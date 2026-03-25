@@ -1,0 +1,1 @@
+UPDATE profiles SET identity_verified = true WHERE id = '563ff18a-ce7a-4c8e-abcf-4e457221e4d1';
