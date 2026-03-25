@@ -271,7 +271,7 @@ const CreateLongStay = () => {
           <div className="mt-8 p-4 rounded-lg bg-muted/50 border border-border">
             <p className="text-xs text-muted-foreground leading-relaxed">
               La garde longue durée est un accord privé entre les deux parties. La contribution aux frais couvre les charges courantes et ne constitue pas un loyer.
-              Guardiens facilite la mise en relation mais n'est pas partie à l'accord.
+              Guardiens facture des frais de service de 70€ à chaque partie pour garantir l'engagement et financer le service.
             </p>
           </div>
 
