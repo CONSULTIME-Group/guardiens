@@ -48,6 +48,12 @@ const LeaveReview = () => {
       if (!sitData) { setLoading(false); return; }
       setSit(sitData);
 
+      // Only allow reviews on completed sits
+      if (sitData.status !== "completed") {
+        setLoading(false);
+        return;
+      }
+
       const isOwner = sitData.user_id === user.id;
       const type = isOwner ? "owner_to_sitter" : "sitter_to_owner";
       setReviewType(type);
