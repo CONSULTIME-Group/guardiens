@@ -51,6 +51,37 @@ export const Sidebar = () => {
         <NotificationBell />
       </div>
 
+      {user?.role === "both" && (
+        <div className="px-3 pb-3">
+          <div className="flex items-center bg-accent rounded-lg p-1 gap-1">
+            <button
+              onClick={() => setActiveRole("owner")}
+              className={cn(
+                "flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-md text-xs font-medium transition-colors",
+                activeRole === "owner"
+                  ? "bg-primary text-primary-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              <PawPrint className="h-3.5 w-3.5" />
+              Propriétaire
+            </button>
+            <button
+              onClick={() => setActiveRole("sitter")}
+              className={cn(
+                "flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-md text-xs font-medium transition-colors",
+                activeRole === "sitter"
+                  ? "bg-primary text-primary-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              <User className="h-3.5 w-3.5" />
+              Gardien
+            </button>
+          </div>
+        </div>
+      )}
+
       <nav className="flex-1 px-3 space-y-1">
         {navItems.filter(item => !("hideForRole" in item) || user?.role !== item.hideForRole).map((item) => (
           <NavLink
