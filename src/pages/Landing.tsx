@@ -135,56 +135,55 @@ const Landing = () => {
       />
 
       {/* Navbar */}
-      <header className="flex items-center justify-between px-6 md:px-12 py-5 sticky top-0 bg-background/80 backdrop-blur-md z-50 border-b border-border/50">
-        <h2 className="font-heading text-2xl font-bold">
+      <header className="flex items-center justify-between px-4 md:px-12 py-4 md:py-5 sticky top-0 bg-background/80 backdrop-blur-md z-50 border-b border-border/50">
+        <h2 className="font-heading text-xl md:text-2xl font-bold">
           <span className="text-primary">g</span>uardiens
         </h2>
-        <div className="flex gap-3 items-center">
-          <Button variant="ghost" onClick={() => navigate("/actualites")}>
+        <div className="flex gap-2 md:gap-3 items-center">
+          <Button variant="ghost" size="sm" className="hidden sm:inline-flex" onClick={() => navigate("/actualites")}>
             Actualités
           </Button>
-          <Button variant="ghost" onClick={() => navigate("/login")}>
+          <Button variant="ghost" size="sm" onClick={() => navigate("/login")}>
             Connexion
           </Button>
-          <Button onClick={() => navigate("/register")}>S'inscrire</Button>
+          <Button size="sm" onClick={() => navigate("/register")}>S'inscrire</Button>
         </div>
       </header>
 
       {/* ═══════════════ HERO BANNER ═══════════════ */}
-      <section className="relative w-full h-[420px] md:h-[520px] lg:h-[600px] overflow-hidden">
+      <section className="relative w-full h-[520px] md:h-[520px] lg:h-[600px] overflow-hidden">
         <img
           src={heroDogBbq}
           alt="Un golden retriever souriant dans un jardin ensoleillé — l'esprit Guardiens"
           className="absolute inset-0 w-full h-full object-cover"
           loading="eager"
         />
-        {/* Gradient overlay for text readability */}
         {/* White pastel veil + bottom gradient for text */}
-        <div className="absolute inset-0 bg-white/30" />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-        <div className="absolute inset-0 flex flex-col items-center justify-end pb-12 md:pb-16 px-6 text-center">
+        <div className="absolute inset-0 bg-white/[0.45]" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
+        <div className="absolute inset-0 flex flex-col items-center justify-end pb-8 md:pb-16 px-4 md:px-6 text-center">
           {/* Pastille */}
-          <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm rounded-full px-4 py-1.5 mb-6 animate-fade-in">
-            <span className="relative flex h-2.5 w-2.5">
+          <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm rounded-full px-3 md:px-4 py-1.5 mb-4 md:mb-6 animate-fade-in">
+            <span className="relative flex h-2 w-2 md:h-2.5 md:w-2.5">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary-foreground opacity-75" />
-              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-primary-foreground" />
+              <span className="relative inline-flex rounded-full h-2 w-2 md:h-2.5 md:w-2.5 bg-primary-foreground" />
             </span>
-            <span className="text-sm text-primary-foreground font-medium">
+            <span className="text-xs md:text-sm text-primary-foreground font-medium">
               Auvergne-Rhône-Alpes · Bientôt partout
             </span>
           </div>
 
-          <h1 className="font-heading text-4xl md:text-6xl lg:text-7xl font-bold leading-tight mb-4 text-white drop-shadow-lg animate-fade-in">
+          <h1 className="font-heading text-3xl md:text-6xl lg:text-7xl font-bold leading-tight mb-3 md:mb-4 text-white drop-shadow-lg animate-fade-in">
             Comme confier ses clés
             <br />
             <span className="italic text-primary-foreground/90">à un voisin.</span>
           </h1>
-          <p className="text-lg md:text-xl text-white/90 max-w-2xl mx-auto mb-8 drop-shadow animate-fade-in" style={{ animationDelay: "0.1s" }}>
+          <p className="text-base md:text-xl text-white/90 max-w-2xl mx-auto mb-6 md:mb-8 drop-shadow animate-fade-in" style={{ animationDelay: "0.1s" }}>
             Vos animaux restent chez eux, votre maison vit, et vous partez
             l'esprit léger. Des gardiens de confiance, près de chez vous.
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in" style={{ animationDelay: "0.2s" }}>
+          <div className="flex flex-col sm:flex-row gap-3 md:gap-4 justify-center w-full sm:w-auto animate-fade-in" style={{ animationDelay: "0.2s" }}>
             <Button variant="hero" size="xl" onClick={() => navigate("/register")}>
               Je cherche un gardien
             </Button>
@@ -196,7 +195,7 @@ const Landing = () => {
               Je veux garder
             </Button>
           </div>
-          <p className="mt-4 text-sm text-white/70 animate-fade-in" style={{ animationDelay: "0.25s" }}>
+          <p className="mt-3 md:mt-4 text-xs md:text-sm text-white/70 animate-fade-in" style={{ animationDelay: "0.25s" }}>
             Gratuit · Premiers inscrits, premiers servis.
           </p>
         </div>
