@@ -175,7 +175,7 @@ const Landing = () => {
             «&nbsp;Demande à Elisa.&nbsp;»
           </p>
           <p className="text-muted-foreground leading-relaxed text-base md:text-lg text-center mt-4">
-            En deux ans, c'est devenu 37&nbsp;maisons gardées et
+            En cinq ans, c'est devenu 37&nbsp;maisons gardées et
             234&nbsp;animaux accompagnés dans toute la région
             Auvergne-Rhône-Alpes. Un soir, autour d'un BBQ chez des
             propriétaires devenus amis, la question est tombée&nbsp;:
