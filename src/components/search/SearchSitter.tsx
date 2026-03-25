@@ -292,6 +292,10 @@ const SearchSitter = () => {
           </div>
         </>
       )}
+      <div className="flex items-center gap-3">
+        <Switch checked={verifiedOnly} onCheckedChange={setVerifiedOnly} />
+        <label className="text-sm">Profils vérifiés uniquement</label>
+      </div>
       <Button onClick={handleSearch} className="w-full gap-2" disabled={loading}>
         <Search className="h-4 w-4" /> {loading ? "Recherche..." : "Rechercher"}
       </Button>
