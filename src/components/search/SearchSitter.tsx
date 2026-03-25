@@ -46,6 +46,7 @@ const SearchSitter = () => {
   const [housingType, setHousingType] = useState("all");
   const [environment, setEnvironment] = useState("all");
   const [duration, setDuration] = useState("all");
+  const [verifiedOnly, setVerifiedOnly] = useState(false);
   const [sort, setSort] = useState<SortOption>("recent");
 
   const [results, setResults] = useState<any[]>([]);
