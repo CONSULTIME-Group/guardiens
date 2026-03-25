@@ -24,6 +24,7 @@ const statusStyles: Record<string, { label: string; className: string }> = {
 };
 
 const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate }: ApplicationsListProps) => {
+  const { user } = useAuth();
   const [applications, setApplications] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
