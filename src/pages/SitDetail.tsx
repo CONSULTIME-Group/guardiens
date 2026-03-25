@@ -357,6 +357,22 @@ const SitDetail = () => {
         endDate={formatDate(sit.end_date)}
         onSuccess={() => setHasApplied(true)}
       />
+
+      {/* Cancel modal */}
+      {sit && (
+        <CancelSitModal
+          open={cancelOpen}
+          onOpenChange={setCancelOpen}
+          sitId={sit.id}
+          sitTitle={sit.title}
+          sitOwnerId={sit.user_id}
+          startDate={formatDate(sit.start_date)}
+          endDate={formatDate(sit.end_date)}
+          onCancelled={() => {
+            setSit({ ...sit, status: sit.user_id === user?.id ? "cancelled" : "published" });
+          }}
+        />
+      )}
     </div>
   );
 };
