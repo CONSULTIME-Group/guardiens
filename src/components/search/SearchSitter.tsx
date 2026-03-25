@@ -186,6 +186,7 @@ const SearchSitter = () => {
     let items = data || [];
 
     if (housingType !== "all") items = items.filter((s: any) => s.property?.type === housingType);
+    if (environment !== "all") items = items.filter((s: any) => s.property?.environment === environment);
 
     if (city) {
       const searchCoords = await geocodeCity(city);
