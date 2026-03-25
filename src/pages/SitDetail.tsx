@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft, Calendar, MapPin, Star, ShieldCheck, Home, PawPrint, MessageSquare, Users, CheckCircle2 } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
+import ApplicationModal from "@/components/sits/ApplicationModal";
+import ApplicationsList from "@/components/sits/ApplicationsList";
 
 const envLabels: Record<string, string> = {
   city_center: "Centre-ville", suburban: "Périurbain", countryside: "Campagne",
