@@ -73,7 +73,7 @@ const Messages = () => {
     if (!user) return;
     const { data: convs } = await supabase
       .from("conversations")
-      .select("*, sit:sits(title, status)")
+      .select("*, sit:sits(title, status, property_id)")
       .or(`owner_id.eq.${user.id},sitter_id.eq.${user.id}`)
       .order("updated_at", { ascending: false });
 
