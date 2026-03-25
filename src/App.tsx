@@ -24,6 +24,8 @@ import OwnerProfile from "./pages/OwnerProfile";
 import CreateLongStay from "./pages/CreateLongStay";
 import LongStayDetail from "./pages/LongStayDetail";
 import EditLongStay from "./pages/EditLongStay";
+import News from "./pages/News";
+import ArticleDetail from "./pages/ArticleDetail";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -47,6 +49,8 @@ const AppRoutes = () => (
     <Route path="/" element={<PublicOnlyRoute><Landing /></PublicOnlyRoute>} />
     <Route path="/login" element={<PublicOnlyRoute><Login /></PublicOnlyRoute>} />
     <Route path="/register" element={<PublicOnlyRoute><Register /></PublicOnlyRoute>} />
+    <Route path="/actualites" element={<News />} />
+    <Route path="/actualites/:slug" element={<ArticleDetail />} />
     <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
       <Route path="/dashboard" element={<Dashboard />} />
       <Route path="/profile" element={<Profile />} />
