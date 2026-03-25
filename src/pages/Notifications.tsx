@@ -26,6 +26,7 @@ const typeIcons: Record<string, string> = {
   review_published: "⭐",
   new_message: "💬",
   application_accepted: "🎉",
+  application_rejected: "😔",
   reminder_7days: "📅",
   reminder_48h: "⏰",
   info: "ℹ️",
