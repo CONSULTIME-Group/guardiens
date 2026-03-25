@@ -14,7 +14,320 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      applications: {
+        Row: {
+          created_at: string
+          id: string
+          message: string | null
+          sit_id: string
+          sitter_id: string
+          status: Database["public"]["Enums"]["application_status"]
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message?: string | null
+          sit_id: string
+          sitter_id: string
+          status?: Database["public"]["Enums"]["application_status"]
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message?: string | null
+          sit_id?: string
+          sitter_id?: string
+          status?: Database["public"]["Enums"]["application_status"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "applications_sit_id_fkey"
+            columns: ["sit_id"]
+            isOneToOne: false
+            referencedRelation: "sits"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "applications_sitter_id_fkey"
+            columns: ["sitter_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pets: {
+        Row: {
+          activity_level: Database["public"]["Enums"]["activity_level"] | null
+          age: number | null
+          alone_duration: Database["public"]["Enums"]["alone_duration"] | null
+          breed: string | null
+          character: string | null
+          food: string | null
+          id: string
+          medication: string | null
+          name: string
+          photo_url: string | null
+          property_id: string
+          special_needs: string | null
+          species: Database["public"]["Enums"]["pet_species"]
+          walk_duration: Database["public"]["Enums"]["walk_duration"] | null
+        }
+        Insert: {
+          activity_level?: Database["public"]["Enums"]["activity_level"] | null
+          age?: number | null
+          alone_duration?: Database["public"]["Enums"]["alone_duration"] | null
+          breed?: string | null
+          character?: string | null
+          food?: string | null
+          id?: string
+          medication?: string | null
+          name?: string
+          photo_url?: string | null
+          property_id: string
+          special_needs?: string | null
+          species?: Database["public"]["Enums"]["pet_species"]
+          walk_duration?: Database["public"]["Enums"]["walk_duration"] | null
+        }
+        Update: {
+          activity_level?: Database["public"]["Enums"]["activity_level"] | null
+          age?: number | null
+          alone_duration?: Database["public"]["Enums"]["alone_duration"] | null
+          breed?: string | null
+          character?: string | null
+          food?: string | null
+          id?: string
+          medication?: string | null
+          name?: string
+          photo_url?: string | null
+          property_id?: string
+          special_needs?: string | null
+          species?: Database["public"]["Enums"]["pet_species"]
+          walk_duration?: Database["public"]["Enums"]["walk_duration"] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pets_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          bio: string | null
+          city: string | null
+          created_at: string
+          email: string | null
+          first_name: string | null
+          id: string
+          last_name: string | null
+          postal_code: string | null
+          profile_completion: number | null
+          role: Database["public"]["Enums"]["user_role"]
+          updated_at: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          bio?: string | null
+          city?: string | null
+          created_at?: string
+          email?: string | null
+          first_name?: string | null
+          id: string
+          last_name?: string | null
+          postal_code?: string | null
+          profile_completion?: number | null
+          role?: Database["public"]["Enums"]["user_role"]
+          updated_at?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          bio?: string | null
+          city?: string | null
+          created_at?: string
+          email?: string | null
+          first_name?: string | null
+          id?: string
+          last_name?: string | null
+          postal_code?: string | null
+          profile_completion?: number | null
+          role?: Database["public"]["Enums"]["user_role"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      properties: {
+        Row: {
+          accessible: boolean | null
+          bedrooms_count: number | null
+          car_required: boolean | null
+          created_at: string
+          description: string | null
+          environment:
+            | Database["public"]["Enums"]["property_environment"]
+            | null
+          id: string
+          region_highlights: string | null
+          rooms_count: number | null
+          type: Database["public"]["Enums"]["property_type"]
+          user_id: string
+        }
+        Insert: {
+          accessible?: boolean | null
+          bedrooms_count?: number | null
+          car_required?: boolean | null
+          created_at?: string
+          description?: string | null
+          environment?:
+            | Database["public"]["Enums"]["property_environment"]
+            | null
+          id?: string
+          region_highlights?: string | null
+          rooms_count?: number | null
+          type?: Database["public"]["Enums"]["property_type"]
+          user_id: string
+        }
+        Update: {
+          accessible?: boolean | null
+          bedrooms_count?: number | null
+          car_required?: boolean | null
+          created_at?: string
+          description?: string | null
+          environment?:
+            | Database["public"]["Enums"]["property_environment"]
+            | null
+          id?: string
+          region_highlights?: string | null
+          rooms_count?: number | null
+          type?: Database["public"]["Enums"]["property_type"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "properties_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reviews: {
+        Row: {
+          comment: string | null
+          created_at: string
+          id: string
+          overall_rating: number
+          published: boolean | null
+          reviewee_id: string
+          reviewer_id: string
+          sit_id: string
+        }
+        Insert: {
+          comment?: string | null
+          created_at?: string
+          id?: string
+          overall_rating: number
+          published?: boolean | null
+          reviewee_id: string
+          reviewer_id: string
+          sit_id: string
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string
+          id?: string
+          overall_rating?: number
+          published?: boolean | null
+          reviewee_id?: string
+          reviewer_id?: string
+          sit_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reviews_reviewee_id_fkey"
+            columns: ["reviewee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reviews_reviewer_id_fkey"
+            columns: ["reviewer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reviews_sit_id_fkey"
+            columns: ["sit_id"]
+            isOneToOne: false
+            referencedRelation: "sits"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sits: {
+        Row: {
+          created_at: string
+          end_date: string | null
+          flexible_dates: boolean | null
+          id: string
+          open_to: string[] | null
+          property_id: string
+          specific_expectations: string | null
+          start_date: string | null
+          status: Database["public"]["Enums"]["sit_status"]
+          title: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          end_date?: string | null
+          flexible_dates?: boolean | null
+          id?: string
+          open_to?: string[] | null
+          property_id: string
+          specific_expectations?: string | null
+          start_date?: string | null
+          status?: Database["public"]["Enums"]["sit_status"]
+          title?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          end_date?: string | null
+          flexible_dates?: boolean | null
+          id?: string
+          open_to?: string[] | null
+          property_id?: string
+          specific_expectations?: string | null
+          start_date?: string | null
+          status?: Database["public"]["Enums"]["sit_status"]
+          title?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sits_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sits_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -23,7 +336,41 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      activity_level: "calm" | "moderate" | "sportive"
+      alone_duration: "never" | "2h" | "6h" | "all_day"
+      application_status:
+        | "pending"
+        | "viewed"
+        | "discussing"
+        | "accepted"
+        | "rejected"
+        | "cancelled"
+      pet_species:
+        | "dog"
+        | "cat"
+        | "horse"
+        | "bird"
+        | "rodent"
+        | "fish"
+        | "reptile"
+        | "farm_animal"
+        | "nac"
+      property_environment:
+        | "city_center"
+        | "suburban"
+        | "countryside"
+        | "mountain"
+        | "seaside"
+        | "forest"
+      property_type: "apartment" | "house" | "farm" | "chalet" | "other"
+      sit_status:
+        | "draft"
+        | "published"
+        | "confirmed"
+        | "completed"
+        | "cancelled"
+      user_role: "owner" | "sitter" | "both"
+      walk_duration: "none" | "30min" | "1h" | "2h_plus"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +497,40 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      activity_level: ["calm", "moderate", "sportive"],
+      alone_duration: ["never", "2h", "6h", "all_day"],
+      application_status: [
+        "pending",
+        "viewed",
+        "discussing",
+        "accepted",
+        "rejected",
+        "cancelled",
+      ],
+      pet_species: [
+        "dog",
+        "cat",
+        "horse",
+        "bird",
+        "rodent",
+        "fish",
+        "reptile",
+        "farm_animal",
+        "nac",
+      ],
+      property_environment: [
+        "city_center",
+        "suburban",
+        "countryside",
+        "mountain",
+        "seaside",
+        "forest",
+      ],
+      property_type: ["apartment", "house", "farm", "chalet", "other"],
+      sit_status: ["draft", "published", "confirmed", "completed", "cancelled"],
+      user_role: ["owner", "sitter", "both"],
+      walk_duration: ["none", "30min", "1h", "2h_plus"],
+    },
   },
 } as const
