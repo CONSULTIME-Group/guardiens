@@ -10,6 +10,8 @@ import { AdminLayout } from "@/components/admin/AdminLayout";
 import Landing from "./pages/Landing";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
 import Dashboard from "./pages/Dashboard";
 import Profile from "./pages/Profile";
 import SearchPage from "./pages/SearchPage";
@@ -65,6 +67,8 @@ const AppRoutes = () => (
     <Route path="/" element={<PublicOnlyRoute><Landing /></PublicOnlyRoute>} />
     <Route path="/login" element={<PublicOnlyRoute><Login /></PublicOnlyRoute>} />
     <Route path="/register" element={<PublicOnlyRoute><Register /></PublicOnlyRoute>} />
+    <Route path="/forgot-password" element={<PublicOnlyRoute><ForgotPassword /></PublicOnlyRoute>} />
+    <Route path="/reset-password" element={<ResetPassword />} />
     <Route path="/actualites" element={<News />} />
     <Route path="/actualites/:slug" element={<ArticleDetail />} />
     <Route path="/a-propos" element={<About />} />
