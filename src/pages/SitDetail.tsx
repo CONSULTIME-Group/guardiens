@@ -52,6 +52,7 @@ const SitDetail = () => {
   const [photoIndex, setPhotoIndex] = useState(0);
   const [applyOpen, setApplyOpen] = useState(false);
   const [hasApplied, setHasApplied] = useState(false);
+  const [cancelOpen, setCancelOpen] = useState(false);
   useEffect(() => {
     if (!id) return;
     const load = async () => {
