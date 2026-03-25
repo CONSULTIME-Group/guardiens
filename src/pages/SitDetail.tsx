@@ -267,6 +267,13 @@ const SitDetail = () => {
         </Section>
       )}
 
+      {/* Le coin (location profile) */}
+      {owner?.city && owner?.postal_code && (
+        <Section icon={MapPin} title={`Découvrir ${owner.city}`}>
+          <LocationProfileCard city={owner.city} postalCode={owner.postal_code} />
+        </Section>
+      )}
+
       {/* Avis */}
       <Section icon={Star} title="Avis">
         <ReviewsDisplay userId={sit.user_id} showAnimalCare={false} />
