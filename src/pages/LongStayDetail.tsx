@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Calendar, Home, Info, Star, Lock } from "lucide-react";
+import LongStayApplicationsList from "@/components/sits/LongStayApplicationsList";
 import { format, differenceInDays } from "date-fns";
 import { fr } from "date-fns/locale";
 
@@ -228,6 +229,18 @@ const LongStayDetail = () => {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Applications list for owner */}
+      {isOwner && (
+        <LongStayApplicationsList
+          longStayId={longStay.id}
+          longStayTitle={longStay.title}
+          petNames={pets.map((p: any) => p.name || "Sans nom")}
+          startDate={longStay.start_date ? format(new Date(longStay.start_date), "d MMM yyyy", { locale: fr }) : ""}
+          endDate={longStay.end_date ? format(new Date(longStay.end_date), "d MMM yyyy", { locale: fr }) : ""}
+          propertyId={longStay.property_id}
+        />
       )}
 
       {/* Apply section */}
