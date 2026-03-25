@@ -71,7 +71,7 @@ const AdminDashboard = () => {
         supabase.from("sits").select("id", { count: "exact", head: true }).eq("status", "published"),
         supabase.from("sits").select("id", { count: "exact", head: true }).eq("status", "confirmed"),
         supabase.from("sits").select("id", { count: "exact", head: true }).eq("status", "completed"),
-        supabase.from("reviews").select("overall_rating"),
+        supabase.from("reviews").select("overall_rating, created_at"),
         supabase.from("profiles").select("created_at, city"),
         supabase.from("applications").select("id", { count: "exact", head: true }),
         supabase.from("sits").select("id", { count: "exact", head: true }).in("status", ["confirmed", "completed"]),
