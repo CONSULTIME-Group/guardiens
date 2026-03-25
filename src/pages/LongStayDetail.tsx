@@ -28,6 +28,7 @@ const LongStayDetail = () => {
   const { id } = useParams<{ id: string }>();
   const { user } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const [longStay, setLongStay] = useState<any>(null);
   const [property, setProperty] = useState<any>(null);
