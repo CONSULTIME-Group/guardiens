@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import ReportButton from "@/components/reports/ReportButton";
 import { supabase } from "@/integrations/supabase/client";
 import { geocodeCity, haversineDistance } from "@/lib/geocode";
 import { useAuth } from "@/contexts/AuthContext";
