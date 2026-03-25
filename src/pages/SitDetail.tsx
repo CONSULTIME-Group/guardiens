@@ -313,6 +313,7 @@ const SitDetail = () => {
         open={applyOpen}
         onOpenChange={setApplyOpen}
         sitId={sit.id}
+        ownerId={sit.user_id}
         ownerFirstName={owner?.first_name || ""}
         petNames={pets.map((p: any) => p.name)}
         city={owner?.city || ""}
