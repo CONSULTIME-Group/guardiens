@@ -422,7 +422,9 @@ export type Database = {
           end_date: string | null
           estimated_contribution: string | null
           id: string
+          owner_fee_paid: boolean
           property_id: string
+          sitter_fee_paid: boolean
           start_date: string | null
           status: Database["public"]["Enums"]["long_stay_status"]
           title: string
@@ -436,7 +438,9 @@ export type Database = {
           end_date?: string | null
           estimated_contribution?: string | null
           id?: string
+          owner_fee_paid?: boolean
           property_id: string
+          sitter_fee_paid?: boolean
           start_date?: string | null
           status?: Database["public"]["Enums"]["long_stay_status"]
           title?: string
@@ -450,7 +454,9 @@ export type Database = {
           end_date?: string | null
           estimated_contribution?: string | null
           id?: string
+          owner_fee_paid?: boolean
           property_id?: string
+          sitter_fee_paid?: boolean
           start_date?: string | null
           status?: Database["public"]["Enums"]["long_stay_status"]
           title?: string
