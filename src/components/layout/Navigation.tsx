@@ -1,5 +1,5 @@
 import { NavLink, useLocation } from "react-router-dom";
-import { Home, Search, Calendar, MessageSquare, User, LogOut } from "lucide-react";
+import { Home, Search, Calendar, MessageSquare, User, LogOut, Bell } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
 import { useEffect, useState } from "react";
@@ -90,22 +90,69 @@ export const Sidebar = () => {
 
 export const BottomNav = () => {
   const location = useLocation();
+  const { user } = useAuth();
+  const [notifCount, setNotifCount] = useState(0);
+
+  useEffect(() => {
+    if (!user) return;
+    const loadCount = async () => {
+      const { count } = await supabase
+        .from("notifications")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", user.id)
+        .is("read_at", null);
+      setNotifCount(count || 0);
+    };
+    loadCount();
+
+    const channel = supabase
+      .channel("bottomnav-notifs")
+      .on("postgres_changes", {
+        event: "INSERT",
+        schema: "public",
+        table: "notifications",
+        filter: `user_id=eq.${user.id}`,
+      }, () => setNotifCount((c) => c + 1))
+      .on("postgres_changes", {
+        event: "UPDATE",
+        schema: "public",
+        table: "notifications",
+        filter: `user_id=eq.${user.id}`,
+      }, () => loadCount())
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
+  }, [user]);
+
+  const mobileItems = [
+    ...navItems.slice(0, 3),
+    { to: "/notifications", icon: Bell, label: "Notifs", notifCount },
+    navItems[4], // Mon profil
+  ];
 
   return (
     <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-card border-t border-border z-50">
       <div className="flex justify-around items-center h-16 px-2">
-        {navItems.map((item) => {
+        {mobileItems.map((item) => {
           const isActive = location.pathname === item.to;
+          const count = "notifCount" in item ? item.notifCount : item.to === "/messages" ? undefined : undefined;
           return (
             <NavLink
               key={item.to}
-              to={item.to}
+              to={item.to === "/notifications" ? "/dashboard" : item.to}
               className={cn(
-                "flex flex-col items-center gap-1 px-2 py-1 text-xs transition-colors",
+                "flex flex-col items-center gap-1 px-2 py-1 text-xs transition-colors relative",
                 isActive ? "text-primary" : "text-muted-foreground"
               )}
             >
-              <item.icon className="h-5 w-5" />
+              <div className="relative">
+                <item.icon className="h-5 w-5" />
+                {item.to === "/notifications" && notifCount > 0 && (
+                  <span className="absolute -top-1.5 -right-2 bg-primary text-primary-foreground text-[9px] rounded-full min-w-[16px] h-4 flex items-center justify-center px-1 font-medium">
+                    {notifCount > 99 ? "99+" : notifCount}
+                  </span>
+                )}
+              </div>
               <span className="truncate max-w-[60px]">{item.label}</span>
             </NavLink>
           );
