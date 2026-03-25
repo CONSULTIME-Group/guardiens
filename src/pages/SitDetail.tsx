@@ -324,26 +324,3 @@ const SitDetail = () => {
   );
 };
 
-const Section = ({ icon: Icon, title, children }: { icon: React.ElementType; title: string; children: React.ReactNode }) => (
-  <div className="mt-8">
-    <div className="flex items-center gap-2 mb-3">
-      <Icon className="h-4 w-4 text-primary" />
-      <h2 className="font-heading text-lg font-semibold">{title}</h2>
-    </div>
-    {children}
-  </div>
-);
-
-export default SitDetail;
-
-const Section = ({ icon: Icon, title, children }: { icon: React.ElementType; title: string; children: React.ReactNode }) => (
-  <div className="mt-8">
-    <div className="flex items-center gap-2 mb-3">
-      <Icon className="h-4 w-4 text-primary" />
-      <h2 className="font-heading text-lg font-semibold">{title}</h2>
-    </div>
-    {children}
-  </div>
-);
-
-export default SitDetail;
