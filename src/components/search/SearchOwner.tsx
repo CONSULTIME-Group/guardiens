@@ -61,6 +61,9 @@ const SearchOwner = () => {
     if (vehicled) {
       items = items.filter((s: any) => s.has_vehicle);
     }
+    if (availableOnly) {
+      items = items.filter((s: any) => s.is_available);
+    }
     if (animalTypes.length > 0 && !animalTypes.includes("Tous")) {
       const wanted = animalTypes.map(a => animalChipToType[a]).filter(Boolean);
       items = items.filter((s: any) => {
