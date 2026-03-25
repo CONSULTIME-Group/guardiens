@@ -80,6 +80,23 @@ const NotificationBell = () => {
           });
         }
       )
+      .on(
+        "postgres_changes",
+        {
+          event: "DELETE",
+          schema: "public",
+          table: "notifications",
+          filter: `user_id=eq.${user.id}`,
+        },
+        (payload) => {
+          const deletedId = (payload.old as Notification).id;
+          setNotifications((prev) => {
+            const next = prev.filter((n) => n.id !== deletedId);
+            setUnreadCount(next.filter((n) => !n.read_at).length);
+            return next;
+          });
+        }
+      )
       .subscribe();
 
     return () => {
