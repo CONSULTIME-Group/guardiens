@@ -65,12 +65,39 @@ const AdminReports = () => {
   }, [reports]);
 
   const markResolved = async (id: string) => {
+    const report = reports.find(r => r.id === id);
     const { error } = await supabase
       .from("reports")
       .update({ status: "resolved", resolved_at: new Date().toISOString() })
       .eq("id", id);
-    if (error) toast.error("Erreur");
-    else { toast.success("Signalement traité"); fetchReports(); }
+    if (error) { toast.error("Erreur"); return; }
+
+    // Send email notification to the reporter
+    if (report) {
+      const { data: reporterProfile } = await supabase
+        .from("profiles")
+        .select("email")
+        .eq("id", report.reporter_id)
+        .single();
+
+      if (reporterProfile?.email) {
+        await supabase.functions.invoke("send-transactional-email", {
+          body: {
+            templateName: "report-resolved",
+            recipientEmail: reporterProfile.email,
+            idempotencyKey: `report-resolved-${id}`,
+            templateData: {
+              reason: report.reason,
+              status: "resolved",
+              adminNotes: report.admin_notes || undefined,
+            },
+          },
+        });
+      }
+    }
+
+    toast.success("Signalement traité");
+    fetchReports();
   };
 
   const markInProgress = async (id: string) => {
