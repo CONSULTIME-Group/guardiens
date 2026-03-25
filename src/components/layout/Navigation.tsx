@@ -11,7 +11,7 @@ const navItems = [
   { to: "/search", icon: Search, label: "Recherche" },
   { to: "/sits", icon: Calendar, label: "Mes gardes" },
   { to: "/messages", icon: MessageSquare, label: "Messagerie" },
-  { to: "/owner-profile", icon: PawPrint, label: "Profil proprio" },
+  { to: "/owner-profile", icon: PawPrint, label: "Profil proprio", hideForRole: "sitter" as const },
   { to: "/profile", icon: User, label: "Mon profil" },
 ];
 
@@ -52,7 +52,7 @@ export const Sidebar = () => {
       </div>
 
       <nav className="flex-1 px-3 space-y-1">
-        {navItems.map((item) => (
+        {navItems.filter(item => !("hideForRole" in item) || user?.role !== item.hideForRole).map((item) => (
           <NavLink
             key={item.to}
             to={item.to}
@@ -139,10 +139,11 @@ export const BottomNav = () => {
     return () => { supabase.removeChannel(channel); };
   }, [user]);
 
+  const filteredItems = navItems.filter(item => !("hideForRole" in item) || user?.role !== item.hideForRole);
   const mobileItems = [
-    ...navItems.slice(0, 3),
+    ...filteredItems.slice(0, 3),
     { to: "/notifications", icon: Bell, label: "Notifs", notifCount },
-    navItems[4], // Mon profil
+    filteredItems[filteredItems.length - 1], // Mon profil
   ];
 
   return (
