@@ -102,6 +102,7 @@ const AppRoutes = () => (
       <Route path="/long-stays/:id" element={<LongStayDetail />} />
       <Route path="/long-stays/:id/edit" element={<EditLongStay />} />
     </Route>
+    <Route path="/unsubscribe" element={<Unsubscribe />} />
     <Route path="*" element={<NotFound />} />
   </Routes>
 );
