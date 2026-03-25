@@ -41,6 +41,7 @@ const AdminDashboard = () => {
   const [weeklySignups, setWeeklySignups] = useState<WeeklySignup[]>([]);
   const [cityData, setCityData] = useState<CityData[]>([]);
   const [funnelData, setFunnelData] = useState<FunnelStep[]>([]);
+  const [monthlyRatings, setMonthlyRatings] = useState<MonthlyRating[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
