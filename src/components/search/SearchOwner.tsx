@@ -56,7 +56,7 @@ const SearchOwner = () => {
       items = items.filter((s: any) => s.profile?.city?.toLowerCase().includes(city.toLowerCase()));
     }
     if (sitterType !== "all") {
-      items = items.filter((s: any) => s.sitter_type === sitterType);
+      items = items.filter((s: any) => (s.sitter_type || "").toLowerCase() === sitterType.toLowerCase());
     }
     if (vehicled) {
       items = items.filter((s: any) => s.has_vehicle);
@@ -183,7 +183,20 @@ const SearchOwner = () => {
           {searched && results.length > 0 && (
             <div className="flex items-center justify-between mb-4">
               <p className="text-sm text-muted-foreground">{results.length} gardien{results.length > 1 ? "s" : ""}</p>
-              <Select value={sort} onValueChange={(v) => setSort(v as SortOption)}>
+              <Select value={sort} onValueChange={(v) => {
+                const newSort = v as SortOption;
+                setSort(newSort);
+                setResults(prev => {
+                  const sorted = [...prev];
+                  if (newSort === "rating") {
+                    sorted.sort((a, b) => parseFloat(b.avgRating || "0") - parseFloat(a.avgRating || "0"));
+                  } else {
+                    const expOrder: Record<string, number> = { "5+": 4, "3-5": 3, "1-2": 2, debutant: 1, "": 0 };
+                    sorted.sort((a, b) => (expOrder[b.experience_years || ""] || 0) - (expOrder[a.experience_years || ""] || 0));
+                  }
+                  return sorted;
+                });
+              }}>
                 <SelectTrigger className="w-44"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="rating">Mieux notés</SelectItem>
