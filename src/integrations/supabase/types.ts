@@ -132,6 +132,33 @@ export type Database = {
           },
         ]
       }
+      geocode_cache: {
+        Row: {
+          city_name: string
+          created_at: string
+          id: string
+          lat: number
+          lng: number
+          normalized_name: string
+        }
+        Insert: {
+          city_name: string
+          created_at?: string
+          id?: string
+          lat: number
+          lng: number
+          normalized_name: string
+        }
+        Update: {
+          city_name?: string
+          created_at?: string
+          id?: string
+          lat?: number
+          lng?: number
+          normalized_name?: string
+        }
+        Relationships: []
+      }
       house_guides: {
         Row: {
           access_codes: string | null
