@@ -280,6 +280,22 @@ const SitDetail = () => {
         </div>
       )}
 
+      {/* Cancel button for confirmed/published sits */}
+      {sit && user && (sit.status === "confirmed" || sit.status === "published") && (
+        (sit.user_id === user.id || hasApplied) && (
+          <div className="mt-6 text-center">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-destructive hover:text-destructive hover:bg-destructive/10 text-xs"
+              onClick={() => setCancelOpen(true)}
+            >
+              <XCircle className="h-4 w-4 mr-1" /> Annuler cette garde
+            </Button>
+          </div>
+        )
+      )}
+
       {/* Reassurance */}
       <div className="mt-8 bg-primary/5 border border-primary/10 rounded-lg p-5 text-center">
         <p className="font-heading text-sm font-semibold text-primary">Vous partez l'esprit léger — et si un imprévu survient, votre réseau local de gardiens prend le relais.</p>
