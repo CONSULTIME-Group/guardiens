@@ -51,6 +51,7 @@ const OwnerDashboard = () => {
       setSits(sitsData);
       setUnreadCount(unreadRes.count || 0);
       setSitterCount(sittersRes.count || 0);
+      setReviews(reviewsRes.data || []);
 
       // Load pets from user's properties
       const propIds = (propsRes.data || []).map((p: any) => p.id);
