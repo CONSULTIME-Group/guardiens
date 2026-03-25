@@ -11,6 +11,7 @@ import ApplicationsList from "@/components/sits/ApplicationsList";
 import ReviewsDisplay from "@/components/reviews/ReviewsDisplay";
 import CancelSitModal from "@/components/sits/CancelSitModal";
 import BreedProfileCard from "@/components/breeds/BreedProfileCard";
+import VerifiedBadge from "@/components/profile/VerifiedBadge";
 import LocationProfileCard from "@/components/location/LocationProfileCard";
 
 const envLabels: Record<string, string> = {
