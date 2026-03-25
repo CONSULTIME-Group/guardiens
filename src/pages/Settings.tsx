@@ -534,4 +534,175 @@ const ThemeSection = () => {
   );
 };
 
+const IdentityVerificationSection = ({ user }: { user: any }) => {
+  const [status, setStatus] = useState<string>("not_submitted");
+  const [documentUrl, setDocumentUrl] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [loaded, setLoaded] = useState(false);
+
+  useEffect(() => {
+    if (!user) return;
+    supabase
+      .from("profiles")
+      .select("identity_verified, identity_verification_status, identity_document_url")
+      .eq("id", user.id)
+      .single()
+      .then(({ data }) => {
+        if (data) {
+          if (data.identity_verified) {
+            setStatus("verified");
+          } else {
+            setStatus((data as any).identity_verification_status || "not_submitted");
+          }
+          setDocumentUrl((data as any).identity_document_url || null);
+        }
+        setLoaded(true);
+      });
+  }, [user]);
+
+  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user) return;
+
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error("Le fichier ne doit pas dépasser 10 Mo.");
+      return;
+    }
+
+    const allowedTypes = ["image/jpeg", "image/png", "image/webp", "application/pdf"];
+    if (!allowedTypes.includes(file.type)) {
+      toast.error("Format accepté : JPG, PNG, WebP ou PDF.");
+      return;
+    }
+
+    setUploading(true);
+    try {
+      const ext = file.name.split(".").pop();
+      const path = `${user.id}/identity-document.${ext}`;
+
+      // Delete old file if exists
+      await supabase.storage.from("identity-documents").remove([path]);
+
+      const { error: uploadError } = await supabase.storage
+        .from("identity-documents")
+        .upload(path, file, { upsert: true });
+
+      if (uploadError) throw uploadError;
+
+      // Update profile
+      await supabase
+        .from("profiles")
+        .update({
+          identity_document_url: path,
+          identity_verification_status: "pending",
+        } as any)
+        .eq("id", user.id);
+
+      setStatus("pending");
+      setDocumentUrl(path);
+      toast.success("Document envoyé ! Votre vérification est en cours de traitement.");
+    } catch (err) {
+      console.error(err);
+      toast.error("Erreur lors de l'envoi du document.");
+    }
+    setUploading(false);
+  };
+
+  if (!loaded) return null;
+
+  const statusConfig: Record<string, { icon: React.ElementType; label: string; desc: string; color: string }> = {
+    not_submitted: {
+      icon: Upload,
+      label: "Non vérifiée",
+      desc: "Envoyez une pièce d'identité pour débloquer les fonctionnalités avancées (gardes longue durée, badge vérifié).",
+      color: "text-muted-foreground",
+    },
+    pending: {
+      icon: Clock,
+      label: "En cours de vérification",
+      desc: "Votre document a été reçu. La vérification est en cours (généralement sous 24-48h).",
+      color: "text-amber-600",
+    },
+    rejected: {
+      icon: AlertCircle,
+      label: "Document refusé",
+      desc: "Votre document n'a pas pu être validé. Veuillez soumettre un nouveau document lisible.",
+      color: "text-destructive",
+    },
+    verified: {
+      icon: CheckCircle2,
+      label: "Identité vérifiée ✓",
+      desc: "Votre identité a été vérifiée avec succès. Vous avez accès à toutes les fonctionnalités.",
+      color: "text-green-600",
+    },
+  };
+
+  const cfg = statusConfig[status] || statusConfig.not_submitted;
+  const StatusIcon = cfg.icon;
+
+  return (
+    <section className="my-8" id="verification">
+      <div className="flex items-center gap-2 mb-4">
+        <ShieldCheck className="h-5 w-5 text-primary" />
+        <h2 className="font-heading text-lg font-semibold">Vérification d'identité</h2>
+      </div>
+
+      <div className="rounded-xl border border-border p-5">
+        <div className="flex items-start gap-3 mb-4">
+          <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${
+            status === "verified" ? "bg-green-100 dark:bg-green-900/30" :
+            status === "pending" ? "bg-amber-100 dark:bg-amber-900/30" :
+            "bg-muted"
+          }`}>
+            <StatusIcon className={`h-5 w-5 ${cfg.color}`} />
+          </div>
+          <div>
+            <p className={`text-sm font-medium ${cfg.color}`}>{cfg.label}</p>
+            <p className="text-xs text-muted-foreground mt-0.5">{cfg.desc}</p>
+          </div>
+        </div>
+
+        {status !== "verified" && (
+          <div className="space-y-3">
+            <div className="text-xs text-muted-foreground space-y-1">
+              <p className="font-medium text-foreground text-sm">Documents acceptés :</p>
+              <ul className="list-disc list-inside space-y-0.5">
+                <li>Carte d'identité (recto)</li>
+                <li>Passeport (page photo)</li>
+                <li>Permis de conduire</li>
+              </ul>
+              <p className="mt-2">Formats : JPG, PNG, WebP, PDF · Max 10 Mo</p>
+            </div>
+
+            <label className="block">
+              <input
+                type="file"
+                accept="image/jpeg,image/png,image/webp,application/pdf"
+                onChange={handleUpload}
+                disabled={uploading}
+                className="hidden"
+              />
+              <Button
+                variant={status === "rejected" ? "default" : "outline"}
+                size="sm"
+                className="gap-2 cursor-pointer"
+                disabled={uploading}
+                asChild
+              >
+                <span>
+                  <Upload className="h-4 w-4" />
+                  {uploading ? "Envoi en cours..." :
+                   status === "pending" ? "Renvoyer un document" :
+                   status === "rejected" ? "Soumettre un nouveau document" :
+                   "Envoyer ma pièce d'identité"}
+                </span>
+              </Button>
+            </label>
+          </div>
+        )}
+      </div>
+    </section>
+  );
+};
+
 export default Settings;
