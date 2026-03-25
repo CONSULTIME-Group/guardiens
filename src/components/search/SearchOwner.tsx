@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
-import { Search, SlidersHorizontal, MapPin, Star, Car, CheckCircle2 } from "lucide-react";
+import { Search, SlidersHorizontal, MapPin, Star, Car, CheckCircle2, CircleDot } from "lucide-react";
 import ChipSelect from "@/components/profile/ChipSelect";
 
 const animalChips = ["Chiens", "Chats", "Chevaux", "Oiseaux", "Animaux de ferme", "NAC", "Tous"];
