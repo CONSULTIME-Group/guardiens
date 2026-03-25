@@ -545,22 +545,31 @@ const IdentityVerificationSection = ({ user }: { user: any }) => {
 
   useEffect(() => {
     if (!user) return;
-    supabase
-      .from("profiles")
-      .select("identity_verified, identity_verification_status, identity_document_url")
-      .eq("id", user.id)
-      .single()
-      .then(({ data }) => {
-        if (data) {
-          if (data.identity_verified) {
-            setStatus("verified");
-          } else {
-            setStatus((data as any).identity_verification_status || "not_submitted");
-          }
-          setDocumentUrl((data as any).identity_document_url || null);
+    Promise.all([
+      supabase
+        .from("profiles")
+        .select("identity_verified, identity_verification_status, identity_document_url")
+        .eq("id", user.id)
+        .single(),
+      supabase
+        .from("identity_verification_logs" as any)
+        .select("*")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false })
+        .limit(10),
+    ]).then(([profileRes, logsRes]) => {
+      if (profileRes.data) {
+        const data = profileRes.data;
+        if (data.identity_verified) {
+          setStatus("verified");
+        } else {
+          setStatus((data as any).identity_verification_status || "not_submitted");
         }
-        setLoaded(true);
-      });
+        setDocumentUrl((data as any).identity_document_url || null);
+      }
+      setLogs((logsRes.data as any[]) || []);
+      setLoaded(true);
+    });
   }, [user]);
 
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
