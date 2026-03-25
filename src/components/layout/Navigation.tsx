@@ -139,7 +139,7 @@ export const BottomNav = () => {
           return (
             <NavLink
               key={item.to}
-              to={item.to === "/notifications" ? "/dashboard" : item.to}
+              to={item.to}
               className={cn(
                 "flex flex-col items-center gap-1 px-2 py-1 text-xs transition-colors relative",
                 isActive ? "text-primary" : "text-muted-foreground"
