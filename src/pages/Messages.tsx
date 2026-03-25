@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ArrowLeft, Send, Image as ImageIcon, Check, CheckCheck, ExternalLink, CheckCircle2, AlertTriangle, Phone, Home, PawPrint } from "lucide-react";
+import { ArrowLeft, Send, Image as ImageIcon, Check, CheckCheck, ExternalLink, CheckCircle2, AlertTriangle, Phone, Home, PawPrint, Star } from "lucide-react";
 import { format, isToday, isYesterday } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Link } from "react-router-dom";
@@ -330,6 +330,23 @@ const Messages = () => {
                 <AlertTriangle className="h-3.5 w-3.5" />
                 Besoin d'aide
               </button>
+            </div>
+          )}
+
+          {/* Completed banner with review link */}
+          {activeConv.sit?.status === "completed" && (
+            <div className="bg-accent border-b border-border px-4 py-2.5 flex items-center justify-between">
+              <div className="flex items-center gap-2 text-sm font-medium">
+                <CheckCircle2 className="h-4 w-4 text-muted-foreground" />
+                Garde terminée
+              </div>
+              <Link
+                to={`/review/${activeConv.sit_id}`}
+                className="text-xs font-medium text-primary hover:underline flex items-center gap-1"
+              >
+                <Star className="h-3.5 w-3.5" />
+                Laisser un avis
+              </Link>
             </div>
           )}
 
