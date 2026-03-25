@@ -14,7 +14,30 @@ const navItems = [
 ];
 
 export const Sidebar = () => {
-  const { logout } = useAuth();
+  const { user, logout } = useAuth();
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  useEffect(() => {
+    if (!user) return;
+    const loadUnread = async () => {
+      const { data: convs } = await supabase
+        .from("conversations")
+        .select("id")
+        .or(`owner_id.eq.${user.id},sitter_id.eq.${user.id}`);
+      if (!convs?.length) return;
+      const convIds = convs.map((c: any) => c.id);
+      const { count } = await supabase
+        .from("messages")
+        .select("id", { count: "exact", head: true })
+        .in("conversation_id", convIds)
+        .neq("sender_id", user.id)
+        .is("read_at", null);
+      setUnreadCount(count || 0);
+    };
+    loadUnread();
+    const interval = setInterval(loadUnread, 15000);
+    return () => clearInterval(interval);
+  }, [user]);
 
   return (
     <aside className="hidden md:flex flex-col w-64 border-r border-border bg-card h-screen sticky top-0">
