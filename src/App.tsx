@@ -77,6 +77,8 @@ const AppRoutes = () => (
       <Route path="/long-stays/create" element={<CreateLongStay />} />
       <Route path="/long-stays/:id" element={<LongStayDetail />} />
       <Route path="/long-stays/:id/edit" element={<EditLongStay />} />
+      <Route path="/admin/articles" element={<AdminArticles />} />
+      <Route path="/admin/articles/:id" element={<ArticleEditor />} />
     </Route>
     <Route path="*" element={<NotFound />} />
   </Routes>
