@@ -68,23 +68,23 @@ const LongStayApplicationsList = ({
   const getOrCreateConversation = async (sitterId: string) => {
     if (!user) return null;
     // Check existing conversation for this long stay
-    const { data: existing } = await supabase
+    const { data: existing } = await (supabase
       .from("conversations")
-      .select("id")
-      .eq("long_stay_id" as any, longStayId)
+      .select("id") as any)
+      .eq("long_stay_id", longStayId)
       .eq("sitter_id", sitterId)
       .maybeSingle();
 
     if (existing) return existing.id;
 
-    const { data: created } = await supabase
+    const { data: created } = await (supabase
       .from("conversations")
       .insert({
-        long_stay_id: longStayId as any,
+        long_stay_id: longStayId,
         owner_id: user.id,
         sitter_id: sitterId,
       } as any)
-      .select("id")
+      .select("id") as any)
       .single();
 
     return created?.id || null;
