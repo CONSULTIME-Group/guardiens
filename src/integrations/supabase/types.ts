@@ -56,6 +56,83 @@ export type Database = {
           },
         ]
       }
+      owner_profiles: {
+        Row: {
+          communication_notes: string | null
+          created_at: string
+          experience_required: boolean | null
+          handover_preference: string | null
+          id: string
+          meeting_preference: string[] | null
+          news_format: string[] | null
+          news_frequency: string | null
+          overnight_guest: string | null
+          preferred_sitter_types: string[] | null
+          preferred_time: string | null
+          presence_expected: string | null
+          rules_notes: string | null
+          smoker_accepted: string | null
+          space_usage: string[] | null
+          specific_expectations: string | null
+          updated_at: string
+          user_id: string
+          visits_allowed: string | null
+          welcome_notes: string | null
+        }
+        Insert: {
+          communication_notes?: string | null
+          created_at?: string
+          experience_required?: boolean | null
+          handover_preference?: string | null
+          id?: string
+          meeting_preference?: string[] | null
+          news_format?: string[] | null
+          news_frequency?: string | null
+          overnight_guest?: string | null
+          preferred_sitter_types?: string[] | null
+          preferred_time?: string | null
+          presence_expected?: string | null
+          rules_notes?: string | null
+          smoker_accepted?: string | null
+          space_usage?: string[] | null
+          specific_expectations?: string | null
+          updated_at?: string
+          user_id: string
+          visits_allowed?: string | null
+          welcome_notes?: string | null
+        }
+        Update: {
+          communication_notes?: string | null
+          created_at?: string
+          experience_required?: boolean | null
+          handover_preference?: string | null
+          id?: string
+          meeting_preference?: string[] | null
+          news_format?: string[] | null
+          news_frequency?: string | null
+          overnight_guest?: string | null
+          preferred_sitter_types?: string[] | null
+          preferred_time?: string | null
+          presence_expected?: string | null
+          rules_notes?: string | null
+          smoker_accepted?: string | null
+          space_usage?: string[] | null
+          specific_expectations?: string | null
+          updated_at?: string
+          user_id?: string
+          visits_allowed?: string | null
+          welcome_notes?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "owner_profiles_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       past_animals: {
         Row: {
           created_at: string
@@ -205,7 +282,9 @@ export type Database = {
           environment:
             | Database["public"]["Enums"]["property_environment"]
             | null
+          equipments: string[] | null
           id: string
+          photos: string[] | null
           region_highlights: string | null
           rooms_count: number | null
           type: Database["public"]["Enums"]["property_type"]
@@ -220,7 +299,9 @@ export type Database = {
           environment?:
             | Database["public"]["Enums"]["property_environment"]
             | null
+          equipments?: string[] | null
           id?: string
+          photos?: string[] | null
           region_highlights?: string | null
           rooms_count?: number | null
           type?: Database["public"]["Enums"]["property_type"]
@@ -235,7 +316,9 @@ export type Database = {
           environment?:
             | Database["public"]["Enums"]["property_environment"]
             | null
+          equipments?: string[] | null
           id?: string
+          photos?: string[] | null
           region_highlights?: string | null
           rooms_count?: number | null
           type?: Database["public"]["Enums"]["property_type"]
