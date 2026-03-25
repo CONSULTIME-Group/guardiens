@@ -15,6 +15,8 @@ interface Notification {
   link: string | null;
   read_at: string | null;
   created_at: string;
+  actor_name: string | null;
+  actor_avatar_url: string | null;
 }
 
 const typeIcons: Record<string, string> = {
@@ -22,6 +24,10 @@ const typeIcons: Record<string, string> = {
   new_application: "📩",
   sit_confirmed: "✅",
   review_published: "⭐",
+  new_message: "💬",
+  application_accepted: "🎉",
+  reminder_7days: "📅",
+  reminder_48h: "⏰",
   info: "ℹ️",
 };
 
