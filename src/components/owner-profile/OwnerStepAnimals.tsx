@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Plus, Pencil, Trash2, ChevronDown, ChevronUp } from "lucide-react";
 import HintBubble from "../profile/HintBubble";
+import BreedProfileCard from "../breeds/BreedProfileCard";
 import type { Pet } from "@/hooks/useOwnerProfile";
 
 const SPECIES = [
