@@ -32,7 +32,7 @@ const About = () => {
             Tout a commencé quand Elisa, Argentine installée à Lyon, a découvert le house-sitting par hasard. Une voisine lui a confié ses chats pour un week-end. Puis un ami ses deux chiens pour une semaine. De fil en aiguille, les propriétaires du quartier se sont passé le mot : « Demande à Elisa. »
           </p>
           <p>
-            En deux ans, c'est devenu 37 maisons gardées et 234 animaux accompagnés dans toute la région Auvergne-Rhône-Alpes. Un soir, autour d'un BBQ chez des propriétaires devenus amis, la question est tombée : « Et si d'autres personnes pouvaient vivre ça aussi ? »
+            En cinq ans, c'est devenu 37 maisons gardées et 234 animaux accompagnés dans toute la région Auvergne-Rhône-Alpes. Un soir, autour d'un BBQ chez des propriétaires devenus amis, la question est tombée : « Et si d'autres personnes pouvaient vivre ça aussi ? »
           </p>
           <p className="font-heading text-xl font-semibold text-primary">
             Guardiens est né ce soir-là.

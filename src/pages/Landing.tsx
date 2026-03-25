@@ -71,7 +71,7 @@ const testimonials = [
 const stats = [
   { value: "37", label: "maisons gardées" },
   { value: "234", label: "animaux accompagnés" },
-  { value: "2 ans", label: "en AURA" },
+  { value: "5 ans", label: "en AURA" },
   { value: "100%", label: "gratuit au lancement" },
 ];
 
@@ -155,7 +155,7 @@ const Landing = () => {
           className="mt-10 text-sm text-muted-foreground animate-fade-in"
           style={{ animationDelay: "0.3s" }}
         >
-          37 maisons gardées · 234 animaux accompagnés · 2 ans en AURA
+          37 maisons gardées · 234 animaux accompagnés · 5 ans en AURA
         </p>
       </section>
 
@@ -175,7 +175,7 @@ const Landing = () => {
             «&nbsp;Demande à Elisa.&nbsp;»
           </p>
           <p className="text-muted-foreground leading-relaxed text-base md:text-lg text-center mt-4">
-            En deux ans, c'est devenu 37&nbsp;maisons gardées et
+            En cinq ans, c'est devenu 37&nbsp;maisons gardées et
             234&nbsp;animaux accompagnés dans toute la région
             Auvergne-Rhône-Alpes. Un soir, autour d'un BBQ chez des
             propriétaires devenus amis, la question est tombée&nbsp;:
