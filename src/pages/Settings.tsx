@@ -22,7 +22,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { User, Bell, Shield, Trash2, Download, Sun, Moon, Monitor } from "lucide-react";
+import { User, Bell, Shield, Trash2, Download, Sun, Moon, Monitor, ShieldCheck, Upload, CheckCircle2, Clock, AlertCircle } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
 
 interface NotifPrefs {
