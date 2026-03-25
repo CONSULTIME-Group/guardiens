@@ -159,6 +159,13 @@ const Notifications = () => {
                       <Check className="h-4 w-4" />
                     </button>
                   )}
+                  <button
+                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); deleteNotification(n.id); }}
+                    className="p-1.5 rounded-md hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors shrink-0"
+                    title="Supprimer"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
                 </div>
               </div>
             );
