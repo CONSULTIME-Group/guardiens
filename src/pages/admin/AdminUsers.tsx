@@ -11,7 +11,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { Eye, Ban, ShieldCheck, StickyNote, RotateCcw } from "lucide-react";
+import { Eye, Ban, ShieldCheck, StickyNote, RotateCcw, Trash2, AlertTriangle } from "lucide-react";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 
 const roleLabels: Record<string, string> = {
   owner: "Propriétaire",
@@ -46,6 +47,10 @@ const AdminUsers = () => {
   const [suspendModal, setSuspendModal] = useState<{ open: boolean; userId: string; reason: string }>({
     open: false, userId: "", reason: ""
   });
+  const [deleteConfirm, setDeleteConfirm] = useState<{ open: boolean; userId: string; userName: string }>({
+    open: false, userId: "", userName: ""
+  });
+  const [deleting, setDeleting] = useState(false);
 
   const fetchUsers = useCallback(async () => {
     setLoading(true);
@@ -113,6 +118,21 @@ const AdminUsers = () => {
     if (error) toast.error("Erreur");
     else { toast.success("Note enregistrée"); fetchUsers(); }
     setNoteModal({ open: false, userId: "", currentNote: "" });
+  };
+
+  const handleDeleteUser = async () => {
+    setDeleting(true);
+    const { data, error } = await supabase.functions.invoke("admin-delete-user", {
+      body: { userId: deleteConfirm.userId },
+    });
+    if (error || data?.error) {
+      toast.error(data?.error || "Erreur lors de la suppression");
+    } else {
+      toast.success("Compte supprimé définitivement");
+      fetchUsers();
+    }
+    setDeleting(false);
+    setDeleteConfirm({ open: false, userId: "", userName: "" });
   };
 
   return (
@@ -262,6 +282,18 @@ const AdminUsers = () => {
                             <Ban className="h-4 w-4 text-destructive" />
                           </Button>
                         )}
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          title="Supprimer définitivement"
+                          onClick={() => setDeleteConfirm({
+                            open: true,
+                            userId: user.id,
+                            userName: `${user.first_name || ""} ${user.last_name || ""}`.trim() || user.email || "cet utilisateur",
+                          })}
+                        >
+                          <Trash2 className="h-4 w-4 text-destructive" />
+                        </Button>
                       </div>
                     </TableCell>
                   </TableRow>
@@ -314,6 +346,32 @@ const AdminUsers = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Delete Confirmation */}
+      <AlertDialog open={deleteConfirm.open} onOpenChange={(o) => !o && setDeleteConfirm({ open: false, userId: "", userName: "" })}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-destructive" />
+              Suppression définitive
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Vous êtes sur le point de supprimer définitivement le compte de <strong>{deleteConfirm.userName}</strong>.
+              Cette action est <strong>irréversible</strong> : toutes les données (profil, annonces, candidatures, messages) seront supprimées.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annuler</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteUser}
+              disabled={deleting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deleting ? "Suppression…" : "Supprimer définitivement"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
