@@ -8,6 +8,7 @@ import { format, isToday, isYesterday } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Link } from "react-router-dom";
 import { useIsMobile } from "@/hooks/use-mobile";
+import HouseGuideBlock from "@/components/messages/HouseGuideBlock";
 
 interface Conversation {
   id: string;
