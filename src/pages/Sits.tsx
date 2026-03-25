@@ -31,12 +31,22 @@ const Sits = () => {
       if (activeRole === "owner") {
         const { data } = await supabase
           .from("sits")
-          .select("*, properties(type, environment), pets:properties(pets(species, name))")
+          .select("*, properties(type, environment)")
           .eq("user_id", user.id)
           .order("created_at", { ascending: false });
-        setSits(data || []);
+
+        // Enrich with application count
+        const enriched = await Promise.all(
+          (data || []).map(async (sit: any) => {
+            const { count } = await supabase
+              .from("applications")
+              .select("id", { count: "exact", head: true })
+              .eq("sit_id", sit.id);
+            return { ...sit, applicationCount: count || 0 };
+          })
+        );
+        setSits(enriched);
       } else {
-        // Sitter: show sits they applied to
         const { data } = await supabase
           .from("applications")
           .select("*, sit:sits(*, properties(type, environment))")
@@ -96,6 +106,20 @@ const Sits = () => {
                       {formatDate(sit.start_date)} → {formatDate(sit.end_date)}
                       {sit.flexible_dates && " (flexible)"}
                     </p>
+                    {activeRole === "owner" && sit.applicationCount > 0 && (
+                      <p className="text-xs text-primary font-medium mt-1">
+                        {sit.applicationCount} candidature{sit.applicationCount > 1 ? "s" : ""}
+                      </p>
+                    )}
+                    {activeRole === "sitter" && sit.application_status && (
+                      <p className={`text-xs font-medium mt-1 ${
+                        sit.application_status === "accepted" ? "text-green-600" :
+                        sit.application_status === "rejected" ? "text-destructive" :
+                        "text-muted-foreground"
+                      }`}>
+                        {statusLabels[sit.application_status]?.label || sit.application_status}
+                      </p>
+                    )}
                   </div>
                   <span className={`px-2.5 py-1 rounded-full text-xs font-medium shrink-0 ${status.className}`}>
                     {status.label}

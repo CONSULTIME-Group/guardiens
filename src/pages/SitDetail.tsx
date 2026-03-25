@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft, Calendar, MapPin, Star, ShieldCheck, Home, PawPrint, MessageSquare, Users, CheckCircle2 } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
+import ApplicationModal from "@/components/sits/ApplicationModal";
+import ApplicationsList from "@/components/sits/ApplicationsList";
 
 const envLabels: Record<string, string> = {
   city_center: "Centre-ville", suburban: "Périurbain", countryside: "Campagne",
@@ -46,7 +48,8 @@ const SitDetail = () => {
   const [sitterProfile, setSitterProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [photoIndex, setPhotoIndex] = useState(0);
-
+  const [applyOpen, setApplyOpen] = useState(false);
+  const [hasApplied, setHasApplied] = useState(false);
   useEffect(() => {
     if (!id) return;
     const load = async () => {
@@ -71,10 +74,14 @@ const SitDetail = () => {
         setPets(petsData || []);
       }
 
-      // Load sitter profile for compatibility badges
+      // Load sitter profile for compatibility badges + check if already applied
       if (user) {
-        const { data: sp } = await supabase.from("sitter_profiles").select("*").eq("user_id", user.id).maybeSingle();
-        setSitterProfile(sp);
+        const [spRes, appRes] = await Promise.all([
+          supabase.from("sitter_profiles").select("*").eq("user_id", user.id).maybeSingle(),
+          supabase.from("applications").select("id").eq("sit_id", id!).eq("sitter_id", user.id).maybeSingle(),
+        ]);
+        setSitterProfile(spRes.data);
+        if (appRes.data) setHasApplied(true);
       }
 
       setLoading(false);
@@ -273,16 +280,46 @@ const SitDetail = () => {
         <p className="text-xs text-muted-foreground mt-1">Profils vérifiés · Avis croisés · Gardiens d'urgence mobilisables</p>
       </div>
 
-      {/* Apply button */}
+      {/* Owner: applications list */}
+      {sit.user_id === user?.id && (
+        <ApplicationsList
+          sitId={sit.id}
+          sitTitle={sit.title}
+          petNames={pets.map((p: any) => p.name)}
+          startDate={formatDate(sit.start_date)}
+          endDate={formatDate(sit.end_date)}
+        />
+      )}
+
+      {/* Sitter: apply button */}
       {activeRole === "sitter" && sit.user_id !== user?.id && (
         <div className="fixed bottom-0 left-0 right-0 md:left-64 bg-card border-t border-border p-4 z-40 md:pb-4 pb-20">
           <div className="max-w-3xl mx-auto">
-            <Button className="w-full h-12 text-base font-semibold bg-primary hover:bg-primary/90">
-              Postuler
-            </Button>
+            {hasApplied ? (
+              <Button className="w-full h-12 text-base font-semibold" disabled>
+                <CheckCircle2 className="h-5 w-5 mr-2" /> Candidature envoyée ✓
+              </Button>
+            ) : (
+              <Button className="w-full h-12 text-base font-semibold" onClick={() => setApplyOpen(true)}>
+                Postuler
+              </Button>
+            )}
           </div>
         </div>
       )}
+
+      {/* Application modal */}
+      <ApplicationModal
+        open={applyOpen}
+        onOpenChange={setApplyOpen}
+        sitId={sit.id}
+        ownerFirstName={owner?.first_name || ""}
+        petNames={pets.map((p: any) => p.name)}
+        city={owner?.city || ""}
+        startDate={formatDate(sit.start_date)}
+        endDate={formatDate(sit.end_date)}
+        onSuccess={() => setHasApplied(true)}
+      />
     </div>
   );
 };
