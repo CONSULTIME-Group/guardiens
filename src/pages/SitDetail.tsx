@@ -3,12 +3,13 @@ import { useParams, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Calendar, MapPin, Star, ShieldCheck, Home, PawPrint, MessageSquare, Users, CheckCircle2 } from "lucide-react";
+import { ArrowLeft, Calendar, MapPin, Star, ShieldCheck, Home, PawPrint, MessageSquare, Users, CheckCircle2, XCircle } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import ApplicationModal from "@/components/sits/ApplicationModal";
 import ApplicationsList from "@/components/sits/ApplicationsList";
 import ReviewsDisplay from "@/components/reviews/ReviewsDisplay";
+import CancelSitModal from "@/components/sits/CancelSitModal";
 
 const envLabels: Record<string, string> = {
   city_center: "Centre-ville", suburban: "Périurbain", countryside: "Campagne",
@@ -51,6 +52,7 @@ const SitDetail = () => {
   const [photoIndex, setPhotoIndex] = useState(0);
   const [applyOpen, setApplyOpen] = useState(false);
   const [hasApplied, setHasApplied] = useState(false);
+  const [cancelOpen, setCancelOpen] = useState(false);
   useEffect(() => {
     if (!id) return;
     const load = async () => {
@@ -278,6 +280,22 @@ const SitDetail = () => {
         </div>
       )}
 
+      {/* Cancel button for confirmed/published sits */}
+      {sit && user && (sit.status === "confirmed" || sit.status === "published") && (
+        (sit.user_id === user.id || hasApplied) && (
+          <div className="mt-6 text-center">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-destructive hover:text-destructive hover:bg-destructive/10 text-xs"
+              onClick={() => setCancelOpen(true)}
+            >
+              <XCircle className="h-4 w-4 mr-1" /> Annuler cette garde
+            </Button>
+          </div>
+        )
+      )}
+
       {/* Reassurance */}
       <div className="mt-8 bg-primary/5 border border-primary/10 rounded-lg p-5 text-center">
         <p className="font-heading text-sm font-semibold text-primary">Vous partez l'esprit léger — et si un imprévu survient, votre réseau local de gardiens prend le relais.</p>
@@ -339,6 +357,22 @@ const SitDetail = () => {
         endDate={formatDate(sit.end_date)}
         onSuccess={() => setHasApplied(true)}
       />
+
+      {/* Cancel modal */}
+      {sit && (
+        <CancelSitModal
+          open={cancelOpen}
+          onOpenChange={setCancelOpen}
+          sitId={sit.id}
+          sitTitle={sit.title}
+          sitOwnerId={sit.user_id}
+          startDate={formatDate(sit.start_date)}
+          endDate={formatDate(sit.end_date)}
+          onCancelled={() => {
+            setSit({ ...sit, status: sit.user_id === user?.id ? "cancelled" : "published" });
+          }}
+        />
+      )}
     </div>
   );
 };

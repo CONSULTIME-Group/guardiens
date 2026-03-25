@@ -529,6 +529,7 @@ export type Database = {
         Row: {
           avatar_url: string | null
           bio: string | null
+          cancellation_count: number
           city: string | null
           created_at: string
           email: string | null
@@ -543,6 +544,7 @@ export type Database = {
         Insert: {
           avatar_url?: string | null
           bio?: string | null
+          cancellation_count?: number
           city?: string | null
           created_at?: string
           email?: string | null
@@ -557,6 +559,7 @@ export type Database = {
         Update: {
           avatar_url?: string | null
           bio?: string | null
+          cancellation_count?: number
           city?: string | null
           created_at?: string
           email?: string | null
@@ -719,6 +722,9 @@ export type Database = {
       }
       sits: {
         Row: {
+          cancellation_reason: string | null
+          cancelled_at: string | null
+          cancelled_by: string | null
           created_at: string
           end_date: string | null
           flexible_dates: boolean | null
@@ -732,6 +738,9 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          cancellation_reason?: string | null
+          cancelled_at?: string | null
+          cancelled_by?: string | null
           created_at?: string
           end_date?: string | null
           flexible_dates?: boolean | null
@@ -745,6 +754,9 @@ export type Database = {
           user_id: string
         }
         Update: {
+          cancellation_reason?: string | null
+          cancelled_at?: string | null
+          cancelled_by?: string | null
           created_at?: string
           end_date?: string | null
           flexible_dates?: boolean | null
