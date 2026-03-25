@@ -22,7 +22,8 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { User, Bell, Shield, Trash2, Download } from "lucide-react";
+import { User, Bell, Shield, Trash2, Download, Sun, Moon, Monitor } from "lucide-react";
+import { useTheme } from "@/contexts/ThemeContext";
 
 interface NotifPrefs {
   email_new_application: boolean;
