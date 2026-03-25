@@ -443,4 +443,16 @@ const EmptyCard = ({ text, cta, to }: { text: string; cta: string; to: string })
   </div>
 );
 
+const ProgressItem = ({ done, label, hint }: { done: boolean; label: string; hint?: string }) => (
+  <div className="flex items-center gap-2">
+    {done ? (
+      <CheckCircle2 className="h-4 w-4 text-green-600 shrink-0" />
+    ) : (
+      <div className="h-4 w-4 rounded-full border-2 border-muted-foreground/30 shrink-0" />
+    )}
+    <span className={`text-xs ${done ? "text-foreground line-through" : "text-muted-foreground"}`}>{label}</span>
+    {hint && !done && <span className="text-[10px] text-primary">{hint}</span>}
+  </div>
+);
+
 export default OwnerDashboard;
