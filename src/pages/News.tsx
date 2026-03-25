@@ -4,7 +4,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Calendar, MapPin, ArrowRight } from "lucide-react";
+import { Calendar, MapPin, ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 
@@ -40,31 +41,49 @@ const CATEGORY_COLORS: Record<string, string> = {
   actualite: "bg-muted text-muted-foreground",
 };
 
+const PAGE_SIZE = 9;
+
 export default function News() {
   const [articles, setArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState(true);
+  const [totalCount, setTotalCount] = useState(0);
   const [searchParams, setSearchParams] = useSearchParams();
   const activeCategory = searchParams.get("cat") || "all";
+  const currentPage = Math.max(1, parseInt(searchParams.get("page") || "1", 10));
 
   useEffect(() => {
     const fetchArticles = async () => {
       setLoading(true);
+      const from = (currentPage - 1) * PAGE_SIZE;
+      const to = from + PAGE_SIZE - 1;
+
       let query = supabase
         .from("articles")
-        .select("id, title, slug, excerpt, cover_image_url, category, tags, city, region, author_name, published_at")
+        .select("id, title, slug, excerpt, cover_image_url, category, tags, city, region, author_name, published_at", { count: "exact" })
         .eq("published", true)
-        .order("published_at", { ascending: false });
+        .order("published_at", { ascending: false })
+        .range(from, to);
 
       if (activeCategory !== "all") {
         query = query.eq("category", activeCategory);
       }
 
-      const { data } = await query;
+      const { data, count } = await query;
       setArticles((data as Article[]) || []);
+      setTotalCount(count || 0);
       setLoading(false);
     };
     fetchArticles();
-  }, [activeCategory]);
+  }, [activeCategory, currentPage]);
+
+  const totalPages = Math.ceil(totalCount / PAGE_SIZE);
+
+  const goToPage = (page: number) => {
+    if (page <= 1) searchParams.delete("page");
+    else searchParams.set("page", String(page));
+    setSearchParams(searchParams);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
   const categories = [
     { key: "all", label: "Tout" },
@@ -90,6 +109,7 @@ export default function News() {
             onClick={() => {
               if (cat.key === "all") searchParams.delete("cat");
               else searchParams.set("cat", cat.key);
+              searchParams.delete("page");
               setSearchParams(searchParams);
             }}
             className={`px-4 py-2 rounded-pill text-sm font-medium transition-colors ${
@@ -125,6 +145,7 @@ export default function News() {
           </p>
         </div>
       ) : (
+        <>
         <div className="grid gap-6 md:grid-cols-2">
           {articles.map((article) => (
             <Link
@@ -180,6 +201,40 @@ export default function News() {
             </Link>
           ))}
         </div>
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="flex items-center justify-center gap-2 mt-10">
+            <Button
+              variant="outline"
+              size="icon"
+              disabled={currentPage <= 1}
+              onClick={() => goToPage(currentPage - 1)}
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+              <Button
+                key={page}
+                variant={page === currentPage ? "default" : "outline"}
+                size="sm"
+                onClick={() => goToPage(page)}
+                className="min-w-[36px]"
+              >
+                {page}
+              </Button>
+            ))}
+            <Button
+              variant="outline"
+              size="icon"
+              disabled={currentPage >= totalPages}
+              onClick={() => goToPage(currentPage + 1)}
+            >
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
+        )}
+        </>
       )}
     </div>
   );
