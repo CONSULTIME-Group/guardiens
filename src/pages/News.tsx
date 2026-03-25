@@ -40,31 +40,49 @@ const CATEGORY_COLORS: Record<string, string> = {
   actualite: "bg-muted text-muted-foreground",
 };
 
+const PAGE_SIZE = 9;
+
 export default function News() {
   const [articles, setArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState(true);
+  const [totalCount, setTotalCount] = useState(0);
   const [searchParams, setSearchParams] = useSearchParams();
   const activeCategory = searchParams.get("cat") || "all";
+  const currentPage = Math.max(1, parseInt(searchParams.get("page") || "1", 10));
 
   useEffect(() => {
     const fetchArticles = async () => {
       setLoading(true);
+      const from = (currentPage - 1) * PAGE_SIZE;
+      const to = from + PAGE_SIZE - 1;
+
       let query = supabase
         .from("articles")
-        .select("id, title, slug, excerpt, cover_image_url, category, tags, city, region, author_name, published_at")
+        .select("id, title, slug, excerpt, cover_image_url, category, tags, city, region, author_name, published_at", { count: "exact" })
         .eq("published", true)
-        .order("published_at", { ascending: false });
+        .order("published_at", { ascending: false })
+        .range(from, to);
 
       if (activeCategory !== "all") {
         query = query.eq("category", activeCategory);
       }
 
-      const { data } = await query;
+      const { data, count } = await query;
       setArticles((data as Article[]) || []);
+      setTotalCount(count || 0);
       setLoading(false);
     };
     fetchArticles();
-  }, [activeCategory]);
+  }, [activeCategory, currentPage]);
+
+  const totalPages = Math.ceil(totalCount / PAGE_SIZE);
+
+  const goToPage = (page: number) => {
+    if (page <= 1) searchParams.delete("page");
+    else searchParams.set("page", String(page));
+    setSearchParams(searchParams);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
   const categories = [
     { key: "all", label: "Tout" },
