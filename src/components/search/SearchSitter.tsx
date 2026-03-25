@@ -74,9 +74,6 @@ const SearchSitter = () => {
       .eq("status", "published")
       .order(sort === "recent" ? "created_at" : "created_at", { ascending: false });
 
-    if (housingType !== "all") {
-      // We filter after fetch since it's a joined field
-    }
     if (startDate) query = query.gte("end_date", startDate);
     if (endDate) query = query.lte("start_date", endDate);
 
@@ -90,10 +87,34 @@ const SearchSitter = () => {
     if (environment !== "all") {
       items = items.filter((s: any) => s.property?.environment === environment);
     }
+
+    // Geocoded radius filter
     if (city) {
-      // Note: radius filtering requires geocoding which is not available.
-      // For now, filter by exact city name match (case-insensitive).
-      items = items.filter((s: any) => s.owner?.city?.toLowerCase().includes(city.toLowerCase()));
+      const searchCoords = await geocodeCity(city);
+      if (searchCoords) {
+        // Geocode each unique owner city and filter by distance
+        const uniqueCities = [...new Set(items.map((s: any) => s.owner?.city).filter(Boolean))] as string[];
+        const cityCoords = new Map<string, { lat: number; lng: number }>();
+
+        await Promise.all(
+          uniqueCities.map(async (c) => {
+            const coords = await geocodeCity(c);
+            if (coords) cityCoords.set(c, { lat: coords.lat, lng: coords.lng });
+          })
+        );
+
+        items = items.filter((s: any) => {
+          const ownerCity = s.owner?.city;
+          if (!ownerCity) return false;
+          const coords = cityCoords.get(ownerCity);
+          if (!coords) return false;
+          const dist = haversineDistance(searchCoords.lat, searchCoords.lng, coords.lat, coords.lng);
+          return dist <= radius[0];
+        });
+      } else {
+        // Fallback to text match if geocoding fails
+        items = items.filter((s: any) => s.owner?.city?.toLowerCase().includes(city.toLowerCase()));
+      }
     }
 
     // Duration filter
