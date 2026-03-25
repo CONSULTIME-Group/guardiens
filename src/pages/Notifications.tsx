@@ -33,6 +33,7 @@ const typeIcons: Record<string, string> = {
   long_stay_cancelled: "❌",
   long_stay_application_accepted: "🎉",
   long_stay_application_cancelled: "🚫",
+  long_stay_application_rejected: "😔",
   new_long_stay_application: "📩",
 };
 
