@@ -11,6 +11,7 @@ interface ApplicationModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   sitId: string;
+  ownerId: string;
   ownerFirstName: string;
   petNames: string[];
   city: string;
