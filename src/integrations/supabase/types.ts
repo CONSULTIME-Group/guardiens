@@ -93,9 +93,13 @@ export type Database = {
           created_at: string
           excerpt: string
           id: string
+          meta_description: string | null
+          meta_title: string | null
           published: boolean
           published_at: string | null
           region: string | null
+          related_breed: string | null
+          related_city: string | null
           slug: string
           tags: string[] | null
           title: string
@@ -110,9 +114,13 @@ export type Database = {
           created_at?: string
           excerpt?: string
           id?: string
+          meta_description?: string | null
+          meta_title?: string | null
           published?: boolean
           published_at?: string | null
           region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
           slug: string
           tags?: string[] | null
           title?: string
@@ -127,9 +135,13 @@ export type Database = {
           created_at?: string
           excerpt?: string
           id?: string
+          meta_description?: string | null
+          meta_title?: string | null
           published?: boolean
           published_at?: string | null
           region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
           slug?: string
           tags?: string[] | null
           title?: string
