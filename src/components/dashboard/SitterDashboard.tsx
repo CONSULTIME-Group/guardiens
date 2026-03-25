@@ -78,6 +78,24 @@ const SitterDashboard = () => {
         )}
       </div>
 
+      {/* Availability toggle */}
+      <div className="flex items-center justify-between rounded-lg border border-green-200 bg-green-50 dark:bg-green-950/20 dark:border-green-800 p-4">
+        <div className="flex items-center gap-3">
+          <CircleDot className={`h-5 w-5 ${isAvailable ? "text-green-600" : "text-muted-foreground"}`} />
+          <div>
+            <p className="font-semibold text-sm">{isAvailable ? "Vous êtes visible et disponible" : "Mode indisponible"}</p>
+            <p className="text-xs text-muted-foreground">Les propriétaires {isAvailable ? "peuvent" : "ne peuvent pas"} vous trouver.</p>
+          </div>
+        </div>
+        <Switch
+          checked={isAvailable}
+          onCheckedChange={async (v) => {
+            setIsAvailable(v);
+            await supabase.from("sitter_profiles").update({ is_available: v }).eq("user_id", user!.id);
+          }}
+        />
+      </div>
+
       {/* Mes gardes (confirmed) */}
       {mySits.length > 0 && (
         <DashSection title="Mes gardes" icon={Calendar}>
