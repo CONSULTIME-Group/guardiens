@@ -336,11 +336,11 @@ const Landing = () => {
             <div>
               <h4 className="font-heading font-semibold text-sm mb-3">Liens</h4>
               <ul className="space-y-2 text-sm text-muted-foreground">
-                <li className="hover:text-foreground cursor-pointer transition-colors">À propos</li>
-                <li className="hover:text-foreground cursor-pointer transition-colors">Blog (bientôt)</li>
-                <li className="hover:text-foreground cursor-pointer transition-colors">Contact</li>
-                <li className="hover:text-foreground cursor-pointer transition-colors">CGU</li>
-                <li className="hover:text-foreground cursor-pointer transition-colors">Politique de confidentialité</li>
+                <li className="hover:text-foreground cursor-pointer transition-colors" onClick={() => navigate("/a-propos")}>À propos</li>
+                <li className="hover:text-foreground cursor-pointer transition-colors" onClick={() => navigate("/actualites")}>Blog</li>
+                <li className="hover:text-foreground cursor-pointer transition-colors" onClick={() => navigate("/contact")}>Contact</li>
+                <li className="hover:text-foreground cursor-pointer transition-colors" onClick={() => navigate("/cgu")}>CGU</li>
+                <li className="hover:text-foreground cursor-pointer transition-colors" onClick={() => navigate("/confidentialite")}>Politique de confidentialité</li>
               </ul>
             </div>
             <div>
