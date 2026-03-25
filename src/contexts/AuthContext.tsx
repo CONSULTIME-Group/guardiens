@@ -63,20 +63,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       async (event, session) => {
         if (session?.user) {
           // Use setTimeout to avoid Supabase auth deadlock
-          setTimeout(() => fetchProfile(session.user), 0);
+          setTimeout(async () => {
+            await fetchProfile(session.user);
+            setLoading(false);
+          }, 0);
         } else {
           setUser(null);
+          setLoading(false);
         }
-        setLoading(false);
       }
     );
 
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (session?.user) {
-        fetchProfile(session.user);
-      } else {
-        setLoading(false);
+        await fetchProfile(session.user);
       }
+      setLoading(false);
     });
 
     return () => subscription.unsubscribe();
