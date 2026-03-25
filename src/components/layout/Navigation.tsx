@@ -139,10 +139,11 @@ export const BottomNav = () => {
     return () => { supabase.removeChannel(channel); };
   }, [user]);
 
+  const filteredItems = navItems.filter(item => !("hideForRole" in item) || user?.role !== item.hideForRole);
   const mobileItems = [
-    ...navItems.slice(0, 3),
+    ...filteredItems.slice(0, 3),
     { to: "/notifications", icon: Bell, label: "Notifs", notifCount },
-    navItems[4], // Mon profil
+    filteredItems[filteredItems.length - 1], // Mon profil
   ];
 
   return (
