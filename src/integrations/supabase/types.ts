@@ -298,6 +298,41 @@ export type Database = {
           },
         ]
       }
+      identity_verification_logs: {
+        Row: {
+          created_at: string
+          document_type: string | null
+          id: string
+          rejection_reason: string | null
+          result: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          document_type?: string | null
+          id?: string
+          rejection_reason?: string | null
+          result?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          document_type?: string | null
+          id?: string
+          rejection_reason?: string | null
+          result?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "identity_verification_logs_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       location_profiles: {
         Row: {
           activities: string

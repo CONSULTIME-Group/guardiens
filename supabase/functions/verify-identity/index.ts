@@ -191,6 +191,14 @@ Rules:
     const verification = JSON.parse(toolCall.function.arguments);
     console.log("Verification result:", JSON.stringify(verification));
 
+    // Log the verification attempt
+    await supabaseAdmin.from("identity_verification_logs").insert({
+      user_id: user.id,
+      result: verification.is_valid ? "verified" : "rejected",
+      document_type: verification.document_type || null,
+      rejection_reason: verification.rejection_reason || null,
+    });
+
     // Update the profile and create notification based on verification result
     if (verification.is_valid) {
       await supabaseAdmin
