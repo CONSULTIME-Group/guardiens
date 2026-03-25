@@ -432,7 +432,10 @@ const SearchSitter = () => {
                         </div>
                       )}
                       <div className="p-4 flex-1 min-w-0">
-                        <h3 className="font-heading font-semibold truncate">{sit.title || "Sans titre"}</h3>
+                        <h3 className="font-heading font-semibold truncate flex items-center gap-1">
+                          {sit.title || "Sans titre"}
+                          {sit.owner?.identity_verified && <VerifiedBadge size="sm" />}
+                        </h3>
                         <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground mt-1.5">
                           {sit.owner?.city && <span className="flex items-center gap-1"><MapPin className="h-3.5 w-3.5" />{sit.owner.city}</span>}
                           <span className="flex items-center gap-1">
