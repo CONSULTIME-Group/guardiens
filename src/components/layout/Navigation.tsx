@@ -140,7 +140,7 @@ export const Sidebar = () => {
 
 export const BottomNav = () => {
   const location = useLocation();
-  const { user } = useAuth();
+  const { user, activeRole } = useAuth();
   const [notifCount, setNotifCount] = useState(0);
 
   useEffect(() => {
