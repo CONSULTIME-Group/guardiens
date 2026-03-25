@@ -541,6 +541,7 @@ const IdentityVerificationSection = ({ user }: { user: any }) => {
   const [documentUrl, setDocumentUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [loaded, setLoaded] = useState(false);
+  const [logs, setLogs] = useState<any[]>([]);
 
   useEffect(() => {
     if (!user) return;
