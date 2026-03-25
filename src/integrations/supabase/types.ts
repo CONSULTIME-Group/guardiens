@@ -977,6 +977,48 @@ export type Database = {
           },
         ]
       }
+      reports: {
+        Row: {
+          admin_notes: string | null
+          created_at: string
+          details: string | null
+          id: string
+          reason: string
+          report_type: string
+          reporter_id: string
+          resolved_at: string | null
+          status: string
+          target_id: string
+          target_type: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          created_at?: string
+          details?: string | null
+          id?: string
+          reason?: string
+          report_type?: string
+          reporter_id: string
+          resolved_at?: string | null
+          status?: string
+          target_id: string
+          target_type?: string
+        }
+        Update: {
+          admin_notes?: string | null
+          created_at?: string
+          details?: string | null
+          id?: string
+          reason?: string
+          report_type?: string
+          reporter_id?: string
+          resolved_at?: string | null
+          status?: string
+          target_id?: string
+          target_type?: string
+        }
+        Relationships: []
+      }
       reviews: {
         Row: {
           animal_care_rating: number | null

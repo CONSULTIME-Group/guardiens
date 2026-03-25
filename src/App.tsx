@@ -35,6 +35,12 @@ import AdminArticles from "./pages/AdminArticles";
 import ArticleEditor from "./pages/ArticleEditor";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminUsers from "./pages/admin/AdminUsers";
+import AdminListings from "./pages/admin/AdminListings";
+import AdminSitsManagement from "./pages/admin/AdminSitsManagement";
+import AdminReviews from "./pages/admin/AdminReviews";
+import AdminReports from "./pages/admin/AdminReports";
+import AdminVerifications from "./pages/admin/AdminVerifications";
+import AdminEmails from "./pages/admin/AdminEmails";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -68,6 +74,12 @@ const AppRoutes = () => (
     <Route element={<AdminLayout />}>
       <Route path="/admin" element={<AdminDashboard />} />
       <Route path="/admin/users" element={<AdminUsers />} />
+      <Route path="/admin/listings" element={<AdminListings />} />
+      <Route path="/admin/sits-management" element={<AdminSitsManagement />} />
+      <Route path="/admin/reviews" element={<AdminReviews />} />
+      <Route path="/admin/reports" element={<AdminReports />} />
+      <Route path="/admin/verifications" element={<AdminVerifications />} />
+      <Route path="/admin/emails" element={<AdminEmails />} />
       <Route path="/admin/articles" element={<AdminArticles />} />
       <Route path="/admin/articles/:id" element={<ArticleEditor />} />
     </Route>
