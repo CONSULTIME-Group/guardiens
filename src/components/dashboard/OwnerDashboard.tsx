@@ -281,7 +281,7 @@ const OwnerDashboard = () => {
             </div>
             <div className="space-y-2.5">
               <ProgressItem done={completedSits.length >= 2} label={`${Math.min(completedSits.length, 2)}/2 gardes complétées`} />
-              <ProgressItem done={false} label="Identité vérifiée" hint="Paramètres → Vérification" />
+              <ProgressItem done={false} label="Identité vérifiée" hint="Paramètres → Vérification" hintTo="/settings" />
             </div>
             <div className="mt-3">
               <div className="flex items-center justify-between text-[10px] text-muted-foreground mb-1">
