@@ -1,0 +1,1 @@
+ALTER TABLE public.sitter_profiles ADD COLUMN is_available boolean NOT NULL DEFAULT false;
