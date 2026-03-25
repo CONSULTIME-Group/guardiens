@@ -105,6 +105,96 @@ export type Database = {
           },
         ]
       }
+      house_guides: {
+        Row: {
+          access_codes: string | null
+          appliance_notes: string | null
+          created_at: string
+          detailed_instructions: string | null
+          electrician_phone: string | null
+          emergency_contact_name: string | null
+          emergency_contact_phone: string | null
+          exact_address: string | null
+          heating_instructions: string | null
+          id: string
+          neighbor_name: string | null
+          neighbor_phone: string | null
+          plumber_phone: string | null
+          property_id: string
+          trash_days: string | null
+          updated_at: string
+          user_id: string
+          vet_address: string | null
+          vet_name: string | null
+          vet_phone: string | null
+          wifi_name: string | null
+          wifi_password: string | null
+        }
+        Insert: {
+          access_codes?: string | null
+          appliance_notes?: string | null
+          created_at?: string
+          detailed_instructions?: string | null
+          electrician_phone?: string | null
+          emergency_contact_name?: string | null
+          emergency_contact_phone?: string | null
+          exact_address?: string | null
+          heating_instructions?: string | null
+          id?: string
+          neighbor_name?: string | null
+          neighbor_phone?: string | null
+          plumber_phone?: string | null
+          property_id: string
+          trash_days?: string | null
+          updated_at?: string
+          user_id: string
+          vet_address?: string | null
+          vet_name?: string | null
+          vet_phone?: string | null
+          wifi_name?: string | null
+          wifi_password?: string | null
+        }
+        Update: {
+          access_codes?: string | null
+          appliance_notes?: string | null
+          created_at?: string
+          detailed_instructions?: string | null
+          electrician_phone?: string | null
+          emergency_contact_name?: string | null
+          emergency_contact_phone?: string | null
+          exact_address?: string | null
+          heating_instructions?: string | null
+          id?: string
+          neighbor_name?: string | null
+          neighbor_phone?: string | null
+          plumber_phone?: string | null
+          property_id?: string
+          trash_days?: string | null
+          updated_at?: string
+          user_id?: string
+          vet_address?: string | null
+          vet_name?: string | null
+          vet_phone?: string | null
+          wifi_name?: string | null
+          wifi_password?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "house_guides_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: true
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "house_guides_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       messages: {
         Row: {
           content: string

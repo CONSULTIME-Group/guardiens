@@ -8,6 +8,7 @@ import { format, isToday, isYesterday } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Link } from "react-router-dom";
 import { useIsMobile } from "@/hooks/use-mobile";
+import HouseGuideBlock from "@/components/messages/HouseGuideBlock";
 
 interface Conversation {
   id: string;
@@ -15,7 +16,7 @@ interface Conversation {
   owner_id: string;
   sitter_id: string;
   updated_at: string;
-  sit?: { title: string; status: string };
+  sit?: { title: string; status: string; property_id: string };
   other_user?: { id: string; first_name: string; avatar_url: string | null };
   last_message?: { content: string; created_at: string; sender_id: string };
   unread_count: number;
@@ -73,7 +74,7 @@ const Messages = () => {
     if (!user) return;
     const { data: convs } = await supabase
       .from("conversations")
-      .select("*, sit:sits(title, status)")
+      .select("*, sit:sits(title, status, property_id)")
       .or(`owner_id.eq.${user.id},sitter_id.eq.${user.id}`)
       .order("updated_at", { ascending: false });
 
@@ -385,7 +386,13 @@ const Messages = () => {
           )}
 
           {/* Messages */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-3 pb-20 md:pb-4" style={{ background: "hsl(var(--background))" }}>
+          <div className="flex-1 overflow-y-auto space-y-3 pb-20 md:pb-4" style={{ background: "hsl(var(--background))" }}>
+            {/* House guide block for confirmed sits */}
+            {activeConv.sit?.status === "confirmed" && activeConv.sit?.property_id && (
+              <HouseGuideBlock propertyId={activeConv.sit.property_id} />
+            )}
+
+            <div className="p-4 space-y-3">
             {messages.map(msg => {
               const isMe = msg.sender_id === user?.id;
               const isSystem = msg.is_system;
@@ -429,6 +436,7 @@ const Messages = () => {
               );
             })}
             <div ref={messagesEndRef} />
+            </div>
           </div>
 
           {/* Input */}

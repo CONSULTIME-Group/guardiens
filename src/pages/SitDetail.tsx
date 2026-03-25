@@ -280,15 +280,28 @@ const SitDetail = () => {
         <p className="text-xs text-muted-foreground mt-1">Profils vérifiés · Avis croisés · Gardiens d'urgence mobilisables</p>
       </div>
 
-      {/* Owner: applications list */}
+      {/* Owner: house guide + applications list */}
       {sit.user_id === user?.id && (
-        <ApplicationsList
-          sitId={sit.id}
-          sitTitle={sit.title}
-          petNames={pets.map((p: any) => p.name)}
-          startDate={formatDate(sit.start_date)}
-          endDate={formatDate(sit.end_date)}
-        />
+        <>
+          <div className="mt-8 p-4 bg-accent/50 rounded-lg border border-border">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium">📋 Guide de la maison</p>
+                <p className="text-xs text-muted-foreground">Adresse, codes, contacts véto, consignes — partagé avec le gardien après confirmation</p>
+              </div>
+              <Link to={`/house-guide/${sit.property_id}`}>
+                <Button variant="outline" size="sm">Modifier</Button>
+              </Link>
+            </div>
+          </div>
+          <ApplicationsList
+            sitId={sit.id}
+            sitTitle={sit.title}
+            petNames={pets.map((p: any) => p.name)}
+            startDate={formatDate(sit.start_date)}
+            endDate={formatDate(sit.end_date)}
+          />
+        </>
       )}
 
       {/* Sitter: apply button */}
