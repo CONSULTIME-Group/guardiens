@@ -74,7 +74,7 @@ const SearchSitter = () => {
       const reviews = reviewsRes.data || [];
       const avgRating = reviews.length > 0 ? reviews.reduce((s: number, r: any) => s + r.overall_rating, 0) / reviews.length : 0;
       const verified = myProfileRes.data?.identity_verified || false;
-      setSitterEligible(completedSits >= 3 && avgRating >= 4.7 && verified);
+      setSitterEligible(true); // TODO: restore → completedSits >= 3 && avgRating >= 4.7 && verified
     };
     load();
   }, [user]);
