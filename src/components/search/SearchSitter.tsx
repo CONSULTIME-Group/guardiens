@@ -34,7 +34,7 @@ const typeLabels: Record<string, string> = {
   apartment: "Appartement", house: "Maison", farm: "Ferme", chalet: "Chalet", other: "Autre",
 };
 
-type SortOption = "recent" | "rating";
+type SortOption = "recent" | "rating" | "start_date" | "contribution";
 type SearchTab = "sits" | "long_stays";
 
 const SearchSitter = () => {
@@ -370,7 +370,7 @@ const SearchSitter = () => {
           {searched && currentResults.length > 0 && (
             <div className="flex items-center justify-between mb-4">
               <p className="text-sm text-muted-foreground">{currentResults.length} résultat{currentResults.length > 1 ? "s" : ""}</p>
-              {tab === "sits" && (
+              {tab === "sits" ? (
                 <Select value={sort} onValueChange={(v) => {
                   const newSort = v as SortOption;
                   setSort(newSort);
@@ -388,6 +388,33 @@ const SearchSitter = () => {
                   <SelectContent>
                     <SelectItem value="recent">Plus récentes</SelectItem>
                     <SelectItem value="rating">Mieux notées</SelectItem>
+                  </SelectContent>
+                </Select>
+              ) : (
+                <Select value={sort} onValueChange={(v) => {
+                  const newSort = v as SortOption;
+                  setSort(newSort);
+                  setLongStayResults(prev => {
+                    const sorted = [...prev];
+                    if (newSort === "start_date") {
+                      sorted.sort((a, b) => new Date(a.start_date || "9999").getTime() - new Date(b.start_date || "9999").getTime());
+                    } else if (newSort === "contribution") {
+                      sorted.sort((a, b) => {
+                        const aVal = parseFloat((a.estimated_contribution || "").replace(/[^0-9.,]/g, "").replace(",", ".")) || 0;
+                        const bVal = parseFloat((b.estimated_contribution || "").replace(/[^0-9.,]/g, "").replace(",", ".")) || 0;
+                        return aVal - bVal;
+                      });
+                    } else {
+                      sorted.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+                    }
+                    return sorted;
+                  });
+                }}>
+                  <SelectTrigger className="w-48"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="recent">Plus récentes</SelectItem>
+                    <SelectItem value="start_date">Date de début</SelectItem>
+                    <SelectItem value="contribution">Contribution ↑</SelectItem>
                   </SelectContent>
                 </Select>
               )}
