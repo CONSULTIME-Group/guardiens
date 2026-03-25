@@ -234,6 +234,7 @@ export default function News() {
             </Button>
           </div>
         )}
+        </>
       )}
     </div>
   );
