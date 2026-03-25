@@ -280,6 +280,11 @@ const Settings = () => {
 
       <Separator />
 
+      {/* Apparence */}
+      <ThemeSection />
+
+      <Separator />
+
       {/* Notifications */}
       <section className="my-8">
         <div className="flex items-center gap-2 mb-4">
