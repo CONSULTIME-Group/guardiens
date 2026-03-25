@@ -338,6 +338,53 @@ const AdminDashboard = () => {
           </div>
         </CardContent>
       </Card>
+
+      {/* Monthly ratings trend */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Tendance des avis (note moyenne par mois)</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="h-64">
+            {monthlyRatings.every(m => m.count === 0) ? (
+              <div className="flex items-center justify-center h-full text-muted-foreground text-sm">
+                Aucun avis pour le moment.
+              </div>
+            ) : (
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={monthlyRatings}>
+                  <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
+                  <XAxis dataKey="month" tick={{ fontSize: 11 }} />
+                  <YAxis domain={[0, 5]} ticks={[1, 2, 3, 4, 5]} tick={{ fontSize: 11 }} />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: "hsl(var(--card))",
+                      border: "1px solid hsl(var(--border))",
+                      borderRadius: "8px",
+                      fontSize: "13px",
+                    }}
+                    formatter={(v: number, name: string) => {
+                      if (name === "avg") return [`${v}/5`, "Note moyenne"];
+                      return [`${v}`, "Nombre d'avis"];
+                    }}
+                    labelFormatter={(l) => `${l}`}
+                  />
+                  <Bar dataKey="avg" radius={[4, 4, 0, 0]} fill="hsl(var(--primary))" name="avg" />
+                  <Line
+                    type="monotone"
+                    dataKey="count"
+                    stroke="hsl(var(--primary) / 0.5)"
+                    strokeWidth={2}
+                    dot={{ fill: "hsl(var(--primary) / 0.5)", r: 3 }}
+                    name="count"
+                    yAxisId={0}
+                  />
+                </BarChart>
+              </ResponsiveContainer>
+            )}
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };
