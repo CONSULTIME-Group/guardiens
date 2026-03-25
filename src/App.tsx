@@ -30,6 +30,8 @@ import About from "./pages/About";
 import Contact from "./pages/Contact";
 import Terms from "./pages/Terms";
 import Privacy from "./pages/Privacy";
+import AdminArticles from "./pages/AdminArticles";
+import ArticleEditor from "./pages/ArticleEditor";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -75,6 +77,8 @@ const AppRoutes = () => (
       <Route path="/long-stays/create" element={<CreateLongStay />} />
       <Route path="/long-stays/:id" element={<LongStayDetail />} />
       <Route path="/long-stays/:id/edit" element={<EditLongStay />} />
+      <Route path="/admin/articles" element={<AdminArticles />} />
+      <Route path="/admin/articles/:id" element={<ArticleEditor />} />
     </Route>
     <Route path="*" element={<NotFound />} />
   </Routes>

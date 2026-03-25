@@ -1,6 +1,9 @@
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { MapPin, Shield, Heart, Users, Star, Quote } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { MapPin, Shield, Heart, Users, Star, Quote, ArrowRight } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 const steps = [
   {
@@ -77,6 +80,13 @@ const stats = [
 
 const Landing = () => {
   const navigate = useNavigate();
+  const [latestArticles, setLatestArticles] = useState<any[]>([]);
+
+  useEffect(() => {
+    supabase.from("articles").select("id,title,slug,excerpt,cover_image_url,category,published_at")
+      .eq("published", true).order("published_at", { ascending: false }).limit(3)
+      .then(({ data }) => setLatestArticles(data || []));
+  }, []);
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -110,7 +120,10 @@ const Landing = () => {
         <h2 className="font-heading text-2xl font-bold">
           <span className="text-primary">g</span>uardiens
         </h2>
-        <div className="flex gap-3">
+        <div className="flex gap-3 items-center">
+          <Button variant="ghost" onClick={() => navigate("/actualites")}>
+            Actualités
+          </Button>
           <Button variant="ghost" onClick={() => navigate("/login")}>
             Connexion
           </Button>
@@ -302,6 +315,31 @@ const Landing = () => {
           </Button>
         </div>
       </section>
+
+      {/* Derniers articles */}
+      {latestArticles.length > 0 && (
+        <section className="px-6 md:px-12 py-20">
+          <div className="max-w-5xl mx-auto">
+            <div className="flex items-center justify-between mb-10">
+              <h2 className="font-heading text-3xl md:text-4xl font-bold">Derniers articles</h2>
+              <Button variant="ghost" onClick={() => navigate("/actualites")} className="text-primary">
+                Voir tous les articles <ArrowRight className="h-4 w-4 ml-1" />
+              </Button>
+            </div>
+            <div className="grid md:grid-cols-3 gap-6">
+              {latestArticles.map(a => (
+                <Link key={a.id} to={`/actualites/${a.slug}`} className="group bg-card rounded-xl overflow-hidden border border-border/50 hover:shadow-lg transition-shadow">
+                  {a.cover_image_url && <img src={a.cover_image_url} alt={a.title} className="w-full h-40 object-cover group-hover:scale-105 transition-transform duration-300" />}
+                  <div className="p-5">
+                    <h3 className="font-heading text-base font-semibold group-hover:text-primary transition-colors line-clamp-2 mb-2">{a.title}</h3>
+                    <p className="text-muted-foreground text-sm line-clamp-2">{a.excerpt}</p>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Preuve sociale — bandeau chiffres */}
       <section className="px-6 md:px-12 py-16 bg-card">
