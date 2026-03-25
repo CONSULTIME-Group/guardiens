@@ -523,34 +523,64 @@ export type Database = {
       }
       reviews: {
         Row: {
+          animal_care_rating: number | null
           comment: string | null
+          communication_rating: number | null
           created_at: string
+          housing_condition_rating: number | null
+          housing_respect_rating: number | null
           id: string
+          instructions_clarity_rating: number | null
+          listing_accuracy_rating: number | null
           overall_rating: number
           published: boolean | null
+          reliability_rating: number | null
+          review_type: string | null
           reviewee_id: string
           reviewer_id: string
           sit_id: string
+          welcome_rating: number | null
+          would_recommend: boolean | null
         }
         Insert: {
+          animal_care_rating?: number | null
           comment?: string | null
+          communication_rating?: number | null
           created_at?: string
+          housing_condition_rating?: number | null
+          housing_respect_rating?: number | null
           id?: string
+          instructions_clarity_rating?: number | null
+          listing_accuracy_rating?: number | null
           overall_rating: number
           published?: boolean | null
+          reliability_rating?: number | null
+          review_type?: string | null
           reviewee_id: string
           reviewer_id: string
           sit_id: string
+          welcome_rating?: number | null
+          would_recommend?: boolean | null
         }
         Update: {
+          animal_care_rating?: number | null
           comment?: string | null
+          communication_rating?: number | null
           created_at?: string
+          housing_condition_rating?: number | null
+          housing_respect_rating?: number | null
           id?: string
+          instructions_clarity_rating?: number | null
+          listing_accuracy_rating?: number | null
           overall_rating?: number
           published?: boolean | null
+          reliability_rating?: number | null
+          review_type?: string | null
           reviewee_id?: string
           reviewer_id?: string
           sit_id?: string
+          welcome_rating?: number | null
+          would_recommend?: boolean | null
         }
         Relationships: [
           {
