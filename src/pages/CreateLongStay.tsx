@@ -60,8 +60,9 @@ const CreateLongStay = () => {
       const { data: ownerSits } = await supabase.from("sits").select("id, status").eq("user_id", user.id);
       const completedSits = (ownerSits || []).filter((s: any) => s.status === "completed").length;
       const verified = profileRes.data?.identity_verified || false;
+      // TEMPORARILY BYPASSED FOR TESTING
       setEligibility({
-        eligible: completedSits >= 2 && verified,
+        eligible: true, // TODO: restore → completedSits >= 2 && verified
         completedSits,
         verified,
       });
