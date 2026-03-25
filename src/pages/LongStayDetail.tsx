@@ -100,6 +100,22 @@ const LongStayDetail = () => {
     }
   };
 
+  const handleDelete = async () => {
+    if (!user || !longStay) return;
+    setDeleting(true);
+    try {
+      const { error } = await supabase.from("long_stays").delete().eq("id", longStay.id);
+      if (error) throw error;
+      toast({ title: "Annonce supprimée", description: "Votre garde longue durée a été supprimée." });
+      navigate("/dashboard");
+    } catch {
+      toast({ variant: "destructive", title: "Erreur", description: "Impossible de supprimer l'annonce." });
+    } finally {
+      setDeleting(false);
+      setDeleteDialogOpen(false);
+    }
+  };
+
   if (loading) return <div className="p-6 md:p-10 max-w-3xl mx-auto text-muted-foreground">Chargement...</div>;
   if (!longStay) return <div className="p-6 md:p-10 max-w-3xl mx-auto text-muted-foreground">Annonce introuvable.</div>;
 
