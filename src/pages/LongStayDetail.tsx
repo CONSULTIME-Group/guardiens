@@ -283,6 +283,20 @@ const LongStayDetail = () => {
         </div>
       )}
 
+      {/* Service fee notice */}
+      <div className="p-4 rounded-lg border border-primary/20 bg-primary/5 mb-6">
+        <div className="flex items-start gap-3">
+          <Info className="h-5 w-5 text-primary mt-0.5 shrink-0" />
+          <div>
+            <p className="font-medium text-sm">Frais de service : 70 € par partie à la confirmation</p>
+            <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+              Lorsqu'une garde longue durée est confirmée, des frais de service de 70 € sont demandés au propriétaire et au gardien.
+              Ces frais couvrent la vérification des profils, l'assistance et la médiation en cas de besoin.
+            </p>
+          </div>
+        </div>
+      </div>
+
       {/* Legal */}
       <div className="p-4 rounded-lg bg-muted/50 border border-border">
         <p className="text-xs text-muted-foreground leading-relaxed">
