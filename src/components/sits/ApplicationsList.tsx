@@ -12,6 +12,7 @@ interface ApplicationsListProps {
   petNames: string[];
   startDate: string;
   endDate: string;
+  propertyId: string;
 }
 
 const statusStyles: Record<string, { label: string; className: string }> = {
