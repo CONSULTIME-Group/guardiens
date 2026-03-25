@@ -495,4 +495,38 @@ const DeletionSection = ({ user, onRequestDelete }: { user: any; onRequestDelete
   );
 };
 
+const ThemeSection = () => {
+  const { theme, setTheme } = useTheme();
+  const options: { value: "light" | "dark" | "system"; label: string; icon: typeof Sun }[] = [
+    { value: "light", label: "Clair", icon: Sun },
+    { value: "dark", label: "Sombre", icon: Moon },
+    { value: "system", label: "Système", icon: Monitor },
+  ];
+
+  return (
+    <section className="my-8">
+      <div className="flex items-center gap-2 mb-4">
+        <Sun className="h-5 w-5 text-primary" />
+        <h2 className="font-heading text-lg font-semibold">Apparence</h2>
+      </div>
+      <div className="flex gap-2">
+        {options.map(({ value, label, icon: Icon }) => (
+          <button
+            key={value}
+            onClick={() => setTheme(value)}
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-lg border text-sm font-medium transition-colors ${
+              theme === value
+                ? "border-primary bg-primary/10 text-primary"
+                : "border-border bg-card text-muted-foreground hover:bg-accent"
+            }`}
+          >
+            <Icon className="h-4 w-4" />
+            {label}
+          </button>
+        ))}
+      </div>
+    </section>
+  );
+};
+
 export default Settings;
