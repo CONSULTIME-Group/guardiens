@@ -135,18 +135,18 @@ const Landing = () => {
       />
 
       {/* Navbar */}
-      <header className="flex items-center justify-between px-6 md:px-12 py-5 sticky top-0 bg-background/80 backdrop-blur-md z-50 border-b border-border/50">
-        <h2 className="font-heading text-2xl font-bold">
+      <header className="flex items-center justify-between px-4 md:px-12 py-4 md:py-5 sticky top-0 bg-background/80 backdrop-blur-md z-50 border-b border-border/50">
+        <h2 className="font-heading text-xl md:text-2xl font-bold">
           <span className="text-primary">g</span>uardiens
         </h2>
-        <div className="flex gap-3 items-center">
-          <Button variant="ghost" onClick={() => navigate("/actualites")}>
+        <div className="flex gap-2 md:gap-3 items-center">
+          <Button variant="ghost" size="sm" className="hidden sm:inline-flex" onClick={() => navigate("/actualites")}>
             Actualités
           </Button>
-          <Button variant="ghost" onClick={() => navigate("/login")}>
+          <Button variant="ghost" size="sm" onClick={() => navigate("/login")}>
             Connexion
           </Button>
-          <Button onClick={() => navigate("/register")}>S'inscrire</Button>
+          <Button size="sm" onClick={() => navigate("/register")}>S'inscrire</Button>
         </div>
       </header>
 
