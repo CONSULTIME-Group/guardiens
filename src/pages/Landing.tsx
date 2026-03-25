@@ -11,37 +11,37 @@ const differentiators = [
     icon: PawPrint,
     title: "Vos animaux restent chez eux",
     description:
-      "Pas de cage de transport, pas de chenil, pas de stress. Votre chien dort dans son panier. Votre chat garde ses habitudes. C'est leur maison — ils ne bougent pas.",
+      "Votre chien dort dans son panier, votre chat garde son canapé préféré. Ils restent dans leur univers, entourés de leurs habitudes et de quelqu'un qui les aime.",
   },
   {
     icon: Home,
     title: "Votre maison vit",
     description:
-      "Volets ouverts, courrier relevé, jardin arrosé. Quelqu'un vit chez vous pendant votre absence. C'est la meilleure protection — et la plus naturelle.",
+      "Volets ouverts, jardin arrosé, une bonne odeur de café le matin. Votre maison n'est pas vide — elle est habitée par quelqu'un qui en prend soin.",
   },
   {
     icon: Clock,
-    title: "À 15 minutes, pas 15 heures",
+    title: "Vos voisins, en mieux",
     description:
-      "Vos gardiens sont dans votre quartier. Un imprévu ? Ils sont là en quelques minutes. C'est ça la force d'un réseau local.",
+      "Vos gardiens habitent à côté. On se croise au marché, on connaît le boulanger, on sait où promener le chien quand il pleut.",
   },
   {
     icon: Handshake,
     title: "On se connaît avant de se confier",
     description:
-      "Pas de profil anonyme arrivant de l'autre bout du pays. Ici on se rencontre. Un dîner, un café, une balade avec le chien — et la confiance naît.",
+      "Un dîner, un café, une balade ensemble. On se rencontre, on rigole, et après seulement on se confie les clés. C'est comme ça que la confiance naît.",
   },
   {
     icon: Sparkles,
     title: "Ça va au-delà de la garde",
     description:
-      "Des barbecues chez les proprios, des sentiers qu'on n'aurait jamais trouvés seuls, des amitiés qui durent. On a gardé 37 maisons — on a gagné 37 histoires.",
+      "Des barbecues improvisés, des sentiers secrets, des apéros qui s'éternisent. On est venus garder un chien, on est repartis avec des amis.",
   },
   {
     icon: Wrench,
     title: "Construit par des gardiens",
     description:
-      "On ne théorise pas le house-sitting depuis un open space. On l'a vécu. 234 animaux, 5 ans, toute la région AURA. Guardiens vient de là.",
+      "On a dormi dans 37 maisons, promené 234 animaux, et découvert des coins qu'on n'aurait jamais trouvés seuls. Guardiens, c'est notre histoire — et bientôt la vôtre.",
   },
 ];
 
@@ -392,10 +392,9 @@ const Landing = () => {
             <span className="text-primary italic">gratuit.</span>
           </h2>
           <p className="text-muted-foreground text-lg leading-relaxed">
-            Notre priorité, c'est de construire une communauté solide — pas de
-            vous faire payer. Guardiens est entièrement gratuit pour le moment.
-            Quand on ajoutera des fonctionnalités premium, les premiers inscrits
-            seront les premiers servis.
+            Pas de piège, pas de petites lignes. On construit la communauté
+            d'abord, on verra le reste ensemble. Profitez-en — les premiers
+            inscrits auront toujours une place spéciale.
           </p>
         </div>
       </section>
