@@ -18,13 +18,15 @@ import NotFound from "./pages/NotFound";
 const queryClient = new QueryClient();
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, loading } = useAuth();
+  if (loading) return <div className="min-h-screen flex items-center justify-center text-muted-foreground">Chargement...</div>;
   if (!isAuthenticated) return <Navigate to="/login" replace />;
   return <>{children}</>;
 };
 
 const PublicOnlyRoute = ({ children }: { children: React.ReactNode }) => {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, loading } = useAuth();
+  if (loading) return <div className="min-h-screen flex items-center justify-center text-muted-foreground">Chargement...</div>;
   if (isAuthenticated) return <Navigate to="/dashboard" replace />;
   return <>{children}</>;
 };

@@ -1,9 +1,11 @@
-import React, { createContext, useContext, useState, useCallback } from "react";
+import React, { createContext, useContext, useState, useCallback, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import type { User as SupabaseUser } from "@supabase/supabase-js";
 
 type Role = "owner" | "sitter" | "both";
 type ActiveRole = "owner" | "sitter";
 
-interface User {
+interface Profile {
   id: string;
   email: string;
   role: Role;
@@ -14,9 +16,10 @@ interface User {
 }
 
 interface AuthContextType {
-  user: User | null;
+  user: Profile | null;
   activeRole: ActiveRole;
   isAuthenticated: boolean;
+  loading: boolean;
   setActiveRole: (role: ActiveRole) => void;
   login: (email: string, password: string) => Promise<void>;
   register: (email: string, password: string, role: Role) => Promise<void>;
@@ -25,36 +28,84 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+const mapProfile = (profile: any): Profile => ({
+  id: profile.id,
+  email: profile.email || "",
+  role: profile.role as Role,
+  firstName: profile.first_name || "",
+  lastName: profile.last_name || "",
+  avatarUrl: profile.avatar_url || undefined,
+  profileCompletion: profile.profile_completion || 0,
+});
+
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<Profile | null>(null);
   const [activeRole, setActiveRole] = useState<ActiveRole>("sitter");
+  const [loading, setLoading] = useState(true);
 
-  const login = useCallback(async (_email: string, _password: string) => {
-    // Mock login — will be replaced with Lovable Cloud
-    setUser({
-      id: "mock-user-1",
-      email: _email,
-      role: "both",
-      firstName: "Jean",
-      lastName: "Dupont",
-      profileCompletion: 0,
-    });
+  const fetchProfile = useCallback(async (supabaseUser: SupabaseUser) => {
+    const { data } = await supabase
+      .from("profiles")
+      .select("*")
+      .eq("id", supabaseUser.id)
+      .single();
+
+    if (data) {
+      const profile = mapProfile(data);
+      setUser(profile);
+      if (profile.role === "owner") setActiveRole("owner");
+      else setActiveRole("sitter");
+    }
   }, []);
 
-  const register = useCallback(async (_email: string, _password: string, role: Role) => {
-    setUser({
-      id: "mock-user-1",
-      email: _email,
-      role,
-      firstName: "",
-      lastName: "",
-      profileCompletion: 0,
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        if (session?.user) {
+          // Use setTimeout to avoid Supabase auth deadlock
+          setTimeout(() => fetchProfile(session.user), 0);
+        } else {
+          setUser(null);
+        }
+        setLoading(false);
+      }
+    );
+
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) {
+        fetchProfile(session.user);
+      } else {
+        setLoading(false);
+      }
     });
-    if (role === "owner" || role === "both") setActiveRole("owner");
-    else setActiveRole("sitter");
+
+    return () => subscription.unsubscribe();
+  }, [fetchProfile]);
+
+  const login = useCallback(async (email: string, password: string) => {
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) throw error;
   }, []);
 
-  const logout = useCallback(() => {
+  const register = useCallback(async (email: string, password: string, role: Role) => {
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: { emailRedirectTo: window.location.origin },
+    });
+    if (error) throw error;
+
+    // Update profile with selected role
+    if (data.user) {
+      await supabase
+        .from("profiles")
+        .update({ role })
+        .eq("id", data.user.id);
+    }
+  }, []);
+
+  const logout = useCallback(async () => {
+    await supabase.auth.signOut();
     setUser(null);
   }, []);
 
@@ -64,6 +115,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         user,
         activeRole,
         isAuthenticated: !!user,
+        loading,
         setActiveRole,
         login,
         register,

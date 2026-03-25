@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
+import { useToast } from "@/hooks/use-toast";
 
 type Role = "owner" | "sitter" | "both";
 
@@ -19,14 +20,29 @@ const Register = () => {
   const [selectedRole, setSelectedRole] = useState<Role | null>(null);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const { register } = useAuth();
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedRole) return;
-    await register(email, password, selectedRole);
-    navigate("/dashboard");
+    setIsLoading(true);
+    try {
+      await register(email, password, selectedRole);
+      navigate("/dashboard");
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Erreur d'inscription",
+        description: error.message?.includes("already registered")
+          ? "Cet email est déjà utilisé."
+          : "Une erreur est survenue. Veuillez réessayer.",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -103,8 +119,8 @@ const Register = () => {
                 className="rounded-lg h-12"
               />
             </div>
-            <Button type="submit" className="w-full" size="lg">
-              Créer mon compte
+            <Button type="submit" className="w-full" size="lg" disabled={isLoading}>
+              {isLoading ? "Création..." : "Créer mon compte"}
             </Button>
           </form>
         )}
