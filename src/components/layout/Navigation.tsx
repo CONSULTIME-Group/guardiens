@@ -52,7 +52,7 @@ export const Sidebar = () => {
       </div>
 
       <nav className="flex-1 px-3 space-y-1">
-        {navItems.map((item) => (
+        {navItems.filter(item => !("hideForRole" in item) || user?.role !== item.hideForRole).map((item) => (
           <NavLink
             key={item.to}
             to={item.to}
