@@ -260,32 +260,39 @@ const OwnerDashboard = () => {
         )}
       </DashSection>
 
-      {/* Sous-locations */}
-      <DashSection title="Sous-locations" icon={KeyRound} action={
-        <Link to="/sublets/create">
-          <Button size="sm" variant="outline" className="gap-1.5"><Plus className="h-3.5 w-3.5" /> Proposer une sous-location</Button>
-        </Link>
+      {/* Gardes longue durée */}
+      <DashSection title="Gardes longue durée" icon={Clock3} action={
+        ownerEligible ? (
+          <Link to="/long-stays/create">
+            <Button size="sm" variant="outline" className="gap-1.5"><Plus className="h-3.5 w-3.5" /> Proposer une garde longue durée</Button>
+          </Link>
+        ) : undefined
       }>
-        {sublets.length === 0 ? (
-          <EmptyCard text="Aucune sous-location publiée." cta="Proposer une sous-location" to="/sublets/create" />
+        {!ownerEligible ? (
+          <div className="p-5 rounded-xl border border-dashed border-border text-center">
+            <Lock className="h-6 w-6 text-muted-foreground mx-auto mb-2" />
+            <p className="text-sm font-medium">Longue durée verrouillée</p>
+            <p className="text-xs text-muted-foreground mt-1">Réalisez 2 gardes pour débloquer les annonces longue durée.</p>
+          </div>
+        ) : longStays.length === 0 ? (
+          <EmptyCard text="Aucune annonce longue durée publiée." cta="Proposer une garde longue durée" to="/long-stays/create" />
         ) : (
           <div className="grid gap-3">
-            {sublets.slice(0, 3).map((sub: any) => {
-              const appCount = sub.sublet_applications?.length || 0;
-              const priceLabel = sub.price_type === "per_night" ? "/nuit" : sub.price_type === "per_week" ? "/sem" : "/mois";
+            {longStays.slice(0, 3).map((ls: any) => {
+              const appCount = ls.long_stay_applications?.length || 0;
               return (
-                <Link key={sub.id} to={`/sublets/${sub.id}`} className="block p-4 rounded-xl border border-border bg-card hover:shadow-md transition-shadow">
+                <Link key={ls.id} to={`/long-stays/${ls.id}`} className="block p-4 rounded-xl border border-blue-200 bg-card hover:shadow-md transition-shadow">
                   <div className="flex items-start justify-between">
                     <div>
                       <div className="flex items-center gap-2 mb-0.5">
-                        <Badge className="bg-blue-100 text-blue-800 border-blue-200 hover:bg-blue-100 text-[10px] px-1.5 py-0">Sous-location</Badge>
-                        <span className="font-medium text-sm">{sub.title}</span>
+                        <Badge className="bg-[#DBEAFE] text-[#1E40AF] border-blue-200 hover:bg-[#DBEAFE] text-[10px] px-1.5 py-0">Longue durée</Badge>
+                        <span className="font-medium text-sm">{ls.title}</span>
                       </div>
                       <p className="text-xs text-muted-foreground">
-                        {sub.start_date && sub.end_date
-                          ? `${format(new Date(sub.start_date), "d MMM", { locale: fr })} → ${format(new Date(sub.end_date), "d MMM yyyy", { locale: fr })}`
+                        {ls.start_date && ls.end_date
+                          ? `${format(new Date(ls.start_date), "d MMM", { locale: fr })} → ${format(new Date(ls.end_date), "d MMM yyyy", { locale: fr })}`
                           : "Dates non définies"}
-                        {" · "}{sub.price_amount}€{priceLabel}
+                        {ls.estimated_contribution ? ` · ${ls.estimated_contribution}` : ""}
                       </p>
                     </div>
                     <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
