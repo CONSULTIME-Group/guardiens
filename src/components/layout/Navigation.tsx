@@ -19,6 +19,7 @@ const navItems = [
 
 export const Sidebar = () => {
   const { user, logout, activeRole, setActiveRole } = useAuth();
+  const { isAdmin } = useAdmin();
   const [unreadCount, setUnreadCount] = useState(0);
 
   useEffect(() => {
