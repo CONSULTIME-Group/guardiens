@@ -732,6 +732,63 @@ const IdentityVerificationSection = ({ user }: { user: any }) => {
           </div>
         )}
       </div>
+
+      {/* Verification history */}
+      {logs.length > 0 && (
+        <div className="mt-5 rounded-xl border border-border p-5">
+          <div className="flex items-center gap-2 mb-3">
+            <History className="h-4 w-4 text-muted-foreground" />
+            <h3 className="text-sm font-semibold">Historique des vérifications</h3>
+          </div>
+          <div className="space-y-2">
+            {logs.map((log: any) => {
+              const isVerified = log.result === "verified";
+              const docTypeLabels: Record<string, string> = {
+                passport: "Passeport",
+                national_id: "Carte d'identité",
+                drivers_license: "Permis de conduire",
+                residence_permit: "Titre de séjour",
+                other: "Autre document",
+                not_a_document: "Non reconnu",
+              };
+              return (
+                <div
+                  key={log.id}
+                  className={`flex items-start gap-3 rounded-lg border px-3 py-2.5 text-sm ${
+                    isVerified ? "border-green-200 bg-green-50 dark:border-green-900 dark:bg-green-950/30" : "border-red-200 bg-red-50 dark:border-red-900 dark:bg-red-950/30"
+                  }`}
+                >
+                  {isVerified ? (
+                    <CheckCircle2 className="h-4 w-4 text-green-600 mt-0.5 shrink-0" />
+                  ) : (
+                    <AlertCircle className="h-4 w-4 text-destructive mt-0.5 shrink-0" />
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className={`font-medium ${isVerified ? "text-green-700 dark:text-green-400" : "text-destructive"}`}>
+                        {isVerified ? "Validé" : "Refusé"}
+                      </span>
+                      <span className="text-xs text-muted-foreground shrink-0">
+                        {format(new Date(log.created_at), "d MMM yyyy · HH:mm", { locale: fr })}
+                      </span>
+                    </div>
+                    {log.document_type && (
+                      <p className="text-xs text-muted-foreground">
+                        {docTypeLabels[log.document_type] || log.document_type}
+                      </p>
+                    )}
+                    {!isVerified && log.rejection_reason && (
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        {log.rejection_reason}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
     </section>
   );
 };
