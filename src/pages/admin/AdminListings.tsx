@@ -75,7 +75,9 @@ const AdminListings = () => {
 
   const handleDelete = async (id: string) => {
     if (!confirm("Supprimer cette annonce ?")) return;
-    const { error } = await supabase.from(filterType).delete().eq("id", id);
+    const { error } = filterType === "sits"
+      ? await supabase.from("sits").delete().eq("id", id)
+      : await supabase.from("long_stays").delete().eq("id", id);
     if (error) toast.error("Erreur");
     else { toast.success("Annonce supprimée"); fetchListings(); }
   };
