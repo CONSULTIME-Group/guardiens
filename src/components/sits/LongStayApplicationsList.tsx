@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
 import { Star, MapPin, CheckCircle2, XCircle, MessageSquare, Users } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import VerifiedBadge from "@/components/profile/VerifiedBadge";
 
 interface LongStayApplicationsListProps {
   longStayId: string;
