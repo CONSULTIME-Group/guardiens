@@ -73,8 +73,8 @@ const CreateLongStay = () => {
 
   const today = new Date().toISOString().split("T")[0];
   const minDuration = startDate && endDate ? differenceInDays(new Date(endDate), new Date(startDate)) : 0;
-  const dateError = startDate && endDate && minDuration < 14
-    ? "La durée minimale est de 2 semaines." : null;
+  const dateError = startDate && endDate && minDuration < 30
+    ? "Les gardes longue durée commencent à partir de 30 jours. Pour une durée plus courte, publiez une garde classique." : null;
 
   const canPublish = property && title && startDate && endDate && !dateError && eligibility.eligible;
 
