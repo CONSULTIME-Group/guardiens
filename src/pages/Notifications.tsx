@@ -94,6 +94,11 @@ const Notifications = () => {
     );
   };
 
+  const deleteNotification = async (id: string) => {
+    await supabase.from("notifications").delete().eq("id", id);
+    setNotifications((prev) => prev.filter((n) => n.id !== id));
+  };
+
   const unreadCount = notifications.filter((n) => !n.read_at).length;
 
   if (loading) return <div className="p-6 text-muted-foreground">Chargement...</div>;
