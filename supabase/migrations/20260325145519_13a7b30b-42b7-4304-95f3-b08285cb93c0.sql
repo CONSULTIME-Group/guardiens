@@ -1,0 +1,2 @@
+ALTER TABLE public.long_stay_applications DROP CONSTRAINT long_stay_applications_long_stay_id_fkey;
+ALTER TABLE public.long_stay_applications ADD CONSTRAINT long_stay_applications_long_stay_id_fkey FOREIGN KEY (long_stay_id) REFERENCES public.long_stays(id) ON DELETE CASCADE;
