@@ -7,9 +7,11 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Slider } from "@/components/ui/slider";
-import { Search, SlidersHorizontal, MapPin, Calendar, Star, CheckCircle2 } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Search, SlidersHorizontal, MapPin, Calendar, Star, CheckCircle2, Lock } from "lucide-react";
 import ChipSelect from "@/components/profile/ChipSelect";
-import { format } from "date-fns";
+import { format, differenceInDays } from "date-fns";
 import { fr } from "date-fns/locale";
 import { geocodeCity, haversineDistance } from "@/lib/geocode";
 
@@ -31,9 +33,11 @@ const typeLabels: Record<string, string> = {
 };
 
 type SortOption = "recent" | "rating";
+type SearchTab = "sits" | "long_stays";
 
 const SearchSitter = () => {
   const { user } = useAuth();
+  const [tab, setTab] = useState<SearchTab>("sits");
   const [city, setCity] = useState("");
   const [radius, setRadius] = useState([50]);
   const [startDate, setStartDate] = useState("");
@@ -45,21 +49,32 @@ const SearchSitter = () => {
   const [sort, setSort] = useState<SortOption>("recent");
 
   const [results, setResults] = useState<any[]>([]);
+  const [longStayResults, setLongStayResults] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState(false);
   const [sitterProfile, setSitterProfile] = useState<any>(null);
   const [userCity, setUserCity] = useState("");
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+  const [sitterEligible, setSitterEligible] = useState(false);
 
   useEffect(() => {
     if (!user) return;
     const load = async () => {
-      const [profileRes, spRes] = await Promise.all([
+      const [profileRes, spRes, eligRes, reviewsRes, myProfileRes] = await Promise.all([
         supabase.from("profiles").select("city").eq("id", user.id).single(),
         supabase.from("sitter_profiles").select("*").eq("user_id", user.id).maybeSingle(),
+        supabase.from("applications").select("id, sit:sits!inner(status)").eq("sitter_id", user.id).eq("status", "accepted"),
+        supabase.from("reviews").select("overall_rating").eq("reviewee_id", user.id).eq("published", true),
+        supabase.from("profiles").select("identity_verified").eq("id", user.id).single(),
       ]);
       setUserCity(profileRes.data?.city || "");
       setSitterProfile(spRes.data);
+
+      const completedSits = (eligRes.data || []).filter((a: any) => a.sit?.status === "completed").length;
+      const reviews = reviewsRes.data || [];
+      const avgRating = reviews.length > 0 ? reviews.reduce((s: number, r: any) => s + r.overall_rating, 0) / reviews.length : 0;
+      const verified = myProfileRes.data?.identity_verified || false;
+      setSitterEligible(completedSits >= 3 && avgRating >= 4.7 && verified);
     };
     load();
   }, [user]);
@@ -68,11 +83,22 @@ const SearchSitter = () => {
     setLoading(true);
     setSearched(true);
 
+    if (tab === "sits") {
+      await searchSits();
+    } else {
+      await searchLongStays();
+    }
+
+    setLoading(false);
+    setMobileFiltersOpen(false);
+  };
+
+  const searchSits = async () => {
     let query = supabase
       .from("sits")
       .select("*, owner:profiles!sits_user_id_fkey(first_name, avatar_url, city), property:properties!sits_property_id_fkey(type, environment, photos, equipments)")
       .eq("status", "published")
-      .order(sort === "recent" ? "created_at" : "created_at", { ascending: false });
+      .order("created_at", { ascending: false });
 
     if (startDate) query = query.gte("end_date", startDate);
     if (endDate) query = query.lte("start_date", endDate);
@@ -80,44 +106,30 @@ const SearchSitter = () => {
     const { data } = await query;
     let items = data || [];
 
-    // Client-side filters
-    if (housingType !== "all") {
-      items = items.filter((s: any) => s.property?.type === housingType);
-    }
-    if (environment !== "all") {
-      items = items.filter((s: any) => s.property?.environment === environment);
-    }
+    if (housingType !== "all") items = items.filter((s: any) => s.property?.type === housingType);
+    if (environment !== "all") items = items.filter((s: any) => s.property?.environment === environment);
 
-    // Geocoded radius filter
     if (city) {
       const searchCoords = await geocodeCity(city);
       if (searchCoords) {
-        // Geocode each unique owner city and filter by distance
         const uniqueCities = [...new Set(items.map((s: any) => s.owner?.city).filter(Boolean))] as string[];
         const cityCoords = new Map<string, { lat: number; lng: number }>();
-
-        await Promise.all(
-          uniqueCities.map(async (c) => {
-            const coords = await geocodeCity(c);
-            if (coords) cityCoords.set(c, { lat: coords.lat, lng: coords.lng });
-          })
-        );
-
+        await Promise.all(uniqueCities.map(async (c) => {
+          const coords = await geocodeCity(c);
+          if (coords) cityCoords.set(c, { lat: coords.lat, lng: coords.lng });
+        }));
         items = items.filter((s: any) => {
           const ownerCity = s.owner?.city;
           if (!ownerCity) return false;
           const coords = cityCoords.get(ownerCity);
           if (!coords) return false;
-          const dist = haversineDistance(searchCoords.lat, searchCoords.lng, coords.lat, coords.lng);
-          return dist <= radius[0];
+          return haversineDistance(searchCoords.lat, searchCoords.lng, coords.lat, coords.lng) <= radius[0];
         });
       } else {
-        // Fallback to text match if geocoding fails
         items = items.filter((s: any) => s.owner?.city?.toLowerCase().includes(city.toLowerCase()));
       }
     }
 
-    // Duration filter
     if (duration !== "all") {
       items = items.filter((s: any) => {
         if (!s.start_date || !s.end_date) return true;
@@ -132,24 +144,14 @@ const SearchSitter = () => {
       });
     }
 
-    // Load pets for each sit to show animal icons
     const enriched = await Promise.all(
       items.map(async (sit: any) => {
-        const { data: pets } = await supabase
-          .from("pets")
-          .select("species, name")
-          .eq("property_id", sit.property_id);
-        // Load reviews for owner
-        const { data: reviews } = await supabase
-          .from("reviews")
-          .select("overall_rating")
-          .eq("reviewee_id", sit.user_id)
-          .eq("published", true);
+        const { data: pets } = await supabase.from("pets").select("species, name").eq("property_id", sit.property_id);
+        const { data: reviews } = await supabase.from("reviews").select("overall_rating").eq("reviewee_id", sit.user_id).eq("published", true);
         const avgRating = reviews && reviews.length > 0
           ? (reviews.reduce((s: number, r: any) => s + r.overall_rating, 0) / reviews.length).toFixed(1)
           : null;
 
-        // Animal type filter
         const petSpecies = (pets || []).map((p: any) => p.species);
         if (animalTypes.length > 0 && !animalTypes.includes("Tous")) {
           const wantedSpecies = animalTypes.map(a => animalChipToSpecies[a]).filter(Boolean);
@@ -161,8 +163,58 @@ const SearchSitter = () => {
     );
 
     setResults(enriched.filter(Boolean));
-    setLoading(false);
-    setMobileFiltersOpen(false);
+  };
+
+  const searchLongStays = async () => {
+    let query = supabase
+      .from("long_stays")
+      .select("*, owner:profiles!long_stays_user_id_fkey(first_name, avatar_url, city), property:properties!long_stays_property_id_fkey(type, environment, photos)")
+      .eq("status", "published")
+      .order("created_at", { ascending: false });
+
+    if (startDate) query = query.gte("end_date", startDate);
+    if (endDate) query = query.lte("start_date", endDate);
+
+    const { data } = await query;
+    let items = data || [];
+
+    if (housingType !== "all") items = items.filter((s: any) => s.property?.type === housingType);
+
+    if (city) {
+      const searchCoords = await geocodeCity(city);
+      if (searchCoords) {
+        const uniqueCities = [...new Set(items.map((s: any) => s.owner?.city).filter(Boolean))] as string[];
+        const cityCoords = new Map<string, { lat: number; lng: number }>();
+        await Promise.all(uniqueCities.map(async (c) => {
+          const coords = await geocodeCity(c);
+          if (coords) cityCoords.set(c, { lat: coords.lat, lng: coords.lng });
+        }));
+        items = items.filter((s: any) => {
+          const ownerCity = s.owner?.city;
+          if (!ownerCity) return false;
+          const coords = cityCoords.get(ownerCity);
+          if (!coords) return false;
+          return haversineDistance(searchCoords.lat, searchCoords.lng, coords.lat, coords.lng) <= radius[0];
+        });
+      } else {
+        items = items.filter((s: any) => s.owner?.city?.toLowerCase().includes(city.toLowerCase()));
+      }
+    }
+
+    // Load pets for each long stay
+    const enriched = await Promise.all(
+      items.map(async (ls: any) => {
+        const { data: pets } = await supabase.from("pets").select("species, name").eq("property_id", ls.property_id);
+        const petSpecies = (pets || []).map((p: any) => p.species);
+        if (animalTypes.length > 0 && !animalTypes.includes("Tous")) {
+          const wantedSpecies = animalTypes.map(a => animalChipToSpecies[a]).filter(Boolean);
+          if (!petSpecies.some((s: string) => wantedSpecies.includes(s))) return null;
+        }
+        return { ...ls, pets: pets || [] };
+      })
+    );
+
+    setLongStayResults(enriched.filter(Boolean));
   };
 
   const formatDate = (d: string | null) => d ? format(new Date(d), "d MMM", { locale: fr }) : "";
@@ -204,42 +256,67 @@ const SearchSitter = () => {
           </SelectContent>
         </Select>
       </div>
-      <div>
-        <label className="text-sm font-medium mb-1.5 block">Environnement</label>
-        <Select value={environment} onValueChange={setEnvironment}>
-          <SelectTrigger><SelectValue /></SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Tous</SelectItem>
-            <SelectItem value="city_center">Ville</SelectItem>
-            <SelectItem value="countryside">Campagne</SelectItem>
-            <SelectItem value="mountain">Montagne</SelectItem>
-            <SelectItem value="seaside">Bord de mer</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-      <div>
-        <label className="text-sm font-medium mb-1.5 block">Durée</label>
-        <Select value={duration} onValueChange={setDuration}>
-          <SelectTrigger><SelectValue /></SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Toutes</SelectItem>
-            <SelectItem value="weekend">Week-end</SelectItem>
-            <SelectItem value="1week">1 semaine</SelectItem>
-            <SelectItem value="2weeks">2+ semaines</SelectItem>
-            <SelectItem value="1month">1 mois+</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
+      {tab === "sits" && (
+        <>
+          <div>
+            <label className="text-sm font-medium mb-1.5 block">Environnement</label>
+            <Select value={environment} onValueChange={setEnvironment}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Tous</SelectItem>
+                <SelectItem value="city_center">Ville</SelectItem>
+                <SelectItem value="countryside">Campagne</SelectItem>
+                <SelectItem value="mountain">Montagne</SelectItem>
+                <SelectItem value="seaside">Bord de mer</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <label className="text-sm font-medium mb-1.5 block">Durée</label>
+            <Select value={duration} onValueChange={setDuration}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Toutes</SelectItem>
+                <SelectItem value="weekend">Week-end</SelectItem>
+                <SelectItem value="1week">1 semaine</SelectItem>
+                <SelectItem value="2weeks">2+ semaines</SelectItem>
+                <SelectItem value="1month">1 mois+</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </>
+      )}
       <Button onClick={handleSearch} className="w-full gap-2" disabled={loading}>
         <Search className="h-4 w-4" /> {loading ? "Recherche..." : "Rechercher"}
       </Button>
     </div>
   );
 
+  const currentResults = tab === "sits" ? results : longStayResults;
+
   return (
     <div className="p-6 md:p-10 max-w-5xl mx-auto animate-fade-in">
       <h1 className="font-heading text-3xl font-bold mb-1">Trouver une garde</h1>
-      <p className="text-muted-foreground mb-6">Parcourez les annonces de garde disponibles.</p>
+      <p className="text-muted-foreground mb-4">Parcourez les annonces disponibles.</p>
+
+      {/* Tabs */}
+      <Tabs value={tab} onValueChange={(v) => { setTab(v as SearchTab); setSearched(false); }} className="mb-6">
+        <TabsList>
+          <TabsTrigger value="sits">Gardes</TabsTrigger>
+          <TabsTrigger value="long_stays">Longue durée</TabsTrigger>
+        </TabsList>
+      </Tabs>
+
+      {/* Long stay eligibility warning */}
+      {tab === "long_stays" && !sitterEligible && (
+        <div className="p-5 rounded-xl border border-dashed border-border text-center mb-6">
+          <Lock className="h-6 w-6 text-muted-foreground mx-auto mb-2" />
+          <p className="text-sm font-medium">Gardes longue durée verrouillées</p>
+          <p className="text-xs text-muted-foreground mt-1">
+            Complétez 3 gardes avec une note de 4.7+ pour accéder aux gardes longue durée.
+          </p>
+        </div>
+      )}
 
       {!userCity && (
         <div className="bg-accent border border-border rounded-lg p-4 mb-6 text-sm">
@@ -274,29 +351,30 @@ const SearchSitter = () => {
 
         {/* Results */}
         <div className="flex-1 min-w-0">
-          {/* Sort */}
-          {searched && results.length > 0 && (
+          {searched && currentResults.length > 0 && (
             <div className="flex items-center justify-between mb-4">
-              <p className="text-sm text-muted-foreground">{results.length} résultat{results.length > 1 ? "s" : ""}</p>
-              <Select value={sort} onValueChange={(v) => {
-                const newSort = v as SortOption;
-                setSort(newSort);
-                setResults(prev => {
-                  const sorted = [...prev];
-                  if (newSort === "recent") {
-                    sorted.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-                  } else {
-                    sorted.sort((a, b) => parseFloat(b.avgRating || "0") - parseFloat(a.avgRating || "0"));
-                  }
-                  return sorted;
-                });
-              }}>
-                <SelectTrigger className="w-44"><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="recent">Plus récentes</SelectItem>
-                  <SelectItem value="rating">Mieux notées</SelectItem>
-                </SelectContent>
-              </Select>
+              <p className="text-sm text-muted-foreground">{currentResults.length} résultat{currentResults.length > 1 ? "s" : ""}</p>
+              {tab === "sits" && (
+                <Select value={sort} onValueChange={(v) => {
+                  const newSort = v as SortOption;
+                  setSort(newSort);
+                  setResults(prev => {
+                    const sorted = [...prev];
+                    if (newSort === "recent") {
+                      sorted.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+                    } else {
+                      sorted.sort((a, b) => parseFloat(b.avgRating || "0") - parseFloat(a.avgRating || "0"));
+                    }
+                    return sorted;
+                  });
+                }}>
+                  <SelectTrigger className="w-44"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="recent">Plus récentes</SelectItem>
+                    <SelectItem value="rating">Mieux notées</SelectItem>
+                  </SelectContent>
+                </Select>
+              )}
             </div>
           )}
 
@@ -307,12 +385,12 @@ const SearchSitter = () => {
             </div>
           ) : loading ? (
             <p className="text-muted-foreground py-10 text-center">Recherche en cours...</p>
-          ) : results.length === 0 ? (
+          ) : currentResults.length === 0 ? (
             <div className="text-center py-20 text-muted-foreground">
-              <p className="font-medium">Pas de garde disponible pour ces critères.</p>
+              <p className="font-medium">Pas de résultat pour ces critères.</p>
               <p className="text-sm mt-1">Essayez d'élargir votre rayon ou vos dates.</p>
             </div>
-          ) : (
+          ) : tab === "sits" ? (
             <div className="space-y-4">
               {results.map((sit: any) => {
                 const photos: string[] = sit.property?.photos || [];
@@ -322,7 +400,6 @@ const SearchSitter = () => {
                   petGroups[p.species].push(p.name);
                 });
 
-                // Compatibility badges
                 const badges: string[] = [];
                 if (sitterProfile) {
                   const sitterAnimals: string[] = sitterProfile.animal_types || [];
@@ -331,11 +408,8 @@ const SearchSitter = () => {
                 }
 
                 return (
-                  <Link
-                    key={sit.id}
-                    to={`/sits/${sit.id}`}
-                    className="block bg-card rounded-lg border border-border overflow-hidden hover:shadow-md transition-shadow"
-                  >
+                  <Link key={sit.id} to={`/sits/${sit.id}`}
+                    className="block bg-card rounded-lg border border-border overflow-hidden hover:shadow-md transition-shadow">
                     <div className="flex flex-col sm:flex-row">
                       {photos.length > 0 && (
                         <div className="sm:w-48 h-40 sm:h-auto shrink-0">
@@ -345,16 +419,12 @@ const SearchSitter = () => {
                       <div className="p-4 flex-1 min-w-0">
                         <h3 className="font-heading font-semibold truncate">{sit.title || "Sans titre"}</h3>
                         <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground mt-1.5">
-                          {sit.owner?.city && (
-                            <span className="flex items-center gap-1"><MapPin className="h-3.5 w-3.5" />{sit.owner.city}</span>
-                          )}
+                          {sit.owner?.city && <span className="flex items-center gap-1"><MapPin className="h-3.5 w-3.5" />{sit.owner.city}</span>}
                           <span className="flex items-center gap-1">
                             <Calendar className="h-3.5 w-3.5" />
                             {formatDate(sit.start_date)} → {formatDate(sit.end_date)}
                           </span>
                         </div>
-
-                        {/* Pet icons */}
                         {Object.keys(petGroups).length > 0 && (
                           <div className="flex flex-wrap items-center gap-2 mt-2">
                             {Object.entries(petGroups).map(([species, names]) => (
@@ -364,8 +434,6 @@ const SearchSitter = () => {
                             ))}
                           </div>
                         )}
-
-                        {/* Rating */}
                         <div className="flex items-center gap-3 mt-2">
                           {sit.avgRating && (
                             <span className="flex items-center gap-1 text-sm">
@@ -374,13 +442,63 @@ const SearchSitter = () => {
                             </span>
                           )}
                         </div>
-
-                        {/* Badges */}
                         {badges.length > 0 && (
                           <div className="flex flex-wrap gap-1.5 mt-2">
                             {badges.map(b => (
                               <span key={b} className="px-2 py-0.5 rounded-full text-xs font-medium bg-green-50 text-green-700">
                                 <CheckCircle2 className="inline h-3 w-3 mr-0.5 -mt-0.5" />{b}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          ) : (
+            /* Long stay results */
+            <div className="space-y-4">
+              {longStayResults.map((ls: any) => {
+                const photos: string[] = ls.property?.photos || [];
+                const nights = ls.start_date && ls.end_date ? differenceInDays(new Date(ls.end_date), new Date(ls.start_date)) : 0;
+                const petGroups: Record<string, string[]> = {};
+                (ls.pets || []).forEach((p: any) => {
+                  if (!petGroups[p.species]) petGroups[p.species] = [];
+                  petGroups[p.species].push(p.name);
+                });
+
+                return (
+                  <Link key={ls.id} to={sitterEligible ? `/long-stays/${ls.id}` : "#"}
+                    className={`block bg-card rounded-lg border border-blue-200 overflow-hidden transition-shadow ${sitterEligible ? "hover:shadow-md" : "opacity-60 cursor-not-allowed"}`}>
+                    <div className="flex flex-col sm:flex-row">
+                      {photos.length > 0 && (
+                        <div className="sm:w-48 h-40 sm:h-auto shrink-0">
+                          <img src={photos[0]} alt="" className="w-full h-full object-cover" />
+                        </div>
+                      )}
+                      <div className="p-4 flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1">
+                          <Badge className="bg-[#DBEAFE] text-[#1E40AF] border-blue-200 hover:bg-[#DBEAFE] text-[10px] px-1.5 py-0">Longue durée</Badge>
+                        </div>
+                        <h3 className="font-heading font-semibold truncate">{ls.title || "Sans titre"}</h3>
+                        <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground mt-1.5">
+                          {ls.owner?.city && <span className="flex items-center gap-1"><MapPin className="h-3.5 w-3.5" />{ls.owner.city}</span>}
+                          <span className="flex items-center gap-1">
+                            <Calendar className="h-3.5 w-3.5" />
+                            {formatDate(ls.start_date)} → {formatDate(ls.end_date)}
+                            <span className="text-foreground font-medium">({nights} nuits)</span>
+                          </span>
+                        </div>
+                        {ls.estimated_contribution && (
+                          <p className="text-sm text-muted-foreground mt-1">{ls.estimated_contribution}</p>
+                        )}
+                        {Object.keys(petGroups).length > 0 && (
+                          <div className="flex flex-wrap items-center gap-2 mt-2">
+                            {Object.entries(petGroups).map(([species, names]) => (
+                              <span key={species} className="text-sm">
+                                {speciesEmoji[species] || "🐾"} ×{names.length} {names.join(", ")}
                               </span>
                             ))}
                           </div>
