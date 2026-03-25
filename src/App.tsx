@@ -26,6 +26,10 @@ import LongStayDetail from "./pages/LongStayDetail";
 import EditLongStay from "./pages/EditLongStay";
 import News from "./pages/News";
 import ArticleDetail from "./pages/ArticleDetail";
+import About from "./pages/About";
+import Contact from "./pages/Contact";
+import Terms from "./pages/Terms";
+import Privacy from "./pages/Privacy";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -51,6 +55,10 @@ const AppRoutes = () => (
     <Route path="/register" element={<PublicOnlyRoute><Register /></PublicOnlyRoute>} />
     <Route path="/actualites" element={<News />} />
     <Route path="/actualites/:slug" element={<ArticleDetail />} />
+    <Route path="/a-propos" element={<About />} />
+    <Route path="/contact" element={<Contact />} />
+    <Route path="/cgu" element={<Terms />} />
+    <Route path="/confidentialite" element={<Privacy />} />
     <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
       <Route path="/dashboard" element={<Dashboard />} />
       <Route path="/profile" element={<Profile />} />
