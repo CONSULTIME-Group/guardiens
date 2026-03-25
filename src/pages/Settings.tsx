@@ -638,8 +638,8 @@ const IdentityVerificationSection = ({ user }: { user: any }) => {
     },
     pending: {
       icon: Clock,
-      label: "En cours de vérification",
-      desc: "Votre document a été reçu. La vérification est en cours (généralement sous 24-48h).",
+      label: "Vérification en cours",
+      desc: "Votre document est en cours de vérification automatique par IA.",
       color: "text-amber-600",
     },
     rejected: {
