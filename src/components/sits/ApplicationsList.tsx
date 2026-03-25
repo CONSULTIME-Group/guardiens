@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
 import { Star, MapPin, CheckCircle2, XCircle, MessageSquare, Users } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import VerifiedBadge from "@/components/profile/VerifiedBadge";
 
 interface ApplicationsListProps {
   sitId: string;
@@ -201,6 +202,7 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="font-medium">{sitter?.first_name || "Gardien"}</span>
+                      {sitter?.identity_verified && <VerifiedBadge />}
                       <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${status.className}`}>
                         {status.label}
                       </span>

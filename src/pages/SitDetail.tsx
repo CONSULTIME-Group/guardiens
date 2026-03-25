@@ -11,6 +11,7 @@ import ApplicationsList from "@/components/sits/ApplicationsList";
 import ReviewsDisplay from "@/components/reviews/ReviewsDisplay";
 import CancelSitModal from "@/components/sits/CancelSitModal";
 import BreedProfileCard from "@/components/breeds/BreedProfileCard";
+import VerifiedBadge from "@/components/profile/VerifiedBadge";
 import LocationProfileCard from "@/components/location/LocationProfileCard";
 
 const envLabels: Record<string, string> = {
@@ -153,7 +154,10 @@ const SitDetail = () => {
             </div>
           )}
           <div>
-            <p className="font-medium">{owner.first_name}</p>
+            <p className="font-medium flex items-center gap-1.5">
+              {owner.first_name}
+              {owner.identity_verified && <VerifiedBadge />}
+            </p>
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
               {avgRating && <span className="flex items-center gap-1"><Star className="h-3.5 w-3.5 text-yellow-500 fill-yellow-500" />{avgRating}</span>}
               <span>{reviews.length} avis</span>

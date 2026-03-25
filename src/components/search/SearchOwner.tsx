@@ -10,6 +10,7 @@ import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { Search, SlidersHorizontal, MapPin, Star, Car, CheckCircle2, CircleDot } from "lucide-react";
 import ChipSelect from "@/components/profile/ChipSelect";
+import VerifiedBadge from "@/components/profile/VerifiedBadge";
 
 const animalChips = ["Chiens", "Chats", "Chevaux", "Oiseaux", "Animaux de ferme", "NAC", "Tous"];
 const animalChipToType: Record<string, string> = {
@@ -263,6 +264,7 @@ const SearchOwner = () => {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
                           <h3 className="font-heading font-semibold">{profile?.first_name || "Gardien"}</h3>
+                          {profile?.identity_verified && <VerifiedBadge />}
                           {s.is_available && (
                             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 text-xs font-medium">
                               <CircleDot className="h-3 w-3" /> Disponible
