@@ -229,7 +229,7 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate }: App
                       size="sm"
                       variant="outline"
                       className="gap-1.5 text-destructive hover:text-destructive"
-                      onClick={() => handleDecline(app.id)}
+                      onClick={() => handleDecline(app.id, app.sitter_id)}
                     >
                       <XCircle className="h-3.5 w-3.5" /> Décliner
                     </Button>
