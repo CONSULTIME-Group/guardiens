@@ -431,7 +431,7 @@ const Messages = () => {
                       ? "rounded-br-md"
                       : "rounded-bl-md"
                   }`} style={{
-                    background: isMe ? "#D8F3DC" : "hsl(var(--muted))",
+                    background: isMe ? "hsl(var(--message-sent))" : "hsl(var(--muted))",
                     color: "hsl(var(--foreground))",
                   }}>
                     {msg.photo_url && (

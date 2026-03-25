@@ -369,7 +369,8 @@ const SitDetail = () => {
           startDate={formatDate(sit.start_date)}
           endDate={formatDate(sit.end_date)}
           onCancelled={() => {
-            setSit({ ...sit, status: sit.user_id === user?.id ? "cancelled" : "published" });
+            setSit({ ...sit, status: "cancelled" });
+            setCancelOpen(false);
           }}
         />
       )}

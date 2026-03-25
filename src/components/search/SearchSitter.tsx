@@ -90,6 +90,8 @@ const SearchSitter = () => {
       items = items.filter((s: any) => s.property?.environment === environment);
     }
     if (city) {
+      // Note: radius filtering requires geocoding which is not available.
+      // For now, filter by exact city name match (case-insensitive).
       items = items.filter((s: any) => s.owner?.city?.toLowerCase().includes(city.toLowerCase()));
     }
 

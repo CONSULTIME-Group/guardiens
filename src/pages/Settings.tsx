@@ -424,4 +424,69 @@ const Settings = () => {
   );
 };
 
+const DeletionSection = ({ user, onRequestDelete }: { user: any; onRequestDelete: () => void }) => {
+  const [pendingRequest, setPendingRequest] = useState<any>(null);
+  const [cancelling, setCancelling] = useState(false);
+
+  useEffect(() => {
+    if (!user) return;
+    supabase
+      .from("account_deletion_requests")
+      .select("*")
+      .eq("user_id", user.id)
+      .eq("status", "pending")
+      .maybeSingle()
+      .then(({ data }) => setPendingRequest(data));
+  }, [user]);
+
+  const handleCancelDeletion = async () => {
+    if (!pendingRequest) return;
+    setCancelling(true);
+    const { error } = await supabase
+      .from("account_deletion_requests")
+      .update({ status: "cancelled", cancelled_at: new Date().toISOString() })
+      .eq("id", pendingRequest.id);
+    if (error) {
+      toast.error("Erreur lors de l'annulation.");
+    } else {
+      toast.success("Demande de suppression annulée.");
+      setPendingRequest(null);
+      // Restore bio
+      await supabase.from("profiles").update({ bio: "" }).eq("id", user.id);
+    }
+    setCancelling(false);
+  };
+
+  if (pendingRequest) {
+    const scheduledDate = new Date(pendingRequest.scheduled_deletion_at).toLocaleDateString("fr-FR");
+    return (
+      <div className="space-y-3">
+        <div className="p-4 bg-destructive/10 rounded-lg border border-destructive/20">
+          <p className="text-sm font-medium text-destructive">Suppression programmée le {scheduledDate}</p>
+          <p className="text-xs text-muted-foreground mt-1">Vous pouvez annuler cette demande avant cette date.</p>
+        </div>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleCancelDeletion}
+          disabled={cancelling}
+        >
+          {cancelling ? "Annulation..." : "Annuler la suppression"}
+        </Button>
+      </div>
+    );
+  }
+
+  return (
+    <Button
+      variant="outline"
+      size="sm"
+      className="text-destructive border-destructive/30 hover:bg-destructive/10"
+      onClick={onRequestDelete}
+    >
+      Supprimer mon compte
+    </Button>
+  );
+};
+
 export default Settings;
