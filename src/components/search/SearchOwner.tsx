@@ -36,6 +36,7 @@ const SearchOwner = () => {
   const [sitterType, setSitterType] = useState("all");
   const [vehicled, setVehicled] = useState(false);
   const [availableOnly, setAvailableOnly] = useState(false);
+  const [verifiedOnly, setVerifiedOnly] = useState(false);
   const [sort, setSort] = useState<SortOption>("rating");
 
   const [results, setResults] = useState<any[]>([]);
@@ -49,7 +50,7 @@ const SearchOwner = () => {
 
     const { data: sitters } = await supabase
       .from("sitter_profiles")
-      .select("*, profile:profiles!sitter_profiles_user_id_fkey(first_name, last_name, avatar_url, city, profile_completion)");
+      .select("*, profile:profiles!sitter_profiles_user_id_fkey(first_name, last_name, avatar_url, city, profile_completion, identity_verified)");
 
     let items = (sitters || []).filter((s: any) => s.profile?.profile_completion >= 60);
 
@@ -89,6 +90,9 @@ const SearchOwner = () => {
     }
     if (availableOnly) {
       items = items.filter((s: any) => s.is_available);
+    }
+    if (verifiedOnly) {
+      items = items.filter((s: any) => s.profile?.identity_verified);
     }
     if (animalTypes.length > 0 && !animalTypes.includes("Tous")) {
       const wanted = animalTypes.map(a => animalChipToType[a]).filter(Boolean);
@@ -170,6 +174,10 @@ const SearchOwner = () => {
       <div className="flex items-center gap-3">
         <Switch checked={availableOnly} onCheckedChange={setAvailableOnly} />
         <label className="text-sm">Disponibles uniquement</label>
+      </div>
+      <div className="flex items-center gap-3">
+        <Switch checked={verifiedOnly} onCheckedChange={setVerifiedOnly} />
+        <label className="text-sm">Profils vérifiés uniquement</label>
       </div>
       <Button onClick={handleSearch} className="w-full gap-2" disabled={loading}>
         <Search className="h-4 w-4" /> {loading ? "Recherche..." : "Rechercher"}

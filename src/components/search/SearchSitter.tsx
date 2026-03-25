@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Slider } from "@/components/ui/slider";
+import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Search, SlidersHorizontal, MapPin, Calendar, Star, CheckCircle2, Lock } from "lucide-react";
@@ -46,6 +47,7 @@ const SearchSitter = () => {
   const [housingType, setHousingType] = useState("all");
   const [environment, setEnvironment] = useState("all");
   const [duration, setDuration] = useState("all");
+  const [verifiedOnly, setVerifiedOnly] = useState(false);
   const [sort, setSort] = useState<SortOption>("recent");
 
   const [results, setResults] = useState<any[]>([]);
@@ -96,7 +98,7 @@ const SearchSitter = () => {
   const searchSits = async () => {
     let query = supabase
       .from("sits")
-      .select("*, owner:profiles!sits_user_id_fkey(first_name, avatar_url, city), property:properties!sits_property_id_fkey(type, environment, photos, equipments)")
+      .select("*, owner:profiles!sits_user_id_fkey(first_name, avatar_url, city, identity_verified), property:properties!sits_property_id_fkey(type, environment, photos, equipments)")
       .eq("status", "published")
       .order("created_at", { ascending: false });
 
@@ -144,6 +146,10 @@ const SearchSitter = () => {
       });
     }
 
+    if (verifiedOnly) {
+      items = items.filter((s: any) => s.owner?.identity_verified);
+    }
+
     const enriched = await Promise.all(
       items.map(async (sit: any) => {
         const { data: pets } = await supabase.from("pets").select("species, name").eq("property_id", sit.property_id);
@@ -168,7 +174,7 @@ const SearchSitter = () => {
   const searchLongStays = async () => {
     let query = supabase
       .from("long_stays")
-      .select("*, owner:profiles!long_stays_user_id_fkey(first_name, avatar_url, city), property:properties!long_stays_property_id_fkey(type, environment, photos)")
+      .select("*, owner:profiles!long_stays_user_id_fkey(first_name, avatar_url, city, identity_verified), property:properties!long_stays_property_id_fkey(type, environment, photos)")
       .eq("status", "published")
       .order("created_at", { ascending: false });
 
@@ -199,6 +205,10 @@ const SearchSitter = () => {
       } else {
         items = items.filter((s: any) => s.owner?.city?.toLowerCase().includes(city.toLowerCase()));
       }
+    }
+
+    if (verifiedOnly) {
+      items = items.filter((s: any) => s.owner?.identity_verified);
     }
 
     // Load pets for each long stay
@@ -286,6 +296,10 @@ const SearchSitter = () => {
           </div>
         </>
       )}
+      <div className="flex items-center gap-3">
+        <Switch checked={verifiedOnly} onCheckedChange={setVerifiedOnly} />
+        <label className="text-sm">Profils vérifiés uniquement</label>
+      </div>
       <Button onClick={handleSearch} className="w-full gap-2" disabled={loading}>
         <Search className="h-4 w-4" /> {loading ? "Recherche..." : "Rechercher"}
       </Button>
