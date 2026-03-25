@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import StarRating from "./StarRating";
 import { Star, ThumbsUp } from "lucide-react";
+import ReportButton from "@/components/reports/ReportButton";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 
