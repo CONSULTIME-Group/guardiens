@@ -2,6 +2,8 @@ import { NavLink, useLocation } from "react-router-dom";
 import { Home, Search, Calendar, MessageSquare, User, LogOut } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 const navItems = [
   { to: "/dashboard", icon: Home, label: "Dashboard" },
@@ -12,7 +14,30 @@ const navItems = [
 ];
 
 export const Sidebar = () => {
-  const { logout } = useAuth();
+  const { user, logout } = useAuth();
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  useEffect(() => {
+    if (!user) return;
+    const loadUnread = async () => {
+      const { data: convs } = await supabase
+        .from("conversations")
+        .select("id")
+        .or(`owner_id.eq.${user.id},sitter_id.eq.${user.id}`);
+      if (!convs?.length) return;
+      const convIds = convs.map((c: any) => c.id);
+      const { count } = await supabase
+        .from("messages")
+        .select("id", { count: "exact", head: true })
+        .in("conversation_id", convIds)
+        .neq("sender_id", user.id)
+        .is("read_at", null);
+      setUnreadCount(count || 0);
+    };
+    loadUnread();
+    const interval = setInterval(loadUnread, 15000);
+    return () => clearInterval(interval);
+  }, [user]);
 
   return (
     <aside className="hidden md:flex flex-col w-64 border-r border-border bg-card h-screen sticky top-0">
@@ -30,7 +55,7 @@ export const Sidebar = () => {
             to={item.to}
             className={({ isActive }) =>
               cn(
-                "flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors",
+                "flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors relative",
                 isActive
                   ? "bg-primary/10 text-primary"
                   : "text-muted-foreground hover:bg-accent hover:text-foreground"
@@ -39,6 +64,11 @@ export const Sidebar = () => {
           >
             <item.icon className="h-5 w-5" />
             {item.label}
+            {item.to === "/messages" && unreadCount > 0 && (
+              <span className="absolute right-3 bg-primary text-primary-foreground text-xs rounded-full min-w-[20px] h-5 flex items-center justify-center px-1.5">
+                {unreadCount}
+              </span>
+            )}
           </NavLink>
         ))}
       </nav>

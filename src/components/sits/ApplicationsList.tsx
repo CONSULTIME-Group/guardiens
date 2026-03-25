@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
 import { Star, MapPin, CheckCircle2, XCircle, MessageSquare, Users } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 interface ApplicationsListProps {
   sitId: string;
@@ -24,6 +25,7 @@ const statusStyles: Record<string, { label: string; className: string }> = {
 const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate }: ApplicationsListProps) => {
   const [applications, setApplications] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   const load = async () => {
     const { data } = await supabase
@@ -139,7 +141,15 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate }: App
                 )}
 
                 {app.status === "pending" && (
-                  <div className="flex gap-2 mt-4">
+                  <div className="flex gap-2 mt-4 flex-wrap">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="gap-1.5"
+                      onClick={() => navigate("/messages")}
+                    >
+                      <MessageSquare className="h-3.5 w-3.5" /> Répondre
+                    </Button>
                     <Button
                       size="sm"
                       className="gap-1.5"
