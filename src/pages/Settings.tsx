@@ -589,7 +589,7 @@ const IdentityVerificationSection = ({ user }: { user: any }) => {
 
       if (uploadError) throw uploadError;
 
-      // Update profile
+      // Update profile with document path
       await supabase
         .from("profiles")
         .update({
@@ -600,7 +600,26 @@ const IdentityVerificationSection = ({ user }: { user: any }) => {
 
       setStatus("pending");
       setDocumentUrl(path);
-      toast.success("Document envoyé ! Votre vérification est en cours de traitement.");
+      toast.info("Document envoyé ! Vérification automatique en cours...");
+
+      // Call AI verification edge function
+      try {
+        const { data: verifyResult, error: verifyError } = await supabase.functions.invoke("verify-identity");
+
+        if (verifyError) throw verifyError;
+
+        if (verifyResult?.verified) {
+          setStatus("verified");
+          toast.success("Identité vérifiée avec succès ! 🎉");
+        } else {
+          setStatus("rejected");
+          toast.error(verifyResult?.rejection_reason || "Document refusé. Veuillez soumettre un document valide et lisible.");
+        }
+      } catch (verifyErr) {
+        console.error("Verification error:", verifyErr);
+        // Keep pending status — manual review fallback
+        toast.warning("Vérification automatique indisponible. Votre document sera examiné manuellement.");
+      }
     } catch (err) {
       console.error(err);
       toast.error("Erreur lors de l'envoi du document.");
