@@ -10,6 +10,8 @@ import ApplicationModal from "@/components/sits/ApplicationModal";
 import ApplicationsList from "@/components/sits/ApplicationsList";
 import ReviewsDisplay from "@/components/reviews/ReviewsDisplay";
 import CancelSitModal from "@/components/sits/CancelSitModal";
+import BreedProfileCard from "@/components/breeds/BreedProfileCard";
+import LocationProfileCard from "@/components/location/LocationProfileCard";
 
 const envLabels: Record<string, string> = {
   city_center: "Centre-ville", suburban: "Périurbain", countryside: "Campagne",
