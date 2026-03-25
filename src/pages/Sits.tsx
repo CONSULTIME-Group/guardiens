@@ -31,12 +31,22 @@ const Sits = () => {
       if (activeRole === "owner") {
         const { data } = await supabase
           .from("sits")
-          .select("*, properties(type, environment), pets:properties(pets(species, name))")
+          .select("*, properties(type, environment)")
           .eq("user_id", user.id)
           .order("created_at", { ascending: false });
-        setSits(data || []);
+
+        // Enrich with application count
+        const enriched = await Promise.all(
+          (data || []).map(async (sit: any) => {
+            const { count } = await supabase
+              .from("applications")
+              .select("id", { count: "exact", head: true })
+              .eq("sit_id", sit.id);
+            return { ...sit, applicationCount: count || 0 };
+          })
+        );
+        setSits(enriched);
       } else {
-        // Sitter: show sits they applied to
         const { data } = await supabase
           .from("applications")
           .select("*, sit:sits(*, properties(type, environment))")
