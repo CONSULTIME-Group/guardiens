@@ -51,10 +51,18 @@ const AdminListings = () => {
   useEffect(() => {
     if (!listings.length) return;
     const fetchCounts = async () => {
-      const table = filterType === "sits" ? "applications" : "long_stay_applications";
-      const fk = filterType === "sits" ? "sit_id" : "long_stay_id";
       const ids = listings.map((l) => l.id);
-      const { data } = await supabase.from(table).select(`id, ${fk}`).in(fk, ids);
+      let data: any[] | null = null;
+      let fk: string;
+      if (filterType === "sits") {
+        fk = "sit_id";
+        const res = await supabase.from("applications").select("id, sit_id").in("sit_id", ids);
+        data = res.data;
+      } else {
+        fk = "long_stay_id";
+        const res = await supabase.from("long_stay_applications").select("id, long_stay_id").in("long_stay_id", ids);
+        data = res.data;
+      }
       const counts: Record<string, number> = {};
       data?.forEach((a: any) => {
         const key = a[fk];
