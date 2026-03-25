@@ -7,7 +7,7 @@ import {
   BarChart, Bar, Cell,
   FunnelChart, Funnel, LabelList,
 } from "recharts";
-import { format, subWeeks, startOfWeek, endOfWeek } from "date-fns";
+import { format, subWeeks, subMonths, startOfWeek, endOfWeek, startOfMonth, endOfMonth } from "date-fns";
 import { fr } from "date-fns/locale";
 
 interface Stats {
@@ -26,6 +26,7 @@ interface Stats {
 interface WeeklySignup { week: string; count: number }
 interface CityData { city: string; count: number }
 interface FunnelStep { name: string; value: number; fill: string }
+interface MonthlyRating { month: string; avg: number; count: number }
 
 const CHART_COLORS = [
   "hsl(var(--primary))",
@@ -40,6 +41,7 @@ const AdminDashboard = () => {
   const [weeklySignups, setWeeklySignups] = useState<WeeklySignup[]>([]);
   const [cityData, setCityData] = useState<CityData[]>([]);
   const [funnelData, setFunnelData] = useState<FunnelStep[]>([]);
+  const [monthlyRatings, setMonthlyRatings] = useState<MonthlyRating[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -69,7 +71,7 @@ const AdminDashboard = () => {
         supabase.from("sits").select("id", { count: "exact", head: true }).eq("status", "published"),
         supabase.from("sits").select("id", { count: "exact", head: true }).eq("status", "confirmed"),
         supabase.from("sits").select("id", { count: "exact", head: true }).eq("status", "completed"),
-        supabase.from("reviews").select("overall_rating"),
+        supabase.from("reviews").select("overall_rating, created_at"),
         supabase.from("profiles").select("created_at, city"),
         supabase.from("applications").select("id", { count: "exact", head: true }),
         supabase.from("sits").select("id", { count: "exact", head: true }).in("status", ["confirmed", "completed"]),
@@ -133,6 +135,26 @@ const AdminDashboard = () => {
         { name: "Gardes confirmées", value: totalConf, fill: CHART_COLORS[3] },
         { name: "Gardes terminées", value: totalComp, fill: CHART_COLORS[4] },
       ]);
+
+      // Monthly average ratings (last 12 months)
+      const months: MonthlyRating[] = [];
+      for (let i = 11; i >= 0; i--) {
+        const mStart = startOfMonth(subMonths(new Date(), i));
+        const mEnd = endOfMonth(subMonths(new Date(), i));
+        const monthReviews = (reviewsData || []).filter(r => {
+          const d = new Date(r.created_at);
+          return d >= mStart && d <= mEnd;
+        });
+        const avg = monthReviews.length > 0
+          ? monthReviews.reduce((s, r) => s + r.overall_rating, 0) / monthReviews.length
+          : 0;
+        months.push({
+          month: format(mStart, "MMM yy", { locale: fr }),
+          avg: Math.round(avg * 10) / 10,
+          count: monthReviews.length,
+        });
+      }
+      setMonthlyRatings(months);
 
       setLoading(false);
     };
@@ -313,6 +335,53 @@ const AdminDashboard = () => {
                 </div>
               );
             })}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Monthly ratings trend */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Tendance des avis (note moyenne par mois)</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="h-64">
+            {monthlyRatings.every(m => m.count === 0) ? (
+              <div className="flex items-center justify-center h-full text-muted-foreground text-sm">
+                Aucun avis pour le moment.
+              </div>
+            ) : (
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={monthlyRatings}>
+                  <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
+                  <XAxis dataKey="month" tick={{ fontSize: 11 }} />
+                  <YAxis domain={[0, 5]} ticks={[1, 2, 3, 4, 5]} tick={{ fontSize: 11 }} />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: "hsl(var(--card))",
+                      border: "1px solid hsl(var(--border))",
+                      borderRadius: "8px",
+                      fontSize: "13px",
+                    }}
+                    formatter={(v: number, name: string) => {
+                      if (name === "avg") return [`${v}/5`, "Note moyenne"];
+                      return [`${v}`, "Nombre d'avis"];
+                    }}
+                    labelFormatter={(l) => `${l}`}
+                  />
+                  <Bar dataKey="avg" radius={[4, 4, 0, 0]} fill="hsl(var(--primary))" name="avg" />
+                  <Line
+                    type="monotone"
+                    dataKey="count"
+                    stroke="hsl(var(--primary) / 0.5)"
+                    strokeWidth={2}
+                    dot={{ fill: "hsl(var(--primary) / 0.5)", r: 3 }}
+                    name="count"
+                    yAxisId={0}
+                  />
+                </BarChart>
+              </ResponsiveContainer>
+            )}
           </div>
         </CardContent>
       </Card>
