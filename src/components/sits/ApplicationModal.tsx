@@ -56,16 +56,28 @@ const ApplicationModal = ({
       return;
     }
 
-    // 2. Create conversation + first message
-    const { data: conv } = await supabase.from("conversations").insert({
-      sit_id: sitId,
-      owner_id: ownerId,
-      sitter_id: user.id,
-    }).select("id").single();
+    // 2. Check for existing conversation to avoid duplicates
+    const { data: existingConv } = await supabase
+      .from("conversations")
+      .select("id")
+      .eq("sit_id", sitId)
+      .eq("sitter_id", user.id)
+      .maybeSingle();
 
-    if (conv) {
+    let convId = existingConv?.id;
+
+    if (!convId) {
+      const { data: conv } = await supabase.from("conversations").insert({
+        sit_id: sitId,
+        owner_id: ownerId,
+        sitter_id: user.id,
+      }).select("id").single();
+      convId = conv?.id;
+    }
+
+    if (convId) {
       await supabase.from("messages").insert({
-        conversation_id: conv.id,
+        conversation_id: convId,
         sender_id: user.id,
         content: message.trim(),
       });
