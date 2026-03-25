@@ -207,6 +207,10 @@ const SearchSitter = () => {
       }
     }
 
+    if (verifiedOnly) {
+      items = items.filter((s: any) => s.owner?.identity_verified);
+    }
+
     // Load pets for each long stay
     const enriched = await Promise.all(
       items.map(async (ls: any) => {
