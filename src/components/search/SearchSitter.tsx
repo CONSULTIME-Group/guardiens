@@ -97,7 +97,7 @@ const SearchSitter = () => {
   const searchSits = async () => {
     let query = supabase
       .from("sits")
-      .select("*, owner:profiles!sits_user_id_fkey(first_name, avatar_url, city), property:properties!sits_property_id_fkey(type, environment, photos, equipments)")
+      .select("*, owner:profiles!sits_user_id_fkey(first_name, avatar_url, city, identity_verified), property:properties!sits_property_id_fkey(type, environment, photos, equipments)")
       .eq("status", "published")
       .order("created_at", { ascending: false });
 
