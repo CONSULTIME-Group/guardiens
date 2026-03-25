@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { geocodeCity, haversineDistance } from "@/lib/geocode";
 import { useAuth } from "@/contexts/AuthContext";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -52,8 +53,32 @@ const SearchOwner = () => {
     let items = (sitters || []).filter((s: any) => s.profile?.profile_completion >= 60);
 
     // Filters
+    // Geocoded radius filter
     if (city) {
-      items = items.filter((s: any) => s.profile?.city?.toLowerCase().includes(city.toLowerCase()));
+      const searchCoords = await geocodeCity(city);
+      if (searchCoords) {
+        const uniqueCities = [...new Set(items.map((s: any) => s.profile?.city).filter(Boolean))] as string[];
+        const cityCoords = new Map<string, { lat: number; lng: number }>();
+
+        await Promise.all(
+          uniqueCities.map(async (c) => {
+            const coords = await geocodeCity(c);
+            if (coords) cityCoords.set(c, { lat: coords.lat, lng: coords.lng });
+          })
+        );
+
+        items = items.filter((s: any) => {
+          const sitterCity = s.profile?.city;
+          if (!sitterCity) return false;
+          const coords = cityCoords.get(sitterCity);
+          if (!coords) return false;
+          const dist = haversineDistance(searchCoords.lat, searchCoords.lng, coords.lat, coords.lng);
+          return dist <= radius[0];
+        });
+      } else {
+        // Fallback to text match if geocoding fails
+        items = items.filter((s: any) => s.profile?.city?.toLowerCase().includes(city.toLowerCase()));
+      }
     }
     if (sitterType !== "all") {
       items = items.filter((s: any) => (s.sitter_type || "").toLowerCase() === sitterType.toLowerCase());
