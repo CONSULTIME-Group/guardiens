@@ -1,12 +1,13 @@
 import { useState, useEffect } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Calendar, Home, Info, Star, Lock } from "lucide-react";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { ArrowLeft, Calendar, Home, Info, Star, Lock, Pencil, Trash2 } from "lucide-react";
 import LongStayApplicationsList from "@/components/sits/LongStayApplicationsList";
 import { format, differenceInDays } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -27,6 +28,7 @@ const LongStayDetail = () => {
   const { id } = useParams<{ id: string }>();
   const { user } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const [longStay, setLongStay] = useState<any>(null);
   const [property, setProperty] = useState<any>(null);
@@ -38,6 +40,8 @@ const LongStayDetail = () => {
   const [message, setMessage] = useState("Bonjour, je suis intéressé(e) par cette garde longue durée. Je suis disponible aux dates indiquées et je prendrai soin de votre logement et de vos animaux.");
   const [applying, setApplying] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   useEffect(() => {
     if (!id || !user) return;
@@ -96,6 +100,22 @@ const LongStayDetail = () => {
     }
   };
 
+  const handleDelete = async () => {
+    if (!user || !longStay) return;
+    setDeleting(true);
+    try {
+      const { error } = await supabase.from("long_stays").delete().eq("id", longStay.id);
+      if (error) throw error;
+      toast({ title: "Annonce supprimée", description: "Votre garde longue durée a été supprimée." });
+      navigate("/dashboard");
+    } catch {
+      toast({ variant: "destructive", title: "Erreur", description: "Impossible de supprimer l'annonce." });
+    } finally {
+      setDeleting(false);
+      setDeleteDialogOpen(false);
+    }
+  };
+
   if (loading) return <div className="p-6 md:p-10 max-w-3xl mx-auto text-muted-foreground">Chargement...</div>;
   if (!longStay) return <div className="p-6 md:p-10 max-w-3xl mx-auto text-muted-foreground">Annonce introuvable.</div>;
 
@@ -112,8 +132,40 @@ const LongStayDetail = () => {
         <ArrowLeft className="h-4 w-4" /> Retour
       </Link>
 
-      {/* Badge */}
-      <Badge className="mb-3 bg-[#DBEAFE] text-[#1E40AF] border-blue-200 hover:bg-[#DBEAFE]">Longue durée</Badge>
+      {/* Badge + Owner actions */}
+      <div className="flex items-center justify-between mb-3">
+        <Badge className="bg-[#DBEAFE] text-[#1E40AF] border-blue-200 hover:bg-[#DBEAFE]">Longue durée</Badge>
+        {isOwner && (
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" asChild className="gap-1.5">
+              <Link to={`/long-stays/${longStay.id}/edit`}>
+                <Pencil className="h-3.5 w-3.5" /> Modifier
+              </Link>
+            </Button>
+            <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+              <DialogTrigger asChild>
+                <Button variant="outline" size="sm" className="gap-1.5 text-destructive hover:text-destructive">
+                  <Trash2 className="h-3.5 w-3.5" /> Supprimer
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Supprimer cette annonce ?</DialogTitle>
+                  <DialogDescription>
+                    Cette action est irréversible. Toutes les candidatures associées seront également supprimées.
+                  </DialogDescription>
+                </DialogHeader>
+                <DialogFooter className="gap-2">
+                  <Button variant="outline" onClick={() => setDeleteDialogOpen(false)}>Annuler</Button>
+                  <Button variant="destructive" onClick={handleDelete} disabled={deleting}>
+                    {deleting ? "Suppression..." : "Confirmer la suppression"}
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          </div>
+        )}
+      </div>
 
       {/* Title & dates */}
       <h1 className="font-heading text-2xl md:text-3xl font-bold mb-2">{longStay.title}</h1>

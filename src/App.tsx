@@ -23,6 +23,7 @@ import Settings from "./pages/Settings";
 import OwnerProfile from "./pages/OwnerProfile";
 import CreateLongStay from "./pages/CreateLongStay";
 import LongStayDetail from "./pages/LongStayDetail";
+import EditLongStay from "./pages/EditLongStay";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -61,6 +62,7 @@ const AppRoutes = () => (
       <Route path="/settings" element={<Settings />} />
       <Route path="/long-stays/create" element={<CreateLongStay />} />
       <Route path="/long-stays/:id" element={<LongStayDetail />} />
+      <Route path="/long-stays/:id/edit" element={<EditLongStay />} />
     </Route>
     <Route path="*" element={<NotFound />} />
   </Routes>
