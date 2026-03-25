@@ -177,7 +177,7 @@ export function useSitterProfile() {
         "motivation", "sitter_type", "accompanied_by", "smoker", "availability_during",
         "lifestyle", "animal_types", "experience_years", "references_text",
         "has_license", "has_vehicle", "geographic_radius", "min_duration", "max_duration",
-        "availability_dates", "strict_rules_ok", "prefer_visitors", "farm_animals_ok",
+        "availability_dates", "is_available", "strict_rules_ok", "prefer_visitors", "farm_animals_ok",
         "preferences_notes", "meeting_preference", "handover_preference",
         "languages", "bonus_skills", "interests",
       ] as const;
