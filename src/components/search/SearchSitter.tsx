@@ -11,6 +11,7 @@ import { Search, SlidersHorizontal, MapPin, Calendar, Star, CheckCircle2 } from 
 import ChipSelect from "@/components/profile/ChipSelect";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
+import { geocodeCity, haversineDistance } from "@/lib/geocode";
 
 const animalChips = ["Chiens", "Chats", "Chevaux", "Oiseaux", "Animaux de ferme", "NAC", "Tous"];
 const animalChipToSpecies: Record<string, string> = {
