@@ -729,18 +729,22 @@ const IdentityVerificationSection = ({ user }: { user: any }) => {
                 variant={status === "rejected" ? "default" : "outline"}
                 size="sm"
                 className="gap-2 cursor-pointer"
-                disabled={uploading}
+                disabled={uploading || rateLimited}
                 asChild
               >
                 <span>
                   <Upload className="h-4 w-4" />
-                  {uploading ? "Envoi en cours..." :
+                  {rateLimited ? "Limite atteinte (5/jour)" :
+                   uploading ? "Envoi en cours..." :
                    status === "pending" ? "Renvoyer un document" :
                    status === "rejected" ? "Soumettre un nouveau document" :
                    "Envoyer ma pièce d'identité"}
                 </span>
               </Button>
             </label>
+            {rateLimited && (
+              <p className="text-xs text-destructive">Vous avez atteint la limite de 5 vérifications par jour. Réessayez demain.</p>
+            )}
           </div>
         )}
       </div>
