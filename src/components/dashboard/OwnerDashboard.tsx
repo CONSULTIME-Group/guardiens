@@ -35,7 +35,8 @@ const OwnerDashboard = () => {
   const [unreadCount, setUnreadCount] = useState(0);
   const [sitterCount, setSitterCount] = useState(0);
   const [reviews, setReviews] = useState<any[]>([]);
-  const [sublets, setSublets] = useState<any[]>([]);
+  const [longStays, setLongStays] = useState<any[]>([]);
+  const [ownerEligible, setOwnerEligible] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
