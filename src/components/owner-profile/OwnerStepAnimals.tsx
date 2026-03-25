@@ -34,6 +34,7 @@ const emptyPet: Pet = {
   species: "dog", breed: "", name: "", age: null, photo_url: "",
   character: "", alone_duration: "never", walk_duration: "none",
   medication: "", food: "", special_needs: "", activity_level: "moderate",
+  owner_breed_note: "",
 };
 
 interface Props {
