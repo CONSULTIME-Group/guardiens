@@ -109,6 +109,7 @@ export default function News() {
             onClick={() => {
               if (cat.key === "all") searchParams.delete("cat");
               else searchParams.set("cat", cat.key);
+              searchParams.delete("page");
               setSearchParams(searchParams);
             }}
             className={`px-4 py-2 rounded-pill text-sm font-medium transition-colors ${
