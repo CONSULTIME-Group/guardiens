@@ -54,7 +54,7 @@ const AdminUsers = () => {
       .select("*")
       .order("created_at", { ascending: false });
 
-    if (filterRole !== "all") query = query.eq("role", filterRole);
+    if (filterRole !== "all") query = query.eq("role", filterRole as any);
     if (filterVerification !== "all") {
       query = query.eq("identity_verification_status", filterVerification);
     }
