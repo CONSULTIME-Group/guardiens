@@ -232,7 +232,7 @@ const CreateSit = () => {
 
         <div>
           <Label className="text-sm font-medium mb-2 block">Annonce ouverte à</Label>
-          <ChipSelect options={openToOptions} value={openTo} onChange={setOpenTo} />
+          <ChipSelect options={openToOptions} selected={openTo} onChange={setOpenTo} />
         </div>
       </div>
 
