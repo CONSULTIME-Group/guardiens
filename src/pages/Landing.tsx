@@ -71,7 +71,7 @@ const testimonials = [
 const stats = [
   { value: "37", label: "maisons gardées" },
   { value: "234", label: "animaux accompagnés" },
-  { value: "2 ans", label: "en AURA" },
+  { value: "5 ans", label: "en AURA" },
   { value: "100%", label: "gratuit au lancement" },
 ];
 
