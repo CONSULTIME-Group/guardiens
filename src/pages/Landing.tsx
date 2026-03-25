@@ -49,17 +49,17 @@ const testimonials = [
   {
     name: "Sophie & Marc",
     detail: "2 chats · Écully",
-    text: "On est partis 10 jours au Maroc. Nos deux chats sont restés dans leur canapé, dans leur maison, avec quelqu'un qui passait leur faire des câlins tous les jours. Zéro stress — pour eux comme pour nous.",
+    text: "On est partis 10 jours au Maroc et nos deux chats sont restés sur leur canapé préféré, avec quelqu'un qui leur faisait des câlins tous les jours. On a reçu des photos tous les soirs — ils avaient l'air plus détendus que nous !",
   },
   {
     name: "Thomas",
     detail: "Gardien · Lyon 7e",
-    text: "J'ai gardé un chalet à Megève pendant une semaine en février. Le golden retriever m'attendait chaque matin devant la cheminée. J'ai découvert un village, des sentiers, des gens. Je n'aurais jamais pu me payer ça autrement.",
+    text: "Un chalet à Megève, un golden retriever qui m'attendait chaque matin devant la cheminée, des balades dans la neige et des voisins adorables. La plus belle semaine de mon hiver — et le début d'une vraie amitié avec les proprios.",
   },
   {
     name: "Claire & Antoine",
     detail: "3 chevaux · Monts du Lyonnais",
-    text: "Nos trois chevaux ne supportent pas le transport. Avant, on ne partait jamais. Maintenant on a une gardienne qui les connaît par leur prénom. Elle arrive la veille, on lui montre les habitudes, et on part tranquilles.",
+    text: "Notre gardienne connaît nos trois chevaux par leur prénom. Elle arrive la veille, on dîne ensemble, on lui montre les petites habitudes, et le lendemain on part le sourire aux lèvres. On a enfin retrouvé le plaisir de voyager.",
   },
 ];
 
