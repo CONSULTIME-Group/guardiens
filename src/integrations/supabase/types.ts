@@ -83,6 +83,45 @@ export type Database = {
           },
         ]
       }
+      breed_profiles: {
+        Row: {
+          breed: string
+          exercise_needs: string
+          generated_at: string
+          grooming: string
+          id: string
+          ideal_for: string
+          sitter_tips: string
+          species: string
+          stranger_behavior: string
+          temperament: string
+        }
+        Insert: {
+          breed: string
+          exercise_needs?: string
+          generated_at?: string
+          grooming?: string
+          id?: string
+          ideal_for?: string
+          sitter_tips?: string
+          species: string
+          stranger_behavior?: string
+          temperament?: string
+        }
+        Update: {
+          breed?: string
+          exercise_needs?: string
+          generated_at?: string
+          grooming?: string
+          id?: string
+          ideal_for?: string
+          sitter_tips?: string
+          species?: string
+          stranger_behavior?: string
+          temperament?: string
+        }
+        Relationships: []
+      }
       conversations: {
         Row: {
           created_at: string
@@ -248,6 +287,45 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      location_profiles: {
+        Row: {
+          activities: string
+          amenities: string
+          city: string
+          generated_at: string
+          id: string
+          ideal_for: string
+          nature_access: string
+          neighborhood_type: string
+          postal_code: string
+          transport: string
+        }
+        Insert: {
+          activities?: string
+          amenities?: string
+          city: string
+          generated_at?: string
+          id?: string
+          ideal_for?: string
+          nature_access?: string
+          neighborhood_type?: string
+          postal_code: string
+          transport?: string
+        }
+        Update: {
+          activities?: string
+          amenities?: string
+          city?: string
+          generated_at?: string
+          id?: string
+          ideal_for?: string
+          nature_access?: string
+          neighborhood_type?: string
+          postal_code?: string
+          transport?: string
+        }
+        Relationships: []
       }
       messages: {
         Row: {
@@ -504,6 +582,7 @@ export type Database = {
           id: string
           medication: string | null
           name: string
+          owner_breed_note: string | null
           photo_url: string | null
           property_id: string
           special_needs: string | null
@@ -520,6 +599,7 @@ export type Database = {
           id?: string
           medication?: string | null
           name?: string
+          owner_breed_note?: string | null
           photo_url?: string | null
           property_id: string
           special_needs?: string | null
@@ -536,6 +616,7 @@ export type Database = {
           id?: string
           medication?: string | null
           name?: string
+          owner_breed_note?: string | null
           photo_url?: string | null
           property_id?: string
           special_needs?: string | null

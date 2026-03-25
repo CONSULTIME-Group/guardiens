@@ -10,6 +10,8 @@ import ApplicationModal from "@/components/sits/ApplicationModal";
 import ApplicationsList from "@/components/sits/ApplicationsList";
 import ReviewsDisplay from "@/components/reviews/ReviewsDisplay";
 import CancelSitModal from "@/components/sits/CancelSitModal";
+import BreedProfileCard from "@/components/breeds/BreedProfileCard";
+import LocationProfileCard from "@/components/location/LocationProfileCard";
 
 const envLabels: Record<string, string> = {
   city_center: "Centre-ville", suburban: "Périurbain", countryside: "Campagne",
@@ -197,25 +199,35 @@ const SitDetail = () => {
         <Section icon={PawPrint} title="Les animaux">
           <div className="space-y-4">
             {pets.map((pet: any) => (
-              <div key={pet.id} className="flex gap-3 p-3 bg-accent/50 rounded-lg">
-                {pet.photo_url ? (
-                  <img src={pet.photo_url} alt={pet.name} className="w-14 h-14 rounded-lg object-cover shrink-0" />
-                ) : (
-                  <div className="w-14 h-14 rounded-lg bg-muted flex items-center justify-center text-2xl shrink-0">
-                    {speciesEmoji[pet.species] || "🐾"}
+              <div key={pet.id}>
+                <div className="flex gap-3 p-3 bg-accent/50 rounded-lg">
+                  {pet.photo_url ? (
+                    <img src={pet.photo_url} alt={pet.name} className="w-14 h-14 rounded-lg object-cover shrink-0" />
+                  ) : (
+                    <div className="w-14 h-14 rounded-lg bg-muted flex items-center justify-center text-2xl shrink-0">
+                      {speciesEmoji[pet.species] || "🐾"}
+                    </div>
+                  )}
+                  <div>
+                    <p className="font-medium text-sm">{speciesEmoji[pet.species]} {pet.name}{pet.breed ? ` — ${pet.breed}` : ""}{pet.age ? ` · ${pet.age} ans` : ""}</p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {[
+                        pet.walk_duration && pet.walk_duration !== "none" ? walkLabels[pet.walk_duration] : null,
+                        pet.alone_duration ? aloneLabels[pet.alone_duration] : null,
+                        pet.medication ? "Médication requise" : "Pas de médication",
+                      ].filter(Boolean).join(" · ")}
+                    </p>
+                    {pet.character && <p className="text-xs text-muted-foreground mt-0.5">{pet.character}</p>}
                   </div>
-                )}
-                <div>
-                  <p className="font-medium text-sm">{speciesEmoji[pet.species]} {pet.name}{pet.breed ? ` — ${pet.breed}` : ""}{pet.age ? ` · ${pet.age} ans` : ""}</p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {[
-                      pet.walk_duration && pet.walk_duration !== "none" ? walkLabels[pet.walk_duration] : null,
-                      pet.alone_duration ? aloneLabels[pet.alone_duration] : null,
-                      pet.medication ? "Médication requise" : "Pas de médication",
-                    ].filter(Boolean).join(" · ")}
-                  </p>
-                  {pet.character && <p className="text-xs text-muted-foreground mt-0.5">{pet.character}</p>}
                 </div>
+                {pet.breed && (
+                  <BreedProfileCard
+                    species={pet.species}
+                    breed={pet.breed}
+                    ownerNote={pet.owner_breed_note}
+                    ownerFirstName={owner?.first_name}
+                  />
+                )}
               </div>
             ))}
           </div>
@@ -252,6 +264,13 @@ const SitDetail = () => {
             {ownerProfile.news_frequency && <p>Nouvelles : {ownerProfile.news_frequency}</p>}
             {ownerProfile.news_format?.length > 0 && <p>Format : {ownerProfile.news_format.join(", ")}</p>}
           </div>
+        </Section>
+      )}
+
+      {/* Le coin (location profile) */}
+      {owner?.city && owner?.postal_code && (
+        <Section icon={MapPin} title={`Découvrir ${owner.city}`}>
+          <LocationProfileCard city={owner.city} postalCode={owner.postal_code} />
         </Section>
       )}
 

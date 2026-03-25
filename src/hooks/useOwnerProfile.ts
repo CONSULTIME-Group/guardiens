@@ -57,6 +57,7 @@ export interface Pet {
   food: string;
   special_needs: string;
   activity_level: string;
+  owner_breed_note: string;
 }
 
 const defaultData: OwnerProfileData = {
@@ -130,6 +131,7 @@ export function useOwnerProfile() {
         alone_duration: a.alone_duration || "never", walk_duration: a.walk_duration || "none",
         medication: a.medication || "", food: a.food || "", special_needs: a.special_needs || "",
         activity_level: a.activity_level || "moderate",
+        owner_breed_note: (a as any).owner_breed_note || "",
       })) || []);
     }
     if (o) setOwnerProfileId(o.id);

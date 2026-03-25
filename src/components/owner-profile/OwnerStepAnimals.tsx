@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Plus, Pencil, Trash2, ChevronDown, ChevronUp } from "lucide-react";
 import HintBubble from "../profile/HintBubble";
+import BreedProfileCard from "../breeds/BreedProfileCard";
 import type { Pet } from "@/hooks/useOwnerProfile";
 
 const SPECIES = [
@@ -33,6 +34,7 @@ const emptyPet: Pet = {
   species: "dog", breed: "", name: "", age: null, photo_url: "",
   character: "", alone_duration: "never", walk_duration: "none",
   medication: "", food: "", special_needs: "", activity_level: "moderate",
+  owner_breed_note: "",
 };
 
 interface Props {
@@ -89,14 +91,25 @@ const OwnerStepAnimals = ({ pets, onAddPet, onUpdatePet, onRemovePet }: Props) =
             {expandedId === pet.id ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
           </button>
           {expandedId === pet.id && (
-            <div className="px-4 pb-4 flex gap-2">
-              <Button type="button" variant="outline" size="sm" onClick={() => startEdit(pet)}>
-                <Pencil className="w-3 h-3 mr-1" /> Modifier
-              </Button>
-              <Button type="button" variant="outline" size="sm" onClick={() => pet.id && onRemovePet(pet.id)}
-                className="text-destructive hover:text-destructive">
-                <Trash2 className="w-3 h-3 mr-1" /> Supprimer
-              </Button>
+            <div className="px-4 pb-4 space-y-3">
+              <div className="flex gap-2">
+                <Button type="button" variant="outline" size="sm" onClick={() => startEdit(pet)}>
+                  <Pencil className="w-3 h-3 mr-1" /> Modifier
+                </Button>
+                <Button type="button" variant="outline" size="sm" onClick={() => pet.id && onRemovePet(pet.id)}
+                  className="text-destructive hover:text-destructive">
+                  <Trash2 className="w-3 h-3 mr-1" /> Supprimer
+                </Button>
+              </div>
+              {pet.breed && (
+                <BreedProfileCard
+                  species={pet.species}
+                  breed={pet.breed}
+                  ownerNote={pet.owner_breed_note}
+                  editable
+                  onNoteChange={(note) => onUpdatePet({ ...pet, owner_breed_note: note })}
+                />
+              )}
             </div>
           )}
         </div>
