@@ -57,7 +57,10 @@ const OwnerDashboard = () => {
       setUnreadCount(unreadRes.count || 0);
       setSitterCount(sittersRes.count || 0);
       setReviews(reviewsRes.data || []);
-      setSublets(subletsRes.data || []);
+      setLongStays(longStaysRes.data || []);
+      // Owner eligibility for long stays: 2+ completed sits + verified
+      const completedCount = sitsData.filter((s: any) => s.status === "completed").length;
+      setOwnerEligible(completedCount >= 2 && (profileRes.data?.identity_verified || false));
 
       // Load pets from user's properties
       const propIds = (propsRes.data || []).map((p: any) => p.id);
