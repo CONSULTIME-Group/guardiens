@@ -48,6 +48,7 @@ const AppRoutes = () => (
       <Route path="/sits" element={<Sits />} />
       <Route path="/sits/create" element={<CreateSit />} />
       <Route path="/sits/:id" element={<SitDetail />} />
+      <Route path="/review/:sitId" element={<LeaveReview />} />
       <Route path="/house-guide/:propertyId" element={<HouseGuide />} />
     </Route>
     <Route path="*" element={<NotFound />} />
