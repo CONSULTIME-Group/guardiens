@@ -18,6 +18,7 @@ import SitDetail from "./pages/SitDetail";
 import HouseGuide from "./pages/HouseGuide";
 import LeaveReview from "./pages/LeaveReview";
 import Notifications from "./pages/Notifications";
+import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -52,6 +53,7 @@ const AppRoutes = () => (
       <Route path="/review/:sitId" element={<LeaveReview />} />
       <Route path="/notifications" element={<Notifications />} />
       <Route path="/house-guide/:propertyId" element={<HouseGuide />} />
+      <Route path="/settings" element={<Settings />} />
     </Route>
     <Route path="*" element={<NotFound />} />
   </Routes>

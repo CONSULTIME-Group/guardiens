@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      account_deletion_requests: {
+        Row: {
+          cancelled_at: string | null
+          id: string
+          requested_at: string
+          scheduled_deletion_at: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          cancelled_at?: string | null
+          id?: string
+          requested_at?: string
+          scheduled_deletion_at?: string
+          status?: string
+          user_id: string
+        }
+        Update: {
+          cancelled_at?: string | null
+          id?: string
+          requested_at?: string
+          scheduled_deletion_at?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       applications: {
         Row: {
           created_at: string
@@ -242,6 +269,51 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      notification_preferences: {
+        Row: {
+          created_at: string
+          email_messages: boolean
+          email_new_application: boolean
+          email_reminders: boolean
+          email_review_prompts: boolean
+          email_sitter_suggestions: boolean
+          id: string
+          message_email_delay: string
+          profile_visibility: string
+          show_last_seen: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          email_messages?: boolean
+          email_new_application?: boolean
+          email_reminders?: boolean
+          email_review_prompts?: boolean
+          email_sitter_suggestions?: boolean
+          id?: string
+          message_email_delay?: string
+          profile_visibility?: string
+          show_last_seen?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          email_messages?: boolean
+          email_new_application?: boolean
+          email_reminders?: boolean
+          email_review_prompts?: boolean
+          email_sitter_suggestions?: boolean
+          id?: string
+          message_email_delay?: string
+          profile_visibility?: string
+          show_last_seen?: boolean
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       notifications: {
         Row: {

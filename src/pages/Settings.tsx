@@ -1,0 +1,431 @@
+import { useState, useEffect } from "react";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import { Separator } from "@/components/ui/separator";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { toast } from "sonner";
+import { User, Bell, Shield, Trash2, Download } from "lucide-react";
+
+interface NotifPrefs {
+  email_new_application: boolean;
+  email_messages: boolean;
+  email_reminders: boolean;
+  email_sitter_suggestions: boolean;
+  email_review_prompts: boolean;
+  message_email_delay: string;
+  profile_visibility: string;
+  show_last_seen: boolean;
+}
+
+const defaultPrefs: NotifPrefs = {
+  email_new_application: true,
+  email_messages: true,
+  email_reminders: true,
+  email_sitter_suggestions: true,
+  email_review_prompts: true,
+  message_email_delay: "30min",
+  profile_visibility: "all",
+  show_last_seen: true,
+};
+
+const Settings = () => {
+  const { user } = useAuth();
+  const [prefs, setPrefs] = useState<NotifPrefs>(defaultPrefs);
+  const [loading, setLoading] = useState(true);
+  const [savingPrefs, setSavingPrefs] = useState(false);
+
+  // Account
+  const [newEmail, setNewEmail] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+
+  // Deletion
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState("");
+  const [deleting, setDeleting] = useState(false);
+
+  // Export
+  const [exporting, setExporting] = useState(false);
+
+  useEffect(() => {
+    if (!user) return;
+    const load = async () => {
+      const { data } = await supabase
+        .from("notification_preferences")
+        .select("*")
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      if (data) {
+        setPrefs({
+          email_new_application: data.email_new_application,
+          email_messages: data.email_messages,
+          email_reminders: data.email_reminders,
+          email_sitter_suggestions: data.email_sitter_suggestions,
+          email_review_prompts: data.email_review_prompts,
+          message_email_delay: data.message_email_delay,
+          profile_visibility: data.profile_visibility,
+          show_last_seen: data.show_last_seen,
+        });
+      }
+      setLoading(false);
+    };
+    load();
+  }, [user]);
+
+  const savePrefs = async (updated: Partial<NotifPrefs>) => {
+    if (!user) return;
+    const newPrefs = { ...prefs, ...updated };
+    setPrefs(newPrefs);
+    setSavingPrefs(true);
+
+    const { error } = await supabase
+      .from("notification_preferences")
+      .upsert({ user_id: user.id, ...newPrefs, updated_at: new Date().toISOString() }, { onConflict: "user_id" });
+
+    setSavingPrefs(false);
+    if (error) toast.error("Erreur lors de la sauvegarde");
+  };
+
+  const handleEmailChange = async () => {
+    if (!newEmail) return;
+    const { error } = await supabase.auth.updateUser({ email: newEmail });
+    if (error) toast.error(error.message);
+    else {
+      toast.success("Un email de confirmation a été envoyé à votre nouvelle adresse.");
+      setNewEmail("");
+    }
+  };
+
+  const handlePasswordChange = async () => {
+    if (newPassword.length < 6) {
+      toast.error("Le mot de passe doit contenir au moins 6 caractères.");
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      toast.error("Les mots de passe ne correspondent pas.");
+      return;
+    }
+    const { error } = await supabase.auth.updateUser({ password: newPassword });
+    if (error) toast.error(error.message);
+    else {
+      toast.success("Mot de passe mis à jour.");
+      setNewPassword("");
+      setConfirmPassword("");
+    }
+  };
+
+  const handleExport = async () => {
+    if (!user) return;
+    setExporting(true);
+    try {
+      const [profile, sitterProfile, ownerProfile, properties, pets, sits, applications, conversations, messages, reviews] = await Promise.all([
+        supabase.from("profiles").select("*").eq("id", user.id).single(),
+        supabase.from("sitter_profiles").select("*").eq("user_id", user.id).maybeSingle(),
+        supabase.from("owner_profiles").select("*").eq("user_id", user.id).maybeSingle(),
+        supabase.from("properties").select("*").eq("user_id", user.id),
+        supabase.from("sits").select("*").eq("user_id", user.id).then(async (sitsRes) => {
+          if (!sitsRes.data?.length) return { data: [] };
+          const propIds = sitsRes.data.map(s => s.property_id);
+          return supabase.from("pets").select("*").in("property_id", propIds);
+        }),
+        supabase.from("sits").select("*").eq("user_id", user.id),
+        supabase.from("applications").select("*").eq("sitter_id", user.id),
+        supabase.from("conversations").select("*").or(`owner_id.eq.${user.id},sitter_id.eq.${user.id}`),
+        supabase.from("conversations").select("id").or(`owner_id.eq.${user.id},sitter_id.eq.${user.id}`).then(async (convRes) => {
+          if (!convRes.data?.length) return { data: [] };
+          return supabase.from("messages").select("*").in("conversation_id", convRes.data.map(c => c.id));
+        }),
+        supabase.from("reviews").select("*").or(`reviewer_id.eq.${user.id},reviewee_id.eq.${user.id}`),
+      ]);
+
+      const exportData = {
+        exported_at: new Date().toISOString(),
+        profile: profile.data,
+        sitter_profile: sitterProfile.data,
+        owner_profile: ownerProfile.data,
+        properties: properties.data,
+        pets: pets.data,
+        sits: sits.data,
+        applications: applications.data,
+        conversations: conversations.data,
+        messages: messages.data,
+        reviews: reviews.data,
+      };
+
+      const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `guardiens-export-${new Date().toISOString().split("T")[0]}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      toast.success("Export terminé !");
+    } catch {
+      toast.error("Erreur lors de l'export.");
+    }
+    setExporting(false);
+  };
+
+  const handleDeleteAccount = async () => {
+    if (!user || deleteConfirm !== "SUPPRIMER") return;
+    setDeleting(true);
+    try {
+      const { error } = await supabase
+        .from("account_deletion_requests")
+        .upsert(
+          { user_id: user.id, status: "pending" },
+          { onConflict: "user_id" }
+        );
+      if (error) throw error;
+
+      // Mark profile as inactive
+      await supabase
+        .from("profiles")
+        .update({ bio: "[Compte en cours de suppression]" })
+        .eq("id", user.id);
+
+      toast.success("Votre demande de suppression a été enregistrée. Vous avez 30 jours pour l'annuler.");
+      setDeleteOpen(false);
+      setDeleteConfirm("");
+    } catch {
+      toast.error("Erreur lors de la demande de suppression.");
+    }
+    setDeleting(false);
+  };
+
+  if (loading) {
+    return <div className="p-6 md:p-10 text-center text-muted-foreground py-20">Chargement...</div>;
+  }
+
+  return (
+    <div className="p-4 md:p-8 max-w-2xl mx-auto pb-24 md:pb-8">
+      <h1 className="font-heading text-2xl md:text-3xl font-bold mb-8">Paramètres</h1>
+
+      {/* Mon compte */}
+      <section className="mb-8">
+        <div className="flex items-center gap-2 mb-4">
+          <User className="h-5 w-5 text-primary" />
+          <h2 className="font-heading text-lg font-semibold">Mon compte</h2>
+        </div>
+
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <Label>Modifier l'email</Label>
+            <div className="flex gap-2">
+              <Input
+                type="email"
+                placeholder={user?.email || "nouveau@email.com"}
+                value={newEmail}
+                onChange={(e) => setNewEmail(e.target.value)}
+              />
+              <Button onClick={handleEmailChange} disabled={!newEmail} size="sm">
+                Modifier
+              </Button>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label>Modifier le mot de passe</Label>
+            <Input
+              type="password"
+              placeholder="Nouveau mot de passe"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+            />
+            <Input
+              type="password"
+              placeholder="Confirmer le mot de passe"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+            />
+            <Button
+              onClick={handlePasswordChange}
+              disabled={!newPassword || !confirmPassword}
+              size="sm"
+            >
+              Changer le mot de passe
+            </Button>
+          </div>
+
+          <div>
+            <Button variant="outline" size="sm" asChild>
+              <a href="/profile">Modifier ma photo de profil →</a>
+            </Button>
+          </div>
+        </div>
+      </section>
+
+      <Separator />
+
+      {/* Notifications */}
+      <section className="my-8">
+        <div className="flex items-center gap-2 mb-4">
+          <Bell className="h-5 w-5 text-primary" />
+          <h2 className="font-heading text-lg font-semibold">Notifications email</h2>
+        </div>
+
+        <div className="space-y-4">
+          {([
+            { key: "email_new_application", label: "Nouvelles candidatures" },
+            { key: "email_messages", label: "Messages" },
+            { key: "email_reminders", label: "Rappels de garde" },
+            { key: "email_sitter_suggestions", label: "Suggestions de gardiens" },
+            { key: "email_review_prompts", label: "Avis à laisser" },
+          ] as const).map(({ key, label }) => (
+            <div key={key} className="flex items-center justify-between">
+              <Label className="text-sm">{label}</Label>
+              <Switch
+                checked={prefs[key]}
+                onCheckedChange={(v) => savePrefs({ [key]: v })}
+              />
+            </div>
+          ))}
+
+          <div className="flex items-center justify-between">
+            <Label className="text-sm">Délai avant email (messages non-lus)</Label>
+            <Select
+              value={prefs.message_email_delay}
+              onValueChange={(v) => savePrefs({ message_email_delay: v })}
+            >
+              <SelectTrigger className="w-32">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="30min">30 min</SelectItem>
+                <SelectItem value="1h">1 heure</SelectItem>
+                <SelectItem value="3h">3 heures</SelectItem>
+                <SelectItem value="never">Jamais</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+      </section>
+
+      <Separator />
+
+      {/* Confidentialité */}
+      <section className="my-8">
+        <div className="flex items-center gap-2 mb-4">
+          <Shield className="h-5 w-5 text-primary" />
+          <h2 className="font-heading text-lg font-semibold">Confidentialité</h2>
+        </div>
+
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <Label className="text-sm">Qui peut voir mon profil</Label>
+            <Select
+              value={prefs.profile_visibility}
+              onValueChange={(v) => savePrefs({ profile_visibility: v })}
+            >
+              <SelectTrigger className="w-48">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Tous les utilisateurs</SelectItem>
+                <SelectItem value="verified">Utilisateurs vérifiés</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="flex items-center justify-between">
+            <Label className="text-sm">Afficher ma dernière connexion</Label>
+            <Switch
+              checked={prefs.show_last_seen}
+              onCheckedChange={(v) => savePrefs({ show_last_seen: v })}
+            />
+          </div>
+        </div>
+      </section>
+
+      <Separator />
+
+      {/* Export données */}
+      <section className="my-8">
+        <div className="flex items-center gap-2 mb-4">
+          <Download className="h-5 w-5 text-primary" />
+          <h2 className="font-heading text-lg font-semibold">Mes données</h2>
+        </div>
+        <p className="text-sm text-muted-foreground mb-3">
+          Conformément au RGPD, vous pouvez exporter l'ensemble de vos données personnelles.
+        </p>
+        <Button variant="outline" onClick={handleExport} disabled={exporting}>
+          {exporting ? "Export en cours..." : "Exporter mes données (JSON)"}
+        </Button>
+      </section>
+
+      <Separator />
+
+      {/* Suppression compte */}
+      <section className="my-8">
+        <div className="flex items-center gap-2 mb-4">
+          <Trash2 className="h-5 w-5 text-destructive" />
+          <h2 className="font-heading text-lg font-semibold text-destructive">Supprimer mon compte</h2>
+        </div>
+        <Button
+          variant="outline"
+          size="sm"
+          className="text-destructive border-destructive/30 hover:bg-destructive/10"
+          onClick={() => setDeleteOpen(true)}
+        >
+          Supprimer mon compte
+        </Button>
+      </section>
+
+      {/* Modal suppression */}
+      <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="text-destructive">Supprimer mon compte</DialogTitle>
+            <DialogDescription className="text-sm leading-relaxed">
+              En supprimant votre compte, toutes vos données personnelles seront effacées sous 30 jours.
+              Vos avis resteront visibles de manière anonyme. Cette action est irréversible.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3">
+            <Label className="text-sm">
+              Tapez <span className="font-bold">SUPPRIMER</span> pour confirmer
+            </Label>
+            <Input
+              value={deleteConfirm}
+              onChange={(e) => setDeleteConfirm(e.target.value)}
+              placeholder="SUPPRIMER"
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setDeleteOpen(false)}>
+              Revenir
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleDeleteAccount}
+              disabled={deleteConfirm !== "SUPPRIMER" || deleting}
+            >
+              {deleting ? "Suppression..." : "Confirmer la suppression"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+};
+
+export default Settings;
