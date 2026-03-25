@@ -26,6 +26,7 @@ interface Stats {
 interface WeeklySignup { week: string; count: number }
 interface CityData { city: string; count: number }
 interface FunnelStep { name: string; value: number; fill: string }
+interface MonthlyRating { month: string; avg: number; count: number }
 
 const CHART_COLORS = [
   "hsl(var(--primary))",
