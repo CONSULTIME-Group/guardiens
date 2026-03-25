@@ -225,6 +225,11 @@ const SearchOwner = () => {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
                           <h3 className="font-heading font-semibold">{profile?.first_name || "Gardien"}</h3>
+                          {s.is_available && (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 text-xs font-medium">
+                              <CircleDot className="h-3 w-3" /> Disponible
+                            </span>
+                          )}
                           {s.has_vehicle && <Car className="h-4 w-4 text-muted-foreground" />}
                         </div>
                         <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground mt-0.5">
