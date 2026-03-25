@@ -197,7 +197,7 @@ const SitterDashboard = () => {
           const sitterSteps = [
             { done: metrics.completed >= 3, label: `${Math.min(metrics.completed, 3)}/3 gardes complétées` },
             { done: metrics.avgRating !== null && parseFloat(metrics.avgRating) >= 4.7, label: `Note ≥ 4.7 ${metrics.avgRating ? `(${metrics.avgRating}/5)` : "(pas encore d'avis)"}` },
-            { done: false, label: "Identité vérifiée", hint: "Paramètres → Vérification" },
+            { done: false, label: "Identité vérifiée", hint: "Paramètres → Vérification", hintTo: "/settings" },
           ];
           const doneCount = sitterSteps.filter(s => s.done).length;
           return (
