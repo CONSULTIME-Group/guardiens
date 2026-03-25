@@ -383,14 +383,7 @@ const Settings = () => {
           <Trash2 className="h-5 w-5 text-destructive" />
           <h2 className="font-heading text-lg font-semibold text-destructive">Supprimer mon compte</h2>
         </div>
-        <Button
-          variant="outline"
-          size="sm"
-          className="text-destructive border-destructive/30 hover:bg-destructive/10"
-          onClick={() => setDeleteOpen(true)}
-        >
-          Supprimer mon compte
-        </Button>
+        <DeletionSection user={user} onRequestDelete={() => setDeleteOpen(true)} />
       </section>
 
       {/* Modal suppression */}
