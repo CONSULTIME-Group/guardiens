@@ -42,17 +42,36 @@ const ApplicationModal = ({
   const handleSend = async () => {
     if (!user || !message.trim()) return;
     setSending(true);
+
+    // 1. Create application
     const { error } = await supabase.from("applications").insert({
       sit_id: sitId,
       sitter_id: user.id,
       message: message.trim(),
       status: "pending",
     });
-    setSending(false);
     if (error) {
+      setSending(false);
       toast({ title: "Erreur", description: "Impossible d'envoyer la candidature.", variant: "destructive" });
       return;
     }
+
+    // 2. Create conversation + first message
+    const { data: conv } = await supabase.from("conversations").insert({
+      sit_id: sitId,
+      owner_id: ownerId,
+      sitter_id: user.id,
+    }).select("id").single();
+
+    if (conv) {
+      await supabase.from("messages").insert({
+        conversation_id: conv.id,
+        sender_id: user.id,
+        content: message.trim(),
+      });
+    }
+
+    setSending(false);
     toast({
       title: "Candidature envoyée !",
       description: "Vous serez notifié quand le propriétaire répondra.",
