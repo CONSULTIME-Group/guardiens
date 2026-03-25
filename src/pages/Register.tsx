@@ -31,7 +31,14 @@ const Register = () => {
     setIsLoading(true);
     try {
       await register(email, password, selectedRole);
-      navigate("/dashboard");
+      toast({
+        title: "Compte créé !",
+        description: "Un email de confirmation vous a été envoyé. Vérifiez votre boîte mail (et vos spams) pour activer votre compte.",
+      });
+      setStep(1);
+      setEmail("");
+      setPassword("");
+      setSelectedRole(null);
     } catch (error: any) {
       toast({
         variant: "destructive",

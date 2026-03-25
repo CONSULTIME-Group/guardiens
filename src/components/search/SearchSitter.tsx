@@ -254,7 +254,19 @@ const SearchSitter = () => {
           {searched && results.length > 0 && (
             <div className="flex items-center justify-between mb-4">
               <p className="text-sm text-muted-foreground">{results.length} résultat{results.length > 1 ? "s" : ""}</p>
-              <Select value={sort} onValueChange={(v) => { setSort(v as SortOption); }}>
+              <Select value={sort} onValueChange={(v) => {
+                const newSort = v as SortOption;
+                setSort(newSort);
+                setResults(prev => {
+                  const sorted = [...prev];
+                  if (newSort === "recent") {
+                    sorted.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+                  } else {
+                    sorted.sort((a, b) => parseFloat(b.avgRating || "0") - parseFloat(a.avgRating || "0"));
+                  }
+                  return sorted;
+                });
+              }}>
                 <SelectTrigger className="w-44"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="recent">Plus récentes</SelectItem>
