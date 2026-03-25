@@ -254,26 +254,29 @@ const SitDetail = () => {
       )}
 
       {/* Avis */}
-      <Section icon={Star} title="Avis des gardiens précédents">
-        {reviews.length > 0 ? (
-          <div className="space-y-4">
-            {reviews.map((r: any) => (
-              <div key={r.id} className="p-3 bg-accent/50 rounded-lg">
-                <div className="flex items-center gap-2 mb-1">
-                  {r.reviewer?.avatar_url && <img src={r.reviewer.avatar_url} alt="" className="w-6 h-6 rounded-full object-cover" />}
-                  <span className="text-sm font-medium">{r.reviewer?.first_name || "Gardien"}</span>
-                  <span className="flex items-center gap-0.5 text-xs text-yellow-600">
-                    {Array.from({ length: r.overall_rating }).map((_, i) => <Star key={i} className="h-3 w-3 fill-yellow-500 text-yellow-500" />)}
-                  </span>
-                </div>
-                {r.comment && <p className="text-sm text-muted-foreground">{r.comment}</p>}
-              </div>
-            ))}
-          </div>
-        ) : (
-          <p className="text-sm text-muted-foreground italic">Pas encore d'avis — soyez le premier gardien !</p>
-        )}
+      <Section icon={Star} title="Avis">
+        <ReviewsDisplay userId={sit.user_id} showAnimalCare={false} />
       </Section>
+
+      {/* Leave review CTA for completed sits */}
+      {sit.status === "completed" && user && sit.user_id !== user.id && (
+        <div className="mt-4">
+          <Link to={`/review/${sit.id}`}>
+            <Button variant="outline" className="w-full gap-2">
+              <Star className="h-4 w-4" /> Laisser un avis
+            </Button>
+          </Link>
+        </div>
+      )}
+      {sit.status === "completed" && user && sit.user_id === user.id && (
+        <div className="mt-4">
+          <Link to={`/review/${sit.id}`}>
+            <Button variant="outline" className="w-full gap-2">
+              <Star className="h-4 w-4" /> Laisser un avis sur le gardien
+            </Button>
+          </Link>
+        </div>
+      )}
 
       {/* Reassurance */}
       <div className="mt-8 bg-primary/5 border border-primary/10 rounded-lg p-5 text-center">
