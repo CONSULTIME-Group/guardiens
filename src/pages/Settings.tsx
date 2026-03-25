@@ -280,6 +280,11 @@ const Settings = () => {
 
       <Separator />
 
+      {/* Vérification d'identité */}
+      <IdentityVerificationSection user={user} />
+
+      <Separator />
+
       {/* Apparence */}
       <ThemeSection />
 
