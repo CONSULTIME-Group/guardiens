@@ -159,37 +159,80 @@ const LongStayDetail = () => {
         <ArrowLeft className="h-4 w-4" /> Retour
       </Link>
 
+      {/* Cancelled banner */}
+      {longStay.status === "cancelled" && (
+        <div className="p-4 rounded-lg bg-destructive/10 border border-destructive/20 mb-4 flex items-center gap-2">
+          <XCircle className="h-5 w-5 text-destructive shrink-0" />
+          <p className="text-sm font-medium text-destructive">Cette garde a été annulée.</p>
+        </div>
+      )}
+
       {/* Badge + Owner actions */}
       <div className="flex items-center justify-between mb-3">
         <Badge className="bg-[#DBEAFE] text-[#1E40AF] border-blue-200 hover:bg-[#DBEAFE]">Longue durée</Badge>
-        {isOwner && (
+        {isOwner && longStay.status !== "cancelled" && (
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" asChild className="gap-1.5">
-              <Link to={`/long-stays/${longStay.id}/edit`}>
-                <Pencil className="h-3.5 w-3.5" /> Modifier
-              </Link>
-            </Button>
-            <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-              <DialogTrigger asChild>
-                <Button variant="outline" size="sm" className="gap-1.5 text-destructive hover:text-destructive">
-                  <Trash2 className="h-3.5 w-3.5" /> Supprimer
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Supprimer cette annonce ?</DialogTitle>
-                  <DialogDescription>
-                    Cette action est irréversible. Toutes les candidatures associées seront également supprimées.
-                  </DialogDescription>
-                </DialogHeader>
-                <DialogFooter className="gap-2">
-                  <Button variant="outline" onClick={() => setDeleteDialogOpen(false)}>Annuler</Button>
-                  <Button variant="destructive" onClick={handleDelete} disabled={deleting}>
-                    {deleting ? "Suppression..." : "Confirmer la suppression"}
+            {longStay.status !== "confirmed" && (
+              <Button variant="outline" size="sm" asChild className="gap-1.5">
+                <Link to={`/long-stays/${longStay.id}/edit`}>
+                  <Pencil className="h-3.5 w-3.5" /> Modifier
+                </Link>
+              </Button>
+            )}
+
+            {longStay.status === "confirmed" ? (
+              <Dialog open={cancelDialogOpen} onOpenChange={setCancelDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button variant="outline" size="sm" className="gap-1.5 text-destructive hover:text-destructive">
+                    <XCircle className="h-3.5 w-3.5" /> Annuler la garde
                   </Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Annuler cette garde confirmée ?</DialogTitle>
+                    <DialogDescription>
+                      Le gardien sera notifié de l'annulation. Cette action incrémente votre compteur d'annulations.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="py-2">
+                    <Textarea
+                      placeholder="Raison de l'annulation (optionnel)..."
+                      value={cancelReason}
+                      onChange={e => setCancelReason(e.target.value)}
+                      rows={3}
+                    />
+                  </div>
+                  <DialogFooter className="gap-2">
+                    <Button variant="outline" onClick={() => setCancelDialogOpen(false)}>Retour</Button>
+                    <Button variant="destructive" onClick={handleCancel} disabled={cancelling}>
+                      {cancelling ? "Annulation..." : "Confirmer l'annulation"}
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+            ) : (
+              <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button variant="outline" size="sm" className="gap-1.5 text-destructive hover:text-destructive">
+                    <Trash2 className="h-3.5 w-3.5" /> Supprimer
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Supprimer cette annonce ?</DialogTitle>
+                    <DialogDescription>
+                      Cette action est irréversible. Toutes les candidatures associées seront également supprimées.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <DialogFooter className="gap-2">
+                    <Button variant="outline" onClick={() => setDeleteDialogOpen(false)}>Annuler</Button>
+                    <Button variant="destructive" onClick={handleDelete} disabled={deleting}>
+                      {deleting ? "Suppression..." : "Confirmer la suppression"}
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+            )}
           </div>
         )}
       </div>
