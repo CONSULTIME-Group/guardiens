@@ -115,6 +115,22 @@ export const Sidebar = () => {
       </nav>
 
       <div className="p-3 border-t border-border space-y-1">
+        {isAdmin && (
+          <NavLink
+            to="/admin"
+            className={({ isActive }) =>
+              cn(
+                "flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors",
+                isActive
+                  ? "bg-primary/10 text-primary"
+                  : "text-muted-foreground hover:bg-accent hover:text-foreground"
+              )
+            }
+          >
+            <Shield className="h-5 w-5" />
+            Espace admin
+          </NavLink>
+        )}
         <NavLink
           to="/settings"
           className={({ isActive }) =>
