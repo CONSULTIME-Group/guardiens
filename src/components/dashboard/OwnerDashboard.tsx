@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Link } from "react-router-dom";
-import { Calendar, MapPin, MessageSquare, Star, Users, Clock, ChevronRight, Plus, PawPrint, Dog, Cat, Bird, Fish, Rabbit } from "lucide-react";
+import { Calendar, MapPin, MessageSquare, Star, Users, Clock, ChevronRight, Plus, PawPrint, Dog, Cat, Bird, Fish, Rabbit, BarChart3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { format, differenceInDays } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -33,22 +33,25 @@ const OwnerDashboard = () => {
   const [recentApps, setRecentApps] = useState<any[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [sitterCount, setSitterCount] = useState(0);
+  const [reviews, setReviews] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!user) return;
     const load = async () => {
-      const [sitsRes, unreadRes, sittersRes, propsRes] = await Promise.all([
+      const [sitsRes, unreadRes, sittersRes, propsRes, reviewsRes] = await Promise.all([
         supabase.from("sits").select("*, applications(id, status)").eq("user_id", user.id).order("created_at", { ascending: false }),
         supabase.from("messages").select("id", { count: "exact", head: true }).neq("sender_id", user.id).is("read_at", null),
         supabase.from("sitter_profiles").select("id", { count: "exact", head: true }),
         supabase.from("properties").select("id").eq("user_id", user.id),
+        supabase.from("reviews").select("overall_rating").eq("reviewee_id", user.id).eq("published", true),
       ]);
 
       const sitsData = sitsRes.data || [];
       setSits(sitsData);
       setUnreadCount(unreadRes.count || 0);
       setSitterCount(sittersRes.count || 0);
+      setReviews(reviewsRes.data || []);
 
       // Load pets from user's properties
       const propIds = (propsRes.data || []).map((p: any) => p.id);
@@ -276,7 +279,36 @@ const OwnerDashboard = () => {
         )}
       </DashSection>
 
-      {/* Messages non lus */}
+      {/* Métriques */}
+      <DashSection title="Mes métriques" icon={BarChart3}>
+        <div className="grid grid-cols-3 gap-3">
+          <div className="p-4 rounded-xl border border-border bg-card text-center">
+            <p className="text-2xl font-bold">{completedSits.length}</p>
+            <p className="text-xs text-muted-foreground mt-1">Garde{completedSits.length !== 1 ? "s" : ""} complétée{completedSits.length !== 1 ? "s" : ""}</p>
+          </div>
+          <div className="p-4 rounded-xl border border-border bg-card text-center">
+            {reviews.length > 0 ? (
+              <>
+                <p className="text-2xl font-bold flex items-center justify-center gap-1">
+                  {(reviews.reduce((sum, r) => sum + r.overall_rating, 0) / reviews.length).toFixed(1)}
+                  <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
+                </p>
+                <p className="text-xs text-muted-foreground mt-1">{reviews.length} avis</p>
+              </>
+            ) : (
+              <>
+                <p className="text-2xl font-bold text-muted-foreground">—</p>
+                <p className="text-xs text-muted-foreground mt-1">Note moyenne</p>
+              </>
+            )}
+          </div>
+          <div className="p-4 rounded-xl border border-border bg-card text-center">
+            <p className="text-2xl font-bold">{pets.length}</p>
+            <p className="text-xs text-muted-foreground mt-1">Animal{pets.length !== 1 ? "x" : ""}</p>
+          </div>
+        </div>
+      </DashSection>
+
       {unreadCount > 0 && (
         <Link to="/messages" className="block p-4 rounded-xl bg-primary/5 border border-primary/10 hover:shadow-md transition-shadow">
           <div className="flex items-center gap-3">
