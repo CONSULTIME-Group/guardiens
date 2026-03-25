@@ -83,7 +83,11 @@ export const Sidebar = () => {
       )}
 
       <nav className="flex-1 px-3 space-y-1">
-        {navItems.filter(item => !("hideForRole" in item) || user?.role !== item.hideForRole).map((item) => (
+        {navItems.filter(item => {
+          if (!("hideForRole" in item)) return true;
+          const effectiveRole = user?.role === "both" ? activeRole : user?.role;
+          return effectiveRole !== item.hideForRole;
+        }).map((item) => (
           <NavLink
             key={item.to}
             to={item.to}
