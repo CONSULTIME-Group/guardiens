@@ -281,7 +281,7 @@ const OwnerDashboard = () => {
             </div>
             <div className="space-y-2.5">
               <ProgressItem done={completedSits.length >= 2} label={`${Math.min(completedSits.length, 2)}/2 gardes complétées`} />
-              <ProgressItem done={false} label="Identité vérifiée" hint="Paramètres → Vérification" />
+              <ProgressItem done={false} label="Identité vérifiée" hint="Paramètres → Vérification" hintTo="/settings" />
             </div>
             <div className="mt-3">
               <div className="flex items-center justify-between text-[10px] text-muted-foreground mb-1">
@@ -443,7 +443,7 @@ const EmptyCard = ({ text, cta, to }: { text: string; cta: string; to: string })
   </div>
 );
 
-const ProgressItem = ({ done, label, hint }: { done: boolean; label: string; hint?: string }) => (
+const ProgressItem = ({ done, label, hint, hintTo }: { done: boolean; label: string; hint?: string; hintTo?: string }) => (
   <div className="flex items-center gap-2">
     {done ? (
       <CheckCircle2 className="h-4 w-4 text-green-600 shrink-0" />
@@ -451,7 +451,11 @@ const ProgressItem = ({ done, label, hint }: { done: boolean; label: string; hin
       <div className="h-4 w-4 rounded-full border-2 border-muted-foreground/30 shrink-0" />
     )}
     <span className={`text-xs ${done ? "text-foreground line-through" : "text-muted-foreground"}`}>{label}</span>
-    {hint && !done && <span className="text-[10px] text-primary">{hint}</span>}
+    {hint && !done && (hintTo ? (
+      <Link to={hintTo} className="text-[10px] text-primary hover:underline">{hint}</Link>
+    ) : (
+      <span className="text-[10px] text-primary">{hint}</span>
+    ))}
   </div>
 );
 

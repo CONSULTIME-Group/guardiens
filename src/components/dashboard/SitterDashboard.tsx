@@ -197,7 +197,7 @@ const SitterDashboard = () => {
           const sitterSteps = [
             { done: metrics.completed >= 3, label: `${Math.min(metrics.completed, 3)}/3 gardes complétées` },
             { done: metrics.avgRating !== null && parseFloat(metrics.avgRating) >= 4.7, label: `Note ≥ 4.7 ${metrics.avgRating ? `(${metrics.avgRating}/5)` : "(pas encore d'avis)"}` },
-            { done: false, label: "Identité vérifiée", hint: "Paramètres → Vérification" },
+            { done: false, label: "Identité vérifiée", hint: "Paramètres → Vérification", hintTo: "/settings" },
           ];
           const doneCount = sitterSteps.filter(s => s.done).length;
           return (
@@ -220,7 +220,11 @@ const SitterDashboard = () => {
                       <div className="h-4 w-4 rounded-full border-2 border-muted-foreground/30 shrink-0" />
                     )}
                     <span className={`text-xs ${step.done ? "text-foreground line-through" : "text-muted-foreground"}`}>{step.label}</span>
-                    {step.hint && !step.done && <span className="text-[10px] text-primary">{step.hint}</span>}
+                    {step.hint && !step.done && (step.hintTo ? (
+                      <Link to={step.hintTo} className="text-[10px] text-primary hover:underline">{step.hint}</Link>
+                    ) : (
+                      <span className="text-[10px] text-primary">{step.hint}</span>
+                    ))}
                   </div>
                 ))}
               </div>
