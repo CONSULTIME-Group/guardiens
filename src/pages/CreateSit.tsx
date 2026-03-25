@@ -64,13 +64,7 @@ const speciesLabels: Record<string, string> = {
 const walkLabels: Record<string, string> = { none: "Aucune", "30min": "30 min/jour", "1h": "1h/jour", "2h_plus": "2h+/jour" };
 const aloneLabels: Record<string, string> = { never: "Jamais seul", "2h": "2h max", "6h": "6h max", all_day: "Toute la journée" };
 
-const openToOptions = [
-  { value: "families", label: "Familles" },
-  { value: "solo", label: "Solo" },
-  { value: "couples", label: "Couples" },
-  { value: "retirees", label: "Retraités" },
-  { value: "no_preference", label: "Sans préférence" },
-];
+const openToOptions = ["Familles", "Solo", "Couples", "Retraités", "Sans préférence"];
 
 const CreateSit = () => {
   const { user } = useAuth();
