@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { AppLayout } from "@/components/layout/AppLayout";
+import { AdminLayout } from "@/components/admin/AdminLayout";
 import Landing from "./pages/Landing";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
@@ -32,6 +33,8 @@ import Terms from "./pages/Terms";
 import Privacy from "./pages/Privacy";
 import AdminArticles from "./pages/AdminArticles";
 import ArticleEditor from "./pages/ArticleEditor";
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import AdminUsers from "./pages/admin/AdminUsers";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -61,6 +64,14 @@ const AppRoutes = () => (
     <Route path="/contact" element={<Contact />} />
     <Route path="/cgu" element={<Terms />} />
     <Route path="/confidentialite" element={<Privacy />} />
+    {/* Admin routes with dedicated layout */}
+    <Route element={<AdminLayout />}>
+      <Route path="/admin" element={<AdminDashboard />} />
+      <Route path="/admin/users" element={<AdminUsers />} />
+      <Route path="/admin/articles" element={<AdminArticles />} />
+      <Route path="/admin/articles/:id" element={<ArticleEditor />} />
+    </Route>
+    {/* App routes */}
     <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
       <Route path="/dashboard" element={<Dashboard />} />
       <Route path="/profile" element={<Profile />} />
@@ -77,8 +88,6 @@ const AppRoutes = () => (
       <Route path="/long-stays/create" element={<CreateLongStay />} />
       <Route path="/long-stays/:id" element={<LongStayDetail />} />
       <Route path="/long-stays/:id/edit" element={<EditLongStay />} />
-      <Route path="/admin/articles" element={<AdminArticles />} />
-      <Route path="/admin/articles/:id" element={<ArticleEditor />} />
     </Route>
     <Route path="*" element={<NotFound />} />
   </Routes>
