@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Link } from "react-router-dom";
-import { Calendar, MapPin, MessageSquare, Star, Users, Clock, ChevronRight, Plus, PawPrint, Dog, Cat, Bird, Fish, Rabbit, BarChart3, Clock3, Lock } from "lucide-react";
+import { Calendar, MapPin, MessageSquare, Star, Users, Clock, ChevronRight, Plus, PawPrint, Dog, Cat, Bird, Fish, Rabbit, BarChart3, Clock3, Lock, CheckCircle2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { format, differenceInDays } from "date-fns";
@@ -269,10 +269,29 @@ const OwnerDashboard = () => {
         ) : undefined
       }>
         {!ownerEligible ? (
-          <div className="p-5 rounded-xl border border-dashed border-border text-center">
-            <Lock className="h-6 w-6 text-muted-foreground mx-auto mb-2" />
-            <p className="text-sm font-medium">Longue durée verrouillée</p>
-            <p className="text-xs text-muted-foreground mt-1">Réalisez 2 gardes pour débloquer les annonces longue durée.</p>
+          <div className="p-5 rounded-xl border border-dashed border-border">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center shrink-0">
+                <Lock className="h-5 w-5 text-muted-foreground" />
+              </div>
+              <div>
+                <p className="text-sm font-medium">Longue durée verrouillée</p>
+                <p className="text-xs text-muted-foreground">Complétez les étapes ci-dessous pour débloquer.</p>
+              </div>
+            </div>
+            <div className="space-y-2.5">
+              <ProgressItem done={completedSits.length >= 2} label={`${Math.min(completedSits.length, 2)}/2 gardes complétées`} />
+              <ProgressItem done={false} label="Identité vérifiée" hint="Paramètres → Vérification" />
+            </div>
+            <div className="mt-3">
+              <div className="flex items-center justify-between text-[10px] text-muted-foreground mb-1">
+                <span>Progression</span>
+                <span>{Math.round(((completedSits.length >= 2 ? 1 : 0) / 2) * 100)}%</span>
+              </div>
+              <div className="h-1.5 rounded-full bg-muted overflow-hidden">
+                <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${((completedSits.length >= 2 ? 1 : 0) / 2) * 100}%` }} />
+              </div>
+            </div>
           </div>
         ) : longStays.length === 0 ? (
           <EmptyCard text="Aucune annonce longue durée publiée." cta="Proposer une garde longue durée" to="/long-stays/create" />
@@ -421,6 +440,18 @@ const EmptyCard = ({ text, cta, to }: { text: string; cta: string; to: string })
   <div className="p-6 rounded-xl border border-dashed border-border text-center">
     <p className="text-sm text-muted-foreground mb-3">{text}</p>
     <Link to={to}><Button size="sm">{cta}</Button></Link>
+  </div>
+);
+
+const ProgressItem = ({ done, label, hint }: { done: boolean; label: string; hint?: string }) => (
+  <div className="flex items-center gap-2">
+    {done ? (
+      <CheckCircle2 className="h-4 w-4 text-green-600 shrink-0" />
+    ) : (
+      <div className="h-4 w-4 rounded-full border-2 border-muted-foreground/30 shrink-0" />
+    )}
+    <span className={`text-xs ${done ? "text-foreground line-through" : "text-muted-foreground"}`}>{label}</span>
+    {hint && !done && <span className="text-[10px] text-primary">{hint}</span>}
   </div>
 );
 
