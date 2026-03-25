@@ -497,6 +497,7 @@ const SearchSitter = () => {
                             ))}
                           </div>
                         )}
+                        <ReportButton targetId={sit.user_id} targetType="profile" className="mt-2" />
                       </div>
                     </div>
                   </Link>

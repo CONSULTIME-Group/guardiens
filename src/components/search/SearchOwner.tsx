@@ -309,6 +309,7 @@ const SearchOwner = () => {
                             ))}
                           </div>
                         )}
+                        <ReportButton targetId={s.user_id} targetType="profile" className="ml-auto mt-2" />
                       </div>
                     </div>
                   </div>

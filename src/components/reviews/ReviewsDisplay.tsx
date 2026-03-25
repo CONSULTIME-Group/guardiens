@@ -82,11 +82,14 @@ const ReviewsDisplay = ({ userId, showAnimalCare = false }: ReviewsDisplayProps)
                 <StarRating value={r.overall_rating} readonly size="sm" />
               </div>
               {r.comment && <p className="text-sm text-muted-foreground whitespace-pre-line">{r.comment}</p>}
-              {r.would_recommend && (
-                <div className="flex items-center gap-1 mt-2 text-xs text-green-600 font-medium">
-                  <ThumbsUp className="h-3 w-3" /> Recommandé
-                </div>
-              )}
+              <div className="flex items-center justify-between mt-2">
+                {r.would_recommend && (
+                  <div className="flex items-center gap-1 text-xs text-green-600 font-medium">
+                    <ThumbsUp className="h-3 w-3" /> Recommandé
+                  </div>
+                )}
+                <ReportButton targetId={r.id} targetType="review" className="ml-auto" />
+              </div>
             </div>
           ))}
         </div>
