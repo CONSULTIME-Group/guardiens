@@ -202,48 +202,6 @@ const Landing = () => {
 
       {/* ═══════════════ 1. HERO CONTENT (stats) ═══════════════ */}
       <section className="px-6 md:px-12 pt-12 pb-16 max-w-5xl mx-auto text-center">
-        {/* Pastille */}
-        <div className="inline-flex items-center gap-2 bg-muted rounded-full px-4 py-1.5 mb-8 animate-fade-in">
-          <span className="relative flex h-2.5 w-2.5">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75" />
-            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-primary" />
-          </span>
-          <span className="text-sm text-muted-foreground font-medium">
-            Auvergne-Rhône-Alpes · Bientôt partout
-          </span>
-        </div>
-
-        <h1 className="font-heading text-4xl md:text-6xl lg:text-7xl font-bold leading-tight mb-6 animate-fade-in">
-          Comme confier ses clés
-          <br />
-          <span className="text-primary italic">à un voisin.</span>
-        </h1>
-        <p
-          className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-10 animate-fade-in"
-          style={{ animationDelay: "0.1s" }}
-        >
-          Vos animaux restent chez eux, votre maison vit, et vous partez
-          l'esprit léger. Des gardiens de confiance, près de chez vous.
-        </p>
-
-        {/* CTA buttons */}
-        <div
-          className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in"
-          style={{ animationDelay: "0.2s" }}
-        >
-          <Button variant="hero" size="xl" onClick={() => navigate("/register")}>
-            Je cherche un gardien
-          </Button>
-          <Button variant="heroOutline" size="xl" onClick={() => navigate("/register")}>
-            Je veux garder
-          </Button>
-        </div>
-        <p
-          className="mt-4 text-sm text-muted-foreground animate-fade-in"
-          style={{ animationDelay: "0.25s" }}
-        >
-          Gratuit · Premiers inscrits, premiers servis.
-        </p>
 
         {/* Stats avec séparateurs */}
         <div
