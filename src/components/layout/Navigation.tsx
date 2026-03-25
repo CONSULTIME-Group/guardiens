@@ -55,7 +55,7 @@ export const Sidebar = () => {
             to={item.to}
             className={({ isActive }) =>
               cn(
-                "flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors",
+                "flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors relative",
                 isActive
                   ? "bg-primary/10 text-primary"
                   : "text-muted-foreground hover:bg-accent hover:text-foreground"
@@ -64,6 +64,11 @@ export const Sidebar = () => {
           >
             <item.icon className="h-5 w-5" />
             {item.label}
+            {item.to === "/messages" && unreadCount > 0 && (
+              <span className="absolute right-3 bg-primary text-primary-foreground text-xs rounded-full min-w-[20px] h-5 flex items-center justify-center px-1.5">
+                {unreadCount}
+              </span>
+            )}
           </NavLink>
         ))}
       </nav>
