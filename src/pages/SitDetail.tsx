@@ -280,19 +280,61 @@ const SitDetail = () => {
         <p className="text-xs text-muted-foreground mt-1">Profils vérifiés · Avis croisés · Gardiens d'urgence mobilisables</p>
       </div>
 
-      {/* Apply button */}
+      {/* Owner: applications list */}
+      {sit.user_id === user?.id && (
+        <ApplicationsList
+          sitId={sit.id}
+          sitTitle={sit.title}
+          petNames={pets.map((p: any) => p.name)}
+          startDate={formatDate(sit.start_date)}
+          endDate={formatDate(sit.end_date)}
+        />
+      )}
+
+      {/* Sitter: apply button */}
       {activeRole === "sitter" && sit.user_id !== user?.id && (
         <div className="fixed bottom-0 left-0 right-0 md:left-64 bg-card border-t border-border p-4 z-40 md:pb-4 pb-20">
           <div className="max-w-3xl mx-auto">
-            <Button className="w-full h-12 text-base font-semibold bg-primary hover:bg-primary/90">
-              Postuler
-            </Button>
+            {hasApplied ? (
+              <Button className="w-full h-12 text-base font-semibold" disabled>
+                <CheckCircle2 className="h-5 w-5 mr-2" /> Candidature envoyée ✓
+              </Button>
+            ) : (
+              <Button className="w-full h-12 text-base font-semibold" onClick={() => setApplyOpen(true)}>
+                Postuler
+              </Button>
+            )}
           </div>
         </div>
       )}
+
+      {/* Application modal */}
+      <ApplicationModal
+        open={applyOpen}
+        onOpenChange={setApplyOpen}
+        sitId={sit.id}
+        ownerFirstName={owner?.first_name || ""}
+        petNames={pets.map((p: any) => p.name)}
+        city={owner?.city || ""}
+        startDate={formatDate(sit.start_date)}
+        endDate={formatDate(sit.end_date)}
+        onSuccess={() => setHasApplied(true)}
+      />
     </div>
   );
 };
+
+const Section = ({ icon: Icon, title, children }: { icon: React.ElementType; title: string; children: React.ReactNode }) => (
+  <div className="mt-8">
+    <div className="flex items-center gap-2 mb-3">
+      <Icon className="h-4 w-4 text-primary" />
+      <h2 className="font-heading text-lg font-semibold">{title}</h2>
+    </div>
+    {children}
+  </div>
+);
+
+export default SitDetail;
 
 const Section = ({ icon: Icon, title, children }: { icon: React.ElementType; title: string; children: React.ReactNode }) => (
   <div className="mt-8">
