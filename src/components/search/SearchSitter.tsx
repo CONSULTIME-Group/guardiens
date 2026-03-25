@@ -145,6 +145,10 @@ const SearchSitter = () => {
       });
     }
 
+    if (verifiedOnly) {
+      items = items.filter((s: any) => s.owner?.identity_verified);
+    }
+
     const enriched = await Promise.all(
       items.map(async (sit: any) => {
         const { data: pets } = await supabase.from("pets").select("species, name").eq("property_id", sit.property_id);
