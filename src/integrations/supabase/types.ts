@@ -327,6 +327,108 @@ export type Database = {
         }
         Relationships: []
       }
+      long_stay_applications: {
+        Row: {
+          created_at: string
+          id: string
+          long_stay_id: string
+          message: string | null
+          sitter_id: string
+          status: Database["public"]["Enums"]["application_status"]
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          long_stay_id: string
+          message?: string | null
+          sitter_id: string
+          status?: Database["public"]["Enums"]["application_status"]
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          long_stay_id?: string
+          message?: string | null
+          sitter_id?: string
+          status?: Database["public"]["Enums"]["application_status"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "long_stay_applications_long_stay_id_fkey"
+            columns: ["long_stay_id"]
+            isOneToOne: false
+            referencedRelation: "long_stays"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "long_stay_applications_sitter_id_fkey"
+            columns: ["sitter_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      long_stays: {
+        Row: {
+          access_level: Database["public"]["Enums"]["long_stay_access_level"]
+          conditions: string | null
+          created_at: string
+          end_date: string | null
+          estimated_contribution: string | null
+          id: string
+          property_id: string
+          start_date: string | null
+          status: Database["public"]["Enums"]["long_stay_status"]
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          access_level?: Database["public"]["Enums"]["long_stay_access_level"]
+          conditions?: string | null
+          created_at?: string
+          end_date?: string | null
+          estimated_contribution?: string | null
+          id?: string
+          property_id: string
+          start_date?: string | null
+          status?: Database["public"]["Enums"]["long_stay_status"]
+          title?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          access_level?: Database["public"]["Enums"]["long_stay_access_level"]
+          conditions?: string | null
+          created_at?: string
+          end_date?: string | null
+          estimated_contribution?: string | null
+          id?: string
+          property_id?: string
+          start_date?: string | null
+          status?: Database["public"]["Enums"]["long_stay_status"]
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "long_stays_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "long_stays_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       messages: {
         Row: {
           content: string
@@ -1001,111 +1103,6 @@ export type Database = {
           },
         ]
       }
-      sublet_applications: {
-        Row: {
-          created_at: string
-          id: string
-          message: string | null
-          sitter_id: string
-          status: Database["public"]["Enums"]["application_status"]
-          sublet_id: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          message?: string | null
-          sitter_id: string
-          status?: Database["public"]["Enums"]["application_status"]
-          sublet_id: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          message?: string | null
-          sitter_id?: string
-          status?: Database["public"]["Enums"]["application_status"]
-          sublet_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "sublet_applications_sitter_id_fkey"
-            columns: ["sitter_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "sublet_applications_sublet_id_fkey"
-            columns: ["sublet_id"]
-            isOneToOne: false
-            referencedRelation: "sublets"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      sublets: {
-        Row: {
-          access_level: Database["public"]["Enums"]["sublet_access_level"]
-          conditions: string | null
-          created_at: string
-          end_date: string | null
-          id: string
-          price_amount: number
-          price_type: Database["public"]["Enums"]["price_type"]
-          property_id: string
-          start_date: string | null
-          status: Database["public"]["Enums"]["sublet_status"]
-          title: string
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          access_level?: Database["public"]["Enums"]["sublet_access_level"]
-          conditions?: string | null
-          created_at?: string
-          end_date?: string | null
-          id?: string
-          price_amount?: number
-          price_type?: Database["public"]["Enums"]["price_type"]
-          property_id: string
-          start_date?: string | null
-          status?: Database["public"]["Enums"]["sublet_status"]
-          title?: string
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          access_level?: Database["public"]["Enums"]["sublet_access_level"]
-          conditions?: string | null
-          created_at?: string
-          end_date?: string | null
-          id?: string
-          price_amount?: number
-          price_type?: Database["public"]["Enums"]["price_type"]
-          property_id?: string
-          start_date?: string | null
-          status?: Database["public"]["Enums"]["sublet_status"]
-          title?: string
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "sublets_property_id_fkey"
-            columns: ["property_id"]
-            isOneToOne: false
-            referencedRelation: "properties"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "sublets_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
     }
     Views: {
       [_ in never]: never
@@ -1123,6 +1120,13 @@ export type Database = {
         | "accepted"
         | "rejected"
         | "cancelled"
+      long_stay_access_level: "eligible" | "past_sitters" | "invite_only"
+      long_stay_status:
+        | "draft"
+        | "published"
+        | "confirmed"
+        | "completed"
+        | "cancelled"
       pet_species:
         | "dog"
         | "cat"
@@ -1133,7 +1137,6 @@ export type Database = {
         | "reptile"
         | "farm_animal"
         | "nac"
-      price_type: "per_night" | "per_week" | "per_month"
       property_environment:
         | "city_center"
         | "suburban"
@@ -1143,13 +1146,6 @@ export type Database = {
         | "forest"
       property_type: "apartment" | "house" | "farm" | "chalet" | "other"
       sit_status:
-        | "draft"
-        | "published"
-        | "confirmed"
-        | "completed"
-        | "cancelled"
-      sublet_access_level: "eligible" | "past_sitters" | "invite_only"
-      sublet_status:
         | "draft"
         | "published"
         | "confirmed"
@@ -1294,6 +1290,14 @@ export const Constants = {
         "rejected",
         "cancelled",
       ],
+      long_stay_access_level: ["eligible", "past_sitters", "invite_only"],
+      long_stay_status: [
+        "draft",
+        "published",
+        "confirmed",
+        "completed",
+        "cancelled",
+      ],
       pet_species: [
         "dog",
         "cat",
@@ -1305,7 +1309,6 @@ export const Constants = {
         "farm_animal",
         "nac",
       ],
-      price_type: ["per_night", "per_week", "per_month"],
       property_environment: [
         "city_center",
         "suburban",
@@ -1316,14 +1319,6 @@ export const Constants = {
       ],
       property_type: ["apartment", "house", "farm", "chalet", "other"],
       sit_status: ["draft", "published", "confirmed", "completed", "cancelled"],
-      sublet_access_level: ["eligible", "past_sitters", "invite_only"],
-      sublet_status: [
-        "draft",
-        "published",
-        "confirmed",
-        "completed",
-        "cancelled",
-      ],
       user_role: ["owner", "sitter", "both"],
       walk_duration: ["none", "30min", "1h", "2h_plus"],
     },
