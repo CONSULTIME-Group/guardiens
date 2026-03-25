@@ -48,6 +48,12 @@ const LeaveReview = () => {
       if (!sitData) { setLoading(false); return; }
       setSit(sitData);
 
+      // Only allow reviews on completed sits
+      if (sitData.status !== "completed") {
+        setLoading(false);
+        return;
+      }
+
       const isOwner = sitData.user_id === user.id;
       const type = isOwner ? "owner_to_sitter" : "sitter_to_owner";
       setReviewType(type);
@@ -133,6 +139,15 @@ const LeaveReview = () => {
 
   if (loading) return <div className="p-6 text-muted-foreground">Chargement...</div>;
   if (!sit || !reviewee) return <div className="p-6">Garde introuvable.</div>;
+  if (sit.status !== "completed") {
+    return (
+      <div className="p-6 md:p-10 max-w-2xl mx-auto text-center">
+        <p className="text-lg font-heading font-semibold mb-2">Garde non terminée</p>
+        <p className="text-sm text-muted-foreground mb-4">Vous pourrez laisser un avis une fois la garde terminée.</p>
+        <Link to={`/sits/${sitId}`}><Button variant="outline">Retour à l'annonce</Button></Link>
+      </div>
+    );
+  }
 
   if (alreadyReviewed) {
     return (

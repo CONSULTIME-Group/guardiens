@@ -116,8 +116,8 @@ const Settings = () => {
   };
 
   const handlePasswordChange = async () => {
-    if (newPassword.length < 6) {
-      toast.error("Le mot de passe doit contenir au moins 6 caractères.");
+    if (newPassword.length < 8) {
+      toast.error("Le mot de passe doit contenir au moins 8 caractères.");
       return;
     }
     if (newPassword !== confirmPassword) {
@@ -137,25 +137,28 @@ const Settings = () => {
     if (!user) return;
     setExporting(true);
     try {
-      const [profile, sitterProfile, ownerProfile, properties, pets, sits, applications, conversations, messages, reviews] = await Promise.all([
+      const [profile, sitterProfile, ownerProfile, properties, sits, applications, reviews] = await Promise.all([
         supabase.from("profiles").select("*").eq("id", user.id).single(),
         supabase.from("sitter_profiles").select("*").eq("user_id", user.id).maybeSingle(),
         supabase.from("owner_profiles").select("*").eq("user_id", user.id).maybeSingle(),
         supabase.from("properties").select("*").eq("user_id", user.id),
-        supabase.from("sits").select("*").eq("user_id", user.id).then(async (sitsRes) => {
-          if (!sitsRes.data?.length) return { data: [] };
-          const propIds = sitsRes.data.map(s => s.property_id);
-          return supabase.from("pets").select("*").in("property_id", propIds);
-        }),
         supabase.from("sits").select("*").eq("user_id", user.id),
         supabase.from("applications").select("*").eq("sitter_id", user.id),
-        supabase.from("conversations").select("*").or(`owner_id.eq.${user.id},sitter_id.eq.${user.id}`),
-        supabase.from("conversations").select("id").or(`owner_id.eq.${user.id},sitter_id.eq.${user.id}`).then(async (convRes) => {
-          if (!convRes.data?.length) return { data: [] };
-          return supabase.from("messages").select("*").in("conversation_id", convRes.data.map(c => c.id));
-        }),
         supabase.from("reviews").select("*").or(`reviewer_id.eq.${user.id},reviewee_id.eq.${user.id}`),
       ]);
+
+      // Fetch pets from user's properties
+      const propIds = properties.data?.map(p => p.id) || [];
+      const pets = propIds.length > 0
+        ? await supabase.from("pets").select("*").in("property_id", propIds)
+        : { data: [] };
+
+      // Fetch conversations and messages
+      const conversations = await supabase.from("conversations").select("*").or(`owner_id.eq.${user.id},sitter_id.eq.${user.id}`);
+      const convIds = conversations.data?.map(c => c.id) || [];
+      const messages = convIds.length > 0
+        ? await supabase.from("messages").select("*").in("conversation_id", convIds)
+        : { data: [] };
 
       const exportData = {
         exported_at: new Date().toISOString(),
