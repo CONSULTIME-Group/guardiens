@@ -120,6 +120,21 @@ const AdminUsers = () => {
     setNoteModal({ open: false, userId: "", currentNote: "" });
   };
 
+  const handleDeleteUser = async () => {
+    setDeleting(true);
+    const { data, error } = await supabase.functions.invoke("admin-delete-user", {
+      body: { userId: deleteConfirm.userId },
+    });
+    if (error || data?.error) {
+      toast.error(data?.error || "Erreur lors de la suppression");
+    } else {
+      toast.success("Compte supprimé définitivement");
+      fetchUsers();
+    }
+    setDeleting(false);
+    setDeleteConfirm({ open: false, userId: "", userName: "" });
+  };
+
   return (
     <div className="space-y-6">
       <h1 className="font-body text-2xl font-bold">Utilisateurs</h1>
