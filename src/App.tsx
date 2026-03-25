@@ -13,6 +13,8 @@ import Profile from "./pages/Profile";
 import SearchPage from "./pages/SearchPage";
 import Messages from "./pages/Messages";
 import Sits from "./pages/Sits";
+import CreateSit from "./pages/CreateSit";
+import SitDetail from "./pages/SitDetail";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -42,6 +44,8 @@ const AppRoutes = () => (
       <Route path="/search" element={<SearchPage />} />
       <Route path="/messages" element={<Messages />} />
       <Route path="/sits" element={<Sits />} />
+      <Route path="/sits/create" element={<CreateSit />} />
+      <Route path="/sits/:id" element={<SitDetail />} />
     </Route>
     <Route path="*" element={<NotFound />} />
   </Routes>
