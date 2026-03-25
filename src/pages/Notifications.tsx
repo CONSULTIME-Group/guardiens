@@ -23,6 +23,7 @@ const typeIcons: Record<string, string> = {
   sitter_available: "🟢",
   new_application: "📩",
   sit_confirmed: "✅",
+  sit_cancelled: "❌",
   review_published: "⭐",
   new_message: "💬",
   application_accepted: "🎉",
