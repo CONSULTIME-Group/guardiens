@@ -4,17 +4,33 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useToast } from "@/hooks/use-toast";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await login(email, password);
-    navigate("/dashboard");
+    setIsLoading(true);
+    try {
+      await login(email, password);
+      navigate("/dashboard");
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Erreur de connexion",
+        description: error.message === "Invalid login credentials"
+          ? "Email ou mot de passe incorrect."
+          : "Une erreur est survenue. Veuillez réessayer.",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -52,8 +68,8 @@ const Login = () => {
               className="rounded-lg h-12"
             />
           </div>
-          <Button type="submit" className="w-full" size="lg">
-            Se connecter
+          <Button type="submit" className="w-full" size="lg" disabled={isLoading}>
+            {isLoading ? "Connexion..." : "Se connecter"}
           </Button>
         </form>
 
