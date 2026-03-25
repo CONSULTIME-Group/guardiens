@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Link } from "react-router-dom";
-import { Calendar, MapPin, MessageSquare, Star, Users, Clock, ChevronRight, Plus, PawPrint } from "lucide-react";
+import { Calendar, MapPin, MessageSquare, Star, Users, Clock, ChevronRight, Plus, PawPrint, Dog, Cat, Bird, Fish, Rabbit } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { format, differenceInDays } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -14,9 +14,22 @@ const sitStatusConfig: Record<string, { emoji: string; label: string; color: str
   cancelled: { emoji: "⚪", label: "Annulée", color: "bg-muted border-border" },
 };
 
+const speciesEmoji: Record<string, string> = {
+  dog: "🐕", cat: "🐱", horse: "🐴", bird: "🐦",
+  rodent: "🐹", fish: "🐠", reptile: "🦎",
+  farm_animal: "🐄", nac: "🐾",
+};
+
+const speciesLabel: Record<string, string> = {
+  dog: "Chien", cat: "Chat", horse: "Cheval", bird: "Oiseau",
+  rodent: "Rongeur", fish: "Poisson", reptile: "Reptile",
+  farm_animal: "Animal de ferme", nac: "NAC",
+};
+
 const OwnerDashboard = () => {
   const { user } = useAuth();
   const [sits, setSits] = useState<any[]>([]);
+  const [pets, setPets] = useState<any[]>([]);
   const [recentApps, setRecentApps] = useState<any[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [sitterCount, setSitterCount] = useState(0);
@@ -25,16 +38,27 @@ const OwnerDashboard = () => {
   useEffect(() => {
     if (!user) return;
     const load = async () => {
-      const [sitsRes, unreadRes, sittersRes] = await Promise.all([
+      const [sitsRes, unreadRes, sittersRes, propsRes] = await Promise.all([
         supabase.from("sits").select("*, applications(id, status)").eq("user_id", user.id).order("created_at", { ascending: false }),
         supabase.from("messages").select("id", { count: "exact", head: true }).neq("sender_id", user.id).is("read_at", null),
         supabase.from("sitter_profiles").select("id", { count: "exact", head: true }),
+        supabase.from("properties").select("id").eq("user_id", user.id),
       ]);
 
       const sitsData = sitsRes.data || [];
       setSits(sitsData);
       setUnreadCount(unreadRes.count || 0);
       setSitterCount(sittersRes.count || 0);
+
+      // Load pets from user's properties
+      const propIds = (propsRes.data || []).map((p: any) => p.id);
+      if (propIds.length > 0) {
+        const { data: petsData } = await supabase
+          .from("pets")
+          .select("*")
+          .in("property_id", propIds);
+        setPets(petsData || []);
+      }
 
       // Recent applications across all sits
       const sitIds = sitsData.map((s: any) => s.id);
@@ -57,11 +81,23 @@ const OwnerDashboard = () => {
 
   const activeSits = sits.filter(s => ["published", "confirmed"].includes(s.status));
   const completedSits = sits.filter(s => s.status === "completed");
+  const upcomingSits = sits
+    .filter(s => ["published", "confirmed"].includes(s.status) && s.start_date)
+    .sort((a, b) => new Date(a.start_date).getTime() - new Date(b.start_date).getTime())
+    .slice(0, 3);
 
   const isOngoing = (s: any) => {
     if (s.status !== "confirmed") return false;
     const now = new Date();
     return s.start_date && new Date(s.start_date) <= now && s.end_date && new Date(s.end_date) >= now;
+  };
+
+  // Find next sit for each pet (through property_id)
+  const getNextSitForPet = (pet: any) => {
+    const now = new Date();
+    return sits
+      .filter(s => s.property_id === pet.property_id && ["published", "confirmed"].includes(s.status) && s.start_date && new Date(s.start_date) >= now)
+      .sort((a, b) => new Date(a.start_date).getTime() - new Date(b.start_date).getTime())[0];
   };
 
   return (
@@ -77,6 +113,95 @@ const OwnerDashboard = () => {
           </Link>
         )}
       </div>
+
+      {/* Mes animaux */}
+      <DashSection title="Mes animaux" icon={PawPrint} action={
+        <Link to="/owner-profile" className="text-xs text-primary hover:underline">Gérer</Link>
+      }>
+        {pets.length === 0 ? (
+          <EmptyCard text="Aucun animal enregistré." cta="Ajouter un animal" to="/owner-profile" />
+        ) : (
+          <div className="grid gap-2">
+            {pets.map(pet => {
+              const nextSit = getNextSitForPet(pet);
+              const emoji = speciesEmoji[pet.species] || "🐾";
+              const label = speciesLabel[pet.species] || pet.species;
+              const daysUntil = nextSit?.start_date ? differenceInDays(new Date(nextSit.start_date), new Date()) : null;
+
+              return (
+                <div key={pet.id} className="flex items-center gap-3 p-3 rounded-xl bg-card border border-border">
+                  {pet.photo_url ? (
+                    <img src={pet.photo_url} alt={pet.name} className="w-10 h-10 rounded-full object-cover shrink-0" />
+                  ) : (
+                    <div className="w-10 h-10 rounded-full bg-accent flex items-center justify-center text-lg shrink-0">
+                      {emoji}
+                    </div>
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-baseline gap-2">
+                      <p className="text-sm font-medium truncate">{pet.name || "Sans nom"}</p>
+                      <span className="text-xs text-muted-foreground">
+                        {label}{pet.breed ? ` · ${pet.breed}` : ""}{pet.age ? ` · ${pet.age} an${pet.age > 1 ? "s" : ""}` : ""}
+                      </span>
+                    </div>
+                    {nextSit ? (
+                      <Link to={`/sits/${nextSit.id}`} className="text-xs text-primary hover:underline flex items-center gap-1 mt-0.5">
+                        <Calendar className="h-3 w-3" />
+                        Prochaine garde {daysUntil !== null && daysUntil >= 0
+                          ? daysUntil === 0 ? "aujourd'hui" : `dans ${daysUntil} jour${daysUntil > 1 ? "s" : ""}`
+                          : format(new Date(nextSit.start_date), "d MMM", { locale: fr })}
+                      </Link>
+                    ) : (
+                      <p className="text-xs text-muted-foreground mt-0.5">Aucune garde prévue</p>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </DashSection>
+
+      {/* Prochaines gardes */}
+      {upcomingSits.length > 0 && (
+        <DashSection title="Prochaines gardes" icon={Clock} action={
+          <Link to="/sits" className="text-xs text-primary hover:underline">Voir tout</Link>
+        }>
+          <div className="grid gap-3">
+            {upcomingSits.map(sit => {
+              const cfg = sitStatusConfig[sit.status] || sitStatusConfig.published;
+              const ongoing = isOngoing(sit);
+              const appCount = sit.applications?.length || 0;
+              const daysUntil = sit.start_date ? differenceInDays(new Date(sit.start_date), new Date()) : null;
+
+              return (
+                <Link key={sit.id} to={`/sits/${sit.id}`} className="block p-4 rounded-xl border border-border bg-card hover:shadow-md transition-shadow">
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <p className="font-medium text-sm">{cfg.emoji} {sit.title}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        {sit.start_date && sit.end_date
+                          ? `${format(new Date(sit.start_date), "d MMM", { locale: fr })} → ${format(new Date(sit.end_date), "d MMM yyyy", { locale: fr })}`
+                          : "Dates non définies"}
+                      </p>
+                    </div>
+                    <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
+                  </div>
+                  <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
+                    {ongoing && <span className="text-green-700 font-medium">🟢 En cours</span>}
+                    {!ongoing && daysUntil !== null && daysUntil >= 0 && (
+                      <span className="flex items-center gap-1"><Clock className="h-3 w-3" /> {daysUntil === 0 ? "Aujourd'hui" : `Dans ${daysUntil} jour${daysUntil > 1 ? "s" : ""}`}</span>
+                    )}
+                    {sit.status === "published" && (
+                      <span className="flex items-center gap-1"><Users className="h-3 w-3" /> {appCount} candidature{appCount !== 1 ? "s" : ""}</span>
+                    )}
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        </DashSection>
+      )}
 
       {/* Mes gardes */}
       <DashSection title="Mes gardes" icon={Calendar} action={
