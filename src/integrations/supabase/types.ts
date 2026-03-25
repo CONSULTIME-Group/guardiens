@@ -83,6 +83,60 @@ export type Database = {
           },
         ]
       }
+      articles: {
+        Row: {
+          author_name: string
+          category: string
+          city: string | null
+          content: string
+          cover_image_url: string | null
+          created_at: string
+          excerpt: string
+          id: string
+          published: boolean
+          published_at: string | null
+          region: string | null
+          slug: string
+          tags: string[] | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          author_name?: string
+          category?: string
+          city?: string | null
+          content?: string
+          cover_image_url?: string | null
+          created_at?: string
+          excerpt?: string
+          id?: string
+          published?: boolean
+          published_at?: string | null
+          region?: string | null
+          slug: string
+          tags?: string[] | null
+          title?: string
+          updated_at?: string
+        }
+        Update: {
+          author_name?: string
+          category?: string
+          city?: string | null
+          content?: string
+          cover_image_url?: string | null
+          created_at?: string
+          excerpt?: string
+          id?: string
+          published?: boolean
+          published_at?: string | null
+          region?: string | null
+          slug?: string
+          tags?: string[] | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       breed_profiles: {
         Row: {
           breed: string
