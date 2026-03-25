@@ -174,7 +174,8 @@ export const BottomNav = () => {
     return () => { supabase.removeChannel(channel); };
   }, [user]);
 
-  const filteredItems = navItems.filter(item => !("hideForRole" in item) || user?.role !== item.hideForRole);
+  const effectiveRole = user?.role === "both" ? activeRole : user?.role;
+  const filteredItems = navItems.filter(item => !("hideForRole" in item) || effectiveRole !== item.hideForRole);
   const mobileItems = [
     ...filteredItems.slice(0, 3),
     { to: "/notifications", icon: Bell, label: "Notifs", notifCount },
