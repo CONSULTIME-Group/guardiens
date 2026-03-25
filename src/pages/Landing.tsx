@@ -392,10 +392,9 @@ const Landing = () => {
             <span className="text-primary italic">gratuit.</span>
           </h2>
           <p className="text-muted-foreground text-lg leading-relaxed">
-            Notre priorité, c'est de construire une communauté solide — pas de
-            vous faire payer. Guardiens est entièrement gratuit pour le moment.
-            Quand on ajoutera des fonctionnalités premium, les premiers inscrits
-            seront les premiers servis.
+            Pas de piège, pas de petites lignes. On construit la communauté
+            d'abord, on verra le reste ensemble. Profitez-en — les premiers
+            inscrits auront toujours une place spéciale.
           </p>
         </div>
       </section>
