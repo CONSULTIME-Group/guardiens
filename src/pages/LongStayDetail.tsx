@@ -120,6 +120,30 @@ const LongStayDetail = () => {
     }
   };
 
+  const handleCancel = async () => {
+    if (!user || !longStay) return;
+    setCancelling(true);
+    try {
+      const { error } = await supabase.from("long_stays").update({
+        status: "cancelled" as any,
+      }).eq("id", longStay.id);
+      if (error) throw error;
+
+      // Increment cancellation count
+      await supabase.from("profiles").update({
+        cancellation_count: (owner?.cancellation_count || 0) + 1,
+      }).eq("id", user.id);
+
+      setLongStay({ ...longStay, status: "cancelled" });
+      toast({ title: "Garde annulée", description: "La garde longue durée a été annulée." });
+      setCancelDialogOpen(false);
+    } catch {
+      toast({ variant: "destructive", title: "Erreur", description: "Impossible d'annuler la garde." });
+    } finally {
+      setCancelling(false);
+    }
+  };
+
   if (loading) return <div className="p-6 md:p-10 max-w-3xl mx-auto text-muted-foreground">Chargement...</div>;
   if (!longStay) return <div className="p-6 md:p-10 max-w-3xl mx-auto text-muted-foreground">Annonce introuvable.</div>;
 
