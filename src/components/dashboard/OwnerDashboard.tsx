@@ -2,7 +2,8 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Link } from "react-router-dom";
-import { Calendar, MapPin, MessageSquare, Star, Users, Clock, ChevronRight, Plus, PawPrint, Dog, Cat, Bird, Fish, Rabbit, BarChart3 } from "lucide-react";
+import { Calendar, MapPin, MessageSquare, Star, Users, Clock, ChevronRight, Plus, PawPrint, Dog, Cat, Bird, Fish, Rabbit, BarChart3, KeyRound } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { format, differenceInDays } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -34,17 +35,19 @@ const OwnerDashboard = () => {
   const [unreadCount, setUnreadCount] = useState(0);
   const [sitterCount, setSitterCount] = useState(0);
   const [reviews, setReviews] = useState<any[]>([]);
+  const [sublets, setSublets] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!user) return;
     const load = async () => {
-      const [sitsRes, unreadRes, sittersRes, propsRes, reviewsRes] = await Promise.all([
+      const [sitsRes, unreadRes, sittersRes, propsRes, reviewsRes, subletsRes] = await Promise.all([
         supabase.from("sits").select("*, applications(id, status)").eq("user_id", user.id).order("created_at", { ascending: false }),
         supabase.from("messages").select("id", { count: "exact", head: true }).neq("sender_id", user.id).is("read_at", null),
         supabase.from("sitter_profiles").select("id", { count: "exact", head: true }),
         supabase.from("properties").select("id").eq("user_id", user.id),
         supabase.from("reviews").select("overall_rating").eq("reviewee_id", user.id).eq("published", true),
+        supabase.from("sublets").select("*, sublet_applications(id, status)").eq("user_id", user.id).order("created_at", { ascending: false }),
       ]);
 
       const sitsData = sitsRes.data || [];
@@ -52,6 +55,7 @@ const OwnerDashboard = () => {
       setUnreadCount(unreadRes.count || 0);
       setSitterCount(sittersRes.count || 0);
       setReviews(reviewsRes.data || []);
+      setSublets(subletsRes.data || []);
 
       // Load pets from user's properties
       const propIds = (propsRes.data || []).map((p: any) => p.id);
@@ -244,6 +248,48 @@ const OwnerDashboard = () => {
                       <span className="flex items-center gap-1"><Users className="h-3 w-3" /> {appCount} candidature{appCount !== 1 ? "s" : ""}</span>
                     )}
                   </div>
+                </Link>
+              );
+            })}
+          </div>
+        )}
+      </DashSection>
+
+      {/* Sous-locations */}
+      <DashSection title="Sous-locations" icon={KeyRound} action={
+        <Link to="/sublets/create">
+          <Button size="sm" variant="outline" className="gap-1.5"><Plus className="h-3.5 w-3.5" /> Proposer une sous-location</Button>
+        </Link>
+      }>
+        {sublets.length === 0 ? (
+          <EmptyCard text="Aucune sous-location publiée." cta="Proposer une sous-location" to="/sublets/create" />
+        ) : (
+          <div className="grid gap-3">
+            {sublets.slice(0, 3).map((sub: any) => {
+              const appCount = sub.sublet_applications?.length || 0;
+              const priceLabel = sub.price_type === "per_night" ? "/nuit" : sub.price_type === "per_week" ? "/sem" : "/mois";
+              return (
+                <Link key={sub.id} to={`/sublets/${sub.id}`} className="block p-4 rounded-xl border border-border bg-card hover:shadow-md transition-shadow">
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <div className="flex items-center gap-2 mb-0.5">
+                        <Badge className="bg-blue-100 text-blue-800 border-blue-200 hover:bg-blue-100 text-[10px] px-1.5 py-0">Sous-location</Badge>
+                        <span className="font-medium text-sm">{sub.title}</span>
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        {sub.start_date && sub.end_date
+                          ? `${format(new Date(sub.start_date), "d MMM", { locale: fr })} → ${format(new Date(sub.end_date), "d MMM yyyy", { locale: fr })}`
+                          : "Dates non définies"}
+                        {" · "}{sub.price_amount}€{priceLabel}
+                      </p>
+                    </div>
+                    <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
+                  </div>
+                  {appCount > 0 && (
+                    <p className="text-xs text-muted-foreground mt-2 flex items-center gap-1">
+                      <Users className="h-3 w-3" /> {appCount} candidature{appCount !== 1 ? "s" : ""}
+                    </p>
+                  )}
                 </Link>
               );
             })}
