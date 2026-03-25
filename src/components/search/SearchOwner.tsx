@@ -50,7 +50,7 @@ const SearchOwner = () => {
 
     const { data: sitters } = await supabase
       .from("sitter_profiles")
-      .select("*, profile:profiles!sitter_profiles_user_id_fkey(first_name, last_name, avatar_url, city, profile_completion)");
+      .select("*, profile:profiles!sitter_profiles_user_id_fkey(first_name, last_name, avatar_url, city, profile_completion, identity_verified)");
 
     let items = (sitters || []).filter((s: any) => s.profile?.profile_completion >= 60);
 
