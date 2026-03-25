@@ -9,6 +9,7 @@ import { fr } from "date-fns/locale";
 import ApplicationModal from "@/components/sits/ApplicationModal";
 import ApplicationsList from "@/components/sits/ApplicationsList";
 import ReviewsDisplay from "@/components/reviews/ReviewsDisplay";
+import CancelSitModal from "@/components/sits/CancelSitModal";
 
 const envLabels: Record<string, string> = {
   city_center: "Centre-ville", suburban: "Périurbain", countryside: "Campagne",
