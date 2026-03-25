@@ -49,6 +49,8 @@ const AppRoutes = () => (
     <Route path="/" element={<PublicOnlyRoute><Landing /></PublicOnlyRoute>} />
     <Route path="/login" element={<PublicOnlyRoute><Login /></PublicOnlyRoute>} />
     <Route path="/register" element={<PublicOnlyRoute><Register /></PublicOnlyRoute>} />
+    <Route path="/actualites" element={<News />} />
+    <Route path="/actualites/:slug" element={<ArticleDetail />} />
     <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
       <Route path="/dashboard" element={<Dashboard />} />
       <Route path="/profile" element={<Profile />} />
