@@ -7,7 +7,7 @@ import {
   BarChart, Bar, Cell,
   FunnelChart, Funnel, LabelList,
 } from "recharts";
-import { format, subWeeks, startOfWeek, endOfWeek } from "date-fns";
+import { format, subWeeks, subMonths, startOfWeek, endOfWeek, startOfMonth, endOfMonth } from "date-fns";
 import { fr } from "date-fns/locale";
 
 interface Stats {
