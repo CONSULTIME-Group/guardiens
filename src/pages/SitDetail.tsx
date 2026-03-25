@@ -282,7 +282,7 @@ const SitDetail = () => {
 
       {/* Cancel button for confirmed/published sits */}
       {sit && user && (sit.status === "confirmed" || sit.status === "published") && (
-        (sit.user_id === user.id || hasApplied) && (
+        (sit.user_id === user.id || (hasApplied && sit.status === "confirmed")) && (
           <div className="mt-6 text-center">
             <Button
               variant="ghost"
