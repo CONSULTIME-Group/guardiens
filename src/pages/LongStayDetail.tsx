@@ -132,8 +132,40 @@ const LongStayDetail = () => {
         <ArrowLeft className="h-4 w-4" /> Retour
       </Link>
 
-      {/* Badge */}
-      <Badge className="mb-3 bg-[#DBEAFE] text-[#1E40AF] border-blue-200 hover:bg-[#DBEAFE]">Longue durée</Badge>
+      {/* Badge + Owner actions */}
+      <div className="flex items-center justify-between mb-3">
+        <Badge className="bg-[#DBEAFE] text-[#1E40AF] border-blue-200 hover:bg-[#DBEAFE]">Longue durée</Badge>
+        {isOwner && (
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" asChild className="gap-1.5">
+              <Link to={`/long-stays/${longStay.id}/edit`}>
+                <Pencil className="h-3.5 w-3.5" /> Modifier
+              </Link>
+            </Button>
+            <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+              <DialogTrigger asChild>
+                <Button variant="outline" size="sm" className="gap-1.5 text-destructive hover:text-destructive">
+                  <Trash2 className="h-3.5 w-3.5" /> Supprimer
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Supprimer cette annonce ?</DialogTitle>
+                  <DialogDescription>
+                    Cette action est irréversible. Toutes les candidatures associées seront également supprimées.
+                  </DialogDescription>
+                </DialogHeader>
+                <DialogFooter className="gap-2">
+                  <Button variant="outline" onClick={() => setDeleteDialogOpen(false)}>Annuler</Button>
+                  <Button variant="destructive" onClick={handleDelete} disabled={deleting}>
+                    {deleting ? "Suppression..." : "Confirmer la suppression"}
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          </div>
+        )}
+      </div>
 
       {/* Title & dates */}
       <h1 className="font-heading text-2xl md:text-3xl font-bold mb-2">{longStay.title}</h1>
