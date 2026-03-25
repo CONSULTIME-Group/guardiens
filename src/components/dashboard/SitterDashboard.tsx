@@ -191,7 +191,7 @@ const SitterDashboard = () => {
       <DashSection title="Gardes longue durée" icon={Clock3} action={
         <Link to="/search" className="text-xs text-primary hover:underline">Voir toutes</Link>
       }>
-        {metrics.completed >= 3 && metrics.avgRating && parseFloat(metrics.avgRating) >= 4.7 ? (
+        {true ? ( // TODO: restore → metrics.completed >= 3 && metrics.avgRating && parseFloat(metrics.avgRating) >= 4.7
           <p className="text-sm text-muted-foreground italic">Explorez les gardes longue durée dans la recherche.</p>
         ) : (
           <div className="p-5 rounded-xl border border-dashed border-border text-center">
