@@ -42,6 +42,7 @@ import AdminReports from "./pages/admin/AdminReports";
 import AdminVerifications from "./pages/admin/AdminVerifications";
 import AdminEmails from "./pages/admin/AdminEmails";
 import NotFound from "./pages/NotFound";
+import Unsubscribe from "./pages/Unsubscribe";
 
 const queryClient = new QueryClient();
 
@@ -101,6 +102,7 @@ const AppRoutes = () => (
       <Route path="/long-stays/:id" element={<LongStayDetail />} />
       <Route path="/long-stays/:id/edit" element={<EditLongStay />} />
     </Route>
+    <Route path="/unsubscribe" element={<Unsubscribe />} />
     <Route path="*" element={<NotFound />} />
   </Routes>
 );
