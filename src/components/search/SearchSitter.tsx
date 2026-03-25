@@ -34,7 +34,7 @@ const typeLabels: Record<string, string> = {
   apartment: "Appartement", house: "Maison", farm: "Ferme", chalet: "Chalet", other: "Autre",
 };
 
-type SortOption = "recent" | "rating";
+type SortOption = "recent" | "rating" | "start_date" | "contribution";
 type SearchTab = "sits" | "long_stays";
 
 const SearchSitter = () => {
