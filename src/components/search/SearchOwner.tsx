@@ -33,6 +33,7 @@ const SearchOwner = () => {
   const [animalTypes, setAnimalTypes] = useState<string[]>([]);
   const [sitterType, setSitterType] = useState("all");
   const [vehicled, setVehicled] = useState(false);
+  const [availableOnly, setAvailableOnly] = useState(false);
   const [sort, setSort] = useState<SortOption>("rating");
 
   const [results, setResults] = useState<any[]>([]);
