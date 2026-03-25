@@ -27,6 +27,7 @@ const typeIcons: Record<string, string> = {
   new_message: "💬",
   application_accepted: "🎉",
   application_rejected: "😔",
+  application_cancelled: "↩️",
   reminder_7days: "📅",
   reminder_48h: "⏰",
   info: "ℹ️",
