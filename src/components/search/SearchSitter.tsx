@@ -12,6 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Search, SlidersHorizontal, MapPin, Calendar, Star, CheckCircle2, Lock } from "lucide-react";
 import ChipSelect from "@/components/profile/ChipSelect";
+import VerifiedBadge from "@/components/profile/VerifiedBadge";
 import { format, differenceInDays } from "date-fns";
 import { fr } from "date-fns/locale";
 import { geocodeCity, haversineDistance } from "@/lib/geocode";
@@ -431,7 +432,10 @@ const SearchSitter = () => {
                         </div>
                       )}
                       <div className="p-4 flex-1 min-w-0">
-                        <h3 className="font-heading font-semibold truncate">{sit.title || "Sans titre"}</h3>
+                        <h3 className="font-heading font-semibold truncate flex items-center gap-1">
+                          {sit.title || "Sans titre"}
+                          {sit.owner?.identity_verified && <VerifiedBadge size="sm" />}
+                        </h3>
                         <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground mt-1.5">
                           {sit.owner?.city && <span className="flex items-center gap-1"><MapPin className="h-3.5 w-3.5" />{sit.owner.city}</span>}
                           <span className="flex items-center gap-1">
@@ -496,7 +500,10 @@ const SearchSitter = () => {
                         <div className="flex items-center gap-2 mb-1">
                           <Badge className="bg-[#DBEAFE] text-[#1E40AF] border-blue-200 hover:bg-[#DBEAFE] text-[10px] px-1.5 py-0">Longue durée</Badge>
                         </div>
-                        <h3 className="font-heading font-semibold truncate">{ls.title || "Sans titre"}</h3>
+                        <h3 className="font-heading font-semibold truncate flex items-center gap-1">
+                          {ls.title || "Sans titre"}
+                          {ls.owner?.identity_verified && <VerifiedBadge size="sm" />}
+                        </h3>
                         <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground mt-1.5">
                           {ls.owner?.city && <span className="flex items-center gap-1"><MapPin className="h-3.5 w-3.5" />{ls.owner.city}</span>}
                           <span className="flex items-center gap-1">
