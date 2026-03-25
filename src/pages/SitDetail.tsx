@@ -11,6 +11,7 @@ import ApplicationsList from "@/components/sits/ApplicationsList";
 import ReviewsDisplay from "@/components/reviews/ReviewsDisplay";
 import CancelSitModal from "@/components/sits/CancelSitModal";
 import BreedProfileCard from "@/components/breeds/BreedProfileCard";
+import ReportButton from "@/components/reports/ReportButton";
 import VerifiedBadge from "@/components/profile/VerifiedBadge";
 import LocationProfileCard from "@/components/location/LocationProfileCard";
 
@@ -131,7 +132,10 @@ const SitDetail = () => {
       )}
 
       {/* Header */}
-      <h1 className="font-heading text-2xl md:text-3xl font-bold mb-2">{sit.title}</h1>
+      <div className="flex items-start justify-between gap-4">
+        <h1 className="font-heading text-2xl md:text-3xl font-bold mb-2">{sit.title}</h1>
+        {user && sit.user_id !== user.id && <ReportButton targetId={sit.id} targetType="sit" />}
+      </div>
       <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground mb-6">
         <span className="flex items-center gap-1.5">
           <Calendar className="h-4 w-4" />

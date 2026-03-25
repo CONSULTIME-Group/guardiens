@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import ReportButton from "@/components/reports/ReportButton";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -497,6 +498,7 @@ const SearchSitter = () => {
                             ))}
                           </div>
                         )}
+                        <ReportButton targetId={sit.user_id} targetType="profile" className="mt-2" />
                       </div>
                     </div>
                   </Link>

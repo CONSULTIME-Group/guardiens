@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import ReportButton from "@/components/reports/ReportButton";
 import { supabase } from "@/integrations/supabase/client";
 import { geocodeCity, haversineDistance } from "@/lib/geocode";
 import { useAuth } from "@/contexts/AuthContext";
@@ -309,6 +310,7 @@ const SearchOwner = () => {
                             ))}
                           </div>
                         )}
+                        <ReportButton targetId={s.user_id} targetType="profile" className="ml-auto mt-2" />
                       </div>
                     </div>
                   </div>
