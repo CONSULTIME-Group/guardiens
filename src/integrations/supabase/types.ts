@@ -126,28 +126,38 @@ export type Database = {
         Row: {
           created_at: string
           id: string
+          long_stay_id: string | null
           owner_id: string
-          sit_id: string
+          sit_id: string | null
           sitter_id: string
           updated_at: string
         }
         Insert: {
           created_at?: string
           id?: string
+          long_stay_id?: string | null
           owner_id: string
-          sit_id: string
+          sit_id?: string | null
           sitter_id: string
           updated_at?: string
         }
         Update: {
           created_at?: string
           id?: string
+          long_stay_id?: string | null
           owner_id?: string
-          sit_id?: string
+          sit_id?: string | null
           sitter_id?: string
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "conversations_long_stay_id_fkey"
+            columns: ["long_stay_id"]
+            isOneToOne: false
+            referencedRelation: "long_stays"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "conversations_owner_id_fkey"
             columns: ["owner_id"]
