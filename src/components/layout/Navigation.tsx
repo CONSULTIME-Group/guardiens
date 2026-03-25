@@ -1,5 +1,5 @@
 import { NavLink, useLocation } from "react-router-dom";
-import { Home, Search, Calendar, MessageSquare, User, LogOut, Bell, Settings, PawPrint } from "lucide-react";
+import { Home, Search, Calendar, MessageSquare, User, LogOut, Bell, Settings, PawPrint, ArrowLeftRight } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
 import { useEffect, useState } from "react";
@@ -16,7 +16,7 @@ const navItems = [
 ];
 
 export const Sidebar = () => {
-  const { user, logout } = useAuth();
+  const { user, logout, activeRole, setActiveRole } = useAuth();
   const [unreadCount, setUnreadCount] = useState(0);
 
   useEffect(() => {
@@ -51,8 +51,43 @@ export const Sidebar = () => {
         <NotificationBell />
       </div>
 
+      {user?.role === "both" && (
+        <div className="px-3 pb-3">
+          <div className="flex items-center bg-accent rounded-lg p-1 gap-1">
+            <button
+              onClick={() => setActiveRole("owner")}
+              className={cn(
+                "flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-md text-xs font-medium transition-colors",
+                activeRole === "owner"
+                  ? "bg-primary text-primary-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              <PawPrint className="h-3.5 w-3.5" />
+              Propriétaire
+            </button>
+            <button
+              onClick={() => setActiveRole("sitter")}
+              className={cn(
+                "flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-md text-xs font-medium transition-colors",
+                activeRole === "sitter"
+                  ? "bg-primary text-primary-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              <User className="h-3.5 w-3.5" />
+              Gardien
+            </button>
+          </div>
+        </div>
+      )}
+
       <nav className="flex-1 px-3 space-y-1">
-        {navItems.filter(item => !("hideForRole" in item) || user?.role !== item.hideForRole).map((item) => (
+        {navItems.filter(item => {
+          if (!("hideForRole" in item)) return true;
+          const effectiveRole = user?.role === "both" ? activeRole : user?.role;
+          return effectiveRole !== item.hideForRole;
+        }).map((item) => (
           <NavLink
             key={item.to}
             to={item.to}
@@ -105,7 +140,7 @@ export const Sidebar = () => {
 
 export const BottomNav = () => {
   const location = useLocation();
-  const { user } = useAuth();
+  const { user, activeRole } = useAuth();
   const [notifCount, setNotifCount] = useState(0);
 
   useEffect(() => {
@@ -139,7 +174,8 @@ export const BottomNav = () => {
     return () => { supabase.removeChannel(channel); };
   }, [user]);
 
-  const filteredItems = navItems.filter(item => !("hideForRole" in item) || user?.role !== item.hideForRole);
+  const effectiveRole = user?.role === "both" ? activeRole : user?.role;
+  const filteredItems = navItems.filter(item => !("hideForRole" in item) || effectiveRole !== item.hideForRole);
   const mobileItems = [
     ...filteredItems.slice(0, 3),
     { to: "/notifications", icon: Bell, label: "Notifs", notifCount },
