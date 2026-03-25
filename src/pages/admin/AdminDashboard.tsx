@@ -136,6 +136,26 @@ const AdminDashboard = () => {
         { name: "Gardes terminées", value: totalComp, fill: CHART_COLORS[4] },
       ]);
 
+      // Monthly average ratings (last 12 months)
+      const months: MonthlyRating[] = [];
+      for (let i = 11; i >= 0; i--) {
+        const mStart = startOfMonth(subMonths(new Date(), i));
+        const mEnd = endOfMonth(subMonths(new Date(), i));
+        const monthReviews = (reviewsData || []).filter(r => {
+          const d = new Date(r.created_at);
+          return d >= mStart && d <= mEnd;
+        });
+        const avg = monthReviews.length > 0
+          ? monthReviews.reduce((s, r) => s + r.overall_rating, 0) / monthReviews.length
+          : 0;
+        months.push({
+          month: format(mStart, "MMM yy", { locale: fr }),
+          avg: Math.round(avg * 10) / 10,
+          count: monthReviews.length,
+        });
+      }
+      setMonthlyRatings(months);
+
       setLoading(false);
     };
 
