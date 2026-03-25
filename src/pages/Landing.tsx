@@ -1,92 +1,112 @@
 import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { MapPin, Shield, Heart, Users, Star, Quote, ArrowRight } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { ArrowRight, Home, PawPrint, Clock, Handshake, Sparkles, Wrench } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-
-const steps = [
-  {
-    number: "01",
-    title: "Créez votre profil",
-    description:
-      "Propriétaire : décrivez votre maison, vos animaux, vos attentes. Gardien : racontez qui vous êtes, votre expérience, vos disponibilités.",
-  },
-  {
-    number: "02",
-    title: "Trouvez votre match",
-    description:
-      "Notre moteur de recherche par proximité vous connecte avec des personnes de confiance près de chez vous. Pas à l'autre bout du pays — dans votre quartier.",
-  },
-  {
-    number: "03",
-    title: "Partez l'esprit léger",
-    description:
-      "Échangez, rencontrez-vous, et confirmez. Votre gardien veille sur votre maison et vos animaux comme un voisin le ferait.",
-  },
-];
+import { toast } from "sonner";
 
 const differentiators = [
   {
-    icon: MapPin,
-    title: "La proximité",
+    icon: PawPrint,
+    title: "Vos animaux restent chez eux",
     description:
-      "Vos gardiens sont près de chez vous. En cas d'imprévu, ils sont là en quelques minutes — pas en quelques heures d'avion.",
+      "Pas de cage de transport, pas de chenil, pas de stress. Votre chien dort dans son panier. Votre chat garde ses habitudes. C'est leur maison — ils ne bougent pas.",
   },
   {
-    icon: Shield,
-    title: "La confiance",
+    icon: Home,
+    title: "Votre maison vit",
     description:
-      "Profils vérifiés, avis croisés, métriques de fiabilité. Vous savez exactement à qui vous confiez vos clés.",
+      "Volets ouverts, courrier relevé, jardin arrosé. Quelqu'un vit chez vous pendant votre absence. C'est la meilleure protection — et la plus naturelle.",
   },
   {
-    icon: Heart,
-    title: "La simplicité",
+    icon: Clock,
+    title: "À 15 minutes, pas 15 heures",
     description:
-      "Pas d'abonnement au lancement. Pas de commission sur les gardes classiques. On crée le réseau de confiance, le reste suit.",
+      "Vos gardiens sont dans votre quartier. Un imprévu ? Ils sont là en quelques minutes. C'est ça la force d'un réseau local.",
   },
   {
-    icon: Users,
-    title: "Le réseau local",
+    icon: Handshake,
+    title: "On se connaît avant de se confier",
     description:
-      "Ce n'est pas une marketplace anonyme. C'est une communauté de voisins qui s'entraident — comme Elisa l'a vécu.",
+      "Pas de profil anonyme arrivant de l'autre bout du pays. Ici on se rencontre. Un dîner, un café, une balade avec le chien — et la confiance naît.",
+  },
+  {
+    icon: Sparkles,
+    title: "Ça va au-delà de la garde",
+    description:
+      "Des barbecues chez les proprios, des sentiers qu'on n'aurait jamais trouvés seuls, des amitiés qui durent. On a gardé 37 maisons — on a gagné 37 histoires.",
+  },
+  {
+    icon: Wrench,
+    title: "Construit par des gardiens",
+    description:
+      "On ne théorise pas le house-sitting depuis un open space. On l'a vécu. 234 animaux, 5 ans, toute la région AURA. Guardiens vient de là.",
   },
 ];
 
 const testimonials = [
   {
-    name: "Sophie",
-    location: "Écully",
-    text: "On a confié notre maison et nos deux chats à une gardienne Guardiens pendant 3 semaines. On a reçu des photos tous les jours et les chats avaient l'air plus heureux qu'avec nous !",
+    name: "Sophie & Marc",
+    detail: "2 chats · Écully",
+    text: "On est partis 10 jours au Maroc. Nos deux chats sont restés dans leur canapé, dans leur maison, avec quelqu'un qui passait leur faire des câlins tous les jours. Zéro stress — pour eux comme pour nous.",
   },
   {
     name: "Thomas",
-    location: "Megève",
-    text: "En tant que gardien, j'ai découvert des endroits incroyables en AURA. Et les propriétaires sont devenus des amis. C'est bien plus qu'une plateforme.",
+    detail: "Gardien · Lyon 7e",
+    text: "J'ai gardé un chalet à Megève pendant une semaine en février. Le golden retriever m'attendait chaque matin devant la cheminée. J'ai découvert un village, des sentiers, des gens. Je n'aurais jamais pu me payer ça autrement.",
   },
   {
-    name: "Claire",
-    location: "Monts du Lyonnais",
-    text: "Avec 3 chiens, 4 chats et un potager, trouver quelqu'un de confiance relevait du miracle. Guardiens a changé nos étés.",
+    name: "Claire & Antoine",
+    detail: "3 chevaux · Monts du Lyonnais",
+    text: "Nos trois chevaux ne supportent pas le transport. Avant, on ne partait jamais. Maintenant on a une gardienne qui les connaît par leur prénom. Elle arrive la veille, on lui montre les habitudes, et on part tranquilles.",
   },
 ];
 
-const stats = [
-  { value: "37", label: "maisons gardées" },
-  { value: "234", label: "animaux accompagnés" },
-  { value: "5 ans", label: "en AURA" },
-  { value: "100%", label: "gratuit au lancement" },
+const steps = [
+  {
+    number: "01",
+    title: "Inscrivez-vous",
+    description:
+      "Créez votre profil en 5 minutes. Propriétaire : décrivez votre maison et vos animaux. Gardien : racontez votre expérience et vos envies.",
+  },
+  {
+    number: "02",
+    title: "Trouvez votre match",
+    description:
+      "Parcourez les annonces de garde près de chez vous, ou rendez-vous disponible et laissez les propriétaires venir à vous.",
+  },
+  {
+    number: "03",
+    title: "Rencontrez-vous",
+    description:
+      "Un café, un dîner, une balade ensemble. La confiance ne se crée pas en ligne — elle se vit. Puis partez l'esprit léger.",
+  },
 ];
 
 const Landing = () => {
   const navigate = useNavigate();
   const [latestArticles, setLatestArticles] = useState<any[]>([]);
+  const [email, setEmail] = useState("");
+  const [emailBottom, setEmailBottom] = useState("");
 
   useEffect(() => {
-    supabase.from("articles").select("id,title,slug,excerpt,cover_image_url,category,published_at")
-      .eq("published", true).order("published_at", { ascending: false }).limit(3)
+    supabase
+      .from("articles")
+      .select("id,title,slug,excerpt,cover_image_url,category,published_at")
+      .eq("published", true)
+      .order("published_at", { ascending: false })
+      .limit(3)
       .then(({ data }) => setLatestArticles(data || []));
   }, []);
+
+  const handleEmailSignup = (emailValue: string) => {
+    if (!emailValue.trim()) {
+      toast.error("Veuillez entrer votre email.");
+      return;
+    }
+    navigate(`/register?email=${encodeURIComponent(emailValue)}`);
+  };
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -96,26 +116,24 @@ const Landing = () => {
         dangerouslySetInnerHTML={{
           __html: JSON.stringify({
             "@context": "https://schema.org",
-            "@type": "LocalBusiness",
+            "@type": "WebSite",
             name: "Guardiens",
-            description:
-              "House-sitting de confiance en Auvergne-Rhône-Alpes",
             url: "https://guardiens.fr",
+            description:
+              "House-sitting de confiance en Auvergne-Rhône-Alpes. Trouvez un gardien de maison et d'animaux près de chez vous.",
             areaServed: {
               "@type": "AdministrativeArea",
               name: "Auvergne-Rhône-Alpes",
             },
-            address: {
-              "@type": "PostalAddress",
-              addressLocality: "Lyon",
-              addressRegion: "Auvergne-Rhône-Alpes",
-              addressCountry: "FR",
-            },
+            founder: [
+              { "@type": "Person", name: "Jérémie" },
+              { "@type": "Person", name: "Elisa" },
+            ],
           }),
         }}
       />
 
-      {/* Header */}
+      {/* Navbar */}
       <header className="flex items-center justify-between px-6 md:px-12 py-5 sticky top-0 bg-background/80 backdrop-blur-md z-50 border-b border-border/50">
         <h2 className="font-heading text-2xl font-bold">
           <span className="text-primary">g</span>uardiens
@@ -131,81 +149,218 @@ const Landing = () => {
         </div>
       </header>
 
-      {/* Hero */}
+      {/* ═══════════════ 1. HERO ═══════════════ */}
       <section className="px-6 md:px-12 pt-20 md:pt-32 pb-16 max-w-5xl mx-auto text-center">
+        {/* Pastille */}
+        <div className="inline-flex items-center gap-2 bg-muted rounded-full px-4 py-1.5 mb-8 animate-fade-in">
+          <span className="relative flex h-2.5 w-2.5">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75" />
+            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-primary" />
+          </span>
+          <span className="text-sm text-muted-foreground font-medium">
+            Auvergne-Rhône-Alpes · Bientôt partout
+          </span>
+        </div>
+
         <h1 className="font-heading text-4xl md:text-6xl lg:text-7xl font-bold leading-tight mb-6 animate-fade-in">
           Comme confier ses clés
           <br />
-          <span className="text-primary">à un voisin</span>
+          <span className="text-primary italic">à un voisin.</span>
         </h1>
         <p
           className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-10 animate-fade-in"
           style={{ animationDelay: "0.1s" }}
         >
-          Trouvez un gardien de confiance près de chez vous pour veiller sur
-          votre maison et vos animaux pendant vos vacances.
+          Vos animaux restent chez eux, votre maison vit, et vous partez
+          l'esprit léger. Des gardiens de confiance, près de chez vous.
         </p>
+
+        {/* CTA buttons */}
         <div
           className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in"
           style={{ animationDelay: "0.2s" }}
         >
-          <Button
-            variant="hero"
-            size="xl"
-            onClick={() => navigate("/register")}
-          >
+          <Button variant="hero" size="xl" onClick={() => navigate("/register")}>
             Je cherche un gardien
           </Button>
-          <Button
-            variant="heroOutline"
-            size="xl"
-            onClick={() => navigate("/register")}
-          >
+          <Button variant="heroOutline" size="xl" onClick={() => navigate("/register")}>
             Je veux garder
           </Button>
         </div>
         <p
-          className="mt-10 text-sm text-muted-foreground animate-fade-in"
+          className="mt-4 text-sm text-muted-foreground animate-fade-in"
+          style={{ animationDelay: "0.25s" }}
+        >
+          Gratuit · Premiers inscrits, premiers servis.
+        </p>
+
+        {/* Stats avec séparateurs */}
+        <div
+          className="flex items-center justify-center gap-0 mt-12 animate-fade-in"
           style={{ animationDelay: "0.3s" }}
         >
-          37 maisons gardées · 234 animaux accompagnés · 5 ans en AURA
-        </p>
-      </section>
-
-      {/* L'histoire */}
-      <section className="px-6 md:px-12 py-20 bg-card">
-        <div className="max-w-3xl mx-auto">
-          <h2 className="font-heading text-3xl md:text-4xl font-bold mb-8 text-center">
-            Née d'une passion,
-            <br />
-            <span className="text-primary">pas d'un business plan</span>
-          </h2>
-          <p className="text-muted-foreground leading-relaxed text-base md:text-lg text-center">
-            Tout a commencé quand Elisa, Argentine installée à Lyon, a découvert
-            le house-sitting par hasard. Une voisine lui a confié ses chats pour
-            un week-end. Puis un ami ses deux chiens pour une semaine. De fil en
-            aiguille, les propriétaires du quartier se sont passé le mot&nbsp;:
-            «&nbsp;Demande à Elisa.&nbsp;»
-          </p>
-          <p className="text-muted-foreground leading-relaxed text-base md:text-lg text-center mt-4">
-            En cinq ans, c'est devenu 37&nbsp;maisons gardées et
-            234&nbsp;animaux accompagnés dans toute la région
-            Auvergne-Rhône-Alpes. Un soir, autour d'un BBQ chez des
-            propriétaires devenus amis, la question est tombée&nbsp;:
-            «&nbsp;Et si d'autres personnes pouvaient vivre ça
-            aussi&nbsp;?&nbsp;»
-          </p>
-          <p className="font-heading text-xl font-semibold text-center mt-6 text-primary">
-            Guardiens est né ce soir-là.
-          </p>
+          <div className="text-center px-6 md:px-10">
+            <span className="block font-heading text-3xl md:text-4xl font-bold text-primary">37</span>
+            <span className="text-muted-foreground text-sm">maisons gardées</span>
+          </div>
+          <div className="w-px h-12 bg-border" />
+          <div className="text-center px-6 md:px-10">
+            <span className="block font-heading text-3xl md:text-4xl font-bold text-primary">234</span>
+            <span className="text-muted-foreground text-sm">animaux accompagnés</span>
+          </div>
+          <div className="w-px h-12 bg-border" />
+          <div className="text-center px-6 md:px-10">
+            <span className="block font-heading text-3xl md:text-4xl font-bold text-primary">5 ans</span>
+            <span className="text-muted-foreground text-sm">en AURA</span>
+          </div>
         </div>
       </section>
 
-      {/* Comment ça marche */}
+      {/* ═══════════════ 2. L'HISTOIRE ═══════════════ */}
+      <section className="px-6 md:px-12 py-20 bg-card">
+        <div className="max-w-3xl mx-auto">
+          <span className="block text-center text-xs font-semibold tracking-[0.2em] uppercase text-secondary mb-4">
+            Notre histoire
+          </span>
+          <h2 className="font-heading text-3xl md:text-4xl font-bold mb-10 text-center">
+            Ça a commencé avec{" "}
+            <span className="text-primary italic">un chien à promener.</span>
+          </h2>
+
+          <div className="space-y-6 text-muted-foreground leading-relaxed text-base md:text-lg">
+            <p>
+              Quand Elisa est arrivée d'Argentine, elle n'avait pas le droit de
+              travailler en France. Alors elle s'est consacrée à sa passion : les
+              animaux. Elle a commencé par promener des chiens, puis passer
+              nourrir des chats chez leurs propriétaires. Puis les chevaux. Puis
+              les agneaux, les brebis, les ânes, les poules.
+            </p>
+            <p>
+              Assez vite, les propriétaires ont posé la question : « Et si tu
+              restais chez nous pendant notre absence ? » Pour que les animaux
+              restent dans leur environnement. Pour qu'il y ait quelqu'un à la
+              maison. Pour partir tranquille.
+            </p>
+
+            {/* Citation encadrée */}
+            <blockquote className="border-l-4 border-primary pl-6 py-3 my-8 bg-primary/5 rounded-r-lg">
+              <p className="font-heading text-lg font-semibold text-foreground italic">
+                « Et si tu restais chez nous ? » — C'est cette question, posée
+                par un propriétaire, qui a tout déclenché.
+              </p>
+            </blockquote>
+
+            <p>
+              En quelques mois, un réseau local s'est créé naturellement. Des
+              propriétaires du coin, dont on connaît les animaux et les
+              habitudes. Disponibles d'un jour à l'autre parce qu'on est à côté.
+            </p>
+            <p>
+              Mais le plus inattendu, c'est ce qui s'est passé autour. Les
+              gardes sont devenues des rencontres. Des dîners improvisés, des
+              barbecues dans le jardin, des cafés qui s'éternisent. On a
+              découvert des gens passionnants, des histoires de vie, des coins
+              secrets. On pourrait écrire un livre sur la ressemblance entre les
+              propriétaires et leurs animaux — c'est fascinant à quel point
+              c'est vrai.
+            </p>
+            <p>
+              Un soir, chez Helen — une expatriée anglaise, trois chats, un
+              cocker, une vue sur les monts — on s'est dit : et si d'autres gens
+              pouvaient vivre ça ? Pas une plateforme froide avec des profils
+              anonymes. Un réseau de voisins qui se font confiance. Comme au
+              village. Guardiens est né ce soir-là.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* ═══════════════ 3. CTA INTERMÉDIAIRE ═══════════════ */}
+      <section className="px-6 md:px-12 py-20 bg-secondary/10">
+        <div className="max-w-3xl mx-auto text-center">
+          <h2 className="font-heading text-3xl md:text-4xl font-bold mb-4">
+            Envie de{" "}
+            <span className="text-primary italic">tenter l'aventure</span> ?
+          </h2>
+          <p className="text-muted-foreground text-lg mb-8">
+            Que vous cherchiez quelqu'un pour garder votre maison, ou que vous
+            rêviez d'échappées à côté de chez vous — on vous attend.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Button variant="hero" size="xl" onClick={() => navigate("/register")}>
+              Je cherche un gardien
+            </Button>
+            <Button variant="heroOutline" size="xl" onClick={() => navigate("/register")}>
+              Je veux garder
+            </Button>
+          </div>
+        </div>
+      </section>
+
+      {/* ═══════════════ 4. DIFFÉRENCIATEURS ═══════════════ */}
+      <section className="px-6 md:px-12 py-20">
+        <div className="max-w-5xl mx-auto">
+          <h2 className="font-heading text-3xl md:text-4xl font-bold text-center mb-3">
+            La proximité change tout.
+          </h2>
+          <p className="text-muted-foreground text-lg text-center mb-14">
+            Ce qu'on a vécu en vrai, on veut le rendre possible pour tous.
+          </p>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
+            {differentiators.map((item, i) => (
+              <div
+                key={item.title}
+                className="bg-card rounded-xl p-8 animate-fade-in"
+                style={{ animationDelay: `${0.08 * i}s` }}
+              >
+                <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary/10 text-primary mb-5">
+                  <item.icon className="h-6 w-6" />
+                </div>
+                <h3 className="font-heading text-lg font-semibold mb-2">
+                  {item.title}
+                </h3>
+                <p className="text-muted-foreground leading-relaxed text-sm">
+                  {item.description}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ═══════════════ 5. TÉMOIGNAGES ═══════════════ */}
+      <section className="px-6 md:px-12 py-20 bg-card">
+        <div className="max-w-5xl mx-auto">
+          <h2 className="font-heading text-3xl md:text-4xl font-bold text-center mb-14">
+            Des histoires comme les nôtres.
+          </h2>
+          <div className="grid md:grid-cols-3 gap-8">
+            {testimonials.map((t, i) => (
+              <div
+                key={t.name}
+                className="bg-background rounded-xl p-8 animate-fade-in"
+                style={{ animationDelay: `${0.1 * i}s` }}
+              >
+                <p className="text-muted-foreground leading-relaxed text-sm mb-6">
+                  "{t.text}"
+                </p>
+                <p className="font-heading font-semibold text-sm">
+                  {t.name}{" "}
+                  <span className="text-muted-foreground font-body font-normal">
+                    — {t.detail}
+                  </span>
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ═══════════════ 6. COMMENT ÇA MARCHE ═══════════════ */}
       <section className="px-6 md:px-12 py-20">
         <div className="max-w-5xl mx-auto">
           <h2 className="font-heading text-3xl md:text-4xl font-bold text-center mb-16">
-            Simple comme bonjour
+            Aussi simple que ça.
           </h2>
           <div className="grid md:grid-cols-3 gap-10">
             {steps.map((step, i) => (
@@ -229,110 +384,59 @@ const Landing = () => {
         </div>
       </section>
 
-      {/* Pourquoi Guardiens */}
+      {/* ═══════════════ 7. PRICING ═══════════════ */}
       <section className="px-6 md:px-12 py-20 bg-card">
-        <div className="max-w-5xl mx-auto">
-          <h2 className="font-heading text-3xl md:text-4xl font-bold text-center mb-14">
-            Ce qui nous rend différents
-          </h2>
-          <div className="grid sm:grid-cols-2 gap-8">
-            {differentiators.map((item, i) => (
-              <div
-                key={item.title}
-                className="bg-background rounded-xl p-8 animate-fade-in"
-                style={{ animationDelay: `${0.1 * i}s` }}
-              >
-                <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary/10 text-primary mb-5">
-                  <item.icon className="h-6 w-6" />
-                </div>
-                <h3 className="font-heading text-lg font-semibold mb-2">
-                  {item.title}
-                </h3>
-                <p className="text-muted-foreground leading-relaxed text-sm">
-                  {item.description}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Témoignages */}
-      <section className="px-6 md:px-12 py-20">
-        <div className="max-w-5xl mx-auto">
-          <h2 className="font-heading text-3xl md:text-4xl font-bold text-center mb-14">
-            Ils nous font confiance
-          </h2>
-          <div className="grid md:grid-cols-3 gap-8">
-            {testimonials.map((t, i) => (
-              <div
-                key={t.name}
-                className="bg-card rounded-xl p-8 relative animate-fade-in"
-                style={{ animationDelay: `${0.1 * i}s` }}
-              >
-                <Quote className="h-8 w-8 text-primary/15 absolute top-6 right-6" />
-                <div className="flex items-center gap-2 mb-4">
-                  <Star className="h-4 w-4 text-secondary fill-secondary" />
-                  <Star className="h-4 w-4 text-secondary fill-secondary" />
-                  <Star className="h-4 w-4 text-secondary fill-secondary" />
-                  <Star className="h-4 w-4 text-secondary fill-secondary" />
-                  <Star className="h-4 w-4 text-secondary fill-secondary" />
-                </div>
-                <p className="text-muted-foreground leading-relaxed text-sm mb-6">
-                  "{t.text}"
-                </p>
-                <p className="font-heading font-semibold text-sm">
-                  {t.name}{" "}
-                  <span className="text-muted-foreground font-body font-normal">
-                    — {t.location}
-                  </span>
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* C'est gratuit */}
-      <section className="px-6 md:px-12 py-20 bg-primary text-primary-foreground">
         <div className="max-w-3xl mx-auto text-center">
           <h2 className="font-heading text-3xl md:text-4xl font-bold mb-5">
-            On vient de lancer,
-            <br />
-            donc c'est gratuit
+            On vient de lancer. Donc c'est{" "}
+            <span className="text-primary italic">gratuit.</span>
           </h2>
-          <p className="text-primary-foreground/80 text-lg mb-10 leading-relaxed">
-            Pas d'abonnement, pas de commission sur les gardes. On construit
-            d'abord la communauté, on verra le modèle ensuite. Profitez-en pour
-            être parmi les premiers.
+          <p className="text-muted-foreground text-lg leading-relaxed">
+            Notre priorité, c'est de construire une communauté solide — pas de
+            vous faire payer. Guardiens est entièrement gratuit pour le moment.
+            Quand on ajoutera des fonctionnalités premium, les premiers inscrits
+            seront les premiers servis.
           </p>
-          <Button
-            size="xl"
-            className="bg-background text-foreground hover:bg-background/90 rounded-pill shadow-lg text-base font-body"
-            onClick={() => navigate("/register")}
-          >
-            Rejoindre Guardiens
-          </Button>
         </div>
       </section>
 
-      {/* Derniers articles */}
+      {/* ═══════════════ DERNIERS ARTICLES ═══════════════ */}
       {latestArticles.length > 0 && (
         <section className="px-6 md:px-12 py-20">
           <div className="max-w-5xl mx-auto">
             <div className="flex items-center justify-between mb-10">
-              <h2 className="font-heading text-3xl md:text-4xl font-bold">Derniers articles</h2>
-              <Button variant="ghost" onClick={() => navigate("/actualites")} className="text-primary">
+              <h2 className="font-heading text-3xl md:text-4xl font-bold">
+                Derniers articles
+              </h2>
+              <Button
+                variant="ghost"
+                onClick={() => navigate("/actualites")}
+                className="text-primary"
+              >
                 Voir tous les articles <ArrowRight className="h-4 w-4 ml-1" />
               </Button>
             </div>
             <div className="grid md:grid-cols-3 gap-6">
-              {latestArticles.map(a => (
-                <Link key={a.id} to={`/actualites/${a.slug}`} className="group bg-card rounded-xl overflow-hidden border border-border/50 hover:shadow-lg transition-shadow">
-                  {a.cover_image_url && <img src={a.cover_image_url} alt={a.title} className="w-full h-40 object-cover group-hover:scale-105 transition-transform duration-300" />}
+              {latestArticles.map((a) => (
+                <Link
+                  key={a.id}
+                  to={`/actualites/${a.slug}`}
+                  className="group bg-card rounded-xl overflow-hidden border border-border/50 hover:shadow-lg transition-shadow"
+                >
+                  {a.cover_image_url && (
+                    <img
+                      src={a.cover_image_url}
+                      alt={a.title}
+                      className="w-full h-40 object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
+                  )}
                   <div className="p-5">
-                    <h3 className="font-heading text-base font-semibold group-hover:text-primary transition-colors line-clamp-2 mb-2">{a.title}</h3>
-                    <p className="text-muted-foreground text-sm line-clamp-2">{a.excerpt}</p>
+                    <h3 className="font-heading text-base font-semibold group-hover:text-primary transition-colors line-clamp-2 mb-2">
+                      {a.title}
+                    </h3>
+                    <p className="text-muted-foreground text-sm line-clamp-2">
+                      {a.excerpt}
+                    </p>
                   </div>
                 </Link>
               ))}
@@ -341,56 +445,65 @@ const Landing = () => {
         </section>
       )}
 
-      {/* Preuve sociale — bandeau chiffres */}
-      <section className="px-6 md:px-12 py-16 bg-card">
-        <div className="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-          {stats.map((s) => (
-            <div key={s.label}>
-              <span className="block font-heading text-3xl md:text-4xl font-bold text-primary">
-                {s.value}
-              </span>
-              <span className="text-muted-foreground text-sm mt-1 block">
-                {s.label}
-              </span>
-            </div>
-          ))}
+      {/* ═══════════════ 8. CTA FINAL (fond sombre) ═══════════════ */}
+      <section className="px-6 md:px-12 py-20" style={{ backgroundColor: "#1C1B18" }}>
+        <div className="max-w-3xl mx-auto text-center">
+          <h2 className="font-heading text-3xl md:text-4xl font-bold mb-4 text-white">
+            On construit Guardiens avec vous.
+          </h2>
+          <p className="text-white/60 text-lg mb-8">
+            Rejoignez la liste d'attente. Vous serez les premiers à tester — et
+            à façonner ce que Guardiens deviendra.
+          </p>
+          <form
+            className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto"
+            onSubmit={(e) => {
+              e.preventDefault();
+              handleEmailSignup(emailBottom);
+            }}
+          >
+            <Input
+              type="email"
+              placeholder="votre@email.com"
+              value={emailBottom}
+              onChange={(e) => setEmailBottom(e.target.value)}
+              className="bg-white/10 border-white/20 text-white placeholder:text-white/40"
+            />
+            <Button type="submit" className="whitespace-nowrap">
+              S'inscrire
+            </Button>
+          </form>
+          <p className="mt-4 text-xs text-white/40">
+            Gratuit · Pas de spam · On vous contacte quand c'est prêt.
+          </p>
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="border-t border-border px-6 md:px-12 py-12">
-        <div className="max-w-5xl mx-auto">
-          <div className="grid sm:grid-cols-3 gap-8 mb-10">
-            <div>
-              <h3 className="font-heading text-lg font-semibold mb-4">
-                <span className="text-primary">g</span>uardiens
-              </h3>
-              <p className="text-muted-foreground text-sm leading-relaxed">
-                House-sitting de proximité
-                <br />
-                en Auvergne-Rhône-Alpes
-              </p>
-            </div>
-            <div>
-              <h4 className="font-heading font-semibold text-sm mb-3">Liens</h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li className="hover:text-foreground cursor-pointer transition-colors" onClick={() => navigate("/a-propos")}>À propos</li>
-                <li className="hover:text-foreground cursor-pointer transition-colors" onClick={() => navigate("/actualites")}>Blog</li>
-                <li className="hover:text-foreground cursor-pointer transition-colors" onClick={() => navigate("/contact")}>Contact</li>
-                <li className="hover:text-foreground cursor-pointer transition-colors" onClick={() => navigate("/cgu")}>CGU</li>
-                <li className="hover:text-foreground cursor-pointer transition-colors" onClick={() => navigate("/confidentialite")}>Politique de confidentialité</li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-heading font-semibold text-sm mb-3">Réseaux</h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li className="hover:text-foreground cursor-pointer transition-colors">Instagram @guardiens.fr</li>
-                <li className="hover:text-foreground cursor-pointer transition-colors">LinkedIn</li>
-              </ul>
-            </div>
+      {/* ═══════════════ 9. FOOTER ═══════════════ */}
+      <footer className="border-t border-border px-6 md:px-12 py-10">
+        <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div>
+            <h3 className="font-heading text-lg font-semibold">
+              <span className="text-primary">g</span>uardiens
+            </h3>
+            <p className="text-muted-foreground text-sm">
+              House-sitting de proximité en AURA
+            </p>
           </div>
-          <div className="border-t border-border pt-6 text-center text-muted-foreground text-xs">
-            © 2026 Guardiens — House-sitting de proximité en Auvergne-Rhône-Alpes
+          <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
+            <span>© 2026 Guardiens</span>
+            <span className="text-border">·</span>
+            <Link to="/cgu" className="hover:text-foreground transition-colors">
+              CGU
+            </Link>
+            <span className="text-border">·</span>
+            <Link to="/confidentialite" className="hover:text-foreground transition-colors">
+              Politique de confidentialité
+            </Link>
+            <span className="text-border">·</span>
+            <Link to="/contact" className="hover:text-foreground transition-colors">
+              Contact
+            </Link>
           </div>
         </div>
       </footer>
