@@ -23,19 +23,21 @@ interface Article {
 }
 
 const CATEGORY_LABELS: Record<string, string> = {
-  conseil: "Conseil",
-  guide_ville: "Guide ville",
-  race: "Races & espèces",
+  guide_race: "Guide race",
+  guide_lieu: "Guide lieu",
+  conseil_gardien: "Conseil gardien",
+  conseil_proprio: "Conseil proprio",
   temoignage: "Témoignage",
-  astuce: "Astuce",
+  actualite: "Actualité",
 };
 
 const CATEGORY_COLORS: Record<string, string> = {
-  conseil: "bg-primary/10 text-primary",
-  guide_ville: "bg-secondary/10 text-secondary",
-  race: "bg-accent text-accent-foreground",
-  temoignage: "bg-muted text-muted-foreground",
-  astuce: "bg-primary/10 text-primary",
+  guide_race: "bg-[hsl(141,50%,90%)] text-[hsl(153,50%,25%)]",
+  guide_lieu: "bg-[hsl(214,80%,92%)] text-[hsl(214,50%,30%)]",
+  conseil_gardien: "bg-[hsl(45,90%,90%)] text-[hsl(37,60%,30%)]",
+  conseil_proprio: "bg-[hsl(45,90%,90%)] text-[hsl(37,60%,30%)]",
+  temoignage: "bg-[hsl(330,80%,94%)] text-[hsl(330,50%,30%)]",
+  actualite: "bg-muted text-muted-foreground",
 };
 
 export default function News() {
