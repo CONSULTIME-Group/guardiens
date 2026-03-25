@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
-import { Search, SlidersHorizontal, MapPin, Star, Car, CheckCircle2 } from "lucide-react";
+import { Search, SlidersHorizontal, MapPin, Star, Car, CheckCircle2, CircleDot } from "lucide-react";
 import ChipSelect from "@/components/profile/ChipSelect";
 
 const animalChips = ["Chiens", "Chats", "Chevaux", "Oiseaux", "Animaux de ferme", "NAC", "Tous"];
@@ -33,6 +33,7 @@ const SearchOwner = () => {
   const [animalTypes, setAnimalTypes] = useState<string[]>([]);
   const [sitterType, setSitterType] = useState("all");
   const [vehicled, setVehicled] = useState(false);
+  const [availableOnly, setAvailableOnly] = useState(false);
   const [sort, setSort] = useState<SortOption>("rating");
 
   const [results, setResults] = useState<any[]>([]);
@@ -59,6 +60,9 @@ const SearchOwner = () => {
     }
     if (vehicled) {
       items = items.filter((s: any) => s.has_vehicle);
+    }
+    if (availableOnly) {
+      items = items.filter((s: any) => s.is_available);
     }
     if (animalTypes.length > 0 && !animalTypes.includes("Tous")) {
       const wanted = animalTypes.map(a => animalChipToType[a]).filter(Boolean);
@@ -136,6 +140,10 @@ const SearchOwner = () => {
       <div className="flex items-center gap-3">
         <Switch checked={vehicled} onCheckedChange={setVehicled} />
         <label className="text-sm">Véhiculé</label>
+      </div>
+      <div className="flex items-center gap-3">
+        <Switch checked={availableOnly} onCheckedChange={setAvailableOnly} />
+        <label className="text-sm">Disponibles uniquement</label>
       </div>
       <Button onClick={handleSearch} className="w-full gap-2" disabled={loading}>
         <Search className="h-4 w-4" /> {loading ? "Recherche..." : "Rechercher"}
@@ -217,6 +225,11 @@ const SearchOwner = () => {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
                           <h3 className="font-heading font-semibold">{profile?.first_name || "Gardien"}</h3>
+                          {s.is_available && (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 text-xs font-medium">
+                              <CircleDot className="h-3 w-3" /> Disponible
+                            </span>
+                          )}
                           {s.has_vehicle && <Car className="h-4 w-4 text-muted-foreground" />}
                         </div>
                         <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground mt-0.5">

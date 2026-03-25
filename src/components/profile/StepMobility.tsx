@@ -43,6 +43,15 @@ const StepMobility = ({ data, onChange }: Props) => {
     <div className="space-y-6">
       <h2 className="font-heading text-2xl font-bold">Mobilité & disponibilités</h2>
 
+      {/* Availability toggle */}
+      <div className="flex items-center justify-between rounded-lg border border-green-200 bg-green-50 dark:bg-green-950/20 dark:border-green-800 p-4">
+        <div>
+          <Label className="text-base font-semibold">Je suis disponible</Label>
+          <p className="text-sm text-muted-foreground mt-0.5">Activez pour apparaître dans les résultats de recherche avec un badge vert.</p>
+        </div>
+        <Switch checked={data.is_available} onCheckedChange={v => onChange({ is_available: v })} />
+      </div>
+
       <div className="flex items-center justify-between py-2">
         <Label>Permis de conduire</Label>
         <Switch checked={data.has_license} onCheckedChange={v => onChange({ has_license: v })} />

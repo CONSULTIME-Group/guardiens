@@ -679,6 +679,7 @@ export type Database = {
           has_vehicle: boolean | null
           id: string
           interests: string[] | null
+          is_available: boolean
           languages: string[] | null
           lifestyle: string[] | null
           max_duration: number | null
@@ -709,6 +710,7 @@ export type Database = {
           has_vehicle?: boolean | null
           id?: string
           interests?: string[] | null
+          is_available?: boolean
           languages?: string[] | null
           lifestyle?: string[] | null
           max_duration?: number | null
@@ -739,6 +741,7 @@ export type Database = {
           has_vehicle?: boolean | null
           id?: string
           interests?: string[] | null
+          is_available?: boolean
           languages?: string[] | null
           lifestyle?: string[] | null
           max_duration?: number | null

@@ -30,6 +30,7 @@ export interface SitterProfileData {
   min_duration: number;
   max_duration: number;
   availability_dates: any[];
+  is_available: boolean;
   // Step 5
   strict_rules_ok: boolean;
   prefer_visitors: boolean;
@@ -54,7 +55,7 @@ const defaultData: SitterProfileData = {
   motivation: "",
   sitter_type: "", accompanied_by: "", smoker: false, availability_during: "", lifestyle: [],
   animal_types: [], experience_years: "", references_text: "",
-  has_license: false, has_vehicle: false, geographic_radius: 30, min_duration: 3, max_duration: 21, availability_dates: [],
+  has_license: false, has_vehicle: false, geographic_radius: 30, min_duration: 3, max_duration: 21, availability_dates: [], is_available: false,
   strict_rules_ok: false, prefer_visitors: false, farm_animals_ok: false, preferences_notes: "",
   meeting_preference: [], handover_preference: "", languages: [], bonus_skills: [], interests: [],
 };
@@ -102,6 +103,7 @@ export function useSitterProfile() {
       min_duration: s?.min_duration || 3,
       max_duration: s?.max_duration || 21,
       availability_dates: (s?.availability_dates as any[]) || [],
+      is_available: s?.is_available || false,
       strict_rules_ok: s?.strict_rules_ok || false,
       prefer_visitors: s?.prefer_visitors || false,
       farm_animals_ok: s?.farm_animals_ok || false,
@@ -175,7 +177,7 @@ export function useSitterProfile() {
         "motivation", "sitter_type", "accompanied_by", "smoker", "availability_during",
         "lifestyle", "animal_types", "experience_years", "references_text",
         "has_license", "has_vehicle", "geographic_radius", "min_duration", "max_duration",
-        "availability_dates", "strict_rules_ok", "prefer_visitors", "farm_animals_ok",
+        "availability_dates", "is_available", "strict_rules_ok", "prefer_visitors", "farm_animals_ok",
         "preferences_notes", "meeting_preference", "handover_preference",
         "languages", "bonus_skills", "interests",
       ] as const;
