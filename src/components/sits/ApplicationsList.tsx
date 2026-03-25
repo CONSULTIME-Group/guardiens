@@ -221,7 +221,7 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate }: App
                     <Button
                       size="sm"
                       className="gap-1.5"
-                      onClick={() => handleAccept(app.id, sitter?.first_name || "Ce gardien")}
+                      onClick={() => handleAccept(app.id, sitter?.first_name || "Ce gardien", app.sitter_id)}
                     >
                       <CheckCircle2 className="h-3.5 w-3.5" /> Accepter ce gardien
                     </Button>
