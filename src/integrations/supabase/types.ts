@@ -245,6 +245,8 @@ export type Database = {
       }
       notifications: {
         Row: {
+          actor_avatar_url: string | null
+          actor_name: string | null
           body: string
           created_at: string
           id: string
@@ -255,6 +257,8 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          actor_avatar_url?: string | null
+          actor_name?: string | null
           body?: string
           created_at?: string
           id?: string
@@ -265,6 +269,8 @@ export type Database = {
           user_id: string
         }
         Update: {
+          actor_avatar_url?: string | null
+          actor_name?: string | null
           body?: string
           created_at?: string
           id?: string
