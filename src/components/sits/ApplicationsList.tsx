@@ -96,6 +96,23 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
         content: confirmMsg,
         is_system: true,
       });
+
+      // Check if house guide exists and send auto-message with link
+      const { data: guideData } = await supabase
+        .from("house_guides")
+        .select("id")
+        .eq("property_id", propertyId)
+        .maybeSingle();
+
+      if (guideData) {
+        await supabase.from("messages").insert({
+          conversation_id: acceptedConv.id,
+          sender_id: user.id,
+          content: "📋 Le guide de la maison est disponible ! Vous y trouverez l'adresse exacte, les codes d'accès, les contacts utiles et toutes les consignes. Consultez-le dans le bandeau en haut de cette conversation.",
+          is_system: true,
+        });
+      }
+
       await supabase.from("conversations").update({ updated_at: new Date().toISOString() }).eq("id", acceptedConv.id);
     }
 
