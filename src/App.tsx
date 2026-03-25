@@ -21,6 +21,8 @@ import LeaveReview from "./pages/LeaveReview";
 import Notifications from "./pages/Notifications";
 import Settings from "./pages/Settings";
 import OwnerProfile from "./pages/OwnerProfile";
+import CreateSublet from "./pages/CreateSublet";
+import SubletDetail from "./pages/SubletDetail";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
