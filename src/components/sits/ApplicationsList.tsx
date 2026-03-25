@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
 import { Star, MapPin, CheckCircle2, XCircle, MessageSquare, Users } from "lucide-react";
@@ -23,6 +24,7 @@ const statusStyles: Record<string, { label: string; className: string }> = {
 };
 
 const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate }: ApplicationsListProps) => {
+  const { user } = useAuth();
   const [applications, setApplications] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
@@ -59,10 +61,15 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate }: App
 
   useEffect(() => { load(); }, [sitId]);
 
-  const handleAccept = async (appId: string, sitterName: string) => {
+  const handleAccept = async (appId: string, sitterName: string, sitterId: string) => {
     // Accept this one
     await supabase.from("applications").update({ status: "accepted" as any }).eq("id", appId);
     // Reject others
+    const { data: rejectedApps } = await supabase
+      .from("applications")
+      .select("sitter_id")
+      .eq("sit_id", sitId)
+      .neq("id", appId);
     await supabase
       .from("applications")
       .update({ status: "rejected" as any })
@@ -71,12 +78,73 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate }: App
     // Update sit status
     await supabase.from("sits").update({ status: "confirmed" as any }).eq("id", sitId);
 
+    // Send confirmation system message to accepted sitter's conversation
+    const petNamesStr = petNames.join(", ");
+    const confirmMsg = `🎉 La garde est confirmée ! Vous avez été choisi(e) pour garder ${petNamesStr} du ${startDate} au ${endDate}.`;
+    const { data: acceptedConv } = await supabase
+      .from("conversations")
+      .select("id")
+      .eq("sit_id", sitId)
+      .eq("sitter_id", sitterId)
+      .maybeSingle();
+
+    if (acceptedConv && user) {
+      await supabase.from("messages").insert({
+        conversation_id: acceptedConv.id,
+        sender_id: user.id,
+        content: confirmMsg,
+        is_system: true,
+      });
+      await supabase.from("conversations").update({ updated_at: new Date().toISOString() }).eq("id", acceptedConv.id);
+    }
+
+    // Send rejection system messages to other sitters' conversations
+    if (rejectedApps && user) {
+      for (const app of rejectedApps) {
+        const { data: rejConv } = await supabase
+          .from("conversations")
+          .select("id")
+          .eq("sit_id", sitId)
+          .eq("sitter_id", app.sitter_id)
+          .maybeSingle();
+        if (rejConv) {
+          await supabase.from("messages").insert({
+            conversation_id: rejConv.id,
+            sender_id: user.id,
+            content: `Le propriétaire a choisi un autre gardien pour cette garde. Merci pour votre candidature !`,
+            is_system: true,
+          });
+          await supabase.from("conversations").update({ updated_at: new Date().toISOString() }).eq("id", rejConv.id);
+        }
+      }
+    }
+
     toast({ title: "Garde confirmée !", description: `${sitterName} a été choisi(e) pour cette garde.` });
     load();
   };
 
-  const handleDecline = async (appId: string) => {
+  const handleDecline = async (appId: string, sitterId: string) => {
     await supabase.from("applications").update({ status: "rejected" as any }).eq("id", appId);
+
+    // Send rejection system message
+    if (user) {
+      const { data: rejConv } = await supabase
+        .from("conversations")
+        .select("id")
+        .eq("sit_id", sitId)
+        .eq("sitter_id", sitterId)
+        .maybeSingle();
+      if (rejConv) {
+        await supabase.from("messages").insert({
+          conversation_id: rejConv.id,
+          sender_id: user.id,
+          content: "Votre candidature a été déclinée pour cette garde. N'hésitez pas à postuler à d'autres annonces !",
+          is_system: true,
+        });
+        await supabase.from("conversations").update({ updated_at: new Date().toISOString() }).eq("id", rejConv.id);
+      }
+    }
+
     toast({ title: "Candidature déclinée" });
     load();
   };
@@ -153,7 +221,7 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate }: App
                     <Button
                       size="sm"
                       className="gap-1.5"
-                      onClick={() => handleAccept(app.id, sitter?.first_name || "Ce gardien")}
+                      onClick={() => handleAccept(app.id, sitter?.first_name || "Ce gardien", app.sitter_id)}
                     >
                       <CheckCircle2 className="h-3.5 w-3.5" /> Accepter ce gardien
                     </Button>
@@ -161,7 +229,7 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate }: App
                       size="sm"
                       variant="outline"
                       className="gap-1.5 text-destructive hover:text-destructive"
-                      onClick={() => handleDecline(app.id)}
+                      onClick={() => handleDecline(app.id, app.sitter_id)}
                     >
                       <XCircle className="h-3.5 w-3.5" /> Décliner
                     </Button>

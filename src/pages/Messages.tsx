@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ArrowLeft, Send, Image as ImageIcon, Check, CheckCheck, ExternalLink } from "lucide-react";
+import { ArrowLeft, Send, Image as ImageIcon, Check, CheckCheck, ExternalLink, CheckCircle2, AlertTriangle, Phone, Home, PawPrint } from "lucide-react";
 import { format, isToday, isYesterday } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Link } from "react-router-dom";
@@ -65,6 +65,8 @@ const Messages = () => {
   const [sending, setSending] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [helpOpen, setHelpOpen] = useState(false);
+  const [helpCategory, setHelpCategory] = useState<string | null>(null);
 
   // Load conversations
   const loadConversations = useCallback(async () => {
@@ -312,6 +314,75 @@ const Messages = () => {
               </div>
             </div>
           </div>
+
+          {/* Confirmed banner + help button */}
+          {activeConv.sit?.status === "confirmed" && (
+            <div className="bg-green-50 border-b border-green-200 px-4 py-2.5 flex items-center justify-between">
+              <div className="flex items-center gap-2 text-sm text-green-700 font-medium">
+                <CheckCircle2 className="h-4 w-4" />
+                Garde confirmée ✓
+              </div>
+              <button
+                onClick={() => { setHelpOpen(!helpOpen); setHelpCategory(null); }}
+                className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1 transition-colors"
+              >
+                <AlertTriangle className="h-3.5 w-3.5" />
+                Besoin d'aide
+              </button>
+            </div>
+          )}
+
+          {/* Help panel */}
+          {helpOpen && activeConv.sit?.status === "confirmed" && (
+            <div className="bg-card border-b border-border px-4 py-3">
+              {!helpCategory ? (
+                <div className="space-y-2">
+                  <p className="text-xs font-medium text-muted-foreground mb-2">Quel type de problème ?</p>
+                  <div className="flex flex-wrap gap-2">
+                    <button onClick={() => setHelpCategory("animal")} className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-accent hover:bg-accent/80 text-xs font-medium transition-colors">
+                      <PawPrint className="h-3.5 w-3.5" /> Animal
+                    </button>
+                    <button onClick={() => setHelpCategory("housing")} className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-accent hover:bg-accent/80 text-xs font-medium transition-colors">
+                      <Home className="h-3.5 w-3.5" /> Logement
+                    </button>
+                    <button onClick={() => setHelpCategory("emergency")} className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-destructive/10 hover:bg-destructive/20 text-xs font-medium text-destructive transition-colors">
+                      <Phone className="h-3.5 w-3.5" /> Urgence
+                    </button>
+                  </div>
+                </div>
+              ) : helpCategory === "animal" ? (
+                <div className="space-y-2">
+                  <button onClick={() => setHelpCategory(null)} className="text-xs text-muted-foreground hover:text-foreground">← Retour</button>
+                  <p className="text-sm font-medium">🐾 Problème avec un animal</p>
+                  <div className="text-xs text-muted-foreground space-y-1.5">
+                    <p>• Consultez le <strong>guide de la maison</strong> pour les coordonnées du vétérinaire</p>
+                    <p>• Contactez le propriétaire via cette messagerie</p>
+                    <p>• En cas d'urgence vitale : <strong>appelez le vétérinaire de garde</strong></p>
+                  </div>
+                </div>
+              ) : helpCategory === "housing" ? (
+                <div className="space-y-2">
+                  <button onClick={() => setHelpCategory(null)} className="text-xs text-muted-foreground hover:text-foreground">← Retour</button>
+                  <p className="text-sm font-medium">🏠 Problème de logement</p>
+                  <div className="text-xs text-muted-foreground space-y-1.5">
+                    <p>• Consultez le <strong>guide de la maison</strong> pour les contacts utiles</p>
+                    <p>• Contactez le propriétaire via cette messagerie</p>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <button onClick={() => setHelpCategory(null)} className="text-xs text-muted-foreground hover:text-foreground">← Retour</button>
+                  <p className="text-sm font-medium text-destructive">🚨 Urgence</p>
+                  <div className="text-xs space-y-1.5">
+                    <p><strong>SAMU :</strong> <a href="tel:15" className="text-primary underline">15</a></p>
+                    <p><strong>Police :</strong> <a href="tel:17" className="text-primary underline">17</a></p>
+                    <p><strong>Pompiers :</strong> <a href="tel:18" className="text-primary underline">18</a></p>
+                    <p className="text-muted-foreground mt-1">Contactez également le propriétaire via cette messagerie.</p>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Messages */}
           <div className="flex-1 overflow-y-auto p-4 space-y-3 pb-20 md:pb-4" style={{ background: "hsl(var(--background))" }}>
