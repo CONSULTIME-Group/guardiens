@@ -27,17 +27,18 @@ const AdminListings = () => {
 
   const fetchListings = useCallback(async () => {
     setLoading(true);
-    const table = filterType;
-    let query = supabase
-      .from(table)
-      .select("*, profiles!inner(first_name, last_name, email)")
-      .order("created_at", { ascending: false });
-
-    if (filterStatus !== "all") {
-      query = query.eq("status", filterStatus as any);
-    }
-
-    const { data, error } = await query;
+    const fetchQuery = async () => {
+      if (filterType === "sits") {
+        let q = supabase.from("sits").select("*, profiles!inner(first_name, last_name, email)").order("created_at", { ascending: false });
+        if (filterStatus !== "all") q = q.eq("status", filterStatus as any);
+        return q;
+      } else {
+        let q = supabase.from("long_stays").select("*, profiles!inner(first_name, last_name, email)").order("created_at", { ascending: false });
+        if (filterStatus !== "all") q = q.eq("status", filterStatus as any);
+        return q;
+      }
+    };
+    const { data, error } = await fetchQuery();
     if (error) toast.error("Erreur de chargement");
     else setListings(data || []);
     setLoading(false);
