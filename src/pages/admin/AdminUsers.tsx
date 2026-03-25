@@ -47,6 +47,10 @@ const AdminUsers = () => {
   const [suspendModal, setSuspendModal] = useState<{ open: boolean; userId: string; reason: string }>({
     open: false, userId: "", reason: ""
   });
+  const [deleteConfirm, setDeleteConfirm] = useState<{ open: boolean; userId: string; userName: string }>({
+    open: false, userId: "", userName: ""
+  });
+  const [deleting, setDeleting] = useState(false);
 
   const fetchUsers = useCallback(async () => {
     setLoading(true);
