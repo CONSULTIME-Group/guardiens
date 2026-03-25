@@ -1,6 +1,7 @@
 import { NavLink, useLocation } from "react-router-dom";
-import { Home, Search, Calendar, MessageSquare, User, LogOut, Bell, Settings, PawPrint, ArrowLeftRight, Newspaper, FileText } from "lucide-react";
+import { Home, Search, Calendar, MessageSquare, User, LogOut, Bell, Settings, PawPrint, ArrowLeftRight, Newspaper, Shield } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useAdmin } from "@/hooks/useAdmin";
 import { cn } from "@/lib/utils";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -12,13 +13,13 @@ const navItems = [
   { to: "/sits", icon: Calendar, label: "Mes gardes" },
   { to: "/messages", icon: MessageSquare, label: "Messagerie" },
   { to: "/actualites", icon: Newspaper, label: "Actualités" },
-  { to: "/admin/articles", icon: FileText, label: "Articles (admin)" },
   { to: "/owner-profile", icon: PawPrint, label: "Profil proprio", hideForRole: "sitter" as const },
   { to: "/profile", icon: User, label: "Mon profil" },
 ];
 
 export const Sidebar = () => {
   const { user, logout, activeRole, setActiveRole } = useAuth();
+  const { isAdmin } = useAdmin();
   const [unreadCount, setUnreadCount] = useState(0);
 
   useEffect(() => {
@@ -114,6 +115,22 @@ export const Sidebar = () => {
       </nav>
 
       <div className="p-3 border-t border-border space-y-1">
+        {isAdmin && (
+          <NavLink
+            to="/admin"
+            className={({ isActive }) =>
+              cn(
+                "flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors",
+                isActive
+                  ? "bg-primary/10 text-primary"
+                  : "text-muted-foreground hover:bg-accent hover:text-foreground"
+              )
+            }
+          >
+            <Shield className="h-5 w-5" />
+            Espace admin
+          </NavLink>
+        )}
         <NavLink
           to="/settings"
           className={({ isActive }) =>
