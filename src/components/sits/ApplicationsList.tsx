@@ -12,6 +12,7 @@ interface ApplicationsListProps {
   petNames: string[];
   startDate: string;
   endDate: string;
+  propertyId: string;
 }
 
 const statusStyles: Record<string, { label: string; className: string }> = {
@@ -23,7 +24,7 @@ const statusStyles: Record<string, { label: string; className: string }> = {
   cancelled: { label: "Annulée", className: "bg-muted text-muted-foreground" },
 };
 
-const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate }: ApplicationsListProps) => {
+const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, propertyId }: ApplicationsListProps) => {
   const { user } = useAuth();
   const [applications, setApplications] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -95,6 +96,23 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate }: App
         content: confirmMsg,
         is_system: true,
       });
+
+      // Check if house guide exists and send auto-message with link
+      const { data: guideData } = await supabase
+        .from("house_guides")
+        .select("id")
+        .eq("property_id", propertyId)
+        .maybeSingle();
+
+      if (guideData) {
+        await supabase.from("messages").insert({
+          conversation_id: acceptedConv.id,
+          sender_id: user.id,
+          content: "📋 Le guide de la maison est disponible ! Vous y trouverez l'adresse exacte, les codes d'accès, les contacts utiles et toutes les consignes. Consultez-le dans le bandeau en haut de cette conversation.",
+          is_system: true,
+        });
+      }
+
       await supabase.from("conversations").update({ updated_at: new Date().toISOString() }).eq("id", acceptedConv.id);
     }
 
