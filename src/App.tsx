@@ -59,6 +59,8 @@ const AppRoutes = () => (
       <Route path="/house-guide/:propertyId" element={<HouseGuide />} />
       <Route path="/owner-profile" element={<OwnerProfile />} />
       <Route path="/settings" element={<Settings />} />
+      <Route path="/sublets/create" element={<CreateSublet />} />
+      <Route path="/sublets/:id" element={<SubletDetail />} />
     </Route>
     <Route path="*" element={<NotFound />} />
   </Routes>
