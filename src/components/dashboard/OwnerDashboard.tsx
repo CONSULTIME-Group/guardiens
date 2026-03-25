@@ -41,12 +41,13 @@ const OwnerDashboard = () => {
   useEffect(() => {
     if (!user) return;
     const load = async () => {
-      const [sitsRes, unreadRes, sittersRes, propsRes, reviewsRes] = await Promise.all([
+      const [sitsRes, unreadRes, sittersRes, propsRes, reviewsRes, subletsRes] = await Promise.all([
         supabase.from("sits").select("*, applications(id, status)").eq("user_id", user.id).order("created_at", { ascending: false }),
         supabase.from("messages").select("id", { count: "exact", head: true }).neq("sender_id", user.id).is("read_at", null),
         supabase.from("sitter_profiles").select("id", { count: "exact", head: true }),
         supabase.from("properties").select("id").eq("user_id", user.id),
         supabase.from("reviews").select("overall_rating").eq("reviewee_id", user.id).eq("published", true),
+        supabase.from("sublets").select("*, sublet_applications(id, status)").eq("user_id", user.id).order("created_at", { ascending: false }),
       ]);
 
       const sitsData = sitsRes.data || [];
