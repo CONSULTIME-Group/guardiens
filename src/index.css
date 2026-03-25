@@ -53,6 +53,50 @@
     --badge-success: 141 50% 90%;
     --badge-success-foreground: 153 50% 25%;
   }
+
+  .dark {
+    --background: 160 10% 8%;
+    --foreground: 40 15% 90%;
+
+    --card: 160 8% 12%;
+    --card-foreground: 40 15% 90%;
+
+    --popover: 160 8% 12%;
+    --popover-foreground: 40 15% 90%;
+
+    --primary: 153 42% 40%;
+    --primary-foreground: 160 10% 8%;
+
+    --secondary: 27 30% 45%;
+    --secondary-foreground: 40 15% 90%;
+
+    --muted: 160 8% 18%;
+    --muted-foreground: 37 10% 55%;
+
+    --accent: 160 8% 16%;
+    --accent-foreground: 40 15% 90%;
+
+    --destructive: 0 62% 50%;
+    --destructive-foreground: 40 15% 90%;
+
+    --border: 160 8% 20%;
+    --input: 160 8% 20%;
+    --ring: 153 42% 40%;
+
+    --sidebar-background: 160 8% 10%;
+    --sidebar-foreground: 40 15% 90%;
+    --sidebar-primary: 153 42% 40%;
+    --sidebar-primary-foreground: 160 10% 8%;
+    --sidebar-accent: 160 8% 16%;
+    --sidebar-accent-foreground: 40 15% 90%;
+    --sidebar-border: 160 8% 20%;
+    --sidebar-ring: 153 42% 40%;
+
+    --hint: 37 10% 45%;
+    --message-sent: 153 30% 20%;
+    --badge-success: 153 30% 20%;
+    --badge-success-foreground: 141 50% 75%;
+  }
 }
 
 @layer base {
