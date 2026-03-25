@@ -145,6 +145,7 @@ export default function News() {
           </p>
         </div>
       ) : (
+        <>
         <div className="grid gap-6 md:grid-cols-2">
           {articles.map((article) => (
             <Link
