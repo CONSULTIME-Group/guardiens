@@ -48,7 +48,8 @@ const SitDetail = () => {
   const [sitterProfile, setSitterProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [photoIndex, setPhotoIndex] = useState(0);
-
+  const [applyOpen, setApplyOpen] = useState(false);
+  const [hasApplied, setHasApplied] = useState(false);
   useEffect(() => {
     if (!id) return;
     const load = async () => {
