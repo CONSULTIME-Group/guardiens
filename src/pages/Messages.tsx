@@ -65,6 +65,8 @@ const Messages = () => {
   const [sending, setSending] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [helpOpen, setHelpOpen] = useState(false);
+  const [helpCategory, setHelpCategory] = useState<string | null>(null);
 
   // Load conversations
   const loadConversations = useCallback(async () => {
