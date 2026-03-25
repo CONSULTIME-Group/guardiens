@@ -59,10 +59,15 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate }: App
 
   useEffect(() => { load(); }, [sitId]);
 
-  const handleAccept = async (appId: string, sitterName: string) => {
+  const handleAccept = async (appId: string, sitterName: string, sitterId: string) => {
     // Accept this one
     await supabase.from("applications").update({ status: "accepted" as any }).eq("id", appId);
     // Reject others
+    const { data: rejectedApps } = await supabase
+      .from("applications")
+      .select("sitter_id")
+      .eq("sit_id", sitId)
+      .neq("id", appId);
     await supabase
       .from("applications")
       .update({ status: "rejected" as any })
@@ -71,12 +76,73 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate }: App
     // Update sit status
     await supabase.from("sits").update({ status: "confirmed" as any }).eq("id", sitId);
 
+    // Send confirmation system message to accepted sitter's conversation
+    const petNamesStr = petNames.join(", ");
+    const confirmMsg = `🎉 La garde est confirmée ! Vous avez été choisi(e) pour garder ${petNamesStr} du ${startDate} au ${endDate}.`;
+    const { data: acceptedConv } = await supabase
+      .from("conversations")
+      .select("id")
+      .eq("sit_id", sitId)
+      .eq("sitter_id", sitterId)
+      .maybeSingle();
+
+    if (acceptedConv && user) {
+      await supabase.from("messages").insert({
+        conversation_id: acceptedConv.id,
+        sender_id: user.id,
+        content: confirmMsg,
+        is_system: true,
+      });
+      await supabase.from("conversations").update({ updated_at: new Date().toISOString() }).eq("id", acceptedConv.id);
+    }
+
+    // Send rejection system messages to other sitters' conversations
+    if (rejectedApps && user) {
+      for (const app of rejectedApps) {
+        const { data: rejConv } = await supabase
+          .from("conversations")
+          .select("id")
+          .eq("sit_id", sitId)
+          .eq("sitter_id", app.sitter_id)
+          .maybeSingle();
+        if (rejConv) {
+          await supabase.from("messages").insert({
+            conversation_id: rejConv.id,
+            sender_id: user.id,
+            content: `Le propriétaire a choisi un autre gardien pour cette garde. Merci pour votre candidature !`,
+            is_system: true,
+          });
+          await supabase.from("conversations").update({ updated_at: new Date().toISOString() }).eq("id", rejConv.id);
+        }
+      }
+    }
+
     toast({ title: "Garde confirmée !", description: `${sitterName} a été choisi(e) pour cette garde.` });
     load();
   };
 
-  const handleDecline = async (appId: string) => {
+  const handleDecline = async (appId: string, sitterId: string) => {
     await supabase.from("applications").update({ status: "rejected" as any }).eq("id", appId);
+
+    // Send rejection system message
+    if (user) {
+      const { data: rejConv } = await supabase
+        .from("conversations")
+        .select("id")
+        .eq("sit_id", sitId)
+        .eq("sitter_id", sitterId)
+        .maybeSingle();
+      if (rejConv) {
+        await supabase.from("messages").insert({
+          conversation_id: rejConv.id,
+          sender_id: user.id,
+          content: "Votre candidature a été déclinée pour cette garde. N'hésitez pas à postuler à d'autres annonces !",
+          is_system: true,
+        });
+        await supabase.from("conversations").update({ updated_at: new Date().toISOString() }).eq("id", rejConv.id);
+      }
+    }
+
     toast({ title: "Candidature déclinée" });
     load();
   };
