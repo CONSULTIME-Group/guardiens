@@ -268,35 +268,35 @@ const SearchSitter = () => {
           </SelectContent>
         </Select>
       </div>
+      <div>
+        <label className="text-sm font-medium mb-1.5 block">Environnement</label>
+        <Select value={environment} onValueChange={setEnvironment}>
+          <SelectTrigger><SelectValue /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Tous</SelectItem>
+            <SelectItem value="city_center">Ville</SelectItem>
+            <SelectItem value="suburban">Périurbain</SelectItem>
+            <SelectItem value="countryside">Campagne</SelectItem>
+            <SelectItem value="mountain">Montagne</SelectItem>
+            <SelectItem value="seaside">Bord de mer</SelectItem>
+            <SelectItem value="forest">Forêt</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
       {tab === "sits" && (
-        <>
-          <div>
-            <label className="text-sm font-medium mb-1.5 block">Environnement</label>
-            <Select value={environment} onValueChange={setEnvironment}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Tous</SelectItem>
-                <SelectItem value="city_center">Ville</SelectItem>
-                <SelectItem value="countryside">Campagne</SelectItem>
-                <SelectItem value="mountain">Montagne</SelectItem>
-                <SelectItem value="seaside">Bord de mer</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <div>
-            <label className="text-sm font-medium mb-1.5 block">Durée</label>
-            <Select value={duration} onValueChange={setDuration}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Toutes</SelectItem>
-                <SelectItem value="weekend">Week-end</SelectItem>
-                <SelectItem value="1week">1 semaine</SelectItem>
-                <SelectItem value="2weeks">2+ semaines</SelectItem>
-                <SelectItem value="1month">1 mois+</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </>
+        <div>
+          <label className="text-sm font-medium mb-1.5 block">Durée</label>
+          <Select value={duration} onValueChange={setDuration}>
+            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Toutes</SelectItem>
+              <SelectItem value="weekend">Week-end</SelectItem>
+              <SelectItem value="1week">1 semaine</SelectItem>
+              <SelectItem value="2weeks">2+ semaines</SelectItem>
+              <SelectItem value="1month">1 mois+</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       )}
       <div className="flex items-center gap-3">
         <Switch checked={verifiedOnly} onCheckedChange={setVerifiedOnly} />
