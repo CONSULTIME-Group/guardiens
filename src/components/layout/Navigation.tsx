@@ -11,6 +11,7 @@ const navItems = [
   { to: "/search", icon: Search, label: "Recherche" },
   { to: "/sits", icon: Calendar, label: "Mes gardes" },
   { to: "/messages", icon: MessageSquare, label: "Messagerie" },
+  { to: "/owner-profile", icon: PawPrint, label: "Profil proprio" },
   { to: "/profile", icon: User, label: "Mon profil" },
 ];
 
