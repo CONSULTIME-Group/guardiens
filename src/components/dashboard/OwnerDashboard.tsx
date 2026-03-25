@@ -279,7 +279,36 @@ const OwnerDashboard = () => {
         )}
       </DashSection>
 
-      {/* Messages non lus */}
+      {/* Métriques */}
+      <DashSection title="Mes métriques" icon={BarChart3}>
+        <div className="grid grid-cols-3 gap-3">
+          <div className="p-4 rounded-xl border border-border bg-card text-center">
+            <p className="text-2xl font-bold">{completedSits.length}</p>
+            <p className="text-xs text-muted-foreground mt-1">Garde{completedSits.length !== 1 ? "s" : ""} complétée{completedSits.length !== 1 ? "s" : ""}</p>
+          </div>
+          <div className="p-4 rounded-xl border border-border bg-card text-center">
+            {reviews.length > 0 ? (
+              <>
+                <p className="text-2xl font-bold flex items-center justify-center gap-1">
+                  {(reviews.reduce((sum, r) => sum + r.overall_rating, 0) / reviews.length).toFixed(1)}
+                  <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
+                </p>
+                <p className="text-xs text-muted-foreground mt-1">{reviews.length} avis</p>
+              </>
+            ) : (
+              <>
+                <p className="text-2xl font-bold text-muted-foreground">—</p>
+                <p className="text-xs text-muted-foreground mt-1">Note moyenne</p>
+              </>
+            )}
+          </div>
+          <div className="p-4 rounded-xl border border-border bg-card text-center">
+            <p className="text-2xl font-bold">{pets.length}</p>
+            <p className="text-xs text-muted-foreground mt-1">Animal{pets.length !== 1 ? "x" : ""}</p>
+          </div>
+        </div>
+      </DashSection>
+
       {unreadCount > 0 && (
         <Link to="/messages" className="block p-4 rounded-xl bg-primary/5 border border-primary/10 hover:shadow-md transition-shadow">
           <div className="flex items-center gap-3">
