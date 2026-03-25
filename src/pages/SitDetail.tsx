@@ -74,10 +74,14 @@ const SitDetail = () => {
         setPets(petsData || []);
       }
 
-      // Load sitter profile for compatibility badges
+      // Load sitter profile for compatibility badges + check if already applied
       if (user) {
-        const { data: sp } = await supabase.from("sitter_profiles").select("*").eq("user_id", user.id).maybeSingle();
-        setSitterProfile(sp);
+        const [spRes, appRes] = await Promise.all([
+          supabase.from("sitter_profiles").select("*").eq("user_id", user.id).maybeSingle(),
+          supabase.from("applications").select("id").eq("sit_id", id!).eq("sitter_id", user.id).maybeSingle(),
+        ]);
+        setSitterProfile(spRes.data);
+        if (appRes.data) setHasApplied(true);
       }
 
       setLoading(false);
