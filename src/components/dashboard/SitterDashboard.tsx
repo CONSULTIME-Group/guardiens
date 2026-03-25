@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Link } from "react-router-dom";
-import { Calendar, MapPin, MessageSquare, Star, Search, Clock, ChevronRight, CheckCircle2, Eye, XCircle, Send as SendIcon, PawPrint, CircleDot, KeyRound, Lock } from "lucide-react";
+import { Calendar, MapPin, MessageSquare, Star, Search, Clock, ChevronRight, CheckCircle2, Eye, XCircle, Send as SendIcon, PawPrint, CircleDot, Clock3, Lock } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -187,18 +187,18 @@ const SitterDashboard = () => {
         )}
       </DashSection>
 
-      {/* Sous-locations disponibles */}
-      <DashSection title="Sous-locations disponibles" icon={KeyRound} action={
+      {/* Gardes longue durée */}
+      <DashSection title="Gardes longue durée" icon={Clock3} action={
         <Link to="/search" className="text-xs text-primary hover:underline">Voir toutes</Link>
       }>
-        {metrics.completed >= 3 && metrics.avgRating && parseFloat(metrics.avgRating) >= 4.5 ? (
-          <p className="text-sm text-muted-foreground italic">Explorez les sous-locations dans la recherche.</p>
+        {metrics.completed >= 3 && metrics.avgRating && parseFloat(metrics.avgRating) >= 4.7 ? (
+          <p className="text-sm text-muted-foreground italic">Explorez les gardes longue durée dans la recherche.</p>
         ) : (
           <div className="p-5 rounded-xl border border-dashed border-border text-center">
             <Lock className="h-6 w-6 text-muted-foreground mx-auto mb-2" />
-            <p className="text-sm font-medium">Sous-locations verrouillées</p>
+            <p className="text-sm font-medium">Longue durée verrouillée</p>
             <p className="text-xs text-muted-foreground mt-1">
-              Encore {Math.max(0, 3 - metrics.completed)} garde{3 - metrics.completed > 1 ? "s" : ""} pour débloquer les sous-locations !
+              Encore {Math.max(0, 3 - metrics.completed)} garde{3 - metrics.completed > 1 ? "s" : ""} pour débloquer les gardes longue durée !
             </p>
           </div>
         )}

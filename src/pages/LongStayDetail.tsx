@@ -6,13 +6,10 @@ import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Calendar, Home, MapPin, Star, User, AlertCircle, Lock } from "lucide-react";
+import { ArrowLeft, Calendar, Home, Info, Star, Lock } from "lucide-react";
 import { format, differenceInDays } from "date-fns";
 import { fr } from "date-fns/locale";
 
-const priceTypeLabels: Record<string, string> = {
-  per_night: "/ nuit", per_week: "/ semaine", per_month: "/ mois",
-};
 const typeLabels: Record<string, string> = {
   apartment: "Appartement", house: "Maison", farm: "Ferme", chalet: "Chalet", other: "Autre",
 };
@@ -20,53 +17,59 @@ const envLabels: Record<string, string> = {
   city_center: "Centre-ville", suburban: "Périurbain", countryside: "Campagne",
   mountain: "Montagne", seaside: "Bord de mer", forest: "Forêt",
 };
+const speciesEmoji: Record<string, string> = {
+  dog: "🐕", cat: "🐱", horse: "🐴", bird: "🐦", rodent: "🐹",
+  fish: "🐠", reptile: "🦎", farm_animal: "🐄", nac: "🐾",
+};
 
-const SubletDetail = () => {
+const LongStayDetail = () => {
   const { id } = useParams<{ id: string }>();
   const { user } = useAuth();
   const { toast } = useToast();
 
-  const [sublet, setSublet] = useState<any>(null);
+  const [longStay, setLongStay] = useState<any>(null);
   const [property, setProperty] = useState<any>(null);
+  const [pets, setPets] = useState<any[]>([]);
   const [owner, setOwner] = useState<any>(null);
   const [ownerReviews, setOwnerReviews] = useState<any[]>([]);
-  const [eligibility, setEligibility] = useState<{ eligible: boolean; completedSits: number; avgRating: number | null }>({ eligible: false, completedSits: 0, avgRating: null });
+  const [eligibility, setEligibility] = useState<{ eligible: boolean; completedSits: number; avgRating: number | null; verified: boolean }>({ eligible: false, completedSits: 0, avgRating: null, verified: false });
   const [hasApplied, setHasApplied] = useState(false);
-  const [message, setMessage] = useState("Bonjour, je suis intéressé(e) par votre sous-location. Je suis disponible aux dates indiquées et je prendrai soin de votre logement.");
+  const [message, setMessage] = useState("Bonjour, je suis intéressé(e) par cette garde longue durée. Je suis disponible aux dates indiquées et je prendrai soin de votre logement et de vos animaux.");
   const [applying, setApplying] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!id || !user) return;
     const load = async () => {
-      // Load sublet
-      const { data: subletData } = await supabase.from("sublets").select("*").eq("id", id).single();
-      if (!subletData) { setLoading(false); return; }
-      setSublet(subletData);
+      const { data: lsData } = await supabase.from("long_stays").select("*").eq("id", id).single();
+      if (!lsData) { setLoading(false); return; }
+      setLongStay(lsData);
 
-      // Load property, owner, reviews in parallel
-      const [propRes, ownerRes, reviewsRes, appRes, eligRes] = await Promise.all([
-        supabase.from("properties").select("*").eq("id", subletData.property_id).single(),
-        supabase.from("profiles").select("*").eq("id", subletData.user_id).single(),
-        supabase.from("reviews").select("overall_rating").eq("reviewee_id", subletData.user_id).eq("published", true),
-        supabase.from("sublet_applications").select("id").eq("sublet_id", id).eq("sitter_id", user.id).limit(1),
-        // Check eligibility: completed sits as sitter
+      const [propRes, ownerRes, reviewsRes, appRes, petsRes, eligRes, profileRes, myReviewsRes] = await Promise.all([
+        supabase.from("properties").select("*").eq("id", lsData.property_id).single(),
+        supabase.from("profiles").select("*").eq("id", lsData.user_id).single(),
+        supabase.from("reviews").select("overall_rating").eq("reviewee_id", lsData.user_id).eq("published", true),
+        supabase.from("long_stay_applications").select("id").eq("long_stay_id", id).eq("sitter_id", user.id).limit(1),
+        supabase.from("pets").select("*").eq("property_id", lsData.property_id),
         supabase.from("applications").select("id, sit:sits!inner(status)").eq("sitter_id", user.id).eq("status", "accepted"),
+        supabase.from("profiles").select("identity_verified").eq("id", user.id).single(),
+        supabase.from("reviews").select("overall_rating").eq("reviewee_id", user.id).eq("published", true),
       ]);
 
       setProperty(propRes.data);
       setOwner(ownerRes.data);
       setOwnerReviews(reviewsRes.data || []);
       setHasApplied((appRes.data || []).length > 0);
+      setPets(petsRes.data || []);
 
-      // Calculate eligibility
       const completedSits = (eligRes.data || []).filter((a: any) => a.sit?.status === "completed").length;
-      const { data: myReviews } = await supabase.from("reviews").select("overall_rating").eq("reviewee_id", user.id).eq("published", true);
-      const avgRating = myReviews && myReviews.length > 0
+      const myReviews = myReviewsRes.data || [];
+      const avgRating = myReviews.length > 0
         ? myReviews.reduce((sum: number, r: any) => sum + r.overall_rating, 0) / myReviews.length
         : null;
-      const isEligible = completedSits >= 3 && (avgRating !== null && avgRating >= 4.5);
-      setEligibility({ eligible: isEligible, completedSits, avgRating });
+      const verified = profileRes.data?.identity_verified || false;
+      const isEligible = completedSits >= 3 && (avgRating !== null && avgRating >= 4.7) && verified;
+      setEligibility({ eligible: isEligible, completedSits, avgRating, verified });
 
       setLoading(false);
     };
@@ -74,11 +77,11 @@ const SubletDetail = () => {
   }, [id, user]);
 
   const handleApply = async () => {
-    if (!user || !sublet) return;
+    if (!user || !longStay) return;
     setApplying(true);
     try {
-      const { error } = await supabase.from("sublet_applications").insert({
-        sublet_id: sublet.id,
+      const { error } = await supabase.from("long_stay_applications").insert({
+        long_stay_id: longStay.id,
         sitter_id: user.id,
         message,
       });
@@ -93,22 +96,10 @@ const SubletDetail = () => {
   };
 
   if (loading) return <div className="p-6 md:p-10 max-w-3xl mx-auto text-muted-foreground">Chargement...</div>;
-  if (!sublet) return <div className="p-6 md:p-10 max-w-3xl mx-auto text-muted-foreground">Sous-location introuvable.</div>;
+  if (!longStay) return <div className="p-6 md:p-10 max-w-3xl mx-auto text-muted-foreground">Annonce introuvable.</div>;
 
-  const isOwner = user?.id === sublet.user_id;
-  const nights = sublet.start_date && sublet.end_date ? differenceInDays(new Date(sublet.end_date), new Date(sublet.start_date)) : 0;
-
-  const calculateTotal = () => {
-    const amount = Number(sublet.price_amount);
-    if (sublet.price_type === "per_night") return { total: amount * nights, label: `${amount}€/nuit × ${nights} nuits` };
-    if (sublet.price_type === "per_week") {
-      const weeks = Math.ceil(nights / 7);
-      return { total: amount * weeks, label: `${amount}€/sem × ${weeks} semaine${weeks > 1 ? "s" : ""}` };
-    }
-    const months = Math.ceil(nights / 30);
-    return { total: amount * months, label: `${amount}€/mois × ${months} mois` };
-  };
-  const pricing = calculateTotal();
+  const isOwner = user?.id === longStay.user_id;
+  const nights = longStay.start_date && longStay.end_date ? differenceInDays(new Date(longStay.end_date), new Date(longStay.start_date)) : 0;
 
   const ownerAvgRating = ownerReviews.length > 0
     ? (ownerReviews.reduce((s, r) => s + r.overall_rating, 0) / ownerReviews.length).toFixed(1)
@@ -121,31 +112,38 @@ const SubletDetail = () => {
       </Link>
 
       {/* Badge */}
-      <Badge className="mb-3 bg-blue-100 text-blue-800 border-blue-200 hover:bg-blue-100">Sous-location</Badge>
+      <Badge className="mb-3 bg-[#DBEAFE] text-[#1E40AF] border-blue-200 hover:bg-[#DBEAFE]">Longue durée</Badge>
 
       {/* Title & dates */}
-      <h1 className="font-heading text-2xl md:text-3xl font-bold mb-2">{sublet.title}</h1>
+      <h1 className="font-heading text-2xl md:text-3xl font-bold mb-2">{longStay.title}</h1>
       <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground mb-6">
-        {sublet.start_date && sublet.end_date && (
+        {longStay.start_date && longStay.end_date && (
           <span className="flex items-center gap-1.5">
             <Calendar className="h-4 w-4" />
-            {format(new Date(sublet.start_date), "d MMM yyyy", { locale: fr })} → {format(new Date(sublet.end_date), "d MMM yyyy", { locale: fr })}
+            {format(new Date(longStay.start_date), "d MMM yyyy", { locale: fr })} → {format(new Date(longStay.end_date), "d MMM yyyy", { locale: fr })}
             <span className="text-foreground font-medium">({nights} nuits)</span>
           </span>
         )}
       </div>
 
-      {/* Pricing */}
-      <div className="bg-card border border-border rounded-xl p-5 mb-6">
-        <div className="flex items-baseline gap-2 mb-1">
-          <span className="text-3xl font-bold">{sublet.price_amount}€</span>
-          <span className="text-muted-foreground">{priceTypeLabels[sublet.price_type]}</span>
+      {/* Contribution info block */}
+      <div className="p-4 rounded-lg border border-border mb-6" style={{ backgroundColor: "#F8F6F1" }}>
+        <div className="flex items-start gap-3">
+          <Info className="h-5 w-5 text-primary mt-0.5 shrink-0" />
+          <div>
+            <p className="font-medium text-sm">À propos de la contribution aux frais</p>
+            <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+              Pour une garde longue durée, il est d'usage de convenir d'une contribution aux frais de la maison (électricité, gaz, eau, internet).
+              Ce n'est ni un loyer ni une sous-location — c'est une participation aux charges, comme on le ferait chez un ami.
+              Discutez-en ensemble avant de confirmer.
+            </p>
+            {longStay.estimated_contribution && (
+              <p className="text-sm font-medium mt-3">
+                Contribution estimée par le propriétaire : {longStay.estimated_contribution}
+              </p>
+            )}
+          </div>
         </div>
-        <p className="text-sm text-muted-foreground">{pricing.label} = <span className="text-foreground font-semibold">{pricing.total}€ total</span></p>
-        <p className="text-xs text-muted-foreground mt-2">Airbnb dans cette zone : ~70€/nuit en moyenne</p>
-        {sublet.price_amount < 50 && (
-          <Badge className="mt-2 bg-emerald-100 text-emerald-800 border-emerald-200 hover:bg-emerald-100">Prix réduit</Badge>
-        )}
       </div>
 
       {/* Property */}
@@ -180,11 +178,28 @@ const SubletDetail = () => {
         </div>
       )}
 
+      {/* Pets */}
+      {pets.length > 0 && (
+        <div className="bg-card border border-border rounded-xl p-5 mb-6">
+          <h2 className="font-heading text-lg font-semibold mb-3">Animaux à garder</h2>
+          <div className="space-y-2">
+            {pets.map(pet => (
+              <div key={pet.id} className="flex items-center gap-2 text-sm">
+                <span>{speciesEmoji[pet.species] || "🐾"}</span>
+                <span className="font-medium">{pet.name || "Sans nom"}</span>
+                {pet.breed && <span className="text-muted-foreground">· {pet.breed}</span>}
+                {pet.age && <span className="text-muted-foreground">· {pet.age} an{pet.age > 1 ? "s" : ""}</span>}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Conditions */}
-      {sublet.conditions && (
+      {longStay.conditions && (
         <div className="bg-card border border-border rounded-xl p-5 mb-6">
           <h2 className="font-heading text-lg font-semibold mb-2">Conditions</h2>
-          <p className="text-sm text-muted-foreground whitespace-pre-line">{sublet.conditions}</p>
+          <p className="text-sm text-muted-foreground whitespace-pre-line">{longStay.conditions}</p>
         </div>
       )}
 
@@ -244,7 +259,8 @@ const SubletDetail = () => {
               <p className="font-medium">Conditions non remplies</p>
               <p className="text-sm text-muted-foreground mt-2">
                 Complétez {Math.max(0, 3 - eligibility.completedSits)} garde{3 - eligibility.completedSits > 1 ? "s" : ""} supplémentaire{3 - eligibility.completedSits > 1 ? "s" : ""}
-                {eligibility.avgRating === null || eligibility.avgRating < 4.5 ? " avec une note de 4.5+" : ""} pour débloquer les sous-locations.
+                {eligibility.avgRating === null || eligibility.avgRating < 4.7 ? " avec une note de 4.7+" : ""}
+                {!eligibility.verified ? " et vérifiez votre identité" : ""} pour accéder aux gardes longue durée.
               </p>
               <Link to="/search" className="text-sm text-primary hover:underline mt-3 inline-block">
                 Trouver une garde →
@@ -257,12 +273,12 @@ const SubletDetail = () => {
       {/* Legal */}
       <div className="p-4 rounded-lg bg-muted/50 border border-border">
         <p className="text-xs text-muted-foreground leading-relaxed">
-          La sous-location est un accord privé entre les deux parties. Guardiens facilite la mise en relation mais n'est pas partie au contrat.
-          Le propriétaire est responsable de vérifier que la sous-location est autorisée par son bail ou sa situation.
+          La garde longue durée est un accord privé entre les deux parties. La contribution aux frais couvre les charges courantes et ne constitue pas un loyer.
+          Guardiens facilite la mise en relation mais n'est pas partie à l'accord.
         </p>
       </div>
     </div>
   );
 };
 
-export default SubletDetail;
+export default LongStayDetail;

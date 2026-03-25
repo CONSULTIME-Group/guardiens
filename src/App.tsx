@@ -21,8 +21,8 @@ import LeaveReview from "./pages/LeaveReview";
 import Notifications from "./pages/Notifications";
 import Settings from "./pages/Settings";
 import OwnerProfile from "./pages/OwnerProfile";
-import CreateSublet from "./pages/CreateSublet";
-import SubletDetail from "./pages/SubletDetail";
+import CreateLongStay from "./pages/CreateLongStay";
+import LongStayDetail from "./pages/LongStayDetail";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -59,8 +59,8 @@ const AppRoutes = () => (
       <Route path="/house-guide/:propertyId" element={<HouseGuide />} />
       <Route path="/owner-profile" element={<OwnerProfile />} />
       <Route path="/settings" element={<Settings />} />
-      <Route path="/sublets/create" element={<CreateSublet />} />
-      <Route path="/sublets/:id" element={<SubletDetail />} />
+      <Route path="/long-stays/create" element={<CreateLongStay />} />
+      <Route path="/long-stays/:id" element={<LongStayDetail />} />
     </Route>
     <Route path="*" element={<NotFound />} />
   </Routes>
