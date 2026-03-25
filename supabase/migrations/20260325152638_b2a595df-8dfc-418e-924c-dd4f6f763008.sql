@@ -1,0 +1,25 @@
+DROP TRIGGER IF EXISTS on_new_application ON public.applications;
+DROP TRIGGER IF EXISTS on_application_accepted ON public.applications;
+DROP TRIGGER IF EXISTS on_sit_confirmed ON public.sits;
+DROP TRIGGER IF EXISTS on_sit_cancelled ON public.sits;
+DROP TRIGGER IF EXISTS on_new_message ON public.messages;
+DROP TRIGGER IF EXISTS on_review_published ON public.reviews;
+DROP TRIGGER IF EXISTS on_auto_publish_reviews ON public.reviews;
+DROP TRIGGER IF EXISTS on_sitter_available ON public.sitter_profiles;
+DROP TRIGGER IF EXISTS on_new_long_stay_application ON public.long_stay_applications;
+DROP TRIGGER IF EXISTS on_long_stay_application_accepted ON public.long_stay_applications;
+DROP TRIGGER IF EXISTS on_long_stay_confirmed ON public.long_stays;
+DROP TRIGGER IF EXISTS on_long_stay_cancelled ON public.long_stays;
+
+CREATE TRIGGER on_new_application AFTER INSERT ON public.applications FOR EACH ROW EXECUTE FUNCTION public.notify_new_application();
+CREATE TRIGGER on_application_accepted AFTER UPDATE ON public.applications FOR EACH ROW EXECUTE FUNCTION public.notify_application_accepted();
+CREATE TRIGGER on_sit_confirmed AFTER UPDATE ON public.sits FOR EACH ROW EXECUTE FUNCTION public.notify_sit_confirmed();
+CREATE TRIGGER on_sit_cancelled AFTER UPDATE ON public.sits FOR EACH ROW EXECUTE FUNCTION public.notify_sit_cancelled();
+CREATE TRIGGER on_new_message AFTER INSERT ON public.messages FOR EACH ROW EXECUTE FUNCTION public.notify_new_message();
+CREATE TRIGGER on_review_published AFTER UPDATE ON public.reviews FOR EACH ROW EXECUTE FUNCTION public.notify_review_published();
+CREATE TRIGGER on_auto_publish_reviews AFTER INSERT ON public.reviews FOR EACH ROW EXECUTE FUNCTION public.auto_publish_reviews();
+CREATE TRIGGER on_sitter_available AFTER UPDATE ON public.sitter_profiles FOR EACH ROW EXECUTE FUNCTION public.notify_owners_sitter_available();
+CREATE TRIGGER on_new_long_stay_application AFTER INSERT ON public.long_stay_applications FOR EACH ROW EXECUTE FUNCTION public.notify_new_long_stay_application();
+CREATE TRIGGER on_long_stay_application_accepted AFTER UPDATE ON public.long_stay_applications FOR EACH ROW EXECUTE FUNCTION public.notify_long_stay_application_accepted();
+CREATE TRIGGER on_long_stay_confirmed AFTER UPDATE ON public.long_stays FOR EACH ROW EXECUTE FUNCTION public.notify_long_stay_confirmed();
+CREATE TRIGGER on_long_stay_cancelled AFTER UPDATE ON public.long_stays FOR EACH ROW EXECUTE FUNCTION public.notify_long_stay_cancelled();
