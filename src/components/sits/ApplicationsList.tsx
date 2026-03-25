@@ -141,7 +141,15 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate }: App
                 )}
 
                 {app.status === "pending" && (
-                  <div className="flex gap-2 mt-4">
+                  <div className="flex gap-2 mt-4 flex-wrap">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="gap-1.5"
+                      onClick={() => navigate("/messages")}
+                    >
+                      <MessageSquare className="h-3.5 w-3.5" /> Répondre
+                    </Button>
                     <Button
                       size="sm"
                       className="gap-1.5"
