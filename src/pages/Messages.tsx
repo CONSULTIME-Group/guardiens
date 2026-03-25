@@ -386,7 +386,13 @@ const Messages = () => {
           )}
 
           {/* Messages */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-3 pb-20 md:pb-4" style={{ background: "hsl(var(--background))" }}>
+          <div className="flex-1 overflow-y-auto space-y-3 pb-20 md:pb-4" style={{ background: "hsl(var(--background))" }}>
+            {/* House guide block for confirmed sits */}
+            {activeConv.sit?.status === "confirmed" && activeConv.sit?.property_id && (
+              <HouseGuideBlock propertyId={activeConv.sit.property_id} />
+            )}
+
+            <div className="p-4 space-y-3">
             {messages.map(msg => {
               const isMe = msg.sender_id === user?.id;
               const isSystem = msg.is_system;
