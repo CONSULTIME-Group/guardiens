@@ -141,6 +141,10 @@ const SearchOwner = () => {
         <Switch checked={vehicled} onCheckedChange={setVehicled} />
         <label className="text-sm">Véhiculé</label>
       </div>
+      <div className="flex items-center gap-3">
+        <Switch checked={availableOnly} onCheckedChange={setAvailableOnly} />
+        <label className="text-sm">Disponibles uniquement</label>
+      </div>
       <Button onClick={handleSearch} className="w-full gap-2" disabled={loading}>
         <Search className="h-4 w-4" /> {loading ? "Recherche..." : "Rechercher"}
       </Button>
