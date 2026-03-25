@@ -103,6 +103,7 @@ export function useSitterProfile() {
       min_duration: s?.min_duration || 3,
       max_duration: s?.max_duration || 21,
       availability_dates: (s?.availability_dates as any[]) || [],
+      is_available: s?.is_available || false,
       strict_rules_ok: s?.strict_rules_ok || false,
       prefer_visitors: s?.prefer_visitors || false,
       farm_animals_ok: s?.farm_animals_ok || false,
