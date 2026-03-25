@@ -854,6 +854,8 @@ export type Database = {
       }
       profiles: {
         Row: {
+          account_status: string
+          admin_notes: string | null
           avatar_url: string | null
           bio: string | null
           cancellation_count: number
@@ -872,6 +874,8 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          account_status?: string
+          admin_notes?: string | null
           avatar_url?: string | null
           bio?: string | null
           cancellation_count?: number
@@ -890,6 +894,8 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          account_status?: string
+          admin_notes?: string | null
           avatar_url?: string | null
           bio?: string | null
           cancellation_count?: number
@@ -1226,16 +1232,44 @@ export type Database = {
           },
         ]
       }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
       activity_level: "calm" | "moderate" | "sportive"
       alone_duration: "never" | "2h" | "6h" | "all_day"
+      app_role: "admin" | "moderator" | "user"
       application_status:
         | "pending"
         | "viewed"
@@ -1405,6 +1439,7 @@ export const Constants = {
     Enums: {
       activity_level: ["calm", "moderate", "sportive"],
       alone_duration: ["never", "2h", "6h", "all_day"],
+      app_role: ["admin", "moderator", "user"],
       application_status: [
         "pending",
         "viewed",
