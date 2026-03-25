@@ -120,7 +120,7 @@ const SitDetail = () => {
       {badges.length > 0 && (
         <div className="flex flex-wrap gap-2 mb-4">
           {badges.map(b => (
-            <span key={b} className="px-3 py-1.5 rounded-full text-xs font-medium" style={{ background: "#D8F3DC", color: "#2D6A4F" }}>
+            <span key={b} className="px-3 py-1.5 rounded-full text-xs font-medium bg-[hsl(var(--badge-success))] text-[hsl(var(--badge-success-foreground))]">
               <CheckCircle2 className="inline h-3.5 w-3.5 mr-1 -mt-0.5" />{b}
             </span>
           ))}
@@ -369,7 +369,8 @@ const SitDetail = () => {
           startDate={formatDate(sit.start_date)}
           endDate={formatDate(sit.end_date)}
           onCancelled={() => {
-            setSit({ ...sit, status: sit.user_id === user?.id ? "cancelled" : "published" });
+            setSit({ ...sit, status: "cancelled" });
+            setCancelOpen(false);
           }}
         />
       )}

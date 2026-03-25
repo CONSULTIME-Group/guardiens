@@ -49,6 +49,9 @@
     --font-body: 'Outfit', sans-serif;
 
     --hint: 37 7% 60%;
+    --message-sent: 141 50% 90%;
+    --badge-success: 141 50% 90%;
+    --badge-success-foreground: 153 50% 25%;
   }
 }
 

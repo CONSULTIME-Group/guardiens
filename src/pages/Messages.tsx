@@ -80,22 +80,39 @@ const Messages = () => {
 
     if (!convs) { setLoading(false); return; }
 
-    const enriched = await Promise.all(
-      convs.map(async (conv: any) => {
-        const otherId = conv.owner_id === user.id ? conv.sitter_id : conv.owner_id;
-        const [profileRes, lastMsgRes, unreadRes] = await Promise.all([
-          supabase.from("profiles").select("id, first_name, avatar_url").eq("id", otherId).single(),
-          supabase.from("messages").select("content, created_at, sender_id").eq("conversation_id", conv.id).order("created_at", { ascending: false }).limit(1).maybeSingle(),
-          supabase.from("messages").select("id", { count: "exact", head: true }).eq("conversation_id", conv.id).neq("sender_id", user.id).is("read_at", null),
-        ]);
-        return {
-          ...conv,
-          other_user: profileRes.data,
-          last_message: lastMsgRes.data,
-          unread_count: unreadRes.count || 0,
-        } as Conversation;
-      })
-    );
+    // Batch fetch: all other user IDs, all last messages, all unread counts
+    const otherIds = convs.map((conv: any) => conv.owner_id === user.id ? conv.sitter_id : conv.owner_id);
+    const convIds = convs.map((conv: any) => conv.id);
+
+    const [profilesRes, allLastMsgsRes, allUnreadRes] = await Promise.all([
+      supabase.from("profiles").select("id, first_name, avatar_url").in("id", otherIds),
+      supabase.from("messages").select("conversation_id, content, created_at, sender_id").in("conversation_id", convIds).order("created_at", { ascending: false }),
+      supabase.from("messages").select("conversation_id, id").in("conversation_id", convIds).neq("sender_id", user.id).is("read_at", null),
+    ]);
+
+    const profilesMap = new Map((profilesRes.data || []).map((p: any) => [p.id, p]));
+
+    // Get last message per conversation
+    const lastMsgMap = new Map<string, any>();
+    (allLastMsgsRes.data || []).forEach((m: any) => {
+      if (!lastMsgMap.has(m.conversation_id)) lastMsgMap.set(m.conversation_id, m);
+    });
+
+    // Count unread per conversation
+    const unreadMap = new Map<string, number>();
+    (allUnreadRes.data || []).forEach((m: any) => {
+      unreadMap.set(m.conversation_id, (unreadMap.get(m.conversation_id) || 0) + 1);
+    });
+
+    const enriched = convs.map((conv: any) => {
+      const otherId = conv.owner_id === user.id ? conv.sitter_id : conv.owner_id;
+      return {
+        ...conv,
+        other_user: profilesMap.get(otherId) || null,
+        last_message: lastMsgMap.get(conv.id) || null,
+        unread_count: unreadMap.get(conv.id) || 0,
+      } as Conversation;
+    });
 
     // Sort: unread first, then by last message date
     enriched.sort((a, b) => {
@@ -431,7 +448,7 @@ const Messages = () => {
                       ? "rounded-br-md"
                       : "rounded-bl-md"
                   }`} style={{
-                    background: isMe ? "#D8F3DC" : "hsl(var(--muted))",
+                    background: isMe ? "hsl(var(--message-sent))" : "hsl(var(--muted))",
                     color: "hsl(var(--foreground))",
                   }}>
                     {msg.photo_url && (

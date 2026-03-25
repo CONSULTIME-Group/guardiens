@@ -143,8 +143,8 @@ export function useSitterProfile() {
     // Step 3 (20%): animal_types, experience_years, references_text
     const s3 = [d.animal_types.length > 0, d.experience_years, d.references_text].filter(Boolean).length / 3;
     total += s3 * 20;
-    // Step 4 (20%): geographic_radius (always set), availability_dates
-    const s4 = [true, d.availability_dates.length > 0].filter(Boolean).length / 2;
+    // Step 4 (20%): has_license or has_vehicle, availability_dates
+    const s4 = [d.has_license || d.has_vehicle, d.availability_dates.length > 0].filter(Boolean).length / 2;
     total += s4 * 20;
     // Step 5 (20%): languages, meeting_preference, handover_preference
     const s5 = [d.languages.length > 0, d.meeting_preference.length > 0, d.handover_preference].filter(Boolean).length / 3;
