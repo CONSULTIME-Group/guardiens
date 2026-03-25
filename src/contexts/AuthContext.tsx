@@ -101,6 +101,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         .from("profiles")
         .update({ role })
         .eq("id", data.user.id);
+
+      // Auto-create sitter_profile if role is sitter or both
+      if (role === "sitter" || role === "both") {
+        await supabase
+          .from("sitter_profiles")
+          .upsert({ user_id: data.user.id }, { onConflict: "user_id" });
+      }
     }
   }, []);
 

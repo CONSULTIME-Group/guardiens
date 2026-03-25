@@ -226,7 +226,7 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
                   </div>
                 )}
 
-                {app.status === "pending" && (
+                {(app.status === "pending" || app.status === "discussing") && (
                   <div className="flex gap-2 mt-4 flex-wrap">
                     <Button
                       size="sm"

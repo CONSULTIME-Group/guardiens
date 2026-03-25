@@ -207,13 +207,18 @@ const CreateSit = () => {
         <div className="grid grid-cols-2 gap-4">
           <div>
             <Label className="text-sm font-medium">Date de début *</Label>
-            <Input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} className="mt-1.5" />
+            <Input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} min={today} className="mt-1.5" />
           </div>
           <div>
             <Label className="text-sm font-medium">Date de fin *</Label>
-            <Input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} className="mt-1.5" />
+            <Input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} min={startDate || today} className="mt-1.5" />
           </div>
         </div>
+        {dateError && (
+          <p className="text-sm text-destructive flex items-center gap-1.5 -mt-2">
+            <AlertCircle className="h-3.5 w-3.5" /> {dateError}
+          </p>
+        )}
 
         <div className="flex items-center gap-3">
           <Switch checked={flexibleDates} onCheckedChange={setFlexibleDates} />
