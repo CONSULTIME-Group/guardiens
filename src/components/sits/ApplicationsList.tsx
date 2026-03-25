@@ -25,6 +25,7 @@ const statusStyles: Record<string, { label: string; className: string }> = {
 const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate }: ApplicationsListProps) => {
   const [applications, setApplications] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   const load = async () => {
     const { data } = await supabase
