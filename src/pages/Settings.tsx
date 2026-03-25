@@ -572,9 +572,21 @@ const IdentityVerificationSection = ({ user }: { user: any }) => {
     });
   }, [user]);
 
+  // Count today's attempts
+  const todayAttempts = logs.filter((log: any) => {
+    const logDate = new Date(log.created_at);
+    return Date.now() - logDate.getTime() < 24 * 60 * 60 * 1000;
+  }).length;
+  const rateLimited = todayAttempts >= 5;
+
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !user) return;
+
+    if (rateLimited) {
+      toast.error("Vous avez atteint la limite de 5 vérifications par jour. Réessayez demain.");
+      return;
+    }
 
     if (file.size > 10 * 1024 * 1024) {
       toast.error("Le fichier ne doit pas dépasser 10 Mo.");

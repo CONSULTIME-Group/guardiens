@@ -45,6 +45,21 @@ serve(async (req) => {
     // Use service role client for admin operations
     const supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
+    // Rate limit: max 5 attempts per day
+    const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+    const { count: attemptsToday } = await supabaseAdmin
+      .from("identity_verification_logs")
+      .select("*", { count: "exact", head: true })
+      .eq("user_id", user.id)
+      .gte("created_at", oneDayAgo);
+
+    if ((attemptsToday ?? 0) >= 5) {
+      return new Response(
+        JSON.stringify({ error: "Vous avez atteint la limite de 5 vérifications par jour. Réessayez demain." }),
+        { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     // Get the user's profile to find the document path
     const { data: profile, error: profileError } = await supabaseAdmin
       .from("profiles")
