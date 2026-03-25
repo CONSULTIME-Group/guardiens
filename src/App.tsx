@@ -16,6 +16,7 @@ import Sits from "./pages/Sits";
 import CreateSit from "./pages/CreateSit";
 import SitDetail from "./pages/SitDetail";
 import HouseGuide from "./pages/HouseGuide";
+import LeaveReview from "./pages/LeaveReview";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
