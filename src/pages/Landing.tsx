@@ -155,7 +155,7 @@ const Landing = () => {
           className="mt-10 text-sm text-muted-foreground animate-fade-in"
           style={{ animationDelay: "0.3s" }}
         >
-          37 maisons gardées · 234 animaux accompagnés · 2 ans en AURA
+          37 maisons gardées · 234 animaux accompagnés · 5 ans en AURA
         </p>
       </section>
 
