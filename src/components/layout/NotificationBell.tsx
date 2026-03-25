@@ -73,9 +73,11 @@ const NotificationBell = () => {
         },
         (payload) => {
           const updated = payload.new as Notification;
-          setNotifications((prev) =>
-            prev.map((n) => (n.id === updated.id ? updated : n))
-          );
+          setNotifications((prev) => {
+            const next = prev.map((n) => (n.id === updated.id ? updated : n));
+            setUnreadCount(next.filter((n) => !n.read_at).length);
+            return next;
+          });
         }
       )
       .subscribe();
