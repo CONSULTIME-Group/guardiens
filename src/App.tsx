@@ -24,6 +24,8 @@ import OwnerProfile from "./pages/OwnerProfile";
 import CreateLongStay from "./pages/CreateLongStay";
 import LongStayDetail from "./pages/LongStayDetail";
 import EditLongStay from "./pages/EditLongStay";
+import News from "./pages/News";
+import ArticleDetail from "./pages/ArticleDetail";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
