@@ -120,7 +120,10 @@ const Landing = () => {
         <h2 className="font-heading text-2xl font-bold">
           <span className="text-primary">g</span>uardiens
         </h2>
-        <div className="flex gap-3">
+        <div className="flex gap-3 items-center">
+          <Button variant="ghost" onClick={() => navigate("/actualites")}>
+            Actualités
+          </Button>
           <Button variant="ghost" onClick={() => navigate("/login")}>
             Connexion
           </Button>
