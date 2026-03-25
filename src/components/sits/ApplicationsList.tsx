@@ -24,7 +24,7 @@ const statusStyles: Record<string, { label: string; className: string }> = {
   cancelled: { label: "Annulée", className: "bg-muted text-muted-foreground" },
 };
 
-const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate }: ApplicationsListProps) => {
+const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, propertyId }: ApplicationsListProps) => {
   const { user } = useAuth();
   const [applications, setApplications] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
