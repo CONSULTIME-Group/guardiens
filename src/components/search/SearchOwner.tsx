@@ -91,6 +91,9 @@ const SearchOwner = () => {
     if (availableOnly) {
       items = items.filter((s: any) => s.is_available);
     }
+    if (verifiedOnly) {
+      items = items.filter((s: any) => s.profile?.identity_verified);
+    }
     if (animalTypes.length > 0 && !animalTypes.includes("Tous")) {
       const wanted = animalTypes.map(a => animalChipToType[a]).filter(Boolean);
       items = items.filter((s: any) => {
