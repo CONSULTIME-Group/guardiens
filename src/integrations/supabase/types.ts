@@ -755,6 +755,8 @@ export type Database = {
           email: string | null
           first_name: string | null
           id: string
+          identity_document_url: string | null
+          identity_verification_status: string | null
           identity_verified: boolean
           last_name: string | null
           postal_code: string | null
@@ -771,6 +773,8 @@ export type Database = {
           email?: string | null
           first_name?: string | null
           id: string
+          identity_document_url?: string | null
+          identity_verification_status?: string | null
           identity_verified?: boolean
           last_name?: string | null
           postal_code?: string | null
@@ -787,6 +791,8 @@ export type Database = {
           email?: string | null
           first_name?: string | null
           id?: string
+          identity_document_url?: string | null
+          identity_verification_status?: string | null
           identity_verified?: boolean
           last_name?: string | null
           postal_code?: string | null
