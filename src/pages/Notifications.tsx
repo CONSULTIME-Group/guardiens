@@ -122,7 +122,11 @@ const Notifications = () => {
                 }`}
               >
                 <div className="flex items-start gap-3">
-                  <span className="text-lg mt-0.5 shrink-0">{typeIcons[n.type] || "🔔"}</span>
+                  {n.actor_avatar_url ? (
+                    <img src={n.actor_avatar_url} alt="" className="w-9 h-9 rounded-full object-cover shrink-0 mt-0.5" />
+                  ) : (
+                    <span className="text-lg mt-0.5 shrink-0">{typeIcons[n.type] || "🔔"}</span>
+                  )}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between gap-2">
                       <p className={`text-sm ${!n.read_at ? "font-semibold" : "font-medium"}`}>{n.title}</p>
