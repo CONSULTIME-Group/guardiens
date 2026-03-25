@@ -129,7 +129,14 @@ const CreateSit = () => {
     load();
   }, [user]);
 
-  const canPublish = profileCompletion >= 60 && property && title && startDate && endDate;
+  const today = new Date().toISOString().split("T")[0];
+  const dateError = startDate && endDate && startDate >= endDate
+    ? "La date de fin doit être après la date de début."
+    : startDate && startDate < today
+    ? "La date de début ne peut pas être dans le passé."
+    : null;
+
+  const canPublish = profileCompletion >= 60 && property && title && startDate && endDate && !dateError;
 
   const handlePublish = async () => {
     if (!user || !property || !canPublish) return;
