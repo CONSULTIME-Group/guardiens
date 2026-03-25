@@ -4,6 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import NotificationBell from "./NotificationBell";
 
 const navItems = [
   { to: "/dashboard", icon: Home, label: "Dashboard" },
@@ -41,11 +42,12 @@ export const Sidebar = () => {
 
   return (
     <aside className="hidden md:flex flex-col w-64 border-r border-border bg-card h-screen sticky top-0">
-      <div className="p-6 pb-4">
+      <div className="p-6 pb-4 flex items-center justify-between">
         <h1 className="font-heading text-2xl font-bold tracking-tight">
           <span className="text-primary">g</span>
           <span className="text-foreground">uardiens</span>
         </h1>
+        <NotificationBell />
       </div>
 
       <nav className="flex-1 px-3 space-y-1">
