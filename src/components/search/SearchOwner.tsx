@@ -56,7 +56,7 @@ const SearchOwner = () => {
       items = items.filter((s: any) => s.profile?.city?.toLowerCase().includes(city.toLowerCase()));
     }
     if (sitterType !== "all") {
-      items = items.filter((s: any) => s.sitter_type === sitterType);
+      items = items.filter((s: any) => (s.sitter_type || "").toLowerCase() === sitterType.toLowerCase());
     }
     if (vehicled) {
       items = items.filter((s: any) => s.has_vehicle);
