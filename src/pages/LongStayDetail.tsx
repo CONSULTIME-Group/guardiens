@@ -40,6 +40,8 @@ const LongStayDetail = () => {
   const [message, setMessage] = useState("Bonjour, je suis intéressé(e) par cette garde longue durée. Je suis disponible aux dates indiquées et je prendrai soin de votre logement et de vos animaux.");
   const [applying, setApplying] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   useEffect(() => {
     if (!id || !user) return;
