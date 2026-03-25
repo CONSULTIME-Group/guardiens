@@ -15,7 +15,7 @@ interface Conversation {
   owner_id: string;
   sitter_id: string;
   updated_at: string;
-  sit?: { title: string; status: string };
+  sit?: { title: string; status: string; property_id: string };
   other_user?: { id: string; first_name: string; avatar_url: string | null };
   last_message?: { content: string; created_at: string; sender_id: string };
   unread_count: number;
