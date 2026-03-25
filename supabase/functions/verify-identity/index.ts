@@ -191,7 +191,7 @@ Rules:
     const verification = JSON.parse(toolCall.function.arguments);
     console.log("Verification result:", JSON.stringify(verification));
 
-    // Update the profile based on verification result
+    // Update the profile and create notification based on verification result
     if (verification.is_valid) {
       await supabaseAdmin
         .from("profiles")
@@ -200,6 +200,14 @@ Rules:
           identity_verification_status: "verified",
         })
         .eq("id", user.id);
+
+      await supabaseAdmin.from("notifications").insert({
+        user_id: user.id,
+        type: "identity_verified",
+        title: "Identité vérifiée ✓",
+        body: "Votre pièce d'identité a été validée avec succès. Vous avez maintenant accès à toutes les fonctionnalités.",
+        link: "/settings#verification",
+      });
     } else {
       await supabaseAdmin
         .from("profiles")
@@ -208,6 +216,15 @@ Rules:
           identity_verification_status: "rejected",
         })
         .eq("id", user.id);
+
+      const reason = verification.rejection_reason || "Document non conforme";
+      await supabaseAdmin.from("notifications").insert({
+        user_id: user.id,
+        type: "identity_rejected",
+        title: "Vérification refusée",
+        body: `Votre document n'a pas pu être validé : ${reason}. Vous pouvez soumettre un nouveau document.`,
+        link: "/settings#verification",
+      });
     }
 
     return new Response(
