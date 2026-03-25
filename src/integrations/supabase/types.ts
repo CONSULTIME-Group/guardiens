@@ -56,6 +56,41 @@ export type Database = {
           },
         ]
       }
+      past_animals: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          photo_url: string | null
+          sitter_profile_id: string
+          species: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name?: string
+          photo_url?: string | null
+          sitter_profile_id: string
+          species?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          photo_url?: string | null
+          sitter_profile_id?: string
+          species?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "past_animals_sitter_profile_id_fkey"
+            columns: ["sitter_profile_id"]
+            isOneToOne: false
+            referencedRelation: "sitter_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pets: {
         Row: {
           activity_level: Database["public"]["Enums"]["activity_level"] | null
@@ -323,6 +358,107 @@ export type Database = {
             foreignKeyName: "sits_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sitter_profiles: {
+        Row: {
+          accompanied_by: string | null
+          animal_types: string[] | null
+          availability_dates: Json | null
+          availability_during: string | null
+          bonus_skills: string[] | null
+          created_at: string
+          experience_years: string | null
+          farm_animals_ok: boolean | null
+          geographic_radius: number | null
+          handover_preference: string | null
+          has_license: boolean | null
+          has_vehicle: boolean | null
+          id: string
+          interests: string[] | null
+          languages: string[] | null
+          lifestyle: string[] | null
+          max_duration: number | null
+          meeting_preference: string[] | null
+          min_duration: number | null
+          motivation: string | null
+          prefer_visitors: boolean | null
+          preferences_notes: string | null
+          references_text: string | null
+          sitter_type: string | null
+          smoker: boolean | null
+          strict_rules_ok: boolean | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          accompanied_by?: string | null
+          animal_types?: string[] | null
+          availability_dates?: Json | null
+          availability_during?: string | null
+          bonus_skills?: string[] | null
+          created_at?: string
+          experience_years?: string | null
+          farm_animals_ok?: boolean | null
+          geographic_radius?: number | null
+          handover_preference?: string | null
+          has_license?: boolean | null
+          has_vehicle?: boolean | null
+          id?: string
+          interests?: string[] | null
+          languages?: string[] | null
+          lifestyle?: string[] | null
+          max_duration?: number | null
+          meeting_preference?: string[] | null
+          min_duration?: number | null
+          motivation?: string | null
+          prefer_visitors?: boolean | null
+          preferences_notes?: string | null
+          references_text?: string | null
+          sitter_type?: string | null
+          smoker?: boolean | null
+          strict_rules_ok?: boolean | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          accompanied_by?: string | null
+          animal_types?: string[] | null
+          availability_dates?: Json | null
+          availability_during?: string | null
+          bonus_skills?: string[] | null
+          created_at?: string
+          experience_years?: string | null
+          farm_animals_ok?: boolean | null
+          geographic_radius?: number | null
+          handover_preference?: string | null
+          has_license?: boolean | null
+          has_vehicle?: boolean | null
+          id?: string
+          interests?: string[] | null
+          languages?: string[] | null
+          lifestyle?: string[] | null
+          max_duration?: number | null
+          meeting_preference?: string[] | null
+          min_duration?: number | null
+          motivation?: string | null
+          prefer_visitors?: boolean | null
+          preferences_notes?: string | null
+          references_text?: string | null
+          sitter_type?: string | null
+          smoker?: boolean | null
+          strict_rules_ok?: boolean | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sitter_profiles_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
