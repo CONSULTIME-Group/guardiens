@@ -24,6 +24,7 @@ const SitterDashboard = () => {
   const [mySits, setMySits] = useState<any[]>([]);
   const [nearbyListings, setNearbyListings] = useState<any[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [isAvailable, setIsAvailable] = useState(false);
   const [metrics, setMetrics] = useState({ completed: 0, avgRating: null as string | null, reviewCount: 0 });
   const [loading, setLoading] = useState(true);
 
