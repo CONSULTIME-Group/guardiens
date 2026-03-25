@@ -58,9 +58,11 @@ const Register = () => {
     <div className="min-h-screen flex items-center justify-center bg-background px-6">
       <div className="w-full max-w-md">
         <div className="text-center mb-10">
-          <h1 className="font-heading text-3xl font-bold mb-2">
-            <span className="text-primary">g</span>uardiens
-          </h1>
+          <Link to="/" className="inline-block">
+            <h1 className="font-heading text-3xl font-bold mb-2 hover:opacity-80 transition-opacity">
+              <span className="text-primary">g</span>uardiens
+            </h1>
+          </Link>
           <p className="text-muted-foreground">
             {step === 1 ? "Quel est votre profil ?" : "Créez votre compte"}
           </p>
