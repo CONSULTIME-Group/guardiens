@@ -269,10 +269,29 @@ const OwnerDashboard = () => {
         ) : undefined
       }>
         {!ownerEligible ? (
-          <div className="p-5 rounded-xl border border-dashed border-border text-center">
-            <Lock className="h-6 w-6 text-muted-foreground mx-auto mb-2" />
-            <p className="text-sm font-medium">Longue durée verrouillée</p>
-            <p className="text-xs text-muted-foreground mt-1">Réalisez 2 gardes pour débloquer les annonces longue durée.</p>
+          <div className="p-5 rounded-xl border border-dashed border-border">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center shrink-0">
+                <Lock className="h-5 w-5 text-muted-foreground" />
+              </div>
+              <div>
+                <p className="text-sm font-medium">Longue durée verrouillée</p>
+                <p className="text-xs text-muted-foreground">Complétez les étapes ci-dessous pour débloquer.</p>
+              </div>
+            </div>
+            <div className="space-y-2.5">
+              <ProgressItem done={completedSits.length >= 2} label={`${Math.min(completedSits.length, 2)}/2 gardes complétées`} />
+              <ProgressItem done={false} label="Identité vérifiée" hint="Paramètres → Vérification" />
+            </div>
+            <div className="mt-3">
+              <div className="flex items-center justify-between text-[10px] text-muted-foreground mb-1">
+                <span>Progression</span>
+                <span>{Math.round(((completedSits.length >= 2 ? 1 : 0) / 2) * 100)}%</span>
+              </div>
+              <div className="h-1.5 rounded-full bg-muted overflow-hidden">
+                <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${((completedSits.length >= 2 ? 1 : 0) / 2) * 100}%` }} />
+              </div>
+            </div>
           </div>
         ) : longStays.length === 0 ? (
           <EmptyCard text="Aucune annonce longue durée publiée." cta="Proposer une garde longue durée" to="/long-stays/create" />

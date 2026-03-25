@@ -193,15 +193,49 @@ const SitterDashboard = () => {
       }>
         {metrics.completed >= 3 && metrics.avgRating && parseFloat(metrics.avgRating) >= 4.7 ? (
           <p className="text-sm text-muted-foreground italic">Explorez les gardes longue durée dans la recherche.</p>
-        ) : (
-          <div className="p-5 rounded-xl border border-dashed border-border text-center">
-            <Lock className="h-6 w-6 text-muted-foreground mx-auto mb-2" />
-            <p className="text-sm font-medium">Longue durée verrouillée</p>
-            <p className="text-xs text-muted-foreground mt-1">
-              Encore {Math.max(0, 3 - metrics.completed)} garde{3 - metrics.completed > 1 ? "s" : ""} pour débloquer les gardes longue durée !
-            </p>
-          </div>
-        )}
+        ) : (() => {
+          const sitterSteps = [
+            { done: metrics.completed >= 3, label: `${Math.min(metrics.completed, 3)}/3 gardes complétées` },
+            { done: metrics.avgRating !== null && parseFloat(metrics.avgRating) >= 4.7, label: `Note ≥ 4.7 ${metrics.avgRating ? `(${metrics.avgRating}/5)` : "(pas encore d'avis)"}` },
+            { done: false, label: "Identité vérifiée", hint: "Paramètres → Vérification" },
+          ];
+          const doneCount = sitterSteps.filter(s => s.done).length;
+          return (
+            <div className="p-5 rounded-xl border border-dashed border-border">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center shrink-0">
+                  <Lock className="h-5 w-5 text-muted-foreground" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium">Longue durée verrouillée</p>
+                  <p className="text-xs text-muted-foreground">Complétez les étapes ci-dessous pour débloquer.</p>
+                </div>
+              </div>
+              <div className="space-y-2.5">
+                {sitterSteps.map((step, i) => (
+                  <div key={i} className="flex items-center gap-2">
+                    {step.done ? (
+                      <CheckCircle2 className="h-4 w-4 text-green-600 shrink-0" />
+                    ) : (
+                      <div className="h-4 w-4 rounded-full border-2 border-muted-foreground/30 shrink-0" />
+                    )}
+                    <span className={`text-xs ${step.done ? "text-foreground line-through" : "text-muted-foreground"}`}>{step.label}</span>
+                    {step.hint && !step.done && <span className="text-[10px] text-primary">{step.hint}</span>}
+                  </div>
+                ))}
+              </div>
+              <div className="mt-3">
+                <div className="flex items-center justify-between text-[10px] text-muted-foreground mb-1">
+                  <span>Progression</span>
+                  <span>{Math.round((doneCount / sitterSteps.length) * 100)}%</span>
+                </div>
+                <div className="h-1.5 rounded-full bg-muted overflow-hidden">
+                  <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${(doneCount / sitterSteps.length) * 100}%` }} />
+                </div>
+              </div>
+            </div>
+          );
+        })()}
       </DashSection>
 
       {/* Messages non lus */}
