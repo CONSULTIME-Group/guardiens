@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Link } from "react-router-dom";
-import { Calendar, MapPin, MessageSquare, Star, Users, Clock, ChevronRight, Plus, PawPrint, Dog, Cat, Bird, Fish, Rabbit } from "lucide-react";
+import { Calendar, MapPin, MessageSquare, Star, Users, Clock, ChevronRight, Plus, PawPrint, Dog, Cat, Bird, Fish, Rabbit, BarChart3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { format, differenceInDays } from "date-fns";
 import { fr } from "date-fns/locale";
