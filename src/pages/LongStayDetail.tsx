@@ -231,6 +231,18 @@ const LongStayDetail = () => {
         </div>
       )}
 
+      {/* Applications list for owner */}
+      {isOwner && (
+        <LongStayApplicationsList
+          longStayId={longStay.id}
+          longStayTitle={longStay.title}
+          petNames={pets.map((p: any) => p.name || "Sans nom")}
+          startDate={longStay.start_date ? format(new Date(longStay.start_date), "d MMM yyyy", { locale: fr }) : ""}
+          endDate={longStay.end_date ? format(new Date(longStay.end_date), "d MMM yyyy", { locale: fr }) : ""}
+          propertyId={longStay.property_id}
+        />
+      )}
+
       {/* Apply section */}
       {!isOwner && (
         <div className="bg-card border border-border rounded-xl p-5 mb-6">
