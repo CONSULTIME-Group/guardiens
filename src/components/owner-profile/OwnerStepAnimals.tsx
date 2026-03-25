@@ -91,14 +91,25 @@ const OwnerStepAnimals = ({ pets, onAddPet, onUpdatePet, onRemovePet }: Props) =
             {expandedId === pet.id ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
           </button>
           {expandedId === pet.id && (
-            <div className="px-4 pb-4 flex gap-2">
-              <Button type="button" variant="outline" size="sm" onClick={() => startEdit(pet)}>
-                <Pencil className="w-3 h-3 mr-1" /> Modifier
-              </Button>
-              <Button type="button" variant="outline" size="sm" onClick={() => pet.id && onRemovePet(pet.id)}
-                className="text-destructive hover:text-destructive">
-                <Trash2 className="w-3 h-3 mr-1" /> Supprimer
-              </Button>
+            <div className="px-4 pb-4 space-y-3">
+              <div className="flex gap-2">
+                <Button type="button" variant="outline" size="sm" onClick={() => startEdit(pet)}>
+                  <Pencil className="w-3 h-3 mr-1" /> Modifier
+                </Button>
+                <Button type="button" variant="outline" size="sm" onClick={() => pet.id && onRemovePet(pet.id)}
+                  className="text-destructive hover:text-destructive">
+                  <Trash2 className="w-3 h-3 mr-1" /> Supprimer
+                </Button>
+              </div>
+              {pet.breed && (
+                <BreedProfileCard
+                  species={pet.species}
+                  breed={pet.breed}
+                  ownerNote={pet.owner_breed_note}
+                  editable
+                  onNoteChange={(note) => onUpdatePet({ ...pet, owner_breed_note: note })}
+                />
+              )}
             </div>
           )}
         </div>
