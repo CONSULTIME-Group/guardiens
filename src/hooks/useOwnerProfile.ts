@@ -57,6 +57,7 @@ export interface Pet {
   food: string;
   special_needs: string;
   activity_level: string;
+  owner_breed_note: string;
 }
 
 const defaultData: OwnerProfileData = {
