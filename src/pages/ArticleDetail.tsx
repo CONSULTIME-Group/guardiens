@@ -7,6 +7,7 @@ import { ArrowLeft, Calendar, MapPin, User } from "lucide-react";
 import PageMeta from "@/components/PageMeta";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
+import { marked } from "marked";
 
 interface ArticleFull {
   id: string;
