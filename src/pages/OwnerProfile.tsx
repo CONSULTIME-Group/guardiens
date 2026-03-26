@@ -9,6 +9,8 @@ import OwnerStepAnimals from "@/components/owner-profile/OwnerStepAnimals";
 import OwnerStepRules from "@/components/owner-profile/OwnerStepRules";
 import OwnerStepCommunication from "@/components/owner-profile/OwnerStepCommunication";
 import OwnerStepCalendar from "@/components/owner-profile/OwnerStepCalendar";
+import OwnerGallery from "@/components/owner-profile/OwnerGallery";
+import OwnerExperiences from "@/components/owner-profile/OwnerExperiences";
 import { useOwnerProfile, type OwnerProfileData } from "@/hooks/useOwnerProfile";
 
 const STEPS = [
@@ -18,6 +20,8 @@ const STEPS = [
   { num: 4, label: "Attentes" },
   { num: 5, label: "Accueil" },
   { num: 6, label: "Calendrier" },
+  { num: 7, label: "Galerie" },
+  { num: 8, label: "Expériences" },
 ];
 
 const OwnerProfilePage = () => {
