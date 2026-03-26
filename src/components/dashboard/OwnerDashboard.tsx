@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Link } from "react-router-dom";
 import { Calendar, MapPin, MessageSquare, Star, Users, Clock, ChevronRight, Plus, PawPrint, Dog, Cat, Bird, Fish, Rabbit, BarChart3, Clock3, Lock, CheckCircle2, BookOpen, Compass } from "lucide-react";
+import VerificationBanner from "./VerificationBanner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { format, differenceInDays } from "date-fns";
@@ -40,6 +41,7 @@ const OwnerDashboard = () => {
   const [breedArticles, setBreedArticles] = useState<any[]>([]);
   const [breedProfiles, setBreedProfiles] = useState<any[]>([]);
   const [localGuides, setLocalGuides] = useState<any[]>([]);
+  const [verificationStatus, setVerificationStatus] = useState<string>("not_submitted");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -52,7 +54,7 @@ const OwnerDashboard = () => {
         supabase.from("properties").select("id").eq("user_id", user.id),
         supabase.from("reviews").select("overall_rating").eq("reviewee_id", user.id).eq("published", true),
         supabase.from("long_stays").select("*, long_stay_applications(id, status)").eq("user_id", user.id).order("created_at", { ascending: false }),
-        supabase.from("profiles").select("identity_verified").eq("id", user.id).single(),
+        supabase.from("profiles").select("identity_verified, identity_verification_status").eq("id", user.id).single(),
       ]);
 
       const sitsData = sitsRes.data || [];
@@ -64,6 +66,7 @@ const OwnerDashboard = () => {
       // Owner eligibility for long stays: TEMPORARILY BYPASSED FOR TESTING
       const completedCount = sitsData.filter((s: any) => s.status === "completed").length;
       setOwnerEligible(completedCount >= 2 && (profileRes.data?.identity_verified || false));
+      setVerificationStatus((profileRes.data as any)?.identity_verification_status || "not_submitted");
 
       // Load pets from user's properties
       const propIds = (propsRes.data || []).map((p: any) => p.id);
@@ -172,6 +175,8 @@ const OwnerDashboard = () => {
           </Link>
         )}
       </div>
+
+      <VerificationBanner status={verificationStatus} />
 
       {/* CTA Publier si aucune annonce active */}
       {activeSits.length === 0 && (

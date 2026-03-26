@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -11,10 +11,14 @@ import StepMobility from "@/components/profile/StepMobility";
 import StepPreferences from "@/components/profile/StepPreferences";
 import SitterGallery from "@/components/profile/SitterGallery";
 import ExternalExperiences from "@/components/profile/ExternalExperiences";
+import TrustProfile from "@/components/profile/TrustProfile";
 import { useSitterProfile, type SitterProfileData } from "@/hooks/useSitterProfile";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 
 const SitterProfile = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const {
     data, pastAnimals, loading, saving, completion, missingFields,
     saveStep, addPastAnimal, removePastAnimal, uploadAvatar,
@@ -24,6 +28,17 @@ const SitterProfile = () => {
   const [localData, setLocalData] = useState<Partial<SitterProfileData>>({});
   const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
   const [activeTab, setActiveTab] = useState("profile");
+  const [trustData, setTrustData] = useState({ identityVerified: false, hasAvatar: false, hasFirstActivity: false });
+
+  useEffect(() => {
+    if (!user) return;
+    supabase.from("profiles").select("identity_verified, avatar_url").eq("id", user.id).single().then(({ data: p }) => {
+      if (p) setTrustData(prev => ({ ...prev, identityVerified: p.identity_verified || false, hasAvatar: !!p.avatar_url }));
+    });
+    supabase.from("applications").select("id", { count: "exact", head: true }).eq("sitter_id", user.id).eq("status", "accepted").then(({ count }) => {
+      setTrustData(prev => ({ ...prev, hasFirstActivity: (count || 0) > 0 }));
+    });
+  }, [user]);
 
   const mergedData = { ...data, ...localData } as SitterProfileData;
 
@@ -54,6 +69,14 @@ const SitterProfile = () => {
   return (
     <div className="p-6 md:p-10 max-w-3xl mx-auto animate-fade-in">
       <h1 className="font-heading text-3xl font-bold mb-3">Mon profil</h1>
+      <TrustProfile
+        emailVerified={true}
+        identityVerified={trustData.identityVerified}
+        hasAvatar={trustData.hasAvatar}
+        profileCompletion={completion}
+        hasFirstActivity={trustData.hasFirstActivity}
+        role="sitter"
+      />
       <p className="text-muted-foreground mb-6">Complétez votre profil pour augmenter vos chances.</p>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-6">

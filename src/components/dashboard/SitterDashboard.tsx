@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Link } from "react-router-dom";
 import { Calendar, MapPin, MessageSquare, Star, Search, Clock, ChevronRight, CheckCircle2, Eye, XCircle, Send as SendIcon, PawPrint, CircleDot, Clock3, Lock } from "lucide-react";
+import VerificationBanner from "./VerificationBanner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -26,19 +27,22 @@ const SitterDashboard = () => {
   const [unreadCount, setUnreadCount] = useState(0);
   const [isAvailable, setIsAvailable] = useState(false);
   const [metrics, setMetrics] = useState({ completed: 0, avgRating: null as string | null, reviewCount: 0 });
+  const [verificationStatus, setVerificationStatus] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!user) return;
     const load = async () => {
-      const [appsRes, unreadRes, reviewsRes, listingsRes, sitterRes] = await Promise.all([
+      const [appsRes, unreadRes, reviewsRes, listingsRes, sitterRes, profileRes] = await Promise.all([
         supabase.from("applications").select("*, sit:sits(id, title, start_date, end_date, status)").eq("sitter_id", user.id).order("created_at", { ascending: false }),
         supabase.from("messages").select("id", { count: "exact", head: true }).neq("sender_id", user.id).is("read_at", null),
         supabase.from("reviews").select("overall_rating").eq("reviewee_id", user.id).eq("published", true),
         supabase.from("sits").select("id, title, start_date, end_date, user_id, property_id, status").eq("status", "published").order("created_at", { ascending: false }).limit(5),
         supabase.from("sitter_profiles").select("is_available").eq("user_id", user.id).single(),
+        supabase.from("profiles").select("identity_verification_status").eq("id", user.id).single(),
       ]);
 
+      setVerificationStatus(profileRes.data?.identity_verification_status || "not_submitted");
       setIsAvailable(sitterRes.data?.is_available || false);
 
       setMyApplications(appsRes.data || []);
@@ -78,6 +82,8 @@ const SitterDashboard = () => {
           </Link>
         )}
       </div>
+
+      <VerificationBanner status={verificationStatus} />
 
       {/* Availability toggle */}
       <div className="flex items-center justify-between rounded-lg border border-green-200 bg-green-50 dark:bg-green-950/20 dark:border-green-800 p-4">

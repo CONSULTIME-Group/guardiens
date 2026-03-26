@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight, LogOut } from "lucide-react";
@@ -11,7 +11,10 @@ import OwnerStepCommunication from "@/components/owner-profile/OwnerStepCommunic
 import OwnerStepCalendar from "@/components/owner-profile/OwnerStepCalendar";
 import OwnerGallery from "@/components/owner-profile/OwnerGallery";
 import OwnerExperiences from "@/components/owner-profile/OwnerExperiences";
+import TrustProfile from "@/components/profile/TrustProfile";
 import { useOwnerProfile, type OwnerProfileData } from "@/hooks/useOwnerProfile";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 
 const STEPS = [
   { num: 1, label: "Identité" },
@@ -26,6 +29,7 @@ const STEPS = [
 
 const OwnerProfilePage = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const {
     data, pets, loading, saving, completion, missingFields,
     saveStep, addPet, updatePet, removePet, uploadPhoto,
@@ -34,6 +38,17 @@ const OwnerProfilePage = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const [localData, setLocalData] = useState<Partial<OwnerProfileData>>({});
   const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
+  const [trustData, setTrustData] = useState({ identityVerified: false, hasAvatar: false, hasFirstActivity: false });
+
+  useEffect(() => {
+    if (!user) return;
+    supabase.from("profiles").select("identity_verified, avatar_url").eq("id", user.id).single().then(({ data: p }) => {
+      if (p) setTrustData(prev => ({ ...prev, identityVerified: p.identity_verified || false, hasAvatar: !!p.avatar_url }));
+    });
+    supabase.from("sits").select("id", { count: "exact", head: true }).eq("user_id", user.id).eq("status", "published").then(({ count }) => {
+      setTrustData(prev => ({ ...prev, hasFirstActivity: (count || 0) > 0 }));
+    });
+  }, [user]);
 
   const mergedData = { ...data, ...localData } as OwnerProfileData;
 
@@ -68,6 +83,14 @@ const OwnerProfilePage = () => {
   return (
     <div className="p-6 md:p-10 max-w-3xl mx-auto animate-fade-in">
       <h1 className="font-heading text-3xl font-bold mb-3">Mon profil propriétaire</h1>
+      <TrustProfile
+        emailVerified={true}
+        identityVerified={trustData.identityVerified}
+        hasAvatar={trustData.hasAvatar}
+        profileCompletion={completion}
+        hasFirstActivity={trustData.hasFirstActivity}
+        role="owner"
+      />
       <p className="text-muted-foreground mb-8">
         Complétez votre profil pour attirer les meilleurs gardiens.
       </p>
