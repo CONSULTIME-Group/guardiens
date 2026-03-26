@@ -3,22 +3,11 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import PageMeta from "@/components/PageMeta";
 import { MapPin, TreePine, Stethoscope, Coffee, Store, Footprints, Droplets, Trees, Star, ArrowRight } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { useEffect } from "react";
+import { lazy, Suspense } from "react";
 
-// Lazy load Leaflet CSS
-import "leaflet/dist/leaflet.css";
-import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
-import L from "leaflet";
-
-// Fix default marker icons
-delete (L.Icon.Default.prototype as any)._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png",
-  iconUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png",
-  shadowUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png",
-});
+const GuideMap = lazy(() => import("@/components/guides/GuideMap"));
 
 interface CityGuide {
   id: string;
@@ -55,13 +44,6 @@ const CATEGORY_CONFIG: Record<string, { label: string; icon: any; color: string 
   water_point: { label: "Points d'eau", icon: Droplets, color: "hsl(200, 70%, 50%)" },
 };
 
-const createColoredIcon = (color: string) =>
-  new L.DivIcon({
-    html: `<div style="background:${color};width:12px;height:12px;border-radius:50%;border:2px solid white;box-shadow:0 1px 3px rgba(0,0,0,0.3)"></div>`,
-    className: "",
-    iconSize: [16, 16],
-    iconAnchor: [8, 8],
-  });
 
 const StarRating = ({ rating }: { rating: number | null }) => {
   if (!rating) return null;
@@ -116,13 +98,6 @@ const GuideDetail = () => {
   const categories = [...new Set(places.map((p) => p.category))];
   const placesWithCoords = places.filter((p) => p.latitude && p.longitude);
 
-  // Get center from places or default to Lyon
-  const center: [number, number] = placesWithCoords.length > 0
-    ? [
-        placesWithCoords.reduce((s, p) => s + p.latitude!, 0) / placesWithCoords.length,
-        placesWithCoords.reduce((s, p) => s + p.longitude!, 0) / placesWithCoords.length,
-      ]
-    : [45.764, 4.8357];
 
   if (guideLoading) {
     return (
@@ -191,53 +166,12 @@ const GuideDetail = () => {
 
         {/* Map */}
         {placesWithCoords.length > 0 && (
-          <div className="max-w-5xl mx-auto px-4 mb-8">
-            <div className="rounded-xl overflow-hidden border border-border h-[300px] sm:h-[400px]">
-              <MapContainer center={center} zoom={13} className="h-full w-full" scrollWheelZoom={false}>
-                <TileLayer
-                  attribution='&copy; <a href="https://osm.org/copyright">OpenStreetMap</a>'
-                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                />
-                {placesWithCoords.map((place) => {
-                  const config = CATEGORY_CONFIG[place.category];
-                  return (
-                    <Marker
-                      key={place.id}
-                      position={[place.latitude!, place.longitude!]}
-                      icon={createColoredIcon(config?.color || "hsl(var(--primary))")}
-                    >
-                      <Popup>
-                        <div className="text-sm">
-                          <strong>{place.name}</strong>
-                          <br />
-                          <span className="text-gray-500">{config?.label}</span>
-                          {place.tips && (
-                            <>
-                              <br />
-                              <em className="text-xs">{place.tips}</em>
-                            </>
-                          )}
-                        </div>
-                      </Popup>
-                    </Marker>
-                  );
-                })}
-              </MapContainer>
-            </div>
-            {/* Legend */}
-            <div className="flex flex-wrap gap-3 mt-3">
-              {categories.map((cat) => {
-                const config = CATEGORY_CONFIG[cat];
-                if (!config) return null;
-                return (
-                  <div key={cat} className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                    <div className="w-3 h-3 rounded-full" style={{ backgroundColor: config.color }} />
-                    {config.label}
-                  </div>
-                );
-              })}
-            </div>
-          </div>
+          <Suspense fallback={<div className="max-w-5xl mx-auto px-4 mb-8 h-[300px] sm:h-[400px] bg-muted animate-pulse rounded-xl" />}>
+            <GuideMap
+              places={placesWithCoords.map(p => ({ id: p.id, name: p.name, category: p.category, latitude: p.latitude!, longitude: p.longitude!, tips: p.tips }))}
+              categories={categories}
+            />
+          </Suspense>
         )}
 
         {/* Places by category */}
