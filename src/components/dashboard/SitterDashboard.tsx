@@ -3,10 +3,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Link } from "react-router-dom";
 import OnboardingWelcome from "./OnboardingWelcome";
+import EmergencyActivation from "./EmergencyActivation";
+import EmergencyDashSection from "./EmergencyDashSection";
 import {
   Home, Star, Mail, Award, CircleDot, ChevronRight, Search,
   Send as SendIcon, Eye, CheckCircle2, XCircle, MessageSquare,
-  Calendar, Handshake, Newspaper, PawPrint,
+  Calendar, Handshake, Newspaper, PawPrint, Zap,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -55,6 +57,9 @@ const SitterDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [onboardingChecks, setOnboardingChecks] = useState({ hasName: false, hasAvatar: false, hasBio: false, hasIdentity: false, hasSitterProfile: false });
+  const [emergencyEligible, setEmergencyEligible] = useState(false);
+  const [hasEmergencyProfile, setHasEmergencyProfile] = useState(false);
+  const [showEmergencyForm, setShowEmergencyForm] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -126,6 +131,19 @@ const SitterDashboard = () => {
       setMyMissionResponses(myResponsesRes.data || []);
 
       setMetrics(prev => ({ ...prev, missionsPosted: allMyMissionsRes.data?.length || 0, missionsHelped: allMyResponsesRes.data?.length || 0 }));
+
+      // Emergency sitter eligibility
+      const { data: emProfile } = await supabase.from("emergency_sitter_profiles").select("id").eq("user_id", user.id).maybeSingle();
+      if (emProfile) {
+        setHasEmergencyProfile(true);
+      } else {
+        const completedSits = acceptedApps.filter((a: any) => a.sit?.status === "completed").length;
+        const avg = reviews.length > 0 ? reviews.reduce((s: number, r: any) => s + r.overall_rating, 0) / reviews.length : 0;
+        const cancellations = (await supabase.from("profiles").select("cancellation_count, identity_verified").eq("id", user.id).single()).data;
+        if (completedSits >= 5 && avg >= 4.7 && (cancellations?.cancellation_count || 0) === 0 && cancellations?.identity_verified) {
+          setEmergencyEligible(true);
+        }
+      }
 
       setLoading(false);
     };
@@ -226,6 +244,36 @@ const SitterDashboard = () => {
           }}
         />
       </div>
+
+      {/* 4b. Emergency sitter section */}
+      {hasEmergencyProfile && <EmergencyDashSection />}
+
+      {/* 4c. Emergency sitter invitation */}
+      {emergencyEligible && !hasEmergencyProfile && !showEmergencyForm && (
+        <div className="rounded-xl border-2 border-amber-300 dark:border-amber-700 bg-gradient-to-br from-amber-50 to-amber-100/50 dark:from-amber-900/20 dark:to-amber-900/10 p-5 space-y-3">
+          <div className="flex items-center gap-2.5">
+            <span className="inline-flex items-center justify-center h-8 w-8 rounded-full bg-gradient-to-br from-amber-400 to-amber-500 text-white shadow">
+              <Zap className="h-4 w-4" fill="currentColor" />
+            </span>
+            <div>
+              <p className="font-heading font-semibold text-sm">Vous êtes éligible au statut Gardien d'urgence !</p>
+              <p className="text-xs text-muted-foreground">Mobilisable rapidement, fiable, expérimenté. Visibilité prioritaire + badge distinctif.</p>
+            </div>
+          </div>
+          <Button onClick={() => setShowEmergencyForm(true)} className="gap-2 w-full">
+            <Zap className="h-4 w-4" /> Activer le mode Gardien d'urgence
+          </Button>
+        </div>
+      )}
+
+      {emergencyEligible && !hasEmergencyProfile && showEmergencyForm && (
+        <div className="rounded-xl border-2 border-amber-300 dark:border-amber-700 bg-card p-5">
+          <h3 className="font-heading font-semibold mb-4 flex items-center gap-2">
+            <Zap className="h-4 w-4 text-amber-500" /> Activer le mode Gardien d'urgence
+          </h3>
+          <EmergencyActivation onActivated={() => { setHasEmergencyProfile(true); setShowEmergencyForm(false); }} />
+        </div>
+      )}
 
       {/* 5. My applications */}
       <DashSection title="Mes candidatures" action={

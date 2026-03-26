@@ -10,10 +10,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
-import { Search, SlidersHorizontal, MapPin, Star, Car, CheckCircle2, CircleDot, MessageCircle } from "lucide-react";
+import { Search, SlidersHorizontal, MapPin, Star, Car, CheckCircle2, CircleDot, MessageCircle, Zap } from "lucide-react";
 import { toast } from "sonner";
 import ChipSelect from "@/components/profile/ChipSelect";
 import VerifiedBadge from "@/components/profile/VerifiedBadge";
+import EmergencyBadge from "@/components/profile/EmergencyBadge";
 import BadgePills from "@/components/badges/BadgePills";
 
 const animalChips = ["Chiens", "Chats", "Chevaux", "Oiseaux", "Animaux de ferme", "NAC", "Tous"];
@@ -42,6 +43,7 @@ const SearchOwner = () => {
   const [vehicled, setVehicled] = useState(false);
   const [availableOnly, setAvailableOnly] = useState(false);
   const [verifiedOnly, setVerifiedOnly] = useState(false);
+  const [emergencyOnly, setEmergencyOnly] = useState(false);
   const [sort, setSort] = useState<SortOption>("rating");
 
   const [results, setResults] = useState<any[]>([]);
@@ -142,15 +144,21 @@ const SearchOwner = () => {
       });
     }
 
-    // Enrich with reviews + badges
+    // Enrich with reviews + badges + emergency status
     const userIds = items.map((s: any) => s.user_id);
-    const { data: allBadges } = await supabase
-      .from("badge_attributions")
-      .select("receiver_id, badge_key")
-      .in("receiver_id", userIds);
+    const [allBadgesRes, emergencyRes] = await Promise.all([
+      supabase.from("badge_attributions").select("receiver_id, badge_key").in("receiver_id", userIds),
+      supabase.from("emergency_sitter_profiles").select("user_id, is_active").in("user_id", userIds).eq("is_active", true),
+    ]);
+
+    const emergencySet = new Set((emergencyRes.data || []).map((e: any) => e.user_id));
+
+    if (emergencyOnly) {
+      items = items.filter((s: any) => emergencySet.has(s.user_id));
+    }
 
     const badgeMap = new Map<string, Map<string, number>>();
-    (allBadges || []).forEach((b: any) => {
+    (allBadgesRes.data || []).forEach((b: any) => {
       if (!badgeMap.has(b.receiver_id)) badgeMap.set(b.receiver_id, new Map());
       const m = badgeMap.get(b.receiver_id)!;
       m.set(b.badge_key, (m.get(b.badge_key) || 0) + 1);
@@ -170,16 +178,22 @@ const SearchOwner = () => {
         const topBadges = userBadges
           ? Array.from(userBadges.entries()).map(([badge_key, count]) => ({ badge_key, count })).sort((a, b) => b.count - a.count).slice(0, 2)
           : [];
-        return { ...s, avgRating, reviewCount: reviews?.length || 0, topBadges };
+        return { ...s, avgRating, reviewCount: reviews?.length || 0, topBadges, isEmergency: emergencySet.has(s.user_id) };
       })
     );
 
-    // Sort
+    // Sort: emergency sitters first, then by selected sort
     if (sort === "rating") {
-      enriched.sort((a, b) => (parseFloat(b.avgRating || "0") - parseFloat(a.avgRating || "0")));
+      enriched.sort((a, b) => {
+        if (a.isEmergency !== b.isEmergency) return a.isEmergency ? -1 : 1;
+        return parseFloat(b.avgRating || "0") - parseFloat(a.avgRating || "0");
+      });
     } else {
       const expOrder: Record<string, number> = { "5+": 4, "3-5": 3, "1-2": 2, debutant: 1, "": 0 };
-      enriched.sort((a, b) => (expOrder[b.experience_years || ""] || 0) - (expOrder[a.experience_years || ""] || 0));
+      enriched.sort((a, b) => {
+        if (a.isEmergency !== b.isEmergency) return a.isEmergency ? -1 : 1;
+        return (expOrder[b.experience_years || ""] || 0) - (expOrder[a.experience_years || ""] || 0);
+      });
     }
 
     setResults(enriched);
@@ -235,6 +249,12 @@ const SearchOwner = () => {
       <div className="flex items-center gap-3">
         <Switch checked={verifiedOnly} onCheckedChange={setVerifiedOnly} />
         <label className="text-sm">Profils vérifiés uniquement</label>
+      </div>
+      <div className="flex items-center gap-3">
+        <Switch checked={emergencyOnly} onCheckedChange={setEmergencyOnly} />
+        <label className="text-sm flex items-center gap-1.5">
+          <Zap className="h-3.5 w-3.5 text-amber-500" /> Gardiens d'urgence
+        </label>
       </div>
       <Button onClick={handleSearch} className="w-full gap-2" disabled={loading}>
         <Search className="h-4 w-4" /> {loading ? "Recherche..." : "Rechercher"}
@@ -334,6 +354,7 @@ const SearchOwner = () => {
                             <h3 className="font-heading font-semibold">{profile?.first_name || "Gardien"}</h3>
                           </Link>
                           {profile?.identity_verified && <VerifiedBadge />}
+                          {s.isEmergency && <EmergencyBadge />}
                           {s.is_available && (
                             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 text-xs font-medium">
                               <CircleDot className="h-3 w-3" /> Disponible

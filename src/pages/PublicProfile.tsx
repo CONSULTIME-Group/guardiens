@@ -6,6 +6,7 @@ import BadgePills from "@/components/badges/BadgePills";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import VerifiedBadge from "@/components/profile/VerifiedBadge";
+import EmergencyBadge from "@/components/profile/EmergencyBadge";
 import ReviewsDisplay from "@/components/reviews/ReviewsDisplay";
 import ReportButton from "@/components/reports/ReportButton";
 import PublicGallery from "@/components/profile/PublicGallery";
@@ -45,6 +46,7 @@ const PublicProfile = () => {
   const [ownerGalleryPhotos, setOwnerGalleryPhotos] = useState<any[]>([]);
   const [ownerHighlights, setOwnerHighlights] = useState<any[]>([]);
   const [badgeCounts, setBadgeCounts] = useState<{ badge_key: string; count: number }[]>([]);
+  const [isEmergencySitter, setIsEmergencySitter] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -117,6 +119,10 @@ const PublicProfile = () => {
         setBadgeCounts(Array.from(countMap.entries()).map(([badge_key, count]) => ({ badge_key, count })));
       }
 
+      // Emergency sitter check
+      const { data: emProfile } = await supabase.from("emergency_sitter_profiles").select("is_active").eq("user_id", id).eq("is_active", true).maybeSingle();
+      setIsEmergencySitter(!!emProfile);
+
       setLoading(false);
     };
     load();
@@ -150,6 +156,7 @@ const PublicProfile = () => {
           <div className="flex items-center gap-2 flex-wrap">
             <h1 className="font-heading text-2xl font-bold">{profile.first_name}</h1>
             {profile.identity_verified && <VerifiedBadge size="md" />}
+            {isEmergencySitter && <EmergencyBadge size="md" />}
             {profile.is_founder && (
               <span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary text-xs font-medium">Fondateur</span>
             )}

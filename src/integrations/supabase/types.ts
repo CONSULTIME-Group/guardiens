@@ -500,6 +500,50 @@ export type Database = {
         }
         Relationships: []
       }
+      emergency_sitter_profiles: {
+        Row: {
+          animal_types: string[]
+          created_at: string
+          id: string
+          is_active: boolean
+          radius_km: number
+          sms_alerts: boolean
+          updated_at: string
+          user_id: string
+          weekly_availability: Json | null
+        }
+        Insert: {
+          animal_types?: string[]
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          radius_km?: number
+          sms_alerts?: boolean
+          updated_at?: string
+          user_id: string
+          weekly_availability?: Json | null
+        }
+        Update: {
+          animal_types?: string[]
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          radius_km?: number
+          sms_alerts?: boolean
+          updated_at?: string
+          user_id?: string
+          weekly_availability?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "emergency_sitter_profiles_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       external_experiences: {
         Row: {
           admin_note: string | null
