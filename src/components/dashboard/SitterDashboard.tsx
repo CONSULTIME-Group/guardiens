@@ -55,7 +55,7 @@ const SitterDashboard = () => {
     if (!user) return;
     const load = async () => {
       const [appsRes, sitterRes, profileRes, reviewsRes, listingsRes, badgesRes, missionsRes, articlesRes] = await Promise.all([
-        supabase.from("applications").select("*, sit:sits(id, title, start_date, end_date, status, property_id, properties:property_id(photos))").eq("sitter_id", user.id).order("created_at", { ascending: false }),
+        supabase.from("applications").select("*, sit:sits(id, title, start_date, end_date, status, user_id, property_id, properties:property_id(photos))").eq("sitter_id", user.id).order("created_at", { ascending: false }),
         supabase.from("sitter_profiles").select("is_available").eq("user_id", user.id).single(),
         supabase.from("profiles").select("identity_verification_status").eq("id", user.id).single(),
         supabase.from("reviews").select("overall_rating").eq("reviewee_id", user.id).eq("published", true),
