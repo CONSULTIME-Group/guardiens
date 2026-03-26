@@ -47,6 +47,8 @@ import NotFound from "./pages/NotFound";
 import Unsubscribe from "./pages/Unsubscribe";
 import CityPage from "./pages/CityPage";
 import AdminCityPages from "./pages/admin/AdminCityPages";
+import FAQ from "./pages/FAQ";
+import AdminFAQ from "./pages/admin/AdminFAQ";
 
 const queryClient = new QueryClient();
 
