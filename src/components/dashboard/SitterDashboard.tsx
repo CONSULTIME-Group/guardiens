@@ -44,6 +44,8 @@ const SitterDashboard = () => {
   const [myApplications, setMyApplications] = useState<any[]>([]);
   const [nearbyListings, setNearbyListings] = useState<any[]>([]);
   const [smallMissions, setSmallMissions] = useState<any[]>([]);
+  const [myMissions, setMyMissions] = useState<any[]>([]);
+  const [myMissionResponses, setMyMissionResponses] = useState<any[]>([]);
   const [articles, setArticles] = useState<any[]>([]);
   const [isAvailable, setIsAvailable] = useState(false);
   const [metrics, setMetrics] = useState({ completed: 0, avgRating: 0, pendingApps: 0, badgeCount: 0 });
