@@ -1,12 +1,18 @@
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Mail, MapPin } from "lucide-react";
+import PageMeta from "@/components/PageMeta";
 
 const Contact = () => {
   const navigate = useNavigate();
 
   return (
     <div className="min-h-screen bg-background text-foreground">
+      <PageMeta
+        title="Contact — Guardiens"
+        description="Contactez l'équipe Guardiens pour toute question sur le house-sitting en Auvergne-Rhône-Alpes."
+        path="/contact"
+      />
       <header className="flex items-center justify-between px-6 md:px-12 py-5 sticky top-0 bg-background/80 backdrop-blur-md z-50 border-b border-border/50">
         <h2 className="font-heading text-2xl font-bold cursor-pointer" onClick={() => navigate("/")}>
           <span className="text-primary">g</span>uardiens

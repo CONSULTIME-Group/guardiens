@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { ArrowRight, Home, PawPrint, Clock, Handshake, Sparkles, Wrench } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import PageMeta from "@/components/PageMeta";
 import heroDogBbq from "@/assets/hero-dog-bbq.jpg";
 
 const differentiators = [
@@ -111,6 +112,11 @@ const Landing = () => {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
+      <PageMeta
+        title="Guardiens — Comme confier ses clés à un voisin."
+        description="House-sitting de proximité en Auvergne-Rhône-Alpes. Vos animaux restent chez eux, votre maison vit, vous partez l'esprit léger. Gardiens vérifiés, gratuit."
+        path="/"
+      />
       {/* JSON-LD Schema */}
       <script
         type="application/ld+json"

@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ArrowLeft, Calendar, MapPin, User } from "lucide-react";
+import PageMeta from "@/components/PageMeta";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 
@@ -75,6 +76,16 @@ export default function ArticleDetail() {
   }
 
   return (
+    <>
+      <PageMeta
+        title={article.title}
+        description={article.excerpt}
+        path={`/actualites/${article.slug}`}
+        image={article.cover_image_url || undefined}
+        type="article"
+        publishedAt={article.published_at || undefined}
+        author={article.author_name}
+      />
     <article className="max-w-3xl mx-auto px-4 py-8 animate-fade-in">
       <Link
         to="/actualites"
@@ -145,5 +156,6 @@ export default function ArticleDetail() {
         </div>
       )}
     </article>
+    </>
   );
 }
