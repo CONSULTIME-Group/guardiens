@@ -46,6 +46,7 @@ const PublicProfile = () => {
   const [ownerGalleryPhotos, setOwnerGalleryPhotos] = useState<any[]>([]);
   const [ownerHighlights, setOwnerHighlights] = useState<any[]>([]);
   const [badgeCounts, setBadgeCounts] = useState<{ badge_key: string; count: number }[]>([]);
+  const [isEmergencySitter, setIsEmergencySitter] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
