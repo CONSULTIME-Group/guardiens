@@ -29,6 +29,13 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
   const { user } = useAuth();
   const [applications, setApplications] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showArchived, setShowArchived] = useState(false);
+  const [archivedIds, setArchivedIds] = useState<Set<string>>(() => {
+    try {
+      const stored = localStorage.getItem(`archived-apps-${sitId}`);
+      return stored ? new Set(JSON.parse(stored)) : new Set();
+    } catch { return new Set(); }
+  });
   const navigate = useNavigate();
 
   const load = async () => {
