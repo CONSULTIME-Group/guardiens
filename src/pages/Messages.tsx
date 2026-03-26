@@ -73,6 +73,51 @@ const formatListDate = (d: string) => {
 type ConvFilter = "all" | "active" | "archived";
 type ConvType = "all" | "garde" | "entraide";
 
+const ownerSuggestions = [
+  "Voulez-vous qu'on se rencontre autour d'un café ?",
+  "Avez-vous de l'expérience avec ce type d'animaux ?",
+  "Êtes-vous disponible pour un appel vidéo ?",
+];
+
+const sitterSuggestions = [
+  "Est-ce que je peux voir le guide de la maison ?",
+  "Y a-t-il des consignes particulières pour les animaux ?",
+  "Serait-il possible de se rencontrer avant ?",
+];
+
+const SuggestedMessages = ({
+  messages: msgs, userId, activeConv, onSelect,
+}: {
+  messages: Message[]; userId?: string; activeConv: Conversation;
+  onSelect: (text: string) => void;
+}) => {
+  const [dismissed, setDismissed] = useState(false);
+
+  // Only show if user hasn't sent any message yet in this conversation
+  const userHasSent = msgs.some(m => m.sender_id === userId && !m.is_system);
+  if (userHasSent || dismissed) return null;
+
+  const isOwner = activeConv.owner_id === userId;
+  const suggestions = isOwner ? ownerSuggestions : sitterSuggestions;
+
+  return (
+    <div className="px-3 py-2 border-t border-border/50 bg-accent/30">
+      <p className="text-[10px] text-muted-foreground mb-1.5 font-medium">Suggestions</p>
+      <div className="flex gap-1.5 overflow-x-auto scrollbar-hide pb-1">
+        {suggestions.map((s, i) => (
+          <button
+            key={i}
+            onClick={() => { onSelect(s); setDismissed(true); }}
+            className="px-3 py-1.5 rounded-full bg-card border border-border text-xs font-medium text-foreground hover:bg-primary/10 hover:border-primary/30 transition-colors whitespace-nowrap shrink-0"
+          >
+            {s}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+};
+
 const Messages = () => {
   const { user } = useAuth();
   const isMobile = useIsMobile();
@@ -695,6 +740,14 @@ const Messages = () => {
               <div ref={messagesEndRef} />
             </div>
           </div>
+
+          {/* Suggested messages */}
+          <SuggestedMessages
+            messages={messages}
+            userId={user?.id}
+            activeConv={activeConv}
+            onSelect={(text) => setNewMessage(text)}
+          />
 
           {/* Input */}
           <div className="border-t border-border bg-card p-3 flex items-center gap-2 mb-16 md:mb-0">
