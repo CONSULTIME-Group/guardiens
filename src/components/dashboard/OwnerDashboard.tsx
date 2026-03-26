@@ -341,14 +341,14 @@ const OwnerDashboard = () => {
         </DashSection>
       )}
 
-      {/* Mes gardes */}
-      <DashSection title="Mes gardes" icon={Calendar} action={
+      {/* Mes annonces */}
+      <DashSection title="Mes annonces" icon={Calendar} action={
         <Link to="/sits/create">
-          <Button size="sm" className="gap-1.5"><Plus className="h-3.5 w-3.5" /> Publier une garde</Button>
+          <Button size="sm" className="gap-1.5"><Plus className="h-3.5 w-3.5" /> Publier une annonce</Button>
         </Link>
       }>
         {sits.length === 0 ? (
-          <EmptyCard text="Aucune garde pour le moment." cta="Publier ma première garde" to="/sits/create" />
+          <EmptyCard text="Aucune annonce pour le moment." cta="Publier ma première annonce" to="/sits/create" />
         ) : (
           <div className="grid gap-3">
             {sits.slice(0, 5).map(sit => {

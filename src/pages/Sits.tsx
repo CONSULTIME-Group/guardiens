@@ -158,7 +158,9 @@ const Sits = () => {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="font-heading text-2xl md:text-3xl font-bold mb-1">Mes gardes</h1>
+          <h1 className="font-heading text-2xl md:text-3xl font-bold mb-1">
+            {activeRole === "owner" ? "Mes annonces" : "Mes gardes"}
+          </h1>
           <p className="text-muted-foreground text-sm">
             {activeRole === "owner"
               ? "Gérez vos annonces de garde."
