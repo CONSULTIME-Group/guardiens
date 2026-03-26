@@ -316,6 +316,32 @@ const GuideDetail = () => {
             </div>
           )}
 
+          {/* Related articles */}
+          {relatedArticles.length > 0 && (
+            <div className="mt-14 border-t border-border pt-10">
+              <h2 className="font-heading text-xl font-semibold text-foreground mb-4">
+                Articles sur {guide.city}
+              </h2>
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {relatedArticles.map((a: any) => (
+                  <Link key={a.slug} to={`/actualites/${a.slug}`} className="group">
+                    <Card className="h-full hover:shadow-md transition-shadow">
+                      <CardContent className="p-4">
+                        <h3 className="font-heading font-semibold text-sm text-foreground group-hover:text-primary transition-colors line-clamp-2 mb-1">
+                          {a.title}
+                        </h3>
+                        <p className="text-xs text-muted-foreground line-clamp-2">{a.excerpt}</p>
+                        <span className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-primary">
+                          Lire <ArrowRight className="h-3 w-3" />
+                        </span>
+                      </CardContent>
+                    </Card>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* CTA */}
           <div className="mt-14 text-center border-t border-border pt-10">
             <p className="text-muted-foreground mb-4">
