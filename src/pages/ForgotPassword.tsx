@@ -42,10 +42,8 @@ const ForgotPassword = () => {
         <div className="relative z-10 flex flex-col items-center text-center max-w-lg">
           <img
             src={forgotPasswordPhoto}
-            alt="Chien et chat heureux"
-            width={400}
-            height={400}
-            className="mb-8 drop-shadow-lg"
+            alt="Chat aventurier dans la nature"
+            className="mb-8 rounded-2xl shadow-lg max-h-80 object-cover"
           />
           <h2 className="font-heading text-2xl font-semibold text-foreground mb-3">
             Pas de panique !
