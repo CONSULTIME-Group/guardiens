@@ -443,9 +443,22 @@ const Messages = () => {
                     )}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between gap-2">
-                        <span className={`text-sm font-medium truncate ${conv.unread_count > 0 ? "font-bold" : ""}`}>
-                          {conv.other_user?.first_name || "Utilisateur"}
-                        </span>
+                        <div className="flex items-center gap-1.5 min-w-0">
+                          <span className={`text-sm font-medium truncate ${conv.unread_count > 0 ? "font-bold" : ""}`}>
+                            {conv.other_user?.first_name || "Utilisateur"}
+                          </span>
+                          {conv.top_badge && (() => {
+                            const def = getBadgeDef(conv.top_badge.badge_key);
+                            if (!def) return null;
+                            const Icon = def.icon;
+                            return (
+                              <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-accent text-[9px] font-medium text-muted-foreground shrink-0" title={def.label}>
+                                <Icon className={`h-2.5 w-2.5 ${def.colorClass}`} />
+                                <span className="hidden sm:inline truncate max-w-[80px]">{def.label}</span>
+                              </span>
+                            );
+                          })()}
+                        </div>
                         <span className="text-xs text-muted-foreground shrink-0">
                           {conv.last_message ? formatListDate(conv.last_message.created_at) : ""}
                         </span>
