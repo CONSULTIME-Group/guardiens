@@ -65,6 +65,8 @@ const StarRating = ({ rating }: { rating: number | null }) => {
 
 const GuideDetail = () => {
   const { slug } = useParams<{ slug: string }>();
+  const navigate = useNavigate();
+  const [searchQuery, setSearchQuery] = useState("");
 
   const { data: guide, isLoading: guideLoading } = useQuery({
     queryKey: ["city-guide", slug],
