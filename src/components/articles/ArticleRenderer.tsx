@@ -26,6 +26,9 @@ const ARTICLE_IMAGES: Record<string, string> = {
   "/images/saint-etienne-parc-chien.jpg": saintEtienneParcChien,
   "/images/saint-etienne-chat-forez.jpg": saintEtienneChatForez,
   "/images/saint-etienne-confiance-cafe.jpg": saintEtienneConfianceCafe,
+  "/images/valence-parc-chien.jpg": valenceParcChien,
+  "/images/valence-chat-drome.jpg": valenceChatDrome,
+  "/images/valence-confiance-cafe.jpg": valenceConfianceCafe,
 };
 
 function resolveArticleImages(html: string): string {
