@@ -36,16 +36,20 @@ const sitterFeatures = [
 ];
 
 const comparisonRows = [
-  { label: "Propriétaire", guardiens: "Gratuit", trusted: "129€/an", nomador: "89€/an", highlight: true },
-  { label: "Gardien", guardiens: "49€/an", trusted: "159€/an", nomador: "89€/an", highlight: true },
+  { label: "Propriétaire", guardiens: "Gratuit", trusted: "$149–$299/an", nomador: "34€/3 mois à 179€/an" },
+  { label: "Gardien", guardiens: "49€/an", trusted: "$129–$259/an + $10/garde", nomador: "34€/3 mois à 179€/an" },
+  { label: "Frais par garde", guardiens: "Aucun", trusted: "$10 par garde", nomador: "Aucun" },
+  { label: "Nombre de formules", guardiens: "1 seule — simple", trusted: "3 niveaux", nomador: "3 formules" },
   { label: "Proximité locale", guardiens: true, trusted: false, nomador: false },
-  { label: "Profils vérifiés", guardiens: true, trusted: true, nomador: true },
-  { label: "Avis croisés détaillés", guardiens: true, trusted: true, nomador: false },
-  { label: "Guide de la maison", guardiens: true, trusted: false, nomador: false },
-  { label: "Fiches races animaux", guardiens: true, trusted: false, nomador: false },
-  { label: "Guides locaux (parcs, vétos)", guardiens: true, trusted: false, nomador: false },
+  { label: "Guide de la maison", guardiens: true, trusted: true, nomador: false },
+  { label: "Vétos", guardiens: "Annuaire local", trusted: "Hotline (Standard+)", nomador: false },
+  { label: "Couvertures / assurances", guardiens: "Votre assurance habitation", trusted: "Plans avec conditions", nomador: "Repose sur votre assurance" },
+  { label: "Fiches races auto-générées", guardiens: true, trusted: false, nomador: false },
+  { label: "Guides locaux (parcs, vétos, balades)", guardiens: true, trusted: false, nomador: false },
   { label: "Gardiens d'urgence", guardiens: true, trusted: false, nomador: false },
-  { label: "Commission sur les gardes", guardiens: "Aucune", trusted: "Aucune", nomador: "Aucune" },
+  { label: "Avis croisés", guardiens: "Détaillés avec sous-critères", trusted: "Blind reviews", nomador: "Badges" },
+  { label: "Vérification ID", guardiens: true, trusted: true, nomador: true },
+  { label: "Simplicité", guardiens: "1 prix, 0 frais", trusted: "3 niveaux × 2 rôles", nomador: "3 formules, conditions variables" },
 ];
 
 const faqItems = [
