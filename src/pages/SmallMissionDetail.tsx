@@ -247,6 +247,12 @@ const SmallMissionDetail = () => {
               <CheckCircle2 className="h-4 w-4" /> Marquer comme terminée
             </Button>
           )}
+
+          {mission.status === "open" && (
+            <Button onClick={handleClose} variant="outline" className="w-full mt-4 gap-2">
+              <XCircle className="h-4 w-4" /> Fermer — J'ai trouvé quelqu'un
+            </Button>
+          )}
         </div>
       )}
 
