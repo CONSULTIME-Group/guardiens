@@ -141,7 +141,6 @@ export default function ArticleDetail() {
         "@context": "https://schema.org",
         "@type": article.category === "conseil_gardien" ? "HowTo" : article.category === "actualite" ? "NewsArticle" : article.category === "guide_lieu" ? "Guide" : article.category === "guide_race" ? "Article" : "BlogPosting",
         ...(article.category === "conseil_gardien" ? { "name": article.title } : { "headline": article.title }),
-        "headline": article.title,
         "description": article.excerpt,
         "author": { "@type": "Person", "name": article.author_name || "Elisa & Thomas" },
         ...(article.cover_image_url && { "image": article.cover_image_url }),
