@@ -192,6 +192,13 @@ const PublicProfile = () => {
               )}
             </div>
           )}
+
+          {/* Badges */}
+          {badgeCounts.length > 0 && (
+            <div className="mt-3">
+              <BadgePills badges={badgeCounts} max={3} size="sm" />
+            </div>
+          )}
         </div>
 
         {/* Actions */}
