@@ -59,22 +59,27 @@ const OwnerStepAnimals = ({ pets, onAddPet, onUpdatePet, onRemovePet }: Props) =
 
   const compressImage = (file: File, maxWidth = 1200, quality = 0.8): Promise<Blob> => {
     return new Promise((resolve, reject) => {
-      const img = new Image();
-      img.onload = () => {
-        const canvas = document.createElement("canvas");
-        const ratio = Math.min(maxWidth / img.width, 1);
-        canvas.width = img.width * ratio;
-        canvas.height = img.height * ratio;
-        const ctx = canvas.getContext("2d")!;
-        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-        canvas.toBlob(
-          (blob) => (blob ? resolve(blob) : reject(new Error("Compression failed"))),
-          "image/jpeg",
-          quality
-        );
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement("canvas");
+          const ratio = Math.min(maxWidth / img.width, 1);
+          canvas.width = Math.max(1, Math.round(img.width * ratio));
+          canvas.height = Math.max(1, Math.round(img.height * ratio));
+          const ctx = canvas.getContext("2d")!;
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          canvas.toBlob(
+            (blob) => (blob ? resolve(blob) : reject(new Error("Compression failed"))),
+            "image/jpeg",
+            quality
+          );
+        };
+        img.onerror = () => reject(new Error("Impossible de lire l'image"));
+        img.src = e.target?.result as string;
       };
-      img.onerror = reject;
-      img.src = URL.createObjectURL(file);
+      reader.onerror = () => reject(new Error("Erreur de lecture du fichier"));
+      reader.readAsDataURL(file);
     });
   };
 
@@ -86,21 +91,21 @@ const OwnerStepAnimals = ({ pets, onAddPet, onUpdatePet, onRemovePet }: Props) =
     }
     setUploading(true);
     try {
-      let uploadFile: Blob | File = file;
-      if (file.size > 2 * 1024 * 1024) {
-        uploadFile = await compressImage(file);
-      }
+      // Always compress to ensure JPEG compatibility (handles HEIC, large files, etc.)
+      const uploadFile = await compressImage(file);
       const path = `pets/${Date.now()}_${Math.random().toString(36).slice(2)}.jpg`;
       const { error } = await supabase.storage.from("property-photos").upload(path, uploadFile, { contentType: "image/jpeg" });
       if (error) {
-        toast.error("Erreur lors de l'upload de la photo");
+        console.error("Storage upload error:", error);
+        toast.error("Erreur lors de l'upload : " + (error.message || "réessayez"));
       } else {
         const { data: urlData } = supabase.storage.from("property-photos").getPublicUrl(path);
         setEditingPet({ ...editingPet, photo_url: urlData.publicUrl });
         toast.success("Photo ajoutée !");
       }
-    } catch {
-      toast.error("Erreur lors du traitement de l'image");
+    } catch (err) {
+      console.error("Photo processing error:", err);
+      toast.error("Format d'image non supporté ou fichier corrompu");
     }
     setUploading(false);
   };
