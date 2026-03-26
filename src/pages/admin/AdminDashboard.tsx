@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, Megaphone, CalendarCheck, Star, UserPlus } from "lucide-react";
+import { Users, Megaphone, CalendarCheck, Star, UserPlus, Handshake } from "lucide-react";
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   BarChart, Bar, Cell,
@@ -21,6 +21,7 @@ interface Stats {
   completedSits: number;
   totalReviews: number;
   avgRating: number;
+  openMissions: number;
 }
 
 interface WeeklySignup { week: string; count: number }
@@ -62,6 +63,7 @@ const AdminDashboard = () => {
         { data: profilesData },
         { count: totalApplications },
         { count: confirmedSits },
+        { count: openMissions },
       ] = await Promise.all([
         supabase.from("profiles").select("id", { count: "exact", head: true }),
         supabase.from("profiles").select("id", { count: "exact", head: true }).eq("role", "owner"),
@@ -75,6 +77,7 @@ const AdminDashboard = () => {
         supabase.from("profiles").select("created_at, city"),
         supabase.from("applications").select("id", { count: "exact", head: true }),
         supabase.from("sits").select("id", { count: "exact", head: true }).in("status", ["confirmed", "completed"]),
+        supabase.from("small_missions").select("id", { count: "exact", head: true }).eq("status", "open" as any),
       ]);
 
       const totalReviews = reviewsData?.length || 0;
@@ -93,6 +96,7 @@ const AdminDashboard = () => {
         completedSits: completedSits || 0,
         totalReviews,
         avgRating: Math.round(avgRating * 10) / 10,
+        openMissions: openMissions || 0,
       });
 
       // Weekly signups (last 12 weeks)
@@ -199,6 +203,12 @@ const AdminDashboard = () => {
       subtitle: stats.avgRating > 0 ? `Note moyenne : ${stats.avgRating}/5` : "Aucun avis",
       icon: Star,
     },
+    {
+      title: "Missions d'entraide",
+      value: stats.openMissions,
+      subtitle: "Ouvertes",
+      icon: Handshake,
+    },
   ];
 
   return (
@@ -206,7 +216,7 @@ const AdminDashboard = () => {
       <h1 className="font-body text-2xl font-bold">Dashboard</h1>
 
       {/* KPI cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
         {cards.map((card) => (
           <Card key={card.title}>
             <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
