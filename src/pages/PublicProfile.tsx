@@ -25,6 +25,7 @@ const lifestyleLabels: Record<string, string> = {
 const PublicProfile = () => {
   const { id } = useParams<{ id: string }>();
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [profile, setProfile] = useState<any>(null);
   const [sitterProfile, setSitterProfile] = useState<any>(null);
   const [ownerProfile, setOwnerProfile] = useState<any>(null);
