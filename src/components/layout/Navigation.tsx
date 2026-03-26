@@ -117,7 +117,8 @@ export const Sidebar = () => {
               </span>
             )}
           </NavLink>
-        ))}
+          );
+        })}
       </nav>
 
       <div className="p-3 border-t border-border space-y-1">
