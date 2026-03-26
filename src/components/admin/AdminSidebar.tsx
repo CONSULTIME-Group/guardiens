@@ -31,6 +31,7 @@ const adminNavItems = [
   { to: "/admin/city-pages", icon: MapPin, label: "Pages villes SEO" },
   { to: "/admin/faq", icon: HelpCircle, label: "FAQ" },
   { to: "/admin/guides", icon: Compass, label: "Guides locaux" },
+  { to: "/admin/departments", icon: MapPin, label: "Départements SEO" },
 ];
 
 export const AdminSidebar = () => {
