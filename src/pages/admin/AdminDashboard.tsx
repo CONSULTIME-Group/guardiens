@@ -203,6 +203,12 @@ const AdminDashboard = () => {
       subtitle: stats.avgRating > 0 ? `Note moyenne : ${stats.avgRating}/5` : "Aucun avis",
       icon: Star,
     },
+    {
+      title: "Missions d'entraide",
+      value: stats.openMissions,
+      subtitle: "Ouvertes",
+      icon: Handshake,
+    },
   ];
 
   return (
