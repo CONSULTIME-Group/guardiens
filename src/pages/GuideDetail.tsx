@@ -242,7 +242,7 @@ const GuideDetail = () => {
               Petites missions d'entraide <ArrowRight className="h-3.5 w-3.5" />
             </Link>
           </div>
-        </header>
+        </div>
 
         {/* Map */}
         {placesWithCoords.length > 0 && (
