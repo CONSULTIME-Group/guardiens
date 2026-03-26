@@ -102,7 +102,7 @@ const OwnerProfilePage = () => {
         <Button type="button" variant="ghost" onClick={handleSaveAndQuit} disabled={saving} className="w-full sm:w-auto text-muted-foreground">
           <LogOut className="w-4 h-4 mr-1" /> Sauvegarder et quitter
         </Button>
-        {currentStep < 6 ? (
+        {currentStep < 8 ? (
           <Button type="button" onClick={() => handleSaveAndNavigate(currentStep + 1)} disabled={saving} className="w-full sm:w-auto">
             {saving ? "Sauvegarde..." : "Suivant"} <ChevronRight className="w-4 h-4 ml-1" />
           </Button>
