@@ -292,6 +292,10 @@ const SearchSitter = () => {
           </SelectContent>
         </Select>
       </div>
+      <div>
+        <label className="text-sm font-medium mb-1.5 block">Équipements</label>
+        <ChipSelect options={EQUIPMENT_CHIPS} selected={selectedEquipments} onChange={setSelectedEquipments} />
+      </div>
       {tab === "sits" && (
         <div>
           <label className="text-sm font-medium mb-1.5 block">Durée</label>
