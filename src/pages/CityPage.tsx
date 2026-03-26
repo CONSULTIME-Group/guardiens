@@ -495,11 +495,6 @@ const CityPage = () => {
             }),
           }}
         />
-                { "@type": "ListItem", position: departmentPage ? 3 : 2, name: page.city, item: `https://guardiens.fr/house-sitting/${page.slug}` },
-              ],
-            }),
-          }}
-        />
       </div>
     </>
   );
