@@ -1091,6 +1091,7 @@ export type Database = {
           identity_document_url: string | null
           identity_verification_status: string | null
           identity_verified: boolean
+          is_founder: boolean
           last_name: string | null
           postal_code: string | null
           profile_completion: number | null
@@ -1111,6 +1112,7 @@ export type Database = {
           identity_document_url?: string | null
           identity_verification_status?: string | null
           identity_verified?: boolean
+          is_founder?: boolean
           last_name?: string | null
           postal_code?: string | null
           profile_completion?: number | null
@@ -1131,6 +1133,7 @@ export type Database = {
           identity_document_url?: string | null
           identity_verification_status?: string | null
           identity_verified?: boolean
+          is_founder?: boolean
           last_name?: string | null
           postal_code?: string | null
           profile_completion?: number | null
@@ -1597,6 +1600,39 @@ export type Database = {
           },
         ]
       }
+      subscriptions: {
+        Row: {
+          created_at: string
+          expires_at: string | null
+          id: string
+          plan: Database["public"]["Enums"]["subscription_plan"]
+          started_at: string
+          status: Database["public"]["Enums"]["subscription_status"]
+          stripe_subscription_id: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          plan: Database["public"]["Enums"]["subscription_plan"]
+          started_at?: string
+          status?: Database["public"]["Enums"]["subscription_status"]
+          stripe_subscription_id?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          plan?: Database["public"]["Enums"]["subscription_plan"]
+          started_at?: string
+          status?: Database["public"]["Enums"]["subscription_status"]
+          stripe_subscription_id?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       suppressed_emails: {
         Row: {
           created_at: string
@@ -1731,6 +1767,12 @@ export type Database = {
         | "confirmed"
         | "completed"
         | "cancelled"
+      subscription_plan:
+        | "free_launch"
+        | "founder_free"
+        | "annual_sitter"
+        | "owner_free"
+      subscription_status: "active" | "expired" | "cancelled"
       user_role: "owner" | "sitter" | "both"
       walk_duration: "none" | "30min" | "1h" | "2h_plus"
     }
@@ -1910,6 +1952,13 @@ export const Constants = {
       ],
       property_type: ["apartment", "house", "farm", "chalet", "other"],
       sit_status: ["draft", "published", "confirmed", "completed", "cancelled"],
+      subscription_plan: [
+        "free_launch",
+        "founder_free",
+        "annual_sitter",
+        "owner_free",
+      ],
+      subscription_status: ["active", "expired", "cancelled"],
       user_role: ["owner", "sitter", "both"],
       walk_duration: ["none", "30min", "1h", "2h_plus"],
     },
