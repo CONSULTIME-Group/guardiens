@@ -5,6 +5,8 @@ import { Input } from "@/components/ui/input";
 import { ArrowRight, Home, PawPrint, Clock, Handshake, Sparkles, Wrench } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import PageMeta from "@/components/PageMeta";
+import heroDogBbq from "@/assets/hero-dog-bbq.jpg";
 import heroDogBbq from "@/assets/hero-dog-bbq.jpg";
 
 const differentiators = [
