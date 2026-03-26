@@ -149,6 +149,55 @@ export type Database = {
         }
         Relationships: []
       }
+      badge_attributions: {
+        Row: {
+          badge_key: string
+          created_at: string
+          giver_id: string
+          id: string
+          receiver_id: string
+          sit_id: string
+        }
+        Insert: {
+          badge_key: string
+          created_at?: string
+          giver_id: string
+          id?: string
+          receiver_id: string
+          sit_id: string
+        }
+        Update: {
+          badge_key?: string
+          created_at?: string
+          giver_id?: string
+          id?: string
+          receiver_id?: string
+          sit_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "badge_attributions_giver_id_fkey"
+            columns: ["giver_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "badge_attributions_receiver_id_fkey"
+            columns: ["receiver_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "badge_attributions_sit_id_fkey"
+            columns: ["sit_id"]
+            isOneToOne: false
+            referencedRelation: "sits"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       breed_profiles: {
         Row: {
           breed: string
