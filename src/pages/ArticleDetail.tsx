@@ -276,6 +276,24 @@ export default function ArticleDetail() {
               "addressCountry": "FR"
             }
           }),
+          ...(article.city === "Valence" && {
+            "geo": { "@type": "GeoCoordinates", "latitude": 44.9333, "longitude": 4.8917 },
+            "areaServed": [
+              { "@type": "City", "name": "Valence" },
+              { "@type": "City", "name": "Bourg-lès-Valence" },
+              { "@type": "City", "name": "Guilherand-Granges" },
+              { "@type": "City", "name": "Romans-sur-Isère" },
+              { "@type": "City", "name": "Montélimar" },
+              { "@type": "City", "name": "Chabeuil" }
+            ],
+            "address": {
+              "@type": "PostalAddress",
+              "addressLocality": "Valence",
+              "addressRegion": "Auvergne-Rhône-Alpes",
+              "postalCode": "26000",
+              "addressCountry": "FR"
+            }
+          }),
           "priceRange": "Gratuit",
           "openingHoursSpecification": {
             "@type": "OpeningHoursSpecification",
