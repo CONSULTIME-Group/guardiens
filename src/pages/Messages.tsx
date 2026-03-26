@@ -696,6 +696,14 @@ const Messages = () => {
             </div>
           </div>
 
+          {/* Suggested messages */}
+          <SuggestedMessages
+            messages={messages}
+            userId={user?.id}
+            activeConv={activeConv}
+            onSelect={(text) => setNewMessage(text)}
+          />
+
           {/* Input */}
           <div className="border-t border-border bg-card p-3 flex items-center gap-2 mb-16 md:mb-0">
             <input
