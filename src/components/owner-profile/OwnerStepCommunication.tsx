@@ -3,6 +3,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import ChipSelect from "../profile/ChipSelect";
 import HintBubble from "../profile/HintBubble";
+import AiSuggestButton from "../profile/AiSuggestButton";
 import type { OwnerProfileData } from "@/hooks/useOwnerProfile";
 
 const MEETING = ["Dîner/apéro avant", "Visite du logement la veille", "Passage le jour même", "Visio avant", "Échange messagerie suffit"];
