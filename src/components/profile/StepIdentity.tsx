@@ -1,4 +1,5 @@
 import { useState, useRef } from "react";
+import { usePostalCodeCity } from "@/hooks/usePostalCodeCity";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -15,6 +16,7 @@ interface Props {
 const StepIdentity = ({ data, onChange, onUploadAvatar }: Props) => {
   const fileRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
+  const { handlePostalCodeChange } = usePostalCodeCity(onChange);
 
   const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -69,7 +71,7 @@ const StepIdentity = ({ data, onChange, onUploadAvatar }: Props) => {
         </div>
         <div className="space-y-2">
           <Label htmlFor="postal_code">Code postal</Label>
-          <Input id="postal_code" value={data.postal_code} onChange={e => onChange({ postal_code: e.target.value })} className="rounded-lg h-12" maxLength={10} />
+          <Input id="postal_code" value={data.postal_code} onChange={e => handlePostalCodeChange(e.target.value)} className="rounded-lg h-12" maxLength={10} />
         </div>
       </div>
 
