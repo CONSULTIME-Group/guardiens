@@ -2,8 +2,8 @@ import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import PageMeta from "@/components/PageMeta";
-import { Link } from "react-router-dom";
-import { MapPin, Search } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { MapPin, Search, ArrowLeft } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -24,6 +24,7 @@ interface PlaceCount {
 
 
 const GuidesListing = () => {
+  const navigate = useNavigate();
   const [search, setSearch] = useState("");
   const [selectedDept, setSelectedDept] = useState("all");
 
@@ -90,6 +91,15 @@ const GuidesListing = () => {
       />
 
       <div className="min-h-screen bg-background">
+        <div className="max-w-5xl mx-auto px-4 pt-6">
+          <button
+            onClick={() => navigate(-1)}
+            className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors mb-4"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Retour
+          </button>
+        </div>
         <header className="bg-primary/5 border-b border-border">
           <div className="max-w-5xl mx-auto px-4 py-12 sm:py-16 text-center">
             <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-primary/10 mb-6">
