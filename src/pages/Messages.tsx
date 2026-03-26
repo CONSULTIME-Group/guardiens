@@ -69,6 +69,7 @@ const formatListDate = (d: string) => {
 };
 
 type ConvFilter = "all" | "active" | "archived";
+type ConvType = "all" | "garde" | "entraide";
 
 const Messages = () => {
   const { user } = useAuth();
@@ -82,6 +83,7 @@ const Messages = () => {
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const [filter, setFilter] = useState<ConvFilter>("active");
+  const [typeFilter, setTypeFilter] = useState<ConvType>("all");
   const [sitFilter, setSitFilter] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
