@@ -4,6 +4,7 @@ import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import ChipSelect from "../profile/ChipSelect";
 import HintBubble from "../profile/HintBubble";
+import AiSuggestButton from "../profile/AiSuggestButton";
 import type { OwnerProfileData } from "@/hooks/useOwnerProfile";
 
 const SITTER_TYPES = ["Sans préférence", "Couple", "Famille", "Retraité", "Actif solo"];
