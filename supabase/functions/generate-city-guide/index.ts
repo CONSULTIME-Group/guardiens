@@ -10,6 +10,19 @@ const LOVABLE_API_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
 
 const CATEGORIES = ["dog_park", "walk_trail", "vet", "dog_friendly_cafe", "pet_shop"];
 
+async function geocodeAddress(query: string): Promise<{ lat: number; lng: number } | null> {
+  try {
+    const url = `https://nominatim.openstreetmap.org/search?format=json&countrycodes=fr&limit=1&q=${encodeURIComponent(query)}`;
+    const res = await fetch(url, { headers: { "User-Agent": "Guardiens-App/1.0" } });
+    if (!res.ok) return null;
+    const results = await res.json();
+    if (!results?.length) return null;
+    return { lat: parseFloat(results[0].lat), lng: parseFloat(results[0].lon) };
+  } catch {
+    return null;
+  }
+}
+
 async function callAI(apiKey: string, prompt: string, maxTokens = 1000) {
   const res = await fetch(LOVABLE_API_URL, {
     method: "POST",
@@ -131,6 +144,25 @@ En français. Maximum 5 lieux. Privilégie les lieux réels et connus.`;
         const placeArray = Array.isArray(places) ? places : [places];
 
         for (const p of placeArray.slice(0, 5)) {
+          // Geocode the place
+          let latitude: number | null = null;
+          let longitude: number | null = null;
+          const queries = [
+            p.address ? `${p.address}, ${city}, France` : null,
+            `${p.name}, ${city}, France`,
+          ].filter(Boolean) as string[];
+          for (const q of queries) {
+            const coords = await geocodeAddress(q);
+            if (coords) {
+              latitude = coords.lat;
+              longitude = coords.lng;
+              break;
+            }
+            await new Promise((r) => setTimeout(r, 1100));
+          }
+          // Rate limit between places
+          await new Promise((r) => setTimeout(r, 1100));
+
           allPlaces.push({
             city_guide_id: guide.id,
             category: cat,
@@ -140,6 +172,8 @@ En français. Maximum 5 lieux. Privilégie les lieux réels et connus.`;
             tips: p.tips || null,
             dogs_welcome: p.dogs_welcome !== false,
             leash_required: p.leash_required ?? null,
+            latitude,
+            longitude,
           });
         }
       } catch (catErr) {
