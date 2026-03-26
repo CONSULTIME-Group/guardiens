@@ -41,6 +41,8 @@ const PublicProfile = () => {
   const [completedSits, setCompletedSits] = useState(0);
   const [galleryPhotos, setGalleryPhotos] = useState<any[]>([]);
   const [externalExperiences, setExternalExperiences] = useState<any[]>([]);
+  const [ownerGalleryPhotos, setOwnerGalleryPhotos] = useState<any[]>([]);
+  const [ownerHighlights, setOwnerHighlights] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
