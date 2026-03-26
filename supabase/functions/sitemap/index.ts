@@ -7,6 +7,7 @@ const staticPages = [
   { loc: "/actualites", priority: "0.8", changefreq: "daily" },
   { loc: "/a-propos", priority: "0.5", changefreq: "monthly" },
   { loc: "/contact", priority: "0.5", changefreq: "monthly" },
+  { loc: "/faq", priority: "0.7", changefreq: "weekly" },
   { loc: "/cgu", priority: "0.3", changefreq: "yearly" },
   { loc: "/confidentialite", priority: "0.3", changefreq: "yearly" },
   { loc: "/login", priority: "0.4", changefreq: "monthly" },
