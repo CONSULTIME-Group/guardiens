@@ -102,6 +102,7 @@ const AppRoutes = () => (
     <Route path="/petites-missions" element={<SmallMissions />} />
     <Route path="/petites-missions/creer" element={<ProtectedRoute><CreateSmallMission /></ProtectedRoute>} />
     <Route path="/petites-missions/:id" element={<SmallMissionDetail />} />
+    <Route path="/profil/:id" element={<PublicProfile />} />
     <Route element={<AdminLayout />}>
       <Route path="/admin" element={<AdminDashboard />} />
       <Route path="/admin/users" element={<AdminUsers />} />
