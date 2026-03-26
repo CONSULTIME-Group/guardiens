@@ -208,7 +208,54 @@ const OwnerDashboard = () => {
         )}
       </DashSection>
 
-      {/* Prochaines gardes */}
+      {/* Conseils race personnalisés */}
+      {breedArticles.length > 0 && (
+        <DashSection title="Conseils pour vos races" icon={BookOpen} action={
+          <Link to="/actualites?cat=guide_race" className="text-xs text-primary hover:underline">Tous les guides</Link>
+        }>
+          <div className="grid gap-3">
+            {breedArticles.map((article: any) => (
+              <Link key={article.id} to={`/actualites/${article.slug}`} className="flex items-center gap-3 p-3 rounded-xl bg-card border border-border hover:shadow-md transition-shadow">
+                {article.cover_image_url ? (
+                  <img src={article.cover_image_url} alt={article.title} className="w-14 h-14 rounded-lg object-cover shrink-0" />
+                ) : (
+                  <div className="w-14 h-14 rounded-lg bg-accent flex items-center justify-center shrink-0">
+                    <BookOpen className="h-5 w-5 text-muted-foreground" />
+                  </div>
+                )}
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium truncate">{article.title}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{article.excerpt}</p>
+                </div>
+                <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
+              </Link>
+            ))}
+          </div>
+        </DashSection>
+      )}
+
+      {/* Guides locaux */}
+      {localGuides.length > 0 && (
+        <DashSection title="Guides autour de chez vous" icon={Compass} action={
+          <Link to="/guides" className="text-xs text-primary hover:underline">Tous les guides</Link>
+        }>
+          <div className="grid gap-3">
+            {localGuides.map((guide: any) => (
+              <Link key={guide.id} to={`/guides/${guide.slug}`} className="flex items-center gap-3 p-3 rounded-xl bg-card border border-border hover:shadow-md transition-shadow">
+                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                  <MapPin className="h-4 w-4 text-primary" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium truncate">{guide.city}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">{guide.department}</p>
+                </div>
+                <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
+              </Link>
+            ))}
+          </div>
+        </DashSection>
+      )}
+
       {upcomingSits.length > 0 && (
         <DashSection title="Prochaines gardes" icon={Clock} action={
           <Link to="/sits" className="text-xs text-primary hover:underline">Voir tout</Link>
