@@ -369,7 +369,7 @@ const OwnerDashboard = () => {
           <Button size="sm" variant="outline" className="gap-1.5"><Plus className="h-3.5 w-3.5" /> Poster une petite mission</Button>
         </Link>
         {smallMissions.length === 0 ? (
-          <p className="text-sm text-muted-foreground italic">Pas encore de petite mission dans votre zone.</p>
+          <EmptyCard icon={Handshake} text="Aucune petite mission dans votre zone" hint="Postez un coup de main et trouvez de l'aide entre voisins" />
         ) : (
           <div className="space-y-2">
             {smallMissions.map((m: any) => (
