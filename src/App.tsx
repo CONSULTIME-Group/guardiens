@@ -88,6 +88,7 @@ const AppRoutes = () => (
     <Route path="/contact" element={<Contact />} />
     <Route path="/cgu" element={<Terms />} />
     <Route path="/confidentialite" element={<Privacy />} />
+    <Route path="/mentions-legales" element={<MentionsLegales />} />
     <Route path="/faq" element={<FAQ />} />
     <Route path="/guides" element={<GuidesListing />} />
     <Route path="/guide/:slug" element={<GuideDetail />} />
