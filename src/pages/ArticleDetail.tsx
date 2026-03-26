@@ -139,8 +139,8 @@ export default function ArticleDetail() {
       />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
         "@context": "https://schema.org",
-        "@type": article.category === "actualite" ? "NewsArticle" : article.category === "guide_lieu" ? "Guide" : article.category === "guide_race" ? "Article" : "BlogPosting",
-        "headline": article.title,
+        "@type": article.category === "conseil_gardien" ? "HowTo" : article.category === "actualite" ? "NewsArticle" : article.category === "guide_lieu" ? "Guide" : article.category === "guide_race" ? "Article" : "BlogPosting",
+        ...(article.category === "conseil_gardien" ? { "name": article.title } : { "headline": article.title }),
         "description": article.excerpt,
         "author": { "@type": "Person", "name": article.author_name || "Elisa & Thomas" },
         ...(article.cover_image_url && { "image": article.cover_image_url }),
