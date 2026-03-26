@@ -85,7 +85,10 @@ const OwnerStepRules = ({ data, onChange }: Props) => (
     </div>
 
     <div className="space-y-2">
-      <Label>Précisions règles de vie</Label>
+      <div className="flex items-center justify-between">
+        <Label>Précisions règles de vie</Label>
+        <AiSuggestButton field="rules_notes" currentValue={data.rules_notes} onSuggestion={text => onChange({ rules_notes: text })} />
+      </div>
       <Textarea value={data.rules_notes} onChange={e => onChange({ rules_notes: e.target.value })}
         placeholder="Nuancez ici — ex : un BBQ entre amis OK, pas de soirée de groupe"
         className="rounded-lg min-h-[80px]" maxLength={2000} />

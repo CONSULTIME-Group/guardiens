@@ -123,7 +123,10 @@ const OwnerStepHousing = ({ data, onChange, onUploadPhoto }: Props) => {
       </div>
 
       <div className="space-y-2">
-        <Label>Description du logement</Label>
+        <div className="flex items-center justify-between">
+          <Label>Description du logement</Label>
+          <AiSuggestButton field="description" currentValue={data.description} context={{ property_type: data.property_type, environment: data.environment, city: data.city }} onSuggestion={text => onChange({ description: text })} />
+        </div>
         <Textarea value={data.description} onChange={e => onChange({ description: e.target.value })}
           placeholder="Ce qui fait le charme de votre logement : son ambiance, ses particularités, ce qu'on y ressent…"
           className="rounded-lg min-h-[120px]" maxLength={3000} />

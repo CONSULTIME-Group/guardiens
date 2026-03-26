@@ -63,7 +63,10 @@ const OwnerStepIdentity = ({ data, onChange, onUploadPhoto }: Props) => {
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="o_bio">Bio</Label>
+        <div className="flex items-center justify-between">
+          <Label htmlFor="o_bio">Bio</Label>
+          <AiSuggestButton field="bio" currentValue={data.bio} context={{ first_name: data.first_name, city: data.city }} onSuggestion={text => onChange({ bio: text })} />
+        </div>
         <Textarea id="o_bio" value={data.bio} onChange={e => onChange({ bio: e.target.value })}
           placeholder="Parlez de vous, de votre famille, de ce qui fait votre quotidien..."
           className="rounded-lg min-h-[120px]" maxLength={2000} />

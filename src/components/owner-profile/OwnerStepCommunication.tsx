@@ -71,7 +71,10 @@ const OwnerStepCommunication = ({ data, onChange }: Props) => (
     </div>
 
     <div className="space-y-2">
-      <Label>Précisions</Label>
+      <div className="flex items-center justify-between">
+        <Label>Précisions</Label>
+        <AiSuggestButton field="communication_notes" currentValue={data.communication_notes} onSuggestion={text => onChange({ communication_notes: text })} />
+      </div>
       <Textarea value={data.communication_notes} onChange={e => onChange({ communication_notes: e.target.value })}
         placeholder="Ex : On adore recevoir des photos en balade, pas besoin de roman !"
         className="rounded-lg min-h-[80px]" maxLength={1000} />
