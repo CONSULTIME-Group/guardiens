@@ -48,6 +48,8 @@ const OwnerDashboard = () => {
   const [sitterBadges, setSitterBadges] = useState<Record<string, { badge_key: string; count: number }[]>>({});
   const [trustedSitterCount, setTrustedSitterCount] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [onboardingChecks, setOnboardingChecks] = useState({ hasName: false, hasAvatar: false, hasBio: false, hasIdentity: false, hasProperty: false, hasPets: false, hasSit: false });
 
   useEffect(() => {
     if (!user) return;
