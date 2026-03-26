@@ -97,6 +97,14 @@ const SitterDashboard = () => {
       setSmallMissions(missionsRes.data || []);
       setArticles(articlesRes.data || []);
 
+      // My own missions + missions I responded to
+      const [myMissionsRes, myResponsesRes] = await Promise.all([
+        supabase.from("small_missions").select("id, title, category, status, created_at, small_mission_responses(id, status)").eq("user_id", user.id).order("created_at", { ascending: false }).limit(3),
+        supabase.from("small_mission_responses").select("id, status, created_at, mission:small_missions(id, title, category, status, user_id)").eq("responder_id", user.id).order("created_at", { ascending: false }).limit(3),
+      ]);
+      setMyMissions(myMissionsRes.data || []);
+      setMyMissionResponses(myResponsesRes.data || []);
+
       setLoading(false);
     };
     load();
