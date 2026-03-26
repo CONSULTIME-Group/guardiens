@@ -6,6 +6,7 @@ import BadgePills from "@/components/badges/BadgePills";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import VerifiedBadge from "@/components/profile/VerifiedBadge";
+import EmergencyBadge from "@/components/profile/EmergencyBadge";
 import ReviewsDisplay from "@/components/reviews/ReviewsDisplay";
 import ReportButton from "@/components/reports/ReportButton";
 import PublicGallery from "@/components/profile/PublicGallery";
