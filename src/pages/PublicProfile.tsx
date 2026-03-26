@@ -102,6 +102,8 @@ const PublicProfile = () => {
   const isSitter = profile.role === "sitter" || profile.role === "both";
   const isOwner = profile.role === "owner" || profile.role === "both";
   const isOwnProfile = user?.id === id;
+  const verifiedExpCount = externalExperiences.filter((e: any) => e.verification_status === "verified").length;
+  const totalSits = completedSits + verifiedExpCount;
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-6 md:py-10 space-y-6">
