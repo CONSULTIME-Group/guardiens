@@ -34,7 +34,7 @@ type StatusFilter = "active" | "all";
 type CategoryFilter = "all" | "animals" | "garden" | "house" | "skills";
 
 const SmallMissions = () => {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("active");
   const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>("all");
 
@@ -199,9 +199,13 @@ const SmallMissions = () => {
                             <span className="inline-block text-xs bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 px-2 py-0.5 rounded-full">En cours</span>
                           ) : null}
                           {!isCompleted && (
-                            <Button size="sm" variant="outline" className="w-full mt-2">
-                              {isAuthenticated ? "Proposer mon aide" : "Inscrivez-vous pour aider"}
-                            </Button>
+                            m.user_id === user?.id ? (
+                              <span className="inline-block text-xs text-muted-foreground text-center w-full mt-2">Votre mission</span>
+                            ) : (
+                              <Button size="sm" variant="outline" className="w-full mt-2">
+                                {isAuthenticated ? "Proposer mon aide" : "Inscrivez-vous pour aider"}
+                              </Button>
+                            )
                           )}
                         </CardContent>
                       </Card>
