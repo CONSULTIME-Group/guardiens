@@ -44,13 +44,6 @@ const CATEGORY_CONFIG: Record<string, { label: string; icon: any; color: string 
   water_point: { label: "Points d'eau", icon: Droplets, color: "hsl(200, 70%, 50%)" },
 };
 
-const createColoredIcon = (color: string) =>
-  new L.DivIcon({
-    html: `<div style="background:${color};width:12px;height:12px;border-radius:50%;border:2px solid white;box-shadow:0 1px 3px rgba(0,0,0,0.3)"></div>`,
-    className: "",
-    iconSize: [16, 16],
-    iconAnchor: [8, 8],
-  });
 
 const StarRating = ({ rating }: { rating: number | null }) => {
   if (!rating) return null;
