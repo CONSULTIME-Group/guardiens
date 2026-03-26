@@ -300,7 +300,7 @@ const CityPage = () => {
               "@type": "LocalBusiness",
               name: `Guardiens — House-sitting à ${page.city}`,
               description: page.meta_description,
-              url: `https://guardiens.fr/house-sitting-${page.slug}`,
+              url: `https://guardiens.fr/house-sitting/${page.slug}`,
               areaServed: {
                 "@type": "City",
                 name: page.city,

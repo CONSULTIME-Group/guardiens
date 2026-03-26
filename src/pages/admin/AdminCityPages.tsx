@@ -137,7 +137,7 @@ const AdminCityPages = () => {
                   {page.published ? "Dépublier" : "Publier"}
                 </Button>
                 <a
-                  href={`/house-sitting-${page.slug}`}
+                  href={`/house-sitting/${page.slug}`}
                   target="_blank"
                   rel="noopener"
                 >
