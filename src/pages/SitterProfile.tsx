@@ -69,6 +69,14 @@ const SitterProfile = () => {
   return (
     <div className="p-6 md:p-10 max-w-3xl mx-auto animate-fade-in">
       <h1 className="font-heading text-3xl font-bold mb-3">Mon profil</h1>
+      <TrustProfile
+        emailVerified={true}
+        identityVerified={trustData.identityVerified}
+        hasAvatar={trustData.hasAvatar}
+        profileCompletion={completion}
+        hasFirstActivity={trustData.hasFirstActivity}
+        role="sitter"
+      />
       <p className="text-muted-foreground mb-6">Complétez votre profil pour augmenter vos chances.</p>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-6">
