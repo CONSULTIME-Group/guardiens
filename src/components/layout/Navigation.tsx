@@ -1,5 +1,5 @@
 import { NavLink, useLocation } from "react-router-dom";
-import { Home, Search, Calendar, MessageSquare, User, LogOut, Bell, Settings, PawPrint, ArrowLeftRight, Newspaper, Shield, Compass } from "lucide-react";
+import { Home, Search, Calendar, MessageSquare, User, LogOut, Bell, Settings, PawPrint, ArrowLeftRight, Newspaper, Shield, Compass, Handshake } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAdmin } from "@/hooks/useAdmin";
 import { cn } from "@/lib/utils";
@@ -14,6 +14,7 @@ const navItems = [
   { to: "/messages", icon: MessageSquare, label: "Messagerie" },
   { to: "/actualites", icon: Newspaper, label: "Actualités" },
   { to: "/guides", icon: Compass, label: "Guides locaux" },
+  { to: "/petites-missions", icon: Handshake, label: "Entraide" },
   { to: "/owner-profile", icon: PawPrint, label: "Profil proprio", hideForRole: "sitter" as const },
   { to: "/profile", icon: User, label: "Mon profil" },
 ];
