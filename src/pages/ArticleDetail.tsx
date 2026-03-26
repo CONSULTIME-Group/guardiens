@@ -156,5 +156,6 @@ export default function ArticleDetail() {
         </div>
       )}
     </article>
+    </>
   );
 }
