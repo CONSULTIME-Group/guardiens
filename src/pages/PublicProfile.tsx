@@ -124,6 +124,9 @@ const PublicProfile = () => {
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-6 md:py-10 space-y-6">
+      <Button variant="ghost" size="sm" onClick={() => navigate(-1)} className="mb-2 -ml-2 text-muted-foreground">
+        <ArrowLeft className="w-4 h-4 mr-1" /> Retour
+      </Button>
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start gap-5">
         {profile.avatar_url ? (
