@@ -43,6 +43,7 @@ const statusLabels: Record<string, string> = {
   draft: "Brouillon",
   published: "En discussion",
   confirmed: "Confirmée",
+  in_progress: "En cours",
   completed: "Terminée",
   cancelled: "Annulée",
 };
