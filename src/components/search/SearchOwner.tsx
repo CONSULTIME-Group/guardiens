@@ -31,6 +31,7 @@ type SortOption = "rating" | "experience";
 
 const SearchOwner = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [city, setCity] = useState("");
   const [radius, setRadius] = useState([50]);
   const [startDate, setStartDate] = useState("");
