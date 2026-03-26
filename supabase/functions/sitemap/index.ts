@@ -81,6 +81,19 @@ Deno.serve(async () => {
     }
   }
 
+  if (cityGuides) {
+    for (const cg of cityGuides) {
+      const lastmod = (cg.updated_at || today).split("T")[0];
+      xml += `  <url>
+    <loc>${SITE_URL}/guide/${cg.slug}</loc>
+    <lastmod>${lastmod}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+`;
+    }
+  }
+
   xml += `</urlset>`;
 
   return new Response(xml, {
