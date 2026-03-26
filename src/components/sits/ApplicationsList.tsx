@@ -219,11 +219,13 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
         </p>
       ) : (
         <div className="space-y-4">
-          {applications.map((app) => {
+          {visibleApps.map((app) => {
             const sitter = app.sitter;
             const status = statusStyles[app.status] || statusStyles.pending;
             const animalTypes: string[] = app.sitterProfile?.animal_types || [];
             const expYears = app.sitterProfile?.experience_years;
+            const isArchived = archivedIds.has(app.id);
+            const canArchive = ["rejected", "cancelled"].includes(app.status);
 
             return (
               <div key={app.id} className="bg-card border border-border rounded-lg p-5">
@@ -295,6 +297,32 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
                 {app.status === "accepted" && (
                   <div className="mt-3 flex items-center gap-2 text-sm text-green-700 font-medium">
                     <CheckCircle2 className="h-4 w-4" /> Gardien choisi pour cette garde
+                  </div>
+                )}
+
+                {canArchive && !isArchived && (
+                  <div className="flex mt-3">
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="gap-1.5 text-muted-foreground"
+                      onClick={() => archiveApp(app.id)}
+                    >
+                      <Archive className="h-3.5 w-3.5" /> Archiver
+                    </Button>
+                  </div>
+                )}
+
+                {isArchived && (
+                  <div className="flex mt-3">
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="gap-1.5 text-muted-foreground"
+                      onClick={() => unarchiveApp(app.id)}
+                    >
+                      <Eye className="h-3.5 w-3.5" /> Désarchiver
+                    </Button>
                   </div>
                 )}
               </div>
