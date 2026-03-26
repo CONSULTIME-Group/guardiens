@@ -144,7 +144,7 @@ export default function ArticleDetail() {
           prose-a:text-primary prose-a:no-underline hover:prose-a:underline
           prose-strong:text-foreground
           prose-li:text-foreground/85"
-        dangerouslySetInnerHTML={{ __html: article.content }}
+        dangerouslySetInnerHTML={{ __html: marked.parse(article.content, { async: false }) as string }}
       />
 
       {article.tags.length > 0 && (
