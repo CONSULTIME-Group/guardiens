@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import ReportButton from "@/components/reports/ReportButton";
 import { supabase } from "@/integrations/supabase/client";
 import { geocodeCity, haversineDistance } from "@/lib/geocode";
@@ -301,16 +301,20 @@ const SearchOwner = () => {
                 return (
                   <div key={s.id} className="bg-card rounded-lg border border-border p-5 hover:shadow-md transition-shadow">
                     <div className="flex gap-4">
-                      {profile?.avatar_url ? (
-                        <img src={profile.avatar_url} alt={profile.first_name} className="w-16 h-16 rounded-full object-cover shrink-0" />
-                      ) : (
-                        <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center font-heading text-xl font-bold shrink-0">
-                          {profile?.first_name?.charAt(0) || "?"}
-                        </div>
-                      )}
+                      <Link to={`/profil/${s.user_id}`} className="shrink-0">
+                        {profile?.avatar_url ? (
+                          <img src={profile.avatar_url} alt={profile.first_name} className="w-16 h-16 rounded-full object-cover hover:ring-2 hover:ring-primary transition-all" />
+                        ) : (
+                          <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center font-heading text-xl font-bold hover:ring-2 hover:ring-primary transition-all">
+                            {profile?.first_name?.charAt(0) || "?"}
+                          </div>
+                        )}
+                      </Link>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
-                          <h3 className="font-heading font-semibold">{profile?.first_name || "Gardien"}</h3>
+                          <Link to={`/profil/${s.user_id}`} className="hover:text-primary transition-colors">
+                            <h3 className="font-heading font-semibold">{profile?.first_name || "Gardien"}</h3>
+                          </Link>
                           {profile?.identity_verified && <VerifiedBadge />}
                           {s.is_available && (
                             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 text-xs font-medium">
