@@ -110,6 +110,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           .from("sitter_profiles")
           .upsert({ user_id: data.user.id }, { onConflict: "user_id" });
       }
+
+      // Send welcome email (fire-and-forget)
+      supabase.functions.invoke("send-transactional-email", {
+        body: {
+          templateName: "welcome",
+          recipientEmail: email,
+          idempotencyKey: `welcome-${data.user.id}`,
+          templateData: { firstName: "", role },
+        },
+      }).catch((err) => console.warn("Welcome email failed:", err));
     }
   }, []);
 
