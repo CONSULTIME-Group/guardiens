@@ -9,6 +9,8 @@ import ReviewsDisplay from "@/components/reviews/ReviewsDisplay";
 import ReportButton from "@/components/reports/ReportButton";
 import PublicGallery from "@/components/profile/PublicGallery";
 import PublicExperiences from "@/components/profile/PublicExperiences";
+import PublicOwnerGallery from "@/components/profile/PublicOwnerGallery";
+import OwnerHighlights from "@/components/profile/OwnerHighlights";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
