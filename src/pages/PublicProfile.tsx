@@ -1,22 +1,24 @@
 import { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { MapPin, Calendar, Star, PawPrint, Car, Globe, Briefcase, Heart, Users, Home, MessageSquare, ArrowLeft } from "lucide-react";
-import BadgePills from "@/components/badges/BadgePills";
+import { MapPin, Calendar, Star, PawPrint, Car, Globe, Briefcase, Home, MessageSquare, ArrowLeft, Eye, ChevronRight } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import VerifiedBadge from "@/components/profile/VerifiedBadge";
-import EmergencyBadge from "@/components/profile/EmergencyBadge";
+import { useAuth } from "@/contexts/AuthContext";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { Helmet } from "react-helmet-async";
+import BadgeShieldGrid from "@/components/badges/BadgeShieldGrid";
+import BadgeShield from "@/components/badges/BadgeShield";
+import StatusShield from "@/components/badges/StatusShield";
 import ReviewsDisplay from "@/components/reviews/ReviewsDisplay";
 import ReportButton from "@/components/reports/ReportButton";
 import PublicGallery from "@/components/profile/PublicGallery";
 import PublicExperiences from "@/components/profile/PublicExperiences";
 import PublicOwnerGallery from "@/components/profile/PublicOwnerGallery";
 import OwnerHighlights from "@/components/profile/OwnerHighlights";
-import { useAuth } from "@/contexts/AuthContext";
-import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import PageMeta from "@/components/PageMeta";
+import { getBadgeDef } from "@/components/badges/badgeDefinitions";
 
 const speciesLabels: Record<string, string> = {
   dog: "🐕 Chiens", cat: "🐱 Chats", horse: "🐴 Chevaux", bird: "🐦 Oiseaux",
@@ -47,6 +49,8 @@ const PublicProfile = () => {
   const [ownerHighlights, setOwnerHighlights] = useState<any[]>([]);
   const [badgeCounts, setBadgeCounts] = useState<{ badge_key: string; count: number }[]>([]);
   const [isEmergencySitter, setIsEmergencySitter] = useState(false);
+  const [activeSit, setActiveSit] = useState<any>(null);
+  const [trustedSittersCount, setTrustedSittersCount] = useState(0);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -66,8 +70,7 @@ const PublicProfile = () => {
 
       if (propsRes.data) {
         setProperties(propsRes.data);
-        const allPets = propsRes.data.flatMap((p: any) => p.pets || []);
-        setPets(allPets);
+        setPets(propsRes.data.flatMap((p: any) => p.pets || []));
       }
 
       const reviews = reviewsRes.data || [];
@@ -76,52 +79,36 @@ const PublicProfile = () => {
         avg: reviews.length > 0 ? reviews.reduce((s: number, r: any) => s + r.overall_rating, 0) / reviews.length : 0,
       });
 
-      // Past animals for sitter
       if (sitterRes.data) {
         const { data: pa } = await supabase.from("past_animals").select("*").eq("sitter_profile_id", sitterRes.data.id);
         setPastAnimals(pa || []);
       }
 
-      // Completed sits count
-      const { count } = await supabase
-        .from("applications")
-        .select("id", { count: "exact", head: true })
-        .eq("sitter_id", id)
-        .eq("status", "accepted");
+      const { count } = await supabase.from("applications").select("id", { count: "exact", head: true }).eq("sitter_id", id).eq("status", "accepted");
       setCompletedSits(count || 0);
 
-      // Gallery photos (sitter)
-      const { data: gallery } = await supabase.from("sitter_gallery").select("*").eq("user_id", id).order("created_at", { ascending: false });
-      setGalleryPhotos(gallery || []);
+      const [galleryRes, extExpRes, ownerGalRes, highlightsRes, badgesRes, emRes, activeSitRes] = await Promise.all([
+        supabase.from("sitter_gallery").select("*").eq("user_id", id).order("created_at", { ascending: false }),
+        supabase.from("external_experiences").select("*").eq("user_id", id).order("created_at", { ascending: false }),
+        supabase.from("owner_gallery").select("*").eq("user_id", id).order("created_at", { ascending: false }),
+        supabase.from("owner_highlights").select("*, sitter:sitter_id(first_name, avatar_url)").eq("owner_id", id).eq("hidden", false).order("created_at", { ascending: false }),
+        supabase.from("badge_attributions").select("badge_key").eq("receiver_id", id),
+        supabase.from("emergency_sitter_profiles").select("is_active").eq("user_id", id).eq("is_active", true).maybeSingle(),
+        supabase.from("sits").select("id, title").eq("user_id", id).in("status", ["open", "confirmed"]).limit(1).maybeSingle(),
+      ]);
 
-      // External experiences (only verified ones visible publicly via RLS)
-      const { data: extExp } = await supabase.from("external_experiences").select("*").eq("user_id", id).order("created_at", { ascending: false });
-      setExternalExperiences(extExp || []);
+      setGalleryPhotos(galleryRes.data || []);
+      setExternalExperiences(extExpRes.data || []);
+      setOwnerGalleryPhotos(ownerGalRes.data || []);
+      setOwnerHighlights(highlightsRes.data || []);
+      setIsEmergencySitter(!!emRes.data);
+      setActiveSit(activeSitRes.data);
 
-      // Owner gallery
-      const { data: ownerGal } = await supabase.from("owner_gallery").select("*").eq("user_id", id).order("created_at", { ascending: false });
-      setOwnerGalleryPhotos(ownerGal || []);
-
-      // Owner highlights (coups de coeur)
-      const { data: highlights } = await supabase
-        .from("owner_highlights")
-        .select("*, sitter:sitter_id(first_name, avatar_url)")
-        .eq("owner_id", id)
-        .eq("hidden", false)
-        .order("created_at", { ascending: false });
-      setOwnerHighlights(highlights || []);
-
-      // Badge counts
-      const { data: badges } = await supabase.from("badge_attributions").select("badge_key").eq("receiver_id", id);
-      if (badges && badges.length > 0) {
+      if (badgesRes.data && badgesRes.data.length > 0) {
         const countMap = new Map<string, number>();
-        badges.forEach((b: any) => countMap.set(b.badge_key, (countMap.get(b.badge_key) || 0) + 1));
+        badgesRes.data.forEach((b: any) => countMap.set(b.badge_key, (countMap.get(b.badge_key) || 0) + 1));
         setBadgeCounts(Array.from(countMap.entries()).map(([badge_key, count]) => ({ badge_key, count })));
       }
-
-      // Emergency sitter check
-      const { data: emProfile } = await supabase.from("emergency_sitter_profiles").select("is_active").eq("user_id", id).eq("is_active", true).maybeSingle();
-      setIsEmergencySitter(!!emProfile);
 
       setLoading(false);
     };
@@ -137,334 +124,366 @@ const PublicProfile = () => {
   const isOwnProfile = user?.id === id;
   const verifiedExpCount = externalExperiences.filter((e: any) => e.verification_status === "verified").length;
   const totalSits = completedSits + verifiedExpCount;
+  const firstName = profile.first_name || "Membre";
+  const topBadge = badgeCounts.length > 0 ? getBadgeDef(badgeCounts.sort((a, b) => b.count - a.count)[0].badge_key)?.label : "";
+  const shouldIndex = (profile.profile_completion || 0) >= 60;
+
+  const metaTitle = isSitter
+    ? `${firstName} — Gardien vérifié à ${profile.city || "France"} | Guardiens`
+    : `${firstName} — Propriétaire à ${profile.city || "France"} | Guardiens`;
+  const metaDesc = isSitter
+    ? `${firstName}, gardien à ${profile.city || "France"}. ${totalSits} garde${totalSits > 1 ? "s" : ""}, note ${reviewStats.avg.toFixed(1)}/5. ${topBadge ? topBadge + ". " : ""}Contactez-le sur Guardiens.`
+    : `${firstName}, propriétaire à ${profile.city || "France"}. ${pets.length} animal${pets.length > 1 ? "ux" : ""}. ${totalSits} garde${totalSits > 1 ? "s" : ""}, note ${reviewStats.avg.toFixed(1)}/5.`;
+
+  const handleContact = async () => {
+    if (!user || !id) return;
+    const { data: existingConv } = await supabase
+      .from("conversations")
+      .select("id")
+      .or(`and(owner_id.eq.${user.id},sitter_id.eq.${id}),and(owner_id.eq.${id},sitter_id.eq.${user.id})`)
+      .maybeSingle();
+    if (existingConv) {
+      navigate(`/messages?conv=${existingConv.id}`);
+    } else {
+      const { data: newConv } = await supabase.from("conversations").insert({ owner_id: user.id, sitter_id: id }).select("id").single();
+      if (newConv) navigate(`/messages?conv=${newConv.id}`);
+    }
+  };
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-6 md:py-10 space-y-6">
-      <Button variant="ghost" size="sm" onClick={() => navigate(-1)} className="mb-2 -ml-2 text-muted-foreground">
-        <ArrowLeft className="w-4 h-4 mr-1" /> Retour
-      </Button>
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row items-start gap-5">
-        {profile.avatar_url ? (
-          <img src={profile.avatar_url} alt="" className="w-24 h-24 rounded-2xl object-cover shadow-md shrink-0" />
-        ) : (
-          <div className="w-24 h-24 rounded-2xl bg-muted flex items-center justify-center font-heading text-3xl font-bold shrink-0">
-            {profile.first_name?.charAt(0) || "?"}
-          </div>
-        )}
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 flex-wrap">
-            <h1 className="font-heading text-2xl font-bold">{profile.first_name}</h1>
-            {profile.identity_verified && <VerifiedBadge size="md" />}
-            {isEmergencySitter && <EmergencyBadge size="md" />}
-            {profile.is_founder && (
-              <span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary text-xs font-medium">Fondateur</span>
-            )}
-          </div>
+    <TooltipProvider>
+      {/* SEO */}
+      <Helmet>
+        <title>{metaTitle}</title>
+        <meta name="description" content={metaDesc} />
+        {!shouldIndex && <meta name="robots" content="noindex, nofollow" />}
+        <meta property="og:title" content={metaTitle} />
+        <meta property="og:description" content={metaDesc} />
+        {profile.avatar_url && <meta property="og:image" content={profile.avatar_url} />}
+        <meta property="og:type" content="profile" />
+        <script type="application/ld+json">{JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "Person",
+          name: firstName,
+          ...(profile.city && { address: { "@type": "PostalAddress", addressLocality: profile.city } }),
+          ...(profile.identity_verified && { hasCredential: { "@type": "EducationalOccupationalCredential", credentialCategory: "Identity Verified" } }),
+        })}</script>
+      </Helmet>
 
-          <div className="flex items-center gap-3 text-sm text-muted-foreground mt-1 flex-wrap">
-            {(profile.postal_code || profile.city) && (
-              <span className="flex items-center gap-1">
-                <MapPin className="h-3.5 w-3.5" />
-                {[profile.postal_code, profile.city].filter(Boolean).join(" ")}
-              </span>
-            )}
-            <span className="flex items-center gap-1">
-              <Calendar className="h-3.5 w-3.5" />
-              Membre depuis {memberSince}
-            </span>
-          </div>
+      <div className="min-h-screen" style={{ backgroundColor: "#FAF9F6" }}>
+        <div className="max-w-3xl mx-auto px-4 py-6 md:py-10 pb-24 space-y-6">
 
-          {/* Roles badges */}
-          <div className="flex gap-2 mt-2">
-            {isSitter && (
-              <span className="px-2.5 py-1 rounded-full bg-accent text-accent-foreground text-xs font-medium">🏡 Gardien</span>
-            )}
-            {isOwner && (
-              <span className="px-2.5 py-1 rounded-full bg-accent text-accent-foreground text-xs font-medium">🐾 Propriétaire</span>
-            )}
-          </div>
+          {/* Back button */}
+          <Button variant="ghost" size="sm" onClick={() => navigate(-1)} className="-ml-2 text-muted-foreground">
+            <ArrowLeft className="w-4 h-4 mr-1" /> Retour
+          </Button>
 
-          {/* Review summary */}
-          {reviewStats.count > 0 && (
-            <div className="flex items-center gap-2 mt-2">
-              <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
-              <span className="font-bold text-sm">{reviewStats.avg.toFixed(1)}</span>
-              <span className="text-xs text-muted-foreground">({reviewStats.count} avis)</span>
-              {totalSits > 0 && (
-                <span className="text-xs text-muted-foreground">
-                  · {totalSits} garde{totalSits > 1 ? "s" : ""} au total
-                  {verifiedExpCount > 0 && ` (${completedSits} Guardiens + ${verifiedExpCount} vérifiée${verifiedExpCount > 1 ? "s" : ""} ailleurs)`}
+          {/* === HEADER === */}
+          <div className="flex flex-col sm:flex-row items-start gap-5">
+            {profile.avatar_url ? (
+              <img src={profile.avatar_url} alt={`Photo de ${firstName}`} className="w-24 h-24 rounded-full object-cover shadow-md border-2 border-white shrink-0" />
+            ) : (
+              <div className="w-24 h-24 rounded-full bg-white border-2 border-border flex items-center justify-center font-heading text-3xl font-bold shrink-0 shadow-sm" style={{ color: "#1C1B18" }}>
+                {firstName.charAt(0)}
+              </div>
+            )}
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 flex-wrap">
+                <h1 className="font-heading text-2xl font-bold" style={{ color: "#1C1B18" }}>{firstName}</h1>
+                {profile.identity_verified && <StatusShield type="verified" />}
+                {profile.is_founder && <StatusShield type="founder" />}
+                {isEmergencySitter && <StatusShield type="emergency" />}
+              </div>
+
+              <div className="flex items-center gap-3 text-sm mt-1 flex-wrap" style={{ color: "#6B7280" }}>
+                {(profile.postal_code || profile.city) && (
+                  <span className="flex items-center gap-1">
+                    <MapPin className="h-3.5 w-3.5" />
+                    {[profile.city, profile.postal_code].filter(Boolean).join(" · ")}
+                  </span>
+                )}
+                <span className="flex items-center gap-1">
+                  <Calendar className="h-3.5 w-3.5" />
+                  Membre depuis {memberSince}
                 </span>
+              </div>
+
+              {profile.bio && (
+                <p className="text-sm italic mt-2" style={{ color: "#4B5563" }}>{profile.bio}</p>
               )}
-            </div>
-          )}
 
-          {/* Badges */}
+              <div className="flex gap-2 mt-2">
+                {isSitter && <span className="px-2.5 py-1 rounded-full text-xs font-medium" style={{ backgroundColor: "#D8F3DC", color: "#2D6A4F" }}>🏡 Gardien</span>}
+                {isOwner && <span className="px-2.5 py-1 rounded-full text-xs font-medium" style={{ backgroundColor: "#DBEAFE", color: "#1E40AF" }}>🐾 Propriétaire</span>}
+              </div>
+            </div>
+
+            {!isOwnProfile && (
+              <div className="flex gap-2 shrink-0">
+                <ReportButton targetId={id!} targetType="profile" />
+              </div>
+            )}
+          </div>
+
+          {/* === METRICS BAR === */}
+          <div className="grid grid-cols-4 divide-x rounded-xl border bg-white p-0 shadow-sm" style={{ borderColor: "#E6E2D9" }}>
+            <MetricCell label="Gardes" value={String(totalSits)} />
+            <MetricCell
+              label="Note"
+              value={reviewStats.count > 0 ? reviewStats.avg.toFixed(1) : "—"}
+              suffix={reviewStats.count > 0 ? <Star className="h-3.5 w-3.5 fill-yellow-500 text-yellow-500 ml-0.5" /> : undefined}
+            />
+            <MetricCell
+              label="Annulations"
+              value={String(profile.cancellation_count || 0)}
+              valueColor={(profile.cancellation_count || 0) === 0 ? "#16A34A" : "#EA580C"}
+            />
+            <MetricCell label="Avis" value={String(reviewStats.count)} />
+          </div>
+
+          {/* === BADGES === */}
           {badgeCounts.length > 0 && (
-            <div className="mt-3">
-              <BadgePills badges={badgeCounts} max={3} size="sm" />
+            <div className="rounded-xl border bg-white p-5 shadow-sm" style={{ borderColor: "#E6E2D9" }}>
+              <BadgeShieldGrid badges={badgeCounts} title={isSitter ? "Ses badges" : "Ses badges"} />
             </div>
           )}
-        </div>
 
-        {/* Actions */}
-        <div className="flex gap-2 shrink-0">
-          {!isOwnProfile && user && (
-            <Button
-              size="sm"
-              className="gap-1.5"
-              onClick={async () => {
-                // Find existing conversation or create one
-                const { data: existingConv } = await supabase
-                  .from("conversations")
-                  .select("id")
-                  .or(`and(owner_id.eq.${user.id},sitter_id.eq.${id}),and(owner_id.eq.${id},sitter_id.eq.${user.id})`)
-                  .maybeSingle();
+          {/* === TABS === */}
+          <Tabs defaultValue={isSitter ? "sitter" : "owner"} className="w-full">
+            <TabsList className="w-full bg-white border shadow-sm rounded-xl" style={{ borderColor: "#E6E2D9" }}>
+              {isSitter && <TabsTrigger value="sitter" className="flex-1 gap-1.5 data-[state=active]:border-b-2 data-[state=active]:border-primary">Gardien</TabsTrigger>}
+              {isOwner && <TabsTrigger value="owner" className="flex-1 gap-1.5 data-[state=active]:border-b-2 data-[state=active]:border-primary">Propriétaire</TabsTrigger>}
+              <TabsTrigger value="reviews" className="flex-1 gap-1.5 data-[state=active]:border-b-2 data-[state=active]:border-primary">Avis ({reviewStats.count})</TabsTrigger>
+              {(galleryPhotos.length > 0 || ownerGalleryPhotos.length > 0) && (
+                <TabsTrigger value="gallery" className="flex-1 gap-1.5 data-[state=active]:border-b-2 data-[state=active]:border-primary">Galerie ({galleryPhotos.length + ownerGalleryPhotos.length})</TabsTrigger>
+              )}
+            </TabsList>
 
-                if (existingConv) {
-                  navigate(`/messages?conv=${existingConv.id}`);
-                } else {
-                  const { data: newConv } = await supabase
-                    .from("conversations")
-                    .insert({ owner_id: user.id, sitter_id: id! })
-                    .select("id")
-                    .single();
-                  if (newConv) navigate(`/messages?conv=${newConv.id}`);
-                }
-              }}
-            >
-              <MessageSquare className="h-3.5 w-3.5" /> Contacter
-            </Button>
-          )}
-          {!isOwnProfile && (
-            <ReportButton targetId={id!} targetType="profile" />
-          )}
-        </div>
-      </div>
-
-      {/* Bio */}
-      {profile.bio && (
-        <div className="p-4 rounded-xl bg-card border border-border">
-          <p className="text-sm whitespace-pre-line">{profile.bio}</p>
-        </div>
-      )}
-
-      {/* Tabs */}
-      <Tabs defaultValue={isSitter ? "sitter" : "owner"} className="w-full">
-        <TabsList className="w-full">
-          {isSitter && <TabsTrigger value="sitter" className="flex-1 gap-1.5"><Users className="h-3.5 w-3.5" /> Gardien</TabsTrigger>}
-          {isOwner && <TabsTrigger value="owner" className="flex-1 gap-1.5"><Home className="h-3.5 w-3.5" /> Propriétaire</TabsTrigger>}
-          <TabsTrigger value="reviews" className="flex-1 gap-1.5"><Star className="h-3.5 w-3.5" /> Avis ({reviewStats.count})</TabsTrigger>
-        </TabsList>
-
-        {/* Sitter tab */}
-        {isSitter && (
-          <TabsContent value="sitter" className="space-y-4 mt-4">
-            {sitterProfile ? (
-              <>
-                {/* Badges */}
-                {badgeCounts.length > 0 && (
-                  <div className="p-4 rounded-xl bg-card border border-border">
-                    <h3 className="font-heading font-semibold text-sm mb-3">Ses badges</h3>
-                    <BadgePills badges={badgeCounts} showAll />
-                  </div>
-                )}
-
-                {/* Motivation */}
-                {sitterProfile.motivation && (
-                  <div>
-                    <h3 className="font-heading font-semibold text-sm mb-1">Motivation</h3>
-                    <p className="text-sm text-muted-foreground whitespace-pre-line">{sitterProfile.motivation}</p>
-                  </div>
-                )}
-
-                {/* Key info grid */}
-                <div className="grid grid-cols-2 gap-3">
-                  {sitterProfile.experience_years && (
-                    <InfoCard icon={<Briefcase className="h-4 w-4" />} label="Expérience" value={sitterProfile.experience_years} />
-                  )}
-                  {sitterProfile.animal_types && sitterProfile.animal_types.length > 0 && (
-                    <InfoCard icon={<PawPrint className="h-4 w-4" />} label="Animaux" value={sitterProfile.animal_types.map((t: string) => speciesLabels[t] || t).join(", ")} />
-                  )}
-                  {sitterProfile.has_vehicle !== null && (
-                    <InfoCard icon={<Car className="h-4 w-4" />} label="Véhicule" value={sitterProfile.has_vehicle ? "Oui" : "Non"} />
-                  )}
-                  {sitterProfile.languages && sitterProfile.languages.length > 0 && (
-                    <InfoCard icon={<Globe className="h-4 w-4" />} label="Langues" value={sitterProfile.languages.join(", ")} />
-                  )}
-                </div>
-
-                {/* Lifestyle */}
-                {sitterProfile.lifestyle && sitterProfile.lifestyle.length > 0 && (
-                  <div>
-                    <h3 className="font-heading font-semibold text-sm mb-2">Mode de vie</h3>
-                    <div className="flex flex-wrap gap-1.5">
-                      {sitterProfile.lifestyle.map((l: string) => (
-                        <span key={l} className="px-2.5 py-1 rounded-full bg-accent text-accent-foreground text-xs">
-                          {lifestyleLabels[l] || l}
-                        </span>
-                      ))}
+            {/* --- Sitter tab --- */}
+            {isSitter && (
+              <TabsContent value="sitter" className="space-y-4 mt-4">
+                {sitterProfile ? (
+                  <>
+                    {/* Key info grid */}
+                    <div className="grid grid-cols-2 gap-3">
+                      {sitterProfile.experience_years && <InfoCard icon={<Briefcase className="h-4 w-4" />} label="Expérience" value={sitterProfile.experience_years === "5+" ? "5+ ans" : sitterProfile.experience_years + " ans"} />}
+                      {sitterProfile.animal_types?.length > 0 && <InfoCard icon={<PawPrint className="h-4 w-4" />} label="Animaux" value={sitterProfile.animal_types.map((t: string) => speciesLabels[t]?.slice(2) || t).join(", ")} />}
+                      {sitterProfile.has_vehicle !== null && <InfoCard icon={<Car className="h-4 w-4" />} label="Véhicule" value={sitterProfile.has_vehicle ? "Oui" : "Non"} />}
+                      {sitterProfile.languages?.length > 0 && <InfoCard icon={<Globe className="h-4 w-4" />} label="Langues" value={sitterProfile.languages.join(", ")} />}
                     </div>
-                  </div>
-                )}
 
-                {/* Bonus skills */}
-                {sitterProfile.bonus_skills && sitterProfile.bonus_skills.length > 0 && (
-                  <div>
-                    <h3 className="font-heading font-semibold text-sm mb-2">Compétences bonus</h3>
-                    <div className="flex flex-wrap gap-1.5">
-                      {sitterProfile.bonus_skills.map((s: string) => (
-                        <span key={s} className="px-2.5 py-1 rounded-full bg-primary/10 text-primary text-xs font-medium">{s}</span>
-                      ))}
-                    </div>
-                  </div>
-                )}
+                    {/* Motivation */}
+                    {sitterProfile.motivation && (
+                      <Card>
+                        <h3 className="font-heading font-semibold text-sm mb-1" style={{ color: "#1C1B18" }}>Motivation</h3>
+                        <p className="text-sm whitespace-pre-line" style={{ color: "#4B5563" }}>{sitterProfile.motivation}</p>
+                      </Card>
+                    )}
 
-                {/* References */}
-                {sitterProfile.references_text && (
-                  <div>
-                    <h3 className="font-heading font-semibold text-sm mb-1">Références</h3>
-                    <p className="text-sm text-muted-foreground whitespace-pre-line">{sitterProfile.references_text}</p>
-                  </div>
-                )}
+                    {/* Lifestyle */}
+                    {sitterProfile.lifestyle?.length > 0 && (
+                      <Card>
+                        <h3 className="font-heading font-semibold text-sm mb-2" style={{ color: "#1C1B18" }}>Mode de vie</h3>
+                        <div className="flex flex-wrap gap-1.5">
+                          {sitterProfile.lifestyle.map((l: string) => (
+                            <span key={l} className="px-2.5 py-1 rounded-full text-xs" style={{ backgroundColor: "#F3F4F6", color: "#374151" }}>
+                              {lifestyleLabels[l] || l}
+                            </span>
+                          ))}
+                        </div>
+                      </Card>
+                    )}
 
-                {/* Past animals */}
-                {pastAnimals.length > 0 && (
-                  <div>
-                    <h3 className="font-heading font-semibold text-sm mb-2">Animaux gardés par le passé</h3>
-                    <div className="flex gap-3 overflow-x-auto pb-2">
-                      {pastAnimals.map(pa => (
-                        <div key={pa.id} className="flex flex-col items-center gap-1 shrink-0">
-                          {pa.photo_url ? (
-                            <img src={pa.photo_url} alt={pa.name} className="w-14 h-14 rounded-full object-cover" />
+                    {/* Bonus skills */}
+                    {sitterProfile.bonus_skills?.length > 0 && (
+                      <Card>
+                        <h3 className="font-heading font-semibold text-sm mb-2" style={{ color: "#1C1B18" }}>Compétences bonus</h3>
+                        <div className="flex flex-wrap gap-1.5">
+                          {sitterProfile.bonus_skills.map((s: string) => (
+                            <span key={s} className="px-2.5 py-1 rounded-full text-xs font-medium" style={{ backgroundColor: "#D8F3DC", color: "#2D6A4F" }}>{s}</span>
+                          ))}
+                        </div>
+                      </Card>
+                    )}
+
+                    {/* Handover preferences */}
+                    {sitterProfile.handover_preference && (
+                      <Card>
+                        <h3 className="font-heading font-semibold text-sm mb-1" style={{ color: "#1C1B18" }}>Comment j'aime arriver</h3>
+                        <p className="text-sm" style={{ color: "#4B5563" }}>{sitterProfile.handover_preference}</p>
+                      </Card>
+                    )}
+
+                    {/* References */}
+                    {sitterProfile.references_text && (
+                      <Card>
+                        <h3 className="font-heading font-semibold text-sm mb-1" style={{ color: "#1C1B18" }}>Références</h3>
+                        <p className="text-sm whitespace-pre-line" style={{ color: "#4B5563" }}>{sitterProfile.references_text}</p>
+                      </Card>
+                    )}
+
+                    {/* Past animals */}
+                    {pastAnimals.length > 0 && (
+                      <Card>
+                        <h3 className="font-heading font-semibold text-sm mb-3" style={{ color: "#1C1B18" }}>Animaux gardés par le passé</h3>
+                        <div className="flex gap-4 overflow-x-auto pb-2">
+                          {pastAnimals.map(pa => (
+                            <div key={pa.id} className="flex flex-col items-center gap-1.5 shrink-0">
+                              {pa.photo_url ? (
+                                <img src={pa.photo_url} alt={pa.name} className="w-16 h-16 rounded-full object-cover border-2 border-white shadow-sm" />
+                              ) : (
+                                <div className="w-16 h-16 rounded-full bg-accent flex items-center justify-center text-xl">
+                                  {pa.species === "dog" ? "🐕" : pa.species === "cat" ? "🐱" : "🐾"}
+                                </div>
+                              )}
+                              <span className="text-xs font-medium" style={{ color: "#1C1B18" }}>{pa.name}</span>
+                              {pa.breed && <span className="text-[10px]" style={{ color: "#6B7280" }}>{pa.breed}</span>}
+                            </div>
+                          ))}
+                        </div>
+                      </Card>
+                    )}
+
+                    {/* External experiences */}
+                    <PublicExperiences experiences={externalExperiences} />
+                  </>
+                ) : (
+                  <p className="text-sm italic" style={{ color: "#6B7280" }}>Profil gardien non complété.</p>
+                )}
+              </TabsContent>
+            )}
+
+            {/* --- Owner tab --- */}
+            {isOwner && (
+              <TabsContent value="owner" className="space-y-4 mt-4">
+                {/* Pets */}
+                {pets.length > 0 && (
+                  <Card>
+                    <h3 className="font-heading font-semibold text-sm mb-3" style={{ color: "#1C1B18" }}>Les animaux</h3>
+                    <div className="grid gap-3">
+                      {pets.map(pet => (
+                        <div key={pet.id} className="flex items-center gap-3">
+                          {pet.photo_url ? (
+                            <img src={pet.photo_url} alt={pet.name} className="w-14 h-14 rounded-full object-cover border-2 border-white shadow-sm" />
                           ) : (
-                            <div className="w-14 h-14 rounded-full bg-muted flex items-center justify-center text-lg">
-                              {pa.species === "dog" ? "🐕" : pa.species === "cat" ? "🐱" : "🐾"}
+                            <div className="w-14 h-14 rounded-full bg-accent flex items-center justify-center text-lg">
+                              {speciesLabels[pet.species]?.charAt(0) || "🐾"}
                             </div>
                           )}
-                          <span className="text-xs font-medium">{pa.name}</span>
+                          <div>
+                            <p className="font-medium text-sm" style={{ color: "#1C1B18" }}>{pet.name}</p>
+                            <p className="text-xs" style={{ color: "#6B7280" }}>
+                              {speciesLabels[pet.species]?.slice(2) || pet.species}
+                              {pet.breed && ` · ${pet.breed}`}
+                              {pet.age && ` · ${pet.age} an${pet.age > 1 ? "s" : ""}`}
+                            </p>
+                            {pet.character && <p className="text-xs mt-0.5" style={{ color: "#4B5563" }}>{pet.character}</p>}
+                          </div>
                         </div>
                       ))}
                     </div>
-                  </div>
+                  </Card>
                 )}
 
-                {/* External experiences */}
-                <PublicExperiences experiences={externalExperiences} />
-
-                {/* Gallery */}
-                <PublicGallery photos={galleryPhotos} firstName={profile.first_name || "Gardien"} />
-              </>
-            ) : (
-              <p className="text-sm text-muted-foreground italic">Profil gardien non complété.</p>
-            )}
-          </TabsContent>
-        )}
-
-        {/* Owner tab */}
-        {isOwner && (
-          <TabsContent value="owner" className="space-y-4 mt-4">
-            {/* Badges */}
-            {badgeCounts.length > 0 && (
-              <div className="p-4 rounded-xl bg-card border border-border">
-                <h3 className="font-heading font-semibold text-sm mb-3">Ses badges</h3>
-                <BadgePills badges={badgeCounts} showAll />
-              </div>
-            )}
-
-            {/* Pets */}
-            {pets.length > 0 && (
-              <div>
-                <h3 className="font-heading font-semibold text-sm mb-3">Animaux</h3>
-                <div className="grid gap-3">
-                  {pets.map(pet => (
-                    <div key={pet.id} className="flex items-center gap-3 p-3 rounded-xl bg-card border border-border">
-                      {pet.photo_url ? (
-                        <img src={pet.photo_url} alt={pet.name} className="w-12 h-12 rounded-xl object-cover" />
-                      ) : (
-                        <div className="w-12 h-12 rounded-xl bg-muted flex items-center justify-center text-lg">
-                          {speciesLabels[pet.species]?.charAt(0) || "🐾"}
-                        </div>
-                      )}
-                      <div>
-                        <p className="font-medium text-sm">{pet.name}</p>
-                        <p className="text-xs text-muted-foreground">
-                          {speciesLabels[pet.species]?.slice(2) || pet.species}
-                          {pet.breed && ` · ${pet.breed}`}
-                          {pet.age && ` · ${pet.age} an${pet.age > 1 ? "s" : ""}`}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Properties */}
-            {properties.length > 0 && (
-              <div>
-                <h3 className="font-heading font-semibold text-sm mb-3">Logement</h3>
+                {/* Properties */}
                 {properties.map(prop => (
-                  <div key={prop.id} className="p-4 rounded-xl bg-card border border-border space-y-2">
-                    <div className="flex items-center gap-2 text-sm">
-                      <Home className="h-4 w-4 text-muted-foreground" />
+                  <Card key={prop.id}>
+                    <h3 className="font-heading font-semibold text-sm mb-2 flex items-center gap-2" style={{ color: "#1C1B18" }}>
+                      <Home className="h-4 w-4" /> Le logement
+                    </h3>
+                    <div className="text-sm mb-2" style={{ color: "#4B5563" }}>
                       <span className="capitalize font-medium">{prop.type}</span>
-                      {prop.environment && <span className="text-muted-foreground">· {prop.environment}</span>}
+                      {prop.environment && <span> · {prop.environment}</span>}
                     </div>
-                    {prop.description && (
-                      <p className="text-sm text-muted-foreground">{prop.description}</p>
-                    )}
-                    {prop.photos && prop.photos.length > 0 && (
-                      <div className="flex gap-2 overflow-x-auto pb-2">
-                        {prop.photos.slice(0, 4).map((url: string, i: number) => (
-                          <img key={i} src={url} alt="" className="w-28 h-20 rounded-lg object-cover shrink-0" />
+                    {prop.description && <p className="text-sm mb-3" style={{ color: "#4B5563" }}>{prop.description}</p>}
+                    {prop.photos?.length > 0 && (
+                      <div className="flex gap-2 overflow-x-auto pb-2 -mx-1">
+                        {prop.photos.slice(0, 6).map((url: string, i: number) => (
+                          <img key={i} src={url} alt="" className="w-32 h-24 rounded-lg object-cover shrink-0 shadow-sm" />
                         ))}
                       </div>
                     )}
-                  </div>
+                    {prop.equipments?.length > 0 && (
+                      <div className="flex flex-wrap gap-1.5 mt-2">
+                        {prop.equipments.map((e: string) => (
+                          <span key={e} className="px-2 py-0.5 rounded-full text-xs" style={{ backgroundColor: "#F3F4F6", color: "#374151" }}>{e}</span>
+                        ))}
+                      </div>
+                    )}
+                  </Card>
                 ))}
-              </div>
+
+                {/* Owner preferences */}
+                {ownerProfile && (
+                  <>
+                    {ownerProfile.welcome_notes && (
+                      <Card>
+                        <h3 className="font-heading font-semibold text-sm mb-1" style={{ color: "#1C1B18" }}>Comment j'accueille</h3>
+                        <p className="text-sm" style={{ color: "#4B5563" }}>{ownerProfile.welcome_notes}</p>
+                      </Card>
+                    )}
+                    {ownerProfile.rules_notes && (
+                      <Card>
+                        <h3 className="font-heading font-semibold text-sm mb-1" style={{ color: "#1C1B18" }}>Règles de la maison</h3>
+                        <p className="text-sm whitespace-pre-line" style={{ color: "#4B5563" }}>{ownerProfile.rules_notes}</p>
+                      </Card>
+                    )}
+                  </>
+                )}
+
+                {/* Highlights (coups de coeur) */}
+                <OwnerHighlights highlights={ownerHighlights} />
+              </TabsContent>
             )}
 
-            {/* Owner preferences */}
-            {ownerProfile && (
-              <div>
-                <h3 className="font-heading font-semibold text-sm mb-2">Attentes</h3>
-                <div className="text-sm text-muted-foreground space-y-1">
-                  {ownerProfile.specific_expectations && <p>{ownerProfile.specific_expectations}</p>}
-                  {ownerProfile.welcome_notes && <p>{ownerProfile.welcome_notes}</p>}
-                </div>
-              </div>
-            )}
+            {/* --- Reviews tab --- */}
+            <TabsContent value="reviews" className="mt-4">
+              <ReviewsDisplay userId={id!} showAnimalCare={isSitter} />
+            </TabsContent>
 
-            {/* Highlights (coups de coeur) */}
-            <OwnerHighlights highlights={ownerHighlights} />
+            {/* --- Gallery tab --- */}
+            <TabsContent value="gallery" className="space-y-6 mt-4">
+              {galleryPhotos.length > 0 && <PublicGallery photos={galleryPhotos} firstName={firstName} />}
+              {ownerGalleryPhotos.length > 0 && <PublicOwnerGallery photos={ownerGalleryPhotos} firstName={firstName} city={profile.city} />}
+            </TabsContent>
+          </Tabs>
+        </div>
 
-            {/* Owner experiences */}
-            <PublicExperiences experiences={externalExperiences} />
-
-            {/* Owner gallery */}
-            <PublicOwnerGallery photos={ownerGalleryPhotos} firstName={profile.first_name || "Propriétaire"} city={profile.city} />
-          </TabsContent>
+        {/* === STICKY CTA === */}
+        {!isOwnProfile && user && (
+          <div className="fixed bottom-0 left-0 right-0 z-40 border-t bg-white/95 backdrop-blur-sm shadow-[0_-2px_10px_rgba(0,0,0,0.05)]" style={{ borderColor: "#E6E2D9" }}>
+            <div className="max-w-3xl mx-auto px-4 py-3 flex gap-3">
+              {activeSit && (
+                <Button variant="outline" className="flex-1 gap-1.5" asChild>
+                  <Link to={`/sits/${activeSit.id}`}>
+                    <Eye className="h-4 w-4" /> Voir l'annonce
+                  </Link>
+                </Button>
+              )}
+              <Button className="flex-1 gap-1.5" onClick={handleContact}>
+                <MessageSquare className="h-4 w-4" /> Contacter {firstName}
+              </Button>
+            </div>
+          </div>
         )}
-
-        {/* Reviews tab */}
-        <TabsContent value="reviews" className="mt-4">
-          <ReviewsDisplay userId={id!} showAnimalCare={isSitter} />
-        </TabsContent>
-      </Tabs>
-    </div>
+      </div>
+    </TooltipProvider>
   );
 };
 
-const InfoCard = ({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) => (
-  <div className="p-3 rounded-xl bg-card border border-border">
-    <div className="flex items-center gap-2 text-muted-foreground mb-1">
-      {icon}
-      <span className="text-xs">{label}</span>
-    </div>
-    <p className="text-sm font-medium">{value}</p>
+/* Helpers */
+const Card = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
+  <div className={`rounded-xl border bg-white p-4 shadow-sm ${className}`} style={{ borderColor: "#E6E2D9" }}>
+    {children}
+  </div>
+);
+
+const MetricCell = ({ label, value, suffix, valueColor }: { label: string; value: string; suffix?: React.ReactNode; valueColor?: string }) => (
+  <div className="flex flex-col items-center py-3 gap-0.5">
+    <span className="text-lg font-bold flex items-center" style={{ color: valueColor || "#1C1B18" }}>
+      {value}{suffix}
+    </span>
+    <span className="text-[11px]" style={{ color: "#6B7280" }}>{label}</span>
   </div>
 );
 
