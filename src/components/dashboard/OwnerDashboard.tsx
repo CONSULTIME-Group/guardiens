@@ -70,6 +70,22 @@ const OwnerDashboard = () => {
       setSmallMissions(missionsRes.data || []);
       setVerificationStatus((profileRes.data as any)?.identity_verification_status || "not_submitted");
 
+      // Onboarding checks
+      const fullProfileRes = await supabase.from("profiles").select("first_name, avatar_url, bio, identity_verification_status").eq("id", user.id).single();
+      const p = fullProfileRes.data;
+      const hasName = !!(p?.first_name);
+      const hasAvatar = !!(p?.avatar_url);
+      const hasBio = !!(p?.bio && p.bio.length > 10);
+      const hasIdentity = p?.identity_verification_status === "verified" || p?.identity_verification_status === "pending";
+      const hasProperty = (propsRes.data || []).length > 0;
+      const hasSit = sitsData.length > 0;
+      setOnboardingChecks({ hasName, hasAvatar, hasBio, hasIdentity, hasProperty, hasPets: false, hasSit });
+
+      const dismissed = localStorage.getItem("onboarding_owner_dismissed");
+      if (!dismissed && user.profileCompletion < 50) {
+        setShowOnboarding(true);
+      }
+
       // Pets
       const propIds = (propsRes.data || []).map((p: any) => p.id);
       if (propIds.length > 0) {
