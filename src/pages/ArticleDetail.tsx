@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ArrowLeft, Calendar, MapPin, User } from "lucide-react";
+import PageMeta from "@/components/PageMeta";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 
