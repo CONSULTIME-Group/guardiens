@@ -9,6 +9,8 @@ import OwnerStepAnimals from "@/components/owner-profile/OwnerStepAnimals";
 import OwnerStepRules from "@/components/owner-profile/OwnerStepRules";
 import OwnerStepCommunication from "@/components/owner-profile/OwnerStepCommunication";
 import OwnerStepCalendar from "@/components/owner-profile/OwnerStepCalendar";
+import OwnerGallery from "@/components/owner-profile/OwnerGallery";
+import OwnerExperiences from "@/components/owner-profile/OwnerExperiences";
 import { useOwnerProfile, type OwnerProfileData } from "@/hooks/useOwnerProfile";
 
 const STEPS = [
@@ -18,6 +20,8 @@ const STEPS = [
   { num: 4, label: "Attentes" },
   { num: 5, label: "Accueil" },
   { num: 6, label: "Calendrier" },
+  { num: 7, label: "Galerie" },
+  { num: 8, label: "Expériences" },
 ];
 
 const OwnerProfilePage = () => {
@@ -84,6 +88,8 @@ const OwnerProfilePage = () => {
         {currentStep === 4 && <OwnerStepRules data={mergedData} onChange={handleChange} />}
         {currentStep === 5 && <OwnerStepCommunication data={mergedData} onChange={handleChange} />}
         {currentStep === 6 && <OwnerStepCalendar />}
+        {currentStep === 7 && <OwnerGallery />}
+        {currentStep === 8 && <OwnerExperiences />}
       </div>
 
       <div className="flex flex-col sm:flex-row items-center gap-3">
@@ -96,7 +102,7 @@ const OwnerProfilePage = () => {
         <Button type="button" variant="ghost" onClick={handleSaveAndQuit} disabled={saving} className="w-full sm:w-auto text-muted-foreground">
           <LogOut className="w-4 h-4 mr-1" /> Sauvegarder et quitter
         </Button>
-        {currentStep < 6 ? (
+        {currentStep < 8 ? (
           <Button type="button" onClick={() => handleSaveAndNavigate(currentStep + 1)} disabled={saving} className="w-full sm:w-auto">
             {saving ? "Sauvegarde..." : "Suivant"} <ChevronRight className="w-4 h-4 ml-1" />
           </Button>

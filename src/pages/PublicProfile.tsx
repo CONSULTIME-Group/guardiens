@@ -9,6 +9,8 @@ import ReviewsDisplay from "@/components/reviews/ReviewsDisplay";
 import ReportButton from "@/components/reports/ReportButton";
 import PublicGallery from "@/components/profile/PublicGallery";
 import PublicExperiences from "@/components/profile/PublicExperiences";
+import PublicOwnerGallery from "@/components/profile/PublicOwnerGallery";
+import OwnerHighlights from "@/components/profile/OwnerHighlights";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -39,6 +41,8 @@ const PublicProfile = () => {
   const [completedSits, setCompletedSits] = useState(0);
   const [galleryPhotos, setGalleryPhotos] = useState<any[]>([]);
   const [externalExperiences, setExternalExperiences] = useState<any[]>([]);
+  const [ownerGalleryPhotos, setOwnerGalleryPhotos] = useState<any[]>([]);
+  const [ownerHighlights, setOwnerHighlights] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -82,13 +86,26 @@ const PublicProfile = () => {
         .eq("status", "accepted");
       setCompletedSits(count || 0);
 
-      // Gallery photos
+      // Gallery photos (sitter)
       const { data: gallery } = await supabase.from("sitter_gallery").select("*").eq("user_id", id).order("created_at", { ascending: false });
       setGalleryPhotos(gallery || []);
 
       // External experiences (only verified ones visible publicly via RLS)
       const { data: extExp } = await supabase.from("external_experiences").select("*").eq("user_id", id).order("created_at", { ascending: false });
       setExternalExperiences(extExp || []);
+
+      // Owner gallery
+      const { data: ownerGal } = await supabase.from("owner_gallery").select("*").eq("user_id", id).order("created_at", { ascending: false });
+      setOwnerGalleryPhotos(ownerGal || []);
+
+      // Owner highlights (coups de coeur)
+      const { data: highlights } = await supabase
+        .from("owner_highlights")
+        .select("*, sitter:sitter_id(first_name, avatar_url)")
+        .eq("owner_id", id)
+        .eq("hidden", false)
+        .order("created_at", { ascending: false });
+      setOwnerHighlights(highlights || []);
 
       setLoading(false);
     };
@@ -377,6 +394,15 @@ const PublicProfile = () => {
                 </div>
               </div>
             )}
+
+            {/* Highlights (coups de coeur) */}
+            <OwnerHighlights highlights={ownerHighlights} />
+
+            {/* Owner experiences */}
+            <PublicExperiences experiences={externalExperiences} />
+
+            {/* Owner gallery */}
+            <PublicOwnerGallery photos={ownerGalleryPhotos} firstName={profile.first_name || "Propriétaire"} city={profile.city} />
           </TabsContent>
         )}
 
