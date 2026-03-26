@@ -7,6 +7,7 @@ import { toast } from "@/hooks/use-toast";
 import { Star, MapPin, CheckCircle2, XCircle, MessageSquare, Users, Archive, Eye, EyeOff } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import VerifiedBadge from "@/components/profile/VerifiedBadge";
+import BadgePills from "@/components/badges/BadgePills";
 
 interface ApplicationsListProps {
   sitId: string;
@@ -50,17 +51,23 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
       // Enrich with sitter profile + reviews
       const enriched = await Promise.all(
         data.map(async (app: any) => {
-          const [spRes, revRes] = await Promise.all([
+          const [spRes, revRes, badgeRes] = await Promise.all([
             supabase.from("sitter_profiles").select("experience_years, animal_types").eq("user_id", app.sitter_id).maybeSingle(),
             supabase.from("reviews").select("overall_rating").eq("reviewee_id", app.sitter_id).eq("published", true),
+            supabase.from("badge_attributions").select("badge_key").eq("receiver_id", app.sitter_id),
           ]);
           const reviews = revRes.data || [];
           const avgRating = reviews.length > 0 ? (reviews.reduce((s: number, r: any) => s + r.overall_rating, 0) / reviews.length).toFixed(1) : null;
+          // Compute badge counts
+          const badgeMap = new Map<string, number>();
+          (badgeRes.data || []).forEach((b: any) => badgeMap.set(b.badge_key, (badgeMap.get(b.badge_key) || 0) + 1));
+          const badgeCounts = Array.from(badgeMap.entries()).map(([badge_key, count]) => ({ badge_key, count }));
           return {
             ...app,
             sitterProfile: spRes.data,
             avgRating,
             reviewCount: reviews.length,
+            badgeCounts,
           };
         })
       );
@@ -260,6 +267,11 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
                       {expYears && <span>{expYears} d'expérience</span>}
                       {animalTypes.length > 0 && <span>{animalTypes.join(", ")}</span>}
                     </div>
+                    {app.badgeCounts && app.badgeCounts.length > 0 && (
+                      <div className="mt-1.5">
+                        <BadgePills badges={app.badgeCounts} max={3} size="sm" />
+                      </div>
+                    )}
                   </div>
                 </div>
 

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { MapPin, Calendar, Star, PawPrint, Car, Globe, Briefcase, Heart, Users, Home, MessageSquare, ArrowLeft } from "lucide-react";
+import BadgePills from "@/components/badges/BadgePills";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import VerifiedBadge from "@/components/profile/VerifiedBadge";
@@ -43,6 +44,7 @@ const PublicProfile = () => {
   const [externalExperiences, setExternalExperiences] = useState<any[]>([]);
   const [ownerGalleryPhotos, setOwnerGalleryPhotos] = useState<any[]>([]);
   const [ownerHighlights, setOwnerHighlights] = useState<any[]>([]);
+  const [badgeCounts, setBadgeCounts] = useState<{ badge_key: string; count: number }[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -106,6 +108,14 @@ const PublicProfile = () => {
         .eq("hidden", false)
         .order("created_at", { ascending: false });
       setOwnerHighlights(highlights || []);
+
+      // Badge counts
+      const { data: badges } = await supabase.from("badge_attributions").select("badge_key").eq("receiver_id", id);
+      if (badges && badges.length > 0) {
+        const countMap = new Map<string, number>();
+        badges.forEach((b: any) => countMap.set(b.badge_key, (countMap.get(b.badge_key) || 0) + 1));
+        setBadgeCounts(Array.from(countMap.entries()).map(([badge_key, count]) => ({ badge_key, count })));
+      }
 
       setLoading(false);
     };
@@ -182,6 +192,13 @@ const PublicProfile = () => {
               )}
             </div>
           )}
+
+          {/* Badges */}
+          {badgeCounts.length > 0 && (
+            <div className="mt-3">
+              <BadgePills badges={badgeCounts} max={3} size="sm" />
+            </div>
+          )}
         </div>
 
         {/* Actions */}
@@ -239,6 +256,14 @@ const PublicProfile = () => {
           <TabsContent value="sitter" className="space-y-4 mt-4">
             {sitterProfile ? (
               <>
+                {/* Badges */}
+                {badgeCounts.length > 0 && (
+                  <div className="p-4 rounded-xl bg-card border border-border">
+                    <h3 className="font-heading font-semibold text-sm mb-3">Ses badges</h3>
+                    <BadgePills badges={badgeCounts} showAll />
+                  </div>
+                )}
+
                 {/* Motivation */}
                 {sitterProfile.motivation && (
                   <div>
@@ -333,6 +358,14 @@ const PublicProfile = () => {
         {/* Owner tab */}
         {isOwner && (
           <TabsContent value="owner" className="space-y-4 mt-4">
+            {/* Badges */}
+            {badgeCounts.length > 0 && (
+              <div className="p-4 rounded-xl bg-card border border-border">
+                <h3 className="font-heading font-semibold text-sm mb-3">Ses badges</h3>
+                <BadgePills badges={badgeCounts} showAll />
+              </div>
+            )}
+
             {/* Pets */}
             {pets.length > 0 && (
               <div>

@@ -7,6 +7,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/hooks/use-toast";
 import { ArrowLeft, ThumbsUp, ThumbsDown } from "lucide-react";
 import StarRating from "@/components/reviews/StarRating";
+import BadgeSelector from "@/components/badges/BadgeSelector";
+import { SITTER_BADGES, OWNER_BADGES } from "@/components/badges/badgeDefinitions";
 
 const ownerCriteria = [
   { key: "animal_care_rating", label: "Soin des animaux" },
@@ -37,6 +39,7 @@ const LeaveReview = () => {
   const [subRatings, setSubRatings] = useState<Record<string, number>>({});
   const [wouldRecommend, setWouldRecommend] = useState<boolean | null>(null);
   const [comment, setComment] = useState("");
+  const [selectedBadges, setSelectedBadges] = useState<string[]>([]);
 
   // Determine if current user is owner or sitter for this sit
   const [reviewType, setReviewType] = useState<"owner_to_sitter" | "sitter_to_owner">("owner_to_sitter");
@@ -114,6 +117,17 @@ const LeaveReview = () => {
       toast({ title: "Erreur", description: "Impossible de soumettre l'avis.", variant: "destructive" });
       setSubmitting(false);
       return;
+    }
+
+    // Save badge attributions
+    if (selectedBadges.length > 0 && reviewee) {
+      const badgeRows = selectedBadges.map(badge_key => ({
+        sit_id: sitId!,
+        giver_id: user.id,
+        receiver_id: reviewee.id,
+        badge_key,
+      }));
+      await supabase.from("badge_attributions").insert(badgeRows as any);
     }
 
     // Send system message in conversation
@@ -237,6 +251,15 @@ const LeaveReview = () => {
         <p className={`text-xs mt-1 ${comment.trim().length >= 50 ? "text-green-600" : "text-muted-foreground"}`}>
           {comment.trim().length}/50 caractères minimum
         </p>
+      </div>
+
+      {/* Badge selection */}
+      <div className="mb-6 p-4 rounded-lg border border-border bg-accent/30">
+        <BadgeSelector
+          badges={reviewType === "owner_to_sitter" ? SITTER_BADGES : OWNER_BADGES}
+          selected={selectedBadges}
+          onChange={setSelectedBadges}
+        />
       </div>
 
       {/* Submit */}
