@@ -1,20 +1,8 @@
 import { NavLink, useNavigate } from "react-router-dom";
 import {
-  LayoutDashboard,
-  Users,
-  Megaphone,
-  CalendarCheck,
-  Star,
-  Flag,
-  ShieldCheck,
-  Mail,
-  FileText,
-  LogOut,
-  ArrowLeft,
-  MapPin,
-  HelpCircle,
-  Compass,
-  Handshake,
+  LayoutDashboard, Users, Megaphone, CalendarCheck, Star, Flag,
+  ShieldCheck, Mail, FileText, LogOut, ArrowLeft, MapPin, HelpCircle,
+  Compass, Handshake, Briefcase,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
@@ -28,6 +16,7 @@ const adminNavItems = [
   { to: "/admin/reports", icon: Flag, label: "Signalements" },
   { to: "/admin/verifications", icon: ShieldCheck, label: "Vérifications ID" },
   { to: "/admin/emails", icon: Mail, label: "Emails" },
+  { to: "/admin/experiences", icon: Briefcase, label: "Expériences" },
   { to: "/admin/articles", icon: FileText, label: "Articles" },
   { to: "/admin/city-pages", icon: MapPin, label: "Pages villes SEO" },
   { to: "/admin/faq", icon: HelpCircle, label: "FAQ" },

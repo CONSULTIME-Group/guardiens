@@ -7,9 +7,12 @@ import { fr } from "date-fns/locale";
 import VerifiedBadge from "@/components/profile/VerifiedBadge";
 import ReviewsDisplay from "@/components/reviews/ReviewsDisplay";
 import ReportButton from "@/components/reports/ReportButton";
+import PublicGallery from "@/components/profile/PublicGallery";
+import PublicExperiences from "@/components/profile/PublicExperiences";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import PageMeta from "@/components/PageMeta";
 
 const speciesLabels: Record<string, string> = {
   dog: "🐕 Chiens", cat: "🐱 Chats", horse: "🐴 Chevaux", bird: "🐦 Oiseaux",
@@ -34,6 +37,8 @@ const PublicProfile = () => {
   const [pastAnimals, setPastAnimals] = useState<any[]>([]);
   const [reviewStats, setReviewStats] = useState({ count: 0, avg: 0 });
   const [completedSits, setCompletedSits] = useState(0);
+  const [galleryPhotos, setGalleryPhotos] = useState<any[]>([]);
+  const [externalExperiences, setExternalExperiences] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -77,6 +82,14 @@ const PublicProfile = () => {
         .eq("status", "accepted");
       setCompletedSits(count || 0);
 
+      // Gallery photos
+      const { data: gallery } = await supabase.from("sitter_gallery").select("*").eq("user_id", id).order("created_at", { ascending: false });
+      setGalleryPhotos(gallery || []);
+
+      // External experiences (only verified ones visible publicly via RLS)
+      const { data: extExp } = await supabase.from("external_experiences").select("*").eq("user_id", id).order("created_at", { ascending: false });
+      setExternalExperiences(extExp || []);
+
       setLoading(false);
     };
     load();
@@ -89,6 +102,8 @@ const PublicProfile = () => {
   const isSitter = profile.role === "sitter" || profile.role === "both";
   const isOwner = profile.role === "owner" || profile.role === "both";
   const isOwnProfile = user?.id === id;
+  const verifiedExpCount = externalExperiences.filter((e: any) => e.verification_status === "verified").length;
+  const totalSits = completedSits + verifiedExpCount;
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-6 md:py-10 space-y-6">
@@ -139,8 +154,11 @@ const PublicProfile = () => {
               <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
               <span className="font-bold text-sm">{reviewStats.avg.toFixed(1)}</span>
               <span className="text-xs text-muted-foreground">({reviewStats.count} avis)</span>
-              {completedSits > 0 && (
-                <span className="text-xs text-muted-foreground">· {completedSits} garde{completedSits > 1 ? "s" : ""}</span>
+              {totalSits > 0 && (
+                <span className="text-xs text-muted-foreground">
+                  · {totalSits} garde{totalSits > 1 ? "s" : ""} au total
+                  {verifiedExpCount > 0 && ` (${completedSits} Guardiens + ${verifiedExpCount} vérifiée${verifiedExpCount > 1 ? "s" : ""} ailleurs)`}
+                </span>
               )}
             </div>
           )}
@@ -279,6 +297,12 @@ const PublicProfile = () => {
                     </div>
                   </div>
                 )}
+
+                {/* External experiences */}
+                <PublicExperiences experiences={externalExperiences} />
+
+                {/* Gallery */}
+                <PublicGallery photos={galleryPhotos} firstName={profile.first_name || "Gardien"} />
               </>
             ) : (
               <p className="text-sm text-muted-foreground italic">Profil gardien non complété.</p>

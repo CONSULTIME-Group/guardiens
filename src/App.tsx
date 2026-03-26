@@ -44,6 +44,7 @@ import AdminReviews from "./pages/admin/AdminReviews";
 import AdminReports from "./pages/admin/AdminReports";
 import AdminVerifications from "./pages/admin/AdminVerifications";
 import AdminEmails from "./pages/admin/AdminEmails";
+import AdminExperienceVerification from "./pages/admin/AdminExperienceVerification";
 import NotFound from "./pages/NotFound";
 import Unsubscribe from "./pages/Unsubscribe";
 import CityPage from "./pages/CityPage";
@@ -112,6 +113,7 @@ const AppRoutes = () => (
       <Route path="/admin/reports" element={<AdminReports />} />
       <Route path="/admin/verifications" element={<AdminVerifications />} />
       <Route path="/admin/emails" element={<AdminEmails />} />
+      <Route path="/admin/experiences" element={<AdminExperienceVerification />} />
       <Route path="/admin/articles" element={<AdminArticles />} />
       <Route path="/admin/articles/:id" element={<ArticleEditor />} />
       <Route path="/admin/city-pages" element={<AdminCityPages />} />
