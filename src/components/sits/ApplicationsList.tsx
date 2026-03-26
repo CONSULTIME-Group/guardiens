@@ -231,16 +231,18 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
             return (
               <div key={app.id} className="bg-card border border-border rounded-lg p-5">
                 <div className="flex items-start gap-3">
-                  {sitter?.avatar_url ? (
-                    <img src={sitter.avatar_url} alt={sitter.first_name} className="w-12 h-12 rounded-full object-cover shrink-0" />
-                  ) : (
-                    <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center font-heading text-lg font-bold shrink-0">
-                      {sitter?.first_name?.charAt(0) || "?"}
-                    </div>
-                  )}
+                  <Link to={`/profil/${app.sitter_id}`} className="shrink-0">
+                    {sitter?.avatar_url ? (
+                      <img src={sitter.avatar_url} alt={sitter.first_name} className="w-12 h-12 rounded-full object-cover hover:ring-2 hover:ring-primary/50 transition-all" />
+                    ) : (
+                      <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center font-heading text-lg font-bold hover:ring-2 hover:ring-primary/50 transition-all">
+                        {sitter?.first_name?.charAt(0) || "?"}
+                      </div>
+                    )}
+                  </Link>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className="font-medium">{sitter?.first_name || "Gardien"}</span>
+                      <Link to={`/profil/${app.sitter_id}`} className="font-medium hover:text-primary transition-colors">{sitter?.first_name || "Gardien"}</Link>
                       {sitter?.identity_verified && <VerifiedBadge />}
                       <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${status.className}`}>
                         {status.label}
