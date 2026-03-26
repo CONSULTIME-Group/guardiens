@@ -266,10 +266,10 @@ const PublicProfile = () => {
                   <>
                     {/* Key info grid */}
                     <div className="grid grid-cols-2 gap-3">
-                      {sitterProfile.experience_years && <InfoCard icon={<Briefcase className="h-4 w-4" />} label="Expérience" value={sitterProfile.experience_years === "5+" ? "5+ ans" : sitterProfile.experience_years + " ans"} />}
-                      {sitterProfile.animal_types?.length > 0 && <InfoCard icon={<PawPrint className="h-4 w-4" />} label="Animaux" value={sitterProfile.animal_types.map((t: string) => speciesLabels[t]?.slice(2) || t).join(", ")} />}
-                      {sitterProfile.has_vehicle !== null && <InfoCard icon={<Car className="h-4 w-4" />} label="Véhicule" value={sitterProfile.has_vehicle ? "Oui" : "Non"} />}
-                      {sitterProfile.languages?.length > 0 && <InfoCard icon={<Globe className="h-4 w-4" />} label="Langues" value={sitterProfile.languages.join(", ")} />}
+                      {sitterProfile.experience_years && <InfoCell icon={<Briefcase className="h-4 w-4" />} label="Expérience" value={sitterProfile.experience_years === "5+" ? "5+ ans" : sitterProfile.experience_years + " ans"} />}
+                      {sitterProfile.animal_types?.length > 0 && <InfoCell icon={<PawPrint className="h-4 w-4" />} label="Animaux" value={sitterProfile.animal_types.map((t: string) => speciesLabels[t]?.slice(2) || t).join(", ")} />}
+                      {sitterProfile.has_vehicle !== null && <InfoCell icon={<Car className="h-4 w-4" />} label="Véhicule" value={sitterProfile.has_vehicle ? "Oui" : "Non"} />}
+                      {sitterProfile.languages?.length > 0 && <InfoCell icon={<Globe className="h-4 w-4" />} label="Langues" value={sitterProfile.languages.join(", ")} />}
                     </div>
 
                     {/* Motivation */}
