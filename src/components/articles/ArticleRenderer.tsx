@@ -67,6 +67,8 @@ const ARTICLE_IMAGES: Record<string, string> = {
   "/images/berger-australien-interieur-lyon.jpg": bergerAustralienInterieurLyon,
   "/images/fondateurs-guardiens-quais-lyon.jpg": fondateursGuardiensQuaisLyon,
   "/images/garde-animaux-appartement-lyon.jpg": gardeAnimauxAppartementLyon,
+  "/images/boom-petsitting-confluence-lyon.jpg": boomPetsittingConfluence,
+  "/images/boom-petsitting-homeoffice-lyon.jpg": boomPetsittingHomeoffice,
 };
 
 function resolveArticleImages(html: string): string {
