@@ -180,7 +180,7 @@ const OwnerStepAnimals = ({ pets, onAddPet, onUpdatePet, onRemovePet }: Props) =
             <Label>Photo</Label>
             <div className="flex items-center gap-4">
               {editingPet.photo_url ? (
-                <img src={editingPet.photo_url} alt="" className="w-20 h-20 rounded-xl object-cover border border-border" />
+                <img src={editingPet.photo_url} alt="" className="w-20 h-20 rounded-xl object-cover border border-border cursor-pointer hover:ring-2 ring-primary transition-all" onClick={() => setLightboxUrl(editingPet.photo_url!)} />
               ) : (
                 <div className="w-20 h-20 rounded-xl bg-muted flex items-center justify-center border border-dashed border-border">
                   <Camera className="w-6 h-6 text-muted-foreground" />
