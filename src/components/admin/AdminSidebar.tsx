@@ -16,6 +16,7 @@ const adminNavItems = [
   { to: "/admin/reports", icon: Flag, label: "Signalements" },
   { to: "/admin/verifications", icon: ShieldCheck, label: "Vérifications ID" },
   { to: "/admin/emails", icon: Mail, label: "Emails" },
+  { to: "/admin/experiences", icon: Briefcase, label: "Expériences" },
   { to: "/admin/articles", icon: FileText, label: "Articles" },
   { to: "/admin/city-pages", icon: MapPin, label: "Pages villes SEO" },
   { to: "/admin/faq", icon: HelpCircle, label: "FAQ" },
