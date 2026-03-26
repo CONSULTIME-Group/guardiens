@@ -1,11 +1,12 @@
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import PageMeta from "@/components/PageMeta";
-import { MapPin, TreePine, Stethoscope, Coffee, Store, Footprints, Droplets, Trees, Star, ArrowRight } from "lucide-react";
+import { MapPin, TreePine, Stethoscope, Coffee, Store, Footprints, Droplets, Trees, Star, ArrowRight, ArrowLeft, Search } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { lazy, Suspense } from "react";
+import { Input } from "@/components/ui/input";
+import { lazy, Suspense, useState, useMemo } from "react";
 
 const GuideMap = lazy(() => import("@/components/guides/GuideMap"));
 
@@ -64,6 +65,8 @@ const StarRating = ({ rating }: { rating: number | null }) => {
 
 const GuideDetail = () => {
   const { slug } = useParams<{ slug: string }>();
+  const navigate = useNavigate();
+  const [searchQuery, setSearchQuery] = useState("");
 
   const { data: guide, isLoading: guideLoading } = useQuery({
     queryKey: ["city-guide", slug],
@@ -112,9 +115,19 @@ const GuideDetail = () => {
     enabled: !!guide?.id && !!guide?.department,
   });
 
-  const categories = [...new Set(places.map((p) => p.category))];
-  const placesWithCoords = places.filter((p) => p.latitude && p.longitude);
+  const filteredPlaces = useMemo(() => {
+    if (!searchQuery.trim()) return places;
+    const q = searchQuery.toLowerCase();
+    return places.filter(p =>
+      p.name.toLowerCase().includes(q) ||
+      p.description.toLowerCase().includes(q) ||
+      p.address.toLowerCase().includes(q) ||
+      (p.tips && p.tips.toLowerCase().includes(q))
+    );
+  }, [places, searchQuery]);
 
+  const categories = [...new Set(filteredPlaces.map((p) => p.category))];
+  const placesWithCoords = filteredPlaces.filter((p) => p.latitude && p.longitude);
 
   if (guideLoading) {
     return (
@@ -142,8 +155,17 @@ const GuideDetail = () => {
       />
 
       <div className="min-h-screen bg-background">
-        {/* Breadcrumb */}
+        {/* Back button + Breadcrumb */}
         <div className="max-w-5xl mx-auto px-4 pt-6">
+          <div className="flex items-center gap-3 mb-2">
+            <button
+              onClick={() => navigate(-1)}
+              className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Retour
+            </button>
+          </div>
           <nav className="flex items-center gap-2 text-sm text-muted-foreground">
             <Link to="/" className="hover:text-foreground">Guardiens</Link>
             <span>/</span>
@@ -162,6 +184,17 @@ const GuideDetail = () => {
             {guide.intro}
           </p>
           <p className="text-sm italic text-secondary font-medium">{guide.ideal_for}</p>
+
+          {/* Search bar */}
+          <div className="mt-5 relative max-w-md">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Rechercher un lieu, un parc, un véto..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10"
+            />
+          </div>
           <div className="mt-4 flex flex-wrap items-center gap-4">
             <Badge variant="secondary">{places.length} lieux référencés</Badge>
             <Link
@@ -203,7 +236,7 @@ const GuideDetail = () => {
             {categories.map((cat) => {
               const config = CATEGORY_CONFIG[cat] || { label: cat, icon: MapPin, color: "gray" };
               const Icon = config.icon;
-              const catPlaces = places.filter((p) => p.category === cat);
+              const catPlaces = filteredPlaces.filter((p) => p.category === cat);
 
               return (
                 <section key={cat}>
