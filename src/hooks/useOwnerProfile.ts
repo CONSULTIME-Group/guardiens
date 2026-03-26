@@ -298,5 +298,6 @@ export function useOwnerProfile() {
     data, pets, loading, saving, propertyId,
     saveStep, addPet, updatePet, removePet, uploadPhoto,
     completion: computeCompletion(data, pets.length),
+    missingFields: computeMissingFields(data, pets.length),
   };
 }

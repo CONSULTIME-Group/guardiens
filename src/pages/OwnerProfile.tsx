@@ -74,6 +74,7 @@ const OwnerProfilePage = () => {
         completedSteps={completedSteps}
         onStepClick={(step) => handleSaveAndNavigate(step)}
         steps={STEPS}
+        missingFields={missingFields}
       />
 
       <div className="bg-card rounded-lg border border-border p-6 md:p-8 mb-6">
