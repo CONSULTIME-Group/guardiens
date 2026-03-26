@@ -15,6 +15,9 @@ import saintEtienneConfianceCafe from "@/assets/saint-etienne-confiance-cafe.jpg
 import valenceParcChien from "@/assets/valence-parc-chien.jpg";
 import valenceChatDrome from "@/assets/valence-chat-drome.jpg";
 import valenceConfianceCafe from "@/assets/valence-confiance-cafe.jpg";
+import chamberyElephantsChien from "@/assets/chambery-elephants-chien.jpg";
+import chamberyChatBauges from "@/assets/chambery-chat-bauges.jpg";
+import chamberyConfianceRue from "@/assets/chambery-confiance-rue.jpg";
 
 const ARTICLE_IMAGES: Record<string, string> = {
   "/images/lyon-hero-quais.jpg": lyonHeroQuais,
@@ -29,6 +32,9 @@ const ARTICLE_IMAGES: Record<string, string> = {
   "/images/valence-parc-chien.jpg": valenceParcChien,
   "/images/valence-chat-drome.jpg": valenceChatDrome,
   "/images/valence-confiance-cafe.jpg": valenceConfianceCafe,
+  "/images/chambery-elephants-chien.jpg": chamberyElephantsChien,
+  "/images/chambery-chat-bauges.jpg": chamberyChatBauges,
+  "/images/chambery-confiance-rue.jpg": chamberyConfianceRue,
 };
 
 function resolveArticleImages(html: string): string {
