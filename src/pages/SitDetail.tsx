@@ -495,7 +495,7 @@ const SitDetail = () => {
         <p className="text-xs text-muted-foreground mt-1">Profils vérifiés · Avis croisés · Gardiens d'urgence mobilisables</p>
       </div>
 
-      {/* Sitter apply bar */}
+      {/* Sitter apply bar - highlights shown just before */}
       {activeRole === "sitter" && !isOwner && sit.status === "published" && (
         <div className="fixed bottom-0 left-0 right-0 md:left-64 bg-card border-t border-border p-4 z-40 md:pb-4 pb-20">
           <div className="max-w-4xl mx-auto">
