@@ -155,12 +155,12 @@ const Landing = () => {
         <img
           src={heroDogBbq}
           alt="Un golden retriever souriant dans un jardin ensoleillé — l'esprit Guardiens"
-          className="absolute inset-0 w-full h-full object-cover"
+          className="absolute inset-0 w-full h-full object-cover saturate-[0.35] brightness-105"
           loading="eager"
         />
-        {/* White pastel veil + bottom gradient for text */}
-        <div className="absolute inset-0 bg-white/[0.45]" />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
+        {/* White pastel veil + stronger bottom gradient for text */}
+        <div className="absolute inset-0 bg-white/[0.30]" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
         <div className="absolute inset-0 flex flex-col items-center justify-end pb-8 md:pb-16 px-4 md:px-6 text-center">
           {/* Pastille */}
           <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm rounded-full px-3 md:px-4 py-1.5 mb-4 md:mb-6 animate-fade-in">
