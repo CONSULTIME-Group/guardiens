@@ -1,0 +1,1 @@
+ALTER TABLE public.past_animals ADD COLUMN IF NOT EXISTS breed text;
