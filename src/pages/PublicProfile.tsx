@@ -394,6 +394,15 @@ const PublicProfile = () => {
                 </div>
               </div>
             )}
+
+            {/* Highlights (coups de coeur) */}
+            <OwnerHighlights highlights={ownerHighlights} />
+
+            {/* Owner experiences */}
+            <PublicExperiences experiences={externalExperiences} />
+
+            {/* Owner gallery */}
+            <PublicOwnerGallery photos={ownerGalleryPhotos} firstName={profile.first_name || "Propriétaire"} city={profile.city} />
           </TabsContent>
         )}
 
