@@ -31,9 +31,9 @@ const Login = () => {
           title: "Compte introuvable",
           description: "Aucun compte existant avec cette adresse.",
           action: (
-            <Button variant="outline" size="sm" className="border-white text-white hover:bg-white/20" onClick={() => navigate("/register")}>
+            <ToastAction altText="Créer un compte" onClick={() => navigate("/register")} className="border-white text-white hover:bg-white/20">
               Créer un compte
-            </Button>
+            </ToastAction>
           ),
         });
       } else {
