@@ -1,27 +1,10 @@
 import { useState } from "react";
 import { Outlet, Navigate, NavLink, useNavigate } from "react-router-dom";
-import { AdminSidebar } from "./AdminSidebar";
+import { AdminSidebar, adminNavGroups_export } from "./AdminSidebar";
 import { useAdmin } from "@/hooks/useAdmin";
 import { useAuth } from "@/contexts/AuthContext";
-import { Menu, X, ArrowLeft, LogOut, LayoutDashboard, Users, Megaphone, CalendarCheck, Star, Flag, ShieldCheck, Mail, FileText, MapPin, HelpCircle, Compass, Handshake } from "lucide-react";
+import { Menu, X, ArrowLeft, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
-
-const mobileAdminNav = [
-  { to: "/admin", icon: LayoutDashboard, label: "Dashboard", end: true },
-  { to: "/admin/users", icon: Users, label: "Utilisateurs" },
-  { to: "/admin/listings", icon: Megaphone, label: "Annonces" },
-  { to: "/admin/sits-management", icon: CalendarCheck, label: "Gardes" },
-  { to: "/admin/reviews", icon: Star, label: "Avis" },
-  { to: "/admin/reports", icon: Flag, label: "Signalements" },
-  { to: "/admin/verifications", icon: ShieldCheck, label: "Vérifications ID" },
-  { to: "/admin/emails", icon: Mail, label: "Emails" },
-  { to: "/admin/articles", icon: FileText, label: "Articles" },
-  { to: "/admin/city-pages", icon: MapPin, label: "Pages villes SEO" },
-  { to: "/admin/faq", icon: HelpCircle, label: "FAQ" },
-  { to: "/admin/guides", icon: Compass, label: "Guides locaux" },
-  { to: "/admin/departments", icon: MapPin, label: "Départements SEO" },
-  { to: "/admin/small-missions", icon: Handshake, label: "Entraide" },
-];
 
 export const AdminLayout = () => {
   const { isAuthenticated, loading: authLoading, logout } = useAuth();
@@ -62,25 +45,34 @@ export const AdminLayout = () => {
       {/* Mobile menu overlay */}
       {mobileMenuOpen && (
         <div className="md:hidden fixed inset-0 z-40 bg-background/95 backdrop-blur-sm pt-16 overflow-y-auto">
-          <nav className="px-4 py-4 space-y-1">
-            {mobileAdminNav.map((item) => (
-              <NavLink
-                key={item.to}
-                to={item.to}
-                end={"end" in item ? item.end : false}
-                onClick={() => setMobileMenuOpen(false)}
-                className={({ isActive }) =>
-                  cn(
-                    "flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors",
-                    isActive
-                      ? "bg-primary/10 text-primary"
-                      : "text-muted-foreground hover:bg-accent hover:text-foreground"
-                  )
-                }
-              >
-                <item.icon className="h-4 w-4" />
-                {item.label}
-              </NavLink>
+          <nav className="px-4 py-4">
+            {adminNavGroups_export.map((group) => (
+              <div key={group.label} className="mb-4">
+                <p className="px-4 py-1.5 text-[10px] font-semibold tracking-widest text-muted-foreground/60 uppercase">
+                  {group.label}
+                </p>
+                <div className="space-y-0.5">
+                  {group.items.map((item) => (
+                    <NavLink
+                      key={item.to}
+                      to={item.to}
+                      end={item.end}
+                      onClick={() => setMobileMenuOpen(false)}
+                      className={({ isActive }) =>
+                        cn(
+                          "flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors",
+                          isActive
+                            ? "bg-primary/10 text-primary"
+                            : "text-muted-foreground hover:bg-accent hover:text-foreground"
+                        )
+                      }
+                    >
+                      <item.icon className="h-4 w-4" />
+                      {item.label}
+                    </NavLink>
+                  ))}
+                </div>
+              </div>
             ))}
             <div className="border-t border-border mt-4 pt-4 space-y-1">
               <button

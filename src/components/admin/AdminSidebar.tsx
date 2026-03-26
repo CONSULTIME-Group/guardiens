@@ -1,33 +1,109 @@
+import { useEffect, useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard, Users, Megaphone, CalendarCheck, Star, Flag,
   ShieldCheck, Mail, FileText, LogOut, ArrowLeft, MapPin, HelpCircle,
-  Compass, Handshake, Briefcase,
+  Compass, Handshake, Briefcase, CreditCard, MessageSquare, ScrollText, Settings,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 
-const adminNavItems = [
-  { to: "/admin", icon: LayoutDashboard, label: "Dashboard", end: true },
-  { to: "/admin/users", icon: Users, label: "Utilisateurs" },
-  { to: "/admin/listings", icon: Megaphone, label: "Annonces" },
-  { to: "/admin/sits-management", icon: CalendarCheck, label: "Gardes" },
-  { to: "/admin/reviews", icon: Star, label: "Avis" },
-  { to: "/admin/reports", icon: Flag, label: "Signalements" },
-  { to: "/admin/verifications", icon: ShieldCheck, label: "Vérifications ID" },
-  { to: "/admin/emails", icon: Mail, label: "Emails" },
-  { to: "/admin/experiences", icon: Briefcase, label: "Expériences" },
-  { to: "/admin/articles", icon: FileText, label: "Articles" },
-  { to: "/admin/city-pages", icon: MapPin, label: "Pages villes SEO" },
-  { to: "/admin/faq", icon: HelpCircle, label: "FAQ" },
-  { to: "/admin/guides", icon: Compass, label: "Guides locaux" },
-  { to: "/admin/departments", icon: MapPin, label: "Départements SEO" },
-  { to: "/admin/small-missions", icon: Handshake, label: "Entraide" },
+interface NavItem {
+  to: string;
+  icon: React.ElementType;
+  label: string;
+  end?: boolean;
+  badgeKey?: string;
+}
+
+interface NavGroup {
+  label: string;
+  items: NavItem[];
+}
+
+const adminNavGroups: NavGroup[] = [
+  {
+    label: "PILOTAGE",
+    items: [
+      { to: "/admin", icon: LayoutDashboard, label: "Dashboard", end: true },
+      { to: "/admin/subscriptions", icon: CreditCard, label: "Abonnements" },
+    ],
+  },
+  {
+    label: "COMMUNAUTÉ",
+    items: [
+      { to: "/admin/users", icon: Users, label: "Utilisateurs" },
+      { to: "/admin/verifications", icon: ShieldCheck, label: "Vérifications ID", badgeKey: "verifications" },
+      { to: "/admin/experiences", icon: Briefcase, label: "Expériences à vérifier", badgeKey: "experiences" },
+    ],
+  },
+  {
+    label: "ACTIVITÉ",
+    items: [
+      { to: "/admin/listings", icon: Megaphone, label: "Annonces" },
+      { to: "/admin/sits-management", icon: CalendarCheck, label: "Gardes" },
+      { to: "/admin/small-missions", icon: Handshake, label: "Petites missions" },
+    ],
+  },
+  {
+    label: "MODÉRATION",
+    items: [
+      { to: "/admin/reviews", icon: Star, label: "Avis" },
+      { to: "/admin/reports", icon: Flag, label: "Signalements", badgeKey: "reports" },
+      { to: "/admin/contact-messages", icon: MessageSquare, label: "Messages contact", badgeKey: "contactMessages" },
+    ],
+  },
+  {
+    label: "CONTENU",
+    items: [
+      { to: "/admin/articles", icon: FileText, label: "Articles" },
+      { to: "/admin/faq", icon: HelpCircle, label: "FAQ" },
+    ],
+  },
+  {
+    label: "SEO / GEO",
+    items: [
+      { to: "/admin/city-pages", icon: MapPin, label: "Pages villes" },
+      { to: "/admin/departments", icon: MapPin, label: "Départements" },
+      { to: "/admin/guides", icon: Compass, label: "Guides locaux" },
+    ],
+  },
+  {
+    label: "SYSTÈME",
+    items: [
+      { to: "/admin/emails", icon: Mail, label: "Emails" },
+      { to: "/admin/legal", icon: ScrollText, label: "Pages légales" },
+      { to: "/admin/settings", icon: Settings, label: "Paramètres" },
+    ],
+  },
 ];
 
 export const AdminSidebar = () => {
   const { logout } = useAuth();
   const navigate = useNavigate();
+  const [badges, setBadges] = useState<Record<string, number>>({});
+
+  useEffect(() => {
+    const fetchBadges = async () => {
+      const [
+        { count: pendingVerifications },
+        { count: pendingExperiences },
+        { count: pendingReports },
+      ] = await Promise.all([
+        supabase.from("profiles").select("id", { count: "exact", head: true }).eq("identity_verification_status", "pending"),
+        supabase.from("external_experiences").select("id", { count: "exact", head: true }).eq("verification_status", "pending"),
+        supabase.from("reports").select("id", { count: "exact", head: true }).eq("status", "pending"),
+      ]);
+      setBadges({
+        verifications: pendingVerifications || 0,
+        experiences: pendingExperiences || 0,
+        reports: pendingReports || 0,
+        contactMessages: 0,
+      });
+    };
+    fetchBadges();
+  }, []);
 
   return (
     <aside className="hidden md:flex flex-col w-64 border-r border-border bg-card h-screen sticky top-0">
@@ -37,24 +113,41 @@ export const AdminSidebar = () => {
         </h1>
       </div>
 
-      <nav className="flex-1 px-3 space-y-0.5 overflow-y-auto">
-        {adminNavItems.map((item) => (
-          <NavLink
-            key={item.to}
-            to={item.to}
-            end={"end" in item ? item.end : false}
-            className={({ isActive }) =>
-              cn(
-                "flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors",
-                isActive
-                  ? "bg-primary/10 text-primary"
-                  : "text-muted-foreground hover:bg-accent hover:text-foreground"
-              )
-            }
-          >
-            <item.icon className="h-4 w-4" />
-            {item.label}
-          </NavLink>
+      <nav className="flex-1 px-3 overflow-y-auto">
+        {adminNavGroups.map((group, gi) => (
+          <div key={group.label} className={cn(gi > 0 && "mt-4")}>
+            <p className="px-4 py-1.5 text-[10px] font-semibold tracking-widest text-muted-foreground/60 uppercase">
+              {group.label}
+            </p>
+            <div className="space-y-0.5">
+              {group.items.map((item) => {
+                const badgeCount = item.badgeKey ? badges[item.badgeKey] || 0 : 0;
+                return (
+                  <NavLink
+                    key={item.to}
+                    to={item.to}
+                    end={item.end}
+                    className={({ isActive }) =>
+                      cn(
+                        "flex items-center gap-3 px-4 py-2 rounded-lg text-sm font-medium transition-colors",
+                        isActive
+                          ? "bg-primary/10 text-primary"
+                          : "text-muted-foreground hover:bg-accent hover:text-foreground"
+                      )
+                    }
+                  >
+                    <item.icon className="h-4 w-4 shrink-0" />
+                    <span className="truncate flex-1">{item.label}</span>
+                    {badgeCount > 0 && (
+                      <span className="ml-auto bg-destructive text-destructive-foreground text-[10px] font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1">
+                        {badgeCount}
+                      </span>
+                    )}
+                  </NavLink>
+                );
+              })}
+            </div>
+          </div>
         ))}
       </nav>
 
@@ -77,3 +170,6 @@ export const AdminSidebar = () => {
     </aside>
   );
 };
+
+// Export groups for mobile layout
+export const adminNavGroups_export = adminNavGroups;
