@@ -106,6 +106,21 @@ const CityPage = () => {
     enabled: !!page?.department,
   });
 
+  // Cross-linking: related articles for this city
+  const { data: relatedArticles = [] } = useQuery({
+    queryKey: ["city-articles", page?.city],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("articles")
+        .select("slug, title, excerpt")
+        .eq("published", true)
+        .or(`city.ilike.%${page!.city}%,tags.cs.{${page!.city.toLowerCase()}}`)
+        .limit(3);
+      return (data || []) as any[];
+    },
+    enabled: !!page?.city,
+  });
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background">
