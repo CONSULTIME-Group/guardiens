@@ -54,7 +54,7 @@ const OwnerDashboard = () => {
         supabase.from("properties").select("id").eq("user_id", user.id),
         supabase.from("reviews").select("overall_rating").eq("reviewee_id", user.id).eq("published", true),
         supabase.from("long_stays").select("*, long_stay_applications(id, status)").eq("user_id", user.id).order("created_at", { ascending: false }),
-        supabase.from("profiles").select("identity_verified").eq("id", user.id).single(),
+        supabase.from("profiles").select("identity_verified, identity_verification_status").eq("id", user.id).single(),
       ]);
 
       const sitsData = sitsRes.data || [];
