@@ -258,6 +258,24 @@ export default function ArticleDetail() {
               { "@type": "City", "name": "Talloires" }
             ]
           }),
+          ...(article.city === "Saint-Étienne" && {
+            "geo": { "@type": "GeoCoordinates", "latitude": 45.4397, "longitude": 4.3872 },
+            "areaServed": [
+              { "@type": "City", "name": "Saint-Étienne" },
+              { "@type": "City", "name": "Saint-Chamond" },
+              { "@type": "City", "name": "Firminy" },
+              { "@type": "City", "name": "Montbrison" },
+              { "@type": "City", "name": "Villars" },
+              { "@type": "City", "name": "Andrézieux-Bouthéon" }
+            ],
+            "address": {
+              "@type": "PostalAddress",
+              "addressLocality": "Saint-Étienne",
+              "addressRegion": "Auvergne-Rhône-Alpes",
+              "postalCode": "42000",
+              "addressCountry": "FR"
+            }
+          }),
           "priceRange": "Gratuit",
           "openingHoursSpecification": {
             "@type": "OpeningHoursSpecification",
