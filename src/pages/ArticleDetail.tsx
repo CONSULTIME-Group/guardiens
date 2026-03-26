@@ -312,6 +312,45 @@ export default function ArticleDetail() {
               "addressCountry": "FR"
             }
           }),
+          ...(article.city === "Clermont-Ferrand" && {
+            "geo": { "@type": "GeoCoordinates", "latitude": 45.7772, "longitude": 3.0870 },
+            "areaServed": [
+              { "@type": "City", "name": "Clermont-Ferrand" },
+              { "@type": "City", "name": "Chamalières" },
+              { "@type": "City", "name": "Cournon-d'Auvergne" },
+              { "@type": "City", "name": "Riom" }
+            ],
+            "address": {
+              "@type": "PostalAddress",
+              "addressLocality": "Clermont-Ferrand",
+              "addressRegion": "Auvergne-Rhône-Alpes",
+              "postalCode": "63000",
+              "addressCountry": "FR"
+            }
+          }),
+          ...(article.city === "Villeurbanne" && {
+            "geo": { "@type": "GeoCoordinates", "latitude": 45.7676, "longitude": 4.8799 },
+            "areaServed": [
+              { "@type": "City", "name": "Villeurbanne" },
+              { "@type": "City", "name": "Lyon" }
+            ]
+          }),
+          ...(article.city === "Vénissieux" && {
+            "geo": { "@type": "GeoCoordinates", "latitude": 45.6971, "longitude": 4.8868 },
+            "areaServed": [
+              { "@type": "City", "name": "Vénissieux" },
+              { "@type": "City", "name": "Saint-Foy-lès-Lyon" },
+              { "@type": "City", "name": "Bron" }
+            ]
+          }),
+          ...(article.city === "Aix-les-Bains" && {
+            "geo": { "@type": "GeoCoordinates", "latitude": 45.6884, "longitude": 5.9153 },
+            "areaServed": [
+              { "@type": "City", "name": "Aix-les-Bains" },
+              { "@type": "City", "name": "Chambéry" },
+              { "@type": "City", "name": "Le Bourget-du-Lac" }
+            ]
+          }),
           "priceRange": "Gratuit",
           "openingHoursSpecification": {
             "@type": "OpeningHoursSpecification",
