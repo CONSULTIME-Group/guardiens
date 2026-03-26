@@ -1,12 +1,13 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Pencil, Trash2, ChevronDown, ChevronUp } from "lucide-react";
+import { Plus, Pencil, Trash2, ChevronDown, ChevronUp, Camera } from "lucide-react";
 import HintBubble from "../profile/HintBubble";
 import BreedProfileCard from "../breeds/BreedProfileCard";
+import { supabase } from "@/integrations/supabase/client";
 import type { Pet } from "@/hooks/useOwnerProfile";
 
 const SPECIES = [
@@ -49,6 +50,22 @@ const OwnerStepAnimals = ({ pets, onAddPet, onUpdatePet, onRemovePet }: Props) =
   const [isNew, setIsNew] = useState(false);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handlePhotoUpload = async (file: File) => {
+    if (!editingPet || !file) return;
+    if (file.size > 5 * 1024 * 1024) return;
+    setUploading(true);
+    const ext = file.name.split(".").pop();
+    const path = `pets/${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
+    const { error } = await supabase.storage.from("property-photos").upload(path, file);
+    if (!error) {
+      const { data: urlData } = supabase.storage.from("property-photos").getPublicUrl(path);
+      setEditingPet({ ...editingPet, photo_url: urlData.publicUrl });
+    }
+    setUploading(false);
+  };
 
   const startNew = () => {
     setEditingPet({ ...emptyPet });
@@ -118,6 +135,40 @@ const OwnerStepAnimals = ({ pets, onAddPet, onUpdatePet, onRemovePet }: Props) =
       {editingPet ? (
         <div className="bg-card rounded-lg border border-primary/30 p-5 space-y-4">
           <h3 className="font-heading text-lg font-semibold">{isNew ? "Nouvel animal" : `Modifier ${editingPet.name}`}</h3>
+
+          {/* Photo upload */}
+          <div className="space-y-2">
+            <Label>Photo</Label>
+            <div className="flex items-center gap-4">
+              {editingPet.photo_url ? (
+                <img src={editingPet.photo_url} alt="" className="w-20 h-20 rounded-xl object-cover border border-border" />
+              ) : (
+                <div className="w-20 h-20 rounded-xl bg-muted flex items-center justify-center border border-dashed border-border">
+                  <Camera className="w-6 h-6 text-muted-foreground" />
+                </div>
+              )}
+              <div className="space-y-1">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  disabled={uploading}
+                  onClick={() => fileInputRef.current?.click()}
+                >
+                  <Camera className="w-3 h-3 mr-1" />
+                  {uploading ? "Upload..." : editingPet.photo_url ? "Changer la photo" : "Ajouter une photo"}
+                </Button>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => e.target.files?.[0] && handlePhotoUpload(e.target.files[0])}
+                />
+                <p className="text-xs text-muted-foreground">Max 5 Mo</p>
+              </div>
+            </div>
+          </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
