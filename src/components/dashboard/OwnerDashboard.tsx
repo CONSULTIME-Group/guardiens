@@ -86,6 +86,36 @@ const OwnerDashboard = () => {
         setRecentApps(apps || []);
       }
 
+      // Fetch breed-related articles based on pet breeds
+      const petBreeds = (petsData || []).map((p: any) => p.breed).filter(Boolean);
+      if (petBreeds.length > 0) {
+        const { data: breedArts } = await supabase
+          .from("articles")
+          .select("id, title, slug, cover_image_url, excerpt, category")
+          .eq("published", true)
+          .eq("category", "guide_race")
+          .limit(20);
+        // Match articles whose title or related_breed contains a pet breed
+        const matched = (breedArts || []).filter((a: any) =>
+          petBreeds.some((b: string) => a.title?.toLowerCase().includes(b.toLowerCase()))
+        );
+        setBreedArticles(matched.slice(0, 3));
+      }
+
+      // Fetch local city guides based on user's city
+      const userCity = profileRes.data ? (await supabase.from("profiles").select("city").eq("id", user.id).single()).data?.city : null;
+      if (userCity) {
+        const { data: guides } = await supabase
+          .from("city_guides")
+          .select("id, city, slug, department, intro")
+          .eq("published", true)
+          .limit(20);
+        // Prioritize same city, then same department
+        const sameCity = (guides || []).filter((g: any) => g.city?.toLowerCase() === userCity.toLowerCase());
+        const others = (guides || []).filter((g: any) => g.city?.toLowerCase() !== userCity.toLowerCase());
+        setLocalGuides([...sameCity, ...others].slice(0, 3));
+      }
+
       setLoading(false);
     };
     load();
