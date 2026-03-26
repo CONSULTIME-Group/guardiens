@@ -88,6 +88,8 @@ const OwnerProfilePage = () => {
         {currentStep === 4 && <OwnerStepRules data={mergedData} onChange={handleChange} />}
         {currentStep === 5 && <OwnerStepCommunication data={mergedData} onChange={handleChange} />}
         {currentStep === 6 && <OwnerStepCalendar />}
+        {currentStep === 7 && <OwnerGallery />}
+        {currentStep === 8 && <OwnerExperiences />}
       </div>
 
       <div className="flex flex-col sm:flex-row items-center gap-3">
