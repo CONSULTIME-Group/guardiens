@@ -156,13 +156,26 @@ const SitterDashboard = () => {
       )}
 
       {/* 3. Stat cards */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
         <StatCard icon={Home} iconColor="text-primary" label="Gardes réalisées" value={metrics.completed} delay={0} emptyMsg={metrics.completed === 0 ? "Votre première garde vous attend !" : undefined} />
         <StatCard icon={Star} iconColor="text-amber-500" label="Note moyenne" value={metrics.avgRating} delay={100} isDecimal emptyMsg={metrics.avgRating === 0 ? "Pas encore d'avis" : undefined} />
         <StatCard icon={Mail} iconColor="text-blue-500" label="Candidatures en attente" value={metrics.pendingApps} delay={200} />
         <StatCard icon={Award} iconColor="text-purple-500" label="Badges reçus" value={metrics.badgeCount} delay={300} />
-        <StatCard icon={Handshake} iconColor="text-primary" label="Missions proposées" value={metrics.missionsPosted} delay={400} />
-        <StatCard icon={Handshake} iconColor="text-amber-500" label="Coups de main donnés" value={metrics.missionsHelped} delay={500} />
+        <div className="p-4 rounded-xl border border-border bg-card hover:shadow-md transition-shadow animate-fade-in" style={{ animationDelay: "400ms" }}>
+          <Handshake className="h-4 w-4 text-primary mb-2" strokeWidth={1.8} />
+          <div className="flex items-baseline gap-3">
+            <div>
+              <p className="font-heading text-[28px] font-bold leading-tight">{metrics.missionsPosted}</p>
+              <p className="text-xs text-muted-foreground mt-1">Proposées</p>
+            </div>
+            <span className="text-muted-foreground/30 text-lg">/</span>
+            <div>
+              <p className="font-heading text-[28px] font-bold leading-tight">{metrics.missionsHelped}</p>
+              <p className="text-xs text-muted-foreground mt-1">Coups de main</p>
+            </div>
+          </div>
+          <p className="text-[10px] text-muted-foreground mt-1.5">Petites missions</p>
+        </div>
       </div>
 
       {/* 4. Availability toggle */}
