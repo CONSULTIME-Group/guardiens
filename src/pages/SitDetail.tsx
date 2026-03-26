@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Calendar, MapPin, Star, ShieldCheck, Home, PawPrint, MessageSquare, Users, CheckCircle2, XCircle } from "lucide-react";
+import { ArrowLeft, Calendar, MapPin, Star, ShieldCheck, Home, PawPrint, MessageSquare, CheckCircle2, XCircle, Send } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import ApplicationModal from "@/components/sits/ApplicationModal";
@@ -14,6 +14,7 @@ import BreedProfileCard from "@/components/breeds/BreedProfileCard";
 import ReportButton from "@/components/reports/ReportButton";
 import VerifiedBadge from "@/components/profile/VerifiedBadge";
 import LocationProfileCard from "@/components/location/LocationProfileCard";
+import { useToast } from "@/hooks/use-toast";
 
 const envLabels: Record<string, string> = {
   city_center: "Centre-ville", suburban: "Périurbain", countryside: "Campagne",
@@ -44,6 +45,8 @@ interface SitData {
 
 const SitDetail = () => {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const { toast } = useToast();
   const { user, activeRole } = useAuth();
   const [sit, setSit] = useState<SitData | null>(null);
   const [owner, setOwner] = useState<any>(null);
@@ -57,6 +60,8 @@ const SitDetail = () => {
   const [applyOpen, setApplyOpen] = useState(false);
   const [hasApplied, setHasApplied] = useState(false);
   const [cancelOpen, setCancelOpen] = useState(false);
+  const [publishing, setPublishing] = useState(false);
+
   useEffect(() => {
     if (!id) return;
     const load = async () => {
@@ -81,7 +86,6 @@ const SitDetail = () => {
         setPets(petsData || []);
       }
 
-      // Load sitter profile for compatibility badges + check if already applied
       if (user) {
         const [spRes, appRes] = await Promise.all([
           supabase.from("sitter_profiles").select("*").eq("user_id", user.id).maybeSingle(),
@@ -101,26 +105,70 @@ const SitDetail = () => {
 
   const photos: string[] = (property as any)?.photos || [];
   const avgRating = reviews.length > 0 ? (reviews.reduce((s: number, r: any) => s + r.overall_rating, 0) / reviews.length).toFixed(1) : null;
+  const isOwner = sit.user_id === user?.id;
+  const isDraft = sit.status === "draft";
 
-  // Compatibility badges
   const badges: string[] = [];
   if (sitterProfile && activeRole === "sitter") {
     const sitterAnimals: string[] = sitterProfile.animal_types || [];
     const petSpecies = pets.map((p: any) => p.species);
     const matchAnimal = petSpecies.some((s: string) => sitterAnimals.includes(s));
     if (matchAnimal) badges.push("Correspond à votre expérience animaux");
-    if (sitterProfile.geographic_radius && owner?.city && user?.firstName) badges.push(`Proche de chez vous`);
+    if (sitterProfile.geographic_radius && owner?.city && user?.firstName) badges.push("Proche de chez vous");
   }
 
   const formatDate = (d: string | null) => d ? format(new Date(d), "d MMMM yyyy", { locale: fr }) : "";
 
+  const handlePublish = async () => {
+    if (!isOwner || !isDraft || publishing) return;
+
+    setPublishing(true);
+    const { error } = await supabase
+      .from("sits")
+      .update({ status: "published" as any })
+      .eq("id", sit.id)
+      .eq("user_id", user!.id);
+
+    setPublishing(false);
+
+    if (error) {
+      toast({
+        variant: "destructive",
+        title: "Publication impossible",
+        description: "Le brouillon n'a pas pu être publié.",
+      });
+      return;
+    }
+
+    setSit({ ...sit, status: "published" });
+    toast({
+      title: "Annonce publiée",
+      description: "Les gardiens peuvent maintenant candidater.",
+    });
+    navigate(`/sits/${sit.id}`, { replace: true });
+  };
+
   return (
     <div className="p-6 md:p-10 max-w-3xl mx-auto animate-fade-in pb-32">
-      <Link to="/search" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-6">
-        <ArrowLeft className="h-4 w-4" /> Retour à la recherche
+      <Link to={isOwner ? "/sits" : "/search"} className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-6">
+        <ArrowLeft className="h-4 w-4" /> {isOwner ? "Retour à mes annonces" : "Retour à la recherche"}
       </Link>
 
-      {/* Compatibility badges */}
+      {isOwner && isDraft && (
+        <div className="mb-6 rounded-xl border border-border bg-accent/50 p-4 md:p-5">
+          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+            <div>
+              <p className="font-heading text-base font-semibold">Cette annonce est encore en brouillon</p>
+              <p className="text-sm text-muted-foreground">Publie-la pour qu'elle apparaisse dans la recherche et commence à recevoir des candidatures.</p>
+            </div>
+            <Button onClick={handlePublish} disabled={publishing} className="gap-2 md:self-start">
+              <Send className="h-4 w-4" />
+              {publishing ? "Publication..." : "Publier l'annonce"}
+            </Button>
+          </div>
+        </div>
+      )}
+
       {badges.length > 0 && (
         <div className="flex flex-wrap gap-2 mb-4">
           {badges.map(b => (
@@ -131,7 +179,6 @@ const SitDetail = () => {
         </div>
       )}
 
-      {/* Header */}
       <div className="flex items-start justify-between gap-4">
         <h1 className="font-heading text-2xl md:text-3xl font-bold mb-2">{sit.title}</h1>
         {user && sit.user_id !== user.id && <ReportButton targetId={sit.id} targetType="sit" />}
@@ -147,7 +194,6 @@ const SitDetail = () => {
         )}
       </div>
 
-      {/* Owner badge */}
       {owner && (
         <div className="flex items-center gap-3 mb-8 p-3 bg-card rounded-lg border border-border">
           {owner.avatar_url ? (
@@ -170,7 +216,6 @@ const SitDetail = () => {
         </div>
       )}
 
-      {/* Le logement */}
       {property && (
         <Section icon={Home} title="Le logement">
           {photos.length > 0 && (
@@ -179,8 +224,11 @@ const SitDetail = () => {
               {photos.length > 1 && (
                 <div className="flex gap-1.5 mt-2 overflow-x-auto">
                   {photos.map((p: string, i: number) => (
-                    <button key={i} onClick={() => setPhotoIndex(i)}
-                      className={`w-16 h-12 rounded-md object-cover border-2 shrink-0 overflow-hidden ${i === photoIndex ? "border-primary" : "border-transparent"}`}>
+                    <button
+                      key={i}
+                      onClick={() => setPhotoIndex(i)}
+                      className={`w-16 h-12 rounded-md object-cover border-2 shrink-0 overflow-hidden ${i === photoIndex ? "border-primary" : "border-transparent"}`}
+                    >
                       <img src={p} alt="" className="w-full h-full object-cover" />
                     </button>
                   ))}
@@ -202,7 +250,6 @@ const SitDetail = () => {
         </Section>
       )}
 
-      {/* Les animaux */}
       {pets.length > 0 && (
         <Section icon={PawPrint} title="Les animaux">
           <div className="space-y-4">
@@ -242,7 +289,6 @@ const SitDetail = () => {
         </Section>
       )}
 
-      {/* Ce qu'on attend */}
       {(ownerProfile || sit.specific_expectations) && (
         <Section icon={ShieldCheck} title="Ce qu'on attend">
           <div className="text-sm space-y-2">
@@ -262,7 +308,6 @@ const SitDetail = () => {
         </Section>
       )}
 
-      {/* L'accueil */}
       {ownerProfile && (ownerProfile.meeting_preference?.length > 0 || ownerProfile.news_frequency) && (
         <Section icon={MessageSquare} title="L'accueil">
           <div className="text-sm space-y-1">
@@ -275,19 +320,16 @@ const SitDetail = () => {
         </Section>
       )}
 
-      {/* Le coin (location profile) */}
       {owner?.city && owner?.postal_code && (
         <Section icon={MapPin} title={`Découvrir ${owner.city}`}>
           <LocationProfileCard city={owner.city} postalCode={owner.postal_code} />
         </Section>
       )}
 
-      {/* Avis */}
       <Section icon={Star} title="Avis">
         <ReviewsDisplay userId={sit.user_id} showAnimalCare={false} />
       </Section>
 
-      {/* Leave review CTA for completed sits */}
       {sit.status === "completed" && user && sit.user_id !== user.id && (
         <div className="mt-4">
           <Link to={`/review/${sit.id}`}>
@@ -307,9 +349,8 @@ const SitDetail = () => {
         </div>
       )}
 
-      {/* Cancel button for confirmed/published sits */}
       {sit && user && (sit.status === "confirmed" || sit.status === "published") && (
-        (sit.user_id === user.id || (hasApplied && sit.status === "confirmed")) && (
+        (isOwner || (hasApplied && sit.status === "confirmed")) && (
           <div className="mt-6 text-center">
             <Button
               variant="ghost"
@@ -323,14 +364,12 @@ const SitDetail = () => {
         )
       )}
 
-      {/* Reassurance */}
       <div className="mt-8 bg-primary/5 border border-primary/10 rounded-lg p-5 text-center">
         <p className="font-heading text-sm font-semibold text-primary">Vous partez l'esprit léger — et si un imprévu survient, votre réseau local de gardiens prend le relais.</p>
         <p className="text-xs text-muted-foreground mt-1">Profils vérifiés · Avis croisés · Gardiens d'urgence mobilisables</p>
       </div>
 
-      {/* Owner: house guide + applications list */}
-      {sit.user_id === user?.id && (
+      {isOwner && (
         <>
           <div className="mt-8 p-4 bg-accent/50 rounded-lg border border-border">
             <div className="flex items-center justify-between">
@@ -354,8 +393,7 @@ const SitDetail = () => {
         </>
       )}
 
-      {/* Sitter: apply button */}
-      {activeRole === "sitter" && sit.user_id !== user?.id && (
+      {activeRole === "sitter" && !isOwner && (
         <div className="fixed bottom-0 left-0 right-0 md:left-64 bg-card border-t border-border p-4 z-40 md:pb-4 pb-20">
           <div className="max-w-3xl mx-auto">
             {hasApplied ? (
@@ -371,7 +409,6 @@ const SitDetail = () => {
         </div>
       )}
 
-      {/* Application modal */}
       <ApplicationModal
         open={applyOpen}
         onOpenChange={setApplyOpen}
@@ -385,7 +422,6 @@ const SitDetail = () => {
         onSuccess={() => setHasApplied(true)}
       />
 
-      {/* Cancel modal */}
       {sit && (
         <CancelSitModal
           open={cancelOpen}
