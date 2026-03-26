@@ -69,6 +69,7 @@ const formatListDate = (d: string) => {
 };
 
 type ConvFilter = "all" | "active" | "archived";
+type ConvType = "all" | "garde" | "entraide";
 
 const Messages = () => {
   const { user } = useAuth();
@@ -82,6 +83,7 @@ const Messages = () => {
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const [filter, setFilter] = useState<ConvFilter>("active");
+  const [typeFilter, setTypeFilter] = useState<ConvType>("all");
   const [sitFilter, setSitFilter] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -303,6 +305,8 @@ const Messages = () => {
     const isArchived = conv.archived_by.includes(user?.id || "");
     if (filter === "active" && isArchived) return false;
     if (filter === "archived" && !isArchived) return false;
+    if (typeFilter === "garde" && !(conv.sit_id || conv.long_stay_id)) return false;
+    if (typeFilter === "entraide" && !((conv as any).small_mission_id)) return false;
     if (sitFilter && conv.sit_id !== sitFilter) return false;
     return true;
   });
@@ -350,6 +354,27 @@ const Messages = () => {
                       ({conversations.filter(c => c.archived_by.includes(user?.id || "")).length})
                     </span>
                   )}
+                </button>
+              ))}
+            </div>
+
+            {/* Type filter: Toutes / Gardes / Entraide */}
+            <div className="flex gap-1 bg-accent rounded-lg p-0.5">
+              {([
+                { value: "all" as ConvType, label: "Toutes" },
+                { value: "garde" as ConvType, label: "🐾 Gardes" },
+                { value: "entraide" as ConvType, label: "🤝 Entraide" },
+              ]).map(tab => (
+                <button
+                  key={tab.value}
+                  onClick={() => setTypeFilter(tab.value)}
+                  className={`flex-1 px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
+                    typeFilter === tab.value
+                      ? "bg-card shadow-sm text-foreground"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  {tab.label}
                 </button>
               ))}
             </div>

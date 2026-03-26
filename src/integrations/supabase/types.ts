@@ -301,6 +301,7 @@ export type Database = {
           owner_id: string
           sit_id: string | null
           sitter_id: string
+          small_mission_id: string | null
           updated_at: string
         }
         Insert: {
@@ -311,6 +312,7 @@ export type Database = {
           owner_id: string
           sit_id?: string | null
           sitter_id: string
+          small_mission_id?: string | null
           updated_at?: string
         }
         Update: {
@@ -321,6 +323,7 @@ export type Database = {
           owner_id?: string
           sit_id?: string | null
           sitter_id?: string
+          small_mission_id?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -350,6 +353,13 @@ export type Database = {
             columns: ["sitter_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conversations_small_mission_id_fkey"
+            columns: ["small_mission_id"]
+            isOneToOne: false
+            referencedRelation: "small_missions"
             referencedColumns: ["id"]
           },
         ]

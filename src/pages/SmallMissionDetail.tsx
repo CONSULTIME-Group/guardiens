@@ -3,7 +3,7 @@ import { useParams, Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, MapPin, Calendar, Clock, Dog, Flower2, Home, Handshake, Heart, MessageSquare, CheckCircle2 } from "lucide-react";
+import { ArrowLeft, MapPin, Calendar, Clock, Dog, Flower2, Home, Handshake, Heart, MessageSquare, CheckCircle2, Users, XCircle } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { useToast } from "@/hooks/use-toast";
@@ -121,6 +121,12 @@ const SmallMissionDetail = () => {
     toast({ title: "Mission terminée !", description: "Merci pour l'entraide 🙌" });
   };
 
+  const handleClose = async () => {
+    await supabase.from("small_missions").update({ status: "completed" as any }).eq("id", id!);
+    setMission({ ...mission, status: "completed" });
+    toast({ title: "Mission fermée", description: "Vous avez trouvé quelqu'un — super ! 🎉" });
+  };
+
   if (loading) return <div className="p-6 md:p-10 text-muted-foreground">Chargement...</div>;
   if (!mission) return <div className="p-6 md:p-10"><p>Mission introuvable.</p><Link to="/petites-missions" className="text-primary underline mt-2 inline-block">Retour aux missions</Link></div>;
 
@@ -157,6 +163,7 @@ const SmallMissionDetail = () => {
           <span className="flex items-center gap-1.5"><Calendar className="h-4 w-4" />{format(new Date(mission.date_needed), "d MMMM yyyy", { locale: fr })}</span>
         )}
         <span className="flex items-center gap-1.5"><Clock className="h-4 w-4" />{mission.duration_estimate}</span>
+        <span className="flex items-center gap-1.5"><Users className="h-4 w-4" />{responses.length} proposition{responses.length > 1 ? "s" : ""}</span>
       </div>
 
       {/* Description */}
@@ -238,6 +245,12 @@ const SmallMissionDetail = () => {
           {mission.status === "in_progress" && (
             <Button onClick={handleComplete} className="w-full mt-4 gap-2">
               <CheckCircle2 className="h-4 w-4" /> Marquer comme terminée
+            </Button>
+          )}
+
+          {mission.status === "open" && (
+            <Button onClick={handleClose} variant="outline" className="w-full mt-4 gap-2">
+              <XCircle className="h-4 w-4" /> Fermer — J'ai trouvé quelqu'un
             </Button>
           )}
         </div>
