@@ -272,7 +272,36 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
                       size="sm"
                       variant="outline"
                       className="gap-1.5"
-                      onClick={() => navigate("/messages")}
+                      onClick={async () => {
+                        // Find or create conversation for this application
+                        if (!user) return;
+                        const { data: existingConv } = await supabase
+                          .from("conversations")
+                          .select("id")
+                          .eq("sit_id", sitId)
+                          .eq("sitter_id", app.sitter_id)
+                          .maybeSingle();
+                        
+                        if (existingConv) {
+                          navigate(`/messages?conv=${existingConv.id}`);
+                        } else {
+                          // Create conversation
+                          const { data: newConv } = await supabase
+                            .from("conversations")
+                            .insert({
+                              sit_id: sitId,
+                              owner_id: user.id,
+                              sitter_id: app.sitter_id,
+                            })
+                            .select("id")
+                            .single();
+                          if (newConv) {
+                            // Mark application as discussing
+                            await supabase.from("applications").update({ status: "discussing" as any }).eq("id", app.id);
+                            navigate(`/messages?conv=${newConv.id}`);
+                          }
+                        }
+                      }}
                     >
                       <MessageSquare className="h-3.5 w-3.5" /> Répondre
                     </Button>

@@ -437,24 +437,22 @@ const Messages = () => {
                 <ArrowLeft className="h-5 w-5" />
               </button>
             )}
-            {activeConv.other_user?.avatar_url ? (
-              <img src={activeConv.other_user.avatar_url} alt="" className="w-10 h-10 rounded-full object-cover" />
-            ) : (
-              <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center font-heading text-sm font-bold">
-                {activeConv.other_user?.first_name?.charAt(0) || "?"}
-              </div>
-            )}
+            <Link to={`/search?user=${activeConv.other_user?.id}`} className="shrink-0">
+              {activeConv.other_user?.avatar_url ? (
+                <img src={activeConv.other_user.avatar_url} alt="" className="w-10 h-10 rounded-full object-cover hover:ring-2 hover:ring-primary/50 transition-all" />
+              ) : (
+                <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center font-heading text-sm font-bold hover:ring-2 hover:ring-primary/50 transition-all">
+                  {activeConv.other_user?.first_name?.charAt(0) || "?"}
+                </div>
+              )}
+            </Link>
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2">
-                <p className="font-medium text-sm">{activeConv.other_user?.first_name}</p>
-                {/* Profile link */}
                 <Link
                   to={`/search?user=${activeConv.other_user?.id}`}
-                  className="p-1 rounded hover:bg-accent text-muted-foreground hover:text-foreground transition-colors"
-                  title="Voir le profil"
-                  onClick={(e) => e.stopPropagation()}
+                  className="font-medium text-sm hover:text-primary transition-colors"
                 >
-                  <ExternalLink className="h-3.5 w-3.5" />
+                  {activeConv.other_user?.first_name}
                 </Link>
               </div>
               <div className="flex items-center gap-2 text-xs text-muted-foreground flex-wrap">
