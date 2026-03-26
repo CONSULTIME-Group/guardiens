@@ -11,7 +11,7 @@ import { Sheet, SheetContent, SheetTrigger, SheetClose } from "@/components/ui/s
 const navItems = [
   { to: "/dashboard", icon: Home, label: "Dashboard" },
   { to: "/search", icon: Search, label: "Recherche" },
-  { to: "/sits", icon: Calendar, label: "Mes gardes" },
+  { to: "/sits", icon: Calendar, label: "Mes annonces", ownerLabel: "Mes annonces", sitterLabel: "Mes gardes" },
   { to: "/messages", icon: MessageSquare, label: "Messagerie" },
   { to: "/actualites", icon: Newspaper, label: "Actualités" },
   { to: "/guides", icon: Compass, label: "Guides locaux" },
