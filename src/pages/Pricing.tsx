@@ -73,6 +73,10 @@ const faqItems = [
     q: "Y a-t-il des frais cachés ?",
     a: "Non. 49€/an pour les gardiens, gratuit pour les propriétaires, aucune commission sur les gardes classiques. Le seul supplément : 70€ par partie pour les gardes longue durée de 30 jours et plus.",
   },
+  {
+    q: "Pourquoi pas d'assurance ou de protection logement ?",
+    a: "Les couvertures proposées par d'autres plateformes reposent en réalité sur l'assurance habitation que vous avez déjà — avec des conditions, des plafonds, et des formulaires. On préfère être honnêtes : votre assurance habitation vous couvre. Ce qu'on vous offre en plus, c'est un réseau de gardiens locaux mobilisables, un annuaire de vétos partenaires, et la tranquillité de savoir que quelqu'un de confiance est à 15 minutes de chez vous.",
+  },
 ];
 
 const CellValue = ({ value }: { value: boolean | string }) => {
