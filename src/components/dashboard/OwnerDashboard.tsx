@@ -173,6 +173,41 @@ const OwnerDashboard = () => {
         )}
       </div>
 
+      {/* CTA Publier si aucune annonce active */}
+      {activeSits.length === 0 && (
+        <Link to="/sits/create" className="block p-6 rounded-xl bg-primary/5 border-2 border-dashed border-primary/30 hover:border-primary/50 hover:shadow-md transition-all text-center">
+          <Plus className="h-8 w-8 text-primary mx-auto mb-2" />
+          <p className="font-heading font-semibold text-lg">Publier une annonce de garde</p>
+          <p className="text-sm text-muted-foreground mt-1">Décrivez vos dates et les gardiens pourront postuler</p>
+        </Link>
+      )}
+
+      {/* Candidatures récentes - en haut si il y en a */}
+      {recentApps.length > 0 && (
+        <DashSection title="Candidatures reçues" icon={Users} action={
+          <Link to="/sits" className="text-xs text-primary hover:underline">Voir toutes mes annonces</Link>
+        }>
+          <div className="space-y-2">
+            {recentApps.map(app => (
+              <Link key={app.id} to={`/sits/${app.sit_id}`} className="flex items-center gap-3 p-3 rounded-lg bg-card border border-border hover:shadow-sm transition-shadow">
+                {app.sitter?.avatar_url ? (
+                  <img src={app.sitter.avatar_url} alt="" className="w-9 h-9 rounded-full object-cover shrink-0" />
+                ) : (
+                  <div className="w-9 h-9 rounded-full bg-muted flex items-center justify-center text-xs font-bold shrink-0">
+                    {app.sitter?.first_name?.charAt(0) || "?"}
+                  </div>
+                )}
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium truncate">{app.sitter?.first_name || "Gardien"}</p>
+                  <p className="text-xs text-muted-foreground truncate">{app.sit?.title}</p>
+                </div>
+                <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
+              </Link>
+            ))}
+          </div>
+        </DashSection>
+      )}
+
       {/* Mes animaux */}
       <DashSection title="Mes animaux" icon={PawPrint} action={
         <Link to="/owner-profile" className="text-xs text-primary hover:underline">Gérer</Link>
