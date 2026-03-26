@@ -115,6 +115,21 @@ const GuideDetail = () => {
     enabled: !!guide?.id && !!guide?.department,
   });
 
+  // Fetch related articles for this city
+  const { data: relatedArticles = [] } = useQuery({
+    queryKey: ["guide-articles", guide?.city],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("articles")
+        .select("slug, title, excerpt")
+        .eq("published", true)
+        .or(`city.ilike.%${guide!.city}%,tags.cs.{${guide!.city.toLowerCase()}}`)
+        .limit(3);
+      return (data || []) as any[];
+    },
+    enabled: !!guide?.city,
+  });
+
   const filteredPlaces = useMemo(() => {
     if (!searchQuery.trim()) return places;
     const q = searchQuery.toLowerCase();
