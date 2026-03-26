@@ -9,6 +9,7 @@ import { fr } from "date-fns/locale";
 import { Link, useSearchParams } from "react-router-dom";
 import { useIsMobile } from "@/hooks/use-mobile";
 import HouseGuideBlock from "@/components/messages/HouseGuideBlock";
+import HelpButton from "@/components/messages/HelpButton";
 import { useToast } from "@/hooks/use-toast";
 import { getBadgeDef } from "@/components/badges/badgeDefinitions";
 
