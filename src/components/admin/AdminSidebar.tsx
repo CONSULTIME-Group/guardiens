@@ -48,7 +48,7 @@ export const AdminSidebar = () => {
         </h1>
       </div>
 
-      <nav className="flex-1 px-3 space-y-0.5">
+      <nav className="flex-1 px-3 space-y-0.5 overflow-y-auto">
         {adminNavItems.map((item) => (
           <NavLink
             key={item.to}
