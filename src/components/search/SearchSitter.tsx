@@ -184,7 +184,7 @@ const SearchSitter = () => {
   const searchLongStays = async () => {
     let query = supabase
       .from("long_stays")
-      .select("*, owner:profiles!long_stays_user_id_fkey(first_name, avatar_url, city, identity_verified), property:properties!long_stays_property_id_fkey(type, environment, photos)")
+      .select("*, owner:profiles!long_stays_user_id_fkey(first_name, avatar_url, city, identity_verified), property:properties!long_stays_property_id_fkey(type, environment, photos, equipments)")
       .eq("status", "published")
       .order("created_at", { ascending: false });
 
