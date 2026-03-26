@@ -154,8 +154,11 @@ const PublicProfile = () => {
               <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
               <span className="font-bold text-sm">{reviewStats.avg.toFixed(1)}</span>
               <span className="text-xs text-muted-foreground">({reviewStats.count} avis)</span>
-              {completedSits > 0 && (
-                <span className="text-xs text-muted-foreground">· {completedSits} garde{completedSits > 1 ? "s" : ""}</span>
+              {totalSits > 0 && (
+                <span className="text-xs text-muted-foreground">
+                  · {totalSits} garde{totalSits > 1 ? "s" : ""} au total
+                  {verifiedExpCount > 0 && ` (${completedSits} Guardiens + ${verifiedExpCount} vérifiée${verifiedExpCount > 1 ? "s" : ""} ailleurs)`}
+                </span>
               )}
             </div>
           )}
