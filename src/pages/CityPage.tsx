@@ -98,7 +98,7 @@ const CityPage = () => {
       <PageMeta
         title={page.meta_title || `House-sitting ${page.city}`}
         description={page.meta_description}
-        path={`/house-sitting-${page.slug}`}
+        path={`/house-sitting/${page.slug}`}
       />
 
       <div className="min-h-screen bg-background">
