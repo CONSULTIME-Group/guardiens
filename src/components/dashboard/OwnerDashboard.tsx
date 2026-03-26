@@ -91,6 +91,8 @@ const OwnerDashboard = () => {
       if (propIds.length > 0) {
         const { data } = await supabase.from("pets").select("*").in("property_id", propIds);
         setPets(data || []);
+        setOnboardingChecks(prev => ({ ...prev, hasPets: (data || []).length > 0 }));
+      }
       }
 
       // Recent applications
