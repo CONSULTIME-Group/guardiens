@@ -163,6 +163,24 @@ export function useOwnerProfile() {
     return Math.round(total);
   }, []);
 
+  const computeMissingFields = useCallback((d: OwnerProfileData, petsCount: number): { step: number; label: string }[] => {
+    const missing: { step: number; label: string }[] = [];
+    if (!d.avatar_url) missing.push({ step: 1, label: "Photo de profil" });
+    if (!d.first_name) missing.push({ step: 1, label: "Prénom" });
+    if (!d.last_name) missing.push({ step: 1, label: "Nom" });
+    if (!d.city) missing.push({ step: 1, label: "Ville" });
+    if (!d.bio) missing.push({ step: 1, label: "Bio" });
+    if (!d.property_type) missing.push({ step: 2, label: "Type de logement" });
+    if (!d.environment) missing.push({ step: 2, label: "Environnement" });
+    if (!d.description) missing.push({ step: 2, label: "Description du logement" });
+    if (petsCount === 0) missing.push({ step: 3, label: "Ajouter un animal" });
+    if (!d.presence_expected) missing.push({ step: 4, label: "Présence attendue" });
+    if (!d.visits_allowed) missing.push({ step: 4, label: "Visites autorisées" });
+    if (d.meeting_preference.length === 0) missing.push({ step: 5, label: "Préférence de rencontre" });
+    if (!d.news_frequency) missing.push({ step: 5, label: "Fréquence des nouvelles" });
+    return missing;
+  }, []);
+
   const saveStep = useCallback(async (stepData: Partial<OwnerProfileData>) => {
     if (!user) return;
     setSaving(true);
@@ -280,5 +298,6 @@ export function useOwnerProfile() {
     data, pets, loading, saving, propertyId,
     saveStep, addPet, updatePet, removePet, uploadPhoto,
     completion: computeCompletion(data, pets.length),
+    missingFields: computeMissingFields(data, pets.length),
   };
 }

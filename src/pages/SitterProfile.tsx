@@ -13,7 +13,7 @@ import { useSitterProfile, type SitterProfileData } from "@/hooks/useSitterProfi
 const SitterProfile = () => {
   const navigate = useNavigate();
   const {
-    data, pastAnimals, loading, saving, completion,
+    data, pastAnimals, loading, saving, completion, missingFields,
     saveStep, addPastAnimal, removePastAnimal, uploadAvatar,
   } = useSitterProfile();
 
@@ -52,7 +52,7 @@ const SitterProfile = () => {
       <h1 className="font-heading text-3xl font-bold mb-3">Mon profil</h1>
       <p className="text-muted-foreground mb-8">Complétez votre profil pour augmenter vos chances.</p>
 
-      <StepProgress currentStep={currentStep} completion={completion} completedSteps={completedSteps} onStepClick={(step) => handleSaveAndNavigate(step)} />
+      <StepProgress currentStep={currentStep} completion={completion} completedSteps={completedSteps} onStepClick={(step) => handleSaveAndNavigate(step)} missingFields={missingFields} />
 
       <div className="bg-card rounded-lg border border-border p-6 md:p-8 mb-6">
         {currentStep === 1 && <StepIdentity data={mergedData} onChange={handleChange} onUploadAvatar={uploadAvatar} />}
