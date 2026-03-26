@@ -4,6 +4,8 @@ const SITE_URL = "https://guardiens.fr";
 
 const staticPages = [
   { loc: "/", priority: "1.0", changefreq: "weekly" },
+  { loc: "/tarifs", priority: "0.8", changefreq: "monthly" },
+  { loc: "/petites-missions", priority: "0.7", changefreq: "daily" },
   { loc: "/actualites", priority: "0.8", changefreq: "daily" },
   { loc: "/a-propos", priority: "0.5", changefreq: "monthly" },
   { loc: "/contact", priority: "0.5", changefreq: "monthly" },
