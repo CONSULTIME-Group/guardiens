@@ -33,14 +33,16 @@ const SitterDashboard = () => {
   useEffect(() => {
     if (!user) return;
     const load = async () => {
-      const [appsRes, unreadRes, reviewsRes, listingsRes, sitterRes] = await Promise.all([
+      const [appsRes, unreadRes, reviewsRes, listingsRes, sitterRes, profileRes] = await Promise.all([
         supabase.from("applications").select("*, sit:sits(id, title, start_date, end_date, status)").eq("sitter_id", user.id).order("created_at", { ascending: false }),
         supabase.from("messages").select("id", { count: "exact", head: true }).neq("sender_id", user.id).is("read_at", null),
         supabase.from("reviews").select("overall_rating").eq("reviewee_id", user.id).eq("published", true),
         supabase.from("sits").select("id, title, start_date, end_date, user_id, property_id, status").eq("status", "published").order("created_at", { ascending: false }).limit(5),
         supabase.from("sitter_profiles").select("is_available").eq("user_id", user.id).single(),
+        supabase.from("profiles").select("identity_verification_status").eq("id", user.id).single(),
       ]);
 
+      setVerificationStatus(profileRes.data?.identity_verification_status || "not_submitted");
       setIsAvailable(sitterRes.data?.is_available || false);
 
       setMyApplications(appsRes.data || []);
