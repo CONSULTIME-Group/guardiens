@@ -82,7 +82,14 @@ const OwnerProfilePage = () => {
 
   return (
     <div className="p-6 md:p-10 max-w-3xl mx-auto animate-fade-in">
-      <h1 className="font-heading text-3xl font-bold mb-3">Mon profil propriétaire</h1>
+      <div className="flex items-center justify-between mb-3">
+        <h1 className="font-heading text-3xl font-bold">Mon profil propriétaire</h1>
+        {user && (
+          <Button variant="outline" size="sm" asChild>
+            <Link to={`/profil/${user.id}`}><Eye className="w-4 h-4 mr-1.5" /> Voir mon profil public</Link>
+          </Button>
+        )}
+      </div>
       <TrustProfile
         emailVerified={true}
         identityVerified={trustData.identityVerified}
