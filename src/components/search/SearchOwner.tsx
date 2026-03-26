@@ -348,7 +348,18 @@ const SearchOwner = () => {
                             ))}
                           </div>
                         )}
-                        <ReportButton targetId={s.user_id} targetType="profile" className="ml-auto mt-2" />
+                        <div className="flex items-center gap-2 mt-3">
+                          <Button
+                            size="sm"
+                            className="gap-1.5"
+                            onClick={() => handleContact(s.user_id)}
+                            disabled={contactingId === s.user_id}
+                          >
+                            <MessageCircle className="h-3.5 w-3.5" />
+                            {contactingId === s.user_id ? "..." : "Contacter"}
+                          </Button>
+                          <ReportButton targetId={s.user_id} targetType="profile" className="ml-auto" />
+                        </div>
                       </div>
                     </div>
                   </div>
