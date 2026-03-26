@@ -79,6 +79,8 @@ const ARTICLE_IMAGES: Record<string, string> = {
   "/images/parc-parilly-labrador-lyon.jpg": parcParillyLabrador,
   "/images/gardien-bellecour-lyon.jpg": gardienBellecour,
   "/images/profil-gardien-laptop-lyon.jpg": profilGardienLaptop,
+  "/images/villa-ouest-lyonnais-vide.jpg": villaOuestVide,
+  "/images/gardien-teletravail-ouest-lyon.jpg": gardienTeletravailOuest,
 };
 
 function resolveArticleImages(html: string): string {
