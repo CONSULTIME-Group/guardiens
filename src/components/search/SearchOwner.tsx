@@ -182,12 +182,18 @@ const SearchOwner = () => {
       })
     );
 
-    // Sort
+    // Sort: emergency sitters first, then by selected sort
     if (sort === "rating") {
-      enriched.sort((a, b) => (parseFloat(b.avgRating || "0") - parseFloat(a.avgRating || "0")));
+      enriched.sort((a, b) => {
+        if (a.isEmergency !== b.isEmergency) return a.isEmergency ? -1 : 1;
+        return parseFloat(b.avgRating || "0") - parseFloat(a.avgRating || "0");
+      });
     } else {
       const expOrder: Record<string, number> = { "5+": 4, "3-5": 3, "1-2": 2, debutant: 1, "": 0 };
-      enriched.sort((a, b) => (expOrder[b.experience_years || ""] || 0) - (expOrder[a.experience_years || ""] || 0));
+      enriched.sort((a, b) => {
+        if (a.isEmergency !== b.isEmergency) return a.isEmergency ? -1 : 1;
+        return (expOrder[b.experience_years || ""] || 0) - (expOrder[a.experience_years || ""] || 0);
+      });
     }
 
     setResults(enriched);
