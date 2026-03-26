@@ -1,7 +1,8 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Dog, Flower2, Home, Handshake, ArrowRight } from "lucide-react";
+import { Dog, Flower2, Home, Handshake, ArrowRight, Filter } from "lucide-react";
 import PageMeta from "@/components/PageMeta";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -29,22 +30,26 @@ const EXAMPLES = [
   { cat: "skills", title: "Dog-training : les bases (rappel, marche en laisse)", exchange: "Un bon café et une balade ensemble" },
 ];
 
+type StatusFilter = "active" | "all";
+type CategoryFilter = "all" | "animals" | "garden" | "house" | "skills";
+
 const SmallMissions = () => {
   const { isAuthenticated } = useAuth();
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>("active");
+  const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>("all");
 
-  const { data: recentMissions } = useQuery({
-    queryKey: ["small-missions-recent"],
+  const { data: allMissions } = useQuery({
+    queryKey: ["small-missions-all"],
     queryFn: async () => {
       const { data: missions } = await supabase
         .from("small_missions")
         .select("*, profiles:user_id(first_name, avatar_url)")
-        .in("status", ["open", "in_progress"] as any[])
+        .in("status", ["open", "in_progress", "completed"] as any[])
         .order("created_at", { ascending: false })
-        .limit(20);
+        .limit(50);
       
       if (!missions || missions.length === 0) return [];
 
-      // Fetch response counts
       const missionIds = missions.map((m: any) => m.id);
       const { data: responses } = await supabase
         .from("small_mission_responses")
@@ -56,17 +61,23 @@ const SmallMissions = () => {
         countMap.set(r.mission_id, (countMap.get(r.mission_id) || 0) + 1);
       });
 
-      // Sort: open first, then in_progress
-      const sorted = missions.map((m: any) => ({ ...m, response_count: countMap.get(m.id) || 0 }));
-      sorted.sort((a: any, b: any) => {
-        if (a.status === "open" && b.status !== "open") return -1;
-        if (a.status !== "open" && b.status === "open") return 1;
-        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
-      });
-
-      return sorted;
+      return missions.map((m: any) => ({ ...m, response_count: countMap.get(m.id) || 0 }));
     },
   });
+
+  const filteredMissions = (allMissions || [])
+    .filter((m: any) => {
+      if (statusFilter === "active" && m.status === "completed") return false;
+      if (categoryFilter !== "all" && m.category !== categoryFilter) return false;
+      return true;
+    })
+    .sort((a: any, b: any) => {
+      // Active first, completed last
+      const order: Record<string, number> = { open: 0, in_progress: 1, completed: 2 };
+      const diff = (order[a.status] ?? 9) - (order[b.status] ?? 9);
+      if (diff !== 0) return diff;
+      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+    });
 
   return (
     <>
