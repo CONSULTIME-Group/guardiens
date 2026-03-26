@@ -63,6 +63,7 @@ const AdminDashboard = () => {
         { data: profilesData },
         { count: totalApplications },
         { count: confirmedSits },
+        { count: openMissions },
       ] = await Promise.all([
         supabase.from("profiles").select("id", { count: "exact", head: true }),
         supabase.from("profiles").select("id", { count: "exact", head: true }).eq("role", "owner"),
@@ -76,6 +77,7 @@ const AdminDashboard = () => {
         supabase.from("profiles").select("created_at, city"),
         supabase.from("applications").select("id", { count: "exact", head: true }),
         supabase.from("sits").select("id", { count: "exact", head: true }).in("status", ["confirmed", "completed"]),
+        supabase.from("small_missions").select("id", { count: "exact", head: true }).eq("status", "open" as any),
       ]);
 
       const totalReviews = reviewsData?.length || 0;
