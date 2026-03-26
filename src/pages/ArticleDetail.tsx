@@ -8,24 +8,7 @@ import { ArrowLeft, ArrowRight, Calendar, MapPin, User, Compass, Building2 } fro
 import PageMeta from "@/components/PageMeta";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { marked } from "marked";
-
-import lyonHeroQuais from "@/assets/lyon-hero-quais.jpg";
-import lyonChatFenetre from "@/assets/lyon-chat-fenetre.jpg";
-import lyonConfianceCafe from "@/assets/lyon-confiance-cafe.jpg";
-
-const ARTICLE_IMAGES: Record<string, string> = {
-  "/images/lyon-hero-quais.jpg": lyonHeroQuais,
-  "/images/lyon-chat-fenetre.jpg": lyonChatFenetre,
-  "/images/lyon-confiance-cafe.jpg": lyonConfianceCafe,
-};
-
-function resolveArticleImages(html: string): string {
-  return html.replace(/src="(\/images\/[^"]+)"/g, (match, path) => {
-    const resolved = ARTICLE_IMAGES[path];
-    return resolved ? `src="${resolved}"` : match;
-  });
-}
+import ArticleRenderer from "@/components/articles/ArticleRenderer";
 
 interface ArticleFull {
   id: string;
@@ -321,21 +304,7 @@ export default function ArticleDetail() {
         </div>
       )}
 
-      <div
-        className="prose prose-lg max-w-none text-foreground
-          prose-headings:font-heading prose-headings:text-foreground
-          prose-h2:text-2xl prose-h2:mt-10 prose-h2:mb-4 prose-h2:pb-2 prose-h2:border-b prose-h2:border-border
-          prose-h3:text-lg prose-h3:mt-8 prose-h3:mb-3
-          prose-p:text-foreground/85 prose-p:leading-relaxed prose-p:mb-4
-          prose-a:text-primary prose-a:no-underline hover:prose-a:underline
-          prose-strong:text-foreground prose-strong:font-semibold
-          prose-li:text-foreground/85 prose-li:mb-1
-          prose-ul:my-4 prose-ol:my-4
-          prose-blockquote:border-l-4 prose-blockquote:border-primary/40 prose-blockquote:bg-primary/5 prose-blockquote:rounded-r-lg prose-blockquote:py-3 prose-blockquote:px-5 prose-blockquote:not-italic prose-blockquote:text-foreground/80 prose-blockquote:my-6
-          prose-hr:border-border prose-hr:my-8
-          prose-img:rounded-xl prose-img:shadow-md"
-        dangerouslySetInnerHTML={{ __html: resolveArticleImages(marked.parse(article.content, { async: false }) as string) }}
-      />
+      <ArticleRenderer content={article.content} />
 
       {/* Cross-links to city pages */}
       {(cityGuideSlug || cityPageSlug) && (
