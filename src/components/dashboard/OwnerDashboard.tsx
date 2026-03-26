@@ -208,7 +208,7 @@ const OwnerDashboard = () => {
         <Link to="/owner-profile" className="text-xs text-primary hover:underline font-medium">Gérer →</Link>
       }>
         {pets.length === 0 ? (
-          <EmptyCard icon={PawPrint} text="Aucun animal enregistré." cta="Ajouter un animal" to="/owner-profile" />
+          <EmptyCard icon={PawPrint} text="Aucun animal enregistré" hint="Ajoutez vos compagnons pour attirer les bons gardiens" cta="Ajouter un animal" to="/owner-profile" />
         ) : (
           <div className="space-y-2">
             {pets.map(pet => {
@@ -276,7 +276,7 @@ const OwnerDashboard = () => {
         recentApps.length > 0 ? <Link to="/sits" className="text-xs text-primary hover:underline font-medium">Voir toutes mes annonces →</Link> : undefined
       }>
         {recentApps.length === 0 ? (
-          <EmptyCard icon={Users} text="Pas encore de candidature. Publiez une annonce →" cta="Publier" to="/sits/create" />
+          <EmptyCard icon={Users} text="Pas encore de candidature reçue" hint="Publiez une annonce et les gardiens viendront à vous" cta="Publier une annonce" to="/sits/create" />
         ) : (
           <div className="space-y-2">
             {recentApps.map(app => (
@@ -369,7 +369,7 @@ const OwnerDashboard = () => {
           <Button size="sm" variant="outline" className="gap-1.5"><Plus className="h-3.5 w-3.5" /> Poster une petite mission</Button>
         </Link>
         {smallMissions.length === 0 ? (
-          <p className="text-sm text-muted-foreground italic">Pas encore de petite mission dans votre zone.</p>
+          <EmptyCard icon={Handshake} text="Aucune petite mission dans votre zone" hint="Postez un coup de main et trouvez de l'aide entre voisins" />
         ) : (
           <div className="space-y-2">
             {smallMissions.map((m: any) => (
@@ -423,11 +423,18 @@ const DashSection = ({ title, action, children }: {
   </div>
 );
 
-const EmptyCard = ({ icon: Icon, text, cta, to }: { icon?: React.ElementType; text: string; cta?: string; to?: string }) => (
-  <div className="p-6 rounded-xl border border-dashed border-border text-center">
-    {Icon && <Icon className="h-8 w-8 text-muted-foreground/40 mx-auto mb-2" />}
-    <p className="text-sm text-muted-foreground mb-3">{text}</p>
-    {cta && to && <Link to={to}><Button size="sm">{cta}</Button></Link>}
+const EmptyCard = ({ icon: Icon, text, cta, to, hint }: { icon?: React.ElementType; text: string; cta?: string; to?: string; hint?: string }) => (
+  <div className="p-8 rounded-xl border border-dashed border-border bg-accent/30 text-center space-y-3">
+    {Icon && (
+      <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
+        <Icon className="h-6 w-6 text-primary/60" />
+      </div>
+    )}
+    <div>
+      <p className="text-sm font-medium text-foreground/80">{text}</p>
+      {hint && <p className="text-xs text-muted-foreground mt-1">{hint}</p>}
+    </div>
+    {cta && to && <Link to={to}><Button size="sm" className="mt-1">{cta}</Button></Link>}
   </div>
 );
 
