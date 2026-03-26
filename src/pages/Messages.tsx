@@ -449,12 +449,12 @@ const Messages = () => {
                 <p className="font-medium text-sm">{activeConv.other_user?.first_name}</p>
                 {/* Profile link */}
                 <Link
-                  to={`/sitter/${activeConv.other_user?.id}`}
+                  to={`/search?user=${activeConv.other_user?.id}`}
                   className="p-1 rounded hover:bg-accent text-muted-foreground hover:text-foreground transition-colors"
                   title="Voir le profil"
                   onClick={(e) => e.stopPropagation()}
                 >
-                  <User className="h-3.5 w-3.5" />
+                  <ExternalLink className="h-3.5 w-3.5" />
                 </Link>
               </div>
               <div className="flex items-center gap-2 text-xs text-muted-foreground flex-wrap">
