@@ -320,7 +320,7 @@ const SearchOwner = () => {
                           {s.has_vehicle && <Car className="h-4 w-4 text-muted-foreground" />}
                         </div>
                         <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground mt-0.5">
-                          {profile?.city && <span className="flex items-center gap-1"><MapPin className="h-3.5 w-3.5" />{profile.city}</span>}
+                          {(profile?.city || profile?.postal_code) && <span className="flex items-center gap-1"><MapPin className="h-3.5 w-3.5" />{[profile.postal_code, profile.city].filter(Boolean).join(" ")}</span>}
                           {s.sitter_type && <span>{sitterTypeLabels[s.sitter_type] || s.sitter_type}</span>}
                         </div>
 
