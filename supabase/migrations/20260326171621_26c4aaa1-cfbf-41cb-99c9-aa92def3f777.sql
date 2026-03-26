@@ -1,0 +1,1 @@
+UPDATE articles SET cover_image_url = 'https://erhccyqevdyevpyctsjj.supabase.co/storage/v1/object/public/property-photos/articles%2Fnotre-histoire-cover.jpg' WHERE slug = 'notre-histoire-pet-sitting-argentine-lyon';
