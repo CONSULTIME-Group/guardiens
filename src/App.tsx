@@ -63,6 +63,8 @@ import CreateSmallMission from "./pages/CreateSmallMission";
 import MentionsLegales from "./pages/MentionsLegales";
 import AdminSmallMissions from "./pages/admin/AdminSmallMissions";
 import AdminSubscriptions from "./pages/admin/AdminSubscriptions";
+import AdminLegal from "./pages/admin/AdminLegal";
+import AdminSettings from "./pages/admin/AdminSettings";
 import PublicProfile from "./pages/PublicProfile";
 
 const queryClient = new QueryClient();
