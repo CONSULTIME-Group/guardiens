@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Plus, X } from "lucide-react";
 import ChipSelect from "../profile/ChipSelect";
 import HintBubble from "../profile/HintBubble";
+import AiSuggestButton from "../profile/AiSuggestButton";
 import LocationProfileCard from "../location/LocationProfileCard";
 import type { OwnerProfileData } from "@/hooks/useOwnerProfile";
 
