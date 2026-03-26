@@ -47,6 +47,8 @@ import NotFound from "./pages/NotFound";
 import Unsubscribe from "./pages/Unsubscribe";
 import CityPage from "./pages/CityPage";
 import AdminCityPages from "./pages/admin/AdminCityPages";
+import FAQ from "./pages/FAQ";
+import AdminFAQ from "./pages/admin/AdminFAQ";
 
 const queryClient = new QueryClient();
 
@@ -77,6 +79,7 @@ const AppRoutes = () => (
     <Route path="/contact" element={<Contact />} />
     <Route path="/cgu" element={<Terms />} />
     <Route path="/confidentialite" element={<Privacy />} />
+    <Route path="/faq" element={<FAQ />} />
     <Route path="/house-sitting/:slug" element={<CityPage />} />
     <Route element={<AdminLayout />}>
       <Route path="/admin" element={<AdminDashboard />} />
@@ -90,6 +93,7 @@ const AppRoutes = () => (
       <Route path="/admin/articles" element={<AdminArticles />} />
       <Route path="/admin/articles/:id" element={<ArticleEditor />} />
       <Route path="/admin/city-pages" element={<AdminCityPages />} />
+      <Route path="/admin/faq" element={<AdminFAQ />} />
     </Route>
     {/* App routes */}
     <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
