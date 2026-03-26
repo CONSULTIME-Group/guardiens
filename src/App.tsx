@@ -58,6 +58,7 @@ import Pricing from "./pages/Pricing";
 import SmallMissions from "./pages/SmallMissions";
 import CreateSmallMission from "./pages/CreateSmallMission";
 import MentionsLegales from "./pages/MentionsLegales";
+import AdminSmallMissions from "./pages/admin/AdminSmallMissions";
 
 const queryClient = new QueryClient();
 
