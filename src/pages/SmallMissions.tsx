@@ -100,22 +100,85 @@ const SmallMissions = () => {
         </header>
 
         <main className="max-w-6xl mx-auto px-4 py-12 space-y-16">
-          {/* H1 + intro */}
-          <section className="text-center space-y-6 max-w-3xl mx-auto">
-            <h1 className="font-heading text-4xl md:text-5xl font-bold text-foreground">
-              Petites missions — L'entraide entre voisins, version Guardiens
-            </h1>
-            <div className="text-left space-y-4 text-muted-foreground">
-              <p>
-                Chez Guardiens, tout a commencé par un coup de main. Promener un chien, nourrir des chats le temps d'un week-end, arroser un jardin. Avant les gardes longues, il y avait ces petits gestes — et c'est eux qui ont créé la confiance.
-              </p>
-              <p>
-                Les petites missions, c'est ce même esprit. Vous avez besoin d'un coup de main avec vos animaux, votre jardin, ou votre maison ? Quelqu'un de la communauté est là. Pas contre de l'argent — contre un bon repas, des tomates du jardin, ou simplement le plaisir de se rendre service.
-              </p>
-              <p>
-                C'est comme ça que les villages fonctionnaient avant. C'est comme ça que Guardiens fonctionne aujourd'hui.
-              </p>
-            </div>
+          {/* Missions en cours — NOW AT TOP */}
+          {recentMissions && recentMissions.length > 0 && (
+            <section className="space-y-6">
+              <div className="text-center space-y-2">
+                <h1 className="font-heading text-4xl md:text-5xl font-bold text-foreground">
+                  Petites missions — Entraide entre voisins
+                </h1>
+                <p className="text-muted-foreground max-w-2xl mx-auto">
+                  Besoin d'un coup de main ? Quelqu'un de la communauté est là. Pas d'argent — juste du lien.
+                </p>
+              </div>
+
+              {isAuthenticated && (
+                <div className="text-center">
+                  <Link to="/petites-missions/creer">
+                    <Button variant="hero" size="lg">
+                      Poster une petite mission
+                      <ArrowRight className="ml-2 h-4 w-4" />
+                    </Button>
+                  </Link>
+                </div>
+              )}
+
+              <h2 className="font-heading text-2xl font-bold text-foreground text-center">
+                Missions actives ({recentMissions.length})
+              </h2>
+              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {recentMissions.map((m: any) => {
+                  const meta = CATEGORY_META[m.category] || CATEGORY_META.animals;
+                  const Icon = meta.icon;
+                  return (
+                    <Link key={m.id} to={isAuthenticated ? `/petites-missions/${m.id}` : "/register"}>
+                      <Card className="border-border hover:border-primary/30 transition-colors h-full">
+                        <CardContent className="p-4 space-y-2">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <Icon className={`h-4 w-4 ${meta.colorClass}`} />
+                              <span className="text-xs font-medium text-muted-foreground">{meta.label}</span>
+                            </div>
+                            {m.response_count > 0 && (
+                              <span className="text-xs text-muted-foreground bg-accent px-2 py-0.5 rounded-full">
+                                {m.response_count} proposition{m.response_count > 1 ? "s" : ""}
+                              </span>
+                            )}
+                          </div>
+                          <p className="font-medium text-sm text-foreground">{m.title}</p>
+                          <p className="text-xs text-muted-foreground">{m.city} • {m.duration_estimate}</p>
+                          <p className="text-xs text-muted-foreground">En échange : {m.exchange_offer}</p>
+                          {m.status === "in_progress" && (
+                            <span className="inline-block text-xs bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 px-2 py-0.5 rounded-full">En cours</span>
+                          )}
+                          <Button size="sm" variant="outline" className="w-full mt-2">
+                            {isAuthenticated ? "Proposer mon aide" : "Inscrivez-vous pour aider"}
+                          </Button>
+                        </CardContent>
+                      </Card>
+                    </Link>
+                  );
+                })}
+              </div>
+            </section>
+          )}
+
+          {/* H1 + intro (if no missions, show as primary) */}
+          {(!recentMissions || recentMissions.length === 0) && (
+            <section className="text-center space-y-6 max-w-3xl mx-auto">
+              <h1 className="font-heading text-4xl md:text-5xl font-bold text-foreground">
+                Petites missions — L'entraide entre voisins, version Guardiens
+              </h1>
+            </section>
+          )}
+
+          <section className="text-left space-y-4 text-muted-foreground max-w-3xl mx-auto">
+            <p>
+              Chez Guardiens, tout a commencé par un coup de main. Promener un chien, nourrir des chats le temps d'un week-end, arroser un jardin. Avant les gardes longues, il y avait ces petits gestes — et c'est eux qui ont créé la confiance.
+            </p>
+            <p>
+              Les petites missions, c'est ce même esprit. Vous avez besoin d'un coup de main avec vos animaux, votre jardin, ou votre maison ? Quelqu'un de la communauté est là. Pas contre de l'argent — contre un bon repas, des tomates du jardin, ou simplement le plaisir de se rendre service.
+            </p>
           </section>
 
           {/* Exemples par catégorie */}
