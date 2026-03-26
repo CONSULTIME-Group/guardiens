@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Link } from "react-router-dom";
+import OnboardingWelcome from "./OnboardingWelcome";
 import {
   Home, Star, Mail, Award, CircleDot, ChevronRight, Search,
   Send as SendIcon, Eye, CheckCircle2, XCircle, MessageSquare,
