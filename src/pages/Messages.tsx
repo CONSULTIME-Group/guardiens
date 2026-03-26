@@ -657,7 +657,7 @@ const Messages = () => {
 
           {/* Messages */}
           <div className="flex-1 overflow-y-auto space-y-3 pb-20 md:pb-4" style={{ background: "hsl(var(--background))" }}>
-            {activeConv.sit?.status === "confirmed" && activeConv.sit?.property_id && (
+            {(activeConv.sit?.status === "confirmed" || activeConv.sit?.status === "in_progress") && activeConv.sit?.property_id && (
               <HouseGuideBlock propertyId={activeConv.sit.property_id} />
             )}
 
