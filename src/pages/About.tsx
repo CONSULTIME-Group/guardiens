@@ -32,26 +32,43 @@ const About = () => {
 
         <div className="prose prose-lg max-w-none text-muted-foreground space-y-6">
           <p>
-            Guardiens est né d'une passion simple : prendre soin des maisons et des animaux de ses voisins.
-          </p>
-          <p>
-            Tout a commencé quand Elisa, Argentine installée à Lyon, a découvert le house-sitting par hasard. Une voisine lui a confié ses chats pour un week-end. Puis un ami ses deux chiens pour une semaine. De fil en aiguille, les propriétaires du quartier se sont passé le mot : « Demande à Elisa. »
-          </p>
-          <p>
-            En cinq ans, c'est devenu 37 maisons gardées et 234 animaux accompagnés dans toute la région Auvergne-Rhône-Alpes. Un soir, autour d'un BBQ chez des propriétaires devenus amis, la question est tombée : « Et si d'autres personnes pouvaient vivre ça aussi ? »
-          </p>
-          <p className="font-heading text-xl font-semibold text-primary">
-            Guardiens est né ce soir-là.
+            Guardiens est né entre deux promenades de chiens, dans un appartement lyonnais qui sentait la croquette, avec un chat sur le canapé et un border collie sous la table.
           </p>
 
-          <h2 className="font-heading text-2xl font-bold text-foreground pt-4">Notre mission</h2>
+          <h2 className="font-heading text-2xl font-bold text-foreground pt-4">Le retour d'Argentine</h2>
           <p>
-            Créer un réseau de confiance local où propriétaires et gardiens se rencontrent, échangent et s'entraident — comme entre voisins. Pas une marketplace anonyme, mais une communauté de proximité.
+            En 2021, nous sommes rentrés d'Argentine. Le Covid n'était pas terminé, les visas étaient compliqués à obtenir — Elisa ne pouvait tout simplement <strong className="text-foreground">pas travailler</strong> en attendant notre mariage et la régularisation de sa situation.
+          </p>
+          <p>
+            Il fallait pourtant s'occuper. Et Elisa adorait les animaux. Ça a commencé par des <strong className="text-foreground">promenades de chiens</strong> dans le quartier. Un voisin qui part au travail, un autre qui se remet d'une opération. Du bouche-à-oreille, rien de plus.
           </p>
 
-          <h2 className="font-heading text-2xl font-bold text-foreground pt-4">Notre région</h2>
+          <blockquote className="border-l-4 border-primary bg-primary/5 rounded-r-lg py-3 px-5 not-italic text-foreground/80">
+            « Au début, c'était juste rendre service. Promener le chien d'une voisine le matin. Puis elle en a parlé à une amie, qui en a parlé à sa sœur… » — Elisa
+          </blockquote>
+
+          <h2 className="font-heading text-2xl font-bold text-foreground pt-4">Des promenades au house-sitting</h2>
           <p>
-            Nous sommes basés à Lyon et opérons dans toute la région Auvergne-Rhône-Alpes : de Megève à Montélimar, des Monts du Lyonnais au Vercors. Notre force, c'est la proximité.
+            Très vite, les demandes se sont multipliées. Plus seulement des promenades, mais des <strong className="text-foreground">gardes à la maison</strong>. Puis on a commencé à recevoir des animaux chez nous. Et un jour, une propriétaire nous a proposé de garder ses animaux <strong className="text-foreground">chez elle</strong>, pendant ses vacances.
+          </p>
+          <p>
+            C'était notre premier house-sitting. On a adoré.
+          </p>
+          <p>
+            À partir de là, tout s'est enchaîné. D'abord dans le <strong className="text-foreground">département</strong>, puis dans toute la <strong className="text-foreground">région</strong>, puis sur <strong className="text-foreground">toute la France</strong> — chalets en montagne, maisons en bord de mer, fermes avec des poules et des chèvres, pavillons de banlieue avec des labradors trop affectueux.
+          </p>
+
+          <h2 className="font-heading text-2xl font-bold text-foreground pt-4">Aujourd'hui</h2>
+          <p>
+            Pour différentes raisons, on n'est plus aussi mobiles qu'avant. Mais chaque semaine, on <strong className="text-foreground">reçoit des animaux chez nous</strong>. C'est devenu un mode de vie, et surtout une communauté informelle qui fonctionne sur un seul principe : la confiance entre voisins.
+          </p>
+
+          <h2 className="font-heading text-2xl font-bold text-foreground pt-4">Pourquoi Guardiens</h2>
+          <p>
+            Le problème, c'est que cette communauté restait invisible. Les plateformes internationales mettent en relation des gens qui ne se connaissent pas, à des centaines de kilomètres. Guardiens est né d'une frustration simple : permettre à des voisins de se faire confiance et de s'entraider — comme Elisa le fait depuis 2021.
+          </p>
+          <p>
+            Pas une marketplace anonyme. Un <strong className="text-foreground">réseau local de confiance</strong>, en Auvergne-Rhône-Alpes d'abord, basé à Lyon.
           </p>
         </div>
       </main>
