@@ -136,8 +136,6 @@ const Messages = () => {
   const [sitFilter, setSitFilter] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [helpOpen, setHelpOpen] = useState(false);
-  const [helpCategory, setHelpCategory] = useState<string | null>(null);
 
   // Load conversations
   const loadConversations = useCallback(async () => {
