@@ -149,8 +149,8 @@ const GuideDetail = () => {
   return (
     <>
       <PageMeta
-        title={`Guide du gardien à ${guide.city}`}
-        description={`Où promener un chien à ${guide.city} ? Parcs dog-friendly, vétérinaires, cafés accueillants, sentiers de balade. Le guide pratique pour les gardiens.`}
+        title={`Guide pet sitting ${guide.city} — Parcs, vétos, cafés dog-friendly | Guardiens`}
+        description={`Guide pratique pour pet sitters à ${guide.city} : parcs dog-friendly, vétérinaires, cafés accueillants, sentiers de balade. ${guide.ideal_for}`}
         path={`/guide/${guide.slug}`}
       />
 
@@ -316,6 +316,7 @@ const GuideDetail = () => {
         </main>
 
         {/* Schema.org */}
+        {/* JSON-LD: Breadcrumb */}
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
@@ -323,10 +324,29 @@ const GuideDetail = () => {
               "@context": "https://schema.org",
               "@type": "BreadcrumbList",
               itemListElement: [
-                { "@type": "ListItem", position: 1, name: "Guardiens", item: "https://guardiens.fr" },
-                { "@type": "ListItem", position: 2, name: "Guides", item: "https://guardiens.fr/guides" },
-                { "@type": "ListItem", position: 3, name: guide.city, item: `https://guardiens.fr/guide/${guide.slug}` },
+                { "@type": "ListItem", position: 1, name: "Guardiens", item: "https://guardiens.lovable.app" },
+                { "@type": "ListItem", position: 2, name: "Guides", item: "https://guardiens.lovable.app/guides" },
+                { "@type": "ListItem", position: 3, name: guide.city, item: `https://guardiens.lovable.app/guide/${guide.slug}` },
               ],
+            }),
+          }}
+        />
+
+        {/* JSON-LD: TouristDestination */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "TouristDestination",
+              name: `${guide.city} — Guide pet sitting`,
+              description: `Guide pratique pour les gardiens d'animaux à ${guide.city}. ${guide.intro}`,
+              url: `https://guardiens.lovable.app/guide/${guide.slug}`,
+              touristType: ["Pet sitter", "House sitter", "Gardien d'animaux"],
+              containedInPlace: {
+                "@type": "AdministrativeArea",
+                name: guide.department,
+              },
             }),
           }}
         />
