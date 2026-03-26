@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
+import { ToastAction } from "@/components/ui/toast";
 import { Eye, EyeOff } from "lucide-react";
 
 const Login = () => {
@@ -24,13 +25,24 @@ const Login = () => {
       navigate("/dashboard");
     } catch (error: any) {
       const isInvalidCredentials = error.message === "Invalid login credentials";
-      toast({
-        variant: "destructive",
-        title: isInvalidCredentials ? "Compte introuvable" : "Erreur de connexion",
-        description: isInvalidCredentials
-          ? "Aucun compte existant avec cette adresse. Créez-vous un compte !"
-          : "Une erreur est survenue. Veuillez réessayer.",
-      });
+      if (isInvalidCredentials) {
+        toast({
+          variant: "destructive",
+          title: "Compte introuvable",
+          description: "Aucun compte existant avec cette adresse.",
+          action: (
+            <ToastAction altText="Créer un compte" onClick={() => navigate("/register")} className="border-white text-white hover:bg-white/20">
+              Créer un compte
+            </ToastAction>
+          ),
+        });
+      } else {
+        toast({
+          variant: "destructive",
+          title: "Erreur de connexion",
+          description: "Une erreur est survenue. Veuillez réessayer.",
+        });
+      }
     } finally {
       setIsLoading(false);
     }
