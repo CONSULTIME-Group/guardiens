@@ -135,6 +135,20 @@ const Messages = () => {
       appMap.set(`${a.sit_id}-${a.sitter_id}`, a.status);
     });
 
+    // Build badge map: receiver_id → top badge
+    const badgeCounts = new Map<string, Map<string, number>>();
+    (badgesRes.data || []).forEach((b: any) => {
+      if (!badgeCounts.has(b.receiver_id)) badgeCounts.set(b.receiver_id, new Map());
+      const m = badgeCounts.get(b.receiver_id)!;
+      m.set(b.badge_key, (m.get(b.badge_key) || 0) + 1);
+    });
+    const topBadgeMap = new Map<string, { badge_key: string; count: number }>();
+    badgeCounts.forEach((counts, userId) => {
+      let top = { badge_key: "", count: 0 };
+      counts.forEach((c, k) => { if (c > top.count) top = { badge_key: k, count: c }; });
+      if (top.badge_key) topBadgeMap.set(userId, top);
+    });
+
     const enriched = convs.map((conv: any) => {
       const otherId = conv.owner_id === user.id ? conv.sitter_id : conv.owner_id;
       const sitterId = conv.sitter_id;
