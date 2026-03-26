@@ -54,6 +54,7 @@ import GuideDetail from "./pages/GuideDetail";
 import AdminGuides from "./pages/admin/AdminGuides";
 import AdminDepartments from "./pages/admin/AdminDepartments";
 import DepartmentPage from "./pages/DepartmentPage";
+import Pricing from "./pages/Pricing";
 
 const queryClient = new QueryClient();
 
