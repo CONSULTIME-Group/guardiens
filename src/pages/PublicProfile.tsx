@@ -358,6 +358,14 @@ const PublicProfile = () => {
         {/* Owner tab */}
         {isOwner && (
           <TabsContent value="owner" className="space-y-4 mt-4">
+            {/* Badges */}
+            {badgeCounts.length > 0 && (
+              <div className="p-4 rounded-xl bg-card border border-border">
+                <h3 className="font-heading font-semibold text-sm mb-3">Ses badges</h3>
+                <BadgePills badges={badgeCounts} showAll />
+              </div>
+            )}
+
             {/* Pets */}
             {pets.length > 0 && (
               <div>
