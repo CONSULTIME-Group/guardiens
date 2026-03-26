@@ -93,7 +93,10 @@ export const Sidebar = () => {
           if (!("hideForRole" in item)) return true;
           const effectiveRole = user?.role === "both" ? activeRole : user?.role;
           return effectiveRole !== item.hideForRole;
-        }).map((item) => (
+        }).map((item) => {
+          const effectiveRole = user?.role === "both" ? activeRole : user?.role;
+          const displayLabel = effectiveRole === "owner" && "ownerLabel" in item ? (item as any).ownerLabel : effectiveRole === "sitter" && "sitterLabel" in item ? (item as any).sitterLabel : item.label;
+          return (
           <NavLink
             key={item.to}
             to={item.to}
@@ -107,7 +110,7 @@ export const Sidebar = () => {
             }
           >
             <item.icon className="h-5 w-5" />
-            {item.label}
+            {displayLabel}
             {item.to === "/messages" && unreadCount > 0 && (
               <span className="absolute right-3 bg-primary text-primary-foreground text-xs rounded-full min-w-[20px] h-5 flex items-center justify-center px-1.5">
                 {unreadCount}
