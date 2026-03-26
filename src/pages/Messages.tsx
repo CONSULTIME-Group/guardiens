@@ -452,7 +452,7 @@ const Messages = () => {
                 <ArrowLeft className="h-5 w-5" />
               </button>
             )}
-            <Link to={`/search?user=${activeConv.other_user?.id}`} className="shrink-0">
+            <Link to={`/profil/${activeConv.other_user?.id}`} className="shrink-0">
               {activeConv.other_user?.avatar_url ? (
                 <img src={activeConv.other_user.avatar_url} alt="" className="w-10 h-10 rounded-full object-cover hover:ring-2 hover:ring-primary/50 transition-all" />
               ) : (
@@ -464,7 +464,7 @@ const Messages = () => {
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2">
                 <Link
-                  to={`/search?user=${activeConv.other_user?.id}`}
+                  to={`/profil/${activeConv.other_user?.id}`}
                   className="font-medium text-sm hover:text-primary transition-colors"
                 >
                   {activeConv.other_user?.first_name}
