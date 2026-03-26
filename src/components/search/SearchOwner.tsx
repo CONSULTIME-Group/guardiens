@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import ReportButton from "@/components/reports/ReportButton";
 import { supabase } from "@/integrations/supabase/client";
 import { geocodeCity, haversineDistance } from "@/lib/geocode";
@@ -9,7 +10,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
-import { Search, SlidersHorizontal, MapPin, Star, Car, CheckCircle2, CircleDot } from "lucide-react";
+import { Search, SlidersHorizontal, MapPin, Star, Car, CheckCircle2, CircleDot, MessageCircle } from "lucide-react";
+import { toast } from "sonner";
 import ChipSelect from "@/components/profile/ChipSelect";
 import VerifiedBadge from "@/components/profile/VerifiedBadge";
 
@@ -29,6 +31,7 @@ type SortOption = "rating" | "experience";
 
 const SearchOwner = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [city, setCity] = useState("");
   const [radius, setRadius] = useState([50]);
   const [startDate, setStartDate] = useState("");
@@ -44,6 +47,41 @@ const SearchOwner = () => {
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState(false);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+
+  const [contactingId, setContactingId] = useState<string | null>(null);
+
+  const handleContact = async (sitterId: string) => {
+    if (!user) return;
+    setContactingId(sitterId);
+    try {
+      // Check if conversation already exists
+      const { data: existing } = await supabase
+        .from("conversations")
+        .select("id")
+        .eq("owner_id", user.id)
+        .eq("sitter_id", sitterId)
+        .maybeSingle();
+
+      if (existing) {
+        navigate(`/messages?conversation=${existing.id}`);
+        return;
+      }
+
+      // Create new conversation
+      const { data: conv, error } = await supabase
+        .from("conversations")
+        .insert({ owner_id: user.id, sitter_id: sitterId })
+        .select("id")
+        .single();
+
+      if (error) throw error;
+      navigate(`/messages?conversation=${conv.id}`);
+    } catch (err) {
+      toast.error("Impossible de démarrer la conversation");
+    } finally {
+      setContactingId(null);
+    }
+  };
 
   const handleSearch = async () => {
     setLoading(true);
@@ -310,7 +348,18 @@ const SearchOwner = () => {
                             ))}
                           </div>
                         )}
-                        <ReportButton targetId={s.user_id} targetType="profile" className="ml-auto mt-2" />
+                        <div className="flex items-center gap-2 mt-3">
+                          <Button
+                            size="sm"
+                            className="gap-1.5"
+                            onClick={() => handleContact(s.user_id)}
+                            disabled={contactingId === s.user_id}
+                          >
+                            <MessageCircle className="h-3.5 w-3.5" />
+                            {contactingId === s.user_id ? "..." : "Contacter"}
+                          </Button>
+                          <ReportButton targetId={s.user_id} targetType="profile" className="ml-auto" />
+                        </div>
                       </div>
                     </div>
                   </div>
