@@ -16,6 +16,7 @@ interface Props {
 const StepIdentity = ({ data, onChange, onUploadAvatar }: Props) => {
   const fileRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
+  const { handlePostalCodeChange } = usePostalCodeCity(onChange);
 
   const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
