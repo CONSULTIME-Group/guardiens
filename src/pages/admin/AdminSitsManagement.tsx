@@ -54,23 +54,22 @@ const AdminSitsManagement = () => {
   // Fetch accepted sitters
   useEffect(() => {
     if (!sits.length) return;
-    const sitIds = sits.filter(s => s._type === "sit").map(s => s.id);
-    const lsIds = sits.filter(s => s._type === "long_stay").map(s => s.id);
+    const fetchSitterData = async () => {
+      const map: Record<string, { name: string; avatar: string | null }> = {};
+      const sitIds = sits.filter(s => s._type === "sit").map(s => s.id);
+      const lsIds = sits.filter(s => s._type === "long_stay").map(s => s.id);
 
-    const promises: Promise<void>[] = [];
-    const map: Record<string, { name: string; avatar: string | null }> = {};
-
-    if (sitIds.length) {
-      promises.push(supabase.from("applications").select("sit_id, sitter:profiles!applications_sitter_id_fkey(first_name, last_name, avatar_url)").in("sit_id", sitIds).eq("status", "accepted").then(({ data }) => {
+      if (sitIds.length) {
+        const { data } = await supabase.from("applications").select("sit_id, sitter:profiles!applications_sitter_id_fkey(first_name, last_name, avatar_url)").in("sit_id", sitIds).eq("status", "accepted");
         data?.forEach((a: any) => { if (a.sitter) map[a.sit_id] = { name: `${a.sitter.first_name || ""} ${a.sitter.last_name || ""}`.trim(), avatar: a.sitter.avatar_url }; });
-      }));
-    }
-    if (lsIds.length) {
-      promises.push(supabase.from("long_stay_applications").select("long_stay_id, sitter:profiles!long_stay_applications_sitter_id_fkey(first_name, last_name, avatar_url)").in("long_stay_id", lsIds).eq("status", "accepted").then(({ data }) => {
+      }
+      if (lsIds.length) {
+        const { data } = await supabase.from("long_stay_applications").select("long_stay_id, sitter:profiles!long_stay_applications_sitter_id_fkey(first_name, last_name, avatar_url)").in("long_stay_id", lsIds).eq("status", "accepted");
         data?.forEach((a: any) => { if (a.sitter) map[a.long_stay_id] = { name: `${a.sitter.first_name || ""} ${a.sitter.last_name || ""}`.trim(), avatar: a.sitter.avatar_url }; });
-      }));
-    }
-    Promise.all(promises).then(() => setSitters(map));
+      }
+      setSitters(map);
+    };
+    fetchSitterData();
   }, [sits]);
 
   // Fetch reviews
