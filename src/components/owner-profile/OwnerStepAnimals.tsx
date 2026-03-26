@@ -135,7 +135,7 @@ const OwnerStepAnimals = ({ pets, onAddPet, onUpdatePet, onRemovePet }: Props) =
       ))}
 
       {editingPet ? (
-        <div className="bg-card rounded-lg border border-primary/30 p-5 space-y-4">
+        <div ref={editFormRef} className="bg-card rounded-lg border border-primary/30 p-5 space-y-4">
           <h3 className="font-heading text-lg font-semibold">{isNew ? "Nouvel animal" : `Modifier ${editingPet.name}`}</h3>
 
           {/* Photo upload */}
