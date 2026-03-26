@@ -154,7 +154,7 @@ const CreateSmallMission = () => {
                   placeholder="Ex : Un bon repas, des légumes du jardin, un panier de fruits..."
                 />
                 {exchangeError && (
-                  <p className="text-sm text-orange-600 bg-orange-50 rounded-md px-3 py-2">
+                  <p className="text-sm text-destructive bg-destructive/10 rounded-md px-3 py-2">
                     {exchangeError}
                   </p>
                 )}
