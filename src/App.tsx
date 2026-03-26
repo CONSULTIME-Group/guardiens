@@ -49,6 +49,9 @@ import CityPage from "./pages/CityPage";
 import AdminCityPages from "./pages/admin/AdminCityPages";
 import FAQ from "./pages/FAQ";
 import AdminFAQ from "./pages/admin/AdminFAQ";
+import GuidesListing from "./pages/GuidesListing";
+import GuideDetail from "./pages/GuideDetail";
+import AdminGuides from "./pages/admin/AdminGuides";
 
 const queryClient = new QueryClient();
 
