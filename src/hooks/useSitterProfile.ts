@@ -260,5 +260,6 @@ export function useSitterProfile() {
     data, pastAnimals, loading, saving, sitterProfileId,
     saveStep, addPastAnimal, removePastAnimal, uploadAvatar,
     completion: computeCompletion(data),
+    missingFields: computeMissingFields(data),
   };
 }
