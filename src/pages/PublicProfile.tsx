@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { MapPin, Calendar, Star, PawPrint, Car, Globe, Briefcase, Heart, Users, Home, MessageSquare } from "lucide-react";
+import { MapPin, Calendar, Star, PawPrint, Car, Globe, Briefcase, Heart, Users, Home, MessageSquare, ArrowLeft } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import VerifiedBadge from "@/components/profile/VerifiedBadge";
@@ -124,6 +124,9 @@ const PublicProfile = () => {
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-6 md:py-10 space-y-6">
+      <Button variant="ghost" size="sm" onClick={() => navigate(-1)} className="mb-2 -ml-2 text-muted-foreground">
+        <ArrowLeft className="w-4 h-4 mr-1" /> Retour
+      </Button>
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start gap-5">
         {profile.avatar_url ? (
