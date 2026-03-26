@@ -36,16 +36,20 @@ const sitterFeatures = [
 ];
 
 const comparisonRows = [
-  { label: "Propriétaire", guardiens: "Gratuit", trusted: "129€/an", nomador: "89€/an", highlight: true },
-  { label: "Gardien", guardiens: "49€/an", trusted: "159€/an", nomador: "89€/an", highlight: true },
+  { label: "Propriétaire", guardiens: "Gratuit", trusted: "$149–$299/an", nomador: "34€/3 mois à 179€/an" },
+  { label: "Gardien", guardiens: "49€/an", trusted: "$129–$259/an + $10/garde", nomador: "34€/3 mois à 179€/an" },
+  { label: "Frais par garde", guardiens: "Aucun", trusted: "$10 par garde", nomador: "Aucun" },
+  { label: "Nombre de formules", guardiens: "1 seule — simple", trusted: "3 niveaux", nomador: "3 formules" },
   { label: "Proximité locale", guardiens: true, trusted: false, nomador: false },
-  { label: "Profils vérifiés", guardiens: true, trusted: true, nomador: true },
-  { label: "Avis croisés détaillés", guardiens: true, trusted: true, nomador: false },
-  { label: "Guide de la maison", guardiens: true, trusted: false, nomador: false },
-  { label: "Fiches races animaux", guardiens: true, trusted: false, nomador: false },
-  { label: "Guides locaux (parcs, vétos)", guardiens: true, trusted: false, nomador: false },
+  { label: "Guide de la maison", guardiens: true, trusted: true, nomador: false },
+  { label: "Vétos", guardiens: "Annuaire local", trusted: "Hotline (Standard+)", nomador: false },
+  { label: "Couvertures / assurances", guardiens: "Votre assurance habitation", trusted: "Plans avec conditions", nomador: "Repose sur votre assurance" },
+  { label: "Fiches races auto-générées", guardiens: true, trusted: false, nomador: false },
+  { label: "Guides locaux (parcs, vétos, balades)", guardiens: true, trusted: false, nomador: false },
   { label: "Gardiens d'urgence", guardiens: true, trusted: false, nomador: false },
-  { label: "Commission sur les gardes", guardiens: "Aucune", trusted: "Aucune", nomador: "Aucune" },
+  { label: "Avis croisés", guardiens: "Détaillés avec sous-critères", trusted: "Blind reviews", nomador: "Badges" },
+  { label: "Vérification ID", guardiens: true, trusted: true, nomador: true },
+  { label: "Simplicité", guardiens: "1 prix, 0 frais", trusted: "3 niveaux × 2 rôles", nomador: "3 formules, conditions variables" },
 ];
 
 const faqItems = [
@@ -69,6 +73,10 @@ const faqItems = [
     q: "Y a-t-il des frais cachés ?",
     a: "Non. 49€/an pour les gardiens, gratuit pour les propriétaires, aucune commission sur les gardes classiques. Le seul supplément : 70€ par partie pour les gardes longue durée de 30 jours et plus.",
   },
+  {
+    q: "Pourquoi pas d'assurance ou de protection logement ?",
+    a: "Les couvertures proposées par d'autres plateformes reposent en réalité sur l'assurance habitation que vous avez déjà — avec des conditions, des plafonds, et des formulaires. On préfère être honnêtes : votre assurance habitation vous couvre. Ce qu'on vous offre en plus, c'est un réseau de gardiens locaux mobilisables, un annuaire de vétos partenaires, et la tranquillité de savoir que quelqu'un de confiance est à 15 minutes de chez vous.",
+  },
 ];
 
 const CellValue = ({ value }: { value: boolean | string }) => {
@@ -86,8 +94,8 @@ const Pricing = () => {
   return (
     <>
       <PageMeta
-        title="Tarifs Guardiens — Gratuit pour les propriétaires, 49€/an pour les gardiens"
-        description="Pas de frais cachés, pas de commission sur les gardes. Propriétaires : gratuit pour toujours. Gardiens : 49€/an. Inscrivez-vous avant le 13 mai pour 1 an gratuit."
+        title="Tarifs Guardiens — 49€/an gardien, gratuit propriétaire | Comparatif house-sitting"
+        description="Guardiens : 49€/an pour les gardiens, gratuit pour les propriétaires. Aucune commission. Comparez avec TrustedHousesitters ($129-$299/an + $10/garde) et Nomador (34-179€/an)."
       />
 
       <div className="min-h-screen bg-background">
@@ -258,8 +266,8 @@ const Pricing = () => {
                 </TableBody>
               </Table>
             </div>
-            <p className="text-xs text-muted-foreground text-center max-w-xl mx-auto">
-              Tarifs publics mars 2026. Guardiens respecte ses concurrents — nous avons simplement une approche différente : locale, de proximité, et plus accessible.
+            <p className="text-xs text-muted-foreground text-center max-w-2xl mx-auto">
+              Tarifs publics mars 2026. THS facture en dollars US — les prix en euros varient selon le taux de change. THS a ajouté un booking fee de $10 par garde en 2026. Les « protections logement » de THS et Nomador nécessitent toutes les deux que le proprio ait déjà une assurance habitation — ce n'est pas une couverture indépendante.
             </p>
           </section>
 
