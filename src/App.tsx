@@ -62,6 +62,7 @@ import SmallMissionDetail from "./pages/SmallMissionDetail";
 import CreateSmallMission from "./pages/CreateSmallMission";
 import MentionsLegales from "./pages/MentionsLegales";
 import AdminSmallMissions from "./pages/admin/AdminSmallMissions";
+import AdminSubscriptions from "./pages/admin/AdminSubscriptions";
 import PublicProfile from "./pages/PublicProfile";
 
 const queryClient = new QueryClient();
@@ -106,6 +107,7 @@ const AppRoutes = () => (
     <Route path="/profil/:id" element={<PublicProfile />} />
     <Route element={<AdminLayout />}>
       <Route path="/admin" element={<AdminDashboard />} />
+      <Route path="/admin/subscriptions" element={<AdminSubscriptions />} />
       <Route path="/admin/users" element={<AdminUsers />} />
       <Route path="/admin/listings" element={<AdminListings />} />
       <Route path="/admin/sits-management" element={<AdminSitsManagement />} />

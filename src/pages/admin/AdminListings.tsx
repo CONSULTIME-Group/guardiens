@@ -3,12 +3,15 @@ import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { Eye, EyeOff, Trash2 } from "lucide-react";
+import { Eye, EyeOff, Trash2, Search, Mail, Sparkles, ExternalLink } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const statusLabels: Record<string, { label: string; variant: "default" | "secondary" | "outline" | "destructive" }> = {
   draft: { label: "Brouillon", variant: "outline" },
@@ -19,84 +22,107 @@ const statusLabels: Record<string, { label: string; variant: "default" | "second
 };
 
 const AdminListings = () => {
+  const navigate = useNavigate();
   const [listings, setListings] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
   const [filterType, setFilterType] = useState<"sits" | "long_stays">("sits");
+  const [filterCity, setFilterCity] = useState("");
+  const [appCounts, setAppCounts] = useState<Record<string, number>>({});
+  const [cities, setCities] = useState<string[]>([]);
+  const [deleteModal, setDeleteModal] = useState<string | null>(null);
+  const [hideModal, setHideModal] = useState<string | null>(null);
 
   const fetchListings = useCallback(async () => {
     setLoading(true);
-    const fetchQuery = async () => {
-      if (filterType === "sits") {
-        let q = supabase.from("sits").select("*, profiles!inner(first_name, last_name, email)").order("created_at", { ascending: false });
-        if (filterStatus !== "all") q = q.eq("status", filterStatus as any);
-        return q;
-      } else {
-        let q = supabase.from("long_stays").select("*, profiles!inner(first_name, last_name, email)").order("created_at", { ascending: false });
-        if (filterStatus !== "all") q = q.eq("status", filterStatus as any);
-        return q;
-      }
-    };
-    const { data, error } = await fetchQuery();
+    const table = filterType === "sits" ? "sits" : "long_stays";
+    const fk = filterType === "sits" ? "sits_user_id_fkey" : "long_stays_user_id_fkey";
+    let q = supabase.from(table).select(`*, owner:profiles!${fk}(first_name, last_name, email, city, avatar_url)`).order("created_at", { ascending: false });
+    if (filterStatus !== "all") q = q.eq("status", filterStatus as any);
+    const { data, error } = await q;
     if (error) toast.error("Erreur de chargement");
-    else setListings(data || []);
+    else {
+      setListings(data || []);
+      const uniqueCities = [...new Set((data || []).map((l: any) => l.owner?.city).filter(Boolean))];
+      setCities(uniqueCities as string[]);
+    }
     setLoading(false);
   }, [filterType, filterStatus]);
 
   useEffect(() => { fetchListings(); }, [fetchListings]);
 
-  // Count applications for each listing
-  const [appCounts, setAppCounts] = useState<Record<string, number>>({});
   useEffect(() => {
     if (!listings.length) return;
+    const ids = listings.map((l) => l.id);
     const fetchCounts = async () => {
-      const ids = listings.map((l) => l.id);
-      let data: any[] | null = null;
-      let fk: string;
-      if (filterType === "sits") {
-        fk = "sit_id";
-        const res = await supabase.from("applications").select("id, sit_id").in("sit_id", ids);
-        data = res.data;
-      } else {
-        fk = "long_stay_id";
-        const res = await supabase.from("long_stay_applications").select("id, long_stay_id").in("long_stay_id", ids);
-        data = res.data;
-      }
       const counts: Record<string, number> = {};
-      data?.forEach((a: any) => {
-        const key = a[fk];
-        counts[key] = (counts[key] || 0) + 1;
-      });
+      if (filterType === "sits") {
+        const { data } = await supabase.from("applications").select("id, sit_id").in("sit_id", ids);
+        data?.forEach((a: any) => { counts[a.sit_id] = (counts[a.sit_id] || 0) + 1; });
+      } else {
+        const { data } = await supabase.from("long_stay_applications").select("id, long_stay_id").in("long_stay_id", ids);
+        data?.forEach((a: any) => { counts[a.long_stay_id] = (counts[a.long_stay_id] || 0) + 1; });
+      }
       setAppCounts(counts);
     };
     fetchCounts();
   }, [listings, filterType]);
 
+  const handleHide = async (id: string) => {
+    const table = filterType === "sits" ? "sits" : "long_stays";
+    await supabase.from(table).update({ status: "cancelled" as any }).eq("id", id);
+    const listing = listings.find(l => l.id === id);
+    if (listing?.owner) {
+      await supabase.from("notifications").insert({
+        user_id: listing.user_id, type: "listing_hidden",
+        title: "Annonce masquée par l'admin",
+        body: `Votre annonce "${listing.title || "Sans titre"}" a été masquée de la recherche par un administrateur.`,
+        link: filterType === "sits" ? `/sits/${id}` : `/long-stays/${id}`,
+      });
+    }
+    toast.success("Annonce masquée"); setHideModal(null); fetchListings();
+  };
+
+  const handleRestore = async (id: string) => {
+    const table = filterType === "sits" ? "sits" : "long_stays";
+    await supabase.from(table).update({ status: "published" as any }).eq("id", id);
+    toast.success("Annonce remise en ligne"); fetchListings();
+  };
+
   const handleDelete = async (id: string) => {
-    if (!confirm("Supprimer cette annonce ?")) return;
-    const { error } = filterType === "sits"
-      ? await supabase.from("sits").delete().eq("id", id)
-      : await supabase.from("long_stays").delete().eq("id", id);
-    if (error) toast.error("Erreur");
-    else { toast.success("Annonce supprimée"); fetchListings(); }
+    const table = filterType === "sits" ? "sits" : "long_stays";
+    const listing = listings.find(l => l.id === id);
+    await supabase.from(table).delete().eq("id", id);
+    if (listing?.owner) {
+      await supabase.from("notifications").insert({
+        user_id: listing.user_id, type: "listing_deleted",
+        title: "Annonce supprimée",
+        body: `Votre annonce "${listing.title || "Sans titre"}" a été supprimée par un administrateur.`,
+      });
+    }
+    toast.success("Annonce supprimée"); setDeleteModal(null); fetchListings();
   };
 
   const filtered = listings.filter((l) => {
-    if (!search) return true;
-    return l.title?.toLowerCase().includes(search.toLowerCase());
+    if (search && !l.title?.toLowerCase().includes(search.toLowerCase()) && !l.owner?.first_name?.toLowerCase().includes(search.toLowerCase())) return false;
+    if (filterCity && l.owner?.city !== filterCity) return false;
+    return true;
   });
 
   return (
     <div className="space-y-6">
       <h1 className="font-body text-2xl font-bold">Annonces</h1>
 
-      <div className="flex flex-col sm:flex-row gap-3">
-        <Input placeholder="Rechercher…" value={search} onChange={(e) => setSearch(e.target.value)} className="max-w-xs" />
+      <div className="flex flex-col sm:flex-row gap-3 flex-wrap">
+        <div className="relative flex-1 min-w-[200px]">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input placeholder="Rechercher titre ou proprio…" value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9" />
+        </div>
         <Select value={filterType} onValueChange={(v) => setFilterType(v as any)}>
           <SelectTrigger className="w-[160px]"><SelectValue /></SelectTrigger>
           <SelectContent>
-            <SelectItem value="sits">Gardes courtes</SelectItem>
+            <SelectItem value="sits">Classique</SelectItem>
             <SelectItem value="long_stays">Longue durée</SelectItem>
           </SelectContent>
         </Select>
@@ -111,49 +137,77 @@ const AdminListings = () => {
             <SelectItem value="cancelled">Annulée</SelectItem>
           </SelectContent>
         </Select>
+        {cities.length > 0 && (
+          <Select value={filterCity} onValueChange={setFilterCity}>
+            <SelectTrigger className="w-[160px]"><SelectValue placeholder="Ville" /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all_cities">Toutes villes</SelectItem>
+              {cities.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+            </SelectContent>
+          </Select>
+        )}
       </div>
 
-      <div className="rounded-lg border bg-card">
+      <p className="text-sm text-muted-foreground">{filtered.length} annonce{filtered.length > 1 ? "s" : ""}</p>
+
+      <div className="rounded-lg border bg-card overflow-x-auto">
         <Table>
           <TableHeader>
             <TableRow>
               <TableHead>Titre</TableHead>
-              <TableHead>Propriétaire</TableHead>
+              <TableHead>Proprio</TableHead>
+              <TableHead>Ville</TableHead>
+              <TableHead>Type</TableHead>
               <TableHead>Dates</TableHead>
-              <TableHead>Statut</TableHead>
               <TableHead>Candidatures</TableHead>
-              <TableHead>Publiée le</TableHead>
+              <TableHead>Statut</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {loading ? (
-              <TableRow><TableCell colSpan={7} className="text-center py-8 text-muted-foreground">Chargement…</TableCell></TableRow>
+              <TableRow><TableCell colSpan={8} className="text-center py-8 text-muted-foreground">Chargement…</TableCell></TableRow>
             ) : filtered.length === 0 ? (
-              <TableRow><TableCell colSpan={7} className="text-center py-8 text-muted-foreground">Aucune annonce</TableCell></TableRow>
+              <TableRow><TableCell colSpan={8} className="text-center py-8 text-muted-foreground">Aucune annonce</TableCell></TableRow>
             ) : filtered.map((listing) => {
               const s = statusLabels[listing.status] || statusLabels.draft;
-              const profile = (listing as any).profiles;
               return (
                 <TableRow key={listing.id}>
-                  <TableCell className="font-medium max-w-[200px] truncate">{listing.title || "Sans titre"}</TableCell>
+                  <TableCell className="font-medium max-w-[180px] truncate">{listing.title || "Sans titre"}</TableCell>
                   <TableCell className="text-sm">
-                    {profile?.first_name} {profile?.last_name}
-                    <div className="text-xs text-muted-foreground">{profile?.email}</div>
+                    <div className="flex items-center gap-2">
+                      {listing.owner?.avatar_url && <img src={listing.owner.avatar_url} className="w-6 h-6 rounded-full object-cover" />}
+                      <span>{listing.owner?.first_name} {listing.owner?.last_name}</span>
+                    </div>
                   </TableCell>
-                  <TableCell className="text-sm text-muted-foreground">
+                  <TableCell className="text-sm text-muted-foreground">{listing.owner?.city || "—"}</TableCell>
+                  <TableCell>
+                    <Badge variant="outline" className="text-xs">
+                      {filterType === "sits" ? "Classique" : "Longue durée"}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="text-sm text-muted-foreground whitespace-nowrap">
                     {listing.start_date ? format(new Date(listing.start_date), "d MMM", { locale: fr }) : "—"}
                     {" → "}
-                    {listing.end_date ? format(new Date(listing.end_date), "d MMM yyyy", { locale: fr }) : "—"}
+                    {listing.end_date ? format(new Date(listing.end_date), "d MMM yy", { locale: fr }) : "—"}
                   </TableCell>
+                  <TableCell className="text-sm font-medium">{appCounts[listing.id] || 0}</TableCell>
                   <TableCell><Badge variant={s.variant}>{s.label}</Badge></TableCell>
-                  <TableCell className="text-sm">{appCounts[listing.id] || 0}</TableCell>
-                  <TableCell className="text-sm text-muted-foreground">
-                    {format(new Date(listing.created_at), "d MMM yyyy", { locale: fr })}
-                  </TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-1">
-                      <Button variant="ghost" size="icon" title="Supprimer" onClick={() => handleDelete(listing.id)}>
+                      <Button variant="ghost" size="icon" title="Voir" onClick={() => navigate(filterType === "sits" ? `/sits/${listing.id}` : `/long-stays/${listing.id}`)}>
+                        <Eye className="h-4 w-4" />
+                      </Button>
+                      {listing.status !== "cancelled" ? (
+                        <Button variant="ghost" size="icon" title="Masquer" onClick={() => setHideModal(listing.id)}>
+                          <EyeOff className="h-4 w-4" />
+                        </Button>
+                      ) : (
+                        <Button variant="ghost" size="icon" title="Remettre en ligne" onClick={() => handleRestore(listing.id)}>
+                          <Sparkles className="h-4 w-4 text-primary" />
+                        </Button>
+                      )}
+                      <Button variant="ghost" size="icon" title="Supprimer" onClick={() => setDeleteModal(listing.id)}>
                         <Trash2 className="h-4 w-4 text-destructive" />
                       </Button>
                     </div>
@@ -164,6 +218,30 @@ const AdminListings = () => {
           </TableBody>
         </Table>
       </div>
+
+      {/* Hide confirmation */}
+      <Dialog open={!!hideModal} onOpenChange={(o) => !o && setHideModal(null)}>
+        <DialogContent>
+          <DialogHeader><DialogTitle>Masquer cette annonce ?</DialogTitle></DialogHeader>
+          <DialogDescription>L'annonce sera retirée de la recherche. Le propriétaire sera notifié.</DialogDescription>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setHideModal(null)}>Annuler</Button>
+            <Button variant="destructive" onClick={() => hideModal && handleHide(hideModal)}>Masquer</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete confirmation */}
+      <Dialog open={!!deleteModal} onOpenChange={(o) => !o && setDeleteModal(null)}>
+        <DialogContent>
+          <DialogHeader><DialogTitle>Supprimer cette annonce ?</DialogTitle></DialogHeader>
+          <DialogDescription>Cette action est irréversible. Le propriétaire sera notifié.</DialogDescription>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeleteModal(null)}>Annuler</Button>
+            <Button variant="destructive" onClick={() => deleteModal && handleDelete(deleteModal)}>Supprimer définitivement</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
