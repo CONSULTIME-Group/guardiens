@@ -14,6 +14,7 @@ import {
   MapPin,
   HelpCircle,
   Compass,
+  Handshake,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
@@ -32,6 +33,7 @@ const adminNavItems = [
   { to: "/admin/faq", icon: HelpCircle, label: "FAQ" },
   { to: "/admin/guides", icon: Compass, label: "Guides locaux" },
   { to: "/admin/departments", icon: MapPin, label: "Départements SEO" },
+  { to: "/admin/small-missions", icon: Handshake, label: "Entraide" },
 ];
 
 export const AdminSidebar = () => {
