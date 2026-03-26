@@ -5,7 +5,7 @@ import PageMeta from "@/components/PageMeta";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { MapPin, Users, ClipboardList, ShieldCheck, Heart, ArrowRight } from "lucide-react";
+import { MapPin, Users, ClipboardList, ShieldCheck, Heart, ArrowRight, Compass, Building2 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 
 const CityPage = () => {
@@ -35,7 +35,6 @@ const CityPage = () => {
         .select("id, title, start_date, end_date, property_id, properties!inner(photos, user_id, profiles!inner(city, first_name))")
         .eq("status", "published")
         .limit(6);
-      // Filter by city match (simple text match)
       return (data || []).filter((s: any) => {
         const sitCity = s.properties?.profiles?.city;
         return sitCity && page?.city && sitCity.toLowerCase().includes(page.city.toLowerCase());
@@ -58,6 +57,53 @@ const CityPage = () => {
       );
     },
     enabled: !!page?.city,
+  });
+
+  // Cross-linking: department page
+  const { data: departmentPage } = useQuery({
+    queryKey: ["city-department-link", page?.department],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("seo_department_pages" as any)
+        .select("slug, department")
+        .eq("department", page!.department)
+        .eq("published", true)
+        .maybeSingle();
+      return data as any;
+    },
+    enabled: !!page?.department,
+  });
+
+  // Cross-linking: local guide
+  const { data: cityGuide } = useQuery({
+    queryKey: ["city-guide-link", slug],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("city_guides" as any)
+        .select("slug, city")
+        .eq("slug", slug)
+        .eq("published", true)
+        .maybeSingle();
+      return data as any;
+    },
+    enabled: !!slug,
+  });
+
+  // Cross-linking: other cities in same department
+  const { data: siblingCities = [] } = useQuery({
+    queryKey: ["sibling-cities", page?.department, slug],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("seo_city_pages" as any)
+        .select("slug, city")
+        .eq("department", page!.department)
+        .eq("published", true)
+        .neq("slug", slug)
+        .order("city")
+        .limit(6);
+      return (data || []) as any[];
+    },
+    enabled: !!page?.department,
   });
 
   if (isLoading) {
@@ -114,7 +160,13 @@ const CityPage = () => {
               </li>
               <li className="text-muted-foreground/50">/</li>
               <li itemProp="itemListElement" itemScope itemType="https://schema.org/ListItem">
-                <span itemProp="name" className="text-foreground font-medium">{page.department}</span>
+                {departmentPage ? (
+                  <Link to={`/departement/${departmentPage.slug}`} className="hover:text-primary transition-colors" itemProp="item">
+                    <span itemProp="name">{page.department}</span>
+                  </Link>
+                ) : (
+                  <span itemProp="name" className="text-foreground font-medium">{page.department}</span>
+                )}
                 <meta itemProp="position" content="2" />
               </li>
               <li className="text-muted-foreground/50">/</li>
@@ -167,6 +219,42 @@ const CityPage = () => {
             </Link>
           </div>
         </section>
+
+        {/* Cross-links: Guide + Department */}
+        {(cityGuide || departmentPage) && (
+          <section className="max-w-5xl mx-auto px-4 py-6">
+            <div className="flex flex-wrap gap-4">
+              {cityGuide && (
+                <Link to={`/guide/${cityGuide.slug}`}>
+                  <Card className="hover:shadow-md transition-shadow">
+                    <CardContent className="p-4 flex items-center gap-3">
+                      <Compass className="h-5 w-5 text-primary" />
+                      <div>
+                        <p className="font-semibold text-sm text-foreground">Guide du gardien à {cityGuide.city}</p>
+                        <p className="text-xs text-muted-foreground">Parcs, balades, vétos, cafés dog-friendly…</p>
+                      </div>
+                      <ArrowRight className="h-4 w-4 text-muted-foreground ml-auto" />
+                    </CardContent>
+                  </Card>
+                </Link>
+              )}
+              {departmentPage && (
+                <Link to={`/departement/${departmentPage.slug}`}>
+                  <Card className="hover:shadow-md transition-shadow">
+                    <CardContent className="p-4 flex items-center gap-3">
+                      <Building2 className="h-5 w-5 text-primary" />
+                      <div>
+                        <p className="font-semibold text-sm text-foreground">House-sitting dans le {departmentPage.department}</p>
+                        <p className="text-xs text-muted-foreground">Toutes les villes du département</p>
+                      </div>
+                      <ArrowRight className="h-4 w-4 text-muted-foreground ml-auto" />
+                    </CardContent>
+                  </Card>
+                </Link>
+              )}
+            </div>
+          </section>
+        )}
 
         {/* Active sits section */}
         <section className="max-w-5xl mx-auto px-4 py-12 border-t border-border">
@@ -239,6 +327,25 @@ const CityPage = () => {
           )}
         </section>
 
+        {/* Sibling cities */}
+        {siblingCities.length > 0 && (
+          <section className="max-w-5xl mx-auto px-4 py-12 border-t border-border">
+            <h2 className="font-serif text-2xl font-bold text-foreground mb-6">
+              Autres villes du {page.department}
+            </h2>
+            <div className="flex flex-wrap gap-3">
+              {siblingCities.map((c: any) => (
+                <Link key={c.slug} to={`/house-sitting/${c.slug}`}>
+                  <Badge variant="outline" className="text-sm px-4 py-2 hover:bg-accent transition-colors gap-1.5 cursor-pointer">
+                    <MapPin className="h-3.5 w-3.5" />
+                    {c.city}
+                  </Badge>
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
+
         {/* Why Guardiens section */}
         <section className="max-w-5xl mx-auto px-4 py-12 border-t border-border">
           <h2 className="font-serif text-2xl font-bold text-foreground mb-8">
@@ -297,18 +404,12 @@ const CityPage = () => {
           dangerouslySetInnerHTML={{
             __html: JSON.stringify({
               "@context": "https://schema.org",
-              "@type": "LocalBusiness",
-              name: `Guardiens — House-sitting à ${page.city}`,
-              description: page.meta_description,
-              url: `https://guardiens.fr/house-sitting/${page.slug}`,
-              areaServed: {
-                "@type": "City",
-                name: page.city,
-                containedInPlace: {
-                  "@type": "AdministrativeArea",
-                  name: page.department,
-                },
-              },
+              "@type": "BreadcrumbList",
+              itemListElement: [
+                { "@type": "ListItem", position: 1, name: "Guardiens", item: "https://guardiens.fr" },
+                ...(departmentPage ? [{ "@type": "ListItem", position: 2, name: page.department, item: `https://guardiens.fr/departement/${departmentPage.slug}` }] : []),
+                { "@type": "ListItem", position: departmentPage ? 3 : 2, name: page.city, item: `https://guardiens.fr/house-sitting/${page.slug}` },
+              ],
             }),
           }}
         />

@@ -99,6 +99,19 @@ Deno.serve(async () => {
     }
   }
 
+  if (departmentPages) {
+    for (const dp of departmentPages) {
+      const lastmod = (dp.updated_at || today).split("T")[0];
+      xml += `  <url>
+    <loc>${SITE_URL}/departement/${dp.slug}</loc>
+    <lastmod>${lastmod}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+`;
+    }
+  }
+
   xml += `</urlset>`;
 
   return new Response(xml, {
