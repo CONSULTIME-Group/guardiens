@@ -295,6 +295,15 @@ const OwnerStepAnimals = ({ pets, onAddPet, onUpdatePet, onRemovePet }: Props) =
           <Plus className="w-4 h-4 mr-2" /> Ajouter un animal
         </Button>
       )}
+
+      {/* Lightbox */}
+      <Dialog open={!!lightboxUrl} onOpenChange={() => setLightboxUrl(null)}>
+        <DialogContent className="max-w-2xl p-2 bg-background/95 backdrop-blur">
+          {lightboxUrl && (
+            <img src={lightboxUrl} alt="Photo animal" className="w-full h-auto max-h-[80vh] object-contain rounded-lg" />
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
