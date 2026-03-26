@@ -23,11 +23,12 @@ const Login = () => {
       await login(email, password);
       navigate("/dashboard");
     } catch (error: any) {
+      const isInvalidCredentials = error.message === "Invalid login credentials";
       toast({
         variant: "destructive",
-        title: "Erreur de connexion",
-        description: error.message === "Invalid login credentials"
-          ? "Email ou mot de passe incorrect."
+        title: isInvalidCredentials ? "Compte introuvable" : "Erreur de connexion",
+        description: isInvalidCredentials
+          ? "Aucun compte existant avec cette adresse. Créez-vous un compte !"
           : "Une erreur est survenue. Veuillez réessayer.",
       });
     } finally {
