@@ -4,6 +4,7 @@ import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import ChipSelect from "../profile/ChipSelect";
 import HintBubble from "../profile/HintBubble";
+import AiSuggestButton from "../profile/AiSuggestButton";
 import type { OwnerProfileData } from "@/hooks/useOwnerProfile";
 
 const SITTER_TYPES = ["Sans préférence", "Couple", "Famille", "Retraité", "Actif solo"];
@@ -43,7 +44,10 @@ const OwnerStepRules = ({ data, onChange }: Props) => (
     </div>
 
     <div className="space-y-2">
-      <Label>Attentes spécifiques</Label>
+      <div className="flex items-center justify-between">
+        <Label>Attentes spécifiques</Label>
+        <AiSuggestButton field="specific_expectations" currentValue={data.specific_expectations} onSuggestion={text => onChange({ specific_expectations: text })} />
+      </div>
       <Textarea value={data.specific_expectations} onChange={e => onChange({ specific_expectations: e.target.value })}
         placeholder="Arrosage, courrier, entretien jardin, ménage... tout ce qui est en plus de la garde"
         className="rounded-lg min-h-[80px]" maxLength={2000} />
@@ -81,7 +85,10 @@ const OwnerStepRules = ({ data, onChange }: Props) => (
     </div>
 
     <div className="space-y-2">
-      <Label>Précisions règles de vie</Label>
+      <div className="flex items-center justify-between">
+        <Label>Précisions règles de vie</Label>
+        <AiSuggestButton field="rules_notes" currentValue={data.rules_notes} onSuggestion={text => onChange({ rules_notes: text })} />
+      </div>
       <Textarea value={data.rules_notes} onChange={e => onChange({ rules_notes: e.target.value })}
         placeholder="Nuancez ici — ex : un BBQ entre amis OK, pas de soirée de groupe"
         className="rounded-lg min-h-[80px]" maxLength={2000} />
