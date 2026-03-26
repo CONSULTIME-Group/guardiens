@@ -245,6 +245,36 @@ const SitterDashboard = () => {
         />
       </div>
 
+      {/* 4b. Emergency sitter section */}
+      {hasEmergencyProfile && <EmergencyDashSection />}
+
+      {/* 4c. Emergency sitter invitation */}
+      {emergencyEligible && !hasEmergencyProfile && !showEmergencyForm && (
+        <div className="rounded-xl border-2 border-amber-300 dark:border-amber-700 bg-gradient-to-br from-amber-50 to-amber-100/50 dark:from-amber-900/20 dark:to-amber-900/10 p-5 space-y-3">
+          <div className="flex items-center gap-2.5">
+            <span className="inline-flex items-center justify-center h-8 w-8 rounded-full bg-gradient-to-br from-amber-400 to-amber-500 text-white shadow">
+              <Zap className="h-4 w-4" fill="currentColor" />
+            </span>
+            <div>
+              <p className="font-heading font-semibold text-sm">Vous êtes éligible au statut Gardien d'urgence !</p>
+              <p className="text-xs text-muted-foreground">Mobilisable rapidement, fiable, expérimenté. Visibilité prioritaire + badge distinctif.</p>
+            </div>
+          </div>
+          <Button onClick={() => setShowEmergencyForm(true)} className="gap-2 w-full">
+            <Zap className="h-4 w-4" /> Activer le mode Gardien d'urgence
+          </Button>
+        </div>
+      )}
+
+      {emergencyEligible && !hasEmergencyProfile && showEmergencyForm && (
+        <div className="rounded-xl border-2 border-amber-300 dark:border-amber-700 bg-card p-5">
+          <h3 className="font-heading font-semibold mb-4 flex items-center gap-2">
+            <Zap className="h-4 w-4 text-amber-500" /> Activer le mode Gardien d'urgence
+          </h3>
+          <EmergencyActivation onActivated={() => { setHasEmergencyProfile(true); setShowEmergencyForm(false); }} />
+        </div>
+      )}
+
       {/* 5. My applications */}
       <DashSection title="Mes candidatures" action={
         myApplications.length > 0 ? <Link to="/sits" className="text-xs text-primary hover:underline font-medium">Voir tout →</Link> : undefined
