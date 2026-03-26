@@ -187,7 +187,7 @@ const SmallMissionDetail = () => {
             <p className="font-medium">{author.first_name}</p>
             <p className="text-xs text-muted-foreground">{[author.postal_code, author.city].filter(Boolean).join(" ")}</p>
           </div>
-          {user && mission.user_id !== user.id && <ReportButton targetId={mission.id} targetType="mission" />}
+          {user && mission.user_id !== user.id && <ReportButton targetId={mission.id} targetType="profile" />}
         </div>
       )}
 
