@@ -137,12 +137,23 @@ const SmallMissionDetail = () => {
   const status = STATUS_LABELS[mission.status] || STATUS_LABELS.open;
 
   return (
-    <div className="p-6 md:p-10 max-w-3xl mx-auto animate-fade-in pb-32">
-      <PageMeta title={`${mission.title} — Entraide Guardiens`} description={mission.description?.slice(0, 155)} />
+    <div className="animate-fade-in pb-32">
+      {/* Hero banner */}
+      <div className="relative overflow-hidden">
+        <div className="absolute inset-0">
+          <img src={entraideHeader} alt="" className="w-full h-full object-cover" />
+          <div className="absolute inset-0 bg-gradient-to-r from-background/90 via-background/75 to-background/60" />
+        </div>
+        <div className="relative max-w-3xl mx-auto px-6 py-10">
+          <PageMeta title={`${mission.title} — Entraide Guardiens`} description={mission.description?.slice(0, 155)} />
+          <Link to="/petites-missions" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-4">
+            <ArrowLeft className="h-4 w-4" /> Retour aux missions
+          </Link>
+          <h1 className="font-heading text-2xl md:text-3xl font-bold">{mission.title}</h1>
+        </div>
+      </div>
 
-      <Link to="/petites-missions" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-6">
-        <ArrowLeft className="h-4 w-4" /> Retour aux missions
-      </Link>
+      <div className="p-6 md:p-10 max-w-3xl mx-auto">
 
       {/* Category + status */}
       <div className="flex items-center gap-3 mb-3">
