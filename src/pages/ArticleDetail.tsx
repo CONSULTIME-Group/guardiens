@@ -193,6 +193,63 @@ export default function ArticleDetail() {
           }) }} />
         );
       })()}
+      {/* LocalBusiness Schema for geo-targeted guide articles */}
+      {article.category === "guide_lieu" && article.city && (
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "LocalBusiness",
+          "name": `Guardiens — Pet-sitting & House-sitting ${article.city}`,
+          "description": article.excerpt,
+          "url": `https://guardiens.lovable.app/actualites/${article.slug}`,
+          "address": {
+            "@type": "PostalAddress",
+            "addressLocality": article.city,
+            "addressRegion": article.region || "Auvergne-Rhône-Alpes",
+            "addressCountry": "FR"
+          },
+          ...(article.city === "Lyon" && {
+            "geo": { "@type": "GeoCoordinates", "latitude": 45.7640, "longitude": 4.8357 },
+            "areaServed": [
+              { "@type": "City", "name": "Lyon" },
+              { "@type": "City", "name": "Villeurbanne" },
+              { "@type": "City", "name": "Écully" },
+              { "@type": "City", "name": "Tassin-la-Demi-Lune" },
+              { "@type": "City", "name": "Francheville" },
+              { "@type": "City", "name": "Craponne" },
+              { "@type": "City", "name": "Saint-Didier-au-Mont-d'Or" },
+              { "@type": "City", "name": "Limonest" },
+              { "@type": "City", "name": "Caluire-et-Cuire" }
+            ]
+          }),
+          ...(article.city === "Grenoble" && {
+            "geo": { "@type": "GeoCoordinates", "latitude": 45.1885, "longitude": 5.7245 },
+            "areaServed": [
+              { "@type": "City", "name": "Grenoble" },
+              { "@type": "City", "name": "Meylan" },
+              { "@type": "City", "name": "La Tronche" },
+              { "@type": "City", "name": "Échirolles" },
+              { "@type": "City", "name": "Saint-Martin-d'Hères" }
+            ]
+          }),
+          ...(article.city === "Annecy" && {
+            "geo": { "@type": "GeoCoordinates", "latitude": 45.8992, "longitude": 6.1294 },
+            "areaServed": [
+              { "@type": "City", "name": "Annecy" },
+              { "@type": "City", "name": "Megève" },
+              { "@type": "City", "name": "Chamonix-Mont-Blanc" },
+              { "@type": "City", "name": "Thônes" },
+              { "@type": "City", "name": "Talloires" }
+            ]
+          }),
+          "priceRange": "Gratuit",
+          "openingHoursSpecification": {
+            "@type": "OpeningHoursSpecification",
+            "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"],
+            "opens": "00:00",
+            "closes": "23:59"
+          }
+        }) }} />
+      )}
     <article className="max-w-3xl mx-auto px-4 py-8 animate-fade-in">
       <Link
         to="/actualites"
