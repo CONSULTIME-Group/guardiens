@@ -7,6 +7,7 @@ import { ArrowLeft, Calendar, MapPin, User } from "lucide-react";
 import PageMeta from "@/components/PageMeta";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
+import { marked } from "marked";
 
 interface ArticleFull {
   id: string;
@@ -86,6 +87,17 @@ export default function ArticleDetail() {
         publishedAt={article.published_at || undefined}
         author={article.author_name}
       />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+        "@context": "https://schema.org",
+        "@type": "BlogPosting",
+        "headline": article.title,
+        "description": article.excerpt,
+        "author": { "@type": "Organization", "name": article.author_name },
+        ...(article.cover_image_url && { "image": article.cover_image_url }),
+        ...(article.published_at && { "datePublished": article.published_at }),
+        "publisher": { "@type": "Organization", "name": "Guardiens", "url": "https://guardiens.lovable.app" },
+        "mainEntityOfPage": `https://guardiens.lovable.app/actualites/${article.slug}`
+      }) }} />
     <article className="max-w-3xl mx-auto px-4 py-8 animate-fade-in">
       <Link
         to="/actualites"
@@ -143,7 +155,7 @@ export default function ArticleDetail() {
           prose-a:text-primary prose-a:no-underline hover:prose-a:underline
           prose-strong:text-foreground
           prose-li:text-foreground/85"
-        dangerouslySetInnerHTML={{ __html: article.content }}
+        dangerouslySetInnerHTML={{ __html: marked.parse(article.content, { async: false }) as string }}
       />
 
       {article.tags.length > 0 && (
