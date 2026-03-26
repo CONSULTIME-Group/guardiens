@@ -79,7 +79,7 @@ const SitterDashboard = () => {
       const completedCount = acceptedApps.filter((a: any) => a.sit?.status === "completed").length;
       const avg = reviews.length > 0 ? reviews.reduce((s: number, r: any) => s + r.overall_rating, 0) / reviews.length : 0;
       const pendingApps = apps.filter((a: any) => a.status === "pending").length;
-      setMetrics({ completed: completedCount, avgRating: Math.round(avg * 10) / 10, pendingApps, badgeCount: badgesRes.data?.length || 0 });
+      setMetrics({ completed: completedCount, avgRating: Math.round(avg * 10) / 10, pendingApps, badgeCount: badgesRes.data?.length || 0, missionsPosted: 0, missionsHelped: 0 });
 
       // Ongoing sit
       const now = new Date();
