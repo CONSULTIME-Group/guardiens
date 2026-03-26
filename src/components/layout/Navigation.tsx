@@ -1,11 +1,12 @@
 import { NavLink, useLocation } from "react-router-dom";
-import { Home, Search, Calendar, MessageSquare, User, LogOut, Bell, Settings, PawPrint, ArrowLeftRight, Newspaper, Shield, Compass, Handshake } from "lucide-react";
+import { Home, Search, Calendar, MessageSquare, User, LogOut, Bell, Settings, PawPrint, ArrowLeftRight, Newspaper, Shield, Compass, Handshake, Menu, X } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAdmin } from "@/hooks/useAdmin";
 import { cn } from "@/lib/utils";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import NotificationBell from "./NotificationBell";
+import { Sheet, SheetContent, SheetTrigger, SheetClose } from "@/components/ui/sheet";
 
 const navItems = [
   { to: "/dashboard", icon: Home, label: "Dashboard" },
