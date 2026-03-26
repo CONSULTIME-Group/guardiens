@@ -139,14 +139,15 @@ export default function ArticleDetail() {
       />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
         "@context": "https://schema.org",
-        "@type": article.category === "guide_race" ? "Article" : "BlogPosting",
+        "@type": article.category === "actualite" ? "NewsArticle" : article.category === "guide_race" ? "Article" : "BlogPosting",
         "headline": article.title,
         "description": article.excerpt,
-        "author": { "@type": "Person", "name": "Elisa & Thomas" },
+        "author": { "@type": "Person", "name": article.author_name || "Elisa & Thomas" },
         ...(article.cover_image_url && { "image": article.cover_image_url }),
         ...(article.published_at && { "datePublished": article.published_at }),
-        "publisher": { "@type": "Organization", "name": "Guardiens", "url": "https://guardiens.lovable.app" },
-        "mainEntityOfPage": `https://guardiens.lovable.app/actualites/${article.slug}`,
+        "publisher": { "@type": "Organization", "name": "Guardiens", "url": "https://guardiens.fr" },
+        "mainEntityOfPage": `https://guardiens.fr/actualites/${article.slug}`,
+        ...(article.category === "actualite" && article.city && { "dateline": `${article.city}, France` }),
         ...(article.category === "guide_race" && {
           "areaServed": "Lyon, Rhône-Alpes",
           "keywords": article.tags?.join(", ") || ""
