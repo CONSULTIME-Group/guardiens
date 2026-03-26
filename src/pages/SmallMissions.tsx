@@ -1,7 +1,8 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Dog, Flower2, Home, Handshake, ArrowRight } from "lucide-react";
+import { Dog, Flower2, Home, Handshake, ArrowRight, Filter } from "lucide-react";
 import PageMeta from "@/components/PageMeta";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -29,22 +30,26 @@ const EXAMPLES = [
   { cat: "skills", title: "Dog-training : les bases (rappel, marche en laisse)", exchange: "Un bon café et une balade ensemble" },
 ];
 
+type StatusFilter = "active" | "all";
+type CategoryFilter = "all" | "animals" | "garden" | "house" | "skills";
+
 const SmallMissions = () => {
   const { isAuthenticated } = useAuth();
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>("active");
+  const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>("all");
 
-  const { data: recentMissions } = useQuery({
-    queryKey: ["small-missions-recent"],
+  const { data: allMissions } = useQuery({
+    queryKey: ["small-missions-all"],
     queryFn: async () => {
       const { data: missions } = await supabase
         .from("small_missions")
         .select("*, profiles:user_id(first_name, avatar_url)")
-        .in("status", ["open", "in_progress"] as any[])
+        .in("status", ["open", "in_progress", "completed"] as any[])
         .order("created_at", { ascending: false })
-        .limit(20);
+        .limit(50);
       
       if (!missions || missions.length === 0) return [];
 
-      // Fetch response counts
       const missionIds = missions.map((m: any) => m.id);
       const { data: responses } = await supabase
         .from("small_mission_responses")
@@ -56,17 +61,23 @@ const SmallMissions = () => {
         countMap.set(r.mission_id, (countMap.get(r.mission_id) || 0) + 1);
       });
 
-      // Sort: open first, then in_progress
-      const sorted = missions.map((m: any) => ({ ...m, response_count: countMap.get(m.id) || 0 }));
-      sorted.sort((a: any, b: any) => {
-        if (a.status === "open" && b.status !== "open") return -1;
-        if (a.status !== "open" && b.status === "open") return 1;
-        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
-      });
-
-      return sorted;
+      return missions.map((m: any) => ({ ...m, response_count: countMap.get(m.id) || 0 }));
     },
   });
+
+  const filteredMissions = (allMissions || [])
+    .filter((m: any) => {
+      if (statusFilter === "active" && m.status === "completed") return false;
+      if (categoryFilter !== "all" && m.category !== categoryFilter) return false;
+      return true;
+    })
+    .sort((a: any, b: any) => {
+      // Active first, completed last
+      const order: Record<string, number> = { open: 0, in_progress: 1, completed: 2 };
+      const diff = (order[a.status] ?? 9) - (order[b.status] ?? 9);
+      if (diff !== 0) return diff;
+      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+    });
 
   return (
     <>
@@ -101,8 +112,7 @@ const SmallMissions = () => {
 
         <main className="max-w-6xl mx-auto px-4 py-12 space-y-16">
           {/* Missions en cours — NOW AT TOP */}
-          {recentMissions && recentMissions.length > 0 && (
-            <section className="space-y-6">
+          <section className="space-y-6">
               <div className="text-center space-y-2">
                 <h1 className="font-heading text-4xl md:text-5xl font-bold text-foreground">
                   Petites missions — Entraide entre voisins
@@ -123,48 +133,88 @@ const SmallMissions = () => {
                 </div>
               )}
 
+              {/* Filters */}
+              <div className="flex flex-wrap items-center gap-2 justify-center">
+                <div className="flex items-center gap-1 bg-muted rounded-lg p-1">
+                  <button
+                    onClick={() => setStatusFilter("active")}
+                    className={`px-3 py-1.5 text-sm rounded-md transition-colors ${statusFilter === "active" ? "bg-background text-foreground shadow-sm font-medium" : "text-muted-foreground hover:text-foreground"}`}
+                  >
+                    Actives
+                  </button>
+                  <button
+                    onClick={() => setStatusFilter("all")}
+                    className={`px-3 py-1.5 text-sm rounded-md transition-colors ${statusFilter === "all" ? "bg-background text-foreground shadow-sm font-medium" : "text-muted-foreground hover:text-foreground"}`}
+                  >
+                    Toutes
+                  </button>
+                </div>
+                <div className="flex items-center gap-1 bg-muted rounded-lg p-1">
+                  {([["all", "Tout", null], ["animals", "Animaux", Dog], ["garden", "Jardin", Flower2], ["house", "Maison", Home], ["skills", "Compétences", Handshake]] as const).map(([key, label, Icon]) => (
+                    <button
+                      key={key}
+                      onClick={() => setCategoryFilter(key as CategoryFilter)}
+                      className={`px-3 py-1.5 text-sm rounded-md transition-colors flex items-center gap-1 ${categoryFilter === key ? "bg-background text-foreground shadow-sm font-medium" : "text-muted-foreground hover:text-foreground"}`}
+                    >
+                      {Icon && <Icon className="h-3.5 w-3.5" />}
+                      <span className="hidden sm:inline">{label}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
               <h2 className="font-heading text-2xl font-bold text-foreground text-center">
-                Missions actives ({recentMissions.length})
+                Missions ({filteredMissions.length})
               </h2>
+
+              {filteredMissions.length > 0 ? (
               <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {recentMissions.map((m: any) => {
+                {filteredMissions.map((m: any) => {
                   const meta = CATEGORY_META[m.category] || CATEGORY_META.animals;
                   const Icon = meta.icon;
+                  const isCompleted = m.status === "completed";
                   return (
                     <Link key={m.id} to={isAuthenticated ? `/petites-missions/${m.id}` : "/register"}>
-                      <Card className="border-border hover:border-primary/30 transition-colors h-full">
+                      <Card className={`border-border transition-colors h-full ${isCompleted ? "opacity-50 grayscale" : "hover:border-primary/30"}`}>
                         <CardContent className="p-4 space-y-2">
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-2">
                               <Icon className={`h-4 w-4 ${meta.colorClass}`} />
                               <span className="text-xs font-medium text-muted-foreground">{meta.label}</span>
                             </div>
-                            {m.response_count > 0 && (
-                              <span className="text-xs text-muted-foreground bg-accent px-2 py-0.5 rounded-full">
-                                {m.response_count} proposition{m.response_count > 1 ? "s" : ""}
-                              </span>
-                            )}
+                            <div className="flex items-center gap-1.5">
+                              {m.response_count > 0 && (
+                                <span className="text-xs text-muted-foreground bg-accent px-2 py-0.5 rounded-full">
+                                  {m.response_count} proposition{m.response_count > 1 ? "s" : ""}
+                                </span>
+                              )}
+                            </div>
                           </div>
                           <p className="font-medium text-sm text-foreground">{m.title}</p>
                           <p className="text-xs text-muted-foreground">{m.city} • {m.duration_estimate}</p>
                           <p className="text-xs text-muted-foreground">En échange : {m.exchange_offer}</p>
-                          {m.status === "in_progress" && (
+                          {isCompleted ? (
+                            <span className="inline-block text-xs bg-muted text-muted-foreground px-2 py-0.5 rounded-full">✅ Trouvé</span>
+                          ) : m.status === "in_progress" ? (
                             <span className="inline-block text-xs bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 px-2 py-0.5 rounded-full">En cours</span>
+                          ) : null}
+                          {!isCompleted && (
+                            <Button size="sm" variant="outline" className="w-full mt-2">
+                              {isAuthenticated ? "Proposer mon aide" : "Inscrivez-vous pour aider"}
+                            </Button>
                           )}
-                          <Button size="sm" variant="outline" className="w-full mt-2">
-                            {isAuthenticated ? "Proposer mon aide" : "Inscrivez-vous pour aider"}
-                          </Button>
                         </CardContent>
                       </Card>
                     </Link>
                   );
                 })}
               </div>
+              ) : (
+                <p className="text-center text-muted-foreground py-8">Aucune mission ne correspond à ces filtres.</p>
+              )}
             </section>
-          )}
 
-          {/* H1 + intro (if no missions, show as primary) */}
-          {(!recentMissions || recentMissions.length === 0) && (
+          {(!allMissions || allMissions.length === 0) && (
             <section className="text-center space-y-6 max-w-3xl mx-auto">
               <h1 className="font-heading text-4xl md:text-5xl font-bold text-foreground">
                 Petites missions — L'entraide entre voisins, version Guardiens
