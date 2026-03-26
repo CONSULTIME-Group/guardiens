@@ -528,6 +528,10 @@ const Landing = () => {
               Politique de confidentialité
             </Link>
             <span className="text-border">·</span>
+            <Link to="/mentions-legales" className="hover:text-foreground transition-colors">
+              Mentions légales
+            </Link>
+            <span className="text-border">·</span>
             <Link to="/contact" className="hover:text-foreground transition-colors">
               Contact
             </Link>
