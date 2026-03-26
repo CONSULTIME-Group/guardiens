@@ -156,6 +156,7 @@ const PublicProfile = () => {
           <div className="flex items-center gap-2 flex-wrap">
             <h1 className="font-heading text-2xl font-bold">{profile.first_name}</h1>
             {profile.identity_verified && <VerifiedBadge size="md" />}
+            {isEmergencySitter && <EmergencyBadge size="md" />}
             {profile.is_founder && (
               <span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary text-xs font-medium">Fondateur</span>
             )}
