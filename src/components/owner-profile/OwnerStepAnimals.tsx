@@ -136,6 +136,40 @@ const OwnerStepAnimals = ({ pets, onAddPet, onUpdatePet, onRemovePet }: Props) =
         <div className="bg-card rounded-lg border border-primary/30 p-5 space-y-4">
           <h3 className="font-heading text-lg font-semibold">{isNew ? "Nouvel animal" : `Modifier ${editingPet.name}`}</h3>
 
+          {/* Photo upload */}
+          <div className="space-y-2">
+            <Label>Photo</Label>
+            <div className="flex items-center gap-4">
+              {editingPet.photo_url ? (
+                <img src={editingPet.photo_url} alt="" className="w-20 h-20 rounded-xl object-cover border border-border" />
+              ) : (
+                <div className="w-20 h-20 rounded-xl bg-muted flex items-center justify-center border border-dashed border-border">
+                  <Camera className="w-6 h-6 text-muted-foreground" />
+                </div>
+              )}
+              <div className="space-y-1">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  disabled={uploading}
+                  onClick={() => fileInputRef.current?.click()}
+                >
+                  <Camera className="w-3 h-3 mr-1" />
+                  {uploading ? "Upload..." : editingPet.photo_url ? "Changer la photo" : "Ajouter une photo"}
+                </Button>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => e.target.files?.[0] && handlePhotoUpload(e.target.files[0])}
+                />
+                <p className="text-xs text-muted-foreground">Max 5 Mo</p>
+              </div>
+            </div>
+          </div>
+
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label>Espèce</Label>
