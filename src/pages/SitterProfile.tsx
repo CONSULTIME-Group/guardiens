@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -11,7 +11,10 @@ import StepMobility from "@/components/profile/StepMobility";
 import StepPreferences from "@/components/profile/StepPreferences";
 import SitterGallery from "@/components/profile/SitterGallery";
 import ExternalExperiences from "@/components/profile/ExternalExperiences";
+import TrustProfile from "@/components/profile/TrustProfile";
 import { useSitterProfile, type SitterProfileData } from "@/hooks/useSitterProfile";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 
 const SitterProfile = () => {
   const navigate = useNavigate();
