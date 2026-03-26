@@ -305,6 +305,8 @@ const Messages = () => {
     const isArchived = conv.archived_by.includes(user?.id || "");
     if (filter === "active" && isArchived) return false;
     if (filter === "archived" && !isArchived) return false;
+    if (typeFilter === "garde" && !(conv.sit_id || conv.long_stay_id)) return false;
+    if (typeFilter === "entraide" && !((conv as any).small_mission_id)) return false;
     if (sitFilter && conv.sit_id !== sitFilter) return false;
     return true;
   });
