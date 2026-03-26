@@ -207,7 +207,7 @@ export const BottomNav = () => {
   const mobileItems = [
     { to: "/dashboard", icon: Home, label: "Accueil" },
     { to: "/search", icon: Search, label: "Recherche" },
-    { to: "/sits", icon: Calendar, label: "Gardes" },
+    { to: "/sits", icon: Calendar, label: effectiveRole === "owner" ? "Annonces" : "Gardes" },
     { to: "/notifications", icon: Bell, label: "Notifs" },
   ];
 
