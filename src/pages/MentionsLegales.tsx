@@ -37,12 +37,11 @@ const MentionsLegales = () => {
           <p>
             Le site guardiens.fr est édité par :<br />
             <strong className="text-foreground">Guardiens</strong><br />
-            Forme juridique : [À compléter — SAS / SARL / auto-entrepreneur]<br />
-            Siège social : [Adresse complète à compléter], Lyon, France<br />
-            SIRET : [À compléter]<br />
-            RCS : [À compléter]<br />
-            Capital social : [À compléter]<br />
-            Directeur de la publication : Jérémie [Nom de famille à compléter]<br />
+            Forme juridique : Entrepreneur individuel<br />
+            Siège social : 22 rue Juiverie, 69005 Lyon, France<br />
+            SIRET : 894 864 040 00015<br />
+            N° TVA intracommunautaire : FR53894864040<br />
+            Directeur de la publication : Jérémie Martinot<br />
             Contact : <a href="mailto:contact@guardiens.fr" className="text-primary hover:underline">contact@guardiens.fr</a>
           </p>
 
