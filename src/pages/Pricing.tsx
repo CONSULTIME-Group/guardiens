@@ -266,8 +266,11 @@ const Pricing = () => {
                 </TableBody>
               </Table>
             </div>
-            <p className="text-xs text-muted-foreground text-center max-w-2xl mx-auto">
-              Tarifs publics mars 2026. THS facture en dollars US — les prix en euros varient selon le taux de change. THS a ajouté un booking fee de $10 par garde en 2026. Les « protections logement » de THS et Nomador nécessitent toutes les deux que le proprio ait déjà une assurance habitation — ce n'est pas une couverture indépendante.
+            <p className="text-xs text-muted-foreground text-center max-w-3xl mx-auto">
+              Comparaison réalisée de bonne foi à titre informatif, sur la base des tarifs publics affichés sur les sites respectifs en mars 2026. Elle ne constitue ni un dénigrement ni une publicité comparative au sens de l'article L. 122-1 du Code de la consommation. TrustedHousesitters facture en dollars US — les prix en euros varient selon le taux de change. Nomador propose des formules trimestrielles et annuelles. Les fonctionnalités listées reflètent les offres publiquement disponibles à la date indiquée et peuvent évoluer. Sources :{" "}
+              <a href="https://www.trustedhousesitters.com/pricing" target="_blank" rel="noopener noreferrer" className="underline">trustedhousesitters.com/pricing</a>,{" "}
+              <a href="https://www.nomador.com/tarifs" target="_blank" rel="noopener noreferrer" className="underline">nomador.com/tarifs</a>. Si vous constatez une inexactitude, merci de nous contacter à{" "}
+              <a href="mailto:contact@guardiens.fr" className="underline">contact@guardiens.fr</a>.
             </p>
           </section>
 
