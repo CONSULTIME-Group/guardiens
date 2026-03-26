@@ -65,7 +65,7 @@ Deno.serve(async () => {
     for (const cp of cityPages) {
       const lastmod = (cp.updated_at || today).split("T")[0];
       xml += `  <url>
-    <loc>${SITE_URL}/house-sitting-${cp.slug}</loc>
+    <loc>${SITE_URL}/house-sitting/${cp.slug}</loc>
     <lastmod>${lastmod}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
