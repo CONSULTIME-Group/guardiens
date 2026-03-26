@@ -73,6 +73,21 @@ const SitterDashboard = () => {
       setVerificationStatus(profileRes.data?.identity_verification_status || "not_submitted");
       setIsAvailable(sitterRes.data?.is_available || false);
 
+      // Onboarding checks
+      const fullProfileRes = await supabase.from("profiles").select("first_name, avatar_url, bio, identity_verification_status").eq("id", user.id).single();
+      const p = fullProfileRes.data;
+      const hasName = !!(p?.first_name);
+      const hasAvatar = !!(p?.avatar_url);
+      const hasBio = !!(p?.bio && p.bio.length > 10);
+      const hasIdentity = p?.identity_verification_status === "verified" || p?.identity_verification_status === "pending";
+      const hasSitterProfile = !!(sitterRes.data);
+      setOnboardingChecks({ hasName, hasAvatar, hasBio, hasIdentity, hasSitterProfile });
+
+      const dismissed = localStorage.getItem("onboarding_sitter_dismissed");
+      if (!dismissed && user.profileCompletion < 50) {
+        setShowOnboarding(true);
+      }
+
       const apps = appsRes.data || [];
       setMyApplications(apps);
 
