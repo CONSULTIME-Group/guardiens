@@ -41,6 +41,7 @@ const OwnerDashboard = () => {
   const [reviews, setReviews] = useState<any[]>([]);
   const [highlights, setHighlights] = useState<any[]>([]);
   const [smallMissions, setSmallMissions] = useState<any[]>([]);
+  const [myMissions, setMyMissions] = useState<any[]>([]);
   const [verificationStatus, setVerificationStatus] = useState("not_submitted");
   const [sitterBadges, setSitterBadges] = useState<Record<string, { badge_key: string; count: number }[]>>({});
   const [trustedSitterCount, setTrustedSitterCount] = useState(0);
