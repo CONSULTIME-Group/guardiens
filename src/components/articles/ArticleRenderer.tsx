@@ -31,6 +31,8 @@ import bouledogueFrancaisVieuxLyon from "@/assets/bouledogue-francais-vieux-lyon
 import bouledogueFrancaisInterieurLyon6 from "@/assets/bouledogue-francais-interieur-lyon6.jpg";
 import bergerAustralienFeyssineLyon from "@/assets/berger-australien-feyssine-lyon.jpg";
 import bergerAustralienInterieurLyon from "@/assets/berger-australien-interieur-lyon.jpg";
+import fondateursGuardiensQuaisLyon from "@/assets/fondateurs-guardiens-quais-lyon.jpg";
+import gardeAnimauxAppartementLyon from "@/assets/garde-animaux-appartement-lyon.jpg";
 
 const ARTICLE_IMAGES: Record<string, string> = {
   "/images/lyon-hero-quais.jpg": lyonHeroQuais,
