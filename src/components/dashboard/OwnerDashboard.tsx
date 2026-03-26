@@ -93,7 +93,6 @@ const OwnerDashboard = () => {
         setPets(data || []);
         setOnboardingChecks(prev => ({ ...prev, hasPets: (data || []).length > 0 }));
       }
-      }
 
       // Recent applications
       const sitIds = sitsData.map((s: any) => s.id);
