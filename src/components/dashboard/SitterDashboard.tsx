@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Link } from "react-router-dom";
 import { Calendar, MapPin, MessageSquare, Star, Search, Clock, ChevronRight, CheckCircle2, Eye, XCircle, Send as SendIcon, PawPrint, CircleDot, Clock3, Lock } from "lucide-react";
+import VerificationBanner from "./VerificationBanner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
