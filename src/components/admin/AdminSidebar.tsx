@@ -1,20 +1,8 @@
 import { NavLink, useNavigate } from "react-router-dom";
 import {
-  LayoutDashboard,
-  Users,
-  Megaphone,
-  CalendarCheck,
-  Star,
-  Flag,
-  ShieldCheck,
-  Mail,
-  FileText,
-  LogOut,
-  ArrowLeft,
-  MapPin,
-  HelpCircle,
-  Compass,
-  Handshake,
+  LayoutDashboard, Users, Megaphone, CalendarCheck, Star, Flag,
+  ShieldCheck, Mail, FileText, LogOut, ArrowLeft, MapPin, HelpCircle,
+  Compass, Handshake, Briefcase,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
