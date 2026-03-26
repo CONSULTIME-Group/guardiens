@@ -66,12 +66,14 @@ const OwnerDashboard = () => {
 
       // Load pets from user's properties
       const propIds = (propsRes.data || []).map((p: any) => p.id);
+      let petsData: any[] = [];
       if (propIds.length > 0) {
-        const { data: petsData } = await supabase
+        const { data } = await supabase
           .from("pets")
           .select("*")
           .in("property_id", propIds);
-        setPets(petsData || []);
+        petsData = data || [];
+        setPets(petsData);
       }
 
       // Recent applications across all sits
