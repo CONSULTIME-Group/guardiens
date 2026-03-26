@@ -266,8 +266,8 @@ const Pricing = () => {
                 </TableBody>
               </Table>
             </div>
-            <p className="text-xs text-muted-foreground text-center max-w-xl mx-auto">
-              Tarifs publics mars 2026. Guardiens respecte ses concurrents — nous avons simplement une approche différente : locale, de proximité, et plus accessible.
+            <p className="text-xs text-muted-foreground text-center max-w-2xl mx-auto">
+              Tarifs publics mars 2026. THS facture en dollars US — les prix en euros varient selon le taux de change. THS a ajouté un booking fee de $10 par garde en 2026. Les « protections logement » de THS et Nomador nécessitent toutes les deux que le proprio ait déjà une assurance habitation — ce n'est pas une couverture indépendante.
             </p>
           </section>
 
