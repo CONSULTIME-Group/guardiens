@@ -971,6 +971,99 @@ export type Database = {
         }
         Relationships: []
       }
+      owner_gallery: {
+        Row: {
+          caption: string
+          category: Database["public"]["Enums"]["owner_gallery_category"]
+          created_at: string
+          id: string
+          photo_url: string
+          season: string | null
+          user_id: string
+        }
+        Insert: {
+          caption?: string
+          category?: Database["public"]["Enums"]["owner_gallery_category"]
+          created_at?: string
+          id?: string
+          photo_url: string
+          season?: string | null
+          user_id: string
+        }
+        Update: {
+          caption?: string
+          category?: Database["public"]["Enums"]["owner_gallery_category"]
+          created_at?: string
+          id?: string
+          photo_url?: string
+          season?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "owner_gallery_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      owner_highlights: {
+        Row: {
+          created_at: string
+          hidden: boolean
+          id: string
+          owner_id: string
+          photo_url: string | null
+          sit_id: string
+          sitter_id: string
+          text: string
+        }
+        Insert: {
+          created_at?: string
+          hidden?: boolean
+          id?: string
+          owner_id: string
+          photo_url?: string | null
+          sit_id: string
+          sitter_id: string
+          text?: string
+        }
+        Update: {
+          created_at?: string
+          hidden?: boolean
+          id?: string
+          owner_id?: string
+          photo_url?: string | null
+          sit_id?: string
+          sitter_id?: string
+          text?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "owner_highlights_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "owner_highlights_sit_id_fkey"
+            columns: ["sit_id"]
+            isOneToOne: false
+            referencedRelation: "sits"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "owner_highlights_sitter_id_fkey"
+            columns: ["sitter_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       owner_profiles: {
         Row: {
           communication_notes: string | null
@@ -1974,6 +2067,12 @@ export type Database = {
         | "confirmed"
         | "completed"
         | "cancelled"
+      owner_gallery_category:
+        | "home_life"
+        | "animals_life"
+        | "garden"
+        | "neighborhood"
+        | "seasonal"
       pet_species:
         | "dog"
         | "cat"
@@ -2166,6 +2265,13 @@ export const Constants = {
         "confirmed",
         "completed",
         "cancelled",
+      ],
+      owner_gallery_category: [
+        "home_life",
+        "animals_life",
+        "garden",
+        "neighborhood",
+        "seasonal",
       ],
       pet_species: [
         "dog",
