@@ -87,7 +87,7 @@ export const Sidebar = () => {
         </div>
       )}
 
-      <nav className="flex-1 px-3 space-y-1">
+      <nav className="flex-1 px-3 space-y-1 overflow-y-auto">
         {navItems.filter(item => {
           if (!("hideForRole" in item)) return true;
           const effectiveRole = user?.role === "both" ? activeRole : user?.role;
