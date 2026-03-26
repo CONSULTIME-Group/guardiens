@@ -301,6 +301,7 @@ const SmallMissionDetail = () => {
           <Link to="/login"><Button>Se connecter</Button></Link>
         </div>
       )}
+      </div>
     </div>
   );
 };
