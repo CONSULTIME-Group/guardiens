@@ -452,7 +452,7 @@ const Messages = () => {
                 <ArrowLeft className="h-5 w-5" />
               </button>
             )}
-            <Link to={`/search?user=${activeConv.other_user?.id}`} className="shrink-0">
+            <Link to={`/profil/${activeConv.other_user?.id}`} className="shrink-0">
               {activeConv.other_user?.avatar_url ? (
                 <img src={activeConv.other_user.avatar_url} alt="" className="w-10 h-10 rounded-full object-cover hover:ring-2 hover:ring-primary/50 transition-all" />
               ) : (
