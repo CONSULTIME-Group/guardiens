@@ -55,6 +55,8 @@ import AdminGuides from "./pages/admin/AdminGuides";
 import AdminDepartments from "./pages/admin/AdminDepartments";
 import DepartmentPage from "./pages/DepartmentPage";
 import Pricing from "./pages/Pricing";
+import SmallMissions from "./pages/SmallMissions";
+import CreateSmallMission from "./pages/CreateSmallMission";
 
 const queryClient = new QueryClient();
 
