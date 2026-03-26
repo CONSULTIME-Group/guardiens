@@ -174,17 +174,33 @@ const NotificationBell = () => {
                 </div>
               );
 
+              const handleClick = async () => {
+                if (!n.read_at) {
+                  await supabase
+                    .from("notifications")
+                    .update({ read_at: new Date().toISOString() })
+                    .eq("id", n.id);
+                  setNotifications((prev) =>
+                    prev.map((x) =>
+                      x.id === n.id ? { ...x, read_at: new Date().toISOString() } : x
+                    )
+                  );
+                  setUnreadCount((prev) => Math.max(0, prev - 1));
+                }
+                setOpen(false);
+              };
+
               return n.link ? (
                 <Link
                   key={n.id}
                   to={n.link}
-                  onClick={() => setOpen(false)}
+                  onClick={handleClick}
                   className="block"
                 >
                   {inner}
                 </Link>
               ) : (
-                <div key={n.id}>{inner}</div>
+                <div key={n.id} onClick={handleClick} className="cursor-pointer">{inner}</div>
               );
             })
           )}
