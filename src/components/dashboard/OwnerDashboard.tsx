@@ -38,6 +38,7 @@ const OwnerDashboard = () => {
   const [longStays, setLongStays] = useState<any[]>([]);
   const [ownerEligible, setOwnerEligible] = useState(false);
   const [breedArticles, setBreedArticles] = useState<any[]>([]);
+  const [breedProfiles, setBreedProfiles] = useState<any[]>([]);
   const [localGuides, setLocalGuides] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
