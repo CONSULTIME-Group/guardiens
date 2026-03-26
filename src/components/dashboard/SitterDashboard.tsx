@@ -328,7 +328,7 @@ const SitterDashboard = () => {
         <Link to="/petites-missions" className="text-xs text-primary hover:underline font-medium">Voir tout →</Link>
       }>
         {smallMissions.length === 0 ? (
-          <p className="text-sm text-muted-foreground italic">Pas encore de petite mission dans votre zone.</p>
+          <EmptyCard icon={Handshake} text="Aucune petite mission dans votre zone" hint="Proposez vos services ou revenez bientôt" cta="Voir les missions" to="/petites-missions" />
         ) : (
           <div className="space-y-2">
             {smallMissions.map((m: any) => (
