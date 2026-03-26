@@ -176,7 +176,7 @@ const OwnerDashboard = () => {
         )}
       </div>
 
-      <VerificationBanner status={user?.identityVerificationStatus || "not_submitted"} />
+      <VerificationBanner status={verificationStatus} />
 
       {/* CTA Publier si aucune annonce active */}
       {activeSits.length === 0 && (
