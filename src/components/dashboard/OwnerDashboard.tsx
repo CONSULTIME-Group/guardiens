@@ -276,7 +276,7 @@ const OwnerDashboard = () => {
         recentApps.length > 0 ? <Link to="/sits" className="text-xs text-primary hover:underline font-medium">Voir toutes mes annonces →</Link> : undefined
       }>
         {recentApps.length === 0 ? (
-          <EmptyCard icon={Users} text="Pas encore de candidature. Publiez une annonce →" cta="Publier" to="/sits/create" />
+          <EmptyCard icon={Users} text="Pas encore de candidature reçue" hint="Publiez une annonce et les gardiens viendront à vous" cta="Publier une annonce" to="/sits/create" />
         ) : (
           <div className="space-y-2">
             {recentApps.map(app => (
