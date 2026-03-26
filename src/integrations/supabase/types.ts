@@ -1192,6 +1192,7 @@ export type Database = {
       }
       past_animals: {
         Row: {
+          breed: string | null
           created_at: string
           id: string
           name: string
@@ -1200,6 +1201,7 @@ export type Database = {
           species: string
         }
         Insert: {
+          breed?: string | null
           created_at?: string
           id?: string
           name?: string
@@ -1208,6 +1210,7 @@ export type Database = {
           species?: string
         }
         Update: {
+          breed?: string | null
           created_at?: string
           id?: string
           name?: string
