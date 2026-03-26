@@ -160,6 +160,7 @@ const Messages = () => {
         last_message: lastMsgMap.get(conv.id) || null,
         unread_count: unreadMap.get(conv.id) || 0,
         application_status: appStatus || null,
+        top_badge: topBadgeMap.get(otherId) || null,
       } as Conversation;
     });
 
