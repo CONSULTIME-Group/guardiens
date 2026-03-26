@@ -4,6 +4,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Camera } from "lucide-react";
 import HintBubble from "../profile/HintBubble";
+import AiSuggestButton from "../profile/AiSuggestButton";
 import type { OwnerProfileData } from "@/hooks/useOwnerProfile";
 
 interface Props {
