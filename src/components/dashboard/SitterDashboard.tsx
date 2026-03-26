@@ -48,7 +48,7 @@ const SitterDashboard = () => {
   const [myMissionResponses, setMyMissionResponses] = useState<any[]>([]);
   const [articles, setArticles] = useState<any[]>([]);
   const [isAvailable, setIsAvailable] = useState(false);
-  const [metrics, setMetrics] = useState({ completed: 0, avgRating: 0, pendingApps: 0, badgeCount: 0 });
+  const [metrics, setMetrics] = useState({ completed: 0, avgRating: 0, pendingApps: 0, badgeCount: 0, missionsPosted: 0, missionsHelped: 0 });
   const [verificationStatus, setVerificationStatus] = useState<string>("not_submitted");
   const [ongoingSit, setOngoingSit] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -79,7 +79,7 @@ const SitterDashboard = () => {
       const completedCount = acceptedApps.filter((a: any) => a.sit?.status === "completed").length;
       const avg = reviews.length > 0 ? reviews.reduce((s: number, r: any) => s + r.overall_rating, 0) / reviews.length : 0;
       const pendingApps = apps.filter((a: any) => a.status === "pending").length;
-      setMetrics({ completed: completedCount, avgRating: Math.round(avg * 10) / 10, pendingApps, badgeCount: badgesRes.data?.length || 0 });
+      setMetrics({ completed: completedCount, avgRating: Math.round(avg * 10) / 10, pendingApps, badgeCount: badgesRes.data?.length || 0, missionsPosted: 0, missionsHelped: 0 });
 
       // Ongoing sit
       const now = new Date();
@@ -98,12 +98,16 @@ const SitterDashboard = () => {
       setArticles(articlesRes.data || []);
 
       // My own missions + missions I responded to
-      const [myMissionsRes, myResponsesRes] = await Promise.all([
+      const [myMissionsRes, myResponsesRes, allMyMissionsRes, allMyResponsesRes] = await Promise.all([
         supabase.from("small_missions").select("id, title, category, status, created_at, small_mission_responses(id, status)").eq("user_id", user.id).order("created_at", { ascending: false }).limit(3),
         supabase.from("small_mission_responses").select("id, status, created_at, mission:small_missions(id, title, category, status, user_id)").eq("responder_id", user.id).order("created_at", { ascending: false }).limit(3),
+        supabase.from("small_missions").select("id").eq("user_id", user.id),
+        supabase.from("small_mission_responses").select("id").eq("responder_id", user.id).eq("status", "accepted"),
       ]);
       setMyMissions(myMissionsRes.data || []);
       setMyMissionResponses(myResponsesRes.data || []);
+
+      setMetrics(prev => ({ ...prev, missionsPosted: allMyMissionsRes.data?.length || 0, missionsHelped: allMyResponsesRes.data?.length || 0 }));
 
       setLoading(false);
     };
@@ -152,11 +156,13 @@ const SitterDashboard = () => {
       )}
 
       {/* 3. Stat cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
         <StatCard icon={Home} iconColor="text-primary" label="Gardes réalisées" value={metrics.completed} delay={0} emptyMsg={metrics.completed === 0 ? "Votre première garde vous attend !" : undefined} />
         <StatCard icon={Star} iconColor="text-amber-500" label="Note moyenne" value={metrics.avgRating} delay={100} isDecimal emptyMsg={metrics.avgRating === 0 ? "Pas encore d'avis" : undefined} />
         <StatCard icon={Mail} iconColor="text-blue-500" label="Candidatures en attente" value={metrics.pendingApps} delay={200} />
         <StatCard icon={Award} iconColor="text-purple-500" label="Badges reçus" value={metrics.badgeCount} delay={300} />
+        <StatCard icon={Handshake} iconColor="text-primary" label="Missions proposées" value={metrics.missionsPosted} delay={400} />
+        <StatCard icon={Handshake} iconColor="text-amber-500" label="Coups de main donnés" value={metrics.missionsHelped} delay={500} />
       </div>
 
       {/* 4. Availability toggle */}

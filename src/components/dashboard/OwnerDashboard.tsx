@@ -43,6 +43,7 @@ const OwnerDashboard = () => {
   const [smallMissions, setSmallMissions] = useState<any[]>([]);
   const [myMissions, setMyMissions] = useState<any[]>([]);
   const [verificationStatus, setVerificationStatus] = useState("not_submitted");
+  const [missionMetrics, setMissionMetrics] = useState({ total: 0, completed: 0 });
   const [sitterBadges, setSitterBadges] = useState<Record<string, { badge_key: string; count: number }[]>>({});
   const [trustedSitterCount, setTrustedSitterCount] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -115,14 +116,14 @@ const OwnerDashboard = () => {
       const trustedCount = Object.values(sitterSitCounts).filter(c => c >= 2).length;
       setTrustedSitterCount(trustedCount);
 
-      // My own missions
-      const { data: myMissionsData } = await supabase
-        .from("small_missions")
-        .select("id, title, category, status, created_at, small_mission_responses(id, status)")
-        .eq("user_id", user.id)
-        .order("created_at", { ascending: false })
-        .limit(3);
-      setMyMissions(myMissionsData || []);
+      // My own missions + count all
+      const [myMissionsDataRes, allMyMissionsCountRes] = await Promise.all([
+        supabase.from("small_missions").select("id, title, category, status, created_at, small_mission_responses(id, status)").eq("user_id", user.id).order("created_at", { ascending: false }).limit(3),
+        supabase.from("small_missions").select("id, status").eq("user_id", user.id),
+      ]);
+      setMyMissions(myMissionsDataRes.data || []);
+      const allMyMissions = allMyMissionsCountRes.data || [];
+      setMissionMetrics({ total: allMyMissions.length, completed: allMyMissions.filter((m: any) => m.status === "completed").length });
 
       setLoading(false);
     };
@@ -248,11 +249,13 @@ const OwnerDashboard = () => {
       </DashSection>
 
       {/* 4. Stat cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
         <StatCard icon={Calendar} iconColor="text-primary" label="Gardes réalisées" value={completedSits.length} delay={0} />
         <StatCard icon={Star} iconColor="text-amber-500" label="Note moyenne" value={avgRating} delay={100} isDecimal emptyMsg={avgRating === 0 ? "Pas encore d'avis" : undefined} />
         <StatCard icon={Megaphone} iconColor="text-blue-500" label="Annonces actives" value={activeSits.length} delay={200} />
         <StatCard icon={Heart} iconColor="text-pink-500" label="Gardiens de confiance" value={trustedSitterCount} delay={300} />
+        <StatCard icon={Handshake} iconColor="text-primary" label="Missions postées" value={missionMetrics.total} delay={400} />
+        <StatCard icon={Handshake} iconColor="text-green-600" label="Missions terminées" value={missionMetrics.completed} delay={500} />
       </div>
 
       {/* 5. Candidatures reçues */}
