@@ -36,9 +36,9 @@ const Privacy = () => {
           <h2 className="font-heading text-xl font-bold text-foreground pt-4">1. Responsable du traitement</h2>
           <p>
             Le responsable du traitement des données personnelles est :<br />
-            <strong className="text-foreground">Guardiens</strong><br />
-            [Adresse complète à compléter], Lyon, France<br />
-            SIRET : [À compléter]<br />
+            <strong className="text-foreground">Guardiens — Jérémie Martinot (EI)</strong><br />
+            22 rue Juiverie, 69005 Lyon, France<br />
+            SIRET : 894 864 040 00015<br />
             Contact : <a href="mailto:contact@guardiens.fr" className="text-primary hover:underline">contact@guardiens.fr</a>
           </p>
 

@@ -155,7 +155,7 @@ const Terms = () => {
             Les présentes CGU sont régies par le droit français. En cas de litige relatif à l'interprétation ou l'exécution des présentes, les parties s'engagent à rechercher une solution amiable avant toute action judiciaire.
           </p>
           <p>
-            Conformément aux articles L. 611-1 et R. 612-1 du Code de la consommation, en cas de litige non résolu, le consommateur peut recourir gratuitement au service de médiation suivant : [Nom du médiateur à compléter — ex : CNPM, Médiateur de la consommation]. Plus d'informations sur <a href="https://www.economie.gouv.fr/mediation-conso" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">economie.gouv.fr/mediation-conso</a>.
+            Conformément aux articles L. 611-1 et R. 612-1 du Code de la consommation, en cas de litige non résolu, le consommateur peut recourir gratuitement à un médiateur de la consommation. Le médiateur compétent sera communiqué dès sa désignation. Plus d'informations sur <a href="https://www.economie.gouv.fr/mediation-conso" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">economie.gouv.fr/mediation-conso</a>.
           </p>
           <p>
             La plateforme européenne de Règlement en Ligne des Litiges (RLL) est accessible à l'adresse : <a href="https://ec.europa.eu/consumers/odr" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">ec.europa.eu/consumers/odr</a>.
@@ -168,7 +168,7 @@ const Terms = () => {
           <p>
             Pour toute question relative aux présentes CGU :<br />
             Email : <a href="mailto:contact@guardiens.fr" className="text-primary hover:underline">contact@guardiens.fr</a><br />
-            Adresse : [Adresse complète à compléter], Lyon, France
+            Adresse : 22 rue Juiverie, 69005 Lyon, France
           </p>
         </div>
       </main>

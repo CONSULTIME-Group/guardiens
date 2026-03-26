@@ -37,12 +37,11 @@ const MentionsLegales = () => {
           <p>
             Le site guardiens.fr est édité par :<br />
             <strong className="text-foreground">Guardiens</strong><br />
-            Forme juridique : [À compléter — SAS / SARL / auto-entrepreneur]<br />
-            Siège social : [Adresse complète à compléter], Lyon, France<br />
-            SIRET : [À compléter]<br />
-            RCS : [À compléter]<br />
-            Capital social : [À compléter]<br />
-            Directeur de la publication : Jérémie [Nom de famille à compléter]<br />
+            Forme juridique : Entrepreneur individuel<br />
+            Siège social : 22 rue Juiverie, 69005 Lyon, France<br />
+            SIRET : 894 864 040 00015<br />
+            N° TVA intracommunautaire : FR53894864040<br />
+            Directeur de la publication : Jérémie Martinot<br />
             Contact : <a href="mailto:contact@guardiens.fr" className="text-primary hover:underline">contact@guardiens.fr</a>
           </p>
 
@@ -95,7 +94,7 @@ const MentionsLegales = () => {
 
           <h2 className="font-heading text-xl font-bold text-foreground pt-4">8. Droit applicable et médiation</h2>
           <p>
-            Les présentes mentions sont régies par le droit français. En cas de litige, les tribunaux de Lyon sont compétents. Conformément aux articles L. 611-1 et R. 612-1 du Code de la consommation, en cas de litige non résolu, le consommateur peut recourir gratuitement à un médiateur de la consommation. Médiateur compétent : [À compléter avec le nom du médiateur].
+            Les présentes mentions sont régies par le droit français. En cas de litige, les tribunaux de Lyon sont compétents. Conformément aux articles L. 611-1 et R. 612-1 du Code de la consommation, en cas de litige non résolu, le consommateur peut recourir gratuitement à un médiateur de la consommation. Le médiateur compétent sera communiqué dès sa désignation.
           </p>
 
           <h2 className="font-heading text-xl font-bold text-foreground pt-4">9. Crédits</h2>
