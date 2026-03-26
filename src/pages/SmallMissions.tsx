@@ -112,8 +112,7 @@ const SmallMissions = () => {
 
         <main className="max-w-6xl mx-auto px-4 py-12 space-y-16">
           {/* Missions en cours — NOW AT TOP */}
-          {recentMissions && recentMissions.length > 0 && (
-            <section className="space-y-6">
+          <section className="space-y-6">
               <div className="text-center space-y-2">
                 <h1 className="font-heading text-4xl md:text-5xl font-bold text-foreground">
                   Petites missions — Entraide entre voisins
@@ -134,48 +133,88 @@ const SmallMissions = () => {
                 </div>
               )}
 
+              {/* Filters */}
+              <div className="flex flex-wrap items-center gap-2 justify-center">
+                <div className="flex items-center gap-1 bg-muted rounded-lg p-1">
+                  <button
+                    onClick={() => setStatusFilter("active")}
+                    className={`px-3 py-1.5 text-sm rounded-md transition-colors ${statusFilter === "active" ? "bg-background text-foreground shadow-sm font-medium" : "text-muted-foreground hover:text-foreground"}`}
+                  >
+                    Actives
+                  </button>
+                  <button
+                    onClick={() => setStatusFilter("all")}
+                    className={`px-3 py-1.5 text-sm rounded-md transition-colors ${statusFilter === "all" ? "bg-background text-foreground shadow-sm font-medium" : "text-muted-foreground hover:text-foreground"}`}
+                  >
+                    Toutes
+                  </button>
+                </div>
+                <div className="flex items-center gap-1 bg-muted rounded-lg p-1">
+                  {([["all", "Tout", null], ["animals", "Animaux", Dog], ["garden", "Jardin", Flower2], ["house", "Maison", Home], ["skills", "Compétences", Handshake]] as const).map(([key, label, Icon]) => (
+                    <button
+                      key={key}
+                      onClick={() => setCategoryFilter(key as CategoryFilter)}
+                      className={`px-3 py-1.5 text-sm rounded-md transition-colors flex items-center gap-1 ${categoryFilter === key ? "bg-background text-foreground shadow-sm font-medium" : "text-muted-foreground hover:text-foreground"}`}
+                    >
+                      {Icon && <Icon className="h-3.5 w-3.5" />}
+                      <span className="hidden sm:inline">{label}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
               <h2 className="font-heading text-2xl font-bold text-foreground text-center">
-                Missions actives ({recentMissions.length})
+                Missions ({filteredMissions.length})
               </h2>
+
+              {filteredMissions.length > 0 ? (
               <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {recentMissions.map((m: any) => {
+                {filteredMissions.map((m: any) => {
                   const meta = CATEGORY_META[m.category] || CATEGORY_META.animals;
                   const Icon = meta.icon;
+                  const isCompleted = m.status === "completed";
                   return (
                     <Link key={m.id} to={isAuthenticated ? `/petites-missions/${m.id}` : "/register"}>
-                      <Card className="border-border hover:border-primary/30 transition-colors h-full">
+                      <Card className={`border-border transition-colors h-full ${isCompleted ? "opacity-50 grayscale" : "hover:border-primary/30"}`}>
                         <CardContent className="p-4 space-y-2">
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-2">
                               <Icon className={`h-4 w-4 ${meta.colorClass}`} />
                               <span className="text-xs font-medium text-muted-foreground">{meta.label}</span>
                             </div>
-                            {m.response_count > 0 && (
-                              <span className="text-xs text-muted-foreground bg-accent px-2 py-0.5 rounded-full">
-                                {m.response_count} proposition{m.response_count > 1 ? "s" : ""}
-                              </span>
-                            )}
+                            <div className="flex items-center gap-1.5">
+                              {m.response_count > 0 && (
+                                <span className="text-xs text-muted-foreground bg-accent px-2 py-0.5 rounded-full">
+                                  {m.response_count} proposition{m.response_count > 1 ? "s" : ""}
+                                </span>
+                              )}
+                            </div>
                           </div>
                           <p className="font-medium text-sm text-foreground">{m.title}</p>
                           <p className="text-xs text-muted-foreground">{m.city} • {m.duration_estimate}</p>
                           <p className="text-xs text-muted-foreground">En échange : {m.exchange_offer}</p>
-                          {m.status === "in_progress" && (
+                          {isCompleted ? (
+                            <span className="inline-block text-xs bg-muted text-muted-foreground px-2 py-0.5 rounded-full">✅ Trouvé</span>
+                          ) : m.status === "in_progress" ? (
                             <span className="inline-block text-xs bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 px-2 py-0.5 rounded-full">En cours</span>
+                          ) : null}
+                          {!isCompleted && (
+                            <Button size="sm" variant="outline" className="w-full mt-2">
+                              {isAuthenticated ? "Proposer mon aide" : "Inscrivez-vous pour aider"}
+                            </Button>
                           )}
-                          <Button size="sm" variant="outline" className="w-full mt-2">
-                            {isAuthenticated ? "Proposer mon aide" : "Inscrivez-vous pour aider"}
-                          </Button>
                         </CardContent>
                       </Card>
                     </Link>
                   );
                 })}
               </div>
+              ) : (
+                <p className="text-center text-muted-foreground py-8">Aucune mission ne correspond à ces filtres.</p>
+              )}
             </section>
-          )}
 
-          {/* H1 + intro (if no missions, show as primary) */}
-          {(!recentMissions || recentMissions.length === 0) && (
+          {(!allMissions || allMissions.length === 0) && (
             <section className="text-center space-y-6 max-w-3xl mx-auto">
               <h1 className="font-heading text-4xl md:text-5xl font-bold text-foreground">
                 Petites missions — L'entraide entre voisins, version Guardiens
