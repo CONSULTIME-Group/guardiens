@@ -267,6 +267,11 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
                       {expYears && <span>{expYears} d'expérience</span>}
                       {animalTypes.length > 0 && <span>{animalTypes.join(", ")}</span>}
                     </div>
+                    {app.badgeCounts && app.badgeCounts.length > 0 && (
+                      <div className="mt-1.5">
+                        <BadgePills badges={app.badgeCounts} max={3} size="sm" />
+                      </div>
+                    )}
                   </div>
                 </div>
 
