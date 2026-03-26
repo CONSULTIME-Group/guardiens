@@ -28,6 +28,17 @@ const SitterProfile = () => {
   const [localData, setLocalData] = useState<Partial<SitterProfileData>>({});
   const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
   const [activeTab, setActiveTab] = useState("profile");
+  const [trustData, setTrustData] = useState({ identityVerified: false, hasAvatar: false, hasFirstActivity: false });
+
+  useEffect(() => {
+    if (!user) return;
+    supabase.from("profiles").select("identity_verified, avatar_url").eq("id", user.id).single().then(({ data: p }) => {
+      if (p) setTrustData(prev => ({ ...prev, identityVerified: p.identity_verified || false, hasAvatar: !!p.avatar_url }));
+    });
+    supabase.from("applications").select("id", { count: "exact", head: true }).eq("sitter_id", user.id).eq("status", "accepted").then(({ count }) => {
+      setTrustData(prev => ({ ...prev, hasFirstActivity: (count || 0) > 0 }));
+    });
+  }, [user]);
 
   const mergedData = { ...data, ...localData } as SitterProfileData;
 

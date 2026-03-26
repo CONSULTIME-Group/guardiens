@@ -29,6 +29,7 @@ const STEPS = [
 
 const OwnerProfilePage = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const {
     data, pets, loading, saving, completion, missingFields,
     saveStep, addPet, updatePet, removePet, uploadPhoto,
