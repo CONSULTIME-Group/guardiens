@@ -256,6 +256,14 @@ const PublicProfile = () => {
           <TabsContent value="sitter" className="space-y-4 mt-4">
             {sitterProfile ? (
               <>
+                {/* Badges */}
+                {badgeCounts.length > 0 && (
+                  <div className="p-4 rounded-xl bg-card border border-border">
+                    <h3 className="font-heading font-semibold text-sm mb-3">Ses badges</h3>
+                    <BadgePills badges={badgeCounts} showAll />
+                  </div>
+                )}
+
                 {/* Motivation */}
                 {sitterProfile.motivation && (
                   <div>
