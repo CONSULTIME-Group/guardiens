@@ -87,6 +87,17 @@ export default function ArticleDetail() {
         publishedAt={article.published_at || undefined}
         author={article.author_name}
       />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+        "@context": "https://schema.org",
+        "@type": "BlogPosting",
+        "headline": article.title,
+        "description": article.excerpt,
+        "author": { "@type": "Organization", "name": article.author_name },
+        ...(article.cover_image_url && { "image": article.cover_image_url }),
+        ...(article.published_at && { "datePublished": article.published_at }),
+        "publisher": { "@type": "Organization", "name": "Guardiens", "url": "https://guardiens.lovable.app" },
+        "mainEntityOfPage": `https://guardiens.lovable.app/actualites/${article.slug}`
+      }) }} />
     <article className="max-w-3xl mx-auto px-4 py-8 animate-fade-in">
       <Link
         to="/actualites"
