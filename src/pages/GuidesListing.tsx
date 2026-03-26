@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import PageMeta from "@/components/PageMeta";
 import { Link, useNavigate } from "react-router-dom";
 import { MapPin, Search, ArrowLeft } from "lucide-react";
+import guideHeaderImg from "@/assets/guide-header.jpg";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -100,15 +101,16 @@ const GuidesListing = () => {
             Retour
           </button>
         </div>
-        <header className="bg-primary/5 border-b border-border">
-          <div className="max-w-5xl mx-auto px-4 py-12 sm:py-16 text-center">
-            <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-primary/10 mb-6">
-              <MapPin className="h-7 w-7 text-primary" />
-            </div>
+        <header className="relative border-b border-border overflow-hidden">
+          <div className="absolute inset-0">
+            <img src={guideHeaderImg} alt="Guide local Guardiens" className="w-full h-full object-cover" />
+            <div className="absolute inset-0 bg-gradient-to-r from-background/90 via-background/70 to-background/40" />
+          </div>
+          <div className="relative max-w-5xl mx-auto px-4 py-14 sm:py-20 text-left">
             <h1 className="font-heading text-3xl sm:text-4xl font-bold text-foreground mb-3">
               Guides locaux
             </h1>
-            <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+            <p className="text-muted-foreground text-lg max-w-xl">
               Où promener, où soigner, où bruncher — tout ce qu'un gardien doit savoir en arrivant dans une nouvelle ville.
             </p>
           </div>

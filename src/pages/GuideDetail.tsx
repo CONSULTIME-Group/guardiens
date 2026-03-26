@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import PageMeta from "@/components/PageMeta";
 import { MapPin, TreePine, Stethoscope, Coffee, Store, Footprints, Droplets, Trees, Star, ArrowRight, ArrowLeft, Search } from "lucide-react";
+import guideHeaderImg from "@/assets/guide-header.jpg";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -191,7 +192,12 @@ const GuideDetail = () => {
         </div>
 
         {/* Header */}
-        <header className="max-w-5xl mx-auto px-4 py-8 sm:py-12">
+        <header className="relative overflow-hidden border-b border-border">
+          <div className="absolute inset-0">
+            <img src={guideHeaderImg} alt={`Guide pet sitting ${guide.city}`} className="w-full h-full object-cover" />
+            <div className="absolute inset-0 bg-gradient-to-r from-background/90 via-background/70 to-background/40" />
+          </div>
+          <div className="relative max-w-5xl mx-auto px-4 py-10 sm:py-14">
           <h1 className="font-heading text-3xl sm:text-4xl font-bold text-foreground mb-4">
             Guide du gardien à {guide.city}
           </h1>
@@ -199,6 +205,9 @@ const GuideDetail = () => {
             {guide.intro}
           </p>
           <p className="text-sm italic text-secondary font-medium">{guide.ideal_for}</p>
+          </div>
+        </header>
+        <div className="max-w-5xl mx-auto px-4 pt-6">
 
           {/* Search bar */}
           <div className="mt-5 relative max-w-md">
@@ -233,7 +242,7 @@ const GuideDetail = () => {
               Petites missions d'entraide <ArrowRight className="h-3.5 w-3.5" />
             </Link>
           </div>
-        </header>
+        </div>
 
         {/* Map */}
         {placesWithCoords.length > 0 && (
