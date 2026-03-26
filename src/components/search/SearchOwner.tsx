@@ -15,7 +15,8 @@ import { toast } from "sonner";
 import ChipSelect from "@/components/profile/ChipSelect";
 import VerifiedBadge from "@/components/profile/VerifiedBadge";
 import EmergencyBadge from "@/components/profile/EmergencyBadge";
-import BadgePills from "@/components/badges/BadgePills";
+import BadgeShield from "@/components/badges/BadgeShield";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 const animalChips = ["Chiens", "Chats", "Chevaux", "Oiseaux", "Animaux de ferme", "NAC", "Tous"];
 const animalChipToType: Record<string, string> = {
