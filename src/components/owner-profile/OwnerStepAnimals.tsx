@@ -139,7 +139,7 @@ const OwnerStepAnimals = ({ pets, onAddPet, onUpdatePet, onRemovePet }: Props) =
         <div key={pet.id} className="bg-muted/30 rounded-lg border border-border overflow-hidden">
           <button type="button" onClick={() => setExpandedId(expandedId === pet.id ? null : pet.id!)}
             className="w-full flex items-center gap-3 p-4 text-left">
-            {pet.photo_url && <img src={pet.photo_url} alt={pet.name} className="w-12 h-12 rounded-lg object-cover" />}
+            {pet.photo_url && <img src={pet.photo_url} alt={pet.name} className="w-12 h-12 rounded-lg object-cover cursor-pointer hover:ring-2 ring-primary transition-all" onClick={(e) => { e.stopPropagation(); setLightboxUrl(pet.photo_url!); }} />}
             <div className="flex-1">
               <span className="font-semibold">{pet.name}</span>
               <span className="text-sm text-muted-foreground ml-2">{speciesLabel(pet.species)}{pet.breed ? ` — ${pet.breed}` : ""}</span>
