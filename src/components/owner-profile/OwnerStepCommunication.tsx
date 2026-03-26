@@ -38,7 +38,10 @@ const OwnerStepCommunication = ({ data, onChange }: Props) => (
     </div>
 
     <div className="space-y-2">
-      <Label>Précisions accueil</Label>
+      <div className="flex items-center justify-between">
+        <Label>Précisions accueil</Label>
+        <AiSuggestButton field="welcome_notes" currentValue={data.welcome_notes} onSuggestion={text => onChange({ welcome_notes: text })} />
+      </div>
       <Textarea value={data.welcome_notes} onChange={e => onChange({ welcome_notes: e.target.value })}
         placeholder="Ex : On aime bien inviter le gardien à dîner quelques jours avant pour se connaître et présenter les animaux"
         className="rounded-lg min-h-[80px]" maxLength={2000} />
