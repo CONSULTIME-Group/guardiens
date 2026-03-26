@@ -14,6 +14,7 @@ import { Search, SlidersHorizontal, MapPin, Star, Car, CheckCircle2, CircleDot, 
 import { toast } from "sonner";
 import ChipSelect from "@/components/profile/ChipSelect";
 import VerifiedBadge from "@/components/profile/VerifiedBadge";
+import BadgePills from "@/components/badges/BadgePills";
 
 const animalChips = ["Chiens", "Chats", "Chevaux", "Oiseaux", "Animaux de ferme", "NAC", "Tous"];
 const animalChipToType: Record<string, string> = {
@@ -141,7 +142,20 @@ const SearchOwner = () => {
       });
     }
 
-    // Enrich with reviews
+    // Enrich with reviews + badges
+    const userIds = items.map((s: any) => s.user_id);
+    const { data: allBadges } = await supabase
+      .from("badge_attributions")
+      .select("receiver_id, badge_key")
+      .in("receiver_id", userIds);
+
+    const badgeMap = new Map<string, Map<string, number>>();
+    (allBadges || []).forEach((b: any) => {
+      if (!badgeMap.has(b.receiver_id)) badgeMap.set(b.receiver_id, new Map());
+      const m = badgeMap.get(b.receiver_id)!;
+      m.set(b.badge_key, (m.get(b.badge_key) || 0) + 1);
+    });
+
     const enriched = await Promise.all(
       items.map(async (s: any) => {
         const { data: reviews } = await supabase
@@ -152,7 +166,11 @@ const SearchOwner = () => {
         const avgRating = reviews && reviews.length > 0
           ? (reviews.reduce((sum: number, r: any) => sum + r.overall_rating, 0) / reviews.length).toFixed(1)
           : null;
-        return { ...s, avgRating, reviewCount: reviews?.length || 0 };
+        const userBadges = badgeMap.get(s.user_id);
+        const topBadges = userBadges
+          ? Array.from(userBadges.entries()).map(([badge_key, count]) => ({ badge_key, count })).sort((a, b) => b.count - a.count).slice(0, 2)
+          : [];
+        return { ...s, avgRating, reviewCount: reviews?.length || 0, topBadges };
       })
     );
 
@@ -341,6 +359,13 @@ const SearchOwner = () => {
                           <div className="flex items-center gap-1 text-sm mt-1">
                             <Star className="h-3.5 w-3.5 text-yellow-500 fill-yellow-500" />
                             {s.avgRating} <span className="text-muted-foreground">({s.reviewCount} avis)</span>
+                          </div>
+                        )}
+
+                        {/* Qualitative badges */}
+                        {s.topBadges && s.topBadges.length > 0 && (
+                          <div className="mt-1.5">
+                            <BadgePills badges={s.topBadges} max={2} size="sm" />
                           </div>
                         )}
 

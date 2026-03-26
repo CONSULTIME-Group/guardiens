@@ -10,6 +10,7 @@ import { Link, useSearchParams } from "react-router-dom";
 import { useIsMobile } from "@/hooks/use-mobile";
 import HouseGuideBlock from "@/components/messages/HouseGuideBlock";
 import { useToast } from "@/hooks/use-toast";
+import { getBadgeDef } from "@/components/badges/badgeDefinitions";
 
 interface Conversation {
   id: string;
@@ -24,6 +25,7 @@ interface Conversation {
   last_message?: { content: string; created_at: string; sender_id: string } | null;
   unread_count: number;
   application_status?: string | null;
+  top_badge?: { badge_key: string; count: number } | null;
 }
 
 interface Message {
@@ -105,13 +107,14 @@ const Messages = () => {
     const convIds = convs.map((conv: any) => conv.id);
     const sitIds = convs.map((conv: any) => conv.sit_id).filter(Boolean);
 
-    const [profilesRes, allLastMsgsRes, allUnreadRes, applicationsRes] = await Promise.all([
+    const [profilesRes, allLastMsgsRes, allUnreadRes, applicationsRes, badgesRes] = await Promise.all([
       supabase.from("profiles").select("id, first_name, avatar_url, identity_verified").in("id", otherIds),
       supabase.from("messages").select("conversation_id, content, created_at, sender_id").in("conversation_id", convIds).order("created_at", { ascending: false }),
       supabase.from("messages").select("conversation_id, id").in("conversation_id", convIds).neq("sender_id", user.id).is("read_at", null),
       sitIds.length > 0
         ? supabase.from("applications").select("sit_id, sitter_id, status").in("sit_id", sitIds)
         : Promise.resolve({ data: [] }),
+      supabase.from("badge_attributions").select("receiver_id, badge_key").in("receiver_id", otherIds),
     ]);
 
     const profilesMap = new Map((profilesRes.data || []).map((p: any) => [p.id, p]));
@@ -132,6 +135,20 @@ const Messages = () => {
       appMap.set(`${a.sit_id}-${a.sitter_id}`, a.status);
     });
 
+    // Build badge map: receiver_id → top badge
+    const badgeCounts = new Map<string, Map<string, number>>();
+    (badgesRes.data || []).forEach((b: any) => {
+      if (!badgeCounts.has(b.receiver_id)) badgeCounts.set(b.receiver_id, new Map());
+      const m = badgeCounts.get(b.receiver_id)!;
+      m.set(b.badge_key, (m.get(b.badge_key) || 0) + 1);
+    });
+    const topBadgeMap = new Map<string, { badge_key: string; count: number }>();
+    badgeCounts.forEach((counts, userId) => {
+      let top = { badge_key: "", count: 0 };
+      counts.forEach((c, k) => { if (c > top.count) top = { badge_key: k, count: c }; });
+      if (top.badge_key) topBadgeMap.set(userId, top);
+    });
+
     const enriched = convs.map((conv: any) => {
       const otherId = conv.owner_id === user.id ? conv.sitter_id : conv.owner_id;
       const sitterId = conv.sitter_id;
@@ -143,6 +160,7 @@ const Messages = () => {
         last_message: lastMsgMap.get(conv.id) || null,
         unread_count: unreadMap.get(conv.id) || 0,
         application_status: appStatus || null,
+        top_badge: topBadgeMap.get(otherId) || null,
       } as Conversation;
     });
 
@@ -425,9 +443,22 @@ const Messages = () => {
                     )}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between gap-2">
-                        <span className={`text-sm font-medium truncate ${conv.unread_count > 0 ? "font-bold" : ""}`}>
-                          {conv.other_user?.first_name || "Utilisateur"}
-                        </span>
+                        <div className="flex items-center gap-1.5 min-w-0">
+                          <span className={`text-sm font-medium truncate ${conv.unread_count > 0 ? "font-bold" : ""}`}>
+                            {conv.other_user?.first_name || "Utilisateur"}
+                          </span>
+                          {conv.top_badge && (() => {
+                            const def = getBadgeDef(conv.top_badge.badge_key);
+                            if (!def) return null;
+                            const Icon = def.icon;
+                            return (
+                              <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-accent text-[9px] font-medium text-muted-foreground shrink-0" title={def.label}>
+                                <Icon className={`h-2.5 w-2.5 ${def.colorClass}`} />
+                                <span className="hidden sm:inline truncate max-w-[80px]">{def.label}</span>
+                              </span>
+                            );
+                          })()}
+                        </div>
                         <span className="text-xs text-muted-foreground shrink-0">
                           {conv.last_message ? formatListDate(conv.last_message.created_at) : ""}
                         </span>

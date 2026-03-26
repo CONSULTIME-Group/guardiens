@@ -14,6 +14,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Search, SlidersHorizontal, MapPin, Calendar, Star, CheckCircle2, Lock } from "lucide-react";
 import ChipSelect from "@/components/profile/ChipSelect";
 import VerifiedBadge from "@/components/profile/VerifiedBadge";
+import BadgePills from "@/components/badges/BadgePills";
 import { format, differenceInDays } from "date-fns";
 import { fr } from "date-fns/locale";
 import { geocodeCity, haversineDistance } from "@/lib/geocode";
@@ -162,11 +163,19 @@ const SearchSitter = () => {
 
     const enriched = await Promise.all(
       items.map(async (sit: any) => {
-        const { data: pets } = await supabase.from("pets").select("species, name").eq("property_id", sit.property_id);
-        const { data: reviews } = await supabase.from("reviews").select("overall_rating").eq("reviewee_id", sit.user_id).eq("published", true);
+        const [{ data: pets }, { data: reviews }, { data: ownerBadges }] = await Promise.all([
+          supabase.from("pets").select("species, name").eq("property_id", sit.property_id),
+          supabase.from("reviews").select("overall_rating").eq("reviewee_id", sit.user_id).eq("published", true),
+          supabase.from("badge_attributions").select("badge_key").eq("receiver_id", sit.user_id),
+        ]);
         const avgRating = reviews && reviews.length > 0
           ? (reviews.reduce((s: number, r: any) => s + r.overall_rating, 0) / reviews.length).toFixed(1)
           : null;
+
+        // Count owner badges
+        const badgeCounts = new Map<string, number>();
+        (ownerBadges || []).forEach((b: any) => badgeCounts.set(b.badge_key, (badgeCounts.get(b.badge_key) || 0) + 1));
+        const topBadges = Array.from(badgeCounts.entries()).map(([badge_key, count]) => ({ badge_key, count })).sort((a, b) => b.count - a.count).slice(0, 2);
 
         const petSpecies = (pets || []).map((p: any) => p.species);
         if (animalTypes.length > 0 && !animalTypes.includes("Tous")) {
@@ -174,7 +183,7 @@ const SearchSitter = () => {
           if (!petSpecies.some((s: string) => wantedSpecies.includes(s))) return null;
         }
 
-        return { ...sit, pets: pets || [], avgRating, reviewCount: reviews?.length || 0 };
+        return { ...sit, pets: pets || [], avgRating, reviewCount: reviews?.length || 0, topBadges };
       })
     );
 
@@ -507,6 +516,12 @@ const SearchSitter = () => {
                             </span>
                           )}
                         </div>
+                        {/* Owner qualitative badges */}
+                        {sit.topBadges && sit.topBadges.length > 0 && (
+                          <div className="mt-1.5">
+                            <BadgePills badges={sit.topBadges} max={2} size="sm" />
+                          </div>
+                        )}
                         {badges.length > 0 && (
                           <div className="flex flex-wrap gap-1.5 mt-2">
                             {badges.map(b => (
