@@ -33,6 +33,8 @@ import bergerAustralienFeyssineLyon from "@/assets/berger-australien-feyssine-ly
 import bergerAustralienInterieurLyon from "@/assets/berger-australien-interieur-lyon.jpg";
 import fondateursGuardiensQuaisLyon from "@/assets/fondateurs-guardiens-quais-lyon.jpg";
 import gardeAnimauxAppartementLyon from "@/assets/garde-animaux-appartement-lyon.jpg";
+import boomPetsittingConfluence from "@/assets/boom-petsitting-confluence-lyon.jpg";
+import boomPetsittingHomeoffice from "@/assets/boom-petsitting-homeoffice-lyon.jpg";
 
 const ARTICLE_IMAGES: Record<string, string> = {
   "/images/lyon-hero-quais.jpg": lyonHeroQuais,
