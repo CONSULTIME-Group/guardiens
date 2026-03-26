@@ -2150,6 +2150,7 @@ export type Database = {
         | "draft"
         | "published"
         | "confirmed"
+        | "in_progress"
         | "completed"
         | "cancelled"
       small_mission_category: "animals" | "garden" | "house" | "skills"
@@ -2348,7 +2349,14 @@ export const Constants = {
         "forest",
       ],
       property_type: ["apartment", "house", "farm", "chalet", "other"],
-      sit_status: ["draft", "published", "confirmed", "completed", "cancelled"],
+      sit_status: [
+        "draft",
+        "published",
+        "confirmed",
+        "in_progress",
+        "completed",
+        "cancelled",
+      ],
       small_mission_category: ["animals", "garden", "house", "skills"],
       small_mission_response_status: ["pending", "accepted", "declined"],
       small_mission_status: ["open", "in_progress", "completed", "cancelled"],
