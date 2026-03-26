@@ -142,7 +142,7 @@ export default function ArticleDetail() {
         "@type": article.category === "conseil_gardien" ? "HowTo" : article.category === "actualite" ? "NewsArticle" : article.category === "guide_lieu" ? "Guide" : article.category === "guide_race" ? "Article" : "BlogPosting",
         ...(article.category === "conseil_gardien" ? { "name": article.title } : { "headline": article.title }),
         "description": article.excerpt,
-        "author": { "@type": "Person", "name": article.author_name || "Elisa & Thomas" },
+        "author": { "@type": "Person", "name": article.author_name || "Elisa & Jérémie" },
         ...(article.cover_image_url && { "image": article.cover_image_url }),
         ...(article.published_at && { "datePublished": article.published_at }),
         "publisher": { "@type": "Organization", "name": "Guardiens", "url": "https://guardiens.fr" },

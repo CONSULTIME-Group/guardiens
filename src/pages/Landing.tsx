@@ -54,7 +54,7 @@ const testimonials = [
     text: "On est partis 10 jours au Maroc et nos deux chats sont restés sur leur canapé préféré, avec quelqu'un qui leur faisait des câlins tous les jours. On a reçu des photos tous les soirs — ils avaient l'air plus détendus que nous !",
   },
   {
-    name: "Thomas",
+    name: "Jérémie",
     detail: "Gardien · Lyon 7e",
     text: "Un chalet à Megève, un golden retriever qui m'attendait chaque matin devant la cheminée, des balades dans la neige et des voisins adorables. La plus belle semaine de mon hiver — et le début d'une vraie amitié avec les proprios.",
   },
