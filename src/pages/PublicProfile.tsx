@@ -148,7 +148,7 @@ const PublicProfile = () => {
         {/* Actions */}
         <div className="flex gap-2 shrink-0">
           {!isOwnProfile && (
-            <ReportButton targetId={id!} targetType="user" />
+            <ReportButton targetId={id!} targetType="profile" />
           )}
         </div>
       </div>
