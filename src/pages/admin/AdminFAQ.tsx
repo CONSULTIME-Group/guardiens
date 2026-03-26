@@ -18,6 +18,15 @@ const CATEGORIES = [
   { value: "pricing", label: "Tarifs & abonnements" },
 ];
 
+interface FaqEntry {
+  id: string;
+  question: string;
+  answer: string;
+  category: string;
+  sort_order: number;
+  published: boolean;
+}
+
 const AdminFAQ = () => {
   const queryClient = useQueryClient();
   const [showForm, setShowForm] = useState(false);
@@ -28,22 +37,22 @@ const AdminFAQ = () => {
     queryKey: ["admin-faq"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("faq_entries")
+        .from("faq_entries" as any)
         .select("*")
         .order("category")
         .order("sort_order", { ascending: true });
       if (error) throw error;
-      return data;
+      return (data || []) as FaqEntry[];
     },
   });
 
   const upsertMutation = useMutation({
     mutationFn: async () => {
       if (editId) {
-        const { error } = await supabase.from("faq_entries").update(form).eq("id", editId);
+        const { error } = await (supabase.from("faq_entries" as any) as any).update(form).eq("id", editId);
         if (error) throw error;
       } else {
-        const { error } = await supabase.from("faq_entries").insert(form);
+        const { error } = await (supabase.from("faq_entries" as any) as any).insert(form);
         if (error) throw error;
       }
     },
@@ -57,7 +66,7 @@ const AdminFAQ = () => {
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase.from("faq_entries").delete().eq("id", id);
+      const { error } = await (supabase.from("faq_entries" as any) as any).delete().eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -68,7 +77,7 @@ const AdminFAQ = () => {
 
   const toggleMutation = useMutation({
     mutationFn: async ({ id, published }: { id: string; published: boolean }) => {
-      const { error } = await supabase.from("faq_entries").update({ published }).eq("id", id);
+      const { error } = await (supabase.from("faq_entries" as any) as any).update({ published }).eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["admin-faq"] }),
@@ -80,7 +89,7 @@ const AdminFAQ = () => {
     setShowForm(false);
   };
 
-  const startEdit = (entry: any) => {
+  const startEdit = (entry: FaqEntry) => {
     setForm({ question: entry.question, answer: entry.answer, category: entry.category, sort_order: entry.sort_order });
     setEditId(entry.id);
     setShowForm(true);

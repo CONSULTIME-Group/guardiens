@@ -10,17 +10,26 @@ import {
 import { Link } from "react-router-dom";
 import { HelpCircle } from "lucide-react";
 
+interface FaqEntry {
+  id: string;
+  question: string;
+  answer: string;
+  category: string;
+  sort_order: number;
+  published: boolean;
+}
+
 const FAQ = () => {
   const { data: entries = [], isLoading } = useQuery({
     queryKey: ["faq-entries"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("faq_entries")
+        .from("faq_entries" as any)
         .select("*")
         .eq("published", true)
         .order("sort_order", { ascending: true });
       if (error) throw error;
-      return data;
+      return (data || []) as FaqEntry[];
     },
   });
 
@@ -63,7 +72,6 @@ const FAQ = () => {
       )}
 
       <div className="min-h-screen bg-background">
-        {/* Header */}
         <header className="bg-primary/5 border-b border-border">
           <div className="max-w-3xl mx-auto px-4 py-12 sm:py-16 text-center">
             <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-primary/10 mb-6">
@@ -78,7 +86,6 @@ const FAQ = () => {
           </div>
         </header>
 
-        {/* Content */}
         <main className="max-w-3xl mx-auto px-4 py-10 sm:py-14">
           {isLoading ? (
             <div className="space-y-4">
@@ -96,7 +103,7 @@ const FAQ = () => {
                 const catEntries = entries.filter((e) => e.category === cat);
                 return (
                   <section key={cat}>
-                    <h2 className="font-heading text-xl font-semibold text-foreground mb-4 flex items-center gap-2">
+                    <h2 className="font-heading text-xl font-semibold text-foreground mb-4">
                       {categoryLabels[cat] || cat}
                     </h2>
                     <Accordion type="multiple" className="space-y-2">
@@ -121,7 +128,6 @@ const FAQ = () => {
             </div>
           )}
 
-          {/* CTA */}
           <div className="mt-14 text-center border-t border-border pt-10">
             <p className="text-muted-foreground mb-4">
               Vous ne trouvez pas la réponse à votre question ?
@@ -135,7 +141,6 @@ const FAQ = () => {
           </div>
         </main>
 
-        {/* Breadcrumb Schema */}
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
@@ -143,18 +148,8 @@ const FAQ = () => {
               "@context": "https://schema.org",
               "@type": "BreadcrumbList",
               itemListElement: [
-                {
-                  "@type": "ListItem",
-                  position: 1,
-                  name: "Guardiens",
-                  item: "https://guardiens.fr",
-                },
-                {
-                  "@type": "ListItem",
-                  position: 2,
-                  name: "FAQ",
-                  item: "https://guardiens.fr/faq",
-                },
+                { "@type": "ListItem", position: 1, name: "Guardiens", item: "https://guardiens.fr" },
+                { "@type": "ListItem", position: 2, name: "FAQ", item: "https://guardiens.fr/faq" },
               ],
             }),
           }}

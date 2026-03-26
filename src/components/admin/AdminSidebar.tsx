@@ -28,6 +28,7 @@ const adminNavItems = [
   { to: "/admin/emails", icon: Mail, label: "Emails" },
   { to: "/admin/articles", icon: FileText, label: "Articles" },
   { to: "/admin/city-pages", icon: MapPin, label: "Pages villes SEO" },
+  { to: "/admin/faq", icon: HelpCircle, label: "FAQ" },
 ];
 
 export const AdminSidebar = () => {
