@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft } from "lucide-react";
-import authIllustration from "@/assets/auth-illustration.png";
+import forgotPasswordPhoto from "@/assets/forgot-password-photo.jpg";
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState("");
