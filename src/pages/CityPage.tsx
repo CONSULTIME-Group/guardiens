@@ -409,6 +409,32 @@ const CityPage = () => {
           </div>
         </section>
 
+        {/* Related articles */}
+        {relatedArticles.length > 0 && (
+          <section className="max-w-5xl mx-auto px-4 py-12 border-t border-border">
+            <h2 className="font-heading text-2xl font-bold text-foreground mb-6">
+              Articles sur {page.city}
+            </h2>
+            <div className="grid gap-4 md:grid-cols-3">
+              {relatedArticles.map((a: any) => (
+                <Link key={a.slug} to={`/actualites/${a.slug}`} className="group">
+                  <Card className="h-full hover:shadow-md transition-shadow">
+                    <CardContent className="p-5">
+                      <h3 className="font-heading font-semibold text-foreground group-hover:text-primary transition-colors line-clamp-2 mb-2">
+                        {a.title}
+                      </h3>
+                      <p className="text-sm text-muted-foreground line-clamp-2">{a.excerpt}</p>
+                      <span className="mt-3 inline-flex items-center gap-1 text-xs font-medium text-primary">
+                        Lire l'article <ArrowRight className="h-3 w-3" />
+                      </span>
+                    </CardContent>
+                  </Card>
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
+
         {/* Final CTA */}
         <section className="max-w-5xl mx-auto px-4 py-16 text-center">
           <h2 className="font-serif text-2xl md:text-3xl font-bold text-foreground mb-4">
