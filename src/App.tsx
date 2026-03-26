@@ -113,6 +113,7 @@ const AppRoutes = () => (
       <Route path="/admin/reports" element={<AdminReports />} />
       <Route path="/admin/verifications" element={<AdminVerifications />} />
       <Route path="/admin/emails" element={<AdminEmails />} />
+      <Route path="/admin/experiences" element={<AdminExperienceVerification />} />
       <Route path="/admin/articles" element={<AdminArticles />} />
       <Route path="/admin/articles/:id" element={<ArticleEditor />} />
       <Route path="/admin/city-pages" element={<AdminCityPages />} />
