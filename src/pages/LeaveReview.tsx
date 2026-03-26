@@ -119,6 +119,17 @@ const LeaveReview = () => {
       return;
     }
 
+    // Save badge attributions
+    if (selectedBadges.length > 0 && reviewee) {
+      const badgeRows = selectedBadges.map(badge_key => ({
+        sit_id: sitId!,
+        giver_id: user.id,
+        receiver_id: reviewee.id,
+        badge_key,
+      }));
+      await supabase.from("badge_attributions").insert(badgeRows as any);
+    }
+
     // Send system message in conversation
     const { data: conv } = await supabase
       .from("conversations")
