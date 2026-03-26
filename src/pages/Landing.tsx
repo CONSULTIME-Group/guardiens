@@ -155,7 +155,7 @@ const Landing = () => {
         <img
           src={heroDogBbq}
           alt="Un golden retriever souriant dans un jardin ensoleillé — l'esprit Guardiens"
-          className="absolute inset-0 w-full h-full object-cover saturate-[0.35] brightness-105"
+          className="absolute inset-0 w-full h-full object-cover saturate-[0.65] brightness-105"
           loading="eager"
         />
         {/* White pastel veil + stronger bottom gradient for text */}
