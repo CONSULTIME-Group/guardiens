@@ -39,10 +39,25 @@ const Login = () => {
           ),
         });
       } else if (msg === "Email not confirmed") {
+        const handleResend = async () => {
+          const { error: resendError } = await supabase.auth.resend({ type: "signup", email });
+          toast({
+            title: resendError ? "Erreur" : "Email envoyé !",
+            description: resendError
+              ? "Impossible de renvoyer l'email. Réessayez plus tard."
+              : "Un nouvel email de confirmation vient d'être envoyé.",
+            variant: resendError ? "destructive" : "default",
+          });
+        };
         toast({
           variant: "destructive",
           title: "Email non confirmé",
-          description: "Vérifiez votre boîte mail et cliquez sur le lien de confirmation pour activer votre compte.",
+          description: "Vérifiez votre boîte mail et cliquez sur le lien de confirmation.",
+          action: (
+            <ToastAction altText="Renvoyer" onClick={handleResend} className="border-white text-white hover:bg-white/20">
+              Renvoyer
+            </ToastAction>
+          ),
         });
       } else {
         toast({
