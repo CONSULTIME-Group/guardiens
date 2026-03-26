@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight, LogOut } from "lucide-react";
@@ -11,7 +11,10 @@ import OwnerStepCommunication from "@/components/owner-profile/OwnerStepCommunic
 import OwnerStepCalendar from "@/components/owner-profile/OwnerStepCalendar";
 import OwnerGallery from "@/components/owner-profile/OwnerGallery";
 import OwnerExperiences from "@/components/owner-profile/OwnerExperiences";
+import TrustProfile from "@/components/profile/TrustProfile";
 import { useOwnerProfile, type OwnerProfileData } from "@/hooks/useOwnerProfile";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 
 const STEPS = [
   { num: 1, label: "Identité" },

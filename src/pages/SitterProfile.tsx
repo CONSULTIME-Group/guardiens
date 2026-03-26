@@ -18,6 +18,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 const SitterProfile = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const {
     data, pastAnimals, loading, saving, completion, missingFields,
     saveStep, addPastAnimal, removePastAnimal, uploadAvatar,
