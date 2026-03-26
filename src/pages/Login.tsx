@@ -10,6 +10,7 @@ import { ToastAction } from "@/components/ui/toast";
 import { Eye, EyeOff } from "lucide-react";
 import authIllustration from "@/assets/auth-illustration.png";
 
+
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
