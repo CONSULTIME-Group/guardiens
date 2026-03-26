@@ -115,14 +115,14 @@ const OwnerDashboard = () => {
       const trustedCount = Object.values(sitterSitCounts).filter(c => c >= 2).length;
       setTrustedSitterCount(trustedCount);
 
-      // My own missions
-      const { data: myMissionsData } = await supabase
-        .from("small_missions")
-        .select("id, title, category, status, created_at, small_mission_responses(id, status)")
-        .eq("user_id", user.id)
-        .order("created_at", { ascending: false })
-        .limit(3);
-      setMyMissions(myMissionsData || []);
+      // My own missions + count all
+      const [myMissionsDataRes, allMyMissionsCountRes] = await Promise.all([
+        supabase.from("small_missions").select("id, title, category, status, created_at, small_mission_responses(id, status)").eq("user_id", user.id).order("created_at", { ascending: false }).limit(3),
+        supabase.from("small_missions").select("id, status").eq("user_id", user.id),
+      ]);
+      setMyMissions(myMissionsDataRes.data || []);
+      const allMyMissions = allMyMissionsCountRes.data || [];
+      setMissionMetrics({ total: allMyMissions.length, completed: allMyMissions.filter((m: any) => m.status === "completed").length });
 
       setLoading(false);
     };
