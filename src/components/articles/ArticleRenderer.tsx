@@ -27,6 +27,8 @@ import goldenRetrieverTeteDorLyon from "@/assets/golden-retriever-tete-dor-lyon.
 import goldenRetrieverInterieurVieuxLyon from "@/assets/golden-retriever-interieur-vieux-lyon.jpg";
 import borderCollieFeyssineLyon from "@/assets/border-collie-feyssine-lyon.jpg";
 import borderCollieInterieurCroixRousse from "@/assets/border-collie-interieur-croix-rousse.jpg";
+import bouledogueFrancaisVieuxLyon from "@/assets/bouledogue-francais-vieux-lyon.jpg";
+import bouledogueFrancaisInterieurLyon6 from "@/assets/bouledogue-francais-interieur-lyon6.jpg";
 
 const ARTICLE_IMAGES: Record<string, string> = {
   "/images/lyon-hero-quais.jpg": lyonHeroQuais,
@@ -53,6 +55,8 @@ const ARTICLE_IMAGES: Record<string, string> = {
   "/images/golden-retriever-interieur-vieux-lyon.jpg": goldenRetrieverInterieurVieuxLyon,
   "/images/border-collie-feyssine-lyon.jpg": borderCollieFeyssineLyon,
   "/images/border-collie-interieur-croix-rousse.jpg": borderCollieInterieurCroixRousse,
+  "/images/bouledogue-francais-vieux-lyon.jpg": bouledogueFrancaisVieuxLyon,
+  "/images/bouledogue-francais-interieur-lyon6.jpg": bouledogueFrancaisInterieurLyon6,
 };
 
 function resolveArticleImages(html: string): string {
