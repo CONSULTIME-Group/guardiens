@@ -21,7 +21,7 @@ Deno.serve(async () => {
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
   );
 
-  const [{ data: articles }, { data: cityPages }] = await Promise.all([
+  const [{ data: articles }, { data: cityPages }, { data: cityGuides }] = await Promise.all([
     supabase
       .from("articles")
       .select("slug, updated_at, published_at")
@@ -29,6 +29,11 @@ Deno.serve(async () => {
       .order("published_at", { ascending: false }),
     supabase
       .from("seo_city_pages")
+      .select("slug, updated_at")
+      .eq("published", true)
+      .order("city"),
+    supabase
+      .from("city_guides")
       .select("slug, updated_at")
       .eq("published", true)
       .order("city"),
