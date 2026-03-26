@@ -3,7 +3,7 @@ import { useParams, Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, MapPin, Calendar, Clock, Dog, Flower2, Home, Handshake, Heart, MessageSquare, CheckCircle2 } from "lucide-react";
+import { ArrowLeft, MapPin, Calendar, Clock, Dog, Flower2, Home, Handshake, Heart, MessageSquare, CheckCircle2, Users, XCircle } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { useToast } from "@/hooks/use-toast";
