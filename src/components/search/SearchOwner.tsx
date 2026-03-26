@@ -83,6 +83,7 @@ const SearchOwner = () => {
     }
   };
 
+  const handleSearch = async () => {
     setLoading(true);
     setSearched(true);
 
