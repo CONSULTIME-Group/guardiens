@@ -89,8 +89,8 @@ const DepartmentPage = () => {
   return (
     <>
       <PageMeta
-        title={page.meta_title || `House-sitting ${page.department}`}
-        description={page.meta_description}
+        title={page.meta_title || `Pet sitting & House sitting ${page.department} – Garde d'animaux gratuite | Guardiens`}
+        description={page.meta_description || `Trouvez un pet sitter ou house sitter dans le ${page.department}. Garde d'animaux gratuite entre particuliers. ${cityPages.length} villes couvertes sur Guardiens.`}
         path={`/departement/${page.slug}`}
       />
 
