@@ -121,6 +121,12 @@ const SmallMissionDetail = () => {
     toast({ title: "Mission terminée !", description: "Merci pour l'entraide 🙌" });
   };
 
+  const handleClose = async () => {
+    await supabase.from("small_missions").update({ status: "completed" as any }).eq("id", id!);
+    setMission({ ...mission, status: "completed" });
+    toast({ title: "Mission fermée", description: "Vous avez trouvé quelqu'un — super ! 🎉" });
+  };
+
   if (loading) return <div className="p-6 md:p-10 text-muted-foreground">Chargement...</div>;
   if (!mission) return <div className="p-6 md:p-10"><p>Mission introuvable.</p><Link to="/petites-missions" className="text-primary underline mt-2 inline-block">Retour aux missions</Link></div>;
 
