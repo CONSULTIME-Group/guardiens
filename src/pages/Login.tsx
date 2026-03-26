@@ -92,9 +92,9 @@ const Login = () => {
         </form>
 
         <p className="text-center text-sm text-muted-foreground mt-6">
-          Pas encore de compte ?{" "}
+          Tu es nouveau ?{" "}
           <Link to="/register" className="text-primary font-medium hover:underline">
-            S'inscrire
+            Créer un compte
           </Link>
         </p>
       </div>
