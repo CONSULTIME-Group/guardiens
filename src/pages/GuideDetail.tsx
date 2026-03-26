@@ -115,9 +115,19 @@ const GuideDetail = () => {
     enabled: !!guide?.id && !!guide?.department,
   });
 
-  const categories = [...new Set(places.map((p) => p.category))];
-  const placesWithCoords = places.filter((p) => p.latitude && p.longitude);
+  const filteredPlaces = useMemo(() => {
+    if (!searchQuery.trim()) return places;
+    const q = searchQuery.toLowerCase();
+    return places.filter(p =>
+      p.name.toLowerCase().includes(q) ||
+      p.description.toLowerCase().includes(q) ||
+      p.address.toLowerCase().includes(q) ||
+      (p.tips && p.tips.toLowerCase().includes(q))
+    );
+  }, [places, searchQuery]);
 
+  const categories = [...new Set(filteredPlaces.map((p) => p.category))];
+  const placesWithCoords = filteredPlaces.filter((p) => p.latitude && p.longitude);
 
   if (guideLoading) {
     return (
