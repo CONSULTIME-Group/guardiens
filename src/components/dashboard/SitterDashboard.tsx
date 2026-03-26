@@ -57,6 +57,9 @@ const SitterDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [onboardingChecks, setOnboardingChecks] = useState({ hasName: false, hasAvatar: false, hasBio: false, hasIdentity: false, hasSitterProfile: false });
+  const [emergencyEligible, setEmergencyEligible] = useState(false);
+  const [hasEmergencyProfile, setHasEmergencyProfile] = useState(false);
+  const [showEmergencyForm, setShowEmergencyForm] = useState(false);
 
   useEffect(() => {
     if (!user) return;
