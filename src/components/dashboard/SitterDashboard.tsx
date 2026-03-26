@@ -27,6 +27,7 @@ const SitterDashboard = () => {
   const [unreadCount, setUnreadCount] = useState(0);
   const [isAvailable, setIsAvailable] = useState(false);
   const [metrics, setMetrics] = useState({ completed: 0, avgRating: null as string | null, reviewCount: 0 });
+  const [verificationStatus, setVerificationStatus] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
