@@ -1,0 +1,2 @@
+UPDATE articles SET content = REPLACE(content, 'Thomas', 'Jérémie') WHERE content ILIKE '%Thomas%';
+UPDATE articles SET author_name = REPLACE(author_name, 'Thomas', 'Jérémie') WHERE author_name ILIKE '%Thomas%';
