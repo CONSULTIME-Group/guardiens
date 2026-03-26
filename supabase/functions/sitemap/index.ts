@@ -21,7 +21,7 @@ Deno.serve(async () => {
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
   );
 
-  const [{ data: articles }, { data: cityPages }, { data: cityGuides }] = await Promise.all([
+  const [{ data: articles }, { data: cityPages }, { data: cityGuides }, { data: departmentPages }] = await Promise.all([
     supabase
       .from("articles")
       .select("slug, updated_at, published_at")
@@ -37,6 +37,11 @@ Deno.serve(async () => {
       .select("slug, updated_at")
       .eq("published", true)
       .order("city"),
+    supabase
+      .from("seo_department_pages")
+      .select("slug, updated_at")
+      .eq("published", true)
+      .order("department"),
   ]);
 
   const today = new Date().toISOString().split("T")[0];
@@ -89,6 +94,19 @@ Deno.serve(async () => {
     <lastmod>${lastmod}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
+  </url>
+`;
+    }
+  }
+
+  if (departmentPages) {
+    for (const dp of departmentPages) {
+      const lastmod = (dp.updated_at || today).split("T")[0];
+      xml += `  <url>
+    <loc>${SITE_URL}/departement/${dp.slug}</loc>
+    <lastmod>${lastmod}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
   </url>
 `;
     }

@@ -1376,6 +1376,57 @@ export type Database = {
         }
         Relationships: []
       }
+      seo_department_pages: {
+        Row: {
+          active_sits_count: number
+          created_at: string
+          department: string
+          h1_title: string
+          highlights: string
+          id: string
+          intro_text: string
+          meta_description: string
+          meta_title: string
+          published: boolean
+          region: string
+          sitter_count: number
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          active_sits_count?: number
+          created_at?: string
+          department: string
+          h1_title?: string
+          highlights?: string
+          id?: string
+          intro_text?: string
+          meta_description?: string
+          meta_title?: string
+          published?: boolean
+          region?: string
+          sitter_count?: number
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          active_sits_count?: number
+          created_at?: string
+          department?: string
+          h1_title?: string
+          highlights?: string
+          id?: string
+          intro_text?: string
+          meta_description?: string
+          meta_title?: string
+          published?: boolean
+          region?: string
+          sitter_count?: number
+          slug?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       sits: {
         Row: {
           cancellation_reason: string | null

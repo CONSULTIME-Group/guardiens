@@ -52,6 +52,8 @@ import AdminFAQ from "./pages/admin/AdminFAQ";
 import GuidesListing from "./pages/GuidesListing";
 import GuideDetail from "./pages/GuideDetail";
 import AdminGuides from "./pages/admin/AdminGuides";
+import AdminDepartments from "./pages/admin/AdminDepartments";
+import DepartmentPage from "./pages/DepartmentPage";
 
 const queryClient = new QueryClient();
 
@@ -86,6 +88,7 @@ const AppRoutes = () => (
     <Route path="/guides" element={<GuidesListing />} />
     <Route path="/guide/:slug" element={<GuideDetail />} />
     <Route path="/house-sitting/:slug" element={<CityPage />} />
+    <Route path="/departement/:slug" element={<DepartmentPage />} />
     <Route element={<AdminLayout />}>
       <Route path="/admin" element={<AdminDashboard />} />
       <Route path="/admin/users" element={<AdminUsers />} />
@@ -99,6 +102,7 @@ const AppRoutes = () => (
       <Route path="/admin/articles/:id" element={<ArticleEditor />} />
       <Route path="/admin/city-pages" element={<AdminCityPages />} />
       <Route path="/admin/guides" element={<AdminGuides />} />
+      <Route path="/admin/departments" element={<AdminDepartments />} />
       <Route path="/admin/faq" element={<AdminFAQ />} />
     </Route>
     {/* App routes */}

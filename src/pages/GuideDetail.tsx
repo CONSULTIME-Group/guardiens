@@ -170,7 +170,7 @@ const GuideDetail = () => {
             {guide.intro}
           </p>
           <p className="text-sm italic text-secondary font-medium">{guide.ideal_for}</p>
-          <div className="mt-4 flex items-center gap-4">
+          <div className="mt-4 flex flex-wrap items-center gap-4">
             <Badge variant="secondary">{places.length} lieux référencés</Badge>
             <Link
               to={`/house-sitting/${guide.slug}`}
@@ -178,6 +178,14 @@ const GuideDetail = () => {
             >
               Voir les gardes à {guide.city} <ArrowRight className="h-3.5 w-3.5" />
             </Link>
+            {guide.department && (
+              <Link
+                to={`/departement/${guide.department.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "")}`}
+                className="text-sm text-primary hover:underline flex items-center gap-1"
+              >
+                House-sitting dans le {guide.department} <ArrowRight className="h-3.5 w-3.5" />
+              </Link>
+            )}
           </div>
         </header>
 
