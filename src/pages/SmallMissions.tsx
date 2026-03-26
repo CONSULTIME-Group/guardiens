@@ -34,7 +34,7 @@ type StatusFilter = "active" | "all";
 type CategoryFilter = "all" | "animals" | "garden" | "house" | "skills";
 
 const SmallMissions = () => {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("active");
   const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>("all");
 
