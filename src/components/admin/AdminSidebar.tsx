@@ -26,6 +26,7 @@ const adminNavItems = [
   { to: "/admin/verifications", icon: ShieldCheck, label: "Vérifications ID" },
   { to: "/admin/emails", icon: Mail, label: "Emails" },
   { to: "/admin/articles", icon: FileText, label: "Articles" },
+  { to: "/admin/city-pages", icon: MapPin, label: "Pages villes SEO" },
 ];
 
 export const AdminSidebar = () => {
