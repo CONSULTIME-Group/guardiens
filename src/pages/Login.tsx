@@ -25,8 +25,8 @@ const Login = () => {
       await login(email, password);
       navigate("/dashboard");
     } catch (error: any) {
-      const isInvalidCredentials = error.message === "Invalid login credentials";
-      if (isInvalidCredentials) {
+      const msg = error.message;
+      if (msg === "Invalid login credentials") {
         toast({
           variant: "destructive",
           title: "Compte introuvable",
@@ -36,6 +36,12 @@ const Login = () => {
               Créer un compte
             </ToastAction>
           ),
+        });
+      } else if (msg === "Email not confirmed") {
+        toast({
+          variant: "destructive",
+          title: "Email non confirmé",
+          description: "Vérifiez votre boîte mail et cliquez sur le lien de confirmation pour activer votre compte.",
         });
       } else {
         toast({
