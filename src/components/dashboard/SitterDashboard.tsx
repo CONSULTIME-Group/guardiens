@@ -134,6 +134,19 @@ const SitterDashboard = () => {
 
   if (loading) return <div className="p-6 text-muted-foreground">Chargement...</div>;
 
+  if (showOnboarding) {
+    return (
+      <OnboardingWelcome
+        role="sitter"
+        checks={onboardingChecks}
+        onDismiss={() => {
+          localStorage.setItem("onboarding_sitter_dismissed", "1");
+          setShowOnboarding(false);
+        }}
+      />
+    );
+  }
+
   /* ── Dynamic subtitle ── */
   const getSubtitle = () => {
     if (user && user.profileCompletion < 100) return { text: `Profil complété à ${user.profileCompletion}% — Complétez votre profil →`, to: "/profile" };
