@@ -13,6 +13,7 @@ const staticPages = [
   { loc: "/guides", priority: "0.7", changefreq: "weekly" },
   { loc: "/cgu", priority: "0.3", changefreq: "yearly" },
   { loc: "/confidentialite", priority: "0.3", changefreq: "yearly" },
+  { loc: "/mentions-legales", priority: "0.3", changefreq: "yearly" },
   { loc: "/login", priority: "0.4", changefreq: "monthly" },
   { loc: "/register", priority: "0.6", changefreq: "monthly" },
 ];

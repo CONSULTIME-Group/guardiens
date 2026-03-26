@@ -57,6 +57,7 @@ import DepartmentPage from "./pages/DepartmentPage";
 import Pricing from "./pages/Pricing";
 import SmallMissions from "./pages/SmallMissions";
 import CreateSmallMission from "./pages/CreateSmallMission";
+import MentionsLegales from "./pages/MentionsLegales";
 
 const queryClient = new QueryClient();
 
@@ -87,6 +88,7 @@ const AppRoutes = () => (
     <Route path="/contact" element={<Contact />} />
     <Route path="/cgu" element={<Terms />} />
     <Route path="/confidentialite" element={<Privacy />} />
+    <Route path="/mentions-legales" element={<MentionsLegales />} />
     <Route path="/faq" element={<FAQ />} />
     <Route path="/guides" element={<GuidesListing />} />
     <Route path="/guide/:slug" element={<GuideDetail />} />
