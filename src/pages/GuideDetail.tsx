@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import PageMeta from "@/components/PageMeta";
 import { MapPin, TreePine, Stethoscope, Coffee, Store, Footprints, Droplets, Trees, Star, ArrowRight, ArrowLeft, Search } from "lucide-react";
+import guideHeaderImg from "@/assets/guide-header.jpg";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";

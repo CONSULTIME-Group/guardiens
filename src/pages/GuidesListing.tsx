@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import PageMeta from "@/components/PageMeta";
 import { Link, useNavigate } from "react-router-dom";
 import { MapPin, Search, ArrowLeft } from "lucide-react";
+import guideHeaderImg from "@/assets/guide-header.jpg";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
