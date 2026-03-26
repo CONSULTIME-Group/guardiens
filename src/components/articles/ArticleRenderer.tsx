@@ -12,6 +12,9 @@ import grenobleConfianceCafe from "@/assets/grenoble-confiance-cafe.jpg";
 import saintEtienneParcChien from "@/assets/saint-etienne-parc-chien.jpg";
 import saintEtienneChatForez from "@/assets/saint-etienne-chat-forez.jpg";
 import saintEtienneConfianceCafe from "@/assets/saint-etienne-confiance-cafe.jpg";
+import valenceParcChien from "@/assets/valence-parc-chien.jpg";
+import valenceChatDrome from "@/assets/valence-chat-drome.jpg";
+import valenceConfianceCafe from "@/assets/valence-confiance-cafe.jpg";
 
 const ARTICLE_IMAGES: Record<string, string> = {
   "/images/lyon-hero-quais.jpg": lyonHeroQuais,
@@ -23,6 +26,9 @@ const ARTICLE_IMAGES: Record<string, string> = {
   "/images/saint-etienne-parc-chien.jpg": saintEtienneParcChien,
   "/images/saint-etienne-chat-forez.jpg": saintEtienneChatForez,
   "/images/saint-etienne-confiance-cafe.jpg": saintEtienneConfianceCafe,
+  "/images/valence-parc-chien.jpg": valenceParcChien,
+  "/images/valence-chat-drome.jpg": valenceChatDrome,
+  "/images/valence-confiance-cafe.jpg": valenceConfianceCafe,
 };
 
 function resolveArticleImages(html: string): string {
