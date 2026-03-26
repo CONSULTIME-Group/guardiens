@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { MapPin, Calendar, Star, PawPrint, Car, Globe, Briefcase, Heart, Users, Home, MessageSquare } from "lucide-react";
+import { MapPin, Calendar, Star, PawPrint, Car, Globe, Briefcase, Heart, Users, Home, MessageSquare, ArrowLeft } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import VerifiedBadge from "@/components/profile/VerifiedBadge";
