@@ -323,6 +323,7 @@ const Pricing = () => {
             <Link to="/contact" className="hover:text-foreground">Contact</Link>
             <Link to="/cgu" className="hover:text-foreground">CGU</Link>
             <Link to="/confidentialite" className="hover:text-foreground">Confidentialité</Link>
+            <Link to="/mentions-legales" className="hover:text-foreground">Mentions légales</Link>
           </div>
         </footer>
       </div>
