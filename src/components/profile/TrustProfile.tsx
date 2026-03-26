@@ -1,8 +1,7 @@
 import { Link } from "react-router-dom";
-import { CheckCircle2, Circle, ShieldCheck, Award } from "lucide-react";
+import { CheckCircle2, Circle, ShieldCheck } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 
 interface Props {
   emailVerified: boolean;
@@ -53,36 +52,6 @@ const TrustProfile = ({ emailVerified, identityVerified, hasAvatar, profileCompl
             )}
           </div>
         ))}
-      </div>
-
-      {/* Badges */}
-      <div className="pt-2 border-t border-border">
-        <div className="flex items-center gap-2 mb-2">
-          <Award className="h-4 w-4 text-primary" />
-          <span className="text-sm font-medium">Badges</span>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <Badge variant={emailVerified ? "default" : "outline"} className={!emailVerified ? "opacity-40" : ""}>
-            ✉️ Email vérifié
-          </Badge>
-          <Badge variant={identityVerified ? "default" : "outline"} className={!identityVerified ? "opacity-40" : ""}>
-            🛡️ Identité vérifiée
-          </Badge>
-          <Badge variant={hasAvatar ? "default" : "outline"} className={!hasAvatar ? "opacity-40" : ""}>
-            📸 Photo ajoutée
-          </Badge>
-          <Badge variant={profileCompletion >= 60 ? "default" : "outline"} className={profileCompletion < 60 ? "opacity-40" : ""}>
-            📝 Profil complet
-          </Badge>
-          <Badge variant={hasFirstActivity ? "default" : "outline"} className={!hasFirstActivity ? "opacity-40" : ""}>
-            ⭐ {role === "owner" ? "Première annonce" : "Première garde"}
-          </Badge>
-          {completedCount === 5 && (
-            <Badge className="bg-amber-500 text-white border-amber-500">
-              🏆 Profil 100%
-            </Badge>
-          )}
-        </div>
       </div>
 
       <p className="text-xs text-muted-foreground italic leading-relaxed">
