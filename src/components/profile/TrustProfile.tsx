@@ -1,8 +1,7 @@
 import { Link } from "react-router-dom";
-import { CheckCircle2, Circle, ShieldCheck, Award } from "lucide-react";
+import { CheckCircle2, Circle, ShieldCheck } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 
 interface Props {
   emailVerified: boolean;
