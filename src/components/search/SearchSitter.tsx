@@ -34,6 +34,7 @@ const envLabels: Record<string, string> = {
 const typeLabels: Record<string, string> = {
   apartment: "Appartement", house: "Maison", farm: "Ferme", chalet: "Chalet", other: "Autre",
 };
+const EQUIPMENT_CHIPS = ["Jardin", "Piscine", "WiFi", "Parking", "Terrasse", "Cheminée", "Buanderie", "Lave-vaisselle", "Congélateur", "TV", "Équipement sport", "BBQ"];
 
 type SortOption = "recent" | "rating" | "start_date" | "contribution";
 type SearchTab = "sits" | "long_stays";
