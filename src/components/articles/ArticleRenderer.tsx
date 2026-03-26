@@ -71,6 +71,8 @@ const ARTICLE_IMAGES: Record<string, string> = {
   "/images/garde-animaux-appartement-lyon.jpg": gardeAnimauxAppartementLyon,
   "/images/boom-petsitting-confluence-lyon.jpg": boomPetsittingConfluence,
   "/images/boom-petsitting-homeoffice-lyon.jpg": boomPetsittingHomeoffice,
+  "/images/parc-tete-dor-chiens-lyon.jpg": parcTeteDorChiens,
+  "/images/parc-parilly-labrador-lyon.jpg": parcParillyLabrador,
 };
 
 function resolveArticleImages(html: string): string {
