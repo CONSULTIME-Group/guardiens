@@ -294,6 +294,24 @@ export default function ArticleDetail() {
               "addressCountry": "FR"
             }
           }),
+          ...(article.city === "Chambéry" && {
+            "geo": { "@type": "GeoCoordinates", "latitude": 45.5646, "longitude": 5.9178 },
+            "areaServed": [
+              { "@type": "City", "name": "Chambéry" },
+              { "@type": "City", "name": "Aix-les-Bains" },
+              { "@type": "City", "name": "Cognin" },
+              { "@type": "City", "name": "La Motte-Servolex" },
+              { "@type": "City", "name": "Barby" },
+              { "@type": "City", "name": "Challes-les-Eaux" }
+            ],
+            "address": {
+              "@type": "PostalAddress",
+              "addressLocality": "Chambéry",
+              "addressRegion": "Auvergne-Rhône-Alpes",
+              "postalCode": "73000",
+              "addressCountry": "FR"
+            }
+          }),
           "priceRange": "Gratuit",
           "openingHoursSpecification": {
             "@type": "OpeningHoursSpecification",
