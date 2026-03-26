@@ -50,6 +50,22 @@ const OwnerStepAnimals = ({ pets, onAddPet, onUpdatePet, onRemovePet }: Props) =
   const [isNew, setIsNew] = useState(false);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handlePhotoUpload = async (file: File) => {
+    if (!editingPet || !file) return;
+    if (file.size > 5 * 1024 * 1024) return;
+    setUploading(true);
+    const ext = file.name.split(".").pop();
+    const path = `pets/${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
+    const { error } = await supabase.storage.from("property-photos").upload(path, file);
+    if (!error) {
+      const { data: urlData } = supabase.storage.from("property-photos").getPublicUrl(path);
+      setEditingPet({ ...editingPet, photo_url: urlData.publicUrl });
+    }
+    setUploading(false);
+  };
 
   const startNew = () => {
     setEditingPet({ ...emptyPet });
