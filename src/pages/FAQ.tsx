@@ -29,7 +29,7 @@ const FAQ = () => {
         .eq("published", true)
         .order("sort_order", { ascending: true });
       if (error) throw error;
-      return (data || []) as FaqEntry[];
+      return (data || []) as unknown as FaqEntry[];
     },
   });
 

@@ -42,7 +42,7 @@ const AdminFAQ = () => {
         .order("category")
         .order("sort_order", { ascending: true });
       if (error) throw error;
-      return (data || []) as FaqEntry[];
+      return (data || []) as unknown as FaqEntry[];
     },
   });
 
