@@ -41,6 +41,7 @@ const OwnerDashboard = () => {
   const [breedArticles, setBreedArticles] = useState<any[]>([]);
   const [breedProfiles, setBreedProfiles] = useState<any[]>([]);
   const [localGuides, setLocalGuides] = useState<any[]>([]);
+  const [verificationStatus, setVerificationStatus] = useState<string>("not_submitted");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
