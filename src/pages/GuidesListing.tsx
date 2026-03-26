@@ -24,6 +24,7 @@ interface PlaceCount {
 
 
 const GuidesListing = () => {
+  const navigate = useNavigate();
   const [search, setSearch] = useState("");
   const [selectedDept, setSelectedDept] = useState("all");
 
