@@ -25,6 +25,8 @@ import aixLesBainsVillaLac from "@/assets/aix-les-bains-villa-lac.jpg";
 import goldenRetrieverQuaisLyon from "@/assets/golden-retriever-quais-lyon.jpg";
 import goldenRetrieverTeteDorLyon from "@/assets/golden-retriever-tete-dor-lyon.jpg";
 import goldenRetrieverInterieurVieuxLyon from "@/assets/golden-retriever-interieur-vieux-lyon.jpg";
+import borderCollieFeyssineLyon from "@/assets/border-collie-feyssine-lyon.jpg";
+import borderCollieInterieurCroixRousse from "@/assets/border-collie-interieur-croix-rousse.jpg";
 
 const ARTICLE_IMAGES: Record<string, string> = {
   "/images/lyon-hero-quais.jpg": lyonHeroQuais,
@@ -49,6 +51,8 @@ const ARTICLE_IMAGES: Record<string, string> = {
   "/images/golden-retriever-quais-lyon.jpg": goldenRetrieverQuaisLyon,
   "/images/golden-retriever-tete-dor-lyon.jpg": goldenRetrieverTeteDorLyon,
   "/images/golden-retriever-interieur-vieux-lyon.jpg": goldenRetrieverInterieurVieuxLyon,
+  "/images/border-collie-feyssine-lyon.jpg": borderCollieFeyssineLyon,
+  "/images/border-collie-interieur-croix-rousse.jpg": borderCollieInterieurCroixRousse,
 };
 
 function resolveArticleImages(html: string): string {
