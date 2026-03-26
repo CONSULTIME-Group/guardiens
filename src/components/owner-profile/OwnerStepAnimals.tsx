@@ -4,10 +4,12 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Pencil, Trash2, ChevronDown, ChevronUp, Camera } from "lucide-react";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Plus, Pencil, Trash2, ChevronDown, ChevronUp, Camera, X } from "lucide-react";
 import HintBubble from "../profile/HintBubble";
 import BreedProfileCard from "../breeds/BreedProfileCard";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 import type { Pet } from "@/hooks/useOwnerProfile";
 
 const SPECIES = [
@@ -53,17 +55,52 @@ const OwnerStepAnimals = ({ pets, onAddPet, onUpdatePet, onRemovePet }: Props) =
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const editFormRef = useRef<HTMLDivElement>(null);
+  const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
+
+  const compressImage = (file: File, maxWidth = 1200, quality = 0.8): Promise<Blob> => {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        const ratio = Math.min(maxWidth / img.width, 1);
+        canvas.width = img.width * ratio;
+        canvas.height = img.height * ratio;
+        const ctx = canvas.getContext("2d")!;
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        canvas.toBlob(
+          (blob) => (blob ? resolve(blob) : reject(new Error("Compression failed"))),
+          "image/jpeg",
+          quality
+        );
+      };
+      img.onerror = reject;
+      img.src = URL.createObjectURL(file);
+    });
+  };
 
   const handlePhotoUpload = async (file: File) => {
     if (!editingPet || !file) return;
-    if (file.size > 5 * 1024 * 1024) return;
+    if (!file.type.startsWith("image/")) {
+      toast.error("Seules les images sont acceptées");
+      return;
+    }
     setUploading(true);
-    const ext = file.name.split(".").pop();
-    const path = `pets/${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
-    const { error } = await supabase.storage.from("property-photos").upload(path, file);
-    if (!error) {
-      const { data: urlData } = supabase.storage.from("property-photos").getPublicUrl(path);
-      setEditingPet({ ...editingPet, photo_url: urlData.publicUrl });
+    try {
+      let uploadFile: Blob | File = file;
+      if (file.size > 2 * 1024 * 1024) {
+        uploadFile = await compressImage(file);
+      }
+      const path = `pets/${Date.now()}_${Math.random().toString(36).slice(2)}.jpg`;
+      const { error } = await supabase.storage.from("property-photos").upload(path, uploadFile, { contentType: "image/jpeg" });
+      if (error) {
+        toast.error("Erreur lors de l'upload de la photo");
+      } else {
+        const { data: urlData } = supabase.storage.from("property-photos").getPublicUrl(path);
+        setEditingPet({ ...editingPet, photo_url: urlData.publicUrl });
+        toast.success("Photo ajoutée !");
+      }
+    } catch {
+      toast.error("Erreur lors du traitement de l'image");
     }
     setUploading(false);
   };
@@ -102,7 +139,7 @@ const OwnerStepAnimals = ({ pets, onAddPet, onUpdatePet, onRemovePet }: Props) =
         <div key={pet.id} className="bg-muted/30 rounded-lg border border-border overflow-hidden">
           <button type="button" onClick={() => setExpandedId(expandedId === pet.id ? null : pet.id!)}
             className="w-full flex items-center gap-3 p-4 text-left">
-            {pet.photo_url && <img src={pet.photo_url} alt={pet.name} className="w-12 h-12 rounded-lg object-cover" />}
+            {pet.photo_url && <img src={pet.photo_url} alt={pet.name} className="w-12 h-12 rounded-lg object-cover cursor-pointer hover:ring-2 ring-primary transition-all" onClick={(e) => { e.stopPropagation(); setLightboxUrl(pet.photo_url!); }} />}
             <div className="flex-1">
               <span className="font-semibold">{pet.name}</span>
               <span className="text-sm text-muted-foreground ml-2">{speciesLabel(pet.species)}{pet.breed ? ` — ${pet.breed}` : ""}</span>
@@ -143,7 +180,7 @@ const OwnerStepAnimals = ({ pets, onAddPet, onUpdatePet, onRemovePet }: Props) =
             <Label>Photo</Label>
             <div className="flex items-center gap-4">
               {editingPet.photo_url ? (
-                <img src={editingPet.photo_url} alt="" className="w-20 h-20 rounded-xl object-cover border border-border" />
+                <img src={editingPet.photo_url} alt="" className="w-20 h-20 rounded-xl object-cover border border-border cursor-pointer hover:ring-2 ring-primary transition-all" onClick={() => setLightboxUrl(editingPet.photo_url!)} />
               ) : (
                 <div className="w-20 h-20 rounded-xl bg-muted flex items-center justify-center border border-dashed border-border">
                   <Camera className="w-6 h-6 text-muted-foreground" />
@@ -258,6 +295,15 @@ const OwnerStepAnimals = ({ pets, onAddPet, onUpdatePet, onRemovePet }: Props) =
           <Plus className="w-4 h-4 mr-2" /> Ajouter un animal
         </Button>
       )}
+
+      {/* Lightbox */}
+      <Dialog open={!!lightboxUrl} onOpenChange={() => setLightboxUrl(null)}>
+        <DialogContent className="max-w-2xl p-2 bg-background/95 backdrop-blur">
+          {lightboxUrl && (
+            <img src={lightboxUrl} alt="Photo animal" className="w-full h-auto max-h-[80vh] object-contain rounded-lg" />
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
