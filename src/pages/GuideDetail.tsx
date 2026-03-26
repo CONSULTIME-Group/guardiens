@@ -98,13 +98,6 @@ const GuideDetail = () => {
   const categories = [...new Set(places.map((p) => p.category))];
   const placesWithCoords = places.filter((p) => p.latitude && p.longitude);
 
-  // Get center from places or default to Lyon
-  const center: [number, number] = placesWithCoords.length > 0
-    ? [
-        placesWithCoords.reduce((s, p) => s + p.latitude!, 0) / placesWithCoords.length,
-        placesWithCoords.reduce((s, p) => s + p.longitude!, 0) / placesWithCoords.length,
-      ]
-    : [45.764, 4.8357];
 
   if (guideLoading) {
     return (
