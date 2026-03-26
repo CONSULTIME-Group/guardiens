@@ -47,6 +47,7 @@ export interface PastAnimal {
   id?: string;
   species: string;
   name: string;
+  breed?: string;
   photo_url?: string;
 }
 
