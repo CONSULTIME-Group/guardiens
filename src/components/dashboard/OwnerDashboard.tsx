@@ -115,6 +115,15 @@ const OwnerDashboard = () => {
       const trustedCount = Object.values(sitterSitCounts).filter(c => c >= 2).length;
       setTrustedSitterCount(trustedCount);
 
+      // My own missions
+      const { data: myMissionsData } = await supabase
+        .from("small_missions")
+        .select("id, title, category, status, created_at, small_mission_responses(id, status)")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false })
+        .limit(3);
+      setMyMissions(myMissionsData || []);
+
       setLoading(false);
     };
     load();
