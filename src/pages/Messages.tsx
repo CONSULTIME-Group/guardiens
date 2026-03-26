@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { ArrowLeft, Send, Image as ImageIcon, Check, CheckCheck, ExternalLink, CheckCircle2, AlertTriangle, Phone, Home, PawPrint, Star, User, Archive, Filter, X } from "lucide-react";
 import { format, isToday, isYesterday } from "date-fns";
 import { fr } from "date-fns/locale";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { useIsMobile } from "@/hooks/use-mobile";
 import HouseGuideBlock from "@/components/messages/HouseGuideBlock";
 import { useToast } from "@/hooks/use-toast";
@@ -74,6 +74,7 @@ const Messages = () => {
   const { user } = useAuth();
   const isMobile = useIsMobile();
   const { toast } = useToast();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [activeConv, setActiveConv] = useState<Conversation | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -156,6 +157,20 @@ const Messages = () => {
   }, [user]);
 
   useEffect(() => { loadConversations(); }, [loadConversations]);
+
+  // Auto-select conversation from URL query param
+  useEffect(() => {
+    const convId = searchParams.get("conv");
+    if (convId && conversations.length > 0 && !activeConv) {
+      const target = conversations.find(c => c.id === convId);
+      if (target) {
+        setActiveConv(target);
+        // Clear the param
+        searchParams.delete("conv");
+        setSearchParams(searchParams, { replace: true });
+      }
+    }
+  }, [conversations, searchParams, activeConv, setSearchParams]);
 
   // Load messages for active conversation
   const loadMessages = useCallback(async (convId: string) => {
@@ -437,24 +452,22 @@ const Messages = () => {
                 <ArrowLeft className="h-5 w-5" />
               </button>
             )}
-            {activeConv.other_user?.avatar_url ? (
-              <img src={activeConv.other_user.avatar_url} alt="" className="w-10 h-10 rounded-full object-cover" />
-            ) : (
-              <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center font-heading text-sm font-bold">
-                {activeConv.other_user?.first_name?.charAt(0) || "?"}
-              </div>
-            )}
+            <Link to={`/search?user=${activeConv.other_user?.id}`} className="shrink-0">
+              {activeConv.other_user?.avatar_url ? (
+                <img src={activeConv.other_user.avatar_url} alt="" className="w-10 h-10 rounded-full object-cover hover:ring-2 hover:ring-primary/50 transition-all" />
+              ) : (
+                <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center font-heading text-sm font-bold hover:ring-2 hover:ring-primary/50 transition-all">
+                  {activeConv.other_user?.first_name?.charAt(0) || "?"}
+                </div>
+              )}
+            </Link>
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2">
-                <p className="font-medium text-sm">{activeConv.other_user?.first_name}</p>
-                {/* Profile link */}
                 <Link
                   to={`/search?user=${activeConv.other_user?.id}`}
-                  className="p-1 rounded hover:bg-accent text-muted-foreground hover:text-foreground transition-colors"
-                  title="Voir le profil"
-                  onClick={(e) => e.stopPropagation()}
+                  className="font-medium text-sm hover:text-primary transition-colors"
                 >
-                  <ExternalLink className="h-3.5 w-3.5" />
+                  {activeConv.other_user?.first_name}
                 </Link>
               </div>
               <div className="flex items-center gap-2 text-xs text-muted-foreground flex-wrap">
