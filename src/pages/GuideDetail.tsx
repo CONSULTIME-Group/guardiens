@@ -161,6 +161,12 @@ const GuideDetail = () => {
                 House-sitting dans le {guide.department} <ArrowRight className="h-3.5 w-3.5" />
               </Link>
             )}
+            <Link
+              to="/petites-missions"
+              className="text-sm text-primary hover:underline flex items-center gap-1"
+            >
+              Petites missions d'entraide <ArrowRight className="h-3.5 w-3.5" />
+            </Link>
           </div>
         </header>
 

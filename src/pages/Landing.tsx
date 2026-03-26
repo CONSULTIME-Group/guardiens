@@ -149,6 +149,12 @@ const Landing = () => {
           <Button variant="ghost" size="sm" className="hidden sm:inline-flex" onClick={() => navigate("/actualites")}>
             Actualités
           </Button>
+          <Button variant="ghost" size="sm" className="hidden sm:inline-flex" onClick={() => navigate("/guides")}>
+            Guides
+          </Button>
+          <Button variant="ghost" size="sm" className="hidden sm:inline-flex" onClick={() => navigate("/petites-missions")}>
+            Entraide
+          </Button>
           <Button variant="ghost" size="sm" className="hidden sm:inline-flex" onClick={() => navigate("/tarifs")}>
             Tarifs
           </Button>
