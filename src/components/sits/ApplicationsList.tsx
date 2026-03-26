@@ -175,19 +175,48 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
     load();
   };
 
+  const archiveApp = (appId: string) => {
+    const next = new Set(archivedIds);
+    next.add(appId);
+    setArchivedIds(next);
+    localStorage.setItem(`archived-apps-${sitId}`, JSON.stringify([...next]));
+    toast({ title: "Candidature archivée" });
+  };
+
+  const unarchiveApp = (appId: string) => {
+    const next = new Set(archivedIds);
+    next.delete(appId);
+    setArchivedIds(next);
+    localStorage.setItem(`archived-apps-${sitId}`, JSON.stringify([...next]));
+  };
+
+  const visibleApps = applications.filter(app => showArchived ? archivedIds.has(app.id) : !archivedIds.has(app.id));
+  const archivedCount = applications.filter(app => archivedIds.has(app.id)).length;
+
   if (loading) return <p className="text-sm text-muted-foreground">Chargement des candidatures...</p>;
 
   return (
     <div className="mt-8">
-      <div className="flex items-center gap-2 mb-4">
+      <div className="flex items-center gap-2 mb-4 flex-wrap">
         <Users className="h-4 w-4 text-primary" />
         <h2 className="font-heading text-lg font-semibold">
-          Candidatures ({applications.length})
+          Candidatures ({applications.length - archivedCount})
         </h2>
+        {archivedCount > 0 && (
+          <button
+            onClick={() => setShowArchived(!showArchived)}
+            className="ml-auto flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
+          >
+            {showArchived ? <Eye className="h-3.5 w-3.5" /> : <EyeOff className="h-3.5 w-3.5" />}
+            {showArchived ? "Voir actives" : `Archivées (${archivedCount})`}
+          </button>
+        )}
       </div>
 
-      {applications.length === 0 ? (
-        <p className="text-sm text-muted-foreground italic">Aucune candidature pour le moment.</p>
+      {visibleApps.length === 0 ? (
+        <p className="text-sm text-muted-foreground italic">
+          {showArchived ? "Aucune candidature archivée." : "Aucune candidature pour le moment."}
+        </p>
       ) : (
         <div className="space-y-4">
           {applications.map((app) => {
