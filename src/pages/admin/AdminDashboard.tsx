@@ -214,7 +214,15 @@ const AdminDashboard = () => {
 
   return (
     <div className="space-y-8">
-      <h1 className="font-body text-2xl font-bold">Dashboard</h1>
+      <div className="flex items-center justify-between">
+        <h1 className="font-body text-2xl font-bold">Dashboard</h1>
+        <Button variant="outline" size="sm" asChild>
+          <a href="https://analytics.google.com/analytics/web/#/p/G-9JP4VR1RRP" target="_blank" rel="noopener noreferrer">
+            <ExternalLink className="h-4 w-4 mr-2" />
+            Google Analytics
+          </a>
+        </Button>
+      </div>
 
       {/* KPI cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
