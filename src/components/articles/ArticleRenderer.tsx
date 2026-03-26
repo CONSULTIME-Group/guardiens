@@ -18,6 +18,10 @@ import valenceConfianceCafe from "@/assets/valence-confiance-cafe.jpg";
 import chamberyElephantsChien from "@/assets/chambery-elephants-chien.jpg";
 import chamberyChatBauges from "@/assets/chambery-chat-bauges.jpg";
 import chamberyConfianceRue from "@/assets/chambery-confiance-rue.jpg";
+import clermontJaudeChien from "@/assets/clermont-jaude-chien.jpg";
+import villeurbanneGrattecielChien from "@/assets/villeurbanne-gratteciel-chien.jpg";
+import venissieuxParillyChat from "@/assets/venissieux-parilly-chat.jpg";
+import aixLesBainsVillaLac from "@/assets/aix-les-bains-villa-lac.jpg";
 
 const ARTICLE_IMAGES: Record<string, string> = {
   "/images/lyon-hero-quais.jpg": lyonHeroQuais,
@@ -35,6 +39,10 @@ const ARTICLE_IMAGES: Record<string, string> = {
   "/images/chambery-elephants-chien.jpg": chamberyElephantsChien,
   "/images/chambery-chat-bauges.jpg": chamberyChatBauges,
   "/images/chambery-confiance-rue.jpg": chamberyConfianceRue,
+  "/images/clermont-jaude-chien.jpg": clermontJaudeChien,
+  "/images/villeurbanne-gratteciel-chien.jpg": villeurbanneGrattecielChien,
+  "/images/venissieux-parilly-chat.jpg": venissieuxParillyChat,
+  "/images/aix-les-bains-villa-lac.jpg": aixLesBainsVillaLac,
 };
 
 function resolveArticleImages(html: string): string {
