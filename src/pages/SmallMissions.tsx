@@ -209,46 +209,6 @@ const SmallMissions = () => {
             })}
           </section>
 
-          {/* Missions en cours */}
-          {recentMissions && recentMissions.length > 0 && (
-            <section className="space-y-6">
-              <h2 className="font-heading text-2xl font-bold text-foreground text-center">
-                Missions en cours
-              </h2>
-              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {recentMissions.map((m: any) => {
-                  const meta = CATEGORY_META[m.category] || CATEGORY_META.animals;
-                  const Icon = meta.icon;
-                  return (
-                    <Card key={m.id} className="border-dashed border-border">
-                      <CardContent className="p-4 space-y-2">
-                        <div className="flex items-center gap-2">
-                          <Icon className={`h-4 w-4 ${meta.colorClass}`} />
-                          <span className="text-xs font-medium text-muted-foreground">{meta.label}</span>
-                        </div>
-                        <p className="font-medium text-sm text-foreground">{m.title}</p>
-                        <p className="text-xs text-muted-foreground">{m.city} • {m.duration_estimate}</p>
-                        <p className="text-xs text-muted-foreground">En échange : {m.exchange_offer}</p>
-                        {isAuthenticated ? (
-                          <Link to={`/petites-missions/${m.id}`}>
-                            <Button size="sm" variant="outline" className="w-full mt-2">
-                              Proposer mon aide
-                            </Button>
-                          </Link>
-                        ) : (
-                          <Link to="/register">
-                            <Button size="sm" variant="outline" className="w-full mt-2">
-                              Inscrivez-vous pour aider
-                            </Button>
-                          </Link>
-                        )}
-                      </CardContent>
-                    </Card>
-                  );
-                })}
-              </div>
-            </section>
-          )}
 
           {/* Comment ça marche */}
           <section className="space-y-8">
