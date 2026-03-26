@@ -1,11 +1,12 @@
 import { NavLink, useLocation } from "react-router-dom";
-import { Home, Search, Calendar, MessageSquare, User, LogOut, Bell, Settings, PawPrint, ArrowLeftRight, Newspaper, Shield, Compass, Handshake } from "lucide-react";
+import { Home, Search, Calendar, MessageSquare, User, LogOut, Bell, Settings, PawPrint, ArrowLeftRight, Newspaper, Shield, Compass, Handshake, Menu, X } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAdmin } from "@/hooks/useAdmin";
 import { cn } from "@/lib/utils";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import NotificationBell from "./NotificationBell";
+import { Sheet, SheetContent, SheetTrigger, SheetClose } from "@/components/ui/sheet";
 
 const navItems = [
   { to: "/dashboard", icon: Home, label: "Dashboard" },
@@ -161,8 +162,10 @@ export const Sidebar = () => {
 
 export const BottomNav = () => {
   const location = useLocation();
-  const { user, activeRole } = useAuth();
+  const { user, activeRole, setActiveRole, logout } = useAuth();
+  const { isAdmin } = useAdmin();
   const [notifCount, setNotifCount] = useState(0);
+  const [sheetOpen, setSheetOpen] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -196,11 +199,12 @@ export const BottomNav = () => {
   }, [user]);
 
   const effectiveRole = user?.role === "both" ? activeRole : user?.role;
-  const filteredItems = navItems.filter(item => !("hideForRole" in item) || effectiveRole !== item.hideForRole);
+
   const mobileItems = [
-    ...filteredItems.slice(0, 3),
-    { to: "/notifications", icon: Bell, label: "Notifs", notifCount },
-    filteredItems[filteredItems.length - 1], // Mon profil
+    { to: "/dashboard", icon: Home, label: "Accueil" },
+    { to: "/search", icon: Search, label: "Recherche" },
+    { to: "/sits", icon: Calendar, label: "Gardes" },
+    { to: "/notifications", icon: Bell, label: "Notifs" },
   ];
 
   return (
@@ -208,7 +212,6 @@ export const BottomNav = () => {
       <div className="flex justify-around items-center h-16 px-2">
         {mobileItems.map((item) => {
           const isActive = location.pathname === item.to;
-          const count = "notifCount" in item ? item.notifCount : item.to === "/messages" ? undefined : undefined;
           return (
             <NavLink
               key={item.to}
@@ -230,6 +233,88 @@ export const BottomNav = () => {
             </NavLink>
           );
         })}
+
+        {/* More menu */}
+        <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
+          <SheetTrigger asChild>
+            <button className="flex flex-col items-center gap-1 px-2 py-1 text-xs text-muted-foreground transition-colors">
+              <Menu className="h-5 w-5" />
+              <span>Plus</span>
+            </button>
+          </SheetTrigger>
+          <SheetContent side="bottom" className="rounded-t-2xl max-h-[80vh] overflow-y-auto">
+            {/* Role switcher */}
+            {user?.role === "both" && (
+              <div className="mb-4">
+                <p className="text-xs text-muted-foreground mb-2 font-medium">Profil actif</p>
+                <div className="flex items-center bg-accent rounded-lg p-1 gap-1">
+                  <button
+                    onClick={() => setActiveRole("owner")}
+                    className={cn(
+                      "flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-md text-sm font-medium transition-colors",
+                      activeRole === "owner"
+                        ? "bg-primary text-primary-foreground shadow-sm"
+                        : "text-muted-foreground hover:text-foreground"
+                    )}
+                  >
+                    <PawPrint className="h-4 w-4" />
+                    Propriétaire
+                  </button>
+                  <button
+                    onClick={() => setActiveRole("sitter")}
+                    className={cn(
+                      "flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-md text-sm font-medium transition-colors",
+                      activeRole === "sitter"
+                        ? "bg-primary text-primary-foreground shadow-sm"
+                        : "text-muted-foreground hover:text-foreground"
+                    )}
+                  >
+                    <User className="h-4 w-4" />
+                    Gardien
+                  </button>
+                </div>
+              </div>
+            )}
+
+            <div className="space-y-1">
+              {[
+                { to: "/messages", icon: MessageSquare, label: "Messagerie" },
+                { to: "/actualites", icon: Newspaper, label: "Actualités" },
+                { to: "/guides", icon: Compass, label: "Guides locaux" },
+                { to: "/petites-missions", icon: Handshake, label: "Entraide" },
+                ...(effectiveRole !== "sitter" ? [{ to: "/owner-profile", icon: PawPrint, label: "Profil proprio" }] : []),
+                { to: "/profile", icon: User, label: "Mon profil" },
+                { to: "/settings", icon: Settings, label: "Paramètres" },
+                ...(isAdmin ? [{ to: "/admin", icon: Shield, label: "Espace admin" }] : []),
+              ].map((item) => (
+                <NavLink
+                  key={item.to}
+                  to={item.to}
+                  onClick={() => setSheetOpen(false)}
+                  className={({ isActive }) =>
+                    cn(
+                      "flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors",
+                      isActive
+                        ? "bg-primary/10 text-primary"
+                        : "text-muted-foreground hover:bg-accent hover:text-foreground"
+                    )
+                  }
+                >
+                  <item.icon className="h-5 w-5" />
+                  {item.label}
+                </NavLink>
+              ))}
+
+              <button
+                onClick={() => { setSheetOpen(false); logout(); }}
+                className="flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-destructive hover:bg-destructive/10 transition-colors w-full"
+              >
+                <LogOut className="h-5 w-5" />
+                Déconnexion
+              </button>
+            </div>
+          </SheetContent>
+        </Sheet>
       </div>
     </nav>
   );

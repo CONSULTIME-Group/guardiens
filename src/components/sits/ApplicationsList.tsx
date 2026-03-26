@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
-import { Star, MapPin, CheckCircle2, XCircle, MessageSquare, Users } from "lucide-react";
+import { Star, MapPin, CheckCircle2, XCircle, MessageSquare, Users, Archive, Eye, EyeOff } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import VerifiedBadge from "@/components/profile/VerifiedBadge";
 
@@ -29,6 +29,13 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
   const { user } = useAuth();
   const [applications, setApplications] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showArchived, setShowArchived] = useState(false);
+  const [archivedIds, setArchivedIds] = useState<Set<string>>(() => {
+    try {
+      const stored = localStorage.getItem(`archived-apps-${sitId}`);
+      return stored ? new Set(JSON.parse(stored)) : new Set();
+    } catch { return new Set(); }
+  });
   const navigate = useNavigate();
 
   const load = async () => {
@@ -168,26 +175,57 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
     load();
   };
 
+  const archiveApp = (appId: string) => {
+    const next = new Set(archivedIds);
+    next.add(appId);
+    setArchivedIds(next);
+    localStorage.setItem(`archived-apps-${sitId}`, JSON.stringify([...next]));
+    toast({ title: "Candidature archivée" });
+  };
+
+  const unarchiveApp = (appId: string) => {
+    const next = new Set(archivedIds);
+    next.delete(appId);
+    setArchivedIds(next);
+    localStorage.setItem(`archived-apps-${sitId}`, JSON.stringify([...next]));
+  };
+
+  const visibleApps = applications.filter(app => showArchived ? archivedIds.has(app.id) : !archivedIds.has(app.id));
+  const archivedCount = applications.filter(app => archivedIds.has(app.id)).length;
+
   if (loading) return <p className="text-sm text-muted-foreground">Chargement des candidatures...</p>;
 
   return (
     <div className="mt-8">
-      <div className="flex items-center gap-2 mb-4">
+      <div className="flex items-center gap-2 mb-4 flex-wrap">
         <Users className="h-4 w-4 text-primary" />
         <h2 className="font-heading text-lg font-semibold">
-          Candidatures ({applications.length})
+          Candidatures ({applications.length - archivedCount})
         </h2>
+        {archivedCount > 0 && (
+          <button
+            onClick={() => setShowArchived(!showArchived)}
+            className="ml-auto flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
+          >
+            {showArchived ? <Eye className="h-3.5 w-3.5" /> : <EyeOff className="h-3.5 w-3.5" />}
+            {showArchived ? "Voir actives" : `Archivées (${archivedCount})`}
+          </button>
+        )}
       </div>
 
-      {applications.length === 0 ? (
-        <p className="text-sm text-muted-foreground italic">Aucune candidature pour le moment.</p>
+      {visibleApps.length === 0 ? (
+        <p className="text-sm text-muted-foreground italic">
+          {showArchived ? "Aucune candidature archivée." : "Aucune candidature pour le moment."}
+        </p>
       ) : (
         <div className="space-y-4">
-          {applications.map((app) => {
+          {visibleApps.map((app) => {
             const sitter = app.sitter;
             const status = statusStyles[app.status] || statusStyles.pending;
             const animalTypes: string[] = app.sitterProfile?.animal_types || [];
             const expYears = app.sitterProfile?.experience_years;
+            const isArchived = archivedIds.has(app.id);
+            const canArchive = ["rejected", "cancelled"].includes(app.status);
 
             return (
               <div key={app.id} className="bg-card border border-border rounded-lg p-5">
@@ -259,6 +297,32 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
                 {app.status === "accepted" && (
                   <div className="mt-3 flex items-center gap-2 text-sm text-green-700 font-medium">
                     <CheckCircle2 className="h-4 w-4" /> Gardien choisi pour cette garde
+                  </div>
+                )}
+
+                {canArchive && !isArchived && (
+                  <div className="flex mt-3">
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="gap-1.5 text-muted-foreground"
+                      onClick={() => archiveApp(app.id)}
+                    >
+                      <Archive className="h-3.5 w-3.5" /> Archiver
+                    </Button>
+                  </div>
+                )}
+
+                {isArchived && (
+                  <div className="flex mt-3">
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="gap-1.5 text-muted-foreground"
+                      onClick={() => unarchiveApp(app.id)}
+                    >
+                      <Eye className="h-3.5 w-3.5" /> Désarchiver
+                    </Button>
                   </div>
                 )}
               </div>
