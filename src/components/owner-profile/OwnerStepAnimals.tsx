@@ -76,6 +76,7 @@ const OwnerStepAnimals = ({ pets, onAddPet, onUpdatePet, onRemovePet }: Props) =
   const startEdit = (pet: Pet) => {
     setEditingPet({ ...pet });
     setIsNew(false);
+    setTimeout(() => editFormRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 100);
   };
 
   const handleSave = async () => {
