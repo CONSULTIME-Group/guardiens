@@ -297,6 +297,12 @@ const PublicProfile = () => {
                     </div>
                   </div>
                 )}
+
+                {/* External experiences */}
+                <PublicExperiences experiences={externalExperiences} />
+
+                {/* Gallery */}
+                <PublicGallery photos={galleryPhotos} firstName={profile.first_name || "Gardien"} />
               </>
             ) : (
               <p className="text-sm text-muted-foreground italic">Profil gardien non complété.</p>
