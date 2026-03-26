@@ -132,6 +132,19 @@ const SitterDashboard = () => {
 
       setMetrics(prev => ({ ...prev, missionsPosted: allMyMissionsRes.data?.length || 0, missionsHelped: allMyResponsesRes.data?.length || 0 }));
 
+      // Emergency sitter eligibility
+      const { data: emProfile } = await supabase.from("emergency_sitter_profiles").select("id").eq("user_id", user.id).maybeSingle();
+      if (emProfile) {
+        setHasEmergencyProfile(true);
+      } else {
+        const completedSits = acceptedApps.filter((a: any) => a.sit?.status === "completed").length;
+        const avg = reviews.length > 0 ? reviews.reduce((s: number, r: any) => s + r.overall_rating, 0) / reviews.length : 0;
+        const cancellations = (await supabase.from("profiles").select("cancellation_count, identity_verified").eq("id", user.id).single()).data;
+        if (completedSits >= 5 && avg >= 4.7 && (cancellations?.cancellation_count || 0) === 0 && cancellations?.identity_verified) {
+          setEmergencyEligible(true);
+        }
+      }
+
       setLoading(false);
     };
     load();
