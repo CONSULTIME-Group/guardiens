@@ -226,14 +226,27 @@ export default function ArticleDetail() {
             ]
           }),
           ...(article.city === "Grenoble" && {
-            "geo": { "@type": "GeoCoordinates", "latitude": 45.1885, "longitude": 5.7245 },
+            "geo": { "@type": "GeoCoordinates", "latitude": 45.1885, "longitude": 5.7248 },
             "areaServed": [
               { "@type": "City", "name": "Grenoble" },
               { "@type": "City", "name": "Meylan" },
+              { "@type": "City", "name": "Saint-Ismier" },
+              { "@type": "City", "name": "Corenc" },
               { "@type": "City", "name": "La Tronche" },
+              { "@type": "City", "name": "Sassenage" },
+              { "@type": "City", "name": "Vizille" },
               { "@type": "City", "name": "Échirolles" },
-              { "@type": "City", "name": "Saint-Martin-d'Hères" }
-            ]
+              { "@type": "City", "name": "Saint-Martin-d'Hères" },
+              { "@type": "City", "name": "Fontaine" },
+              { "@type": "City", "name": "Voiron" }
+            ],
+            "address": {
+              "@type": "PostalAddress",
+              "addressLocality": "Grenoble",
+              "addressRegion": "Auvergne-Rhône-Alpes",
+              "postalCode": "38000",
+              "addressCountry": "FR"
+            }
           }),
           ...(article.city === "Annecy" && {
             "geo": { "@type": "GeoCoordinates", "latitude": 45.8992, "longitude": 6.1294 },
