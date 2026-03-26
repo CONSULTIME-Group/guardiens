@@ -1,4 +1,5 @@
 import { useState } from "react";
+import entraideHeader from "@/assets/entraide-header.jpg";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -110,17 +111,24 @@ const SmallMissions = () => {
           </div>
         </header>
 
+        {/* Hero with image */}
+        <section className="relative -mt-0 overflow-hidden rounded-b-2xl">
+          <div className="absolute inset-0">
+            <img src={entraideHeader} alt="" className="w-full h-full object-cover" />
+            <div className="absolute inset-0 bg-gradient-to-r from-background/90 via-background/75 to-background/60" />
+          </div>
+          <div className="relative max-w-6xl mx-auto px-4 py-16 md:py-24 text-center space-y-4">
+            <h1 className="font-heading text-4xl md:text-5xl font-bold text-foreground">
+              Petites missions — Entraide entre voisins
+            </h1>
+            <p className="text-muted-foreground max-w-2xl mx-auto">
+              Besoin d'un coup de main ? Quelqu'un de la communauté est là. Pas d'argent — juste du lien.
+            </p>
+          </div>
+        </section>
+
         <main className="max-w-6xl mx-auto px-4 py-12 space-y-16">
-          {/* Missions en cours — NOW AT TOP */}
           <section className="space-y-6">
-              <div className="text-center space-y-2">
-                <h1 className="font-heading text-4xl md:text-5xl font-bold text-foreground">
-                  Petites missions — Entraide entre voisins
-                </h1>
-                <p className="text-muted-foreground max-w-2xl mx-auto">
-                  Besoin d'un coup de main ? Quelqu'un de la communauté est là. Pas d'argent — juste du lien.
-                </p>
-              </div>
 
               {isAuthenticated && (
                 <div className="text-center">
