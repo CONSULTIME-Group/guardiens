@@ -57,6 +57,7 @@ import AdminDepartments from "./pages/admin/AdminDepartments";
 import DepartmentPage from "./pages/DepartmentPage";
 import Pricing from "./pages/Pricing";
 import SmallMissions from "./pages/SmallMissions";
+import SmallMissionDetail from "./pages/SmallMissionDetail";
 import CreateSmallMission from "./pages/CreateSmallMission";
 import MentionsLegales from "./pages/MentionsLegales";
 import AdminSmallMissions from "./pages/admin/AdminSmallMissions";
@@ -99,6 +100,7 @@ const AppRoutes = () => (
     <Route path="/tarifs" element={<Pricing />} />
     <Route path="/petites-missions" element={<SmallMissions />} />
     <Route path="/petites-missions/creer" element={<ProtectedRoute><CreateSmallMission /></ProtectedRoute>} />
+    <Route path="/petites-missions/:id" element={<SmallMissionDetail />} />
     <Route element={<AdminLayout />}>
       <Route path="/admin" element={<AdminDashboard />} />
       <Route path="/admin/users" element={<AdminUsers />} />
