@@ -52,6 +52,8 @@ import AdminFAQ from "./pages/admin/AdminFAQ";
 import GuidesListing from "./pages/GuidesListing";
 import GuideDetail from "./pages/GuideDetail";
 import AdminGuides from "./pages/admin/AdminGuides";
+import AdminDepartments from "./pages/admin/AdminDepartments";
+import DepartmentPage from "./pages/DepartmentPage";
 
 const queryClient = new QueryClient();
 
