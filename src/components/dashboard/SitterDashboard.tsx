@@ -48,7 +48,7 @@ const SitterDashboard = () => {
   const [myMissionResponses, setMyMissionResponses] = useState<any[]>([]);
   const [articles, setArticles] = useState<any[]>([]);
   const [isAvailable, setIsAvailable] = useState(false);
-  const [metrics, setMetrics] = useState({ completed: 0, avgRating: 0, pendingApps: 0, badgeCount: 0 });
+  const [metrics, setMetrics] = useState({ completed: 0, avgRating: 0, pendingApps: 0, badgeCount: 0, missionsPosted: 0, missionsHelped: 0 });
   const [verificationStatus, setVerificationStatus] = useState<string>("not_submitted");
   const [ongoingSit, setOngoingSit] = useState<any>(null);
   const [loading, setLoading] = useState(true);
