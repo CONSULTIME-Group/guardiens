@@ -166,7 +166,7 @@ const Pricing = () => {
               <CardHeader className="text-center pb-2">
                 <div className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-2">Propriétaire</div>
                 <CardTitle className="font-heading text-4xl font-bold text-foreground">Gratuit</CardTitle>
-                <p className="text-muted-foreground text-sm mt-1">Toujours. Pas de piège.</p>
+                <p className="text-muted-foreground text-sm mt-1">Gratuit en 2026. Pas de piège.</p>
               </CardHeader>
               <CardContent className="space-y-4 pt-4">
                 <ul className="space-y-3">
