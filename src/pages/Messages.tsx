@@ -464,7 +464,7 @@ const Messages = () => {
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2">
                 <Link
-                  to={`/search?user=${activeConv.other_user?.id}`}
+                  to={`/profil/${activeConv.other_user?.id}`}
                   className="font-medium text-sm hover:text-primary transition-colors"
                 >
                   {activeConv.other_user?.first_name}
