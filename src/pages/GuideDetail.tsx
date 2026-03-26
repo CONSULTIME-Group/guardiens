@@ -149,8 +149,8 @@ const GuideDetail = () => {
   return (
     <>
       <PageMeta
-        title={`Guide du gardien à ${guide.city}`}
-        description={`Où promener un chien à ${guide.city} ? Parcs dog-friendly, vétérinaires, cafés accueillants, sentiers de balade. Le guide pratique pour les gardiens.`}
+        title={`Guide pet sitting ${guide.city} — Parcs, vétos, cafés dog-friendly | Guardiens`}
+        description={`Guide pratique pour pet sitters à ${guide.city} : parcs dog-friendly, vétérinaires, cafés accueillants, sentiers de balade. ${guide.ideal_for}`}
         path={`/guide/${guide.slug}`}
       />
 
