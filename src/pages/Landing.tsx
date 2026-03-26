@@ -593,7 +593,50 @@ const Landing = () => {
 
       {/* ═══════════════ 9. FOOTER ═══════════════ */}
       <footer className="border-t border-border px-6 md:px-12 py-10">
-        <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="max-w-5xl mx-auto space-y-8">
+
+          {/* SEO local links */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-6">
+            <div>
+              <h4 className="text-sm font-semibold text-foreground mb-2">Garde d'animaux à Lyon</h4>
+              <ul className="space-y-1 text-xs text-muted-foreground">
+                <li><Link to="/actualites/pet-sitting-lyon-ouest-lyonnais" className="hover:text-primary transition-colors">Vieux Lyon (69005)</Link></li>
+                <li><Link to="/actualites/pet-sitting-lyon-ouest-lyonnais" className="hover:text-primary transition-colors">Monplaisir (69008)</Link></li>
+                <li><Link to="/actualites/pet-sitting-lyon-ouest-lyonnais" className="hover:text-primary transition-colors">Croix-Rousse (69004)</Link></li>
+                <li><Link to="/actualites/pet-sitting-lyon-ouest-lyonnais" className="hover:text-primary transition-colors">Lyon 6 — Tête d'Or</Link></li>
+                <li><Link to="/actualites/pet-sitting-lyon-ouest-lyonnais" className="hover:text-primary transition-colors">Monts d'Or</Link></li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="text-sm font-semibold text-foreground mb-2">House-sitting AURA</h4>
+              <ul className="space-y-1 text-xs text-muted-foreground">
+                <li><Link to="/actualites/house-sitting-haute-savoie-annecy-megeve" className="hover:text-primary transition-colors">Haute-Savoie & Annecy</Link></li>
+                <li><Link to="/actualites/pet-sitting-grenoble-chartreuse" className="hover:text-primary transition-colors">Grenoble & Chartreuse</Link></li>
+                <li><Link to="/actualites/gardiennage-maison-vacances-aura" className="hover:text-primary transition-colors">Gardiennage vacances</Link></li>
+                <li><Link to="/actualites/garde-ferme-animaux-monts-du-lyonnais" className="hover:text-primary transition-colors">Monts du Lyonnais</Link></li>
+                <li><Link to="/actualites/house-sitting-auvergne-rhone-alpes" className="hover:text-primary transition-colors">Guide AURA complet</Link></li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="text-sm font-semibold text-foreground mb-2">Ressources</h4>
+              <ul className="space-y-1 text-xs text-muted-foreground">
+                <li><Link to="/actualites" className="hover:text-primary transition-colors">Tous nos articles</Link></li>
+                <li><Link to="/guides" className="hover:text-primary transition-colors">Guides locaux</Link></li>
+                <li><Link to="/faq" className="hover:text-primary transition-colors">FAQ</Link></li>
+                <li><Link to="/tarifs" className="hover:text-primary transition-colors">Tarifs</Link></li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="text-sm font-semibold text-foreground mb-2">Guardiens</h4>
+              <ul className="space-y-1 text-xs text-muted-foreground">
+                <li><Link to="/a-propos" className="hover:text-primary transition-colors">À propos</Link></li>
+                <li><Link to="/contact" className="hover:text-primary transition-colors">Contact</Link></li>
+                <li><Link to="/register" className="hover:text-primary transition-colors">Inscription</Link></li>
+              </ul>
+            </div>
+          </div>
+
+          <div className="border-t border-border pt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div>
             <h3 className="font-heading text-lg font-semibold">
               <span className="text-primary">g</span>uardiens
@@ -620,6 +663,7 @@ const Landing = () => {
             <Link to="/contact" className="hover:text-foreground transition-colors">
               Contact
             </Link>
+          </div>
           </div>
         </div>
       </footer>

@@ -148,6 +148,51 @@ export default function ArticleDetail() {
         "publisher": { "@type": "Organization", "name": "Guardiens", "url": "https://guardiens.lovable.app" },
         "mainEntityOfPage": `https://guardiens.lovable.app/actualites/${article.slug}`
       }) }} />
+      {/* FAQ Schema for articles containing FAQ sections */}
+      {article.content.includes("### ") && article.content.includes("?") && (() => {
+        const faqItems: { question: string; answer: string }[] = [];
+        const lines = article.content.split("\n");
+        let currentQ = "";
+        let currentA = "";
+        for (let i = 0; i < lines.length; i++) {
+          const line = lines[i];
+          if (line.startsWith("### ") && line.includes("?")) {
+            if (currentQ && currentA.trim()) {
+              faqItems.push({ question: currentQ, answer: currentA.trim() });
+            }
+            currentQ = line.replace("### ", "").trim();
+            currentA = "";
+          } else if (currentQ) {
+            if (line.startsWith("## ") || line.startsWith("# ")) {
+              if (currentA.trim()) {
+                faqItems.push({ question: currentQ, answer: currentA.trim() });
+              }
+              currentQ = "";
+              currentA = "";
+            } else {
+              currentA += line + " ";
+            }
+          }
+        }
+        if (currentQ && currentA.trim()) {
+          faqItems.push({ question: currentQ, answer: currentA.trim() });
+        }
+        if (faqItems.length === 0) return null;
+        return (
+          <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            "mainEntity": faqItems.map(faq => ({
+              "@type": "Question",
+              "name": faq.question,
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": faq.answer.replace(/\*\*/g, "").replace(/\[.*?\]\(.*?\)/g, "").trim()
+              }
+            }))
+          }) }} />
+        );
+      })()}
     <article className="max-w-3xl mx-auto px-4 py-8 animate-fade-in">
       <Link
         to="/actualites"
