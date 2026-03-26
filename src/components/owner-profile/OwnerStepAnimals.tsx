@@ -91,9 +91,16 @@ const OwnerStepAnimals = ({ pets, onAddPet, onUpdatePet, onRemovePet }: Props) =
     }
     setUploading(true);
     try {
-      // Always compress to ensure JPEG compatibility (handles HEIC, large files, etc.)
+      const { data: authData } = await supabase.auth.getUser();
+      const userId = authData.user?.id;
+
+      if (!userId) {
+        toast.error("Vous devez être connecté pour uploader une photo");
+        return;
+      }
+
       const uploadFile = await compressImage(file);
-      const path = `pets/${Date.now()}_${Math.random().toString(36).slice(2)}.jpg`;
+      const path = `${userId}/pets/${Date.now()}_${Math.random().toString(36).slice(2)}.jpg`;
       const { error } = await supabase.storage.from("property-photos").upload(path, uploadFile, { contentType: "image/jpeg" });
       if (error) {
         console.error("Storage upload error:", error);
