@@ -174,6 +174,8 @@ const OwnerDashboard = () => {
         )}
       </div>
 
+      <VerificationBanner status={user?.identityVerificationStatus || "not_submitted"} />
+
       {/* CTA Publier si aucune annonce active */}
       {activeSits.length === 0 && (
         <Link to="/sits/create" className="block p-6 rounded-xl bg-primary/5 border-2 border-dashed border-primary/30 hover:border-primary/50 hover:shadow-md transition-all text-center">

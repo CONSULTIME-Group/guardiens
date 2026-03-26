@@ -83,6 +83,8 @@ const SitterDashboard = () => {
         )}
       </div>
 
+      <VerificationBanner status={verificationStatus} />
+
       {/* Availability toggle */}
       <div className="flex items-center justify-between rounded-lg border border-green-200 bg-green-50 dark:bg-green-950/20 dark:border-green-800 p-4">
         <div className="flex items-center gap-3">
