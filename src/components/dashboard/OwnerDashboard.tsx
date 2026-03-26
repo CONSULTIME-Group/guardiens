@@ -89,18 +89,30 @@ const OwnerDashboard = () => {
         setRecentApps(apps || []);
       }
 
-      // Fetch breed-related articles based on pet breeds
-      const petBreeds = (petsData || []).map((p: any) => p.breed).filter(Boolean);
-      if (petBreeds.length > 0) {
+      // Fetch breed-related data based on pet breeds
+      const petBreeds = petsData.map((p: any) => p.breed?.trim().toLowerCase()).filter(Boolean);
+      const uniqueBreeds = [...new Set(petBreeds)];
+      if (uniqueBreeds.length > 0) {
+        // Fetch breed profiles
+        const { data: bProfiles } = await supabase
+          .from("breed_profiles")
+          .select("*")
+          .in("breed", uniqueBreeds);
+        setBreedProfiles(bProfiles || []);
+
+        // Fetch matching articles
         const { data: breedArts } = await supabase
           .from("articles")
-          .select("id, title, slug, cover_image_url, excerpt, category")
+          .select("id, title, slug, cover_image_url, excerpt, category, related_breed")
           .eq("published", true)
           .eq("category", "guide_race")
           .limit(20);
-        // Match articles whose title or related_breed contains a pet breed
         const matched = (breedArts || []).filter((a: any) =>
-          petBreeds.some((b: string) => a.title?.toLowerCase().includes(b.toLowerCase()))
+          uniqueBreeds.some((b: string) =>
+            a.title?.toLowerCase().includes(b) ||
+            a.related_breed?.toLowerCase().includes(b) ||
+            a.slug?.toLowerCase().includes(b)
+          )
         );
         setBreedArticles(matched.slice(0, 3));
       }
