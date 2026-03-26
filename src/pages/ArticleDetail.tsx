@@ -3,7 +3,8 @@ import { useParams, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ArrowLeft, Calendar, MapPin, User } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { ArrowLeft, ArrowRight, Calendar, MapPin, User, Compass, Building2 } from "lucide-react";
 import PageMeta from "@/components/PageMeta";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -22,6 +23,14 @@ interface ArticleFull {
   region: string | null;
   author_name: string;
   published_at: string | null;
+  related_city: string | null;
+}
+
+interface RelatedArticle {
+  slug: string;
+  title: string;
+  excerpt: string;
+  category: string;
 }
 
 const CATEGORY_LABELS: Record<string, string> = {
@@ -30,26 +39,67 @@ const CATEGORY_LABELS: Record<string, string> = {
   race: "Races & espèces",
   temoignage: "Témoignage",
   astuce: "Astuce",
+  conseil_gardien: "Conseil gardien",
+  conseil_proprio: "Conseil proprio",
+  guide_race: "Guide race",
+  guide_lieu: "Guide lieu",
+  actualite: "Actualité",
 };
 
 export default function ArticleDetail() {
   const { slug } = useParams<{ slug: string }>();
   const [article, setArticle] = useState<ArticleFull | null>(null);
   const [loading, setLoading] = useState(true);
+  const [relatedArticles, setRelatedArticles] = useState<RelatedArticle[]>([]);
+  const [cityGuideSlug, setCityGuideSlug] = useState<string | null>(null);
+  const [cityPageSlug, setCityPageSlug] = useState<string | null>(null);
 
   useEffect(() => {
     if (!slug) return;
-    const fetch = async () => {
+    const fetchAll = async () => {
       const { data } = await supabase
         .from("articles")
         .select("*")
         .eq("slug", slug)
         .eq("published", true)
         .maybeSingle();
-      setArticle(data as ArticleFull | null);
+      const art = data as ArticleFull | null;
+      setArticle(art);
       setLoading(false);
+
+      if (!art) return;
+
+      // Fetch related articles (same category, excluding current)
+      const { data: related } = await supabase
+        .from("articles")
+        .select("slug, title, excerpt, category")
+        .eq("published", true)
+        .eq("category", art.category)
+        .neq("slug", slug)
+        .limit(3);
+      setRelatedArticles((related as RelatedArticle[]) || []);
+
+      // Cross-link: city guide
+      if (art.city) {
+        const citySlug = art.city.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, "-");
+        const { data: guide } = await supabase
+          .from("city_guides")
+          .select("slug")
+          .eq("published", true)
+          .ilike("city", `%${art.city}%`)
+          .maybeSingle();
+        if (guide) setCityGuideSlug((guide as any).slug);
+
+        const { data: cp } = await supabase
+          .from("seo_city_pages")
+          .select("slug")
+          .eq("published", true)
+          .ilike("city", `%${art.city}%`)
+          .maybeSingle();
+        if (cp) setCityPageSlug((cp as any).slug);
+      }
     };
-    fetch();
+    fetchAll();
   }, [slug]);
 
   if (loading) {
@@ -158,6 +208,33 @@ export default function ArticleDetail() {
         dangerouslySetInnerHTML={{ __html: marked.parse(article.content, { async: false }) as string }}
       />
 
+      {/* Cross-links to city pages */}
+      {(cityGuideSlug || cityPageSlug) && (
+        <div className="mt-8 p-4 rounded-lg bg-muted/50 border border-border space-y-2">
+          <p className="text-sm font-medium text-foreground">En savoir plus sur {article.city} :</p>
+          <div className="flex flex-wrap gap-3">
+            {cityPageSlug && (
+              <Link
+                to={`/house-sitting/${cityPageSlug}`}
+                className="inline-flex items-center gap-1.5 text-sm text-primary hover:underline"
+              >
+                <Building2 className="h-3.5 w-3.5" />
+                Pet sitting à {article.city}
+              </Link>
+            )}
+            {cityGuideSlug && (
+              <Link
+                to={`/guide/${cityGuideSlug}`}
+                className="inline-flex items-center gap-1.5 text-sm text-primary hover:underline"
+              >
+                <Compass className="h-3.5 w-3.5" />
+                Guide local {article.city}
+              </Link>
+            )}
+          </div>
+        </div>
+      )}
+
       {article.tags.length > 0 && (
         <div className="flex flex-wrap gap-2 mt-10 pt-6 border-t border-border">
           {article.tags.map((tag) => (
@@ -165,6 +242,35 @@ export default function ArticleDetail() {
               #{tag}
             </Badge>
           ))}
+        </div>
+      )}
+
+      {/* Related articles */}
+      {relatedArticles.length > 0 && (
+        <div className="mt-10 pt-8 border-t border-border">
+          <h2 className="font-heading text-xl font-semibold text-foreground mb-4">
+            Articles similaires
+          </h2>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {relatedArticles.map((a) => (
+              <Link key={a.slug} to={`/actualites/${a.slug}`} className="group">
+                <Card className="h-full hover:shadow-md transition-shadow">
+                  <CardContent className="p-4">
+                    <Badge variant="secondary" className="mb-2 text-xs">
+                      {CATEGORY_LABELS[a.category] || a.category}
+                    </Badge>
+                    <h3 className="font-heading font-semibold text-sm text-foreground group-hover:text-primary transition-colors line-clamp-2 mb-1">
+                      {a.title}
+                    </h3>
+                    <p className="text-xs text-muted-foreground line-clamp-2">{a.excerpt}</p>
+                    <span className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-primary">
+                      Lire <ArrowRight className="h-3 w-3" />
+                    </span>
+                  </CardContent>
+                </Card>
+              </Link>
+            ))}
+          </div>
         </div>
       )}
     </article>

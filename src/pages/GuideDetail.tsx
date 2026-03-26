@@ -115,6 +115,21 @@ const GuideDetail = () => {
     enabled: !!guide?.id && !!guide?.department,
   });
 
+  // Fetch related articles for this city
+  const { data: relatedArticles = [] } = useQuery({
+    queryKey: ["guide-articles", guide?.city],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("articles")
+        .select("slug, title, excerpt")
+        .eq("published", true)
+        .or(`city.ilike.%${guide!.city}%,tags.cs.{${guide!.city.toLowerCase()}}`)
+        .limit(3);
+      return (data || []) as any[];
+    },
+    enabled: !!guide?.city,
+  });
+
   const filteredPlaces = useMemo(() => {
     if (!searchQuery.trim()) return places;
     const q = searchQuery.toLowerCase();
@@ -295,6 +310,32 @@ const GuideDetail = () => {
                   >
                     <MapPin className="h-4 w-4 text-primary shrink-0" />
                     <span className="text-sm font-medium text-foreground">{ng.city}</span>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Related articles */}
+          {relatedArticles.length > 0 && (
+            <div className="mt-14 border-t border-border pt-10">
+              <h2 className="font-heading text-xl font-semibold text-foreground mb-4">
+                Articles sur {guide.city}
+              </h2>
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {relatedArticles.map((a: any) => (
+                  <Link key={a.slug} to={`/actualites/${a.slug}`} className="group">
+                    <Card className="h-full hover:shadow-md transition-shadow">
+                      <CardContent className="p-4">
+                        <h3 className="font-heading font-semibold text-sm text-foreground group-hover:text-primary transition-colors line-clamp-2 mb-1">
+                          {a.title}
+                        </h3>
+                        <p className="text-xs text-muted-foreground line-clamp-2">{a.excerpt}</p>
+                        <span className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-primary">
+                          Lire <ArrowRight className="h-3 w-3" />
+                        </span>
+                      </CardContent>
+                    </Card>
                   </Link>
                 ))}
               </div>
