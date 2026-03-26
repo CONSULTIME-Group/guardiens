@@ -142,7 +142,20 @@ const SearchOwner = () => {
       });
     }
 
-    // Enrich with reviews
+    // Enrich with reviews + badges
+    const userIds = items.map((s: any) => s.user_id);
+    const { data: allBadges } = await supabase
+      .from("badge_attributions")
+      .select("receiver_id, badge_key")
+      .in("receiver_id", userIds);
+
+    const badgeMap = new Map<string, Map<string, number>>();
+    (allBadges || []).forEach((b: any) => {
+      if (!badgeMap.has(b.receiver_id)) badgeMap.set(b.receiver_id, new Map());
+      const m = badgeMap.get(b.receiver_id)!;
+      m.set(b.badge_key, (m.get(b.badge_key) || 0) + 1);
+    });
+
     const enriched = await Promise.all(
       items.map(async (s: any) => {
         const { data: reviews } = await supabase
@@ -153,7 +166,11 @@ const SearchOwner = () => {
         const avgRating = reviews && reviews.length > 0
           ? (reviews.reduce((sum: number, r: any) => sum + r.overall_rating, 0) / reviews.length).toFixed(1)
           : null;
-        return { ...s, avgRating, reviewCount: reviews?.length || 0 };
+        const userBadges = badgeMap.get(s.user_id);
+        const topBadges = userBadges
+          ? Array.from(userBadges.entries()).map(([badge_key, count]) => ({ badge_key, count })).sort((a, b) => b.count - a.count).slice(0, 2)
+          : [];
+        return { ...s, avgRating, reviewCount: reviews?.length || 0, topBadges };
       })
     );
 
