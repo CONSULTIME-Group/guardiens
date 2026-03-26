@@ -107,13 +107,14 @@ const Messages = () => {
     const convIds = convs.map((conv: any) => conv.id);
     const sitIds = convs.map((conv: any) => conv.sit_id).filter(Boolean);
 
-    const [profilesRes, allLastMsgsRes, allUnreadRes, applicationsRes] = await Promise.all([
+    const [profilesRes, allLastMsgsRes, allUnreadRes, applicationsRes, badgesRes] = await Promise.all([
       supabase.from("profiles").select("id, first_name, avatar_url, identity_verified").in("id", otherIds),
       supabase.from("messages").select("conversation_id, content, created_at, sender_id").in("conversation_id", convIds).order("created_at", { ascending: false }),
       supabase.from("messages").select("conversation_id, id").in("conversation_id", convIds).neq("sender_id", user.id).is("read_at", null),
       sitIds.length > 0
         ? supabase.from("applications").select("sit_id, sitter_id, status").in("sit_id", sitIds)
         : Promise.resolve({ data: [] }),
+      supabase.from("badge_attributions").select("receiver_id, badge_key").in("receiver_id", otherIds),
     ]);
 
     const profilesMap = new Map((profilesRes.data || []).map((p: any) => [p.id, p]));
