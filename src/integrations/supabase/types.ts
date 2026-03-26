@@ -441,6 +441,62 @@ export type Database = {
         }
         Relationships: []
       }
+      external_experiences: {
+        Row: {
+          admin_note: string | null
+          animal_types: string
+          city: string | null
+          country: string | null
+          created_at: string
+          duration: string
+          experience_date: string
+          id: string
+          platform_name: string
+          screenshot_urls: string[]
+          summary: string
+          user_id: string
+          verification_status: Database["public"]["Enums"]["verification_status"]
+        }
+        Insert: {
+          admin_note?: string | null
+          animal_types?: string
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          duration?: string
+          experience_date?: string
+          id?: string
+          platform_name?: string
+          screenshot_urls?: string[]
+          summary?: string
+          user_id: string
+          verification_status?: Database["public"]["Enums"]["verification_status"]
+        }
+        Update: {
+          admin_note?: string | null
+          animal_types?: string
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          duration?: string
+          experience_date?: string
+          id?: string
+          platform_name?: string
+          screenshot_urls?: string[]
+          summary?: string
+          user_id?: string
+          verification_status?: Database["public"]["Enums"]["verification_status"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "external_experiences_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       faq_entries: {
         Row: {
           answer: string
@@ -1499,6 +1555,63 @@ export type Database = {
           },
         ]
       }
+      sitter_gallery: {
+        Row: {
+          animal_breed: string | null
+          animal_type: string | null
+          caption: string
+          city: string | null
+          created_at: string
+          id: string
+          photo_date: string | null
+          photo_url: string
+          sit_id: string | null
+          source: Database["public"]["Enums"]["gallery_source"]
+          user_id: string
+        }
+        Insert: {
+          animal_breed?: string | null
+          animal_type?: string | null
+          caption?: string
+          city?: string | null
+          created_at?: string
+          id?: string
+          photo_date?: string | null
+          photo_url: string
+          sit_id?: string | null
+          source?: Database["public"]["Enums"]["gallery_source"]
+          user_id: string
+        }
+        Update: {
+          animal_breed?: string | null
+          animal_type?: string | null
+          caption?: string
+          city?: string | null
+          created_at?: string
+          id?: string
+          photo_date?: string | null
+          photo_url?: string
+          sit_id?: string | null
+          source?: Database["public"]["Enums"]["gallery_source"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sitter_gallery_sit_id_fkey"
+            columns: ["sit_id"]
+            isOneToOne: false
+            referencedRelation: "sits"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sitter_gallery_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       sitter_profiles: {
         Row: {
           accompanied_by: string | null
@@ -1834,6 +1947,7 @@ export type Database = {
         | "accepted"
         | "rejected"
         | "cancelled"
+      gallery_source: "guardiens" | "external"
       guide_place_category:
         | "dog_park"
         | "walk_trail"
@@ -1884,6 +1998,7 @@ export type Database = {
         | "owner_free"
       subscription_status: "active" | "expired" | "cancelled"
       user_role: "owner" | "sitter" | "both"
+      verification_status: "pending" | "verified" | "rejected"
       walk_duration: "none" | "30min" | "1h" | "2h_plus"
     }
     CompositeTypes: {
@@ -2023,6 +2138,7 @@ export const Constants = {
         "rejected",
         "cancelled",
       ],
+      gallery_source: ["guardiens", "external"],
       guide_place_category: [
         "dog_park",
         "walk_trail",
@@ -2073,6 +2189,7 @@ export const Constants = {
       ],
       subscription_status: ["active", "expired", "cancelled"],
       user_role: ["owner", "sitter", "both"],
+      verification_status: ["pending", "verified", "rejected"],
       walk_duration: ["none", "30min", "1h", "2h_plus"],
     },
   },
