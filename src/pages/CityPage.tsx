@@ -252,6 +252,18 @@ const CityPage = () => {
                   </Card>
                 </Link>
               )}
+              <Link to="/petites-missions">
+                <Card className="hover:shadow-md transition-shadow">
+                  <CardContent className="p-4 flex items-center gap-3">
+                    <Compass className="h-5 w-5 text-primary" />
+                    <div>
+                      <p className="font-semibold text-sm text-foreground">Petites missions à {page.city}</p>
+                      <p className="text-xs text-muted-foreground">Entraide entre voisins : animaux, jardin, coups de main</p>
+                    </div>
+                    <ArrowRight className="h-4 w-4 text-muted-foreground ml-auto" />
+                  </CardContent>
+                </Card>
+              </Link>
             </div>
           </section>
         )}
