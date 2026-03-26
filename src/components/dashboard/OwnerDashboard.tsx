@@ -82,19 +82,35 @@ const OwnerDashboard = () => {
           .limit(3);
         setRecentApps(apps || []);
 
-        // Badges for sitters
-        // loaded inline in render via BadgePills
+        // Load badges for sitters in applications
+        const sitterIds = [...new Set((apps || []).map((a: any) => a.sitter?.id).filter(Boolean))];
+        if (sitterIds.length > 0) {
+          const { data: badgeData } = await supabase
+            .from("badge_attributions")
+            .select("receiver_id, badge_key")
+            .in("receiver_id", sitterIds);
+          const grouped: Record<string, Record<string, number>> = {};
+          (badgeData || []).forEach((b: any) => {
+            if (!grouped[b.receiver_id]) grouped[b.receiver_id] = {};
+            grouped[b.receiver_id][b.badge_key] = (grouped[b.receiver_id][b.badge_key] || 0) + 1;
+          });
+          const result: Record<string, { badge_key: string; count: number }[]> = {};
+          Object.entries(grouped).forEach(([uid, badges]) => {
+            result[uid] = Object.entries(badges).map(([k, c]) => ({ badge_key: k, count: c }));
+          });
+          setSitterBadges(result);
+        }
       }
 
       // Trusted sitters (2+ completed sits with same sitter)
-      const completedSits = sitsData.filter((s: any) => s.status === "completed");
+      const completedSitsData = sitsData.filter((s: any) => s.status === "completed");
       const sitterSitCounts: Record<string, number> = {};
-      completedSits.forEach((s: any) => {
+      completedSitsData.forEach((s: any) => {
         (s.applications || [])
           .filter((a: any) => a.status === "accepted")
           .forEach((a: any) => { sitterSitCounts[a.sitter_id] = (sitterSitCounts[a.sitter_id] || 0) + 1; });
       });
-      setTrustedSitterCount(Object.values(sitterSitCounts).filter(c => c >= 2).length);
+      const trustedCount = Object.values(sitterSitCounts).filter(c => c >= 2).length;
 
       setLoading(false);
     };
