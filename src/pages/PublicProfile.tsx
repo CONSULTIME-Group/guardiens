@@ -147,6 +147,33 @@ const PublicProfile = () => {
 
         {/* Actions */}
         <div className="flex gap-2 shrink-0">
+          {!isOwnProfile && user && (
+            <Button
+              size="sm"
+              className="gap-1.5"
+              onClick={async () => {
+                // Find existing conversation or create one
+                const { data: existingConv } = await supabase
+                  .from("conversations")
+                  .select("id")
+                  .or(`and(owner_id.eq.${user.id},sitter_id.eq.${id}),and(owner_id.eq.${id},sitter_id.eq.${user.id})`)
+                  .maybeSingle();
+
+                if (existingConv) {
+                  navigate(`/messages?conv=${existingConv.id}`);
+                } else {
+                  const { data: newConv } = await supabase
+                    .from("conversations")
+                    .insert({ owner_id: user.id, sitter_id: id! })
+                    .select("id")
+                    .single();
+                  if (newConv) navigate(`/messages?conv=${newConv.id}`);
+                }
+              }}
+            >
+              <MessageSquare className="h-3.5 w-3.5" /> Contacter
+            </Button>
+          )}
           {!isOwnProfile && (
             <ReportButton targetId={id!} targetType="profile" />
           )}
