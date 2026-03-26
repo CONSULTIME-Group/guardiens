@@ -139,14 +139,18 @@ export default function ArticleDetail() {
       />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
         "@context": "https://schema.org",
-        "@type": "BlogPosting",
+        "@type": article.category === "guide_race" ? "Article" : "BlogPosting",
         "headline": article.title,
         "description": article.excerpt,
-        "author": { "@type": "Organization", "name": article.author_name },
+        "author": { "@type": "Person", "name": "Elisa & Thomas" },
         ...(article.cover_image_url && { "image": article.cover_image_url }),
         ...(article.published_at && { "datePublished": article.published_at }),
         "publisher": { "@type": "Organization", "name": "Guardiens", "url": "https://guardiens.lovable.app" },
-        "mainEntityOfPage": `https://guardiens.lovable.app/actualites/${article.slug}`
+        "mainEntityOfPage": `https://guardiens.lovable.app/actualites/${article.slug}`,
+        ...(article.category === "guide_race" && {
+          "areaServed": "Lyon, Rhône-Alpes",
+          "keywords": article.tags?.join(", ") || ""
+        })
       }) }} />
       {/* FAQ Schema for articles containing FAQ sections */}
       {article.content.includes("### ") && article.content.includes("?") && (() => {
