@@ -489,33 +489,7 @@ const OwnerDashboard = () => {
         )}
       </DashSection>
 
-      {/* Candidatures récentes */}
-      <DashSection title="Candidatures récentes" icon={Users} action={
-        recentApps.length > 0 ? <Link to="/sits" className="text-xs text-primary hover:underline">Voir tout</Link> : undefined
-      }>
-        {recentApps.length === 0 ? (
-          <p className="text-sm text-muted-foreground italic">Aucune candidature reçue.</p>
-        ) : (
-          <div className="space-y-2">
-            {recentApps.map(app => (
-              <Link key={app.id} to={`/sits/${app.sit_id}`} className="flex items-center gap-3 p-3 rounded-lg bg-card border border-border hover:shadow-sm transition-shadow">
-                {app.sitter?.avatar_url ? (
-                  <img src={app.sitter.avatar_url} alt="" className="w-9 h-9 rounded-full object-cover shrink-0" />
-                ) : (
-                  <div className="w-9 h-9 rounded-full bg-muted flex items-center justify-center text-xs font-bold shrink-0">
-                    {app.sitter?.first_name?.charAt(0) || "?"}
-                  </div>
-                )}
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium truncate">{app.sitter?.first_name || "Gardien"}</p>
-                  <p className="text-xs text-muted-foreground truncate">{app.sit?.title}</p>
-                </div>
-                <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
-              </Link>
-            ))}
-          </div>
-        )}
-      </DashSection>
+      {/* Candidatures already shown above */}
 
       {/* Métriques */}
       <DashSection title="Mes métriques" icon={BarChart3}>
