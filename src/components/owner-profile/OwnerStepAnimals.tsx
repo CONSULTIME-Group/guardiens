@@ -4,10 +4,12 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Pencil, Trash2, ChevronDown, ChevronUp, Camera } from "lucide-react";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Plus, Pencil, Trash2, ChevronDown, ChevronUp, Camera, X } from "lucide-react";
 import HintBubble from "../profile/HintBubble";
 import BreedProfileCard from "../breeds/BreedProfileCard";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 import type { Pet } from "@/hooks/useOwnerProfile";
 
 const SPECIES = [
