@@ -236,7 +236,7 @@ const GuideDetail = () => {
             {categories.map((cat) => {
               const config = CATEGORY_CONFIG[cat] || { label: cat, icon: MapPin, color: "gray" };
               const Icon = config.icon;
-              const catPlaces = places.filter((p) => p.category === cat);
+              const catPlaces = filteredPlaces.filter((p) => p.category === cat);
 
               return (
                 <section key={cat}>
