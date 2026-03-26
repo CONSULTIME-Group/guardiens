@@ -86,13 +86,26 @@ const PublicProfile = () => {
         .eq("status", "accepted");
       setCompletedSits(count || 0);
 
-      // Gallery photos
+      // Gallery photos (sitter)
       const { data: gallery } = await supabase.from("sitter_gallery").select("*").eq("user_id", id).order("created_at", { ascending: false });
       setGalleryPhotos(gallery || []);
 
       // External experiences (only verified ones visible publicly via RLS)
       const { data: extExp } = await supabase.from("external_experiences").select("*").eq("user_id", id).order("created_at", { ascending: false });
       setExternalExperiences(extExp || []);
+
+      // Owner gallery
+      const { data: ownerGal } = await supabase.from("owner_gallery").select("*").eq("user_id", id).order("created_at", { ascending: false });
+      setOwnerGalleryPhotos(ownerGal || []);
+
+      // Owner highlights (coups de coeur)
+      const { data: highlights } = await supabase
+        .from("owner_highlights")
+        .select("*, sitter:sitter_id(first_name, avatar_url)")
+        .eq("owner_id", id)
+        .eq("hidden", false)
+        .order("created_at", { ascending: false });
+      setOwnerHighlights(highlights || []);
 
       setLoading(false);
     };
