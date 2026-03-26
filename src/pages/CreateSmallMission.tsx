@@ -29,7 +29,7 @@ const DURATIONS = [
 ];
 
 const CreateSmallMission = () => {
-  const { user, profile } = useAuth();
+  const { user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
 
