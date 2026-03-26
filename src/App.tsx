@@ -83,6 +83,8 @@ const AppRoutes = () => (
     <Route path="/cgu" element={<Terms />} />
     <Route path="/confidentialite" element={<Privacy />} />
     <Route path="/faq" element={<FAQ />} />
+    <Route path="/guides" element={<GuidesListing />} />
+    <Route path="/guide/:slug" element={<GuideDetail />} />
     <Route path="/house-sitting/:slug" element={<CityPage />} />
     <Route element={<AdminLayout />}>
       <Route path="/admin" element={<AdminDashboard />} />
