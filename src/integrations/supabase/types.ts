@@ -1251,6 +1251,7 @@ export type Database = {
           first_name: string | null
           id: string
           identity_document_url: string | null
+          identity_selfie_url: string | null
           identity_verification_status: string | null
           identity_verified: boolean
           is_founder: boolean
@@ -1272,6 +1273,7 @@ export type Database = {
           first_name?: string | null
           id: string
           identity_document_url?: string | null
+          identity_selfie_url?: string | null
           identity_verification_status?: string | null
           identity_verified?: boolean
           is_founder?: boolean
@@ -1293,6 +1295,7 @@ export type Database = {
           first_name?: string | null
           id?: string
           identity_document_url?: string | null
+          identity_selfie_url?: string | null
           identity_verification_status?: string | null
           identity_verified?: boolean
           is_founder?: boolean
