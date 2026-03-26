@@ -607,18 +607,35 @@ const Messages = () => {
 
           {/* Confirmed banner + help button */}
           {activeConv.sit?.status === "confirmed" && (
-            <div className="bg-green-50 border-b border-green-200 px-4 py-2.5 flex items-center justify-between">
-              <div className="flex items-center gap-2 text-sm text-green-700 font-medium">
+            <div className="bg-green-50 dark:bg-green-900/20 border-b border-green-200 dark:border-green-800 px-4 py-2.5 flex items-center justify-between">
+              <div className="flex items-center gap-2 text-sm text-green-700 dark:text-green-400 font-medium">
                 <CheckCircle2 className="h-4 w-4" />
                 Garde confirmée ✓
               </div>
-              <button
-                onClick={() => { setHelpOpen(!helpOpen); setHelpCategory(null); }}
-                className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1 transition-colors"
-              >
-                <AlertTriangle className="h-3.5 w-3.5" />
-                Besoin d'aide
-              </button>
+              {activeConv.sit?.property_id && (
+                <HelpButton
+                  propertyId={activeConv.sit.property_id}
+                  ownerId={activeConv.owner_id}
+                  ownerName={activeConv.other_user?.first_name || "le propriétaire"}
+                />
+              )}
+            </div>
+          )}
+
+          {/* In-progress banner + help button */}
+          {activeConv.sit?.status === "in_progress" && (
+            <div className="bg-emerald-50 dark:bg-emerald-900/20 border-b border-emerald-200 dark:border-emerald-800 px-4 py-2.5 flex items-center justify-between">
+              <div className="flex items-center gap-2 text-sm text-emerald-700 dark:text-emerald-400 font-medium animate-pulse">
+                <CheckCircle2 className="h-4 w-4" />
+                Garde en cours
+              </div>
+              {activeConv.sit?.property_id && (
+                <HelpButton
+                  propertyId={activeConv.sit.property_id}
+                  ownerId={activeConv.owner_id}
+                  ownerName={activeConv.other_user?.first_name || "le propriétaire"}
+                />
+              )}
             </div>
           )}
 
@@ -636,58 +653,6 @@ const Messages = () => {
                 <Star className="h-3.5 w-3.5" />
                 Laisser un avis
               </Link>
-            </div>
-          )}
-
-          {/* Help panel */}
-          {helpOpen && activeConv.sit?.status === "confirmed" && (
-            <div className="bg-card border-b border-border px-4 py-3">
-              {!helpCategory ? (
-                <div className="space-y-2">
-                  <p className="text-xs font-medium text-muted-foreground mb-2">Quel type de problème ?</p>
-                  <div className="flex flex-wrap gap-2">
-                    <button onClick={() => setHelpCategory("animal")} className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-accent hover:bg-accent/80 text-xs font-medium transition-colors">
-                      <PawPrint className="h-3.5 w-3.5" /> Animal
-                    </button>
-                    <button onClick={() => setHelpCategory("housing")} className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-accent hover:bg-accent/80 text-xs font-medium transition-colors">
-                      <Home className="h-3.5 w-3.5" /> Logement
-                    </button>
-                    <button onClick={() => setHelpCategory("emergency")} className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-destructive/10 hover:bg-destructive/20 text-xs font-medium text-destructive transition-colors">
-                      <Phone className="h-3.5 w-3.5" /> Urgence
-                    </button>
-                  </div>
-                </div>
-              ) : helpCategory === "animal" ? (
-                <div className="space-y-2">
-                  <button onClick={() => setHelpCategory(null)} className="text-xs text-muted-foreground hover:text-foreground">← Retour</button>
-                  <p className="text-sm font-medium">🐾 Problème avec un animal</p>
-                  <div className="text-xs text-muted-foreground space-y-1.5">
-                    <p>• Consultez le <strong>guide de la maison</strong> pour les coordonnées du vétérinaire</p>
-                    <p>• Contactez le propriétaire via cette messagerie</p>
-                    <p>• En cas d'urgence vitale : <strong>appelez le vétérinaire de garde</strong></p>
-                  </div>
-                </div>
-              ) : helpCategory === "housing" ? (
-                <div className="space-y-2">
-                  <button onClick={() => setHelpCategory(null)} className="text-xs text-muted-foreground hover:text-foreground">← Retour</button>
-                  <p className="text-sm font-medium">🏠 Problème de logement</p>
-                  <div className="text-xs text-muted-foreground space-y-1.5">
-                    <p>• Consultez le <strong>guide de la maison</strong> pour les contacts utiles</p>
-                    <p>• Contactez le propriétaire via cette messagerie</p>
-                  </div>
-                </div>
-              ) : (
-                <div className="space-y-2">
-                  <button onClick={() => setHelpCategory(null)} className="text-xs text-muted-foreground hover:text-foreground">← Retour</button>
-                  <p className="text-sm font-medium text-destructive">🚨 Urgence</p>
-                  <div className="text-xs space-y-1.5">
-                    <p><strong>SAMU :</strong> <a href="tel:15" className="text-primary underline">15</a></p>
-                    <p><strong>Police :</strong> <a href="tel:17" className="text-primary underline">17</a></p>
-                    <p><strong>Pompiers :</strong> <a href="tel:18" className="text-primary underline">18</a></p>
-                    <p className="text-muted-foreground mt-1">Contactez également le propriétaire via cette messagerie.</p>
-                  </div>
-                </div>
-              )}
             </div>
           )}
 
