@@ -37,6 +37,8 @@ const OwnerDashboard = () => {
   const [reviews, setReviews] = useState<any[]>([]);
   const [longStays, setLongStays] = useState<any[]>([]);
   const [ownerEligible, setOwnerEligible] = useState(false);
+  const [breedArticles, setBreedArticles] = useState<any[]>([]);
+  const [localGuides, setLocalGuides] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
