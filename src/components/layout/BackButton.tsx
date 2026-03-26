@@ -6,8 +6,8 @@ export const BackButton = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Don't show on dashboard (it's the home page)
-  if (location.pathname === "/dashboard") return null;
+  // Don't show on dashboard or messages (has its own navigation)
+  if (location.pathname === "/dashboard" || location.pathname === "/messages") return null;
 
   return (
     <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-sm border-b border-border px-4 py-2 md:px-6">
