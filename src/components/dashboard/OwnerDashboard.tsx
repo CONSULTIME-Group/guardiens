@@ -38,6 +38,7 @@ const OwnerDashboard = () => {
   const [longStays, setLongStays] = useState<any[]>([]);
   const [ownerEligible, setOwnerEligible] = useState(false);
   const [breedArticles, setBreedArticles] = useState<any[]>([]);
+  const [breedProfiles, setBreedProfiles] = useState<any[]>([]);
   const [localGuides, setLocalGuides] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -88,18 +89,30 @@ const OwnerDashboard = () => {
         setRecentApps(apps || []);
       }
 
-      // Fetch breed-related articles based on pet breeds
-      const petBreeds = (petsData || []).map((p: any) => p.breed).filter(Boolean);
-      if (petBreeds.length > 0) {
+      // Fetch breed-related data based on pet breeds
+      const petBreeds = petsData.map((p: any) => p.breed?.trim().toLowerCase()).filter(Boolean);
+      const uniqueBreeds = [...new Set(petBreeds)];
+      if (uniqueBreeds.length > 0) {
+        // Fetch breed profiles
+        const { data: bProfiles } = await supabase
+          .from("breed_profiles")
+          .select("*")
+          .in("breed", uniqueBreeds);
+        setBreedProfiles(bProfiles || []);
+
+        // Fetch matching articles
         const { data: breedArts } = await supabase
           .from("articles")
-          .select("id, title, slug, cover_image_url, excerpt, category")
+          .select("id, title, slug, cover_image_url, excerpt, category, related_breed")
           .eq("published", true)
           .eq("category", "guide_race")
           .limit(20);
-        // Match articles whose title or related_breed contains a pet breed
         const matched = (breedArts || []).filter((a: any) =>
-          petBreeds.some((b: string) => a.title?.toLowerCase().includes(b.toLowerCase()))
+          uniqueBreeds.some((b: string) =>
+            a.title?.toLowerCase().includes(b) ||
+            a.related_breed?.toLowerCase().includes(b) ||
+            a.slug?.toLowerCase().includes(b)
+          )
         );
         setBreedArticles(matched.slice(0, 3));
       }
@@ -208,13 +221,45 @@ const OwnerDashboard = () => {
         )}
       </DashSection>
 
-      {/* Conseils race personnalisés */}
-      {breedArticles.length > 0 && (
+      {/* Fiches race personnalisées */}
+      {breedProfiles.length > 0 && (
         <DashSection title="Conseils pour vos races" icon={BookOpen} action={
           <Link to="/actualites?cat=guide_race" className="text-xs text-primary hover:underline">Tous les guides</Link>
         }>
+          <div className="grid gap-4">
+            {breedProfiles.map((bp: any) => (
+              <div key={bp.id} className="p-4 rounded-xl bg-card border border-border space-y-2">
+                <div className="flex items-center gap-2">
+                  <span className="text-lg">{speciesEmoji[bp.species] || "🐾"}</span>
+                  <h3 className="font-heading font-semibold text-sm capitalize">{bp.breed}</h3>
+                </div>
+                <div className="grid gap-1.5 text-xs text-muted-foreground">
+                  <p><span className="font-medium text-foreground">Tempérament :</span> {bp.temperament?.slice(0, 120)}…</p>
+                  <p><span className="font-medium text-foreground">Exercice :</span> {bp.exercise_needs?.slice(0, 120)}…</p>
+                  <p><span className="font-medium text-foreground">Conseil gardien :</span> {bp.sitter_tips?.slice(0, 120)}…</p>
+                </div>
+                {/* Link to matching article if exists */}
+                {breedArticles.find((a: any) => a.slug?.includes(bp.breed) || a.title?.toLowerCase().includes(bp.breed)) && (
+                  <Link
+                    to={`/actualites/${breedArticles.find((a: any) => a.slug?.includes(bp.breed) || a.title?.toLowerCase().includes(bp.breed))?.slug}`}
+                    className="text-xs text-primary hover:underline inline-flex items-center gap-1 mt-1"
+                  >
+                    Lire le guide complet <ChevronRight className="h-3 w-3" />
+                  </Link>
+                )}
+              </div>
+            ))}
+          </div>
+        </DashSection>
+      )}
+
+      {/* Articles race sans fiche (fallback) */}
+      {breedArticles.filter((a: any) => !breedProfiles.some((bp: any) => a.slug?.includes(bp.breed) || a.title?.toLowerCase().includes(bp.breed))).length > 0 && (
+        <DashSection title="Articles pour vos races" icon={BookOpen}>
           <div className="grid gap-3">
-            {breedArticles.map((article: any) => (
+            {breedArticles
+              .filter((a: any) => !breedProfiles.some((bp: any) => a.slug?.includes(bp.breed) || a.title?.toLowerCase().includes(bp.breed)))
+              .map((article: any) => (
               <Link key={article.id} to={`/actualites/${article.slug}`} className="flex items-center gap-3 p-3 rounded-xl bg-card border border-border hover:shadow-md transition-shadow">
                 {article.cover_image_url ? (
                   <img src={article.cover_image_url} alt={article.title} className="w-14 h-14 rounded-lg object-cover shrink-0" />
