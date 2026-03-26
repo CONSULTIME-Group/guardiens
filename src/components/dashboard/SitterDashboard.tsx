@@ -53,6 +53,8 @@ const SitterDashboard = () => {
   const [verificationStatus, setVerificationStatus] = useState<string>("not_submitted");
   const [ongoingSit, setOngoingSit] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [onboardingChecks, setOnboardingChecks] = useState({ hasName: false, hasAvatar: false, hasBio: false, hasIdentity: false, hasSitterProfile: false });
 
   useEffect(() => {
     if (!user) return;
