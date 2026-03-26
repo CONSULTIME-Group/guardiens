@@ -14,6 +14,7 @@ import { Search, SlidersHorizontal, MapPin, Star, Car, CheckCircle2, CircleDot, 
 import { toast } from "sonner";
 import ChipSelect from "@/components/profile/ChipSelect";
 import VerifiedBadge from "@/components/profile/VerifiedBadge";
+import BadgePills from "@/components/badges/BadgePills";
 
 const animalChips = ["Chiens", "Chats", "Chevaux", "Oiseaux", "Animaux de ferme", "NAC", "Tous"];
 const animalChipToType: Record<string, string> = {
