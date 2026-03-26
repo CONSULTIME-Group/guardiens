@@ -92,6 +92,12 @@ export default function News() {
   ];
 
   return (
+    <>
+      <PageMeta
+        title="Actualités — Conseils house-sitting & guides locaux"
+        description="Articles, témoignages et guides pratiques pour le house-sitting en Auvergne-Rhône-Alpes. Conseils pour gardiens et propriétaires."
+        path="/actualites"
+      />
     <div className="max-w-4xl mx-auto px-4 py-8 animate-fade-in">
       <header className="mb-8">
         <h1 className="text-3xl md:text-4xl font-heading font-bold text-foreground mb-2">

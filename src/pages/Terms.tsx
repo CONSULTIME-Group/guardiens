@@ -8,6 +8,11 @@ const Terms = () => {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
+      <PageMeta
+        title="Conditions Générales d'Utilisation — Guardiens"
+        description="Consultez les conditions générales d'utilisation de la plateforme Guardiens."
+        path="/cgu"
+      />
       <header className="flex items-center justify-between px-6 md:px-12 py-5 sticky top-0 bg-background/80 backdrop-blur-md z-50 border-b border-border/50">
         <h2 className="font-heading text-2xl font-bold cursor-pointer" onClick={() => navigate("/")}>
           <span className="text-primary">g</span>uardiens

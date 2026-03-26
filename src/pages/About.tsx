@@ -8,6 +8,11 @@ const About = () => {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
+      <PageMeta
+        title="À propos de Guardiens"
+        description="Découvrez l'histoire de Guardiens, née d'une passion pour les animaux et le house-sitting de proximité en Auvergne-Rhône-Alpes."
+        path="/a-propos"
+      />
       <header className="flex items-center justify-between px-6 md:px-12 py-5 sticky top-0 bg-background/80 backdrop-blur-md z-50 border-b border-border/50">
         <h2 className="font-heading text-2xl font-bold cursor-pointer" onClick={() => navigate("/")}>
           <span className="text-primary">g</span>uardiens
