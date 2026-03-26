@@ -188,6 +188,110 @@ export type Database = {
         }
         Relationships: []
       }
+      city_guide_places: {
+        Row: {
+          address: string
+          category: Database["public"]["Enums"]["guide_place_category"]
+          city_guide_id: string
+          created_at: string
+          description: string
+          dogs_welcome: boolean
+          google_place_id: string | null
+          google_rating: number | null
+          id: string
+          latitude: number | null
+          leash_required: boolean | null
+          longitude: number | null
+          name: string
+          photo_url: string | null
+          tips: string | null
+        }
+        Insert: {
+          address?: string
+          category: Database["public"]["Enums"]["guide_place_category"]
+          city_guide_id: string
+          created_at?: string
+          description?: string
+          dogs_welcome?: boolean
+          google_place_id?: string | null
+          google_rating?: number | null
+          id?: string
+          latitude?: number | null
+          leash_required?: boolean | null
+          longitude?: number | null
+          name: string
+          photo_url?: string | null
+          tips?: string | null
+        }
+        Update: {
+          address?: string
+          category?: Database["public"]["Enums"]["guide_place_category"]
+          city_guide_id?: string
+          created_at?: string
+          description?: string
+          dogs_welcome?: boolean
+          google_place_id?: string | null
+          google_rating?: number | null
+          id?: string
+          latitude?: number | null
+          leash_required?: boolean | null
+          longitude?: number | null
+          name?: string
+          photo_url?: string | null
+          tips?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "city_guide_places_city_guide_id_fkey"
+            columns: ["city_guide_id"]
+            isOneToOne: false
+            referencedRelation: "city_guides"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      city_guides: {
+        Row: {
+          city: string
+          created_at: string
+          department: string
+          generated_at: string
+          id: string
+          ideal_for: string
+          intro: string
+          postal_code: string
+          published: boolean
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          city: string
+          created_at?: string
+          department?: string
+          generated_at?: string
+          id?: string
+          ideal_for?: string
+          intro?: string
+          postal_code?: string
+          published?: boolean
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          city?: string
+          created_at?: string
+          department?: string
+          generated_at?: string
+          id?: string
+          ideal_for?: string
+          intro?: string
+          postal_code?: string
+          published?: boolean
+          slug?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       conversations: {
         Row: {
           created_at: string
@@ -1536,6 +1640,15 @@ export type Database = {
         | "accepted"
         | "rejected"
         | "cancelled"
+      guide_place_category:
+        | "dog_park"
+        | "walk_trail"
+        | "vet"
+        | "dog_friendly_cafe"
+        | "dog_friendly_restaurant"
+        | "pet_shop"
+        | "water_point"
+        | "general_park"
       long_stay_access_level: "eligible" | "past_sitters" | "invite_only"
       long_stay_status:
         | "draft"
@@ -1706,6 +1819,16 @@ export const Constants = {
         "accepted",
         "rejected",
         "cancelled",
+      ],
+      guide_place_category: [
+        "dog_park",
+        "walk_trail",
+        "vet",
+        "dog_friendly_cafe",
+        "dog_friendly_restaurant",
+        "pet_shop",
+        "water_point",
+        "general_park",
       ],
       long_stay_access_level: ["eligible", "past_sitters", "invite_only"],
       long_stay_status: [

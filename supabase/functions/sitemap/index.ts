@@ -8,6 +8,7 @@ const staticPages = [
   { loc: "/a-propos", priority: "0.5", changefreq: "monthly" },
   { loc: "/contact", priority: "0.5", changefreq: "monthly" },
   { loc: "/faq", priority: "0.7", changefreq: "weekly" },
+  { loc: "/guides", priority: "0.7", changefreq: "weekly" },
   { loc: "/cgu", priority: "0.3", changefreq: "yearly" },
   { loc: "/confidentialite", priority: "0.3", changefreq: "yearly" },
   { loc: "/login", priority: "0.4", changefreq: "monthly" },
@@ -20,7 +21,7 @@ Deno.serve(async () => {
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
   );
 
-  const [{ data: articles }, { data: cityPages }] = await Promise.all([
+  const [{ data: articles }, { data: cityPages }, { data: cityGuides }] = await Promise.all([
     supabase
       .from("articles")
       .select("slug, updated_at, published_at")
@@ -28,6 +29,11 @@ Deno.serve(async () => {
       .order("published_at", { ascending: false }),
     supabase
       .from("seo_city_pages")
+      .select("slug, updated_at")
+      .eq("published", true)
+      .order("city"),
+    supabase
+      .from("city_guides")
       .select("slug, updated_at")
       .eq("published", true)
       .order("city"),
@@ -70,6 +76,19 @@ Deno.serve(async () => {
     <lastmod>${lastmod}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
+  </url>
+`;
+    }
+  }
+
+  if (cityGuides) {
+    for (const cg of cityGuides) {
+      const lastmod = (cg.updated_at || today).split("T")[0];
+      xml += `  <url>
+    <loc>${SITE_URL}/guide/${cg.slug}</loc>
+    <lastmod>${lastmod}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
   </url>
 `;
     }
