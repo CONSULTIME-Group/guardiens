@@ -94,8 +94,8 @@ const Pricing = () => {
   return (
     <>
       <PageMeta
-        title="Tarifs Guardiens — Gratuit pour les propriétaires, 49€/an pour les gardiens"
-        description="Pas de frais cachés, pas de commission sur les gardes. Propriétaires : gratuit pour toujours. Gardiens : 49€/an. Inscrivez-vous avant le 13 mai pour 1 an gratuit."
+        title="Tarifs Guardiens — 49€/an gardien, gratuit propriétaire | Comparatif house-sitting"
+        description="Guardiens : 49€/an pour les gardiens, gratuit pour les propriétaires. Aucune commission. Comparez avec TrustedHousesitters ($129-$299/an + $10/garde) et Nomador (34-179€/an)."
       />
 
       <div className="min-h-screen bg-background">
