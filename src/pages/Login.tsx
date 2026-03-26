@@ -24,13 +24,24 @@ const Login = () => {
       navigate("/dashboard");
     } catch (error: any) {
       const isInvalidCredentials = error.message === "Invalid login credentials";
-      toast({
-        variant: "destructive",
-        title: isInvalidCredentials ? "Compte introuvable" : "Erreur de connexion",
-        description: isInvalidCredentials
-          ? "Aucun compte existant avec cette adresse. Créez-vous un compte !"
-          : "Une erreur est survenue. Veuillez réessayer.",
-      });
+      if (isInvalidCredentials) {
+        toast({
+          variant: "destructive",
+          title: "Compte introuvable",
+          description: "Aucun compte existant avec cette adresse.",
+          action: (
+            <Button variant="outline" size="sm" className="border-white text-white hover:bg-white/20" onClick={() => navigate("/register")}>
+              Créer un compte
+            </Button>
+          ),
+        });
+      } else {
+        toast({
+          variant: "destructive",
+          title: "Erreur de connexion",
+          description: "Une erreur est survenue. Veuillez réessayer.",
+        });
+      }
     } finally {
       setIsLoading(false);
     }
