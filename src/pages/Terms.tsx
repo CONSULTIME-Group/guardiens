@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
+import PageMeta from "@/components/PageMeta";
 
 const Terms = () => {
   const navigate = useNavigate();

@@ -76,6 +76,16 @@ export default function ArticleDetail() {
   }
 
   return (
+    <>
+      <PageMeta
+        title={article.title}
+        description={article.excerpt}
+        path={`/actualites/${article.slug}`}
+        image={article.cover_image_url || undefined}
+        type="article"
+        publishedAt={article.published_at || undefined}
+        author={article.author_name}
+      />
     <article className="max-w-3xl mx-auto px-4 py-8 animate-fade-in">
       <Link
         to="/actualites"

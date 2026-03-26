@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Mail, MapPin } from "lucide-react";
+import PageMeta from "@/components/PageMeta";
 
 const Contact = () => {
   const navigate = useNavigate();
