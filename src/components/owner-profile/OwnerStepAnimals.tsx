@@ -52,6 +52,7 @@ const OwnerStepAnimals = ({ pets, onAddPet, onUpdatePet, onRemovePet }: Props) =
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const editFormRef = useRef<HTMLDivElement>(null);
 
   const handlePhotoUpload = async (file: File) => {
     if (!editingPet || !file) return;
@@ -75,6 +76,7 @@ const OwnerStepAnimals = ({ pets, onAddPet, onUpdatePet, onRemovePet }: Props) =
   const startEdit = (pet: Pet) => {
     setEditingPet({ ...pet });
     setIsNew(false);
+    setTimeout(() => editFormRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 100);
   };
 
   const handleSave = async () => {
@@ -133,7 +135,7 @@ const OwnerStepAnimals = ({ pets, onAddPet, onUpdatePet, onRemovePet }: Props) =
       ))}
 
       {editingPet ? (
-        <div className="bg-card rounded-lg border border-primary/30 p-5 space-y-4">
+        <div ref={editFormRef} className="bg-card rounded-lg border border-primary/30 p-5 space-y-4">
           <h3 className="font-heading text-lg font-semibold">{isNew ? "Nouvel animal" : `Modifier ${editingPet.name}`}</h3>
 
           {/* Photo upload */}
