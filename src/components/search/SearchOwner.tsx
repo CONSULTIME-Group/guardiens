@@ -144,15 +144,21 @@ const SearchOwner = () => {
       });
     }
 
-    // Enrich with reviews + badges
+    // Enrich with reviews + badges + emergency status
     const userIds = items.map((s: any) => s.user_id);
-    const { data: allBadges } = await supabase
-      .from("badge_attributions")
-      .select("receiver_id, badge_key")
-      .in("receiver_id", userIds);
+    const [allBadgesRes, emergencyRes] = await Promise.all([
+      supabase.from("badge_attributions").select("receiver_id, badge_key").in("receiver_id", userIds),
+      supabase.from("emergency_sitter_profiles").select("user_id, is_active").in("user_id", userIds).eq("is_active", true),
+    ]);
+
+    const emergencySet = new Set((emergencyRes.data || []).map((e: any) => e.user_id));
+
+    if (emergencyOnly) {
+      items = items.filter((s: any) => emergencySet.has(s.user_id));
+    }
 
     const badgeMap = new Map<string, Map<string, number>>();
-    (allBadges || []).forEach((b: any) => {
+    (allBadgesRes.data || []).forEach((b: any) => {
       if (!badgeMap.has(b.receiver_id)) badgeMap.set(b.receiver_id, new Map());
       const m = badgeMap.get(b.receiver_id)!;
       m.set(b.badge_key, (m.get(b.badge_key) || 0) + 1);
@@ -172,7 +178,7 @@ const SearchOwner = () => {
         const topBadges = userBadges
           ? Array.from(userBadges.entries()).map(([badge_key, count]) => ({ badge_key, count })).sort((a, b) => b.count - a.count).slice(0, 2)
           : [];
-        return { ...s, avgRating, reviewCount: reviews?.length || 0, topBadges };
+        return { ...s, avgRating, reviewCount: reviews?.length || 0, topBadges, isEmergency: emergencySet.has(s.user_id) };
       })
     );
 
