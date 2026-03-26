@@ -66,6 +66,7 @@ const OwnerDashboard = () => {
       // Owner eligibility for long stays: TEMPORARILY BYPASSED FOR TESTING
       const completedCount = sitsData.filter((s: any) => s.status === "completed").length;
       setOwnerEligible(completedCount >= 2 && (profileRes.data?.identity_verified || false));
+      setVerificationStatus((profileRes.data as any)?.identity_verification_status || "not_submitted");
 
       // Load pets from user's properties
       const propIds = (propsRes.data || []).map((p: any) => p.id);
