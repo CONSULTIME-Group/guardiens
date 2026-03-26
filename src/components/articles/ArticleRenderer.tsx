@@ -29,6 +29,8 @@ import borderCollieFeyssineLyon from "@/assets/border-collie-feyssine-lyon.jpg";
 import borderCollieInterieurCroixRousse from "@/assets/border-collie-interieur-croix-rousse.jpg";
 import bouledogueFrancaisVieuxLyon from "@/assets/bouledogue-francais-vieux-lyon.jpg";
 import bouledogueFrancaisInterieurLyon6 from "@/assets/bouledogue-francais-interieur-lyon6.jpg";
+import bergerAustralienFeyssineLyon from "@/assets/berger-australien-feyssine-lyon.jpg";
+import bergerAustralienInterieurLyon from "@/assets/berger-australien-interieur-lyon.jpg";
 
 const ARTICLE_IMAGES: Record<string, string> = {
   "/images/lyon-hero-quais.jpg": lyonHeroQuais,
