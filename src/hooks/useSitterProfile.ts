@@ -233,10 +233,16 @@ export function useSitterProfile() {
     if (!sitterProfileId) return;
     const { data: created } = await supabase
       .from("past_animals")
-      .insert({ sitter_profile_id: sitterProfileId, species: animal.species, name: animal.name, photo_url: animal.photo_url || null })
+      .insert({
+        sitter_profile_id: sitterProfileId,
+        species: animal.species,
+        name: animal.name,
+        photo_url: animal.photo_url || null,
+        breed: animal.breed || null,
+      } as any)
       .select()
       .single();
-    if (created) setPastAnimals(prev => [...prev, { id: created.id, species: created.species, name: created.name, photo_url: created.photo_url || undefined }]);
+    if (created) setPastAnimals(prev => [...prev, { id: created.id, species: created.species, name: created.name, breed: (created as any).breed || undefined, photo_url: created.photo_url || undefined }]);
   }, [sitterProfileId]);
 
   const removePastAnimal = useCallback(async (id: string) => {
