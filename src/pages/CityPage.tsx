@@ -142,8 +142,8 @@ const CityPage = () => {
   return (
     <>
       <PageMeta
-        title={page.meta_title || `House-sitting ${page.city}`}
-        description={page.meta_description}
+        title={page.meta_title || `Pet sitting & House sitting à ${page.city} – Garde d'animaux gratuite | Guardiens`}
+        description={page.meta_description || `Trouvez un pet sitter ou house sitter de confiance à ${page.city}. Garde d'animaux à domicile gratuite. Gardiens vérifiés, avis détaillés. Inscrivez-vous sur Guardiens.`}
         path={`/house-sitting/${page.slug}`}
       />
 
