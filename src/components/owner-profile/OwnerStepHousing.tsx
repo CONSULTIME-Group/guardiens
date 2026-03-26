@@ -19,7 +19,7 @@ const ENV_MAP: Record<string, string> = { "Centre-ville": "city_center", Périur
 const ENV_REVERSE: Record<string, string> = Object.fromEntries(Object.entries(ENV_MAP).map(([k, v]) => [v, k]));
 
 const COUNTS = ["1", "2", "3", "4", "5", "Plus de 5"];
-const EQUIPMENTS = ["Jardin", "Piscine", "WiFi", "Parking", "Terrasse", "Cheminée", "Buanderie", "Lave-vaisselle", "Congélateur", "TV", "Équipement sport"];
+const EQUIPMENTS = ["Jardin", "Piscine", "WiFi", "Parking", "Terrasse", "Cheminée", "Buanderie", "Lave-vaisselle", "Congélateur", "TV", "Équipement sport", "BBQ"];
 
 interface Props {
   data: OwnerProfileData;

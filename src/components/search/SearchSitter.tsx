@@ -34,6 +34,7 @@ const envLabels: Record<string, string> = {
 const typeLabels: Record<string, string> = {
   apartment: "Appartement", house: "Maison", farm: "Ferme", chalet: "Chalet", other: "Autre",
 };
+const EQUIPMENT_CHIPS = ["Jardin", "Piscine", "WiFi", "Parking", "Terrasse", "Cheminée", "Buanderie", "Lave-vaisselle", "Congélateur", "TV", "Équipement sport", "BBQ"];
 
 type SortOption = "recent" | "rating" | "start_date" | "contribution";
 type SearchTab = "sits" | "long_stays";
@@ -50,6 +51,7 @@ const SearchSitter = () => {
   const [environment, setEnvironment] = useState("all");
   const [duration, setDuration] = useState("all");
   const [verifiedOnly, setVerifiedOnly] = useState(false);
+  const [selectedEquipments, setSelectedEquipments] = useState<string[]>([]);
   const [sort, setSort] = useState<SortOption>("recent");
 
   const [results, setResults] = useState<any[]>([]);
@@ -112,6 +114,12 @@ const SearchSitter = () => {
 
     if (housingType !== "all") items = items.filter((s: any) => s.property?.type === housingType);
     if (environment !== "all") items = items.filter((s: any) => s.property?.environment === environment);
+    if (selectedEquipments.length > 0) {
+      items = items.filter((s: any) => {
+        const eq = s.property?.equipments || [];
+        return selectedEquipments.every((e: string) => eq.includes(e));
+      });
+    }
 
     if (city) {
       const searchCoords = await geocodeCity(city);
@@ -176,7 +184,7 @@ const SearchSitter = () => {
   const searchLongStays = async () => {
     let query = supabase
       .from("long_stays")
-      .select("*, owner:profiles!long_stays_user_id_fkey(first_name, avatar_url, city, identity_verified), property:properties!long_stays_property_id_fkey(type, environment, photos)")
+      .select("*, owner:profiles!long_stays_user_id_fkey(first_name, avatar_url, city, identity_verified), property:properties!long_stays_property_id_fkey(type, environment, photos, equipments)")
       .eq("status", "published")
       .order("created_at", { ascending: false });
 
@@ -188,6 +196,12 @@ const SearchSitter = () => {
 
     if (housingType !== "all") items = items.filter((s: any) => s.property?.type === housingType);
     if (environment !== "all") items = items.filter((s: any) => s.property?.environment === environment);
+    if (selectedEquipments.length > 0) {
+      items = items.filter((s: any) => {
+        const eq = s.property?.equipments || [];
+        return selectedEquipments.every((e: string) => eq.includes(e));
+      });
+    }
 
     if (city) {
       const searchCoords = await geocodeCity(city);
@@ -283,6 +297,10 @@ const SearchSitter = () => {
             <SelectItem value="forest">Forêt</SelectItem>
           </SelectContent>
         </Select>
+      </div>
+      <div>
+        <label className="text-sm font-medium mb-1.5 block">Équipements</label>
+        <ChipSelect options={EQUIPMENT_CHIPS} selected={selectedEquipments} onChange={setSelectedEquipments} />
       </div>
       {tab === "sits" && (
         <div>
