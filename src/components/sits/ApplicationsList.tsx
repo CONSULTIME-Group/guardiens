@@ -7,6 +7,7 @@ import { toast } from "@/hooks/use-toast";
 import { Star, MapPin, CheckCircle2, XCircle, MessageSquare, Users, Archive, Eye, EyeOff } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import VerifiedBadge from "@/components/profile/VerifiedBadge";
+import BadgePills from "@/components/badges/BadgePills";
 
 interface ApplicationsListProps {
   sitId: string;
