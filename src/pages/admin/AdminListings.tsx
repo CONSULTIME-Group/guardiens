@@ -55,13 +55,18 @@ const AdminListings = () => {
   useEffect(() => {
     if (!listings.length) return;
     const ids = listings.map((l) => l.id);
-    const appTable = filterType === "sits" ? "applications" : "long_stay_applications";
-    const fk = filterType === "sits" ? "sit_id" : "long_stay_id";
-    supabase.from(appTable).select(`id, ${fk}`).in(fk, ids).then(({ data }) => {
+    const fetchCounts = async () => {
       const counts: Record<string, number> = {};
-      data?.forEach((a: any) => { counts[a[fk]] = (counts[a[fk]] || 0) + 1; });
+      if (filterType === "sits") {
+        const { data } = await supabase.from("applications").select("id, sit_id").in("sit_id", ids);
+        data?.forEach((a: any) => { counts[a.sit_id] = (counts[a.sit_id] || 0) + 1; });
+      } else {
+        const { data } = await supabase.from("long_stay_applications").select("id, long_stay_id").in("long_stay_id", ids);
+        data?.forEach((a: any) => { counts[a.long_stay_id] = (counts[a.long_stay_id] || 0) + 1; });
+      }
       setAppCounts(counts);
-    });
+    };
+    fetchCounts();
   }, [listings, filterType]);
 
   const handleHide = async (id: string) => {

@@ -29,16 +29,18 @@ const AdminSitsManagement = () => {
   const fetchSits = useCallback(async () => {
     setLoading(true);
     const results: any[] = [];
+    type SitStatus = "confirmed" | "completed" | "cancelled";
+    type LSStatus = "confirmed" | "completed" | "cancelled";
+    const sitStatuses: SitStatus[] = filterStatus === "all" ? ["confirmed", "completed", "cancelled"] : [filterStatus as SitStatus];
+    const lsStatuses: LSStatus[] = filterStatus === "all" ? ["confirmed", "completed", "cancelled"] : [filterStatus as LSStatus];
 
     if (filterType !== "long_stays") {
-      let q = supabase.from("sits").select("*, owner:profiles!sits_user_id_fkey(first_name, last_name, avatar_url, city)").in("status", filterStatus === "all" ? ["confirmed", "completed", "cancelled"] : [filterStatus]).order("start_date", { ascending: false });
-      const { data } = await q;
+      const { data } = await supabase.from("sits").select("*, owner:profiles!sits_user_id_fkey(first_name, last_name, avatar_url, city)").in("status", sitStatuses).order("start_date", { ascending: false });
       (data || []).forEach(d => results.push({ ...d, _type: "sit" }));
     }
 
     if (filterType !== "sits") {
-      let q = supabase.from("long_stays").select("*, owner:profiles!long_stays_user_id_fkey(first_name, last_name, avatar_url, city)").in("status", filterStatus === "all" ? ["confirmed", "completed", "cancelled"] : [filterStatus]).order("start_date", { ascending: false });
-      const { data } = await q;
+      const { data } = await supabase.from("long_stays").select("*, owner:profiles!long_stays_user_id_fkey(first_name, last_name, avatar_url, city)").in("status", lsStatuses).order("start_date", { ascending: false });
       (data || []).forEach(d => results.push({ ...d, _type: "long_stay" }));
     }
 
