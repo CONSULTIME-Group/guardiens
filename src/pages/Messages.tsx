@@ -358,6 +358,27 @@ const Messages = () => {
               ))}
             </div>
 
+            {/* Type filter: Toutes / Gardes / Entraide */}
+            <div className="flex gap-1 bg-accent rounded-lg p-0.5">
+              {([
+                { value: "all" as ConvType, label: "Toutes" },
+                { value: "garde" as ConvType, label: "🐾 Gardes" },
+                { value: "entraide" as ConvType, label: "🤝 Entraide" },
+              ]).map(tab => (
+                <button
+                  key={tab.value}
+                  onClick={() => setTypeFilter(tab.value)}
+                  className={`flex-1 px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
+                    typeFilter === tab.value
+                      ? "bg-card shadow-sm text-foreground"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+
             {/* Filter by sit */}
             {sitOptions.length > 1 && (
               <div className="flex items-center gap-1.5">
