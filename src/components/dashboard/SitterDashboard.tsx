@@ -247,7 +247,64 @@ const SitterDashboard = () => {
         )}
       </DashSection>
 
-      {/* 7. Petites missions */}
+      {/* 7. Mes petites missions */}
+      {(myMissions.length > 0 || myMissionResponses.length > 0) && (
+        <DashSection title="Mes petites missions" action={
+          <Link to="/petites-missions" className="text-xs text-primary hover:underline font-medium">Voir tout →</Link>
+        }>
+          {myMissions.length > 0 && (
+            <div className="mb-3">
+              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">Missions proposées</p>
+              <div className="space-y-2">
+                {myMissions.map((m: any) => {
+                  const responseCount = m.small_mission_responses?.length || 0;
+                  const pendingCount = m.small_mission_responses?.filter((r: any) => r.status === "pending").length || 0;
+                  return (
+                    <Link key={m.id} to={`/petites-missions/${m.id}`} className="flex items-center gap-3 p-3 rounded-xl bg-card border border-border hover:bg-accent/50 transition-colors">
+                      <Handshake className="h-5 w-5 text-primary shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium truncate">{m.title}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {m.status === "completed" ? "✅ Terminée" : m.status === "in_progress" ? "🔄 En cours" : `${responseCount} réponse${responseCount > 1 ? "s" : ""}`}
+                          {pendingCount > 0 && <span className="ml-1 text-primary font-medium">· {pendingCount} en attente</span>}
+                        </p>
+                      </div>
+                      <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+          {myMissionResponses.length > 0 && (
+            <div>
+              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">Missions auxquelles j'ai répondu</p>
+              <div className="space-y-2">
+                {myMissionResponses.map((r: any) => {
+                  const statusConfig: Record<string, { label: string; color: string }> = {
+                    pending: { label: "En attente", color: "text-muted-foreground" },
+                    accepted: { label: "Acceptée", color: "text-green-600" },
+                    declined: { label: "Déclinée", color: "text-red-500" },
+                  };
+                  const cfg = statusConfig[r.status] || statusConfig.pending;
+                  return (
+                    <Link key={r.id} to={`/petites-missions/${r.mission?.id}`} className="flex items-center gap-3 p-3 rounded-xl bg-card border border-border hover:bg-accent/50 transition-colors">
+                      <Handshake className="h-5 w-5 text-amber-500 shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium truncate">{r.mission?.title}</p>
+                        <p className={`text-xs ${cfg.color}`}>{cfg.label}</p>
+                      </div>
+                      <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+        </DashSection>
+      )}
+
+      {/* 8. Petites missions à proximité */}
       <DashSection title="Coups de main près de chez vous" action={
         <Link to="/petites-missions" className="text-xs text-primary hover:underline font-medium">Voir tout →</Link>
       }>
