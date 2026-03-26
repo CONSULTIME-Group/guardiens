@@ -25,6 +25,7 @@ interface Conversation {
   last_message?: { content: string; created_at: string; sender_id: string } | null;
   unread_count: number;
   application_status?: string | null;
+  top_badge?: { badge_key: string; count: number } | null;
 }
 
 interface Message {
