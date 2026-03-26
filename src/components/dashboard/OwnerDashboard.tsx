@@ -153,6 +153,19 @@ const OwnerDashboard = () => {
 
   if (loading) return <div className="p-6 text-muted-foreground">Chargement...</div>;
 
+  if (showOnboarding) {
+    return (
+      <OnboardingWelcome
+        role="owner"
+        checks={onboardingChecks}
+        onDismiss={() => {
+          localStorage.setItem("onboarding_owner_dismissed", "1");
+          setShowOnboarding(false);
+        }}
+      />
+    );
+  }
+
   const activeSits = sits.filter(s => ["published", "confirmed"].includes(s.status));
   const completedSits = sits.filter(s => s.status === "completed");
   const avgRating = reviews.length > 0 ? Math.round((reviews.reduce((s, r) => s + r.overall_rating, 0) / reviews.length) * 10) / 10 : 0;
