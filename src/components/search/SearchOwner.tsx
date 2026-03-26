@@ -48,7 +48,41 @@ const SearchOwner = () => {
   const [searched, setSearched] = useState(false);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
 
-  const handleSearch = async () => {
+  const [contactingId, setContactingId] = useState<string | null>(null);
+
+  const handleContact = async (sitterId: string) => {
+    if (!user) return;
+    setContactingId(sitterId);
+    try {
+      // Check if conversation already exists
+      const { data: existing } = await supabase
+        .from("conversations")
+        .select("id")
+        .eq("owner_id", user.id)
+        .eq("sitter_id", sitterId)
+        .maybeSingle();
+
+      if (existing) {
+        navigate(`/messages?conversation=${existing.id}`);
+        return;
+      }
+
+      // Create new conversation
+      const { data: conv, error } = await supabase
+        .from("conversations")
+        .insert({ owner_id: user.id, sitter_id: sitterId })
+        .select("id")
+        .single();
+
+      if (error) throw error;
+      navigate(`/messages?conversation=${conv.id}`);
+    } catch (err) {
+      toast.error("Impossible de démarrer la conversation");
+    } finally {
+      setContactingId(null);
+    }
+  };
+
     setLoading(true);
     setSearched(true);
 
