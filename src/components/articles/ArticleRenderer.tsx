@@ -39,6 +39,8 @@ import parcTeteDorChiens from "@/assets/parc-tete-dor-chiens-lyon.jpg";
 import parcParillyLabrador from "@/assets/parc-parilly-labrador-lyon.jpg";
 import gardienBellecour from "@/assets/gardien-bellecour-lyon.jpg";
 import profilGardienLaptop from "@/assets/profil-gardien-laptop-lyon.jpg";
+import villaOuestVide from "@/assets/villa-ouest-lyonnais-vide.jpg";
+import gardienTeletravailOuest from "@/assets/gardien-teletravail-ouest-lyon.jpg";
 
 const ARTICLE_IMAGES: Record<string, string> = {
   "/images/lyon-hero-quais.jpg": lyonHeroQuais,
@@ -77,6 +79,8 @@ const ARTICLE_IMAGES: Record<string, string> = {
   "/images/parc-parilly-labrador-lyon.jpg": parcParillyLabrador,
   "/images/gardien-bellecour-lyon.jpg": gardienBellecour,
   "/images/profil-gardien-laptop-lyon.jpg": profilGardienLaptop,
+  "/images/villa-ouest-lyonnais-vide.jpg": villaOuestVide,
+  "/images/gardien-teletravail-ouest-lyon.jpg": gardienTeletravailOuest,
 };
 
 function resolveArticleImages(html: string): string {
