@@ -38,6 +38,17 @@ const OwnerProfilePage = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const [localData, setLocalData] = useState<Partial<OwnerProfileData>>({});
   const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
+  const [trustData, setTrustData] = useState({ identityVerified: false, hasAvatar: false, hasFirstActivity: false });
+
+  useEffect(() => {
+    if (!user) return;
+    supabase.from("profiles").select("identity_verified, avatar_url").eq("id", user.id).single().then(({ data: p }) => {
+      if (p) setTrustData(prev => ({ ...prev, identityVerified: p.identity_verified || false, hasAvatar: !!p.avatar_url }));
+    });
+    supabase.from("sits").select("id", { count: "exact", head: true }).eq("user_id", user.id).eq("status", "published").then(({ count }) => {
+      setTrustData(prev => ({ ...prev, hasFirstActivity: (count || 0) > 0 }));
+    });
+  }, [user]);
 
   const mergedData = { ...data, ...localData } as OwnerProfileData;
 
