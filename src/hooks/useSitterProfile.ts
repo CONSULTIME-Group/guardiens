@@ -124,7 +124,7 @@ export function useSitterProfile() {
         .from("past_animals")
         .select("*")
         .eq("sitter_profile_id", s.id);
-      setPastAnimals(animals?.map(a => ({ id: a.id, species: a.species, name: a.name, photo_url: a.photo_url || undefined })) || []);
+      setPastAnimals(animals?.map(a => ({ id: a.id, species: a.species, name: a.name, breed: (a as any).breed || undefined, photo_url: a.photo_url || undefined })) || []);
     }
 
     setLoading(false);
