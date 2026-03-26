@@ -128,6 +128,35 @@ const LeaveReview = () => {
         badge_key,
       }));
       await supabase.from("badge_attributions").insert(badgeRows as any);
+
+      // Check for mutual badges → "Le courant passe"
+      // The other party gave badges to ME for this sit
+      const { data: otherBadges } = await supabase
+        .from("badge_attributions")
+        .select("id")
+        .eq("sit_id", sitId)
+        .eq("giver_id", revieweeId)
+        .eq("receiver_id", user.id);
+
+      const otherGaveCount = otherBadges?.length || 0;
+      if (otherGaveCount >= 2 && selectedBadges.length >= 2) {
+        // Both gave ≥2 badges — insert "Le courant passe" for both (if not already there)
+        const mutualKey = SPECIAL_BADGE.key;
+        const { data: existing } = await supabase
+          .from("badge_attributions")
+          .select("id")
+          .eq("sit_id", sitId)
+          .eq("badge_key", mutualKey)
+          .eq("receiver_id", user.id)
+          .maybeSingle();
+
+        if (!existing) {
+          await supabase.from("badge_attributions").insert([
+            { sit_id: sitId, giver_id: revieweeId, receiver_id: user.id, badge_key: mutualKey },
+            { sit_id: sitId, giver_id: user.id, receiver_id: revieweeId, badge_key: mutualKey },
+          ] as any);
+        }
+      }
     }
 
     // Send system message in conversation
