@@ -1600,6 +1600,110 @@ export type Database = {
           },
         ]
       }
+      small_mission_responses: {
+        Row: {
+          created_at: string
+          id: string
+          message: string
+          mission_id: string
+          responder_id: string
+          status: Database["public"]["Enums"]["small_mission_response_status"]
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message?: string
+          mission_id: string
+          responder_id: string
+          status?: Database["public"]["Enums"]["small_mission_response_status"]
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message?: string
+          mission_id?: string
+          responder_id?: string
+          status?: Database["public"]["Enums"]["small_mission_response_status"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "small_mission_responses_mission_id_fkey"
+            columns: ["mission_id"]
+            isOneToOne: false
+            referencedRelation: "small_missions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "small_mission_responses_responder_id_fkey"
+            columns: ["responder_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      small_missions: {
+        Row: {
+          category: Database["public"]["Enums"]["small_mission_category"]
+          city: string
+          created_at: string
+          date_needed: string | null
+          description: string
+          duration_estimate: string
+          exchange_offer: string
+          id: string
+          latitude: number | null
+          longitude: number | null
+          postal_code: string
+          status: Database["public"]["Enums"]["small_mission_status"]
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          category?: Database["public"]["Enums"]["small_mission_category"]
+          city?: string
+          created_at?: string
+          date_needed?: string | null
+          description?: string
+          duration_estimate?: string
+          exchange_offer?: string
+          id?: string
+          latitude?: number | null
+          longitude?: number | null
+          postal_code?: string
+          status?: Database["public"]["Enums"]["small_mission_status"]
+          title?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          category?: Database["public"]["Enums"]["small_mission_category"]
+          city?: string
+          created_at?: string
+          date_needed?: string | null
+          description?: string
+          duration_estimate?: string
+          exchange_offer?: string
+          id?: string
+          latitude?: number | null
+          longitude?: number | null
+          postal_code?: string
+          status?: Database["public"]["Enums"]["small_mission_status"]
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "small_missions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       subscriptions: {
         Row: {
           created_at: string
@@ -1767,6 +1871,9 @@ export type Database = {
         | "confirmed"
         | "completed"
         | "cancelled"
+      small_mission_category: "animals" | "garden" | "house" | "skills"
+      small_mission_response_status: "pending" | "accepted" | "declined"
+      small_mission_status: "open" | "in_progress" | "completed" | "cancelled"
       subscription_plan:
         | "free_launch"
         | "founder_free"
@@ -1952,6 +2059,9 @@ export const Constants = {
       ],
       property_type: ["apartment", "house", "farm", "chalet", "other"],
       sit_status: ["draft", "published", "confirmed", "completed", "cancelled"],
+      small_mission_category: ["animals", "garden", "house", "skills"],
+      small_mission_response_status: ["pending", "accepted", "declined"],
+      small_mission_status: ["open", "in_progress", "completed", "cancelled"],
       subscription_plan: [
         "free_launch",
         "founder_free",
