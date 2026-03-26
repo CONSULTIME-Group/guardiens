@@ -6,11 +6,17 @@ import { Button } from "@/components/ui/button";
 import lyonHeroQuais from "@/assets/lyon-hero-quais.jpg";
 import lyonChatFenetre from "@/assets/lyon-chat-fenetre.jpg";
 import lyonConfianceCafe from "@/assets/lyon-confiance-cafe.jpg";
+import grenobleBastilleChien from "@/assets/grenoble-bastille-chien.jpg";
+import grenobleChatChartreuse from "@/assets/grenoble-chat-chartreuse.jpg";
+import grenobleConfianceCafe from "@/assets/grenoble-confiance-cafe.jpg";
 
 const ARTICLE_IMAGES: Record<string, string> = {
   "/images/lyon-hero-quais.jpg": lyonHeroQuais,
   "/images/lyon-chat-fenetre.jpg": lyonChatFenetre,
   "/images/lyon-confiance-cafe.jpg": lyonConfianceCafe,
+  "/images/grenoble-bastille-chien.jpg": grenobleBastilleChien,
+  "/images/grenoble-chat-chartreuse.jpg": grenobleChatChartreuse,
+  "/images/grenoble-confiance-cafe.jpg": grenobleConfianceCafe,
 };
 
 function resolveArticleImages(html: string): string {
