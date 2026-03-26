@@ -57,6 +57,7 @@ import DepartmentPage from "./pages/DepartmentPage";
 import Pricing from "./pages/Pricing";
 import SmallMissions from "./pages/SmallMissions";
 import CreateSmallMission from "./pages/CreateSmallMission";
+import MentionsLegales from "./pages/MentionsLegales";
 
 const queryClient = new QueryClient();
 
