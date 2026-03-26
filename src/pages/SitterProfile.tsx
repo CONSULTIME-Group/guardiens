@@ -13,7 +13,7 @@ import { useSitterProfile, type SitterProfileData } from "@/hooks/useSitterProfi
 const SitterProfile = () => {
   const navigate = useNavigate();
   const {
-    data, pastAnimals, loading, saving, completion,
+    data, pastAnimals, loading, saving, completion, missingFields,
     saveStep, addPastAnimal, removePastAnimal, uploadAvatar,
   } = useSitterProfile();
 
