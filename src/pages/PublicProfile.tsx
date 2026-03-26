@@ -37,6 +37,8 @@ const PublicProfile = () => {
   const [pastAnimals, setPastAnimals] = useState<any[]>([]);
   const [reviewStats, setReviewStats] = useState({ count: 0, avg: 0 });
   const [completedSits, setCompletedSits] = useState(0);
+  const [galleryPhotos, setGalleryPhotos] = useState<any[]>([]);
+  const [externalExperiences, setExternalExperiences] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
