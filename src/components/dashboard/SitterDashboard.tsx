@@ -240,7 +240,7 @@ const SitterDashboard = () => {
         <Link to="/search" className="text-xs text-primary hover:underline font-medium">Voir tout →</Link>
       }>
         {nearbyListings.length === 0 ? (
-          <EmptyCard icon={Search} text="Pas encore d'annonce dans votre zone. Activez le mode disponible pour être contacté !" />
+          <EmptyCard icon={Search} text="Aucune annonce dans votre zone pour le moment" hint="Activez le mode disponible pour être contacté directement par les propriétaires" />
         ) : (
           <div className="space-y-2">
             {nearbyListings.map(sit => {
