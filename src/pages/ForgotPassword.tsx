@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft } from "lucide-react";
-import loginIllustration from "@/assets/login-illustration.png";
+import authIllustration from "@/assets/login-illustration.png";
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState("");
@@ -41,7 +41,7 @@ const ForgotPassword = () => {
         <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-secondary/10" />
         <div className="relative z-10 flex flex-col items-center text-center max-w-lg">
           <img
-            src={loginIllustration}
+            src={authIllustration}
             alt="Chien et chat heureux"
             width={400}
             height={400}
@@ -73,7 +73,7 @@ const ForgotPassword = () => {
           {/* Illustration mobile only */}
           <div className="flex justify-center mb-8 lg:hidden">
             <img
-              src={loginIllustration}
+              src={authIllustration}
               alt="Chien et chat heureux"
               width={200}
               height={200}
