@@ -201,7 +201,7 @@ const SitterDashboard = () => {
         myApplications.length > 0 ? <Link to="/sits" className="text-xs text-primary hover:underline font-medium">Voir tout →</Link> : undefined
       }>
         {myApplications.length === 0 ? (
-          <EmptyCard icon={Search} text="Pas encore de candidature. Explorez les annonces →" cta="Rechercher" to="/search" />
+          <EmptyCard icon={Search} text="Vous n'avez pas encore candidaté" hint="Parcourez les annonces et trouvez la garde idéale" cta="Explorer les annonces" to="/search" />
         ) : (
           <div className="space-y-2">
             {myApplications.slice(0, 3).map(app => {
