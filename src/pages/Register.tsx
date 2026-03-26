@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { Eye, EyeOff } from "lucide-react";
-import loginIllustration from "@/assets/login-illustration.png";
+import authIllustration from "@/assets/auth-illustration.png";
 
 type Role = "owner" | "sitter" | "both";
 

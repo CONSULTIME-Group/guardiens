@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { ToastAction } from "@/components/ui/toast";
 import { Eye, EyeOff } from "lucide-react";
-import loginIllustration from "@/assets/login-illustration.png";
+import authIllustration from "@/assets/auth-illustration.png";
 
 const Login = () => {
   const [email, setEmail] = useState("");
