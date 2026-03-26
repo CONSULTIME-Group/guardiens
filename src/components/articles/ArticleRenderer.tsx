@@ -59,6 +59,8 @@ const ARTICLE_IMAGES: Record<string, string> = {
   "/images/border-collie-interieur-croix-rousse.jpg": borderCollieInterieurCroixRousse,
   "/images/bouledogue-francais-vieux-lyon.jpg": bouledogueFrancaisVieuxLyon,
   "/images/bouledogue-francais-interieur-lyon6.jpg": bouledogueFrancaisInterieurLyon6,
+  "/images/berger-australien-feyssine-lyon.jpg": bergerAustralienFeyssineLyon,
+  "/images/berger-australien-interieur-lyon.jpg": bergerAustralienInterieurLyon,
 };
 
 function resolveArticleImages(html: string): string {
