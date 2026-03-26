@@ -19,11 +19,18 @@ Deno.serve(async () => {
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
   );
 
-  const { data: articles } = await supabase
-    .from("articles")
-    .select("slug, updated_at, published_at")
-    .eq("published", true)
-    .order("published_at", { ascending: false });
+  const [{ data: articles }, { data: cityPages }] = await Promise.all([
+    supabase
+      .from("articles")
+      .select("slug, updated_at, published_at")
+      .eq("published", true)
+      .order("published_at", { ascending: false }),
+    supabase
+      .from("seo_city_pages")
+      .select("slug, updated_at")
+      .eq("published", true)
+      .order("city"),
+  ]);
 
   const today = new Date().toISOString().split("T")[0];
 
@@ -49,6 +56,19 @@ Deno.serve(async () => {
     <lastmod>${lastmod}</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+  </url>
+`;
+    }
+  }
+
+  if (cityPages) {
+    for (const cp of cityPages) {
+      const lastmod = (cp.updated_at || today).split("T")[0];
+      xml += `  <url>
+    <loc>${SITE_URL}/house-sitting-${cp.slug}</loc>
+    <lastmod>${lastmod}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
   </url>
 `;
     }
