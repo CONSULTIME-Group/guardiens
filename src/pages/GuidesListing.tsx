@@ -190,6 +190,7 @@ const GuidesListing = () => {
           )}
         </main>
 
+        {/* JSON-LD: Breadcrumb */}
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
@@ -197,9 +198,29 @@ const GuidesListing = () => {
               "@context": "https://schema.org",
               "@type": "BreadcrumbList",
               itemListElement: [
-                { "@type": "ListItem", position: 1, name: "Guardiens", item: "https://guardiens.fr" },
-                { "@type": "ListItem", position: 2, name: "Guides locaux", item: "https://guardiens.fr/guides" },
+                { "@type": "ListItem", position: 1, name: "Guardiens", item: "https://guardiens.lovable.app" },
+                { "@type": "ListItem", position: 2, name: "Guides locaux", item: "https://guardiens.lovable.app/guides" },
               ],
+            }),
+          }}
+        />
+
+        {/* JSON-LD: CollectionPage */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "CollectionPage",
+              name: "Guides locaux pour pet sitters et house sitters",
+              description: "Collection de guides pratiques par ville : parcs, vétérinaires, cafés dog-friendly, sentiers de balade pour les gardiens d'animaux.",
+              url: "https://guardiens.lovable.app/guides",
+              isPartOf: {
+                "@type": "WebSite",
+                name: "Guardiens",
+                url: "https://guardiens.lovable.app",
+              },
+              numberOfItems: filteredGuides.length,
             }),
           }}
         />

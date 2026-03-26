@@ -113,21 +113,21 @@ const Landing = () => {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <PageMeta
-        title="Guardiens — Comme confier ses clés à un voisin."
-        description="House-sitting de proximité en Auvergne-Rhône-Alpes. Vos animaux restent chez eux, votre maison vit, vous partez l'esprit léger. Gardiens vérifiés, gratuit."
+        title="Guardiens — Pet sitting & House sitting gratuit en Auvergne-Rhône-Alpes"
+        description="Trouvez un pet sitter ou house sitter de confiance près de chez vous. Garde d'animaux gratuite, gardiens vérifiés, avis détaillés. Vos animaux restent chez eux, votre maison vit."
         path="/"
       />
-      {/* JSON-LD Schema */}
+      {/* JSON-LD: Organization */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
           __html: JSON.stringify({
             "@context": "https://schema.org",
-            "@type": "WebSite",
+            "@type": "Organization",
             name: "Guardiens",
-            url: "https://guardiens.fr",
-            description:
-              "House-sitting de confiance en Auvergne-Rhône-Alpes. Trouvez un gardien de maison et d'animaux près de chez vous.",
+            url: "https://guardiens.lovable.app",
+            logo: "https://guardiens.lovable.app/favicon.ico",
+            description: "Plateforme gratuite de pet sitting et house sitting de proximité en Auvergne-Rhône-Alpes.",
             areaServed: {
               "@type": "AdministrativeArea",
               name: "Auvergne-Rhône-Alpes",
@@ -135,6 +135,91 @@ const Landing = () => {
             founder: [
               { "@type": "Person", name: "Jérémie" },
               { "@type": "Person", name: "Elisa" },
+            ],
+            sameAs: [],
+          }),
+        }}
+      />
+      {/* JSON-LD: WebSite with SearchAction */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "WebSite",
+            name: "Guardiens",
+            url: "https://guardiens.lovable.app",
+            potentialAction: {
+              "@type": "SearchAction",
+              target: {
+                "@type": "EntryPoint",
+                urlTemplate: "https://guardiens.lovable.app/recherche?q={search_term_string}",
+              },
+              "query-input": "required name=search_term_string",
+            },
+          }),
+        }}
+      />
+      {/* JSON-LD: Service */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "Service",
+            name: "Pet sitting & House sitting gratuit",
+            description: "Service de garde d'animaux et house sitting gratuit en Auvergne-Rhône-Alpes. Gardiens vérifiés, avis croisés, inscription gratuite.",
+            provider: {
+              "@type": "Organization",
+              name: "Guardiens",
+              url: "https://guardiens.lovable.app",
+            },
+            areaServed: {
+              "@type": "AdministrativeArea",
+              name: "Auvergne-Rhône-Alpes",
+            },
+            serviceType: ["Pet sitting", "House sitting", "Garde d'animaux", "Gardiennage de maison", "Garde de chien", "Garde de chat"],
+            offers: {
+              "@type": "Offer",
+              price: "0",
+              priceCurrency: "EUR",
+              description: "Inscription et mise en relation 100% gratuites",
+            },
+          }),
+        }}
+      />
+      {/* JSON-LD: FAQPage */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            mainEntity: [
+              {
+                "@type": "Question",
+                name: "Qu'est-ce que le house sitting ?",
+                acceptedAnswer: {
+                  "@type": "Answer",
+                  text: "Le house sitting est un échange de services : un gardien habite gratuitement dans votre maison pendant votre absence et prend soin de vos animaux. C'est gratuit pour les deux parties.",
+                },
+              },
+              {
+                "@type": "Question",
+                name: "Guardiens est-il gratuit ?",
+                acceptedAnswer: {
+                  "@type": "Answer",
+                  text: "Oui, Guardiens est 100% gratuit. Pas de commission, pas d'abonnement obligatoire, pas de frais cachés. L'inscription et la mise en relation sont entièrement gratuites.",
+                },
+              },
+              {
+                "@type": "Question",
+                name: "Comment trouver un pet sitter près de chez moi ?",
+                acceptedAnswer: {
+                  "@type": "Answer",
+                  text: "Inscrivez-vous sur Guardiens, publiez votre annonce de garde avec les dates et vos animaux, et recevez des candidatures de gardiens vérifiés qui habitent près de chez vous.",
+                },
+              },
             ],
           }),
         }}
