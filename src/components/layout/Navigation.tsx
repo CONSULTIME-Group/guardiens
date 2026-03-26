@@ -11,7 +11,7 @@ import { Sheet, SheetContent, SheetTrigger, SheetClose } from "@/components/ui/s
 const navItems = [
   { to: "/dashboard", icon: Home, label: "Dashboard" },
   { to: "/search", icon: Search, label: "Recherche" },
-  { to: "/sits", icon: Calendar, label: "Mes gardes" },
+  { to: "/sits", icon: Calendar, label: "Mes annonces", ownerLabel: "Mes annonces", sitterLabel: "Mes gardes" },
   { to: "/messages", icon: MessageSquare, label: "Messagerie" },
   { to: "/actualites", icon: Newspaper, label: "Actualités" },
   { to: "/guides", icon: Compass, label: "Guides locaux" },
@@ -93,7 +93,10 @@ export const Sidebar = () => {
           if (!("hideForRole" in item)) return true;
           const effectiveRole = user?.role === "both" ? activeRole : user?.role;
           return effectiveRole !== item.hideForRole;
-        }).map((item) => (
+        }).map((item) => {
+          const effectiveRole = user?.role === "both" ? activeRole : user?.role;
+          const displayLabel = effectiveRole === "owner" && "ownerLabel" in item ? (item as any).ownerLabel : effectiveRole === "sitter" && "sitterLabel" in item ? (item as any).sitterLabel : item.label;
+          return (
           <NavLink
             key={item.to}
             to={item.to}
@@ -107,14 +110,15 @@ export const Sidebar = () => {
             }
           >
             <item.icon className="h-5 w-5" />
-            {item.label}
+            {displayLabel}
             {item.to === "/messages" && unreadCount > 0 && (
               <span className="absolute right-3 bg-primary text-primary-foreground text-xs rounded-full min-w-[20px] h-5 flex items-center justify-center px-1.5">
                 {unreadCount}
               </span>
             )}
           </NavLink>
-        ))}
+          );
+        })}
       </nav>
 
       <div className="p-3 border-t border-border space-y-1">
@@ -203,7 +207,7 @@ export const BottomNav = () => {
   const mobileItems = [
     { to: "/dashboard", icon: Home, label: "Accueil" },
     { to: "/search", icon: Search, label: "Recherche" },
-    { to: "/sits", icon: Calendar, label: "Gardes" },
+    { to: "/sits", icon: Calendar, label: effectiveRole === "owner" ? "Annonces" : "Gardes" },
     { to: "/notifications", icon: Bell, label: "Notifs" },
   ];
 
