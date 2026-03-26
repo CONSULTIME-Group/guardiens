@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { ArrowLeft, Send, Image as ImageIcon, Check, CheckCheck, ExternalLink, CheckCircle2, AlertTriangle, Phone, Home, PawPrint, Star, User, Archive, Filter, X } from "lucide-react";
 import { format, isToday, isYesterday } from "date-fns";
 import { fr } from "date-fns/locale";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { useIsMobile } from "@/hooks/use-mobile";
 import HouseGuideBlock from "@/components/messages/HouseGuideBlock";
 import { useToast } from "@/hooks/use-toast";
