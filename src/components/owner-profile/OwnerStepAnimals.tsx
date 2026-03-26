@@ -55,17 +55,52 @@ const OwnerStepAnimals = ({ pets, onAddPet, onUpdatePet, onRemovePet }: Props) =
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const editFormRef = useRef<HTMLDivElement>(null);
+  const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
+
+  const compressImage = (file: File, maxWidth = 1200, quality = 0.8): Promise<Blob> => {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        const ratio = Math.min(maxWidth / img.width, 1);
+        canvas.width = img.width * ratio;
+        canvas.height = img.height * ratio;
+        const ctx = canvas.getContext("2d")!;
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        canvas.toBlob(
+          (blob) => (blob ? resolve(blob) : reject(new Error("Compression failed"))),
+          "image/jpeg",
+          quality
+        );
+      };
+      img.onerror = reject;
+      img.src = URL.createObjectURL(file);
+    });
+  };
 
   const handlePhotoUpload = async (file: File) => {
     if (!editingPet || !file) return;
-    if (file.size > 5 * 1024 * 1024) return;
+    if (!file.type.startsWith("image/")) {
+      toast.error("Seules les images sont acceptées");
+      return;
+    }
     setUploading(true);
-    const ext = file.name.split(".").pop();
-    const path = `pets/${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
-    const { error } = await supabase.storage.from("property-photos").upload(path, file);
-    if (!error) {
-      const { data: urlData } = supabase.storage.from("property-photos").getPublicUrl(path);
-      setEditingPet({ ...editingPet, photo_url: urlData.publicUrl });
+    try {
+      let uploadFile: Blob | File = file;
+      if (file.size > 2 * 1024 * 1024) {
+        uploadFile = await compressImage(file);
+      }
+      const path = `pets/${Date.now()}_${Math.random().toString(36).slice(2)}.jpg`;
+      const { error } = await supabase.storage.from("property-photos").upload(path, uploadFile, { contentType: "image/jpeg" });
+      if (error) {
+        toast.error("Erreur lors de l'upload de la photo");
+      } else {
+        const { data: urlData } = supabase.storage.from("property-photos").getPublicUrl(path);
+        setEditingPet({ ...editingPet, photo_url: urlData.publicUrl });
+        toast.success("Photo ajoutée !");
+      }
+    } catch {
+      toast.error("Erreur lors du traitement de l'image");
     }
     setUploading(false);
   };
