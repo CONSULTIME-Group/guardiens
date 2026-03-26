@@ -10,6 +10,23 @@ import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { marked } from "marked";
 
+import lyonHeroQuais from "@/assets/lyon-hero-quais.jpg";
+import lyonChatFenetre from "@/assets/lyon-chat-fenetre.jpg";
+import lyonConfianceCafe from "@/assets/lyon-confiance-cafe.jpg";
+
+const ARTICLE_IMAGES: Record<string, string> = {
+  "/images/lyon-hero-quais.jpg": lyonHeroQuais,
+  "/images/lyon-chat-fenetre.jpg": lyonChatFenetre,
+  "/images/lyon-confiance-cafe.jpg": lyonConfianceCafe,
+};
+
+function resolveArticleImages(html: string): string {
+  return html.replace(/src="(\/images\/[^"]+)"/g, (match, path) => {
+    const resolved = ARTICLE_IMAGES[path];
+    return resolved ? `src="${resolved}"` : match;
+  });
+}
+
 interface ArticleFull {
   id: string;
   title: string;
@@ -218,7 +235,11 @@ export default function ArticleDetail() {
               { "@type": "City", "name": "Craponne" },
               { "@type": "City", "name": "Saint-Didier-au-Mont-d'Or" },
               { "@type": "City", "name": "Limonest" },
-              { "@type": "City", "name": "Caluire-et-Cuire" }
+              { "@type": "City", "name": "Caluire-et-Cuire" },
+              { "@type": "City", "name": "Sainte-Foy-lès-Lyon" },
+              { "@type": "City", "name": "Oullins" },
+              { "@type": "City", "name": "Bron" },
+              { "@type": "City", "name": "Vénissieux" }
             ]
           }),
           ...(article.city === "Grenoble" && {
@@ -313,7 +334,7 @@ export default function ArticleDetail() {
           prose-blockquote:border-l-4 prose-blockquote:border-primary/40 prose-blockquote:bg-primary/5 prose-blockquote:rounded-r-lg prose-blockquote:py-3 prose-blockquote:px-5 prose-blockquote:not-italic prose-blockquote:text-foreground/80 prose-blockquote:my-6
           prose-hr:border-border prose-hr:my-8
           prose-img:rounded-xl prose-img:shadow-md"
-        dangerouslySetInnerHTML={{ __html: marked.parse(article.content, { async: false }) as string }}
+        dangerouslySetInnerHTML={{ __html: resolveArticleImages(marked.parse(article.content, { async: false }) as string) }}
       />
 
       {/* Cross-links to city pages */}
