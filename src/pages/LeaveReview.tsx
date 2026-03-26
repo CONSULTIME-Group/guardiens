@@ -8,7 +8,7 @@ import { toast } from "@/hooks/use-toast";
 import { ArrowLeft, ThumbsUp, ThumbsDown } from "lucide-react";
 import StarRating from "@/components/reviews/StarRating";
 import BadgeSelector from "@/components/badges/BadgeSelector";
-import { SITTER_BADGES, OWNER_BADGES } from "@/components/badges/badgeDefinitions";
+import { SITTER_BADGES, OWNER_BADGES, SPECIAL_BADGE } from "@/components/badges/badgeDefinitions";
 
 const ownerCriteria = [
   { key: "animal_care_rating", label: "Soin des animaux" },
@@ -128,6 +128,33 @@ const LeaveReview = () => {
         badge_key,
       }));
       await supabase.from("badge_attributions").insert(badgeRows as any);
+
+      // Check for mutual badges → "Le courant passe"
+      const { data: otherBadges } = await supabase
+        .from("badge_attributions")
+        .select("id")
+        .eq("sit_id", sitId)
+        .eq("giver_id", reviewee.id)
+        .eq("receiver_id", user.id);
+
+      const otherGaveCount = otherBadges?.length || 0;
+      if (otherGaveCount >= 2 && selectedBadges.length >= 2) {
+        const mutualKey = SPECIAL_BADGE.key;
+        const { data: existing } = await supabase
+          .from("badge_attributions")
+          .select("id")
+          .eq("sit_id", sitId)
+          .eq("badge_key", mutualKey)
+          .eq("receiver_id", user.id)
+          .maybeSingle();
+
+        if (!existing) {
+          await supabase.from("badge_attributions").insert([
+            { sit_id: sitId, giver_id: reviewee.id, receiver_id: user.id, badge_key: mutualKey },
+            { sit_id: sitId, giver_id: user.id, receiver_id: reviewee.id, badge_key: mutualKey },
+          ] as any);
+        }
+      }
     }
 
     // Send system message in conversation
