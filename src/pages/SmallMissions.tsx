@@ -35,13 +35,36 @@ const SmallMissions = () => {
   const { data: recentMissions } = useQuery({
     queryKey: ["small-missions-recent"],
     queryFn: async () => {
-      const { data } = await supabase
+      const { data: missions } = await supabase
         .from("small_missions")
         .select("*, profiles:user_id(first_name, avatar_url)")
-        .eq("status", "open")
+        .in("status", ["open", "in_progress"] as any[])
         .order("created_at", { ascending: false })
-        .limit(6);
-      return data || [];
+        .limit(20);
+      
+      if (!missions || missions.length === 0) return [];
+
+      // Fetch response counts
+      const missionIds = missions.map((m: any) => m.id);
+      const { data: responses } = await supabase
+        .from("small_mission_responses")
+        .select("mission_id")
+        .in("mission_id", missionIds);
+      
+      const countMap = new Map<string, number>();
+      (responses || []).forEach((r: any) => {
+        countMap.set(r.mission_id, (countMap.get(r.mission_id) || 0) + 1);
+      });
+
+      // Sort: open first, then in_progress
+      const sorted = missions.map((m: any) => ({ ...m, response_count: countMap.get(m.id) || 0 }));
+      sorted.sort((a: any, b: any) => {
+        if (a.status === "open" && b.status !== "open") return -1;
+        if (a.status !== "open" && b.status === "open") return 1;
+        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+      });
+
+      return sorted;
     },
   });
 
