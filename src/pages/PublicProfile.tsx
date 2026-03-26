@@ -44,6 +44,7 @@ const PublicProfile = () => {
   const [externalExperiences, setExternalExperiences] = useState<any[]>([]);
   const [ownerGalleryPhotos, setOwnerGalleryPhotos] = useState<any[]>([]);
   const [ownerHighlights, setOwnerHighlights] = useState<any[]>([]);
+  const [badgeCounts, setBadgeCounts] = useState<{ badge_key: string; count: number }[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
