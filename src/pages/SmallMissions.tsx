@@ -1,4 +1,5 @@
 import { useState } from "react";
+import entraideHeader from "@/assets/entraide-header.jpg";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
