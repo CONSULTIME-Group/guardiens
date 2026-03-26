@@ -152,11 +152,13 @@ const SitterDashboard = () => {
       )}
 
       {/* 3. Stat cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
         <StatCard icon={Home} iconColor="text-primary" label="Gardes réalisées" value={metrics.completed} delay={0} emptyMsg={metrics.completed === 0 ? "Votre première garde vous attend !" : undefined} />
         <StatCard icon={Star} iconColor="text-amber-500" label="Note moyenne" value={metrics.avgRating} delay={100} isDecimal emptyMsg={metrics.avgRating === 0 ? "Pas encore d'avis" : undefined} />
         <StatCard icon={Mail} iconColor="text-blue-500" label="Candidatures en attente" value={metrics.pendingApps} delay={200} />
         <StatCard icon={Award} iconColor="text-purple-500" label="Badges reçus" value={metrics.badgeCount} delay={300} />
+        <StatCard icon={Handshake} iconColor="text-primary" label="Missions proposées" value={metrics.missionsPosted} delay={400} />
+        <StatCard icon={Handshake} iconColor="text-amber-500" label="Coups de main donnés" value={metrics.missionsHelped} delay={500} />
       </div>
 
       {/* 4. Availability toggle */}
