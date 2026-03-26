@@ -39,6 +39,7 @@ const LeaveReview = () => {
   const [subRatings, setSubRatings] = useState<Record<string, number>>({});
   const [wouldRecommend, setWouldRecommend] = useState<boolean | null>(null);
   const [comment, setComment] = useState("");
+  const [selectedBadges, setSelectedBadges] = useState<string[]>([]);
 
   // Determine if current user is owner or sitter for this sit
   const [reviewType, setReviewType] = useState<"owner_to_sitter" | "sitter_to_owner">("owner_to_sitter");
