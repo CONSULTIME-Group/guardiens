@@ -89,8 +89,8 @@ const DepartmentPage = () => {
   return (
     <>
       <PageMeta
-        title={page.meta_title || `House-sitting ${page.department}`}
-        description={page.meta_description}
+        title={page.meta_title || `Pet sitting & House sitting ${page.department} – Garde d'animaux gratuite | Guardiens`}
+        description={page.meta_description || `Trouvez un pet sitter ou house sitter dans le ${page.department}. Garde d'animaux gratuite entre particuliers. ${cityPages.length} villes couvertes sur Guardiens.`}
         path={`/departement/${page.slug}`}
       />
 
@@ -270,7 +270,7 @@ const DepartmentPage = () => {
           </Link>
         </section>
 
-        {/* JSON-LD */}
+        {/* JSON-LD: Breadcrumb */}
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
@@ -278,8 +278,70 @@ const DepartmentPage = () => {
               "@context": "https://schema.org",
               "@type": "BreadcrumbList",
               itemListElement: [
-                { "@type": "ListItem", position: 1, name: "Guardiens", item: "https://guardiens.fr" },
-                { "@type": "ListItem", position: 2, name: page.department, item: `https://guardiens.fr/departement/${page.slug}` },
+                { "@type": "ListItem", position: 1, name: "Guardiens", item: "https://guardiens.lovable.app" },
+                { "@type": "ListItem", position: 2, name: page.department, item: `https://guardiens.lovable.app/departement/${page.slug}` },
+              ],
+            }),
+          }}
+        />
+
+        {/* JSON-LD: Service */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "Service",
+              name: `Pet sitting & House sitting dans le ${page.department}`,
+              description: `Service de garde d'animaux et house sitting gratuit dans le ${page.department}. ${cityPages.length} villes couvertes. Gardiens vérifiés.`,
+              provider: {
+                "@type": "Organization",
+                name: "Guardiens",
+                url: "https://guardiens.lovable.app",
+              },
+              areaServed: {
+                "@type": "AdministrativeArea",
+                name: page.department,
+                containedInPlace: {
+                  "@type": "AdministrativeArea",
+                  name: page.region || "France",
+                },
+              },
+              serviceType: ["Pet sitting", "House sitting", "Garde d'animaux", "Gardiennage de maison"],
+              offers: {
+                "@type": "Offer",
+                price: "0",
+                priceCurrency: "EUR",
+                description: "Inscription et mise en relation gratuites",
+              },
+            }),
+          }}
+        />
+
+        {/* JSON-LD: FAQPage */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "FAQPage",
+              mainEntity: [
+                {
+                  "@type": "Question",
+                  name: `Comment trouver un pet sitter dans le ${page.department} ?`,
+                  acceptedAnswer: {
+                    "@type": "Answer",
+                    text: `Inscrivez-vous gratuitement sur Guardiens et parcourez les ${cityPages.length} villes du ${page.department} pour trouver un gardien vérifié près de chez vous.`,
+                  },
+                },
+                {
+                  "@type": "Question",
+                  name: `Le house sitting dans le ${page.department} est-il gratuit ?`,
+                  acceptedAnswer: {
+                    "@type": "Answer",
+                    text: "Oui, Guardiens est 100% gratuit. Le house sitting repose sur l'échange : le gardien loge gratuitement en échange de la garde de vos animaux.",
+                  },
+                },
               ],
             }),
           }}

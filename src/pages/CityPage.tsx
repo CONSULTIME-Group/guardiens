@@ -142,8 +142,8 @@ const CityPage = () => {
   return (
     <>
       <PageMeta
-        title={page.meta_title || `House-sitting ${page.city}`}
-        description={page.meta_description}
+        title={page.meta_title || `Pet sitting & House sitting à ${page.city} – Garde d'animaux gratuite | Guardiens`}
+        description={page.meta_description || `Trouvez un pet sitter ou house sitter de confiance à ${page.city}. Garde d'animaux à domicile gratuite. Gardiens vérifiés, avis détaillés. Inscrivez-vous sur Guardiens.`}
         path={`/house-sitting/${page.slug}`}
       />
 
@@ -410,7 +410,7 @@ const CityPage = () => {
           </Link>
         </section>
 
-        {/* JSON-LD */}
+        {/* JSON-LD: Breadcrumb */}
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
@@ -418,9 +418,79 @@ const CityPage = () => {
               "@context": "https://schema.org",
               "@type": "BreadcrumbList",
               itemListElement: [
-                { "@type": "ListItem", position: 1, name: "Guardiens", item: "https://guardiens.fr" },
-                ...(departmentPage ? [{ "@type": "ListItem", position: 2, name: page.department, item: `https://guardiens.fr/departement/${departmentPage.slug}` }] : []),
-                { "@type": "ListItem", position: departmentPage ? 3 : 2, name: page.city, item: `https://guardiens.fr/house-sitting/${page.slug}` },
+                { "@type": "ListItem", position: 1, name: "Guardiens", item: "https://guardiens.lovable.app" },
+                ...(departmentPage ? [{ "@type": "ListItem", position: 2, name: page.department, item: `https://guardiens.lovable.app/departement/${departmentPage.slug}` }] : []),
+                { "@type": "ListItem", position: departmentPage ? 3 : 2, name: page.city, item: `https://guardiens.lovable.app/house-sitting/${page.slug}` },
+              ],
+            }),
+          }}
+        />
+
+        {/* JSON-LD: Service */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "Service",
+              name: `Pet sitting & House sitting à ${page.city}`,
+              description: `Service de garde d'animaux et house sitting gratuit à ${page.city}. Trouvez un gardien de confiance vérifié pour vos animaux et votre maison.`,
+              provider: {
+                "@type": "Organization",
+                name: "Guardiens",
+                url: "https://guardiens.lovable.app",
+              },
+              areaServed: {
+                "@type": "City",
+                name: page.city,
+                containedInPlace: {
+                  "@type": "AdministrativeArea",
+                  name: page.department,
+                },
+              },
+              serviceType: ["Pet sitting", "House sitting", "Garde d'animaux", "Gardiennage de maison"],
+              offers: {
+                "@type": "Offer",
+                price: "0",
+                priceCurrency: "EUR",
+                description: "Inscription et mise en relation gratuites",
+              },
+            }),
+          }}
+        />
+
+        {/* JSON-LD: FAQPage */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "FAQPage",
+              mainEntity: [
+                {
+                  "@type": "Question",
+                  name: `Comment trouver un pet sitter à ${page.city} ?`,
+                  acceptedAnswer: {
+                    "@type": "Answer",
+                    text: `Inscrivez-vous gratuitement sur Guardiens, publiez votre annonce de garde et recevez des candidatures de gardiens vérifiés à ${page.city}.`,
+                  },
+                },
+                {
+                  "@type": "Question",
+                  name: `Le house sitting à ${page.city} est-il gratuit ?`,
+                  acceptedAnswer: {
+                    "@type": "Answer",
+                    text: "Oui, Guardiens est entièrement gratuit. Pas de commission, pas de frais cachés. Le house sitting repose sur l'échange : le gardien loge gratuitement en échange de la garde de vos animaux.",
+                  },
+                },
+                {
+                  "@type": "Question",
+                  name: `Combien de gardiens sont disponibles à ${page.city} ?`,
+                  acceptedAnswer: {
+                    "@type": "Answer",
+                    text: `Actuellement ${sitterCount} gardien${sitterCount > 1 ? "s" : ""} vérifié${sitterCount > 1 ? "s" : ""} ${sitterCount > 1 ? "sont" : "est"} disponible${sitterCount > 1 ? "s" : ""} à ${page.city} sur Guardiens. Ce nombre grandit chaque jour.`,
+                  },
+                },
               ],
             }),
           }}
