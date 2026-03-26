@@ -43,6 +43,7 @@ const SearchOwner = () => {
   const [vehicled, setVehicled] = useState(false);
   const [availableOnly, setAvailableOnly] = useState(false);
   const [verifiedOnly, setVerifiedOnly] = useState(false);
+  const [emergencyOnly, setEmergencyOnly] = useState(false);
   const [sort, setSort] = useState<SortOption>("rating");
 
   const [results, setResults] = useState<any[]>([]);
