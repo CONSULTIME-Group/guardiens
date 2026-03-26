@@ -362,6 +362,13 @@ const SearchOwner = () => {
                           </div>
                         )}
 
+                        {/* Qualitative badges */}
+                        {s.topBadges && s.topBadges.length > 0 && (
+                          <div className="mt-1.5">
+                            <BadgePills badges={s.topBadges} max={2} size="sm" />
+                          </div>
+                        )}
+
                         {/* Lifestyle chips */}
                         {lifestyle.length > 0 && (
                           <div className="flex flex-wrap gap-1.5 mt-2">
