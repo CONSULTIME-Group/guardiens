@@ -119,6 +119,10 @@ const PublicProfile = () => {
         setBadgeCounts(Array.from(countMap.entries()).map(([badge_key, count]) => ({ badge_key, count })));
       }
 
+      // Emergency sitter check
+      const { data: emProfile } = await supabase.from("emergency_sitter_profiles").select("is_active").eq("user_id", id).eq("is_active", true).maybeSingle();
+      setIsEmergencySitter(!!emProfile);
+
       setLoading(false);
     };
     load();
