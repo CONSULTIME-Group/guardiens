@@ -166,53 +166,12 @@ const GuideDetail = () => {
 
         {/* Map */}
         {placesWithCoords.length > 0 && (
-          <div className="max-w-5xl mx-auto px-4 mb-8">
-            <div className="rounded-xl overflow-hidden border border-border h-[300px] sm:h-[400px]">
-              <MapContainer center={center} zoom={13} className="h-full w-full" scrollWheelZoom={false}>
-                <TileLayer
-                  attribution='&copy; <a href="https://osm.org/copyright">OpenStreetMap</a>'
-                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                />
-                {placesWithCoords.map((place) => {
-                  const config = CATEGORY_CONFIG[place.category];
-                  return (
-                    <Marker
-                      key={place.id}
-                      position={[place.latitude!, place.longitude!]}
-                      icon={createColoredIcon(config?.color || "hsl(var(--primary))")}
-                    >
-                      <Popup>
-                        <div className="text-sm">
-                          <strong>{place.name}</strong>
-                          <br />
-                          <span className="text-gray-500">{config?.label}</span>
-                          {place.tips && (
-                            <>
-                              <br />
-                              <em className="text-xs">{place.tips}</em>
-                            </>
-                          )}
-                        </div>
-                      </Popup>
-                    </Marker>
-                  );
-                })}
-              </MapContainer>
-            </div>
-            {/* Legend */}
-            <div className="flex flex-wrap gap-3 mt-3">
-              {categories.map((cat) => {
-                const config = CATEGORY_CONFIG[cat];
-                if (!config) return null;
-                return (
-                  <div key={cat} className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                    <div className="w-3 h-3 rounded-full" style={{ backgroundColor: config.color }} />
-                    {config.label}
-                  </div>
-                );
-              })}
-            </div>
-          </div>
+          <Suspense fallback={<div className="max-w-5xl mx-auto px-4 mb-8 h-[300px] sm:h-[400px] bg-muted animate-pulse rounded-xl" />}>
+            <GuideMap
+              places={placesWithCoords.map(p => ({ id: p.id, name: p.name, category: p.category, latitude: p.latitude!, longitude: p.longitude!, tips: p.tips }))}
+              categories={categories}
+            />
+          </Suspense>
         )}
 
         {/* Places by category */}
