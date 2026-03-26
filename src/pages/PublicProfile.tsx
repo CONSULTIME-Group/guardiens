@@ -109,6 +109,14 @@ const PublicProfile = () => {
         .order("created_at", { ascending: false });
       setOwnerHighlights(highlights || []);
 
+      // Badge counts
+      const { data: badges } = await supabase.from("badge_attributions").select("badge_key").eq("receiver_id", id);
+      if (badges && badges.length > 0) {
+        const countMap = new Map<string, number>();
+        badges.forEach((b: any) => countMap.set(b.badge_key, (countMap.get(b.badge_key) || 0) + 1));
+        setBadgeCounts(Array.from(countMap.entries()).map(([badge_key, count]) => ({ badge_key, count })));
+      }
+
       setLoading(false);
     };
     load();
