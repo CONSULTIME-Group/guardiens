@@ -1,7 +1,8 @@
 import { useState, useCallback, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight, LogOut } from "lucide-react";
+import { ChevronLeft, ChevronRight, LogOut, Eye } from "lucide-react";
+import { Link } from "react-router-dom";
 import StepProgress from "@/components/profile/StepProgress";
 import OwnerStepIdentity from "@/components/owner-profile/OwnerStepIdentity";
 import OwnerStepHousing from "@/components/owner-profile/OwnerStepHousing";

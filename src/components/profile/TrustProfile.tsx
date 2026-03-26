@@ -55,6 +55,36 @@ const TrustProfile = ({ emailVerified, identityVerified, hasAvatar, profileCompl
         ))}
       </div>
 
+      {/* Badges */}
+      <div className="pt-2 border-t border-border">
+        <div className="flex items-center gap-2 mb-2">
+          <Award className="h-4 w-4 text-primary" />
+          <span className="text-sm font-medium">Badges</span>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <Badge variant={emailVerified ? "default" : "outline"} className={!emailVerified ? "opacity-40" : ""}>
+            ✉️ Email vérifié
+          </Badge>
+          <Badge variant={identityVerified ? "default" : "outline"} className={!identityVerified ? "opacity-40" : ""}>
+            🛡️ Identité vérifiée
+          </Badge>
+          <Badge variant={hasAvatar ? "default" : "outline"} className={!hasAvatar ? "opacity-40" : ""}>
+            📸 Photo ajoutée
+          </Badge>
+          <Badge variant={profileCompletion >= 60 ? "default" : "outline"} className={profileCompletion < 60 ? "opacity-40" : ""}>
+            📝 Profil complet
+          </Badge>
+          <Badge variant={hasFirstActivity ? "default" : "outline"} className={!hasFirstActivity ? "opacity-40" : ""}>
+            ⭐ {role === "owner" ? "Première annonce" : "Première garde"}
+          </Badge>
+          {completedCount === 5 && (
+            <Badge className="bg-amber-500 text-white border-amber-500">
+              🏆 Profil 100%
+            </Badge>
+          )}
+        </div>
+      </div>
+
       <p className="text-xs text-muted-foreground italic leading-relaxed">
         Plus votre profil de confiance est complet, plus vous inspirez confiance. Un profil 100% vérifié, c'est comme une poignée de main ferme : ça rassure.
       </p>
