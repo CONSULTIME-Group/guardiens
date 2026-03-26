@@ -60,7 +60,7 @@ const OwnerStepIdentity = ({ data, onChange, onUploadPhoto }: Props) => {
         </div>
         <div className="space-y-2">
           <Label htmlFor="o_postal">Code postal</Label>
-          <Input id="o_postal" value={data.postal_code} onChange={e => onChange({ postal_code: e.target.value })} className="rounded-lg h-12" maxLength={10} />
+          <Input id="o_postal" value={data.postal_code} onChange={e => handlePostalCodeChange(e.target.value)} className="rounded-lg h-12" maxLength={10} />
         </div>
       </div>
 
