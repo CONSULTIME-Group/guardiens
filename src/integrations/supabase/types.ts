@@ -294,6 +294,7 @@ export type Database = {
       }
       conversations: {
         Row: {
+          archived_by: string[] | null
           created_at: string
           id: string
           long_stay_id: string | null
@@ -303,6 +304,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          archived_by?: string[] | null
           created_at?: string
           id?: string
           long_stay_id?: string | null
@@ -312,6 +314,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          archived_by?: string[] | null
           created_at?: string
           id?: string
           long_stay_id?: string | null
