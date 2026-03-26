@@ -51,10 +51,20 @@ const GuideMap = ({ places, categories }: GuideMapProps) => {
     places.reduce((s, p) => s + p.longitude, 0) / places.length,
   ];
 
+  // Calculate bounds to fit all places and determine appropriate zoom
+  const bounds = L.latLngBounds(places.map(p => [p.latitude, p.longitude] as [number, number]));
+
   return (
     <div className="max-w-5xl mx-auto px-4 mb-8">
       <div className="rounded-xl overflow-hidden border border-border h-[300px] sm:h-[400px]">
-        <MapContainer center={center} zoom={13} className="h-full w-full" scrollWheelZoom={false}>
+        <MapContainer
+          center={center}
+          bounds={bounds}
+          boundsOptions={{ padding: [40, 40], maxZoom: 14 }}
+          minZoom={10}
+          className="h-full w-full"
+          scrollWheelZoom={false}
+        >
           <TileLayer
             attribution='&copy; <a href="https://osm.org/copyright">OpenStreetMap</a>'
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"

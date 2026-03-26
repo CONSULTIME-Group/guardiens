@@ -1,10 +1,12 @@
+import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import PageMeta from "@/components/PageMeta";
 import { Link } from "react-router-dom";
-import { MapPin, TreePine, Stethoscope, Coffee, Store, Footprints } from "lucide-react";
+import { MapPin, Search } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
-
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 interface CityGuide {
   id: string;
   city: string;
@@ -20,15 +22,11 @@ interface PlaceCount {
   count: number;
 }
 
-const categoryIcons: Record<string, any> = {
-  dog_park: TreePine,
-  walk_trail: Footprints,
-  vet: Stethoscope,
-  dog_friendly_cafe: Coffee,
-  pet_shop: Store,
-};
 
 const GuidesListing = () => {
+  const [search, setSearch] = useState("");
+  const [selectedDept, setSelectedDept] = useState("all");
+
   const { data: guides = [], isLoading } = useQuery({
     queryKey: ["city-guides-listing"],
     queryFn: async () => {
@@ -64,7 +62,24 @@ const GuidesListing = () => {
   const getPlaceCount = (guideId: string) =>
     placeCounts.find((p) => p.city_guide_id === guideId)?.count || 0;
 
-  const departments = [...new Set(guides.map((g) => g.department).filter(Boolean))];
+  const allDepartments = useMemo(() => 
+    [...new Set(guides.map((g) => g.department).filter(Boolean))].sort(),
+    [guides]
+  );
+
+  const filteredGuides = useMemo(() => {
+    let result = guides;
+    if (selectedDept !== "all") {
+      result = result.filter((g) => g.department === selectedDept);
+    }
+    if (search.trim()) {
+      const q = search.toLowerCase().trim();
+      result = result.filter((g) => g.city.toLowerCase().includes(q) || g.department.toLowerCase().includes(q));
+    }
+    return result;
+  }, [guides, search, selectedDept]);
+
+  const departments = [...new Set(filteredGuides.map((g) => g.department).filter(Boolean))];
 
   return (
     <>
@@ -90,20 +105,44 @@ const GuidesListing = () => {
         </header>
 
         <main className="max-w-5xl mx-auto px-4 py-10">
+          {/* Filters */}
+          <div className="flex flex-col sm:flex-row gap-3 mb-8">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Rechercher une ville..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="pl-9"
+              />
+            </div>
+            <Select value={selectedDept} onValueChange={setSelectedDept}>
+              <SelectTrigger className="w-full sm:w-56">
+                <SelectValue placeholder="Tous les départements" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Tous les départements</SelectItem>
+                {allDepartments.map((dept) => (
+                  <SelectItem key={dept} value={dept}>{dept}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
           {isLoading ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {[1, 2, 3, 4, 5, 6].map((i) => (
                 <div key={i} className="h-48 bg-muted animate-pulse rounded-xl" />
               ))}
             </div>
-          ) : guides.length === 0 ? (
+          ) : filteredGuides.length === 0 ? (
             <p className="text-center text-muted-foreground py-12">
-              Aucun guide disponible pour le moment.
+              {guides.length === 0 ? "Aucun guide disponible pour le moment." : "Aucun guide ne correspond à votre recherche."}
             </p>
           ) : (
             <div className="space-y-10">
               {departments.map((dept) => {
-                const deptGuides = guides.filter((g) => g.department === dept);
+                const deptGuides = filteredGuides.filter((g) => g.department === dept);
                 return (
                   <section key={dept}>
                     <h2 className="font-heading text-xl font-semibold text-foreground mb-4">

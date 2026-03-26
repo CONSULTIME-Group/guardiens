@@ -95,6 +95,23 @@ const GuideDetail = () => {
     enabled: !!guide?.id,
   });
 
+  // Fetch nearby guides from same department
+  const { data: nearbyGuides = [] } = useQuery({
+    queryKey: ["nearby-guides", guide?.department, guide?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("city_guides" as any)
+        .select("id, city, slug")
+        .eq("department", guide!.department)
+        .eq("published", true)
+        .neq("id", guide!.id)
+        .order("city");
+      if (error) throw error;
+      return (data || []) as unknown as { id: string; city: string; slug: string }[];
+    },
+    enabled: !!guide?.id && !!guide?.department,
+  });
+
   const categories = [...new Set(places.map((p) => p.category))];
   const placesWithCoords = places.filter((p) => p.latitude && p.longitude);
 
@@ -229,6 +246,27 @@ const GuideDetail = () => {
               );
             })}
           </div>
+
+          {/* Nearby guides */}
+          {nearbyGuides.length > 0 && (
+            <div className="mt-14 border-t border-border pt-10">
+              <h2 className="font-heading text-xl font-semibold text-foreground mb-4">
+                Guides proches — {guide.department}
+              </h2>
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+                {nearbyGuides.map((ng) => (
+                  <Link
+                    key={ng.id}
+                    to={`/guide/${ng.slug}`}
+                    className="flex items-center gap-2 p-3 rounded-lg border border-border hover:bg-accent/50 transition-colors"
+                  >
+                    <MapPin className="h-4 w-4 text-primary shrink-0" />
+                    <span className="text-sm font-medium text-foreground">{ng.city}</span>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* CTA */}
           <div className="mt-14 text-center border-t border-border pt-10">
