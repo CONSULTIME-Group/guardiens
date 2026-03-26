@@ -348,7 +348,7 @@ const SitterDashboard = () => {
       {/* 8. Articles */}
       <DashSection title="Conseils pour vous">
         {articles.length === 0 ? (
-          <p className="text-sm text-muted-foreground italic">Aucun article pour le moment.</p>
+          <EmptyCard icon={Newspaper} text="Les articles arrivent bientôt" hint="Conseils, astuces et histoires de gardiens" />
         ) : (
           <div className="space-y-2">
             {articles.map((a: any) => (
