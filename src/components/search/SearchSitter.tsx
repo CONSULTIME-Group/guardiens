@@ -196,6 +196,12 @@ const SearchSitter = () => {
 
     if (housingType !== "all") items = items.filter((s: any) => s.property?.type === housingType);
     if (environment !== "all") items = items.filter((s: any) => s.property?.environment === environment);
+    if (selectedEquipments.length > 0) {
+      items = items.filter((s: any) => {
+        const eq = s.property?.equipments || [];
+        return selectedEquipments.every((e: string) => eq.includes(e));
+      });
+    }
 
     if (city) {
       const searchCoords = await geocodeCity(city);
