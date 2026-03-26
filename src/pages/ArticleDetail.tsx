@@ -8,7 +8,6 @@ import { ArrowLeft, ArrowRight, Calendar, MapPin, User, Compass, Building2 } fro
 import PageMeta from "@/components/PageMeta";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { marked } from "marked";
 import ArticleRenderer from "@/components/articles/ArticleRenderer";
 
 interface ArticleFull {
