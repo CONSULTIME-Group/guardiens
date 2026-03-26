@@ -163,8 +163,6 @@ const SmallMissionDetail = () => {
         <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${status.className}`}>{status.label}</span>
       </div>
 
-      {/* Title */}
-      <h1 className="font-heading text-2xl md:text-3xl font-bold mb-2">{mission.title}</h1>
 
       {/* Meta */}
       <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground mb-6">
