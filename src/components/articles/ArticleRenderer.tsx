@@ -29,6 +29,10 @@ import borderCollieFeyssineLyon from "@/assets/border-collie-feyssine-lyon.jpg";
 import borderCollieInterieurCroixRousse from "@/assets/border-collie-interieur-croix-rousse.jpg";
 import bouledogueFrancaisVieuxLyon from "@/assets/bouledogue-francais-vieux-lyon.jpg";
 import bouledogueFrancaisInterieurLyon6 from "@/assets/bouledogue-francais-interieur-lyon6.jpg";
+import bergerAustralienFeyssineLyon from "@/assets/berger-australien-feyssine-lyon.jpg";
+import bergerAustralienInterieurLyon from "@/assets/berger-australien-interieur-lyon.jpg";
+import fondateursGuardiensQuaisLyon from "@/assets/fondateurs-guardiens-quais-lyon.jpg";
+import gardeAnimauxAppartementLyon from "@/assets/garde-animaux-appartement-lyon.jpg";
 
 const ARTICLE_IMAGES: Record<string, string> = {
   "/images/lyon-hero-quais.jpg": lyonHeroQuais,
@@ -57,6 +61,10 @@ const ARTICLE_IMAGES: Record<string, string> = {
   "/images/border-collie-interieur-croix-rousse.jpg": borderCollieInterieurCroixRousse,
   "/images/bouledogue-francais-vieux-lyon.jpg": bouledogueFrancaisVieuxLyon,
   "/images/bouledogue-francais-interieur-lyon6.jpg": bouledogueFrancaisInterieurLyon6,
+  "/images/berger-australien-feyssine-lyon.jpg": bergerAustralienFeyssineLyon,
+  "/images/berger-australien-interieur-lyon.jpg": bergerAustralienInterieurLyon,
+  "/images/fondateurs-guardiens-quais-lyon.jpg": fondateursGuardiensQuaisLyon,
+  "/images/garde-animaux-appartement-lyon.jpg": gardeAnimauxAppartementLyon,
 };
 
 function resolveArticleImages(html: string): string {
