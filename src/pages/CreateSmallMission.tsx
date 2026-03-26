@@ -38,8 +38,8 @@ const CreateSmallMission = () => {
   const [description, setDescription] = useState("");
   const [exchangeOffer, setExchangeOffer] = useState("");
   const [exchangeError, setExchangeError] = useState("");
-  const [city, setCity] = useState(profile?.city || "");
-  const [postalCode, setPostalCode] = useState(profile?.postal_code || "");
+  const [city, setCity] = useState("");
+  const [postalCode, setPostalCode] = useState("");
   const [dateNeeded, setDateNeeded] = useState("");
   const [duration, setDuration] = useState("");
   const [submitting, setSubmitting] = useState(false);
