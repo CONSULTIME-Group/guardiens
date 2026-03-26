@@ -10,7 +10,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
-import { Search, SlidersHorizontal, MapPin, Star, Car, CheckCircle2, CircleDot } from "lucide-react";
+import { Search, SlidersHorizontal, MapPin, Star, Car, CheckCircle2, CircleDot, MessageCircle } from "lucide-react";
+import { toast } from "sonner";
 import ChipSelect from "@/components/profile/ChipSelect";
 import VerifiedBadge from "@/components/profile/VerifiedBadge";
 
