@@ -112,6 +112,7 @@ const OwnerDashboard = () => {
           .forEach((a: any) => { sitterSitCounts[a.sitter_id] = (sitterSitCounts[a.sitter_id] || 0) + 1; });
       });
       const trustedCount = Object.values(sitterSitCounts).filter(c => c >= 2).length;
+      setTrustedSitterCount(trustedCount);
 
       setLoading(false);
     };
