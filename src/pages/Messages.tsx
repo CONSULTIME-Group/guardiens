@@ -158,6 +158,20 @@ const Messages = () => {
 
   useEffect(() => { loadConversations(); }, [loadConversations]);
 
+  // Auto-select conversation from URL query param
+  useEffect(() => {
+    const convId = searchParams.get("conv");
+    if (convId && conversations.length > 0 && !activeConv) {
+      const target = conversations.find(c => c.id === convId);
+      if (target) {
+        setActiveConv(target);
+        // Clear the param
+        searchParams.delete("conv");
+        setSearchParams(searchParams, { replace: true });
+      }
+    }
+  }, [conversations, searchParams, activeConv, setSearchParams]);
+
   // Load messages for active conversation
   const loadMessages = useCallback(async (convId: string) => {
     const { data } = await supabase
