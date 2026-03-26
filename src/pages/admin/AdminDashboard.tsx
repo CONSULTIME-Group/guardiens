@@ -96,6 +96,7 @@ const AdminDashboard = () => {
         completedSits: completedSits || 0,
         totalReviews,
         avgRating: Math.round(avgRating * 10) / 10,
+        openMissions: openMissions || 0,
       });
 
       // Weekly signups (last 12 weeks)
