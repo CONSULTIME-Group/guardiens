@@ -21,6 +21,7 @@ interface Stats {
   completedSits: number;
   totalReviews: number;
   avgRating: number;
+  openMissions: number;
 }
 
 interface WeeklySignup { week: string; count: number }
