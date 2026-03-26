@@ -94,7 +94,7 @@ const MentionsLegales = () => {
 
           <h2 className="font-heading text-xl font-bold text-foreground pt-4">8. Droit applicable et médiation</h2>
           <p>
-            Les présentes mentions sont régies par le droit français. En cas de litige, les tribunaux de Lyon sont compétents. Conformément aux articles L. 611-1 et R. 612-1 du Code de la consommation, en cas de litige non résolu, le consommateur peut recourir gratuitement à un médiateur de la consommation. Médiateur compétent : [À compléter avec le nom du médiateur].
+            Les présentes mentions sont régies par le droit français. En cas de litige, les tribunaux de Lyon sont compétents. Conformément aux articles L. 611-1 et R. 612-1 du Code de la consommation, en cas de litige non résolu, le consommateur peut recourir gratuitement à un médiateur de la consommation. Le médiateur compétent sera communiqué dès sa désignation.
           </p>
 
           <h2 className="font-heading text-xl font-bold text-foreground pt-4">9. Crédits</h2>

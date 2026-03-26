@@ -168,7 +168,7 @@ const Terms = () => {
           <p>
             Pour toute question relative aux présentes CGU :<br />
             Email : <a href="mailto:contact@guardiens.fr" className="text-primary hover:underline">contact@guardiens.fr</a><br />
-            Adresse : [Adresse complète à compléter], Lyon, France
+            Adresse : 22 rue Juiverie, 69005 Lyon, France
           </p>
         </div>
       </main>
