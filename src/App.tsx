@@ -45,6 +45,8 @@ import AdminVerifications from "./pages/admin/AdminVerifications";
 import AdminEmails from "./pages/admin/AdminEmails";
 import NotFound from "./pages/NotFound";
 import Unsubscribe from "./pages/Unsubscribe";
+import CityPage from "./pages/CityPage";
+import AdminCityPages from "./pages/admin/AdminCityPages";
 
 const queryClient = new QueryClient();
 
