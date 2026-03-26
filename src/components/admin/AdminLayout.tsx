@@ -3,7 +3,7 @@ import { Outlet, Navigate, NavLink, useNavigate } from "react-router-dom";
 import { AdminSidebar } from "./AdminSidebar";
 import { useAdmin } from "@/hooks/useAdmin";
 import { useAuth } from "@/contexts/AuthContext";
-import { Menu, X, ArrowLeft, LogOut, LayoutDashboard, Users, Megaphone, CalendarCheck, Star, Flag, ShieldCheck, Mail, FileText, MapPin, HelpCircle, Compass } from "lucide-react";
+import { Menu, X, ArrowLeft, LogOut, LayoutDashboard, Users, Megaphone, CalendarCheck, Star, Flag, ShieldCheck, Mail, FileText, MapPin, HelpCircle, Compass, Handshake } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const mobileAdminNav = [
@@ -20,6 +20,7 @@ const mobileAdminNav = [
   { to: "/admin/faq", icon: HelpCircle, label: "FAQ" },
   { to: "/admin/guides", icon: Compass, label: "Guides locaux" },
   { to: "/admin/departments", icon: MapPin, label: "Départements SEO" },
+  { to: "/admin/small-missions", icon: Handshake, label: "Entraide" },
 ];
 
 export const AdminLayout = () => {
