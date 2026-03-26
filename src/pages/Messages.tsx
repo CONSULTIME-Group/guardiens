@@ -10,6 +10,7 @@ import { Link, useSearchParams } from "react-router-dom";
 import { useIsMobile } from "@/hooks/use-mobile";
 import HouseGuideBlock from "@/components/messages/HouseGuideBlock";
 import { useToast } from "@/hooks/use-toast";
+import { getBadgeDef } from "@/components/badges/badgeDefinitions";
 
 interface Conversation {
   id: string;

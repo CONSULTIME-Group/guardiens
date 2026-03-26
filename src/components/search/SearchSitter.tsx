@@ -516,6 +516,12 @@ const SearchSitter = () => {
                             </span>
                           )}
                         </div>
+                        {/* Owner qualitative badges */}
+                        {sit.topBadges && sit.topBadges.length > 0 && (
+                          <div className="mt-1.5">
+                            <BadgePills badges={sit.topBadges} max={2} size="sm" />
+                          </div>
+                        )}
                         {badges.length > 0 && (
                           <div className="flex flex-wrap gap-1.5 mt-2">
                             {badges.map(b => (
