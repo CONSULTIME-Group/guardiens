@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Link } from "react-router-dom";
+import OnboardingWelcome from "./OnboardingWelcome";
 import {
   Calendar, Star, Megaphone, Heart, ChevronRight, Plus, PawPrint,
   Users, Handshake, Newspaper, Home,
@@ -47,6 +48,8 @@ const OwnerDashboard = () => {
   const [sitterBadges, setSitterBadges] = useState<Record<string, { badge_key: string; count: number }[]>>({});
   const [trustedSitterCount, setTrustedSitterCount] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [onboardingChecks, setOnboardingChecks] = useState({ hasName: false, hasAvatar: false, hasBio: false, hasIdentity: false, hasProperty: false, hasPets: false, hasSit: false });
 
   useEffect(() => {
     if (!user) return;
@@ -67,11 +70,28 @@ const OwnerDashboard = () => {
       setSmallMissions(missionsRes.data || []);
       setVerificationStatus((profileRes.data as any)?.identity_verification_status || "not_submitted");
 
+      // Onboarding checks
+      const fullProfileRes = await supabase.from("profiles").select("first_name, avatar_url, bio, identity_verification_status").eq("id", user.id).single();
+      const p = fullProfileRes.data;
+      const hasName = !!(p?.first_name);
+      const hasAvatar = !!(p?.avatar_url);
+      const hasBio = !!(p?.bio && p.bio.length > 10);
+      const hasIdentity = p?.identity_verification_status === "verified" || p?.identity_verification_status === "pending";
+      const hasProperty = (propsRes.data || []).length > 0;
+      const hasSit = sitsData.length > 0;
+      setOnboardingChecks({ hasName, hasAvatar, hasBio, hasIdentity, hasProperty, hasPets: false, hasSit });
+
+      const dismissed = localStorage.getItem("onboarding_owner_dismissed");
+      if (!dismissed && user.profileCompletion < 50) {
+        setShowOnboarding(true);
+      }
+
       // Pets
       const propIds = (propsRes.data || []).map((p: any) => p.id);
       if (propIds.length > 0) {
         const { data } = await supabase.from("pets").select("*").in("property_id", propIds);
         setPets(data || []);
+        setOnboardingChecks(prev => ({ ...prev, hasPets: (data || []).length > 0 }));
       }
 
       // Recent applications
@@ -131,6 +151,19 @@ const OwnerDashboard = () => {
   }, [user]);
 
   if (loading) return <div className="p-6 text-muted-foreground">Chargement...</div>;
+
+  if (showOnboarding) {
+    return (
+      <OnboardingWelcome
+        role="owner"
+        checks={onboardingChecks}
+        onDismiss={() => {
+          localStorage.setItem("onboarding_owner_dismissed", "1");
+          setShowOnboarding(false);
+        }}
+      />
+    );
+  }
 
   const activeSits = sits.filter(s => ["published", "confirmed"].includes(s.status));
   const completedSits = sits.filter(s => s.status === "completed");
