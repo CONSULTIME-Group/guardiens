@@ -35,6 +35,8 @@ import fondateursGuardiensQuaisLyon from "@/assets/fondateurs-guardiens-quais-ly
 import gardeAnimauxAppartementLyon from "@/assets/garde-animaux-appartement-lyon.jpg";
 import boomPetsittingConfluence from "@/assets/boom-petsitting-confluence-lyon.jpg";
 import boomPetsittingHomeoffice from "@/assets/boom-petsitting-homeoffice-lyon.jpg";
+import parcTeteDorChiens from "@/assets/parc-tete-dor-chiens-lyon.jpg";
+import parcParillyLabrador from "@/assets/parc-parilly-labrador-lyon.jpg";
 
 const ARTICLE_IMAGES: Record<string, string> = {
   "/images/lyon-hero-quais.jpg": lyonHeroQuais,
@@ -69,6 +71,8 @@ const ARTICLE_IMAGES: Record<string, string> = {
   "/images/garde-animaux-appartement-lyon.jpg": gardeAnimauxAppartementLyon,
   "/images/boom-petsitting-confluence-lyon.jpg": boomPetsittingConfluence,
   "/images/boom-petsitting-homeoffice-lyon.jpg": boomPetsittingHomeoffice,
+  "/images/parc-tete-dor-chiens-lyon.jpg": parcTeteDorChiens,
+  "/images/parc-parilly-labrador-lyon.jpg": parcParillyLabrador,
 };
 
 function resolveArticleImages(html: string): string {
