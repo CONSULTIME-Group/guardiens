@@ -200,10 +200,14 @@ export type Database = {
       }
       breed_profiles: {
         Row: {
+          alimentation: string
           breed: string
+          compatibility: string
+          difficulty_level: string
           exercise_needs: string
           generated_at: string
           grooming: string
+          health_notes: string
           id: string
           ideal_for: string
           sitter_tips: string
@@ -212,10 +216,14 @@ export type Database = {
           temperament: string
         }
         Insert: {
+          alimentation?: string
           breed: string
+          compatibility?: string
+          difficulty_level?: string
           exercise_needs?: string
           generated_at?: string
           grooming?: string
+          health_notes?: string
           id?: string
           ideal_for?: string
           sitter_tips?: string
@@ -224,10 +232,14 @@ export type Database = {
           temperament?: string
         }
         Update: {
+          alimentation?: string
           breed?: string
+          compatibility?: string
+          difficulty_level?: string
           exercise_needs?: string
           generated_at?: string
           grooming?: string
+          health_notes?: string
           id?: string
           ideal_for?: string
           sitter_tips?: string
