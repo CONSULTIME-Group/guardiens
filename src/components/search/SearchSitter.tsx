@@ -14,7 +14,8 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Search, SlidersHorizontal, MapPin, Calendar, Star, CheckCircle2, Lock } from "lucide-react";
 import ChipSelect from "@/components/profile/ChipSelect";
 import VerifiedBadge from "@/components/profile/VerifiedBadge";
-import BadgePills from "@/components/badges/BadgePills";
+import BadgeShield from "@/components/badges/BadgeShield";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import { format, differenceInDays } from "date-fns";
 import { fr } from "date-fns/locale";
 import { geocodeCity, haversineDistance } from "@/lib/geocode";
@@ -518,9 +519,13 @@ const SearchSitter = () => {
                         </div>
                         {/* Owner qualitative badges */}
                         {sit.topBadges && sit.topBadges.length > 0 && (
-                          <div className="mt-1.5">
-                            <BadgePills badges={sit.topBadges} max={2} size="sm" />
-                          </div>
+                          <TooltipProvider>
+                            <div className="mt-1.5 flex gap-1.5">
+                              {sit.topBadges.slice(0, 2).map((b: any) => (
+                                <BadgeShield key={b.badge_key} badgeKey={b.badge_key} count={b.count} size="sm" showLabel={false} />
+                              ))}
+                            </div>
+                          </TooltipProvider>
                         )}
                         {badges.length > 0 && (
                           <div className="flex flex-wrap gap-1.5 mt-2">

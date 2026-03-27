@@ -10,7 +10,8 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import VerifiedBadge from "@/components/profile/VerifiedBadge";
-import BadgePills from "@/components/badges/BadgePills";
+import BadgeShield from "@/components/badges/BadgeShield";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
@@ -290,9 +291,13 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
 
                     {/* Badges */}
                     {app.badgeCounts && app.badgeCounts.length > 0 && (
-                      <div className="mt-1.5">
-                        <BadgePills badges={app.badgeCounts} max={3} size="sm" />
-                      </div>
+                      <TooltipProvider>
+                        <div className="mt-1.5 flex gap-1.5">
+                          {app.badgeCounts.slice(0, 3).map((b: any) => (
+                            <BadgeShield key={b.badge_key} badgeKey={b.badge_key} count={b.count} size="sm" showLabel={false} />
+                          ))}
+                        </div>
+                      </TooltipProvider>
                     )}
 
                     {/* Verified experiences */}
@@ -438,7 +443,7 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
                         </span>
                       )}
                       {confirmApp.badgeCounts?.[0] && (
-                        <BadgePills badges={confirmApp.badgeCounts.slice(0, 1)} max={1} size="sm" />
+                        <TooltipProvider><BadgeShield badgeKey={confirmApp.badgeCounts[0].badge_key} count={confirmApp.badgeCounts[0].count} size="sm" showLabel={false} /></TooltipProvider>
                       )}
                     </div>
                   </div>
