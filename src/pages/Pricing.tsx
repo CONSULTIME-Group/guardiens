@@ -64,8 +64,8 @@ const faqItems = [
     a: "C'est l'anniversaire de Jérémie, cofondateur de Guardiens. Il a préféré offrir l'accès gratuit à la communauté plutôt que recevoir des chaussettes. Les inscrits avant cette date reçoivent le badge Fondateur et 1 an d'accès gratuit.",
   },
   {
-    q: "Que se passe-t-il quand mon année gratuite expire ?",
-    a: "Vous recevez un rappel 30 jours avant. Vous pouvez renouveler pour 49€/an. Votre profil, vos avis et votre historique sont conservés. Vos gardes en cours ne sont pas affectées.",
+    q: "Que se passe-t-il après le 13 mai pour les Fondateurs ?",
+    a: "Les Fondateurs (inscrits avant le 13 mai) conservent un accès gratuit jusqu'au 13 juin 2026 — un mois de grâce pour décider. Après le 13 juin, l'abonnement à 49€/an est nécessaire pour garder l'accès complet. Le badge Fondateur reste à vie dans tous les cas.",
   },
   {
     q: "Est-ce que 49€/an c'est rentable ?",
