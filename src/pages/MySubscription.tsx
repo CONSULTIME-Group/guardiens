@@ -133,8 +133,12 @@ const MySubscription = () => {
   }
 
   const now = new Date();
+  const isBeforeLaunch = now < LAUNCH_DATE;
+  const isInGracePeriod = now >= LAUNCH_DATE && now < GRACE_END_DATE;
   const daysLeftGrace = Math.max(0, differenceInDays(GRACE_END_DATE, now));
-  const graceProgressPct = Math.round((daysLeftGrace / 31) * 100);
+  const totalGraceDays = differenceInDays(GRACE_END_DATE, LAUNCH_DATE); // 31
+  const daysElapsed = Math.max(0, totalGraceDays - daysLeftGrace);
+  const graceProgressPct = Math.min(100, Math.max(0, Math.round((daysLeftGrace / totalGraceDays) * 100)));
   const graceBarColor = daysLeftGrace < 7 ? "bg-red-500" : daysLeftGrace < 14 ? "bg-amber-500" : "bg-green-500";
 
   return (
