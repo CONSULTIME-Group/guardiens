@@ -206,7 +206,7 @@ export default function ArticleDetail() {
           "@type": "LocalBusiness",
           "name": `Guardiens — Pet-sitting & House-sitting ${article.city}`,
           "description": article.excerpt,
-          "url": `https://guardiens.lovable.app/actualites/${article.slug}`,
+          "url": `https://guardiens.fr/actualites/${article.slug}`,
           "address": {
             "@type": "PostalAddress",
             "addressLocality": article.city,

@@ -200,8 +200,8 @@ const GuidesListing = () => {
               "@context": "https://schema.org",
               "@type": "BreadcrumbList",
               itemListElement: [
-                { "@type": "ListItem", position: 1, name: "Guardiens", item: "https://guardiens.lovable.app" },
-                { "@type": "ListItem", position: 2, name: "Guides locaux", item: "https://guardiens.lovable.app/guides" },
+                { "@type": "ListItem", position: 1, name: "Guardiens", item: "https://guardiens.fr" },
+                { "@type": "ListItem", position: 2, name: "Guides locaux", item: "https://guardiens.fr/guides" },
               ],
             }),
           }}
@@ -216,11 +216,11 @@ const GuidesListing = () => {
               "@type": "CollectionPage",
               name: "Guides locaux pour pet sitters et house sitters",
               description: "Collection de guides pratiques par ville : parcs, vétérinaires, cafés dog-friendly, sentiers de balade pour les gardiens d'animaux.",
-              url: "https://guardiens.lovable.app/guides",
+              url: "https://guardiens.fr/guides",
               isPartOf: {
                 "@type": "WebSite",
                 name: "Guardiens",
-                url: "https://guardiens.lovable.app",
+                url: "https://guardiens.fr",
               },
               numberOfItems: filteredGuides.length,
             }),

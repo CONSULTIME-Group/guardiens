@@ -125,8 +125,8 @@ const Landing = () => {
             "@context": "https://schema.org",
             "@type": "Organization",
             name: "Guardiens",
-            url: "https://guardiens.lovable.app",
-            logo: "https://guardiens.lovable.app/favicon.ico",
+            url: "https://guardiens.fr",
+            logo: "https://guardiens.fr/favicon.ico",
             description: "Plateforme gratuite de pet sitting et house sitting de proximité en Auvergne-Rhône-Alpes.",
             areaServed: {
               "@type": "AdministrativeArea",
@@ -148,12 +148,12 @@ const Landing = () => {
             "@context": "https://schema.org",
             "@type": "WebSite",
             name: "Guardiens",
-            url: "https://guardiens.lovable.app",
+            url: "https://guardiens.fr",
             potentialAction: {
               "@type": "SearchAction",
               target: {
                 "@type": "EntryPoint",
-                urlTemplate: "https://guardiens.lovable.app/recherche?q={search_term_string}",
+                urlTemplate: "https://guardiens.fr/recherche?q={search_term_string}",
               },
               "query-input": "required name=search_term_string",
             },
@@ -172,7 +172,7 @@ const Landing = () => {
             provider: {
               "@type": "Organization",
               name: "Guardiens",
-              url: "https://guardiens.lovable.app",
+              url: "https://guardiens.fr",
             },
             areaServed: {
               "@type": "AdministrativeArea",
