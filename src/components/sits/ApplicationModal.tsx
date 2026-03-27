@@ -7,7 +7,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "@/hooks/use-toast";
 import { Send, Star, MapPin, Shield, CheckCircle2, Calendar } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import BadgePills from "@/components/badges/BadgePills";
+import BadgeShield from "@/components/badges/BadgeShield";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 interface ApplicationModalProps {
   open: boolean;

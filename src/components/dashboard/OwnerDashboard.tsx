@@ -10,7 +10,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { format, differenceInDays } from "date-fns";
 import { fr } from "date-fns/locale";
-import BadgePills from "@/components/badges/BadgePills";
+import BadgeShield from "@/components/badges/BadgeShield";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 const speciesLabel: Record<string, string> = {
   dog: "Chien", cat: "Chat", horse: "Cheval", bird: "Oiseau",
