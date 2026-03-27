@@ -495,26 +495,74 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
         </Dialog>
       )}
 
-      {/* ── Decline Confirmation ── */}
-      <AlertDialog open={!!declineApp} onOpenChange={() => setDeclineApp(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Décliner cette candidature ?</AlertDialogTitle>
-            <AlertDialogDescription>
-              {declineApp?.sitter?.first_name} sera notifié(e) que sa candidature a été déclinée.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Annuler</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={() => declineApp && handleDecline(declineApp)}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              Décliner
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      {/* ── Decline Dialog with message templates ── */}
+      {declineApp && (
+        <Dialog open={!!declineApp} onOpenChange={(o) => { if (!o) { setDeclineApp(null); setDeclineMessage(""); setDeclineCustom(false); } }}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="font-heading">Décliner cette candidature ?</DialogTitle>
+              <DialogDescription>
+                {declineApp.sitter?.first_name} sera notifié(e). Vous pouvez ajouter un message d'accompagnement.
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-3 mt-2">
+              <p className="text-sm font-medium text-foreground">Message d'accompagnement <span className="text-muted-foreground font-normal">(optionnel)</span></p>
+              
+              {declineTemplates.map((tpl, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  onClick={() => { setDeclineMessage(tpl); setDeclineCustom(false); }}
+                  className={`w-full text-left p-3 rounded-lg border text-sm transition-colors ${
+                    declineMessage === tpl && !declineCustom
+                      ? "border-primary bg-primary/5 text-foreground"
+                      : "border-border bg-card text-muted-foreground hover:border-primary/50"
+                  }`}
+                >
+                  {tpl}
+                </button>
+              ))}
+
+              <button
+                type="button"
+                onClick={() => { setDeclineCustom(true); if (declineTemplates.includes(declineMessage)) setDeclineMessage(""); }}
+                className={`w-full text-left p-3 rounded-lg border text-sm transition-colors ${
+                  declineCustom
+                    ? "border-primary bg-primary/5 text-foreground"
+                    : "border-border bg-card text-muted-foreground hover:border-primary/50"
+                }`}
+              >
+                ✏️ Écrire un message personnalisé
+              </button>
+
+              {declineCustom && (
+                <textarea
+                  value={declineMessage}
+                  onChange={(e) => setDeclineMessage(e.target.value)}
+                  placeholder="Votre message au gardien…"
+                  maxLength={300}
+                  rows={3}
+                  className="w-full rounded-lg border border-border bg-background p-3 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary/30"
+                />
+              )}
+            </div>
+
+            <div className="flex justify-end gap-2 mt-4">
+              <Button variant="outline" onClick={() => { setDeclineApp(null); setDeclineMessage(""); setDeclineCustom(false); }}>
+                Annuler
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={() => handleDecline(declineApp, declineMessage)}
+                className="gap-2"
+              >
+                <XCircle className="h-4 w-4" /> Décliner
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 };
