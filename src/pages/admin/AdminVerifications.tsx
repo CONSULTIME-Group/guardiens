@@ -111,6 +111,7 @@ const AdminVerifications = () => {
     });
     toast.success("Demande de nouveau document envoyée");
     fetchQueue();
+    window.dispatchEvent(new Event("admin-badges-refresh"));
   };
 
   const rejectionReasons = ["Photo floue", "Document expiré", "Selfie ne correspond pas", "Document non conforme", "Autre"];
