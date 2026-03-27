@@ -60,6 +60,7 @@ const SitterDashboard = () => {
   const [onboardingChecks, setOnboardingChecks] = useState({ hasName: false, hasAvatar: false, hasBio: false, hasIdentity: false, hasSitterProfile: false });
   const [emergencyEligible, setEmergencyEligible] = useState(false);
   const [hasEmergencyProfile, setHasEmergencyProfile] = useState(false);
+  const [emergencyBlocked, setEmergencyBlocked] = useState<string | null>(null);
   const [showEmergencyForm, setShowEmergencyForm] = useState(false);
 
   useEffect(() => {
