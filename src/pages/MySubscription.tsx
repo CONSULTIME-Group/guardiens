@@ -401,6 +401,13 @@ const MySubscription = () => {
               </AccordionContent>
             </AccordionItem>
           </Accordion>
+
+          <p className="text-center text-sm text-muted-foreground mt-4">
+            Nouveau sur Guardiens ?{" "}
+            <a href="/blog/reussir-premiere-garde-house-sitting" className="text-primary underline font-medium">
+              Découvrez comment réussir votre première garde →
+            </a>
+          </p>
         </div>
       )}
 

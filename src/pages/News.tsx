@@ -25,12 +25,17 @@ interface Article {
 }
 
 const CATEGORY_LABELS: Record<string, string> = {
-  guide_race: "Guide race",
+  guide_race: "Races",
   guide_lieu: "Guide lieu",
-  conseil_gardien: "Conseil gardien",
-  conseil_proprio: "Conseil proprio",
+  conseil_gardien: "Conseils gardiens",
+  conseil_proprio: "Conseils propriétaires",
+  conseil: "Conseils",
   temoignage: "Témoignage",
   actualite: "Actualité",
+  ville: "Villes",
+  thematique: "Guides pratiques",
+  guide_local: "Guides pratiques",
+  saisonnier: "Saisonniers",
 };
 
 const CATEGORY_COLORS: Record<string, string> = {
@@ -38,8 +43,13 @@ const CATEGORY_COLORS: Record<string, string> = {
   guide_lieu: "bg-[hsl(214,80%,92%)] text-[hsl(214,50%,30%)]",
   conseil_gardien: "bg-[hsl(45,90%,90%)] text-[hsl(37,60%,30%)]",
   conseil_proprio: "bg-[hsl(45,90%,90%)] text-[hsl(37,60%,30%)]",
+  conseil: "bg-[hsl(45,90%,90%)] text-[hsl(37,60%,30%)]",
   temoignage: "bg-[hsl(330,80%,94%)] text-[hsl(330,50%,30%)]",
   actualite: "bg-muted text-muted-foreground",
+  ville: "bg-[hsl(214,80%,92%)] text-[hsl(214,50%,30%)]",
+  thematique: "bg-[hsl(270,60%,92%)] text-[hsl(270,40%,30%)]",
+  guide_local: "bg-[hsl(270,60%,92%)] text-[hsl(270,40%,30%)]",
+  saisonnier: "bg-[hsl(20,80%,92%)] text-[hsl(20,50%,30%)]",
 };
 
 const PAGE_SIZE = 9;
@@ -49,7 +59,7 @@ export default function News() {
   const [loading, setLoading] = useState(true);
   const [totalCount, setTotalCount] = useState(0);
   const [searchParams, setSearchParams] = useSearchParams();
-  const activeCategory = searchParams.get("cat") || "all";
+  const activeCategory = searchParams.get("categorie") || searchParams.get("cat") || "all";
   const currentPage = Math.max(1, parseInt(searchParams.get("page") || "1", 10));
 
   useEffect(() => {
@@ -66,7 +76,11 @@ export default function News() {
         .range(from, to);
 
       if (activeCategory !== "all") {
-        query = query.eq("category", activeCategory);
+        if (activeCategory === "guides_pratiques") {
+          query = query.in("category", ["thematique", "guide_local"]);
+        } else {
+          query = query.eq("category", activeCategory);
+        }
       }
 
       const { data, count } = await query;
@@ -87,8 +101,14 @@ export default function News() {
   };
 
   const categories = [
-    { key: "all", label: "Tout" },
-    ...Object.entries(CATEGORY_LABELS).map(([key, label]) => ({ key, label })),
+    { key: "all", label: "Tous" },
+    { key: "conseil_gardien", label: "Conseils gardiens" },
+    { key: "conseil_proprio", label: "Conseils propriétaires" },
+    { key: "conseil", label: "Conseils" },
+    { key: "guide_race", label: "Races" },
+    { key: "ville", label: "Villes" },
+    { key: "guides_pratiques", label: "Guides pratiques" },
+    { key: "saisonnier", label: "Saisonniers" },
   ];
 
   return (
@@ -114,8 +134,13 @@ export default function News() {
           <button
             key={cat.key}
             onClick={() => {
-              if (cat.key === "all") searchParams.delete("cat");
-              else searchParams.set("cat", cat.key);
+              if (cat.key === "all") {
+                searchParams.delete("categorie");
+                searchParams.delete("cat");
+              } else {
+                searchParams.set("categorie", cat.key);
+                searchParams.delete("cat");
+              }
               searchParams.delete("page");
               setSearchParams(searchParams);
             }}

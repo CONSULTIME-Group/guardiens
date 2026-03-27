@@ -4,6 +4,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Link } from "react-router-dom";
 import EmergencyActivation from "./EmergencyActivation";
 import EmergencyDashSection from "./EmergencyDashSection";
+import ResourceSection from "@/components/shared/ResourceSection";
+import type { ResourceItem } from "@/components/shared/ResourceCard";
 import {
   Home, Star, Mail, Award, CircleDot, ChevronRight, Search,
   Send as SendIcon, Eye, CheckCircle2, XCircle, MessageSquare,
@@ -293,18 +295,23 @@ const SitterDashboard = () => {
 
       {/* Ongoing sit banner */}
       {ongoingSit && (
-        <Link to={`/sits/${ongoingSit.id}`} className="block p-4 rounded-xl border-2 border-primary/30 bg-primary/5 hover:shadow-md transition-shadow">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-              <Calendar className="h-5 w-5 text-primary" />
+        <>
+          <Link to={`/sits/${ongoingSit.id}`} className="block p-4 rounded-xl border-2 border-primary/30 bg-primary/5 hover:shadow-md transition-shadow">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                <Calendar className="h-5 w-5 text-primary" />
+              </div>
+              <div className="flex-1">
+                <p className="text-sm font-semibold">Garde en cours</p>
+                <p className="text-xs text-muted-foreground">{ongoingSit.title} — chez {ongoingSit.ownerName}</p>
+              </div>
+              <ChevronRight className="h-4 w-4 text-muted-foreground" />
             </div>
-            <div className="flex-1">
-              <p className="text-sm font-semibold">Garde en cours</p>
-              <p className="text-xs text-muted-foreground">{ongoingSit.title} — chez {ongoingSit.ownerName}</p>
-            </div>
-            <ChevronRight className="h-4 w-4 text-muted-foreground" />
-          </div>
-        </Link>
+          </Link>
+          <a href="/blog/gerer-imprevu-pendant-garde" className="text-xs text-primary/70 hover:text-primary hover:underline -mt-7 inline-block ml-1">
+            Un imprévu ? Voir le guide →
+          </a>
+        </>
       )}
 
       {/* Emergency active section - at top if active */}
@@ -376,6 +383,38 @@ const SitterDashboard = () => {
           </div>
         )}
       </DashSection>
+
+      {/* Contextual resources */}
+      {!hasEmergencyProfile && (() => {
+        const completedCount = metrics.completed;
+        let resTitle = "";
+        let resItems: ResourceItem[] = [];
+
+        if (profileCompletion < 60 || verificationStatus !== "verified") {
+          resTitle = "Bien démarrer sur Guardiens";
+          resItems = [
+            { title: "Créer un profil qui attire des missions", description: "Photo, bio, expérience : ce qui convainc.", href: "/blog/creer-profil-gardien-attractif", icon: "gardien" },
+            { title: "Réussir sa première garde", description: "La rencontre, le premier soir, la communication.", href: "/blog/reussir-premiere-garde-house-sitting", icon: "gardien" },
+            { title: "Devenir Gardien d'Urgence", description: "Les conditions, les avantages, les obligations.", href: "/blog/devenir-gardien-urgence-guardiens", icon: "urgence" },
+          ];
+        } else if (completedCount >= 1 && completedCount < 5) {
+          resTitle = "Progresser sur Guardiens";
+          resItems = [
+            { title: "Gérer les animaux difficiles", description: "Chien anxieux, chat caché, animal malade.", href: "/blog/gerer-animaux-difficiles-garde", icon: "animal" },
+            { title: "Gérer les imprévus pendant une garde", description: "Panne, urgence, départ anticipé : les protocoles.", href: "/blog/gerer-imprevu-pendant-garde", icon: "gardien" },
+            { title: "Devenir Gardien d'Urgence", description: "Encore quelques gardes avant d'y accéder.", href: "/blog/devenir-gardien-urgence-guardiens", icon: "urgence" },
+          ];
+        } else if (completedCount >= 5) {
+          resTitle = "Passer au niveau supérieur";
+          resItems = [
+            { title: "Devenir Gardien d'Urgence", description: "Vous remplissez peut-être déjà les conditions.", href: "/blog/devenir-gardien-urgence-guardiens", icon: "urgence" },
+            { title: "Gérer les animaux difficiles", description: "Les situations que les bons gardiens gèrent.", href: "/blog/gerer-animaux-difficiles-garde", icon: "animal" },
+            { title: "Gérer les imprévus pendant une garde", description: "Panne, urgence, départ anticipé : les protocoles.", href: "/blog/gerer-imprevu-pendant-garde", icon: "gardien" },
+          ];
+        }
+
+        return resItems.length > 0 ? <ResourceSection title={resTitle} resources={resItems} /> : null;
+      })()}
 
       {/* Nearby listings */}
       <DashSection title="Annonces près de chez vous" action={

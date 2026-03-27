@@ -189,6 +189,9 @@ const SitterProfile = () => {
           hasFirstActivity={trustData.hasFirstActivity}
           role="sitter"
         />
+        <a href="/blog/creer-profil-gardien-attractif" className="text-xs text-primary hover:underline mt-1 inline-block">
+          💡 Comment créer un profil qui attire des missions →
+        </a>
 
         {/* ── Missing items banner ── */}
         {completion < 100 && missingFields.length > 0 && (
