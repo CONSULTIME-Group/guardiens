@@ -66,6 +66,7 @@ import AdminSubscriptions from "./pages/admin/AdminSubscriptions";
 import AdminLegal from "./pages/admin/AdminLegal";
 import AdminSettings from "./pages/admin/AdminSettings";
 import PublicProfile from "./pages/PublicProfile";
+import EmergencySitter from "./pages/EmergencySitter";
 
 const queryClient = new QueryClient();
 
@@ -103,6 +104,7 @@ const AppRoutes = () => (
     <Route path="/house-sitting/:slug" element={<CityPage />} />
     <Route path="/departement/:slug" element={<DepartmentPage />} />
     <Route path="/tarifs" element={<Pricing />} />
+    <Route path="/gardien-urgence" element={<EmergencySitter />} />
     <Route path="/petites-missions" element={<SmallMissions />} />
     <Route path="/petites-missions/creer" element={<ProtectedRoute><CreateSmallMission /></ProtectedRoute>} />
     <Route path="/petites-missions/:id" element={<SmallMissionDetail />} />
