@@ -1,4 +1,10 @@
 User-agent: *
 Allow: /
+Disallow: /admin
+Disallow: /dashboard
+Disallow: /messages
+Disallow: /mon-profil
+Disallow: /mon-abonnement
+Disallow: /parametres
 
-Sitemap: https://erhccyqevdyevpyctsjj.supabase.co/functions/v1/sitemap
+Sitemap: https://guardiens.fr/sitemap.xml
