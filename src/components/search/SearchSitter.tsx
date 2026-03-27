@@ -331,6 +331,26 @@ const SearchSitter = () => {
         <Switch checked={verifiedOnly} onCheckedChange={setVerifiedOnly} />
         <label className="text-sm">Profils vérifiés uniquement</label>
       </div>
+      <div className="flex items-center gap-3">
+        <Switch />
+        <label className="text-sm flex items-center gap-1.5">
+          <Zap className="h-3.5 w-3.5 text-amber-500" />
+          Gardiens d'urgence
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <a href="/gardien-urgence" target="_blank" rel="noopener noreferrer" className="inline-flex" onClick={e => e.stopPropagation()}>
+                  <Info className="h-3.5 w-3.5 text-muted-foreground hover:text-primary cursor-pointer" />
+                </a>
+              </TooltipTrigger>
+              <TooltipContent side="top" className="max-w-[220px] text-xs">
+                Gardiens expérimentés, vérifiés, mobilisables rapidement.{" "}
+                <a href="/gardien-urgence" className="text-primary underline">En savoir plus →</a>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        </label>
+      </div>
       <Button onClick={handleSearch} className="w-full gap-2" disabled={loading}>
         <Search className="h-4 w-4" /> {loading ? "Recherche..." : "Rechercher"}
       </Button>
