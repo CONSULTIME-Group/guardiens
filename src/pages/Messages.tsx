@@ -635,6 +635,8 @@ const Messages = () => {
                   propertyId={activeConv.sit.property_id}
                   ownerId={activeConv.owner_id}
                   ownerName={activeConv.other_user?.first_name || "le propriétaire"}
+                  sitId={activeConv.sit_id || undefined}
+                  sitCity={activeConv.other_user?.city || undefined}
                 />
               )}
             </div>
