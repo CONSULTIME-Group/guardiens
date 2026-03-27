@@ -439,6 +439,7 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
                     <div className="flex items-center gap-1.5">
                       <span className="font-medium text-sm">{confirmApp.sitter?.first_name}</span>
                       {confirmApp.sitter?.identity_verified && <Shield className="h-3.5 w-3.5 text-primary" />}
+                      {confirmApp.isEmergencySitter && <EmergencyBadge size="sm" />}
                     </div>
                     <div className="flex items-center gap-2 text-xs text-muted-foreground">
                       {confirmApp.avgRating && (
