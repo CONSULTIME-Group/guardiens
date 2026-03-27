@@ -88,6 +88,7 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
             badgeCounts,
             verifiedExperienceCount: extExpRes.data?.length || 0,
             gallery: galleryRes.data || [],
+            isEmergencySitter: !!emRes.data,
           };
         })
       );
