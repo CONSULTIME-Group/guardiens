@@ -1,10 +1,8 @@
 import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { ArrowRight, Home, PawPrint, Clock, Handshake, Sparkles, Wrench } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
 import PageMeta from "@/components/PageMeta";
 import heroDogBbq from "@/assets/hero-dog-bbq.jpg";
 
@@ -89,8 +87,6 @@ const steps = [
 const Landing = () => {
   const navigate = useNavigate();
   const [latestArticles, setLatestArticles] = useState<any[]>([]);
-  const [email, setEmail] = useState("");
-  const [emailBottom, setEmailBottom] = useState("");
 
   useEffect(() => {
     supabase
@@ -101,14 +97,6 @@ const Landing = () => {
       .limit(3)
       .then(({ data }) => setLatestArticles(data || []));
   }, []);
-
-  const handleEmailSignup = (emailValue: string) => {
-    if (!emailValue.trim()) {
-      toast.error("Veuillez entrer votre email.");
-      return;
-    }
-    navigate(`/register?email=${encodeURIComponent(emailValue)}`);
-  };
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -581,32 +569,30 @@ const Landing = () => {
       <section className="px-6 md:px-12 py-20" style={{ backgroundColor: "#1C1B18" }}>
         <div className="max-w-3xl mx-auto text-center">
           <h2 className="font-heading text-3xl md:text-4xl font-bold mb-4 text-white">
-            On construit Guardiens avec vous.
+            Prêt à partir l'esprit léger ?
           </h2>
           <p className="text-white/60 text-lg mb-8">
-            Rejoignez la liste d'attente. Vous serez les premiers à tester — et
-            à façonner ce que Guardiens deviendra.
+            Rejoignez les membres fondateurs avant le 13 mai. Gratuit, sans engagement.
           </p>
-          <form
-            className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto"
-            onSubmit={(e) => {
-              e.preventDefault();
-              handleEmailSignup(emailBottom);
-            }}
-          >
-            <Input
-              type="email"
-              placeholder="votre@email.com"
-              value={emailBottom}
-              onChange={(e) => setEmailBottom(e.target.value)}
-              className="bg-white/10 border-white/20 text-white placeholder:text-white/40"
-            />
-            <Button type="submit" className="whitespace-nowrap">
-              S'inscrire
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <Button
+              size="lg"
+              className="bg-white text-foreground hover:bg-white/90 font-semibold"
+              onClick={() => navigate("/register?role=owner")}
+            >
+              Je cherche un gardien
             </Button>
-          </form>
+            <Button
+              size="lg"
+              variant="outline"
+              className="border-white/40 text-white hover:bg-white/10 font-semibold"
+              onClick={() => navigate("/register?role=guardian")}
+            >
+              Je veux garder
+            </Button>
+          </div>
           <p className="mt-4 text-xs text-white/40">
-            Gratuit · Pas de spam · On vous contacte quand c'est prêt.
+            Gratuit · Badge Fondateur à vie · Accès jusqu'au 13 juin
           </p>
         </div>
       </section>
@@ -618,23 +604,23 @@ const Landing = () => {
           {/* SEO local links */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-6">
             <div>
-              <h4 className="text-sm font-semibold text-foreground mb-2">Garde d'animaux à Lyon</h4>
+              <h4 className="text-sm font-semibold text-foreground mb-2">House-sitting par ville</h4>
               <ul className="space-y-1 text-xs text-muted-foreground">
-                <li><Link to="/actualites/pet-sitting-lyon-ouest-lyonnais" className="hover:text-primary transition-colors">Vieux Lyon (69005)</Link></li>
-                <li><Link to="/actualites/pet-sitting-lyon-ouest-lyonnais" className="hover:text-primary transition-colors">Monplaisir (69008)</Link></li>
-                <li><Link to="/actualites/pet-sitting-lyon-ouest-lyonnais" className="hover:text-primary transition-colors">Croix-Rousse (69004)</Link></li>
-                <li><Link to="/actualites/pet-sitting-lyon-ouest-lyonnais" className="hover:text-primary transition-colors">Lyon 6 — Tête d'Or</Link></li>
-                <li><Link to="/actualites/pet-sitting-lyon-ouest-lyonnais" className="hover:text-primary transition-colors">Monts d'Or</Link></li>
+                <li><Link to="/house-sitting/lyon" className="hover:text-primary transition-colors">House-sitting Lyon</Link></li>
+                <li><Link to="/house-sitting/annecy" className="hover:text-primary transition-colors">House-sitting Annecy</Link></li>
+                <li><Link to="/house-sitting/grenoble" className="hover:text-primary transition-colors">House-sitting Grenoble</Link></li>
+                <li><Link to="/house-sitting/chambery" className="hover:text-primary transition-colors">House-sitting Chambéry</Link></li>
+                <li><Link to="/house-sitting/caluire-et-cuire" className="hover:text-primary transition-colors">House-sitting Caluire</Link></li>
               </ul>
             </div>
             <div>
               <h4 className="text-sm font-semibold text-foreground mb-2">House-sitting AURA</h4>
               <ul className="space-y-1 text-xs text-muted-foreground">
-                <li><Link to="/actualites/house-sitting-haute-savoie-annecy-megeve" className="hover:text-primary transition-colors">Haute-Savoie & Annecy</Link></li>
-                <li><Link to="/actualites/pet-sitting-grenoble-chartreuse" className="hover:text-primary transition-colors">Grenoble & Chartreuse</Link></li>
-                <li><Link to="/actualites/gardiennage-maison-vacances-aura" className="hover:text-primary transition-colors">Gardiennage vacances</Link></li>
-                <li><Link to="/actualites/garde-ferme-animaux-monts-du-lyonnais" className="hover:text-primary transition-colors">Monts du Lyonnais</Link></li>
-                <li><Link to="/actualites/house-sitting-auvergne-rhone-alpes" className="hover:text-primary transition-colors">Guide AURA complet</Link></li>
+                <li><Link to="/actualites/house-sitting-auvergne-rhone-alpes" className="hover:text-primary transition-colors">House-sitting en AURA</Link></li>
+                <li><Link to="/actualites/parcs-chiens-lyon-guide-complet" className="hover:text-primary transition-colors">Parcs chiens Lyon</Link></li>
+                <li><Link to="/actualites/parcs-balades-chiens-annecy-guide" className="hover:text-primary transition-colors">Parcs chiens Annecy</Link></li>
+                <li><Link to="/actualites/parcs-balades-chiens-grenoble-guide" className="hover:text-primary transition-colors">Parcs chiens Grenoble</Link></li>
+                <li><Link to="/actualites/gardes-longue-duree-guide" className="hover:text-primary transition-colors">Gardes longue durée</Link></li>
               </ul>
             </div>
             <div>
@@ -644,6 +630,7 @@ const Landing = () => {
                 <li><Link to="/guides" className="hover:text-primary transition-colors">Guides locaux</Link></li>
                 <li><Link to="/faq" className="hover:text-primary transition-colors">FAQ</Link></li>
                 <li><Link to="/tarifs" className="hover:text-primary transition-colors">Tarifs</Link></li>
+                <li><Link to="/actualites/c-est-quoi-le-house-sitting" className="hover:text-primary transition-colors">C'est quoi le house-sitting</Link></li>
               </ul>
             </div>
             <div>
@@ -652,6 +639,7 @@ const Landing = () => {
                 <li><Link to="/a-propos" className="hover:text-primary transition-colors">À propos</Link></li>
                 <li><Link to="/contact" className="hover:text-primary transition-colors">Contact</Link></li>
                 <li><Link to="/register" className="hover:text-primary transition-colors">Inscription</Link></li>
+                <li><Link to="/petites-missions" className="hover:text-primary transition-colors">Petites missions</Link></li>
               </ul>
             </div>
           </div>
