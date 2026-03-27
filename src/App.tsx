@@ -67,6 +67,7 @@ import AdminLegal from "./pages/admin/AdminLegal";
 import AdminSettings from "./pages/admin/AdminSettings";
 import PublicProfile from "./pages/PublicProfile";
 import EmergencySitter from "./pages/EmergencySitter";
+import MySubscription from "./pages/MySubscription";
 
 const queryClient = new QueryClient();
 
