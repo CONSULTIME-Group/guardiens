@@ -14,7 +14,7 @@ const steps = [
   {
     icon: Bell,
     title: "Les gardiens d'urgence sont alertés",
-    desc: "Notification prioritaire envoyée aux gardiens d'urgence disponibles dans le rayon.",
+    desc: "Notification automatique envoyée aux gardiens d'urgence disponibles dans un rayon de 35 km.",
     color: "text-primary",
     bg: "bg-primary/10",
   },
