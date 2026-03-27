@@ -231,8 +231,8 @@
   /* CTA block */
   .article-cta-block {
     @apply my-10 py-8 px-6 rounded-2xl text-center;
-    background: linear-gradient(135deg, hsl(var(--primary) / 0.08), hsl(var(--secondary) / 0.1));
-    border: 1px solid hsl(var(--primary) / 0.15);
+    background: #FAF9F6;
+    border: 1px solid hsl(var(--primary) / 0.2);
   }
 
   .article-cta-inner {
