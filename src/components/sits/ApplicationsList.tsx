@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import VerifiedBadge from "@/components/profile/VerifiedBadge";
+import EmergencyBadge from "@/components/profile/EmergencyBadge";
 import BadgeShield from "@/components/badges/BadgeShield";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
