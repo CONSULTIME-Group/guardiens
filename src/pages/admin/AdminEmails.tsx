@@ -1,26 +1,30 @@
-import { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useState, useEffect, useCallback } from "react";
+import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Slider } from "@/components/ui/slider";
-import { Mail, Clock, FileText, Send, ShieldOff, History, Settings2, Trash2, RefreshCw, AlertCircle, CheckCircle2, XCircle, Ban } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Mail, Clock, FileText, Send, ShieldOff, History, Settings2, RefreshCw, AlertCircle, Ban, Eye, SendHorizonal } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
+import { useAuth } from "@/contexts/AuthContext";
 
 // ── Templates tab ──
-const emailTemplates = [
-  { name: "Confirmation d'inscription", trigger: "Après inscription", type: "auth", key: "signup" },
-  { name: "Réinitialisation de mot de passe", trigger: "Demande de reset", type: "auth", key: "recovery" },
-  { name: "Lien magique", trigger: "Connexion sans mot de passe", type: "auth", key: "magic-link" },
-  { name: "Changement d'email", trigger: "Modification d'email", type: "auth", key: "email-change" },
-  { name: "Ré-authentification", trigger: "Action sensible", type: "auth", key: "reauthentication" },
-  { name: "Invitation", trigger: "Invitation envoyée", type: "auth", key: "invite" },
+const authTemplates = [
+  { name: "Confirmation d'inscription", trigger: "Après inscription", key: "signup" },
+  { name: "Réinitialisation de mot de passe", trigger: "Demande de reset", key: "recovery" },
+  { name: "Lien magique", trigger: "Connexion sans mot de passe", key: "magic-link" },
+  { name: "Changement d'email", trigger: "Modification d'email", key: "email-change" },
+  { name: "Ré-authentification", trigger: "Action sensible", key: "reauthentication" },
+  { name: "Invitation", trigger: "Invitation envoyée", key: "invite" },
+];
+
+const notifTemplates = [
   { name: "Nouvelle candidature reçue", trigger: "Candidature créée", type: "notification", key: "new-application" },
   { name: "Candidature acceptée", trigger: "Statut → acceptée", type: "notification", key: "application-accepted" },
   { name: "Rappel garde J-7", trigger: "Cron J-7", type: "cron", key: "reminder-7d" },
@@ -29,33 +33,189 @@ const emailTemplates = [
   { name: "Annulation de garde", trigger: "Statut → annulée", type: "notification", key: "cancellation" },
 ];
 
-const TemplatesTab = () => (
-  <div className="space-y-4">
-    <p className="text-sm text-muted-foreground">
-      Les templates d'emails sont gérés dans le code. Voici la liste des emails automatiques actifs.
-    </p>
-    <div className="grid gap-2">
-      {emailTemplates.map((tpl) => (
-        <Card key={tpl.key}>
-          <CardContent className="flex items-center justify-between py-3 px-5">
-            <div className="flex items-center gap-3">
-              <Mail className="h-4 w-4 text-muted-foreground" />
-              <div>
-                <div className="font-medium text-sm">{tpl.name}</div>
-                <div className="text-xs text-muted-foreground flex items-center gap-1">
-                  <Clock className="h-3 w-3" /> {tpl.trigger}
+interface TransactionalTemplate {
+  name: string;
+  displayName: string;
+  subject: string;
+  hasPreviewData: boolean;
+}
+
+const TemplatesTab = () => {
+  const { user } = useAuth();
+  const [transactionalTemplates, setTransactionalTemplates] = useState<TransactionalTemplate[]>([]);
+  const [loadingTemplates, setLoadingTemplates] = useState(true);
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [previewHtml, setPreviewHtml] = useState("");
+  const [previewSubject, setPreviewSubject] = useState("");
+  const [previewName, setPreviewName] = useState("");
+  const [loadingPreview, setLoadingPreview] = useState(false);
+  const [testEmail, setTestEmail] = useState(user?.email || "");
+  const [sendingTest, setSendingTest] = useState<string | null>(null);
+
+  const fetchTemplates = useCallback(async () => {
+    setLoadingTemplates(true);
+    const { data, error } = await supabase.functions.invoke("admin-preview-email", { body: {} });
+    if (!error && data?.templates) {
+      setTransactionalTemplates(data.templates);
+    }
+    setLoadingTemplates(false);
+  }, []);
+
+  useEffect(() => { fetchTemplates(); }, [fetchTemplates]);
+
+  const handlePreview = async (templateName: string) => {
+    setLoadingPreview(true);
+    setPreviewOpen(true);
+    setPreviewName(templateName);
+    const { data, error } = await supabase.functions.invoke("admin-preview-email", {
+      body: { templateName },
+    });
+    if (!error && data?.html) {
+      setPreviewHtml(data.html);
+      setPreviewSubject(data.subject);
+    } else {
+      setPreviewHtml("<p style='padding:20px;color:#999;'>Erreur lors du rendu du template.</p>");
+      setPreviewSubject("");
+    }
+    setLoadingPreview(false);
+  };
+
+  const handleTestSend = async (templateName: string) => {
+    if (!testEmail) { toast.error("Entrez un email de test"); return; }
+    setSendingTest(templateName);
+    const { error } = await supabase.functions.invoke("send-transactional-email", {
+      body: {
+        templateName,
+        recipientEmail: testEmail,
+        idempotencyKey: `admin-test-${templateName}-${Date.now()}`,
+      },
+    });
+    if (error) {
+      toast.error("Erreur lors de l'envoi du test");
+    } else {
+      toast.success(`Email de test envoyé à ${testEmail}`);
+    }
+    setSendingTest(null);
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center gap-3 bg-accent/50 rounded-lg p-3">
+        <Mail className="h-4 w-4 text-muted-foreground shrink-0" />
+        <div className="flex-1">
+          <label className="text-xs font-medium text-muted-foreground">Email de test</label>
+          <Input value={testEmail} onChange={e => setTestEmail(e.target.value)} placeholder="admin@example.com" className="h-8 text-sm mt-0.5" />
+        </div>
+      </div>
+
+      <div>
+        <h3 className="font-medium text-sm mb-3 flex items-center gap-2">
+          <SendHorizonal className="h-4 w-4 text-primary" /> Templates transactionnels
+          <Badge variant="secondary" className="text-[10px]">{transactionalTemplates.length}</Badge>
+        </h3>
+        {loadingTemplates ? (
+          <p className="text-sm text-muted-foreground py-4 text-center">Chargement des templates...</p>
+        ) : transactionalTemplates.length === 0 ? (
+          <p className="text-sm text-muted-foreground py-4 text-center">Aucun template transactionnel trouvé</p>
+        ) : (
+          <div className="space-y-2">
+            {transactionalTemplates.map((tpl) => (
+              <Card key={tpl.name}>
+                <CardContent className="flex items-center justify-between py-3 px-5">
+                  <div className="flex items-center gap-3 flex-1 min-w-0">
+                    <Mail className="h-4 w-4 text-primary shrink-0" />
+                    <div className="min-w-0">
+                      <div className="font-medium text-sm">{tpl.displayName}</div>
+                      <div className="text-xs text-muted-foreground truncate">Objet : {tpl.subject}</div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <Button size="sm" variant="outline" className="h-7 text-xs gap-1" onClick={() => handlePreview(tpl.name)}>
+                      <Eye className="h-3.5 w-3.5" /> Prévisualiser
+                    </Button>
+                    <Button size="sm" variant="outline" className="h-7 text-xs gap-1" onClick={() => handleTestSend(tpl.name)} disabled={sendingTest === tpl.name}>
+                      <Send className="h-3.5 w-3.5" /> {sendingTest === tpl.name ? "Envoi..." : "Envoyer un test"}
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div>
+        <h3 className="font-medium text-sm mb-3 flex items-center gap-2">
+          <Clock className="h-4 w-4 text-muted-foreground" /> Templates d'authentification
+          <Badge variant="outline" className="text-[10px]">Code</Badge>
+        </h3>
+        <div className="space-y-2">
+          {authTemplates.map((tpl) => (
+            <Card key={tpl.key}>
+              <CardContent className="flex items-center justify-between py-3 px-5">
+                <div className="flex items-center gap-3">
+                  <Mail className="h-4 w-4 text-muted-foreground" />
+                  <div>
+                    <div className="font-medium text-sm">{tpl.name}</div>
+                    <div className="text-xs text-muted-foreground flex items-center gap-1"><Clock className="h-3 w-3" /> {tpl.trigger}</div>
+                  </div>
                 </div>
-              </div>
-            </div>
-            <Badge variant={tpl.type === "auth" ? "default" : tpl.type === "cron" ? "secondary" : "outline"} className="text-xs">
-              {tpl.type === "auth" ? "Authentification" : tpl.type === "cron" ? "Planifié" : "Notification"}
-            </Badge>
-          </CardContent>
-        </Card>
-      ))}
+                <Badge variant="default" className="text-xs">Auth</Badge>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+
+      <div>
+        <h3 className="font-medium text-sm mb-3 flex items-center gap-2">
+          <FileText className="h-4 w-4 text-muted-foreground" /> Templates de notification
+          <Badge variant="outline" className="text-[10px]">Code</Badge>
+        </h3>
+        <div className="space-y-2">
+          {notifTemplates.map((tpl) => (
+            <Card key={tpl.key}>
+              <CardContent className="flex items-center justify-between py-3 px-5">
+                <div className="flex items-center gap-3">
+                  <Mail className="h-4 w-4 text-muted-foreground" />
+                  <div>
+                    <div className="font-medium text-sm">{tpl.name}</div>
+                    <div className="text-xs text-muted-foreground flex items-center gap-1"><Clock className="h-3 w-3" /> {tpl.trigger}</div>
+                  </div>
+                </div>
+                <Badge variant={tpl.type === "cron" ? "secondary" : "outline"} className="text-xs">
+                  {tpl.type === "cron" ? "Planifié" : "Notification"}
+                </Badge>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+
+      <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
+        <DialogContent className="max-w-2xl max-h-[85vh] flex flex-col">
+          <DialogHeader>
+            <DialogTitle className="text-base">Prévisualisation — {previewName}</DialogTitle>
+            {previewSubject && <p className="text-sm text-muted-foreground">Objet : {previewSubject}</p>}
+          </DialogHeader>
+          <div className="flex-1 overflow-auto border rounded-lg bg-white">
+            {loadingPreview ? (
+              <div className="flex items-center justify-center h-64 text-muted-foreground text-sm">Rendu en cours...</div>
+            ) : (
+              <iframe srcDoc={previewHtml} className="w-full h-[500px] border-0" sandbox="allow-same-origin" title="Email preview" />
+            )}
+          </div>
+          <DialogFooter className="flex-row gap-2">
+            <Button variant="outline" size="sm" className="gap-1.5" onClick={() => handleTestSend(previewName)} disabled={sendingTest === previewName}>
+              <Send className="h-3.5 w-3.5" /> {sendingTest === previewName ? "Envoi..." : `Envoyer un test à ${testEmail || "..."}`}
+            </Button>
+            <Button variant="ghost" size="sm" onClick={() => setPreviewOpen(false)}>Fermer</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
-  </div>
-);
+  );
+};
 
 // ── Status badge helper ──
 const statusConfig: Record<string, { label: string; variant: "default" | "destructive" | "secondary" | "outline" }> = {
@@ -108,7 +268,6 @@ const LogsTab = () => {
       return;
     }
 
-    // Deduplicate by message_id (keep latest)
     const byMessageId = new Map<string, any>();
     (data || []).forEach((row) => {
       const key = row.message_id || row.id;
@@ -139,17 +298,11 @@ const LogsTab = () => {
     setTemplates(unique);
   };
 
-  useEffect(() => {
-    fetchTemplates();
-  }, []);
-
-  useEffect(() => {
-    fetchLogs();
-  }, [timeRange, statusFilter, templateFilter]);
+  useEffect(() => { fetchTemplates(); }, []);
+  useEffect(() => { fetchLogs(); }, [timeRange, statusFilter, templateFilter]);
 
   return (
     <div className="space-y-4">
-      {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <Card><CardContent className="pt-4 pb-3 text-center">
           <div className="text-2xl font-bold">{stats.total}</div>
@@ -169,7 +322,6 @@ const LogsTab = () => {
         </CardContent></Card>
       </div>
 
-      {/* Filters */}
       <div className="flex flex-wrap gap-2 items-center">
         <div className="flex gap-1">
           {["24h", "7d", "30d"].map((range) => (
@@ -200,7 +352,6 @@ const LogsTab = () => {
         <Button size="sm" variant="ghost" onClick={fetchLogs}><RefreshCw className="h-3.5 w-3.5" /></Button>
       </div>
 
-      {/* Table */}
       <div className="rounded-md border overflow-auto">
         <Table>
           <TableHeader>
@@ -262,9 +413,7 @@ const SuppressionsTab = () => {
     }
   };
 
-  useEffect(() => {
-    fetchSuppressions();
-  }, []);
+  useEffect(() => { fetchSuppressions(); }, []);
 
   const reasonLabels: Record<string, string> = {
     unsubscribe: "Désabonnement",
@@ -275,9 +424,8 @@ const SuppressionsTab = () => {
   return (
     <div className="space-y-4">
       <p className="text-sm text-muted-foreground">
-        Emails bloqués automatiquement suite à un rebond, une plainte ou un désabonnement. Vous pouvez débloquer un email si nécessaire.
+        Emails bloqués automatiquement suite à un rebond, une plainte ou un désabonnement.
       </p>
-
       <div className="rounded-md border overflow-auto">
         <Table>
           <TableHeader>
@@ -298,7 +446,7 @@ const SuppressionsTab = () => {
                 <TableRow key={s.id}>
                   <TableCell className="text-sm">{s.email}</TableCell>
                   <TableCell>
-                    <Badge variant={s.reason === "bounce" ? "destructive" : s.reason === "complaint" ? "destructive" : "secondary"} className="text-xs">
+                    <Badge variant={s.reason === "bounce" || s.reason === "complaint" ? "destructive" : "secondary"} className="text-xs">
                       {reasonLabels[s.reason] || s.reason}
                     </Badge>
                   </TableCell>
@@ -307,8 +455,7 @@ const SuppressionsTab = () => {
                   </TableCell>
                   <TableCell>
                     <Button size="sm" variant="ghost" className="text-xs h-7" onClick={() => handleUnblock(s.id, s.email)}>
-                      <ShieldOff className="h-3.5 w-3.5 mr-1" />
-                      Débloquer
+                      <ShieldOff className="h-3.5 w-3.5 mr-1" /> Débloquer
                     </Button>
                   </TableCell>
                 </TableRow>
@@ -350,17 +497,12 @@ const ConfigTab = () => {
         transactional_email_ttl_minutes: config.transactional_email_ttl_minutes,
       })
       .eq("id", 1);
-    if (error) {
-      toast.error("Erreur lors de la sauvegarde");
-    } else {
-      toast.success("Configuration sauvegardée");
-    }
+    if (error) toast.error("Erreur lors de la sauvegarde");
+    else toast.success("Configuration sauvegardée");
     setSaving(false);
   };
 
-  useEffect(() => {
-    fetchConfig();
-  }, []);
+  useEffect(() => { fetchConfig(); }, []);
 
   if (loading || !config) return <div className="text-center text-muted-foreground py-8">Chargement...</div>;
 
@@ -374,49 +516,25 @@ const ConfigTab = () => {
         <div>
           <label className="text-sm font-medium">Taille du batch</label>
           <p className="text-xs text-muted-foreground mb-2">Nombre d'emails traités par cycle (actuel : {config.batch_size})</p>
-          <Input
-            type="number"
-            min={1}
-            max={100}
-            value={config.batch_size}
-            onChange={(e) => setConfig({ ...config, batch_size: parseInt(e.target.value) || 10 })}
-          />
+          <Input type="number" min={1} max={100} value={config.batch_size} onChange={(e) => setConfig({ ...config, batch_size: parseInt(e.target.value) || 10 })} />
         </div>
 
         <div>
           <label className="text-sm font-medium">Délai entre envois (ms)</label>
-          <p className="text-xs text-muted-foreground mb-2">Pause entre chaque email pour éviter le rate-limiting (actuel : {config.send_delay_ms}ms)</p>
-          <Input
-            type="number"
-            min={0}
-            max={5000}
-            value={config.send_delay_ms}
-            onChange={(e) => setConfig({ ...config, send_delay_ms: parseInt(e.target.value) || 200 })}
-          />
+          <p className="text-xs text-muted-foreground mb-2">Pause entre chaque email (actuel : {config.send_delay_ms}ms)</p>
+          <Input type="number" min={0} max={5000} value={config.send_delay_ms} onChange={(e) => setConfig({ ...config, send_delay_ms: parseInt(e.target.value) || 200 })} />
         </div>
 
         <div>
           <label className="text-sm font-medium">TTL emails d'authentification (minutes)</label>
-          <p className="text-xs text-muted-foreground mb-2">Durée de vie max d'un email d'auth en file (actuel : {config.auth_email_ttl_minutes} min)</p>
-          <Input
-            type="number"
-            min={1}
-            max={120}
-            value={config.auth_email_ttl_minutes}
-            onChange={(e) => setConfig({ ...config, auth_email_ttl_minutes: parseInt(e.target.value) || 15 })}
-          />
+          <p className="text-xs text-muted-foreground mb-2">Durée de vie max d'un email d'auth (actuel : {config.auth_email_ttl_minutes} min)</p>
+          <Input type="number" min={1} max={120} value={config.auth_email_ttl_minutes} onChange={(e) => setConfig({ ...config, auth_email_ttl_minutes: parseInt(e.target.value) || 15 })} />
         </div>
 
         <div>
           <label className="text-sm font-medium">TTL emails transactionnels (minutes)</label>
-          <p className="text-xs text-muted-foreground mb-2">Durée de vie max d'un email transactionnel en file (actuel : {config.transactional_email_ttl_minutes} min)</p>
-          <Input
-            type="number"
-            min={1}
-            max={1440}
-            value={config.transactional_email_ttl_minutes}
-            onChange={(e) => setConfig({ ...config, transactional_email_ttl_minutes: parseInt(e.target.value) || 60 })}
-          />
+          <p className="text-xs text-muted-foreground mb-2">Durée de vie max d'un email transactionnel (actuel : {config.transactional_email_ttl_minutes} min)</p>
+          <Input type="number" min={1} max={1440} value={config.transactional_email_ttl_minutes} onChange={(e) => setConfig({ ...config, transactional_email_ttl_minutes: parseInt(e.target.value) || 60 })} />
         </div>
 
         {config.retry_after_until && (
@@ -444,28 +562,24 @@ const AdminEmails = () => {
     <div className="space-y-6">
       <h1 className="font-body text-2xl font-bold">Emails & Communications</h1>
 
-      <Tabs defaultValue="logs" className="space-y-4">
+      <Tabs defaultValue="templates" className="space-y-4">
         <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="logs" className="text-xs gap-1">
-            <History className="h-3.5 w-3.5" />
-            Logs
-          </TabsTrigger>
           <TabsTrigger value="templates" className="text-xs gap-1">
-            <FileText className="h-3.5 w-3.5" />
-            Templates
+            <FileText className="h-3.5 w-3.5" /> Templates
+          </TabsTrigger>
+          <TabsTrigger value="logs" className="text-xs gap-1">
+            <History className="h-3.5 w-3.5" /> Logs
           </TabsTrigger>
           <TabsTrigger value="suppressions" className="text-xs gap-1">
-            <Ban className="h-3.5 w-3.5" />
-            Suppressions
+            <Ban className="h-3.5 w-3.5" /> Suppressions
           </TabsTrigger>
           <TabsTrigger value="config" className="text-xs gap-1">
-            <Settings2 className="h-3.5 w-3.5" />
-            Config
+            <Settings2 className="h-3.5 w-3.5" /> Config
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="logs"><LogsTab /></TabsContent>
         <TabsContent value="templates"><TemplatesTab /></TabsContent>
+        <TabsContent value="logs"><LogsTab /></TabsContent>
         <TabsContent value="suppressions"><SuppressionsTab /></TabsContent>
         <TabsContent value="config"><ConfigTab /></TabsContent>
       </Tabs>
