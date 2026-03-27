@@ -1,10 +1,10 @@
 import { useState, useRef } from "react";
-import { usePostalCodeCity } from "@/hooks/usePostalCodeCity";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Camera } from "lucide-react";
 import HintBubble from "./HintBubble";
+import PostalCodeCityFields from "./PostalCodeCityFields";
 import type { SitterProfileData } from "@/hooks/useSitterProfile";
 
 interface Props {
@@ -16,7 +16,6 @@ interface Props {
 const StepIdentity = ({ data, onChange, onUploadAvatar }: Props) => {
   const fileRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
-  const { handlePostalCodeChange } = usePostalCodeCity(onChange);
 
   const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -63,16 +62,11 @@ const StepIdentity = ({ data, onChange, onUploadAvatar }: Props) => {
       </div>
 
       {/* Location */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label htmlFor="city">Ville</Label>
-          <Input id="city" value={data.city} onChange={e => onChange({ city: e.target.value })} className="rounded-lg h-12" maxLength={100} />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="postal_code">Code postal</Label>
-          <Input id="postal_code" value={data.postal_code} onChange={e => handlePostalCodeChange(e.target.value)} className="rounded-lg h-12" maxLength={10} />
-        </div>
-      </div>
+      <PostalCodeCityFields
+        city={data.city}
+        postalCode={data.postal_code}
+        onChange={onChange}
+      />
 
       {/* Bio */}
       <div className="space-y-2">

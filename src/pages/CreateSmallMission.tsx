@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import PostalCodeCityFields from "@/components/profile/PostalCodeCityFields";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dog, Flower2, Home, Handshake, Heart } from "lucide-react";
@@ -161,16 +162,16 @@ const CreateSmallMission = () => {
               </div>
 
               {/* Ville + CP */}
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Ville *</Label>
-                  <Input value={city} onChange={(e) => setCity(e.target.value)} placeholder="Lyon" />
-                </div>
-                <div className="space-y-2">
-                  <Label>Code postal</Label>
-                  <Input value={postalCode} onChange={(e) => setPostalCode(e.target.value)} placeholder="69001" />
-                </div>
-              </div>
+              <PostalCodeCityFields
+                city={city}
+                postalCode={postalCode}
+                onChange={(partial) => {
+                  if (partial.city !== undefined) setCity(partial.city);
+                  if (partial.postal_code !== undefined) setPostalCode(partial.postal_code);
+                }}
+                required
+                inputClassName=""
+              />
 
               {/* Date */}
               <div className="space-y-2">
