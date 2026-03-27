@@ -19,11 +19,7 @@ import {
 } from "@/components/ui/dialog";
 import { format, differenceInDays, parseISO } from "date-fns";
 import { fr } from "date-fns/locale";
-import {
-  AlertDialog, AlertDialogAction, AlertDialogCancel,
-  AlertDialogContent, AlertDialogDescription, AlertDialogFooter,
-  AlertDialogHeader, AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+import { Textarea } from "@/components/ui/textarea";
 
 interface ApplicationsListProps {
   sitId: string;
@@ -54,9 +50,17 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
       return stored ? new Set(JSON.parse(stored)) : new Set();
     } catch { return new Set(); }
   });
-  const [confirmApp, setConfirmApp] = useState<any>(null); // app to confirm
-  const [declineApp, setDeclineApp] = useState<any>(null); // app to decline
+  const [confirmApp, setConfirmApp] = useState<any>(null);
+  const [declineApp, setDeclineApp] = useState<any>(null);
+  const [declineMessage, setDeclineMessage] = useState("");
+  const [declineCustom, setDeclineCustom] = useState(false);
   const navigate = useNavigate();
+
+  const declineTemplates = [
+    "Merci pour votre candidature ! J'ai trouvé un gardien dont le profil correspondait davantage à mes besoins cette fois-ci. N'hésitez pas à postuler à mes prochaines annonces !",
+    "Merci de votre intérêt ! Les dates ne correspondent malheureusement pas tout à fait. J'espère qu'on pourra collaborer une prochaine fois !",
+    "Merci pour votre message ! J'ai choisi un gardien plus proche géographiquement pour cette garde. Bonne continuation sur Guardiens !",
+  ];
 
   const load = async () => {
     const { data } = await supabase
@@ -177,7 +181,7 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
     load();
   };
 
-  const handleDecline = async (app: any) => {
+  const handleDecline = async (app: any, message?: string) => {
     await supabase.from("applications").update({ status: "rejected" as any }).eq("id", app.id);
 
     if (user) {
@@ -188,18 +192,29 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
         .eq("sitter_id", app.sitter_id)
         .maybeSingle();
       if (rejConv) {
+        const systemMsg = "Votre candidature a été déclinée pour cette garde.";
         await supabase.from("messages").insert({
           conversation_id: rejConv.id,
           sender_id: user.id,
-          content: "Votre candidature a été déclinée pour cette garde. N'hésitez pas à postuler à d'autres annonces !",
+          content: systemMsg,
           is_system: true,
         });
+        if (message?.trim()) {
+          await supabase.from("messages").insert({
+            conversation_id: rejConv.id,
+            sender_id: user.id,
+            content: message.trim(),
+            is_system: false,
+          });
+        }
         await supabase.from("conversations").update({ updated_at: new Date().toISOString() }).eq("id", rejConv.id);
       }
     }
 
     toast({ title: "Candidature déclinée" });
     setDeclineApp(null);
+    setDeclineMessage("");
+    setDeclineCustom(false);
     load();
   };
 
@@ -476,26 +491,74 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
         </Dialog>
       )}
 
-      {/* ── Decline Confirmation ── */}
-      <AlertDialog open={!!declineApp} onOpenChange={() => setDeclineApp(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Décliner cette candidature ?</AlertDialogTitle>
-            <AlertDialogDescription>
-              {declineApp?.sitter?.first_name} sera notifié(e) que sa candidature a été déclinée.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Annuler</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={() => declineApp && handleDecline(declineApp)}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              Décliner
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      {/* ── Decline Dialog with message templates ── */}
+      {declineApp && (
+        <Dialog open={!!declineApp} onOpenChange={(o) => { if (!o) { setDeclineApp(null); setDeclineMessage(""); setDeclineCustom(false); } }}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="font-heading">Décliner cette candidature ?</DialogTitle>
+              <DialogDescription>
+                {declineApp.sitter?.first_name} sera notifié(e). Vous pouvez ajouter un message d'accompagnement.
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-3 mt-2">
+              <p className="text-sm font-medium text-foreground">Message d'accompagnement <span className="text-muted-foreground font-normal">(optionnel)</span></p>
+              
+              {declineTemplates.map((tpl, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  onClick={() => { setDeclineMessage(tpl); setDeclineCustom(false); }}
+                  className={`w-full text-left p-3 rounded-lg border text-sm transition-colors ${
+                    declineMessage === tpl && !declineCustom
+                      ? "border-primary bg-primary/5 text-foreground"
+                      : "border-border bg-card text-muted-foreground hover:border-primary/50"
+                  }`}
+                >
+                  {tpl}
+                </button>
+              ))}
+
+              <button
+                type="button"
+                onClick={() => { setDeclineCustom(true); if (declineTemplates.includes(declineMessage)) setDeclineMessage(""); }}
+                className={`w-full text-left p-3 rounded-lg border text-sm transition-colors ${
+                  declineCustom
+                    ? "border-primary bg-primary/5 text-foreground"
+                    : "border-border bg-card text-muted-foreground hover:border-primary/50"
+                }`}
+              >
+                ✏️ Écrire un message personnalisé
+              </button>
+
+              {declineCustom && (
+                <textarea
+                  value={declineMessage}
+                  onChange={(e) => setDeclineMessage(e.target.value)}
+                  placeholder="Votre message au gardien…"
+                  maxLength={300}
+                  rows={3}
+                  className="w-full rounded-lg border border-border bg-background p-3 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary/30"
+                />
+              )}
+            </div>
+
+            <div className="flex justify-end gap-2 mt-4">
+              <Button variant="outline" onClick={() => { setDeclineApp(null); setDeclineMessage(""); setDeclineCustom(false); }}>
+                Annuler
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={() => handleDecline(declineApp, declineMessage)}
+                className="gap-2"
+              >
+                <XCircle className="h-4 w-4" /> Décliner
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 };
