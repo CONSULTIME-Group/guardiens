@@ -422,7 +422,7 @@ export default function ArticleDetail() {
         </div>
       )}
 
-      <ArticleRenderer content={article.content} />
+      <ArticleRenderer content={article.content} userRole={isAuthenticated ? user?.role : undefined} />
 
       {/* Cross-links to city pages */}
       {(cityGuideSlug || cityPageSlug) && (
