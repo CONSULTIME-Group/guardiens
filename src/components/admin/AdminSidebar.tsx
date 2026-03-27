@@ -90,16 +90,18 @@ export const AdminSidebar = () => {
         { count: pendingVerifications },
         { count: pendingExperiences },
         { count: pendingReports },
+        { count: newContactMessages },
       ] = await Promise.all([
         supabase.from("profiles").select("id", { count: "exact", head: true }).eq("identity_verification_status", "pending"),
         supabase.from("external_experiences").select("id", { count: "exact", head: true }).eq("verification_status", "pending"),
         supabase.from("reports").select("id", { count: "exact", head: true }).eq("status", "new"),
+        supabase.from("contact_messages").select("id", { count: "exact", head: true }).eq("status", "new"),
       ]);
       setBadges({
         verifications: pendingVerifications || 0,
         experiences: pendingExperiences || 0,
         reports: pendingReports || 0,
-        contactMessages: 0,
+        contactMessages: newContactMessages || 0,
       });
     };
     fetchBadges();
