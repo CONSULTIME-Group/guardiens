@@ -1,11 +1,11 @@
 import { useState, useRef } from "react";
-import { usePostalCodeCity } from "@/hooks/usePostalCodeCity";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Camera } from "lucide-react";
 import HintBubble from "../profile/HintBubble";
 import AiSuggestButton from "../profile/AiSuggestButton";
+import PostalCodeCityFields from "../profile/PostalCodeCityFields";
 import type { OwnerProfileData } from "@/hooks/useOwnerProfile";
 
 interface Props {
