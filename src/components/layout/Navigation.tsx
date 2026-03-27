@@ -138,7 +138,7 @@ export const Sidebar = () => {
       {/* Bottom section */}
       <div className="p-3 border-t border-border space-y-0.5">
         {effectiveRole === "sitter" && (
-          <SidebarItem to="/pricing" icon={Star} label="Mon abonnement" />
+          <SidebarItem to="/mon-abonnement" icon={Star} label="Mon abonnement" />
         )}
         {isAdmin && (
           <SidebarItem to="/admin" icon={Shield} label="Espace admin" />
