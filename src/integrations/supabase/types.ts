@@ -86,6 +86,7 @@ export type Database = {
       articles: {
         Row: {
           author_name: string
+          canonical_url: string | null
           category: string
           city: string | null
           content: string
@@ -107,6 +108,7 @@ export type Database = {
         }
         Insert: {
           author_name?: string
+          canonical_url?: string | null
           category?: string
           city?: string | null
           content?: string
@@ -128,6 +130,7 @@ export type Database = {
         }
         Update: {
           author_name?: string
+          canonical_url?: string | null
           category?: string
           city?: string | null
           content?: string
