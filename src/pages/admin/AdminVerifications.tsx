@@ -74,6 +74,7 @@ const AdminVerifications = () => {
     });
     toast.success("Identité validée ✅");
     fetchQueue();
+    window.dispatchEvent(new Event("admin-badges-refresh"));
   };
 
   const handleReject = async () => {
@@ -98,6 +99,7 @@ const AdminVerifications = () => {
     toast.success("Document refusé");
     setRejectModal({ open: false, userId: "", reason: "", customReason: "" });
     fetchQueue();
+    window.dispatchEvent(new Event("admin-badges-refresh"));
   };
 
   const handleRequestResend = async (userId: string) => {
@@ -110,6 +112,7 @@ const AdminVerifications = () => {
     });
     toast.success("Demande de nouveau document envoyée");
     fetchQueue();
+    window.dispatchEvent(new Event("admin-badges-refresh"));
   };
 
   const rejectionReasons = ["Photo floue", "Document expiré", "Selfie ne correspond pas", "Document non conforme", "Autre"];
