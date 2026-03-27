@@ -111,9 +111,12 @@ const SuggestedMessages = ({
 };
 
 const Messages = () => {
-  const { user } = useAuth();
+  const { user, activeRole } = useAuth();
   const isMobile = useIsMobile();
   const { toast } = useToast();
+  const navigate = useNavigate();
+  const { hasAccess, loading: subLoading } = useSubscriptionAccess();
+  const effectiveRole = user?.role === "both" ? activeRole : user?.role;
   const [searchParams, setSearchParams] = useSearchParams();
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [activeConv, setActiveConv] = useState<Conversation | null>(null);
