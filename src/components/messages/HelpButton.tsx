@@ -4,18 +4,23 @@ import { Button } from "@/components/ui/button";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
-import { AlertTriangle, PawPrint, Home, Phone, Zap } from "lucide-react";
+import { AlertTriangle, PawPrint, Home, Phone, Zap, CheckCircle2, Loader2 } from "lucide-react";
 import { Link } from "react-router-dom";
+import { toast } from "@/hooks/use-toast";
 
 interface HelpButtonProps {
   propertyId: string;
   ownerId: string;
   ownerName: string;
+  sitId?: string;
+  sitCity?: string;
 }
 
-const HelpButton = ({ propertyId, ownerId, ownerName }: HelpButtonProps) => {
+const HelpButton = ({ propertyId, ownerId, ownerName, sitId, sitCity }: HelpButtonProps) => {
   const [open, setOpen] = useState(false);
   const [guide, setGuide] = useState<any>(null);
+  const [alerting, setAlerting] = useState(false);
+  const [alerted, setAlerted] = useState(false);
 
   useEffect(() => {
     if (!open || !propertyId) return;
@@ -26,6 +31,31 @@ const HelpButton = ({ propertyId, ownerId, ownerName }: HelpButtonProps) => {
       .maybeSingle()
       .then(({ data }) => setGuide(data));
   }, [open, propertyId]);
+
+  const handleAlertEmergencySitters = async () => {
+    if (!sitId || !sitCity || alerting || alerted) return;
+    setAlerting(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("alert-emergency-sitters", {
+        body: { sitId, sitCity },
+      });
+      if (error) throw error;
+      const count = data?.alerted || 0;
+      setAlerted(true);
+      toast({
+        title: count > 0
+          ? `${count} gardien${count > 1 ? "s" : ""} d'urgence alerté${count > 1 ? "s" : ""} ⚡`
+          : "Aucun gardien d'urgence disponible dans votre zone",
+        description: count > 0
+          ? "Ils recevront une notification et pourront vous contacter."
+          : "Essayez la recherche manuelle pour élargir le périmètre.",
+      });
+    } catch {
+      toast({ title: "Erreur", description: "Impossible d'alerter les gardiens.", variant: "destructive" });
+    } finally {
+      setAlerting(false);
+    }
+  };
 
   const options = [
     {
@@ -107,11 +137,30 @@ const HelpButton = ({ propertyId, ownerId, ownerName }: HelpButtonProps) => {
       content: (
         <div className="space-y-3 text-sm">
           <p className="text-muted-foreground">
-            Besoin d'un remplaçant rapidement ? Les gardiens d'urgence sont des membres expérimentés mobilisables en quelques heures.
+            Besoin d'un remplaçant rapidement ? Les gardiens d'urgence sont des membres expérimentés mobilisables en quelques heures dans un rayon de 35 km.
           </p>
+
+          {sitId && sitCity && (
+            <Button
+              size="sm"
+              variant={alerted ? "outline" : "default"}
+              className="gap-1.5 w-full"
+              disabled={alerting || alerted}
+              onClick={handleAlertEmergencySitters}
+            >
+              {alerting ? (
+                <><Loader2 className="h-3.5 w-3.5 animate-spin" /> Envoi en cours…</>
+              ) : alerted ? (
+                <><CheckCircle2 className="h-3.5 w-3.5 text-green-500" /> Gardiens alertés ✓</>
+              ) : (
+                <><Zap className="h-3.5 w-3.5" /> Alerter les gardiens d'urgence à proximité</>
+              )}
+            </Button>
+          )}
+
           <Link to="/search?emergency=true" onClick={() => setOpen(false)}>
-            <Button size="sm" className="gap-1.5 w-full">
-              <Zap className="h-3.5 w-3.5" /> Chercher un gardien d'urgence
+            <Button size="sm" variant="outline" className="gap-1.5 w-full">
+              <Zap className="h-3.5 w-3.5" /> Rechercher manuellement
             </Button>
           </Link>
         </div>
@@ -127,7 +176,7 @@ const HelpButton = ({ propertyId, ownerId, ownerName }: HelpButtonProps) => {
         variant="outline"
         size="sm"
         className="gap-1.5 border-destructive/30 text-destructive hover:bg-destructive/10 hover:text-destructive"
-        onClick={() => { setOpen(true); setActiveOption(null); }}
+        onClick={() => { setOpen(true); setActiveOption(null); setAlerted(false); }}
       >
         <AlertTriangle className="h-3.5 w-3.5" />
         Besoin d'aide

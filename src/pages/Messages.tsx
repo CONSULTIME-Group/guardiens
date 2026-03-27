@@ -22,7 +22,7 @@ interface Conversation {
   updated_at: string;
   archived_by: string[];
   sit?: { title: string; status: string; property_id: string } | null;
-  other_user?: { id: string; first_name: string; avatar_url: string | null; identity_verified: boolean } | null;
+  other_user?: { id: string; first_name: string; avatar_url: string | null; identity_verified: boolean; city?: string | null } | null;
   last_message?: { content: string; created_at: string; sender_id: string } | null;
   unread_count: number;
   application_status?: string | null;
@@ -153,7 +153,7 @@ const Messages = () => {
     const sitIds = convs.map((conv: any) => conv.sit_id).filter(Boolean);
 
     const [profilesRes, allLastMsgsRes, allUnreadRes, applicationsRes, badgesRes] = await Promise.all([
-      supabase.from("profiles").select("id, first_name, avatar_url, identity_verified").in("id", otherIds),
+      supabase.from("profiles").select("id, first_name, avatar_url, identity_verified, city").in("id", otherIds),
       supabase.from("messages").select("conversation_id, content, created_at, sender_id").in("conversation_id", convIds).order("created_at", { ascending: false }),
       supabase.from("messages").select("conversation_id, id").in("conversation_id", convIds).neq("sender_id", user.id).is("read_at", null),
       sitIds.length > 0
@@ -616,6 +616,8 @@ const Messages = () => {
                   propertyId={activeConv.sit.property_id}
                   ownerId={activeConv.owner_id}
                   ownerName={activeConv.other_user?.first_name || "le propriétaire"}
+                  sitId={activeConv.sit_id || undefined}
+                  sitCity={activeConv.other_user?.city || undefined}
                 />
               )}
             </div>
@@ -633,6 +635,8 @@ const Messages = () => {
                   propertyId={activeConv.sit.property_id}
                   ownerId={activeConv.owner_id}
                   ownerName={activeConv.other_user?.first_name || "le propriétaire"}
+                  sitId={activeConv.sit_id || undefined}
+                  sitCity={activeConv.other_user?.city || undefined}
                 />
               )}
             </div>
