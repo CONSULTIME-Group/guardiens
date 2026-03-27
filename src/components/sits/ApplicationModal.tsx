@@ -186,7 +186,13 @@ const ApplicationModal = ({
 
               {/* Badges */}
               {sitterInfo.badgeCounts.length > 0 && (
-                <BadgePills badges={sitterInfo.badgeCounts} max={3} size="sm" />
+                <TooltipProvider>
+                  <div className="flex gap-1.5">
+                    {sitterInfo.badgeCounts.slice(0, 3).map((b: any) => (
+                      <BadgeShield key={b.badge_key} badgeKey={b.badge_key} count={b.count} size="sm" showLabel={false} />
+                    ))}
+                  </div>
+                </TooltipProvider>
               )}
 
               {/* Mini gallery */}

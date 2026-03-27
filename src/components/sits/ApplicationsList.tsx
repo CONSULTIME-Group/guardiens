@@ -291,9 +291,13 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
 
                     {/* Badges */}
                     {app.badgeCounts && app.badgeCounts.length > 0 && (
-                      <div className="mt-1.5">
-                        <BadgePills badges={app.badgeCounts} max={3} size="sm" />
-                      </div>
+                      <TooltipProvider>
+                        <div className="mt-1.5 flex gap-1.5">
+                          {app.badgeCounts.slice(0, 3).map((b: any) => (
+                            <BadgeShield key={b.badge_key} badgeKey={b.badge_key} count={b.count} size="sm" showLabel={false} />
+                          ))}
+                        </div>
+                      </TooltipProvider>
                     )}
 
                     {/* Verified experiences */}
