@@ -126,10 +126,15 @@ const SmallMissionDetail = () => {
   };
 
   const handleAcceptResponse = async (responseId: string) => {
+    const resp = responses.find(r => r.id === responseId);
     await supabase.from("small_mission_responses").update({ status: "accepted" as any }).eq("id", responseId);
     await supabase.from("small_missions").update({ status: "in_progress" as any }).eq("id", id!);
     setMission({ ...mission, status: "in_progress" });
     setResponses(prev => prev.map(r => r.id === responseId ? { ...r, status: "accepted" } : r));
+    if (resp) {
+      setAcceptedResponderId(resp.responder_id);
+      setAcceptedResponderName(resp.responder?.first_name || "l'aidant");
+    }
     toast({ title: "Proposition acceptée !" });
   };
 
@@ -138,16 +143,28 @@ const SmallMissionDetail = () => {
     setResponses(prev => prev.map(r => r.id === responseId ? { ...r, status: "declined" } : r));
   };
 
+  const openFeedbackFor = (receiverId: string, receiverName: string) => {
+    setFeedbackTarget({ id: receiverId, name: receiverName });
+    setFeedbackOpen(true);
+  };
+
   const handleComplete = async () => {
     await supabase.from("small_missions").update({ status: "completed" as any }).eq("id", id!);
     setMission({ ...mission, status: "completed" });
     toast({ title: "Mission terminée !", description: "Merci pour l'entraide 🙌" });
+    // Open feedback modal for author → responder
+    if (acceptedResponderId) {
+      openFeedbackFor(acceptedResponderId, acceptedResponderName);
+    }
   };
 
   const handleClose = async () => {
     await supabase.from("small_missions").update({ status: "completed" as any }).eq("id", id!);
     setMission({ ...mission, status: "completed" });
     toast({ title: "Mission fermée", description: "Vous avez trouvé quelqu'un — super ! 🎉" });
+    if (acceptedResponderId) {
+      openFeedbackFor(acceptedResponderId, acceptedResponderName);
+    }
   };
 
   if (loading) return <div className="p-6 md:p-10 text-muted-foreground">Chargement...</div>;
