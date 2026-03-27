@@ -87,7 +87,7 @@ const EmergencyDashSection = () => {
           <p>🐾 {(profile.animal_types as string[])?.join(", ") || "Tous"}</p>
           <p>{profile.sms_alerts ? "📱 Alertes SMS activées" : "📱 Alertes SMS désactivées"}</p>
           {(profile as any).interventions_count > 0 && (
-            <p>⚡ {(profile as any).interventions_count} intervention{(profile as any).interventions_count > 1 ? "s" : ""} — {(profile as any).interventions_count} mois offert{(profile as any).interventions_count > 1 ? "s" : ""}</p>
+            <p>⚡ {(profile as any).interventions_count} intervention{(profile as any).interventions_count > 1 ? "s" : ""} — {(profile as any).interventions_count * 3} mois offert{(profile as any).interventions_count * 3 > 1 ? "s" : ""}</p>
           )}
         </div>
       )}
@@ -104,7 +104,7 @@ const EmergencyDashSection = () => {
           <div className="space-y-5 mt-2">
             <div>
               <label className="text-sm font-medium mb-1.5 block">Rayon : {radius[0]} km</label>
-              <Slider value={radius} onValueChange={setRadius} min={5} max={30} step={5} />
+              <Slider value={radius} onValueChange={setRadius} min={5} max={35} step={5} />
             </div>
             <div>
               <label className="text-sm font-medium mb-1.5 block">Animaux acceptés</label>

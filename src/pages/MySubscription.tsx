@@ -167,7 +167,7 @@ const MySubscription = () => {
           {emergencyInfo && emergencyInfo.interventions > 0 && (
             <div className="rounded-lg border border-border bg-card p-4 text-sm">
               <Zap className="h-4 w-4 text-amber-500 inline mr-1.5" />
-              Gardien d'urgence — {emergencyInfo.interventions} intervention{emergencyInfo.interventions > 1 ? "s" : ""} → {emergencyInfo.interventions} mois offert{emergencyInfo.interventions > 1 ? "s" : ""}
+              Gardien d'urgence — {emergencyInfo.interventions} intervention{emergencyInfo.interventions > 1 ? "s" : ""} → {emergencyInfo.interventions * 3} mois offert{emergencyInfo.interventions * 3 > 1 ? "s" : ""}
             </div>
           )}
 
@@ -197,7 +197,7 @@ const MySubscription = () => {
           {emergencyInfo && emergencyInfo.interventions > 0 && (
             <div className="rounded-lg border border-border bg-card p-4 text-sm">
               <Zap className="h-4 w-4 text-amber-500 inline mr-1.5" />
-              Gardien d'urgence — {emergencyInfo.interventions} intervention{emergencyInfo.interventions > 1 ? "s" : ""} → {emergencyInfo.interventions} mois offert{emergencyInfo.interventions > 1 ? "s" : ""}
+              Gardien d'urgence — {emergencyInfo.interventions} intervention{emergencyInfo.interventions > 1 ? "s" : ""} → {emergencyInfo.interventions * 3} mois offert{emergencyInfo.interventions * 3 > 1 ? "s" : ""}
             </div>
           )}
 

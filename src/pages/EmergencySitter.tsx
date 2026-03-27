@@ -14,7 +14,7 @@ const steps = [
   {
     icon: Bell,
     title: "Les gardiens d'urgence sont alertés",
-    desc: "Notification prioritaire envoyée aux gardiens d'urgence disponibles dans le rayon.",
+    desc: "Notification automatique envoyée aux gardiens d'urgence disponibles dans un rayon de 35 km.",
     color: "text-primary",
     bg: "bg-primary/10",
   },
@@ -30,7 +30,7 @@ const steps = [
 const ownerCards = [
   { icon: Clock, title: "Mobilisable en quelques heures", desc: "Pas besoin d'attendre des jours. Les gardiens d'urgence répondent vite." },
   { icon: Shield, title: "Vérifié et expérimenté", desc: "3+ gardes réalisées, note 4.7+, 0 annulation, identité vérifiée." },
-  { icon: MapPin, title: "Près de chez vous", desc: "La force de la proximité : quelqu'un de confiance dans votre zone." },
+  { icon: MapPin, title: "Près de chez vous", desc: "Sollicités automatiquement dans un rayon de 35 km du lieu de garde." },
 ];
 
 const conditions = [
@@ -46,7 +46,7 @@ const advantages = [
   "Alertes urgentes reçues en premier",
   "Accès anticipé aux gardes longue durée",
   "Écusson distinctif « Gardien d'urgence »",
-  "1 mois d'abonnement offert par intervention",
+  "3 mois d'abonnement offerts par intervention",
 ];
 
 const EmergencySitter = () => {
@@ -203,7 +203,7 @@ const EmergencySitter = () => {
               },
               {
                 q: "Est-ce que le gardien d'urgence est payé plus ?",
-                a: "Non, pas d'échange d'argent. Mais chaque intervention vous offre 1 mois d'abonnement gratuit. Plus la visibilité prioritaire et l'accès anticipé aux gardes longue durée."
+                a: "Non, pas d'échange d'argent. Mais chaque intervention vous offre 3 mois d'abonnement gratuit. Plus la visibilité prioritaire et l'accès anticipé aux gardes longue durée."
               },
               {
                 q: "Que se passe-t-il si je refuse une demande d'urgence ?",

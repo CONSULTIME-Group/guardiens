@@ -44,7 +44,7 @@ const EmergencyActivation = ({ onActivated }: EmergencyActivationProps) => {
     <div className="space-y-5">
       <div>
         <label className="text-sm font-medium mb-1.5 block">Rayon d'intervention : {radius[0]} km</label>
-        <Slider value={radius} onValueChange={setRadius} min={5} max={30} step={5} />
+        <Slider value={radius} onValueChange={setRadius} min={5} max={35} step={5} />
       </div>
 
       <div>
