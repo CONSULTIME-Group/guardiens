@@ -185,7 +185,7 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
     load();
   };
 
-  const handleDecline = async (app: any) => {
+  const handleDecline = async (app: any, message?: string) => {
     await supabase.from("applications").update({ status: "rejected" as any }).eq("id", app.id);
 
     if (user) {
@@ -196,18 +196,29 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
         .eq("sitter_id", app.sitter_id)
         .maybeSingle();
       if (rejConv) {
+        const systemMsg = "Votre candidature a été déclinée pour cette garde.";
         await supabase.from("messages").insert({
           conversation_id: rejConv.id,
           sender_id: user.id,
-          content: "Votre candidature a été déclinée pour cette garde. N'hésitez pas à postuler à d'autres annonces !",
+          content: systemMsg,
           is_system: true,
         });
+        if (message?.trim()) {
+          await supabase.from("messages").insert({
+            conversation_id: rejConv.id,
+            sender_id: user.id,
+            content: message.trim(),
+            is_system: false,
+          });
+        }
         await supabase.from("conversations").update({ updated_at: new Date().toISOString() }).eq("id", rejConv.id);
       }
     }
 
     toast({ title: "Candidature déclinée" });
     setDeclineApp(null);
+    setDeclineMessage("");
+    setDeclineCustom(false);
     load();
   };
 
