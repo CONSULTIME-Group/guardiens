@@ -261,7 +261,7 @@
 
   .article-cta-btn-primary {
     background: hsl(var(--primary));
-    color: hsl(var(--primary-foreground));
+    color: white;
   }
   .article-cta-btn-primary:hover {
     opacity: 0.9;
@@ -274,7 +274,7 @@
     border: 1.5px solid hsl(var(--primary) / 0.3);
   }
   .article-cta-btn-secondary:hover {
-    background: hsl(var(--primary) / 0.05);
+    background: hsl(var(--primary) / 0.08);
   }
 
   /* Fact box "Le saviez-vous" */
