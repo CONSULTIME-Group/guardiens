@@ -523,7 +523,7 @@ const SitDetail = () => {
               </Button>
             ) : !subHasAccess ? (
               <Button className="w-full h-12 text-base font-semibold bg-amber-600 hover:bg-amber-700 text-white" onClick={() => navigate("/mon-abonnement")}>
-                <Lock className="h-5 w-5 mr-2" /> Abonnez-vous pour postuler — 49€/an
+                <LockKeyhole className="h-5 w-5 mr-2" /> Abonnez-vous pour postuler — 49€/an
               </Button>
             ) : (
               <Button className="w-full h-12 text-base font-semibold" onClick={() => setApplyOpen(true)}>
