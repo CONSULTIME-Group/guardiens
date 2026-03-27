@@ -138,7 +138,7 @@ export const Sidebar = () => {
       {/* Bottom section */}
       <div className="p-3 border-t border-border space-y-0.5">
         {effectiveRole === "sitter" && (
-          <SidebarItem to="/pricing" icon={Star} label="Mon abonnement" />
+          <SidebarItem to="/mon-abonnement" icon={Star} label="Mon abonnement" />
         )}
         {isAdmin && (
           <SidebarItem to="/admin" icon={Shield} label="Espace admin" />
@@ -263,7 +263,7 @@ export const BottomNav = () => {
                 { to: "/petites-missions", icon: Handshake, label: "Petites missions" },
                 { to: "/actualites", icon: Newspaper, label: "Actualités" },
                 { to: "/guides", icon: Compass, label: "Guides locaux" },
-                ...(effectiveRole === "sitter" ? [{ to: "/pricing", icon: Star, label: "Mon abonnement" }] : []),
+                ...(effectiveRole === "sitter" ? [{ to: "/mon-abonnement", icon: Star, label: "Mon abonnement" }] : []),
                 { to: "/settings", icon: Settings, label: "Paramètres" },
                 ...(isAdmin ? [{ to: "/admin", icon: Shield, label: "Espace admin" }] : []),
               ].map((item) => (
