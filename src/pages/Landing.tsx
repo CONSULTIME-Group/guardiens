@@ -88,25 +88,6 @@ const steps = [
 const Landing = () => {
   const navigate = useNavigate();
   const [latestArticles, setLatestArticles] = useState<any[]>([]);
-  const [email, setEmail] = "";
-
-  useEffect(() => {
-    supabase
-      .from("articles")
-      .select("id,title,slug,excerpt,cover_image_url,category,published_at")
-      .eq("published", true)
-      .order("published_at", { ascending: false })
-      .limit(3)
-      .then(({ data }) => setLatestArticles(data || []));
-  }, []);
-
-  const handleEmailSignup = (emailValue: string) => {
-    if (!emailValue.trim()) {
-      toast.error("Veuillez entrer votre email.");
-      return;
-    }
-    navigate(`/register?email=${encodeURIComponent(emailValue)}`);
-  };
 
   return (
     <div className="min-h-screen bg-background text-foreground">
