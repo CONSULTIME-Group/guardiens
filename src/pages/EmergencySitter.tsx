@@ -29,7 +29,7 @@ const steps = [
 
 const ownerCards = [
   { icon: Clock, title: "Mobilisable en quelques heures", desc: "Pas besoin d'attendre des jours. Les gardiens d'urgence répondent vite." },
-  { icon: Shield, title: "Vérifié et expérimenté", desc: "5+ gardes réalisées, note 4.7+, 0 annulation, identité vérifiée." },
+  { icon: Shield, title: "Vérifié et expérimenté", desc: "3+ gardes réalisées, note 4.7+, 0 annulation, identité vérifiée." },
   { icon: MapPin, title: "Près de chez vous", desc: "La force de la proximité : quelqu'un de confiance dans votre zone." },
 ];
 
