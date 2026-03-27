@@ -251,43 +251,35 @@ const Pricing = () => {
             </p>
           </section>
 
-          {/* Comparison Table */}
+          {/* Strengths Grid */}
           <section className="space-y-6">
-            <h2 className="font-heading text-2xl font-bold text-foreground text-center">Comparez en toute transparence</h2>
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-1/4"></TableHead>
-                    <TableHead className="text-center font-bold text-primary">Guardiens</TableHead>
-                    <TableHead className="text-center">TrustedHousesitters</TableHead>
-                    <TableHead className="text-center">Nomador</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {comparisonRows.map((row) => (
-                    <TableRow key={row.label}>
-                      <TableCell className="font-medium">{row.label}</TableCell>
-                      <TableCell className="text-center">
-                        <CellValue value={row.guardiens} />
-                      </TableCell>
-                      <TableCell className="text-center">
-                        <CellValue value={row.trusted} />
-                      </TableCell>
-                      <TableCell className="text-center">
-                        <CellValue value={row.nomador} />
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+            <h2 className="font-heading text-2xl font-bold text-foreground text-center">Tout ça, c'est Guardiens</h2>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+              {strengthBlocks.map((block) => (
+                <Card key={block.title} className="border-border">
+                  <CardContent className="pt-6 space-y-3">
+                    <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                      <block.icon className="h-5 w-5 text-primary" />
+                    </div>
+                    <h3 className="font-heading font-bold text-foreground">{block.title}</h3>
+                    <p className="text-sm text-muted-foreground leading-relaxed">{block.desc}</p>
+                  </CardContent>
+                </Card>
+              ))}
             </div>
-            <p className="text-xs text-muted-foreground text-center max-w-3xl mx-auto">
-              Comparaison réalisée de bonne foi à titre informatif, sur la base des tarifs publics affichés sur les sites respectifs en mars 2026. Elle ne constitue ni un dénigrement ni une publicité comparative au sens de l'article L. 122-1 du Code de la consommation. TrustedHousesitters facture en dollars US — les prix en euros varient selon le taux de change. Nomador propose des formules trimestrielles et annuelles. Les fonctionnalités listées reflètent les offres publiquement disponibles à la date indiquée et peuvent évoluer. Sources :{" "}
-              <a href="https://www.trustedhousesitters.com/pricing" target="_blank" rel="noopener noreferrer" className="underline">trustedhousesitters.com/pricing</a>,{" "}
-              <a href="https://www.nomador.com/tarifs" target="_blank" rel="noopener noreferrer" className="underline">nomador.com/tarifs</a>. Si vous constatez une inexactitude, merci de nous contacter à{" "}
-              <a href="mailto:contact@guardiens.fr" className="underline">contact@guardiens.fr</a>.
-            </p>
+          </section>
+
+          {/* Promise */}
+          <section className="max-w-2xl mx-auto space-y-6 text-center">
+            <h2 className="font-heading text-2xl font-bold text-foreground">Notre promesse — Simple, honnête, et c'est tout</h2>
+            <ul className="space-y-3 text-left">
+              {promisePoints.map((point) => (
+                <li key={point} className="flex items-start gap-2.5 text-sm">
+                  <Check className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+                  <span className="text-foreground">{point}</span>
+                </li>
+              ))}
+            </ul>
           </section>
 
           {/* FAQ */}
