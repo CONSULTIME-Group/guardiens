@@ -415,7 +415,7 @@ const SitterDashboard = () => {
                 </Link>
               );
             })}
-            {smallMissions.map((m: any) => <MissionCard key={m.id} mission={m} />)}
+            {smallMissions.filter((m: any) => m.user_id !== user!.id && !myMissions.some((mm: any) => mm.id === m.id)).map((m: any) => <MissionCard key={m.id} mission={m} />)}
           </div>
         )}
       </DashSection>
