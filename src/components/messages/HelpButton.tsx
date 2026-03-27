@@ -4,7 +4,8 @@ import { Button } from "@/components/ui/button";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
-import { AlertTriangle, PawPrint, Home, Phone } from "lucide-react";
+import { AlertTriangle, PawPrint, Home, Phone, Zap } from "lucide-react";
+import { Link } from "react-router-dom";
 
 interface HelpButtonProps {
   propertyId: string;
@@ -96,6 +97,23 @@ const HelpButton = ({ propertyId, ownerId, ownerName }: HelpButtonProps) => {
           <p className="text-xs text-muted-foreground">
             En cas d'urgence grave (incendie, accident), appelez d'abord les secours (15, 18 ou 112).
           </p>
+        </div>
+      ),
+    },
+    {
+      icon: Zap,
+      label: "Trouver un gardien d'urgence",
+      color: "text-amber-600",
+      content: (
+        <div className="space-y-3 text-sm">
+          <p className="text-muted-foreground">
+            Besoin d'un remplaçant rapidement ? Les gardiens d'urgence sont des membres expérimentés mobilisables en quelques heures.
+          </p>
+          <Link to="/search?emergency=true" onClick={() => setOpen(false)}>
+            <Button size="sm" className="gap-1.5 w-full">
+              <Zap className="h-3.5 w-3.5" /> Chercher un gardien d'urgence
+            </Button>
+          </Link>
         </div>
       ),
     },

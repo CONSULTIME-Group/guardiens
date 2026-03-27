@@ -1,0 +1,1 @@
+UPDATE sits SET status = 'published' WHERE id = 'fddf8f90-706c-4d7d-9d59-4cb6044945e0'
