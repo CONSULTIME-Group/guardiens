@@ -46,7 +46,7 @@ const advantages = [
   "Alertes urgentes reçues en premier",
   "Accès anticipé aux gardes longue durée",
   "Écusson distinctif « Gardien d'urgence »",
-  "1 mois d'abonnement offert par intervention",
+  "3 mois d'abonnement offerts par intervention",
 ];
 
 const EmergencySitter = () => {
