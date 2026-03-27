@@ -263,7 +263,7 @@ export const BottomNav = () => {
                 { to: "/petites-missions", icon: Handshake, label: "Petites missions" },
                 { to: "/actualites", icon: Newspaper, label: "Actualités" },
                 { to: "/guides", icon: Compass, label: "Guides locaux" },
-                ...(effectiveRole === "sitter" ? [{ to: "/pricing", icon: Star, label: "Mon abonnement" }] : []),
+                ...(effectiveRole === "sitter" ? [{ to: "/mon-abonnement", icon: Star, label: "Mon abonnement" }] : []),
                 { to: "/settings", icon: Settings, label: "Paramètres" },
                 ...(isAdmin ? [{ to: "/admin", icon: Shield, label: "Espace admin" }] : []),
               ].map((item) => (
