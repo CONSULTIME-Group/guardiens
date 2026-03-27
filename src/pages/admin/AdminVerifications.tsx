@@ -7,7 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { format } from "date-fns";
+import { format, startOfWeek } from "date-fns";
 import { fr } from "date-fns/locale";
 import { ShieldCheck, ShieldX, RotateCcw, Clock, CheckCircle2, XCircle, AlertTriangle } from "lucide-react";
 
@@ -30,11 +30,11 @@ const AdminVerifications = () => {
     setQueue(data || []);
 
     // Fetch metrics
-    const weekAgo = new Date(Date.now() - 7 * 86400000).toISOString();
+    const weekStart = startOfWeek(new Date(), { weekStartsOn: 1 }).toISOString();
     const [pendingRes, verifiedRes, rejectedRes] = await Promise.all([
       supabase.from("profiles").select("id", { count: "exact", head: true }).eq("identity_verification_status", "pending"),
-      supabase.from("identity_verification_logs").select("id", { count: "exact", head: true }).eq("result", "verified").gte("created_at", weekAgo),
-      supabase.from("identity_verification_logs").select("id", { count: "exact", head: true }).eq("result", "rejected").gte("created_at", weekAgo),
+      supabase.from("profiles").select("id", { count: "exact", head: true }).eq("identity_verification_status", "verified").gte("updated_at", weekStart),
+      supabase.from("profiles").select("id", { count: "exact", head: true }).eq("identity_verification_status", "rejected").gte("updated_at", weekStart),
     ]);
     setMetrics({
       pending: pendingRes.count || 0,
