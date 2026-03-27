@@ -7,7 +7,9 @@ import { Check, X, Star, Gift } from "lucide-react";
 import PageMeta from "@/components/PageMeta";
 
 const LAUNCH_DATE = new Date("2026-05-13T00:00:00");
+const GRACE_END = new Date("2026-06-13T00:00:00");
 const isBeforeLaunch = () => new Date() < LAUNCH_DATE;
+const isInGracePeriod = () => { const n = new Date(); return n >= LAUNCH_DATE && n < GRACE_END; };
 
 const ownerFeatures = [
   "Créer votre profil complet",
@@ -62,8 +64,8 @@ const faqItems = [
     a: "C'est l'anniversaire de Jérémie, cofondateur de Guardiens. Il a préféré offrir l'accès gratuit à la communauté plutôt que recevoir des chaussettes. Les inscrits avant cette date reçoivent le badge Fondateur et 1 an d'accès gratuit.",
   },
   {
-    q: "Que se passe-t-il quand mon année gratuite expire ?",
-    a: "Vous recevez un rappel 30 jours avant. Vous pouvez renouveler pour 49€/an. Votre profil, vos avis et votre historique sont conservés. Vos gardes en cours ne sont pas affectées.",
+    q: "Que se passe-t-il après le 13 mai pour les Fondateurs ?",
+    a: "Les Fondateurs (inscrits avant le 13 mai) conservent un accès gratuit jusqu'au 13 juin 2026 — un mois de grâce pour décider. Après le 13 juin, l'abonnement à 49€/an est nécessaire pour garder l'accès complet. Le badge Fondateur reste à vie dans tous les cas.",
   },
   {
     q: "Est-ce que 49€/an c'est rentable ?",
@@ -90,7 +92,7 @@ const CellValue = ({ value }: { value: boolean | string }) => {
 
 const Pricing = () => {
   const before = isBeforeLaunch();
-
+  const grace = isInGracePeriod();
   return (
     <>
       <PageMeta
@@ -142,11 +144,11 @@ const Pricing = () => {
             >
               <div className="flex items-center justify-center gap-2">
                 <Star className="h-6 w-6" style={{ color: "hsl(24 36% 60%)" }} fill="hsl(24 36% 60%)" />
-                <h2 className="font-heading text-2xl font-bold text-foreground">Gratuit jusqu'au 13 mai 2026</h2>
+                <h2 className="font-heading text-2xl font-bold text-foreground">Inscrivez-vous avant le 13 mai 2026</h2>
                 <Star className="h-6 w-6" style={{ color: "hsl(24 36% 60%)" }} fill="hsl(24 36% 60%)" />
               </div>
               <p className="text-muted-foreground max-w-2xl mx-auto">
-                Inscrivez-vous avant le 13 mai et profitez d'1 an d'accès gratuit + le badge Fondateur à vie.
+                Badge Fondateur à vie + accès gratuit jusqu'au 13 juin 2026 (1 mois de grâce après le lancement).
                 Pourquoi le 13 mai ? C'est l'anniversaire de Jérémie, cofondateur de Guardiens.
                 Et comme cadeau, il préfère vous offrir l'accès gratuit plutôt que recevoir des chaussettes.
               </p>
@@ -156,6 +158,27 @@ const Pricing = () => {
                   En profiter avant le 13 mai
                 </Button>
               </Link>
+            </section>
+          )}
+
+          {/* Grace period banner (between May 13 and June 13) */}
+          {grace && (
+            <section
+              className="rounded-2xl p-6 md:p-8 text-center space-y-4 border-2"
+              style={{
+                backgroundColor: "hsl(45 100% 96%)",
+                borderColor: "hsl(24 36% 60%)",
+              }}
+            >
+              <div className="flex items-center justify-center gap-2">
+                <Star className="h-6 w-6" style={{ color: "hsl(24 36% 60%)" }} fill="hsl(24 36% 60%)" />
+                <h2 className="font-heading text-2xl font-bold text-foreground">Les Fondateurs ont jusqu'au 13 juin</h2>
+                <Star className="h-6 w-6" style={{ color: "hsl(24 36% 60%)" }} fill="hsl(24 36% 60%)" />
+              </div>
+              <p className="text-muted-foreground max-w-2xl mx-auto">
+                Les membres inscrits avant le 13 mai conservent un accès gratuit jusqu'au 13 juin.
+                Après cette date, l'abonnement à 49€/an sera nécessaire. Le badge Fondateur reste à vie ✨
+              </p>
             </section>
           )}
 
@@ -198,8 +221,9 @@ const Pricing = () => {
                 <div className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-2">Gardien</div>
                 {before ? (
                   <div className="space-y-1">
-                    <span className="text-sm font-semibold text-primary uppercase">GRATUIT jusqu'au 13 mai</span>
+                    <span className="text-sm font-semibold text-primary uppercase">GRATUIT jusqu'au 13 juin</span>
                     <CardTitle className="font-heading text-4xl font-bold text-muted-foreground line-through">49€/an</CardTitle>
+                    <p className="text-xs text-muted-foreground">Inscription avant le 13 mai → accès gratuit jusqu'au 13 juin 2026</p>
                   </div>
                 ) : (
                   <div className="space-y-1">
@@ -291,7 +315,7 @@ const Pricing = () => {
           <section className="text-center space-y-4 py-8">
             <p className="text-lg text-muted-foreground max-w-xl mx-auto">
               {before
-                ? "Inscrivez-vous maintenant — c'est gratuit et vous serez Fondateur à vie."
+                ? "Inscrivez-vous maintenant — accès gratuit jusqu'au 13 juin + badge Fondateur à vie."
                 : "49€/an pour les gardiens. Gratuit pour les propriétaires. Sans engagement."}
             </p>
             <Link to="/register">
