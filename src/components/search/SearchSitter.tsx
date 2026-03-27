@@ -54,7 +54,7 @@ const SearchSitter = () => {
   const [environment, setEnvironment] = useState("all");
   const [duration, setDuration] = useState("all");
   const [verifiedOnly, setVerifiedOnly] = useState(false);
-  const [emergencyOnly, setEmergencyOnly] = useState(false);
+  const [emergencyOnly, setEmergencyOnly] = useState(searchParams.get("emergency") === "true");
   const [selectedEquipments, setSelectedEquipments] = useState<string[]>([]);
   const [sort, setSort] = useState<SortOption>("recent");
 
