@@ -581,32 +581,30 @@ const Landing = () => {
       <section className="px-6 md:px-12 py-20" style={{ backgroundColor: "#1C1B18" }}>
         <div className="max-w-3xl mx-auto text-center">
           <h2 className="font-heading text-3xl md:text-4xl font-bold mb-4 text-white">
-            On construit Guardiens avec vous.
+            Prêt à partir l'esprit léger ?
           </h2>
           <p className="text-white/60 text-lg mb-8">
-            Rejoignez la liste d'attente. Vous serez les premiers à tester — et
-            à façonner ce que Guardiens deviendra.
+            Rejoignez les membres fondateurs avant le 13 mai. Gratuit, sans engagement.
           </p>
-          <form
-            className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto"
-            onSubmit={(e) => {
-              e.preventDefault();
-              handleEmailSignup(emailBottom);
-            }}
-          >
-            <Input
-              type="email"
-              placeholder="votre@email.com"
-              value={emailBottom}
-              onChange={(e) => setEmailBottom(e.target.value)}
-              className="bg-white/10 border-white/20 text-white placeholder:text-white/40"
-            />
-            <Button type="submit" className="whitespace-nowrap">
-              S'inscrire
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <Button
+              size="lg"
+              className="bg-white text-foreground hover:bg-white/90 font-semibold"
+              onClick={() => navigate("/register?role=owner")}
+            >
+              Je cherche un gardien
             </Button>
-          </form>
+            <Button
+              size="lg"
+              variant="outline"
+              className="border-white/40 text-white hover:bg-white/10 font-semibold"
+              onClick={() => navigate("/register?role=guardian")}
+            >
+              Je veux garder
+            </Button>
+          </div>
           <p className="mt-4 text-xs text-white/40">
-            Gratuit · Pas de spam · On vous contacte quand c'est prêt.
+            Gratuit · Badge Fondateur à vie · Accès jusqu'au 13 juin
           </p>
         </div>
       </section>
