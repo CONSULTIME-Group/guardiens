@@ -19,6 +19,7 @@ import PublicExperiences from "@/components/profile/PublicExperiences";
 import PublicOwnerGallery from "@/components/profile/PublicOwnerGallery";
 import OwnerHighlights from "@/components/profile/OwnerHighlights";
 import { getBadgeDef } from "@/components/badges/badgeDefinitions";
+import EntraideSection from "@/components/missions/EntraideSection";
 
 const speciesLabels: Record<string, string> = {
   dog: "🐕 Chiens", cat: "🐱 Chats", horse: "🐴 Chevaux", bird: "🐦 Oiseaux",
