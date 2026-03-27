@@ -25,12 +25,17 @@ interface Article {
 }
 
 const CATEGORY_LABELS: Record<string, string> = {
-  guide_race: "Guide race",
+  guide_race: "Races",
   guide_lieu: "Guide lieu",
-  conseil_gardien: "Conseil gardien",
-  conseil_proprio: "Conseil proprio",
+  conseil_gardien: "Conseils gardiens",
+  conseil_proprio: "Conseils propriétaires",
+  conseil: "Conseils",
   temoignage: "Témoignage",
   actualite: "Actualité",
+  ville: "Villes",
+  thematique: "Guides pratiques",
+  guide_local: "Guides pratiques",
+  saisonnier: "Saisonniers",
 };
 
 const CATEGORY_COLORS: Record<string, string> = {
@@ -38,8 +43,13 @@ const CATEGORY_COLORS: Record<string, string> = {
   guide_lieu: "bg-[hsl(214,80%,92%)] text-[hsl(214,50%,30%)]",
   conseil_gardien: "bg-[hsl(45,90%,90%)] text-[hsl(37,60%,30%)]",
   conseil_proprio: "bg-[hsl(45,90%,90%)] text-[hsl(37,60%,30%)]",
+  conseil: "bg-[hsl(45,90%,90%)] text-[hsl(37,60%,30%)]",
   temoignage: "bg-[hsl(330,80%,94%)] text-[hsl(330,50%,30%)]",
   actualite: "bg-muted text-muted-foreground",
+  ville: "bg-[hsl(214,80%,92%)] text-[hsl(214,50%,30%)]",
+  thematique: "bg-[hsl(270,60%,92%)] text-[hsl(270,40%,30%)]",
+  guide_local: "bg-[hsl(270,60%,92%)] text-[hsl(270,40%,30%)]",
+  saisonnier: "bg-[hsl(20,80%,92%)] text-[hsl(20,50%,30%)]",
 };
 
 const PAGE_SIZE = 9;
