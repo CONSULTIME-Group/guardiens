@@ -88,8 +88,7 @@ const steps = [
 const Landing = () => {
   const navigate = useNavigate();
   const [latestArticles, setLatestArticles] = useState<any[]>([]);
-  const [email, setEmail] = useState("");
-  const [emailBottom, setEmailBottom] = useState("");
+  const [email, setEmail] = "";
 
   useEffect(() => {
     supabase
