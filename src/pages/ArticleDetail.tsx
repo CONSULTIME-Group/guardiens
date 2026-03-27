@@ -17,6 +17,7 @@ interface ArticleFull {
   excerpt: string;
   content: string;
   cover_image_url: string | null;
+  canonical_url: string | null;
   category: string;
   tags: string[];
   city: string | null;
@@ -136,6 +137,7 @@ export default function ArticleDetail() {
         type="article"
         publishedAt={article.published_at || undefined}
         author={article.author_name}
+        canonicalUrl={article.canonical_url || undefined}
       />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
         "@context": "https://schema.org",
@@ -412,6 +414,8 @@ export default function ArticleDetail() {
             src={article.cover_image_url}
             alt={article.title}
             className="w-full h-auto max-h-96 object-cover"
+            loading="eager"
+            fetchPriority="high"
           />
         </div>
       )}
