@@ -12,6 +12,7 @@ interface PageMetaProps {
   type?: "website" | "article";
   publishedAt?: string;
   author?: string;
+  canonicalUrl?: string;
 }
 
 const PageMeta = ({
