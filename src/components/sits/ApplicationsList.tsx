@@ -19,11 +19,7 @@ import {
 } from "@/components/ui/dialog";
 import { format, differenceInDays, parseISO } from "date-fns";
 import { fr } from "date-fns/locale";
-import {
-  AlertDialog, AlertDialogAction, AlertDialogCancel,
-  AlertDialogContent, AlertDialogDescription, AlertDialogFooter,
-  AlertDialogHeader, AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+import { Textarea } from "@/components/ui/textarea";
 
 interface ApplicationsListProps {
   sitId: string;
