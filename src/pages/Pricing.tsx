@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Check, X, Star, Gift } from "lucide-react";
+import { Check, Star, Gift, MapPin, ShieldCheck, Map, PawPrint, Heart, Siren } from "lucide-react";
 import PageMeta from "@/components/PageMeta";
 
 const LAUNCH_DATE = new Date("2026-05-13T00:00:00");
