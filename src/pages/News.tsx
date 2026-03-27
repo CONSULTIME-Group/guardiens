@@ -59,7 +59,7 @@ export default function News() {
   const [loading, setLoading] = useState(true);
   const [totalCount, setTotalCount] = useState(0);
   const [searchParams, setSearchParams] = useSearchParams();
-  const activeCategory = searchParams.get("cat") || "all";
+  const activeCategory = searchParams.get("categorie") || searchParams.get("cat") || "all";
   const currentPage = Math.max(1, parseInt(searchParams.get("page") || "1", 10));
 
   useEffect(() => {
