@@ -37,21 +37,21 @@ const sitterFeatures = [
   "Support",
 ];
 
-const comparisonRows = [
-  { label: "Propriétaire", guardiens: "Gratuit", trusted: "$149–$299/an", nomador: "34€/3 mois à 179€/an" },
-  { label: "Gardien", guardiens: "49€/an", trusted: "$129–$259/an + $10/garde", nomador: "34€/3 mois à 179€/an" },
-  { label: "Frais par garde", guardiens: "Aucun", trusted: "$10 par garde", nomador: "Aucun" },
-  { label: "Nombre de formules", guardiens: "1 seule — simple", trusted: "3 niveaux", nomador: "3 formules" },
-  { label: "Proximité locale", guardiens: true, trusted: false, nomador: false },
-  { label: "Guide de la maison", guardiens: true, trusted: true, nomador: false },
-  { label: "Vétos", guardiens: "Annuaire local", trusted: "Hotline (Standard+)", nomador: false },
-  { label: "Couvertures / assurances", guardiens: "Votre assurance habitation", trusted: "Plans avec conditions", nomador: "Repose sur votre assurance" },
-  { label: "Fiches races auto-générées", guardiens: true, trusted: false, nomador: false },
-  { label: "Guides locaux (parcs, vétos, balades)", guardiens: true, trusted: false, nomador: false },
-  { label: "Gardiens d'urgence", guardiens: true, trusted: false, nomador: false },
-  { label: "Avis croisés", guardiens: "Détaillés avec sous-critères", trusted: "Blind reviews", nomador: "Badges" },
-  { label: "Vérification ID", guardiens: true, trusted: true, nomador: true },
-  { label: "Simplicité", guardiens: "1 prix, 0 frais", trusted: "3 niveaux × 2 rôles", nomador: "3 formules, conditions variables" },
+const strengthBlocks = [
+  { icon: MapPin, title: "Gardiens de proximité", desc: "Vos gardiens sont dans votre quartier — pas à l'autre bout du pays. Un problème ? Quelqu'un est à 15 minutes." },
+  { icon: ShieldCheck, title: "Profils vérifiés", desc: "Identité vérifiée, avis croisés détaillés, écussons qualitatifs. Vous savez à qui vous confiez vos animaux." },
+  { icon: Map, title: "Guides locaux", desc: "Parcs, vétérinaires, balades, cafés dog-friendly — tout ce qu'il faut pour que votre gardien se sente chez lui." },
+  { icon: PawPrint, title: "Fiches races", desc: "Caractère, besoins, conseils de garde — votre gardien sait exactement comment s'occuper de votre animal." },
+  { icon: Heart, title: "Petites missions", desc: "Entraide entre voisins : promener un chien, arroser un jardin. Pas d'argent — un bon repas, un coup de main, du lien." },
+  { icon: Siren, title: "Gardiens d'urgence", desc: "Des gardiens expérimentés, mobilisables rapidement parce qu'ils sont à côté. Le filet de sécurité que vous méritez." },
+];
+
+const promisePoints = [
+  "Un seul prix : 49€/an pour les gardiens. Point.",
+  "Gratuit pour les propriétaires — pour toujours.",
+  "Aucune commission sur les gardes classiques.",
+  "Un réseau local de confiance, pas une marketplace anonyme.",
+  "Annulation en 1 clic, sans justification.",
 ];
 
 const faqItems = [
