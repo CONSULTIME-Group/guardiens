@@ -505,10 +505,30 @@ const Landing = () => {
             <span className="text-primary italic">gratuit.</span>
           </h2>
           <p className="text-muted-foreground text-lg leading-relaxed">
-            Pas de piège, pas de petites lignes. On construit la communauté
+            Transparent, simple, et toujours à votre écoute. On construit la communauté
             d'abord, on verra le reste ensemble. Profitez-en — les premiers
             inscrits auront toujours une place spéciale.
           </p>
+        </div>
+      </section>
+
+      {/* ═══════════════ ENCART FONDATEUR ═══════════════ */}
+      <section className="px-6 md:px-12 py-12">
+        <div
+          className="max-w-3xl mx-auto rounded-2xl p-8 md:p-10 text-center space-y-4 border-2"
+          style={{ backgroundColor: "#FEF3C7", borderColor: "hsl(24 36% 60%)" }}
+        >
+          <h3 className="font-heading text-xl md:text-2xl font-bold text-foreground">
+            ⭐ Inscrivez-vous avant le 13 mai
+          </h3>
+          <p className="text-muted-foreground max-w-xl mx-auto leading-relaxed">
+            Badge Fondateur à vie + accès gratuit jusqu'au 13 juin.
+            Pourquoi le 13 mai ? C'est l'anniversaire de Jérémie.
+            Il préfère offrir l'accès plutôt que recevoir des chaussettes.
+          </p>
+          <Button variant="hero" size="xl" onClick={() => navigate("/register")}>
+            En profiter
+          </Button>
         </div>
       </section>
 
