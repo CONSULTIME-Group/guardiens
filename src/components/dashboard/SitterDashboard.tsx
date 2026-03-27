@@ -379,6 +379,38 @@ const SitterDashboard = () => {
         )}
       </DashSection>
 
+      {/* Contextual resources */}
+      {!hasEmergencyProfile && (() => {
+        const completedCount = metrics.completed;
+        let resTitle = "";
+        let resItems: ResourceItem[] = [];
+
+        if (profileCompletion < 60 || verificationStatus !== "verified") {
+          resTitle = "Bien démarrer sur Guardiens";
+          resItems = [
+            { title: "Créer un profil qui attire des missions", description: "Photo, bio, expérience : ce qui convainc.", href: "/blog/creer-profil-gardien-attractif", icon: "gardien" },
+            { title: "Réussir sa première garde", description: "La rencontre, le premier soir, la communication.", href: "/blog/reussir-premiere-garde-house-sitting", icon: "gardien" },
+            { title: "Devenir Gardien d'Urgence", description: "Les conditions, les avantages, les obligations.", href: "/blog/devenir-gardien-urgence-guardiens", icon: "urgence" },
+          ];
+        } else if (completedCount >= 1 && completedCount < 5) {
+          resTitle = "Progresser sur Guardiens";
+          resItems = [
+            { title: "Gérer les animaux difficiles", description: "Chien anxieux, chat caché, animal malade.", href: "/blog/gerer-animaux-difficiles-garde", icon: "animal" },
+            { title: "Gérer les imprévus pendant une garde", description: "Panne, urgence, départ anticipé : les protocoles.", href: "/blog/gerer-imprevu-pendant-garde", icon: "gardien" },
+            { title: "Devenir Gardien d'Urgence", description: "Encore quelques gardes avant d'y accéder.", href: "/blog/devenir-gardien-urgence-guardiens", icon: "urgence" },
+          ];
+        } else if (completedCount >= 5) {
+          resTitle = "Passer au niveau supérieur";
+          resItems = [
+            { title: "Devenir Gardien d'Urgence", description: "Vous remplissez peut-être déjà les conditions.", href: "/blog/devenir-gardien-urgence-guardiens", icon: "urgence" },
+            { title: "Gérer les animaux difficiles", description: "Les situations que les bons gardiens gèrent.", href: "/blog/gerer-animaux-difficiles-garde", icon: "animal" },
+            { title: "Gérer les imprévus pendant une garde", description: "Panne, urgence, départ anticipé : les protocoles.", href: "/blog/gerer-imprevu-pendant-garde", icon: "gardien" },
+          ];
+        }
+
+        return resItems.length > 0 ? <ResourceSection title={resTitle} resources={resItems} /> : null;
+      })()}
+
       {/* Nearby listings */}
       <DashSection title="Annonces près de chez vous" action={
         <Link to="/search" className="text-xs text-primary hover:underline font-medium">Voir tout →</Link>
