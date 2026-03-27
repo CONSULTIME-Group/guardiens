@@ -182,7 +182,10 @@ const CreateSit = () => {
       </Link>
 
       <h1 className="font-heading text-3xl font-bold mb-2">Publier une garde</h1>
-      <p className="text-muted-foreground mb-8">Les informations de votre profil sont pré-remplies. Ajoutez les détails spécifiques à cette garde.</p>
+      <p className="text-muted-foreground mb-4">Les informations de votre profil sont pré-remplies. Ajoutez les détails spécifiques à cette garde.</p>
+
+      <FirstAnnonceTip />
+
 
       {profileCompletion < 60 && (
         <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-4 mb-8 flex items-start gap-3">
