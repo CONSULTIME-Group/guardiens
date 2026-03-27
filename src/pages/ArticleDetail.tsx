@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -49,6 +50,7 @@ const CATEGORY_LABELS: Record<string, string> = {
 
 export default function ArticleDetail() {
   const { slug } = useParams<{ slug: string }>();
+  const { user, isAuthenticated } = useAuth();
   const [article, setArticle] = useState<ArticleFull | null>(null);
   const [loading, setLoading] = useState(true);
   const [relatedArticles, setRelatedArticles] = useState<RelatedArticle[]>([]);
@@ -420,7 +422,7 @@ export default function ArticleDetail() {
         </div>
       )}
 
-      <ArticleRenderer content={article.content} />
+      <ArticleRenderer content={article.content} userRole={isAuthenticated ? user?.role : undefined} />
 
       {/* Cross-links to city pages */}
       {(cityGuideSlug || cityPageSlug) && (

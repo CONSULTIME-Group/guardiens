@@ -129,9 +129,39 @@ function addEndCTA(html: string): string {
 
 interface ArticleRendererProps {
   content: string;
+  userRole?: "owner" | "sitter" | "both";
 }
 
-export default function ArticleRenderer({ content }: ArticleRendererProps) {
+/** Replace inscription CTAs based on user role */
+function adaptCTAsForRole(html: string, role?: "owner" | "sitter" | "both"): string {
+  if (!role) return html;
+
+  const ownerCTA = '<a href="/annonces/nouvelle" class="article-cta-btn article-cta-btn-primary">Publier une annonce →</a>';
+  const sitterCTA = '<a href="/recherche" class="article-cta-btn article-cta-btn-primary">Trouver une garde près de chez vous →</a>';
+
+  // Replace inscription links with role-appropriate CTAs
+  const ownerPattern = /href="\/inscription\?role=owner"[^>]*>([^<]*)</g;
+  const sitterPattern = /href="\/inscription\?role=guardian"[^>]*>([^<]*)</g;
+  const genericPattern = /href="\/inscription"[^>]*>([^<]*)</g;
+
+  if (role === "owner") {
+    html = html.replace(ownerPattern, `href="/annonces/nouvelle">Publier une annonce →`);
+    html = html.replace(sitterPattern, `href="/recherche">Trouver une garde près de chez vous →`);
+    html = html.replace(genericPattern, `href="/annonces/nouvelle">Publier une annonce →`);
+  } else if (role === "sitter") {
+    html = html.replace(sitterPattern, `href="/recherche">Trouver une garde près de chez vous →`);
+    html = html.replace(ownerPattern, `href="/annonces/nouvelle">Publier une annonce →`);
+    html = html.replace(genericPattern, `href="/recherche">Trouver une garde près de chez vous →`);
+  } else if (role === "both") {
+    html = html.replace(ownerPattern, `href="/annonces/nouvelle">Publier une annonce →`);
+    html = html.replace(sitterPattern, `href="/recherche">Trouver une garde près de chez vous →`);
+    html = html.replace(genericPattern, `href="/annonces/nouvelle">Publier une annonce →`);
+  }
+
+  return html;
+}
+
+export default function ArticleRenderer({ content, userRole }: ArticleRendererProps) {
   // Pre-process markdown for custom blocks
   const preprocessed = transformFactBoxes(content);
   
@@ -143,6 +173,7 @@ export default function ArticleRenderer({ content }: ArticleRendererProps) {
   html = injectCTA(html);
   html = addBandedSections(html);
   html = addEndCTA(html);
+  html = adaptCTAsForRole(html, userRole);
   
   return (
     <div
