@@ -191,7 +191,7 @@ const EmergencySitter = () => {
             {[
               {
                 q: "Qu'est-ce qu'un gardien d'urgence ?",
-                a: "Un gardien expérimenté : 5+ gardes, note 4.7+, zéro annulation sur 6 mois, ID vérifiée. Disponible rapidement dans son rayon. C'est le plus haut niveau de confiance sur Guardiens."
+                a: "Un gardien expérimenté : 3+ gardes, note 4.7+, zéro annulation sur 6 mois, ID vérifiée. Disponible rapidement dans son rayon. C'est le plus haut niveau de confiance sur Guardiens."
               },
               {
                 q: "Comment trouver un gardien d'urgence ?",
