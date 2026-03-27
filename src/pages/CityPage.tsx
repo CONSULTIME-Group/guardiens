@@ -1,17 +1,42 @@
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, Navigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import PageMeta from "@/components/PageMeta";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { MapPin, Users, ClipboardList, ShieldCheck, Heart, ArrowRight, Compass, Building2 } from "lucide-react";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Users,
+  ShieldCheck,
+  Heart,
+  ArrowRight,
+  Compass,
+  Building2,
+} from "lucide-react";
+
+import { CITIES } from "@/data/cities";
+import { useCityStats } from "@/hooks/useCityStats";
+import CityPageMeta from "@/components/seo/CityPageMeta";
+import CitySchemaOrg from "@/components/seo/CitySchemaOrg";
+import LocalExpertise from "@/components/seo/LocalExpertise";
+import LocalSpotsGrid from "@/components/seo/LocalSpotsGrid";
+import LocalNetworkGrid from "@/components/seo/LocalNetworkGrid";
+import StickyCTA from "@/components/seo/StickyCTA";
 
 const CityPage = () => {
   const { slug } = useParams<{ slug: string }>();
 
-  const { data: page, isLoading } = useQuery({
+  // Try static city data first
+  const cityData = CITIES.find((c) => c.slug === slug);
+
+  // Fallback: fetch from seo_city_pages if not in static data
+  const { data: dbPage, isLoading: dbLoading } = useQuery({
     queryKey: ["city-page", slug],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -23,58 +48,29 @@ const CityPage = () => {
       if (error) throw error;
       return data as any;
     },
-    enabled: !!slug,
+    enabled: !!slug && !cityData,
   });
 
-  // Fetch active sits near this city
-  const { data: nearbySits } = useQuery({
-    queryKey: ["city-sits", page?.city],
-    queryFn: async () => {
-      const { data } = await supabase
-        .from("sits")
-        .select("id, title, start_date, end_date, property_id, properties!inner(photos, user_id, profiles!inner(city, first_name))")
-        .eq("status", "published")
-        .limit(6);
-      return (data || []).filter((s: any) => {
-        const sitCity = s.properties?.profiles?.city;
-        return sitCity && page?.city && sitCity.toLowerCase().includes(page.city.toLowerCase());
-      });
-    },
-    enabled: !!page?.city,
-  });
+  const stats = useCityStats(
+    cityData?.departmentCode || "",
+    cityData?.name || dbPage?.city || ""
+  );
 
-  // Fetch sitters near this city
-  const { data: nearbySitters } = useQuery({
-    queryKey: ["city-sitters", page?.city],
-    queryFn: async () => {
-      const { data } = await supabase
-        .from("profiles")
-        .select("id, first_name, avatar_url, city, role")
-        .in("role", ["sitter", "both"])
-        .limit(6);
-      return (data || []).filter((p: any) =>
-        p.city && page?.city && p.city.toLowerCase().includes(page.city.toLowerCase())
-      );
-    },
-    enabled: !!page?.city,
-  });
-
-  // Cross-linking: department page
+  // Cross-linking queries (kept for DB-based pages)
   const { data: departmentPage } = useQuery({
-    queryKey: ["city-department-link", page?.department],
+    queryKey: ["city-department-link", dbPage?.department],
     queryFn: async () => {
       const { data } = await supabase
         .from("seo_department_pages" as any)
         .select("slug, department")
-        .eq("department", page!.department)
+        .eq("department", dbPage!.department)
         .eq("published", true)
         .maybeSingle();
       return data as any;
     },
-    enabled: !!page?.department,
+    enabled: !!dbPage?.department && !cityData,
   });
 
-  // Cross-linking: local guide
   const { data: cityGuide } = useQuery({
     queryKey: ["city-guide-link", slug],
     queryFn: async () => {
@@ -89,39 +85,189 @@ const CityPage = () => {
     enabled: !!slug,
   });
 
-  // Cross-linking: other cities in same department
-  const { data: siblingCities = [] } = useQuery({
-    queryKey: ["sibling-cities", page?.department, slug],
-    queryFn: async () => {
-      const { data } = await supabase
-        .from("seo_city_pages" as any)
-        .select("slug, city")
-        .eq("department", page!.department)
-        .eq("published", true)
-        .neq("slug", slug)
-        .order("city")
-        .limit(6);
-      return (data || []) as any[];
-    },
-    enabled: !!page?.department,
-  });
-
-  // Cross-linking: related articles for this city
   const { data: relatedArticles = [] } = useQuery({
-    queryKey: ["city-articles", page?.city],
+    queryKey: ["city-articles", cityData?.name || dbPage?.city],
     queryFn: async () => {
+      const cityName = cityData?.name || dbPage?.city;
       const { data } = await supabase
         .from("articles")
         .select("slug, title, excerpt")
         .eq("published", true)
-        .or(`city.ilike.%${page!.city}%,tags.cs.{${page!.city.toLowerCase()}}`)
+        .or(
+          `city.ilike.%${cityName}%,tags.cs.{${cityName!.toLowerCase()}}`
+        )
         .limit(3);
       return (data || []) as any[];
     },
-    enabled: !!page?.city,
+    enabled: !!(cityData?.name || dbPage?.city),
   });
 
-  if (isLoading) {
+  // ── STATIC CITY DATA PATH ──
+  if (cityData) {
+    const faqItems = [
+      {
+        q: `Comment trouver un gardien de maison à ${cityData.name} ?`,
+        a: `Sur Guardiens, vous publiez une annonce gratuite et les gardiens disponibles à ${cityData.name} et ses environs postulent directement. Chaque gardien est vérifié manuellement avant d'apparaître sur la plateforme.`,
+      },
+      {
+        q: `Est-ce vraiment gratuit pour les propriétaires à ${cityData.name} ?`,
+        a: "Oui. Guardiens est gratuit pour tous les propriétaires, sans limite dans le temps. Seuls les gardiens paient un abonnement annuel de 49€ pour accéder aux annonces et postuler.",
+      },
+      {
+        q: `Que se passe-t-il en cas d'urgence pendant la garde à ${cityData.name} ?`,
+        a: "Guardiens dispose d'un réseau de Gardiens d'Urgence dans chaque zone, disponibles sous 15 minutes. En cas d'imprévu — animal malade, problème technique — le gardien en poste peut déclencher une alerte directement depuis l'application.",
+      },
+    ];
+
+    return (
+      <>
+        <CityPageMeta city={cityData} />
+        <CitySchemaOrg city={cityData} stats={stats} />
+
+        <div className="min-h-screen bg-background relative">
+          {/* Hero */}
+          <section className="max-w-5xl mx-auto px-4 py-16">
+            <h1 className="font-serif text-3xl md:text-5xl font-bold text-foreground mb-6">
+              {cityData.h1}
+            </h1>
+            <p className="text-lg text-muted-foreground max-w-3xl leading-relaxed mb-6">
+              {stats.guardiansCount > 0
+                ? `${stats.guardiansCount} gardien${stats.guardiansCount > 1 ? "s" : ""} vérifié${stats.guardiansCount > 1 ? "s" : ""} en ${cityData.department}`
+                : `Gardiens vérifiés en ${cityData.department}`}
+              {" · Gratuit pour les propriétaires"}
+            </p>
+
+            <div className="flex flex-wrap gap-3 mb-8">
+              <Badge variant="secondary" className="text-sm px-4 py-2 gap-2">
+                <ShieldCheck className="h-4 w-4" />
+                Vérification d'identité manuelle
+              </Badge>
+              <Badge variant="outline" className="text-sm px-4 py-2 gap-2">
+                <Heart className="h-4 w-4" />
+                Gratuit propriétaires
+              </Badge>
+            </div>
+
+            <div className="flex flex-col sm:flex-row gap-3">
+              <Link to={`/search?ville=${cityData.slug}`}>
+                <Button size="lg" className="gap-2">
+                  Voir les gardiens à {cityData.name}
+                  <ArrowRight className="h-4 w-4" />
+                </Button>
+              </Link>
+            </div>
+          </section>
+
+          {/* Cross-links */}
+          {cityGuide && (
+            <section className="max-w-5xl mx-auto px-4 py-6">
+              <Link to={`/guide/${cityGuide.slug}`}>
+                <Card className="hover:shadow-md transition-shadow">
+                  <CardContent className="p-4 flex items-center gap-3">
+                    <Compass className="h-5 w-5 text-primary" />
+                    <div>
+                      <p className="font-semibold text-sm text-foreground">
+                        Guide du gardien à {cityGuide.city}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        Parcs, balades, vétos, cafés dog-friendly…
+                      </p>
+                    </div>
+                    <ArrowRight className="h-4 w-4 text-muted-foreground ml-auto" />
+                  </CardContent>
+                </Card>
+              </Link>
+            </section>
+          )}
+
+          {/* Expertise */}
+          <LocalExpertise city={cityData} />
+
+          {/* Spots */}
+          <LocalSpotsGrid city={cityData} />
+
+          {/* Network */}
+          <LocalNetworkGrid current={cityData} allCities={CITIES} />
+
+          {/* FAQ */}
+          <section className="max-w-5xl mx-auto px-4 py-12 border-t border-border">
+            <h2 className="font-serif text-2xl font-bold text-foreground mb-6">
+              Questions fréquentes sur le house-sitting à {cityData.name}
+            </h2>
+            <Accordion type="single" collapsible className="w-full">
+              {faqItems.map((faq, i) => (
+                <AccordionItem key={i} value={`faq-${i}`}>
+                  <AccordionTrigger className="text-left">
+                    {faq.q}
+                  </AccordionTrigger>
+                  <AccordionContent>{faq.a}</AccordionContent>
+                </AccordionItem>
+              ))}
+            </Accordion>
+          </section>
+
+          {/* Related articles */}
+          {relatedArticles.length > 0 && (
+            <section className="max-w-5xl mx-auto px-4 py-12 border-t border-border">
+              <h2 className="font-serif text-2xl font-bold text-foreground mb-6">
+                Articles sur {cityData.name}
+              </h2>
+              <div className="grid gap-4 md:grid-cols-3">
+                {relatedArticles.map((a: any) => (
+                  <Link
+                    key={a.slug}
+                    to={`/actualites/${a.slug}`}
+                    className="group"
+                  >
+                    <Card className="h-full hover:shadow-md transition-shadow">
+                      <CardContent className="p-5">
+                        <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors line-clamp-2 mb-2">
+                          {a.title}
+                        </h3>
+                        <p className="text-sm text-muted-foreground line-clamp-2">
+                          {a.excerpt}
+                        </p>
+                      </CardContent>
+                    </Card>
+                  </Link>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {/* Final CTA */}
+          <section className="max-w-5xl mx-auto px-4 py-16 text-center border-t border-border">
+            <h2 className="font-serif text-2xl md:text-3xl font-bold text-foreground mb-4">
+              Prêt à partir l'esprit libre ?
+            </h2>
+            <p className="text-muted-foreground mb-8 max-w-xl mx-auto">
+              Publiez votre annonce en 5 minutes. Gratuit.
+            </p>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+              <Link to="/register?role=owner">
+                <Button size="lg" className="gap-2">
+                  Créer mon annonce
+                  <ArrowRight className="h-4 w-4" />
+                </Button>
+              </Link>
+              <Link
+                to="/register?role=guardian"
+                className="text-sm text-primary hover:underline"
+              >
+                Je suis gardien, je m'inscris →
+              </Link>
+            </div>
+          </section>
+
+          {/* Sticky CTA */}
+          <StickyCTA city={cityData} stats={stats} />
+        </div>
+      </>
+    );
+  }
+
+  // ── DB FALLBACK PATH (existing seo_city_pages) ──
+  if (dbLoading) {
     return (
       <div className="min-h-screen bg-background">
         <div className="max-w-5xl mx-auto px-4 py-16">
@@ -137,58 +283,60 @@ const CityPage = () => {
     );
   }
 
-  if (!page) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-foreground mb-2">Page non trouvée</h1>
-          <p className="text-muted-foreground mb-4">Cette page ville n'existe pas encore.</p>
-          <Link to="/">
-            <Button>Retour à l'accueil</Button>
-          </Link>
-        </div>
-      </div>
-    );
+  if (!dbPage) {
+    return <Navigate to="/404" replace />;
   }
 
-  const sitCount = nearbySits?.length || page.active_sits_count || 0;
-  const sitterCount = nearbySitters?.length || page.sitter_count || 0;
-
+  // Render DB-based page (simplified legacy)
   return (
     <>
-      <PageMeta
-        title={page.meta_title || `Pet sitting & House sitting à ${page.city} – Garde d'animaux gratuite | Guardiens`}
-        description={page.meta_description || `Trouvez un pet sitter ou house sitter de confiance à ${page.city}. Garde d'animaux à domicile gratuite. Gardiens vérifiés, avis détaillés. Inscrivez-vous sur Guardiens.`}
-        path={`/house-sitting/${page.slug}`}
+      <CityPageMeta
+        city={{
+          slug: dbPage.slug,
+          name: dbPage.city,
+          department: dbPage.department,
+          departmentCode: "",
+          region: "Auvergne-Rhône-Alpes",
+          coordinates: { lat: 0, lng: 0 },
+          zoneProfile: "urbain",
+          keywordPrimary: "",
+          keywordSecondary: [],
+          h1: dbPage.h1_title,
+          metaDescription: dbPage.meta_description,
+          localSpots: [],
+          riskProfile: [],
+          expertiseTips: [],
+          heroImageAlt: "",
+        }}
       />
 
       <div className="min-h-screen bg-background">
         {/* Breadcrumb */}
         <div className="max-w-5xl mx-auto px-4 pt-6">
           <nav className="text-sm text-muted-foreground" aria-label="Breadcrumb">
-            <ol className="flex items-center gap-1.5" itemScope itemType="https://schema.org/BreadcrumbList">
-              <li itemProp="itemListElement" itemScope itemType="https://schema.org/ListItem">
-                <Link to="/" className="hover:text-primary transition-colors" itemProp="item">
-                  <span itemProp="name">Guardiens</span>
+            <ol className="flex items-center gap-1.5">
+              <li>
+                <Link to="/" className="hover:text-primary transition-colors">
+                  Guardiens
                 </Link>
-                <meta itemProp="position" content="1" />
               </li>
               <li className="text-muted-foreground/50">/</li>
-              <li itemProp="itemListElement" itemScope itemType="https://schema.org/ListItem">
-                {departmentPage ? (
-                  <Link to={`/departement/${departmentPage.slug}`} className="hover:text-primary transition-colors" itemProp="item">
-                    <span itemProp="name">{page.department}</span>
+              {departmentPage ? (
+                <li>
+                  <Link
+                    to={`/departement/${departmentPage.slug}`}
+                    className="hover:text-primary transition-colors"
+                  >
+                    {dbPage.department}
                   </Link>
-                ) : (
-                  <span itemProp="name" className="text-foreground font-medium">{page.department}</span>
-                )}
-                <meta itemProp="position" content="2" />
-              </li>
+                </li>
+              ) : (
+                <li className="text-foreground font-medium">
+                  {dbPage.department}
+                </li>
+              )}
               <li className="text-muted-foreground/50">/</li>
-              <li itemProp="itemListElement" itemScope itemType="https://schema.org/ListItem">
-                <span itemProp="name" className="text-foreground font-medium">{page.city}</span>
-                <meta itemProp="position" content="3" />
-              </li>
+              <li className="text-foreground font-medium">{dbPage.city}</li>
             </ol>
           </nav>
         </div>
@@ -196,46 +344,42 @@ const CityPage = () => {
         {/* Hero */}
         <section className="max-w-5xl mx-auto px-4 py-12">
           <h1 className="font-serif text-3xl md:text-5xl font-bold text-foreground mb-6">
-            {page.h1_title}
+            {dbPage.h1_title}
           </h1>
           <p className="text-lg text-muted-foreground max-w-3xl leading-relaxed mb-8">
-            {page.intro_text}
+            {dbPage.intro_text}
           </p>
-
-          {/* Stats */}
           <div className="flex flex-wrap gap-4 mb-8">
-            <Badge variant="secondary" className="text-base px-4 py-2 gap-2">
-              <Users className="h-4 w-4" />
-              {sitterCount} gardien{sitterCount > 1 ? "s" : ""} vérifié{sitterCount > 1 ? "s" : ""}
-            </Badge>
-            <Badge variant="secondary" className="text-base px-4 py-2 gap-2">
-              <ClipboardList className="h-4 w-4" />
-              {sitCount} annonce{sitCount > 1 ? "s" : ""} active{sitCount > 1 ? "s" : ""}
-            </Badge>
+            {dbPage.sitter_count > 0 && (
+              <Badge variant="secondary" className="text-base px-4 py-2 gap-2">
+                <Users className="h-4 w-4" />
+                {dbPage.sitter_count} gardien
+                {dbPage.sitter_count > 1 ? "s" : ""} vérifié
+                {dbPage.sitter_count > 1 ? "s" : ""}
+              </Badge>
+            )}
             <Badge variant="outline" className="text-base px-4 py-2 gap-2">
               <Heart className="h-4 w-4" />
               Inscrivez-vous gratuitement
             </Badge>
           </div>
-
-          {/* CTAs */}
           <div className="flex flex-col sm:flex-row gap-3">
             <Link to="/register">
               <Button size="lg" className="gap-2">
-                Je cherche un gardien à {page.city}
+                Je cherche un gardien à {dbPage.city}
                 <ArrowRight className="h-4 w-4" />
               </Button>
             </Link>
             <Link to="/register">
               <Button size="lg" variant="outline" className="gap-2">
-                Je veux garder à {page.city}
+                Je veux garder à {dbPage.city}
                 <ArrowRight className="h-4 w-4" />
               </Button>
             </Link>
           </div>
         </section>
 
-        {/* Cross-links: Guide + Department */}
+        {/* Cross-links */}
         {(cityGuide || departmentPage) && (
           <section className="max-w-5xl mx-auto px-4 py-6">
             <div className="flex flex-wrap gap-4">
@@ -245,8 +389,12 @@ const CityPage = () => {
                     <CardContent className="p-4 flex items-center gap-3">
                       <Compass className="h-5 w-5 text-primary" />
                       <div>
-                        <p className="font-semibold text-sm text-foreground">Guide du gardien à {cityGuide.city}</p>
-                        <p className="text-xs text-muted-foreground">Parcs, balades, vétos, cafés dog-friendly…</p>
+                        <p className="font-semibold text-sm text-foreground">
+                          Guide du gardien à {cityGuide.city}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          Parcs, balades, vétos, cafés dog-friendly…
+                        </p>
                       </div>
                       <ArrowRight className="h-4 w-4 text-muted-foreground ml-auto" />
                     </CardContent>
@@ -259,178 +407,18 @@ const CityPage = () => {
                     <CardContent className="p-4 flex items-center gap-3">
                       <Building2 className="h-5 w-5 text-primary" />
                       <div>
-                        <p className="font-semibold text-sm text-foreground">House-sitting dans le {departmentPage.department}</p>
-                        <p className="text-xs text-muted-foreground">Toutes les villes du département</p>
+                        <p className="font-semibold text-sm text-foreground">
+                          House-sitting dans le {departmentPage.department}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          Toutes les villes du département
+                        </p>
                       </div>
                       <ArrowRight className="h-4 w-4 text-muted-foreground ml-auto" />
                     </CardContent>
                   </Card>
                 </Link>
               )}
-              <Link to="/petites-missions">
-                <Card className="hover:shadow-md transition-shadow">
-                  <CardContent className="p-4 flex items-center gap-3">
-                    <Compass className="h-5 w-5 text-primary" />
-                    <div>
-                      <p className="font-semibold text-sm text-foreground">Petites missions à {page.city}</p>
-                      <p className="text-xs text-muted-foreground">Entraide entre voisins : animaux, jardin, coups de main</p>
-                    </div>
-                    <ArrowRight className="h-4 w-4 text-muted-foreground ml-auto" />
-                  </CardContent>
-                </Card>
-              </Link>
-            </div>
-          </section>
-        )}
-
-        {/* Active sits section */}
-        <section className="max-w-5xl mx-auto px-4 py-12 border-t border-border">
-          <h2 className="font-serif text-2xl font-bold text-foreground mb-6">
-            Annonces actives à {page.city}
-          </h2>
-          {nearbySits && nearbySits.length > 0 ? (
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {nearbySits.map((sit: any) => (
-                <Card key={sit.id} className="hover:shadow-md transition-shadow">
-                  <CardContent className="p-4">
-                    <h3 className="font-semibold text-foreground mb-1">{sit.title}</h3>
-                    <p className="text-sm text-muted-foreground">
-                      {sit.start_date && sit.end_date
-                        ? `Du ${new Date(sit.start_date).toLocaleDateString("fr-FR")} au ${new Date(sit.end_date).toLocaleDateString("fr-FR")}`
-                        : "Dates flexibles"}
-                    </p>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          ) : (
-            <Card className="bg-muted/50">
-              <CardContent className="p-8 text-center">
-                <p className="text-muted-foreground mb-3">
-                  Pas encore d'annonce à {page.city}. Soyez le premier à publier !
-                </p>
-                <Link to="/register">
-                  <Button variant="outline" size="sm">Publier une annonce</Button>
-                </Link>
-              </CardContent>
-            </Card>
-          )}
-        </section>
-
-        {/* Available sitters section */}
-        <section className="max-w-5xl mx-auto px-4 py-12 border-t border-border">
-          <h2 className="font-serif text-2xl font-bold text-foreground mb-6">
-            Gardiens disponibles à {page.city}
-          </h2>
-          {nearbySitters && nearbySitters.length > 0 ? (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-              {nearbySitters.map((sitter: any) => (
-                <div key={sitter.id} className="text-center">
-                  <div className="w-16 h-16 mx-auto rounded-full bg-muted overflow-hidden mb-2">
-                    {sitter.avatar_url ? (
-                      <img src={sitter.avatar_url} alt={sitter.first_name} className="w-full h-full object-cover" />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-muted-foreground text-lg font-semibold">
-                        {sitter.first_name?.[0] || "?"}
-                      </div>
-                    )}
-                  </div>
-                  <p className="text-sm font-medium text-foreground">{sitter.first_name}</p>
-                  <p className="text-xs text-muted-foreground">{sitter.city}</p>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <Card className="bg-muted/50">
-              <CardContent className="p-8 text-center">
-                <p className="text-muted-foreground mb-3">
-                  Pas encore de gardien à {page.city}. Inscrivez-vous !
-                </p>
-                <Link to="/register">
-                  <Button variant="outline" size="sm">Devenir gardien</Button>
-                </Link>
-              </CardContent>
-            </Card>
-          )}
-        </section>
-
-        {/* Sibling cities */}
-        {siblingCities.length > 0 && (
-          <section className="max-w-5xl mx-auto px-4 py-12 border-t border-border">
-            <h2 className="font-serif text-2xl font-bold text-foreground mb-6">
-              Autres villes du {page.department}
-            </h2>
-            <div className="flex flex-wrap gap-3">
-              {siblingCities.map((c: any) => (
-                <Link key={c.slug} to={`/house-sitting/${c.slug}`}>
-                  <Badge variant="outline" className="text-sm px-4 py-2 hover:bg-accent transition-colors gap-1.5 cursor-pointer">
-                    <MapPin className="h-3.5 w-3.5" />
-                    {c.city}
-                  </Badge>
-                </Link>
-              ))}
-            </div>
-          </section>
-        )}
-
-        {/* Why Guardiens section */}
-        <section className="max-w-5xl mx-auto px-4 py-12 border-t border-border">
-          <h2 className="font-serif text-2xl font-bold text-foreground mb-8">
-            Pourquoi Guardiens à {page.city} ?
-          </h2>
-          <div className="grid md:grid-cols-3 gap-6">
-            <Card>
-              <CardContent className="p-6">
-                <MapPin className="h-8 w-8 text-primary mb-3" />
-                <h3 className="font-semibold text-foreground mb-2">Proximité</h3>
-                <p className="text-sm text-muted-foreground">
-                  Des gardiens qui habitent dans votre quartier. On se connaît, on se fait confiance.
-                </p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-6">
-                <ShieldCheck className="h-8 w-8 text-primary mb-3" />
-                <h3 className="font-semibold text-foreground mb-2">Confiance</h3>
-                <p className="text-sm text-muted-foreground">
-                  Profils vérifiés, avis croisés détaillés, métriques de fiabilité. La transparence avant tout.
-                </p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-6">
-                <Heart className="h-8 w-8 text-primary mb-3" />
-                <h3 className="font-semibold text-foreground mb-2">Gratuité</h3>
-                <p className="text-sm text-muted-foreground">
-                  Inscrivez-vous gratuitement. Pas de commission sur les gardes. Simple et honnête.
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-        </section>
-
-        {/* Related articles */}
-        {relatedArticles.length > 0 && (
-          <section className="max-w-5xl mx-auto px-4 py-12 border-t border-border">
-            <h2 className="font-heading text-2xl font-bold text-foreground mb-6">
-              Articles sur {page.city}
-            </h2>
-            <div className="grid gap-4 md:grid-cols-3">
-              {relatedArticles.map((a: any) => (
-                <Link key={a.slug} to={`/actualites/${a.slug}`} className="group">
-                  <Card className="h-full hover:shadow-md transition-shadow">
-                    <CardContent className="p-5">
-                      <h3 className="font-heading font-semibold text-foreground group-hover:text-primary transition-colors line-clamp-2 mb-2">
-                        {a.title}
-                      </h3>
-                      <p className="text-sm text-muted-foreground line-clamp-2">{a.excerpt}</p>
-                      <span className="mt-3 inline-flex items-center gap-1 text-xs font-medium text-primary">
-                        Lire l'article <ArrowRight className="h-3 w-3" />
-                      </span>
-                    </CardContent>
-                  </Card>
-                </Link>
-              ))}
             </div>
           </section>
         )}
@@ -438,10 +426,11 @@ const CityPage = () => {
         {/* Final CTA */}
         <section className="max-w-5xl mx-auto px-4 py-16 text-center">
           <h2 className="font-serif text-2xl md:text-3xl font-bold text-foreground mb-4">
-            Rejoignez la communauté Guardiens à {page.city}
+            Rejoignez la communauté Guardiens à {dbPage.city}
           </h2>
           <p className="text-muted-foreground mb-8 max-w-xl mx-auto">
-            Que vous soyez propriétaire ou gardien, rejoignez un réseau de confiance basé sur la proximité et le partage.
+            Que vous soyez propriétaire ou gardien, rejoignez un réseau de
+            confiance basé sur la proximité et le partage.
           </p>
           <Link to="/register">
             <Button size="lg" className="gap-2">
@@ -450,92 +439,6 @@ const CityPage = () => {
             </Button>
           </Link>
         </section>
-
-        {/* JSON-LD: Breadcrumb */}
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              "@context": "https://schema.org",
-              "@type": "BreadcrumbList",
-              itemListElement: [
-                { "@type": "ListItem", position: 1, name: "Guardiens", item: "https://guardiens.fr" },
-                ...(departmentPage ? [{ "@type": "ListItem", position: 2, name: page.department, item: `https://guardiens.fr/departement/${departmentPage.slug}` }] : []),
-                { "@type": "ListItem", position: departmentPage ? 3 : 2, name: page.city, item: `https://guardiens.fr/house-sitting/${page.slug}` },
-              ],
-            }),
-          }}
-        />
-
-        {/* JSON-LD: Service */}
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              "@context": "https://schema.org",
-              "@type": "Service",
-              name: `Pet sitting & House sitting à ${page.city}`,
-              description: `Service de garde d'animaux et house sitting gratuit à ${page.city}. Trouvez un gardien de confiance vérifié pour vos animaux et votre maison.`,
-              provider: {
-                "@type": "Organization",
-                name: "Guardiens",
-                url: "https://guardiens.fr",
-              },
-              areaServed: {
-                "@type": "City",
-                name: page.city,
-                containedInPlace: {
-                  "@type": "AdministrativeArea",
-                  name: page.department,
-                },
-              },
-              serviceType: ["Pet sitting", "House sitting", "Garde d'animaux", "Gardiennage de maison"],
-              offers: {
-                "@type": "Offer",
-                price: "0",
-                priceCurrency: "EUR",
-                description: "Inscription et mise en relation gratuites",
-              },
-            }),
-          }}
-        />
-
-        {/* JSON-LD: FAQPage */}
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              "@context": "https://schema.org",
-              "@type": "FAQPage",
-              mainEntity: [
-                {
-                  "@type": "Question",
-                  name: `Comment trouver un pet sitter à ${page.city} ?`,
-                  acceptedAnswer: {
-                    "@type": "Answer",
-                    text: `Inscrivez-vous gratuitement sur Guardiens, publiez votre annonce de garde et recevez des candidatures de gardiens vérifiés à ${page.city}.`,
-                  },
-                },
-                {
-                  "@type": "Question",
-                  name: `Le house sitting à ${page.city} est-il gratuit ?`,
-                  acceptedAnswer: {
-                    "@type": "Answer",
-                    text: "Oui, Guardiens est entièrement gratuit. Pas de commission, pas de frais cachés. Le house sitting repose sur l'échange : le gardien loge gratuitement en échange de la garde de vos animaux.",
-                  },
-                },
-                {
-                  "@type": "Question",
-                  name: `Combien de gardiens sont disponibles à ${page.city} ?`,
-                  acceptedAnswer: {
-                    "@type": "Answer",
-                    text: `Actuellement ${sitterCount} gardien${sitterCount > 1 ? "s" : ""} vérifié${sitterCount > 1 ? "s" : ""} ${sitterCount > 1 ? "sont" : "est"} disponible${sitterCount > 1 ? "s" : ""} à ${page.city} sur Guardiens. Ce nombre grandit chaque jour.`,
-                  },
-                },
-              ],
-            }),
-          }}
-        />
       </div>
     </>
   );
