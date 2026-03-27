@@ -15,6 +15,9 @@ import MessageBubble from "@/components/messages/MessageBubble";
 import { useToast } from "@/hooks/use-toast";
 import { getBadgeDef } from "@/components/badges/badgeDefinitions";
 import StatusShield from "@/components/badges/StatusShield";
+import { useSubscriptionAccess } from "@/hooks/useSubscriptionAccess";
+import { Lock } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 interface Conversation {
   id: string;
