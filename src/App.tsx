@@ -146,6 +146,7 @@ const AppRoutes = () => (
       <Route path="/house-guide/:propertyId" element={<HouseGuide />} />
       <Route path="/owner-profile" element={<OwnerProfile />} />
       <Route path="/settings" element={<Settings />} />
+      <Route path="/mon-abonnement" element={<MySubscription />} />
       <Route path="/long-stays/create" element={<CreateLongStay />} />
       <Route path="/long-stays/:id" element={<LongStayDetail />} />
       <Route path="/long-stays/:id/edit" element={<EditLongStay />} />
