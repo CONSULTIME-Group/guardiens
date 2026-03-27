@@ -137,6 +137,7 @@ export default function ArticleDetail() {
         type="article"
         publishedAt={article.published_at || undefined}
         author={article.author_name}
+        canonicalUrl={article.canonical_url || undefined}
       />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
         "@context": "https://schema.org",
