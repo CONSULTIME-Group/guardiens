@@ -17,6 +17,7 @@ interface ArticleFull {
   excerpt: string;
   content: string;
   cover_image_url: string | null;
+  canonical_url: string | null;
   category: string;
   tags: string[];
   city: string | null;
