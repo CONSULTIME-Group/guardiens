@@ -34,7 +34,7 @@ const ownerCards = [
 ];
 
 const conditions = [
-  "5 gardes réalisées sur Guardiens",
+  "3 gardes réalisées sur Guardiens",
   "Note moyenne ≥ 4.7/5",
   "0 annulation sur les 6 derniers mois",
   "Identité vérifiée",

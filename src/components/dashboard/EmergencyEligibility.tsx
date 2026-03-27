@@ -52,7 +52,7 @@ const EmergencyEligibility = () => {
   ];
 
   const doneCount = items.filter(i => i.ok).length;
-  const remaining = 5 - checks.completedSits;
+  const remaining = Math.max(0, 3 - checks.completedSits);
 
   return (
     <div className="rounded-xl border border-border bg-card p-5 space-y-3">
