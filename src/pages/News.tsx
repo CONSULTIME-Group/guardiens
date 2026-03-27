@@ -76,7 +76,11 @@ export default function News() {
         .range(from, to);
 
       if (activeCategory !== "all") {
-        query = query.eq("category", activeCategory);
+        if (activeCategory === "guides_pratiques") {
+          query = query.in("category", ["thematique", "guide_local"]);
+        } else {
+          query = query.eq("category", activeCategory);
+        }
       }
 
       const { data, count } = await query;
