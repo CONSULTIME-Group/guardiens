@@ -26,11 +26,11 @@ import PageMeta from "@/components/PageMeta";
 /* ── Section completion helpers ── */
 function sectionComplete(section: number, d: SitterProfileData): boolean {
   switch (section) {
-    case 1: return !!(d.avatar_url && d.first_name && d.city && d.bio);
-    case 2: return !!d.motivation;
-    case 3: return !!(d.experience_years && d.animal_types.length > 0);
-    case 4: return !!(d.has_vehicle !== undefined && d.languages.length > 0);
-    case 5: return !!(d.min_duration || d.max_duration);
+    case 1: return !!(d.avatar_url && d.first_name && d.last_name && d.city && d.bio && d.motivation);
+    case 2: return !!(d.sitter_type && d.availability_during && d.lifestyle.length > 0);
+    case 3: return !!(d.experience_years && d.animal_types.length > 0 && d.references_text);
+    case 4: return !!((d.has_license || d.has_vehicle) && d.availability_dates.length > 0);
+    case 5: return !!(d.languages.length > 0 && d.meeting_preference.length > 0 && d.handover_preference);
     default: return false;
   }
 }
