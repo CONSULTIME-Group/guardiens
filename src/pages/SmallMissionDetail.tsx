@@ -348,11 +348,38 @@ const SmallMissionDetail = () => {
         </div>
       )}
 
+      {/* Feedback for non-author (responder) on completed mission */}
+      {user && !isAuthor && mission.status === "completed" && !hasFeedback && (
+        <div className="text-center py-6">
+          <Button
+            onClick={() => openFeedbackFor(mission.user_id, author?.first_name || "le posteur")}
+            className="gap-2"
+          >
+            <Handshake className="h-4 w-4" /> Donner mon retour sur l'entraide
+          </Button>
+        </div>
+      )}
+      {user && !isAuthor && mission.status === "completed" && hasFeedback && (
+        <p className="text-sm text-muted-foreground text-center py-6">✅ Vous avez donné votre retour — merci !</p>
+      )}
+
       {!user && (
         <div className="text-center py-8">
           <p className="text-muted-foreground mb-3">Connectez-vous pour proposer votre aide.</p>
           <Link to="/login"><Button>Se connecter</Button></Link>
         </div>
+      )}
+
+      {/* Feedback modal */}
+      {feedbackTarget && (
+        <MissionFeedbackModal
+          open={feedbackOpen}
+          onOpenChange={setFeedbackOpen}
+          missionId={id!}
+          receiverId={feedbackTarget.id}
+          receiverName={feedbackTarget.name}
+          onSubmitted={() => setHasFeedback(true)}
+        />
       )}
       </div>
     </div>
