@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://guardiens.fr/sitemap.xml
+Sitemap: https://erhccyqevdyevpyctsjj.supabase.co/functions/v1/sitemap
