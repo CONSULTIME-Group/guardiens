@@ -341,6 +341,42 @@ export type Database = {
         }
         Relationships: []
       }
+      contact_messages: {
+        Row: {
+          admin_notes: string | null
+          created_at: string
+          email: string
+          id: string
+          message: string
+          name: string
+          resolved_at: string | null
+          status: string
+          subject: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          created_at?: string
+          email?: string
+          id?: string
+          message?: string
+          name?: string
+          resolved_at?: string | null
+          status?: string
+          subject?: string
+        }
+        Update: {
+          admin_notes?: string | null
+          created_at?: string
+          email?: string
+          id?: string
+          message?: string
+          name?: string
+          resolved_at?: string | null
+          status?: string
+          subject?: string
+        }
+        Relationships: []
+      }
       conversations: {
         Row: {
           archived_by: string[] | null

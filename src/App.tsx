@@ -65,6 +65,7 @@ import AdminSmallMissions from "./pages/admin/AdminSmallMissions";
 import AdminSubscriptions from "./pages/admin/AdminSubscriptions";
 import AdminLegal from "./pages/admin/AdminLegal";
 import AdminSettings from "./pages/admin/AdminSettings";
+import AdminContactMessages from "./pages/admin/AdminContactMessages";
 import PublicProfile from "./pages/PublicProfile";
 import EmergencySitter from "./pages/EmergencySitter";
 import MySubscription from "./pages/MySubscription";
@@ -130,6 +131,7 @@ const AppRoutes = () => (
       <Route path="/admin/small-missions" element={<AdminSmallMissions />} />
       <Route path="/admin/legal" element={<AdminLegal />} />
       <Route path="/admin/settings" element={<AdminSettings />} />
+      <Route path="/admin/contact-messages" element={<AdminContactMessages />} />
     </Route>
     {/* App routes */}
     <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
