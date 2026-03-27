@@ -318,9 +318,9 @@ const SearchSitter = () => {
       items = items.map((m: any) => ({ ...m, distance: null, isNew: differenceInHours(new Date(), new Date(m.created_at)) < 48 }) as any);
     }
 
-    let final = [...items];
-    if (sort === "closest") final.sort((a, b) => (a.distance ?? 9999) - (b.distance ?? 9999));
-    else if (sort === "recent") final.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+    let final: any[] = [...items];
+    if (sort === "closest") final.sort((a: any, b: any) => (a.distance ?? 9999) - (b.distance ?? 9999));
+    else if (sort === "recent") final.sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
     setResults(final);
   };
 
