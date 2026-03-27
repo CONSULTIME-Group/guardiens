@@ -54,9 +54,17 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
       return stored ? new Set(JSON.parse(stored)) : new Set();
     } catch { return new Set(); }
   });
-  const [confirmApp, setConfirmApp] = useState<any>(null); // app to confirm
-  const [declineApp, setDeclineApp] = useState<any>(null); // app to decline
+  const [confirmApp, setConfirmApp] = useState<any>(null);
+  const [declineApp, setDeclineApp] = useState<any>(null);
+  const [declineMessage, setDeclineMessage] = useState("");
+  const [declineCustom, setDeclineCustom] = useState(false);
   const navigate = useNavigate();
+
+  const declineTemplates = [
+    "Merci pour votre candidature ! J'ai trouvé un gardien dont le profil correspondait davantage à mes besoins cette fois-ci. N'hésitez pas à postuler à mes prochaines annonces !",
+    "Merci de votre intérêt ! Les dates ne correspondent malheureusement pas tout à fait. J'espère qu'on pourra collaborer une prochaine fois !",
+    "Merci pour votre message ! J'ai choisi un gardien plus proche géographiquement pour cette garde. Bonne continuation sur Guardiens !",
+  ];
 
   const load = async () => {
     const { data } = await supabase
