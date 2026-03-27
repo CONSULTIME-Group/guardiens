@@ -17,7 +17,6 @@ interface Props {
 const OwnerStepIdentity = ({ data, onChange, onUploadPhoto }: Props) => {
   const fileRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
-  const { handlePostalCodeChange } = usePostalCodeCity(onChange);
 
   const handleAvatar = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
