@@ -92,7 +92,7 @@ const CellValue = ({ value }: { value: boolean | string }) => {
 
 const Pricing = () => {
   const before = isBeforeLaunch();
-
+  const grace = isInGracePeriod();
   return (
     <>
       <PageMeta
