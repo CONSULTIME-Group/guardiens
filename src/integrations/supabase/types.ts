@@ -503,10 +503,13 @@ export type Database = {
       emergency_sitter_profiles: {
         Row: {
           animal_types: string[]
+          blocked_until: string | null
           created_at: string
           id: string
+          interventions_count: number
           is_active: boolean
           radius_km: number
+          refusal_count: number
           sms_alerts: boolean
           updated_at: string
           user_id: string
@@ -514,10 +517,13 @@ export type Database = {
         }
         Insert: {
           animal_types?: string[]
+          blocked_until?: string | null
           created_at?: string
           id?: string
+          interventions_count?: number
           is_active?: boolean
           radius_km?: number
+          refusal_count?: number
           sms_alerts?: boolean
           updated_at?: string
           user_id: string
@@ -525,10 +531,13 @@ export type Database = {
         }
         Update: {
           animal_types?: string[]
+          blocked_until?: string | null
           created_at?: string
           id?: string
+          interventions_count?: number
           is_active?: boolean
           radius_km?: number
+          refusal_count?: number
           sms_alerts?: boolean
           updated_at?: string
           user_id?: string
@@ -1700,6 +1709,7 @@ export type Database = {
           end_date: string | null
           flexible_dates: boolean | null
           id: string
+          is_urgent: boolean
           open_to: string[] | null
           property_id: string
           specific_expectations: string | null
@@ -1716,6 +1726,7 @@ export type Database = {
           end_date?: string | null
           flexible_dates?: boolean | null
           id?: string
+          is_urgent?: boolean
           open_to?: string[] | null
           property_id: string
           specific_expectations?: string | null
@@ -1732,6 +1743,7 @@ export type Database = {
           end_date?: string | null
           flexible_dates?: boolean | null
           id?: string
+          is_urgent?: boolean
           open_to?: string[] | null
           property_id?: string
           specific_expectations?: string | null

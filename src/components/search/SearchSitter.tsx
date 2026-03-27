@@ -11,7 +11,7 @@ import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Search, SlidersHorizontal, MapPin, Calendar, Star, CheckCircle2, Lock } from "lucide-react";
+import { Search, SlidersHorizontal, MapPin, Calendar, Star, CheckCircle2, Lock, Zap } from "lucide-react";
 import ChipSelect from "@/components/profile/ChipSelect";
 import VerifiedBadge from "@/components/profile/VerifiedBadge";
 import BadgeShield from "@/components/badges/BadgeShield";
@@ -489,7 +489,12 @@ const SearchSitter = () => {
                         </div>
                       )}
                       <div className="p-4 flex-1 min-w-0">
-                        <h3 className="font-heading font-semibold truncate flex items-center gap-1">
+                        <h3 className="font-heading font-semibold truncate flex items-center gap-2">
+                          {(sit as any).is_urgent && (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 text-[11px] font-semibold shrink-0">
+                              <Zap className="h-3 w-3" /> Urgent
+                            </span>
+                          )}
                           {sit.title || "Sans titre"}
                           {sit.owner?.identity_verified && <VerifiedBadge size="sm" />}
                         </h3>

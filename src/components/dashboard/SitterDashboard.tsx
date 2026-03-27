@@ -5,6 +5,7 @@ import { Link } from "react-router-dom";
 import OnboardingWelcome from "./OnboardingWelcome";
 import EmergencyActivation from "./EmergencyActivation";
 import EmergencyDashSection from "./EmergencyDashSection";
+import EmergencyEligibility from "./EmergencyEligibility";
 import {
   Home, Star, Mail, Award, CircleDot, ChevronRight, Search,
   Send as SendIcon, Eye, CheckCircle2, XCircle, MessageSquare,
@@ -59,6 +60,7 @@ const SitterDashboard = () => {
   const [onboardingChecks, setOnboardingChecks] = useState({ hasName: false, hasAvatar: false, hasBio: false, hasIdentity: false, hasSitterProfile: false });
   const [emergencyEligible, setEmergencyEligible] = useState(false);
   const [hasEmergencyProfile, setHasEmergencyProfile] = useState(false);
+  const [emergencyBlocked, setEmergencyBlocked] = useState<string | null>(null);
   const [showEmergencyForm, setShowEmergencyForm] = useState(false);
 
   useEffect(() => {
@@ -133,9 +135,14 @@ const SitterDashboard = () => {
       setMetrics(prev => ({ ...prev, missionsPosted: allMyMissionsRes.data?.length || 0, missionsHelped: allMyResponsesRes.data?.length || 0 }));
 
       // Emergency sitter eligibility
-      const { data: emProfile } = await supabase.from("emergency_sitter_profiles").select("id").eq("user_id", user.id).maybeSingle();
+      const { data: emProfile } = await supabase.from("emergency_sitter_profiles").select("id, blocked_until").eq("user_id", user.id).maybeSingle();
       if (emProfile) {
-        setHasEmergencyProfile(true);
+        const blockedUntil = (emProfile as any).blocked_until;
+        if (blockedUntil && new Date(blockedUntil) > new Date()) {
+          setEmergencyBlocked(blockedUntil);
+        } else {
+          setHasEmergencyProfile(true);
+        }
       } else {
         const completedSits = acceptedApps.filter((a: any) => a.sit?.status === "completed").length;
         const avg = reviews.length > 0 ? reviews.reduce((s: number, r: any) => s + r.overall_rating, 0) / reviews.length : 0;
@@ -274,6 +281,22 @@ const SitterDashboard = () => {
           <EmergencyActivation onActivated={() => { setHasEmergencyProfile(true); setShowEmergencyForm(false); }} />
         </div>
       )}
+
+      {/* 4d. Emergency blocked */}
+      {emergencyBlocked && (
+        <div className="rounded-xl border border-border bg-muted/50 p-5 space-y-2">
+          <div className="flex items-center gap-2.5">
+            <Zap className="h-4 w-4 text-muted-foreground" />
+            <p className="font-heading font-semibold text-sm text-muted-foreground">Gardien d'urgence — en pause</p>
+          </div>
+          <p className="text-xs text-muted-foreground">
+            Votre statut est en pause jusqu'au {new Date(emergencyBlocked).toLocaleDateString("fr-FR")}. Continuez à garder avec excellence pour le réactiver.
+          </p>
+        </div>
+      )}
+
+      {/* 4e. Not yet eligible — show progress */}
+      {!emergencyEligible && !hasEmergencyProfile && !emergencyBlocked && <EmergencyEligibility />}
 
       {/* 5. My applications */}
       <DashSection title="Mes candidatures" action={

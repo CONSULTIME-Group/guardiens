@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Link } from "react-router-dom";
 import OnboardingWelcome from "./OnboardingWelcome";
+import NearbyEmergencySitters from "./NearbyEmergencySitters";
 import {
   Calendar, Star, Megaphone, Heart, ChevronRight, Plus, PawPrint,
   Users, Handshake, Newspaper, Home,
@@ -336,7 +337,10 @@ const OwnerDashboard = () => {
         )}
       </DashSection>
 
-      {/* 6. CTA */}
+      {/* 6. Nearby emergency sitters */}
+      <NearbyEmergencySitters />
+
+      {/* 7. CTA */}
       {cta && (
         <div className="p-6 rounded-xl bg-primary/5 border-2 border-dashed border-primary/30 text-center">
           <p className="text-sm text-muted-foreground mb-3">{cta.text}</p>

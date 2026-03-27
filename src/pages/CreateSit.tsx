@@ -9,7 +9,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import ChipSelect from "@/components/profile/ChipSelect";
-import { Calendar, Home, PawPrint, ShieldCheck, MessageSquare, Users, ArrowLeft, AlertCircle } from "lucide-react";
+import { Calendar, Home, PawPrint, ShieldCheck, MessageSquare, Users, ArrowLeft, AlertCircle, Zap } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Link } from "react-router-dom";
 
 interface PropertySummary {
@@ -78,6 +79,7 @@ const CreateSit = () => {
   const [flexibilityNote, setFlexibilityNote] = useState("");
   const [specificExpectations, setSpecificExpectations] = useState("");
   const [openTo, setOpenTo] = useState<string[]>([]);
+  const [isUrgent, setIsUrgent] = useState(false);
 
   const [property, setProperty] = useState<PropertySummary | null>(null);
   const [pets, setPets] = useState<PetSummary[]>([]);
@@ -155,8 +157,9 @@ const CreateSit = () => {
         flexible_dates: flexibleDates,
         specific_expectations: expectations,
         open_to: openTo,
+        is_urgent: isUrgent,
         status: "published" as any,
-      }).select("id").single();
+      } as any).select("id").single();
 
       if (error) throw error;
       toast({ title: "Annonce publiée ! 🎉", description: "Les gardiens peuvent maintenant postuler." });
@@ -245,6 +248,23 @@ const CreateSit = () => {
         <div>
           <Label className="text-sm font-medium mb-2 block">Annonce ouverte à</Label>
           <ChipSelect options={openToOptions} selected={openTo} onChange={setOpenTo} />
+        </div>
+
+        <div className="flex items-start gap-3 rounded-lg border border-amber-200 dark:border-amber-800 bg-amber-50/50 dark:bg-amber-900/10 p-4">
+          <Checkbox
+            checked={isUrgent}
+            onCheckedChange={(v) => setIsUrgent(v === true)}
+            className="mt-0.5"
+          />
+          <div>
+            <label className="text-sm font-medium flex items-center gap-1.5 cursor-pointer" onClick={() => setIsUrgent(!isUrgent)}>
+              <Zap className="h-3.5 w-3.5 text-amber-500" />
+              Urgent — garde dans moins de 48h
+            </label>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              Les gardiens d'urgence seront alertés en priorité
+            </p>
+          </div>
         </div>
       </div>
 
