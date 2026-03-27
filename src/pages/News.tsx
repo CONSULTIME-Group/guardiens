@@ -101,8 +101,14 @@ export default function News() {
   };
 
   const categories = [
-    { key: "all", label: "Tout" },
-    ...Object.entries(CATEGORY_LABELS).map(([key, label]) => ({ key, label })),
+    { key: "all", label: "Tous" },
+    { key: "conseil_gardien", label: "Conseils gardiens" },
+    { key: "conseil_proprio", label: "Conseils propriétaires" },
+    { key: "conseil", label: "Conseils" },
+    { key: "guide_race", label: "Races" },
+    { key: "ville", label: "Villes" },
+    { key: "guides_pratiques", label: "Guides pratiques" },
+    { key: "saisonnier", label: "Saisonniers" },
   ];
 
   return (
