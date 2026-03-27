@@ -7,7 +7,9 @@ import { Check, X, Star, Gift } from "lucide-react";
 import PageMeta from "@/components/PageMeta";
 
 const LAUNCH_DATE = new Date("2026-05-13T00:00:00");
+const GRACE_END = new Date("2026-06-13T00:00:00");
 const isBeforeLaunch = () => new Date() < LAUNCH_DATE;
+const isInGracePeriod = () => { const n = new Date(); return n >= LAUNCH_DATE && n < GRACE_END; };
 
 const ownerFeatures = [
   "Créer votre profil complet",
