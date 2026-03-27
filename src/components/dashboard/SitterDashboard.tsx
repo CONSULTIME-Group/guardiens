@@ -4,6 +4,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Link } from "react-router-dom";
 import EmergencyActivation from "./EmergencyActivation";
 import EmergencyDashSection from "./EmergencyDashSection";
+import ResourceSection from "@/components/shared/ResourceSection";
+import type { ResourceItem } from "@/components/shared/ResourceCard";
 import {
   Home, Star, Mail, Award, CircleDot, ChevronRight, Search,
   Send as SendIcon, Eye, CheckCircle2, XCircle, MessageSquare,
