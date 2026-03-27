@@ -15,6 +15,9 @@ import MessageBubble from "@/components/messages/MessageBubble";
 import { useToast } from "@/hooks/use-toast";
 import { getBadgeDef } from "@/components/badges/badgeDefinitions";
 import StatusShield from "@/components/badges/StatusShield";
+import { useSubscriptionAccess } from "@/hooks/useSubscriptionAccess";
+import { Lock } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 interface Conversation {
   id: string;
@@ -108,9 +111,12 @@ const SuggestedMessages = ({
 };
 
 const Messages = () => {
-  const { user } = useAuth();
+  const { user, activeRole } = useAuth();
   const isMobile = useIsMobile();
   const { toast } = useToast();
+  const navigate = useNavigate();
+  const { hasAccess, loading: subLoading } = useSubscriptionAccess();
+  const effectiveRole = user?.role === "both" ? activeRole : user?.role;
   const [searchParams, setSearchParams] = useSearchParams();
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [activeConv, setActiveConv] = useState<Conversation | null>(null);
@@ -541,23 +547,38 @@ const Messages = () => {
             onSelect={(text) => setNewMessage(text)}
           />
 
-          {/* Input */}
-          <div className="border-t border-border bg-card p-3 flex items-center gap-2 mb-16 md:mb-0">
-            <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handlePhotoUpload} />
-            <button onClick={() => fileInputRef.current?.click()} className="p-2 rounded-lg hover:bg-accent text-muted-foreground">
-              <ImageIcon className="h-5 w-5" />
-            </button>
-            <Input
-              value={newMessage}
-              onChange={e => setNewMessage(e.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder="Écrire un message..."
-              className="flex-1 rounded-full"
-            />
-            <Button size="icon" onClick={handleSend} disabled={sending || !newMessage.trim()} className="rounded-full shrink-0">
-              <Send className="h-4 w-4" />
-            </Button>
-          </div>
+          {/* Input or Paywall */}
+          {effectiveRole === "sitter" && !hasAccess ? (
+            <div className="border-t border-border bg-amber-50 dark:bg-amber-900/20 p-4 mb-16 md:mb-0">
+              <div className="flex items-center gap-3">
+                <Lock className="h-5 w-5 text-amber-600 shrink-0" />
+                <div className="flex-1">
+                  <p className="text-sm font-semibold text-amber-900 dark:text-amber-200">Abonnez-vous pour répondre</p>
+                  <p className="text-xs text-amber-700 dark:text-amber-300">L'accès à la messagerie nécessite un abonnement — 49€/an</p>
+                </div>
+                <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white shrink-0" onClick={() => navigate("/mon-abonnement")}>
+                  S'abonner
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <div className="border-t border-border bg-card p-3 flex items-center gap-2 mb-16 md:mb-0">
+              <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handlePhotoUpload} />
+              <button onClick={() => fileInputRef.current?.click()} className="p-2 rounded-lg hover:bg-accent text-muted-foreground">
+                <ImageIcon className="h-5 w-5" />
+              </button>
+              <Input
+                value={newMessage}
+                onChange={e => setNewMessage(e.target.value)}
+                onKeyDown={handleKeyDown}
+                placeholder="Écrire un message..."
+                className="flex-1 rounded-full"
+              />
+              <Button size="icon" onClick={handleSend} disabled={sending || !newMessage.trim()} className="rounded-full shrink-0">
+                <Send className="h-4 w-4" />
+              </Button>
+            </div>
+          )}
         </div>
       ) : !isMobile ? (
         <div className="flex-1 flex items-center justify-center text-muted-foreground">

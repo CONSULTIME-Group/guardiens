@@ -3,7 +3,8 @@ import { useParams, Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Calendar, MapPin, Star, ShieldCheck, Home, PawPrint, MessageSquare, CheckCircle2, XCircle, Send, Pencil, Heart } from "lucide-react";
+import { ArrowLeft, Calendar, MapPin, Star, ShieldCheck, Home, PawPrint, MessageSquare, CheckCircle2, XCircle, Send, Pencil, Heart, LockKeyhole } from "lucide-react";
+import { useSubscriptionAccess } from "@/hooks/useSubscriptionAccess";
 import PostConfirmationChecklist from "@/components/sits/PostConfirmationChecklist";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -51,6 +52,7 @@ const SitDetail = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { user, activeRole } = useAuth();
+  const { hasAccess: subHasAccess } = useSubscriptionAccess();
   const [sit, setSit] = useState<SitData | null>(null);
   const [owner, setOwner] = useState<any>(null);
   const [property, setProperty] = useState<any>(null);
@@ -519,6 +521,10 @@ const SitDetail = () => {
             {hasApplied ? (
               <Button className="w-full h-12 text-base font-semibold" disabled>
                 <CheckCircle2 className="h-5 w-5 mr-2" /> Candidature envoyée ✓
+              </Button>
+            ) : !subHasAccess ? (
+              <Button className="w-full h-12 text-base font-semibold bg-amber-600 hover:bg-amber-700 text-white" onClick={() => navigate("/mon-abonnement")}>
+                <LockKeyhole className="h-5 w-5 mr-2" /> Abonnez-vous pour postuler — 49€/an
               </Button>
             ) : (
               <Button className="w-full h-12 text-base font-semibold" onClick={() => setApplyOpen(true)}>
