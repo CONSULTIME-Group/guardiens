@@ -135,9 +135,14 @@ const SitterDashboard = () => {
       setMetrics(prev => ({ ...prev, missionsPosted: allMyMissionsRes.data?.length || 0, missionsHelped: allMyResponsesRes.data?.length || 0 }));
 
       // Emergency sitter eligibility
-      const { data: emProfile } = await supabase.from("emergency_sitter_profiles").select("id").eq("user_id", user.id).maybeSingle();
+      const { data: emProfile } = await supabase.from("emergency_sitter_profiles").select("id, blocked_until").eq("user_id", user.id).maybeSingle();
       if (emProfile) {
-        setHasEmergencyProfile(true);
+        const blockedUntil = (emProfile as any).blocked_until;
+        if (blockedUntil && new Date(blockedUntil) > new Date()) {
+          setEmergencyBlocked(blockedUntil);
+        } else {
+          setHasEmergencyProfile(true);
+        }
       } else {
         const completedSits = acceptedApps.filter((a: any) => a.sit?.status === "completed").length;
         const avg = reviews.length > 0 ? reviews.reduce((s: number, r: any) => s + r.overall_rating, 0) / reviews.length : 0;
