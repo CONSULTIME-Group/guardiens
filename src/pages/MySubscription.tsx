@@ -7,14 +7,15 @@ import { Progress } from "@/components/ui/progress";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import {
   Star, Lock, CheckCircle2, XCircle, Zap, Search as SearchIcon,
-  Mail, Map, PawPrint, Award, Radio, CalendarDays, Handshake, CreditCard,
+  Mail, Map, PawPrint, Award, Radio, CalendarDays, Handshake, CreditCard, AlertTriangle,
 } from "lucide-react";
 import { differenceInDays, format } from "date-fns";
 import { fr } from "date-fns/locale";
 
-const LAUNCH_DATE = new Date("2026-05-13T00:00:00");
+const LAUNCH_DATE = new Date("2026-05-13T00:00:00Z");
+const GRACE_END_DATE = new Date("2026-06-13T00:00:00Z");
 
-type SubStatus = "founder" | "premium" | "expired" | "never" | "owner";
+type SubStatus = "founder_grace" | "founder_expired" | "premium" | "expired" | "never" | "owner";
 
 const benefitCards = [
   { icon: SearchIcon, title: "Annonces complètes", desc: "Photos, descriptions, détails des animaux et infos de contact." },
@@ -99,16 +100,18 @@ const MySubscription = () => {
       setSub(subRes.data);
       setEmergencyInfo(emergencyRes.data ? { interventions: emergencyRes.data.interventions_count } : null);
 
-      // Determine status
       const createdDate = p?.created_at ? new Date(p.created_at) : new Date();
-      const isFounder = p?.is_founder || createdDate < new Date("2026-05-13T00:00:00Z");
+      const isFounder = p?.is_founder || createdDate < LAUNCH_DATE;
+      const now = new Date();
 
       if (effectiveRole === "owner") {
         setStatus("owner");
-      } else if (isFounder) {
-        setStatus("founder");
       } else if (subRes.data?.status === "active") {
         setStatus("premium");
+      } else if (isFounder && now < GRACE_END_DATE) {
+        setStatus("founder_grace");
+      } else if (isFounder && now >= GRACE_END_DATE && subRes.data?.status !== "active") {
+        setStatus("founder_expired");
       } else if (subRes.data?.status === "expired" || subRes.data?.status === "cancelled") {
         setStatus("expired");
       } else {
@@ -127,13 +130,10 @@ const MySubscription = () => {
     );
   }
 
-  const createdAt = profile?.created_at ? new Date(profile.created_at) : new Date();
-  const founderExpiry = new Date(createdAt);
-  founderExpiry.setFullYear(founderExpiry.getFullYear() + 1);
-  const daysLeft = Math.max(0, differenceInDays(founderExpiry, new Date()));
-  const progressPct = Math.round((daysLeft / 365) * 100);
-
-  const barColor = daysLeft < 30 ? "bg-red-500" : daysLeft < 60 ? "bg-amber-500" : "bg-green-500";
+  const now = new Date();
+  const daysLeftGrace = Math.max(0, differenceInDays(GRACE_END_DATE, now));
+  const graceProgressPct = Math.round((daysLeftGrace / 31) * 100);
+  const graceBarColor = daysLeftGrace < 7 ? "bg-red-500" : daysLeftGrace < 14 ? "bg-amber-500" : "bg-green-500";
 
   return (
     <div className="p-6 md:p-10 max-w-3xl mx-auto animate-fade-in space-y-8">
@@ -141,29 +141,32 @@ const MySubscription = () => {
 
       <h1 className="font-heading text-3xl font-bold">Mon abonnement</h1>
 
-      {/* ═══ FONDATEUR ═══ */}
-      {status === "founder" && (
+      {/* ═══ FONDATEUR EN PÉRIODE DE GRÂCE ═══ */}
+      {status === "founder_grace" && (
         <div className="rounded-xl border-2 border-[#C4956A] bg-[#FEF3C7]/60 dark:bg-amber-900/20 p-6 space-y-5">
           <div className="text-center space-y-2">
             <Star className="h-16 w-16 text-amber-500 mx-auto" fill="currentColor" />
             <h2 className="font-heading text-2xl font-bold">Vous êtes Fondateur</h2>
-            <p className="text-sm text-muted-foreground">Inscrit avant le 13 mai — accès gratuit pendant 1 an + badge à vie.</p>
+            <p className="text-sm text-muted-foreground">
+              Inscrit avant le 13 mai — votre accès gratuit est valable jusqu'au <strong>13 juin 2026</strong>.
+              Après cette date, l'abonnement à 49€/an sera nécessaire pour continuer. Votre badge Fondateur reste à vie, quoi qu'il arrive ✨
+            </p>
           </div>
 
           <div className="grid grid-cols-2 gap-4 text-sm">
             <div><span className="text-muted-foreground">Plan :</span> <span className="font-medium">Fondateur (gratuit)</span></div>
-            <div><span className="text-muted-foreground">Début :</span> <span className="font-medium">{format(createdAt, "d MMMM yyyy", { locale: fr })}</span></div>
-            <div><span className="text-muted-foreground">Expire :</span> <span className="font-medium">{format(founderExpiry, "d MMMM yyyy", { locale: fr })}</span></div>
-            <div><span className="text-muted-foreground">Badge :</span> <span className="font-medium">Permanent ✨</span></div>
+            <div><span className="text-muted-foreground">Accès gratuit jusqu'au :</span> <span className="font-medium">13 juin 2026</span></div>
+            <div><span className="text-muted-foreground">Badge :</span> <span className="font-medium">Fondateur — permanent ✨</span></div>
+            <div><span className="text-muted-foreground">Après le 13 juin :</span> <span className="font-medium">49€/an</span></div>
           </div>
 
           <div className="space-y-2">
             <div className="flex justify-between text-sm">
-              <span>Il vous reste {daysLeft} jours sur 365</span>
-              <span className="font-medium">{progressPct}%</span>
+              <span>Il vous reste {daysLeftGrace} jour{daysLeftGrace > 1 ? "s" : ""} d'accès gratuit</span>
+              <span className="font-medium">{graceProgressPct}%</span>
             </div>
             <div className="w-full bg-muted rounded-full h-3 overflow-hidden">
-              <div className={`h-full rounded-full transition-all ${barColor}`} style={{ width: `${progressPct}%` }} />
+              <div className={`h-full rounded-full transition-all ${graceBarColor}`} style={{ width: `${graceProgressPct}%` }} />
             </div>
           </div>
 
@@ -175,8 +178,74 @@ const MySubscription = () => {
           )}
 
           <div className="text-center space-y-1.5">
-            <Button variant="outline" size="lg">Renouveler en avance — 49€/an</Button>
-            <p className="text-xs text-muted-foreground">Vous ne serez débité qu'à l'expiration de votre période gratuite.</p>
+            <Button size="lg" className="bg-green-600 hover:bg-green-700 text-white text-base px-8">
+              Souscrire maintenant — 49€/an
+            </Button>
+            <p className="text-xs text-muted-foreground">Activé immédiatement, prolonge votre accès d'un an à partir du 13 juin.</p>
+          </div>
+
+          {daysLeftGrace <= 7 && (
+            <div className="rounded-lg border border-amber-300 dark:border-amber-700 bg-amber-50 dark:bg-amber-900/30 p-4 flex items-start gap-3">
+              <AlertTriangle className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
+              <div className="text-sm">
+                <p className="font-semibold text-amber-900 dark:text-amber-200">Derniers jours d'accès gratuit</p>
+                <p className="text-amber-800 dark:text-amber-300 mt-0.5">
+                  Votre période de grâce expire dans {daysLeftGrace} jour{daysLeftGrace > 1 ? "s" : ""}. 
+                  Abonnez-vous pour ne pas perdre l'accès à vos gardes, messages et candidatures.
+                </p>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ═══ FONDATEUR EXPIRÉ (après le 13 juin, pas abonné) ═══ */}
+      {status === "founder_expired" && (
+        <div className="rounded-xl border-2 border-destructive bg-red-50/60 dark:bg-red-900/10 p-6 space-y-5">
+          <div className="text-center space-y-2">
+            <div className="relative inline-block">
+              <Lock className="h-16 w-16 text-destructive mx-auto" />
+              <Star className="h-6 w-6 text-amber-500 absolute -top-1 -right-1" fill="currentColor" />
+            </div>
+            <h2 className="font-heading text-2xl font-bold">Votre accès gratuit Fondateur a expiré</h2>
+            <p className="text-sm text-muted-foreground">
+              Votre période de grâce (jusqu'au 13 juin) est terminée. Votre <strong>badge Fondateur reste à vie</strong>,
+              mais l'accès complet nécessite un abonnement.
+            </p>
+          </div>
+
+          {/* Comparison */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="rounded-lg bg-muted/70 p-4 space-y-2">
+              <p className="font-semibold text-sm text-center">Sans abonnement</p>
+              {withoutSub.map((item, i) => (
+                <div key={i} className="flex items-center gap-2 text-sm">
+                  <XCircle className="h-4 w-4 text-destructive shrink-0" />
+                  <span className="text-muted-foreground">{item}</span>
+                </div>
+              ))}
+            </div>
+            <div className="rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 p-4 space-y-2">
+              <p className="font-semibold text-sm text-center">Avec abonnement</p>
+              {withSub.map((item, i) => (
+                <div key={i} className="flex items-center gap-2 text-sm">
+                  <CheckCircle2 className="h-4 w-4 text-green-600 shrink-0" />
+                  <span>{item}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 p-4 text-center text-sm">
+            <Star className="h-4 w-4 text-amber-500 inline mr-1" fill="currentColor" />
+            Votre badge Fondateur est <strong>conservé à vie</strong> — il continuera d'apparaître sur votre profil.
+          </div>
+
+          <div className="text-center space-y-1.5">
+            <Button size="lg" className="bg-green-600 hover:bg-green-700 text-white text-base px-8">
+              S'abonner — 49€/an
+            </Button>
+            <p className="text-xs text-muted-foreground">Votre profil, vos avis et votre historique sont conservés.</p>
           </div>
         </div>
       )}
@@ -197,6 +266,14 @@ const MySubscription = () => {
             <div><span className="text-muted-foreground">Paiement :</span> <span className="font-medium">•••• 4242</span></div>
           </div>
 
+          {/* Show founder badge if applicable */}
+          {profile && (profile.is_founder || (profile.created_at && new Date(profile.created_at) < LAUNCH_DATE)) && (
+            <div className="rounded-lg border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-900/20 p-3 flex items-center gap-2 text-sm">
+              <Star className="h-4 w-4 text-amber-500 shrink-0" fill="currentColor" />
+              <span>Badge <strong>Fondateur</strong> — permanent ✨</span>
+            </div>
+          )}
+
           {emergencyInfo && emergencyInfo.interventions > 0 && (
             <div className="rounded-lg border border-border bg-card p-4 text-sm">
               <Zap className="h-4 w-4 text-amber-500 inline mr-1.5" />
@@ -215,7 +292,7 @@ const MySubscription = () => {
         </div>
       )}
 
-      {/* ═══ EXPIRÉ ═══ */}
+      {/* ═══ EXPIRÉ (non-fondateur) ═══ */}
       {status === "expired" && (
         <div className="rounded-xl border-2 border-destructive bg-red-50/60 dark:bg-red-900/10 p-6 space-y-5">
           <div className="text-center space-y-2">
@@ -228,7 +305,6 @@ const MySubscription = () => {
             Expiré depuis le {sub?.expires_at ? format(new Date(sub.expires_at), "d MMMM yyyy", { locale: fr }) : "—"}
           </div>
 
-          {/* Comparison */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="rounded-lg bg-muted/70 p-4 space-y-2">
               <p className="font-semibold text-sm text-center">Sans abonnement</p>
@@ -263,7 +339,7 @@ const MySubscription = () => {
         </div>
       )}
 
-      {/* ═══ JAMAIS ABONNÉ ═══ */}
+      {/* ═══ JAMAIS ABONNÉ (post-13 mai) ═══ */}
       {status === "never" && (
         <div className="rounded-xl border-2 border-blue-400 dark:border-blue-700 bg-blue-50/60 dark:bg-blue-900/10 p-6 space-y-6">
           <div className="text-center space-y-2">
