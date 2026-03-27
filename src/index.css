@@ -242,12 +242,12 @@
   .article-cta-heading {
     @apply text-xl font-bold mb-2;
     font-family: var(--font-heading);
-    color: hsl(var(--foreground));
+    color: #1C1B18;
   }
 
   .article-cta-text {
     @apply text-sm mb-4;
-    color: hsl(var(--muted-foreground));
+    color: #6B7280;
   }
 
   .article-cta-buttons {
