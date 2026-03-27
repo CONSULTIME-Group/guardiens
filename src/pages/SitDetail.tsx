@@ -270,6 +270,22 @@ const SitDetail = () => {
         </div>
       )}
 
+      {/* Post-confirmation checklist */}
+      {sit && user && (sit.status === "confirmed" || sit.status === "in_progress") && (
+        <div className="mb-8">
+          <PostConfirmationChecklist
+            sitId={sit.id}
+            sitOwnerId={sit.user_id}
+            propertyId={sit.property_id}
+            startDate={sit.start_date}
+            endDate={sit.end_date}
+            ownerCity={owner?.city}
+            isOwner={isOwner}
+            isLongStay={false}
+          />
+        </div>
+      )}
+
       {/* Tabbed content like Nomador */}
       <Tabs defaultValue="animals" className="mt-2">
         <TabsList className="w-full justify-start border-b border-border rounded-none bg-transparent h-auto p-0 gap-0">
