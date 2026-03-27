@@ -22,7 +22,7 @@ interface Conversation {
   updated_at: string;
   archived_by: string[];
   sit?: { title: string; status: string; property_id: string } | null;
-  other_user?: { id: string; first_name: string; avatar_url: string | null; identity_verified: boolean } | null;
+  other_user?: { id: string; first_name: string; avatar_url: string | null; identity_verified: boolean; city?: string | null } | null;
   last_message?: { content: string; created_at: string; sender_id: string } | null;
   unread_count: number;
   application_status?: string | null;
