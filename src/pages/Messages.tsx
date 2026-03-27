@@ -153,7 +153,7 @@ const Messages = () => {
     const sitIds = convs.map((conv: any) => conv.sit_id).filter(Boolean);
 
     const [profilesRes, allLastMsgsRes, allUnreadRes, applicationsRes, badgesRes] = await Promise.all([
-      supabase.from("profiles").select("id, first_name, avatar_url, identity_verified").in("id", otherIds),
+      supabase.from("profiles").select("id, first_name, avatar_url, identity_verified, city").in("id", otherIds),
       supabase.from("messages").select("conversation_id, content, created_at, sender_id").in("conversation_id", convIds).order("created_at", { ascending: false }),
       supabase.from("messages").select("conversation_id, id").in("conversation_id", convIds).neq("sender_id", user.id).is("read_at", null),
       sitIds.length > 0
