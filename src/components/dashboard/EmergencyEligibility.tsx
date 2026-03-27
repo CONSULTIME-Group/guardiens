@@ -45,14 +45,14 @@ const EmergencyEligibility = () => {
   if (!checks) return null;
 
   const items = [
-    { label: `Gardes : ${checks.completedSits}/5`, ok: checks.completedSits >= 5 },
+    { label: `Gardes : ${checks.completedSits}/3`, ok: checks.completedSits >= 3 },
     { label: `Note : ${checks.avgRating || "—"}/4.7`, ok: checks.avgRating >= 4.7 },
     { label: `Annulations (6 mois) : ${checks.recentCancellations}`, ok: checks.recentCancellations === 0 },
     { label: "ID vérifiée", ok: checks.identityVerified },
   ];
 
   const doneCount = items.filter(i => i.ok).length;
-  const remaining = 5 - checks.completedSits;
+  const remaining = Math.max(0, 3 - checks.completedSits);
 
   return (
     <div className="rounded-xl border border-border bg-card p-5 space-y-3">

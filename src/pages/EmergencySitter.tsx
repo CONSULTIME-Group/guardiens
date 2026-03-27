@@ -29,12 +29,12 @@ const steps = [
 
 const ownerCards = [
   { icon: Clock, title: "Mobilisable en quelques heures", desc: "Pas besoin d'attendre des jours. Les gardiens d'urgence répondent vite." },
-  { icon: Shield, title: "Vérifié et expérimenté", desc: "5+ gardes réalisées, note 4.7+, 0 annulation, identité vérifiée." },
+  { icon: Shield, title: "Vérifié et expérimenté", desc: "3+ gardes réalisées, note 4.7+, 0 annulation, identité vérifiée." },
   { icon: MapPin, title: "Près de chez vous", desc: "La force de la proximité : quelqu'un de confiance dans votre zone." },
 ];
 
 const conditions = [
-  "5 gardes réalisées sur Guardiens",
+  "3 gardes réalisées sur Guardiens",
   "Note moyenne ≥ 4.7/5",
   "0 annulation sur les 6 derniers mois",
   "Identité vérifiée",
@@ -191,7 +191,7 @@ const EmergencySitter = () => {
             {[
               {
                 q: "Qu'est-ce qu'un gardien d'urgence ?",
-                a: "Un gardien expérimenté : 5+ gardes, note 4.7+, zéro annulation sur 6 mois, ID vérifiée. Disponible rapidement dans son rayon. C'est le plus haut niveau de confiance sur Guardiens."
+                a: "Un gardien expérimenté : 3+ gardes, note 4.7+, zéro annulation sur 6 mois, ID vérifiée. Disponible rapidement dans son rayon. C'est le plus haut niveau de confiance sur Guardiens."
               },
               {
                 q: "Comment trouver un gardien d'urgence ?",
@@ -199,7 +199,7 @@ const EmergencySitter = () => {
               },
               {
                 q: "Comment devenir gardien d'urgence ?",
-                a: "Remplissez les conditions (5 gardes, 4.7+, 0 annulation sur 6 mois, ID vérifiée, abonnement actif). L'invitation apparaît automatiquement sur votre dashboard."
+                a: "Remplissez les conditions (3 gardes, 4.7+, 0 annulation sur 6 mois, ID vérifiée, abonnement actif). L'invitation apparaît automatiquement sur votre dashboard."
               },
               {
                 q: "Est-ce que le gardien d'urgence est payé plus ?",
