@@ -21,7 +21,7 @@ const LocalNetworkGrid = ({ current, allCities }: Props) => {
         {nearby.map((city) => (
           <Link
             key={city.slug}
-            to={`/house-sitting-${city.slug}`}
+            to={`/house-sitting/${city.slug}`}
             className="text-primary hover:underline font-medium text-sm"
           >
             House-sitting {city.name}
