@@ -189,7 +189,7 @@ const SitterProfile = () => {
           hasFirstActivity={trustData.hasFirstActivity}
           role="sitter"
         />
-        <a href="/blog/creer-profil-gardien-attractif" className="text-xs text-primary hover:underline mt-1 inline-block">
+        <a href="/actualites/creer-profil-gardien-attractif" className="text-xs text-primary hover:underline mt-1 inline-block">
           💡 Comment créer un profil qui attire des missions →
         </a>
 
