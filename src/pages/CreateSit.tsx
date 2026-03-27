@@ -157,8 +157,9 @@ const CreateSit = () => {
         flexible_dates: flexibleDates,
         specific_expectations: expectations,
         open_to: openTo,
+        is_urgent: isUrgent,
         status: "published" as any,
-      }).select("id").single();
+      } as any).select("id").single();
 
       if (error) throw error;
       toast({ title: "Annonce publiée ! 🎉", description: "Les gardiens peuvent maintenant postuler." });
