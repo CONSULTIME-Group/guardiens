@@ -81,7 +81,7 @@ const SitterDashboard = () => {
         supabase.from("sits").select("id, title, start_date, end_date, user_id, property_id, status, created_at, is_urgent, properties:property_id(photos, type, environment)").eq("status", "published").order("created_at", { ascending: false }).limit(6),
         supabase.from("badge_attributions").select("id").eq("receiver_id", user.id),
         supabase.from("small_missions").select("id, title, category, city, created_at, exchange_offer, user_id").eq("status", "open").order("created_at", { ascending: false }).limit(6),
-        supabase.from("articles").select("id, title, slug, cover_image_url, excerpt").eq("published", true).order("published_at", { ascending: false }).limit(3),
+        supabase.from("articles").select("id, title, slug, cover_image_url, excerpt, category").eq("published", true).in("category", ["conseil", "conseil_gardien"]).order("published_at", { ascending: false }).limit(3),
       ]);
 
       const vStatus = profileRes.data?.identity_verification_status || "not_submitted";
