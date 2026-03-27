@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { ArrowLeft, Calendar, Home, Info, Star, Lock, Pencil, Trash2, XCircle } from "lucide-react";
+import PostConfirmationChecklist from "@/components/sits/PostConfirmationChecklist";
 import LongStayApplicationsList from "@/components/sits/LongStayApplicationsList";
 import { format, differenceInDays } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -248,6 +249,22 @@ const LongStayDetail = () => {
           </span>
         )}
       </div>
+
+      {/* Post-confirmation checklist for long stays */}
+      {longStay.status === "confirmed" && user && (
+        <div className="mb-6">
+          <PostConfirmationChecklist
+            sitId={longStay.id}
+            sitOwnerId={longStay.user_id}
+            propertyId={longStay.property_id}
+            startDate={longStay.start_date}
+            endDate={longStay.end_date}
+            ownerCity={owner?.city}
+            isOwner={isOwner}
+            isLongStay={true}
+          />
+        </div>
+      )}
 
       {/* Contribution info block */}
       <div className="p-4 rounded-lg border border-border mb-6" style={{ backgroundColor: "#F8F6F1" }}>

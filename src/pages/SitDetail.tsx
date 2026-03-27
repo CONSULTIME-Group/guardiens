@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Calendar, MapPin, Star, ShieldCheck, Home, PawPrint, MessageSquare, CheckCircle2, XCircle, Send, Pencil, Heart } from "lucide-react";
+import PostConfirmationChecklist from "@/components/sits/PostConfirmationChecklist";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import ApplicationModal from "@/components/sits/ApplicationModal";
@@ -266,6 +267,22 @@ const SitDetail = () => {
               <Button variant="outline" size="sm">Voir le profil</Button>
             </Link>
           )}
+        </div>
+      )}
+
+      {/* Post-confirmation checklist */}
+      {sit && user && (sit.status === "confirmed" || sit.status === "in_progress") && (
+        <div className="mb-8">
+          <PostConfirmationChecklist
+            sitId={sit.id}
+            sitOwnerId={sit.user_id}
+            propertyId={sit.property_id}
+            startDate={sit.start_date}
+            endDate={sit.end_date}
+            ownerCity={owner?.city}
+            isOwner={isOwner}
+            isLongStay={false}
+          />
         </div>
       )}
 

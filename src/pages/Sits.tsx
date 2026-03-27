@@ -533,6 +533,9 @@ const QuickActions = ({ sit, isOwner, effectiveStatus }: { sit: any; isOwner: bo
             <BookOpen className="h-3.5 w-3.5" /> Guide
           </Link>
         )}
+        <Link to={`/sits/${sit.id}`} className={cn(btnClass, "bg-green-50 text-green-700 hover:bg-green-100 dark:bg-green-900/20 dark:text-green-400")}>
+          <CheckCircle className="h-3.5 w-3.5" /> Checklist
+        </Link>
       </>
     );
   }
