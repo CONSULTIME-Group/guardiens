@@ -250,6 +250,22 @@ const LongStayDetail = () => {
         )}
       </div>
 
+      {/* Post-confirmation checklist for long stays */}
+      {longStay.status === "confirmed" && user && (
+        <div className="mb-6">
+          <PostConfirmationChecklist
+            sitId={longStay.id}
+            sitOwnerId={longStay.user_id}
+            propertyId={longStay.property_id}
+            startDate={longStay.start_date}
+            endDate={longStay.end_date}
+            ownerCity={owner?.city}
+            isOwner={isOwner}
+            isLongStay={true}
+          />
+        </div>
+      )}
+
       {/* Contribution info block */}
       <div className="p-4 rounded-lg border border-border mb-6" style={{ backgroundColor: "#F8F6F1" }}>
         <div className="flex items-start gap-3">
