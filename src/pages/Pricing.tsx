@@ -315,7 +315,7 @@ const Pricing = () => {
           <section className="text-center space-y-4 py-8">
             <p className="text-lg text-muted-foreground max-w-xl mx-auto">
               {before
-                ? "Inscrivez-vous maintenant — c'est gratuit et vous serez Fondateur à vie."
+                ? "Inscrivez-vous maintenant — accès gratuit jusqu'au 13 juin + badge Fondateur à vie."
                 : "49€/an pour les gardiens. Gratuit pour les propriétaires. Sans engagement."}
             </p>
             <Link to="/register">
