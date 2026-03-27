@@ -23,9 +23,9 @@ const PageMeta = ({
   type = "website",
   publishedAt,
   author,
+  canonicalUrl,
 }: PageMetaProps) => {
-  const fullUrl = `${SITE_URL}${path}`;
-  const fullTitle = path === "/" ? title : `${title} | ${SITE_NAME}`;
+  const fullUrl = canonicalUrl || `${SITE_URL}${path}`;
 
   return (
     <Helmet>
