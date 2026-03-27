@@ -30,11 +30,11 @@ const AdminVerifications = () => {
     setQueue(data || []);
 
     // Fetch metrics
-    const weekAgo = new Date(Date.now() - 7 * 86400000).toISOString();
+    const weekStart = startOfWeek(new Date(), { weekStartsOn: 1 }).toISOString();
     const [pendingRes, verifiedRes, rejectedRes] = await Promise.all([
       supabase.from("profiles").select("id", { count: "exact", head: true }).eq("identity_verification_status", "pending"),
-      supabase.from("identity_verification_logs").select("id", { count: "exact", head: true }).eq("result", "verified").gte("created_at", weekAgo),
-      supabase.from("identity_verification_logs").select("id", { count: "exact", head: true }).eq("result", "rejected").gte("created_at", weekAgo),
+      supabase.from("profiles").select("id", { count: "exact", head: true }).eq("identity_verification_status", "verified").gte("updated_at", weekStart),
+      supabase.from("profiles").select("id", { count: "exact", head: true }).eq("identity_verification_status", "rejected").gte("updated_at", weekStart),
     ]);
     setMetrics({
       pending: pendingRes.count || 0,
