@@ -86,6 +86,9 @@ const EmergencyDashSection = () => {
           <p>📍 Rayon : {profile.radius_km} km</p>
           <p>🐾 {(profile.animal_types as string[])?.join(", ") || "Tous"}</p>
           <p>{profile.sms_alerts ? "📱 Alertes SMS activées" : "📱 Alertes SMS désactivées"}</p>
+          {(profile as any).interventions_count > 0 && (
+            <p>⚡ {(profile as any).interventions_count} intervention{(profile as any).interventions_count > 1 ? "s" : ""} — {(profile as any).interventions_count} mois offert{(profile as any).interventions_count > 1 ? "s" : ""}</p>
+          )}
         </div>
       )}
 

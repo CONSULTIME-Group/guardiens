@@ -337,7 +337,10 @@ const OwnerDashboard = () => {
         )}
       </DashSection>
 
-      {/* 6. CTA */}
+      {/* 6. Nearby emergency sitters */}
+      <NearbyEmergencySitters />
+
+      {/* 7. CTA */}
       {cta && (
         <div className="p-6 rounded-xl bg-primary/5 border-2 border-dashed border-primary/30 text-center">
           <p className="text-sm text-muted-foreground mb-3">{cta.text}</p>
