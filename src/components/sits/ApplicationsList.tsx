@@ -67,12 +67,13 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
     if (data) {
       const enriched = await Promise.all(
         data.map(async (app: any) => {
-          const [spRes, revRes, badgeRes, extExpRes, galleryRes] = await Promise.all([
+          const [spRes, revRes, badgeRes, extExpRes, galleryRes, emRes] = await Promise.all([
             supabase.from("sitter_profiles").select("experience_years, animal_types").eq("user_id", app.sitter_id).maybeSingle(),
             supabase.from("reviews").select("overall_rating").eq("reviewee_id", app.sitter_id).eq("published", true),
             supabase.from("badge_attributions").select("badge_key").eq("receiver_id", app.sitter_id),
             supabase.from("external_experiences").select("id").eq("user_id", app.sitter_id).eq("verification_status", "verified"),
             supabase.from("sitter_gallery").select("photo_url").eq("user_id", app.sitter_id).limit(4),
+            supabase.from("emergency_sitter_profiles").select("id").eq("user_id", app.sitter_id).eq("is_active", true).maybeSingle(),
           ]);
           const reviews = revRes.data || [];
           const avgRating = reviews.length > 0 ? (reviews.reduce((s: number, r: any) => s + r.overall_rating, 0) / reviews.length).toFixed(1) : null;
