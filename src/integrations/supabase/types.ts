@@ -1025,6 +1025,61 @@ export type Database = {
           },
         ]
       }
+      mission_feedbacks: {
+        Row: {
+          badge_key: string | null
+          comment: string | null
+          created_at: string
+          giver_id: string
+          id: string
+          mission_id: string
+          positive: boolean
+          receiver_id: string
+        }
+        Insert: {
+          badge_key?: string | null
+          comment?: string | null
+          created_at?: string
+          giver_id: string
+          id?: string
+          mission_id: string
+          positive: boolean
+          receiver_id: string
+        }
+        Update: {
+          badge_key?: string | null
+          comment?: string | null
+          created_at?: string
+          giver_id?: string
+          id?: string
+          mission_id?: string
+          positive?: boolean
+          receiver_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mission_feedbacks_giver_id_fkey"
+            columns: ["giver_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mission_feedbacks_mission_id_fkey"
+            columns: ["mission_id"]
+            isOneToOne: false
+            referencedRelation: "small_missions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mission_feedbacks_receiver_id_fkey"
+            columns: ["receiver_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notification_preferences: {
         Row: {
           created_at: string

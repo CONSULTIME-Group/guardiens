@@ -19,6 +19,7 @@ import PublicExperiences from "@/components/profile/PublicExperiences";
 import PublicOwnerGallery from "@/components/profile/PublicOwnerGallery";
 import OwnerHighlights from "@/components/profile/OwnerHighlights";
 import { getBadgeDef } from "@/components/badges/badgeDefinitions";
+import EntraideSection from "@/components/missions/EntraideSection";
 
 const speciesLabels: Record<string, string> = {
   dog: "🐕 Chiens", cat: "🐱 Chats", horse: "🐴 Chevaux", bird: "🐦 Oiseaux",
@@ -437,8 +438,9 @@ const PublicProfile = () => {
             )}
 
             {/* --- Reviews tab --- */}
-            <TabsContent value="reviews" className="mt-4">
+            <TabsContent value="reviews" className="mt-4 space-y-8">
               <ReviewsDisplay userId={id!} showAnimalCare={isSitter} />
+              <EntraideSection userId={id!} />
             </TabsContent>
 
             {/* --- Gallery tab --- */}

@@ -11,6 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import ReportButton from "@/components/reports/ReportButton";
 import PageMeta from "@/components/PageMeta";
 import entraideHeader from "@/assets/entraide-header.jpg";
+import MissionFeedbackModal from "@/components/missions/MissionFeedbackModal";
 
 const CATEGORY_META: Record<string, { label: string; icon: typeof Dog; colorClass: string }> = {
   animals: { label: "Animaux", icon: Dog, colorClass: "text-orange-500" },
@@ -39,6 +40,11 @@ const SmallMissionDetail = () => {
   const [message, setMessage] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [hasResponded, setHasResponded] = useState(false);
+  const [feedbackOpen, setFeedbackOpen] = useState(false);
+  const [feedbackTarget, setFeedbackTarget] = useState<{ id: string; name: string } | null>(null);
+  const [hasFeedback, setHasFeedback] = useState(false);
+  const [acceptedResponderId, setAcceptedResponderId] = useState<string | null>(null);
+  const [acceptedResponderName, setAcceptedResponderName] = useState<string>("");
 
   useEffect(() => {
     if (!id) return;
@@ -67,9 +73,25 @@ const SmallMissionDetail = () => {
         .order("created_at", { ascending: false });
       setResponses(resps || []);
 
+      // Find accepted responder
+      const acceptedResp = resps?.find((r: any) => r.status === "accepted");
+      if (acceptedResp) {
+        setAcceptedResponderId(acceptedResp.responder_id);
+        setAcceptedResponderName(acceptedResp.responder?.first_name || "l'aidant");
+      }
+
       if (user) {
         const already = resps?.some((r: any) => r.responder_id === user.id);
         setHasResponded(!!already);
+
+        // Check if user already gave feedback
+        const { data: existingFb } = await supabase
+          .from("mission_feedbacks" as any)
+          .select("id")
+          .eq("mission_id", id)
+          .eq("giver_id", user.id)
+          .maybeSingle();
+        setHasFeedback(!!existingFb);
       }
 
       setLoading(false);
@@ -104,10 +126,15 @@ const SmallMissionDetail = () => {
   };
 
   const handleAcceptResponse = async (responseId: string) => {
+    const resp = responses.find(r => r.id === responseId);
     await supabase.from("small_mission_responses").update({ status: "accepted" as any }).eq("id", responseId);
     await supabase.from("small_missions").update({ status: "in_progress" as any }).eq("id", id!);
     setMission({ ...mission, status: "in_progress" });
     setResponses(prev => prev.map(r => r.id === responseId ? { ...r, status: "accepted" } : r));
+    if (resp) {
+      setAcceptedResponderId(resp.responder_id);
+      setAcceptedResponderName(resp.responder?.first_name || "l'aidant");
+    }
     toast({ title: "Proposition acceptée !" });
   };
 
@@ -116,16 +143,28 @@ const SmallMissionDetail = () => {
     setResponses(prev => prev.map(r => r.id === responseId ? { ...r, status: "declined" } : r));
   };
 
+  const openFeedbackFor = (receiverId: string, receiverName: string) => {
+    setFeedbackTarget({ id: receiverId, name: receiverName });
+    setFeedbackOpen(true);
+  };
+
   const handleComplete = async () => {
     await supabase.from("small_missions").update({ status: "completed" as any }).eq("id", id!);
     setMission({ ...mission, status: "completed" });
     toast({ title: "Mission terminée !", description: "Merci pour l'entraide 🙌" });
+    // Open feedback modal for author → responder
+    if (acceptedResponderId) {
+      openFeedbackFor(acceptedResponderId, acceptedResponderName);
+    }
   };
 
   const handleClose = async () => {
     await supabase.from("small_missions").update({ status: "completed" as any }).eq("id", id!);
     setMission({ ...mission, status: "completed" });
     toast({ title: "Mission fermée", description: "Vous avez trouvé quelqu'un — super ! 🎉" });
+    if (acceptedResponderId) {
+      openFeedbackFor(acceptedResponderId, acceptedResponderName);
+    }
   };
 
   if (loading) return <div className="p-6 md:p-10 text-muted-foreground">Chargement...</div>;
@@ -263,6 +302,20 @@ const SmallMissionDetail = () => {
               <XCircle className="h-4 w-4" /> Fermer — J'ai trouvé quelqu'un
             </Button>
           )}
+
+          {/* Feedback button for completed missions (author) */}
+          {mission.status === "completed" && !hasFeedback && acceptedResponderId && (
+            <Button
+              onClick={() => openFeedbackFor(acceptedResponderId!, acceptedResponderName)}
+              variant="outline"
+              className="w-full mt-4 gap-2"
+            >
+              <Handshake className="h-4 w-4" /> Donner mon retour sur l'entraide
+            </Button>
+          )}
+          {mission.status === "completed" && hasFeedback && (
+            <p className="text-sm text-muted-foreground text-center mt-4">✅ Vous avez donné votre retour — merci !</p>
+          )}
         </div>
       )}
 
@@ -295,11 +348,38 @@ const SmallMissionDetail = () => {
         </div>
       )}
 
+      {/* Feedback for non-author (responder) on completed mission */}
+      {user && !isAuthor && mission.status === "completed" && !hasFeedback && (
+        <div className="text-center py-6">
+          <Button
+            onClick={() => openFeedbackFor(mission.user_id, author?.first_name || "le posteur")}
+            className="gap-2"
+          >
+            <Handshake className="h-4 w-4" /> Donner mon retour sur l'entraide
+          </Button>
+        </div>
+      )}
+      {user && !isAuthor && mission.status === "completed" && hasFeedback && (
+        <p className="text-sm text-muted-foreground text-center py-6">✅ Vous avez donné votre retour — merci !</p>
+      )}
+
       {!user && (
         <div className="text-center py-8">
           <p className="text-muted-foreground mb-3">Connectez-vous pour proposer votre aide.</p>
           <Link to="/login"><Button>Se connecter</Button></Link>
         </div>
+      )}
+
+      {/* Feedback modal */}
+      {feedbackTarget && (
+        <MissionFeedbackModal
+          open={feedbackOpen}
+          onOpenChange={setFeedbackOpen}
+          missionId={id!}
+          receiverId={feedbackTarget.id}
+          receiverName={feedbackTarget.name}
+          onSubmitted={() => setHasFeedback(true)}
+        />
       )}
       </div>
     </div>
