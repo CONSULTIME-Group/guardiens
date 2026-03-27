@@ -199,7 +199,7 @@ const EmergencySitter = () => {
               },
               {
                 q: "Comment devenir gardien d'urgence ?",
-                a: "Remplissez les conditions (5 gardes, 4.7+, 0 annulation sur 6 mois, ID vérifiée, abonnement actif). L'invitation apparaît automatiquement sur votre dashboard."
+                a: "Remplissez les conditions (3 gardes, 4.7+, 0 annulation sur 6 mois, ID vérifiée, abonnement actif). L'invitation apparaît automatiquement sur votre dashboard."
               },
               {
                 q: "Est-ce que le gardien d'urgence est payé plus ?",
