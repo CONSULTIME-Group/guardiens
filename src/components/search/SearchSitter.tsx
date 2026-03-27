@@ -333,7 +333,7 @@ const SearchSitter = () => {
         <label className="text-sm">Profils vérifiés uniquement</label>
       </div>
       <div className="flex items-center gap-3">
-        <Switch />
+        <Switch checked={emergencyOnly} onCheckedChange={setEmergencyOnly} />
         <label className="text-sm flex items-center gap-1.5">
           <Zap className="h-3.5 w-3.5 text-amber-500" />
           Gardiens d'urgence
