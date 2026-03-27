@@ -22,7 +22,6 @@ const StepSitterProfile = ({ data, onChange }: Props) => {
 
   return (
     <div className="space-y-6">
-      <h2 className="font-heading text-2xl font-bold">Mon profil de gardien</h2>
 
       <div className="space-y-2">
         <Label>Type de gardien</Label>

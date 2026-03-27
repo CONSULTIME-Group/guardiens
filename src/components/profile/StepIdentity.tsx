@@ -29,7 +29,6 @@ const StepIdentity = ({ data, onChange, onUploadAvatar }: Props) => {
 
   return (
     <div className="space-y-6">
-      <h2 className="font-heading text-2xl font-bold">Identité</h2>
 
       {/* Avatar */}
       <div className="flex flex-col items-center gap-3">

@@ -21,7 +21,6 @@ interface Props {
 
 const StepPreferences = ({ data, onChange }: Props) => (
   <div className="space-y-6">
-    <h2 className="font-heading text-2xl font-bold">Préférences & bonus</h2>
 
     <h3 className="font-heading text-lg font-semibold mt-2">Préférences de garde</h3>
 

@@ -41,7 +41,6 @@ const StepMobility = ({ data, onChange }: Props) => {
 
   return (
     <div className="space-y-6">
-      <h2 className="font-heading text-2xl font-bold">Mobilité & disponibilités</h2>
 
       {/* Availability toggle */}
       <div className="flex items-center justify-between rounded-lg border border-green-200 bg-green-50 dark:bg-green-950/20 dark:border-green-800 p-4">

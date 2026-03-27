@@ -86,7 +86,6 @@ const StepExperience = ({ data, pastAnimals, onChange, onAddAnimal, onRemoveAnim
 
   return (
     <div className="space-y-6">
-      <h2 className="font-heading text-2xl font-bold">Expérience animaux</h2>
 
       <div className="space-y-2">
         <Label>Types d'animaux gérés</Label>
