@@ -2,6 +2,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
+import { Sidebar, BottomNav } from "./components/layout/Navigation";
+import { BackButton } from "./components/layout/BackButton";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
@@ -86,6 +88,23 @@ const PublicOnlyRoute = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
+const SmallMissionsRoute = () => {
+  const { isAuthenticated } = useAuth();
+  if (isAuthenticated) {
+    return (
+      <div className="flex min-h-screen bg-background">
+        <Sidebar />
+        <main className="flex-1 pb-20 md:pb-0">
+          <BackButton />
+          <SmallMissions />
+        </main>
+        <BottomNav />
+      </div>
+    );
+  }
+  return <SmallMissions />;
+};
+
 const AppRoutes = () => (
   <Routes>
     <Route path="/" element={<PublicOnlyRoute><Landing /></PublicOnlyRoute>} />
@@ -107,7 +126,7 @@ const AppRoutes = () => (
     <Route path="/departement/:slug" element={<DepartmentPage />} />
     <Route path="/tarifs" element={<Pricing />} />
     <Route path="/gardien-urgence" element={<EmergencySitter />} />
-    <Route path="/petites-missions" element={<SmallMissions />} />
+    <Route path="/petites-missions" element={<SmallMissionsRoute />} />
     <Route path="/petites-missions/creer" element={<ProtectedRoute><CreateSmallMission /></ProtectedRoute>} />
     <Route path="/petites-missions/:id" element={<SmallMissionDetail />} />
     <Route path="/profil/:id" element={<PublicProfile />} />
