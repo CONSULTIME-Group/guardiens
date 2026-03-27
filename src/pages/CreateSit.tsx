@@ -67,6 +67,21 @@ const aloneLabels: Record<string, string> = { never: "Jamais seul", "2h": "2h ma
 
 const openToOptions = ["Familles", "Solo", "Couples", "Retraités", "Sans préférence"];
 
+const FirstAnnonceTip = () => {
+  const [dismissed, setDismissed] = useState(false);
+  if (dismissed) return null;
+  return (
+    <div className="flex items-start gap-3 rounded-lg border-l-4 border-amber-400 bg-amber-50/60 dark:bg-amber-900/10 p-3 mb-8">
+      <div className="flex-1">
+        <p className="text-sm text-amber-900 dark:text-amber-200">
+          Première annonce ? <a href="/blog/rediger-bonne-annonce-house-sitting" className="text-primary underline font-medium">Lisez nos conseils pour attirer les meilleurs gardiens →</a>
+        </p>
+      </div>
+      <button onClick={() => setDismissed(true)} className="text-amber-500 hover:text-amber-700 text-lg leading-none shrink-0">×</button>
+    </div>
+  );
+};
+
 const CreateSit = () => {
   const { user } = useAuth();
   const { toast } = useToast();
