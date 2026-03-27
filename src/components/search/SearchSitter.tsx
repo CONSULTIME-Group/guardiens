@@ -307,12 +307,12 @@ const SearchSitter = () => {
       items = items.map((m: any) => {
         let dist: number | null = null;
         if (m.latitude && m.longitude) {
-          dist = haversineDistance(searchCoords.lat, searchCoords.lng, m.latitude, m.longitude);
+          dist = haversineDistance(searchCoords!.lat, searchCoords!.lng, m.latitude, m.longitude);
         } else if (m.owner?.city) {
           const coords = cityCoords.get(m.owner.city);
-          if (coords) dist = haversineDistance(searchCoords.lat, searchCoords.lng, coords.lat, coords.lng);
+          if (coords) dist = haversineDistance(searchCoords!.lat, searchCoords!.lng, coords.lat, coords.lng);
         }
-        return { ...m, distance: dist, isNew: differenceInHours(new Date(), new Date(m.created_at)) < 48 };
+        return { ...m, distance: dist, isNew: differenceInHours(new Date(), new Date(m.created_at)) < 48 } as any;
       });
     } else {
       items = items.map((m: any) => ({ ...m, distance: null, isNew: differenceInHours(new Date(), new Date(m.created_at)) < 48 }));
