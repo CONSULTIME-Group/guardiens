@@ -107,7 +107,7 @@ const AppRoutes = () => (
     <Route path="/departement/:slug" element={<DepartmentPage />} />
     <Route path="/tarifs" element={<Pricing />} />
     <Route path="/gardien-urgence" element={<EmergencySitter />} />
-    <Route path="/petites-missions" element={<SmallMissions />} />
+    <Route path="/petites-missions" element={<SmallMissionsRoute />} />
     <Route path="/petites-missions/creer" element={<ProtectedRoute><CreateSmallMission /></ProtectedRoute>} />
     <Route path="/petites-missions/:id" element={<SmallMissionDetail />} />
     <Route path="/profil/:id" element={<PublicProfile />} />
