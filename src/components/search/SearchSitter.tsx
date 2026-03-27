@@ -11,7 +11,7 @@ import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Search, SlidersHorizontal, MapPin, Calendar, Star, CheckCircle2, Lock } from "lucide-react";
+import { Search, SlidersHorizontal, MapPin, Calendar, Star, CheckCircle2, Lock, Zap } from "lucide-react";
 import ChipSelect from "@/components/profile/ChipSelect";
 import VerifiedBadge from "@/components/profile/VerifiedBadge";
 import BadgeShield from "@/components/badges/BadgeShield";
