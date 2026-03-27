@@ -104,13 +104,15 @@ const MySubscription = () => {
       const isFounder = p?.is_founder || createdDate < LAUNCH_DATE;
       const now = new Date();
 
+      const hasActiveSub = subRes.data?.status === "active";
+
       if (effectiveRole === "owner") {
         setStatus("owner");
-      } else if (subRes.data?.status === "active") {
+      } else if (hasActiveSub) {
         setStatus("premium");
       } else if (isFounder && now < GRACE_END_DATE) {
         setStatus("founder_grace");
-      } else if (isFounder && now >= GRACE_END_DATE && subRes.data?.status !== "active") {
+      } else if (isFounder && !hasActiveSub) {
         setStatus("founder_expired");
       } else if (subRes.data?.status === "expired" || subRes.data?.status === "cancelled") {
         setStatus("expired");
