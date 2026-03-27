@@ -315,7 +315,7 @@ const SearchSitter = () => {
         return { ...m, distance: dist, isNew: differenceInHours(new Date(), new Date(m.created_at)) < 48 } as any;
       });
     } else {
-      items = items.map((m: any) => ({ ...m, distance: null, isNew: differenceInHours(new Date(), new Date(m.created_at)) < 48 }));
+      items = items.map((m: any) => ({ ...m, distance: null, isNew: differenceInHours(new Date(), new Date(m.created_at)) < 48 }) as any);
     }
 
     let final = [...items];
