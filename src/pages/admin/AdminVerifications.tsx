@@ -75,6 +75,7 @@ const AdminVerifications = () => {
     toast.success("Identité validée ✅");
     fetchQueue();
     window.dispatchEvent(new Event("admin-badges-refresh"));
+  };
 
   const handleReject = async () => {
     const reason = rejectModal.reason === "Autre" ? rejectModal.customReason : rejectModal.reason;
