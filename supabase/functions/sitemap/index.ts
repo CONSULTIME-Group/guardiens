@@ -1,17 +1,18 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-const SITE_URL = "https://guardiens.lovable.app";
+const SITE_URL = "https://guardiens.fr";
 
 const staticPages = [
   { loc: "/", priority: "1.0", changefreq: "weekly" },
   { loc: "/tarifs", priority: "0.8", changefreq: "monthly" },
-  { loc: "/petites-missions", priority: "0.7", changefreq: "daily" },
-  { loc: "/actualites", priority: "0.8", changefreq: "daily" },
-  { loc: "/a-propos", priority: "0.5", changefreq: "monthly" },
-  { loc: "/contact", priority: "0.5", changefreq: "monthly" },
   { loc: "/faq", priority: "0.7", changefreq: "weekly" },
+  { loc: "/actualites", priority: "0.8", changefreq: "daily" },
+  { loc: "/petites-missions", priority: "0.7", changefreq: "daily" },
+  { loc: "/gardien-urgence", priority: "0.7", changefreq: "weekly" },
   { loc: "/guides", priority: "0.8", changefreq: "weekly" },
   { loc: "/recherche", priority: "0.7", changefreq: "daily" },
+  { loc: "/contact", priority: "0.5", changefreq: "monthly" },
+  { loc: "/a-propos", priority: "0.5", changefreq: "monthly" },
   { loc: "/cgu", priority: "0.3", changefreq: "yearly" },
   { loc: "/confidentialite", priority: "0.3", changefreq: "yearly" },
   { loc: "/mentions-legales", priority: "0.3", changefreq: "yearly" },
@@ -19,9 +20,13 @@ const staticPages = [
   { loc: "/register", priority: "0.6", changefreq: "monthly" },
 ];
 
+function escapeXml(s: string): string {
+  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&apos;");
+}
+
 function urlEntry(loc: string, lastmod: string, changefreq: string, priority: string): string {
   return `  <url>
-    <loc>${SITE_URL}${loc}</loc>
+    <loc>${escapeXml(SITE_URL + loc)}</loc>
     <lastmod>${lastmod}</lastmod>
     <changefreq>${changefreq}</changefreq>
     <priority>${priority}</priority>
@@ -40,6 +45,7 @@ Deno.serve(async () => {
     { data: cityGuides },
     { data: departmentPages },
     { data: breedProfiles },
+    { data: publicProfiles },
   ] = await Promise.all([
     supabase
       .from("articles")
@@ -63,8 +69,15 @@ Deno.serve(async () => {
       .order("department"),
     supabase
       .from("breed_profiles")
-      .select("breed, species")
+      .select("breed, species, generated_at")
       .order("breed"),
+    supabase
+      .from("profiles")
+      .select("id, updated_at")
+      .eq("account_status", "active")
+      .gte("profile_completion", 60)
+      .order("updated_at", { ascending: false })
+      .limit(1000),
   ]);
 
   const today = new Date().toISOString().split("T")[0];
@@ -98,6 +111,19 @@ Deno.serve(async () => {
   if (departmentPages) {
     for (const dp of departmentPages) {
       xml += urlEntry(`/departement/${dp.slug}`, (dp.updated_at || today).split("T")[0], "weekly", "0.8");
+    }
+  }
+
+  if (breedProfiles) {
+    for (const bp of breedProfiles) {
+      const slug = `${bp.species.toLowerCase()}-${bp.breed.toLowerCase().replace(/\s+/g, "-")}`;
+      xml += urlEntry(`/races/${slug}`, (bp.generated_at || today).split("T")[0], "monthly", "0.6");
+    }
+  }
+
+  if (publicProfiles) {
+    for (const p of publicProfiles) {
+      xml += urlEntry(`/profil/${p.id}`, (p.updated_at || today).split("T")[0], "monthly", "0.5");
     }
   }
 
