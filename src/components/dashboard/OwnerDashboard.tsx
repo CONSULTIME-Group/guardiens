@@ -4,6 +4,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Link } from "react-router-dom";
 import OnboardingWelcome from "./OnboardingWelcome";
 import NearbyEmergencySitters from "./NearbyEmergencySitters";
+import ResourceSection from "@/components/shared/ResourceSection";
+import type { ResourceItem } from "@/components/shared/ResourceCard";
 import {
   Calendar, Star, Megaphone, Heart, ChevronRight, Plus, PawPrint,
   Users, Handshake, Newspaper, Home,
