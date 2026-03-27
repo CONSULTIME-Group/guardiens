@@ -73,9 +73,25 @@ const SmallMissionDetail = () => {
         .order("created_at", { ascending: false });
       setResponses(resps || []);
 
+      // Find accepted responder
+      const acceptedResp = resps?.find((r: any) => r.status === "accepted");
+      if (acceptedResp) {
+        setAcceptedResponderId(acceptedResp.responder_id);
+        setAcceptedResponderName(acceptedResp.responder?.first_name || "l'aidant");
+      }
+
       if (user) {
         const already = resps?.some((r: any) => r.responder_id === user.id);
         setHasResponded(!!already);
+
+        // Check if user already gave feedback
+        const { data: existingFb } = await supabase
+          .from("mission_feedbacks" as any)
+          .select("id")
+          .eq("mission_id", id)
+          .eq("giver_id", user.id)
+          .maybeSingle();
+        setHasFeedback(!!existingFb);
       }
 
       setLoading(false);
