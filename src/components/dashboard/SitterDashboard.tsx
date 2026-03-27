@@ -5,6 +5,7 @@ import { Link } from "react-router-dom";
 import OnboardingWelcome from "./OnboardingWelcome";
 import EmergencyActivation from "./EmergencyActivation";
 import EmergencyDashSection from "./EmergencyDashSection";
+import EmergencyEligibility from "./EmergencyEligibility";
 import {
   Home, Star, Mail, Award, CircleDot, ChevronRight, Search,
   Send as SendIcon, Eye, CheckCircle2, XCircle, MessageSquare,
