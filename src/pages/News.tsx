@@ -134,8 +134,13 @@ export default function News() {
           <button
             key={cat.key}
             onClick={() => {
-              if (cat.key === "all") searchParams.delete("cat");
-              else searchParams.set("cat", cat.key);
+              if (cat.key === "all") {
+                searchParams.delete("categorie");
+                searchParams.delete("cat");
+              } else {
+                searchParams.set("categorie", cat.key);
+                searchParams.delete("cat");
+              }
               searchParams.delete("page");
               setSearchParams(searchParams);
             }}
