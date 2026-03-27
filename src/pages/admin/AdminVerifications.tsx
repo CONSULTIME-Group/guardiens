@@ -98,6 +98,7 @@ const AdminVerifications = () => {
     toast.success("Document refusé");
     setRejectModal({ open: false, userId: "", reason: "", customReason: "" });
     fetchQueue();
+    window.dispatchEvent(new Event("admin-badges-refresh"));
   };
 
   const handleRequestResend = async (userId: string) => {
