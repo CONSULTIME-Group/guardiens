@@ -62,7 +62,7 @@ Deno.serve(async (req) => {
     const results = await res.json();
     if (!results || results.length === 0) {
       return new Response(JSON.stringify({ error: "City not found", lat: null, lng: null }), {
-        status: 404,
+        status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
