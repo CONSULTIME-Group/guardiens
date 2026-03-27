@@ -4,7 +4,8 @@ import { Button } from "@/components/ui/button";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
-import { AlertTriangle, PawPrint, Home, Phone } from "lucide-react";
+import { AlertTriangle, PawPrint, Home, Phone, Zap } from "lucide-react";
+import { Link } from "react-router-dom";
 
 interface HelpButtonProps {
   propertyId: string;
