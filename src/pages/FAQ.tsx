@@ -41,6 +41,15 @@ const FAQ = () => {
     sitter: "Pour les gardiens",
     security: "Sécurité & confiance",
     pricing: "Tarifs & abonnements",
+    "Fonctionnement": "Fonctionnement",
+    "Tarifs": "Tarifs & abonnements",
+    "Avant la garde": "Avant la garde",
+    "Pendant la garde": "Pendant la garde",
+    "Confiance et sécurité": "Confiance & sécurité",
+    "Gardien d'urgence": "Gardien d'urgence",
+    "Gardes longue durée": "Gardes longue durée",
+    "Petites missions": "Petites missions",
+    "Mon compte": "Mon compte",
   };
 
   const faqJsonLd = {
