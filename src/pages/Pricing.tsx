@@ -144,11 +144,11 @@ const Pricing = () => {
             >
               <div className="flex items-center justify-center gap-2">
                 <Star className="h-6 w-6" style={{ color: "hsl(24 36% 60%)" }} fill="hsl(24 36% 60%)" />
-                <h2 className="font-heading text-2xl font-bold text-foreground">Gratuit jusqu'au 13 mai 2026</h2>
+                <h2 className="font-heading text-2xl font-bold text-foreground">Inscrivez-vous avant le 13 mai 2026</h2>
                 <Star className="h-6 w-6" style={{ color: "hsl(24 36% 60%)" }} fill="hsl(24 36% 60%)" />
               </div>
               <p className="text-muted-foreground max-w-2xl mx-auto">
-                Inscrivez-vous avant le 13 mai et profitez d'1 an d'accès gratuit + le badge Fondateur à vie.
+                Badge Fondateur à vie + accès gratuit jusqu'au 13 juin 2026 (1 mois de grâce après le lancement).
                 Pourquoi le 13 mai ? C'est l'anniversaire de Jérémie, cofondateur de Guardiens.
                 Et comme cadeau, il préfère vous offrir l'accès gratuit plutôt que recevoir des chaussettes.
               </p>
@@ -158,6 +158,27 @@ const Pricing = () => {
                   En profiter avant le 13 mai
                 </Button>
               </Link>
+            </section>
+          )}
+
+          {/* Grace period banner (between May 13 and June 13) */}
+          {grace && (
+            <section
+              className="rounded-2xl p-6 md:p-8 text-center space-y-4 border-2"
+              style={{
+                backgroundColor: "hsl(45 100% 96%)",
+                borderColor: "hsl(24 36% 60%)",
+              }}
+            >
+              <div className="flex items-center justify-center gap-2">
+                <Star className="h-6 w-6" style={{ color: "hsl(24 36% 60%)" }} fill="hsl(24 36% 60%)" />
+                <h2 className="font-heading text-2xl font-bold text-foreground">Les Fondateurs ont jusqu'au 13 juin</h2>
+                <Star className="h-6 w-6" style={{ color: "hsl(24 36% 60%)" }} fill="hsl(24 36% 60%)" />
+              </div>
+              <p className="text-muted-foreground max-w-2xl mx-auto">
+                Les membres inscrits avant le 13 mai conservent un accès gratuit jusqu'au 13 juin.
+                Après cette date, l'abonnement à 49€/an sera nécessaire. Le badge Fondateur reste à vie ✨
+              </p>
             </section>
           )}
 
