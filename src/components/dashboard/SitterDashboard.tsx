@@ -295,22 +295,24 @@ const SitterDashboard = () => {
 
       {/* Ongoing sit banner */}
       {ongoingSit && (
-        <Link to={`/sits/${ongoingSit.id}`} className="block p-4 rounded-xl border-2 border-primary/30 bg-primary/5 hover:shadow-md transition-shadow">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-              <Calendar className="h-5 w-5 text-primary" />
+        <>
+          <Link to={`/sits/${ongoingSit.id}`} className="block p-4 rounded-xl border-2 border-primary/30 bg-primary/5 hover:shadow-md transition-shadow">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                <Calendar className="h-5 w-5 text-primary" />
+              </div>
+              <div className="flex-1">
+                <p className="text-sm font-semibold">Garde en cours</p>
+                <p className="text-xs text-muted-foreground">{ongoingSit.title} — chez {ongoingSit.ownerName}</p>
+              </div>
+              <ChevronRight className="h-4 w-4 text-muted-foreground" />
             </div>
-            <div className="flex-1">
-              <p className="text-sm font-semibold">Garde en cours</p>
-              <p className="text-xs text-muted-foreground">{ongoingSit.title} — chez {ongoingSit.ownerName}</p>
-            </div>
-            <ChevronRight className="h-4 w-4 text-muted-foreground" />
-          </div>
-         </Link>
-         <a href="/blog/gerer-imprevu-pendant-garde" className="text-xs text-primary/70 hover:text-primary hover:underline mt-1 inline-block ml-13">
-           Un imprévu ? Voir le guide →
-         </a>
-       )}
+          </Link>
+          <a href="/blog/gerer-imprevu-pendant-garde" className="text-xs text-primary/70 hover:text-primary hover:underline -mt-7 inline-block ml-1">
+            Un imprévu ? Voir le guide →
+          </a>
+        </>
+      )}
 
       {/* Emergency active section - at top if active */}
       {hasEmergencyProfile && <EmergencyDashSection />}
