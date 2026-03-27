@@ -18,6 +18,7 @@ type HistoryFilter = "all" | "verified" | "rejected" | "pending";
 const AdminVerifications = () => {
   const [queue, setQueue] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [busyUserId, setBusyUserId] = useState<string | null>(null);
   const [metrics, setMetrics] = useState({ pending: 0, verifiedWeek: 0, rejectedWeek: 0 });
   const [rejectModal, setRejectModal] = useState<{ open: boolean; userId: string; reason: string; customReason: string }>({
     open: false, userId: "", reason: "", customReason: ""
@@ -40,6 +41,31 @@ const AdminVerifications = () => {
     open: false, userId: "", name: "", reason: ""
   });
 
+  const getSignedIdentityUrl = async (path: string | null) => {
+    if (!path) return null;
+
+    const { data, error } = await supabase.storage
+      .from("identity-documents")
+      .createSignedUrl(path, 60 * 60);
+
+    if (error) {
+      console.error("identity-doc signed url error", path, error);
+      return null;
+    }
+
+    return data.signedUrl;
+  };
+
+  const hydrateIdentityAssets = async (users: any[]) => {
+    return Promise.all(
+      users.map(async (user) => ({
+        ...user,
+        identity_document_signed_url: await getSignedIdentityUrl(user.identity_document_url),
+        identity_selfie_signed_url: await getSignedIdentityUrl(user.identity_selfie_url),
+      })),
+    );
+  };
+
   const fetchQueue = useCallback(async () => {
     setLoading(true);
     const { data } = await supabase
@@ -47,7 +73,7 @@ const AdminVerifications = () => {
       .select("id, first_name, last_name, email, avatar_url, identity_document_url, identity_selfie_url, identity_verification_status, created_at, updated_at")
       .eq("identity_verification_status", "pending")
       .order("updated_at", { ascending: true });
-    setQueue(data || []);
+    setQueue(await hydrateIdentityAssets(data || []));
 
     const weekStart = startOfWeek(new Date(), { weekStartsOn: 1 }).toISOString();
     const [pendingRes, verifiedRes, rejectedRes] = await Promise.all([
@@ -75,7 +101,7 @@ const AdminVerifications = () => {
     query = query.neq("identity_verification_status", "not_submitted");
 
     const { data, count } = await query;
-    setHistory(data || []);
+    setHistory(await hydrateIdentityAssets(data || []));
     setHistoryTotal(count || 0);
 
     // Fetch rejection reasons from logs for rejected users
@@ -116,83 +142,142 @@ const AdminVerifications = () => {
   const refreshAll = () => { fetchQueue(); fetchHistory(); };
 
   const handleApprove = async (userId: string) => {
-    const { error } = await supabase
-      .from("profiles")
-      .update({ identity_verified: true, identity_verification_status: "verified" })
-      .eq("id", userId);
-    if (error) { toast.error("Erreur"); return; }
+    setBusyUserId(userId);
+    try {
+      const { error } = await supabase
+        .from("profiles")
+        .update({ identity_verified: true, identity_verification_status: "verified" })
+        .eq("id", userId)
+        .select("id")
+        .single();
 
-    await supabase.from("identity_verification_logs").insert({ user_id: userId, result: "verified" });
-    await supabase.from("notifications").insert({
-      user_id: userId, type: "id_verified",
-      title: "Identité vérifiée ✓",
-      body: "Votre identité a été vérifiée. Le badge apparaît maintenant sur votre profil.",
-      link: "/profile",
-    });
-    toast.success("Identité validée ✅");
-    refreshAll();
-    window.dispatchEvent(new Event("admin-badges-refresh"));
+      if (error) throw error;
+
+      await Promise.allSettled([
+        supabase.from("identity_verification_logs").insert({ user_id: userId, result: "verified" }),
+        supabase.from("notifications").insert({
+          user_id: userId,
+          type: "id_verified",
+          title: "Identité vérifiée ✓",
+          body: "Votre identité a été vérifiée. Le badge apparaît maintenant sur votre profil.",
+          link: "/profile",
+        }),
+      ]);
+
+      toast.success("Identité validée ✅");
+      refreshAll();
+      window.dispatchEvent(new Event("admin-badges-refresh"));
+    } catch (error: any) {
+      toast.error(error?.message || "Impossible de valider cette vérification");
+    } finally {
+      setBusyUserId(null);
+    }
   };
 
   const handleReject = async () => {
     const reason = rejectModal.reason === "Autre" ? rejectModal.customReason : rejectModal.reason;
     if (!reason) { toast.error("Veuillez préciser un motif"); return; }
 
-    const { error } = await supabase
-      .from("profiles")
-      .update({ identity_verified: false, identity_verification_status: "rejected" })
-      .eq("id", rejectModal.userId);
-    if (error) { toast.error("Erreur"); return; }
+    setBusyUserId(rejectModal.userId);
+    try {
+      const { error } = await supabase
+        .from("profiles")
+        .update({ identity_verified: false, identity_verification_status: "rejected" })
+        .eq("id", rejectModal.userId)
+        .select("id")
+        .single();
 
-    await supabase.from("identity_verification_logs").insert({
-      user_id: rejectModal.userId, result: "rejected", rejection_reason: reason,
-    });
-    await supabase.from("notifications").insert({
-      user_id: rejectModal.userId, type: "id_rejected",
-      title: "Vérification d'identité refusée",
-      body: `Votre document n'a pas pu être validé. Raison : ${reason}. Vous pouvez soumettre un nouveau document.`,
-      link: "/settings",
-    });
-    toast.success("Document refusé");
-    setRejectModal({ open: false, userId: "", reason: "", customReason: "" });
-    refreshAll();
-    window.dispatchEvent(new Event("admin-badges-refresh"));
+      if (error) throw error;
+
+      await Promise.allSettled([
+        supabase.from("identity_verification_logs").insert({
+          user_id: rejectModal.userId, result: "rejected", rejection_reason: reason,
+        }),
+        supabase.from("notifications").insert({
+          user_id: rejectModal.userId,
+          type: "id_rejected",
+          title: "Vérification d'identité refusée",
+          body: `Votre document n'a pas pu être validé. Raison : ${reason}. Vous pouvez soumettre un nouveau document.`,
+          link: "/settings",
+        }),
+      ]);
+
+      toast.success("Document refusé");
+      setRejectModal({ open: false, userId: "", reason: "", customReason: "" });
+      refreshAll();
+      window.dispatchEvent(new Event("admin-badges-refresh"));
+    } catch (error: any) {
+      toast.error(error?.message || "Impossible de refuser cette vérification");
+    } finally {
+      setBusyUserId(null);
+    }
   };
 
   const handleRequestResend = async (userId: string) => {
-    await supabase.from("profiles").update({ identity_verification_status: "not_submitted" }).eq("id", userId);
-    await supabase.from("notifications").insert({
-      user_id: userId, type: "id_resend_request",
-      title: "Nouveau document demandé",
-      body: "Nous avons besoin d'un nouveau document d'identité. Veuillez en soumettre un depuis vos paramètres.",
-      link: "/settings",
-    });
-    toast.success("Demande de nouveau document envoyée");
-    refreshAll();
-    window.dispatchEvent(new Event("admin-badges-refresh"));
+    setBusyUserId(userId);
+    try {
+      const { error } = await supabase
+        .from("profiles")
+        .update({ identity_verified: false, identity_verification_status: "not_submitted" })
+        .eq("id", userId)
+        .select("id")
+        .single();
+
+      if (error) throw error;
+
+      await supabase.from("notifications").insert({
+        user_id: userId,
+        type: "id_resend_request",
+        title: "Nouveau document demandé",
+        body: "Nous avons besoin d'un nouveau document d'identité. Veuillez en soumettre un depuis vos paramètres.",
+        link: "/settings",
+      });
+
+      toast.success("Demande de nouveau document envoyée");
+      refreshAll();
+      window.dispatchEvent(new Event("admin-badges-refresh"));
+    } catch (error: any) {
+      toast.error(error?.message || "Impossible d'envoyer la demande");
+    } finally {
+      setBusyUserId(null);
+    }
   };
 
   const handleRevoke = async () => {
     if (!revokeModal.reason.trim()) { toast.error("Précisez un motif"); return; }
-    const { error } = await supabase
-      .from("profiles")
-      .update({ identity_verified: false, identity_verification_status: "not_submitted", identity_document_url: null, identity_selfie_url: null })
-      .eq("id", revokeModal.userId);
-    if (error) { toast.error("Erreur"); return; }
+    setBusyUserId(revokeModal.userId);
+    try {
+      const { error } = await supabase
+        .from("profiles")
+        .update({ identity_verified: false, identity_verification_status: "not_submitted", identity_document_url: null, identity_selfie_url: null })
+        .eq("id", revokeModal.userId)
+        .select("id")
+        .single();
 
-    await supabase.from("identity_verification_logs").insert({
-      user_id: revokeModal.userId, result: "rejected", rejection_reason: "Révocation : " + revokeModal.reason,
-    });
-    await supabase.from("notifications").insert({
-      user_id: revokeModal.userId, type: "id_rejected",
-      title: "Badge ID vérifiée retiré",
-      body: `Votre badge d'identité vérifiée a été retiré. Raison : ${revokeModal.reason}. Vous pouvez soumettre un nouveau document.`,
-      link: "/settings",
-    });
-    toast.success("Vérification révoquée");
-    setRevokeModal({ open: false, userId: "", name: "", reason: "" });
-    refreshAll();
-    window.dispatchEvent(new Event("admin-badges-refresh"));
+      if (error) throw error;
+
+      await Promise.allSettled([
+        supabase.from("identity_verification_logs").insert({
+          user_id: revokeModal.userId, result: "rejected", rejection_reason: "Révocation : " + revokeModal.reason,
+        }),
+        supabase.from("notifications").insert({
+          user_id: revokeModal.userId,
+          type: "id_rejected",
+          title: "Badge ID vérifiée retiré",
+          body: `Votre badge d'identité vérifiée a été retiré. Raison : ${revokeModal.reason}. Vous pouvez soumettre un nouveau document.`,
+          link: "/settings",
+        }),
+      ]);
+
+      toast.success("Vérification révoquée");
+      setRevokeModal({ open: false, userId: "", name: "", reason: "" });
+      refreshAll();
+      window.dispatchEvent(new Event("admin-badges-refresh"));
+    } catch (error: any) {
+      toast.error(error?.message || "Impossible de révoquer cette vérification");
+    } finally {
+      setBusyUserId(null);
+    }
   };
 
   const rejectionReasons = ["Photo floue", "Document expiré", "Selfie ne correspond pas", "Document non conforme", "Autre"];
@@ -246,19 +331,19 @@ const AdminVerifications = () => {
               return (
                 <Card key={user.id} className="overflow-hidden">
                   <CardContent className="p-5 space-y-4">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                      <div className="flex items-center gap-3 min-w-0">
                         {user.avatar_url ? (
                           <img src={user.avatar_url} alt="" className="w-10 h-10 rounded-full object-cover" />
                         ) : (
                           <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center font-bold text-sm">{user.first_name?.charAt(0) || "?"}</div>
                         )}
-                        <div>
-                          <p className="font-medium">{user.first_name} {user.last_name}</p>
-                          <p className="text-xs text-muted-foreground">{user.email}</p>
+                        <div className="min-w-0">
+                          <p className="font-medium break-words">{user.first_name} {user.last_name}</p>
+                          <p className="text-xs text-muted-foreground break-all">{user.email}</p>
                         </div>
                       </div>
-                      <div className="flex items-center gap-2">
+                      <div className="flex flex-wrap items-center gap-2">
                         {attempts > 0 && <Badge variant="outline" className="text-xs"><AlertTriangle className="h-3 w-3 mr-1" /> Tentative n°{attempts + 1}</Badge>}
                         <Badge variant="secondary" className="text-xs"><Clock className="h-3 w-3 mr-1" /> {format(new Date(user.updated_at), "d MMM yyyy HH:mm", { locale: fr })}</Badge>
                         <span className="text-xs text-muted-foreground font-mono">#{idx + 1}</span>
@@ -267,21 +352,33 @@ const AdminVerifications = () => {
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       <div className="space-y-1">
                         <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Document d'identité</p>
-                        {user.identity_document_url ? <img src={user.identity_document_url} alt="Document" className="w-full h-48 object-contain rounded-lg border bg-muted cursor-pointer hover:opacity-80 transition-opacity" /> : <div className="w-full h-48 rounded-lg border bg-muted flex items-center justify-center text-xs text-muted-foreground">Non fourni</div>}
+                        {user.identity_document_signed_url ? (
+                          <img
+                            src={user.identity_document_signed_url}
+                            alt="Document"
+                            className="w-full h-48 object-contain rounded-lg border bg-muted cursor-pointer hover:opacity-80 transition-opacity"
+                            onClick={() => setDocModal({
+                              open: true,
+                              docUrl: user.identity_document_signed_url,
+                              selfieUrl: user.identity_selfie_signed_url,
+                              name: `${user.first_name} ${user.last_name}`
+                            })}
+                          />
+                        ) : <div className="w-full h-48 rounded-lg border bg-muted flex items-center justify-center text-xs text-muted-foreground">Document inaccessible ou non fourni</div>}
                       </div>
                       <div className="space-y-1">
                         <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Selfie</p>
-                        {user.identity_selfie_url ? <img src={user.identity_selfie_url} alt="Selfie" className="w-full h-48 object-contain rounded-lg border bg-muted" /> : <div className="w-full h-48 rounded-lg border bg-muted flex items-center justify-center text-xs text-muted-foreground">Non fourni</div>}
+                        {user.identity_selfie_signed_url ? <img src={user.identity_selfie_signed_url} alt="Selfie" className="w-full h-48 object-contain rounded-lg border bg-muted" /> : <div className="w-full h-48 rounded-lg border bg-muted flex items-center justify-center text-xs text-muted-foreground">Non fourni</div>}
                       </div>
                       <div className="space-y-1">
                         <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Photo de profil</p>
                         {user.avatar_url ? <img src={user.avatar_url} alt="Profil" className="w-full h-48 object-contain rounded-lg border bg-muted" /> : <div className="w-full h-48 rounded-lg border bg-muted flex items-center justify-center text-xs text-muted-foreground">Aucune photo</div>}
                       </div>
                     </div>
-                    <div className="flex items-center gap-3 pt-2 border-t border-border">
-                      <Button size="sm" className="gap-1.5" onClick={() => handleApprove(user.id)}><ShieldCheck className="h-4 w-4" /> Valider</Button>
-                      <Button size="sm" variant="destructive" className="gap-1.5" onClick={() => setRejectModal({ open: true, userId: user.id, reason: "", customReason: "" })}><ShieldX className="h-4 w-4" /> Refuser</Button>
-                      <Button size="sm" variant="outline" className="gap-1.5" onClick={() => handleRequestResend(user.id)}><RotateCcw className="h-4 w-4" /> Demander nouveau document</Button>
+                    <div className="flex flex-wrap items-center gap-3 pt-2 border-t border-border">
+                      <Button size="sm" className="gap-1.5" disabled={busyUserId === user.id} onClick={() => handleApprove(user.id)}><ShieldCheck className="h-4 w-4" /> {busyUserId === user.id ? "Validation..." : "Valider"}</Button>
+                      <Button size="sm" variant="destructive" className="gap-1.5" disabled={busyUserId === user.id} onClick={() => setRejectModal({ open: true, userId: user.id, reason: "", customReason: "" })}><ShieldX className="h-4 w-4" /> Refuser</Button>
+                      <Button size="sm" variant="outline" className="gap-1.5" disabled={busyUserId === user.id} onClick={() => handleRequestResend(user.id)}><RotateCcw className="h-4 w-4" /> Demander nouveau document</Button>
                     </div>
                   </CardContent>
                 </Card>
@@ -293,9 +390,9 @@ const AdminVerifications = () => {
 
       {/* History */}
       <div className="space-y-4">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <h2 className="font-heading text-lg font-semibold">Historique des vérifications</h2>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             {(["all", "verified", "rejected", "pending"] as HistoryFilter[]).map(f => (
               <Button
                 key={f}
@@ -325,11 +422,11 @@ const AdminVerifications = () => {
                   <TableRow>
                     <TableHead className="w-12"></TableHead>
                     <TableHead>Membre</TableHead>
-                    <TableHead>Email</TableHead>
-                    <TableHead>Soumission</TableHead>
-                    <TableHead>Traitement</TableHead>
+                      <TableHead className="hidden md:table-cell">Email</TableHead>
+                      <TableHead className="hidden md:table-cell">Soumission</TableHead>
+                      <TableHead className="hidden md:table-cell">Traitement</TableHead>
                     <TableHead>Statut</TableHead>
-                    <TableHead>Motif</TableHead>
+                      <TableHead className="hidden lg:table-cell">Motif</TableHead>
                     <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -343,11 +440,11 @@ const AdminVerifications = () => {
                         </Avatar>
                       </TableCell>
                       <TableCell className="font-medium">{user.first_name} {user.last_name}</TableCell>
-                      <TableCell className="text-sm text-muted-foreground">{user.email}</TableCell>
-                      <TableCell className="text-sm">{format(new Date(user.created_at), "d MMM yyyy", { locale: fr })}</TableCell>
-                      <TableCell className="text-sm">{format(new Date(user.updated_at), "d MMM yyyy", { locale: fr })}</TableCell>
+                      <TableCell className="hidden md:table-cell text-sm text-muted-foreground break-all">{user.email}</TableCell>
+                      <TableCell className="hidden md:table-cell text-sm">{format(new Date(user.created_at), "d MMM yyyy", { locale: fr })}</TableCell>
+                      <TableCell className="hidden md:table-cell text-sm">{format(new Date(user.updated_at), "d MMM yyyy", { locale: fr })}</TableCell>
                       <TableCell>{statusBadge(user.identity_verification_status)}</TableCell>
-                      <TableCell className="text-sm text-muted-foreground max-w-[200px] truncate">
+                      <TableCell className="hidden lg:table-cell text-sm text-muted-foreground max-w-[200px] truncate">
                         {user._rejectionReason || "—"}
                       </TableCell>
                       <TableCell>
@@ -358,8 +455,8 @@ const AdminVerifications = () => {
                             className="h-8 gap-1 text-xs"
                             onClick={() => setDocModal({
                               open: true,
-                              docUrl: user.identity_document_url,
-                              selfieUrl: user.identity_selfie_url,
+                              docUrl: user.identity_document_signed_url,
+                              selfieUrl: user.identity_selfie_signed_url,
                               name: `${user.first_name} ${user.last_name}`
                             })}
                           >
@@ -430,7 +527,7 @@ const AdminVerifications = () => {
 
       {/* Document viewer modal */}
       <Dialog open={docModal.open} onOpenChange={(o) => !o && setDocModal({ open: false, docUrl: null, selfieUrl: null, name: "" })}>
-        <DialogContent className="max-w-3xl">
+        <DialogContent className="max-w-3xl w-[calc(100vw-2rem)] max-h-[85vh] overflow-y-auto">
           <DialogHeader><DialogTitle>Documents — {docModal.name}</DialogTitle></DialogHeader>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">

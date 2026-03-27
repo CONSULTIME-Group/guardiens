@@ -159,7 +159,7 @@ const MySubscription = () => {
             </p>
           </div>
 
-          <div className="grid grid-cols-2 gap-4 text-sm">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
             <div><span className="text-muted-foreground">Plan :</span> <span className="font-medium">Fondateur (gratuit)</span></div>
             <div><span className="text-muted-foreground">Accès gratuit jusqu'au :</span> <span className="font-medium">13 juin 2026</span></div>
             <div><span className="text-muted-foreground">Badge :</span> <span className="font-medium">Fondateur — permanent ✨</span></div>
@@ -277,7 +277,7 @@ const MySubscription = () => {
             <p className="text-sm text-muted-foreground">Vous avez accès à toutes les fonctionnalités.</p>
           </div>
 
-          <div className="grid grid-cols-2 gap-4 text-sm">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
             <div><span className="text-muted-foreground">Plan :</span> <span className="font-medium">Premium (49€/an)</span></div>
             <div><span className="text-muted-foreground">Début :</span> <span className="font-medium">{sub?.started_at ? format(new Date(sub.started_at), "d MMMM yyyy", { locale: fr }) : "—"}</span></div>
             <div><span className="text-muted-foreground">Prochain renouvellement :</span> <span className="font-medium">{sub?.expires_at ? format(new Date(sub.expires_at), "d MMMM yyyy", { locale: fr }) : "—"} — 49€</span></div>
