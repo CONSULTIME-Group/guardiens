@@ -93,7 +93,7 @@ export const AdminSidebar = () => {
       ] = await Promise.all([
         supabase.from("profiles").select("id", { count: "exact", head: true }).eq("identity_verification_status", "pending"),
         supabase.from("external_experiences").select("id", { count: "exact", head: true }).eq("verification_status", "pending"),
-        supabase.from("reports").select("id", { count: "exact", head: true }).eq("status", "pending"),
+        supabase.from("reports").select("id", { count: "exact", head: true }).eq("status", "new"),
       ]);
       setBadges({
         verifications: pendingVerifications || 0,
@@ -103,6 +103,11 @@ export const AdminSidebar = () => {
       });
     };
     fetchBadges();
+
+    // Re-fetch when admin actions happen
+    const handler = () => fetchBadges();
+    window.addEventListener("admin-badges-refresh", handler);
+    return () => window.removeEventListener("admin-badges-refresh", handler);
   }, []);
 
   return (
