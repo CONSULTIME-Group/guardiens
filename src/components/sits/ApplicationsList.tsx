@@ -276,6 +276,7 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
                         {sitter?.first_name || "Gardien"}
                       </Link>
                       {sitter?.identity_verified && <VerifiedBadge />}
+                      {app.isEmergencySitter && <EmergencyBadge size="sm" />}
                       <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${status.className}`}>
                         {status.label}
                       </span>
