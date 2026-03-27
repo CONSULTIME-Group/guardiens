@@ -51,6 +51,7 @@ const SitDetail = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { user, activeRole } = useAuth();
+  const { hasAccess: subHasAccess } = useSubscriptionAccess();
   const [sit, setSit] = useState<SitData | null>(null);
   const [owner, setOwner] = useState<any>(null);
   const [property, setProperty] = useState<any>(null);
