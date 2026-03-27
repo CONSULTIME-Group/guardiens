@@ -308,7 +308,7 @@ const SitterDashboard = () => {
               <ChevronRight className="h-4 w-4 text-muted-foreground" />
             </div>
           </Link>
-          <a href="/blog/gerer-imprevu-pendant-garde" className="text-xs text-primary/70 hover:text-primary hover:underline -mt-7 inline-block ml-1">
+          <a href="/actualites/gerer-imprevu-pendant-garde" className="text-xs text-primary/70 hover:text-primary hover:underline -mt-7 inline-block ml-1">
             Un imprévu ? Voir le guide →
           </a>
         </>
@@ -393,23 +393,23 @@ const SitterDashboard = () => {
         if (profileCompletion < 60 || verificationStatus !== "verified") {
           resTitle = "Bien démarrer sur Guardiens";
           resItems = [
-            { title: "Créer un profil qui attire des missions", description: "Photo, bio, expérience : ce qui convainc.", href: "/blog/creer-profil-gardien-attractif", icon: "gardien" },
-            { title: "Réussir sa première garde", description: "La rencontre, le premier soir, la communication.", href: "/blog/reussir-premiere-garde-house-sitting", icon: "gardien" },
-            { title: "Devenir Gardien d'Urgence", description: "Les conditions, les avantages, les obligations.", href: "/blog/devenir-gardien-urgence-guardiens", icon: "urgence" },
+            { title: "Créer un profil qui attire des missions", description: "Photo, bio, expérience : ce qui convainc.", href: "/actualites/creer-profil-gardien-attractif", icon: "gardien" },
+            { title: "Réussir sa première garde", description: "La rencontre, le premier soir, la communication.", href: "/actualites/reussir-premiere-garde-house-sitting", icon: "gardien" },
+            { title: "Devenir Gardien d'Urgence", description: "Les conditions, les avantages, les obligations.", href: "/actualites/devenir-gardien-urgence-guardiens", icon: "urgence" },
           ];
         } else if (completedCount >= 1 && completedCount < 5) {
           resTitle = "Progresser sur Guardiens";
           resItems = [
-            { title: "Gérer les animaux difficiles", description: "Chien anxieux, chat caché, animal malade.", href: "/blog/gerer-animaux-difficiles-garde", icon: "animal" },
-            { title: "Gérer les imprévus pendant une garde", description: "Panne, urgence, départ anticipé : les protocoles.", href: "/blog/gerer-imprevu-pendant-garde", icon: "gardien" },
-            { title: "Devenir Gardien d'Urgence", description: "Encore quelques gardes avant d'y accéder.", href: "/blog/devenir-gardien-urgence-guardiens", icon: "urgence" },
+            { title: "Gérer les animaux difficiles", description: "Chien anxieux, chat caché, animal malade.", href: "/actualites/gerer-animaux-difficiles-garde", icon: "animal" },
+            { title: "Gérer les imprévus pendant une garde", description: "Panne, urgence, départ anticipé : les protocoles.", href: "/actualites/gerer-imprevu-pendant-garde", icon: "gardien" },
+            { title: "Devenir Gardien d'Urgence", description: "Encore quelques gardes avant d'y accéder.", href: "/actualites/devenir-gardien-urgence-guardiens", icon: "urgence" },
           ];
         } else if (completedCount >= 5) {
           resTitle = "Passer au niveau supérieur";
           resItems = [
-            { title: "Devenir Gardien d'Urgence", description: "Vous remplissez peut-être déjà les conditions.", href: "/blog/devenir-gardien-urgence-guardiens", icon: "urgence" },
-            { title: "Gérer les animaux difficiles", description: "Les situations que les bons gardiens gèrent.", href: "/blog/gerer-animaux-difficiles-garde", icon: "animal" },
-            { title: "Gérer les imprévus pendant une garde", description: "Panne, urgence, départ anticipé : les protocoles.", href: "/blog/gerer-imprevu-pendant-garde", icon: "gardien" },
+            { title: "Devenir Gardien d'Urgence", description: "Vous remplissez peut-être déjà les conditions.", href: "/actualites/devenir-gardien-urgence-guardiens", icon: "urgence" },
+            { title: "Gérer les animaux difficiles", description: "Les situations que les bons gardiens gèrent.", href: "/actualites/gerer-animaux-difficiles-garde", icon: "animal" },
+            { title: "Gérer les imprévus pendant une garde", description: "Panne, urgence, départ anticipé : les protocoles.", href: "/actualites/gerer-imprevu-pendant-garde", icon: "gardien" },
           ];
         }
 
