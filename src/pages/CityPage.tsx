@@ -459,9 +459,9 @@ const CityPage = () => {
               "@context": "https://schema.org",
               "@type": "BreadcrumbList",
               itemListElement: [
-                { "@type": "ListItem", position: 1, name: "Guardiens", item: "https://guardiens.lovable.app" },
-                ...(departmentPage ? [{ "@type": "ListItem", position: 2, name: page.department, item: `https://guardiens.lovable.app/departement/${departmentPage.slug}` }] : []),
-                { "@type": "ListItem", position: departmentPage ? 3 : 2, name: page.city, item: `https://guardiens.lovable.app/house-sitting/${page.slug}` },
+                { "@type": "ListItem", position: 1, name: "Guardiens", item: "https://guardiens.fr" },
+                ...(departmentPage ? [{ "@type": "ListItem", position: 2, name: page.department, item: `https://guardiens.fr/departement/${departmentPage.slug}` }] : []),
+                { "@type": "ListItem", position: departmentPage ? 3 : 2, name: page.city, item: `https://guardiens.fr/house-sitting/${page.slug}` },
               ],
             }),
           }}
@@ -479,7 +479,7 @@ const CityPage = () => {
               provider: {
                 "@type": "Organization",
                 name: "Guardiens",
-                url: "https://guardiens.lovable.app",
+                url: "https://guardiens.fr",
               },
               areaServed: {
                 "@type": "City",

@@ -374,9 +374,9 @@ const GuideDetail = () => {
               "@context": "https://schema.org",
               "@type": "BreadcrumbList",
               itemListElement: [
-                { "@type": "ListItem", position: 1, name: "Guardiens", item: "https://guardiens.lovable.app" },
-                { "@type": "ListItem", position: 2, name: "Guides", item: "https://guardiens.lovable.app/guides" },
-                { "@type": "ListItem", position: 3, name: guide.city, item: `https://guardiens.lovable.app/guide/${guide.slug}` },
+                { "@type": "ListItem", position: 1, name: "Guardiens", item: "https://guardiens.fr" },
+                { "@type": "ListItem", position: 2, name: "Guides", item: "https://guardiens.fr/guides" },
+                { "@type": "ListItem", position: 3, name: guide.city, item: `https://guardiens.fr/guide/${guide.slug}` },
               ],
             }),
           }}
@@ -391,7 +391,7 @@ const GuideDetail = () => {
               "@type": "TouristDestination",
               name: `${guide.city} — Guide pet sitting`,
               description: `Guide pratique pour les gardiens d'animaux à ${guide.city}. ${guide.intro}`,
-              url: `https://guardiens.lovable.app/guide/${guide.slug}`,
+              url: `https://guardiens.fr/guide/${guide.slug}`,
               touristType: ["Pet sitter", "House sitter", "Gardien d'animaux"],
               containedInPlace: {
                 "@type": "AdministrativeArea",

@@ -278,8 +278,8 @@ const DepartmentPage = () => {
               "@context": "https://schema.org",
               "@type": "BreadcrumbList",
               itemListElement: [
-                { "@type": "ListItem", position: 1, name: "Guardiens", item: "https://guardiens.lovable.app" },
-                { "@type": "ListItem", position: 2, name: page.department, item: `https://guardiens.lovable.app/departement/${page.slug}` },
+                { "@type": "ListItem", position: 1, name: "Guardiens", item: "https://guardiens.fr" },
+                { "@type": "ListItem", position: 2, name: page.department, item: `https://guardiens.fr/departement/${page.slug}` },
               ],
             }),
           }}
@@ -297,7 +297,7 @@ const DepartmentPage = () => {
               provider: {
                 "@type": "Organization",
                 name: "Guardiens",
-                url: "https://guardiens.lovable.app",
+                url: "https://guardiens.fr",
               },
               areaServed: {
                 "@type": "AdministrativeArea",

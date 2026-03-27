@@ -334,7 +334,7 @@ const SmallMissions = () => {
                 name: "Petites missions Guardiens",
                 description: "Entraide communautaire entre voisins autour des animaux, du jardin et de la maison.",
                 areaServed: { "@type": "AdministrativeArea", name: "Auvergne-Rhône-Alpes" },
-                provider: { "@type": "Organization", name: "Guardiens", url: "https://guardiens.lovable.app" },
+                provider: { "@type": "Organization", name: "Guardiens", url: "https://guardiens.fr" },
               }),
             }}
           />
