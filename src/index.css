@@ -306,4 +306,18 @@
     @apply mt-12;
     background: linear-gradient(135deg, hsl(var(--primary) / 0.1), hsl(var(--primary) / 0.04));
   }
+
+  /* CTA-style links in last paragraphs of articles */
+  .article-rich-content p:last-of-type a,
+  .article-rich-content p:nth-last-of-type(2) a {
+    @apply inline-block px-5 py-2.5 rounded-lg font-semibold text-sm no-underline mt-2 mr-2 transition-all;
+    background: hsl(var(--primary));
+    color: hsl(var(--primary-foreground));
+  }
+  .article-rich-content p:last-of-type a:hover,
+  .article-rich-content p:nth-last-of-type(2) a:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+    text-decoration: none;
+  }
 }
