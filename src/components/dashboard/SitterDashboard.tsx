@@ -282,6 +282,22 @@ const SitterDashboard = () => {
         </div>
       )}
 
+      {/* 4d. Emergency blocked */}
+      {emergencyBlocked && (
+        <div className="rounded-xl border border-border bg-muted/50 p-5 space-y-2">
+          <div className="flex items-center gap-2.5">
+            <Zap className="h-4 w-4 text-muted-foreground" />
+            <p className="font-heading font-semibold text-sm text-muted-foreground">Gardien d'urgence — en pause</p>
+          </div>
+          <p className="text-xs text-muted-foreground">
+            Votre statut est en pause jusqu'au {new Date(emergencyBlocked).toLocaleDateString("fr-FR")}. Continuez à garder avec excellence pour le réactiver.
+          </p>
+        </div>
+      )}
+
+      {/* 4e. Not yet eligible — show progress */}
+      {!emergencyEligible && !hasEmergencyProfile && !emergencyBlocked && <EmergencyEligibility />}
+
       {/* 5. My applications */}
       <DashSection title="Mes candidatures" action={
         myApplications.length > 0 ? <Link to="/sits" className="text-xs text-primary hover:underline font-medium">Voir tout →</Link> : undefined
