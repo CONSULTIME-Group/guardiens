@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import ReportButton from "@/components/reports/ReportButton";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Input } from "@/components/ui/input";
