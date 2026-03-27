@@ -52,16 +52,13 @@ const OwnerStepIdentity = ({ data, onChange, onUploadPhoto }: Props) => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label htmlFor="o_city">Ville</Label>
-          <Input id="o_city" value={data.city} onChange={e => onChange({ city: e.target.value })} className="rounded-lg h-12" maxLength={100} />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="o_postal">Code postal</Label>
-          <Input id="o_postal" value={data.postal_code} onChange={e => handlePostalCodeChange(e.target.value)} className="rounded-lg h-12" maxLength={10} />
-        </div>
-      </div>
+      <PostalCodeCityFields
+        city={data.city}
+        postalCode={data.postal_code}
+        onChange={onChange}
+        cityId="o_city"
+        postalId="o_postal"
+      />
 
       <div className="space-y-2">
         <div className="flex items-center justify-between">

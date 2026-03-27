@@ -62,16 +62,11 @@ const StepIdentity = ({ data, onChange, onUploadAvatar }: Props) => {
       </div>
 
       {/* Location */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label htmlFor="city">Ville</Label>
-          <Input id="city" value={data.city} onChange={e => onChange({ city: e.target.value })} className="rounded-lg h-12" maxLength={100} />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="postal_code">Code postal</Label>
-          <Input id="postal_code" value={data.postal_code} onChange={e => handlePostalCodeChange(e.target.value)} className="rounded-lg h-12" maxLength={10} />
-        </div>
-      </div>
+      <PostalCodeCityFields
+        city={data.city}
+        postalCode={data.postal_code}
+        onChange={onChange}
+      />
 
       {/* Bio */}
       <div className="space-y-2">
