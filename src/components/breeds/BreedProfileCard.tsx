@@ -1,13 +1,17 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Info, RefreshCw } from "lucide-react";
+import { Info, RefreshCw, Activity, Heart, Utensils, Shield, Users, PawPrint, Star, Gauge } from "lucide-react";
 
 interface BreedProfile {
   temperament: string;
   exercise_needs: string;
   grooming: string;
+  alimentation: string;
+  health_notes: string;
   stranger_behavior: string;
+  compatibility: string;
   sitter_tips: string;
+  difficulty_level: string;
   ideal_for: string;
 }
 
@@ -20,19 +24,17 @@ interface Props {
   editable?: boolean;
 }
 
-const speciesLabels: Record<string, string> = {
-  dog: "chiens", cat: "chats", horse: "chevaux", bird: "oiseaux",
-  rodent: "rongeurs", fish: "poissons", reptile: "reptiles",
-  farm_animal: "animaux de ferme", nac: "NAC",
-};
-
-const fields: { key: keyof BreedProfile; label: string }[] = [
-  { key: "temperament", label: "Caractère" },
-  { key: "exercise_needs", label: "Exercice" },
-  { key: "grooming", label: "Entretien" },
-  { key: "stranger_behavior", label: "Avec les inconnus" },
-  { key: "sitter_tips", label: "Conseils gardien" },
-  { key: "ideal_for", label: "Idéal pour" },
+const fields: { key: keyof BreedProfile; label: string; icon: React.ReactNode }[] = [
+  { key: "temperament", label: "Caractère", icon: <Heart className="h-3.5 w-3.5 text-primary" /> },
+  { key: "exercise_needs", label: "Exercice", icon: <Activity className="h-3.5 w-3.5 text-primary" /> },
+  { key: "alimentation", label: "Alimentation", icon: <Utensils className="h-3.5 w-3.5 text-primary" /> },
+  { key: "grooming", label: "Entretien", icon: <PawPrint className="h-3.5 w-3.5 text-primary" /> },
+  { key: "health_notes", label: "Santé", icon: <Shield className="h-3.5 w-3.5 text-primary" /> },
+  { key: "stranger_behavior", label: "Avec les inconnus", icon: <Users className="h-3.5 w-3.5 text-primary" /> },
+  { key: "compatibility", label: "Avec d'autres animaux", icon: <PawPrint className="h-3.5 w-3.5 text-primary" /> },
+  { key: "sitter_tips", label: "Conseils gardien", icon: <Star className="h-3.5 w-3.5 text-primary" /> },
+  { key: "difficulty_level", label: "Niveau gardien", icon: <Gauge className="h-3.5 w-3.5 text-primary" /> },
+  { key: "ideal_for", label: "Idéal pour", icon: <Info className="h-3.5 w-3.5 text-primary" /> },
 ];
 
 const BreedProfileCard = ({ species, breed, ownerNote, ownerFirstName, onNoteChange, editable = false }: Props) => {
@@ -79,27 +81,28 @@ const BreedProfileCard = ({ species, breed, ownerNote, ownerFirstName, onNoteCha
   if (error || !profile) return null;
 
   const breedLabel = breed.trim();
-  const speciesLabel = speciesLabels[species] || species;
 
   return (
     <div className="mt-3 rounded-lg border border-border bg-accent/30 p-4 space-y-3">
       <div className="flex items-center gap-2">
         <Info className="h-4 w-4 text-primary shrink-0" />
-        <h4 className="text-sm font-semibold">À savoir sur les {breedLabel}</h4>
+        <h4 className="text-sm font-semibold">Fiche race — {breedLabel}</h4>
       </div>
 
       <div className="space-y-2">
-        {fields.map(({ key, label }) => (
+        {fields.map(({ key, label, icon }) => (
           profile[key] ? (
-            <div key={key} className="text-sm">
-              <span className="font-medium">{label} :</span>{" "}
-              <span className="text-muted-foreground">{profile[key]}</span>
+            <div key={key} className="text-sm flex items-start gap-2">
+              <span className="mt-0.5 shrink-0">{icon}</span>
+              <div>
+                <span className="font-medium">{label} :</span>{" "}
+                <span className="text-muted-foreground">{profile[key]}</span>
+              </div>
             </div>
           ) : null
         ))}
       </div>
 
-      {/* Owner note (editable mode for owner profile) */}
       {editable && onNoteChange && (
         <div className="pt-2 border-t border-border/50">
           <label className="text-xs font-medium text-muted-foreground block mb-1">
@@ -115,7 +118,6 @@ const BreedProfileCard = ({ species, breed, ownerNote, ownerFirstName, onNoteCha
         </div>
       )}
 
-      {/* Owner note (read-only mode for sitter view) */}
       {!editable && ownerNote && ownerFirstName && (
         <div className="pt-2 border-t border-border/50">
           <p className="text-sm">

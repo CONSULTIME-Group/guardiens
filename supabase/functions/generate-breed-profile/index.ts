@@ -26,7 +26,6 @@ Deno.serve(async (req) => {
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Normalize for lookup
     const normalizedBreed = breed.trim().toLowerCase();
     const normalizedSpecies = species.trim().toLowerCase();
 
@@ -44,7 +43,6 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Generate via Lovable AI
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
       throw new Error("LOVABLE_API_KEY is not configured");
@@ -64,18 +62,24 @@ Deno.serve(async (req) => {
       ? `${speciesLabel} croisé / sans race définie`
       : `${speciesLabel} de race ${breed}`;
 
-    const prompt = `Tu es un expert en animaux de compagnie. Génère une fiche descriptive pour : ${breedPrompt}.
+    const prompt = `Tu es un expert animalier. Génère une fiche descriptive GÉNÉRALE pour : ${breedPrompt}.
+
+IMPORTANT : Cette fiche décrit la RACE en général. Ne mentionne AUCUNE ville, région ou lieu géographique. Le contenu doit être universel.
 
 Réponds UNIQUEMENT en JSON valide avec cette structure exacte :
 {
-  "temperament": "Description du caractère typique en 2-3 phrases",
-  "exercise_needs": "Besoins d'exercice quotidien en 2-3 phrases",
-  "grooming": "Entretien et toilettage en 1-2 phrases",
-  "stranger_behavior": "Comportement avec les inconnus en 1-2 phrases",
-  "sitter_tips": "Ce qu'un gardien doit savoir avant de s'occuper de cette race, en 2-3 phrases",
-  "ideal_for": "Idéal pour un gardien qui... (1 phrase)"
+  "temperament": "Caractère général typique de cette race en 2-3 phrases",
+  "exercise_needs": "Besoins en exercice quotidien : durée, intensité, type d'activités recommandées en 2-3 phrases",
+  "grooming": "Entretien du pelage/plumage, fréquence de toilettage, mue en 1-2 phrases",
+  "alimentation": "Besoins alimentaires spécifiques, quantités indicatives, aliments à éviter en 2-3 phrases",
+  "health_notes": "Points d'attention santé : maladies fréquentes de la race, prédispositions génétiques, signes à surveiller en 2-3 phrases",
+  "stranger_behavior": "Comportement avec les inconnus et réaction face à un gardien qui n'est pas son maître en 1-2 phrases",
+  "compatibility": "Compatibilité avec d'autres animaux (chiens, chats, petits animaux) en 1-2 phrases",
+  "sitter_tips": "Conseils pratiques pour un gardien : ce qu'il doit absolument savoir, les erreurs à éviter, comment gagner la confiance de l'animal en 2-3 phrases",
+  "difficulty_level": "Niveau de difficulté pour un gardien débutant : Facile / Modéré / Exigeant — avec une justification en 1 phrase",
+  "ideal_for": "Idéal pour un gardien qui... (1 phrase décrivant le profil de gardien compatible)"
 }
-Ton : chaleureux et pratique, pas encyclopédique. En français.`;
+Ton : chaleureux et pratique, orienté gardien. En français.`;
 
     const aiResponse = await fetch(LOVABLE_API_URL, {
       method: "POST",
@@ -86,7 +90,7 @@ Ton : chaleureux et pratique, pas encyclopédique. En français.`;
       body: JSON.stringify({
         model: "google/gemini-2.5-flash",
         messages: [{ role: "user", content: prompt }],
-        max_tokens: 500,
+        max_tokens: 800,
         temperature: 0.7,
       }),
     });
@@ -99,7 +103,6 @@ Ton : chaleureux et pratique, pas encyclopédique. En français.`;
     const aiData = await aiResponse.json();
     const content = aiData.choices?.[0]?.message?.content || aiData.content || "";
 
-    // Extract JSON from response
     const jsonMatch = content.match(/\{[\s\S]*\}/);
     if (!jsonMatch) {
       throw new Error("Could not parse AI response as JSON");
@@ -107,15 +110,18 @@ Ton : chaleureux et pratique, pas encyclopédique. En français.`;
 
     const profile = JSON.parse(jsonMatch[0]);
 
-    // Store in cache
     const record = {
       species: normalizedSpecies,
       breed: normalizedBreed,
       temperament: profile.temperament || "",
       exercise_needs: profile.exercise_needs || "",
       grooming: profile.grooming || "",
+      alimentation: profile.alimentation || "",
+      health_notes: profile.health_notes || "",
       stranger_behavior: profile.stranger_behavior || "",
+      compatibility: profile.compatibility || "",
       sitter_tips: profile.sitter_tips || "",
+      difficulty_level: profile.difficulty_level || "",
       ideal_for: profile.ideal_for || "",
     };
 
