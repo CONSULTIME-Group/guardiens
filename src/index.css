@@ -231,8 +231,8 @@
   /* CTA block */
   .article-cta-block {
     @apply my-10 py-8 px-6 rounded-2xl text-center;
-    background: linear-gradient(135deg, hsl(var(--primary) / 0.08), hsl(var(--secondary) / 0.1));
-    border: 1px solid hsl(var(--primary) / 0.15);
+    background: #FAF9F6;
+    border: 1px solid hsl(var(--primary) / 0.2);
   }
 
   .article-cta-inner {
@@ -242,12 +242,12 @@
   .article-cta-heading {
     @apply text-xl font-bold mb-2;
     font-family: var(--font-heading);
-    color: hsl(var(--foreground));
+    color: #1C1B18;
   }
 
   .article-cta-text {
     @apply text-sm mb-4;
-    color: hsl(var(--muted-foreground));
+    color: #6B7280;
   }
 
   .article-cta-buttons {
@@ -261,7 +261,7 @@
 
   .article-cta-btn-primary {
     background: hsl(var(--primary));
-    color: hsl(var(--primary-foreground));
+    color: white;
   }
   .article-cta-btn-primary:hover {
     opacity: 0.9;
@@ -274,7 +274,7 @@
     border: 1.5px solid hsl(var(--primary) / 0.3);
   }
   .article-cta-btn-secondary:hover {
-    background: hsl(var(--primary) / 0.05);
+    background: hsl(var(--primary) / 0.08);
   }
 
   /* Fact box "Le saviez-vous" */
