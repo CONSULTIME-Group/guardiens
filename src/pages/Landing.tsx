@@ -89,6 +89,16 @@ const Landing = () => {
   const navigate = useNavigate();
   const [latestArticles, setLatestArticles] = useState<any[]>([]);
 
+  useEffect(() => {
+    supabase
+      .from("articles")
+      .select("id,title,slug,excerpt,cover_image_url,category,published_at")
+      .eq("published", true)
+      .order("published_at", { ascending: false })
+      .limit(3)
+      .then(({ data }) => setLatestArticles(data || []));
+  }, []);
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       <PageMeta
