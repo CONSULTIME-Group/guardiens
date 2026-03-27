@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { ArrowLeft, Calendar, Home, Info, Star, Lock, Pencil, Trash2, XCircle } from "lucide-react";
+import PostConfirmationChecklist from "@/components/sits/PostConfirmationChecklist";
 import LongStayApplicationsList from "@/components/sits/LongStayApplicationsList";
 import { format, differenceInDays } from "date-fns";
 import { fr } from "date-fns/locale";
