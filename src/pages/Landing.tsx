@@ -616,23 +616,23 @@ const Landing = () => {
           {/* SEO local links */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-6">
             <div>
-              <h4 className="text-sm font-semibold text-foreground mb-2">Garde d'animaux à Lyon</h4>
+              <h4 className="text-sm font-semibold text-foreground mb-2">House-sitting par ville</h4>
               <ul className="space-y-1 text-xs text-muted-foreground">
-                <li><Link to="/actualites/pet-sitting-lyon-ouest-lyonnais" className="hover:text-primary transition-colors">Vieux Lyon (69005)</Link></li>
-                <li><Link to="/actualites/pet-sitting-lyon-ouest-lyonnais" className="hover:text-primary transition-colors">Monplaisir (69008)</Link></li>
-                <li><Link to="/actualites/pet-sitting-lyon-ouest-lyonnais" className="hover:text-primary transition-colors">Croix-Rousse (69004)</Link></li>
-                <li><Link to="/actualites/pet-sitting-lyon-ouest-lyonnais" className="hover:text-primary transition-colors">Lyon 6 — Tête d'Or</Link></li>
-                <li><Link to="/actualites/pet-sitting-lyon-ouest-lyonnais" className="hover:text-primary transition-colors">Monts d'Or</Link></li>
+                <li><Link to="/house-sitting/lyon" className="hover:text-primary transition-colors">House-sitting Lyon</Link></li>
+                <li><Link to="/house-sitting/annecy" className="hover:text-primary transition-colors">House-sitting Annecy</Link></li>
+                <li><Link to="/house-sitting/grenoble" className="hover:text-primary transition-colors">House-sitting Grenoble</Link></li>
+                <li><Link to="/house-sitting/chambery" className="hover:text-primary transition-colors">House-sitting Chambéry</Link></li>
+                <li><Link to="/house-sitting/caluire-et-cuire" className="hover:text-primary transition-colors">House-sitting Caluire</Link></li>
               </ul>
             </div>
             <div>
               <h4 className="text-sm font-semibold text-foreground mb-2">House-sitting AURA</h4>
               <ul className="space-y-1 text-xs text-muted-foreground">
-                <li><Link to="/actualites/house-sitting-haute-savoie-annecy-megeve" className="hover:text-primary transition-colors">Haute-Savoie & Annecy</Link></li>
-                <li><Link to="/actualites/pet-sitting-grenoble-chartreuse" className="hover:text-primary transition-colors">Grenoble & Chartreuse</Link></li>
-                <li><Link to="/actualites/gardiennage-maison-vacances-aura" className="hover:text-primary transition-colors">Gardiennage vacances</Link></li>
-                <li><Link to="/actualites/garde-ferme-animaux-monts-du-lyonnais" className="hover:text-primary transition-colors">Monts du Lyonnais</Link></li>
-                <li><Link to="/actualites/house-sitting-auvergne-rhone-alpes" className="hover:text-primary transition-colors">Guide AURA complet</Link></li>
+                <li><Link to="/actualites/house-sitting-auvergne-rhone-alpes" className="hover:text-primary transition-colors">House-sitting en AURA</Link></li>
+                <li><Link to="/actualites/parcs-chiens-lyon-guide-complet" className="hover:text-primary transition-colors">Parcs chiens Lyon</Link></li>
+                <li><Link to="/actualites/parcs-balades-chiens-annecy-guide" className="hover:text-primary transition-colors">Parcs chiens Annecy</Link></li>
+                <li><Link to="/actualites/parcs-balades-chiens-grenoble-guide" className="hover:text-primary transition-colors">Parcs chiens Grenoble</Link></li>
+                <li><Link to="/actualites/gardes-longue-duree-guide" className="hover:text-primary transition-colors">Gardes longue durée</Link></li>
               </ul>
             </div>
             <div>
@@ -642,6 +642,7 @@ const Landing = () => {
                 <li><Link to="/guides" className="hover:text-primary transition-colors">Guides locaux</Link></li>
                 <li><Link to="/faq" className="hover:text-primary transition-colors">FAQ</Link></li>
                 <li><Link to="/tarifs" className="hover:text-primary transition-colors">Tarifs</Link></li>
+                <li><Link to="/actualites/c-est-quoi-le-house-sitting" className="hover:text-primary transition-colors">C'est quoi le house-sitting</Link></li>
               </ul>
             </div>
             <div>
@@ -650,6 +651,7 @@ const Landing = () => {
                 <li><Link to="/a-propos" className="hover:text-primary transition-colors">À propos</Link></li>
                 <li><Link to="/contact" className="hover:text-primary transition-colors">Contact</Link></li>
                 <li><Link to="/register" className="hover:text-primary transition-colors">Inscription</Link></li>
+                <li><Link to="/petites-missions" className="hover:text-primary transition-colors">Petites missions</Link></li>
               </ul>
             </div>
           </div>
