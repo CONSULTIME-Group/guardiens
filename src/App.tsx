@@ -86,6 +86,14 @@ const PublicOnlyRoute = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
+const SmallMissionsRoute = () => {
+  const { isAuthenticated } = useAuth();
+  if (isAuthenticated) {
+    return <AppLayout />;
+  }
+  return <SmallMissions />;
+};
+
 const AppRoutes = () => (
   <Routes>
     <Route path="/" element={<PublicOnlyRoute><Landing /></PublicOnlyRoute>} />
