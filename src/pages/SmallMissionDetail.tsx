@@ -40,6 +40,11 @@ const SmallMissionDetail = () => {
   const [message, setMessage] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [hasResponded, setHasResponded] = useState(false);
+  const [feedbackOpen, setFeedbackOpen] = useState(false);
+  const [feedbackTarget, setFeedbackTarget] = useState<{ id: string; name: string } | null>(null);
+  const [hasFeedback, setHasFeedback] = useState(false);
+  const [acceptedResponderId, setAcceptedResponderId] = useState<string | null>(null);
+  const [acceptedResponderName, setAcceptedResponderName] = useState<string>("");
 
   useEffect(() => {
     if (!id) return;
