@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import ReportButton from "@/components/reports/ReportButton";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Input } from "@/components/ui/input";
@@ -11,11 +11,11 @@ import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Search, SlidersHorizontal, MapPin, Calendar, Star, CheckCircle2, Lock, Zap } from "lucide-react";
+import { Search, SlidersHorizontal, MapPin, Calendar, Star, CheckCircle2, Lock, Zap, Info } from "lucide-react";
 import ChipSelect from "@/components/profile/ChipSelect";
 import VerifiedBadge from "@/components/profile/VerifiedBadge";
 import BadgeShield from "@/components/badges/BadgeShield";
-import { TooltipProvider } from "@/components/ui/tooltip";
+import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { format, differenceInDays } from "date-fns";
 import { fr } from "date-fns/locale";
 import { geocodeCity, haversineDistance } from "@/lib/geocode";
@@ -43,6 +43,7 @@ type SearchTab = "sits" | "long_stays";
 
 const SearchSitter = () => {
   const { user } = useAuth();
+  const [searchParams] = useSearchParams();
   const [tab, setTab] = useState<SearchTab>("sits");
   const [city, setCity] = useState("");
   const [radius, setRadius] = useState([50]);
@@ -53,6 +54,7 @@ const SearchSitter = () => {
   const [environment, setEnvironment] = useState("all");
   const [duration, setDuration] = useState("all");
   const [verifiedOnly, setVerifiedOnly] = useState(false);
+  const [emergencyOnly, setEmergencyOnly] = useState(searchParams.get("emergency") === "true");
   const [selectedEquipments, setSelectedEquipments] = useState<string[]>([]);
   const [sort, setSort] = useState<SortOption>("recent");
 
@@ -330,6 +332,26 @@ const SearchSitter = () => {
       <div className="flex items-center gap-3">
         <Switch checked={verifiedOnly} onCheckedChange={setVerifiedOnly} />
         <label className="text-sm">Profils vérifiés uniquement</label>
+      </div>
+      <div className="flex items-center gap-3">
+        <Switch checked={emergencyOnly} onCheckedChange={setEmergencyOnly} />
+        <label className="text-sm flex items-center gap-1.5">
+          <Zap className="h-3.5 w-3.5 text-amber-500" />
+          Gardiens d'urgence
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <a href="/gardien-urgence" target="_blank" rel="noopener noreferrer" className="inline-flex" onClick={e => e.stopPropagation()}>
+                  <Info className="h-3.5 w-3.5 text-muted-foreground hover:text-primary cursor-pointer" />
+                </a>
+              </TooltipTrigger>
+              <TooltipContent side="top" className="max-w-[220px] text-xs">
+                Gardiens expérimentés, vérifiés, mobilisables rapidement.{" "}
+                <a href="/gardien-urgence" className="text-primary underline">En savoir plus →</a>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        </label>
       </div>
       <Button onClick={handleSearch} className="w-full gap-2" disabled={loading}>
         <Search className="h-4 w-4" /> {loading ? "Recherche..." : "Rechercher"}
