@@ -302,6 +302,20 @@ const SmallMissionDetail = () => {
               <XCircle className="h-4 w-4" /> Fermer — J'ai trouvé quelqu'un
             </Button>
           )}
+
+          {/* Feedback button for completed missions (author) */}
+          {mission.status === "completed" && !hasFeedback && acceptedResponderId && (
+            <Button
+              onClick={() => openFeedbackFor(acceptedResponderId!, acceptedResponderName)}
+              variant="outline"
+              className="w-full mt-4 gap-2"
+            >
+              <Handshake className="h-4 w-4" /> Donner mon retour sur l'entraide
+            </Button>
+          )}
+          {mission.status === "completed" && hasFeedback && (
+            <p className="text-sm text-muted-foreground text-center mt-4">✅ Vous avez donné votre retour — merci !</p>
+          )}
         </div>
       )}
 
