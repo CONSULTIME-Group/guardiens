@@ -166,15 +166,27 @@ const MySubscription = () => {
             <div><span className="text-muted-foreground">Après le 13 juin :</span> <span className="font-medium">49€/an</span></div>
           </div>
 
-          <div className="space-y-2">
-            <div className="flex justify-between text-sm">
-              <span>Il vous reste {daysLeftGrace} jour{daysLeftGrace > 1 ? "s" : ""} d'accès gratuit</span>
-              <span className="font-medium">{graceProgressPct}%</span>
+          {isBeforeLaunch ? (
+            <div className="rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 p-4 text-center text-sm">
+              <CheckCircle2 className="h-4 w-4 text-green-600 inline mr-1.5" />
+              C'est <strong>gratuit pour tout le monde</strong> jusqu'au 13 mai 2026 !
             </div>
-            <div className="w-full bg-muted rounded-full h-3 overflow-hidden">
-              <div className={`h-full rounded-full transition-all ${graceBarColor}`} style={{ width: `${graceProgressPct}%` }} />
+          ) : isInGracePeriod ? (
+            <div className="space-y-2">
+              <div className="flex justify-between text-sm">
+                <span>Il vous reste {daysLeftGrace} jour{daysLeftGrace > 1 ? "s" : ""} d'accès gratuit Fondateur</span>
+                <span className="font-medium">{graceProgressPct}%</span>
+              </div>
+              <div className="w-full bg-muted rounded-full h-3 overflow-hidden">
+                <div className={`h-full rounded-full transition-all ${graceBarColor}`} style={{ width: `${graceProgressPct}%` }} />
+              </div>
             </div>
-          </div>
+          ) : (
+            <div className="rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 p-4 text-center text-sm">
+              <AlertTriangle className="h-4 w-4 text-red-600 inline mr-1.5" />
+              Votre accès gratuit a expiré. Abonnez-vous pour continuer.
+            </div>
+          )}
 
           {emergencyInfo && emergencyInfo.interventions > 0 && (
             <div className="rounded-lg border border-border bg-card p-4 text-sm">
