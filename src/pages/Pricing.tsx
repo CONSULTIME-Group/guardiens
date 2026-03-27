@@ -2,8 +2,8 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Check, X, Star, Gift } from "lucide-react";
+
+import { Check, Star, Gift, MapPin, ShieldCheck, Map, PawPrint, Heart, Siren } from "lucide-react";
 import PageMeta from "@/components/PageMeta";
 
 const LAUNCH_DATE = new Date("2026-05-13T00:00:00");
@@ -37,21 +37,21 @@ const sitterFeatures = [
   "Support",
 ];
 
-const comparisonRows = [
-  { label: "Propriétaire", guardiens: "Gratuit", trusted: "$149–$299/an", nomador: "34€/3 mois à 179€/an" },
-  { label: "Gardien", guardiens: "49€/an", trusted: "$129–$259/an + $10/garde", nomador: "34€/3 mois à 179€/an" },
-  { label: "Frais par garde", guardiens: "Aucun", trusted: "$10 par garde", nomador: "Aucun" },
-  { label: "Nombre de formules", guardiens: "1 seule — simple", trusted: "3 niveaux", nomador: "3 formules" },
-  { label: "Proximité locale", guardiens: true, trusted: false, nomador: false },
-  { label: "Guide de la maison", guardiens: true, trusted: true, nomador: false },
-  { label: "Vétos", guardiens: "Annuaire local", trusted: "Hotline (Standard+)", nomador: false },
-  { label: "Couvertures / assurances", guardiens: "Votre assurance habitation", trusted: "Plans avec conditions", nomador: "Repose sur votre assurance" },
-  { label: "Fiches races auto-générées", guardiens: true, trusted: false, nomador: false },
-  { label: "Guides locaux (parcs, vétos, balades)", guardiens: true, trusted: false, nomador: false },
-  { label: "Gardiens d'urgence", guardiens: true, trusted: false, nomador: false },
-  { label: "Avis croisés", guardiens: "Détaillés avec sous-critères", trusted: "Blind reviews", nomador: "Badges" },
-  { label: "Vérification ID", guardiens: true, trusted: true, nomador: true },
-  { label: "Simplicité", guardiens: "1 prix, 0 frais", trusted: "3 niveaux × 2 rôles", nomador: "3 formules, conditions variables" },
+const strengthBlocks = [
+  { icon: MapPin, title: "Gardiens de proximité", desc: "Vos gardiens sont dans votre quartier — pas à l'autre bout du pays. Un problème ? Quelqu'un est à 15 minutes." },
+  { icon: ShieldCheck, title: "Profils vérifiés", desc: "Identité vérifiée, avis croisés détaillés, écussons qualitatifs. Vous savez à qui vous confiez vos animaux." },
+  { icon: Map, title: "Guides locaux", desc: "Parcs, vétérinaires, balades, cafés dog-friendly — tout ce qu'il faut pour que votre gardien se sente chez lui." },
+  { icon: PawPrint, title: "Fiches races", desc: "Caractère, besoins, conseils de garde — votre gardien sait exactement comment s'occuper de votre animal." },
+  { icon: Heart, title: "Petites missions", desc: "Entraide entre voisins : promener un chien, arroser un jardin. Pas d'argent — un bon repas, un coup de main, du lien." },
+  { icon: Siren, title: "Gardiens d'urgence", desc: "Des gardiens expérimentés, mobilisables rapidement parce qu'ils sont à côté. Le filet de sécurité que vous méritez." },
+];
+
+const promisePoints = [
+  "Un seul prix : 49€/an pour les gardiens. Point.",
+  "Gratuit pour les propriétaires — pour toujours.",
+  "Aucune commission sur les gardes classiques.",
+  "Un réseau local de confiance, pas une marketplace anonyme.",
+  "Annulation en 1 clic, sans justification.",
 ];
 
 const faqItems = [
@@ -81,14 +81,6 @@ const faqItems = [
   },
 ];
 
-const CellValue = ({ value }: { value: boolean | string }) => {
-  if (typeof value === "string") return <span className="font-semibold">{value}</span>;
-  return value ? (
-    <Check className="h-5 w-5 text-primary mx-auto" />
-  ) : (
-    <X className="h-5 w-5 text-muted-foreground/40 mx-auto" />
-  );
-};
 
 const Pricing = () => {
   const before = isBeforeLaunch();
@@ -259,43 +251,35 @@ const Pricing = () => {
             </p>
           </section>
 
-          {/* Comparison Table */}
+          {/* Strengths Grid */}
           <section className="space-y-6">
-            <h2 className="font-heading text-2xl font-bold text-foreground text-center">Comparez en toute transparence</h2>
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-1/4"></TableHead>
-                    <TableHead className="text-center font-bold text-primary">Guardiens</TableHead>
-                    <TableHead className="text-center">TrustedHousesitters</TableHead>
-                    <TableHead className="text-center">Nomador</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {comparisonRows.map((row) => (
-                    <TableRow key={row.label}>
-                      <TableCell className="font-medium">{row.label}</TableCell>
-                      <TableCell className="text-center">
-                        <CellValue value={row.guardiens} />
-                      </TableCell>
-                      <TableCell className="text-center">
-                        <CellValue value={row.trusted} />
-                      </TableCell>
-                      <TableCell className="text-center">
-                        <CellValue value={row.nomador} />
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+            <h2 className="font-heading text-2xl font-bold text-foreground text-center">Tout ça, c'est Guardiens</h2>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+              {strengthBlocks.map((block) => (
+                <Card key={block.title} className="border-border">
+                  <CardContent className="pt-6 space-y-3">
+                    <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                      <block.icon className="h-5 w-5 text-primary" />
+                    </div>
+                    <h3 className="font-heading font-bold text-foreground">{block.title}</h3>
+                    <p className="text-sm text-muted-foreground leading-relaxed">{block.desc}</p>
+                  </CardContent>
+                </Card>
+              ))}
             </div>
-            <p className="text-xs text-muted-foreground text-center max-w-3xl mx-auto">
-              Comparaison réalisée de bonne foi à titre informatif, sur la base des tarifs publics affichés sur les sites respectifs en mars 2026. Elle ne constitue ni un dénigrement ni une publicité comparative au sens de l'article L. 122-1 du Code de la consommation. TrustedHousesitters facture en dollars US — les prix en euros varient selon le taux de change. Nomador propose des formules trimestrielles et annuelles. Les fonctionnalités listées reflètent les offres publiquement disponibles à la date indiquée et peuvent évoluer. Sources :{" "}
-              <a href="https://www.trustedhousesitters.com/pricing" target="_blank" rel="noopener noreferrer" className="underline">trustedhousesitters.com/pricing</a>,{" "}
-              <a href="https://www.nomador.com/tarifs" target="_blank" rel="noopener noreferrer" className="underline">nomador.com/tarifs</a>. Si vous constatez une inexactitude, merci de nous contacter à{" "}
-              <a href="mailto:contact@guardiens.fr" className="underline">contact@guardiens.fr</a>.
-            </p>
+          </section>
+
+          {/* Promise */}
+          <section className="max-w-2xl mx-auto space-y-6 text-center">
+            <h2 className="font-heading text-2xl font-bold text-foreground">Notre promesse — Simple, honnête, et c'est tout</h2>
+            <ul className="space-y-3 text-left">
+              {promisePoints.map((point) => (
+                <li key={point} className="flex items-start gap-2.5 text-sm">
+                  <Check className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+                  <span className="text-foreground">{point}</span>
+                </li>
+              ))}
+            </ul>
           </section>
 
           {/* FAQ */}
