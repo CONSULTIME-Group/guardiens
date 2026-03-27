@@ -43,6 +43,7 @@ type SearchTab = "sits" | "long_stays";
 
 const SearchSitter = () => {
   const { user } = useAuth();
+  const [searchParams] = useSearchParams();
   const [tab, setTab] = useState<SearchTab>("sits");
   const [city, setCity] = useState("");
   const [radius, setRadius] = useState([50]);
