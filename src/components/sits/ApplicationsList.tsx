@@ -443,7 +443,7 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
                         </span>
                       )}
                       {confirmApp.badgeCounts?.[0] && (
-                        <BadgePills badges={confirmApp.badgeCounts.slice(0, 1)} max={1} size="sm" />
+                        <TooltipProvider><BadgeShield badgeKey={confirmApp.badgeCounts[0].badge_key} count={confirmApp.badgeCounts[0].count} size="sm" showLabel={false} /></TooltipProvider>
                       )}
                     </div>
                   </div>
