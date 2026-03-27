@@ -221,8 +221,9 @@ const Pricing = () => {
                 <div className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-2">Gardien</div>
                 {before ? (
                   <div className="space-y-1">
-                    <span className="text-sm font-semibold text-primary uppercase">GRATUIT jusqu'au 13 mai</span>
+                    <span className="text-sm font-semibold text-primary uppercase">GRATUIT jusqu'au 13 juin</span>
                     <CardTitle className="font-heading text-4xl font-bold text-muted-foreground line-through">49€/an</CardTitle>
+                    <p className="text-xs text-muted-foreground">Inscription avant le 13 mai → accès gratuit jusqu'au 13 juin 2026</p>
                   </div>
                 ) : (
                   <div className="space-y-1">
