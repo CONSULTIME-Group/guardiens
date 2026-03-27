@@ -100,6 +100,23 @@ const HelpButton = ({ propertyId, ownerId, ownerName }: HelpButtonProps) => {
         </div>
       ),
     },
+    {
+      icon: Zap,
+      label: "Trouver un gardien d'urgence",
+      color: "text-amber-600",
+      content: (
+        <div className="space-y-3 text-sm">
+          <p className="text-muted-foreground">
+            Besoin d'un remplaçant rapidement ? Les gardiens d'urgence sont des membres expérimentés mobilisables en quelques heures.
+          </p>
+          <Link to="/search?emergency=true" onClick={() => setOpen(false)}>
+            <Button size="sm" className="gap-1.5 w-full">
+              <Zap className="h-3.5 w-3.5" /> Chercher un gardien d'urgence
+            </Button>
+          </Link>
+        </div>
+      ),
+    },
   ];
 
   const [activeOption, setActiveOption] = useState<number | null>(null);
