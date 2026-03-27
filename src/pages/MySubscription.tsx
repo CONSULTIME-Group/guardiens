@@ -100,9 +100,12 @@ const MySubscription = () => {
       setEmergencyInfo(emergencyRes.data ? { interventions: emergencyRes.data.interventions_count } : null);
 
       // Determine status
+      const createdDate = p?.created_at ? new Date(p.created_at) : new Date();
+      const isFounder = p?.is_founder || createdDate < new Date("2026-05-13T00:00:00Z");
+
       if (effectiveRole === "owner") {
         setStatus("owner");
-      } else if (p?.is_founder) {
+      } else if (isFounder) {
         setStatus("founder");
       } else if (subRes.data?.status === "active") {
         setStatus("premium");
