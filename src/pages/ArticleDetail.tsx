@@ -414,6 +414,8 @@ export default function ArticleDetail() {
             src={article.cover_image_url}
             alt={article.title}
             className="w-full h-auto max-h-96 object-cover"
+            loading="eager"
+            fetchPriority="high"
           />
         </div>
       )}
