@@ -306,8 +306,11 @@ const SitterDashboard = () => {
             </div>
             <ChevronRight className="h-4 w-4 text-muted-foreground" />
           </div>
-        </Link>
-      )}
+         </Link>
+         <a href="/blog/gerer-imprevu-pendant-garde" className="text-xs text-primary/70 hover:text-primary hover:underline mt-1 inline-block ml-13">
+           Un imprévu ? Voir le guide →
+         </a>
+       )}
 
       {/* Emergency active section - at top if active */}
       {hasEmergencyProfile && <EmergencyDashSection />}
