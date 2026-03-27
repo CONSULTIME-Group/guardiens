@@ -3,21 +3,28 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 const SITE_URL = "https://guardiens.fr";
 
 const staticPages = [
-  { loc: "/", priority: "1.0", changefreq: "weekly" },
-  { loc: "/tarifs", priority: "0.8", changefreq: "monthly" },
-  { loc: "/faq", priority: "0.7", changefreq: "weekly" },
-  { loc: "/actualites", priority: "0.8", changefreq: "daily" },
-  { loc: "/petites-missions", priority: "0.7", changefreq: "daily" },
-  { loc: "/gardien-urgence", priority: "0.7", changefreq: "weekly" },
+  { loc: "/", priority: "1.0", changefreq: "daily" },
+  { loc: "/tarifs", priority: "0.8", changefreq: "weekly" },
+  { loc: "/faq", priority: "0.8", changefreq: "weekly" },
+  { loc: "/contact", priority: "0.8", changefreq: "weekly" },
+  { loc: "/petites-missions", priority: "0.8", changefreq: "weekly" },
+  { loc: "/gardien-urgence", priority: "0.8", changefreq: "weekly" },
+  { loc: "/blog", priority: "0.8", changefreq: "weekly" },
   { loc: "/guides", priority: "0.8", changefreq: "weekly" },
+  { loc: "/communaute", priority: "0.8", changefreq: "weekly" },
+  { loc: "/outils-pratiques", priority: "0.8", changefreq: "weekly" },
+  { loc: "/inscription", priority: "0.8", changefreq: "weekly" },
   { loc: "/recherche", priority: "0.7", changefreq: "daily" },
-  { loc: "/contact", priority: "0.5", changefreq: "monthly" },
-  { loc: "/a-propos", priority: "0.5", changefreq: "monthly" },
+];
+
+const cityPages = [
+  "annecy", "lyon", "grenoble", "caluire-et-cuire", "chambery", "aura",
+];
+
+const legalPages = [
   { loc: "/cgu", priority: "0.3", changefreq: "yearly" },
   { loc: "/confidentialite", priority: "0.3", changefreq: "yearly" },
   { loc: "/mentions-legales", priority: "0.3", changefreq: "yearly" },
-  { loc: "/login", priority: "0.4", changefreq: "monthly" },
-  { loc: "/register", priority: "0.6", changefreq: "monthly" },
 ];
 
 function escapeXml(s: string): string {
@@ -33,6 +40,15 @@ function urlEntry(loc: string, lastmod: string, changefreq: string, priority: st
   </url>\n`;
 }
 
+const PRIORITY_MAP: Record<string, string> = {
+  ville: "0.8",
+  guide_local: "0.8",
+  guide_pratique: "0.8",
+  guide_race: "0.7",
+  thematique: "0.7",
+  saisonnier: "0.7",
+};
+
 Deno.serve(async () => {
   const supabase = createClient(
     Deno.env.get("SUPABASE_URL")!,
@@ -41,7 +57,7 @@ Deno.serve(async () => {
 
   const [
     { data: articles },
-    { data: cityPages },
+    { data: seoCityPages },
     { data: cityGuides },
     { data: departmentPages },
     { data: breedProfiles },
@@ -49,7 +65,7 @@ Deno.serve(async () => {
   ] = await Promise.all([
     supabase
       .from("articles")
-      .select("slug, updated_at, published_at")
+      .select("slug, category, updated_at, published_at")
       .eq("published", true)
       .order("published_at", { ascending: false }),
     supabase
@@ -86,34 +102,51 @@ Deno.serve(async () => {
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 `;
 
+  // Static pages
   for (const page of staticPages) {
     xml += urlEntry(page.loc, today, page.changefreq, page.priority);
   }
 
+  // City landing pages
+  for (const slug of cityPages) {
+    xml += urlEntry(`/house-sitting-${slug}`, today, "weekly", "0.9");
+  }
+
+  // Articles → /blog/{slug}
   if (articles) {
     for (const a of articles) {
-      xml += urlEntry(`/actualites/${a.slug}`, (a.updated_at || a.published_at || today).split("T")[0], "monthly", "0.7");
+      const priority = PRIORITY_MAP[a.category] || "0.7";
+      xml += urlEntry(
+        `/blog/${a.slug}`,
+        (a.updated_at || a.published_at || today).split("T")[0],
+        "monthly",
+        priority
+      );
     }
   }
 
-  if (cityPages) {
-    for (const cp of cityPages) {
+  // SEO city pages from DB
+  if (seoCityPages) {
+    for (const cp of seoCityPages) {
       xml += urlEntry(`/house-sitting/${cp.slug}`, (cp.updated_at || today).split("T")[0], "weekly", "0.8");
     }
   }
 
+  // City guides
   if (cityGuides) {
     for (const cg of cityGuides) {
       xml += urlEntry(`/guide/${cg.slug}`, (cg.updated_at || today).split("T")[0], "weekly", "0.7");
     }
   }
 
+  // Department pages
   if (departmentPages) {
     for (const dp of departmentPages) {
       xml += urlEntry(`/departement/${dp.slug}`, (dp.updated_at || today).split("T")[0], "weekly", "0.8");
     }
   }
 
+  // Breed profiles
   if (breedProfiles) {
     for (const bp of breedProfiles) {
       const slug = `${bp.species.toLowerCase()}-${bp.breed.toLowerCase().replace(/\s+/g, "-")}`;
@@ -121,10 +154,16 @@ Deno.serve(async () => {
     }
   }
 
+  // Public profiles
   if (publicProfiles) {
     for (const p of publicProfiles) {
       xml += urlEntry(`/profil/${p.id}`, (p.updated_at || today).split("T")[0], "monthly", "0.5");
     }
+  }
+
+  // Legal pages
+  for (const page of legalPages) {
+    xml += urlEntry(page.loc, today, page.changefreq, page.priority);
   }
 
   xml += `</urlset>`;

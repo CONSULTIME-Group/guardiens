@@ -1,8 +1,6 @@
 /**
  * Generates a static public/sitemap.xml at build time.
  * Run: node scripts/generate-sitemap.mjs
- *
- * Reads static routes from siteRoutes.ts and fetches dynamic content from Supabase.
  */
 import { createClient } from "@supabase/supabase-js";
 import fs from "fs";
@@ -12,29 +10,44 @@ import { fileURLToPath } from "url";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const SITE_URL = "https://guardiens.fr";
 
-// Supabase connection — uses anon key (read-only public data)
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL || "https://erhccyqevdyevpyctsjj.supabase.co";
 const SUPABASE_KEY = process.env.VITE_SUPABASE_PUBLISHABLE_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVyaGNjeXFldmR5ZXZweWN0c2pqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0MjMzMzQsImV4cCI6MjA4OTk5OTMzNH0.ltBQtcouoqd5tuv_wQXb92x5Q5YYa9mkEQvZUx0wLTY";
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const staticPages = [
-  { loc: "/", priority: "1.0", changefreq: "weekly" },
-  { loc: "/tarifs", priority: "0.8", changefreq: "monthly" },
-  { loc: "/faq", priority: "0.7", changefreq: "weekly" },
-  { loc: "/actualites", priority: "0.8", changefreq: "daily" },
-  { loc: "/petites-missions", priority: "0.7", changefreq: "daily" },
-  { loc: "/gardien-urgence", priority: "0.7", changefreq: "weekly" },
+  { loc: "/", priority: "1.0", changefreq: "daily" },
+  { loc: "/tarifs", priority: "0.8", changefreq: "weekly" },
+  { loc: "/faq", priority: "0.8", changefreq: "weekly" },
+  { loc: "/contact", priority: "0.8", changefreq: "weekly" },
+  { loc: "/petites-missions", priority: "0.8", changefreq: "weekly" },
+  { loc: "/gardien-urgence", priority: "0.8", changefreq: "weekly" },
+  { loc: "/blog", priority: "0.8", changefreq: "weekly" },
   { loc: "/guides", priority: "0.8", changefreq: "weekly" },
+  { loc: "/communaute", priority: "0.8", changefreq: "weekly" },
+  { loc: "/outils-pratiques", priority: "0.8", changefreq: "weekly" },
+  { loc: "/inscription", priority: "0.8", changefreq: "weekly" },
   { loc: "/recherche", priority: "0.7", changefreq: "daily" },
-  { loc: "/contact", priority: "0.5", changefreq: "monthly" },
-  { loc: "/a-propos", priority: "0.5", changefreq: "monthly" },
-  { loc: "/login", priority: "0.4", changefreq: "monthly" },
-  { loc: "/register", priority: "0.6", changefreq: "monthly" },
+];
+
+const cityLandingPages = [
+  "annecy", "lyon", "grenoble", "caluire-et-cuire", "chambery", "aura",
+];
+
+const legalPages = [
   { loc: "/cgu", priority: "0.3", changefreq: "yearly" },
   { loc: "/confidentialite", priority: "0.3", changefreq: "yearly" },
   { loc: "/mentions-legales", priority: "0.3", changefreq: "yearly" },
 ];
+
+const PRIORITY_MAP = {
+  ville: "0.8",
+  guide_local: "0.8",
+  guide_pratique: "0.8",
+  guide_race: "0.7",
+  thematique: "0.7",
+  saisonnier: "0.7",
+};
 
 function escapeXml(s) {
   return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&apos;");
@@ -52,16 +65,15 @@ function urlEntry(loc, lastmod, changefreq, priority) {
 async function main() {
   const today = new Date().toISOString().split("T")[0];
 
-  // Fetch dynamic content
   const [
     { data: articles },
-    { data: cityPages },
+    { data: seoCityPages },
     { data: cityGuides },
     { data: departmentPages },
     { data: breedProfiles },
     { data: publicProfiles },
   ] = await Promise.all([
-    supabase.from("articles").select("slug, updated_at, published_at").eq("published", true),
+    supabase.from("articles").select("slug, category, updated_at, published_at").eq("published", true),
     supabase.from("seo_city_pages").select("slug, updated_at").eq("published", true),
     supabase.from("city_guides").select("slug, updated_at").eq("published", true),
     supabase.from("seo_department_pages").select("slug, updated_at").eq("published", true),
@@ -76,16 +88,22 @@ async function main() {
     entries.push(urlEntry(page.loc, today, page.changefreq, page.priority));
   }
 
-  // Articles
+  // City landing pages
+  for (const slug of cityLandingPages) {
+    entries.push(urlEntry(`/house-sitting-${slug}`, today, "weekly", "0.9"));
+  }
+
+  // Articles → /blog/{slug}
   if (articles) {
     for (const a of articles) {
-      entries.push(urlEntry(`/actualites/${a.slug}`, (a.updated_at || a.published_at || today).split("T")[0], "monthly", "0.7"));
+      const priority = PRIORITY_MAP[a.category] || "0.7";
+      entries.push(urlEntry(`/blog/${a.slug}`, (a.updated_at || a.published_at || today).split("T")[0], "monthly", priority));
     }
   }
 
-  // City SEO pages
-  if (cityPages) {
-    for (const cp of cityPages) {
+  // SEO city pages from DB
+  if (seoCityPages) {
+    for (const cp of seoCityPages) {
       entries.push(urlEntry(`/house-sitting/${cp.slug}`, (cp.updated_at || today).split("T")[0], "weekly", "0.8"));
     }
   }
@@ -119,6 +137,11 @@ async function main() {
     }
   }
 
+  // Legal pages
+  for (const page of legalPages) {
+    entries.push(urlEntry(page.loc, today, page.changefreq, page.priority));
+  }
+
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${entries.join("\n")}
@@ -127,6 +150,8 @@ ${entries.join("\n")}
   const outPath = path.resolve(__dirname, "../public/sitemap.xml");
   fs.writeFileSync(outPath, xml, "utf-8");
   console.log(`✅ Sitemap generated: ${entries.length} URLs → ${outPath}`);
+  console.log(`\nSitemap mis à jour : ${entries.length} URLs incluses.`);
+  console.log(`Action manuelle requise : soumettre le sitemap dans Google Search Console → Sitemaps → https://guardiens.fr/sitemap.xml`);
 }
 
 main().catch((err) => {
