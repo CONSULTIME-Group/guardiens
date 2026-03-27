@@ -41,29 +41,32 @@ const AdminVerifications = () => {
     open: false, userId: "", name: "", reason: ""
   });
 
-  const getSignedIdentityUrl = async (path: string | null) => {
-    if (!path) return null;
-
-    const { data, error } = await supabase.storage
-      .from("identity-documents")
-      .createSignedUrl(path, 60 * 60);
-
-    if (error) {
-      console.error("identity-doc signed url error", path, error);
-      return null;
-    }
-
-    return data.signedUrl;
-  };
-
   const hydrateIdentityAssets = async (users: any[]) => {
     return Promise.all(
-      users.map(async (user) => ({
-        ...user,
-        identity_document_signed_url: await getSignedIdentityUrl(user.identity_document_url),
-        identity_selfie_signed_url: await getSignedIdentityUrl(user.identity_selfie_url),
-      })),
+      users.map(async (user) => {
+        const { data, error } = await supabase.functions.invoke("admin-manage-identity-verification", {
+          body: { action: "preview", userId: user.id },
+        });
+
+        if (error) {
+          console.error("identity preview error", user.id, error);
+        }
+
+        return {
+          ...user,
+          identity_document_signed_url: data?.docUrl ?? null,
+          identity_selfie_signed_url: data?.selfieUrl ?? null,
+        };
+      }),
     );
+  };
+
+  const runIdentityAction = async (action: "approve" | "reject" | "request_resend" | "revoke", userId: string, reason?: string) => {
+    const { error } = await supabase.functions.invoke("admin-manage-identity-verification", {
+      body: { action, userId, reason },
+    });
+
+    if (error) throw error;
   };
 
   const fetchQueue = useCallback(async () => {
@@ -144,25 +147,7 @@ const AdminVerifications = () => {
   const handleApprove = async (userId: string) => {
     setBusyUserId(userId);
     try {
-      const { error } = await supabase
-        .from("profiles")
-        .update({ identity_verified: true, identity_verification_status: "verified" })
-        .eq("id", userId)
-        .select("id")
-        .single();
-
-      if (error) throw error;
-
-      await Promise.allSettled([
-        supabase.from("identity_verification_logs").insert({ user_id: userId, result: "verified" }),
-        supabase.from("notifications").insert({
-          user_id: userId,
-          type: "id_verified",
-          title: "Identité vérifiée ✓",
-          body: "Votre identité a été vérifiée. Le badge apparaît maintenant sur votre profil.",
-          link: "/profile",
-        }),
-      ]);
+      await runIdentityAction("approve", userId);
 
       toast.success("Identité validée ✅");
       refreshAll();
@@ -180,27 +165,7 @@ const AdminVerifications = () => {
 
     setBusyUserId(rejectModal.userId);
     try {
-      const { error } = await supabase
-        .from("profiles")
-        .update({ identity_verified: false, identity_verification_status: "rejected" })
-        .eq("id", rejectModal.userId)
-        .select("id")
-        .single();
-
-      if (error) throw error;
-
-      await Promise.allSettled([
-        supabase.from("identity_verification_logs").insert({
-          user_id: rejectModal.userId, result: "rejected", rejection_reason: reason,
-        }),
-        supabase.from("notifications").insert({
-          user_id: rejectModal.userId,
-          type: "id_rejected",
-          title: "Vérification d'identité refusée",
-          body: `Votre document n'a pas pu être validé. Raison : ${reason}. Vous pouvez soumettre un nouveau document.`,
-          link: "/settings",
-        }),
-      ]);
+      await runIdentityAction("reject", rejectModal.userId, reason);
 
       toast.success("Document refusé");
       setRejectModal({ open: false, userId: "", reason: "", customReason: "" });
@@ -216,22 +181,7 @@ const AdminVerifications = () => {
   const handleRequestResend = async (userId: string) => {
     setBusyUserId(userId);
     try {
-      const { error } = await supabase
-        .from("profiles")
-        .update({ identity_verified: false, identity_verification_status: "not_submitted" })
-        .eq("id", userId)
-        .select("id")
-        .single();
-
-      if (error) throw error;
-
-      await supabase.from("notifications").insert({
-        user_id: userId,
-        type: "id_resend_request",
-        title: "Nouveau document demandé",
-        body: "Nous avons besoin d'un nouveau document d'identité. Veuillez en soumettre un depuis vos paramètres.",
-        link: "/settings",
-      });
+      await runIdentityAction("request_resend", userId);
 
       toast.success("Demande de nouveau document envoyée");
       refreshAll();
@@ -247,27 +197,7 @@ const AdminVerifications = () => {
     if (!revokeModal.reason.trim()) { toast.error("Précisez un motif"); return; }
     setBusyUserId(revokeModal.userId);
     try {
-      const { error } = await supabase
-        .from("profiles")
-        .update({ identity_verified: false, identity_verification_status: "not_submitted", identity_document_url: null, identity_selfie_url: null })
-        .eq("id", revokeModal.userId)
-        .select("id")
-        .single();
-
-      if (error) throw error;
-
-      await Promise.allSettled([
-        supabase.from("identity_verification_logs").insert({
-          user_id: revokeModal.userId, result: "rejected", rejection_reason: "Révocation : " + revokeModal.reason,
-        }),
-        supabase.from("notifications").insert({
-          user_id: revokeModal.userId,
-          type: "id_rejected",
-          title: "Badge ID vérifiée retiré",
-          body: `Votre badge d'identité vérifiée a été retiré. Raison : ${revokeModal.reason}. Vous pouvez soumettre un nouveau document.`,
-          link: "/settings",
-        }),
-      ]);
+      await runIdentityAction("revoke", revokeModal.userId, revokeModal.reason);
 
       toast.success("Vérification révoquée");
       setRevokeModal({ open: false, userId: "", name: "", reason: "" });
