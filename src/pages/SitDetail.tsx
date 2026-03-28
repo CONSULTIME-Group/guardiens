@@ -5,6 +5,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Calendar, MapPin, Star, ShieldCheck, Home, PawPrint, MessageSquare, CheckCircle2, XCircle, Send, Pencil, Heart, LockKeyhole } from "lucide-react";
 import { useSubscriptionAccess } from "@/hooks/useSubscriptionAccess";
+import { useAccessLevel } from "@/hooks/useAccessLevel";
+import AccessGateBanner from "@/components/access/AccessGateBanner";
 import PostConfirmationChecklist from "@/components/sits/PostConfirmationChecklist";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
