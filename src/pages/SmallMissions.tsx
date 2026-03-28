@@ -132,7 +132,7 @@ const SmallMissions = () => {
         <main className="max-w-6xl mx-auto px-4 py-12 space-y-16">
           <section className="space-y-6">
 
-              {isAuthenticated && (
+              {isAuthenticated && hasAccess && (
                 <div className="text-center">
                   <Link to="/petites-missions/creer">
                     <Button variant="hero" size="lg">
@@ -140,6 +140,17 @@ const SmallMissions = () => {
                       <ArrowRight className="ml-2 h-4 w-4" />
                     </Button>
                   </Link>
+                </div>
+              )}
+              {isAuthenticated && !hasAccess && (
+                <div className="text-center space-y-2">
+                  <Link to="/mon-abonnement">
+                    <Button variant="outline" size="lg" className="gap-2">
+                      <Lock className="h-4 w-4" />
+                      Abonnement requis pour poster une mission
+                    </Button>
+                  </Link>
+                  <p className="text-xs text-muted-foreground">Passez Premium pour participer à l'entraide</p>
                 </div>
               )}
 
