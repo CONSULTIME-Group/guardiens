@@ -131,7 +131,7 @@ export const Sidebar = () => {
         <SidebarItem to="/petites-missions" icon={Handshake} label="Petites missions" />
 
         <GroupLabel label="Ressources" />
-        <SidebarItem to="/actualites" icon={Newspaper} label="Actualités" />
+        <SidebarItem to="/actualites" icon={Newspaper} label="Guides & Conseils" />
         <SidebarItem to="/guides" icon={Compass} label="Guides locaux" />
       </nav>
 
