@@ -60,7 +60,7 @@ import AdminDepartments from "./pages/admin/AdminDepartments";
 import DepartmentPage from "./pages/DepartmentPage";
 import Pricing from "./pages/Pricing";
 import SmallMissions from "./pages/SmallMissions";
-import SmallMissionDetail from "./pages/SmallMissionDetail";
+import SmallMissionsPublic from "./pages/SmallMissionsPublic";
 import CreateSmallMission from "./pages/CreateSmallMission";
 import MentionsLegales from "./pages/MentionsLegales";
 import AdminSmallMissions from "./pages/admin/AdminSmallMissions";
