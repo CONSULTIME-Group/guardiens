@@ -9,6 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Label } from "@/components/ui/label";
 import { Plus, Upload, CheckCircle2, Clock, XCircle, Briefcase } from "lucide-react";
 import { toast } from "sonner";
+import { compressImageFile } from "@/lib/compressImage";
 
 const platformOptions = [
   "Rover",
