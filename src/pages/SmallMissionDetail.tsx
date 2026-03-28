@@ -13,6 +13,8 @@ import PageMeta from "@/components/PageMeta";
 import entraideHeader from "@/assets/entraide-header.jpg";
 import MissionFeedbackModal from "@/components/missions/MissionFeedbackModal";
 import { useSubscriptionAccess } from "@/hooks/useSubscriptionAccess";
+import { useAccessLevel } from "@/hooks/useAccessLevel";
+import AccessGateBanner from "@/components/access/AccessGateBanner";
 
 const CATEGORY_META: Record<string, { label: string; icon: typeof Dog; colorClass: string }> = {
   animals: { label: "Animaux", icon: Dog, colorClass: "text-orange-500" },
