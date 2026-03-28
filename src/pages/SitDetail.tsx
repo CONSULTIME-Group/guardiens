@@ -521,14 +521,14 @@ const SitDetail = () => {
       {activeRole === "sitter" && !isOwner && sit.status === "published" && (
         <div className="fixed bottom-0 left-0 right-0 md:left-64 bg-card border-t border-border p-4 z-40 md:pb-4 pb-20">
           <div className="max-w-4xl mx-auto">
-            {hasApplied ? (
+            {(accessLevel === 1 || accessLevel === 2) ? (
+              <AccessGateBanner level={accessLevel} profileCompletion={profileCompletion} context="guard" />
+            ) : hasApplied ? (
               <Button className="w-full h-12 text-base font-semibold" disabled>
                 <CheckCircle2 className="h-5 w-5 mr-2" /> Candidature envoyée ✓
               </Button>
-            ) : !subHasAccess ? (
-              <Button className="w-full h-12 text-base font-semibold bg-amber-600 hover:bg-amber-700 text-white" onClick={() => navigate("/mon-abonnement")}>
-                <LockKeyhole className="h-5 w-5 mr-2" /> Abonnez-vous pour postuler — 49€/an
-              </Button>
+            ) : !canApplyGuards ? (
+              <AccessGateBanner level="3A" profileCompletion={profileCompletion} context="guard" />
             ) : (
               <Button className="w-full h-12 text-base font-semibold" onClick={() => setApplyOpen(true)}>
                 Postuler pour cette garde
