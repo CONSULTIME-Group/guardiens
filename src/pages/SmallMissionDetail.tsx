@@ -32,6 +32,7 @@ const SmallMissionDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { hasAccess } = useSubscriptionAccess();
   const { toast } = useToast();
 
   const [mission, setMission] = useState<any>(null);
