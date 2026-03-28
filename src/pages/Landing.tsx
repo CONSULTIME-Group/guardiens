@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Home, PawPrint, Clock, Handshake, Sparkles, Wrench } from "lucide-react";
@@ -87,6 +87,8 @@ const steps = [
 const Landing = () => {
   const navigate = useNavigate();
   const [latestArticles, setLatestArticles] = useState<any[]>([]);
+  const [dynamicCounts, setDynamicCounts] = useState<{ members: number; missions: number; sits: number } | null>(null);
+  const lastFetchRef = useRef<number>(0);
 
   useEffect(() => {
     supabase
@@ -96,6 +98,25 @@ const Landing = () => {
       .order("published_at", { ascending: false })
       .limit(3)
       .then(({ data }) => setLatestArticles(data || []));
+
+    // Dynamic counters with 10-min cache
+    const fetchCounts = async () => {
+      const now = Date.now();
+      if (now - lastFetchRef.current < 10 * 60 * 1000) return;
+      lastFetchRef.current = now;
+
+      const [membersRes, missionsRes, sitsRes] = await Promise.all([
+        supabase.from("profiles").select("id", { count: "exact", head: true }),
+        supabase.from("small_missions").select("id", { count: "exact", head: true }).in("status", ["open", "in_progress", "completed"]),
+        supabase.from("sits").select("id", { count: "exact", head: true }).in("status", ["confirmed", "completed"]),
+      ]);
+      setDynamicCounts({
+        members: membersRes.count ?? 0,
+        missions: missionsRes.count ?? 0,
+        sits: sitsRes.count ?? 0,
+      });
+    };
+    fetchCounts();
   }, []);
 
   return (
@@ -120,6 +141,15 @@ const Landing = () => {
               "@type": "AdministrativeArea",
               name: "Auvergne-Rhône-Alpes",
             },
+            knowsAbout: [
+              "House-sitting",
+              "Pet-sitting",
+              "Garde d'animaux à domicile",
+              "Entraide de voisinage",
+              "Petites missions entre voisins",
+              "Auvergne-Rhône-Alpes",
+            ],
+            slogan: "Comme confier ses clés à un voisin.",
             founder: [
               { "@type": "Person", name: "Jérémie" },
               { "@type": "Person", name: "Elisa" },
@@ -128,7 +158,7 @@ const Landing = () => {
           }),
         }}
       />
-      {/* JSON-LD: WebSite with SearchAction */}
+      {/* JSON-LD: WebSite with SearchAction + SiteLinksSearchBox */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -294,7 +324,7 @@ const Landing = () => {
 
         {/* Stats avec séparateurs */}
         <div
-          className="flex items-center justify-center gap-0 mt-12 animate-fade-in"
+          className="flex flex-wrap items-center justify-center gap-0 mt-12 animate-fade-in"
           style={{ animationDelay: "0.3s" }}
         >
           <div className="text-center px-6 md:px-10">
@@ -311,6 +341,33 @@ const Landing = () => {
             <span className="block font-heading text-3xl md:text-4xl font-bold text-primary">5 ans</span>
             <span className="text-muted-foreground text-sm">en AURA</span>
           </div>
+          {dynamicCounts && dynamicCounts.members > 50 && (
+            <>
+              <div className="w-px h-12 bg-border hidden sm:block" />
+              <div className="text-center px-6 md:px-10 mt-4 sm:mt-0">
+                <span className="block font-heading text-3xl md:text-4xl font-bold text-primary">{dynamicCounts.members}</span>
+                <span className="text-muted-foreground text-sm">membres</span>
+              </div>
+            </>
+          )}
+          {dynamicCounts && dynamicCounts.sits > 5 && (
+            <>
+              <div className="w-px h-12 bg-border hidden sm:block" />
+              <div className="text-center px-6 md:px-10 mt-4 sm:mt-0">
+                <span className="block font-heading text-3xl md:text-4xl font-bold text-primary">{dynamicCounts.sits}</span>
+                <span className="text-muted-foreground text-sm">gardes confirmées</span>
+              </div>
+            </>
+          )}
+          {dynamicCounts && dynamicCounts.missions > 10 && (
+            <>
+              <div className="w-px h-12 bg-border hidden sm:block" />
+              <div className="text-center px-6 md:px-10 mt-4 sm:mt-0">
+                <span className="block font-heading text-3xl md:text-4xl font-bold text-primary">{dynamicCounts.missions}</span>
+                <span className="text-muted-foreground text-sm">missions d'entraide</span>
+              </div>
+            </>
+          )}
         </div>
       </section>
 
@@ -426,6 +483,43 @@ const Landing = () => {
               </div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* ═══════════════ 4b. ENCART ENTRAIDE ═══════════════ */}
+      <section className="px-6 md:px-12 py-10" style={{ backgroundColor: "#F9F6F1" }}>
+        <div className="max-w-4xl mx-auto text-center">
+          <h2 className="font-heading text-2xl md:text-3xl font-bold mb-2">
+            Et au-delà des gardes...
+          </h2>
+          <p className="text-muted-foreground text-base mb-8">
+            Guardiens, c'est aussi un réseau de voisins qui se rendent service au quotidien.
+          </p>
+          <div className="grid sm:grid-cols-3 gap-6 mb-8">
+            <div className="flex flex-col items-center gap-2 text-sm text-muted-foreground">
+              <span className="text-2xl">🐕</span>
+              <span>Promener un chien le matin contre un repas maison</span>
+            </div>
+            <div className="flex flex-col items-center gap-2 text-sm text-muted-foreground">
+              <span className="text-2xl">🌱</span>
+              <span>Arroser un potager pendant les vacances contre des légumes du jardin</span>
+            </div>
+            <div className="flex flex-col items-center gap-2 text-sm text-muted-foreground">
+              <span className="text-2xl">📬</span>
+              <span>Réceptionner un colis contre un cours de cuisine</span>
+            </div>
+          </div>
+          <p className="text-xs text-muted-foreground mb-4 italic">
+            Jamais d'argent — l'échange se décide entre voisins.
+          </p>
+          <Link to="/petites-missions" className="text-primary font-medium hover:underline inline-flex items-center gap-1">
+            Découvrir les petites missions <ArrowRight className="h-4 w-4" />
+          </Link>
+          {dynamicCounts && dynamicCounts.missions > 10 && (
+            <p className="text-xs text-muted-foreground mt-3">
+              {dynamicCounts.missions} missions actives en AURA en ce moment
+            </p>
+          )}
         </div>
       </section>
 
