@@ -17,7 +17,7 @@ const differentiators = [
     icon: Home,
     title: "Votre maison vit",
     description:
-      "Volets ouverts, jardin arrosé, une bonne odeur de café le matin. Votre maison n'est pas vide — elle est habitée par quelqu'un qui en prend soin.",
+      "Volets ouverts le matin. Courrier relevé. Lumières allumées le soir. Votre maison ne signale pas votre absence. Elle continue d'exister.",
   },
   {
     icon: Clock,
