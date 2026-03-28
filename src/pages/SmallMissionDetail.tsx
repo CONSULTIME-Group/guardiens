@@ -3,7 +3,7 @@ import { useParams, Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, MapPin, Calendar, Clock, Dog, Flower2, Home, Handshake, Heart, MessageSquare, CheckCircle2, Users, XCircle } from "lucide-react";
+import { ArrowLeft, MapPin, Calendar, Clock, Dog, Flower2, Home, Handshake, Heart, MessageSquare, CheckCircle2, Users, XCircle, Lock } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { useToast } from "@/hooks/use-toast";
@@ -12,6 +12,7 @@ import ReportButton from "@/components/reports/ReportButton";
 import PageMeta from "@/components/PageMeta";
 import entraideHeader from "@/assets/entraide-header.jpg";
 import MissionFeedbackModal from "@/components/missions/MissionFeedbackModal";
+import { useSubscriptionAccess } from "@/hooks/useSubscriptionAccess";
 
 const CATEGORY_META: Record<string, { label: string; icon: typeof Dog; colorClass: string }> = {
   animals: { label: "Animaux", icon: Dog, colorClass: "text-orange-500" },
