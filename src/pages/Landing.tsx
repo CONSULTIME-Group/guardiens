@@ -11,37 +11,37 @@ const differentiators = [
     icon: PawPrint,
     title: "Vos animaux restent chez eux",
     description:
-      "Votre chien dort dans son panier, votre chat garde son canapé préféré. Ils restent dans leur univers, entourés de leurs habitudes et de quelqu'un qui les aime.",
+      "Votre chien dort dans son panier. Votre chat garde son canapé préféré. Leurs repères intacts. Leur univers préservé. Quelqu'un qui les aime — vraiment.",
   },
   {
     icon: Home,
     title: "Votre maison vit",
     description:
-      "Volets ouverts, jardin arrosé, une bonne odeur de café le matin. Votre maison n'est pas vide — elle est habitée par quelqu'un qui en prend soin.",
+      "Volets ouverts le matin. Courrier relevé. Lumières allumées le soir. Votre maison ne signale pas votre absence. Elle continue d'exister.",
   },
   {
     icon: Clock,
     title: "Vos voisins, en mieux",
     description:
-      "Vos gardiens habitent à côté. On se croise au marché, on connaît le boulanger, on sait où promener le chien quand il pleut.",
+      "Ils connaissent le boulanger, le meilleur sentier pour le chien quand il pleut, l'heure à laquelle les voisins du dessus font du bruit. Ils habitent là. Vraiment.",
   },
   {
     icon: Handshake,
     title: "On se connaît avant de se confier",
     description:
-      "Un dîner, un café, une balade ensemble. On se rencontre, on rigole, et après seulement on se confie les clés. C'est comme ça que la confiance naît.",
+      "Un café. Une balade. Un dîner parfois. La confiance ne se crée pas en ligne. Elle se vit. Ensuite seulement on se confie les clés.",
   },
   {
     icon: Sparkles,
     title: "Ça va au-delà de la garde",
     description:
-      "Des barbecues improvisés, des sentiers secrets, des apéros qui s'éternisent. On est venus garder un chien, on est repartis avec des amis.",
+      "Un potager arrosé contre des légumes. Un coup de main contre un repas maison. Une compétence contre une expérience. Des échanges qui n'ont pas de tarif parce qu'ils n'ont pas de prix.",
   },
   {
     icon: Wrench,
     title: "Construit par des gardiens",
     description:
-      "On a dormi dans 37 maisons, promené 234 animaux, et découvert des coins qu'on n'aurait jamais trouvés seuls. Guardiens, c'est notre histoire — et bientôt la vôtre.",
+      "37 maisons. 234 animaux. 5 ans en AURA. On a vécu ce qu'on construit. Guardiens, c'est notre histoire — et bientôt la vôtre.",
   },
 ];
 
@@ -49,17 +49,17 @@ const testimonials = [
   {
     name: "Sophie & Marc",
     detail: "2 chats · Écully",
-    text: "On est partis 10 jours au Maroc et nos deux chats sont restés sur leur canapé préféré, avec quelqu'un qui leur faisait des câlins tous les jours. On a reçu des photos tous les soirs — ils avaient l'air plus détendus que nous !",
+    text: "On est partis 10 jours au Maroc et nos deux chats sont restés chez eux, sur leur canapé, avec quelqu'un qui leur faisait des câlins tous les jours. On a reçu des photos chaque soir. Ils avaient l'air plus détendus que nous.",
   },
   {
     name: "Jérémie",
-    detail: "Gardien · Lyon 7e",
-    text: "Un chalet à Megève, un golden retriever qui m'attendait chaque matin devant la cheminée, des balades dans la neige et des voisins adorables. La plus belle semaine de mon hiver — et le début d'une vraie amitié avec les proprios.",
+    detail: "Gardien · Vieux-Lyon",
+    text: "Un chalet à Megève, un golden qui m'attendait chaque matin devant la cheminée, des balades dans la neige et des voisins adorables. Je suis venu garder une maison. Je suis reparti avec des amis.",
   },
   {
     name: "Claire & Antoine",
     detail: "3 chevaux · Monts du Lyonnais",
-    text: "Notre gardienne connaît nos trois chevaux par leur prénom. Elle arrive la veille, on dîne ensemble, on lui montre les petites habitudes, et le lendemain on part le sourire aux lèvres. On a enfin retrouvé le plaisir de voyager.",
+    text: "Notre gardienne connaissait nos trois chevaux par leur prénom avant même d'arriver. Elle est venue la veille, on a dîné ensemble, on lui a montré les petites habitudes. Le lendemain on est partis le sourire aux lèvres. On avait enfin retrouvé le plaisir de voyager.",
   },
 ];
 
@@ -68,19 +68,19 @@ const steps = [
     number: "01",
     title: "Inscrivez-vous",
     description:
-      "Créez votre profil en 5 minutes. Propriétaire : décrivez votre maison et vos animaux. Gardien : racontez votre expérience et vos envies.",
+      "5 minutes. Racontez votre maison, vos animaux, ce que vous cherchez. Ou racontez qui vous êtes et ce que vous avez envie de vivre.",
   },
   {
     number: "02",
     title: "Trouvez votre match",
     description:
-      "Parcourez les annonces de garde près de chez vous, ou rendez-vous disponible et laissez les propriétaires venir à vous.",
+      "Des profils vérifiés, proches de chez vous. Pas des inconnus — des voisins qui n'attendent que de se rencontrer.",
   },
   {
     number: "03",
     title: "Rencontrez-vous",
     description:
-      "Un café, un dîner, une balade ensemble. La confiance ne se crée pas en ligne — elle se vit. Puis partez l'esprit léger.",
+      "Un café, une balade, une visite. La confiance se crée en vrai. Puis vous partez — ou vous accueillez. L'histoire commence là.",
   },
 ];
 
@@ -297,8 +297,12 @@ const Landing = () => {
             <span className="italic text-primary-foreground/90">à un voisin.</span>
           </h1>
           <p className="text-base md:text-xl text-white/90 max-w-2xl mx-auto mb-6 md:mb-8 drop-shadow animate-fade-in" style={{ animationDelay: "0.1s" }}>
-            Vos animaux restent chez eux, votre maison vit, et vous partez
-            l'esprit léger. Des gardiens de confiance, près de chez vous.
+            Vos animaux restent chez eux. Votre maison vit.
+            Et vous partez vraiment — sans vous retourner.
+            Des gens du quartier, vérifiés, que vous avez
+            rencontrés avant de leur confier vos clés.
+            C'est comme ça qu'on a toujours fait.
+            On a juste construit l'endroit pour se retrouver.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-3 md:gap-4 justify-center w-full sm:w-auto animate-fade-in" style={{ animationDelay: "0.2s" }}>
@@ -323,8 +327,11 @@ const Landing = () => {
       <section className="px-6 md:px-12 pt-12 pb-16 max-w-5xl mx-auto text-center">
 
         {/* Stats avec séparateurs */}
+        <p className="text-xs font-semibold tracking-[0.2em] uppercase text-muted-foreground/60 mb-6">
+          Ce qu'on a vécu avant de construire Guardiens.
+        </p>
         <div
-          className="flex flex-wrap items-center justify-center gap-0 mt-12 animate-fade-in"
+          className="flex flex-wrap items-center justify-center gap-0 mt-0 animate-fade-in"
           style={{ animationDelay: "0.3s" }}
         >
           <div className="text-center px-6 md:px-10">
@@ -378,56 +385,66 @@ const Landing = () => {
             Notre histoire
           </span>
           <h2 className="font-heading text-3xl md:text-4xl font-bold mb-10 text-center">
-            Ça a commencé avec{" "}
-            <span className="text-primary italic">un chien à promener.</span>
+            On a tous un voisin{" "}
+            <span className="text-primary italic">qu'on ne connaît pas.</span>
           </h2>
 
           <div className="space-y-6 text-muted-foreground leading-relaxed text-base md:text-lg">
             <p>
-              Quand Elisa est arrivée d'Argentine, elle avait une certitude :
-              elle voulait passer ses journées avec des animaux. Alors elle a
-              commencé par promener des chiens dans le quartier. Puis elle a
-              nourri des chats, brossé des chevaux, donné le biberon à des
-              agneaux. Chaque jour, un nouveau compagnon, une nouvelle histoire.
+              Celui qui habite à trois mètres depuis deux ans.
+              Dont vous entendez la musique le samedi soir.
+              Qui pourrait garder vos clés en cas d'urgence —
+              mais à qui vous n'avez jamais vraiment parlé.
             </p>
             <p>
-              Et puis un jour, un propriétaire lui a dit quelque chose de tout
-              simple : « Et si tu restais chez nous pendant qu'on part ? » Les
-              animaux garderaient leurs habitudes, la maison serait vivante, et
-              tout le monde partirait le cœur léger. C'était une évidence.
+              On a construit des villes extraordinaires.
+              Et on s'y est perdus les uns des autres.
+            </p>
+            <p>
+              Guardiens est né d'une idée simple, presque naïve.
+              Et si vos voisins étaient la meilleure chose
+              qui vous soit arrivée ?
+            </p>
+            <p>
+              Pour échanger. Votre jardin contre un repas.
+              Votre maison contre une expérience.
+              Votre temps contre du temps.
+              Sans que personne n'en profite sur l'autre.
+            </p>
+            <p>
+              On a gardé 37 maisons en cinq ans.
+              Des chalets où la neige entrait sous les portes.
+              Des jardins qu'on a appris à lire.
+              Des animaux dont on a compris le caractère
+              en trois heures. Des propriétaires qui nous ont
+              laissé leurs clés et sont partis sans se retourner.
+            </p>
+            <p>
+              Pas toujours extraordinaire. Parfois très ordinaire.
+              Mais toujours vrai. Toujours vivant.
             </p>
 
             {/* Citation encadrée */}
             <blockquote className="border-l-4 border-primary pl-6 py-3 my-8 bg-primary/5 rounded-r-lg">
               <p className="font-heading text-lg font-semibold text-foreground italic">
-                « Et si tu restais chez nous ? » — C'est cette phrase toute
-                simple qui a tout déclenché.
+                « On ne gardait pas des maisons. On collectionnait des vies. »
               </p>
             </blockquote>
 
             <p>
-              Très vite, un petit réseau s'est tissé. Des voisins, des amis
-              d'amis, des gens du coin qui se recommandent entre eux. On connaît
-              les animaux par leur prénom, on sait que le chat de Sophie aime
-              dormir sur le radiateur et que le golden de Marc rapporte toujours
-              la même balle.
+              Quand on a gardé notre première maison
+              dans le Vieux-Lyon — trois chats, un golden,
+              une vue sur les toits — on a compris que
+              ce n'était pas une transaction.
+              C'était une rencontre.
             </p>
             <p>
-              Et puis il y a eu tout le reste — le meilleur, en fait. Les
-              dîners improvisés chez les proprios, les balades sur des sentiers
-              qu'on n'aurait jamais trouvés seuls, les barbecues qui finissent
-              tard, les fous rires avec le chien qui vole les chaussettes.
-              On pourrait écrire un livre sur la ressemblance entre les
-              propriétaires et leurs animaux — c'est fascinant (et souvent
-              hilarant).
+              Une confiance donnée, une confiance reçue.
+              Et des histoires qu'on raconte encore.
             </p>
             <p>
-              Un soir d'été, chez Helen — trois chats, un cocker, une vue
-              incroyable sur les monts — on s'est regardés et on a dit : « Il
-              faut que d'autres gens puissent vivre ça. » Un réseau de voisins
-              qui se font confiance, qui s'entraident, qui partagent bien plus
-              que des clés. Guardiens est né ce soir-là, autour d'un verre de
-              rouge et d'un cocker endormi sur nos pieds.
+              C'est ça qu'on veut rendre possible
+              pour tout le monde en AURA.
             </p>
           </div>
         </div>
@@ -459,10 +476,10 @@ const Landing = () => {
       <section className="px-6 md:px-12 py-20">
         <div className="max-w-5xl mx-auto">
           <h2 className="font-heading text-3xl md:text-4xl font-bold text-center mb-3">
-            La proximité change tout.
+            Un réseau de voisins qui se font confiance.
           </h2>
           <p className="text-muted-foreground text-lg text-center mb-14">
-            Ce qu'on a vécu en vrai, on veut le rendre possible pour tous.
+            Pas des inconnus. Des gens du quartier, vérifiés, qui se sont rencontrés en vrai.
           </p>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
             {differentiators.map((item, i) => (
@@ -493,16 +510,16 @@ const Landing = () => {
             Et au-delà des gardes...
           </h2>
           <p className="text-muted-foreground text-base mb-8">
-            Guardiens, c'est aussi un réseau de voisins qui se rendent service au quotidien.
+            Parce que l'échange ne s'arrête pas à la porte d'entrée.
           </p>
           <div className="grid sm:grid-cols-3 gap-6 mb-8">
             <div className="flex flex-col items-center gap-2 text-sm text-muted-foreground">
-              <span className="text-2xl">🐕</span>
-              <span>Promener un chien le matin contre un repas maison</span>
+              <span className="text-2xl">🌱</span>
+              <span>Tondre un jardin contre des légumes du potager</span>
             </div>
             <div className="flex flex-col items-center gap-2 text-sm text-muted-foreground">
-              <span className="text-2xl">🌱</span>
-              <span>Arroser un potager pendant les vacances contre des légumes du jardin</span>
+              <span className="text-2xl">🍽️</span>
+              <span>Donner un coup de main contre un repas maison</span>
             </div>
             <div className="flex flex-col items-center gap-2 text-sm text-muted-foreground">
               <span className="text-2xl">📬</span>
@@ -510,7 +527,7 @@ const Landing = () => {
             </div>
           </div>
           <p className="text-xs text-muted-foreground mb-4 italic">
-            Jamais d'argent — l'échange se décide entre voisins.
+            Jamais d'argent. L'échange se décide entre vous. C'est ça, l'esprit Guardiens.
           </p>
           <Link to="/petites-missions" className="text-primary font-medium hover:underline inline-flex items-center gap-1">
             Découvrir les petites missions <ArrowRight className="h-4 w-4" />
@@ -527,7 +544,7 @@ const Landing = () => {
       <section className="px-6 md:px-12 py-20 bg-card">
         <div className="max-w-5xl mx-auto">
           <h2 className="font-heading text-3xl md:text-4xl font-bold text-center mb-14">
-            Des histoires comme les nôtres.
+            Des histoires qui ressemblent à la nôtre.
           </h2>
           <div className="grid md:grid-cols-3 gap-8">
             {testimonials.map((t, i) => (
@@ -555,7 +572,7 @@ const Landing = () => {
       <section className="px-6 md:px-12 py-20">
         <div className="max-w-5xl mx-auto">
           <h2 className="font-heading text-3xl md:text-4xl font-bold text-center mb-16">
-            Aussi simple que ça.
+            Trois étapes. Une relation.
           </h2>
           <div className="grid md:grid-cols-3 gap-10">
             {steps.map((step, i) => (
@@ -601,15 +618,16 @@ const Landing = () => {
           style={{ backgroundColor: "#FEF3C7", borderColor: "hsl(24 36% 60%)" }}
         >
           <h3 className="font-heading text-xl md:text-2xl font-bold text-foreground">
-            ⭐ Inscrivez-vous avant le 13 mai
+            ⭐ Inscrivez-vous avant le 13 mai.
           </h3>
           <p className="text-muted-foreground max-w-xl mx-auto leading-relaxed">
-            Badge Fondateur à vie + accès gratuit jusqu'au 13 juin.
+            Badge Fondateur à vie. Accès gratuit jusqu'au 13 juin.
+            Et surtout — vous serez parmi les premiers à vivre ça.
             Pourquoi le 13 mai ? C'est l'anniversaire de Jérémie.
             Il préfère offrir l'accès plutôt que recevoir des chaussettes.
           </p>
           <Button variant="hero" size="xl" onClick={() => navigate("/register")}>
-            En profiter
+            Rejoindre le mouvement
           </Button>
         </div>
       </section>
@@ -663,10 +681,16 @@ const Landing = () => {
       <section className="px-6 md:px-12 py-20" style={{ backgroundColor: "#1C1B18" }}>
         <div className="max-w-3xl mx-auto text-center">
           <h2 className="font-heading text-3xl md:text-4xl font-bold mb-4 text-white">
-            Prêt à partir l'esprit léger ?
+            Votre quartier vous attend.
           </h2>
           <p className="text-white/60 text-lg mb-8">
-            Rejoignez les membres fondateurs avant le 13 mai. Gratuit, sans engagement.
+            Des gardes, de l'entraide, des petits services
+            contre un repas ou des légumes du jardin.
+            Des endroits qu'on n'aurait jamais connus.
+            Des gens qu'on n'aurait jamais croisés.
+            Des histoires qu'on n'aurait jamais vécues.
+            Gratuit pour commencer.
+            Irremplaçable pour la suite.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Button
