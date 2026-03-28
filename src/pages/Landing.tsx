@@ -41,7 +41,7 @@ const differentiators = [
     icon: Wrench,
     title: "Construit par des gardiens",
     description:
-      "On a dormi dans 37 maisons, promené 234 animaux, et découvert des coins qu'on n'aurait jamais trouvés seuls. Guardiens, c'est notre histoire — et bientôt la vôtre.",
+      "37 maisons. 234 animaux. 5 ans en AURA. On a vécu ce qu'on construit. Guardiens, c'est notre histoire — et bientôt la vôtre.",
   },
 ];
 
