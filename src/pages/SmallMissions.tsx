@@ -217,13 +217,13 @@ const SmallMissions = () => {
                           {!isCompleted && (
                             m.user_id === user?.id ? (
                               <span className="inline-block text-xs text-muted-foreground text-center w-full mt-2">Votre mission</span>
-                            ) : isAuthenticated && !hasAccess ? (
+                            ) : isAuthenticated && !canApplyMissions ? (
                               <Button size="sm" variant="outline" className="w-full mt-2 gap-1 text-muted-foreground" disabled>
-                                <Lock className="h-3 w-3" /> Abonnement requis
+                                <Lock className="h-3 w-3" /> Complétez votre profil
                               </Button>
                             ) : (
                               <Button size="sm" variant="outline" className="w-full mt-2">
-                                {isAuthenticated ? "Proposer mon aide" : "Inscrivez-vous pour aider"}
+                                Proposer mon aide
                               </Button>
                             )
                           )}
