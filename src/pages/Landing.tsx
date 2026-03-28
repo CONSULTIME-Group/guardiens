@@ -47,24 +47,34 @@ const differentiators = [
 
 const testimonials = [
   {
-    name: "Sophie & Marc",
-    detail: "2 chats · Écully",
-    text: "On est partis 10 jours au Maroc et nos deux chats sont restés chez eux, sur leur canapé, avec quelqu'un qui leur faisait des câlins tous les jours. On a reçu des photos chaque soir. Ils avaient l'air plus détendus que nous.",
+    name: "Nadia",
+    detail: "2 chats, 1 chien · Lyon 6e",
+    text: "Deux chats et un chien. On n'avait pas pris de vraies vacances depuis trois ans. Notre gardienne habite à Caluire. On s'est rencontrés autour d'un café le jeudi. On est partis le samedi.",
   },
   {
-    name: "Jérémie",
-    detail: "Gardien · Vieux-Lyon",
-    text: "Un chalet à Megève, un golden qui m'attendait chaque matin devant la cheminée, des balades dans la neige et des voisins adorables. Je suis venu garder une maison. Je suis reparti avec des amis.",
+    name: "Tomas",
+    detail: "Grenoble",
+    text: "Je cherchais un logement temporaire entre deux jobs. J'ai gardé quatre maisons en deux mois. J'ai découvert des endroits que j'habitais depuis dix ans sans jamais vraiment connaître.",
   },
   {
-    name: "Claire & Antoine",
-    detail: "3 chevaux · Monts du Lyonnais",
-    text: "Notre gardienne connaissait nos trois chevaux par leur prénom avant même d'arriver. Elle est venue la veille, on a dîné ensemble, on lui a montré les petites habitudes. Le lendemain on est partis le sourire aux lèvres. On avait enfin retrouvé le plaisir de voyager.",
+    name: "Rania & David",
+    detail: "Ardèche",
+    text: "On a une maison en Ardèche qu'on laissait vide huit mois par an. Maintenant elle vit. Les gens qui la gardent nous envoient des photos du jardin. C'est bizarre comme ça fait du bien.",
   },
   {
-    name: "Thomas",
-    detail: "Jardin · Caluire-et-Cuire",
-    text: "J'avais un potager qui partait à l'abandon pendant mes déplacements pro. Un voisin Guardiens a proposé de s'en occuper contre les légumes de la récolte. Il est venu deux fois par semaine pendant un mois. On ne se connaissait pas. Maintenant il garde aussi mon chat.",
+    name: "Giulia",
+    detail: "Écully",
+    text: "Je devais partir trois semaines. Mon potager, mes poules, mes plantes. Un membre Guardiens a tout géré contre des légumes et des œufs. On se connaissait pas. On se voit encore.",
+  },
+  {
+    name: "Sarah & Karim",
+    detail: "Monts du Lyonnais",
+    text: "Trois chevaux, quatre chats, un perroquet. Tout le monde nous dit que c'est impossible à faire garder. Notre gardienne est venue deux fois avant qu'on parte. Elle connaissait leurs noms par cœur.",
+  },
+  {
+    name: "Elena",
+    detail: "Annecy",
+    text: "J'ai commencé par arroser les plantes d'une voisine contre un repas. Maintenant je garde sa maison quand elle part. C'est comme ça que ça marche ici — doucement, naturellement.",
   },
 ];
 
