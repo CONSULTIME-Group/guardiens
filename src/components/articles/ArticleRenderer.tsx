@@ -140,9 +140,9 @@ function adaptCTAsForRole(html: string, role?: "owner" | "sitter" | "both"): str
   const sitterCTA = '<a href="/recherche" class="article-cta-btn article-cta-btn-primary">Trouver une garde près de chez vous →</a>';
 
   // Replace inscription links with role-appropriate CTAs
-  const ownerPattern = /href="\/inscription\?role=owner"[^>]*>([^<]*)</g;
-  const sitterPattern = /href="\/inscription\?role=guardian"[^>]*>([^<]*)</g;
-  const genericPattern = /href="\/inscription"[^>]*>([^<]*)</g;
+  const ownerPattern = /href="\/inscription\?role=owner"[^>]*>[^<]*/g;
+  const sitterPattern = /href="\/inscription\?role=guardian"[^>]*>[^<]*/g;
+  const genericPattern = /href="\/inscription"[^>]*>[^<]*/g;
 
   if (role === "owner") {
     html = html.replace(ownerPattern, `href="/annonces/nouvelle">Publier une annonce →`);
