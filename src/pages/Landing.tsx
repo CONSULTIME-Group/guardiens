@@ -316,8 +316,8 @@ const Landing = () => {
           <Button variant="ghost" size="sm" className="hidden sm:inline-flex" onClick={() => navigate("/guides")}>
             Guides locaux
           </Button>
-          <Button variant="ghost" size="sm" className="hidden sm:inline-flex" onClick={() => navigate("/petites-missions")}>
-            Entraide
+          <Button variant="ghost" size="sm" className="hidden sm:inline-flex" asChild>
+            <a href="#entraide">Entraide</a>
           </Button>
           <Button variant="ghost" size="sm" className="hidden sm:inline-flex" onClick={() => navigate("/tarifs")}>
             Tarifs
