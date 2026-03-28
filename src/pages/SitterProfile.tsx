@@ -299,7 +299,7 @@ const SitterProfile = () => {
 
       {/* ── Sticky save button ── */}
       {activeTab === "profile" && (
-        <div className="fixed bottom-0 left-0 right-0 z-40 bg-background/80 backdrop-blur border-t border-border p-3 flex justify-center">
+        <div className="fixed bottom-16 md:bottom-0 left-0 right-0 z-40 bg-background/95 backdrop-blur border-t border-border p-3 flex justify-center supports-[padding:max(0px)]:pb-[max(env(safe-area-inset-bottom),0.75rem)]">
           <Button
             onClick={handleSave}
             disabled={saving || !dirty}
