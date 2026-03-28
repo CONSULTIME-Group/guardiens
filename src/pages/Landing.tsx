@@ -59,7 +59,7 @@ const testimonials = [
   {
     name: "Claire & Antoine",
     detail: "3 chevaux · Monts du Lyonnais",
-    text: "Notre gardienne connaît nos trois chevaux par leur prénom. Elle arrive la veille, on dîne ensemble, on lui montre les petites habitudes, et le lendemain on part le sourire aux lèvres. On a enfin retrouvé le plaisir de voyager.",
+    text: "Notre gardienne connaissait nos trois chevaux par leur prénom avant même d'arriver. Elle est venue la veille, on a dîné ensemble, on lui a montré les petites habitudes. Le lendemain on est partis le sourire aux lèvres. On avait enfin retrouvé le plaisir de voyager.",
   },
 ];
 
