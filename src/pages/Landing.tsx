@@ -514,12 +514,12 @@ const Landing = () => {
           </p>
           <div className="grid sm:grid-cols-3 gap-6 mb-8">
             <div className="flex flex-col items-center gap-2 text-sm text-muted-foreground">
-              <span className="text-2xl">🐕</span>
-              <span>Promener un chien le matin contre un repas maison</span>
+              <span className="text-2xl">🌱</span>
+              <span>Tondre un jardin contre des légumes du potager</span>
             </div>
             <div className="flex flex-col items-center gap-2 text-sm text-muted-foreground">
-              <span className="text-2xl">🌱</span>
-              <span>Arroser un potager pendant les vacances contre des légumes du jardin</span>
+              <span className="text-2xl">🍽️</span>
+              <span>Donner un coup de main contre un repas maison</span>
             </div>
             <div className="flex flex-col items-center gap-2 text-sm text-muted-foreground">
               <span className="text-2xl">📬</span>
