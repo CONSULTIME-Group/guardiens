@@ -544,7 +544,7 @@ const Landing = () => {
       <section className="px-6 md:px-12 py-20 bg-card">
         <div className="max-w-5xl mx-auto">
           <h2 className="font-heading text-3xl md:text-4xl font-bold text-center mb-14">
-            Des histoires comme les nôtres.
+            Des histoires qui ressemblent à la nôtre.
           </h2>
           <div className="grid md:grid-cols-3 gap-8">
             {testimonials.map((t, i) => (
