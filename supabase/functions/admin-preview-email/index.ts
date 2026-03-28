@@ -2,6 +2,21 @@ import * as React from 'npm:react@18.3.1'
 import { renderAsync } from 'npm:@react-email/components@0.0.22'
 import { createClient } from 'npm:@supabase/supabase-js@2'
 import { TEMPLATES } from '../_shared/transactional-email-templates/registry.ts'
+import { SignupEmail } from '../_shared/email-templates/signup.tsx'
+import { InviteEmail } from '../_shared/email-templates/invite.tsx'
+import { MagicLinkEmail } from '../_shared/email-templates/magic-link.tsx'
+import { RecoveryEmail } from '../_shared/email-templates/recovery.tsx'
+import { EmailChangeEmail } from '../_shared/email-templates/email-change.tsx'
+import { ReauthenticationEmail } from '../_shared/email-templates/reauthentication.tsx'
+
+const AUTH_TEMPLATES: Record<string, { component: React.ComponentType<any>, sampleData: object }> = {
+  signup: { component: SignupEmail, sampleData: { siteName: 'Guardiens', siteUrl: 'https://guardiens.fr', recipient: 'user@example.com', confirmationUrl: 'https://guardiens.fr' } },
+  recovery: { component: RecoveryEmail, sampleData: { siteName: 'Guardiens', confirmationUrl: 'https://guardiens.fr' } },
+  'magic-link': { component: MagicLinkEmail, sampleData: { siteName: 'Guardiens', confirmationUrl: 'https://guardiens.fr' } },
+  invite: { component: InviteEmail, sampleData: { siteName: 'Guardiens', siteUrl: 'https://guardiens.fr', confirmationUrl: 'https://guardiens.fr' } },
+  'email-change': { component: EmailChangeEmail, sampleData: { siteName: 'Guardiens', email: 'ancien@example.com', newEmail: 'nouveau@example.com', confirmationUrl: 'https://guardiens.fr' } },
+  reauthentication: { component: ReauthenticationEmail, sampleData: { token: '123456' } },
+}
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
