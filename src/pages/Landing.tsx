@@ -53,8 +53,8 @@ const testimonials = [
   },
   {
     name: "Jérémie",
-    detail: "Gardien · Lyon 7e",
-    text: "Un chalet à Megève, un golden retriever qui m'attendait chaque matin devant la cheminée, des balades dans la neige et des voisins adorables. La plus belle semaine de mon hiver — et le début d'une vraie amitié avec les proprios.",
+    detail: "Gardien · Vieux-Lyon",
+    text: "Un chalet à Megève, un golden qui m'attendait chaque matin devant la cheminée, des balades dans la neige et des voisins adorables. Je suis venu garder une maison. Je suis reparti avec des amis.",
   },
   {
     name: "Claire & Antoine",
