@@ -41,6 +41,7 @@ const SmallMissions = () => {
   const { isAuthenticated, user } = useAuth();
   const { hasAccess, status: subStatus } = useSubscriptionAccess();
   const { level: accessLevel, profileCompletion, canApplyMissions } = useAccessLevel();
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>("active");
   const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>("all");
 
   const { data: allMissions } = useQuery({
