@@ -60,6 +60,7 @@ const PAGE_SIZE = 9;
 
 export default function News() {
   const [articles, setArticles] = useState<Article[]>([]);
+  const [vieLocaleArticles, setVieLocaleArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState(true);
   const [totalCount, setTotalCount] = useState(0);
   const [searchParams, setSearchParams] = useSearchParams();
