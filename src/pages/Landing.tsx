@@ -201,7 +201,7 @@ const Landing = () => {
             "@context": "https://schema.org",
             "@type": "Service",
             name: "Pet sitting & House sitting gratuit",
-            description: "Service de garde d'animaux et house sitting gratuit en Auvergne-Rhône-Alpes. Gardiens vérifiés, avis croisés, inscription gratuite.",
+            description: "Service de garde d'animaux et house sitting gratuit en Auvergne-Rhône-Alpes. Avis croisés, inscription gratuite.",
             provider: {
               "@type": "Organization",
               name: "Guardiens",
