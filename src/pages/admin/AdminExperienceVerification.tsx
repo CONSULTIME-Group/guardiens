@@ -175,14 +175,15 @@ const AdminExperienceVerification = () => {
                     </p>
                     <div className="flex gap-3 overflow-x-auto pb-2">
                       {exp.screenshot_urls.map((path: string, i: number) => {
-                        const { data } = supabase.storage.from("experience-screenshots").getPublicUrl(path);
+                        const url = signedUrls[path];
+                        if (!url) return <div key={i} className="h-52 w-40 bg-muted rounded-lg animate-pulse" />;
                         return (
                           <img
                             key={i}
-                            src={data.publicUrl}
+                            src={url}
                             alt={`Screenshot ${i + 1}`}
                             className="h-52 rounded-lg border border-border object-contain bg-muted cursor-pointer hover:opacity-80 transition-opacity"
-                            onClick={() => setZoomedImg(data.publicUrl)}
+                            onClick={() => setZoomedImg(url)}
                           />
                         );
                       })}
