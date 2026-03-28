@@ -322,7 +322,7 @@ const SmallMissionDetail = () => {
       )}
 
       {/* Non-author: respond */}
-      {user && !isAuthor && mission.status === "open" && (
+      {user && !isAuthor && mission.status === "open" && hasAccess && (
         <div className="fixed bottom-0 left-0 right-0 md:left-64 bg-card border-t border-border p-4 z-40 md:pb-4 pb-20">
           <div className="max-w-3xl mx-auto">
             {hasResponded ? (
@@ -346,6 +346,20 @@ const SmallMissionDetail = () => {
                 </Button>
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Non-author without Premium: upgrade CTA */}
+      {user && !isAuthor && mission.status === "open" && !hasAccess && (
+        <div className="fixed bottom-0 left-0 right-0 md:left-64 bg-card border-t border-border p-4 z-40 md:pb-4 pb-20">
+          <div className="max-w-3xl mx-auto text-center space-y-2">
+            <Link to="/mon-abonnement">
+              <Button variant="outline" className="w-full h-12 text-base font-semibold gap-2">
+                <Lock className="h-4 w-4" /> Abonnement requis pour proposer votre aide
+              </Button>
+            </Link>
+            <p className="text-xs text-muted-foreground">Passez Premium pour participer aux petites missions</p>
           </div>
         </div>
       )}
