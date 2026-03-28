@@ -121,7 +121,7 @@ const SitterProfile = () => {
     <div className="min-h-screen" style={{ background: "#FAF9F6" }}>
       <PageMeta title="Mon profil | Guardiens" description="Modifiez votre profil gardien Guardiens." />
 
-      <div className="p-6 md:p-10 max-w-3xl mx-auto animate-fade-in space-y-6 pb-32">
+      <div className="p-4 sm:p-6 md:p-10 max-w-3xl mx-auto animate-fade-in space-y-6 pb-32 min-w-0">
 
         {/* ── Header card ── */}
         <div className="bg-card rounded-xl border border-border p-5 md:p-6 flex flex-col sm:flex-row items-center gap-5">
@@ -299,7 +299,7 @@ const SitterProfile = () => {
 
       {/* ── Sticky save button ── */}
       {activeTab === "profile" && (
-        <div className="fixed bottom-0 left-0 right-0 z-40 bg-background/80 backdrop-blur border-t border-border p-3 flex justify-center">
+        <div className="fixed bottom-16 md:bottom-0 left-0 right-0 z-40 bg-background/95 backdrop-blur border-t border-border p-3 flex justify-center supports-[padding:max(0px)]:pb-[max(env(safe-area-inset-bottom),0.75rem)]">
           <Button
             onClick={handleSave}
             disabled={saving || !dirty}
