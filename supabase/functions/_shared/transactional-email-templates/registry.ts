@@ -11,8 +11,30 @@ export interface TemplateEntry {
 
 import { template as reportResolved } from './report-resolved.tsx'
 import { template as welcome } from './welcome.tsx'
+import { template as newApplication } from './new-application.tsx'
+import { template as applicationDeclined } from './application-declined.tsx'
+import { template as applicationAccepted } from './application-accepted.tsx'
+import { template as newMessage } from './new-message.tsx'
+import { template as subscriptionExpires30d } from './subscription-expires-30d.tsx'
+import { template as subscriptionExpires7d } from './subscription-expires-7d.tsx'
+import { template as subscriptionExpired } from './subscription-expired.tsx'
+import { template as identityVerified } from './identity-verified.tsx'
+import { template as identityRejected } from './identity-rejected.tsx'
+import { template as reviewReminder } from './review-reminder.tsx'
+import { template as missionResponse } from './mission-response.tsx'
 
 export const TEMPLATES: Record<string, TemplateEntry> = {
   'report-resolved': reportResolved,
   'welcome': welcome,
+  'new-application': newApplication,
+  'application-declined': applicationDeclined,
+  'application-accepted': applicationAccepted,
+  'new-message': newMessage,
+  'subscription-expires-30d': subscriptionExpires30d,
+  'subscription-expires-7d': subscriptionExpires7d,
+  'subscription-expired': subscriptionExpired,
+  'identity-verified': identityVerified,
+  'identity-rejected': identityRejected,
+  'review-reminder': reviewReminder,
+  'mission-response': missionResponse,
 }
