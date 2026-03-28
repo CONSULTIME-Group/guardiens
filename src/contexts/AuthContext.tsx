@@ -13,6 +13,7 @@ interface Profile {
   lastName: string;
   avatarUrl?: string;
   profileCompletion: number;
+  identityVerified: boolean;
 }
 
 interface AuthContextType {
