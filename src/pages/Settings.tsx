@@ -632,7 +632,11 @@ const IdentityVerificationSection = ({ user }: { user: any }) => {
     setUploading(true);
     setUploadProgress(10);
     try {
-      const ext = file.name.split(".").pop();
+      // Compress image if over 5MB
+      const compressed = await compressImageFile(file, 5, 2048);
+      setUploadProgress(20);
+
+      const ext = compressed.name.split(".").pop();
       const path = `${user.id}/identity-document.${ext}`;
 
       setUploadProgress(30);
@@ -641,7 +645,7 @@ const IdentityVerificationSection = ({ user }: { user: any }) => {
       setUploadProgress(50);
       const { error: uploadError } = await supabase.storage
         .from("identity-documents")
-        .upload(path, file, { upsert: true });
+        .upload(path, compressed, { upsert: true });
 
       if (uploadError) throw uploadError;
       setUploadProgress(80);
