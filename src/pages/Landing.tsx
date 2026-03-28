@@ -545,7 +545,7 @@ const Landing = () => {
       </section>
 
       {/* ═══════════════ 4b. ENCART ENTRAIDE ═══════════════ */}
-      <section className="px-6 md:px-12 py-20" style={{ backgroundColor: "#F9F6F1" }}>
+      <section id="entraide" className="px-6 md:px-12 py-20 scroll-mt-20" style={{ backgroundColor: "#F9F6F1" }}>
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="font-heading text-2xl md:text-3xl font-bold mb-2">
             Et au-delà des gardes.
