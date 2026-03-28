@@ -74,7 +74,7 @@ const steps = [
     number: "02",
     title: "Trouvez votre match",
     description:
-      "Parcourez les annonces de garde près de chez vous, ou rendez-vous disponible et laissez les propriétaires venir à vous.",
+      "Des profils vérifiés, proches de chez vous. Pas des inconnus — des voisins qui n'attendent que de se rencontrer.",
   },
   {
     number: "03",
