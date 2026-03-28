@@ -37,6 +37,7 @@ const CATEGORY_LABELS: Record<string, string> = {
   guide_local: "Guides locaux",
   saisonnier: "Saisonniers",
   guide_pratique: "Guides pratiques",
+  vie_locale: "Vie locale & Entraide",
 };
 
 const CATEGORY_COLORS: Record<string, string> = {
@@ -51,6 +52,8 @@ const CATEGORY_COLORS: Record<string, string> = {
   thematique: "bg-[hsl(270,60%,92%)] text-[hsl(270,40%,30%)]",
   guide_local: "bg-[hsl(270,60%,92%)] text-[hsl(270,40%,30%)]",
   saisonnier: "bg-[hsl(20,80%,92%)] text-[hsl(20,50%,30%)]",
+  guide_pratique: "bg-[hsl(170,50%,90%)] text-[hsl(170,40%,25%)]",
+  vie_locale: "bg-[hsl(30,80%,92%)] text-[hsl(30,50%,25%)]",
 };
 
 const PAGE_SIZE = 9;
