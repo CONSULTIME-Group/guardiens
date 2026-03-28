@@ -158,13 +158,13 @@ const ExternalExperiences = () => {
                 </Select>
               </div>
               <div>
-                <Label>Screenshot de l'avis * (1-3 images)</Label>
-                <Input type="file" accept="image/*" multiple onChange={e => setScreenshots(Array.from(e.target.files || []).slice(0, 3))} />
+                <Label>Screenshot de l'avis * (1-3 images, JPG/PNG, max 5 Mo chacune)</Label>
+                <Input type="file" accept="image/jpeg,image/png" multiple onChange={e => setScreenshots(Array.from(e.target.files || []).slice(0, 3))} />
                 <p className="text-xs text-muted-foreground mt-1">Faites une capture d'écran de l'avis que vous avez reçu sur l'autre plateforme.</p>
               </div>
               <div>
-                <Label>Résumé de l'expérience *</Label>
-                <Textarea value={summary} onChange={e => setSummary(e.target.value)} rows={4} placeholder="Décrivez cette garde en quelques phrases : quels animaux, combien de temps, ce que vous avez aimé. Ex : J'ai gardé 2 labradors pendant 3 semaines dans un chalet à Megève. Les proprios étaient adorables, les chiens super faciles." />
+                <Label>Résumé de l'expérience * <span className="text-muted-foreground font-normal">({summary.length}/300)</span></Label>
+                <Textarea value={summary} onChange={e => setSummary(e.target.value.slice(0, 300))} rows={4} maxLength={300} placeholder="Décrivez cette garde en quelques phrases : quels animaux, combien de temps, ce que vous avez aimé." />
               </div>
               <div>
                 <Label>Animaux gardés *</Label>
