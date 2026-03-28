@@ -512,7 +512,7 @@ const Landing = () => {
       <section className="px-6 md:px-12 py-10" style={{ backgroundColor: "#F9F6F1" }}>
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="font-heading text-2xl md:text-3xl font-bold mb-2">
-            Et au-delà des gardes...
+            Et au-delà des gardes.
           </h2>
           <p className="text-muted-foreground text-base mb-8">
             Parce que l'échange ne s'arrête pas à la porte d'entrée.
