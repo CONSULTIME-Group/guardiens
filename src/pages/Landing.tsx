@@ -89,7 +89,7 @@ const steps = [
     number: "02",
     title: "Trouvez votre match",
     description:
-      "Des profils vérifiés, proches de chez vous. Pas des inconnus — des voisins qui n'attendent que de se rencontrer.",
+      "Des profils proches de chez vous. Pas des inconnus — des gens du coin qui n'attendent que de se rencontrer.",
   },
   {
     number: "03",
