@@ -9,39 +9,39 @@ import heroDogBbq from "@/assets/hero-dog-bbq.jpg";
 const differentiators = [
   {
     icon: PawPrint,
-    title: "Vos animaux restent chez eux",
+    title: "Vos animaux restent chez eux.",
     description:
-      "Votre chien dort dans son panier. Votre chat garde son canapé préféré. Leurs repères intacts. Leur univers préservé. Quelqu'un qui les aime — vraiment.",
+      "Leur panier, leur canapé, leurs habitudes. Quelqu'un du coin qui les connaît par leur prénom.",
   },
   {
     icon: Home,
-    title: "Votre maison vit",
+    title: "Votre maison vit.",
     description:
-      "Volets ouverts le matin. Courrier relevé. Lumières allumées le soir. Votre maison ne signale pas votre absence. Elle continue d'exister.",
+      "Volets ouverts, courrier relevé, lumières allumées. Pas une maison vide — une maison habitée.",
   },
   {
     icon: Clock,
-    title: "Vos voisins, en mieux",
+    title: "On se rencontre avant.",
     description:
-      "Ils connaissent le boulanger, le meilleur sentier pour le chien quand il pleut, l'heure à laquelle les voisins du dessus font du bruit. Ils habitent là. Vraiment.",
+      "Un café, une balade. La confiance ne se crée pas en ligne. Elle se vit.",
   },
   {
     icon: Handshake,
-    title: "On se connaît avant de se confier",
+    title: "Votre jardin contre un repas.",
     description:
-      "Un café. Une balade. Un dîner parfois. La confiance ne se crée pas en ligne. Elle se vit. Ensuite seulement on se confie les clés.",
+      "Vos clés contre une histoire. Ici personne ne facture ce qui n'a pas de prix.",
   },
   {
     icon: Sparkles,
-    title: "Ça va au-delà de la garde",
+    title: "Et au-delà des gardes.",
     description:
-      "Un potager arrosé contre des légumes. Un coup de main contre un repas maison. Une compétence contre une expérience. Des échanges qui n'ont pas de tarif parce qu'ils n'ont pas de prix.",
+      "Un coup de main, un service rendu, une compétence échangée. Des gens du coin qui s'ouvrent.",
   },
   {
     icon: Wrench,
-    title: "Construit par des gardiens",
+    title: "37 maisons. 234 animaux. 5 ans.",
     description:
-      "37 maisons. 234 animaux. 5 ans en AURA. On a vécu ce qu'on construit. Guardiens, c'est notre vécu — et bientôt le vôtre.",
+      "On a vécu ce qu'on construit. Guardiens c'est notre histoire — et bientôt la vôtre.",
   },
 ];
 
