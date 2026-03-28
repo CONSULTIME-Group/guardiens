@@ -35,6 +35,7 @@ const CreateSmallMission = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { hasAccess, loading: subLoading } = useSubscriptionAccess();
 
   const [category, setCategory] = useState("animals");
   const [title, setTitle] = useState("");
