@@ -35,6 +35,7 @@ const SmallMissionDetail = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { hasAccess } = useSubscriptionAccess();
+  const { level: accessLevel, profileCompletion, canApplyMissions } = useAccessLevel();
   const { toast } = useToast();
 
   const [mission, setMission] = useState<any>(null);
