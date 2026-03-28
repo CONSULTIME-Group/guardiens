@@ -9,6 +9,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { useSubscriptionAccess } from "@/hooks/useSubscriptionAccess";
+import { useAccessLevel } from "@/hooks/useAccessLevel";
+import AccessGateBanner from "@/components/access/AccessGateBanner";
 
 const CATEGORY_META: Record<string, { label: string; icon: typeof Dog; colorClass: string }> = {
   animals: { label: "Animaux", icon: Dog, colorClass: "text-orange-500" },
