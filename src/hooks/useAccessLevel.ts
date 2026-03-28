@@ -40,8 +40,8 @@ export const useAccessLevel = (): AccessInfo => {
     };
   }
 
-  const completion = user.completion_rate || 0;
-  const identityVerified = user.identity_verified ?? false;
+  const completion = user.profileCompletion || 0;
+  const identityVerified = user.identityVerified ?? false;
   const effectiveRole = user.role === "both" ? activeRole : user.role;
 
   if (completion < 60) {
