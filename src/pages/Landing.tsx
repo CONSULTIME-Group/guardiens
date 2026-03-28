@@ -87,6 +87,8 @@ const steps = [
 const Landing = () => {
   const navigate = useNavigate();
   const [latestArticles, setLatestArticles] = useState<any[]>([]);
+  const [dynamicCounts, setDynamicCounts] = useState<{ members: number; missions: number; sits: number } | null>(null);
+  const lastFetchRef = useRef<number>(0);
 
   useEffect(() => {
     supabase
@@ -96,6 +98,25 @@ const Landing = () => {
       .order("published_at", { ascending: false })
       .limit(3)
       .then(({ data }) => setLatestArticles(data || []));
+
+    // Dynamic counters with 10-min cache
+    const fetchCounts = async () => {
+      const now = Date.now();
+      if (now - lastFetchRef.current < 10 * 60 * 1000) return;
+      lastFetchRef.current = now;
+
+      const [membersRes, missionsRes, sitsRes] = await Promise.all([
+        supabase.from("profiles").select("id", { count: "exact", head: true }),
+        supabase.from("small_missions").select("id", { count: "exact", head: true }).in("status", ["active", "completed"]),
+        supabase.from("sits").select("id", { count: "exact", head: true }).in("status", ["confirmed", "completed"]),
+      ]);
+      setDynamicCounts({
+        members: membersRes.count ?? 0,
+        missions: missionsRes.count ?? 0,
+        sits: sitsRes.count ?? 0,
+      });
+    };
+    fetchCounts();
   }, []);
 
   return (
