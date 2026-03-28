@@ -579,6 +579,31 @@ const IdentityVerificationSection = ({ user }: { user: any }) => {
   }).length;
   const rateLimited = todayAttempts >= 5;
 
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [selfieUrl, setSelfieUrl] = useState<string | null>(null);
+  const [selfiePreview, setSelfiePreview] = useState<string | null>(null);
+  const [uploadingSelfie, setUploadingSelfie] = useState(false);
+
+  // Also load selfie URL
+  useEffect(() => {
+    if (!user) return;
+    supabase.from("profiles").select("identity_selfie_url").eq("id", user.id).single()
+      .then(({ data }) => { if (data) setSelfieUrl((data as any).identity_selfie_url || null); });
+  }, [user]);
+
+  const validateFile = (file: File, maxMb: number = 10): string | null => {
+    if (file.size > maxMb * 1024 * 1024) {
+      return `Le fichier ne doit pas dépasser ${maxMb} Mo.`;
+    }
+    const allowedTypes = ["image/jpeg", "image/png", "image/webp", "application/pdf", "image/heic", "image/heif"];
+    const ext = file.name.split(".").pop()?.toLowerCase() || "";
+    if (!allowedTypes.includes(file.type) && !["heic", "heif"].includes(ext)) {
+      return "Votre fichier n'a pas pu être envoyé. Vérifiez le format (JPG, PNG, PDF, HEIC) et la taille (max 10 Mo).";
+    }
+    return null;
+  };
+
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !user) return;
@@ -588,32 +613,38 @@ const IdentityVerificationSection = ({ user }: { user: any }) => {
       return;
     }
 
-    if (file.size > 10 * 1024 * 1024) {
-      toast.error("Le fichier ne doit pas dépasser 10 Mo.");
+    const validationError = validateFile(file);
+    if (validationError) {
+      toast.error(validationError);
       return;
     }
 
-    const allowedTypes = ["image/jpeg", "image/png", "image/webp", "application/pdf"];
-    if (!allowedTypes.includes(file.type)) {
-      toast.error("Format accepté : JPG, PNG, WebP ou PDF.");
-      return;
+    // Show preview for images
+    if (file.type.startsWith("image/")) {
+      const reader = new FileReader();
+      reader.onload = (ev) => setPreviewUrl(ev.target?.result as string);
+      reader.readAsDataURL(file);
+    } else {
+      setPreviewUrl(null);
     }
 
     setUploading(true);
+    setUploadProgress(10);
     try {
       const ext = file.name.split(".").pop();
       const path = `${user.id}/identity-document.${ext}`;
 
-      // Delete old file if exists
+      setUploadProgress(30);
       await supabase.storage.from("identity-documents").remove([path]);
 
+      setUploadProgress(50);
       const { error: uploadError } = await supabase.storage
         .from("identity-documents")
         .upload(path, file, { upsert: true });
 
       if (uploadError) throw uploadError;
+      setUploadProgress(80);
 
-      // Update profile with document path
       await supabase
         .from("profiles")
         .update({
@@ -622,16 +653,14 @@ const IdentityVerificationSection = ({ user }: { user: any }) => {
         } as any)
         .eq("id", user.id);
 
+      setUploadProgress(90);
       setStatus("pending");
       setDocumentUrl(path);
-      toast.info("Document envoyé ! Vérification automatique en cours...");
+      toast.info("Document envoyé ! Vérification en cours...");
 
-      // Call AI verification edge function
       try {
         const { data: verifyResult, error: verifyError } = await supabase.functions.invoke("verify-identity");
-
         if (verifyError) throw verifyError;
-
         if (verifyResult?.verified) {
           setStatus("verified");
           toast.success("Identité vérifiée avec succès ! 🎉");
@@ -639,16 +668,53 @@ const IdentityVerificationSection = ({ user }: { user: any }) => {
           setStatus("rejected");
           toast.error(verifyResult?.rejection_reason || "Document refusé. Veuillez soumettre un document valide et lisible.");
         }
-      } catch (verifyErr) {
-        console.error("Verification error:", verifyErr);
-        // Keep pending status — manual review fallback
+      } catch {
         toast.warning("Vérification automatique indisponible. Votre document sera examiné manuellement.");
       }
+      setUploadProgress(100);
     } catch (err) {
       console.error(err);
-      toast.error("Erreur lors de l'envoi du document.");
+      toast.error("Votre fichier n'a pas pu être envoyé. Vérifiez le format (JPG, PNG, PDF, HEIC) et la taille (max 10 Mo).");
+      setPreviewUrl(null);
     }
+    setTimeout(() => setUploadProgress(0), 1000);
     setUploading(false);
+  };
+
+  const handleSelfieUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user) return;
+
+    const validationError = validateFile(file, 5);
+    if (validationError) {
+      toast.error(validationError);
+      return;
+    }
+
+    if (file.type.startsWith("image/")) {
+      const reader = new FileReader();
+      reader.onload = (ev) => setSelfiePreview(ev.target?.result as string);
+      reader.readAsDataURL(file);
+    }
+
+    setUploadingSelfie(true);
+    try {
+      const ext = file.name.split(".").pop();
+      const path = `${user.id}/identity-selfie.${ext}`;
+      await supabase.storage.from("identity-documents").remove([path]);
+      const { error: uploadError } = await supabase.storage
+        .from("identity-documents")
+        .upload(path, file, { upsert: true });
+      if (uploadError) throw uploadError;
+
+      await supabase.from("profiles").update({ identity_selfie_url: path } as any).eq("id", user.id);
+      setSelfieUrl(path);
+      toast.success("Selfie envoyé !");
+    } catch {
+      toast.error("Votre fichier n'a pas pu être envoyé. Vérifiez le format (JPG, PNG) et la taille (max 5 Mo).");
+      setSelfiePreview(null);
+    }
+    setUploadingSelfie(false);
   };
 
   if (!loaded) return null;
