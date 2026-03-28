@@ -297,8 +297,12 @@ const Landing = () => {
             <span className="italic text-primary-foreground/90">à un voisin.</span>
           </h1>
           <p className="text-base md:text-xl text-white/90 max-w-2xl mx-auto mb-6 md:mb-8 drop-shadow animate-fade-in" style={{ animationDelay: "0.1s" }}>
-            Vos animaux restent chez eux, votre maison vit, et vous partez
-            l'esprit léger. Des gardiens de confiance, près de chez vous.
+            Vos animaux restent chez eux. Votre maison vit.
+            Et vous partez vraiment — sans vous retourner.
+            Des gens du quartier, vérifiés, que vous avez
+            rencontrés avant de leur confier vos clés.
+            C'est comme ça qu'on a toujours fait.
+            On a juste construit l'endroit pour se retrouver.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-3 md:gap-4 justify-center w-full sm:w-auto animate-fade-in" style={{ animationDelay: "0.2s" }}>
