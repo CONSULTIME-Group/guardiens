@@ -11,7 +11,7 @@ const differentiators = [
     icon: PawPrint,
     title: "Vos animaux restent chez eux",
     description:
-      "Votre chien dort dans son panier, votre chat garde son canapé préféré. Ils restent dans leur univers, entourés de leurs habitudes et de quelqu'un qui les aime.",
+      "Votre chien dort dans son panier. Votre chat garde son canapé préféré. Leurs repères intacts. Leur univers préservé. Quelqu'un qui les aime — vraiment.",
   },
   {
     icon: Home,
