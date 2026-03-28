@@ -572,7 +572,7 @@ const Landing = () => {
       <section className="px-6 md:px-12 py-20">
         <div className="max-w-5xl mx-auto">
           <h2 className="font-heading text-3xl md:text-4xl font-bold text-center mb-16">
-            Aussi simple que ça.
+            Trois étapes. Une relation.
           </h2>
           <div className="grid md:grid-cols-3 gap-10">
             {steps.map((step, i) => (
