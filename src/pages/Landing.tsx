@@ -315,7 +315,7 @@ const Landing = () => {
 
         {/* Stats avec séparateurs */}
         <div
-          className="flex items-center justify-center gap-0 mt-12 animate-fade-in"
+          className="flex flex-wrap items-center justify-center gap-0 mt-12 animate-fade-in"
           style={{ animationDelay: "0.3s" }}
         >
           <div className="text-center px-6 md:px-10">
@@ -332,6 +332,33 @@ const Landing = () => {
             <span className="block font-heading text-3xl md:text-4xl font-bold text-primary">5 ans</span>
             <span className="text-muted-foreground text-sm">en AURA</span>
           </div>
+          {dynamicCounts && dynamicCounts.members > 50 && (
+            <>
+              <div className="w-px h-12 bg-border hidden sm:block" />
+              <div className="text-center px-6 md:px-10 mt-4 sm:mt-0">
+                <span className="block font-heading text-3xl md:text-4xl font-bold text-primary">{dynamicCounts.members}</span>
+                <span className="text-muted-foreground text-sm">membres</span>
+              </div>
+            </>
+          )}
+          {dynamicCounts && dynamicCounts.sits > 5 && (
+            <>
+              <div className="w-px h-12 bg-border hidden sm:block" />
+              <div className="text-center px-6 md:px-10 mt-4 sm:mt-0">
+                <span className="block font-heading text-3xl md:text-4xl font-bold text-primary">{dynamicCounts.sits}</span>
+                <span className="text-muted-foreground text-sm">gardes confirmées</span>
+              </div>
+            </>
+          )}
+          {dynamicCounts && dynamicCounts.missions > 10 && (
+            <>
+              <div className="w-px h-12 bg-border hidden sm:block" />
+              <div className="text-center px-6 md:px-10 mt-4 sm:mt-0">
+                <span className="block font-heading text-3xl md:text-4xl font-bold text-primary">{dynamicCounts.missions}</span>
+                <span className="text-muted-foreground text-sm">missions d'entraide</span>
+              </div>
+            </>
+          )}
         </div>
       </section>
 
