@@ -68,7 +68,7 @@ const steps = [
     number: "01",
     title: "Inscrivez-vous",
     description:
-      "Créez votre profil en 5 minutes. Propriétaire : décrivez votre maison et vos animaux. Gardien : racontez votre expérience et vos envies.",
+      "5 minutes. Racontez votre maison, vos animaux, ce que vous cherchez. Ou racontez qui vous êtes et ce que vous avez envie de vivre.",
   },
   {
     number: "02",
