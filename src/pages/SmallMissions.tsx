@@ -98,8 +98,8 @@ const SmallMissions = () => {
               <span className="text-foreground">uardiens</span>
             </Link>
             <div className="flex items-center gap-3">
-              <Link to="/actualites" className="text-sm text-muted-foreground hover:text-foreground hidden sm:inline">Guides & Conseils</Link>
-              <Link to="/guides" className="text-sm text-muted-foreground hover:text-foreground hidden sm:inline">Guides</Link>
+              <Link to="/actualites" className="text-sm text-muted-foreground hover:text-foreground hidden sm:inline">Articles</Link>
+              <Link to="/guides" className="text-sm text-muted-foreground hover:text-foreground hidden sm:inline">Guides locaux</Link>
               <Link to="/tarifs" className="text-sm text-muted-foreground hover:text-foreground hidden sm:inline">Tarifs</Link>
               {!isAuthenticated ? (
                 <>
