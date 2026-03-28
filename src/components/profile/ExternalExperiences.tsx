@@ -75,17 +75,34 @@ const ExternalExperiences = () => {
   };
 
   const handleSubmit = async () => {
-    if (!user || !platform || !summary || screenshots.length === 0) return;
+    if (!user || !platform || !summary || screenshots.length === 0) {
+      toast.error("Veuillez remplir tous les champs obligatoires.");
+      return;
+    }
+    if (summary.length > 300) {
+      toast.error("Le résumé ne doit pas dépasser 300 caractères.");
+      return;
+    }
+    // Validate screenshots
+    for (const file of screenshots) {
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error("Chaque screenshot ne doit pas dépasser 5 Mo.");
+        return;
+      }
+      const allowed = ["image/jpeg", "image/png", "image/webp"];
+      if (!allowed.includes(file.type)) {
+        toast.error("Format de screenshot non supporté. Utilisez JPG ou PNG.");
+        return;
+      }
+    }
     setSubmitting(true);
     try {
-      // Upload screenshots
       const urls: string[] = [];
       for (const file of screenshots.slice(0, 3)) {
         const ext = file.name.split(".").pop();
         const path = `${user.id}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
         const { error: upErr } = await supabase.storage.from("experience-screenshots").upload(path, file);
         if (upErr) throw upErr;
-        // Store path, not public URL (bucket is private)
         urls.push(path);
       }
 
@@ -107,7 +124,7 @@ const ExternalExperiences = () => {
       setDialogOpen(false);
       toast.success("Expérience soumise pour vérification !");
     } catch (err: any) {
-      toast.error(err.message || "Erreur lors de la soumission");
+      toast.error(err.message || "Erreur lors de la soumission. Vérifiez vos fichiers et réessayez.");
     } finally {
       setSubmitting(false);
     }
