@@ -103,7 +103,7 @@ const SmallMissionsRoute = () => {
       </div>
     );
   }
-  return <SmallMissions />;
+  return <SmallMissionsPublic />;
 };
 
 const AppRoutes = () => (
