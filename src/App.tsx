@@ -107,7 +107,7 @@ const SmallMissionsRoute = () => {
 
 const AppRoutes = () => (
   <Routes>
-    <Route path="/" element={<PublicOnlyRoute><Landing /></PublicOnlyRoute>} />
+    <Route path="/" element={<Landing />} />
     <Route path="/login" element={<PublicOnlyRoute><Login /></PublicOnlyRoute>} />
     <Route path="/register" element={<PublicOnlyRoute><Register /></PublicOnlyRoute>} />
     <Route path="/forgot-password" element={<PublicOnlyRoute><ForgotPassword /></PublicOnlyRoute>} />
