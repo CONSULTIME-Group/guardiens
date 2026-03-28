@@ -216,6 +216,7 @@ const CreateSmallMission = () => {
             </form>
           </CardContent>
         </Card>
+        </>}
       </div>
     </>
   );
