@@ -3,11 +3,12 @@ import entraideHeader from "@/assets/entraide-header.jpg";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Dog, Flower2, Home, Handshake, ArrowRight, Filter } from "lucide-react";
+import { Dog, Flower2, Home, Handshake, ArrowRight, Filter, Lock } from "lucide-react";
 import PageMeta from "@/components/PageMeta";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
+import { useSubscriptionAccess } from "@/hooks/useSubscriptionAccess";
 
 const CATEGORY_META: Record<string, { label: string; icon: typeof Dog; colorClass: string }> = {
   animals: { label: "Animaux", icon: Dog, colorClass: "text-orange-500" },
