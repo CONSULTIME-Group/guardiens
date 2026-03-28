@@ -29,7 +29,7 @@ const differentiators = [
     icon: Handshake,
     title: "On se connaît avant de se confier",
     description:
-      "Un dîner, un café, une balade ensemble. On se rencontre, on rigole, et après seulement on se confie les clés. C'est comme ça que la confiance naît.",
+      "Un café. Une balade. Un dîner parfois. La confiance ne se crée pas en ligne. Elle se vit. Ensuite seulement on se confie les clés.",
   },
   {
     icon: Sparkles,
