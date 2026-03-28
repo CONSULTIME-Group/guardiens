@@ -3,11 +3,12 @@ import entraideHeader from "@/assets/entraide-header.jpg";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Dog, Flower2, Home, Handshake, ArrowRight, Filter } from "lucide-react";
+import { Dog, Flower2, Home, Handshake, ArrowRight, Filter, Lock } from "lucide-react";
 import PageMeta from "@/components/PageMeta";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
+import { useSubscriptionAccess } from "@/hooks/useSubscriptionAccess";
 
 const CATEGORY_META: Record<string, { label: string; icon: typeof Dog; colorClass: string }> = {
   animals: { label: "Animaux", icon: Dog, colorClass: "text-orange-500" },
@@ -36,6 +37,7 @@ type CategoryFilter = "all" | "animals" | "garden" | "house" | "skills";
 
 const SmallMissions = () => {
   const { isAuthenticated, user } = useAuth();
+  const { hasAccess, status: subStatus } = useSubscriptionAccess();
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("active");
   const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>("all");
 
@@ -96,8 +98,8 @@ const SmallMissions = () => {
               <span className="text-foreground">uardiens</span>
             </Link>
             <div className="flex items-center gap-3">
-              <Link to="/actualites" className="text-sm text-muted-foreground hover:text-foreground hidden sm:inline">Guides & Conseils</Link>
-              <Link to="/guides" className="text-sm text-muted-foreground hover:text-foreground hidden sm:inline">Guides</Link>
+              <Link to="/actualites" className="text-sm text-muted-foreground hover:text-foreground hidden sm:inline">Articles</Link>
+              <Link to="/guides" className="text-sm text-muted-foreground hover:text-foreground hidden sm:inline">Guides locaux</Link>
               <Link to="/tarifs" className="text-sm text-muted-foreground hover:text-foreground hidden sm:inline">Tarifs</Link>
               {!isAuthenticated ? (
                 <>
@@ -130,7 +132,7 @@ const SmallMissions = () => {
         <main className="max-w-6xl mx-auto px-4 py-12 space-y-16">
           <section className="space-y-6">
 
-              {isAuthenticated && (
+              {isAuthenticated && hasAccess && (
                 <div className="text-center">
                   <Link to="/petites-missions/creer">
                     <Button variant="hero" size="lg">
@@ -138,6 +140,17 @@ const SmallMissions = () => {
                       <ArrowRight className="ml-2 h-4 w-4" />
                     </Button>
                   </Link>
+                </div>
+              )}
+              {isAuthenticated && !hasAccess && (
+                <div className="text-center space-y-2">
+                  <Link to="/mon-abonnement">
+                    <Button variant="outline" size="lg" className="gap-2">
+                      <Lock className="h-4 w-4" />
+                      Abonnement requis pour poster une mission
+                    </Button>
+                  </Link>
+                  <p className="text-xs text-muted-foreground">Passez Premium pour participer à l'entraide</p>
                 </div>
               )}
 
@@ -209,6 +222,10 @@ const SmallMissions = () => {
                           {!isCompleted && (
                             m.user_id === user?.id ? (
                               <span className="inline-block text-xs text-muted-foreground text-center w-full mt-2">Votre mission</span>
+                            ) : isAuthenticated && !hasAccess ? (
+                              <Button size="sm" variant="outline" className="w-full mt-2 gap-1 text-muted-foreground" disabled>
+                                <Lock className="h-3 w-3" /> Abonnement requis
+                              </Button>
                             ) : (
                               <Button size="sm" variant="outline" className="w-full mt-2">
                                 {isAuthenticated ? "Proposer mon aide" : "Inscrivez-vous pour aider"}

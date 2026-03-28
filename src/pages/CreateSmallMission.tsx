@@ -12,6 +12,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import PageMeta from "@/components/PageMeta";
+import { useSubscriptionAccess } from "@/hooks/useSubscriptionAccess";
+import { Lock } from "lucide-react";
 
 const EURO_REGEX = /\d+\s*[€]|[€]\s*\d+|\d+\s*euro/i;
 
@@ -33,6 +35,7 @@ const CreateSmallMission = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { hasAccess, loading: subLoading } = useSubscriptionAccess();
 
   const [category, setCategory] = useState("animals");
   const [title, setTitle] = useState("");
@@ -90,6 +93,21 @@ const CreateSmallMission = () => {
       <PageMeta title="Poster une petite mission | Guardiens" description="Proposez une mission d'entraide à la communauté Guardiens." />
 
       <div className="max-w-2xl mx-auto px-4 py-8 space-y-6">
+        {/* Premium gate */}
+        {!subLoading && !hasAccess && (
+          <div className="rounded-xl border-2 border-dashed border-border p-8 text-center space-y-4">
+            <Lock className="h-10 w-10 text-muted-foreground mx-auto" />
+            <h2 className="font-heading text-xl font-bold">Abonnement requis</h2>
+            <p className="text-muted-foreground">
+              Les petites missions sont réservées aux membres Premium, Fondateurs et Propriétaires.
+            </p>
+            <Button onClick={() => navigate("/mon-abonnement")} variant="hero" size="lg">
+              Voir les abonnements
+            </Button>
+          </div>
+        )}
+
+        {(subLoading || hasAccess) && <>
         {/* Encart pédagogique */}
         <div
           className="rounded-xl p-5 border space-y-2"
@@ -198,6 +216,7 @@ const CreateSmallMission = () => {
             </form>
           </CardContent>
         </Card>
+        </>}
       </div>
     </>
   );
