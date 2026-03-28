@@ -35,7 +35,7 @@ const differentiators = [
     icon: Sparkles,
     title: "Ça va au-delà de la garde",
     description:
-      "Des barbecues improvisés, des sentiers secrets, des apéros qui s'éternisent. On est venus garder un chien, on est repartis avec des amis.",
+      "Un potager arrosé contre des légumes. Un coup de main contre un repas maison. Une compétence contre une expérience. Des échanges qui n'ont pas de tarif parce qu'ils n'ont pas de prix.",
   },
   {
     icon: Wrench,
