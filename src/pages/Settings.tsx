@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { User, Bell, Shield, Trash2, Download, Sun, Moon, Monitor, ShieldCheck, Upload, CheckCircle2, Clock, AlertCircle, History } from "lucide-react";
+import { compressImageFile } from "@/lib/compressImage";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { useTheme } from "@/contexts/ThemeContext";
