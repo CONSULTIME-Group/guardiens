@@ -40,7 +40,7 @@ type CategoryFilter = "all" | "animals" | "garden" | "house" | "skills";
 const SmallMissions = () => {
   const { isAuthenticated, user } = useAuth();
   const { hasAccess, status: subStatus } = useSubscriptionAccess();
-  const [statusFilter, setStatusFilter] = useState<StatusFilter>("active");
+  const { level: accessLevel, profileCompletion, canApplyMissions } = useAccessLevel();
   const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>("all");
 
   const { data: allMissions } = useQuery({
