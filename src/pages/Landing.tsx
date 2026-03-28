@@ -141,6 +141,15 @@ const Landing = () => {
               "@type": "AdministrativeArea",
               name: "Auvergne-Rhône-Alpes",
             },
+            knowsAbout: [
+              "House-sitting",
+              "Pet-sitting",
+              "Garde d'animaux à domicile",
+              "Entraide de voisinage",
+              "Petites missions entre voisins",
+              "Auvergne-Rhône-Alpes",
+            ],
+            slogan: "Comme confier ses clés à un voisin.",
             founder: [
               { "@type": "Person", name: "Jérémie" },
               { "@type": "Person", name: "Elisa" },
@@ -149,7 +158,7 @@ const Landing = () => {
           }),
         }}
       />
-      {/* JSON-LD: WebSite with SearchAction */}
+      {/* JSON-LD: WebSite with SearchAction + SiteLinksSearchBox */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
