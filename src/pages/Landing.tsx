@@ -681,10 +681,16 @@ const Landing = () => {
       <section className="px-6 md:px-12 py-20" style={{ backgroundColor: "#1C1B18" }}>
         <div className="max-w-3xl mx-auto text-center">
           <h2 className="font-heading text-3xl md:text-4xl font-bold mb-4 text-white">
-            Prêt à partir l'esprit léger ?
+            Votre quartier vous attend.
           </h2>
           <p className="text-white/60 text-lg mb-8">
-            Rejoignez les membres fondateurs avant le 13 mai. Gratuit, sans engagement.
+            Des gardes, de l'entraide, des petits services
+            contre un repas ou des légumes du jardin.
+            Des endroits qu'on n'aurait jamais connus.
+            Des gens qu'on n'aurait jamais croisés.
+            Des histoires qu'on n'aurait jamais vécues.
+            Gratuit pour commencer.
+            Irremplaçable pour la suite.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Button
