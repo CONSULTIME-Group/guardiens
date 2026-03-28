@@ -164,7 +164,7 @@ const Landing = () => {
               "Petites missions entre voisins",
               "Auvergne-Rhône-Alpes",
             ],
-            slogan: "Comme confier ses clés aux gens du coin.",
+            slogan: "Ce que vous avez contre ce que vous n'avez pas encore vécu.",
             founder: [
               { "@type": "Person", name: "Jérémie" },
               { "@type": "Person", name: "Elisa" },
@@ -307,30 +307,33 @@ const Landing = () => {
           </div>
 
           <h1 className="font-heading text-3xl md:text-6xl lg:text-7xl font-bold leading-tight mb-3 md:mb-4 text-white drop-shadow-lg animate-fade-in">
-            Comme confier ses clés
+            Ce que vous avez contre ce que vous
             <br />
-            <span className="italic text-primary-foreground/90">aux gens du coin.</span>
+            <span className="italic text-primary-foreground/90">n'avez pas encore vécu.</span>
           </h1>
           <p className="text-base md:text-xl text-white/90 max-w-2xl mx-auto mb-6 md:mb-8 drop-shadow animate-fade-in" style={{ animationDelay: "0.1s" }}>
-            Des gardes, de l'entraide, des petits services
-            entre gens du coin.
-            Des gens proches à qui vous avez choisi
-            de faire confiance.
+            Des gardes de maison, de l'entraide,
+            des petits services.
+            <br />
+            Entre gens du coin qui se choisissent.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-3 md:gap-4 justify-center w-full sm:w-auto animate-fade-in" style={{ animationDelay: "0.2s" }}>
-            <Button variant="hero" size="xl" onClick={() => navigate("/register")}>
+            <Button variant="hero" size="xl" onClick={() => navigate("/inscription?role=owner")}>
               Je cherche un gardien
             </Button>
             <Button
               size="xl"
-              onClick={() => navigate("/register")}
+              onClick={() => navigate("/inscription?role=sitter")}
               className="bg-white/20 backdrop-blur-sm text-white border border-white/30 hover:bg-white/30 font-semibold rounded-2xl"
             >
               Je veux garder
             </Button>
           </div>
-          <p className="mt-3 md:mt-4 text-xs md:text-sm text-white/70 animate-fade-in" style={{ animationDelay: "0.25s" }}>
+          <Link to="/petites-missions" className="mt-3 text-sm text-primary-foreground hover:underline inline-flex items-center gap-1 animate-fade-in" style={{ animationDelay: "0.22s" }}>
+            Découvrir les petites missions <ArrowRight className="h-3.5 w-3.5" />
+          </Link>
+          <p className="mt-2 md:mt-3 text-xs md:text-sm text-white/70 animate-fade-in" style={{ animationDelay: "0.25s" }}>
             Gratuit · Premiers inscrits, premiers servis.
           </p>
         </div>
@@ -415,12 +418,14 @@ const Landing = () => {
 
             <p>
               On a gardé 37 maisons en cinq ans.
-              Géraldine, 72 ans, cheveux rouges, à Passy —
-              un perroquet et deux chiens sur le pas de la porte.
-              Rio à Collonges — on y est retournés six fois.
-              À Briord, ils nous ont laissé les clés de la maison,
-              les clés de la Triumph, les clés du bateau,
-              les clés de la BM.
+              Géraldine, l'irlandaise de 77 ans aux cheveux
+              rouge fluo à Passy, avec son perroquet Coco
+              et ses deux chiens sur le pas de la porte.
+              Rio à Collonges, le chien joueur infatigable
+              chez qui on est retournés six fois.
+              Et puis Briord. Les clés de la maison.
+              Les clés de la Triumph. Les clés du bateau.
+              Les clés de la BM.
             </p>
             <p>
               Des gens qu'on ne connaissait pas
