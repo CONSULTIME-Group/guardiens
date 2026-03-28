@@ -477,6 +477,43 @@ const Landing = () => {
         </div>
       </section>
 
+      {/* ═══════════════ 4b. ENCART ENTRAIDE ═══════════════ */}
+      <section className="px-6 md:px-12 py-10" style={{ backgroundColor: "#F9F6F1" }}>
+        <div className="max-w-4xl mx-auto text-center">
+          <h2 className="font-heading text-2xl md:text-3xl font-bold mb-2">
+            Et au-delà des gardes...
+          </h2>
+          <p className="text-muted-foreground text-base mb-8">
+            Guardiens, c'est aussi un réseau de voisins qui se rendent service au quotidien.
+          </p>
+          <div className="grid sm:grid-cols-3 gap-6 mb-8">
+            <div className="flex flex-col items-center gap-2 text-sm text-muted-foreground">
+              <span className="text-2xl">🐕</span>
+              <span>Promener un chien le matin contre un repas maison</span>
+            </div>
+            <div className="flex flex-col items-center gap-2 text-sm text-muted-foreground">
+              <span className="text-2xl">🌱</span>
+              <span>Arroser un potager pendant les vacances contre des légumes du jardin</span>
+            </div>
+            <div className="flex flex-col items-center gap-2 text-sm text-muted-foreground">
+              <span className="text-2xl">📬</span>
+              <span>Réceptionner un colis contre un cours de cuisine</span>
+            </div>
+          </div>
+          <p className="text-xs text-muted-foreground mb-4 italic">
+            Jamais d'argent — l'échange se décide entre voisins.
+          </p>
+          <Link to="/petites-missions" className="text-primary font-medium hover:underline inline-flex items-center gap-1">
+            Découvrir les petites missions <ArrowRight className="h-4 w-4" />
+          </Link>
+          {dynamicCounts && dynamicCounts.missions > 10 && (
+            <p className="text-xs text-muted-foreground mt-3">
+              {dynamicCounts.missions} missions actives en AURA en ce moment
+            </p>
+          )}
+        </div>
+      </section>
+
       {/* ═══════════════ 5. TÉMOIGNAGES ═══════════════ */}
       <section className="px-6 md:px-12 py-20 bg-card">
         <div className="max-w-5xl mx-auto">
