@@ -704,12 +704,13 @@ const IdentityVerificationSection = ({ user }: { user: any }) => {
 
     setUploadingSelfie(true);
     try {
-      const ext = file.name.split(".").pop();
+      const compressed = await compressImageFile(file, 5, 2048);
+      const ext = compressed.name.split(".").pop();
       const path = `${user.id}/identity-selfie.${ext}`;
       await supabase.storage.from("identity-documents").remove([path]);
       const { error: uploadError } = await supabase.storage
         .from("identity-documents")
-        .upload(path, file, { upsert: true });
+        .upload(path, compressed, { upsert: true });
       if (uploadError) throw uploadError;
 
       await supabase.from("profiles").update({ identity_selfie_url: path } as any).eq("id", user.id);

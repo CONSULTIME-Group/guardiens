@@ -58,7 +58,8 @@ const OwnerExperiences = () => {
 
     // Upload screenshots
     const urls: string[] = [];
-    for (const file of screenshots.slice(0, 3)) {
+    for (const rawFile of screenshots.slice(0, 3)) {
+      const file = await compressImageFile(rawFile, 5, 2048);
       const ext = file.name.split(".").pop();
       const path = `owner-exp/${user.id}/${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
       const { error } = await supabase.storage.from("experience-screenshots").upload(path, file);
