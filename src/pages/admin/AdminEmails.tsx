@@ -4,10 +4,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Mail, Clock, FileText, Send, ShieldOff, History, Settings2, RefreshCw, AlertCircle, Ban, Eye, SendHorizonal } from "lucide-react";
+import { Mail, Clock, FileText, Send, ShieldOff, History, Settings2, RefreshCw, AlertCircle, Ban, Eye, SendHorizonal, Pencil, Info } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { format } from "date-fns";
@@ -22,15 +23,6 @@ const authTemplates = [
   { name: "Changement d'email", trigger: "Modification d'email", key: "email-change" },
   { name: "Ré-authentification", trigger: "Action sensible", key: "reauthentication" },
   { name: "Invitation", trigger: "Invitation envoyée", key: "invite" },
-];
-
-const notifTemplates = [
-  { name: "Nouvelle candidature reçue", trigger: "Candidature créée", type: "notification", key: "new-application" },
-  { name: "Candidature acceptée", trigger: "Statut → acceptée", type: "notification", key: "application-accepted" },
-  { name: "Rappel garde J-7", trigger: "Cron J-7", type: "cron", key: "reminder-7d" },
-  { name: "Rappel garde J-2", trigger: "Cron J-2", type: "cron", key: "reminder-2d" },
-  { name: "Laisser un avis", trigger: "J+1 après fin", type: "cron", key: "review-prompt" },
-  { name: "Annulation de garde", trigger: "Statut → annulée", type: "notification", key: "cancellation" },
 ];
 
 interface TransactionalTemplate {
@@ -51,6 +43,7 @@ const TemplatesTab = () => {
   const [loadingPreview, setLoadingPreview] = useState(false);
   const [testEmail, setTestEmail] = useState(user?.email || "");
   const [sendingTest, setSendingTest] = useState<string | null>(null);
+  const [authInfoOpen, setAuthInfoOpen] = useState(false);
 
   const fetchTemplates = useCallback(async () => {
     setLoadingTemplates(true);
@@ -147,7 +140,7 @@ const TemplatesTab = () => {
       <div>
         <h3 className="font-medium text-sm mb-3 flex items-center gap-2">
           <Clock className="h-4 w-4 text-muted-foreground" /> Templates d'authentification
-          <Badge variant="outline" className="text-[10px]">Code</Badge>
+          <Badge variant="outline" className="text-[10px]">Auth</Badge>
         </h3>
         <div className="space-y-2">
           {authTemplates.map((tpl) => (
@@ -160,38 +153,19 @@ const TemplatesTab = () => {
                     <div className="text-xs text-muted-foreground flex items-center gap-1"><Clock className="h-3 w-3" /> {tpl.trigger}</div>
                   </div>
                 </div>
-                <Badge variant="default" className="text-xs">Auth</Badge>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      </div>
-
-      <div>
-        <h3 className="font-medium text-sm mb-3 flex items-center gap-2">
-          <FileText className="h-4 w-4 text-muted-foreground" /> Templates de notification
-          <Badge variant="outline" className="text-[10px]">Code</Badge>
-        </h3>
-        <div className="space-y-2">
-          {notifTemplates.map((tpl) => (
-            <Card key={tpl.key}>
-              <CardContent className="flex items-center justify-between py-3 px-5">
-                <div className="flex items-center gap-3">
-                  <Mail className="h-4 w-4 text-muted-foreground" />
-                  <div>
-                    <div className="font-medium text-sm">{tpl.name}</div>
-                    <div className="text-xs text-muted-foreground flex items-center gap-1"><Clock className="h-3 w-3" /> {tpl.trigger}</div>
-                  </div>
+                <div className="flex items-center gap-2">
+                  <Badge variant="default" className="text-xs">Auth</Badge>
+                  <Button size="sm" variant="ghost" className="h-7 text-xs gap-1" onClick={() => setAuthInfoOpen(true)}>
+                    <Info className="h-3.5 w-3.5" />
+                  </Button>
                 </div>
-                <Badge variant={tpl.type === "cron" ? "secondary" : "outline"} className="text-xs">
-                  {tpl.type === "cron" ? "Planifié" : "Notification"}
-                </Badge>
               </CardContent>
             </Card>
           ))}
         </div>
       </div>
 
+      {/* Preview dialog */}
       <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
         <DialogContent className="max-w-2xl max-h-[85vh] flex flex-col">
           <DialogHeader>
@@ -210,6 +184,28 @@ const TemplatesTab = () => {
               <Send className="h-3.5 w-3.5" /> {sendingTest === previewName ? "Envoi..." : `Envoyer un test à ${testEmail || "..."}`}
             </Button>
             <Button variant="ghost" size="sm" onClick={() => setPreviewOpen(false)}>Fermer</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Auth info dialog */}
+      <Dialog open={authInfoOpen} onOpenChange={setAuthInfoOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-base flex items-center gap-2">
+              <Info className="h-4 w-4 text-muted-foreground" /> Template d'authentification
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3">
+            <p className="text-sm text-muted-foreground">
+              Ce template est géré dans le code source de l'application et ne peut pas être modifié depuis cette interface.
+            </p>
+            <p className="text-sm text-muted-foreground">
+              Pour le modifier, contactez le support ou modifiez directement les fichiers dans <code className="text-xs bg-muted px-1.5 py-0.5 rounded">supabase/functions/_shared/email-templates/</code>.
+            </p>
+          </div>
+          <DialogFooter>
+            <Button variant="ghost" size="sm" onClick={() => setAuthInfoOpen(false)}>Compris</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
