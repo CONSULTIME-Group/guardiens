@@ -23,7 +23,7 @@ const differentiators = [
     icon: Clock,
     title: "Vos voisins, en mieux",
     description:
-      "Vos gardiens habitent à côté. On se croise au marché, on connaît le boulanger, on sait où promener le chien quand il pleut.",
+      "Ils connaissent le boulanger, le meilleur sentier pour le chien quand il pleut, l'heure à laquelle les voisins du dessus font du bruit. Ils habitent là. Vraiment.",
   },
   {
     icon: Handshake,
