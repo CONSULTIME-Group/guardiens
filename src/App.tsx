@@ -60,6 +60,7 @@ import AdminDepartments from "./pages/admin/AdminDepartments";
 import DepartmentPage from "./pages/DepartmentPage";
 import Pricing from "./pages/Pricing";
 import SmallMissions from "./pages/SmallMissions";
+import SmallMissionsPublic from "./pages/SmallMissionsPublic";
 import SmallMissionDetail from "./pages/SmallMissionDetail";
 import CreateSmallMission from "./pages/CreateSmallMission";
 import MentionsLegales from "./pages/MentionsLegales";
@@ -102,7 +103,7 @@ const SmallMissionsRoute = () => {
       </div>
     );
   }
-  return <SmallMissions />;
+  return <SmallMissionsPublic />;
 };
 
 const AppRoutes = () => (

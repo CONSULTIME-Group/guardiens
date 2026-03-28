@@ -13,6 +13,7 @@ interface Profile {
   lastName: string;
   avatarUrl?: string;
   profileCompletion: number;
+  identityVerified: boolean;
 }
 
 interface AuthContextType {
@@ -36,6 +37,7 @@ const mapProfile = (profile: any): Profile => ({
   lastName: profile.last_name || "",
   avatarUrl: profile.avatar_url || undefined,
   profileCompletion: profile.profile_completion || 0,
+  identityVerified: profile.identity_verified || false,
 });
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {

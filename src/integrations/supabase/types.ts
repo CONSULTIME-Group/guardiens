@@ -2223,6 +2223,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      calculate_profile_completion: {
+        Args: { p_user_id: string }
+        Returns: number
+      }
       delete_email: {
         Args: { message_id: number; queue_name: string }
         Returns: boolean

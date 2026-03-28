@@ -9,6 +9,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { useSubscriptionAccess } from "@/hooks/useSubscriptionAccess";
+import { useAccessLevel } from "@/hooks/useAccessLevel";
+import AccessGateBanner from "@/components/access/AccessGateBanner";
 
 const CATEGORY_META: Record<string, { label: string; icon: typeof Dog; colorClass: string }> = {
   animals: { label: "Animaux", icon: Dog, colorClass: "text-orange-500" },
@@ -38,6 +40,7 @@ type CategoryFilter = "all" | "animals" | "garden" | "house" | "skills";
 const SmallMissions = () => {
   const { isAuthenticated, user } = useAuth();
   const { hasAccess, status: subStatus } = useSubscriptionAccess();
+  const { level: accessLevel, profileCompletion, canApplyMissions } = useAccessLevel();
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("active");
   const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>("all");
 
@@ -132,7 +135,7 @@ const SmallMissions = () => {
         <main className="max-w-6xl mx-auto px-4 py-12 space-y-16">
           <section className="space-y-6">
 
-              {isAuthenticated && hasAccess && (
+              {isAuthenticated && canApplyMissions && (
                 <div className="text-center">
                   <Link to="/petites-missions/creer">
                     <Button variant="hero" size="lg">
@@ -142,16 +145,8 @@ const SmallMissions = () => {
                   </Link>
                 </div>
               )}
-              {isAuthenticated && !hasAccess && (
-                <div className="text-center space-y-2">
-                  <Link to="/mon-abonnement">
-                    <Button variant="outline" size="lg" className="gap-2">
-                      <Lock className="h-4 w-4" />
-                      Abonnement requis pour poster une mission
-                    </Button>
-                  </Link>
-                  <p className="text-xs text-muted-foreground">Passez Premium pour participer à l'entraide</p>
-                </div>
+              {isAuthenticated && (accessLevel === 1 || accessLevel === 2) && (
+                <AccessGateBanner level={accessLevel} profileCompletion={profileCompletion} context="mission" />
               )}
 
               {/* Filters */}
@@ -222,13 +217,13 @@ const SmallMissions = () => {
                           {!isCompleted && (
                             m.user_id === user?.id ? (
                               <span className="inline-block text-xs text-muted-foreground text-center w-full mt-2">Votre mission</span>
-                            ) : isAuthenticated && !hasAccess ? (
+                            ) : isAuthenticated && !canApplyMissions ? (
                               <Button size="sm" variant="outline" className="w-full mt-2 gap-1 text-muted-foreground" disabled>
-                                <Lock className="h-3 w-3" /> Abonnement requis
+                                <Lock className="h-3 w-3" /> Complétez votre profil
                               </Button>
                             ) : (
                               <Button size="sm" variant="outline" className="w-full mt-2">
-                                {isAuthenticated ? "Proposer mon aide" : "Inscrivez-vous pour aider"}
+                                Proposer mon aide
                               </Button>
                             )
                           )}
