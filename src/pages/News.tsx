@@ -93,7 +93,20 @@ export default function News() {
       setTotalCount(count || 0);
       setLoading(false);
     };
+
+    const fetchVieLocale = async () => {
+      const { data } = await supabase
+        .from("articles")
+        .select("id, title, slug, excerpt, cover_image_url, category, tags, city, region, author_name, published_at")
+        .eq("published", true)
+        .eq("category", "vie_locale")
+        .order("published_at", { ascending: false })
+        .limit(3);
+      setVieLocaleArticles((data as Article[]) || []);
+    };
+
     fetchArticles();
+    if (activeCategory === "all") fetchVieLocale();
   }, [activeCategory, currentPage]);
 
   const totalPages = Math.ceil(totalCount / PAGE_SIZE);
