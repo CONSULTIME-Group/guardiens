@@ -33,9 +33,10 @@ const CATEGORY_LABELS: Record<string, string> = {
   temoignage: "Témoignage",
   actualite: "Actualité",
   ville: "Villes",
-  thematique: "Guides pratiques",
-  guide_local: "Guides pratiques",
+  thematique: "House-sitting",
+  guide_local: "Guides locaux",
   saisonnier: "Saisonniers",
+  guide_pratique: "Guides pratiques",
 };
 
 const CATEGORY_COLORS: Record<string, string> = {
