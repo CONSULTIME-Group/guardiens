@@ -476,10 +476,10 @@ const Landing = () => {
       <section className="px-6 md:px-12 py-20">
         <div className="max-w-5xl mx-auto">
           <h2 className="font-heading text-3xl md:text-4xl font-bold text-center mb-3">
-            La proximité change tout.
+            Un réseau de voisins qui se font confiance.
           </h2>
           <p className="text-muted-foreground text-lg text-center mb-14">
-            Ce qu'on a vécu en vrai, on veut le rendre possible pour tous.
+            Pas des inconnus. Des gens du quartier, vérifiés, qui se sont rencontrés en vrai.
           </p>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
             {differentiators.map((item, i) => (
