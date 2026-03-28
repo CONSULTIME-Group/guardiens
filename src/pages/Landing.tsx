@@ -418,12 +418,14 @@ const Landing = () => {
 
             <p>
               On a gardé 37 maisons en cinq ans.
-              Géraldine, 72 ans, cheveux rouges, à Passy —
-              un perroquet et deux chiens sur le pas de la porte.
-              Rio à Collonges — on y est retournés six fois.
-              À Briord, ils nous ont laissé les clés de la maison,
-              les clés de la Triumph, les clés du bateau,
-              les clés de la BM.
+              Géraldine, l'irlandaise de 77 ans aux cheveux
+              rouge fluo à Passy, avec son perroquet Coco
+              et ses deux chiens sur le pas de la porte.
+              Rio à Collonges, le chien joueur infatigable
+              chez qui on est retournés six fois.
+              Et puis Briord. Les clés de la maison.
+              Les clés de la Triumph. Les clés du bateau.
+              Les clés de la BM.
             </p>
             <p>
               Des gens qu'on ne connaissait pas
