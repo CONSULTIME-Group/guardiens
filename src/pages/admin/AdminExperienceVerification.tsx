@@ -19,6 +19,15 @@ const AdminExperienceVerification = () => {
     open: false, id: "", userId: "", message: ""
   });
   const [zoomedImg, setZoomedImg] = useState<string | null>(null);
+  const [signedUrls, setSignedUrls] = useState<Record<string, string>>({});
+
+  const getSignedUrl = async (path: string): Promise<string> => {
+    if (signedUrls[path]) return signedUrls[path];
+    const { data } = await supabase.storage.from("experience-screenshots").createSignedUrl(path, 3600);
+    const url = data?.signedUrl || "";
+    if (url) setSignedUrls(prev => ({ ...prev, [path]: url }));
+    return url;
+  };
 
   const fetchExperiences = async () => {
     setLoading(true);
@@ -27,7 +36,14 @@ const AdminExperienceVerification = () => {
       .select("*, profile:profiles!external_experiences_user_id_fkey(first_name, last_name, avatar_url, role)")
       .eq("verification_status", "pending")
       .order("created_at", { ascending: true });
-    setExperiences(data || []);
+    const exps = data || [];
+    // Pre-fetch signed URLs for all screenshots
+    for (const exp of exps) {
+      for (const path of (exp.screenshot_urls || [])) {
+        getSignedUrl(path);
+      }
+    }
+    setExperiences(exps);
     setLoading(false);
   };
 
@@ -159,14 +175,15 @@ const AdminExperienceVerification = () => {
                     </p>
                     <div className="flex gap-3 overflow-x-auto pb-2">
                       {exp.screenshot_urls.map((path: string, i: number) => {
-                        const { data } = supabase.storage.from("experience-screenshots").getPublicUrl(path);
+                        const url = signedUrls[path];
+                        if (!url) return <div key={i} className="h-52 w-40 bg-muted rounded-lg animate-pulse" />;
                         return (
                           <img
                             key={i}
-                            src={data.publicUrl}
+                            src={url}
                             alt={`Screenshot ${i + 1}`}
                             className="h-52 rounded-lg border border-border object-contain bg-muted cursor-pointer hover:opacity-80 transition-opacity"
-                            onClick={() => setZoomedImg(data.publicUrl)}
+                            onClick={() => setZoomedImg(url)}
                           />
                         );
                       })}
