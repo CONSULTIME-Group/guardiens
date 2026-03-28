@@ -97,6 +97,9 @@ const Login = () => {
       {/* Right panel - form */}
       <div className="flex-1 flex items-center justify-center px-6 py-12">
         <div className="w-full max-w-md">
+          <Link to="/" className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground mb-6 gap-1">
+            ← Retour au site
+          </Link>
           <div className="text-center mb-10">
             <Link to="/" className="inline-block">
               <h1 className="font-heading text-3xl font-bold mb-2 hover:opacity-80 transition-opacity">
