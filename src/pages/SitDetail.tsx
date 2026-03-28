@@ -55,6 +55,7 @@ const SitDetail = () => {
   const { toast } = useToast();
   const { user, activeRole } = useAuth();
   const { hasAccess: subHasAccess } = useSubscriptionAccess();
+  const { level: accessLevel, profileCompletion, canApplyGuards } = useAccessLevel();
   const [sit, setSit] = useState<SitData | null>(null);
   const [owner, setOwner] = useState<any>(null);
   const [property, setProperty] = useState<any>(null);
