@@ -1,9 +1,10 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Home, PawPrint, Clock, Handshake, Sparkles, Wrench } from "lucide-react";
+import { ArrowRight, ArrowLeft, Home, PawPrint, Clock, Handshake, Sparkles, Wrench } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import PageMeta from "@/components/PageMeta";
+import useEmblaCarousel from "embla-carousel-react";
 import heroDogBbq from "@/assets/hero-dog-bbq.jpg";
 
 const differentiators = [
@@ -99,11 +100,56 @@ const steps = [
   },
 ];
 
+/* ── Separator for histoire section ── */
+const StoryDivider = () => (
+  <div className="flex justify-center my-8">
+    <div className="w-[60px] h-px" style={{ backgroundColor: "#E8E4DC" }} />
+  </div>
+);
+
 const Landing = () => {
   const navigate = useNavigate();
   const [latestArticles, setLatestArticles] = useState<any[]>([]);
   const [dynamicCounts, setDynamicCounts] = useState<{ members: number; missions: number; sits: number } | null>(null);
   const lastFetchRef = useRef<number>(0);
+
+  /* ── Embla carousel for testimonials ── */
+  const [emblaRef, emblaApi] = useEmblaCarousel({
+    align: "start",
+    loop: true,
+    slidesToScroll: 1,
+  });
+  const [selectedIndex, setSelectedIndex] = useState(0);
+  const [scrollSnaps, setScrollSnaps] = useState<number[]>([]);
+
+  const onEmblaSelect = useCallback(() => {
+    if (!emblaApi) return;
+    setSelectedIndex(emblaApi.selectedScrollSnap());
+  }, [emblaApi]);
+
+  useEffect(() => {
+    if (!emblaApi) return;
+    setScrollSnaps(emblaApi.scrollSnapList());
+    emblaApi.on("select", onEmblaSelect);
+    onEmblaSelect();
+    return () => { emblaApi.off("select", onEmblaSelect); };
+  }, [emblaApi, onEmblaSelect]);
+
+  /* Autoplay every 5s, pause on hover */
+  const autoplayRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const [isHovered, setIsHovered] = useState(false);
+
+  useEffect(() => {
+    if (!emblaApi) return;
+    if (isHovered) {
+      if (autoplayRef.current) clearInterval(autoplayRef.current);
+      return;
+    }
+    autoplayRef.current = setInterval(() => {
+      emblaApi.scrollNext();
+    }, 5000);
+    return () => { if (autoplayRef.current) clearInterval(autoplayRef.current); };
+  }, [emblaApi, isHovered]);
 
   useEffect(() => {
     supabase
@@ -265,10 +311,10 @@ const Landing = () => {
         </h2>
         <div className="flex gap-2 md:gap-3 items-center">
           <Button variant="ghost" size="sm" className="hidden sm:inline-flex" onClick={() => navigate("/actualites")}>
-            Guides & Conseils
+            Articles
           </Button>
           <Button variant="ghost" size="sm" className="hidden sm:inline-flex" onClick={() => navigate("/guides")}>
-            Guides
+            Guides locaux
           </Button>
           <Button variant="ghost" size="sm" className="hidden sm:inline-flex" onClick={() => navigate("/petites-missions")}>
             Entraide
@@ -291,9 +337,14 @@ const Landing = () => {
           className="absolute inset-0 w-full h-full object-cover blur-[3px] scale-[1.02]"
           loading="eager"
         />
-        {/* Colored overlay to harmonize + bottom gradient for text */}
-        <div className="absolute inset-0 bg-primary/[0.15]" />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+        {/* Left-to-right gradient overlay for text readability */}
+        <div
+          className="absolute inset-0"
+          style={{
+            background: "linear-gradient(to right, rgba(0,0,0,0.45), rgba(0,0,0,0.15))",
+          }}
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
         <div className="absolute inset-0 flex flex-col items-center justify-end pb-8 md:pb-16 px-4 md:px-6 text-center">
           {/* Pastille */}
           <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm rounded-full px-3 md:px-4 py-1.5 mb-4 md:mb-6 animate-fade-in">
@@ -340,7 +391,7 @@ const Landing = () => {
       </section>
 
       {/* ═══════════════ 1. HERO CONTENT (stats) ═══════════════ */}
-      <section className="px-6 md:px-12 pt-12 pb-16 max-w-5xl mx-auto text-center">
+      <section className="px-6 md:px-12 pt-16 pb-20 max-w-5xl mx-auto text-center">
 
         {/* Stats avec séparateurs */}
         <p className="text-xs font-semibold tracking-[0.2em] uppercase text-muted-foreground/60 mb-6">
@@ -395,7 +446,7 @@ const Landing = () => {
       </section>
 
       {/* ═══════════════ 2. L'HISTOIRE ═══════════════ */}
-      <section className="px-6 md:px-12 py-20 bg-card">
+      <section className="px-6 md:px-12 py-24 lg:py-28 bg-card">
         <div className="max-w-3xl mx-auto">
           <h2 className="font-heading text-3xl md:text-4xl font-bold mb-10 text-center">
             Tout a commencé avec un visa.
@@ -414,7 +465,7 @@ const Landing = () => {
               <em className="text-foreground">{" "}« Et si tu restais chez nous pendant qu'on part ? »</em>
             </p>
 
-            <div className="py-2" />
+            <StoryDivider />
 
             <p>
               On a gardé 37 maisons en cinq ans.
@@ -436,7 +487,7 @@ const Landing = () => {
               On collectionnait des vies.</strong>
             </p>
 
-            <div className="py-2" />
+            <StoryDivider />
 
             <p>
               Un soir chez Helen — Stanley qui aboyait,
@@ -448,7 +499,7 @@ const Landing = () => {
               C'est pour ça qu'on a construit Guardiens.
             </p>
 
-            <div className="py-2" />
+            <StoryDivider />
 
             <p>
               Votre jardin contre un repas.
@@ -460,30 +511,10 @@ const Landing = () => {
         </div>
       </section>
 
-      {/* ═══════════════ 3. CTA INTERMÉDIAIRE ═══════════════ */}
-      <section className="px-6 md:px-12 py-20 bg-secondary/10">
-        <div className="max-w-3xl mx-auto text-center">
-          <h2 className="font-heading text-3xl md:text-4xl font-bold mb-4">
-            Envie de{" "}
-            <span className="text-primary italic">tenter l'aventure</span> ?
-          </h2>
-          <p className="text-muted-foreground text-lg mb-8">
-            Que vous cherchiez quelqu'un pour garder votre maison, ou que vous
-            rêviez d'échappées à côté de chez vous — on vous attend.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button variant="hero" size="xl" onClick={() => navigate("/register")}>
-              Je cherche un gardien
-            </Button>
-            <Button variant="heroOutline" size="xl" onClick={() => navigate("/register")}>
-              Je veux garder
-            </Button>
-          </div>
-        </div>
-      </section>
+      {/* Section "Envie de tenter l'aventure" SUPPRIMÉE */}
 
       {/* ═══════════════ 4. DIFFÉRENCIATEURS ═══════════════ */}
-      <section className="px-6 md:px-12 py-20">
+      <section className="px-6 md:px-12 py-24 lg:py-28">
         <div className="max-w-5xl mx-auto">
           <h2 className="font-heading text-3xl md:text-4xl font-bold text-center mb-3">
             Un réseau de gens du coin qui se font confiance.
@@ -495,7 +526,7 @@ const Landing = () => {
             {differentiators.map((item, i) => (
               <div
                 key={item.title}
-                className="bg-card rounded-xl p-8 animate-fade-in"
+                className="bg-card rounded-xl p-8 animate-fade-in border-b-2 border-transparent hover:border-primary transition-all duration-200 hover:shadow-[0_4px_16px_rgba(0,0,0,0.08)]"
                 style={{ animationDelay: `${0.08 * i}s` }}
               >
                 <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary/10 text-primary mb-5">
@@ -514,7 +545,7 @@ const Landing = () => {
       </section>
 
       {/* ═══════════════ 4b. ENCART ENTRAIDE ═══════════════ */}
-      <section className="px-6 md:px-12 py-10" style={{ backgroundColor: "#F9F6F1" }}>
+      <section className="px-6 md:px-12 py-20" style={{ backgroundColor: "#F9F6F1" }}>
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="font-heading text-2xl md:text-3xl font-bold mb-2">
             Et au-delà des gardes.
@@ -550,36 +581,89 @@ const Landing = () => {
         </div>
       </section>
 
-      {/* ═══════════════ 5. TÉMOIGNAGES ═══════════════ */}
-      <section className="px-6 md:px-12 py-20 bg-card">
-        <div className="max-w-5xl mx-auto">
+      {/* ═══════════════ 5. TÉMOIGNAGES (CAROUSEL) ═══════════════ */}
+      <section className="px-6 md:px-12 py-24 lg:py-28 bg-card">
+        <div className="max-w-6xl mx-auto">
           <h2 className="font-heading text-3xl md:text-4xl font-bold text-center mb-14">
             Ils ont sauté le pas.
           </h2>
-          <div className="grid md:grid-cols-3 gap-8">
-            {testimonials.map((t, i) => (
-              <div
-                key={t.name}
-                className="bg-background rounded-xl p-8 animate-fade-in"
-                style={{ animationDelay: `${0.1 * i}s` }}
-              >
-                <p className="text-muted-foreground leading-relaxed text-sm mb-6">
-                  "{t.text}"
-                </p>
-                <p className="font-heading font-semibold text-sm">
-                  {t.name}{" "}
-                  <span className="text-muted-foreground font-body font-normal">
-                    — {t.detail}
-                  </span>
-                </p>
+
+          <div className="relative">
+            {/* Arrows */}
+            <button
+              onClick={() => emblaApi?.scrollPrev()}
+              className="absolute -left-4 md:-left-6 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-background border border-border shadow-sm flex items-center justify-center hover:bg-accent transition-colors"
+              aria-label="Témoignage précédent"
+            >
+              <ArrowLeft className="h-4 w-4" />
+            </button>
+            <button
+              onClick={() => emblaApi?.scrollNext()}
+              className="absolute -right-4 md:-right-6 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-background border border-border shadow-sm flex items-center justify-center hover:bg-accent transition-colors"
+              aria-label="Témoignage suivant"
+            >
+              <ArrowRight className="h-4 w-4" />
+            </button>
+
+            <div
+              ref={emblaRef}
+              className="overflow-hidden"
+              onMouseEnter={() => setIsHovered(true)}
+              onMouseLeave={() => setIsHovered(false)}
+            >
+              <div className="flex">
+                {testimonials.map((t) => (
+                  <div
+                    key={t.name}
+                    className="flex-[0_0_100%] md:flex-[0_0_33.333%] min-w-0 px-3"
+                  >
+                    <div
+                      className="bg-background rounded-2xl p-7 h-full"
+                      style={{ boxShadow: "0 2px 12px rgba(0,0,0,0.06)" }}
+                    >
+                      {/* Opening quote */}
+                      <span
+                        className="block font-serif leading-none mb-2 select-none text-primary"
+                        style={{ fontSize: "60px", opacity: 0.3 }}
+                      >
+                        "
+                      </span>
+                      <p className="text-muted-foreground leading-relaxed mb-6" style={{ fontSize: "15px", lineHeight: 1.6 }}>
+                        {t.text}
+                      </p>
+                      <p>
+                        <span className="font-semibold text-primary" style={{ fontSize: "13px" }}>
+                          {t.name}
+                        </span>
+                        <span className="text-muted-foreground" style={{ fontSize: "13px" }}>
+                          {" "}— {t.detail}
+                        </span>
+                      </p>
+                    </div>
+                  </div>
+                ))}
               </div>
-            ))}
+            </div>
+
+            {/* Pagination dots */}
+            <div className="flex justify-center gap-2 mt-8">
+              {scrollSnaps.map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => emblaApi?.scrollTo(i)}
+                  className={`w-2.5 h-2.5 rounded-full transition-colors ${
+                    i === selectedIndex ? "bg-primary" : "bg-border"
+                  }`}
+                  aria-label={`Aller au témoignage ${i + 1}`}
+                />
+              ))}
+            </div>
           </div>
         </div>
       </section>
 
       {/* ═══════════════ 6. COMMENT ÇA MARCHE ═══════════════ */}
-      <section className="px-6 md:px-12 py-20">
+      <section className="px-6 md:px-12 py-24 lg:py-28">
         <div className="max-w-5xl mx-auto">
           <h2 className="font-heading text-3xl md:text-4xl font-bold text-center mb-16">
             Trois étapes. Une relation.
@@ -610,19 +694,21 @@ const Landing = () => {
       <section className="px-6 md:px-12 py-20 bg-card">
         <div className="max-w-3xl mx-auto text-center">
           <h2 className="font-heading text-3xl md:text-4xl font-bold mb-5">
-            On vient de lancer. Donc c'est{" "}
-            <span className="text-primary italic">gratuit.</span>
+            Votre prochaine histoire commence ici.
           </h2>
           <p className="text-muted-foreground text-lg leading-relaxed">
-            Transparent, simple, et toujours à votre écoute. On construit la communauté
-            d'abord, on verra le reste ensemble. Profitez-en — les premiers
-            inscrits auront toujours une place spéciale.
+            Des gardes, de l'entraide, des gens du coin
+            qui se font confiance.
+            <br />
+            Gratuit pour commencer.
+            <br />
+            Irremplaçable pour la suite.
           </p>
         </div>
       </section>
 
       {/* ═══════════════ ENCART FONDATEUR ═══════════════ */}
-      <section className="px-6 md:px-12 py-12">
+      <section className="px-6 md:px-12 py-16">
         <div
           className="max-w-3xl mx-auto rounded-2xl p-8 md:p-10 text-center space-y-4 border-2"
           style={{ backgroundColor: "#FEF3C7", borderColor: "hsl(24 36% 60%)" }}
@@ -688,7 +774,7 @@ const Landing = () => {
       )}
 
       {/* ═══════════════ 8. CTA FINAL (fond sombre) ═══════════════ */}
-      <section className="px-6 md:px-12 py-20" style={{ backgroundColor: "#1C1B18" }}>
+      <section className="px-6 md:px-12 py-24" style={{ backgroundColor: "#1C1B18" }}>
         <div className="max-w-3xl mx-auto text-center">
           <h2 className="font-heading text-3xl md:text-4xl font-bold mb-4 text-white">
             Votre prochaine histoire commence ici.
@@ -751,7 +837,7 @@ const Landing = () => {
             <div>
               <h4 className="text-sm font-semibold text-foreground mb-2">Ressources</h4>
               <ul className="space-y-1 text-xs text-muted-foreground">
-                <li><Link to="/actualites" className="hover:text-primary transition-colors">Guides & Conseils</Link></li>
+                <li><Link to="/actualites" className="hover:text-primary transition-colors">Articles</Link></li>
                 <li><Link to="/guides" className="hover:text-primary transition-colors">Guides locaux</Link></li>
                 <li><Link to="/faq" className="hover:text-primary transition-colors">FAQ</Link></li>
                 <li><Link to="/tarifs" className="hover:text-primary transition-colors">Tarifs</Link></li>
@@ -762,6 +848,7 @@ const Landing = () => {
               <h4 className="text-sm font-semibold text-foreground mb-2">Guardiens</h4>
               <ul className="space-y-1 text-xs text-muted-foreground">
                 <li><Link to="/a-propos" className="hover:text-primary transition-colors">À propos</Link></li>
+                <li><Link to="/notre-histoire" className="hover:text-primary transition-colors">Notre histoire</Link></li>
                 <li><Link to="/contact" className="hover:text-primary transition-colors">Contact</Link></li>
                 <li><Link to="/register" className="hover:text-primary transition-colors">Inscription</Link></li>
                 <li><Link to="/petites-missions" className="hover:text-primary transition-colors">Petites missions</Link></li>
