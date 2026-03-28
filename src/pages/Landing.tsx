@@ -250,7 +250,7 @@ const Landing = () => {
                 name: "Comment trouver un pet sitter près de chez moi ?",
                 acceptedAnswer: {
                   "@type": "Answer",
-                  text: "Inscrivez-vous sur Guardiens, publiez votre annonce de garde avec les dates et vos animaux, et recevez des candidatures de gardiens vérifiés qui habitent près de chez vous.",
+                  text: "Inscrivez-vous sur Guardiens, publiez votre annonce de garde avec les dates et vos animaux, et recevez des candidatures de gardiens qui habitent près de chez vous.",
                 },
               },
             ],
