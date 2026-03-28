@@ -61,6 +61,11 @@ const testimonials = [
     detail: "3 chevaux · Monts du Lyonnais",
     text: "Notre gardienne connaissait nos trois chevaux par leur prénom avant même d'arriver. Elle est venue la veille, on a dîné ensemble, on lui a montré les petites habitudes. Le lendemain on est partis le sourire aux lèvres. On avait enfin retrouvé le plaisir de voyager.",
   },
+  {
+    name: "Thomas",
+    detail: "Jardin · Caluire-et-Cuire",
+    text: "J'avais un potager qui partait à l'abandon pendant mes déplacements pro. Un voisin Guardiens a proposé de s'en occuper contre les légumes de la récolte. Il est venu deux fois par semaine pendant un mois. On ne se connaissait pas. Maintenant il garde aussi mon chat.",
+  },
 ];
 
 const steps = [
