@@ -120,13 +120,14 @@ export default function News() {
 
   const categories = [
     { key: "all", label: "Tous" },
+    { key: "thematique", label: "House-sitting" },
+    { key: "vie_locale", label: "Vie locale & Entraide" },
     { key: "conseil_gardien", label: "Conseils gardiens" },
     { key: "conseil_proprio", label: "Conseils propriétaires" },
     { key: "guide_race", label: "Races" },
     { key: "ville", label: "Villes" },
-    { key: "thematique", label: "House-sitting" },
     { key: "guide_local", label: "Guides locaux" },
-    { key: "guides_pratiques", label: "Guides pratiques" },
+    { key: "guide_pratique", label: "Guides pratiques" },
     { key: "saisonnier", label: "Saisonniers" },
   ];
 
