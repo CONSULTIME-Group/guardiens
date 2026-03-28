@@ -386,70 +386,62 @@ const Landing = () => {
       {/* ═══════════════ 2. L'HISTOIRE ═══════════════ */}
       <section className="px-6 md:px-12 py-20 bg-card">
         <div className="max-w-3xl mx-auto">
-          <span className="block text-center text-xs font-semibold tracking-[0.2em] uppercase text-secondary mb-4">
-            Notre histoire
-          </span>
           <h2 className="font-heading text-3xl md:text-4xl font-bold mb-10 text-center">
-            On a tous un voisin{" "}
-            <span className="text-primary italic">qu'on ne connaît pas.</span>
+            Tout a commencé avec un visa.
           </h2>
 
           <div className="space-y-6 text-muted-foreground leading-relaxed text-base md:text-lg">
             <p>
-              Celui qui habite à trois mètres depuis deux ans.
-              Dont vous entendez la musique le samedi soir.
-              Qui pourrait garder vos clés en cas d'urgence —
-              mais à qui vous n'avez jamais vraiment parlé.
+              Elisa est arrivée d'Argentine avec un visa
+              qui ne lui permettait pas de travailler.
+              Elle gardait des animaux. Elle rentrait avec
+              des histoires. Des gens qui ouvraient leur porte
+              sans calcul, leur vie sans condition.
             </p>
             <p>
-              On a construit des villes extraordinaires.
-              Et on s'y est perdus les uns des autres.
+              Un soir un propriétaire lui a dit&nbsp;:
+              <em className="text-foreground">{" "}« Et si tu restais chez nous pendant qu'on part ? »</em>
             </p>
-            <p>
-              Guardiens est né d'une idée simple, presque naïve.
-              Et si vos voisins étaient la meilleure chose
-              qui vous soit arrivée ?
-            </p>
-            <p>
-              Pour échanger. Votre jardin contre un repas.
-              Votre maison contre une expérience.
-              Votre temps contre du temps.
-              Sans que personne n'en profite sur l'autre.
-            </p>
+
+            <div className="py-2" />
+
             <p>
               On a gardé 37 maisons en cinq ans.
-              Des chalets où la neige entrait sous les portes.
-              Des jardins qu'on a appris à lire.
-              Des animaux dont on a compris le caractère
-              en trois heures. Des propriétaires qui nous ont
-              laissé leurs clés et sont partis sans se retourner.
+              Géraldine, 72 ans, cheveux rouges, à Passy —
+              un perroquet et deux chiens sur le pas de la porte.
+              Rio à Collonges — on y est retournés six fois.
+              À Briord, ils nous ont laissé les clés de la maison,
+              les clés de la Triumph, les clés du bateau,
+              les clés de la BM.
             </p>
             <p>
-              Pas toujours extraordinaire. Parfois très ordinaire.
-              Mais toujours vrai. Toujours vivant.
+              Des gens qu'on ne connaissait pas
+              trois semaines avant.
+            </p>
+            <p>
+              <strong className="text-foreground">On ne gardait pas des maisons.
+              On collectionnait des vies.</strong>
             </p>
 
-            {/* Citation encadrée */}
-            <blockquote className="border-l-4 border-primary pl-6 py-3 my-8 bg-primary/5 rounded-r-lg">
-              <p className="font-heading text-lg font-semibold text-foreground italic">
-                « On ne gardait pas des maisons. On collectionnait des vies. »
-              </p>
-            </blockquote>
+            <div className="py-2" />
 
             <p>
-              Quand on a gardé notre première maison
-              dans le Vieux-Lyon — trois chats, un golden,
-              une vue sur les toits — on a compris que
-              ce n'était pas une transaction.
-              C'était une rencontre.
+              Un soir chez Helen — Stanley qui aboyait,
+              Rafa couché sur nos pieds, la vue sur le Mont-Blanc.
+              On s'est dit&nbsp;: pourquoi il n'y a pas plus de monde
+              qui fait ça ?
             </p>
             <p>
-              Une confiance donnée, une confiance reçue.
-              Et des histoires qu'on raconte encore.
+              C'est pour ça qu'on a construit Guardiens.
             </p>
+
+            <div className="py-2" />
+
             <p>
-              C'est ça qu'on veut rendre possible
-              pour tout le monde en AURA.
+              Votre jardin contre un repas.
+              Vos clés contre une histoire.
+              Des gens du coin qui se font confiance —
+              et parfois des amis pour la vie.
             </p>
           </div>
         </div>
