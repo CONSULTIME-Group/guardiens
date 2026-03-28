@@ -99,7 +99,7 @@ const CreateSmallMission = () => {
           <AccessGateBanner level={accessLevel} profileCompletion={profileCompletion} context="mission" />
         )}
 
-        {(subLoading || hasAccess) && <>
+        {(accessLoading || canApplyMissions) && <>
         {/* Encart pédagogique */}
         <div
           className="rounded-xl p-5 border space-y-2"
