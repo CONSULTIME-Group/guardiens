@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { User, Bell, Shield, Trash2, Download, Sun, Moon, Monitor, ShieldCheck, Upload, CheckCircle2, Clock, AlertCircle, History } from "lucide-react";
+import { compressImageFile } from "@/lib/compressImage";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { useTheme } from "@/contexts/ThemeContext";
@@ -631,7 +632,11 @@ const IdentityVerificationSection = ({ user }: { user: any }) => {
     setUploading(true);
     setUploadProgress(10);
     try {
-      const ext = file.name.split(".").pop();
+      // Compress image if over 5MB
+      const compressed = await compressImageFile(file, 5, 2048);
+      setUploadProgress(20);
+
+      const ext = compressed.name.split(".").pop();
       const path = `${user.id}/identity-document.${ext}`;
 
       setUploadProgress(30);
@@ -640,7 +645,7 @@ const IdentityVerificationSection = ({ user }: { user: any }) => {
       setUploadProgress(50);
       const { error: uploadError } = await supabase.storage
         .from("identity-documents")
-        .upload(path, file, { upsert: true });
+        .upload(path, compressed, { upsert: true });
 
       if (uploadError) throw uploadError;
       setUploadProgress(80);
@@ -699,12 +704,13 @@ const IdentityVerificationSection = ({ user }: { user: any }) => {
 
     setUploadingSelfie(true);
     try {
-      const ext = file.name.split(".").pop();
+      const compressed = await compressImageFile(file, 5, 2048);
+      const ext = compressed.name.split(".").pop();
       const path = `${user.id}/identity-selfie.${ext}`;
       await supabase.storage.from("identity-documents").remove([path]);
       const { error: uploadError } = await supabase.storage
         .from("identity-documents")
-        .upload(path, file, { upsert: true });
+        .upload(path, compressed, { upsert: true });
       if (uploadError) throw uploadError;
 
       await supabase.from("profiles").update({ identity_selfie_url: path } as any).eq("id", user.id);
