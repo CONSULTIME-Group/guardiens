@@ -80,7 +80,7 @@ const steps = [
     number: "03",
     title: "Rencontrez-vous",
     description:
-      "Un café, un dîner, une balade ensemble. La confiance ne se crée pas en ligne — elle se vit. Puis partez l'esprit léger.",
+      "Un café, une balade, une visite. La confiance se crée en vrai. Puis vous partez — ou vous accueillez. L'histoire commence là.",
   },
 ];
 
