@@ -12,6 +12,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import PageMeta from "@/components/PageMeta";
+import { useSubscriptionAccess } from "@/hooks/useSubscriptionAccess";
+import { Lock } from "lucide-react";
 
 const EURO_REGEX = /\d+\s*[€]|[€]\s*\d+|\d+\s*euro/i;
 
