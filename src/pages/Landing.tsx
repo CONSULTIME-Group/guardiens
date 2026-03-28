@@ -327,8 +327,11 @@ const Landing = () => {
       <section className="px-6 md:px-12 pt-12 pb-16 max-w-5xl mx-auto text-center">
 
         {/* Stats avec séparateurs */}
+        <p className="text-xs font-semibold tracking-[0.2em] uppercase text-muted-foreground/60 mb-6">
+          Ce qu'on a vécu avant de construire Guardiens.
+        </p>
         <div
-          className="flex flex-wrap items-center justify-center gap-0 mt-12 animate-fade-in"
+          className="flex flex-wrap items-center justify-center gap-0 mt-0 animate-fade-in"
           style={{ animationDelay: "0.3s" }}
         >
           <div className="text-center px-6 md:px-10">
