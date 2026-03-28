@@ -385,56 +385,66 @@ const Landing = () => {
             Notre histoire
           </span>
           <h2 className="font-heading text-3xl md:text-4xl font-bold mb-10 text-center">
-            Ça a commencé avec{" "}
-            <span className="text-primary italic">un chien à promener.</span>
+            On a tous un voisin{" "}
+            <span className="text-primary italic">qu'on ne connaît pas.</span>
           </h2>
 
           <div className="space-y-6 text-muted-foreground leading-relaxed text-base md:text-lg">
             <p>
-              Quand Elisa est arrivée d'Argentine, elle avait une certitude :
-              elle voulait passer ses journées avec des animaux. Alors elle a
-              commencé par promener des chiens dans le quartier. Puis elle a
-              nourri des chats, brossé des chevaux, donné le biberon à des
-              agneaux. Chaque jour, un nouveau compagnon, une nouvelle histoire.
+              Celui qui habite à trois mètres depuis deux ans.
+              Dont vous entendez la musique le samedi soir.
+              Qui pourrait garder vos clés en cas d'urgence —
+              mais à qui vous n'avez jamais vraiment parlé.
             </p>
             <p>
-              Et puis un jour, un propriétaire lui a dit quelque chose de tout
-              simple : « Et si tu restais chez nous pendant qu'on part ? » Les
-              animaux garderaient leurs habitudes, la maison serait vivante, et
-              tout le monde partirait le cœur léger. C'était une évidence.
+              On a construit des villes extraordinaires.
+              Et on s'y est perdus les uns des autres.
+            </p>
+            <p>
+              Guardiens est né d'une idée simple, presque naïve.
+              Et si vos voisins étaient la meilleure chose
+              qui vous soit arrivée ?
+            </p>
+            <p>
+              Pour échanger. Votre jardin contre un repas.
+              Votre maison contre une expérience.
+              Votre temps contre du temps.
+              Sans que personne n'en profite sur l'autre.
+            </p>
+            <p>
+              On a gardé 37 maisons en cinq ans.
+              Des chalets où la neige entrait sous les portes.
+              Des jardins qu'on a appris à lire.
+              Des animaux dont on a compris le caractère
+              en trois heures. Des propriétaires qui nous ont
+              laissé leurs clés et sont partis sans se retourner.
+            </p>
+            <p>
+              Pas toujours extraordinaire. Parfois très ordinaire.
+              Mais toujours vrai. Toujours vivant.
             </p>
 
             {/* Citation encadrée */}
             <blockquote className="border-l-4 border-primary pl-6 py-3 my-8 bg-primary/5 rounded-r-lg">
               <p className="font-heading text-lg font-semibold text-foreground italic">
-                « Et si tu restais chez nous ? » — C'est cette phrase toute
-                simple qui a tout déclenché.
+                « On ne gardait pas des maisons. On collectionnait des vies. »
               </p>
             </blockquote>
 
             <p>
-              Très vite, un petit réseau s'est tissé. Des voisins, des amis
-              d'amis, des gens du coin qui se recommandent entre eux. On connaît
-              les animaux par leur prénom, on sait que le chat de Sophie aime
-              dormir sur le radiateur et que le golden de Marc rapporte toujours
-              la même balle.
+              Quand on a gardé notre première maison
+              dans le Vieux-Lyon — trois chats, un golden,
+              une vue sur les toits — on a compris que
+              ce n'était pas une transaction.
+              C'était une rencontre.
             </p>
             <p>
-              Et puis il y a eu tout le reste — le meilleur, en fait. Les
-              dîners improvisés chez les proprios, les balades sur des sentiers
-              qu'on n'aurait jamais trouvés seuls, les barbecues qui finissent
-              tard, les fous rires avec le chien qui vole les chaussettes.
-              On pourrait écrire un livre sur la ressemblance entre les
-              propriétaires et leurs animaux — c'est fascinant (et souvent
-              hilarant).
+              Une confiance donnée, une confiance reçue.
+              Et des histoires qu'on raconte encore.
             </p>
             <p>
-              Un soir d'été, chez Helen — trois chats, un cocker, une vue
-              incroyable sur les monts — on s'est regardés et on a dit : « Il
-              faut que d'autres gens puissent vivre ça. » Un réseau de voisins
-              qui se font confiance, qui s'entraident, qui partagent bien plus
-              que des clés. Guardiens est né ce soir-là, autour d'un verre de
-              rouge et d'un cocker endormi sur nos pieds.
+              C'est ça qu'on veut rendre possible
+              pour tout le monde en AURA.
             </p>
           </div>
         </div>
