@@ -121,6 +121,9 @@ export default function News() {
         path="/actualites"
       />
     <div className="max-w-4xl mx-auto px-4 py-8 animate-fade-in">
+      <Link to="/" className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground mb-6 gap-1">
+        ← Retour au site
+      </Link>
       <header className="mb-8">
         <h1 className="text-3xl md:text-4xl font-heading font-bold text-foreground mb-2">
           Guides & Conseils
