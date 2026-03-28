@@ -250,7 +250,7 @@ const Landing = () => {
         </h2>
         <div className="flex gap-2 md:gap-3 items-center">
           <Button variant="ghost" size="sm" className="hidden sm:inline-flex" onClick={() => navigate("/actualites")}>
-            Actualités
+            Guides & Conseils
           </Button>
           <Button variant="ghost" size="sm" className="hidden sm:inline-flex" onClick={() => navigate("/guides")}>
             Guides
@@ -620,14 +620,14 @@ const Landing = () => {
           <div className="max-w-5xl mx-auto">
             <div className="flex items-center justify-between mb-10">
               <h2 className="font-heading text-3xl md:text-4xl font-bold">
-                Derniers articles
+                Derniers guides & conseils
               </h2>
               <Button
                 variant="ghost"
                 onClick={() => navigate("/actualites")}
                 className="text-primary"
               >
-                Voir tous les articles <ArrowRight className="h-4 w-4 ml-1" />
+                Voir tous les guides <ArrowRight className="h-4 w-4 ml-1" />
               </Button>
             </div>
             <div className="grid md:grid-cols-3 gap-6">
@@ -720,7 +720,7 @@ const Landing = () => {
             <div>
               <h4 className="text-sm font-semibold text-foreground mb-2">Ressources</h4>
               <ul className="space-y-1 text-xs text-muted-foreground">
-                <li><Link to="/actualites" className="hover:text-primary transition-colors">Tous nos articles</Link></li>
+                <li><Link to="/actualites" className="hover:text-primary transition-colors">Guides & Conseils</Link></li>
                 <li><Link to="/guides" className="hover:text-primary transition-colors">Guides locaux</Link></li>
                 <li><Link to="/faq" className="hover:text-primary transition-colors">FAQ</Link></li>
                 <li><Link to="/tarifs" className="hover:text-primary transition-colors">Tarifs</Link></li>

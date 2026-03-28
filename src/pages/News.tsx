@@ -33,9 +33,10 @@ const CATEGORY_LABELS: Record<string, string> = {
   temoignage: "Témoignage",
   actualite: "Actualité",
   ville: "Villes",
-  thematique: "Guides pratiques",
-  guide_local: "Guides pratiques",
+  thematique: "House-sitting",
+  guide_local: "Guides locaux",
   saisonnier: "Saisonniers",
+  guide_pratique: "Guides pratiques",
 };
 
 const CATEGORY_COLORS: Record<string, string> = {
@@ -104,9 +105,10 @@ export default function News() {
     { key: "all", label: "Tous" },
     { key: "conseil_gardien", label: "Conseils gardiens" },
     { key: "conseil_proprio", label: "Conseils propriétaires" },
-    { key: "conseil", label: "Conseils" },
     { key: "guide_race", label: "Races" },
     { key: "ville", label: "Villes" },
+    { key: "thematique", label: "House-sitting" },
+    { key: "guide_local", label: "Guides locaux" },
     { key: "guides_pratiques", label: "Guides pratiques" },
     { key: "saisonnier", label: "Saisonniers" },
   ];
@@ -114,14 +116,14 @@ export default function News() {
   return (
     <>
       <PageMeta
-        title="Actualités — Conseils house-sitting & guides locaux"
+        title="Guides & Conseils — House-sitting & guides locaux"
         description="Articles, témoignages et guides pratiques pour le house-sitting en Auvergne-Rhône-Alpes. Conseils pour gardiens et propriétaires."
         path="/actualites"
       />
     <div className="max-w-4xl mx-auto px-4 py-8 animate-fade-in">
       <header className="mb-8">
         <h1 className="text-3xl md:text-4xl font-heading font-bold text-foreground mb-2">
-          Actualités
+          Guides & Conseils
         </h1>
         <p className="text-muted-foreground text-lg">
           Conseils, guides et astuces pour les propriétaires et gardiens d'animaux.

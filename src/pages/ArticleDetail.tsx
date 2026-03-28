@@ -123,7 +123,7 @@ export default function ArticleDetail() {
       <div className="max-w-3xl mx-auto px-4 py-16 text-center">
         <h1 className="text-2xl font-heading font-bold text-foreground mb-4">Article introuvable</h1>
         <Link to="/actualites" className="text-primary hover:underline">
-          ← Retour aux actualités
+          ← Retour aux guides
         </Link>
       </div>
     );
@@ -376,7 +376,7 @@ export default function ArticleDetail() {
         className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-primary transition-colors mb-6"
       >
         <ArrowLeft className="h-4 w-4" />
-        Retour aux actualités
+        Retour aux guides
       </Link>
 
       <header className="mb-8">

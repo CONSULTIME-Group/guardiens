@@ -131,7 +131,7 @@ export const Sidebar = () => {
         <SidebarItem to="/petites-missions" icon={Handshake} label="Petites missions" />
 
         <GroupLabel label="Ressources" />
-        <SidebarItem to="/actualites" icon={Newspaper} label="Actualités" />
+        <SidebarItem to="/actualites" icon={Newspaper} label="Guides & Conseils" />
         <SidebarItem to="/guides" icon={Compass} label="Guides locaux" />
       </nav>
 
@@ -261,7 +261,7 @@ export const BottomNav = () => {
               {[
                 { to: "/sits", icon: Calendar, label: effectiveRole === "owner" ? "Mes annonces" : "Mes gardes" },
                 { to: "/petites-missions", icon: Handshake, label: "Petites missions" },
-                { to: "/actualites", icon: Newspaper, label: "Actualités" },
+                { to: "/actualites", icon: Newspaper, label: "Guides & Conseils" },
                 { to: "/guides", icon: Compass, label: "Guides locaux" },
                 ...(effectiveRole === "sitter" ? [{ to: "/mon-abonnement", icon: Star, label: "Mon abonnement" }] : []),
                 { to: "/settings", icon: Settings, label: "Paramètres" },
