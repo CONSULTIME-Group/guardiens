@@ -772,21 +772,44 @@ const IdentityVerificationSection = ({ user }: { user: any }) => {
         </div>
 
         {status !== "verified" && (
-          <div className="space-y-3">
+          <div className="space-y-4">
             <div className="text-xs text-muted-foreground space-y-1">
               <p className="font-medium text-foreground text-sm">Documents acceptés :</p>
               <ul className="list-disc list-inside space-y-0.5">
                 <li>Carte d'identité (recto)</li>
                 <li>Passeport (page photo)</li>
                 <li>Permis de conduire</li>
+                <li>Titre de séjour</li>
               </ul>
-              <p className="mt-2">Formats : JPG, PNG, WebP, PDF · Max 10 Mo</p>
+              <p className="mt-2">Formats : JPG, PNG, PDF, HEIC · Max 10 Mo</p>
             </div>
 
+            {/* Upload progress */}
+            {uploadProgress > 0 && (
+              <div className="space-y-1">
+                <div className="flex justify-between text-xs text-muted-foreground">
+                  <span>Envoi en cours...</span>
+                  <span>{uploadProgress}%</span>
+                </div>
+                <div className="w-full h-2 bg-muted rounded-full overflow-hidden">
+                  <div className="h-full bg-primary rounded-full transition-all duration-300" style={{ width: `${uploadProgress}%` }} />
+                </div>
+              </div>
+            )}
+
+            {/* Document preview */}
+            {previewUrl && (
+              <div className="space-y-1">
+                <p className="text-xs font-medium text-muted-foreground">Aperçu du document :</p>
+                <img src={previewUrl} alt="Aperçu" className="max-h-40 rounded-lg border border-border object-contain" />
+              </div>
+            )}
+
+            {/* Document upload */}
             <label className="block">
               <input
                 type="file"
-                accept="image/jpeg,image/png,image/webp,application/pdf"
+                accept="image/jpeg,image/png,image/webp,application/pdf,image/heic,image/heif,.heic,.heif"
                 onChange={handleUpload}
                 disabled={uploading}
                 className="hidden"
@@ -808,6 +831,34 @@ const IdentityVerificationSection = ({ user }: { user: any }) => {
                 </span>
               </Button>
             </label>
+
+            {/* Selfie section */}
+            <div className="pt-3 border-t border-border space-y-2">
+              <p className="text-sm font-medium text-foreground">Selfie de vérification</p>
+              <p className="text-xs text-muted-foreground">Prenez un selfie pour confirmer que le document vous appartient. Formats : JPG, PNG · Max 5 Mo</p>
+
+              {selfiePreview && (
+                <img src={selfiePreview} alt="Aperçu selfie" className="max-h-32 rounded-lg border border-border object-contain" />
+              )}
+
+              <label className="block">
+                <input
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  capture="user"
+                  onChange={handleSelfieUpload}
+                  disabled={uploadingSelfie}
+                  className="hidden"
+                />
+                <Button variant="outline" size="sm" className="gap-2 cursor-pointer" disabled={uploadingSelfie} asChild>
+                  <span>
+                    <Upload className="h-4 w-4" />
+                    {uploadingSelfie ? "Envoi en cours..." : selfieUrl ? "Changer le selfie" : "Prendre / envoyer un selfie"}
+                  </span>
+                </Button>
+              </label>
+            </div>
+
             {rateLimited && (
               <p className="text-xs text-destructive">Vous avez atteint la limite de 5 vérifications par jour. Réessayez demain.</p>
             )}

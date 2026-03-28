@@ -11,7 +11,8 @@ import { Plus, Upload, CheckCircle2, Clock, XCircle, Briefcase } from "lucide-re
 import { toast } from "sonner";
 
 const platformOptions = [
-  "TrustedHousesitters",
+  "Rover",
+  "TrustedHouseSitters",
   "Nomador",
   "Emprunte Mon Toutou",
   "Bouche à oreille",
