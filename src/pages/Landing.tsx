@@ -510,7 +510,7 @@ const Landing = () => {
             Et au-delà des gardes...
           </h2>
           <p className="text-muted-foreground text-base mb-8">
-            Guardiens, c'est aussi un réseau de voisins qui se rendent service au quotidien.
+            Parce que l'échange ne s'arrête pas à la porte d'entrée.
           </p>
           <div className="grid sm:grid-cols-3 gap-6 mb-8">
             <div className="flex flex-col items-center gap-2 text-sm text-muted-foreground">
