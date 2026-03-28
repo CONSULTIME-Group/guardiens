@@ -376,7 +376,7 @@ export default function ArticleDetail() {
         className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-primary transition-colors mb-6"
       >
         <ArrowLeft className="h-4 w-4" />
-        Retour aux actualités
+        Retour aux guides
       </Link>
 
       <header className="mb-8">

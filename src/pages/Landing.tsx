@@ -720,7 +720,7 @@ const Landing = () => {
             <div>
               <h4 className="text-sm font-semibold text-foreground mb-2">Ressources</h4>
               <ul className="space-y-1 text-xs text-muted-foreground">
-                <li><Link to="/actualites" className="hover:text-primary transition-colors">Tous nos articles</Link></li>
+                <li><Link to="/actualites" className="hover:text-primary transition-colors">Guides & Conseils</Link></li>
                 <li><Link to="/guides" className="hover:text-primary transition-colors">Guides locaux</Link></li>
                 <li><Link to="/faq" className="hover:text-primary transition-colors">FAQ</Link></li>
                 <li><Link to="/tarifs" className="hover:text-primary transition-colors">Tarifs</Link></li>
