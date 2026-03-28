@@ -250,7 +250,7 @@ const Landing = () => {
         </h2>
         <div className="flex gap-2 md:gap-3 items-center">
           <Button variant="ghost" size="sm" className="hidden sm:inline-flex" onClick={() => navigate("/actualites")}>
-            Actualités
+            Guides & Conseils
           </Button>
           <Button variant="ghost" size="sm" className="hidden sm:inline-flex" onClick={() => navigate("/guides")}>
             Guides
