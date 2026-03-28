@@ -107,7 +107,7 @@ const Landing = () => {
 
       const [membersRes, missionsRes, sitsRes] = await Promise.all([
         supabase.from("profiles").select("id", { count: "exact", head: true }),
-        supabase.from("small_missions").select("id", { count: "exact", head: true }).in("status", ["active", "completed"]),
+        supabase.from("small_missions").select("id", { count: "exact", head: true }).in("status", ["open", "in_progress", "completed"]),
         supabase.from("sits").select("id", { count: "exact", head: true }).in("status", ["confirmed", "completed"]),
       ]);
       setDynamicCounts({
