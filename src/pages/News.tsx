@@ -178,6 +178,39 @@ export default function News() {
         ))}
       </div>
 
+      {/* Featured "Vie locale & Entraide" section when "Tous" is active */}
+      {activeCategory === "all" && vieLocaleArticles.length > 0 && !loading && (
+        <div className="mb-10 p-6 rounded-xl" style={{ backgroundColor: "#F9F6F1" }}>
+          <h2 className="font-heading text-xl font-bold mb-1">Vie locale & Entraide</h2>
+          <p className="text-muted-foreground text-sm mb-5">
+            Des échanges sans argent, des voisins qui se rendent service, une autre façon de vivre ensemble.
+          </p>
+          <div className="grid sm:grid-cols-3 gap-4 mb-4">
+            {vieLocaleArticles.map((a) => (
+              <Link key={a.id} to={`/actualites/${a.slug}`} className="group flex gap-3 bg-background rounded-lg p-3 hover:shadow-md transition-shadow">
+                {a.cover_image_url && (
+                  <img src={a.cover_image_url} alt={a.title} className="w-20 h-20 rounded-lg object-cover flex-shrink-0" loading="lazy" />
+                )}
+                <div className="min-w-0">
+                  <h3 className="font-heading text-sm font-semibold line-clamp-2 group-hover:text-primary transition-colors">{a.title}</h3>
+                  <p className="text-xs text-muted-foreground line-clamp-2 mt-1">{a.excerpt}</p>
+                </div>
+              </Link>
+            ))}
+          </div>
+          <button
+            onClick={() => {
+              searchParams.set("categorie", "vie_locale");
+              searchParams.delete("page");
+              setSearchParams(searchParams);
+            }}
+            className="text-primary text-sm font-medium hover:underline inline-flex items-center gap-1"
+          >
+            Voir tous les articles <ArrowRight className="h-3 w-3" />
+          </button>
+        </div>
+      )}
+
       {/* Articles grid */}
       {loading ? (
         <div className="grid gap-6 md:grid-cols-2">
