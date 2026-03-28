@@ -49,7 +49,7 @@ const testimonials = [
   {
     name: "Sophie & Marc",
     detail: "2 chats · Écully",
-    text: "On est partis 10 jours au Maroc et nos deux chats sont restés sur leur canapé préféré, avec quelqu'un qui leur faisait des câlins tous les jours. On a reçu des photos tous les soirs — ils avaient l'air plus détendus que nous !",
+    text: "On est partis 10 jours au Maroc et nos deux chats sont restés chez eux, sur leur canapé, avec quelqu'un qui leur faisait des câlins tous les jours. On a reçu des photos chaque soir. Ils avaient l'air plus détendus que nous.",
   },
   {
     name: "Jérémie",
