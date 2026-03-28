@@ -9,62 +9,72 @@ import heroDogBbq from "@/assets/hero-dog-bbq.jpg";
 const differentiators = [
   {
     icon: PawPrint,
-    title: "Vos animaux restent chez eux",
+    title: "Vos animaux restent chez eux.",
     description:
-      "Votre chien dort dans son panier. Votre chat garde son canapé préféré. Leurs repères intacts. Leur univers préservé. Quelqu'un qui les aime — vraiment.",
+      "Leur panier, leur canapé, leurs habitudes. Quelqu'un du coin qui les connaît par leur prénom.",
   },
   {
     icon: Home,
-    title: "Votre maison vit",
+    title: "Votre maison vit.",
     description:
-      "Volets ouverts le matin. Courrier relevé. Lumières allumées le soir. Votre maison ne signale pas votre absence. Elle continue d'exister.",
+      "Volets ouverts, courrier relevé, lumières allumées. Pas une maison vide — une maison habitée.",
   },
   {
     icon: Clock,
-    title: "Vos voisins, en mieux",
+    title: "On se rencontre avant.",
     description:
-      "Ils connaissent le boulanger, le meilleur sentier pour le chien quand il pleut, l'heure à laquelle les voisins du dessus font du bruit. Ils habitent là. Vraiment.",
+      "Un café, une balade. La confiance ne se crée pas en ligne. Elle se vit.",
   },
   {
     icon: Handshake,
-    title: "On se connaît avant de se confier",
+    title: "Votre jardin contre un repas.",
     description:
-      "Un café. Une balade. Un dîner parfois. La confiance ne se crée pas en ligne. Elle se vit. Ensuite seulement on se confie les clés.",
+      "Vos clés contre une histoire. Ici personne ne facture ce qui n'a pas de prix.",
   },
   {
     icon: Sparkles,
-    title: "Ça va au-delà de la garde",
+    title: "Et au-delà des gardes.",
     description:
-      "Un potager arrosé contre des légumes. Un coup de main contre un repas maison. Une compétence contre une expérience. Des échanges qui n'ont pas de tarif parce qu'ils n'ont pas de prix.",
+      "Un coup de main, un service rendu, une compétence échangée. Des gens du coin qui s'ouvrent.",
   },
   {
     icon: Wrench,
-    title: "Construit par des gardiens",
+    title: "37 maisons. 234 animaux. 5 ans.",
     description:
-      "37 maisons. 234 animaux. 5 ans en AURA. On a vécu ce qu'on construit. Guardiens, c'est notre vécu — et bientôt le vôtre.",
+      "On a vécu ce qu'on construit. Guardiens c'est notre histoire — et bientôt la vôtre.",
   },
 ];
 
 const testimonials = [
   {
-    name: "Sophie & Marc",
-    detail: "2 chats · Écully",
-    text: "On est partis 10 jours au Maroc et nos deux chats sont restés chez eux, sur leur canapé, avec quelqu'un qui leur faisait des câlins tous les jours. On a reçu des photos chaque soir. Ils avaient l'air plus détendus que nous.",
+    name: "Nadia",
+    detail: "2 chats, 1 chien · Lyon 6e",
+    text: "Deux chats et un chien. On n'avait pas pris de vraies vacances depuis trois ans. Notre gardienne habite à Caluire. On s'est rencontrés autour d'un café le jeudi. On est partis le samedi.",
   },
   {
-    name: "Jérémie",
-    detail: "Gardien · Vieux-Lyon",
-    text: "Un chalet à Megève, un golden qui m'attendait chaque matin devant la cheminée, des balades dans la neige et des voisins adorables. Je suis venu garder une maison. Je suis reparti avec des amis.",
+    name: "Tomas",
+    detail: "Grenoble",
+    text: "Je cherchais un logement temporaire entre deux jobs. J'ai gardé quatre maisons en deux mois. J'ai découvert des endroits que j'habitais depuis dix ans sans jamais vraiment connaître.",
   },
   {
-    name: "Claire & Antoine",
-    detail: "3 chevaux · Monts du Lyonnais",
-    text: "Notre gardienne connaissait nos trois chevaux par leur prénom avant même d'arriver. Elle est venue la veille, on a dîné ensemble, on lui a montré les petites habitudes. Le lendemain on est partis le sourire aux lèvres. On avait enfin retrouvé le plaisir de voyager.",
+    name: "Rania & David",
+    detail: "Ardèche",
+    text: "On a une maison en Ardèche qu'on laissait vide huit mois par an. Maintenant elle vit. Les gens qui la gardent nous envoient des photos du jardin. C'est bizarre comme ça fait du bien.",
   },
   {
-    name: "Thomas",
-    detail: "Jardin · Caluire-et-Cuire",
-    text: "J'avais un potager qui partait à l'abandon pendant mes déplacements pro. Un voisin Guardiens a proposé de s'en occuper contre les légumes de la récolte. Il est venu deux fois par semaine pendant un mois. On ne se connaissait pas. Maintenant il garde aussi mon chat.",
+    name: "Giulia",
+    detail: "Écully",
+    text: "Je devais partir trois semaines. Mon potager, mes poules, mes plantes. Un membre Guardiens a tout géré contre des légumes et des œufs. On se connaissait pas. On se voit encore.",
+  },
+  {
+    name: "Sarah & Karim",
+    detail: "Monts du Lyonnais",
+    text: "Trois chevaux, quatre chats, un perroquet. Tout le monde nous dit que c'est impossible à faire garder. Notre gardienne est venue deux fois avant qu'on parte. Elle connaissait leurs noms par cœur.",
+  },
+  {
+    name: "Elena",
+    detail: "Annecy",
+    text: "J'ai commencé par arroser les plantes d'une voisine contre un repas. Maintenant je garde sa maison quand elle part. C'est comme ça que ça marche ici — doucement, naturellement.",
   },
 ];
 
@@ -79,7 +89,7 @@ const steps = [
     number: "02",
     title: "Trouvez votre match",
     description:
-      "Des profils vérifiés, proches de chez vous. Pas des inconnus — des voisins qui n'attendent que de se rencontrer.",
+      "Des profils proches de chez vous. Pas des inconnus — des gens du coin qui n'attendent que de se rencontrer.",
   },
   {
     number: "03",
@@ -128,7 +138,7 @@ const Landing = () => {
     <div className="min-h-screen bg-background text-foreground">
       <PageMeta
         title="Guardiens — Pet sitting & House sitting gratuit en Auvergne-Rhône-Alpes"
-        description="Trouvez un pet sitter ou house sitter de confiance près de chez vous. Garde d'animaux gratuite, gardiens vérifiés, avis détaillés. Vos animaux restent chez eux, votre maison vit."
+        description="Trouvez un pet sitter ou house sitter de confiance près de chez vous. Garde d'animaux gratuite, avis détaillés. Vos animaux restent chez eux, votre maison vit."
         path="/"
       />
       {/* JSON-LD: Organization */}
@@ -154,7 +164,7 @@ const Landing = () => {
               "Petites missions entre voisins",
               "Auvergne-Rhône-Alpes",
             ],
-            slogan: "Comme confier ses clés à un voisin.",
+            slogan: "Comme confier ses clés aux gens du coin.",
             founder: [
               { "@type": "Person", name: "Jérémie" },
               { "@type": "Person", name: "Elisa" },
@@ -191,7 +201,7 @@ const Landing = () => {
             "@context": "https://schema.org",
             "@type": "Service",
             name: "Pet sitting & House sitting gratuit",
-            description: "Service de garde d'animaux et house sitting gratuit en Auvergne-Rhône-Alpes. Gardiens vérifiés, avis croisés, inscription gratuite.",
+            description: "Service de garde d'animaux et house sitting gratuit en Auvergne-Rhône-Alpes. Avis croisés, inscription gratuite.",
             provider: {
               "@type": "Organization",
               name: "Guardiens",
@@ -240,7 +250,7 @@ const Landing = () => {
                 name: "Comment trouver un pet sitter près de chez moi ?",
                 acceptedAnswer: {
                   "@type": "Answer",
-                  text: "Inscrivez-vous sur Guardiens, publiez votre annonce de garde avec les dates et vos animaux, et recevez des candidatures de gardiens vérifiés qui habitent près de chez vous.",
+                  text: "Inscrivez-vous sur Guardiens, publiez votre annonce de garde avec les dates et vos animaux, et recevez des candidatures de gardiens qui habitent près de chez vous.",
                 },
               },
             ],
@@ -299,15 +309,13 @@ const Landing = () => {
           <h1 className="font-heading text-3xl md:text-6xl lg:text-7xl font-bold leading-tight mb-3 md:mb-4 text-white drop-shadow-lg animate-fade-in">
             Comme confier ses clés
             <br />
-            <span className="italic text-primary-foreground/90">à un voisin.</span>
+            <span className="italic text-primary-foreground/90">aux gens du coin.</span>
           </h1>
           <p className="text-base md:text-xl text-white/90 max-w-2xl mx-auto mb-6 md:mb-8 drop-shadow animate-fade-in" style={{ animationDelay: "0.1s" }}>
-            Vos animaux restent chez eux. Votre maison vit.
-            Et vous partez vraiment — sans vous retourner.
-            Des gens du quartier, vérifiés, que vous avez
-            rencontrés avant de leur confier vos clés.
-            C'est comme ça qu'on a toujours fait.
-            On a juste construit l'endroit pour se retrouver.
+            Des gardes, de l'entraide, des petits services
+            entre gens du coin.
+            Des gens proches à qui vous avez choisi
+            de faire confiance.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-3 md:gap-4 justify-center w-full sm:w-auto animate-fade-in" style={{ animationDelay: "0.2s" }}>
@@ -473,10 +481,10 @@ const Landing = () => {
       <section className="px-6 md:px-12 py-20">
         <div className="max-w-5xl mx-auto">
           <h2 className="font-heading text-3xl md:text-4xl font-bold text-center mb-3">
-            Un réseau de voisins qui se font confiance.
+            Un réseau de gens du coin qui se font confiance.
           </h2>
           <p className="text-muted-foreground text-lg text-center mb-14">
-            Pas des inconnus. Des gens du quartier, vérifiés, qui se sont rencontrés en vrai.
+            Pas des inconnus. Des gens proches, que vous avez rencontrés en vrai.
           </p>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
             {differentiators.map((item, i) => (
@@ -504,7 +512,7 @@ const Landing = () => {
       <section className="px-6 md:px-12 py-10" style={{ backgroundColor: "#F9F6F1" }}>
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="font-heading text-2xl md:text-3xl font-bold mb-2">
-            Et au-delà des gardes...
+            Et au-delà des gardes.
           </h2>
           <p className="text-muted-foreground text-base mb-8">
             Parce que l'échange ne s'arrête pas à la porte d'entrée.
@@ -524,7 +532,7 @@ const Landing = () => {
             </div>
           </div>
           <p className="text-xs text-muted-foreground mb-4 italic">
-            Jamais d'argent. L'échange se décide entre vous. C'est ça, l'esprit Guardiens.
+            Jamais d'argent. L'échange se décide entre vous.
           </p>
           <Link to="/petites-missions" className="text-primary font-medium hover:underline inline-flex items-center gap-1">
             Découvrir les petites missions <ArrowRight className="h-4 w-4" />
@@ -541,7 +549,7 @@ const Landing = () => {
       <section className="px-6 md:px-12 py-20 bg-card">
         <div className="max-w-5xl mx-auto">
           <h2 className="font-heading text-3xl md:text-4xl font-bold text-center mb-14">
-            Des histoires qui ressemblent à la nôtre.
+            Ils ont sauté le pas.
           </h2>
           <div className="grid md:grid-cols-3 gap-8">
             {testimonials.map((t, i) => (
@@ -678,14 +686,11 @@ const Landing = () => {
       <section className="px-6 md:px-12 py-20" style={{ backgroundColor: "#1C1B18" }}>
         <div className="max-w-3xl mx-auto text-center">
           <h2 className="font-heading text-3xl md:text-4xl font-bold mb-4 text-white">
-            Votre quartier vous attend.
+            Votre prochaine histoire commence ici.
           </h2>
           <p className="text-white/60 text-lg mb-8">
-            Des gardes, de l'entraide, des petits services
-            contre un repas ou des légumes du jardin.
-            Des endroits qu'on n'aurait jamais connus.
-            Des gens qu'on n'aurait jamais croisés.
-            Des histoires qu'on n'aurait jamais vécues.
+            Des gardes, de l'entraide, des gens du coin
+            qui se font confiance.
             Gratuit pour commencer.
             Irremplaçable pour la suite.
           </p>
