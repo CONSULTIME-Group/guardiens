@@ -620,14 +620,14 @@ const Landing = () => {
           <div className="max-w-5xl mx-auto">
             <div className="flex items-center justify-between mb-10">
               <h2 className="font-heading text-3xl md:text-4xl font-bold">
-                Derniers articles
+                Derniers guides & conseils
               </h2>
               <Button
                 variant="ghost"
                 onClick={() => navigate("/actualites")}
                 className="text-primary"
               >
-                Voir tous les articles <ArrowRight className="h-4 w-4 ml-1" />
+                Voir tous les guides <ArrowRight className="h-4 w-4 ml-1" />
               </Button>
             </div>
             <div className="grid md:grid-cols-3 gap-6">
