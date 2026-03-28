@@ -164,7 +164,7 @@ const Landing = () => {
               "Petites missions entre voisins",
               "Auvergne-Rhône-Alpes",
             ],
-            slogan: "Comme confier ses clés aux gens du coin.",
+            slogan: "Ce que vous avez contre ce que vous n'avez pas encore vécu.",
             founder: [
               { "@type": "Person", name: "Jérémie" },
               { "@type": "Person", name: "Elisa" },
