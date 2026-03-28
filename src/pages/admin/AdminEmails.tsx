@@ -91,6 +91,29 @@ const TemplatesTab = () => {
     setSendingTest(null);
   };
 
+  const handleAuthPreview = async (type: string) => {
+    setLoadingPreview(true);
+    setPreviewOpen(true);
+    setPreviewName(authTemplates.find(t => t.key === type)?.name || type);
+    try {
+      const { data, error } = await supabase.functions.invoke("auth-email-hook/preview", {
+        body: { type },
+      });
+      if (!error && typeof data === "string") {
+        setPreviewHtml(data);
+        setPreviewSubject("");
+      } else if (!error && data?.html) {
+        setPreviewHtml(data.html);
+        setPreviewSubject("");
+      } else {
+        setPreviewHtml("<p style='padding:20px;color:#999;'>Erreur lors du rendu du template auth.</p>");
+      }
+    } catch {
+      setPreviewHtml("<p style='padding:20px;color:#999;'>Erreur lors du rendu du template auth.</p>");
+    }
+    setLoadingPreview(false);
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-3 bg-accent/50 rounded-lg p-3">
