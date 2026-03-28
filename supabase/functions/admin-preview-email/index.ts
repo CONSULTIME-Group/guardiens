@@ -55,7 +55,27 @@ Deno.serve(async (req) => {
   }
 
   // Parse request
-  const { templateName } = await req.json().catch(() => ({ templateName: null }))
+  const { templateName, authType } = await req.json().catch(() => ({ templateName: null, authType: null }))
+
+  // Handle auth template preview
+  if (authType) {
+    const authTpl = AUTH_TEMPLATES[authType]
+    if (!authTpl) {
+      return new Response(JSON.stringify({ error: `Unknown auth template: ${authType}` }), {
+        status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
+    try {
+      const html = await renderAsync(React.createElement(authTpl.component, authTpl.sampleData))
+      return new Response(JSON.stringify({ html }), {
+        status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    } catch (err) {
+      return new Response(JSON.stringify({ error: 'Render failed', message: err instanceof Error ? err.message : String(err) }), {
+        status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
+  }
 
   // If no templateName, return the list of all templates with metadata
   if (!templateName) {

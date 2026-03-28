@@ -96,13 +96,10 @@ const TemplatesTab = () => {
     setPreviewOpen(true);
     setPreviewName(authTemplates.find(t => t.key === type)?.name || type);
     try {
-      const { data, error } = await supabase.functions.invoke("auth-email-hook/preview", {
-        body: { type },
+      const { data, error } = await supabase.functions.invoke("admin-preview-email", {
+        body: { authType: type },
       });
-      if (!error && typeof data === "string") {
-        setPreviewHtml(data);
-        setPreviewSubject("");
-      } else if (!error && data?.html) {
+      if (!error && data?.html) {
         setPreviewHtml(data.html);
         setPreviewSubject("");
       } else {
