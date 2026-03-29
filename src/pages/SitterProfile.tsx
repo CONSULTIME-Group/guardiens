@@ -42,6 +42,7 @@ const sections = [
   { id: "experience", num: 3, label: "Expérience" },
   { id: "mobility", num: 4, label: "Mobilité" },
   { id: "preferences", num: 5, label: "Préférences de garde" },
+  { id: "skills", num: 6, label: "Ce que je sais faire" },
 ];
 
 const SitterProfile = () => {
