@@ -210,7 +210,7 @@ const SmallMissionsPublic = () => {
 
             <Reveal delay={0.3}>
               <p className="text-center font-body text-base text-foreground/60 italic mt-12">
-                L'échange se décide entre vous. Guardiens fournit l'espace — pas la transaction.
+                L'échange se décide entre vous. Parfois immédiat. Parfois à la saison prochaine. C'est vous qui décidez — pas la plateforme.
               </p>
             </Reveal>
           </div>
