@@ -110,7 +110,11 @@ const SearchSitter = () => {
     } else if (tab === "long_stays") {
       await searchLongStays(searchCoords);
     } else {
-      await searchMissions(searchCoords);
+      if (missionSubTab === "members") {
+        await searchAvailableMembers(searchCoords);
+      } else {
+        await searchMissions(searchCoords);
+      }
     }
 
     setLoading(false);
