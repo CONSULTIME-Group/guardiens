@@ -1,5 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { TrendingUp, TrendingDown, Minus } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 interface MetricCardProps {
   title: string;
@@ -8,10 +9,14 @@ interface MetricCardProps {
   subtitle: string;
   change?: number;
   invertChange?: boolean;
+  isNew?: boolean;
 }
 
-const MetricCard = ({ title, icon, value, subtitle, change, invertChange }: MetricCardProps) => {
+const MetricCard = ({ title, icon, value, subtitle, change, invertChange, isNew }: MetricCardProps) => {
   const getChangeDisplay = () => {
+    if (isNew) {
+      return <Badge variant="secondary" className="text-[10px] px-1.5 py-0">Nouveau</Badge>;
+    }
     if (change === undefined || change === null || isNaN(change)) return null;
     const isPositive = invertChange ? change < 0 : change > 0;
     const isNeutral = Math.abs(change) < 0.5;
@@ -26,7 +31,7 @@ const MetricCard = ({ title, icon, value, subtitle, change, invertChange }: Metr
     }
 
     return (
-      <span className={`flex items-center gap-1 text-xs ${isPositive ? "text-[#2D7D46]" : "text-[#EF4444]"}`}>
+      <span className={`flex items-center gap-1 text-xs font-medium ${isPositive ? "text-emerald-600" : "text-red-500"}`}>
         {isPositive ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
         {formatted}
       </span>
