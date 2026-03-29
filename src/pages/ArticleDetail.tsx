@@ -7,6 +7,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowLeft, ArrowRight, Calendar, MapPin, User, Compass, Building2 } from "lucide-react";
 import PageMeta from "@/components/PageMeta";
+import { Helmet } from "react-helmet-async";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import ArticleRenderer from "@/components/articles/ArticleRenderer";
@@ -25,7 +26,13 @@ interface ArticleFull {
   region: string | null;
   author_name: string;
   published_at: string | null;
+  updated_at: string;
+  created_at: string;
   related_city: string | null;
+  meta_title: string | null;
+  meta_description: string | null;
+  hero_image_alt: string | null;
+  internal_links: any;
 }
 
 interface RelatedArticle {
@@ -46,7 +53,33 @@ const CATEGORY_LABELS: Record<string, string> = {
   guide_race: "Guide race",
   guide_lieu: "Guide lieu",
   actualite: "Actualité",
+  ville: "Ville",
+  vie_locale: "Vie locale",
+  guide_local: "Guide local",
+  guide_pratique: "Guide pratique",
+  saisonnier: "Saisonnier",
 };
+
+/** Generate alt text from article data when hero_image_alt is empty */
+function generateAltText(article: ArticleFull): string {
+  const cat = article.category;
+  const city = article.city || "";
+  const title = article.title;
+  
+  if (cat === "guide_race" || cat === "race") {
+    return `${title} — guide garde d'animaux Guardiens`;
+  }
+  if (cat === "ville" || cat === "guide_ville") {
+    return `House-sitting à ${city || title} — gardiens de confiance`;
+  }
+  if (cat === "vie_locale") {
+    return `${title} — entraide Guardiens`;
+  }
+  if (cat === "guide_lieu" || cat === "guide_local") {
+    return city ? `${title} à ${city} — guide Guardiens` : `${title} — guide Guardiens`;
+  }
+  return `${title} — Guardiens`;
+}
 
 export default function ArticleDetail() {
   const { slug } = useParams<{ slug: string }>();
@@ -84,7 +117,6 @@ export default function ArticleDetail() {
 
       // Cross-link: city guide
       if (art.city) {
-        const citySlug = art.city.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, "-");
         const { data: guide } = await supabase
           .from("city_guides")
           .select("slug")
@@ -129,67 +161,80 @@ export default function ArticleDetail() {
     );
   }
 
+  const altText = article.hero_image_alt || generateAltText(article);
+  const internalLinks = (article.internal_links as { text: string; url: string }[] | null) || [];
+
+  // Schema.org Article — CORRECTION 1
+  const articleSchema = {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": article.meta_title || article.title,
+    "description": article.meta_description || article.excerpt,
+    "url": `https://guardiens.fr/actualites/${article.slug}`,
+    "datePublished": article.created_at,
+    "dateModified": article.updated_at,
+    "author": {
+      "@type": "Person",
+      "name": "Jérémie Martinot"
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "Guardiens",
+      "url": "https://guardiens.fr"
+    },
+    ...(article.cover_image_url && { "image": article.cover_image_url }),
+    "mainEntityOfPage": `https://guardiens.fr/actualites/${article.slug}`,
+  };
+
+  // FAQ schema extraction
+  const faqItems: { question: string; answer: string }[] = [];
+  if (article.content.includes("### ") && article.content.includes("?")) {
+    const lines = article.content.split("\n");
+    let currentQ = "";
+    let currentA = "";
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      if (line.startsWith("### ") && line.includes("?")) {
+        if (currentQ && currentA.trim()) {
+          faqItems.push({ question: currentQ, answer: currentA.trim() });
+        }
+        currentQ = line.replace("### ", "").trim();
+        currentA = "";
+      } else if (currentQ) {
+        if (line.startsWith("## ") || line.startsWith("# ")) {
+          if (currentA.trim()) {
+            faqItems.push({ question: currentQ, answer: currentA.trim() });
+          }
+          currentQ = "";
+          currentA = "";
+        } else {
+          currentA += line + " ";
+        }
+      }
+    }
+    if (currentQ && currentA.trim()) {
+      faqItems.push({ question: currentQ, answer: currentA.trim() });
+    }
+  }
+
   return (
     <>
       <PageMeta
-        title={article.title}
-        description={article.excerpt}
+        title={article.meta_title || article.title}
+        description={article.meta_description || article.excerpt}
         path={`/actualites/${article.slug}`}
         image={article.cover_image_url || undefined}
         type="article"
         publishedAt={article.published_at || undefined}
         author={article.author_name}
-        canonicalUrl={article.canonical_url || undefined}
+        canonicalUrl={article.canonical_url || `https://guardiens.fr/actualites/${article.slug}`}
       />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
-        "@context": "https://schema.org",
-        "@type": article.category === "conseil_gardien" ? "HowTo" : article.category === "actualite" ? "NewsArticle" : article.category === "guide_lieu" ? "Guide" : article.category === "guide_race" ? "Article" : "BlogPosting",
-        ...(article.category === "conseil_gardien" ? { "name": article.title } : { "headline": article.title }),
-        "description": article.excerpt,
-        "author": { "@type": "Person", "name": article.author_name || "Elisa & Jérémie" },
-        ...(article.cover_image_url && { "image": article.cover_image_url }),
-        ...(article.published_at && { "datePublished": article.published_at }),
-        "publisher": { "@type": "Organization", "name": "Guardiens", "url": "https://guardiens.fr" },
-        "mainEntityOfPage": `https://guardiens.fr/actualites/${article.slug}`,
-        ...(article.category === "actualite" && article.city && { "dateline": `${article.city}, France` }),
-        ...(article.category === "guide_lieu" && article.city && { "contentLocation": { "@type": "City", "name": article.city } }),
-        ...(article.category === "guide_race" && {
-          "areaServed": "Lyon, Rhône-Alpes",
-          "keywords": article.tags?.join(", ") || ""
-        })
-      }) }} />
-      {/* FAQ Schema for articles containing FAQ sections */}
-      {article.content.includes("### ") && article.content.includes("?") && (() => {
-        const faqItems: { question: string; answer: string }[] = [];
-        const lines = article.content.split("\n");
-        let currentQ = "";
-        let currentA = "";
-        for (let i = 0; i < lines.length; i++) {
-          const line = lines[i];
-          if (line.startsWith("### ") && line.includes("?")) {
-            if (currentQ && currentA.trim()) {
-              faqItems.push({ question: currentQ, answer: currentA.trim() });
-            }
-            currentQ = line.replace("### ", "").trim();
-            currentA = "";
-          } else if (currentQ) {
-            if (line.startsWith("## ") || line.startsWith("# ")) {
-              if (currentA.trim()) {
-                faqItems.push({ question: currentQ, answer: currentA.trim() });
-              }
-              currentQ = "";
-              currentA = "";
-            } else {
-              currentA += line + " ";
-            }
-          }
-        }
-        if (currentQ && currentA.trim()) {
-          faqItems.push({ question: currentQ, answer: currentA.trim() });
-        }
-        if (faqItems.length === 0) return null;
-        return (
-          <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+
+      {/* CORRECTION 1 — Schema.org Article */}
+      <Helmet>
+        <script type="application/ld+json">{JSON.stringify(articleSchema)}</script>
+        {faqItems.length > 0 && (
+          <script type="application/ld+json">{JSON.stringify({
             "@context": "https://schema.org",
             "@type": "FAQPage",
             "mainEntity": faqItems.map(faq => ({
@@ -200,176 +245,30 @@ export default function ArticleDetail() {
                 "text": faq.answer.replace(/\*\*/g, "").replace(/\[.*?\]\(.*?\)/g, "").trim()
               }
             }))
-          }) }} />
-        );
-      })()}
+          })}</script>
+        )}
+      </Helmet>
+
       {/* LocalBusiness Schema for geo-targeted guide articles */}
       {article.category === "guide_lieu" && article.city && (
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
-          "@context": "https://schema.org",
-          "@type": "LocalBusiness",
-          "name": `Guardiens — Pet-sitting & House-sitting ${article.city}`,
-          "description": article.excerpt,
-          "url": `https://guardiens.fr/actualites/${article.slug}`,
-          "address": {
-            "@type": "PostalAddress",
-            "addressLocality": article.city,
-            "addressRegion": article.region || "Auvergne-Rhône-Alpes",
-            "addressCountry": "FR"
-          },
-          ...(article.city === "Lyon" && {
-            "geo": { "@type": "GeoCoordinates", "latitude": 45.7640, "longitude": 4.8357 },
-            "areaServed": [
-              { "@type": "City", "name": "Lyon" },
-              { "@type": "City", "name": "Villeurbanne" },
-              { "@type": "City", "name": "Écully" },
-              { "@type": "City", "name": "Tassin-la-Demi-Lune" },
-              { "@type": "City", "name": "Francheville" },
-              { "@type": "City", "name": "Craponne" },
-              { "@type": "City", "name": "Saint-Didier-au-Mont-d'Or" },
-              { "@type": "City", "name": "Limonest" },
-              { "@type": "City", "name": "Caluire-et-Cuire" },
-              { "@type": "City", "name": "Sainte-Foy-lès-Lyon" },
-              { "@type": "City", "name": "Oullins" },
-              { "@type": "City", "name": "Bron" },
-              { "@type": "City", "name": "Vénissieux" }
-            ]
-          }),
-          ...(article.city === "Grenoble" && {
-            "geo": { "@type": "GeoCoordinates", "latitude": 45.1885, "longitude": 5.7248 },
-            "areaServed": [
-              { "@type": "City", "name": "Grenoble" },
-              { "@type": "City", "name": "Meylan" },
-              { "@type": "City", "name": "Saint-Ismier" },
-              { "@type": "City", "name": "Corenc" },
-              { "@type": "City", "name": "La Tronche" },
-              { "@type": "City", "name": "Sassenage" },
-              { "@type": "City", "name": "Vizille" },
-              { "@type": "City", "name": "Échirolles" },
-              { "@type": "City", "name": "Saint-Martin-d'Hères" },
-              { "@type": "City", "name": "Fontaine" },
-              { "@type": "City", "name": "Voiron" }
-            ],
+        <Helmet>
+          <script type="application/ld+json">{JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "LocalBusiness",
+            "name": `Guardiens — Pet-sitting & House-sitting ${article.city}`,
+            "description": article.excerpt,
+            "url": `https://guardiens.fr/actualites/${article.slug}`,
             "address": {
               "@type": "PostalAddress",
-              "addressLocality": "Grenoble",
-              "addressRegion": "Auvergne-Rhône-Alpes",
-              "postalCode": "38000",
+              "addressLocality": article.city,
+              "addressRegion": article.region || "Auvergne-Rhône-Alpes",
               "addressCountry": "FR"
-            }
-          }),
-          ...(article.city === "Annecy" && {
-            "geo": { "@type": "GeoCoordinates", "latitude": 45.8992, "longitude": 6.1294 },
-            "areaServed": [
-              { "@type": "City", "name": "Annecy" },
-              { "@type": "City", "name": "Megève" },
-              { "@type": "City", "name": "Chamonix-Mont-Blanc" },
-              { "@type": "City", "name": "Thônes" },
-              { "@type": "City", "name": "Talloires" }
-            ]
-          }),
-          ...(article.city === "Saint-Étienne" && {
-            "geo": { "@type": "GeoCoordinates", "latitude": 45.4397, "longitude": 4.3872 },
-            "areaServed": [
-              { "@type": "City", "name": "Saint-Étienne" },
-              { "@type": "City", "name": "Saint-Chamond" },
-              { "@type": "City", "name": "Firminy" },
-              { "@type": "City", "name": "Montbrison" },
-              { "@type": "City", "name": "Villars" },
-              { "@type": "City", "name": "Andrézieux-Bouthéon" }
-            ],
-            "address": {
-              "@type": "PostalAddress",
-              "addressLocality": "Saint-Étienne",
-              "addressRegion": "Auvergne-Rhône-Alpes",
-              "postalCode": "42000",
-              "addressCountry": "FR"
-            }
-          }),
-          ...(article.city === "Valence" && {
-            "geo": { "@type": "GeoCoordinates", "latitude": 44.9333, "longitude": 4.8917 },
-            "areaServed": [
-              { "@type": "City", "name": "Valence" },
-              { "@type": "City", "name": "Bourg-lès-Valence" },
-              { "@type": "City", "name": "Guilherand-Granges" },
-              { "@type": "City", "name": "Romans-sur-Isère" },
-              { "@type": "City", "name": "Montélimar" },
-              { "@type": "City", "name": "Chabeuil" }
-            ],
-            "address": {
-              "@type": "PostalAddress",
-              "addressLocality": "Valence",
-              "addressRegion": "Auvergne-Rhône-Alpes",
-              "postalCode": "26000",
-              "addressCountry": "FR"
-            }
-          }),
-          ...(article.city === "Chambéry" && {
-            "geo": { "@type": "GeoCoordinates", "latitude": 45.5646, "longitude": 5.9178 },
-            "areaServed": [
-              { "@type": "City", "name": "Chambéry" },
-              { "@type": "City", "name": "Aix-les-Bains" },
-              { "@type": "City", "name": "Cognin" },
-              { "@type": "City", "name": "La Motte-Servolex" },
-              { "@type": "City", "name": "Barby" },
-              { "@type": "City", "name": "Challes-les-Eaux" }
-            ],
-            "address": {
-              "@type": "PostalAddress",
-              "addressLocality": "Chambéry",
-              "addressRegion": "Auvergne-Rhône-Alpes",
-              "postalCode": "73000",
-              "addressCountry": "FR"
-            }
-          }),
-          ...(article.city === "Clermont-Ferrand" && {
-            "geo": { "@type": "GeoCoordinates", "latitude": 45.7772, "longitude": 3.0870 },
-            "areaServed": [
-              { "@type": "City", "name": "Clermont-Ferrand" },
-              { "@type": "City", "name": "Chamalières" },
-              { "@type": "City", "name": "Cournon-d'Auvergne" },
-              { "@type": "City", "name": "Riom" }
-            ],
-            "address": {
-              "@type": "PostalAddress",
-              "addressLocality": "Clermont-Ferrand",
-              "addressRegion": "Auvergne-Rhône-Alpes",
-              "postalCode": "63000",
-              "addressCountry": "FR"
-            }
-          }),
-          ...(article.city === "Villeurbanne" && {
-            "geo": { "@type": "GeoCoordinates", "latitude": 45.7676, "longitude": 4.8799 },
-            "areaServed": [
-              { "@type": "City", "name": "Villeurbanne" },
-              { "@type": "City", "name": "Lyon" }
-            ]
-          }),
-          ...(article.city === "Vénissieux" && {
-            "geo": { "@type": "GeoCoordinates", "latitude": 45.6971, "longitude": 4.8868 },
-            "areaServed": [
-              { "@type": "City", "name": "Vénissieux" },
-              { "@type": "City", "name": "Saint-Foy-lès-Lyon" },
-              { "@type": "City", "name": "Bron" }
-            ]
-          }),
-          ...(article.city === "Aix-les-Bains" && {
-            "geo": { "@type": "GeoCoordinates", "latitude": 45.6884, "longitude": 5.9153 },
-            "areaServed": [
-              { "@type": "City", "name": "Aix-les-Bains" },
-              { "@type": "City", "name": "Chambéry" },
-              { "@type": "City", "name": "Le Bourget-du-Lac" }
-            ]
-          }),
-          "priceRange": "Gratuit",
-          "openingHoursSpecification": {
-            "@type": "OpeningHoursSpecification",
-            "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"],
-            "opens": "00:00",
-            "closes": "23:59"
-          }
-        }) }} />
+            },
+            "priceRange": "Gratuit",
+          })}</script>
+        </Helmet>
       )}
+
     <article className="max-w-3xl mx-auto px-4 py-8 animate-fade-in">
       <Link
         to="/actualites"
@@ -392,9 +291,15 @@ export default function ArticleDetail() {
           )}
         </div>
 
-        <h1 className="text-3xl md:text-4xl font-heading font-bold text-foreground mb-4 leading-tight">
+        <h1 className="text-3xl md:text-4xl font-heading font-bold text-foreground mb-3 leading-tight">
           {article.title}
         </h1>
+
+        {/* CORRECTION 6 — Date de mise à jour visible */}
+        <div className="flex items-center gap-1.5 text-sm text-muted-foreground mb-4">
+          <Calendar className="h-3.5 w-3.5" />
+          <span>Mis à jour le {format(new Date(article.updated_at), "d MMMM yyyy", { locale: fr })}</span>
+        </div>
 
         <div className="flex items-center gap-4 text-sm text-muted-foreground">
           <span className="flex items-center gap-1">
@@ -410,11 +315,12 @@ export default function ArticleDetail() {
         </div>
       </header>
 
+      {/* CORRECTION 2 — Alt text systématique */}
       {article.cover_image_url && (
         <div className="rounded-xl overflow-hidden mb-8">
           <img
             src={article.cover_image_url}
-            alt={article.title}
+            alt={altText}
             className="w-full h-auto max-h-96 object-cover"
             loading="eager"
             fetchPriority="high"
@@ -423,6 +329,27 @@ export default function ArticleDetail() {
       )}
 
       <ArticleRenderer content={article.content} userRole={isAuthenticated ? user?.role : undefined} />
+
+      {/* CORRECTION 3 — À lire aussi (internal links) */}
+      {internalLinks.length > 0 && (
+        <div className="mt-10 p-5 rounded-xl bg-muted/50 border border-border">
+          <h3 className="font-heading text-lg font-semibold text-foreground mb-3">À lire aussi</h3>
+          <div className="grid gap-3 sm:grid-cols-2">
+            {internalLinks.slice(0, 4).map((link, i) => (
+              <Link
+                key={i}
+                to={link.url}
+                className="group flex items-center gap-2 p-3 rounded-lg bg-background border border-border hover:border-primary/30 hover:shadow-sm transition-all"
+              >
+                <ArrowRight className="h-4 w-4 text-primary shrink-0" />
+                <span className="text-sm font-medium text-foreground group-hover:text-primary transition-colors line-clamp-2">
+                  {link.text}
+                </span>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Cross-links to city pages */}
       {(cityGuideSlug || cityPageSlug) && (

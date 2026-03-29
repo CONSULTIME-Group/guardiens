@@ -41,12 +41,19 @@ function urlEntry(loc: string, lastmod: string, changefreq: string, priority: st
 }
 
 const PRIORITY_MAP: Record<string, string> = {
-  ville: "0.8",
+  ville: "0.9",
+  guide_race: "0.8",
   guide_local: "0.8",
-  guide_pratique: "0.8",
-  guide_race: "0.7",
-  thematique: "0.7",
-  saisonnier: "0.7",
+  guide_lieu: "0.8",
+  vie_locale: "0.7",
+  guide_pratique: "0.6",
+  conseil: "0.6",
+  conseil_gardien: "0.6",
+  conseil_proprio: "0.6",
+  saisonnier: "0.6",
+  temoignage: "0.6",
+  actualite: "0.6",
+  thematique: "0.6",
 };
 
 Deno.serve(async () => {
