@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import PageMeta from "@/components/PageMeta";
+import heroImg from "@/assets/hero-missions.jpg";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Apple, Sprout, Egg, PawPrint, Hammer, ChefHat } from "lucide-react";
 
@@ -53,28 +54,40 @@ const SmallMissionsPublic = () => {
       />
 
       <div className="min-h-screen bg-background font-body">
-        {/* ═══ SECTION 1 — HERO ═══ */}
-        <section className="bg-muted">
-          <div className="max-w-2xl mx-auto px-6 py-24 md:py-32 text-center">
+        {/* ═══ SECTION 1 — HERO WITH PHOTO ═══ */}
+        <section className="relative h-[40vh] md:h-[50vh] flex items-end justify-center overflow-hidden">
+          <img
+            src={heroImg}
+            alt="Silhouettes s'entraidant au sommet d'un rocher face au soleil couchant"
+            className="absolute inset-0 w-full h-full object-cover"
+            style={{ objectPosition: "center 30%" }}
+            loading="eager"
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/15 to-black/50" />
+          <div className="relative z-10 max-w-2xl mx-auto px-6 pb-12 md:pb-16 text-center">
             <Reveal>
-              <p className="text-xs font-body font-semibold tracking-widest uppercase text-primary/60 mb-6">
+              <p className="text-xs font-body font-semibold tracking-widest uppercase text-white/60 mb-6">
                 Petites missions · Entraide
               </p>
             </Reveal>
-
             <Reveal delay={0.1}>
-              <h1 className="font-heading text-5xl md:text-6xl font-bold text-foreground leading-tight max-w-2xl mx-auto">
+              <h1 className="font-heading text-5xl md:text-6xl font-bold text-white leading-tight max-w-2xl mx-auto">
                 Ce que tu as contre ce que<br className="hidden md:block" /> tu n'as pas encore vécu.
               </h1>
             </Reveal>
+          </div>
+        </section>
 
-            <Reveal delay={0.2}>
-              <p className="font-body text-lg text-foreground/70 leading-relaxed text-center max-w-lg mx-auto mt-6">
+        {/* ═══ SECTION 1B — HERO TEXT ═══ */}
+        <section className="bg-muted">
+          <div className="max-w-2xl mx-auto px-6 py-16 md:py-20 text-center">
+            <Reveal>
+              <p className="font-body text-lg text-foreground/70 leading-relaxed text-center max-w-lg mx-auto">
                 Un coup de main contre un repas. Un jardin contre des légumes. Une compétence contre une soirée. Ici personne ne facture ce qui n'a pas de prix.
               </p>
             </Reveal>
 
-            <Reveal delay={0.3}>
+            <Reveal delay={0.1}>
               <div className="flex flex-col sm:flex-row gap-4 justify-center mt-12">
                 <Button asChild className="bg-primary text-primary-foreground rounded-full px-9 py-4 h-auto text-sm font-semibold tracking-wide hover:bg-primary/90 transition-all duration-200">
                   <Link to="/petites-missions/creer">Je propose une mission</Link>
