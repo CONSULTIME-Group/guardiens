@@ -567,6 +567,9 @@ const Landing = () => {
       <section className="py-20 md:py-[120px] bg-background">
         <div className="max-w-6xl mx-auto px-6 md:px-12">
           <RevealSection className="text-center mb-16">
+            <p className="text-[11px] font-body font-semibold tracking-[0.15em] uppercase text-primary/60 mb-4">
+              Pourquoi Guardiens
+            </p>
             <h2 className="font-heading text-[36px] md:text-[48px] lg:text-[52px] font-semibold text-foreground leading-[1.2]">
               Un réseau de gens du coin qui se font confiance.
             </h2>
