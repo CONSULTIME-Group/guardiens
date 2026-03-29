@@ -119,7 +119,7 @@ const SearchSitter = () => {
 
     setLoading(false);
     setDrawerOpen(false);
-  }, [tab, city, radius, startDate, endDate, animalTypes, housingType, duration, verifiedOnly, emergencyOnly, sort, userCoords, userCity]);
+  }, [tab, missionSubTab, city, radius, startDate, endDate, animalTypes, housingType, duration, verifiedOnly, emergencyOnly, sort, userCoords, userCity, missionTypeFilter, missionCategoryFilter]);
 
   // Trigger search on filter changes
   useEffect(() => {
