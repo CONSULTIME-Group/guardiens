@@ -270,14 +270,11 @@ const Pricing = () => {
           {/* Promise */}
           <section className="max-w-2xl mx-auto space-y-6 text-center">
             <h2 className="font-heading text-2xl font-bold text-foreground">Notre promesse — Simple, honnête, et c'est tout</h2>
-            <ul className="space-y-3 text-left">
-              {promisePoints.map((point) => (
-                <li key={point} className="flex items-start gap-2.5 text-sm">
-                  <Check className="h-4 w-4 text-primary mt-0.5 shrink-0" />
-                  <span className="text-foreground">{point}</span>
-                </li>
+            <div className="space-y-4">
+              {promiseLines.map((line) => (
+                <p key={line} className="text-lg text-foreground/80 leading-relaxed">{line}</p>
               ))}
-            </ul>
+            </div>
           </section>
 
           {/* FAQ */}
