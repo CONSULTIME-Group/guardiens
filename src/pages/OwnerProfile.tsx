@@ -13,6 +13,7 @@ import OwnerStepCalendar from "@/components/owner-profile/OwnerStepCalendar";
 import OwnerGallery from "@/components/owner-profile/OwnerGallery";
 import OwnerExperiences from "@/components/owner-profile/OwnerExperiences";
 import TrustProfile from "@/components/profile/TrustProfile";
+import StepSkills from "@/components/profile/StepSkills";
 import { useOwnerProfile, type OwnerProfileData } from "@/hooks/useOwnerProfile";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
