@@ -568,7 +568,7 @@ const Landing = () => {
             </div>
           </div>
           <p className="text-xs text-muted-foreground mb-4 italic">
-            Jamais d'argent. L'échange se décide entre vous.
+            L'échange se décide entre vous. Jamais d'argent. Juste des gens du coin.
           </p>
           <Link to="/petites-missions" className="text-primary font-medium hover:underline inline-flex items-center gap-1">
             Découvrir les petites missions <ArrowRight className="h-4 w-4" />
