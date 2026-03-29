@@ -462,7 +462,7 @@ const Landing = () => {
               <span className="block font-heading text-[48px] md:text-[72px] font-bold text-foreground leading-none">
                 5
               </span>
-              <span className="font-body text-sm text-foreground/60 tracking-[0.05em]">ans d'expérience</span>
+              <span className="font-body text-sm text-foreground/60 tracking-[0.05em]">ans en AURA</span>
             </div>
             {dynamicCounts && dynamicCounts.missions > 10 && (
               <>
