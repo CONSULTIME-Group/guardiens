@@ -93,7 +93,7 @@ const CreateSmallMission = () => {
     <>
       <PageMeta title="Poster une petite mission | Guardiens" description="Proposez une mission d'entraide à la communauté Guardiens." />
 
-      <div className="max-w-2xl mx-auto px-4 py-8 space-y-6">
+      <div className="max-w-2xl mx-auto px-4 py-8 space-y-6 pb-40">
         <button
           onClick={() => navigate("/petites-missions")}
           className="flex items-center gap-1 text-sm text-foreground/60 hover:text-foreground transition-colors -ml-2"

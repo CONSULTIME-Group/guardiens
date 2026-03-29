@@ -71,7 +71,7 @@ const EditSit = () => {
   if (loading) return <div className="p-6 md:p-10 text-muted-foreground">Chargement...</div>;
 
   return (
-    <div className="p-6 md:p-10 max-w-3xl mx-auto animate-fade-in pb-32">
+    <div className="p-6 md:p-10 max-w-3xl mx-auto animate-fade-in pb-40">
       <Link to={`/sits/${id}`} className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-6">
         <ArrowLeft className="h-4 w-4" /> Retour à l'annonce
       </Link>

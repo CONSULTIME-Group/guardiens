@@ -191,7 +191,7 @@ const CreateSit = () => {
   }
 
   return (
-    <div className="p-6 md:p-10 max-w-3xl mx-auto animate-fade-in pb-32">
+    <div className="p-6 md:p-10 max-w-3xl mx-auto animate-fade-in pb-40">
       <Link to="/sits" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-6">
         <ArrowLeft className="h-4 w-4" /> Retour à mes gardes
       </Link>
