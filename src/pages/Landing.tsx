@@ -780,7 +780,7 @@ const Landing = () => {
               border: "1px solid rgba(255,255,255,0.3)",
             }}
           >
-            <span className="font-body text-[12px] text-white uppercase tracking-[0.1em]">Fondateur</span>
+            <span className="font-body text-[12px] text-white uppercase tracking-[0.1em]">Fondateurs</span>
           </div>
           <h2 className="font-heading text-[36px] md:text-[48px] lg:text-[52px] font-bold text-white leading-[1.2] mb-6">
             ⭐ Inscris-toi avant le 13 mai.
