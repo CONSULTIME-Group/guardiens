@@ -79,25 +79,16 @@ const testimonials = [
   },
 ];
 
-const steps = [
-  {
-    number: "01",
-    title: "Raconte-toi",
-    description:
-      "5 minutes. Ta maison, tes animaux, ce que tu cherches. Ou qui tu es et ce que tu as envie de vivre.",
-  },
-  {
-    number: "02",
-    title: "Découvre tes gens du coin",
-    description:
-      "Des profils proches de chez toi. Des gens qui n'attendent que de se rencontrer.",
-  },
-  {
-    number: "03",
-    title: "Rencontrez-vous en vrai",
-    description:
-      "Un café, une balade, une visite. La confiance se crée en face à face. Puis tu pars — ou tu accueilles. L'histoire commence là.",
-  },
+const ownerSteps = [
+  { number: "01", title: "Tu publies", description: "Ta maison, tes animaux, tes dates.\nCe dont tu as besoin. Cinq minutes." },
+  { number: "02", title: "Tu choisis", description: "Des profils du quartier.\nTu lis, tu échanges, tu rencontres.\nC'est toi qui décides." },
+  { number: "03", title: "Tu pars.", description: "Vraiment." },
+];
+
+const sitterSteps = [
+  { number: "01", title: "Tu te présentes", description: "Qui tu es, ce que tu aimes,\noù tu veux aller. Cinq minutes." },
+  { number: "02", title: "Tu postules", description: "Des gardes proches de chez toi.\nTu choisis celles qui te ressemblent." },
+  { number: "03", title: "Tu rencontres.", description: "Des gens que tu n'aurais\njamais croisés autrement." },
 ];
 
 /* ── Separator for histoire section ── */
