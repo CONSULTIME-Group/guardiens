@@ -334,17 +334,17 @@ const Landing = () => {
           <span className="text-primary">g</span>uardiens
         </h2>
         <div className="flex gap-2 md:gap-3 items-center">
-          <Button variant="ghost" size="sm" className="hidden sm:inline-flex" onClick={() => navigate("/actualites")}>
-            Articles
+          <Button variant="ghost" size="sm" className="hidden sm:inline-flex" onClick={() => navigate("/petites-missions")}>
+            Entraide
           </Button>
           <Button variant="ghost" size="sm" className="hidden sm:inline-flex" onClick={() => navigate("/guides")}>
             Guides locaux
           </Button>
-          <Button variant="ghost" size="sm" className="hidden sm:inline-flex" asChild>
-            <a href="#entraide">Entraide</a>
-          </Button>
           <Button variant="ghost" size="sm" className="hidden sm:inline-flex" onClick={() => navigate("/tarifs")}>
             Tarifs
+          </Button>
+          <Button variant="ghost" size="sm" className="hidden sm:inline-flex" onClick={() => navigate("/actualites")}>
+            Articles
           </Button>
           <Button variant="ghost" size="sm" onClick={() => navigate("/login")}>
             Connexion
