@@ -720,53 +720,7 @@ const Landing = () => {
         </RevealSection>
       </section>
 
-      {/* ═══════════════ DERNIERS ARTICLES ═══════════════ */}
-      {latestArticles.length > 0 && (
-        <section className="py-24 md:py-32 bg-background">
-          <div className="max-w-6xl mx-auto px-6 md:px-12">
-            <RevealSection>
-              <div className="flex items-center justify-between mb-12">
-                <h2 className="font-heading text-2xl md:text-4xl font-semibold text-foreground">
-                  Derniers guides & conseils
-                </h2>
-                <Button
-                  variant="ghost"
-                  onClick={() => navigate("/actualites")}
-                  className="text-primary"
-                >
-                  Voir tous les guides <ArrowRight className="h-4 w-4 ml-1" />
-                </Button>
-              </div>
-            </RevealSection>
-            <div className="grid md:grid-cols-3 gap-8">
-              {latestArticles.map((a, i) => (
-                <RevealSection key={a.id} delay={0.1 * i}>
-                  <Link
-                    to={`/actualites/${a.slug}`}
-                    className="group bg-card rounded-2xl overflow-hidden border border-border hover:-translate-y-1 hover:shadow-lg transition-all duration-300 block"
-                  >
-                    {a.cover_image_url && (
-                      <img
-                        src={a.cover_image_url}
-                        alt={a.title}
-                        className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-500"
-                      />
-                    )}
-                    <div className="p-6">
-                      <h3 className="font-heading text-lg font-semibold group-hover:text-primary transition-colors line-clamp-2 mb-2">
-                        {a.title}
-                      </h3>
-                      <p className="font-body text-sm text-foreground/60 line-clamp-2">
-                        {a.excerpt}
-                      </p>
-                    </div>
-                  </Link>
-                </RevealSection>
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
+
 
       {/* ═══════════════ SECTION 8 — CTA FINAL ═══════════════ */}
       <section className="py-24 md:py-32 bg-foreground">
