@@ -105,12 +105,13 @@ export const AdminSidebar = () => {
         supabase.from("reports").select("id", { count: "exact", head: true }).eq("status", "new"),
         supabase.from("contact_messages").select("id", { count: "exact", head: true }).eq("status", "new"),
         supabase.from("skills_library").select("id", { count: "exact", head: true }).eq("status", "pending"),
-      ]);
+      ]) as any;
       setBadges({
         verifications: pendingVerifications || 0,
         experiences: pendingExperiences || 0,
         reports: pendingReports || 0,
         contactMessages: newContactMessages || 0,
+        skills: results?.[4]?.count || 0,
       });
     };
     fetchBadges();
