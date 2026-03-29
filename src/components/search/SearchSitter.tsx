@@ -229,6 +229,10 @@ const SearchSitter = () => {
 
     let final = enriched.filter(Boolean);
     final = sortResults(final, sort);
+    // Inject demo sits if below threshold
+    if (final.length < DEMO_THRESHOLD) {
+      final = [...final, ...DEMO_SITS];
+    }
     setResults(final);
   };
 
