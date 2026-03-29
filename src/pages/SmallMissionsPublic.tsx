@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import PageMeta from "@/components/PageMeta";
-import heroImg from "@/assets/hero-missions.jpg";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Apple, Sprout, Egg, PawPrint, Hammer, ChefHat } from "lucide-react";
 
