@@ -75,7 +75,7 @@ const testimonials = [
   {
     name: "Elena",
     detail: "Annecy",
-    text: "J'ai commencé par arroser les plantes d'une voisine contre un repas. Maintenant je garde sa maison quand elle part. C'est comme ça que ça marche ici — doucement, naturellement.",
+    text: "J'ai commencé par arroser les plantes d'un membre contre un repas. Maintenant je garde sa maison quand elle part. C'est comme ça que ça marche ici — doucement, naturellement.",
   },
 ];
 
