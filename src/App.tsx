@@ -155,6 +155,7 @@ const AppRoutes = () => (
       <Route path="/admin/settings" element={<AdminSettings />} />
       <Route path="/admin/contact-messages" element={<AdminContactMessages />} />
       <Route path="/admin/seo" element={<AdminSEO />} />
+      <Route path="/admin/skills" element={<AdminSkills />} />
     </Route>
     {/* App routes */}
     <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
