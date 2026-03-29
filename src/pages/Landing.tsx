@@ -762,11 +762,14 @@ const Landing = () => {
           <h2 className="font-heading text-3xl md:text-4xl font-bold mb-4 text-white">
             Votre prochaine histoire commence ici.
           </h2>
-          <p className="text-white/60 text-lg mb-8">
+          <p className="text-white/60 text-lg mb-8 leading-relaxed">
             Des gardes, de l'entraide, des gens du coin
+            <br />
             qui se font confiance.
+            <br />
             Gratuit pour commencer.
-            Irremplaçable pour la suite.
+            <br />
+            Ce que vous allez vivre ne l'est pas.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Button
