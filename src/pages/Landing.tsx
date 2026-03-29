@@ -110,7 +110,7 @@ const StoryDivider = () => (
 const Landing = () => {
   const navigate = useNavigate();
   const [latestArticles, setLatestArticles] = useState<any[]>([]);
-  const [dynamicCounts, setDynamicCounts] = useState<{ members: number; missions: number; sits: number } | null>(null);
+  const [dynamicCounts, setDynamicCounts] = useState<{ maisons: number; animaux: number; missions: number } | null>(null);
   const lastFetchRef = useRef<number>(0);
 
   /* ── Embla carousel for testimonials ── */
