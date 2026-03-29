@@ -169,9 +169,9 @@ const Landing = () => {
   useEffect(() => {
     supabase
       .from("articles")
-      .select("id,title,slug,excerpt,cover_image_url,category,published_at")
+      .select("id,title,slug,category,cover_image_url,hero_image_alt,meta_description,created_at")
       .eq("published", true)
-      .order("published_at", { ascending: false })
+      .order("created_at", { ascending: false })
       .limit(3)
       .then(({ data }) => setLatestArticles(data || []));
 
