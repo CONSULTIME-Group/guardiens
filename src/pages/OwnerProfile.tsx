@@ -27,6 +27,7 @@ const STEPS = [
   { num: 6, label: "Calendrier" },
   { num: 7, label: "Galerie" },
   { num: 8, label: "Expériences" },
+  { num: 9, label: "Compétences" },
 ];
 
 const OwnerProfilePage = () => {
