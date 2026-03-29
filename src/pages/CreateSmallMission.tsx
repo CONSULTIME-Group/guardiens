@@ -127,7 +127,7 @@ const CreateSmallMission = () => {
             <CardTitle className="font-heading">Proposer une petite mission</CardTitle>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-5">
+            <form onSubmit={handleSubmit} className="space-y-5 pb-32">
               {/* Catégorie */}
               <div className="space-y-2">
                 <Label>Catégorie *</Label>

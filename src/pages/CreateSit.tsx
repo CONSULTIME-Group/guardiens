@@ -287,7 +287,7 @@ const CreateSit = () => {
       </div>
 
       {/* Pre-filled summaries */}
-      <div className="mt-10 space-y-6">
+      <div className="mt-10 space-y-6 pb-32">
         <h2 className="font-heading text-xl font-semibold">Résumé depuis votre profil</h2>
 
         {/* Housing */}

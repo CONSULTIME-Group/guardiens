@@ -85,7 +85,7 @@ const EditLongStay = () => {
       <h1 className="font-heading text-3xl font-bold mb-2">Modifier l'annonce</h1>
       <p className="text-muted-foreground mb-8">Mettez à jour les informations de votre garde longue durée.</p>
 
-      <div className="space-y-6">
+      <div className="space-y-6 pb-32">
         <div>
           <Label className="text-sm font-medium">Titre de l'annonce *</Label>
           <Input value={title} onChange={e => setTitle(e.target.value)} className="mt-1.5" />

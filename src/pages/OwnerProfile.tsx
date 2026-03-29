@@ -114,7 +114,7 @@ const OwnerProfilePage = () => {
         missingFields={missingFields}
       />
 
-      <div className="bg-card rounded-lg border border-border p-6 md:p-8 mb-6">
+      <div className="bg-card rounded-lg border border-border p-6 md:p-8 mb-6 pb-32">
         {currentStep === 1 && <OwnerStepIdentity data={mergedData} onChange={handleChange} onUploadPhoto={uploadPhoto} />}
         {currentStep === 2 && <OwnerStepHousing data={mergedData} onChange={handleChange} onUploadPhoto={uploadPhoto} />}
         {currentStep === 3 && <OwnerStepAnimals pets={pets} onAddPet={addPet} onUpdatePet={updatePet} onRemovePet={removePet} />}
