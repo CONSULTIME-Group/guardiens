@@ -32,7 +32,7 @@ interface ArticleFull {
   meta_title: string | null;
   meta_description: string | null;
   hero_image_alt: string | null;
-  internal_links: { text: string; url: string }[] | null;
+  internal_links: any;
 }
 
 interface RelatedArticle {
