@@ -110,7 +110,7 @@ const StoryDivider = () => (
 const Landing = () => {
   const navigate = useNavigate();
   const [latestArticles, setLatestArticles] = useState<any[]>([]);
-  const [dynamicCounts, setDynamicCounts] = useState<{ members: number; missions: number; sits: number } | null>(null);
+  const [dynamicCounts, setDynamicCounts] = useState<{ maisons: number; animaux: number; missions: number } | null>(null);
   const lastFetchRef = useRef<number>(0);
 
   /* ── Embla carousel for testimonials ── */
@@ -166,16 +166,40 @@ const Landing = () => {
       if (now - lastFetchRef.current < 10 * 60 * 1000) return;
       lastFetchRef.current = now;
 
-      const [membersRes, missionsRes, sitsRes] = await Promise.all([
-        supabase.from("profiles").select("id", { count: "exact", head: true }),
-        supabase.from("small_missions").select("id", { count: "exact", head: true }).in("status", ["open", "in_progress", "completed"]),
-        supabase.from("sits").select("id", { count: "exact", head: true }).in("status", ["confirmed", "completed"]),
-      ]);
-      setDynamicCounts({
-        members: membersRes.count ?? 0,
-        missions: missionsRes.count ?? 0,
-        sits: sitsRes.count ?? 0,
-      });
+      try {
+        // Maisons: count distinct properties with confirmed/completed sits
+        const sitsRes = await supabase
+          .from("sits")
+          .select("property_id")
+          .in("status", ["confirmed", "completed"]);
+        const distinctProperties = new Set((sitsRes.data || []).map(s => s.property_id));
+        const maisons = 37 + distinctProperties.size;
+
+        // Animaux: get pets from properties that have confirmed/completed sits
+        const propertyIds = Array.from(distinctProperties);
+        let animaux = 234;
+        if (propertyIds.length > 0) {
+          const petsRes = await supabase
+            .from("pets")
+            .select("id", { count: "exact", head: true })
+            .in("property_id", propertyIds);
+          animaux += (petsRes.count ?? 0);
+        }
+
+        // Missions d'entraide
+        const missionsRes = await supabase
+          .from("small_missions")
+          .select("id", { count: "exact", head: true })
+          .in("status", ["open", "in_progress", "completed"]);
+
+        setDynamicCounts({
+          maisons,
+          animaux,
+          missions: missionsRes.count ?? 0,
+        });
+      } catch {
+        setDynamicCounts({ maisons: 37, animaux: 234, missions: 0 });
+      }
     };
     fetchCounts();
   }, []);
@@ -402,37 +426,19 @@ const Landing = () => {
           style={{ animationDelay: "0.3s" }}
         >
           <div className="text-center px-6 md:px-10">
-            <span className="block font-heading text-3xl md:text-4xl font-bold text-primary">37</span>
+            <span className="block font-heading text-3xl md:text-4xl font-bold text-primary">{dynamicCounts?.maisons ?? 37}</span>
             <span className="text-muted-foreground text-sm">maisons gardées</span>
           </div>
           <div className="w-px h-12 bg-border" />
           <div className="text-center px-6 md:px-10">
-            <span className="block font-heading text-3xl md:text-4xl font-bold text-primary">234</span>
+            <span className="block font-heading text-3xl md:text-4xl font-bold text-primary">{dynamicCounts?.animaux ?? 234}</span>
             <span className="text-muted-foreground text-sm">animaux accompagnés</span>
           </div>
           <div className="w-px h-12 bg-border" />
           <div className="text-center px-6 md:px-10">
             <span className="block font-heading text-3xl md:text-4xl font-bold text-primary">5 ans</span>
-            <span className="text-muted-foreground text-sm">en AURA</span>
+            <span className="text-muted-foreground text-sm">d'expérience en AURA</span>
           </div>
-          {dynamicCounts && dynamicCounts.members > 50 && (
-            <>
-              <div className="w-px h-12 bg-border hidden sm:block" />
-              <div className="text-center px-6 md:px-10 mt-4 sm:mt-0">
-                <span className="block font-heading text-3xl md:text-4xl font-bold text-primary">{dynamicCounts.members}</span>
-                <span className="text-muted-foreground text-sm">membres</span>
-              </div>
-            </>
-          )}
-          {dynamicCounts && dynamicCounts.sits > 5 && (
-            <>
-              <div className="w-px h-12 bg-border hidden sm:block" />
-              <div className="text-center px-6 md:px-10 mt-4 sm:mt-0">
-                <span className="block font-heading text-3xl md:text-4xl font-bold text-primary">{dynamicCounts.sits}</span>
-                <span className="text-muted-foreground text-sm">gardes confirmées</span>
-              </div>
-            </>
-          )}
           {dynamicCounts && dynamicCounts.missions > 10 && (
             <>
               <div className="w-px h-12 bg-border hidden sm:block" />
