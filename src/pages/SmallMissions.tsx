@@ -88,8 +88,8 @@ const SmallMissions = () => {
   return (
     <>
       <PageMeta
-        title="Petites missions — Entraide entre voisins autour des animaux et du jardin | Guardiens"
-        description="Besoin d'un coup de main pour promener le chien, arroser le jardin, nourrir les chats ? La communauté Guardiens s'entraide — pas d'argent, juste du lien. Inscrivez-vous gratuitement."
+        title="Petites missions — Entraide entre gens du coin | Guardiens"
+        description="Des coups de main, des échanges, des compétences. Entre gens du coin qui se choisissent. Pas d'argent — juste du lien. Inscrivez-vous gratuitement."
       />
 
       <div className="min-h-screen bg-background">

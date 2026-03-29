@@ -94,6 +94,10 @@ const CreateSmallMission = () => {
       <PageMeta title="Poster une petite mission | Guardiens" description="Proposez une mission d'entraide à la communauté Guardiens." />
 
       <div className="max-w-2xl mx-auto px-4 py-8 space-y-6">
+        <Button variant="ghost" size="sm" className="gap-2 text-muted-foreground hover:text-foreground -ml-2" onClick={() => navigate("/petites-missions")}>
+          <ArrowLeft className="h-4 w-4" />
+          Retour
+        </Button>
         {/* Access gate */}
         {!accessLoading && !canApplyMissions && (
           <AccessGateBanner level={accessLevel} profileCompletion={profileCompletion} context="mission" />
