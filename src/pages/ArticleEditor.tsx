@@ -77,6 +77,15 @@ const ArticleEditor = () => {
     if (!form.title.trim()) { toast.error("Le titre est obligatoire"); return; }
     if (!form.slug.trim()) { toast.error("Le slug est obligatoire"); return; }
 
+    // Check slug uniqueness
+    const slugQuery = supabase.from("articles").select("id").eq("slug", form.slug);
+    if (!isNew && id) slugQuery.neq("id", id);
+    const { data: dupes } = await slugQuery;
+    if (dupes && dupes.length > 0) {
+      toast.error("Ce slug existe déjà — choisissez un slug unique");
+      return;
+    }
+
     setSaving(true);
     const shouldPublish = publish ?? form.published;
     const record: any = {
