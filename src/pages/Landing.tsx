@@ -82,21 +82,21 @@ const testimonials = [
 const steps = [
   {
     number: "01",
-    title: "Inscris-toi",
+    title: "Raconte-toi",
     description:
-      "5 minutes. Raconte ta maison, tes animaux, ce que tu cherches. Ou raconte qui tu es et ce que tu as envie de vivre.",
+      "5 minutes. Ta maison, tes animaux, ce que tu cherches. Ou qui tu es et ce que tu as envie de vivre.",
   },
   {
     number: "02",
-    title: "Trouve ton match",
+    title: "Découvre tes gens du coin",
     description:
-      "Des profils proches de chez toi. Des gens du coin qui n'attendent que de se rencontrer.",
+      "Des profils proches de chez toi. Des gens qui n'attendent que de se rencontrer.",
   },
   {
     number: "03",
-    title: "Rencontrez-vous",
+    title: "Rencontrez-vous en vrai",
     description:
-      "Un café, une balade, une visite. La confiance se crée en vrai. Puis tu pars — ou tu accueilles. L'histoire commence là.",
+      "Un café, une balade, une visite. La confiance se crée en face à face. Puis tu pars — ou tu accueilles. L'histoire commence là.",
   },
 ];
 
