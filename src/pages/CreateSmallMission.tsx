@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import PostalCodeCityFields from "@/components/profile/PostalCodeCityFields";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dog, Flower2, Home, Handshake, Heart, ArrowLeft } from "lucide-react";
+import { Dog, Flower2, Home, Handshake, Heart, ChevronLeft } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
