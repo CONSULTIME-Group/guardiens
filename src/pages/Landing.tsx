@@ -690,23 +690,6 @@ const Landing = () => {
         </div>
       </section>
 
-      {/* ═══════════════ 7. PRICING ═══════════════ */}
-      <section className="px-6 md:px-12 py-20 bg-card">
-        <div className="max-w-3xl mx-auto text-center">
-          <h2 className="font-heading text-3xl md:text-4xl font-bold mb-5">
-            Votre prochaine histoire commence ici.
-          </h2>
-          <p className="text-muted-foreground text-lg leading-relaxed">
-            Des gardes, de l'entraide, des gens du coin
-            qui se font confiance.
-            <br />
-            Gratuit pour commencer.
-            <br />
-            Irremplaçable pour la suite.
-          </p>
-        </div>
-      </section>
-
       {/* ═══════════════ ENCART FONDATEUR ═══════════════ */}
       <section className="px-6 md:px-12 py-16">
         <div
