@@ -306,41 +306,8 @@ Deno.serve(async (req) => {
       "https://www.googleapis.com/auth/analytics.readonly",
     ]);
 
-    // GA4: resolve property ID from service account
-    // Try to discover the GA4 property
-    let ga4PropertyId = "";
-    try {
-      const accountsRes = await fetch(
-        "https://analyticsadmin.googleapis.com/v1beta/accountSummaries",
-        { headers: { Authorization: `Bearer ${accessToken}` } }
-      );
-      const accountsData = await accountsRes.json();
-      // Find property with measurement ID G-9JP4VR1RRP
-      for (const account of accountsData.accountSummaries || []) {
-        for (const prop of account.propertySummaries || []) {
-          // The property name format is "properties/XXXXXXX"
-          // Try to match by checking data streams
-          const propId = prop.property?.replace("properties/", "");
-          if (propId) {
-            const streamsRes = await fetch(
-              `https://analyticsadmin.googleapis.com/v1beta/properties/${propId}/dataStreams`,
-              { headers: { Authorization: `Bearer ${accessToken}` } }
-            );
-            const streamsData = await streamsRes.json();
-            for (const stream of streamsData.dataStreams || []) {
-              if (stream.webStreamData?.measurementId === "G-9JP4VR1RRP") {
-                ga4PropertyId = propId;
-                break;
-              }
-            }
-            if (ga4PropertyId) break;
-          }
-        }
-        if (ga4PropertyId) break;
-      }
-    } catch (e) {
-      console.error("GA4 property discovery failed:", e);
-    }
+    // GA4: use hardcoded property ID
+    const ga4PropertyId = Deno.env.get("GA4_PROPERTY_ID") || "530010609";
 
     // Date ranges
     const today = new Date();
