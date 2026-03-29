@@ -40,6 +40,9 @@ export interface OwnerProfileData {
   news_format: string[];
   preferred_time: string;
   communication_notes: string;
+  // Skills (from profiles table)
+  skill_categories: string[];
+  available_for_help: boolean;
 }
 
 export interface Pet {
