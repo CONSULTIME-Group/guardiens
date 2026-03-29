@@ -426,37 +426,19 @@ const Landing = () => {
           style={{ animationDelay: "0.3s" }}
         >
           <div className="text-center px-6 md:px-10">
-            <span className="block font-heading text-3xl md:text-4xl font-bold text-primary">37</span>
+            <span className="block font-heading text-3xl md:text-4xl font-bold text-primary">{dynamicCounts?.maisons ?? 37}</span>
             <span className="text-muted-foreground text-sm">maisons gardées</span>
           </div>
           <div className="w-px h-12 bg-border" />
           <div className="text-center px-6 md:px-10">
-            <span className="block font-heading text-3xl md:text-4xl font-bold text-primary">234</span>
+            <span className="block font-heading text-3xl md:text-4xl font-bold text-primary">{dynamicCounts?.animaux ?? 234}</span>
             <span className="text-muted-foreground text-sm">animaux accompagnés</span>
           </div>
           <div className="w-px h-12 bg-border" />
           <div className="text-center px-6 md:px-10">
             <span className="block font-heading text-3xl md:text-4xl font-bold text-primary">5 ans</span>
-            <span className="text-muted-foreground text-sm">en AURA</span>
+            <span className="text-muted-foreground text-sm">d'expérience en AURA</span>
           </div>
-          {dynamicCounts && dynamicCounts.members > 50 && (
-            <>
-              <div className="w-px h-12 bg-border hidden sm:block" />
-              <div className="text-center px-6 md:px-10 mt-4 sm:mt-0">
-                <span className="block font-heading text-3xl md:text-4xl font-bold text-primary">{dynamicCounts.members}</span>
-                <span className="text-muted-foreground text-sm">membres</span>
-              </div>
-            </>
-          )}
-          {dynamicCounts && dynamicCounts.sits > 5 && (
-            <>
-              <div className="w-px h-12 bg-border hidden sm:block" />
-              <div className="text-center px-6 md:px-10 mt-4 sm:mt-0">
-                <span className="block font-heading text-3xl md:text-4xl font-bold text-primary">{dynamicCounts.sits}</span>
-                <span className="text-muted-foreground text-sm">gardes confirmées</span>
-              </div>
-            </>
-          )}
           {dynamicCounts && dynamicCounts.missions > 10 && (
             <>
               <div className="w-px h-12 bg-border hidden sm:block" />
