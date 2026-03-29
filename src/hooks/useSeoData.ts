@@ -52,10 +52,8 @@ export const useSeoData = () => {
     setError(null);
 
     try {
-      const { data: result, error: fnError } = await supabase.functions.invoke(
-        "fetch-seo-data",
-        { body: null, method: "GET" }
-      );
+      const url = forceRefresh ? "fetch-seo-data?refresh=true" : "fetch-seo-data";
+      const { data: result, error: fnError } = await supabase.functions.invoke(url);
 
       if (fnError) throw new Error(fnError.message);
       if (result?.error && !result?.gsc) throw new Error(result.error);
