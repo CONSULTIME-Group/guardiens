@@ -43,7 +43,7 @@ const StepSkills = ({ skillCategories, availableForHelp, onChange }: Props) => {
       .eq("id", user.id)
       .single()
       .then(({ data }) => {
-        const skills = (data?.custom_skills as CustomSkill[]) || [];
+        const skills = (data?.custom_skills as unknown as CustomSkill[]) || [];
         // Filter out rejected
         const visible = skills.filter(s => s.status !== "rejected");
         if (visible.length < skills.length) {

@@ -101,8 +101,8 @@ const AdminSkills = () => {
 
     if (profiles) {
       for (const p of profiles) {
-        const skills = (p.custom_skills as any[]) || [];
-        const updated = skills.map((s: any) =>
+        const pSkills = (p.custom_skills as unknown as any[]) || [];
+        const updated = pSkills.map((s: any) =>
           s.skill_id === skill.id
             ? { ...s, status: "approved", ...(newLabel ? { label: newLabel } : {}) }
             : s
