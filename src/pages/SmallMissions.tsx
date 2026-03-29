@@ -124,10 +124,10 @@ const SmallMissions = () => {
           </div>
           <div className="relative max-w-6xl mx-auto px-4 py-16 md:py-24 text-center space-y-4">
             <h1 className="font-heading text-4xl md:text-5xl font-bold text-foreground">
-              Petites missions — Entraide entre voisins
+              Petites missions — Entraide entre gens du coin
             </h1>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              Besoin d'un coup de main ? Quelqu'un de la communauté est là. Pas d'argent — juste du lien.
+              Des coups de main, des échanges, des compétences. Entre gens du coin qui se choisissent.
             </p>
           </div>
         </section>
