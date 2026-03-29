@@ -4,6 +4,7 @@ import {
   LayoutDashboard, Users, Megaphone, CalendarCheck, Star, Flag,
   ShieldCheck, Mail, FileText, LogOut, ArrowLeft, MapPin, HelpCircle,
   Compass, Handshake, Briefcase, CreditCard, MessageSquare, ScrollText, Settings,
+  Lightbulb,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
@@ -36,6 +37,7 @@ const adminNavGroups: NavGroup[] = [
       { to: "/admin/users", icon: Users, label: "Utilisateurs" },
       { to: "/admin/verifications", icon: ShieldCheck, label: "Vérifications ID", badgeKey: "verifications" },
       { to: "/admin/experiences", icon: Briefcase, label: "Expériences à vérifier", badgeKey: "experiences" },
+      { to: "/admin/skills", icon: Lightbulb, label: "Compétences", badgeKey: "skills" },
     ],
   },
   {
@@ -92,22 +94,19 @@ export const AdminSidebar = () => {
 
   useEffect(() => {
     const fetchBadges = async () => {
-      const [
-        { count: pendingVerifications },
-        { count: pendingExperiences },
-        { count: pendingReports },
-        { count: newContactMessages },
-      ] = await Promise.all([
+      const results = await Promise.all([
         supabase.from("profiles").select("id", { count: "exact", head: true }).eq("identity_verification_status", "pending"),
         supabase.from("external_experiences").select("id", { count: "exact", head: true }).eq("verification_status", "pending"),
         supabase.from("reports").select("id", { count: "exact", head: true }).eq("status", "new"),
         supabase.from("contact_messages").select("id", { count: "exact", head: true }).eq("status", "new"),
+        supabase.from("skills_library").select("id", { count: "exact", head: true }).eq("status", "pending"),
       ]);
       setBadges({
-        verifications: pendingVerifications || 0,
-        experiences: pendingExperiences || 0,
-        reports: pendingReports || 0,
-        contactMessages: newContactMessages || 0,
+        verifications: results[0].count || 0,
+        experiences: results[1].count || 0,
+        reports: results[2].count || 0,
+        contactMessages: results[3].count || 0,
+        skills: results[4].count || 0,
       });
     };
     fetchBadges();

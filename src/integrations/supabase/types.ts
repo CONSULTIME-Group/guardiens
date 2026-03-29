@@ -1465,6 +1465,7 @@ export type Database = {
           cancellation_count: number
           city: string | null
           created_at: string
+          custom_skills: Json | null
           email: string | null
           first_name: string | null
           id: string
@@ -1489,6 +1490,7 @@ export type Database = {
           cancellation_count?: number
           city?: string | null
           created_at?: string
+          custom_skills?: Json | null
           email?: string | null
           first_name?: string | null
           id: string
@@ -1513,6 +1515,7 @@ export type Database = {
           cancellation_count?: number
           city?: string | null
           created_at?: string
+          custom_skills?: Json | null
           email?: string | null
           first_name?: string | null
           id?: string
@@ -2065,6 +2068,57 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: true
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      skills_library: {
+        Row: {
+          category: string | null
+          created_at: string
+          first_submitted_by: string | null
+          id: string
+          label: string
+          merged_into: string | null
+          normalized_label: string
+          status: string
+          usage_count: number
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string
+          first_submitted_by?: string | null
+          id?: string
+          label: string
+          merged_into?: string | null
+          normalized_label: string
+          status?: string
+          usage_count?: number
+        }
+        Update: {
+          category?: string | null
+          created_at?: string
+          first_submitted_by?: string | null
+          id?: string
+          label?: string
+          merged_into?: string | null
+          normalized_label?: string
+          status?: string
+          usage_count?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "skills_library_first_submitted_by_fkey"
+            columns: ["first_submitted_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "skills_library_merged_into_fkey"
+            columns: ["merged_into"]
+            isOneToOne: false
+            referencedRelation: "skills_library"
             referencedColumns: ["id"]
           },
         ]

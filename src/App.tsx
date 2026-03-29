@@ -70,6 +70,7 @@ import AdminLegal from "./pages/admin/AdminLegal";
 import AdminSettings from "./pages/admin/AdminSettings";
 import AdminContactMessages from "./pages/admin/AdminContactMessages";
 import AdminSEO from "./pages/admin/AdminSEO";
+import AdminSkills from "./pages/admin/AdminSkills";
 import PublicProfile from "./pages/PublicProfile";
 import EmergencySitter from "./pages/EmergencySitter";
 import MySubscription from "./pages/MySubscription";
@@ -154,6 +155,7 @@ const AppRoutes = () => (
       <Route path="/admin/settings" element={<AdminSettings />} />
       <Route path="/admin/contact-messages" element={<AdminContactMessages />} />
       <Route path="/admin/seo" element={<AdminSEO />} />
+      <Route path="/admin/skills" element={<AdminSkills />} />
     </Route>
     {/* App routes */}
     <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
