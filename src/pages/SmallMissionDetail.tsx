@@ -53,6 +53,8 @@ const SmallMissionDetail = () => {
 
   useEffect(() => {
     if (!id) return;
+    // SEO guard: demo missions have no detail page
+    if (id.startsWith("demo-")) { navigate("/petites-missions", { replace: true }); return; }
     const load = async () => {
       const { data: m } = await supabase
         .from("small_missions")

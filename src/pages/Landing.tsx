@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import PageMeta from "@/components/PageMeta";
 import useEmblaCarousel from "embla-carousel-react";
 import heroDogBbq from "@/assets/hero-dog-bbq.jpg";
+import DemoListingShowcase from "@/components/landing/DemoListingShowcase";
 
 const differentiators = [
   {
@@ -543,6 +544,11 @@ const Landing = () => {
           </div>
         </div>
       </section>
+
+      {/* ═══════════════ SECTION 4bis — VITRINE DÉMO ═══════════════ */}
+      <RevealSection>
+        <DemoListingShowcase />
+      </RevealSection>
 
       {/* ═══════════════ SECTION 5 — TÉMOIGNAGES ═══════════════ */}
       <section className="py-24 md:py-32 bg-foreground">
