@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import PageMeta from "@/components/PageMeta";
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import { Scissors, Hammer, Mail, PawPrint, Sprout, Lightbulb } from "lucide-react";
+import { Apple, Sprout, Egg, PawPrint, Hammer, ChefHat } from "lucide-react";
 
 /* ── scroll reveal ── */
 function useScrollReveal(threshold = 0.1) {
@@ -35,12 +35,12 @@ function Reveal({ children, delay = 0 }: { children: ReactNode; delay?: number }
 
 /* ── data ── */
 const examples = [
-  { Icon: Scissors, title: "Jardin tondu", text: "3h de tonte contre un panier de légumes du potager.", badge: "Légumes · Écully" },
-  { Icon: Hammer, title: "Meubles montés", text: "Une armoire IKEA contre un repas fait maison.", badge: "Repas · Lyon 3e" },
-  { Icon: Mail, title: "Colis réceptionné", text: "Garder un colis 2 jours contre un cours de cuisine.", badge: "Cuisine · Caluire" },
-  { Icon: PawPrint, title: "Chien promené", text: "30 minutes par jour pendant les vacances contre des œufs frais.", badge: "Œufs · Grenoble" },
-  { Icon: Sprout, title: "Plantes arrosées", text: "10 jours d'arrosage contre une bouteille de vin local.", badge: "Vin · Annecy" },
-  { Icon: Lightbulb, title: "Cours donné", text: "2h de cours de guitare contre une aide à la déclaration d'impôts.", badge: "Admin · Chambéry" },
+  { Icon: Apple, title: "Verger à ramasser", text: "Venir ramasser les fruits avant qu'ils tombent contre un énorme panier de fruits frais à emporter.", badge: "Fruits · Écully" },
+  { Icon: Sprout, title: "Potager à planter", text: "Donner un coup de main pour planter les légumes au printemps — et venir se servir librement à la récolte.", badge: "Légumes · Lyon 3e" },
+  { Icon: Egg, title: "Poules à garder", text: "Nourrir les poules et ramasser les œufs pendant 10 jours contre des œufs frais à volonté au retour.", badge: "Œufs · Caluire" },
+  { Icon: PawPrint, title: "Chien à promener", text: "Deux semaines de balades contre son chien promené la prochaine fois qu'on part.", badge: "Réciprocité · Grenoble" },
+  { Icon: Hammer, title: "Meubles à monter", text: "Une après-midi de montage IKEA contre un vrai repas fait maison et une bouteille.", badge: "Repas · Annecy" },
+  { Icon: ChefHat, title: "Cours de cuisine", text: "2h à apprendre à faire la pâte fraîche contre une aide pour la déclaration d'impôts.", badge: "Échange · Chambéry" },
 ];
 
 /* ── page ── */
@@ -100,7 +100,7 @@ const SmallMissionsPublic = () => {
             </Reveal>
             <Reveal delay={0.1}>
               <p className="text-lg font-heading italic leading-relaxed text-foreground/85 text-center mb-7">
-                Ton expertise de bricoleur contre le tajine d'une personne du coin. Tes bras contre ses légumes du potager. Ton temps contre une histoire.
+                Tes bras pour planter les légumes ce week-end. Ses tomates cet été. Peut-être son aide pour repeindre la cuisine en septembre. L'échange n'a pas besoin d'être immédiat pour être juste.
               </p>
             </Reveal>
             <Reveal delay={0.2}>
@@ -210,7 +210,7 @@ const SmallMissionsPublic = () => {
 
             <Reveal delay={0.3}>
               <p className="text-center font-body text-base text-foreground/60 italic mt-12">
-                L'échange se décide entre vous. Guardiens fournit l'espace — pas la transaction.
+                L'échange se décide entre vous. Parfois immédiat. Parfois à la saison prochaine. C'est vous qui décidez — pas la plateforme.
               </p>
             </Reveal>
           </div>
