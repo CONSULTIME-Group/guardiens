@@ -462,7 +462,7 @@ const Landing = () => {
               <span className="block font-heading text-[48px] md:text-[72px] font-bold text-foreground leading-none">
                 5
               </span>
-              <span className="font-body text-sm text-foreground/60 tracking-[0.05em]">ans d'expérience</span>
+              <span className="font-body text-sm text-foreground/60 tracking-[0.05em]">ans en AURA</span>
             </div>
             {dynamicCounts && dynamicCounts.missions > 10 && (
               <>
@@ -567,6 +567,9 @@ const Landing = () => {
       <section className="py-20 md:py-[120px] bg-background">
         <div className="max-w-6xl mx-auto px-6 md:px-12">
           <RevealSection className="text-center mb-16">
+            <p className="text-[11px] font-body font-semibold tracking-[0.15em] uppercase text-primary/60 mb-4">
+              Pourquoi Guardiens
+            </p>
             <h2 className="font-heading text-[36px] md:text-[48px] lg:text-[52px] font-semibold text-foreground leading-[1.2]">
               Un réseau de gens du coin qui se font confiance.
             </h2>
@@ -600,6 +603,9 @@ const Landing = () => {
       <section className="py-20 md:py-[120px] bg-foreground">
         <div className="max-w-6xl mx-auto px-6 md:px-12">
           <RevealSection className="text-center mb-16">
+            <p className="text-[11px] font-body font-semibold tracking-[0.15em] uppercase text-white/40 mb-4">
+              Ils ont sauté le pas
+            </p>
             <h2 className="font-heading text-[36px] md:text-[48px] lg:text-[52px] font-semibold text-white leading-[1.2]">
               Ils ont sauté le pas.
             </h2>
@@ -682,6 +688,9 @@ const Landing = () => {
       <section className="py-20 md:py-[120px] bg-background">
         <div className="max-w-6xl mx-auto px-6 md:px-12">
           <RevealSection className="text-center mb-16">
+            <p className="text-[11px] font-body font-semibold tracking-[0.15em] uppercase text-primary/60 mb-4">
+              Comment ça marche
+            </p>
             <h2 className="font-heading text-[36px] md:text-[48px] lg:text-[52px] font-semibold text-foreground leading-[1.2]">
               Trois étapes. Une relation.
             </h2>
@@ -771,7 +780,7 @@ const Landing = () => {
               border: "1px solid rgba(255,255,255,0.3)",
             }}
           >
-            <span className="font-body text-[12px] text-white uppercase tracking-[0.1em]">Fondateur</span>
+            <span className="font-body text-[12px] text-white uppercase tracking-[0.1em]">Fondateurs</span>
           </div>
           <h2 className="font-heading text-[36px] md:text-[48px] lg:text-[52px] font-bold text-white leading-[1.2] mb-6">
             ⭐ Inscris-toi avant le 13 mai.
