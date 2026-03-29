@@ -33,7 +33,6 @@ const STATUS_LABELS: Record<string, { label: string; className: string }> = {
 const SmallMissionDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const navigate = useNavigate();
   const { user } = useAuth();
   const { hasAccess } = useSubscriptionAccess();
   const { level: accessLevel, profileCompletion, canApplyMissions } = useAccessLevel();
