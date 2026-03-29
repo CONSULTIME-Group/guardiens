@@ -214,6 +214,11 @@ const PublicProfile = () => {
                 <p className="text-sm italic mt-2" style={{ color: "#4B5563" }}>{profile.bio}</p>
               )}
 
+              {/* Skills section */}
+              {profile.available_for_help && profile.skill_categories?.length > 0 && (
+                <PublicSkills skillCategories={profile.skill_categories} userId={id!} />
+              )}
+
               <div className="flex gap-2 mt-2">
                 {isSitter && <span className="px-2.5 py-1 rounded-full text-xs font-medium" style={{ backgroundColor: "#D8F3DC", color: "#2D6A4F" }}>🏡 Gardien</span>}
                 {isOwner && <span className="px-2.5 py-1 rounded-full text-xs font-medium" style={{ backgroundColor: "#DBEAFE", color: "#1E40AF" }}>🐾 Propriétaire</span>}

@@ -189,7 +189,7 @@ export function useOwnerProfile() {
 
     try {
       // Profile fields
-      const profileFields = ["first_name", "last_name", "city", "postal_code", "bio", "avatar_url"] as const;
+      const profileFields = ["first_name", "last_name", "city", "postal_code", "bio", "avatar_url", "skill_categories", "available_for_help"] as const;
       const profileUpdate: any = {};
       profileFields.forEach(f => { if (f in stepData) profileUpdate[f] = (stepData as any)[f]; });
       profileUpdate.profile_completion = computeCompletion(newData, pets.length);
