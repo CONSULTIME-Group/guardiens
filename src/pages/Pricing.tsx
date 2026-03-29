@@ -46,12 +46,10 @@ const strengthBlocks = [
   { icon: Siren, title: "Gardiens d'urgence", desc: "Des gardiens expérimentés, mobilisables rapidement parce qu'ils sont à côté. Le filet de sécurité que vous méritez." },
 ];
 
-const promisePoints = [
-  "Un seul prix : 49€/an pour les gardiens. Point.",
-  "Gratuit pour les propriétaires — pour toujours.",
-  "Aucune commission sur les gardes classiques.",
-  "Un réseau local de confiance, pas une marketplace anonyme.",
-  "Annulation en 1 clic, sans justification.",
+const promiseLines = [
+  "L'échange entre le propriétaire et le gardien se décide entre vous.",
+  "Guardiens fournit l'espace — pas la transaction.",
+  "Un prix. Transparent. C'est tout.",
 ];
 
 const faqItems = [
