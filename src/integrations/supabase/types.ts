@@ -1707,6 +1707,27 @@ export type Database = {
           },
         ]
       }
+      seo_cache: {
+        Row: {
+          cache_key: string
+          data: Json
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          cache_key: string
+          data?: Json
+          id?: string
+          updated_at?: string
+        }
+        Update: {
+          cache_key?: string
+          data?: Json
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       seo_city_pages: {
         Row: {
           active_sits_count: number
