@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import PageMeta from "@/components/PageMeta";
 import useEmblaCarousel from "embla-carousel-react";
 import heroDogBbq from "@/assets/hero-dog-bbq.jpg";
+import DemoListingShowcase from "@/components/landing/DemoListingShowcase";
 
 const differentiators = [
   {
