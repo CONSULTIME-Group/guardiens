@@ -280,6 +280,13 @@ const SitterProfile = () => {
                       {num === 5 && (
                         <StepPreferences data={mergedData} onChange={handleChange} />
                       )}
+                      {num === 6 && (
+                        <StepSkills
+                          skillCategories={mergedData.skill_categories || []}
+                          availableForHelp={mergedData.available_for_help || false}
+                          onChange={(partial) => handleChange(partial as any)}
+                        />
+                      )}
                     </AccordionContent>
                   </AccordionItem>
                 );
