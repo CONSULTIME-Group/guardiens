@@ -775,7 +775,7 @@ const Landing = () => {
             <Button
               size="lg"
               className="bg-white text-foreground hover:bg-white/90 font-semibold"
-              onClick={() => navigate("/register?role=owner")}
+              onClick={() => navigate("/inscription?role=owner")}
             >
               Je cherche un gardien
             </Button>
