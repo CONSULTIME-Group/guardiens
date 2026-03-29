@@ -7,7 +7,7 @@ const corsHeaders = {
 };
 
 const GSC_SITE_URL = "https://guardiens.fr/";
-const GA4_PROPERTY_ID = ""; // Will be resolved from measurement ID
+// GA4 Property ID is read from env or defaults to 530010609
 
 // ---------- Google JWT Auth ----------
 
