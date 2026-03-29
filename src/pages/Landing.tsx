@@ -202,7 +202,7 @@ const Landing = () => {
         const missionsRes = await supabase
           .from("small_missions")
           .select("id", { count: "exact", head: true })
-          .in("status", ["active", "completed"]);
+          .in("status", ["open", "in_progress", "completed"]);
 
         setDynamicCounts({
           maisons,
