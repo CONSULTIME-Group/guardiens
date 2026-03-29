@@ -438,30 +438,6 @@ const OwnerDashboard = () => {
         </DashSection>
       )}
 
-      {/* 9. Petites missions à proximité */}
-      <DashSection title="Besoin d'un coup de main ?" action={
-        <Link to="/petites-missions" className="text-xs text-primary hover:underline font-medium">Voir les petites missions →</Link>
-      }>
-        <Link to="/petites-missions/create" className="inline-flex mb-3">
-          <Button size="sm" variant="outline" className="gap-1.5"><Plus className="h-3.5 w-3.5" /> Poster une petite mission</Button>
-        </Link>
-        {smallMissions.length === 0 ? (
-          <EmptyCard icon={Handshake} text="Aucune petite mission dans votre zone" hint="Postez un coup de main et trouvez de l'aide entre voisins" />
-        ) : (
-          <div className="space-y-2">
-            {smallMissions.map((m: any) => (
-              <Link key={m.id} to={`/petites-missions/${m.id}`} className="flex items-center gap-3 p-3 rounded-xl bg-card border border-border hover:bg-accent/50 transition-colors">
-                <Handshake className="h-5 w-5 text-primary shrink-0" />
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium truncate">{m.title}</p>
-                  {m.exchange && <p className="text-xs text-muted-foreground">En échange : {m.exchange}</p>}
-                </div>
-                <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
-              </Link>
-            ))}
-          </div>
-        )}
-      </DashSection>
     </div>
   );
 };
