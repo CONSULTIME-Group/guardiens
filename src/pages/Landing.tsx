@@ -210,7 +210,7 @@ const Landing = () => {
               "Petites missions entre voisins",
               "Auvergne-Rhône-Alpes",
             ],
-            slogan: "Ce que vous avez contre ce que vous n'avez pas encore vécu.",
+            slogan: "Proches de chez vous. Partir. Revenir. Recommencer.",
             founder: [
               { "@type": "Person", name: "Jérémie" },
               { "@type": "Person", name: "Elisa" },
@@ -357,17 +357,17 @@ const Landing = () => {
             </span>
           </div>
 
-          <h1 className="font-heading text-3xl md:text-6xl lg:text-7xl font-bold leading-tight mb-3 md:mb-4 text-white drop-shadow-lg animate-fade-in">
-            Ce que vous avez contre ce que vous
-            <br />
-            <span className="italic text-primary-foreground/90">n'avez pas encore vécu.</span>
-          </h1>
-          <p className="text-base md:text-xl text-white/90 max-w-2xl mx-auto mb-6 md:mb-8 drop-shadow animate-fade-in" style={{ animationDelay: "0.1s" }}>
-            Des gardes de maison, de l'entraide,
-            des petits services.
-            <br />
-            Entre gens du coin qui se choisissent.
-          </p>
+          <div className="space-y-2 md:space-y-3 mb-6 md:mb-8 animate-fade-in">
+            <h1 className="font-heading text-3xl md:text-6xl lg:text-7xl font-bold leading-tight text-white drop-shadow-lg">
+              Proches de chez vous.
+            </h1>
+            <p className="font-heading text-2xl md:text-4xl lg:text-5xl italic text-white/95 drop-shadow-lg">
+              Partir. Revenir. Recommencer.
+            </p>
+            <p className="text-base md:text-xl text-white/85 max-w-2xl mx-auto drop-shadow">
+              Garder une maison. Échanger un service. Se faire confiance.
+            </p>
+          </div>
 
           <div className="flex flex-col sm:flex-row gap-3 md:gap-4 justify-center w-full sm:w-auto animate-fade-in" style={{ animationDelay: "0.2s" }}>
             <Button variant="hero" size="xl" onClick={() => navigate("/inscription?role=owner")}>
