@@ -120,7 +120,7 @@ const SitterProfile = () => {
   const completedSections = sections.filter(s => sectionComplete(s.num, mergedData)).length;
 
   return (
-    <div className="min-h-screen" style={{ background: "#FAF9F6" }}>
+    <div className="min-h-screen bg-background">
       <PageMeta title="Mon profil | Guardiens" description="Modifiez votre profil gardien Guardiens." />
 
       <div className="p-4 sm:p-6 md:p-10 max-w-3xl mx-auto animate-fade-in space-y-6 pb-40 min-w-0">
