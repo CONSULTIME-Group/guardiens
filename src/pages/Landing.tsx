@@ -705,7 +705,7 @@ const Landing = () => {
             Pourquoi le 13 mai ? C'est l'anniversaire de Jérémie.
             Il préfère offrir l'accès plutôt que recevoir des chaussettes.
           </p>
-          <Button variant="hero" size="xl" onClick={() => navigate("/register")}>
+          <Button variant="hero" size="xl" onClick={() => navigate("/inscription")}>
             Rejoindre le mouvement
           </Button>
         </div>
