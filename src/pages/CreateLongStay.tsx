@@ -144,7 +144,7 @@ const CreateLongStay = () => {
       )}
 
       {eligibility.eligible && (
-        <>
+        <div className="space-y-8 pb-32">
           <div className="space-y-6">
             <div>
               <Label className="text-sm font-medium">Titre de l'annonce *</Label>
@@ -287,7 +287,7 @@ const CreateLongStay = () => {
               </Button>
             </div>
           </div>
-        </>
+        </div>
       )}
     </div>
   );
