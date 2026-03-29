@@ -40,6 +40,10 @@ const SearchSitter = () => {
   const isMobile = useIsMobile();
   const [searchParams] = useSearchParams();
   const [tab, setTab] = useState<SearchTab>("sits");
+  const [missionSubTab, setMissionSubTab] = useState<MissionSubTab>("published");
+  const [missionTypeFilter, setMissionTypeFilter] = useState<"all" | "besoin" | "offre">("all");
+  const [missionCategoryFilter, setMissionCategoryFilter] = useState<"all" | "garden" | "animals" | "skills" | "house">("all");
+  const [availableMembers, setAvailableMembers] = useState<any[]>([]);
   const [city, setCity] = useState("");
   const [radius, setRadius] = useState([50]);
   const [startDate, setStartDate] = useState("");
