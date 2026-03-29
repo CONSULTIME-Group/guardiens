@@ -413,6 +413,7 @@ const SearchSitter = () => {
     setResults([]); // Clear results since members are separate
   };
 
+  const sortResults = (items: any[], sortBy: SortOption) => {
     const sorted = [...items];
     if (sortBy === "closest") sorted.sort((a, b) => (a.distance ?? 9999) - (b.distance ?? 9999));
     else if (sortBy === "recent") sorted.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
