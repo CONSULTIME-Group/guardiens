@@ -79,25 +79,16 @@ const testimonials = [
   },
 ];
 
-const steps = [
-  {
-    number: "01",
-    title: "Raconte-toi",
-    description:
-      "5 minutes. Ta maison, tes animaux, ce que tu cherches. Ou qui tu es et ce que tu as envie de vivre.",
-  },
-  {
-    number: "02",
-    title: "Découvre tes gens du coin",
-    description:
-      "Des profils proches de chez toi. Des gens qui n'attendent que de se rencontrer.",
-  },
-  {
-    number: "03",
-    title: "Rencontrez-vous en vrai",
-    description:
-      "Un café, une balade, une visite. La confiance se crée en face à face. Puis tu pars — ou tu accueilles. L'histoire commence là.",
-  },
+const ownerSteps = [
+  { number: "01", title: "Tu publies", description: "Ta maison, tes animaux, tes dates.\nCe dont tu as besoin. Cinq minutes." },
+  { number: "02", title: "Tu choisis", description: "Des profils du quartier.\nTu lis, tu échanges, tu rencontres.\nC'est toi qui décides." },
+  { number: "03", title: "Tu pars.", description: "Vraiment." },
+];
+
+const sitterSteps = [
+  { number: "01", title: "Tu te présentes", description: "Qui tu es, ce que tu aimes,\noù tu veux aller. Cinq minutes." },
+  { number: "02", title: "Tu postules", description: "Des gardes proches de chez toi.\nTu choisis celles qui te ressemblent." },
+  { number: "03", title: "Tu rencontres.", description: "Des gens que tu n'aurais\njamais croisés autrement." },
 ];
 
 /* ── Separator for histoire section ── */
@@ -334,17 +325,17 @@ const Landing = () => {
           <span className="text-primary">g</span>uardiens
         </h2>
         <div className="flex gap-2 md:gap-3 items-center">
-          <Button variant="ghost" size="sm" className="hidden sm:inline-flex" onClick={() => navigate("/actualites")}>
-            Articles
+          <Button variant="ghost" size="sm" className="hidden sm:inline-flex" onClick={() => navigate("/petites-missions")}>
+            Entraide
           </Button>
           <Button variant="ghost" size="sm" className="hidden sm:inline-flex" onClick={() => navigate("/guides")}>
             Guides locaux
           </Button>
-          <Button variant="ghost" size="sm" className="hidden sm:inline-flex" asChild>
-            <a href="#entraide">Entraide</a>
-          </Button>
           <Button variant="ghost" size="sm" className="hidden sm:inline-flex" onClick={() => navigate("/tarifs")}>
             Tarifs
+          </Button>
+          <Button variant="ghost" size="sm" className="hidden sm:inline-flex" onClick={() => navigate("/actualites")}>
+            Articles
           </Button>
           <Button variant="ghost" size="sm" onClick={() => navigate("/login")}>
             Connexion
@@ -668,30 +659,75 @@ const Landing = () => {
         </div>
       </section>
 
-      {/* ═══════════════ 6. COMMENT ÇA MARCHE ═══════════════ */}
+      {/* ═══════════════ 6. TROIS ÉTAPES — DEUX COLONNES ═══════════════ */}
       <section className="px-6 md:px-12 py-24 lg:py-28">
         <div className="max-w-5xl mx-auto">
           <h2 className="font-heading text-3xl md:text-4xl font-bold text-center mb-16">
             Trois étapes. Une relation.
           </h2>
-          <div className="grid md:grid-cols-3 gap-10">
-            {steps.map((step, i) => (
-              <div
-                key={step.number}
-                className="text-center animate-fade-in"
-                style={{ animationDelay: `${0.1 * i}s` }}
-              >
-                <span className="inline-block font-heading text-5xl font-bold text-primary/20 mb-4">
-                  {step.number}
-                </span>
-                <h3 className="font-heading text-xl font-semibold mb-3">
-                  {step.title}
-                </h3>
-                <p className="text-muted-foreground leading-relaxed">
-                  {step.description}
-                </p>
+          <div className="grid md:grid-cols-2 gap-12 md:gap-16">
+            {/* Colonne gauche — Propriétaire */}
+            <div>
+              <p className="text-[11px] font-semibold tracking-[0.2em] uppercase text-primary mb-8">
+                Tu as une maison, des animaux
+              </p>
+              <div className="space-y-8">
+                {ownerSteps.map((step, i) => (
+                  <div key={step.number} className="animate-fade-in" style={{ animationDelay: `${0.1 * i}s` }}>
+                    <span className="font-heading text-4xl font-bold text-primary/20">{step.number}</span>
+                    <h3 className="font-heading text-lg font-semibold mt-1 mb-2">{step.title}</h3>
+                    <p className="text-muted-foreground leading-relaxed whitespace-pre-line text-sm">{step.description}</p>
+                  </div>
+                ))}
               </div>
-            ))}
+              <Link
+                to="/inscription?role=owner"
+                className="inline-flex items-center gap-1 mt-8 text-primary font-medium hover:underline"
+              >
+                Je cherche un gardien <ArrowRight className="h-4 w-4" />
+              </Link>
+            </div>
+
+            {/* Colonne droite — Gardien */}
+            <div>
+              <p className="text-[11px] font-semibold tracking-[0.2em] uppercase text-primary mb-8">
+                Tu veux garder
+              </p>
+              <div className="space-y-8">
+                {sitterSteps.map((step, i) => (
+                  <div key={step.number} className="animate-fade-in" style={{ animationDelay: `${0.1 * i}s` }}>
+                    <span className="font-heading text-4xl font-bold text-primary/20">{step.number}</span>
+                    <h3 className="font-heading text-lg font-semibold mt-1 mb-2">{step.title}</h3>
+                    <p className="text-muted-foreground leading-relaxed whitespace-pre-line text-sm">{step.description}</p>
+                  </div>
+                ))}
+              </div>
+              <Link
+                to="/inscription?role=sitter"
+                className="inline-flex items-center gap-1 mt-8 text-primary font-medium hover:underline"
+              >
+                Je veux garder <ArrowRight className="h-4 w-4" />
+              </Link>
+            </div>
+          </div>
+
+          {/* Encart entraide */}
+          <div className="mt-16 rounded-2xl p-8 md:p-10 text-center" style={{ backgroundColor: "#F5F3EF" }}>
+            <h3 className="font-heading text-xl md:text-2xl font-bold mb-3">
+              Un jardin à arroser ? Un meuble à monter ?
+            </h3>
+            <p className="text-muted-foreground leading-relaxed max-w-xl mx-auto mb-5">
+              Jardinage, bricolage, courses, coup de main —
+              les petites missions sont là pour ça.
+              <br />
+              Sans argent. Entre gens du coin qui se choisissent.
+            </p>
+            <Link
+              to="/petites-missions"
+              className="text-primary font-medium hover:underline inline-flex items-center gap-1"
+            >
+              Découvrir les petites missions <ArrowRight className="h-4 w-4" />
+            </Link>
           </div>
         </div>
       </section>
