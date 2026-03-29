@@ -166,16 +166,40 @@ const Landing = () => {
       if (now - lastFetchRef.current < 10 * 60 * 1000) return;
       lastFetchRef.current = now;
 
-      const [membersRes, missionsRes, sitsRes] = await Promise.all([
-        supabase.from("profiles").select("id", { count: "exact", head: true }),
-        supabase.from("small_missions").select("id", { count: "exact", head: true }).in("status", ["open", "in_progress", "completed"]),
-        supabase.from("sits").select("id", { count: "exact", head: true }).in("status", ["confirmed", "completed"]),
-      ]);
-      setDynamicCounts({
-        members: membersRes.count ?? 0,
-        missions: missionsRes.count ?? 0,
-        sits: sitsRes.count ?? 0,
-      });
+      try {
+        // Maisons: count distinct properties with confirmed/completed sits
+        const sitsRes = await supabase
+          .from("sits")
+          .select("property_id")
+          .in("status", ["confirmed", "completed"]);
+        const distinctProperties = new Set((sitsRes.data || []).map(s => s.property_id));
+        const maisons = 37 + distinctProperties.size;
+
+        // Animaux: get pets from properties that have confirmed/completed sits
+        const propertyIds = Array.from(distinctProperties);
+        let animaux = 234;
+        if (propertyIds.length > 0) {
+          const petsRes = await supabase
+            .from("pets")
+            .select("id", { count: "exact", head: true })
+            .in("property_id", propertyIds);
+          animaux += (petsRes.count ?? 0);
+        }
+
+        // Missions d'entraide
+        const missionsRes = await supabase
+          .from("small_missions")
+          .select("id", { count: "exact", head: true })
+          .in("status", ["open", "in_progress", "completed"]);
+
+        setDynamicCounts({
+          maisons,
+          animaux,
+          missions: missionsRes.count ?? 0,
+        });
+      } catch {
+        setDynamicCounts({ maisons: 37, animaux: 234, missions: 0 });
+      }
     };
     fetchCounts();
   }, []);
