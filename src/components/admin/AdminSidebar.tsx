@@ -104,6 +104,7 @@ export const AdminSidebar = () => {
         supabase.from("external_experiences").select("id", { count: "exact", head: true }).eq("verification_status", "pending"),
         supabase.from("reports").select("id", { count: "exact", head: true }).eq("status", "new"),
         supabase.from("contact_messages").select("id", { count: "exact", head: true }).eq("status", "new"),
+        supabase.from("skills_library").select("id", { count: "exact", head: true }).eq("status", "pending"),
       ]);
       setBadges({
         verifications: pendingVerifications || 0,
