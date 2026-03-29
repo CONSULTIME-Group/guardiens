@@ -123,6 +123,13 @@ const OwnerProfilePage = () => {
         {currentStep === 6 && <OwnerStepCalendar />}
         {currentStep === 7 && <OwnerGallery />}
         {currentStep === 8 && <OwnerExperiences />}
+        {currentStep === 9 && (
+          <StepSkills
+            skillCategories={(mergedData as any).skill_categories || []}
+            availableForHelp={(mergedData as any).available_for_help || false}
+            onChange={(partial) => handleChange(partial as any)}
+          />
+        )}
       </div>
 
       <div className="flex flex-col sm:flex-row items-center gap-3">
