@@ -100,7 +100,7 @@ const SmallMissionsPublic = () => {
             </Reveal>
             <Reveal delay={0.1}>
               <p className="text-lg font-heading italic leading-relaxed text-foreground/85 text-center mb-7">
-                Ton expertise de bricoleur contre le tajine d'une personne du coin. Tes bras contre ses légumes du potager. Ton temps contre une histoire.
+                Tes bras pour planter les légumes ce week-end. Ses tomates cet été. Peut-être son aide pour repeindre la cuisine en septembre. L'échange n'a pas besoin d'être immédiat pour être juste.
               </p>
             </Reveal>
             <Reveal delay={0.2}>
