@@ -210,7 +210,7 @@ const Landing = () => {
               "Petites missions entre voisins",
               "Auvergne-Rhône-Alpes",
             ],
-            slogan: "Ce que vous avez contre ce que vous n'avez pas encore vécu.",
+            slogan: "Proches de chez vous. Partir. Revenir. Recommencer.",
             founder: [
               { "@type": "Person", name: "Jérémie" },
               { "@type": "Person", name: "Elisa" },
