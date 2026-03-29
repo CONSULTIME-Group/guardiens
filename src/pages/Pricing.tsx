@@ -46,12 +46,10 @@ const strengthBlocks = [
   { icon: Siren, title: "Gardiens d'urgence", desc: "Des gardiens expérimentés, mobilisables rapidement parce qu'ils sont à côté. Le filet de sécurité que vous méritez." },
 ];
 
-const promisePoints = [
-  "Un seul prix : 49€/an pour les gardiens. Point.",
-  "Gratuit pour les propriétaires — pour toujours.",
-  "Aucune commission sur les gardes classiques.",
-  "Un réseau local de confiance, pas une marketplace anonyme.",
-  "Annulation en 1 clic, sans justification.",
+const promiseLines = [
+  "L'échange entre le propriétaire et le gardien se décide entre vous.",
+  "Guardiens fournit l'espace — pas la transaction.",
+  "Un prix. Transparent. C'est tout.",
 ];
 
 const faqItems = [
@@ -272,14 +270,11 @@ const Pricing = () => {
           {/* Promise */}
           <section className="max-w-2xl mx-auto space-y-6 text-center">
             <h2 className="font-heading text-2xl font-bold text-foreground">Notre promesse — Simple, honnête, et c'est tout</h2>
-            <ul className="space-y-3 text-left">
-              {promisePoints.map((point) => (
-                <li key={point} className="flex items-start gap-2.5 text-sm">
-                  <Check className="h-4 w-4 text-primary mt-0.5 shrink-0" />
-                  <span className="text-foreground">{point}</span>
-                </li>
+            <div className="space-y-4">
+              {promiseLines.map((line) => (
+                <p key={line} className="text-lg text-foreground/80 leading-relaxed">{line}</p>
               ))}
-            </ul>
+            </div>
           </section>
 
           {/* FAQ */}
