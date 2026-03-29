@@ -37,6 +37,7 @@ const adminNavGroups: NavGroup[] = [
       { to: "/admin/users", icon: Users, label: "Utilisateurs" },
       { to: "/admin/verifications", icon: ShieldCheck, label: "Vérifications ID", badgeKey: "verifications" },
       { to: "/admin/experiences", icon: Briefcase, label: "Expériences à vérifier", badgeKey: "experiences" },
+      { to: "/admin/skills", icon: Lightbulb, label: "Compétences", badgeKey: "skills" },
     ],
   },
   {
