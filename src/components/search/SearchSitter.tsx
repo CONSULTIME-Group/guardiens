@@ -529,8 +529,7 @@ const SearchSitter = () => {
     const isDemo = !!item.is_demo;
     const linkTo = isDemo ? "#" : isMission ? `/petites-missions/${item.id}` : isLongStay ? (sitterEligible ? `/long-stays/${item.id}` : "#") : `/sits/${item.id}`;
 
-    return (
-      const cardContent = (
+    const cardContent = (
         <div className={`block bg-card rounded-lg border overflow-hidden hover:shadow-md transition-shadow ${isLongStay && !sitterEligible ? "opacity-60 cursor-not-allowed" : ""} ${isLongStay ? "border-blue-200" : "border-border"}`}>
           <div className="flex flex-col sm:flex-row">
             {photos.length > 0 && (
