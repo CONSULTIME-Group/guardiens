@@ -41,6 +41,9 @@ export interface SitterProfileData {
   languages: string[];
   bonus_skills: string[];
   interests: string[];
+  // Skills
+  skill_categories: string[];
+  available_for_help: boolean;
 }
 
 export interface PastAnimal {
@@ -59,6 +62,7 @@ const defaultData: SitterProfileData = {
   has_license: false, has_vehicle: false, geographic_radius: 30, min_duration: 3, max_duration: 21, availability_dates: [], is_available: false,
   strict_rules_ok: false, prefer_visitors: false, farm_animals_ok: false, preferences_notes: "",
   meeting_preference: [], handover_preference: "", languages: [], bonus_skills: [], interests: [],
+  skill_categories: [], available_for_help: false,
 };
 
 export function useSitterProfile() {
@@ -114,6 +118,8 @@ export function useSitterProfile() {
       languages: s?.languages || [],
       bonus_skills: s?.bonus_skills || [],
       interests: s?.interests || [],
+      skill_categories: (p as any)?.skill_categories || [],
+      available_for_help: (p as any)?.available_for_help || false,
     };
 
     setData(merged);
@@ -184,7 +190,7 @@ export function useSitterProfile() {
 
     try {
       // Save profile fields
-      const profileFields = ["first_name", "last_name", "city", "postal_code", "bio", "avatar_url"] as const;
+      const profileFields = ["first_name", "last_name", "city", "postal_code", "bio", "avatar_url", "skill_categories", "available_for_help"] as const;
       const profileUpdate: any = {};
       profileFields.forEach(f => { if (f in stepData) profileUpdate[f] = (stepData as any)[f]; });
 

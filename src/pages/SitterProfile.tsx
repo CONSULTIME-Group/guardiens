@@ -14,6 +14,7 @@ import StepSitterProfile from "@/components/profile/StepSitterProfile";
 import StepExperience from "@/components/profile/StepExperience";
 import StepMobility from "@/components/profile/StepMobility";
 import StepPreferences from "@/components/profile/StepPreferences";
+import StepSkills from "@/components/profile/StepSkills";
 import SitterGallery from "@/components/profile/SitterGallery";
 import ExternalExperiences from "@/components/profile/ExternalExperiences";
 import TrustProfile from "@/components/profile/TrustProfile";
@@ -41,6 +42,7 @@ const sections = [
   { id: "experience", num: 3, label: "Expérience" },
   { id: "mobility", num: 4, label: "Mobilité" },
   { id: "preferences", num: 5, label: "Préférences de garde" },
+  { id: "skills", num: 6, label: "Ce que je sais faire" },
 ];
 
 const SitterProfile = () => {
@@ -277,6 +279,13 @@ const SitterProfile = () => {
                       )}
                       {num === 5 && (
                         <StepPreferences data={mergedData} onChange={handleChange} />
+                      )}
+                      {num === 6 && (
+                        <StepSkills
+                          skillCategories={mergedData.skill_categories || []}
+                          availableForHelp={mergedData.available_for_help || false}
+                          onChange={(partial) => handleChange(partial as any)}
+                        />
                       )}
                     </AccordionContent>
                   </AccordionItem>

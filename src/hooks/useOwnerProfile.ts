@@ -40,6 +40,9 @@ export interface OwnerProfileData {
   news_format: string[];
   preferred_time: string;
   communication_notes: string;
+  // Skills (from profiles table)
+  skill_categories: string[];
+  available_for_help: boolean;
 }
 
 export interface Pet {
@@ -69,6 +72,7 @@ const defaultData: OwnerProfileData = {
   smoker_accepted: "", rules_notes: "",
   meeting_preference: [], handover_preference: "", welcome_notes: "",
   news_frequency: "", news_format: [], preferred_time: "", communication_notes: "",
+  skill_categories: [], available_for_help: false,
 };
 
 export function useOwnerProfile() {
@@ -120,6 +124,8 @@ export function useOwnerProfile() {
       news_format: o?.news_format || [],
       preferred_time: o?.preferred_time || "",
       communication_notes: o?.communication_notes || "",
+      skill_categories: (p as any)?.skill_categories || [],
+      available_for_help: (p as any)?.available_for_help || false,
     });
 
     if (prop) {
@@ -189,7 +195,7 @@ export function useOwnerProfile() {
 
     try {
       // Profile fields
-      const profileFields = ["first_name", "last_name", "city", "postal_code", "bio", "avatar_url"] as const;
+      const profileFields = ["first_name", "last_name", "city", "postal_code", "bio", "avatar_url", "skill_categories", "available_for_help"] as const;
       const profileUpdate: any = {};
       profileFields.forEach(f => { if (f in stepData) profileUpdate[f] = (stepData as any)[f]; });
       profileUpdate.profile_completion = computeCompletion(newData, pets.length);

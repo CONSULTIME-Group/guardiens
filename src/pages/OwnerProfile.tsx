@@ -13,6 +13,7 @@ import OwnerStepCalendar from "@/components/owner-profile/OwnerStepCalendar";
 import OwnerGallery from "@/components/owner-profile/OwnerGallery";
 import OwnerExperiences from "@/components/owner-profile/OwnerExperiences";
 import TrustProfile from "@/components/profile/TrustProfile";
+import StepSkills from "@/components/profile/StepSkills";
 import { useOwnerProfile, type OwnerProfileData } from "@/hooks/useOwnerProfile";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -26,6 +27,7 @@ const STEPS = [
   { num: 6, label: "Calendrier" },
   { num: 7, label: "Galerie" },
   { num: 8, label: "Expériences" },
+  { num: 9, label: "Compétences" },
 ];
 
 const OwnerProfilePage = () => {
@@ -121,6 +123,13 @@ const OwnerProfilePage = () => {
         {currentStep === 6 && <OwnerStepCalendar />}
         {currentStep === 7 && <OwnerGallery />}
         {currentStep === 8 && <OwnerExperiences />}
+        {currentStep === 9 && (
+          <StepSkills
+            skillCategories={(mergedData as any).skill_categories || []}
+            availableForHelp={(mergedData as any).available_for_help || false}
+            onChange={(partial) => handleChange(partial as any)}
+          />
+        )}
       </div>
 
       <div className="flex flex-col sm:flex-row items-center gap-3">
@@ -133,7 +142,7 @@ const OwnerProfilePage = () => {
         <Button type="button" variant="ghost" onClick={handleSaveAndQuit} disabled={saving} className="w-full sm:w-auto text-muted-foreground">
           <LogOut className="w-4 h-4 mr-1" /> Sauvegarder et quitter
         </Button>
-        {currentStep < 8 ? (
+        {currentStep < 9 ? (
           <Button type="button" onClick={() => handleSaveAndNavigate(currentStep + 1)} disabled={saving} className="w-full sm:w-auto">
             {saving ? "Sauvegarde..." : "Suivant"} <ChevronRight className="w-4 h-4 ml-1" />
           </Button>

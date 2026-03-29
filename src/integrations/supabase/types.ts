@@ -1459,6 +1459,7 @@ export type Database = {
         Row: {
           account_status: string
           admin_notes: string | null
+          available_for_help: boolean | null
           avatar_url: string | null
           bio: string | null
           cancellation_count: number
@@ -1476,11 +1477,13 @@ export type Database = {
           postal_code: string | null
           profile_completion: number | null
           role: Database["public"]["Enums"]["user_role"]
+          skill_categories: string[] | null
           updated_at: string
         }
         Insert: {
           account_status?: string
           admin_notes?: string | null
+          available_for_help?: boolean | null
           avatar_url?: string | null
           bio?: string | null
           cancellation_count?: number
@@ -1498,11 +1501,13 @@ export type Database = {
           postal_code?: string | null
           profile_completion?: number | null
           role?: Database["public"]["Enums"]["user_role"]
+          skill_categories?: string[] | null
           updated_at?: string
         }
         Update: {
           account_status?: string
           admin_notes?: string | null
+          available_for_help?: boolean | null
           avatar_url?: string | null
           bio?: string | null
           cancellation_count?: number
@@ -1520,6 +1525,7 @@ export type Database = {
           postal_code?: string | null
           profile_completion?: number | null
           role?: Database["public"]["Enums"]["user_role"]
+          skill_categories?: string[] | null
           updated_at?: string
         }
         Relationships: []

@@ -20,6 +20,7 @@ import PublicOwnerGallery from "@/components/profile/PublicOwnerGallery";
 import OwnerHighlights from "@/components/profile/OwnerHighlights";
 import { getBadgeDef } from "@/components/badges/badgeDefinitions";
 import EntraideSection from "@/components/missions/EntraideSection";
+import PublicSkills from "@/components/profile/PublicSkills";
 
 const speciesLabels: Record<string, string> = {
   dog: "🐕 Chiens", cat: "🐱 Chats", horse: "🐴 Chevaux", bird: "🐦 Oiseaux",
@@ -211,6 +212,11 @@ const PublicProfile = () => {
 
               {profile.bio && (
                 <p className="text-sm italic mt-2" style={{ color: "#4B5563" }}>{profile.bio}</p>
+              )}
+
+              {/* Skills section */}
+              {profile.available_for_help && profile.skill_categories?.length > 0 && (
+                <PublicSkills skillCategories={profile.skill_categories} userId={id!} />
               )}
 
               <div className="flex gap-2 mt-2">
