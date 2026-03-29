@@ -545,6 +545,11 @@ const Landing = () => {
         </div>
       </section>
 
+      {/* ═══════════════ SECTION 4bis — VITRINE DÉMO ═══════════════ */}
+      <RevealSection>
+        <DemoListingShowcase />
+      </RevealSection>
+
       {/* ═══════════════ SECTION 5 — TÉMOIGNAGES ═══════════════ */}
       <section className="py-24 md:py-32 bg-foreground">
         <div className="max-w-6xl mx-auto px-6 md:px-12">
