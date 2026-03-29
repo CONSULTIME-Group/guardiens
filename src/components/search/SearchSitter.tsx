@@ -530,102 +530,134 @@ const SearchSitter = () => {
     const linkTo = isDemo ? "#" : isMission ? `/petites-missions/${item.id}` : isLongStay ? (sitterEligible ? `/long-stays/${item.id}` : "#") : `/sits/${item.id}`;
 
     return (
-      <Link
-        key={item.id}
-        to={linkTo}
-        className={`block bg-card rounded-lg border overflow-hidden hover:shadow-md transition-shadow ${isLongStay && !sitterEligible ? "opacity-60 cursor-not-allowed" : ""} ${isLongStay ? "border-blue-200" : "border-border"}`}
-      >
-        <div className="flex flex-col sm:flex-row">
-          {photos.length > 0 && (
-            <div className="sm:w-44 h-36 sm:h-auto shrink-0">
-              <img src={photos[0]} alt="" className="w-full h-full object-cover" />
-            </div>
-          )}
-          <div className="p-4 flex-1 min-w-0">
-            {/* Badges row */}
-            <div className="flex flex-wrap items-center gap-1.5 mb-1">
-              {item.isNew && (
-                <Badge className="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 border-0 text-[10px] px-1.5 py-0">
-                  <Sparkles className="h-3 w-3 mr-0.5" /> Nouveau
-                </Badge>
-              )}
-              {item.is_urgent && (
-                <Badge className="bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 border-0 text-[10px] px-1.5 py-0">
-                  <Zap className="h-3 w-3 mr-0.5" /> Urgent
-                </Badge>
-              )}
-              {isLongStay && (
-                <Badge className="bg-[#DBEAFE] text-[#1E40AF] border-blue-200 hover:bg-[#DBEAFE] text-[10px] px-1.5 py-0">Longue durée</Badge>
-              )}
-            </div>
-
-            <h3 className="font-heading font-semibold truncate flex items-center gap-1.5">
-              {item.title || "Sans titre"}
-              {item.owner?.identity_verified && <VerifiedBadge size="sm" />}
-            </h3>
-
-            <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground mt-1">
-              {item.owner?.city && (
-                <span className="flex items-center gap-1">
-                  <MapPin className="h-3.5 w-3.5" />{item.owner.city}
-                </span>
-              )}
-              {item.distance != null && (
-                <span className="text-xs text-muted-foreground">à {Math.round(item.distance)} km</span>
-              )}
-              {!isMission && item.start_date && (
-                <span className="flex items-center gap-1">
-                  <Calendar className="h-3.5 w-3.5" />
-                  {formatDate(item.start_date)} → {formatDate(item.end_date)}
-                </span>
-              )}
-              {isMission && item.date_needed && (
-                <span className="flex items-center gap-1">
-                  <Calendar className="h-3.5 w-3.5" />
-                  {formatDate(item.date_needed)}
-                </span>
-              )}
-            </div>
-
-            {/* Animals */}
-            {Object.keys(petGroups).length > 0 && (
-              <div className="flex flex-wrap items-center gap-2 mt-1.5">
-                {Object.entries(petGroups).map(([species, names]) => (
-                  <span key={species} className="text-sm">
-                    {speciesEmoji[species] || "🐾"} ×{names.length}
+      const cardContent = (
+        <div className={`block bg-card rounded-lg border overflow-hidden hover:shadow-md transition-shadow ${isLongStay && !sitterEligible ? "opacity-60 cursor-not-allowed" : ""} ${isLongStay ? "border-blue-200" : "border-border"}`}>
+          <div className="flex flex-col sm:flex-row">
+            {photos.length > 0 && (
+              <div className="sm:w-44 h-36 sm:h-auto shrink-0 relative">
+                <img src={photos[0]} alt="" className="w-full h-full object-cover" />
+                {isDemo && (
+                  <span className="absolute top-3 left-3 bg-white/90 text-foreground/50 text-xs font-body font-medium px-3 py-1 rounded-full border border-border/60 z-10">
+                    Exemple
                   </span>
-                ))}
+                )}
               </div>
             )}
-
-            {/* Mission specific info */}
-            {isMission && (
-              <p className="text-sm text-muted-foreground mt-1 truncate">{item.description}</p>
-            )}
-
-            {/* Rating + Badges */}
-            <div className="flex items-center gap-3 mt-1.5">
-              {item.avgRating && (
-                <span className="flex items-center gap-1 text-sm">
-                  <Star className="h-3.5 w-3.5 text-yellow-500 fill-yellow-500" />{item.avgRating}
-                  <span className="text-muted-foreground">({item.reviewCount})</span>
+            {photos.length === 0 && isDemo && (
+              <div className="p-2">
+                <span className="bg-white/90 text-foreground/50 text-xs font-body font-medium px-3 py-1 rounded-full border border-border/60">
+                  Exemple
                 </span>
+              </div>
+            )}
+            <div className="p-4 flex-1 min-w-0">
+              {/* Badges row */}
+              <div className="flex flex-wrap items-center gap-1.5 mb-1">
+                {isDemo && photos.length === 0 && (
+                  <Badge className="bg-muted text-muted-foreground border-0 text-[10px] px-1.5 py-0">Exemple</Badge>
+                )}
+                {item.isNew && (
+                  <Badge className="bg-green-100 text-green-700 border-0 text-[10px] px-1.5 py-0">
+                    <Sparkles className="h-3 w-3 mr-0.5" /> Nouveau
+                  </Badge>
+                )}
+                {item.is_urgent && (
+                  <Badge className="bg-red-100 text-red-700 border-0 text-[10px] px-1.5 py-0">
+                    <Zap className="h-3 w-3 mr-0.5" /> Urgent
+                  </Badge>
+                )}
+                {isLongStay && (
+                  <Badge className="bg-[#DBEAFE] text-[#1E40AF] border-blue-200 hover:bg-[#DBEAFE] text-[10px] px-1.5 py-0">Longue durée</Badge>
+                )}
+              </div>
+
+              <h3 className="font-heading font-semibold truncate flex items-center gap-1.5">
+                {item.title || "Sans titre"}
+                {item.owner?.identity_verified && <VerifiedBadge size="sm" />}
+              </h3>
+
+              <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground mt-1">
+                {item.owner?.city && (
+                  <span className="flex items-center gap-1">
+                    <MapPin className="h-3.5 w-3.5" />{item.owner.city}
+                  </span>
+                )}
+                {item.distance != null && (
+                  <span className="text-xs text-muted-foreground">à {Math.round(item.distance)} km</span>
+                )}
+                {!isMission && item.start_date && (
+                  <span className="flex items-center gap-1">
+                    <Calendar className="h-3.5 w-3.5" />
+                    {formatDate(item.start_date)} → {formatDate(item.end_date)}
+                  </span>
+                )}
+                {isMission && item.date_needed && (
+                  <span className="flex items-center gap-1">
+                    <Calendar className="h-3.5 w-3.5" />
+                    {formatDate(item.date_needed)}
+                  </span>
+                )}
+              </div>
+
+              {/* Animals */}
+              {Object.keys(petGroups).length > 0 && (
+                <div className="flex flex-wrap items-center gap-2 mt-1.5">
+                  {Object.entries(petGroups).map(([species, names]) => (
+                    <span key={species} className="text-sm">
+                      {speciesEmoji[species] || "🐾"} ×{names.length}
+                    </span>
+                  ))}
+                </div>
               )}
-              {item.topBadges && item.topBadges.length > 0 && (
-                <TooltipProvider>
-                  <div className="flex gap-1">
-                    {item.topBadges.slice(0, 2).map((b: any) => (
-                      <BadgeShield key={b.badge_key} badgeKey={b.badge_key} count={b.count} size="sm" showLabel={false} />
-                    ))}
-                  </div>
-                </TooltipProvider>
+
+              {/* Mission specific info */}
+              {isMission && (
+                <p className="text-sm text-muted-foreground mt-1 truncate">{item.description}</p>
+              )}
+
+              {/* Rating + Badges */}
+              <div className="flex items-center gap-3 mt-1.5">
+                {item.avgRating && (
+                  <span className="flex items-center gap-1 text-sm">
+                    <Star className="h-3.5 w-3.5 text-yellow-500 fill-yellow-500" />{item.avgRating}
+                    <span className="text-muted-foreground">({item.reviewCount})</span>
+                  </span>
+                )}
+                {item.topBadges && item.topBadges.length > 0 && (
+                  <TooltipProvider>
+                    <div className="flex gap-1">
+                      {item.topBadges.slice(0, 2).map((b: any) => (
+                        <BadgeShield key={b.badge_key} badgeKey={b.badge_key} count={b.count} size="sm" showLabel={false} />
+                      ))}
+                    </div>
+                  </TooltipProvider>
+                )}
+              </div>
+
+              {/* Demo CTA */}
+              {isDemo && (
+                <Link
+                  to="/register"
+                  className="mt-3 inline-block w-full py-2 rounded-xl bg-primary/10 text-primary font-body font-medium text-sm text-center hover:bg-primary/20 transition-colors"
+                >
+                  Rejoindre pour postuler →
+                </Link>
               )}
             </div>
           </div>
         </div>
-      </Link>
-    );
-  };
+      );
+
+      if (isDemo) {
+        return <div key={item.id}>{cardContent}</div>;
+      }
+
+      return (
+        <Link key={item.id} to={linkTo}>
+          {cardContent}
+        </Link>
+      );
+    };
 
   return (
     <div className="p-4 md:p-8 max-w-6xl mx-auto animate-fade-in">
