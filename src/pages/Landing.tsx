@@ -659,30 +659,75 @@ const Landing = () => {
         </div>
       </section>
 
-      {/* ═══════════════ 6. COMMENT ÇA MARCHE ═══════════════ */}
+      {/* ═══════════════ 6. TROIS ÉTAPES — DEUX COLONNES ═══════════════ */}
       <section className="px-6 md:px-12 py-24 lg:py-28">
         <div className="max-w-5xl mx-auto">
           <h2 className="font-heading text-3xl md:text-4xl font-bold text-center mb-16">
             Trois étapes. Une relation.
           </h2>
-          <div className="grid md:grid-cols-3 gap-10">
-            {steps.map((step, i) => (
-              <div
-                key={step.number}
-                className="text-center animate-fade-in"
-                style={{ animationDelay: `${0.1 * i}s` }}
-              >
-                <span className="inline-block font-heading text-5xl font-bold text-primary/20 mb-4">
-                  {step.number}
-                </span>
-                <h3 className="font-heading text-xl font-semibold mb-3">
-                  {step.title}
-                </h3>
-                <p className="text-muted-foreground leading-relaxed">
-                  {step.description}
-                </p>
+          <div className="grid md:grid-cols-2 gap-12 md:gap-16">
+            {/* Colonne gauche — Propriétaire */}
+            <div>
+              <p className="text-[11px] font-semibold tracking-[0.2em] uppercase text-primary mb-8">
+                Tu as une maison, des animaux
+              </p>
+              <div className="space-y-8">
+                {ownerSteps.map((step, i) => (
+                  <div key={step.number} className="animate-fade-in" style={{ animationDelay: `${0.1 * i}s` }}>
+                    <span className="font-heading text-4xl font-bold text-primary/20">{step.number}</span>
+                    <h3 className="font-heading text-lg font-semibold mt-1 mb-2">{step.title}</h3>
+                    <p className="text-muted-foreground leading-relaxed whitespace-pre-line text-sm">{step.description}</p>
+                  </div>
+                ))}
               </div>
-            ))}
+              <Link
+                to="/inscription?role=owner"
+                className="inline-flex items-center gap-1 mt-8 text-primary font-medium hover:underline"
+              >
+                Je cherche un gardien <ArrowRight className="h-4 w-4" />
+              </Link>
+            </div>
+
+            {/* Colonne droite — Gardien */}
+            <div>
+              <p className="text-[11px] font-semibold tracking-[0.2em] uppercase text-primary mb-8">
+                Tu veux garder
+              </p>
+              <div className="space-y-8">
+                {sitterSteps.map((step, i) => (
+                  <div key={step.number} className="animate-fade-in" style={{ animationDelay: `${0.1 * i}s` }}>
+                    <span className="font-heading text-4xl font-bold text-primary/20">{step.number}</span>
+                    <h3 className="font-heading text-lg font-semibold mt-1 mb-2">{step.title}</h3>
+                    <p className="text-muted-foreground leading-relaxed whitespace-pre-line text-sm">{step.description}</p>
+                  </div>
+                ))}
+              </div>
+              <Link
+                to="/inscription?role=sitter"
+                className="inline-flex items-center gap-1 mt-8 text-primary font-medium hover:underline"
+              >
+                Je veux garder <ArrowRight className="h-4 w-4" />
+              </Link>
+            </div>
+          </div>
+
+          {/* Encart entraide */}
+          <div className="mt-16 rounded-2xl p-8 md:p-10 text-center" style={{ backgroundColor: "#F5F3EF" }}>
+            <h3 className="font-heading text-xl md:text-2xl font-bold mb-3">
+              Un jardin à arroser ? Un meuble à monter ?
+            </h3>
+            <p className="text-muted-foreground leading-relaxed max-w-xl mx-auto mb-5">
+              Jardinage, bricolage, courses, coup de main —
+              les petites missions sont là pour ça.
+              <br />
+              Sans argent. Entre gens du coin qui se choisissent.
+            </p>
+            <Link
+              to="/petites-missions"
+              className="text-primary font-medium hover:underline inline-flex items-center gap-1"
+            >
+              Découvrir les petites missions <ArrowRight className="h-4 w-4" />
+            </Link>
           </div>
         </div>
       </section>
