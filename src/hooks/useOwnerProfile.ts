@@ -72,6 +72,7 @@ const defaultData: OwnerProfileData = {
   smoker_accepted: "", rules_notes: "",
   meeting_preference: [], handover_preference: "", welcome_notes: "",
   news_frequency: "", news_format: [], preferred_time: "", communication_notes: "",
+  skill_categories: [], available_for_help: false,
 };
 
 export function useOwnerProfile() {
