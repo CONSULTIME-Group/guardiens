@@ -14,6 +14,7 @@ import StepSitterProfile from "@/components/profile/StepSitterProfile";
 import StepExperience from "@/components/profile/StepExperience";
 import StepMobility from "@/components/profile/StepMobility";
 import StepPreferences from "@/components/profile/StepPreferences";
+import StepSkills from "@/components/profile/StepSkills";
 import SitterGallery from "@/components/profile/SitterGallery";
 import ExternalExperiences from "@/components/profile/ExternalExperiences";
 import TrustProfile from "@/components/profile/TrustProfile";
