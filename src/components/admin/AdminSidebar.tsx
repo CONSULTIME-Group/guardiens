@@ -70,6 +70,12 @@ const adminNavGroups: NavGroup[] = [
     ],
   },
   {
+    label: "SEO & TRAFIC",
+    items: [
+      { to: "/admin/seo", icon: MapPin, label: "Dashboard SEO" },
+    ],
+  },
+  {
     label: "SYSTÈME",
     items: [
       { to: "/admin/emails", icon: Mail, label: "Emails" },
