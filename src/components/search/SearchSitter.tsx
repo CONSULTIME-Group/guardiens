@@ -526,7 +526,8 @@ const SearchSitter = () => {
 
     const isLongStay = tab === "long_stays";
     const isMission = tab === "missions";
-    const linkTo = isMission ? `/petites-missions/${item.id}` : isLongStay ? (sitterEligible ? `/long-stays/${item.id}` : "#") : `/sits/${item.id}`;
+    const isDemo = !!item.is_demo;
+    const linkTo = isDemo ? "#" : isMission ? `/petites-missions/${item.id}` : isLongStay ? (sitterEligible ? `/long-stays/${item.id}` : "#") : `/sits/${item.id}`;
 
     return (
       <Link
