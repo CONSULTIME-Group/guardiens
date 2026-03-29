@@ -295,10 +295,13 @@ export default function ArticleDetail() {
           {article.title}
         </h1>
 
-        {/* CORRECTION 6 — Date de mise à jour visible */}
+        {/* CORRECTION 6 — Date de mise à jour ou publication */}
         <div className="flex items-center gap-1.5 text-sm text-muted-foreground mb-4">
           <Calendar className="h-3.5 w-3.5" />
-          <span>Mis à jour le {format(new Date(article.updated_at), "d MMMM yyyy", { locale: fr })}</span>
+          {article.updated_at && article.created_at && new Date(article.updated_at).getTime() - new Date(article.created_at).getTime() > 86400000
+            ? <span>Mis à jour le {format(new Date(article.updated_at), "d MMMM yyyy", { locale: fr })}</span>
+            : <span>Publié le {format(new Date(article.published_at || article.created_at), "d MMMM yyyy", { locale: fr })}</span>
+          }
         </div>
 
         <div className="flex items-center gap-4 text-sm text-muted-foreground">

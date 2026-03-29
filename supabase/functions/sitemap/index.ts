@@ -50,10 +50,26 @@ const PRIORITY_MAP: Record<string, string> = {
   conseil: "0.6",
   conseil_gardien: "0.6",
   conseil_proprio: "0.6",
-  saisonnier: "0.6",
+  saisonnier: "0.5",
   temoignage: "0.6",
   actualite: "0.6",
   thematique: "0.6",
+};
+
+const CHANGEFREQ_MAP: Record<string, string> = {
+  ville: "weekly",
+  guide_race: "monthly",
+  guide_local: "monthly",
+  guide_lieu: "monthly",
+  vie_locale: "monthly",
+  guide_pratique: "monthly",
+  conseil: "monthly",
+  conseil_gardien: "monthly",
+  conseil_proprio: "monthly",
+  saisonnier: "yearly",
+  temoignage: "monthly",
+  actualite: "monthly",
+  thematique: "monthly",
 };
 
 Deno.serve(async () => {
@@ -119,14 +135,15 @@ Deno.serve(async () => {
     xml += urlEntry(`/house-sitting-${slug}`, today, "weekly", "0.9");
   }
 
-  // Articles → /blog/{slug}
+  // Articles → /actualites/{slug}
   if (articles) {
     for (const a of articles) {
       const priority = PRIORITY_MAP[a.category] || "0.7";
+      const changefreq = CHANGEFREQ_MAP[a.category] || "monthly";
       xml += urlEntry(
-        `/blog/${a.slug}`,
+        `/actualites/${a.slug}`,
         (a.updated_at || a.published_at || today).split("T")[0],
-        "monthly",
+        changefreq,
         priority
       );
     }
