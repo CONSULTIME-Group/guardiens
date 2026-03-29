@@ -70,6 +70,7 @@ import AdminLegal from "./pages/admin/AdminLegal";
 import AdminSettings from "./pages/admin/AdminSettings";
 import AdminContactMessages from "./pages/admin/AdminContactMessages";
 import AdminSEO from "./pages/admin/AdminSEO";
+import AdminSkills from "./pages/admin/AdminSkills";
 import PublicProfile from "./pages/PublicProfile";
 import EmergencySitter from "./pages/EmergencySitter";
 import MySubscription from "./pages/MySubscription";
