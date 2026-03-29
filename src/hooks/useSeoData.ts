@@ -45,7 +45,6 @@ export const useSeoData = () => {
   const lastFetch = useRef<number>(0);
 
   const fetchData = useCallback(async (forceRefresh = false) => {
-    // Cache 10min client-side
     if (!forceRefresh && Date.now() - lastFetch.current < 600000 && data) return;
 
     setLoading(true);

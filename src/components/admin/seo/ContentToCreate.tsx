@@ -7,17 +7,18 @@ import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
 import { CheckCircle2, AlertTriangle, XCircle, Plus } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 interface TypeCount { category: string; count: number }
 
 const TYPE_OBJECTIVES = [
-  { label: "Villes AURA", filter: (c: string) => c === "ville", goal: 10 },
-  { label: "Races", filter: (c: string) => c === "guide_race", goal: 15 },
-  { label: "Vie locale", filter: (c: string) => c === "vie_locale", goal: 10 },
-  { label: "Guides locaux", filter: (c: string) => c === "guide_local", goal: 15 },
-  { label: "Conseils", filter: (c: string) => c === "conseil_gardien" || c === "conseil_proprio", goal: 15 },
-  { label: "Guides pratiques", filter: (c: string) => c === "guide_pratique", goal: 10 },
-  { label: "Saisonniers", filter: (c: string) => c === "saisonnier", goal: 4 },
+  { label: "Villes AURA", filter: (c: string) => c === "ville", goal: 10, priority: "high" as const },
+  { label: "Races", filter: (c: string) => c === "guide_race", goal: 15, priority: "medium" as const },
+  { label: "Guides locaux", filter: (c: string) => c === "guide_local", goal: 15, priority: "medium" as const },
+  { label: "Vie locale", filter: (c: string) => c === "vie_locale", goal: 10, priority: "low" as const },
+  { label: "Conseils", filter: (c: string) => c === "conseil_gardien" || c === "conseil_proprio", goal: 15, priority: "low" as const },
+  { label: "Guides pratiques", filter: (c: string) => c === "guide_pratique", goal: 10, priority: "low" as const },
+  { label: "Saisonniers", filter: (c: string) => c === "saisonnier", goal: 4, priority: "low" as const },
 ];
 
 const PRIORITY_ARTICLES = [
@@ -37,10 +38,16 @@ const PRIORITY_ARTICLES = [
   { slug: "bricolage-voisin-chambery", type: "vie_locale", group: "Vie locale nouvelles villes" },
 ];
 
+const PRIORITY_BADGES = {
+  high: { label: "🔴 Haute", className: "bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300" },
+  medium: { label: "🟠 Moyenne", className: "bg-orange-100 text-orange-700 dark:bg-orange-900 dark:text-orange-300" },
+  low: { label: "🟡 Basse", className: "bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300" },
+};
+
 const StatusIcon = ({ status }: { status: "done" | "warn" | "fail" }) => {
-  if (status === "done") return <CheckCircle2 className="h-5 w-5 text-[#2D7D46]" />;
-  if (status === "warn") return <AlertTriangle className="h-5 w-5 text-[#F59E0B]" />;
-  return <XCircle className="h-5 w-5 text-[#EF4444]" />;
+  if (status === "done") return <CheckCircle2 className="h-5 w-5 text-emerald-600" />;
+  if (status === "warn") return <AlertTriangle className="h-5 w-5 text-orange-500" />;
+  return <XCircle className="h-5 w-5 text-red-500" />;
 };
 
 const ContentToCreate = () => {
@@ -87,7 +94,7 @@ const ContentToCreate = () => {
     <>
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg">Performance par type d'article</CardTitle>
+          <CardTitle className="text-lg">Objectifs par type d'article</CardTitle>
         </CardHeader>
         <CardContent>
           <Table>
@@ -96,6 +103,8 @@ const ContentToCreate = () => {
                 <TableHead>Type</TableHead>
                 <TableHead className="text-right">Publiés</TableHead>
                 <TableHead className="text-right">Objectif</TableHead>
+                <TableHead className="text-right">Manquants</TableHead>
+                <TableHead className="text-center">Priorité</TableHead>
                 <TableHead className="text-center">Statut</TableHead>
               </TableRow>
             </TableHeader>
@@ -103,11 +112,27 @@ const ContentToCreate = () => {
               {TYPE_OBJECTIVES.map((obj) => {
                 const current = getCountForObjective(obj.filter);
                 const status = getObjectiveStatus(current, obj.goal);
+                const missing = Math.max(0, obj.goal - current);
+                const priorityBadge = PRIORITY_BADGES[obj.priority];
                 return (
                   <TableRow key={obj.label}>
                     <TableCell className="font-medium">{obj.label}</TableCell>
                     <TableCell className="text-right">{current}</TableCell>
                     <TableCell className="text-right text-muted-foreground">{obj.goal}</TableCell>
+                    <TableCell className="text-right">
+                      {missing > 0 ? <span className="font-medium text-red-500">{missing}</span> : "—"}
+                    </TableCell>
+                    <TableCell className="text-center">
+                      {status === "done" ? (
+                        <Badge className="bg-emerald-100 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-300 text-[10px]">
+                          ✅ Atteint
+                        </Badge>
+                      ) : (
+                        <Badge className={`text-[10px] ${priorityBadge.className}`}>
+                          {priorityBadge.label}
+                        </Badge>
+                      )}
+                    </TableCell>
                     <TableCell className="text-center"><StatusIcon status={status} /></TableCell>
                   </TableRow>
                 );
