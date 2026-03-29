@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import ReportButton from "@/components/reports/ReportButton";
+import { Sprout, PawPrint, GraduationCap, Handshake as HandshakeIcon } from "lucide-react";
 import { Link, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -33,12 +34,17 @@ const speciesEmoji: Record<string, string> = {
 
 type SortOption = "closest" | "recent" | "rating";
 type SearchTab = "sits" | "long_stays" | "missions";
+type MissionSubTab = "published" | "members";
 
 const SearchSitter = () => {
   const { user } = useAuth();
   const isMobile = useIsMobile();
   const [searchParams] = useSearchParams();
   const [tab, setTab] = useState<SearchTab>("sits");
+  const [missionSubTab, setMissionSubTab] = useState<MissionSubTab>("published");
+  const [missionTypeFilter, setMissionTypeFilter] = useState<"all" | "besoin" | "offre">("all");
+  const [missionCategoryFilter, setMissionCategoryFilter] = useState<"all" | "garden" | "animals" | "skills" | "house">("all");
+  const [availableMembers, setAvailableMembers] = useState<any[]>([]);
   const [city, setCity] = useState("");
   const [radius, setRadius] = useState([50]);
   const [startDate, setStartDate] = useState("");
@@ -105,12 +111,16 @@ const SearchSitter = () => {
     } else if (tab === "long_stays") {
       await searchLongStays(searchCoords);
     } else {
-      await searchMissions(searchCoords);
+      if (missionSubTab === "members") {
+        await searchAvailableMembers(searchCoords);
+      } else {
+        await searchMissions(searchCoords);
+      }
     }
 
     setLoading(false);
     setDrawerOpen(false);
-  }, [tab, city, radius, startDate, endDate, animalTypes, housingType, duration, verifiedOnly, emergencyOnly, sort, userCoords, userCity]);
+  }, [tab, missionSubTab, city, radius, startDate, endDate, animalTypes, housingType, duration, verifiedOnly, emergencyOnly, sort, userCoords, userCity, missionTypeFilter, missionCategoryFilter]);
 
   // Trigger search on filter changes
   useEffect(() => {
@@ -322,6 +332,86 @@ const SearchSitter = () => {
     if (sort === "closest") final.sort((a: any, b: any) => (a.distance ?? 9999) - (b.distance ?? 9999));
     else if (sort === "recent") final.sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
     setResults(final);
+  };
+
+  const searchAvailableMembers = async (searchCoords: { lat: number; lng: number } | null) => {
+    const { data } = await supabase
+      .from("profiles")
+      .select("id, first_name, avatar_url, city, skill_categories, available_for_help")
+      .eq("available_for_help", true)
+      .not("skill_categories", "eq", "{}");
+
+    let items = (data || []).filter((m: any) => m.id !== user?.id);
+
+    // Filter by category
+    const catToSkill: Record<string, string> = { garden: "jardin", animals: "animaux", skills: "competences", house: "coups_de_main" };
+    if (missionCategoryFilter !== "all") {
+      const skillKey = catToSkill[missionCategoryFilter];
+      items = items.filter((m: any) => m.skill_categories?.includes(skillKey));
+    }
+
+    // Location filter
+    if (searchCoords) {
+      const uniqueCities = [...new Set(items.map((m: any) => m.city).filter(Boolean))] as string[];
+      const cityCoords = new Map<string, { lat: number; lng: number }>();
+      await Promise.all(uniqueCities.map(async (c) => {
+        const coords = await geocodeCity(c);
+        if (coords) cityCoords.set(c, { lat: coords.lat, lng: coords.lng });
+      }));
+      items = items.filter((m: any) => {
+        if (!m.city) return false;
+        const coords = cityCoords.get(m.city);
+        if (!coords) return false;
+        return haversineDistance(searchCoords.lat, searchCoords.lng, coords.lat, coords.lng) <= radius[0];
+      }).map((m: any) => {
+        const coords = cityCoords.get(m.city);
+        const dist = coords ? haversineDistance(searchCoords.lat, searchCoords.lng, coords.lat, coords.lng) : null;
+        return { ...m, distance: dist };
+      });
+    }
+
+    // Get reviews for members
+    const memberIds = items.map((m: any) => m.id);
+    if (memberIds.length > 0) {
+      const { data: reviews } = await supabase
+        .from("reviews")
+        .select("reviewee_id, overall_rating")
+        .in("reviewee_id", memberIds)
+        .eq("published", true);
+
+      const reviewMap = new Map<string, { count: number; total: number }>();
+      (reviews || []).forEach((r: any) => {
+        const cur = reviewMap.get(r.reviewee_id) || { count: 0, total: 0 };
+        reviewMap.set(r.reviewee_id, { count: cur.count + 1, total: cur.total + r.overall_rating });
+      });
+
+      const { data: apps } = await supabase
+        .from("applications")
+        .select("sitter_id")
+        .in("sitter_id", memberIds)
+        .eq("status", "accepted");
+
+      const sitsMap = new Map<string, number>();
+      (apps || []).forEach((a: any) => {
+        sitsMap.set(a.sitter_id, (sitsMap.get(a.sitter_id) || 0) + 1);
+      });
+
+      items = items.map((m: any) => {
+        const rev = reviewMap.get(m.id);
+        return {
+          ...m,
+          avgRating: rev ? (rev.total / rev.count).toFixed(1) : null,
+          reviewCount: rev?.count || 0,
+          sitsCount: sitsMap.get(m.id) || 0,
+        };
+      });
+    }
+
+    if (sort === "closest") items.sort((a: any, b: any) => (a.distance ?? 9999) - (b.distance ?? 9999));
+    else if (sort === "rating") items.sort((a: any, b: any) => parseFloat(b.avgRating || "0") - parseFloat(a.avgRating || "0"));
+
+    setAvailableMembers(items);
+    setResults([]); // Clear results since members are separate
   };
 
   const sortResults = (items: any[], sortBy: SortOption) => {
@@ -541,6 +631,67 @@ const SearchSitter = () => {
         </TabsList>
       </Tabs>
 
+      {/* Mission sub-tabs */}
+      {tab === "missions" && (
+        <div className="mb-4 space-y-3">
+          <div className="flex gap-2">
+            <button
+              onClick={() => { setMissionSubTab("published"); }}
+              className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${missionSubTab === "published" ? "bg-primary text-primary-foreground" : "bg-muted text-foreground hover:bg-accent"}`}
+            >
+              Missions publiées
+            </button>
+            <button
+              onClick={() => { setMissionSubTab("members"); }}
+              className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${missionSubTab === "members" ? "bg-primary text-primary-foreground" : "bg-muted text-foreground hover:bg-accent"}`}
+            >
+              Membres disponibles
+            </button>
+          </div>
+          {/* Category filter pills */}
+          <div className="flex flex-wrap gap-2">
+            {([
+              { key: "all" as const, label: "Tout", icon: null },
+              { key: "garden" as const, label: "Jardin", icon: Sprout },
+              { key: "animals" as const, label: "Animaux", icon: PawPrint },
+              { key: "skills" as const, label: "Compétences", icon: GraduationCap },
+              { key: "house" as const, label: "Coups de main", icon: HandshakeIcon },
+            ]).map(({ key, label, icon: Icon }) => (
+              <button
+                key={key}
+                onClick={() => setMissionCategoryFilter(key)}
+                className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs transition-colors ${
+                  missionCategoryFilter === key
+                    ? "bg-primary text-primary-foreground border-primary"
+                    : "bg-muted text-foreground border-border"
+                }`}
+              >
+                {Icon && <Icon className="h-3 w-3" />}
+                {label}
+              </button>
+            ))}
+          </div>
+          {/* Type filter for published missions */}
+          {missionSubTab === "published" && (
+            <div className="flex gap-2">
+              {(["all", "besoin", "offre"] as const).map((t) => (
+                <button
+                  key={t}
+                  onClick={() => setMissionTypeFilter(t)}
+                  className={`px-3 py-1.5 text-xs rounded-full border transition-colors ${
+                    missionTypeFilter === t
+                      ? "bg-primary text-primary-foreground border-primary"
+                      : "bg-muted text-foreground border-border"
+                  }`}
+                >
+                  {t === "all" ? "Tout" : t === "besoin" ? "Besoin" : "Offre"}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Long stay eligibility warning */}
       {tab === "long_stays" && !sitterEligible && (
         <div className="p-4 rounded-xl border border-dashed border-border text-center mb-4">
@@ -590,20 +741,88 @@ const SearchSitter = () => {
           {/* Sort bar */}
           <div className="flex items-center justify-between mb-4">
             <p className="text-sm text-muted-foreground">
-              {loading ? "Recherche…" : `${results.length} annonce${results.length > 1 ? "s" : ""} trouvée${results.length > 1 ? "s" : ""}`}
+              {loading ? "Recherche…" : tab === "missions" && missionSubTab === "members"
+                ? `${availableMembers.length} membre${availableMembers.length > 1 ? "s" : ""} disponible${availableMembers.length > 1 ? "s" : ""}`
+                : `${results.length} annonce${results.length > 1 ? "s" : ""} trouvée${results.length > 1 ? "s" : ""}`
+              }
             </p>
             <Select value={sort} onValueChange={handleSortChange}>
               <SelectTrigger className="w-40"><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="closest">Plus proches</SelectItem>
-                <SelectItem value="recent">Plus récentes</SelectItem>
+                {!(tab === "missions" && missionSubTab === "members") && <SelectItem value="recent">Plus récentes</SelectItem>}
                 {tab !== "missions" && <SelectItem value="rating">Mieux notées</SelectItem>}
+                {tab === "missions" && missionSubTab === "members" && <SelectItem value="rating">Mieux notés</SelectItem>}
               </SelectContent>
             </Select>
           </div>
 
           {loading ? (
             <p className="text-muted-foreground py-10 text-center">Recherche en cours...</p>
+          ) : tab === "missions" && missionSubTab === "members" ? (
+            /* Available members results */
+            availableMembers.length === 0 ? (
+              <div className="text-center py-16 space-y-3">
+                <Search className="h-12 w-12 mx-auto text-primary/30" />
+                <p className="font-heading font-semibold text-lg">Aucun membre disponible dans ce rayon</p>
+                <p className="text-sm text-foreground/60">Élargis ton rayon de recherche.</p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {availableMembers.map((member: any) => {
+                  const skillMeta: Record<string, { label: string; icon: typeof Sprout }> = {
+                    jardin: { label: "Jardin", icon: Sprout },
+                    animaux: { label: "Animaux", icon: PawPrint },
+                    competences: { label: "Compétences", icon: GraduationCap },
+                    coups_de_main: { label: "Coups de main", icon: HandshakeIcon },
+                  };
+                  const skills: string[] = member.skill_categories || [];
+                  const visibleSkills = skills.slice(0, 2);
+                  const extraCount = skills.length - 2;
+
+                  return (
+                    <div key={member.id} className="bg-card rounded-lg border border-border p-4 flex items-center gap-4">
+                      {member.avatar_url ? (
+                        <img src={member.avatar_url} alt="" className="w-12 h-12 rounded-full object-cover shrink-0" />
+                      ) : (
+                        <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center text-sm font-bold shrink-0">
+                          {member.first_name?.charAt(0) || "?"}
+                        </div>
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <p className="text-base font-heading font-semibold">{member.first_name || "Membre"}</p>
+                        {member.city && <p className="text-xs text-muted-foreground">{member.city}{member.distance != null ? ` · à ${Math.round(member.distance)} km` : ""}</p>}
+                        <div className="flex flex-wrap gap-1.5 mt-1.5">
+                          {visibleSkills.map((s: string) => {
+                            const meta = skillMeta[s];
+                            if (!meta) return null;
+                            const Icon = meta.icon;
+                            return (
+                              <span key={s} className="flex items-center gap-1 bg-primary/10 text-primary border border-primary/20 rounded-full text-xs px-3 py-1">
+                                <Icon className="h-3 w-3" />{meta.label}
+                              </span>
+                            );
+                          })}
+                          {extraCount > 0 && <span className="text-xs text-muted-foreground self-center">+{extraCount}</span>}
+                        </div>
+                        {(member.avgRating || member.sitsCount > 0) && (
+                          <p className="text-xs text-foreground/50 mt-1">
+                            {member.avgRating && <>★ {member.avgRating}</>}
+                            {member.sitsCount > 0 && <> · {member.sitsCount} garde{member.sitsCount > 1 ? "s" : ""}</>}
+                          </p>
+                        )}
+                      </div>
+                      <Link
+                        to={`/messages?new=true&to=${member.id}&context=entraide`}
+                        className="text-sm text-primary font-semibold shrink-0 hover:underline"
+                      >
+                        Contacter →
+                      </Link>
+                    </div>
+                  );
+                })}
+              </div>
+            )
           ) : results.length === 0 ? (
             <div className="text-center py-16 space-y-4">
               <Search className="h-12 w-12 mx-auto text-primary/30" />

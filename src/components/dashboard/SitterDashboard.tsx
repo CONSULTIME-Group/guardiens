@@ -4,6 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Link } from "react-router-dom";
 import EmergencyActivation from "./EmergencyActivation";
 import EmergencyDashSection from "./EmergencyDashSection";
+import MissionsNearbySection from "./MissionsNearbySection";
 import ResourceSection from "@/components/shared/ResourceSection";
 import type { ResourceItem } from "@/components/shared/ResourceCard";
 import {
@@ -252,18 +253,8 @@ const SitterDashboard = () => {
           )}
         </DashSection>
 
-        {/* Small missions - discreet */}
-        <DashSection title="Coups de main près de chez vous" action={
-          <Link to="/petites-missions" className="text-xs text-primary hover:underline font-medium">Voir tout →</Link>
-        }>
-          {smallMissions.length === 0 ? (
-            <EmptyCard icon={Handshake} text="Aucune petite mission dans votre zone" hint="Proposez vos services ou revenez bientôt" cta="Voir les missions" to="/petites-missions" />
-          ) : (
-            <div className="space-y-2">
-              {smallMissions.map((m: any) => <MissionCard key={m.id} mission={m} />)}
-            </div>
-          )}
-        </DashSection>
+      {/* Échanges autour de toi */}
+        <MissionsNearbySection />
 
         {/* Tips */}
         <DashSection title="Conseils pour vous" action={
@@ -429,35 +420,8 @@ const SitterDashboard = () => {
         )}
       </DashSection>
 
-      {/* Small missions */}
-      <DashSection title="Petites missions" action={
-        <Link to="/petites-missions" className="text-xs text-primary hover:underline font-medium">Voir tout →</Link>
-      }>
-        {(myMissions.length === 0 && myMissionResponses.length === 0 && smallMissions.length === 0) ? (
-          <EmptyCard icon={Handshake} text="Aucune petite mission dans votre zone" hint="Proposez vos services ou revenez bientôt" cta="Voir les missions" to="/petites-missions" />
-        ) : (
-          <div className="space-y-2">
-            {myMissions.length > 0 && myMissions.map((m: any) => {
-              const responseCount = m.small_mission_responses?.length || 0;
-              const pendingCount = m.small_mission_responses?.filter((r: any) => r.status === "pending").length || 0;
-              return (
-                <Link key={m.id} to={`/petites-missions/${m.id}`} className="flex items-center gap-3 p-3 rounded-xl bg-card border border-border hover:bg-accent/50 transition-colors">
-                  <Handshake className="h-5 w-5 text-primary shrink-0" />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate">{m.title}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {m.status === "completed" ? "✅ Terminée" : `${responseCount} réponse${responseCount > 1 ? "s" : ""}`}
-                      {pendingCount > 0 && <span className="ml-1 text-primary font-medium">· {pendingCount} en attente</span>}
-                    </p>
-                  </div>
-                  <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
-                </Link>
-              );
-            })}
-            {smallMissions.filter((m: any) => m.user_id !== user!.id && !myMissions.some((mm: any) => mm.id === m.id)).map((m: any) => <MissionCard key={m.id} mission={m} />)}
-          </div>
-        )}
-      </DashSection>
+      {/* Échanges autour de toi */}
+      <MissionsNearbySection />
 
       {/* Emergency section */}
       {emergencyEligible && !hasEmergencyProfile && !showEmergencyForm && (
