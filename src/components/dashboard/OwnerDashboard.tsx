@@ -373,6 +373,9 @@ const OwnerDashboard = () => {
         return resItems.length > 0 ? <ResourceSection title={resTitle} resources={resItems} /> : null;
       })()}
 
+      {/* Échanges autour de toi */}
+      <MissionsNearbySection />
+
       {/* 6. Nearby emergency sitters */}
       <NearbyEmergencySitters />
 
