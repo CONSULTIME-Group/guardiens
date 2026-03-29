@@ -75,28 +75,28 @@ const testimonials = [
   {
     name: "Elena",
     detail: "Annecy",
-    text: "J'ai commencé par arroser les plantes d'une voisine contre un repas. Maintenant je garde sa maison quand elle part. C'est comme ça que ça marche ici — doucement, naturellement.",
+    text: "J'ai commencé par arroser les plantes d'un membre contre un repas. Maintenant je garde sa maison quand elle part. C'est comme ça que ça marche ici — doucement, naturellement.",
   },
 ];
 
 const steps = [
   {
     number: "01",
-    title: "Inscrivez-vous",
+    title: "Inscris-toi",
     description:
-      "5 minutes. Racontez votre maison, vos animaux, ce que vous cherchez. Ou racontez qui vous êtes et ce que vous avez envie de vivre.",
+      "5 minutes. Raconte ta maison, tes animaux, ce que tu cherches. Ou raconte qui tu es et ce que tu as envie de vivre.",
   },
   {
     number: "02",
-    title: "Trouvez votre match",
+    title: "Trouve ton match",
     description:
-      "Des profils proches de chez vous. Pas des inconnus — des gens du coin qui n'attendent que de se rencontrer.",
+      "Des profils proches de chez toi. Des gens du coin qui n'attendent que de se rencontrer.",
   },
   {
     number: "03",
     title: "Rencontrez-vous",
     description:
-      "Un café, une balade, une visite. La confiance se crée en vrai. Puis vous partez — ou vous accueillez. L'histoire commence là.",
+      "Un café, une balade, une visite. La confiance se crée en vrai. Puis tu pars — ou tu accueilles. L'histoire commence là.",
   },
 ];
 
@@ -206,8 +206,8 @@ const Landing = () => {
               "House-sitting",
               "Pet-sitting",
               "Garde d'animaux à domicile",
-              "Entraide de voisinage",
-              "Petites missions entre voisins",
+              "Entraide entre gens du coin",
+              "Petites missions entre gens du coin",
               "Auvergne-Rhône-Alpes",
             ],
             slogan: "Proches de chez vous. Partir. Revenir. Recommencer.",
@@ -568,7 +568,7 @@ const Landing = () => {
             </div>
           </div>
           <p className="text-xs text-muted-foreground mb-4 italic">
-            Jamais d'argent. L'échange se décide entre vous.
+            L'échange se décide entre vous. Jamais d'argent. Juste des gens du coin.
           </p>
           <Link to="/petites-missions" className="text-primary font-medium hover:underline inline-flex items-center gap-1">
             Découvrir les petites missions <ArrowRight className="h-4 w-4" />
@@ -690,23 +690,6 @@ const Landing = () => {
         </div>
       </section>
 
-      {/* ═══════════════ 7. PRICING ═══════════════ */}
-      <section className="px-6 md:px-12 py-20 bg-card">
-        <div className="max-w-3xl mx-auto text-center">
-          <h2 className="font-heading text-3xl md:text-4xl font-bold mb-5">
-            Votre prochaine histoire commence ici.
-          </h2>
-          <p className="text-muted-foreground text-lg leading-relaxed">
-            Des gardes, de l'entraide, des gens du coin
-            qui se font confiance.
-            <br />
-            Gratuit pour commencer.
-            <br />
-            Irremplaçable pour la suite.
-          </p>
-        </div>
-      </section>
-
       {/* ═══════════════ ENCART FONDATEUR ═══════════════ */}
       <section className="px-6 md:px-12 py-16">
         <div
@@ -714,11 +697,11 @@ const Landing = () => {
           style={{ backgroundColor: "#FEF3C7", borderColor: "hsl(24 36% 60%)" }}
         >
           <h3 className="font-heading text-xl md:text-2xl font-bold text-foreground">
-            ⭐ Inscrivez-vous avant le 13 mai.
+            ⭐ Inscris-toi avant le 13 mai.
           </h3>
           <p className="text-muted-foreground max-w-xl mx-auto leading-relaxed">
             Badge Fondateur à vie. Accès gratuit jusqu'au 13 juin.
-            Et surtout — vous serez parmi les premiers à vivre ça.
+            Et surtout — tu seras parmi les premiers à vivre ça.
             Pourquoi le 13 mai ? C'est l'anniversaire de Jérémie.
             Il préfère offrir l'accès plutôt que recevoir des chaussettes.
           </p>
@@ -779,17 +762,20 @@ const Landing = () => {
           <h2 className="font-heading text-3xl md:text-4xl font-bold mb-4 text-white">
             Votre prochaine histoire commence ici.
           </h2>
-          <p className="text-white/60 text-lg mb-8">
+          <p className="text-white/60 text-lg mb-8 leading-relaxed">
             Des gardes, de l'entraide, des gens du coin
+            <br />
             qui se font confiance.
+            <br />
             Gratuit pour commencer.
-            Irremplaçable pour la suite.
+            <br />
+            Ce que vous allez vivre ne l'est pas.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Button
               size="lg"
               className="bg-white text-foreground hover:bg-white/90 font-semibold"
-              onClick={() => navigate("/register?role=owner")}
+              onClick={() => navigate("/inscription?role=owner")}
             >
               Je cherche un gardien
             </Button>
@@ -797,7 +783,7 @@ const Landing = () => {
               size="lg"
               variant="outline"
               className="border-white/40 text-white hover:bg-white/10 font-semibold"
-              onClick={() => navigate("/register?role=guardian")}
+              onClick={() => navigate("/inscription?role=sitter")}
             >
               Je veux garder
             </Button>
