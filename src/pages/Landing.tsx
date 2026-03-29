@@ -74,15 +74,15 @@ const testimonials = [
 ];
 
 const ownerSteps = [
-  { number: "01", title: "Tu publies", description: "Ta maison, tes animaux, tes dates.\nCe dont tu as besoin. Cinq minutes." },
-  { number: "02", title: "Tu choisis", description: "Des profils du quartier.\nTu lis, tu échanges, tu rencontres.\nC'est toi qui décides." },
+  { number: "01", title: "Tu publies", description: "Ta maison, tes animaux, tes dates. Ce dont tu as besoin. Cinq minutes." },
+  { number: "02", title: "Tu choisis", description: "Des profils du quartier. Tu lis, tu échanges, tu rencontres. C'est toi qui décides." },
   { number: "03", title: "Tu pars.", description: "Vraiment." },
 ];
 
 const sitterSteps = [
-  { number: "01", title: "Tu te présentes", description: "Qui tu es, ce que tu aimes,\noù tu veux aller. Cinq minutes." },
-  { number: "02", title: "Tu postules", description: "Des gardes proches de chez toi.\nTu choisis celles qui te ressemblent." },
-  { number: "03", title: "Tu rencontres.", description: "Des gens que tu n'aurais\njamais croisés autrement." },
+  { number: "01", title: "Tu te présentes", description: "Qui tu es, ce que tu aimes, où tu veux aller. Cinq minutes." },
+  { number: "02", title: "Tu postules", description: "Des gardes proches de chez toi. Tu choisis celles qui te ressemblent." },
+  { number: "03", title: "Tu rencontres.", description: "Des gens que tu n'aurais jamais croisés autrement." },
 ];
 
 /* ── IntersectionObserver hook for scroll animations ── */
@@ -114,12 +114,8 @@ const RevealSection = ({ children, className = "", delay = 0 }: { children: Reac
   return (
     <div
       ref={ref}
-      className={className}
-      style={{
-        opacity: isVisible ? 1 : 0,
-        transform: isVisible ? "translateY(0)" : "translateY(20px)",
-        transition: `opacity 0.6s ease-out ${delay}s, transform 0.6s ease-out ${delay}s`,
-      }}
+      className={`transition-all duration-700 ease-out ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-5"} ${className}`}
+      style={{ transitionDelay: `${delay}s` }}
     >
       {children}
     </div>
@@ -351,67 +347,43 @@ const Landing = () => {
           className="absolute inset-0 w-full h-full object-cover"
           loading="eager"
         />
-        <div
-          className="absolute inset-0"
-          style={{
-            background: "linear-gradient(to right, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0.45) 50%, rgba(0,0,0,0.2) 100%)",
-          }}
-        />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/65 via-black/45 to-black/20" />
 
         <div className="relative z-10 w-full px-[5%] md:px-[8%] py-24">
-          <div className="max-w-[680px]">
+          <div className="max-w-2xl">
             {/* Badge géographique */}
-            <div
-              className="inline-flex items-center gap-2 rounded-full px-5 py-2 mb-8"
-              style={{
-                background: "rgba(255,255,255,0.15)",
-                backdropFilter: "blur(8px)",
-                WebkitBackdropFilter: "blur(8px)",
-              }}
-            >
+            <div className="inline-flex items-center gap-2 rounded-full px-5 py-2 mb-8 bg-white/15 backdrop-blur-md">
               <span className="relative flex h-2 w-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75" />
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-white" />
               </span>
-              <span className="text-white text-[13px] tracking-[0.1em] font-body">
+              <span className="text-white text-xs tracking-widest font-body">
                 Auvergne-Rhône-Alpes · Bientôt partout
               </span>
             </div>
 
             {/* H1 with staggered animation */}
-            <h1
-              className="font-heading text-[48px] md:text-[72px] lg:text-[80px] font-bold text-white leading-[1.1] mb-4"
-              style={{ animation: "heroFadeUp 0.8s ease-out both" }}
-            >
+            <h1 className="font-heading text-5xl md:text-6xl lg:text-7xl font-bold text-white leading-tight mb-4 animate-hero-fade-up">
               Proches de chez vous.
             </h1>
-            <p
-              className="font-heading text-[32px] md:text-[44px] lg:text-[52px] italic text-white/90 leading-[1.1] mb-4"
-              style={{ animation: "heroFadeUp 0.8s ease-out 0.4s both" }}
-            >
+            <p className="font-heading text-3xl md:text-4xl lg:text-5xl italic text-white/90 leading-tight mb-4 animate-hero-fade-up animation-delay-400">
               Partir. Revenir. Recommencer.
             </p>
-            <p
-              className="font-body text-base md:text-xl text-white/75 max-w-[500px] mb-10"
-              style={{ animation: "heroFadeUp 0.6s ease-out 0.7s both" }}
-            >
+            <p className="font-body text-base md:text-xl text-white/75 max-w-lg mb-10 animate-hero-fade-up animation-delay-700">
               Garder une maison. Échanger un service. Se faire confiance.
             </p>
 
             {/* CTAs */}
-            <div
-              className="flex flex-col sm:flex-row gap-3 mb-4"
-              style={{ animation: "heroFadeUp 0.6s ease-out 0.9s both" }}
-            >
+            <div className="flex flex-col sm:flex-row gap-3 mb-4 animate-hero-fade-up animation-delay-900">
               <button
                 onClick={() => navigate("/inscription?role=owner")}
-                className="font-body text-[15px] font-semibold tracking-[0.03em] rounded-full px-10 py-[18px] bg-primary text-primary-foreground hover:brightness-90 hover:scale-[1.02] transition-all duration-200"
+                className="font-body text-sm font-semibold tracking-wide rounded-full px-10 py-4 bg-primary text-primary-foreground hover:brightness-90 hover:scale-[1.02] transition-all duration-200"
               >
                 Je cherche un gardien
               </button>
               <button
                 onClick={() => navigate("/inscription?role=sitter")}
-                className="font-body text-[15px] font-semibold tracking-[0.03em] rounded-full px-10 py-[18px] bg-transparent text-white border-2 border-white/70 hover:bg-white/15 transition-all duration-200"
+                className="font-body text-sm font-semibold tracking-wide rounded-full px-10 py-4 bg-transparent text-white border-2 border-white/70 hover:bg-white/15 transition-all duration-200"
               >
                 Je veux garder
               </button>
@@ -419,16 +391,12 @@ const Landing = () => {
 
             <Link
               to="/petites-missions"
-              className="inline-flex items-center gap-1 text-white/80 text-sm underline underline-offset-4 hover:text-white transition-colors"
-              style={{ animation: "heroFadeUp 0.5s ease-out 1s both" }}
+              className="inline-flex items-center gap-1 text-white/80 text-sm underline underline-offset-4 hover:text-white transition-colors animate-hero-fade-up animation-delay-1000"
             >
               Découvrir les petites missions <ArrowRight className="h-3.5 w-3.5" />
             </Link>
 
-            <p
-              className="mt-4 text-[13px] text-white/60 font-body"
-              style={{ animation: "heroFadeUp 0.5s ease-out 1.1s both" }}
-            >
+            <p className="mt-4 text-xs text-white/60 font-body animate-hero-fade-up animation-delay-1100">
               Gratuit · Premiers inscrits, premiers servis.
             </p>
           </div>
@@ -436,43 +404,43 @@ const Landing = () => {
       </section>
 
       {/* ═══════════════ SECTION 2 — CHIFFRES FONDATEURS ═══════════════ */}
-      <section className="py-20 md:py-[80px] bg-background">
-        <RevealSection className="max-w-[900px] mx-auto px-6">
-          <p className="text-[11px] font-body font-semibold tracking-[0.15em] uppercase text-primary/60 text-center mb-10">
+      <section className="py-24 md:py-32 bg-background">
+        <RevealSection className="max-w-4xl mx-auto px-6">
+          <p className="text-xs font-body font-semibold tracking-widest uppercase text-primary/60 text-center mb-10">
             Ce qu'on a vécu avant de construire Guardiens.
           </p>
-          <div className="flex flex-col md:flex-row items-center justify-center gap-0">
+          <div className="flex flex-col md:flex-row items-center justify-center">
             <div className="text-center px-8 md:px-12 py-4 md:py-0">
-              <span className="block font-heading text-[48px] md:text-[72px] font-bold text-foreground leading-none">
+              <span className="block font-heading text-5xl md:text-7xl font-bold text-foreground leading-none">
                 <CountUp target={dynamicCounts?.maisons ?? 37} />
               </span>
-              <span className="font-body text-sm text-foreground/60 tracking-[0.05em]">maisons gardées</span>
+              <span className="font-body text-sm text-foreground/60 tracking-wide">maisons gardées</span>
             </div>
             <div className="hidden md:block w-px h-16 bg-border" />
             <div className="block md:hidden w-16 h-px bg-border my-2" />
             <div className="text-center px-8 md:px-12 py-4 md:py-0">
-              <span className="block font-heading text-[48px] md:text-[72px] font-bold text-foreground leading-none">
+              <span className="block font-heading text-5xl md:text-7xl font-bold text-foreground leading-none">
                 <CountUp target={dynamicCounts?.animaux ?? 234} />
               </span>
-              <span className="font-body text-sm text-foreground/60 tracking-[0.05em]">animaux accompagnés</span>
+              <span className="font-body text-sm text-foreground/60 tracking-wide">animaux accompagnés</span>
             </div>
             <div className="hidden md:block w-px h-16 bg-border" />
             <div className="block md:hidden w-16 h-px bg-border my-2" />
             <div className="text-center px-8 md:px-12 py-4 md:py-0">
-              <span className="block font-heading text-[48px] md:text-[72px] font-bold text-foreground leading-none">
+              <span className="block font-heading text-5xl md:text-7xl font-bold text-foreground leading-none">
                 5
               </span>
-              <span className="font-body text-sm text-foreground/60 tracking-[0.05em]">ans en AURA</span>
+              <span className="font-body text-sm text-foreground/60 tracking-wide">ans en AURA</span>
             </div>
             {dynamicCounts && dynamicCounts.missions > 10 && (
               <>
                 <div className="hidden md:block w-px h-16 bg-border" />
                 <div className="block md:hidden w-16 h-px bg-border my-2" />
                 <div className="text-center px-8 md:px-12 py-4 md:py-0">
-                  <span className="block font-heading text-[48px] md:text-[72px] font-bold text-foreground leading-none">
+                  <span className="block font-heading text-5xl md:text-7xl font-bold text-foreground leading-none">
                     <CountUp target={dynamicCounts.missions} />
                   </span>
-                  <span className="font-body text-sm text-foreground/60 tracking-[0.05em]">missions d'entraide</span>
+                  <span className="font-body text-sm text-foreground/60 tracking-wide">missions échangées</span>
                 </div>
               </>
             )}
@@ -481,16 +449,16 @@ const Landing = () => {
       </section>
 
       {/* ═══════════════ SECTION 3 — NOTRE HISTOIRE ═══════════════ */}
-      <section className="py-20 md:py-[120px] bg-muted">
+      <section className="py-24 md:py-32 bg-muted">
         <div className="max-w-6xl mx-auto px-6 md:px-12">
           <div className="grid md:grid-cols-[2fr_3fr] gap-12 md:gap-20">
             {/* Left column — sticky */}
             <RevealSection>
-              <div className="md:sticky md:top-[120px]">
-                <p className="text-[11px] font-body font-semibold tracking-[0.15em] uppercase text-primary/60 mb-4">
+              <div className="md:sticky md:top-32">
+                <p className="text-xs font-body font-semibold tracking-widest uppercase text-primary/60 mb-4">
                   Notre histoire
                 </p>
-                <h2 className="font-heading text-[36px] md:text-[48px] font-semibold text-foreground leading-[1.2]">
+                <h2 className="font-heading text-4xl md:text-5xl font-semibold text-foreground leading-snug">
                   Tout a commencé avec un visa.
                 </h2>
               </div>
@@ -498,64 +466,42 @@ const Landing = () => {
 
             {/* Right column — text */}
             <RevealSection delay={0.15}>
-              <div className="space-y-7">
-                <p className="font-body text-[17px] leading-[1.8] text-foreground/85">
-                  Elisa est arrivée d'Argentine avec un visa
-                  qui ne lui permettait pas de travailler.
-                  Elle gardait des animaux. Elle rentrait avec
-                  des histoires. Des gens qui ouvraient leur porte
-                  sans calcul, leur vie sans condition.
+              <div>
+                <p className="text-lg font-body leading-relaxed text-foreground/85 mb-7">
+                  Elisa est arrivée d'Argentine avec un visa qui ne lui permettait pas de travailler. Elle gardait des animaux. Elle rentrait avec des histoires. Des gens qui ouvraient leur porte sans calcul, leur vie sans condition.
                 </p>
-                <p className="font-body text-[17px] leading-[1.8] text-foreground/85">
-                  Un soir un propriétaire lui a dit&nbsp;:
-                </p>
-                <blockquote className="border-l-[3px] border-primary pl-6 my-8">
-                  <p className="font-heading text-[22px] italic text-foreground/85 leading-[1.6]">
+
+                <blockquote className="border-l-2 border-primary pl-6 my-7">
+                  <p className="text-lg font-heading italic text-foreground/85 leading-relaxed">
                     « Et si tu restais chez nous pendant qu'on part ? »
                   </p>
                 </blockquote>
 
-                <div className="h-10" />
+                <div className="py-10" />
 
-                <p className="font-body text-[17px] leading-[1.8] text-foreground/85">
+                <p className="text-lg font-body leading-relaxed text-foreground/85 mb-7">
                   On a gardé 37 maisons en cinq ans.
-                  Géraldine, l'irlandaise de 77 ans aux cheveux
-                  rouge fluo à Passy, avec son perroquet Coco
-                  et ses deux chiens sur le pas de la porte.
-                  Rio à Collonges, le chien joueur infatigable
-                  chez qui on est retournés six fois.
-                  Et puis Briord. Les clés de la maison.
-                  Les clés de la Triumph. Les clés du bateau.
-                  Les clés de la BM.
                 </p>
-                <p className="font-body text-[17px] leading-[1.8] text-foreground/85">
-                  Des gens qu'on ne connaissait pas
-                  trois semaines avant.
+                <p className="text-lg font-body leading-relaxed text-foreground/85 mb-7">
+                  Géraldine, l'irlandaise de 77 ans aux cheveux rouge fluo à Passy, avec son perroquet Coco et ses deux chiens sur le pas de la porte. Rio à Collonges, le chien joueur infatigable chez qui on est retournés six fois.
                 </p>
-                <p className="font-body text-[17px] leading-[1.8] text-foreground font-bold">
-                  On ne gardait pas des maisons.
-                  On collectionnait des vies.
+                <p className="text-lg font-body leading-relaxed text-foreground/85 mb-7">
+                  Et puis Briord. Les clés de la maison. Les clés de la Triumph. Les clés du bateau. Les clés de la BM. Des gens qu'on ne connaissait pas trois semaines avant.
+                </p>
+                <p className="text-lg font-body leading-relaxed text-foreground font-semibold mb-7">
+                  On ne gardait pas des maisons. On collectionnait des vies.
                 </p>
 
-                <div className="h-10" />
+                <div className="py-10" />
 
-                <p className="font-body text-[17px] leading-[1.8] text-foreground/85">
-                  Un soir chez Helen — Stanley qui aboyait,
-                  Rafa couché sur nos pieds, la vue sur le Mont-Blanc.
-                  On s'est dit&nbsp;: pourquoi il n'y a pas plus de monde
-                  qui fait ça ?
-                </p>
-                <p className="font-body text-[17px] leading-[1.8] text-foreground/85">
-                  C'est pour ça qu'on a construit Guardiens.
+                <p className="text-lg font-body leading-relaxed text-foreground/85 mb-7">
+                  Un soir chez Helen — Stanley qui aboyait, Rafa couché sur nos pieds, la vue sur le Mont-Blanc. On s'est dit&nbsp;: pourquoi il n'y a pas plus de monde qui fait ça ? C'est pour ça qu'on a construit Guardiens.
                 </p>
 
-                <div className="h-10" />
+                <div className="py-10" />
 
-                <p className="font-body text-[17px] leading-[1.8] text-foreground/85">
-                  Votre jardin contre un repas.
-                  Vos clés contre une histoire.
-                  Des gens du coin qui se font confiance —
-                  et parfois des amis pour la vie.
+                <p className="text-lg font-body leading-relaxed text-foreground/85">
+                  Votre jardin contre un repas. Vos clés contre une histoire. Des gens du coin qui se font confiance — et parfois des amis pour la vie.
                 </p>
               </div>
             </RevealSection>
@@ -564,16 +510,16 @@ const Landing = () => {
       </section>
 
       {/* ═══════════════ SECTION 4 — PILIERS ═══════════════ */}
-      <section className="py-20 md:py-[120px] bg-background">
+      <section className="py-24 md:py-32 bg-background">
         <div className="max-w-6xl mx-auto px-6 md:px-12">
           <RevealSection className="text-center mb-16">
-            <p className="text-[11px] font-body font-semibold tracking-[0.15em] uppercase text-primary/60 mb-4">
+            <p className="text-xs font-body font-semibold tracking-widest uppercase text-primary/60 mb-4">
               Pourquoi Guardiens
             </p>
-            <h2 className="font-heading text-[36px] md:text-[48px] lg:text-[52px] font-semibold text-foreground leading-[1.2]">
+            <h2 className="font-heading text-4xl md:text-5xl font-semibold text-foreground leading-snug">
               Un réseau de gens du coin qui se font confiance.
             </h2>
-            <p className="font-body text-xl text-foreground/70 max-w-[600px] mx-auto mt-4">
+            <p className="text-lg md:text-xl font-body font-normal text-foreground/70 max-w-xl mx-auto mt-4 leading-relaxed">
               Pas des inconnus. Des gens proches, que vous avez rencontrés en vrai.
             </p>
           </RevealSection>
@@ -581,15 +527,14 @@ const Landing = () => {
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
             {differentiators.map((item, i) => (
               <RevealSection key={item.title} delay={0.1 * i}>
-                <div className="relative bg-card border border-border rounded-2xl p-10 hover:-translate-y-1 hover:shadow-[0_20px_40px_rgba(0,0,0,0.08)] transition-all duration-300 h-full overflow-hidden">
-                  {/* Large background number */}
-                  <span className="absolute top-4 right-6 font-heading text-[64px] text-primary/10 leading-none select-none">
+                <div className="relative bg-card border border-border rounded-2xl p-10 hover:-translate-y-1 hover:shadow-lg transition-all duration-300 h-full overflow-hidden">
+                  <span className="absolute top-4 right-6 font-heading text-6xl text-primary/10 leading-none select-none">
                     {String(i + 1).padStart(2, "0")}
                   </span>
-                  <h3 className="font-heading text-[22px] font-semibold text-foreground mb-3 relative z-10">
+                  <h3 className="font-heading text-xl md:text-2xl font-semibold text-foreground mb-3 relative z-10">
                     {item.title}
                   </h3>
-                  <p className="font-body text-[15px] text-foreground/70 leading-[1.7] relative z-10">
+                  <p className="text-sm md:text-base font-body text-foreground/70 leading-relaxed relative z-10">
                     {item.description}
                   </p>
                 </div>
@@ -600,19 +545,18 @@ const Landing = () => {
       </section>
 
       {/* ═══════════════ SECTION 5 — TÉMOIGNAGES ═══════════════ */}
-      <section className="py-20 md:py-[120px] bg-foreground">
+      <section className="py-24 md:py-32 bg-foreground">
         <div className="max-w-6xl mx-auto px-6 md:px-12">
           <RevealSection className="text-center mb-16">
-            <p className="text-[11px] font-body font-semibold tracking-[0.15em] uppercase text-white/40 mb-4">
+            <p className="text-xs font-body font-semibold tracking-widest uppercase text-white/40 mb-4">
               Ils ont sauté le pas
             </p>
-            <h2 className="font-heading text-[36px] md:text-[48px] lg:text-[52px] font-semibold text-white leading-[1.2]">
+            <h2 className="font-heading text-4xl md:text-5xl font-semibold text-white leading-snug">
               Ils ont sauté le pas.
             </h2>
           </RevealSection>
 
           <div className="relative">
-            {/* Arrows */}
             <button
               onClick={() => emblaApi?.scrollPrev()}
               className="absolute -left-2 md:-left-6 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full border border-white/20 flex items-center justify-center hover:bg-white/10 transition-colors text-white/60 hover:text-white"
@@ -640,25 +584,14 @@ const Landing = () => {
                     key={t.name}
                     className="flex-[0_0_100%] md:flex-[0_0_33.333%] min-w-0 px-3"
                   >
-                    <div
-                      className="rounded-2xl p-10 h-full"
-                      style={{
-                        background: "rgba(255,255,255,0.06)",
-                        border: "1px solid rgba(255,255,255,0.12)",
-                        backdropFilter: "blur(10px)",
-                        WebkitBackdropFilter: "blur(10px)",
-                      }}
-                    >
-                      <span
-                        className="block font-heading leading-none mb-3 select-none text-primary"
-                        style={{ fontSize: "80px", opacity: 0.4, lineHeight: 0.8 }}
-                      >
+                    <div className="rounded-2xl p-10 h-full bg-white/5 border border-white/10 backdrop-blur-sm">
+                      <span className="block font-heading text-7xl leading-none mb-3 select-none text-primary/40">
                         "
                       </span>
-                      <p className="font-body text-[17px] text-white/90 leading-[1.7] italic mb-6">
+                      <p className="font-body text-base md:text-lg text-white/90 leading-relaxed italic mb-6">
                         {t.text}
                       </p>
-                      <p className="font-body text-[13px] text-white/50 uppercase tracking-[0.1em]">
+                      <p className="font-body text-xs text-white/50 uppercase tracking-widest">
                         {t.name} — {t.detail}
                       </p>
                     </div>
@@ -667,7 +600,6 @@ const Landing = () => {
               </div>
             </div>
 
-            {/* Pagination dots */}
             <div className="flex justify-center gap-2 mt-10">
               {scrollSnaps.map((_, i) => (
                 <button
@@ -685,13 +617,13 @@ const Landing = () => {
       </section>
 
       {/* ═══════════════ SECTION 6 — TROIS ÉTAPES ═══════════════ */}
-      <section className="py-20 md:py-[120px] bg-background">
+      <section className="py-24 md:py-32 bg-background">
         <div className="max-w-6xl mx-auto px-6 md:px-12">
           <RevealSection className="text-center mb-16">
-            <p className="text-[11px] font-body font-semibold tracking-[0.15em] uppercase text-primary/60 mb-4">
+            <p className="text-xs font-body font-semibold tracking-widest uppercase text-primary/60 mb-4">
               Comment ça marche
             </p>
-            <h2 className="font-heading text-[36px] md:text-[48px] lg:text-[52px] font-semibold text-foreground leading-[1.2]">
+            <h2 className="font-heading text-4xl md:text-5xl font-semibold text-foreground leading-snug">
               Trois étapes. Une relation.
             </h2>
           </RevealSection>
@@ -699,21 +631,21 @@ const Landing = () => {
           <div className="grid md:grid-cols-2 gap-12 md:gap-0">
             {/* Colonne gauche — Propriétaire */}
             <RevealSection className="md:pr-10 lg:pr-16 md:border-r md:border-border">
-              <p className="text-[11px] font-body font-semibold tracking-[0.15em] uppercase text-primary mb-10">
+              <p className="text-xs font-body font-semibold tracking-widest uppercase text-primary mb-10">
                 Tu as une maison, des animaux
               </p>
               <div className="space-y-12">
                 {ownerSteps.map((step) => (
                   <div key={step.number}>
-                    <span className="block font-heading text-[80px] text-primary/15 leading-none">{step.number}</span>
-                    <h3 className="font-heading text-2xl font-semibold text-foreground mt-1 mb-2">{step.title}</h3>
-                    <p className="font-body text-base text-foreground/70 leading-[1.7] whitespace-pre-line">{step.description}</p>
+                    <span className="block font-heading text-6xl md:text-7xl text-primary/15 leading-none">{step.number}</span>
+                    <h3 className="font-heading text-xl md:text-2xl font-semibold text-foreground mt-1 mb-2">{step.title}</h3>
+                    <p className="text-base font-body text-foreground/70 leading-relaxed">{step.description}</p>
                   </div>
                 ))}
               </div>
               <Link
                 to="/inscription?role=owner"
-                className="inline-flex items-center gap-2 mt-10 text-primary font-body text-[15px] font-semibold hover:gap-3 transition-all"
+                className="inline-flex items-center gap-2 mt-10 text-primary font-body text-sm font-semibold hover:gap-3 transition-all"
               >
                 Je cherche un gardien <ArrowRight className="h-4 w-4" />
               </Link>
@@ -721,21 +653,21 @@ const Landing = () => {
 
             {/* Colonne droite — Gardien */}
             <RevealSection delay={0.15} className="md:pl-10 lg:pl-16">
-              <p className="text-[11px] font-body font-semibold tracking-[0.15em] uppercase text-primary mb-10">
+              <p className="text-xs font-body font-semibold tracking-widest uppercase text-primary mb-10">
                 Tu veux garder
               </p>
               <div className="space-y-12">
                 {sitterSteps.map((step) => (
                   <div key={step.number}>
-                    <span className="block font-heading text-[80px] text-primary/15 leading-none">{step.number}</span>
-                    <h3 className="font-heading text-2xl font-semibold text-foreground mt-1 mb-2">{step.title}</h3>
-                    <p className="font-body text-base text-foreground/70 leading-[1.7] whitespace-pre-line">{step.description}</p>
+                    <span className="block font-heading text-6xl md:text-7xl text-primary/15 leading-none">{step.number}</span>
+                    <h3 className="font-heading text-xl md:text-2xl font-semibold text-foreground mt-1 mb-2">{step.title}</h3>
+                    <p className="text-base font-body text-foreground/70 leading-relaxed">{step.description}</p>
                   </div>
                 ))}
               </div>
               <Link
                 to="/inscription?role=sitter"
-                className="inline-flex items-center gap-2 mt-10 text-primary font-body text-[15px] font-semibold hover:gap-3 transition-all"
+                className="inline-flex items-center gap-2 mt-10 text-primary font-body text-sm font-semibold hover:gap-3 transition-all"
               >
                 Je veux garder <ArrowRight className="h-4 w-4" />
               </Link>
@@ -744,19 +676,16 @@ const Landing = () => {
 
           {/* Encart entraide */}
           <RevealSection className="mt-20">
-            <div className="bg-muted rounded-[20px] p-12 md:p-12 max-w-[800px] mx-auto text-center">
-              <h3 className="font-heading text-[26px] md:text-[32px] font-semibold text-foreground mb-4">
+            <div className="bg-muted rounded-2xl p-12 max-w-3xl mx-auto text-center">
+              <h3 className="font-heading text-2xl md:text-3xl font-semibold text-foreground mb-4">
                 Un jardin à arroser ? Un meuble à monter ?
               </h3>
-              <p className="font-body text-[17px] text-foreground/75 leading-[1.7] max-w-xl mx-auto mb-6">
-                Jardinage, bricolage, courses, coup de main —
-                les petites missions sont là pour ça.
-                <br />
-                Sans argent. Entre gens du coin qui se choisissent.
+              <p className="font-body text-base md:text-lg text-foreground/75 leading-relaxed max-w-xl mx-auto mb-6">
+                Jardinage, bricolage, courses, coup de main — les petites missions sont là pour ça. Sans argent. Entre gens du coin qui se choisissent.
               </p>
               <Link
                 to="/petites-missions"
-                className="text-primary font-body font-semibold text-[15px] underline underline-offset-4 hover:no-underline inline-flex items-center gap-1"
+                className="text-primary font-body font-semibold text-sm underline underline-offset-4 hover:no-underline inline-flex items-center gap-1"
               >
                 Découvrir les petites missions <ArrowRight className="h-4 w-4" />
               </Link>
@@ -771,29 +700,20 @@ const Landing = () => {
       </section>
 
       {/* ═══════════════ SECTION 7 — ENCART FONDATEUR ═══════════════ */}
-      <section className="py-16 md:py-[100px] bg-primary">
-        <RevealSection className="max-w-[600px] mx-auto px-6 text-center">
-          <div
-            className="inline-flex items-center rounded-full px-4 py-1.5 mb-6"
-            style={{
-              background: "rgba(255,255,255,0.15)",
-              border: "1px solid rgba(255,255,255,0.3)",
-            }}
-          >
-            <span className="font-body text-[12px] text-white uppercase tracking-[0.1em]">Fondateurs</span>
+      <section className="py-24 md:py-32 bg-primary">
+        <RevealSection className="max-w-xl mx-auto px-6 text-center">
+          <div className="inline-flex items-center rounded-full px-4 py-1.5 mb-6 bg-white/15 border border-white/30">
+            <span className="font-body text-xs text-white uppercase tracking-widest">Fondateurs</span>
           </div>
-          <h2 className="font-heading text-[36px] md:text-[48px] lg:text-[52px] font-bold text-white leading-[1.2] mb-6">
-            ⭐ Inscris-toi avant le 13 mai.
+          <h2 className="font-heading text-4xl md:text-5xl font-bold text-white leading-snug mb-6">
+            Inscris-toi avant le 13 mai.
           </h2>
-          <p className="font-body text-[18px] text-white/85 leading-[1.7] mb-10">
-            Badge Fondateur à vie. Accès gratuit jusqu'au 13 juin.
-            Et surtout — tu seras parmi les premiers à vivre ça.
-            Pourquoi le 13 mai ? C'est l'anniversaire de Jérémie.
-            Il préfère offrir l'accès plutôt que recevoir des chaussettes.
+          <p className="font-body text-lg text-white/85 leading-relaxed mb-10">
+            Badge Fondateur à vie. Accès gratuit jusqu'au 13 juin. Et surtout — tu seras parmi les premiers à vivre ça. Pourquoi le 13 mai ? C'est l'anniversaire de Jérémie. Il préfère offrir l'accès plutôt que recevoir des chaussettes.
           </p>
           <button
             onClick={() => navigate("/inscription")}
-            className="font-body text-[15px] font-bold tracking-[0.03em] rounded-full px-12 py-[18px] bg-white text-primary hover:bg-background hover:scale-[1.02] transition-all duration-200"
+            className="font-body text-sm font-bold tracking-wide rounded-full px-12 py-4 bg-white text-primary hover:bg-background hover:scale-[1.02] transition-all duration-200"
           >
             Rejoindre le mouvement
           </button>
@@ -802,11 +722,11 @@ const Landing = () => {
 
       {/* ═══════════════ DERNIERS ARTICLES ═══════════════ */}
       {latestArticles.length > 0 && (
-        <section className="py-20 md:py-[100px] bg-background">
+        <section className="py-24 md:py-32 bg-background">
           <div className="max-w-6xl mx-auto px-6 md:px-12">
             <RevealSection>
               <div className="flex items-center justify-between mb-12">
-                <h2 className="font-heading text-[28px] md:text-[36px] font-semibold text-foreground">
+                <h2 className="font-heading text-2xl md:text-4xl font-semibold text-foreground">
                   Derniers guides & conseils
                 </h2>
                 <Button
@@ -823,7 +743,7 @@ const Landing = () => {
                 <RevealSection key={a.id} delay={0.1 * i}>
                   <Link
                     to={`/actualites/${a.slug}`}
-                    className="group bg-card rounded-2xl overflow-hidden border border-border hover:-translate-y-1 hover:shadow-[0_20px_40px_rgba(0,0,0,0.08)] transition-all duration-300 block"
+                    className="group bg-card rounded-2xl overflow-hidden border border-border hover:-translate-y-1 hover:shadow-lg transition-all duration-300 block"
                   >
                     {a.cover_image_url && (
                       <img
@@ -849,43 +769,40 @@ const Landing = () => {
       )}
 
       {/* ═══════════════ SECTION 8 — CTA FINAL ═══════════════ */}
-      <section className="py-20 md:py-[120px] bg-foreground">
-        <RevealSection className="max-w-[700px] mx-auto px-6 text-center">
-          <h2 className="font-heading text-[44px] md:text-[56px] lg:text-[64px] font-bold text-white leading-[1.1] mb-6">
+      <section className="py-24 md:py-32 bg-foreground">
+        <RevealSection className="max-w-2xl mx-auto px-6 text-center">
+          <h2 className="font-heading text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight mb-6">
             Votre prochaine histoire commence ici.
           </h2>
-          <p className="font-body text-[18px] text-white/70 leading-[1.7] max-w-[500px] mx-auto mb-10">
-            Des gardes, de l'entraide, des gens du coin
-            qui se font confiance.
-            Gratuit pour commencer.
-            Ce que vous allez vivre ne l'est pas.
+          <p className="font-body text-lg text-white/70 leading-relaxed max-w-lg mx-auto mb-10">
+            Des gardes, de l'entraide, des gens du coin qui se font confiance. Gratuit pour commencer. Ce que vous allez vivre ne l'est pas.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <button
               onClick={() => navigate("/inscription?role=owner")}
-              className="font-body text-[15px] font-semibold tracking-[0.03em] rounded-full px-10 py-[18px] bg-primary text-primary-foreground hover:brightness-90 hover:scale-[1.02] transition-all duration-200"
+              className="font-body text-sm font-semibold tracking-wide rounded-full px-10 py-4 bg-primary text-primary-foreground hover:brightness-90 hover:scale-[1.02] transition-all duration-200"
             >
               Je cherche un gardien
             </button>
             <button
               onClick={() => navigate("/inscription?role=sitter")}
-              className="font-body text-[15px] font-semibold tracking-[0.03em] rounded-full px-10 py-[18px] bg-transparent text-white border-2 border-white/40 hover:bg-white/10 transition-all duration-200"
+              className="font-body text-sm font-semibold tracking-wide rounded-full px-10 py-4 bg-transparent text-white border-2 border-white/40 hover:bg-white/10 transition-all duration-200"
             >
               Je veux garder
             </button>
           </div>
-          <p className="mt-6 text-[13px] text-white/40 font-body">
+          <p className="mt-6 text-xs text-white/40 font-body">
             Gratuit · Badge Fondateur à vie · Accès jusqu'au 13 juin
           </p>
         </RevealSection>
       </section>
 
       {/* ═══════════════ FOOTER ═══════════════ */}
-      <footer className="bg-foreground" style={{ borderTop: "1px solid rgba(255,255,255,0.1)" }}>
+      <footer className="bg-foreground border-t border-white/10">
         <div className="max-w-6xl mx-auto px-6 md:px-12 py-16">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-10 mb-12">
             <div>
-              <h4 className="font-body text-[11px] uppercase tracking-[0.15em] text-white/30 mb-4">House-sitting par ville</h4>
+              <h4 className="font-body text-xs uppercase tracking-widest text-white/30 mb-4">House-sitting par ville</h4>
               <ul className="space-y-2">
                 <li><Link to="/house-sitting/lyon" className="font-body text-sm text-white/50 hover:text-white transition-colors">House-sitting Lyon</Link></li>
                 <li><Link to="/house-sitting/annecy" className="font-body text-sm text-white/50 hover:text-white transition-colors">House-sitting Annecy</Link></li>
@@ -895,7 +812,7 @@ const Landing = () => {
               </ul>
             </div>
             <div>
-              <h4 className="font-body text-[11px] uppercase tracking-[0.15em] text-white/30 mb-4">House-sitting AURA</h4>
+              <h4 className="font-body text-xs uppercase tracking-widest text-white/30 mb-4">House-sitting AURA</h4>
               <ul className="space-y-2">
                 <li><Link to="/actualites/house-sitting-auvergne-rhone-alpes" className="font-body text-sm text-white/50 hover:text-white transition-colors">House-sitting en AURA</Link></li>
                 <li><Link to="/actualites/parcs-chiens-lyon-guide-complet" className="font-body text-sm text-white/50 hover:text-white transition-colors">Parcs chiens Lyon</Link></li>
@@ -905,7 +822,7 @@ const Landing = () => {
               </ul>
             </div>
             <div>
-              <h4 className="font-body text-[11px] uppercase tracking-[0.15em] text-white/30 mb-4">Ressources</h4>
+              <h4 className="font-body text-xs uppercase tracking-widest text-white/30 mb-4">Ressources</h4>
               <ul className="space-y-2">
                 <li><Link to="/actualites" className="font-body text-sm text-white/50 hover:text-white transition-colors">Articles</Link></li>
                 <li><Link to="/guides" className="font-body text-sm text-white/50 hover:text-white transition-colors">Guides locaux</Link></li>
@@ -915,7 +832,7 @@ const Landing = () => {
               </ul>
             </div>
             <div>
-              <h4 className="font-body text-[11px] uppercase tracking-[0.15em] text-white/30 mb-4">Guardiens</h4>
+              <h4 className="font-body text-xs uppercase tracking-widest text-white/30 mb-4">Guardiens</h4>
               <ul className="space-y-2">
                 <li><Link to="/a-propos" className="font-body text-sm text-white/50 hover:text-white transition-colors">À propos</Link></li>
                 <li><Link to="/notre-histoire" className="font-body text-sm text-white/50 hover:text-white transition-colors">Notre histoire</Link></li>
@@ -926,7 +843,7 @@ const Landing = () => {
             </div>
           </div>
 
-          <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4" style={{ borderTop: "1px solid rgba(255,255,255,0.1)" }}>
+          <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-white/10">
             <div>
               <h3 className="font-heading text-lg font-semibold text-white/90">
                 <span className="text-primary">g</span>uardiens
@@ -956,6 +873,12 @@ const Landing = () => {
           from { opacity: 0; transform: translateY(20px); }
           to { opacity: 1; transform: translateY(0); }
         }
+        .animate-hero-fade-up { animation: heroFadeUp 0.8s ease-out both; }
+        .animation-delay-400 { animation-delay: 0.4s; }
+        .animation-delay-700 { animation-delay: 0.7s; }
+        .animation-delay-900 { animation-delay: 0.9s; }
+        .animation-delay-1000 { animation-delay: 1s; }
+        .animation-delay-1100 { animation-delay: 1.1s; }
         @media (prefers-reduced-motion: reduce) {
           * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
         }
