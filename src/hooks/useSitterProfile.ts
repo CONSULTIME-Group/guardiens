@@ -118,6 +118,8 @@ export function useSitterProfile() {
       languages: s?.languages || [],
       bonus_skills: s?.bonus_skills || [],
       interests: s?.interests || [],
+      skill_categories: (p as any)?.skill_categories || [],
+      available_for_help: (p as any)?.available_for_help || false,
     };
 
     setData(merged);
