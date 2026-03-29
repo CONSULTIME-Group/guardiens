@@ -697,11 +697,11 @@ const Landing = () => {
           style={{ backgroundColor: "#FEF3C7", borderColor: "hsl(24 36% 60%)" }}
         >
           <h3 className="font-heading text-xl md:text-2xl font-bold text-foreground">
-            ⭐ Inscrivez-vous avant le 13 mai.
+            ⭐ Inscris-toi avant le 13 mai.
           </h3>
           <p className="text-muted-foreground max-w-xl mx-auto leading-relaxed">
             Badge Fondateur à vie. Accès gratuit jusqu'au 13 juin.
-            Et surtout — vous serez parmi les premiers à vivre ça.
+            Et surtout — tu seras parmi les premiers à vivre ça.
             Pourquoi le 13 mai ? C'est l'anniversaire de Jérémie.
             Il préfère offrir l'accès plutôt que recevoir des chaussettes.
           </p>
