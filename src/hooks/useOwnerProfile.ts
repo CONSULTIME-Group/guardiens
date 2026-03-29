@@ -124,6 +124,8 @@ export function useOwnerProfile() {
       news_format: o?.news_format || [],
       preferred_time: o?.preferred_time || "",
       communication_notes: o?.communication_notes || "",
+      skill_categories: (p as any)?.skill_categories || [],
+      available_for_help: (p as any)?.available_for_help || false,
     });
 
     if (prop) {
