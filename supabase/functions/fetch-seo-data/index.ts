@@ -7,7 +7,6 @@ const corsHeaders = {
 };
 
 const GSC_SITE_URL = "https://guardiens.fr/";
-// GA4 Property ID is read from env or defaults to 530010609
 
 // ---------- Google JWT Auth ----------
 
@@ -173,13 +172,9 @@ async function fetchGSCData(
   startDate: string,
   endDate: string,
   dimensions: string[] = [],
-  rowLimit = 10
+  rowLimit = 25
 ): Promise<{ totals: GSCMetrics; rows: GSCRow[] }> {
-  const body: any = {
-    startDate,
-    endDate,
-    rowLimit,
-  };
+  const body: any = { startDate, endDate, rowLimit };
   if (dimensions.length > 0) body.dimensions = dimensions;
 
   const res = await fetch(
@@ -205,27 +200,21 @@ async function fetchGSCData(
     position: r.position || 0,
   }));
 
-  // Compute totals
-  const totals = rows.reduce(
-    (acc, r) => ({
-      clicks: acc.clicks + r.clicks,
-      impressions: acc.impressions + r.impressions,
-      ctr: 0,
-      position: 0,
-    }),
-    { clicks: 0, impressions: 0, ctr: 0, position: 0 }
-  );
+  // Compute totals from all rows
+  const totalClicks = rows.reduce((s, r) => s + r.clicks, 0);
+  const totalImpressions = rows.reduce((s, r) => s + r.impressions, 0);
+  const weightedPosition = totalImpressions > 0
+    ? rows.reduce((s, r) => s + r.position * r.impressions, 0) / totalImpressions
+    : 0;
 
-  if (totals.impressions > 0) {
-    totals.ctr = totals.clicks / totals.impressions;
-  }
-  if (rows.length > 0) {
-    totals.position =
-      rows.reduce((s, r) => s + r.position * r.impressions, 0) /
-      (totals.impressions || 1);
-  }
+  const totals: GSCMetrics = {
+    clicks: totalClicks,
+    impressions: totalImpressions,
+    ctr: totalImpressions > 0 ? totalClicks / totalImpressions : 0,
+    position: weightedPosition,
+  };
 
-  // If no dimensions, use the API-provided totals
+  // If no dimensions were requested, use the single-row API totals
   if (dimensions.length === 0 && data.rows?.length > 0) {
     const r = data.rows[0];
     return {
@@ -266,7 +255,6 @@ Deno.serve(async (req) => {
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Check for force refresh
     const url = new URL(req.url);
     const forceRefresh = url.searchParams.get("refresh") === "true";
 
@@ -289,7 +277,6 @@ Deno.serve(async (req) => {
       }
     }
 
-    // Load service account
     const saJson = Deno.env.get("GOOGLE_SERVICE_ACCOUNT_JSON");
     if (!saJson) {
       return new Response(
@@ -299,19 +286,15 @@ Deno.serve(async (req) => {
     }
 
     const serviceAccount = JSON.parse(saJson);
-
-    // Get access token with both scopes
     const accessToken = await getAccessToken(serviceAccount, [
       "https://www.googleapis.com/auth/webmasters.readonly",
       "https://www.googleapis.com/auth/analytics.readonly",
     ]);
 
-    // GA4: use hardcoded property ID
     const ga4PropertyId = Deno.env.get("GA4_PROPERTY_ID") || "530010609";
 
     // Date ranges
-    const today = new Date();
-    const gscEnd = formatDate(daysAgo(3)); // GSC has 3-day delay
+    const gscEnd = formatDate(daysAgo(3));
     const gscStart = formatDate(daysAgo(31));
     const gscPrevEnd = formatDate(daysAgo(32));
     const gscPrevStart = formatDate(daysAgo(60));
@@ -327,32 +310,23 @@ Deno.serve(async (req) => {
       gscPrevious,
       gscTopPages,
       gscTopQueries,
+      ga4Current,
+      ga4Previous,
     ] = await Promise.all([
       fetchGSCData(accessToken, gscStart, gscEnd),
       fetchGSCData(accessToken, gscPrevStart, gscPrevEnd),
-      fetchGSCData(accessToken, gscStart, gscEnd, ["page"], 10),
+      fetchGSCData(accessToken, gscStart, gscEnd, ["page"], 25),
       fetchGSCData(accessToken, gscStart, gscEnd, ["query"], 10),
+      fetchGA4Data(accessToken, ga4PropertyId, ga4Start, ga4End, true),
+      fetchGA4Data(accessToken, ga4PropertyId, ga4PrevStart, ga4PrevEnd, false),
     ]);
 
-    let ga4Current: GA4Metrics | null = null;
-    let ga4Previous: GA4Metrics | null = null;
-
-    if (ga4PropertyId) {
-      [ga4Current, ga4Previous] = await Promise.all([
-        fetchGA4Data(accessToken, ga4PropertyId, ga4Start, ga4End, true),
-        fetchGA4Data(accessToken, ga4PropertyId, ga4PrevStart, ga4PrevEnd, false),
-      ]);
-    }
-
-    // Build result
     const result = {
-      ga4: ga4Current
-        ? {
-            current: ga4Current,
-            previous: ga4Previous,
-            propertyId: ga4PropertyId,
-          }
-        : null,
+      ga4: {
+        current: ga4Current,
+        previous: ga4Previous,
+        propertyId: ga4PropertyId,
+      },
       gsc: {
         current: gscCurrent.totals,
         previous: gscPrevious.totals,
@@ -381,7 +355,6 @@ Deno.serve(async (req) => {
   } catch (error) {
     console.error("fetch-seo-data error:", error);
 
-    // Try to return cached data on error
     try {
       const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
       const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
