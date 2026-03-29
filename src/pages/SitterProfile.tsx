@@ -234,7 +234,7 @@ const SitterProfile = () => {
           </TabsList>
 
           {/* ── Profile Tab: Accordion ── */}
-          <TabsContent value="profile" className="mt-4 pb-32">
+          <TabsContent value="profile" className="mt-4 pb-44">
             <Accordion type="multiple" defaultValue={["identity"]} ref={accordionRef} className="space-y-3">
               {sections.map(({ id, num, label }) => {
                 const complete = sectionComplete(num, mergedData);
