@@ -33,6 +33,7 @@ const speciesEmoji: Record<string, string> = {
 
 type SortOption = "closest" | "recent" | "rating";
 type SearchTab = "sits" | "long_stays" | "missions";
+type MissionSubTab = "published" | "members";
 
 const SearchSitter = () => {
   const { user } = useAuth();
