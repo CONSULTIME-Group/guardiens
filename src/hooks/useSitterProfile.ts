@@ -62,6 +62,7 @@ const defaultData: SitterProfileData = {
   has_license: false, has_vehicle: false, geographic_radius: 30, min_duration: 3, max_duration: 21, availability_dates: [], is_available: false,
   strict_rules_ok: false, prefer_visitors: false, farm_animals_ok: false, preferences_notes: "",
   meeting_preference: [], handover_preference: "", languages: [], bonus_skills: [], interests: [],
+  skill_categories: [], available_for_help: false,
 };
 
 export function useSitterProfile() {
