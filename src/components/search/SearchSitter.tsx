@@ -333,7 +333,86 @@ const SearchSitter = () => {
     setResults(final);
   };
 
-  const sortResults = (items: any[], sortBy: SortOption) => {
+  const searchAvailableMembers = async (searchCoords: { lat: number; lng: number } | null) => {
+    const { data } = await supabase
+      .from("profiles")
+      .select("id, first_name, avatar_url, city, skill_categories, available_for_help")
+      .eq("available_for_help", true)
+      .not("skill_categories", "eq", "{}");
+
+    let items = (data || []).filter((m: any) => m.id !== user?.id);
+
+    // Filter by category
+    const catToSkill: Record<string, string> = { garden: "jardin", animals: "animaux", skills: "competences", house: "coups_de_main" };
+    if (missionCategoryFilter !== "all") {
+      const skillKey = catToSkill[missionCategoryFilter];
+      items = items.filter((m: any) => m.skill_categories?.includes(skillKey));
+    }
+
+    // Location filter
+    if (searchCoords) {
+      const uniqueCities = [...new Set(items.map((m: any) => m.city).filter(Boolean))] as string[];
+      const cityCoords = new Map<string, { lat: number; lng: number }>();
+      await Promise.all(uniqueCities.map(async (c) => {
+        const coords = await geocodeCity(c);
+        if (coords) cityCoords.set(c, { lat: coords.lat, lng: coords.lng });
+      }));
+      items = items.filter((m: any) => {
+        if (!m.city) return false;
+        const coords = cityCoords.get(m.city);
+        if (!coords) return false;
+        return haversineDistance(searchCoords.lat, searchCoords.lng, coords.lat, coords.lng) <= radius[0];
+      }).map((m: any) => {
+        const coords = cityCoords.get(m.city);
+        const dist = coords ? haversineDistance(searchCoords.lat, searchCoords.lng, coords.lat, coords.lng) : null;
+        return { ...m, distance: dist };
+      });
+    }
+
+    // Get reviews for members
+    const memberIds = items.map((m: any) => m.id);
+    if (memberIds.length > 0) {
+      const { data: reviews } = await supabase
+        .from("reviews")
+        .select("reviewee_id, overall_rating")
+        .in("reviewee_id", memberIds)
+        .eq("published", true);
+
+      const reviewMap = new Map<string, { count: number; total: number }>();
+      (reviews || []).forEach((r: any) => {
+        const cur = reviewMap.get(r.reviewee_id) || { count: 0, total: 0 };
+        reviewMap.set(r.reviewee_id, { count: cur.count + 1, total: cur.total + r.overall_rating });
+      });
+
+      const { data: apps } = await supabase
+        .from("applications")
+        .select("sitter_id")
+        .in("sitter_id", memberIds)
+        .eq("status", "accepted");
+
+      const sitsMap = new Map<string, number>();
+      (apps || []).forEach((a: any) => {
+        sitsMap.set(a.sitter_id, (sitsMap.get(a.sitter_id) || 0) + 1);
+      });
+
+      items = items.map((m: any) => {
+        const rev = reviewMap.get(m.id);
+        return {
+          ...m,
+          avgRating: rev ? (rev.total / rev.count).toFixed(1) : null,
+          reviewCount: rev?.count || 0,
+          sitsCount: sitsMap.get(m.id) || 0,
+        };
+      });
+    }
+
+    if (sort === "closest") items.sort((a: any, b: any) => (a.distance ?? 9999) - (b.distance ?? 9999));
+    else if (sort === "rating") items.sort((a: any, b: any) => parseFloat(b.avgRating || "0") - parseFloat(a.avgRating || "0"));
+
+    setAvailableMembers(items);
+    setResults([]); // Clear results since members are separate
+  };
+
     const sorted = [...items];
     if (sortBy === "closest") sorted.sort((a, b) => (a.distance ?? 9999) - (b.distance ?? 9999));
     else if (sortBy === "recent") sorted.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
