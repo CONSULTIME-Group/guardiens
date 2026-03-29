@@ -1,0 +1,125 @@
+import { Link } from "react-router-dom";
+
+const DEMO_LISTINGS = [
+  {
+    id: "demo-1",
+    photo: "https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=800&q=80",
+    city: "Lyon 6e",
+    animals: ["1 chien", "2 chats"],
+    dates: "14 → 28 juil.",
+    title: "Maison avec jardin, Laïka et ses deux compères",
+    description: "Belle maison en briques avec terrasse ensoleillée. Laïka (labrador 4 ans) adore les balades au parc de la Tête d'Or. Les deux chats sont indépendants.",
+    ownerName: "Nadia",
+    ownerPhoto: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&q=80",
+    badges: ["ID vérifiée", "Fondatrice"],
+  },
+  {
+    id: "demo-2",
+    photo: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&q=80",
+    city: "Annecy",
+    animals: ["3 poules", "1 chat"],
+    dates: "2 → 16 août",
+    title: "Maison en bois face au lac, potager et basse-cour",
+    description: "Vue imprenable sur le lac d'Annecy. Trois poules pondeuses (les œufs sont pour vous), un chat discret, un potager à arroser. Le paradis.",
+    ownerName: "Rania",
+    ownerPhoto: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=200&q=80",
+    badges: ["ID vérifiée", "3 gardes"],
+  },
+  {
+    id: "demo-3",
+    photo: "https://images.unsplash.com/photo-1598928636135-d146006ff4be?w=800&q=80",
+    city: "Grenoble",
+    animals: ["2 chats"],
+    dates: "20 sept. → 4 oct.",
+    title: "Appartement calme, deux chats aux habitudes bien rodées",
+    description: "Appartement lumineux au pied du Vercors. Milo et Louane sont habitués aux gardiens — une semaine et ils vous ont adopté. Quartier animé, tout à pied.",
+    ownerName: "Giulia",
+    ownerPhoto: "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=200&q=80",
+    badges: ["ID vérifiée", "Fondatrice"],
+  },
+];
+
+const DemoListingCard = ({
+  photo, city, animals, dates, title, description, ownerName, ownerPhoto, badges,
+}: typeof DEMO_LISTINGS[0]) => (
+  <div className="bg-card rounded-2xl overflow-hidden border border-border shadow-sm flex flex-col">
+    <div className="relative">
+      <img src={photo} alt={title} className="w-full h-48 object-cover" />
+      <span className="absolute top-3 left-3 bg-white/90 text-foreground/50 text-xs font-body font-medium px-3 py-1 rounded-full border border-border/60">
+        Exemple
+      </span>
+      <div className="absolute bottom-3 left-3 flex gap-1 flex-wrap">
+        {animals.map((a) => (
+          <span key={a} className="bg-black/50 text-white text-xs font-body px-2 py-0.5 rounded-full backdrop-blur-sm">
+            {a}
+          </span>
+        ))}
+      </div>
+    </div>
+
+    <div className="p-5 flex flex-col gap-3 flex-1">
+      <div className="flex items-center justify-between">
+        <span className="text-sm font-body font-medium text-foreground/80">{city}</span>
+        <span className="text-xs font-body text-foreground/50">{dates}</span>
+      </div>
+
+      <h3 className="text-xl font-heading font-semibold leading-snug">{title}</h3>
+
+      <p className="text-sm font-body text-foreground/70 line-clamp-2">{description}</p>
+
+      <div className="flex items-center gap-3 mt-auto pt-3 border-t border-border">
+        <img src={ownerPhoto} alt={ownerName} className="w-9 h-9 rounded-full object-cover" />
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-body font-medium text-foreground/90 truncate">{ownerName}</p>
+          <div className="flex gap-1 flex-wrap">
+            {badges.map((b) => (
+              <span key={b} className="text-xs font-body text-primary/70">{b}</span>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <Link
+        to="/register"
+        className="w-full mt-3 py-2.5 rounded-xl bg-primary/10 text-primary font-body font-medium text-sm text-center hover:bg-primary/20 transition-colors block"
+      >
+        Rejoindre pour postuler →
+      </Link>
+    </div>
+  </div>
+);
+
+const DemoListingShowcase = () => (
+  <section className="py-24 md:py-32 bg-muted/30">
+    <div className="max-w-6xl mx-auto px-4">
+      <p className="text-xs tracking-widest uppercase text-primary/60 font-body text-center mb-4">
+        Ce qui vous attend
+      </p>
+
+      <h2 className="text-4xl md:text-5xl font-heading font-semibold leading-snug text-center mb-4">
+        Des maisons. Des animaux. Des gens du coin.
+      </h2>
+
+      <p className="text-lg md:text-xl font-body font-normal text-foreground/70 text-center mb-16 max-w-2xl mx-auto">
+        Voici à quoi ressemblent les gardes sur Guardiens.
+      </p>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+        {DEMO_LISTINGS.map((card) => (
+          <DemoListingCard key={card.id} {...card} />
+        ))}
+      </div>
+
+      <div className="text-center">
+        <Link
+          to="/register"
+          className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-8 py-4 rounded-full font-body font-medium text-base hover:bg-primary/90 transition-colors"
+        >
+          Rejoindre Guardiens — gratuit pour commencer
+        </Link>
+      </div>
+    </div>
+  </section>
+);
+
+export default DemoListingShowcase;
