@@ -135,14 +135,15 @@ Deno.serve(async () => {
     xml += urlEntry(`/house-sitting-${slug}`, today, "weekly", "0.9");
   }
 
-  // Articles → /blog/{slug}
+  // Articles → /actualites/{slug}
   if (articles) {
     for (const a of articles) {
       const priority = PRIORITY_MAP[a.category] || "0.7";
+      const changefreq = CHANGEFREQ_MAP[a.category] || "monthly";
       xml += urlEntry(
-        `/blog/${a.slug}`,
+        `/actualites/${a.slug}`,
         (a.updated_at || a.published_at || today).split("T")[0],
-        "monthly",
+        changefreq,
         priority
       );
     }

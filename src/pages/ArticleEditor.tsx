@@ -264,16 +264,32 @@ const ArticleEditor = () => {
           </div>
         )}
 
-        <details className="pt-2">
-          <summary className="text-sm text-muted-foreground cursor-pointer">SEO (optionnel)</summary>
+        <details className="pt-2" open>
+          <summary className="text-sm font-medium cursor-pointer">SEO</summary>
           <div className="space-y-3 pt-3">
             <div>
-              <Label>Meta title</Label>
+              <Label>Meta title <span className="text-muted-foreground text-xs">(max 60 car.)</span></Label>
               <Input value={form.meta_title} onChange={e => updateField("meta_title", e.target.value)} placeholder="Auto-généré depuis le titre si vide" />
+              <div className="flex items-center justify-between mt-1">
+                <p className={`text-xs ${form.meta_title.length > 60 ? "text-destructive font-medium" : "text-muted-foreground"}`}>
+                  {form.meta_title.length}/60
+                </p>
+                {form.meta_title.length > 60 && (
+                  <p className="text-xs text-destructive">Trop long — Google tronquera à 60 caractères</p>
+                )}
+              </div>
             </div>
             <div>
-              <Label>Meta description</Label>
+              <Label>Meta description <span className="text-muted-foreground text-xs">(max 155 car.)</span></Label>
               <Textarea value={form.meta_description} onChange={e => updateField("meta_description", e.target.value)} placeholder="Auto-généré depuis le résumé si vide" rows={2} />
+              <div className="flex items-center justify-between mt-1">
+                <p className={`text-xs ${form.meta_description.length > 155 ? "text-destructive font-medium" : "text-muted-foreground"}`}>
+                  {form.meta_description.length}/155
+                </p>
+                {form.meta_description.length > 155 && (
+                  <p className="text-xs text-destructive">Trop long — Google tronquera à 155 caractères</p>
+                )}
+              </div>
             </div>
           </div>
         </details>
