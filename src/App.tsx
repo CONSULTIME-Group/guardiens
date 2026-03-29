@@ -69,6 +69,7 @@ import AdminSubscriptions from "./pages/admin/AdminSubscriptions";
 import AdminLegal from "./pages/admin/AdminLegal";
 import AdminSettings from "./pages/admin/AdminSettings";
 import AdminContactMessages from "./pages/admin/AdminContactMessages";
+import AdminSEO from "./pages/admin/AdminSEO";
 import PublicProfile from "./pages/PublicProfile";
 import EmergencySitter from "./pages/EmergencySitter";
 import MySubscription from "./pages/MySubscription";
