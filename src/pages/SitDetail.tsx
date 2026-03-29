@@ -118,6 +118,8 @@ const SitDetail = () => {
 
   if (loading) return <div className="p-6 md:p-10 text-muted-foreground">Chargement...</div>;
   if (!sit) return <div className="p-6 md:p-10"><p>Annonce introuvable.</p></div>;
+  // SEO guard: demo listings have no detail page
+  if (id?.startsWith("demo-")) return <Navigate to="/search" replace />;
 
   const photos: string[] = (property as any)?.photos || [];
   const avgRating = reviews.length > 0 ? (reviews.reduce((s: number, r: any) => s + r.overall_rating, 0) / reviews.length).toFixed(1) : null;
