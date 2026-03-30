@@ -70,19 +70,19 @@ const faqItems = [
   },
   {
     q: "Pourquoi le 13 mai ?",
-    a: "C'est l'anniversaire de Jérémie, cofondateur de Guardiens. Il a préféré offrir l'accès gratuit à la communauté plutôt que recevoir des chaussettes. Les inscrits avant cette date reçoivent le badge Fondateur et 1 an d'accès gratuit.",
+    a: "C'est l'anniversaire de Jérémie, cofondateur de Guardiens. Il a préféré offrir l'accès gratuit à la communauté plutôt que recevoir des chaussettes. Les inscrits avant cette date reçoivent le badge Fondateur et un accès gratuit jusqu'au 13 juin.",
   },
   {
     q: "Que se passe-t-il après le 13 mai pour les Fondateurs ?",
-    a: "Les Fondateurs (inscrits avant le 13 mai) conservent un accès gratuit jusqu'au 13 juin 2026 — un mois de grâce pour décider. Après le 13 juin, l'abonnement à 49€/an est nécessaire pour garder l'accès complet. Le badge Fondateur reste à vie dans tous les cas.",
+    a: "Les Fondateurs (inscrits avant le 13 mai) conservent un accès gratuit jusqu'au 13 juin 2026 — un mois de grâce pour décider. Après le 13 juin, l'abonnement à 9€/mois est nécessaire pour garder l'accès complet. Le badge Fondateur reste à vie dans tous les cas.",
   },
   {
-    q: "Est-ce que 49€/an c'est rentable ?",
-    a: "Un seul week-end en house-sitting, c'est 0€ de logement. Comparez avec un Airbnb à 80€/nuit ou un hôtel : 49€ c'est rentabilisé dès la première garde.",
+    q: "Est-ce que 9€/mois c'est rentable ?",
+    a: "Un seul week-end en house-sitting, c'est 0€ de logement. Comparez avec un Airbnb à 80€/nuit ou un hôtel : 9€/mois c'est rentabilisé dès la première garde.",
   },
   {
     q: "Y a-t-il des frais cachés ?",
-    a: "Non. 49€/an pour les gardiens, gratuit pour les propriétaires, aucune commission sur les gardes classiques. Le seul supplément : 70€ par partie pour les gardes longue durée de 30 jours et plus.",
+    a: "Non. 9€/mois pour les gardiens (ou moins avec le tarif annuel proratisé), gratuit pour les propriétaires, aucune commission sur les gardes classiques. Le seul supplément : 70€ par partie pour les gardes longue durée de 30 jours et plus.",
   },
   {
     q: "Pourquoi pas d'assurance ou de protection logement ?",
