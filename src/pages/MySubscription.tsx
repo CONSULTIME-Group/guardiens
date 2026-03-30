@@ -28,7 +28,7 @@ const calculateYearlyProrata = (): { price: number; months: number; savings: num
     (endOfYear.getTime() - now.getTime()) / (1000 * 60 * 60 * 24 * 30.44)
   );
   const fullPrice = months * 9;
-  const discounted = Math.round(fullPrice * 0.8);
+  const discounted = Math.floor(fullPrice * 0.8);
   return { price: discounted, months, savings: Math.round(fullPrice * 0.2) };
 };
 
