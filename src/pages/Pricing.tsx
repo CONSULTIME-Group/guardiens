@@ -11,6 +11,17 @@ const GRACE_END = new Date("2026-06-13T00:00:00");
 const isBeforeLaunch = () => new Date() < LAUNCH_DATE;
 const isInGracePeriod = () => { const n = new Date(); return n >= LAUNCH_DATE && n < GRACE_END; };
 
+const calculateYearlyProrata = (): { price: number; months: number } => {
+  const now = new Date();
+  const endOfYear = new Date(2026, 11, 31);
+  const months = Math.ceil(
+    (endOfYear.getTime() - now.getTime()) / (1000 * 60 * 60 * 24 * 30.44)
+  );
+  const fullPrice = months * 9;
+  const discounted = Math.round(fullPrice * 0.8);
+  return { price: discounted, months };
+};
+
 const ownerFeatures = [
   "Créer votre profil complet",
   "Publier vos annonces de garde",

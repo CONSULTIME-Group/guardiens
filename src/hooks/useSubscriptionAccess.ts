@@ -9,9 +9,10 @@ export type SubStatus = "founder_grace" | "founder_expired" | "premium" | "expir
 
 /**
  * Returns whether the current sitter has full access (can message, apply, etc.)
+ * Uses Stripe via check-subscription edge function for subscription status.
  * Before May 13: everyone has access.
- * Between May 13 and June 13: founders have access, non-founders need sub.
- * After June 13: everyone needs a sub (founders included).
+ * Between May 13 and June 13: founders have access.
+ * After June 13: everyone needs a Stripe sub (founders included).
  * Owners always have access.
  */
 export const useSubscriptionAccess = () => {
@@ -26,22 +27,25 @@ export const useSubscriptionAccess = () => {
     if (!user) { setLoading(false); return; }
 
     const load = async () => {
-      const [profileRes, subRes] = await Promise.all([
+      // Fetch profile data and Stripe subscription status in parallel
+      const [profileRes, stripeRes] = await Promise.all([
         supabase.from("profiles").select("is_founder, created_at, role").eq("id", user.id).single(),
-        supabase.from("subscriptions").select("status").eq("user_id", user.id).eq("status", "active").maybeSingle(),
+        supabase.functions.invoke("check-subscription").catch(() => ({ data: null, error: true })),
       ]);
 
       const p = profileRes.data;
       const now = new Date();
       const createdDate = p?.created_at ? new Date(p.created_at) : new Date();
       const isFounder = p?.is_founder || createdDate < LAUNCH_DATE;
-      const hasActiveSub = subRes.data?.status === "active";
+      
+      // Check Stripe subscription
+      const stripeData = stripeRes?.data as { subscribed?: boolean } | null;
+      const hasActiveSub = stripeData?.subscribed === true;
 
       if (effectiveRole === "owner") {
         setStatus("owner");
         setHasAccess(true);
       } else if (now < LAUNCH_DATE) {
-        // Before May 13: free for everyone
         setStatus("pre_launch");
         setHasAccess(true);
       } else if (hasActiveSub) {
