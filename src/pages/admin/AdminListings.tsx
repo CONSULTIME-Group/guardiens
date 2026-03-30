@@ -91,53 +91,26 @@ const AdminListings = () => {
   };
 
   const handleDelete = async (id: string) => {
-    const table = filterType === "sits" ? "sits" : "long_stays";
     const listing = listings.find(l => l.id === id);
     try {
-      if (filterType === "sits") {
-        // Delete reviews linked to this sit
-        await supabase.from("reviews").delete().eq("sit_id", id);
-        // Delete badge attributions linked to this sit
-        await supabase.from("badge_attributions").delete().eq("sit_id", id);
-        // Delete owner highlights linked to this sit
-        await supabase.from("owner_highlights").delete().eq("sit_id", id);
-        // Delete applications
-        await supabase.from("applications").delete().eq("sit_id", id);
-        // Delete messages in conversations linked to this sit, then conversations
-        const { data: convos } = await supabase.from("conversations").select("id").eq("sit_id", id);
-        if (convos?.length) {
-          const convoIds = convos.map(c => c.id);
-          await supabase.from("messages").delete().in("conversation_id", convoIds);
-        }
-        await supabase.from("conversations").delete().eq("sit_id", id);
-      } else {
-        // Delete long stay applications
-        await supabase.from("long_stay_applications").delete().eq("long_stay_id", id);
-        // Delete messages in conversations linked to this long stay, then conversations
-        const { data: convos } = await supabase.from("conversations").select("id").eq("long_stay_id", id);
-        if (convos?.length) {
-          const convoIds = convos.map(c => c.id);
-          await supabase.from("messages").delete().in("conversation_id", convoIds);
-        }
-        await supabase.from("conversations").delete().eq("long_stay_id", id);
+      const { data, error } = await supabase.functions.invoke("admin-delete-listing", {
+        body: {
+          listingId: id,
+          listingType: filterType,
+          ownerUserId: listing?.user_id ?? null,
+          listingTitle: listing?.title ?? "Sans titre",
+        },
+      });
+
+      if (error) throw error;
+      if (!data?.success) {
+        throw new Error(data?.error || "suppression impossible");
       }
-      const { error } = await supabase.from(table).delete().eq("id", id);
-      if (error) {
-        toast.error("Erreur lors de la suppression : " + error.message);
-        setDeleteModal(null);
-        return;
-      }
-      if (listing?.owner) {
-        await supabase.from("notifications").insert({
-          user_id: listing.user_id, type: "listing_deleted",
-          title: "Annonce supprimée",
-          body: `Votre annonce "${listing.title || "Sans titre"}" a été supprimée par un administrateur.`,
-        });
-      }
+
       toast.success("Annonce supprimée");
       setDeleteModal(null);
       setListings(prev => prev.filter(l => l.id !== id));
-      fetchListings();
+      await fetchListings();
     } catch (err: any) {
       toast.error("Erreur : " + (err?.message || "suppression impossible"));
       setDeleteModal(null);
