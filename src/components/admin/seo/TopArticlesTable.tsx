@@ -214,8 +214,12 @@ const TopArticlesTable = ({ topPages }: TopArticlesTableProps) => {
                       className="h-7 text-xs"
                       asChild
                     >
-                      <a href={`/admin/articles?slug=${row.article.slug}`}>
-                        Optimiser
+                      <a
+                        href={`/actualites/${row.article.slug}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        Optimiser <ExternalLink className="h-3 w-3 ml-1 inline" />
                       </a>
                     </Button>
                   </TableCell>
