@@ -246,9 +246,10 @@ const Landing = () => {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <PageMeta
-        title="Guardiens — Pet sitting & House sitting gratuit en Auvergne-Rhône-Alpes"
-        description="Trouvez un pet sitter ou house sitter de confiance près de chez vous. Garde d'animaux gratuite, avis détaillés. Vos animaux restent chez eux, votre maison vit."
+        title="Guardiens — Proches de chez vous."
+        description="Des gardes de maison, de l'entraide, des petits services. Entre gens du coin qui se choisissent. Gratuit pour les propriétaires."
         path="/"
+        image="https://guardiens.fr/og-default.jpg"
       />
       {/* JSON-LD: Organization */}
       <script
