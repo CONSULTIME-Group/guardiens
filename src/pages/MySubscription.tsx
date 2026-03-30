@@ -24,12 +24,12 @@ interface StripeSubInfo {
 const calculateYearlyProrata = (): { price: number; months: number; savings: number } => {
   const now = new Date();
   const endOfYear = new Date(2026, 11, 31);
-  const months = Math.ceil(
+  const months = Math.max(0, Math.floor(
     (endOfYear.getTime() - now.getTime()) / (1000 * 60 * 60 * 24 * 30.44)
-  );
+  ));
   const fullPrice = months * 9;
   const discounted = Math.floor(fullPrice * 0.8);
-  return { price: discounted, months, savings: Math.round(fullPrice * 0.2) };
+  return { price: discounted, months, savings: Math.floor(fullPrice * 0.2) };
 };
 
 const MySubscription = () => {
