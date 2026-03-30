@@ -11,6 +11,17 @@ const GRACE_END = new Date("2026-06-13T00:00:00");
 const isBeforeLaunch = () => new Date() < LAUNCH_DATE;
 const isInGracePeriod = () => { const n = new Date(); return n >= LAUNCH_DATE && n < GRACE_END; };
 
+const calculateYearlyProrata = (): { price: number; months: number } => {
+  const now = new Date();
+  const endOfYear = new Date(2026, 11, 31);
+  const months = Math.ceil(
+    (endOfYear.getTime() - now.getTime()) / (1000 * 60 * 60 * 24 * 30.44)
+  );
+  const fullPrice = months * 9;
+  const discounted = Math.round(fullPrice * 0.8);
+  return { price: discounted, months };
+};
+
 const ownerFeatures = [
   "Créer votre profil complet",
   "Publier vos annonces de garde",
@@ -59,19 +70,19 @@ const faqItems = [
   },
   {
     q: "Pourquoi le 13 mai ?",
-    a: "C'est l'anniversaire de Jérémie, cofondateur de Guardiens. Il a préféré offrir l'accès gratuit à la communauté plutôt que recevoir des chaussettes. Les inscrits avant cette date reçoivent le badge Fondateur et 1 an d'accès gratuit.",
+    a: "C'est l'anniversaire de Jérémie, cofondateur de Guardiens. Il a préféré offrir l'accès gratuit à la communauté plutôt que recevoir des chaussettes. Les inscrits avant cette date reçoivent le badge Fondateur et un accès gratuit jusqu'au 13 juin.",
   },
   {
     q: "Que se passe-t-il après le 13 mai pour les Fondateurs ?",
-    a: "Les Fondateurs (inscrits avant le 13 mai) conservent un accès gratuit jusqu'au 13 juin 2026 — un mois de grâce pour décider. Après le 13 juin, l'abonnement à 49€/an est nécessaire pour garder l'accès complet. Le badge Fondateur reste à vie dans tous les cas.",
+    a: "Les Fondateurs (inscrits avant le 13 mai) conservent un accès gratuit jusqu'au 13 juin 2026 — un mois de grâce pour décider. Après le 13 juin, l'abonnement à 9€/mois est nécessaire pour garder l'accès complet. Le badge Fondateur reste à vie dans tous les cas.",
   },
   {
-    q: "Est-ce que 49€/an c'est rentable ?",
-    a: "Un seul week-end en house-sitting, c'est 0€ de logement. Comparez avec un Airbnb à 80€/nuit ou un hôtel : 49€ c'est rentabilisé dès la première garde.",
+    q: "Est-ce que 9€/mois c'est rentable ?",
+    a: "Un seul week-end en house-sitting, c'est 0€ de logement. Comparez avec un Airbnb à 80€/nuit ou un hôtel : 9€/mois c'est rentabilisé dès la première garde.",
   },
   {
     q: "Y a-t-il des frais cachés ?",
-    a: "Non. 49€/an pour les gardiens, gratuit pour les propriétaires, aucune commission sur les gardes classiques. Le seul supplément : 70€ par partie pour les gardes longue durée de 30 jours et plus.",
+    a: "Non. 9€/mois pour les gardiens (ou moins avec le tarif annuel proratisé), gratuit pour les propriétaires, aucune commission sur les gardes classiques. Le seul supplément : 70€ par partie pour les gardes longue durée de 30 jours et plus.",
   },
   {
     q: "Pourquoi pas d'assurance ou de protection logement ?",
@@ -83,11 +94,12 @@ const faqItems = [
 const Pricing = () => {
   const before = isBeforeLaunch();
   const grace = isInGracePeriod();
+  const { price: prorataPrice, months: prorataMonths } = calculateYearlyProrata();
   return (
     <>
       <PageMeta
-        title="Tarifs Guardiens — 49€/an gardien, gratuit propriétaire | Comparatif house-sitting"
-        description="Guardiens : 49€/an pour les gardiens, gratuit pour les propriétaires. Aucune commission. Comparez avec TrustedHousesitters ($129-$299/an + $10/garde) et Nomador (34-179€/an)."
+        title="Tarifs Guardiens — 9€/mois gardien, gratuit propriétaire | House-sitting AURA"
+        description="Guardiens : 9€/mois pour les gardiens (ou tarif annuel proratisé -20%), gratuit pour les propriétaires. Aucune commission sur les gardes."
       />
 
       <div className="min-h-screen bg-background">
@@ -119,7 +131,7 @@ const Pricing = () => {
               Des tarifs simples et honnêtes
             </h1>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Pas de frais cachés, pas de commission sur les gardes. Juste un abonnement annuel pour les gardiens.
+              Pas de frais cachés, pas de commission sur les gardes. Un abonnement mensuel pour les gardiens, résiliable à tout moment.
             </p>
           </section>
 
@@ -167,7 +179,7 @@ const Pricing = () => {
               </div>
               <p className="text-muted-foreground max-w-2xl mx-auto">
                 Les membres inscrits avant le 13 mai conservent un accès gratuit jusqu'au 13 juin.
-                Après cette date, l'abonnement à 49€/an sera nécessaire. Le badge Fondateur reste à vie ✨
+                Après cette date, l'abonnement à 9€/mois sera nécessaire. Le badge Fondateur reste à vie.
               </p>
             </section>
           )}
@@ -212,13 +224,13 @@ const Pricing = () => {
                 {before ? (
                   <div className="space-y-1">
                     <span className="text-sm font-semibold text-primary uppercase">GRATUIT jusqu'au 13 juin</span>
-                    <CardTitle className="font-heading text-4xl font-bold text-muted-foreground line-through">49€/an</CardTitle>
+                    <CardTitle className="font-heading text-4xl font-bold text-muted-foreground line-through">9€/mois</CardTitle>
                     <p className="text-xs text-muted-foreground">Inscription avant le 13 mai → accès gratuit jusqu'au 13 juin 2026</p>
                   </div>
                 ) : (
                   <div className="space-y-1">
-                    <CardTitle className="font-heading text-4xl font-bold text-foreground">49€<span className="text-lg font-normal text-muted-foreground"> / an</span></CardTitle>
-                    <p className="text-sm text-muted-foreground">Moins de 5€ par mois pour des expériences incroyables</p>
+                    <CardTitle className="font-heading text-4xl font-bold text-foreground">9€<span className="text-lg font-normal text-muted-foreground"> / mois</span></CardTitle>
+                    <p className="text-sm text-muted-foreground">Sans engagement · ou {prorataPrice}€ pour finir 2026 (-20%)</p>
                   </div>
                 )}
               </CardHeader>
@@ -233,7 +245,7 @@ const Pricing = () => {
                 </ul>
                 <Link to="/register" className="block">
                   <Button className="w-full" variant="hero" size="lg">
-                    {before ? "S'inscrire gratuitement" : "S'abonner — 49€/an"}
+                    {before ? "S'inscrire gratuitement" : "Commencer à 9€/mois"}
                   </Button>
                 </Link>
               </CardContent>
@@ -295,7 +307,7 @@ const Pricing = () => {
             <p className="text-lg text-muted-foreground max-w-xl mx-auto">
               {before
                 ? "Inscrivez-vous maintenant — accès gratuit jusqu'au 13 juin + badge Fondateur à vie."
-                : "49€/an pour les gardiens. Gratuit pour les propriétaires. Sans engagement."}
+                : "9€/mois pour les gardiens. Gratuit pour les propriétaires. Sans engagement."}
             </p>
             <Link to="/register">
               <Button variant="hero" size="xl">S'inscrire</Button>
