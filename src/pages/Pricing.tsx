@@ -131,7 +131,7 @@ const Pricing = () => {
               Des tarifs simples et honnêtes
             </h1>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Pas de frais cachés, pas de commission sur les gardes. Juste un abonnement annuel pour les gardiens.
+              Pas de frais cachés, pas de commission sur les gardes. Un abonnement mensuel pour les gardiens, résiliable à tout moment.
             </p>
           </section>
 
