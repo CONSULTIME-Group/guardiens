@@ -96,8 +96,11 @@ const AdminListings = () => {
     // Delete related applications first to avoid FK constraint errors
     if (filterType === "sits") {
       await supabase.from("applications").delete().eq("sit_id", id);
+      // Delete conversations linked to this sit
+      await supabase.from("conversations").delete().eq("sit_id", id);
     } else {
       await supabase.from("long_stay_applications").delete().eq("long_stay_id", id);
+      await supabase.from("conversations").delete().eq("long_stay_id", id);
     }
     const { error } = await supabase.from(table).delete().eq("id", id);
     if (error) {
@@ -114,9 +117,7 @@ const AdminListings = () => {
     }
     toast.success("Annonce supprimée");
     setDeleteModal(null);
-    // Remove from local state immediately for instant UI feedback
     setListings(prev => prev.filter(l => l.id !== id));
-    // Then refetch for consistency
     fetchListings();
   };
 
