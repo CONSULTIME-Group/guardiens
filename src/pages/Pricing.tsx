@@ -224,13 +224,13 @@ const Pricing = () => {
                 {before ? (
                   <div className="space-y-1">
                     <span className="text-sm font-semibold text-primary uppercase">GRATUIT jusqu'au 13 juin</span>
-                    <CardTitle className="font-heading text-4xl font-bold text-muted-foreground line-through">49€/an</CardTitle>
+                    <CardTitle className="font-heading text-4xl font-bold text-muted-foreground line-through">9€/mois</CardTitle>
                     <p className="text-xs text-muted-foreground">Inscription avant le 13 mai → accès gratuit jusqu'au 13 juin 2026</p>
                   </div>
                 ) : (
                   <div className="space-y-1">
-                    <CardTitle className="font-heading text-4xl font-bold text-foreground">49€<span className="text-lg font-normal text-muted-foreground"> / an</span></CardTitle>
-                    <p className="text-sm text-muted-foreground">Moins de 5€ par mois pour des expériences incroyables</p>
+                    <CardTitle className="font-heading text-4xl font-bold text-foreground">9€<span className="text-lg font-normal text-muted-foreground"> / mois</span></CardTitle>
+                    <p className="text-sm text-muted-foreground">Sans engagement · ou {prorataPrice}€ pour finir 2026 (-20%)</p>
                   </div>
                 )}
               </CardHeader>
@@ -245,7 +245,7 @@ const Pricing = () => {
                 </ul>
                 <Link to="/register" className="block">
                   <Button className="w-full" variant="hero" size="lg">
-                    {before ? "S'inscrire gratuitement" : "S'abonner — 49€/an"}
+                    {before ? "S'inscrire gratuitement" : "Commencer à 9€/mois"}
                   </Button>
                 </Link>
               </CardContent>
