@@ -252,14 +252,6 @@ const Pricing = () => {
             </Card>
           </section>
 
-          {/* Long stays */}
-          <section className="text-center space-y-3 max-w-2xl mx-auto">
-            <h2 className="font-heading text-2xl font-bold text-foreground">Pour les gardes de 30 jours et plus</h2>
-            <p className="text-muted-foreground">
-              Les gardes longue durée nécessitent des frais de service de <strong className="text-foreground">70€ par partie</strong> (propriétaire et gardien) à la confirmation.
-              C'est un gage d'engagement mutuel : quelqu'un qui paye 70€ ne confirme pas à la légère.
-            </p>
-          </section>
 
           {/* Strengths Grid */}
           <section className="space-y-6">
