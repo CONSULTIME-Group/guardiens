@@ -452,10 +452,10 @@ const Landing = () => {
       {/* ═══════════════ SECTION 3 — NOTRE HISTOIRE ═══════════════ */}
       <section className="py-24 md:py-32 bg-muted">
         <div className="max-w-6xl mx-auto px-6 md:px-12">
-          <div className="grid md:grid-cols-[2fr_3fr] gap-12 md:gap-20">
-            {/* Left column — sticky */}
+          <div className="grid md:grid-cols-2 gap-16 items-start">
+            {/* Left column */}
             <RevealSection>
-              <div className="md:sticky md:top-32">
+              <div>
                 <p className="text-xs font-body font-semibold tracking-widest uppercase text-primary/60 mb-4">
                   Notre histoire
                 </p>
@@ -468,38 +468,32 @@ const Landing = () => {
             {/* Right column — text */}
             <RevealSection delay={0.15}>
               <div>
-                <p className="text-lg font-body leading-relaxed text-foreground/85 mb-7">
+                <p className="text-lg font-body leading-relaxed text-foreground/85 mb-6">
                   Elisa est arrivée d'Argentine avec un visa qui ne lui permettait pas de travailler. Elle gardait des animaux. Elle rentrait avec des histoires. Des gens qui ouvraient leur porte sans calcul, leur vie sans condition.
                 </p>
 
-                <blockquote className="border-l-2 border-primary pl-6 my-7">
+                <blockquote className="border-l-2 border-primary pl-6 mb-6">
                   <p className="text-lg font-heading italic text-foreground/85 leading-relaxed">
                     « Et si tu restais chez nous pendant qu'on part ? »
                   </p>
                 </blockquote>
 
-                <div className="py-10" />
-
-                <p className="text-lg font-body leading-relaxed text-foreground/85 mb-7">
+                <p className="text-lg font-body leading-relaxed text-foreground/85 mb-6">
                   On a gardé 37 maisons en cinq ans.
                 </p>
-                <p className="text-lg font-body leading-relaxed text-foreground/85 mb-7">
+                <p className="text-lg font-body leading-relaxed text-foreground/85 mb-6">
                   Géraldine, l'irlandaise de 77 ans aux cheveux rouge fluo à Passy, avec son perroquet Coco et ses deux chiens sur le pas de la porte. Rio à Collonges, le chien joueur infatigable chez qui on est retournés six fois.
                 </p>
-                <p className="text-lg font-body leading-relaxed text-foreground/85 mb-7">
+                <p className="text-lg font-body leading-relaxed text-foreground/85 mb-6">
                   Et puis Briord. Les clés de la maison. Les clés de la Triumph. Les clés du bateau. Les clés de la BM. Des gens qu'on ne connaissait pas trois semaines avant.
                 </p>
-                <p className="text-lg font-body leading-relaxed text-foreground font-semibold mb-7">
+                <p className="text-lg font-body leading-relaxed text-foreground font-semibold mb-6">
                   On ne gardait pas des maisons. On collectionnait des vies.
                 </p>
 
-                <div className="py-10" />
-
-                <p className="text-lg font-body leading-relaxed text-foreground/85 mb-7">
+                <p className="text-lg font-body leading-relaxed text-foreground/85 mb-6">
                   Un soir chez Helen — Stanley qui aboyait, Rafa couché sur nos pieds, la vue sur le Mont-Blanc. On s'est dit&nbsp;: pourquoi il n'y a pas plus de monde qui fait ça ? C'est pour ça qu'on a construit Guardiens.
                 </p>
-
-                <div className="py-10" />
 
                 <p className="text-lg font-body leading-relaxed text-foreground/85">
                   Votre jardin contre un repas. Vos clés contre une histoire. Des gens du coin qui se font confiance — et parfois des amis pour la vie.
