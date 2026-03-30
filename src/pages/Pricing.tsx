@@ -179,7 +179,7 @@ const Pricing = () => {
               </div>
               <p className="text-muted-foreground max-w-2xl mx-auto">
                 Les membres inscrits avant le 13 mai conservent un accès gratuit jusqu'au 13 juin.
-                Après cette date, l'abonnement à 49€/an sera nécessaire. Le badge Fondateur reste à vie ✨
+                Après cette date, l'abonnement à 9€/mois sera nécessaire. Le badge Fondateur reste à vie.
               </p>
             </section>
           )}
