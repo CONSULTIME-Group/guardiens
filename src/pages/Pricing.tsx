@@ -307,7 +307,7 @@ const Pricing = () => {
             <p className="text-lg text-muted-foreground max-w-xl mx-auto">
               {before
                 ? "Inscrivez-vous maintenant — accès gratuit jusqu'au 13 juin + badge Fondateur à vie."
-                : "49€/an pour les gardiens. Gratuit pour les propriétaires. Sans engagement."}
+                : "9€/mois pour les gardiens. Gratuit pour les propriétaires. Sans engagement."}
             </p>
             <Link to="/register">
               <Button variant="hero" size="xl">S'inscrire</Button>
