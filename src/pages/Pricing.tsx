@@ -94,6 +94,7 @@ const faqItems = [
 const Pricing = () => {
   const before = isBeforeLaunch();
   const grace = isInGracePeriod();
+  const { price: prorataPrice, months: prorataMonths } = calculateYearlyProrata();
   return (
     <>
       <PageMeta
