@@ -670,7 +670,7 @@ const Landing = () => {
                 Un jardin à arroser, un coup de main à donner, une compétence à partager.
               </h3>
               <p className="font-body text-base md:text-lg text-foreground/75 leading-relaxed max-w-xl mx-auto mb-6">
-                Jardinage, bricolage, courses, coup de main — les petites missions sont là pour ça. Sans argent. Entre gens du coin qui se choisissent.
+                Jardinage, bricolage, courses, coup de main — les petites missions sont là pour ça. L'échange en nature. Entre gens du coin qui se choisissent.
               </p>
               <Link
                 to="/petites-missions"
