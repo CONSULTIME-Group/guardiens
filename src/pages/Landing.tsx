@@ -698,7 +698,7 @@ const Landing = () => {
             Inscris-toi avant le 13 mai.
           </h2>
           <p className="font-body text-lg text-white/85 leading-relaxed mb-10">
-            Badge Fondateur à vie. Accès gratuit jusqu'au 13 juin. Et surtout — tu seras parmi les premiers à vivre ça. Pourquoi le 13 mai ? C'est l'anniversaire de Jérémie. Il préfère offrir l'accès plutôt que recevoir des chaussettes.
+            Badge Fondateur à vie. Accès gratuit jusqu'au 13 juin. Et surtout, tu seras parmi les premiers à vivre ça. Pourquoi le 13 mai ? C'est l'anniversaire de Jérémie. Il préfère offrir l'accès plutôt que recevoir des chaussettes.
           </p>
           <button
             onClick={() => navigate("/inscription")}
