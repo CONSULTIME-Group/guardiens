@@ -20,11 +20,18 @@ export interface GSCRow extends GSCMetrics {
   keys: string[];
 }
 
+export interface GA4ChannelRow {
+  channel: string;
+  sessions: number;
+  activeUsers: number;
+}
+
 export interface SeoData {
   ga4: {
     current: GA4Metrics;
     previous: GA4Metrics | null;
     propertyId: string;
+    channels?: GA4ChannelRow[];
   } | null;
   gsc: {
     current: GSCMetrics;
