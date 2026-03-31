@@ -451,7 +451,7 @@ const Landing = () => {
       </section>
 
       {/* ═══════════════ SECTION 3 — NOTRE HISTOIRE ═══════════════ */}
-       <section className="pt-12 pb-24 md:pt-16 md:pb-32 bg-background">
+       <section className="py-24 md:py-32 bg-background">
          <div className="max-w-3xl mx-auto px-6">
           <RevealSection>
             <span className="text-xs tracking-widest uppercase text-primary/60 font-body mb-4 block">
@@ -460,20 +460,31 @@ const Landing = () => {
             <h2 className="text-4xl md:text-5xl font-heading font-semibold leading-snug text-foreground mb-10">
               Tout a commencé avec un visa.
             </h2>
-            <p className="text-xl font-body leading-relaxed text-foreground/85 mb-7">
+            <p className="text-lg font-body leading-relaxed text-foreground/85 mb-7">
               On a perdu l'habitude de s'ouvrir aux gens du coin. Par manque de prétexte.
             </p>
-            <p className="text-xl font-body leading-relaxed text-foreground/85 mb-7">
-              Elisa, ma compagne et co-fondatrice de Guardiens, est arrivée d'Argentine avec un visa qui ne lui permettait pas de travailler. Elle gardait des animaux. Elle rentrait avec des histoires — des gens qui ouvraient leur porte, leur vie, librement. Des inconnus qui finissaient par nous inviter à Noël.
+            <p className="text-lg font-body leading-relaxed text-foreground/85 mb-7">
+              Elisa, ma compagne et co-fondatrice de Guardiens, est arrivée d'Argentine avec un visa qui ne lui permettait pas de travailler. Elle gardait des animaux. Elle rentrait avec des histoires : des gens qui ouvraient leur porte, leur vie, librement. Des inconnus qui finissaient par nous inviter à Noël.
             </p>
-            <p className="text-lg font-body leading-relaxed italic text-foreground/80 mb-7">
-              On n'a jamais gardé des maisons. On est entrés dans des vies.
+            <p className="text-lg font-body leading-relaxed text-foreground/85 mb-7">
+              Elisa et moi avons gardé 37 maisons en cinq ans en Auvergne-Rhône-Alpes.
             </p>
-            <p className="text-xl font-body leading-relaxed text-foreground/85 mb-7">
-              Guardiens, c'est le prétexte qui manquait. Les petites missions d'abord — un potager arrosé contre un repas, une compétence contre une autre, l'échange en nature entre gens du coin. La garde ensuite — vos clés confiées à quelqu'un que vous avez choisi, rencontré en vrai, regardé dans les yeux.
+            <div className="border-l-4 border-primary pl-6 my-10">
+              <p className="text-2xl md:text-3xl font-heading font-semibold italic text-foreground leading-snug">
+                On n'a jamais gardé des maisons. On est entrés dans des vies.
+              </p>
+            </div>
+            <p className="text-lg font-body leading-relaxed text-foreground/85 mb-7">
+              C'est ça que le village faisait naturellement, et qu'on a oublié de faire.
             </p>
-            <p className="text-xl font-body leading-relaxed text-foreground/85 mb-7">
-              Nous, on ne s'attendait pas à ce que ça compte autant. C'est pour ça qu'on a construit Guardiens. Pour que vous viviez ça aussi.
+            <p className="text-lg font-body leading-relaxed text-foreground/85 mb-7">
+              Guardiens, c'est le prétexte qui manquait. Les petites missions d'abord : un potager arrosé contre un repas, une compétence contre une autre, l'échange en nature entre gens du coin. La garde ensuite : vos clés confiées à quelqu'un que vous avez choisi, rencontré en vrai, regardé dans les yeux.
+            </p>
+            <p className="text-lg font-body leading-relaxed text-foreground/85 mb-7">
+              Vous partirez l'esprit léger. Vous rentrerez avec une histoire. Nous, on ne s'attendait pas à ce que ça compte autant.
+            </p>
+            <p className="text-lg font-body leading-relaxed text-foreground/85 mb-7">
+              C'est pour ça qu'on a construit Guardiens. Pour que vous viviez ça aussi.
             </p>
             <span className="text-sm font-body italic text-foreground/50 mt-10 block">
               — Jérémie &amp; Elisa
