@@ -20,7 +20,7 @@ const DEMO_LISTINGS = [
     animals: ["3 poules", "1 chat"],
     dates: "2 → 16 août",
     title: "Maison en bois face au lac, potager et basse-cour",
-    description: "Vue imprenable sur le lac d'Annecy. Trois poules pondeuses (les œufs sont pour vous), un chat discret, un potager à arroser. Le paradis.",
+    description: "Vue imprenable sur le lac d'Annecy. Trois poules pondeuses (les œufs sont pour vous), un chat discret, un potager à arroser.",
     ownerName: "Rania",
     ownerPhoto: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=200&q=80",
     badges: ["ID vérifiée", "3 gardes"],
