@@ -472,7 +472,7 @@ const Landing = () => {
             </RevealSection>
 
             {/* Right column — label + H2 + text */}
-            <RevealSection delay={0.15}>
+            <RevealSection delay={0.15} className="w-full md:w-1/2">
               <div>
                 <p className="text-xs tracking-widest uppercase text-primary/60 font-body mb-4">
                   Notre histoire
