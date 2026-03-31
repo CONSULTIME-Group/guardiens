@@ -409,7 +409,7 @@ const Landing = () => {
       <section className="pt-24 md:pt-32 pb-0 bg-background">
         <RevealSection className="max-w-4xl mx-auto px-6">
           <p className="text-xs font-body font-semibold tracking-widest uppercase text-primary/60 text-center mb-10">
-            Ce qu'on a vécu avant de construire Guardiens.
+            Ce qu'on a vécu avant d'ouvrir Guardiens.
           </p>
           <div className="flex flex-col md:flex-row items-center justify-center">
             <div className="text-center px-8 md:px-12 py-4 md:py-0">
