@@ -81,6 +81,122 @@ const RevealSection = ({ children, className = "", delay = 0 }: { children: Reac
   );
 };
 
+const HowItWorksSection = ({ dynamicCounts }: { dynamicCounts: { maisons: number; animaux: number; missions: number } | null }) => {
+  const [activeTab, setActiveTab] = useState<"owner" | "sitter">("owner");
+
+  return (
+    <section className="py-24 md:py-32 bg-[#FAF9F6]">
+      <div className="max-w-5xl mx-auto px-6">
+        <RevealSection>
+          <span className="text-xs tracking-widest uppercase text-primary/60 font-body mb-4 block text-center">
+            Comment ça marche
+          </span>
+          <h2 className="text-4xl md:text-5xl font-heading font-semibold leading-snug text-foreground text-center mb-12">
+            Trois étapes. Une rencontre.
+          </h2>
+
+          <div className="flex justify-center gap-2 mb-0">
+            <button
+              onClick={() => setActiveTab("owner")}
+              className={`rounded-full px-6 py-2 text-sm font-body font-medium transition-colors ${
+                activeTab === "owner"
+                  ? "bg-primary text-white"
+                  : "bg-transparent text-foreground/60 border border-foreground/20"
+              }`}
+            >
+              J'ai une maison, des animaux
+            </button>
+            <button
+              onClick={() => setActiveTab("sitter")}
+              className={`rounded-full px-6 py-2 text-sm font-body font-medium transition-colors ${
+                activeTab === "sitter"
+                  ? "bg-primary text-white"
+                  : "bg-transparent text-foreground/60 border border-foreground/20"
+              }`}
+            >
+              Je veux garder
+            </button>
+          </div>
+        </RevealSection>
+
+        {activeTab === "owner" && (
+          <div className="max-w-lg mx-auto mt-12">
+            <div className="mb-10">
+              <span className="text-6xl font-heading text-foreground/10 leading-none mb-1 block">01</span>
+              <h3 className="text-2xl font-heading font-semibold text-foreground mb-2">Tu publies.</h3>
+              <p className="text-lg font-body text-foreground/70 leading-relaxed">Ta maison, tes animaux, tes dates. Cinq minutes.</p>
+            </div>
+            <div className="mb-10">
+              <span className="text-6xl font-heading text-foreground/10 leading-none mb-1 block">02</span>
+              <h3 className="text-2xl font-heading font-semibold text-foreground mb-2">Tu choisis.</h3>
+              <p className="text-lg font-body text-foreground/70 leading-relaxed">Des profils du quartier. Tu lis, tu échanges, tu rencontres. C'est toi qui décides.</p>
+            </div>
+            <div className="mb-10">
+              <span className="text-6xl font-heading text-foreground/10 leading-none mb-1 block">03</span>
+              <h3 className="text-2xl font-heading font-semibold text-foreground mb-2">Tu pars vraiment.</h3>
+              <p className="text-lg font-body text-foreground/70 leading-relaxed">L'esprit léger. Sans culpabilité.</p>
+            </div>
+            <Link
+              to="/inscription?role=owner"
+              className="bg-primary text-white rounded-full px-8 py-3 font-body font-medium mt-8 inline-block"
+            >
+              Je cherche un gardien
+            </Link>
+          </div>
+        )}
+
+        {activeTab === "sitter" && (
+          <div className="max-w-lg mx-auto mt-12">
+            <div className="mb-10">
+              <span className="text-6xl font-heading text-foreground/10 leading-none mb-1 block">01</span>
+              <h3 className="text-2xl font-heading font-semibold text-foreground mb-2">Tu te présentes.</h3>
+              <p className="text-lg font-body text-foreground/70 leading-relaxed">Qui tu es, ce que tu aimes, où tu veux aller. Cinq minutes.</p>
+            </div>
+            <div className="mb-10">
+              <span className="text-6xl font-heading text-foreground/10 leading-none mb-1 block">02</span>
+              <h3 className="text-2xl font-heading font-semibold text-foreground mb-2">Tu postules.</h3>
+              <p className="text-lg font-body text-foreground/70 leading-relaxed">Des gardes proches de chez toi. Tu choisis celles qui te ressemblent.</p>
+            </div>
+            <div className="mb-10">
+              <span className="text-6xl font-heading text-foreground/10 leading-none mb-1 block">03</span>
+              <h3 className="text-2xl font-heading font-semibold text-foreground mb-2">Tu rencontres des gens que tu n'aurais jamais croisés autrement.</h3>
+            </div>
+            <Link
+              to="/inscription?role=sitter"
+              className="bg-primary text-white rounded-full px-8 py-3 font-body font-medium mt-8 inline-block"
+            >
+              Je veux garder
+            </Link>
+          </div>
+        )}
+
+        {/* Encart entraide */}
+        <RevealSection className="mt-20">
+          <div className="bg-muted rounded-2xl p-12 max-w-3xl mx-auto text-center">
+            <h3 className="font-heading text-2xl md:text-3xl font-semibold text-foreground mb-4">
+              Un jardin à arroser, un coup de main à donner, une compétence à partager.
+            </h3>
+            <p className="font-body text-base md:text-lg text-foreground/75 leading-relaxed max-w-xl mx-auto mb-6">
+              Jardinage, bricolage, courses, coup de main — les petites missions sont là pour ça. L'échange en nature. Entre gens du coin qui se choisissent.
+            </p>
+            <Link
+              to="/petites-missions"
+              className="text-primary font-body font-semibold text-sm underline underline-offset-4 hover:no-underline inline-flex items-center gap-1"
+            >
+              Découvrir les petites missions <ArrowRight className="h-4 w-4" />
+            </Link>
+            {dynamicCounts && dynamicCounts.missions > 10 && (
+              <p className="font-body text-xs text-foreground/50 mt-4">
+                {dynamicCounts.missions} missions actives en AURA en ce moment
+              </p>
+            )}
+          </div>
+        </RevealSection>
+      </div>
+    </section>
+  );
+};
+
 const Landing = () => {
   const navigate = useNavigate();
   const [latestArticles, setLatestArticles] = useState<any[]>([]);
