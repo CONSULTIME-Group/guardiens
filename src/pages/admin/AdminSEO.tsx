@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
   Globe, Users, MousePointerClick, Eye, ArrowUpDown, Timer,
-  BarChart3, ExternalLink, AlertCircle,
+  BarChart3, ExternalLink, AlertCircle, FileText, Search,
 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 import MetricCard from "@/components/admin/seo/MetricCard";
 import StatusBar from "@/components/admin/seo/StatusBar";
 import TopArticlesTable from "@/components/admin/seo/TopArticlesTable";
@@ -28,6 +29,21 @@ function formatDuration(seconds: number): string {
 const AdminSEO = () => {
   const { data: seoData, loading, error, refresh } = useSeoData();
   const [refreshing, setRefreshing] = useState(false);
+  const [articleStats, setArticleStats] = useState<{ published: number; total: number } | null>(null);
+
+  useEffect(() => {
+    const fetchArticleStats = async () => {
+      const { count: published } = await supabase
+        .from("articles")
+        .select("id", { count: "exact", head: true })
+        .eq("published", true);
+      const { count: total } = await supabase
+        .from("articles")
+        .select("id", { count: "exact", head: true });
+      setArticleStats({ published: published ?? 0, total: total ?? 0 });
+    };
+    fetchArticleStats();
+  }, []);
 
   const handleRefresh = async () => {
     setRefreshing(true);
@@ -86,79 +102,67 @@ const AdminSEO = () => {
         </Card>
       )}
 
-      {/* BLOC 2 — Trafic Global GA4 */}
-      {ga4 && (
-        <section className="space-y-4">
-          <h2 className="text-lg font-semibold text-foreground">Trafic global — GA4 (30 jours)</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <MetricCard
-              title="Sessions"
-              icon={<Globe className="h-4 w-4 text-primary" />}
-              value={ga4.current.sessions.toLocaleString()}
-              subtitle="30 derniers jours"
-              change={pctChange(ga4.current.sessions, ga4.previous?.sessions ?? 0)}
-              isNew={isPrevZero(ga4.current.sessions, ga4.previous?.sessions)}
-            />
-            <MetricCard
-              title="Utilisateurs actifs"
-              icon={<Users className="h-4 w-4 text-primary" />}
-              value={ga4.current.activeUsers.toLocaleString()}
-              subtitle="30 derniers jours"
-              change={pctChange(ga4.current.activeUsers, ga4.previous?.activeUsers ?? 0)}
-              isNew={isPrevZero(ga4.current.activeUsers, ga4.previous?.activeUsers)}
-            />
-            <MetricCard
-              title="Pages vues"
-              icon={<Eye className="h-4 w-4 text-primary" />}
-              value={ga4.current.screenPageViews.toLocaleString()}
-              subtitle="30 derniers jours"
-              change={pctChange(ga4.current.screenPageViews, ga4.previous?.screenPageViews ?? 0)}
-              isNew={isPrevZero(ga4.current.screenPageViews, ga4.previous?.screenPageViews)}
-            />
-            <MetricCard
-              title="Durée moyenne"
-              icon={<Timer className="h-4 w-4 text-primary" />}
-              value={formatDuration(ga4.current.averageSessionDuration)}
-              subtitle="Par session"
-              change={pctChange(ga4.current.averageSessionDuration, ga4.previous?.averageSessionDuration ?? 0)}
-              isNew={isPrevZero(ga4.current.averageSessionDuration, ga4.previous?.averageSessionDuration)}
-            />
-          </div>
+      {/* BLOC 2 — KPIs SEO essentiels */}
+      <section className="space-y-4">
+        <h2 className="text-lg font-semibold text-foreground">Vue d'ensemble SEO</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <MetricCard
+            title="Clics GSC"
+            icon={<MousePointerClick className="h-4 w-4 text-primary" />}
+            value={gsc ? gsc.current.clicks.toLocaleString() : "—"}
+            subtitle="28 derniers jours"
+            change={gsc ? pctChange(gsc.current.clicks, gsc.previous.clicks) : undefined}
+            isNew={gsc ? isPrevZero(gsc.current.clicks, gsc.previous.clicks) : false}
+          />
+          <MetricCard
+            title="Impressions GSC"
+            icon={<Eye className="h-4 w-4 text-primary" />}
+            value={gsc ? gsc.current.impressions.toLocaleString() : "—"}
+            subtitle="28 derniers jours"
+            change={gsc ? pctChange(gsc.current.impressions, gsc.previous.impressions) : undefined}
+            isNew={gsc ? isPrevZero(gsc.current.impressions, gsc.previous.impressions) : false}
+          />
+          <MetricCard
+            title="Position moyenne"
+            icon={<ArrowUpDown className="h-4 w-4 text-primary" />}
+            value={gsc ? gsc.current.position.toFixed(1) : "—"}
+            subtitle="Plus bas = mieux"
+            change={gsc ? pctChange(gsc.current.position, gsc.previous.position) : undefined}
+            invertChange
+          />
+          <MetricCard
+            title="Articles publiés"
+            icon={<FileText className="h-4 w-4 text-primary" />}
+            value={articleStats ? `${articleStats.published}` : "—"}
+            subtitle={articleStats ? `${articleStats.total} au total` : ""}
+          />
+        </div>
+      </section>
 
-          {ga4.current.sessionsByDay.length > 0 && (
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">Sessions par jour</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="h-32 flex items-end gap-[2px]">
-                  {ga4.current.sessionsByDay.map((d, i) => {
-                    const max = Math.max(...ga4.current.sessionsByDay.map((x) => x.sessions), 1);
-                    const height = (d.sessions / max) * 100;
-                    return (
-                      <div
-                        key={i}
-                        className="flex-1 bg-primary/60 hover:bg-primary rounded-t transition-colors relative group cursor-default"
-                        style={{ height: `${Math.max(2, height)}%` }}
-                      >
-                        <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-foreground text-background text-[10px] px-1.5 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-10">
-                          {d.date.replace(/(\d{4})(\d{2})(\d{2})/, "$3/$2")} — {d.sessions}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </CardContent>
-            </Card>
-          )}
-        </section>
-      )}
-
-      {!ga4 && seoData && (
-        <Card className="border-orange-300">
-          <CardContent className="py-4 text-sm text-orange-600 flex items-center gap-2">
-            <AlertCircle className="h-4 w-4" />
-            GA4 non disponible — vérifiez que le compte de service a accès à la propriété Analytics
+      {/* Graphique sessions GA4 (conservé pour contexte) */}
+      {ga4 && ga4.current.sessionsByDay.length > 0 && (
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">Sessions GA4 par jour (30j)</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="h-32 flex items-end gap-[2px]">
+              {ga4.current.sessionsByDay.map((d, i) => {
+                const max = Math.max(...ga4.current.sessionsByDay.map((x) => x.sessions), 1);
+                const height = (d.sessions / max) * 100;
+                return (
+                  <div
+                    key={i}
+                    className="flex-1 bg-primary/60 hover:bg-primary rounded-t transition-colors relative group cursor-default"
+                    style={{ height: `${Math.max(2, height)}%` }}
+                  >
+                    <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-foreground text-background text-[10px] px-1.5 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-10">
+                      {d.date.replace(/(\d{4})(\d{2})(\d{2})/, "$3/$2")} — {d.sessions}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </CardContent>
         </Card>
       )}
@@ -168,55 +172,17 @@ const AdminSEO = () => {
         <TopArticlesTable topPages={gsc?.topPages || []} />
       </section>
 
-      {/* BLOC 4 — Performance GSC */}
-      {gsc && (
-        <section className="space-y-4">
-          <h2 className="text-lg font-semibold text-foreground">Performance GSC (28 jours)</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <MetricCard
-              title="Clics"
-              icon={<MousePointerClick className="h-4 w-4 text-primary" />}
-              value={gsc.current.clicks.toLocaleString()}
-              subtitle="28 derniers jours"
-              change={pctChange(gsc.current.clicks, gsc.previous.clicks)}
-              isNew={isPrevZero(gsc.current.clicks, gsc.previous.clicks)}
-            />
-            <MetricCard
-              title="Impressions"
-              icon={<Eye className="h-4 w-4 text-primary" />}
-              value={gsc.current.impressions.toLocaleString()}
-              subtitle="28 derniers jours"
-              change={pctChange(gsc.current.impressions, gsc.previous.impressions)}
-              isNew={isPrevZero(gsc.current.impressions, gsc.previous.impressions)}
-            />
-            <MetricCard
-              title="CTR moyen"
-              icon={<BarChart3 className="h-4 w-4 text-primary" />}
-              value={`${(gsc.current.ctr * 100).toFixed(1)}%`}
-              subtitle="Taux de clics"
-              change={pctChange(gsc.current.ctr, gsc.previous.ctr)}
-              isNew={isPrevZero(gsc.current.ctr, gsc.previous.ctr)}
-            />
-            <MetricCard
-              title="Position moyenne"
-              icon={<ArrowUpDown className="h-4 w-4 text-primary" />}
-              value={gsc.current.position.toFixed(1)}
-              subtitle="Plus bas = mieux"
-              change={pctChange(gsc.current.position, gsc.previous.position)}
-              invertChange
-            />
-          </div>
-
-          {gsc.topQueries && gsc.topQueries.length > 0 && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Top 10 requêtes</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <GSCQueriesTable rows={gsc.topQueries} />
-              </CardContent>
-            </Card>
-          )}
+      {/* BLOC 4 — Top requêtes GSC */}
+      {gsc && gsc.topQueries && gsc.topQueries.length > 0 && (
+        <section>
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Top 10 requêtes GSC</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <GSCQueriesTable rows={gsc.topQueries} />
+            </CardContent>
+          </Card>
         </section>
       )}
 
