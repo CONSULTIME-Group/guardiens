@@ -455,7 +455,7 @@ const Landing = () => {
         <div className="max-w-6xl mx-auto px-6 md:px-12">
           <div className="flex flex-col md:flex-row gap-16 items-start">
             {/* Left column — image + signature */}
-            <RevealSection>
+            <RevealSection className="w-full md:w-1/2 md:flex-shrink-0">
               <div>
                 <div className="aspect-[3/4] overflow-hidden rounded-2xl shadow-md">
                   <img
