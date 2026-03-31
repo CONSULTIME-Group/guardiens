@@ -17,7 +17,7 @@ const differentiators = [
   {
     title: "Votre maison vit.",
     description:
-      "Volets ouverts, courrier relevé, lumières allumées. Pas une maison vide — une maison habitée.",
+      "Volets ouverts, courrier relevé, lumières allumées. Une maison habitée.",
   },
   {
     title: "On se rencontre avant.",
@@ -27,7 +27,7 @@ const differentiators = [
   {
     title: "Votre jardin contre un repas.",
     description:
-      "Vos clés contre une histoire. Ici personne ne facture ce qui n'a pas de prix.",
+      "Vos clés contre une histoire. L'échange se décide entre vous.",
   },
   {
     title: "Et au-delà des gardes.",
@@ -37,7 +37,7 @@ const differentiators = [
   {
     title: "37 maisons. 234 animaux. 5 ans.",
     description:
-      "On a vécu ce qu'on construit. Guardiens c'est notre histoire — et bientôt la vôtre.",
+      "On a vécu ce qu'on construit. Guardiens, c'est notre histoire. Vous écrivez la vôtre.",
   },
 ];
 
@@ -75,15 +75,15 @@ const testimonials = [
 ];
 
 const ownerSteps = [
-  { number: "01", title: "Tu publies", description: "Ta maison, tes animaux, tes dates. Ce dont tu as besoin. Cinq minutes." },
+  { number: "01", title: "Tu publies", description: "Ta maison, tes animaux, tes dates. Cinq minutes." },
   { number: "02", title: "Tu choisis", description: "Des profils du quartier. Tu lis, tu échanges, tu rencontres. C'est toi qui décides." },
-  { number: "03", title: "Tu pars.", description: "Vraiment." },
+  { number: "03", title: "Tu pars vraiment.", description: "" },
 ];
 
 const sitterSteps = [
   { number: "01", title: "Tu te présentes", description: "Qui tu es, ce que tu aimes, où tu veux aller. Cinq minutes." },
   { number: "02", title: "Tu postules", description: "Des gardes proches de chez toi. Tu choisis celles qui te ressemblent." },
-  { number: "03", title: "Tu rencontres.", description: "Des gens que tu n'aurais jamais croisés autrement." },
+  { number: "03", title: "Tu rencontres", description: "Des gens que tu n'aurais jamais croisés autrement." },
 ];
 
 /* ── IntersectionObserver hook for scroll animations ── */
@@ -372,7 +372,7 @@ const Landing = () => {
               Partir. Revenir. Recommencer.
             </p>
             <p className="font-body text-base md:text-xl text-white/75 max-w-lg mb-10 animate-hero-fade-up animation-delay-700">
-              Garder une maison. Échanger un service. Se faire confiance.
+              Garder une maison. Rendre service. Se faire confiance.
             </p>
 
             {/* CTAs */}
@@ -409,12 +409,12 @@ const Landing = () => {
       <section className="pt-24 md:pt-32 pb-0 bg-background">
         <RevealSection className="max-w-4xl mx-auto px-6">
           <p className="text-xs font-body font-semibold tracking-widest uppercase text-primary/60 text-center mb-10">
-            Ce qu'on a vécu avant de construire Guardiens.
+            Ce qu'on a vécu avant d'ouvrir Guardiens.
           </p>
           <div className="flex flex-col md:flex-row items-center justify-center">
             <div className="text-center px-8 md:px-12 py-4 md:py-0">
               <span className="block font-heading text-5xl md:text-7xl font-bold text-foreground leading-none">
-                <CountUp target={dynamicCounts?.maisons ?? 37} />
+                <CountUp target={37} />
               </span>
               <span className="font-body text-sm text-foreground/60 tracking-wide">maisons gardées</span>
             </div>
@@ -422,7 +422,7 @@ const Landing = () => {
             <div className="block md:hidden w-16 h-px bg-border my-2" />
             <div className="text-center px-8 md:px-12 py-4 md:py-0">
               <span className="block font-heading text-5xl md:text-7xl font-bold text-foreground leading-none">
-                <CountUp target={dynamicCounts?.animaux ?? 234} />
+                <CountUp target={234} />
               </span>
               <span className="font-body text-sm text-foreground/60 tracking-wide">animaux accompagnés</span>
             </div>
@@ -461,7 +461,7 @@ const Landing = () => {
               Tout a commencé avec un visa.
             </h2>
             <p className="text-lg font-body leading-relaxed text-foreground/85 mb-7">
-              On a perdu l'habitude de s'ouvrir aux gens du coin. Par manque de prétexte.
+              L'habitude de s'ouvrir aux gens du coin s'est perdue. Par manque de prétexte.
             </p>
             <p className="text-lg font-body leading-relaxed text-foreground/85 mb-7">
               Elisa, ma compagne et co-fondatrice de Guardiens, est arrivée d'Argentine avec un visa qui ne lui permettait pas de travailler. Elle gardait des animaux. Elle rentrait avec des histoires : des gens qui ouvraient leur porte, leur vie, librement. Des inconnus qui finissaient par nous inviter à Noël.
@@ -475,10 +475,13 @@ const Landing = () => {
               </p>
             </div>
             <p className="text-lg font-body leading-relaxed text-foreground/85 mb-7">
-              C'est ça que le village faisait naturellement, et qu'on a oublié de faire.
+              C'est ça que le village faisait naturellement.
             </p>
             <p className="text-lg font-body leading-relaxed text-foreground/85 mb-7">
-              Guardiens, c'est le prétexte qui manquait. Les petites missions d'abord : un potager arrosé contre un repas, une compétence contre une autre, l'échange en nature entre gens du coin. La garde ensuite : vos clés confiées à quelqu'un que vous avez choisi, rencontré en vrai, regardé dans les yeux.
+              Vous aussi vous avez quelque chose à offrir. Et quelque chose à vivre.
+            </p>
+            <p className="text-lg font-body leading-relaxed text-foreground/85 mb-7">
+              Guardiens, c'est le prétexte qui manquait. Les petites missions d'abord : un potager arrosé contre un repas, une compétence contre une autre, l'échange en nature entre gens du coin. La garde ensuite : vos clés confiées à quelqu'un que vous avez regardé dans les yeux.
             </p>
             <p className="text-lg font-body leading-relaxed text-foreground/85 mb-7">
               Vous partirez l'esprit léger. Vous rentrerez avec une histoire. Nous, on ne s'attendait pas à ce que ça compte autant.
@@ -501,10 +504,10 @@ const Landing = () => {
               Pourquoi Guardiens
             </p>
             <h2 className="font-heading text-4xl md:text-5xl font-semibold text-foreground leading-snug">
-              Un réseau de gens du coin qui se font confiance.
+              Des gens du coin qui se font confiance.
             </h2>
             <p className="text-lg md:text-xl font-body font-normal text-foreground/70 max-w-xl mx-auto mt-4 leading-relaxed">
-              Pas des inconnus. Des gens proches, que vous avez rencontrés en vrai.
+              Des gens du coin que vous avez choisis. Rencontrés avant. En vrai.
             </p>
           </RevealSection>
 
@@ -521,6 +524,11 @@ const Landing = () => {
                   <p className="text-sm md:text-base font-body text-foreground/70 leading-relaxed relative z-10">
                     {item.description}
                   </p>
+                  {i === 2 && (
+                    <p className="text-sm font-body text-foreground/60 mt-2 relative z-10">
+                      Chaque gardien est vérifié manuellement. Vous le rencontrez avant. Vous décidez.
+                    </p>
+                  )}
                 </div>
               </RevealSection>
             ))}
@@ -537,9 +545,6 @@ const Landing = () => {
       <section className="py-24 md:py-32 bg-foreground">
         <div className="max-w-6xl mx-auto px-6 md:px-12">
           <RevealSection className="text-center mb-16">
-            <p className="text-xs font-body font-semibold tracking-widest uppercase text-white/40 mb-4">
-              Ils ont sauté le pas
-            </p>
             <h2 className="font-heading text-4xl md:text-5xl font-semibold text-white leading-snug">
               Ils ont sauté le pas.
             </h2>
@@ -613,7 +618,7 @@ const Landing = () => {
               Comment ça marche
             </p>
             <h2 className="font-heading text-4xl md:text-5xl font-semibold text-foreground leading-snug">
-              Trois étapes. Une relation.
+              Trois étapes. Puis plus rien à organiser.
             </h2>
           </RevealSection>
 
@@ -667,10 +672,10 @@ const Landing = () => {
           <RevealSection className="mt-20">
             <div className="bg-muted rounded-2xl p-12 max-w-3xl mx-auto text-center">
               <h3 className="font-heading text-2xl md:text-3xl font-semibold text-foreground mb-4">
-                Un jardin à arroser ? Un meuble à monter ?
+                Un jardin à arroser, un coup de main à donner, une compétence à partager.
               </h3>
               <p className="font-body text-base md:text-lg text-foreground/75 leading-relaxed max-w-xl mx-auto mb-6">
-                Jardinage, bricolage, courses, coup de main — les petites missions sont là pour ça. Sans argent. Entre gens du coin qui se choisissent.
+                Jardinage, bricolage, courses, coup de main — les petites missions sont là pour ça. L'échange en nature. Entre gens du coin qui se choisissent.
               </p>
               <Link
                 to="/petites-missions"
@@ -698,7 +703,7 @@ const Landing = () => {
             Inscris-toi avant le 13 mai.
           </h2>
           <p className="font-body text-lg text-white/85 leading-relaxed mb-10">
-            Badge Fondateur à vie. Accès gratuit jusqu'au 13 juin. Et surtout — tu seras parmi les premiers à vivre ça. Pourquoi le 13 mai ? C'est l'anniversaire de Jérémie. Il préfère offrir l'accès plutôt que recevoir des chaussettes.
+            Badge Fondateur à vie. Accès gratuit jusqu'au 13 juin. Et surtout, tu seras parmi les premiers à vivre ça. Pourquoi le 13 mai ? C'est l'anniversaire de Jérémie. Il préfère offrir l'accès plutôt que recevoir des chaussettes.
           </p>
           <button
             onClick={() => navigate("/inscription")}
@@ -715,10 +720,10 @@ const Landing = () => {
       <section className="py-24 md:py-32 bg-foreground">
         <RevealSection className="max-w-2xl mx-auto px-6 text-center">
           <h2 className="font-heading text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight mb-6">
-            Votre prochaine histoire commence ici.
+            Ton histoire commence ici.
           </h2>
           <p className="font-body text-lg text-white/70 leading-relaxed max-w-lg mx-auto mb-10">
-            Des gardes, de l'entraide, des gens du coin qui se font confiance. Gratuit pour commencer. Ce que vous allez vivre ne l'est pas.
+            Gratuit pour les propriétaires, pour toujours. Ce que tu vas vivre ne l'est pas.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <button

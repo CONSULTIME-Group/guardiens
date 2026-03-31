@@ -20,7 +20,7 @@ const DEMO_LISTINGS = [
     animals: ["3 poules", "1 chat"],
     dates: "2 → 16 août",
     title: "Maison en bois face au lac, potager et basse-cour",
-    description: "Vue imprenable sur le lac d'Annecy. Trois poules pondeuses (les œufs sont pour vous), un chat discret, un potager à arroser. Le paradis.",
+    description: "Vue imprenable sur le lac d'Annecy. Trois poules pondeuses (les œufs sont pour vous), un chat discret, un potager à arroser.",
     ownerName: "Rania",
     ownerPhoto: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=200&q=80",
     badges: ["ID vérifiée", "3 gardes"],
@@ -46,7 +46,7 @@ const DemoListingCard = ({
     <div className="relative">
       <img src={photo} alt={title} className="w-full h-48 object-cover" />
       <span className="absolute top-3 left-3 bg-white/90 text-foreground/50 text-xs font-body font-medium px-3 py-1 rounded-full border border-border/60">
-        Exemple
+        Bientôt disponible
       </span>
       <div className="absolute bottom-3 left-3 flex gap-1 flex-wrap">
         {animals.map((a) => (
@@ -83,7 +83,7 @@ const DemoListingCard = ({
         to="/register"
         className="w-full mt-3 py-2.5 rounded-xl bg-primary/10 text-primary font-body font-medium text-sm text-center hover:bg-primary/20 transition-colors block"
       >
-        Rejoindre pour postuler →
+        S'inscrire pour postuler →
       </Link>
     </div>
   </div>
