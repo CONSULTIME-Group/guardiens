@@ -507,7 +507,7 @@ const Landing = () => {
               Des gens du coin qui se font confiance.
             </h2>
             <p className="text-lg md:text-xl font-body font-normal text-foreground/70 max-w-xl mx-auto mt-4 leading-relaxed">
-              Pas des inconnus. Des gens proches, que vous avez rencontrés en vrai.
+              Des gens du coin que vous avez choisis. Rencontrés avant. En vrai.
             </p>
           </RevealSection>
 
