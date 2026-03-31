@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
   Globe, Users, MousePointerClick, Eye, ArrowUpDown, Timer,
-  BarChart3, ExternalLink, AlertCircle, FileText, Search,
+  BarChart3, ExternalLink, AlertCircle, FileText, UserCheck,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import MetricCard from "@/components/admin/seo/MetricCard";
@@ -30,6 +30,7 @@ const AdminSEO = () => {
   const { data: seoData, loading, error, refresh } = useSeoData();
   const [refreshing, setRefreshing] = useState(false);
   const [articleStats, setArticleStats] = useState<{ published: number; total: number } | null>(null);
+  const [profileCount, setProfileCount] = useState<number | null>(null);
 
   useEffect(() => {
     const fetchArticleStats = async () => {
@@ -42,7 +43,14 @@ const AdminSEO = () => {
         .select("id", { count: "exact", head: true });
       setArticleStats({ published: published ?? 0, total: total ?? 0 });
     };
+    const fetchProfileCount = async () => {
+      const { count } = await supabase
+        .from("profiles")
+        .select("id", { count: "exact", head: true });
+      setProfileCount(count ?? 0);
+    };
     fetchArticleStats();
+    fetchProfileCount();
   }, []);
 
   const handleRefresh = async () => {
@@ -135,6 +143,35 @@ const AdminSEO = () => {
             icon={<FileText className="h-4 w-4 text-primary" />}
             value={articleStats ? `${articleStats.published}` : "—"}
             subtitle={articleStats ? `${articleStats.total} au total` : ""}
+          />
+        </div>
+      </section>
+
+      {/* BLOC 2bis — KPIs Activité */}
+      <section className="space-y-4">
+        <h2 className="text-lg font-semibold text-foreground">Activité</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <MetricCard
+            title="Profils inscrits"
+            icon={<UserCheck className="h-4 w-4 text-primary" />}
+            value={profileCount !== null ? profileCount.toLocaleString() : "—"}
+            subtitle="Total"
+          />
+          <MetricCard
+            title="Visiteurs uniques"
+            icon={<Users className="h-4 w-4 text-primary" />}
+            value={ga4 ? ga4.current.activeUsers.toLocaleString() : "—"}
+            subtitle="30 derniers jours (GA4)"
+            change={ga4?.previous ? pctChange(ga4.current.activeUsers, ga4.previous.activeUsers) : undefined}
+            isNew={ga4 ? isPrevZero(ga4.current.activeUsers, ga4.previous?.activeUsers ?? 0) : false}
+          />
+          <MetricCard
+            title="Temps moyen"
+            icon={<Timer className="h-4 w-4 text-primary" />}
+            value={ga4 ? formatDuration(ga4.current.averageSessionDuration) : "—"}
+            subtitle="Par session (GA4)"
+            change={ga4?.previous ? pctChange(ga4.current.averageSessionDuration, ga4.previous.averageSessionDuration) : undefined}
+            isNew={ga4 ? isPrevZero(ga4.current.averageSessionDuration, ga4.previous?.averageSessionDuration ?? 0) : false}
           />
         </div>
       </section>
