@@ -29,6 +29,21 @@ function formatDuration(seconds: number): string {
 const AdminSEO = () => {
   const { data: seoData, loading, error, refresh } = useSeoData();
   const [refreshing, setRefreshing] = useState(false);
+  const [articleStats, setArticleStats] = useState<{ published: number; total: number } | null>(null);
+
+  useEffect(() => {
+    const fetchArticleStats = async () => {
+      const { count: published } = await supabase
+        .from("articles")
+        .select("id", { count: "exact", head: true })
+        .eq("published", true);
+      const { count: total } = await supabase
+        .from("articles")
+        .select("id", { count: "exact", head: true });
+      setArticleStats({ published: published ?? 0, total: total ?? 0 });
+    };
+    fetchArticleStats();
+  }, []);
 
   const handleRefresh = async () => {
     setRefreshing(true);
