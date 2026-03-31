@@ -43,17 +43,6 @@ const testimonials = [
   },
 ];
 
-const ownerSteps = [
-  { number: "01", title: "Tu publies", description: "Ta maison, tes animaux, tes dates. Cinq minutes." },
-  { number: "02", title: "Tu choisis", description: "Des profils du quartier. Tu lis, tu échanges, tu rencontres. C'est toi qui décides." },
-  { number: "03", title: "Tu pars vraiment.", description: "" },
-];
-
-const sitterSteps = [
-  { number: "01", title: "Tu te présentes", description: "Qui tu es, ce que tu aimes, où tu veux aller. Cinq minutes." },
-  { number: "02", title: "Tu postules", description: "Des gardes proches de chez toi. Tu choisis celles qui te ressemblent." },
-  { number: "03", title: "Tu rencontres", description: "Des gens que tu n'aurais jamais croisés autrement." },
-];
 
 /* ── IntersectionObserver hook for scroll animations ── */
 function useScrollReveal() {
