@@ -481,7 +481,7 @@ const Landing = () => {
               Vous aussi vous avez quelque chose à offrir. Et quelque chose à vivre.
             </p>
             <p className="text-lg font-body leading-relaxed text-foreground/85 mb-7">
-              Guardiens, c'est le prétexte qui manquait. Les petites missions d'abord : un potager arrosé contre un repas, une compétence contre une autre, l'échange en nature entre gens du coin. La garde ensuite : vos clés confiées à quelqu'un que vous avez choisi, rencontré en vrai, regardé dans les yeux.
+              Guardiens, c'est le prétexte qui manquait. Les petites missions d'abord : un potager arrosé contre un repas, une compétence contre une autre, l'échange en nature entre gens du coin. La garde ensuite : vos clés confiées à quelqu'un que vous avez regardé dans les yeux.
             </p>
             <p className="text-lg font-body leading-relaxed text-foreground/85 mb-7">
               Vous partirez l'esprit léger. Vous rentrerez avec une histoire. Nous, on ne s'attendait pas à ce que ça compte autant.
