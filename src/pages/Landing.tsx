@@ -399,7 +399,7 @@ const Landing = () => {
             </Link>
 
             <p className="mt-4 text-xs text-white/60 font-body animate-hero-fade-up animation-delay-1100">
-              Gratuit · Premiers inscrits, premiers servis.
+              Gratuit · Badge Fondateur à vie jusqu'au 13 mai.
             </p>
           </div>
         </div>
