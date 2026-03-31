@@ -77,7 +77,7 @@ const testimonials = [
 const ownerSteps = [
   { number: "01", title: "Tu publies", description: "Ta maison, tes animaux, tes dates. Cinq minutes." },
   { number: "02", title: "Tu choisis", description: "Des profils du quartier. Tu lis, tu échanges, tu rencontres. C'est toi qui décides." },
-  { number: "03", title: "Tu pars.", description: "Vraiment." },
+  { number: "03", title: "Tu pars vraiment.", description: "" },
 ];
 
 const sitterSteps = [
