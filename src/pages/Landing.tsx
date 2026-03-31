@@ -500,38 +500,56 @@ const Landing = () => {
       <section className="py-24 md:py-32 bg-background">
         <div className="max-w-6xl mx-auto px-6 md:px-12">
           <RevealSection className="text-center mb-16">
-            <p className="text-xs font-body font-semibold tracking-widest uppercase text-primary/60 mb-4">
+            <span className="text-xs tracking-widest uppercase text-primary/60 font-body mb-4 block text-center">
               Pourquoi Guardiens
-            </p>
-            <h2 className="font-heading text-4xl md:text-5xl font-semibold text-foreground leading-snug">
-              Des gens du coin qui se font confiance.
+            </span>
+            <h2 className="text-4xl md:text-5xl font-heading font-semibold leading-snug text-foreground text-center mb-6">
+              Un prétexte pour vivre des vies qu'on n'aurait pas vécues.
             </h2>
-            <p className="text-lg md:text-xl font-body font-normal text-foreground/70 max-w-xl mx-auto mt-4 leading-relaxed">
-              Des gens du coin que vous avez choisis. Rencontrés avant. En vrai.
-            </p>
+            <div className="max-w-2xl mx-auto mb-16 text-center">
+              <p className="text-xl font-body italic text-foreground/80 mb-6">
+                Parfois extraordinaires. Souvent très ordinaires. Toujours inattendues.
+              </p>
+              <p className="text-lg font-body leading-relaxed text-foreground/85 mb-6">
+                Une maison gardée dans un quartier inconnu. Un échange de compétences avec quelqu'un de deux générations différentes. Un repas partagé avec des gens qu'on ne connaissait pas la semaine d'avant.
+              </p>
+              <p className="text-lg font-body leading-relaxed text-foreground/85">
+                Guardiens existe pour que ces moments arrivent. Pas par hasard — par intention. Celle de rendre service. Et de recevoir sans que ça se négocie. Sans argent qui change de mains. Juste du bon sens, de la confiance, des choses solides entre gens qui se font confiance.
+              </p>
+            </div>
           </RevealSection>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
-            {differentiators.map((item, i) => (
-              <RevealSection key={item.title} delay={0.1 * i}>
-                <div className="relative bg-card border border-border rounded-2xl p-10 hover:-translate-y-1 hover:shadow-lg transition-all duration-300 h-full overflow-hidden">
-                  <span className="absolute top-4 right-6 font-heading text-6xl text-primary/10 leading-none select-none">
-                    {String(i + 1).padStart(2, "0")}
-                  </span>
-                  <h3 className="font-heading text-xl md:text-2xl font-semibold text-foreground mb-3 relative z-10">
-                    {item.title}
-                  </h3>
-                  <p className="text-sm md:text-base font-body text-foreground/70 leading-relaxed relative z-10">
-                    {item.description}
-                  </p>
-                  {i === 2 && (
-                    <p className="text-sm font-body text-foreground/60 mt-2 relative z-10">
-                      Chaque gardien est vérifié manuellement. Vous le rencontrez avant. Vous décidez.
-                    </p>
-                  )}
-                </div>
-              </RevealSection>
-            ))}
+          <div className="grid lg:grid-cols-3 gap-8">
+            <RevealSection delay={0.1}>
+              <div className="bg-white rounded-2xl p-8 shadow-sm h-full">
+                <h3 className="text-xl font-heading font-semibold text-foreground mb-3">
+                  Des expériences qu'on ne planifie pas.
+                </h3>
+                <p className="text-base font-body leading-relaxed text-foreground/70">
+                  Une rencontre inattendue, un endroit découvert, une compétence apprise d'un inconnu.
+                </p>
+              </div>
+            </RevealSection>
+            <RevealSection delay={0.2}>
+              <div className="bg-white rounded-2xl p-8 shadow-sm h-full">
+                <h3 className="text-xl font-heading font-semibold text-foreground mb-3">
+                  Des gens qu'on n'aurait pas croisés.
+                </h3>
+                <p className="text-base font-body leading-relaxed text-foreground/70">
+                  Pas le même âge, pas le même quartier, pas la même vie. Et pourtant quelque chose passe. C'est souvent là que quelque chose dure.
+                </p>
+              </div>
+            </RevealSection>
+            <RevealSection delay={0.3}>
+              <div className="bg-white rounded-2xl p-8 shadow-sm h-full">
+                <h3 className="text-xl font-heading font-semibold text-foreground mb-3">
+                  Rien qui s'achète.
+                </h3>
+                <p className="text-base font-body leading-relaxed text-foreground/70">
+                  L'échange en nature, le service rendu, la confiance donnée. Ce qui compte ici ne se facture pas.
+                </p>
+              </div>
+            </RevealSection>
           </div>
         </div>
       </section>
