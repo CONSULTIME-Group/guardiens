@@ -718,7 +718,7 @@ const Landing = () => {
             Ton histoire commence ici.
           </h2>
           <p className="font-body text-lg text-white/70 leading-relaxed max-w-lg mx-auto mb-10">
-            Des gardes, de l'entraide, des gens du coin qui se font confiance. Gratuit pour commencer. Ce que vous allez vivre ne l'est pas.
+            Gratuit pour les propriétaires, pour toujours. Ce que tu vas vivre ne l'est pas.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <button

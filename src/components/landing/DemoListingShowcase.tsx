@@ -83,7 +83,7 @@ const DemoListingCard = ({
         to="/register"
         className="w-full mt-3 py-2.5 rounded-xl bg-primary/10 text-primary font-body font-medium text-sm text-center hover:bg-primary/20 transition-colors block"
       >
-        Rejoindre pour postuler →
+        S'inscrire pour postuler →
       </Link>
     </div>
   </div>
