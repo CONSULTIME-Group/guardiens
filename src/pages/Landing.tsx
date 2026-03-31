@@ -27,7 +27,7 @@ const differentiators = [
   {
     title: "Votre jardin contre un repas.",
     description:
-      "Vos clés contre une histoire. Ici personne ne facture ce qui n'a pas de prix.",
+      "Vos clés contre une histoire. L'échange se décide entre vous.",
   },
   {
     title: "Et au-delà des gardes.",
