@@ -172,55 +172,17 @@ const AdminSEO = () => {
         <TopArticlesTable topPages={gsc?.topPages || []} />
       </section>
 
-      {/* BLOC 4 — Performance GSC */}
-      {gsc && (
-        <section className="space-y-4">
-          <h2 className="text-lg font-semibold text-foreground">Performance GSC (28 jours)</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <MetricCard
-              title="Clics"
-              icon={<MousePointerClick className="h-4 w-4 text-primary" />}
-              value={gsc.current.clicks.toLocaleString()}
-              subtitle="28 derniers jours"
-              change={pctChange(gsc.current.clicks, gsc.previous.clicks)}
-              isNew={isPrevZero(gsc.current.clicks, gsc.previous.clicks)}
-            />
-            <MetricCard
-              title="Impressions"
-              icon={<Eye className="h-4 w-4 text-primary" />}
-              value={gsc.current.impressions.toLocaleString()}
-              subtitle="28 derniers jours"
-              change={pctChange(gsc.current.impressions, gsc.previous.impressions)}
-              isNew={isPrevZero(gsc.current.impressions, gsc.previous.impressions)}
-            />
-            <MetricCard
-              title="CTR moyen"
-              icon={<BarChart3 className="h-4 w-4 text-primary" />}
-              value={`${(gsc.current.ctr * 100).toFixed(1)}%`}
-              subtitle="Taux de clics"
-              change={pctChange(gsc.current.ctr, gsc.previous.ctr)}
-              isNew={isPrevZero(gsc.current.ctr, gsc.previous.ctr)}
-            />
-            <MetricCard
-              title="Position moyenne"
-              icon={<ArrowUpDown className="h-4 w-4 text-primary" />}
-              value={gsc.current.position.toFixed(1)}
-              subtitle="Plus bas = mieux"
-              change={pctChange(gsc.current.position, gsc.previous.position)}
-              invertChange
-            />
-          </div>
-
-          {gsc.topQueries && gsc.topQueries.length > 0 && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Top 10 requêtes</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <GSCQueriesTable rows={gsc.topQueries} />
-              </CardContent>
-            </Card>
-          )}
+      {/* BLOC 4 — Top requêtes GSC */}
+      {gsc && gsc.topQueries && gsc.topQueries.length > 0 && (
+        <section>
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Top 10 requêtes GSC</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <GSCQueriesTable rows={gsc.topQueries} />
+            </CardContent>
+          </Card>
         </section>
       )}
 
