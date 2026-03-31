@@ -406,7 +406,7 @@ const Landing = () => {
       </section>
 
       {/* ═══════════════ SECTION 2 — CHIFFRES FONDATEURS ═══════════════ */}
-      <section className="py-24 md:py-32 bg-background">
+      <section className="pt-24 md:pt-32 pb-8 bg-background">
         <RevealSection className="max-w-4xl mx-auto px-6">
           <p className="text-xs font-body font-semibold tracking-widest uppercase text-primary/60 text-center mb-10">
             Ce qu'on a vécu avant de construire Guardiens.
@@ -453,13 +453,13 @@ const Landing = () => {
       {/* ═══════════════ SECTION 3 — NOTRE HISTOIRE ═══════════════ */}
       <section className="py-24 md:py-32 bg-background">
         <div className="max-w-6xl mx-auto px-6 md:px-12">
-          <div className="grid md:grid-cols-2 gap-16 items-start">
+          <div className="flex flex-col md:flex-row gap-16 items-start">
             {/* Left column — image + signature */}
-            <RevealSection>
+            <RevealSection className="w-full md:w-1/2 md:flex-shrink-0">
               <div>
                 <div className="aspect-[3/4] overflow-hidden rounded-2xl shadow-md">
                   <img
-                    src="https://images.unsplash.com/photo-1450778869180-41d0601e046e?w=600&q=80"
+                    src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&q=80"
                     alt="Elisa et Jérémie lors d'une garde en Auvergne-Rhône-Alpes"
                     className="w-full h-full object-cover"
                     loading="lazy"
@@ -472,7 +472,7 @@ const Landing = () => {
             </RevealSection>
 
             {/* Right column — label + H2 + text */}
-            <RevealSection delay={0.15}>
+            <RevealSection delay={0.15} className="w-full md:w-1/2">
               <div>
                 <p className="text-xs tracking-widest uppercase text-primary/60 font-body mb-4">
                   Notre histoire
@@ -499,7 +499,7 @@ const Landing = () => {
                   Guardiens, c'est le prétexte qui manquait. Les petites missions d'abord — un potager arrosé contre un repas, une compétence contre une autre, l'échange en nature entre gens du coin. La garde ensuite — vos clés confiées à quelqu'un que vous avez choisi, rencontré en vrai, regardé dans les yeux.
                 </p>
                 <p className="text-lg font-body leading-relaxed text-foreground/85 mb-7">
-                  Vous partirez l'esprit léger. Vous rentrerez avec une histoire. Nous, on est revenus avec des amis pour la vie.
+                  Vous partirez l'esprit léger. Vous rentrerez avec une histoire. Nous, on ne s'attendait pas à ce que ça compte autant.
                 </p>
                 <p className="text-lg font-body leading-relaxed text-foreground/85">
                   C'est pour ça qu'on a construit Guardiens. Pour que vous viviez ça aussi.
