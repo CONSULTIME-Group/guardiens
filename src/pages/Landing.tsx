@@ -725,14 +725,14 @@ const Landing = () => {
                     key={t.name}
                     className="flex-[0_0_100%] md:flex-[0_0_33.333%] min-w-0 px-3"
                   >
-                    <div className="rounded-2xl p-10 h-full bg-white/5 border border-white/10 backdrop-blur-sm">
+                    <div className="rounded-2xl p-10 h-full bg-white border border-border shadow-sm">
                       <span className="block font-heading text-7xl leading-none mb-3 select-none text-primary/40">
                         "
                       </span>
-                      <p className="font-body text-base md:text-lg text-white/90 leading-relaxed italic mb-6">
+                      <p className="font-body text-base md:text-lg text-foreground/70 leading-relaxed italic mb-6">
                         {t.text}
                       </p>
-                      <p className="font-body text-xs text-white/50 uppercase tracking-widest">
+                      <p className="font-body text-xs text-foreground/50 uppercase tracking-widest">
                         {t.name} — {t.detail}
                       </p>
                     </div>
