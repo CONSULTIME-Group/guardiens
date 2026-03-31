@@ -46,7 +46,7 @@ const DemoListingCard = ({
     <div className="relative">
       <img src={photo} alt={title} className="w-full h-48 object-cover" />
       <span className="absolute top-3 left-3 bg-white/90 text-foreground/50 text-xs font-body font-medium px-3 py-1 rounded-full border border-border/60">
-        Exemple
+        Bientôt disponible
       </span>
       <div className="absolute bottom-3 left-3 flex gap-1 flex-wrap">
         {animals.map((a) => (
