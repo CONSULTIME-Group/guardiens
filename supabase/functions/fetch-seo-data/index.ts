@@ -360,6 +360,7 @@ Deno.serve(async (req) => {
         current: ga4Current,
         previous: ga4Previous,
         propertyId: ga4PropertyId,
+        channels: ga4Channels,
       },
       gsc: {
         current: gscCurrent.totals,
