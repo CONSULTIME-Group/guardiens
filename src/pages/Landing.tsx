@@ -372,7 +372,7 @@ const Landing = () => {
               Partir. Revenir. Recommencer.
             </p>
             <p className="font-body text-base md:text-xl text-white/75 max-w-lg mb-10 animate-hero-fade-up animation-delay-700">
-              Garder une maison. Échanger un service. Se faire confiance.
+              Garder une maison. Rendre service. Se faire confiance.
             </p>
 
             {/* CTAs */}
