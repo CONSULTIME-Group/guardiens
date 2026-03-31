@@ -304,6 +304,38 @@ Deno.serve(async (req) => {
     const ga4PrevEnd = formatDate(daysAgo(31));
     const ga4PrevStart = formatDate(daysAgo(60));
 
+    // Fetch channel grouping data from GA4
+    async function fetchGA4Channels(
+      token: string,
+      propId: string,
+      start: string,
+      end: string
+    ): Promise<{ channel: string; sessions: number; activeUsers: number }[]> {
+      const res = await fetch(
+        `https://analyticsdata.googleapis.com/v1beta/properties/${propId}:runReport`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            dateRanges: [{ startDate: start, endDate: end }],
+            dimensions: [{ name: "sessionDefaultChannelGroup" }],
+            metrics: [{ name: "sessions" }, { name: "activeUsers" }],
+            orderBys: [{ metric: { metricName: "sessions" }, desc: true }],
+            limit: 20,
+          }),
+        }
+      );
+      const data = await res.json();
+      return (data.rows || []).map((r: any) => ({
+        channel: r.dimensionValues[0].value,
+        sessions: parseInt(r.metricValues[0].value || "0"),
+        activeUsers: parseInt(r.metricValues[1].value || "0"),
+      }));
+    }
+
     // Fetch all data in parallel
     const [
       gscCurrent,
@@ -312,6 +344,7 @@ Deno.serve(async (req) => {
       gscTopQueries,
       ga4Current,
       ga4Previous,
+      ga4Channels,
     ] = await Promise.all([
       fetchGSCData(accessToken, gscStart, gscEnd),
       fetchGSCData(accessToken, gscPrevStart, gscPrevEnd),
@@ -319,6 +352,7 @@ Deno.serve(async (req) => {
       fetchGSCData(accessToken, gscStart, gscEnd, ["query"], 10),
       fetchGA4Data(accessToken, ga4PropertyId, ga4Start, ga4End, true),
       fetchGA4Data(accessToken, ga4PropertyId, ga4PrevStart, ga4PrevEnd, false),
+      fetchGA4Channels(accessToken, ga4PropertyId, ga4Start, ga4End),
     ]);
 
     const result = {
