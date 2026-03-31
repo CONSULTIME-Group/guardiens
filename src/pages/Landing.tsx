@@ -471,7 +471,7 @@ const Landing = () => {
             </p>
             <div className="border-l-4 border-primary pl-6 my-10">
               <p className="text-2xl md:text-3xl font-heading font-semibold italic text-foreground leading-snug">
-                On n'a jamais gardé des maisons. On est entrés dans des vies.
+                On n'a jamais gardé des maisons. On a été invités dans des vies.
               </p>
             </div>
             <p className="text-lg font-body leading-relaxed text-foreground/85 mb-7">
