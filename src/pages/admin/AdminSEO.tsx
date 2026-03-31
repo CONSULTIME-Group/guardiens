@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
   Globe, Users, MousePointerClick, Eye, ArrowUpDown, Timer,
-  BarChart3, ExternalLink, AlertCircle,
+  BarChart3, ExternalLink, AlertCircle, FileText, Search,
 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 import MetricCard from "@/components/admin/seo/MetricCard";
 import StatusBar from "@/components/admin/seo/StatusBar";
 import TopArticlesTable from "@/components/admin/seo/TopArticlesTable";
