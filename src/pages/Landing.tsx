@@ -104,7 +104,7 @@ const HowItWorksSection = ({ dynamicCounts }: { dynamicCounts: { maisons: number
                   : "bg-transparent text-foreground/60 border border-foreground/20"
               }`}
             >
-              J'ai une maison, des animaux
+              J'ai une maison à faire garder
             </button>
             <button
               onClick={() => setActiveTab("sitter")}
@@ -122,17 +122,17 @@ const HowItWorksSection = ({ dynamicCounts }: { dynamicCounts: { maisons: number
         {activeTab === "owner" && (
           <div className="max-w-lg mx-auto mt-12">
             <div className="mb-10">
-              <span className="text-6xl font-heading text-foreground/10 leading-none mb-1 block">01</span>
+              <span className="text-6xl font-heading text-foreground/20 leading-none mb-1 block">01</span>
               <h3 className="text-2xl font-heading font-semibold text-foreground mb-2">Tu publies.</h3>
               <p className="text-lg font-body text-foreground/70 leading-relaxed">Ta maison, tes animaux, tes dates. Cinq minutes.</p>
             </div>
             <div className="mb-10">
-              <span className="text-6xl font-heading text-foreground/10 leading-none mb-1 block">02</span>
+              <span className="text-6xl font-heading text-foreground/20 leading-none mb-1 block">02</span>
               <h3 className="text-2xl font-heading font-semibold text-foreground mb-2">Tu choisis.</h3>
               <p className="text-lg font-body text-foreground/70 leading-relaxed">Des profils du quartier. Tu lis, tu échanges, tu rencontres. C'est toi qui décides.</p>
             </div>
             <div className="mb-10">
-              <span className="text-6xl font-heading text-foreground/10 leading-none mb-1 block">03</span>
+              <span className="text-6xl font-heading text-foreground/20 leading-none mb-1 block">03</span>
               <h3 className="text-2xl font-heading font-semibold text-foreground mb-2">Tu pars vraiment.</h3>
               <p className="text-lg font-body text-foreground/70 leading-relaxed">L'esprit léger. Sans culpabilité.</p>
             </div>
@@ -148,17 +148,17 @@ const HowItWorksSection = ({ dynamicCounts }: { dynamicCounts: { maisons: number
         {activeTab === "sitter" && (
           <div className="max-w-lg mx-auto mt-12">
             <div className="mb-10">
-              <span className="text-6xl font-heading text-foreground/10 leading-none mb-1 block">01</span>
+              <span className="text-6xl font-heading text-foreground/20 leading-none mb-1 block">01</span>
               <h3 className="text-2xl font-heading font-semibold text-foreground mb-2">Tu te présentes.</h3>
               <p className="text-lg font-body text-foreground/70 leading-relaxed">Qui tu es, ce que tu aimes, où tu veux aller. Cinq minutes.</p>
             </div>
             <div className="mb-10">
-              <span className="text-6xl font-heading text-foreground/10 leading-none mb-1 block">02</span>
+              <span className="text-6xl font-heading text-foreground/20 leading-none mb-1 block">02</span>
               <h3 className="text-2xl font-heading font-semibold text-foreground mb-2">Tu postules.</h3>
               <p className="text-lg font-body text-foreground/70 leading-relaxed">Des gardes proches de chez toi. Tu choisis celles qui te ressemblent.</p>
             </div>
             <div className="mb-10">
-              <span className="text-6xl font-heading text-foreground/10 leading-none mb-1 block">03</span>
+              <span className="text-6xl font-heading text-foreground/20 leading-none mb-1 block">03</span>
               <h3 className="text-2xl font-heading font-semibold text-foreground mb-2">Tu rencontres des gens que tu n'aurais jamais croisés autrement.</h3>
             </div>
             <Link
@@ -689,10 +689,10 @@ const Landing = () => {
       </RevealSection>
 
       {/* ═══════════════ SECTION 5 — TÉMOIGNAGES ═══════════════ */}
-      <section className="py-24 md:py-32 bg-foreground">
+      <section className="py-24 md:py-32 bg-[#FAF9F6]">
         <div className="max-w-6xl mx-auto px-6 md:px-12">
           <RevealSection className="text-center mb-16">
-            <h2 className="font-heading text-4xl md:text-5xl font-semibold text-white leading-snug">
+            <h2 className="font-heading text-4xl md:text-5xl font-semibold text-foreground leading-snug">
               Ils ont sauté le pas.
             </h2>
           </RevealSection>
@@ -700,14 +700,14 @@ const Landing = () => {
           <div className="relative">
             <button
               onClick={() => emblaApi?.scrollPrev()}
-              className="absolute -left-2 md:-left-6 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full border border-white/20 flex items-center justify-center hover:bg-white/10 transition-colors text-white/60 hover:text-white"
+              className="absolute -left-2 md:-left-6 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full border border-foreground/20 flex items-center justify-center hover:bg-foreground/5 transition-colors text-foreground/40 hover:text-foreground/70"
               aria-label="Témoignage précédent"
             >
               <ArrowLeft className="h-4 w-4" />
             </button>
             <button
               onClick={() => emblaApi?.scrollNext()}
-              className="absolute -right-2 md:-right-6 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full border border-white/20 flex items-center justify-center hover:bg-white/10 transition-colors text-white/60 hover:text-white"
+              className="absolute -right-2 md:-right-6 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full border border-foreground/20 flex items-center justify-center hover:bg-foreground/5 transition-colors text-foreground/40 hover:text-foreground/70"
               aria-label="Témoignage suivant"
             >
               <ArrowRight className="h-4 w-4" />
@@ -725,14 +725,14 @@ const Landing = () => {
                     key={t.name}
                     className="flex-[0_0_100%] md:flex-[0_0_33.333%] min-w-0 px-3"
                   >
-                    <div className="rounded-2xl p-10 h-full bg-white/5 border border-white/10 backdrop-blur-sm">
+                    <div className="rounded-2xl p-10 h-full bg-white border border-border shadow-sm">
                       <span className="block font-heading text-7xl leading-none mb-3 select-none text-primary/40">
                         "
                       </span>
-                      <p className="font-body text-base md:text-lg text-white/90 leading-relaxed italic mb-6">
+                      <p className="font-body text-base md:text-lg text-foreground/70 leading-relaxed italic mb-6">
                         {t.text}
                       </p>
-                      <p className="font-body text-xs text-white/50 uppercase tracking-widest">
+                      <p className="font-body text-xs text-foreground/50 uppercase tracking-widest">
                         {t.name} — {t.detail}
                       </p>
                     </div>
@@ -747,7 +747,7 @@ const Landing = () => {
                   key={i}
                   onClick={() => emblaApi?.scrollTo(i)}
                   className={`w-2.5 h-2.5 rounded-full transition-colors ${
-                    i === selectedIndex ? "bg-primary" : "bg-white/30"
+                    i === selectedIndex ? "bg-primary" : "bg-foreground/20"
                   }`}
                   aria-label={`Aller au témoignage ${i + 1}`}
                 />
