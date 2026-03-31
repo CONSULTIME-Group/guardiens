@@ -148,17 +148,17 @@ const HowItWorksSection = ({ dynamicCounts }: { dynamicCounts: { maisons: number
         {activeTab === "sitter" && (
           <div className="max-w-lg mx-auto mt-12">
             <div className="mb-10">
-              <span className="text-6xl font-heading text-foreground/10 leading-none mb-1 block">01</span>
+              <span className="text-6xl font-heading text-foreground/20 leading-none mb-1 block">01</span>
               <h3 className="text-2xl font-heading font-semibold text-foreground mb-2">Tu te présentes.</h3>
               <p className="text-lg font-body text-foreground/70 leading-relaxed">Qui tu es, ce que tu aimes, où tu veux aller. Cinq minutes.</p>
             </div>
             <div className="mb-10">
-              <span className="text-6xl font-heading text-foreground/10 leading-none mb-1 block">02</span>
+              <span className="text-6xl font-heading text-foreground/20 leading-none mb-1 block">02</span>
               <h3 className="text-2xl font-heading font-semibold text-foreground mb-2">Tu postules.</h3>
               <p className="text-lg font-body text-foreground/70 leading-relaxed">Des gardes proches de chez toi. Tu choisis celles qui te ressemblent.</p>
             </div>
             <div className="mb-10">
-              <span className="text-6xl font-heading text-foreground/10 leading-none mb-1 block">03</span>
+              <span className="text-6xl font-heading text-foreground/20 leading-none mb-1 block">03</span>
               <h3 className="text-2xl font-heading font-semibold text-foreground mb-2">Tu rencontres des gens que tu n'aurais jamais croisés autrement.</h3>
             </div>
             <Link

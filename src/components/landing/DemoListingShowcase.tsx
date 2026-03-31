@@ -27,7 +27,7 @@ const DEMO_LISTINGS = [
   },
   {
     id: "demo-3",
-    photo: "https://images.unsplash.com/photo-1598928636135-d146006ff4be?w=800&q=80",
+    photo: "https://images.unsplash.com/photo-1548550023-2bdb3c5beed7?w=800&q=80",
     city: "Grenoble",
     animals: ["2 chats"],
     dates: "20 sept. → 4 oct.",
