@@ -715,7 +715,7 @@ const Landing = () => {
       <section className="py-24 md:py-32 bg-foreground">
         <RevealSection className="max-w-2xl mx-auto px-6 text-center">
           <h2 className="font-heading text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight mb-6">
-            Votre prochaine histoire commence ici.
+            Ton histoire commence ici.
           </h2>
           <p className="font-body text-lg text-white/70 leading-relaxed max-w-lg mx-auto mb-10">
             Des gardes, de l'entraide, des gens du coin qui se font confiance. Gratuit pour commencer. Ce que vous allez vivre ne l'est pas.
