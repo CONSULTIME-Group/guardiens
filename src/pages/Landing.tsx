@@ -504,7 +504,7 @@ const Landing = () => {
               Pourquoi Guardiens
             </p>
             <h2 className="font-heading text-4xl md:text-5xl font-semibold text-foreground leading-snug">
-              Un réseau de gens du coin qui se font confiance.
+              Des gens du coin qui se font confiance.
             </h2>
             <p className="text-lg md:text-xl font-body font-normal text-foreground/70 max-w-xl mx-auto mt-4 leading-relaxed">
               Pas des inconnus. Des gens proches, que vous avez rencontrés en vrai.
