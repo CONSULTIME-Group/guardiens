@@ -667,7 +667,7 @@ const Landing = () => {
           <RevealSection className="mt-20">
             <div className="bg-muted rounded-2xl p-12 max-w-3xl mx-auto text-center">
               <h3 className="font-heading text-2xl md:text-3xl font-semibold text-foreground mb-4">
-                Un jardin à arroser ? Un meuble à monter ?
+                Un jardin à arroser, un coup de main à donner, une compétence à partager.
               </h3>
               <p className="font-body text-base md:text-lg text-foreground/75 leading-relaxed max-w-xl mx-auto mb-6">
                 Jardinage, bricolage, courses, coup de main — les petites missions sont là pour ça. Sans argent. Entre gens du coin qui se choisissent.
