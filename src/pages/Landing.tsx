@@ -414,7 +414,7 @@ const Landing = () => {
           <div className="flex flex-col md:flex-row items-center justify-center">
             <div className="text-center px-8 md:px-12 py-4 md:py-0">
               <span className="block font-heading text-5xl md:text-7xl font-bold text-foreground leading-none">
-                <CountUp target={dynamicCounts?.maisons ?? 37} />
+                <CountUp target={37} />
               </span>
               <span className="font-body text-sm text-foreground/60 tracking-wide">maisons gardées</span>
             </div>
