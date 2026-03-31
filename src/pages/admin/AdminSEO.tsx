@@ -12,6 +12,7 @@ import TopArticlesTable from "@/components/admin/seo/TopArticlesTable";
 import PriorityActions from "@/components/admin/seo/PriorityActions";
 import ContentToCreate from "@/components/admin/seo/ContentToCreate";
 import GSCQueriesTable from "@/components/admin/seo/GSCQueriesTable";
+import TrafficSources from "@/components/admin/seo/TrafficSources";
 import { useSeoData } from "@/hooks/useSeoData";
 
 function pctChange(current: number, previous: number): number | undefined {
