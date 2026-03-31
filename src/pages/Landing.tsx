@@ -122,17 +122,17 @@ const HowItWorksSection = ({ dynamicCounts }: { dynamicCounts: { maisons: number
         {activeTab === "owner" && (
           <div className="max-w-lg mx-auto mt-12">
             <div className="mb-10">
-              <span className="text-6xl font-heading text-foreground/10 leading-none mb-1 block">01</span>
+              <span className="text-6xl font-heading text-foreground/20 leading-none mb-1 block">01</span>
               <h3 className="text-2xl font-heading font-semibold text-foreground mb-2">Tu publies.</h3>
               <p className="text-lg font-body text-foreground/70 leading-relaxed">Ta maison, tes animaux, tes dates. Cinq minutes.</p>
             </div>
             <div className="mb-10">
-              <span className="text-6xl font-heading text-foreground/10 leading-none mb-1 block">02</span>
+              <span className="text-6xl font-heading text-foreground/20 leading-none mb-1 block">02</span>
               <h3 className="text-2xl font-heading font-semibold text-foreground mb-2">Tu choisis.</h3>
               <p className="text-lg font-body text-foreground/70 leading-relaxed">Des profils du quartier. Tu lis, tu échanges, tu rencontres. C'est toi qui décides.</p>
             </div>
             <div className="mb-10">
-              <span className="text-6xl font-heading text-foreground/10 leading-none mb-1 block">03</span>
+              <span className="text-6xl font-heading text-foreground/20 leading-none mb-1 block">03</span>
               <h3 className="text-2xl font-heading font-semibold text-foreground mb-2">Tu pars vraiment.</h3>
               <p className="text-lg font-body text-foreground/70 leading-relaxed">L'esprit léger. Sans culpabilité.</p>
             </div>
