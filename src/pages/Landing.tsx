@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, ArrowLeft } from "lucide-react";
+import { ArrowRight, ArrowLeft, Home, Key, Handshake } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import PageMeta from "@/components/PageMeta";
 import useEmblaCarousel from "embla-carousel-react";
@@ -419,6 +419,61 @@ const Landing = () => {
         </RevealSection>
       </section>
 
+      {/* ═══════════════ SECTION 2b — CE QU'ON FAIT ENSEMBLE ═══════════════ */}
+      <section className="py-24 md:py-32 bg-[#FAF9F6]">
+        <div className="max-w-5xl mx-auto px-6">
+          <RevealSection>
+            <span className="text-xs tracking-widest uppercase text-primary/60 font-body mb-4 block text-center">
+              Ce qu'on fait ensemble
+            </span>
+            <h2 className="text-4xl md:text-5xl font-heading font-semibold leading-snug text-foreground text-center mb-16">
+              Trois façons de vivre quelque chose.
+            </h2>
+          </RevealSection>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <RevealSection delay={0.1}>
+              <div className="bg-white rounded-2xl p-8 shadow-sm text-left h-full">
+                <Home className="h-8 w-8 text-primary mb-4" />
+                <h3 className="text-xl font-heading font-semibold text-foreground mb-3">Vous partez. Votre maison vit.</h3>
+                <p className="text-base font-body leading-relaxed text-foreground/70 mb-4">
+                  Trouvez quelqu'un du coin pour garder votre maison et vos animaux. Vous le rencontrez avant. Vous choisissez. Gratuit pour les propriétaires.
+                </p>
+                <Link to="/inscription?role=owner" className="text-sm font-body text-primary font-medium hover:underline">
+                  Je cherche un gardien →
+                </Link>
+              </div>
+            </RevealSection>
+
+            <RevealSection delay={0.2}>
+              <div className="bg-white rounded-2xl p-8 shadow-sm text-left h-full">
+                <Key className="h-8 w-8 text-primary mb-4" />
+                <h3 className="text-xl font-heading font-semibold text-foreground mb-3">Vous gardez. Vous découvrez.</h3>
+                <p className="text-base font-body leading-relaxed text-foreground/70 mb-4">
+                  Proposez-vous comme gardien. Vivez dans des maisons, avec des animaux, dans des quartiers que vous n'auriez jamais explorés autrement.
+                </p>
+                <Link to="/inscription?role=sitter" className="text-sm font-body text-primary font-medium hover:underline">
+                  Je veux garder →
+                </Link>
+              </div>
+            </RevealSection>
+
+            <RevealSection delay={0.3}>
+              <div className="bg-white rounded-2xl p-8 shadow-sm text-left h-full">
+                <Handshake className="h-8 w-8 text-primary mb-4" />
+                <h3 className="text-xl font-heading font-semibold text-foreground mb-3">Un coup de main. Un échange.</h3>
+                <p className="text-base font-body leading-relaxed text-foreground/70 mb-4">
+                  Arroser un potager, promener un chien, partager une compétence. Sans argent. Entre gens qui se font confiance.
+                </p>
+                <Link to="/petites-missions" className="text-sm font-body text-primary font-medium hover:underline">
+                  Découvrir les petites missions →
+                </Link>
+              </div>
+            </RevealSection>
+          </div>
+        </div>
+      </section>
+
       {/* ═══════════════ SECTION 3 — NOTRE HISTOIRE ═══════════════ */}
        <section className="py-24 md:py-32 bg-background">
          <div className="max-w-3xl mx-auto px-6">
@@ -700,7 +755,6 @@ const Landing = () => {
           </button>
         </RevealSection>
       </section>
-
 
 
       {/* ═══════════════ SECTION 8 — CTA FINAL ═══════════════ */}
