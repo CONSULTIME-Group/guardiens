@@ -37,7 +37,7 @@ const differentiators = [
   {
     title: "37 maisons. 234 animaux. 5 ans.",
     description:
-      "On a vécu ce qu'on construit. Guardiens c'est notre histoire — et bientôt la vôtre.",
+      "On a vécu ce qu'on construit. Guardiens, c'est notre histoire. Vous écrivez la vôtre.",
   },
 ];
 
