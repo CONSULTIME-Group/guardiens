@@ -30,6 +30,7 @@ const AdminSEO = () => {
   const { data: seoData, loading, error, refresh } = useSeoData();
   const [refreshing, setRefreshing] = useState(false);
   const [articleStats, setArticleStats] = useState<{ published: number; total: number } | null>(null);
+  const [profileCount, setProfileCount] = useState<number | null>(null);
 
   useEffect(() => {
     const fetchArticleStats = async () => {
