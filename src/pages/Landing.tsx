@@ -451,50 +451,58 @@ const Landing = () => {
       </section>
 
       {/* ═══════════════ SECTION 3 — NOTRE HISTOIRE ═══════════════ */}
-      <section className="py-24 md:py-32 bg-muted">
+      <section className="py-24 md:py-32 bg-background">
         <div className="max-w-6xl mx-auto px-6 md:px-12">
           <div className="grid md:grid-cols-2 gap-16 items-start">
-            {/* Left column */}
+            {/* Left column — image + signature */}
             <RevealSection>
               <div>
-                <p className="text-xs font-body font-semibold tracking-widest uppercase text-primary/60 mb-4">
-                  Notre histoire
+                <div className="aspect-[3/4] overflow-hidden rounded-2xl shadow-md">
+                  <img
+                    src="https://images.unsplash.com/photo-1450778869180-41d0601e046e?w=600&q=80"
+                    alt="Elisa et Jérémie lors d'une garde en Auvergne-Rhône-Alpes"
+                    className="w-full h-full object-cover"
+                    loading="lazy"
+                  />
+                </div>
+                <p className="text-sm font-body italic text-foreground/50 mt-4 text-center">
+                  — Jérémie &amp; Elisa
                 </p>
-                <h2 className="font-heading text-4xl md:text-5xl font-semibold text-foreground leading-snug">
-                  On habite les mêmes rues. On ne se connaît pas.
-                </h2>
               </div>
             </RevealSection>
 
-            {/* Right column — text */}
+            {/* Right column — label + H2 + text */}
             <RevealSection delay={0.15}>
               <div>
-                <p className="text-lg font-body leading-relaxed text-foreground/85 mb-6">
+                <p className="text-xs tracking-widest uppercase text-primary/60 font-body mb-4">
+                  Notre histoire
+                </p>
+                <h2 className="text-4xl md:text-5xl font-heading font-semibold leading-snug text-foreground mb-8">
+                  Tout a commencé avec un visa.
+                </h2>
+                <p className="text-lg font-body leading-relaxed text-foreground/85 mb-7">
                   On a perdu l'habitude de s'ouvrir aux gens du coin. Par manque de prétexte.
                 </p>
-                <p className="text-lg font-body leading-relaxed text-foreground/85 mb-6">
+                <p className="text-lg font-body leading-relaxed text-foreground/85 mb-7">
                   Elisa, ma compagne et co-fondatrice de Guardiens, est arrivée d'Argentine avec un visa qui ne lui permettait pas de travailler. Elle gardait des animaux. Elle rentrait avec des histoires — des gens qui ouvraient leur porte, leur vie, librement. Des inconnus qui finissaient par nous inviter à Noël.
                 </p>
-                <p className="text-lg font-body leading-relaxed text-foreground/85 mb-6">
+                <p className="text-lg font-body leading-relaxed text-foreground/85 mb-7">
                   Elisa et moi avons gardé 37 maisons en cinq ans en Auvergne-Rhône-Alpes.
                 </p>
-                <p className="text-lg font-body leading-relaxed text-foreground/85 italic mb-6">
+                <p className="text-lg font-body leading-relaxed italic text-foreground/80 mb-7">
                   On n'a jamais gardé des maisons. On est entrés dans des vies.
                 </p>
-                <p className="text-lg font-body leading-relaxed text-foreground/85 mb-6">
+                <p className="text-lg font-body leading-relaxed text-foreground/85 mb-7">
                   C'est ça que le village faisait naturellement — et qu'on a oublié de faire.
                 </p>
-                <p className="text-lg font-body leading-relaxed text-foreground/85 mb-6">
+                <p className="text-lg font-body leading-relaxed text-foreground/85 mb-7">
                   Guardiens, c'est le prétexte qui manquait. Les petites missions d'abord — un potager arrosé contre un repas, une compétence contre une autre, l'échange en nature entre gens du coin. La garde ensuite — vos clés confiées à quelqu'un que vous avez choisi, rencontré en vrai, regardé dans les yeux.
                 </p>
-                <p className="text-lg font-body leading-relaxed text-foreground/85 mb-6">
+                <p className="text-lg font-body leading-relaxed text-foreground/85 mb-7">
                   Vous partirez l'esprit léger. Vous rentrerez avec une histoire. Nous, on est revenus avec des amis pour la vie.
                 </p>
-                <p className="text-lg font-body leading-relaxed text-foreground/85 mb-6">
+                <p className="text-lg font-body leading-relaxed text-foreground/85">
                   C'est pour ça qu'on a construit Guardiens. Pour que vous viviez ça aussi.
-                </p>
-                <p className="text-sm font-body italic text-foreground/50">
-                  — Jérémie &amp; Elisa
                 </p>
               </div>
             </RevealSection>
