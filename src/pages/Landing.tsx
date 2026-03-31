@@ -104,7 +104,7 @@ const HowItWorksSection = ({ dynamicCounts }: { dynamicCounts: { maisons: number
                   : "bg-transparent text-foreground/60 border border-foreground/20"
               }`}
             >
-              J'ai une maison, des animaux
+              J'ai une maison à faire garder
             </button>
             <button
               onClick={() => setActiveTab("sitter")}
