@@ -461,7 +461,7 @@ const Landing = () => {
                   Notre histoire
                 </p>
                 <h2 className="font-heading text-4xl md:text-5xl font-semibold text-foreground leading-snug">
-                  Tout a commencé avec un visa.
+                  On habite les mêmes rues. On ne se connaît pas.
                 </h2>
               </div>
             </RevealSection>
@@ -470,34 +470,31 @@ const Landing = () => {
             <RevealSection delay={0.15}>
               <div>
                 <p className="text-lg font-body leading-relaxed text-foreground/85 mb-6">
-                  Elisa est arrivée d'Argentine avec un visa qui ne lui permettait pas de travailler. Elle gardait des animaux. Elle rentrait avec des histoires. Des gens qui ouvraient leur porte sans calcul, leur vie sans condition.
-                </p>
-
-                <blockquote className="border-l-2 border-primary pl-6 mb-6">
-                  <p className="text-lg font-heading italic text-foreground/85 leading-relaxed">
-                    « Et si tu restais chez nous pendant qu'on part ? »
-                  </p>
-                </blockquote>
-
-                <p className="text-lg font-body leading-relaxed text-foreground/85 mb-6">
-                  On a gardé 37 maisons en cinq ans.
+                  On a perdu l'habitude de s'ouvrir aux gens du coin. Par manque de prétexte.
                 </p>
                 <p className="text-lg font-body leading-relaxed text-foreground/85 mb-6">
-                  Géraldine, l'irlandaise de 77 ans aux cheveux rouge fluo à Passy, avec son perroquet Coco et ses deux chiens sur le pas de la porte. Rio à Collonges, le chien joueur infatigable chez qui on est retournés six fois.
+                  Elisa, ma compagne et co-fondatrice de Guardiens, est arrivée d'Argentine avec un visa qui ne lui permettait pas de travailler. Elle gardait des animaux. Elle rentrait avec des histoires — des gens qui ouvraient leur porte, leur vie, librement. Des inconnus qui finissaient par nous inviter à Noël.
                 </p>
                 <p className="text-lg font-body leading-relaxed text-foreground/85 mb-6">
-                  Et puis Briord. Les clés de la maison. Les clés de la Triumph. Les clés du bateau. Les clés de la BM. Des gens qu'on ne connaissait pas trois semaines avant.
+                  Elisa et moi avons gardé 37 maisons en cinq ans en Auvergne-Rhône-Alpes.
                 </p>
-                <p className="text-lg font-body leading-relaxed text-foreground font-semibold mb-6">
-                  On ne gardait pas des maisons. On collectionnait des vies.
+                <p className="text-lg font-body leading-relaxed text-foreground/85 italic mb-6">
+                  On n'a jamais gardé des maisons. On est entrés dans des vies.
                 </p>
-
                 <p className="text-lg font-body leading-relaxed text-foreground/85 mb-6">
-                  Un soir chez Helen — Stanley qui aboyait, Rafa couché sur nos pieds, la vue sur le Mont-Blanc. On s'est dit&nbsp;: pourquoi il n'y a pas plus de monde qui fait ça ? C'est pour ça qu'on a construit Guardiens.
+                  C'est ça que le village faisait naturellement — et qu'on a oublié de faire.
                 </p>
-
-                <p className="text-lg font-body leading-relaxed text-foreground/85">
-                  Votre jardin contre un repas. Vos clés contre une histoire. Des gens du coin qui se font confiance — et parfois des amis pour la vie.
+                <p className="text-lg font-body leading-relaxed text-foreground/85 mb-6">
+                  Guardiens, c'est le prétexte qui manquait. Les petites missions d'abord — un potager arrosé contre un repas, une compétence contre une autre, l'échange en nature entre gens du coin. La garde ensuite — vos clés confiées à quelqu'un que vous avez choisi, rencontré en vrai, regardé dans les yeux.
+                </p>
+                <p className="text-lg font-body leading-relaxed text-foreground/85 mb-6">
+                  Vous partirez l'esprit léger. Vous rentrerez avec une histoire. Nous, on est revenus avec des amis pour la vie.
+                </p>
+                <p className="text-lg font-body leading-relaxed text-foreground/85 mb-6">
+                  C'est pour ça qu'on a construit Guardiens. Pour que vous viviez ça aussi.
+                </p>
+                <p className="text-sm font-body italic text-foreground/50">
+                  — Jérémie &amp; Elisa
                 </p>
               </div>
             </RevealSection>
