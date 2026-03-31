@@ -15,7 +15,7 @@ const DEMO_LISTINGS = [
   },
   {
     id: "demo-2",
-    photo: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&q=80",
+    photo: "https://images.unsplash.com/photo-1499678329028-101435549a4e?w=800&q=80",
     city: "Annecy",
     animals: ["3 poules", "1 chat"],
     dates: "2 → 16 août",
