@@ -8,38 +8,7 @@ import useEmblaCarousel from "embla-carousel-react";
 import heroDogBbq from "@/assets/hero-dog-bbq.jpg";
 import DemoListingShowcase from "@/components/landing/DemoListingShowcase";
 
-const differentiators = [
-  {
-    title: "Vos animaux restent chez eux.",
-    description:
-      "Leur panier, leur canapé, leurs habitudes. Quelqu'un du coin qui les connaît par leur prénom.",
-  },
-  {
-    title: "Votre maison vit.",
-    description:
-      "Volets ouverts, courrier relevé, lumières allumées. Une maison habitée.",
-  },
-  {
-    title: "On se rencontre avant.",
-    description:
-      "Un café, une balade. La confiance ne se crée pas en ligne. Elle se vit.",
-  },
-  {
-    title: "Votre jardin contre un repas.",
-    description:
-      "Vos clés contre une histoire. L'échange se décide entre vous.",
-  },
-  {
-    title: "Et au-delà des gardes.",
-    description:
-      "Un coup de main, un service rendu, une compétence échangée. Des gens du coin qui s'ouvrent.",
-  },
-  {
-    title: "37 maisons. 234 animaux. 5 ans.",
-    description:
-      "On a vécu ce qu'on construit. Guardiens, c'est notre histoire. Vous écrivez la vôtre.",
-  },
-];
+
 
 const testimonials = [
   {
