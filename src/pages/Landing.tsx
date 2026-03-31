@@ -461,7 +461,7 @@ const Landing = () => {
               Tout a commencé avec un visa.
             </h2>
             <p className="text-lg font-body leading-relaxed text-foreground/85 mb-7">
-              On a perdu l'habitude de s'ouvrir aux gens du coin. Par manque de prétexte.
+              L'habitude de s'ouvrir aux gens du coin s'est perdue. Par manque de prétexte.
             </p>
             <p className="text-lg font-body leading-relaxed text-foreground/85 mb-7">
               Elisa, ma compagne et co-fondatrice de Guardiens, est arrivée d'Argentine avec un visa qui ne lui permettait pas de travailler. Elle gardait des animaux. Elle rentrait avec des histoires : des gens qui ouvraient leur porte, leur vie, librement. Des inconnus qui finissaient par nous inviter à Noël.
