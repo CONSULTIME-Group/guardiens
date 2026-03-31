@@ -117,6 +117,7 @@ const AppRoutes = () => (
     <Route path="/reset-password" element={<ResetPassword />} />
     <Route path="/actualites" element={<News />} />
     <Route path="/actualites/:slug" element={<ArticleDetail />} />
+    <Route path="/blog" element={<Navigate to="/actualites" replace />} />
     <Route path="/a-propos" element={<About />} />
     <Route path="/contact" element={<Contact />} />
     <Route path="/cgu" element={<Terms />} />
