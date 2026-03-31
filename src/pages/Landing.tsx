@@ -475,7 +475,7 @@ const Landing = () => {
               </p>
             </div>
             <p className="text-lg font-body leading-relaxed text-foreground/85 mb-7">
-              C'est ça que le village faisait naturellement, et qu'on a oublié de faire.
+              C'est ça que le village faisait naturellement.
             </p>
             <p className="text-lg font-body leading-relaxed text-foreground/85 mb-7">
               Guardiens, c'est le prétexte qui manquait. Les petites missions d'abord : un potager arrosé contre un repas, une compétence contre une autre, l'échange en nature entre gens du coin. La garde ensuite : vos clés confiées à quelqu'un que vous avez choisi, rencontré en vrai, regardé dans les yeux.
