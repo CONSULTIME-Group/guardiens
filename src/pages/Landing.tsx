@@ -700,7 +700,7 @@ const Landing = () => {
           <div className="relative">
             <button
               onClick={() => emblaApi?.scrollPrev()}
-              className="absolute -left-2 md:-left-6 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full border border-white/20 flex items-center justify-center hover:bg-white/10 transition-colors text-white/60 hover:text-white"
+              className="absolute -left-2 md:-left-6 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full border border-foreground/20 flex items-center justify-center hover:bg-foreground/5 transition-colors text-foreground/40 hover:text-foreground/70"
               aria-label="Témoignage précédent"
             >
               <ArrowLeft className="h-4 w-4" />
