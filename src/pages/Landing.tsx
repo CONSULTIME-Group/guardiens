@@ -613,7 +613,7 @@ const Landing = () => {
               Comment ça marche
             </p>
             <h2 className="font-heading text-4xl md:text-5xl font-semibold text-foreground leading-snug">
-              Trois étapes. Une relation.
+              Trois étapes. Puis plus rien à organiser.
             </h2>
           </RevealSection>
 
