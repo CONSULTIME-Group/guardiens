@@ -43,7 +43,14 @@ const AdminSEO = () => {
         .select("id", { count: "exact", head: true });
       setArticleStats({ published: published ?? 0, total: total ?? 0 });
     };
+    const fetchProfileCount = async () => {
+      const { count } = await supabase
+        .from("profiles")
+        .select("id", { count: "exact", head: true });
+      setProfileCount(count ?? 0);
+    };
     fetchArticleStats();
+    fetchProfileCount();
   }, []);
 
   const handleRefresh = async () => {
