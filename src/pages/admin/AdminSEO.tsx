@@ -205,6 +205,11 @@ const AdminSEO = () => {
         </Card>
       )}
 
+      {/* BLOC — Sources de trafic */}
+      <section>
+        <TrafficSources channels={ga4?.channels} loading={loading && !seoData} />
+      </section>
+
       {/* BLOC 3 — Top 10 Articles */}
       <section>
         <TopArticlesTable topPages={gsc?.topPages || []} />
