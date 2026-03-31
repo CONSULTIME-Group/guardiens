@@ -524,6 +524,11 @@ const Landing = () => {
                   <p className="text-sm md:text-base font-body text-foreground/70 leading-relaxed relative z-10">
                     {item.description}
                   </p>
+                  {i === 2 && (
+                    <p className="text-sm font-body text-foreground/60 mt-2 relative z-10">
+                      Chaque gardien est vérifié manuellement. Vous le rencontrez avant. Vous décidez.
+                    </p>
+                  )}
                 </div>
               </RevealSection>
             ))}
