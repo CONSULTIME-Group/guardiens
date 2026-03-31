@@ -453,7 +453,7 @@ const Landing = () => {
       {/* ═══════════════ SECTION 3 — NOTRE HISTOIRE ═══════════════ */}
       <section className="py-24 md:py-32 bg-background">
         <div className="max-w-6xl mx-auto px-6 md:px-12">
-          <div className="grid md:grid-cols-2 gap-16 items-start">
+          <div className="flex flex-col md:flex-row gap-16 items-start">
             {/* Left column — image + signature */}
             <RevealSection>
               <div>
