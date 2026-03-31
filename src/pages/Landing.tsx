@@ -747,7 +747,7 @@ const Landing = () => {
                   key={i}
                   onClick={() => emblaApi?.scrollTo(i)}
                   className={`w-2.5 h-2.5 rounded-full transition-colors ${
-                    i === selectedIndex ? "bg-primary" : "bg-white/30"
+                    i === selectedIndex ? "bg-primary" : "bg-foreground/20"
                   }`}
                   aria-label={`Aller au témoignage ${i + 1}`}
                 />
