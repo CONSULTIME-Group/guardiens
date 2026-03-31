@@ -422,7 +422,7 @@ const Landing = () => {
             <div className="block md:hidden w-16 h-px bg-border my-2" />
             <div className="text-center px-8 md:px-12 py-4 md:py-0">
               <span className="block font-heading text-5xl md:text-7xl font-bold text-foreground leading-none">
-                <CountUp target={dynamicCounts?.animaux ?? 234} />
+                <CountUp target={234} />
               </span>
               <span className="font-body text-sm text-foreground/60 tracking-wide">animaux accompagnés</span>
             </div>
