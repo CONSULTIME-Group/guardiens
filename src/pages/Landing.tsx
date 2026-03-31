@@ -459,7 +459,7 @@ const Landing = () => {
               <div>
                 <div className="aspect-[3/4] overflow-hidden rounded-2xl shadow-md">
                   <img
-                    src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&q=80"
+                    src="https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=600&q=80"
                     alt="Elisa et Jérémie lors d'une garde en Auvergne-Rhône-Alpes"
                     className="w-full h-full object-cover"
                     loading="lazy"
