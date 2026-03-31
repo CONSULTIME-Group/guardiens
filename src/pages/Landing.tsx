@@ -17,7 +17,7 @@ const differentiators = [
   {
     title: "Votre maison vit.",
     description:
-      "Volets ouverts, courrier relevé, lumières allumées. Pas une maison vide — une maison habitée.",
+      "Volets ouverts, courrier relevé, lumières allumées. Une maison habitée.",
   },
   {
     title: "On se rencontre avant.",
