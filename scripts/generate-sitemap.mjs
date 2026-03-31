@@ -104,7 +104,7 @@ async function main() {
   if (articles) {
     for (const a of articles) {
       const priority = PRIORITY_MAP[a.category] || "0.7";
-      entries.push(urlEntry(`/blog/${a.slug}`, (a.updated_at || a.published_at || today).split("T")[0], "monthly", priority));
+      entries.push(urlEntry(`/actualites/${a.slug}`, (a.updated_at || a.published_at || today).split("T")[0], "monthly", priority));
     }
   }
 
