@@ -540,9 +540,6 @@ const Landing = () => {
       <section className="py-24 md:py-32 bg-foreground">
         <div className="max-w-6xl mx-auto px-6 md:px-12">
           <RevealSection className="text-center mb-16">
-            <p className="text-xs font-body font-semibold tracking-widest uppercase text-white/40 mb-4">
-              Ils ont sauté le pas
-            </p>
             <h2 className="font-heading text-4xl md:text-5xl font-semibold text-white leading-snug">
               Ils ont sauté le pas.
             </h2>
