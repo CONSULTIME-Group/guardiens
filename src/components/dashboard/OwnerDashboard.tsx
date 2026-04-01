@@ -222,10 +222,7 @@ const OwnerDashboard = () => {
   const cta = getCTA();
 
   const totalReceivedApps = sits.reduce((sum: number, s: any) => sum + (s.applications?.filter((a: any) => a.status === "pending").length || 0), 0);
-
-  const emergencySitterCount = 0; // populated below
   const [nearbyEmergencyCount, setNearbyEmergencyCount] = useState(0);
-  useEffect(() => {
     supabase.from("emergency_sitter_profiles").select("user_id", { count: "exact", head: true }).eq("is_active", true).then(({ count }) => {
       setNearbyEmergencyCount(count || 0);
     });
