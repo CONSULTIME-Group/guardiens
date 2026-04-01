@@ -385,7 +385,7 @@ const SitterDashboard = () => {
               <div className="flex flex-wrap gap-2">
                 {badges.slice(0, 6).map((b: any) => (
                   <div key={b.id} title={b.badge_key}>
-                    <BadgeShield badgeKey={b.badge_key} size={28} />
+                    <BadgeShield badgeKey={b.badge_key} size="sm" showLabel={false} />
                   </div>
                 ))}
               </div>
