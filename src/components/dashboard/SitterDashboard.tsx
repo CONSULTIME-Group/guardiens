@@ -12,8 +12,11 @@ import {
   Home, Star, Mail, Award, CircleDot, ChevronRight, Search,
   Send as SendIcon, Eye, CheckCircle2, XCircle, MessageSquare,
   Calendar, Handshake, Newspaper, PawPrint, Zap, ShieldCheck,
-  UserCircle, Sparkles, MapPin,
+  UserCircle, MapPin, ExternalLink, Circle,
 } from "lucide-react";
+
+const capitalize = (name: string) =>
+  name ? name.charAt(0).toUpperCase() + name.slice(1).toLowerCase() : "";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { format, differenceInDays, differenceInHours } from "date-fns";
@@ -64,6 +67,7 @@ const SitterDashboard = () => {
   const [emergencyBlocked, setEmergencyBlocked] = useState<string | null>(null);
   const [showEmergencyForm, setShowEmergencyForm] = useState(false);
   const [cancelSitOpen, setCancelSitOpen] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
 
   // Onboarding checks for new sitters
   const [onboardingChecks, setOnboardingChecks] = useState({
@@ -155,6 +159,14 @@ const SitterDashboard = () => {
         }
       }
 
+      // Unread messages count
+      const { count } = await supabase
+        .from("messages")
+        .select("id", { count: "exact", head: true })
+        .neq("sender_id", user.id)
+        .is("read_at", null);
+      setUnreadCount(count || 0);
+
       setLoading(false);
     };
     load();
@@ -185,19 +197,35 @@ const SitterDashboard = () => {
       <div className="space-y-10">
         {/* Welcome card with checklist */}
         <div className="rounded-2xl border-2 border-primary/20 bg-gradient-to-br from-primary/5 via-background to-accent/30 p-6 md:p-8 space-y-6">
-          <div className="flex items-start gap-4">
-            <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-              <Sparkles className="h-6 w-6 text-primary" />
-            </div>
-            <div>
+          <div>
+            <div className="flex items-center justify-between">
               <h1 className="font-heading text-xl md:text-2xl font-bold">
-                Bienvenue{user?.firstName ? `, ${user.firstName}` : ""} ! 🎉
+                Bienvenue{user?.firstName ? `, ${capitalize(user.firstName)}` : ""}
               </h1>
-              <p className="text-sm text-muted-foreground mt-1">
-                Voici vos premières étapes pour décrocher votre première garde :
-              </p>
+              <Link
+                to={`/gardiens/${user?.id}`}
+                className="text-xs text-primary hover:underline flex items-center gap-1"
+              >
+                Voir mon profil public <ExternalLink className="h-3 w-3" />
+              </Link>
             </div>
+            <p className="text-sm text-muted-foreground mt-1">
+              Voici tes prochaines étapes pour vivre ta première garde.
+            </p>
           </div>
+
+          {/* Unread messages banner */}
+          {unreadCount > 0 && (
+            <Link to="/messagerie" className="flex items-center justify-between bg-primary/5 border border-primary/20 rounded-xl px-4 py-3">
+              <div className="flex items-center gap-2">
+                <MessageSquare className="h-4 w-4 text-primary" />
+                <span className="text-sm text-foreground">
+                  Tu as {unreadCount} message{unreadCount > 1 ? "s" : ""} non lu{unreadCount > 1 ? "s" : ""}
+                </span>
+              </div>
+              <span className="text-sm text-primary hover:underline">Voir →</span>
+            </Link>
+          )}
 
           <div className="space-y-2">
             <ChecklistItem
@@ -212,7 +240,7 @@ const SitterDashboard = () => {
             />
             <ChecklistItem
               done={false}
-              label="Trouver ma première garde"
+              label="Découvre les gardes disponibles"
               to="/search"
             />
             <div className="flex items-center gap-3 p-3 rounded-xl bg-card border border-border">
@@ -243,10 +271,11 @@ const SitterDashboard = () => {
           {nearbyListings.length === 0 ? (
             <EmptyCard
               icon={Search}
-              text="Pas encore d'annonce dans votre zone"
-              hint="Activez le mode Disponible pour être contacté directement par les propriétaires !"
-              cta="Explorer les annonces"
+              text="Pas encore d'annonce dans ta zone"
+              hint="Active le mode disponible pour être contacté directement par les proprios."
+              cta="Explorer les annonces →"
               to="/search"
+              outlineBtn
             />
           ) : (
             <div className="grid gap-3 sm:grid-cols-2">
@@ -274,17 +303,38 @@ const SitterDashboard = () => {
   return (
     <div className="space-y-10">
       {/* Header */}
-      <div>
-        <h1 className="font-heading text-2xl md:text-3xl font-bold">
-          Bonjour{user?.firstName ? `, ${user.firstName}` : ""} 👋
-        </h1>
-        <p className="text-sm text-muted-foreground mt-1">
-          {ongoingSit
-            ? `Garde en cours chez ${ongoingSit.ownerName || "…"} — ${ongoingSit.daysLeft} jour${ongoingSit.daysLeft > 1 ? "s" : ""} restant${ongoingSit.daysLeft > 1 ? "s" : ""}`
-            : "Votre tableau de bord gardien"
-          }
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="font-heading text-2xl md:text-3xl font-bold">
+            Bonjour{user?.firstName ? `, ${capitalize(user.firstName)}` : ""} 👋
+          </h1>
+          <p className="text-sm text-muted-foreground mt-1">
+            {ongoingSit
+              ? `Garde en cours chez ${ongoingSit.ownerName || "…"} — ${ongoingSit.daysLeft} jour${ongoingSit.daysLeft > 1 ? "s" : ""} restant${ongoingSit.daysLeft > 1 ? "s" : ""}`
+              : "Ton tableau de bord gardien"
+            }
+          </p>
+        </div>
+        <Link
+          to={`/gardiens/${user?.id}`}
+          className="text-xs text-primary hover:underline flex items-center gap-1"
+        >
+          Voir mon profil public <ExternalLink className="h-3 w-3" />
+        </Link>
       </div>
+
+      {/* Unread messages banner */}
+      {unreadCount > 0 && (
+        <Link to="/messagerie" className="flex items-center justify-between bg-primary/5 border border-primary/20 rounded-xl px-4 py-3">
+          <div className="flex items-center gap-2">
+            <MessageSquare className="h-4 w-4 text-primary" />
+            <span className="text-sm text-foreground">
+              Tu as {unreadCount} message{unreadCount > 1 ? "s" : ""} non lu{unreadCount > 1 ? "s" : ""}
+            </span>
+          </div>
+          <span className="text-sm text-primary hover:underline">Voir →</span>
+        </Link>
+      )}
 
       {/* Ongoing sit banner */}
       {ongoingSit && (
@@ -439,7 +489,7 @@ const SitterDashboard = () => {
         <Link to="/search" className="text-xs text-primary hover:underline font-medium">Voir tout →</Link>
       }>
         {nearbyListings.length === 0 ? (
-          <EmptyCard icon={Search} text="Pas encore d'annonce dans votre zone" hint="Activez le mode Disponible pour être contacté directement" cta="Explorer les annonces" to="/search" />
+          <EmptyCard icon={Search} text="Pas encore d'annonce dans ta zone" hint="Active le mode disponible pour être contacté directement par les proprios." cta="Explorer les annonces →" to="/search" outlineBtn />
         ) : (
           <div className="grid gap-3 sm:grid-cols-2">
             {nearbyListings.map(sit => <ListingCard key={sit.id} sit={sit} />)}
@@ -589,7 +639,7 @@ const ArticleCards = ({ articles }: { articles: any[] }) => {
   return (
     <div className="flex gap-3 overflow-x-auto pb-1 -mx-1 px-1">
       {articles.map((a: any) => (
-        <Link key={a.id} to={`/actualites/${a.slug}`} className="flex-shrink-0 w-64 rounded-xl border border-border bg-card overflow-hidden hover:shadow-md transition-shadow">
+        <a key={a.id} href={`/actualites/${a.slug}`} className="flex-shrink-0 w-64 rounded-xl border border-border bg-card overflow-hidden hover:shadow-md transition-shadow cursor-pointer">
           {a.cover_image_url ? (
             <img src={a.cover_image_url} alt="" className="w-full h-28 object-cover" />
           ) : (
@@ -601,7 +651,7 @@ const ArticleCards = ({ articles }: { articles: any[] }) => {
             <p className="text-sm font-semibold line-clamp-2">{a.title}</p>
             <p className="text-xs text-muted-foreground line-clamp-1 mt-1">{a.excerpt}</p>
           </div>
-        </Link>
+        </a>
       ))}
     </div>
   );
@@ -609,18 +659,15 @@ const ArticleCards = ({ articles }: { articles: any[] }) => {
 
 const EmergencyProgress = () => {
   const { user } = useAuth();
-  const [checks, setChecks] = useState<{ completedSits: number; avgRating: number; recentCancellations: number; identityVerified: boolean } | null>(null);
+  const [checks, setChecks] = useState<{ completedSits: number; avgRating: number; cancellations: number; identityVerified: boolean; hasSubscription: boolean } | null>(null);
 
   useEffect(() => {
     if (!user) return;
     const load = async () => {
-      const sixMonthsAgo = new Date();
-      sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
-      const [appsRes, reviewsRes, profileRes, cancellationsRes] = await Promise.all([
+      const [appsRes, reviewsRes, profileRes] = await Promise.all([
         supabase.from("applications").select("id, sit:sits!inner(status)").eq("sitter_id", user.id).eq("status", "accepted"),
         supabase.from("reviews").select("overall_rating").eq("reviewee_id", user.id).eq("published", true),
-        supabase.from("profiles").select("identity_verified").eq("id", user.id).single(),
-        supabase.from("sits").select("id").eq("cancelled_by", user.id).gte("cancelled_at", sixMonthsAgo.toISOString()),
+        supabase.from("profiles").select("identity_verified, cancellation_count").eq("id", user.id).single(),
       ]);
       const completedSits = (appsRes.data || []).filter((a: any) => a.sit?.status === "completed").length;
       const reviews = reviewsRes.data || [];
@@ -628,8 +675,9 @@ const EmergencyProgress = () => {
       setChecks({
         completedSits,
         avgRating: Math.round(avgRating * 10) / 10,
-        recentCancellations: cancellationsRes.data?.length || 0,
+        cancellations: profileRes.data?.cancellation_count || 0,
         identityVerified: profileRes.data?.identity_verified || false,
+        hasSubscription: false, // TODO: check subscription
       });
     };
     load();
@@ -637,37 +685,86 @@ const EmergencyProgress = () => {
 
   if (!checks) return null;
 
-  const items = [
-    { label: `Gardes : ${checks.completedSits}/5`, ok: checks.completedSits >= 5 },
-    { label: `Note : ${checks.avgRating || "—"}/4.7`, ok: checks.avgRating >= 4.7 },
-    { label: `Annulations (6 mois) : ${checks.recentCancellations}`, ok: checks.recentCancellations === 0 },
-    { label: "ID vérifiée", ok: checks.identityVerified },
+  const conditions = [
+    {
+      label: `5 gardes réalisées sur Guardiens`,
+      sublabel: `${checks.completedSits}/5 gardes`,
+      ok: checks.completedSits >= 5,
+      progress: checks.completedSits < 5 ? (checks.completedSits / 5) * 100 : undefined,
+    },
+    {
+      label: "Note moyenne ≥ 4.7/5",
+      sublabel: checks.avgRating > 0 ? `★ ${checks.avgRating}/5` : "Pas encore de note — réalise ta première garde",
+      ok: checks.avgRating >= 4.7,
+    },
+    {
+      label: "Aucune annulation de garde",
+      sublabel: checks.cancellations > 0 ? `${checks.cancellations} annulation${checks.cancellations > 1 ? "s" : ""} enregistrée${checks.cancellations > 1 ? "s" : ""}` : undefined,
+      ok: checks.cancellations === 0,
+      isError: checks.cancellations > 0,
+    },
+    {
+      label: "Identité vérifiée",
+      ok: checks.identityVerified,
+    },
+    {
+      label: "Abonnement actif",
+      ok: checks.hasSubscription,
+    },
   ];
 
-  const remaining = Math.max(0, 5 - checks.completedSits);
+  const doneCount = conditions.filter(c => c.ok).length;
+  const allDone = doneCount === 5;
+
+  if (allDone) {
+    return (
+      <div className="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-2xl p-4 flex items-center gap-3">
+        <Zap className="h-5 w-5 text-amber-600 dark:text-amber-400 shrink-0" />
+        <div className="flex-1">
+          <p className="text-sm font-semibold text-amber-800 dark:text-amber-200">Tu es éligible au statut Gardien d'urgence !</p>
+        </div>
+        <Link to="/mon-profil#urgence" className="bg-amber-500 text-white rounded-full px-4 py-2 text-sm hover:bg-amber-600 transition-colors shrink-0">
+          Activer le statut →
+        </Link>
+      </div>
+    );
+  }
 
   return (
-    <div className="rounded-xl border border-border bg-card p-5 space-y-3">
-      <div className="flex items-center gap-2.5">
-        <span className="inline-flex items-center justify-center h-8 w-8 rounded-full bg-muted">
-          <Zap className="h-4 w-4 text-amber-500" />
-        </span>
-        <div>
-          <p className="font-heading font-semibold text-sm">Gardien d'urgence</p>
-          <p className="text-xs text-muted-foreground">Le plus haut niveau de confiance sur Guardiens</p>
+    <div className="rounded-xl border border-border bg-card p-5 space-y-4">
+      <div>
+        <p className="text-sm font-semibold text-foreground mb-1">Statut Gardien d'urgence</p>
+        <p className="text-xs text-muted-foreground mb-4">
+          Les gardiens d'urgence sont contactés en priorité pour les gardes urgentes.
+        </p>
+        <p className="text-xs text-muted-foreground mb-3">{doneCount}/5 conditions remplies</p>
+        <div className="h-2 rounded-full bg-muted overflow-hidden">
+          <div className="h-full bg-primary rounded-full transition-all duration-500" style={{ width: `${(doneCount / 5) * 100}%` }} />
         </div>
       </div>
-      <div className="space-y-2">
-        {items.map((item, i) => (
-          <div key={i} className="flex items-center gap-2 text-sm">
-            {item.ok ? <CheckCircle2 className="h-4 w-4 text-green-500 shrink-0" /> : <XCircle className="h-4 w-4 text-red-400 shrink-0" />}
-            <span className={item.ok ? "text-foreground" : "text-muted-foreground"}>{item.label}</span>
+      <div className="space-y-1">
+        {conditions.map((c, i) => (
+          <div key={i}>
+            <div className="flex items-center gap-2 py-1.5">
+              {c.ok
+                ? <CheckCircle2 className="h-4 w-4 text-primary shrink-0" />
+                : <Circle className="h-4 w-4 text-muted-foreground shrink-0" />
+              }
+              <span className={`text-sm ${c.ok ? "line-through text-muted-foreground" : "text-foreground"}`}>
+                {c.label}
+              </span>
+            </div>
+            {c.sublabel && !c.ok && (
+              <p className={`text-xs ml-6 ${c.isError ? "text-destructive/70" : "text-muted-foreground"}`}>{c.sublabel}</p>
+            )}
+            {c.progress !== undefined && (
+              <div className="ml-6 h-1 w-full rounded-full bg-muted mt-1">
+                <div className="h-full bg-primary rounded-full" style={{ width: `${c.progress}%` }} />
+              </div>
+            )}
           </div>
         ))}
       </div>
-      {remaining > 0 && (
-        <p className="text-xs text-muted-foreground">Encore {remaining} garde{remaining > 1 ? "s" : ""} pour débloquer le statut !</p>
-      )}
       <Link to="/gardien-urgence" className="text-xs text-primary hover:underline inline-block">En savoir plus →</Link>
     </div>
   );
@@ -685,7 +782,7 @@ const DashSection = ({ title, action, children }: {
   </div>
 );
 
-const EmptyCard = ({ icon: Icon, text, cta, to, hint }: { icon?: React.ElementType; text: string; cta?: string; to?: string; hint?: string }) => (
+const EmptyCard = ({ icon: Icon, text, cta, to, hint, outlineBtn }: { icon?: React.ElementType; text: string; cta?: string; to?: string; hint?: string; outlineBtn?: boolean }) => (
   <div className="p-8 rounded-xl border border-dashed border-border bg-accent/30 text-center space-y-3">
     {Icon && (
       <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
@@ -696,7 +793,17 @@ const EmptyCard = ({ icon: Icon, text, cta, to, hint }: { icon?: React.ElementTy
       <p className="text-sm font-medium text-foreground/80">{text}</p>
       {hint && <p className="text-xs text-muted-foreground mt-1.5 max-w-xs mx-auto">{hint}</p>}
     </div>
-    {cta && to && <Link to={to}><Button size="sm" className="mt-1">{cta}</Button></Link>}
+    {cta && to && (
+      <Link to={to}>
+        {outlineBtn ? (
+          <span className="inline-block border border-border rounded-full px-4 py-2 text-sm text-foreground hover:border-primary transition-colors mt-1">
+            {cta}
+          </span>
+        ) : (
+          <Button size="sm" className="mt-1">{cta}</Button>
+        )}
+      </Link>
+    )}
   </div>
 );
 
