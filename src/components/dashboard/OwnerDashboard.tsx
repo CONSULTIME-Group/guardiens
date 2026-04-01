@@ -1,15 +1,13 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import OnboardingWelcome from "./OnboardingWelcome";
 import NearbyEmergencySitters from "./NearbyEmergencySitters";
-import MissionsNearbySection from "./MissionsNearbySection";
 import ResourceSection from "@/components/shared/ResourceSection";
 import type { ResourceItem } from "@/components/shared/ResourceCard";
 import {
-  Calendar, Star, Megaphone, Heart, ChevronRight, Plus, PawPrint,
-  Users, Handshake, Newspaper, Home,
+  ChevronRight, Plus, PawPrint, Users, Handshake,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { format, differenceInDays } from "date-fns";
@@ -23,24 +21,19 @@ const speciesLabel: Record<string, string> = {
   farm_animal: "Animal de ferme", nac: "NAC",
 };
 
-/* ── Count-up hook ── */
-const useCountUp = (target: number, duration = 600) => {
-  const [value, setValue] = useState(0);
-  useEffect(() => {
-    if (target === 0) { setValue(0); return; }
-    const start = performance.now();
-    const animate = (now: number) => {
-      const progress = Math.min((now - start) / duration, 1);
-      setValue(Math.round(progress * target));
-      if (progress < 1) requestAnimationFrame(animate);
-    };
-    requestAnimationFrame(animate);
-  }, [target, duration]);
-  return value;
+const capitalize = (s: string | null | undefined) => {
+  if (!s) return "";
+  return s.charAt(0).toUpperCase() + s.slice(1).toLowerCase();
+};
+
+const capitalizeWords = (s: string | null | undefined) => {
+  if (!s) return "";
+  return s.split(" ").map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(" ");
 };
 
 const OwnerDashboard = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [sits, setSits] = useState<any[]>([]);
   const [pets, setPets] = useState<any[]>([]);
   const [recentApps, setRecentApps] = useState<any[]>([]);
@@ -51,6 +44,7 @@ const OwnerDashboard = () => {
   const [verificationStatus, setVerificationStatus] = useState("not_submitted");
   const [missionMetrics, setMissionMetrics] = useState({ total: 0, completed: 0 });
   const [sitterBadges, setSitterBadges] = useState<Record<string, { badge_key: string; count: number }[]>>({});
+  const [sitterProfiles, setSitterProfiles] = useState<Record<string, any>>({});
   const [trustedSitterCount, setTrustedSitterCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [showOnboarding, setShowOnboarding] = useState(false);
@@ -75,7 +69,6 @@ const OwnerDashboard = () => {
       setSmallMissions(missionsRes.data || []);
       setVerificationStatus((profileRes.data as any)?.identity_verification_status || "not_submitted");
 
-      // Onboarding checks
       const fullProfileRes = await supabase.from("profiles").select("first_name, avatar_url, bio, identity_verification_status").eq("id", user.id).single();
       const p = fullProfileRes.data;
       const hasName = !!(p?.first_name);
@@ -91,7 +84,6 @@ const OwnerDashboard = () => {
         setShowOnboarding(true);
       }
 
-      // Pets
       const propIds = (propsRes.data || []).map((p: any) => p.id);
       if (propIds.length > 0) {
         const { data } = await supabase.from("pets").select("*").in("property_id", propIds);
@@ -99,24 +91,30 @@ const OwnerDashboard = () => {
         setOnboardingChecks(prev => ({ ...prev, hasPets: (data || []).length > 0 }));
       }
 
-      // Recent applications
       const sitIds = sitsData.map((s: any) => s.id);
       if (sitIds.length > 0) {
         const { data: apps } = await supabase
           .from("applications")
-          .select("*, sitter:profiles!applications_sitter_id_fkey(id, first_name, avatar_url), sit:sits(title, start_date, end_date)")
+          .select("*, sitter:profiles!applications_sitter_id_fkey(id, first_name, avatar_url, identity_verified, completed_sits_count), sit:sits(title, start_date, end_date)")
           .in("sit_id", sitIds)
           .order("created_at", { ascending: false })
           .limit(3);
         setRecentApps(apps || []);
 
-        // Load badges for sitters in applications
+        // Build sitter profiles lookup
+        const profiles: Record<string, any> = {};
+        (apps || []).forEach((a: any) => {
+          if (a.sitter?.id) profiles[a.sitter.id] = a.sitter;
+        });
+        setSitterProfiles(profiles);
+
+        // Load sitter reviews for avg rating
         const sitterIds = [...new Set((apps || []).map((a: any) => a.sitter?.id).filter(Boolean))];
         if (sitterIds.length > 0) {
-          const { data: badgeData } = await supabase
-            .from("badge_attributions")
-            .select("receiver_id, badge_key")
-            .in("receiver_id", sitterIds);
+          const [{ data: badgeData }, { data: sitterReviews }] = await Promise.all([
+            supabase.from("badge_attributions").select("receiver_id, badge_key").in("receiver_id", sitterIds),
+            supabase.from("reviews").select("reviewee_id, overall_rating").in("reviewee_id", sitterIds).eq("published", true),
+          ]);
           const grouped: Record<string, Record<string, number>> = {};
           (badgeData || []).forEach((b: any) => {
             if (!grouped[b.receiver_id]) grouped[b.receiver_id] = {};
@@ -127,10 +125,25 @@ const OwnerDashboard = () => {
             result[uid] = Object.entries(badges).map(([k, c]) => ({ badge_key: k, count: c }));
           });
           setSitterBadges(result);
+
+          // Compute avg rating per sitter
+          const ratingMap: Record<string, number[]> = {};
+          (sitterReviews || []).forEach((r: any) => {
+            if (!ratingMap[r.reviewee_id]) ratingMap[r.reviewee_id] = [];
+            ratingMap[r.reviewee_id].push(r.overall_rating);
+          });
+          setSitterProfiles(prev => {
+            const updated = { ...prev };
+            Object.entries(ratingMap).forEach(([id, ratings]) => {
+              if (updated[id]) {
+                updated[id] = { ...updated[id], avgNote: Math.round((ratings.reduce((a, b) => a + b, 0) / ratings.length) * 10) / 10 };
+              }
+            });
+            return updated;
+          });
         }
       }
 
-      // Trusted sitters (2+ completed sits with same sitter)
       const completedSitsData = sitsData.filter((s: any) => s.status === "completed");
       const sitterSitCounts: Record<string, number> = {};
       completedSitsData.forEach((s: any) => {
@@ -138,10 +151,8 @@ const OwnerDashboard = () => {
           .filter((a: any) => a.status === "accepted")
           .forEach((a: any) => { sitterSitCounts[a.sitter_id] = (sitterSitCounts[a.sitter_id] || 0) + 1; });
       });
-      const trustedCount = Object.values(sitterSitCounts).filter(c => c >= 2).length;
-      setTrustedSitterCount(trustedCount);
+      setTrustedSitterCount(Object.values(sitterSitCounts).filter(c => c >= 2).length);
 
-      // My own missions + count all
       const [myMissionsDataRes, allMyMissionsCountRes] = await Promise.all([
         supabase.from("small_missions").select("id, title, category, status, created_at, small_mission_responses(id, status)").eq("user_id", user.id).order("created_at", { ascending: false }).limit(3),
         supabase.from("small_missions").select("id, status").eq("user_id", user.id),
@@ -175,301 +186,390 @@ const OwnerDashboard = () => {
   const avgRating = reviews.length > 0 ? Math.round((reviews.reduce((s, r) => s + r.overall_rating, 0) / reviews.length) * 10) / 10 : 0;
   const pendingAppCount = recentApps.filter(a => a.status === "pending").length;
 
-  /* ── Ongoing sit ── */
   const now = new Date();
   const ongoingSit = sits.find(s => s.status === "confirmed" && s.start_date && new Date(s.start_date) <= now && s.end_date && new Date(s.end_date) >= now);
 
-  /* ── Subtitle ── */
   const getSubtitle = () => {
-    // Garde confirmée en cours
     if (ongoingSit) {
       const daysLeft = ongoingSit.end_date ? differenceInDays(new Date(ongoingSit.end_date), now) : null;
-      return { text: `Votre garde est en cours${daysLeft !== null ? ` — fin dans ${daysLeft} jour${daysLeft > 1 ? "s" : ""}` : ""}.`, to: "" };
+      return `Votre garde est en cours${daysLeft !== null ? ` — fin dans ${daysLeft} jour${daysLeft > 1 ? "s" : ""}` : ""}.`;
     }
-    // Garde confirmée à venir
     const nextConfirmed = sits.find(s => s.status === "confirmed" && s.start_date && new Date(s.start_date) > now);
     if (nextConfirmed) {
       const daysUntil = differenceInDays(new Date(nextConfirmed.start_date), now);
-      return { text: `Votre prochaine garde est dans ${daysUntil} jour${daysUntil > 1 ? "s" : ""}.`, to: "" };
+      return `Votre prochaine garde commence dans ${daysUntil} jour${daysUntil > 1 ? "s" : ""}.`;
     }
-    // Candidature non lue
-    if (pendingAppCount > 0) return { text: "Vous avez une nouvelle candidature à examiner.", to: "" };
-    // Défaut
-    return { text: "Trouvez le gardien idéal pour vos animaux.", to: "" };
+    if (pendingAppCount > 0) return "Vous avez une nouvelle candidature à examiner.";
+    return "Trouvez le gardien idéal pour vos animaux.";
   };
-  const subtitle = getSubtitle();
 
-  /* ── Banner ── */
   const getBanner = () => {
     if (verificationStatus !== "verified" && verificationStatus !== "pending")
-      return { bg: "bg-[#FEF3C7] border-amber-200", text: "text-amber-800", label: "Vérifier mon identité", to: "/settings#verification" };
+      return { bg: "bg-amber-50 border-amber-200", text: "text-amber-800", label: "Vérifier mon identité", to: "/settings#verification" };
     if (ongoingSit) {
       const petNames = pets.map(p => p.name).filter(Boolean).join(", ");
-      return { bg: "bg-[#D8F3DC] border-green-200", text: "text-green-800", label: `Garde en cours — un gardien veille sur ${petNames || "vos animaux"}`, to: `/sits/${ongoingSit.id}` };
+      return { bg: "bg-green-50 border-green-200", text: "text-green-800", label: `Garde en cours — un gardien veille sur ${petNames || "vos animaux"}`, to: `/sits/${ongoingSit.id}` };
     }
     if (pendingAppCount > 0)
-      return { bg: "bg-[#DBEAFE] border-blue-200", text: "text-blue-800", label: `Vous avez ${pendingAppCount} nouvelle${pendingAppCount > 1 ? "s" : ""} candidature${pendingAppCount > 1 ? "s" : ""}`, to: "/sits" };
+      return { bg: "bg-blue-50 border-blue-200", text: "text-blue-800", label: `Vous avez ${pendingAppCount} nouvelle${pendingAppCount > 1 ? "s" : ""} candidature${pendingAppCount > 1 ? "s" : ""}`, to: "/sits" };
     return null;
   };
   const banner = getBanner();
 
-  /* ── Next sit per pet ── */
   const getNextSitForPet = (pet: any) => {
     return sits
       .filter(s => s.property_id === pet.property_id && ["published", "confirmed"].includes(s.status) && s.start_date && new Date(s.start_date) >= now)
       .sort((a, b) => new Date(a.start_date).getTime() - new Date(b.start_date).getTime())[0];
   };
 
-  /* ── CTA logic ── */
   const getCTA = () => {
     if (activeSits.length === 0)
       return { text: "Publiez votre première annonce — c'est gratuit et ça prend 5 minutes", cta: "Publier une annonce", to: "/sits/create" };
     const noAppSit = activeSits.find(s => s.status === "published" && (!s.applications || s.applications.length === 0) && differenceInDays(now, new Date(s.created_at)) >= 7);
     if (noAppSit)
-      return { text: "Votre annonce n'a pas encore de candidature. Enrichissez votre profil pour attirer les gardiens →", cta: "Voir mon profil", to: "/owner-profile" };
+      return { text: "Votre annonce n'a pas encore de candidature. Enrichissez votre profil pour attirer les gardiens.", cta: "Voir mon profil", to: "/owner-profile" };
     return null;
   };
   const cta = getCTA();
 
   return (
     <div className="space-y-8">
-      {/* 1. Header */}
-      <div>
-      <h1 className="font-heading text-2xl md:text-3xl font-bold">
-          Bonjour{user?.firstName ? `, ${user.firstName.charAt(0).toUpperCase() + user.firstName.slice(1).toLowerCase()}` : ""} !
-        </h1>
-        <span className="text-xs uppercase tracking-widest text-muted-foreground font-sans">
-          Espace propriétaire
-        </span>
-        {subtitle.to ? (
-          <Link to={subtitle.to} className="text-sm text-primary hover:underline mt-1 inline-block">{subtitle.text}</Link>
-        ) : (
-          <p className="text-sm text-muted-foreground mt-1">{subtitle.text}</p>
-        )}
+      {/* ═══ 1. HEADER VERT ═══ */}
+      <div className="relative overflow-hidden bg-primary rounded-b-3xl px-10 pt-8 pb-6 mb-8">
+        <div className="absolute right-0 top-0 opacity-[0.06] pointer-events-none">
+          <svg width="280" height="200" viewBox="0 0 280 200">
+            <ellipse cx="200" cy="100" rx="160" ry="100" fill="white"/>
+            <rect x="80" y="50" width="100" height="90" fill="white" rx="6"/>
+            <polygon points="80,50 130,15 180,50" fill="white"/>
+          </svg>
+        </div>
+        <div className="relative z-10 flex items-end justify-between">
+          <div>
+            <p className="text-xs uppercase tracking-[3px] text-white/60 font-sans mb-1">
+              Espace propriétaire
+            </p>
+            <h1 className="text-4xl font-heading font-bold text-white leading-tight mb-1">
+              Bonjour{user?.firstName ? `, ${capitalize(user.firstName)}` : ""} !
+            </h1>
+            <p className="text-sm text-white/75 font-sans">
+              {getSubtitle()}
+            </p>
+          </div>
+          <button
+            onClick={() => navigate("/sits/create")}
+            className="shrink-0 bg-white text-primary rounded-xl px-5 py-2.5 text-sm font-medium font-sans hover:bg-white/90 transition-colors"
+          >
+            + Publier une annonce
+          </button>
+        </div>
       </div>
 
-      {/* 2. Banner */}
+      {/* ═══ Banner ═══ */}
       {banner && (
-        <Link to={banner.to} className={`block p-4 rounded-xl border ${banner.bg} hover:shadow-md transition-shadow`}>
-          <p className={`text-sm font-medium ${banner.text}`}>{banner.label}</p>
+        <Link to={banner.to} className={`block px-8 -mt-4 mb-4`}>
+          <div className={`p-4 rounded-xl border ${banner.bg} hover:shadow-md transition-shadow`}>
+            <p className={`text-sm font-medium ${banner.text}`}>{banner.label}</p>
+          </div>
         </Link>
       )}
 
-      {/* 3. Mes animaux */}
-      <DashSection title="Mes animaux" action={
-        <Link to="/owner-profile" className="text-xs text-primary hover:underline font-medium">Gérer →</Link>
-      }>
-        {pets.length === 0 ? (
-          <EmptyCard icon={PawPrint} text="Aucun animal enregistré" hint="Ajoutez vos compagnons pour attirer les bons gardiens" cta="Ajouter un animal" to="/owner-profile" />
-        ) : (
-          <div className="space-y-2">
-            {pets.map(pet => {
-              const nextSit = getNextSitForPet(pet);
-              const daysUntil = nextSit?.start_date ? differenceInDays(new Date(nextSit.start_date), now) : null;
-              return (
-                <div key={pet.id} className="flex items-center gap-3 p-3 rounded-xl bg-card border border-border">
-                  {pet.photo_url ? (
-                    <img src={pet.photo_url} alt={pet.name} className="w-[50px] h-[50px] rounded-full object-cover shrink-0" />
-                  ) : (
-                    <div className="w-[50px] h-[50px] rounded-full bg-accent flex items-center justify-center text-lg shrink-0">🐾</div>
-                  )}
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium">{pet.name ? pet.name.charAt(0).toUpperCase() + pet.name.slice(1).toLowerCase() : "Sans nom"}
-                      <span className="text-xs text-muted-foreground ml-2">
-                        {speciesLabel[pet.species] || pet.species}{pet.breed ? ` · ${pet.breed.split(" ").map((w: string) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(" ")}` : ""}{pet.age ? ` · ${pet.age} an${pet.age > 1 ? "s" : ""}` : ""}
-                      </span>
-                    </p>
-                    {nextSit ? (
-                      nextSit.status === "confirmed" ? (
-                        <Link to={`/sits/${nextSit.id}`} className="text-xs text-primary hover:underline flex items-center gap-1 mt-0.5">
-                          <Calendar className="h-3 w-3" />
-                          Prochaine garde {daysUntil !== null && daysUntil >= 0
-                            ? daysUntil === 0 ? "aujourd'hui" : `dans ${daysUntil} jour${daysUntil > 1 ? "s" : ""}`
-                            : ""}
-                        </Link>
-                      ) : (
-                        <p className="text-xs text-muted-foreground mt-0.5">Annonce en cours</p>
-                      )
-                    ) : (
-                      <p className="text-xs text-muted-foreground mt-0.5">{""}</p>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
-            <Link to="/owner-profile" className="flex items-center gap-2 px-3 py-2 text-xs text-primary hover:underline">
-              <Plus className="h-3.5 w-3.5" /> Ajouter un animal
-            </Link>
-          </div>
-        )}
-      </DashSection>
-
-      {/* 4. Stat cards */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-        <StatCard icon={Calendar} iconColor="text-primary" label="Gardes réalisées" value={completedSits.length} delay={0} />
-        <StatCard icon={Star} iconColor="text-amber-500" label="Note moyenne" value={avgRating} delay={100} isDecimal emptyMsg={avgRating === 0 ? "Note moyenne" : undefined} />
-        <StatCard icon={Megaphone} iconColor="text-blue-500" label="Annonces actives" value={activeSits.length} delay={200} />
-        <StatCard icon={Heart} iconColor="text-pink-500" label="Gardiens de confiance" value={trustedSitterCount} delay={300} />
-        <StatCard icon={Handshake} iconColor="text-primary" label="Petites missions" value={missionMetrics.total} delay={400} subLabel={missionMetrics.completed > 0 ? `${missionMetrics.completed} terminée${missionMetrics.completed > 1 ? "s" : ""}` : undefined} />
+      {/* ═══ 2. STATS 4 COLONNES ═══ */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 px-8">
+        <div className="bg-card border border-border rounded-2xl p-4 text-center">
+          <p className="text-3xl font-heading font-bold text-foreground mb-1">{completedSits.length}</p>
+          <p className="text-xs uppercase tracking-wider text-muted-foreground font-sans">Gardes réalisées</p>
+        </div>
+        <div className="bg-card border border-border rounded-2xl p-4 text-center">
+          {avgRating > 0 ? (
+            <p className="text-3xl font-heading font-bold text-foreground mb-1">{avgRating} <span className="text-amber-500">&#9733;</span></p>
+          ) : (
+            <p className="text-sm text-muted-foreground mb-1 mt-2">Pas encore</p>
+          )}
+          <p className="text-xs uppercase tracking-wider text-muted-foreground font-sans">Note moyenne</p>
+        </div>
+        <div className="bg-card border border-border rounded-2xl p-4 text-center">
+          <p className="text-3xl font-heading font-bold text-foreground mb-1">{activeSits.length}</p>
+          <p className="text-xs uppercase tracking-wider text-muted-foreground font-sans">Annonces actives</p>
+        </div>
+        <div className="bg-card border border-border rounded-2xl p-4 text-center">
+          <p className="text-3xl font-heading font-bold text-foreground mb-1">{trustedSitterCount}</p>
+          <p className="text-xs uppercase tracking-wider text-muted-foreground font-sans">Gardiens de confiance</p>
+        </div>
       </div>
 
-      {/* 5. Candidatures reçues */}
-      <DashSection title="Candidatures récentes" action={
-        recentApps.length > 0 ? <Link to="/sits" className="text-xs text-primary hover:underline font-medium">Voir toutes mes annonces →</Link> : undefined
-      }>
-        {recentApps.length === 0 ? (
-          <EmptyCard icon={Users} text="Pas encore de candidature reçue" hint="Publiez une annonce et les gardiens viendront à vous" cta="Publier une annonce" to="/sits/create" />
-        ) : (
-          <div className="space-y-2">
-            {recentApps.map(app => (
-              <Link key={app.id} to={`/sits/${app.sit_id}`} className="flex items-center gap-3 p-3 rounded-xl bg-card border border-border hover:bg-accent/50 transition-colors">
-                {app.sitter?.avatar_url ? (
-                  <img src={app.sitter.avatar_url} alt="" className="w-[50px] h-[50px] rounded-full object-cover shrink-0" />
-                ) : (
-                  <div className="w-[50px] h-[50px] rounded-full bg-muted flex items-center justify-center text-sm font-bold shrink-0">
-                    {app.sitter?.first_name?.charAt(0) || "?"}
-                  </div>
-                )}
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <p className="text-sm font-medium">{app.sitter?.first_name || "Gardien"}</p>
-                  </div>
-                  {app.sitter?.id && sitterBadges[app.sitter.id] && <TooltipProvider><div className="flex gap-1">{sitterBadges[app.sitter.id].slice(0, 2).map((b: any) => <BadgeShield key={b.badge_key} badgeKey={b.badge_key} count={b.count} size="sm" showLabel={false} />)}</div></TooltipProvider>}
-                  <p className="text-xs text-muted-foreground truncate mt-0.5">{app.sit?.title} · {app.sit?.start_date ? format(new Date(app.sit.start_date), "d MMM", { locale: fr }) : ""}</p>
-                </div>
-                <Button size="sm" variant="outline" className="shrink-0 text-xs">Voir</Button>
+      {/* ═══ 3. ANIMAUX 2 COLONNES ═══ */}
+      <div className="px-8">
+        <DashSection title="Mes animaux" action={
+          <Link to="/owner-profile" className="text-xs text-primary hover:underline font-medium">Gérer</Link>
+        }>
+          {pets.length === 0 ? (
+            <EmptyCard icon={PawPrint} text="Aucun animal enregistré" hint="Ajoutez vos compagnons pour attirer les bons gardiens" cta="Ajouter un animal" to="/owner-profile" />
+          ) : (
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
+                {pets.map(pet => {
+                  const nextSit = getNextSitForPet(pet);
+                  return (
+                    <div key={pet.id} className="bg-card border border-border rounded-2xl p-4 flex items-center gap-3">
+                      <div className="w-11 h-11 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-lg shrink-0 overflow-hidden">
+                        {pet.photo_url ? (
+                          <img src={pet.photo_url} alt={pet.name} className="w-full h-full rounded-full object-cover" />
+                        ) : (
+                          pet.name ? pet.name[0].toUpperCase() : "?"
+                        )}
+                      </div>
+                      <div>
+                        <p className="text-sm font-semibold text-foreground">
+                          {capitalize(pet.name)}
+                        </p>
+                        <p className="text-xs text-muted-foreground font-sans">
+                          {speciesLabel[pet.species] || capitalize(pet.species)}
+                          {pet.breed ? ` · ${capitalizeWords(pet.breed)}` : ""}
+                          {pet.age ? ` · ${pet.age} an${pet.age > 1 ? "s" : ""}` : ""}
+                        </p>
+                        {nextSit ? (
+                          nextSit.status === "confirmed" ? (
+                            <span className="text-xs font-sans bg-primary/10 text-primary rounded-md px-2 py-0.5 mt-1 inline-block">
+                              Garde confirmée
+                            </span>
+                          ) : (
+                            <span className="text-xs font-sans bg-amber-50 text-amber-700 rounded-md px-2 py-0.5 mt-1 inline-block">
+                              Annonce en cours
+                            </span>
+                          )
+                        ) : null}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+              <Link to="/owner-profile" className="text-sm text-primary font-sans flex items-center gap-1 hover:underline">
+                <Plus className="h-3.5 w-3.5" /> Ajouter un animal
               </Link>
-            ))}
+            </>
+          )}
+        </DashSection>
+      </div>
+
+      {/* ═══ 4. CANDIDATURES ENRICHIES ═══ */}
+      <div className="px-8">
+        <DashSection title="Candidatures récentes" action={
+          recentApps.length > 0 ? <Link to="/sits" className="text-xs text-primary hover:underline font-medium">Voir toutes</Link> : undefined
+        }>
+          {recentApps.length === 0 ? (
+            <EmptyCard icon={Users} text="Pas encore de candidature reçue" hint="Publiez une annonce et les gardiens viendront à vous" cta="Publier une annonce" to="/sits/create" />
+          ) : (
+            <div className="space-y-3">
+              {recentApps.map(app => {
+                const sitter = sitterProfiles[app.sitter?.id] || app.sitter || {};
+                const isNew = app.status === "pending";
+                return (
+                  <div key={app.id} className="bg-card border border-border rounded-2xl p-4 flex items-center gap-4">
+                    <div className="w-11 h-11 rounded-full bg-primary/15 text-primary font-bold flex items-center justify-center text-base font-sans shrink-0 overflow-hidden">
+                      {sitter.avatar_url ? (
+                        <img src={sitter.avatar_url} alt="" className="w-full h-full rounded-full object-cover" />
+                      ) : (
+                        sitter.first_name?.charAt(0)?.toUpperCase() || "?"
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold text-foreground">
+                        {capitalize(sitter.first_name)}
+                      </p>
+                      <p className="text-xs text-muted-foreground font-sans">
+                        {app.sit?.title} {app.sit?.start_date ? `· ${format(new Date(app.sit.start_date), "d MMM", { locale: fr })}` : ""}
+                      </p>
+                      <div className="flex gap-2 mt-1.5 flex-wrap">
+                        {isNew && (
+                          <span className="text-xs font-sans bg-primary text-white rounded-full px-2 py-0.5">
+                            Nouvelle
+                          </span>
+                        )}
+                        {sitter.identity_verified && (
+                          <span className="text-xs font-sans border border-border rounded-full px-2 py-0.5 text-muted-foreground">
+                            ID vérifiée
+                          </span>
+                        )}
+                        {sitter.avgNote && (
+                          <span className="text-xs font-sans border border-border rounded-full px-2 py-0.5 text-muted-foreground">
+                            {sitter.avgNote} &#9733;
+                          </span>
+                        )}
+                      </div>
+                      {sitter.id && sitterBadges[sitter.id] && (
+                        <TooltipProvider>
+                          <div className="flex gap-1 mt-1">
+                            {sitterBadges[sitter.id].slice(0, 2).map((b: any) => (
+                              <BadgeShield key={b.badge_key} badgeKey={b.badge_key} count={b.count} size="sm" showLabel={false} />
+                            ))}
+                          </div>
+                        </TooltipProvider>
+                      )}
+                    </div>
+                    <button
+                      onClick={() => navigate(`/gardiens/${sitter.id}`)}
+                      className="shrink-0 border border-primary text-primary rounded-xl px-4 py-2 text-xs font-sans hover:bg-primary/5 transition-colors"
+                    >
+                      Voir le profil
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </DashSection>
+      </div>
+
+      {/* ═══ Contextual resources ═══ */}
+      <div className="px-8">
+        {(() => {
+          const annoncesCount = sits.length;
+          const gardesCount = completedSits.length;
+          let resTitle = "";
+          let resItems: ResourceItem[] = [];
+
+          if (annoncesCount === 0) {
+            resTitle = "Avant de publier votre première annonce";
+            resItems = [
+              { title: "Rédiger une bonne annonce", description: "Ce qui attire les bons gardiens en 48h.", href: "/actualites/rediger-bonne-annonce-house-sitting", icon: "maison" },
+              { title: "Choisir son gardien : les bons critères", description: "Ce qui compte, ce qui ne sert à rien.", href: "/actualites/choisir-gardien-bons-criteres", icon: "proprio" },
+              { title: "Préparer sa maison avant une garde", description: "Guide de la maison, sécurité, animaux.", href: "/actualites/preparer-maison-avant-garde", icon: "maison" },
+            ];
+          } else if (annoncesCount >= 1 && gardesCount === 0) {
+            resTitle = "Préparer votre première garde";
+            resItems = [
+              { title: "Accueillir son gardien", description: "Remise des clés, visite, jour du départ.", href: "/actualites/accueillir-gardien-bonnes-pratiques", icon: "proprio" },
+              { title: "Préparer sa maison avant une garde", description: "Ce qu'on oublie dans le guide de la maison.", href: "/actualites/preparer-maison-avant-garde", icon: "maison" },
+              { title: "Que faire si quelque chose se passe mal", description: "Animal malade, panne, gardien défaillant.", href: "/actualites/que-faire-probleme-pendant-garde", icon: "proprio" },
+            ];
+          } else if (gardesCount >= 1) {
+            resTitle = "Optimiser vos prochaines gardes";
+            resItems = [
+              { title: "Choisir son gardien : les bons critères", description: "Affinez votre sélection à chaque garde.", href: "/actualites/choisir-gardien-bons-criteres", icon: "proprio" },
+              { title: "Que faire si quelque chose se passe mal", description: "Animal malade, panne, gardien défaillant.", href: "/actualites/que-faire-probleme-pendant-garde", icon: "proprio" },
+              { title: "Accueillir son gardien", description: "Ce qui fait qu'un gardien prend soin de tout.", href: "/actualites/accueillir-gardien-bonnes-pratiques", icon: "proprio" },
+            ];
+          }
+
+          return resItems.length > 0 ? <ResourceSection title={resTitle} resources={resItems} /> : null;
+        })()}
+      </div>
+
+      {/* ═══ 6. BAS DE PAGE — 2 COLONNES ═══ */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 px-8">
+        {/* Colonne gauche — Mes petites missions */}
+        <div className="bg-card border border-border rounded-2xl p-5">
+          <div className="flex justify-between items-center mb-4">
+            <p className="text-sm font-semibold text-foreground">Mes petites missions</p>
+            <Link to="/petites-missions" className="text-xs text-primary font-sans hover:underline">Voir tout</Link>
           </div>
-        )}
-      </DashSection>
+          {myMissions.length === 0 ? (
+            <p className="text-xs text-muted-foreground font-sans italic text-center py-4">
+              Aucune mission pour le moment.
+            </p>
+          ) : (
+            myMissions.map((m: any) => {
+              const responseCount = m.small_mission_responses?.length || 0;
+              const isCompleted = m.status === "completed";
+              return (
+                <Link key={m.id} to={`/petites-missions/${m.id}`} className="flex items-center gap-3 py-2.5 border-b border-border last:border-0">
+                  <div className={`w-2 h-2 rounded-full shrink-0 ${isCompleted ? "bg-muted-foreground/30" : "bg-primary"}`} />
+                  <p className={`text-xs font-sans flex-1 ${isCompleted ? "text-muted-foreground line-through" : "text-foreground"}`}>
+                    {m.title}
+                  </p>
+                  <p className="text-xs text-muted-foreground font-sans shrink-0">
+                    {isCompleted ? "Terminée" : `${responseCount} réponse${responseCount > 1 ? "s" : ""}`}
+                  </p>
+                </Link>
+              );
+            })
+          )}
+        </div>
 
-      {/* Contextual resources */}
-      {(() => {
-        const annoncesCount = sits.length;
-        const gardesCount = completedSits.length;
-        let resTitle = "";
-        let resItems: ResourceItem[] = [];
+        {/* Colonne droite — Échanges */}
+        <div className="bg-card border border-border rounded-2xl p-5">
+          <div className="flex justify-between items-center mb-4">
+            <p className="text-sm font-semibold text-foreground">Échanges autour de vous</p>
+            <Link to="/petites-missions" className="text-xs text-primary font-sans hover:underline">Voir tout</Link>
+          </div>
+          <p className="text-xs text-muted-foreground font-sans mb-3">
+            Les échanges près de chez vous — en priorité ceux qui correspondent à vos compétences.
+          </p>
+          <div className="flex flex-col gap-2 mb-3">
+            <button
+              onClick={() => navigate("/petites-missions/creer")}
+              className="w-full bg-primary text-white rounded-xl py-2.5 text-xs font-sans font-medium"
+            >
+              Publier un besoin
+            </button>
+            <button
+              onClick={() => navigate("/petites-missions")}
+              className="w-full border border-primary text-primary rounded-xl py-2.5 text-xs font-sans font-medium"
+            >
+              Proposer mon aide
+            </button>
+          </div>
+          {smallMissions.length === 0 ? (
+            <p className="text-xs text-muted-foreground font-sans italic text-center">
+              Pas encore d'échange dans votre zone.
+            </p>
+          ) : (
+            smallMissions.map((m: any) => (
+              <Link key={m.id} to={`/petites-missions/${m.id}`} className="flex items-center gap-3 py-2.5 border-b border-border last:border-0">
+                <div className="w-2 h-2 rounded-full shrink-0 bg-primary" />
+                <p className="text-xs font-sans flex-1 text-foreground">{m.title}</p>
+                <p className="text-xs text-muted-foreground font-sans shrink-0">{m.city || ""}</p>
+              </Link>
+            ))
+          )}
+        </div>
+      </div>
 
-        if (annoncesCount === 0) {
-          resTitle = "Avant de publier votre première annonce";
-          resItems = [
-            { title: "Rédiger une bonne annonce", description: "Ce qui attire les bons gardiens en 48h.", href: "/actualites/rediger-bonne-annonce-house-sitting", icon: "maison" },
-            { title: "Choisir son gardien : les bons critères", description: "Ce qui compte, ce qui ne sert à rien.", href: "/actualites/choisir-gardien-bons-criteres", icon: "proprio" },
-            { title: "Préparer sa maison avant une garde", description: "Guide de la maison, sécurité, animaux.", href: "/actualites/preparer-maison-avant-garde", icon: "maison" },
-          ];
-        } else if (annoncesCount >= 1 && gardesCount === 0) {
-          resTitle = "Préparer votre première garde";
-          resItems = [
-            { title: "Accueillir son gardien", description: "Remise des clés, visite, jour du départ.", href: "/actualites/accueillir-gardien-bonnes-pratiques", icon: "proprio" },
-            { title: "Préparer sa maison avant une garde", description: "Ce qu'on oublie dans le guide de la maison.", href: "/actualites/preparer-maison-avant-garde", icon: "maison" },
-            { title: "Que faire si quelque chose se passe mal", description: "Animal malade, panne, gardien défaillant.", href: "/actualites/que-faire-probleme-pendant-garde", icon: "proprio" },
-          ];
-        } else if (gardesCount >= 1) {
-          resTitle = "Optimiser vos prochaines gardes";
-          resItems = [
-            { title: "Choisir son gardien : les bons critères", description: "Affinez votre sélection à chaque garde.", href: "/actualites/choisir-gardien-bons-criteres", icon: "proprio" },
-            { title: "Que faire si quelque chose se passe mal", description: "Animal malade, panne, gardien défaillant.", href: "/actualites/que-faire-probleme-pendant-garde", icon: "proprio" },
-            { title: "Accueillir son gardien", description: "Ce qui fait qu'un gardien prend soin de tout.", href: "/actualites/accueillir-gardien-bonnes-pratiques", icon: "proprio" },
-          ];
-        }
+      {/* ═══ Emergency sitters ═══ */}
+      <div className="px-8">
+        <NearbyEmergencySitters />
+      </div>
 
-        return resItems.length > 0 ? <ResourceSection title={resTitle} resources={resItems} /> : null;
-      })()}
-
-      {/* Échanges autour de toi */}
-      <MissionsNearbySection />
-
-      {/* 6. Nearby emergency sitters */}
-      <NearbyEmergencySitters />
-
-      {/* 7. CTA */}
+      {/* ═══ CTA ═══ */}
       {cta && (
-        <div className="p-6 rounded-xl bg-primary/5 border-2 border-dashed border-primary/30 text-center">
-          <p className="text-sm text-muted-foreground mb-3">{cta.text}</p>
-          <Link to={cta.to}><Button>{cta.cta}</Button></Link>
+        <div className="px-8">
+          <div className="p-6 rounded-xl bg-primary/5 border-2 border-dashed border-primary/30 text-center">
+            <p className="text-sm text-muted-foreground mb-3">{cta.text}</p>
+            <Link to={cta.to}><Button>{cta.cta}</Button></Link>
+          </div>
         </div>
       )}
 
-      {/* 7. Coups de cœur */}
+      {/* ═══ Coups de coeur ═══ */}
       {highlights.length > 0 && (
-        <DashSection title="Ce que les gardiens disent de votre maison">
-          <div className="space-y-2">
-            {highlights.slice(0, 3).map((h: any) => (
-              <div key={h.id} className="flex items-start gap-3 p-3 rounded-xl bg-card border border-border">
-                {h.sitter?.avatar_url ? (
-                  <img src={h.sitter.avatar_url} alt="" className="w-10 h-10 rounded-full object-cover shrink-0" />
-                ) : (
-                  <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-sm font-bold shrink-0">
-                    {h.sitter?.first_name?.charAt(0) || "?"}
-                  </div>
-                )}
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs font-medium">{h.sitter?.first_name}</p>
-                  <p className="text-sm text-muted-foreground mt-0.5">{h.text}</p>
-                </div>
-                {h.photo_url && <img src={h.photo_url} alt="" className="w-16 h-12 rounded-lg object-cover shrink-0" />}
-              </div>
-            ))}
-          </div>
-        </DashSection>
-      )}
-
-      {/* 8. Mes petites missions */}
-      {myMissions.length > 0 && (
-        <DashSection title="Mes petites missions" action={
-          <Link to="/petites-missions" className="text-xs text-primary hover:underline font-medium">Voir tout →</Link>
-        }>
-          <div className="space-y-2">
-            {myMissions.map((m: any) => {
-              const responseCount = m.small_mission_responses?.length || 0;
-              const pendingCount = m.small_mission_responses?.filter((r: any) => r.status === "pending").length || 0;
-              return (
-                <Link key={m.id} to={`/petites-missions/${m.id}`} className="flex items-center gap-3 p-3 rounded-xl bg-card border border-border hover:bg-accent/50 transition-colors">
-                  <Handshake className="h-5 w-5 text-primary shrink-0" />
+        <div className="px-8">
+          <DashSection title="Ce que les gardiens disent de votre maison">
+            <div className="space-y-2">
+              {highlights.slice(0, 3).map((h: any) => (
+                <div key={h.id} className="flex items-start gap-3 p-3 rounded-xl bg-card border border-border">
+                  {h.sitter?.avatar_url ? (
+                    <img src={h.sitter.avatar_url} alt="" className="w-10 h-10 rounded-full object-cover shrink-0" />
+                  ) : (
+                    <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-sm font-bold shrink-0">
+                      {h.sitter?.first_name?.charAt(0) || "?"}
+                    </div>
+                  )}
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate">{m.title}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {m.status === "completed" ? "✅ Terminée" : m.status === "in_progress" ? "🔄 En cours" : `${responseCount} réponse${responseCount > 1 ? "s" : ""}`}
-                      {pendingCount > 0 && <span className="ml-1 text-primary font-medium">· {pendingCount} en attente</span>}
-                    </p>
+                    <p className="text-xs font-medium">{capitalize(h.sitter?.first_name)}</p>
+                    <p className="text-sm text-muted-foreground mt-0.5">{h.text}</p>
                   </div>
-                  <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
-                </Link>
-              );
-            })}
-          </div>
-        </DashSection>
+                  {h.photo_url && <img src={h.photo_url} alt="" className="w-16 h-12 rounded-lg object-cover shrink-0" />}
+                </div>
+              ))}
+            </div>
+          </DashSection>
+        </div>
       )}
-
     </div>
   );
 };
 
 /* ── Shared ── */
-
-const StatCard = ({ icon: Icon, iconColor, label, value, delay, isDecimal, emptyMsg, subLabel }: {
-  icon: React.ElementType; iconColor: string; label: string; value: number; delay: number; isDecimal?: boolean; emptyMsg?: string; subLabel?: string;
-}) => {
-  const displayed = useCountUp(isDecimal ? Math.round(value * 10) : value);
-  const formatted = isDecimal ? (displayed / 10).toFixed(1) : String(displayed);
-
-  return (
-    <div
-      className="p-4 rounded-xl border border-border bg-card hover:shadow-md transition-shadow animate-fade-in"
-      style={{ animationDelay: `${delay}ms` }}
-    >
-      <Icon className={`h-4 w-4 ${iconColor} mb-2`} strokeWidth={1.8} />
-      {value === 0 && emptyMsg ? (
-        <p className="text-sm text-muted-foreground mt-1">Pas encore</p>
-      ) : (
-        <p className="font-heading text-[28px] font-bold leading-tight">{formatted}</p>
-      )}
-      <p className="text-xs text-muted-foreground mt-1">{emptyMsg && value > 0 ? label : emptyMsg || label}</p>
-      {subLabel && <p className="text-xs text-muted-foreground">{subLabel}</p>}
-    </div>
-  );
-};
 
 const DashSection = ({ title, action, children }: {
   title: string; action?: React.ReactNode; children: React.ReactNode;
