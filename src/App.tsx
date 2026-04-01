@@ -76,6 +76,7 @@ import PublicProfile from "./pages/PublicProfile";
 import EmergencySitter from "./pages/EmergencySitter";
 import MySubscription from "./pages/MySubscription";
 import PublicSitDetail from "./pages/PublicSitDetail";
+import PublicSitterProfile from "./pages/PublicSitterProfile";
 
 const queryClient = new QueryClient();
 
