@@ -552,9 +552,24 @@ const QuickActions = ({ sit, isOwner, effectiveStatus }: { sit: any; isOwner: bo
   }
 
   if (effectiveStatus === "published" && isOwner) {
+    const count = sit.applicationCount || 0;
+    if (count === 0) {
+      return (
+        <span className={cn(btnClass, "border border-border text-muted-foreground cursor-default")}>
+          Aucune candidature
+        </span>
+      );
+    }
+    if (count === 1) {
+      return (
+        <Link to={`/sits/${sit.id}`} className={cn(btnClass, "bg-primary/10 text-primary hover:bg-primary/20")}>
+          <Users className="h-3.5 w-3.5" /> Voir 1 candidature
+        </Link>
+      );
+    }
     return (
-      <Link to={`/sits/${sit.id}`} className={cn(btnClass, "bg-primary/10 text-primary hover:bg-primary/20")}>
-        <Eye className="h-3.5 w-3.5" /> Voir les candidatures
+      <Link to={`/sits/${sit.id}`} className={cn(btnClass, "bg-primary text-primary-foreground hover:bg-primary/90")}>
+        <Users className="h-3.5 w-3.5" /> Voir {count} candidatures
       </Link>
     );
   }
