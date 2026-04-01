@@ -36,7 +36,7 @@ const SearchOwner = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [city, setCity] = useState("");
-  const [radius, setRadius] = useState([50]);
+  const [radius, setRadius] = useState([15]);
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [animalTypes, setAnimalTypes] = useState<string[]>([]);
