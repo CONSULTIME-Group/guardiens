@@ -12,8 +12,11 @@ import {
   Home, Star, Mail, Award, CircleDot, ChevronRight, Search,
   Send as SendIcon, Eye, CheckCircle2, XCircle, MessageSquare,
   Calendar, Handshake, Newspaper, PawPrint, Zap, ShieldCheck,
-  UserCircle, Sparkles, MapPin,
+  UserCircle, MapPin, ExternalLink, Circle,
 } from "lucide-react";
+
+const capitalize = (name: string) =>
+  name ? name.charAt(0).toUpperCase() + name.slice(1).toLowerCase() : "";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { format, differenceInDays, differenceInHours } from "date-fns";
