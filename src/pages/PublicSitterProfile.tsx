@@ -8,7 +8,7 @@ import BadgeShield from "@/components/badges/BadgeShield";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
-  Car, MapPin, Quote, ExternalLink, X,
+  Car, MapPin, ExternalLink, X,
   ChevronLeft, ChevronRight,
 } from "lucide-react";
 import { format } from "date-fns";
@@ -120,24 +120,29 @@ export default function PublicSitterProfile() {
   const firstName = capitalize(profile.first_name || "");
   const city = profile.city || "";
   const bio = sitterProfile?.motivation || profile.bio || "";
-  const whySitter = sitterProfile?.motivation && profile.bio ? profile.bio : "";
+  const shortBio = profile.bio || "";
+  const motivation = sitterProfile?.motivation || "";
   const animalTypes: string[] = sitterProfile?.animal_types || [];
   const hasVehicle = sitterProfile?.has_vehicle || false;
-  const radius = sitterProfile?.geographic_radius || 0;
+  const rawRadius = sitterProfile?.geographic_radius || 0;
   const competences: string[] = sitterProfile?.competences || [];
   const isAvailable = sitterProfile?.is_available || false;
   const completedSits = profile.completed_sits_count || 0;
   const cancellations = profile.cancellation_count || 0;
+  const radius = (rawRadius === 100 && completedSits === 0) ? 15 : rawRadius;
   const isOwn = auth?.user?.id === id;
   const isOwner = auth?.activeRole === "owner";
   const isAuthenticated = auth?.isAuthenticated;
+  const isSitter = auth?.activeRole === "sitter";
+  const showStickyBar = !(isOwn || (isAuthenticated && isSitter && !isOwn));
 
   const visibleReviews = reviews.slice(0, 5);
   const visibleGallery = gallery.slice(0, 9);
 
   /* ── SEO ── */
-  const pageTitle = `${firstName}, gardien de maison à ${city || "France"} — Guardiens`;
-  const pageDesc = `Découvrez le profil de ${firstName}, gardien de maison et pet-sitter à ${city || "France"}. ${completedSits} garde${completedSits > 1 ? "s" : ""} réalisée${completedSits > 1 ? "s" : ""} sur Guardiens.`;
+  const animalLabels = animalTypes.map(a => ANIMAL_LABELS[a] || a).join(", ");
+  const pageTitle = `${firstName} — Gardien à ${city || "France"} | Guardiens`;
+  const pageDesc = `${firstName} garde des ${animalLabels || "animaux"} à ${city || "France"} et dans un rayon de ${radius}km. Profil vérifié sur Guardiens.fr.`;
   const pageUrl = `${SITE_URL}/gardiens/${id}`;
 
   const jsonLd = {
@@ -160,13 +165,16 @@ export default function PublicSitterProfile() {
         <title>{pageTitle}</title>
         <meta name="description" content={pageDesc} />
         <link rel="canonical" href={pageUrl} />
-        <meta property="og:title" content={`${firstName} — Gardien Guardiens`} />
-        <meta property="og:description" content={`${firstName} garde des maisons et des animaux à ${city || "France"}.`} />
+        <meta property="og:title" content={pageTitle} />
+        <meta property="og:description" content={pageDesc} />
+        {profile.avatar_url && <meta property="og:image" content={profile.avatar_url} />}
         <meta property="og:url" content={pageUrl} />
         <meta property="og:type" content="profile" />
         <meta property="og:site_name" content="Guardiens" />
         <meta name="twitter:card" content="summary" />
-        <meta name="twitter:title" content={`${firstName} — Gardien Guardiens`} />
+        <meta name="twitter:title" content={pageTitle} />
+        <meta name="twitter:description" content={pageDesc} />
+        {profile.avatar_url && <meta name="twitter:image" content={profile.avatar_url} />}
         <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>
       </Helmet>
 
@@ -190,7 +198,12 @@ export default function PublicSitterProfile() {
       </header>
 
       {/* ── SECTION 1: Hero ── */}
-      <section className="px-6 py-10 max-w-3xl mx-auto">
+      <section className="px-6 py-10 max-w-3xl mx-auto space-y-4">
+        {/* Back link */}
+        <Link to="/recherche-gardiens" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+          ← Retour aux gardiens
+        </Link>
+
         <div className="flex flex-col items-center">
           <Avatar className="w-32 h-32 border-2 border-border mb-4">
             {profile.avatar_url ? (
@@ -203,9 +216,9 @@ export default function PublicSitterProfile() {
 
           {/* Status badges */}
           <div className="flex justify-center gap-2 mb-4">
-            {profile.identity_verified && <BadgeShield badgeKey="identity_verified" size="sm" showLabel={false} />}
-            {profile.is_founder && <BadgeShield badgeKey="founder" size="sm" showLabel={false} />}
-            {emergencyActive && <BadgeShield badgeKey="emergency_sitter" size="sm" showLabel={false} />}
+            {profile.identity_verified && <BadgeShield badgeKey="identity_verified" size="sm" />}
+            {profile.is_founder && <BadgeShield badgeKey="founder" size="sm" />}
+            {emergencyActive && <BadgeShield badgeKey="emergency_sitter" size="sm" />}
           </div>
 
           <h1 className="text-2xl font-semibold text-foreground text-center">{firstName}</h1>
@@ -220,7 +233,7 @@ export default function PublicSitterProfile() {
               <p className="text-xs text-muted-foreground">Gardes</p>
             </div>
             <div className="text-center">
-              <p className="text-xl font-semibold text-foreground">{avgRating > 0 ? `${avgRating}` : "—"}</p>
+              <p className="text-xl font-semibold text-foreground">{avgRating > 0 ? `${avgRating}` : <span className="text-muted-foreground text-base">Pas encore</span>}</p>
               <p className="text-xs text-muted-foreground">Note ★</p>
             </div>
             <div className="text-center">
@@ -229,22 +242,25 @@ export default function PublicSitterProfile() {
             </div>
           </div>
 
-          {cancellations > 0 && (
-            <p className="text-xs text-muted-foreground mt-2">{cancellations} annulation{cancellations > 1 ? "s" : ""}</p>
+          {completedSits > 0 && cancellations > 0 && (
+            <p className="text-xs text-muted-foreground mt-2">
+              {cancellations} annulation{cancellations > 1 ? "s" : ""}
+            </p>
           )}
         </div>
       </section>
 
       {/* ── SECTION 2: Bio ── */}
-      {(bio || whySitter) && (
+      {(shortBio || motivation) && (
         <section className="max-w-3xl mx-auto px-6 py-6 border-t border-border">
-          <h2 className="text-sm font-semibold text-foreground uppercase tracking-wide mb-3">À propos</h2>
-          {bio && <p className="text-base text-foreground/80 leading-relaxed">{bio}</p>}
-          {whySitter && (
-            <div className="mt-4 bg-muted/30 rounded-xl p-4 border-l-4 border-primary">
-              <Quote className="w-4 h-4 text-primary mb-2" />
-              <p className="italic text-foreground/80 text-sm">{whySitter}</p>
-            </div>
+          {shortBio && (
+            <p className="text-sm text-muted-foreground mb-4">{shortBio}</p>
+          )}
+          {motivation && (
+            <>
+              <h2 className="text-sm font-semibold text-foreground uppercase tracking-wide mb-3">À propos</h2>
+              <p className="text-base text-foreground/80 leading-relaxed">{motivation}</p>
+            </>
           )}
         </section>
       )}
@@ -252,7 +268,7 @@ export default function PublicSitterProfile() {
       {/* ── SECTION 3: Ce qu'il/elle garde ── */}
       {animalTypes.length > 0 && (
         <section className="max-w-3xl mx-auto px-6 py-6 border-t border-border">
-          <h2 className="text-sm font-semibold uppercase tracking-wide mb-4">Ce que je garde</h2>
+          <h2 className="text-sm font-semibold uppercase tracking-wide mb-4">Animaux acceptés</h2>
           <div className="flex flex-wrap gap-2">
             {animalTypes.map((a) => (
               <span key={a} className="bg-primary/10 text-primary rounded-full px-3 py-1 text-sm">
@@ -261,7 +277,7 @@ export default function PublicSitterProfile() {
             ))}
           </div>
           {sitterProfile?.farm_animals_ok && (
-            <span className="inline-block mt-2 bg-amber-50 text-amber-700 rounded-full px-3 py-1 text-xs">
+            <span className="inline-block mt-2 bg-primary/10 text-primary rounded-full px-3 py-1 text-xs">
               Races exigeantes ✓
             </span>
           )}
@@ -269,7 +285,7 @@ export default function PublicSitterProfile() {
             {hasVehicle ? (
               <>
                 <Car className="w-4 h-4" />
-                <span>Véhiculé(e) — rayon {radius}km</span>
+                <span>Avec véhicule — rayon {radius}km</span>
               </>
             ) : radius > 0 ? (
               <>
@@ -411,6 +427,7 @@ export default function PublicSitterProfile() {
       )}
 
       {/* ── CTA Sticky ── */}
+      {showStickyBar && (
       <div className="fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-sm border-t border-border px-6 py-4 flex items-center justify-between z-50">
         <div className="text-sm text-foreground">
           {firstName}
@@ -419,7 +436,7 @@ export default function PublicSitterProfile() {
         <div>
           {!isAuthenticated && (
             <Link
-              to="/register?role=owner"
+              to={`/inscription?redirect=/gardiens/${id}`}
               className="bg-primary text-primary-foreground rounded-full px-6 py-2.5 text-sm font-medium hover:opacity-90 transition-opacity"
             >
               S'inscrire pour contacter
@@ -427,22 +444,15 @@ export default function PublicSitterProfile() {
           )}
           {isAuthenticated && isOwner && (
             <Link
-              to={`/messages?sitter=${id}`}
+              to={`/messagerie?gardien=${id}`}
               className="bg-primary text-primary-foreground rounded-full px-6 py-2.5 text-sm font-medium hover:opacity-90 transition-opacity"
             >
               Contacter {firstName}
             </Link>
           )}
-          {isAuthenticated && isOwn && (
-            <Link
-              to="/profile"
-              className="border border-border text-foreground rounded-full px-6 py-2.5 text-sm font-medium hover:border-primary transition-colors"
-            >
-              Modifier mon profil
-            </Link>
-          )}
         </div>
       </div>
+      )}
     </div>
   );
 }
