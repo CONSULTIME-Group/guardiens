@@ -168,8 +168,7 @@ const SitDetail = () => {
 
   return (
     <div className="p-6 md:p-10 max-w-4xl mx-auto animate-fade-in pb-32">
-      {shouldNoindex && <Helmet><meta name="robots" content="noindex, nofollow" /></Helmet>}
-      {!shouldNoindex && <Helmet><meta name="robots" content="noindex, nofollow" /></Helmet>}
+      <Helmet><meta name="robots" content="noindex, nofollow" /></Helmet>
       <Link to={isOwner ? "/sits" : "/search"} className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-6">
         <ArrowLeft className="h-4 w-4" /> {isOwner ? "Retour à mes annonces" : "Retour à la recherche"}
       </Link>
