@@ -274,20 +274,24 @@ const OwnerDashboard = () => {
                     <div className="w-[50px] h-[50px] rounded-full bg-accent flex items-center justify-center text-lg shrink-0">🐾</div>
                   )}
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium">{pet.name || "Sans nom"}
+                    <p className="text-sm font-medium">{pet.name ? pet.name.charAt(0).toUpperCase() + pet.name.slice(1).toLowerCase() : "Sans nom"}
                       <span className="text-xs text-muted-foreground ml-2">
-                        {speciesLabel[pet.species] || pet.species}{pet.breed ? ` · ${pet.breed}` : ""}{pet.age ? ` · ${pet.age} an${pet.age > 1 ? "s" : ""}` : ""}
+                        {speciesLabel[pet.species] || pet.species}{pet.breed ? ` · ${pet.breed.split(" ").map((w: string) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(" ")}` : ""}{pet.age ? ` · ${pet.age} an${pet.age > 1 ? "s" : ""}` : ""}
                       </span>
                     </p>
                     {nextSit ? (
-                      <Link to={`/sits/${nextSit.id}`} className="text-xs text-primary hover:underline flex items-center gap-1 mt-0.5">
-                        <Calendar className="h-3 w-3" />
-                        Prochaine garde {daysUntil !== null && daysUntil >= 0
-                          ? daysUntil === 0 ? "aujourd'hui" : `dans ${daysUntil} jour${daysUntil > 1 ? "s" : ""}`
-                          : ""}
-                      </Link>
+                      nextSit.status === "confirmed" ? (
+                        <Link to={`/sits/${nextSit.id}`} className="text-xs text-primary hover:underline flex items-center gap-1 mt-0.5">
+                          <Calendar className="h-3 w-3" />
+                          Prochaine garde {daysUntil !== null && daysUntil >= 0
+                            ? daysUntil === 0 ? "aujourd'hui" : `dans ${daysUntil} jour${daysUntil > 1 ? "s" : ""}`
+                            : ""}
+                        </Link>
+                      ) : (
+                        <p className="text-xs text-muted-foreground mt-0.5">Annonce en cours</p>
+                      )
                     ) : (
-                      <p className="text-xs text-muted-foreground mt-0.5">Aucune garde prévue</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">{""}</p>
                     )}
                   </div>
                 </div>
