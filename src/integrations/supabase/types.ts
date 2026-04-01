@@ -1871,6 +1871,7 @@ export type Database = {
       }
       sits: {
         Row: {
+          animaux_override: string | null
           cancellation_reason: string | null
           cancelled_at: string | null
           cancelled_by: string | null
@@ -1880,6 +1881,7 @@ export type Database = {
           flexible_dates: boolean | null
           id: string
           is_urgent: boolean
+          logement_override: string | null
           min_gardien_sits: number
           open_to: string[] | null
           property_id: string
@@ -1890,6 +1892,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          animaux_override?: string | null
           cancellation_reason?: string | null
           cancelled_at?: string | null
           cancelled_by?: string | null
@@ -1899,6 +1902,7 @@ export type Database = {
           flexible_dates?: boolean | null
           id?: string
           is_urgent?: boolean
+          logement_override?: string | null
           min_gardien_sits?: number
           open_to?: string[] | null
           property_id: string
@@ -1909,6 +1913,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          animaux_override?: string | null
           cancellation_reason?: string | null
           cancelled_at?: string | null
           cancelled_by?: string | null
@@ -1918,6 +1923,7 @@ export type Database = {
           flexible_dates?: boolean | null
           id?: string
           is_urgent?: boolean
+          logement_override?: string | null
           min_gardien_sits?: number
           open_to?: string[] | null
           property_id?: string
