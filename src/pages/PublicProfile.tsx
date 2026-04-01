@@ -193,7 +193,7 @@ const PublicProfile = () => {
             )}
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
-                <h1 className="font-heading text-2xl font-bold" style={{ color: "#1C1B18" }}>{firstName}</h1>
+                <h1 className="font-heading text-2xl font-bold text-foreground">{firstName}</h1>
                 {profile.identity_verified && <StatusShield type="verified" />}
                 {profile.is_founder && <StatusShield type="founder" />}
                 {isEmergencySitter && <StatusShield type="emergency" />}
