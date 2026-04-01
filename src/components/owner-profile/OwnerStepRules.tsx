@@ -13,6 +13,8 @@ const VISITS = ["Oui librement", "Oui ponctuellement", "Non"];
 const OVERNIGHT = ["Oui conjoint/ami", "À discuter", "Non"];
 const SPACES = ["Piscine", "BBQ", "Jardin", "Cuisine complète", "Buanderie"];
 const SMOKER = ["Oui dehors uniquement", "Non"];
+const MEETING_OPTIONS = ["Obligatoire pour moi", "Fortement souhaitée", "Selon disponibilités", "Non nécessaire"];
+const NEWS_OPTIONS = ["Chaque jour", "Tous les 2-3 jours", "En cas d'imprévu uniquement", "Je fais confiance — pas de contrainte"];
 
 interface Props {
   data: OwnerProfileData;
@@ -22,6 +24,24 @@ interface Props {
 const OwnerStepRules = ({ data, onChange }: Props) => (
   <div className="space-y-6">
     <h2 className="font-heading text-2xl font-bold">Attentes & règles</h2>
+
+    {/* Rencontre avant la garde */}
+    <div className="space-y-1">
+      <Label className="text-sm font-medium">Rencontre avant la garde</Label>
+      <p className="text-xs text-muted-foreground mb-3">
+        Dans le house-sitting, une rencontre physique avant la garde est fortement recommandée. Elle permet aux animaux de s'habituer au gardien et d'établir la confiance.
+      </p>
+      <ChipSelect options={MEETING_OPTIONS} selected={data.meeting_preference} onChange={v => onChange({ meeting_preference: v })} />
+    </div>
+
+    {/* Nouvelles pendant la garde */}
+    <div className="space-y-1">
+      <Label className="text-sm font-medium">Nouvelles pendant la garde</Label>
+      <p className="text-xs text-muted-foreground mb-3">
+        À quelle fréquence souhaitez-vous recevoir des nouvelles (photos, messages) de votre gardien ?
+      </p>
+      <ChipSelect options={NEWS_OPTIONS} selected={data.news_frequency ? [data.news_frequency] : []} onChange={v => onChange({ news_frequency: v[v.length - 1] || "" })} />
+    </div>
 
     <h3 className="font-heading text-lg font-semibold">Attentes envers le gardien</h3>
 
