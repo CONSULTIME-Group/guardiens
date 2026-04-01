@@ -538,7 +538,7 @@ const QuickActions = ({ sit, isOwner, effectiveStatus }: { sit: any; isOwner: bo
     return (
       <>
         {!sit.hasReviewed && (
-          <Link to={`/review/${sit.id}`} className={cn(btnClass, "bg-amber-50 text-amber-700 hover:bg-amber-100 dark:bg-amber-900/20 dark:text-amber-400")}>
+          <Link to={`/review/${sit.id}`} className={cn(btnClass, "bg-secondary/10 text-secondary hover:bg-secondary/20")}>
             <Star className="h-3.5 w-3.5" /> Laisser un avis
           </Link>
         )}

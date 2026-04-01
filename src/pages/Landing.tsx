@@ -501,7 +501,7 @@ const Landing = () => {
       <section className="py-24 md:py-32 bg-background">
         <div className="max-w-5xl mx-auto px-6">
           <RevealSection>
-            <div className="bg-white rounded-2xl p-12 max-w-3xl mx-auto text-center shadow-sm">
+            <div className="bg-card rounded-2xl p-12 max-w-3xl mx-auto text-center shadow-sm">
               <h3 className="font-heading text-2xl md:text-3xl font-semibold text-foreground mb-4">
                 Un jardin à arroser, un coup de main à donner, une compétence à partager.
               </h3>

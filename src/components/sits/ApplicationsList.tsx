@@ -34,8 +34,8 @@ interface ApplicationsListProps {
 const statusStyles: Record<string, { label: string; className: string }> = {
   pending: { label: "En attente", className: "bg-primary/10 text-primary" },
   viewed: { label: "En attente", className: "bg-primary/10 text-primary" },
-  discussing: { label: "En discussion", className: "bg-blue-50 text-blue-700" },
-  accepted: { label: "Acceptée", className: "bg-green-50 text-green-700" },
+  discussing: { label: "En discussion", className: "bg-accent text-foreground" },
+  accepted: { label: "Acceptée", className: "bg-primary/10 text-primary" },
   rejected: { label: "Déclinée", className: "bg-muted text-muted-foreground" },
   cancelled: { label: "Annulée", className: "bg-muted text-muted-foreground" },
 };

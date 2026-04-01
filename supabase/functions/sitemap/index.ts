@@ -176,12 +176,7 @@ Deno.serve(async () => {
     }
   }
 
-  // Public profiles
-  if (publicProfiles) {
-    for (const p of publicProfiles) {
-      xml += urlEntry(`/profil/${p.id}`, (p.updated_at || today).split("T")[0], "monthly", "0.5");
-    }
-  }
+  // Public profiles removed from sitemap — /profil/ is disallowed in robots.txt
 
   // Legal pages
   for (const page of legalPages) {
