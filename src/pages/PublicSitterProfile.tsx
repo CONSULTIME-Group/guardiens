@@ -197,7 +197,7 @@ export default function PublicSitterProfile() {
   // SEO
   const animalLabels = animalTypes.map(a => ANIMAL_LABELS[a] || a).join(", ");
   const pageTitle = `${firstName} — Gardien à ${city || "France"} | Guardiens`;
-  const pageDesc = `${firstName} garde des ${animalLabels || "animaux"} à ${city || "France"} dans un rayon de ${radius}km. Profil vérifié sur Guardiens.fr.`;
+  const pageDesc = `${firstName} garde des ${animalLabels || "animaux"} à ${city || "France"}${radius ? ` dans un rayon de ${radius}km` : ""}. Profil vérifié sur Guardiens.fr.`;
   const pageUrl = `${SITE_URL}/gardiens/${id}`;
 
   const jsonLd = {
