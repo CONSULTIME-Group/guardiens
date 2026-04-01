@@ -141,7 +141,9 @@ const CreateSit = () => {
           handover_preference: o.handover_preference, welcome_notes: o.welcome_notes,
           news_frequency: o.news_frequency, news_format: o.news_format || [],
           communication_notes: o.communication_notes,
+          environments: (o as any).environments || [],
         });
+        setSitEnvironments((o as any).environments || []);
       }
       setLoading(false);
     };
