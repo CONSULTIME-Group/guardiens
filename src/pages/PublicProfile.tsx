@@ -249,6 +249,16 @@ const PublicProfile = () => {
             />
             <MetricCell label="Avis" value={String(reviewStats.count)} />
           </div>
+          {(profile.cancellations_as_proprio || 0) > 0 && (
+            <p className="text-xs text-muted-foreground mt-1">
+              {profile.cancellations_as_proprio} annulation{(profile.cancellations_as_proprio || 0) > 1 ? "s" : ""} de garde
+            </p>
+          )}
+          {(profile.cancellation_count || 0) > 0 && (
+            <p className="text-xs text-muted-foreground mt-1">
+              {profile.cancellation_count} annulation{(profile.cancellation_count || 0) > 1 ? "s" : ""} en tant que gardien
+            </p>
+          )}
 
           {/* === ENVIRONMENTS === */}
           {ownerProfile?.environments?.length > 0 && (
