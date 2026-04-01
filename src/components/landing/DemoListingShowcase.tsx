@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 const DEMO_LISTINGS = [
   {
     id: "demo-1",
-    photo: "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800&q=80",
+    photo: "https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=800&q=80",
     city: "Lyon 6e",
     animals: ["1 chien", "2 chats"],
     dates: "14 → 28 juil.",
