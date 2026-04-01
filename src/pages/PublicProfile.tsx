@@ -266,7 +266,7 @@ const PublicProfile = () => {
 
           {/* === TABS === */}
           <Tabs defaultValue={isSitter ? "sitter" : "owner"} className="w-full">
-            <TabsList className="w-full bg-white border shadow-sm rounded-xl" style={{ borderColor: "#E6E2D9" }}>
+            <TabsList className="w-full bg-white border border-border shadow-sm rounded-xl">
               {isSitter && <TabsTrigger value="sitter" className="flex-1 gap-1.5 data-[state=active]:border-b-2 data-[state=active]:border-primary">Gardien</TabsTrigger>}
               {isOwner && <TabsTrigger value="owner" className="flex-1 gap-1.5 data-[state=active]:border-b-2 data-[state=active]:border-primary">Propriétaire</TabsTrigger>}
               <TabsTrigger value="reviews" className="flex-1 gap-1.5 data-[state=active]:border-b-2 data-[state=active]:border-primary">Avis ({reviewStats.count})</TabsTrigger>
