@@ -339,7 +339,7 @@ const SitterDashboard = () => {
               </div>
             </div>
             {completedSits === 0 && (
-              <p className="text-xs text-muted-foreground italic mt-3">Tes stats apparaîtront après ta première garde.</p>
+              <p className="text-xs text-muted-foreground italic mt-3">Vos statistiques apparaîtront après votre première garde.</p>
             )}
           </div>
 
