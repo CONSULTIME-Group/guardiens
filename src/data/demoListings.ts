@@ -59,7 +59,7 @@ export const DEMO_SITS = [
     property: {
       type: "house",
       environment: "countryside",
-      photos: ["https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&q=80"],
+      photos: ["https://images.unsplash.com/photo-1499678329028-101435549a4e?w=800&q=80"],
     },
     pets: [
       { species: "farm_animal", name: "Poule 1" },
