@@ -671,8 +671,27 @@ const Landing = () => {
         </div>
       </section>
 
-      {/* ═══════════════ SECTION 6 — COMMENT ÇA MARCHE ═══════════════ */}
-      <HowItWorksSection dynamicCounts={dynamicCounts} />
+      {/* ═══════════════ SECTION 6 — PETITES MISSIONS ═══════════════ */}
+      <section className="py-24 md:py-32 bg-[#FAF9F6]">
+        <div className="max-w-5xl mx-auto px-6">
+          <RevealSection>
+            <div className="bg-white rounded-2xl p-12 max-w-3xl mx-auto text-center shadow-sm">
+              <h3 className="font-heading text-2xl md:text-3xl font-semibold text-foreground mb-4">
+                Un jardin à arroser, un coup de main à donner, une compétence à partager.
+              </h3>
+              <p className="font-body text-base md:text-lg text-foreground/75 leading-relaxed max-w-xl mx-auto mb-6">
+                Jardinage, bricolage, courses, coup de main — les petites missions sont là pour ça. L'échange en nature. Entre gens du coin qui se choisissent.
+              </p>
+              <Link
+                to="/petites-missions"
+                className="text-primary font-body font-semibold text-sm underline underline-offset-4 hover:no-underline inline-flex items-center gap-1"
+              >
+                Découvrir les petites missions <ArrowRight className="h-4 w-4" />
+              </Link>
+            </div>
+          </RevealSection>
+        </div>
+      </section>
 
       {/* ═══════════════ SECTION 7 — ENCART FONDATEUR ═══════════════ */}
       <section className="py-24 md:py-32 bg-primary">
