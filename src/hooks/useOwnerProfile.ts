@@ -45,6 +45,10 @@ export interface OwnerProfileData {
   // Skills (from profiles table)
   skill_categories: string[];
   available_for_help: boolean;
+  // Owner competences (from owner_profiles table)
+  owner_competences: string[];
+  owner_competences_disponible: boolean;
+  owner_skill_categories: string[];
 }
 
 export interface Pet {
