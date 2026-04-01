@@ -78,8 +78,8 @@ const MissionsNearbySection = () => {
         </Link>
       </div>
       <p className="text-sm text-foreground/60 mt-1 mb-4">
-        {mySkills.length > 0
-          ? "En priorité : les échanges qui correspondent à tes compétences."
+       {mySkills.length > 0
+          ? "En priorité : les échanges qui correspondent à vos compétences."
           : "Des gens du coin qui cherchent de l'aide, d'autres qui proposent la leur."}
       </p>
 
