@@ -235,166 +235,167 @@ export default function PublicSitterProfile() {
         <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>
       </Helmet>
 
-      {/* ── HERO ILLUSTRÉ SVG ── */}
-      <div className="w-full h-[180px] relative overflow-hidden bg-[#F0EDE6]">
-        <svg viewBox="0 0 1200 180" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice" className="absolute inset-0 w-full h-full">
-          <defs>
-            <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#E8E4DC"/>
-              <stop offset="100%" stopColor="#F0EDE6"/>
-            </linearGradient>
-            <linearGradient id="fadeBottom" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="60%" stopColor="#F0EDE6" stopOpacity="0"/>
-              <stop offset="100%" stopColor="#FAF9F6" stopOpacity="1"/>
-            </linearGradient>
-          </defs>
-          <rect width="1200" height="180" fill="url(#sky)"/>
-          <ellipse cx="200" cy="200" rx="300" ry="80" fill="#2D6A4F" opacity="0.06"/>
-          <ellipse cx="900" cy="210" rx="350" ry="90" fill="#2D6A4F" opacity="0.05"/>
-          <ellipse cx="600" cy="220" rx="400" ry="100" fill="#2D6A4F" opacity="0.07"/>
-          <rect x="0" y="148" width="1200" height="32" fill="#2D6A4F" opacity="0.08"/>
-          <g opacity="0.18" fill="#2D6A4F">
-            <rect x="80" y="100" width="60" height="50"/>
-            <polygon points="80,100 140,100 110,68"/>
-            <rect x="100" y="120" width="16" height="30"/>
-            <rect x="88" y="108" width="12" height="12"/>
-            <rect x="120" y="108" width="12" height="12"/>
-          </g>
-          <g opacity="0.15" fill="#2D6A4F">
-            <rect x="168" y="110" width="6" height="40"/>
-            <ellipse cx="171" cy="100" rx="18" ry="22"/>
-          </g>
-          <g opacity="0.14" fill="#2D6A4F">
-            <rect x="540" y="90" width="80" height="60"/>
-            <polygon points="540,90 620,90 580,55"/>
-            <rect x="565" y="118" width="20" height="32"/>
-            <rect x="548" y="100" width="14" height="14"/>
-            <rect x="598" y="100" width="14" height="14"/>
-            <rect x="600" y="58" width="8" height="16"/>
-          </g>
-          <g opacity="0.12" fill="#2D6A4F">
-            <rect x="488" y="105" width="7" height="45"/>
-            <ellipse cx="491" cy="92" rx="22" ry="26"/>
-          </g>
-          <g opacity="0.13" fill="#2D6A4F">
-            <rect x="648" y="112" width="6" height="38"/>
-            <ellipse cx="651" cy="100" rx="17" ry="20"/>
-          </g>
-          <g opacity="0.12" fill="#2D6A4F">
-            <rect x="980" y="105" width="55" height="45"/>
-            <polygon points="980,105 1035,105 1007,76"/>
-            <rect x="997" y="125" width="14" height="25"/>
-            <rect x="986" y="113" width="10" height="10"/>
-            <rect x="1015" y="113" width="10" height="10"/>
-          </g>
-          <g opacity="0.11" fill="#2D6A4F">
-            <rect x="1055" y="108" width="6" height="42"/>
-            <ellipse cx="1058" cy="96" rx="20" ry="24"/>
-          </g>
-          <g opacity="0.20" fill="#2D6A4F" transform="translate(340, 118)">
-            <ellipse cx="30" cy="18" rx="28" ry="12"/>
-            <circle cx="56" cy="12" r="10"/>
-            <ellipse cx="62" cy="8" rx="5" ry="8" transform="rotate(15,62,8)"/>
-            <path d="M2,16 Q-12,8 -8,2" stroke="#2D6A4F" strokeWidth="3" fill="none" opacity="0.20"/>
-            <rect x="8" y="28" width="5" height="14" rx="2"/>
-            <rect x="18" y="28" width="5" height="12" rx="2"/>
-            <rect x="35" y="28" width="5" height="14" rx="2"/>
-            <rect x="45" y="28" width="5" height="12" rx="2"/>
-            <ellipse cx="64" cy="16" rx="4" ry="3"/>
-          </g>
-          <g opacity="0.16" fill="#2D6A4F" transform="translate(820, 120)">
-            <ellipse cx="16" cy="20" rx="14" ry="16"/>
-            <circle cx="16" cy="6" r="10"/>
-            <polygon points="8,0 4,-8 14,-2"/>
-            <polygon points="24,0 28,-8 18,-2"/>
-            <path d="M30,28 Q44,20 40,10" stroke="#2D6A4F" strokeWidth="3" fill="none" opacity="0.16"/>
-            <ellipse cx="11" cy="6" rx="2" ry="2.5" fill="#F0EDE6"/>
-            <ellipse cx="21" cy="6" rx="2" ry="2.5" fill="#F0EDE6"/>
-          </g>
-          <rect width="1200" height="180" fill="url(#fadeBottom)"/>
-        </svg>
-      </div>
+      {/* ── HERO FUSIONNÉ : SVG + HEADER ── */}
+      <div className="relative overflow-hidden w-full min-h-[240px] flex items-end bg-[#F0EDE6]">
+        {/* SVG fond */}
+        <div className="absolute inset-0 z-0 pointer-events-none">
+          <svg viewBox="0 0 1200 240" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice" className="w-full h-full">
+            <defs>
+              <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#E8E4DC"/>
+                <stop offset="100%" stopColor="#F0EDE6"/>
+              </linearGradient>
+              <linearGradient id="fadeBottom" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="60%" stopColor="#F0EDE6" stopOpacity="0"/>
+                <stop offset="100%" stopColor="#FAF9F6" stopOpacity="1"/>
+              </linearGradient>
+            </defs>
+            <rect width="1200" height="240" fill="url(#sky)"/>
+            <ellipse cx="200" cy="260" rx="300" ry="80" fill="#2D6A4F" opacity="0.06"/>
+            <ellipse cx="900" cy="270" rx="350" ry="90" fill="#2D6A4F" opacity="0.05"/>
+            <ellipse cx="600" cy="280" rx="400" ry="100" fill="#2D6A4F" opacity="0.07"/>
+            <rect x="0" y="208" width="1200" height="32" fill="#2D6A4F" opacity="0.08"/>
+            <g opacity="0.18" fill="#2D6A4F">
+              <rect x="80" y="160" width="60" height="50"/>
+              <polygon points="80,160 140,160 110,128"/>
+              <rect x="100" y="180" width="16" height="30"/>
+              <rect x="88" y="168" width="12" height="12"/>
+              <rect x="120" y="168" width="12" height="12"/>
+            </g>
+            <g opacity="0.15" fill="#2D6A4F">
+              <rect x="168" y="170" width="6" height="40"/>
+              <ellipse cx="171" cy="160" rx="18" ry="22"/>
+            </g>
+            <g opacity="0.14" fill="#2D6A4F">
+              <rect x="540" y="150" width="80" height="60"/>
+              <polygon points="540,150 620,150 580,115"/>
+              <rect x="565" y="178" width="20" height="32"/>
+              <rect x="548" y="160" width="14" height="14"/>
+              <rect x="598" y="160" width="14" height="14"/>
+              <rect x="600" y="118" width="8" height="16"/>
+            </g>
+            <g opacity="0.12" fill="#2D6A4F">
+              <rect x="488" y="165" width="7" height="45"/>
+              <ellipse cx="491" cy="152" rx="22" ry="26"/>
+            </g>
+            <g opacity="0.13" fill="#2D6A4F">
+              <rect x="648" y="172" width="6" height="38"/>
+              <ellipse cx="651" cy="160" rx="17" ry="20"/>
+            </g>
+            <g opacity="0.12" fill="#2D6A4F">
+              <rect x="980" y="165" width="55" height="45"/>
+              <polygon points="980,165 1035,165 1007,136"/>
+              <rect x="997" y="185" width="14" height="25"/>
+              <rect x="986" y="173" width="10" height="10"/>
+              <rect x="1015" y="173" width="10" height="10"/>
+            </g>
+            <g opacity="0.11" fill="#2D6A4F">
+              <rect x="1055" y="168" width="6" height="42"/>
+              <ellipse cx="1058" cy="156" rx="20" ry="24"/>
+            </g>
+            <g opacity="0.20" fill="#2D6A4F" transform="translate(340, 178)">
+              <ellipse cx="30" cy="18" rx="28" ry="12"/>
+              <circle cx="56" cy="12" r="10"/>
+              <ellipse cx="62" cy="8" rx="5" ry="8" transform="rotate(15,62,8)"/>
+              <path d="M2,16 Q-12,8 -8,2" stroke="#2D6A4F" strokeWidth="3" fill="none" opacity="0.20"/>
+              <rect x="8" y="28" width="5" height="14" rx="2"/>
+              <rect x="18" y="28" width="5" height="12" rx="2"/>
+              <rect x="35" y="28" width="5" height="14" rx="2"/>
+              <rect x="45" y="28" width="5" height="12" rx="2"/>
+              <ellipse cx="64" cy="16" rx="4" ry="3"/>
+            </g>
+            <g opacity="0.16" fill="#2D6A4F" transform="translate(820, 180)">
+              <ellipse cx="16" cy="20" rx="14" ry="16"/>
+              <circle cx="16" cy="6" r="10"/>
+              <polygon points="8,0 4,-8 14,-2"/>
+              <polygon points="24,0 28,-8 18,-2"/>
+              <path d="M30,28 Q44,20 40,10" stroke="#2D6A4F" strokeWidth="3" fill="none" opacity="0.16"/>
+              <ellipse cx="11" cy="6" rx="2" ry="2.5" fill="#F0EDE6"/>
+              <ellipse cx="21" cy="6" rx="2" ry="2.5" fill="#F0EDE6"/>
+            </g>
+            <rect width="1200" height="240" fill="url(#fadeBottom)"/>
+          </svg>
+        </div>
 
-      {/* ── HEADER TYPOGRAPHIQUE ── */}
-      <div className="max-w-5xl mx-auto px-6 pt-10 pb-8">
-        <div className="flex items-center gap-6 md:gap-8">
-          {/* Photo médaillon */}
-          <img
-            src={profile.avatar_url || "/placeholder.svg"}
-            alt={firstName}
-            className={`w-20 h-20 md:w-24 md:h-24 rounded-full shrink-0 object-cover object-center border-2 border-border ${isAvailable ? "ring-2 ring-primary ring-offset-2" : ""}`}
-          />
+        {/* Dégradé bas */}
+        <div className="absolute bottom-0 left-0 right-0 h-24 z-[1] bg-gradient-to-b from-transparent to-background pointer-events-none" />
 
-          {/* Bloc texte */}
-          <div className="flex-1 flex flex-col gap-1 min-w-0">
-            {/* Ligne disponibilité + retour */}
-            <div className="flex justify-between items-center">
-              <div>
-                {isAvailable && (
-                  <span className="bg-primary/10 text-primary text-xs px-2.5 py-0.5 rounded-full font-medium">
-                    Disponible
-                  </span>
-                )}
-              </div>
-              <Link
-                to="/recherche-gardiens"
-                className="text-sm text-muted-foreground hover:text-foreground hidden md:block"
-              >
-                ← Retour aux gardiens
-              </Link>
+        {/* Contenu header par-dessus */}
+        <div className="relative z-10 w-full max-w-5xl mx-auto px-6 pb-8 pt-6">
+          {/* Ligne retour */}
+          <div className="flex justify-end mb-4">
+            <Link
+              to="/recherche-gardiens"
+              className="text-sm text-muted-foreground hover:text-foreground"
+            >
+              ← Retour aux gardiens
+            </Link>
+          </div>
+
+          {/* Flex photo + infos */}
+          <div className="flex items-end gap-6">
+            {/* Photo grande */}
+            <div className="shrink-0">
+              <img
+                src={profile.avatar_url || "/placeholder.svg"}
+                alt={firstName}
+                className="w-28 h-28 md:w-40 md:h-40 rounded-full object-cover object-center border-4 border-white shadow-md ring-2 ring-primary ring-offset-2"
+              />
             </div>
 
-            {/* Prénom h1 */}
-            <h1 className="text-4xl md:text-5xl font-bold text-foreground leading-tight">
-              {firstName}
-            </h1>
-
-            {/* Ville */}
-            {city && (
-              <p className="text-base text-muted-foreground flex items-center gap-1">
-                <MapPin className="w-3.5 h-3.5" />
-                Gardien à {city}
-              </p>
-            )}
-
-            {/* Badges statut */}
-            {activeBadgeKeys.length > 0 && (
-              <div className="flex items-center gap-2 mt-1">
-                {badgeMap["id_verifiee"] && (
-                  <span className="inline-flex items-center gap-1 text-xs text-muted-foreground border border-border rounded-full px-2 py-0.5">
-                    <Shield size={11} className="text-primary" /> ID vérifiée
-                  </span>
-                )}
-                {badgeMap["fondateur"] && (
-                  <span className="inline-flex items-center gap-1 text-xs text-muted-foreground border border-border rounded-full px-2 py-0.5">
-                    <Star size={11} className="text-primary" /> Fondateur
-                  </span>
-                )}
-                {badgeMap["gardien_urgence"] && (
-                  <span className="inline-flex items-center gap-1 text-xs text-muted-foreground border border-border rounded-full px-2 py-0.5">
-                    <Shield size={11} className="text-primary" /> Gardien d'urgence
-                  </span>
-                )}
-              </div>
-            )}
-
-            {/* Stats */}
-            <p className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
-              {statsItems.map((s, i) => (
-                <span key={i} className="flex items-center gap-1">
-                  {i > 0 && <span className="text-border mr-3">·</span>}
-                  {s}
+            {/* Infos */}
+            <div className="flex flex-col gap-1.5 pb-1">
+              {isAvailable && (
+                <span className="inline-flex w-fit items-center text-xs bg-primary/10 text-primary px-2.5 py-0.5 rounded-full font-medium">
+                  Disponible
                 </span>
-              ))}
-            </p>
+              )}
+
+              <h1 className="text-4xl md:text-5xl font-heading font-bold text-foreground leading-tight capitalize">
+                {firstName}
+              </h1>
+
+              {city && (
+                <p className="text-base text-muted-foreground flex items-center gap-1">
+                  <MapPin className="w-3.5 h-3.5" /> Gardien à {city}
+                </p>
+              )}
+
+              {activeBadgeKeys.length > 0 && (
+                <div className="flex items-center gap-2 flex-wrap">
+                  {badgeMap["id_verifiee"] && (
+                    <span className="inline-flex items-center gap-1 text-xs text-muted-foreground border border-border rounded-full px-2 py-0.5 bg-white/80">
+                      <Shield size={11} className="text-primary" /> ID vérifiée
+                    </span>
+                  )}
+                  {badgeMap["fondateur"] && (
+                    <span className="inline-flex items-center gap-1 text-xs text-muted-foreground border border-border rounded-full px-2 py-0.5 bg-white/80">
+                      <Star size={11} className="text-primary" /> Fondateur
+                    </span>
+                  )}
+                  {badgeMap["gardien_urgence"] && (
+                    <span className="inline-flex items-center gap-1 text-xs text-muted-foreground border border-border rounded-full px-2 py-0.5 bg-white/80">
+                      <Shield size={11} className="text-primary" /> Gardien d'urgence
+                    </span>
+                  )}
+                </div>
+              )}
+
+              <div className="flex items-center gap-4 text-sm text-muted-foreground mt-1">
+                {statsItems.map((s, i) => (
+                  <span key={i} className="flex items-center gap-1">
+                    {i > 0 && <span className="text-border mr-3">·</span>}
+                    {s}
+                  </span>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
       {/* ── SÉPARATEUR ── */}
-      <div className="max-w-5xl mx-auto px-6">
-        <hr className="border-border" />
-      </div>
+      <hr className="border-border max-w-5xl mx-auto" />
 
       {/* ── BODY — TWO COLUMNS ── */}
       <div className="max-w-5xl mx-auto px-6 py-8 flex flex-col md:flex-row gap-8 md:gap-12 items-start">
