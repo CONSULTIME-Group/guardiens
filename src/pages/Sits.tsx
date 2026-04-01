@@ -22,7 +22,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 /* ── Status configs ── */
 const statusConfig: Record<string, { label: string; className: string }> = {
   draft: { label: "Brouillon", className: "bg-muted text-muted-foreground" },
-  published: { label: "En recherche", className: "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400" },
+  published: { label: "En recherche", className: "bg-primary/10 text-primary" },
   confirmed: { label: "Confirmée", className: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" },
   in_progress: { label: "En cours", className: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400" },
   completed: { label: "Terminée", className: "bg-muted text-muted-foreground" },
@@ -406,9 +406,9 @@ const SitCard = ({ sit, isOwner, userId }: { sit: any; isOwner: boolean; userId?
 
       <div className="flex">
         {/* Thumbnail */}
-        {photo && (
-          <div className="w-24 md:w-32 shrink-0 hidden sm:block relative">
-            <img src={photo} alt="" className="w-full h-full object-cover" />
+         {photo && (
+          <div className="shrink-0 hidden sm:block relative">
+            <img src={photo} alt="" className="w-32 h-24 rounded-xl object-cover" />
           </div>
         )}
 
@@ -471,13 +471,7 @@ const SitCard = ({ sit, isOwner, userId }: { sit: any; isOwner: boolean; userId?
                 </div>
               )}
 
-              {/* Candidates count for owner */}
-              {isOwner && effectiveStatus === "published" && sit.applicationCount > 0 && (
-                <Link to={`/sits/${sit.id}`} className="flex items-center gap-1 text-xs text-primary font-medium hover:underline">
-                  <Users className="h-3.5 w-3.5" />
-                  {sit.applicationCount} candidature{sit.applicationCount > 1 ? "s" : ""}
-                </Link>
-              )}
+              {/* Candidates count removed — integrated into QuickActions button */}
             </div>
 
             {/* Pet summary */}
@@ -558,9 +552,24 @@ const QuickActions = ({ sit, isOwner, effectiveStatus }: { sit: any; isOwner: bo
   }
 
   if (effectiveStatus === "published" && isOwner) {
+    const count = sit.applicationCount || 0;
+    if (count === 0) {
+      return (
+        <span className={cn(btnClass, "border border-border text-muted-foreground cursor-default")}>
+          Aucune candidature
+        </span>
+      );
+    }
+    if (count === 1) {
+      return (
+        <Link to={`/sits/${sit.id}`} className={cn(btnClass, "bg-primary/10 text-primary hover:bg-primary/20")}>
+          <Users className="h-3.5 w-3.5" /> Voir 1 candidature
+        </Link>
+      );
+    }
     return (
-      <Link to={`/sits/${sit.id}`} className={cn(btnClass, "bg-primary/10 text-primary hover:bg-primary/20")}>
-        <Eye className="h-3.5 w-3.5" /> Voir les candidatures
+      <Link to={`/sits/${sit.id}`} className={cn(btnClass, "bg-primary text-primary-foreground hover:bg-primary/90")}>
+        <Users className="h-3.5 w-3.5" /> Voir {count} candidatures
       </Link>
     );
   }
