@@ -48,6 +48,7 @@ interface OwnerSummary {
   news_frequency: string | null;
   news_format: string[];
   communication_notes: string | null;
+  environments: string[];
 }
 
 const envLabels: Record<string, string> = {
