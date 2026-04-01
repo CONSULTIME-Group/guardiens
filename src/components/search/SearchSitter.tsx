@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef, lazy, Suspense } from "react";
 import ReportButton from "@/components/reports/ReportButton";
 import { Sprout, PawPrint, GraduationCap, Handshake as HandshakeIcon, LayoutGrid, Map as MapIcon, Cat, Bird, SlidersHorizontal, ShieldCheck, Crosshair } from "lucide-react";
+import EnvironmentPills from "@/components/shared/EnvironmentPills";
 import { Link, useSearchParams, useNavigate } from "react-router-dom";
 
 const SearchMapView = lazy(() => import("@/components/search/SearchMapView"));
