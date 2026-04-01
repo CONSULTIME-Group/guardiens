@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef } from "react";
-import TwoColumnLayout from "@/components/layout/TwoColumnLayout";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Link } from "react-router-dom";
@@ -10,9 +9,8 @@ import ResourceSection from "@/components/shared/ResourceSection";
 import type { ResourceItem } from "@/components/shared/ResourceCard";
 import {
   Calendar, Star, Megaphone, Heart, ChevronRight, Plus, PawPrint,
-  Users, Handshake, Newspaper, Home, CheckCircle2, RotateCcw,
+  Users, Handshake, Newspaper, Home,
 } from "lucide-react";
-import { capitalizeName } from "@/lib/capitalize";
 import { Button } from "@/components/ui/button";
 import { format, differenceInDays } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -57,13 +55,6 @@ const OwnerDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [onboardingChecks, setOnboardingChecks] = useState({ hasName: false, hasAvatar: false, hasBio: false, hasIdentity: false, hasProperty: false, hasPets: false, hasSit: false });
-  const [nearbyEmergencyCount, setNearbyEmergencyCount] = useState(0);
-
-  useEffect(() => {
-    supabase.from("emergency_sitter_profiles").select("user_id", { count: "exact", head: true }).eq("is_active", true).then(({ count }) => {
-      setNearbyEmergencyCount(count || 0);
-    });
-  }, []);
 
   useEffect(() => {
     if (!user) return;
@@ -164,19 +155,7 @@ const OwnerDashboard = () => {
     load();
   }, [user]);
 
-  if (loading) return (
-    <div className="p-8 flex items-center justify-center">
-      <div className="animate-pulse space-y-4 w-full max-w-lg">
-        <div className="h-8 bg-muted rounded-lg w-2/3" />
-        <div className="grid grid-cols-2 gap-3">
-          <div className="h-24 bg-muted rounded-xl" />
-          <div className="h-24 bg-muted rounded-xl" />
-        </div>
-        <div className="h-16 bg-muted rounded-xl" />
-        <div className="h-32 bg-muted rounded-xl" />
-      </div>
-    </div>
-  );
+  if (loading) return <div className="p-6 text-muted-foreground">Chargement...</div>;
 
   if (showOnboarding) {
     return (
@@ -241,84 +220,28 @@ const OwnerDashboard = () => {
   };
   const cta = getCTA();
 
-  const totalReceivedApps = sits.reduce((sum: number, s: any) => sum + (s.applications?.filter((a: any) => a.status === "pending").length || 0), 0);
-
-  const leftContent = (
-    <div className="space-y-5">
-      {/* BLOC 1 — Statut profil */}
-      <div className="bg-card border border-border rounded-2xl p-4 space-y-3">
-        <div className="flex items-center gap-3">
-          {user?.avatarUrl ? (
-            <img src={user.avatarUrl} alt={user.firstName} className="w-16 h-16 rounded-full object-cover shrink-0" />
-          ) : (
-            <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center font-heading text-xl font-bold shrink-0">
-              {user?.firstName?.charAt(0) || "?"}
-            </div>
-          )}
-          <div className="min-w-0">
-            <p className="font-heading font-semibold text-sm">{capitalizeName(user?.firstName) || "Propriétaire"}</p>
-            {user && (
-              <p className="text-xs text-muted-foreground">{(user as any).city || ""}</p>
-            )}
-          </div>
-        </div>
-        {user && user.profileCompletion < 100 ? (
-          <div>
-            <div className="flex items-center justify-between text-xs mb-1">
-              <span className="text-muted-foreground">Profil</span>
-              <span className="font-medium">{user.profileCompletion}% complété</span>
-            </div>
-            <div className="h-1.5 rounded-full bg-muted overflow-hidden">
-              <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${user.profileCompletion}%` }} />
-            </div>
-          </div>
+  return (
+    <div className="space-y-8">
+      {/* 1. Header */}
+      <div>
+        <h1 className="font-heading text-2xl md:text-3xl font-bold">
+          Bonjour{user?.firstName ? `, ${user.firstName}` : ""} 👋
+        </h1>
+        {subtitle.to ? (
+          <Link to={subtitle.to} className="text-sm text-primary hover:underline mt-1 inline-block">{subtitle.text}</Link>
         ) : (
-          <p className="text-xs text-primary font-medium">✓ Profil complet</p>
-        )}
-        {user && user.profileCompletion < 60 && (
-          <div className="rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 p-3">
-            <p className="text-xs text-amber-800 dark:text-amber-200">Complétez votre profil pour attirer les gardiens</p>
-            <Link to="/owner-profile" className="text-xs font-medium text-primary hover:underline mt-1 inline-block">Compléter →</Link>
-          </div>
+          <p className="text-sm text-muted-foreground mt-1">{subtitle.text}</p>
         )}
       </div>
 
-      {/* BLOC 2 — 4 métriques */}
-      <div className="grid grid-cols-2 gap-3">
-        <MiniMetric label="Gardes réalisées" value={completedSits.length} />
-        <MiniMetric label="Annonces actives" value={activeSits.length} />
-        <MiniMetric label="Candidatures reçues" value={totalReceivedApps} />
-        <MiniMetric label="Gardiens de confiance" value={trustedSitterCount} />
-      </div>
-
-      {/* BLOC 3 — Action rapide */}
-      {activeSits.length === 0 ? (
-        <Link to="/sits/create">
-          <Button className="w-full rounded-xl py-3 gap-2">
-            <Plus className="h-4 w-4" /> Publier une annonce →
-          </Button>
-        </Link>
-      ) : (
-        <Link to="/sits/create">
-          <Button variant="outline" className="w-full rounded-xl py-3 gap-2">
-            <Plus className="h-4 w-4" /> Nouvelle annonce →
-          </Button>
+      {/* 2. Banner */}
+      {banner && (
+        <Link to={banner.to} className={`block p-4 rounded-xl border ${banner.bg} hover:shadow-md transition-shadow`}>
+          <p className={`text-sm font-medium ${banner.text}`}>{banner.label}</p>
         </Link>
       )}
 
-      {/* BLOC 4 — Gardiens d'urgence proches */}
-      <div className="rounded-xl border border-border bg-card p-3 space-y-1">
-        <p className="text-sm text-muted-foreground">
-          <span className="font-semibold text-foreground">{nearbyEmergencyCount}</span> gardien{nearbyEmergencyCount > 1 ? "s" : ""} d'urgence disponible{nearbyEmergencyCount > 1 ? "s" : ""}
-        </p>
-        <Link to="/recherche-gardiens" className="text-xs text-primary hover:underline font-medium">Voir →</Link>
-      </div>
-    </div>
-  );
-
-  const rightContent = (
-    <div className="space-y-8">
-      {/* Mes animaux */}
+      {/* 3. Mes animaux */}
       <DashSection title="Mes animaux" action={
         <Link to="/owner-profile" className="text-xs text-primary hover:underline font-medium">Gérer →</Link>
       }>
@@ -334,9 +257,7 @@ const OwnerDashboard = () => {
                   {pet.photo_url ? (
                     <img src={pet.photo_url} alt={pet.name} className="w-[50px] h-[50px] rounded-full object-cover shrink-0" />
                   ) : (
-                    <div className="w-[50px] h-[50px] rounded-full bg-accent flex items-center justify-center shrink-0">
-                      <PawPrint className="h-5 w-5 text-muted-foreground" />
-                    </div>
+                    <div className="w-[50px] h-[50px] rounded-full bg-accent flex items-center justify-center text-lg shrink-0">🐾</div>
                   )}
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium">{pet.name || "Sans nom"}
@@ -365,7 +286,30 @@ const OwnerDashboard = () => {
         )}
       </DashSection>
 
-      {/* Candidatures récentes */}
+      {/* 4. Stat cards */}
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+        <StatCard icon={Calendar} iconColor="text-primary" label="Gardes réalisées" value={completedSits.length} delay={0} />
+        <StatCard icon={Star} iconColor="text-amber-500" label="Note moyenne" value={avgRating} delay={100} isDecimal emptyMsg={avgRating === 0 ? "Pas encore d'avis" : undefined} />
+        <StatCard icon={Megaphone} iconColor="text-blue-500" label="Annonces actives" value={activeSits.length} delay={200} />
+        <StatCard icon={Heart} iconColor="text-pink-500" label="Gardiens de confiance" value={trustedSitterCount} delay={300} />
+        <div className="p-4 rounded-xl border border-border bg-card hover:shadow-md transition-shadow animate-fade-in" style={{ animationDelay: "400ms" }}>
+          <Handshake className="h-4 w-4 text-primary mb-2" strokeWidth={1.8} />
+          <div className="flex items-baseline gap-3">
+            <div>
+              <p className="font-heading text-[28px] font-bold leading-tight">{missionMetrics.total}</p>
+              <p className="text-xs text-muted-foreground mt-1">Postées</p>
+            </div>
+            <span className="text-muted-foreground/30 text-lg">/</span>
+            <div>
+              <p className="font-heading text-[28px] font-bold leading-tight">{missionMetrics.completed}</p>
+              <p className="text-xs text-muted-foreground mt-1">Terminées</p>
+            </div>
+          </div>
+          <p className="text-[10px] text-muted-foreground mt-1.5">Petites missions</p>
+        </div>
+      </div>
+
+      {/* 5. Candidatures reçues */}
       <DashSection title="Candidatures récentes" action={
         recentApps.length > 0 ? <Link to="/sits" className="text-xs text-primary hover:underline font-medium">Voir toutes mes annonces →</Link> : undefined
       }>
@@ -384,7 +328,7 @@ const OwnerDashboard = () => {
                 )}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <p className="text-sm font-medium">{capitalizeName(app.sitter?.first_name) || "Gardien"}</p>
+                    <p className="text-sm font-medium">{app.sitter?.first_name || "Gardien"}</p>
                   </div>
                   {app.sitter?.id && sitterBadges[app.sitter.id] && <TooltipProvider><div className="flex gap-1">{sitterBadges[app.sitter.id].slice(0, 2).map((b: any) => <BadgeShield key={b.badge_key} badgeKey={b.badge_key} count={b.count} size="sm" showLabel={false} />)}</div></TooltipProvider>}
                   <p className="text-xs text-muted-foreground truncate mt-0.5">{app.sit?.title} · {app.sit?.start_date ? format(new Date(app.sit.start_date), "d MMM", { locale: fr }) : ""}</p>
@@ -457,7 +401,7 @@ const OwnerDashboard = () => {
                   </div>
                 )}
                 <div className="flex-1 min-w-0">
-                  <p className="text-xs font-medium">{capitalizeName(h.sitter?.first_name)}</p>
+                  <p className="text-xs font-medium">{h.sitter?.first_name}</p>
                   <p className="text-sm text-muted-foreground mt-0.5">{h.text}</p>
                 </div>
                 {h.photo_url && <img src={h.photo_url} alt="" className="w-16 h-12 rounded-lg object-cover shrink-0" />}
@@ -482,7 +426,7 @@ const OwnerDashboard = () => {
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium truncate">{m.title}</p>
                     <p className="text-xs text-muted-foreground">
-                      {m.status === "completed" ? "Terminée" : m.status === "in_progress" ? "En cours" : `${responseCount} réponse${responseCount > 1 ? "s" : ""}`}
+                      {m.status === "completed" ? "✅ Terminée" : m.status === "in_progress" ? "🔄 En cours" : `${responseCount} réponse${responseCount > 1 ? "s" : ""}`}
                       {pendingCount > 0 && <span className="ml-1 text-primary font-medium">· {pendingCount} en attente</span>}
                     </p>
                   </div>
@@ -496,22 +440,7 @@ const OwnerDashboard = () => {
 
     </div>
   );
-
-  return (
-    <TwoColumnLayout
-      leftWidth={260}
-      leftContent={leftContent}
-      rightContent={rightContent}
-    />
-  );
 };
-
-const MiniMetric = ({ label, value }: { label: string; value: number | string }) => (
-  <div className="bg-muted/50 rounded-xl p-3">
-    <p className="text-2xl font-semibold">{typeof value === "number" && value === 0 ? "—" : value}</p>
-    <p className="text-xs text-muted-foreground">{label}</p>
-  </div>
-);
 
 /* ── Shared ── */
 
@@ -548,15 +477,17 @@ const DashSection = ({ title, action, children }: {
 );
 
 const EmptyCard = ({ icon: Icon, text, cta, to, hint }: { icon?: React.ElementType; text: string; cta?: string; to?: string; hint?: string }) => (
-  <div className="flex flex-col items-center justify-center py-12 px-6 text-center">
-    {Icon && <Icon className="h-10 w-10 text-muted-foreground mb-4" />}
-    <p className="text-sm font-medium text-foreground mb-1">{text}</p>
-    {hint && <p className="text-xs text-muted-foreground mb-4 max-w-xs mx-auto">{hint}</p>}
-    {cta && to && (
-      <Link to={to} className="border border-border rounded-full px-4 py-2 text-sm text-foreground hover:border-primary transition-colors">
-        {cta} →
-      </Link>
+  <div className="p-8 rounded-xl border border-dashed border-border bg-accent/30 text-center space-y-3">
+    {Icon && (
+      <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
+        <Icon className="h-6 w-6 text-primary/60" />
+      </div>
     )}
+    <div>
+      <p className="text-sm font-medium text-foreground/80">{text}</p>
+      {hint && <p className="text-xs text-muted-foreground mt-1">{hint}</p>}
+    </div>
+    {cta && to && <Link to={to}><Button size="sm" className="mt-1">{cta}</Button></Link>}
   </div>
 );
 

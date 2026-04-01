@@ -670,7 +670,7 @@ const IdentityVerificationSection = ({ user }: { user: any }) => {
         if (verifyError) throw verifyError;
         if (verifyResult?.verified) {
           setStatus("verified");
-          toast.success("Identité vérifiée avec succès");
+          toast.success("Identité vérifiée avec succès ! 🎉");
         } else {
           setStatus("rejected");
           toast.error(verifyResult?.rejection_reason || "Document refusé. Veuillez soumettre un document valide et lisible.");

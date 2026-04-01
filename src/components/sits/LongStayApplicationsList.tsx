@@ -117,7 +117,7 @@ const LongStayApplicationsList = ({
     const convId = await getOrCreateConversation(sitterId);
     if (convId) {
       const petNamesStr = petNames.length > 0 ? petNames.join(", ") : "les animaux";
-      const confirmMsg = `La garde longue durée est confirmée ! Vous avez été choisi(e) pour garder ${petNamesStr} du ${startDate} au ${endDate}.`;
+      const confirmMsg = `🎉 La garde longue durée est confirmée ! Vous avez été choisi(e) pour garder ${petNamesStr} du ${startDate} au ${endDate}.`;
 
       await supabase.from("messages").insert({
         conversation_id: convId,

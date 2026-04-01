@@ -370,21 +370,7 @@ const Messages = () => {
   const showList = !activeConv || !isMobile;
   const showThread = !!activeConv;
 
-  if (loading) return (
-    <div className="p-8 flex items-center justify-center h-screen">
-      <div className="animate-pulse space-y-3 w-full max-w-sm">
-        {[1, 2, 3, 4, 5].map(i => (
-          <div key={i} className="flex items-center gap-3">
-            <div className="w-11 h-11 rounded-full bg-muted" />
-            <div className="flex-1 space-y-2">
-              <div className="h-4 bg-muted rounded w-2/3" />
-              <div className="h-3 bg-muted rounded w-1/2" />
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
+  if (loading) return <div className="p-6 md:p-10 text-muted-foreground">Chargement...</div>;
 
   const pills: { value: ConvPill; label: string }[] = [
     { value: "all", label: "Tout" },
@@ -439,7 +425,7 @@ const Messages = () => {
           <div className="flex items-center justify-between gap-2 mt-0.5">
             <p className={`text-xs truncate ${hasUnread ? "text-foreground font-medium" : "text-muted-foreground"}`}>
               {conv.last_message?.sender_id === user?.id ? "Vous : " : ""}
-              {conv.last_message?.content || "Photo"}
+              {conv.last_message?.content || "📷 Photo"}
             </p>
             {hasUnread && (
               <span className="bg-primary text-primary-foreground text-[10px] rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1 shrink-0 font-bold">
@@ -535,17 +521,8 @@ const Messages = () => {
 
           <div className="flex-1 overflow-y-auto">
             {displayConversations.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-12 px-6 text-center">
-                <MessageSquare className="h-10 w-10 text-muted-foreground mb-4" />
-                <p className="text-sm font-medium text-foreground mb-1">Aucune conversation</p>
-                <p className="text-xs text-muted-foreground mb-4 max-w-xs mx-auto">
-                  {pill === "archived" ? "Aucune conversation archivée." : "Contacte un gardien ou postule à une annonce."}
-                </p>
-                {pill !== "archived" && (
-                  <Link to="/recherche-gardiens" className="border border-border rounded-full px-4 py-2 text-sm text-foreground hover:border-primary transition-colors">
-                    Rechercher un gardien →
-                  </Link>
-                )}
+              <div className="p-6 text-center text-sm text-muted-foreground">
+                {pill === "archived" ? "Aucune conversation archivée." : "Aucune conversation pour le moment."}
               </div>
             ) : (
               <>

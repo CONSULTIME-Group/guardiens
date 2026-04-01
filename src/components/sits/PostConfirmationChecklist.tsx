@@ -252,7 +252,7 @@ const PostConfirmationChecklist = ({
       {/* All done celebration */}
       {completedCount === items.length && (
         <div className="text-center py-2">
-          <p className="text-sm font-medium text-primary">Tout est prêt, bonne garde</p>
+          <p className="text-sm font-medium text-green-700 dark:text-green-400">🎉 Tout est prêt ! Bonne garde !</p>
         </div>
       )}
     </div>

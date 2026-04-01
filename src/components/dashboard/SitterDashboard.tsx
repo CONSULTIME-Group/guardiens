@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef } from "react";
-import TwoColumnLayout from "@/components/layout/TwoColumnLayout";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Link } from "react-router-dom";
@@ -15,7 +14,6 @@ import {
   Calendar, Handshake, Newspaper, PawPrint, Zap, ShieldCheck,
   UserCircle, Sparkles, MapPin,
 } from "lucide-react";
-import { capitalizeName } from "@/lib/capitalize";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { format, differenceInDays, differenceInHours } from "date-fns";
@@ -193,10 +191,10 @@ const SitterDashboard = () => {
             </div>
             <div>
               <h1 className="font-heading text-xl md:text-2xl font-bold">
-                Bienvenue{user?.firstName ? `, ${capitalizeName(user.firstName)}` : ""}
+                Bienvenue{user?.firstName ? `, ${user.firstName}` : ""} ! 🎉
               </h1>
               <p className="text-sm text-muted-foreground mt-1">
-                Voici tes premières étapes pour décrocher ta première garde :
+                Voici vos premières étapes pour décrocher votre première garde :
               </p>
             </div>
           </div>
@@ -273,77 +271,21 @@ const SitterDashboard = () => {
   /* ─────────────────────────────────────────────
    *  ACTIVE SITTER DASHBOARD
    * ───────────────────────────────────────────── */
-  const sitterLeftContent = (
-    <div className="space-y-5">
-      {/* BLOC 1 — Statut profil */}
-      <div className="bg-card border border-border rounded-2xl p-4 space-y-3">
-        <div className="flex items-center gap-3">
-          {user?.avatarUrl ? (
-            <img src={user.avatarUrl} alt={user.firstName} className="w-16 h-16 rounded-full object-cover shrink-0" />
-          ) : (
-            <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center font-heading text-xl font-bold shrink-0">
-              {user?.firstName?.charAt(0) || "?"}
-            </div>
-          )}
-          <div className="min-w-0">
-            <p className="font-heading font-semibold text-sm">{capitalizeName(user?.firstName) || "Gardien"}</p>
-            <p className="text-xs text-muted-foreground">{(user as any)?.city || ""}</p>
-          </div>
-        </div>
-        {profileCompletion < 100 ? (
-          <div>
-            <div className="flex items-center justify-between text-xs mb-1">
-              <span className="text-muted-foreground">Profil</span>
-              <span className="font-medium">{profileCompletion}% complété</span>
-            </div>
-            <div className="h-1.5 rounded-full bg-muted overflow-hidden">
-              <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${profileCompletion}%` }} />
-            </div>
-          </div>
-        ) : (
-          <p className="text-xs text-primary font-medium">✓ Profil complet</p>
-        )}
-        {profileCompletion < 60 && (
-          <div className="rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 p-3">
-            <p className="text-xs text-amber-800 dark:text-amber-200">Complète ton profil pour apparaître dans les recherches</p>
-            <Link to="/profile" className="text-xs font-medium text-primary hover:underline mt-1 inline-block">Compléter →</Link>
-          </div>
-        )}
-      </div>
-
-      {/* BLOC 2 — 4 métriques */}
-      <div className="grid grid-cols-2 gap-3">
-        <MiniMetric label="Gardes réalisées" value={metrics.completed} />
-        <MiniMetric label="Note moyenne" value={metrics.avgRating > 0 ? `★ ${metrics.avgRating}` : "—"} />
-        <MiniMetric label="Candidatures en cours" value={metrics.pendingApps} />
-        <MiniMetric label="Écussons reçus" value={metrics.badgeCount} />
-      </div>
-
-      {/* BLOC 3 — Toggle disponibilité */}
-      <div className="rounded-xl border border-border bg-card p-3 space-y-2">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className={`w-2.5 h-2.5 rounded-full ${isAvailable ? "bg-primary animate-pulse" : "bg-muted-foreground/30"}`} />
-            <p className="font-semibold text-xs">Je suis disponible</p>
-          </div>
-          <Switch
-            checked={isAvailable}
-            onCheckedChange={async (v) => {
-              setIsAvailable(v);
-              await supabase.from("sitter_profiles").update({ is_available: v }).eq("user_id", user!.id);
-            }}
-          />
-        </div>
-        <p className="text-[10px] text-muted-foreground">Apparais en premier dans les recherches</p>
-      </div>
-
-      {/* BLOC 4 — Abonnement (placeholder - check subscription) */}
-      {/* Will show if user doesn't have an active subscription */}
-    </div>
-  );
-
-  const sitterRightContent = (
+  return (
     <div className="space-y-10">
+      {/* Header */}
+      <div>
+        <h1 className="font-heading text-2xl md:text-3xl font-bold">
+          Bonjour{user?.firstName ? `, ${user.firstName}` : ""} 👋
+        </h1>
+        <p className="text-sm text-muted-foreground mt-1">
+          {ongoingSit
+            ? `Garde en cours chez ${ongoingSit.ownerName || "…"} — ${ongoingSit.daysLeft} jour${ongoingSit.daysLeft > 1 ? "s" : ""} restant${ongoingSit.daysLeft > 1 ? "s" : ""}`
+            : "Votre tableau de bord gardien"
+          }
+        </p>
+      </div>
+
       {/* Ongoing sit banner */}
       {ongoingSit && (
         <>
@@ -375,6 +317,7 @@ const SitterDashboard = () => {
             </div>
           </div>
 
+          {/* Cancel modal for sitter */}
           <CancelSitModal
             open={cancelSitOpen}
             onOpenChange={setCancelSitOpen}
@@ -389,15 +332,43 @@ const SitterDashboard = () => {
         </>
       )}
 
-      {/* Emergency active section */}
+      {/* Emergency active section - at top if active */}
       {hasEmergencyProfile && <EmergencyDashSection />}
+
+      {/* 4 stat cards - only show non-zero relevant ones */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <StatCard icon={Home} iconColor="text-primary" label="Gardes réalisées" value={metrics.completed} delay={0} />
+        <StatCard icon={Star} iconColor="text-amber-500" label="Note moyenne" value={metrics.avgRating} delay={100} isDecimal suffix="/5" />
+        <StatCard icon={Mail} iconColor="text-blue-500" label="Candidatures actives" value={metrics.pendingApps} delay={200} />
+        <StatCard icon={Award} iconColor="text-purple-500" label="Badges reçus" value={metrics.badgeCount} delay={300} />
+      </div>
+
+      {/* Availability toggle */}
+      <div className="flex items-center justify-between rounded-xl border border-border bg-card p-4 hover:shadow-sm transition-shadow">
+        <div className="flex items-center gap-3">
+          <div className={`w-3 h-3 rounded-full ${isAvailable ? "bg-primary animate-pulse" : "bg-muted-foreground/30"}`} />
+          <div>
+            <p className="font-semibold text-sm">Je suis disponible</p>
+            <p className="text-xs text-muted-foreground">
+              {isAvailable ? "Les propriétaires peuvent vous trouver" : "Vous n'apparaissez pas dans les recherches"}
+            </p>
+          </div>
+        </div>
+        <Switch
+          checked={isAvailable}
+          onCheckedChange={async (v) => {
+            setIsAvailable(v);
+            await supabase.from("sitter_profiles").update({ is_available: v }).eq("user_id", user!.id);
+          }}
+        />
+      </div>
 
       {/* Applications - PRIORITY section */}
       <DashSection title="Mes candidatures" action={
         myApplications.length > 0 ? <Link to="/sits" className="text-xs text-primary hover:underline font-medium">Voir tout →</Link> : undefined
       }>
         {myApplications.length === 0 ? (
-          <EmptyCard icon={SendIcon} text="Aucune candidature en cours" hint="Postule à des gardes pour les voir apparaître ici." cta="Trouver une garde" to="/search" />
+          <EmptyCard icon={Search} text="Vous n'avez pas encore candidaté" hint="Parcourez les annonces et trouvez la garde idéale" cta="Explorer les annonces" to="/search" />
         ) : (
           <div className="space-y-2">
             {myApplications.slice(0, 4).map(app => {
@@ -468,7 +439,7 @@ const SitterDashboard = () => {
         <Link to="/search" className="text-xs text-primary hover:underline font-medium">Voir tout →</Link>
       }>
         {nearbyListings.length === 0 ? (
-          <EmptyCard icon={Search} text="Pas encore d'annonce dans ta zone" hint="Active le mode disponible pour être contacté directement." cta="Explorer les annonces" to="/search" />
+          <EmptyCard icon={Search} text="Pas encore d'annonce dans votre zone" hint="Activez le mode Disponible pour être contacté directement" cta="Explorer les annonces" to="/search" />
         ) : (
           <div className="grid gap-3 sm:grid-cols-2">
             {nearbyListings.map(sit => <ListingCard key={sit.id} sit={sit} />)}
@@ -528,22 +499,7 @@ const SitterDashboard = () => {
       </DashSection>
     </div>
   );
-
-  return (
-    <TwoColumnLayout
-      leftWidth={260}
-      leftContent={sitterLeftContent}
-      rightContent={sitterRightContent}
-    />
-  );
 };
-
-const MiniMetric = ({ label, value }: { label: string; value: number | string }) => (
-  <div className="bg-muted/50 rounded-xl p-3">
-    <p className="text-2xl font-semibold">{typeof value === "number" && value === 0 ? "—" : value}</p>
-    <p className="text-xs text-muted-foreground">{label}</p>
-  </div>
-);
 
 /* ── Shared components ── */
 
@@ -730,15 +686,17 @@ const DashSection = ({ title, action, children }: {
 );
 
 const EmptyCard = ({ icon: Icon, text, cta, to, hint }: { icon?: React.ElementType; text: string; cta?: string; to?: string; hint?: string }) => (
-  <div className="flex flex-col items-center justify-center py-12 px-6 text-center">
-    {Icon && <Icon className="h-10 w-10 text-muted-foreground mb-4" />}
-    <p className="text-sm font-medium text-foreground mb-1">{text}</p>
-    {hint && <p className="text-xs text-muted-foreground mb-4 max-w-xs mx-auto">{hint}</p>}
-    {cta && to && (
-      <Link to={to} className="border border-border rounded-full px-4 py-2 text-sm text-foreground hover:border-primary transition-colors">
-        {cta} →
-      </Link>
+  <div className="p-8 rounded-xl border border-dashed border-border bg-accent/30 text-center space-y-3">
+    {Icon && (
+      <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
+        <Icon className="h-7 w-7 text-primary/60" />
+      </div>
     )}
+    <div>
+      <p className="text-sm font-medium text-foreground/80">{text}</p>
+      {hint && <p className="text-xs text-muted-foreground mt-1.5 max-w-xs mx-auto">{hint}</p>}
+    </div>
+    {cta && to && <Link to={to}><Button size="sm" className="mt-1">{cta}</Button></Link>}
   </div>
 );
 

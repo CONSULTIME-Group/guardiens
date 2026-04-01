@@ -27,32 +27,20 @@ const OwnerStepIdentity = ({ data, onChange, onUploadPhoto }: Props) => {
     setUploading(false);
   };
 
-  const bioLen = data.bio?.length || 0;
-
   return (
     <div className="space-y-6">
-      <h2 className="text-xl font-semibold text-foreground mb-6">Identité & vérification</h2>
+      <h2 className="font-heading text-2xl font-bold">Identité & vérification</h2>
 
-      {/* Photo grande cliquable */}
       <div className="flex flex-col items-center gap-3">
         <button type="button" onClick={() => fileRef.current?.click()}
-          className="relative group w-32 h-32 rounded-full bg-muted border-2 border-border flex items-center justify-center overflow-hidden hover:border-primary transition-colors">
-          {data.avatar_url ? (
-            <img src={data.avatar_url} alt="Avatar" className="w-full h-full object-cover" />
-          ) : (
-            <Camera className="w-8 h-8 text-muted-foreground" />
-          )}
-          <div className="absolute inset-0 rounded-full bg-black/40 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-white text-xs gap-0.5">
-            <Camera className="h-4 w-4" />
-            <span>Modifier</span>
-          </div>
+          className="w-28 h-28 rounded-full bg-muted border-2 border-dashed border-border flex items-center justify-center overflow-hidden hover:border-primary transition-colors">
+          {data.avatar_url ? <img src={data.avatar_url} alt="Avatar" className="w-full h-full object-cover" /> : <Camera className="w-8 h-8 text-muted-foreground" />}
         </button>
         <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleAvatar} />
         <span className="text-sm text-muted-foreground">{uploading ? "Envoi..." : "Cliquez pour ajouter une photo"}</span>
         <HintBubble>Les propriétaires avec une photo inspirent davantage confiance aux gardiens.</HintBubble>
       </div>
 
-      {/* 2 colonnes Prénom / Nom */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label htmlFor="o_first">Prénom</Label>
@@ -64,7 +52,6 @@ const OwnerStepIdentity = ({ data, onChange, onUploadPhoto }: Props) => {
         </div>
       </div>
 
-      {/* Ville / Code postal */}
       <PostalCodeCityFields
         city={data.city}
         postalCode={data.postal_code}
@@ -73,23 +60,15 @@ const OwnerStepIdentity = ({ data, onChange, onUploadPhoto }: Props) => {
         postalId="o_postal"
       />
 
-      {/* Bio avec compteur */}
       <div className="space-y-2">
         <div className="flex items-center justify-between">
-          <div>
-            <Label htmlFor="o_bio">Présentation</Label>
-            <p className="text-xs text-muted-foreground mt-0.5">
-              Ce que les gardiens liront en premier — parlez de votre maison, de vos animaux, de ce qui vous tient à cœur.
-            </p>
-          </div>
+          <Label htmlFor="o_bio">Bio</Label>
           <AiSuggestButton field="bio" currentValue={data.bio} context={{ first_name: data.first_name, city: data.city }} onSuggestion={text => onChange({ bio: text })} />
         </div>
         <Textarea id="o_bio" value={data.bio} onChange={e => onChange({ bio: e.target.value })}
           placeholder="Parlez de vous, de votre famille, de ce qui fait votre quotidien..."
-          className="rounded-lg min-h-[120px]" maxLength={2000} rows={5} />
-        <p className={`text-xs text-right mt-1 ${bioLen < 50 ? "text-destructive" : "text-muted-foreground"}`}>
-          {bioLen}/2000{bioLen < 50 && " · 50 caractères minimum"}
-        </p>
+          className="rounded-lg min-h-[120px]" maxLength={2000} />
+        <HintBubble>Racontez votre quotidien : les gardiens veulent savoir dans quel univers ils vont s'installer.</HintBubble>
       </div>
     </div>
   );

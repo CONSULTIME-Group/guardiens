@@ -119,7 +119,7 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
     await supabase.from("sits").update({ status: "confirmed" as any }).eq("id", sitId);
 
     const petNamesStr = petNames.join(", ");
-    const confirmMsg = `La garde est confirmée ! Vous avez été choisi(e) pour garder ${petNamesStr} du ${startDate} au ${endDate}.`;
+    const confirmMsg = `🎉 La garde est confirmée ! Vous avez été choisi(e) pour garder ${petNamesStr} du ${startDate} au ${endDate}.`;
     const { data: acceptedConv } = await supabase
       .from("conversations")
       .select("id")

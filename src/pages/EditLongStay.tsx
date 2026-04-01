@@ -65,7 +65,7 @@ const EditLongStay = () => {
         access_level: accessLevel as any,
       }).eq("id", id);
       if (error) throw error;
-      toast({ title: "Annonce mise à jour" });
+      toast({ title: "Annonce mise à jour ✅" });
       navigate(`/long-stays/${id}`);
     } catch {
       toast({ variant: "destructive", title: "Erreur", description: "Impossible de sauvegarder." });

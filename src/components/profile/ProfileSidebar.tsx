@@ -1,8 +1,6 @@
 import { CheckCircle2, Circle, Camera, Eye } from "lucide-react";
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import BadgeShield from "@/components/badges/BadgeShield";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 export interface SidebarSection {
   id: string;
@@ -11,7 +9,6 @@ export interface SidebarSection {
   subtitle: string;
   missingCount: number;
   complete: boolean;
-  missingHint?: string;
 }
 
 interface ProfileSidebarProps {
@@ -25,18 +22,15 @@ interface ProfileSidebarProps {
   onAvatarChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   publicProfileUrl: string;
   role: "sitter" | "owner";
-  identityVerified?: boolean;
-  isFounder?: boolean;
 }
 
 const ProfileSidebar = ({
   avatarUrl, firstName, city, completion, sections,
   activeSection, onSectionClick, onAvatarChange, publicProfileUrl, role,
-  identityVerified, isFounder,
 }: ProfileSidebarProps) => {
   return (
-    <div className="space-y-5">
-      {/* BLOC 1 — Photo + identité */}
+    <aside className="w-full lg:w-[280px] lg:sticky lg:top-24 lg:self-start space-y-5 shrink-0">
+      {/* Avatar + info */}
       <div className="flex flex-col items-center gap-3">
         <div className="relative group">
           {avatarUrl ? (
@@ -53,36 +47,12 @@ const ProfileSidebar = ({
           </label>
         </div>
         <div className="text-center">
-          <p className="text-base font-semibold text-foreground capitalize">{firstName || "Votre profil"}</p>
+          <p className="text-base font-semibold text-foreground">{firstName || "Votre profil"}</p>
           {city && <p className="text-sm text-muted-foreground">{city}</p>}
         </div>
       </div>
 
-      {/* BLOC 2 — Badges statut */}
-      {(identityVerified || isFounder) && (
-        <div className="flex flex-wrap gap-2 justify-center">
-          <TooltipProvider>
-            {identityVerified && (
-              <Tooltip>
-                <TooltipTrigger>
-                  <BadgeShield badgeKey="id_verified" count={1} size="sm" showLabel={false} />
-                </TooltipTrigger>
-                <TooltipContent>ID vérifiée</TooltipContent>
-              </Tooltip>
-            )}
-            {isFounder && (
-              <Tooltip>
-                <TooltipTrigger>
-                  <BadgeShield badgeKey="founder" count={1} size="sm" showLabel={false} />
-                </TooltipTrigger>
-                <TooltipContent>Membre fondateur</TooltipContent>
-              </Tooltip>
-            )}
-          </TooltipProvider>
-        </div>
-      )}
-
-      {/* BLOC 3 — Complétion unifiée */}
+      {/* Completion */}
       <div className="space-y-2">
         <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Complétion du profil</p>
         <div className="h-2 rounded-full bg-muted overflow-hidden">
@@ -94,13 +64,13 @@ const ProfileSidebar = ({
             ✓ Profil visible par les {role === "sitter" ? "proprios" : "gardiens"}
           </span>
         ) : (
-          <span className="inline-block text-xs text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/30 rounded-full px-2 py-0.5">
-            ⚠ Profil non visible — 60% requis
+          <span className="inline-block text-xs text-amber-700 bg-amber-50 rounded-full px-2 py-0.5">
+            ⚠ Profil non visible — complétez à 60%
           </span>
         )}
       </div>
 
-      {/* BLOC 4 — Navigation sections */}
+      {/* Section nav — vertical on desktop, horizontal scroll on mobile */}
       <nav className="flex lg:flex-col gap-1.5 overflow-x-auto lg:overflow-x-visible pb-2 lg:pb-0 -mx-1 px-1">
         {sections.map((s) => {
           const isActive = activeSection === s.id;
@@ -110,9 +80,9 @@ const ProfileSidebar = ({
               type="button"
               onClick={() => onSectionClick(s.id)}
               className={cn(
-                "flex items-center gap-3 text-left rounded-xl px-3 py-2 transition-colors whitespace-nowrap lg:whitespace-normal lg:w-full shrink-0 cursor-pointer",
-                isActive && "bg-primary/10 border-l-2 border-primary pl-2",
-                !isActive && "hover:bg-muted transition-colors"
+                "flex items-center gap-2.5 text-left rounded-lg px-3 py-2 transition-colors whitespace-nowrap lg:whitespace-normal lg:w-full shrink-0",
+                isActive && "bg-primary/10 border-l-2 border-primary",
+                !isActive && "hover:bg-muted/50"
               )}
             >
               {s.complete ? (
@@ -121,9 +91,9 @@ const ProfileSidebar = ({
                 <Circle className="h-4 w-4 text-muted-foreground shrink-0" />
               )}
               <div className="min-w-0">
-                <p className="text-sm font-medium text-foreground">{s.label}</p>
-                <p className={cn("text-xs hidden lg:block", s.complete ? "text-primary" : "text-amber-600 dark:text-amber-400")}>
-                  {s.complete ? "Complété ✓" : s.missingHint || s.subtitle}
+                <p className={cn("text-sm font-medium", isActive ? "text-foreground" : "text-foreground")}>{s.label}</p>
+                <p className={cn("text-xs hidden lg:block", s.complete ? "text-primary" : "text-muted-foreground")}>
+                  {s.complete ? "Complété ✓" : s.missingCount > 0 ? `${s.missingCount} point${s.missingCount > 1 ? "s" : ""} manquant${s.missingCount > 1 ? "s" : ""}` : s.subtitle}
                 </p>
               </div>
             </button>
@@ -131,15 +101,15 @@ const ProfileSidebar = ({
         })}
       </nav>
 
-      {/* BLOC 5 — Lien profil public */}
+      {/* Public profile link */}
       <Link
         to={publicProfileUrl}
         target="_blank"
-        className="flex items-center justify-center gap-1 border border-border rounded-full px-3 py-1.5 text-xs text-foreground hover:border-primary transition-colors w-full mt-4"
+        className="flex items-center justify-center gap-2 border border-border rounded-full px-4 py-2 text-sm text-foreground hover:border-primary transition-colors w-full"
       >
-        <Eye className="h-3 w-3" /> Voir mon profil public →
+        <Eye className="h-3.5 w-3.5" /> Voir mon profil public →
       </Link>
-    </div>
+    </aside>
   );
 };
 

@@ -2,11 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Link } from "react-router-dom";
-import {
-  Bell, Check, CheckCheck, Trash2, CircleDot, Mail, CheckCircle2,
-  XCircle, Star, MessageSquare, CalendarDays, Clock, Info, Home,
-  Ban, Send as SendIcon,
-} from "lucide-react";
+import { Bell, Check, CheckCheck, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -23,25 +19,25 @@ interface Notification {
   actor_avatar_url: string | null;
 }
 
-const typeIconComponents: Record<string, React.ElementType> = {
-  sitter_available: CircleDot,
-  new_application: Mail,
-  sit_confirmed: CheckCircle2,
-  sit_cancelled: XCircle,
-  review_published: Star,
-  new_message: MessageSquare,
-  application_accepted: CheckCircle2,
-  application_rejected: XCircle,
-  application_cancelled: XCircle,
-  reminder_7days: CalendarDays,
-  reminder_48h: Clock,
-  info: Info,
-  long_stay_confirmed: Home,
-  long_stay_cancelled: XCircle,
-  long_stay_application_accepted: CheckCircle2,
-  long_stay_application_cancelled: Ban,
-  long_stay_application_rejected: XCircle,
-  new_long_stay_application: SendIcon,
+const typeIcons: Record<string, string> = {
+  sitter_available: "🟢",
+  new_application: "📩",
+  sit_confirmed: "✅",
+  sit_cancelled: "❌",
+  review_published: "⭐",
+  new_message: "💬",
+  application_accepted: "🎉",
+  application_rejected: "😔",
+  application_cancelled: "↩️",
+  reminder_7days: "📅",
+  reminder_48h: "⏰",
+  info: "ℹ️",
+  long_stay_confirmed: "🏡",
+  long_stay_cancelled: "❌",
+  long_stay_application_accepted: "🎉",
+  long_stay_application_cancelled: "🚫",
+  long_stay_application_rejected: "😔",
+  new_long_stay_application: "📩",
 };
 
 const Notifications = () => {
@@ -142,10 +138,9 @@ const Notifications = () => {
                 <div className="flex items-start gap-3">
                   {n.actor_avatar_url ? (
                     <img src={n.actor_avatar_url} alt="" className="w-9 h-9 rounded-full object-cover shrink-0 mt-0.5" />
-                  ) : (() => {
-                    const IconComp = typeIconComponents[n.type] || Bell;
-                    return <IconComp className="h-5 w-5 text-muted-foreground mt-0.5 shrink-0" />;
-                  })()}
+                  ) : (
+                    <span className="text-lg mt-0.5 shrink-0">{typeIcons[n.type] || "🔔"}</span>
+                  )}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between gap-2">
                       <p className={`text-sm ${!n.read_at ? "font-semibold" : "font-medium"}`}>{n.title}</p>
