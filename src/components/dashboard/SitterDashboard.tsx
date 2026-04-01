@@ -1,75 +1,55 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { useSubscriptionAccess } from "@/hooks/useSubscriptionAccess";
 import { Link } from "react-router-dom";
-import EmergencyActivation from "./EmergencyActivation";
-import CancelSitModal from "@/components/sits/CancelSitModal";
 import EmergencyDashSection from "./EmergencyDashSection";
 import MissionsNearbySection from "./MissionsNearbySection";
-import ResourceSection from "@/components/shared/ResourceSection";
-import type { ResourceItem } from "@/components/shared/ResourceCard";
-import {
-  Home, Star, Mail, Award, CircleDot, ChevronRight, Search,
-  Send as SendIcon, Eye, CheckCircle2, XCircle, MessageSquare,
-  Calendar, Handshake, Newspaper, PawPrint, Zap, ShieldCheck,
-  UserCircle, MapPin, ExternalLink, Circle,
-} from "lucide-react";
-
-const capitalize = (name: string) =>
-  name ? name.charAt(0).toUpperCase() + name.slice(1).toLowerCase() : "";
-import { Button } from "@/components/ui/button";
+import BadgeShield from "@/components/badges/BadgeShield";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Switch } from "@/components/ui/switch";
+import {
+  Home, Star, Search, Send as SendIcon, CheckCircle2, XCircle,
+  MessageSquare, Calendar, Handshake, Newspaper, Zap, ChevronRight,
+  Eye, Circle, CheckCircle, ChevronDown,
+} from "lucide-react";
 import { format, differenceInDays, differenceInHours } from "date-fns";
 import { fr } from "date-fns/locale";
 
+const capitalize = (name: string) =>
+  name ? name.charAt(0).toUpperCase() + name.slice(1).toLowerCase() : "";
+
 /* ── status config ── */
 const appStatusConfig: Record<string, { label: string; icon: React.ElementType; bg: string; text: string }> = {
-  pending:    { label: "Envoyée",    icon: SendIcon,     bg: "bg-muted",           text: "text-muted-foreground" },
-  viewed:     { label: "Vue",        icon: Eye,          bg: "bg-accent",           text: "text-foreground" },
-  discussing: { label: "En discussion", icon: MessageSquare, bg: "bg-accent",       text: "text-foreground" },
-  accepted:   { label: "Acceptée",   icon: CheckCircle2, bg: "bg-primary/10",       text: "text-primary" },
-  rejected:   { label: "Déclinée",   icon: XCircle,      bg: "bg-destructive/10",   text: "text-destructive" },
-  cancelled:  { label: "Annulée",    icon: XCircle,      bg: "bg-muted",           text: "text-muted-foreground" },
-};
-
-/* ── Count-up hook ── */
-const useCountUp = (target: number, duration = 600) => {
-  const [value, setValue] = useState(0);
-  useEffect(() => {
-    if (target === 0) { setValue(0); return; }
-    const start = performance.now();
-    const animate = (now: number) => {
-      const progress = Math.min((now - start) / duration, 1);
-      setValue(Math.round(progress * target));
-      if (progress < 1) requestAnimationFrame(animate);
-    };
-    requestAnimationFrame(animate);
-  }, [target, duration]);
-  return value;
+  pending:    { label: "Envoyée",       icon: SendIcon,      bg: "bg-muted",         text: "text-muted-foreground" },
+  viewed:     { label: "Vue",           icon: Eye,           bg: "bg-accent",        text: "text-foreground" },
+  discussing: { label: "En discussion", icon: MessageSquare, bg: "bg-accent",        text: "text-foreground" },
+  accepted:   { label: "Acceptée",      icon: CheckCircle2,  bg: "bg-primary/10",    text: "text-primary" },
+  rejected:   { label: "Déclinée",      icon: XCircle,       bg: "bg-destructive/10",text: "text-destructive" },
+  cancelled:  { label: "Annulée",       icon: XCircle,       bg: "bg-muted",         text: "text-muted-foreground" },
 };
 
 const SitterDashboard = () => {
   const { user } = useAuth();
-  const [myApplications, setMyApplications] = useState<any[]>([]);
-  const [nearbyListings, setNearbyListings] = useState<any[]>([]);
-  const [smallMissions, setSmallMissions] = useState<any[]>([]);
-  const [myMissions, setMyMissions] = useState<any[]>([]);
-  const [myMissionResponses, setMyMissionResponses] = useState<any[]>([]);
-  const [articles, setArticles] = useState<any[]>([]);
-  const [isAvailable, setIsAvailable] = useState(false);
-  const [metrics, setMetrics] = useState({ completed: 0, avgRating: 0, pendingApps: 0, badgeCount: 0 });
-  const [verificationStatus, setVerificationStatus] = useState<string>("not_submitted");
-  const [profileCompletion, setProfileCompletion] = useState(0);
-  const [ongoingSit, setOngoingSit] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
-  const [emergencyEligible, setEmergencyEligible] = useState(false);
-  const [hasEmergencyProfile, setHasEmergencyProfile] = useState(false);
-  const [emergencyBlocked, setEmergencyBlocked] = useState<string | null>(null);
-  const [showEmergencyForm, setShowEmergencyForm] = useState(false);
-  const [cancelSitOpen, setCancelSitOpen] = useState(false);
-  const [unreadCount, setUnreadCount] = useState(0);
+  const { hasAccess: hasSubscription } = useSubscriptionAccess();
 
-  // Onboarding checks for new sitters
+  const [loading, setLoading] = useState(true);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [pendingAppsCount, setPendingAppsCount] = useState(0);
+  const [nextGuard, setNextGuard] = useState<any>(null);
+  const [profileCompletion, setProfileCompletion] = useState(0);
+  const [identityVerified, setIdentityVerified] = useState(false);
+  const [completedSits, setCompletedSits] = useState(0);
+  const [avgRating, setAvgRating] = useState(0);
+  const [badgeCount, setBadgeCount] = useState(0);
+  const [totalApps, setTotalApps] = useState(0);
+  const [cancellations, setCancellations] = useState(0);
+  const [badges, setBadges] = useState<any[]>([]);
+  const [isAvailable, setIsAvailable] = useState(false);
+  const [nearbyListings, setNearbyListings] = useState<any[]>([]);
+  const [articles, setArticles] = useState<any[]>([]);
+  const [hasEmergencyProfile, setHasEmergencyProfile] = useState(false);
+
   const [onboardingChecks, setOnboardingChecks] = useState({
     profileComplete: false,
     identityVerified: false,
@@ -80,92 +60,78 @@ const SitterDashboard = () => {
   useEffect(() => {
     if (!user) return;
     const load = async () => {
-      const [appsRes, sitterRes, profileRes, reviewsRes, listingsRes, badgesRes, missionsRes, articlesRes] = await Promise.all([
+      const [
+        appsRes, sitterRes, profileRes, reviewsRes, listingsRes,
+        badgesRes, articlesRes, unreadRes, badgeDetailsRes,
+      ] = await Promise.all([
         supabase.from("applications").select("*, sit:sits(id, title, start_date, end_date, status, user_id, property_id, properties:property_id(photos))").eq("sitter_id", user.id).order("created_at", { ascending: false }),
         supabase.from("sitter_profiles").select("is_available").eq("user_id", user.id).single(),
-        supabase.from("profiles").select("identity_verification_status, profile_completion, identity_verified").eq("id", user.id).single(),
+        supabase.from("profiles").select("identity_verification_status, profile_completion, identity_verified, cancellation_count").eq("id", user.id).single(),
         supabase.from("reviews").select("overall_rating").eq("reviewee_id", user.id).eq("published", true),
         supabase.from("sits").select("id, title, start_date, end_date, user_id, property_id, status, created_at, is_urgent, properties:property_id(photos, type, environment)").eq("status", "published").order("created_at", { ascending: false }).limit(6),
         supabase.from("badge_attributions").select("id").eq("receiver_id", user.id),
-        supabase.from("small_missions").select("id, title, category, city, created_at, exchange_offer, user_id").eq("status", "open").order("created_at", { ascending: false }).limit(6),
         supabase.from("articles").select("id, title, slug, cover_image_url, excerpt, category").eq("published", true).eq("category", "conseil_gardien").order("published_at", { ascending: false }).limit(3),
+        supabase.from("messages").select("id", { count: "exact", head: true }).neq("sender_id", user.id).is("read_at", null),
+        supabase.from("badge_attributions").select("id, badge_key, created_at").eq("receiver_id", user.id).order("created_at", { ascending: false }).limit(6),
       ]);
 
-      const vStatus = profileRes.data?.identity_verification_status || "not_submitted";
       const pCompletion = profileRes.data?.profile_completion || 0;
-      setVerificationStatus(vStatus);
+      const idVerified = profileRes.data?.identity_verified || false;
+      const vStatus = profileRes.data?.identity_verification_status || "not_submitted";
       setProfileCompletion(pCompletion);
+      setIdentityVerified(idVerified);
+      setCancellations(profileRes.data?.cancellation_count || 0);
       setIsAvailable(sitterRes.data?.is_available || false);
 
       const apps = appsRes.data || [];
-      setMyApplications(apps);
+      const acceptedApps = apps.filter((a: any) => a.status === "accepted");
+      const completed = acceptedApps.filter((a: any) => a.sit?.status === "completed").length;
+      setCompletedSits(completed);
+      setTotalApps(apps.length);
+
+      const pending = apps.filter((a: any) => ["pending", "viewed", "discussing"].includes(a.status)).length;
+      setPendingAppsCount(pending);
 
       const reviews = reviewsRes.data || [];
-      const acceptedApps = apps.filter((a: any) => a.status === "accepted");
-      const completedCount = acceptedApps.filter((a: any) => a.sit?.status === "completed").length;
       const avg = reviews.length > 0 ? reviews.reduce((s: number, r: any) => s + r.overall_rating, 0) / reviews.length : 0;
-      const pendingApps = apps.filter((a: any) => ["pending", "viewed", "discussing"].includes(a.status)).length;
-      setMetrics({
-        completed: completedCount,
-        avgRating: Math.round(avg * 10) / 10,
-        pendingApps,
-        badgeCount: badgesRes.data?.length || 0,
-      });
+      setAvgRating(Math.round(avg * 10) / 10);
 
-      // Onboarding checks
-      setOnboardingChecks({
-        profileComplete: pCompletion >= 100,
-        identityVerified: vStatus === "verified" || vStatus === "pending",
-        firstSearch: false, // can't track this easily
-        availableMode: sitterRes.data?.is_available || false,
-      });
+      setBadgeCount(badgesRes.data?.length || 0);
+      setBadges(badgeDetailsRes.data || []);
+      setUnreadCount(unreadRes.count || 0);
 
-      // Ongoing sit
+      // Next confirmed guard
       const now = new Date();
-      const ongoing = acceptedApps.find((a: any) => {
-        const s = a.sit;
-        return s && s.start_date && new Date(s.start_date) <= now && s.end_date && new Date(s.end_date) >= now;
-      });
-      if (ongoing) {
-        const ownerRes = await supabase.from("profiles").select("first_name").eq("id", ongoing.sit.user_id).single();
-        setOngoingSit({ ...ongoing.sit, ownerName: ownerRes.data?.first_name, daysLeft: differenceInDays(new Date(ongoing.sit.end_date), now) });
+      const futureGuards = acceptedApps
+        .filter((a: any) => a.sit?.start_date && new Date(a.sit.start_date) > now)
+        .sort((a: any, b: any) => new Date(a.sit.start_date).getTime() - new Date(b.sit.start_date).getTime());
+
+      if (futureGuards.length > 0) {
+        const g = futureGuards[0];
+        const ownerRes = await supabase.from("profiles").select("first_name").eq("id", g.sit.user_id).single();
+        // Get pets for this guard
+        const petsRes = await supabase.from("pets").select("species").eq("property_id", g.sit.property_id);
+        setNextGuard({
+          ...g.sit,
+          ownerName: ownerRes.data?.first_name || "",
+          daysUntil: differenceInDays(new Date(g.sit.start_date), now),
+          pets: petsRes.data || [],
+        });
       }
 
       setNearbyListings((listingsRes.data || []).filter((s: any) => s.user_id !== user.id).slice(0, 4));
-      setSmallMissions(missionsRes.data || []);
       setArticles(articlesRes.data || []);
 
-      // My missions
-      const [myMissionsRes, myResponsesRes] = await Promise.all([
-        supabase.from("small_missions").select("id, title, category, status, created_at, small_mission_responses(id, status)").eq("user_id", user.id).order("created_at", { ascending: false }).limit(3),
-        supabase.from("small_mission_responses").select("id, status, created_at, mission:small_missions(id, title, category, status, user_id)").eq("responder_id", user.id).order("created_at", { ascending: false }).limit(3),
-      ]);
-      setMyMissions(myMissionsRes.data || []);
-      setMyMissionResponses(myResponsesRes.data || []);
+      setOnboardingChecks({
+        profileComplete: pCompletion >= 100,
+        identityVerified: vStatus === "verified" || idVerified,
+        firstSearch: false,
+        availableMode: sitterRes.data?.is_available || false,
+      });
 
-      // Emergency sitter
-      const { data: emProfile } = await supabase.from("emergency_sitter_profiles").select("id, blocked_until").eq("user_id", user.id).maybeSingle();
-      if (emProfile) {
-        const blockedUntil = (emProfile as any).blocked_until;
-        if (blockedUntil && new Date(blockedUntil) > new Date()) {
-          setEmergencyBlocked(blockedUntil);
-        } else {
-          setHasEmergencyProfile(true);
-        }
-      } else {
-        const cancellations = (await supabase.from("profiles").select("cancellation_count, identity_verified").eq("id", user.id).single()).data;
-        if (completedCount >= 5 && avg >= 4.7 && (cancellations?.cancellation_count || 0) === 0 && cancellations?.identity_verified) {
-          setEmergencyEligible(true);
-        }
-      }
-
-      // Unread messages count
-      const { count } = await supabase
-        .from("messages")
-        .select("id", { count: "exact", head: true })
-        .neq("sender_id", user.id)
-        .is("read_at", null);
-      setUnreadCount(count || 0);
+      // Emergency profile check
+      const { data: emProfile } = await supabase.from("emergency_sitter_profiles").select("id").eq("user_id", user.id).maybeSingle();
+      setHasEmergencyProfile(!!emProfile);
 
       setLoading(false);
     };
@@ -176,414 +142,384 @@ const SitterDashboard = () => {
     <div className="p-8 flex items-center justify-center">
       <div className="animate-pulse space-y-4 w-full max-w-lg">
         <div className="h-8 bg-muted rounded-lg w-2/3" />
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-3 gap-3">
+          <div className="h-24 bg-muted rounded-xl" />
           <div className="h-24 bg-muted rounded-xl" />
           <div className="h-24 bg-muted rounded-xl" />
         </div>
-        <div className="h-16 bg-muted rounded-xl" />
         <div className="h-32 bg-muted rounded-xl" />
       </div>
     </div>
   );
 
-  const isNewSitter = metrics.completed === 0 && profileCompletion < 100;
-  const isActiveSitter = metrics.completed > 0 || profileCompletion >= 100;
+  // Dynamic subtitle priority
+  const subtitle = nextGuard
+    ? `Ta prochaine garde commence dans ${nextGuard.daysUntil} jour${nextGuard.daysUntil > 1 ? "s" : ""}.`
+    : pendingAppsCount > 0
+    ? `Tu as ${pendingAppsCount} candidature${pendingAppsCount > 1 ? "s" : ""} en attente de réponse.`
+    : unreadCount > 0
+    ? `Tu as ${unreadCount} message${unreadCount > 1 ? "s" : ""} non lu${unreadCount > 1 ? "s" : ""}.`
+    : "Explore les annonces près de chez toi.";
 
-  /* ─────────────────────────────────────────────
-   *  NEW SITTER DASHBOARD (guided journey)
-   * ───────────────────────────────────────────── */
-  if (isNewSitter) {
-    return (
-      <div className="space-y-10">
-        {/* Welcome card with checklist */}
-        <div className="rounded-2xl border-2 border-primary/20 bg-gradient-to-br from-primary/5 via-background to-accent/30 p-6 md:p-8 space-y-6">
-          <div>
-            <div className="flex items-center justify-between">
-              <h1 className="font-heading text-xl md:text-2xl font-bold">
-                Bienvenue{user?.firstName ? `, ${capitalize(user.firstName)}` : ""}
-              </h1>
-              <Link
-                to={`/gardiens/${user?.id}`}
-                className="text-xs text-primary hover:underline flex items-center gap-1"
-              >
-                Voir mon profil public <ExternalLink className="h-3 w-3" />
+  // Emergency conditions
+  const emergencyConditions = [
+    { label: `5 gardes réalisées (${completedSits}/5)`, ok: completedSits >= 5, progress: completedSits < 5 ? (completedSits / 5) * 100 : undefined },
+    { label: "Note ≥ 4.7", ok: avgRating >= 4.7 },
+    { label: "Aucune annulation", ok: cancellations === 0 },
+    { label: "Identité vérifiée", ok: identityVerified },
+    { label: "Abonnement actif", ok: !!hasSubscription },
+  ];
+  const emergencyDone = emergencyConditions.filter(c => c.ok).length;
+  const allEmergencyDone = emergencyDone === 5;
+
+  // Onboarding checklist
+  const checklistItems = [
+    { done: onboardingChecks.profileComplete, label: `Compléter mon profil (${profileCompletion}%)`, to: "/mon-profil" },
+    { done: onboardingChecks.identityVerified, label: "Vérifier mon identité", to: "/mon-profil#identite" },
+    { done: false, label: "Découvre les gardes disponibles", to: "/recherche" },
+  ];
+  const checklistDone = checklistItems.filter(c => c.done).length + (onboardingChecks.availableMode ? 1 : 0);
+  const allChecklistDone = checklistDone === 4;
+
+  // Has anything to show in bloc 2
+  const showBloc2 = unreadCount > 0 || pendingAppsCount > 0 || !!nextGuard;
+
+  // Priority CTA
+  const priorityCTA = profileCompletion < 60
+    ? { label: "Compléter mon profil →", to: "/mon-profil", style: "bg-primary text-primary-foreground" }
+    : !identityVerified
+    ? { label: "Vérifier mon identité →", to: "/mon-profil#identite", style: "bg-amber-500 text-white" }
+    : totalApps === 0
+    ? { label: "Découvre les gardes disponibles →", to: "/recherche", style: "bg-primary text-primary-foreground" }
+    : pendingAppsCount > 0
+    ? { label: "Voir mes candidatures →", to: "/mes-gardes", style: "border border-primary text-primary" }
+    : { label: "Explorer les nouvelles annonces →", to: "/recherche", style: "border border-border text-foreground" };
+
+  return (
+    <div className="space-y-8">
+      {/* ═══ BLOC 1 — Header dynamique ═══ */}
+      <div className="mb-6">
+        <div className="flex items-center justify-between">
+          <h1 className="text-2xl font-semibold text-foreground">
+            Bonjour{user?.firstName ? `, ${capitalize(user.firstName)}` : ""} !
+          </h1>
+          <span
+            className="text-xs text-muted-foreground cursor-not-allowed pointer-events-none"
+            title="Profil public bientôt disponible"
+          >
+            Voir mon profil public
+          </span>
+        </div>
+        <p className="text-sm text-muted-foreground mt-1">{subtitle}</p>
+      </div>
+
+      {/* ═══ BLOC 2 — Ce qui m'attend ═══ */}
+      {showBloc2 && (
+        <div>
+          <p className="text-sm font-semibold text-foreground mb-3">Ce qui t'attend</p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            {/* Messages */}
+            {unreadCount > 0 ? (
+              <Link to="/messagerie" className="bg-card border border-border rounded-2xl p-4 cursor-pointer hover:border-primary transition-colors">
+                <MessageSquare className="h-5 w-5 text-primary mb-2" />
+                <p className="text-2xl font-semibold text-foreground">{unreadCount}</p>
+                <p className="text-xs text-muted-foreground">message{unreadCount > 1 ? "s" : ""} non lu{unreadCount > 1 ? "s" : ""}</p>
               </Link>
-            </div>
-            <p className="text-sm text-muted-foreground mt-1">
-              Voici tes prochaines étapes pour vivre ta première garde.
-            </p>
-          </div>
-
-          {/* Unread messages banner */}
-          {unreadCount > 0 && (
-            <Link to="/messagerie" className="flex items-center justify-between bg-primary/5 border border-primary/20 rounded-xl px-4 py-3">
-              <div className="flex items-center gap-2">
-                <MessageSquare className="h-4 w-4 text-primary" />
-                <span className="text-sm text-foreground">
-                  Tu as {unreadCount} message{unreadCount > 1 ? "s" : ""} non lu{unreadCount > 1 ? "s" : ""}
-                </span>
+            ) : (
+              <div className="bg-card border border-border rounded-2xl p-4 opacity-40 pointer-events-none">
+                <MessageSquare className="h-5 w-5 text-primary mb-2" />
+                <p className="text-2xl font-semibold text-foreground">0</p>
+                <p className="text-xs text-muted-foreground">message non lu</p>
               </div>
-              <span className="text-sm text-primary hover:underline">Voir →</span>
-            </Link>
-          )}
+            )}
 
-          <div className="space-y-2">
-            <ChecklistItem
-              done={onboardingChecks.profileComplete}
-              label={`Compléter mon profil (${profileCompletion}%)`}
-              to="/profile"
-            />
-            <ChecklistItem
-              done={onboardingChecks.identityVerified}
-              label="Vérifier mon identité"
-              to="/settings#verification"
-            />
-            <ChecklistItem
-              done={false}
-              label="Découvre les gardes disponibles"
-              to="/search"
-            />
-            <div className="flex items-center gap-3 p-3 rounded-xl bg-card border border-border">
-              <div className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 ${
-                onboardingChecks.availableMode ? "bg-primary text-primary-foreground" : "border-2 border-muted-foreground/30"
-              }`}>
-                {onboardingChecks.availableMode && <CheckCircle2 className="h-4 w-4" />}
+            {/* Candidatures */}
+            {pendingAppsCount > 0 ? (
+              <Link to="/mes-gardes" className="bg-card border border-border rounded-2xl p-4 cursor-pointer hover:border-primary transition-colors">
+                <SendIcon className="h-5 w-5 text-primary mb-2" />
+                <p className="text-2xl font-semibold text-foreground">{pendingAppsCount}</p>
+                <p className="text-xs text-muted-foreground">candidature{pendingAppsCount > 1 ? "s" : ""} en cours</p>
+              </Link>
+            ) : (
+              <div className="bg-card border border-border rounded-2xl p-4 opacity-40 pointer-events-none">
+                <SendIcon className="h-5 w-5 text-primary mb-2" />
+                <p className="text-2xl font-semibold text-foreground">0</p>
+                <p className="text-xs text-muted-foreground">candidature en cours</p>
               </div>
-              <span className={`text-sm flex-1 ${onboardingChecks.availableMode ? "line-through text-muted-foreground" : "font-medium"}`}>
-                Activer le mode disponible
-              </span>
-              <Switch
-                checked={isAvailable}
-                onCheckedChange={async (v) => {
-                  setIsAvailable(v);
-                  setOnboardingChecks(prev => ({ ...prev, availableMode: v }));
-                  await supabase.from("sitter_profiles").update({ is_available: v }).eq("user_id", user!.id);
-                }}
-              />
-            </div>
+            )}
+
+            {/* Prochaine garde */}
+            {nextGuard ? (
+              <Link to="/mes-gardes" className="bg-primary/5 border border-primary/30 rounded-2xl p-4 cursor-pointer hover:border-primary transition-colors">
+                <Calendar className="h-5 w-5 text-primary mb-2" />
+                <p className="text-sm font-medium text-foreground">{capitalize(nextGuard.ownerName || "—")}</p>
+                <p className="text-xs text-muted-foreground">
+                  Du {format(new Date(nextGuard.start_date), "d MMM", { locale: fr })} au {format(new Date(nextGuard.end_date), "d MMM", { locale: fr })}
+                </p>
+                {nextGuard.pets?.length > 0 && (
+                  <div className="flex flex-wrap gap-1 mt-2">
+                    {nextGuard.pets.map((p: any, i: number) => (
+                      <span key={i} className="text-xs bg-muted rounded-full px-2 py-0.5">{p.species || "Animal"}</span>
+                    ))}
+                  </div>
+                )}
+              </Link>
+            ) : (
+              <div className="bg-card border border-border rounded-2xl p-4 opacity-40 pointer-events-none">
+                <Calendar className="h-5 w-5 text-primary mb-2" />
+                <p className="text-sm font-medium text-foreground">Aucune garde à venir</p>
+              </div>
+            )}
           </div>
         </div>
+      )}
 
-        {/* Priority: nearby listings */}
-        <DashSection title="Annonces près de chez vous" action={
-          <Link to="/search" className="text-xs text-primary hover:underline font-medium">Voir tout →</Link>
-        }>
+      {/* ═══ BLOC 3 — Où j'en suis ═══ */}
+      <div>
+        <p className="text-sm font-semibold text-foreground mb-3">Où tu en es</p>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {/* Profil */}
+          <div className="bg-card border border-border rounded-2xl p-4">
+            <p className="text-xs text-muted-foreground uppercase tracking-wide mb-3">Mon profil</p>
+            <div className="h-2 rounded-full bg-muted mb-1 overflow-hidden">
+              <div className="h-full bg-primary rounded-full transition-all duration-500" style={{ width: `${profileCompletion}%` }} />
+            </div>
+            <p className="text-sm font-semibold text-foreground">{profileCompletion}% complété</p>
+            {profileCompletion >= 60 ? (
+              <span className="inline-block bg-primary/10 text-primary text-xs rounded-full px-2 py-0.5 mt-2">✓ Visible par les proprios</span>
+            ) : (
+              <span className="inline-block bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-300 text-xs rounded-full px-2 py-0.5 mt-2">⚠ Non visible — 60% requis</span>
+            )}
+            <Link to="/mon-profil" className="text-xs text-primary hover:underline mt-3 block">Compléter →</Link>
+          </div>
+
+          {/* Stats */}
+          <div className="bg-card border border-border rounded-2xl p-4">
+            <p className="text-xs text-muted-foreground uppercase tracking-wide mb-3">Mes stats</p>
+            <div className="grid grid-cols-2 gap-2">
+              <div className="text-center">
+                <p className="text-xl font-semibold text-foreground">{completedSits}</p>
+                <p className="text-xs text-muted-foreground">Gardes</p>
+              </div>
+              <div className="text-center">
+                <p className="text-xl font-semibold text-foreground">{avgRating > 0 ? `${avgRating}` : "—"}</p>
+                <p className="text-xs text-muted-foreground">Note ★</p>
+              </div>
+              <div className="text-center">
+                <p className="text-xl font-semibold text-foreground">{badgeCount}</p>
+                <p className="text-xs text-muted-foreground">Écussons</p>
+              </div>
+              <div className="text-center">
+                <p className="text-xl font-semibold text-foreground">{totalApps}</p>
+                <p className="text-xs text-muted-foreground">Candidatures</p>
+              </div>
+            </div>
+            {completedSits === 0 && (
+              <p className="text-xs text-muted-foreground italic mt-3">Tes stats apparaîtront après ta première garde.</p>
+            )}
+          </div>
+
+          {/* Gardien d'urgence */}
+          <div className={`border rounded-2xl p-4 ${allEmergencyDone || hasEmergencyProfile ? "bg-amber-50 dark:bg-amber-950/30 border-amber-200 dark:border-amber-800" : "bg-card border-border"}`}>
+            <p className="text-xs text-muted-foreground uppercase tracking-wide mb-3">Statut d'urgence</p>
+            {hasEmergencyProfile ? (
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <Zap className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+                  <p className="text-sm font-semibold text-amber-800 dark:text-amber-200">Statut actif ✓</p>
+                </div>
+                <Link to="/mon-profil#urgence" className="text-xs text-primary hover:underline">Gérer →</Link>
+              </div>
+            ) : allEmergencyDone ? (
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <Zap className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+                  <p className="text-sm font-semibold text-amber-800 dark:text-amber-200">Éligible !</p>
+                </div>
+                <Link to="/mon-profil#urgence" className="inline-block bg-amber-500 text-white rounded-full px-4 py-2 text-sm hover:bg-amber-600 transition-colors mt-1">
+                  Activer le statut →
+                </Link>
+              </div>
+            ) : (
+              <div>
+                <div className="h-2 rounded-full bg-muted mb-2 overflow-hidden">
+                  <div className="h-full bg-amber-400 rounded-full transition-all duration-500" style={{ width: `${(emergencyDone / 5) * 100}%` }} />
+                </div>
+                <p className="text-xs text-muted-foreground mb-3">{emergencyDone}/5 conditions</p>
+                <div className="space-y-0.5">
+                  {emergencyConditions.map((c, i) => (
+                    <div key={i} className="text-xs flex items-center gap-1.5 py-0.5">
+                      {c.ok
+                        ? <CheckCircle className="h-3.5 w-3.5 text-primary shrink-0" />
+                        : <Circle className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                      }
+                      <span className={c.ok ? "text-muted-foreground line-through" : "text-foreground"}>{c.label}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Emergency active section */}
+      {hasEmergencyProfile && <EmergencyDashSection />}
+
+      {/* ═══ BLOC 4 — Quoi faire ═══ */}
+      <div>
+        <p className="text-sm font-semibold text-foreground mb-3">Quoi faire</p>
+
+        {/* Priority CTA */}
+        <Link to={priorityCTA.to} className={`block rounded-xl px-4 py-3 w-full text-sm font-medium text-center transition-colors ${priorityCTA.style}`}>
+          {priorityCTA.label}
+        </Link>
+
+        {/* Badges collection */}
+        <div className="mt-4 bg-card border border-border rounded-2xl p-4">
+          <p className="text-xs text-muted-foreground uppercase tracking-wide mb-3">Mes écussons</p>
+          {badges.length === 0 ? (
+            <p className="text-xs text-muted-foreground italic">Tes premiers écussons apparaîtront après ta première garde.</p>
+          ) : (
+            <div>
+              <div className="flex flex-wrap gap-2">
+                {badges.slice(0, 6).map((b: any) => (
+                  <div key={b.id} title={b.badge_key}>
+                    <BadgeShield badgeKey={b.badge_key} size={28} />
+                  </div>
+                ))}
+              </div>
+              {badges.length > 6 && (
+                <Link to="/mon-profil#ecussons" className="text-xs text-primary hover:underline mt-2 inline-block">Voir tous mes écussons →</Link>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Checklist accordion */}
+        <div className="mt-4">
+          <Accordion type="single" collapsible defaultValue={allChecklistDone ? undefined : "checklist"}>
+            <AccordionItem value="checklist" className="border-none">
+              <AccordionTrigger className="flex items-center justify-between bg-muted/30 rounded-xl px-4 py-3 cursor-pointer hover:no-underline [&[data-state=open]>svg]:rotate-180">
+                <div className="flex items-center gap-2">
+                  {allChecklistDone ? (
+                    <>
+                      <CheckCircle className="h-4 w-4 text-primary" />
+                      <span className="text-sm font-medium text-primary">4/4 étapes complétées ✓</span>
+                    </>
+                  ) : (
+                    <span className="text-sm font-medium text-foreground">Tes prochaines étapes ({checklistDone}/4 complétées)</span>
+                  )}
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="pt-2 pb-0">
+                <div className="space-y-2">
+                  {checklistItems.map((item, i) => (
+                    <Link key={i} to={item.to} className="flex items-center gap-3 p-3 rounded-xl bg-card border border-border hover:bg-accent/50 transition-colors">
+                      <div className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 ${item.done ? "bg-primary text-primary-foreground" : "border-2 border-muted-foreground/30"}`}>
+                        {item.done && <CheckCircle2 className="h-4 w-4" />}
+                      </div>
+                      <span className={`text-sm flex-1 ${item.done ? "line-through text-muted-foreground" : "font-medium"}`}>{item.label}</span>
+                      {!item.done && <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />}
+                    </Link>
+                  ))}
+                  {/* Available mode toggle */}
+                  <div className="flex items-center gap-3 p-3 rounded-xl bg-card border border-border">
+                    <div className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 ${onboardingChecks.availableMode ? "bg-primary text-primary-foreground" : "border-2 border-muted-foreground/30"}`}>
+                      {onboardingChecks.availableMode && <CheckCircle2 className="h-4 w-4" />}
+                    </div>
+                    <span className={`text-sm flex-1 ${onboardingChecks.availableMode ? "line-through text-muted-foreground" : "font-medium"}`}>
+                      Activer le mode disponible
+                    </span>
+                    <Switch
+                      checked={isAvailable}
+                      onCheckedChange={async (v) => {
+                        setIsAvailable(v);
+                        setOnboardingChecks(prev => ({ ...prev, availableMode: v }));
+                        await supabase.from("sitter_profiles").update({ is_available: v }).eq("user_id", user!.id);
+                      }}
+                    />
+                  </div>
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
+        </div>
+      </div>
+
+      {/* ═══ BLOC 5 — Annonces et missions ═══ */}
+      <div className="space-y-8">
+        {/* Annonces */}
+        <div className="animate-fade-in">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="font-heading text-lg font-semibold">Annonces près de chez toi</h2>
+            <Link to="/recherche" className="text-xs text-primary hover:underline font-medium">Voir tout →</Link>
+          </div>
           {nearbyListings.length === 0 ? (
-            <EmptyCard
-              icon={Search}
-              text="Pas encore d'annonce dans ta zone"
-              hint="Active le mode disponible pour être contacté directement par les proprios."
-              cta="Explorer les annonces →"
-              to="/search"
-              outlineBtn
-            />
+            <div className="p-8 rounded-xl border border-dashed border-border bg-accent/30 text-center space-y-3">
+              <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
+                <Search className="h-7 w-7 text-primary/60" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-foreground/80">Pas encore d'annonce dans ta zone</p>
+                <p className="text-xs text-muted-foreground mt-1.5 max-w-xs mx-auto">Active le mode disponible pour être contacté directement par les proprios.</p>
+              </div>
+              <Link to="/recherche">
+                <span className="inline-block border border-border rounded-full px-4 py-2 text-sm text-foreground hover:border-primary transition-colors mt-1">
+                  Explorer les annonces →
+                </span>
+              </Link>
+            </div>
           ) : (
             <div className="grid gap-3 sm:grid-cols-2">
               {nearbyListings.map(sit => <ListingCard key={sit.id} sit={sit} />)}
             </div>
           )}
-        </DashSection>
+        </div>
 
-      {/* Échanges autour de toi */}
+        {/* Échanges */}
         <MissionsNearbySection />
 
-        {/* Tips */}
-        <DashSection title="Conseils pour vous" action={
-          <Link to="/actualites" className="text-xs text-primary hover:underline font-medium">Voir tout →</Link>
-        }>
-          <ArticleCards articles={articles} />
-        </DashSection>
-      </div>
-    );
-  }
-
-  /* ─────────────────────────────────────────────
-   *  ACTIVE SITTER DASHBOARD
-   * ───────────────────────────────────────────── */
-  return (
-    <div className="space-y-10">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="font-heading text-2xl md:text-3xl font-bold">
-            Bonjour{user?.firstName ? `, ${capitalize(user.firstName)}` : ""} 👋
-          </h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            {ongoingSit
-              ? `Garde en cours chez ${ongoingSit.ownerName || "…"} — ${ongoingSit.daysLeft} jour${ongoingSit.daysLeft > 1 ? "s" : ""} restant${ongoingSit.daysLeft > 1 ? "s" : ""}`
-              : "Ton tableau de bord gardien"
-            }
-          </p>
-        </div>
-        <Link
-          to={`/gardiens/${user?.id}`}
-          className="text-xs text-primary hover:underline flex items-center gap-1"
-        >
-          Voir mon profil public <ExternalLink className="h-3 w-3" />
-        </Link>
-      </div>
-
-      {/* Unread messages banner */}
-      {unreadCount > 0 && (
-        <Link to="/messagerie" className="flex items-center justify-between bg-primary/5 border border-primary/20 rounded-xl px-4 py-3">
-          <div className="flex items-center gap-2">
-            <MessageSquare className="h-4 w-4 text-primary" />
-            <span className="text-sm text-foreground">
-              Tu as {unreadCount} message{unreadCount > 1 ? "s" : ""} non lu{unreadCount > 1 ? "s" : ""}
-            </span>
+        {/* Conseils */}
+        <div className="animate-fade-in">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="font-heading text-lg font-semibold">Conseils pour toi</h2>
+            <Link to="/actualites" className="text-xs text-primary hover:underline font-medium">Voir tout →</Link>
           </div>
-          <span className="text-sm text-primary hover:underline">Voir →</span>
-        </Link>
-      )}
-
-      {/* Ongoing sit banner */}
-      {ongoingSit && (
-        <>
-          <div className="rounded-xl border-2 border-primary/30 bg-primary/5">
-            <Link to={`/sits/${ongoingSit.id}`} className="block p-4 hover:shadow-md transition-shadow">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                  <Calendar className="h-5 w-5 text-primary" />
-                </div>
-                <div className="flex-1">
-                  <p className="text-sm font-semibold">Garde en cours</p>
-                  <p className="text-xs text-muted-foreground">{ongoingSit.title} — chez {ongoingSit.ownerName}</p>
-                </div>
-                <ChevronRight className="h-4 w-4 text-muted-foreground" />
+          {articles.length === 0 ? (
+            <div className="p-8 rounded-xl border border-dashed border-border bg-accent/30 text-center space-y-3">
+              <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
+                <Newspaper className="h-7 w-7 text-primary/60" />
               </div>
-            </Link>
-            <div className="px-4 pb-3">
-              <a href="/actualites/gerer-imprevu-pendant-garde" className="text-xs text-primary/70 hover:text-primary hover:underline">
-                Un imprévu ? Voir le guide →
-              </a>
+              <p className="text-sm font-medium text-foreground/80">Les articles arrivent bientôt</p>
+              <p className="text-xs text-muted-foreground">Conseils, astuces et histoires de gardiens</p>
             </div>
-            <div className="border-t border-border mt-4 pt-4 px-4 pb-4">
-              <button
-                onClick={() => setCancelSitOpen(true)}
-                className="text-xs text-muted-foreground hover:text-destructive transition-colors underline-offset-2 hover:underline cursor-pointer w-full text-center"
-              >
-                Annuler ma garde
-              </button>
-            </div>
-          </div>
-
-          {/* Cancel modal for sitter */}
-          <CancelSitModal
-            open={cancelSitOpen}
-            onOpenChange={setCancelSitOpen}
-            sitId={ongoingSit.id}
-            sitTitle={ongoingSit.title || "Garde"}
-            sitOwnerId={ongoingSit.user_id}
-            otherPartyName={ongoingSit.ownerName}
-            startDate={ongoingSit.start_date}
-            endDate={ongoingSit.end_date}
-            onCancelled={() => { setOngoingSit(null); }}
-          />
-        </>
-      )}
-
-      {/* Emergency active section - at top if active */}
-      {hasEmergencyProfile && <EmergencyDashSection />}
-
-      {/* 4 stat cards - only show non-zero relevant ones */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <StatCard icon={Home} iconColor="text-primary" label="Gardes réalisées" value={metrics.completed} delay={0} />
-        <StatCard icon={Star} iconColor="text-amber-500" label="Note moyenne" value={metrics.avgRating} delay={100} isDecimal suffix="/5" />
-        <StatCard icon={Mail} iconColor="text-blue-500" label="Candidatures actives" value={metrics.pendingApps} delay={200} />
-        <StatCard icon={Award} iconColor="text-purple-500" label="Badges reçus" value={metrics.badgeCount} delay={300} />
-      </div>
-
-      {/* Availability toggle */}
-      <div className="flex items-center justify-between rounded-xl border border-border bg-card p-4 hover:shadow-sm transition-shadow">
-        <div className="flex items-center gap-3">
-          <div className={`w-3 h-3 rounded-full ${isAvailable ? "bg-primary animate-pulse" : "bg-muted-foreground/30"}`} />
-          <div>
-            <p className="font-semibold text-sm">Je suis disponible</p>
-            <p className="text-xs text-muted-foreground">
-              {isAvailable ? "Les propriétaires peuvent vous trouver" : "Vous n'apparaissez pas dans les recherches"}
-            </p>
-          </div>
-        </div>
-        <Switch
-          checked={isAvailable}
-          onCheckedChange={async (v) => {
-            setIsAvailable(v);
-            await supabase.from("sitter_profiles").update({ is_available: v }).eq("user_id", user!.id);
-          }}
-        />
-      </div>
-
-      {/* Applications - PRIORITY section */}
-      <DashSection title="Mes candidatures" action={
-        myApplications.length > 0 ? <Link to="/sits" className="text-xs text-primary hover:underline font-medium">Voir tout →</Link> : undefined
-      }>
-        {myApplications.length === 0 ? (
-          <EmptyCard icon={Search} text="Vous n'avez pas encore candidaté" hint="Parcourez les annonces et trouvez la garde idéale" cta="Explorer les annonces" to="/search" />
-        ) : (
-          <div className="space-y-2">
-            {myApplications.slice(0, 4).map(app => {
-              const cfg = appStatusConfig[app.status] || appStatusConfig.pending;
-              const StatusIcon = cfg.icon;
-              const photo = app.sit?.properties?.photos?.[0];
-              return (
-                <Link key={app.id} to={`/sits/${app.sit_id}`} className="flex items-center gap-3 p-4 rounded-xl bg-card border-2 border-border hover:border-primary/20 hover:shadow-md transition-all">
-                  {photo ? (
-                    <img src={photo} alt="" className="w-14 h-14 rounded-lg object-cover shrink-0" />
+          ) : (
+            <div className="flex gap-3 overflow-x-auto pb-1 -mx-1 px-1">
+              {articles.map((a: any) => (
+                <a key={a.id} href={`/actualites/${a.slug}`} className="flex-shrink-0 w-64 rounded-xl border border-border bg-card overflow-hidden hover:shadow-md transition-shadow cursor-pointer">
+                  {a.cover_image_url ? (
+                    <img src={a.cover_image_url} alt="" className="w-full h-28 object-cover" />
                   ) : (
-                    <div className="w-14 h-14 rounded-lg bg-accent flex items-center justify-center shrink-0">
-                      <Home className="h-6 w-6 text-muted-foreground" />
+                    <div className="w-full h-28 bg-accent flex items-center justify-center">
+                      <Newspaper className="h-8 w-8 text-muted-foreground/40" />
                     </div>
                   )}
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold truncate">{app.sit?.title || "Garde"}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {app.sit?.start_date && app.sit?.end_date
-                        ? `${format(new Date(app.sit.start_date), "d MMM", { locale: fr })} → ${format(new Date(app.sit.end_date), "d MMM", { locale: fr })}`
-                        : ""}
-                    </p>
+                  <div className="p-3">
+                    <p className="text-sm font-semibold line-clamp-2">{a.title}</p>
+                    <p className="text-xs text-muted-foreground line-clamp-1 mt-1">{a.excerpt}</p>
                   </div>
-                  <span className={`flex items-center gap-1.5 text-xs font-medium px-2.5 py-1.5 rounded-full ${cfg.bg} ${cfg.text}`}>
-                    <StatusIcon className="h-3 w-3" /> {cfg.label}
-                  </span>
-                </Link>
-              );
-            })}
-          </div>
-        )}
-      </DashSection>
-
-      {/* Contextual resources */}
-      {!hasEmergencyProfile && (() => {
-        const completedCount = metrics.completed;
-        let resTitle = "";
-        let resItems: ResourceItem[] = [];
-
-        if (profileCompletion < 60 || verificationStatus !== "verified") {
-          resTitle = "Bien démarrer sur Guardiens";
-          resItems = [
-            { title: "Créer un profil qui attire des missions", description: "Photo, bio, expérience : ce qui convainc.", href: "/actualites/creer-profil-gardien-attractif", icon: "gardien" },
-            { title: "Réussir sa première garde", description: "La rencontre, le premier soir, la communication.", href: "/actualites/reussir-premiere-garde-house-sitting", icon: "gardien" },
-            { title: "Devenir Gardien d'Urgence", description: "Les conditions, les avantages, les obligations.", href: "/actualites/devenir-gardien-urgence-guardiens", icon: "urgence" },
-          ];
-        } else if (completedCount >= 1 && completedCount < 5) {
-          resTitle = "Progresser sur Guardiens";
-          resItems = [
-            { title: "Gérer les animaux difficiles", description: "Chien anxieux, chat caché, animal malade.", href: "/actualites/gerer-animaux-difficiles-garde", icon: "animal" },
-            { title: "Gérer les imprévus pendant une garde", description: "Panne, urgence, départ anticipé : les protocoles.", href: "/actualites/gerer-imprevu-pendant-garde", icon: "gardien" },
-            { title: "Devenir Gardien d'Urgence", description: "Encore quelques gardes avant d'y accéder.", href: "/actualites/devenir-gardien-urgence-guardiens", icon: "urgence" },
-          ];
-        } else if (completedCount >= 5) {
-          resTitle = "Passer au niveau supérieur";
-          resItems = [
-            { title: "Devenir Gardien d'Urgence", description: "Vous remplissez peut-être déjà les conditions.", href: "/actualites/devenir-gardien-urgence-guardiens", icon: "urgence" },
-            { title: "Gérer les animaux difficiles", description: "Les situations que les bons gardiens gèrent.", href: "/actualites/gerer-animaux-difficiles-garde", icon: "animal" },
-            { title: "Gérer les imprévus pendant une garde", description: "Panne, urgence, départ anticipé : les protocoles.", href: "/actualites/gerer-imprevu-pendant-garde", icon: "gardien" },
-          ];
-        }
-
-        return resItems.length > 0 ? <ResourceSection title={resTitle} resources={resItems} /> : null;
-      })()}
-
-      {/* Nearby listings */}
-      <DashSection title="Annonces près de chez vous" action={
-        <Link to="/search" className="text-xs text-primary hover:underline font-medium">Voir tout →</Link>
-      }>
-        {nearbyListings.length === 0 ? (
-          <EmptyCard icon={Search} text="Pas encore d'annonce dans ta zone" hint="Active le mode disponible pour être contacté directement par les proprios." cta="Explorer les annonces →" to="/search" outlineBtn />
-        ) : (
-          <div className="grid gap-3 sm:grid-cols-2">
-            {nearbyListings.map(sit => <ListingCard key={sit.id} sit={sit} />)}
-          </div>
-        )}
-      </DashSection>
-
-      {/* Échanges autour de toi */}
-      <MissionsNearbySection />
-
-      {/* Emergency section */}
-      {emergencyEligible && !hasEmergencyProfile && !showEmergencyForm && (
-        <div className="rounded-2xl border-2 border-secondary/40 bg-secondary/5 p-6 space-y-4">
-          <div className="flex items-center gap-3">
-            <span className="inline-flex items-center justify-center h-10 w-10 rounded-full bg-secondary text-secondary-foreground shadow">
-              <Zap className="h-5 w-5" fill="currentColor" />
-            </span>
-            <div>
-              <p className="font-heading font-semibold">Vous êtes éligible au statut Gardien d'urgence !</p>
-              <p className="text-xs text-muted-foreground">Mobilisable rapidement, fiable, expérimenté. Visibilité prioritaire.</p>
+                </a>
+              ))}
             </div>
-          </div>
-          <Button onClick={() => setShowEmergencyForm(true)} className="gap-2 w-full">
-            <Zap className="h-4 w-4" /> Activer le mode Gardien d'urgence
-          </Button>
+          )}
         </div>
-      )}
-
-      {emergencyEligible && !hasEmergencyProfile && showEmergencyForm && (
-        <div className="rounded-2xl border-2 border-secondary/40 bg-card p-6">
-          <h3 className="font-heading font-semibold mb-4 flex items-center gap-2">
-            <Zap className="h-4 w-4 text-secondary" /> Activer le mode Gardien d'urgence
-          </h3>
-          <EmergencyActivation onActivated={() => { setHasEmergencyProfile(true); setShowEmergencyForm(false); }} />
-        </div>
-      )}
-
-      {emergencyBlocked && (
-        <div className="rounded-xl border border-border bg-muted/50 p-5 space-y-2">
-          <div className="flex items-center gap-2.5">
-            <Zap className="h-4 w-4 text-muted-foreground" />
-            <p className="font-heading font-semibold text-sm text-muted-foreground">Gardien d'urgence — en pause</p>
-          </div>
-          <p className="text-xs text-muted-foreground">
-            Votre statut est en pause jusqu'au {new Date(emergencyBlocked).toLocaleDateString("fr-FR")}.
-          </p>
-        </div>
-      )}
-
-      {!emergencyEligible && !hasEmergencyProfile && !emergencyBlocked && <EmergencyProgress />}
-
-      {/* Tips */}
-      <DashSection title="Conseils pour vous" action={
-        <Link to="/actualites" className="text-xs text-primary hover:underline font-medium">Voir tout →</Link>
-      }>
-        <ArticleCards articles={articles} />
-      </DashSection>
+      </div>
     </div>
   );
 };
 
 /* ── Shared components ── */
-
-const ChecklistItem = ({ done, label, to }: { done: boolean; label: string; to: string }) => (
-  <Link to={to} className="flex items-center gap-3 p-3 rounded-xl bg-card border border-border hover:bg-accent/50 transition-colors group">
-    <div className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 ${
-      done ? "bg-primary text-primary-foreground" : "border-2 border-muted-foreground/30 group-hover:border-primary/50"
-    }`}>
-      {done && <CheckCircle2 className="h-4 w-4" />}
-    </div>
-    <span className={`text-sm flex-1 ${done ? "line-through text-muted-foreground" : "font-medium"}`}>{label}</span>
-    {!done && <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />}
-  </Link>
-);
-
-const StatCard = ({ icon: Icon, iconColor, label, value, delay, isDecimal, suffix }: {
-  icon: React.ElementType; iconColor: string; label: string; value: number; delay: number; isDecimal?: boolean; suffix?: string;
-}) => {
-  const displayed = useCountUp(isDecimal ? Math.round(value * 10) : value);
-  const formatted = isDecimal ? (displayed / 10).toFixed(1) : String(displayed);
-
-  return (
-    <div
-      className="p-4 rounded-xl border border-border bg-card hover:shadow-md transition-shadow animate-fade-in"
-      style={{ animationDelay: `${delay}ms` }}
-    >
-      <Icon className={`h-4 w-4 ${iconColor} mb-2`} strokeWidth={1.8} />
-      <p className="font-heading text-[28px] font-bold leading-tight">
-        {formatted}{suffix && <span className="text-base font-normal text-muted-foreground">{suffix}</span>}
-      </p>
-      <p className="text-xs text-muted-foreground mt-1">{label}</p>
-    </div>
-  );
-};
 
 const ListingCard = ({ sit }: { sit: any }) => {
   const isNew = differenceInHours(new Date(), new Date(sit.created_at)) < 48;
@@ -604,7 +540,7 @@ const ListingCard = ({ sit }: { sit: any }) => {
           <p className="text-sm font-semibold truncate">{sit.title}</p>
           {isNew && <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-primary text-primary-foreground">Nouveau</span>}
           {sit.is_urgent && <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-destructive text-destructive-foreground">Urgent</span>}
-          {durationDays >= 30 && <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">Longue durée</span>}
+          {durationDays >= 30 && <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-accent text-foreground">Longue durée</span>}
         </div>
         <p className="text-xs text-muted-foreground mt-0.5">
           {sit.start_date && sit.end_date
@@ -615,196 +551,5 @@ const ListingCard = ({ sit }: { sit: any }) => {
     </Link>
   );
 };
-
-const MissionCard = ({ mission }: { mission: any }) => (
-  <Link to={`/petites-missions/${mission.id}`} className="flex items-center gap-3 p-3 rounded-xl bg-card border border-border hover:bg-accent/50 transition-colors">
-    <Handshake className="h-5 w-5 text-primary shrink-0" />
-    <div className="flex-1 min-w-0">
-      <p className="text-sm font-medium truncate">{mission.title}</p>
-      <p className="text-xs text-muted-foreground">
-        {mission.city && <span>{mission.city} · </span>}
-        {mission.exchange_offer && `En échange : ${mission.exchange_offer}`}
-      </p>
-    </div>
-    <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
-  </Link>
-);
-
-const ArticleCards = ({ articles }: { articles: any[] }) => {
-  if (articles.length === 0) {
-    return (
-      <EmptyCard icon={Newspaper} text="Les articles arrivent bientôt" hint="Conseils, astuces et histoires de gardiens" />
-    );
-  }
-  return (
-    <div className="flex gap-3 overflow-x-auto pb-1 -mx-1 px-1">
-      {articles.map((a: any) => (
-        <a key={a.id} href={`/actualites/${a.slug}`} className="flex-shrink-0 w-64 rounded-xl border border-border bg-card overflow-hidden hover:shadow-md transition-shadow cursor-pointer">
-          {a.cover_image_url ? (
-            <img src={a.cover_image_url} alt="" className="w-full h-28 object-cover" />
-          ) : (
-            <div className="w-full h-28 bg-accent flex items-center justify-center">
-              <Newspaper className="h-8 w-8 text-muted-foreground/40" />
-            </div>
-          )}
-          <div className="p-3">
-            <p className="text-sm font-semibold line-clamp-2">{a.title}</p>
-            <p className="text-xs text-muted-foreground line-clamp-1 mt-1">{a.excerpt}</p>
-          </div>
-        </a>
-      ))}
-    </div>
-  );
-};
-
-const EmergencyProgress = () => {
-  const { user } = useAuth();
-  const [checks, setChecks] = useState<{ completedSits: number; avgRating: number; cancellations: number; identityVerified: boolean; hasSubscription: boolean } | null>(null);
-
-  useEffect(() => {
-    if (!user) return;
-    const load = async () => {
-      const [appsRes, reviewsRes, profileRes] = await Promise.all([
-        supabase.from("applications").select("id, sit:sits!inner(status)").eq("sitter_id", user.id).eq("status", "accepted"),
-        supabase.from("reviews").select("overall_rating").eq("reviewee_id", user.id).eq("published", true),
-        supabase.from("profiles").select("identity_verified, cancellation_count").eq("id", user.id).single(),
-      ]);
-      const completedSits = (appsRes.data || []).filter((a: any) => a.sit?.status === "completed").length;
-      const reviews = reviewsRes.data || [];
-      const avgRating = reviews.length > 0 ? reviews.reduce((s: number, r: any) => s + r.overall_rating, 0) / reviews.length : 0;
-      setChecks({
-        completedSits,
-        avgRating: Math.round(avgRating * 10) / 10,
-        cancellations: profileRes.data?.cancellation_count || 0,
-        identityVerified: profileRes.data?.identity_verified || false,
-        hasSubscription: false, // TODO: check subscription
-      });
-    };
-    load();
-  }, [user]);
-
-  if (!checks) return null;
-
-  const conditions = [
-    {
-      label: `5 gardes réalisées sur Guardiens`,
-      sublabel: `${checks.completedSits}/5 gardes`,
-      ok: checks.completedSits >= 5,
-      progress: checks.completedSits < 5 ? (checks.completedSits / 5) * 100 : undefined,
-    },
-    {
-      label: "Note moyenne ≥ 4.7/5",
-      sublabel: checks.avgRating > 0 ? `★ ${checks.avgRating}/5` : "Pas encore de note — réalise ta première garde",
-      ok: checks.avgRating >= 4.7,
-    },
-    {
-      label: "Aucune annulation de garde",
-      sublabel: checks.cancellations > 0 ? `${checks.cancellations} annulation${checks.cancellations > 1 ? "s" : ""} enregistrée${checks.cancellations > 1 ? "s" : ""}` : undefined,
-      ok: checks.cancellations === 0,
-      isError: checks.cancellations > 0,
-    },
-    {
-      label: "Identité vérifiée",
-      ok: checks.identityVerified,
-    },
-    {
-      label: "Abonnement actif",
-      ok: checks.hasSubscription,
-    },
-  ];
-
-  const doneCount = conditions.filter(c => c.ok).length;
-  const allDone = doneCount === 5;
-
-  if (allDone) {
-    return (
-      <div className="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-2xl p-4 flex items-center gap-3">
-        <Zap className="h-5 w-5 text-amber-600 dark:text-amber-400 shrink-0" />
-        <div className="flex-1">
-          <p className="text-sm font-semibold text-amber-800 dark:text-amber-200">Tu es éligible au statut Gardien d'urgence !</p>
-        </div>
-        <Link to="/mon-profil#urgence" className="bg-amber-500 text-white rounded-full px-4 py-2 text-sm hover:bg-amber-600 transition-colors shrink-0">
-          Activer le statut →
-        </Link>
-      </div>
-    );
-  }
-
-  return (
-    <div className="rounded-xl border border-border bg-card p-5 space-y-4">
-      <div>
-        <p className="text-sm font-semibold text-foreground mb-1">Statut Gardien d'urgence</p>
-        <p className="text-xs text-muted-foreground mb-4">
-          Les gardiens d'urgence sont contactés en priorité pour les gardes urgentes.
-        </p>
-        <p className="text-xs text-muted-foreground mb-3">{doneCount}/5 conditions remplies</p>
-        <div className="h-2 rounded-full bg-muted overflow-hidden">
-          <div className="h-full bg-primary rounded-full transition-all duration-500" style={{ width: `${(doneCount / 5) * 100}%` }} />
-        </div>
-      </div>
-      <div className="space-y-1">
-        {conditions.map((c, i) => (
-          <div key={i}>
-            <div className="flex items-center gap-2 py-1.5">
-              {c.ok
-                ? <CheckCircle2 className="h-4 w-4 text-primary shrink-0" />
-                : <Circle className="h-4 w-4 text-muted-foreground shrink-0" />
-              }
-              <span className={`text-sm ${c.ok ? "line-through text-muted-foreground" : "text-foreground"}`}>
-                {c.label}
-              </span>
-            </div>
-            {c.sublabel && !c.ok && (
-              <p className={`text-xs ml-6 ${c.isError ? "text-destructive/70" : "text-muted-foreground"}`}>{c.sublabel}</p>
-            )}
-            {c.progress !== undefined && (
-              <div className="ml-6 h-1 w-full rounded-full bg-muted mt-1">
-                <div className="h-full bg-primary rounded-full" style={{ width: `${c.progress}%` }} />
-              </div>
-            )}
-          </div>
-        ))}
-      </div>
-      <Link to="/gardien-urgence" className="text-xs text-primary hover:underline inline-block">En savoir plus →</Link>
-    </div>
-  );
-};
-
-const DashSection = ({ title, action, children }: {
-  title: string; action?: React.ReactNode; children: React.ReactNode;
-}) => (
-  <div className="animate-fade-in">
-    <div className="flex items-center justify-between mb-4">
-      <h2 className="font-heading text-lg font-semibold">{title}</h2>
-      {action}
-    </div>
-    {children}
-  </div>
-);
-
-const EmptyCard = ({ icon: Icon, text, cta, to, hint, outlineBtn }: { icon?: React.ElementType; text: string; cta?: string; to?: string; hint?: string; outlineBtn?: boolean }) => (
-  <div className="p-8 rounded-xl border border-dashed border-border bg-accent/30 text-center space-y-3">
-    {Icon && (
-      <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
-        <Icon className="h-7 w-7 text-primary/60" />
-      </div>
-    )}
-    <div>
-      <p className="text-sm font-medium text-foreground/80">{text}</p>
-      {hint && <p className="text-xs text-muted-foreground mt-1.5 max-w-xs mx-auto">{hint}</p>}
-    </div>
-    {cta && to && (
-      <Link to={to}>
-        {outlineBtn ? (
-          <span className="inline-block border border-border rounded-full px-4 py-2 text-sm text-foreground hover:border-primary transition-colors mt-1">
-            {cta}
-          </span>
-        ) : (
-          <Button size="sm" className="mt-1">{cta}</Button>
-        )}
-      </Link>
-    )}
-  </div>
-);
 
 export default SitterDashboard;
