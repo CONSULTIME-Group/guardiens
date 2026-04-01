@@ -9,8 +9,6 @@ import {
   Car, MapPin, X,
   ChevronLeft, ChevronRight,
 } from "lucide-react";
-import { format } from "date-fns";
-import { fr } from "date-fns/locale";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 const SITE_URL = "https://guardiens.fr";
@@ -112,9 +110,14 @@ export default function PublicSitterProfile() {
   if (loading) {
     return (
       <div className="min-h-screen bg-background">
-        <div className="max-w-3xl mx-auto px-6 py-10 space-y-6">
-          <Skeleton className="w-full h-[320px] rounded-none" />
-          <Skeleton className="h-8 w-48 mx-auto" />
+        <div className="max-w-5xl mx-auto px-6 py-10 space-y-6">
+          <div className="flex items-center gap-8">
+            <Skeleton className="w-24 h-24 rounded-full shrink-0" />
+            <div className="space-y-3 flex-1">
+              <Skeleton className="h-10 w-48" />
+              <Skeleton className="h-4 w-32" />
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -185,7 +188,6 @@ export default function PublicSitterProfile() {
     url: pageUrl,
   };
 
-  // Sitter type + accompanied label
   const typeLabel = SITTER_TYPE_LABELS[sitterType] || sitterType;
   const accompLabel = accompaniedBy ? `avec ${accompaniedBy}` : "";
   const typeLineItems = [typeLabel, accompLabel].filter(Boolean);
@@ -198,8 +200,20 @@ export default function PublicSitterProfile() {
   // Stats line
   const statsItems: string[] = [];
   statsItems.push(`${completedSits} garde${completedSits !== 1 ? "s" : ""}`);
-  statsItems.push(avgRating > 0 ? `${avgRating} ★` : "Pas encore");
+  statsItems.push(avgRating > 0 ? `${avgRating} ★` : "Pas encore noté");
   statsItems.push(`${totalBadgeCount} écusson${totalBadgeCount !== 1 ? "s" : ""}`);
+
+  // Relative date helper
+  const relativeDate = (dateStr: string) => {
+    const diff = Date.now() - new Date(dateStr).getTime();
+    const days = Math.floor(diff / 86400000);
+    if (days < 1) return "Aujourd'hui";
+    if (days < 30) return `il y a ${days} jour${days > 1 ? "s" : ""}`;
+    const months = Math.floor(days / 30);
+    if (months < 12) return `il y a ${months} mois`;
+    const years = Math.floor(months / 12);
+    return `il y a ${years} an${years > 1 ? "s" : ""}`;
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -220,134 +234,146 @@ export default function PublicSitterProfile() {
         <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>
       </Helmet>
 
-      {/* ── HERO ── */}
-      <div className="relative w-full h-[260px] md:h-[320px] overflow-hidden bg-muted">
-        {profile.avatar_url && (
+      {/* ── HEADER TYPOGRAPHIQUE ── */}
+      <div className="max-w-5xl mx-auto px-6 pt-10 pb-8">
+        <div className="flex items-center gap-6 md:gap-8">
+          {/* Photo médaillon */}
           <img
-            src={profile.avatar_url}
+            src={profile.avatar_url || "/placeholder.svg"}
             alt={firstName}
-            className="absolute inset-0 w-full h-full object-cover object-top"
+            className={`w-20 h-20 md:w-24 md:h-24 rounded-full shrink-0 object-cover object-center border-2 border-border ${isAvailable ? "ring-2 ring-primary ring-offset-2" : ""}`}
           />
-        )}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/0 via-black/20 to-black/70" />
 
-        {/* Back link */}
-        <Link
-          to="/recherche-gardiens"
-          className="absolute top-4 left-6 text-sm text-white/80 hover:text-white z-10"
-        >
-          ← Retour aux gardiens
-        </Link>
-
-        {/* Hero content */}
-        <div className="absolute bottom-0 left-0 right-0 px-6 md:px-8 pb-6 md:pb-8 flex flex-col gap-1">
-          {isAvailable && (
-            <span className="self-start bg-primary text-white text-xs px-3 py-1 rounded-full mb-1">
-              Disponible
-            </span>
-          )}
-
-          {activeBadgeKeys.length > 0 && (
-            <div className="flex gap-2 mb-1">
-              {activeBadgeKeys.map(k => (
-                <div key={k} style={{ filter: 'brightness(0) invert(1)' }}>
-                  <BadgeTimbre id={k} unlocked size="compact" showTooltip={false} />
-                </div>
-              ))}
+          {/* Bloc texte */}
+          <div className="flex-1 flex flex-col gap-1 min-w-0">
+            {/* Ligne disponibilité + retour */}
+            <div className="flex justify-between items-center">
+              <div>
+                {isAvailable && (
+                  <span className="bg-primary/10 text-primary text-xs px-2.5 py-0.5 rounded-full font-medium">
+                    Disponible
+                  </span>
+                )}
+              </div>
+              <Link
+                to="/recherche-gardiens"
+                className="text-sm text-muted-foreground hover:text-foreground hidden md:block"
+              >
+                ← Retour aux gardiens
+              </Link>
             </div>
-          )}
 
-          <h1 className="text-3xl md:text-4xl font-bold text-white">
-            {firstName}
-          </h1>
+            {/* Prénom h1 */}
+            <h1 className="text-4xl md:text-5xl font-bold text-foreground leading-tight">
+              {firstName}
+            </h1>
 
-          {city && (
-            <p className="text-sm text-white/70 flex items-center gap-1">
-              <MapPin className="w-3.5 h-3.5" />
-              {city}
+            {/* Ville */}
+            {city && (
+              <p className="text-base text-muted-foreground flex items-center gap-1">
+                <MapPin className="w-3.5 h-3.5" />
+                Gardien à {city}
+              </p>
+            )}
+
+            {/* Badges statut */}
+            {activeBadgeKeys.length > 0 && (
+              <div className="flex items-center gap-2 mt-1">
+                {activeBadgeKeys.map(k => (
+                  <div key={k} className="flex items-center gap-1">
+                    <BadgeTimbre id={k} unlocked size="compact" showTooltip={false} />
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Stats */}
+            <p className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
+              {statsItems.map((s, i) => (
+                <span key={i} className="flex items-center gap-1">
+                  {i > 0 && <span className="text-border mr-3">·</span>}
+                  {s}
+                </span>
+              ))}
             </p>
-          )}
-
-          <p className="text-sm text-white/80">
-            {statsItems.join(" · ")}
-          </p>
-
-          {completedSits > 0 && cancellations > 0 && (
-            <p className="text-xs text-white/60">
-              {cancellations} annulation{cancellations > 1 ? "s" : ""}
-            </p>
-          )}
+          </div>
         </div>
       </div>
 
+      {/* ── SÉPARATEUR ── */}
+      <div className="max-w-5xl mx-auto px-6">
+        <hr className="border-border" />
+      </div>
+
       {/* ── BODY — TWO COLUMNS ── */}
-      <div className="max-w-5xl mx-auto px-4 md:px-6 py-8 md:py-10 flex flex-col md:flex-row gap-8 md:gap-10 items-start">
+      <div className="max-w-5xl mx-auto px-6 py-8 flex flex-col md:flex-row gap-8 md:gap-12 items-start">
 
         {/* ── LEFT COLUMN ── */}
-        <div className="w-full md:w-[300px] md:shrink-0 md:sticky md:top-8">
-          <div className="bg-card rounded-2xl border border-border p-6 space-y-5">
+        <div className="w-full md:w-[260px] md:shrink-0 md:sticky md:top-8 space-y-6">
 
-            {/* Lifestyle */}
-            {lifestyle.length > 0 && (
-              <div>
-                <p className="text-xs uppercase tracking-widest text-muted-foreground mb-2">Style de vie</p>
-                <div className="flex flex-wrap gap-1.5">
-                  {lifestyle.map(l => (
-                    <span key={l} className="border border-border rounded-full text-xs px-2 py-0.5 text-foreground">
-                      {l}
-                    </span>
-                  ))}
-                </div>
+          {/* Lifestyle */}
+          {lifestyle.length > 0 && (
+            <div>
+              <p className="text-xs uppercase tracking-widest text-muted-foreground mb-2">Style de vie</p>
+              <div className="flex flex-wrap gap-1.5">
+                {lifestyle.map(l => (
+                  <span key={l} className="border border-border rounded-full text-xs px-2.5 py-0.5 text-foreground">
+                    {l}
+                  </span>
+                ))}
               </div>
-            )}
+            </div>
+          )}
 
-            {/* Type + accompanied */}
-            {typeLine && (
-              <p className="text-sm text-muted-foreground">{typeLine}</p>
-            )}
+          {/* Profile info */}
+          {(typeLine || durationLabel) && (
+            <div className="text-sm text-foreground/70 space-y-0.5">
+              {typeLine && <p>{typeLine}</p>}
+              {durationLabel && <p>{durationLabel}</p>}
+            </div>
+          )}
 
-            {/* Min duration */}
-            {durationLabel && (
-              <p className="text-sm text-muted-foreground">{durationLabel}</p>
-            )}
-
-            {/* Preferred environments */}
-            {preferredEnvironments.length > 0 && (
-              <div>
-                <p className="text-xs uppercase tracking-widest text-muted-foreground mb-2">Environnements</p>
-                <div className="flex flex-wrap gap-1.5">
-                  {preferredEnvironments.map(e => (
-                    <span key={e} className="border border-border rounded-full text-xs px-2 py-0.5 text-foreground">
-                      {ENV_LABELS[e] || e}
-                    </span>
-                  ))}
-                </div>
+          {/* Preferred environments */}
+          {preferredEnvironments.length > 0 && (
+            <div>
+              <p className="text-xs uppercase tracking-widest text-muted-foreground mb-2">Environnements</p>
+              <div className="flex flex-wrap gap-1.5">
+                {preferredEnvironments.map(e => (
+                  <span key={e} className="border border-border rounded-full text-xs px-2.5 py-0.5 text-foreground">
+                    {ENV_LABELS[e] || e}
+                  </span>
+                ))}
               </div>
-            )}
+            </div>
+          )}
 
-            {/* CTA */}
-            {showCTA && (
-              <>
-                <hr className="border-border" />
-                {!isAuthenticated && (
+          {/* CTA */}
+          {showCTA && (
+            <>
+              <hr className="border-border" />
+              {!isAuthenticated && (
+                <>
                   <Link
                     to={`/inscription?redirect=/gardiens/${id}`}
-                    className="block bg-primary text-white rounded-xl py-3 text-sm font-medium w-full text-center"
+                    className="block bg-primary text-primary-foreground rounded-xl py-3 text-sm font-medium w-full text-center"
                   >
                     S'inscrire pour contacter
                   </Link>
-                )}
-                {isAuthenticated && isOwner && (
-                  <Link
-                    to={`/messagerie?gardien=${id}`}
-                    className="block bg-primary text-white rounded-xl py-3 text-sm font-medium w-full text-center"
-                  >
-                    Contacter {firstName}
-                  </Link>
-                )}
-              </>
-            )}
-          </div>
+                  <p className="text-xs text-muted-foreground text-center mt-2">
+                    Gratuit pour les propriétaires.
+                  </p>
+                </>
+              )}
+              {isAuthenticated && isOwner && (
+                <Link
+                  to={`/messagerie?gardien=${id}`}
+                  className="block bg-primary text-primary-foreground rounded-xl py-3 text-sm font-medium w-full text-center"
+                >
+                  Contacter {firstName}
+                </Link>
+              )}
+            </>
+          )}
         </div>
 
         {/* ── RIGHT COLUMN ── */}
@@ -355,14 +381,14 @@ export default function PublicSitterProfile() {
 
           {/* Motivation */}
           {motivation && (
-            <p className="text-xl font-semibold leading-relaxed text-foreground/85">
+            <p className="text-lg font-semibold leading-relaxed text-foreground/85">
               {motivation}
             </p>
           )}
 
           {/* Bio */}
           {bio && (
-            <p className="text-sm italic text-muted-foreground">{bio}</p>
+            <p className="text-sm italic text-muted-foreground mt-3">{bio}</p>
           )}
 
           {/* Animaux acceptés */}
@@ -399,10 +425,58 @@ export default function PublicSitterProfile() {
             </div>
           )}
 
+          {/* Avis */}
+          <div>
+            <p className="text-xs uppercase tracking-widest text-muted-foreground mb-3">
+              Avis{reviewCount > 0 ? ` (${reviewCount})` : ""}
+            </p>
+            {reviewCount > 0 ? (
+              <>
+                <div className="space-y-3">
+                  {visibleReviews.map((r: any) => (
+                    <div key={r.id} className="bg-card border border-border rounded-2xl p-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Avatar className="w-8 h-8">
+                          {r.reviewer?.avatar_url ? (
+                            <AvatarImage src={r.reviewer.avatar_url} />
+                          ) : null}
+                          <AvatarFallback className="text-xs bg-muted">
+                            {capitalize(r.reviewer?.first_name || "?").charAt(0)}
+                          </AvatarFallback>
+                        </Avatar>
+                        <span className="text-sm font-medium text-foreground">
+                          {capitalize(r.reviewer?.first_name || "")}
+                        </span>
+                        <span className="text-xs text-muted-foreground">
+                          {relativeDate(r.created_at)}
+                        </span>
+                        {r.overall_rating && (
+                          <span className="text-xs text-primary ml-auto">★ {r.overall_rating}/5</span>
+                        )}
+                      </div>
+                      {r.comment && (
+                        <p className="text-sm text-foreground/80">{r.comment}</p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+                {reviewCount > 5 && (
+                  <p className="text-xs text-primary hover:underline mt-3 cursor-pointer">
+                    Voir tous les avis →
+                  </p>
+                )}
+              </>
+            ) : (
+              <p className="text-sm text-muted-foreground italic">
+                Les avis apparaîtront après la première garde.
+              </p>
+            )}
+          </div>
+
           {/* Collection de timbres */}
           <div>
             <p className="text-xs uppercase tracking-widest text-muted-foreground mb-3">Sa collection</p>
-            <div className="grid grid-cols-6 gap-2">
+            <div className="grid grid-cols-6 gap-3">
               {TIMBRES_ORDER.map(key => (
                 <div key={key} className="flex justify-center">
                   <BadgeTimbre id={key} unlocked={!!badgeMap[key]} size="compact" showTooltip />
@@ -413,48 +487,6 @@ export default function PublicSitterProfile() {
               {unlockedCount} timbre{unlockedCount > 1 ? "s" : ""} sur 12
             </p>
           </div>
-
-          {/* Avis */}
-          {reviewCount > 0 && (
-            <div>
-              <p className="text-xs uppercase tracking-widest text-muted-foreground mb-3">
-                Avis ({reviewCount})
-              </p>
-              <div className="space-y-3">
-                {visibleReviews.map((r: any) => (
-                  <div key={r.id} className="bg-card border border-border rounded-2xl p-4">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Avatar className="w-8 h-8">
-                        {r.reviewer?.avatar_url ? (
-                          <AvatarImage src={r.reviewer.avatar_url} />
-                        ) : null}
-                        <AvatarFallback className="text-xs bg-muted">
-                          {capitalize(r.reviewer?.first_name || "?").charAt(0)}
-                        </AvatarFallback>
-                      </Avatar>
-                      <span className="text-sm font-medium text-foreground">
-                        {capitalize(r.reviewer?.first_name || "")}
-                      </span>
-                      <span className="text-xs text-muted-foreground">
-                        {format(new Date(r.created_at), "MMMM yyyy", { locale: fr })}
-                      </span>
-                      {r.overall_rating && (
-                        <span className="text-xs text-amber-600 ml-auto">★ {r.overall_rating}/5</span>
-                      )}
-                    </div>
-                    {r.comment && (
-                      <p className="text-sm text-foreground/80 italic">{r.comment}</p>
-                    )}
-                  </div>
-                ))}
-              </div>
-              {reviewCount > 5 && (
-                <p className="text-xs text-primary hover:underline mt-3 cursor-pointer">
-                  Voir tous les avis →
-                </p>
-              )}
-            </div>
-          )}
 
           {/* Galerie */}
           {gallery.length > 0 && (
