@@ -63,6 +63,7 @@ const SitterDashboard = () => {
   const [hasEmergencyProfile, setHasEmergencyProfile] = useState(false);
   const [emergencyBlocked, setEmergencyBlocked] = useState<string | null>(null);
   const [showEmergencyForm, setShowEmergencyForm] = useState(false);
+  const [cancelSitOpen, setCancelSitOpen] = useState(false);
 
   // Onboarding checks for new sitters
   const [onboardingChecks, setOnboardingChecks] = useState({
