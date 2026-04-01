@@ -72,7 +72,7 @@ const MissionsNearbySection = () => {
   return (
     <div className="animate-fade-in">
       <div className="flex items-center justify-between mb-1">
-        <h2 className="font-heading text-xl font-semibold">Échanges autour de toi</h2>
+        <h2 className="font-heading text-xl font-semibold">Échanges autour de vous</h2>
         <Link to="/petites-missions" className="text-xs text-primary hover:underline font-medium">
           Voir toutes les missions →
         </Link>
