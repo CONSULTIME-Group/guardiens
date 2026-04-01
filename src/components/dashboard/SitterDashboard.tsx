@@ -518,6 +518,14 @@ const SitterDashboard = () => {
       </DashSection>
     </div>
   );
+
+  return (
+    <TwoColumnLayout
+      leftWidth={260}
+      leftContent={sitterLeftContent}
+      rightContent={sitterRightContent}
+    />
+  );
 };
 
 /* ── Shared components ── */
