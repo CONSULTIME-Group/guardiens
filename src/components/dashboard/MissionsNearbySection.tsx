@@ -142,9 +142,9 @@ const MissionsNearbySection = () => {
         <div className="bg-muted rounded-xl p-4 flex items-start gap-3 mt-4">
           <Sparkles className="h-5 w-5 text-primary shrink-0 mt-0.5" />
           <div className="flex-1">
-            <p className="text-sm text-foreground font-medium">
-              Déclare tes compétences pour voir en priorité les échanges qui te correspondent.
-            </p>
+             <p className="text-sm text-foreground font-medium">
+               Déclarez vos compétences pour voir en priorité les échanges qui vous correspondent.
+             </p>
             <Link to="/profile#competences" className="text-sm text-primary font-semibold mt-1 inline-block">
               Ajouter mes compétences →
             </Link>

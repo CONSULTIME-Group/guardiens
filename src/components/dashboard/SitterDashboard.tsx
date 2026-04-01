@@ -553,7 +553,7 @@ const SitterDashboard = () => {
         {/* Conseils */}
         <div className="animate-fade-in">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="font-heading text-lg font-semibold">Conseils pour toi</h2>
+            <h2 className="font-heading text-lg font-semibold">Conseils pour vous</h2>
             <Link to="/actualites" className="text-xs text-primary hover:underline font-medium">Voir tout →</Link>
           </div>
           {articles.length === 0 ? (
