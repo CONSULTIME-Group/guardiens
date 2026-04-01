@@ -181,7 +181,7 @@ const SitDetail = () => {
     }, 800);
   }, [sit]);
 
-
+  const statusLabel: Record<string, { label: string; className: string }> = {
     draft: { label: "Brouillon", className: "bg-muted text-muted-foreground" },
     published: { label: "Publiée", className: "bg-primary/10 text-primary" },
     confirmed: { label: "Confirmée", className: "bg-primary/10 text-primary" },
