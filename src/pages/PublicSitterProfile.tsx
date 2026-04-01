@@ -282,23 +282,16 @@ export default function PublicSitterProfile() {
       )}
 
       {/* ── SECTION 4: Écussons ── */}
-      {badges.length > 0 && (
-        <section className="max-w-3xl mx-auto px-6 py-6 border-t border-border">
-          <h2 className="text-sm font-semibold uppercase tracking-wide mb-4">Écussons reçus</h2>
-          <div className="flex flex-wrap gap-3">
-            {badges.map((b) => (
-              <div key={b.badge_key} className="relative">
-                <BadgeShield badgeKey={b.badge_key} count={b.count} size="md" />
-                {b.count > 1 && (
-                  <span className="absolute -bottom-1 -right-1 bg-primary text-primary-foreground text-xs w-5 h-5 rounded-full flex items-center justify-center">
-                    {b.count}
-                  </span>
-                )}
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
+      <section className="max-w-3xl mx-auto px-6 py-6 border-t border-border">
+        <h2 className="text-sm font-semibold uppercase tracking-wide mb-4">Écussons reçus</h2>
+        <BadgeGrid
+          unlockedBadges={badges.reduce((acc: Record<string, number>, b) => {
+            acc[b.badge_key] = b.count;
+            return acc;
+          }, {})}
+          variant="public"
+        />
+      </section>
 
       {/* ── SECTION 5: Avis ── */}
       {reviewCount > 0 && (
