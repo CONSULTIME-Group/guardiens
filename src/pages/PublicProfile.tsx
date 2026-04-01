@@ -222,8 +222,8 @@ const PublicProfile = () => {
               )}
 
               <div className="flex gap-2 mt-2">
-                {isSitter && <span className="px-2.5 py-1 rounded-full text-xs font-medium" style={{ backgroundColor: "#D8F3DC", color: "#2D6A4F" }}>🏡 Gardien</span>}
-                {isOwner && <span className="px-2.5 py-1 rounded-full text-xs font-medium" style={{ backgroundColor: "#DBEAFE", color: "#1E40AF" }}>🐾 Propriétaire</span>}
+                {isSitter && <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary">🏡 Gardien</span>}
+                {isOwner && <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-700">🐾 Propriétaire</span>}
               </div>
             </div>
 
