@@ -27,7 +27,7 @@ interface Conversation {
   sitter_id: string;
   updated_at: string;
   archived_by: string[];
-  sit?: { title: string; status: string; property_id: string } | null;
+  sit?: { title: string; status: string; property_id: string; start_date?: string | null; end_date?: string | null } | null;
   other_user?: { id: string; first_name: string; avatar_url: string | null; identity_verified: boolean; city?: string | null; is_founder?: boolean } | null;
   last_message?: { content: string; created_at: string; sender_id: string } | null;
   unread_count: number;
