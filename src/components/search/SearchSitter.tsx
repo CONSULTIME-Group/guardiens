@@ -160,6 +160,7 @@ const SearchSitter = () => {
         if (coords) setUserCoords(coords);
       }
       const completedSits = (eligRes.data || []).filter((a: any) => a.sit?.status === "completed").length;
+      setUserCompletedSits(completedSits);
       const reviews = reviewsRes.data || [];
       const avgRating = reviews.length > 0 ? reviews.reduce((s: number, r: any) => s + r.overall_rating, 0) / reviews.length : 0;
       const verified = myProfileRes.data?.identity_verified || false;
