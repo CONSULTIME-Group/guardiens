@@ -347,9 +347,30 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
 
         {app.status === "accepted" && (
           <div className="mt-4 space-y-2">
-            <p className="text-sm text-primary font-medium">✓ Candidature acceptée — garde confirmée</p>
-            <Link to="/messages" className="inline-block border border-border rounded-full px-4 py-2 text-sm text-foreground hover:border-primary transition-colors">
+            <p className="text-sm text-primary font-medium">✓ Garde confirmée</p>
+            <button
+              onClick={async () => {
+                const { data: conv } = await supabase
+                  .from("conversations").select("id")
+                  .eq("sit_id", sitId).eq("sitter_id", app.sitter_id).maybeSingle();
+                if (conv) navigate(`/messages?conv=${conv.id}`);
+                else navigate("/messages");
+              }}
+              className="inline-block border border-border rounded-full px-4 py-2 text-sm text-foreground hover:border-primary transition-colors"
+            >
               Voir la messagerie
+            </button>
+          </div>
+        )}
+
+        {(app.status === "rejected" || app.status === "cancelled") && (
+          <div className="mt-3">
+            <Link
+              to={`/profil/${app.sitter_id}`}
+              target="_blank"
+              className="text-xs text-primary hover:underline"
+            >
+              Voir le profil →
             </Link>
           </div>
         )}
