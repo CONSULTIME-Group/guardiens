@@ -75,6 +75,7 @@ import AdminSkills from "./pages/admin/AdminSkills";
 import PublicProfile from "./pages/PublicProfile";
 import EmergencySitter from "./pages/EmergencySitter";
 import MySubscription from "./pages/MySubscription";
+import PublicSitDetail from "./pages/PublicSitDetail";
 
 const queryClient = new QueryClient();
 
