@@ -1,142 +1,172 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback, useRef, lazy, Suspense } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import ReportButton from "@/components/reports/ReportButton";
 import { supabase } from "@/integrations/supabase/client";
 import { geocodeCity, haversineDistance } from "@/lib/geocode";
 import { useAuth } from "@/contexts/AuthContext";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
-import { Search, SlidersHorizontal, MapPin, Star, Car, CheckCircle2, CircleDot, MessageCircle, Zap } from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import {
+  MapPin, Star, SlidersHorizontal, MessageCircle, Zap,
+  LayoutGrid, Map as MapIcon, ShieldCheck, Crosshair, CircleDot, Car, Calendar
+} from "lucide-react";
 import { toast } from "sonner";
-import ChipSelect from "@/components/profile/ChipSelect";
 import VerifiedBadge from "@/components/profile/VerifiedBadge";
 import EmergencyBadge from "@/components/profile/EmergencyBadge";
 import BadgeShield from "@/components/badges/BadgeShield";
 import { TooltipProvider } from "@/components/ui/tooltip";
+
+const SearchMapView = lazy(() => import("@/components/search/SearchMapView"));
 
 const animalChips = ["Chiens", "Chats", "Chevaux", "Oiseaux", "Animaux de ferme", "NAC", "Tous"];
 const animalChipToType: Record<string, string> = {
   Chiens: "dog", Chats: "cat", Chevaux: "horse", Oiseaux: "bird",
   "Animaux de ferme": "farm_animal", NAC: "nac",
 };
-const sitterTypeLabels: Record<string, string> = {
-  solo: "Solo", couple: "Couple", family: "Famille", retiree: "Retraité",
-};
-const experienceLabels: Record<string, string> = {
-  "": "Non renseigné", "debutant": "Débutant", "1-2": "1-2 ans", "3-5": "3-5 ans", "5+": "5+ ans",
-};
 
-type SortOption = "rating" | "experience";
+const RADIUS_SHORTCUTS = [5, 10, 15, 30, 50];
+
+type SortOption = "closest" | "rating" | "experience";
+type ViewMode = "list" | "map";
 
 const SearchOwner = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
+
+  // Filter state
   const [city, setCity] = useState("");
+  const [citySuggestions, setCitySuggestions] = useState<any[]>([]);
   const [radius, setRadius] = useState([15]);
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [animalTypes, setAnimalTypes] = useState<string[]>([]);
-  const [sitterType, setSitterType] = useState("all");
   const [vehicled, setVehicled] = useState(false);
   const [availableOnly, setAvailableOnly] = useState(false);
   const [verifiedOnly, setVerifiedOnly] = useState(false);
   const [emergencyOnly, setEmergencyOnly] = useState(false);
-  const [sort, setSort] = useState<SortOption>("rating");
+  const [minSits, setMinSits] = useState<string>("all");
+  const [minRating, setMinRating] = useState<string>("all");
+  const [sort, setSort] = useState<SortOption>("closest");
+  const [viewMode, setViewMode] = useState<ViewMode>("list");
 
   const [results, setResults] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
-  const [searched, setSearched] = useState(false);
-  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
-
   const [contactingId, setContactingId] = useState<string | null>(null);
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const [initialLoaded, setInitialLoaded] = useState(false);
 
+  // Popover open states (only one at a time)
+  const [openPop, setOpenPop] = useState<string | null>(null);
+
+  // Debounce ref
+  const debounceRef = useRef<ReturnType<typeof setTimeout>>();
+
+  // City autocomplete
+  const cityDebounceRef = useRef<ReturnType<typeof setTimeout>>();
+  const fetchCitySuggestions = useCallback((q: string) => {
+    clearTimeout(cityDebounceRef.current);
+    if (q.length < 2) { setCitySuggestions([]); return; }
+    cityDebounceRef.current = setTimeout(async () => {
+      try {
+        const res = await fetch(`https://geo.api.gouv.fr/communes?nom=${encodeURIComponent(q)}&fields=nom,codesPostaux,centre&boost=population&limit=5`);
+        const data = await res.json();
+        setCitySuggestions(data || []);
+      } catch { setCitySuggestions([]); }
+    }, 300);
+  }, []);
+
+  // Geolocation
+  const handleGeolocate = useCallback(() => {
+    if (!navigator.geolocation) { toast.error("Géolocalisation non disponible"); return; }
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        try {
+          const res = await fetch(`https://geo.api.gouv.fr/communes?lat=${pos.coords.latitude}&lon=${pos.coords.longitude}&fields=nom&limit=1`);
+          const data = await res.json();
+          if (data?.[0]) { setCity(data[0].nom); setCitySuggestions([]); }
+        } catch { toast.error("Impossible de déterminer votre ville"); }
+      },
+      () => toast.error("Géolocalisation refusée")
+    );
+  }, []);
+
+  // Load owner city on mount
+  useEffect(() => {
+    if (!user) return;
+    (async () => {
+      const { data } = await supabase.from("profiles").select("city").eq("id", user.id).single();
+      if (data?.city) setCity(data.city);
+      setInitialLoaded(true);
+    })();
+  }, [user]);
+
+  // Contact handler
   const handleContact = async (sitterId: string) => {
     if (!user) return;
     setContactingId(sitterId);
     try {
-      // Check if conversation already exists
       const { data: existing } = await supabase
-        .from("conversations")
-        .select("id")
-        .eq("owner_id", user.id)
-        .eq("sitter_id", sitterId)
-        .maybeSingle();
-
-      if (existing) {
-        navigate(`/messages?conversation=${existing.id}`);
-        return;
-      }
-
-      // Create new conversation
+        .from("conversations").select("id")
+        .eq("owner_id", user.id).eq("sitter_id", sitterId).maybeSingle();
+      if (existing) { navigate(`/messages?conversation=${existing.id}`); return; }
       const { data: conv, error } = await supabase
-        .from("conversations")
-        .insert({ owner_id: user.id, sitter_id: sitterId })
-        .select("id")
-        .single();
-
+        .from("conversations").insert({ owner_id: user.id, sitter_id: sitterId })
+        .select("id").single();
       if (error) throw error;
       navigate(`/messages?conversation=${conv.id}`);
-    } catch (err) {
-      toast.error("Impossible de démarrer la conversation");
-    } finally {
-      setContactingId(null);
-    }
+    } catch { toast.error("Impossible de démarrer la conversation"); }
+    finally { setContactingId(null); }
   };
 
-  const handleSearch = async () => {
+  // Search logic
+  const handleSearch = useCallback(async () => {
     setLoading(true);
-    setSearched(true);
 
     const { data: sitters } = await supabase
       .from("sitter_profiles")
-      .select("*, profile:profiles!sitter_profiles_user_id_fkey(first_name, last_name, avatar_url, city, postal_code, profile_completion, identity_verified)");
+      .select("*, profile:profiles!sitter_profiles_user_id_fkey(first_name, last_name, avatar_url, city, postal_code, profile_completion, identity_verified, completed_sits_count)");
 
     let items = (sitters || []).filter((s: any) => s.profile?.profile_completion >= 60);
 
-    // Filters
     // Geocoded radius filter
+    let searchCoords: { lat: number; lng: number } | null = null;
     if (city) {
-      const searchCoords = await geocodeCity(city);
+      searchCoords = await geocodeCity(city);
       if (searchCoords) {
         const uniqueCities = [...new Set(items.map((s: any) => s.profile?.city).filter(Boolean))] as string[];
         const cityCoords = new Map<string, { lat: number; lng: number }>();
-
-        await Promise.all(
-          uniqueCities.map(async (c) => {
-            const coords = await geocodeCity(c);
-            if (coords) cityCoords.set(c, { lat: coords.lat, lng: coords.lng });
-          })
-        );
-
-        items = items.filter((s: any) => {
+        await Promise.all(uniqueCities.map(async (c) => {
+          const coords = await geocodeCity(c);
+          if (coords) cityCoords.set(c, { lat: coords.lat, lng: coords.lng });
+        }));
+        items = items.map((s: any) => {
           const sitterCity = s.profile?.city;
-          if (!sitterCity) return false;
+          if (!sitterCity) return { ...s, _dist: Infinity };
           const coords = cityCoords.get(sitterCity);
-          if (!coords) return false;
-          const dist = haversineDistance(searchCoords.lat, searchCoords.lng, coords.lat, coords.lng);
-          return dist <= radius[0];
-        });
+          if (!coords) return { ...s, _dist: Infinity };
+          const dist = haversineDistance(searchCoords!.lat, searchCoords!.lng, coords.lat, coords.lng);
+          return { ...s, _dist: Math.round(dist) };
+        }).filter((s: any) => s._dist <= radius[0]);
       } else {
-        // Fallback to text match if geocoding fails
-        items = items.filter((s: any) => s.profile?.city?.toLowerCase().includes(city.toLowerCase()));
+        items = items.filter((s: any) => s.profile?.city?.toLowerCase().includes(city.toLowerCase())).map((s: any) => ({ ...s, _dist: null }));
       }
+    } else {
+      items = items.map((s: any) => ({ ...s, _dist: null }));
     }
-    if (sitterType !== "all") {
-      items = items.filter((s: any) => (s.sitter_type || "").toLowerCase() === sitterType.toLowerCase());
-    }
-    if (vehicled) {
-      items = items.filter((s: any) => s.has_vehicle);
-    }
-    if (availableOnly) {
-      items = items.filter((s: any) => s.is_available);
-    }
-    if (verifiedOnly) {
-      items = items.filter((s: any) => s.profile?.identity_verified);
-    }
+
+    // Filter: vehicle
+    if (vehicled) items = items.filter((s: any) => s.has_vehicle);
+    // Filter: available
+    if (availableOnly) items = items.filter((s: any) => s.is_available);
+    // Filter: verified
+    if (verifiedOnly) items = items.filter((s: any) => s.profile?.identity_verified);
+    // Filter: animal types
     if (animalTypes.length > 0 && !animalTypes.includes("Tous")) {
       const wanted = animalTypes.map(a => animalChipToType[a]).filter(Boolean);
       items = items.filter((s: any) => {
@@ -144,19 +174,21 @@ const SearchOwner = () => {
         return wanted.some(w => types.includes(w));
       });
     }
+    // Filter: min sits
+    if (minSits !== "all") {
+      const min = parseInt(minSits);
+      items = items.filter((s: any) => (s.profile?.completed_sits_count || 0) >= min);
+    }
 
-    // Enrich with reviews + badges + emergency status
+    // Enrich with reviews + badges + emergency
     const userIds = items.map((s: any) => s.user_id);
     const [allBadgesRes, emergencyRes] = await Promise.all([
-      supabase.from("badge_attributions").select("receiver_id, badge_key").in("receiver_id", userIds),
-      supabase.from("emergency_sitter_profiles").select("user_id, is_active").in("user_id", userIds).eq("is_active", true),
+      supabase.from("badge_attributions").select("receiver_id, badge_key").in("receiver_id", userIds.length > 0 ? userIds : ["__none__"]),
+      supabase.from("emergency_sitter_profiles").select("user_id, is_active").in("user_id", userIds.length > 0 ? userIds : ["__none__"]).eq("is_active", true),
     ]);
 
     const emergencySet = new Set((emergencyRes.data || []).map((e: any) => e.user_id));
-
-    if (emergencyOnly) {
-      items = items.filter((s: any) => emergencySet.has(s.user_id));
-    }
+    if (emergencyOnly) items = items.filter((s: any) => emergencySet.has(s.user_id));
 
     const badgeMap = new Map<string, Map<string, number>>();
     (allBadgesRes.data || []).forEach((b: any) => {
@@ -168,162 +200,277 @@ const SearchOwner = () => {
     const enriched = await Promise.all(
       items.map(async (s: any) => {
         const { data: reviews } = await supabase
-          .from("reviews")
-          .select("overall_rating")
-          .eq("reviewee_id", s.user_id)
-          .eq("published", true);
+          .from("reviews").select("overall_rating")
+          .eq("reviewee_id", s.user_id).eq("published", true);
         const avgRating = reviews && reviews.length > 0
-          ? (reviews.reduce((sum: number, r: any) => sum + r.overall_rating, 0) / reviews.length).toFixed(1)
+          ? (reviews.reduce((sum: number, r: any) => sum + r.overall_rating, 0) / reviews.length)
           : null;
         const userBadges = badgeMap.get(s.user_id);
         const topBadges = userBadges
-          ? Array.from(userBadges.entries()).map(([badge_key, count]) => ({ badge_key, count })).sort((a, b) => b.count - a.count).slice(0, 2)
+          ? Array.from(userBadges.entries()).map(([badge_key, count]) => ({ badge_key, count })).sort((a, b) => b.count - a.count).slice(0, 3)
           : [];
         return { ...s, avgRating, reviewCount: reviews?.length || 0, topBadges, isEmergency: emergencySet.has(s.user_id) };
       })
     );
 
-    // Sort: emergency sitters first, then by selected sort
-    if (sort === "rating") {
-      enriched.sort((a, b) => {
+    // Filter: min rating (post-enrichment)
+    let final = enriched;
+    if (minRating !== "all") {
+      const min = parseFloat(minRating);
+      final = final.filter((s: any) => s.avgRating !== null && s.avgRating >= min);
+    }
+
+    // Sort
+    if (sort === "closest") {
+      final.sort((a, b) => {
         if (a.isEmergency !== b.isEmergency) return a.isEmergency ? -1 : 1;
-        return parseFloat(b.avgRating || "0") - parseFloat(a.avgRating || "0");
+        return (a._dist ?? Infinity) - (b._dist ?? Infinity);
+      });
+    } else if (sort === "rating") {
+      final.sort((a, b) => {
+        if (a.isEmergency !== b.isEmergency) return a.isEmergency ? -1 : 1;
+        return (b.avgRating || 0) - (a.avgRating || 0);
       });
     } else {
-      const expOrder: Record<string, number> = { "5+": 4, "3-5": 3, "1-2": 2, debutant: 1, "": 0 };
-      enriched.sort((a, b) => {
+      final.sort((a, b) => {
         if (a.isEmergency !== b.isEmergency) return a.isEmergency ? -1 : 1;
-        return (expOrder[b.experience_years || ""] || 0) - (expOrder[a.experience_years || ""] || 0);
+        return (b.profile?.completed_sits_count || 0) - (a.profile?.completed_sits_count || 0);
       });
     }
 
-    setResults(enriched);
+    setResults(final);
     setLoading(false);
-    setMobileFiltersOpen(false);
+  }, [city, radius, animalTypes, vehicled, availableOnly, verifiedOnly, emergencyOnly, minSits, minRating, sort]);
+
+  // Auto-search on filter change (debounced)
+  useEffect(() => {
+    if (!initialLoaded) return;
+    clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => { handleSearch(); }, 400);
+    return () => clearTimeout(debounceRef.current);
+  }, [initialLoaded, city, radius, animalTypes, vehicled, availableOnly, verifiedOnly, emergencyOnly, minSits, minRating, sort]);
+
+  const hasActiveFilters = vehicled || availableOnly || verifiedOnly || emergencyOnly || minSits !== "all" || minRating !== "all";
+
+  const resetFilters = () => {
+    setVehicled(false);
+    setAvailableOnly(false);
+    setVerifiedOnly(false);
+    setEmergencyOnly(false);
+    setMinSits("all");
+    setMinRating("all");
   };
 
-  const filtersContent = (
-    <div className="space-y-5">
-      <div>
-        <label className="text-sm font-medium mb-1.5 block">Localisation</label>
-        <Input placeholder="Ville" value={city} onChange={e => setCity(e.target.value)} />
-        <div className="mt-2">
-          <label className="text-xs text-muted-foreground">Rayon : {radius[0]} km</label>
-          <Slider value={radius} onValueChange={setRadius} min={10} max={100} step={5} className="mt-1" />
-        </div>
-      </div>
-      <div className="grid grid-cols-2 gap-3">
-        <div>
-          <label className="text-sm font-medium mb-1.5 block">Dispo du</label>
-          <Input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} />
-        </div>
-        <div>
-          <label className="text-sm font-medium mb-1.5 block">Au</label>
-          <Input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} />
-        </div>
-      </div>
-      <div>
-        <label className="text-sm font-medium mb-1.5 block">Type d'animaux gérés</label>
-        <ChipSelect options={animalChips} selected={animalTypes} onChange={setAnimalTypes} />
-      </div>
-      <div>
-        <label className="text-sm font-medium mb-1.5 block">Type de gardien</label>
-        <Select value={sitterType} onValueChange={setSitterType}>
-          <SelectTrigger><SelectValue /></SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Tous</SelectItem>
-            <SelectItem value="solo">Solo</SelectItem>
-            <SelectItem value="couple">Couple</SelectItem>
-            <SelectItem value="family">Famille</SelectItem>
-            <SelectItem value="retiree">Retraité</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-      <div className="flex items-center gap-3">
-        <Switch checked={vehicled} onCheckedChange={setVehicled} />
-        <label className="text-sm">Véhiculé</label>
-      </div>
-      <div className="flex items-center gap-3">
-        <Switch checked={availableOnly} onCheckedChange={setAvailableOnly} />
-        <label className="text-sm">Disponibles uniquement</label>
-      </div>
-      <div className="flex items-center gap-3">
-        <Switch checked={verifiedOnly} onCheckedChange={setVerifiedOnly} />
-        <label className="text-sm">Profils vérifiés uniquement</label>
-      </div>
-      <div className="flex items-center gap-3">
-        <Switch checked={emergencyOnly} onCheckedChange={setEmergencyOnly} />
-        <label className="text-sm flex items-center gap-1.5">
-          <Zap className="h-3.5 w-3.5 text-amber-500" /> Gardiens d'urgence
-        </label>
-      </div>
-      <Button onClick={handleSearch} className="w-full gap-2" disabled={loading}>
-        <Search className="h-4 w-4" /> {loading ? "Recherche..." : "Rechercher"}
-      </Button>
-    </div>
-  );
+  // Animal type helpers
+  const animalLabel = animalTypes.length > 0
+    ? animalTypes.length <= 2 ? animalTypes.join(", ") : `${animalTypes.length} types`
+    : "Animaux";
+
+  const toggleAnimal = (chip: string) => {
+    if (chip === "Tous") { setAnimalTypes(prev => prev.includes("Tous") ? [] : ["Tous"]); return; }
+    setAnimalTypes(prev => {
+      const filtered = prev.filter(a => a !== "Tous");
+      return filtered.includes(chip) ? filtered.filter(a => a !== chip) : [...filtered, chip];
+    });
+  };
+
+  const pillBase = "flex items-center gap-2 px-4 py-2 rounded-full border border-border bg-card cursor-pointer hover:border-primary transition-colors text-sm whitespace-nowrap";
+  const pillActive = "flex items-center gap-2 px-4 py-2 rounded-full border border-primary bg-primary/10 text-primary cursor-pointer transition-colors text-sm font-medium whitespace-nowrap";
+
+  const sortPillBase = "rounded-full px-3 py-1 text-xs border border-border text-muted-foreground cursor-pointer hover:border-primary transition-colors";
+  const sortPillActive = "rounded-full px-3 py-1 text-xs bg-foreground text-background cursor-pointer";
 
   return (
-    <div className="p-6 md:p-10 max-w-5xl mx-auto animate-fade-in">
-      <h1 className="font-heading text-3xl font-bold mb-1">Trouver un gardien</h1>
-      <p className="text-muted-foreground mb-6">Recherchez le gardien idéal pour votre maison et vos animaux.</p>
-
-      {/* Mobile filter button */}
-      <div className="md:hidden mb-4">
-        <Sheet open={mobileFiltersOpen} onOpenChange={setMobileFiltersOpen}>
-          <SheetTrigger asChild>
-            <Button variant="outline" className="gap-2 w-full">
-              <SlidersHorizontal className="h-4 w-4" /> Filtres
-            </Button>
-          </SheetTrigger>
-          <SheetContent side="bottom" className="max-h-[85vh] overflow-y-auto">
-            <h3 className="font-heading font-semibold text-lg mb-4">Filtres</h3>
-            {filtersContent}
-          </SheetContent>
-        </Sheet>
+    <div className="animate-fade-in">
+      {/* Title */}
+      <div className="px-6 pt-6 pb-2 md:pt-10">
+        <h1 className="font-heading text-3xl font-bold mb-1">Trouver un gardien</h1>
+        <p className="text-muted-foreground">Recherchez le gardien idéal pour votre maison et vos animaux.</p>
       </div>
 
-      <div className="flex gap-8">
-        <aside className="hidden md:block w-72 shrink-0">
-          <div className="sticky top-6 bg-card rounded-lg border border-border p-5">
-            <h3 className="font-heading font-semibold mb-4">Filtres</h3>
-            {filtersContent}
+      {/* Sticky search bar */}
+      <div className="sticky top-0 z-10 bg-background border-b border-border px-6 py-3">
+        <div className="flex items-center gap-2 overflow-x-auto no-scrollbar">
+          {/* PILL 1 — Localisation */}
+          <Popover open={openPop === "loc"} onOpenChange={(o) => setOpenPop(o ? "loc" : null)}>
+            <PopoverTrigger asChild>
+              <button className={city ? pillActive : pillBase}>
+                <MapPin className="h-3.5 w-3.5 shrink-0" />
+                {city || "Localisation"}
+              </button>
+            </PopoverTrigger>
+            <PopoverContent align="start" className="w-72 p-3 space-y-3">
+              <div className="relative">
+                <Input
+                  placeholder="Rechercher une ville..."
+                  value={city}
+                  onChange={(e) => { setCity(e.target.value); fetchCitySuggestions(e.target.value); }}
+                  className="pr-10"
+                />
+                <button onClick={handleGeolocate} className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary">
+                  <Crosshair className="h-4 w-4" />
+                </button>
+              </div>
+              {citySuggestions.length > 0 && (
+                <div className="space-y-1">
+                  {citySuggestions.map((s: any, i: number) => (
+                    <button key={i} className="w-full text-left px-3 py-2 rounded-lg text-sm hover:bg-muted transition-colors" onClick={() => { setCity(s.nom); setCitySuggestions([]); setOpenPop(null); }}>
+                      <span className="font-medium">{s.nom}</span>
+                      {s.codesPostaux?.[0] && <span className="text-muted-foreground ml-1">({s.codesPostaux[0]})</span>}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </PopoverContent>
+          </Popover>
+
+          {/* PILL 2 — Rayon */}
+          <Popover open={openPop === "rad"} onOpenChange={(o) => setOpenPop(o ? "rad" : null)}>
+            <PopoverTrigger asChild>
+              <button className={pillBase}>{radius[0]} km</button>
+            </PopoverTrigger>
+            <PopoverContent align="start" className="w-64 p-3 space-y-3">
+              <div className="flex gap-2 flex-wrap">
+                {RADIUS_SHORTCUTS.map(r => (
+                  <button key={r} onClick={() => setRadius([r])} className={`rounded-full px-3 py-1 text-xs border transition-colors ${radius[0] === r ? "bg-primary text-primary-foreground border-primary" : "border-border text-muted-foreground hover:border-primary"}`}>{r} km</button>
+                ))}
+              </div>
+              <Slider value={radius} onValueChange={setRadius} min={5} max={100} step={5} />
+              <p className="text-xs text-muted-foreground text-center">{radius[0]} km</p>
+            </PopoverContent>
+          </Popover>
+
+          {/* PILL 3 — Dates */}
+          <Popover open={openPop === "dates"} onOpenChange={(o) => setOpenPop(o ? "dates" : null)}>
+            <PopoverTrigger asChild>
+              <button className={startDate || endDate ? pillActive : pillBase}>
+                <Calendar className="h-3.5 w-3.5 shrink-0" />
+                {startDate && endDate ? `${startDate} → ${endDate}` : "Dates"}
+              </button>
+            </PopoverTrigger>
+            <PopoverContent align="start" className="w-72 p-3 space-y-3">
+              <div>
+                <label className="text-xs text-muted-foreground mb-1 block">Du</label>
+                <Input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} />
+              </div>
+              <div>
+                <label className="text-xs text-muted-foreground mb-1 block">Au</label>
+                <Input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} />
+              </div>
+            </PopoverContent>
+          </Popover>
+
+          {/* PILL 4 — Animaux */}
+          <Popover open={openPop === "animals"} onOpenChange={(o) => setOpenPop(o ? "animals" : null)}>
+            <PopoverTrigger asChild>
+              <button className={animalTypes.length > 0 ? pillActive : pillBase}>{animalLabel}</button>
+            </PopoverTrigger>
+            <PopoverContent align="start" className="w-56 p-3 space-y-2">
+              {animalChips.map(chip => (
+                <button key={chip} onClick={() => toggleAnimal(chip)} className={`block w-full text-left px-3 py-2 rounded-lg text-sm transition-colors ${animalTypes.includes(chip) ? "bg-primary/10 text-primary font-medium" : "hover:bg-muted"}`}>{chip}</button>
+              ))}
+            </PopoverContent>
+          </Popover>
+
+          {/* PILL 5 — Filtres avancés */}
+          <Sheet open={filtersOpen} onOpenChange={setFiltersOpen}>
+            <SheetTrigger asChild>
+              <button className={pillBase + " relative"}>
+                <SlidersHorizontal className="h-3.5 w-3.5 shrink-0" />
+                Filtres
+                {hasActiveFilters && <span className="absolute -top-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-primary" />}
+              </button>
+            </SheetTrigger>
+            <SheetContent side="right" className="w-80 overflow-y-auto">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="font-heading font-semibold text-lg">Filtres</h3>
+                <button onClick={resetFilters} className="text-sm text-primary hover:underline">Réinitialiser</button>
+              </div>
+
+              <div className="space-y-6">
+                {/* Section 1 — Disponibilité */}
+                <div className="space-y-3">
+                  <h4 className="text-sm font-medium">Disponibilité</h4>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm">Disponibles uniquement</p>
+                      <p className="text-xs text-muted-foreground">Gardiens ayant activé leur mode disponible</p>
+                    </div>
+                    <Switch checked={availableOnly} onCheckedChange={setAvailableOnly} />
+                  </div>
+                </div>
+
+                {/* Section 2 — Profil de confiance */}
+                <div className="space-y-3">
+                  <h4 className="text-sm font-medium">Profil de confiance</h4>
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm">Profils vérifiés uniquement</p>
+                    <Switch checked={verifiedOnly} onCheckedChange={setVerifiedOnly} />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm flex items-center gap-1.5"><Zap className="h-3.5 w-3.5 text-amber-500" /> Gardiens d'urgence</p>
+                    <Switch checked={emergencyOnly} onCheckedChange={setEmergencyOnly} />
+                  </div>
+                </div>
+
+                {/* Section 3 — Mobilité */}
+                <div className="space-y-3">
+                  <h4 className="text-sm font-medium">Mobilité</h4>
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm">Avec véhicule</p>
+                    <Switch checked={vehicled} onCheckedChange={setVehicled} />
+                  </div>
+                </div>
+
+                {/* Section 4 — Expérience */}
+                <div className="space-y-3">
+                  <h4 className="text-sm font-medium">Gardes validées minimum</h4>
+                  <div className="flex gap-2 flex-wrap">
+                    {[{ label: "Tous", value: "all" }, { label: "1+", value: "1" }, { label: "3+", value: "3" }, { label: "5+", value: "5" }].map(opt => (
+                      <button key={opt.value} onClick={() => setMinSits(opt.value)} className={`rounded-full px-3 py-1 text-xs border transition-colors ${minSits === opt.value ? "bg-primary text-primary-foreground border-primary" : "border-border text-muted-foreground hover:border-primary"}`}>{opt.label}</button>
+                    ))}
+                  </div>
+                  <p className="text-xs text-muted-foreground">Basé sur les gardes réalisées sur Guardiens</p>
+                </div>
+
+                {/* Section 5 — Note moyenne */}
+                <div className="space-y-3">
+                  <h4 className="text-sm font-medium">Note minimum</h4>
+                  <div className="flex gap-2 flex-wrap">
+                    {[{ label: "Tous", value: "all" }, { label: "4+", value: "4" }, { label: "4.5+", value: "4.5" }, { label: "4.8+", value: "4.8" }].map(opt => (
+                      <button key={opt.value} onClick={() => setMinRating(opt.value)} className={`rounded-full px-3 py-1 text-xs border transition-colors ${minRating === opt.value ? "bg-primary text-primary-foreground border-primary" : "border-border text-muted-foreground hover:border-primary"}`}>{opt.label}</button>
+                    ))}
+                  </div>
+                  <p className="text-xs text-muted-foreground">Disponible une fois les premières gardes réalisées</p>
+                </div>
+
+                <Button onClick={() => setFiltersOpen(false)} className="w-full py-3 rounded-xl">Appliquer</Button>
+              </div>
+            </SheetContent>
+          </Sheet>
+        </div>
+      </div>
+
+      {/* Sort bar + view toggle */}
+      <div className="flex items-center justify-between px-6 py-2 border-b border-border">
+        <div className="flex items-center gap-3">
+          <p className="text-sm text-muted-foreground">{results.length} gardien{results.length !== 1 ? "s" : ""} disponible{results.length !== 1 ? "s" : ""}</p>
+          <div className="flex gap-1.5">
+            {[{ label: "Plus proches", value: "closest" as SortOption }, { label: "Mieux notés", value: "rating" as SortOption }, { label: "Plus expérimentés", value: "experience" as SortOption }].map(opt => (
+              <button key={opt.value} onClick={() => setSort(opt.value)} className={sort === opt.value ? sortPillActive : sortPillBase}>{opt.label}</button>
+            ))}
           </div>
-        </aside>
+        </div>
+        <div className="flex items-center gap-1 border border-border rounded-lg p-0.5">
+          <button onClick={() => setViewMode("list")} className={`p-1.5 rounded ${viewMode === "list" ? "bg-muted" : ""}`}><LayoutGrid className="h-4 w-4" /></button>
+          <button onClick={() => setViewMode("map")} className={`p-1.5 rounded ${viewMode === "map" ? "bg-muted" : ""}`}><MapIcon className="h-4 w-4" /></button>
+        </div>
+      </div>
 
-        <div className="flex-1 min-w-0">
-          {searched && results.length > 0 && (
-            <div className="flex items-center justify-between mb-4">
-              <p className="text-sm text-muted-foreground">{results.length} gardien{results.length > 1 ? "s" : ""}</p>
-              <Select value={sort} onValueChange={(v) => {
-                const newSort = v as SortOption;
-                setSort(newSort);
-                setResults(prev => {
-                  const sorted = [...prev];
-                  if (newSort === "rating") {
-                    sorted.sort((a, b) => parseFloat(b.avgRating || "0") - parseFloat(a.avgRating || "0"));
-                  } else {
-                    const expOrder: Record<string, number> = { "5+": 4, "3-5": 3, "1-2": 2, debutant: 1, "": 0 };
-                    sorted.sort((a, b) => (expOrder[b.experience_years || ""] || 0) - (expOrder[a.experience_years || ""] || 0));
-                  }
-                  return sorted;
-                });
-              }}>
-                <SelectTrigger className="w-44"><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="rating">Mieux notés</SelectItem>
-                  <SelectItem value="experience">Plus expérimentés</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          )}
-
-          {!searched ? (
-            <div className="text-center py-20 text-muted-foreground">
-              <Search className="h-12 w-12 mx-auto mb-4 opacity-30" />
-              <p>Utilisez les filtres pour trouver un gardien.</p>
-            </div>
-          ) : loading ? (
+      {/* Results */}
+      {viewMode === "list" ? (
+        <div className="p-6">
+          {loading ? (
             <p className="text-muted-foreground py-10 text-center">Recherche en cours...</p>
           ) : results.length === 0 ? (
             <div className="text-center py-20 text-muted-foreground">
@@ -331,91 +478,88 @@ const SearchOwner = () => {
               <p className="text-sm mt-1">Essayez d'élargir vos filtres.</p>
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {results.map((s: any) => {
                 const profile = s.profile;
-                const animalTypes: string[] = s.animal_types || [];
-                const lifestyle: string[] = s.lifestyle || [];
+                const sitterAnimalTypes: string[] = s.animal_types || [];
+                const firstName = profile?.first_name || "Gardien";
 
                 return (
-                  <div key={s.id} className="bg-card rounded-lg border border-border p-5 hover:shadow-md transition-shadow">
-                    <div className="flex gap-4">
-                      <Link to={`/profil/${s.user_id}`} className="shrink-0">
-                        {profile?.avatar_url ? (
-                          <img src={profile.avatar_url} alt={profile.first_name} className="w-16 h-16 rounded-full object-cover hover:ring-2 hover:ring-primary transition-all" />
-                        ) : (
-                          <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center font-heading text-xl font-bold hover:ring-2 hover:ring-primary transition-all">
-                            {profile?.first_name?.charAt(0) || "?"}
-                          </div>
-                        )}
+                  <div key={s.id} className="bg-card rounded-2xl overflow-hidden border border-border cursor-pointer hover:shadow-md transition-shadow">
+                    {/* Photo */}
+                    <Link to={`/profil/${s.user_id}`} className="block relative">
+                      {profile?.avatar_url ? (
+                        <img src={profile.avatar_url} alt={firstName} className="h-48 w-full object-cover" />
+                      ) : (
+                        <div className="h-48 w-full bg-primary/10 flex items-center justify-center">
+                          <span className="text-4xl text-primary font-heading font-bold">{firstName.charAt(0)}</span>
+                        </div>
+                      )}
+                      {s.isEmergency && (
+                        <span className="absolute top-3 left-3 flex items-center gap-1 bg-card/90 rounded-full px-2 py-1 text-xs text-amber-700 font-medium">
+                          <Zap className="h-3 w-3" /> Urgence
+                        </span>
+                      )}
+                      {profile?.identity_verified && (
+                        <span className="absolute top-3 right-3 flex items-center gap-1 bg-card/90 rounded-full px-2 py-1 text-xs text-primary">
+                          <ShieldCheck className="h-3 w-3" /> Vérifié
+                        </span>
+                      )}
+                    </Link>
+
+                    {/* Body */}
+                    <div className="p-4">
+                      <Link to={`/profil/${s.user_id}`}>
+                        <h3 className="text-base font-semibold mb-1">{firstName}{profile?.city ? ` · ${profile.city}` : ""}</h3>
                       </Link>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2">
-                          <Link to={`/profil/${s.user_id}`} className="hover:text-primary transition-colors">
-                            <h3 className="font-heading font-semibold">{profile?.first_name || "Gardien"}</h3>
-                          </Link>
-                          {profile?.identity_verified && <VerifiedBadge />}
-                          {s.isEmergency && <EmergencyBadge />}
-                          {s.is_available && (
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 text-xs font-medium">
-                              <CircleDot className="h-3 w-3" /> Disponible
-                            </span>
-                          )}
-                          {s.has_vehicle && <Car className="h-4 w-4 text-muted-foreground" />}
-                        </div>
-                        <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground mt-0.5">
-                          {(profile?.city || profile?.postal_code) && <span className="flex items-center gap-1"><MapPin className="h-3.5 w-3.5" />{[profile.postal_code, profile.city].filter(Boolean).join(" ")}</span>}
-                          {s.sitter_type && <span>{sitterTypeLabels[s.sitter_type] || s.sitter_type}</span>}
-                        </div>
+                      {s._dist !== null && s._dist !== undefined && s._dist !== Infinity && (
+                        <p className="text-sm text-muted-foreground mb-1">📍 {s._dist} km</p>
+                      )}
 
-                        {/* Experience & animals */}
-                        <p className="text-sm mt-1.5">
-                          {s.experience_years && <span>{experienceLabels[s.experience_years] || s.experience_years}</span>}
-                          {animalTypes.length > 0 && (
-                            <span className="text-muted-foreground"> · {animalTypes.join(", ")}</span>
-                          )}
-                        </p>
-
-                        {/* Rating */}
-                        {s.avgRating && (
-                          <div className="flex items-center gap-1 text-sm mt-1">
+                      {/* Metrics */}
+                      <div className="flex gap-4 mb-2 text-sm">
+                        {(profile?.completed_sits_count || 0) > 0 && (
+                          <span>{profile.completed_sits_count} garde{profile.completed_sits_count > 1 ? "s" : ""}</span>
+                        )}
+                        {s.avgRating !== null && (
+                          <span className="flex items-center gap-1">
                             <Star className="h-3.5 w-3.5 text-yellow-500 fill-yellow-500" />
-                            {s.avgRating} <span className="text-muted-foreground">({s.reviewCount} avis)</span>
-                          </div>
+                            {s.avgRating.toFixed(1)}
+                          </span>
                         )}
+                      </div>
 
-                        {/* Qualitative badges */}
-                        {s.topBadges && s.topBadges.length > 0 && (
-                          <TooltipProvider>
-                            <div className="mt-1.5 flex gap-1.5">
-                              {s.topBadges.slice(0, 2).map((b: any) => (
-                                <BadgeShield key={b.badge_key} badgeKey={b.badge_key} count={b.count} size="sm" showLabel={false} />
-                              ))}
-                            </div>
-                          </TooltipProvider>
-                        )}
-
-                        {/* Lifestyle chips */}
-                        {lifestyle.length > 0 && (
-                          <div className="flex flex-wrap gap-1.5 mt-2">
-                            {lifestyle.slice(0, 4).map(l => (
-                              <span key={l} className="px-2 py-0.5 rounded-full bg-accent text-xs">{l}</span>
+                      {/* Badges */}
+                      {s.topBadges && s.topBadges.length > 0 && (
+                        <TooltipProvider>
+                          <div className="flex gap-1.5 mb-2">
+                            {s.topBadges.slice(0, 3).map((b: any) => (
+                              <BadgeShield key={b.badge_key} badgeKey={b.badge_key} count={b.count} size="sm" showLabel={false} />
                             ))}
                           </div>
-                        )}
-                        <div className="flex items-center gap-2 mt-3">
-                          <Button
-                            size="sm"
-                            className="gap-1.5"
-                            onClick={() => handleContact(s.user_id)}
-                            disabled={contactingId === s.user_id}
-                          >
-                            <MessageCircle className="h-3.5 w-3.5" />
-                            {contactingId === s.user_id ? "..." : "Contacter"}
-                          </Button>
-                          <ReportButton targetId={s.user_id} targetType="profile" className="ml-auto" />
+                        </TooltipProvider>
+                      )}
+
+                      {/* Animal types */}
+                      {sitterAnimalTypes.length > 0 && (
+                        <div className="flex flex-wrap gap-1.5 mb-3">
+                          {sitterAnimalTypes.slice(0, 3).map((a: string) => (
+                            <span key={a} className="text-xs bg-muted rounded-full px-2 py-1">{a}</span>
+                          ))}
+                          {sitterAnimalTypes.length > 3 && (
+                            <span className="text-xs bg-muted rounded-full px-2 py-1">+{sitterAnimalTypes.length - 3}</span>
+                          )}
                         </div>
-                      </div>
+                      )}
+
+                      {/* CTA */}
+                      <button
+                        onClick={(e) => { e.preventDefault(); handleContact(s.user_id); }}
+                        disabled={contactingId === s.user_id}
+                        className="w-full py-2 text-sm text-center bg-primary text-primary-foreground rounded-xl font-medium mt-1 hover:bg-primary/90 transition-colors"
+                      >
+                        {contactingId === s.user_id ? "..." : `Contacter ${firstName}`}
+                      </button>
                     </div>
                   </div>
                 );
@@ -423,7 +567,50 @@ const SearchOwner = () => {
             </div>
           )}
         </div>
-      </div>
+      ) : (
+        <div className="flex h-[calc(100vh-220px)]">
+          <div className="w-1/2 overflow-y-auto border-r border-border p-4 space-y-3">
+            {results.map((s: any) => {
+              const profile = s.profile;
+              const firstName = profile?.first_name || "Gardien";
+              return (
+                <div key={s.id} className="flex gap-3 p-3 rounded-xl border border-border hover:shadow-sm transition-shadow cursor-pointer" onClick={() => navigate(`/profil/${s.user_id}`)}>
+                  {profile?.avatar_url ? (
+                    <img src={profile.avatar_url} alt={firstName} className="h-14 w-14 rounded-xl object-cover shrink-0" />
+                  ) : (
+                    <div className="h-14 w-14 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                      <span className="text-lg text-primary font-bold">{firstName.charAt(0)}</span>
+                    </div>
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-sm truncate">{firstName}</p>
+                    {s._dist !== null && s._dist !== Infinity && <p className="text-xs text-muted-foreground">📍 {s._dist} km</p>}
+                    <div className="flex gap-3 text-xs text-muted-foreground mt-0.5">
+                      {s.avgRating !== null && <span className="flex items-center gap-0.5"><Star className="h-3 w-3 text-yellow-500 fill-yellow-500" />{s.avgRating.toFixed(1)}</span>}
+                      {(profile?.completed_sits_count || 0) > 0 && <span>{profile.completed_sits_count} garde{profile.completed_sits_count > 1 ? "s" : ""}</span>}
+                    </div>
+                  </div>
+                  <button onClick={(e) => { e.stopPropagation(); handleContact(s.user_id); }} className="shrink-0 self-center px-3 py-1.5 text-xs bg-primary text-primary-foreground rounded-lg font-medium">Contacter</button>
+                </div>
+              );
+            })}
+          </div>
+          <div className="w-1/2">
+            <Suspense fallback={<div className="flex items-center justify-center h-full text-muted-foreground">Chargement carte...</div>}>
+              <SearchMapView
+                markers={results.filter((s: any) => s._dist !== null && s._dist !== Infinity).map((s: any) => ({
+                  id: s.user_id,
+                  lat: 0,
+                  lng: 0,
+                  title: s.profile?.first_name || "Gardien",
+                  type: "sitter" as const,
+                }))}
+                center={undefined}
+              />
+            </Suspense>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
