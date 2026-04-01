@@ -255,7 +255,7 @@ const SitDetail = () => {
                 </Button>
               </Link>
               <Link
-                to={`/sits/${sit.id}`}
+                to={`/annonces/${sit.id}`}
                 target="_blank"
                 className="text-sm text-primary hover:underline cursor-pointer flex items-center gap-1"
               >
