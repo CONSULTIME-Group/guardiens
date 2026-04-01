@@ -659,18 +659,15 @@ const ArticleCards = ({ articles }: { articles: any[] }) => {
 
 const EmergencyProgress = () => {
   const { user } = useAuth();
-  const [checks, setChecks] = useState<{ completedSits: number; avgRating: number; recentCancellations: number; identityVerified: boolean } | null>(null);
+  const [checks, setChecks] = useState<{ completedSits: number; avgRating: number; cancellations: number; identityVerified: boolean; hasSubscription: boolean } | null>(null);
 
   useEffect(() => {
     if (!user) return;
     const load = async () => {
-      const sixMonthsAgo = new Date();
-      sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
-      const [appsRes, reviewsRes, profileRes, cancellationsRes] = await Promise.all([
+      const [appsRes, reviewsRes, profileRes] = await Promise.all([
         supabase.from("applications").select("id, sit:sits!inner(status)").eq("sitter_id", user.id).eq("status", "accepted"),
         supabase.from("reviews").select("overall_rating").eq("reviewee_id", user.id).eq("published", true),
-        supabase.from("profiles").select("identity_verified").eq("id", user.id).single(),
-        supabase.from("sits").select("id").eq("cancelled_by", user.id).gte("cancelled_at", sixMonthsAgo.toISOString()),
+        supabase.from("profiles").select("identity_verified, cancellation_count").eq("id", user.id).single(),
       ]);
       const completedSits = (appsRes.data || []).filter((a: any) => a.sit?.status === "completed").length;
       const reviews = reviewsRes.data || [];
@@ -678,8 +675,9 @@ const EmergencyProgress = () => {
       setChecks({
         completedSits,
         avgRating: Math.round(avgRating * 10) / 10,
-        recentCancellations: cancellationsRes.data?.length || 0,
+        cancellations: profileRes.data?.cancellation_count || 0,
         identityVerified: profileRes.data?.identity_verified || false,
+        hasSubscription: false, // TODO: check subscription
       });
     };
     load();
@@ -687,37 +685,86 @@ const EmergencyProgress = () => {
 
   if (!checks) return null;
 
-  const items = [
-    { label: `Gardes : ${checks.completedSits}/5`, ok: checks.completedSits >= 5 },
-    { label: `Note : ${checks.avgRating || "—"}/4.7`, ok: checks.avgRating >= 4.7 },
-    { label: `Annulations (6 mois) : ${checks.recentCancellations}`, ok: checks.recentCancellations === 0 },
-    { label: "ID vérifiée", ok: checks.identityVerified },
+  const conditions = [
+    {
+      label: `5 gardes réalisées sur Guardiens`,
+      sublabel: `${checks.completedSits}/5 gardes`,
+      ok: checks.completedSits >= 5,
+      progress: checks.completedSits < 5 ? (checks.completedSits / 5) * 100 : undefined,
+    },
+    {
+      label: "Note moyenne ≥ 4.7/5",
+      sublabel: checks.avgRating > 0 ? `★ ${checks.avgRating}/5` : "Pas encore de note — réalise ta première garde",
+      ok: checks.avgRating >= 4.7,
+    },
+    {
+      label: "Aucune annulation de garde",
+      sublabel: checks.cancellations > 0 ? `${checks.cancellations} annulation${checks.cancellations > 1 ? "s" : ""} enregistrée${checks.cancellations > 1 ? "s" : ""}` : undefined,
+      ok: checks.cancellations === 0,
+      isError: checks.cancellations > 0,
+    },
+    {
+      label: "Identité vérifiée",
+      ok: checks.identityVerified,
+    },
+    {
+      label: "Abonnement actif",
+      ok: checks.hasSubscription,
+    },
   ];
 
-  const remaining = Math.max(0, 5 - checks.completedSits);
+  const doneCount = conditions.filter(c => c.ok).length;
+  const allDone = doneCount === 5;
+
+  if (allDone) {
+    return (
+      <div className="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-2xl p-4 flex items-center gap-3">
+        <Zap className="h-5 w-5 text-amber-600 dark:text-amber-400 shrink-0" />
+        <div className="flex-1">
+          <p className="text-sm font-semibold text-amber-800 dark:text-amber-200">Tu es éligible au statut Gardien d'urgence !</p>
+        </div>
+        <Link to="/mon-profil#urgence" className="bg-amber-500 text-white rounded-full px-4 py-2 text-sm hover:bg-amber-600 transition-colors shrink-0">
+          Activer le statut →
+        </Link>
+      </div>
+    );
+  }
 
   return (
-    <div className="rounded-xl border border-border bg-card p-5 space-y-3">
-      <div className="flex items-center gap-2.5">
-        <span className="inline-flex items-center justify-center h-8 w-8 rounded-full bg-muted">
-          <Zap className="h-4 w-4 text-amber-500" />
-        </span>
-        <div>
-          <p className="font-heading font-semibold text-sm">Gardien d'urgence</p>
-          <p className="text-xs text-muted-foreground">Le plus haut niveau de confiance sur Guardiens</p>
+    <div className="rounded-xl border border-border bg-card p-5 space-y-4">
+      <div>
+        <p className="text-sm font-semibold text-foreground mb-1">Statut Gardien d'urgence</p>
+        <p className="text-xs text-muted-foreground mb-4">
+          Les gardiens d'urgence sont contactés en priorité pour les gardes urgentes.
+        </p>
+        <p className="text-xs text-muted-foreground mb-3">{doneCount}/5 conditions remplies</p>
+        <div className="h-2 rounded-full bg-muted overflow-hidden">
+          <div className="h-full bg-primary rounded-full transition-all duration-500" style={{ width: `${(doneCount / 5) * 100}%` }} />
         </div>
       </div>
-      <div className="space-y-2">
-        {items.map((item, i) => (
-          <div key={i} className="flex items-center gap-2 text-sm">
-            {item.ok ? <CheckCircle2 className="h-4 w-4 text-green-500 shrink-0" /> : <XCircle className="h-4 w-4 text-red-400 shrink-0" />}
-            <span className={item.ok ? "text-foreground" : "text-muted-foreground"}>{item.label}</span>
+      <div className="space-y-1">
+        {conditions.map((c, i) => (
+          <div key={i}>
+            <div className="flex items-center gap-2 py-1.5">
+              {c.ok
+                ? <CheckCircle2 className="h-4 w-4 text-primary shrink-0" />
+                : <Circle className="h-4 w-4 text-muted-foreground shrink-0" />
+              }
+              <span className={`text-sm ${c.ok ? "line-through text-muted-foreground" : "text-foreground"}`}>
+                {c.label}
+              </span>
+            </div>
+            {c.sublabel && !c.ok && (
+              <p className={`text-xs ml-6 ${c.isError ? "text-destructive/70" : "text-muted-foreground"}`}>{c.sublabel}</p>
+            )}
+            {c.progress !== undefined && (
+              <div className="ml-6 h-1 w-full rounded-full bg-muted mt-1">
+                <div className="h-full bg-primary rounded-full" style={{ width: `${c.progress}%` }} />
+              </div>
+            )}
           </div>
         ))}
       </div>
-      {remaining > 0 && (
-        <p className="text-xs text-muted-foreground">Encore {remaining} garde{remaining > 1 ? "s" : ""} pour débloquer le statut !</p>
-      )}
       <Link to="/gardien-urgence" className="text-xs text-primary hover:underline inline-block">En savoir plus →</Link>
     </div>
   );
