@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
+import notreHistoirePanorama from "@/assets/notre-histoire-panorama.png";
 import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, ArrowLeft, Home, Key, Handshake } from "lucide-react";
@@ -412,7 +413,7 @@ const Landing = () => {
           {/* Photo panoramique */}
           <div className="w-full mt-16 rounded-2xl overflow-hidden">
             <img
-              src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1600&q=80"
+              src={notreHistoirePanorama}
               alt="Une garde en Auvergne-Rhône-Alpes — Guardiens"
               className="w-full h-64 md:h-96 object-cover object-center"
               loading="lazy"
