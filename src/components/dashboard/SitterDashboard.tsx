@@ -161,6 +161,7 @@ const SitterDashboard = () => {
     return () => { supabase.removeChannel(channel); };
   }, [user]);
 
+  if (loading) return (
     <div className="p-8 flex items-center justify-center">
       <div className="animate-pulse space-y-4 w-full max-w-lg">
         <div className="h-8 bg-muted rounded-lg w-2/3" />
