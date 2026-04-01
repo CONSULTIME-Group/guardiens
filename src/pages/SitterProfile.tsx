@@ -86,8 +86,8 @@ const SitterProfile = () => {
 
   const sidebarSections: SidebarSection[] = SECTIONS_META.map(s => ({
     ...s,
-    complete: sectionComplete(s.num, mergedData),
-    missingCount: countMissing(s.num, mergedData, missingFields),
+    complete: s.optional ? false : sectionComplete(s.num, mergedData),
+    missingCount: s.optional ? 0 : countMissing(s.num, mergedData, missingFields),
   }));
 
   if (loading) {
