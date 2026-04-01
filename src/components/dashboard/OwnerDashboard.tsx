@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import TwoColumnLayout from "@/components/layout/TwoColumnLayout";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Link } from "react-router-dom";
