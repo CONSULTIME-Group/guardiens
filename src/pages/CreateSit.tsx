@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import ChipSelect from "@/components/profile/ChipSelect";
+import EnvironmentPills from "@/components/shared/EnvironmentPills";
 import { Calendar, Home, PawPrint, ShieldCheck, MessageSquare, Users, ArrowLeft, AlertCircle, Zap } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Link } from "react-router-dom";
@@ -48,6 +49,7 @@ interface OwnerSummary {
   news_frequency: string | null;
   news_format: string[];
   communication_notes: string | null;
+  environments: string[];
 }
 
 const envLabels: Record<string, string> = {
@@ -95,6 +97,7 @@ const CreateSit = () => {
   const [specificExpectations, setSpecificExpectations] = useState("");
   const [openTo, setOpenTo] = useState<string[]>([]);
   const [isUrgent, setIsUrgent] = useState(false);
+  const [sitEnvironments, setSitEnvironments] = useState<string[]>([]);
 
   const [property, setProperty] = useState<PropertySummary | null>(null);
   const [pets, setPets] = useState<PetSummary[]>([]);
@@ -139,7 +142,9 @@ const CreateSit = () => {
           handover_preference: o.handover_preference, welcome_notes: o.welcome_notes,
           news_frequency: o.news_frequency, news_format: o.news_format || [],
           communication_notes: o.communication_notes,
+          environments: (o as any).environments || [],
         });
+        setSitEnvironments((o as any).environments || []);
       }
       setLoading(false);
     };
@@ -174,6 +179,7 @@ const CreateSit = () => {
         open_to: openTo,
         is_urgent: isUrgent,
         status: "published" as any,
+        environments: sitEnvironments,
       } as any).select("id").single();
 
       if (error) throw error;
@@ -266,6 +272,12 @@ const CreateSit = () => {
         <div>
           <Label className="text-sm font-medium mb-2 block">Annonce ouverte à</Label>
           <ChipSelect options={openToOptions} selected={openTo} onChange={setOpenTo} />
+        </div>
+
+        <div>
+          <Label className="text-sm font-medium text-foreground mb-1 block">Environnement (optionnel)</Label>
+          <p className="text-xs text-muted-foreground mb-3">Par défaut, on utilise l'environnement de votre profil. Vous pouvez le personnaliser pour cette annonce.</p>
+          <EnvironmentPills selected={sitEnvironments} onChange={setSitEnvironments} />
         </div>
 
         <div className="flex items-start gap-3 rounded-lg border border-amber-200 dark:border-amber-800 bg-amber-50/50 dark:bg-amber-900/10 p-4">

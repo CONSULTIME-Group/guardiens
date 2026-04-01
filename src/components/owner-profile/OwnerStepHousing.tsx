@@ -9,6 +9,7 @@ import ChipSelect from "../profile/ChipSelect";
 import HintBubble from "../profile/HintBubble";
 import AiSuggestButton from "../profile/AiSuggestButton";
 import LocationProfileCard from "../location/LocationProfileCard";
+import EnvironmentPills from "../shared/EnvironmentPills";
 import type { OwnerProfileData } from "@/hooks/useOwnerProfile";
 
 const TYPES = ["Appartement", "Maison", "Ferme", "Chalet", "Autre"];
@@ -66,6 +67,12 @@ const OwnerStepHousing = ({ data, onChange, onUploadPhoto }: Props) => {
             </SelectContent>
           </Select>
         </div>
+      </div>
+
+      <div className="space-y-1">
+        <Label className="text-sm font-medium text-foreground">L'environnement de votre logement</Label>
+        <p className="text-xs text-muted-foreground mb-3">Sélectionnez jusqu'à 3 environnements qui décrivent votre cadre de vie.</p>
+        <EnvironmentPills selected={data.environments} onChange={v => onChange({ environments: v })} />
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

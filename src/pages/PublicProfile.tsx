@@ -21,6 +21,7 @@ import OwnerHighlights from "@/components/profile/OwnerHighlights";
 import { getBadgeDef } from "@/components/badges/badgeDefinitions";
 import EntraideSection from "@/components/missions/EntraideSection";
 import PublicSkills from "@/components/profile/PublicSkills";
+import EnvironmentPills from "@/components/shared/EnvironmentPills";
 
 const speciesLabels: Record<string, string> = {
   dog: "🐕 Chiens", cat: "🐱 Chats", horse: "🐴 Chevaux", bird: "🐦 Oiseaux",
@@ -247,6 +248,13 @@ const PublicProfile = () => {
             />
             <MetricCell label="Avis" value={String(reviewStats.count)} />
           </div>
+
+          {/* === ENVIRONMENTS === */}
+          {ownerProfile?.environments?.length > 0 && (
+            <div className="mb-4">
+              <EnvironmentPills selected={ownerProfile.environments} onChange={() => {}} readOnly />
+            </div>
+          )}
 
           {/* === BADGES === */}
           {badgeCounts.length > 0 && (

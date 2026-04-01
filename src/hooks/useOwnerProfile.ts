@@ -22,6 +22,8 @@ export interface OwnerProfileData {
   photos: string[];
   description: string;
   region_highlights: string;
+  // Owner environments (owner_profiles table)
+  environments: string[];
   // Step 4 - Expectations (owner_profiles table)
   preferred_sitter_types: string[];
   presence_expected: string;
@@ -67,6 +69,7 @@ const defaultData: OwnerProfileData = {
   first_name: "", last_name: "", city: "", postal_code: "", bio: "", avatar_url: "",
   property_type: "", environment: "", rooms_count: 0, bedrooms_count: 0, car_required: false,
   accessible: false, equipments: [], photos: [], description: "", region_highlights: "",
+  environments: [],
   preferred_sitter_types: [], presence_expected: "", experience_required: false,
   specific_expectations: "", visits_allowed: "", overnight_guest: "", space_usage: [],
   smoker_accepted: "", rules_notes: "",
@@ -108,6 +111,7 @@ export function useOwnerProfile() {
       car_required: prop?.car_required || false, accessible: prop?.accessible || false,
       equipments: (prop as any)?.equipments || [], photos: (prop as any)?.photos || [],
       description: prop?.description || "", region_highlights: prop?.region_highlights || "",
+      environments: (o as any)?.environments || [],
       preferred_sitter_types: o?.preferred_sitter_types || [],
       presence_expected: o?.presence_expected || "",
       experience_required: o?.experience_required || false,
@@ -231,6 +235,7 @@ export function useOwnerProfile() {
         "specific_expectations", "visits_allowed", "overnight_guest", "space_usage",
         "smoker_accepted", "rules_notes", "meeting_preference", "handover_preference",
         "welcome_notes", "news_frequency", "news_format", "preferred_time", "communication_notes",
+        "environments",
       ] as const;
       const ownerUpdate: any = {};
       ownerFields.forEach(f => { if (f in stepData) ownerUpdate[f] = (stepData as any)[f]; });
