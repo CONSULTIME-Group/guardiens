@@ -302,7 +302,7 @@ const PublicProfile = () => {
                         <h3 className="font-heading font-semibold text-sm mb-2 text-foreground">Mode de vie</h3>
                         <div className="flex flex-wrap gap-1.5">
                           {sitterProfile.lifestyle.map((l: string) => (
-                            <span key={l} className="px-2.5 py-1 rounded-full text-xs">
+                            <span key={l} className="px-2.5 py-1 rounded-full text-xs bg-muted text-foreground">
                               {lifestyleLabels[l] || l}
                             </span>
                           ))}
