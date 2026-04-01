@@ -235,6 +235,7 @@ export function useOwnerProfile() {
         "specific_expectations", "visits_allowed", "overnight_guest", "space_usage",
         "smoker_accepted", "rules_notes", "meeting_preference", "handover_preference",
         "welcome_notes", "news_frequency", "news_format", "preferred_time", "communication_notes",
+        "environments",
       ] as const;
       const ownerUpdate: any = {};
       ownerFields.forEach(f => { if (f in stepData) ownerUpdate[f] = (stepData as any)[f]; });
