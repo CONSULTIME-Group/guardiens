@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef, lazy, Suspense } from "react";
 import ReportButton from "@/components/reports/ReportButton";
-import { Sprout, PawPrint, GraduationCap, Handshake as HandshakeIcon, LayoutList, Map as MapIcon, Cat, Bird, SlidersHorizontal, ShieldCheck } from "lucide-react";
+import { Sprout, PawPrint, GraduationCap, Handshake as HandshakeIcon, LayoutGrid, Map as MapIcon, Cat, Bird, SlidersHorizontal, ShieldCheck, Crosshair } from "lucide-react";
 import { Link, useSearchParams, useNavigate } from "react-router-dom";
 
 const SearchMapView = lazy(() => import("@/components/search/SearchMapView"));
@@ -10,19 +10,13 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
-import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Search, MapPin, Calendar, Star, Lock, Zap, Sparkles } from "lucide-react";
-import ChipSelect from "@/components/profile/ChipSelect";
-import VerifiedBadge from "@/components/profile/VerifiedBadge";
-import BadgeShield from "@/components/badges/BadgeShield";
-import { TooltipProvider } from "@/components/ui/tooltip";
 import { format, differenceInDays, differenceInHours } from "date-fns";
 import { fr } from "date-fns/locale";
 import { geocodeCity, haversineDistance } from "@/lib/geocode";
@@ -38,10 +32,14 @@ const speciesIcon: Record<string, typeof PawPrint> = {
   fish: PawPrint, reptile: PawPrint, farm_animal: Bird, nac: PawPrint,
 };
 
+const RADIUS_SHORTCUTS = [5, 10, 15, 30, 50];
+
 type SortOption = "closest" | "recent" | "rating";
 type SearchTab = "sits" | "long_stays" | "missions";
 type MissionSubTab = "published" | "members";
 type ViewMode = "list" | "map";
+type HousingFilter = "all" | "house" | "apartment" | "farm";
+type ExperienceFilter = "all" | "1" | "3";
 
 const SearchSitter = () => {
   const { user } = useAuth();
@@ -58,9 +56,11 @@ const SearchSitter = () => {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [animalTypes, setAnimalTypes] = useState<string[]>([]);
-  const [housingType, setHousingType] = useState("all");
+  const [housingTypes, setHousingTypes] = useState<HousingFilter[]>([]);
   const [duration, setDuration] = useState("all");
   const [verifiedOnly, setVerifiedOnly] = useState(false);
+  const [withPhotosOnly, setWithPhotosOnly] = useState(false);
+  const [minExperience, setMinExperience] = useState<ExperienceFilter>("all");
   const [emergencyOnly, setEmergencyOnly] = useState(searchParams.get("emergency") === "true");
   const [sort, setSort] = useState<SortOption>("closest");
   const [viewMode, setViewMode] = useState<ViewMode>("list");
@@ -78,7 +78,64 @@ const SearchSitter = () => {
   // Pill popover states
   const [editingCity, setEditingCity] = useState(false);
   const [cityInput, setCityInput] = useState("");
+  const [citySuggestions, setCitySuggestions] = useState<{ nom: string; codesPostaux?: string[] }[]>([]);
   const [showMoreAnimals, setShowMoreAnimals] = useState(false);
+
+  // Environment (visual only for now)
+  const [environments, setEnvironments] = useState<string[]>([]);
+  const envOptions = [
+    { key: "city", label: "🏙️ Ville" },
+    { key: "countryside", label: "🌿 Campagne" },
+    { key: "mountain", label: "⛰️ Montagne" },
+    { key: "lake", label: "🏞️ Lac" },
+    { key: "vineyard", label: "🍇 Vignes" },
+    { key: "forest", label: "🌲 Forêt" },
+  ];
+
+  // Derive housingType for existing filter logic (backward compat)
+  const housingType = housingTypes.length === 1 ? housingTypes[0] : "all";
+
+  const hasActiveFilters = housingTypes.length > 0 || verifiedOnly || withPhotosOnly || minExperience !== "all" || environments.length > 0;
+
+  // ─── City autocomplete via geo.api.gouv.fr ───
+  const citySearchTimeout = useRef<NodeJS.Timeout | null>(null);
+  const handleCityInputChange = (val: string) => {
+    setCityInput(val);
+    if (citySearchTimeout.current) clearTimeout(citySearchTimeout.current);
+    if (val.length < 2) { setCitySuggestions([]); return; }
+    citySearchTimeout.current = setTimeout(async () => {
+      try {
+        const res = await fetch(`https://geo.api.gouv.fr/communes?nom=${encodeURIComponent(val)}&fields=nom,codesPostaux&boost=population&limit=5`);
+        const data = await res.json();
+        setCitySuggestions(data || []);
+      } catch { setCitySuggestions([]); }
+    }, 250);
+  };
+
+  const handleCitySelect = (name: string) => {
+    setCityInput(name);
+    setCity(name);
+    setCitySuggestions([]);
+    setEditingCity(false);
+  };
+
+  const handleGeolocation = () => {
+    if (!navigator.geolocation) return;
+    navigator.geolocation.getCurrentPosition(async (pos) => {
+      const coords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+      setUserCoords(coords);
+      try {
+        const res = await fetch(`https://geo.api.gouv.fr/communes?lat=${coords.lat}&lon=${coords.lng}&fields=nom&limit=1`);
+        const data = await res.json();
+        if (data?.[0]?.nom) {
+          setCityInput(data[0].nom);
+          setCity(data[0].nom);
+          setUserCity(data[0].nom);
+        }
+      } catch { /* silently fail */ }
+      setEditingCity(false);
+    });
+  };
 
   // Load user profile & eligibility
   useEffect(() => {
@@ -100,7 +157,6 @@ const SearchSitter = () => {
         const coords = await geocodeCity(uc);
         if (coords) setUserCoords(coords);
       }
-
       const completedSits = (eligRes.data || []).filter((a: any) => a.sit?.status === "completed").length;
       const reviews = reviewsRes.data || [];
       const avgRating = reviews.length > 0 ? reviews.reduce((s: number, r: any) => s + r.overall_rating, 0) / reviews.length : 0;
@@ -130,7 +186,7 @@ const SearchSitter = () => {
       }
     }
     setLoading(false);
-  }, [tab, missionSubTab, city, radius, startDate, endDate, animalTypes, housingType, duration, verifiedOnly, emergencyOnly, sort, userCoords, userCity, missionTypeFilter, missionCategoryFilter]);
+  }, [tab, missionSubTab, city, radius, startDate, endDate, animalTypes, housingType, duration, verifiedOnly, emergencyOnly, sort, userCoords, userCity, missionTypeFilter, missionCategoryFilter, withPhotosOnly, minExperience]);
 
   useEffect(() => {
     if (!initialLoadDone.current) return;
@@ -183,6 +239,7 @@ const SearchSitter = () => {
     const { data } = await query;
     let items = data || [];
     if (housingType !== "all") items = items.filter((s: any) => s.property?.type === housingType);
+    if (withPhotosOnly) items = items.filter((s: any) => s.property?.photos?.length > 0);
     if (duration !== "all") {
       items = items.filter((s: any) => {
         if (!s.start_date || !s.end_date) return true;
@@ -210,6 +267,14 @@ const SearchSitter = () => {
           const wantedSpecies = animalTypes.map(a => animalChipToSpecies[a]).filter(Boolean);
           if (!petSpecies.some((s: string) => wantedSpecies.includes(s))) return null;
         }
+        // Min experience filter
+        if (minExperience !== "all") {
+          const completedCount = (ownerBadges || []).length; // Approximate: badge count as proxy
+          const minCount = parseInt(minExperience);
+          // We'll use review count as a proxy for experience
+          const revCount = reviews?.length || 0;
+          if (revCount < minCount) return null;
+        }
         const dist = searchCoords && sit.owner?.city ? computeDistance(sit.owner.city, cityCoords, searchCoords) : null;
         const isNew = differenceInHours(new Date(), new Date(sit.created_at)) < 48;
         const days = sit.start_date && sit.end_date ? differenceInDays(new Date(sit.end_date), new Date(sit.start_date)) : 0;
@@ -221,7 +286,6 @@ const SearchSitter = () => {
     if (final.length < DEMO_THRESHOLD) {
       final = [...final, ...DEMO_SITS];
     }
-    // Store coords for map pins
     const coordsMap = new Map<string, { lat: number; lng: number }>();
     final.forEach((item: any) => {
       if (item && item.owner?.city) {
@@ -399,21 +463,41 @@ const SearchSitter = () => {
   const handleCityConfirm = () => {
     setCity(cityInput);
     setEditingCity(false);
+    setCitySuggestions([]);
   };
 
   const toggleAnimalFilter = (animal: string) => {
     setAnimalTypes(prev => prev.includes(animal) ? prev.filter(a => a !== animal) : [...prev, animal]);
   };
 
+  const toggleHousingType = (t: HousingFilter) => {
+    setHousingTypes(prev => prev.includes(t) ? prev.filter(x => x !== t) : [...prev, t]);
+  };
+
+  const toggleEnv = (e: string) => {
+    setEnvironments(prev => prev.includes(e) ? prev.filter(x => x !== e) : prev.length < 3 ? [...prev, e] : prev);
+  };
+
+  const resetFilters = () => {
+    setHousingTypes([]);
+    setVerifiedOnly(false);
+    setWithPhotosOnly(false);
+    setMinExperience("all");
+    setEnvironments([]);
+  };
+
   const animalsLabel = animalTypes.length > 0 ? animalTypes.join(" · ") : "Animaux";
   const datesLabel = startDate && endDate
-    ? `${format(new Date(startDate), "d MMM", { locale: fr })} – ${format(new Date(endDate), "d MMM", { locale: fr })}`
+    ? `${format(new Date(startDate), "d MMM", { locale: fr })} → ${format(new Date(endDate), "d MMM", { locale: fr })}`
     : "Dates";
 
   const resultCount = tab === "missions" && missionSubTab === "members" ? availableMembers.length : results.length;
   const countLabel = tab === "missions" && missionSubTab === "members"
     ? `${resultCount} membre${resultCount > 1 ? "s" : ""} disponible${resultCount > 1 ? "s" : ""}`
     : `${resultCount} garde${resultCount > 1 ? "s" : ""} disponible${resultCount > 1 ? "s" : ""} près de vous`;
+
+  // ─── Pill style ───
+  const pillClass = "flex items-center gap-2 px-4 py-2 rounded-full border border-border bg-card cursor-pointer hover:border-primary transition-colors text-sm whitespace-nowrap shrink-0";
 
   // ─── Card renderer ───
   const renderCard = (item: any) => {
@@ -428,73 +512,64 @@ const SearchSitter = () => {
     const isDemo = !!item.is_demo;
     const linkTo = isMission ? `/petites-missions/${item.id}` : isLongStay ? (sitterEligible ? `/long-stays/${item.id}` : "#") : `/sits/${item.id}`;
 
-    // CAS 1: hasAccess + real → clickable card, no CTA
-    // CAS 2: hasAccess + demo → not clickable, no CTA
-    // CAS 3: !hasAccess + real → not clickable, CTA to /mon-abonnement
-    // CAS 4: !hasAccess + demo → not clickable, CTA to /mon-abonnement
     const showCTA = !hasAccess;
     const isClickable = hasAccess && !isDemo;
 
     const cardContent = (
-      <div className={`bg-white rounded-2xl overflow-hidden border border-[#E8E6DC] transition-shadow ${isClickable ? "cursor-pointer hover:shadow-md" : ""}`}>
-        {/* Photo */}
+      <div className={`bg-card rounded-2xl overflow-hidden border border-border transition-shadow ${isClickable ? "cursor-pointer hover:shadow-md" : ""}`}>
         {photos.length > 0 && (
-          <div className="h-48 relative">
+          <div className="h-52 relative">
             <img src={photos[0]} alt="" className="w-full h-full object-cover" />
             {item.owner?.identity_verified && (
-              <span className="absolute top-3 left-3 flex items-center gap-1 bg-white/90 backdrop-blur-sm rounded-full px-2 py-1 text-xs text-[#2D6A4F] font-medium">
+              <span className="absolute top-3 left-3 flex items-center gap-1 bg-white/90 backdrop-blur-sm rounded-full px-2 py-1 text-xs text-primary font-medium">
                 <ShieldCheck className="h-3 w-3" /> Vérifié
               </span>
             )}
             {isDemo && (
-              <span className="absolute top-3 right-3 bg-black/40 text-white rounded-full px-2 py-1 text-xs">
+              <span className="absolute top-3 right-3 bg-black/50 text-white rounded-full px-2 py-1 text-xs">
                 Annonce type
               </span>
             )}
             {item.isNew && !isDemo && (
-              <span className="absolute top-3 right-3 bg-[#2D6A4F] text-white rounded-full px-2 py-1 text-xs flex items-center gap-1">
+              <span className="absolute top-3 right-3 bg-primary text-primary-foreground rounded-full px-2 py-1 text-xs flex items-center gap-1">
                 <Sparkles className="h-3 w-3" /> Nouveau
               </span>
             )}
           </div>
         )}
-        {/* Body */}
         <div className="p-4">
-          <h3 className="text-base font-semibold text-[#1a1a1a] leading-snug mb-1 line-clamp-2">
+          <h3 className="text-base font-semibold text-foreground leading-snug mb-1 line-clamp-2">
             {item.title || "Sans titre"}
           </h3>
-          <p className="text-sm text-[#6B7280] mb-2 flex items-center gap-1">
+          <p className="text-sm text-muted-foreground mb-2 flex items-center gap-1">
             <MapPin className="h-3.5 w-3.5" />
             {item.owner?.city || ""}
             {item.distance != null && ` · ${item.distance < 1 ? "< 1" : Math.round(item.distance).toLocaleString("fr-FR").replace(/\s/g, "\u202F")} km`}
           </p>
-          {/* Animal icons */}
           {Object.keys(petGroups).length > 0 && (
-            <div className="flex flex-wrap items-center gap-2 mb-2">
+            <div className="flex flex-wrap items-center gap-3 mb-2">
               {Object.entries(petGroups).map(([species, names]) => {
                 const IconComp = speciesIcon[species] || PawPrint;
                 return (
-                  <span key={species} className="flex items-center gap-0.5 text-[#92400E] text-sm">
+                  <span key={species} className="flex items-center gap-0.5 text-amber-700 text-sm">
                     <IconComp className="h-4 w-4" /> ×{names.length}
                   </span>
                 );
               })}
             </div>
           )}
-          {/* Dates */}
           {!isMission && item.start_date && (
-            <p className="text-xs text-[#6B7280]">
+            <p className="text-xs text-muted-foreground">
               {formatDate(item.start_date)} → {formatDate(item.end_date)}
             </p>
           )}
           {isMission && item.description && (
-            <p className="text-sm text-[#6B7280] truncate">{item.description}</p>
+            <p className="text-sm text-muted-foreground truncate">{item.description}</p>
           )}
-          {/* CTA for non-subscribers (CAS 3 & 4) */}
           {showCTA && (
             <Link
               to="/mon-abonnement"
-              className="block w-full py-2 text-sm text-[#2D6A4F] bg-[#EAF3DE] rounded-xl font-medium hover:bg-[#D1FAE5] mt-3 text-center"
+              className="block w-full py-2 text-sm text-center text-primary bg-primary/10 rounded-xl font-medium mt-3 hover:bg-primary/20 transition-colors"
             >
               S'abonner pour postuler
             </Link>
@@ -503,7 +578,6 @@ const SearchSitter = () => {
       </div>
     );
 
-    // Only wrap in Link if CAS 1 (hasAccess + real)
     if (isClickable) {
       return <Link key={item.id} to={linkTo}>{cardContent}</Link>;
     }
@@ -513,18 +587,27 @@ const SearchSitter = () => {
   // ─── Render ───
   return (
     <div className="animate-fade-in">
-      {/* Tabs */}
-      <div className="px-6 pt-4">
-        <Tabs value={tab} onValueChange={(v) => { if (v !== "long_stays") setTab(v as SearchTab); }} className="mb-0">
-          <TabsList>
-            <TabsTrigger value="sits">Gardes</TabsTrigger>
-            <TabsTrigger value="long_stays" disabled className="opacity-60 cursor-not-allowed">
-              Longue durée
-              <span className="ml-2 bg-[#E8E6DC] text-[#6B7280] rounded-full px-2 py-0.5 text-[10px] font-medium">Bientôt disponible</span>
-            </TabsTrigger>
-            <TabsTrigger value="missions">Petites missions</TabsTrigger>
-          </TabsList>
-        </Tabs>
+      {/* ─── Tabs ─── */}
+      <div className="px-6 pt-4 border-b border-border">
+        <div className="flex gap-6">
+          {([
+            { key: "sits" as SearchTab, label: "Gardes" },
+            { key: "long_stays" as SearchTab, label: "Longue durée" },
+            { key: "missions" as SearchTab, label: "Petites missions" },
+          ]).map(({ key, label }) => (
+            <button
+              key={key}
+              onClick={() => setTab(key)}
+              className={`pb-2 text-sm transition-colors ${
+                tab === key
+                  ? "font-medium text-foreground border-b-2 border-primary"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Mission sub-tabs */}
@@ -533,13 +616,13 @@ const SearchSitter = () => {
           <div className="flex gap-2">
             <button
               onClick={() => setMissionSubTab("published")}
-              className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${missionSubTab === "published" ? "bg-[#1a1a1a] text-white" : "bg-white text-[#6B7280] border border-[#E8E6DC] hover:bg-[#F5F5F0]"}`}
+              className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${missionSubTab === "published" ? "bg-foreground text-background" : "bg-card text-muted-foreground border border-border hover:bg-accent"}`}
             >
               Missions publiées
             </button>
             <button
               onClick={() => setMissionSubTab("members")}
-              className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${missionSubTab === "members" ? "bg-[#1a1a1a] text-white" : "bg-white text-[#6B7280] border border-[#E8E6DC] hover:bg-[#F5F5F0]"}`}
+              className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${missionSubTab === "members" ? "bg-foreground text-background" : "bg-card text-muted-foreground border border-border hover:bg-accent"}`}
             >
               Membres disponibles
             </button>
@@ -557,8 +640,8 @@ const SearchSitter = () => {
                 onClick={() => setMissionCategoryFilter(key)}
                 className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs transition-colors ${
                   missionCategoryFilter === key
-                    ? "bg-[#1a1a1a] text-white border-[#1a1a1a]"
-                    : "bg-white text-[#6B7280] border-[#E8E6DC]"
+                    ? "bg-foreground text-background border-foreground"
+                    : "bg-card text-muted-foreground border-border"
                 }`}
               >
                 {Icon && <Icon className="h-3 w-3" />}
@@ -570,55 +653,93 @@ const SearchSitter = () => {
       )}
 
       {/* ─── Sticky search bar ─── */}
-      <div className="sticky top-0 z-10 bg-white border-b border-[#E8E6DC]" style={{ borderBottomWidth: "0.5px" }}>
-        <div className="flex flex-row items-center gap-3 px-6 py-3 overflow-x-auto">
+      <div className="sticky top-0 z-10 bg-background border-b border-border">
+        <div className="flex flex-row items-center gap-2 px-6 py-3 overflow-x-auto">
           {/* Location pill */}
           <Popover open={editingCity} onOpenChange={setEditingCity}>
             <PopoverTrigger asChild>
-              <button className="flex items-center gap-2 px-4 py-2 rounded-full border border-[#E8E6DC] bg-white text-sm cursor-pointer hover:border-[#2D6A4F] whitespace-nowrap shrink-0 transition-colors">
-                <MapPin className="h-3.5 w-3.5" /> {city || "Ville"}
+              <button className={pillClass}>
+                <MapPin className="h-4 w-4 text-primary" />
+                <span className="text-foreground">{city || "Ville"}</span>
               </button>
             </PopoverTrigger>
-            <PopoverContent className="w-64 p-3" align="start">
+            <PopoverContent className="w-72 p-3" align="start">
               <Input
-                placeholder="Entrez une ville"
+                placeholder="Rechercher une ville…"
                 value={cityInput}
-                onChange={e => setCityInput(e.target.value)}
+                onChange={e => handleCityInputChange(e.target.value)}
                 onKeyDown={e => { if (e.key === "Enter") handleCityConfirm(); }}
                 autoFocus
               />
-              <Button size="sm" className="w-full mt-2" onClick={handleCityConfirm}>Valider</Button>
+              {citySuggestions.length > 0 && (
+                <div className="mt-1 border border-border rounded-lg overflow-hidden">
+                  {citySuggestions.map((s, i) => (
+                    <button
+                      key={i}
+                      onClick={() => handleCitySelect(s.nom)}
+                      className="w-full text-left px-3 py-2 text-sm text-foreground hover:bg-accent transition-colors"
+                    >
+                      {s.nom}
+                      {s.codesPostaux?.[0] && <span className="text-muted-foreground ml-1">({s.codesPostaux[0]})</span>}
+                    </button>
+                  ))}
+                </div>
+              )}
+              <button
+                onClick={handleGeolocation}
+                className="flex items-center gap-2 w-full mt-2 px-3 py-2 text-sm text-primary hover:bg-accent rounded-lg transition-colors"
+              >
+                <Crosshair className="h-4 w-4" /> Utiliser ma position
+              </button>
             </PopoverContent>
           </Popover>
 
           {/* Radius pill */}
           <Popover>
             <PopoverTrigger asChild>
-              <button className="flex items-center gap-2 px-4 py-2 rounded-full border border-[#E8E6DC] bg-white text-sm cursor-pointer hover:border-[#2D6A4F] whitespace-nowrap shrink-0 transition-colors">
-                {radius[0]} km
+              <button className={pillClass}>
+                <span className="text-foreground">{radius[0]} km</span>
               </button>
             </PopoverTrigger>
-            <PopoverContent className="w-56 p-4" align="start">
-              <p className="text-xs text-[#6B7280] mb-2">Rayon : {radius[0]} km</p>
+            <PopoverContent className="w-64 p-4" align="start">
+              <div className="flex flex-wrap gap-1.5 mb-4">
+                {RADIUS_SHORTCUTS.map(r => (
+                  <button
+                    key={r}
+                    onClick={() => setRadius([r])}
+                    className={`rounded-full px-3 py-1 text-xs transition-colors ${
+                      radius[0] === r
+                        ? "bg-primary text-primary-foreground"
+                        : "border border-border text-muted-foreground hover:border-primary"
+                    }`}
+                  >
+                    {r === 50 ? "50 km+" : `${r} km`}
+                  </button>
+                ))}
+              </div>
               <Slider value={radius} onValueChange={setRadius} min={5} max={100} step={5} />
+              <p className="text-xs text-muted-foreground mt-3">
+                {loading ? "Calcul…" : `${resultCount} garde${resultCount > 1 ? "s" : ""} dans ce rayon`}
+              </p>
             </PopoverContent>
           </Popover>
 
           {/* Dates pill */}
           <Popover>
             <PopoverTrigger asChild>
-              <button className="flex items-center gap-2 px-4 py-2 rounded-full border border-[#E8E6DC] bg-white text-sm cursor-pointer hover:border-[#2D6A4F] whitespace-nowrap shrink-0 transition-colors">
-                <Calendar className="h-3.5 w-3.5" /> {datesLabel}
+              <button className={pillClass}>
+                <Calendar className="h-4 w-4 text-primary" />
+                <span className="text-foreground">{datesLabel}</span>
               </button>
             </PopoverTrigger>
             <PopoverContent className="w-64 p-4" align="start">
               <div className="space-y-3">
                 <div>
-                  <label className="text-xs text-[#6B7280] block mb-1">Du</label>
+                  <label className="text-xs text-muted-foreground block mb-1">Du</label>
                   <Input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} />
                 </div>
                 <div>
-                  <label className="text-xs text-[#6B7280] block mb-1">Au</label>
+                  <label className="text-xs text-muted-foreground block mb-1">Au</label>
                   <Input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} />
                 </div>
               </div>
@@ -628,25 +749,28 @@ const SearchSitter = () => {
           {/* Animals pill */}
           <Popover>
             <PopoverTrigger asChild>
-              <button className="flex items-center gap-2 px-4 py-2 rounded-full border border-[#E8E6DC] bg-white text-sm cursor-pointer hover:border-[#2D6A4F] whitespace-nowrap shrink-0 transition-colors">
-                <PawPrint className="h-3.5 w-3.5" /> {animalsLabel}
+              <button className={pillClass}>
+                <PawPrint className="h-4 w-4 text-primary" />
+                <span className="text-foreground">{animalsLabel}</span>
               </button>
             </PopoverTrigger>
             <PopoverContent className="w-56 p-3" align="start">
               <div className="space-y-2">
                 {["Chiens", "Chats"].map(animal => (
-                  <label key={animal} className="flex items-center gap-2 text-sm cursor-pointer">
+                  <label key={animal} className="flex items-center gap-2 text-sm text-foreground cursor-pointer">
                     <Checkbox checked={animalTypes.includes(animal)} onCheckedChange={() => toggleAnimalFilter(animal)} />
+                    {animal === "Chiens" && <PawPrint className="h-3.5 w-3.5 text-muted-foreground" />}
+                    {animal === "Chats" && <Cat className="h-3.5 w-3.5 text-muted-foreground" />}
                     {animal}
                   </label>
                 ))}
                 {!showMoreAnimals && (
-                  <button className="text-xs text-[#2D6A4F] hover:underline" onClick={() => setShowMoreAnimals(true)}>
-                    Voir plus →
+                  <button className="text-xs text-primary hover:underline" onClick={() => setShowMoreAnimals(true)}>
+                    Voir plus ▾
                   </button>
                 )}
                 {showMoreAnimals && ["Chevaux", "Animaux de ferme", "NAC"].map(animal => (
-                  <label key={animal} className="flex items-center gap-2 text-sm cursor-pointer">
+                  <label key={animal} className="flex items-center gap-2 text-sm text-foreground cursor-pointer">
                     <Checkbox checked={animalTypes.includes(animal)} onCheckedChange={() => toggleAnimalFilter(animal)} />
                     {animal}
                   </label>
@@ -658,47 +782,112 @@ const SearchSitter = () => {
           {/* Advanced filters pill */}
           <Sheet>
             <SheetTrigger asChild>
-              <button className="flex items-center gap-2 px-4 py-2 rounded-full border border-[#E8E6DC] bg-white text-sm cursor-pointer hover:border-[#2D6A4F] whitespace-nowrap shrink-0 transition-colors">
-                <SlidersHorizontal className="h-3.5 w-3.5" /> Filtres
+              <button className={`${pillClass} relative`}>
+                <SlidersHorizontal className="h-4 w-4" />
+                <span className="text-foreground">Filtres</span>
+                {hasActiveFilters && (
+                  <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-primary" />
+                )}
               </button>
             </SheetTrigger>
             <SheetContent side="right" className="w-80 overflow-y-auto">
-              <h3 className="font-heading font-semibold text-lg mb-6 mt-2">Filtres avancés</h3>
+              <div className="flex items-center justify-between mb-6 mt-2">
+                <h3 className="font-heading font-semibold text-lg text-foreground">Filtres</h3>
+                <button onClick={resetFilters} className="text-sm text-primary hover:underline">Réinitialiser</button>
+              </div>
               <div className="space-y-6">
+                {/* Housing type */}
                 <div>
-                  <label className="text-sm font-medium mb-1.5 block">Type de logement</label>
-                  <Select value={housingType} onValueChange={setHousingType}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Tous</SelectItem>
-                      <SelectItem value="apartment">Appartement</SelectItem>
-                      <SelectItem value="house">Maison</SelectItem>
-                      <SelectItem value="farm">Ferme / Chalet</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <label className="text-sm font-medium text-foreground mb-2 block">Type de logement</label>
+                  <div className="flex flex-wrap gap-2">
+                    {([
+                      { key: "house" as HousingFilter, label: "Maison" },
+                      { key: "apartment" as HousingFilter, label: "Appartement" },
+                      { key: "farm" as HousingFilter, label: "Ferme" },
+                    ]).map(({ key, label }) => (
+                      <button
+                        key={key}
+                        onClick={() => toggleHousingType(key)}
+                        className={`rounded-full px-3 py-1.5 text-xs transition-colors ${
+                          housingTypes.includes(key)
+                            ? "bg-primary text-primary-foreground"
+                            : "border border-border text-muted-foreground hover:border-primary"
+                        }`}
+                      >
+                        {label}
+                      </button>
+                    ))}
+                  </div>
                 </div>
+
+                {/* Environment (visual only) */}
                 <div>
-                  <label className="text-sm font-medium mb-1.5 block">Durée</label>
-                  <Select value={duration} onValueChange={setDuration}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Toutes</SelectItem>
-                      <SelectItem value="short">Court séjour (≤ 7j)</SelectItem>
-                      <SelectItem value="medium">1-2 semaines</SelectItem>
-                      <SelectItem value="long">Longue durée (15j+)</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <label className="text-sm font-medium text-foreground mb-2 block">Environnement</label>
+                  <div className="flex flex-wrap gap-2">
+                    {envOptions.map(({ key, label }) => (
+                      <button
+                        key={key}
+                        onClick={() => toggleEnv(key)}
+                        className={`rounded-full px-3 py-1.5 text-xs transition-colors ${
+                          environments.includes(key)
+                            ? "bg-primary text-primary-foreground"
+                            : "border border-border text-muted-foreground hover:border-primary"
+                        }`}
+                      >
+                        {label}
+                      </button>
+                    ))}
+                  </div>
                 </div>
+
+                {/* Verified toggle */}
+                <div>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <label className="text-sm text-foreground block">Propriétaire avec ID vérifiée</label>
+                      <span className="text-xs text-muted-foreground">Afficher uniquement les annonces de proprios dont l'identité a été vérifiée</span>
+                    </div>
+                    <Switch checked={verifiedOnly} onCheckedChange={setVerifiedOnly} />
+                  </div>
+                </div>
+
+                {/* With photos toggle */}
                 <div className="flex items-center justify-between">
-                  <label className="text-sm">Profils vérifiés uniquement</label>
-                  <Switch checked={verifiedOnly} onCheckedChange={setVerifiedOnly} />
+                  <label className="text-sm text-foreground">Annonces avec photos</label>
+                  <Switch checked={withPhotosOnly} onCheckedChange={setWithPhotosOnly} />
                 </div>
-                <div className="flex items-center justify-between">
-                  <label className="text-sm flex items-center gap-1.5">
-                    <Zap className="h-3.5 w-3.5 text-amber-500" /> Gardiens d'urgence
-                  </label>
-                  <Switch checked={emergencyOnly} onCheckedChange={setEmergencyOnly} />
+
+                {/* Min experience */}
+                <div>
+                  <label className="text-sm font-medium text-foreground mb-2 block">Expérience du propriétaire</label>
+                  <div className="flex flex-wrap gap-2">
+                    {([
+                      { key: "all" as ExperienceFilter, label: "Tous" },
+                      { key: "1" as ExperienceFilter, label: "1 garde+" },
+                      { key: "3" as ExperienceFilter, label: "3 gardes+" },
+                    ]).map(({ key, label }) => (
+                      <button
+                        key={key}
+                        onClick={() => setMinExperience(key)}
+                        className={`rounded-full px-3 py-1.5 text-xs transition-colors ${
+                          minExperience === key
+                            ? "bg-primary text-primary-foreground"
+                            : "border border-border text-muted-foreground hover:border-primary"
+                        }`}
+                      >
+                        {label}
+                      </button>
+                    ))}
+                  </div>
                 </div>
+
+                {/* Apply button */}
+                <Button className="w-full bg-primary text-primary-foreground py-3 rounded-xl font-medium" onClick={() => {
+                  // Close the sheet by triggering search
+                  doSearch();
+                }}>
+                  Appliquer les filtres
+                </Button>
               </div>
             </SheetContent>
           </Sheet>
@@ -706,16 +895,18 @@ const SearchSitter = () => {
       </div>
 
       {/* ─── Sort bar + view toggle ─── */}
-      <div className="flex justify-between items-center px-6 py-2.5 border-b border-[#E8E6DC]" style={{ borderBottomWidth: "0.5px" }}>
+      <div className="flex justify-between items-center px-6 py-2 border-b border-border bg-background">
         <div className="flex items-center gap-3 flex-wrap">
-          <span className="text-sm text-[#6B7280]">{loading ? "Recherche…" : countLabel}</span>
-          <div className="flex gap-1.5">
+          <span className="text-sm text-muted-foreground">{loading ? "Recherche…" : countLabel}</span>
+          <div className="flex gap-2">
             {(["closest", "recent", "rating"] as SortOption[]).map(s => (
               <button
                 key={s}
                 onClick={() => handleSortChange(s)}
                 className={`rounded-full px-3 py-1 text-xs transition-colors ${
-                  sort === s ? "bg-[#1a1a1a] text-white" : "bg-white text-[#6B7280] border border-[#E8E6DC]"
+                  sort === s
+                    ? "bg-foreground text-background font-medium"
+                    : "border border-border text-muted-foreground hover:border-primary"
                 }`}
               >
                 {s === "closest" ? "Plus proches" : s === "recent" ? "Plus récentes" : "Mieux notées"}
@@ -723,16 +914,16 @@ const SearchSitter = () => {
             ))}
           </div>
         </div>
-        <div className="border border-[#E8E6DC] rounded-lg overflow-hidden flex shrink-0">
+        <div className="flex border border-border rounded-lg overflow-hidden shrink-0">
           <button
             onClick={() => setViewMode("list")}
-            className={`p-2 transition-colors ${viewMode === "list" ? "bg-[#2D6A4F] text-white" : "bg-white text-[#6B7280]"}`}
+            className={`p-2 transition-colors ${viewMode === "list" ? "bg-primary text-primary-foreground" : "bg-card text-muted-foreground"}`}
           >
-            <LayoutList className="h-4 w-4" />
+            <LayoutGrid className="h-4 w-4" />
           </button>
           <button
             onClick={() => setViewMode("map")}
-            className={`p-2 transition-colors ${viewMode === "map" ? "bg-[#2D6A4F] text-white" : "bg-white text-[#6B7280]"}`}
+            className={`p-2 transition-colors ${viewMode === "map" ? "bg-primary text-primary-foreground" : "bg-card text-muted-foreground"}`}
           >
             <MapIcon className="h-4 w-4" />
           </button>
@@ -751,13 +942,27 @@ const SearchSitter = () => {
       {viewMode === "list" ? (
         <div className="p-6">
           {loading ? (
-            <p className="text-[#6B7280] py-10 text-center">Recherche en cours...</p>
+            <p className="text-muted-foreground py-10 text-center">Recherche en cours...</p>
+          ) : tab === "long_stays" ? (
+            /* Long stay coming soon message */
+            <div className="text-center py-16 space-y-4 max-w-md mx-auto">
+              <Search className="h-12 w-12 mx-auto text-primary/30" />
+              <p className="font-heading font-semibold text-lg text-foreground">Les gardes longue durée (30j+) arrivent bientôt.</p>
+              <p className="text-sm text-muted-foreground">
+                Complète ton profil pour être parmi les premiers à y avoir accès.
+              </p>
+              <Link to="/profile" className="inline-block">
+                <Button className="gap-2">
+                  <Sparkles className="h-4 w-4" /> Compléter mon profil
+                </Button>
+              </Link>
+            </div>
           ) : tab === "missions" && missionSubTab === "members" ? (
             availableMembers.length === 0 ? (
               <div className="text-center py-16 space-y-3">
                 <Search className="h-12 w-12 mx-auto text-primary/30" />
-                <p className="font-heading font-semibold text-lg">Aucun membre disponible dans ce rayon</p>
-                <p className="text-sm text-[#6B7280]">Élargis ton rayon de recherche.</p>
+                <p className="font-heading font-semibold text-lg text-foreground">Aucun membre disponible dans ce rayon</p>
+                <p className="text-sm text-muted-foreground">Élargis ton rayon de recherche.</p>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -772,32 +977,32 @@ const SearchSitter = () => {
                   const visibleSkills = skills.slice(0, 2);
                   const extraCount = skills.length - 2;
                   return (
-                    <div key={member.id} className="bg-white rounded-2xl border border-[#E8E6DC] p-4 flex items-center gap-4">
+                    <div key={member.id} className="bg-card rounded-2xl border border-border p-4 flex items-center gap-4">
                       {member.avatar_url ? (
                         <img src={member.avatar_url} alt="" className="w-12 h-12 rounded-full object-cover shrink-0" />
                       ) : (
-                        <div className="w-12 h-12 rounded-full bg-[#F5F5F0] flex items-center justify-center text-sm font-bold shrink-0">
+                        <div className="w-12 h-12 rounded-full bg-accent flex items-center justify-center text-sm font-bold shrink-0 text-foreground">
                           {member.first_name?.charAt(0) || "?"}
                         </div>
                       )}
                       <div className="flex-1 min-w-0">
-                        <p className="text-base font-heading font-semibold">{member.first_name || "Membre"}</p>
-                        {member.city && <p className="text-xs text-[#6B7280]">{member.city}{member.distance != null ? ` · à ${Math.round(member.distance)} km` : ""}</p>}
+                        <p className="text-base font-heading font-semibold text-foreground">{member.first_name || "Membre"}</p>
+                        {member.city && <p className="text-xs text-muted-foreground">{member.city}{member.distance != null ? ` · à ${Math.round(member.distance)} km` : ""}</p>}
                         <div className="flex flex-wrap gap-1.5 mt-1.5">
                           {visibleSkills.map((s: string) => {
                             const meta = skillMeta[s];
                             if (!meta) return null;
                             const Icon = meta.icon;
                             return (
-                              <span key={s} className="flex items-center gap-1 bg-[#EAF3DE] text-[#2D6A4F] rounded-full text-xs px-3 py-1">
+                              <span key={s} className="flex items-center gap-1 bg-primary/10 text-primary rounded-full text-xs px-3 py-1">
                                 <Icon className="h-3 w-3" />{meta.label}
                               </span>
                             );
                           })}
-                          {extraCount > 0 && <span className="text-xs text-[#6B7280] self-center">+{extraCount}</span>}
+                          {extraCount > 0 && <span className="text-xs text-muted-foreground self-center">+{extraCount}</span>}
                         </div>
                         {(member.avgRating || member.sitsCount > 0) && (
-                          <p className="text-xs text-[#6B7280] mt-1">
+                          <p className="text-xs text-muted-foreground mt-1">
                             {member.avgRating && <>★ {member.avgRating}</>}
                             {member.sitsCount > 0 && <> · {member.sitsCount} garde{member.sitsCount > 1 ? "s" : ""}</>}
                           </p>
@@ -805,7 +1010,7 @@ const SearchSitter = () => {
                       </div>
                       <Link
                         to={`/messages?new=true&to=${member.id}&context=entraide`}
-                        className="text-sm text-[#2D6A4F] font-semibold shrink-0 hover:underline"
+                        className="text-sm text-primary font-semibold shrink-0 hover:underline"
                       >
                         Contacter →
                       </Link>
@@ -817,8 +1022,8 @@ const SearchSitter = () => {
           ) : results.length === 0 ? (
             <div className="text-center py-16 space-y-4">
               <Search className="h-12 w-12 mx-auto text-primary/30" />
-              <p className="font-heading font-semibold text-lg">Pas encore d'annonce dans votre zone</p>
-              <p className="text-sm text-[#6B7280] max-w-md mx-auto">
+              <p className="font-heading font-semibold text-lg text-foreground">Pas encore d'annonce dans votre zone</p>
+              <p className="text-sm text-muted-foreground max-w-md mx-auto">
                 Activez le mode Disponible pour être contacté directement par les propriétaires !
               </p>
               <Button onClick={handleActivateAvailable} className="gap-2">
@@ -833,7 +1038,7 @@ const SearchSitter = () => {
         </div>
       ) : (
         /* ─── Map view ─── */
-        <Suspense fallback={<div className="flex items-center justify-center h-[calc(100vh-200px)]"><p className="text-[#6B7280]">Chargement de la carte…</p></div>}>
+        <Suspense fallback={<div className="flex items-center justify-center h-[calc(100vh-200px)]"><p className="text-muted-foreground">Chargement de la carte…</p></div>}>
           <SearchMapView
             results={results}
             resultCoords={resultCoords}
