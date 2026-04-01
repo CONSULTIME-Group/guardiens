@@ -291,12 +291,26 @@ const SitterDashboard = () => {
               <div className="h-full bg-primary rounded-full transition-all duration-500" style={{ width: `${profileCompletion}%` }} />
             </div>
             <p className="text-sm font-semibold text-foreground">{profileCompletion}% complété</p>
-            {profileCompletion >= 60 ? (
-              <span className="inline-block bg-primary/10 text-primary text-xs rounded-full px-2 py-0.5 mt-2">✓ Visible par les proprios</span>
-            ) : (
-              <span className="inline-block bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-300 text-xs rounded-full px-2 py-0.5 mt-2">⚠ Non visible — 60% requis</span>
-            )}
-            <Link to="/profile" className="text-xs text-primary hover:underline mt-3 block">Compléter →</Link>
+             {profileCompletion >= 60 ? (
+               <span className="inline-block bg-primary/10 text-primary text-xs rounded-full px-2 py-0.5 mt-2">✓ Visible par les proprios</span>
+             ) : (
+               <span className="inline-block bg-amber-50 text-amber-700 text-xs rounded-full px-2 py-0.5 mt-2">⚠ Non visible — 60% requis</span>
+             )}
+             <div className="flex items-center justify-between mt-3 py-2 border-t border-border">
+               <div>
+                 <p className="text-xs text-foreground font-medium">Je suis disponible</p>
+                 <p className="text-[11px] text-muted-foreground">Apparaissez dans les résultats avec un badge vert.</p>
+               </div>
+               <Switch
+                 checked={isAvailable}
+                 onCheckedChange={async (v) => {
+                   setIsAvailable(v);
+                   setOnboardingChecks(prev => ({ ...prev, availableMode: v }));
+                   await supabase.from("sitter_profiles").update({ is_available: v }).eq("user_id", user!.id);
+                 }}
+               />
+             </div>
+             <Link to="/profile" className="text-xs text-primary hover:underline mt-3 block">Compléter →</Link>
           </div>
 
           {/* Stats */}
