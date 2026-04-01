@@ -94,7 +94,7 @@ export const DEMO_SITS = [
     property: {
       type: "apartment",
       environment: "city_center",
-      photos: ["https://images.unsplash.com/photo-1598928636135-d146006ff4be?w=800&q=80"],
+      photos: ["https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800&q=80"],
     },
     pets: [
       { species: "cat", name: "Milo" },
