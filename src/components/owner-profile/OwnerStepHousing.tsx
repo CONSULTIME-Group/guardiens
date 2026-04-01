@@ -69,6 +69,12 @@ const OwnerStepHousing = ({ data, onChange, onUploadPhoto }: Props) => {
         </div>
       </div>
 
+      <div className="space-y-1">
+        <Label className="text-sm font-medium text-foreground">L'environnement de votre logement</Label>
+        <p className="text-xs text-muted-foreground mb-3">Sélectionnez jusqu'à 3 environnements qui décrivent votre cadre de vie.</p>
+        <EnvironmentPills selected={data.environments} onChange={v => onChange({ environments: v })} />
+      </div>
+
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label>Nombre de pièces</Label>
