@@ -6,6 +6,7 @@ import { Link } from "react-router-dom";
 import EmergencyDashSection from "./EmergencyDashSection";
 import MissionsNearbySection from "./MissionsNearbySection";
 import BadgeShield from "@/components/badges/BadgeShield";
+import BadgeGrid from "@/components/badges/BadgeGrid";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Switch } from "@/components/ui/switch";
 import {
@@ -381,72 +382,102 @@ const SitterDashboard = () => {
         {/* Badges collection */}
         <div className="mt-4 bg-card border border-border rounded-2xl p-4">
           <p className="text-xs text-muted-foreground uppercase tracking-wide mb-3">Mes écussons</p>
-          {badges.length === 0 ? (
-            <p className="text-xs text-muted-foreground italic">Tes premiers écussons apparaîtront après ta première garde.</p>
-          ) : (
-            <div>
-              <div className="flex flex-wrap gap-2">
-                {badges.slice(0, 6).map((b: any) => (
-                  <div key={b.id} title={b.badge_key}>
-                    <BadgeShield badgeKey={b.badge_key} size="sm" showLabel={false} />
-                  </div>
-                ))}
-              </div>
-              {badges.length > 6 && (
-                <Link to="/mon-profil#ecussons" className="text-xs text-primary hover:underline mt-2 inline-block">Voir tous mes écussons →</Link>
-              )}
-            </div>
-          )}
+          <BadgeGrid
+            unlockedBadges={badges.reduce((acc: Record<string, number>, b: any) => {
+              const key = b.badge_key || b.id;
+              acc[key] = (acc[key] || 0) + 1;
+              return acc;
+            }, {})}
+            variant="dashboard"
+          />
         </div>
 
-        {/* Checklist accordion */}
+        {/* Checklist — split completed/incomplete */}
         <div className="mt-4">
-          <Accordion type="single" collapsible defaultValue={allChecklistDone ? undefined : "checklist"}>
-            <AccordionItem value="checklist" className="border-none">
-              <AccordionTrigger className="flex items-center justify-between bg-muted/30 rounded-xl px-4 py-3 cursor-pointer hover:no-underline [&[data-state=open]>svg]:rotate-180">
-                <div className="flex items-center gap-2">
-                  {allChecklistDone ? (
-                    <>
-                      <CheckCircle className="h-4 w-4 text-primary" />
-                      <span className="text-sm font-medium text-primary">4/4 étapes complétées ✓</span>
-                    </>
-                  ) : (
-                    <span className="text-sm font-medium text-foreground">Tes prochaines étapes ({checklistDone}/4 complétées)</span>
-                  )}
-                </div>
-              </AccordionTrigger>
-              <AccordionContent className="pt-2 pb-0">
-                <div className="space-y-2">
-                  {checklistItems.map((item, i) => (
-                    <Link key={i} to={item.to} className="flex items-center gap-3 p-3 rounded-xl bg-card border border-border hover:bg-accent/50 transition-colors">
-                      <div className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 ${item.done ? "bg-primary text-primary-foreground" : "border-2 border-muted-foreground/30"}`}>
-                        {item.done && <CheckCircle2 className="h-4 w-4" />}
-                      </div>
-                      <span className={`text-sm flex-1 ${item.done ? "line-through text-muted-foreground" : "font-medium"}`}>{item.label}</span>
-                      {!item.done && <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />}
-                    </Link>
-                  ))}
-                  {/* Available mode toggle */}
-                  <div className="flex items-center gap-3 p-3 rounded-xl bg-card border border-border">
-                    <div className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 ${onboardingChecks.availableMode ? "bg-primary text-primary-foreground" : "border-2 border-muted-foreground/30"}`}>
-                      {onboardingChecks.availableMode && <CheckCircle2 className="h-4 w-4" />}
+          {(() => {
+            const allItems = [
+              ...checklistItems,
+              { done: onboardingChecks.availableMode, label: "Activer le mode disponible", to: "", isToggle: true },
+            ];
+            const completed = allItems.filter(c => c.done);
+            const incomplete = allItems.filter(c => !c.done);
+
+            return (
+              <div className="space-y-4">
+                {/* Incomplete items — always visible */}
+                {incomplete.length > 0 && (
+                  <div>
+                    <p className="text-sm font-medium text-foreground mb-3">
+                      À compléter ({incomplete.length} restante{incomplete.length > 1 ? "s" : ""})
+                    </p>
+                    <div>
+                      {incomplete.map((item: any, i) => (
+                        item.isToggle ? (
+                          <div key="toggle" className="flex items-center justify-between py-3 border-b border-border last:border-0 px-2">
+                            <div className="flex items-center">
+                              <Circle className="h-4 w-4 text-muted-foreground" />
+                              <span className="text-sm text-foreground ml-3">Activer le mode disponible</span>
+                            </div>
+                            <Switch
+                              checked={isAvailable}
+                              onCheckedChange={async (v) => {
+                                setIsAvailable(v);
+                                setOnboardingChecks(prev => ({ ...prev, availableMode: v }));
+                                await supabase.from("sitter_profiles").update({ is_available: v }).eq("user_id", user!.id);
+                              }}
+                            />
+                          </div>
+                        ) : (
+                          <Link
+                            key={i}
+                            to={item.to}
+                            className="flex items-center justify-between py-3 border-b border-border last:border-0 cursor-pointer hover:bg-muted/30 rounded-lg px-2 transition-colors"
+                          >
+                            <div className="flex items-center">
+                              <Circle className="h-4 w-4 text-muted-foreground" />
+                              <span className="text-sm text-foreground ml-3">{item.label}</span>
+                            </div>
+                            <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                          </Link>
+                        )
+                      ))}
                     </div>
-                    <span className={`text-sm flex-1 ${onboardingChecks.availableMode ? "line-through text-muted-foreground" : "font-medium"}`}>
-                      Activer le mode disponible
-                    </span>
-                    <Switch
-                      checked={isAvailable}
-                      onCheckedChange={async (v) => {
-                        setIsAvailable(v);
-                        setOnboardingChecks(prev => ({ ...prev, availableMode: v }));
-                        await supabase.from("sitter_profiles").update({ is_available: v }).eq("user_id", user!.id);
-                      }}
-                    />
                   </div>
-                </div>
-              </AccordionContent>
-            </AccordionItem>
-          </Accordion>
+                )}
+
+                {/* Completed items — accordion, collapsed */}
+                {completed.length > 0 && (
+                  <Accordion type="single" collapsible>
+                    <AccordionItem value="done" className="border-none">
+                      <AccordionTrigger className="flex items-center justify-between bg-muted/30 rounded-xl px-4 py-3 cursor-pointer hover:no-underline [&[data-state=open]>svg]:rotate-180">
+                        <div className="flex items-center gap-2">
+                          {allChecklistDone ? (
+                            <>
+                              <CheckCircle className="h-4 w-4 text-primary" />
+                              <span className="text-sm font-medium text-primary">4/4 étapes complétées ✓</span>
+                            </>
+                          ) : (
+                            <>
+                              <CheckCircle className="h-4 w-4 text-primary" />
+                              <span className="text-sm font-medium text-primary">{completed.length} étape{completed.length > 1 ? "s" : ""} déjà complétée{completed.length > 1 ? "s" : ""}</span>
+                            </>
+                          )}
+                        </div>
+                      </AccordionTrigger>
+                      <AccordionContent className="pt-2 pb-0">
+                        {completed.map((item: any, i) => (
+                          <div key={i} className="flex items-center gap-3 py-2 border-b border-border last:border-0">
+                            <CheckCircle className="h-4 w-4 text-primary" />
+                            <span className="text-sm line-through text-muted-foreground">{item.label}</span>
+                          </div>
+                        ))}
+                      </AccordionContent>
+                    </AccordionItem>
+                  </Accordion>
+                )}
+              </div>
+            );
+          })()}
         </div>
       </div>
 
