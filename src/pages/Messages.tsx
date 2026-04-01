@@ -45,6 +45,7 @@ interface Message {
   is_system: boolean;
   read_at: string | null;
   created_at: string;
+  metadata: { action?: string; actor?: string; actor_id?: string; garde_id?: string; actor_name?: string; dates?: string } | null;
 }
 
 const appStatusLabels: Record<string, { label: string; className: string }> = {
@@ -333,13 +334,28 @@ const Messages = () => {
     toast({ title: conv.archived_by.includes(user.id) ? "Conversation désarchivée" : "Conversation archivée" });
   };
 
+  // ─── Reset active conv when role changes ───
+  useEffect(() => {
+    setActiveConv(null);
+    setAutoOpened(false);
+    loadConversations();
+  }, [activeRole]); // eslint-disable-line react-hooks/exhaustive-deps
+
   // ─── Filtering ───
   const filteredConversations = conversations.filter(conv => {
     const isArchived = conv.archived_by.includes(user?.id || "");
     if (pill === "archived") return isArchived;
     if (isArchived) return false;
+
+    // Role-based filtering: missions visible in both roles
+    const isMission = !!conv.small_mission_id;
+    if (!isMission && user) {
+      if (effectiveRole === "owner" && conv.owner_id !== user.id) return false;
+      if (effectiveRole === "sitter" && conv.sitter_id !== user.id) return false;
+    }
+
     if (pill === "garde") return !!(conv.sit_id || conv.long_stay_id);
-    if (pill === "mission") return !!conv.small_mission_id;
+    if (pill === "mission") return isMission;
     return true; // "all"
   });
 
@@ -488,6 +504,9 @@ const Messages = () => {
                 </button>
               ))}
             </div>
+            <p className="text-xs text-muted-foreground">
+              Conversations en tant que {effectiveRole === "owner" ? "Propriétaire" : "Gardien"}
+            </p>
           </div>
 
           {/* Search filter */}
@@ -551,7 +570,7 @@ const Messages = () => {
                   <div key={msg.id}>
                     {showDaySep && <DaySeparator date={msg.created_at} />}
                     <div className="py-1">
-                      <MessageBubble msg={msg} isMe={isMe} />
+                      <MessageBubble msg={msg} isMe={isMe} readerRole={activeConv.owner_id === user?.id ? "proprio" : "gardien"} />
                     </div>
                   </div>
                 );

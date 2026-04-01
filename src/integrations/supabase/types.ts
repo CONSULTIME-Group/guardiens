@@ -1029,6 +1029,7 @@ export type Database = {
           created_at: string
           id: string
           is_system: boolean
+          metadata: Json | null
           photo_url: string | null
           read_at: string | null
           sender_id: string
@@ -1039,6 +1040,7 @@ export type Database = {
           created_at?: string
           id?: string
           is_system?: boolean
+          metadata?: Json | null
           photo_url?: string | null
           read_at?: string | null
           sender_id: string
@@ -1049,6 +1051,7 @@ export type Database = {
           created_at?: string
           id?: string
           is_system?: boolean
+          metadata?: Json | null
           photo_url?: string | null
           read_at?: string | null
           sender_id?: string

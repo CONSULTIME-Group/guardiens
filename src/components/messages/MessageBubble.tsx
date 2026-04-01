@@ -12,20 +12,67 @@ interface MessageBubbleProps {
     is_system: boolean;
     read_at: string | null;
     created_at: string;
+    metadata?: { action?: string; actor?: string; actor_id?: string; actor_name?: string; dates?: string } | null;
   };
   isMe: boolean;
+  readerRole?: "proprio" | "gardien";
 }
 
-const MessageBubble = ({ msg, isMe }: MessageBubbleProps) => {
+const systemMessageText = (
+  metadata: { action?: string; actor?: string; actor_name?: string; dates?: string } | null | undefined,
+  readerRole: "proprio" | "gardien",
+  fallback: string,
+): string => {
+  if (!metadata?.action) return fallback;
+  const name = metadata.actor_name || "";
+  const dates = metadata.dates || "";
+  const map: Record<string, Record<string, string>> = {
+    candidature_declinee: {
+      proprio: metadata.actor === "proprio" ? "Vous avez décliné cette candidature." : "Le gardien a retiré sa candidature.",
+      gardien: metadata.actor === "proprio" ? "Votre candidature a été déclinée." : "Vous avez retiré votre candidature.",
+    },
+    candidature_acceptee: {
+      proprio: `Vous avez accepté ${name || "le gardien"}. Garde confirmée ✓`,
+      gardien: "Votre candidature a été acceptée. Garde confirmée ✓",
+    },
+    garde_confirmee: {
+      proprio: `Garde confirmée avec ${name}${dates ? " · " + dates : ""}`,
+      gardien: `Garde confirmée avec ${name}${dates ? " · " + dates : ""}`,
+    },
+    garde_annulee_proprio: {
+      proprio: "Vous avez annulé cette garde.",
+      gardien: "Le propriétaire a annulé la garde.",
+    },
+    garde_annulee_gardien: {
+      proprio: "Le gardien a annulé la garde.",
+      gardien: "Vous avez annulé cette garde.",
+    },
+    candidature_expiree: {
+      proprio: "Candidature expirée — sans réponse dans les 48h.",
+      gardien: "Candidature expirée — sans réponse dans les 48h.",
+    },
+    garde_en_cours: {
+      proprio: `La garde a commencé. ${name || "Le gardien"} est sur place.`,
+      gardien: "La garde a commencé. Bon séjour !",
+    },
+    garde_terminee: {
+      proprio: "Garde terminée. Pensez à laisser un avis !",
+      gardien: "Garde terminée. Pensez à laisser un avis !",
+    },
+  };
+  return map[metadata.action]?.[readerRole] || fallback;
+};
+
+const MessageBubble = ({ msg, isMe, readerRole = "gardien" }: MessageBubbleProps) => {
   const [lightboxOpen, setLightboxOpen] = useState(false);
 
-  // MOD 4 — System messages styled differently
   if (msg.is_system) {
+    const text = systemMessageText(msg.metadata, readerRole, msg.content);
     return (
       <div className="flex justify-center">
         <div className="bg-muted/50 rounded-full px-4 py-1 flex items-center gap-1">
           <Info className="h-3 w-3 text-muted-foreground shrink-0" />
-          <span className="text-xs text-muted-foreground italic">{msg.content}</span>
+          <span className="text-xs text-muted-foreground italic">{text}</span>
         </div>
       </div>
     );
@@ -54,7 +101,6 @@ const MessageBubble = ({ msg, isMe }: MessageBubbleProps) => {
         </div>
       </div>
 
-      {/* Lightbox */}
       {msg.photo_url && (
         <Dialog open={lightboxOpen} onOpenChange={setLightboxOpen}>
           <DialogContent className="max-w-3xl p-2 bg-background border-none">
