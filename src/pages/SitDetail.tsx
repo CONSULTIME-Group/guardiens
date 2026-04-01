@@ -135,6 +135,12 @@ const SitDetail = () => {
     load();
   }, [id, user]);
 
+  // Set default tab for owners
+  useEffect(() => {
+    if (sit && sit.user_id === user?.id) setActiveTab("candidatures");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sit?.user_id, user?.id]);
+
   const isOwnerCheck = sit?.user_id === user?.id;
   const saveOverride = useCallback((field: "logement_override" | "animaux_override", value: string) => {
     if (!sit || !isOwnerCheck) return;
