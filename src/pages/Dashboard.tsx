@@ -1,5 +1,6 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { useRef, useEffect, useState } from "react";
+import { Helmet } from "react-helmet-async";
 import OwnerDashboard from "@/components/dashboard/OwnerDashboard";
 import SitterDashboard from "@/components/dashboard/SitterDashboard";
 
