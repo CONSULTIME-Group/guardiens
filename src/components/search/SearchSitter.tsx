@@ -287,6 +287,13 @@ const SearchSitter = () => {
       })
     );
     let final = enriched.filter(Boolean);
+    // Environment filter (using resolved environments with fallback)
+    if (environments.length > 0) {
+      final = final.filter((item: any) => {
+        const envs: string[] = item.environments || [];
+        return envs.some((e: string) => environments.includes(e));
+      });
+    }
     final = sortResults(final, sort);
     if (final.length < DEMO_THRESHOLD) {
       final = [...final, ...DEMO_SITS];
