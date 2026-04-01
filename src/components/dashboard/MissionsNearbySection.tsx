@@ -132,8 +132,8 @@ const MissionsNearbySection = () => {
       ) : (
         <div className="p-6 rounded-xl border border-dashed border-border bg-accent/30 text-center">
           <Handshake className="h-8 w-8 text-primary/40 mx-auto mb-2" />
-          <p className="text-sm text-foreground/80">Pas encore d'échange dans ta zone</p>
-          <p className="text-xs text-muted-foreground mt-1">Publie un besoin ou propose ton aide</p>
+           <p className="text-sm text-foreground/80">Pas encore d'échange dans votre zone</p>
+           <p className="text-xs text-muted-foreground mt-1">Publiez un besoin ou proposez votre aide</p>
         </div>
       )}
 
