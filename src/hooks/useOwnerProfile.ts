@@ -111,6 +111,7 @@ export function useOwnerProfile() {
       car_required: prop?.car_required || false, accessible: prop?.accessible || false,
       equipments: (prop as any)?.equipments || [], photos: (prop as any)?.photos || [],
       description: prop?.description || "", region_highlights: prop?.region_highlights || "",
+      environments: (o as any)?.environments || [],
       preferred_sitter_types: o?.preferred_sitter_types || [],
       presence_expected: o?.presence_expected || "",
       experience_required: o?.experience_required || false,
