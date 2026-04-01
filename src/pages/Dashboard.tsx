@@ -27,7 +27,7 @@ const Dashboard = () => {
   }, [activeRole]);
 
   return (
-    <div className="p-6 md:p-10 max-w-4xl mx-auto">
+    <div className="w-full">
       <Helmet><meta name="robots" content="noindex, nofollow" /></Helmet>
       <div
         key={displayedRole}
