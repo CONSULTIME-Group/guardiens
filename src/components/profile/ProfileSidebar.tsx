@@ -89,7 +89,10 @@ const ProfileSidebar = ({
                 <Circle className="h-4 w-4 text-muted-foreground shrink-0" />
               )}
               <div className="min-w-0">
-                <p className={cn("text-sm font-medium", isActive ? "text-foreground" : "text-foreground")}>{s.label}</p>
+                <p className={cn("text-sm font-medium", isActive ? "text-foreground" : "text-foreground")}>
+                  {s.label}
+                  {s.optional && <span className="text-xs font-normal text-muted-foreground ml-1">(optionnel)</span>}
+                </p>
                 <p className={cn("text-xs hidden lg:block", s.complete ? "text-primary" : "text-muted-foreground")}>
                   {s.complete ? "Complété ✓" : s.missingCount > 0 ? `${s.missingCount} point${s.missingCount > 1 ? "s" : ""} manquant${s.missingCount > 1 ? "s" : ""}` : s.subtitle}
                 </p>
