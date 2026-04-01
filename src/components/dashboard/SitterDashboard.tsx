@@ -48,6 +48,7 @@ const SitterDashboard = () => {
   const [badges, setBadges] = useState<any[]>([]);
   const [isAvailable, setIsAvailable] = useState(false);
   const [nearbyListings, setNearbyListings] = useState<any[]>([]);
+  const [isFounder, setIsFounder] = useState(false);
   const [articles, setArticles] = useState<any[]>([]);
   const [hasEmergencyProfile, setHasEmergencyProfile] = useState(false);
 
