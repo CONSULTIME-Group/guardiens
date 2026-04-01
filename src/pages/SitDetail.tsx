@@ -199,7 +199,12 @@ const SitDetail = () => {
     { value: "reviews", label: `⭐ Avis (${reviews.length})` },
   ];
 
-  const [activeTab, setActiveTab] = useState(isOwner ? "candidatures" : "animals");
+  // Set active tab based on owner status (effect to avoid hook after return)
+  useEffect(() => {
+    if (sit && sit.user_id === user?.id) {
+      setActiveTab("candidatures");
+    }
+  }, [sit, user]);
 
   const leftContent = (
     <div className="space-y-6">
