@@ -744,67 +744,7 @@ const Landing = () => {
         </RevealSection>
       </section>
 
-      {/* ═══════════════ ARTICLES RÉCENTS ═══════════════ */}
-      {latestArticles.length > 0 && (
-        <section className="py-24 md:py-32 bg-background">
-          <div className="max-w-5xl mx-auto px-6">
-            <RevealSection>
-              <p className="text-xs tracking-widest uppercase text-primary/60 font-body mb-4 text-center">
-                À lire aussi
-              </p>
-              <h2 className="font-heading text-4xl md:text-5xl font-semibold text-foreground text-center mb-16">
-                Des histoires et des conseils.
-              </h2>
-            </RevealSection>
-            <div className="grid md:grid-cols-3 gap-8">
-              {latestArticles.map((a, i) => {
-                const categoryLabels: Record<string, string> = {
-                  ville: "Ville", guide_race: "Race", vie_locale: "Vie locale",
-                  conseil_gardien: "Conseil", conseil_proprio: "Conseil",
-                  guide_local: "Guide local", thematique: "House-sitting",
-                  conseil: "Conseil", guide_pratique: "Guide",
-                  saisonnier: "Saison",
-                };
-                return (
-                  <RevealSection key={a.id} delay={0.1 * i}>
-                    <Link
-                      to={`/actualites/${a.slug}`}
-                      className="group bg-card rounded-2xl overflow-hidden border border-border hover:-translate-y-1 hover:shadow-lg transition-all duration-300 block h-full"
-                    >
-                      {a.cover_image_url && (
-                        <img
-                          src={a.cover_image_url}
-                          alt={a.hero_image_alt || a.title}
-                          className="w-full h-48 object-cover"
-                        />
-                      )}
-                      <div className="p-6 flex flex-col">
-                        <span className="text-xs uppercase tracking-widest text-primary/60 font-body mb-3">
-                          {categoryLabels[a.category] || "Article"}
-                        </span>
-                        <h3 className="font-heading text-xl font-semibold text-foreground leading-snug mb-3 line-clamp-2">
-                          {a.title}
-                        </h3>
-                        <p className="font-body text-sm text-foreground/70 leading-relaxed line-clamp-3 mb-4">
-                          {a.meta_description || ""}
-                        </p>
-                        <span className="text-primary font-body text-sm font-semibold inline-flex items-center gap-1 group-hover:gap-2 transition-all mt-auto">
-                          Lire <ArrowRight className="h-3.5 w-3.5" />
-                        </span>
-                      </div>
-                    </Link>
-                  </RevealSection>
-                );
-              })}
-            </div>
-            <div className="mt-12 text-center">
-              <Link to="/actualites" className="text-primary font-body font-semibold inline-flex items-center gap-1 hover:gap-2 transition-all">
-                Voir tous les articles <ArrowRight className="h-4 w-4" />
-              </Link>
-            </div>
-          </div>
-        </section>
-      )}
+
 
 
       <footer className="bg-foreground border-t border-white/10">
