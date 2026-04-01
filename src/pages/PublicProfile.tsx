@@ -187,7 +187,7 @@ const PublicProfile = () => {
             {profile.avatar_url ? (
               <img src={profile.avatar_url} alt={`Photo de ${firstName}`} className="w-24 h-24 rounded-full object-cover shadow-md border-2 border-white shrink-0" />
             ) : (
-              <div className="w-24 h-24 rounded-full bg-white border-2 border-border flex items-center justify-center font-heading text-3xl font-bold shrink-0 shadow-sm" style={{ color: "#1C1B18" }}>
+              <div className="w-24 h-24 rounded-full bg-white border-2 border-border flex items-center justify-center font-heading text-3xl font-bold shrink-0 shadow-sm text-foreground">
                 {firstName.charAt(0)}
               </div>
             )}
