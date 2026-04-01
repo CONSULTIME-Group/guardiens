@@ -83,6 +83,7 @@ const SitterDashboard = () => {
       setProfileCompletion(pCompletion);
       setIdentityVerified(idVerified);
       setCancellations(profileRes.data?.cancellation_count || 0);
+      setIsFounder(profileRes.data?.is_founder || false);
       setIsAvailable(sitterRes.data?.is_available || false);
 
       const apps = appsRes.data || [];
