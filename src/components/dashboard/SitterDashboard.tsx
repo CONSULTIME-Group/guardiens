@@ -2,17 +2,14 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSubscriptionAccess } from "@/hooks/useSubscriptionAccess";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import EmergencyDashSection from "./EmergencyDashSection";
 import MissionsNearbySection from "./MissionsNearbySection";
-import BadgeShield from "@/components/badges/BadgeShield";
 import BadgeTimbre, { TIMBRES_ORDER } from "@/components/badges/BadgeTimbre";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Switch } from "@/components/ui/switch";
 import {
-  Home, Star, Search, Send as SendIcon, CheckCircle2, XCircle,
-  MessageSquare, Calendar, Handshake, Newspaper, Zap, ChevronRight,
-  Eye, Circle, CheckCircle, ChevronDown, ExternalLink,
+  Home, Search, CheckCircle, Circle, ChevronRight,
+  Newspaper,
 } from "lucide-react";
 import { format, differenceInDays, differenceInHours } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -20,18 +17,9 @@ import { fr } from "date-fns/locale";
 const capitalize = (name: string) =>
   name ? name.charAt(0).toUpperCase() + name.slice(1).toLowerCase() : "";
 
-/* ── status config ── */
-const appStatusConfig: Record<string, { label: string; icon: React.ElementType; bg: string; text: string }> = {
-  pending:    { label: "Envoyée",       icon: SendIcon,      bg: "bg-muted",         text: "text-muted-foreground" },
-  viewed:     { label: "Vue",           icon: Eye,           bg: "bg-accent",        text: "text-foreground" },
-  discussing: { label: "En discussion", icon: MessageSquare, bg: "bg-accent",        text: "text-foreground" },
-  accepted:   { label: "Acceptée",      icon: CheckCircle2,  bg: "bg-primary/10",    text: "text-primary" },
-  rejected:   { label: "Déclinée",      icon: XCircle,       bg: "bg-destructive/10",text: "text-destructive" },
-  cancelled:  { label: "Annulée",       icon: XCircle,       bg: "bg-muted",         text: "text-muted-foreground" },
-};
-
 const SitterDashboard = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const { hasAccess: hasSubscription } = useSubscriptionAccess();
 
   const [loading, setLoading] = useState(true);
@@ -51,6 +39,7 @@ const SitterDashboard = () => {
   const [isFounder, setIsFounder] = useState(false);
   const [articles, setArticles] = useState<any[]>([]);
   const [hasEmergencyProfile, setHasEmergencyProfile] = useState(false);
+  const [hasAcceptedRecent, setHasAcceptedRecent] = useState(false);
 
   const [onboardingChecks, setOnboardingChecks] = useState({
     profileComplete: false,
@@ -92,6 +81,13 @@ const SitterDashboard = () => {
       setCompletedSits(completed);
       setTotalApps(apps.length);
 
+      // Check for recently accepted application (last 7 days)
+      const recentAccepted = acceptedApps.some((a: any) => {
+        const created = new Date(a.created_at);
+        return differenceInDays(new Date(), created) <= 7;
+      });
+      setHasAcceptedRecent(recentAccepted);
+
       const pending = apps.filter((a: any) => ["pending", "viewed", "discussing"].includes(a.status)).length;
       setPendingAppsCount(pending);
 
@@ -112,7 +108,6 @@ const SitterDashboard = () => {
       if (futureGuards.length > 0) {
         const g = futureGuards[0];
         const ownerRes = await supabase.from("profiles").select("first_name").eq("id", g.sit.user_id).single();
-        // Get pets for this guard
         const petsRes = await supabase.from("pets").select("species").eq("property_id", g.sit.property_id);
         setNextGuard({
           ...g.sit,
@@ -132,14 +127,13 @@ const SitterDashboard = () => {
         availableMode: sitterRes.data?.is_available || false,
       });
 
-      // Emergency profile check
       const { data: emProfile } = await supabase.from("emergency_sitter_profiles").select("id").eq("user_id", user.id).maybeSingle();
       setHasEmergencyProfile(!!emProfile);
 
       setLoading(false);
     };
     load();
-   }, [user]);
+  }, [user]);
 
   // Realtime sync for is_available toggle
   useEffect(() => {
@@ -161,6 +155,13 @@ const SitterDashboard = () => {
     return () => { supabase.removeChannel(channel); };
   }, [user]);
 
+  const toggleAvailability = async () => {
+    const newVal = !isAvailable;
+    setIsAvailable(newVal);
+    setOnboardingChecks(prev => ({ ...prev, availableMode: newVal }));
+    await supabase.from("sitter_profiles").update({ is_available: newVal }).eq("user_id", user!.id);
+  };
+
   if (loading) return (
     <div className="p-8 flex items-center justify-center">
       <div className="animate-pulse space-y-4 w-full max-w-lg">
@@ -175,470 +176,401 @@ const SitterDashboard = () => {
     </div>
   );
 
-  // Dynamic subtitle priority
+  // Dynamic subtitle
   const subtitle = nextGuard
-    ? `Votre prochaine garde commence dans ${nextGuard.daysUntil} jour${nextGuard.daysUntil > 1 ? "s" : ""}.`
-    : pendingAppsCount > 0
-    ? `Vous avez ${pendingAppsCount} candidature${pendingAppsCount > 1 ? "s" : ""} en attente de réponse.`
-    : unreadCount > 0
-    ? `Vous avez ${unreadCount} message${unreadCount > 1 ? "s" : ""} non lu${unreadCount > 1 ? "s" : ""}.`
+    ? `Votre prochaine garde est dans ${nextGuard.daysUntil} jour${nextGuard.daysUntil > 1 ? "s" : ""}.`
+    : hasAcceptedRecent
+    ? "Félicitations — votre candidature a été acceptée."
     : "Explorez les annonces près de chez vous.";
 
   // Emergency conditions
   const emergencyConditions = [
-    { label: `5 gardes réalisées (${completedSits}/5)`, ok: completedSits >= 5, progress: completedSits < 5 ? (completedSits / 5) * 100 : undefined },
+    { label: `5 gardes réalisées (${completedSits}/5)`, ok: completedSits >= 5 },
     { label: "Note ≥ 4.7", ok: avgRating >= 4.7 },
     { label: "Aucune annulation", ok: cancellations === 0 },
     { label: "Identité vérifiée", ok: identityVerified },
     { label: "Abonnement actif", ok: !!hasSubscription },
   ];
   const emergencyDone = emergencyConditions.filter(c => c.ok).length;
-  const allEmergencyDone = emergencyDone === 5;
 
-  // Onboarding checklist
+  // Badges unlocked set
+  const unlockedSet: Record<string, boolean> = {};
+  if (identityVerified) unlockedSet["id_verifiee"] = true;
+  if (isFounder) unlockedSet["fondateur"] = true;
+  badges.forEach((b: any) => {
+    const key = b.badge_key || b.id;
+    if (key) unlockedSet[key] = true;
+  });
+  const unlockedCount = TIMBRES_ORDER.filter(k => unlockedSet[k]).length;
+
+  // Checklist
   const checklistItems = [
     { done: onboardingChecks.profileComplete, label: `Compléter mon profil (${profileCompletion}%)`, to: "/profile" },
     { done: onboardingChecks.identityVerified, label: "Vérifier mon identité", to: "/profile#identite" },
     { done: false, label: "Découvrez les gardes disponibles", to: "/search" },
   ];
-  const checklistDone = checklistItems.filter(c => c.done).length + (onboardingChecks.availableMode ? 1 : 0);
-  const allChecklistDone = checklistDone === 4;
-
-  // Has anything to show in bloc 2
-  const showBloc2 = unreadCount > 0 || pendingAppsCount > 0 || !!nextGuard;
-
-  // Priority CTA
-  const priorityCTA = profileCompletion < 60
-    ? { label: "Compléter mon profil →", to: "/profile", style: "bg-primary text-primary-foreground" }
-    : !identityVerified
-    ? { label: "Vérifier mon identité →", to: "/profile#identite", style: "bg-amber-500 text-white" }
-    : totalApps === 0
-    ? { label: "Découvrez les gardes disponibles →", to: "/search", style: "border border-primary text-primary hover:bg-primary/5" }
-    : pendingAppsCount > 0
-    ? { label: "Voir mes candidatures →", to: "/sits", style: "border border-primary text-primary" }
-    : { label: "Explorer les nouvelles annonces →", to: "/search", style: "border border-border text-foreground" };
+  const allItems = [
+    ...checklistItems,
+    { done: onboardingChecks.availableMode, label: "Activer le mode disponible", to: "", isToggle: true },
+  ];
+  const completedItems = allItems.filter(c => c.done);
+  const incompleteItems = allItems.filter(c => !c.done);
+  const allChecklistDone = completedItems.length === 4;
 
   return (
-    <div className="space-y-8">
-      {/* ═══ BLOC 1 — Header dynamique ═══ */}
-      <div className="mb-6">
-        <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-semibold text-foreground">
-            Bonjour{user?.firstName ? `, ${capitalize(user.firstName)}` : ""} !
-          </h1>
-          <a
-            href={`/gardiens/${user?.id}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-xs text-primary hover:underline flex items-center gap-1"
-          >
-            Voir votre profil public
-            <ExternalLink className="w-3 h-3" />
-          </a>
+    <div className="space-y-0">
+      {/* ═══ 1. HEADER — VERT FONCÉ ═══ */}
+      <div className="relative overflow-hidden bg-[#1a4a35] rounded-b-3xl px-10 pt-8 pb-6 mb-8">
+        {/* Formes décoratives */}
+        <div className="absolute right-0 top-0 opacity-[0.07] pointer-events-none">
+          <svg width="300" height="200" viewBox="0 0 300 200">
+            <circle cx="250" cy="50" r="120" fill="white"/>
+            <circle cx="200" cy="150" r="80" fill="white"/>
+          </svg>
         </div>
-        <p className="text-sm text-muted-foreground mt-1">{subtitle}</p>
+
+        <div className="relative z-10 flex items-center justify-between">
+          {/* Gauche — titre */}
+          <div>
+            <p className="text-xs uppercase tracking-[3px] text-white/60 font-sans mb-1">
+              Espace gardien
+            </p>
+            <h1 className="text-4xl font-heading font-bold text-white leading-tight mb-1">
+              Bonjour{user?.firstName ? `, ${capitalize(user.firstName)}` : ""} !
+            </h1>
+            <p className="text-sm text-white/75 font-sans">
+              {subtitle}
+            </p>
+          </div>
+
+          {/* Droite — lien profil + toggle */}
+          <div className="flex flex-col items-end gap-3 shrink-0">
+            <a
+              href={`/gardiens/${user?.id}`}
+              className="text-xs text-white/70 font-sans flex items-center gap-1 hover:text-white/90"
+            >
+              Voir votre profil public ↗
+            </a>
+
+            {/* Toggle disponibilité */}
+            <div className="flex items-center gap-3 bg-white/10 border border-white/20 rounded-xl px-4 py-2.5">
+              <div>
+                <p className="text-sm text-white font-sans font-medium leading-none mb-0.5">
+                  Je suis disponible
+                </p>
+                <p className="text-xs text-white/60 font-sans">
+                  {isAvailable ? "Visible dans les résultats" : "Activez pour apparaître"}
+                </p>
+              </div>
+              <button
+                onClick={toggleAvailability}
+                className={`relative w-11 h-6 rounded-full transition-colors duration-200 ${isAvailable ? 'bg-green-400' : 'bg-white/20'}`}
+              >
+                <span className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-all duration-200 ${isAvailable ? 'left-5' : 'left-0.5'}`} />
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
 
-      {/* ═══ BLOC 2 — Ce qui m'attend ═══ */}
-      {showBloc2 && (
-        <div>
-          <p className="text-sm font-semibold text-foreground mb-3">Ce qui vous attend</p>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-            {/* Messages */}
-            {unreadCount > 0 ? (
-              <Link to="/messages" className="bg-card border border-border rounded-2xl p-4 cursor-pointer hover:border-primary transition-colors">
-                <MessageSquare className="h-5 w-5 text-primary mb-2" />
-                <p className="text-2xl font-semibold text-foreground">{unreadCount}</p>
-                <p className="text-xs text-muted-foreground">message{unreadCount > 1 ? "s" : ""} non lu{unreadCount > 1 ? "s" : ""}</p>
-              </Link>
-            ) : (
-              <div className="bg-card border border-border rounded-2xl p-4 opacity-40 pointer-events-none">
-                <MessageSquare className="h-5 w-5 text-primary mb-2" />
-                <p className="text-2xl font-semibold text-foreground">0</p>
-                <p className="text-xs text-muted-foreground">message non lu</p>
-              </div>
-            )}
-
-            {/* Candidatures */}
-            {pendingAppsCount > 0 ? (
-              <Link to="/sits" className="bg-card border border-border rounded-2xl p-4 cursor-pointer hover:border-primary transition-colors">
-                <SendIcon className="h-5 w-5 text-primary mb-2" />
-                <p className="text-2xl font-semibold text-foreground">{pendingAppsCount}</p>
-                <p className="text-xs text-muted-foreground">candidature{pendingAppsCount > 1 ? "s" : ""} en cours</p>
-              </Link>
-            ) : (
-              <div className="bg-card border border-border rounded-2xl p-4 opacity-40 pointer-events-none">
-                <SendIcon className="h-5 w-5 text-primary mb-2" />
-                <p className="text-2xl font-semibold text-foreground">0</p>
-                <p className="text-xs text-muted-foreground">candidature en cours</p>
-              </div>
-            )}
-
-            {/* Prochaine garde */}
-            {nextGuard ? (
-              <Link to="/sits" className="bg-primary/5 border border-primary/30 rounded-2xl p-4 cursor-pointer hover:border-primary transition-colors">
-                <Calendar className="h-5 w-5 text-primary mb-2" />
-                <p className="text-sm font-medium text-foreground">{capitalize(nextGuard.ownerName || "—")}</p>
-                <p className="text-xs text-muted-foreground">
-                  Du {format(new Date(nextGuard.start_date), "d MMM", { locale: fr })} au {format(new Date(nextGuard.end_date), "d MMM", { locale: fr })}
-                </p>
-                {nextGuard.pets?.length > 0 && (
-                  <div className="flex flex-wrap gap-1 mt-2">
-                    {nextGuard.pets.map((p: any, i: number) => (
-                      <span key={i} className="text-xs bg-muted rounded-full px-2 py-0.5">{p.species || "Animal"}</span>
-                    ))}
-                  </div>
-                )}
-              </Link>
-            ) : (
-              <div className="bg-card border border-border rounded-2xl p-4 opacity-40 pointer-events-none">
-                <Calendar className="h-5 w-5 text-primary mb-2" />
-                <p className="text-sm font-medium text-foreground">Aucune garde à venir</p>
-              </div>
-            )}
+      {/* ═══ 2. BARRE DE STATUT UNIFIÉE ═══ */}
+      <div className="mx-8 mb-8 bg-card border border-border rounded-2xl overflow-hidden grid grid-cols-3">
+        {/* Zone 1 — MON PROFIL */}
+        <div className="p-5 border-r border-border">
+          <p className="text-xs uppercase tracking-widest text-muted-foreground font-sans mb-3">
+            Mon profil
+          </p>
+          <div className="h-1.5 bg-muted rounded-full mb-2">
+            <div
+              className="h-1.5 bg-primary rounded-full transition-all duration-500"
+              style={{ width: `${profileCompletion}%` }}
+            />
           </div>
+          <p className="text-lg font-heading font-bold text-foreground mb-1">
+            {profileCompletion}% complété
+          </p>
+          {profileCompletion >= 60 && (
+            <span className="text-xs font-sans bg-primary/10 text-primary rounded-md px-2 py-0.5 inline-block mb-3">
+              Visible par les proprios
+            </span>
+          )}
+          {profileCompletion < 100 && (
+            <Link to="/profile" className="text-xs text-primary font-sans block">
+              Compléter →
+            </Link>
+          )}
         </div>
-      )}
 
-      {/* ═══ BLOC 3 — Où j'en suis ═══ */}
-      <div>
-        <p className="text-sm font-semibold text-foreground mb-3">Où vous en êtes</p>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {/* Profil */}
-          <div className="bg-card border border-border rounded-2xl p-4">
-            <p className="text-xs text-muted-foreground uppercase tracking-wide mb-3">Mon profil</p>
-            <div className="h-2 rounded-full bg-muted mb-1 overflow-hidden">
-              <div className="h-full bg-primary rounded-full transition-all duration-500" style={{ width: `${profileCompletion}%` }} />
+        {/* Zone 2 — MES STATS */}
+        <div className="p-5 border-r border-border">
+          <p className="text-xs uppercase tracking-widest text-muted-foreground font-sans mb-3">
+            Mes stats
+          </p>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="text-center">
+              <p className="text-2xl font-heading font-bold text-foreground">{completedSits}</p>
+              <p className="text-xs text-muted-foreground font-sans">Gardes</p>
             </div>
-            <p className="text-sm font-semibold text-foreground">{profileCompletion}% complété</p>
-             {profileCompletion >= 60 ? (
-               <span className="inline-block bg-primary/10 text-primary text-xs rounded-full px-2 py-0.5 mt-2">✓ Visible par les proprios</span>
-             ) : (
-               <span className="inline-block bg-amber-50 text-amber-700 text-xs rounded-full px-2 py-0.5 mt-2">⚠ Non visible — 60% requis</span>
-             )}
-             <div className="flex items-center justify-between mt-3 py-2 border-t border-border">
-               <div>
-                 <p className="text-xs text-foreground font-medium">Je suis disponible</p>
-                 <p className="text-[11px] text-muted-foreground">Apparaissez dans les résultats avec un badge vert.</p>
-               </div>
-               <Switch
-                 checked={isAvailable}
-                 onCheckedChange={async (v) => {
-                   setIsAvailable(v);
-                   setOnboardingChecks(prev => ({ ...prev, availableMode: v }));
-                   await supabase.from("sitter_profiles").update({ is_available: v }).eq("user_id", user!.id);
-                 }}
-               />
-             </div>
-             <Link to="/profile" className="text-xs text-primary hover:underline mt-3 block">Compléter →</Link>
-          </div>
-
-          {/* Stats */}
-          <div className="bg-card border border-border rounded-2xl p-4">
-            <p className="text-xs text-muted-foreground uppercase tracking-wide mb-3">Mes stats</p>
-            <div className="grid grid-cols-2 gap-2">
-              <div className="text-center">
-                <p className="text-xl font-semibold text-foreground">{completedSits}</p>
-                <p className="text-xs text-muted-foreground">Gardes</p>
-              </div>
-              <div className="text-center">
-                 {avgRating > 0 ? (
-                   <p className="text-xl font-semibold text-foreground">{avgRating}</p>
-                 ) : (
-                   <p className="text-sm font-medium text-muted-foreground">Pas encore</p>
-                 )}
-                <p className="text-xs text-muted-foreground">Note ★</p>
-              </div>
-              <div className="text-center">
-                <p className="text-xl font-semibold text-foreground">{badgeCount}</p>
-                <p className="text-xs text-muted-foreground">Écussons</p>
-              </div>
-              <div className="text-center">
-                <p className="text-xl font-semibold text-foreground">{totalApps}</p>
-                <p className="text-xs text-muted-foreground">Candidatures</p>
-              </div>
+            <div className="text-center">
+              {avgRating > 0 ? (
+                <p className="text-2xl font-heading font-bold text-foreground">{avgRating}</p>
+              ) : (
+                <p className="text-sm text-muted-foreground font-sans mt-1">–</p>
+              )}
+              <p className="text-xs text-muted-foreground font-sans">Note</p>
             </div>
-            {completedSits === 0 && (
-              <p className="text-xs text-muted-foreground italic mt-3">Vos statistiques apparaîtront après votre première garde.</p>
-            )}
+            <div className="text-center">
+              <p className="text-2xl font-heading font-bold text-foreground">{badgeCount}</p>
+              <p className="text-xs text-muted-foreground font-sans">Écussons</p>
+            </div>
+            <div className="text-center">
+              <p className="text-2xl font-heading font-bold text-foreground">{totalApps}</p>
+              <p className="text-xs text-muted-foreground font-sans">Candidatures</p>
+            </div>
           </div>
+          {completedSits === 0 && (
+            <p className="text-xs text-muted-foreground font-sans italic mt-3 leading-snug">
+              Vos statistiques apparaîtront après votre première garde.
+            </p>
+          )}
+        </div>
 
-          {/* Gardien d'urgence */}
-           <div className={`border rounded-2xl p-4 ${allEmergencyDone || hasEmergencyProfile ? "bg-amber-50 border-amber-200" : "bg-card border-border"}`}>
-             <p className="text-xs text-muted-foreground uppercase tracking-wide mb-3">Statut d'urgence</p>
-             {hasEmergencyProfile ? (
-               <div>
-                 <div className="flex items-center gap-2 mb-2">
-                   <Zap className="h-5 w-5 text-amber-600" />
-                   <p className="text-sm font-semibold text-amber-800">Statut actif ✓</p>
-                </div>
-                <Link to="/profile#urgence" className="text-xs text-primary hover:underline">Gérer →</Link>
+        {/* Zone 3 — STATUT D'URGENCE */}
+        <div className="p-5">
+          <p className="text-xs uppercase tracking-widest text-muted-foreground font-sans mb-3">
+            Statut d'urgence
+          </p>
+          <div className="h-1.5 bg-muted rounded-full mb-1">
+            <div
+              className="h-1.5 bg-amber-400 rounded-full transition-all duration-500"
+              style={{ width: `${(emergencyDone / 5) * 100}%` }}
+            />
+          </div>
+          <p className="text-xs text-amber-600 font-sans mb-3">
+            {emergencyDone}/5 conditions remplies
+          </p>
+          <div className="flex flex-col gap-1.5">
+            {emergencyConditions.map((c, i) => (
+              <div key={i} className="flex items-center gap-2">
+                <div className={`w-2 h-2 rounded-full shrink-0 ${c.ok ? 'bg-primary' : 'bg-muted'}`} />
+                <span className={`text-xs font-sans ${c.ok ? 'text-muted-foreground line-through' : 'text-foreground/70'}`}>
+                  {c.label}
+                </span>
               </div>
-            ) : allEmergencyDone ? (
-              <div>
-                 <div className="flex items-center gap-2 mb-2">
-                   <Zap className="h-5 w-5 text-amber-600" />
-                   <p className="text-sm font-semibold text-amber-800">Éligible !</p>
-                </div>
-                <Link to="/profile#urgence" className="inline-block bg-amber-500 text-white rounded-full px-4 py-2 text-sm hover:bg-amber-600 transition-colors mt-1">
-                  Activer le statut →
-                </Link>
-              </div>
-            ) : (
-              <div>
-                <div className="h-2 rounded-full bg-muted mb-2 overflow-hidden">
-                  <div className="h-full bg-amber-400 rounded-full transition-all duration-500" style={{ width: `${(emergencyDone / 5) * 100}%` }} />
-                </div>
-                <p className="text-xs text-muted-foreground mb-3">{emergencyDone}/5 conditions</p>
-                <div className="space-y-0.5">
-                  {emergencyConditions.map((c, i) => (
-                    <div key={i} className="text-xs flex items-center gap-1.5 py-0.5">
-                      {c.ok
-                        ? <CheckCircle className="h-3.5 w-3.5 text-primary shrink-0" />
-                        : <Circle className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
-                      }
-                      <span className={c.ok ? "text-muted-foreground" : "text-foreground"}>{c.label}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
+            ))}
           </div>
         </div>
       </div>
 
       {/* Emergency active section */}
-      {hasEmergencyProfile && <EmergencyDashSection />}
+      {hasEmergencyProfile && <div className="px-8"><EmergencyDashSection /></div>}
 
-      {/* ═══ BLOC 4 — Quoi faire ═══ */}
-      <div>
-        <p className="text-sm font-semibold text-foreground mb-3">Quoi faire</p>
+      {/* ═══ 3. CTA + TIMBRES ═══ */}
+      <div className="px-8 mb-8">
+        <button
+          onClick={() => navigate('/search')}
+          className="w-full bg-primary text-white rounded-2xl py-4 text-base font-sans font-semibold mb-6 hover:bg-primary/90 transition-colors"
+        >
+          Découvrez les gardes disponibles →
+        </button>
 
-        {/* Priority CTA */}
-        <Link to={priorityCTA.to} className={`block rounded-xl px-4 py-3 w-full text-sm font-medium text-center transition-colors ${priorityCTA.style}`}>
-          {priorityCTA.label}
-        </Link>
-
-        {/* Badges collection */}
-        <div className="mt-4 bg-card border border-border rounded-2xl p-4">
-          <p className="text-xs text-muted-foreground uppercase tracking-wide mb-3">Mes écussons</p>
-          {(() => {
-            const unlockedSet: Record<string, boolean> = {};
-            if (identityVerified) unlockedSet["id_verifiee"] = true;
-            if (isFounder) unlockedSet["fondateur"] = true;
-            badges.forEach((b: any) => {
-              const key = b.badge_key || b.id;
-              if (key) unlockedSet[key] = true;
-            });
-            const unlockedCount = TIMBRES_ORDER.filter(k => unlockedSet[k]).length;
-            return (
-              <>
-                <div className="grid grid-cols-6 gap-3">
-                  {TIMBRES_ORDER.map((key) => (
-                    <div key={key} className="flex justify-center">
-                      <BadgeTimbre id={key} unlocked={!!unlockedSet[key]} />
-                    </div>
-                  ))}
-                </div>
-                <p className="text-xs text-muted-foreground text-center mt-2">
-                  {unlockedCount}/12 timbres débloqués
-                </p>
-              </>
-            );
-          })()}
-        </div>
-
-        {/* Checklist — split completed/incomplete */}
-        <div className="mt-4">
-          {(() => {
-            const allItems = [
-              ...checklistItems,
-              { done: onboardingChecks.availableMode, label: "Activer le mode disponible", to: "", isToggle: true },
-            ];
-            const completed = allItems.filter(c => c.done);
-            const incomplete = allItems.filter(c => !c.done);
-
-            return (
-              <div className="space-y-4">
-                {/* Incomplete items — always visible */}
-                {incomplete.length > 0 && (
-                  <div>
-                    <p className="text-sm font-medium text-foreground mb-3">
-                      À compléter ({incomplete.length} restante{incomplete.length > 1 ? "s" : ""})
-                    </p>
-                    <div>
-                      {incomplete.map((item: any, i) => (
-                        item.isToggle ? (
-                          <div key="toggle" className="flex items-center justify-between py-3 border-b border-border last:border-0 px-2">
-                            <div className="flex items-center">
-                              <Circle className="h-4 w-4 text-muted-foreground" />
-                              <span className="text-sm text-foreground ml-3">Activer le mode disponible</span>
-                            </div>
-                            <Switch
-                              checked={isAvailable}
-                              onCheckedChange={async (v) => {
-                                setIsAvailable(v);
-                                setOnboardingChecks(prev => ({ ...prev, availableMode: v }));
-                                await supabase.from("sitter_profiles").update({ is_available: v }).eq("user_id", user!.id);
-                              }}
-                            />
-                          </div>
-                        ) : (
-                          <Link
-                            key={i}
-                            to={item.to}
-                            className="flex items-center justify-between py-3 border-b border-border last:border-0 cursor-pointer hover:bg-muted/30 rounded-lg px-2 transition-colors"
-                          >
-                            <div className="flex items-center">
-                              <Circle className="h-4 w-4 text-muted-foreground" />
-                              <span className="text-sm text-foreground ml-3">{item.label}</span>
-                            </div>
-                            <ChevronRight className="h-4 w-4 text-muted-foreground" />
-                          </Link>
-                        )
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Completed items — accordion, collapsed */}
-                {completed.length > 0 && (
-                  <Accordion type="single" collapsible>
-                    <AccordionItem value="done" className="border-none">
-                      <AccordionTrigger className="flex items-center justify-between bg-muted/30 rounded-xl px-4 py-3 cursor-pointer hover:no-underline [&[data-state=open]>svg]:rotate-180">
-                        <div className="flex items-center gap-2">
-                          {allChecklistDone ? (
-                            <>
-                              <CheckCircle className="h-4 w-4 text-primary" />
-                              <span className="text-sm font-medium text-primary">4/4 étapes complétées ✓</span>
-                            </>
-                          ) : (
-                            <>
-                              <CheckCircle className="h-4 w-4 text-primary" />
-                              <span className="text-sm font-medium text-primary">{completed.length} étape{completed.length > 1 ? "s" : ""} déjà complétée{completed.length > 1 ? "s" : ""}</span>
-                            </>
-                          )}
-                        </div>
-                      </AccordionTrigger>
-                      <AccordionContent className="pt-2 pb-0">
-                        {completed.map((item: any, i) => (
-                          <div key={i} className="flex items-center gap-3 py-2 border-b border-border last:border-0">
-                            <CheckCircle className="h-4 w-4 text-primary" />
-                            <span className="text-sm line-through text-muted-foreground">{item.label}</span>
-                          </div>
-                        ))}
-                      </AccordionContent>
-                    </AccordionItem>
-                  </Accordion>
-                )}
+        <div className="bg-card border border-border rounded-2xl p-5">
+          <p className="text-xs uppercase tracking-widest text-muted-foreground font-sans mb-3">
+            Mes écussons
+          </p>
+          <div className="grid grid-cols-6 gap-2.5 mb-3">
+            {TIMBRES_ORDER.map((key) => (
+              <div key={key} className="flex justify-center">
+                <BadgeTimbre id={key} unlocked={!!unlockedSet[key]} size="compact" />
               </div>
-            );
-          })()}
+            ))}
+          </div>
+          <p className="text-xs text-muted-foreground font-sans text-center">
+            {unlockedCount} timbre(s) sur 12 débloqué(s)
+            {unlockedCount === 0 && " — continuez à garder pour en collecter."}
+          </p>
         </div>
       </div>
 
-      {/* ═══ BLOC 5 — Annonces et missions ═══ */}
-      <div className="space-y-8">
-        {/* Annonces */}
-        <div className="animate-fade-in">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="font-heading text-lg font-semibold">Annonces près de chez vous</h2>
-            <Link to="/search" className="text-xs text-primary hover:underline font-medium">Voir tout →</Link>
+      {/* ═══ 4. CHECKLIST ═══ */}
+      <div className="px-8 mb-8">
+        {incompleteItems.length > 0 && (
+          <div className="mb-4">
+            <p className="text-sm font-medium text-foreground mb-3">
+              À compléter ({incompleteItems.length} restante{incompleteItems.length > 1 ? "s" : ""})
+            </p>
+            <div>
+              {incompleteItems.map((item: any, i: number) => (
+                item.isToggle ? (
+                  <div key="toggle" className="flex items-center justify-between py-3 border-b border-border last:border-0 px-2">
+                    <div className="flex items-center">
+                      <Circle className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-sm text-foreground ml-3">Activer le mode disponible</span>
+                    </div>
+                    <button
+                      onClick={toggleAvailability}
+                      className={`relative w-11 h-6 rounded-full transition-colors duration-200 ${isAvailable ? 'bg-green-400' : 'bg-muted'}`}
+                    >
+                      <span className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-all duration-200 ${isAvailable ? 'left-5' : 'left-0.5'}`} />
+                    </button>
+                  </div>
+                ) : (
+                  <Link
+                    key={i}
+                    to={item.to}
+                    className="flex items-center justify-between py-3 border-b border-border last:border-0 cursor-pointer hover:bg-muted/30 rounded-lg px-2 transition-colors"
+                  >
+                    <div className="flex items-center">
+                      <Circle className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-sm text-foreground ml-3">{item.label}</span>
+                    </div>
+                    <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                  </Link>
+                )
+              ))}
+            </div>
+          </div>
+        )}
+
+        {completedItems.length > 0 && (
+          <Accordion type="single" collapsible>
+            <AccordionItem value="done" className="border-none">
+              <AccordionTrigger className="flex items-center justify-between bg-muted/30 rounded-xl px-4 py-3 cursor-pointer hover:no-underline [&[data-state=open]>svg]:rotate-180">
+                <div className="flex items-center gap-2">
+                  <CheckCircle className="h-4 w-4 text-primary" />
+                  <span className="text-sm font-medium text-primary">
+                    {allChecklistDone
+                      ? "4/4 étapes complétées"
+                      : `${completedItems.length} étape${completedItems.length > 1 ? "s" : ""} déjà complétée${completedItems.length > 1 ? "s" : ""}`
+                    }
+                  </span>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="pt-2 pb-0">
+                {completedItems.map((item: any, i: number) => (
+                  <div key={i} className="flex items-center gap-3 py-2 border-b border-border last:border-0">
+                    <CheckCircle className="h-4 w-4 text-primary" />
+                    <span className="text-sm line-through text-muted-foreground">{item.label}</span>
+                  </div>
+                ))}
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
+        )}
+      </div>
+
+      {/* ═══ 5. BAS DE PAGE — DEUX COLONNES ═══ */}
+      <div className="grid grid-cols-2 gap-4 px-8 mb-8">
+        {/* Colonne gauche — Annonces */}
+        <div className="bg-card border border-border rounded-2xl p-5">
+          <div className="flex justify-between items-center mb-4">
+            <p className="text-sm font-semibold text-foreground">
+              Annonces près de chez vous
+            </p>
+            <Link to="/search" className="text-xs text-primary font-sans">
+              Voir tout →
+            </Link>
           </div>
           {nearbyListings.length === 0 ? (
-            <div className="p-8 rounded-xl border border-dashed border-border bg-accent/30 text-center space-y-3">
-              <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
-                <Search className="h-7 w-7 text-primary/60" />
-              </div>
-              <div>
-                 <p className="text-sm font-medium text-foreground/80">Pas encore d'annonce dans votre zone</p>
-                 <p className="text-xs text-muted-foreground mt-1.5 max-w-xs mx-auto">Activez le mode disponible pour être contacté directement par les propriétaires.</p>
-              </div>
-              <Link to="/search">
-                <span className="inline-block border border-border rounded-full px-4 py-2 text-sm text-foreground hover:border-primary transition-colors mt-1">
-                  Explorer les annonces →
-                </span>
-              </Link>
+            <div className="text-center py-4">
+              <p className="text-sm text-muted-foreground font-sans italic mb-3">
+                Pas encore d'annonce dans votre zone.
+              </p>
+              <p className="text-xs text-muted-foreground font-sans">
+                Activez le mode disponible pour être contacté directement par les propriétaires.
+              </p>
             </div>
           ) : (
-            <div className="grid gap-3 sm:grid-cols-2">
-              {nearbyListings.map(sit => <ListingCard key={sit.id} sit={sit} />)}
-            </div>
+            nearbyListings.slice(0, 3).map((sit: any) => {
+              const isNew = differenceInHours(new Date(), new Date(sit.created_at)) < 48;
+              return (
+                <Link
+                  key={sit.id}
+                  to={`/sits/${sit.id}`}
+                  className="flex items-start gap-3 py-2.5 border-b border-border last:border-0"
+                >
+                  <div className="w-2 h-2 rounded-full bg-primary shrink-0 mt-1.5" />
+                  <div className="flex-1">
+                    <p className="text-xs text-foreground/80 font-sans leading-snug">
+                      {sit.title}
+                      {isNew && (
+                        <span className="ml-2 text-xs bg-primary text-white rounded px-1.5 py-0.5">
+                          Nouveau
+                        </span>
+                      )}
+                    </p>
+                    <p className="text-xs text-muted-foreground font-sans mt-0.5">
+                      {sit.start_date && sit.end_date
+                        ? `${format(new Date(sit.start_date), "d MMM", { locale: fr })} → ${format(new Date(sit.end_date), "d MMM", { locale: fr })}`
+                        : "Dates flexibles"}
+                    </p>
+                  </div>
+                </Link>
+              );
+            })
           )}
         </div>
 
-        {/* Échanges */}
-        <MissionsNearbySection />
+        {/* Colonne droite — Échanges */}
+        <div className="bg-card border border-border rounded-2xl p-5">
+          <div className="flex justify-between items-center mb-4">
+            <p className="text-sm font-semibold text-foreground">
+              Échanges autour de vous
+            </p>
+            <Link to="/petites-missions" className="text-xs text-primary font-sans">
+              Voir tout →
+            </Link>
+          </div>
+          <p className="text-xs text-muted-foreground font-sans mb-3">
+            En priorité : les échanges qui correspondent à vos compétences.
+          </p>
+          <div className="flex flex-col gap-2 mb-4">
+            <button
+              onClick={() => navigate('/petites-missions')}
+              className="w-full bg-primary text-white rounded-xl py-2.5 text-xs font-sans font-medium"
+            >
+              Publier un besoin →
+            </button>
+            <button
+              onClick={() => navigate('/petites-missions')}
+              className="w-full border border-primary text-primary rounded-xl py-2.5 text-xs font-sans font-medium"
+            >
+              Proposer mon aide →
+            </button>
+          </div>
+          <p className="text-xs text-muted-foreground font-sans italic text-center">
+            Pas encore d'échange dans votre zone.
+          </p>
+        </div>
+      </div>
 
-        {/* Conseils */}
-        <div className="animate-fade-in">
+      {/* Conseils */}
+      {articles.length > 0 && (
+        <div className="px-8 mb-8">
           <div className="flex items-center justify-between mb-4">
             <h2 className="font-heading text-lg font-semibold">Conseils pour vous</h2>
             <Link to="/actualites" className="text-xs text-primary hover:underline font-medium">Voir tout →</Link>
           </div>
-          {articles.length === 0 ? (
-            <div className="p-8 rounded-xl border border-dashed border-border bg-accent/30 text-center space-y-3">
-              <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
-                <Newspaper className="h-7 w-7 text-primary/60" />
-              </div>
-              <p className="text-sm font-medium text-foreground/80">Les articles arrivent bientôt</p>
-              <p className="text-xs text-muted-foreground">Conseils, astuces et histoires de gardiens</p>
-            </div>
-          ) : (
-            <div className="flex gap-3 overflow-x-auto pb-1 -mx-1 px-1">
-              {articles.map((a: any) => (
-                <a key={a.id} href={`/actualites/${a.slug}`} className="flex-shrink-0 w-64 rounded-xl border border-border bg-card overflow-hidden hover:shadow-md transition-shadow cursor-pointer">
-                  {a.cover_image_url ? (
-                    <img src={a.cover_image_url} alt="" className="w-full h-28 object-cover" />
-                  ) : (
-                    <div className="w-full h-28 bg-accent flex items-center justify-center">
-                      <Newspaper className="h-8 w-8 text-muted-foreground/40" />
-                    </div>
-                  )}
-                  <div className="p-3">
-                    <p className="text-sm font-semibold line-clamp-2">{a.title}</p>
-                    <p className="text-xs text-muted-foreground line-clamp-1 mt-1">{a.excerpt}</p>
+          <div className="flex gap-3 overflow-x-auto pb-1 -mx-1 px-1">
+            {articles.map((a: any) => (
+              <a key={a.id} href={`/actualites/${a.slug}`} className="flex-shrink-0 w-64 rounded-xl border border-border bg-card overflow-hidden hover:shadow-md transition-shadow cursor-pointer">
+                {a.cover_image_url ? (
+                  <img src={a.cover_image_url} alt="" className="w-full h-28 object-cover" />
+                ) : (
+                  <div className="w-full h-28 bg-accent flex items-center justify-center">
+                    <Newspaper className="h-8 w-8 text-muted-foreground/40" />
                   </div>
-                </a>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-};
-
-/* ── Shared components ── */
-
-const ListingCard = ({ sit }: { sit: any }) => {
-  const isNew = differenceInHours(new Date(), new Date(sit.created_at)) < 48;
-  const photo = sit.properties?.photos?.[0];
-  const durationDays = sit.start_date && sit.end_date ? differenceInDays(new Date(sit.end_date), new Date(sit.start_date)) : 0;
-
-  return (
-    <Link to={`/sits/${sit.id}`} className="flex gap-3 p-3 rounded-xl bg-card border border-border hover:border-primary/20 hover:shadow-md transition-all">
-      {photo ? (
-        <img src={photo} alt="" className="w-20 h-16 rounded-lg object-cover shrink-0" />
-      ) : (
-        <div className="w-20 h-16 rounded-lg bg-accent flex items-center justify-center shrink-0">
-          <Home className="h-6 w-6 text-muted-foreground" />
+                )}
+                <div className="p-3">
+                  <p className="text-sm font-semibold line-clamp-2">{a.title}</p>
+                  <p className="text-xs text-muted-foreground line-clamp-2 mt-1">{a.excerpt}</p>
+                </div>
+              </a>
+            ))}
+          </div>
         </div>
       )}
-      <div className="flex-1 min-w-0 py-0.5">
-        <div className="flex items-center gap-1.5 flex-wrap">
-          <p className="text-sm font-semibold truncate">{sit.title}</p>
-          {isNew && <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-primary text-primary-foreground">Nouveau</span>}
-          {sit.is_urgent && <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-destructive text-destructive-foreground">Urgent</span>}
-          {durationDays >= 30 && <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-accent text-foreground">Longue durée</span>}
-        </div>
-        <p className="text-xs text-muted-foreground mt-0.5">
-          {sit.start_date && sit.end_date
-            ? `${format(new Date(sit.start_date), "d MMM", { locale: fr })} → ${format(new Date(sit.end_date), "d MMM", { locale: fr })}`
-            : "Dates flexibles"}
-        </p>
-      </div>
-    </Link>
+    </div>
   );
 };
 
