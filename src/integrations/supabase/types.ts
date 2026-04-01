@@ -1467,6 +1467,7 @@ export type Database = {
           bio: string | null
           cancellation_count: number
           city: string | null
+          completed_sits_count: number
           created_at: string
           custom_skills: Json | null
           email: string | null
@@ -1492,6 +1493,7 @@ export type Database = {
           bio?: string | null
           cancellation_count?: number
           city?: string | null
+          completed_sits_count?: number
           created_at?: string
           custom_skills?: Json | null
           email?: string | null
@@ -1517,6 +1519,7 @@ export type Database = {
           bio?: string | null
           cancellation_count?: number
           city?: string | null
+          completed_sits_count?: number
           created_at?: string
           custom_skills?: Json | null
           email?: string | null
@@ -2355,6 +2358,10 @@ export type Database = {
           msg_id: number
           read_ct: number
         }[]
+      }
+      recalculate_completed_sits: {
+        Args: { p_user_id: string }
+        Returns: undefined
       }
     }
     Enums: {
