@@ -464,7 +464,7 @@ const SitCard = ({ sit, isOwner, userId }: { sit: any; isOwner: boolean; userId?
                     <span className="text-sm font-medium">{otherParty.first_name}</span>
                     {otherParty.rating && (
                       <span className="text-xs text-muted-foreground ml-1.5">
-                        <Star className="h-3 w-3 inline text-amber-500 fill-amber-500 -mt-0.5" /> {otherParty.rating}
+                        <Star className="h-3 w-3 inline text-secondary fill-secondary -mt-0.5" /> {otherParty.rating}
                       </span>
                     )}
                   </div>

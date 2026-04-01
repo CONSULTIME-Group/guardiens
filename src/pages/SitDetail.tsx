@@ -267,7 +267,7 @@ const SitDetail = () => {
         <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${status.className}`}>{status.label}</span>
         {avgRating && (
           <span className="flex items-center gap-1">
-            <Star className="h-3.5 w-3.5 text-yellow-500 fill-yellow-500" />{avgRating} ({reviews.length})
+            <Star className="h-3.5 w-3.5 text-secondary fill-secondary" />{avgRating} ({reviews.length})
           </span>
         )}
       </div>
