@@ -65,6 +65,7 @@ const defaultData: SitterProfileData = {
   strict_rules_ok: false, prefer_visitors: false, farm_animals_ok: false, preferences_notes: "",
   meeting_preference: [], handover_preference: "", languages: [], bonus_skills: [], interests: [],
   skill_categories: [], available_for_help: false,
+  competences: [],
 };
 
 export function useSitterProfile() {
