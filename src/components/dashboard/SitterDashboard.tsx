@@ -11,7 +11,7 @@ import { Switch } from "@/components/ui/switch";
 import {
   Home, Star, Search, Send as SendIcon, CheckCircle2, XCircle,
   MessageSquare, Calendar, Handshake, Newspaper, Zap, ChevronRight,
-  Eye, Circle, CheckCircle, ChevronDown,
+  Eye, Circle, CheckCircle, ChevronDown, ExternalLink,
 } from "lucide-react";
 import { format, differenceInDays, differenceInHours } from "date-fns";
 import { fr } from "date-fns/locale";
