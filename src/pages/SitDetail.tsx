@@ -625,27 +625,6 @@ const SitDetail = () => {
         <p className="text-xs text-muted-foreground mt-1">Profils vérifiés · Avis croisés · Gardiens d'urgence mobilisables</p>
       </div>
 
-      {/* Sitter apply bar - highlights shown just before */}
-      {activeRole === "sitter" && !isOwner && sit.status === "published" && (
-        <div className="fixed bottom-0 left-0 right-0 md:left-64 bg-card border-t border-border p-4 z-40 md:pb-4 pb-20">
-          <div className="max-w-4xl mx-auto">
-            {(accessLevel === 1 || accessLevel === 2) ? (
-              <AccessGateBanner level={accessLevel} profileCompletion={profileCompletion} context="guard" />
-            ) : hasApplied ? (
-              <Button className="w-full h-12 text-base font-semibold" disabled>
-                <CheckCircle2 className="h-5 w-5 mr-2" /> Candidature envoyée ✓
-              </Button>
-            ) : !canApplyGuards ? (
-              <AccessGateBanner level="3A" profileCompletion={profileCompletion} context="guard" />
-            ) : (
-              <Button className="w-full h-12 text-base font-semibold" onClick={() => setApplyOpen(true)}>
-                Postuler pour cette garde
-              </Button>
-            )}
-          </div>
-        </div>
-      )}
-
       <ApplicationModal
         open={applyOpen}
         onOpenChange={setApplyOpen}
@@ -674,6 +653,39 @@ const SitDetail = () => {
           }}
         />
       )}
+    </div>
+  );
+
+  return (
+    <div className="w-full animate-fade-in">
+      <Helmet><meta name="robots" content="noindex, nofollow" /></Helmet>
+
+      {/* Sitter apply bar */}
+      {activeRole === "sitter" && !isOwner && sit.status === "published" && (
+        <div className="fixed bottom-0 left-0 right-0 md:left-64 bg-card border-t border-border p-4 z-40 md:pb-4 pb-20">
+          <div className="w-full max-w-4xl mx-auto">
+            {(accessLevel === 1 || accessLevel === 2) ? (
+              <AccessGateBanner level={accessLevel} profileCompletion={profileCompletion} context="guard" />
+            ) : hasApplied ? (
+              <Button className="w-full h-12 text-base font-semibold" disabled>
+                <CheckCircle2 className="h-5 w-5 mr-2" /> Candidature envoyée ✓
+              </Button>
+            ) : !canApplyGuards ? (
+              <AccessGateBanner level="3A" profileCompletion={profileCompletion} context="guard" />
+            ) : (
+              <Button className="w-full h-12 text-base font-semibold" onClick={() => setApplyOpen(true)}>
+                Postuler pour cette garde
+              </Button>
+            )}
+          </div>
+        </div>
+      )}
+
+      <TwoColumnLayout
+        leftWidth={300}
+        leftContent={leftContent}
+        rightContent={rightContent}
+      />
     </div>
   );
 };
