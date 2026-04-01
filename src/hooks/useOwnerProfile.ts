@@ -135,6 +135,9 @@ export function useOwnerProfile() {
       communication_notes: o?.communication_notes || "",
       skill_categories: (p as any)?.skill_categories || [],
       available_for_help: (p as any)?.available_for_help || false,
+      owner_competences: (o as any)?.competences || [],
+      owner_competences_disponible: (o as any)?.competences_disponible || false,
+      owner_skill_categories: (p as any)?.skill_categories || [],
     });
 
     if (prop) {
