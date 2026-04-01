@@ -226,7 +226,7 @@ const SitterDashboard = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
             {/* Messages */}
             {unreadCount > 0 ? (
-              <Link to="/messagerie" className="bg-card border border-border rounded-2xl p-4 cursor-pointer hover:border-primary transition-colors">
+              <Link to="/messages" className="bg-card border border-border rounded-2xl p-4 cursor-pointer hover:border-primary transition-colors">
                 <MessageSquare className="h-5 w-5 text-primary mb-2" />
                 <p className="text-2xl font-semibold text-foreground">{unreadCount}</p>
                 <p className="text-xs text-muted-foreground">message{unreadCount > 1 ? "s" : ""} non lu{unreadCount > 1 ? "s" : ""}</p>
@@ -241,7 +241,7 @@ const SitterDashboard = () => {
 
             {/* Candidatures */}
             {pendingAppsCount > 0 ? (
-              <Link to="/mes-gardes" className="bg-card border border-border rounded-2xl p-4 cursor-pointer hover:border-primary transition-colors">
+              <Link to="/sits" className="bg-card border border-border rounded-2xl p-4 cursor-pointer hover:border-primary transition-colors">
                 <SendIcon className="h-5 w-5 text-primary mb-2" />
                 <p className="text-2xl font-semibold text-foreground">{pendingAppsCount}</p>
                 <p className="text-xs text-muted-foreground">candidature{pendingAppsCount > 1 ? "s" : ""} en cours</p>
@@ -256,7 +256,7 @@ const SitterDashboard = () => {
 
             {/* Prochaine garde */}
             {nextGuard ? (
-              <Link to="/mes-gardes" className="bg-primary/5 border border-primary/30 rounded-2xl p-4 cursor-pointer hover:border-primary transition-colors">
+              <Link to="/sits" className="bg-primary/5 border border-primary/30 rounded-2xl p-4 cursor-pointer hover:border-primary transition-colors">
                 <Calendar className="h-5 w-5 text-primary mb-2" />
                 <p className="text-sm font-medium text-foreground">{capitalize(nextGuard.ownerName || "—")}</p>
                 <p className="text-xs text-muted-foreground">
@@ -296,7 +296,7 @@ const SitterDashboard = () => {
             ) : (
               <span className="inline-block bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-300 text-xs rounded-full px-2 py-0.5 mt-2">⚠ Non visible — 60% requis</span>
             )}
-            <Link to="/mon-profil" className="text-xs text-primary hover:underline mt-3 block">Compléter →</Link>
+            <Link to="/profile" className="text-xs text-primary hover:underline mt-3 block">Compléter →</Link>
           </div>
 
           {/* Stats */}
@@ -334,7 +334,7 @@ const SitterDashboard = () => {
                   <Zap className="h-5 w-5 text-amber-600 dark:text-amber-400" />
                   <p className="text-sm font-semibold text-amber-800 dark:text-amber-200">Statut actif ✓</p>
                 </div>
-                <Link to="/mon-profil#urgence" className="text-xs text-primary hover:underline">Gérer →</Link>
+                <Link to="/profile#urgence" className="text-xs text-primary hover:underline">Gérer →</Link>
               </div>
             ) : allEmergencyDone ? (
               <div>
@@ -342,7 +342,7 @@ const SitterDashboard = () => {
                   <Zap className="h-5 w-5 text-amber-600 dark:text-amber-400" />
                   <p className="text-sm font-semibold text-amber-800 dark:text-amber-200">Éligible !</p>
                 </div>
-                <Link to="/mon-profil#urgence" className="inline-block bg-amber-500 text-white rounded-full px-4 py-2 text-sm hover:bg-amber-600 transition-colors mt-1">
+                <Link to="/profile#urgence" className="inline-block bg-amber-500 text-white rounded-full px-4 py-2 text-sm hover:bg-amber-600 transition-colors mt-1">
                   Activer le statut →
                 </Link>
               </div>
@@ -505,7 +505,7 @@ const SitterDashboard = () => {
         <div className="animate-fade-in">
           <div className="flex items-center justify-between mb-4">
             <h2 className="font-heading text-lg font-semibold">Annonces près de chez toi</h2>
-            <Link to="/recherche" className="text-xs text-primary hover:underline font-medium">Voir tout →</Link>
+            <Link to="/search" className="text-xs text-primary hover:underline font-medium">Voir tout →</Link>
           </div>
           {nearbyListings.length === 0 ? (
             <div className="p-8 rounded-xl border border-dashed border-border bg-accent/30 text-center space-y-3">
@@ -516,7 +516,7 @@ const SitterDashboard = () => {
                 <p className="text-sm font-medium text-foreground/80">Pas encore d'annonce dans ta zone</p>
                 <p className="text-xs text-muted-foreground mt-1.5 max-w-xs mx-auto">Active le mode disponible pour être contacté directement par les proprios.</p>
               </div>
-              <Link to="/recherche">
+              <Link to="/search">
                 <span className="inline-block border border-border rounded-full px-4 py-2 text-sm text-foreground hover:border-primary transition-colors mt-1">
                   Explorer les annonces →
                 </span>
