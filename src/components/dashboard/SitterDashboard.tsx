@@ -6,7 +6,7 @@ import { Link } from "react-router-dom";
 import EmergencyDashSection from "./EmergencyDashSection";
 import MissionsNearbySection from "./MissionsNearbySection";
 import BadgeShield from "@/components/badges/BadgeShield";
-import BadgeGrid from "@/components/badges/BadgeGrid";
+import BadgeTimbre, { TIMBRES_ORDER } from "@/components/badges/BadgeTimbre";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Switch } from "@/components/ui/switch";
 import {
@@ -48,6 +48,7 @@ const SitterDashboard = () => {
   const [badges, setBadges] = useState<any[]>([]);
   const [isAvailable, setIsAvailable] = useState(false);
   const [nearbyListings, setNearbyListings] = useState<any[]>([]);
+  const [isFounder, setIsFounder] = useState(false);
   const [articles, setArticles] = useState<any[]>([]);
   const [hasEmergencyProfile, setHasEmergencyProfile] = useState(false);
 
@@ -67,7 +68,7 @@ const SitterDashboard = () => {
       ] = await Promise.all([
         supabase.from("applications").select("*, sit:sits(id, title, start_date, end_date, status, user_id, property_id, properties:property_id(photos))").eq("sitter_id", user.id).order("created_at", { ascending: false }),
         supabase.from("sitter_profiles").select("is_available").eq("user_id", user.id).single(),
-        supabase.from("profiles").select("identity_verification_status, profile_completion, identity_verified, cancellation_count").eq("id", user.id).single(),
+        supabase.from("profiles").select("identity_verification_status, profile_completion, identity_verified, cancellation_count, is_founder").eq("id", user.id).single(),
         supabase.from("reviews").select("overall_rating").eq("reviewee_id", user.id).eq("published", true),
         supabase.from("sits").select("id, title, start_date, end_date, user_id, property_id, status, created_at, is_urgent, properties:property_id(photos, type, environment)").eq("status", "published").order("created_at", { ascending: false }).limit(6),
         supabase.from("badge_attributions").select("id").eq("receiver_id", user.id),
@@ -82,6 +83,7 @@ const SitterDashboard = () => {
       setProfileCompletion(pCompletion);
       setIdentityVerified(idVerified);
       setCancellations(profileRes.data?.cancellation_count || 0);
+      setIsFounder(profileRes.data?.is_founder || false);
       setIsAvailable(sitterRes.data?.is_available || false);
 
       const apps = appsRes.data || [];
@@ -382,14 +384,30 @@ const SitterDashboard = () => {
         {/* Badges collection */}
         <div className="mt-4 bg-card border border-border rounded-2xl p-4">
           <p className="text-xs text-muted-foreground uppercase tracking-wide mb-3">Mes écussons</p>
-          <BadgeGrid
-            unlockedBadges={badges.reduce((acc: Record<string, number>, b: any) => {
+          {(() => {
+            const unlockedSet: Record<string, boolean> = {};
+            if (identityVerified) unlockedSet["id_verifiee"] = true;
+            if (isFounder) unlockedSet["fondateur"] = true;
+            badges.forEach((b: any) => {
               const key = b.badge_key || b.id;
-              acc[key] = (acc[key] || 0) + 1;
-              return acc;
-            }, {})}
-            variant="dashboard"
-          />
+              if (key) unlockedSet[key] = true;
+            });
+            const unlockedCount = TIMBRES_ORDER.filter(k => unlockedSet[k]).length;
+            return (
+              <>
+                <div className="grid grid-cols-6 gap-3">
+                  {TIMBRES_ORDER.map((key) => (
+                    <div key={key} className="flex justify-center">
+                      <BadgeTimbre id={key} unlocked={!!unlockedSet[key]} />
+                    </div>
+                  ))}
+                </div>
+                <p className="text-xs text-muted-foreground text-center mt-2">
+                  {unlockedCount}/12 timbres débloqués
+                </p>
+              </>
+            );
+          })()}
         </div>
 
         {/* Checklist — split completed/incomplete */}
