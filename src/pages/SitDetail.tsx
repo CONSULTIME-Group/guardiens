@@ -173,7 +173,15 @@ const SitDetail = () => {
     toast({ title: "Annonce publiée", description: "Les gardiens peuvent maintenant candidater." });
   };
 
-  const statusLabel: Record<string, { label: string; className: string }> = {
+  const saveOverride = useCallback((field: "logement_override" | "animaux_override", value: string) => {
+    if (!sit || !isOwner) return;
+    if (overrideSaveTimeout.current) clearTimeout(overrideSaveTimeout.current);
+    overrideSaveTimeout.current = setTimeout(async () => {
+      await supabase.from("sits").update({ [field]: value } as any).eq("id", sit.id);
+    }, 800);
+  }, [sit]);
+
+
     draft: { label: "Brouillon", className: "bg-muted text-muted-foreground" },
     published: { label: "Publiée", className: "bg-primary/10 text-primary" },
     confirmed: { label: "Confirmée", className: "bg-primary/10 text-primary" },
