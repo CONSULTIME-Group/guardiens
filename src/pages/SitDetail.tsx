@@ -122,6 +122,8 @@ const SitDetail = () => {
   // SEO guard: demo listings have no detail page
   if (id?.startsWith("demo-")) return <Navigate to="/search" replace />;
 
+  const shouldNoindex = ["completed", "cancelled", "expired"].includes(sit.status);
+
   const photos: string[] = (property as any)?.photos || [];
   const avgRating = reviews.length > 0 ? (reviews.reduce((s: number, r: any) => s + r.overall_rating, 0) / reviews.length).toFixed(1) : null;
   const isOwner = sit.user_id === user?.id;
