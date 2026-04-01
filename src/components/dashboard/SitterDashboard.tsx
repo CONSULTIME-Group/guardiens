@@ -139,6 +139,26 @@ const SitterDashboard = () => {
       setLoading(false);
     };
     load();
+   }, [user]);
+
+  // Realtime sync for is_available toggle
+  useEffect(() => {
+    if (!user) return;
+    const channel = supabase
+      .channel('sitter-availability')
+      .on('postgres_changes', {
+        event: 'UPDATE',
+        schema: 'public',
+        table: 'sitter_profiles',
+        filter: `user_id=eq.${user.id}`,
+      }, (payload) => {
+        if (typeof payload.new?.is_available === 'boolean') {
+          setIsAvailable(payload.new.is_available);
+          setOnboardingChecks(prev => ({ ...prev, availableMode: payload.new.is_available }));
+        }
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
   }, [user]);
 
   if (loading) return (
@@ -157,12 +177,12 @@ const SitterDashboard = () => {
 
   // Dynamic subtitle priority
   const subtitle = nextGuard
-    ? `Ta prochaine garde commence dans ${nextGuard.daysUntil} jour${nextGuard.daysUntil > 1 ? "s" : ""}.`
+    ? `Votre prochaine garde commence dans ${nextGuard.daysUntil} jour${nextGuard.daysUntil > 1 ? "s" : ""}.`
     : pendingAppsCount > 0
-    ? `Tu as ${pendingAppsCount} candidature${pendingAppsCount > 1 ? "s" : ""} en attente de réponse.`
+    ? `Vous avez ${pendingAppsCount} candidature${pendingAppsCount > 1 ? "s" : ""} en attente de réponse.`
     : unreadCount > 0
-    ? `Tu as ${unreadCount} message${unreadCount > 1 ? "s" : ""} non lu${unreadCount > 1 ? "s" : ""}.`
-    : "Explore les annonces près de chez toi.";
+    ? `Vous avez ${unreadCount} message${unreadCount > 1 ? "s" : ""} non lu${unreadCount > 1 ? "s" : ""}.`
+    : "Explorez les annonces près de chez vous.";
 
   // Emergency conditions
   const emergencyConditions = [
@@ -179,7 +199,7 @@ const SitterDashboard = () => {
   const checklistItems = [
     { done: onboardingChecks.profileComplete, label: `Compléter mon profil (${profileCompletion}%)`, to: "/profile" },
     { done: onboardingChecks.identityVerified, label: "Vérifier mon identité", to: "/profile#identite" },
-    { done: false, label: "Découvre les gardes disponibles", to: "/search" },
+    { done: false, label: "Découvrez les gardes disponibles", to: "/search" },
   ];
   const checklistDone = checklistItems.filter(c => c.done).length + (onboardingChecks.availableMode ? 1 : 0);
   const allChecklistDone = checklistDone === 4;
@@ -193,7 +213,7 @@ const SitterDashboard = () => {
     : !identityVerified
     ? { label: "Vérifier mon identité →", to: "/profile#identite", style: "bg-amber-500 text-white" }
     : totalApps === 0
-    ? { label: "Découvre les gardes disponibles →", to: "/search", style: "border border-primary text-primary hover:bg-primary/5" }
+    ? { label: "Découvrez les gardes disponibles →", to: "/search", style: "border border-primary text-primary hover:bg-primary/5" }
     : pendingAppsCount > 0
     ? { label: "Voir mes candidatures →", to: "/sits", style: "border border-primary text-primary" }
     : { label: "Explorer les nouvelles annonces →", to: "/search", style: "border border-border text-foreground" };
@@ -212,7 +232,7 @@ const SitterDashboard = () => {
             rel="noopener noreferrer"
             className="text-xs text-primary hover:underline flex items-center gap-1"
           >
-            Voir mon profil public
+            Voir votre profil public
             <ExternalLink className="w-3 h-3" />
           </a>
         </div>
@@ -222,7 +242,7 @@ const SitterDashboard = () => {
       {/* ═══ BLOC 2 — Ce qui m'attend ═══ */}
       {showBloc2 && (
         <div>
-          <p className="text-sm font-semibold text-foreground mb-3">Ce qui t'attend</p>
+          <p className="text-sm font-semibold text-foreground mb-3">Ce qui vous attend</p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
             {/* Messages */}
             {unreadCount > 0 ? (
@@ -282,7 +302,7 @@ const SitterDashboard = () => {
 
       {/* ═══ BLOC 3 — Où j'en suis ═══ */}
       <div>
-        <p className="text-sm font-semibold text-foreground mb-3">Où tu en es</p>
+        <p className="text-sm font-semibold text-foreground mb-3">Où vous en êtes</p>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {/* Profil */}
           <div className="bg-card border border-border rounded-2xl p-4">
@@ -291,12 +311,26 @@ const SitterDashboard = () => {
               <div className="h-full bg-primary rounded-full transition-all duration-500" style={{ width: `${profileCompletion}%` }} />
             </div>
             <p className="text-sm font-semibold text-foreground">{profileCompletion}% complété</p>
-            {profileCompletion >= 60 ? (
-              <span className="inline-block bg-primary/10 text-primary text-xs rounded-full px-2 py-0.5 mt-2">✓ Visible par les proprios</span>
-            ) : (
-              <span className="inline-block bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-300 text-xs rounded-full px-2 py-0.5 mt-2">⚠ Non visible — 60% requis</span>
-            )}
-            <Link to="/profile" className="text-xs text-primary hover:underline mt-3 block">Compléter →</Link>
+             {profileCompletion >= 60 ? (
+               <span className="inline-block bg-primary/10 text-primary text-xs rounded-full px-2 py-0.5 mt-2">✓ Visible par les proprios</span>
+             ) : (
+               <span className="inline-block bg-amber-50 text-amber-700 text-xs rounded-full px-2 py-0.5 mt-2">⚠ Non visible — 60% requis</span>
+             )}
+             <div className="flex items-center justify-between mt-3 py-2 border-t border-border">
+               <div>
+                 <p className="text-xs text-foreground font-medium">Je suis disponible</p>
+                 <p className="text-[11px] text-muted-foreground">Apparaissez dans les résultats avec un badge vert.</p>
+               </div>
+               <Switch
+                 checked={isAvailable}
+                 onCheckedChange={async (v) => {
+                   setIsAvailable(v);
+                   setOnboardingChecks(prev => ({ ...prev, availableMode: v }));
+                   await supabase.from("sitter_profiles").update({ is_available: v }).eq("user_id", user!.id);
+                 }}
+               />
+             </div>
+             <Link to="/profile" className="text-xs text-primary hover:underline mt-3 block">Compléter →</Link>
           </div>
 
           {/* Stats */}
@@ -308,7 +342,11 @@ const SitterDashboard = () => {
                 <p className="text-xs text-muted-foreground">Gardes</p>
               </div>
               <div className="text-center">
-                <p className="text-xl font-semibold text-foreground">{avgRating > 0 ? `${avgRating}` : "—"}</p>
+                 {avgRating > 0 ? (
+                   <p className="text-xl font-semibold text-foreground">{avgRating}</p>
+                 ) : (
+                   <p className="text-sm font-medium text-muted-foreground">Pas encore</p>
+                 )}
                 <p className="text-xs text-muted-foreground">Note ★</p>
               </div>
               <div className="text-center">
@@ -321,26 +359,26 @@ const SitterDashboard = () => {
               </div>
             </div>
             {completedSits === 0 && (
-              <p className="text-xs text-muted-foreground italic mt-3">Tes stats apparaîtront après ta première garde.</p>
+              <p className="text-xs text-muted-foreground italic mt-3">Vos statistiques apparaîtront après votre première garde.</p>
             )}
           </div>
 
           {/* Gardien d'urgence */}
-          <div className={`border rounded-2xl p-4 ${allEmergencyDone || hasEmergencyProfile ? "bg-amber-50 dark:bg-amber-950/30 border-amber-200 dark:border-amber-800" : "bg-card border-border"}`}>
-            <p className="text-xs text-muted-foreground uppercase tracking-wide mb-3">Statut d'urgence</p>
-            {hasEmergencyProfile ? (
-              <div>
-                <div className="flex items-center gap-2 mb-2">
-                  <Zap className="h-5 w-5 text-amber-600 dark:text-amber-400" />
-                  <p className="text-sm font-semibold text-amber-800 dark:text-amber-200">Statut actif ✓</p>
+           <div className={`border rounded-2xl p-4 ${allEmergencyDone || hasEmergencyProfile ? "bg-amber-50 border-amber-200" : "bg-card border-border"}`}>
+             <p className="text-xs text-muted-foreground uppercase tracking-wide mb-3">Statut d'urgence</p>
+             {hasEmergencyProfile ? (
+               <div>
+                 <div className="flex items-center gap-2 mb-2">
+                   <Zap className="h-5 w-5 text-amber-600" />
+                   <p className="text-sm font-semibold text-amber-800">Statut actif ✓</p>
                 </div>
                 <Link to="/profile#urgence" className="text-xs text-primary hover:underline">Gérer →</Link>
               </div>
             ) : allEmergencyDone ? (
               <div>
-                <div className="flex items-center gap-2 mb-2">
-                  <Zap className="h-5 w-5 text-amber-600 dark:text-amber-400" />
-                  <p className="text-sm font-semibold text-amber-800 dark:text-amber-200">Éligible !</p>
+                 <div className="flex items-center gap-2 mb-2">
+                   <Zap className="h-5 w-5 text-amber-600" />
+                   <p className="text-sm font-semibold text-amber-800">Éligible !</p>
                 </div>
                 <Link to="/profile#urgence" className="inline-block bg-amber-500 text-white rounded-full px-4 py-2 text-sm hover:bg-amber-600 transition-colors mt-1">
                   Activer le statut →
@@ -359,7 +397,7 @@ const SitterDashboard = () => {
                         ? <CheckCircle className="h-3.5 w-3.5 text-primary shrink-0" />
                         : <Circle className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
                       }
-                      <span className={c.ok ? "text-muted-foreground line-through" : "text-foreground"}>{c.label}</span>
+                      <span className={c.ok ? "text-muted-foreground" : "text-foreground"}>{c.label}</span>
                     </div>
                   ))}
                 </div>
@@ -504,7 +542,7 @@ const SitterDashboard = () => {
         {/* Annonces */}
         <div className="animate-fade-in">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="font-heading text-lg font-semibold">Annonces près de chez toi</h2>
+            <h2 className="font-heading text-lg font-semibold">Annonces près de chez vous</h2>
             <Link to="/search" className="text-xs text-primary hover:underline font-medium">Voir tout →</Link>
           </div>
           {nearbyListings.length === 0 ? (
@@ -513,8 +551,8 @@ const SitterDashboard = () => {
                 <Search className="h-7 w-7 text-primary/60" />
               </div>
               <div>
-                <p className="text-sm font-medium text-foreground/80">Pas encore d'annonce dans ta zone</p>
-                <p className="text-xs text-muted-foreground mt-1.5 max-w-xs mx-auto">Active le mode disponible pour être contacté directement par les proprios.</p>
+                 <p className="text-sm font-medium text-foreground/80">Pas encore d'annonce dans votre zone</p>
+                 <p className="text-xs text-muted-foreground mt-1.5 max-w-xs mx-auto">Activez le mode disponible pour être contacté directement par les propriétaires.</p>
               </div>
               <Link to="/search">
                 <span className="inline-block border border-border rounded-full px-4 py-2 text-sm text-foreground hover:border-primary transition-colors mt-1">
@@ -535,7 +573,7 @@ const SitterDashboard = () => {
         {/* Conseils */}
         <div className="animate-fade-in">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="font-heading text-lg font-semibold">Conseils pour toi</h2>
+            <h2 className="font-heading text-lg font-semibold">Conseils pour vous</h2>
             <Link to="/actualites" className="text-xs text-primary hover:underline font-medium">Voir tout →</Link>
           </div>
           {articles.length === 0 ? (

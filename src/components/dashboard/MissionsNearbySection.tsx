@@ -72,14 +72,14 @@ const MissionsNearbySection = () => {
   return (
     <div className="animate-fade-in">
       <div className="flex items-center justify-between mb-1">
-        <h2 className="font-heading text-xl font-semibold">Échanges autour de toi</h2>
+        <h2 className="font-heading text-xl font-semibold">Échanges autour de vous</h2>
         <Link to="/petites-missions" className="text-xs text-primary hover:underline font-medium">
           Voir toutes les missions →
         </Link>
       </div>
       <p className="text-sm text-foreground/60 mt-1 mb-4">
-        {mySkills.length > 0
-          ? "En priorité : les échanges qui correspondent à tes compétences."
+       {mySkills.length > 0
+          ? "En priorité : les échanges qui correspondent à vos compétences."
           : "Des gens du coin qui cherchent de l'aide, d'autres qui proposent la leur."}
       </p>
 
@@ -132,8 +132,8 @@ const MissionsNearbySection = () => {
       ) : (
         <div className="p-6 rounded-xl border border-dashed border-border bg-accent/30 text-center">
           <Handshake className="h-8 w-8 text-primary/40 mx-auto mb-2" />
-          <p className="text-sm text-foreground/80">Pas encore d'échange dans ta zone</p>
-          <p className="text-xs text-muted-foreground mt-1">Publie un besoin ou propose ton aide</p>
+           <p className="text-sm text-foreground/80">Pas encore d'échange dans votre zone</p>
+           <p className="text-xs text-muted-foreground mt-1">Publiez un besoin ou proposez votre aide</p>
         </div>
       )}
 
@@ -142,9 +142,9 @@ const MissionsNearbySection = () => {
         <div className="bg-muted rounded-xl p-4 flex items-start gap-3 mt-4">
           <Sparkles className="h-5 w-5 text-primary shrink-0 mt-0.5" />
           <div className="flex-1">
-            <p className="text-sm text-foreground font-medium">
-              Déclare tes compétences pour voir en priorité les échanges qui te correspondent.
-            </p>
+             <p className="text-sm text-foreground font-medium">
+               Déclarez vos compétences pour voir en priorité les échanges qui vous correspondent.
+             </p>
             <Link to="/profile#competences" className="text-sm text-primary font-semibold mt-1 inline-block">
               Ajouter mes compétences →
             </Link>
