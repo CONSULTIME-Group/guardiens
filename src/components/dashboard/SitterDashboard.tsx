@@ -537,6 +537,13 @@ const SitterDashboard = () => {
   );
 };
 
+const MiniMetric = ({ label, value }: { label: string; value: number | string }) => (
+  <div className="bg-muted/50 rounded-xl p-3">
+    <p className="text-2xl font-semibold">{typeof value === "number" && value === 0 ? "—" : value}</p>
+    <p className="text-xs text-muted-foreground">{label}</p>
+  </div>
+);
+
 /* ── Shared components ── */
 
 const ChecklistItem = ({ done, label, to }: { done: boolean; label: string; to: string }) => (
