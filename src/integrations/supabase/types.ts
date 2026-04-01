@@ -1646,6 +1646,9 @@ export type Database = {
       reviews: {
         Row: {
           animal_care_rating: number | null
+          cancellation_reason: string | null
+          cancellation_response: string | null
+          cancelled_by_role: string | null
           comment: string | null
           communication_rating: number | null
           created_at: string
@@ -1654,9 +1657,12 @@ export type Database = {
           id: string
           instructions_clarity_rating: number | null
           listing_accuracy_rating: number | null
+          moderation_status: string
           overall_rating: number
           published: boolean | null
           reliability_rating: number | null
+          response_status: string | null
+          response_submitted_at: string | null
           review_type: string | null
           reviewee_id: string
           reviewer_id: string
@@ -1666,6 +1672,9 @@ export type Database = {
         }
         Insert: {
           animal_care_rating?: number | null
+          cancellation_reason?: string | null
+          cancellation_response?: string | null
+          cancelled_by_role?: string | null
           comment?: string | null
           communication_rating?: number | null
           created_at?: string
@@ -1674,9 +1683,12 @@ export type Database = {
           id?: string
           instructions_clarity_rating?: number | null
           listing_accuracy_rating?: number | null
+          moderation_status?: string
           overall_rating: number
           published?: boolean | null
           reliability_rating?: number | null
+          response_status?: string | null
+          response_submitted_at?: string | null
           review_type?: string | null
           reviewee_id: string
           reviewer_id: string
@@ -1686,6 +1698,9 @@ export type Database = {
         }
         Update: {
           animal_care_rating?: number | null
+          cancellation_reason?: string | null
+          cancellation_response?: string | null
+          cancelled_by_role?: string | null
           comment?: string | null
           communication_rating?: number | null
           created_at?: string
@@ -1694,9 +1709,12 @@ export type Database = {
           id?: string
           instructions_clarity_rating?: number | null
           listing_accuracy_rating?: number | null
+          moderation_status?: string
           overall_rating?: number
           published?: boolean | null
           reliability_rating?: number | null
+          response_status?: string | null
+          response_submitted_at?: string | null
           review_type?: string | null
           reviewee_id?: string
           reviewer_id?: string
@@ -2319,12 +2337,75 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      avis_publics: {
+        Row: {
+          animal_care_rating: number | null
+          auteur_avatar: string | null
+          auteur_nom: string | null
+          cancellation_reason: string | null
+          cancellation_response: string | null
+          cancelled_by_role: string | null
+          cible_nom: string | null
+          comment: string | null
+          communication_rating: number | null
+          created_at: string | null
+          housing_condition_rating: number | null
+          housing_respect_rating: number | null
+          id: string | null
+          instructions_clarity_rating: number | null
+          listing_accuracy_rating: number | null
+          moderation_status: string | null
+          overall_rating: number | null
+          published: boolean | null
+          reliability_rating: number | null
+          response_status: string | null
+          response_submitted_at: string | null
+          review_type: string | null
+          reviewee_id: string | null
+          reviewer_id: string | null
+          sit_id: string | null
+          welcome_rating: number | null
+          would_recommend: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reviews_reviewee_id_fkey"
+            columns: ["reviewee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reviews_reviewer_id_fkey"
+            columns: ["reviewer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reviews_sit_id_fkey"
+            columns: ["sit_id"]
+            isOneToOne: false
+            referencedRelation: "sits"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       calculate_profile_completion: {
         Args: { p_user_id: string }
         Returns: number
+      }
+      create_avis_annulation: {
+        Args: {
+          p_cancelled_by_role: string
+          p_reason: string
+          p_reviewee_id: string
+          p_reviewer_id: string
+          p_sit_id: string
+        }
+        Returns: string
       }
       delete_email: {
         Args: { message_id: number; queue_name: string }
@@ -2364,6 +2445,14 @@ export type Database = {
       }
       recalculate_completed_sits: {
         Args: { p_user_id: string }
+        Returns: undefined
+      }
+      repondre_avis_annulation: {
+        Args: {
+          p_respondent_id: string
+          p_response: string
+          p_review_id: string
+        }
         Returns: undefined
       }
     }
