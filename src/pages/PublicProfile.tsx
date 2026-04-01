@@ -22,6 +22,7 @@ import { getBadgeDef } from "@/components/badges/badgeDefinitions";
 import EntraideSection from "@/components/missions/EntraideSection";
 import PublicSkills from "@/components/profile/PublicSkills";
 import EnvironmentPills from "@/components/shared/EnvironmentPills";
+import CancellationReviewsSection from "@/components/reviews/CancellationReviewsSection";
 
 const speciesLabels: Record<string, string> = {
   dog: "🐕 Chiens", cat: "🐱 Chats", horse: "🐴 Chevaux", bird: "🐦 Oiseaux",
