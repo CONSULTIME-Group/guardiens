@@ -291,15 +291,15 @@ const PublicProfile = () => {
                     {/* Motivation */}
                     {sitterProfile.motivation && (
                       <Card>
-                        <h3 className="font-heading font-semibold text-sm mb-1">Motivation</h3>
-                        <p className="text-sm whitespace-pre-line">{sitterProfile.motivation}</p>
+                        <h3 className="font-heading font-semibold text-sm mb-1 text-foreground">Motivation</h3>
+                        <p className="text-sm whitespace-pre-line text-muted-foreground">{sitterProfile.motivation}</p>
                       </Card>
                     )}
 
                     {/* Lifestyle */}
                     {sitterProfile.lifestyle?.length > 0 && (
                       <Card>
-                        <h3 className="font-heading font-semibold text-sm mb-2">Mode de vie</h3>
+                        <h3 className="font-heading font-semibold text-sm mb-2 text-foreground">Mode de vie</h3>
                         <div className="flex flex-wrap gap-1.5">
                           {sitterProfile.lifestyle.map((l: string) => (
                             <span key={l} className="px-2.5 py-1 rounded-full text-xs">
@@ -313,7 +313,7 @@ const PublicProfile = () => {
                     {/* Bonus skills */}
                     {sitterProfile.bonus_skills?.length > 0 && (
                       <Card>
-                        <h3 className="font-heading font-semibold text-sm mb-2">Compétences bonus</h3>
+                        <h3 className="font-heading font-semibold text-sm mb-2 text-foreground">Compétences bonus</h3>
                         <div className="flex flex-wrap gap-1.5">
                           {sitterProfile.bonus_skills.map((s: string) => (
                             <span key={s} className="px-2.5 py-1 rounded-full text-xs font-medium">{s}</span>
@@ -325,7 +325,7 @@ const PublicProfile = () => {
                     {/* Handover preferences */}
                     {sitterProfile.handover_preference && (
                       <Card>
-                        <h3 className="font-heading font-semibold text-sm mb-1">Comment j'aime arriver</h3>
+                        <h3 className="font-heading font-semibold text-sm mb-1 text-foreground">Comment j'aime arriver</h3>
                         <p className="text-sm">{sitterProfile.handover_preference}</p>
                       </Card>
                     )}
@@ -333,15 +333,15 @@ const PublicProfile = () => {
                     {/* References */}
                     {sitterProfile.references_text && (
                       <Card>
-                        <h3 className="font-heading font-semibold text-sm mb-1">Références</h3>
-                        <p className="text-sm whitespace-pre-line">{sitterProfile.references_text}</p>
+                        <h3 className="font-heading font-semibold text-sm mb-1 text-foreground">Références</h3>
+                        <p className="text-sm whitespace-pre-line text-muted-foreground">{sitterProfile.references_text}</p>
                       </Card>
                     )}
 
                     {/* Past animals */}
                     {pastAnimals.length > 0 && (
                       <Card>
-                        <h3 className="font-heading font-semibold text-sm mb-3">Animaux gardés par le passé</h3>
+                        <h3 className="font-heading font-semibold text-sm mb-3 text-foreground">Animaux gardés par le passé</h3>
                         <div className="flex gap-4 overflow-x-auto pb-2">
                           {pastAnimals.map(pa => (
                             <div key={pa.id} className="flex flex-col items-center gap-1.5 shrink-0">
@@ -375,7 +375,7 @@ const PublicProfile = () => {
                 {/* Pets */}
                 {pets.length > 0 && (
                   <Card>
-                    <h3 className="font-heading font-semibold text-sm mb-3">Les animaux</h3>
+                    <h3 className="font-heading font-semibold text-sm mb-3 text-foreground">Les animaux</h3>
                     <div className="grid gap-3">
                       {pets.map(pet => (
                         <div key={pet.id} className="flex items-center gap-3">
@@ -404,7 +404,7 @@ const PublicProfile = () => {
                 {/* Properties */}
                 {properties.map(prop => (
                   <Card key={prop.id}>
-                    <h3 className="font-heading font-semibold text-sm mb-2 flex items-center gap-2">
+                    <h3 className="font-heading font-semibold text-sm mb-2 flex items-center gap-2 text-foreground">
                       <Home className="h-4 w-4" /> Le logement
                     </h3>
                     <div className="text-sm mb-2">
@@ -434,14 +434,14 @@ const PublicProfile = () => {
                   <>
                     {ownerProfile.welcome_notes && (
                       <Card>
-                        <h3 className="font-heading font-semibold text-sm mb-1">Comment j'accueille</h3>
+                        <h3 className="font-heading font-semibold text-sm mb-1 text-foreground">Comment j'accueille</h3>
                         <p className="text-sm">{ownerProfile.welcome_notes}</p>
                       </Card>
                     )}
                     {ownerProfile.rules_notes && (
                       <Card>
-                        <h3 className="font-heading font-semibold text-sm mb-1">Règles de la maison</h3>
-                        <p className="text-sm whitespace-pre-line">{ownerProfile.rules_notes}</p>
+                        <h3 className="font-heading font-semibold text-sm mb-1 text-foreground">Règles de la maison</h3>
+                        <p className="text-sm whitespace-pre-line text-muted-foreground">{ownerProfile.rules_notes}</p>
                       </Card>
                     )}
                   </>
