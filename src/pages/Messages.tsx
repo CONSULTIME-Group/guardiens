@@ -128,6 +128,7 @@ const Messages = () => {
   const [filter, setFilter] = useState<ConvFilter>("active");
   const [typeFilter, setTypeFilter] = useState<ConvType>("all");
   const [sitFilter, setSitFilter] = useState<string | null>(null);
+  const [searchFilter, setSearchFilter] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
