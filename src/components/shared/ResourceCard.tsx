@@ -36,8 +36,8 @@ const ResourceCard = ({ title, description, href, icon }: ResourceItem) => {
         <Icon className={`h-4 w-4 ${color}`} />
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-semibold truncate">{title}</p>
-        <p className="text-xs text-muted-foreground truncate">{description}</p>
+        <p className="text-sm font-semibold line-clamp-2">{title}</p>
+        <p className="text-xs text-muted-foreground line-clamp-2">{description}</p>
       </div>
       <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0 group-hover:text-primary transition-colors" />
     </a>
