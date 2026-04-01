@@ -123,6 +123,7 @@ export function useSitterProfile() {
       interests: s?.interests || [],
       skill_categories: (p as any)?.skill_categories || [],
       available_for_help: (p as any)?.available_for_help || false,
+      competences: (s as any)?.competences || [],
     };
 
     setData(merged);
