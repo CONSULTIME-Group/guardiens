@@ -22,8 +22,8 @@ const SECTIONS_META = [
   { id: "sitter", num: 2, label: "Profil gardien", subtitle: "Votre expérience" },
   { id: "experience", num: 3, label: "Animaux", subtitle: "Ce que vous acceptez" },
   { id: "mobility", num: 4, label: "Mobilité & Rayon", subtitle: "Votre rayon" },
-  { id: "gallery", num: 5, label: "Galerie", subtitle: "Vos gardes en photos" },
-  { id: "experiences", num: 6, label: "Expériences", subtitle: "Vos gardes passées" },
+  { id: "gallery", num: 5, label: "Galerie", subtitle: "Vos gardes en photos", optional: true },
+  { id: "experiences", num: 6, label: "Expériences", subtitle: "Expériences hors Guardiens", optional: true },
   { id: "skills", num: 7, label: "Compétences", subtitle: "Ce que vous savez faire" },
 ];
 
