@@ -158,6 +158,26 @@ export default function PublicSitterProfile() {
   const lifestyle: string[] = sitterProfile?.lifestyle || [];
   const minDuration: string = sitterProfile?.min_duration || "";
   const preferredEnvironments: string[] = sitterProfile?.preferred_environments || [];
+  const competences: string[] = sitterProfile?.competences || [];
+  const preferredFrequency: string = sitterProfile?.preferred_frequency || "";
+  const minNotice: string = sitterProfile?.min_notice || "";
+
+  const FREQUENCY_LABELS: Record<string, string> = {
+    occasionnel: "Occasionnel",
+    occasional: "Occasionnel",
+    regulier: "Régulier",
+    regular: "Régulier",
+  };
+  const NOTICE_LABELS: Record<string, string> = {
+    "1_semaine": "Préavis : 1 semaine",
+    "1_week": "Préavis : 1 semaine",
+    "2_semaines": "Préavis : 2 semaines",
+    "2_weeks": "Préavis : 2 semaines",
+    "1_mois": "Préavis : 1 mois",
+    "1_month": "Préavis : 1 mois",
+  };
+  const frequencyLabel = FREQUENCY_LABELS[preferredFrequency] || "";
+  const noticeLabel = NOTICE_LABELS[minNotice] || "";
 
   const badgeMap: Record<string, boolean> = {};
   badges.forEach(b => { badgeMap[b.badge_key] = true; });
