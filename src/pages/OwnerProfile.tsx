@@ -1,9 +1,6 @@
 import { useState, useCallback, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { Check, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight, LogOut, Eye } from "lucide-react";
-import { Link } from "react-router-dom";
-import StepProgress from "@/components/profile/StepProgress";
 import OwnerStepIdentity from "@/components/owner-profile/OwnerStepIdentity";
 import OwnerStepHousing from "@/components/owner-profile/OwnerStepHousing";
 import OwnerStepAnimals from "@/components/owner-profile/OwnerStepAnimals";
@@ -12,145 +9,140 @@ import OwnerStepCommunication from "@/components/owner-profile/OwnerStepCommunic
 import OwnerStepCalendar from "@/components/owner-profile/OwnerStepCalendar";
 import OwnerGallery from "@/components/owner-profile/OwnerGallery";
 import OwnerExperiences from "@/components/owner-profile/OwnerExperiences";
-import TrustProfile from "@/components/profile/TrustProfile";
 import StepSkills from "@/components/profile/StepSkills";
+import ProfileSidebar, { type SidebarSection } from "@/components/profile/ProfileSidebar";
 import { useOwnerProfile, type OwnerProfileData } from "@/hooks/useOwnerProfile";
 import { useAuth } from "@/contexts/AuthContext";
-import { supabase } from "@/integrations/supabase/client";
 
-const STEPS = [
-  { num: 1, label: "Identité" },
-  { num: 2, label: "Logement" },
-  { num: 3, label: "Animaux" },
-  { num: 4, label: "Attentes" },
-  { num: 5, label: "Accueil" },
-  { num: 6, label: "Calendrier" },
-  { num: 7, label: "Galerie" },
-  { num: 8, label: "Expériences" },
-  { num: 9, label: "Compétences" },
+const SECTIONS_META = [
+  { id: "identity", num: 1, label: "Identité", subtitle: "Qui vous êtes" },
+  { id: "housing", num: 2, label: "Logement", subtitle: "Votre maison" },
+  { id: "animals", num: 3, label: "Animaux", subtitle: "Vos animaux" },
+  { id: "rules", num: 4, label: "Attentes", subtitle: "Ce que vous cherchez" },
+  { id: "communication", num: 5, label: "Accueil", subtitle: "Comment vous accueillez" },
+  { id: "calendar", num: 6, label: "Calendrier", subtitle: "Vos disponibilités" },
+  { id: "gallery", num: 7, label: "Galerie", subtitle: "Photos de votre maison" },
+  { id: "guide", num: 8, label: "Guide de la maison", subtitle: "Codes et contacts" },
 ];
 
+function sectionComplete(num: number, d: OwnerProfileData, petsCount: number): boolean {
+  switch (num) {
+    case 1: return !!(d.avatar_url && d.first_name && d.last_name && d.city && d.bio);
+    case 2: return !!(d.property_type && d.environment && d.description);
+    case 3: return petsCount > 0;
+    case 4: return !!(d.presence_expected && d.visits_allowed);
+    case 5: return !!(d.meeting_preference.length > 0 && d.news_frequency);
+    default: return false;
+  }
+}
+
+function countMissing(num: number, allMissing: { step: number; label: string }[]): number {
+  return allMissing.filter(m => m.step === num).length;
+}
+
 const OwnerProfilePage = () => {
-  const navigate = useNavigate();
   const { user } = useAuth();
   const {
     data, pets, loading, saving, completion, missingFields,
     saveStep, addPet, updatePet, removePet, uploadPhoto,
   } = useOwnerProfile();
 
-  const [currentStep, setCurrentStep] = useState(1);
   const [localData, setLocalData] = useState<Partial<OwnerProfileData>>({});
-  const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
-  const [trustData, setTrustData] = useState({ identityVerified: false, hasAvatar: false, hasFirstActivity: false });
-
-  useEffect(() => {
-    if (!user) return;
-    supabase.from("profiles").select("identity_verified, avatar_url").eq("id", user.id).single().then(({ data: p }) => {
-      if (p) setTrustData(prev => ({ ...prev, identityVerified: p.identity_verified || false, hasAvatar: !!p.avatar_url }));
-    });
-    supabase.from("sits").select("id", { count: "exact", head: true }).eq("user_id", user.id).eq("status", "published").then(({ count }) => {
-      setTrustData(prev => ({ ...prev, hasFirstActivity: (count || 0) > 0 }));
-    });
-  }, [user]);
+  const [activeSection, setActiveSection] = useState("identity");
+  const [dirty, setDirty] = useState(false);
+  const [saved, setSaved] = useState(false);
 
   const mergedData = { ...data, ...localData } as OwnerProfileData;
 
   const handleChange = useCallback((partial: Partial<OwnerProfileData>) => {
     setLocalData(prev => ({ ...prev, ...partial }));
+    setDirty(true);
+    setSaved(false);
   }, []);
 
-  const handleSaveAndNavigate = useCallback(async (nextStep?: number) => {
+  const handleSave = useCallback(async () => {
     if (Object.keys(localData).length > 0) {
       await saveStep(localData);
-      setCompletedSteps(prev => new Set([...prev, currentStep]));
       setLocalData({});
-    } else {
-      setCompletedSteps(prev => new Set([...prev, currentStep]));
     }
-    if (nextStep) setCurrentStep(nextStep);
-  }, [localData, saveStep, currentStep]);
+    setDirty(false);
+    setSaved(true);
+  }, [localData, saveStep]);
 
-  const handleSaveAndQuit = useCallback(async () => {
-    if (Object.keys(localData).length > 0) await saveStep(localData);
-    navigate("/dashboard");
-  }, [localData, saveStep, navigate]);
+  const sidebarSections: SidebarSection[] = SECTIONS_META.map(s => ({
+    ...s,
+    complete: sectionComplete(s.num, mergedData, pets.length),
+    missingCount: countMissing(s.num, missingFields),
+  }));
 
   if (loading) {
     return (
-      <div className="p-6 md:p-10 max-w-3xl mx-auto animate-fade-in">
+      <div className="p-6 md:p-10 max-w-5xl mx-auto animate-fade-in">
         <div className="text-center text-muted-foreground py-20">Chargement du profil...</div>
       </div>
     );
   }
 
   return (
-    <div className="p-4 sm:p-6 md:p-10 max-w-3xl mx-auto animate-fade-in pb-40 min-w-0">
-      <div className="flex items-center justify-between mb-3">
-        <h1 className="font-heading text-3xl font-bold">Mon profil propriétaire</h1>
-        {user && (
-          <Button variant="outline" size="sm" asChild>
-            <Link to={`/profil/${user.id}`}><Eye className="w-4 h-4 mr-1.5" /> Voir mon profil public</Link>
-          </Button>
-        )}
-      </div>
-      <TrustProfile
-        emailVerified={true}
-        identityVerified={trustData.identityVerified}
-        hasAvatar={trustData.hasAvatar}
-        profileCompletion={completion}
-        hasFirstActivity={trustData.hasFirstActivity}
-        role="owner"
-      />
-      <p className="text-muted-foreground mb-8">
-        Complétez votre profil pour attirer les meilleurs gardiens.
-      </p>
-
-      <StepProgress
-        currentStep={currentStep}
-        completion={completion}
-        completedSteps={completedSteps}
-        onStepClick={(step) => handleSaveAndNavigate(step)}
-        steps={STEPS}
-        missingFields={missingFields}
-      />
-
-      <div className="bg-card rounded-lg border border-border p-6 md:p-8 mb-6 pb-32">
-        {currentStep === 1 && <OwnerStepIdentity data={mergedData} onChange={handleChange} onUploadPhoto={uploadPhoto} />}
-        {currentStep === 2 && <OwnerStepHousing data={mergedData} onChange={handleChange} onUploadPhoto={uploadPhoto} />}
-        {currentStep === 3 && <OwnerStepAnimals pets={pets} onAddPet={addPet} onUpdatePet={updatePet} onRemovePet={removePet} />}
-        {currentStep === 4 && <OwnerStepRules data={mergedData} onChange={handleChange} />}
-        {currentStep === 5 && <OwnerStepCommunication data={mergedData} onChange={handleChange} />}
-        {currentStep === 6 && <OwnerStepCalendar />}
-        {currentStep === 7 && <OwnerGallery />}
-        {currentStep === 8 && <OwnerExperiences />}
-        {currentStep === 9 && (
-          <StepSkills
-            skillCategories={(mergedData as any).skill_categories || []}
-            availableForHelp={(mergedData as any).available_for_help || false}
-            onChange={(partial) => handleChange(partial as any)}
+    <div className="min-h-screen bg-background">
+      <div className="p-4 sm:p-6 md:p-10 max-w-5xl mx-auto animate-fade-in">
+        <div className="flex flex-col lg:flex-row gap-8">
+          {/* Left sidebar */}
+          <ProfileSidebar
+            avatarUrl={mergedData.avatar_url}
+            firstName={mergedData.first_name}
+            city={mergedData.city}
+            completion={completion}
+            sections={sidebarSections}
+            activeSection={activeSection}
+            onSectionClick={setActiveSection}
+            onAvatarChange={async (e) => {
+              const file = e.target.files?.[0];
+              if (!file) return;
+              const url = await uploadPhoto(file, "avatars");
+              if (url) handleChange({ avatar_url: url });
+            }}
+            publicProfileUrl={user ? `/profil/${user.id}` : "#"}
+            role="owner"
           />
-        )}
+
+          {/* Right content */}
+          <div className="flex-1 min-w-0 pb-32">
+            <div className="bg-card rounded-xl border border-border p-5 md:p-8">
+              {activeSection === "identity" && <OwnerStepIdentity data={mergedData} onChange={handleChange} onUploadPhoto={uploadPhoto} />}
+              {activeSection === "housing" && <OwnerStepHousing data={mergedData} onChange={handleChange} onUploadPhoto={uploadPhoto} />}
+              {activeSection === "animals" && <OwnerStepAnimals pets={pets} onAddPet={addPet} onUpdatePet={updatePet} onRemovePet={removePet} />}
+              {activeSection === "rules" && <OwnerStepRules data={mergedData} onChange={handleChange} />}
+              {activeSection === "communication" && <OwnerStepCommunication data={mergedData} onChange={handleChange} />}
+              {activeSection === "calendar" && <OwnerStepCalendar />}
+              {activeSection === "gallery" && <OwnerGallery />}
+              {activeSection === "guide" && <OwnerExperiences />}
+            </div>
+          </div>
+        </div>
       </div>
 
-      <div className="flex flex-col sm:flex-row items-center gap-3">
-        {currentStep > 1 && (
-          <Button type="button" variant="outline" onClick={() => handleSaveAndNavigate(currentStep - 1)} disabled={saving} className="w-full sm:w-auto">
-            <ChevronLeft className="w-4 h-4 mr-1" /> Précédent
-          </Button>
-        )}
-        <div className="flex-1" />
-        <Button type="button" variant="ghost" onClick={handleSaveAndQuit} disabled={saving} className="w-full sm:w-auto text-muted-foreground">
-          <LogOut className="w-4 h-4 mr-1" /> Sauvegarder et quitter
+      {/* Sticky save bar */}
+      <div className="fixed bottom-16 md:bottom-0 left-0 right-0 z-40 bg-background/95 backdrop-blur-sm border-t border-border py-4 px-6 flex items-center justify-between supports-[padding:max(0px)]:pb-[max(env(safe-area-inset-bottom),0.75rem)]">
+        <p className="text-xs text-muted-foreground">
+          {saved && !dirty ? (
+            <span className="text-primary">✓ Profil à jour</span>
+          ) : dirty ? (
+            "Modifications non sauvegardées"
+          ) : null}
+        </p>
+        <Button
+          onClick={handleSave}
+          disabled={saving || !dirty}
+          className="rounded-full px-6 gap-2"
+          size="lg"
+        >
+          {saving ? (
+            <><Loader2 className="h-4 w-4 animate-spin" /> Sauvegarde…</>
+          ) : (
+            <><Check className="h-4 w-4" /> Sauvegarder</>
+          )}
         </Button>
-        {currentStep < 9 ? (
-          <Button type="button" onClick={() => handleSaveAndNavigate(currentStep + 1)} disabled={saving} className="w-full sm:w-auto">
-            {saving ? "Sauvegarde..." : "Suivant"} <ChevronRight className="w-4 h-4 ml-1" />
-          </Button>
-        ) : (
-          <Button type="button" onClick={() => handleSaveAndNavigate()} disabled={saving} className="w-full sm:w-auto">
-            {saving ? "Sauvegarde..." : "Terminer"}
-          </Button>
-        )}
       </div>
     </div>
   );

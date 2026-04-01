@@ -5,6 +5,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Camera } from "lucide-react";
 import HintBubble from "./HintBubble";
 import PostalCodeCityFields from "./PostalCodeCityFields";
+import { cn } from "@/lib/utils";
 import type { SitterProfileData } from "@/hooks/useSitterProfile";
 
 interface Props {
@@ -25,6 +26,8 @@ const StepIdentity = ({ data, onChange, onUploadAvatar }: Props) => {
     if (url) onChange({ avatar_url: url });
     setUploading(false);
   };
+
+  const motivationLen = (data.motivation || "").length;
 
   return (
     <div className="space-y-6">
@@ -82,17 +85,36 @@ const StepIdentity = ({ data, onChange, onUploadAvatar }: Props) => {
       </div>
 
       {/* Motivation */}
-      <div className="space-y-2">
-        <Label htmlFor="motivation">Pourquoi je veux garder</Label>
+      <div className="space-y-1">
+        <Label htmlFor="motivation" className="text-sm font-medium text-foreground">Pourquoi je veux garder</Label>
+        <p className="text-xs text-muted-foreground mb-2">
+          C'est la première chose que les propriétaires lisent. Soyez concret : parlez de votre rapport aux animaux, d'une garde mémorable, de ce que vous aimez dans le house-sitting.
+        </p>
         <Textarea
           id="motivation"
           value={data.motivation}
           onChange={e => onChange({ motivation: e.target.value })}
-          placeholder="Qu'est-ce qui vous attire dans le house-sitting ? Racontez votre motivation..."
-          className="rounded-lg min-h-[120px]"
+          placeholder="Ex : J'ai grandi avec des chiens et des chats. Depuis 3 ans je garde des maisons en AURA — ma meilleure garde était chez une famille avec deux golden retrievers à Annecy. Je donne des nouvelles chaque soir avec photos."
+          className="rounded-lg min-h-[150px]"
           maxLength={2000}
         />
-        <HintBubble>C'est la première chose que les propriétaires liront. Une anecdote vaut mieux qu'une liste de compétences.</HintBubble>
+        <p className={cn(
+          "text-xs text-right",
+          motivationLen < 50 && "text-destructive",
+          motivationLen >= 50 && motivationLen <= 200 && "text-amber-600",
+          motivationLen > 200 && "text-primary",
+        )}>
+          {motivationLen < 50
+            ? `${motivationLen}/50 minimum`
+            : motivationLen <= 200
+              ? `${motivationLen} car. — Bien, mais un peu plus serait idéal`
+              : `${motivationLen} car. ✓`}
+        </p>
+        {motivationLen > 0 && motivationLen < 50 && (
+          <p className="text-xs text-destructive">
+            Ce champ doit contenir au moins 50 caractères pour rassurer les proprios.
+          </p>
+        )}
       </div>
     </div>
   );

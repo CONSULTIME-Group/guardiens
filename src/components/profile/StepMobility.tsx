@@ -3,10 +3,13 @@ import { Switch } from "@/components/ui/switch";
 import { Slider } from "@/components/ui/slider";
 import { Calendar } from "@/components/ui/calendar";
 import HintBubble from "./HintBubble";
+import ChipSelect from "./ChipSelect";
 import type { SitterProfileData } from "@/hooks/useSitterProfile";
 import { useState } from "react";
 import type { DateRange } from "react-day-picker";
 import { fr } from "date-fns/locale";
+
+const VEHICLE_OPTIONS = ["Oui — voiture", "Oui — moto", "Non — transports en commun", "Non — vélo uniquement"];
 
 interface Props {
   data: SitterProfileData;
@@ -14,7 +17,6 @@ interface Props {
 }
 
 const StepMobility = ({ data, onChange }: Props) => {
-  // Parse availability_dates as date ranges for display
   const [dateRange, setDateRange] = useState<DateRange | undefined>(() => {
     if (data.availability_dates.length > 0) {
       const last = data.availability_dates[data.availability_dates.length - 1];
@@ -30,7 +32,6 @@ const StepMobility = ({ data, onChange }: Props) => {
         ...data.availability_dates.slice(0, -1),
         { from: range.from.toISOString(), to: range.to?.toISOString() || null },
       ];
-      // If it's a brand new range, just add it
       if (!dateRange?.from) {
         onChange({ availability_dates: [...data.availability_dates, { from: range.from.toISOString(), to: range.to?.toISOString() || null }] });
       } else {
@@ -41,14 +42,26 @@ const StepMobility = ({ data, onChange }: Props) => {
 
   return (
     <div className="space-y-6">
-
       {/* Availability toggle */}
-      <div className="flex items-center justify-between rounded-lg border border-green-200 bg-green-50 dark:bg-green-950/20 dark:border-green-800 p-4">
+      <div className="flex items-center justify-between rounded-lg border border-primary/20 bg-primary/5 p-4">
         <div>
           <Label className="text-base font-semibold">Je suis disponible</Label>
           <p className="text-sm text-muted-foreground mt-0.5">Activez pour apparaître dans les résultats de recherche avec un badge vert.</p>
         </div>
         <Switch checked={data.is_available} onCheckedChange={v => onChange({ is_available: v })} />
+      </div>
+
+      {/* Vehicle type */}
+      <div className="space-y-2">
+        <Label>Vous avez un véhicule ?</Label>
+        <ChipSelect
+          options={VEHICLE_OPTIONS}
+          selected={(data as any).vehicle_type ? [(data as any).vehicle_type] : []}
+          onChange={v => onChange({ vehicle_type: v[v.length - 1] || "" } as any)}
+        />
+        <p className="text-xs text-muted-foreground">
+          Indispensable pour les gardes en zone rurale ou avec animaux nécessitant des sorties véto.
+        </p>
       </div>
 
       <div className="flex items-center justify-between py-2">
@@ -69,9 +82,7 @@ const StepMobility = ({ data, onChange }: Props) => {
         <Slider
           value={[data.geographic_radius]}
           onValueChange={v => onChange({ geographic_radius: v[0] })}
-          min={10}
-          max={100}
-          step={5}
+          min={10} max={100} step={5}
           className="py-2"
         />
         <HintBubble>Plus votre rayon est large, plus vous verrez d'annonces. Mais la proximité est un atout — les propriétaires préfèrent les gardiens proches.</HintBubble>
@@ -100,9 +111,7 @@ const StepMobility = ({ data, onChange }: Props) => {
         <Slider
           value={[data.min_duration, data.max_duration]}
           onValueChange={v => onChange({ min_duration: v[0], max_duration: v[1] })}
-          min={1}
-          max={60}
-          step={1}
+          min={1} max={60} step={1}
           className="py-2"
         />
       </div>
