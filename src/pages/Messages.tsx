@@ -504,6 +504,9 @@ const Messages = () => {
                 </button>
               ))}
             </div>
+            <p className="text-xs text-muted-foreground">
+              Conversations en tant que {effectiveRole === "owner" ? "Propriétaire" : "Gardien"}
+            </p>
           </div>
 
           {/* Search filter */}
