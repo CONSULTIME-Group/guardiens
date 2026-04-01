@@ -356,9 +356,9 @@ const SitterDashboard = () => {
               </div>
             ) : allEmergencyDone ? (
               <div>
-                <div className="flex items-center gap-2 mb-2">
-                  <Zap className="h-5 w-5 text-amber-600 dark:text-amber-400" />
-                  <p className="text-sm font-semibold text-amber-800 dark:text-amber-200">Éligible !</p>
+                 <div className="flex items-center gap-2 mb-2">
+                   <Zap className="h-5 w-5 text-amber-600" />
+                   <p className="text-sm font-semibold text-amber-800">Éligible !</p>
                 </div>
                 <Link to="/profile#urgence" className="inline-block bg-amber-500 text-white rounded-full px-4 py-2 text-sm hover:bg-amber-600 transition-colors mt-1">
                   Activer le statut →
