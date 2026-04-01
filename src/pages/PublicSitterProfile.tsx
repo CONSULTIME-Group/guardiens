@@ -152,7 +152,7 @@ export default function PublicSitterProfile() {
   const sitterType = sitterProfile?.sitter_type || "";
   const accompaniedBy = sitterProfile?.accompanied_by || "";
   const lifestyle: string[] = sitterProfile?.lifestyle || [];
-  const minDuration: number = sitterProfile?.min_duration || 0;
+  const minDuration: string = sitterProfile?.min_duration || "";
   const preferredEnvironments: string[] = sitterProfile?.preferred_environments || [];
 
   const badgeMap: Record<string, boolean> = {};
