@@ -200,11 +200,6 @@ const SitDetail = () => {
   ];
 
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => {
-    if (sit && sit.user_id === user?.id) setActiveTab("candidatures");
-  }, [sit?.id]);
-
   const leftContent = (
     <div className="space-y-6">
       {/* Photos */}
