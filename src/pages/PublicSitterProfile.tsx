@@ -308,73 +308,74 @@ export default function PublicSitterProfile() {
       </div>
 
       {/* ── BODY — TWO COLUMNS ── */}
-      <div className="max-w-5xl mx-auto px-4 md:px-6 py-8 md:py-10 flex flex-col md:flex-row gap-8 md:gap-10 items-start">
+      <div className="max-w-5xl mx-auto px-6 py-8 flex flex-col md:flex-row gap-8 md:gap-12 items-start">
 
         {/* ── LEFT COLUMN ── */}
-        <div className="w-full md:w-[300px] md:shrink-0 md:sticky md:top-8">
-          <div className="bg-card rounded-2xl border border-border p-6 space-y-5">
+        <div className="w-full md:w-[260px] md:shrink-0 md:sticky md:top-8 space-y-6">
 
-            {/* Lifestyle */}
-            {lifestyle.length > 0 && (
-              <div>
-                <p className="text-xs uppercase tracking-widest text-muted-foreground mb-2">Style de vie</p>
-                <div className="flex flex-wrap gap-1.5">
-                  {lifestyle.map(l => (
-                    <span key={l} className="border border-border rounded-full text-xs px-2 py-0.5 text-foreground">
-                      {l}
-                    </span>
-                  ))}
-                </div>
+          {/* Lifestyle */}
+          {lifestyle.length > 0 && (
+            <div>
+              <p className="text-xs uppercase tracking-widest text-muted-foreground mb-2">Style de vie</p>
+              <div className="flex flex-wrap gap-1.5">
+                {lifestyle.map(l => (
+                  <span key={l} className="border border-border rounded-full text-xs px-2.5 py-0.5 text-foreground">
+                    {l}
+                  </span>
+                ))}
               </div>
-            )}
+            </div>
+          )}
 
-            {/* Type + accompanied */}
-            {typeLine && (
-              <p className="text-sm text-muted-foreground">{typeLine}</p>
-            )}
+          {/* Profile info */}
+          {(typeLine || durationLabel) && (
+            <div className="text-sm text-foreground/70 space-y-0.5">
+              {typeLine && <p>{typeLine}</p>}
+              {durationLabel && <p>{durationLabel}</p>}
+            </div>
+          )}
 
-            {/* Min duration */}
-            {durationLabel && (
-              <p className="text-sm text-muted-foreground">{durationLabel}</p>
-            )}
-
-            {/* Preferred environments */}
-            {preferredEnvironments.length > 0 && (
-              <div>
-                <p className="text-xs uppercase tracking-widest text-muted-foreground mb-2">Environnements</p>
-                <div className="flex flex-wrap gap-1.5">
-                  {preferredEnvironments.map(e => (
-                    <span key={e} className="border border-border rounded-full text-xs px-2 py-0.5 text-foreground">
-                      {ENV_LABELS[e] || e}
-                    </span>
-                  ))}
-                </div>
+          {/* Preferred environments */}
+          {preferredEnvironments.length > 0 && (
+            <div>
+              <p className="text-xs uppercase tracking-widest text-muted-foreground mb-2">Environnements</p>
+              <div className="flex flex-wrap gap-1.5">
+                {preferredEnvironments.map(e => (
+                  <span key={e} className="border border-border rounded-full text-xs px-2.5 py-0.5 text-foreground">
+                    {ENV_LABELS[e] || e}
+                  </span>
+                ))}
               </div>
-            )}
+            </div>
+          )}
 
-            {/* CTA */}
-            {showCTA && (
-              <>
-                <hr className="border-border" />
-                {!isAuthenticated && (
+          {/* CTA */}
+          {showCTA && (
+            <>
+              <hr className="border-border" />
+              {!isAuthenticated && (
+                <>
                   <Link
                     to={`/inscription?redirect=/gardiens/${id}`}
-                    className="block bg-primary text-white rounded-xl py-3 text-sm font-medium w-full text-center"
+                    className="block bg-primary text-primary-foreground rounded-xl py-3 text-sm font-medium w-full text-center"
                   >
                     S'inscrire pour contacter
                   </Link>
-                )}
-                {isAuthenticated && isOwner && (
-                  <Link
-                    to={`/messagerie?gardien=${id}`}
-                    className="block bg-primary text-white rounded-xl py-3 text-sm font-medium w-full text-center"
-                  >
-                    Contacter {firstName}
-                  </Link>
-                )}
-              </>
-            )}
-          </div>
+                  <p className="text-xs text-muted-foreground text-center mt-2">
+                    Gratuit pour les propriétaires.
+                  </p>
+                </>
+              )}
+              {isAuthenticated && isOwner && (
+                <Link
+                  to={`/messagerie?gardien=${id}`}
+                  className="block bg-primary text-primary-foreground rounded-xl py-3 text-sm font-medium w-full text-center"
+                >
+                  Contacter {firstName}
+                </Link>
+              )}
+            </>
+          )}
         </div>
 
         {/* ── RIGHT COLUMN ── */}
@@ -382,14 +383,14 @@ export default function PublicSitterProfile() {
 
           {/* Motivation */}
           {motivation && (
-            <p className="text-xl font-semibold leading-relaxed text-foreground/85">
+            <p className="text-lg font-semibold leading-relaxed text-foreground/85">
               {motivation}
             </p>
           )}
 
           {/* Bio */}
           {bio && (
-            <p className="text-sm italic text-muted-foreground">{bio}</p>
+            <p className="text-sm italic text-muted-foreground mt-3">{bio}</p>
           )}
 
           {/* Animaux acceptés */}
@@ -426,10 +427,58 @@ export default function PublicSitterProfile() {
             </div>
           )}
 
+          {/* Avis */}
+          <div>
+            <p className="text-xs uppercase tracking-widest text-muted-foreground mb-3">
+              Avis{reviewCount > 0 ? ` (${reviewCount})` : ""}
+            </p>
+            {reviewCount > 0 ? (
+              <>
+                <div className="space-y-3">
+                  {visibleReviews.map((r: any) => (
+                    <div key={r.id} className="bg-card border border-border rounded-2xl p-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Avatar className="w-8 h-8">
+                          {r.reviewer?.avatar_url ? (
+                            <AvatarImage src={r.reviewer.avatar_url} />
+                          ) : null}
+                          <AvatarFallback className="text-xs bg-muted">
+                            {capitalize(r.reviewer?.first_name || "?").charAt(0)}
+                          </AvatarFallback>
+                        </Avatar>
+                        <span className="text-sm font-medium text-foreground">
+                          {capitalize(r.reviewer?.first_name || "")}
+                        </span>
+                        <span className="text-xs text-muted-foreground">
+                          {relativeDate(r.created_at)}
+                        </span>
+                        {r.overall_rating && (
+                          <span className="text-xs text-primary ml-auto">★ {r.overall_rating}/5</span>
+                        )}
+                      </div>
+                      {r.comment && (
+                        <p className="text-sm text-foreground/80">{r.comment}</p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+                {reviewCount > 5 && (
+                  <p className="text-xs text-primary hover:underline mt-3 cursor-pointer">
+                    Voir tous les avis →
+                  </p>
+                )}
+              </>
+            ) : (
+              <p className="text-sm text-muted-foreground italic">
+                Les avis apparaîtront après la première garde.
+              </p>
+            )}
+          </div>
+
           {/* Collection de timbres */}
           <div>
             <p className="text-xs uppercase tracking-widest text-muted-foreground mb-3">Sa collection</p>
-            <div className="grid grid-cols-6 gap-2">
+            <div className="grid grid-cols-6 gap-3">
               {TIMBRES_ORDER.map(key => (
                 <div key={key} className="flex justify-center">
                   <BadgeTimbre id={key} unlocked={!!badgeMap[key]} size="compact" showTooltip />
@@ -440,48 +489,6 @@ export default function PublicSitterProfile() {
               {unlockedCount} timbre{unlockedCount > 1 ? "s" : ""} sur 12
             </p>
           </div>
-
-          {/* Avis */}
-          {reviewCount > 0 && (
-            <div>
-              <p className="text-xs uppercase tracking-widest text-muted-foreground mb-3">
-                Avis ({reviewCount})
-              </p>
-              <div className="space-y-3">
-                {visibleReviews.map((r: any) => (
-                  <div key={r.id} className="bg-card border border-border rounded-2xl p-4">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Avatar className="w-8 h-8">
-                        {r.reviewer?.avatar_url ? (
-                          <AvatarImage src={r.reviewer.avatar_url} />
-                        ) : null}
-                        <AvatarFallback className="text-xs bg-muted">
-                          {capitalize(r.reviewer?.first_name || "?").charAt(0)}
-                        </AvatarFallback>
-                      </Avatar>
-                      <span className="text-sm font-medium text-foreground">
-                        {capitalize(r.reviewer?.first_name || "")}
-                      </span>
-                      <span className="text-xs text-muted-foreground">
-                        {format(new Date(r.created_at), "MMMM yyyy", { locale: fr })}
-                      </span>
-                      {r.overall_rating && (
-                        <span className="text-xs text-amber-600 ml-auto">★ {r.overall_rating}/5</span>
-                      )}
-                    </div>
-                    {r.comment && (
-                      <p className="text-sm text-foreground/80 italic">{r.comment}</p>
-                    )}
-                  </div>
-                ))}
-              </div>
-              {reviewCount > 5 && (
-                <p className="text-xs text-primary hover:underline mt-3 cursor-pointer">
-                  Voir tous les avis →
-                </p>
-              )}
-            </div>
-          )}
 
           {/* Galerie */}
           {gallery.length > 0 && (
