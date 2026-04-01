@@ -22,10 +22,10 @@ import { fr } from "date-fns/locale";
 /* ── status config ── */
 const appStatusConfig: Record<string, { label: string; icon: React.ElementType; bg: string; text: string }> = {
   pending:    { label: "Envoyée",    icon: SendIcon,     bg: "bg-muted",           text: "text-muted-foreground" },
-  viewed:     { label: "Vue",        icon: Eye,          bg: "bg-blue-100 dark:bg-blue-900/30", text: "text-blue-700 dark:text-blue-300" },
-  discussing: { label: "En discussion", icon: MessageSquare, bg: "bg-blue-100 dark:bg-blue-900/30", text: "text-blue-700 dark:text-blue-300" },
-  accepted:   { label: "Acceptée",   icon: CheckCircle2, bg: "bg-green-100 dark:bg-green-900/30", text: "text-green-700 dark:text-green-300" },
-  rejected:   { label: "Déclinée",   icon: XCircle,      bg: "bg-red-100 dark:bg-red-900/30",   text: "text-red-700 dark:text-red-300" },
+  viewed:     { label: "Vue",        icon: Eye,          bg: "bg-accent",           text: "text-foreground" },
+  discussing: { label: "En discussion", icon: MessageSquare, bg: "bg-accent",       text: "text-foreground" },
+  accepted:   { label: "Acceptée",   icon: CheckCircle2, bg: "bg-primary/10",       text: "text-primary" },
+  rejected:   { label: "Déclinée",   icon: XCircle,      bg: "bg-destructive/10",   text: "text-destructive" },
   cancelled:  { label: "Annulée",    icon: XCircle,      bg: "bg-muted",           text: "text-muted-foreground" },
 };
 
