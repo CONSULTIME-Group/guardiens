@@ -735,7 +735,7 @@ const DashSection = ({ title, action, children }: {
   </div>
 );
 
-const EmptyCard = ({ icon: Icon, text, cta, to, hint }: { icon?: React.ElementType; text: string; cta?: string; to?: string; hint?: string }) => (
+const EmptyCard = ({ icon: Icon, text, cta, to, hint, outlineBtn }: { icon?: React.ElementType; text: string; cta?: string; to?: string; hint?: string; outlineBtn?: boolean }) => (
   <div className="p-8 rounded-xl border border-dashed border-border bg-accent/30 text-center space-y-3">
     {Icon && (
       <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
@@ -746,7 +746,17 @@ const EmptyCard = ({ icon: Icon, text, cta, to, hint }: { icon?: React.ElementTy
       <p className="text-sm font-medium text-foreground/80">{text}</p>
       {hint && <p className="text-xs text-muted-foreground mt-1.5 max-w-xs mx-auto">{hint}</p>}
     </div>
-    {cta && to && <Link to={to}><Button size="sm" className="mt-1">{cta}</Button></Link>}
+    {cta && to && (
+      <Link to={to}>
+        {outlineBtn ? (
+          <span className="inline-block border border-border rounded-full px-4 py-2 text-sm text-foreground hover:border-primary transition-colors mt-1">
+            {cta}
+          </span>
+        ) : (
+          <Button size="sm" className="mt-1">{cta}</Button>
+        )}
+      </Link>
+    )}
   </div>
 );
 
