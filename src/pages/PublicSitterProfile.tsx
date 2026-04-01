@@ -589,6 +589,9 @@ export default function PublicSitterProfile() {
             <p className="text-xs text-muted-foreground mt-2">
               {unlockedCount} timbre{unlockedCount > 1 ? "s" : ""} sur 12
             </p>
+            <p className="text-xs text-muted-foreground mt-1">
+              Les écussons sont attribués par les propriétaires après chaque garde.
+            </p>
           </div>
 
           {/* Galerie */}
