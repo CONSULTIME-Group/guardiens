@@ -11,7 +11,7 @@ import { Switch } from "@/components/ui/switch";
 import {
   Home, Star, Search, Send as SendIcon, CheckCircle2, XCircle,
   MessageSquare, Calendar, Handshake, Newspaper, Zap, ChevronRight,
-  Eye, Circle, CheckCircle, ChevronDown,
+  Eye, Circle, CheckCircle, ChevronDown, ExternalLink,
 } from "lucide-react";
 import { format, differenceInDays, differenceInHours } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -203,12 +203,15 @@ const SitterDashboard = () => {
           <h1 className="text-2xl font-semibold text-foreground">
             Bonjour{user?.firstName ? `, ${capitalize(user.firstName)}` : ""} !
           </h1>
-          <span
-            className="text-xs text-muted-foreground cursor-not-allowed pointer-events-none"
-            title="Profil public bientôt disponible"
+          <a
+            href={`/gardiens/${user?.id}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-xs text-primary hover:underline flex items-center gap-1"
           >
             Voir mon profil public
-          </span>
+            <ExternalLink className="w-3 h-3" />
+          </a>
         </div>
         <p className="text-sm text-muted-foreground mt-1">{subtitle}</p>
       </div>

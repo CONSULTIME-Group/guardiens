@@ -76,6 +76,7 @@ import PublicProfile from "./pages/PublicProfile";
 import EmergencySitter from "./pages/EmergencySitter";
 import MySubscription from "./pages/MySubscription";
 import PublicSitDetail from "./pages/PublicSitDetail";
+import PublicSitterProfile from "./pages/PublicSitterProfile";
 
 const queryClient = new QueryClient();
 
@@ -137,6 +138,7 @@ const AppRoutes = () => (
     <Route path="/petites-missions/:id" element={<SmallMissionDetail />} />
     <Route path="/profil/:id" element={<PublicProfile />} />
     <Route path="/annonces/:id" element={<PublicSitDetail />} />
+    <Route path="/gardiens/:id" element={<PublicSitterProfile />} />
     <Route element={<AdminLayout />}>
       <Route path="/admin" element={<AdminDashboard />} />
       <Route path="/admin/subscriptions" element={<AdminSubscriptions />} />
