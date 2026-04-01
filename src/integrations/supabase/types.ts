@@ -362,6 +362,30 @@ export type Database = {
         }
         Relationships: []
       }
+      competences_validees: {
+        Row: {
+          categorie: string
+          created_at: string | null
+          id: string
+          label: string
+          usage_count: number | null
+        }
+        Insert: {
+          categorie: string
+          created_at?: string | null
+          id?: string
+          label: string
+          usage_count?: number | null
+        }
+        Update: {
+          categorie?: string
+          created_at?: string | null
+          id?: string
+          label?: string
+          usage_count?: number | null
+        }
+        Relationships: []
+      }
       contact_messages: {
         Row: {
           admin_notes: string | null
@@ -1281,6 +1305,8 @@ export type Database = {
       owner_profiles: {
         Row: {
           communication_notes: string | null
+          competences: string[] | null
+          competences_disponible: boolean | null
           created_at: string
           environments: string[]
           experience_required: boolean | null
@@ -1304,6 +1330,8 @@ export type Database = {
         }
         Insert: {
           communication_notes?: string | null
+          competences?: string[] | null
+          competences_disponible?: boolean | null
           created_at?: string
           environments?: string[]
           experience_required?: boolean | null
@@ -1327,6 +1355,8 @@ export type Database = {
         }
         Update: {
           communication_notes?: string | null
+          competences?: string[] | null
+          competences_disponible?: boolean | null
           created_at?: string
           environments?: string[]
           experience_required?: boolean | null
@@ -2014,6 +2044,7 @@ export type Database = {
           availability_dates: Json | null
           availability_during: string | null
           bonus_skills: string[] | null
+          competences: string[] | null
           created_at: string
           experience_years: string | null
           farm_animals_ok: boolean | null
@@ -2045,6 +2076,7 @@ export type Database = {
           availability_dates?: Json | null
           availability_during?: string | null
           bonus_skills?: string[] | null
+          competences?: string[] | null
           created_at?: string
           experience_years?: string | null
           farm_animals_ok?: boolean | null
@@ -2076,6 +2108,7 @@ export type Database = {
           availability_dates?: Json | null
           availability_during?: string | null
           bonus_skills?: string[] | null
+          competences?: string[] | null
           created_at?: string
           experience_years?: string | null
           farm_animals_ok?: boolean | null
