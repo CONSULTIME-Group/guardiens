@@ -199,7 +199,7 @@ const PublicProfile = () => {
                 {isEmergencySitter && <StatusShield type="emergency" />}
               </div>
 
-              <div className="flex items-center gap-3 text-sm mt-1 flex-wrap" style={{ color: "#6B7280" }}>
+              <div className="flex items-center gap-3 text-sm mt-1 flex-wrap text-muted-foreground">
                 {(profile.postal_code || profile.city) && (
                   <span className="flex items-center gap-1">
                     <MapPin className="h-3.5 w-3.5" />
