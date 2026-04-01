@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Send, Image as ImageIcon, Archive, Filter, X } from "lucide-react";
+import { Send, Image as ImageIcon, Archive, Filter, X, Home, HeartHandshake } from "lucide-react";
 import { format, isToday, isYesterday, isSameDay } from "date-fns";
 import { fr } from "date-fns/locale";
 import { useSearchParams } from "react-router-dom";
