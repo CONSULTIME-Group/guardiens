@@ -270,6 +270,51 @@ const OwnerDashboard = () => {
     <div className="space-y-8">
       {/* Mes animaux */}
       <DashSection title="Mes animaux" action={
+        <Link to="/owner-profile" className="text-xs text-primary hover:underline font-medium">Gérer →</Link>
+      }>
+        {pets.length === 0 ? (
+          <EmptyCard icon={PawPrint} text="Aucun animal enregistré" hint="Ajoutez vos compagnons pour attirer les bons gardiens" cta="Ajouter un animal" to="/owner-profile" />
+        ) : (
+          <div className="space-y-2">
+            {pets.map(pet => {
+              const nextSit = getNextSitForPet(pet);
+              const daysUntil = nextSit?.start_date ? differenceInDays(new Date(nextSit.start_date), now) : null;
+              return (
+                <div key={pet.id} className="flex items-center gap-3 p-3 rounded-xl bg-card border border-border">
+                  {pet.photo_url ? (
+                    <img src={pet.photo_url} alt={pet.name} className="w-[50px] h-[50px] rounded-full object-cover shrink-0" />
+                  ) : (
+                    <div className="w-[50px] h-[50px] rounded-full bg-accent flex items-center justify-center text-lg shrink-0">🐾</div>
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium">{pet.name || "Sans nom"}
+                      <span className="text-xs text-muted-foreground ml-2">
+                        {speciesLabel[pet.species] || pet.species}{pet.breed ? ` · ${pet.breed}` : ""}{pet.age ? ` · ${pet.age} an${pet.age > 1 ? "s" : ""}` : ""}
+                      </span>
+                    </p>
+                    {nextSit ? (
+                      <Link to={`/sits/${nextSit.id}`} className="text-xs text-primary hover:underline flex items-center gap-1 mt-0.5">
+                        <Calendar className="h-3 w-3" />
+                        Prochaine garde {daysUntil !== null && daysUntil >= 0
+                          ? daysUntil === 0 ? "aujourd'hui" : `dans ${daysUntil} jour${daysUntil > 1 ? "s" : ""}`
+                          : ""}
+                      </Link>
+                    ) : (
+                      <p className="text-xs text-muted-foreground mt-0.5">Aucune garde prévue</p>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+            <Link to="/owner-profile" className="flex items-center gap-2 px-3 py-2 text-xs text-primary hover:underline">
+              <Plus className="h-3.5 w-3.5" /> Ajouter un animal
+            </Link>
+          </div>
+        )}
+      </DashSection>
+
+      {/* Candidatures récentes */}
+      <DashSection title="Candidatures récentes" action={
         recentApps.length > 0 ? <Link to="/sits" className="text-xs text-primary hover:underline font-medium">Voir toutes mes annonces →</Link> : undefined
       }>
         {recentApps.length === 0 ? (
