@@ -475,6 +475,21 @@ const Landing = () => {
             <p className="mt-4 text-xs text-white/60 font-body animate-hero-fade-up animation-delay-1100">
               Gratuit · Badge Fondateur à vie jusqu'au 13 mai.
             </p>
+
+            <div className="flex flex-row justify-center sm:justify-start gap-12 mt-12 animate-hero-fade-up animation-delay-1100">
+              <div className="border-r border-white/20 pr-12">
+                <span className="block text-3xl font-heading font-bold text-white">37</span>
+                <span className="text-xs font-body text-white/50 tracking-wide uppercase mt-1 block">maisons gardées</span>
+              </div>
+              <div className="border-r border-white/20 pr-12">
+                <span className="block text-3xl font-heading font-bold text-white">234</span>
+                <span className="text-xs font-body text-white/50 tracking-wide uppercase mt-1 block">animaux accompagnés</span>
+              </div>
+              <div>
+                <span className="block text-3xl font-heading font-bold text-white">5 ans</span>
+                <span className="text-xs font-body text-white/50 tracking-wide uppercase mt-1 block">en Auvergne-Rhône-Alpes</span>
+              </div>
+            </div>
           </div>
         </div>
       </section>
