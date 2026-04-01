@@ -139,9 +139,28 @@ const SitterDashboard = () => {
       setLoading(false);
     };
     load();
+   }, [user]);
+
+  // Realtime sync for is_available toggle
+  useEffect(() => {
+    if (!user) return;
+    const channel = supabase
+      .channel('sitter-availability')
+      .on('postgres_changes', {
+        event: 'UPDATE',
+        schema: 'public',
+        table: 'sitter_profiles',
+        filter: `user_id=eq.${user.id}`,
+      }, (payload) => {
+        if (typeof payload.new?.is_available === 'boolean') {
+          setIsAvailable(payload.new.is_available);
+          setOnboardingChecks(prev => ({ ...prev, availableMode: payload.new.is_available }));
+        }
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
   }, [user]);
 
-  if (loading) return (
     <div className="p-8 flex items-center justify-center">
       <div className="animate-pulse space-y-4 w-full max-w-lg">
         <div className="h-8 bg-muted rounded-lg w-2/3" />
