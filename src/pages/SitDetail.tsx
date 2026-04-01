@@ -542,9 +542,6 @@ const SitDetail = () => {
           </div>
         </div>
       )}
-          />
-        </>
-      )}
 
       {/* Cancel button */}
       {sit && user && (sit.status === "confirmed" || sit.status === "published") && (
