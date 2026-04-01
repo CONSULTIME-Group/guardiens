@@ -259,7 +259,7 @@ const PublicProfile = () => {
 
           {/* === BADGES === */}
           {badgeCounts.length > 0 && (
-            <div className="rounded-xl border bg-white p-5 shadow-sm" style={{ borderColor: "#E6E2D9" }}>
+            <div className="rounded-xl border border-border bg-white p-5 shadow-sm">
               <BadgeShieldGrid badges={badgeCounts} title={isSitter ? "Ses badges" : "Ses badges"} />
             </div>
           )}
