@@ -193,10 +193,10 @@ const SitterDashboard = () => {
             </div>
             <div>
               <h1 className="font-heading text-xl md:text-2xl font-bold">
-                Bienvenue{user?.firstName ? `, ${user.firstName}` : ""} ! 🎉
+                Bienvenue{user?.firstName ? `, ${capitalizeName(user.firstName)}` : ""}
               </h1>
               <p className="text-sm text-muted-foreground mt-1">
-                Voici vos premières étapes pour décrocher votre première garde :
+                Voici tes premières étapes pour décrocher ta première garde :
               </p>
             </div>
           </div>
