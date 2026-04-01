@@ -193,7 +193,7 @@ const SitterDashboard = () => {
     : !identityVerified
     ? { label: "Vérifier mon identité →", to: "/mon-profil#identite", style: "bg-amber-500 text-white" }
     : totalApps === 0
-    ? { label: "Découvre les gardes disponibles →", to: "/recherche", style: "bg-primary text-primary-foreground" }
+    ? { label: "Découvre les gardes disponibles →", to: "/recherche", style: "border border-primary text-primary hover:bg-primary/5" }
     : pendingAppsCount > 0
     ? { label: "Voir mes candidatures →", to: "/mes-gardes", style: "border border-primary text-primary" }
     : { label: "Explorer les nouvelles annonces →", to: "/recherche", style: "border border-border text-foreground" };
