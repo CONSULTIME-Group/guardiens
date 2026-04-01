@@ -455,8 +455,10 @@ export default function PublicSitterProfile() {
             <div className="border-b border-border pb-4 mb-4">
               <p className="text-xs uppercase tracking-widest text-muted-foreground mb-2">Profil</p>
               <div className="text-sm text-foreground/70 space-y-0.5">
-                {typeLine && <p>{typeLine}</p>}
+               {typeLine && <p>{typeLine}</p>}
                 {durationLabel && <p>{durationLabel}</p>}
+                {frequencyLabel && <p>{frequencyLabel}</p>}
+                {noticeLabel && <p>{noticeLabel}</p>}
               </div>
             </div>
           )}
