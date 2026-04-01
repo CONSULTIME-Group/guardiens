@@ -71,6 +71,9 @@ const SitDetail = () => {
   const [cancelOpen, setCancelOpen] = useState(false);
   const [publishing, setPublishing] = useState(false);
   const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const [appCount, setAppCount] = useState(0);
+  const [pendingAppCount, setPendingAppCount] = useState(0);
+  const [breedAccordions, setBreedAccordions] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     if (!id) return;
