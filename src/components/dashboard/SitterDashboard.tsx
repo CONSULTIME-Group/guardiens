@@ -639,7 +639,7 @@ const ArticleCards = ({ articles }: { articles: any[] }) => {
   return (
     <div className="flex gap-3 overflow-x-auto pb-1 -mx-1 px-1">
       {articles.map((a: any) => (
-        <Link key={a.id} to={`/actualites/${a.slug}`} className="flex-shrink-0 w-64 rounded-xl border border-border bg-card overflow-hidden hover:shadow-md transition-shadow">
+        <a key={a.id} href={`/actualites/${a.slug}`} className="flex-shrink-0 w-64 rounded-xl border border-border bg-card overflow-hidden hover:shadow-md transition-shadow cursor-pointer">
           {a.cover_image_url ? (
             <img src={a.cover_image_url} alt="" className="w-full h-28 object-cover" />
           ) : (
@@ -651,7 +651,7 @@ const ArticleCards = ({ articles }: { articles: any[] }) => {
             <p className="text-sm font-semibold line-clamp-2">{a.title}</p>
             <p className="text-xs text-muted-foreground line-clamp-1 mt-1">{a.excerpt}</p>
           </div>
-        </Link>
+        </a>
       ))}
     </div>
   );
