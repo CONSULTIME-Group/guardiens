@@ -223,11 +223,6 @@ const OwnerDashboard = () => {
   const cta = getCTA();
 
   const totalReceivedApps = sits.reduce((sum: number, s: any) => sum + (s.applications?.filter((a: any) => a.status === "pending").length || 0), 0);
-  const [nearbyEmergencyCount, setNearbyEmergencyCount] = useState(0);
-    supabase.from("emergency_sitter_profiles").select("user_id", { count: "exact", head: true }).eq("is_active", true).then(({ count }) => {
-      setNearbyEmergencyCount(count || 0);
-    });
-  }, []);
 
   const leftContent = (
     <div className="space-y-5">
