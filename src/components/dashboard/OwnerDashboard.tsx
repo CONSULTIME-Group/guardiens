@@ -310,21 +310,7 @@ const OwnerDashboard = () => {
         <StatCard icon={Star} iconColor="text-amber-500" label="Note moyenne" value={avgRating} delay={100} isDecimal emptyMsg={avgRating === 0 ? "Pas encore d'avis" : undefined} />
         <StatCard icon={Megaphone} iconColor="text-blue-500" label="Annonces actives" value={activeSits.length} delay={200} />
         <StatCard icon={Heart} iconColor="text-pink-500" label="Gardiens de confiance" value={trustedSitterCount} delay={300} />
-        <div className="p-4 rounded-xl border border-border bg-card hover:shadow-md transition-shadow animate-fade-in" style={{ animationDelay: "400ms" }}>
-          <Handshake className="h-4 w-4 text-primary mb-2" strokeWidth={1.8} />
-          <div className="flex items-baseline gap-3">
-            <div>
-              <p className="font-heading text-[28px] font-bold leading-tight">{missionMetrics.total}</p>
-              <p className="text-xs text-muted-foreground mt-1">Postées</p>
-            </div>
-            <span className="text-muted-foreground/30 text-lg">/</span>
-            <div>
-              <p className="font-heading text-[28px] font-bold leading-tight">{missionMetrics.completed}</p>
-              <p className="text-xs text-muted-foreground mt-1">Terminées</p>
-            </div>
-          </div>
-          <p className="text-[10px] text-muted-foreground mt-1.5">Petites missions</p>
-        </div>
+        <StatCard icon={Handshake} iconColor="text-primary" label="Petites missions" value={missionMetrics.total} delay={400} subLabel={missionMetrics.completed > 0 ? `${missionMetrics.completed} terminée${missionMetrics.completed > 1 ? "s" : ""}` : undefined} />
       </div>
 
       {/* 5. Candidatures reçues */}
