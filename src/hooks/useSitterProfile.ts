@@ -224,6 +224,7 @@ export function useSitterProfile() {
         "availability_dates", "is_available", "strict_rules_ok", "prefer_visitors", "farm_animals_ok",
         "preferences_notes", "meeting_preference", "handover_preference",
         "languages", "bonus_skills", "interests", "competences",
+        "min_stay_duration", "preferred_frequency", "min_notice", "preferred_periods", "preferred_environments",
       ] as const;
 
       const sitterUpdate: any = {};
