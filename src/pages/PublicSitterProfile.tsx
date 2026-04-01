@@ -222,7 +222,7 @@ export default function PublicSitterProfile() {
             className="absolute inset-0 w-full h-full object-cover object-top"
           />
         )}
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-background" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/0 via-black/20 to-black/70" />
 
         {/* Back link */}
         <Link
