@@ -471,13 +471,7 @@ const SitCard = ({ sit, isOwner, userId }: { sit: any; isOwner: boolean; userId?
                 </div>
               )}
 
-              {/* Candidates count for owner */}
-              {isOwner && effectiveStatus === "published" && sit.applicationCount > 0 && (
-                <Link to={`/sits/${sit.id}`} className="flex items-center gap-1 text-xs text-primary font-medium hover:underline">
-                  <Users className="h-3.5 w-3.5" />
-                  {sit.applicationCount} candidature{sit.applicationCount > 1 ? "s" : ""}
-                </Link>
-              )}
+              {/* Candidates count removed — integrated into QuickActions button */}
             </div>
 
             {/* Pet summary */}
