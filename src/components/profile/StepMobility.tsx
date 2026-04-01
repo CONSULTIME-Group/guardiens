@@ -151,7 +151,6 @@ const StepMobility = ({ data, onChange }: Props) => {
           onChange={v => {
             if (v.length <= 3) onChange({ preferred_environments: v });
           }}
-          multi
         />
         <p className="text-xs text-muted-foreground">
           Vos préférences — pas une contrainte. Cela aide les propriétaires à vous choisir.
