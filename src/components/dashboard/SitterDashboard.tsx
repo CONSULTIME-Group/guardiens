@@ -273,61 +273,71 @@ const SitterDashboard = () => {
    *  ACTIVE SITTER DASHBOARD
    * ───────────────────────────────────────────── */
   const sitterLeftContent = (
-    <div className="space-y-6">
-      {/* Header */}
-      <div>
-        <h1 className="font-heading text-xl font-bold">
-          Bonjour{user?.firstName ? `, ${user.firstName}` : ""} 👋
-        </h1>
-        <p className="text-xs text-muted-foreground mt-1">
-          {ongoingSit
-            ? `Garde en cours — ${ongoingSit.daysLeft} jour${ongoingSit.daysLeft > 1 ? "s" : ""} restant${ongoingSit.daysLeft > 1 ? "s" : ""}`
-            : "Votre tableau de bord gardien"
-          }
-        </p>
-      </div>
-
-      {/* Stats */}
-      <div className="grid grid-cols-2 gap-2">
-        <StatCard icon={Home} iconColor="text-primary" label="Gardes" value={metrics.completed} delay={0} />
-        <StatCard icon={Star} iconColor="text-amber-500" label="Note" value={metrics.avgRating} delay={100} isDecimal suffix="/5" />
-        <StatCard icon={Mail} iconColor="text-blue-500" label="Candidatures" value={metrics.pendingApps} delay={200} />
-        <StatCard icon={Award} iconColor="text-purple-500" label="Badges" value={metrics.badgeCount} delay={300} />
-      </div>
-
-      {/* Availability toggle */}
-      <div className="flex items-center justify-between rounded-xl border border-border bg-card p-3">
-        <div className="flex items-center gap-2">
-          <div className={`w-2.5 h-2.5 rounded-full ${isAvailable ? "bg-primary animate-pulse" : "bg-muted-foreground/30"}`} />
-          <div>
-            <p className="font-semibold text-xs">Disponible</p>
-            <p className="text-[10px] text-muted-foreground">
-              {isAvailable ? "Visible" : "Masqué"}
-            </p>
+    <div className="space-y-5">
+      {/* BLOC 1 — Statut profil */}
+      <div className="bg-card border border-border rounded-2xl p-4 space-y-3">
+        <div className="flex items-center gap-3">
+          {user?.avatarUrl ? (
+            <img src={user.avatarUrl} alt={user.firstName} className="w-16 h-16 rounded-full object-cover shrink-0" />
+          ) : (
+            <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center font-heading text-xl font-bold shrink-0">
+              {user?.firstName?.charAt(0) || "?"}
+            </div>
+          )}
+          <div className="min-w-0">
+            <p className="font-heading font-semibold text-sm capitalize">{user?.firstName || "Gardien"}</p>
+            <p className="text-xs text-muted-foreground">{(user as any)?.city || ""}</p>
           </div>
         </div>
-        <Switch
-          checked={isAvailable}
-          onCheckedChange={async (v) => {
-            setIsAvailable(v);
-            await supabase.from("sitter_profiles").update({ is_available: v }).eq("user_id", user!.id);
-          }}
-        />
+        {profileCompletion < 100 ? (
+          <div>
+            <div className="flex items-center justify-between text-xs mb-1">
+              <span className="text-muted-foreground">Profil</span>
+              <span className="font-medium">{profileCompletion}% complété</span>
+            </div>
+            <div className="h-1.5 rounded-full bg-muted overflow-hidden">
+              <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${profileCompletion}%` }} />
+            </div>
+          </div>
+        ) : (
+          <p className="text-xs text-primary font-medium">✓ Profil complet</p>
+        )}
+        {profileCompletion < 60 && (
+          <div className="rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 p-3">
+            <p className="text-xs text-amber-800 dark:text-amber-200">Complétez votre profil pour apparaître dans les recherches</p>
+            <Link to="/profile" className="text-xs font-medium text-primary hover:underline mt-1 inline-block">Compléter →</Link>
+          </div>
+        )}
       </div>
 
-      {/* Quick actions */}
-      <div className="space-y-2">
-        <Link to="/search">
-          <Button className="w-full gap-2" size="sm">
-            <Search className="h-4 w-4" /> Explorer les annonces
-          </Button>
-        </Link>
-        <Link to="/profile">
-          <Button variant="outline" className="w-full gap-2" size="sm">
-            <UserCircle className="h-4 w-4" /> Mon profil
-          </Button>
-        </Link>
+      {/* BLOC 2 — 4 métriques */}
+      <div className="grid grid-cols-2 gap-3">
+        <MiniMetric label="Gardes réalisées" value={metrics.completed} />
+        <MiniMetric label="Note moyenne" value={metrics.avgRating > 0 ? `★ ${metrics.avgRating}` : "—"} />
+        <MiniMetric label="Candidatures en cours" value={metrics.pendingApps} />
+        <MiniMetric label="Écussons reçus" value={metrics.badgeCount} />
       </div>
+
+      {/* BLOC 3 — Toggle disponibilité */}
+      <div className="rounded-xl border border-border bg-card p-3 space-y-2">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className={`w-2.5 h-2.5 rounded-full ${isAvailable ? "bg-primary animate-pulse" : "bg-muted-foreground/30"}`} />
+            <p className="font-semibold text-xs">Je suis disponible</p>
+          </div>
+          <Switch
+            checked={isAvailable}
+            onCheckedChange={async (v) => {
+              setIsAvailable(v);
+              await supabase.from("sitter_profiles").update({ is_available: v }).eq("user_id", user!.id);
+            }}
+          />
+        </div>
+        <p className="text-[10px] text-muted-foreground">Apparaissez en premier dans les recherches</p>
+      </div>
+
+      {/* BLOC 4 — Abonnement (placeholder - check subscription) */}
+      {/* Will show if user doesn't have an active subscription */}
     </div>
   );
 
@@ -526,6 +536,13 @@ const SitterDashboard = () => {
     />
   );
 };
+
+const MiniMetric = ({ label, value }: { label: string; value: number | string }) => (
+  <div className="bg-muted/50 rounded-xl p-3">
+    <p className="text-2xl font-semibold">{typeof value === "number" && value === 0 ? "—" : value}</p>
+    <p className="text-xs text-muted-foreground">{label}</p>
+  </div>
+);
 
 /* ── Shared components ── */
 
