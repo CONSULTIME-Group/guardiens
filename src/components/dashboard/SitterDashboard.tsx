@@ -15,6 +15,7 @@ import {
   Calendar, Handshake, Newspaper, PawPrint, Zap, ShieldCheck,
   UserCircle, Sparkles, MapPin,
 } from "lucide-react";
+import { capitalizeName } from "@/lib/capitalize";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { format, differenceInDays, differenceInHours } from "date-fns";
