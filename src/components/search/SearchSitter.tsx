@@ -187,7 +187,7 @@ const SearchSitter = () => {
       }
     }
     setLoading(false);
-  }, [tab, missionSubTab, city, radius, startDate, endDate, animalTypes, housingType, duration, verifiedOnly, emergencyOnly, sort, userCoords, userCity, missionTypeFilter, missionCategoryFilter, withPhotosOnly, minExperience]);
+  }, [tab, missionSubTab, city, radius, startDate, endDate, animalTypes, housingType, duration, verifiedOnly, emergencyOnly, sort, userCoords, userCity, missionTypeFilter, missionCategoryFilter, withPhotosOnly, minExperience, environments]);
 
   useEffect(() => {
     if (!initialLoadDone.current) return;
