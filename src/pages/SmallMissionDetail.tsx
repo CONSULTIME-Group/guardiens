@@ -168,7 +168,7 @@ const SmallMissionDetail = () => {
   const handleClose = async () => {
     await supabase.from("small_missions").update({ status: "completed" as any }).eq("id", id!);
     setMission({ ...mission, status: "completed" });
-    toast({ title: "Mission fermée", description: "Vous avez trouvé quelqu'un — super ! 🎉" });
+    toast({ title: "Mission fermée", description: "Vous avez trouvé quelqu'un" });
     if (acceptedResponderId) {
       openFeedbackFor(acceptedResponderId, acceptedResponderName);
     }

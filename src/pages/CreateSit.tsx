@@ -209,7 +209,7 @@ const CreateSit = () => {
       } as any).select("id").single();
 
       if (error) throw error;
-      toast({ title: "Annonce publiée ! 🎉", description: "Les gardiens peuvent maintenant postuler." });
+      toast({ title: "Annonce publiée", description: "Les gardiens peuvent maintenant postuler." });
       navigate(`/sits/${sit.id}`);
     } catch {
       toast({ variant: "destructive", title: "Erreur", description: "Impossible de publier l'annonce." });

@@ -10,8 +10,9 @@ import ResourceSection from "@/components/shared/ResourceSection";
 import type { ResourceItem } from "@/components/shared/ResourceCard";
 import {
   Calendar, Star, Megaphone, Heart, ChevronRight, Plus, PawPrint,
-  Users, Handshake, Newspaper, Home,
+  Users, Handshake, Newspaper, Home, CheckCircle2, RotateCcw,
 } from "lucide-react";
+import { capitalizeName } from "@/lib/capitalize";
 import { Button } from "@/components/ui/button";
 import { format, differenceInDays } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -163,7 +164,19 @@ const OwnerDashboard = () => {
     load();
   }, [user]);
 
-  if (loading) return <div className="p-6 text-muted-foreground">Chargement...</div>;
+  if (loading) return (
+    <div className="p-8 flex items-center justify-center">
+      <div className="animate-pulse space-y-4 w-full max-w-lg">
+        <div className="h-8 bg-muted rounded-lg w-2/3" />
+        <div className="grid grid-cols-2 gap-3">
+          <div className="h-24 bg-muted rounded-xl" />
+          <div className="h-24 bg-muted rounded-xl" />
+        </div>
+        <div className="h-16 bg-muted rounded-xl" />
+        <div className="h-32 bg-muted rounded-xl" />
+      </div>
+    </div>
+  );
 
   if (showOnboarding) {
     return (
@@ -243,7 +256,7 @@ const OwnerDashboard = () => {
             </div>
           )}
           <div className="min-w-0">
-            <p className="font-heading font-semibold text-sm capitalize">{user?.firstName || "Propriétaire"}</p>
+            <p className="font-heading font-semibold text-sm">{capitalizeName(user?.firstName) || "Propriétaire"}</p>
             {user && (
               <p className="text-xs text-muted-foreground">{(user as any).city || ""}</p>
             )}
@@ -321,7 +334,9 @@ const OwnerDashboard = () => {
                   {pet.photo_url ? (
                     <img src={pet.photo_url} alt={pet.name} className="w-[50px] h-[50px] rounded-full object-cover shrink-0" />
                   ) : (
-                    <div className="w-[50px] h-[50px] rounded-full bg-accent flex items-center justify-center text-lg shrink-0">🐾</div>
+                    <div className="w-[50px] h-[50px] rounded-full bg-accent flex items-center justify-center shrink-0">
+                      <PawPrint className="h-5 w-5 text-muted-foreground" />
+                    </div>
                   )}
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium">{pet.name || "Sans nom"}
@@ -369,7 +384,7 @@ const OwnerDashboard = () => {
                 )}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <p className="text-sm font-medium">{app.sitter?.first_name || "Gardien"}</p>
+                    <p className="text-sm font-medium">{capitalizeName(app.sitter?.first_name) || "Gardien"}</p>
                   </div>
                   {app.sitter?.id && sitterBadges[app.sitter.id] && <TooltipProvider><div className="flex gap-1">{sitterBadges[app.sitter.id].slice(0, 2).map((b: any) => <BadgeShield key={b.badge_key} badgeKey={b.badge_key} count={b.count} size="sm" showLabel={false} />)}</div></TooltipProvider>}
                   <p className="text-xs text-muted-foreground truncate mt-0.5">{app.sit?.title} · {app.sit?.start_date ? format(new Date(app.sit.start_date), "d MMM", { locale: fr }) : ""}</p>
@@ -442,7 +457,7 @@ const OwnerDashboard = () => {
                   </div>
                 )}
                 <div className="flex-1 min-w-0">
-                  <p className="text-xs font-medium">{h.sitter?.first_name}</p>
+                  <p className="text-xs font-medium">{capitalizeName(h.sitter?.first_name)}</p>
                   <p className="text-sm text-muted-foreground mt-0.5">{h.text}</p>
                 </div>
                 {h.photo_url && <img src={h.photo_url} alt="" className="w-16 h-12 rounded-lg object-cover shrink-0" />}
@@ -467,7 +482,7 @@ const OwnerDashboard = () => {
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium truncate">{m.title}</p>
                     <p className="text-xs text-muted-foreground">
-                      {m.status === "completed" ? "✅ Terminée" : m.status === "in_progress" ? "🔄 En cours" : `${responseCount} réponse${responseCount > 1 ? "s" : ""}`}
+                      {m.status === "completed" ? "Terminée" : m.status === "in_progress" ? "En cours" : `${responseCount} réponse${responseCount > 1 ? "s" : ""}`}
                       {pendingCount > 0 && <span className="ml-1 text-primary font-medium">· {pendingCount} en attente</span>}
                     </p>
                   </div>
@@ -533,17 +548,15 @@ const DashSection = ({ title, action, children }: {
 );
 
 const EmptyCard = ({ icon: Icon, text, cta, to, hint }: { icon?: React.ElementType; text: string; cta?: string; to?: string; hint?: string }) => (
-  <div className="p-8 rounded-xl border border-dashed border-border bg-accent/30 text-center space-y-3">
-    {Icon && (
-      <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
-        <Icon className="h-6 w-6 text-primary/60" />
-      </div>
+  <div className="flex flex-col items-center justify-center py-12 px-6 text-center">
+    {Icon && <Icon className="h-10 w-10 text-muted-foreground mb-4" />}
+    <p className="text-sm font-medium text-foreground mb-1">{text}</p>
+    {hint && <p className="text-xs text-muted-foreground mb-4 max-w-xs mx-auto">{hint}</p>}
+    {cta && to && (
+      <Link to={to} className="border border-border rounded-full px-4 py-2 text-sm text-foreground hover:border-primary transition-colors">
+        {cta} →
+      </Link>
     )}
-    <div>
-      <p className="text-sm font-medium text-foreground/80">{text}</p>
-      {hint && <p className="text-xs text-muted-foreground mt-1">{hint}</p>}
-    </div>
-    {cta && to && <Link to={to}><Button size="sm" className="mt-1">{cta}</Button></Link>}
   </div>
 );
 

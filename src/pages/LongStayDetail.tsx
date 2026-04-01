@@ -96,7 +96,7 @@ const LongStayDetail = () => {
       });
       if (error) throw error;
       setHasApplied(true);
-      toast({ title: "Candidature envoyée ! 🎉", description: "Le propriétaire recevra votre demande." });
+      toast({ title: "Candidature envoyée", description: "Le propriétaire recevra votre demande." });
     } catch {
       toast({ variant: "destructive", title: "Erreur", description: "Impossible d'envoyer la candidature." });
     } finally {
@@ -388,7 +388,7 @@ const LongStayDetail = () => {
           {eligibility.eligible ? (
             hasApplied ? (
               <div className="text-center py-4">
-                <p className="font-medium text-primary">✅ Candidature envoyée</p>
+                <p className="font-medium text-primary">Candidature envoyée</p>
                 <p className="text-sm text-muted-foreground mt-1">Le propriétaire examinera votre demande.</p>
               </div>
             ) : (

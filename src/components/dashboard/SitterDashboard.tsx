@@ -15,6 +15,7 @@ import {
   Calendar, Handshake, Newspaper, PawPrint, Zap, ShieldCheck,
   UserCircle, Sparkles, MapPin,
 } from "lucide-react";
+import { capitalizeName } from "@/lib/capitalize";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { format, differenceInDays, differenceInHours } from "date-fns";
@@ -192,10 +193,10 @@ const SitterDashboard = () => {
             </div>
             <div>
               <h1 className="font-heading text-xl md:text-2xl font-bold">
-                Bienvenue{user?.firstName ? `, ${user.firstName}` : ""} ! 🎉
+                Bienvenue{user?.firstName ? `, ${capitalizeName(user.firstName)}` : ""}
               </h1>
               <p className="text-sm text-muted-foreground mt-1">
-                Voici vos premières étapes pour décrocher votre première garde :
+                Voici tes premières étapes pour décrocher ta première garde :
               </p>
             </div>
           </div>
@@ -285,7 +286,7 @@ const SitterDashboard = () => {
             </div>
           )}
           <div className="min-w-0">
-            <p className="font-heading font-semibold text-sm capitalize">{user?.firstName || "Gardien"}</p>
+            <p className="font-heading font-semibold text-sm">{capitalizeName(user?.firstName) || "Gardien"}</p>
             <p className="text-xs text-muted-foreground">{(user as any)?.city || ""}</p>
           </div>
         </div>
@@ -304,7 +305,7 @@ const SitterDashboard = () => {
         )}
         {profileCompletion < 60 && (
           <div className="rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 p-3">
-            <p className="text-xs text-amber-800 dark:text-amber-200">Complétez votre profil pour apparaître dans les recherches</p>
+            <p className="text-xs text-amber-800 dark:text-amber-200">Complète ton profil pour apparaître dans les recherches</p>
             <Link to="/profile" className="text-xs font-medium text-primary hover:underline mt-1 inline-block">Compléter →</Link>
           </div>
         )}
@@ -333,7 +334,7 @@ const SitterDashboard = () => {
             }}
           />
         </div>
-        <p className="text-[10px] text-muted-foreground">Apparaissez en premier dans les recherches</p>
+        <p className="text-[10px] text-muted-foreground">Apparais en premier dans les recherches</p>
       </div>
 
       {/* BLOC 4 — Abonnement (placeholder - check subscription) */}
@@ -396,7 +397,7 @@ const SitterDashboard = () => {
         myApplications.length > 0 ? <Link to="/sits" className="text-xs text-primary hover:underline font-medium">Voir tout →</Link> : undefined
       }>
         {myApplications.length === 0 ? (
-          <EmptyCard icon={Search} text="Vous n'avez pas encore candidaté" hint="Parcourez les annonces et trouvez la garde idéale" cta="Explorer les annonces" to="/search" />
+          <EmptyCard icon={SendIcon} text="Aucune candidature en cours" hint="Postule à des gardes pour les voir apparaître ici." cta="Trouver une garde" to="/search" />
         ) : (
           <div className="space-y-2">
             {myApplications.slice(0, 4).map(app => {
@@ -467,7 +468,7 @@ const SitterDashboard = () => {
         <Link to="/search" className="text-xs text-primary hover:underline font-medium">Voir tout →</Link>
       }>
         {nearbyListings.length === 0 ? (
-          <EmptyCard icon={Search} text="Pas encore d'annonce dans votre zone" hint="Activez le mode Disponible pour être contacté directement" cta="Explorer les annonces" to="/search" />
+          <EmptyCard icon={Search} text="Pas encore d'annonce dans ta zone" hint="Active le mode disponible pour être contacté directement." cta="Explorer les annonces" to="/search" />
         ) : (
           <div className="grid gap-3 sm:grid-cols-2">
             {nearbyListings.map(sit => <ListingCard key={sit.id} sit={sit} />)}
@@ -729,17 +730,15 @@ const DashSection = ({ title, action, children }: {
 );
 
 const EmptyCard = ({ icon: Icon, text, cta, to, hint }: { icon?: React.ElementType; text: string; cta?: string; to?: string; hint?: string }) => (
-  <div className="p-8 rounded-xl border border-dashed border-border bg-accent/30 text-center space-y-3">
-    {Icon && (
-      <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
-        <Icon className="h-7 w-7 text-primary/60" />
-      </div>
+  <div className="flex flex-col items-center justify-center py-12 px-6 text-center">
+    {Icon && <Icon className="h-10 w-10 text-muted-foreground mb-4" />}
+    <p className="text-sm font-medium text-foreground mb-1">{text}</p>
+    {hint && <p className="text-xs text-muted-foreground mb-4 max-w-xs mx-auto">{hint}</p>}
+    {cta && to && (
+      <Link to={to} className="border border-border rounded-full px-4 py-2 text-sm text-foreground hover:border-primary transition-colors">
+        {cta} →
+      </Link>
     )}
-    <div>
-      <p className="text-sm font-medium text-foreground/80">{text}</p>
-      {hint && <p className="text-xs text-muted-foreground mt-1.5 max-w-xs mx-auto">{hint}</p>}
-    </div>
-    {cta && to && <Link to={to}><Button size="sm" className="mt-1">{cta}</Button></Link>}
   </div>
 );
 

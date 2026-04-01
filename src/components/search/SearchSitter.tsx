@@ -86,12 +86,12 @@ const SearchSitter = () => {
   // Environment (visual only for now)
   const [environments, setEnvironments] = useState<string[]>([]);
   const envOptions = [
-    { key: "city", label: "🏙️ Ville" },
-    { key: "countryside", label: "🌿 Campagne" },
-    { key: "mountain", label: "⛰️ Montagne" },
-    { key: "lake", label: "🏞️ Lac" },
-    { key: "vineyard", label: "🍇 Vignes" },
-    { key: "forest", label: "🌲 Forêt" },
+    { key: "city", label: "Ville" },
+    { key: "countryside", label: "Campagne" },
+    { key: "mountain", label: "Montagne" },
+    { key: "lake", label: "Lac" },
+    { key: "vineyard", label: "Vignes" },
+    { key: "forest", label: "Forêt" },
   ];
 
   // Derive housingType for existing filter logic (backward compat)
