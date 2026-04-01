@@ -595,19 +595,8 @@ const SearchOwner = () => {
               );
             })}
           </div>
-          <div className="w-1/2">
-            <Suspense fallback={<div className="flex items-center justify-center h-full text-muted-foreground">Chargement carte...</div>}>
-              <SearchMapView
-                markers={results.filter((s: any) => s._dist !== null && s._dist !== Infinity).map((s: any) => ({
-                  id: s.user_id,
-                  lat: 0,
-                  lng: 0,
-                  title: s.profile?.first_name || "Gardien",
-                  type: "sitter" as const,
-                }))}
-                center={undefined}
-              />
-            </Suspense>
+          <div className="w-1/2 flex items-center justify-center bg-muted/30 text-muted-foreground text-sm">
+            Vue carte à venir
           </div>
         </div>
       )}
