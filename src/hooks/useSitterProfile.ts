@@ -31,6 +31,11 @@ export interface SitterProfileData {
   max_duration: number;
   availability_dates: any[];
   is_available: boolean;
+  min_stay_duration: string;
+  preferred_frequency: string;
+  min_notice: string;
+  preferred_periods: string[];
+  preferred_environments: string[];
   // Step 5
   strict_rules_ok: boolean;
   prefer_visitors: boolean;

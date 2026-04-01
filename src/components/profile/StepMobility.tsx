@@ -1,15 +1,47 @@
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Slider } from "@/components/ui/slider";
-import { Calendar } from "@/components/ui/calendar";
 import HintBubble from "./HintBubble";
 import ChipSelect from "./ChipSelect";
 import type { SitterProfileData } from "@/hooks/useSitterProfile";
-import { useState } from "react";
-import type { DateRange } from "react-day-picker";
-import { fr } from "date-fns/locale";
 
 const VEHICLE_OPTIONS = ["Oui — voiture", "Oui — moto", "Non — transports en commun", "Non — vélo uniquement"];
+
+const DURATION_OPTIONS = ["1-3 jours", "1 semaine", "2 semaines", "1 mois", "Flexible"];
+const DURATION_VALUES: Record<string, string> = {
+  "1-3 jours": "1_3_days",
+  "1 semaine": "1_week",
+  "2 semaines": "2_weeks",
+  "1 mois": "1_month",
+  "Flexible": "flexible",
+};
+const DURATION_REVERSE: Record<string, string> = Object.fromEntries(
+  Object.entries(DURATION_VALUES).map(([k, v]) => [v, k])
+);
+
+const FREQUENCY_OPTIONS = ["Occasionnel", "Régulier", "Flexible"];
+const FREQUENCY_VALUES: Record<string, string> = {
+  "Occasionnel": "occasional",
+  "Régulier": "regular",
+  "Flexible": "flexible",
+};
+const FREQUENCY_REVERSE: Record<string, string> = Object.fromEntries(
+  Object.entries(FREQUENCY_VALUES).map(([k, v]) => [v, k])
+);
+
+const NOTICE_OPTIONS = ["Dès que possible", "1 semaine", "2 semaines", "1 mois"];
+const NOTICE_VALUES: Record<string, string> = {
+  "Dès que possible": "asap",
+  "1 semaine": "1_week",
+  "2 semaines": "2_weeks",
+  "1 mois": "1_month",
+};
+const NOTICE_REVERSE: Record<string, string> = Object.fromEntries(
+  Object.entries(NOTICE_VALUES).map(([k, v]) => [v, k])
+);
+
+const PERIOD_OPTIONS = ["Toute l'année", "Été", "Hiver", "Vacances scolaires", "Week-ends"];
+const ENVIRONMENT_OPTIONS = ["Ville", "Campagne", "Montagne", "Lac", "Vignes", "Forêt"];
 
 interface Props {
   data: SitterProfileData;
@@ -17,32 +49,8 @@ interface Props {
 }
 
 const StepMobility = ({ data, onChange }: Props) => {
-  const [dateRange, setDateRange] = useState<DateRange | undefined>(() => {
-    if (data.availability_dates.length > 0) {
-      const last = data.availability_dates[data.availability_dates.length - 1];
-      return { from: new Date(last.from), to: last.to ? new Date(last.to) : undefined };
-    }
-    return undefined;
-  });
-
-  const handleDateSelect = (range: DateRange | undefined) => {
-    setDateRange(range);
-    if (range?.from) {
-      const newDates = [
-        ...data.availability_dates.slice(0, -1),
-        { from: range.from.toISOString(), to: range.to?.toISOString() || null },
-      ];
-      if (!dateRange?.from) {
-        onChange({ availability_dates: [...data.availability_dates, { from: range.from.toISOString(), to: range.to?.toISOString() || null }] });
-      } else {
-        onChange({ availability_dates: newDates });
-      }
-    }
-  };
-
   return (
     <div className="space-y-6">
-
       {/* Vehicle type */}
       <div className="space-y-2">
         <Label>Vous avez un véhicule ?</Label>
@@ -80,32 +88,75 @@ const StepMobility = ({ data, onChange }: Props) => {
         <HintBubble>Plus votre rayon est large, plus vous verrez d'annonces. Mais la proximité est un atout — les propriétaires préfèrent les gardiens proches.</HintBubble>
       </div>
 
-      <div className="space-y-3">
-        <Label>Disponibilités</Label>
-        <div className="bg-card rounded-lg border border-border p-4 flex justify-center">
-          <Calendar
-            mode="range"
-            selected={dateRange}
-            onSelect={handleDateSelect}
-            locale={fr}
-            numberOfMonths={1}
-            disabled={{ before: new Date() }}
-            className="pointer-events-auto"
-          />
-        </div>
+      {/* Durée minimum souhaitée */}
+      <div className="space-y-2">
+        <Label>Durée minimum souhaitée</Label>
+        <ChipSelect
+          options={DURATION_OPTIONS}
+          selected={DURATION_REVERSE[data.min_stay_duration] ? [DURATION_REVERSE[data.min_stay_duration]] : ["Flexible"]}
+          onChange={v => {
+            const last = v[v.length - 1] || "Flexible";
+            onChange({ min_stay_duration: DURATION_VALUES[last] || "flexible" });
+          }}
+        />
+        <p className="text-xs text-muted-foreground">
+          Nous vous montrons les annonces qui correspondent à cette durée minimum.
+        </p>
       </div>
 
-      <div className="space-y-3">
-        <div className="flex items-center justify-between">
-          <Label>Durée de garde souhaitée</Label>
-          <span className="text-sm font-semibold text-primary">{data.min_duration}j — {data.max_duration}j</span>
-        </div>
-        <Slider
-          value={[data.min_duration, data.max_duration]}
-          onValueChange={v => onChange({ min_duration: v[0], max_duration: v[1] })}
-          min={1} max={60} step={1}
-          className="py-2"
+      {/* Fréquence souhaitée */}
+      <div className="space-y-2">
+        <Label>Fréquence souhaitée</Label>
+        <ChipSelect
+          options={FREQUENCY_OPTIONS}
+          selected={FREQUENCY_REVERSE[data.preferred_frequency] ? [FREQUENCY_REVERSE[data.preferred_frequency]] : ["Flexible"]}
+          onChange={v => {
+            const last = v[v.length - 1] || "Flexible";
+            onChange({ preferred_frequency: FREQUENCY_VALUES[last] || "flexible" });
+          }}
         />
+      </div>
+
+      {/* Préavis minimum */}
+      <div className="space-y-2">
+        <Label>Préavis minimum</Label>
+        <ChipSelect
+          options={NOTICE_OPTIONS}
+          selected={NOTICE_REVERSE[data.min_notice] ? [NOTICE_REVERSE[data.min_notice]] : ["Dès que possible"]}
+          onChange={v => {
+            const last = v[v.length - 1] || "Dès que possible";
+            onChange({ min_notice: NOTICE_VALUES[last] || "asap" });
+          }}
+        />
+      </div>
+
+      {/* Période de l'année */}
+      <div className="space-y-2">
+        <Label>Période de l'année</Label>
+        <ChipSelect
+          options={PERIOD_OPTIONS}
+          selected={data.preferred_periods}
+          onChange={v => {
+            if (v.length <= 3) onChange({ preferred_periods: v });
+          }}
+          multi
+        />
+      </div>
+
+      {/* Environnements préférés */}
+      <div className="space-y-2">
+        <Label>Environnements préférés</Label>
+        <ChipSelect
+          options={ENVIRONMENT_OPTIONS}
+          selected={data.preferred_environments}
+          onChange={v => {
+            if (v.length <= 3) onChange({ preferred_environments: v });
+          }}
+          multi
+        />
+        <p className="text-xs text-muted-foreground">
+          Vos préférences — pas une contrainte. Cela aide les propriétaires à vous choisir.
+        </p>
       </div>
     </div>
   );
