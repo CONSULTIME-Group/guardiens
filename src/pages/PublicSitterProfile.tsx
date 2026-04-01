@@ -540,21 +540,21 @@ export default function PublicSitterProfile() {
                   </span>
                 )}
               </div>
-              {(hasVehicle || radius > 0) && (
-                <div className="mt-3 flex items-center gap-2 text-sm text-muted-foreground">
-                  {hasVehicle ? (
-                    <>
-                      <Car className="w-4 h-4" />
-                      <span>Avec véhicule — rayon {radius}km</span>
-                    </>
-                  ) : radius > 0 ? (
-                    <>
-                      <MapPin className="w-4 h-4" />
-                      <span>Rayon {radius}km</span>
-                    </>
-                  ) : null}
-                </div>
-              )}
+              <div className="mt-3 flex items-center gap-2 text-sm text-muted-foreground">
+                {hasVehicle ? (
+                  <>
+                    <Car className="w-4 h-4" />
+                    <span>Avec véhicule{radius ? ` — rayon ${radius}km` : ""}</span>
+                  </>
+                ) : radius ? (
+                  <>
+                    <MapPin className="w-4 h-4" />
+                    <span>Rayon {radius}km</span>
+                  </>
+                ) : (
+                  <span className="text-muted-foreground">Rayon : Non renseigné</span>
+                )}
+              </div>
             </div>
           )}
 
