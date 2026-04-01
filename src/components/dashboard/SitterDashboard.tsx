@@ -452,9 +452,9 @@ const SitterDashboard = () => {
 
       {/* Emergency section */}
       {emergencyEligible && !hasEmergencyProfile && !showEmergencyForm && (
-        <div className="rounded-2xl border-2 border-amber-300 dark:border-amber-700 bg-gradient-to-br from-amber-50 to-amber-100/50 dark:from-amber-900/20 dark:to-amber-900/10 p-6 space-y-4">
+        <div className="rounded-2xl border-2 border-secondary/40 bg-secondary/5 p-6 space-y-4">
           <div className="flex items-center gap-3">
-            <span className="inline-flex items-center justify-center h-10 w-10 rounded-full bg-gradient-to-br from-amber-400 to-amber-500 text-white shadow">
+            <span className="inline-flex items-center justify-center h-10 w-10 rounded-full bg-secondary text-secondary-foreground shadow">
               <Zap className="h-5 w-5" fill="currentColor" />
             </span>
             <div>
