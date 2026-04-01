@@ -28,9 +28,16 @@ const SITTER_TYPE_LABELS: Record<string, string> = {
   solo: "Solo", couple: "Couple", family: "Famille", retired: "Retraité(e)",
 };
 
-const MIN_DURATION_LABELS: Record<number, string> = {
-  1: "À partir de 1 jour", 2: "À partir de 2 jours", 3: "À partir de 3 jours",
-  5: "À partir de 5 jours", 7: "À partir de 7 jours", 14: "À partir de 14 jours",
+const MIN_DURATION_LABELS: Record<string, string> = {
+  "1-3 jours": "1 à 3 jours minimum",
+  "short": "1 à 3 jours minimum",
+  "1 semaine": "1 semaine minimum",
+  "week": "1 semaine minimum",
+  "2 semaines": "2 semaines minimum",
+  "two_weeks": "2 semaines minimum",
+  "1 mois": "1 mois minimum",
+  "month": "1 mois minimum",
+  "flexible": "Durée flexible",
 };
 
 const ENV_LABELS: Record<string, string> = {
