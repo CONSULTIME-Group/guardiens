@@ -96,6 +96,7 @@ const CreateSit = () => {
   const [specificExpectations, setSpecificExpectations] = useState("");
   const [openTo, setOpenTo] = useState<string[]>([]);
   const [isUrgent, setIsUrgent] = useState(false);
+  const [sitEnvironments, setSitEnvironments] = useState<string[]>([]);
 
   const [property, setProperty] = useState<PropertySummary | null>(null);
   const [pets, setPets] = useState<PetSummary[]>([]);
