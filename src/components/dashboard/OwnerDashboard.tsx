@@ -10,8 +10,9 @@ import ResourceSection from "@/components/shared/ResourceSection";
 import type { ResourceItem } from "@/components/shared/ResourceCard";
 import {
   Calendar, Star, Megaphone, Heart, ChevronRight, Plus, PawPrint,
-  Users, Handshake, Newspaper, Home,
+  Users, Handshake, Newspaper, Home, CheckCircle2, RotateCcw,
 } from "lucide-react";
+import { capitalizeName } from "@/lib/capitalize";
 import { Button } from "@/components/ui/button";
 import { format, differenceInDays } from "date-fns";
 import { fr } from "date-fns/locale";
