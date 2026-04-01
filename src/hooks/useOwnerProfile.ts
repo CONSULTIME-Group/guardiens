@@ -247,6 +247,9 @@ export function useOwnerProfile() {
       ] as const;
       const ownerUpdate: any = {};
       ownerFields.forEach(f => { if (f in stepData) ownerUpdate[f] = (stepData as any)[f]; });
+      // Map owner-specific competence fields
+      if ("owner_competences" in stepData) ownerUpdate.competences = (stepData as any).owner_competences;
+      if ("owner_competences_disponible" in stepData) ownerUpdate.competences_disponible = (stepData as any).owner_competences_disponible;
       if (Object.keys(ownerUpdate).length > 0) {
         if (ownerProfileId) {
           await supabase.from("owner_profiles").update(ownerUpdate).eq("id", ownerProfileId);
