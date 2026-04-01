@@ -171,6 +171,12 @@ const PublicProfile = () => {
           name: firstName,
           ...(profile.city && { address: { "@type": "PostalAddress", addressLocality: profile.city } }),
           ...(profile.identity_verified && { hasCredential: { "@type": "EducationalOccupationalCredential", credentialCategory: "Identity Verified" } }),
+          ...((sitterProfile?.competences?.length > 0 || ownerProfile?.competences?.length > 0) && {
+            knowsAbout: [
+              ...(sitterProfile?.competences || []),
+              ...((ownerProfile?.competences_disponible && ownerProfile?.competences) || []),
+            ].filter((v: string, i: number, a: string[]) => a.indexOf(v) === i),
+          }),
         })}</script>
       </Helmet>
 
