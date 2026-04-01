@@ -66,6 +66,7 @@ const SearchSitter = () => {
   const [viewMode, setViewMode] = useState<ViewMode>("list");
 
   const [results, setResults] = useState<any[]>([]);
+  const [resultCoords, setResultCoords] = useState<Map<string, { lat: number; lng: number }>>(new Map());
   const [loading, setLoading] = useState(false);
   const [userCity, setUserCity] = useState("");
   const [userCoords, setUserCoords] = useState<{ lat: number; lng: number } | null>(null);
