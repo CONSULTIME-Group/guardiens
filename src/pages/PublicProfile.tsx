@@ -388,7 +388,7 @@ const PublicProfile = () => {
                           )}
                           <div>
                             <p className="font-medium text-sm text-foreground">{pet.name}</p>
-                            <p className="text-xs">
+                            <p className="text-xs text-muted-foreground">
                               {speciesLabels[pet.species]?.slice(2) || pet.species}
                               {pet.breed && ` · ${pet.breed}`}
                               {pet.age && ` · ${pet.age} an${pet.age > 1 ? "s" : ""}`}
