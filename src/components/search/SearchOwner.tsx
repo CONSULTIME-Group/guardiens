@@ -21,7 +21,7 @@ import EmergencyBadge from "@/components/profile/EmergencyBadge";
 import BadgeShield from "@/components/badges/BadgeShield";
 import { TooltipProvider } from "@/components/ui/tooltip";
 
-const SearchMapView = lazy(() => import("@/components/search/SearchMapView"));
+
 
 const animalChips = ["Chiens", "Chats", "Chevaux", "Oiseaux", "Animaux de ferme", "NAC", "Tous"];
 const animalChipToType: Record<string, string> = {
