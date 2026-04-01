@@ -59,6 +59,12 @@ const OwnerDashboard = () => {
   const [nearbyEmergencyCount, setNearbyEmergencyCount] = useState(0);
 
   useEffect(() => {
+    supabase.from("emergency_sitter_profiles").select("user_id", { count: "exact", head: true }).eq("is_active", true).then(({ count }) => {
+      setNearbyEmergencyCount(count || 0);
+    });
+  }, []);
+
+  useEffect(() => {
     if (!user) return;
     const load = async () => {
       const [sitsRes, propsRes, reviewsRes, profileRes, highlightsRes, missionsRes] = await Promise.all([
