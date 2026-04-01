@@ -460,79 +460,87 @@ const Messages = () => {
                 });
 
                 const renderConvItem = (conv: Conversation) => {
-                const hasUnread = conv.unread_count > 0;
-                const appInfo = conv.application_status ? appStatusLabels[conv.application_status] : null;
-                const topBadgeDef = conv.top_badge ? getBadgeDef(conv.top_badge.badge_key) : null;
-
-                return (
-                  <div
-                    key={conv.id}
-                    className={`group relative flex items-start gap-3 p-3.5 text-left hover:bg-accent/50 transition-colors border-b border-border/50 cursor-pointer ${activeConv?.id === conv.id ? "bg-accent/50" : ""}`}
-                    onClick={() => setActiveConv(conv)}
-                  >
-                    {/* Avatar */}
-                    <div className="relative shrink-0">
-                      {conv.other_user?.avatar_url ? (
-                        <img src={conv.other_user.avatar_url} alt="" className="w-11 h-11 rounded-full object-cover" />
-                      ) : (
-                        <div className="w-11 h-11 rounded-full bg-muted flex items-center justify-center font-heading text-sm font-bold">
-                          {conv.other_user?.first_name?.charAt(0) || "?"}
-                        </div>
-                      )}
-                      {/* Mini badge shield */}
-                      {topBadgeDef && (
-                        <span className="absolute -bottom-0.5 -right-0.5">
-                          <StatusShield type="verified" size="xs" />
-                        </span>
-                      )}
-                    </div>
-
-                    {/* Content */}
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between gap-2">
-                        <span className={`text-sm truncate ${hasUnread ? "font-bold text-foreground" : "font-medium"}`}>
-                          {conv.other_user?.first_name || "Utilisateur"}
-                        </span>
-                        <span className="text-[11px] text-muted-foreground shrink-0">
-                          {conv.last_message ? formatListDate(conv.last_message.created_at) : ""}
-                        </span>
-                      </div>
-
-                      {/* Sit title */}
-                      <p className="text-[11px] text-muted-foreground truncate mt-0.5">
-                        {conv.sit?.title || "Garde"}
-                        {appInfo && (
-                          <span className={`ml-1.5 inline-block px-1.5 py-0.5 rounded text-[9px] font-medium ${appInfo.className}`}>
-                            {appInfo.label}
-                          </span>
-                        )}
-                      </p>
-
-                      {/* Last message preview */}
-                      <div className="flex items-center justify-between gap-2 mt-0.5">
-                        <p className={`text-xs truncate ${hasUnread ? "text-foreground font-medium" : "text-muted-foreground"}`}>
-                          {conv.last_message?.sender_id === user?.id ? "Vous : " : ""}
-                          {conv.last_message?.content || "📷 Photo"}
-                        </p>
-                        {hasUnread && (
-                          <span className="bg-primary text-primary-foreground text-[10px] rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1 shrink-0 font-bold">
-                            {conv.unread_count}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Archive on hover */}
-                    <button
-                      onClick={(e) => { e.stopPropagation(); handleArchive(conv); }}
-                      className="absolute top-2 right-2 p-1 rounded hover:bg-accent opacity-0 group-hover:opacity-100 transition-opacity"
-                      title={conv.archived_by.includes(user?.id || "") ? "Désarchiver" : "Archiver"}
+                  const hasUnread = conv.unread_count > 0;
+                  const appInfo = conv.application_status ? appStatusLabels[conv.application_status] : null;
+                  const topBadgeDef = conv.top_badge ? getBadgeDef(conv.top_badge.badge_key) : null;
+                  return (
+                    <div
+                      key={conv.id}
+                      className={`group relative flex items-start gap-3 p-3.5 pl-6 text-left hover:bg-accent/50 transition-colors border-b border-border/50 cursor-pointer ${activeConv?.id === conv.id ? "bg-accent/50" : ""}`}
+                      onClick={() => setActiveConv(conv)}
                     >
-                      <Archive className="h-3.5 w-3.5 text-muted-foreground" />
-                    </button>
+                      <div className="relative shrink-0">
+                        {conv.other_user?.avatar_url ? (
+                          <img src={conv.other_user.avatar_url} alt="" className="w-11 h-11 rounded-full object-cover" />
+                        ) : (
+                          <div className="w-11 h-11 rounded-full bg-muted flex items-center justify-center font-heading text-sm font-bold">
+                            {conv.other_user?.first_name?.charAt(0) || "?"}
+                          </div>
+                        )}
+                        {topBadgeDef && (
+                          <span className="absolute -bottom-0.5 -right-0.5">
+                            <StatusShield type="verified" size="xs" />
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between gap-2">
+                          <span className={`text-sm truncate ${hasUnread ? "font-bold text-foreground" : "font-medium"}`}>
+                            {conv.other_user?.first_name || "Utilisateur"}
+                          </span>
+                          <span className="text-[11px] text-muted-foreground shrink-0">
+                            {conv.last_message ? formatListDate(conv.last_message.created_at) : ""}
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between gap-2 mt-0.5">
+                          <p className={`text-xs truncate ${hasUnread ? "text-foreground font-medium" : "text-muted-foreground"}`}>
+                            {conv.last_message?.sender_id === user?.id ? "Vous : " : ""}
+                            {conv.last_message?.content || "📷 Photo"}
+                          </p>
+                          {hasUnread && (
+                            <span className="bg-primary text-primary-foreground text-[10px] rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1 shrink-0 font-bold">
+                              {conv.unread_count}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      <button
+                        onClick={(e) => { e.stopPropagation(); handleArchive(conv); }}
+                        className="absolute top-2 right-2 p-1 rounded hover:bg-accent opacity-0 group-hover:opacity-100 transition-opacity"
+                        title={conv.archived_by.includes(user?.id || "") ? "Désarchiver" : "Archiver"}
+                      >
+                        <Archive className="h-3.5 w-3.5 text-muted-foreground" />
+                      </button>
+                    </div>
+                  );
+                };
+
+                const renderGroup = (key: string, title: string, convs: Conversation[], unreadCount: number, icon: React.ReactNode) => (
+                  <div key={key}>
+                    <div className="bg-muted/50 px-4 py-2 sticky top-0 z-10 flex items-center gap-2">
+                      {icon}
+                      <span className="text-xs font-medium text-foreground truncate flex-1">{title}</span>
+                      {unreadCount > 0 && (
+                        <span className="bg-primary text-primary-foreground rounded-full w-4 h-4 text-[10px] flex items-center justify-center font-bold shrink-0">
+                          {unreadCount}
+                        </span>
+                      )}
+                    </div>
+                    {convs.map(renderConvItem)}
                   </div>
                 );
-              })
+
+                return (
+                  <>
+                    {Array.from(groups.entries()).map(([sitId, g]) =>
+                      renderGroup(sitId, g.title, g.convs, g.unreadCount, <Home className="h-3.5 w-3.5 text-muted-foreground shrink-0" />)
+                    )}
+                    {noSitGroup.length > 0 &&
+                      renderGroup("no-sit", "Échanges & Missions", noSitGroup, noSitGroup.reduce((s, c) => s + c.unread_count, 0), <HeartHandshake className="h-3.5 w-3.5 text-muted-foreground shrink-0" />)
+                    }
+                  </>
+                );
+              })()
             )}
           </div>
         </div>
