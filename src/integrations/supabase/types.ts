@@ -1859,6 +1859,7 @@ export type Database = {
           flexible_dates: boolean | null
           id: string
           is_urgent: boolean
+          min_gardien_sits: number
           open_to: string[] | null
           property_id: string
           specific_expectations: string | null
@@ -1877,6 +1878,7 @@ export type Database = {
           flexible_dates?: boolean | null
           id?: string
           is_urgent?: boolean
+          min_gardien_sits?: number
           open_to?: string[] | null
           property_id: string
           specific_expectations?: string | null
@@ -1895,6 +1897,7 @@ export type Database = {
           flexible_dates?: boolean | null
           id?: string
           is_urgent?: boolean
+          min_gardien_sits?: number
           open_to?: string[] | null
           property_id?: string
           specific_expectations?: string | null
