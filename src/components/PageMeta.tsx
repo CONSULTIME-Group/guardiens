@@ -13,6 +13,7 @@ interface PageMetaProps {
   publishedAt?: string;
   author?: string;
   canonicalUrl?: string;
+  noindex?: boolean;
 }
 
 const PageMeta = ({
