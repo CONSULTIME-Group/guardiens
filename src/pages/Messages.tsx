@@ -337,6 +337,14 @@ const Messages = () => {
     return true;
   });
 
+  const displayConversations = filteredConversations.filter(conv => {
+    if (!searchFilter.trim()) return true;
+    const q = searchFilter.toLowerCase();
+    const matchName = conv.other_user?.first_name?.toLowerCase().includes(q);
+    const matchSit = conv.sit?.title?.toLowerCase().includes(q);
+    return matchName || matchSit;
+  });
+
   const sitOptions = Array.from(
     new Map(conversations.filter(c => c.sit?.title).map(c => [c.sit_id, c.sit!.title])).entries()
   );
