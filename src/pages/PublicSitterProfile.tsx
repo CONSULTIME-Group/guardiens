@@ -9,7 +9,6 @@ import {
   Car, MapPin, X,
   ChevronLeft, ChevronRight,
 } from "lucide-react";
-import {
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 const SITE_URL = "https://guardiens.fr";
