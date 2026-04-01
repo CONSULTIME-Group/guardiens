@@ -177,9 +177,9 @@ const SitterDashboard = () => {
 
   // Onboarding checklist
   const checklistItems = [
-    { done: onboardingChecks.profileComplete, label: `Compléter mon profil (${profileCompletion}%)`, to: "/mon-profil" },
-    { done: onboardingChecks.identityVerified, label: "Vérifier mon identité", to: "/mon-profil#identite" },
-    { done: false, label: "Découvre les gardes disponibles", to: "/recherche" },
+    { done: onboardingChecks.profileComplete, label: `Compléter mon profil (${profileCompletion}%)`, to: "/profile" },
+    { done: onboardingChecks.identityVerified, label: "Vérifier mon identité", to: "/profile#identite" },
+    { done: false, label: "Découvre les gardes disponibles", to: "/search" },
   ];
   const checklistDone = checklistItems.filter(c => c.done).length + (onboardingChecks.availableMode ? 1 : 0);
   const allChecklistDone = checklistDone === 4;
