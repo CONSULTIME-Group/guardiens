@@ -143,10 +143,10 @@ export default function PublicSitterProfile() {
   const motivation = sitterProfile?.motivation || "";
   const animalTypes: string[] = sitterProfile?.animal_types || [];
   const hasVehicle = sitterProfile?.has_vehicle || false;
-  const rawRadius = sitterProfile?.geographic_radius || 0;
+  const rawRadius = sitterProfile?.geographic_radius;
   const completedSits = profile.completed_sits_count || 0;
   const cancellations = profile.cancellation_count || 0;
-  const radius = (rawRadius === 100 && completedSits === 0) ? 15 : rawRadius;
+  const radius = rawRadius && rawRadius > 0 ? rawRadius : null;
   const isOwn = auth?.user?.id === id;
   const isAuthenticated = auth?.isAuthenticated;
   const isOwner = auth?.activeRole === "owner";
@@ -158,6 +158,26 @@ export default function PublicSitterProfile() {
   const lifestyle: string[] = sitterProfile?.lifestyle || [];
   const minDuration: string = sitterProfile?.min_duration || "";
   const preferredEnvironments: string[] = sitterProfile?.preferred_environments || [];
+  const competences: string[] = sitterProfile?.competences || [];
+  const preferredFrequency: string = sitterProfile?.preferred_frequency || "";
+  const minNotice: string = sitterProfile?.min_notice || "";
+
+  const FREQUENCY_LABELS: Record<string, string> = {
+    occasionnel: "Occasionnel",
+    occasional: "Occasionnel",
+    regulier: "Régulier",
+    regular: "Régulier",
+  };
+  const NOTICE_LABELS: Record<string, string> = {
+    "1_semaine": "Préavis : 1 semaine",
+    "1_week": "Préavis : 1 semaine",
+    "2_semaines": "Préavis : 2 semaines",
+    "2_weeks": "Préavis : 2 semaines",
+    "1_mois": "Préavis : 1 mois",
+    "1_month": "Préavis : 1 mois",
+  };
+  const frequencyLabel = FREQUENCY_LABELS[preferredFrequency] || "";
+  const noticeLabel = NOTICE_LABELS[minNotice] || "";
 
   const badgeMap: Record<string, boolean> = {};
   badges.forEach(b => { badgeMap[b.badge_key] = true; });
@@ -177,7 +197,7 @@ export default function PublicSitterProfile() {
   // SEO
   const animalLabels = animalTypes.map(a => ANIMAL_LABELS[a] || a).join(", ");
   const pageTitle = `${firstName} — Gardien à ${city || "France"} | Guardiens`;
-  const pageDesc = `${firstName} garde des ${animalLabels || "animaux"} à ${city || "France"} dans un rayon de ${radius}km. Profil vérifié sur Guardiens.fr.`;
+  const pageDesc = `${firstName} garde des ${animalLabels || "animaux"} à ${city || "France"}${radius ? ` dans un rayon de ${radius}km` : ""}. Profil vérifié sur Guardiens.fr.`;
   const pageUrl = `${SITE_URL}/gardiens/${id}`;
 
   const jsonLd = {
@@ -435,8 +455,10 @@ export default function PublicSitterProfile() {
             <div className="border-b border-border pb-4 mb-4">
               <p className="text-xs uppercase tracking-widest text-muted-foreground mb-2">Profil</p>
               <div className="text-sm text-foreground/70 space-y-0.5">
-                {typeLine && <p>{typeLine}</p>}
+               {typeLine && <p>{typeLine}</p>}
                 {durationLabel && <p>{durationLabel}</p>}
+                {frequencyLabel && <p>{frequencyLabel}</p>}
+                {noticeLabel && <p>{noticeLabel}</p>}
               </div>
             </div>
           )}
@@ -518,22 +540,39 @@ export default function PublicSitterProfile() {
                   </span>
                 )}
               </div>
-              {(hasVehicle || radius > 0) && (
-                <div className="mt-3 flex items-center gap-2 text-sm text-muted-foreground">
-                  {hasVehicle ? (
-                    <>
-                      <Car className="w-4 h-4" />
-                      <span>Avec véhicule — rayon {radius}km</span>
-                    </>
-                  ) : radius > 0 ? (
-                    <>
-                      <MapPin className="w-4 h-4" />
-                      <span>Rayon {radius}km</span>
-                    </>
-                  ) : null}
-                </div>
-              )}
+              <div className="mt-3 flex items-center gap-2 text-sm text-muted-foreground">
+                {hasVehicle ? (
+                  <>
+                    <Car className="w-4 h-4" />
+                    <span>Avec véhicule{radius ? ` — rayon ${radius}km` : ""}</span>
+                  </>
+                ) : radius ? (
+                  <>
+                    <MapPin className="w-4 h-4" />
+                    <span>Rayon {radius}km</span>
+                  </>
+                ) : (
+                  <span className="text-muted-foreground">Rayon : Non renseigné</span>
+                )}
+              </div>
             </div>
+          )}
+
+          {/* Compétences */}
+          {competences.length > 0 && (
+            <>
+              <hr className="border-border" />
+              <div>
+                <p className="text-xs uppercase tracking-widest text-muted-foreground mb-3">Compétences</p>
+                <div className="flex flex-wrap gap-2">
+                  {competences.map(c => (
+                    <span key={c} className="border border-border rounded-full text-sm px-3 py-1 text-foreground/80">
+                      {c}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </>
           )}
 
           <hr className="border-border" />
