@@ -380,7 +380,6 @@ const SitterDashboard = () => {
 
       {/* Emergency active section */}
       {hasEmergencyProfile && <EmergencyDashSection />}
-      </div>
 
       {/* Applications - PRIORITY section */}
       <DashSection title="Mes candidatures" action={
