@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Link } from "react-router-dom";
 import EmergencyActivation from "./EmergencyActivation";
+import CancelSitModal from "@/components/sits/CancelSitModal";
 import EmergencyDashSection from "./EmergencyDashSection";
 import MissionsNearbySection from "./MissionsNearbySection";
 import ResourceSection from "@/components/shared/ResourceSection";
