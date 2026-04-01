@@ -360,11 +360,21 @@ export default function PublicSitterProfile() {
             {/* Badges statut */}
             {activeBadgeKeys.length > 0 && (
               <div className="flex items-center gap-2 mt-1">
-                {activeBadgeKeys.map(k => (
-                  <div key={k} className="flex items-center gap-1">
-                    <BadgeTimbre id={k} unlocked size="compact" showTooltip={false} />
-                  </div>
-                ))}
+                {badgeMap["id_verifiee"] && (
+                  <span className="inline-flex items-center gap-1 text-xs text-muted-foreground border border-border rounded-full px-2 py-0.5">
+                    <Shield size={11} className="text-primary" /> ID vérifiée
+                  </span>
+                )}
+                {badgeMap["fondateur"] && (
+                  <span className="inline-flex items-center gap-1 text-xs text-muted-foreground border border-border rounded-full px-2 py-0.5">
+                    <Star size={11} className="text-primary" /> Fondateur
+                  </span>
+                )}
+                {badgeMap["gardien_urgence"] && (
+                  <span className="inline-flex items-center gap-1 text-xs text-muted-foreground border border-border rounded-full px-2 py-0.5">
+                    <Shield size={11} className="text-primary" /> Gardien d'urgence
+                  </span>
+                )}
               </div>
             )}
 
