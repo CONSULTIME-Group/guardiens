@@ -322,7 +322,9 @@ const OwnerDashboard = () => {
                   {pet.photo_url ? (
                     <img src={pet.photo_url} alt={pet.name} className="w-[50px] h-[50px] rounded-full object-cover shrink-0" />
                   ) : (
-                    <div className="w-[50px] h-[50px] rounded-full bg-accent flex items-center justify-center text-lg shrink-0">🐾</div>
+                    <div className="w-[50px] h-[50px] rounded-full bg-accent flex items-center justify-center shrink-0">
+                      <PawPrint className="h-5 w-5 text-muted-foreground" />
+                    </div>
                   )}
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium">{pet.name || "Sans nom"}
