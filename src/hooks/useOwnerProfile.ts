@@ -69,6 +69,7 @@ const defaultData: OwnerProfileData = {
   first_name: "", last_name: "", city: "", postal_code: "", bio: "", avatar_url: "",
   property_type: "", environment: "", rooms_count: 0, bedrooms_count: 0, car_required: false,
   accessible: false, equipments: [], photos: [], description: "", region_highlights: "",
+  environments: [],
   preferred_sitter_types: [], presence_expected: "", experience_required: false,
   specific_expectations: "", visits_allowed: "", overnight_guest: "", space_usage: [],
   smoker_accepted: "", rules_notes: "",
