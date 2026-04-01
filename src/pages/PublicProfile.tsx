@@ -326,7 +326,7 @@ const PublicProfile = () => {
                     {sitterProfile.handover_preference && (
                       <Card>
                         <h3 className="font-heading font-semibold text-sm mb-1 text-foreground">Comment j'aime arriver</h3>
-                        <p className="text-sm">{sitterProfile.handover_preference}</p>
+                        <p className="text-sm text-muted-foreground">{sitterProfile.handover_preference}</p>
                       </Card>
                     )}
 
@@ -352,8 +352,8 @@ const PublicProfile = () => {
                                   {pa.species === "dog" ? "🐕" : pa.species === "cat" ? "🐱" : "🐾"}
                                 </div>
                               )}
-                              <span className="text-xs font-medium">{pa.name}</span>
-                              {pa.breed && <span className="text-[10px]">{pa.breed}</span>}
+                              <span className="text-xs font-medium text-foreground">{pa.name}</span>
+                              {pa.breed && <span className="text-[10px] text-muted-foreground">{pa.breed}</span>}
                             </div>
                           ))}
                         </div>
@@ -364,7 +364,7 @@ const PublicProfile = () => {
                     <PublicExperiences experiences={externalExperiences} />
                   </>
                 ) : (
-                  <p className="text-sm italic">Profil gardien non complété.</p>
+                  <p className="text-sm italic text-muted-foreground">Profil gardien non complété.</p>
                 )}
               </TabsContent>
             )}
@@ -387,13 +387,13 @@ const PublicProfile = () => {
                             </div>
                           )}
                           <div>
-                            <p className="font-medium text-sm">{pet.name}</p>
+                            <p className="font-medium text-sm text-foreground">{pet.name}</p>
                             <p className="text-xs">
                               {speciesLabels[pet.species]?.slice(2) || pet.species}
                               {pet.breed && ` · ${pet.breed}`}
                               {pet.age && ` · ${pet.age} an${pet.age > 1 ? "s" : ""}`}
                             </p>
-                            {pet.character && <p className="text-xs mt-0.5">{pet.character}</p>}
+                            {pet.character && <p className="text-xs mt-0.5 text-muted-foreground">{pet.character}</p>}
                           </div>
                         </div>
                       ))}
@@ -407,11 +407,11 @@ const PublicProfile = () => {
                     <h3 className="font-heading font-semibold text-sm mb-2 flex items-center gap-2 text-foreground">
                       <Home className="h-4 w-4" /> Le logement
                     </h3>
-                    <div className="text-sm mb-2">
+                    <div className="text-sm mb-2 text-muted-foreground">
                       <span className="capitalize font-medium">{prop.type}</span>
                       {prop.environment && <span> · {prop.environment}</span>}
                     </div>
-                    {prop.description && <p className="text-sm mb-3">{prop.description}</p>}
+                    {prop.description && <p className="text-sm mb-3 text-muted-foreground">{prop.description}</p>}
                     {prop.photos?.length > 0 && (
                       <div className="flex gap-2 overflow-x-auto pb-2 -mx-1">
                         {prop.photos.slice(0, 6).map((url: string, i: number) => (
@@ -435,7 +435,7 @@ const PublicProfile = () => {
                     {ownerProfile.welcome_notes && (
                       <Card>
                         <h3 className="font-heading font-semibold text-sm mb-1 text-foreground">Comment j'accueille</h3>
-                        <p className="text-sm">{ownerProfile.welcome_notes}</p>
+                        <p className="text-sm text-muted-foreground">{ownerProfile.welcome_notes}</p>
                       </Card>
                     )}
                     {ownerProfile.rules_notes && (
