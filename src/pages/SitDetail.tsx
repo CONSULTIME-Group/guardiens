@@ -366,22 +366,9 @@ const SitDetail = () => {
         />
       )}
 
-        {/* Candidatures tab (owner only) */}
-        {isOwner && (
-          <TabsContent value="candidatures" className="mt-6">
-            <ApplicationsList
-              sitId={sit.id}
-              sitTitle={sit.title}
-              petNames={pets.map((p: any) => p.name)}
-              startDate={formatDate(sit.start_date)}
-              endDate={formatDate(sit.end_date)}
-              propertyId={sit.property_id}
-            />
-          </TabsContent>
-        )}
-
-        {/* Animals tab */}
-        <TabsContent value="animals" className="mt-6">
+      {/* Animals tab */}
+      {activeTab === "animals" && (
+        <div className="space-y-4">
           {pets.length > 0 ? (
             <div className="space-y-4">
               {pets.map((pet: any) => (
@@ -437,10 +424,12 @@ const SitDetail = () => {
           ) : (
             <p className="text-sm text-muted-foreground italic py-8 text-center">Aucun animal renseigné pour cette garde.</p>
           )}
-        </TabsContent>
+        </div>
+      )}
 
-        {/* Housing tab */}
-        <TabsContent value="housing" className="mt-6 space-y-6">
+      {/* Housing tab */}
+      {activeTab === "housing" && (
+        <div className="space-y-6">
           {isOwner && (
             <div className="bg-muted/30 rounded-xl p-4 mb-4 border border-border">
               <p className="text-sm text-muted-foreground mb-3">
@@ -526,10 +515,12 @@ const SitDetail = () => {
           {owner?.city && owner?.postal_code && (
             <LocationProfileCard city={owner.city} postalCode={owner.postal_code} />
           )}
-        </TabsContent>
+        </div>
+      )}
 
-        {/* Expectations tab */}
-        <TabsContent value="expectations" className="mt-6 space-y-6">
+      {/* Expectations tab */}
+      {activeTab === "expectations" && (
+        <div className="space-y-6">
           {(ownerProfile || sit.specific_expectations) && (
             <div className="bg-card rounded-xl border border-border p-5">
               <div className="flex items-center gap-2 mb-3">
@@ -579,10 +570,12 @@ const SitDetail = () => {
               </div>
             </div>
           )}
-        </TabsContent>
+        </div>
+      )}
 
-        {/* Reviews tab */}
-        <TabsContent value="reviews" className="mt-6">
+      {/* Reviews tab */}
+      {activeTab === "reviews" && (
+        <div>
           <ReviewsDisplay userId={sit.user_id} showAnimalCare={false} />
           {sit.status === "completed" && user && (
             <div className="mt-4">
@@ -593,8 +586,8 @@ const SitDetail = () => {
               </Link>
             </div>
           )}
-        </TabsContent>
-      </Tabs>
+        </div>
+      )}
 
       {/* Guide de la maison (owner only) */}
       {isOwner && (
