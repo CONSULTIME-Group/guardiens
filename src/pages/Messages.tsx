@@ -570,7 +570,7 @@ const Messages = () => {
                   <div key={msg.id}>
                     {showDaySep && <DaySeparator date={msg.created_at} />}
                     <div className="py-1">
-                      <MessageBubble msg={msg} isMe={isMe} />
+                      <MessageBubble msg={msg} isMe={isMe} readerRole={activeConv.owner_id === user?.id ? "proprio" : "gardien"} />
                     </div>
                   </div>
                 );
