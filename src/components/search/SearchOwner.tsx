@@ -467,8 +467,8 @@ const SearchOwner = () => {
           </div>
         </div>
         <div className="flex items-center gap-1 border border-border rounded-lg p-0.5">
-          <button onClick={() => setViewMode("list")} className={`p-1.5 rounded ${viewMode === "list" ? "bg-muted" : ""}`}><LayoutGrid className="h-4 w-4" /></button>
-          <button onClick={() => setViewMode("map")} className={`p-1.5 rounded ${viewMode === "map" ? "bg-muted" : ""}`}><MapIcon className="h-4 w-4" /></button>
+          <button onClick={() => setViewMode("list")} aria-label="Vue grille" className={`p-1.5 rounded ${viewMode === "list" ? "bg-muted" : ""}`}><LayoutGrid className="h-4 w-4" /></button>
+          <button onClick={() => setViewMode("map")} aria-label="Vue carte" className={`p-1.5 rounded ${viewMode === "map" ? "bg-muted" : ""}`}><MapIcon className="h-4 w-4" /></button>
         </div>
       </div>
 

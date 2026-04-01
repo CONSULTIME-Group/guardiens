@@ -72,6 +72,7 @@ const SearchSitter = () => {
   const [userCity, setUserCity] = useState("");
   const [userCoords, setUserCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [sitterEligible, setSitterEligible] = useState(false);
+  const [userCompletedSits, setUserCompletedSits] = useState(0);
   const [sitterProfile, setSitterProfile] = useState<any>(null);
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const initialLoadDone = useRef(false);
@@ -159,6 +160,7 @@ const SearchSitter = () => {
         if (coords) setUserCoords(coords);
       }
       const completedSits = (eligRes.data || []).filter((a: any) => a.sit?.status === "completed").length;
+      setUserCompletedSits(completedSits);
       const reviews = reviewsRes.data || [];
       const avgRating = reviews.length > 0 ? reviews.reduce((s: number, r: any) => s + r.overall_rating, 0) / reviews.length : 0;
       const verified = myProfileRes.data?.identity_verified || false;
@@ -292,6 +294,13 @@ const SearchSitter = () => {
       final = final.filter((item: any) => {
         const envs: string[] = item.environments || [];
         return envs.some((e: string) => environments.includes(e));
+      });
+    }
+    // Filter by min_gardien_sits: only show sits where user meets the requirement
+    if (user) {
+      final = final.filter((item: any) => {
+        const minRequired = (item as any).min_gardien_sits || 0;
+        return userCompletedSits >= minRequired;
       });
     }
     final = sortResults(final, sort);
@@ -935,12 +944,14 @@ const SearchSitter = () => {
         <div className="flex border border-border rounded-lg overflow-hidden shrink-0">
           <button
             onClick={() => setViewMode("list")}
+            aria-label="Vue grille"
             className={`p-2 transition-colors ${viewMode === "list" ? "bg-primary text-primary-foreground" : "bg-card text-muted-foreground"}`}
           >
             <LayoutGrid className="h-4 w-4" />
           </button>
           <button
             onClick={() => setViewMode("map")}
+            aria-label="Vue carte"
             className={`p-2 transition-colors ${viewMode === "map" ? "bg-primary text-primary-foreground" : "bg-card text-muted-foreground"}`}
           >
             <MapIcon className="h-4 w-4" />

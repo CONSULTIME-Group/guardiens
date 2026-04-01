@@ -174,7 +174,7 @@ const PublicProfile = () => {
         })}</script>
       </Helmet>
 
-      <div className="min-h-screen" style={{ backgroundColor: "#FAF9F6" }}>
+      <div className="min-h-screen bg-background">
         <div className="max-w-3xl mx-auto px-4 py-6 md:py-10 pb-24 space-y-6">
 
           {/* Back button */}
@@ -187,19 +187,19 @@ const PublicProfile = () => {
             {profile.avatar_url ? (
               <img src={profile.avatar_url} alt={`Photo de ${firstName}`} className="w-24 h-24 rounded-full object-cover shadow-md border-2 border-white shrink-0" />
             ) : (
-              <div className="w-24 h-24 rounded-full bg-white border-2 border-border flex items-center justify-center font-heading text-3xl font-bold shrink-0 shadow-sm" style={{ color: "#1C1B18" }}>
+              <div className="w-24 h-24 rounded-full bg-white border-2 border-border flex items-center justify-center font-heading text-3xl font-bold shrink-0 shadow-sm text-foreground">
                 {firstName.charAt(0)}
               </div>
             )}
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
-                <h1 className="font-heading text-2xl font-bold" style={{ color: "#1C1B18" }}>{firstName}</h1>
+                <h1 className="font-heading text-2xl font-bold text-foreground">{firstName}</h1>
                 {profile.identity_verified && <StatusShield type="verified" />}
                 {profile.is_founder && <StatusShield type="founder" />}
                 {isEmergencySitter && <StatusShield type="emergency" />}
               </div>
 
-              <div className="flex items-center gap-3 text-sm mt-1 flex-wrap" style={{ color: "#6B7280" }}>
+              <div className="flex items-center gap-3 text-sm mt-1 flex-wrap text-muted-foreground">
                 {(profile.postal_code || profile.city) && (
                   <span className="flex items-center gap-1">
                     <MapPin className="h-3.5 w-3.5" />
@@ -213,7 +213,7 @@ const PublicProfile = () => {
               </div>
 
               {profile.bio && (
-                <p className="text-sm italic mt-2" style={{ color: "#4B5563" }}>{profile.bio}</p>
+                <p className="text-sm italic mt-2 text-muted-foreground">{profile.bio}</p>
               )}
 
               {/* Skills section */}
@@ -222,8 +222,8 @@ const PublicProfile = () => {
               )}
 
               <div className="flex gap-2 mt-2">
-                {isSitter && <span className="px-2.5 py-1 rounded-full text-xs font-medium" style={{ backgroundColor: "#D8F3DC", color: "#2D6A4F" }}>🏡 Gardien</span>}
-                {isOwner && <span className="px-2.5 py-1 rounded-full text-xs font-medium" style={{ backgroundColor: "#DBEAFE", color: "#1E40AF" }}>🐾 Propriétaire</span>}
+                {isSitter && <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary">🏡 Gardien</span>}
+                {isOwner && <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-700">🐾 Propriétaire</span>}
               </div>
             </div>
 
@@ -235,7 +235,7 @@ const PublicProfile = () => {
           </div>
 
           {/* === METRICS BAR === */}
-          <div className="grid grid-cols-4 divide-x rounded-xl border bg-white p-0 shadow-sm" style={{ borderColor: "#E6E2D9" }}>
+          <div className="grid grid-cols-4 divide-x rounded-xl border border-border bg-white p-0 shadow-sm">
             <MetricCell label="Gardes" value={String(totalSits)} />
             <MetricCell
               label="Note"
@@ -244,8 +244,8 @@ const PublicProfile = () => {
             />
             <MetricCell
               label="Annulations"
-              value={String(profile.cancellation_count || 0)}
-              valueColor={(profile.cancellation_count || 0) === 0 ? "#16A34A" : "#EA580C"}
+              value={String((profile.cancellation_count || 0) + (profile.cancellations_as_proprio || 0))}
+              variant={(profile.cancellation_count || 0) + (profile.cancellations_as_proprio || 0) === 0 ? "success" : "warning"}
             />
             <MetricCell label="Avis" value={String(reviewStats.count)} />
           </div>
@@ -259,14 +259,14 @@ const PublicProfile = () => {
 
           {/* === BADGES === */}
           {badgeCounts.length > 0 && (
-            <div className="rounded-xl border bg-white p-5 shadow-sm" style={{ borderColor: "#E6E2D9" }}>
+            <div className="rounded-xl border border-border bg-white p-5 shadow-sm">
               <BadgeShieldGrid badges={badgeCounts} title={isSitter ? "Ses badges" : "Ses badges"} />
             </div>
           )}
 
           {/* === TABS === */}
           <Tabs defaultValue={isSitter ? "sitter" : "owner"} className="w-full">
-            <TabsList className="w-full bg-white border shadow-sm rounded-xl" style={{ borderColor: "#E6E2D9" }}>
+            <TabsList className="w-full bg-white border border-border shadow-sm rounded-xl">
               {isSitter && <TabsTrigger value="sitter" className="flex-1 gap-1.5 data-[state=active]:border-b-2 data-[state=active]:border-primary">Gardien</TabsTrigger>}
               {isOwner && <TabsTrigger value="owner" className="flex-1 gap-1.5 data-[state=active]:border-b-2 data-[state=active]:border-primary">Propriétaire</TabsTrigger>}
               <TabsTrigger value="reviews" className="flex-1 gap-1.5 data-[state=active]:border-b-2 data-[state=active]:border-primary">Avis ({reviewStats.count})</TabsTrigger>
@@ -291,18 +291,18 @@ const PublicProfile = () => {
                     {/* Motivation */}
                     {sitterProfile.motivation && (
                       <Card>
-                        <h3 className="font-heading font-semibold text-sm mb-1" style={{ color: "#1C1B18" }}>Motivation</h3>
-                        <p className="text-sm whitespace-pre-line" style={{ color: "#4B5563" }}>{sitterProfile.motivation}</p>
+                        <h3 className="font-heading font-semibold text-sm mb-1 text-foreground">Motivation</h3>
+                        <p className="text-sm whitespace-pre-line text-muted-foreground">{sitterProfile.motivation}</p>
                       </Card>
                     )}
 
                     {/* Lifestyle */}
                     {sitterProfile.lifestyle?.length > 0 && (
                       <Card>
-                        <h3 className="font-heading font-semibold text-sm mb-2" style={{ color: "#1C1B18" }}>Mode de vie</h3>
+                        <h3 className="font-heading font-semibold text-sm mb-2 text-foreground">Mode de vie</h3>
                         <div className="flex flex-wrap gap-1.5">
                           {sitterProfile.lifestyle.map((l: string) => (
-                            <span key={l} className="px-2.5 py-1 rounded-full text-xs" style={{ backgroundColor: "#F3F4F6", color: "#374151" }}>
+                            <span key={l} className="px-2.5 py-1 rounded-full text-xs bg-muted text-foreground">
                               {lifestyleLabels[l] || l}
                             </span>
                           ))}
@@ -313,10 +313,10 @@ const PublicProfile = () => {
                     {/* Bonus skills */}
                     {sitterProfile.bonus_skills?.length > 0 && (
                       <Card>
-                        <h3 className="font-heading font-semibold text-sm mb-2" style={{ color: "#1C1B18" }}>Compétences bonus</h3>
+                        <h3 className="font-heading font-semibold text-sm mb-2 text-foreground">Compétences bonus</h3>
                         <div className="flex flex-wrap gap-1.5">
                           {sitterProfile.bonus_skills.map((s: string) => (
-                            <span key={s} className="px-2.5 py-1 rounded-full text-xs font-medium" style={{ backgroundColor: "#D8F3DC", color: "#2D6A4F" }}>{s}</span>
+                            <span key={s} className="px-2.5 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary">{s}</span>
                           ))}
                         </div>
                       </Card>
@@ -325,23 +325,23 @@ const PublicProfile = () => {
                     {/* Handover preferences */}
                     {sitterProfile.handover_preference && (
                       <Card>
-                        <h3 className="font-heading font-semibold text-sm mb-1" style={{ color: "#1C1B18" }}>Comment j'aime arriver</h3>
-                        <p className="text-sm" style={{ color: "#4B5563" }}>{sitterProfile.handover_preference}</p>
+                        <h3 className="font-heading font-semibold text-sm mb-1 text-foreground">Comment j'aime arriver</h3>
+                        <p className="text-sm text-muted-foreground">{sitterProfile.handover_preference}</p>
                       </Card>
                     )}
 
                     {/* References */}
                     {sitterProfile.references_text && (
                       <Card>
-                        <h3 className="font-heading font-semibold text-sm mb-1" style={{ color: "#1C1B18" }}>Références</h3>
-                        <p className="text-sm whitespace-pre-line" style={{ color: "#4B5563" }}>{sitterProfile.references_text}</p>
+                        <h3 className="font-heading font-semibold text-sm mb-1 text-foreground">Références</h3>
+                        <p className="text-sm whitespace-pre-line text-muted-foreground">{sitterProfile.references_text}</p>
                       </Card>
                     )}
 
                     {/* Past animals */}
                     {pastAnimals.length > 0 && (
                       <Card>
-                        <h3 className="font-heading font-semibold text-sm mb-3" style={{ color: "#1C1B18" }}>Animaux gardés par le passé</h3>
+                        <h3 className="font-heading font-semibold text-sm mb-3 text-foreground">Animaux gardés par le passé</h3>
                         <div className="flex gap-4 overflow-x-auto pb-2">
                           {pastAnimals.map(pa => (
                             <div key={pa.id} className="flex flex-col items-center gap-1.5 shrink-0">
@@ -352,8 +352,8 @@ const PublicProfile = () => {
                                   {pa.species === "dog" ? "🐕" : pa.species === "cat" ? "🐱" : "🐾"}
                                 </div>
                               )}
-                              <span className="text-xs font-medium" style={{ color: "#1C1B18" }}>{pa.name}</span>
-                              {pa.breed && <span className="text-[10px]" style={{ color: "#6B7280" }}>{pa.breed}</span>}
+                              <span className="text-xs font-medium text-foreground">{pa.name}</span>
+                              {pa.breed && <span className="text-[10px] text-muted-foreground">{pa.breed}</span>}
                             </div>
                           ))}
                         </div>
@@ -364,7 +364,7 @@ const PublicProfile = () => {
                     <PublicExperiences experiences={externalExperiences} />
                   </>
                 ) : (
-                  <p className="text-sm italic" style={{ color: "#6B7280" }}>Profil gardien non complété.</p>
+                  <p className="text-sm italic text-muted-foreground">Profil gardien non complété.</p>
                 )}
               </TabsContent>
             )}
@@ -375,7 +375,7 @@ const PublicProfile = () => {
                 {/* Pets */}
                 {pets.length > 0 && (
                   <Card>
-                    <h3 className="font-heading font-semibold text-sm mb-3" style={{ color: "#1C1B18" }}>Les animaux</h3>
+                    <h3 className="font-heading font-semibold text-sm mb-3 text-foreground">Les animaux</h3>
                     <div className="grid gap-3">
                       {pets.map(pet => (
                         <div key={pet.id} className="flex items-center gap-3">
@@ -387,13 +387,13 @@ const PublicProfile = () => {
                             </div>
                           )}
                           <div>
-                            <p className="font-medium text-sm" style={{ color: "#1C1B18" }}>{pet.name}</p>
-                            <p className="text-xs" style={{ color: "#6B7280" }}>
+                            <p className="font-medium text-sm text-foreground">{pet.name}</p>
+                            <p className="text-xs text-muted-foreground">
                               {speciesLabels[pet.species]?.slice(2) || pet.species}
                               {pet.breed && ` · ${pet.breed}`}
                               {pet.age && ` · ${pet.age} an${pet.age > 1 ? "s" : ""}`}
                             </p>
-                            {pet.character && <p className="text-xs mt-0.5" style={{ color: "#4B5563" }}>{pet.character}</p>}
+                            {pet.character && <p className="text-xs mt-0.5 text-muted-foreground">{pet.character}</p>}
                           </div>
                         </div>
                       ))}
@@ -404,14 +404,14 @@ const PublicProfile = () => {
                 {/* Properties */}
                 {properties.map(prop => (
                   <Card key={prop.id}>
-                    <h3 className="font-heading font-semibold text-sm mb-2 flex items-center gap-2" style={{ color: "#1C1B18" }}>
+                    <h3 className="font-heading font-semibold text-sm mb-2 flex items-center gap-2 text-foreground">
                       <Home className="h-4 w-4" /> Le logement
                     </h3>
-                    <div className="text-sm mb-2" style={{ color: "#4B5563" }}>
+                    <div className="text-sm mb-2 text-muted-foreground">
                       <span className="capitalize font-medium">{prop.type}</span>
                       {prop.environment && <span> · {prop.environment}</span>}
                     </div>
-                    {prop.description && <p className="text-sm mb-3" style={{ color: "#4B5563" }}>{prop.description}</p>}
+                    {prop.description && <p className="text-sm mb-3 text-muted-foreground">{prop.description}</p>}
                     {prop.photos?.length > 0 && (
                       <div className="flex gap-2 overflow-x-auto pb-2 -mx-1">
                         {prop.photos.slice(0, 6).map((url: string, i: number) => (
@@ -422,7 +422,7 @@ const PublicProfile = () => {
                     {prop.equipments?.length > 0 && (
                       <div className="flex flex-wrap gap-1.5 mt-2">
                         {prop.equipments.map((e: string) => (
-                          <span key={e} className="px-2 py-0.5 rounded-full text-xs" style={{ backgroundColor: "#F3F4F6", color: "#374151" }}>{e}</span>
+                          <span key={e} className="px-2 py-0.5 rounded-full text-xs bg-muted text-foreground">{e}</span>
                         ))}
                       </div>
                     )}
@@ -434,14 +434,14 @@ const PublicProfile = () => {
                   <>
                     {ownerProfile.welcome_notes && (
                       <Card>
-                        <h3 className="font-heading font-semibold text-sm mb-1" style={{ color: "#1C1B18" }}>Comment j'accueille</h3>
-                        <p className="text-sm" style={{ color: "#4B5563" }}>{ownerProfile.welcome_notes}</p>
+                        <h3 className="font-heading font-semibold text-sm mb-1 text-foreground">Comment j'accueille</h3>
+                        <p className="text-sm text-muted-foreground">{ownerProfile.welcome_notes}</p>
                       </Card>
                     )}
                     {ownerProfile.rules_notes && (
                       <Card>
-                        <h3 className="font-heading font-semibold text-sm mb-1" style={{ color: "#1C1B18" }}>Règles de la maison</h3>
-                        <p className="text-sm whitespace-pre-line" style={{ color: "#4B5563" }}>{ownerProfile.rules_notes}</p>
+                        <h3 className="font-heading font-semibold text-sm mb-1 text-foreground">Règles de la maison</h3>
+                        <p className="text-sm whitespace-pre-line text-muted-foreground">{ownerProfile.rules_notes}</p>
                       </Card>
                     )}
                   </>
@@ -469,7 +469,7 @@ const PublicProfile = () => {
 
         {/* === STICKY CTA === */}
         {!isOwnProfile && user && (
-          <div className="fixed bottom-0 left-0 right-0 z-40 border-t bg-white/95 backdrop-blur-sm shadow-[0_-2px_10px_rgba(0,0,0,0.05)]" style={{ borderColor: "#E6E2D9" }}>
+          <div className="fixed bottom-0 left-0 right-0 z-40 border-t bg-white/95 backdrop-blur-sm shadow-[0_-2px_10px_rgba(0,0,0,0.05)]">
             <div className="max-w-3xl mx-auto px-4 py-3 flex gap-3">
               {activeSit && (
                 <Button variant="outline" className="flex-1 gap-1.5" asChild>
@@ -491,27 +491,27 @@ const PublicProfile = () => {
 
 /* Helpers */
 const Card = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
-  <div className={`rounded-xl border bg-white p-4 shadow-sm ${className}`} style={{ borderColor: "#E6E2D9" }}>
+  <div className={`rounded-xl border border-border bg-white p-4 shadow-sm ${className}`}>
     {children}
   </div>
 );
 
-const MetricCell = ({ label, value, suffix, valueColor }: { label: string; value: string; suffix?: React.ReactNode; valueColor?: string }) => (
+const MetricCell = ({ label, value, suffix, variant }: { label: string; value: string; suffix?: React.ReactNode; variant?: "success" | "warning" }) => (
   <div className="flex flex-col items-center py-3 gap-0.5">
-    <span className="text-lg font-bold flex items-center" style={{ color: valueColor || "#1C1B18" }}>
+    <span className={`text-lg font-bold flex items-center ${variant === "success" ? "text-green-600" : variant === "warning" ? "text-orange-600" : "text-foreground"}`}>
       {value}{suffix}
     </span>
-    <span className="text-[11px]" style={{ color: "#6B7280" }}>{label}</span>
+    <span className="text-[11px] text-muted-foreground">{label}</span>
   </div>
 );
 
 const InfoCell = ({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) => (
-  <div className="rounded-xl border bg-white p-3 shadow-sm" style={{ borderColor: "#E6E2D9" }}>
-    <div className="flex items-center gap-2 mb-1" style={{ color: "#6B7280" }}>
+  <div className="rounded-xl border border-border bg-white p-3 shadow-sm">
+    <div className="flex items-center gap-2 mb-1 text-muted-foreground">
       {icon}
       <span className="text-xs">{label}</span>
     </div>
-    <p className="text-sm font-medium" style={{ color: "#1C1B18" }}>{value}</p>
+    <p className="text-sm font-medium text-foreground">{value}</p>
   </div>
 );
 
