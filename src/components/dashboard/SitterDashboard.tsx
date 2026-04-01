@@ -189,14 +189,14 @@ const SitterDashboard = () => {
 
   // Priority CTA
   const priorityCTA = profileCompletion < 60
-    ? { label: "Compléter mon profil →", to: "/mon-profil", style: "bg-primary text-primary-foreground" }
+    ? { label: "Compléter mon profil →", to: "/profile", style: "bg-primary text-primary-foreground" }
     : !identityVerified
-    ? { label: "Vérifier mon identité →", to: "/mon-profil#identite", style: "bg-amber-500 text-white" }
+    ? { label: "Vérifier mon identité →", to: "/profile#identite", style: "bg-amber-500 text-white" }
     : totalApps === 0
-    ? { label: "Découvre les gardes disponibles →", to: "/recherche", style: "border border-primary text-primary hover:bg-primary/5" }
+    ? { label: "Découvre les gardes disponibles →", to: "/search", style: "border border-primary text-primary hover:bg-primary/5" }
     : pendingAppsCount > 0
-    ? { label: "Voir mes candidatures →", to: "/mes-gardes", style: "border border-primary text-primary" }
-    : { label: "Explorer les nouvelles annonces →", to: "/recherche", style: "border border-border text-foreground" };
+    ? { label: "Voir mes candidatures →", to: "/sits", style: "border border-primary text-primary" }
+    : { label: "Explorer les nouvelles annonces →", to: "/search", style: "border border-border text-foreground" };
 
   return (
     <div className="space-y-8">
