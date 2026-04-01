@@ -212,7 +212,7 @@ const SitterDashboard = () => {
             rel="noopener noreferrer"
             className="text-xs text-primary hover:underline flex items-center gap-1"
           >
-            Voir mon profil public
+            Voir votre profil public
             <ExternalLink className="w-3 h-3" />
           </a>
         </div>
