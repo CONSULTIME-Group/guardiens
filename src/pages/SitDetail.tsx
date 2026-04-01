@@ -236,11 +236,20 @@ const SitDetail = () => {
         <h1 className="font-heading text-2xl md:text-3xl font-bold">{sit.title || `Garde à ${owner?.city || "..."}`}</h1>
         <div className="flex items-center gap-2 shrink-0">
           {isOwner && (
-            <Link to={`/sits/${sit.id}/edit`}>
-              <Button variant="outline" size="sm" className="gap-1.5">
-                <Pencil className="h-3.5 w-3.5" /> Modifier
-              </Button>
-            </Link>
+            <>
+              <Link to={`/sits/${sit.id}/edit`}>
+                <Button variant="outline" size="sm" className="gap-1.5">
+                  <Pencil className="h-3.5 w-3.5" /> Modifier
+                </Button>
+              </Link>
+              <Link
+                to={`/sits/${sit.id}`}
+                target="_blank"
+                className="text-sm text-primary hover:underline cursor-pointer flex items-center gap-1"
+              >
+                Voir comme un gardien <ExternalLink className="h-3.5 w-3.5" />
+              </Link>
+            </>
           )}
           {user && sit.user_id !== user.id && <ReportButton targetId={sit.id} targetType="sit" />}
         </div>
