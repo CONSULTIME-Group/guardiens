@@ -377,7 +377,7 @@ const SitterDashboard = () => {
                         ? <CheckCircle className="h-3.5 w-3.5 text-primary shrink-0" />
                         : <Circle className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
                       }
-                      <span className={c.ok ? "text-muted-foreground line-through" : "text-foreground"}>{c.label}</span>
+                      <span className={c.ok ? "text-muted-foreground" : "text-foreground"}>{c.label}</span>
                     </div>
                   ))}
                 </div>
