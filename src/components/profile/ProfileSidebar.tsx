@@ -1,4 +1,4 @@
-import { CheckCircle2, Circle, Camera, Eye } from "lucide-react";
+import { CheckCircle2, Circle, Eye } from "lucide-react";
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
