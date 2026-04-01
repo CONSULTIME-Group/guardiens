@@ -416,13 +416,41 @@ const Messages = () => {
             )}
           </div>
 
+          {/* Search filter */}
+          <div className="px-3 py-2 border-b border-border">
+            <Input
+              value={searchFilter}
+              onChange={e => setSearchFilter(e.target.value)}
+              placeholder="Filtrer par annonce ou prénom..."
+              className="h-8 text-xs rounded-lg"
+            />
+          </div>
+
           <div className="flex-1 overflow-y-auto">
-            {filteredConversations.length === 0 ? (
+            {displayConversations.length === 0 ? (
               <div className="p-6 text-center text-sm text-muted-foreground">
                 {filter === "archived" ? "Aucune conversation archivée." : "Aucune conversation pour le moment."}
               </div>
             ) : (
-              filteredConversations.map(conv => {
+              (() => {
+                // Group by sit
+                const groups = new Map<string, { title: string; convs: typeof displayConversations; unreadCount: number }>();
+                const noSitGroup: typeof displayConversations = [];
+                displayConversations.forEach(conv => {
+                  if (conv.sit_id && conv.sit?.title) {
+                    const existing = groups.get(conv.sit_id);
+                    if (existing) {
+                      existing.convs.push(conv);
+                      existing.unreadCount += conv.unread_count;
+                    } else {
+                      groups.set(conv.sit_id, { title: conv.sit.title, convs: [conv], unreadCount: conv.unread_count });
+                    }
+                  } else {
+                    noSitGroup.push(conv);
+                  }
+                });
+
+                const renderConvItem = (conv: Conversation) => {
                 const hasUnread = conv.unread_count > 0;
                 const appInfo = conv.application_status ? appStatusLabels[conv.application_status] : null;
                 const topBadgeDef = conv.top_badge ? getBadgeDef(conv.top_badge.badge_key) : null;
