@@ -531,8 +531,8 @@ const SitterDashboard = () => {
                 <Search className="h-7 w-7 text-primary/60" />
               </div>
               <div>
-                <p className="text-sm font-medium text-foreground/80">Pas encore d'annonce dans ta zone</p>
-                <p className="text-xs text-muted-foreground mt-1.5 max-w-xs mx-auto">Active le mode disponible pour être contacté directement par les proprios.</p>
+                 <p className="text-sm font-medium text-foreground/80">Pas encore d'annonce dans votre zone</p>
+                 <p className="text-xs text-muted-foreground mt-1.5 max-w-xs mx-auto">Activez le mode disponible pour être contacté directement par les propriétaires.</p>
               </div>
               <Link to="/search">
                 <span className="inline-block border border-border rounded-full px-4 py-2 text-sm text-foreground hover:border-primary transition-colors mt-1">
