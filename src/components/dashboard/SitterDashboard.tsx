@@ -344,13 +344,13 @@ const SitterDashboard = () => {
           </div>
 
           {/* Gardien d'urgence */}
-          <div className={`border rounded-2xl p-4 ${allEmergencyDone || hasEmergencyProfile ? "bg-amber-50 dark:bg-amber-950/30 border-amber-200 dark:border-amber-800" : "bg-card border-border"}`}>
-            <p className="text-xs text-muted-foreground uppercase tracking-wide mb-3">Statut d'urgence</p>
-            {hasEmergencyProfile ? (
-              <div>
-                <div className="flex items-center gap-2 mb-2">
-                  <Zap className="h-5 w-5 text-amber-600 dark:text-amber-400" />
-                  <p className="text-sm font-semibold text-amber-800 dark:text-amber-200">Statut actif ✓</p>
+           <div className={`border rounded-2xl p-4 ${allEmergencyDone || hasEmergencyProfile ? "bg-amber-50 border-amber-200" : "bg-card border-border"}`}>
+             <p className="text-xs text-muted-foreground uppercase tracking-wide mb-3">Statut d'urgence</p>
+             {hasEmergencyProfile ? (
+               <div>
+                 <div className="flex items-center gap-2 mb-2">
+                   <Zap className="h-5 w-5 text-amber-600" />
+                   <p className="text-sm font-semibold text-amber-800">Statut actif ✓</p>
                 </div>
                 <Link to="/profile#urgence" className="text-xs text-primary hover:underline">Gérer →</Link>
               </div>
