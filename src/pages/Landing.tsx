@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, ArrowLeft, Home, Key, Handshake } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+
 import PageMeta from "@/components/PageMeta";
 import useEmblaCarousel from "embla-carousel-react";
 import heroDogBbq from "@/assets/hero-dog-bbq.jpg";
@@ -81,127 +81,10 @@ const RevealSection = ({ children, className = "", delay = 0 }: { children: Reac
   );
 };
 
-const HowItWorksSection = ({ dynamicCounts }: { dynamicCounts: { maisons: number; animaux: number; missions: number } | null }) => {
-  const [activeTab, setActiveTab] = useState<"owner" | "sitter">("owner");
 
-  return (
-    <section className="py-24 md:py-32 bg-[#FAF9F6]">
-      <div className="max-w-5xl mx-auto px-6">
-        <RevealSection>
-          <span className="text-xs tracking-widest uppercase text-primary/60 font-body mb-4 block text-center">
-            Comment ça marche
-          </span>
-          <h2 className="text-4xl md:text-5xl font-heading font-semibold leading-snug text-foreground text-center mb-12">
-            Trois étapes. Une rencontre.
-          </h2>
-
-          <div className="flex justify-center gap-2 mb-0">
-            <button
-              onClick={() => setActiveTab("owner")}
-              className={`rounded-full px-6 py-2 text-sm font-body font-medium transition-colors ${
-                activeTab === "owner"
-                  ? "bg-primary text-white"
-                  : "bg-transparent text-foreground/60 border border-foreground/20"
-              }`}
-            >
-              J'ai une maison à faire garder
-            </button>
-            <button
-              onClick={() => setActiveTab("sitter")}
-              className={`rounded-full px-6 py-2 text-sm font-body font-medium transition-colors ${
-                activeTab === "sitter"
-                  ? "bg-primary text-white"
-                  : "bg-transparent text-foreground/60 border border-foreground/20"
-              }`}
-            >
-              Je veux garder
-            </button>
-          </div>
-        </RevealSection>
-
-        {activeTab === "owner" && (
-          <div className="max-w-lg mx-auto mt-12">
-            <div className="mb-10">
-              <span className="text-6xl font-heading text-foreground/20 leading-none mb-1 block">01</span>
-              <h3 className="text-2xl font-heading font-semibold text-foreground mb-2">Tu publies.</h3>
-              <p className="text-lg font-body text-foreground/70 leading-relaxed">Ta maison, tes animaux, tes dates. Cinq minutes.</p>
-            </div>
-            <div className="mb-10">
-              <span className="text-6xl font-heading text-foreground/20 leading-none mb-1 block">02</span>
-              <h3 className="text-2xl font-heading font-semibold text-foreground mb-2">Tu choisis.</h3>
-              <p className="text-lg font-body text-foreground/70 leading-relaxed">Des profils du quartier. Tu lis, tu échanges, tu rencontres. C'est toi qui décides.</p>
-            </div>
-            <div className="mb-10">
-              <span className="text-6xl font-heading text-foreground/20 leading-none mb-1 block">03</span>
-              <h3 className="text-2xl font-heading font-semibold text-foreground mb-2">Tu pars vraiment.</h3>
-              <p className="text-lg font-body text-foreground/70 leading-relaxed">L'esprit léger. Sans culpabilité.</p>
-            </div>
-            <Link
-              to="/inscription?role=owner"
-              className="bg-primary text-white rounded-full px-8 py-3 font-body font-medium mt-8 inline-block"
-            >
-              Je cherche un gardien
-            </Link>
-          </div>
-        )}
-
-        {activeTab === "sitter" && (
-          <div className="max-w-lg mx-auto mt-12">
-            <div className="mb-10">
-              <span className="text-6xl font-heading text-foreground/20 leading-none mb-1 block">01</span>
-              <h3 className="text-2xl font-heading font-semibold text-foreground mb-2">Tu te présentes.</h3>
-              <p className="text-lg font-body text-foreground/70 leading-relaxed">Qui tu es, ce que tu aimes, où tu veux aller. Cinq minutes.</p>
-            </div>
-            <div className="mb-10">
-              <span className="text-6xl font-heading text-foreground/20 leading-none mb-1 block">02</span>
-              <h3 className="text-2xl font-heading font-semibold text-foreground mb-2">Tu postules.</h3>
-              <p className="text-lg font-body text-foreground/70 leading-relaxed">Des gardes proches de chez toi. Tu choisis celles qui te ressemblent.</p>
-            </div>
-            <div className="mb-10">
-              <span className="text-6xl font-heading text-foreground/20 leading-none mb-1 block">03</span>
-              <h3 className="text-2xl font-heading font-semibold text-foreground mb-2">Tu rencontres des gens que tu n'aurais jamais croisés autrement.</h3>
-            </div>
-            <Link
-              to="/inscription?role=sitter"
-              className="bg-primary text-white rounded-full px-8 py-3 font-body font-medium mt-8 inline-block"
-            >
-              Je veux garder
-            </Link>
-          </div>
-        )}
-
-        {/* Encart entraide */}
-        <RevealSection className="mt-20">
-          <div className="bg-muted rounded-2xl p-12 max-w-3xl mx-auto text-center">
-            <h3 className="font-heading text-2xl md:text-3xl font-semibold text-foreground mb-4">
-              Un jardin à arroser, un coup de main à donner, une compétence à partager.
-            </h3>
-            <p className="font-body text-base md:text-lg text-foreground/75 leading-relaxed max-w-xl mx-auto mb-6">
-              Jardinage, bricolage, courses, coup de main — les petites missions sont là pour ça. L'échange en nature. Entre gens du coin qui se choisissent.
-            </p>
-            <Link
-              to="/petites-missions"
-              className="text-primary font-body font-semibold text-sm underline underline-offset-4 hover:no-underline inline-flex items-center gap-1"
-            >
-              Découvrir les petites missions <ArrowRight className="h-4 w-4" />
-            </Link>
-            {dynamicCounts && dynamicCounts.missions > 10 && (
-              <p className="font-body text-xs text-foreground/50 mt-4">
-                {dynamicCounts.missions} missions actives en AURA en ce moment
-              </p>
-            )}
-          </div>
-        </RevealSection>
-      </div>
-    </section>
-  );
-};
 
 const Landing = () => {
   const navigate = useNavigate();
-  const [latestArticles, setLatestArticles] = useState<any[]>([]);
-  const [dynamicCounts, setDynamicCounts] = useState<{ maisons: number; animaux: number; missions: number } | null>(null);
-  const lastFetchRef = useRef<number>(0);
 
   /* ── Embla carousel for testimonials ── */
   const [emblaRef, emblaApi] = useEmblaCarousel({
@@ -241,81 +124,6 @@ const Landing = () => {
     return () => { if (autoplayRef.current) clearInterval(autoplayRef.current); };
   }, [emblaApi, isHovered]);
 
-  useEffect(() => {
-    supabase
-      .from("articles")
-      .select("id,title,slug,category,cover_image_url,hero_image_alt,meta_description,created_at")
-      .eq("published", true)
-      .order("created_at", { ascending: false })
-      .limit(3)
-      .then(({ data }) => setLatestArticles(data || []));
-
-    // Dynamic counters with 10-min cache
-    const fetchCounts = async () => {
-      const now = Date.now();
-      if (now - lastFetchRef.current < 10 * 60 * 1000) return;
-      lastFetchRef.current = now;
-
-      try {
-        const sitsRes = await supabase
-          .from("sits")
-          .select("property_id")
-          .in("status", ["confirmed", "completed"]);
-        const distinctProperties = new Set((sitsRes.data || []).map(s => s.property_id));
-        const maisons = 37 + distinctProperties.size;
-
-        const propertyIds = Array.from(distinctProperties);
-        let animaux = 234;
-        if (propertyIds.length > 0) {
-          const petsRes = await supabase
-            .from("pets")
-            .select("id", { count: "exact", head: true })
-            .in("property_id", propertyIds);
-          animaux += (petsRes.count ?? 0);
-        }
-
-        const missionsRes = await supabase
-          .from("small_missions")
-          .select("id", { count: "exact", head: true })
-          .in("status", ["open", "in_progress", "completed"]);
-
-        setDynamicCounts({
-          maisons,
-          animaux,
-          missions: missionsRes.count ?? 0,
-        });
-      } catch {
-        setDynamicCounts({ maisons: 37, animaux: 234, missions: 0 });
-      }
-    };
-    fetchCounts();
-  }, []);
-
-  /* Count-up animation */
-  const CountUp = ({ target, suffix = "" }: { target: number; suffix?: string }) => {
-    const [count, setCount] = useState(0);
-    const { ref, isVisible } = useScrollReveal();
-
-    useEffect(() => {
-      if (!isVisible) return;
-      const duration = 1200;
-      const steps = 40;
-      const increment = target / steps;
-      let current = 0;
-      const timer = setInterval(() => {
-        current += increment;
-        if (current >= target) {
-          setCount(target);
-          clearInterval(timer);
-        } else {
-          setCount(Math.floor(current));
-        }
-      }, duration / steps);
-      return () => clearInterval(timer);
-    }, [isVisible, target]);
-
-    return <span ref={ref}>{count}{suffix}</span>;
-  };
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -475,54 +283,25 @@ const Landing = () => {
             <p className="mt-4 text-xs text-white/60 font-body animate-hero-fade-up animation-delay-1100">
               Gratuit · Badge Fondateur à vie jusqu'au 13 mai.
             </p>
+
+            <div className="flex flex-row justify-center sm:justify-start gap-12 mt-12 animate-hero-fade-up animation-delay-1100">
+              <div className="border-r border-white/20 pr-12">
+                <span className="block text-3xl font-heading font-bold text-white">37</span>
+                <span className="text-xs font-body text-white/50 tracking-wide uppercase mt-1 block">maisons gardées</span>
+              </div>
+              <div className="border-r border-white/20 pr-12">
+                <span className="block text-3xl font-heading font-bold text-white">234</span>
+                <span className="text-xs font-body text-white/50 tracking-wide uppercase mt-1 block">animaux accompagnés</span>
+              </div>
+              <div>
+                <span className="block text-3xl font-heading font-bold text-white">5 ans</span>
+                <span className="text-xs font-body text-white/50 tracking-wide uppercase mt-1 block">en Auvergne-Rhône-Alpes</span>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* ═══════════════ SECTION 2 — CHIFFRES FONDATEURS ═══════════════ */}
-      <section className="pt-24 md:pt-32 pb-0 bg-background">
-        <RevealSection className="max-w-4xl mx-auto px-6">
-          <p className="text-xs font-body font-semibold tracking-widest uppercase text-primary/60 text-center mb-10">
-            Ce qu'on a vécu avant d'ouvrir Guardiens.
-          </p>
-          <div className="flex flex-col md:flex-row items-center justify-center">
-            <div className="text-center px-8 md:px-12 py-4 md:py-0">
-              <span className="block font-heading text-5xl md:text-7xl font-bold text-foreground leading-none">
-                <CountUp target={37} />
-              </span>
-              <span className="font-body text-sm text-foreground/60 tracking-wide">maisons gardées</span>
-            </div>
-            <div className="hidden md:block w-px h-16 bg-border" />
-            <div className="block md:hidden w-16 h-px bg-border my-2" />
-            <div className="text-center px-8 md:px-12 py-4 md:py-0">
-              <span className="block font-heading text-5xl md:text-7xl font-bold text-foreground leading-none">
-                <CountUp target={234} />
-              </span>
-              <span className="font-body text-sm text-foreground/60 tracking-wide">animaux accompagnés</span>
-            </div>
-            <div className="hidden md:block w-px h-16 bg-border" />
-            <div className="block md:hidden w-16 h-px bg-border my-2" />
-            <div className="text-center px-8 md:px-12 py-4 md:py-0">
-              <span className="block font-heading text-5xl md:text-7xl font-bold text-foreground leading-none">
-                5
-              </span>
-              <span className="font-body text-sm text-foreground/60 tracking-wide">ans en AURA</span>
-            </div>
-            {dynamicCounts && dynamicCounts.missions > 10 && (
-              <>
-                <div className="hidden md:block w-px h-16 bg-border" />
-                <div className="block md:hidden w-16 h-px bg-border my-2" />
-                <div className="text-center px-8 md:px-12 py-4 md:py-0">
-                  <span className="block font-heading text-5xl md:text-7xl font-bold text-foreground leading-none">
-                    <CountUp target={dynamicCounts.missions} />
-                  </span>
-                  <span className="font-body text-sm text-foreground/60 tracking-wide">missions échangées</span>
-                </div>
-              </>
-            )}
-          </div>
-        </RevealSection>
-      </section>
 
       {/* ═══════════════ SECTION 2b — CE QU'ON FAIT ENSEMBLE ═══════════════ */}
       <section className="py-24 md:py-32 bg-[#FAF9F6]">
@@ -625,63 +404,6 @@ const Landing = () => {
         </div>
       </section>
 
-      {/* ═══════════════ SECTION 4 — PILIERS ═══════════════ */}
-      <section className="py-24 md:py-32 bg-background">
-        <div className="max-w-6xl mx-auto px-6 md:px-12">
-          <RevealSection className="text-center mb-16">
-            <span className="text-xs tracking-widest uppercase text-primary/60 font-body mb-4 block text-center">
-              Pourquoi Guardiens
-            </span>
-            <h2 className="text-4xl md:text-5xl font-heading font-semibold leading-snug text-foreground text-center mb-6">
-              Un prétexte pour vivre des vies qu'on n'aurait pas vécues.
-            </h2>
-            <div className="max-w-2xl mx-auto mb-16 text-center">
-              <p className="text-xl font-body italic text-foreground/80 mb-6">
-                Parfois extraordinaires. Souvent très ordinaires. Toujours inattendues.
-              </p>
-              <p className="text-lg font-body leading-relaxed text-foreground/85 mb-6">
-                Une maison gardée dans un quartier inconnu. Un échange de compétences avec quelqu'un de deux générations différentes. Un repas partagé avec des gens qu'on ne connaissait pas la semaine d'avant.
-              </p>
-              <p className="text-lg font-body leading-relaxed text-foreground/85">
-                Guardiens existe pour que ces moments arrivent. Pas par hasard — par intention. Celle de rendre service. Et de recevoir sans que ça se négocie. Sans argent qui change de mains. Juste du bon sens, de la confiance, des choses solides entre gens qui se font confiance.
-              </p>
-            </div>
-          </RevealSection>
-
-          <div className="grid lg:grid-cols-3 gap-8">
-            <RevealSection delay={0.1}>
-              <div className="bg-white rounded-2xl p-8 shadow-sm h-full">
-                <h3 className="text-xl font-heading font-semibold text-foreground mb-3">
-                  Des expériences qu'on ne planifie pas.
-                </h3>
-                <p className="text-base font-body leading-relaxed text-foreground/70">
-                  Une rencontre inattendue, un endroit découvert, une compétence apprise d'un inconnu.
-                </p>
-              </div>
-            </RevealSection>
-            <RevealSection delay={0.2}>
-              <div className="bg-white rounded-2xl p-8 shadow-sm h-full">
-                <h3 className="text-xl font-heading font-semibold text-foreground mb-3">
-                  Des gens qu'on n'aurait pas croisés.
-                </h3>
-                <p className="text-base font-body leading-relaxed text-foreground/70">
-                  Pas le même âge, pas le même quartier, pas la même vie. Et pourtant quelque chose passe. C'est souvent là que quelque chose dure.
-                </p>
-              </div>
-            </RevealSection>
-            <RevealSection delay={0.3}>
-              <div className="bg-white rounded-2xl p-8 shadow-sm h-full">
-                <h3 className="text-xl font-heading font-semibold text-foreground mb-3">
-                  Rien qui s'achète.
-                </h3>
-                <p className="text-base font-body leading-relaxed text-foreground/70">
-                  L'échange en nature, le service rendu, la confiance donnée. Ce qui compte ici ne se facture pas.
-                </p>
-              </div>
-            </RevealSection>
-          </div>
-        </div>
-      </section>
 
       {/* ═══════════════ SECTION 4bis — VITRINE DÉMO ═══════════════ */}
       <RevealSection>
@@ -757,8 +479,27 @@ const Landing = () => {
         </div>
       </section>
 
-      {/* ═══════════════ SECTION 6 — COMMENT ÇA MARCHE ═══════════════ */}
-      <HowItWorksSection dynamicCounts={dynamicCounts} />
+      {/* ═══════════════ SECTION 6 — PETITES MISSIONS ═══════════════ */}
+      <section className="py-24 md:py-32 bg-[#FAF9F6]">
+        <div className="max-w-5xl mx-auto px-6">
+          <RevealSection>
+            <div className="bg-white rounded-2xl p-12 max-w-3xl mx-auto text-center shadow-sm">
+              <h3 className="font-heading text-2xl md:text-3xl font-semibold text-foreground mb-4">
+                Un jardin à arroser, un coup de main à donner, une compétence à partager.
+              </h3>
+              <p className="font-body text-base md:text-lg text-foreground/75 leading-relaxed max-w-xl mx-auto mb-6">
+                Jardinage, bricolage, courses, coup de main — les petites missions sont là pour ça. L'échange en nature. Entre gens du coin qui se choisissent.
+              </p>
+              <Link
+                to="/petites-missions"
+                className="text-primary font-body font-semibold text-sm underline underline-offset-4 hover:no-underline inline-flex items-center gap-1"
+              >
+                Découvrir les petites missions <ArrowRight className="h-4 w-4" />
+              </Link>
+            </div>
+          </RevealSection>
+        </div>
+      </section>
 
       {/* ═══════════════ SECTION 7 — ENCART FONDATEUR ═══════════════ */}
       <section className="py-24 md:py-32 bg-primary">
@@ -811,67 +552,7 @@ const Landing = () => {
         </RevealSection>
       </section>
 
-      {/* ═══════════════ ARTICLES RÉCENTS ═══════════════ */}
-      {latestArticles.length > 0 && (
-        <section className="py-24 md:py-32 bg-background">
-          <div className="max-w-5xl mx-auto px-6">
-            <RevealSection>
-              <p className="text-xs tracking-widest uppercase text-primary/60 font-body mb-4 text-center">
-                À lire aussi
-              </p>
-              <h2 className="font-heading text-4xl md:text-5xl font-semibold text-foreground text-center mb-16">
-                Des histoires et des conseils.
-              </h2>
-            </RevealSection>
-            <div className="grid md:grid-cols-3 gap-8">
-              {latestArticles.map((a, i) => {
-                const categoryLabels: Record<string, string> = {
-                  ville: "Ville", guide_race: "Race", vie_locale: "Vie locale",
-                  conseil_gardien: "Conseil", conseil_proprio: "Conseil",
-                  guide_local: "Guide local", thematique: "House-sitting",
-                  conseil: "Conseil", guide_pratique: "Guide",
-                  saisonnier: "Saison",
-                };
-                return (
-                  <RevealSection key={a.id} delay={0.1 * i}>
-                    <Link
-                      to={`/actualites/${a.slug}`}
-                      className="group bg-card rounded-2xl overflow-hidden border border-border hover:-translate-y-1 hover:shadow-lg transition-all duration-300 block h-full"
-                    >
-                      {a.cover_image_url && (
-                        <img
-                          src={a.cover_image_url}
-                          alt={a.hero_image_alt || a.title}
-                          className="w-full h-48 object-cover"
-                        />
-                      )}
-                      <div className="p-6 flex flex-col">
-                        <span className="text-xs uppercase tracking-widest text-primary/60 font-body mb-3">
-                          {categoryLabels[a.category] || "Article"}
-                        </span>
-                        <h3 className="font-heading text-xl font-semibold text-foreground leading-snug mb-3 line-clamp-2">
-                          {a.title}
-                        </h3>
-                        <p className="font-body text-sm text-foreground/70 leading-relaxed line-clamp-3 mb-4">
-                          {a.meta_description || ""}
-                        </p>
-                        <span className="text-primary font-body text-sm font-semibold inline-flex items-center gap-1 group-hover:gap-2 transition-all mt-auto">
-                          Lire <ArrowRight className="h-3.5 w-3.5" />
-                        </span>
-                      </div>
-                    </Link>
-                  </RevealSection>
-                );
-              })}
-            </div>
-            <div className="mt-12 text-center">
-              <Link to="/actualites" className="text-primary font-body font-semibold inline-flex items-center gap-1 hover:gap-2 transition-all">
-                Voir tous les articles <ArrowRight className="h-4 w-4" />
-              </Link>
-            </div>
-          </div>
-        </section>
-      )}
+
 
 
       <footer className="bg-foreground border-t border-white/10">
