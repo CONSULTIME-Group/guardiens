@@ -425,7 +425,7 @@ const Messages = () => {
           <div className="flex items-center justify-between gap-2 mt-0.5">
             <p className={`text-xs truncate ${hasUnread ? "text-foreground font-medium" : "text-muted-foreground"}`}>
               {conv.last_message?.sender_id === user?.id ? "Vous : " : ""}
-              {conv.last_message?.content || "📷 Photo"}
+              {conv.last_message?.content || "Photo"}
             </p>
             {hasUnread && (
               <span className="bg-primary text-primary-foreground text-[10px] rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1 shrink-0 font-bold">
