@@ -494,50 +494,6 @@ const Landing = () => {
         </div>
       </section>
 
-      {/* ═══════════════ SECTION 2 — CHIFFRES FONDATEURS ═══════════════ */}
-      <section className="pt-24 md:pt-32 pb-0 bg-background">
-        <RevealSection className="max-w-4xl mx-auto px-6">
-          <p className="text-xs font-body font-semibold tracking-widest uppercase text-primary/60 text-center mb-10">
-            Ce qu'on a vécu avant d'ouvrir Guardiens.
-          </p>
-          <div className="flex flex-col md:flex-row items-center justify-center">
-            <div className="text-center px-8 md:px-12 py-4 md:py-0">
-              <span className="block font-heading text-5xl md:text-7xl font-bold text-foreground leading-none">
-                <CountUp target={37} />
-              </span>
-              <span className="font-body text-sm text-foreground/60 tracking-wide">maisons gardées</span>
-            </div>
-            <div className="hidden md:block w-px h-16 bg-border" />
-            <div className="block md:hidden w-16 h-px bg-border my-2" />
-            <div className="text-center px-8 md:px-12 py-4 md:py-0">
-              <span className="block font-heading text-5xl md:text-7xl font-bold text-foreground leading-none">
-                <CountUp target={234} />
-              </span>
-              <span className="font-body text-sm text-foreground/60 tracking-wide">animaux accompagnés</span>
-            </div>
-            <div className="hidden md:block w-px h-16 bg-border" />
-            <div className="block md:hidden w-16 h-px bg-border my-2" />
-            <div className="text-center px-8 md:px-12 py-4 md:py-0">
-              <span className="block font-heading text-5xl md:text-7xl font-bold text-foreground leading-none">
-                5
-              </span>
-              <span className="font-body text-sm text-foreground/60 tracking-wide">ans en AURA</span>
-            </div>
-            {dynamicCounts && dynamicCounts.missions > 10 && (
-              <>
-                <div className="hidden md:block w-px h-16 bg-border" />
-                <div className="block md:hidden w-16 h-px bg-border my-2" />
-                <div className="text-center px-8 md:px-12 py-4 md:py-0">
-                  <span className="block font-heading text-5xl md:text-7xl font-bold text-foreground leading-none">
-                    <CountUp target={dynamicCounts.missions} />
-                  </span>
-                  <span className="font-body text-sm text-foreground/60 tracking-wide">missions échangées</span>
-                </div>
-              </>
-            )}
-          </div>
-        </RevealSection>
-      </section>
 
       {/* ═══════════════ SECTION 2b — CE QU'ON FAIT ENSEMBLE ═══════════════ */}
       <section className="py-24 md:py-32 bg-[#FAF9F6]">
