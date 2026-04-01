@@ -17,6 +17,7 @@ import ResetPassword from "./pages/ResetPassword";
 import Dashboard from "./pages/Dashboard";
 import Profile from "./pages/Profile";
 import SearchPage from "./pages/SearchPage";
+import SearchOwner from "./components/search/SearchOwner";
 import Messages from "./pages/Messages";
 import Sits from "./pages/Sits";
 import CreateSit from "./pages/CreateSit";
