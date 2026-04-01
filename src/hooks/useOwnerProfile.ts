@@ -22,6 +22,8 @@ export interface OwnerProfileData {
   photos: string[];
   description: string;
   region_highlights: string;
+  // Owner environments (owner_profiles table)
+  environments: string[];
   // Step 4 - Expectations (owner_profiles table)
   preferred_sitter_types: string[];
   presence_expected: string;
