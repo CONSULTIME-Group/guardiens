@@ -470,7 +470,7 @@ const OwnerDashboard = () => {
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium truncate">{m.title}</p>
                     <p className="text-xs text-muted-foreground">
-                      {m.status === "completed" ? "✅ Terminée" : m.status === "in_progress" ? "🔄 En cours" : `${responseCount} réponse${responseCount > 1 ? "s" : ""}`}
+                      {m.status === "completed" ? "Terminée" : m.status === "in_progress" ? "En cours" : `${responseCount} réponse${responseCount > 1 ? "s" : ""}`}
                       {pendingCount > 0 && <span className="ml-1 text-primary font-medium">· {pendingCount} en attente</span>}
                     </p>
                   </div>
