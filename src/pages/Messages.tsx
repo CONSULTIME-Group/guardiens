@@ -626,14 +626,16 @@ const Messages = () => {
           <MessageSquare className="h-10 w-10 text-muted-foreground" />
           <h2 className="text-lg font-semibold text-foreground">Vos échanges</h2>
           <p className="text-sm text-muted-foreground text-center max-w-xs">
-            Sélectionnez une conversation ou contactez un gardien.
+            Sélectionnez une conversation ou lancez une recherche.
           </p>
-          <Link
-            to="/recherche-gardiens"
-            className="border border-border rounded-full px-4 py-2 text-sm hover:border-primary transition-colors"
-          >
-            Rechercher un gardien →
-          </Link>
+          {pill !== "archived" && (
+            <Link
+              to={pill === "mission" ? "/small-missions" : "/search"}
+              className="border border-border rounded-full px-4 py-2 text-sm hover:border-primary transition-colors"
+            >
+              {pill === "mission" ? "Rechercher une mission →" : "Rechercher une annonce →"}
+            </Link>
+          )}
         </div>
       ) : null}
     </div>
