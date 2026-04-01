@@ -1,0 +1,202 @@
+import { useState, useEffect, useRef } from "react";
+import { MapContainer, TileLayer, Marker, useMap } from "react-leaflet";
+import L from "leaflet";
+import { Link } from "react-router-dom";
+import { MapPin, PawPrint, Cat, Bird, Home } from "lucide-react";
+import { renderToString } from "react-dom/server";
+import "leaflet/dist/leaflet.css";
+
+const speciesIcon: Record<string, typeof PawPrint> = {
+  dog: PawPrint, cat: Cat, horse: PawPrint, bird: Bird, rodent: PawPrint,
+  fish: PawPrint, reptile: PawPrint, farm_animal: Bird, nac: PawPrint,
+};
+
+const DEMO_CITY_COORDS: Record<string, { lat: number; lng: number }> = {
+  "Lyon 6e": { lat: 45.7676, lng: 4.8344 },
+  "Annecy": { lat: 45.8992, lng: 6.1294 },
+  "Grenoble": { lat: 45.1885, lng: 5.7245 },
+};
+
+const createPinIcon = (isActive: boolean) => {
+  const color = isActive ? "#1a1a1a" : "#2D6A4F";
+  return L.divIcon({
+    className: "",
+    iconSize: [36, 36],
+    iconAnchor: [18, 18],
+    html: `<div style="width:36px;height:36px;border-radius:50%;background:${color};border:3px solid white;box-shadow:0 2px 8px rgba(0,0,0,0.2);display:flex;align-items:center;justify-content:center;transition:transform 0.15s;cursor:pointer;">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    </div>`,
+  });
+};
+
+interface MapCenterProps {
+  center: [number, number];
+  zoom: number;
+}
+
+const MapCenterController = ({ center, zoom }: MapCenterProps) => {
+  const map = useMap();
+  useEffect(() => {
+    map.setView(center, zoom);
+  }, [center, zoom, map]);
+  return null;
+};
+
+interface SearchMapViewProps {
+  results: any[];
+  resultCoords: Map<string, { lat: number; lng: number }>;
+  userCoords: { lat: number; lng: number } | null;
+  hasAccess: boolean;
+  formatDate: (d: string | null) => string;
+  tab: string;
+  sitterEligible: boolean;
+  renderCard: (item: any) => React.ReactNode;
+}
+
+const SearchMapView = ({
+  results,
+  resultCoords,
+  userCoords,
+  hasAccess,
+  formatDate,
+  tab,
+  sitterEligible,
+  renderCard,
+}: SearchMapViewProps) => {
+  const [activePin, setActivePin] = useState<string | null>(null);
+  const popoverRef = useRef<HTMLDivElement>(null);
+
+  // Close popover on outside click
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (popoverRef.current && !popoverRef.current.contains(e.target as Node)) {
+        setActivePin(null);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  const getCoords = (item: any): { lat: number; lng: number } | null => {
+    if (resultCoords.has(item.id)) return resultCoords.get(item.id)!;
+    if (item.is_demo && item.owner?.city && DEMO_CITY_COORDS[item.owner.city]) {
+      return DEMO_CITY_COORDS[item.owner.city];
+    }
+    return null;
+  };
+
+  const center: [number, number] = userCoords
+    ? [userCoords.lat, userCoords.lng]
+    : [45.7676, 4.8344];
+
+  const activeItem = results.find((r) => r.id === activePin);
+
+  return (
+    <div className="flex h-[calc(100vh-200px)]">
+      {/* Left: scrollable list */}
+      <div className="w-1/2 overflow-y-auto p-4 space-y-3 border-r border-[#E8E6DC]">
+        {results.map(renderCard)}
+      </div>
+
+      {/* Right: Leaflet map */}
+      <div className="w-1/2 relative">
+        <MapContainer
+          center={center}
+          zoom={12}
+          className="w-full h-full"
+          zoomControl={true}
+          attributionControl={false}
+        >
+          <MapCenterController center={center} zoom={12} />
+          <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+          {results.map((item) => {
+            const coords = getCoords(item);
+            if (!coords) return null;
+            return (
+              <Marker
+                key={item.id}
+                position={[coords.lat, coords.lng]}
+                icon={createPinIcon(activePin === item.id)}
+                eventHandlers={{
+                  click: () => setActivePin(activePin === item.id ? null : item.id),
+                }}
+              />
+            );
+          })}
+        </MapContainer>
+
+        {/* Popover */}
+        {activeItem && (() => {
+          const coords = getCoords(activeItem);
+          if (!coords) return null;
+          const photos: string[] = activeItem.property?.photos || [];
+          const petGroups: Record<string, string[]> = {};
+          (activeItem.pets || []).forEach((p: any) => {
+            if (!petGroups[p.species]) petGroups[p.species] = [];
+            petGroups[p.species].push(p.name);
+          });
+          const isDemo = !!activeItem.is_demo;
+          const isLongStay = tab === "long_stays";
+          const linkTo = isDemo
+            ? null
+            : isLongStay
+              ? sitterEligible ? `/long-stays/${activeItem.id}` : null
+              : `/sits/${activeItem.id}`;
+
+          return (
+            <div
+              ref={popoverRef}
+              className="absolute z-[1000] bg-white rounded-xl shadow-lg border border-[#E8E6DC] overflow-hidden"
+              style={{ width: 240, top: "50%", left: "50%", transform: "translate(-50%, -50%)" }}
+            >
+              {photos.length > 0 && (
+                <img src={photos[0]} alt="" className="w-full h-[120px] object-cover" />
+              )}
+              <div className="p-3">
+                <h4 className="text-sm font-semibold text-[#1a1a1a] line-clamp-2 mb-1">
+                  {activeItem.title || "Sans titre"}
+                </h4>
+                <p className="text-xs text-[#6B7280] mb-1 flex items-center gap-1">
+                  <MapPin className="h-3 w-3" />
+                  {activeItem.owner?.city || ""}
+                  {activeItem.distance != null && ` · ${Math.round(activeItem.distance)} km`}
+                </p>
+                {Object.keys(petGroups).length > 0 && (
+                  <div className="flex flex-wrap items-center gap-1.5 mb-2">
+                    {Object.entries(petGroups).map(([species, names]) => {
+                      const IconComp = speciesIcon[species] || PawPrint;
+                      return (
+                        <span key={species} className="flex items-center gap-0.5 text-[#92400E] text-xs">
+                          <IconComp className="h-3 w-3" /> ×{names.length}
+                        </span>
+                      );
+                    })}
+                  </div>
+                )}
+                {linkTo && hasAccess ? (
+                  <Link
+                    to={linkTo}
+                    className="block w-full py-2 text-xs text-center bg-[#2D6A4F] text-white rounded-lg font-medium"
+                  >
+                    Voir l'annonce →
+                  </Link>
+                ) : (
+                  <Link
+                    to="/mon-abonnement"
+                    className="block w-full py-2 text-xs text-center bg-[#2D6A4F] text-white rounded-lg font-medium"
+                  >
+                    {hasAccess ? "Annonce type" : "S'abonner pour postuler"}
+                  </Link>
+                )}
+              </div>
+              {/* Arrow */}
+              <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-white border-b border-r border-[#E8E6DC] rotate-45" />
+            </div>
+          );
+        })()}
+      </div>
+    </div>
+  );
+};
+
+export default SearchMapView;

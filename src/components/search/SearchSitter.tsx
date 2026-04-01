@@ -1,7 +1,9 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, lazy, Suspense } from "react";
 import ReportButton from "@/components/reports/ReportButton";
 import { Sprout, PawPrint, GraduationCap, Handshake as HandshakeIcon, LayoutList, Map as MapIcon, Cat, Bird, SlidersHorizontal, ShieldCheck } from "lucide-react";
 import { Link, useSearchParams, useNavigate } from "react-router-dom";
+
+const SearchMapView = lazy(() => import("@/components/search/SearchMapView"));
 import { DEMO_SITS, DEMO_MISSIONS, DEMO_THRESHOLD } from "@/data/demoListings";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -64,6 +66,7 @@ const SearchSitter = () => {
   const [viewMode, setViewMode] = useState<ViewMode>("list");
 
   const [results, setResults] = useState<any[]>([]);
+  const [resultCoords, setResultCoords] = useState<Map<string, { lat: number; lng: number }>>(new Map());
   const [loading, setLoading] = useState(false);
   const [userCity, setUserCity] = useState("");
   const [userCoords, setUserCoords] = useState<{ lat: number; lng: number } | null>(null);
@@ -218,6 +221,15 @@ const SearchSitter = () => {
     if (final.length < DEMO_THRESHOLD) {
       final = [...final, ...DEMO_SITS];
     }
+    // Store coords for map pins
+    const coordsMap = new Map<string, { lat: number; lng: number }>();
+    final.forEach((item: any) => {
+      if (item && item.owner?.city) {
+        const c = cityCoords.get(item.owner.city);
+        if (c) coordsMap.set(item.id, c);
+      }
+    });
+    setResultCoords(coordsMap);
     setResults(final);
   };
 
@@ -414,10 +426,17 @@ const SearchSitter = () => {
     const isLongStay = tab === "long_stays";
     const isMission = tab === "missions";
     const isDemo = !!item.is_demo;
-    const linkTo = isDemo ? "#" : isMission ? `/petites-missions/${item.id}` : isLongStay ? (sitterEligible ? `/long-stays/${item.id}` : "#") : `/sits/${item.id}`;
+    const linkTo = isMission ? `/petites-missions/${item.id}` : isLongStay ? (sitterEligible ? `/long-stays/${item.id}` : "#") : `/sits/${item.id}`;
+
+    // CAS 1: hasAccess + real → clickable card, no CTA
+    // CAS 2: hasAccess + demo → not clickable, no CTA
+    // CAS 3: !hasAccess + real → not clickable, CTA to /mon-abonnement
+    // CAS 4: !hasAccess + demo → not clickable, CTA to /mon-abonnement
+    const showCTA = !hasAccess;
+    const isClickable = hasAccess && !isDemo;
 
     const cardContent = (
-      <div className="bg-white rounded-2xl overflow-hidden border border-[#E8E6DC] cursor-pointer hover:shadow-md transition-shadow">
+      <div className={`bg-white rounded-2xl overflow-hidden border border-[#E8E6DC] transition-shadow ${isClickable ? "cursor-pointer hover:shadow-md" : ""}`}>
         {/* Photo */}
         {photos.length > 0 && (
           <div className="h-48 relative">
@@ -432,7 +451,7 @@ const SearchSitter = () => {
                 Annonce type
               </span>
             )}
-            {item.isNew && (
+            {item.isNew && !isDemo && (
               <span className="absolute top-3 right-3 bg-[#2D6A4F] text-white rounded-full px-2 py-1 text-xs flex items-center gap-1">
                 <Sparkles className="h-3 w-3" /> Nouveau
               </span>
@@ -471,17 +490,10 @@ const SearchSitter = () => {
           {isMission && item.description && (
             <p className="text-sm text-[#6B7280] truncate">{item.description}</p>
           )}
-          {/* CTA for non-subscribers */}
-          {isDemo ? (
+          {/* CTA for non-subscribers (CAS 3 & 4) */}
+          {showCTA && (
             <Link
-              to="/register"
-              className="block w-full py-2 text-sm text-[#2D6A4F] bg-[#EAF3DE] rounded-xl font-medium hover:bg-[#D1FAE5] mt-3 text-center"
-            >
-              Rejoindre pour postuler →
-            </Link>
-          ) : !hasAccess && (
-            <Link
-              to="/abonnement"
+              to="/mon-abonnement"
               className="block w-full py-2 text-sm text-[#2D6A4F] bg-[#EAF3DE] rounded-xl font-medium hover:bg-[#D1FAE5] mt-3 text-center"
             >
               S'abonner pour postuler
@@ -491,8 +503,11 @@ const SearchSitter = () => {
       </div>
     );
 
-    if (isDemo) return <div key={item.id}>{cardContent}</div>;
-    return <Link key={item.id} to={linkTo}>{cardContent}</Link>;
+    // Only wrap in Link if CAS 1 (hasAccess + real)
+    if (isClickable) {
+      return <Link key={item.id} to={linkTo}>{cardContent}</Link>;
+    }
+    return <div key={item.id}>{cardContent}</div>;
   };
 
   // ─── Render ───
@@ -818,18 +833,18 @@ const SearchSitter = () => {
         </div>
       ) : (
         /* ─── Map view ─── */
-        <div className="flex h-[calc(100vh-200px)]">
-          <div className="w-1/2 overflow-y-auto p-4 space-y-3 border-r border-[#E8E6DC]">
-            {results.map(renderCard)}
-          </div>
-          <div className="w-1/2">
-            <iframe
-              title="Carte des annonces"
-              src={`https://www.openstreetmap.org/export/embed.html?bbox=${userCoords ? `${userCoords.lng - 0.5},${userCoords.lat - 0.3},${userCoords.lng + 0.5},${userCoords.lat + 0.3}` : "4.5,45.5,5.5,46.0"}&layer=mapnik`}
-              className="w-full h-full border-0"
-            />
-          </div>
-        </div>
+        <Suspense fallback={<div className="flex items-center justify-center h-[calc(100vh-200px)]"><p className="text-[#6B7280]">Chargement de la carte…</p></div>}>
+          <SearchMapView
+            results={results}
+            resultCoords={resultCoords}
+            userCoords={userCoords}
+            hasAccess={hasAccess}
+            formatDate={formatDate}
+            tab={tab}
+            sitterEligible={sitterEligible}
+            renderCard={renderCard}
+          />
+        </Suspense>
       )}
     </div>
   );
