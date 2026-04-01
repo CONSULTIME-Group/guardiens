@@ -372,7 +372,7 @@ const OwnerDashboard = () => {
                 )}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <p className="text-sm font-medium">{app.sitter?.first_name || "Gardien"}</p>
+                    <p className="text-sm font-medium">{capitalizeName(app.sitter?.first_name) || "Gardien"}</p>
                   </div>
                   {app.sitter?.id && sitterBadges[app.sitter.id] && <TooltipProvider><div className="flex gap-1">{sitterBadges[app.sitter.id].slice(0, 2).map((b: any) => <BadgeShield key={b.badge_key} badgeKey={b.badge_key} count={b.count} size="sm" showLabel={false} />)}</div></TooltipProvider>}
                   <p className="text-xs text-muted-foreground truncate mt-0.5">{app.sit?.title} · {app.sit?.start_date ? format(new Date(app.sit.start_date), "d MMM", { locale: fr }) : ""}</p>
