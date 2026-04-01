@@ -475,14 +475,17 @@ export default function PublicSitterProfile() {
 
           {/* Motivation */}
           {motivation && (
-            <p className="text-lg font-semibold leading-relaxed text-foreground/85">
+            <p className="text-base font-normal leading-loose text-foreground/80">
               {motivation}
             </p>
           )}
 
           {/* Bio */}
           {bio && (
-            <p className="text-sm italic text-muted-foreground mt-3">{bio}</p>
+            <>
+              <p className="text-sm italic text-muted-foreground mt-3">{bio}</p>
+              <hr className="border-border" />
+            </>
           )}
 
           {/* Animaux acceptés */}
