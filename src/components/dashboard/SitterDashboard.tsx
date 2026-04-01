@@ -522,7 +522,7 @@ const SitterDashboard = () => {
         {/* Annonces */}
         <div className="animate-fade-in">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="font-heading text-lg font-semibold">Annonces près de chez toi</h2>
+            <h2 className="font-heading text-lg font-semibold">Annonces près de chez vous</h2>
             <Link to="/search" className="text-xs text-primary hover:underline font-medium">Voir tout →</Link>
           </div>
           {nearbyListings.length === 0 ? (
