@@ -86,7 +86,7 @@ const StepIdentity = ({ data, onChange, onUploadAvatar }: Props) => {
 
       {/* Motivation */}
       <div className="space-y-1">
-        <Label htmlFor="motivation" className="text-sm font-medium text-foreground">Pourquoi je veux garder</Label>
+        <Label htmlFor="motivation" className="text-sm font-medium text-foreground">Votre motivation</Label>
         <p className="text-xs text-muted-foreground mb-2">
           C'est la première chose que les propriétaires lisent. Soyez concret : parlez de votre rapport aux animaux, d'une garde mémorable, de ce que vous aimez dans le house-sitting.
         </p>
@@ -108,7 +108,7 @@ const StepIdentity = ({ data, onChange, onUploadAvatar }: Props) => {
             ? `${motivationLen}/50 minimum`
             : motivationLen <= 200
               ? `${motivationLen} car. — Bien, mais un peu plus serait idéal`
-              : `${motivationLen} car. ✓`}
+              : `${motivationLen} caractères`}
         </p>
         {motivationLen > 0 && motivationLen < 50 && (
           <p className="text-xs text-destructive">

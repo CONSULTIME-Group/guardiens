@@ -90,19 +90,12 @@ const OwnerProfilePage = () => {
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Left sidebar */}
           <ProfileSidebar
-            avatarUrl={mergedData.avatar_url}
             firstName={mergedData.first_name}
             city={mergedData.city}
             completion={completion}
             sections={sidebarSections}
             activeSection={activeSection}
             onSectionClick={setActiveSection}
-            onAvatarChange={async (e) => {
-              const file = e.target.files?.[0];
-              if (!file) return;
-              const url = await uploadPhoto(file, "avatars");
-              if (url) handleChange({ avatar_url: url });
-            }}
             publicProfileUrl={user ? `/profil/${user.id}` : "#"}
             role="owner"
           />
