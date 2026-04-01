@@ -3,7 +3,7 @@ import { useParams, Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import BadgeGrid from "@/components/badges/BadgeGrid";
+import BadgeTimbre, { TIMBRES_ORDER } from "@/components/badges/BadgeTimbre";
 import BadgeShield from "@/components/badges/BadgeShield";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -281,16 +281,31 @@ export default function PublicSitterProfile() {
         </section>
       )}
 
-      {/* ── SECTION 4: Écussons ── */}
+      {/* ── SECTION 4: Sa collection ── */}
       <section className="max-w-3xl mx-auto px-6 py-6 border-t border-border">
-        <h2 className="text-sm font-semibold uppercase tracking-wide mb-4">Écussons reçus</h2>
-        <BadgeGrid
-          unlockedBadges={badges.reduce((acc: Record<string, number>, b) => {
-            acc[b.badge_key] = b.count;
-            return acc;
-          }, {})}
-          variant="public"
-        />
+        <h2 className="text-sm font-semibold uppercase tracking-wide mb-4">Sa collection</h2>
+        {(() => {
+          const badgeMap: Record<string, boolean> = {};
+          badges.forEach(b => { badgeMap[b.badge_key] = true; });
+          if (profile?.identity_verified) badgeMap["id_verifiee"] = true;
+          if (profile?.is_founder) badgeMap["fondateur"] = true;
+          if (emergencyActive) badgeMap["gardien_urgence"] = true;
+          const unlockedCount = TIMBRES_ORDER.filter(k => badgeMap[k]).length;
+          return (
+            <>
+              <div className="grid grid-cols-4 md:grid-cols-6 gap-4">
+                {TIMBRES_ORDER.map((key) => (
+                  <div key={key} className="flex justify-center">
+                    <BadgeTimbre id={key} unlocked={!!badgeMap[key]} size="normal" showTooltip />
+                  </div>
+                ))}
+              </div>
+              <p className="text-xs text-muted-foreground text-center mt-3">
+                {unlockedCount} timbre{unlockedCount > 1 ? "s" : ""} sur 12
+              </p>
+            </>
+          );
+        })()}
       </section>
 
       {/* ── SECTION 5: Avis ── */}
