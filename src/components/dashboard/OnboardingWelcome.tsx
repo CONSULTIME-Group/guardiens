@@ -6,6 +6,7 @@ import {
   ChevronRight, CheckCircle2, Sparkles,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { capitalizeName } from "@/lib/capitalize";
 
 interface OnboardingStep {
   key: string;
