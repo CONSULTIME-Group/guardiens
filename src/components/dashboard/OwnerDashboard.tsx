@@ -181,10 +181,21 @@ const OwnerDashboard = () => {
 
   /* ── Subtitle ── */
   const getSubtitle = () => {
-    if (user && user.profileCompletion < 100) return { text: `Profil complété à ${user.profileCompletion}% — Complétez votre profil →`, to: "/owner-profile" };
-    if (verificationStatus !== "verified" && verificationStatus !== "pending") return { text: "Vérifiez votre identité — ça rassure les gardiens →", to: "/settings#verification" };
-    if (activeSits.length === 0) return { text: "Publiez votre première annonce pour trouver un gardien →", to: "/sits/create" };
-    return { text: "Vos animaux sont entre bonnes mains.", to: "" };
+    // Garde confirmée en cours
+    if (ongoingSit) {
+      const daysLeft = ongoingSit.end_date ? differenceInDays(new Date(ongoingSit.end_date), now) : null;
+      return { text: `Votre garde est en cours${daysLeft !== null ? ` — fin dans ${daysLeft} jour${daysLeft > 1 ? "s" : ""}` : ""}.`, to: "" };
+    }
+    // Garde confirmée à venir
+    const nextConfirmed = sits.find(s => s.status === "confirmed" && s.start_date && new Date(s.start_date) > now);
+    if (nextConfirmed) {
+      const daysUntil = differenceInDays(new Date(nextConfirmed.start_date), now);
+      return { text: `Votre prochaine garde est dans ${daysUntil} jour${daysUntil > 1 ? "s" : ""}.`, to: "" };
+    }
+    // Candidature non lue
+    if (pendingAppCount > 0) return { text: "Vous avez une nouvelle candidature à examiner.", to: "" };
+    // Défaut
+    return { text: "Trouvez le gardien idéal pour vos animaux.", to: "" };
   };
   const subtitle = getSubtitle();
 
@@ -224,9 +235,12 @@ const OwnerDashboard = () => {
     <div className="space-y-8">
       {/* 1. Header */}
       <div>
-        <h1 className="font-heading text-2xl md:text-3xl font-bold">
-          Bonjour{user?.firstName ? `, ${user.firstName}` : ""} 👋
+      <h1 className="font-heading text-2xl md:text-3xl font-bold">
+          Bonjour{user?.firstName ? `, ${user.firstName.charAt(0).toUpperCase() + user.firstName.slice(1).toLowerCase()}` : ""} !
         </h1>
+        <span className="text-xs uppercase tracking-widest text-muted-foreground font-sans">
+          Espace propriétaire
+        </span>
         {subtitle.to ? (
           <Link to={subtitle.to} className="text-sm text-primary hover:underline mt-1 inline-block">{subtitle.text}</Link>
         ) : (
@@ -260,20 +274,24 @@ const OwnerDashboard = () => {
                     <div className="w-[50px] h-[50px] rounded-full bg-accent flex items-center justify-center text-lg shrink-0">🐾</div>
                   )}
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium">{pet.name || "Sans nom"}
+                    <p className="text-sm font-medium">{pet.name ? pet.name.charAt(0).toUpperCase() + pet.name.slice(1).toLowerCase() : "Sans nom"}
                       <span className="text-xs text-muted-foreground ml-2">
-                        {speciesLabel[pet.species] || pet.species}{pet.breed ? ` · ${pet.breed}` : ""}{pet.age ? ` · ${pet.age} an${pet.age > 1 ? "s" : ""}` : ""}
+                        {speciesLabel[pet.species] || pet.species}{pet.breed ? ` · ${pet.breed.split(" ").map((w: string) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(" ")}` : ""}{pet.age ? ` · ${pet.age} an${pet.age > 1 ? "s" : ""}` : ""}
                       </span>
                     </p>
                     {nextSit ? (
-                      <Link to={`/sits/${nextSit.id}`} className="text-xs text-primary hover:underline flex items-center gap-1 mt-0.5">
-                        <Calendar className="h-3 w-3" />
-                        Prochaine garde {daysUntil !== null && daysUntil >= 0
-                          ? daysUntil === 0 ? "aujourd'hui" : `dans ${daysUntil} jour${daysUntil > 1 ? "s" : ""}`
-                          : ""}
-                      </Link>
+                      nextSit.status === "confirmed" ? (
+                        <Link to={`/sits/${nextSit.id}`} className="text-xs text-primary hover:underline flex items-center gap-1 mt-0.5">
+                          <Calendar className="h-3 w-3" />
+                          Prochaine garde {daysUntil !== null && daysUntil >= 0
+                            ? daysUntil === 0 ? "aujourd'hui" : `dans ${daysUntil} jour${daysUntil > 1 ? "s" : ""}`
+                            : ""}
+                        </Link>
+                      ) : (
+                        <p className="text-xs text-muted-foreground mt-0.5">Annonce en cours</p>
+                      )
                     ) : (
-                      <p className="text-xs text-muted-foreground mt-0.5">Aucune garde prévue</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">{""}</p>
                     )}
                   </div>
                 </div>
@@ -289,24 +307,10 @@ const OwnerDashboard = () => {
       {/* 4. Stat cards */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
         <StatCard icon={Calendar} iconColor="text-primary" label="Gardes réalisées" value={completedSits.length} delay={0} />
-        <StatCard icon={Star} iconColor="text-amber-500" label="Note moyenne" value={avgRating} delay={100} isDecimal emptyMsg={avgRating === 0 ? "Pas encore d'avis" : undefined} />
+        <StatCard icon={Star} iconColor="text-amber-500" label="Note moyenne" value={avgRating} delay={100} isDecimal emptyMsg={avgRating === 0 ? "Note moyenne" : undefined} />
         <StatCard icon={Megaphone} iconColor="text-blue-500" label="Annonces actives" value={activeSits.length} delay={200} />
         <StatCard icon={Heart} iconColor="text-pink-500" label="Gardiens de confiance" value={trustedSitterCount} delay={300} />
-        <div className="p-4 rounded-xl border border-border bg-card hover:shadow-md transition-shadow animate-fade-in" style={{ animationDelay: "400ms" }}>
-          <Handshake className="h-4 w-4 text-primary mb-2" strokeWidth={1.8} />
-          <div className="flex items-baseline gap-3">
-            <div>
-              <p className="font-heading text-[28px] font-bold leading-tight">{missionMetrics.total}</p>
-              <p className="text-xs text-muted-foreground mt-1">Postées</p>
-            </div>
-            <span className="text-muted-foreground/30 text-lg">/</span>
-            <div>
-              <p className="font-heading text-[28px] font-bold leading-tight">{missionMetrics.completed}</p>
-              <p className="text-xs text-muted-foreground mt-1">Terminées</p>
-            </div>
-          </div>
-          <p className="text-[10px] text-muted-foreground mt-1.5">Petites missions</p>
-        </div>
+        <StatCard icon={Handshake} iconColor="text-primary" label="Petites missions" value={missionMetrics.total} delay={400} subLabel={missionMetrics.completed > 0 ? `${missionMetrics.completed} terminée${missionMetrics.completed > 1 ? "s" : ""}` : undefined} />
       </div>
 
       {/* 5. Candidatures reçues */}
@@ -444,8 +448,8 @@ const OwnerDashboard = () => {
 
 /* ── Shared ── */
 
-const StatCard = ({ icon: Icon, iconColor, label, value, delay, isDecimal, emptyMsg }: {
-  icon: React.ElementType; iconColor: string; label: string; value: number; delay: number; isDecimal?: boolean; emptyMsg?: string;
+const StatCard = ({ icon: Icon, iconColor, label, value, delay, isDecimal, emptyMsg, subLabel }: {
+  icon: React.ElementType; iconColor: string; label: string; value: number; delay: number; isDecimal?: boolean; emptyMsg?: string; subLabel?: string;
 }) => {
   const displayed = useCountUp(isDecimal ? Math.round(value * 10) : value);
   const formatted = isDecimal ? (displayed / 10).toFixed(1) : String(displayed);
@@ -456,10 +460,13 @@ const StatCard = ({ icon: Icon, iconColor, label, value, delay, isDecimal, empty
       style={{ animationDelay: `${delay}ms` }}
     >
       <Icon className={`h-4 w-4 ${iconColor} mb-2`} strokeWidth={1.8} />
-      <p className="font-heading text-[28px] font-bold leading-tight">
-        {value === 0 && emptyMsg ? "—" : formatted}
-      </p>
-      <p className="text-xs text-muted-foreground mt-1">{emptyMsg || label}</p>
+      {value === 0 && emptyMsg ? (
+        <p className="text-sm text-muted-foreground mt-1">Pas encore</p>
+      ) : (
+        <p className="font-heading text-[28px] font-bold leading-tight">{formatted}</p>
+      )}
+      <p className="text-xs text-muted-foreground mt-1">{emptyMsg && value > 0 ? label : emptyMsg || label}</p>
+      {subLabel && <p className="text-xs text-muted-foreground">{subLabel}</p>}
     </div>
   );
 };
