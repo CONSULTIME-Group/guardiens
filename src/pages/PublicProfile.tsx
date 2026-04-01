@@ -316,7 +316,7 @@ const PublicProfile = () => {
                         <h3 className="font-heading font-semibold text-sm mb-2 text-foreground">Compétences bonus</h3>
                         <div className="flex flex-wrap gap-1.5">
                           {sitterProfile.bonus_skills.map((s: string) => (
-                            <span key={s} className="px-2.5 py-1 rounded-full text-xs font-medium">{s}</span>
+                            <span key={s} className="px-2.5 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary">{s}</span>
                           ))}
                         </div>
                       </Card>
