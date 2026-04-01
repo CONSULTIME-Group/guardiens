@@ -115,6 +115,14 @@ const OwnerProfilePage = () => {
               {activeSection === "animals" && <OwnerStepAnimals pets={pets} onAddPet={addPet} onUpdatePet={updatePet} onRemovePet={removePet} />}
               {activeSection === "rules" && <OwnerStepRules data={mergedData} onChange={handleChange} />}
               {activeSection === "communication" && <OwnerStepCommunication data={mergedData} onChange={handleChange} />}
+              {activeSection === "skills" && (
+                <OwnerStepSkills
+                  competences={mergedData.owner_competences || []}
+                  competencesDisponible={mergedData.owner_competences_disponible || false}
+                  skillCategories={mergedData.owner_skill_categories || []}
+                  onChange={(partial) => handleChange(partial as any)}
+                />
+              )}
               {activeSection === "calendar" && <OwnerStepCalendar />}
               {activeSection === "gallery" && <OwnerGallery />}
               {activeSection === "guide" && <OwnerExperiences />}
