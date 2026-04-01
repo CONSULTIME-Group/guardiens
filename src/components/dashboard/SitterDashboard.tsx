@@ -22,10 +22,10 @@ import { fr } from "date-fns/locale";
 /* ── status config ── */
 const appStatusConfig: Record<string, { label: string; icon: React.ElementType; bg: string; text: string }> = {
   pending:    { label: "Envoyée",    icon: SendIcon,     bg: "bg-muted",           text: "text-muted-foreground" },
-  viewed:     { label: "Vue",        icon: Eye,          bg: "bg-blue-100 dark:bg-blue-900/30", text: "text-blue-700 dark:text-blue-300" },
-  discussing: { label: "En discussion", icon: MessageSquare, bg: "bg-blue-100 dark:bg-blue-900/30", text: "text-blue-700 dark:text-blue-300" },
-  accepted:   { label: "Acceptée",   icon: CheckCircle2, bg: "bg-green-100 dark:bg-green-900/30", text: "text-green-700 dark:text-green-300" },
-  rejected:   { label: "Déclinée",   icon: XCircle,      bg: "bg-red-100 dark:bg-red-900/30",   text: "text-red-700 dark:text-red-300" },
+  viewed:     { label: "Vue",        icon: Eye,          bg: "bg-accent",           text: "text-foreground" },
+  discussing: { label: "En discussion", icon: MessageSquare, bg: "bg-accent",       text: "text-foreground" },
+  accepted:   { label: "Acceptée",   icon: CheckCircle2, bg: "bg-primary/10",       text: "text-primary" },
+  rejected:   { label: "Déclinée",   icon: XCircle,      bg: "bg-destructive/10",   text: "text-destructive" },
   cancelled:  { label: "Annulée",    icon: XCircle,      bg: "bg-muted",           text: "text-muted-foreground" },
 };
 
@@ -452,9 +452,9 @@ const SitterDashboard = () => {
 
       {/* Emergency section */}
       {emergencyEligible && !hasEmergencyProfile && !showEmergencyForm && (
-        <div className="rounded-2xl border-2 border-amber-300 dark:border-amber-700 bg-gradient-to-br from-amber-50 to-amber-100/50 dark:from-amber-900/20 dark:to-amber-900/10 p-6 space-y-4">
+        <div className="rounded-2xl border-2 border-secondary/40 bg-secondary/5 p-6 space-y-4">
           <div className="flex items-center gap-3">
-            <span className="inline-flex items-center justify-center h-10 w-10 rounded-full bg-gradient-to-br from-amber-400 to-amber-500 text-white shadow">
+            <span className="inline-flex items-center justify-center h-10 w-10 rounded-full bg-secondary text-secondary-foreground shadow">
               <Zap className="h-5 w-5" fill="currentColor" />
             </span>
             <div>
@@ -469,9 +469,9 @@ const SitterDashboard = () => {
       )}
 
       {emergencyEligible && !hasEmergencyProfile && showEmergencyForm && (
-        <div className="rounded-2xl border-2 border-amber-300 dark:border-amber-700 bg-card p-6">
+        <div className="rounded-2xl border-2 border-secondary/40 bg-card p-6">
           <h3 className="font-heading font-semibold mb-4 flex items-center gap-2">
-            <Zap className="h-4 w-4 text-amber-500" /> Activer le mode Gardien d'urgence
+            <Zap className="h-4 w-4 text-secondary" /> Activer le mode Gardien d'urgence
           </h3>
           <EmergencyActivation onActivated={() => { setHasEmergencyProfile(true); setShowEmergencyForm(false); }} />
         </div>

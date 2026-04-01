@@ -23,17 +23,17 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 const statusConfig: Record<string, { label: string; className: string }> = {
   draft: { label: "Brouillon", className: "bg-muted text-muted-foreground" },
   published: { label: "En recherche", className: "bg-primary/10 text-primary" },
-  confirmed: { label: "Confirmée", className: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" },
-  in_progress: { label: "En cours", className: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400" },
+  confirmed: { label: "Confirmée", className: "bg-primary/10 text-primary" },
+  in_progress: { label: "En cours", className: "bg-primary/15 text-primary" },
   completed: { label: "Terminée", className: "bg-muted text-muted-foreground" },
   cancelled: { label: "Annulée", className: "bg-destructive/10 text-destructive" },
 };
 
 const appStatusConfig: Record<string, { label: string; className: string }> = {
   pending: { label: "Envoyée", className: "bg-muted text-muted-foreground" },
-  viewed: { label: "Consultée", className: "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400" },
-  discussing: { label: "En discussion", className: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400" },
-  accepted: { label: "Acceptée", className: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" },
+  viewed: { label: "Consultée", className: "bg-secondary/10 text-secondary" },
+  discussing: { label: "En discussion", className: "bg-accent text-foreground" },
+  accepted: { label: "Acceptée", className: "bg-primary/10 text-primary" },
   rejected: { label: "Déclinée", className: "bg-destructive/10 text-destructive" },
   cancelled: { label: "Annulée", className: "bg-destructive/10 text-destructive" },
 };
@@ -394,7 +394,7 @@ const SitCard = ({ sit, isOwner, userId }: { sit: any; isOwner: boolean; userId?
     <div className="bg-card rounded-xl border border-border hover:shadow-md transition-shadow overflow-hidden group">
       {/* In progress banner */}
       {effectiveStatus === "in_progress" && (
-        <div className="bg-emerald-500 text-white px-4 py-2 text-xs font-medium flex items-center gap-2">
+        <div className="bg-primary text-primary-foreground px-4 py-2 text-xs font-medium flex items-center gap-2">
           <Clock className="h-3.5 w-3.5" />
           Garde en cours
           {sit.end_date && (() => {
@@ -464,7 +464,7 @@ const SitCard = ({ sit, isOwner, userId }: { sit: any; isOwner: boolean; userId?
                     <span className="text-sm font-medium">{otherParty.first_name}</span>
                     {otherParty.rating && (
                       <span className="text-xs text-muted-foreground ml-1.5">
-                        <Star className="h-3 w-3 inline text-amber-500 fill-amber-500 -mt-0.5" /> {otherParty.rating}
+                        <Star className="h-3 w-3 inline text-secondary fill-secondary -mt-0.5" /> {otherParty.rating}
                       </span>
                     )}
                   </div>
@@ -527,7 +527,7 @@ const QuickActions = ({ sit, isOwner, effectiveStatus }: { sit: any; isOwner: bo
             <BookOpen className="h-3.5 w-3.5" /> Guide
           </Link>
         )}
-        <Link to={`/sits/${sit.id}`} className={cn(btnClass, "bg-green-50 text-green-700 hover:bg-green-100 dark:bg-green-900/20 dark:text-green-400")}>
+        <Link to={`/sits/${sit.id}`} className={cn(btnClass, "bg-primary/10 text-primary hover:bg-primary/20")}>
           <CheckCircle className="h-3.5 w-3.5" /> Checklist
         </Link>
       </>
@@ -538,7 +538,7 @@ const QuickActions = ({ sit, isOwner, effectiveStatus }: { sit: any; isOwner: bo
     return (
       <>
         {!sit.hasReviewed && (
-          <Link to={`/review/${sit.id}`} className={cn(btnClass, "bg-amber-50 text-amber-700 hover:bg-amber-100 dark:bg-amber-900/20 dark:text-amber-400")}>
+          <Link to={`/review/${sit.id}`} className={cn(btnClass, "bg-secondary/10 text-secondary hover:bg-secondary/20")}>
             <Star className="h-3.5 w-3.5" /> Laisser un avis
           </Link>
         )}

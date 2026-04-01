@@ -305,7 +305,7 @@ const Landing = () => {
 
 
       {/* ═══════════════ SECTION 2b — CE QU'ON FAIT ENSEMBLE ═══════════════ */}
-      <section className="py-24 md:py-32 bg-[#FAF9F6]">
+      <section className="py-24 md:py-32 bg-background">
         <div className="max-w-5xl mx-auto px-6">
           <RevealSection>
             <span className="text-xs tracking-widest uppercase text-primary/60 font-body mb-4 block text-center">
@@ -318,7 +318,7 @@ const Landing = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <RevealSection delay={0.1}>
-              <div className="bg-white rounded-2xl p-8 shadow-sm text-left h-full">
+              <div className="bg-card rounded-2xl p-8 shadow-sm text-left h-full">
                 <Home className="h-8 w-8 text-primary mb-4" />
                 <h3 className="text-xl font-heading font-semibold text-foreground mb-3">Vous partez. Votre maison vit.</h3>
                 <p className="text-base font-body leading-relaxed text-foreground/70 mb-4">
@@ -331,7 +331,7 @@ const Landing = () => {
             </RevealSection>
 
             <RevealSection delay={0.2}>
-              <div className="bg-white rounded-2xl p-8 shadow-sm text-left h-full">
+              <div className="bg-card rounded-2xl p-8 shadow-sm text-left h-full">
                 <Key className="h-8 w-8 text-primary mb-4" />
                 <h3 className="text-xl font-heading font-semibold text-foreground mb-3">Vous gardez. Vous découvrez.</h3>
                 <p className="text-base font-body leading-relaxed text-foreground/70 mb-4">
@@ -344,7 +344,7 @@ const Landing = () => {
             </RevealSection>
 
             <RevealSection delay={0.3}>
-              <div className="bg-white rounded-2xl p-8 shadow-sm text-left h-full">
+              <div className="bg-card rounded-2xl p-8 shadow-sm text-left h-full">
                 <Handshake className="h-8 w-8 text-primary mb-4" />
                 <h3 className="text-xl font-heading font-semibold text-foreground mb-3">Un coup de main. Un échange.</h3>
                 <p className="text-base font-body leading-relaxed text-foreground/70 mb-4">
@@ -429,7 +429,7 @@ const Landing = () => {
       </RevealSection>
 
       {/* ═══════════════ SECTION 5 — TÉMOIGNAGES ═══════════════ */}
-      <section className="py-24 md:py-32 bg-[#FAF9F6]">
+      <section className="py-24 md:py-32 bg-background">
         <div className="max-w-6xl mx-auto px-6 md:px-12">
           <RevealSection className="text-center mb-16">
             <h2 className="font-heading text-4xl md:text-5xl font-semibold text-foreground leading-snug">
@@ -465,7 +465,7 @@ const Landing = () => {
                     key={t.name}
                     className="flex-[0_0_100%] md:flex-[0_0_33.333%] min-w-0 px-3"
                   >
-                    <div className="rounded-2xl p-10 h-full bg-white border border-border shadow-sm">
+                    <div className="rounded-2xl p-10 h-full bg-card border border-border shadow-sm">
                       <span className="block font-heading text-7xl leading-none mb-3 select-none text-primary/40">
                         "
                       </span>
@@ -498,10 +498,10 @@ const Landing = () => {
       </section>
 
       {/* ═══════════════ SECTION 6 — PETITES MISSIONS ═══════════════ */}
-      <section className="py-24 md:py-32 bg-[#FAF9F6]">
+      <section className="py-24 md:py-32 bg-background">
         <div className="max-w-5xl mx-auto px-6">
           <RevealSection>
-            <div className="bg-white rounded-2xl p-12 max-w-3xl mx-auto text-center shadow-sm">
+            <div className="bg-card rounded-2xl p-12 max-w-3xl mx-auto text-center shadow-sm">
               <h3 className="font-heading text-2xl md:text-3xl font-semibold text-foreground mb-4">
                 Un jardin à arroser, un coup de main à donner, une compétence à partager.
               </h3>
