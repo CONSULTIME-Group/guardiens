@@ -344,7 +344,7 @@ const Landing = () => {
             </RevealSection>
 
             <RevealSection delay={0.3}>
-              <div className="bg-white rounded-2xl p-8 shadow-sm text-left h-full">
+              <div className="bg-card rounded-2xl p-8 shadow-sm text-left h-full">
                 <Handshake className="h-8 w-8 text-primary mb-4" />
                 <h3 className="text-xl font-heading font-semibold text-foreground mb-3">Un coup de main. Un échange.</h3>
                 <p className="text-base font-body leading-relaxed text-foreground/70 mb-4">
