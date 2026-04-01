@@ -106,6 +106,14 @@ const SitDetail = () => {
         setPets(petsData || []);
       }
 
+      // Fetch application counts
+      const [allAppsRes, pendingAppsRes] = await Promise.all([
+        supabase.from("applications").select("id", { count: "exact", head: true }).eq("sit_id", id!),
+        supabase.from("applications").select("id", { count: "exact", head: true }).eq("sit_id", id!).in("status", ["pending", "viewed"]),
+      ]);
+      setAppCount(allAppsRes.count || 0);
+      setPendingAppCount(pendingAppsRes.count || 0);
+
       if (user) {
         const [spRes, appRes] = await Promise.all([
           supabase.from("sitter_profiles").select("*").eq("user_id", user.id).maybeSingle(),
