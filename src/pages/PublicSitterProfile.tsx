@@ -125,11 +125,11 @@ export default function PublicSitterProfile() {
   const animalTypes: string[] = sitterProfile?.animal_types || [];
   const hasVehicle = sitterProfile?.has_vehicle || false;
   const rawRadius = sitterProfile?.geographic_radius || 0;
-  const radius = (rawRadius === 100 && completedSits === 0) ? 15 : rawRadius;
   const competences: string[] = sitterProfile?.competences || [];
   const isAvailable = sitterProfile?.is_available || false;
   const completedSits = profile.completed_sits_count || 0;
   const cancellations = profile.cancellation_count || 0;
+  const radius = (rawRadius === 100 && completedSits === 0) ? 15 : rawRadius;
   const isOwn = auth?.user?.id === id;
   const isOwner = auth?.activeRole === "owner";
   const isAuthenticated = auth?.isAuthenticated;
