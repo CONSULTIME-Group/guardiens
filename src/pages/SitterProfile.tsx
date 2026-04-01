@@ -126,7 +126,7 @@ const SitterProfile = () => {
               const url = await uploadAvatar(file);
               if (url) handleChange({ avatar_url: url });
             }}
-            publicProfileUrl={user ? `/profil/${user.id}` : "#"}
+            publicProfileUrl={user ? `/gardiens/${user.id}` : "#"}
             role="sitter"
           />
 
