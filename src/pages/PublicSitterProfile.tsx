@@ -566,9 +566,11 @@ export default function PublicSitterProfile() {
                 )}
               </>
             ) : (
-              <p className="text-sm text-muted-foreground italic">
-                Les avis apparaîtront après la première garde.
-              </p>
+              <div className="border border-border rounded-xl p-5 bg-card text-sm text-muted-foreground italic">
+                Les avis apparaîtront ici après la première garde.
+                Chaque propriétaire évalue le gardien et peut attribuer
+                jusqu'à 3 écussons.
+              </div>
             )}
           </div>
 
