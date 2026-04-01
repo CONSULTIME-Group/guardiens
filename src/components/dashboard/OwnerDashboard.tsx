@@ -445,7 +445,7 @@ const OwnerDashboard = () => {
                   </div>
                 )}
                 <div className="flex-1 min-w-0">
-                  <p className="text-xs font-medium">{h.sitter?.first_name}</p>
+                  <p className="text-xs font-medium">{capitalizeName(h.sitter?.first_name)}</p>
                   <p className="text-sm text-muted-foreground mt-0.5">{h.text}</p>
                 </div>
                 {h.photo_url && <img src={h.photo_url} alt="" className="w-16 h-12 rounded-lg object-cover shrink-0" />}
