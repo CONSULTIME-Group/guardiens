@@ -224,9 +224,12 @@ const OwnerDashboard = () => {
     <div className="space-y-8">
       {/* 1. Header */}
       <div>
-        <h1 className="font-heading text-2xl md:text-3xl font-bold">
-          Bonjour{user?.firstName ? `, ${user.firstName}` : ""} 👋
+      <h1 className="font-heading text-2xl md:text-3xl font-bold">
+          Bonjour{user?.firstName ? `, ${user.firstName.charAt(0).toUpperCase() + user.firstName.slice(1).toLowerCase()}` : ""} !
         </h1>
+        <span className="text-xs uppercase tracking-widest text-muted-foreground font-sans">
+          Espace propriétaire
+        </span>
         {subtitle.to ? (
           <Link to={subtitle.to} className="text-sm text-primary hover:underline mt-1 inline-block">{subtitle.text}</Link>
         ) : (
