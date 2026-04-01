@@ -334,7 +334,7 @@ const SitterDashboard = () => {
             }}
           />
         </div>
-        <p className="text-[10px] text-muted-foreground">Apparaissez en premier dans les recherches</p>
+        <p className="text-[10px] text-muted-foreground">Apparais en premier dans les recherches</p>
       </div>
 
       {/* BLOC 4 — Abonnement (placeholder - check subscription) */}
