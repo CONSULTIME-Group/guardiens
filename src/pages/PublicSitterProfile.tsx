@@ -191,8 +191,8 @@ export default function PublicSitterProfile() {
   const typeLineItems = [typeLabel, accompLabel].filter(Boolean);
   const typeLine = typeLineItems.length > 0 ? typeLineItems.join(" · ") : "";
 
-  const durationLabel = minDuration > 0
-    ? (MIN_DURATION_LABELS[minDuration] || `À partir de ${minDuration} jours`)
+  const durationLabel = minDuration
+    ? (MIN_DURATION_LABELS[minDuration] || "Durée flexible")
     : "";
 
   // Stats line
