@@ -25,7 +25,7 @@ export const DEMO_SITS = [
     property: {
       type: "house",
       environment: "city_center",
-      photos: ["https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=800&q=80"],
+      photos: ["https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800&q=80"],
     },
     pets: [
       { species: "dog", name: "Laïka" },
