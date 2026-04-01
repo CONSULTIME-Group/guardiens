@@ -496,12 +496,12 @@ const Card = ({ children, className = "" }: { children: React.ReactNode; classNa
   </div>
 );
 
-const MetricCell = ({ label, value, suffix, valueColor }: { label: string; value: string; suffix?: React.ReactNode; valueColor?: string }) => (
+const MetricCell = ({ label, value, suffix, variant }: { label: string; value: string; suffix?: React.ReactNode; variant?: "success" | "warning" }) => (
   <div className="flex flex-col items-center py-3 gap-0.5">
-    <span className="text-lg font-bold flex items-center" style={{ color: valueColor || "#1C1B18" }}>
+    <span className={`text-lg font-bold flex items-center ${variant === "success" ? "text-green-600" : variant === "warning" ? "text-orange-600" : "text-foreground"}`}>
       {value}{suffix}
     </span>
-    <span className="text-[11px]" style={{ color: "#6B7280" }}>{label}</span>
+    <span className="text-[11px] text-muted-foreground">{label}</span>
   </div>
 );
 
