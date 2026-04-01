@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import TwoColumnLayout from "@/components/layout/TwoColumnLayout";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Link } from "react-router-dom";
@@ -220,28 +221,54 @@ const OwnerDashboard = () => {
   };
   const cta = getCTA();
 
-  return (
-    <div className="space-y-8">
-      {/* 1. Header */}
+  const leftContent = (
+    <div className="space-y-6">
+      {/* Header */}
       <div>
-        <h1 className="font-heading text-2xl md:text-3xl font-bold">
+        <h1 className="font-heading text-xl font-bold">
           Bonjour{user?.firstName ? `, ${user.firstName}` : ""} 👋
         </h1>
         {subtitle.to ? (
-          <Link to={subtitle.to} className="text-sm text-primary hover:underline mt-1 inline-block">{subtitle.text}</Link>
+          <Link to={subtitle.to} className="text-xs text-primary hover:underline mt-1 inline-block">{subtitle.text}</Link>
         ) : (
-          <p className="text-sm text-muted-foreground mt-1">{subtitle.text}</p>
+          <p className="text-xs text-muted-foreground mt-1">{subtitle.text}</p>
         )}
       </div>
 
-      {/* 2. Banner */}
+      {/* Banner */}
       {banner && (
-        <Link to={banner.to} className={`block p-4 rounded-xl border ${banner.bg} hover:shadow-md transition-shadow`}>
-          <p className={`text-sm font-medium ${banner.text}`}>{banner.label}</p>
+        <Link to={banner.to} className={`block p-3 rounded-xl border ${banner.bg} hover:shadow-md transition-shadow`}>
+          <p className={`text-xs font-medium ${banner.text}`}>{banner.label}</p>
         </Link>
       )}
 
-      {/* 3. Mes animaux */}
+      {/* Stats */}
+      <div className="grid grid-cols-2 gap-2">
+        <StatCard icon={Calendar} iconColor="text-primary" label="Gardes" value={completedSits.length} delay={0} />
+        <StatCard icon={Star} iconColor="text-amber-500" label="Note" value={avgRating} delay={100} isDecimal emptyMsg={avgRating === 0 ? "—" : undefined} />
+        <StatCard icon={Megaphone} iconColor="text-blue-500" label="Actives" value={activeSits.length} delay={200} />
+        <StatCard icon={Heart} iconColor="text-pink-500" label="Confiance" value={trustedSitterCount} delay={300} />
+      </div>
+
+      {/* Quick actions */}
+      <div className="space-y-2">
+        <Link to="/sits/create">
+          <Button className="w-full gap-2" size="sm">
+            <Plus className="h-4 w-4" /> Publier une annonce
+          </Button>
+        </Link>
+        <Link to="/owner-profile">
+          <Button variant="outline" className="w-full gap-2" size="sm">
+            Modifier mon profil
+          </Button>
+        </Link>
+      </div>
+    </div>
+  );
+
+  const rightContent = (
+    <div className="space-y-8">
+      {/* Mes animaux */}
       <DashSection title="Mes animaux" action={
         <Link to="/owner-profile" className="text-xs text-primary hover:underline font-medium">Gérer →</Link>
       }>
@@ -286,30 +313,7 @@ const OwnerDashboard = () => {
         )}
       </DashSection>
 
-      {/* 4. Stat cards */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-        <StatCard icon={Calendar} iconColor="text-primary" label="Gardes réalisées" value={completedSits.length} delay={0} />
-        <StatCard icon={Star} iconColor="text-amber-500" label="Note moyenne" value={avgRating} delay={100} isDecimal emptyMsg={avgRating === 0 ? "Pas encore d'avis" : undefined} />
-        <StatCard icon={Megaphone} iconColor="text-blue-500" label="Annonces actives" value={activeSits.length} delay={200} />
-        <StatCard icon={Heart} iconColor="text-pink-500" label="Gardiens de confiance" value={trustedSitterCount} delay={300} />
-        <div className="p-4 rounded-xl border border-border bg-card hover:shadow-md transition-shadow animate-fade-in" style={{ animationDelay: "400ms" }}>
-          <Handshake className="h-4 w-4 text-primary mb-2" strokeWidth={1.8} />
-          <div className="flex items-baseline gap-3">
-            <div>
-              <p className="font-heading text-[28px] font-bold leading-tight">{missionMetrics.total}</p>
-              <p className="text-xs text-muted-foreground mt-1">Postées</p>
-            </div>
-            <span className="text-muted-foreground/30 text-lg">/</span>
-            <div>
-              <p className="font-heading text-[28px] font-bold leading-tight">{missionMetrics.completed}</p>
-              <p className="text-xs text-muted-foreground mt-1">Terminées</p>
-            </div>
-          </div>
-          <p className="text-[10px] text-muted-foreground mt-1.5">Petites missions</p>
-        </div>
-      </div>
-
-      {/* 5. Candidatures reçues */}
+      {/* Candidatures récentes */}
       <DashSection title="Candidatures récentes" action={
         recentApps.length > 0 ? <Link to="/sits" className="text-xs text-primary hover:underline font-medium">Voir toutes mes annonces →</Link> : undefined
       }>
@@ -439,6 +443,14 @@ const OwnerDashboard = () => {
       )}
 
     </div>
+  );
+
+  return (
+    <TwoColumnLayout
+      leftWidth={260}
+      leftContent={leftContent}
+      rightContent={rightContent}
+    />
   );
 };
 

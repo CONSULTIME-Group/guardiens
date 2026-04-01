@@ -1,4 +1,5 @@
 import { useAuth } from "@/contexts/AuthContext";
+import TwoColumnLayout from "@/components/layout/TwoColumnLayout";
 import { Link } from "react-router-dom";
 import {
   Plus, Calendar, MessageSquare, Star, Users, Eye, BookOpen,
@@ -255,57 +256,73 @@ const Sits = () => {
   }, [sits, activeRole, activeTab]);
 
   return (
-    <div className="p-4 md:p-10 max-w-4xl mx-auto animate-fade-in pb-24 md:pb-8">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="font-heading text-2xl md:text-3xl font-bold mb-1">
-            {activeRole === "owner" ? "Mes annonces" : "Mes gardes"}
-          </h1>
-          <p className="text-muted-foreground text-sm">
-            {activeRole === "owner"
-              ? "Gérez vos annonces et suivez vos gardes."
-              : "Suivez vos candidatures et gardes."}
-          </p>
-        </div>
-        {activeRole === "owner" && (
-          <Link to="/sits/create">
-            <Button className="gap-2">
-              <Plus className="h-4 w-4" /> Publier
-            </Button>
-          </Link>
-        )}
-      </div>
+    <div className="w-full animate-fade-in pb-24 md:pb-8">
+      <TwoColumnLayout
+        leftWidth={240}
+        leftContent={
+          <div className="space-y-6">
+            {/* Header */}
+            <div>
+              <h1 className="font-heading text-xl font-bold mb-1">
+                {activeRole === "owner" ? "Mes annonces" : "Mes gardes"}
+              </h1>
+              <p className="text-muted-foreground text-xs">
+                {activeRole === "owner"
+                  ? "Gérez vos annonces et suivez vos gardes."
+                  : "Suivez vos candidatures et gardes."}
+              </p>
+            </div>
 
-      {/* Tabs with counters */}
-      <div className="flex gap-2 overflow-x-auto pb-2 mb-6 scrollbar-hide">
-        {tabs.map((tab) => (
-          <button
-            key={tab.value}
-            onClick={() => setActiveTab(tab.value)}
-            className={cn(
-              "px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors shrink-0 flex items-center gap-1.5",
-              activeTab === tab.value
-                ? "bg-primary text-primary-foreground"
-                : "bg-accent text-muted-foreground hover:text-foreground"
+            {activeRole === "owner" && (
+              <Link to="/sits/create">
+                <Button className="gap-2 w-full" size="sm">
+                  <Plus className="h-4 w-4" /> Publier
+                </Button>
+              </Link>
             )}
-          >
-            {tab.label}
-            {tabCounts[tab.value] > 0 && (
-              <span className={cn(
-                "text-[10px] rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1 font-semibold",
-                activeTab === tab.value
-                  ? "bg-primary-foreground/20 text-primary-foreground"
-                  : "bg-muted-foreground/15 text-muted-foreground"
-              )}>
-                {tabCounts[tab.value]}
-              </span>
-            )}
-          </button>
-        ))}
-      </div>
 
-      {/* Content */}
+            {/* Tabs / filters */}
+            <div className="flex flex-row md:flex-col gap-2 overflow-x-auto md:overflow-x-visible scrollbar-hide">
+              {tabs.map((tab) => {
+                const TabIcon = tab.icon;
+                return (
+                  <button
+                    key={tab.value}
+                    onClick={() => setActiveTab(tab.value)}
+                    className={cn(
+                      "px-3 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors shrink-0 flex items-center gap-2 w-full text-left",
+                      activeTab === tab.value
+                        ? "bg-primary text-primary-foreground"
+                        : "text-muted-foreground hover:text-foreground hover:bg-accent"
+                    )}
+                  >
+                    <TabIcon className="h-4 w-4 shrink-0" />
+                    {tab.label}
+                    {tabCounts[tab.value] > 0 && (
+                      <span className={cn(
+                        "text-[10px] rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1 font-semibold ml-auto",
+                        activeTab === tab.value
+                          ? "bg-primary-foreground/20 text-primary-foreground"
+                          : "bg-muted-foreground/15 text-muted-foreground"
+                      )}>
+                        {tabCounts[tab.value]}
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Summary counts */}
+            <div className="hidden md:block space-y-2 pt-2 border-t border-border">
+              <p className="text-xs text-muted-foreground">
+                {sits.length} {activeRole === "owner" ? "annonce" : "garde"}{sits.length > 1 ? "s" : ""} au total
+              </p>
+            </div>
+          </div>
+        }
+        rightContent={
+          <div>
       {loading ? (
         <div className="space-y-4">
           {[1, 2, 3].map((i) => (
@@ -359,6 +376,9 @@ const Sits = () => {
           ))}
         </div>
       )}
+          </div>
+        }
+      />
     </div>
   );
 };
