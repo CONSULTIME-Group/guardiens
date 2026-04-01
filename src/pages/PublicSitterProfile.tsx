@@ -9,8 +9,7 @@ import {
   Car, MapPin, X,
   ChevronLeft, ChevronRight,
 } from "lucide-react";
-import { format } from "date-fns";
-import { fr } from "date-fns/locale";
+import {
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 const SITE_URL = "https://guardiens.fr";
