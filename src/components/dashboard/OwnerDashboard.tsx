@@ -221,47 +221,85 @@ const OwnerDashboard = () => {
   };
   const cta = getCTA();
 
+  const totalReceivedApps = sits.reduce((sum: number, s: any) => sum + (s.applications?.filter((a: any) => a.status === "pending").length || 0), 0);
+
+  const emergencySitterCount = 0; // populated below
+  const [nearbyEmergencyCount, setNearbyEmergencyCount] = useState(0);
+  useEffect(() => {
+    supabase.from("emergency_sitter_profiles").select("user_id", { count: "exact", head: true }).eq("is_active", true).then(({ count }) => {
+      setNearbyEmergencyCount(count || 0);
+    });
+  }, []);
+
   const leftContent = (
-    <div className="space-y-6">
-      {/* Header */}
-      <div>
-        <h1 className="font-heading text-xl font-bold">
-          Bonjour{user?.firstName ? `, ${user.firstName}` : ""} 👋
-        </h1>
-        {subtitle.to ? (
-          <Link to={subtitle.to} className="text-xs text-primary hover:underline mt-1 inline-block">{subtitle.text}</Link>
+    <div className="space-y-5">
+      {/* BLOC 1 — Statut profil */}
+      <div className="bg-card border border-border rounded-2xl p-4 space-y-3">
+        <div className="flex items-center gap-3">
+          {user?.avatarUrl ? (
+            <img src={user.avatarUrl} alt={user.firstName} className="w-16 h-16 rounded-full object-cover shrink-0" />
+          ) : (
+            <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center font-heading text-xl font-bold shrink-0">
+              {user?.firstName?.charAt(0) || "?"}
+            </div>
+          )}
+          <div className="min-w-0">
+            <p className="font-heading font-semibold text-sm capitalize">{user?.firstName || "Propriétaire"}</p>
+            {user && (
+              <p className="text-xs text-muted-foreground">{(user as any).city || ""}</p>
+            )}
+          </div>
+        </div>
+        {user && user.profileCompletion < 100 ? (
+          <div>
+            <div className="flex items-center justify-between text-xs mb-1">
+              <span className="text-muted-foreground">Profil</span>
+              <span className="font-medium">{user.profileCompletion}% complété</span>
+            </div>
+            <div className="h-1.5 rounded-full bg-muted overflow-hidden">
+              <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${user.profileCompletion}%` }} />
+            </div>
+          </div>
         ) : (
-          <p className="text-xs text-muted-foreground mt-1">{subtitle.text}</p>
+          <p className="text-xs text-primary font-medium">✓ Profil complet</p>
+        )}
+        {user && user.profileCompletion < 60 && (
+          <div className="rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 p-3">
+            <p className="text-xs text-amber-800 dark:text-amber-200">Complétez votre profil pour attirer les gardiens</p>
+            <Link to="/owner-profile" className="text-xs font-medium text-primary hover:underline mt-1 inline-block">Compléter →</Link>
+          </div>
         )}
       </div>
 
-      {/* Banner */}
-      {banner && (
-        <Link to={banner.to} className={`block p-3 rounded-xl border ${banner.bg} hover:shadow-md transition-shadow`}>
-          <p className={`text-xs font-medium ${banner.text}`}>{banner.label}</p>
+      {/* BLOC 2 — 4 métriques */}
+      <div className="grid grid-cols-2 gap-3">
+        <MiniMetric label="Gardes réalisées" value={completedSits.length} />
+        <MiniMetric label="Annonces actives" value={activeSits.length} />
+        <MiniMetric label="Candidatures reçues" value={totalReceivedApps} />
+        <MiniMetric label="Gardiens de confiance" value={trustedSitterCount} />
+      </div>
+
+      {/* BLOC 3 — Action rapide */}
+      {activeSits.length === 0 ? (
+        <Link to="/sits/create">
+          <Button className="w-full rounded-xl py-3 gap-2">
+            <Plus className="h-4 w-4" /> Publier une annonce →
+          </Button>
+        </Link>
+      ) : (
+        <Link to="/sits/create">
+          <Button variant="outline" className="w-full rounded-xl py-3 gap-2">
+            <Plus className="h-4 w-4" /> Nouvelle annonce →
+          </Button>
         </Link>
       )}
 
-      {/* Stats */}
-      <div className="grid grid-cols-2 gap-2">
-        <StatCard icon={Calendar} iconColor="text-primary" label="Gardes" value={completedSits.length} delay={0} />
-        <StatCard icon={Star} iconColor="text-amber-500" label="Note" value={avgRating} delay={100} isDecimal emptyMsg={avgRating === 0 ? "—" : undefined} />
-        <StatCard icon={Megaphone} iconColor="text-blue-500" label="Actives" value={activeSits.length} delay={200} />
-        <StatCard icon={Heart} iconColor="text-pink-500" label="Confiance" value={trustedSitterCount} delay={300} />
-      </div>
-
-      {/* Quick actions */}
-      <div className="space-y-2">
-        <Link to="/sits/create">
-          <Button className="w-full gap-2" size="sm">
-            <Plus className="h-4 w-4" /> Publier une annonce
-          </Button>
-        </Link>
-        <Link to="/owner-profile">
-          <Button variant="outline" className="w-full gap-2" size="sm">
-            Modifier mon profil
-          </Button>
-        </Link>
+      {/* BLOC 4 — Gardiens d'urgence proches */}
+      <div className="rounded-xl border border-border bg-card p-3 space-y-1">
+        <p className="text-sm text-muted-foreground">
+          <span className="font-semibold text-foreground">{nearbyEmergencyCount}</span> gardien{nearbyEmergencyCount > 1 ? "s" : ""} d'urgence disponible{nearbyEmergencyCount > 1 ? "s" : ""}
+        </p>
+        <Link to="/recherche-gardiens" className="text-xs text-primary hover:underline font-medium">Voir →</Link>
       </div>
     </div>
   );
