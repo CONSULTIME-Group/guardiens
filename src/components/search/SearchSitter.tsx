@@ -833,18 +833,18 @@ const SearchSitter = () => {
         </div>
       ) : (
         /* ─── Map view ─── */
-        <div className="flex h-[calc(100vh-200px)]">
-          <div className="w-1/2 overflow-y-auto p-4 space-y-3 border-r border-[#E8E6DC]">
-            {results.map(renderCard)}
-          </div>
-          <div className="w-1/2">
-            <iframe
-              title="Carte des annonces"
-              src={`https://www.openstreetmap.org/export/embed.html?bbox=${userCoords ? `${userCoords.lng - 0.5},${userCoords.lat - 0.3},${userCoords.lng + 0.5},${userCoords.lat + 0.3}` : "4.5,45.5,5.5,46.0"}&layer=mapnik`}
-              className="w-full h-full border-0"
-            />
-          </div>
-        </div>
+        <Suspense fallback={<div className="flex items-center justify-center h-[calc(100vh-200px)]"><p className="text-[#6B7280]">Chargement de la carte…</p></div>}>
+          <SearchMapView
+            results={results}
+            resultCoords={resultCoords}
+            userCoords={userCoords}
+            hasAccess={hasAccess}
+            formatDate={formatDate}
+            tab={tab}
+            sitterEligible={sitterEligible}
+            renderCard={renderCard}
+          />
+        </Suspense>
       )}
     </div>
   );
