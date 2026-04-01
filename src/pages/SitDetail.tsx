@@ -199,12 +199,11 @@ const SitDetail = () => {
     { value: "reviews", label: `⭐ Avis (${reviews.length})` },
   ];
 
-  // Set active tab based on owner status (effect to avoid hook after return)
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
-    if (sit && sit.user_id === user?.id) {
-      setActiveTab("candidatures");
-    }
-  }, [sit, user]);
+    if (sit && sit.user_id === user?.id) setActiveTab("candidatures");
+  }, [sit?.id]);
 
   const leftContent = (
     <div className="space-y-6">
