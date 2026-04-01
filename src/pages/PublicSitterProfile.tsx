@@ -234,6 +234,86 @@ export default function PublicSitterProfile() {
         <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>
       </Helmet>
 
+      {/* ── HERO ILLUSTRÉ SVG ── */}
+      <div className="w-full h-[180px] relative overflow-hidden bg-[#F0EDE6]">
+        <svg viewBox="0 0 1200 180" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice" className="absolute inset-0 w-full h-full">
+          <defs>
+            <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#E8E4DC"/>
+              <stop offset="100%" stopColor="#F0EDE6"/>
+            </linearGradient>
+            <linearGradient id="fadeBottom" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="60%" stopColor="#F0EDE6" stopOpacity="0"/>
+              <stop offset="100%" stopColor="#FAF9F6" stopOpacity="1"/>
+            </linearGradient>
+          </defs>
+          <rect width="1200" height="180" fill="url(#sky)"/>
+          <ellipse cx="200" cy="200" rx="300" ry="80" fill="#2D6A4F" opacity="0.06"/>
+          <ellipse cx="900" cy="210" rx="350" ry="90" fill="#2D6A4F" opacity="0.05"/>
+          <ellipse cx="600" cy="220" rx="400" ry="100" fill="#2D6A4F" opacity="0.07"/>
+          <rect x="0" y="148" width="1200" height="32" fill="#2D6A4F" opacity="0.08"/>
+          <g opacity="0.18" fill="#2D6A4F">
+            <rect x="80" y="100" width="60" height="50"/>
+            <polygon points="80,100 140,100 110,68"/>
+            <rect x="100" y="120" width="16" height="30"/>
+            <rect x="88" y="108" width="12" height="12"/>
+            <rect x="120" y="108" width="12" height="12"/>
+          </g>
+          <g opacity="0.15" fill="#2D6A4F">
+            <rect x="168" y="110" width="6" height="40"/>
+            <ellipse cx="171" cy="100" rx="18" ry="22"/>
+          </g>
+          <g opacity="0.14" fill="#2D6A4F">
+            <rect x="540" y="90" width="80" height="60"/>
+            <polygon points="540,90 620,90 580,55"/>
+            <rect x="565" y="118" width="20" height="32"/>
+            <rect x="548" y="100" width="14" height="14"/>
+            <rect x="598" y="100" width="14" height="14"/>
+            <rect x="600" y="58" width="8" height="16"/>
+          </g>
+          <g opacity="0.12" fill="#2D6A4F">
+            <rect x="488" y="105" width="7" height="45"/>
+            <ellipse cx="491" cy="92" rx="22" ry="26"/>
+          </g>
+          <g opacity="0.13" fill="#2D6A4F">
+            <rect x="648" y="112" width="6" height="38"/>
+            <ellipse cx="651" cy="100" rx="17" ry="20"/>
+          </g>
+          <g opacity="0.12" fill="#2D6A4F">
+            <rect x="980" y="105" width="55" height="45"/>
+            <polygon points="980,105 1035,105 1007,76"/>
+            <rect x="997" y="125" width="14" height="25"/>
+            <rect x="986" y="113" width="10" height="10"/>
+            <rect x="1015" y="113" width="10" height="10"/>
+          </g>
+          <g opacity="0.11" fill="#2D6A4F">
+            <rect x="1055" y="108" width="6" height="42"/>
+            <ellipse cx="1058" cy="96" rx="20" ry="24"/>
+          </g>
+          <g opacity="0.20" fill="#2D6A4F" transform="translate(340, 118)">
+            <ellipse cx="30" cy="18" rx="28" ry="12"/>
+            <circle cx="56" cy="12" r="10"/>
+            <ellipse cx="62" cy="8" rx="5" ry="8" transform="rotate(15,62,8)"/>
+            <path d="M2,16 Q-12,8 -8,2" stroke="#2D6A4F" strokeWidth="3" fill="none" opacity="0.20"/>
+            <rect x="8" y="28" width="5" height="14" rx="2"/>
+            <rect x="18" y="28" width="5" height="12" rx="2"/>
+            <rect x="35" y="28" width="5" height="14" rx="2"/>
+            <rect x="45" y="28" width="5" height="12" rx="2"/>
+            <ellipse cx="64" cy="16" rx="4" ry="3"/>
+          </g>
+          <g opacity="0.16" fill="#2D6A4F" transform="translate(820, 120)">
+            <ellipse cx="16" cy="20" rx="14" ry="16"/>
+            <circle cx="16" cy="6" r="10"/>
+            <polygon points="8,0 4,-8 14,-2"/>
+            <polygon points="24,0 28,-8 18,-2"/>
+            <path d="M30,28 Q44,20 40,10" stroke="#2D6A4F" strokeWidth="3" fill="none" opacity="0.16"/>
+            <ellipse cx="11" cy="6" rx="2" ry="2.5" fill="#F0EDE6"/>
+            <ellipse cx="21" cy="6" rx="2" ry="2.5" fill="#F0EDE6"/>
+          </g>
+          <rect width="1200" height="180" fill="url(#fadeBottom)"/>
+        </svg>
+      </div>
+
       {/* ── HEADER TYPOGRAPHIQUE ── */}
       <div className="max-w-5xl mx-auto px-6 pt-10 pb-8">
         <div className="flex items-center gap-6 md:gap-8">
