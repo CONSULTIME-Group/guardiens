@@ -215,7 +215,7 @@ const MySubscription = () => {
 
   return (
     <div className="p-6 md:p-10 max-w-3xl mx-auto animate-fade-in space-y-8">
-      <PageMeta title="Mon abonnement | Guardiens" description="Gérez votre abonnement Guardiens." />
+      <PageMeta title="Mon abonnement | Guardiens" description="Gérez votre abonnement Guardiens." noindex />
 
       <h1 className="font-heading text-3xl font-bold">Mon abonnement</h1>
 

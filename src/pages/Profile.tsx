@@ -1,5 +1,6 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { lazy, Suspense } from "react";
+import { Helmet } from "react-helmet-async";
 
 const SitterProfilePage = lazy(() => import("./SitterProfile"));
 const OwnerProfilePage = lazy(() => import("./OwnerProfile"));
