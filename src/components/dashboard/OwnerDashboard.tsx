@@ -399,6 +399,14 @@ const OwnerDashboard = () => {
 
     </div>
   );
+
+  return (
+    <TwoColumnLayout
+      leftWidth={260}
+      leftContent={leftContent}
+      rightContent={rightContent}
+    />
+  );
 };
 
 /* ── Shared ── */
