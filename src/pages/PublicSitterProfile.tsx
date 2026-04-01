@@ -4,26 +4,38 @@ import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import BadgeTimbre, { TIMBRES_ORDER } from "@/components/badges/BadgeTimbre";
-import BadgeShield from "@/components/badges/BadgeShield";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
-  Car, MapPin, ExternalLink, X,
+  Car, MapPin, X,
   ChevronLeft, ChevronRight,
 } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 const SITE_URL = "https://guardiens.fr";
 
 const capitalize = (name: string) =>
   name ? name.charAt(0).toUpperCase() + name.slice(1).toLowerCase() : "";
 
-/* ── Animal labels ── */
 const ANIMAL_LABELS: Record<string, string> = {
   dog: "Chiens", cat: "Chats", bird: "Oiseaux", fish: "Poissons",
   reptile: "Reptiles", rabbit: "Lapins", horse: "Chevaux",
   rodent: "Rongeurs", nac: "NAC", farm: "Animaux de ferme",
+};
+
+const SITTER_TYPE_LABELS: Record<string, string> = {
+  solo: "Solo", couple: "Couple", family: "Famille", retired: "Retraité(e)",
+};
+
+const MIN_DURATION_LABELS: Record<number, string> = {
+  1: "À partir de 1 jour", 2: "À partir de 2 jours", 3: "À partir de 3 jours",
+  5: "À partir de 5 jours", 7: "À partir de 7 jours", 14: "À partir de 14 jours",
+};
+
+const ENV_LABELS: Record<string, string> = {
+  city: "Ville", countryside: "Campagne", mountain: "Montagne",
+  sea: "Bord de mer", suburb: "Banlieue",
 };
 
 export default function PublicSitterProfile() {
@@ -68,7 +80,6 @@ export default function PublicSitterProfile() {
       if (galleryRes.data) setGallery(galleryRes.data);
       if (emergencyRes.data) setEmergencyActive(emergencyRes.data.is_active);
 
-      // Aggregate badges
       if (badgesRes.data) {
         const map: Record<string, number> = {};
         badgesRes.data.forEach((b: any) => {
@@ -77,7 +88,6 @@ export default function PublicSitterProfile() {
         setBadges(Object.entries(map).map(([badge_key, count]) => ({ badge_key, count })));
       }
 
-      // Reviews
       if (reviewsRes.data) {
         setReviews(reviewsRes.data);
         setReviewCount(reviewsRes.data.length);
@@ -96,9 +106,8 @@ export default function PublicSitterProfile() {
     return (
       <div className="min-h-screen bg-background">
         <div className="max-w-3xl mx-auto px-6 py-10 space-y-6">
-          <Skeleton className="w-32 h-32 rounded-full mx-auto" />
+          <Skeleton className="w-full h-[320px] rounded-none" />
           <Skeleton className="h-8 w-48 mx-auto" />
-          <Skeleton className="h-4 w-32 mx-auto" />
         </div>
       </div>
     );
@@ -119,48 +128,74 @@ export default function PublicSitterProfile() {
 
   const firstName = capitalize(profile.first_name || "");
   const city = profile.city || "";
-  const bio = sitterProfile?.motivation || profile.bio || "";
-  const shortBio = profile.bio || "";
+  const bio = profile.bio || "";
   const motivation = sitterProfile?.motivation || "";
   const animalTypes: string[] = sitterProfile?.animal_types || [];
   const hasVehicle = sitterProfile?.has_vehicle || false;
   const rawRadius = sitterProfile?.geographic_radius || 0;
-  const competences: string[] = sitterProfile?.competences || [];
-  const isAvailable = sitterProfile?.is_available || false;
   const completedSits = profile.completed_sits_count || 0;
   const cancellations = profile.cancellation_count || 0;
   const radius = (rawRadius === 100 && completedSits === 0) ? 15 : rawRadius;
   const isOwn = auth?.user?.id === id;
-  const isOwner = auth?.activeRole === "owner";
   const isAuthenticated = auth?.isAuthenticated;
+  const isOwner = auth?.activeRole === "owner";
   const isSitter = auth?.activeRole === "sitter";
-  const showStickyBar = !(isOwn || (isAuthenticated && isSitter && !isOwn));
+  const isAvailable = sitterProfile?.is_available || false;
+
+  const sitterType = sitterProfile?.sitter_type || "";
+  const accompaniedBy = sitterProfile?.accompanied_by || "";
+  const lifestyle: string[] = sitterProfile?.lifestyle || [];
+  const minDuration: number = sitterProfile?.min_duration || 0;
+  const preferredEnvironments: string[] = sitterProfile?.preferred_environments || [];
+
+  const badgeMap: Record<string, boolean> = {};
+  badges.forEach(b => { badgeMap[b.badge_key] = true; });
+  if (profile?.identity_verified) badgeMap["id_verifiee"] = true;
+  if (profile?.is_founder) badgeMap["fondateur"] = true;
+  if (emergencyActive) badgeMap["gardien_urgence"] = true;
+  const unlockedCount = TIMBRES_ORDER.filter(k => badgeMap[k]).length;
+  const totalBadgeCount = badges.reduce((s, b) => s + b.count, 0);
+
+  const activeBadgeKeys = ["id_verifiee", "fondateur", "gardien_urgence"].filter(k => badgeMap[k]);
 
   const visibleReviews = reviews.slice(0, 5);
   const visibleGallery = gallery.slice(0, 9);
 
-  /* ── SEO ── */
+  const showCTA = !(isOwn || (isAuthenticated && isSitter));
+
+  // SEO
   const animalLabels = animalTypes.map(a => ANIMAL_LABELS[a] || a).join(", ");
   const pageTitle = `${firstName} — Gardien à ${city || "France"} | Guardiens`;
-  const pageDesc = `${firstName} garde des ${animalLabels || "animaux"} à ${city || "France"} et dans un rayon de ${radius}km. Profil vérifié sur Guardiens.fr.`;
+  const pageDesc = `${firstName} garde des ${animalLabels || "animaux"} à ${city || "France"} dans un rayon de ${radius}km. Profil vérifié sur Guardiens.fr.`;
   const pageUrl = `${SITE_URL}/gardiens/${id}`;
 
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Person",
     name: firstName,
-    address: {
-      "@type": "PostalAddress",
-      addressLocality: city,
-      addressCountry: "FR",
-    },
-    description: bio,
-    knowsAbout: competences,
+    address: { "@type": "PostalAddress", addressLocality: city, addressCountry: "FR" },
+    description: motivation || bio,
     url: pageUrl,
   };
 
+  // Sitter type + accompanied label
+  const typeLabel = SITTER_TYPE_LABELS[sitterType] || sitterType;
+  const accompLabel = accompaniedBy ? `avec ${accompaniedBy}` : "";
+  const typeLineItems = [typeLabel, accompLabel].filter(Boolean);
+  const typeLine = typeLineItems.length > 0 ? typeLineItems.join(" · ") : "";
+
+  const durationLabel = minDuration > 0
+    ? (MIN_DURATION_LABELS[minDuration] || `À partir de ${minDuration} jours`)
+    : "";
+
+  // Stats line
+  const statsItems: string[] = [];
+  statsItems.push(`${completedSits} garde${completedSits !== 1 ? "s" : ""}`);
+  statsItems.push(avgRating > 0 ? `${avgRating} ★` : "Pas encore");
+  statsItems.push(`${totalBadgeCount} écusson${totalBadgeCount !== 1 ? "s" : ""}`);
+
   return (
-    <div className="min-h-screen bg-background pb-24">
+    <div className="min-h-screen bg-background">
       <Helmet>
         <title>{pageTitle}</title>
         <meta name="description" content={pageDesc} />
@@ -178,216 +213,266 @@ export default function PublicSitterProfile() {
         <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>
       </Helmet>
 
-      {/* ── Header ── */}
-      <header className="border-b border-border bg-background">
-        <div className="max-w-3xl mx-auto px-6 py-3 flex items-center justify-between">
-          <Link to="/" className="text-lg font-bold text-primary">Guardiens</Link>
-          {isAuthenticated ? (
-            <Link to="/dashboard" className="text-sm text-primary hover:underline">
-              {capitalize(auth.user?.firstName || "")} — Dashboard
-            </Link>
-          ) : (
-            <div className="flex items-center gap-3">
-              <Link to="/login" className="text-sm text-foreground hover:underline">Se connecter</Link>
-              <Link to="/register" className="text-sm bg-primary text-primary-foreground rounded-full px-4 py-1.5">
-                S'inscrire
-              </Link>
-            </div>
-          )}
-        </div>
-      </header>
+      {/* ── HERO ── */}
+      <div className="relative w-full h-[260px] md:h-[320px] overflow-hidden bg-muted">
+        {profile.avatar_url && (
+          <img
+            src={profile.avatar_url}
+            alt={firstName}
+            className="absolute inset-0 w-full h-full object-cover object-top"
+          />
+        )}
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-background" />
 
-      {/* ── SECTION 1: Hero ── */}
-      <section className="px-6 py-10 max-w-3xl mx-auto space-y-4">
         {/* Back link */}
-        <Link to="/recherche-gardiens" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+        <Link
+          to="/recherche-gardiens"
+          className="absolute top-4 left-6 text-sm text-white/80 hover:text-white z-10"
+        >
           ← Retour aux gardiens
         </Link>
 
-        <div className="flex flex-col items-center">
-          <Avatar className="w-32 h-32 border-2 border-border mb-4">
-            {profile.avatar_url ? (
-              <AvatarImage src={profile.avatar_url} alt={firstName} className="object-cover" />
-            ) : null}
-            <AvatarFallback className="bg-primary/10 text-primary text-4xl">
-              {firstName.charAt(0)}
-            </AvatarFallback>
-          </Avatar>
-
-          {/* Status badges */}
-          <div className="flex justify-center gap-2 mb-4">
-            {profile.identity_verified && <BadgeShield badgeKey="identity_verified" size="sm" />}
-            {profile.is_founder && <BadgeShield badgeKey="founder" size="sm" />}
-            {emergencyActive && <BadgeShield badgeKey="emergency_sitter" size="sm" />}
-          </div>
-
-          <h1 className="text-2xl font-semibold text-foreground text-center">{firstName}</h1>
-          {city && (
-            <p className="text-base text-muted-foreground text-center mb-2">📍 {city}</p>
+        {/* Hero content */}
+        <div className="absolute bottom-0 left-0 right-0 px-6 md:px-8 pb-6 md:pb-8 flex flex-col gap-1">
+          {isAvailable && (
+            <span className="self-start bg-primary text-white text-xs px-3 py-1 rounded-full mb-1">
+              Disponible
+            </span>
           )}
 
-          {/* Metrics */}
-          <div className="flex justify-center gap-6 mt-4 flex-wrap">
-            <div className="text-center">
-              <p className="text-xl font-semibold text-foreground">{completedSits}</p>
-              <p className="text-xs text-muted-foreground">Gardes</p>
+          {activeBadgeKeys.length > 0 && (
+            <div className="flex gap-2 mb-1">
+              {activeBadgeKeys.map(k => (
+                <div key={k} className="brightness-0 invert">
+                  <BadgeTimbre id={k} unlocked size="compact" />
+                </div>
+              ))}
             </div>
-            <div className="text-center">
-              <p className="text-xl font-semibold text-foreground">{avgRating > 0 ? `${avgRating}` : <span className="text-muted-foreground text-base">Pas encore</span>}</p>
-              <p className="text-xs text-muted-foreground">Note ★</p>
-            </div>
-            <div className="text-center">
-              <p className="text-xl font-semibold text-foreground">{badges.reduce((s, b) => s + b.count, 0)}</p>
-              <p className="text-xs text-muted-foreground">Écussons</p>
-            </div>
-          </div>
+          )}
+
+          <h1 className="text-3xl md:text-4xl font-bold text-white">
+            {firstName}
+          </h1>
+
+          {city && (
+            <p className="text-sm text-white/70 flex items-center gap-1">
+              <MapPin className="w-3.5 h-3.5" />
+              {city}
+            </p>
+          )}
+
+          <p className="text-sm text-white/80">
+            {statsItems.join(" · ")}
+          </p>
 
           {completedSits > 0 && cancellations > 0 && (
-            <p className="text-xs text-muted-foreground mt-2">
+            <p className="text-xs text-white/60">
               {cancellations} annulation{cancellations > 1 ? "s" : ""}
             </p>
           )}
         </div>
-      </section>
+      </div>
 
-      {/* ── SECTION 2: Bio ── */}
-      {(shortBio || motivation) && (
-        <section className="max-w-3xl mx-auto px-6 py-6 border-t border-border">
-          {shortBio && (
-            <p className="text-sm text-muted-foreground mb-4">{shortBio}</p>
-          )}
+      {/* ── BODY — TWO COLUMNS ── */}
+      <div className="max-w-5xl mx-auto px-4 md:px-6 py-8 md:py-10 flex flex-col md:flex-row gap-8 md:gap-10 items-start">
+
+        {/* ── LEFT COLUMN ── */}
+        <div className="w-full md:w-[300px] md:shrink-0 md:sticky md:top-8">
+          <div className="bg-card rounded-2xl border border-border p-6 space-y-5">
+
+            {/* Lifestyle */}
+            {lifestyle.length > 0 && (
+              <div>
+                <p className="text-xs uppercase tracking-widest text-muted-foreground mb-2">Style de vie</p>
+                <div className="flex flex-wrap gap-1.5">
+                  {lifestyle.map(l => (
+                    <span key={l} className="border border-border rounded-full text-xs px-2 py-0.5 text-foreground">
+                      {l}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Type + accompanied */}
+            {typeLine && (
+              <p className="text-sm text-muted-foreground">{typeLine}</p>
+            )}
+
+            {/* Min duration */}
+            {durationLabel && (
+              <p className="text-sm text-muted-foreground">{durationLabel}</p>
+            )}
+
+            {/* Preferred environments */}
+            {preferredEnvironments.length > 0 && (
+              <div>
+                <p className="text-xs uppercase tracking-widest text-muted-foreground mb-2">Environnements</p>
+                <div className="flex flex-wrap gap-1.5">
+                  {preferredEnvironments.map(e => (
+                    <span key={e} className="border border-border rounded-full text-xs px-2 py-0.5 text-foreground">
+                      {ENV_LABELS[e] || e}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* CTA */}
+            {showCTA && (
+              <>
+                <hr className="border-border" />
+                {!isAuthenticated && (
+                  <Link
+                    to={`/inscription?redirect=/gardiens/${id}`}
+                    className="block bg-primary text-white rounded-xl py-3 text-sm font-medium w-full text-center"
+                  >
+                    S'inscrire pour contacter
+                  </Link>
+                )}
+                {isAuthenticated && isOwner && (
+                  <Link
+                    to={`/messagerie?gardien=${id}`}
+                    className="block bg-primary text-white rounded-xl py-3 text-sm font-medium w-full text-center"
+                  >
+                    Contacter {firstName}
+                  </Link>
+                )}
+              </>
+            )}
+          </div>
+        </div>
+
+        {/* ── RIGHT COLUMN ── */}
+        <div className="flex-1 space-y-10 min-w-0">
+
+          {/* Motivation */}
           {motivation && (
-            <>
-              <h2 className="text-sm font-semibold text-foreground uppercase tracking-wide mb-3">À propos</h2>
-              <p className="text-base text-foreground/80 leading-relaxed">{motivation}</p>
-            </>
+            <p className="text-xl font-semibold leading-relaxed text-foreground/85">
+              {motivation}
+            </p>
           )}
-        </section>
-      )}
 
-      {/* ── SECTION 3: Ce qu'il/elle garde ── */}
-      {animalTypes.length > 0 && (
-        <section className="max-w-3xl mx-auto px-6 py-6 border-t border-border">
-          <h2 className="text-sm font-semibold uppercase tracking-wide mb-4">Animaux acceptés</h2>
-          <div className="flex flex-wrap gap-2">
-            {animalTypes.map((a) => (
-              <span key={a} className="bg-primary/10 text-primary rounded-full px-3 py-1 text-sm">
-                {ANIMAL_LABELS[a] || a}
-              </span>
-            ))}
-          </div>
-          {sitterProfile?.farm_animals_ok && (
-            <span className="inline-block mt-2 bg-primary/10 text-primary rounded-full px-3 py-1 text-xs">
-              Races exigeantes ✓
-            </span>
+          {/* Bio */}
+          {bio && (
+            <p className="text-sm italic text-muted-foreground">{bio}</p>
           )}
-          <div className="mt-4 flex items-center gap-2 text-sm text-muted-foreground">
-            {hasVehicle ? (
-              <>
-                <Car className="w-4 h-4" />
-                <span>Avec véhicule — rayon {radius}km</span>
-              </>
-            ) : radius > 0 ? (
-              <>
-                <MapPin className="w-4 h-4" />
-                <span>Rayon {radius}km</span>
-              </>
-            ) : null}
-          </div>
-        </section>
-      )}
 
-      {/* ── SECTION 4: Sa collection ── */}
-      <section className="max-w-3xl mx-auto px-6 py-6 border-t border-border">
-        <h2 className="text-sm font-semibold uppercase tracking-wide mb-4">Sa collection</h2>
-        {(() => {
-          const badgeMap: Record<string, boolean> = {};
-          badges.forEach(b => { badgeMap[b.badge_key] = true; });
-          if (profile?.identity_verified) badgeMap["id_verifiee"] = true;
-          if (profile?.is_founder) badgeMap["fondateur"] = true;
-          if (emergencyActive) badgeMap["gardien_urgence"] = true;
-          const unlockedCount = TIMBRES_ORDER.filter(k => badgeMap[k]).length;
-          return (
-            <>
-              <div className="grid grid-cols-4 md:grid-cols-6 gap-4">
-                {TIMBRES_ORDER.map((key) => (
-                  <div key={key} className="flex justify-center">
-                    <BadgeTimbre id={key} unlocked={!!badgeMap[key]} size="normal" showTooltip />
+          {/* Animaux acceptés */}
+          {animalTypes.length > 0 && (
+            <div>
+              <p className="text-xs uppercase tracking-widest text-muted-foreground mb-3">Animaux acceptés</p>
+              <div className="flex flex-wrap gap-2">
+                {animalTypes.map(a => (
+                  <span key={a} className="border border-border rounded-full text-sm px-3 py-1 text-foreground">
+                    {ANIMAL_LABELS[a] || a}
+                  </span>
+                ))}
+                {sitterProfile?.farm_animals_ok && (
+                  <span className="border border-primary text-primary rounded-full text-sm px-3 py-1">
+                    Races exigeantes
+                  </span>
+                )}
+              </div>
+              {(hasVehicle || radius > 0) && (
+                <div className="mt-3 flex items-center gap-2 text-sm text-muted-foreground">
+                  {hasVehicle ? (
+                    <>
+                      <Car className="w-4 h-4" />
+                      <span>Avec véhicule — rayon {radius}km</span>
+                    </>
+                  ) : radius > 0 ? (
+                    <>
+                      <MapPin className="w-4 h-4" />
+                      <span>Rayon {radius}km</span>
+                    </>
+                  ) : null}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Collection de timbres */}
+          <div>
+            <p className="text-xs uppercase tracking-widest text-muted-foreground mb-3">Sa collection</p>
+            <div className="grid grid-cols-6 gap-2">
+              {TIMBRES_ORDER.map(key => (
+                <div key={key} className="flex justify-center">
+                  <BadgeTimbre id={key} unlocked={!!badgeMap[key]} size="compact" showTooltip />
+                </div>
+              ))}
+            </div>
+            <p className="text-xs text-muted-foreground mt-2">
+              {unlockedCount} timbre{unlockedCount > 1 ? "s" : ""} sur 12
+            </p>
+          </div>
+
+          {/* Avis */}
+          {reviewCount > 0 && (
+            <div>
+              <p className="text-xs uppercase tracking-widest text-muted-foreground mb-3">
+                Avis ({reviewCount})
+              </p>
+              <div className="space-y-3">
+                {visibleReviews.map((r: any) => (
+                  <div key={r.id} className="bg-card border border-border rounded-2xl p-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Avatar className="w-8 h-8">
+                        {r.reviewer?.avatar_url ? (
+                          <AvatarImage src={r.reviewer.avatar_url} />
+                        ) : null}
+                        <AvatarFallback className="text-xs bg-muted">
+                          {capitalize(r.reviewer?.first_name || "?").charAt(0)}
+                        </AvatarFallback>
+                      </Avatar>
+                      <span className="text-sm font-medium text-foreground">
+                        {capitalize(r.reviewer?.first_name || "")}
+                      </span>
+                      <span className="text-xs text-muted-foreground">
+                        {format(new Date(r.created_at), "MMMM yyyy", { locale: fr })}
+                      </span>
+                      {r.overall_rating && (
+                        <span className="text-xs text-amber-600 ml-auto">★ {r.overall_rating}/5</span>
+                      )}
+                    </div>
+                    {r.comment && (
+                      <p className="text-sm text-foreground/80 italic">{r.comment}</p>
+                    )}
                   </div>
                 ))}
               </div>
-              <p className="text-xs text-muted-foreground text-center mt-3">
-                {unlockedCount} timbre{unlockedCount > 1 ? "s" : ""} sur 12
-              </p>
-            </>
-          );
-        })()}
-      </section>
+              {reviewCount > 5 && (
+                <p className="text-xs text-primary hover:underline mt-3 cursor-pointer">
+                  Voir tous les avis →
+                </p>
+              )}
+            </div>
+          )}
 
-      {/* ── SECTION 5: Avis ── */}
-      {reviewCount > 0 && (
-        <section className="max-w-3xl mx-auto px-6 py-6 border-t border-border">
-          <h2 className="text-sm font-semibold uppercase tracking-wide mb-4">
-            Avis ({reviewCount})
-          </h2>
-          <div className="space-y-3">
-            {visibleReviews.map((r: any) => (
-              <div key={r.id} className="bg-card border border-border rounded-2xl p-4">
-                <div className="flex items-center gap-2 mb-2">
-                  <Avatar className="w-8 h-8">
-                    {r.reviewer?.avatar_url ? (
-                      <AvatarImage src={r.reviewer.avatar_url} />
-                    ) : null}
-                    <AvatarFallback className="text-xs bg-muted">
-                      {capitalize(r.reviewer?.first_name || "?").charAt(0)}
-                    </AvatarFallback>
-                  </Avatar>
-                  <span className="text-sm font-medium text-foreground">
-                    {capitalize(r.reviewer?.first_name || "")}
-                  </span>
-                  <span className="text-xs text-muted-foreground">
-                    {format(new Date(r.created_at), "MMMM yyyy", { locale: fr })}
-                  </span>
-                  {r.overall_rating && (
-                    <span className="text-xs text-amber-600 ml-auto">★ {r.overall_rating}/5</span>
-                  )}
-                </div>
-                {r.comment && (
-                  <p className="text-sm text-foreground/80 italic">{r.comment}</p>
-                )}
+          {/* Galerie */}
+          {gallery.length > 0 && (
+            <div>
+              <p className="text-xs uppercase tracking-widest text-muted-foreground mb-3">Galerie</p>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                {visibleGallery.map((g, i) => (
+                  <img
+                    key={g.id}
+                    src={g.photo_url}
+                    alt={g.caption || "Photo"}
+                    className="aspect-square object-cover rounded-xl cursor-pointer hover:opacity-90 transition-opacity"
+                    onClick={() => setLightboxIdx(i)}
+                  />
+                ))}
               </div>
-            ))}
-          </div>
-          {reviewCount > 5 && (
-            <p className="text-xs text-primary hover:underline mt-3 cursor-pointer">
-              Voir tous les avis →
-            </p>
+              {gallery.length > 9 && (
+                <p className="text-xs text-primary hover:underline mt-3 cursor-pointer">
+                  Voir toutes les photos →
+                </p>
+              )}
+            </div>
           )}
-        </section>
-      )}
-
-      {/* ── SECTION 6: Galerie ── */}
-      {gallery.length > 0 && (
-        <section className="max-w-3xl mx-auto px-6 py-6 border-t border-border">
-          <h2 className="text-sm font-semibold uppercase tracking-wide mb-4">Galerie</h2>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-            {visibleGallery.map((g, i) => (
-              <img
-                key={g.id}
-                src={g.photo_url}
-                alt={g.caption || "Photo"}
-                className="aspect-square object-cover rounded-xl cursor-pointer hover:opacity-90 transition-opacity"
-                onClick={() => setLightboxIdx(i)}
-              />
-            ))}
-          </div>
-          {gallery.length > 9 && (
-            <p className="text-xs text-primary hover:underline mt-3 cursor-pointer">
-              Voir toutes les photos →
-            </p>
-          )}
-        </section>
-      )}
+        </div>
+      </div>
 
       {/* ── Lightbox ── */}
       {lightboxIdx !== null && (
@@ -424,34 +509,6 @@ export default function PublicSitterProfile() {
             onClick={(e) => e.stopPropagation()}
           />
         </div>
-      )}
-
-      {/* ── CTA Sticky ── */}
-      {showStickyBar && (
-      <div className="fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-sm border-t border-border px-6 py-4 flex items-center justify-between z-50">
-        <div className="text-sm text-foreground">
-          {firstName}
-          {isAvailable && <span className="text-muted-foreground"> est disponible</span>}
-        </div>
-        <div>
-          {!isAuthenticated && (
-            <Link
-              to={`/inscription?redirect=/gardiens/${id}`}
-              className="bg-primary text-primary-foreground rounded-full px-6 py-2.5 text-sm font-medium hover:opacity-90 transition-opacity"
-            >
-              S'inscrire pour contacter
-            </Link>
-          )}
-          {isAuthenticated && isOwner && (
-            <Link
-              to={`/messagerie?gardien=${id}`}
-              className="bg-primary text-primary-foreground rounded-full px-6 py-2.5 text-sm font-medium hover:opacity-90 transition-opacity"
-            >
-              Contacter {firstName}
-            </Link>
-          )}
-        </div>
-      </div>
       )}
     </div>
   );
