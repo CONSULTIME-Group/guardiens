@@ -203,12 +203,15 @@ const SitterDashboard = () => {
           <h1 className="text-2xl font-semibold text-foreground">
             Bonjour{user?.firstName ? `, ${capitalize(user.firstName)}` : ""} !
           </h1>
-          <span
-            className="text-xs text-muted-foreground cursor-not-allowed pointer-events-none"
-            title="Profil public bientôt disponible"
+          <a
+            href={`/gardiens/${user?.id}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-xs text-primary hover:underline flex items-center gap-1"
           >
             Voir mon profil public
-          </span>
+            <ExternalLink className="w-3 h-3" />
+          </a>
         </div>
         <p className="text-sm text-muted-foreground mt-1">{subtitle}</p>
       </div>
