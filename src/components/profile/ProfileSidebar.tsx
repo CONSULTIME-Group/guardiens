@@ -20,14 +20,14 @@ interface ProfileSidebarProps {
   sections: SidebarSection[];
   activeSection: string;
   onSectionClick: (id: string) => void;
-  onAvatarChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onAvatarChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   publicProfileUrl: string;
   role: "sitter" | "owner";
 }
 
 const ProfileSidebar = ({
   avatarUrl, firstName, city, completion, sections,
-  activeSection, onSectionClick, onAvatarChange, publicProfileUrl, role,
+  activeSection, onSectionClick, publicProfileUrl, role,
 }: ProfileSidebarProps) => {
   return (
     <aside className="w-full lg:w-[280px] lg:sticky lg:top-24 lg:self-start space-y-5 shrink-0">

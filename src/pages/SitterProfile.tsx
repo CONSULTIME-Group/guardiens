@@ -120,12 +120,6 @@ const SitterProfile = () => {
             sections={sidebarSections}
             activeSection={activeSection}
             onSectionClick={setActiveSection}
-            onAvatarChange={async (e) => {
-              const file = e.target.files?.[0];
-              if (!file) return;
-              const url = await uploadAvatar(file);
-              if (url) handleChange({ avatar_url: url });
-            }}
             publicProfileUrl={user ? `/gardiens/${user.id}` : "#"}
             role="sitter"
           />
