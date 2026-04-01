@@ -6,9 +6,7 @@ import HintBubble from "../profile/HintBubble";
 import AiSuggestButton from "../profile/AiSuggestButton";
 import type { OwnerProfileData } from "@/hooks/useOwnerProfile";
 
-const MEETING = ["Dîner/apéro avant", "Visite du logement la veille", "Passage le jour même", "Visio avant", "Échange messagerie suffit"];
 const HANDOVER = ["La veille avec nuit commune", "Le jour du départ", "À distance — clés chez un voisin ou boîte à clé"];
-const FREQUENCY = ["Tous les jours", "Tous les 2-3 jours", "Une fois par semaine", "Selon les événements", "Pas besoin"];
 const FORMAT = ["Photos + texte court", "Simple message texte", "Appel vidéo ponctuel"];
 const TIME = ["Matin", "Soir", "Pas de préférence"];
 
@@ -22,12 +20,6 @@ const OwnerStepCommunication = ({ data, onChange }: Props) => (
     <h2 className="font-heading text-2xl font-bold">Accueil & communication</h2>
 
     <h3 className="font-heading text-lg font-semibold">Comment j'aime accueillir</h3>
-
-    <div className="space-y-2">
-      <Label>Rencontre souhaitée avant la garde</Label>
-      <ChipSelect options={MEETING} selected={data.meeting_preference} onChange={v => onChange({ meeting_preference: v })} />
-      <HintBubble>La rencontre avant la garde est souvent le moment où la confiance se crée. Dites comment vous aimez faire.</HintBubble>
-    </div>
 
     <div className="space-y-2">
       <Label>Passage de relais</Label>
@@ -48,14 +40,6 @@ const OwnerStepCommunication = ({ data, onChange }: Props) => (
     </div>
 
     <h3 className="font-heading text-lg font-semibold mt-4">Pendant la garde — communication</h3>
-
-    <div className="space-y-2">
-      <Label>Fréquence des nouvelles souhaitée</Label>
-      <Select value={data.news_frequency} onValueChange={v => onChange({ news_frequency: v })}>
-        <SelectTrigger className="rounded-lg h-12"><SelectValue placeholder="Choisir" /></SelectTrigger>
-        <SelectContent>{FREQUENCY.map(f => <SelectItem key={f} value={f}>{f}</SelectItem>)}</SelectContent>
-      </Select>
-    </div>
 
     <div className="space-y-2">
       <Label>Format souhaité</Label>
