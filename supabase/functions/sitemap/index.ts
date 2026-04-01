@@ -82,7 +82,6 @@ Deno.serve(async () => {
     { data: cityGuides },
     { data: departmentPages },
     { data: breedProfiles },
-    { data: publicProfiles },
   ] = await Promise.all([
     supabase
       .from("articles")
@@ -108,13 +107,6 @@ Deno.serve(async () => {
       .from("breed_profiles")
       .select("breed, species, generated_at")
       .order("breed"),
-    supabase
-      .from("profiles")
-      .select("id, updated_at")
-      .eq("account_status", "active")
-      .gte("profile_completion", 60)
-      .order("updated_at", { ascending: false })
-      .limit(1000),
   ]);
 
   const today = new Date().toISOString().split("T")[0];
