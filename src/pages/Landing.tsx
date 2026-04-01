@@ -359,48 +359,65 @@ const Landing = () => {
       </section>
 
       {/* ═══════════════ SECTION 3 — NOTRE HISTOIRE ═══════════════ */}
-       <section className="py-24 md:py-32 bg-background">
-         <div className="max-w-3xl mx-auto px-6">
+      <section className="bg-background">
+        <div className="max-w-6xl mx-auto px-6 py-24 md:py-32">
           <RevealSection>
             <span className="text-xs tracking-widest uppercase text-primary/60 font-body mb-4 block">
               Notre histoire
             </span>
-            <h2 className="text-4xl md:text-5xl font-heading font-semibold leading-snug text-foreground mb-10">
+            <h2 className="text-4xl md:text-5xl font-heading font-semibold leading-snug text-foreground mb-12">
               Tout a commencé avec un visa.
             </h2>
-            <p className="text-lg font-body leading-relaxed text-foreground/85 mb-7">
-              L'habitude de s'ouvrir aux gens du coin s'est perdue. Par manque de prétexte.
-            </p>
-            <p className="text-lg font-body leading-relaxed text-foreground/85 mb-7">
-              Elisa, ma compagne et co-fondatrice de Guardiens, est arrivée d'Argentine avec un visa qui ne lui permettait pas de travailler. Elle gardait des animaux. Elle rentrait avec des histoires : des gens qui ouvraient leur porte, leur vie, librement. Des inconnus qui finissaient par nous inviter à Noël.
-            </p>
-            <p className="text-lg font-body leading-relaxed text-foreground/85 mb-7">
-              Elisa et moi avons gardé 37 maisons en cinq ans en Auvergne-Rhône-Alpes.
-            </p>
-            <div className="border-l-4 border-primary pl-6 my-10">
-              <p className="text-2xl md:text-3xl font-heading font-semibold italic text-foreground leading-snug">
-                On n'a jamais gardé des maisons. On a été invités dans des vies.
-              </p>
-            </div>
-            <p className="text-lg font-body leading-relaxed text-foreground/85 mb-7">
-              C'est ça que le village faisait naturellement.
-            </p>
-            <p className="text-lg font-body leading-relaxed text-foreground/85 mb-7">
-              Vous aussi vous avez quelque chose à offrir. Et quelque chose à vivre.
-            </p>
-            <p className="text-lg font-body leading-relaxed text-foreground/85 mb-7">
-              Guardiens, c'est le prétexte qui manquait. Les petites missions d'abord : un potager arrosé contre un repas, une compétence contre une autre, l'échange en nature entre gens du coin. La garde ensuite : vos clés confiées à quelqu'un que vous avez regardé dans les yeux.
-            </p>
-            <p className="text-lg font-body leading-relaxed text-foreground/85 mb-7">
-              Vous partirez l'esprit léger. Vous rentrerez avec une histoire. Nous, on ne s'attendait pas à ce que ça compte autant.
-            </p>
-            <p className="text-lg font-body leading-relaxed text-foreground/85 mb-7">
-              C'est pour ça qu'on a construit Guardiens. Pour que vous viviez ça aussi.
-            </p>
-            <span className="text-sm font-body italic text-foreground/50 mt-10 block">
-              — Jérémie &amp; Elisa
-            </span>
           </RevealSection>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-16 items-start">
+            {/* Colonne gauche */}
+            <RevealSection delay={0.1}>
+              <p className="text-lg font-body leading-relaxed text-foreground/85 mb-7">
+                L'habitude de s'ouvrir aux gens du coin s'est perdue. Par manque de prétexte.
+              </p>
+              <p className="text-lg font-body leading-relaxed text-foreground/85 mb-7">
+                Elisa, ma compagne et co-fondatrice de Guardiens, est arrivée d'Argentine avec un visa qui ne lui permettait pas de travailler. Elle gardait des animaux. Elle rentrait avec des histoires : des gens qui ouvraient leur porte, leur vie, librement. Des inconnus qui finissaient par nous inviter à Noël.
+              </p>
+              <p className="text-lg font-body leading-relaxed text-foreground/85 mb-7">
+                Elisa et moi avons gardé 37 maisons en cinq ans en Auvergne-Rhône-Alpes.
+              </p>
+              <div className="border-l-4 border-primary pl-6 my-8">
+                <p className="text-2xl md:text-3xl font-heading font-semibold italic text-foreground leading-snug">
+                  On n'a jamais gardé des maisons. On a été invités dans des vies.
+                </p>
+              </div>
+            </RevealSection>
+
+            {/* Colonne droite */}
+            <RevealSection delay={0.2}>
+              <p className="text-lg font-body leading-relaxed text-foreground/85 mb-7">
+                C'est ça que le village faisait naturellement.
+              </p>
+              <p className="text-lg font-body leading-relaxed text-foreground/85 mb-7">
+                Guardiens, c'est le prétexte qui manquait. Les petites missions d'abord : un potager arrosé contre un repas, une compétence contre une autre, l'échange en nature entre gens du coin. La garde ensuite : vos clés confiées à quelqu'un que vous avez regardé dans les yeux.
+              </p>
+              <p className="text-lg font-body leading-relaxed text-foreground/85 mb-7">
+                Vous partirez l'esprit léger. Vous rentrerez avec une histoire. Nous, on ne s'attendait pas à ce que ça compte autant.
+              </p>
+              <p className="text-lg font-body leading-relaxed text-foreground/85 mb-7">
+                C'est pour ça qu'on a construit Guardiens. Pour que vous viviez ça aussi.
+              </p>
+              <span className="text-sm font-body italic text-foreground/50 mt-10 block">
+                — Jérémie &amp; Elisa
+              </span>
+            </RevealSection>
+          </div>
+
+          {/* Photo panoramique */}
+          <div className="w-full mt-16 rounded-2xl overflow-hidden">
+            <img
+              src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1600&q=80"
+              alt="Une garde en Auvergne-Rhône-Alpes — Guardiens"
+              className="w-full h-64 md:h-96 object-cover object-center"
+              loading="lazy"
+            />
+          </div>
         </div>
       </section>
 
