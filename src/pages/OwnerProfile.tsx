@@ -9,7 +9,7 @@ import OwnerStepCommunication from "@/components/owner-profile/OwnerStepCommunic
 import OwnerStepCalendar from "@/components/owner-profile/OwnerStepCalendar";
 import OwnerGallery from "@/components/owner-profile/OwnerGallery";
 import OwnerExperiences from "@/components/owner-profile/OwnerExperiences";
-import StepSkills from "@/components/profile/StepSkills";
+import OwnerStepSkills from "@/components/owner-profile/OwnerStepSkills";
 import ProfileSidebar, { type SidebarSection } from "@/components/profile/ProfileSidebar";
 import { useOwnerProfile, type OwnerProfileData } from "@/hooks/useOwnerProfile";
 import { useAuth } from "@/contexts/AuthContext";
@@ -20,9 +20,10 @@ const SECTIONS_META = [
   { id: "animals", num: 3, label: "Animaux", subtitle: "Vos animaux" },
   { id: "rules", num: 4, label: "Attentes", subtitle: "Ce que vous cherchez" },
   { id: "communication", num: 5, label: "Accueil", subtitle: "Comment vous accueillez" },
-  { id: "calendar", num: 6, label: "Calendrier", subtitle: "Vos disponibilités" },
-  { id: "gallery", num: 7, label: "Galerie", subtitle: "Photos de votre maison" },
-  { id: "guide", num: 8, label: "Guide de la maison", subtitle: "Codes et contacts" },
+  { id: "skills", num: 6, label: "Compétences", subtitle: "Ce que vous pouvez offrir" },
+  { id: "calendar", num: 7, label: "Calendrier", subtitle: "Vos disponibilités" },
+  { id: "gallery", num: 8, label: "Galerie", subtitle: "Photos de votre maison" },
+  { id: "guide", num: 9, label: "Guide de la maison", subtitle: "Codes et contacts" },
 ];
 
 function sectionComplete(num: number, d: OwnerProfileData, petsCount: number): boolean {
