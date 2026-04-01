@@ -491,7 +491,7 @@ const PublicProfile = () => {
 
 /* Helpers */
 const Card = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
-  <div className={`rounded-xl border bg-white p-4 shadow-sm ${className}`} style={{ borderColor: "#E6E2D9" }}>
+  <div className={`rounded-xl border border-border bg-white p-4 shadow-sm ${className}`}>
     {children}
   </div>
 );
