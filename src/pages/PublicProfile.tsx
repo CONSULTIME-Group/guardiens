@@ -249,6 +249,13 @@ const PublicProfile = () => {
             <MetricCell label="Avis" value={String(reviewStats.count)} />
           </div>
 
+          {/* === ENVIRONMENTS === */}
+          {ownerProfile?.environments?.length > 0 && (
+            <div className="mb-4">
+              <EnvironmentPills selected={ownerProfile.environments} onChange={() => {}} readOnly />
+            </div>
+          )}
+
           {/* === BADGES === */}
           {badgeCounts.length > 0 && (
             <div className="rounded-xl border bg-white p-5 shadow-sm" style={{ borderColor: "#E6E2D9" }}>
