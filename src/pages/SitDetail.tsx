@@ -133,9 +133,17 @@ const SitDetail = () => {
     load();
   }, [id, user]);
 
+  const isOwnerCheck = sit?.user_id === user?.id;
+  const saveOverride = useCallback((field: "logement_override" | "animaux_override", value: string) => {
+    if (!sit || !isOwnerCheck) return;
+    if (overrideSaveTimeout.current) clearTimeout(overrideSaveTimeout.current);
+    overrideSaveTimeout.current = setTimeout(async () => {
+      await supabase.from("sits").update({ [field]: value } as any).eq("id", sit.id);
+    }, 800);
+  }, [sit, isOwnerCheck]);
+
   if (loading) return <div className="p-6 md:p-10 text-muted-foreground">Chargement...</div>;
   if (!sit) return <div className="p-6 md:p-10"><p>Annonce introuvable.</p></div>;
-  // SEO guard: demo listings have no detail page
   if (id?.startsWith("demo-")) return <Navigate to="/search" replace />;
 
   const shouldNoindex = ["completed", "cancelled", "expired"].includes(sit.status);
@@ -172,15 +180,6 @@ const SitDetail = () => {
     setSit({ ...sit, status: "published" });
     toast({ title: "Annonce publiée", description: "Les gardiens peuvent maintenant candidater." });
   };
-
-  const saveOverride = useCallback((field: "logement_override" | "animaux_override", value: string) => {
-    if (!sit || !isOwner) return;
-    if (overrideSaveTimeout.current) clearTimeout(overrideSaveTimeout.current);
-    overrideSaveTimeout.current = setTimeout(async () => {
-      await supabase.from("sits").update({ [field]: value } as any).eq("id", sit.id);
-    }, 800);
-  }, [sit]);
-
   const statusLabel: Record<string, { label: string; className: string }> = {
     draft: { label: "Brouillon", className: "bg-muted text-muted-foreground" },
     published: { label: "Publiée", className: "bg-primary/10 text-primary" },
