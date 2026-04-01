@@ -139,7 +139,6 @@ const StepMobility = ({ data, onChange }: Props) => {
           onChange={v => {
             if (v.length <= 3) onChange({ preferred_periods: v });
           }}
-          multi
         />
       </div>
 
