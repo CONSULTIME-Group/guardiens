@@ -47,9 +47,9 @@ const StepIdentity = ({ data, onChange, onUploadAvatar }: Props) => {
         </button>
         <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarChange} />
         <span className="text-sm text-muted-foreground">
-          {uploading ? "Envoi en cours..." : "Cliquez pour ajouter une photo"}
+          {uploading ? "Envoi en cours..." : "Ajouter une photo de profil"}
         </span>
-        <HintBubble>Les gardiens avec une photo de profil reçoivent 3x plus de réponses.</HintBubble>
+        <HintBubble>C'est la première chose que les propriétaires regardent.</HintBubble>
       </div>
 
       {/* Name fields */}

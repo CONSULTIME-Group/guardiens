@@ -1,4 +1,4 @@
-import { CheckCircle2, Circle, Camera, Eye } from "lucide-react";
+import { CheckCircle2, Circle, Eye } from "lucide-react";
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
@@ -9,6 +9,7 @@ export interface SidebarSection {
   subtitle: string;
   missingCount: number;
   complete: boolean;
+  optional?: boolean;
 }
 
 interface ProfileSidebarProps {
@@ -32,22 +33,19 @@ const ProfileSidebar = ({
     <aside className="w-full lg:w-[280px] lg:sticky lg:top-24 lg:self-start space-y-5 shrink-0">
       {/* Avatar + info */}
       <div className="flex flex-col items-center gap-3">
-        <div className="relative group">
+        <div>
           {avatarUrl ? (
             <img src={avatarUrl} alt="" className="w-24 h-24 rounded-full object-cover border-2 border-border" />
           ) : (
             <div className="w-24 h-24 rounded-full bg-primary/10 flex items-center justify-center text-primary text-3xl font-medium border-2 border-border">
-              {firstName?.charAt(0) || "?"}
+              {firstName?.charAt(0)?.toUpperCase() || "?"}
             </div>
           )}
-          <label className="absolute inset-0 rounded-full bg-black/40 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer text-white text-xs gap-0.5">
-            <Camera className="h-4 w-4" />
-            <span>Modifier</span>
-            <input type="file" accept="image/*" className="hidden" onChange={onAvatarChange} />
-          </label>
         </div>
         <div className="text-center">
-          <p className="text-base font-semibold text-foreground">{firstName || "Votre profil"}</p>
+          <p className="text-base font-semibold text-foreground">
+            {firstName ? firstName.charAt(0).toUpperCase() + firstName.slice(1).toLowerCase() : "Votre profil"}
+          </p>
           {city && <p className="text-sm text-muted-foreground">{city}</p>}
         </div>
       </div>
@@ -91,7 +89,10 @@ const ProfileSidebar = ({
                 <Circle className="h-4 w-4 text-muted-foreground shrink-0" />
               )}
               <div className="min-w-0">
-                <p className={cn("text-sm font-medium", isActive ? "text-foreground" : "text-foreground")}>{s.label}</p>
+                <p className={cn("text-sm font-medium", isActive ? "text-foreground" : "text-foreground")}>
+                  {s.label}
+                  {s.optional && <span className="text-xs font-normal text-muted-foreground ml-1">(optionnel)</span>}
+                </p>
                 <p className={cn("text-xs hidden lg:block", s.complete ? "text-primary" : "text-muted-foreground")}>
                   {s.complete ? "Complété ✓" : s.missingCount > 0 ? `${s.missingCount} point${s.missingCount > 1 ? "s" : ""} manquant${s.missingCount > 1 ? "s" : ""}` : s.subtitle}
                 </p>
