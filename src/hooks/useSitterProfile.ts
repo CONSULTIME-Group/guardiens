@@ -107,7 +107,7 @@ export function useSitterProfile() {
       references_text: s?.references_text || "",
       has_license: s?.has_license || false,
       has_vehicle: s?.has_vehicle || false,
-      geographic_radius: s?.geographic_radius || 30,
+      geographic_radius: s?.geographic_radius || 15,
       min_duration: s?.min_duration || 3,
       max_duration: s?.max_duration || 21,
       availability_dates: (s?.availability_dates as any[]) || [],

@@ -65,7 +65,7 @@ const StepSitterProfile = ({ data, onChange }: Props) => {
       <div className="space-y-2">
         <Label>Style de vie / habitudes</Label>
         <ChipSelect options={LIFESTYLE_OPTIONS} selected={data.lifestyle} onChange={v => onChange({ lifestyle: v })} />
-        <HintBubble>Les propriétaires d'un chien sportif chercheront un gardien actif. Soyez honnête, ça aide au matching.</HintBubble>
+        <HintBubble>Ces informations aident les propriétaires à vous choisir. Plus c'est précis, mieux c'est.</HintBubble>
       </div>
     </div>
   );

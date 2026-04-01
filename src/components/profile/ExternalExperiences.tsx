@@ -203,7 +203,7 @@ const ExternalExperiences = () => {
       {experiences.length === 0 ? (
         <div className="text-center py-12 text-muted-foreground">
           <Briefcase className="h-10 w-10 mx-auto mb-3 opacity-30" />
-          <p className="text-sm">Vous avez de l'expérience sur d'autres plateformes ? Importez vos avis ici.</p>
+          <p className="text-sm">Vous avez gardé des maisons avant Guardiens ? Ces expériences ont de la valeur — ajoutez-les ici.</p>
         </div>
       ) : (
         <div className="space-y-3">
