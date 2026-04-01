@@ -28,6 +28,7 @@ const Dashboard = () => {
 
   return (
     <div className="p-6 md:p-10 max-w-4xl mx-auto">
+      <Helmet><meta name="robots" content="noindex, nofollow" /></Helmet>
       <div
         key={displayedRole}
         className={transitioning ? "animate-fade-out" : "animate-fade-in"}
