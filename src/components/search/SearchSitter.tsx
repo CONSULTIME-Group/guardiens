@@ -296,6 +296,13 @@ const SearchSitter = () => {
         return envs.some((e: string) => environments.includes(e));
       });
     }
+    // Filter by min_gardien_sits: only show sits where user meets the requirement
+    if (user) {
+      final = final.filter((item: any) => {
+        const minRequired = (item as any).min_gardien_sits || 0;
+        return userCompletedSits >= minRequired;
+      });
+    }
     final = sortResults(final, sort);
     if (final.length < DEMO_THRESHOLD) {
       final = [...final, ...DEMO_SITS];
