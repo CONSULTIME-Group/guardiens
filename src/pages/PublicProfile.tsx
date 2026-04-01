@@ -22,6 +22,7 @@ import { getBadgeDef } from "@/components/badges/badgeDefinitions";
 import EntraideSection from "@/components/missions/EntraideSection";
 import PublicSkills from "@/components/profile/PublicSkills";
 import EnvironmentPills from "@/components/shared/EnvironmentPills";
+import CancellationReviewsSection from "@/components/reviews/CancellationReviewsSection";
 
 const speciesLabels: Record<string, string> = {
   dog: "🐕 Chiens", cat: "🐱 Chats", horse: "🐴 Chevaux", bird: "🐦 Oiseaux",
@@ -454,6 +455,7 @@ const PublicProfile = () => {
             {/* --- Reviews tab --- */}
             <TabsContent value="reviews" className="mt-4 space-y-8">
               <ReviewsDisplay userId={id!} showAnimalCare={isSitter} />
+              <CancellationReviewsSection userId={id!} />
               <EntraideSection userId={id!} />
             </TabsContent>
 

@@ -2,32 +2,15 @@ import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
+import { AlertTriangle } from "lucide-react";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { toast } from "sonner";
-
-const reasons = [
-  "Empêchement personnel",
-  "Problème de santé",
-  "Changement de dates",
-  "Logement non conforme",
-  "Autre",
-];
 
 interface CancelSitModalProps {
   open: boolean;
@@ -35,6 +18,7 @@ interface CancelSitModalProps {
   sitId: string;
   sitTitle: string;
   sitOwnerId: string;
+  otherPartyName?: string;
   startDate?: string;
   endDate?: string;
   onCancelled: () => void;
@@ -46,35 +30,62 @@ const CancelSitModal = ({
   sitId,
   sitTitle,
   sitOwnerId,
+  otherPartyName,
   startDate,
   endDate,
   onCancelled,
 }: CancelSitModalProps) => {
   const { user } = useAuth();
   const [reason, setReason] = useState("");
-  const [details, setDetails] = useState("");
   const [loading, setLoading] = useState(false);
 
+  const isSitterCancelling = user?.id !== sitOwnerId;
+  const cancelledByRole = isSitterCancelling ? "gardien" : "proprio";
+  const otherName = otherPartyName || (isSitterCancelling ? "le propriétaire" : "le gardien");
+
+  const canSubmit = reason.trim().length >= 20;
+
   const handleCancel = async () => {
-    if (!user || !reason) return;
+    if (!user || !canSubmit) return;
     setLoading(true);
 
     try {
-      const isSitterCancelling = user.id !== sitOwnerId;
-      const fullReason = details ? `${reason} — ${details}` : reason;
+      // Determine reviewee_id: the other party
+      // For owner cancelling: reviewee is the accepted sitter
+      // For sitter cancelling: reviewee is the owner
+      let revieweeId: string;
 
-      // Update sit status
-      const { error: sitError } = await supabase
-        .from("sits")
-        .update({
-          status: isSitterCancelling ? "published" : "cancelled",
-          cancelled_by: user.id,
-          cancellation_reason: fullReason,
-          cancelled_at: new Date().toISOString(),
-        } as any)
-        .eq("id", sitId);
+      if (isSitterCancelling) {
+        revieweeId = sitOwnerId;
+      } else {
+        // Get accepted sitter
+        const { data: acceptedApp } = await supabase
+          .from("applications")
+          .select("sitter_id")
+          .eq("sit_id", sitId)
+          .eq("status", "accepted")
+          .maybeSingle();
+        revieweeId = acceptedApp?.sitter_id || sitOwnerId;
+      }
 
-      if (sitError) throw sitError;
+      // Call the RPC function
+      const { error: rpcError } = await supabase.rpc("create_avis_annulation", {
+        p_sit_id: sitId,
+        p_reviewer_id: user.id,
+        p_reviewee_id: revieweeId,
+        p_cancelled_by_role: cancelledByRole,
+        p_reason: reason.trim(),
+      });
+
+      if (rpcError) throw rpcError;
+
+      // If sitter cancelled, re-publish the sit
+      if (isSitterCancelling) {
+        await supabase
+          .from("sits")
+          .update({ status: "published" as any })
+          .eq("id", sitId);
+      }
 
       // Cancel accepted applications
       await supabase
@@ -83,7 +94,6 @@ const CancelSitModal = ({
         .eq("sit_id", sitId)
         .eq("status", "accepted");
 
-      // If sitter cancelled, also cancel their specific application
       if (isSitterCancelling) {
         await supabase
           .from("applications")
@@ -92,7 +102,7 @@ const CancelSitModal = ({
           .eq("sitter_id", user.id);
       }
 
-      // Send auto-message in conversation
+      // Send system message in conversation
       const { data: convs } = await supabase
         .from("conversations")
         .select("id")
@@ -101,7 +111,7 @@ const CancelSitModal = ({
 
       if (convs?.length) {
         const dateRange = startDate && endDate ? ` du ${startDate} au ${endDate}` : "";
-        const msgContent = `La garde${dateRange} a été annulée par ${user.firstName}. Raison : ${fullReason}.`;
+        const msgContent = `La garde${dateRange} a été annulée par ${user.firstName || "l'utilisateur"}. Raison : ${reason.trim()}.`;
 
         await Promise.all(
           convs.map((conv) =>
@@ -115,17 +125,37 @@ const CancelSitModal = ({
         );
       }
 
+      // Trigger transactional email via edge function
+      try {
+        const templateName = isSitterCancelling ? "cancellation-by-sitter" : "cancellation-by-owner";
+        await supabase.functions.invoke("send-transactional-email", {
+          body: {
+            template: templateName,
+            recipientUserId: revieweeId,
+            data: {
+              cancellerFirstName: user.firstName || "Un membre",
+              sitTitle: sitTitle,
+              startDate: startDate || "",
+              reason: reason.trim(),
+            },
+          },
+        });
+      } catch {
+        // Non-blocking: email failure shouldn't prevent cancellation
+      }
+
       toast.success(
         isSitterCancelling
           ? "Garde annulée. L'annonce est de nouveau visible pour d'autres gardiens."
-          : "Garde annulée. Les gardiens ont été notifiés."
+          : "Garde annulée. Le gardien a été notifié."
       );
 
+      setReason("");
       onCancelled();
       onOpenChange(false);
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      toast.error("Erreur lors de l'annulation.");
+      toast.error(err?.message || "Erreur lors de l'annulation.");
     }
 
     setLoading(false);
@@ -135,49 +165,50 @@ const CancelSitModal = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Annuler cette garde</DialogTitle>
-          <DialogDescription className="text-sm leading-relaxed">
-            La vie est imprévisible, on comprend. Une annulation impacte votre taux de fiabilité visible par tous.
-          </DialogDescription>
+          <DialogTitle>Annuler cette garde ?</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4">
-          <div className="space-y-2">
-            <Label>Raison de l'annulation</Label>
-            <Select value={reason} onValueChange={setReason}>
-              <SelectTrigger>
-                <SelectValue placeholder="Sélectionnez une raison" />
-              </SelectTrigger>
-              <SelectContent>
-                {reasons.map((r) => (
-                  <SelectItem key={r} value={r}>
-                    {r}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+          {/* Info banner */}
+          <div className="flex gap-3 rounded-xl border border-amber-200 bg-amber-50 p-3">
+            <AlertTriangle className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
+            <p className="text-sm text-amber-800">
+              Votre commentaire sera soumis à validation puis publié sur votre profil.{" "}
+              {otherName} pourra y répondre dans les 7 jours.
+            </p>
           </div>
 
-          <div className="space-y-2">
-            <Label>Précisions (optionnel)</Label>
-            <Textarea
-              value={details}
-              onChange={(e) => setDetails(e.target.value)}
-              placeholder="Expliquez brièvement si vous le souhaitez..."
-              rows={3}
-              maxLength={500}
+          {/* Reason textarea */}
+          <div>
+            <label className="text-sm font-medium text-foreground mb-1 block">
+              Raison de l'annulation *
+            </label>
+            <textarea
+              value={reason}
+              onChange={(e) => setReason(e.target.value.slice(0, 300))}
+              placeholder="Expliquez la raison de votre annulation (20 caractères minimum)..."
+              className="w-full border border-border rounded-xl p-3 text-sm resize-none h-24 focus:border-primary focus:outline-none bg-background"
+              maxLength={300}
             />
+            <p className={`text-xs text-right mt-1 ${reason.trim().length < 20 ? "text-destructive" : "text-muted-foreground"}`}>
+              {reason.length}/300 caractères
+            </p>
           </div>
         </div>
 
-        <DialogFooter>
-          <Button variant="ghost" onClick={() => onOpenChange(false)}>
-            Revenir
+        <DialogFooter className="gap-2">
+          <Button
+            variant="outline"
+            onClick={() => onOpenChange(false)}
+            className="border border-border text-foreground"
+          >
+            Garder la garde
           </Button>
           <Button
             variant="destructive"
             onClick={handleCancel}
-            disabled={!reason || loading}
+            disabled={!canSubmit || loading}
+            className={!canSubmit ? "opacity-50 cursor-not-allowed" : ""}
           >
             {loading ? "Annulation..." : "Confirmer l'annulation"}
           </Button>
