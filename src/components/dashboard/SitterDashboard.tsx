@@ -222,7 +222,7 @@ const SitterDashboard = () => {
       {/* ═══ BLOC 2 — Ce qui m'attend ═══ */}
       {showBloc2 && (
         <div>
-          <p className="text-sm font-semibold text-foreground mb-3">Ce qui t'attend</p>
+          <p className="text-sm font-semibold text-foreground mb-3">Ce qui vous attend</p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
             {/* Messages */}
             {unreadCount > 0 ? (
