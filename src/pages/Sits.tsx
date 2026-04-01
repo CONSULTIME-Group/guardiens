@@ -406,9 +406,9 @@ const SitCard = ({ sit, isOwner, userId }: { sit: any; isOwner: boolean; userId?
 
       <div className="flex">
         {/* Thumbnail */}
-        {photo && (
-          <div className="w-24 md:w-32 shrink-0 hidden sm:block relative">
-            <img src={photo} alt="" className="w-full h-full object-cover" />
+         {photo && (
+          <div className="shrink-0 hidden sm:block relative">
+            <img src={photo} alt="" className="w-32 h-24 rounded-xl object-cover" />
           </div>
         )}
 
