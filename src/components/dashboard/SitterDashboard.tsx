@@ -322,7 +322,11 @@ const SitterDashboard = () => {
                 <p className="text-xs text-muted-foreground">Gardes</p>
               </div>
               <div className="text-center">
-                <p className="text-xl font-semibold text-foreground">{avgRating > 0 ? `${avgRating}` : "—"}</p>
+                 {avgRating > 0 ? (
+                   <p className="text-xl font-semibold text-foreground">{avgRating}</p>
+                 ) : (
+                   <p className="text-sm font-medium text-muted-foreground">Pas encore</p>
+                 )}
                 <p className="text-xs text-muted-foreground">Note ★</p>
               </div>
               <div className="text-center">
