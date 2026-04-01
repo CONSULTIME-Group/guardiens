@@ -1,4 +1,5 @@
 import { useAuth } from "@/contexts/AuthContext";
+import TwoColumnLayout from "@/components/layout/TwoColumnLayout";
 import { Link } from "react-router-dom";
 import {
   Plus, Calendar, MessageSquare, Star, Users, Eye, BookOpen,
