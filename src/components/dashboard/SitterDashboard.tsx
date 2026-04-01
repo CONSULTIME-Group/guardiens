@@ -197,19 +197,35 @@ const SitterDashboard = () => {
       <div className="space-y-10">
         {/* Welcome card with checklist */}
         <div className="rounded-2xl border-2 border-primary/20 bg-gradient-to-br from-primary/5 via-background to-accent/30 p-6 md:p-8 space-y-6">
-          <div className="flex items-start gap-4">
-            <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-              <Sparkles className="h-6 w-6 text-primary" />
-            </div>
-            <div>
+          <div>
+            <div className="flex items-center justify-between">
               <h1 className="font-heading text-xl md:text-2xl font-bold">
-                Bienvenue{user?.firstName ? `, ${user.firstName}` : ""} ! 🎉
+                Bienvenue{user?.firstName ? `, ${capitalize(user.firstName)}` : ""}
               </h1>
-              <p className="text-sm text-muted-foreground mt-1">
-                Voici vos premières étapes pour décrocher votre première garde :
-              </p>
+              <Link
+                to={`/gardiens/${user?.id}`}
+                className="text-xs text-primary hover:underline flex items-center gap-1"
+              >
+                Voir mon profil public <ExternalLink className="h-3 w-3" />
+              </Link>
             </div>
+            <p className="text-sm text-muted-foreground mt-1">
+              Voici tes prochaines étapes pour vivre ta première garde.
+            </p>
           </div>
+
+          {/* Unread messages banner */}
+          {unreadCount > 0 && (
+            <Link to="/messagerie" className="flex items-center justify-between bg-primary/5 border border-primary/20 rounded-xl px-4 py-3">
+              <div className="flex items-center gap-2">
+                <MessageSquare className="h-4 w-4 text-primary" />
+                <span className="text-sm text-foreground">
+                  Tu as {unreadCount} message{unreadCount > 1 ? "s" : ""} non lu{unreadCount > 1 ? "s" : ""}
+                </span>
+              </div>
+              <span className="text-sm text-primary hover:underline">Voir →</span>
+            </Link>
+          )}
 
           <div className="space-y-2">
             <ChecklistItem
@@ -224,7 +240,7 @@ const SitterDashboard = () => {
             />
             <ChecklistItem
               done={false}
-              label="Trouver ma première garde"
+              label="Découvre les gardes disponibles"
               to="/search"
             />
             <div className="flex items-center gap-3 p-3 rounded-xl bg-card border border-border">
@@ -255,10 +271,11 @@ const SitterDashboard = () => {
           {nearbyListings.length === 0 ? (
             <EmptyCard
               icon={Search}
-              text="Pas encore d'annonce dans votre zone"
-              hint="Activez le mode Disponible pour être contacté directement par les propriétaires !"
-              cta="Explorer les annonces"
+              text="Pas encore d'annonce dans ta zone"
+              hint="Active le mode disponible pour être contacté directement par les proprios."
+              cta="Explorer les annonces →"
               to="/search"
+              outlineBtn
             />
           ) : (
             <div className="grid gap-3 sm:grid-cols-2">
