@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import ReportButton from "@/components/reports/ReportButton";
-import { Sprout, PawPrint, GraduationCap, Handshake as HandshakeIcon, LayoutList, Map, Cat, Bird, SlidersHorizontal, ShieldCheck } from "lucide-react";
+import { Sprout, PawPrint, GraduationCap, Handshake as HandshakeIcon, LayoutList, Map as MapIcon, Cat, Bird, SlidersHorizontal, ShieldCheck } from "lucide-react";
 import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import { DEMO_SITS, DEMO_MISSIONS, DEMO_THRESHOLD } from "@/data/demoListings";
 import { supabase } from "@/integrations/supabase/client";
