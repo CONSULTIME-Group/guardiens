@@ -253,10 +253,11 @@ const SearchSitter = () => {
     items = locFiltered;
     const enriched = await Promise.all(
       items.map(async (sit: any) => {
-        const [{ data: pets }, { data: reviews }, { data: ownerBadges }] = await Promise.all([
+        const [{ data: pets }, { data: reviews }, { data: ownerBadges }, { data: ownerProf }] = await Promise.all([
           supabase.from("pets").select("species, name").eq("property_id", sit.property_id),
           supabase.from("reviews").select("overall_rating").eq("reviewee_id", sit.user_id).eq("published", true),
           supabase.from("badge_attributions").select("badge_key").eq("receiver_id", sit.user_id),
+          supabase.from("owner_profiles").select("environments").eq("user_id", sit.user_id).maybeSingle(),
         ]);
         const avgRating = reviews && reviews.length > 0
           ? (reviews.reduce((s: number, r: any) => s + r.overall_rating, 0) / reviews.length).toFixed(1) : null;
@@ -270,16 +271,19 @@ const SearchSitter = () => {
         }
         // Min experience filter
         if (minExperience !== "all") {
-          const completedCount = (ownerBadges || []).length; // Approximate: badge count as proxy
+          const completedCount = (ownerBadges || []).length;
           const minCount = parseInt(minExperience);
-          // We'll use review count as a proxy for experience
           const revCount = reviews?.length || 0;
           if (revCount < minCount) return null;
         }
         const dist = searchCoords && sit.owner?.city ? computeDistance(sit.owner.city, cityCoords, searchCoords) : null;
         const isNew = differenceInHours(new Date(), new Date(sit.created_at)) < 48;
         const days = sit.start_date && sit.end_date ? differenceInDays(new Date(sit.end_date), new Date(sit.start_date)) : 0;
-        return { ...sit, pets: pets || [], avgRating, reviewCount: reviews?.length || 0, topBadges, distance: dist, isNew, durationDays: days };
+        // Resolve environments: sit-level first, then owner profile fallback
+        const sitEnvs: string[] = (sit as any).environments || [];
+        const ownerEnvs: string[] = (ownerProf as any)?.environments || [];
+        const resolvedEnvs = sitEnvs.length > 0 ? sitEnvs : ownerEnvs;
+        return { ...sit, pets: pets || [], avgRating, reviewCount: reviews?.length || 0, topBadges, distance: dist, isNew, durationDays: days, environments: resolvedEnvs, ownerEnvironments: ownerEnvs };
       })
     );
     let final = enriched.filter(Boolean);
