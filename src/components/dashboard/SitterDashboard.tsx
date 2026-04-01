@@ -272,21 +272,67 @@ const SitterDashboard = () => {
   /* ─────────────────────────────────────────────
    *  ACTIVE SITTER DASHBOARD
    * ───────────────────────────────────────────── */
-  return (
-    <div className="space-y-10">
+  const sitterLeftContent = (
+    <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="font-heading text-2xl md:text-3xl font-bold">
+        <h1 className="font-heading text-xl font-bold">
           Bonjour{user?.firstName ? `, ${user.firstName}` : ""} 👋
         </h1>
-        <p className="text-sm text-muted-foreground mt-1">
+        <p className="text-xs text-muted-foreground mt-1">
           {ongoingSit
-            ? `Garde en cours chez ${ongoingSit.ownerName || "…"} — ${ongoingSit.daysLeft} jour${ongoingSit.daysLeft > 1 ? "s" : ""} restant${ongoingSit.daysLeft > 1 ? "s" : ""}`
+            ? `Garde en cours — ${ongoingSit.daysLeft} jour${ongoingSit.daysLeft > 1 ? "s" : ""} restant${ongoingSit.daysLeft > 1 ? "s" : ""}`
             : "Votre tableau de bord gardien"
           }
         </p>
       </div>
 
+      {/* Stats */}
+      <div className="grid grid-cols-2 gap-2">
+        <StatCard icon={Home} iconColor="text-primary" label="Gardes" value={metrics.completed} delay={0} />
+        <StatCard icon={Star} iconColor="text-amber-500" label="Note" value={metrics.avgRating} delay={100} isDecimal suffix="/5" />
+        <StatCard icon={Mail} iconColor="text-blue-500" label="Candidatures" value={metrics.pendingApps} delay={200} />
+        <StatCard icon={Award} iconColor="text-purple-500" label="Badges" value={metrics.badgeCount} delay={300} />
+      </div>
+
+      {/* Availability toggle */}
+      <div className="flex items-center justify-between rounded-xl border border-border bg-card p-3">
+        <div className="flex items-center gap-2">
+          <div className={`w-2.5 h-2.5 rounded-full ${isAvailable ? "bg-primary animate-pulse" : "bg-muted-foreground/30"}`} />
+          <div>
+            <p className="font-semibold text-xs">Disponible</p>
+            <p className="text-[10px] text-muted-foreground">
+              {isAvailable ? "Visible" : "Masqué"}
+            </p>
+          </div>
+        </div>
+        <Switch
+          checked={isAvailable}
+          onCheckedChange={async (v) => {
+            setIsAvailable(v);
+            await supabase.from("sitter_profiles").update({ is_available: v }).eq("user_id", user!.id);
+          }}
+        />
+      </div>
+
+      {/* Quick actions */}
+      <div className="space-y-2">
+        <Link to="/search">
+          <Button className="w-full gap-2" size="sm">
+            <Search className="h-4 w-4" /> Explorer les annonces
+          </Button>
+        </Link>
+        <Link to="/profile">
+          <Button variant="outline" className="w-full gap-2" size="sm">
+            <UserCircle className="h-4 w-4" /> Mon profil
+          </Button>
+        </Link>
+      </div>
+    </div>
+  );
+
+  const sitterRightContent = (
+    <div className="space-y-10">
       {/* Ongoing sit banner */}
       {ongoingSit && (
         <>
@@ -318,7 +364,6 @@ const SitterDashboard = () => {
             </div>
           </div>
 
-          {/* Cancel modal for sitter */}
           <CancelSitModal
             open={cancelSitOpen}
             onOpenChange={setCancelSitOpen}
@@ -333,35 +378,8 @@ const SitterDashboard = () => {
         </>
       )}
 
-      {/* Emergency active section - at top if active */}
+      {/* Emergency active section */}
       {hasEmergencyProfile && <EmergencyDashSection />}
-
-      {/* 4 stat cards - only show non-zero relevant ones */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <StatCard icon={Home} iconColor="text-primary" label="Gardes réalisées" value={metrics.completed} delay={0} />
-        <StatCard icon={Star} iconColor="text-amber-500" label="Note moyenne" value={metrics.avgRating} delay={100} isDecimal suffix="/5" />
-        <StatCard icon={Mail} iconColor="text-blue-500" label="Candidatures actives" value={metrics.pendingApps} delay={200} />
-        <StatCard icon={Award} iconColor="text-purple-500" label="Badges reçus" value={metrics.badgeCount} delay={300} />
-      </div>
-
-      {/* Availability toggle */}
-      <div className="flex items-center justify-between rounded-xl border border-border bg-card p-4 hover:shadow-sm transition-shadow">
-        <div className="flex items-center gap-3">
-          <div className={`w-3 h-3 rounded-full ${isAvailable ? "bg-primary animate-pulse" : "bg-muted-foreground/30"}`} />
-          <div>
-            <p className="font-semibold text-sm">Je suis disponible</p>
-            <p className="text-xs text-muted-foreground">
-              {isAvailable ? "Les propriétaires peuvent vous trouver" : "Vous n'apparaissez pas dans les recherches"}
-            </p>
-          </div>
-        </div>
-        <Switch
-          checked={isAvailable}
-          onCheckedChange={async (v) => {
-            setIsAvailable(v);
-            await supabase.from("sitter_profiles").update({ is_available: v }).eq("user_id", user!.id);
-          }}
-        />
       </div>
 
       {/* Applications - PRIORITY section */}
