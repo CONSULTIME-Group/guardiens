@@ -221,6 +221,15 @@ const SearchSitter = () => {
     if (final.length < DEMO_THRESHOLD) {
       final = [...final, ...DEMO_SITS];
     }
+    // Store coords for map pins
+    const coordsMap = new Map<string, { lat: number; lng: number }>();
+    final.forEach((item: any) => {
+      if (item && item.owner?.city) {
+        const c = cityCoords.get(item.owner.city);
+        if (c) coordsMap.set(item.id, c);
+      }
+    });
+    setResultCoords(coordsMap);
     setResults(final);
   };
 
