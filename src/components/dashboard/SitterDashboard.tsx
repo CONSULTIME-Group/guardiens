@@ -282,7 +282,7 @@ const SitterDashboard = () => {
 
       {/* ═══ BLOC 3 — Où j'en suis ═══ */}
       <div>
-        <p className="text-sm font-semibold text-foreground mb-3">Où tu en es</p>
+        <p className="text-sm font-semibold text-foreground mb-3">Où vous en êtes</p>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {/* Profil */}
           <div className="bg-card border border-border rounded-2xl p-4">
