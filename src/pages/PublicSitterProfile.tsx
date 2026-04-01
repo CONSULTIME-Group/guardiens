@@ -404,7 +404,7 @@ export default function PublicSitterProfile() {
 
           {/* Lifestyle */}
           {lifestyle.length > 0 && (
-            <div>
+            <div className="border-b border-border pb-4 mb-4">
               <p className="text-xs uppercase tracking-widest text-muted-foreground mb-2">Style de vie</p>
               <div className="flex flex-wrap gap-1.5">
                 {lifestyle.map(l => (
@@ -418,15 +418,18 @@ export default function PublicSitterProfile() {
 
           {/* Profile info */}
           {(typeLine || durationLabel) && (
-            <div className="text-sm text-foreground/70 space-y-0.5">
-              {typeLine && <p>{typeLine}</p>}
-              {durationLabel && <p>{durationLabel}</p>}
+            <div className="border-b border-border pb-4 mb-4">
+              <p className="text-xs uppercase tracking-widest text-muted-foreground mb-2">Profil</p>
+              <div className="text-sm text-foreground/70 space-y-0.5">
+                {typeLine && <p>{typeLine}</p>}
+                {durationLabel && <p>{durationLabel}</p>}
+              </div>
             </div>
           )}
 
           {/* Preferred environments */}
           {preferredEnvironments.length > 0 && (
-            <div>
+            <div className="border-b border-border pb-4 mb-4">
               <p className="text-xs uppercase tracking-widest text-muted-foreground mb-2">Environnements</p>
               <div className="flex flex-wrap gap-1.5">
                 {preferredEnvironments.map(e => (
