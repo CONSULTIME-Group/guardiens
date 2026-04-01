@@ -364,7 +364,7 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
         )}
 
         {(app.status === "rejected" || app.status === "cancelled") && (
-          <div className="mt-3">
+          <div className="flex gap-4 items-center mt-3">
             <Link
               to={`/profil/${app.sitter_id}`}
               target="_blank"
@@ -372,6 +372,25 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
             >
               Voir le profil →
             </Link>
+            <button
+              onClick={async () => {
+                if (!user) return;
+                const { data: existingConv } = await supabase
+                  .from("conversations").select("id")
+                  .eq("sit_id", sitId).eq("sitter_id", app.sitter_id).maybeSingle();
+                if (existingConv) {
+                  navigate(`/messages?conv=${existingConv.id}`);
+                } else {
+                  const { data: newConv } = await supabase
+                    .from("conversations").insert({ sit_id: sitId, owner_id: user.id, sitter_id: app.sitter_id })
+                    .select("id").single();
+                  if (newConv) navigate(`/messages?conv=${newConv.id}`);
+                }
+              }}
+              className="text-xs text-primary hover:underline"
+            >
+              Contacter →
+            </button>
           </div>
         )}
       </div>

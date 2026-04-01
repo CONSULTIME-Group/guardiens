@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useParams, Link, useNavigate, Navigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
@@ -74,6 +74,9 @@ const SitDetail = () => {
   const [appCount, setAppCount] = useState(0);
   const [pendingAppCount, setPendingAppCount] = useState(0);
   const [breedAccordions, setBreedAccordions] = useState<Record<string, boolean>>({});
+  const [logementOverride, setLogementOverride] = useState("");
+  const [animauxOverride, setAnimauxOverride] = useState("");
+  const overrideSaveTimeout = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     if (!id) return;
@@ -81,6 +84,8 @@ const SitDetail = () => {
       const { data: sitData } = await supabase.from("sits").select("*").eq("id", id).single();
       if (!sitData) { setLoading(false); return; }
       setSit(sitData as SitData);
+      setLogementOverride((sitData as any).logement_override || "");
+      setAnimauxOverride((sitData as any).animaux_override || "");
 
       const [ownerRes, propRes, ownerProfRes, reviewsRes] = await Promise.all([
         supabase.from("profiles").select("*").eq("id", sitData.user_id).single(),
@@ -128,9 +133,17 @@ const SitDetail = () => {
     load();
   }, [id, user]);
 
+  const isOwnerCheck = sit?.user_id === user?.id;
+  const saveOverride = useCallback((field: "logement_override" | "animaux_override", value: string) => {
+    if (!sit || !isOwnerCheck) return;
+    if (overrideSaveTimeout.current) clearTimeout(overrideSaveTimeout.current);
+    overrideSaveTimeout.current = setTimeout(async () => {
+      await supabase.from("sits").update({ [field]: value } as any).eq("id", sit.id);
+    }, 800);
+  }, [sit, isOwnerCheck]);
+
   if (loading) return <div className="p-6 md:p-10 text-muted-foreground">Chargement...</div>;
   if (!sit) return <div className="p-6 md:p-10"><p>Annonce introuvable.</p></div>;
-  // SEO guard: demo listings have no detail page
   if (id?.startsWith("demo-")) return <Navigate to="/search" replace />;
 
   const shouldNoindex = ["completed", "cancelled", "expired"].includes(sit.status);
@@ -167,7 +180,6 @@ const SitDetail = () => {
     setSit({ ...sit, status: "published" });
     toast({ title: "Annonce publiée", description: "Les gardiens peuvent maintenant candidater." });
   };
-
   const statusLabel: Record<string, { label: string; className: string }> = {
     draft: { label: "Brouillon", className: "bg-muted text-muted-foreground" },
     published: { label: "Publiée", className: "bg-primary/10 text-primary" },
@@ -243,7 +255,7 @@ const SitDetail = () => {
                 </Button>
               </Link>
               <Link
-                to={`/sits/${sit.id}`}
+                to={`/annonces/${sit.id}`}
                 target="_blank"
                 className="text-sm text-primary hover:underline cursor-pointer flex items-center gap-1"
               >
@@ -415,6 +427,48 @@ const SitDetail = () => {
 
         {/* Housing tab */}
         <TabsContent value="housing" className="mt-6 space-y-6">
+          {isOwner && (
+            <div className="bg-muted/30 rounded-xl p-4 mb-4 border border-border">
+              <p className="text-sm text-muted-foreground mb-3">
+                Le logement et les animaux se gèrent depuis votre profil. Les modifications s'appliquent à toutes vos annonces.
+              </p>
+              <Link
+                to="/profile#logement"
+                className="border border-border rounded-full px-4 py-2 text-sm text-foreground hover:border-primary transition-colors inline-block"
+              >
+                Modifier mon profil →
+              </Link>
+            </div>
+          )}
+
+          {isOwner && (
+            <div className="bg-card rounded-xl border border-border p-5">
+              <h3 className="text-sm font-medium text-foreground mb-1">Spécifique à cette garde (optionnel)</h3>
+              <p className="text-xs text-muted-foreground mb-3">Ces informations s'appliquent uniquement à cette garde et complètent votre profil.</p>
+              <div className="space-y-4">
+                <div>
+                  <label className="text-sm font-medium text-foreground block mb-1">Précisions sur le logement</label>
+                  <textarea
+                    rows={3}
+                    className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    placeholder="Ex : La chambre d'amis sera fermée, accès jardin uniquement le matin..."
+                    value={logementOverride}
+                    onChange={e => { setLogementOverride(e.target.value); saveOverride("logement_override", e.target.value); }}
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-foreground block mb-1">Précisions sur les animaux</label>
+                  <textarea
+                    rows={3}
+                    className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    placeholder="Ex : Rex aura besoin d'une promenade supplémentaire le soir pendant cette période..."
+                    value={animauxOverride}
+                    onChange={e => { setAnimauxOverride(e.target.value); saveOverride("animaux_override", e.target.value); }}
+                  />
+                </div>
+              </div>
+            </div>
+          )}
           {property && (
             <div className="bg-card rounded-xl border border-border p-5">
               <div className="flex items-center gap-2 mb-3">
