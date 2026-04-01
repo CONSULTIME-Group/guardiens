@@ -212,7 +212,7 @@ export function useSitterProfile() {
         "has_license", "has_vehicle", "geographic_radius", "min_duration", "max_duration",
         "availability_dates", "is_available", "strict_rules_ok", "prefer_visitors", "farm_animals_ok",
         "preferences_notes", "meeting_preference", "handover_preference",
-        "languages", "bonus_skills", "interests",
+        "languages", "bonus_skills", "interests", "competences",
       ] as const;
 
       const sitterUpdate: any = {};
