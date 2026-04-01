@@ -8,6 +8,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import {
   Car, MapPin, X,
   ChevronLeft, ChevronRight,
+  Shield, Star,
 } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
@@ -359,11 +360,21 @@ export default function PublicSitterProfile() {
             {/* Badges statut */}
             {activeBadgeKeys.length > 0 && (
               <div className="flex items-center gap-2 mt-1">
-                {activeBadgeKeys.map(k => (
-                  <div key={k} className="flex items-center gap-1">
-                    <BadgeTimbre id={k} unlocked size="compact" showTooltip={false} />
-                  </div>
-                ))}
+                {badgeMap["id_verifiee"] && (
+                  <span className="inline-flex items-center gap-1 text-xs text-muted-foreground border border-border rounded-full px-2 py-0.5">
+                    <Shield size={11} className="text-primary" /> ID vérifiée
+                  </span>
+                )}
+                {badgeMap["fondateur"] && (
+                  <span className="inline-flex items-center gap-1 text-xs text-muted-foreground border border-border rounded-full px-2 py-0.5">
+                    <Star size={11} className="text-primary" /> Fondateur
+                  </span>
+                )}
+                {badgeMap["gardien_urgence"] && (
+                  <span className="inline-flex items-center gap-1 text-xs text-muted-foreground border border-border rounded-full px-2 py-0.5">
+                    <Shield size={11} className="text-primary" /> Gardien d'urgence
+                  </span>
+                )}
               </div>
             )}
 
@@ -393,7 +404,7 @@ export default function PublicSitterProfile() {
 
           {/* Lifestyle */}
           {lifestyle.length > 0 && (
-            <div>
+            <div className="border-b border-border pb-4 mb-4">
               <p className="text-xs uppercase tracking-widest text-muted-foreground mb-2">Style de vie</p>
               <div className="flex flex-wrap gap-1.5">
                 {lifestyle.map(l => (
@@ -407,15 +418,18 @@ export default function PublicSitterProfile() {
 
           {/* Profile info */}
           {(typeLine || durationLabel) && (
-            <div className="text-sm text-foreground/70 space-y-0.5">
-              {typeLine && <p>{typeLine}</p>}
-              {durationLabel && <p>{durationLabel}</p>}
+            <div className="border-b border-border pb-4 mb-4">
+              <p className="text-xs uppercase tracking-widest text-muted-foreground mb-2">Profil</p>
+              <div className="text-sm text-foreground/70 space-y-0.5">
+                {typeLine && <p>{typeLine}</p>}
+                {durationLabel && <p>{durationLabel}</p>}
+              </div>
             </div>
           )}
 
           {/* Preferred environments */}
           {preferredEnvironments.length > 0 && (
-            <div>
+            <div className="border-b border-border pb-4 mb-4">
               <p className="text-xs uppercase tracking-widest text-muted-foreground mb-2">Environnements</p>
               <div className="flex flex-wrap gap-1.5">
                 {preferredEnvironments.map(e => (
@@ -461,14 +475,17 @@ export default function PublicSitterProfile() {
 
           {/* Motivation */}
           {motivation && (
-            <p className="text-lg font-semibold leading-relaxed text-foreground/85">
+            <p className="text-base font-normal leading-loose text-foreground/80">
               {motivation}
             </p>
           )}
 
           {/* Bio */}
           {bio && (
-            <p className="text-sm italic text-muted-foreground mt-3">{bio}</p>
+            <>
+              <p className="text-sm italic text-muted-foreground mt-3">{bio}</p>
+              <hr className="border-border" />
+            </>
           )}
 
           {/* Animaux acceptés */}
@@ -504,6 +521,8 @@ export default function PublicSitterProfile() {
               )}
             </div>
           )}
+
+          <hr className="border-border" />
 
           {/* Avis */}
           <div>
@@ -547,11 +566,15 @@ export default function PublicSitterProfile() {
                 )}
               </>
             ) : (
-              <p className="text-sm text-muted-foreground italic">
-                Les avis apparaîtront après la première garde.
-              </p>
+              <div className="border border-border rounded-xl p-5 bg-card text-sm text-muted-foreground italic">
+                Les avis apparaîtront ici après la première garde.
+                Chaque propriétaire évalue le gardien et peut attribuer
+                jusqu'à 3 écussons.
+              </div>
             )}
           </div>
+
+          <hr className="border-border" />
 
           {/* Collection de timbres */}
           <div>
@@ -565,6 +588,9 @@ export default function PublicSitterProfile() {
             </div>
             <p className="text-xs text-muted-foreground mt-2">
               {unlockedCount} timbre{unlockedCount > 1 ? "s" : ""} sur 12
+            </p>
+            <p className="text-xs text-muted-foreground mt-1">
+              Les écussons sont attribués par les propriétaires après chaque garde.
             </p>
           </div>
 
