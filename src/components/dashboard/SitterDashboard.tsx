@@ -382,14 +382,30 @@ const SitterDashboard = () => {
         {/* Badges collection */}
         <div className="mt-4 bg-card border border-border rounded-2xl p-4">
           <p className="text-xs text-muted-foreground uppercase tracking-wide mb-3">Mes écussons</p>
-          <BadgeGrid
-            unlockedBadges={badges.reduce((acc: Record<string, number>, b: any) => {
+          {(() => {
+            const unlockedSet: Record<string, boolean> = {};
+            if (profile?.identity_verified) unlockedSet["id_verifiee"] = true;
+            if (profile?.is_founder) unlockedSet["fondateur"] = true;
+            badges.forEach((b: any) => {
               const key = b.badge_key || b.id;
-              acc[key] = (acc[key] || 0) + 1;
-              return acc;
-            }, {})}
-            variant="dashboard"
-          />
+              if (key) unlockedSet[key] = true;
+            });
+            const unlockedCount = TIMBRES_ORDER.filter(k => unlockedSet[k]).length;
+            return (
+              <>
+                <div className="grid grid-cols-6 gap-3">
+                  {TIMBRES_ORDER.map((key) => (
+                    <div key={key} className="flex justify-center">
+                      <BadgeTimbre id={key} unlocked={!!unlockedSet[key]} />
+                    </div>
+                  ))}
+                </div>
+                <p className="text-xs text-muted-foreground text-center mt-2">
+                  {unlockedCount}/12 timbres débloqués
+                </p>
+              </>
+            );
+          })()}
         </div>
 
         {/* Checklist — split completed/incomplete */}
