@@ -288,21 +288,44 @@ const SitterDashboard = () => {
       {/* Ongoing sit banner */}
       {ongoingSit && (
         <>
-          <Link to={`/sits/${ongoingSit.id}`} className="block p-4 rounded-xl border-2 border-primary/30 bg-primary/5 hover:shadow-md transition-shadow">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                <Calendar className="h-5 w-5 text-primary" />
+          <div className="rounded-xl border-2 border-primary/30 bg-primary/5">
+            <Link to={`/sits/${ongoingSit.id}`} className="block p-4 hover:shadow-md transition-shadow">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                  <Calendar className="h-5 w-5 text-primary" />
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm font-semibold">Garde en cours</p>
+                  <p className="text-xs text-muted-foreground">{ongoingSit.title} — chez {ongoingSit.ownerName}</p>
+                </div>
+                <ChevronRight className="h-4 w-4 text-muted-foreground" />
               </div>
-              <div className="flex-1">
-                <p className="text-sm font-semibold">Garde en cours</p>
-                <p className="text-xs text-muted-foreground">{ongoingSit.title} — chez {ongoingSit.ownerName}</p>
-              </div>
-              <ChevronRight className="h-4 w-4 text-muted-foreground" />
+            </Link>
+            <div className="px-4 pb-3 flex items-center justify-between">
+              <a href="/actualites/gerer-imprevu-pendant-garde" className="text-xs text-primary/70 hover:text-primary hover:underline">
+                Un imprévu ? Voir le guide →
+              </a>
+              <button
+                onClick={() => setCancelSitOpen(true)}
+                className="text-xs text-muted-foreground hover:text-destructive underline-offset-2 hover:underline cursor-pointer"
+              >
+                Annuler ma garde
+              </button>
             </div>
-          </Link>
-          <a href="/actualites/gerer-imprevu-pendant-garde" className="text-xs text-primary/70 hover:text-primary hover:underline -mt-7 inline-block ml-1">
-            Un imprévu ? Voir le guide →
-          </a>
+          </div>
+
+          {/* Cancel modal for sitter */}
+          <CancelSitModal
+            open={cancelSitOpen}
+            onOpenChange={setCancelSitOpen}
+            sitId={ongoingSit.id}
+            sitTitle={ongoingSit.title || "Garde"}
+            sitOwnerId={ongoingSit.user_id}
+            otherPartyName={ongoingSit.ownerName}
+            startDate={ongoingSit.start_date}
+            endDate={ongoingSit.end_date}
+            onCancelled={() => { setOngoingSit(null); }}
+          />
         </>
       )}
 

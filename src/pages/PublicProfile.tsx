@@ -455,6 +455,7 @@ const PublicProfile = () => {
             {/* --- Reviews tab --- */}
             <TabsContent value="reviews" className="mt-4 space-y-8">
               <ReviewsDisplay userId={id!} showAnimalCare={isSitter} />
+              <CancellationReviewsSection userId={id!} />
               <EntraideSection userId={id!} />
             </TabsContent>
 
