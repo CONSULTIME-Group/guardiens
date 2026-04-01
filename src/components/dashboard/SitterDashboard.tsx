@@ -384,8 +384,8 @@ const SitterDashboard = () => {
           <p className="text-xs text-muted-foreground uppercase tracking-wide mb-3">Mes écussons</p>
           {(() => {
             const unlockedSet: Record<string, boolean> = {};
-            if (profile?.identity_verified) unlockedSet["id_verifiee"] = true;
-            if (profile?.is_founder) unlockedSet["fondateur"] = true;
+            if (identityVerified) unlockedSet["id_verifiee"] = true;
+            // fondateur status not fetched yet — default false
             badges.forEach((b: any) => {
               const key = b.badge_key || b.id;
               if (key) unlockedSet[key] = true;
