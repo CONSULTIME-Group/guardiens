@@ -247,7 +247,7 @@ export default function BadgeTimbre({
           setTimeout(() => setShowMobileTooltip(false), 1500)
         }
       >
-        <title>{label}</title>
+        <title>{unlocked ? label : `À débloquer — ${condition}`}</title>
         <path
           d={DENTELURE}
           fill={unlocked ? fill : "#F1EFE8"}
