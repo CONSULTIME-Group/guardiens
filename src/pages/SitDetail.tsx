@@ -427,6 +427,48 @@ const SitDetail = () => {
 
         {/* Housing tab */}
         <TabsContent value="housing" className="mt-6 space-y-6">
+          {isOwner && (
+            <div className="bg-muted/30 rounded-xl p-4 mb-4 border border-border">
+              <p className="text-sm text-muted-foreground mb-3">
+                Le logement et les animaux se gèrent depuis votre profil. Les modifications s'appliquent à toutes vos annonces.
+              </p>
+              <Link
+                to="/profile#logement"
+                className="border border-border rounded-full px-4 py-2 text-sm text-foreground hover:border-primary transition-colors inline-block"
+              >
+                Modifier mon profil →
+              </Link>
+            </div>
+          )}
+
+          {isOwner && (
+            <div className="bg-card rounded-xl border border-border p-5">
+              <h3 className="text-sm font-medium text-foreground mb-1">Spécifique à cette garde (optionnel)</h3>
+              <p className="text-xs text-muted-foreground mb-3">Ces informations s'appliquent uniquement à cette garde et complètent votre profil.</p>
+              <div className="space-y-4">
+                <div>
+                  <label className="text-sm font-medium text-foreground block mb-1">Précisions sur le logement</label>
+                  <textarea
+                    rows={3}
+                    className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    placeholder="Ex : La chambre d'amis sera fermée, accès jardin uniquement le matin..."
+                    value={logementOverride}
+                    onChange={e => { setLogementOverride(e.target.value); saveOverride("logement_override", e.target.value); }}
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-foreground block mb-1">Précisions sur les animaux</label>
+                  <textarea
+                    rows={3}
+                    className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    placeholder="Ex : Rex aura besoin d'une promenade supplémentaire le soir pendant cette période..."
+                    value={animauxOverride}
+                    onChange={e => { setAnimauxOverride(e.target.value); saveOverride("animaux_override", e.target.value); }}
+                  />
+                </div>
+              </div>
+            </div>
+          )}
           {property && (
             <div className="bg-card rounded-xl border border-border p-5">
               <div className="flex items-center gap-2 mb-3">
