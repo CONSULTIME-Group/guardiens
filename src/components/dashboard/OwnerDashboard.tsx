@@ -164,7 +164,19 @@ const OwnerDashboard = () => {
     load();
   }, [user]);
 
-  if (loading) return <div className="p-6 text-muted-foreground">Chargement...</div>;
+  if (loading) return (
+    <div className="p-8 flex items-center justify-center">
+      <div className="animate-pulse space-y-4 w-full max-w-lg">
+        <div className="h-8 bg-muted rounded-lg w-2/3" />
+        <div className="grid grid-cols-2 gap-3">
+          <div className="h-24 bg-muted rounded-xl" />
+          <div className="h-24 bg-muted rounded-xl" />
+        </div>
+        <div className="h-16 bg-muted rounded-xl" />
+        <div className="h-32 bg-muted rounded-xl" />
+      </div>
+    </div>
+  );
 
   if (showOnboarding) {
     return (
