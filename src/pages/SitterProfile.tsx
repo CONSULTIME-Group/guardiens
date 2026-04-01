@@ -157,6 +157,7 @@ const SitterProfile = () => {
                 <StepSkills
                   skillCategories={mergedData.skill_categories || []}
                   availableForHelp={mergedData.available_for_help || false}
+                  competences={mergedData.competences || []}
                   onChange={(partial) => handleChange(partial as any)}
                 />
               )}
