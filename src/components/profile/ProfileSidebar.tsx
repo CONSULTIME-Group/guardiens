@@ -13,41 +13,29 @@ export interface SidebarSection {
 }
 
 interface ProfileSidebarProps {
-  avatarUrl?: string;
   firstName?: string;
   city?: string;
   completion: number;
   sections: SidebarSection[];
   activeSection: string;
   onSectionClick: (id: string) => void;
-  onAvatarChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   publicProfileUrl: string;
   role: "sitter" | "owner";
+  isFounder?: boolean;
 }
 
 const ProfileSidebar = ({
-  avatarUrl, firstName, city, completion, sections,
-  activeSection, onSectionClick, publicProfileUrl, role,
+  firstName, city, completion, sections,
+  activeSection, onSectionClick, publicProfileUrl, role, isFounder,
 }: ProfileSidebarProps) => {
   return (
     <aside className="w-full lg:w-[280px] lg:sticky lg:top-24 lg:self-start space-y-5 shrink-0">
-      {/* Avatar + info */}
-      <div className="flex flex-col items-center gap-3">
-        <div>
-          {avatarUrl ? (
-            <img src={avatarUrl} alt="" className="w-24 h-24 rounded-full object-cover border-2 border-border" />
-          ) : (
-            <div className="w-24 h-24 rounded-full bg-primary/10 flex items-center justify-center text-primary text-3xl font-medium border-2 border-border">
-              {firstName?.charAt(0)?.toUpperCase() || "?"}
-            </div>
-          )}
-        </div>
-        <div className="text-center">
-          <p className="text-base font-semibold text-foreground">
-            {firstName ? firstName.charAt(0).toUpperCase() + firstName.slice(1).toLowerCase() : "Votre profil"}
-          </p>
-          {city && <p className="text-sm text-muted-foreground">{city}</p>}
-        </div>
+      {/* Name + city + founder badge */}
+      <div className="text-center space-y-1">
+        <p className="text-base font-semibold text-foreground">
+          {firstName ? firstName.charAt(0).toUpperCase() + firstName.slice(1).toLowerCase() : "Votre profil"}
+        </p>
+        {city && <p className="text-sm text-muted-foreground">{city}</p>}
       </div>
 
       {/* Completion */}
