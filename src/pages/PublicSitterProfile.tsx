@@ -143,10 +143,10 @@ export default function PublicSitterProfile() {
   const motivation = sitterProfile?.motivation || "";
   const animalTypes: string[] = sitterProfile?.animal_types || [];
   const hasVehicle = sitterProfile?.has_vehicle || false;
-  const rawRadius = sitterProfile?.geographic_radius || 0;
+  const rawRadius = sitterProfile?.geographic_radius;
   const completedSits = profile.completed_sits_count || 0;
   const cancellations = profile.cancellation_count || 0;
-  const radius = (rawRadius === 100 && completedSits === 0) ? 15 : rawRadius;
+  const radius = rawRadius && rawRadius > 0 ? rawRadius : null;
   const isOwn = auth?.user?.id === id;
   const isAuthenticated = auth?.isAuthenticated;
   const isOwner = auth?.activeRole === "owner";
