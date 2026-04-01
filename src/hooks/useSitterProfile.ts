@@ -67,6 +67,7 @@ const defaultData: SitterProfileData = {
   sitter_type: "", accompanied_by: "", smoker: false, availability_during: "", lifestyle: [],
   animal_types: [], experience_years: "", references_text: "",
   has_license: false, has_vehicle: false, geographic_radius: 15, min_duration: 3, max_duration: 21, availability_dates: [], is_available: false,
+  min_stay_duration: "flexible", preferred_frequency: "flexible", min_notice: "asap", preferred_periods: [], preferred_environments: [],
   strict_rules_ok: false, prefer_visitors: false, farm_animals_ok: false, preferences_notes: "",
   meeting_preference: [], handover_preference: "", languages: [], bonus_skills: [], interests: [],
   skill_categories: [], available_for_help: false,
