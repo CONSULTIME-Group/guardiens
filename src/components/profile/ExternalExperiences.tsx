@@ -139,7 +139,7 @@ const ExternalExperiences = () => {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="font-heading text-xl font-bold">Expériences passées</h2>
-          <p className="text-sm text-muted-foreground">Importez vos avis d'autres plateformes</p>
+          <p className="text-sm text-muted-foreground">Vos gardes passées ailleurs comptent aussi.</p>
         </div>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
