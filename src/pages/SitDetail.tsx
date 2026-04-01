@@ -84,6 +84,8 @@ const SitDetail = () => {
       const { data: sitData } = await supabase.from("sits").select("*").eq("id", id).single();
       if (!sitData) { setLoading(false); return; }
       setSit(sitData as SitData);
+      setLogementOverride((sitData as any).logement_override || "");
+      setAnimauxOverride((sitData as any).animaux_override || "");
 
       const [ownerRes, propRes, ownerProfRes, reviewsRes] = await Promise.all([
         supabase.from("profiles").select("*").eq("id", sitData.user_id).single(),
