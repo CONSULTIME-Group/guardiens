@@ -522,6 +522,8 @@ export default function PublicSitterProfile() {
             </div>
           )}
 
+          <hr className="border-border" />
+
           {/* Avis */}
           <div>
             <p className="text-xs uppercase tracking-widest text-muted-foreground mb-3">
