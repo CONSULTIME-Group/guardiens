@@ -1,6 +1,7 @@
 import { CheckCircle2, Circle, Eye } from "lucide-react";
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
+import BadgeShield from "@/components/badges/BadgeShield";
 
 export interface SidebarSection {
   id: string;
@@ -36,6 +37,11 @@ const ProfileSidebar = ({
           {firstName ? firstName.charAt(0).toUpperCase() + firstName.slice(1).toLowerCase() : "Votre profil"}
         </p>
         {city && <p className="text-sm text-muted-foreground">{city}</p>}
+        {isFounder && (
+          <div className="flex justify-center pt-1">
+            <BadgeShield badgeKey="founder" size="sm" />
+          </div>
+        )}
       </div>
 
       {/* Completion */}
