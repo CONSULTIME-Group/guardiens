@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 const DEMO_LISTINGS = [
   {
     id: "demo-1",
-    photo: "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800&q=80",
+    photo: "https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=800&q=80",
     city: "Lyon 6e",
     animals: ["1 chien", "2 chats"],
     dates: "14 → 28 juil.",
@@ -15,7 +15,7 @@ const DEMO_LISTINGS = [
   },
   {
     id: "demo-2",
-    photo: "https://images.unsplash.com/photo-1499678329028-101435549a4e?w=800&q=80",
+    photo: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&q=80",
     city: "Annecy",
     animals: ["3 poules", "1 chat"],
     dates: "2 → 16 août",
@@ -27,7 +27,7 @@ const DEMO_LISTINGS = [
   },
   {
     id: "demo-3",
-    photo: "https://images.unsplash.com/photo-1548550023-2bdb3c5beed7?w=800&q=80",
+    photo: "https://images.unsplash.com/photo-1598928636135-d146006ff4be?w=800&q=80",
     city: "Grenoble",
     animals: ["2 chats"],
     dates: "20 sept. → 4 oct.",
