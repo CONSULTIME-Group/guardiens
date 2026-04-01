@@ -243,8 +243,8 @@ export default function PublicSitterProfile() {
           {activeBadgeKeys.length > 0 && (
             <div className="flex gap-2 mb-1">
               {activeBadgeKeys.map(k => (
-                <div key={k} className="brightness-0 invert">
-                  <BadgeTimbre id={k} unlocked size="compact" />
+                <div key={k} style={{ filter: 'brightness(0) invert(1)' }}>
+                  <BadgeTimbre id={k} unlocked size="compact" showTooltip={false} />
                 </div>
               ))}
             </div>
