@@ -56,6 +56,7 @@ const OwnerDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [onboardingChecks, setOnboardingChecks] = useState({ hasName: false, hasAvatar: false, hasBio: false, hasIdentity: false, hasProperty: false, hasPets: false, hasSit: false });
+  const [nearbyEmergencyCount, setNearbyEmergencyCount] = useState(0);
 
   useEffect(() => {
     if (!user) return;
