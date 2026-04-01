@@ -22,7 +22,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 /* ── Status configs ── */
 const statusConfig: Record<string, { label: string; className: string }> = {
   draft: { label: "Brouillon", className: "bg-muted text-muted-foreground" },
-  published: { label: "En recherche", className: "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400" },
+  published: { label: "En recherche", className: "bg-primary/10 text-primary" },
   confirmed: { label: "Confirmée", className: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" },
   in_progress: { label: "En cours", className: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400" },
   completed: { label: "Terminée", className: "bg-muted text-muted-foreground" },
