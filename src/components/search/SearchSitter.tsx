@@ -719,7 +719,7 @@ const SearchSitter = () => {
             onClick={() => setViewMode("map")}
             className={`p-2 transition-colors ${viewMode === "map" ? "bg-[#2D6A4F] text-white" : "bg-white text-[#6B7280]"}`}
           >
-            <Map className="h-4 w-4" />
+            <MapIcon className="h-4 w-4" />
           </button>
         </div>
       </div>
