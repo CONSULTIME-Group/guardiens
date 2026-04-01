@@ -9,6 +9,7 @@ export interface SidebarSection {
   subtitle: string;
   missingCount: number;
   complete: boolean;
+  optional?: boolean;
 }
 
 interface ProfileSidebarProps {
