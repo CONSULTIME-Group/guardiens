@@ -251,6 +251,7 @@ const SearchOwner = () => {
   }, [initialLoaded, city, radius, animalTypes, vehicled, availableOnly, verifiedOnly, emergencyOnly, minSits, minRating, sort]);
 
   const hasActiveFilters = vehicled || availableOnly || verifiedOnly || emergencyOnly || minSits !== "all" || minRating !== "all";
+  const hasAnyRating = results.some((s: any) => s.avgRating !== null);
 
   const resetFilters = () => {
     setVehicled(false);
@@ -434,14 +435,18 @@ const SearchOwner = () => {
                 </div>
 
                 {/* Section 5 — Note moyenne */}
-                <div className="space-y-3">
+                <div className={`space-y-3 ${!hasAnyRating ? "opacity-50 pointer-events-none" : ""}`}>
                   <h4 className="text-sm font-medium">Note minimum</h4>
                   <div className="flex gap-2 flex-wrap">
                     {[{ label: "Tous", value: "all" }, { label: "4+", value: "4" }, { label: "4.5+", value: "4.5" }, { label: "4.8+", value: "4.8" }].map(opt => (
                       <button key={opt.value} onClick={() => setMinRating(opt.value)} className={`rounded-full px-3 py-1 text-xs border transition-colors ${minRating === opt.value ? "bg-primary text-primary-foreground border-primary" : "border-border text-muted-foreground hover:border-primary"}`}>{opt.label}</button>
                     ))}
                   </div>
-                  <p className="text-xs text-muted-foreground">Disponible une fois les premières gardes réalisées</p>
+                  {!hasAnyRating ? (
+                    <p className="text-xs text-muted-foreground italic">Disponible une fois les premières gardes réalisées sur Guardiens</p>
+                  ) : (
+                    <p className="text-xs text-muted-foreground">Disponible une fois les premières gardes réalisées</p>
+                  )}
                 </div>
 
                 <Button onClick={() => setFiltersOpen(false)} className="w-full py-3 rounded-xl">Appliquer</Button>
