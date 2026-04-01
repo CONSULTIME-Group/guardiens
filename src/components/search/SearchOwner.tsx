@@ -251,6 +251,7 @@ const SearchOwner = () => {
   }, [initialLoaded, city, radius, animalTypes, vehicled, availableOnly, verifiedOnly, emergencyOnly, minSits, minRating, sort]);
 
   const hasActiveFilters = vehicled || availableOnly || verifiedOnly || emergencyOnly || minSits !== "all" || minRating !== "all";
+  const hasAnyRating = results.some((s: any) => s.avgRating !== null);
 
   const resetFilters = () => {
     setVehicled(false);
