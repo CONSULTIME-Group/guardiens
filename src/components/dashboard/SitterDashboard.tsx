@@ -6,7 +6,7 @@ import { Link } from "react-router-dom";
 import EmergencyDashSection from "./EmergencyDashSection";
 import MissionsNearbySection from "./MissionsNearbySection";
 import BadgeShield from "@/components/badges/BadgeShield";
-import BadgeGrid from "@/components/badges/BadgeGrid";
+import BadgeTimbre, { TIMBRES_ORDER } from "@/components/badges/BadgeTimbre";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Switch } from "@/components/ui/switch";
 import {
