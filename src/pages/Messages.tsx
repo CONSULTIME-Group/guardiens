@@ -147,7 +147,7 @@ const Messages = () => {
     if (!user) return;
     const { data: convs } = await supabase
       .from("conversations")
-      .select("*, sit:sits(title, status, property_id)")
+      .select("*, sit:sits(title, status, property_id, start_date, end_date)")
       .or(`owner_id.eq.${user.id},sitter_id.eq.${user.id}`)
       .order("updated_at", { ascending: false });
 
