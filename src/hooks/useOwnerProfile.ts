@@ -80,6 +80,7 @@ const defaultData: OwnerProfileData = {
   meeting_preference: [], handover_preference: "", welcome_notes: "",
   news_frequency: "", news_format: [], preferred_time: "", communication_notes: "",
   skill_categories: [], available_for_help: false,
+  owner_competences: [], owner_competences_disponible: false, owner_skill_categories: [],
 };
 
 export function useOwnerProfile() {
