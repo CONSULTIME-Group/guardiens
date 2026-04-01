@@ -4,18 +4,16 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Send, Image as ImageIcon, Archive, Filter, X, Home, HeartHandshake } from "lucide-react";
+import { Send, Image as ImageIcon, Archive, X, Home, HeartHandshake, MessageSquare, Info, Search } from "lucide-react";
 import { format, isToday, isYesterday, isSameDay } from "date-fns";
 import { fr } from "date-fns/locale";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, Link } from "react-router-dom";
 import { useIsMobile } from "@/hooks/use-mobile";
 import HouseGuideBlock from "@/components/messages/HouseGuideBlock";
 import ConversationHeader from "@/components/messages/ConversationHeader";
 import DaySeparator from "@/components/messages/DaySeparator";
 import MessageBubble from "@/components/messages/MessageBubble";
 import { useToast } from "@/hooks/use-toast";
-import { getBadgeDef } from "@/components/badges/badgeDefinitions";
-import StatusShield from "@/components/badges/StatusShield";
 import { useSubscriptionAccess } from "@/hooks/useSubscriptionAccess";
 import { Lock } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -24,6 +22,7 @@ interface Conversation {
   id: string;
   sit_id: string | null;
   long_stay_id: string | null;
+  small_mission_id: string | null;
   owner_id: string;
   sitter_id: string;
   updated_at: string;
@@ -33,7 +32,6 @@ interface Conversation {
   last_message?: { content: string; created_at: string; sender_id: string } | null;
   unread_count: number;
   application_status?: string | null;
-  top_badge?: { badge_key: string; count: number } | null;
   other_user_rating?: number;
   other_user_is_emergency?: boolean;
 }
@@ -50,12 +48,12 @@ interface Message {
 }
 
 const appStatusLabels: Record<string, { label: string; className: string }> = {
-  pending: { label: "En attente", className: "bg-orange-100 text-orange-700" },
-  viewed: { label: "Consultée", className: "bg-orange-100 text-orange-700" },
-  discussing: { label: "En discussion", className: "bg-blue-100 text-blue-700" },
-  accepted: { label: "Acceptée", className: "bg-green-100 text-green-700" },
-  rejected: { label: "Refusée", className: "bg-destructive/10 text-destructive" },
-  cancelled: { label: "Annulée", className: "bg-muted text-muted-foreground" },
+  pending: { label: "En attente", className: "bg-amber-50 text-amber-700" },
+  viewed: { label: "En attente", className: "bg-amber-50 text-amber-700" },
+  discussing: { label: "En discussion", className: "bg-blue-50 text-blue-700" },
+  accepted: { label: "Acceptée ✓", className: "bg-primary/10 text-primary" },
+  rejected: { label: "Déclinée", className: "bg-muted text-muted-foreground" },
+  cancelled: { label: "Déclinée", className: "bg-muted text-muted-foreground" },
 };
 
 const formatListDate = (d: string) => {
@@ -65,19 +63,28 @@ const formatListDate = (d: string) => {
   return format(date, "d MMM", { locale: fr });
 };
 
-type ConvFilter = "active" | "archived";
-type ConvType = "all" | "garde" | "entraide";
+const capitalize = (s?: string | null) => {
+  if (!s) return "";
+  return s.charAt(0).toUpperCase() + s.slice(1).toLowerCase();
+};
 
-const ownerSuggestions = [
-  "Voulez-vous qu'on se rencontre ?",
-  "Avez-vous de l'expérience avec ce type d'animaux ?",
-  "Êtes-vous disponible pour un appel vidéo ?",
+type ConvPill = "all" | "garde" | "mission" | "archived";
+
+// ─── Suggested messages by context ─────────────────────────
+const ownerGardeSuggestions = [
+  "Bonjour, merci pour votre candidature !",
+  "Pouvez-vous me dire plus sur votre expérience avec les chats ?",
+  "Seriez-vous disponible pour une rencontre avant la garde ?",
 ];
-
-const sitterSuggestions = [
-  "Serait-il possible de se rencontrer avant ?",
-  "Y a-t-il des consignes particulières ?",
-  "Est-ce que je peux voir le guide de la maison ?",
+const sitterGardeSuggestions = [
+  "Bonjour, je suis très intéressé par cette garde.",
+  "J'ai de l'expérience avec ce type d'animaux.",
+  "Je serais disponible pour une rencontre si vous le souhaitez.",
+];
+const missionSuggestions = [
+  "Bonjour, je peux vous aider !",
+  "Quand seriez-vous disponible ?",
+  "Qu'attendez-vous en échange ?",
 ];
 
 const SuggestedMessages = ({
@@ -86,27 +93,32 @@ const SuggestedMessages = ({
   messages: Message[]; userId?: string; activeConv: Conversation;
   onSelect: (text: string) => void;
 }) => {
-  const [dismissed, setDismissed] = useState(false);
-  const userHasSent = msgs.some(m => m.sender_id === userId && !m.is_system);
-  if (userHasSent || dismissed) return null;
+  const userMsgs = msgs.filter(m => m.sender_id === userId && !m.is_system);
+  if (userMsgs.length > 0) return null;
 
   const isOwner = activeConv.owner_id === userId;
-  const suggestions = isOwner ? ownerSuggestions : sitterSuggestions;
+  const isMission = !!activeConv.small_mission_id;
+
+  let suggestions: string[];
+  if (isMission) {
+    suggestions = missionSuggestions;
+  } else if (isOwner) {
+    suggestions = ownerGardeSuggestions;
+  } else {
+    suggestions = sitterGardeSuggestions;
+  }
 
   return (
-    <div className="px-3 py-2 border-t border-border/50 bg-accent/30">
-      <p className="text-[10px] text-muted-foreground mb-1.5 font-medium">Suggestions</p>
-      <div className="flex gap-1.5 overflow-x-auto scrollbar-hide pb-1">
-        {suggestions.map((s, i) => (
-          <button
-            key={i}
-            onClick={() => { onSelect(s); setDismissed(true); }}
-            className="px-3 py-1.5 rounded-full bg-card border border-border text-xs font-medium text-foreground hover:bg-primary/10 hover:border-primary/30 transition-colors whitespace-nowrap shrink-0"
-          >
-            {s}
-          </button>
-        ))}
-      </div>
+    <div className="px-4 pb-2 flex flex-wrap gap-2">
+      {suggestions.map((s, i) => (
+        <button
+          key={i}
+          onClick={() => onSelect(s)}
+          className="border border-border rounded-full px-3 py-1 text-xs text-foreground bg-card hover:bg-muted cursor-pointer transition-colors"
+        >
+          {s}
+        </button>
+      ))}
     </div>
   );
 };
@@ -125,12 +137,11 @@ const Messages = () => {
   const [newMessage, setNewMessage] = useState("");
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
-  const [filter, setFilter] = useState<ConvFilter>("active");
-  const [typeFilter, setTypeFilter] = useState<ConvType>("all");
-  const [sitFilter, setSitFilter] = useState<string | null>(null);
+  const [pill, setPill] = useState<ConvPill>("all");
   const [searchFilter, setSearchFilter] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [autoOpened, setAutoOpened] = useState(false);
 
   const loadConversations = useCallback(async () => {
     if (!user) return;
@@ -146,14 +157,13 @@ const Messages = () => {
     const convIds = convs.map((conv: any) => conv.id);
     const sitIds = convs.map((conv: any) => conv.sit_id).filter(Boolean);
 
-    const [profilesRes, allLastMsgsRes, allUnreadRes, applicationsRes, badgesRes, ratingsRes, emergencyRes] = await Promise.all([
+    const [profilesRes, allLastMsgsRes, allUnreadRes, applicationsRes, ratingsRes, emergencyRes] = await Promise.all([
       supabase.from("profiles").select("id, first_name, avatar_url, identity_verified, city, is_founder").in("id", otherIds),
       supabase.from("messages").select("conversation_id, content, created_at, sender_id").in("conversation_id", convIds).order("created_at", { ascending: false }),
       supabase.from("messages").select("conversation_id, id").in("conversation_id", convIds).neq("sender_id", user.id).is("read_at", null),
       sitIds.length > 0
         ? supabase.from("applications").select("sit_id, sitter_id, status").in("sit_id", sitIds)
         : Promise.resolve({ data: [] }),
-      supabase.from("badge_attributions").select("receiver_id, badge_key").in("receiver_id", otherIds),
       supabase.from("reviews").select("reviewee_id, overall_rating").in("reviewee_id", otherIds).eq("published", true),
       supabase.from("emergency_sitter_profiles").select("user_id, is_active").in("user_id", otherIds).eq("is_active", true),
     ]);
@@ -175,27 +185,12 @@ const Messages = () => {
       appMap.set(`${a.sit_id}-${a.sitter_id}`, a.status);
     });
 
-    const topBadgeMap = new Map<string, { badge_key: string; count: number }>();
-    const badgeCounts = new Map<string, Map<string, number>>();
-    (badgesRes.data || []).forEach((b: any) => {
-      if (!badgeCounts.has(b.receiver_id)) badgeCounts.set(b.receiver_id, new Map());
-      const m = badgeCounts.get(b.receiver_id)!;
-      m.set(b.badge_key, (m.get(b.badge_key) || 0) + 1);
-    });
-    badgeCounts.forEach((counts, uid) => {
-      let top = { badge_key: "", count: 0 };
-      counts.forEach((c, k) => { if (c > top.count) top = { badge_key: k, count: c }; });
-      if (top.badge_key) topBadgeMap.set(uid, top);
-    });
-
-    // Rating map
     const ratingMap = new Map<string, { sum: number; count: number }>();
     (ratingsRes.data || []).forEach((r: any) => {
       const cur = ratingMap.get(r.reviewee_id) || { sum: 0, count: 0 };
       ratingMap.set(r.reviewee_id, { sum: cur.sum + r.overall_rating, count: cur.count + 1 });
     });
 
-    // Emergency set
     const emergencySet = new Set((emergencyRes.data || []).map((e: any) => e.user_id));
 
     const enriched = convs.map((conv: any) => {
@@ -210,7 +205,6 @@ const Messages = () => {
         last_message: lastMsgMap.get(conv.id) || null,
         unread_count: unreadMap.get(conv.id) || 0,
         application_status: appStatus || null,
-        top_badge: topBadgeMap.get(otherId) || null,
         other_user_rating: rating ? rating.sum / rating.count : 0,
         other_user_is_emergency: emergencySet.has(otherId),
       } as Conversation;
@@ -230,17 +224,29 @@ const Messages = () => {
 
   useEffect(() => { loadConversations(); }, [loadConversations]);
 
+  // Auto-open unread or from query param
   useEffect(() => {
+    if (conversations.length === 0 || autoOpened) return;
+
     const convId = searchParams.get("conv");
-    if (convId && conversations.length > 0 && !activeConv) {
+    if (convId) {
       const target = conversations.find(c => c.id === convId);
       if (target) {
         setActiveConv(target);
         searchParams.delete("conv");
         setSearchParams(searchParams, { replace: true });
+        setAutoOpened(true);
+        return;
       }
     }
-  }, [conversations, searchParams, activeConv, setSearchParams]);
+
+    // Auto-open most recent unread
+    const unread = conversations.find(c => c.unread_count > 0 && !c.archived_by.includes(user?.id || ""));
+    if (unread) {
+      setActiveConv(unread);
+    }
+    setAutoOpened(true);
+  }, [conversations, searchParams, autoOpened, setSearchParams, user]);
 
   const loadMessages = useCallback(async (convId: string) => {
     const { data } = await supabase
@@ -327,14 +333,14 @@ const Messages = () => {
     toast({ title: conv.archived_by.includes(user.id) ? "Conversation désarchivée" : "Conversation archivée" });
   };
 
+  // ─── Filtering ───
   const filteredConversations = conversations.filter(conv => {
     const isArchived = conv.archived_by.includes(user?.id || "");
-    if (filter === "active" && isArchived) return false;
-    if (filter === "archived" && !isArchived) return false;
-    if (typeFilter === "garde" && !(conv.sit_id || conv.long_stay_id)) return false;
-    if (typeFilter === "entraide" && !((conv as any).small_mission_id)) return false;
-    if (sitFilter && conv.sit_id !== sitFilter) return false;
-    return true;
+    if (pill === "archived") return isArchived;
+    if (isArchived) return false;
+    if (pill === "garde") return !!(conv.sit_id || conv.long_stay_id);
+    if (pill === "mission") return !!conv.small_mission_id;
+    return true; // "all"
   });
 
   const displayConversations = filteredConversations.filter(conv => {
@@ -345,84 +351,143 @@ const Messages = () => {
     return matchName || matchSit;
   });
 
-  const sitOptions = Array.from(
-    new Map(conversations.filter(c => c.sit?.title).map(c => [c.sit_id, c.sit!.title])).entries()
-  );
-
   const showList = !activeConv || !isMobile;
   const showThread = !!activeConv;
 
   if (loading) return <div className="p-6 md:p-10 text-muted-foreground">Chargement...</div>;
 
+  const pills: { value: ConvPill; label: string }[] = [
+    { value: "all", label: "Tout" },
+    { value: "garde", label: "Gardes" },
+    { value: "mission", label: "Missions" },
+    { value: "archived", label: "Archivées" },
+  ];
+
+  const renderConvItem = (conv: Conversation) => {
+    const hasUnread = conv.unread_count > 0;
+    const appInfo = conv.application_status ? appStatusLabels[conv.application_status] : null;
+    const isOwner = conv.owner_id === user?.id;
+    const isMission = !!conv.small_mission_id;
+    const roleLabel = isMission ? null : isOwner ? "Votre annonce" : "Vous avez postulé";
+
+    return (
+      <div
+        key={conv.id}
+        className={`group relative flex items-start gap-3 p-3.5 pl-6 text-left hover:bg-accent/50 transition-colors border-b border-border/50 cursor-pointer ${activeConv?.id === conv.id ? "bg-accent/50" : ""}`}
+        onClick={() => setActiveConv(conv)}
+      >
+        <div className="relative shrink-0">
+          {conv.other_user?.avatar_url ? (
+            <img src={conv.other_user.avatar_url} alt="" className="w-11 h-11 rounded-full object-cover" />
+          ) : (
+            <div className="w-11 h-11 rounded-full bg-primary/10 flex items-center justify-center text-primary font-medium text-sm">
+              {conv.other_user?.first_name?.charAt(0)?.toUpperCase() || "?"}
+            </div>
+          )}
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2 min-w-0">
+              <span className={`text-sm truncate capitalize ${hasUnread ? "font-bold text-foreground" : "font-medium"}`}>
+                {capitalize(conv.other_user?.first_name) || "Utilisateur"}
+              </span>
+              {/* MOD 3 — Application status badge */}
+              {appInfo && !isMission && (
+                <span className={`${appInfo.className} rounded-full px-2 py-0.5 text-xs shrink-0`}>
+                  {appInfo.label}
+                </span>
+              )}
+            </div>
+            <span className="text-[11px] text-muted-foreground shrink-0">
+              {conv.last_message ? formatListDate(conv.last_message.created_at) : ""}
+            </span>
+          </div>
+          {/* MOD 9 — Role indicator */}
+          {roleLabel && (
+            <p className="text-xs text-muted-foreground">{roleLabel}</p>
+          )}
+          <div className="flex items-center justify-between gap-2 mt-0.5">
+            <p className={`text-xs truncate ${hasUnread ? "text-foreground font-medium" : "text-muted-foreground"}`}>
+              {conv.last_message?.sender_id === user?.id ? "Vous : " : ""}
+              {conv.last_message?.content || "📷 Photo"}
+            </p>
+            {hasUnread && (
+              <span className="bg-primary text-primary-foreground text-[10px] rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1 shrink-0 font-bold">
+                {conv.unread_count}
+              </span>
+            )}
+          </div>
+        </div>
+        <button
+          onClick={(e) => { e.stopPropagation(); handleArchive(conv); }}
+          className="absolute top-2 right-2 p-1 rounded hover:bg-accent opacity-0 group-hover:opacity-100 transition-opacity"
+          title={conv.archived_by.includes(user?.id || "") ? "Désarchiver" : "Archiver"}
+          aria-label={conv.archived_by.includes(user?.id || "") ? "Désarchiver" : "Archiver"}
+        >
+          <Archive className="h-3.5 w-3.5 text-muted-foreground" />
+        </button>
+      </div>
+    );
+  };
+
+  const renderGroup = (key: string, title: string, convs: Conversation[], unreadCount: number, icon: React.ReactNode) => (
+    <div key={key}>
+      <div className="bg-muted/50 px-4 py-2 sticky top-0 z-10 flex items-center gap-2">
+        {icon}
+        <span className="text-xs font-medium text-foreground truncate flex-1">{title}</span>
+        {unreadCount > 0 && (
+          <span className="bg-primary text-primary-foreground rounded-full w-4 h-4 text-[10px] flex items-center justify-center font-bold shrink-0">
+            {unreadCount}
+          </span>
+        )}
+      </div>
+      {convs.map(renderConvItem)}
+    </div>
+  );
+
+  // Group conversations by sit
+  const groups = new Map<string, { title: string; convs: Conversation[]; unreadCount: number }>();
+  const noSitGroup: Conversation[] = [];
+  displayConversations.forEach(conv => {
+    if (conv.sit_id && conv.sit?.title) {
+      const existing = groups.get(conv.sit_id);
+      if (existing) {
+        existing.convs.push(conv);
+        existing.unreadCount += conv.unread_count;
+      } else {
+        groups.set(conv.sit_id, { title: conv.sit.title, convs: [conv], unreadCount: conv.unread_count });
+      }
+    } else {
+      noSitGroup.push(conv);
+    }
+  });
+
   return (
     <div className="flex h-[calc(100vh-0px)] md:h-screen overflow-hidden">
       <Helmet><meta name="robots" content="noindex, nofollow" /></Helmet>
+
       {/* ═══ CONVERSATION LIST ═══ */}
       {showList && (
         <div className={`${isMobile && activeConv ? "hidden" : ""} ${isMobile ? "w-full" : "w-80 border-r border-border"} flex flex-col bg-card`}>
           <div className="p-4 border-b border-border space-y-3">
             <h1 className="font-heading text-xl font-bold">Messagerie</h1>
 
-            <div className="flex gap-1 bg-accent rounded-lg p-0.5">
-              {([
-                { value: "active" as ConvFilter, label: "Actives" },
-                { value: "archived" as ConvFilter, label: "Archivées" },
-              ]).map(tab => (
+            {/* MOD 2 — Single pill row */}
+            <div className="flex gap-2">
+              {pills.map(p => (
                 <button
-                  key={tab.value}
-                  onClick={() => setFilter(tab.value)}
-                  className={`flex-1 px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
-                    filter === tab.value ? "bg-card shadow-sm text-foreground" : "text-muted-foreground hover:text-foreground"
+                  key={p.value}
+                  onClick={() => setPill(p.value)}
+                  className={`rounded-full px-3 py-1 text-xs transition-colors ${
+                    pill === p.value
+                      ? "bg-foreground text-background"
+                      : "border border-border text-muted-foreground hover:border-primary"
                   }`}
                 >
-                  {tab.label}
-                  {tab.value === "archived" && conversations.filter(c => c.archived_by.includes(user?.id || "")).length > 0 && (
-                    <span className="ml-1 text-[10px] opacity-60">
-                      ({conversations.filter(c => c.archived_by.includes(user?.id || "")).length})
-                    </span>
-                  )}
+                  {p.label}
                 </button>
               ))}
             </div>
-
-            <div className="flex gap-1 bg-accent rounded-lg p-0.5">
-              {([
-                { value: "all" as ConvType, label: "Toutes" },
-                { value: "garde" as ConvType, label: "🐾 Gardes" },
-                { value: "entraide" as ConvType, label: "🤝 Entraide" },
-              ]).map(tab => (
-                <button
-                  key={tab.value}
-                  onClick={() => setTypeFilter(tab.value)}
-                  className={`flex-1 px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
-                    typeFilter === tab.value ? "bg-card shadow-sm text-foreground" : "text-muted-foreground hover:text-foreground"
-                  }`}
-                >
-                  {tab.label}
-                </button>
-              ))}
-            </div>
-
-            {sitOptions.length > 1 && (
-              <div className="flex items-center gap-1.5">
-                <Filter className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
-                <select
-                  value={sitFilter || ""}
-                  onChange={e => setSitFilter(e.target.value || null)}
-                  className="text-xs bg-transparent border-0 text-muted-foreground focus:ring-0 cursor-pointer w-full truncate"
-                >
-                  <option value="">Toutes les annonces</option>
-                  {sitOptions.map(([id, title]) => (
-                    <option key={id} value={id || ""}>{title}</option>
-                  ))}
-                </select>
-                {sitFilter && (
-                  <button onClick={() => setSitFilter(null)} className="p-0.5 hover:bg-accent rounded">
-                    <X className="h-3 w-3 text-muted-foreground" />
-                  </button>
-                )}
-              </div>
-            )}
           </div>
 
           {/* Search filter */}
@@ -438,109 +503,17 @@ const Messages = () => {
           <div className="flex-1 overflow-y-auto">
             {displayConversations.length === 0 ? (
               <div className="p-6 text-center text-sm text-muted-foreground">
-                {filter === "archived" ? "Aucune conversation archivée." : "Aucune conversation pour le moment."}
+                {pill === "archived" ? "Aucune conversation archivée." : "Aucune conversation pour le moment."}
               </div>
             ) : (
-              (() => {
-                // Group by sit
-                const groups = new Map<string, { title: string; convs: typeof displayConversations; unreadCount: number }>();
-                const noSitGroup: typeof displayConversations = [];
-                displayConversations.forEach(conv => {
-                  if (conv.sit_id && conv.sit?.title) {
-                    const existing = groups.get(conv.sit_id);
-                    if (existing) {
-                      existing.convs.push(conv);
-                      existing.unreadCount += conv.unread_count;
-                    } else {
-                      groups.set(conv.sit_id, { title: conv.sit.title, convs: [conv], unreadCount: conv.unread_count });
-                    }
-                  } else {
-                    noSitGroup.push(conv);
-                  }
-                });
-
-                const renderConvItem = (conv: Conversation) => {
-                  const hasUnread = conv.unread_count > 0;
-                  const appInfo = conv.application_status ? appStatusLabels[conv.application_status] : null;
-                  const topBadgeDef = conv.top_badge ? getBadgeDef(conv.top_badge.badge_key) : null;
-                  return (
-                    <div
-                      key={conv.id}
-                      className={`group relative flex items-start gap-3 p-3.5 pl-6 text-left hover:bg-accent/50 transition-colors border-b border-border/50 cursor-pointer ${activeConv?.id === conv.id ? "bg-accent/50" : ""}`}
-                      onClick={() => setActiveConv(conv)}
-                    >
-                      <div className="relative shrink-0">
-                        {conv.other_user?.avatar_url ? (
-                          <img src={conv.other_user.avatar_url} alt="" className="w-11 h-11 rounded-full object-cover" />
-                        ) : (
-                          <div className="w-11 h-11 rounded-full bg-muted flex items-center justify-center font-heading text-sm font-bold">
-                            {conv.other_user?.first_name?.charAt(0) || "?"}
-                          </div>
-                        )}
-                        {topBadgeDef && (
-                          <span className="absolute -bottom-0.5 -right-0.5">
-                            <StatusShield type="verified" size="xs" />
-                          </span>
-                        )}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between gap-2">
-                          <span className={`text-sm truncate ${hasUnread ? "font-bold text-foreground" : "font-medium"}`}>
-                            {conv.other_user?.first_name || "Utilisateur"}
-                          </span>
-                          <span className="text-[11px] text-muted-foreground shrink-0">
-                            {conv.last_message ? formatListDate(conv.last_message.created_at) : ""}
-                          </span>
-                        </div>
-                        <div className="flex items-center justify-between gap-2 mt-0.5">
-                          <p className={`text-xs truncate ${hasUnread ? "text-foreground font-medium" : "text-muted-foreground"}`}>
-                            {conv.last_message?.sender_id === user?.id ? "Vous : " : ""}
-                            {conv.last_message?.content || "📷 Photo"}
-                          </p>
-                          {hasUnread && (
-                            <span className="bg-primary text-primary-foreground text-[10px] rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1 shrink-0 font-bold">
-                              {conv.unread_count}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                      <button
-                        onClick={(e) => { e.stopPropagation(); handleArchive(conv); }}
-                        className="absolute top-2 right-2 p-1 rounded hover:bg-accent opacity-0 group-hover:opacity-100 transition-opacity"
-                        title={conv.archived_by.includes(user?.id || "") ? "Désarchiver" : "Archiver"}
-                      >
-                        <Archive className="h-3.5 w-3.5 text-muted-foreground" />
-                      </button>
-                    </div>
-                  );
-                };
-
-                const renderGroup = (key: string, title: string, convs: Conversation[], unreadCount: number, icon: React.ReactNode) => (
-                  <div key={key}>
-                    <div className="bg-muted/50 px-4 py-2 sticky top-0 z-10 flex items-center gap-2">
-                      {icon}
-                      <span className="text-xs font-medium text-foreground truncate flex-1">{title}</span>
-                      {unreadCount > 0 && (
-                        <span className="bg-primary text-primary-foreground rounded-full w-4 h-4 text-[10px] flex items-center justify-center font-bold shrink-0">
-                          {unreadCount}
-                        </span>
-                      )}
-                    </div>
-                    {convs.map(renderConvItem)}
-                  </div>
-                );
-
-                return (
-                  <>
-                    {Array.from(groups.entries()).map(([sitId, g]) =>
-                      renderGroup(sitId, g.title, g.convs, g.unreadCount, <Home className="h-3.5 w-3.5 text-muted-foreground shrink-0" />)
-                    )}
-                    {noSitGroup.length > 0 &&
-                      renderGroup("no-sit", "Échanges & Missions", noSitGroup, noSitGroup.reduce((s, c) => s + c.unread_count, 0), <HeartHandshake className="h-3.5 w-3.5 text-muted-foreground shrink-0" />)
-                    }
-                  </>
-                );
-              })()
+              <>
+                {Array.from(groups.entries()).map(([sitId, g]) =>
+                  renderGroup(sitId, g.title, g.convs, g.unreadCount, <Home className="h-3.5 w-3.5 text-muted-foreground shrink-0" />)
+                )}
+                {noSitGroup.length > 0 &&
+                  renderGroup("no-sit", "Échanges & Missions", noSitGroup, noSitGroup.reduce((s, c) => s + c.unread_count, 0), <HeartHandshake className="h-3.5 w-3.5 text-muted-foreground shrink-0" />)
+                }
+              </>
             )}
           </div>
         </div>
@@ -552,6 +525,7 @@ const Messages = () => {
           <ConversationHeader
             conv={activeConv}
             userId={user?.id}
+            userRole={effectiveRole}
             isMobile={isMobile}
             onBack={() => setActiveConv(null)}
             onArchive={() => activeConv && handleArchive(activeConv)}
@@ -603,7 +577,7 @@ const Messages = () => {
                   <p className="text-sm font-semibold text-amber-900 dark:text-amber-200">Abonnez-vous pour répondre</p>
                   <p className="text-xs text-amber-700 dark:text-amber-300">L'accès à la messagerie nécessite un abonnement — 49€/an</p>
                 </div>
-                <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white shrink-0" onClick={() => navigate("/mon-abonnement")}>
+                <Button size="sm" className="bg-primary hover:bg-primary/90 text-primary-foreground shrink-0" onClick={() => navigate("/mon-abonnement")}>
                   S'abonner
                 </Button>
               </div>
@@ -611,7 +585,7 @@ const Messages = () => {
           ) : (
             <div className="border-t border-border bg-card p-3 flex items-center gap-2 mb-16 md:mb-0">
               <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handlePhotoUpload} />
-              <button onClick={() => fileInputRef.current?.click()} className="p-2 rounded-lg hover:bg-accent text-muted-foreground">
+              <button onClick={() => fileInputRef.current?.click()} className="p-2 rounded-lg hover:bg-accent text-muted-foreground" aria-label="Joindre une photo">
                 <ImageIcon className="h-5 w-5" />
               </button>
               <Input
@@ -621,15 +595,26 @@ const Messages = () => {
                 placeholder="Écrire un message..."
                 className="flex-1 rounded-full"
               />
-              <Button size="icon" onClick={handleSend} disabled={sending || !newMessage.trim()} className="rounded-full shrink-0">
+              <Button size="icon" onClick={handleSend} disabled={sending || !newMessage.trim()} className="rounded-full shrink-0" aria-label="Envoyer">
                 <Send className="h-4 w-4" />
               </Button>
             </div>
           )}
         </div>
       ) : !isMobile ? (
-        <div className="flex-1 flex items-center justify-center text-muted-foreground">
-          <p>Sélectionnez une conversation</p>
+        /* MOD 1 — Empty state */
+        <div className="flex-1 flex flex-col items-center justify-center h-full gap-4">
+          <MessageSquare className="h-10 w-10 text-muted-foreground" />
+          <h2 className="text-lg font-semibold text-foreground">Vos échanges</h2>
+          <p className="text-sm text-muted-foreground text-center max-w-xs">
+            Sélectionnez une conversation ou contactez un gardien.
+          </p>
+          <Link
+            to="/recherche-gardiens"
+            className="border border-border rounded-full px-4 py-2 text-sm hover:border-primary transition-colors"
+          >
+            Rechercher un gardien →
+          </Link>
         </div>
       ) : null}
     </div>
