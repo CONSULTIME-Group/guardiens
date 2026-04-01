@@ -469,9 +469,9 @@ const SitterDashboard = () => {
       )}
 
       {emergencyEligible && !hasEmergencyProfile && showEmergencyForm && (
-        <div className="rounded-2xl border-2 border-amber-300 dark:border-amber-700 bg-card p-6">
+        <div className="rounded-2xl border-2 border-secondary/40 bg-card p-6">
           <h3 className="font-heading font-semibold mb-4 flex items-center gap-2">
-            <Zap className="h-4 w-4 text-amber-500" /> Activer le mode Gardien d'urgence
+            <Zap className="h-4 w-4 text-secondary" /> Activer le mode Gardien d'urgence
           </h3>
           <EmergencyActivation onActivated={() => { setHasEmergencyProfile(true); setShowEmergencyForm(false); }} />
         </div>
