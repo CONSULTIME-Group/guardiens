@@ -303,17 +303,38 @@ const SitterDashboard = () => {
   return (
     <div className="space-y-10">
       {/* Header */}
-      <div>
-        <h1 className="font-heading text-2xl md:text-3xl font-bold">
-          Bonjour{user?.firstName ? `, ${user.firstName}` : ""} 👋
-        </h1>
-        <p className="text-sm text-muted-foreground mt-1">
-          {ongoingSit
-            ? `Garde en cours chez ${ongoingSit.ownerName || "…"} — ${ongoingSit.daysLeft} jour${ongoingSit.daysLeft > 1 ? "s" : ""} restant${ongoingSit.daysLeft > 1 ? "s" : ""}`
-            : "Votre tableau de bord gardien"
-          }
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="font-heading text-2xl md:text-3xl font-bold">
+            Bonjour{user?.firstName ? `, ${capitalize(user.firstName)}` : ""} 👋
+          </h1>
+          <p className="text-sm text-muted-foreground mt-1">
+            {ongoingSit
+              ? `Garde en cours chez ${ongoingSit.ownerName || "…"} — ${ongoingSit.daysLeft} jour${ongoingSit.daysLeft > 1 ? "s" : ""} restant${ongoingSit.daysLeft > 1 ? "s" : ""}`
+              : "Ton tableau de bord gardien"
+            }
+          </p>
+        </div>
+        <Link
+          to={`/gardiens/${user?.id}`}
+          className="text-xs text-primary hover:underline flex items-center gap-1"
+        >
+          Voir mon profil public <ExternalLink className="h-3 w-3" />
+        </Link>
       </div>
+
+      {/* Unread messages banner */}
+      {unreadCount > 0 && (
+        <Link to="/messagerie" className="flex items-center justify-between bg-primary/5 border border-primary/20 rounded-xl px-4 py-3">
+          <div className="flex items-center gap-2">
+            <MessageSquare className="h-4 w-4 text-primary" />
+            <span className="text-sm text-foreground">
+              Tu as {unreadCount} message{unreadCount > 1 ? "s" : ""} non lu{unreadCount > 1 ? "s" : ""}
+            </span>
+          </div>
+          <span className="text-sm text-primary hover:underline">Voir →</span>
+        </Link>
+      )}
 
       {/* Ongoing sit banner */}
       {ongoingSit && (
