@@ -235,7 +235,7 @@ const PublicProfile = () => {
           </div>
 
           {/* === METRICS BAR === */}
-          <div className="grid grid-cols-4 divide-x rounded-xl border bg-white p-0 shadow-sm" style={{ borderColor: "#E6E2D9" }}>
+          <div className="grid grid-cols-4 divide-x rounded-xl border border-border bg-white p-0 shadow-sm">
             <MetricCell label="Gardes" value={String(totalSits)} />
             <MetricCell
               label="Note"
@@ -244,8 +244,8 @@ const PublicProfile = () => {
             />
             <MetricCell
               label="Annulations"
-              value={String(profile.cancellation_count || 0)}
-              valueColor={(profile.cancellation_count || 0) === 0 ? "#16A34A" : "#EA580C"}
+              value={String((profile.cancellation_count || 0) + (profile.cancellations_as_proprio || 0))}
+              variant={(profile.cancellation_count || 0) + (profile.cancellations_as_proprio || 0) === 0 ? "success" : "warning"}
             />
             <MetricCell label="Avis" value={String(reviewStats.count)} />
           </div>
