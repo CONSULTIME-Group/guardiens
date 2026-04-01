@@ -25,7 +25,7 @@ export const DEMO_SITS = [
     property: {
       type: "house",
       environment: "city_center",
-      photos: ["https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=800&q=80"],
+      photos: ["https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800&q=80"],
     },
     pets: [
       { species: "dog", name: "Laïka" },
@@ -59,7 +59,7 @@ export const DEMO_SITS = [
     property: {
       type: "house",
       environment: "countryside",
-      photos: ["https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&q=80"],
+      photos: ["https://images.unsplash.com/photo-1499678329028-101435549a4e?w=800&q=80"],
     },
     pets: [
       { species: "farm_animal", name: "Poule 1" },
@@ -94,7 +94,7 @@ export const DEMO_SITS = [
     property: {
       type: "apartment",
       environment: "city_center",
-      photos: ["https://images.unsplash.com/photo-1598928636135-d146006ff4be?w=800&q=80"],
+      photos: ["https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800&q=80"],
     },
     pets: [
       { species: "cat", name: "Milo" },
