@@ -28,9 +28,16 @@ const SITTER_TYPE_LABELS: Record<string, string> = {
   solo: "Solo", couple: "Couple", family: "Famille", retired: "Retraité(e)",
 };
 
-const MIN_DURATION_LABELS: Record<number, string> = {
-  1: "À partir de 1 jour", 2: "À partir de 2 jours", 3: "À partir de 3 jours",
-  5: "À partir de 5 jours", 7: "À partir de 7 jours", 14: "À partir de 14 jours",
+const MIN_DURATION_LABELS: Record<string, string> = {
+  "1-3 jours": "1 à 3 jours minimum",
+  "short": "1 à 3 jours minimum",
+  "1 semaine": "1 semaine minimum",
+  "week": "1 semaine minimum",
+  "2 semaines": "2 semaines minimum",
+  "two_weeks": "2 semaines minimum",
+  "1 mois": "1 mois minimum",
+  "month": "1 mois minimum",
+  "flexible": "Durée flexible",
 };
 
 const ENV_LABELS: Record<string, string> = {
@@ -145,7 +152,7 @@ export default function PublicSitterProfile() {
   const sitterType = sitterProfile?.sitter_type || "";
   const accompaniedBy = sitterProfile?.accompanied_by || "";
   const lifestyle: string[] = sitterProfile?.lifestyle || [];
-  const minDuration: number = sitterProfile?.min_duration || 0;
+  const minDuration: string = sitterProfile?.min_duration || "";
   const preferredEnvironments: string[] = sitterProfile?.preferred_environments || [];
 
   const badgeMap: Record<string, boolean> = {};
@@ -184,8 +191,8 @@ export default function PublicSitterProfile() {
   const typeLineItems = [typeLabel, accompLabel].filter(Boolean);
   const typeLine = typeLineItems.length > 0 ? typeLineItems.join(" · ") : "";
 
-  const durationLabel = minDuration > 0
-    ? (MIN_DURATION_LABELS[minDuration] || `À partir de ${minDuration} jours`)
+  const durationLabel = minDuration
+    ? (MIN_DURATION_LABELS[minDuration] || "Durée flexible")
     : "";
 
   // Stats line
@@ -222,7 +229,7 @@ export default function PublicSitterProfile() {
             className="absolute inset-0 w-full h-full object-cover object-top"
           />
         )}
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-background" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/0 via-black/20 to-black/70" />
 
         {/* Back link */}
         <Link
@@ -243,8 +250,8 @@ export default function PublicSitterProfile() {
           {activeBadgeKeys.length > 0 && (
             <div className="flex gap-2 mb-1">
               {activeBadgeKeys.map(k => (
-                <div key={k} className="brightness-0 invert">
-                  <BadgeTimbre id={k} unlocked size="compact" />
+                <div key={k} style={{ filter: 'brightness(0) invert(1)' }}>
+                  <BadgeTimbre id={k} unlocked size="compact" showTooltip={false} />
                 </div>
               ))}
             </div>
