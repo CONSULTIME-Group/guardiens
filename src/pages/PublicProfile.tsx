@@ -213,7 +213,7 @@ const PublicProfile = () => {
               </div>
 
               {profile.bio && (
-                <p className="text-sm italic mt-2" style={{ color: "#4B5563" }}>{profile.bio}</p>
+                <p className="text-sm italic mt-2 text-muted-foreground">{profile.bio}</p>
               )}
 
               {/* Skills section */}
