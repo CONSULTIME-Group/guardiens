@@ -65,11 +65,29 @@ const OwnerProfilePage = () => {
 
   const mergedData = { ...data, ...localData } as OwnerProfileData;
 
+  const debounceRef = useRef<ReturnType<typeof setTimeout>>();
+
   const handleChange = useCallback((partial: Partial<OwnerProfileData>) => {
     setLocalData(prev => ({ ...prev, ...partial }));
     setDirty(true);
     setSaved(false);
   }, []);
+
+  // Auto-save debounce 800ms
+  useEffect(() => {
+    if (!dirty) return;
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => {
+      if (Object.keys(localData).length > 0) {
+        saveStep(localData).then(() => {
+          setLocalData({});
+          setDirty(false);
+          setSaved(true);
+        });
+      }
+    }, 800);
+    return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
+  }, [dirty, localData, saveStep]);
 
   const handleSave = useCallback(async () => {
     if (Object.keys(localData).length > 0) {
