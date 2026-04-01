@@ -157,12 +157,12 @@ const SitterDashboard = () => {
 
   // Dynamic subtitle priority
   const subtitle = nextGuard
-    ? `Ta prochaine garde commence dans ${nextGuard.daysUntil} jour${nextGuard.daysUntil > 1 ? "s" : ""}.`
+    ? `Votre prochaine garde commence dans ${nextGuard.daysUntil} jour${nextGuard.daysUntil > 1 ? "s" : ""}.`
     : pendingAppsCount > 0
-    ? `Tu as ${pendingAppsCount} candidature${pendingAppsCount > 1 ? "s" : ""} en attente de réponse.`
+    ? `Vous avez ${pendingAppsCount} candidature${pendingAppsCount > 1 ? "s" : ""} en attente de réponse.`
     : unreadCount > 0
-    ? `Tu as ${unreadCount} message${unreadCount > 1 ? "s" : ""} non lu${unreadCount > 1 ? "s" : ""}.`
-    : "Explore les annonces près de chez toi.";
+    ? `Vous avez ${unreadCount} message${unreadCount > 1 ? "s" : ""} non lu${unreadCount > 1 ? "s" : ""}.`
+    : "Explorez les annonces près de chez vous.";
 
   // Emergency conditions
   const emergencyConditions = [
