@@ -559,6 +559,12 @@ const SearchSitter = () => {
               })}
             </div>
           )}
+          {/* Environments */}
+          {(item.environments?.length > 0 || item.ownerEnvironments?.length > 0) && (
+            <div className="mb-2">
+              <EnvironmentPills selected={item.environments?.length > 0 ? item.environments : item.ownerEnvironments || []} onChange={() => {}} readOnly maxVisible={2} />
+            </div>
+          )}
           {!isMission && item.start_date && (
             <p className="text-xs text-muted-foreground">
               {formatDate(item.start_date)} → {formatDate(item.end_date)}
