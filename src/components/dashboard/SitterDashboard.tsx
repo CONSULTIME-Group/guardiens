@@ -305,7 +305,7 @@ const SitterDashboard = () => {
         )}
         {profileCompletion < 60 && (
           <div className="rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 p-3">
-            <p className="text-xs text-amber-800 dark:text-amber-200">Complétez votre profil pour apparaître dans les recherches</p>
+            <p className="text-xs text-amber-800 dark:text-amber-200">Complète ton profil pour apparaître dans les recherches</p>
             <Link to="/profile" className="text-xs font-medium text-primary hover:underline mt-1 inline-block">Compléter →</Link>
           </div>
         )}
