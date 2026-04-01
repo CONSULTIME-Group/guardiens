@@ -465,7 +465,7 @@ const Landing = () => {
                     key={t.name}
                     className="flex-[0_0_100%] md:flex-[0_0_33.333%] min-w-0 px-3"
                   >
-                    <div className="rounded-2xl p-10 h-full bg-white border border-border shadow-sm">
+                    <div className="rounded-2xl p-10 h-full bg-card border border-border shadow-sm">
                       <span className="block font-heading text-7xl leading-none mb-3 select-none text-primary/40">
                         "
                       </span>
