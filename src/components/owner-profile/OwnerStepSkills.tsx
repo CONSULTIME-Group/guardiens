@@ -2,30 +2,31 @@ import { useState, useEffect, useCallback } from "react";
 import { Sprout, PawPrint, GraduationCap, Handshake } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import CompetenceAutocomplete from "./CompetenceAutocomplete";
+import CompetenceAutocomplete from "@/components/profile/CompetenceAutocomplete";
 
 const SKILL_CATEGORIES = [
-  { key: "jardin", label: "🌿 Jardin", icon: Sprout },
-  { key: "animaux", label: "🐾 Animaux", icon: PawPrint },
-  { key: "competences", label: "📚 Compétences & Savoirs", icon: GraduationCap },
-  { key: "coups_de_main", label: "🤝 Coups de main", icon: Handshake },
+  { key: "jardin", label: "🌿 Jardin" },
+  { key: "animaux", label: "🐾 Animaux" },
+  { key: "competences", label: "📚 Compétences & Savoirs" },
+  { key: "coups_de_main", label: "🤝 Coups de main" },
 ] as const;
 
 interface Props {
+  competences: string[];
+  competencesDisponible: boolean;
   skillCategories: string[];
-  availableForHelp: boolean;
-  competences?: string[];
-  onChange: (partial: { skill_categories?: string[]; available_for_help?: boolean; competences?: string[] }) => void;
+  onChange: (partial: {
+    owner_competences?: string[];
+    owner_competences_disponible?: boolean;
+    owner_skill_categories?: string[];
+  }) => void;
 }
 
-const StepSkills = ({ skillCategories, availableForHelp, competences = [], onChange }: Props) => {
-  const { user } = useAuth();
+const OwnerStepSkills = ({ competences, competencesDisponible, skillCategories, onChange }: Props) => {
   const [validatedLabels, setValidatedLabels] = useState<string[]>([]);
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
 
-  // Load validated competence labels
   useEffect(() => {
     supabase
       .from("competences_validees")
@@ -39,21 +40,17 @@ const StepSkills = ({ skillCategories, availableForHelp, competences = [], onCha
     const updated = skillCategories.includes(key)
       ? skillCategories.filter(k => k !== key)
       : [...skillCategories, key];
-    const changes: { skill_categories: string[]; available_for_help?: boolean } = { skill_categories: updated };
-    if (updated.length > 0 && !availableForHelp) {
-      changes.available_for_help = true;
-    }
     setActiveCategory(updated.includes(key) ? key : updated[updated.length - 1] || null);
-    onChange(changes);
+    onChange({ owner_skill_categories: updated });
   };
 
-  const handleAddCompetence = useCallback((label: string) => {
+  const handleAdd = useCallback((label: string) => {
     if (competences.includes(label)) return;
-    onChange({ competences: [...competences, label] });
+    onChange({ owner_competences: [...competences, label] });
   }, [competences, onChange]);
 
-  const handleRemoveCompetence = useCallback((label: string) => {
-    onChange({ competences: competences.filter(c => c !== label) });
+  const handleRemove = useCallback((label: string) => {
+    onChange({ owner_competences: competences.filter(c => c !== label) });
   }, [competences, onChange]);
 
   return (
@@ -64,6 +61,7 @@ const StepSkills = ({ skillCategories, availableForHelp, competences = [], onCha
         </h3>
         <p className="text-sm text-muted-foreground mt-1">
           Déclarez vos compétences pour apparaître dans les échanges qui vous correspondent.
+          En tant que propriétaire, vous pouvez aussi proposer votre aide à la communauté.
         </p>
       </div>
 
@@ -87,30 +85,28 @@ const StepSkills = ({ skillCategories, availableForHelp, competences = [], onCha
         })}
       </div>
 
-      {/* Autocomplete */}
       <CompetenceAutocomplete
         competences={competences}
         validatedLabels={validatedLabels}
         activeCategory={activeCategory}
-        onAdd={handleAddCompetence}
-        onRemove={handleRemoveCompetence}
+        onAdd={handleAdd}
+        onRemove={handleRemove}
       />
 
       <div className="flex items-center justify-between py-2">
-        <Label className="flex-1 pr-4">Je suis disponible pour aider</Label>
+        <div className="flex-1 pr-4">
+          <Label>Je suis disponible pour aider</Label>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            Vous apparaissez dans le feed d'entraide pour les catégories sélectionnées.
+          </p>
+        </div>
         <Switch
-          checked={availableForHelp}
-          onCheckedChange={v => onChange({ available_for_help: v })}
+          checked={competencesDisponible}
+          onCheckedChange={v => onChange({ owner_competences_disponible: v })}
         />
       </div>
-
-      <p className="text-xs text-muted-foreground">
-        {availableForHelp
-          ? "Vous apparaissez dans le feed d'entraide pour les catégories sélectionnées."
-          : "Vos compétences sont enregistrées mais vous n'apparaissez pas dans le feed."}
-      </p>
     </div>
   );
 };
 
-export default StepSkills;
+export default OwnerStepSkills;

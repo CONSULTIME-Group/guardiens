@@ -44,6 +44,8 @@ export interface SitterProfileData {
   // Skills
   skill_categories: string[];
   available_for_help: boolean;
+  // Competences
+  competences: string[];
 }
 
 export interface PastAnimal {
@@ -63,6 +65,7 @@ const defaultData: SitterProfileData = {
   strict_rules_ok: false, prefer_visitors: false, farm_animals_ok: false, preferences_notes: "",
   meeting_preference: [], handover_preference: "", languages: [], bonus_skills: [], interests: [],
   skill_categories: [], available_for_help: false,
+  competences: [],
 };
 
 export function useSitterProfile() {
@@ -120,6 +123,7 @@ export function useSitterProfile() {
       interests: s?.interests || [],
       skill_categories: (p as any)?.skill_categories || [],
       available_for_help: (p as any)?.available_for_help || false,
+      competences: (s as any)?.competences || [],
     };
 
     setData(merged);
@@ -208,7 +212,7 @@ export function useSitterProfile() {
         "has_license", "has_vehicle", "geographic_radius", "min_duration", "max_duration",
         "availability_dates", "is_available", "strict_rules_ok", "prefer_visitors", "farm_animals_ok",
         "preferences_notes", "meeting_preference", "handover_preference",
-        "languages", "bonus_skills", "interests",
+        "languages", "bonus_skills", "interests", "competences",
       ] as const;
 
       const sitterUpdate: any = {};

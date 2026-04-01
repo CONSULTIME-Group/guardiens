@@ -45,6 +45,10 @@ export interface OwnerProfileData {
   // Skills (from profiles table)
   skill_categories: string[];
   available_for_help: boolean;
+  // Owner competences (from owner_profiles table)
+  owner_competences: string[];
+  owner_competences_disponible: boolean;
+  owner_skill_categories: string[];
 }
 
 export interface Pet {
@@ -76,6 +80,7 @@ const defaultData: OwnerProfileData = {
   meeting_preference: [], handover_preference: "", welcome_notes: "",
   news_frequency: "", news_format: [], preferred_time: "", communication_notes: "",
   skill_categories: [], available_for_help: false,
+  owner_competences: [], owner_competences_disponible: false, owner_skill_categories: [],
 };
 
 export function useOwnerProfile() {
@@ -130,6 +135,9 @@ export function useOwnerProfile() {
       communication_notes: o?.communication_notes || "",
       skill_categories: (p as any)?.skill_categories || [],
       available_for_help: (p as any)?.available_for_help || false,
+      owner_competences: (o as any)?.competences || [],
+      owner_competences_disponible: (o as any)?.competences_disponible || false,
+      owner_skill_categories: (p as any)?.skill_categories || [],
     });
 
     if (prop) {
@@ -239,6 +247,9 @@ export function useOwnerProfile() {
       ] as const;
       const ownerUpdate: any = {};
       ownerFields.forEach(f => { if (f in stepData) ownerUpdate[f] = (stepData as any)[f]; });
+      // Map owner-specific competence fields
+      if ("owner_competences" in stepData) ownerUpdate.competences = (stepData as any).owner_competences;
+      if ("owner_competences_disponible" in stepData) ownerUpdate.competences_disponible = (stepData as any).owner_competences_disponible;
       if (Object.keys(ownerUpdate).length > 0) {
         if (ownerProfileId) {
           await supabase.from("owner_profiles").update(ownerUpdate).eq("id", ownerProfileId);
