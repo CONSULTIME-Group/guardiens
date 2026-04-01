@@ -44,6 +44,8 @@ export interface SitterProfileData {
   // Skills
   skill_categories: string[];
   available_for_help: boolean;
+  // Competences
+  competences: string[];
 }
 
 export interface PastAnimal {
