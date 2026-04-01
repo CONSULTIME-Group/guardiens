@@ -78,6 +78,7 @@ const SitDetail = () => {
   const [logementOverride, setLogementOverride] = useState("");
   const [animauxOverride, setAnimauxOverride] = useState("");
   const overrideSaveTimeout = useRef<NodeJS.Timeout | null>(null);
+  const [activeTab, setActiveTab] = useState("animals");
 
   useEffect(() => {
     if (!id) return;
