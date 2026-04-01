@@ -127,7 +127,7 @@ const OwnerProfilePage = () => {
         const url = await uploadPhoto(file, "avatars");
         if (url) handleChange({ avatar_url: url });
       }}
-      publicProfileUrl={user ? `/profil/${user.id}` : "#"}
+      publicProfileUrl={user ? `/proprios/${user.id}` : "#"}
       role="owner"
       identityVerified={user?.identityVerified}
       isFounder={isFounder}
