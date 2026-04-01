@@ -72,6 +72,7 @@ const SearchSitter = () => {
   const [userCity, setUserCity] = useState("");
   const [userCoords, setUserCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [sitterEligible, setSitterEligible] = useState(false);
+  const [userCompletedSits, setUserCompletedSits] = useState(0);
   const [sitterProfile, setSitterProfile] = useState<any>(null);
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const initialLoadDone = useRef(false);

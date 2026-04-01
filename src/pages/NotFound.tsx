@@ -58,7 +58,7 @@ const NotFound = () => {
   return (
     <>
       <PageMeta title="Page introuvable | Guardiens" description="La page que vous cherchez n'existe pas." />
-      <div className="flex min-h-screen items-center justify-center px-4" style={{ backgroundColor: "#FAF9F6" }}>
+      <div className="flex min-h-screen items-center justify-center px-4 bg-background">
         <div className="text-center max-w-lg space-y-6">
           <DiggingDogSvg />
 
