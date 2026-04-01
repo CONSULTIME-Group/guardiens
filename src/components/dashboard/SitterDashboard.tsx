@@ -387,7 +387,7 @@ const SitterDashboard = () => {
           {(() => {
             const unlockedSet: Record<string, boolean> = {};
             if (identityVerified) unlockedSet["id_verifiee"] = true;
-            // fondateur status not fetched yet — default false
+            if (isFounder) unlockedSet["fondateur"] = true;
             badges.forEach((b: any) => {
               const key = b.badge_key || b.id;
               if (key) unlockedSet[key] = true;
