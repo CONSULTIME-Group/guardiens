@@ -506,12 +506,12 @@ const MetricCell = ({ label, value, suffix, variant }: { label: string; value: s
 );
 
 const InfoCell = ({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) => (
-  <div className="rounded-xl border bg-white p-3 shadow-sm" style={{ borderColor: "#E6E2D9" }}>
-    <div className="flex items-center gap-2 mb-1" style={{ color: "#6B7280" }}>
+  <div className="rounded-xl border border-border bg-white p-3 shadow-sm">
+    <div className="flex items-center gap-2 mb-1 text-muted-foreground">
       {icon}
       <span className="text-xs">{label}</span>
     </div>
-    <p className="text-sm font-medium" style={{ color: "#1C1B18" }}>{value}</p>
+    <p className="text-sm font-medium text-foreground">{value}</p>
   </div>
 );
 
