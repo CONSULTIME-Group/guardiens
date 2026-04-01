@@ -448,8 +448,8 @@ const OwnerDashboard = () => {
 
 /* ── Shared ── */
 
-const StatCard = ({ icon: Icon, iconColor, label, value, delay, isDecimal, emptyMsg }: {
-  icon: React.ElementType; iconColor: string; label: string; value: number; delay: number; isDecimal?: boolean; emptyMsg?: string;
+const StatCard = ({ icon: Icon, iconColor, label, value, delay, isDecimal, emptyMsg, subLabel }: {
+  icon: React.ElementType; iconColor: string; label: string; value: number; delay: number; isDecimal?: boolean; emptyMsg?: string; subLabel?: string;
 }) => {
   const displayed = useCountUp(isDecimal ? Math.round(value * 10) : value);
   const formatted = isDecimal ? (displayed / 10).toFixed(1) : String(displayed);
@@ -460,10 +460,13 @@ const StatCard = ({ icon: Icon, iconColor, label, value, delay, isDecimal, empty
       style={{ animationDelay: `${delay}ms` }}
     >
       <Icon className={`h-4 w-4 ${iconColor} mb-2`} strokeWidth={1.8} />
-      <p className="font-heading text-[28px] font-bold leading-tight">
-        {value === 0 && emptyMsg ? "—" : formatted}
-      </p>
-      <p className="text-xs text-muted-foreground mt-1">{emptyMsg || label}</p>
+      {value === 0 && emptyMsg ? (
+        <p className="text-sm text-muted-foreground mt-1">Pas encore</p>
+      ) : (
+        <p className="font-heading text-[28px] font-bold leading-tight">{formatted}</p>
+      )}
+      <p className="text-xs text-muted-foreground mt-1">{emptyMsg && value > 0 ? label : emptyMsg || label}</p>
+      {subLabel && <p className="text-xs text-muted-foreground">{subLabel}</p>}
     </div>
   );
 };
