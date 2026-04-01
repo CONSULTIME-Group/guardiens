@@ -159,6 +159,14 @@ const SitterDashboard = () => {
         }
       }
 
+      // Unread messages count
+      const { count } = await supabase
+        .from("messages")
+        .select("id", { count: "exact", head: true })
+        .neq("sender_id", user.id)
+        .is("read_at", null);
+      setUnreadCount(count || 0);
+
       setLoading(false);
     };
     load();
