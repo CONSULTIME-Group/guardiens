@@ -291,18 +291,18 @@ const PublicProfile = () => {
                     {/* Motivation */}
                     {sitterProfile.motivation && (
                       <Card>
-                        <h3 className="font-heading font-semibold text-sm mb-1" style={{ color: "#1C1B18" }}>Motivation</h3>
-                        <p className="text-sm whitespace-pre-line" style={{ color: "#4B5563" }}>{sitterProfile.motivation}</p>
+                        <h3 className="font-heading font-semibold text-sm mb-1">Motivation</h3>
+                        <p className="text-sm whitespace-pre-line">{sitterProfile.motivation}</p>
                       </Card>
                     )}
 
                     {/* Lifestyle */}
                     {sitterProfile.lifestyle?.length > 0 && (
                       <Card>
-                        <h3 className="font-heading font-semibold text-sm mb-2" style={{ color: "#1C1B18" }}>Mode de vie</h3>
+                        <h3 className="font-heading font-semibold text-sm mb-2">Mode de vie</h3>
                         <div className="flex flex-wrap gap-1.5">
                           {sitterProfile.lifestyle.map((l: string) => (
-                            <span key={l} className="px-2.5 py-1 rounded-full text-xs" style={{ backgroundColor: "#F3F4F6", color: "#374151" }}>
+                            <span key={l} className="px-2.5 py-1 rounded-full text-xs">
                               {lifestyleLabels[l] || l}
                             </span>
                           ))}
@@ -313,10 +313,10 @@ const PublicProfile = () => {
                     {/* Bonus skills */}
                     {sitterProfile.bonus_skills?.length > 0 && (
                       <Card>
-                        <h3 className="font-heading font-semibold text-sm mb-2" style={{ color: "#1C1B18" }}>Compétences bonus</h3>
+                        <h3 className="font-heading font-semibold text-sm mb-2">Compétences bonus</h3>
                         <div className="flex flex-wrap gap-1.5">
                           {sitterProfile.bonus_skills.map((s: string) => (
-                            <span key={s} className="px-2.5 py-1 rounded-full text-xs font-medium" style={{ backgroundColor: "#D8F3DC", color: "#2D6A4F" }}>{s}</span>
+                            <span key={s} className="px-2.5 py-1 rounded-full text-xs font-medium">{s}</span>
                           ))}
                         </div>
                       </Card>
@@ -325,23 +325,23 @@ const PublicProfile = () => {
                     {/* Handover preferences */}
                     {sitterProfile.handover_preference && (
                       <Card>
-                        <h3 className="font-heading font-semibold text-sm mb-1" style={{ color: "#1C1B18" }}>Comment j'aime arriver</h3>
-                        <p className="text-sm" style={{ color: "#4B5563" }}>{sitterProfile.handover_preference}</p>
+                        <h3 className="font-heading font-semibold text-sm mb-1">Comment j'aime arriver</h3>
+                        <p className="text-sm">{sitterProfile.handover_preference}</p>
                       </Card>
                     )}
 
                     {/* References */}
                     {sitterProfile.references_text && (
                       <Card>
-                        <h3 className="font-heading font-semibold text-sm mb-1" style={{ color: "#1C1B18" }}>Références</h3>
-                        <p className="text-sm whitespace-pre-line" style={{ color: "#4B5563" }}>{sitterProfile.references_text}</p>
+                        <h3 className="font-heading font-semibold text-sm mb-1">Références</h3>
+                        <p className="text-sm whitespace-pre-line">{sitterProfile.references_text}</p>
                       </Card>
                     )}
 
                     {/* Past animals */}
                     {pastAnimals.length > 0 && (
                       <Card>
-                        <h3 className="font-heading font-semibold text-sm mb-3" style={{ color: "#1C1B18" }}>Animaux gardés par le passé</h3>
+                        <h3 className="font-heading font-semibold text-sm mb-3">Animaux gardés par le passé</h3>
                         <div className="flex gap-4 overflow-x-auto pb-2">
                           {pastAnimals.map(pa => (
                             <div key={pa.id} className="flex flex-col items-center gap-1.5 shrink-0">
@@ -352,8 +352,8 @@ const PublicProfile = () => {
                                   {pa.species === "dog" ? "🐕" : pa.species === "cat" ? "🐱" : "🐾"}
                                 </div>
                               )}
-                              <span className="text-xs font-medium" style={{ color: "#1C1B18" }}>{pa.name}</span>
-                              {pa.breed && <span className="text-[10px]" style={{ color: "#6B7280" }}>{pa.breed}</span>}
+                              <span className="text-xs font-medium">{pa.name}</span>
+                              {pa.breed && <span className="text-[10px]">{pa.breed}</span>}
                             </div>
                           ))}
                         </div>
@@ -364,7 +364,7 @@ const PublicProfile = () => {
                     <PublicExperiences experiences={externalExperiences} />
                   </>
                 ) : (
-                  <p className="text-sm italic" style={{ color: "#6B7280" }}>Profil gardien non complété.</p>
+                  <p className="text-sm italic">Profil gardien non complété.</p>
                 )}
               </TabsContent>
             )}
@@ -375,7 +375,7 @@ const PublicProfile = () => {
                 {/* Pets */}
                 {pets.length > 0 && (
                   <Card>
-                    <h3 className="font-heading font-semibold text-sm mb-3" style={{ color: "#1C1B18" }}>Les animaux</h3>
+                    <h3 className="font-heading font-semibold text-sm mb-3">Les animaux</h3>
                     <div className="grid gap-3">
                       {pets.map(pet => (
                         <div key={pet.id} className="flex items-center gap-3">
@@ -387,13 +387,13 @@ const PublicProfile = () => {
                             </div>
                           )}
                           <div>
-                            <p className="font-medium text-sm" style={{ color: "#1C1B18" }}>{pet.name}</p>
-                            <p className="text-xs" style={{ color: "#6B7280" }}>
+                            <p className="font-medium text-sm">{pet.name}</p>
+                            <p className="text-xs">
                               {speciesLabels[pet.species]?.slice(2) || pet.species}
                               {pet.breed && ` · ${pet.breed}`}
                               {pet.age && ` · ${pet.age} an${pet.age > 1 ? "s" : ""}`}
                             </p>
-                            {pet.character && <p className="text-xs mt-0.5" style={{ color: "#4B5563" }}>{pet.character}</p>}
+                            {pet.character && <p className="text-xs mt-0.5">{pet.character}</p>}
                           </div>
                         </div>
                       ))}
@@ -404,14 +404,14 @@ const PublicProfile = () => {
                 {/* Properties */}
                 {properties.map(prop => (
                   <Card key={prop.id}>
-                    <h3 className="font-heading font-semibold text-sm mb-2 flex items-center gap-2" style={{ color: "#1C1B18" }}>
+                    <h3 className="font-heading font-semibold text-sm mb-2 flex items-center gap-2">
                       <Home className="h-4 w-4" /> Le logement
                     </h3>
-                    <div className="text-sm mb-2" style={{ color: "#4B5563" }}>
+                    <div className="text-sm mb-2">
                       <span className="capitalize font-medium">{prop.type}</span>
                       {prop.environment && <span> · {prop.environment}</span>}
                     </div>
-                    {prop.description && <p className="text-sm mb-3" style={{ color: "#4B5563" }}>{prop.description}</p>}
+                    {prop.description && <p className="text-sm mb-3">{prop.description}</p>}
                     {prop.photos?.length > 0 && (
                       <div className="flex gap-2 overflow-x-auto pb-2 -mx-1">
                         {prop.photos.slice(0, 6).map((url: string, i: number) => (
@@ -422,7 +422,7 @@ const PublicProfile = () => {
                     {prop.equipments?.length > 0 && (
                       <div className="flex flex-wrap gap-1.5 mt-2">
                         {prop.equipments.map((e: string) => (
-                          <span key={e} className="px-2 py-0.5 rounded-full text-xs" style={{ backgroundColor: "#F3F4F6", color: "#374151" }}>{e}</span>
+                          <span key={e} className="px-2 py-0.5 rounded-full text-xs">{e}</span>
                         ))}
                       </div>
                     )}
@@ -434,14 +434,14 @@ const PublicProfile = () => {
                   <>
                     {ownerProfile.welcome_notes && (
                       <Card>
-                        <h3 className="font-heading font-semibold text-sm mb-1" style={{ color: "#1C1B18" }}>Comment j'accueille</h3>
-                        <p className="text-sm" style={{ color: "#4B5563" }}>{ownerProfile.welcome_notes}</p>
+                        <h3 className="font-heading font-semibold text-sm mb-1">Comment j'accueille</h3>
+                        <p className="text-sm">{ownerProfile.welcome_notes}</p>
                       </Card>
                     )}
                     {ownerProfile.rules_notes && (
                       <Card>
-                        <h3 className="font-heading font-semibold text-sm mb-1" style={{ color: "#1C1B18" }}>Règles de la maison</h3>
-                        <p className="text-sm whitespace-pre-line" style={{ color: "#4B5563" }}>{ownerProfile.rules_notes}</p>
+                        <h3 className="font-heading font-semibold text-sm mb-1">Règles de la maison</h3>
+                        <p className="text-sm whitespace-pre-line">{ownerProfile.rules_notes}</p>
                       </Card>
                     )}
                   </>
@@ -469,7 +469,7 @@ const PublicProfile = () => {
 
         {/* === STICKY CTA === */}
         {!isOwnProfile && user && (
-          <div className="fixed bottom-0 left-0 right-0 z-40 border-t bg-white/95 backdrop-blur-sm shadow-[0_-2px_10px_rgba(0,0,0,0.05)]" style={{ borderColor: "#E6E2D9" }}>
+          <div className="fixed bottom-0 left-0 right-0 z-40 border-t bg-white/95 backdrop-blur-sm shadow-[0_-2px_10px_rgba(0,0,0,0.05)]">
             <div className="max-w-3xl mx-auto px-4 py-3 flex gap-3">
               {activeSit && (
                 <Button variant="outline" className="flex-1 gap-1.5" asChild>
