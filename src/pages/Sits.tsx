@@ -394,7 +394,7 @@ const SitCard = ({ sit, isOwner, userId }: { sit: any; isOwner: boolean; userId?
     <div className="bg-card rounded-xl border border-border hover:shadow-md transition-shadow overflow-hidden group">
       {/* In progress banner */}
       {effectiveStatus === "in_progress" && (
-        <div className="bg-emerald-500 text-white px-4 py-2 text-xs font-medium flex items-center gap-2">
+        <div className="bg-primary text-primary-foreground px-4 py-2 text-xs font-medium flex items-center gap-2">
           <Clock className="h-3.5 w-3.5" />
           Garde en cours
           {sit.end_date && (() => {
