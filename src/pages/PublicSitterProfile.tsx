@@ -112,9 +112,14 @@ export default function PublicSitterProfile() {
   if (loading) {
     return (
       <div className="min-h-screen bg-background">
-        <div className="max-w-3xl mx-auto px-6 py-10 space-y-6">
-          <Skeleton className="w-full h-[320px] rounded-none" />
-          <Skeleton className="h-8 w-48 mx-auto" />
+        <div className="max-w-5xl mx-auto px-6 py-10 space-y-6">
+          <div className="flex items-center gap-8">
+            <Skeleton className="w-24 h-24 rounded-full shrink-0" />
+            <div className="space-y-3 flex-1">
+              <Skeleton className="h-10 w-48" />
+              <Skeleton className="h-4 w-32" />
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -185,7 +190,6 @@ export default function PublicSitterProfile() {
     url: pageUrl,
   };
 
-  // Sitter type + accompanied label
   const typeLabel = SITTER_TYPE_LABELS[sitterType] || sitterType;
   const accompLabel = accompaniedBy ? `avec ${accompaniedBy}` : "";
   const typeLineItems = [typeLabel, accompLabel].filter(Boolean);
@@ -198,8 +202,20 @@ export default function PublicSitterProfile() {
   // Stats line
   const statsItems: string[] = [];
   statsItems.push(`${completedSits} garde${completedSits !== 1 ? "s" : ""}`);
-  statsItems.push(avgRating > 0 ? `${avgRating} ★` : "Pas encore");
+  statsItems.push(avgRating > 0 ? `${avgRating} ★` : "Pas encore noté");
   statsItems.push(`${totalBadgeCount} écusson${totalBadgeCount !== 1 ? "s" : ""}`);
+
+  // Relative date helper
+  const relativeDate = (dateStr: string) => {
+    const diff = Date.now() - new Date(dateStr).getTime();
+    const days = Math.floor(diff / 86400000);
+    if (days < 1) return "Aujourd'hui";
+    if (days < 30) return `il y a ${days} jour${days > 1 ? "s" : ""}`;
+    const months = Math.floor(days / 30);
+    if (months < 12) return `il y a ${months} mois`;
+    const years = Math.floor(months / 12);
+    return `il y a ${years} an${years > 1 ? "s" : ""}`;
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -220,64 +236,75 @@ export default function PublicSitterProfile() {
         <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>
       </Helmet>
 
-      {/* ── HERO ── */}
-      <div className="relative w-full h-[260px] md:h-[320px] overflow-hidden bg-muted">
-        {profile.avatar_url && (
+      {/* ── HEADER TYPOGRAPHIQUE ── */}
+      <div className="max-w-5xl mx-auto px-6 pt-10 pb-8">
+        <div className="flex items-center gap-6 md:gap-8">
+          {/* Photo médaillon */}
           <img
-            src={profile.avatar_url}
+            src={profile.avatar_url || "/placeholder.svg"}
             alt={firstName}
-            className="absolute inset-0 w-full h-full object-cover object-top"
+            className={`w-20 h-20 md:w-24 md:h-24 rounded-full shrink-0 object-cover object-center border-2 border-border ${isAvailable ? "ring-2 ring-primary ring-offset-2" : ""}`}
           />
-        )}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/0 via-black/20 to-black/70" />
 
-        {/* Back link */}
-        <Link
-          to="/recherche-gardiens"
-          className="absolute top-4 left-6 text-sm text-white/80 hover:text-white z-10"
-        >
-          ← Retour aux gardiens
-        </Link>
-
-        {/* Hero content */}
-        <div className="absolute bottom-0 left-0 right-0 px-6 md:px-8 pb-6 md:pb-8 flex flex-col gap-1">
-          {isAvailable && (
-            <span className="self-start bg-primary text-white text-xs px-3 py-1 rounded-full mb-1">
-              Disponible
-            </span>
-          )}
-
-          {activeBadgeKeys.length > 0 && (
-            <div className="flex gap-2 mb-1">
-              {activeBadgeKeys.map(k => (
-                <div key={k} style={{ filter: 'brightness(0) invert(1)' }}>
-                  <BadgeTimbre id={k} unlocked size="compact" showTooltip={false} />
-                </div>
-              ))}
+          {/* Bloc texte */}
+          <div className="flex-1 flex flex-col gap-1 min-w-0">
+            {/* Ligne disponibilité + retour */}
+            <div className="flex justify-between items-center">
+              <div>
+                {isAvailable && (
+                  <span className="bg-primary/10 text-primary text-xs px-2.5 py-0.5 rounded-full font-medium">
+                    Disponible
+                  </span>
+                )}
+              </div>
+              <Link
+                to="/recherche-gardiens"
+                className="text-sm text-muted-foreground hover:text-foreground hidden md:block"
+              >
+                ← Retour aux gardiens
+              </Link>
             </div>
-          )}
 
-          <h1 className="text-3xl md:text-4xl font-bold text-white">
-            {firstName}
-          </h1>
+            {/* Prénom h1 */}
+            <h1 className="text-4xl md:text-5xl font-bold text-foreground leading-tight">
+              {firstName}
+            </h1>
 
-          {city && (
-            <p className="text-sm text-white/70 flex items-center gap-1">
-              <MapPin className="w-3.5 h-3.5" />
-              {city}
+            {/* Ville */}
+            {city && (
+              <p className="text-base text-muted-foreground flex items-center gap-1">
+                <MapPin className="w-3.5 h-3.5" />
+                Gardien à {city}
+              </p>
+            )}
+
+            {/* Badges statut */}
+            {activeBadgeKeys.length > 0 && (
+              <div className="flex items-center gap-2 mt-1">
+                {activeBadgeKeys.map(k => (
+                  <div key={k} className="flex items-center gap-1">
+                    <BadgeTimbre id={k} unlocked size="compact" showTooltip={false} />
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Stats */}
+            <p className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
+              {statsItems.map((s, i) => (
+                <span key={i} className="flex items-center gap-1">
+                  {i > 0 && <span className="text-border mr-3">·</span>}
+                  {s}
+                </span>
+              ))}
             </p>
-          )}
-
-          <p className="text-sm text-white/80">
-            {statsItems.join(" · ")}
-          </p>
-
-          {completedSits > 0 && cancellations > 0 && (
-            <p className="text-xs text-white/60">
-              {cancellations} annulation{cancellations > 1 ? "s" : ""}
-            </p>
-          )}
+          </div>
         </div>
+      </div>
+
+      {/* ── SÉPARATEUR ── */}
+      <div className="max-w-5xl mx-auto px-6">
+        <hr className="border-border" />
       </div>
 
       {/* ── BODY — TWO COLUMNS ── */}
