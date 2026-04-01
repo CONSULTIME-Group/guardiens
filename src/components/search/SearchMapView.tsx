@@ -2,8 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { MapContainer, TileLayer, Marker, useMap } from "react-leaflet";
 import L from "leaflet";
 import { Link } from "react-router-dom";
-import { MapPin, PawPrint, Cat, Bird, Home } from "lucide-react";
-import { renderToString } from "react-dom/server";
+import { MapPin, PawPrint, Cat, Bird } from "lucide-react";
 import "leaflet/dist/leaflet.css";
 
 const speciesIcon: Record<string, typeof PawPrint> = {
@@ -18,7 +17,7 @@ const DEMO_CITY_COORDS: Record<string, { lat: number; lng: number }> = {
 };
 
 const createPinIcon = (isActive: boolean) => {
-  const color = isActive ? "#1a1a1a" : "#2D6A4F";
+  const color = isActive ? "hsl(40, 12%, 10%)" : "hsl(153, 42%, 30%)";
   return L.divIcon({
     className: "",
     iconSize: [36, 36],
@@ -66,7 +65,6 @@ const SearchMapView = ({
   const [activePin, setActivePin] = useState<string | null>(null);
   const popoverRef = useRef<HTMLDivElement>(null);
 
-  // Close popover on outside click
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       if (popoverRef.current && !popoverRef.current.contains(e.target as Node)) {
@@ -93,12 +91,10 @@ const SearchMapView = ({
 
   return (
     <div className="flex h-[calc(100vh-200px)]">
-      {/* Left: scrollable list */}
-      <div className="w-1/2 overflow-y-auto p-4 space-y-3 border-r border-[#E8E6DC]">
+      <div className="w-1/2 overflow-y-auto p-4 space-y-3 border-r border-border">
         {results.map(renderCard)}
       </div>
 
-      {/* Right: Leaflet map */}
       <div className="w-1/2 relative">
         <MapContainer
           center={center}
@@ -125,7 +121,6 @@ const SearchMapView = ({
           })}
         </MapContainer>
 
-        {/* Popover */}
         {activeItem && (() => {
           const coords = getCoords(activeItem);
           if (!coords) return null;
@@ -146,17 +141,17 @@ const SearchMapView = ({
           return (
             <div
               ref={popoverRef}
-              className="absolute z-[1000] bg-white rounded-xl shadow-lg border border-[#E8E6DC] overflow-hidden"
+              className="absolute z-[1000] bg-card rounded-xl shadow-lg border border-border overflow-hidden"
               style={{ width: 240, top: "50%", left: "50%", transform: "translate(-50%, -50%)" }}
             >
               {photos.length > 0 && (
                 <img src={photos[0]} alt="" className="w-full h-[120px] object-cover" />
               )}
               <div className="p-3">
-                <h4 className="text-sm font-semibold text-[#1a1a1a] line-clamp-2 mb-1">
+                <h4 className="text-sm font-semibold text-foreground line-clamp-2 mb-1">
                   {activeItem.title || "Sans titre"}
                 </h4>
-                <p className="text-xs text-[#6B7280] mb-1 flex items-center gap-1">
+                <p className="text-xs text-muted-foreground mb-1 flex items-center gap-1">
                   <MapPin className="h-3 w-3" />
                   {activeItem.owner?.city || ""}
                   {activeItem.distance != null && ` · ${Math.round(activeItem.distance)} km`}
@@ -166,7 +161,7 @@ const SearchMapView = ({
                     {Object.entries(petGroups).map(([species, names]) => {
                       const IconComp = speciesIcon[species] || PawPrint;
                       return (
-                        <span key={species} className="flex items-center gap-0.5 text-[#92400E] text-xs">
+                        <span key={species} className="flex items-center gap-0.5 text-amber-700 text-xs">
                           <IconComp className="h-3 w-3" /> ×{names.length}
                         </span>
                       );
@@ -176,21 +171,20 @@ const SearchMapView = ({
                 {linkTo && hasAccess ? (
                   <Link
                     to={linkTo}
-                    className="block w-full py-2 text-xs text-center bg-[#2D6A4F] text-white rounded-lg font-medium"
+                    className="block w-full py-2 text-xs text-center bg-primary text-primary-foreground rounded-lg font-medium"
                   >
                     Voir l'annonce →
                   </Link>
                 ) : (
                   <Link
                     to="/mon-abonnement"
-                    className="block w-full py-2 text-xs text-center bg-[#2D6A4F] text-white rounded-lg font-medium"
+                    className="block w-full py-2 text-xs text-center bg-primary text-primary-foreground rounded-lg font-medium"
                   >
                     {hasAccess ? "Annonce type" : "S'abonner pour postuler"}
                   </Link>
                 )}
               </div>
-              {/* Arrow */}
-              <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-white border-b border-r border-[#E8E6DC] rotate-45" />
+              <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-card border-b border-r border-border rotate-45" />
             </div>
           );
         })()}
