@@ -74,6 +74,9 @@ const SitDetail = () => {
   const [appCount, setAppCount] = useState(0);
   const [pendingAppCount, setPendingAppCount] = useState(0);
   const [breedAccordions, setBreedAccordions] = useState<Record<string, boolean>>({});
+  const [logementOverride, setLogementOverride] = useState("");
+  const [animauxOverride, setAnimauxOverride] = useState("");
+  const overrideSaveTimeout = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     if (!id) return;
