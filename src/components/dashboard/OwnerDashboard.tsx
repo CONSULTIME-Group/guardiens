@@ -244,7 +244,7 @@ const OwnerDashboard = () => {
             </div>
           )}
           <div className="min-w-0">
-            <p className="font-heading font-semibold text-sm capitalize">{user?.firstName || "Propriétaire"}</p>
+            <p className="font-heading font-semibold text-sm">{capitalizeName(user?.firstName) || "Propriétaire"}</p>
             {user && (
               <p className="text-xs text-muted-foreground">{(user as any).city || ""}</p>
             )}
