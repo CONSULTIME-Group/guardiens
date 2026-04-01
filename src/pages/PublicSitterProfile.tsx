@@ -246,6 +246,8 @@ export default function PublicSitterProfile() {
         <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>
       </Helmet>
 
+      {/* ── Contenu principal z-1 ── */}
+      <div className="relative z-[1]">
       {/* ── HERO FUSIONNÉ : SVG + HEADER ── */}
       <div className="relative overflow-hidden w-full min-h-[240px] flex items-end bg-[#F0EDE6]">
         {/* SVG fond */}
