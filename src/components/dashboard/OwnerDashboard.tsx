@@ -181,10 +181,21 @@ const OwnerDashboard = () => {
 
   /* ── Subtitle ── */
   const getSubtitle = () => {
-    if (user && user.profileCompletion < 100) return { text: `Profil complété à ${user.profileCompletion}% — Complétez votre profil →`, to: "/owner-profile" };
-    if (verificationStatus !== "verified" && verificationStatus !== "pending") return { text: "Vérifiez votre identité — ça rassure les gardiens →", to: "/settings#verification" };
-    if (activeSits.length === 0) return { text: "Publiez votre première annonce pour trouver un gardien →", to: "/sits/create" };
-    return { text: "Vos animaux sont entre bonnes mains.", to: "" };
+    // Garde confirmée en cours
+    if (ongoingSit) {
+      const daysLeft = ongoingSit.end_date ? differenceInDays(new Date(ongoingSit.end_date), now) : null;
+      return { text: `Votre garde est en cours${daysLeft !== null ? ` — fin dans ${daysLeft} jour${daysLeft > 1 ? "s" : ""}` : ""}.`, to: "" };
+    }
+    // Garde confirmée à venir
+    const nextConfirmed = sits.find(s => s.status === "confirmed" && s.start_date && new Date(s.start_date) > now);
+    if (nextConfirmed) {
+      const daysUntil = differenceInDays(new Date(nextConfirmed.start_date), now);
+      return { text: `Votre prochaine garde est dans ${daysUntil} jour${daysUntil > 1 ? "s" : ""}.`, to: "" };
+    }
+    // Candidature non lue
+    if (pendingAppCount > 0) return { text: "Vous avez une nouvelle candidature à examiner.", to: "" };
+    // Défaut
+    return { text: "Trouvez le gardien idéal pour vos animaux.", to: "" };
   };
   const subtitle = getSubtitle();
 
