@@ -274,6 +274,12 @@ const CreateSit = () => {
           <ChipSelect options={openToOptions} selected={openTo} onChange={setOpenTo} />
         </div>
 
+        <div>
+          <Label className="text-sm font-medium text-foreground mb-1 block">Environnement (optionnel)</Label>
+          <p className="text-xs text-muted-foreground mb-3">Par défaut, on utilise l'environnement de votre profil. Vous pouvez le personnaliser pour cette annonce.</p>
+          <EnvironmentPills selected={sitEnvironments} onChange={setSitEnvironments} />
+        </div>
+
         <div className="flex items-start gap-3 rounded-lg border border-amber-200 dark:border-amber-800 bg-amber-50/50 dark:bg-amber-900/10 p-4">
           <Checkbox
             checked={isUrgent}
