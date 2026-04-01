@@ -382,22 +382,14 @@ const SitterDashboard = () => {
         {/* Badges collection */}
         <div className="mt-4 bg-card border border-border rounded-2xl p-4">
           <p className="text-xs text-muted-foreground uppercase tracking-wide mb-3">Mes écussons</p>
-          {badges.length === 0 ? (
-            <p className="text-xs text-muted-foreground italic">Tes premiers écussons apparaîtront après ta première garde.</p>
-          ) : (
-            <div>
-              <div className="flex flex-wrap gap-2">
-                {badges.slice(0, 6).map((b: any) => (
-                  <div key={b.id} title={b.badge_key}>
-                    <BadgeShield badgeKey={b.badge_key} size="sm" showLabel={false} />
-                  </div>
-                ))}
-              </div>
-              {badges.length > 6 && (
-                <Link to="/mon-profil#ecussons" className="text-xs text-primary hover:underline mt-2 inline-block">Voir tous mes écussons →</Link>
-              )}
-            </div>
-          )}
+          <BadgeGrid
+            unlockedBadges={badges.reduce((acc: Record<string, number>, b: any) => {
+              const key = b.badge_key || b.id;
+              acc[key] = (acc[key] || 0) + 1;
+              return acc;
+            }, {})}
+            variant="dashboard"
+          />
         </div>
 
         {/* Checklist accordion */}
