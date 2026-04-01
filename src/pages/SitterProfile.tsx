@@ -103,17 +103,9 @@ const SitterProfile = () => {
       <PageMeta title="Mon profil | Guardiens" description="Modifiez votre profil gardien Guardiens." />
 
       <div className="p-4 sm:p-6 md:p-10 max-w-5xl mx-auto animate-fade-in">
-        {/* Founder badge */}
-        {isFounder && (
-          <div className="mb-4 flex gap-2">
-            <BadgeShield badgeKey="founder" size="sm" />
-          </div>
-        )}
-
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Left sidebar */}
           <ProfileSidebar
-            avatarUrl={mergedData.avatar_url}
             firstName={mergedData.first_name}
             city={mergedData.city}
             completion={completion}
@@ -122,6 +114,7 @@ const SitterProfile = () => {
             onSectionClick={setActiveSection}
             publicProfileUrl={user ? `/gardiens/${user.id}` : "#"}
             role="sitter"
+            isFounder={isFounder}
           />
 
           {/* Right content */}
