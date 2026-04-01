@@ -1466,6 +1466,7 @@ export type Database = {
           avatar_url: string | null
           bio: string | null
           cancellation_count: number
+          cancellations_as_proprio: number
           city: string | null
           completed_sits_count: number
           created_at: string
@@ -1492,6 +1493,7 @@ export type Database = {
           avatar_url?: string | null
           bio?: string | null
           cancellation_count?: number
+          cancellations_as_proprio?: number
           city?: string | null
           completed_sits_count?: number
           created_at?: string
@@ -1518,6 +1520,7 @@ export type Database = {
           avatar_url?: string | null
           bio?: string | null
           cancellation_count?: number
+          cancellations_as_proprio?: number
           city?: string | null
           completed_sits_count?: number
           created_at?: string
@@ -2442,6 +2445,10 @@ export type Database = {
           msg_id: number
           read_ct: number
         }[]
+      }
+      recalculate_cancellations: {
+        Args: { p_role: string; p_user_id: string }
+        Returns: undefined
       }
       recalculate_completed_sits: {
         Args: { p_user_id: string }
