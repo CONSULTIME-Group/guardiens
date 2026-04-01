@@ -2063,9 +2063,14 @@ export type Database = {
           max_duration: number | null
           meeting_preference: string[] | null
           min_duration: number | null
+          min_notice: string | null
+          min_stay_duration: string | null
           motivation: string | null
           prefer_visitors: boolean | null
           preferences_notes: string | null
+          preferred_environments: string[] | null
+          preferred_frequency: string | null
+          preferred_periods: string[] | null
           references_text: string | null
           sitter_type: string | null
           smoker: boolean | null
@@ -2095,9 +2100,14 @@ export type Database = {
           max_duration?: number | null
           meeting_preference?: string[] | null
           min_duration?: number | null
+          min_notice?: string | null
+          min_stay_duration?: string | null
           motivation?: string | null
           prefer_visitors?: boolean | null
           preferences_notes?: string | null
+          preferred_environments?: string[] | null
+          preferred_frequency?: string | null
+          preferred_periods?: string[] | null
           references_text?: string | null
           sitter_type?: string | null
           smoker?: boolean | null
@@ -2127,9 +2137,14 @@ export type Database = {
           max_duration?: number | null
           meeting_preference?: string[] | null
           min_duration?: number | null
+          min_notice?: string | null
+          min_stay_duration?: string | null
           motivation?: string | null
           prefer_visitors?: boolean | null
           preferences_notes?: string | null
+          preferred_environments?: string[] | null
+          preferred_frequency?: string | null
+          preferred_periods?: string[] | null
           references_text?: string | null
           sitter_type?: string | null
           smoker?: boolean | null

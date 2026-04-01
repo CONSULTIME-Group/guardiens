@@ -31,6 +31,11 @@ export interface SitterProfileData {
   max_duration: number;
   availability_dates: any[];
   is_available: boolean;
+  min_stay_duration: string;
+  preferred_frequency: string;
+  min_notice: string;
+  preferred_periods: string[];
+  preferred_environments: string[];
   // Step 5
   strict_rules_ok: boolean;
   prefer_visitors: boolean;
@@ -62,6 +67,7 @@ const defaultData: SitterProfileData = {
   sitter_type: "", accompanied_by: "", smoker: false, availability_during: "", lifestyle: [],
   animal_types: [], experience_years: "", references_text: "",
   has_license: false, has_vehicle: false, geographic_radius: 15, min_duration: 3, max_duration: 21, availability_dates: [], is_available: false,
+  min_stay_duration: "flexible", preferred_frequency: "flexible", min_notice: "asap", preferred_periods: [], preferred_environments: [],
   strict_rules_ok: false, prefer_visitors: false, farm_animals_ok: false, preferences_notes: "",
   meeting_preference: [], handover_preference: "", languages: [], bonus_skills: [], interests: [],
   skill_categories: [], available_for_help: false,
@@ -112,7 +118,12 @@ export function useSitterProfile() {
       max_duration: s?.max_duration || 21,
       availability_dates: (s?.availability_dates as any[]) || [],
       is_available: s?.is_available || false,
-      strict_rules_ok: s?.strict_rules_ok || false,
+       strict_rules_ok: s?.strict_rules_ok || false,
+       min_stay_duration: (s as any)?.min_stay_duration || "flexible",
+       preferred_frequency: (s as any)?.preferred_frequency || "flexible",
+       min_notice: (s as any)?.min_notice || "asap",
+       preferred_periods: (s as any)?.preferred_periods || [],
+       preferred_environments: (s as any)?.preferred_environments || [],
       prefer_visitors: s?.prefer_visitors || false,
       farm_animals_ok: s?.farm_animals_ok || false,
       preferences_notes: s?.preferences_notes || "",
@@ -213,6 +224,7 @@ export function useSitterProfile() {
         "availability_dates", "is_available", "strict_rules_ok", "prefer_visitors", "farm_animals_ok",
         "preferences_notes", "meeting_preference", "handover_preference",
         "languages", "bonus_skills", "interests", "competences",
+        "min_stay_duration", "preferred_frequency", "min_notice", "preferred_periods", "preferred_environments",
       ] as const;
 
       const sitterUpdate: any = {};
