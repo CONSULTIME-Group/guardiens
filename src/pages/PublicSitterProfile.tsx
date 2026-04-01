@@ -558,6 +558,23 @@ export default function PublicSitterProfile() {
             </div>
           )}
 
+          {/* Compétences */}
+          {competences.length > 0 && (
+            <>
+              <hr className="border-border" />
+              <div>
+                <p className="text-xs uppercase tracking-widest text-muted-foreground mb-3">Compétences</p>
+                <div className="flex flex-wrap gap-2">
+                  {competences.map(c => (
+                    <span key={c} className="border border-border rounded-full text-sm px-3 py-1 text-foreground/80">
+                      {c}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </>
+          )}
+
           <hr className="border-border" />
 
           {/* Avis */}
