@@ -17,6 +17,7 @@ import ResetPassword from "./pages/ResetPassword";
 import Dashboard from "./pages/Dashboard";
 import Profile from "./pages/Profile";
 import SearchPage from "./pages/SearchPage";
+import SearchOwner from "./components/search/SearchOwner";
 import Messages from "./pages/Messages";
 import Sits from "./pages/Sits";
 import CreateSit from "./pages/CreateSit";
@@ -163,6 +164,7 @@ const AppRoutes = () => (
       <Route path="/dashboard" element={<Dashboard />} />
       <Route path="/profile" element={<Profile />} />
       <Route path="/search" element={<SearchPage />} />
+      <Route path="/recherche-gardiens" element={<SearchOwner />} />
       <Route path="/messages" element={<Messages />} />
       <Route path="/sits" element={<Sits />} />
       <Route path="/sits/create" element={<CreateSit />} />
