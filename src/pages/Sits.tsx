@@ -31,9 +31,9 @@ const statusConfig: Record<string, { label: string; className: string }> = {
 
 const appStatusConfig: Record<string, { label: string; className: string }> = {
   pending: { label: "Envoyée", className: "bg-muted text-muted-foreground" },
-  viewed: { label: "Consultée", className: "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400" },
-  discussing: { label: "En discussion", className: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400" },
-  accepted: { label: "Acceptée", className: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" },
+  viewed: { label: "Consultée", className: "bg-secondary/10 text-secondary" },
+  discussing: { label: "En discussion", className: "bg-accent text-foreground" },
+  accepted: { label: "Acceptée", className: "bg-primary/10 text-primary" },
   rejected: { label: "Déclinée", className: "bg-destructive/10 text-destructive" },
   cancelled: { label: "Annulée", className: "bg-destructive/10 text-destructive" },
 };
