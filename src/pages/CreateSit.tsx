@@ -178,6 +178,7 @@ const CreateSit = () => {
         open_to: openTo,
         is_urgent: isUrgent,
         status: "published" as any,
+        environments: sitEnvironments,
       } as any).select("id").single();
 
       if (error) throw error;
