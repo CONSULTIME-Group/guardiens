@@ -302,13 +302,15 @@ const SitterDashboard = () => {
                 <ChevronRight className="h-4 w-4 text-muted-foreground" />
               </div>
             </Link>
-            <div className="px-4 pb-3 flex items-center justify-between">
+            <div className="px-4 pb-3">
               <a href="/actualites/gerer-imprevu-pendant-garde" className="text-xs text-primary/70 hover:text-primary hover:underline">
                 Un imprévu ? Voir le guide →
               </a>
+            </div>
+            <div className="border-t border-border mt-4 pt-4 px-4 pb-4">
               <button
                 onClick={() => setCancelSitOpen(true)}
-                className="text-xs text-muted-foreground hover:text-destructive underline-offset-2 hover:underline cursor-pointer"
+                className="text-xs text-muted-foreground hover:text-destructive transition-colors underline-offset-2 hover:underline cursor-pointer w-full text-center"
               >
                 Annuler ma garde
               </button>
