@@ -1282,6 +1282,7 @@ export type Database = {
         Row: {
           communication_notes: string | null
           created_at: string
+          environments: string[]
           experience_required: boolean | null
           handover_preference: string | null
           id: string
@@ -1304,6 +1305,7 @@ export type Database = {
         Insert: {
           communication_notes?: string | null
           created_at?: string
+          environments?: string[]
           experience_required?: boolean | null
           handover_preference?: string | null
           id?: string
@@ -1326,6 +1328,7 @@ export type Database = {
         Update: {
           communication_notes?: string | null
           created_at?: string
+          environments?: string[]
           experience_required?: boolean | null
           handover_preference?: string | null
           id?: string
@@ -1849,6 +1852,7 @@ export type Database = {
           cancelled_by: string | null
           created_at: string
           end_date: string | null
+          environments: string[]
           flexible_dates: boolean | null
           id: string
           is_urgent: boolean
@@ -1866,6 +1870,7 @@ export type Database = {
           cancelled_by?: string | null
           created_at?: string
           end_date?: string | null
+          environments?: string[]
           flexible_dates?: boolean | null
           id?: string
           is_urgent?: boolean
@@ -1883,6 +1888,7 @@ export type Database = {
           cancelled_by?: string | null
           created_at?: string
           end_date?: string | null
+          environments?: string[]
           flexible_dates?: boolean | null
           id?: string
           is_urgent?: boolean
@@ -2321,6 +2327,10 @@ export type Database = {
       enqueue_email: {
         Args: { payload: Json; queue_name: string }
         Returns: number
+      }
+      get_garde_environments: {
+        Args: { p_garde_id: string }
+        Returns: string[]
       }
       has_role: {
         Args: {
