@@ -4,7 +4,7 @@ import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Calendar, MapPin, Star, ShieldCheck, Home, PawPrint, MessageSquare, CheckCircle2, XCircle, Send, Pencil, Heart, LockKeyhole } from "lucide-react";
+import { ArrowLeft, Calendar, MapPin, Star, ShieldCheck, Home, PawPrint, MessageSquare, CheckCircle2, XCircle, Send, Pencil, Heart, LockKeyhole, ExternalLink, ChevronDown } from "lucide-react";
 import { useSubscriptionAccess } from "@/hooks/useSubscriptionAccess";
 import { useAccessLevel } from "@/hooks/useAccessLevel";
 import AccessGateBanner from "@/components/access/AccessGateBanner";
@@ -71,6 +71,9 @@ const SitDetail = () => {
   const [cancelOpen, setCancelOpen] = useState(false);
   const [publishing, setPublishing] = useState(false);
   const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const [appCount, setAppCount] = useState(0);
+  const [pendingAppCount, setPendingAppCount] = useState(0);
+  const [breedAccordions, setBreedAccordions] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     if (!id) return;
@@ -102,6 +105,14 @@ const SitDetail = () => {
         const { data: petsData } = await supabase.from("pets").select("*").eq("property_id", propRes.data.id);
         setPets(petsData || []);
       }
+
+      // Fetch application counts
+      const [allAppsRes, pendingAppsRes] = await Promise.all([
+        supabase.from("applications").select("id", { count: "exact", head: true }).eq("sit_id", id!),
+        supabase.from("applications").select("id", { count: "exact", head: true }).eq("sit_id", id!).in("status", ["pending", "viewed"]),
+      ]);
+      setAppCount(allAppsRes.count || 0);
+      setPendingAppCount(pendingAppsRes.count || 0);
 
       if (user) {
         const [spRes, appRes] = await Promise.all([
@@ -203,7 +214,7 @@ const SitDetail = () => {
       {/* Hero: Photos gallery */}
       {photos.length > 0 && (
         <div className="mb-6 relative">
-          <img src={photos[photoIndex]} alt="Logement" className="w-full h-72 md:h-96 rounded-xl object-cover" />
+          <img src={photos[photoIndex]} alt="Logement" className="w-full h-48 md:h-64 rounded-xl object-cover" />
           {photos.length > 1 && (
             <div className="flex gap-1.5 mt-2 overflow-x-auto pb-1">
               {photos.map((p: string, i: number) => (
@@ -225,11 +236,20 @@ const SitDetail = () => {
         <h1 className="font-heading text-2xl md:text-3xl font-bold">{sit.title || `Garde à ${owner?.city || "..."}`}</h1>
         <div className="flex items-center gap-2 shrink-0">
           {isOwner && (
-            <Link to={`/sits/${sit.id}/edit`}>
-              <Button variant="outline" size="sm" className="gap-1.5">
-                <Pencil className="h-3.5 w-3.5" /> Modifier
-              </Button>
-            </Link>
+            <>
+              <Link to={`/sits/${sit.id}/edit`}>
+                <Button variant="outline" size="sm" className="gap-1.5">
+                  <Pencil className="h-3.5 w-3.5" /> Modifier
+                </Button>
+              </Link>
+              <Link
+                to={`/sits/${sit.id}`}
+                target="_blank"
+                className="text-sm text-primary hover:underline cursor-pointer flex items-center gap-1"
+              >
+                Voir comme un gardien <ExternalLink className="h-3.5 w-3.5" />
+              </Link>
+            </>
           )}
           {user && sit.user_id !== user.id && <ReportButton targetId={sit.id} targetType="sit" />}
         </div>
@@ -297,9 +317,15 @@ const SitDetail = () => {
         </div>
       )}
 
-      {/* Tabbed content like Nomador */}
-      <Tabs defaultValue="animals" className="mt-2">
-        <TabsList className="w-full justify-start border-b border-border rounded-none bg-transparent h-auto p-0 gap-0">
+      {/* Tabbed content */}
+      <Tabs defaultValue={isOwner ? "candidatures" : "animals"} className="mt-2">
+        <TabsList className="w-full justify-start border-b border-border rounded-none bg-transparent h-auto p-0 gap-0 overflow-x-auto">
+          {isOwner && (
+            <TabsTrigger value="candidatures" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-2.5 text-sm">
+              Candidatures ({appCount})
+              {pendingAppCount > 0 && <span className="w-2 h-2 rounded-full bg-primary inline-block ml-1 mb-0.5" />}
+            </TabsTrigger>
+          )}
           <TabsTrigger value="animals" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-2.5 text-sm">
             🐾 Animaux
           </TabsTrigger>
@@ -313,6 +339,20 @@ const SitDetail = () => {
             ⭐ Avis ({reviews.length})
           </TabsTrigger>
         </TabsList>
+
+        {/* Candidatures tab (owner only) */}
+        {isOwner && (
+          <TabsContent value="candidatures" className="mt-6">
+            <ApplicationsList
+              sitId={sit.id}
+              sitTitle={sit.title}
+              petNames={pets.map((p: any) => p.name)}
+              startDate={formatDate(sit.start_date)}
+              endDate={formatDate(sit.end_date)}
+              propertyId={sit.property_id}
+            />
+          </TabsContent>
+        )}
 
         {/* Animals tab */}
         <TabsContent value="animals" className="mt-6">
@@ -345,12 +385,25 @@ const SitDetail = () => {
                     </div>
                   </div>
                   {pet.breed && (
-                    <BreedProfileCard
-                      species={pet.species}
-                      breed={pet.breed}
-                      ownerNote={pet.owner_breed_note}
-                      ownerFirstName={owner?.first_name}
-                    />
+                    <div className="mt-2">
+                      <button
+                        onClick={() => setBreedAccordions(prev => ({ ...prev, [pet.id]: !prev[pet.id] }))}
+                        className="text-sm text-primary hover:underline cursor-pointer inline-flex items-center gap-1"
+                      >
+                        En savoir plus sur le {pet.breed}
+                        <ChevronDown className={`h-3.5 w-3.5 transition-transform duration-300 ${breedAccordions[pet.id] ? "rotate-180" : ""}`} />
+                      </button>
+                      <div className={`overflow-hidden transition-all duration-300 ${breedAccordions[pet.id] ? "max-h-[2000px] opacity-100" : "max-h-0 opacity-0"}`}>
+                        <div className="pt-4">
+                          <BreedProfileCard
+                            species={pet.species}
+                            breed={pet.breed}
+                            ownerNote={pet.owner_breed_note}
+                            ownerFirstName={owner?.first_name}
+                          />
+                        </div>
+                      </div>
+                    </div>
                   )}
                 </div>
               ))}
@@ -382,7 +435,6 @@ const SitDetail = () => {
             </div>
           )}
 
-          {/* Location map */}
           {coords && owner?.city && (
             <div className="bg-card rounded-xl border border-border p-5">
               <div className="flex items-center gap-2 mb-3">
@@ -403,7 +455,6 @@ const SitDetail = () => {
             </div>
           )}
 
-          {/* Location profile */}
           {owner?.city && owner?.postal_code && (
             <LocationProfileCard city={owner.city} postalCode={owner.postal_code} />
           )}
@@ -477,29 +528,19 @@ const SitDetail = () => {
         </TabsContent>
       </Tabs>
 
-      {/* Owner-only sections */}
+      {/* Guide de la maison (owner only) */}
       {isOwner && (
-        <>
-          <div className="mt-8 p-4 bg-accent/50 rounded-xl border border-border">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium">📋 Guide de la maison</p>
-                <p className="text-xs text-muted-foreground">Adresse, codes, contacts véto — partagé après confirmation</p>
-              </div>
-              <Link to={`/house-guide/${sit.property_id}`}>
-                <Button variant="outline" size="sm">Modifier</Button>
-              </Link>
+        <div className="mt-8 p-4 bg-accent/50 rounded-xl border border-border">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium">📋 Guide de la maison</p>
+              <p className="text-xs text-muted-foreground">Adresse, codes, contacts véto — partagé après confirmation</p>
             </div>
+            <Link to={`/house-guide/${sit.property_id}`}>
+              <Button variant="outline" size="sm">Modifier</Button>
+            </Link>
           </div>
-          <ApplicationsList
-            sitId={sit.id}
-            sitTitle={sit.title}
-            petNames={pets.map((p: any) => p.name)}
-            startDate={formatDate(sit.start_date)}
-            endDate={formatDate(sit.end_date)}
-            propertyId={sit.property_id}
-          />
-        </>
+        </div>
       )}
 
       {/* Cancel button */}
