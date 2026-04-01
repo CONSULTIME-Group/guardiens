@@ -307,7 +307,7 @@ const OwnerDashboard = () => {
       {/* 4. Stat cards */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
         <StatCard icon={Calendar} iconColor="text-primary" label="Gardes réalisées" value={completedSits.length} delay={0} />
-        <StatCard icon={Star} iconColor="text-amber-500" label="Note moyenne" value={avgRating} delay={100} isDecimal emptyMsg={avgRating === 0 ? "Pas encore d'avis" : undefined} />
+        <StatCard icon={Star} iconColor="text-amber-500" label="Note moyenne" value={avgRating} delay={100} isDecimal emptyMsg={avgRating === 0 ? "Note moyenne" : undefined} />
         <StatCard icon={Megaphone} iconColor="text-blue-500" label="Annonces actives" value={activeSits.length} delay={200} />
         <StatCard icon={Heart} iconColor="text-pink-500" label="Gardiens de confiance" value={trustedSitterCount} delay={300} />
         <StatCard icon={Handshake} iconColor="text-primary" label="Petites missions" value={missionMetrics.total} delay={400} subLabel={missionMetrics.completed > 0 ? `${missionMetrics.completed} terminée${missionMetrics.completed > 1 ? "s" : ""}` : undefined} />
