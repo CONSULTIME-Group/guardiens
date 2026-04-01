@@ -521,8 +521,17 @@ const Messages = () => {
 
           <div className="flex-1 overflow-y-auto">
             {displayConversations.length === 0 ? (
-              <div className="p-6 text-center text-sm text-muted-foreground">
-                {pill === "archived" ? "Aucune conversation archivée." : "Aucune conversation pour le moment."}
+              <div className="flex flex-col items-center justify-center py-12 px-6 text-center">
+                <MessageSquare className="h-10 w-10 text-muted-foreground mb-4" />
+                <p className="text-sm font-medium text-foreground mb-1">Aucune conversation</p>
+                <p className="text-xs text-muted-foreground mb-4 max-w-xs mx-auto">
+                  {pill === "archived" ? "Aucune conversation archivée." : "Contacte un gardien ou postule à une annonce."}
+                </p>
+                {pill !== "archived" && (
+                  <Link to="/recherche-gardiens" className="border border-border rounded-full px-4 py-2 text-sm text-foreground hover:border-primary transition-colors">
+                    Rechercher un gardien →
+                  </Link>
+                )}
               </div>
             ) : (
               <>

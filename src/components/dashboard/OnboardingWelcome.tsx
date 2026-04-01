@@ -155,7 +155,7 @@ const OnboardingWelcome = ({ role, checks, onDismiss }: OnboardingWelcomeProps) 
           <Sparkles className="h-8 w-8 text-primary" />
         </div>
         <h1 className="font-heading text-2xl md:text-3xl font-bold">
-          Bienvenue{user?.firstName ? `, ${user.firstName}` : ""} ! 🎉
+          Bienvenue{user?.firstName ? `, ${capitalizeName(user.firstName)}` : ""}
         </h1>
         <p className="text-muted-foreground text-sm max-w-md mx-auto">
           {role === "sitter"
