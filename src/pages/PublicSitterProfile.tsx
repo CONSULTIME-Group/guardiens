@@ -574,6 +574,8 @@ export default function PublicSitterProfile() {
             )}
           </div>
 
+          <hr className="border-border" />
+
           {/* Collection de timbres */}
           <div>
             <p className="text-xs uppercase tracking-widest text-muted-foreground mb-3">Sa collection</p>
