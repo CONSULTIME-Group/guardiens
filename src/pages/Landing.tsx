@@ -498,7 +498,7 @@ const Landing = () => {
       </section>
 
       {/* ═══════════════ SECTION 6 — PETITES MISSIONS ═══════════════ */}
-      <section className="py-24 md:py-32 bg-[#FAF9F6]">
+      <section className="py-24 md:py-32 bg-background">
         <div className="max-w-5xl mx-auto px-6">
           <RevealSection>
             <div className="bg-white rounded-2xl p-12 max-w-3xl mx-auto text-center shadow-sm">
