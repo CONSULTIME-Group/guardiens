@@ -334,32 +334,32 @@ const Sits = () => {
           ))}
         </div>
       ) : filteredSits.length === 0 ? (
-        <div className="text-center py-20">
-          <Calendar className="h-12 w-12 mx-auto text-muted-foreground/30 mb-4" />
-          <p className="text-muted-foreground font-medium mb-1">
+        <div className="flex flex-col items-center justify-center py-12 px-6 text-center">
+          <Calendar className="h-10 w-10 text-muted-foreground mb-4" />
+          <p className="text-sm font-medium text-foreground mb-1">
             {activeTab === "upcoming" && "Aucune garde à venir"}
             {activeTab === "in_progress" && "Aucune garde en cours"}
             {activeTab === "completed" && "Aucune garde passée"}
             {activeTab === "cancelled" && "Aucune garde annulée"}
           </p>
-          <p className="text-muted-foreground/60 text-sm">
+          <p className="text-xs text-muted-foreground mb-4 max-w-xs mx-auto">
             {activeTab === "upcoming" && activeRole === "owner"
-              ? "Publiez une annonce pour trouver un gardien."
+              ? "Publiez votre première annonce pour trouver un gardien."
               : activeTab === "upcoming" && activeRole === "sitter"
-              ? "Consultez les annonces pour postuler."
+              ? "Postule aux annonces près de chez toi."
               : ""}
           </p>
           {activeTab === "upcoming" && activeRole === "owner" && (
             <Link to="/sits/create">
-              <Button variant="outline" className="mt-4 gap-2">
-                <Plus className="h-4 w-4" /> Créer une annonce
+              <Button variant="outline" className="rounded-full gap-2">
+                <Plus className="h-4 w-4" /> Publier une annonce
               </Button>
             </Link>
           )}
           {activeTab === "upcoming" && activeRole === "sitter" && (
             <Link to="/search">
-              <Button variant="outline" className="mt-4 gap-2">
-                <Eye className="h-4 w-4" /> Voir les annonces
+              <Button variant="outline" className="rounded-full gap-2">
+                <Eye className="h-4 w-4" /> Trouver une garde
               </Button>
             </Link>
           )}

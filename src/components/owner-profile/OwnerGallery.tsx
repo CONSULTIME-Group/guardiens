@@ -9,18 +9,18 @@ import { Plus, Trash2, Camera, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const CATEGORIES = [
-  { value: "home_life", label: "🏠 La vie à la maison" },
-  { value: "animals_life", label: "🐾 Mes animaux au quotidien" },
-  { value: "garden", label: "🌿 Le jardin / extérieur" },
-  { value: "neighborhood", label: "🏘️ Le quartier" },
-  { value: "seasonal", label: "🍂 Au fil des saisons" },
+  { value: "home_life", label: "La vie à la maison" },
+  { value: "animals_life", label: "Mes animaux au quotidien" },
+  { value: "garden", label: "Le jardin / extérieur" },
+  { value: "neighborhood", label: "Le quartier" },
+  { value: "seasonal", label: "Au fil des saisons" },
 ];
 
 const SEASONS = [
-  { value: "printemps", label: "🌸 Printemps" },
-  { value: "été", label: "☀️ Été" },
-  { value: "automne", label: "🍂 Automne" },
-  { value: "hiver", label: "❄️ Hiver" },
+  { value: "printemps", label: "Printemps" },
+  { value: "été", label: "Été" },
+  { value: "automne", label: "Automne" },
+  { value: "hiver", label: "Hiver" },
 ];
 
 interface GalleryPhoto {
