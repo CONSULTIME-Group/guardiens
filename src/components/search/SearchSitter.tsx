@@ -426,10 +426,17 @@ const SearchSitter = () => {
     const isLongStay = tab === "long_stays";
     const isMission = tab === "missions";
     const isDemo = !!item.is_demo;
-    const linkTo = isDemo ? "#" : isMission ? `/petites-missions/${item.id}` : isLongStay ? (sitterEligible ? `/long-stays/${item.id}` : "#") : `/sits/${item.id}`;
+    const linkTo = isMission ? `/petites-missions/${item.id}` : isLongStay ? (sitterEligible ? `/long-stays/${item.id}` : "#") : `/sits/${item.id}`;
+
+    // CAS 1: hasAccess + real → clickable card, no CTA
+    // CAS 2: hasAccess + demo → not clickable, no CTA
+    // CAS 3: !hasAccess + real → not clickable, CTA to /mon-abonnement
+    // CAS 4: !hasAccess + demo → not clickable, CTA to /mon-abonnement
+    const showCTA = !hasAccess;
+    const isClickable = hasAccess && !isDemo;
 
     const cardContent = (
-      <div className="bg-white rounded-2xl overflow-hidden border border-[#E8E6DC] cursor-pointer hover:shadow-md transition-shadow">
+      <div className={`bg-white rounded-2xl overflow-hidden border border-[#E8E6DC] transition-shadow ${isClickable ? "cursor-pointer hover:shadow-md" : ""}`}>
         {/* Photo */}
         {photos.length > 0 && (
           <div className="h-48 relative">
@@ -444,7 +451,7 @@ const SearchSitter = () => {
                 Annonce type
               </span>
             )}
-            {item.isNew && (
+            {item.isNew && !isDemo && (
               <span className="absolute top-3 right-3 bg-[#2D6A4F] text-white rounded-full px-2 py-1 text-xs flex items-center gap-1">
                 <Sparkles className="h-3 w-3" /> Nouveau
               </span>
@@ -483,17 +490,10 @@ const SearchSitter = () => {
           {isMission && item.description && (
             <p className="text-sm text-[#6B7280] truncate">{item.description}</p>
           )}
-          {/* CTA for non-subscribers */}
-          {isDemo ? (
+          {/* CTA for non-subscribers (CAS 3 & 4) */}
+          {showCTA && (
             <Link
-              to="/register"
-              className="block w-full py-2 text-sm text-[#2D6A4F] bg-[#EAF3DE] rounded-xl font-medium hover:bg-[#D1FAE5] mt-3 text-center"
-            >
-              Rejoindre pour postuler →
-            </Link>
-          ) : !hasAccess && (
-            <Link
-              to="/abonnement"
+              to="/mon-abonnement"
               className="block w-full py-2 text-sm text-[#2D6A4F] bg-[#EAF3DE] rounded-xl font-medium hover:bg-[#D1FAE5] mt-3 text-center"
             >
               S'abonner pour postuler
@@ -503,8 +503,11 @@ const SearchSitter = () => {
       </div>
     );
 
-    if (isDemo) return <div key={item.id}>{cardContent}</div>;
-    return <Link key={item.id} to={linkTo}>{cardContent}</Link>;
+    // Only wrap in Link if CAS 1 (hasAccess + real)
+    if (isClickable) {
+      return <Link key={item.id} to={linkTo}>{cardContent}</Link>;
+    }
+    return <div key={item.id}>{cardContent}</div>;
   };
 
   // ─── Render ───
