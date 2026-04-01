@@ -13,6 +13,7 @@ interface PageMetaProps {
   publishedAt?: string;
   author?: string;
   canonicalUrl?: string;
+  noindex?: boolean;
 }
 
 const PageMeta = ({
@@ -24,6 +25,7 @@ const PageMeta = ({
   publishedAt,
   author,
   canonicalUrl,
+  noindex = false,
 }: PageMetaProps) => {
   const fullUrl = canonicalUrl || `${SITE_URL}${path}`;
   const fullTitle = path === "/" ? title : `${title} | ${SITE_NAME}`;
@@ -32,6 +34,7 @@ const PageMeta = ({
     <Helmet>
       <title>{fullTitle}</title>
       <meta name="description" content={description} />
+      {noindex && <meta name="robots" content="noindex, nofollow" />}
       <link rel="canonical" href={fullUrl} />
 
       {/* Open Graph */}

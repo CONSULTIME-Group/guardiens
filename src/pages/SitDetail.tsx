@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, Link, useNavigate, Navigate } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -121,6 +122,8 @@ const SitDetail = () => {
   // SEO guard: demo listings have no detail page
   if (id?.startsWith("demo-")) return <Navigate to="/search" replace />;
 
+  const shouldNoindex = ["completed", "cancelled", "expired"].includes(sit.status);
+
   const photos: string[] = (property as any)?.photos || [];
   const avgRating = reviews.length > 0 ? (reviews.reduce((s: number, r: any) => s + r.overall_rating, 0) / reviews.length).toFixed(1) : null;
   const isOwner = sit.user_id === user?.id;
@@ -165,6 +168,7 @@ const SitDetail = () => {
 
   return (
     <div className="p-6 md:p-10 max-w-4xl mx-auto animate-fade-in pb-32">
+      <Helmet><meta name="robots" content="noindex, nofollow" /></Helmet>
       <Link to={isOwner ? "/sits" : "/search"} className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-6">
         <ArrowLeft className="h-4 w-4" /> {isOwner ? "Retour à mes annonces" : "Retour à la recherche"}
       </Link>

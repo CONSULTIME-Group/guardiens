@@ -129,7 +129,7 @@ const MySubscription = () => {
   if (view === "loading") {
     return (
       <div className="p-6 md:p-10 max-w-3xl mx-auto">
-        <PageMeta title="Mon abonnement | Guardiens" description="Gérez votre abonnement Guardiens." />
+        <PageMeta title="Mon abonnement | Guardiens" description="Gérez votre abonnement Guardiens." noindex />
         <div className="h-64 flex items-center justify-center text-foreground/40">
           <Loader2 className="h-6 w-6 animate-spin" />
         </div>
@@ -215,7 +215,7 @@ const MySubscription = () => {
 
   return (
     <div className="p-6 md:p-10 max-w-3xl mx-auto animate-fade-in space-y-8">
-      <PageMeta title="Mon abonnement | Guardiens" description="Gérez votre abonnement Guardiens." />
+      <PageMeta title="Mon abonnement | Guardiens" description="Gérez votre abonnement Guardiens." noindex />
 
       <h1 className="font-heading text-3xl font-bold">Mon abonnement</h1>
 

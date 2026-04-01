@@ -1,5 +1,6 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { useRef, useEffect, useState } from "react";
+import { Helmet } from "react-helmet-async";
 import OwnerDashboard from "@/components/dashboard/OwnerDashboard";
 import SitterDashboard from "@/components/dashboard/SitterDashboard";
 
@@ -27,6 +28,7 @@ const Dashboard = () => {
 
   return (
     <div className="p-6 md:p-10 max-w-4xl mx-auto">
+      <Helmet><meta name="robots" content="noindex, nofollow" /></Helmet>
       <div
         key={displayedRole}
         className={transitioning ? "animate-fade-out" : "animate-fade-in"}

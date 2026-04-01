@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
+import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -346,6 +347,7 @@ const Messages = () => {
 
   return (
     <div className="flex h-[calc(100vh-0px)] md:h-screen overflow-hidden">
+      <Helmet><meta name="robots" content="noindex, nofollow" /></Helmet>
       {/* ═══ CONVERSATION LIST ═══ */}
       {showList && (
         <div className={`${isMobile && activeConv ? "hidden" : ""} ${isMobile ? "w-full" : "w-80 border-r border-border"} flex flex-col bg-card`}>
