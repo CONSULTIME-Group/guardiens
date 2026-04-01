@@ -669,6 +669,7 @@ export default function PublicSitterProfile() {
           />
         </div>
       )}
+      </div>
     </div>
   );
 }
