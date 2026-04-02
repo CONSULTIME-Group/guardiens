@@ -456,7 +456,7 @@ const SitterDashboard = () => {
       </div>
 
       {/* ═══ 5. BAS DE PAGE — DEUX COLONNES ═══ */}
-      <div className="grid grid-cols-2 gap-4 px-8 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 px-5 md:px-8 mb-6 md:mb-8">
         {/* Colonne gauche — Annonces */}
         <div className="bg-card border border-border rounded-2xl p-5">
           <div className="flex justify-between items-center mb-4">
