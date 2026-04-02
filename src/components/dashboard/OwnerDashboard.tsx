@@ -266,7 +266,7 @@ const OwnerDashboard = () => {
 
       {/* ═══ Banner ═══ */}
       {banner && (
-        <Link to={banner.to} className={`block px-8 -mt-4 mb-4`}>
+        <Link to={banner.to} className="block px-5 md:px-8 -mt-4 mb-4">
           <div className={`p-4 rounded-xl border ${banner.bg} hover:shadow-md transition-shadow`}>
             <p className={`text-sm font-medium ${banner.text}`}>{banner.label}</p>
           </div>
