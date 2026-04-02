@@ -421,7 +421,7 @@ const OwnerDashboard = () => {
       </div>
 
       {/* ═══ Contextual resources ═══ */}
-      <div className="px-8">
+      <div className="px-5 md:px-8">
         {(() => {
           const annoncesCount = sits.length;
           const gardesCount = completedSits.length;
