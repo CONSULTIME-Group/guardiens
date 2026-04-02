@@ -532,7 +532,7 @@ const OwnerDashboard = () => {
 
       {/* ═══ CTA ═══ */}
       {cta && (
-        <div className="px-8">
+        <div className="px-5 md:px-8">
           <div className="p-6 rounded-xl bg-primary/5 border-2 border-dashed border-primary/30 text-center">
             <p className="text-sm text-muted-foreground mb-3">{cta.text}</p>
             <Link to={cta.to}><Button>{cta.cta}</Button></Link>
