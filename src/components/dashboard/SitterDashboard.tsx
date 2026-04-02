@@ -298,7 +298,7 @@ const SitterDashboard = () => {
         </div>
 
         {/* Zone 2 — MES STATS */}
-        <div className="p-5 border-r border-border">
+        <div className="p-4 md:p-5 border-b md:border-b-0 md:border-r border-border">
           <p className="text-xs uppercase tracking-widest text-muted-foreground font-sans mb-3">
             Mes stats
           </p>
