@@ -359,7 +359,7 @@ const SitterDashboard = () => {
       </div>
 
       {/* Emergency active section */}
-      {hasEmergencyProfile && <div className="px-8"><EmergencyDashSection /></div>}
+      {hasEmergencyProfile && <div className="px-5 md:px-8"><EmergencyDashSection /></div>}
 
       {/* ═══ 3. CTA + TIMBRES ═══ */}
       <div className="px-8 mb-8">
