@@ -362,7 +362,7 @@ const SitterDashboard = () => {
       {hasEmergencyProfile && <div className="px-5 md:px-8"><EmergencyDashSection /></div>}
 
       {/* ═══ 3. CTA + TIMBRES ═══ */}
-      <div className="px-8 mb-8">
+      <div className="px-5 md:px-8 mb-6 md:mb-8">
         <button
           onClick={() => navigate('/search')}
           className="w-full bg-primary text-white rounded-2xl py-4 text-base font-sans font-semibold mb-6 hover:bg-primary/90 transition-colors"
@@ -370,11 +370,11 @@ const SitterDashboard = () => {
           Découvrez les gardes disponibles →
         </button>
 
-        <div className="bg-card border border-border rounded-2xl p-5">
+        <div className="bg-card border border-border rounded-2xl p-4 md:p-5">
           <p className="text-xs uppercase tracking-widest text-muted-foreground font-sans mb-3">
             Mes écussons
           </p>
-          <div className="grid grid-cols-6 gap-2.5 mb-3">
+          <div className="grid grid-cols-4 md:grid-cols-6 gap-2.5 mb-3">
             {TIMBRES_ORDER.map((key) => (
               <div key={key} className="flex justify-center">
                 <BadgeTimbre id={key} unlocked={!!unlockedSet[key]} size="compact" />
