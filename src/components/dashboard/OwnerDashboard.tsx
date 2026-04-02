@@ -542,7 +542,7 @@ const OwnerDashboard = () => {
 
       {/* ═══ Coups de coeur ═══ */}
       {highlights.length > 0 && (
-        <div className="px-8">
+        <div className="px-5 md:px-8">
           <DashSection title="Ce que les gardiens disent de votre maison">
             <div className="space-y-2">
               {highlights.slice(0, 3).map((h: any) => (

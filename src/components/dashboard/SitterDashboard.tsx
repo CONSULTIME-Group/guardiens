@@ -542,7 +542,7 @@ const SitterDashboard = () => {
 
       {/* Conseils */}
       {articles.length > 0 && (
-        <div className="px-8 mb-8">
+        <div className="px-5 md:px-8 mb-6 md:mb-8">
           <div className="flex items-center justify-between mb-4">
             <h2 className="font-heading text-lg font-semibold">Conseils pour vous</h2>
             <Link to="/actualites" className="text-xs text-primary hover:underline font-medium">Voir tout →</Link>
