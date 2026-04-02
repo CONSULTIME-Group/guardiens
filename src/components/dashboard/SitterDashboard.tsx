@@ -332,7 +332,7 @@ const SitterDashboard = () => {
         </div>
 
         {/* Zone 3 — STATUT D'URGENCE */}
-        <div className="p-5">
+        <div className="p-4 md:p-5">
           <p className="text-xs uppercase tracking-widest text-muted-foreground font-sans mb-3">
             Statut d'urgence
           </p>
