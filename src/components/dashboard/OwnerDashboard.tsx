@@ -352,7 +352,7 @@ const OwnerDashboard = () => {
       </div>
 
       {/* ═══ 4. CANDIDATURES ENRICHIES ═══ */}
-      <div className="px-8">
+      <div className="px-5 md:px-8">
         <DashSection title="Candidatures récentes" action={
           recentApps.length > 0 ? <Link to="/sits" className="text-xs text-primary hover:underline font-medium">Voir toutes</Link> : undefined
         }>
