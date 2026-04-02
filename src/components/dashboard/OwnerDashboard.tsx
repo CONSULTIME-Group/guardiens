@@ -526,7 +526,7 @@ const OwnerDashboard = () => {
       </div>
 
       {/* ═══ Emergency sitters ═══ */}
-      <div className="px-8">
+      <div className="px-5 md:px-8">
         <NearbyEmergencySitters />
       </div>
 
