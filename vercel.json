@@ -1,0 +1,31 @@
+{
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "https://service.prerender.io/$1",
+      "has": [
+        {
+          "type": "header",
+          "key": "user-agent",
+          "value": ".*(googlebot|bingbot|yandex|baiduspider|facebookexternalhit|twitterbot|rogerbot|linkedinbot|embedly|quora link preview|showyoubot|outbrain|pinterest|slackbot|vkShare|W3C_Validator).*"
+        }
+      ],
+      "missing": []
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "X-Prerender-Token",
+          "value": "P7riC8MFdBNYlNYGa8oz"
+        }
+      ]
+    }
+  ]
+}
