@@ -235,7 +235,7 @@ const OwnerDashboard = () => {
   return (
     <div className="space-y-8">
       {/* ═══ 1. HEADER VERT ═══ */}
-      <div className="relative overflow-hidden bg-primary rounded-b-3xl px-10 pt-8 pb-6 mb-8">
+      <div className="relative overflow-hidden bg-primary rounded-b-3xl px-5 md:px-10 pt-6 md:pt-8 pb-5 md:pb-6 mb-6 md:mb-8">
         <div className="absolute right-0 top-0 opacity-[0.06] pointer-events-none">
           <svg width="280" height="200" viewBox="0 0 280 200">
             <ellipse cx="200" cy="100" rx="160" ry="100" fill="white"/>
@@ -243,12 +243,12 @@ const OwnerDashboard = () => {
             <polygon points="80,50 130,15 180,50" fill="white"/>
           </svg>
         </div>
-        <div className="relative z-10 flex items-end justify-between">
+        <div className="relative z-10 flex flex-col md:flex-row md:items-end md:justify-between gap-4">
           <div>
             <p className="text-xs uppercase tracking-[3px] text-white/60 font-sans mb-1">
               Espace propriétaire
             </p>
-            <h1 className="text-4xl font-heading font-bold text-white leading-tight mb-1">
+            <h1 className="text-2xl md:text-4xl font-heading font-bold text-white leading-tight mb-1">
               Bonjour{user?.firstName ? `, ${capitalize(user.firstName)}` : ""} !
             </h1>
             <p className="text-sm text-white/75 font-sans">
@@ -257,7 +257,7 @@ const OwnerDashboard = () => {
           </div>
           <button
             onClick={() => navigate("/sits/create")}
-            className="shrink-0 bg-white text-primary rounded-xl px-5 py-2.5 text-sm font-medium font-sans hover:bg-white/90 transition-colors"
+            className="shrink-0 bg-white text-primary rounded-xl px-5 py-2.5 text-sm font-medium font-sans hover:bg-white/90 transition-colors w-full md:w-auto text-center"
           >
             + Publier une annonce
           </button>
