@@ -220,8 +220,7 @@ const SitterDashboard = () => {
   return (
     <div className="space-y-0">
       {/* ═══ 1. HEADER — VERT FONCÉ ═══ */}
-      <div className="relative overflow-hidden bg-[#1a4a35] rounded-b-3xl px-10 pt-8 pb-6 mb-8">
-        {/* Formes décoratives */}
+      <div className="relative overflow-hidden bg-[#1a4a35] rounded-b-3xl px-5 md:px-10 pt-6 md:pt-8 pb-5 md:pb-6 mb-6 md:mb-8">
         <div className="absolute right-0 top-0 opacity-[0.07] pointer-events-none">
           <svg width="300" height="200" viewBox="0 0 300 200">
             <circle cx="250" cy="50" r="120" fill="white"/>
@@ -229,13 +228,12 @@ const SitterDashboard = () => {
           </svg>
         </div>
 
-        <div className="relative z-10 flex items-center justify-between">
-          {/* Gauche — titre */}
+        <div className="relative z-10 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
             <p className="text-xs uppercase tracking-[3px] text-white/60 font-sans mb-1">
               Espace gardien
             </p>
-            <h1 className="text-4xl font-heading font-bold text-white leading-tight mb-1">
+            <h1 className="text-2xl md:text-4xl font-heading font-bold text-white leading-tight mb-1">
               Bonjour{user?.firstName ? `, ${capitalize(user.firstName)}` : ""} !
             </h1>
             <p className="text-sm text-white/75 font-sans">
@@ -243,8 +241,7 @@ const SitterDashboard = () => {
             </p>
           </div>
 
-          {/* Droite — lien profil + toggle */}
-          <div className="flex flex-col items-end gap-3 shrink-0">
+          <div className="flex flex-col items-start md:items-end gap-3 shrink-0">
             <a
               href={`/gardiens/${user?.id}`}
               className="text-xs text-white/70 font-sans flex items-center gap-1 hover:text-white/90"
@@ -252,9 +249,8 @@ const SitterDashboard = () => {
               Voir votre profil public ↗
             </a>
 
-            {/* Toggle disponibilité */}
-            <div className="flex items-center gap-3 bg-white/10 border border-white/20 rounded-xl px-4 py-2.5">
-              <div>
+            <div className="flex items-center gap-3 bg-white/10 border border-white/20 rounded-xl px-4 py-2.5 w-full md:w-auto">
+              <div className="flex-1 md:flex-none">
                 <p className="text-sm text-white font-sans font-medium leading-none mb-0.5">
                   Je suis disponible
                 </p>
