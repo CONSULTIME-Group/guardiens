@@ -389,7 +389,7 @@ const SitterDashboard = () => {
       </div>
 
       {/* ═══ 4. CHECKLIST ═══ */}
-      <div className="px-8 mb-8">
+      <div className="px-5 md:px-8 mb-6 md:mb-8">
         {incompleteItems.length > 0 && (
           <div className="mb-4">
             <p className="text-sm font-medium text-foreground mb-3">
