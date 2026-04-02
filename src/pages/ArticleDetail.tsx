@@ -232,6 +232,7 @@ export default function ArticleDetail() {
 
       {/* CORRECTION 1 — Schema.org Article */}
       <Helmet>
+        <meta name="robots" content="index, follow" />
         <script type="application/ld+json">{JSON.stringify(articleSchema)}</script>
         {faqItems.length > 0 && (
           <script type="application/ld+json">{JSON.stringify({
