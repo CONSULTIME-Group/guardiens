@@ -274,7 +274,7 @@ const OwnerDashboard = () => {
       )}
 
       {/* ═══ 2. STATS 4 COLONNES ═══ */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 px-8">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 px-5 md:px-8">
         <div className="bg-card border border-border rounded-2xl p-4 text-center">
           <p className="text-3xl font-heading font-bold text-foreground mb-1">{completedSits.length}</p>
           <p className="text-xs uppercase tracking-wider text-muted-foreground font-sans">Gardes réalisées</p>
