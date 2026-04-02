@@ -6,7 +6,7 @@ import { ArrowRight, ArrowLeft, Home, Key, Handshake } from "lucide-react";
 
 import PageMeta from "@/components/PageMeta";
 import useEmblaCarousel from "embla-carousel-react";
-import heroDogBbq from "@/assets/hero-dog-bbq.jpg";
+import heroDogBbq from "@/assets/hero-landing.png";
 import DemoListingShowcase from "@/components/landing/DemoListingShowcase";
 
 
