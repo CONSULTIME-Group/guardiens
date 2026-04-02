@@ -220,8 +220,7 @@ const SitterDashboard = () => {
   return (
     <div className="space-y-0">
       {/* ═══ 1. HEADER — VERT FONCÉ ═══ */}
-      <div className="relative overflow-hidden bg-[#1a4a35] rounded-b-3xl px-10 pt-8 pb-6 mb-8">
-        {/* Formes décoratives */}
+      <div className="relative overflow-hidden bg-[#1a4a35] rounded-b-3xl px-5 md:px-10 pt-6 md:pt-8 pb-5 md:pb-6 mb-6 md:mb-8">
         <div className="absolute right-0 top-0 opacity-[0.07] pointer-events-none">
           <svg width="300" height="200" viewBox="0 0 300 200">
             <circle cx="250" cy="50" r="120" fill="white"/>
@@ -229,13 +228,12 @@ const SitterDashboard = () => {
           </svg>
         </div>
 
-        <div className="relative z-10 flex items-center justify-between">
-          {/* Gauche — titre */}
+        <div className="relative z-10 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
             <p className="text-xs uppercase tracking-[3px] text-white/60 font-sans mb-1">
               Espace gardien
             </p>
-            <h1 className="text-4xl font-heading font-bold text-white leading-tight mb-1">
+            <h1 className="text-2xl md:text-4xl font-heading font-bold text-white leading-tight mb-1">
               Bonjour{user?.firstName ? `, ${capitalize(user.firstName)}` : ""} !
             </h1>
             <p className="text-sm text-white/75 font-sans">
@@ -243,8 +241,7 @@ const SitterDashboard = () => {
             </p>
           </div>
 
-          {/* Droite — lien profil + toggle */}
-          <div className="flex flex-col items-end gap-3 shrink-0">
+          <div className="flex flex-col items-start md:items-end gap-3 shrink-0">
             <a
               href={`/gardiens/${user?.id}`}
               className="text-xs text-white/70 font-sans flex items-center gap-1 hover:text-white/90"
@@ -252,9 +249,8 @@ const SitterDashboard = () => {
               Voir votre profil public ↗
             </a>
 
-            {/* Toggle disponibilité */}
-            <div className="flex items-center gap-3 bg-white/10 border border-white/20 rounded-xl px-4 py-2.5">
-              <div>
+            <div className="flex items-center gap-3 bg-white/10 border border-white/20 rounded-xl px-4 py-2.5 w-full md:w-auto">
+              <div className="flex-1 md:flex-none">
                 <p className="text-sm text-white font-sans font-medium leading-none mb-0.5">
                   Je suis disponible
                 </p>
@@ -274,9 +270,9 @@ const SitterDashboard = () => {
       </div>
 
       {/* ═══ 2. BARRE DE STATUT UNIFIÉE ═══ */}
-      <div className="mx-8 mb-8 bg-card border border-border rounded-2xl overflow-hidden grid grid-cols-3">
+      <div className="mx-5 md:mx-8 mb-6 md:mb-8 bg-card border border-border rounded-2xl overflow-hidden grid grid-cols-1 md:grid-cols-3">
         {/* Zone 1 — MON PROFIL */}
-        <div className="p-5 border-r border-border">
+        <div className="p-4 md:p-5 border-b md:border-b-0 md:border-r border-border">
           <p className="text-xs uppercase tracking-widest text-muted-foreground font-sans mb-3">
             Mon profil
           </p>
@@ -302,7 +298,7 @@ const SitterDashboard = () => {
         </div>
 
         {/* Zone 2 — MES STATS */}
-        <div className="p-5 border-r border-border">
+        <div className="p-4 md:p-5 border-b md:border-b-0 md:border-r border-border">
           <p className="text-xs uppercase tracking-widest text-muted-foreground font-sans mb-3">
             Mes stats
           </p>
@@ -336,7 +332,7 @@ const SitterDashboard = () => {
         </div>
 
         {/* Zone 3 — STATUT D'URGENCE */}
-        <div className="p-5">
+        <div className="p-4 md:p-5">
           <p className="text-xs uppercase tracking-widest text-muted-foreground font-sans mb-3">
             Statut d'urgence
           </p>
@@ -363,10 +359,10 @@ const SitterDashboard = () => {
       </div>
 
       {/* Emergency active section */}
-      {hasEmergencyProfile && <div className="px-8"><EmergencyDashSection /></div>}
+      {hasEmergencyProfile && <div className="px-5 md:px-8"><EmergencyDashSection /></div>}
 
       {/* ═══ 3. CTA + TIMBRES ═══ */}
-      <div className="px-8 mb-8">
+      <div className="px-5 md:px-8 mb-6 md:mb-8">
         <button
           onClick={() => navigate('/search')}
           className="w-full bg-primary text-white rounded-2xl py-4 text-base font-sans font-semibold mb-6 hover:bg-primary/90 transition-colors"
@@ -374,11 +370,11 @@ const SitterDashboard = () => {
           Découvrez les gardes disponibles →
         </button>
 
-        <div className="bg-card border border-border rounded-2xl p-5">
+        <div className="bg-card border border-border rounded-2xl p-4 md:p-5">
           <p className="text-xs uppercase tracking-widest text-muted-foreground font-sans mb-3">
             Mes écussons
           </p>
-          <div className="grid grid-cols-6 gap-2.5 mb-3">
+          <div className="grid grid-cols-4 md:grid-cols-6 gap-2.5 mb-3">
             {TIMBRES_ORDER.map((key) => (
               <div key={key} className="flex justify-center">
                 <BadgeTimbre id={key} unlocked={!!unlockedSet[key]} size="compact" />
@@ -393,7 +389,7 @@ const SitterDashboard = () => {
       </div>
 
       {/* ═══ 4. CHECKLIST ═══ */}
-      <div className="px-8 mb-8">
+      <div className="px-5 md:px-8 mb-6 md:mb-8">
         {incompleteItems.length > 0 && (
           <div className="mb-4">
             <p className="text-sm font-medium text-foreground mb-3">
@@ -460,7 +456,7 @@ const SitterDashboard = () => {
       </div>
 
       {/* ═══ 5. BAS DE PAGE — DEUX COLONNES ═══ */}
-      <div className="grid grid-cols-2 gap-4 px-8 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 px-5 md:px-8 mb-6 md:mb-8">
         {/* Colonne gauche — Annonces */}
         <div className="bg-card border border-border rounded-2xl p-5">
           <div className="flex justify-between items-center mb-4">
@@ -546,7 +542,7 @@ const SitterDashboard = () => {
 
       {/* Conseils */}
       {articles.length > 0 && (
-        <div className="px-8 mb-8">
+        <div className="px-5 md:px-8 mb-6 md:mb-8">
           <div className="flex items-center justify-between mb-4">
             <h2 className="font-heading text-lg font-semibold">Conseils pour vous</h2>
             <Link to="/actualites" className="text-xs text-primary hover:underline font-medium">Voir tout →</Link>

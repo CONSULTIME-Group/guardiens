@@ -235,7 +235,7 @@ const OwnerDashboard = () => {
   return (
     <div className="space-y-8">
       {/* ═══ 1. HEADER VERT ═══ */}
-      <div className="relative overflow-hidden bg-primary rounded-b-3xl px-10 pt-8 pb-6 mb-8">
+      <div className="relative overflow-hidden bg-primary rounded-b-3xl px-5 md:px-10 pt-6 md:pt-8 pb-5 md:pb-6 mb-6 md:mb-8">
         <div className="absolute right-0 top-0 opacity-[0.06] pointer-events-none">
           <svg width="280" height="200" viewBox="0 0 280 200">
             <ellipse cx="200" cy="100" rx="160" ry="100" fill="white"/>
@@ -243,12 +243,12 @@ const OwnerDashboard = () => {
             <polygon points="80,50 130,15 180,50" fill="white"/>
           </svg>
         </div>
-        <div className="relative z-10 flex items-end justify-between">
+        <div className="relative z-10 flex flex-col md:flex-row md:items-end md:justify-between gap-4">
           <div>
             <p className="text-xs uppercase tracking-[3px] text-white/60 font-sans mb-1">
               Espace propriétaire
             </p>
-            <h1 className="text-4xl font-heading font-bold text-white leading-tight mb-1">
+            <h1 className="text-2xl md:text-4xl font-heading font-bold text-white leading-tight mb-1">
               Bonjour{user?.firstName ? `, ${capitalize(user.firstName)}` : ""} !
             </h1>
             <p className="text-sm text-white/75 font-sans">
@@ -257,7 +257,7 @@ const OwnerDashboard = () => {
           </div>
           <button
             onClick={() => navigate("/sits/create")}
-            className="shrink-0 bg-white text-primary rounded-xl px-5 py-2.5 text-sm font-medium font-sans hover:bg-white/90 transition-colors"
+            className="shrink-0 bg-white text-primary rounded-xl px-5 py-2.5 text-sm font-medium font-sans hover:bg-white/90 transition-colors w-full md:w-auto text-center"
           >
             + Publier une annonce
           </button>
@@ -266,7 +266,7 @@ const OwnerDashboard = () => {
 
       {/* ═══ Banner ═══ */}
       {banner && (
-        <Link to={banner.to} className={`block px-8 -mt-4 mb-4`}>
+        <Link to={banner.to} className="block px-5 md:px-8 -mt-4 mb-4">
           <div className={`p-4 rounded-xl border ${banner.bg} hover:shadow-md transition-shadow`}>
             <p className={`text-sm font-medium ${banner.text}`}>{banner.label}</p>
           </div>
@@ -274,7 +274,7 @@ const OwnerDashboard = () => {
       )}
 
       {/* ═══ 2. STATS 4 COLONNES ═══ */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 px-8">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 px-5 md:px-8">
         <div className="bg-card border border-border rounded-2xl p-4 text-center">
           <p className="text-3xl font-heading font-bold text-foreground mb-1">{completedSits.length}</p>
           <p className="text-xs uppercase tracking-wider text-muted-foreground font-sans">Gardes réalisées</p>
@@ -298,7 +298,7 @@ const OwnerDashboard = () => {
       </div>
 
       {/* ═══ 3. ANIMAUX 2 COLONNES ═══ */}
-      <div className="px-8">
+      <div className="px-5 md:px-8">
         <DashSection title="Mes animaux" action={
           <Link to="/owner-profile" className="text-xs text-primary hover:underline font-medium">Gérer</Link>
         }>
@@ -352,7 +352,7 @@ const OwnerDashboard = () => {
       </div>
 
       {/* ═══ 4. CANDIDATURES ENRICHIES ═══ */}
-      <div className="px-8">
+      <div className="px-5 md:px-8">
         <DashSection title="Candidatures récentes" action={
           recentApps.length > 0 ? <Link to="/sits" className="text-xs text-primary hover:underline font-medium">Voir toutes</Link> : undefined
         }>
@@ -408,7 +408,7 @@ const OwnerDashboard = () => {
                     </div>
                     <button
                       onClick={() => navigate(`/gardiens/${sitter.id}`)}
-                      className="shrink-0 border border-primary text-primary rounded-xl px-4 py-2 text-xs font-sans hover:bg-primary/5 transition-colors"
+                      className="shrink-0 border border-primary text-primary rounded-xl px-3 md:px-4 py-2 text-xs font-sans hover:bg-primary/5 transition-colors"
                     >
                       Voir le profil
                     </button>
@@ -421,7 +421,7 @@ const OwnerDashboard = () => {
       </div>
 
       {/* ═══ Contextual resources ═══ */}
-      <div className="px-8">
+      <div className="px-5 md:px-8">
         {(() => {
           const annoncesCount = sits.length;
           const gardesCount = completedSits.length;
@@ -456,7 +456,7 @@ const OwnerDashboard = () => {
       </div>
 
       {/* ═══ 6. BAS DE PAGE — 2 COLONNES ═══ */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 px-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 px-5 md:px-8">
         {/* Colonne gauche — Mes petites missions */}
         <div className="bg-card border border-border rounded-2xl p-5">
           <div className="flex justify-between items-center mb-4">
@@ -526,13 +526,13 @@ const OwnerDashboard = () => {
       </div>
 
       {/* ═══ Emergency sitters ═══ */}
-      <div className="px-8">
+      <div className="px-5 md:px-8">
         <NearbyEmergencySitters />
       </div>
 
       {/* ═══ CTA ═══ */}
       {cta && (
-        <div className="px-8">
+        <div className="px-5 md:px-8">
           <div className="p-6 rounded-xl bg-primary/5 border-2 border-dashed border-primary/30 text-center">
             <p className="text-sm text-muted-foreground mb-3">{cta.text}</p>
             <Link to={cta.to}><Button>{cta.cta}</Button></Link>
@@ -542,7 +542,7 @@ const OwnerDashboard = () => {
 
       {/* ═══ Coups de coeur ═══ */}
       {highlights.length > 0 && (
-        <div className="px-8">
+        <div className="px-5 md:px-8">
           <DashSection title="Ce que les gardiens disent de votre maison">
             <div className="space-y-2">
               {highlights.slice(0, 3).map((h: any) => (
