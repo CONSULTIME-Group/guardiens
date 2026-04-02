@@ -272,7 +272,7 @@ const SitterDashboard = () => {
       {/* ═══ 2. BARRE DE STATUT UNIFIÉE ═══ */}
       <div className="mx-5 md:mx-8 mb-6 md:mb-8 bg-card border border-border rounded-2xl overflow-hidden grid grid-cols-1 md:grid-cols-3">
         {/* Zone 1 — MON PROFIL */}
-        <div className="p-5 border-r border-border">
+        <div className="p-4 md:p-5 border-b md:border-b-0 md:border-r border-border">
           <p className="text-xs uppercase tracking-widest text-muted-foreground font-sans mb-3">
             Mon profil
           </p>
