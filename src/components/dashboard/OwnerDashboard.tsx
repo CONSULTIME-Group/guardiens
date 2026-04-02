@@ -298,7 +298,7 @@ const OwnerDashboard = () => {
       </div>
 
       {/* ═══ 3. ANIMAUX 2 COLONNES ═══ */}
-      <div className="px-8">
+      <div className="px-5 md:px-8">
         <DashSection title="Mes animaux" action={
           <Link to="/owner-profile" className="text-xs text-primary hover:underline font-medium">Gérer</Link>
         }>
