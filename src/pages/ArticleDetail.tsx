@@ -173,6 +173,7 @@ export default function ArticleDetail() {
     "url": `https://guardiens.fr/actualites/${article.slug}`,
     "datePublished": article.created_at,
     "dateModified": article.updated_at,
+    ...(article.cover_image_url && { "image": article.cover_image_url }),
     "author": {
       "@type": "Person",
       "name": "Jérémie Martinot"
@@ -180,10 +181,16 @@ export default function ArticleDetail() {
     "publisher": {
       "@type": "Organization",
       "name": "Guardiens",
-      "url": "https://guardiens.fr"
+      "url": "https://guardiens.fr",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://guardiens.fr/logo.png"
+      }
     },
-    ...(article.cover_image_url && { "image": article.cover_image_url }),
-    "mainEntityOfPage": `https://guardiens.fr/actualites/${article.slug}`,
+    "mainEntityOfPage": {
+      "@type": "WebPage",
+      "@id": `https://guardiens.fr/actualites/${article.slug}`
+    },
   };
 
   // FAQ schema extraction
