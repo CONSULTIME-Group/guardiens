@@ -408,7 +408,7 @@ const OwnerDashboard = () => {
                     </div>
                     <button
                       onClick={() => navigate(`/gardiens/${sitter.id}`)}
-                      className="shrink-0 border border-primary text-primary rounded-xl px-4 py-2 text-xs font-sans hover:bg-primary/5 transition-colors"
+                      className="shrink-0 border border-primary text-primary rounded-xl px-3 md:px-4 py-2 text-xs font-sans hover:bg-primary/5 transition-colors"
                     >
                       Voir le profil
                     </button>
