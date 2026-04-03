@@ -113,7 +113,7 @@ async function main() {
   // City guides
   if (cityGuides) {
     for (const cg of cityGuides) {
-      entries.push(urlEntry(`/guide/${cg.slug}`, (cg.updated_at || today).split("T")[0], "weekly", "0.7"));
+      entries.push(urlEntry(`/guides/${cg.slug}`, (cg.updated_at || today).split("T")[0], "weekly", "0.7"));
     }
   }
 

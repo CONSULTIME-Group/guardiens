@@ -146,7 +146,7 @@ Deno.serve(async () => {
   // City guides
   if (cityGuides) {
     for (const cg of cityGuides) {
-      xml += urlEntry(`/guide/${cg.slug}`, (cg.updated_at || today).split("T")[0], "weekly", "0.7");
+      xml += urlEntry(`/guides/${cg.slug}`, (cg.updated_at || today).split("T")[0], "weekly", "0.7");
     }
   }
 
