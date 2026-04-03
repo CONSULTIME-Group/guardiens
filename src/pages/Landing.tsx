@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import notreHistoirePanorama from "@/assets/notre-histoire-panorama.png";
+import notreHistoirePanorama from "@/assets/story-photo.jpeg";
 import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, ArrowLeft, Home, Key, Handshake } from "lucide-react";
