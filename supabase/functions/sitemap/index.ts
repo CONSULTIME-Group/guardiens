@@ -119,7 +119,7 @@ Deno.serve(async () => {
 
   // City landing pages
   for (const slug of cityPages) {
-    xml += urlEntry(`/house-sitting-${slug}`, today, "weekly", "0.9");
+    xml += urlEntry(`/house-sitting/${slug}`, today, "weekly", "0.9");
   }
 
   // Articles → /actualites/{slug}
