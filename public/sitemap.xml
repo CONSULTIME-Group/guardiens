@@ -43,517 +43,493 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/communaute</loc>
-    <lastmod>2026-03-27</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://guardiens.fr/outils-pratiques</loc>
-    <lastmod>2026-03-27</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://guardiens.fr/inscription</loc>
-    <lastmod>2026-03-27</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://guardiens.fr/recherche</loc>
-    <lastmod>2026-03-27</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://guardiens.fr/house-sitting-annecy</loc>
+    <loc>https://guardiens.fr/house-sitting/annecy</loc>
     <lastmod>2026-03-27</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/house-sitting-lyon</loc>
+    <loc>https://guardiens.fr/house-sitting/lyon</loc>
     <lastmod>2026-03-27</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/house-sitting-grenoble</loc>
+    <loc>https://guardiens.fr/house-sitting/grenoble</loc>
     <lastmod>2026-03-27</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/house-sitting-caluire-et-cuire</loc>
+    <loc>https://guardiens.fr/house-sitting/caluire-et-cuire</loc>
     <lastmod>2026-03-27</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/house-sitting-chambery</loc>
+    <loc>https://guardiens.fr/house-sitting/chambery</loc>
     <lastmod>2026-03-27</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/house-sitting-aura</loc>
+    <loc>https://guardiens.fr/house-sitting/aura</loc>
     <lastmod>2026-03-27</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/blog/erreurs-premiere-garde</loc>
+    <loc>https://guardiens.fr/actualites/erreurs-premiere-garde</loc>
     <lastmod>2026-03-25</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/blog/preparer-maison-avant-vacances</loc>
+    <loc>https://guardiens.fr/actualites/preparer-maison-avant-vacances</loc>
     <lastmod>2026-03-25</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/blog/pet-sitting-grenoble-guide</loc>
+    <loc>https://guardiens.fr/actualites/pet-sitting-grenoble-guide</loc>
     <lastmod>2026-03-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/blog/garde-chien-lyon-solutions</loc>
+    <loc>https://guardiens.fr/actualites/garde-chien-lyon-solutions</loc>
     <lastmod>2026-03-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/blog/garde-chat-domicile-house-sitting</loc>
+    <loc>https://guardiens.fr/actualites/garde-chat-domicile-house-sitting</loc>
     <lastmod>2026-03-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/blog/devenir-pet-sitter-guide-debutant</loc>
+    <loc>https://guardiens.fr/actualites/devenir-pet-sitter-guide-debutant</loc>
     <lastmod>2026-03-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/blog/house-sitting-auvergne-rhone-alpes</loc>
+    <loc>https://guardiens.fr/actualites/house-sitting-auvergne-rhone-alpes</loc>
     <lastmod>2026-03-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/blog/notre-histoire-pet-sitting-argentine-lyon</loc>
+    <loc>https://guardiens.fr/actualites/notre-histoire-pet-sitting-argentine-lyon</loc>
     <lastmod>2026-03-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/blog/house-sitting-saint-etienne-guide</loc>
+    <loc>https://guardiens.fr/actualites/house-sitting-saint-etienne-guide</loc>
     <lastmod>2026-03-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/blog/pet-sitting-clermont-ferrand-guide</loc>
+    <loc>https://guardiens.fr/actualites/pet-sitting-clermont-ferrand-guide</loc>
     <lastmod>2026-03-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/blog/pet-sitting-lyon-guide-complet</loc>
+    <loc>https://guardiens.fr/actualites/pet-sitting-lyon-guide-complet</loc>
     <lastmod>2026-03-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/blog/garde-ferme-animaux-monts-du-lyonnais</loc>
+    <loc>https://guardiens.fr/actualites/garde-ferme-animaux-monts-du-lyonnais</loc>
     <lastmod>2026-03-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/blog/gardiennage-maison-vacances-aura</loc>
+    <loc>https://guardiens.fr/actualites/gardiennage-maison-vacances-aura</loc>
     <lastmod>2026-03-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/blog/pet-sitting-valence-drome</loc>
+    <loc>https://guardiens.fr/actualites/pet-sitting-valence-drome</loc>
     <lastmod>2026-03-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/blog/pet-sitting-grenoble-chartreuse</loc>
+    <loc>https://guardiens.fr/actualites/pet-sitting-grenoble-chartreuse</loc>
     <lastmod>2026-03-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/blog/house-sitting-haute-savoie-annecy-megeve</loc>
+    <loc>https://guardiens.fr/actualites/house-sitting-haute-savoie-annecy-megeve</loc>
     <lastmod>2026-03-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/blog/pet-sitting-lyon-ouest-lyonnais</loc>
+    <loc>https://guardiens.fr/actualites/pet-sitting-lyon-ouest-lyonnais</loc>
     <lastmod>2026-03-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/blog/house-sitting-aix-les-bains</loc>
+    <loc>https://guardiens.fr/actualites/house-sitting-aix-les-bains</loc>
     <lastmod>2026-03-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/blog/guide-house-sitting-lyon</loc>
+    <loc>https://guardiens.fr/actualites/guide-house-sitting-lyon</loc>
     <lastmod>2026-03-25</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/blog/pet-sitting-saint-etienne-loire</loc>
+    <loc>https://guardiens.fr/actualites/pet-sitting-saint-etienne-loire</loc>
     <lastmod>2026-03-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/blog/pet-sitting-annecy-guide</loc>
+    <loc>https://guardiens.fr/actualites/pet-sitting-annecy-guide</loc>
     <lastmod>2026-03-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/blog/berger-australien-guide</loc>
+    <loc>https://guardiens.fr/actualites/berger-australien-guide</loc>
     <lastmod>2026-03-25</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/blog/pet-sitting-venissieux</loc>
+    <loc>https://guardiens.fr/actualites/pet-sitting-venissieux</loc>
     <lastmod>2026-03-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/blog/conseils-garder-chien</loc>
+    <loc>https://guardiens.fr/actualites/conseils-garder-chien</loc>
     <lastmod>2026-03-25</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/blog/temoignage-premiere-garde-auvergne</loc>
+    <loc>https://guardiens.fr/actualites/temoignage-premiere-garde-auvergne</loc>
     <lastmod>2026-03-25</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/blog/border-collie-lyon-guide-race</loc>
+    <loc>https://guardiens.fr/actualites/border-collie-lyon-guide-race</loc>
     <lastmod>2026-03-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/blog/guide-lieu-meilleurs-parcs-chiens-lyon</loc>
+    <loc>https://guardiens.fr/actualites/guide-lieu-meilleurs-parcs-chiens-lyon</loc>
     <lastmod>2026-03-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/blog/conseil-gardien-creer-profil-attractif-lyon</loc>
+    <loc>https://guardiens.fr/actualites/conseil-gardien-creer-profil-attractif-lyon</loc>
     <lastmod>2026-03-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/blog/house-sitting-annecy</loc>
+    <loc>https://guardiens.fr/actualites/house-sitting-annecy</loc>
     <lastmod>2026-03-27</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/blog/house-sitting-lyon</loc>
+    <loc>https://guardiens.fr/actualites/house-sitting-lyon</loc>
     <lastmod>2026-03-27</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/blog/house-sitting-grenoble</loc>
+    <loc>https://guardiens.fr/actualites/house-sitting-grenoble</loc>
     <lastmod>2026-03-27</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/blog/golden-retriever-lyon-guide-race</loc>
+    <loc>https://guardiens.fr/actualites/golden-retriever-lyon-guide-race</loc>
     <lastmod>2026-03-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/blog/house-sitting-caluire-et-cuire</loc>
+    <loc>https://guardiens.fr/actualites/house-sitting-caluire-et-cuire</loc>
     <lastmod>2026-03-27</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/blog/house-sitting-chambery</loc>
+    <loc>https://guardiens.fr/actualites/house-sitting-chambery</loc>
     <lastmod>2026-03-27</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/blog/pet-sitting-clermont-ferrand</loc>
+    <loc>https://guardiens.fr/actualites/pet-sitting-clermont-ferrand</loc>
     <lastmod>2026-03-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/blog/pet-sitting-villeurbanne</loc>
+    <loc>https://guardiens.fr/actualites/pet-sitting-villeurbanne</loc>
     <lastmod>2026-03-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/blog/boom-pet-sitting-lyon-2026</loc>
+    <loc>https://guardiens.fr/actualites/boom-pet-sitting-lyon-2026</loc>
     <lastmod>2026-03-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/blog/malinois-lyon-guide-race</loc>
+    <loc>https://guardiens.fr/actualites/malinois-lyon-guide-race</loc>
     <lastmod>2026-03-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/blog/bouledogue-francais-lyon-guide-race</loc>
+    <loc>https://guardiens.fr/actualites/bouledogue-francais-lyon-guide-race</loc>
     <lastmod>2026-03-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/blog/pet-sitting-chambery-savoie</loc>
+    <loc>https://guardiens.fr/actualites/pet-sitting-chambery-savoie</loc>
     <lastmod>2026-03-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/blog/labrador-retriever-guide-race</loc>
+    <loc>https://guardiens.fr/actualites/labrador-retriever-guide-race</loc>
     <lastmod>2026-03-27</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/blog/berger-allemand-guide-race</loc>
+    <loc>https://guardiens.fr/actualites/berger-allemand-guide-race</loc>
     <lastmod>2026-03-27</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/blog/parcs-chiens-lyon-guide-complet</loc>
+    <loc>https://guardiens.fr/actualites/parcs-chiens-lyon-guide-complet</loc>
     <lastmod>2026-03-27</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/blog/veterinaire-urgence-lyon-guide</loc>
+    <loc>https://guardiens.fr/actualites/veterinaire-urgence-lyon-guide</loc>
     <lastmod>2026-03-27</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/blog/checklist-partir-vacances-animaux</loc>
+    <loc>https://guardiens.fr/actualites/checklist-partir-vacances-animaux</loc>
     <lastmod>2026-03-27</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/blog/parcs-balades-chiens-annecy-guide</loc>
+    <loc>https://guardiens.fr/actualites/parcs-balades-chiens-annecy-guide</loc>
     <lastmod>2026-03-27</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/blog/veterinaire-urgence-annecy-haute-savoie</loc>
+    <loc>https://guardiens.fr/actualites/veterinaire-urgence-annecy-haute-savoie</loc>
     <lastmod>2026-03-27</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/blog/house-sitting-ete-aura-guide</loc>
+    <loc>https://guardiens.fr/actualites/house-sitting-ete-aura-guide</loc>
     <lastmod>2026-03-27</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/blog/house-sitting-hiver-montagne-savoie</loc>
+    <loc>https://guardiens.fr/actualites/house-sitting-hiver-montagne-savoie</loc>
     <lastmod>2026-03-27</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/blog/house-sitting-noel-fetes-fin-annee</loc>
+    <loc>https://guardiens.fr/actualites/house-sitting-noel-fetes-fin-annee</loc>
     <lastmod>2026-03-27</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/blog/house-sitting-week-end-court-sejour-aura</loc>
+    <loc>https://guardiens.fr/actualites/house-sitting-week-end-court-sejour-aura</loc>
     <lastmod>2026-03-27</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/blog/parcs-balades-chiens-grenoble-guide</loc>
+    <loc>https://guardiens.fr/actualites/parcs-balades-chiens-grenoble-guide</loc>
     <lastmod>2026-03-27</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/blog/creer-profil-gardien-attractif</loc>
+    <loc>https://guardiens.fr/actualites/creer-profil-gardien-attractif</loc>
     <lastmod>2026-03-27</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/blog/choisir-gardien-bons-criteres</loc>
+    <loc>https://guardiens.fr/actualites/choisir-gardien-bons-criteres</loc>
     <lastmod>2026-03-27</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/blog/preparer-maison-avant-garde</loc>
+    <loc>https://guardiens.fr/actualites/preparer-maison-avant-garde</loc>
     <lastmod>2026-03-27</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/blog/rediger-bonne-annonce-house-sitting</loc>
+    <loc>https://guardiens.fr/actualites/rediger-bonne-annonce-house-sitting</loc>
     <lastmod>2026-03-27</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/blog/cavalier-king-charles-guide-race</loc>
+    <loc>https://guardiens.fr/actualites/cavalier-king-charles-guide-race</loc>
     <lastmod>2026-03-27</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/blog/golden-retriever-guide-race-complet</loc>
+    <loc>https://guardiens.fr/actualites/golden-retriever-guide-race-complet</loc>
     <lastmod>2026-03-27</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/blog/berger-australien-guide-race</loc>
+    <loc>https://guardiens.fr/actualites/berger-australien-guide-race</loc>
     <lastmod>2026-03-27</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/blog/c-est-quoi-le-house-sitting</loc>
+    <loc>https://guardiens.fr/actualites/c-est-quoi-le-house-sitting</loc>
     <lastmod>2026-03-27</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/blog/devenir-gardien-guide-complet</loc>
+    <loc>https://guardiens.fr/actualites/devenir-gardien-guide-complet</loc>
     <lastmod>2026-03-27</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/blog/proprietaire-preparer-garde-maison</loc>
+    <loc>https://guardiens.fr/actualites/proprietaire-preparer-garde-maison</loc>
     <lastmod>2026-03-27</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/blog/house-sitting-vs-pension-comparatif</loc>
+    <loc>https://guardiens.fr/actualites/house-sitting-vs-pension-comparatif</loc>
     <lastmod>2026-03-27</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/blog/securite-confiance-house-sitting</loc>
+    <loc>https://guardiens.fr/actualites/securite-confiance-house-sitting</loc>
     <lastmod>2026-03-27</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/blog/bien-etre-animal-pendant-absence</loc>
+    <loc>https://guardiens.fr/actualites/bien-etre-animal-pendant-absence</loc>
     <lastmod>2026-03-27</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/blog/gardes-longue-duree-guide</loc>
+    <loc>https://guardiens.fr/actualites/gardes-longue-duree-guide</loc>
     <lastmod>2026-03-27</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/blog/petites-missions-entraide-guide</loc>
+    <loc>https://guardiens.fr/actualites/petites-missions-entraide-guide</loc>
     <lastmod>2026-03-27</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/blog/premiers-pas-sur-guardiens</loc>
+    <loc>https://guardiens.fr/actualites/premiers-pas-sur-guardiens</loc>
     <lastmod>2026-03-27</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/blog/house-sitting-aura-guide-complet</loc>
+    <loc>https://guardiens.fr/actualites/house-sitting-aura-guide-complet</loc>
     <lastmod>2026-03-27</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/blog/veterinaire-urgence-grenoble-isere</loc>
+    <loc>https://guardiens.fr/actualites/veterinaire-urgence-grenoble-isere</loc>
     <lastmod>2026-03-27</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/blog/que-faire-probleme-pendant-garde</loc>
+    <loc>https://guardiens.fr/actualites/que-faire-probleme-pendant-garde</loc>
     <lastmod>2026-03-27</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/blog/reussir-premiere-garde-house-sitting</loc>
+    <loc>https://guardiens.fr/actualites/reussir-premiere-garde-house-sitting</loc>
     <lastmod>2026-03-27</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/blog/gerer-animaux-difficiles-garde</loc>
+    <loc>https://guardiens.fr/actualites/gerer-animaux-difficiles-garde</loc>
     <lastmod>2026-03-27</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/blog/devenir-gardien-urgence-guardiens</loc>
+    <loc>https://guardiens.fr/actualites/devenir-gardien-urgence-guardiens</loc>
     <lastmod>2026-03-27</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/blog/gerer-imprevu-pendant-garde</loc>
+    <loc>https://guardiens.fr/actualites/gerer-imprevu-pendant-garde</loc>
     <lastmod>2026-03-27</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/blog/accueillir-gardien-bonnes-pratiques</loc>
+    <loc>https://guardiens.fr/actualites/accueillir-gardien-bonnes-pratiques</loc>
     <lastmod>2026-03-27</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
@@ -661,271 +637,271 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/guide/lyon</loc>
+    <loc>https://guardiens.fr/guides/lyon</loc>
     <lastmod>2026-03-26</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/guide/clermont-ferrand</loc>
+    <loc>https://guardiens.fr/guides/clermont-ferrand</loc>
     <lastmod>2026-03-26</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/guide/megeve</loc>
+    <loc>https://guardiens.fr/guides/megeve</loc>
     <lastmod>2026-03-26</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/guide/valence</loc>
+    <loc>https://guardiens.fr/guides/valence</loc>
     <lastmod>2026-03-26</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/guide/villeurbanne</loc>
+    <loc>https://guardiens.fr/guides/villeurbanne</loc>
     <lastmod>2026-03-26</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/guide/ecully</loc>
+    <loc>https://guardiens.fr/guides/ecully</loc>
     <lastmod>2026-03-26</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/guide/beaujolais</loc>
+    <loc>https://guardiens.fr/guides/beaujolais</loc>
     <lastmod>2026-03-26</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/guide/chambery</loc>
+    <loc>https://guardiens.fr/guides/chambery</loc>
     <lastmod>2026-03-26</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/guide/annecy</loc>
+    <loc>https://guardiens.fr/guides/annecy</loc>
     <lastmod>2026-03-26</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/guide/saint-etienne</loc>
+    <loc>https://guardiens.fr/guides/saint-etienne</loc>
     <lastmod>2026-03-26</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/guide/tassin-la-demi-lune</loc>
+    <loc>https://guardiens.fr/guides/tassin-la-demi-lune</loc>
     <lastmod>2026-03-26</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/guide/caluire-et-cuire</loc>
+    <loc>https://guardiens.fr/guides/caluire-et-cuire</loc>
     <lastmod>2026-03-26</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/guide/monts-du-lyonnais</loc>
+    <loc>https://guardiens.fr/guides/monts-du-lyonnais</loc>
     <lastmod>2026-03-26</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/guide/saint-didier-au-mont-d-or</loc>
+    <loc>https://guardiens.fr/guides/saint-didier-au-mont-d-or</loc>
     <lastmod>2026-03-26</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/guide/grenoble</loc>
+    <loc>https://guardiens.fr/guides/grenoble</loc>
     <lastmod>2026-03-26</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/guide/saint-priest</loc>
+    <loc>https://guardiens.fr/guides/saint-priest</loc>
     <lastmod>2026-03-26</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/guide/vaulx-en-velin</loc>
+    <loc>https://guardiens.fr/guides/vaulx-en-velin</loc>
     <lastmod>2026-03-26</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/guide/bron</loc>
+    <loc>https://guardiens.fr/guides/bron</loc>
     <lastmod>2026-03-26</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/guide/villefranche-sur-saone</loc>
+    <loc>https://guardiens.fr/guides/villefranche-sur-saone</loc>
     <lastmod>2026-03-26</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/guide/roanne</loc>
+    <loc>https://guardiens.fr/guides/roanne</loc>
     <lastmod>2026-03-26</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/guide/montelimar</loc>
+    <loc>https://guardiens.fr/guides/montelimar</loc>
     <lastmod>2026-03-26</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/guide/romans-sur-isere</loc>
+    <loc>https://guardiens.fr/guides/romans-sur-isere</loc>
     <lastmod>2026-03-26</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/guide/bourg-en-bresse</loc>
+    <loc>https://guardiens.fr/guides/bourg-en-bresse</loc>
     <lastmod>2026-03-26</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/guide/oyonnax</loc>
+    <loc>https://guardiens.fr/guides/oyonnax</loc>
     <lastmod>2026-03-26</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/guide/annemasse</loc>
+    <loc>https://guardiens.fr/guides/annemasse</loc>
     <lastmod>2026-03-26</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/guide/meyzieu</loc>
+    <loc>https://guardiens.fr/guides/meyzieu</loc>
     <lastmod>2026-03-26</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/guide/venissieux</loc>
+    <loc>https://guardiens.fr/guides/venissieux</loc>
     <lastmod>2026-03-26</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/guide/rillieux-la-pape</loc>
+    <loc>https://guardiens.fr/guides/rillieux-la-pape</loc>
     <lastmod>2026-03-26</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/guide/decines-charpieu</loc>
+    <loc>https://guardiens.fr/guides/decines-charpieu</loc>
     <lastmod>2026-03-26</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/guide/oullins</loc>
+    <loc>https://guardiens.fr/guides/oullins</loc>
     <lastmod>2026-03-26</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/guide/saint-martin-d-heres</loc>
+    <loc>https://guardiens.fr/guides/saint-martin-d-heres</loc>
     <lastmod>2026-03-26</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/guide/thonon-les-bains</loc>
+    <loc>https://guardiens.fr/guides/thonon-les-bains</loc>
     <lastmod>2026-03-26</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/guide/aix-les-bains</loc>
+    <loc>https://guardiens.fr/guides/aix-les-bains</loc>
     <lastmod>2026-03-26</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/guide/echirolles</loc>
+    <loc>https://guardiens.fr/guides/echirolles</loc>
     <lastmod>2026-03-26</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/guide/vichy</loc>
+    <loc>https://guardiens.fr/guides/vichy</loc>
     <lastmod>2026-03-26</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/guide/voiron</loc>
+    <loc>https://guardiens.fr/guides/voiron</loc>
     <lastmod>2026-03-26</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/guide/montlucon</loc>
+    <loc>https://guardiens.fr/guides/montlucon</loc>
     <lastmod>2026-03-26</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/guide/vienne</loc>
+    <loc>https://guardiens.fr/guides/vienne</loc>
     <lastmod>2026-03-26</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/guide/moulins</loc>
+    <loc>https://guardiens.fr/guides/moulins</loc>
     <lastmod>2026-03-26</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/guide/bourgoin-jallieu</loc>
+    <loc>https://guardiens.fr/guides/bourgoin-jallieu</loc>
     <lastmod>2026-03-26</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/guide/aurillac</loc>
+    <loc>https://guardiens.fr/guides/aurillac</loc>
     <lastmod>2026-03-26</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/guide/le-puy-en-velay</loc>
+    <loc>https://guardiens.fr/guides/le-puy-en-velay</loc>
     <lastmod>2026-03-26</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/guide/saint-chamond</loc>
+    <loc>https://guardiens.fr/guides/saint-chamond</loc>
     <lastmod>2026-03-26</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/guide/annonay</loc>
+    <loc>https://guardiens.fr/guides/annonay</loc>
     <lastmod>2026-03-26</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/guide/aubenas</loc>
+    <loc>https://guardiens.fr/guides/aubenas</loc>
     <lastmod>2026-03-26</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>

@@ -9,10 +9,7 @@ const staticPages = [
   { loc: "/contact", priority: "0.8", changefreq: "weekly" },
   { loc: "/petites-missions", priority: "0.8", changefreq: "weekly" },
   { loc: "/gardien-urgence", priority: "0.8", changefreq: "weekly" },
-  { loc: "/blog", priority: "0.8", changefreq: "weekly" },
   { loc: "/guides", priority: "0.8", changefreq: "weekly" },
-  { loc: "/communaute", priority: "0.8", changefreq: "weekly" },
-  { loc: "/outils-pratiques", priority: "0.8", changefreq: "weekly" },
 ];
 
 const cityPages = [
@@ -122,7 +119,7 @@ Deno.serve(async () => {
 
   // City landing pages
   for (const slug of cityPages) {
-    xml += urlEntry(`/house-sitting-${slug}`, today, "weekly", "0.9");
+    xml += urlEntry(`/house-sitting/${slug}`, today, "weekly", "0.9");
   }
 
   // Articles → /actualites/{slug}
@@ -149,7 +146,7 @@ Deno.serve(async () => {
   // City guides
   if (cityGuides) {
     for (const cg of cityGuides) {
-      xml += urlEntry(`/guide/${cg.slug}`, (cg.updated_at || today).split("T")[0], "weekly", "0.7");
+      xml += urlEntry(`/guides/${cg.slug}`, (cg.updated_at || today).split("T")[0], "weekly", "0.7");
     }
   }
 

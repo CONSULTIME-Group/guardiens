@@ -23,8 +23,6 @@ const staticPages = [
   { loc: "/petites-missions", priority: "0.8", changefreq: "weekly" },
   { loc: "/gardien-urgence", priority: "0.8", changefreq: "weekly" },
   { loc: "/guides", priority: "0.8", changefreq: "weekly" },
-  { loc: "/communaute", priority: "0.8", changefreq: "weekly" },
-  { loc: "/outils-pratiques", priority: "0.8", changefreq: "weekly" },
 ];
 
 const cityLandingPages = [
@@ -94,7 +92,7 @@ async function main() {
 
   // City landing pages
   for (const slug of cityLandingPages) {
-    entries.push(urlEntry(`/house-sitting-${slug}`, today, "weekly", "0.9"));
+    entries.push(urlEntry(`/house-sitting/${slug}`, today, "weekly", "0.9"));
   }
 
   // Articles → /blog/{slug}
@@ -115,7 +113,7 @@ async function main() {
   // City guides
   if (cityGuides) {
     for (const cg of cityGuides) {
-      entries.push(urlEntry(`/guide/${cg.slug}`, (cg.updated_at || today).split("T")[0], "weekly", "0.7"));
+      entries.push(urlEntry(`/guides/${cg.slug}`, (cg.updated_at || today).split("T")[0], "weekly", "0.7"));
     }
   }
 
