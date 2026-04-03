@@ -92,7 +92,7 @@ async function main() {
 
   // City landing pages
   for (const slug of cityLandingPages) {
-    entries.push(urlEntry(`/house-sitting-${slug}`, today, "weekly", "0.9"));
+    entries.push(urlEntry(`/house-sitting/${slug}`, today, "weekly", "0.9"));
   }
 
   // Articles → /blog/{slug}
