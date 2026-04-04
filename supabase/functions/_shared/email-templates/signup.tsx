@@ -29,32 +29,21 @@ export const SignupEmail = ({
 }: SignupEmailProps) => (
   <Html lang="fr" dir="ltr">
     <Head />
-    <Preview>Confirmez votre email pour guardiens</Preview>
+    <Preview>Confirmez votre adresse email — Guardiens</Preview>
     <Body style={main}>
       <Container style={container}>
         <Heading style={logo}>
           <span style={{ color: '#3d7a5f' }}>g</span>uardiens
         </Heading>
-        <Heading style={h1}>Bienvenue parmi nous !</Heading>
+        <Heading style={h1}>Vous venez de rejoindre Guardiens.</Heading>
         <Text style={text}>
-          Merci de vous être inscrit(e) sur{' '}
-          <Link href={siteUrl} style={link}>
-            <strong>guardiens</strong>
-          </Link>
-          .
-        </Text>
-        <Text style={text}>
-          Pour activer votre compte, veuillez confirmer votre adresse email (
-          <Link href={`mailto:${recipient}`} style={link}>
-            {recipient}
-          </Link>
-          ) en cliquant sur le bouton ci-dessous :
+          Pour activer votre compte, confirmez votre adresse email en cliquant sur le bouton ci-dessous.
         </Text>
         <Button style={button} href={confirmationUrl}>
           Confirmer mon email
         </Button>
         <Text style={footer}>
-          Si vous n'avez pas créé de compte, vous pouvez ignorer cet email.
+          Si vous n'avez pas créé de compte, ignorez cet email.
         </Text>
       </Container>
     </Body>
@@ -85,7 +74,6 @@ const text = {
   lineHeight: '1.6',
   margin: '0 0 25px',
 }
-const link = { color: '#3d7a5f', textDecoration: 'underline' }
 const button = {
   backgroundColor: '#3d7a5f',
   color: '#f7f5f2',

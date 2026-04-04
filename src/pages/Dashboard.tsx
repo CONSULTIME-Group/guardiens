@@ -1,14 +1,30 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { useRef, useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
+import { useToast } from "@/hooks/use-toast";
 import OwnerDashboard from "@/components/dashboard/OwnerDashboard";
 import SitterDashboard from "@/components/dashboard/SitterDashboard";
 
 const Dashboard = () => {
   const { activeRole } = useAuth();
+  const { toast } = useToast();
+  const [searchParams] = useSearchParams();
   const [displayedRole, setDisplayedRole] = useState(activeRole);
   const [transitioning, setTransitioning] = useState(false);
   const isFirstRender = useRef(true);
+  const welcomeShown = useRef(false);
+
+  useEffect(() => {
+    if (!welcomeShown.current) {
+      const hash = window.location.hash;
+      if (hash.includes("type=signup") || hash.includes("type=email")) {
+        welcomeShown.current = true;
+        toast({ title: "Bienvenue sur Guardiens !" });
+        window.history.replaceState({}, "", "/dashboard");
+      }
+    }
+  }, [toast]);
 
   useEffect(() => {
     if (isFirstRender.current) {
