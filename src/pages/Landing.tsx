@@ -255,19 +255,19 @@ const Landing = () => {
               Partir. Revenir. Recommencer.
             </p>
             <p className="font-body text-base md:text-xl text-white/75 max-w-lg mb-10 animate-hero-fade-up animation-delay-700">
-              Garder une maison. Rendre service. Se faire confiance.
+              Garder une maison. Échanger un service. Se faire confiance.
             </p>
 
             {/* CTAs */}
             <div className="flex flex-col sm:flex-row gap-3 mb-4 animate-hero-fade-up animation-delay-900">
               <button
-                onClick={() => navigate("/inscription?role=owner")}
+                onClick={() => navigate("/search")}
                 className="font-body text-sm font-semibold tracking-wide rounded-full px-10 py-4 bg-primary text-primary-foreground hover:brightness-90 hover:scale-[1.02] transition-all duration-200"
               >
                 Je cherche un gardien
               </button>
               <button
-                onClick={() => navigate("/inscription?role=sitter")}
+                onClick={() => navigate("/register?role=sitter")}
                 className="font-body text-sm font-semibold tracking-wide rounded-full px-10 py-4 bg-transparent text-white border-2 border-white/70 hover:bg-white/15 transition-all duration-200"
               >
                 Je veux garder
@@ -324,7 +324,7 @@ const Landing = () => {
                 <p className="text-base font-body leading-relaxed text-foreground/70 mb-4">
                   Trouvez quelqu'un du coin pour garder votre maison et vos animaux. Vous le rencontrez avant. Vous choisissez. Gratuit pour les propriétaires.
                 </p>
-                <Link to="/inscription?role=owner" className="text-sm font-body text-primary font-medium hover:underline">
+                <Link to="/search" className="text-sm font-body text-primary font-medium hover:underline">
                   Je cherche un gardien →
                 </Link>
               </div>
@@ -337,7 +337,7 @@ const Landing = () => {
                 <p className="text-base font-body leading-relaxed text-foreground/70 mb-4">
                   Proposez-vous comme gardien. Vivez dans des maisons, avec des animaux, dans des quartiers que vous n'auriez jamais explorés autrement.
                 </p>
-                <Link to="/inscription?role=sitter" className="text-sm font-body text-primary font-medium hover:underline">
+                <Link to="/register?role=sitter" className="text-sm font-body text-primary font-medium hover:underline">
                   Je veux garder →
                 </Link>
               </div>
@@ -532,7 +532,7 @@ const Landing = () => {
             Badge Fondateur à vie. Accès gratuit jusqu'au 13 juin. Et surtout, tu seras parmi les premiers à vivre ça. Pourquoi le 13 mai ? C'est l'anniversaire de Jérémie. Il préfère offrir l'accès plutôt que recevoir des chaussettes.
           </p>
           <button
-            onClick={() => navigate("/inscription")}
+            onClick={() => navigate("/register")}
             className="font-body text-sm font-bold tracking-wide rounded-full px-12 py-4 bg-white text-primary hover:bg-background hover:scale-[1.02] transition-all duration-200"
           >
             Rejoindre le mouvement
@@ -552,13 +552,13 @@ const Landing = () => {
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <button
-              onClick={() => navigate("/inscription?role=owner")}
+              onClick={() => navigate("/search")}
               className="font-body text-sm font-semibold tracking-wide rounded-full px-10 py-4 bg-primary text-primary-foreground hover:brightness-90 hover:scale-[1.02] transition-all duration-200"
             >
               Je cherche un gardien
             </button>
             <button
-              onClick={() => navigate("/inscription?role=sitter")}
+              onClick={() => navigate("/register?role=sitter")}
               className="font-body text-sm font-semibold tracking-wide rounded-full px-10 py-4 bg-transparent text-white border-2 border-white/40 hover:bg-white/10 transition-all duration-200"
             >
               Je veux garder
@@ -610,7 +610,7 @@ const Landing = () => {
               <h4 className="font-body text-xs uppercase tracking-widest text-white/30 mb-4">Guardiens</h4>
               <ul className="space-y-2">
                 <li><Link to="/a-propos" className="font-body text-sm text-white/50 hover:text-white transition-colors">À propos</Link></li>
-                <li><Link to="/notre-histoire" className="font-body text-sm text-white/50 hover:text-white transition-colors">Notre histoire</Link></li>
+                <li><Link to="/a-propos" className="font-body text-sm text-white/50 hover:text-white transition-colors">Notre histoire</Link></li>
                 <li><Link to="/contact" className="font-body text-sm text-white/50 hover:text-white transition-colors">Contact</Link></li>
                 <li><Link to="/register" className="font-body text-sm text-white/50 hover:text-white transition-colors">Inscription</Link></li>
                 <li><Link to="/petites-missions" className="font-body text-sm text-white/50 hover:text-white transition-colors">Petites missions</Link></li>
