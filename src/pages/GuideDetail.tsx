@@ -83,6 +83,10 @@ const GuideDetail = () => {
     enabled: !!slug,
   });
 
+  useEffect(() => {
+    if (!guideLoading) window.prerenderReady = true;
+  }, [guideLoading]);
+
   const { data: places = [] } = useQuery({
     queryKey: ["guide-places", guide?.id],
     queryFn: async () => {
