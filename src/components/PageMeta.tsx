@@ -1,4 +1,4 @@
-import { Helmet } from "react-helmet-async";
+import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { buildAbsoluteUrl, normalizePathname } from "@/lib/seo";
 
@@ -34,37 +34,64 @@ const PageMeta = ({
   const titleWithoutSuffix = title.replace(/\s*\|\s*Guardiens\s*$/i, "").replace(/\s*—\s*Guardiens\s*$/i, "");
   const fullTitle = currentPath === "/" ? titleWithoutSuffix : `${titleWithoutSuffix} | ${SITE_NAME}`;
 
-  return (
-    <Helmet>
-      <title>{fullTitle}</title>
-      <meta name="description" content={metaDescription} />
-      <meta name="robots" content={noindex ? "noindex, nofollow" : "index, follow"} />
-      <link rel="canonical" href={currentUrl} />
+  useEffect(() => {
+    const upsertMetaTag = ({ attr, key, content }: { attr: "name" | "property"; key: string; content: string }) => {
+      document.head.querySelectorAll(`meta[${attr}="${key}"]`).forEach((node) => node.remove());
 
-      {/* Open Graph */}
-      <meta property="og:title" content={fullTitle || metaTitle} />
-      <meta property="og:description" content={metaDescription} />
-      <meta property="og:url" content={currentUrl} />
-      <meta property="og:image" content={image} />
-      <meta property="og:type" content={type} />
-      <meta property="og:site_name" content={SITE_NAME} />
-      <meta property="og:locale" content="fr_FR" />
+      const meta = document.createElement("meta");
+      meta.setAttribute(attr, key);
+      meta.setAttribute("content", content);
+      meta.setAttribute("data-page-meta", "true");
+      document.head.appendChild(meta);
+    };
 
-      {/* Twitter */}
-      <meta name="twitter:card" content="summary_large_image" />
-      <meta name="twitter:title" content={fullTitle || metaTitle} />
-      <meta name="twitter:description" content={metaDescription} />
-      <meta name="twitter:image" content={image} />
+    const removeMetaTag = ({ attr, key }: { attr: "name" | "property"; key: string }) => {
+      document.head.querySelectorAll(`meta[${attr}="${key}"]`).forEach((node) => node.remove());
+    };
 
-      {/* Article-specific */}
-      {type === "article" && publishedAt && (
-        <meta property="article:published_time" content={publishedAt} />
-      )}
-      {type === "article" && author && (
-        <meta property="article:author" content={author} />
-      )}
-    </Helmet>
-  );
+    const upsertCanonical = (href: string) => {
+      document.head.querySelectorAll('link[rel="canonical"]').forEach((node) => node.remove());
+
+      const link = document.createElement("link");
+      link.setAttribute("rel", "canonical");
+      link.setAttribute("href", href);
+      link.setAttribute("data-page-meta", "true");
+      document.head.appendChild(link);
+    };
+
+    document.title = fullTitle || metaTitle;
+
+    upsertMetaTag({ attr: "name", key: "description", content: metaDescription });
+    upsertMetaTag({ attr: "name", key: "robots", content: noindex ? "noindex, nofollow" : "index, follow" });
+    upsertCanonical(currentUrl);
+
+    upsertMetaTag({ attr: "property", key: "og:title", content: fullTitle || metaTitle });
+    upsertMetaTag({ attr: "property", key: "og:description", content: metaDescription });
+    upsertMetaTag({ attr: "property", key: "og:url", content: currentUrl });
+    upsertMetaTag({ attr: "property", key: "og:image", content: image });
+    upsertMetaTag({ attr: "property", key: "og:type", content: type });
+    upsertMetaTag({ attr: "property", key: "og:site_name", content: SITE_NAME });
+    upsertMetaTag({ attr: "property", key: "og:locale", content: "fr_FR" });
+
+    upsertMetaTag({ attr: "name", key: "twitter:card", content: "summary_large_image" });
+    upsertMetaTag({ attr: "name", key: "twitter:title", content: fullTitle || metaTitle });
+    upsertMetaTag({ attr: "name", key: "twitter:description", content: metaDescription });
+    upsertMetaTag({ attr: "name", key: "twitter:image", content: image });
+
+    if (type === "article" && publishedAt) {
+      upsertMetaTag({ attr: "property", key: "article:published_time", content: publishedAt });
+    } else {
+      removeMetaTag({ attr: "property", key: "article:published_time" });
+    }
+
+    if (type === "article" && author) {
+      upsertMetaTag({ attr: "property", key: "article:author", content: author });
+    } else {
+      removeMetaTag({ attr: "property", key: "article:author" });
+    }
+  }, [author, currentUrl, fullTitle, image, metaDescription, metaTitle, noindex, publishedAt, type]);
+
+  return null;
 };
 
 export default PageMeta;
