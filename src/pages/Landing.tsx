@@ -610,7 +610,7 @@ const Landing = () => {
               <h4 className="font-body text-xs uppercase tracking-widest text-white/30 mb-4">Guardiens</h4>
               <ul className="space-y-2">
                 <li><Link to="/a-propos" className="font-body text-sm text-white/50 hover:text-white transition-colors">À propos</Link></li>
-                <li><Link to="/notre-histoire" className="font-body text-sm text-white/50 hover:text-white transition-colors">Notre histoire</Link></li>
+                <li><Link to="/a-propos" className="font-body text-sm text-white/50 hover:text-white transition-colors">Notre histoire</Link></li>
                 <li><Link to="/contact" className="font-body text-sm text-white/50 hover:text-white transition-colors">Contact</Link></li>
                 <li><Link to="/register" className="font-body text-sm text-white/50 hover:text-white transition-colors">Inscription</Link></li>
                 <li><Link to="/petites-missions" className="font-body text-sm text-white/50 hover:text-white transition-colors">Petites missions</Link></li>
