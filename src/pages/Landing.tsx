@@ -337,7 +337,7 @@ const Landing = () => {
                 <p className="text-base font-body leading-relaxed text-foreground/70 mb-4">
                   Proposez-vous comme gardien. Vivez dans des maisons, avec des animaux, dans des quartiers que vous n'auriez jamais explorés autrement.
                 </p>
-                <Link to="/inscription?role=sitter" className="text-sm font-body text-primary font-medium hover:underline">
+                <Link to="/register?role=sitter" className="text-sm font-body text-primary font-medium hover:underline">
                   Je veux garder →
                 </Link>
               </div>
