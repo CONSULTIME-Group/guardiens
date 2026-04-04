@@ -102,16 +102,24 @@ const MySubscription = () => {
   const handleCheckout = async (type: "monthly" | "yearly_prorata") => {
     setCheckoutLoading(true);
     try {
-      const { data, error } = await supabase.functions.invoke("create-checkout", {
-        body: { type },
-      });
-      if (error) throw error;
-      if (data?.url) {
-        window.location.href = data.url;
+      if (type === "monthly") {
+        const { data, error } = await supabase.functions.invoke("create-checkout-session");
+        if (error) throw error;
+        if (data?.url) {
+          window.location.href = data.url;
+        }
+      } else {
+        const { data, error } = await supabase.functions.invoke("create-checkout", {
+          body: { type },
+        });
+        if (error) throw error;
+        if (data?.url) {
+          window.location.href = data.url;
+        }
       }
     } catch (e: any) {
-      toast.error("Erreur lors de la redirection vers le paiement.");
-      console.error(e);
+      toast.error("Impossible de lancer le paiement. Réessaie.");
+      console.error("Erreur checkout:", e);
     } finally {
       setCheckoutLoading(false);
     }
