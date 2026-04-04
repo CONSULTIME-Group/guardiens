@@ -87,6 +87,7 @@ const OwnerProfilePage = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <Helmet><meta name="robots" content="noindex, nofollow" /></Helmet>
       <div className="p-4 sm:p-6 md:p-10 max-w-5xl mx-auto animate-fade-in">
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Left sidebar */}
