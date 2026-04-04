@@ -324,7 +324,7 @@ const Landing = () => {
                 <p className="text-base font-body leading-relaxed text-foreground/70 mb-4">
                   Trouvez quelqu'un du coin pour garder votre maison et vos animaux. Vous le rencontrez avant. Vous choisissez. Gratuit pour les propriétaires.
                 </p>
-                <Link to="/inscription?role=owner" className="text-sm font-body text-primary font-medium hover:underline">
+                <Link to="/search" className="text-sm font-body text-primary font-medium hover:underline">
                   Je cherche un gardien →
                 </Link>
               </div>
