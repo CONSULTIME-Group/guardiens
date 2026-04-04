@@ -71,8 +71,11 @@ const MySubscription = () => {
   // Show success toast on return from Stripe
   useEffect(() => {
     if (searchParams.get("success") === "true") {
-      toast.success("Abonnement activé avec succès !");
+      toast.success("Abonnement activé ! 🎉", {
+        description: "Ton essai gratuit de 30 jours commence maintenant.",
+      });
       checkSubscription();
+      window.history.replaceState({}, "", "/mon-abonnement");
     }
   }, [searchParams, checkSubscription]);
 
@@ -99,16 +102,24 @@ const MySubscription = () => {
   const handleCheckout = async (type: "monthly" | "yearly_prorata") => {
     setCheckoutLoading(true);
     try {
-      const { data, error } = await supabase.functions.invoke("create-checkout", {
-        body: { type },
-      });
-      if (error) throw error;
-      if (data?.url) {
-        window.location.href = data.url;
+      if (type === "monthly") {
+        const { data, error } = await supabase.functions.invoke("create-checkout-session");
+        if (error) throw error;
+        if (data?.url) {
+          window.location.href = data.url;
+        }
+      } else {
+        const { data, error } = await supabase.functions.invoke("create-checkout", {
+          body: { type },
+        });
+        if (error) throw error;
+        if (data?.url) {
+          window.location.href = data.url;
+        }
       }
     } catch (e: any) {
-      toast.error("Erreur lors de la redirection vers le paiement.");
-      console.error(e);
+      toast.error("Impossible de lancer le paiement. Réessaie.");
+      console.error("Erreur checkout:", e);
     } finally {
       setCheckoutLoading(false);
     }
@@ -172,8 +183,9 @@ const MySubscription = () => {
           <button
             onClick={() => handleCheckout("monthly")}
             disabled={checkoutLoading}
-            className="w-full py-3 rounded-xl border border-primary text-primary font-body font-medium text-sm hover:bg-primary/5 transition-colors disabled:opacity-50"
+            className="w-full py-3 rounded-xl border border-primary text-primary font-body font-medium text-sm hover:bg-primary/5 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
           >
+            {checkoutLoading && <Loader2 className="h-4 w-4 animate-spin" />}
             {checkoutLoading ? "Redirection..." : "Commencer à 9€/mois"}
           </button>
         </div>
@@ -199,8 +211,9 @@ const MySubscription = () => {
           <button
             onClick={() => handleCheckout("yearly_prorata")}
             disabled={checkoutLoading}
-            className="w-full py-3 rounded-xl bg-white text-primary font-body font-medium text-sm hover:bg-white/90 transition-colors disabled:opacity-50"
+            className="w-full py-3 rounded-xl bg-white text-primary font-body font-medium text-sm hover:bg-white/90 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
           >
+            {checkoutLoading && <Loader2 className="h-4 w-4 animate-spin" />}
             {checkoutLoading ? "Redirection..." : `Payer ${prorataPrice}€ pour 2026`}
           </button>
         </div>
