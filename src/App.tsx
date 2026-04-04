@@ -134,7 +134,9 @@ const AppRoutes = () => (
     <Route path="/mentions-legales" element={<MentionsLegales />} />
     <Route path="/faq" element={<FAQ />} />
     <Route path="/guides" element={<GuidesListing />} />
-    <Route path="/guide/:slug" element={<GuideDetail />} />
+    <Route path="/guides/:slug" element={<GuideDetail />} />
+    <Route path="/guide" element={<Navigate to="/guides" replace />} />
+    <Route path="/guide/:slug" element={<NavigateGuideSlug />} />
     <Route path="/house-sitting/:slug" element={<CityPage />} />
     <Route path="/departement/:slug" element={<DepartmentPage />} />
     <Route path="/tarifs" element={<Pricing />} />
