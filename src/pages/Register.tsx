@@ -193,6 +193,9 @@ const Register = () => {
                   </button>
                 </div>
               </div>
+              {formError && (
+                <p className="text-sm text-destructive">{formError}</p>
+              )}
               <Button type="submit" className="w-full" size="lg" disabled={isLoading}>
                 {isLoading ? "Création..." : "Créer mon compte"}
               </Button>
