@@ -1,4 +1,5 @@
 import { Helmet } from "react-helmet-async";
+import { useLocation } from "react-router-dom";
 
 const SITE_URL = "https://guardiens.fr";
 const DEFAULT_IMAGE = "https://guardiens.fr/og-default.jpg";
@@ -19,7 +20,7 @@ interface PageMetaProps {
 const PageMeta = ({
   title,
   description,
-  path = "/",
+  path,
   image = DEFAULT_IMAGE,
   type = "website",
   publishedAt,
@@ -27,8 +28,10 @@ const PageMeta = ({
   canonicalUrl,
   noindex = false,
 }: PageMetaProps) => {
-  const fullUrl = canonicalUrl || `${SITE_URL}${path}`;
-  const fullTitle = path === "/" ? title : `${title} | ${SITE_NAME}`;
+  const location = useLocation();
+  const currentPath = path || location.pathname;
+  const fullUrl = canonicalUrl || `${SITE_URL}${currentPath}`;
+  const fullTitle = currentPath === "/" ? title : `${title} | ${SITE_NAME}`;
 
   return (
     <Helmet>

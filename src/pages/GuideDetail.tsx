@@ -167,7 +167,7 @@ const GuideDetail = () => {
       <PageMeta
         title={`Guide pet sitting ${guide.city} — Parcs, vétos, cafés dog-friendly | Guardiens`}
         description={`Guide pratique pour pet sitters à ${guide.city} : parcs dog-friendly, vétérinaires, cafés accueillants, sentiers de balade. ${guide.ideal_for}`}
-        path={`/guide/${guide.slug}`}
+        path={`/guides/${guide.slug}`}
       />
 
       <div className="min-h-screen bg-background">
