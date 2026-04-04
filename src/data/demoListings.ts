@@ -16,6 +16,8 @@ export const DEMO_SITS = [
     is_urgent: false,
     user_id: "demo",
     property_id: "demo",
+    latitude: 45.7676,
+    longitude: 4.8344,
     owner: {
       first_name: "Nadia",
       avatar_url: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&q=80",
@@ -50,6 +52,8 @@ export const DEMO_SITS = [
     is_urgent: false,
     user_id: "demo",
     property_id: "demo",
+    latitude: 45.8992,
+    longitude: 6.1294,
     owner: {
       first_name: "Rania",
       avatar_url: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=200&q=80",
@@ -85,6 +89,8 @@ export const DEMO_SITS = [
     is_urgent: false,
     user_id: "demo",
     property_id: "demo",
+    latitude: 45.1885,
+    longitude: 5.7245,
     owner: {
       first_name: "Giulia",
       avatar_url: "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=200&q=80",
@@ -124,6 +130,8 @@ export const DEMO_MISSIONS = [
     date_needed: null,
     created_at: new Date().toISOString(),
     user_id: "demo",
+    latitude: 45.7797,
+    longitude: 3.0863,
     owner: {
       first_name: "Giulia",
       avatar_url: "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=200&q=80",
@@ -148,6 +156,8 @@ export const DEMO_MISSIONS = [
     date_needed: null,
     created_at: new Date().toISOString(),
     user_id: "demo",
+    latitude: 45.7953,
+    longitude: 4.8500,
     owner: {
       first_name: "David",
       avatar_url: null,
@@ -172,6 +182,8 @@ export const DEMO_MISSIONS = [
     date_needed: null,
     created_at: new Date().toISOString(),
     user_id: "demo",
+    latitude: 45.7640,
+    longitude: 4.8357,
     owner: {
       first_name: "Sarah",
       avatar_url: null,
