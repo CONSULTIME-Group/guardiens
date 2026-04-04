@@ -116,6 +116,11 @@ const NavigateBlogSlug = () => {
   return <Navigate to={`/actualites/${slug}`} replace />;
 };
 
+const NavigateGuideSlug = () => {
+  const { slug } = useParams();
+  return <Navigate to={`/guides/${slug}`} replace />;
+};
+
 const AppRoutes = () => (
   <Routes>
     <Route path="/" element={<Landing />} />
