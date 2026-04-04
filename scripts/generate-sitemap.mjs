@@ -95,9 +95,31 @@ async function main() {
     entries.push(urlEntry(`/house-sitting/${slug}`, today, "weekly", "0.9"));
   }
 
-  // Articles → /blog/{slug}
+  // Excluded article slugs (noindex)
+  const excludedSlugs = new Set([
+    "guide-house-sitting-lyon", "guide-lieu-meilleurs-parcs-chiens-lyon",
+    "house-sitting-aix-les-bains", "house-sitting-haute-savoie-annecy-megeve",
+    "pet-sitting-chambery-savoie", "pet-sitting-clermont-ferrand",
+    "pet-sitting-grenoble-chartreuse", "pet-sitting-lyon-ouest-lyonnais",
+    "pet-sitting-saint-etienne-loire", "pet-sitting-valence-drome",
+    "pet-sitting-venissieux", "pet-sitting-villeurbanne",
+    "pet-sitting-lyon-guide-complet", "pet-sitting-annecy-guide",
+    "pet-sitting-grenoble-guide", "pet-sitting-clermont-ferrand-guide",
+    "house-sitting-saint-etienne-guide", "border-collie-lyon-guide-race",
+    "bouledogue-francais-lyon-guide-race", "malinois-lyon-guide-race",
+    "golden-retriever-lyon-guide-race", "berger-australien-guide",
+    "conseil-gardien-creer-profil-attractif-lyon", "conseils-garder-chien",
+    "accueillir-gardien-bonnes-pratiques", "preparer-maison-avant-vacances",
+    "gardes-longue-duree-guide", "devenir-pet-sitter-guide-debutant",
+    "garde-chat-domicile-house-sitting", "garde-chien-lyon-solutions",
+    "boom-pet-sitting-lyon-2026", "house-sitting-noel-fetes-fin-annee",
+    "house-sitting-week-end-court-sejour-aura",
+  ]);
+
+  // Articles → /actualites/{slug}
   if (articles) {
     for (const a of articles) {
+      if (excludedSlugs.has(a.slug)) continue;
       const priority = PRIORITY_MAP[a.category] || "0.7";
       entries.push(urlEntry(`/actualites/${a.slug}`, (a.updated_at || a.published_at || today).split("T")[0], "monthly", priority));
     }
