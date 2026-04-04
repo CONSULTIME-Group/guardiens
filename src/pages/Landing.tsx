@@ -261,7 +261,7 @@ const Landing = () => {
             {/* CTAs */}
             <div className="flex flex-col sm:flex-row gap-3 mb-4 animate-hero-fade-up animation-delay-900">
               <button
-                onClick={() => navigate("/inscription?role=owner")}
+                onClick={() => navigate("/search")}
                 className="font-body text-sm font-semibold tracking-wide rounded-full px-10 py-4 bg-primary text-primary-foreground hover:brightness-90 hover:scale-[1.02] transition-all duration-200"
               >
                 Je cherche un gardien
