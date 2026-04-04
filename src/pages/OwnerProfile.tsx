@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect } from "react";
+import { Helmet } from "react-helmet-async";
 import { Check, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import OwnerStepIdentity from "@/components/owner-profile/OwnerStepIdentity";
