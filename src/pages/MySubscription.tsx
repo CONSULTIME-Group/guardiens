@@ -71,8 +71,11 @@ const MySubscription = () => {
   // Show success toast on return from Stripe
   useEffect(() => {
     if (searchParams.get("success") === "true") {
-      toast.success("Abonnement activé avec succès !");
+      toast.success("Abonnement activé ! 🎉", {
+        description: "Ton essai gratuit de 30 jours commence maintenant.",
+      });
       checkSubscription();
+      window.history.replaceState({}, "", "/mon-abonnement");
     }
   }, [searchParams, checkSubscription]);
 
