@@ -68,9 +68,8 @@ const FAQ = () => {
   return (
     <>
       <PageMeta
-        title="FAQ — Questions fréquentes"
-        description="Trouvez les réponses à toutes vos questions sur Guardiens : house-sitting, inscription, sécurité, tarifs et plus encore."
-        path="/faq"
+        title="FAQ Guardiens — Toutes vos questions"
+        description="Toutes les réponses sur le house-sitting et pet-sitting de proximité en Auvergne-Rhône-Alpes."
       />
 
       {entries.length > 0 && (

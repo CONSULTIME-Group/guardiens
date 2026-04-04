@@ -31,13 +31,14 @@ const PageMeta = ({
   const location = useLocation();
   const currentPath = path || location.pathname;
   const fullUrl = canonicalUrl || `${SITE_URL}${currentPath}`;
-  const fullTitle = currentPath === "/" ? title : `${title} | ${SITE_NAME}`;
+  const titleWithoutSuffix = title.replace(/\s*\|\s*Guardiens\s*$/i, "").replace(/\s*—\s*Guardiens\s*$/i, "");
+  const fullTitle = currentPath === "/" ? titleWithoutSuffix : `${titleWithoutSuffix} | ${SITE_NAME}`;
 
   return (
     <Helmet>
       <title>{fullTitle}</title>
       <meta name="description" content={description} />
-      {noindex && <meta name="robots" content="noindex, nofollow" />}
+      <meta name="robots" content={noindex ? "noindex, nofollow" : "index, follow"} />
       <link rel="canonical" href={fullUrl} />
 
       {/* Open Graph */}

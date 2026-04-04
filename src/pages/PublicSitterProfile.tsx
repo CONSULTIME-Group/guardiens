@@ -194,11 +194,13 @@ export default function PublicSitterProfile() {
 
   const showCTA = !(isOwn || (isAuthenticated && isSitter));
 
-  // SEO
+   // SEO
   const animalLabels = animalTypes.map(a => ANIMAL_LABELS[a] || a).join(", ");
-  const pageTitle = `${firstName} — Gardien à ${city || "France"} | Guardiens`;
-  const pageDesc = `${firstName} garde des ${animalLabels || "animaux"} à ${city || "France"}${radius ? ` dans un rayon de ${radius}km` : ""}. Profil vérifié sur Guardiens.fr.`;
+  const rawTitle = `${firstName} — Gardien de maison en AURA`;
+  const pageTitle = rawTitle;
+  const pageDesc = ((bio || motivation || "") as string).slice(0, 160) || `${firstName} garde des ${animalLabels || "animaux"} à ${city || "France"}. Profil vérifié sur Guardiens.fr.`;
   const pageUrl = `${SITE_URL}/gardiens/${id}`;
+  const shouldNoindex = !profile.identity_verified || (profile.profile_completion ?? 0) < 60;
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -249,9 +251,10 @@ export default function PublicSitterProfile() {
       <div style={{ position: 'fixed', right: '10px', top: '50%', transform: 'translateY(-50%) rotate(90deg)', fontSize: '9px', letterSpacing: '4px', textTransform: 'uppercase' as const, color: 'rgba(45,106,79,0.28)', whiteSpace: 'nowrap', pointerEvents: 'none', zIndex: 0, fontFamily: 'sans-serif' }}>
         Gardiens de confiance · Gens du coin
       </div>
-      <Helmet>
-        <title>{pageTitle}</title>
+       <Helmet>
+        <title>{pageTitle} | Guardiens</title>
         <meta name="description" content={pageDesc} />
+        <meta name="robots" content={shouldNoindex ? "noindex, nofollow" : "index, follow"} />
         <link rel="canonical" href={pageUrl} />
         <meta property="og:title" content={pageTitle} />
         <meta property="og:description" content={pageDesc} />

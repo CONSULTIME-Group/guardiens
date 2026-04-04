@@ -53,8 +53,8 @@ const EmergencySitter = () => {
   return (
     <div className="min-h-screen bg-background">
       <PageMeta
-        title="Gardien d'urgence — Votre filet de sécurité local | Guardiens"
-        description="Besoin d'un gardien en urgence ? Les gardiens d'urgence Guardiens sont expérimentés, vérifiés, et mobilisables en quelques heures près de chez vous."
+        title="Gardien d'urgence — Intervention rapide en AURA"
+        description="Besoin d'un gardien en urgence ? Des gardiens vérifiés disponibles rapidement en Auvergne-Rhône-Alpes."
       />
 
       {/* Hero */}

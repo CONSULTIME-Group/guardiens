@@ -100,7 +100,7 @@ const SitterProfile = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <PageMeta title="Mon profil | Guardiens" description="Modifiez votre profil gardien Guardiens." />
+      <PageMeta title="Mon profil" description="Modifiez votre profil gardien Guardiens." noindex />
 
       <div className="p-4 sm:p-6 md:p-10 max-w-5xl mx-auto animate-fade-in">
         <div className="flex flex-col lg:flex-row gap-8">

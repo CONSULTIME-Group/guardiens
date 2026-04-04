@@ -98,8 +98,8 @@ const Pricing = () => {
   return (
     <>
       <PageMeta
-        title="Tarifs Guardiens — 9€/mois gardien, gratuit propriétaire | House-sitting AURA"
-        description="Guardiens : 9€/mois pour les gardiens (ou tarif annuel proratisé -20%), gratuit pour les propriétaires. Aucune commission sur les gardes."
+        title="Tarifs Guardiens — 9€/mois pour les gardiens"
+        description="Gratuit pour les propriétaires. 9€/mois pour les gardiens avec 30 jours d'essai offerts."
       />
 
       <div className="min-h-screen bg-background">

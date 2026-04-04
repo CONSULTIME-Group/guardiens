@@ -48,8 +48,8 @@ const SmallMissionsPublic = () => {
   return (
     <>
       <PageMeta
-        title="Petites missions — Échanges sans argent entre gens du coin | Guardiens"
-        description="Un coup de main contre un repas. Un jardin contre des légumes. L'entraide de proximité sans argent. Rejoignez Guardiens gratuitement."
+        title="Petites missions d'entraide"
+        description="Échangez des services avec les gens du coin. Jardinage, animaux, coups de main — jamais d'argent."
       />
 
       <div className="min-h-screen bg-background font-body">

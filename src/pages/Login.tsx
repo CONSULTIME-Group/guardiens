@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Helmet } from "react-helmet-async";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -74,6 +75,7 @@ const Login = () => {
 
   return (
     <div className="min-h-screen flex bg-background">
+      <Helmet><meta name="robots" content="noindex, nofollow" /></Helmet>
       {/* Left panel - illustration (hidden on mobile) */}
       <div className="hidden lg:flex lg:w-1/2 bg-accent items-center justify-center p-12 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-secondary/10" />
