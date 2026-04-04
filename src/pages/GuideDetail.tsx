@@ -68,6 +68,7 @@ const GuideDetail = () => {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
+  const guideLoadingRef = { current: false };
 
   const { data: guide, isLoading: guideLoading } = useQuery({
     queryKey: ["city-guide", slug],
