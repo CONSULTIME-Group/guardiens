@@ -309,7 +309,11 @@ const SearchSitter = () => {
     }
     const coordsMap = new Map<string, { lat: number; lng: number }>();
     final.forEach((item: any) => {
-      if (item && item.owner?.city) {
+      if (!item) return;
+      // Use item-level lat/lng first (for demo items), then fall back to geocoded city
+      if (item.latitude && item.longitude) {
+        coordsMap.set(item.id, { lat: item.latitude, lng: item.longitude });
+      } else if (item.owner?.city) {
         const c = cityCoords.get(item.owner.city);
         if (c) coordsMap.set(item.id, c);
       }

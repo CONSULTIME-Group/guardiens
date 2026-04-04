@@ -10,12 +10,6 @@ const speciesIcon: Record<string, typeof PawPrint> = {
   fish: PawPrint, reptile: PawPrint, farm_animal: Bird, nac: PawPrint,
 };
 
-const DEMO_CITY_COORDS: Record<string, { lat: number; lng: number }> = {
-  "Lyon 6e": { lat: 45.7676, lng: 4.8344 },
-  "Annecy": { lat: 45.8992, lng: 6.1294 },
-  "Grenoble": { lat: 45.1885, lng: 5.7245 },
-};
-
 const createPinIcon = (isActive: boolean) => {
   const color = isActive ? "hsl(40, 12%, 10%)" : "hsl(153, 42%, 30%)";
   return L.divIcon({
