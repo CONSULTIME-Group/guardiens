@@ -228,7 +228,7 @@ export default function ArticleDetail() {
   return (
     <>
       <PageMeta
-        title={article.meta_title || article.title}
+        title={`${article.meta_title || article.title} | BUILD-OK`}
         description={article.meta_description || article.excerpt}
         path={`/actualites/${article.slug}`}
         image={article.cover_image_url || undefined}
