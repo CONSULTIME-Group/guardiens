@@ -78,8 +78,6 @@ const PageMeta = ({
     upsertMetaTag({ attr: "name", key: "twitter:description", content: metaDescription });
     upsertMetaTag({ attr: "name", key: "twitter:image", content: image });
 
-    // DEBUG temporaire — marqueur de build
-    upsertMetaTag({ attr: "name", key: "x-build-debug", content: "seo-fix-2026-04-04-2147" });
 
     if (type === "article" && publishedAt) {
       upsertMetaTag({ attr: "property", key: "article:published_time", content: publishedAt });
