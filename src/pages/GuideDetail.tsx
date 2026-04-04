@@ -7,7 +7,7 @@ import guideHeaderImg from "@/assets/guide-header.jpg";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { lazy, Suspense, useState, useMemo } from "react";
+import { lazy, Suspense, useState, useMemo, useEffect } from "react";
 
 const GuideMap = lazy(() => import("@/components/guides/GuideMap"));
 
