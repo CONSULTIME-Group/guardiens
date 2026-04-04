@@ -558,7 +558,7 @@ const Landing = () => {
               Je cherche un gardien
             </button>
             <button
-              onClick={() => navigate("/inscription?role=sitter")}
+              onClick={() => navigate("/register?role=sitter")}
               className="font-body text-sm font-semibold tracking-wide rounded-full px-10 py-4 bg-transparent text-white border-2 border-white/40 hover:bg-white/10 transition-all duration-200"
             >
               Je veux garder
