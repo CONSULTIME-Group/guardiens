@@ -10,12 +10,6 @@ const speciesIcon: Record<string, typeof PawPrint> = {
   fish: PawPrint, reptile: PawPrint, farm_animal: Bird, nac: PawPrint,
 };
 
-const DEMO_CITY_COORDS: Record<string, { lat: number; lng: number }> = {
-  "Lyon 6e": { lat: 45.7676, lng: 4.8344 },
-  "Annecy": { lat: 45.8992, lng: 6.1294 },
-  "Grenoble": { lat: 45.1885, lng: 5.7245 },
-};
-
 const createPinIcon = (isActive: boolean) => {
   const color = isActive ? "hsl(40, 12%, 10%)" : "hsl(153, 42%, 30%)";
   return L.divIcon({
@@ -77,8 +71,8 @@ const SearchMapView = ({
 
   const getCoords = (item: any): { lat: number; lng: number } | null => {
     if (resultCoords.has(item.id)) return resultCoords.get(item.id)!;
-    if (item.is_demo && item.owner?.city && DEMO_CITY_COORDS[item.owner.city]) {
-      return DEMO_CITY_COORDS[item.owner.city];
+    if (item.latitude && item.longitude) {
+      return { lat: item.latitude, lng: item.longitude };
     }
     return null;
   };
