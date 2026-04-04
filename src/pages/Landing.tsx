@@ -532,7 +532,7 @@ const Landing = () => {
             Badge Fondateur à vie. Accès gratuit jusqu'au 13 juin. Et surtout, tu seras parmi les premiers à vivre ça. Pourquoi le 13 mai ? C'est l'anniversaire de Jérémie. Il préfère offrir l'accès plutôt que recevoir des chaussettes.
           </p>
           <button
-            onClick={() => navigate("/inscription")}
+            onClick={() => navigate("/register")}
             className="font-body text-sm font-bold tracking-wide rounded-full px-12 py-4 bg-white text-primary hover:bg-background hover:scale-[1.02] transition-all duration-200"
           >
             Rejoindre le mouvement
