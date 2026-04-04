@@ -211,8 +211,9 @@ const MySubscription = () => {
           <button
             onClick={() => handleCheckout("yearly_prorata")}
             disabled={checkoutLoading}
-            className="w-full py-3 rounded-xl bg-white text-primary font-body font-medium text-sm hover:bg-white/90 transition-colors disabled:opacity-50"
+            className="w-full py-3 rounded-xl bg-white text-primary font-body font-medium text-sm hover:bg-white/90 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
           >
+            {checkoutLoading && <Loader2 className="h-4 w-4 animate-spin" />}
             {checkoutLoading ? "Redirection..." : `Payer ${prorataPrice}€ pour 2026`}
           </button>
         </div>
