@@ -111,6 +111,11 @@ const SmallMissionsRoute = () => {
   return <SmallMissionsPublic />;
 };
 
+const NavigateBlogSlug = () => {
+  const { slug } = useParams();
+  return <Navigate to={`/actualites/${slug}`} replace />;
+};
+
 const AppRoutes = () => (
   <Routes>
     <Route path="/" element={<Landing />} />
