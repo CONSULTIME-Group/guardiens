@@ -7,7 +7,7 @@ import guideHeaderImg from "@/assets/guide-header.jpg";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { lazy, Suspense, useState, useMemo } from "react";
+import { lazy, Suspense, useState, useMemo, useEffect } from "react";
 
 const GuideMap = lazy(() => import("@/components/guides/GuideMap"));
 
@@ -68,7 +68,6 @@ const GuideDetail = () => {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
-
   const { data: guide, isLoading: guideLoading } = useQuery({
     queryKey: ["city-guide", slug],
     queryFn: async () => {
@@ -83,6 +82,10 @@ const GuideDetail = () => {
     },
     enabled: !!slug,
   });
+
+  useEffect(() => {
+    if (!guideLoading) window.prerenderReady = true;
+  }, [guideLoading]);
 
   const { data: places = [] } = useQuery({
     queryKey: ["guide-places", guide?.id],

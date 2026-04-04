@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { useParams, Link, Navigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -50,6 +51,10 @@ const CityPage = () => {
     },
     enabled: !!slug && !cityData,
   });
+
+  useEffect(() => {
+    if (cityData || (!dbLoading && dbPage !== undefined)) window.prerenderReady = true;
+  }, [cityData, dbLoading, dbPage]);
 
   const stats = useCityStats(
     cityData?.departmentCode || "",
