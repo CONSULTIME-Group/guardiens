@@ -52,6 +52,10 @@ const CityPage = () => {
     enabled: !!slug && !cityData,
   });
 
+  useEffect(() => {
+    if (cityData || (!dbLoading && dbPage !== undefined)) window.prerenderReady = true;
+  }, [cityData, dbLoading, dbPage]);
+
   const stats = useCityStats(
     cityData?.departmentCode || "",
     cityData?.name || dbPage?.city || ""
