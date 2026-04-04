@@ -124,7 +124,7 @@ export const Sidebar = () => {
         <SidebarItem to="/dashboard" icon={Home} label="Dashboard" />
         <SidebarItem to="/sits" icon={Calendar} label={effectiveRole === "owner" ? "Mes annonces" : "Mes gardes"} />
         <SidebarItem to="/messages" icon={MessageSquare} label="Messagerie" badge={unreadCount} />
-        <SidebarItem to="/profile" icon={User} label="Mon profil" />
+        <SidebarItem to={effectiveRole === "owner" ? "/owner-profile" : "/profile"} icon={User} label="Mon profil" />
 
         <GroupLabel label="Découvrir" />
         <SidebarItem to="/search" icon={Search} label={effectiveRole === "owner" ? "Recherche gardiens" : "Recherche"} />

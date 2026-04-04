@@ -239,7 +239,7 @@ const CreateSit = () => {
           <div>
             <p className="font-medium text-destructive">Profil incomplet ({profileCompletion}%)</p>
             <p className="text-sm text-muted-foreground mt-1">Complétez votre profil à au moins 60% pour publier une annonce.</p>
-            <Link to="/profile" className="text-sm text-primary underline mt-2 inline-block">Compléter mon profil →</Link>
+            <Link to="/owner-profile" className="text-sm text-primary underline mt-2 inline-block">Compléter mon profil →</Link>
           </div>
         </div>
       )}

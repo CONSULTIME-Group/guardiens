@@ -433,7 +433,7 @@ const SitDetail = () => {
                 Le logement et les animaux se gèrent depuis votre profil. Les modifications s'appliquent à toutes vos annonces.
               </p>
               <Link
-                to="/profile#logement"
+                to="/owner-profile"
                 className="border border-border rounded-full px-4 py-2 text-sm text-foreground hover:border-primary transition-colors inline-block"
               >
                 Modifier mon profil →
