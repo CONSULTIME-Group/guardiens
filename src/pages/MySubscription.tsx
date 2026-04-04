@@ -183,8 +183,9 @@ const MySubscription = () => {
           <button
             onClick={() => handleCheckout("monthly")}
             disabled={checkoutLoading}
-            className="w-full py-3 rounded-xl border border-primary text-primary font-body font-medium text-sm hover:bg-primary/5 transition-colors disabled:opacity-50"
+            className="w-full py-3 rounded-xl border border-primary text-primary font-body font-medium text-sm hover:bg-primary/5 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
           >
+            {checkoutLoading && <Loader2 className="h-4 w-4 animate-spin" />}
             {checkoutLoading ? "Redirection..." : "Commencer à 9€/mois"}
           </button>
         </div>
