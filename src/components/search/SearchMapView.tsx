@@ -71,8 +71,8 @@ const SearchMapView = ({
 
   const getCoords = (item: any): { lat: number; lng: number } | null => {
     if (resultCoords.has(item.id)) return resultCoords.get(item.id)!;
-    if (item.is_demo && item.owner?.city && DEMO_CITY_COORDS[item.owner.city]) {
-      return DEMO_CITY_COORDS[item.owner.city];
+    if (item.latitude && item.longitude) {
+      return { lat: item.latitude, lng: item.longitude };
     }
     return null;
   };
