@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Helmet } from "react-helmet-async";
+import PageMeta from "@/components/PageMeta";
 import BadgeShieldGrid from "@/components/badges/BadgeShieldGrid";
 import BadgeShield from "@/components/badges/BadgeShield";
 import StatusShield from "@/components/badges/StatusShield";
@@ -115,6 +116,7 @@ const PublicProfile = () => {
       }
 
       setLoading(false);
+      window.prerenderReady = true;
     };
     load();
   }, [id]);
@@ -157,14 +159,15 @@ const PublicProfile = () => {
   return (
     <TooltipProvider>
       {/* SEO */}
+      <PageMeta
+        title={metaTitle}
+        description={metaDesc}
+        path={`/profil/${id}`}
+        image={profile.avatar_url || undefined}
+        type="website"
+        noindex={!shouldIndex}
+      />
       <Helmet>
-        <title>{metaTitle}</title>
-        <meta name="description" content={metaDesc} />
-        {!shouldIndex && <meta name="robots" content="noindex, nofollow" />}
-        <meta property="og:title" content={metaTitle} />
-        <meta property="og:description" content={metaDesc} />
-        {profile.avatar_url && <meta property="og:image" content={profile.avatar_url} />}
-        <meta property="og:type" content="profile" />
         <script type="application/ld+json">{JSON.stringify({
           "@context": "https://schema.org",
           "@type": "Person",

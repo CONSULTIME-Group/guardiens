@@ -3,16 +3,16 @@ import { useParams, Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import PageMeta from "@/components/PageMeta";
 import BadgeTimbre, { TIMBRES_ORDER } from "@/components/badges/BadgeTimbre";
 import { Skeleton } from "@/components/ui/skeleton";
+import { buildAbsoluteUrl } from "@/lib/seo";
 import {
   Car, MapPin, X,
   ChevronLeft, ChevronRight,
   Shield, Star,
 } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-
-const SITE_URL = "https://guardiens.fr";
 
 const capitalize = (name: string) =>
   name ? name.charAt(0).toUpperCase() + name.slice(1).toLowerCase() : "";
@@ -200,7 +200,7 @@ export default function PublicSitterProfile() {
   const rawTitle = `${firstName} — Gardien de maison en AURA`;
   const pageTitle = rawTitle;
   const pageDesc = ((bio || motivation || "") as string).slice(0, 160) || `${firstName} garde des ${animalLabels || "animaux"} à ${city || "France"}. Profil vérifié sur Guardiens.fr.`;
-  const pageUrl = `${SITE_URL}/gardiens/${id}`;
+  const pageUrl = buildAbsoluteUrl(`/gardiens/${id}`);
   const shouldNoindex = !profile.identity_verified || (profile.profile_completion ?? 0) < 60;
 
   const jsonLd = {
@@ -252,21 +252,15 @@ export default function PublicSitterProfile() {
       <div style={{ position: 'fixed', right: '10px', top: '50%', transform: 'translateY(-50%) rotate(90deg)', fontSize: '9px', letterSpacing: '4px', textTransform: 'uppercase' as const, color: 'rgba(45,106,79,0.28)', whiteSpace: 'nowrap', pointerEvents: 'none', zIndex: 0, fontFamily: 'sans-serif' }}>
         Gardiens de confiance · Gens du coin
       </div>
-       <Helmet>
-        <title>{pageTitle} | Guardiens</title>
-        <meta name="description" content={pageDesc} />
-        <meta name="robots" content={shouldNoindex ? "noindex, nofollow" : "index, follow"} />
-        <link rel="canonical" href={pageUrl} />
-        <meta property="og:title" content={pageTitle} />
-        <meta property="og:description" content={pageDesc} />
-        {profile.avatar_url && <meta property="og:image" content={profile.avatar_url} />}
-        <meta property="og:url" content={pageUrl} />
-        <meta property="og:type" content="profile" />
-        <meta property="og:site_name" content="Guardiens" />
-        <meta name="twitter:card" content="summary" />
-        <meta name="twitter:title" content={pageTitle} />
-        <meta name="twitter:description" content={pageDesc} />
-        {profile.avatar_url && <meta name="twitter:image" content={profile.avatar_url} />}
+      <PageMeta
+        title={pageTitle}
+        description={pageDesc}
+        path={`/gardiens/${id}`}
+        image={profile.avatar_url || undefined}
+        type="website"
+        noindex={shouldNoindex}
+      />
+      <Helmet>
         <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>
       </Helmet>
 
