@@ -104,6 +104,7 @@ export default function PublicSitterProfile() {
       }
 
       setLoading(false);
+      window.prerenderReady = true;
     };
     load();
   }, [id]);

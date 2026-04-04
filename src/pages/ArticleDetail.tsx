@@ -102,6 +102,7 @@ export default function ArticleDetail() {
       const art = data as ArticleFull | null;
       setArticle(art);
       setLoading(false);
+      window.prerenderReady = true;
 
       if (!art) return;
 
