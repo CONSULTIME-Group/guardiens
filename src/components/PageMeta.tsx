@@ -2,7 +2,6 @@ import { Helmet } from "react-helmet-async";
 import { useLocation } from "react-router-dom";
 import { buildAbsoluteUrl, normalizePathname } from "@/lib/seo";
 
-const SITE_URL = "https://guardiens.fr";
 const DEFAULT_IMAGE = "https://guardiens.fr/og-default.jpg";
 const SITE_NAME = "Guardiens";
 
