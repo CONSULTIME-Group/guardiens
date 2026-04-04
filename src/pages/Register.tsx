@@ -29,28 +29,43 @@ const Register = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
+  const [formError, setFormError] = useState<string | null>(null);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedRole) return;
+    setFormError(null);
+
+    if (password.length < 8) {
+      setFormError("Votre mot de passe doit contenir au moins 8 caractères.");
+      return;
+    }
+
     setIsLoading(true);
     try {
       await register(email, password, selectedRole);
       toast({
-        title: "Compte créé !",
-        description: "Un email de confirmation vous a été envoyé. Vérifiez votre boîte mail (et vos spams) pour activer votre compte.",
+        title: "Vérifiez votre email pour activer votre compte.",
       });
       setStep(1);
       setEmail("");
       setPassword("");
       setSelectedRole(null);
+      setFormError(null);
     } catch (error: any) {
-      toast({
-        variant: "destructive",
-        title: "Erreur d'inscription",
-        description: error.message?.includes("already registered")
-          ? "Cet email est déjà utilisé."
-          : "Une erreur est survenue. Veuillez réessayer.",
-      });
+      if (error.message?.includes("already registered") || error.message?.includes("already been registered")) {
+        setFormError("Un compte existe déjà avec cette adresse.");
+      } else if (error.message?.includes("network") || error.message?.includes("fetch")) {
+        toast({
+          variant: "destructive",
+          title: "Une erreur est survenue. Réessayez dans quelques instants.",
+        });
+      } else {
+        toast({
+          variant: "destructive",
+          title: "Une erreur est survenue. Réessayez dans quelques instants.",
+        });
+      }
     } finally {
       setIsLoading(false);
     }
