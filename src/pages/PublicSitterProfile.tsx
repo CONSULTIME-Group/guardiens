@@ -251,9 +251,10 @@ export default function PublicSitterProfile() {
       <div style={{ position: 'fixed', right: '10px', top: '50%', transform: 'translateY(-50%) rotate(90deg)', fontSize: '9px', letterSpacing: '4px', textTransform: 'uppercase' as const, color: 'rgba(45,106,79,0.28)', whiteSpace: 'nowrap', pointerEvents: 'none', zIndex: 0, fontFamily: 'sans-serif' }}>
         Gardiens de confiance · Gens du coin
       </div>
-      <Helmet>
-        <title>{pageTitle}</title>
+       <Helmet>
+        <title>{pageTitle} | Guardiens</title>
         <meta name="description" content={pageDesc} />
+        <meta name="robots" content={shouldNoindex ? "noindex, nofollow" : "index, follow"} />
         <link rel="canonical" href={pageUrl} />
         <meta property="og:title" content={pageTitle} />
         <meta property="og:description" content={pageDesc} />
