@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { cn } from "@/lib/utils";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -8,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import ChipSelect from "@/components/profile/ChipSelect";
-import { ArrowLeft, AlertCircle } from "lucide-react";
+import { ArrowLeft, AlertCircle, Zap } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
 
@@ -206,14 +207,22 @@ const EditSit = () => {
         )}
 
         <div>
-          <Label className="text-sm font-medium">Attentes spécifiques à cette garde</Label>
+          <Label className="text-sm font-medium">Description de la garde *</Label>
           <Textarea
-            placeholder="Ce qui est particulier à cette garde"
+            placeholder="Ce qui est particulier à cette garde (min. 50 caractères)"
             value={specificExpectations}
             onChange={e => setSpecificExpectations(e.target.value)}
             className="mt-1.5"
             rows={4}
           />
+          <p className={cn(
+            "text-xs mt-1",
+            specificExpectations.length > 0 && specificExpectations.length < 50
+              ? "text-destructive"
+              : "text-muted-foreground"
+          )}>
+            {specificExpectations.length}/50 caractères minimum
+          </p>
         </div>
 
         {/* CORRECTION 1 — "Idéale pour" */}
@@ -254,7 +263,7 @@ const EditSit = () => {
             />
             <div>
               <label className="text-sm font-medium flex items-center gap-1.5 cursor-pointer text-amber-800" onClick={() => setIsUrgent(!isUrgent)}>
-                ⚡ Urgent — garde dans moins de 48h
+                <Zap className="h-4 w-4" /> Urgent — garde dans moins de 48h
               </label>
               <p className="text-xs text-amber-600 mt-0.5">
                 Les gardiens d'urgence seront alertés en priorité
