@@ -102,6 +102,9 @@ const ARTICLE_REDIRECTS: Record<string, string> = {
   "conseil-gardien-creer-profil-attractif-lyon": "creer-profil-gardien-attractif",
   "proprietaire-preparer-garde-maison": "preparer-maison-avant-garde",
   "pet-sitting-clermont-ferrand-guide": "pet-sitting-clermont-ferrand",
+  "conseils-garder-chien": "reussir-premiere-garde-house-sitting",
+  "erreurs-premiere-garde": "reussir-premiere-garde-house-sitting",
+  "house-sitting-saint-etienne-guide": "pet-sitting-saint-etienne-loire",
 };
 
 export default function ArticleDetail() {
