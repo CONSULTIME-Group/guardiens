@@ -203,15 +203,21 @@ const OwnerDashboard = () => {
     return "Trouvez le gardien idéal pour vos animaux.";
   };
 
-  const getBanner = () => {
+  const getBanner = (): { bg: string; text: string; label: string; to?: string; ctaLabel?: string } | null => {
+    // Priorité 1 — ID non vérifiée
     if (verificationStatus !== "verified" && verificationStatus !== "pending")
-      return { bg: "bg-amber-50 border-amber-200", text: "text-amber-800", label: "Vérifier mon identité", to: "/settings#verification" };
+      return { bg: "bg-amber-50 border-amber-200", text: "text-amber-800", label: "Vérifiez votre identité pour publier une annonce et recevoir des candidatures.", to: "/settings#verification", ctaLabel: "Vérifier mon identité →" };
+    // Priorité 2 — Garde en cours
     if (ongoingSit) {
-      const petNames = pets.map(p => p.name).filter(Boolean).join(", ");
-      return { bg: "bg-green-50 border-green-200", text: "text-green-800", label: `Garde en cours — un gardien veille sur ${petNames || "vos animaux"}`, to: `/sits/${ongoingSit.id}` };
+      const acceptedApp = (ongoingSit.applications || []).find((a: any) => a.status === "accepted");
+      const sitterName = acceptedApp?.sitter_id && sitterProfiles[acceptedApp.sitter_id]?.first_name;
+      const endLabel = ongoingSit.end_date ? format(new Date(ongoingSit.end_date), "d MMMM", { locale: fr }) : "";
+      const nameStr = sitterName ? capitalize(sitterName) : "votre gardien";
+      return { bg: "bg-green-50 border-green-200", text: "text-green-800", label: `Garde en cours — ${nameStr} s'occupe de vos animaux${endLabel ? ` jusqu'au ${endLabel}` : ""}.` };
     }
+    // Priorité 3 — Candidatures non lues
     if (pendingAppCount > 0)
-      return { bg: "bg-blue-50 border-blue-200", text: "text-blue-800", label: `Vous avez ${pendingAppCount} nouvelle${pendingAppCount > 1 ? "s" : ""} candidature${pendingAppCount > 1 ? "s" : ""}`, to: "/sits" };
+      return { bg: "bg-blue-50 border-blue-200", text: "text-blue-800", label: `Vous avez ${pendingAppCount} candidature${pendingAppCount > 1 ? "s" : ""} non lue${pendingAppCount > 1 ? "s" : ""}.`, to: "/sits", ctaLabel: "Voir les candidatures →" };
     return null;
   };
   const banner = getBanner();
@@ -266,11 +272,16 @@ const OwnerDashboard = () => {
 
       {/* ═══ Banner ═══ */}
       {banner && (
-        <Link to={banner.to} className="block px-5 md:px-8 -mt-4 mb-4">
-          <div className={`p-4 rounded-xl border ${banner.bg} hover:shadow-md transition-shadow`}>
+        <div className="px-5 md:px-8 -mt-4 mb-4">
+          <div className={`p-4 rounded-xl border ${banner.bg} flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2`}>
             <p className={`text-sm font-medium ${banner.text}`}>{banner.label}</p>
+            {banner.ctaLabel && banner.to && (
+              <Link to={banner.to} className={`text-sm font-semibold ${banner.text} hover:underline shrink-0`}>
+                {banner.ctaLabel}
+              </Link>
+            )}
           </div>
-        </Link>
+        </div>
       )}
 
       {/* ═══ 2. STATS 4 COLONNES ═══ */}
@@ -362,10 +373,16 @@ const OwnerDashboard = () => {
             <div className="space-y-3">
               {recentApps.map(app => {
                 const sitter = sitterProfiles[app.sitter?.id] || app.sitter || {};
-                const isNew = app.status === "pending";
+                const sitTitle = app.sit?.title || "";
+                const dateRange = [
+                  app.sit?.start_date ? format(new Date(app.sit.start_date), "d MMM", { locale: fr }) : "",
+                  app.sit?.end_date ? format(new Date(app.sit.end_date), "d MMM", { locale: fr }) : "",
+                ].filter(Boolean).join(" → ");
+                const badges = sitter.id && sitterBadges[sitter.id] ? sitterBadges[sitter.id].sort((a: any, b: any) => b.count - a.count).slice(0, 2) : [];
+
                 return (
-                  <div key={app.id} className="bg-card border border-border rounded-2xl p-4 flex items-center gap-4">
-                    <div className="w-11 h-11 rounded-full bg-primary/15 text-primary font-bold flex items-center justify-center text-base font-sans shrink-0 overflow-hidden">
+                  <div key={app.id} className="bg-card border border-border rounded-2xl p-4 flex gap-4">
+                    <div className="w-12 h-12 rounded-full bg-primary/15 text-primary font-bold flex items-center justify-center text-lg font-sans shrink-0 overflow-hidden">
                       {sitter.avatar_url ? (
                         <img src={sitter.avatar_url} alt="" className="w-full h-full rounded-full object-cover" />
                       ) : (
@@ -376,42 +393,42 @@ const OwnerDashboard = () => {
                       <p className="text-sm font-semibold text-foreground">
                         {capitalize(sitter.first_name)}
                       </p>
-                      <p className="text-xs text-muted-foreground font-sans">
-                        {app.sit?.title} {app.sit?.start_date ? `· ${format(new Date(app.sit.start_date), "d MMM", { locale: fr })}` : ""}
+                      <p className="text-xs text-muted-foreground font-sans mt-0.5 truncate">
+                        {sitTitle}{dateRange ? ` · ${dateRange}` : ""}
                       </p>
-                      <div className="flex gap-2 mt-1.5 flex-wrap">
-                        {isNew && (
-                          <span className="text-xs font-sans bg-primary text-white rounded-full px-2 py-0.5">
-                            Nouvelle
+                      <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+                        {sitter.avgNote ? (
+                          <span className="text-xs font-sans text-amber-600 font-medium">
+                            &#9733; {sitter.avgNote}
                           </span>
+                        ) : (
+                          <span className="text-xs font-sans text-muted-foreground italic">Nouveau</span>
                         )}
-                        {sitter.identity_verified && (
-                          <span className="text-xs font-sans border border-border rounded-full px-2 py-0.5 text-muted-foreground">
-                            ID vérifiée
-                          </span>
-                        )}
-                        {sitter.avgNote && (
-                          <span className="text-xs font-sans border border-border rounded-full px-2 py-0.5 text-muted-foreground">
-                            {sitter.avgNote} &#9733;
-                          </span>
+                        {badges.length > 0 && (
+                          <TooltipProvider>
+                            <div className="flex gap-1">
+                              {badges.map((b: any) => (
+                                <BadgeShield key={b.badge_key} badgeKey={b.badge_key} count={b.count} size="sm" showLabel={false} />
+                              ))}
+                            </div>
+                          </TooltipProvider>
                         )}
                       </div>
-                      {sitter.id && sitterBadges[sitter.id] && (
-                        <TooltipProvider>
-                          <div className="flex gap-1 mt-1">
-                            {sitterBadges[sitter.id].slice(0, 2).map((b: any) => (
-                              <BadgeShield key={b.badge_key} badgeKey={b.badge_key} count={b.count} size="sm" showLabel={false} />
-                            ))}
-                          </div>
-                        </TooltipProvider>
-                      )}
+                      <div className="flex gap-2 mt-3">
+                        <button
+                          onClick={() => navigate(`/gardiens/${sitter.id}`)}
+                          className="border border-border text-muted-foreground rounded-xl px-3 py-1.5 text-xs font-sans hover:bg-accent transition-colors"
+                        >
+                          Voir le profil
+                        </button>
+                        <button
+                          onClick={() => navigate(`/mes-annonces/${app.sit_id}`)}
+                          className="bg-primary text-primary-foreground rounded-xl px-4 py-1.5 text-xs font-sans font-medium hover:bg-primary/90 transition-colors"
+                        >
+                          Répondre
+                        </button>
+                      </div>
                     </div>
-                    <button
-                      onClick={() => navigate(`/gardiens/${sitter.id}`)}
-                      className="shrink-0 border border-primary text-primary rounded-xl px-3 md:px-4 py-2 text-xs font-sans hover:bg-primary/5 transition-colors"
-                    >
-                      Voir le profil
-                    </button>
                   </div>
                 );
               })}
