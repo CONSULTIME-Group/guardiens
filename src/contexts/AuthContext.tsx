@@ -29,9 +29,9 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const mapProfile = (profile: any): Profile => ({
+const mapProfile = (profile: any, authEmail?: string): Profile => ({
   id: profile.id,
-  email: profile.email || "",
+  email: authEmail || profile.email || "",
   role: profile.role as Role,
   firstName: profile.first_name || "",
   lastName: profile.last_name || "",
