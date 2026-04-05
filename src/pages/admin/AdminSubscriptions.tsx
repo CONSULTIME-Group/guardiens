@@ -10,8 +10,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogD
 import { toast } from "sonner";
 import { format, differenceInDays } from "date-fns";
 import { fr } from "date-fns/locale";
-import { CreditCard, Users, Crown, AlertTriangle, Clock, Gift, Plus, Minus, ShieldCheck, ShieldX, Search, Eye } from "lucide-react";
+import { CreditCard, Users, Crown, AlertTriangle, Clock, Gift, Plus, Minus, ShieldCheck, ShieldX, Search, Eye, Mail, Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 
 const planLabels: Record<string, { label: string; color: string }> = {
   founder_free: { label: "Fondateur", color: "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400" },
@@ -30,6 +31,9 @@ const AdminSubscriptions = () => {
   const [metrics, setMetrics] = useState({ active: 0, founders: 0, expiredMonth: 0, revenue: 0 });
   const [actionModal, setActionModal] = useState<{ open: boolean; sub: any; action: string; duration: string; motif: string }>({
     open: false, sub: null, action: "", duration: "1", motif: ""
+  });
+  const [founderReminder, setFounderReminder] = useState<{ type: "30" | "7" | null; count: number; loading: boolean; sending: boolean }>({
+    type: null, count: 0, loading: false, sending: false,
   });
 
   const fetchSubscriptions = useCallback(async () => {
@@ -128,9 +132,63 @@ const AdminSubscriptions = () => {
   // Count expiring in 30 days
   const expiringCount = subscriptions.filter(s => s.status === "active" && s.expires_at && differenceInDays(new Date(s.expires_at), new Date()) <= 30 && differenceInDays(new Date(s.expires_at), new Date()) >= 0).length;
 
+  const handleFounderReminderClick = async (type: "30" | "7") => {
+    setFounderReminder({ type, count: 0, loading: true, sending: false });
+    // Count eligible founders
+    const { data: founders } = await supabase
+      .from("profiles")
+      .select("id")
+      .eq("is_founder", true);
+
+    let count = 0;
+    for (const f of (founders || [])) {
+      const { data: sub } = await supabase
+        .from("abonnements")
+        .select("statut")
+        .eq("user_id", f.id)
+        .in("statut", ["trial", "active"])
+        .limit(1);
+      if (!sub || sub.length === 0) count++;
+    }
+    setFounderReminder({ type, count, loading: false, sending: false });
+  };
+
+  const confirmFounderReminder = async () => {
+    const type = founderReminder.type;
+    if (!type) return;
+    setFounderReminder(s => ({ ...s, sending: true }));
+    try {
+      const { data, error } = await supabase.functions.invoke(`send-founder-reminder-${type}`);
+      if (error) throw error;
+      toast.success(`Email envoyé à ${data?.sent || 0} fondateur(s)`);
+    } catch {
+      toast.error("Erreur lors de l'envoi des emails");
+    }
+    setFounderReminder({ type: null, count: 0, loading: false, sending: false });
+  };
+
   return (
     <div className="space-y-6">
       <h1 className="font-body text-2xl font-bold">Abonnements</h1>
+
+      {/* Founder reminder buttons */}
+      <Card>
+        <CardContent className="p-4 flex flex-col sm:flex-row items-start sm:items-center gap-3">
+          <Crown className="h-5 w-5 text-amber-500 shrink-0" />
+          <div className="flex-1">
+            <p className="font-medium text-sm">Rappels fondateurs</p>
+            <p className="text-xs text-muted-foreground">Envoyer les emails de rappel aux fondateurs sans abonnement actif</p>
+          </div>
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm" onClick={() => handleFounderReminderClick("30")}>
+              <Mail className="h-4 w-4 mr-1" /> Rappel J-30
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => handleFounderReminderClick("7")}>
+              <Mail className="h-4 w-4 mr-1" /> Rappel J-7
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* KPI Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -319,6 +377,31 @@ const AdminSubscriptions = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      {/* Founder reminder confirmation */}
+      <AlertDialog open={founderReminder.type !== null} onOpenChange={(o) => !o && setFounderReminder({ type: null, count: 0, loading: false, sending: false })}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              Envoyer le rappel J-{founderReminder.type} aux fondateurs
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {founderReminder.loading
+                ? "Comptage des destinataires en cours..."
+                : `Envoyer cet email à ${founderReminder.count} fondateur(s) sans abonnement actif ?`
+              }
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annuler</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmFounderReminder}
+              disabled={founderReminder.loading || founderReminder.sending || founderReminder.count === 0}
+            >
+              {founderReminder.sending ? <><Loader2 className="h-4 w-4 animate-spin mr-1" /> Envoi...</> : "Envoyer"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
