@@ -70,7 +70,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const fetchProfile = useCallback(async (supabaseUser: SupabaseUser) => {
     const { data } = await supabase
       .from("profiles")
-      .select("*")
+      .select("id, role, first_name, last_name, avatar_url, profile_completion, identity_verified, is_founder")
       .eq("id", supabaseUser.id)
       .single();
 
