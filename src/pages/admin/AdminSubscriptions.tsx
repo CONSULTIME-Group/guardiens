@@ -377,6 +377,31 @@ const AdminSubscriptions = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      {/* Founder reminder confirmation */}
+      <AlertDialog open={founderReminder.type !== null} onOpenChange={(o) => !o && setFounderReminder({ type: null, count: 0, loading: false, sending: false })}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              Envoyer le rappel J-{founderReminder.type} aux fondateurs
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {founderReminder.loading
+                ? "Comptage des destinataires en cours..."
+                : `Envoyer cet email à ${founderReminder.count} fondateur(s) sans abonnement actif ?`
+              }
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annuler</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmFounderReminder}
+              disabled={founderReminder.loading || founderReminder.sending || founderReminder.count === 0}
+            >
+              {founderReminder.sending ? <><Loader2 className="h-4 w-4 animate-spin mr-1" /> Envoi...</> : "Envoyer"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
