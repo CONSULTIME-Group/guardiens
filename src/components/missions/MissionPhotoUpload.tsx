@@ -1,9 +1,9 @@
 import { useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { compressImageFile } from "@/lib/compressImage";
-import { Button } from "@/components/ui/button";
 import { ImagePlus, X, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { Progress } from "@/components/ui/progress";
 
 const ACCEPTED = ".jpg,.jpeg,.png,.webp";
 const MAX_PHOTOS = 3;
@@ -18,6 +18,7 @@ const MissionPhotoUpload = ({ userId, photos, onChange }: MissionPhotoUploadProp
   const { toast } = useToast();
   const inputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
+  const [progress, setProgress] = useState(0);
 
   const handleFiles = async (files: FileList | null) => {
     if (!files || !files.length) return;
@@ -28,29 +29,35 @@ const MissionPhotoUpload = ({ userId, photos, onChange }: MissionPhotoUploadProp
     }
 
     setUploading(true);
+    setProgress(0);
+    const toProcess = Math.min(files.length, remaining);
     const newUrls: string[] = [];
 
-    for (let i = 0; i < Math.min(files.length, remaining); i++) {
+    for (let i = 0; i < toProcess; i++) {
       const file = files[i];
       if (!file.type.startsWith("image/")) continue;
 
       try {
-        const compressed = await compressImageFile(file, 2, 1600);
-        const ext = compressed.name.split(".").pop() || "jpg";
+        setProgress(Math.round(((i) / toProcess) * 80));
+        const compressed = await compressImageFile(file, 0.3, 1200);
+        const ext = compressed.name.split(".").pop() || "webp";
         const path = `${userId}/${crypto.randomUUID()}.${ext}`;
 
+        setProgress(Math.round(((i + 0.5) / toProcess) * 80));
         const { error } = await supabase.storage.from("mission-photos").upload(path, compressed);
         if (error) throw error;
 
         const { data: urlData } = supabase.storage.from("mission-photos").getPublicUrl(path);
         newUrls.push(urlData.publicUrl);
+        setProgress(Math.round(((i + 1) / toProcess) * 100));
       } catch {
-        toast({ title: "Erreur", description: "Impossible d'envoyer la photo.", variant: "destructive" });
+        toast({ title: "Erreur", description: "Une photo n'a pas pu être envoyée. Veuillez réessayer.", variant: "destructive" });
       }
     }
 
     if (newUrls.length) onChange([...photos, ...newUrls]);
     setUploading(false);
+    setProgress(0);
     if (inputRef.current) inputRef.current.value = "";
   };
 
@@ -92,6 +99,10 @@ const MissionPhotoUpload = ({ userId, photos, onChange }: MissionPhotoUploadProp
           </button>
         )}
       </div>
+
+      {uploading && (
+        <Progress value={progress} className="h-2" />
+      )}
 
       <p className="text-xs text-muted-foreground">{photos.length}/{MAX_PHOTOS} photos</p>
 
