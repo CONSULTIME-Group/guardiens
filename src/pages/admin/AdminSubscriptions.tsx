@@ -10,8 +10,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogD
 import { toast } from "sonner";
 import { format, differenceInDays } from "date-fns";
 import { fr } from "date-fns/locale";
-import { CreditCard, Users, Crown, AlertTriangle, Clock, Gift, Plus, Minus, ShieldCheck, ShieldX, Search, Eye } from "lucide-react";
+import { CreditCard, Users, Crown, AlertTriangle, Clock, Gift, Plus, Minus, ShieldCheck, ShieldX, Search, Eye, Mail, Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 
 const planLabels: Record<string, { label: string; color: string }> = {
   founder_free: { label: "Fondateur", color: "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400" },
@@ -30,6 +31,9 @@ const AdminSubscriptions = () => {
   const [metrics, setMetrics] = useState({ active: 0, founders: 0, expiredMonth: 0, revenue: 0 });
   const [actionModal, setActionModal] = useState<{ open: boolean; sub: any; action: string; duration: string; motif: string }>({
     open: false, sub: null, action: "", duration: "1", motif: ""
+  });
+  const [founderReminder, setFounderReminder] = useState<{ type: "30" | "7" | null; count: number; loading: boolean; sending: boolean }>({
+    type: null, count: 0, loading: false, sending: false,
   });
 
   const fetchSubscriptions = useCallback(async () => {

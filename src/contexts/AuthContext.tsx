@@ -45,6 +45,28 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [activeRole, setActiveRole] = useState<ActiveRole>("sitter");
   const [loading, setLoading] = useState(true);
 
+  const checkFounderExpiry = useCallback(async (userId: string, isFounder: boolean) => {
+    if (!isFounder) return;
+    const FOUNDER_DEADLINE = new Date("2026-06-13T23:59:59Z");
+    if (new Date() <= FOUNDER_DEADLINE) return;
+
+    // Check if they have an active/trial subscription
+    const { data: subs } = await supabase
+      .from("abonnements")
+      .select("statut")
+      .eq("user_id", userId)
+      .in("statut", ["trial", "active"])
+      .limit(1);
+
+    if (subs && subs.length > 0) return;
+
+    // Expire their subscription
+    await supabase
+      .from("abonnements")
+      .update({ statut: "expired" } as any)
+      .eq("user_id", userId);
+  }, []);
+
   const fetchProfile = useCallback(async (supabaseUser: SupabaseUser) => {
     const { data } = await supabase
       .from("profiles")
@@ -57,8 +79,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setUser(profile);
       if (profile.role === "owner") setActiveRole("owner");
       else setActiveRole("sitter");
+
+      // Check founder expiry in background
+      checkFounderExpiry(data.id, data.is_founder).catch(console.warn);
     }
-  }, []);
+  }, [checkFounderExpiry]);
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
