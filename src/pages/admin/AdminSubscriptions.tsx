@@ -171,6 +171,25 @@ const AdminSubscriptions = () => {
     <div className="space-y-6">
       <h1 className="font-body text-2xl font-bold">Abonnements</h1>
 
+      {/* Founder reminder buttons */}
+      <Card>
+        <CardContent className="p-4 flex flex-col sm:flex-row items-start sm:items-center gap-3">
+          <Crown className="h-5 w-5 text-amber-500 shrink-0" />
+          <div className="flex-1">
+            <p className="font-medium text-sm">Rappels fondateurs</p>
+            <p className="text-xs text-muted-foreground">Envoyer les emails de rappel aux fondateurs sans abonnement actif</p>
+          </div>
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm" onClick={() => handleFounderReminderClick("30")}>
+              <Mail className="h-4 w-4 mr-1" /> Rappel J-30
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => handleFounderReminderClick("7")}>
+              <Mail className="h-4 w-4 mr-1" /> Rappel J-7
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* KPI Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <Card>
