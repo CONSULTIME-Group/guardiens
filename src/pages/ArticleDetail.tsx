@@ -237,7 +237,7 @@ export default function ArticleDetail() {
         type="article"
         publishedAt={article.published_at || undefined}
         author={article.author_name}
-        noindex={NOINDEX_SLUGS.has(article.slug)}
+        noindex={article.noindex === true}
       />
 
       {/* CORRECTION 1 — Schema.org Article */}
