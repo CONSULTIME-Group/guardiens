@@ -42,7 +42,50 @@ interface ActivityItem {
 }
 
 interface WeeklySignup { week: string; sitters: number; owners: number }
-interface CityData { city: string; count: number }
+interface DeptData { dept: string; count: number }
+
+const DEPT_NAMES: Record<string, string> = {
+  "01":"Ain","02":"Aisne","03":"Allier","04":"Alpes-de-Haute-Provence","05":"Hautes-Alpes",
+  "06":"Alpes-Maritimes","07":"Ardèche","08":"Ardennes","09":"Ariège","10":"Aube",
+  "11":"Aude","12":"Aveyron","13":"Bouches-du-Rhône","14":"Calvados","15":"Cantal",
+  "16":"Charente","17":"Charente-Maritime","18":"Cher","19":"Corrèze","2A":"Corse-du-Sud",
+  "2B":"Haute-Corse","21":"Côte-d'Or","22":"Côtes-d'Armor","23":"Creuse","24":"Dordogne",
+  "25":"Doubs","26":"Drôme","27":"Eure","28":"Eure-et-Loir","29":"Finistère",
+  "30":"Gard","31":"Haute-Garonne","32":"Gers","33":"Gironde","34":"Hérault",
+  "35":"Ille-et-Vilaine","36":"Indre","37":"Indre-et-Loire","38":"Isère","39":"Jura",
+  "40":"Landes","41":"Loir-et-Cher","42":"Loire","43":"Haute-Loire","44":"Loire-Atlantique",
+  "45":"Loiret","46":"Lot","47":"Lot-et-Garonne","48":"Lozère","49":"Maine-et-Loire",
+  "50":"Manche","51":"Marne","52":"Haute-Marne","53":"Mayenne","54":"Meurthe-et-Moselle",
+  "55":"Meuse","56":"Morbihan","57":"Moselle","58":"Nièvre","59":"Nord",
+  "60":"Oise","61":"Orne","62":"Pas-de-Calais","63":"Puy-de-Dôme","64":"Pyrénées-Atlantiques",
+  "65":"Hautes-Pyrénées","66":"Pyrénées-Orientales","67":"Bas-Rhin","68":"Haut-Rhin","69":"Rhône",
+  "70":"Haute-Saône","71":"Saône-et-Loire","72":"Sarthe","73":"Savoie","74":"Haute-Savoie",
+  "75":"Paris","76":"Seine-Maritime","77":"Seine-et-Marne","78":"Yvelines","79":"Deux-Sèvres",
+  "80":"Somme","81":"Tarn","82":"Tarn-et-Garonne","83":"Var","84":"Vaucluse",
+  "85":"Vendée","86":"Vienne","87":"Haute-Vienne","88":"Vosges","89":"Yonne",
+  "90":"Territoire de Belfort","91":"Essonne","92":"Hauts-de-Seine","93":"Seine-Saint-Denis",
+  "94":"Val-de-Marne","95":"Val-d'Oise",
+  "971":"Guadeloupe","972":"Martinique","973":"Guyane","974":"La Réunion","976":"Mayotte",
+};
+
+function postalToDept(postalCode: string | null | undefined): string {
+  if (!postalCode) return "Non renseigné";
+  const cp = postalCode.trim();
+  if (cp.length < 4) return "Non renseigné";
+  // DOM-TOM: 3 first digits
+  if (cp.startsWith("97")) {
+    const code = cp.substring(0, 3);
+    return DEPT_NAMES[code] ? `${code} ${DEPT_NAMES[code]}` : "Non renseigné";
+  }
+  // Corse
+  if (cp.startsWith("20")) {
+    const num = parseInt(cp.substring(0, 5), 10);
+    if (num >= 20000 && num <= 20190) return "2A Corse-du-Sud";
+    return "2B Haute-Corse";
+  }
+  const code = cp.substring(0, 2);
+  return DEPT_NAMES[code] ? `${code} ${DEPT_NAMES[code]}` : "Non renseigné";
+}
 
 const CHART_COLORS = [
   "hsl(var(--primary))",
@@ -58,7 +101,7 @@ const AdminDashboard = () => {
   const [alerts, setAlerts] = useState<Alert[]>([]);
   const [activity, setActivity] = useState<ActivityItem[]>([]);
   const [weeklySignups, setWeeklySignups] = useState<WeeklySignup[]>([]);
-  const [cityData, setCityData] = useState<CityData[]>([]);
+  const [deptData, setDeptData] = useState<DeptData[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -93,7 +136,7 @@ const AdminDashboard = () => {
         supabase.from("sits").select("id", { count: "exact", head: true }).eq("status", "published"),
         supabase.from("sits").select("id", { count: "exact", head: true }).eq("status", "confirmed"),
         supabase.from("reviews").select("overall_rating"),
-        supabase.from("profiles").select("created_at, city, role, first_name, id"),
+        supabase.from("profiles").select("created_at, city, role, first_name, id, postal_code"),
         supabase.from("profiles").select("id", { count: "exact", head: true }).eq("identity_verification_status", "pending"),
         supabase.from("external_experiences").select("id", { count: "exact", head: true }).eq("verification_status", "pending"),
         supabase.from("reports").select("id", { count: "exact", head: true }).eq("status", "pending"),
@@ -155,18 +198,21 @@ const AdminDashboard = () => {
       }
       setWeeklySignups(weeks);
 
-      // City distribution (top 10)
-      const cityMap: Record<string, number> = {};
+      // Department distribution (top 10)
+      const deptMap: Record<string, number> = {};
       (profilesData || []).forEach(p => {
-        const city = (p.city || "").trim();
-        if (city) cityMap[city] = (cityMap[city] || 0) + 1;
+        const dept = postalToDept((p as any).postal_code);
+        deptMap[dept] = (deptMap[dept] || 0) + 1;
       });
-      setCityData(
-        Object.entries(cityMap)
-          .sort((a, b) => b[1] - a[1])
-          .slice(0, 10)
-          .map(([city, count]) => ({ city, count }))
-      );
+      // Remove "Non renseigné" from chart, add at end if present
+      const nonRenseigne = deptMap["Non renseigné"] || 0;
+      delete deptMap["Non renseigné"];
+      const sorted = Object.entries(deptMap)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 10)
+        .map(([dept, count]) => ({ dept, count }));
+      if (nonRenseigne > 0) sorted.push({ dept: "Non renseigné", count: nonRenseigne });
+      setDeptData(sorted);
 
       // Activity timeline — merge and sort recent events
       const activityItems: ActivityItem[] = [];
@@ -386,23 +432,23 @@ const AdminDashboard = () => {
           </CardContent>
         </Card>
 
-        {/* Geographic distribution - horizontal bars top 10 */}
+        {/* Geographic distribution by department */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Répartition géographique (top 10)</CardTitle>
+            <CardTitle className="text-base">Répartition par département (top 10)</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="h-56">
-              {cityData.length === 0 ? (
+              {deptData.length === 0 ? (
                 <div className="flex items-center justify-center h-full text-muted-foreground text-sm">
-                  Aucune donnée de ville disponible.
+                  Aucune donnée disponible.
                 </div>
               ) : (
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={cityData} layout="vertical" margin={{ left: 8 }}>
+                  <BarChart data={deptData} layout="vertical" margin={{ left: 8 }}>
                     <CartesianGrid strokeDasharray="3 3" className="stroke-border" horizontal={false} />
                     <XAxis type="number" allowDecimals={false} tick={{ fontSize: 11 }} />
-                    <YAxis dataKey="city" type="category" tick={{ fontSize: 11 }} width={90} />
+                    <YAxis dataKey="dept" type="category" tick={{ fontSize: 11 }} width={140} />
                     <Tooltip
                       contentStyle={{
                         backgroundColor: "hsl(var(--card))",
@@ -413,7 +459,7 @@ const AdminDashboard = () => {
                       formatter={(v: number) => [`${v} utilisateurs`, "Inscrits"]}
                     />
                     <Bar dataKey="count" radius={[0, 4, 4, 0]}>
-                      {cityData.map((_, i) => (
+                      {deptData.map((_, i) => (
                         <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />
                       ))}
                     </Bar>
