@@ -1957,6 +1957,10 @@ export type Database = {
           min_gardien_sits: number
           open_to: string[] | null
           property_id: string
+          reminder_j48_sent: boolean | null
+          reminder_j7_sent: boolean | null
+          review_j1_sent: boolean | null
+          review_j5_sent: boolean | null
           specific_expectations: string | null
           start_date: string | null
           status: Database["public"]["Enums"]["sit_status"]
@@ -1978,6 +1982,10 @@ export type Database = {
           min_gardien_sits?: number
           open_to?: string[] | null
           property_id: string
+          reminder_j48_sent?: boolean | null
+          reminder_j7_sent?: boolean | null
+          review_j1_sent?: boolean | null
+          review_j5_sent?: boolean | null
           specific_expectations?: string | null
           start_date?: string | null
           status?: Database["public"]["Enums"]["sit_status"]
@@ -1999,6 +2007,10 @@ export type Database = {
           min_gardien_sits?: number
           open_to?: string[] | null
           property_id?: string
+          reminder_j48_sent?: boolean | null
+          reminder_j7_sent?: boolean | null
+          review_j1_sent?: boolean | null
+          review_j5_sent?: boolean | null
           specific_expectations?: string | null
           start_date?: string | null
           status?: Database["public"]["Enums"]["sit_status"]
