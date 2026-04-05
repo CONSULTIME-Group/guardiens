@@ -101,8 +101,7 @@ const CreateSit = () => {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [flexibleDates, setFlexibleDates] = useState(false);
-  const [flexibleMonths, setFlexibleMonths] = useState<string[]>([]);
-  const [flexibleDuration, setFlexibleDuration] = useState("");
+  const [flexibleNotes, setFlexibleNotes] = useState("");
   const [specificExpectations, setSpecificExpectations] = useState("");
   const [openTo, setOpenTo] = useState<string[]>([]);
   const [isUrgent, setIsUrgent] = useState(false);
