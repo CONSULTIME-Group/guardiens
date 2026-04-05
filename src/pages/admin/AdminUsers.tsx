@@ -290,9 +290,7 @@ const AdminUsers = () => {
                       {user.postal_code || "—"}
                     </TableCell>
                     <TableCell className="text-sm text-muted-foreground">
-                      {user.postal_code
-                        ? (/^97[1-6]/.test(user.postal_code) ? user.postal_code.slice(0, 3) : user.postal_code.slice(0, 2))
-                        : "—"}
+                      {getDeptLabel(user.postal_code)}
                     </TableCell>
                     <TableCell className="text-sm text-muted-foreground">
                       {format(new Date(user.created_at), "d MMM yyyy", { locale: fr })}
