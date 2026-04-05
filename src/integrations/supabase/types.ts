@@ -455,6 +455,7 @@ export type Database = {
           message: string
           name: string
           resolved_at: string | null
+          source: string | null
           status: string
           subject: string
         }
@@ -466,6 +467,7 @@ export type Database = {
           message?: string
           name?: string
           resolved_at?: string | null
+          source?: string | null
           status?: string
           subject?: string
         }
@@ -477,6 +479,7 @@ export type Database = {
           message?: string
           name?: string
           resolved_at?: string | null
+          source?: string | null
           status?: string
           subject?: string
         }
