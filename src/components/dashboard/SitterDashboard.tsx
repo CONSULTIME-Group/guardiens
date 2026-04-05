@@ -9,8 +9,9 @@ import BadgeTimbre, { TIMBRES_ORDER } from "@/components/badges/BadgeTimbre";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import {
   Home, Search, CheckCircle, Circle, ChevronRight,
-  Newspaper,
+  Newspaper, Info,
 } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { format, differenceInDays, differenceInHours } from "date-fns";
 import { fr } from "date-fns/locale";
 
