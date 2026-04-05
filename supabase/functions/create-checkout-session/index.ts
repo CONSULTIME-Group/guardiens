@@ -7,6 +7,10 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+const logStep = (step: string, details?: unknown) => {
+  console.log(`[create-checkout-session] ${step}${details ? ` - ${JSON.stringify(details)}` : ""}`);
+};
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
@@ -19,13 +23,24 @@ Deno.serve(async (req) => {
     );
 
     const authHeader = req.headers.get("Authorization");
-    if (!authHeader) throw new Error("Non authentifié");
+    if (!authHeader) throw new Error("Non authentifie");
 
     const token = authHeader.replace("Bearer ", "");
     const { data: userData, error: userError } = await supabaseClient.auth.getUser(token);
-    if (userError || !userData.user?.email) throw new Error("Utilisateur non authentifié");
+    if (userError || !userData.user?.email) throw new Error("Utilisateur non authentifie");
 
     const user = userData.user;
+
+    // Parse body for lookup_key (defaults to gardien_mensuel)
+    let lookupKey = "gardien_mensuel";
+    try {
+      const body = await req.json();
+      if (body?.lookup_key) lookupKey = body.lookup_key;
+    } catch {
+      // No body or invalid JSON — use default
+    }
+
+    logStep("Lookup key", { lookupKey });
 
     const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY")!, {
       apiVersion: "2025-08-27.basil",
@@ -33,34 +48,49 @@ Deno.serve(async (req) => {
 
     // Look up the price by lookup_key
     const prices = await stripe.prices.list({
-      lookup_keys: ["gardien_mensuel"],
+      lookup_keys: [lookupKey],
       expand: ["data.product"],
     });
 
     if (!prices.data.length) {
-      throw new Error("Prix gardien_mensuel introuvable dans Stripe");
+      throw new Error(`Prix '${lookupKey}' introuvable dans Stripe`);
     }
+
+    const price = prices.data[0];
+    logStep("Price found", { priceId: price.id, type: price.type });
 
     // Check existing Stripe customer
     const customers = await stripe.customers.list({ email: user.email, limit: 1 });
     const customerId = customers.data.length > 0 ? customers.data[0].id : undefined;
 
     const origin = req.headers.get("origin") || "https://guardiens.fr";
+    const isRecurring = price.recurring !== null;
 
-    const session = await stripe.checkout.sessions.create({
-      mode: "subscription",
+    const sessionParams: Stripe.Checkout.SessionCreateParams = {
       customer: customerId,
       customer_email: customerId ? undefined : user.email,
-      line_items: [{ price: prices.data[0].id, quantity: 1 }],
-      subscription_data: {
-        trial_period_days: 30,
-        metadata: { user_id: user.id },
-      },
+      line_items: [{ price: price.id, quantity: 1 }],
+      mode: isRecurring ? "subscription" : "payment",
       success_url: `${origin}/mon-abonnement?success=true`,
       cancel_url: `${origin}/mon-abonnement?cancelled=true`,
-      metadata: { user_id: user.id },
-    });
+      metadata: { user_id: user.id, lookup_key: lookupKey },
+    };
 
+    // Add trial for monthly subscriptions
+    if (isRecurring && lookupKey === "gardien_mensuel") {
+      sessionParams.subscription_data = {
+        trial_period_days: 30,
+        metadata: { user_id: user.id, plan: "monthly" },
+      };
+    } else if (isRecurring) {
+      sessionParams.subscription_data = {
+        metadata: { user_id: user.id, plan: lookupKey },
+      };
+    }
+
+    const session = await stripe.checkout.sessions.create(sessionParams);
+
+    logStep("Checkout session created", { url: session.url });
     return new Response(JSON.stringify({ url: session.url }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,

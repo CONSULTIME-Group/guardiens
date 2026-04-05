@@ -8,7 +8,7 @@ import BadgeTimbre, { TIMBRES_ORDER } from "@/components/badges/BadgeTimbre";
 import { Skeleton } from "@/components/ui/skeleton";
 import { buildAbsoluteUrl } from "@/lib/seo";
 import {
-  Car, MapPin, X,
+  Car, MapPin, X, BadgeCheck,
   ChevronLeft, ChevronRight,
   Shield, Star,
 } from "lucide-react";
@@ -57,13 +57,14 @@ export default function PublicSitterProfile() {
   const [gallery, setGallery] = useState<any[]>([]);
   const [avgRating, setAvgRating] = useState(0);
   const [emergencyActive, setEmergencyActive] = useState(false);
+  const [hasActiveSubscription, setHasActiveSubscription] = useState(false);
   const [lightboxIdx, setLightboxIdx] = useState<number | null>(null);
 
   useEffect(() => {
     if (!id) return;
     const load = async () => {
       setLoading(true);
-      const [profileRes, sitterRes, badgesRes, reviewsRes, galleryRes, emergencyRes] =
+      const [profileRes, sitterRes, badgesRes, reviewsRes, galleryRes, emergencyRes, subRes] =
         await Promise.all([
           supabase.from("profiles").select("*").eq("id", id).single(),
           supabase.from("sitter_profiles").select("*").eq("user_id", id).single(),
@@ -79,12 +80,14 @@ export default function PublicSitterProfile() {
             .limit(10),
           supabase.from("sitter_gallery").select("*").eq("user_id", id).order("created_at", { ascending: false }),
           supabase.from("emergency_sitter_profiles").select("is_active").eq("user_id", id).single(),
+          supabase.from("abonnements").select("statut").eq("user_id", id).in("statut", ["trial", "active"]).limit(1),
         ]);
 
       if (profileRes.data) setProfile(profileRes.data);
       if (sitterRes.data) setSitterProfile(sitterRes.data);
       if (galleryRes.data) setGallery(galleryRes.data);
       if (emergencyRes.data) setEmergencyActive(emergencyRes.data.is_active);
+      setHasActiveSubscription(!!(subRes.data && (subRes.data as any[]).length > 0));
 
       if (badgesRes.data) {
         const map: Record<string, number> = {};
@@ -392,11 +395,16 @@ export default function PublicSitterProfile() {
                 </p>
               )}
 
-              {activeBadgeKeys.length > 0 && (
+              {(activeBadgeKeys.length > 0 || hasActiveSubscription) && (
                 <div className="flex items-center gap-2 flex-wrap">
+                  {hasActiveSubscription && (
+                    <span className="inline-flex items-center gap-1 text-xs text-muted-foreground border border-border rounded-full px-2 py-0.5 bg-white/80">
+                      <BadgeCheck size={11} className="text-primary" /> Abonne
+                    </span>
+                  )}
                   {badgeMap["id_verifiee"] && (
                     <span className="inline-flex items-center gap-1 text-xs text-muted-foreground border border-border rounded-full px-2 py-0.5 bg-white/80">
-                      <Shield size={11} className="text-primary" /> ID vérifiée
+                      <Shield size={11} className="text-primary" /> ID verifiee
                     </span>
                   )}
                   {badgeMap["fondateur"] && (
