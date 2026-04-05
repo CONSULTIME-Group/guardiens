@@ -325,26 +325,25 @@ const Sits = () => {
             {activeTab === "completed" && "Aucune garde passée"}
             {activeTab === "cancelled" && "Aucune garde annulée"}
           </p>
-          <p className="text-muted-foreground/60 text-sm">
-            {activeTab === "upcoming" && activeRole === "owner"
-              ? "Publiez une annonce pour trouver un gardien."
-              : activeTab === "upcoming" && activeRole === "sitter"
-              ? "Consultez les annonces pour postuler."
-              : ""}
-          </p>
           {activeTab === "upcoming" && activeRole === "owner" && (
-            <Link to="/sits/create">
-              <Button variant="outline" className="mt-4 gap-2">
-                <Plus className="h-4 w-4" /> Créer une annonce
-              </Button>
-            </Link>
+            <>
+              <p className="text-muted-foreground/60 text-sm">Vous n'avez pas encore publié d'annonce.</p>
+              <Link to="/sits/create">
+                <Button variant="outline" className="mt-4 gap-2">
+                  <Plus className="h-4 w-4" /> Publier ma première annonce
+                </Button>
+              </Link>
+            </>
           )}
           {activeTab === "upcoming" && activeRole === "sitter" && (
-            <Link to="/search">
-              <Button variant="outline" className="mt-4 gap-2">
-                <Eye className="h-4 w-4" /> Voir les annonces
-              </Button>
-            </Link>
+            <>
+              <p className="text-muted-foreground/60 text-sm">Consultez les annonces pour postuler.</p>
+              <Link to="/search">
+                <Button variant="outline" className="mt-4 gap-2">
+                  <Eye className="h-4 w-4" /> Voir les annonces
+                </Button>
+              </Link>
+            </>
           )}
         </div>
       ) : (
@@ -428,6 +427,11 @@ const SitCard = ({ sit, isOwner, userId }: { sit: any; isOwner: boolean; userId?
                 </span>
                 {duration && (
                   <span className="text-xs text-muted-foreground">· {duration}</span>
+                )}
+                {sit.flexible_dates && (
+                  <span className="text-xs px-1.5 py-0.5 rounded bg-accent text-muted-foreground font-medium">
+                    Dates flexibles
+                  </span>
                 )}
                 {(isOwner ? sit.owner?.city : sit.owner?.city) && !isOwner && (
                   <span className="text-xs text-muted-foreground flex items-center gap-1">

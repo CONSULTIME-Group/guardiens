@@ -68,8 +68,7 @@ const walkLabels: Record<string, string> = { none: "Aucune", "30min": "30 min/jo
 const aloneLabels: Record<string, string> = { never: "Jamais seul", "2h": "2h max", "6h": "6h max", all_day: "Toute la journée" };
 
 const openToOptions = ["Familles", "Solo", "Couples", "Retraités", "Sans préférence"];
-const FLEXIBLE_MONTHS = ["Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre"];
-const FLEXIBLE_DURATIONS = ["Week-end", "1 semaine", "2 semaines", "1 mois+"];
+
 const MIN_SITS_OPTIONS = [
   { label: "Aucune exigence", value: 0 },
   { label: "1 garde+", value: 1 },
@@ -101,8 +100,7 @@ const CreateSit = () => {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [flexibleDates, setFlexibleDates] = useState(false);
-  const [flexibleMonths, setFlexibleMonths] = useState<string[]>([]);
-  const [flexibleDuration, setFlexibleDuration] = useState("");
+  const [flexibleNotes, setFlexibleNotes] = useState("");
   const [specificExpectations, setSpecificExpectations] = useState("");
   const [openTo, setOpenTo] = useState<string[]>([]);
   const [isUrgent, setIsUrgent] = useState(false);
@@ -165,17 +163,13 @@ const CreateSit = () => {
   }, [user]);
 
   const today = new Date().toISOString().split("T")[0];
-  const dateError = !flexibleDates && startDate && endDate && startDate >= endDate
+  const dateError = startDate && endDate && startDate >= endDate
     ? "La date de fin doit être après la date de début."
-    : !flexibleDates && startDate && startDate < today
+    : startDate && startDate < today
     ? "La date de début ne peut pas être dans le passé."
     : null;
 
-  const hasDatesOrFlexible = flexibleDates
-    ? flexibleMonths.length > 0
-    : !!(startDate && endDate && !dateError);
-
-  const canPublish = profileCompletion >= 60 && property && title && hasDatesOrFlexible;
+  const canPublish = profileCompletion >= 60 && property && title && startDate && endDate && !dateError;
 
   // Show urgent option: not confirmed, start < 7 days or flexible
   const showUrgent = flexibleDates || (startDate && new Date(startDate).getTime() - Date.now() < 7 * 86400000);
@@ -185,20 +179,16 @@ const CreateSit = () => {
     setPublishing(true);
     try {
       let expectations = specificExpectations;
-      if (flexibleDates) {
-        const flexNote = [
-          flexibleMonths.length > 0 ? `Mois : ${flexibleMonths.join(", ")}` : "",
-          flexibleDuration ? `Durée : ${flexibleDuration}` : "",
-        ].filter(Boolean).join(" · ");
-        if (flexNote) expectations = `${expectations}\n\n📅 Flexibilité : ${flexNote}`.trim();
+      if (flexibleDates && flexibleNotes) {
+        expectations = `${expectations}\n\nDates flexibles : ${flexibleNotes}`.trim();
       }
 
       const { data: sit, error } = await supabase.from("sits").insert({
         user_id: user.id,
         property_id: property.id,
         title,
-        start_date: flexibleDates ? null : startDate,
-        end_date: flexibleDates ? null : endDate,
+        start_date: startDate,
+        end_date: endDate,
         flexible_dates: flexibleDates,
         specific_expectations: expectations,
         open_to: openTo,
@@ -256,77 +246,49 @@ const CreateSit = () => {
           />
         </div>
 
-        {/* CORRECTION 2 — Dates flexibles enrichies */}
-        {!flexibleDates ? (
-          <>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label className="text-sm font-medium">Date de début *</Label>
-                <Input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} min={today} className="mt-1.5" />
-              </div>
-              <div>
-                <Label className="text-sm font-medium">Date de fin *</Label>
-                <Input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} min={startDate || today} className="mt-1.5" />
-              </div>
-            </div>
-            {dateError && (
-              <p className="text-sm text-destructive flex items-center gap-1.5 -mt-2">
-                <AlertCircle className="h-3.5 w-3.5" /> {dateError}
-              </p>
-            )}
-            <button
-              type="button"
-              onClick={() => setFlexibleDates(true)}
-              className="text-xs text-primary cursor-pointer mt-2 block hover:underline"
-            >
-              Mes dates sont flexibles →
-            </button>
-          </>
-        ) : (
-          <div className="space-y-4">
-            <div>
-              <p className="text-xs text-muted-foreground mb-2">Quel mois ?</p>
-              <div className="grid grid-cols-3 gap-2">
-                {FLEXIBLE_MONTHS.map(m => (
-                  <button
-                    key={m}
-                    type="button"
-                    onClick={() => setFlexibleMonths(prev => prev.includes(m) ? prev.filter(x => x !== m) : [...prev, m])}
-                    className={flexibleMonths.includes(m)
-                      ? "bg-primary text-primary-foreground rounded-full px-3 py-1.5 text-xs"
-                      : "border border-border rounded-full px-3 py-1.5 text-xs text-muted-foreground hover:border-primary transition-colors"
-                    }
-                  >
-                    {m}
-                  </button>
-                ))}
-              </div>
-            </div>
-            <div>
-              <p className="text-xs text-muted-foreground mb-2 mt-4">Combien de temps ?</p>
-              <div className="flex flex-wrap gap-2">
-                {FLEXIBLE_DURATIONS.map(d => (
-                  <button
-                    key={d}
-                    type="button"
-                    onClick={() => setFlexibleDuration(prev => prev === d ? "" : d)}
-                    className={flexibleDuration === d
-                      ? "bg-primary text-primary-foreground rounded-full px-3 py-1.5 text-xs"
-                      : "border border-border rounded-full px-3 py-1.5 text-xs text-muted-foreground hover:border-primary transition-colors"
-                    }
-                  >
-                    {d}
-                  </button>
-                ))}
-              </div>
-            </div>
-            <button
-              type="button"
-              onClick={() => setFlexibleDates(false)}
-              className="text-xs text-muted-foreground mt-3 block cursor-pointer hover:text-primary"
-            >
-              ← Renseigner des dates précises
-            </button>
+        {/* Dates obligatoires */}
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <Label className="text-sm font-medium">Date de début *</Label>
+            <Input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} min={today} className="mt-1.5" />
+          </div>
+          <div>
+            <Label className="text-sm font-medium">Date de fin *</Label>
+            <Input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} min={startDate || today} className="mt-1.5" />
+          </div>
+        </div>
+        {dateError && (
+          <p className="text-sm text-destructive flex items-center gap-1.5 -mt-2">
+            <AlertCircle className="h-3.5 w-3.5" /> {dateError}
+          </p>
+        )}
+
+        {/* Option dates flexibles */}
+        <div className="flex items-start gap-3">
+          <Checkbox
+            id="flexible-dates"
+            checked={flexibleDates}
+            onCheckedChange={(v) => setFlexibleDates(v === true)}
+            className="mt-0.5"
+          />
+          <div className="flex-1">
+            <label htmlFor="flexible-dates" className="text-sm font-medium cursor-pointer">
+              Dates flexibles
+            </label>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              Les dates ci-dessus restent obligatoires pour les rappels automatiques, mais vous indiquez aux gardiens que vous êtes flexible.
+            </p>
+          </div>
+        </div>
+        {flexibleDates && (
+          <div className="-mt-2">
+            <Label className="text-sm font-medium">Précisez vos dates approximatives</Label>
+            <Input
+              placeholder="Ex : autour du 15 juillet, flexible d'une semaine"
+              value={flexibleNotes}
+              onChange={e => setFlexibleNotes(e.target.value)}
+              className="mt-1.5"
+            />
           </div>
         )}
 
