@@ -428,6 +428,11 @@ const SitCard = ({ sit, isOwner, userId }: { sit: any; isOwner: boolean; userId?
                 {duration && (
                   <span className="text-xs text-muted-foreground">· {duration}</span>
                 )}
+                {sit.flexible_dates && (
+                  <span className="text-xs px-1.5 py-0.5 rounded bg-accent text-muted-foreground font-medium">
+                    Dates flexibles
+                  </span>
+                )}
                 {(isOwner ? sit.owner?.city : sit.owner?.city) && !isOwner && (
                   <span className="text-xs text-muted-foreground flex items-center gap-1">
                     <MapPin className="h-3 w-3" />
