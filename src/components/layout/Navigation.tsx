@@ -11,6 +11,8 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import NotificationBell from "./NotificationBell";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Button } from "@/components/ui/button";
+import FeedbackDialog from "@/components/feedback/FeedbackDialog";
 
 // ── Sidebar group label ──
 const GroupLabel = ({ label }: { label: string }) => (
