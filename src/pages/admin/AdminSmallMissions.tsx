@@ -42,7 +42,7 @@ const AdminSmallMissions = () => {
     setLoading(true);
     let query = supabase
       .from("small_missions")
-      .select("*, poster:profiles!small_missions_user_id_fkey(first_name, last_name, email, avatar_url)")
+      .select("*, poster:profiles!small_missions_user_id_fkey(first_name, last_name, avatar_url)")
       .order("created_at", { ascending: false });
 
     if (filterStatus !== "all") query = query.eq("status", filterStatus as any);
@@ -70,7 +70,7 @@ const AdminSmallMissions = () => {
   const filtered = missions.filter((m) => {
     if (!search) return true;
     const s = search.toLowerCase();
-    return m.title?.toLowerCase().includes(s) || m.city?.toLowerCase().includes(s) || m.poster?.first_name?.toLowerCase().includes(s) || m.poster?.email?.toLowerCase().includes(s);
+    return m.title?.toLowerCase().includes(s) || m.city?.toLowerCase().includes(s) || m.poster?.first_name?.toLowerCase().includes(s);
   });
 
   // Detect missions mentioning money
@@ -97,8 +97,7 @@ const AdminSmallMissions = () => {
   };
 
   const handleContact = async (mission: any) => {
-    if (!mission.poster?.email) { toast.error("Email non disponible"); return; }
-    // Create notification
+    // Create notification instead of relying on email
     await supabase.from("notifications").insert({
       user_id: mission.user_id, type: "admin_contact",
       title: "Message de l'équipe Guardiens",

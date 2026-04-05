@@ -98,7 +98,7 @@ const AdminUsers = () => {
     setLoading(true);
     let query = supabase
       .from("profiles")
-      .select("*")
+      .select("id, first_name, last_name, role, city, postal_code, avatar_url, bio, profile_completion, created_at, updated_at, cancellation_count, identity_verified, identity_verification_status, account_status, is_founder, skill_categories, available_for_help, custom_skills, completed_sits_count, cancellations_as_proprio")
       .order("created_at", { ascending: false });
 
     if (filterRole !== "all") query = query.eq("role", filterRole as any);
@@ -108,7 +108,18 @@ const AdminUsers = () => {
 
     const { data, error } = await query;
     if (error) toast.error("Erreur de chargement");
-    else setUsers(data || []);
+    else {
+      // Fetch emails for admin via RPC
+      const userIds = (data || []).map((u: any) => u.id);
+      if (userIds.length > 0) {
+        const { data: emailData } = await supabase.rpc("get_user_emails_admin", { p_user_ids: userIds });
+        const emailMap = new Map((emailData || []).map((e: any) => [e.id, e.email]));
+        const usersWithEmail = (data || []).map((u: any) => ({ ...u, email: emailMap.get(u.id) || "" }));
+        setUsers(usersWithEmail);
+      } else {
+        setUsers(data || []);
+      }
+    }
     setLoading(false);
   }, [filterRole, filterVerification]);
 
