@@ -21,6 +21,7 @@ import entraideHeader from "@/assets/entraide-header.jpg";
 import { useSubscriptionAccess } from "@/hooks/useSubscriptionAccess";
 import { useAccessLevel } from "@/hooks/useAccessLevel";
 import AccessGateBanner from "@/components/access/AccessGateBanner";
+import MissionPhotoGallery from "@/components/missions/MissionPhotoGallery";
 
 const CATEGORY_META: Record<string, { label: string; icon: typeof Dog; colorClass: string }> = {
   animals: { label: "Animaux", icon: Dog, colorClass: "text-orange-500" },
@@ -373,6 +374,9 @@ const SmallMissionDetail = () => {
         <div className="bg-card rounded-xl border border-border p-5 mb-6">
           <p className="text-sm leading-relaxed whitespace-pre-wrap">{mission.description}</p>
         </div>
+
+        {/* Photos */}
+        <MissionPhotoGallery photos={mission.photos || []} />
 
         {/* Exchange */}
         <div className="bg-primary/5 border border-primary/10 rounded-xl p-5 mb-6">
