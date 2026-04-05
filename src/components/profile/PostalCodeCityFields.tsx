@@ -71,7 +71,12 @@ const PostalCodeCityFields = ({
           <Input
             id={postalId}
             value={postalCode}
-            onChange={(e) => handlePostalCodeChange(e.target.value)}
+            onChange={(e) => {
+              const v = e.target.value.replace(/\D/g, "");
+              handlePostalCodeChange(v);
+            }}
+            inputMode="numeric"
+            pattern="[0-9]*"
             className={inputClassName}
             maxLength={5}
             placeholder="69001"
