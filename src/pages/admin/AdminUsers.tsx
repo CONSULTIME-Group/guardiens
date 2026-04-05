@@ -218,6 +218,17 @@ const AdminUsers = () => {
             <SelectItem value="rejected">Refusé</SelectItem>
           </SelectContent>
         </Select>
+        <Select value={filterDept} onValueChange={setFilterDept}>
+          <SelectTrigger className="w-[200px]"><SelectValue /></SelectTrigger>
+          <SelectContent className="max-h-60">
+            <SelectItem value="all">Tous départements</SelectItem>
+            {availableDepts.map((code) => (
+              <SelectItem key={code} value={code}>
+                {code} {DEPT_NAMES[code] || ""}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       <div className="rounded-lg border bg-card">
