@@ -289,7 +289,7 @@ const CityPage = () => {
   }
 
   if (!dbPage) {
-    return <Navigate to="/404" replace />;
+    return <Navigate to="/" replace />;
   }
 
   // Render DB-based page (simplified legacy)

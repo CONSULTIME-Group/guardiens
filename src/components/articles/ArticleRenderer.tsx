@@ -96,7 +96,7 @@ function injectCTA(html: string): string {
   return html.replace(/<h2/g, (match) => {
     h2Count++;
     if (h2Count === 3) {
-      return `<div class="article-cta-block"><div class="article-cta-inner"><p class="article-cta-text">Vous êtes propriétaire d'animaux ou vous aimez les animaux ?</p><div class="article-cta-buttons"><a href="/inscription" class="article-cta-btn article-cta-btn-primary">Rejoindre la communauté</a><a href="/recherche" class="article-cta-btn article-cta-btn-secondary">Trouver un gardien</a></div></div></div>\n${match}`;
+      return `<div class="article-cta-block"><div class="article-cta-inner"><p class="article-cta-text">Vous êtes propriétaire d'animaux ou vous aimez les animaux ?</p><div class="article-cta-buttons"><a href="/register" class="article-cta-btn article-cta-btn-primary">Rejoindre la communauté</a><a href="/search" class="article-cta-btn article-cta-btn-secondary">Trouver un gardien</a></div></div></div>\n${match}`;
     }
     return match;
   });
@@ -124,7 +124,7 @@ function addBandedSections(html: string): string {
 
 /** Add end-of-article CTA */
 function addEndCTA(html: string): string {
-  return html + `<div class="article-cta-block article-cta-end"><div class="article-cta-inner"><p class="article-cta-heading">Prêt à rejoindre la communauté ?</p><p class="article-cta-text">Créez votre profil gratuitement et rencontrez vos voisins gardiens.</p><div class="article-cta-buttons"><a href="/inscription" class="article-cta-btn article-cta-btn-primary">Créer mon profil</a></div></div></div>`;
+  return html + `<div class="article-cta-block article-cta-end"><div class="article-cta-inner"><p class="article-cta-heading">Prêt à rejoindre la communauté ?</p><p class="article-cta-text">Créez votre profil gratuitement et rencontrez vos voisins gardiens.</p><div class="article-cta-buttons"><a href="/register" class="article-cta-btn article-cta-btn-primary">Créer mon profil</a></div></div></div>`;
 }
 
 interface ArticleRendererProps {
@@ -136,26 +136,26 @@ interface ArticleRendererProps {
 function adaptCTAsForRole(html: string, role?: "owner" | "sitter" | "both"): string {
   if (!role) return html;
 
-  const ownerCTA = '<a href="/annonces/nouvelle" class="article-cta-btn article-cta-btn-primary">Publier une annonce →</a>';
-  const sitterCTA = '<a href="/recherche" class="article-cta-btn article-cta-btn-primary">Trouver une garde près de chez vous →</a>';
+  const ownerCTA = '<a href="/sits/create" class="article-cta-btn article-cta-btn-primary">Publier une annonce →</a>';
+  const sitterCTA = '<a href="/search" class="article-cta-btn article-cta-btn-primary">Trouver une garde près de chez vous →</a>';
 
   // Replace inscription links with role-appropriate CTAs
-  const ownerPattern = /href="\/inscription\?role=owner"[^>]*>[^<]*/g;
-  const sitterPattern = /href="\/inscription\?role=guardian"[^>]*>[^<]*/g;
-  const genericPattern = /href="\/inscription"[^>]*>[^<]*/g;
+  const ownerPattern = /href="\/register\?role=owner"[^>]*>[^<]*/g;
+  const sitterPattern = /href="\/register\?role=guardian"[^>]*>[^<]*/g;
+  const genericPattern = /href="\/register"[^>]*>[^<]*/g;
 
   if (role === "owner") {
-    html = html.replace(ownerPattern, `href="/annonces/nouvelle">Publier une annonce →`);
-    html = html.replace(sitterPattern, `href="/recherche">Trouver une garde près de chez vous →`);
-    html = html.replace(genericPattern, `href="/annonces/nouvelle">Publier une annonce →`);
+    html = html.replace(ownerPattern, `href="/sits/create">Publier une annonce →`);
+    html = html.replace(sitterPattern, `href="/search">Trouver une garde près de chez vous →`);
+    html = html.replace(genericPattern, `href="/sits/create">Publier une annonce →`);
   } else if (role === "sitter") {
-    html = html.replace(sitterPattern, `href="/recherche">Trouver une garde près de chez vous →`);
-    html = html.replace(ownerPattern, `href="/annonces/nouvelle">Publier une annonce →`);
-    html = html.replace(genericPattern, `href="/recherche">Trouver une garde près de chez vous →`);
+    html = html.replace(sitterPattern, `href="/search">Trouver une garde près de chez vous →`);
+    html = html.replace(ownerPattern, `href="/sits/create">Publier une annonce →`);
+    html = html.replace(genericPattern, `href="/search">Trouver une garde près de chez vous →`);
   } else if (role === "both") {
-    html = html.replace(ownerPattern, `href="/annonces/nouvelle">Publier une annonce →`);
-    html = html.replace(sitterPattern, `href="/recherche">Trouver une garde près de chez vous →`);
-    html = html.replace(genericPattern, `href="/annonces/nouvelle">Publier une annonce →`);
+    html = html.replace(ownerPattern, `href="/sits/create">Publier une annonce →`);
+    html = html.replace(sitterPattern, `href="/search">Trouver une garde près de chez vous →`);
+    html = html.replace(genericPattern, `href="/sits/create">Publier une annonce →`);
   }
 
   return html;
