@@ -68,7 +68,6 @@ const walkLabels: Record<string, string> = { none: "Aucune", "30min": "30 min/jo
 const aloneLabels: Record<string, string> = { never: "Jamais seul", "2h": "2h max", "6h": "6h max", all_day: "Toute la journée" };
 
 const openToOptions = ["Familles", "Solo", "Couples", "Retraités", "Sans préférence"];
-const FLEXIBLE_MONTHS = ["Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre"];
 const FLEXIBLE_DURATIONS = ["Week-end", "1 semaine", "2 semaines", "1 mois+"];
 const MIN_SITS_OPTIONS = [
   { label: "Aucune exigence", value: 0 },
@@ -164,17 +163,13 @@ const CreateSit = () => {
   }, [user]);
 
   const today = new Date().toISOString().split("T")[0];
-  const dateError = !flexibleDates && startDate && endDate && startDate >= endDate
+  const dateError = startDate && endDate && startDate >= endDate
     ? "La date de fin doit être après la date de début."
-    : !flexibleDates && startDate && startDate < today
+    : startDate && startDate < today
     ? "La date de début ne peut pas être dans le passé."
     : null;
 
-  const hasDatesOrFlexible = flexibleDates
-    ? flexibleMonths.length > 0
-    : !!(startDate && endDate && !dateError);
-
-  const canPublish = profileCompletion >= 60 && property && title && hasDatesOrFlexible;
+  const canPublish = profileCompletion >= 60 && property && title && startDate && endDate && !dateError;
 
   // Show urgent option: not confirmed, start < 7 days or flexible
   const showUrgent = flexibleDates || (startDate && new Date(startDate).getTime() - Date.now() < 7 * 86400000);
@@ -184,20 +179,16 @@ const CreateSit = () => {
     setPublishing(true);
     try {
       let expectations = specificExpectations;
-      if (flexibleDates) {
-        const flexNote = [
-          flexibleMonths.length > 0 ? `Mois : ${flexibleMonths.join(", ")}` : "",
-          flexibleDuration ? `Durée : ${flexibleDuration}` : "",
-        ].filter(Boolean).join(" · ");
-        if (flexNote) expectations = `${expectations}\n\n📅 Flexibilité : ${flexNote}`.trim();
+      if (flexibleDates && flexibleNotes) {
+        expectations = `${expectations}\n\nDates flexibles : ${flexibleNotes}`.trim();
       }
 
       const { data: sit, error } = await supabase.from("sits").insert({
         user_id: user.id,
         property_id: property.id,
         title,
-        start_date: flexibleDates ? null : startDate,
-        end_date: flexibleDates ? null : endDate,
+        start_date: startDate,
+        end_date: endDate,
         flexible_dates: flexibleDates,
         specific_expectations: expectations,
         open_to: openTo,
