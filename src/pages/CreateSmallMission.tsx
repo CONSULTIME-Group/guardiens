@@ -211,6 +211,12 @@ const CreateSmallMission = () => {
                 </Select>
               </div>
 
+              {/* Photos */}
+              <div className="space-y-2">
+                <Label>Photos (optionnel)</Label>
+                <MissionPhotoUpload userId={user!.id} photos={photos} onChange={setPhotos} />
+              </div>
+
               <Button type="submit" className="w-full" size="lg" disabled={submitting || !!exchangeError}>
                 {submitting ? "Publication..." : "Publier la mission"}
               </Button>
