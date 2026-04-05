@@ -7,8 +7,9 @@ import NearbyEmergencySitters from "./NearbyEmergencySitters";
 import ResourceSection from "@/components/shared/ResourceSection";
 import type { ResourceItem } from "@/components/shared/ResourceCard";
 import {
-  ChevronRight, Plus, PawPrint, Users, Handshake,
+  ChevronRight, Plus, PawPrint, Users, Handshake, ChevronDown,
 } from "lucide-react";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import { format, differenceInDays } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -98,7 +99,7 @@ const OwnerDashboard = () => {
           .select("*, sitter:profiles!applications_sitter_id_fkey(id, first_name, avatar_url, identity_verified, completed_sits_count), sit:sits(title, start_date, end_date)")
           .in("sit_id", sitIds)
           .order("created_at", { ascending: false })
-          .limit(3);
+          .limit(20);
         setRecentApps(apps || []);
 
         // Build sitter profiles lookup
@@ -284,7 +285,105 @@ const OwnerDashboard = () => {
         </div>
       )}
 
-      {/* ═══ 2. STATS 4 COLONNES ═══ */}
+      {/* ═══ 2. CANDIDATURES NON LUES ═══ */}
+      <div className="px-5 md:px-8">
+        {(() => {
+          const unread = recentApps.filter(a => a.status === "pending" || a.status === "discussing");
+          const read = recentApps.filter(a => a.status !== "pending" && a.status !== "discussing");
+
+          const renderAppCard = (app: any) => {
+            const sitter = sitterProfiles[app.sitter?.id] || app.sitter || {};
+            const sitTitle = app.sit?.title || "";
+            const dateRange = [
+              app.sit?.start_date ? format(new Date(app.sit.start_date), "d MMM", { locale: fr }) : "",
+              app.sit?.end_date ? format(new Date(app.sit.end_date), "d MMM", { locale: fr }) : "",
+            ].filter(Boolean).join(" → ");
+            const badges = sitter.id && sitterBadges[sitter.id] ? sitterBadges[sitter.id].sort((a: any, b: any) => b.count - a.count).slice(0, 2) : [];
+
+            return (
+              <div key={app.id} className="bg-card border border-border rounded-2xl p-4 flex gap-4">
+                <div className="w-12 h-12 rounded-full bg-primary/15 text-primary font-bold flex items-center justify-center text-lg font-sans shrink-0 overflow-hidden">
+                  {sitter.avatar_url ? (
+                    <img src={sitter.avatar_url} alt="" className="w-full h-full rounded-full object-cover" />
+                  ) : (
+                    sitter.first_name?.charAt(0)?.toUpperCase() || "?"
+                  )}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-foreground">
+                    {capitalize(sitter.first_name)}
+                  </p>
+                  <p className="text-xs text-muted-foreground font-sans mt-0.5 truncate">
+                    {sitTitle}{dateRange ? ` · ${dateRange}` : ""}
+                  </p>
+                  <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+                    {sitter.avgNote ? (
+                      <span className="text-xs font-sans text-amber-600 font-medium">
+                        &#9733; {sitter.avgNote}
+                      </span>
+                    ) : (
+                      <span className="text-xs font-sans text-muted-foreground italic">Nouveau</span>
+                    )}
+                    {badges.length > 0 && (
+                      <TooltipProvider>
+                        <div className="flex gap-1">
+                          {badges.map((b: any) => (
+                            <BadgeShield key={b.badge_key} badgeKey={b.badge_key} count={b.count} size="sm" showLabel={false} />
+                          ))}
+                        </div>
+                      </TooltipProvider>
+                    )}
+                  </div>
+                  <div className="flex gap-2 mt-3">
+                    <button
+                      onClick={() => navigate(`/gardiens/${sitter.id}`)}
+                      className="border border-border text-muted-foreground rounded-xl px-3 py-1.5 text-xs font-sans hover:bg-accent transition-colors"
+                    >
+                      Voir le profil
+                    </button>
+                    <button
+                      onClick={() => navigate("/messages")}
+                      className="bg-primary text-primary-foreground rounded-xl px-4 py-1.5 text-xs font-sans font-medium hover:bg-primary/90 transition-colors"
+                    >
+                      Répondre
+                    </button>
+                  </div>
+                </div>
+              </div>
+            );
+          };
+
+          return (
+            <DashSection title="Candidatures non lues" action={
+              recentApps.length > 0 ? <Link to="/sits" className="text-xs text-primary hover:underline font-medium">Voir toutes</Link> : undefined
+            }>
+              {unread.length === 0 ? (
+                <p className="text-sm text-muted-foreground font-sans italic py-4 text-center">Aucune candidature en attente</p>
+              ) : (
+                <div className="space-y-3">
+                  {unread.map(renderAppCard)}
+                </div>
+              )}
+              {read.length > 0 && (
+                <Accordion type="single" collapsible className="mt-4">
+                  <AccordionItem value="read" className="border rounded-xl">
+                    <AccordionTrigger className="px-4 py-3 text-sm text-muted-foreground hover:no-underline">
+                      Candidatures déjà consultées ({read.length})
+                    </AccordionTrigger>
+                    <AccordionContent className="px-4 pb-4">
+                      <div className="space-y-3">
+                        {read.map(renderAppCard)}
+                      </div>
+                    </AccordionContent>
+                  </AccordionItem>
+                </Accordion>
+              )}
+            </DashSection>
+          );
+        })()}
+      </div>
+
+      {/* ═══ 3. STATS 4 COLONNES ═══ */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 px-5 md:px-8">
         <div className="bg-card border border-border rounded-2xl p-4 text-center">
           <p className="text-3xl font-heading font-bold text-foreground mb-1">{completedSits.length}</p>
@@ -308,7 +407,7 @@ const OwnerDashboard = () => {
         </div>
       </div>
 
-      {/* ═══ 3. ANIMAUX 2 COLONNES ═══ */}
+      {/* ═══ 4. ANIMAUX ═══ */}
       <div className="px-5 md:px-8">
         <DashSection title="Mes animaux" action={
           <Link to="/owner-profile" className="text-xs text-primary hover:underline font-medium">Gérer</Link>
@@ -358,81 +457,6 @@ const OwnerDashboard = () => {
                 <Plus className="h-3.5 w-3.5" /> Ajouter un animal
               </Link>
             </>
-          )}
-        </DashSection>
-      </div>
-
-      {/* ═══ 4. CANDIDATURES ENRICHIES ═══ */}
-      <div className="px-5 md:px-8">
-        <DashSection title="Candidatures récentes" action={
-          recentApps.length > 0 ? <Link to="/sits" className="text-xs text-primary hover:underline font-medium">Voir toutes</Link> : undefined
-        }>
-          {recentApps.length === 0 ? (
-            <EmptyCard icon={Users} text="Pas encore de candidature reçue" hint="Publiez une annonce et les gardiens viendront à vous" cta="Publier une annonce" to="/sits/create" />
-          ) : (
-            <div className="space-y-3">
-              {recentApps.map(app => {
-                const sitter = sitterProfiles[app.sitter?.id] || app.sitter || {};
-                const sitTitle = app.sit?.title || "";
-                const dateRange = [
-                  app.sit?.start_date ? format(new Date(app.sit.start_date), "d MMM", { locale: fr }) : "",
-                  app.sit?.end_date ? format(new Date(app.sit.end_date), "d MMM", { locale: fr }) : "",
-                ].filter(Boolean).join(" → ");
-                const badges = sitter.id && sitterBadges[sitter.id] ? sitterBadges[sitter.id].sort((a: any, b: any) => b.count - a.count).slice(0, 2) : [];
-
-                return (
-                  <div key={app.id} className="bg-card border border-border rounded-2xl p-4 flex gap-4">
-                    <div className="w-12 h-12 rounded-full bg-primary/15 text-primary font-bold flex items-center justify-center text-lg font-sans shrink-0 overflow-hidden">
-                      {sitter.avatar_url ? (
-                        <img src={sitter.avatar_url} alt="" className="w-full h-full rounded-full object-cover" />
-                      ) : (
-                        sitter.first_name?.charAt(0)?.toUpperCase() || "?"
-                      )}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold text-foreground">
-                        {capitalize(sitter.first_name)}
-                      </p>
-                      <p className="text-xs text-muted-foreground font-sans mt-0.5 truncate">
-                        {sitTitle}{dateRange ? ` · ${dateRange}` : ""}
-                      </p>
-                      <div className="flex items-center gap-2 mt-1.5 flex-wrap">
-                        {sitter.avgNote ? (
-                          <span className="text-xs font-sans text-amber-600 font-medium">
-                            &#9733; {sitter.avgNote}
-                          </span>
-                        ) : (
-                          <span className="text-xs font-sans text-muted-foreground italic">Nouveau</span>
-                        )}
-                        {badges.length > 0 && (
-                          <TooltipProvider>
-                            <div className="flex gap-1">
-                              {badges.map((b: any) => (
-                                <BadgeShield key={b.badge_key} badgeKey={b.badge_key} count={b.count} size="sm" showLabel={false} />
-                              ))}
-                            </div>
-                          </TooltipProvider>
-                        )}
-                      </div>
-                      <div className="flex gap-2 mt-3">
-                        <button
-                          onClick={() => navigate(`/gardiens/${sitter.id}`)}
-                          className="border border-border text-muted-foreground rounded-xl px-3 py-1.5 text-xs font-sans hover:bg-accent transition-colors"
-                        >
-                          Voir le profil
-                        </button>
-                        <button
-                          onClick={() => navigate(`/sits/${app.sit_id}`)}
-                          className="bg-primary text-primary-foreground rounded-xl px-4 py-1.5 text-xs font-sans font-medium hover:bg-primary/90 transition-colors"
-                        >
-                          Répondre
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
           )}
         </DashSection>
       </div>

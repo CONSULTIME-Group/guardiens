@@ -122,8 +122,10 @@ const ConversationHeader = ({
         {/* Right side */}
         <div className="flex items-center gap-2 shrink-0">
           {annonceLinkHref && (
-            <Link to={annonceLinkHref} className="text-xs text-primary hover:underline flex items-center gap-1">
-              Voir l'annonce <ExternalLink className="h-3 w-3" />
+            <Link to={annonceLinkHref}>
+              <Button size="sm" variant="outline" className="gap-1.5 border-primary text-primary hover:bg-primary/5">
+                Voir l'annonce <ExternalLink className="h-3.5 w-3.5" />
+              </Button>
             </Link>
           )}
           {isOwner && isPendingApp && (
