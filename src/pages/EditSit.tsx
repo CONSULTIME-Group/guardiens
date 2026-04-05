@@ -265,7 +265,6 @@ const EditSit = () => {
               <label className="text-sm font-medium flex items-center gap-1.5 cursor-pointer text-amber-800" onClick={() => setIsUrgent(!isUrgent)}>
                 <Zap className="h-4 w-4" /> Urgent — garde dans moins de 48h
               </label>
-              </label>
               <p className="text-xs text-amber-600 mt-0.5">
                 Les gardiens d'urgence seront alertés en priorité
               </p>
