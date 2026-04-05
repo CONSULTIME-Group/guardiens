@@ -64,7 +64,7 @@ export default function PublicSitterProfile() {
     if (!id) return;
     const load = async () => {
       setLoading(true);
-      const [profileRes, sitterRes, badgesRes, reviewsRes, galleryRes, emergencyRes] =
+      const [profileRes, sitterRes, badgesRes, reviewsRes, galleryRes, emergencyRes, subRes] =
         await Promise.all([
           supabase.from("profiles").select("*").eq("id", id).single(),
           supabase.from("sitter_profiles").select("*").eq("user_id", id).single(),
@@ -80,6 +80,7 @@ export default function PublicSitterProfile() {
             .limit(10),
           supabase.from("sitter_gallery").select("*").eq("user_id", id).order("created_at", { ascending: false }),
           supabase.from("emergency_sitter_profiles").select("is_active").eq("user_id", id).single(),
+          supabase.from("abonnements").select("statut").eq("user_id", id).in("statut", ["trial", "active"]).limit(1),
         ]);
 
       if (profileRes.data) setProfile(profileRes.data);
