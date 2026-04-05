@@ -134,6 +134,7 @@ export type Database = {
           internal_links: Json | null
           meta_description: string | null
           meta_title: string | null
+          noindex: boolean | null
           published: boolean
           published_at: string | null
           region: string | null
@@ -158,6 +159,7 @@ export type Database = {
           internal_links?: Json | null
           meta_description?: string | null
           meta_title?: string | null
+          noindex?: boolean | null
           published?: boolean
           published_at?: string | null
           region?: string | null
@@ -182,6 +184,7 @@ export type Database = {
           internal_links?: Json | null
           meta_description?: string | null
           meta_title?: string | null
+          noindex?: boolean | null
           published?: boolean
           published_at?: string | null
           region?: string | null
