@@ -57,6 +57,7 @@ export default function PublicSitterProfile() {
   const [gallery, setGallery] = useState<any[]>([]);
   const [avgRating, setAvgRating] = useState(0);
   const [emergencyActive, setEmergencyActive] = useState(false);
+  const [hasActiveSubscription, setHasActiveSubscription] = useState(false);
   const [lightboxIdx, setLightboxIdx] = useState<number | null>(null);
 
   useEffect(() => {
