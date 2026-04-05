@@ -395,11 +395,16 @@ export default function PublicSitterProfile() {
                 </p>
               )}
 
-              {activeBadgeKeys.length > 0 && (
+              {(activeBadgeKeys.length > 0 || hasActiveSubscription) && (
                 <div className="flex items-center gap-2 flex-wrap">
+                  {hasActiveSubscription && (
+                    <span className="inline-flex items-center gap-1 text-xs text-muted-foreground border border-border rounded-full px-2 py-0.5 bg-white/80">
+                      <BadgeCheck size={11} className="text-primary" /> Abonne
+                    </span>
+                  )}
                   {badgeMap["id_verifiee"] && (
                     <span className="inline-flex items-center gap-1 text-xs text-muted-foreground border border-border rounded-full px-2 py-0.5 bg-white/80">
-                      <Shield size={11} className="text-primary" /> ID vérifiée
+                      <Shield size={11} className="text-primary" /> ID verifiee
                     </span>
                   )}
                   {badgeMap["fondateur"] && (
