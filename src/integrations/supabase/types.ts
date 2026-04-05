@@ -2799,6 +2799,14 @@ export type Database = {
         Args: { p_garde_id: string }
         Returns: string[]
       }
+      get_own_email: { Args: never; Returns: string }
+      get_user_emails_admin: {
+        Args: { p_user_ids: string[] }
+        Returns: {
+          email: string
+          id: string
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
