@@ -75,7 +75,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       .single();
 
     if (data) {
-      const profile = mapProfile(data);
+      const profile = mapProfile(data, supabaseUser.email);
       setUser(profile);
       if (profile.role === "owner") setActiveRole("owner");
       else setActiveRole("sitter");
