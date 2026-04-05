@@ -11,6 +11,8 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import NotificationBell from "./NotificationBell";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Button } from "@/components/ui/button";
+import FeedbackDialog from "@/components/feedback/FeedbackDialog";
 
 // ── Sidebar group label ──
 const GroupLabel = ({ label }: { label: string }) => (
@@ -50,6 +52,7 @@ export const Sidebar = () => {
   const { user, logout, activeRole, setActiveRole } = useAuth();
   const { isAdmin } = useAdmin();
   const [unreadCount, setUnreadCount] = useState(0);
+  const [feedbackOpen, setFeedbackOpen] = useState(false);
 
   const effectiveRole = user?.role === "both" ? activeRole : user?.role;
 
@@ -83,8 +86,20 @@ export const Sidebar = () => {
           <span className="text-primary">g</span>
           <span className="text-foreground">uardiens</span>
         </h1>
-        <NotificationBell />
+        <div className="flex items-center gap-1">
+          <Button
+            variant="default"
+            size="sm"
+            onClick={() => setFeedbackOpen(true)}
+            className="gap-1.5"
+          >
+            <MessageSquare className="h-4 w-4" />
+            <span className="hidden lg:inline">Votre avis compte</span>
+          </Button>
+          <NotificationBell />
+        </div>
       </div>
+      <FeedbackDialog open={feedbackOpen} onOpenChange={setFeedbackOpen} />
 
       {/* Role toggle */}
       {user?.role === "both" && (
