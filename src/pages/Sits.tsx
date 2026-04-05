@@ -325,26 +325,25 @@ const Sits = () => {
             {activeTab === "completed" && "Aucune garde passée"}
             {activeTab === "cancelled" && "Aucune garde annulée"}
           </p>
-          <p className="text-muted-foreground/60 text-sm">
-            {activeTab === "upcoming" && activeRole === "owner"
-              ? "Publiez une annonce pour trouver un gardien."
-              : activeTab === "upcoming" && activeRole === "sitter"
-              ? "Consultez les annonces pour postuler."
-              : ""}
-          </p>
           {activeTab === "upcoming" && activeRole === "owner" && (
-            <Link to="/sits/create">
-              <Button variant="outline" className="mt-4 gap-2">
-                <Plus className="h-4 w-4" /> Créer une annonce
-              </Button>
-            </Link>
+            <>
+              <p className="text-muted-foreground/60 text-sm">Vous n'avez pas encore publié d'annonce.</p>
+              <Link to="/sits/create">
+                <Button variant="outline" className="mt-4 gap-2">
+                  <Plus className="h-4 w-4" /> Publier ma première annonce
+                </Button>
+              </Link>
+            </>
           )}
           {activeTab === "upcoming" && activeRole === "sitter" && (
-            <Link to="/search">
-              <Button variant="outline" className="mt-4 gap-2">
-                <Eye className="h-4 w-4" /> Voir les annonces
-              </Button>
-            </Link>
+            <>
+              <p className="text-muted-foreground/60 text-sm">Consultez les annonces pour postuler.</p>
+              <Link to="/search">
+                <Button variant="outline" className="mt-4 gap-2">
+                  <Eye className="h-4 w-4" /> Voir les annonces
+                </Button>
+              </Link>
+            </>
           )}
         </div>
       ) : (
