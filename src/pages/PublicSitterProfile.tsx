@@ -8,7 +8,7 @@ import BadgeTimbre, { TIMBRES_ORDER } from "@/components/badges/BadgeTimbre";
 import { Skeleton } from "@/components/ui/skeleton";
 import { buildAbsoluteUrl } from "@/lib/seo";
 import {
-  Car, MapPin, X,
+  Car, MapPin, X, BadgeCheck,
   ChevronLeft, ChevronRight,
   Shield, Star,
 } from "lucide-react";
