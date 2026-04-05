@@ -7,6 +7,7 @@ import { Progress } from "@/components/ui/progress";
 import PricingCards from "@/components/subscription/PricingCards";
 import AdvantagesList from "@/components/subscription/AdvantagesList";
 import SubscriptionFAQ from "@/components/subscription/SubscriptionFAQ";
+import BadgeTimbre from "@/components/badges/BadgeTimbre";
 import {
   Star, BadgeCheck, Home, AlertCircle, Clock, Loader2,
   Check, X, FileText,
@@ -72,11 +73,11 @@ const MySubscription = () => {
   // Toast on return from Stripe
   useEffect(() => {
     if (searchParams.get("success") === "true") {
-      toast.success("Votre abonnement est active !");
+      toast.success("Votre abonnement est activé !");
       loadData();
       window.history.replaceState({}, "", "/mon-abonnement");
     } else if (searchParams.get("cancelled") === "true") {
-      toast("Retour a votre espace abonnement");
+      toast("Retour à votre espace abonnement");
       window.history.replaceState({}, "", "/mon-abonnement");
     }
   }, [searchParams, loadData]);
@@ -121,7 +122,7 @@ const MySubscription = () => {
   if (view === "loading") {
     return (
       <div className="p-6 md:p-10 max-w-3xl mx-auto space-y-6">
-        <PageMeta title="Mon abonnement | Guardiens" description="Gerez votre abonnement Guardiens." noindex />
+        <PageMeta title="Mon abonnement | Guardiens" description="Gérez votre abonnement Guardiens." noindex />
         <Skeleton className="h-8 w-64" />
         <Skeleton className="h-40 w-full rounded-2xl" />
         <div className="grid grid-cols-2 gap-4">
@@ -155,7 +156,7 @@ const MySubscription = () => {
 
   return (
     <div className="p-6 md:p-10 max-w-3xl mx-auto animate-fade-in space-y-8">
-      <PageMeta title="Mon abonnement | Guardiens" description="Gerez votre abonnement Guardiens." noindex />
+      <PageMeta title="Mon abonnement | Guardiens" description="Gérez votre abonnement Guardiens." noindex />
       <h1 className="font-heading text-3xl font-bold">Mon abonnement</h1>
 
       {/* ══ VUE PROPRIO ══ */}
@@ -164,7 +165,7 @@ const MySubscription = () => {
           <div className="flex items-center gap-3">
             <Home className="h-8 w-8 text-primary" />
             <h2 className="text-2xl font-heading font-semibold">
-              Votre acces est gratuit en 2026.
+              Votre accès est gratuit en 2026.
             </h2>
           </div>
           <p className="text-sm font-body text-muted-foreground">
@@ -176,8 +177,8 @@ const MySubscription = () => {
               {[
                 "Publier des annonces de garde",
                 "Recevoir et consulter les candidatures",
-                "Echanger avec les gardiens via la messagerie",
-                "Acceder aux petites missions",
+                "Échanger avec les gardiens via la messagerie",
+                "Accéder aux petites missions",
                 "Consulter les profils et avis des gardiens",
               ].map((t) => (
                 <li key={t} className="flex items-center gap-2 text-sm font-body text-foreground/70">
@@ -192,20 +193,22 @@ const MySubscription = () => {
 
       {/* ══ VUE FONDATEUR GRACE ══ */}
       {view === "founder_grace" && (
-        <div className="bg-[#FDF8EC] border border-amber-200 rounded-2xl p-8 max-w-xl mx-auto space-y-6 text-center">
-          <Star className="h-12 w-12 text-amber-500 mx-auto" fill="currentColor" />
+        <div className="bg-amber-50 border border-amber-200 rounded-2xl p-8 max-w-xl mx-auto space-y-6 text-center">
+          <div className="flex justify-center">
+            <BadgeTimbre id="fondateur" unlocked={true} size="normal" />
+          </div>
           <span className="inline-flex items-center gap-1.5 text-xs font-body bg-amber-100 text-amber-700 px-3 py-1 rounded-full">
             <Star className="h-3 w-3" fill="currentColor" /> Fondateur
           </span>
-          <h2 className="text-2xl font-heading font-semibold">Vous etes Fondateur Guardiens</h2>
-          <p className="text-sm font-body text-foreground/70 max-w-md mx-auto">
-            Votre acces complet est gratuit jusqu'au 13 juin 2026. Apres cette date, l'abonnement sera a 9&#8364;/mois.
+          <h2 className="font-heading text-2xl font-bold">Vous êtes Fondateur Guardiens</h2>
+          <p className="text-sm text-foreground/60 max-w-md mx-auto">
+            Votre accès complet est gratuit jusqu'au 13 juin 2026. Après cette date, l'abonnement sera à 9&nbsp;€/mois.
           </p>
 
           {now >= LAUNCH_DATE && now < GRACE_END && (
             <div className="text-left">
               <div className="flex justify-between text-xs font-body text-muted-foreground mb-1">
-                <span>{daysLeftGrace} jour{daysLeftGrace > 1 ? "s" : ""} restant{daysLeftGrace > 1 ? "s" : ""} sur votre periode fondateur</span>
+                <span>{daysLeftGrace} jour{daysLeftGrace > 1 ? "s" : ""} restant{daysLeftGrace > 1 ? "s" : ""} sur votre période fondateur</span>
               </div>
               <Progress
                 value={graceProgress}
@@ -214,11 +217,13 @@ const MySubscription = () => {
             </div>
           )}
 
-          <AdvantagesList title="Ce que vous debloquez" />
+          <AdvantagesList title="Ce que vous débloquez" />
 
-          <p className="text-xs font-body text-muted-foreground">
-            Votre badge Fondateur est permanent a vie, quelle que soit votre situation future.
-          </p>
+          <div className="border-t border-amber-100 mt-4 pt-4">
+            <p className="italic text-xs text-foreground/50 text-center">
+              Votre badge Fondateur est permanent à vie, quelle que soit votre situation future.
+            </p>
+          </div>
         </div>
       )}
 
@@ -226,13 +231,15 @@ const MySubscription = () => {
       {view === "founder_switch" && (
         <div className="max-w-xl mx-auto space-y-6">
           <div className="text-center space-y-3">
-            <Star className="h-10 w-10 text-amber-500 mx-auto" fill="currentColor" />
+            <div className="flex justify-center">
+              <BadgeTimbre id="fondateur" unlocked={true} size="normal" />
+            </div>
             <span className="inline-flex items-center gap-1.5 text-xs font-body bg-amber-100 text-amber-700 px-3 py-1 rounded-full">
               <Star className="h-3 w-3" fill="currentColor" /> Fondateur
             </span>
-            <h2 className="text-2xl font-heading font-semibold">Votre periode fondateur est terminee</h2>
+            <h2 className="font-heading text-2xl font-bold">Votre période fondateur est terminée</h2>
             <p className="text-sm font-body text-muted-foreground max-w-md mx-auto">
-              Votre badge Fondateur reste a vie. Choisissez votre formule pour continuer a postuler aux gardes.
+              Votre badge Fondateur reste à vie. Choisissez votre formule pour continuer à postuler aux gardes.
             </p>
           </div>
           <PricingCards />
@@ -245,7 +252,7 @@ const MySubscription = () => {
         <div className="max-w-xl mx-auto space-y-6">
           <div className="flex items-center gap-3 flex-wrap">
             <span className="inline-flex items-center gap-1.5 text-xs font-body bg-primary/10 text-primary px-3 py-1 rounded-full">
-              <BadgeCheck className="h-3.5 w-3.5" /> Abonne Guardiens
+              <BadgeCheck className="h-3.5 w-3.5" /> Abonné Guardiens
             </span>
             {isFounder && (
               <span className="inline-flex items-center gap-1.5 text-xs font-body bg-amber-100 text-amber-700 px-3 py-1 rounded-full">
@@ -259,8 +266,8 @@ const MySubscription = () => {
             <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 flex items-start gap-2 text-sm font-body text-foreground/70">
               <Clock className="h-4 w-4 text-amber-500 shrink-0 mt-0.5" />
               <span>
-                Periode d'essai — premier prelevement le {trialEndFormatted}.
-                Aucun montant debite avant cette date.
+                Période d'essai — premier prélèvement le {trialEndFormatted}.
+                Aucun montant débité avant cette date.
               </span>
             </div>
           )}
@@ -271,12 +278,12 @@ const MySubscription = () => {
               <AlertCircle className="h-4 w-4 text-amber-500 shrink-0 mt-0.5" />
               <div>
                 Votre abonnement se renouvelle dans {daysUntilRenewal} jour{daysUntilRenewal > 1 ? "s" : ""}.
-                Assurez-vous que votre moyen de paiement est a jour.
+                Assurez-vous que votre moyen de paiement est à jour.
                 <button
                   onClick={openPortal}
                   className="block mt-1 text-primary hover:underline font-medium"
                 >
-                  Gerer mon abonnement
+                  Gérer mon abonnement
                 </button>
               </div>
             </div>
@@ -286,7 +293,7 @@ const MySubscription = () => {
           <div className="bg-card border border-border rounded-2xl p-6 space-y-4">
             <div className="grid grid-cols-2 gap-4 text-sm font-body">
               <div>
-                <p className="text-muted-foreground mb-1">Abonne depuis</p>
+                <p className="text-muted-foreground mb-1">Abonné depuis</p>
                 <p className="font-medium">{subscribedDays} jour{subscribedDays > 1 ? "s" : ""}</p>
               </div>
               <div>
@@ -295,17 +302,17 @@ const MySubscription = () => {
               </div>
               <div>
                 <p className="text-muted-foreground mb-1">Montant</p>
-                <p className="font-medium">9&#8364;/mois</p>
+                <p className="font-medium">9&nbsp;€/mois</p>
               </div>
               {sub?.statut === "active" && daysUntilRenewal !== null && daysUntilRenewal > 7 && (
                 <div>
-                  <p className="text-muted-foreground mb-1">Acces garanti encore</p>
+                  <p className="text-muted-foreground mb-1">Accès garanti encore</p>
                   <p className="font-medium">{daysUntilRenewal} jour{daysUntilRenewal > 1 ? "s" : ""}</p>
                 </div>
               )}
             </div>
             <p className="text-xs font-body text-muted-foreground">
-              Conformement a la loi francaise, vous recevrez un email 30 jours avant tout renouvellement automatique.
+              Conformément à la loi française, vous recevrez un email 30 jours avant tout renouvellement automatique.
             </p>
           </div>
 
@@ -317,14 +324,14 @@ const MySubscription = () => {
               className="w-full py-3 rounded-xl border border-primary text-primary font-body font-medium text-sm hover:bg-primary/5 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
             >
               {portalLoading && <Loader2 className="h-4 w-4 animate-spin" />}
-              Gerer mon abonnement
+              Gérer mon abonnement
             </button>
             <button
               onClick={openPortal}
               className="w-full py-2 text-xs font-body text-muted-foreground hover:text-foreground transition-colors flex items-center justify-center gap-1.5"
             >
               <FileText className="h-3.5 w-3.5" />
-              Telecharger ma derniere facture
+              Télécharger ma dernière facture
             </button>
           </div>
 
@@ -337,9 +344,9 @@ const MySubscription = () => {
         <div className="max-w-xl mx-auto space-y-6">
           <div className="text-center space-y-3">
             <AlertCircle className="h-10 w-10 text-amber-500 mx-auto" />
-            <h2 className="text-2xl font-heading font-semibold">Votre abonnement est expire</h2>
+            <h2 className="text-2xl font-heading font-semibold">Votre abonnement est expiré</h2>
             <p className="text-sm font-body text-muted-foreground max-w-md mx-auto">
-              Vos donnees et votre historique sont conserves. Reactivez votre abonnement pour postuler a nouveau aux gardes.
+              Vos données et votre historique sont conservés. Réactivez votre abonnement pour postuler à nouveau aux gardes.
             </p>
           </div>
 
@@ -348,16 +355,16 @@ const MySubscription = () => {
             <table className="w-full text-sm font-body">
               <thead>
                 <tr className="border-b border-border">
-                  <th className="text-left px-4 py-3 text-muted-foreground font-medium">Fonctionnalite</th>
+                  <th className="text-left px-4 py-3 text-muted-foreground font-medium">Fonctionnalité</th>
                   <th className="px-4 py-3 text-center text-muted-foreground font-medium">Actif</th>
-                  <th className="px-4 py-3 text-center text-muted-foreground font-medium">Expire</th>
+                  <th className="px-4 py-3 text-center text-muted-foreground font-medium">Expiré</th>
                 </tr>
               </thead>
               <tbody>
                 {[
                   { label: "Postuler aux gardes", active: true, expired: false },
                   { label: "Messagerie gardes", active: true, expired: false },
-                  { label: "Apparaitre dans la recherche", active: true, expired: false },
+                  { label: "Apparaître dans la recherche", active: true, expired: false },
                   { label: "Petites missions", active: true, expired: true },
                   { label: "Profil et historique", active: true, expired: true },
                 ].map((row) => (
@@ -386,15 +393,15 @@ const MySubscription = () => {
       {/* ══ VUE DEMARRAGE ══ */}
       {view === "start" && (
         <div className="max-w-xl mx-auto space-y-6 text-center">
-          <h2 className="text-2xl font-heading font-semibold">Demarrez votre essai gratuit</h2>
+          <h2 className="text-2xl font-heading font-semibold">Démarrez votre essai gratuit</h2>
           <p className="text-sm font-body text-muted-foreground max-w-md mx-auto">
-            30 jours gratuits pour decouvrir Guardiens. Aucun prelevement pendant la periode d'essai.
+            30 jours gratuits pour découvrir Guardiens. Aucun prélèvement pendant la période d'essai.
           </p>
           <p className="text-lg font-body font-medium text-foreground">
-            Puis 9&#8364;/mois — sans engagement
+            Puis 9&nbsp;€/mois — sans engagement
           </p>
           <StartTrialButton />
-          <AdvantagesList title="Ce que vous debloquerez" />
+          <AdvantagesList title="Ce que vous débloquerez" />
         </div>
       )}
     </div>
@@ -412,7 +419,7 @@ function StartTrialButton() {
       if (error) throw error;
       if (data?.url) window.location.href = data.url;
     } catch {
-      toast.error("Impossible de lancer le paiement. Veuillez reessayer.");
+      toast.error("Impossible de lancer le paiement. Veuillez réessayer.");
     } finally {
       setLoading(false);
     }
@@ -424,7 +431,7 @@ function StartTrialButton() {
       className="px-8 py-3 rounded-xl bg-primary text-primary-foreground font-body font-medium text-sm hover:bg-primary/90 transition-colors disabled:opacity-50 inline-flex items-center gap-2"
     >
       {loading && <Loader2 className="h-4 w-4 animate-spin" />}
-      {loading ? "Redirection..." : "Demarrer mon essai gratuit"}
+      {loading ? "Redirection..." : "Démarrer mon essai gratuit"}
     </button>
   );
 }

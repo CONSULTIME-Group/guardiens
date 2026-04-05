@@ -5,15 +5,15 @@ import {
 const ADVANTAGES = [
   { icon: Send, label: "Postuler aux gardes" },
   { icon: MessageSquare, label: "Messagerie gardes" },
-  { icon: Search, label: "Apparaitre dans la recherche des proprietaires" },
+  { icon: Search, label: "Apparaître dans la recherche des propriétaires" },
   { icon: ToggleRight, label: 'Mode "Disponible"' },
-  { icon: Clock, label: "Acces aux gardes longue duree" },
-  { icon: Shield, label: "Ecussons et metriques de fiabilite" },
+  { icon: Clock, label: "Accès aux gardes longue durée" },
+  { icon: Shield, label: "Écussons et métriques de fiabilité" },
 ];
 
-export default function AdvantagesList({ title = "Ce que vous debloquez" }: { title?: string }) {
+export default function AdvantagesList({ title = "Ce que vous débloquez" }: { title?: string }) {
   return (
-    <div className="bg-muted/40 border border-border rounded-xl p-5">
+    <div className="bg-white/60 border border-amber-100 rounded-xl p-5">
       <p className="text-sm font-body font-semibold text-foreground mb-3">{title}</p>
       <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2">
         {ADVANTAGES.map((a) => (
