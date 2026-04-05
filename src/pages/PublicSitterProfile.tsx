@@ -87,6 +87,7 @@ export default function PublicSitterProfile() {
       if (sitterRes.data) setSitterProfile(sitterRes.data);
       if (galleryRes.data) setGallery(galleryRes.data);
       if (emergencyRes.data) setEmergencyActive(emergencyRes.data.is_active);
+      setHasActiveSubscription(!!(subRes.data && (subRes.data as any[]).length > 0));
 
       if (badgesRes.data) {
         const map: Record<string, number> = {};
