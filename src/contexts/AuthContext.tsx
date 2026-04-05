@@ -29,9 +29,9 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const mapProfile = (profile: any): Profile => ({
+const mapProfile = (profile: any, authEmail?: string): Profile => ({
   id: profile.id,
-  email: profile.email || "",
+  email: authEmail || profile.email || "",
   role: profile.role as Role,
   firstName: profile.first_name || "",
   lastName: profile.last_name || "",
@@ -70,12 +70,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const fetchProfile = useCallback(async (supabaseUser: SupabaseUser) => {
     const { data } = await supabase
       .from("profiles")
-      .select("*")
+      .select("id, role, first_name, last_name, avatar_url, profile_completion, identity_verified, is_founder")
       .eq("id", supabaseUser.id)
       .single();
 
     if (data) {
-      const profile = mapProfile(data);
+      const profile = mapProfile(data, supabaseUser.email);
       setUser(profile);
       if (profile.role === "owner") setActiveRole("owner");
       else setActiveRole("sitter");

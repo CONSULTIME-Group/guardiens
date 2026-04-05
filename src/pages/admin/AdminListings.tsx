@@ -38,7 +38,7 @@ const AdminListings = () => {
     setLoading(true);
     const table = filterType === "sits" ? "sits" : "long_stays";
     const fk = filterType === "sits" ? "sits_user_id_fkey" : "long_stays_user_id_fkey";
-    let q = supabase.from(table).select(`*, owner:profiles!${fk}(first_name, last_name, email, city, avatar_url)`).order("created_at", { ascending: false });
+    let q = supabase.from(table).select(`*, owner:profiles!${fk}(first_name, last_name, city, avatar_url)`).order("created_at", { ascending: false });
     if (filterStatus !== "all") q = q.eq("status", filterStatus as any);
     const { data, error } = await q;
     if (error) toast.error("Erreur de chargement");

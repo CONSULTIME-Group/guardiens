@@ -270,7 +270,7 @@ const AdminVerifications = () => {
                         )}
                         <div className="min-w-0">
                           <p className="font-medium break-words">{user.first_name} {user.last_name}</p>
-                          <p className="text-xs text-muted-foreground break-all">{user.email}</p>
+                          <p className="text-xs text-muted-foreground break-all">ID: {user.id.slice(0, 8)}…</p>
                         </div>
                       </div>
                       <div className="flex flex-wrap items-center gap-2">

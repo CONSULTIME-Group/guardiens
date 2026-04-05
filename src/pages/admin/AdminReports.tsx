@@ -71,12 +71,13 @@ const AdminReports = () => {
     await supabase.from("reports").update({ status: "resolved", resolved_at: new Date().toISOString() }).eq("id", actionModal.reportId);
 
     // Send email to reporter
-    const { data: reporterProfile } = await supabase.from("profiles").select("email").eq("id", report.reporter_id).single();
-    if (reporterProfile?.email) {
+    const { data: emailData } = await supabase.rpc("get_user_emails_admin", { p_user_ids: [report.reporter_id] });
+    const reporterEmail = emailData?.[0]?.email;
+    if (reporterEmail) {
       await supabase.functions.invoke("send-transactional-email", {
         body: {
           templateName: "report-resolved",
-          recipientEmail: reporterProfile.email,
+          recipientEmail: reporterEmail,
           idempotencyKey: `report-resolved-${actionModal.reportId}`,
           templateData: { reason: report.reason, status: "resolved", adminNotes: report.admin_notes || undefined },
         },
