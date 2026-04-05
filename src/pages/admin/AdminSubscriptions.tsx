@@ -132,6 +132,41 @@ const AdminSubscriptions = () => {
   // Count expiring in 30 days
   const expiringCount = subscriptions.filter(s => s.status === "active" && s.expires_at && differenceInDays(new Date(s.expires_at), new Date()) <= 30 && differenceInDays(new Date(s.expires_at), new Date()) >= 0).length;
 
+  const handleFounderReminderClick = async (type: "30" | "7") => {
+    setFounderReminder({ type, count: 0, loading: true, sending: false });
+    // Count eligible founders
+    const { data: founders } = await supabase
+      .from("profiles")
+      .select("id")
+      .eq("is_founder", true);
+
+    let count = 0;
+    for (const f of (founders || [])) {
+      const { data: sub } = await supabase
+        .from("abonnements")
+        .select("statut")
+        .eq("user_id", f.id)
+        .in("statut", ["trial", "active"])
+        .limit(1);
+      if (!sub || sub.length === 0) count++;
+    }
+    setFounderReminder({ type, count, loading: false, sending: false });
+  };
+
+  const confirmFounderReminder = async () => {
+    const type = founderReminder.type;
+    if (!type) return;
+    setFounderReminder(s => ({ ...s, sending: true }));
+    try {
+      const { data, error } = await supabase.functions.invoke(`send-founder-reminder-${type}`);
+      if (error) throw error;
+      toast.success(`Email envoyé à ${data?.sent || 0} fondateur(s)`);
+    } catch {
+      toast.error("Erreur lors de l'envoi des emails");
+    }
+    setFounderReminder({ type: null, count: 0, loading: false, sending: false });
+  };
+
   return (
     <div className="space-y-6">
       <h1 className="font-body text-2xl font-bold">Abonnements</h1>
