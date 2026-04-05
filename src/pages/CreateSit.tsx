@@ -68,7 +68,7 @@ const walkLabels: Record<string, string> = { none: "Aucune", "30min": "30 min/jo
 const aloneLabels: Record<string, string> = { never: "Jamais seul", "2h": "2h max", "6h": "6h max", all_day: "Toute la journée" };
 
 const openToOptions = ["Familles", "Solo", "Couples", "Retraités", "Sans préférence"];
-const FLEXIBLE_DURATIONS = ["Week-end", "1 semaine", "2 semaines", "1 mois+"];
+
 const MIN_SITS_OPTIONS = [
   { label: "Aucune exigence", value: 0 },
   { label: "1 garde+", value: 1 },
