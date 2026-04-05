@@ -432,23 +432,23 @@ const AdminDashboard = () => {
           </CardContent>
         </Card>
 
-        {/* Geographic distribution - horizontal bars top 10 */}
+        {/* Geographic distribution by department */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Répartition géographique (top 10)</CardTitle>
+            <CardTitle className="text-base">Répartition par département (top 10)</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="h-56">
-              {cityData.length === 0 ? (
+              {deptData.length === 0 ? (
                 <div className="flex items-center justify-center h-full text-muted-foreground text-sm">
-                  Aucune donnée de ville disponible.
+                  Aucune donnée disponible.
                 </div>
               ) : (
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={cityData} layout="vertical" margin={{ left: 8 }}>
+                  <BarChart data={deptData} layout="vertical" margin={{ left: 8 }}>
                     <CartesianGrid strokeDasharray="3 3" className="stroke-border" horizontal={false} />
                     <XAxis type="number" allowDecimals={false} tick={{ fontSize: 11 }} />
-                    <YAxis dataKey="city" type="category" tick={{ fontSize: 11 }} width={90} />
+                    <YAxis dataKey="dept" type="category" tick={{ fontSize: 11 }} width={140} />
                     <Tooltip
                       contentStyle={{
                         backgroundColor: "hsl(var(--card))",
@@ -459,7 +459,7 @@ const AdminDashboard = () => {
                       formatter={(v: number) => [`${v} utilisateurs`, "Inscrits"]}
                     />
                     <Bar dataKey="count" radius={[0, 4, 4, 0]}>
-                      {cityData.map((_, i) => (
+                      {deptData.map((_, i) => (
                         <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />
                       ))}
                     </Bar>
