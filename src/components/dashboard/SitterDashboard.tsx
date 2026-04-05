@@ -334,9 +334,19 @@ const SitterDashboard = () => {
 
         {/* Zone 3 — STATUT D'URGENCE */}
         <div className="p-4 md:p-5">
-          <p className="text-xs uppercase tracking-widest text-muted-foreground font-sans mb-3">
-            Statut d'urgence
-          </p>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <p className="text-xs uppercase tracking-widest text-muted-foreground font-sans mb-3 inline-flex items-center gap-1 cursor-default">
+                  Statut d'urgence
+                  <Info className="h-[13px] w-[13px] text-foreground/40" />
+                </p>
+              </TooltipTrigger>
+              <TooltipContent side="top" className="max-w-[220px] text-xs text-center">
+                Les gardiens d'urgence sont disponibles sous 48h pour intervenir quand un proprio se retrouve sans solution. Un statut visible, prioritaire dans la recherche, et reconnu par la communauté.
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
           <div className="h-1.5 bg-muted rounded-full mb-1">
             <div
               className="h-1.5 bg-amber-400 rounded-full transition-all duration-500"
