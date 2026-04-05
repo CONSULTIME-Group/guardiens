@@ -40,7 +40,7 @@ const AdminSubscriptions = () => {
     setLoading(true);
     let query = supabase
       .from("subscriptions")
-      .select("*, profile:profiles!subscriptions_user_id_fkey(first_name, last_name, email, avatar_url, role, is_founder)")
+      .select("*, profile:profiles!subscriptions_user_id_fkey(first_name, last_name, avatar_url, role, is_founder)")
       .order("expires_at", { ascending: true });
 
     if (filterPlan !== "all") query = query.eq("plan", filterPlan as any);
@@ -74,7 +74,7 @@ const AdminSubscriptions = () => {
   // Also fetch profiles without subscriptions (founders, owners)
   const [unsubscribedProfiles, setUnsubscribedProfiles] = useState<any[]>([]);
   useEffect(() => {
-    supabase.from("profiles").select("id, first_name, last_name, email, avatar_url, role, is_founder").eq("is_founder", true).then(({ data }) => {
+    supabase.from("profiles").select("id, first_name, last_name, avatar_url, role, is_founder").eq("is_founder", true).then(({ data }) => {
       setUnsubscribedProfiles(data || []);
     });
   }, []);
@@ -126,7 +126,7 @@ const AdminSubscriptions = () => {
   const filtered = subscriptions.filter(s => {
     if (!search) return true;
     const q = search.toLowerCase();
-    return s.profile?.first_name?.toLowerCase().includes(q) || s.profile?.last_name?.toLowerCase().includes(q) || s.profile?.email?.toLowerCase().includes(q);
+    return s.profile?.first_name?.toLowerCase().includes(q) || s.profile?.last_name?.toLowerCase().includes(q);
   });
 
   // Count expiring in 30 days
@@ -292,7 +292,7 @@ const AdminSubscriptions = () => {
                       <span className="font-medium text-sm">{sub.profile?.first_name} {sub.profile?.last_name}</span>
                     </div>
                   </TableCell>
-                  <TableCell className="text-xs text-muted-foreground">{sub.profile?.email}</TableCell>
+                  <TableCell className="text-xs text-muted-foreground">{sub.profile?.first_name} {sub.profile?.last_name}</TableCell>
                   <TableCell className="text-xs capitalize">{sub.profile?.role}</TableCell>
                   <TableCell>
                     <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${plan.color}`}>{plan.label}</span>
