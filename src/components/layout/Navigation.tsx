@@ -86,15 +86,15 @@ export const Sidebar = () => {
           <span className="text-primary">g</span>
           <span className="text-foreground">uardiens</span>
         </h1>
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1.5">
           <Button
-            variant="default"
+            variant="outline"
             size="sm"
             onClick={() => setFeedbackOpen(true)}
-            className="gap-1.5"
+            className="gap-1.5 border-primary/40 text-primary bg-transparent hover:border-primary hover:text-primary hover:bg-primary/5 h-8"
           >
-            <MessageSquare className="h-4 w-4" />
-            <span className="hidden lg:inline">Votre avis compte</span>
+            <MessageSquare className="h-[15px] w-[15px]" />
+            <span className="hidden lg:inline text-xs">Votre avis</span>
           </Button>
           <NotificationBell />
         </div>
