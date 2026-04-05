@@ -62,7 +62,7 @@ const PublicProfile = () => {
     if (!id) return;
     const load = async () => {
       const [profileRes, sitterRes, ownerRes, propsRes, reviewsRes] = await Promise.all([
-        supabase.from("profiles").select("*").eq("id", id).single(),
+        supabase.from("public_profiles").select("*").eq("id", id).single(),
         supabase.from("sitter_profiles").select("*").eq("user_id", id).maybeSingle(),
         supabase.from("owner_profiles").select("*").eq("user_id", id).maybeSingle(),
         supabase.from("properties").select("*, pets(*)").eq("user_id", id),
