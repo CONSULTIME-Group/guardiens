@@ -33,6 +33,7 @@ interface ArticleFull {
   meta_description: string | null;
   hero_image_alt: string | null;
   internal_links: any;
+  noindex: boolean | null;
 }
 
 interface RelatedArticle {
