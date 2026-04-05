@@ -375,6 +375,9 @@ const SmallMissionDetail = () => {
           <p className="text-sm leading-relaxed whitespace-pre-wrap">{mission.description}</p>
         </div>
 
+        {/* Photos */}
+        <MissionPhotoGallery photos={mission.photos || []} />
+
         {/* Exchange */}
         <div className="bg-primary/5 border border-primary/10 rounded-xl p-5 mb-6">
           <div className="flex items-center gap-2 mb-2">
