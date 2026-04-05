@@ -52,6 +52,7 @@ export const Sidebar = () => {
   const { user, logout, activeRole, setActiveRole } = useAuth();
   const { isAdmin } = useAdmin();
   const [unreadCount, setUnreadCount] = useState(0);
+  const [feedbackOpen, setFeedbackOpen] = useState(false);
 
   const effectiveRole = user?.role === "both" ? activeRole : user?.role;
 
