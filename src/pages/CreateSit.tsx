@@ -13,6 +13,7 @@ import { Calendar, Home, PawPrint, ShieldCheck, MessageSquare, Users, ArrowLeft,
 import { Checkbox } from "@/components/ui/checkbox";
 import { Link } from "react-router-dom";
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
+import { cn } from "@/lib/utils";
 
 interface PropertySummary {
   id: string;
