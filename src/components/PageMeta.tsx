@@ -62,7 +62,7 @@ const PageMeta = ({
     document.title = fullTitle || metaTitle;
 
     upsertMetaTag({ attr: "name", key: "description", content: metaDescription });
-    upsertMetaTag({ attr: "name", key: "robots", content: noindex ? "noindex, nofollow" : "index, follow" });
+    upsertMetaTag({ attr: "name", key: "robots", content: noindex ? "noindex, follow" : "index, follow" });
     upsertCanonical(currentUrl);
 
     upsertMetaTag({ attr: "property", key: "og:title", content: fullTitle || metaTitle });

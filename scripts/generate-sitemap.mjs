@@ -75,7 +75,7 @@ async function main() {
     { data: breedProfiles },
     { data: publicProfiles },
   ] = await Promise.all([
-    supabase.from("articles").select("slug, category, updated_at, published_at").eq("published", true),
+    supabase.from("articles").select("slug, category, updated_at, published_at").eq("published", true).or("noindex.is.null,noindex.eq.false"),
     supabase.from("seo_city_pages").select("slug, updated_at").eq("published", true),
     supabase.from("city_guides").select("slug, updated_at").eq("published", true),
     supabase.from("seo_department_pages").select("slug, updated_at").eq("published", true),
