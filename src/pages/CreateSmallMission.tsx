@@ -7,14 +7,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import PostalCodeCityFields from "@/components/profile/PostalCodeCityFields";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dog, Flower2, Home, Handshake, Heart, ChevronLeft } from "lucide-react";
+import { Dog, Flower2, Home, Handshake, Heart, ChevronLeft, Lock } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import PageMeta from "@/components/PageMeta";
 import { useAccessLevel } from "@/hooks/useAccessLevel";
 import AccessGateBanner from "@/components/access/AccessGateBanner";
-import { Lock } from "lucide-react";
+import MissionPhotoUpload from "@/components/missions/MissionPhotoUpload";
 
 const EURO_REGEX = /\d+\s*[€]|[€]\s*\d+|\d+\s*euro/i;
 
@@ -48,6 +48,7 @@ const CreateSmallMission = () => {
   const [dateNeeded, setDateNeeded] = useState("");
   const [duration, setDuration] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [photos, setPhotos] = useState<string[]>([]);
 
   const handleExchangeChange = (val: string) => {
     setExchangeOffer(val);
@@ -78,7 +79,8 @@ const CreateSmallMission = () => {
       postal_code: postalCode.trim(),
       date_needed: dateNeeded || null,
       duration_estimate: duration,
-    });
+      photos,
+    } as any);
 
     setSubmitting(false);
     if (error) {
