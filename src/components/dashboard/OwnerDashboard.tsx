@@ -422,7 +422,7 @@ const OwnerDashboard = () => {
                           Voir le profil
                         </button>
                         <button
-                          onClick={() => navigate(`/mes-annonces/${app.sit_id}`)}
+                          onClick={() => navigate(`/sits/${app.sit_id}`)}
                           className="bg-primary text-primary-foreground rounded-xl px-4 py-1.5 text-xs font-sans font-medium hover:bg-primary/90 transition-colors"
                         >
                           Répondre
