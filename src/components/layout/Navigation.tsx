@@ -85,8 +85,20 @@ export const Sidebar = () => {
           <span className="text-primary">g</span>
           <span className="text-foreground">uardiens</span>
         </h1>
-        <NotificationBell />
+        <div className="flex items-center gap-1">
+          <Button
+            variant="default"
+            size="sm"
+            onClick={() => setFeedbackOpen(true)}
+            className="gap-1.5"
+          >
+            <MessageSquare className="h-4 w-4" />
+            <span className="hidden lg:inline">Votre avis compte</span>
+          </Button>
+          <NotificationBell />
+        </div>
       </div>
+      <FeedbackDialog open={feedbackOpen} onOpenChange={setFeedbackOpen} />
 
       {/* Role toggle */}
       {user?.role === "both" && (
