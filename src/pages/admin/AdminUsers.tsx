@@ -115,14 +115,25 @@ const AdminUsers = () => {
   useEffect(() => { fetchUsers(); }, [fetchUsers]);
 
   const filtered = users.filter((u) => {
-    if (!search) return true;
-    const s = search.toLowerCase();
-    return (
-      (u.first_name || "").toLowerCase().includes(s) ||
-      (u.last_name || "").toLowerCase().includes(s) ||
-      (u.email || "").toLowerCase().includes(s)
-    );
+    if (search) {
+      const s = search.toLowerCase();
+      if (
+        !(u.first_name || "").toLowerCase().includes(s) &&
+        !(u.last_name || "").toLowerCase().includes(s) &&
+        !(u.email || "").toLowerCase().includes(s)
+      ) return false;
+    }
+    if (filterDept !== "all") {
+      const code = getDeptCode(u.postal_code);
+      if (code !== filterDept) return false;
+    }
+    return true;
   });
+
+  // Compute available departments from loaded users for the dropdown
+  const availableDepts = Array.from(
+    new Set(users.map((u) => getDeptCode(u.postal_code)).filter(Boolean) as string[])
+  ).sort((a, b) => a.localeCompare(b, "fr"));
 
   const handleSuspend = async () => {
     const { error } = await supabase
