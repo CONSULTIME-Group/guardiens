@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
@@ -83,8 +83,30 @@ function generateAltText(article: ArticleFull): string {
 }
 
 
+const ARTICLE_REDIRECTS: Record<string, string> = {
+  "golden-retriever-lyon-guide-race": "golden-retriever-guide-race-complet",
+  "berger-australien-guide": "berger-australien-guide-race",
+  "preparer-maison-avant-vacances": "preparer-maison-avant-garde",
+  "guide-lieu-meilleurs-parcs-chiens-lyon": "parcs-chiens-lyon-guide-complet",
+  "guide-house-sitting-lyon": "house-sitting-lyon",
+  "gardiennage-maison-vacances-aura": "house-sitting-aura-guide-complet",
+  "house-sitting-auvergne-rhone-alpes": "house-sitting-aura-guide-complet",
+  "pet-sitting-grenoble-chartreuse": "house-sitting-grenoble",
+  "pet-sitting-grenoble-guide": "house-sitting-grenoble",
+  "pet-sitting-annecy-guide": "house-sitting-annecy",
+  "pet-sitting-lyon-guide-complet": "house-sitting-lyon",
+  "pet-sitting-chambery-savoie": "house-sitting-chambery",
+  "garde-chien-lyon-solutions": "house-sitting-lyon",
+  "devenir-pet-sitter-guide-debutant": "creer-profil-gardien-attractif",
+  "devenir-gardien-guide-complet": "creer-profil-gardien-attractif",
+  "conseil-gardien-creer-profil-attractif-lyon": "creer-profil-gardien-attractif",
+  "proprietaire-preparer-garde-maison": "preparer-maison-avant-garde",
+  "pet-sitting-clermont-ferrand-guide": "pet-sitting-clermont-ferrand",
+};
+
 export default function ArticleDetail() {
   const { slug } = useParams<{ slug: string }>();
+  const navigate = useNavigate();
   const { user, isAuthenticated } = useAuth();
   const [article, setArticle] = useState<ArticleFull | null>(null);
   const [loading, setLoading] = useState(true);
@@ -94,6 +116,11 @@ export default function ArticleDetail() {
 
   useEffect(() => {
     if (!slug) return;
+    const target = ARTICLE_REDIRECTS[slug];
+    if (target) {
+      navigate(`/actualites/${target}`, { replace: true });
+      return;
+    }
     const fetchAll = async () => {
       const { data } = await supabase
         .from("articles")
