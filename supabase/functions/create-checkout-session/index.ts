@@ -103,33 +103,42 @@ Deno.serve(async (req) => {
     }
 
     const origin = req.headers.get("origin") || "https://guardiens.fr";
-    const isTestStripeKey = stripeKey.startsWith("sk_test_") || stripeKey.startsWith("rk_test_");
 
+    // Resolve a price: try lookup_keys first, then fallback to finding
+    // the first active price of the right type on any product matching the name.
     const resolveActivePrice = async (
       lookupKeys: string[],
-      fallbackPriceId?: string,
+      productNameHint: string,
+      priceType: "recurring" | "one_time" = "recurring",
     ) => {
-      const prices = await stripe.prices.list({
+      // 1. Try lookup_keys (works when they're set in Stripe)
+      const byLookup = await stripe.prices.list({
         lookup_keys: lookupKeys,
         active: true,
-        limit: Math.max(lookupKeys.length, 1),
+        limit: 5,
       });
-
-      if (prices.data.length > 0) {
-        return (
-          prices.data.find((price) =>
-            price.lookup_key ? lookupKeys.includes(price.lookup_key) : false,
-          ) ?? prices.data[0]
-        );
+      if (byLookup.data.length > 0) {
+        console.log(`[create-checkout-session] Found price via lookup_key: ${byLookup.data[0].id}`);
+        return byLookup.data[0];
       }
 
-      if (isTestStripeKey && fallbackPriceId) {
-        console.warn(
-          `[create-checkout-session] lookup_keys introuvables (${lookupKeys.join(", ")}), fallback sur ${fallbackPriceId}`,
-        );
-        const fallbackPrice = await stripe.prices.retrieve(fallbackPriceId);
-        if (!("deleted" in fallbackPrice) && fallbackPrice.active) {
-          return fallbackPrice;
+      // 2. Fallback: search products by name, then find matching price
+      console.warn(`[create-checkout-session] No price for lookup_keys [${lookupKeys.join(",")}], searching by product name "${productNameHint}"`);
+      const products = await stripe.products.search({
+        query: `name~"${productNameHint}"`,
+        limit: 5,
+      });
+      for (const product of products.data) {
+        if (!product.active) continue;
+        const prices = await stripe.prices.list({
+          product: product.id,
+          active: true,
+          type: priceType,
+          limit: 5,
+        });
+        if (prices.data.length > 0) {
+          console.log(`[create-checkout-session] Found price ${prices.data[0].id} on product ${product.id} (${product.name})`);
+          return prices.data[0];
         }
       }
 
