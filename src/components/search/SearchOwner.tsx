@@ -35,7 +35,7 @@ type SortOption = "closest" | "rating" | "experience";
 type ViewMode = "list" | "map";
 
 const SearchOwner = () => {
-  const { user } = useAuth();
+  const { user, switchRole } = useAuth();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
 
