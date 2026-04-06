@@ -50,6 +50,8 @@ const ENV_LABELS: Record<string, string> = {
 export default function PublicSitterProfile() {
   const { id } = useParams<{ id: string }>();
   const auth = useAuth();
+  const { data: reputation } = useProfileReputation(id);
+  const { data: userBadges } = useUserBadges(id);
 
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState<any>(null);
