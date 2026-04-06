@@ -542,7 +542,7 @@ const MySubscription = () => {
                     </div>
                   </div>
                   <a
-                    href="/mon-profil"
+                    href="/profile"
                     className="text-sm font-medium text-primary font-body hover:underline whitespace-nowrap flex-shrink-0"
                     onClick={() => trackEvent("cta_complete_profile", { source: "pre_launch_nudge" })}
                   >
