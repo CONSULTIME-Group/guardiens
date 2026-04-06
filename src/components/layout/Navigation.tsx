@@ -275,17 +275,47 @@ export const BottomNav = () => {
   return (
     <>
       <FeedbackDialog open={feedbackOpen} onOpenChange={setFeedbackOpen} />
+      <PremiumGateDialog open={gateOpen} onClose={() => setGateOpen(false)} featureName={gateFeature} />
       <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-card border-t border-border z-50">
         <div className="flex justify-around items-center h-16 px-1">
           {tabs.map((item) => {
             const isActive = location.pathname === item.to || location.pathname.startsWith(item.to + "/");
+            const isSitterLocked = effectiveRole === "sitter" && !hasAccess;
+            const isGated = isSitterLocked && (item.to === "/search" || item.to === "/messages");
+            const featureName = item.to === "/search" ? "la recherche d'annonces" : "la messagerie";
+
+            if (isGated) {
+              return (
+                <button
+                  key={item.to}
+                  type="button"
+                  onClick={() => { setGateFeature(featureName); setGateOpen(true); }}
+                  className={cn(
+                    "flex flex-col items-center gap-0.5 px-2 py-1 text-[10px] transition-colors relative min-w-[56px]",
+                    "text-muted-foreground"
+                  )}
+                >
+                  <div className="relative">
+                    <item.icon className="h-5 w-5" strokeWidth={1.8} />
+                    <Crown className="h-[9px] w-[9px] text-amber-500 absolute -top-1 -right-1.5" />
+                    {item.badge !== undefined && item.badge > 0 && (
+                      <span className="absolute -top-1 -right-2 bg-destructive text-destructive-foreground text-[8px] rounded-full min-w-[14px] h-[14px] flex items-center justify-center px-0.5 font-bold">
+                        {item.badge > 99 ? "99+" : item.badge}
+                      </span>
+                    )}
+                  </div>
+                  <span className="font-medium">{item.label}</span>
+                </button>
+              );
+            }
+
             return (
               <NavLink
                 key={item.to}
                 to={item.to}
                 className={cn(
                   "flex flex-col items-center gap-0.5 px-2 py-1 text-[10px] transition-colors relative min-w-[56px]",
-                  isActive ? "text-[#2D6A4F]" : "text-[#9A958A]"
+                  isActive ? "text-primary" : "text-muted-foreground"
                 )}
               >
                 <div className="relative">
