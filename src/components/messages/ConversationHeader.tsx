@@ -45,6 +45,10 @@ const ConversationHeader = ({
   conv, userId, userRole, isMobile, onBack, onArchive, onActionDone,
   otherUserRating, isFounder, isEmergencySitter,
 }: ConversationHeaderProps) => {
+  const [reportOpen, setReportOpen] = useState(false);
+  const [reportReason, setReportReason] = useState("");
+  const [reportSending, setReportSending] = useState(false);
+
   const isOwner = conv.owner_id === userId;
   const isPendingApp = conv.application_status === "pending" || conv.application_status === "discussing";
   const isConfirmed = conv.sit?.status === "confirmed";
@@ -58,6 +62,28 @@ const ConversationHeader = ({
   const annonceLinkHref = conv.sit_id
     ? (isOwner ? `/sits/${conv.sit_id}` : `/annonces/${conv.sit_id}`)
     : null;
+
+  const reportedUserId = conv.owner_id === userId ? conv.sitter_id : conv.owner_id;
+
+  const handleReport = async () => {
+    if (!userId || !reportReason.trim()) return;
+    setReportSending(true);
+    const { error } = await supabase.from("reports").insert({
+      reporter_id: userId,
+      target_type: "user",
+      target_id: reportedUserId,
+      report_type: "inappropriate",
+      reason: reportReason.trim(),
+    });
+    setReportSending(false);
+    if (error) {
+      toast.error("Une erreur est survenue, réessayez.");
+      return;
+    }
+    toast.success("Signalement envoyé. On examine ça dans les 24h.");
+    setReportOpen(false);
+    setReportReason("");
+  };
 
   const handleAcceptApplication = async () => {
     if (!conv.sit_id) return;
