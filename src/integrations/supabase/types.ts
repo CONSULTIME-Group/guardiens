@@ -41,6 +41,85 @@ export type Database = {
         }
         Relationships: []
       }
+      admin_subscription_logs: {
+        Row: {
+          action: string
+          id: string
+          note: string
+          params: Json | null
+          performed_at: string | null
+          performed_by: string | null
+          result: Json | null
+          stripe_called: boolean | null
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          id?: string
+          note: string
+          params?: Json | null
+          performed_at?: string | null
+          performed_by?: string | null
+          result?: Json | null
+          stripe_called?: boolean | null
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          id?: string
+          note?: string
+          params?: Json | null
+          performed_at?: string | null
+          performed_by?: string | null
+          result?: Json | null
+          stripe_called?: boolean | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admin_subscription_logs_performed_by_fkey"
+            columns: ["performed_by"]
+            isOneToOne: false
+            referencedRelation: "profile_reputation"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "admin_subscription_logs_performed_by_fkey"
+            columns: ["performed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "admin_subscription_logs_performed_by_fkey"
+            columns: ["performed_by"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "admin_subscription_logs_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profile_reputation"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "admin_subscription_logs_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "admin_subscription_logs_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       applications: {
         Row: {
           created_at: string
@@ -1767,6 +1846,7 @@ export type Database = {
           custom_skills: Json | null
           email: string | null
           first_name: string | null
+          free_months_credit: number | null
           id: string
           identity_document_url: string | null
           identity_selfie_url: string | null
@@ -1778,6 +1858,7 @@ export type Database = {
           postal_code: string | null
           profile_completion: number | null
           referral_code: string | null
+          referred_by: string | null
           role: Database["public"]["Enums"]["user_role"]
           skill_categories: string[] | null
           updated_at: string
@@ -1796,6 +1877,7 @@ export type Database = {
           custom_skills?: Json | null
           email?: string | null
           first_name?: string | null
+          free_months_credit?: number | null
           id: string
           identity_document_url?: string | null
           identity_selfie_url?: string | null
@@ -1807,6 +1889,7 @@ export type Database = {
           postal_code?: string | null
           profile_completion?: number | null
           referral_code?: string | null
+          referred_by?: string | null
           role?: Database["public"]["Enums"]["user_role"]
           skill_categories?: string[] | null
           updated_at?: string
@@ -1825,6 +1908,7 @@ export type Database = {
           custom_skills?: Json | null
           email?: string | null
           first_name?: string | null
+          free_months_credit?: number | null
           id?: string
           identity_document_url?: string | null
           identity_selfie_url?: string | null
@@ -1836,11 +1920,34 @@ export type Database = {
           postal_code?: string | null
           profile_completion?: number | null
           referral_code?: string | null
+          referred_by?: string | null
           role?: Database["public"]["Enums"]["user_role"]
           skill_categories?: string[] | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "profiles_referred_by_fkey"
+            columns: ["referred_by"]
+            isOneToOne: false
+            referencedRelation: "profile_reputation"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "profiles_referred_by_fkey"
+            columns: ["referred_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profiles_referred_by_fkey"
+            columns: ["referred_by"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       properties: {
         Row: {
@@ -1912,6 +2019,82 @@ export type Database = {
           {
             foreignKeyName: "properties_user_id_fkey"
             columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      referrals: {
+        Row: {
+          created_at: string | null
+          id: string
+          referred_id: string | null
+          referrer_id: string | null
+          reward_applied_referred: boolean | null
+          reward_applied_referrer: boolean | null
+          status: string | null
+          triggered_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          referred_id?: string | null
+          referrer_id?: string | null
+          reward_applied_referred?: boolean | null
+          reward_applied_referrer?: boolean | null
+          status?: string | null
+          triggered_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          referred_id?: string | null
+          referrer_id?: string | null
+          reward_applied_referred?: boolean | null
+          reward_applied_referrer?: boolean | null
+          status?: string | null
+          triggered_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "referrals_referred_id_fkey"
+            columns: ["referred_id"]
+            isOneToOne: true
+            referencedRelation: "profile_reputation"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "referrals_referred_id_fkey"
+            columns: ["referred_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "referrals_referred_id_fkey"
+            columns: ["referred_id"]
+            isOneToOne: true
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "referrals_referrer_id_fkey"
+            columns: ["referrer_id"]
+            isOneToOne: false
+            referencedRelation: "profile_reputation"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "referrals_referrer_id_fkey"
+            columns: ["referrer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "referrals_referrer_id_fkey"
+            columns: ["referrer_id"]
             isOneToOne: false
             referencedRelation: "public_profiles"
             referencedColumns: ["id"]
@@ -2755,33 +2938,51 @@ export type Database = {
       }
       subscriptions: {
         Row: {
+          admin_override: boolean | null
+          admin_override_note: string | null
           created_at: string
+          current_period_start: string | null
           expires_at: string | null
           id: string
           plan: Database["public"]["Enums"]["subscription_plan"]
           started_at: string
           status: Database["public"]["Enums"]["subscription_status"]
+          stripe_customer_id: string | null
           stripe_subscription_id: string | null
+          subscription_type: string | null
+          trial_end: string | null
           user_id: string
         }
         Insert: {
+          admin_override?: boolean | null
+          admin_override_note?: string | null
           created_at?: string
+          current_period_start?: string | null
           expires_at?: string | null
           id?: string
           plan: Database["public"]["Enums"]["subscription_plan"]
           started_at?: string
           status?: Database["public"]["Enums"]["subscription_status"]
+          stripe_customer_id?: string | null
           stripe_subscription_id?: string | null
+          subscription_type?: string | null
+          trial_end?: string | null
           user_id: string
         }
         Update: {
+          admin_override?: boolean | null
+          admin_override_note?: string | null
           created_at?: string
+          current_period_start?: string | null
           expires_at?: string | null
           id?: string
           plan?: Database["public"]["Enums"]["subscription_plan"]
           started_at?: string
           status?: Database["public"]["Enums"]["subscription_status"]
+          stripe_customer_id?: string | null
           stripe_subscription_id?: string | null
+          subscription_type?: string | null
+          trial_end?: string | null
           user_id?: string
         }
         Relationships: []
@@ -3010,6 +3211,10 @@ export type Database = {
       }
     }
     Functions: {
+      apply_referral_reward: {
+        Args: { p_referred_id: string }
+        Returns: undefined
+      }
       award_badge: {
         Args: {
           p_badge_id: string
@@ -3162,7 +3367,15 @@ export type Database = {
         | "founder_free"
         | "annual_sitter"
         | "owner_free"
-      subscription_status: "active" | "expired" | "cancelled"
+        | "monthly"
+        | "one_shot"
+        | "prorata"
+      subscription_status:
+        | "active"
+        | "expired"
+        | "cancelled"
+        | "trial"
+        | "past_due"
       user_role: "owner" | "sitter" | "both"
       verification_status: "pending" | "verified" | "rejected"
       walk_duration: "none" | "30min" | "1h" | "2h_plus"
@@ -3366,8 +3579,17 @@ export const Constants = {
         "founder_free",
         "annual_sitter",
         "owner_free",
+        "monthly",
+        "one_shot",
+        "prorata",
       ],
-      subscription_status: ["active", "expired", "cancelled"],
+      subscription_status: [
+        "active",
+        "expired",
+        "cancelled",
+        "trial",
+        "past_due",
+      ],
       user_role: ["owner", "sitter", "both"],
       verification_status: ["pending", "verified", "rejected"],
       walk_duration: ["none", "30min", "1h", "2h_plus"],
