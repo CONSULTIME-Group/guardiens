@@ -15,7 +15,7 @@ interface PostConfirmationChecklistProps {
   endDate: string | null;
   ownerCity?: string;
   isOwner: boolean;
-  isLongStay?: boolean;
+  
 }
 
 interface CheckItem {
@@ -29,7 +29,7 @@ interface CheckItem {
 }
 
 const PostConfirmationChecklist = ({
-  sitId, sitOwnerId, propertyId, startDate, isOwner, ownerCity, isLongStay = false,
+  sitId, sitOwnerId, propertyId, startDate, isOwner, ownerCity,
 }: PostConfirmationChecklistProps) => {
   const { user } = useAuth();
   const [checked, setChecked] = useState<Record<string, boolean>>({});
