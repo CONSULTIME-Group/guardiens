@@ -60,6 +60,8 @@ export const Sidebar = () => {
   const [feedbackOpen, setFeedbackOpen] = useState(false);
   const [gateOpen, setGateOpen] = useState(false);
   const [gateFeature, setGateFeature] = useState("");
+  const [roleDialogOpen, setRoleDialogOpen] = useState(false);
+  const [roleDialogTarget, setRoleDialogTarget] = useState<"gardien" | "proprio">("proprio");
 
   const effectiveRole = user?.role === "both" ? activeRole : user?.role;
 
