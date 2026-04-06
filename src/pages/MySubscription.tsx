@@ -107,9 +107,9 @@ function PricingCardsNew({ context }: { context?: "founder" }) {
         <div className="bg-card border-2 border-primary rounded-xl p-5 flex flex-col flex-1">
           <p className="font-heading text-lg font-semibold mb-2">Mois après mois</p>
           <p className="mb-1"><span className="text-3xl font-heading font-bold">9€</span><span className="text-sm text-muted-foreground">/mois</span></p>
-          <p className="text-xs text-muted-foreground mb-4">7 jours gratuits. Annulable à tout moment.</p>
-          <ul className="text-sm space-y-2 mb-6 flex-1">
-            <li className="flex items-center gap-2"><Check className="h-3.5 w-3.5 text-primary shrink-0" /> Trial 7 jours offerts</li>
+           <p className="text-xs text-muted-foreground mb-4">7 jours d'essai. Annulable à tout moment.</p>
+           <ul className="text-sm space-y-2 mb-6 flex-1">
+             <li className="flex items-center gap-2"><Check className="h-3.5 w-3.5 text-primary shrink-0" /> 7 jours d'essai offerts</li>
             <li className="flex items-center gap-2"><Check className="h-3.5 w-3.5 text-primary shrink-0" /> Sans engagement</li>
             <li className="flex items-center gap-2"><Check className="h-3.5 w-3.5 text-primary shrink-0" /> Annulable en un clic</li>
           </ul>
@@ -126,9 +126,9 @@ function PricingCardsNew({ context }: { context?: "founder" }) {
         <p className="mb-1"><span className="text-3xl font-heading font-bold">{prorataPrice}€</span><span className="text-sm text-muted-foreground"> pour {months} mois</span></p>
         <p className="text-xs text-green-600 font-medium mb-4">Économie de {savings}€</p>
         <ul className="text-sm space-y-2 mb-6 flex-1">
-          <li className="flex items-center gap-2"><Check className="h-3.5 w-3.5 text-primary shrink-0" /> Accès jusqu'au 31 décembre</li>
-          <li className="flex items-center gap-2"><Check className="h-3.5 w-3.5 text-primary shrink-0" /> -20% sur le tarif mensuel</li>
-          <li className="flex items-center gap-2"><Check className="h-3.5 w-3.5 text-primary shrink-0" /> Sans renouvellement automatique en 2027</li>
+           <li className="flex items-center gap-2"><Check className="h-3.5 w-3.5 text-primary shrink-0" /> Accès au 31 décembre</li>
+           <li className="flex items-center gap-2"><Check className="h-3.5 w-3.5 text-primary shrink-0" /> -20% sur le tarif mensuel</li>
+           <li className="flex items-center gap-2"><Check className="h-3.5 w-3.5 text-primary shrink-0" /> Pas de renouvellement en 2027</li>
         </ul>
         <Button variant="outline" className="w-full" onClick={() => handleCheckout("prorata")} disabled={loading !== null}>
           {loading === "prorata" ? <Loader2 className="h-4 w-4 animate-spin" /> : "Choisir cette formule"}
