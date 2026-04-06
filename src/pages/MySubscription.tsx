@@ -197,17 +197,39 @@ const MySubscription = () => {
 
   const effectiveRole = user?.role === "both" ? activeRole : user?.role;
 
+  const [loadError, setLoadError] = useState(false);
+
   const loadData = useCallback(async () => {
-    if (!user) return;
-    const [profileRes, subRes] = await Promise.all([
-      supabase.from("profiles").select("is_founder, created_at, role, referral_code, identity_verified").eq("id", user.id).single(),
-      supabase.from("subscriptions").select("status, plan, expires_at, stripe_subscription_id").eq("user_id", user.id).order("created_at", { ascending: false }).limit(1).maybeSingle(),
-    ]);
-    setProfile(profileRes.data);
-    setSub(subRes.data);
+    if (!user) { setView("start"); return; }
+    try {
+      const [profileRes, subRes] = await Promise.all([
+        supabase.from("profiles").select("is_founder, created_at, role, referral_code, identity_verified").eq("id", user.id).maybeSingle(),
+        supabase.from("subscriptions").select("status, plan, expires_at, stripe_subscription_id").eq("user_id", user.id).order("created_at", { ascending: false }).limit(1).maybeSingle(),
+      ]);
+      if (profileRes.error) {
+        setLoadError(true);
+        setView("start");
+        return;
+      }
+      setProfile(profileRes.data ?? { is_founder: false, referral_code: null });
+      setSub(subRes.data);
+    } catch {
+      setLoadError(true);
+      setView("start");
+    }
   }, [user]);
 
   useEffect(() => { loadData(); }, [loadData]);
+
+  // Safety timeout — never stay on skeleton forever
+  useEffect(() => {
+    if (view !== "loading") return;
+    const t = setTimeout(() => {
+      setView("start");
+      setLoadError(true);
+    }, 5000);
+    return () => clearTimeout(t);
+  }, [view]);
 
   // Toast on return from Stripe
   useEffect(() => {
@@ -463,7 +485,13 @@ const MySubscription = () => {
           )}
 
           {showReferral && <ReferralSection referralCode={profile?.referral_code} userId={user!.id} />}
-        </>
+      </>
+      )}
+
+      {loadError && (
+        <p className="text-xs text-foreground/40 text-center mt-4">
+          Impossible de charger votre statut — réessayez.
+        </p>
       )}
     </div>
   );
