@@ -2646,12 +2646,9 @@ export type Database = {
       avis_publics: {
         Row: {
           animal_care_rating: number | null
-          auteur_avatar: string | null
-          auteur_nom: string | null
           cancellation_reason: string | null
           cancellation_response: string | null
           cancelled_by_role: string | null
-          cible_nom: string | null
           comment: string | null
           communication_rating: number | null
           created_at: string | null
@@ -2672,6 +2669,58 @@ export type Database = {
           sit_id: string | null
           welcome_rating: number | null
           would_recommend: boolean | null
+        }
+        Insert: {
+          animal_care_rating?: number | null
+          cancellation_reason?: string | null
+          cancellation_response?: string | null
+          cancelled_by_role?: string | null
+          comment?: string | null
+          communication_rating?: number | null
+          created_at?: string | null
+          housing_condition_rating?: number | null
+          housing_respect_rating?: number | null
+          id?: string | null
+          instructions_clarity_rating?: number | null
+          listing_accuracy_rating?: number | null
+          moderation_status?: string | null
+          overall_rating?: number | null
+          published?: boolean | null
+          reliability_rating?: number | null
+          response_status?: string | null
+          response_submitted_at?: string | null
+          review_type?: string | null
+          reviewee_id?: string | null
+          reviewer_id?: string | null
+          sit_id?: string | null
+          welcome_rating?: number | null
+          would_recommend?: boolean | null
+        }
+        Update: {
+          animal_care_rating?: number | null
+          cancellation_reason?: string | null
+          cancellation_response?: string | null
+          cancelled_by_role?: string | null
+          comment?: string | null
+          communication_rating?: number | null
+          created_at?: string | null
+          housing_condition_rating?: number | null
+          housing_respect_rating?: number | null
+          id?: string | null
+          instructions_clarity_rating?: number | null
+          listing_accuracy_rating?: number | null
+          moderation_status?: string | null
+          overall_rating?: number | null
+          published?: boolean | null
+          reliability_rating?: number | null
+          response_status?: string | null
+          response_submitted_at?: string | null
+          review_type?: string | null
+          reviewee_id?: string | null
+          reviewer_id?: string | null
+          sit_id?: string | null
+          welcome_rating?: number | null
+          would_recommend?: boolean | null
         }
         Relationships: [
           {
