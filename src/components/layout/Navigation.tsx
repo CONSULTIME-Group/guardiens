@@ -442,8 +442,15 @@ export const BottomNav = () => {
           {/* More */}
           <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
             <SheetTrigger asChild>
-              <button className="flex flex-col items-center gap-0.5 px-2 py-1 text-[10px] text-[#9A958A] transition-colors min-w-[56px]">
-                <MoreHorizontal className="h-5 w-5" strokeWidth={1.8} />
+              <button className="flex flex-col items-center gap-0.5 px-2 py-1 text-[10px] text-muted-foreground transition-colors min-w-[56px] relative">
+                <div className="relative">
+                  <MoreHorizontal className="h-5 w-5" strokeWidth={1.8} />
+                  {missionBadgeCount > 0 && (
+                    <span className="absolute -top-1 -right-2 bg-destructive text-destructive-foreground text-[8px] rounded-full min-w-[14px] h-[14px] flex items-center justify-center px-0.5 font-bold">
+                      {missionBadgeCount > 99 ? "99+" : missionBadgeCount}
+                    </span>
+                  )}
+                </div>
                 <span className="font-medium">Plus</span>
               </button>
             </SheetTrigger>
@@ -501,13 +508,13 @@ export const BottomNav = () => {
 
               <div className="space-y-1">
                 {[
-                  { to: "/sits", icon: Calendar, label: effectiveRole === "owner" ? "Mes annonces" : "Mes gardes" },
-                  { to: "/petites-missions", icon: Handshake, label: "Petites missions" },
-                  { to: "/actualites", icon: Newspaper, label: "Guides & Conseils" },
-                  { to: "/guides", icon: Compass, label: "Guides locaux" },
-                  ...(effectiveRole === "sitter" ? [{ to: "/mon-abonnement", icon: Star, label: "Mon abonnement" }] : []),
-                  { to: "/settings", icon: Settings, label: "Paramètres" },
-                  ...(isAdmin ? [{ to: "/admin", icon: Shield, label: "Espace admin" }] : []),
+                  { to: "/sits", icon: Calendar, label: effectiveRole === "owner" ? "Mes annonces" : "Mes gardes", badge: pendingAppsCount },
+                  { to: "/petites-missions", icon: Handshake, label: "Petites missions", badge: missionBadgeCount },
+                  { to: "/actualites", icon: Newspaper, label: "Guides & Conseils", badge: 0 },
+                  { to: "/guides", icon: Compass, label: "Guides locaux", badge: 0 },
+                  ...(effectiveRole === "sitter" ? [{ to: "/mon-abonnement", icon: Star, label: "Mon abonnement", badge: 0 }] : []),
+                  { to: "/settings", icon: Settings, label: "Paramètres", badge: 0 },
+                  ...(isAdmin ? [{ to: "/admin", icon: Shield, label: "Espace admin", badge: 0 }] : []),
                 ].map((item) => (
                   <NavLink
                     key={item.to}
@@ -515,15 +522,20 @@ export const BottomNav = () => {
                     onClick={() => setSheetOpen(false)}
                     className={({ isActive }) =>
                       cn(
-                        "flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors",
+                        "flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors relative",
                         isActive
-                          ? "bg-[hsl(var(--primary)/0.08)] text-[#2D6A4F]"
+                          ? "bg-[hsl(var(--primary)/0.08)] text-primary"
                           : "text-muted-foreground hover:bg-accent hover:text-foreground"
                       )
                     }
                   >
                     <item.icon className="h-5 w-5" strokeWidth={1.8} />
                     {item.label}
+                    {item.badge > 0 && (
+                      <span className="absolute right-3 bg-destructive text-destructive-foreground text-[10px] rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1 font-semibold">
+                        {item.badge > 99 ? "99+" : item.badge}
+                      </span>
+                    )}
                   </NavLink>
                 ))}
 
