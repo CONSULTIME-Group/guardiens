@@ -26,7 +26,7 @@ interface ProposeExchangeDialogProps {
 const ProposeExchangeDialog = ({
   open, onClose, mission, targetUserId, targetFirstName,
 }: ProposeExchangeDialogProps) => {
-  const { user } = useAuth();
+  const { user, switchRole } = useAuth();
   const navigate = useNavigate();
   const [message, setMessage] = useState(
     `Bonjour ${targetFirstName}, je suis intéressé(e) par votre mission. En échange je peux...`
@@ -99,8 +99,9 @@ const ProposeExchangeDialog = ({
         link: `/messages?conversationId=${convId}`,
       });
 
-      // 6. Close + navigate
+      // 6. Close + switch role + navigate
       onClose();
+      switchRole('sitter');
       navigate(`/messages?conversationId=${convId}`);
     } catch {
       toast.error("Impossible d'envoyer la proposition. Réessaie.", {
