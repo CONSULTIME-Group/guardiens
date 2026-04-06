@@ -505,11 +505,11 @@ const SearchOwner = () => {
                 const distLabel = s._dist !== null && s._dist !== undefined && s._dist !== Infinity ? `${s._dist} km` : null;
 
                 return (
-                  <div key={s.id} className="bg-card rounded-xl overflow-hidden border border-border hover:shadow-md transition-shadow flex flex-col">
+                  <div key={s.id} className="bg-card rounded-xl overflow-hidden border border-border hover:shadow-md transition-shadow flex flex-col max-w-sm">
                     {/* Photo — compact 16:9 */}
                     <Link to={`/profil/${s.user_id}`} className="block relative">
                       {profile?.avatar_url ? (
-                        <img src={profile.avatar_url} alt={firstName} className="h-32 w-full object-cover object-top" />
+                        <img src={profile.avatar_url} alt={firstName} className="h-32 w-full object-cover object-center" />
                       ) : (
                         <div className="h-32 w-full bg-primary/10 flex items-center justify-center">
                           <span className="text-3xl text-primary font-heading font-bold">{firstName.charAt(0)}</span>
@@ -524,18 +524,20 @@ const SearchOwner = () => {
 
                     {/* Body */}
                     <div className="p-3 flex flex-col flex-1">
-                      {/* Line 1: name + city + distance */}
+                      {/* Line 1: name + verified pill + city + distance */}
                       <Link to={`/profil/${s.user_id}`}>
                         <p className="text-sm font-semibold truncate">
                           {firstName}
+                          {profile?.identity_verified && (
+                            <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full font-medium ml-1.5 inline-block align-middle">✓ Vérifié</span>
+                          )}
                           {profile?.city && <span className="text-muted-foreground font-normal"> · {profile.city}</span>}
                           {distLabel && <span className="text-muted-foreground font-normal"> · {distLabel}</span>}
                         </p>
                       </Link>
 
-                      {/* Line 2: badges + rating */}
+                      {/* Line 2: rating + experience */}
                       <div className="flex items-center gap-2 mt-1">
-                        {profile?.identity_verified && <VerifiedBadge size="sm" />}
                         {s.avgRating !== null && (
                           <span className="flex items-center gap-0.5 text-xs text-muted-foreground">
                             <Star className="h-3 w-3 text-yellow-500 fill-yellow-500" />
