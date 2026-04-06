@@ -213,7 +213,8 @@ export default function PublicSitterProfile() {
 
   const totalBadgeCount = badges.reduce((s: any, b: any) => s + b.count, 0);
 
-  const visibleReviews = reviews.slice(0, 5);
+  const gardeReviews = useMemo(() => reviews.filter((r: any) => r.sit_id !== null), [reviews]);
+  const missionReviews = useMemo(() => reviews.filter((r: any) => r.sit_id === null), [reviews]);
   const visibleGallery = gallery.slice(0, 9);
 
   const showCTA = !(isOwn || (isAuthenticated && isSitter));
