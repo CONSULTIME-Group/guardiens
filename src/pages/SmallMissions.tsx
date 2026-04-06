@@ -178,6 +178,18 @@ const SmallMissions = () => {
       if (!data) return [];
 
       const helperIds = data.map((h: any) => h.id);
+
+      // Fetch sitter_profiles competences
+      const { data: sitterProfiles } = await supabase
+        .from("sitter_profiles")
+        .select("user_id, competences")
+        .in("user_id", helperIds);
+
+      const competenceMap = new Map<string, string[]>();
+      (sitterProfiles || []).forEach((sp: any) => {
+        if (sp.competences?.length) competenceMap.set(sp.user_id, sp.competences);
+      });
+
       const { data: reviews } = await supabase
         .from("reviews")
         .select("reviewee_id, overall_rating")
@@ -207,6 +219,7 @@ const SmallMissions = () => {
           const rev = reviewMap.get(h.id);
           return {
             ...h,
+            competences: competenceMap.get(h.id) || [],
             review_avg: rev ? rev.total / rev.count : 0,
             review_count: rev?.count || 0,
             sits_count: sitsMap.get(h.id) || 0,
@@ -490,28 +503,41 @@ const SmallMissions = () => {
                             {h.review_count > 0 ? `${h.review_avg.toFixed(1)} · ` : ""}{h.sits_count} garde{h.sits_count > 1 ? "s" : ""}
                           </p>
                         )}
-                        {/* Competences */}
-                        {h.custom_skills?.length > 0 && (
-                          <div className="flex flex-wrap gap-1">
-                            {(h.custom_skills as string[]).slice(0, 2).map((c: string) => (
-                              <span key={c} className="text-xs bg-muted text-foreground/70 px-2 py-0.5 rounded-full border border-border">
-                                {c}
-                              </span>
-                            ))}
-                            {h.custom_skills.length > 2 && (
-                              <span className="text-xs bg-muted text-foreground/70 px-2 py-0.5 rounded-full border border-border">
-                                +{h.custom_skills.length - 2}
-                              </span>
-                            )}
-                          </div>
-                        )}
-                        <button
-                          onClick={() => handleContactHelper(h.id)}
-                          disabled={contactingHelperId === h.id}
-                          className="text-sm text-primary font-semibold hover:underline disabled:opacity-50"
-                        >
-                          {contactingHelperId === h.id ? "…" : "Contacter →"}
-                        </button>
+                        {/* Competences spécifiques (priorité) puis catégories */}
+                        {(() => {
+                          const comps: string[] = h.competences || [];
+                          const toShow = comps.length > 0 ? comps : (h.custom_skills as string[] || []);
+                          if (toShow.length === 0) return null;
+                          return (
+                            <div className="flex flex-wrap gap-1">
+                              {toShow.slice(0, 3).map((c: string) => (
+                                <span key={c} className="text-xs bg-muted text-foreground/70 px-2 py-0.5 rounded-full border border-border">
+                                  {c}
+                                </span>
+                              ))}
+                              {toShow.length > 3 && (
+                                <span className="text-xs bg-muted text-foreground/70 px-2 py-0.5 rounded-full border border-border">
+                                  +{toShow.length - 3}
+                                </span>
+                              )}
+                            </div>
+                          );
+                        })()}
+                        <div className="flex items-center justify-between gap-2 pt-1">
+                          <button
+                            onClick={() => handleContactHelper(h.id)}
+                            disabled={contactingHelperId === h.id}
+                            className="text-sm text-primary font-semibold hover:underline disabled:opacity-50"
+                          >
+                            {contactingHelperId === h.id ? "…" : "Proposer un échange →"}
+                          </button>
+                          <button
+                            onClick={() => navigate(`/profil/${h.id}`)}
+                            className="text-xs text-muted-foreground hover:text-foreground hover:underline"
+                          >
+                            Voir le profil
+                          </button>
+                        </div>
                       </div>
                     );
                   })}
