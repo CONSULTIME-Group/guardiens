@@ -66,13 +66,13 @@ function PricingCardsNew({ context }: { context?: "founder" }) {
   const handleCheckout = async (type: "oneshot" | "monthly" | "prorata") => {
     setLoading(type);
     try {
-      const lookupMap: Record<string, string> = {
-        oneshot: "gardien_oneshot",
-        monthly: "gardien_mensuel",
-        prorata: "gardien_annuel_2026",
+      const formulaMap: Record<string, string> = {
+        oneshot: "one_shot",
+        monthly: "monthly",
+        prorata: "prorata",
       };
       const { data, error } = await supabase.functions.invoke("create-checkout-session", {
-        body: { lookup_key: lookupMap[type] },
+        body: { formula_type: formulaMap[type] },
       });
       if (error) throw error;
       if (data?.url) window.location.href = data.url;
