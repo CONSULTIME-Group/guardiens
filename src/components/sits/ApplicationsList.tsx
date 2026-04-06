@@ -74,13 +74,13 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
           const [spRes, revRes, badgeRes, emRes] = await Promise.all([
             supabase.from("sitter_profiles").select("experience_years, animal_types").eq("user_id", app.sitter_id).maybeSingle(),
             supabase.from("reviews").select("overall_rating").eq("reviewee_id", app.sitter_id).eq("published", true),
-            supabase.from("badge_attributions").select("badge_key").eq("receiver_id", app.sitter_id),
+            supabase.from("badge_attributions").select("badge_id").eq("user_id", app.sitter_id),
             supabase.from("emergency_sitter_profiles").select("id").eq("user_id", app.sitter_id).eq("is_active", true).maybeSingle(),
           ]);
           const reviews = revRes.data || [];
           const avgRating = reviews.length > 0 ? (reviews.reduce((s: number, r: any) => s + r.overall_rating, 0) / reviews.length).toFixed(1) : null;
           const badgeMap = new Map<string, number>();
-          (badgeRes.data || []).forEach((b: any) => badgeMap.set(b.badge_key, (badgeMap.get(b.badge_key) || 0) + 1));
+          (badgeRes.data || []).forEach((b: any) => badgeMap.set(b.badge_id, (badgeMap.get(b.badge_id) || 0) + 1));
           const badgeCounts = Array.from(badgeMap.entries()).map(([badge_key, count]) => ({ badge_key, count })).sort((a, b) => b.count - a.count);
           return {
             ...app,

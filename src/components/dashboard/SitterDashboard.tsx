@@ -62,10 +62,10 @@ const SitterDashboard = () => {
         supabase.from("profiles").select("identity_verification_status, profile_completion, identity_verified, cancellation_count, is_founder").eq("id", user.id).single(),
         supabase.from("reviews").select("overall_rating").eq("reviewee_id", user.id).eq("published", true),
         supabase.from("sits").select("id, title, start_date, end_date, user_id, property_id, status, created_at, is_urgent, properties:property_id(photos, type, environment)").eq("status", "published").order("created_at", { ascending: false }).limit(6),
-        supabase.from("badge_attributions").select("id").eq("receiver_id", user.id),
+        supabase.from("badge_attributions").select("id").eq("user_id", user.id),
         supabase.from("articles").select("id, title, slug, cover_image_url, excerpt, category").eq("published", true).eq("category", "conseil_gardien").order("published_at", { ascending: false }).limit(3),
         supabase.from("messages").select("id", { count: "exact", head: true }).neq("sender_id", user.id).is("read_at", null),
-        supabase.from("badge_attributions").select("id, badge_key, created_at").eq("receiver_id", user.id).order("created_at", { ascending: false }).limit(6),
+        supabase.from("badge_attributions").select("id, badge_id, created_at").eq("user_id", user.id).order("created_at", { ascending: false }).limit(6),
       ]);
 
       const pCompletion = profileRes.data?.profile_completion || 0;
