@@ -11,11 +11,14 @@ import {
 } from "lucide-react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
-import { format, differenceInDays } from "date-fns";
+import { format, differenceInDays, differenceInMonths } from "date-fns";
 import { fr } from "date-fns/locale";
 
 import { TooltipProvider } from "@/components/ui/tooltip";
 import RoleActivationBanner from "./RoleActivationBanner";
+import { BadgeSceau } from '@/components/badges/BadgeSceau';
+import { useUserBadges } from '@/hooks/useProfileReputation';
+import { PROPRIO_BADGE_IDS } from '@/components/badges/badge-definitions';
 
 const speciesLabel: Record<string, string> = {
   dog: "Chien", cat: "Chat", horse: "Cheval", bird: "Oiseau",
@@ -37,6 +40,18 @@ const OwnerDashboard = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [sits, setSits] = useState<any[]>([]);
+  const { data: userBadges } = useUserBadges(user?.id);
+
+  const PROPRIO_SPECIAL_IDS = ['fondateur', 'id_verifiee', 'courant_passe'];
+
+  const activeBadgeCount = (userBadges ?? []).filter(b =>
+    PROPRIO_BADGE_IDS.includes(b.badge_id) &&
+    differenceInMonths(new Date(), new Date(b.created_at)) < 12
+  ).length;
+
+  const specialBadges = (userBadges ?? []).filter(b =>
+    PROPRIO_SPECIAL_IDS.includes(b.badge_id)
+  );
   const [pets, setPets] = useState<any[]>([]);
   const [recentApps, setRecentApps] = useState<any[]>([]);
   const [reviews, setReviews] = useState<any[]>([]);
@@ -403,7 +418,56 @@ const OwnerDashboard = () => {
         </div>
       </div>
 
-      {/* ═══ 4. ANIMAUX ═══ */}
+      {/* ═══ VOS BADGES ═══ */}
+      <div className="px-5 md:px-8 mb-6 md:mb-8">
+        <div className="flex items-baseline justify-between mb-3">
+          <h2 className="text-sm font-semibold text-foreground">Vos Badges</h2>
+          <span className="text-xs text-muted-foreground">
+            {activeBadgeCount} actif{activeBadgeCount > 1 ? 's' : ''} sur 12
+          </span>
+        </div>
+
+        <div className="grid grid-cols-6 gap-2 mb-4">
+          {PROPRIO_BADGE_IDS.map(id => {
+            const userBadge = userBadges?.find(b => b.badge_id === id);
+            const count = userBadge?.count ?? 0;
+            const isActive = count > 0 && userBadge
+              ? differenceInMonths(new Date(), new Date(userBadge.created_at)) < 12
+              : false;
+            return (
+              <BadgeSceau
+                key={id}
+                id={id}
+                count={count}
+                active={isActive}
+                size="compact"
+                showCount={false}
+                obtainedAt={userBadge?.created_at}
+              />
+            );
+          })}
+        </div>
+
+        {specialBadges.length > 0 && (
+          <div className="mt-3">
+            <p className="text-xs text-muted-foreground font-sans mb-2">
+              Badges spéciaux
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {specialBadges.map(b => (
+                <BadgeSceau
+                  key={b.badge_id}
+                  id={b.badge_id}
+                  count={b.count}
+                  active
+                  size="compact"
+                  obtainedAt={b.created_at}
+                />
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
       <div className="px-5 md:px-8">
         <DashSection title="Mes animaux" action={
           <Link to="/owner-profile" className="text-xs text-primary hover:underline font-medium">Gérer</Link>
