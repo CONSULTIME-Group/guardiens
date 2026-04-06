@@ -69,7 +69,7 @@ const FAQ = () => {
     <>
       <PageMeta
         title="FAQ Guardiens — Toutes vos questions"
-        description="Toutes les réponses sur le house-sitting et pet-sitting de proximité en Auvergne-Rhône-Alpes."
+        description="Toutes vos questions sur Guardiens — abonnement gardien, accès propriétaire gratuit, parrainage et petites missions d'entraide en Auvergne-Rhône-Alpes."
       />
 
       {entries.length > 0 && (
