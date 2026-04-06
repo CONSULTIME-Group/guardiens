@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import entraideHeader from "@/assets/entraide-header.jpg";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -308,63 +308,87 @@ const SmallMissions = () => {
               ))}
             </div>
 
-            <h2 className="font-heading text-2xl font-bold text-foreground text-center">
-              Missions ({filteredMissions.length})
+            {/* ═══ Section 1 — Missions près de chez toi ═══ */}
+            <h2 className="text-base font-semibold text-foreground mb-4 flex items-center gap-2">
+              Missions près de chez toi
+              <span className="text-xs font-normal bg-muted text-muted-foreground px-2 py-0.5 rounded-full">
+                {missionCount} mission{missionCount > 1 ? "s" : ""}
+              </span>
             </h2>
 
-            {interleaved.length > 0 ? (
+            {missionCount > 0 ? (
               <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {interleaved.map((item, idx) => {
-                  if (item.type === "mission") {
-                    const m = item.data;
-                    const meta = CATEGORY_META[m.category] || CATEGORY_META.animals;
-                    const Icon = meta.icon;
-                    const isCompleted = m.status === "completed";
-                    const isMine = m.user_id === user?.id;
-                    return (
-                      <Link key={`m-${m.id}`} to={isAuthenticated ? `/petites-missions/${m.id}` : "/register"}>
-                        <Card className={`border-border transition-colors h-full ${isCompleted ? "opacity-50 grayscale" : "hover:border-primary/30"}`}>
-                          <CardContent className="p-4 space-y-2">
-                            <div className="flex items-center justify-between">
-                              <div className="flex items-center gap-2">
-                                <Icon className="h-4 w-4 text-primary" />
-                                <span className="text-xs font-medium text-muted-foreground">{meta.label}</span>
-                              </div>
-                              {m.response_count > 0 && (
-                                <span className="text-xs text-muted-foreground bg-accent px-2 py-0.5 rounded-full">
-                                  {m.response_count} proposition{m.response_count > 1 ? "s" : ""}
-                                </span>
-                              )}
+                {filteredMissions.map((m: any) => {
+                  const meta = CATEGORY_META[m.category] || CATEGORY_META.animals;
+                  const Icon = meta.icon;
+                  const isCompleted = m.status === "completed";
+                  const isMine = m.user_id === user?.id;
+                  return (
+                    <Link key={`m-${m.id}`} to={isAuthenticated ? `/petites-missions/${m.id}` : "/register"}>
+                      <Card className={`border-border transition-colors h-full ${isCompleted ? "opacity-50 grayscale" : "hover:border-primary/30"}`}>
+                        <CardContent className="p-4 space-y-2">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <Icon className="h-4 w-4 text-primary" />
+                              <span className="text-xs font-medium text-muted-foreground">{meta.label}</span>
                             </div>
-                            <p className="font-medium text-sm text-foreground">{m.title}</p>
-                            <p className="text-xs text-muted-foreground">
-                              {formatCity(m.city || "—")} · {formatDuration(m.duration_estimate || "—")}
-                            </p>
-                            <p className="text-xs text-muted-foreground">En échange : {m.exchange_offer}</p>
-                            {isCompleted ? (
-                              <span className="inline-block text-xs bg-muted text-muted-foreground px-2 py-0.5 rounded-full">Trouvé</span>
-                            ) : m.status === "in_progress" ? (
-                              <span className="inline-block text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full">En cours</span>
-                            ) : null}
-                            {!isCompleted && (
-                              isMine ? (
-                                <span className="inline-block text-xs text-muted-foreground text-center w-full mt-2">Votre mission</span>
-                              ) : isAuthenticated && !canApplyMissions ? (
-                                <Button size="sm" variant="outline" className="w-full mt-2 gap-1 text-muted-foreground" disabled>
-                                  <Lock className="h-3 w-3" /> Complétez votre profil
-                                </Button>
-                              ) : (
-                                <Button size="sm" variant="outline" className="w-full mt-2">
-                                  Proposer mon aide
-                                </Button>
-                              )
+                            {m.response_count > 0 && (
+                              <span className="text-xs text-muted-foreground bg-accent px-2 py-0.5 rounded-full">
+                                {m.response_count} proposition{m.response_count > 1 ? "s" : ""}
+                              </span>
                             )}
-                          </CardContent>
-                        </Card>
-                      </Link>
-                    );
-                  } else {
-                    const h = item.data;
+                          </div>
+                          <p className="font-medium text-sm text-foreground">{m.title}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {formatCity(m.city || "—")} · {formatDuration(m.duration_estimate || "—")}
+                          </p>
+                          <p className="text-xs text-muted-foreground">En échange : {m.exchange_offer}</p>
+                          {isCompleted ? (
+                            <span className="inline-block text-xs bg-muted text-muted-foreground px-2 py-0.5 rounded-full">Trouvé</span>
+                          ) : m.status === "in_progress" ? (
+                            <span className="inline-block text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full">En cours</span>
+                          ) : null}
+                          {!isCompleted && (
+                            isMine ? (
+                              <span className="inline-block text-xs text-muted-foreground text-center w-full mt-2">Votre mission</span>
+                            ) : isAuthenticated && !canApplyMissions ? (
+                              <Button size="sm" variant="outline" className="w-full mt-2 gap-1 text-muted-foreground" disabled>
+                                <Lock className="h-3 w-3" /> Complétez votre profil
+                              </Button>
+                            ) : (
+                              <Button size="sm" variant="outline" className="w-full mt-2">
+                                Proposer mon aide
+                              </Button>
+                            )
+                          )}
+                        </CardContent>
+                      </Card>
+                    </Link>
+                  );
+                })}
+              </div>
+            ) : (
+              <div>
+                <p className="text-sm text-muted-foreground">
+                  Aucune mission publiée près de chez toi.
+                </p>
+                <Link to="/petites-missions/creer" className="text-sm text-primary underline mt-1 inline-block">
+                  Publie la tienne →
+                </Link>
+              </div>
+            )}
+
+            {/* ═══ Section 2 — Disponibles pour aider ═══ */}
+            {helperCount > 0 && (
+              <div className="mt-10">
+                <h2 className="text-base font-semibold text-foreground mb-4 flex items-center gap-2">
+                  Disponibles pour aider
+                  <span className="text-xs font-normal bg-muted text-muted-foreground px-2 py-0.5 rounded-full">
+                    {helperCount} voisin{helperCount > 1 ? "s" : ""}
+                  </span>
+                </h2>
+                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {filteredHelpers.map((h: any) => {
                     const skillCats: string[] = h.skill_categories || [];
                     const displayedSkills = skillCats.slice(0, 2);
                     const extraCount = skillCats.length - 2;
@@ -409,18 +433,16 @@ const SmallMissions = () => {
                           </p>
                         )}
                         <button
-                          onClick={() => navigate(`/gardiens/${h.id}`)}
+                          onClick={() => navigate(`/profil/${h.id}`)}
                           className="text-sm text-primary font-semibold hover:underline"
                         >
                           Proposer un échange →
                         </button>
                       </div>
                     );
-                  }
-                })}
+                  })}
+                </div>
               </div>
-            ) : (
-              <p className="text-center text-muted-foreground py-8">Aucune mission ne correspond à ces filtres.</p>
             )}
           </section>
 
