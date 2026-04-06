@@ -931,20 +931,6 @@ const SearchSitter = () => {
         <div className="p-6">
           {loading ? (
             <p className="text-muted-foreground py-10 text-center">Recherche en cours...</p>
-          ) : tab === "long_stays" ? (
-            /* Long stay coming soon message */
-            <div className="text-center py-16 space-y-4 max-w-md mx-auto">
-              <Search className="h-12 w-12 mx-auto text-primary/30" />
-              <p className="font-heading font-semibold text-lg text-foreground">Les gardes longue durée (30j+) arrivent bientôt.</p>
-              <p className="text-sm text-muted-foreground">
-                Complète ton profil pour être parmi les premiers à y avoir accès.
-              </p>
-              <Link to="/profile" className="inline-block">
-                <Button className="gap-2">
-                  <Sparkles className="h-4 w-4" /> Compléter mon profil
-                </Button>
-              </Link>
-            </div>
           ) : tab === "missions" && missionSubTab === "members" ? (
             availableMembers.length === 0 ? (
               <div className="text-center py-16 space-y-3">
