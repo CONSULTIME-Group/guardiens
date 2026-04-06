@@ -57,6 +57,8 @@ export const Sidebar = () => {
   const navigate = useNavigate();
   const { hasAccess } = useSubscriptionAccess();
   const [unreadCount, setUnreadCount] = useState(0);
+  const [pendingAppsCount, setPendingAppsCount] = useState(0);
+  const [missionBadgeCount, setMissionBadgeCount] = useState(0);
   const [feedbackOpen, setFeedbackOpen] = useState(false);
   const [gateOpen, setGateOpen] = useState(false);
   const [gateFeature, setGateFeature] = useState("");
@@ -67,23 +69,62 @@ export const Sidebar = () => {
 
   useEffect(() => {
     if (!user) return;
-    const loadUnread = async () => {
+    const loadCounts = async () => {
+      // Unread messages
       const { data: convs } = await supabase
         .from("conversations")
         .select("id")
         .or(`owner_id.eq.${user.id},sitter_id.eq.${user.id}`);
-      if (!convs?.length) return;
-      const convIds = convs.map((c: any) => c.id);
-      const { count } = await supabase
-        .from("messages")
-        .select("id", { count: "exact", head: true })
-        .in("conversation_id", convIds)
-        .neq("sender_id", user.id)
-        .is("read_at", null);
-      setUnreadCount(count || 0);
+      if (convs?.length) {
+        const convIds = convs.map((c: any) => c.id);
+        const { count } = await supabase
+          .from("messages")
+          .select("id", { count: "exact", head: true })
+          .in("conversation_id", convIds)
+          .neq("sender_id", user.id)
+          .is("read_at", null);
+        setUnreadCount(count || 0);
+      } else {
+        setUnreadCount(0);
+      }
+
+      // Pending applications on user's sits (owner view)
+      const { data: userSits } = await supabase
+        .from("sits")
+        .select("id")
+        .eq("user_id", user.id);
+      if (userSits?.length) {
+        const { count: appCount } = await supabase
+          .from("applications")
+          .select("id", { count: "exact", head: true })
+          .in("sit_id", userSits.map((s: any) => s.id))
+          .eq("status", "pending");
+        setPendingAppsCount(appCount || 0);
+      } else {
+        setPendingAppsCount(0);
+      }
+
+      // Mission conversations with unread messages
+      const { data: missionConvs } = await supabase
+        .from("conversations")
+        .select("id, small_mission_id")
+        .or(`owner_id.eq.${user.id},sitter_id.eq.${user.id}`)
+        .not("small_mission_id", "is", null);
+      if (missionConvs?.length) {
+        const mConvIds = missionConvs.map((c: any) => c.id);
+        const { count: mCount } = await supabase
+          .from("messages")
+          .select("id", { count: "exact", head: true })
+          .in("conversation_id", mConvIds)
+          .neq("sender_id", user.id)
+          .is("read_at", null);
+        setMissionBadgeCount(mCount || 0);
+      } else {
+        setMissionBadgeCount(0);
+      }
     };
-    loadUnread();
-    const interval = setInterval(loadUnread, 15000);
+    loadCounts();
+    const interval = setInterval(loadCounts, 15000);
     return () => clearInterval(interval);
   }, [user]);
 
@@ -170,7 +211,7 @@ export const Sidebar = () => {
             <>
               <GroupLabel label="Mon activité" />
               <SidebarItem to="/dashboard" icon={Home} label="Dashboard" />
-              <SidebarItem to="/sits" icon={Calendar} label={effectiveRole === "owner" ? "Mes annonces" : "Mes gardes"} />
+              <SidebarItem to="/sits" icon={Calendar} label={effectiveRole === "owner" ? "Mes annonces" : "Mes gardes"} badge={pendingAppsCount} />
 
               {isSitterLocked ? (
                 <button
@@ -209,7 +250,7 @@ export const Sidebar = () => {
                 <SidebarItem to="/search" icon={Search} label={effectiveRole === "owner" ? "Recherche gardiens" : "Recherche"} />
               )}
 
-              <SidebarItem to="/petites-missions" icon={Handshake} label="Petites missions" />
+              <SidebarItem to="/petites-missions" icon={Handshake} label="Petites missions" badge={missionBadgeCount} />
 
               <GroupLabel label="Ressources" />
               <SidebarItem to="/actualites" icon={Newspaper} label="Guides & Conseils" />
@@ -260,6 +301,8 @@ export const BottomNav = () => {
   const { isAdmin } = useAdmin();
   const { hasAccess } = useSubscriptionAccess();
   const [unreadCount, setUnreadCount] = useState(0);
+  const [pendingAppsCount, setPendingAppsCount] = useState(0);
+  const [missionBadgeCount, setMissionBadgeCount] = useState(0);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [feedbackOpen, setFeedbackOpen] = useState(false);
   const [gateOpen, setGateOpen] = useState(false);
@@ -276,22 +319,61 @@ export const BottomNav = () => {
         .from("conversations")
         .select("id")
         .or(`owner_id.eq.${user.id},sitter_id.eq.${user.id}`);
-      if (!convs?.length) { setUnreadCount(0); return; }
-      const { count } = await supabase
-        .from("messages")
-        .select("id", { count: "exact", head: true })
-        .in("conversation_id", convs.map((c: any) => c.id))
-        .neq("sender_id", user.id)
-        .is("read_at", null);
-      setUnreadCount(count || 0);
+      if (convs?.length) {
+        const convIds = convs.map((c: any) => c.id);
+        const { count } = await supabase
+          .from("messages")
+          .select("id", { count: "exact", head: true })
+          .in("conversation_id", convIds)
+          .neq("sender_id", user.id)
+          .is("read_at", null);
+        setUnreadCount(count || 0);
+      } else {
+        setUnreadCount(0);
+      }
+
+      const { data: userSits } = await supabase
+        .from("sits")
+        .select("id")
+        .eq("user_id", user.id);
+      if (userSits?.length) {
+        const { count: appCount } = await supabase
+          .from("applications")
+          .select("id", { count: "exact", head: true })
+          .in("sit_id", userSits.map((s: any) => s.id))
+          .eq("status", "pending");
+        setPendingAppsCount(appCount || 0);
+      } else {
+        setPendingAppsCount(0);
+      }
+
+      const { data: missionConvs } = await supabase
+        .from("conversations")
+        .select("id, small_mission_id")
+        .or(`owner_id.eq.${user.id},sitter_id.eq.${user.id}`)
+        .not("small_mission_id", "is", null);
+      if (missionConvs?.length) {
+        const mConvIds = missionConvs.map((c: any) => c.id);
+        const { count: mCount } = await supabase
+          .from("messages")
+          .select("id", { count: "exact", head: true })
+          .in("conversation_id", mConvIds)
+          .neq("sender_id", user.id)
+          .is("read_at", null);
+        setMissionBadgeCount(mCount || 0);
+      } else {
+        setMissionBadgeCount(0);
+      }
     };
     loadCount();
     const interval = setInterval(loadCount, 15000);
     return () => clearInterval(interval);
   }, [user]);
 
+  const totalBadge = unreadCount + pendingAppsCount + missionBadgeCount;
+
   const tabs = [
-    { to: "/dashboard", icon: Home, label: "Accueil" },
+    { to: "/dashboard", icon: Home, label: "Accueil", badge: pendingAppsCount },
     { to: "/search", icon: Search, label: "Recherche" },
     { to: "/messages", icon: MessageSquare, label: "Messages", badge: unreadCount },
     { to: "/profile", icon: User, label: "Profil" },
@@ -360,8 +442,15 @@ export const BottomNav = () => {
           {/* More */}
           <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
             <SheetTrigger asChild>
-              <button className="flex flex-col items-center gap-0.5 px-2 py-1 text-[10px] text-[#9A958A] transition-colors min-w-[56px]">
-                <MoreHorizontal className="h-5 w-5" strokeWidth={1.8} />
+              <button className="flex flex-col items-center gap-0.5 px-2 py-1 text-[10px] text-muted-foreground transition-colors min-w-[56px] relative">
+                <div className="relative">
+                  <MoreHorizontal className="h-5 w-5" strokeWidth={1.8} />
+                  {missionBadgeCount > 0 && (
+                    <span className="absolute -top-1 -right-2 bg-destructive text-destructive-foreground text-[8px] rounded-full min-w-[14px] h-[14px] flex items-center justify-center px-0.5 font-bold">
+                      {missionBadgeCount > 99 ? "99+" : missionBadgeCount}
+                    </span>
+                  )}
+                </div>
                 <span className="font-medium">Plus</span>
               </button>
             </SheetTrigger>
@@ -419,13 +508,13 @@ export const BottomNav = () => {
 
               <div className="space-y-1">
                 {[
-                  { to: "/sits", icon: Calendar, label: effectiveRole === "owner" ? "Mes annonces" : "Mes gardes" },
-                  { to: "/petites-missions", icon: Handshake, label: "Petites missions" },
-                  { to: "/actualites", icon: Newspaper, label: "Guides & Conseils" },
-                  { to: "/guides", icon: Compass, label: "Guides locaux" },
-                  ...(effectiveRole === "sitter" ? [{ to: "/mon-abonnement", icon: Star, label: "Mon abonnement" }] : []),
-                  { to: "/settings", icon: Settings, label: "Paramètres" },
-                  ...(isAdmin ? [{ to: "/admin", icon: Shield, label: "Espace admin" }] : []),
+                  { to: "/sits", icon: Calendar, label: effectiveRole === "owner" ? "Mes annonces" : "Mes gardes", badge: pendingAppsCount },
+                  { to: "/petites-missions", icon: Handshake, label: "Petites missions", badge: missionBadgeCount },
+                  { to: "/actualites", icon: Newspaper, label: "Guides & Conseils", badge: 0 },
+                  { to: "/guides", icon: Compass, label: "Guides locaux", badge: 0 },
+                  ...(effectiveRole === "sitter" ? [{ to: "/mon-abonnement", icon: Star, label: "Mon abonnement", badge: 0 }] : []),
+                  { to: "/settings", icon: Settings, label: "Paramètres", badge: 0 },
+                  ...(isAdmin ? [{ to: "/admin", icon: Shield, label: "Espace admin", badge: 0 }] : []),
                 ].map((item) => (
                   <NavLink
                     key={item.to}
@@ -433,15 +522,20 @@ export const BottomNav = () => {
                     onClick={() => setSheetOpen(false)}
                     className={({ isActive }) =>
                       cn(
-                        "flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors",
+                        "flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors relative",
                         isActive
-                          ? "bg-[hsl(var(--primary)/0.08)] text-[#2D6A4F]"
+                          ? "bg-[hsl(var(--primary)/0.08)] text-primary"
                           : "text-muted-foreground hover:bg-accent hover:text-foreground"
                       )
                     }
                   >
                     <item.icon className="h-5 w-5" strokeWidth={1.8} />
                     {item.label}
+                    {item.badge > 0 && (
+                      <span className="absolute right-3 bg-destructive text-destructive-foreground text-[10px] rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1 font-semibold">
+                        {item.badge > 99 ? "99+" : item.badge}
+                      </span>
+                    )}
                   </NavLink>
                 ))}
 
