@@ -113,7 +113,7 @@ const AdminSitsManagement = () => {
 
     // Notify both parties
     if (sit.user_id) {
-      await supabase.from("notifications").insert({ user_id: sit.user_id, type: "sit_cancelled", title: "Garde annulée par l'admin", body: `La garde "${sit.title}" a été annulée. Motif : ${cancelModal.reason}`, link: sit._type === "sit" ? `/sits/${sit.id}` : `/long-stays/${sit.id}` });
+      await supabase.from("notifications").insert({ user_id: sit.user_id, type: "sit_cancelled", title: "Garde annulée par l'admin", body: `La garde "${sit.title}" a été annulée. Motif : ${cancelModal.reason}`, link: `/sits/${sit.id}` });
     }
     const sitter = sitters[sit.id];
     // We don't have sitter user_id easily — the notification triggers will handle it
@@ -254,7 +254,7 @@ const AdminSitsManagement = () => {
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-1">
-                      <Button variant="ghost" size="icon" title="Voir" onClick={() => navigate(sit._type === "sit" ? `/sits/${sit.id}` : `/long-stays/${sit.id}`)}>
+                      <Button variant="ghost" size="icon" title="Voir" onClick={() => navigate(`/sits/${sit.id}`)}>
                         <Eye className="h-4 w-4" />
                       </Button>
                       {isOverdue && (

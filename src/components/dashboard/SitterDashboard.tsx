@@ -393,7 +393,7 @@ const SitterDashboard = () => {
               <p className="text-xs font-medium text-foreground">Gardien d'Urgence</p>
               <p className="text-xs text-muted-foreground">Statut distinct — 5 conditions</p>
             </div>
-            <Link to="/urgence" className="text-xs text-primary font-sans">
+            <Link to="/gardien-urgence" className="text-xs text-primary font-sans">
               En savoir plus →
             </Link>
           </div>
