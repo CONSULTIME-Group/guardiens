@@ -355,6 +355,7 @@ const AdminUsers = () => {
                         >
                           <Crown className={`h-4 w-4 ${user.is_manual_super ? 'text-amber-500' : ''}`} />
                         </Button>
+                        <Button
                           variant="ghost"
                           size="icon"
                           title="Note interne"
