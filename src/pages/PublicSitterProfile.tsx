@@ -68,6 +68,7 @@ export default function PublicSitterProfile() {
   const [emergencyActive, setEmergencyActive] = useState(false);
   const [hasActiveSubscription, setHasActiveSubscription] = useState(false);
   const [lightboxIdx, setLightboxIdx] = useState<number | null>(null);
+  const [badgesBySitId, setBadgesBySitId] = useState<Record<string, string[]>>({});
 
   useEffect(() => {
     if (!id) return;
