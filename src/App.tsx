@@ -46,6 +46,7 @@ import AdminVerifications from "./pages/admin/AdminVerifications";
 import AdminEmails from "./pages/admin/AdminEmails";
 import AdminExperienceVerification from "./pages/admin/AdminExperienceVerification";
 import NotFound from "./pages/NotFound";
+import PlancheBadges from "./pages/PlancheBadges";
 import Unsubscribe from "./pages/Unsubscribe";
 import CityPage from "./pages/CityPage";
 import AdminCityPages from "./pages/admin/AdminCityPages";
