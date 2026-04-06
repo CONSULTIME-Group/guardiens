@@ -4,6 +4,9 @@ import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import PageMeta from "@/components/PageMeta";
+import { BadgeRow } from "@/components/badges/BadgeRow";
+import { StatutGardienBadge } from "@/components/profile/StatutGardienBadge";
+import { useProfileReputation, useUserBadges } from "@/hooks/useProfileReputation";
 
 import { Skeleton } from "@/components/ui/skeleton";
 import { buildAbsoluteUrl } from "@/lib/seo";
