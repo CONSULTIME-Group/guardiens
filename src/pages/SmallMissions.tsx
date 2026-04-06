@@ -199,22 +199,8 @@ const SmallMissions = () => {
     return h.skill_categories?.includes(skillKey);
   });
 
-  const interleaved = useMemo(() => {
-    const result: { type: "mission" | "helper"; data: any }[] = [];
-    let helperIdx = 0;
-    filteredMissions.forEach((m, i) => {
-      result.push({ type: "mission", data: m });
-      if ((i + 1) % 4 === 0 && helperIdx < filteredHelpers.length) {
-        result.push({ type: "helper", data: filteredHelpers[helperIdx] });
-        helperIdx++;
-      }
-    });
-    while (helperIdx < filteredHelpers.length && filteredMissions.length > 0) {
-      result.push({ type: "helper", data: filteredHelpers[helperIdx] });
-      helperIdx++;
-    }
-    return result;
-  }, [filteredMissions, filteredHelpers]);
+  const missionCount = filteredMissions.length;
+  const helperCount = filteredHelpers.length;
 
   const dismissSkillPrompt = () => {
     setSkillPromptDismissed(true);
