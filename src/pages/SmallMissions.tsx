@@ -71,7 +71,7 @@ type CategoryFilter = "all" | "animals" | "garden" | "skills" | "coups_de_main" 
 type ModeFilter = "need" | "offer";
 
 const SmallMissions = () => {
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated, user, switchRole } = useAuth();
   const navigate = useNavigate();
   const { hasAccess, status: subStatus } = useSubscriptionAccess();
   const { level: accessLevel, profileCompletion, canApplyMissions } = useAccessLevel();

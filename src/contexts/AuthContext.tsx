@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useCallback, useEffect } from "react";
+import React, { createContext, useContext, useState, useCallback, useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { User as SupabaseUser } from "@supabase/supabase-js";
 
@@ -21,6 +21,7 @@ interface AuthContextType {
   activeRole: ActiveRole;
   isAuthenticated: boolean;
   loading: boolean;
+  switchRole: (role: ActiveRole) => void;
   setActiveRole: (role: ActiveRole) => void;
   login: (email: string, password: string) => Promise<void>;
   register: (email: string, password: string, role: Role) => Promise<void>;
@@ -47,19 +48,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return (saved === 'owner' || saved === 'sitter') ? saved : 'sitter';
   });
   const [loading, setLoading] = useState(true);
-  const [roleInitialized, setRoleInitialized] = useState(false);
+  const roleInitialized = useRef(false);
 
-  const setActiveRole = useCallback((role: ActiveRole) => {
+  const switchRole = useCallback((role: ActiveRole) => {
     setActiveRoleState(role);
     localStorage.setItem('guardiens_active_role', role);
   }, []);
+
+  // Keep setActiveRole as alias for backward compat
+  const setActiveRole = switchRole;
 
   const checkFounderExpiry = useCallback(async (userId: string, isFounder: boolean) => {
     if (!isFounder) return;
     const FOUNDER_DEADLINE = new Date("2026-06-13T23:59:59Z");
     if (new Date() <= FOUNDER_DEADLINE) return;
 
-    // Check if they have an active subscription
     const { data: subs } = await supabase
       .from("subscriptions")
       .select("status")
@@ -68,9 +71,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       .limit(1);
 
     if (subs && subs.length > 0) return;
-
-    // No active subscription after founder deadline — nothing to expire client-side
-    // The check-subscription edge function handles Stripe status
   }, []);
 
   const fetchProfile = useCallback(async (supabaseUser: SupabaseUser) => {
@@ -84,38 +84,44 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const profile = mapProfile(data, supabaseUser.email);
       setUser(profile);
 
-      // Only set activeRole on first load, never override user's manual selection
-      if (!roleInitialized) {
-        const saved = localStorage.getItem('guardiens_active_role');
+      // Only initialize role ONCE per session — never override user's manual choice
+      if (!roleInitialized.current) {
+        roleInitialized.current = true;
+        const saved = localStorage.getItem('guardiens_active_role') as ActiveRole | null;
+
         if (saved === 'owner' || saved === 'sitter') {
-          setActiveRoleState(saved);
-        } else if (profile.role === 'owner') {
-          setActiveRoleState('owner');
-          localStorage.setItem('guardiens_active_role', 'owner');
+          // Verify saved role is compatible with profile
+          if (profile.role === 'both' || profile.role === saved) {
+            setActiveRoleState(saved);
+          } else {
+            // Saved role incompatible — use profile default
+            const defaultRole: ActiveRole = profile.role === 'sitter' ? 'sitter' : 'owner';
+            setActiveRoleState(defaultRole);
+            localStorage.setItem('guardiens_active_role', defaultRole);
+          }
         } else {
-          setActiveRoleState('sitter');
-          localStorage.setItem('guardiens_active_role', 'sitter');
+          // No saved choice — default based on profile
+          const defaultRole: ActiveRole = profile.role === 'sitter' ? 'sitter' : 'owner';
+          setActiveRoleState(defaultRole);
+          localStorage.setItem('guardiens_active_role', defaultRole);
         }
-        setRoleInitialized(true);
       }
 
-      // Check founder expiry in background
-      checkFounderExpiry(data.id, data.is_founder).catch(console.warn);
+      checkFounderExpiry(data.id, data.is_founder).catch(() => {});
     }
-  }, [checkFounderExpiry, roleInitialized]);
+  }, [checkFounderExpiry]);
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         if (session?.user) {
-          // Use setTimeout to avoid Supabase auth deadlock
           setTimeout(async () => {
             await fetchProfile(session.user);
             setLoading(false);
           }, 0);
         } else {
           setUser(null);
-          setRoleInitialized(false);
+          roleInitialized.current = false;
           setLoading(false);
         }
       }
@@ -144,21 +150,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
     if (error) throw error;
 
-    // Update profile with selected role
     if (data.user) {
       await supabase
         .from("profiles")
         .update({ role })
         .eq("id", data.user.id);
 
-      // Auto-create sitter_profile if role is sitter or both
       if (role === "sitter" || role === "both") {
         await supabase
           .from("sitter_profiles")
           .upsert({ user_id: data.user.id }, { onConflict: "user_id" });
       }
 
-      // Send welcome email (fire-and-forget)
       supabase.functions.invoke("send-transactional-email", {
         body: {
           templateName: "welcome",
@@ -171,8 +174,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const logout = useCallback(async () => {
-    await supabase.auth.signOut();
+    localStorage.removeItem('guardiens_active_role');
     setUser(null);
+    roleInitialized.current = false;
+    await supabase.auth.signOut();
   }, []);
 
   return (
@@ -182,6 +187,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         activeRole,
         isAuthenticated: !!user,
         loading,
+        switchRole,
         setActiveRole,
         login,
         register,
