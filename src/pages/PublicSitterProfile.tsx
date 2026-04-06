@@ -366,12 +366,17 @@ export default function PublicSitterProfile() {
           {/* Flex photo + infos */}
           <div className="flex items-end gap-6">
             {/* Photo grande */}
-            <div className="shrink-0">
+            <div className="shrink-0 relative">
               <img
                 src={profile.avatar_url || "/placeholder.svg"}
                 alt={firstName}
                 className="w-28 h-28 md:w-40 md:h-40 rounded-full object-cover object-center border-4 border-white shadow-md ring-2 ring-primary ring-offset-2"
               />
+              {reputation && reputation.statut_gardien !== 'novice' && (
+                <div className="absolute -bottom-2 -right-2">
+                  <StatutGardienBadge statut={reputation.statut_gardien} />
+                </div>
+              )}
             </div>
 
             {/* Infos */}
@@ -632,7 +637,12 @@ export default function PublicSitterProfile() {
 
           <hr className="border-border" />
 
-          {/* Badges gardien — migration en cours */}
+          {userBadges && userBadges.length > 0 && (
+            <div className="space-y-2">
+              <h3 className="text-sm font-semibold text-foreground">Badges</h3>
+              <BadgeRow badges={userBadges} />
+            </div>
+          )}
 
           {/* Galerie */}
           {gallery.length > 0 && (
