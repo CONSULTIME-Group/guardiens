@@ -77,6 +77,8 @@ const SmallMissions = () => {
   const { level: accessLevel, profileCompletion, canApplyMissions } = useAccessLevel();
   const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>("all");
   const [mode, setMode] = useState<ModeFilter>("need");
+  const [dialogMission, setDialogMission] = useState<any>(null);
+  const [dialogTarget, setDialogTarget] = useState<{ id: string; name: string } | null>(null);
   const [skillPromptDismissed, setSkillPromptDismissed] = useState(() => {
     try { return localStorage.getItem("guardiens_skill_prompt_dismissed") === "true"; } catch { return false; }
   });
@@ -112,15 +114,21 @@ const SmallMissions = () => {
       const missionIds = missions.map((m: any) => m.id);
       const { data: responses } = await supabase
         .from("small_mission_responses")
-        .select("mission_id")
+        .select("mission_id, responder_id")
         .in("mission_id", missionIds);
 
       const countMap = new Map<string, number>();
+      const myResponseSet = new Set<string>();
       (responses || []).forEach((r: any) => {
         countMap.set(r.mission_id, (countMap.get(r.mission_id) || 0) + 1);
+        if (r.responder_id === user?.id) myResponseSet.add(r.mission_id);
       });
 
-      return missions.map((m: any) => ({ ...m, response_count: countMap.get(m.id) || 0 }));
+      return missions.map((m: any) => ({
+        ...m,
+        response_count: countMap.get(m.id) || 0,
+        already_proposed: myResponseSet.has(m.id),
+      }));
     },
   });
 
