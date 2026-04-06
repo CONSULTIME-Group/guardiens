@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Helmet } from "react-helmet-async";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -11,12 +11,13 @@ import { ToastAction } from "@/components/ui/toast";
 import { Eye, EyeOff } from "lucide-react";
 import authIllustration from "@/assets/auth-illustration.png";
 
-
 const Login = () => {
-  const [email, setEmail] = useState("");
+  const [searchParams] = useSearchParams();
+  const [email, setEmail] = useState(searchParams.get("email") ?? "");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [passwordError, setPasswordError] = useState<string | null>(null);
   const { login } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -24,22 +25,14 @@ const Login = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setPasswordError(null);
     try {
       await login(email, password);
       navigate("/dashboard");
     } catch (error: any) {
       const msg = error.message;
       if (msg === "Invalid login credentials") {
-        toast({
-          variant: "destructive",
-          title: "Compte introuvable",
-          description: "Aucun compte existant avec cette adresse.",
-          action: (
-            <ToastAction altText="Créer un compte" onClick={() => navigate("/register")} className="border-white text-white hover:bg-white/20">
-              Créer un compte
-            </ToastAction>
-          ),
-        });
+        setPasswordError("Email ou mot de passe incorrect.");
       } else if (msg === "Email not confirmed") {
         const handleResend = async () => {
           const { error: resendError } = await supabase.auth.resend({ type: "signup", email });
@@ -76,27 +69,17 @@ const Login = () => {
   return (
     <div className="min-h-screen flex bg-background">
       <Helmet><meta name="robots" content="noindex, nofollow" /></Helmet>
-      {/* Left panel - illustration (hidden on mobile) */}
       <div className="hidden lg:flex lg:w-1/2 bg-accent items-center justify-center p-12 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-secondary/10" />
         <div className="relative z-10 flex flex-col items-center text-center max-w-lg">
-          <img
-            src={authIllustration}
-            alt="Chien et chat heureux"
-            width={400}
-            height={400}
-            className="mb-8 drop-shadow-lg"
-          />
-          <h2 className="font-heading text-2xl font-semibold text-foreground mb-3">
-            Vos animaux entre de bonnes mains
-          </h2>
+          <img src={authIllustration} alt="Chien et chat heureux" width={400} height={400} className="mb-8 drop-shadow-lg" />
+          <h2 className="font-heading text-2xl font-semibold text-foreground mb-3">Vos animaux entre de bonnes mains</h2>
           <p className="text-muted-foreground leading-relaxed">
             Rejoignez une communauté de passionnés qui prennent soin des animaux comme des leurs, dans le confort de leur foyer.
           </p>
         </div>
       </div>
 
-      {/* Right panel - form */}
       <div className="flex-1 flex items-center justify-center px-6 py-12">
         <div className="w-full max-w-md">
           <Link to="/" className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground mb-6 gap-1">
@@ -111,29 +94,14 @@ const Login = () => {
             <p className="text-muted-foreground">Content de vous revoir</p>
           </div>
 
-          {/* Illustration mobile only */}
           <div className="flex justify-center mb-8 lg:hidden">
-            <img
-              src={authIllustration}
-              alt="Chien et chat heureux"
-              width={200}
-              height={200}
-              className="drop-shadow-md"
-            />
+            <img src={authIllustration} alt="Chien et chat heureux" width={200} height={200} className="drop-shadow-md" />
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="vous@exemple.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                className="rounded-lg h-12"
-              />
+              <Input id="email" type="email" placeholder="vous@exemple.com" value={email} onChange={(e) => setEmail(e.target.value)} required className="rounded-lg h-12" />
             </div>
             <div className="space-y-2">
               <Label htmlFor="password">Mot de passe</Label>
@@ -143,18 +111,15 @@ const Login = () => {
                   type={showPassword ? "text" : "password"}
                   placeholder="Votre mot de passe"
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  onChange={(e) => { setPassword(e.target.value); setPasswordError(null); }}
                   required
                   className="rounded-lg h-12 pr-12"
                 />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                >
+                <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors">
                   {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                 </button>
               </div>
+              {passwordError && <p className="text-sm text-destructive">{passwordError}</p>}
             </div>
             <div className="flex justify-end">
               <Link to="/forgot-password" className="text-sm text-muted-foreground hover:text-primary transition-colors">
@@ -168,9 +133,7 @@ const Login = () => {
 
           <p className="text-center text-sm text-muted-foreground mt-6">
             Tu es nouveau ?{" "}
-            <Link to="/register" className="text-primary font-medium hover:underline">
-              Créer un compte
-            </Link>
+            <Link to="/register" className="text-primary font-medium hover:underline">Créer un compte</Link>
           </p>
         </div>
       </div>
