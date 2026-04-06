@@ -283,14 +283,7 @@ const LeaveReview = () => {
         </p>
       </div>
 
-      {/* Badge selection */}
-      <div className="mb-6 p-4 rounded-lg border border-border bg-accent/30">
-        <BadgeSelector
-          badges={reviewType === "owner_to_sitter" ? SITTER_BADGES : OWNER_BADGES}
-          selected={selectedBadges}
-          onChange={setSelectedBadges}
-        />
-      </div>
+      {/* Badge selection — migration en cours */}
 
       {/* Submit */}
       <div className="fixed bottom-0 left-0 right-0 md:left-64 bg-card border-t border-border p-4 z-40 md:pb-4 pb-20">
