@@ -364,9 +364,24 @@ const SmallMissions = () => {
                               <Button size="sm" variant="outline" className="w-full mt-2 gap-1 text-muted-foreground" disabled>
                                 <Lock className="h-3 w-3" /> Complétez votre profil
                               </Button>
+                            ) : m.already_proposed ? (
+                              <Button size="sm" variant="outline" className="w-full mt-2 opacity-60 cursor-not-allowed" disabled>
+                                Proposition envoyée
+                              </Button>
                             ) : (
-                              <Button size="sm" variant="outline" className="w-full mt-2">
-                                Proposer mon aide
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="w-full mt-2"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  if (!isAuthenticated) { navigate("/register"); return; }
+                                  setDialogMission(m);
+                                  setDialogTarget({ id: m.user_id, name: (m.profiles as any)?.first_name || "ce membre" });
+                                }}
+                              >
+                                Proposer un échange →
                               </Button>
                             )
                           )}
