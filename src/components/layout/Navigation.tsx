@@ -99,38 +99,57 @@ export const Sidebar = () => {
       </div>
       <FeedbackDialog open={feedbackOpen} onOpenChange={setFeedbackOpen} />
       <PremiumGateDialog open={gateOpen} onClose={() => setGateOpen(false)} featureName={gateFeature} />
+      <ActivateRoleDialog open={roleDialogOpen} onClose={() => setRoleDialogOpen(false)} targetRole={roleDialogTarget} />
 
       {/* Role toggle */}
-      {user?.role === "both" && (
-        <div className="px-3 pb-2">
-          <div className="flex items-center bg-accent rounded-lg p-1 gap-1">
-            <button
-              onClick={() => setActiveRole("owner")}
-              className={cn(
-                "flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-md text-xs font-medium transition-colors",
-                activeRole === "owner"
-                  ? "bg-primary text-primary-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
-              )}
-            >
-              <PawPrint className="h-3.5 w-3.5" />
-              Propriétaire
-            </button>
-            <button
-              onClick={() => setActiveRole("sitter")}
-              className={cn(
-                "flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-md text-xs font-medium transition-colors",
-                activeRole === "sitter"
-                  ? "bg-primary text-primary-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
-              )}
-            >
-              <User className="h-3.5 w-3.5" />
-              Gardien
-            </button>
-          </div>
+      <div className="px-3 pb-2">
+        <div className="flex items-center bg-accent rounded-lg p-1 gap-1">
+          <button
+            onClick={() => {
+              if (user?.role === "both" || user?.role === "owner") {
+                setActiveRole("owner");
+              } else {
+                setRoleDialogTarget("proprio");
+                setRoleDialogOpen(true);
+              }
+            }}
+            className={cn(
+              "flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-md text-xs font-medium transition-colors",
+              (user?.role === "both" || user?.role === "owner") && activeRole === "owner"
+                ? "bg-primary text-primary-foreground shadow-sm"
+                : user?.role === "sitter"
+                ? "text-muted-foreground/60 hover:text-muted-foreground"
+                : "text-muted-foreground hover:text-foreground"
+            )}
+          >
+            <PawPrint className="h-3.5 w-3.5" />
+            Propriétaire
+            {user?.role === "sitter" && <Plus className="h-[11px] w-[11px]" />}
+          </button>
+          <button
+            onClick={() => {
+              if (user?.role === "both" || user?.role === "sitter") {
+                setActiveRole("sitter");
+              } else {
+                setRoleDialogTarget("gardien");
+                setRoleDialogOpen(true);
+              }
+            }}
+            className={cn(
+              "flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-md text-xs font-medium transition-colors",
+              (user?.role === "both" || user?.role === "sitter") && activeRole === "sitter"
+                ? "bg-primary text-primary-foreground shadow-sm"
+                : user?.role === "owner"
+                ? "text-muted-foreground/60 hover:text-muted-foreground"
+                : "text-muted-foreground hover:text-foreground"
+            )}
+          >
+            <User className="h-3.5 w-3.5" />
+            Gardien
+            {user?.role === "owner" && <Plus className="h-[11px] w-[11px]" />}
+          </button>
         </div>
-      )}
+      </div>
 
       {/* Nav groups */}
       <nav className="flex-1 px-3 overflow-y-auto">
