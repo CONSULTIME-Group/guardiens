@@ -45,9 +45,12 @@ const ConversationHeader = ({
   conv, userId, userRole, isMobile, onBack, onArchive, onActionDone,
   otherUserRating, isFounder, isEmergencySitter,
 }: ConversationHeaderProps) => {
+  const navigate = useNavigate();
   const [reportOpen, setReportOpen] = useState(false);
   const [reportReason, setReportReason] = useState("");
   const [reportSending, setReportSending] = useState(false);
+  const [missionData, setMissionData] = useState<any>(null);
+  const [responseData, setResponseData] = useState<any>(null);
 
   const isOwner = conv.owner_id === userId;
   const isPendingApp = conv.application_status === "pending" || conv.application_status === "discussing";
@@ -57,6 +60,88 @@ const ConversationHeader = ({
   const isSmallMission = !!(conv as any).small_mission_id;
   const sitterName = capitalize(conv.other_user?.first_name) || "le gardien";
   const appBadge = conv.application_status ? appStatusBadge[conv.application_status] : null;
+
+  // Mission exchange roles
+  const isInitiator = responseData?.responder_id === userId;
+  const isRecipient = missionData?.user_id === userId;
+
+  // Load mission data if small_mission_id
+  useEffect(() => {
+    const missionId = (conv as any).small_mission_id;
+    if (!missionId) return;
+
+    const load = async () => {
+      const [{ data: mission }, { data: response }] = await Promise.all([
+        supabase.from("small_missions")
+          .select("id, title, exchange_offer, date_needed, user_id")
+          .eq("id", missionId)
+          .single(),
+        supabase.from("small_mission_responses")
+          .select("id, status, responder_id, conversation_id")
+          .eq("mission_id", missionId)
+          .eq("conversation_id", conv.id)
+          .maybeSingle(),
+      ]);
+      setMissionData(mission);
+      setResponseData(response);
+    };
+    load();
+
+    // Realtime
+    const channel = supabase
+      .channel(`response-${conv.id}`)
+      .on("postgres_changes", {
+        event: "UPDATE",
+        schema: "public",
+        table: "small_mission_responses",
+        filter: `conversation_id=eq.${conv.id}`,
+      }, (payload) => setResponseData(payload.new))
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
+  }, [conv.id, (conv as any).small_mission_id]);
+
+  const handleAcceptExchange = async () => {
+    if (!responseData?.id) return;
+    await supabase.from("small_mission_responses")
+      .update({ status: "accepted" as any })
+      .eq("id", responseData.id);
+    await supabase.from("notifications").insert({
+      user_id: responseData.responder_id,
+      type: "mission_accepted",
+      title: "Échange accepté !",
+      body: `${capitalize(conv.other_user?.first_name) || "Un membre"} a accepté votre proposition pour "${missionData?.title}"`,
+      link: `/messages?conversationId=${conv.id}`,
+    });
+    setResponseData((prev: any) => ({ ...prev, status: "accepted" }));
+  };
+
+  const handleDeclineExchange = async () => {
+    if (!responseData?.id) return;
+    await supabase.from("small_mission_responses")
+      .update({ status: "declined" as any })
+      .eq("id", responseData.id);
+    await supabase.from("notifications").insert({
+      user_id: responseData.responder_id,
+      type: "mission_declined",
+      title: "Échange décliné",
+      body: `${capitalize(conv.other_user?.first_name) || "Un membre"} n'est pas disponible pour "${missionData?.title}"`,
+      link: `/messages?conversationId=${conv.id}`,
+    });
+    setResponseData((prev: any) => ({ ...prev, status: "declined" }));
+  };
+
+  const handleMarkDone = async () => {
+    if (!responseData?.id) return;
+    await supabase.from("small_mission_responses")
+      .update({ status: "completed" as any })
+      .eq("id", responseData.id);
+    setResponseData((prev: any) => ({ ...prev, status: "completed" }));
+  };
+
+  const handleLeaveReview = () => {
+    navigate(`/avis-mission?missionId=${missionData?.id}&conversationId=${conv.id}`);
+  };
 
   // Determine "Voir l'annonce" link
   const annonceLinkHref = conv.sit_id
