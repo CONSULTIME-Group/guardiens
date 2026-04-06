@@ -535,11 +535,7 @@ const SearchOwner = () => {
                       </div>
 
                       {/* Badges */}
-                      {s.topBadges && s.topBadges.length > 0 && (
-                        <TooltipProvider>
-                          {/* Badges — migration en cours */}
-                        </TooltipProvider>
-                      )}
+                      {/* Badges — migration en cours */}
 
                       {/* Animal types */}
                       {sitterAnimalTypes.length > 0 && (

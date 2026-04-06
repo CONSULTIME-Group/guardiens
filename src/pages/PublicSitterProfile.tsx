@@ -387,24 +387,24 @@ export default function PublicSitterProfile() {
                 </p>
               )}
 
-              {(activeBadgeKeys.length > 0 || hasActiveSubscription) && (
+              {(profile?.identity_verified || profile?.is_founder || emergencyActive || hasActiveSubscription) && (
                 <div className="flex items-center gap-2 flex-wrap">
                   {hasActiveSubscription && (
                     <span className="inline-flex items-center gap-1 text-xs text-muted-foreground border border-border rounded-full px-2 py-0.5 bg-white/80">
-                      <BadgeCheck size={11} className="text-primary" /> Abonne
+                      <BadgeCheck size={11} className="text-primary" /> Abonné
                     </span>
                   )}
-                  {badgeMap["id_verifiee"] && (
+                  {profile?.identity_verified && (
                     <span className="inline-flex items-center gap-1 text-xs text-muted-foreground border border-border rounded-full px-2 py-0.5 bg-white/80">
-                      <Shield size={11} className="text-primary" /> ID verifiee
+                      <Shield size={11} className="text-primary" /> ID vérifiée
                     </span>
                   )}
-                  {badgeMap["fondateur"] && (
+                  {profile?.is_founder && (
                     <span className="inline-flex items-center gap-1 text-xs text-muted-foreground border border-border rounded-full px-2 py-0.5 bg-white/80">
                       <Star size={11} className="text-primary" /> Fondateur
                     </span>
                   )}
-                  {badgeMap["gardien_urgence"] && (
+                  {emergencyActive && (
                     <span className="inline-flex items-center gap-1 text-xs text-muted-foreground border border-border rounded-full px-2 py-0.5 bg-white/80">
                       <Shield size={11} className="text-primary" /> Gardien d'urgence
                     </span>

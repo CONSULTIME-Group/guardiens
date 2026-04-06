@@ -192,11 +192,7 @@ const PublicSitDetail = () => {
                 </span>
               )}
             </div>
-            {badges.length > 0 && (
-              <TooltipProvider>
-                {/* Badges — migration en cours */}
-              </TooltipProvider>
-            )}
+            {/* Badges — migration en cours */}
           </div>
         )}
 

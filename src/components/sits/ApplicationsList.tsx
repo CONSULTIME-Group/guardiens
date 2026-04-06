@@ -257,11 +257,7 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
         </div>
 
         {/* LINE 2 — Badges */}
-        {app.badgeCounts && app.badgeCounts.length > 0 && (
-          <TooltipProvider>
-            {/* Badges — migration en cours */}
-          </TooltipProvider>
-        )}
+        {/* Badges — migration en cours */}
 
         {/* LINE 3 — Message */}
         {app.message && (

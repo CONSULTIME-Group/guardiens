@@ -185,11 +185,7 @@ const ApplicationModal = ({
               )}
 
               {/* Badges */}
-              {sitterInfo.badgeCounts.length > 0 && (
-                <TooltipProvider>
-                  {/* Badges — migration en cours */}
-                </TooltipProvider>
-              )}
+              {/* Badges — migration en cours */}
 
               {/* Mini gallery */}
               {sitterInfo.gallery.length > 0 && (

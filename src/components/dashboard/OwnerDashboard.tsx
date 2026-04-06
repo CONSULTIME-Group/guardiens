@@ -328,11 +328,7 @@ const OwnerDashboard = () => {
                     ) : (
                       <span className="text-xs font-sans text-muted-foreground italic">Nouveau</span>
                     )}
-                    {badges.length > 0 && (
-                      <TooltipProvider>
-                        {/* Badges — migration en cours */}
-                      </TooltipProvider>
-                    )}
+                    {/* Badges — migration en cours */}
                   </div>
                   <div className="flex gap-2 mt-3">
                     <button
