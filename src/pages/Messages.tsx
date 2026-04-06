@@ -654,6 +654,7 @@ const Messages = () => {
             userId={user?.id}
             activeConv={activeConv}
             onSelect={(text) => setNewMessage(text)}
+            isEntraideContact={isEntraideContact}
           />
 
           {/* Input or Paywall — only gate sit conversations for non-subscribed sitters */}
