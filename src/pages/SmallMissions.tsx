@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import entraideHeader from "@/assets/entraide-header.jpg";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -82,6 +82,40 @@ const SmallMissions = () => {
   const [skillPromptDismissed, setSkillPromptDismissed] = useState(() => {
     try { return localStorage.getItem("guardiens_skill_prompt_dismissed") === "true"; } catch { return false; }
   });
+  const [contactingHelperId, setContactingHelperId] = useState<string | null>(null);
+
+  const handleContactHelper = useCallback(async (helperId: string) => {
+    if (!isAuthenticated || !user) { navigate("/register"); return; }
+    if (helperId === user.id) return;
+    setContactingHelperId(helperId);
+    try {
+      // Check existing conversation (either direction)
+      const { data: existing } = await supabase
+        .from("conversations")
+        .select("id, owner_id")
+        .or(`and(owner_id.eq.${user.id},sitter_id.eq.${helperId}),and(owner_id.eq.${helperId},sitter_id.eq.${user.id})`)
+        .is("sit_id", null)
+        .is("small_mission_id", null)
+        .maybeSingle();
+      if (existing) {
+        switchRole(existing.owner_id === user.id ? "owner" : "sitter");
+        navigate(`/messages?conversationId=${existing.id}`);
+        return;
+      }
+      const { data: conv, error } = await supabase
+        .from("conversations")
+        .insert({ owner_id: user.id, sitter_id: helperId, sit_id: null, small_mission_id: null })
+        .select("id")
+        .single();
+      if (error) throw error;
+      switchRole("owner");
+      navigate(`/messages?conversationId=${conv!.id}`);
+    } catch {
+      // silent fail — toast could be added
+    } finally {
+      setContactingHelperId(null);
+    }
+  }, [isAuthenticated, user, navigate, switchRole]);
 
   const { data: currentUserProfile } = useQuery({
     queryKey: ["my-profile-skills", user?.id],
@@ -472,10 +506,11 @@ const SmallMissions = () => {
                           </div>
                         )}
                         <button
-                          onClick={() => navigate(`/profil/${h.id}`)}
-                          className="text-sm text-primary font-semibold hover:underline"
+                          onClick={() => handleContactHelper(h.id)}
+                          disabled={contactingHelperId === h.id}
+                          className="text-sm text-primary font-semibold hover:underline disabled:opacity-50"
                         >
-                          Proposer un échange →
+                          {contactingHelperId === h.id ? "…" : "Contacter →"}
                         </button>
                       </div>
                     );
