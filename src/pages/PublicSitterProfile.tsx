@@ -1,12 +1,16 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import PageMeta from "@/components/PageMeta";
 import { BadgeRow } from "@/components/badges/BadgeRow";
+import { BadgeSceau } from "@/components/badges/BadgeSceau";
 import { StatutGardienBadge } from "@/components/profile/StatutGardienBadge";
 import { useProfileReputation, useUserBadges } from "@/hooks/useProfileReputation";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { format } from "date-fns";
+import { fr } from "date-fns/locale";
 
 import { Skeleton } from "@/components/ui/skeleton";
 import { buildAbsoluteUrl } from "@/lib/seo";
