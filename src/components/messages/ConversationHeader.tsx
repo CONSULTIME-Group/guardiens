@@ -1,6 +1,9 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Archive, ExternalLink, CheckCircle2, Star, Home, Handshake, Calendar, MapPin } from "lucide-react";
+import { ArrowLeft, Archive, ExternalLink, CheckCircle2, Star, Home, Handshake, Calendar, MapPin, Flag } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
 import HelpButton from "./HelpButton";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
