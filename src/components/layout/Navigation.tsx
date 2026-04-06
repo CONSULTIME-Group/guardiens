@@ -94,6 +94,7 @@ export const Sidebar = () => {
         <h1 className="font-heading text-2xl font-bold tracking-tight">
           <span className="text-primary">g</span>
           <span className="text-foreground">uardiens</span>
+          <span className="ml-1.5 text-[10px] font-medium tracking-wide text-foreground/35 align-middle select-none" aria-label="Version b\u00eata">b\u00eata</span>
         </h1>
         <NotificationBell />
       </div>
