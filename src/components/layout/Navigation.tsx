@@ -53,8 +53,12 @@ const SidebarItem = ({
 export const Sidebar = () => {
   const { user, logout, activeRole, setActiveRole } = useAuth();
   const { isAdmin } = useAdmin();
+  const navigate = useNavigate();
+  const { hasAccess } = useSubscriptionAccess();
   const [unreadCount, setUnreadCount] = useState(0);
   const [feedbackOpen, setFeedbackOpen] = useState(false);
+  const [gateOpen, setGateOpen] = useState(false);
+  const [gateFeature, setGateFeature] = useState("");
 
   const effectiveRole = user?.role === "both" ? activeRole : user?.role;
 
