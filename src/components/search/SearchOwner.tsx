@@ -120,14 +120,19 @@ const SearchOwner = () => {
     setContactingId(sitterId);
     try {
       const { data: existing } = await supabase
-        .from("conversations").select("id")
+        .from("conversations").select("id, owner_id")
         .eq("owner_id", user.id).eq("sitter_id", sitterId).maybeSingle();
-      if (existing) { navigate(`/messages?conversation=${existing.id}`); return; }
+      if (existing) {
+        switchRole(existing.owner_id === user.id ? 'owner' : 'sitter');
+        navigate(`/messages?conversation=${existing.id}`);
+        return;
+      }
       const { data: conv, error } = await supabase
         .from("conversations").insert({ owner_id: user.id, sitter_id: sitterId })
         .select("id").single();
       if (error) throw error;
       if (!conv?.id) throw new Error("no_conv");
+      switchRole('owner');
       navigate(`/messages?conversation=${conv.id}`);
     } catch (err: any) {
       console.error("handleContact error:", err);
