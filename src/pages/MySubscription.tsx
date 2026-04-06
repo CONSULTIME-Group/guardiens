@@ -300,12 +300,6 @@ const MySubscription = () => {
         supabase.from("subscriptions").select("status, plan, expires_at, stripe_subscription_id").eq("user_id", user.id).order("created_at", { ascending: false }).limit(1).maybeSingle(),
       ]);
 
-      if (profileRes.error) {
-        setLoadError(true);
-        setView("never_subscribed");
-        return;
-      }
-
       const p = profileRes.data;
       const pData = p ?? { is_founder: false, referral_code: null, profile_completion: 0, role: null };
       setProfile(pData);
@@ -320,12 +314,10 @@ const MySubscription = () => {
       const { count } = await supabase.from("profiles").select("*", { count: "exact", head: true });
       if (typeof count === "number") setMemberCount(count);
 
-      // Determine role
-      const isOwner =
-        effectiveRole === "owner" ||
-        (p?.role as string) === "owner";
+      // Determine role — use activeRole (UI choice)
+      const isOwner = activeRole === "owner";
 
-      // Pre-launch check
+      // Pre-launch check — FIRST, before any other view determination
       const isPrelaunched = new Date() < LAUNCH_DATE;
       if (isPrelaunched && !isOwner) {
         setView("pre_launch");
@@ -334,7 +326,7 @@ const MySubscription = () => {
       }
 
       // Post-launch view determination
-      const isFounder = p.is_founder === true;
+      const isFounder = p?.is_founder === true;
       const subStatut = (subRes.data?.status as string) ?? null;
       const now = new Date();
 
@@ -360,7 +352,7 @@ const MySubscription = () => {
       setLoadError(true);
       setView("never_subscribed");
     }
-  }, [user, effectiveRole]);
+  }, [user, activeRole]);
 
   useEffect(() => { loadData(); }, [loadData]);
 
