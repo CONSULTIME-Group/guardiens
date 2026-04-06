@@ -42,9 +42,17 @@ const mapProfile = (profile: any, authEmail?: string): Profile => ({
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<Profile | null>(null);
-  const [activeRole, setActiveRole] = useState<ActiveRole>("sitter");
+  const [activeRole, setActiveRoleState] = useState<ActiveRole>(() => {
+    const saved = localStorage.getItem('guardiens_active_role');
+    return (saved === 'owner' || saved === 'sitter') ? saved : 'sitter';
+  });
   const [loading, setLoading] = useState(true);
   const [roleInitialized, setRoleInitialized] = useState(false);
+
+  const setActiveRole = useCallback((role: ActiveRole) => {
+    setActiveRoleState(role);
+    localStorage.setItem('guardiens_active_role', role);
+  }, []);
 
   const checkFounderExpiry = useCallback(async (userId: string, isFounder: boolean) => {
     if (!isFounder) return;
