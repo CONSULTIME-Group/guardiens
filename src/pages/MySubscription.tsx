@@ -30,9 +30,8 @@ type ViewState =
   | "loading";
 
 interface SubRow {
-  statut: string | null;
-  trial_end: string | null;
-  current_period_end: string | null;
+  status: string | null;
+  expires_at: string | null;
   created_at: string | null;
 }
 
