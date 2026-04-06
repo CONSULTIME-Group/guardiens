@@ -324,7 +324,7 @@ const SitDetail = () => {
             endDate={sit.end_date}
             ownerCity={owner?.city}
             isOwner={isOwner}
-            isLongStay={false}
+            
           />
         </div>
       )}
