@@ -156,7 +156,7 @@ const Messages = () => {
     if (!user) return;
     const { data: convs } = await supabase
       .from("conversations")
-      .select("*, sit:sits(title, status, property_id, start_date, end_date)")
+      .select("*")
       .or(`owner_id.eq.${user.id},sitter_id.eq.${user.id}`)
       .order("updated_at", { ascending: false });
 
@@ -166,18 +166,22 @@ const Messages = () => {
     const convIds = convs.map((conv: any) => conv.id);
     const sitIds = convs.map((conv: any) => conv.sit_id).filter(Boolean);
 
-    const [profilesRes, allLastMsgsRes, allUnreadRes, applicationsRes, ratingsRes, emergencyRes] = await Promise.all([
+    const [profilesRes, allLastMsgsRes, allUnreadRes, ratingsRes, emergencyRes, sitsRes, applicationsRes] = await Promise.all([
       supabase.from("profiles").select("id, first_name, avatar_url, identity_verified, city, is_founder").in("id", otherIds),
       supabase.from("messages").select("conversation_id, content, created_at, sender_id").in("conversation_id", convIds).order("created_at", { ascending: false }),
       supabase.from("messages").select("conversation_id, id").in("conversation_id", convIds).neq("sender_id", user.id).is("read_at", null),
-      sitIds.length > 0
-        ? supabase.from("applications").select("sit_id, sitter_id, status").in("sit_id", sitIds)
-        : Promise.resolve({ data: [] }),
       supabase.from("reviews").select("reviewee_id, overall_rating").in("reviewee_id", otherIds).eq("published", true),
       supabase.from("emergency_sitter_profiles").select("user_id, is_active").in("user_id", otherIds).eq("is_active", true),
+      sitIds.length > 0
+        ? supabase.from("sits").select("id, title, status, property_id, start_date, end_date").in("id", sitIds)
+        : Promise.resolve({ data: [], error: null }),
+      sitIds.length > 0
+        ? supabase.from("applications").select("sit_id, sitter_id, status").in("sit_id", sitIds)
+        : Promise.resolve({ data: [], error: null }),
     ]);
 
     const profilesMap = new Map((profilesRes.data || []).map((p: any) => [p.id, p]));
+    const sitsMap = new Map((sitsRes.data || []).map((s: any) => [s.id, s]));
 
     const lastMsgMap = new Map<string, any>();
     (allLastMsgsRes.data || []).forEach((m: any) => {
@@ -210,6 +214,7 @@ const Messages = () => {
       return {
         ...conv,
         archived_by: conv.archived_by || [],
+        sit: conv.sit_id ? (sitsMap.get(conv.sit_id) || null) : null,
         other_user: profilesMap.get(otherId) || null,
         last_message: lastMsgMap.get(conv.id) || null,
         unread_count: unreadMap.get(conv.id) || 0,
@@ -262,7 +267,7 @@ const Messages = () => {
           const { data: newConv, error } = await supabase
             .from("conversations")
             .insert({ owner_id: user.id, sitter_id: gardienId })
-            .select("*, sit:sits(title, status, property_id, start_date, end_date)")
+            .select("*")
             .single();
           if (error || !newConv) return;
 
@@ -315,7 +320,7 @@ const Messages = () => {
           try {
             const { data: fetchedConv } = await supabase
               .from("conversations")
-              .select("*, sit:sits(title, status, property_id, start_date, end_date)")
+              .select("*")
               .eq("id", convId)
               .single();
             if (!fetchedConv) return;
