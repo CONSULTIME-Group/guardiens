@@ -54,8 +54,8 @@ const MySubscription = () => {
         .eq("id", user.id)
         .single(),
       supabase
-        .from("abonnements")
-        .select("statut, trial_end, current_period_end, created_at")
+        .from("subscriptions")
+        .select("status, expires_at, created_at")
         .eq("user_id", user.id)
         .order("created_at", { ascending: false })
         .limit(1)
