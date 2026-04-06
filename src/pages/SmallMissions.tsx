@@ -137,7 +137,7 @@ const SmallMissions = () => {
     queryFn: async () => {
       const { data } = await supabase
         .from("profiles")
-        .select("id, first_name, avatar_url, city, skill_categories, available_for_help")
+        .select("id, first_name, avatar_url, city, skill_categories, available_for_help, custom_skills")
         .eq("available_for_help", true)
         .not("skill_categories", "eq", "{}")
         .limit(20);
@@ -455,6 +455,21 @@ const SmallMissions = () => {
                             <Star className="h-3 w-3 fill-primary text-primary" />
                             {h.review_count > 0 ? `${h.review_avg.toFixed(1)} · ` : ""}{h.sits_count} garde{h.sits_count > 1 ? "s" : ""}
                           </p>
+                        )}
+                        {/* Competences */}
+                        {h.custom_skills?.length > 0 && (
+                          <div className="flex flex-wrap gap-1">
+                            {(h.custom_skills as string[]).slice(0, 2).map((c: string) => (
+                              <span key={c} className="text-xs bg-muted text-foreground/70 px-2 py-0.5 rounded-full border border-border">
+                                {c}
+                              </span>
+                            ))}
+                            {h.custom_skills.length > 2 && (
+                              <span className="text-xs bg-muted text-foreground/70 px-2 py-0.5 rounded-full border border-border">
+                                +{h.custom_skills.length - 2}
+                              </span>
+                            )}
+                          </div>
                         )}
                         <button
                           onClick={() => navigate(`/profil/${h.id}`)}
