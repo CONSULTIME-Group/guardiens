@@ -11,6 +11,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useSubscriptionAccess } from "@/hooks/useSubscriptionAccess";
 import { useAccessLevel } from "@/hooks/useAccessLevel";
 import AccessGateBanner from "@/components/access/AccessGateBanner";
+import ProposeExchangeDialog from "@/components/missions/ProposeExchangeDialog";
 
 const CATEGORY_META: Record<string, { label: string; icon: typeof Dog; colorClass: string }> = {
   animals: { label: "Animaux", icon: Dog, colorClass: "text-primary" },
@@ -76,6 +77,8 @@ const SmallMissions = () => {
   const { level: accessLevel, profileCompletion, canApplyMissions } = useAccessLevel();
   const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>("all");
   const [mode, setMode] = useState<ModeFilter>("need");
+  const [dialogMission, setDialogMission] = useState<any>(null);
+  const [dialogTarget, setDialogTarget] = useState<{ id: string; name: string } | null>(null);
   const [skillPromptDismissed, setSkillPromptDismissed] = useState(() => {
     try { return localStorage.getItem("guardiens_skill_prompt_dismissed") === "true"; } catch { return false; }
   });
@@ -111,15 +114,21 @@ const SmallMissions = () => {
       const missionIds = missions.map((m: any) => m.id);
       const { data: responses } = await supabase
         .from("small_mission_responses")
-        .select("mission_id")
+        .select("mission_id, responder_id")
         .in("mission_id", missionIds);
 
       const countMap = new Map<string, number>();
+      const myResponseSet = new Set<string>();
       (responses || []).forEach((r: any) => {
         countMap.set(r.mission_id, (countMap.get(r.mission_id) || 0) + 1);
+        if (r.responder_id === user?.id) myResponseSet.add(r.mission_id);
       });
 
-      return missions.map((m: any) => ({ ...m, response_count: countMap.get(m.id) || 0 }));
+      return missions.map((m: any) => ({
+        ...m,
+        response_count: countMap.get(m.id) || 0,
+        already_proposed: myResponseSet.has(m.id),
+      }));
     },
   });
 
@@ -128,7 +137,7 @@ const SmallMissions = () => {
     queryFn: async () => {
       const { data } = await supabase
         .from("profiles")
-        .select("id, first_name, avatar_url, city, skill_categories, available_for_help")
+        .select("id, first_name, avatar_url, city, skill_categories, available_for_help, custom_skills")
         .eq("available_for_help", true)
         .not("skill_categories", "eq", "{}")
         .limit(20);
@@ -355,9 +364,24 @@ const SmallMissions = () => {
                               <Button size="sm" variant="outline" className="w-full mt-2 gap-1 text-muted-foreground" disabled>
                                 <Lock className="h-3 w-3" /> Complétez votre profil
                               </Button>
+                            ) : m.already_proposed ? (
+                              <Button size="sm" variant="outline" className="w-full mt-2 opacity-60 cursor-not-allowed" disabled>
+                                Proposition envoyée
+                              </Button>
                             ) : (
-                              <Button size="sm" variant="outline" className="w-full mt-2">
-                                Proposer mon aide
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="w-full mt-2"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  if (!isAuthenticated) { navigate("/register"); return; }
+                                  setDialogMission(m);
+                                  setDialogTarget({ id: m.user_id, name: (m.profiles as any)?.first_name || "ce membre" });
+                                }}
+                              >
+                                Proposer un échange →
                               </Button>
                             )
                           )}
@@ -431,6 +455,21 @@ const SmallMissions = () => {
                             <Star className="h-3 w-3 fill-primary text-primary" />
                             {h.review_count > 0 ? `${h.review_avg.toFixed(1)} · ` : ""}{h.sits_count} garde{h.sits_count > 1 ? "s" : ""}
                           </p>
+                        )}
+                        {/* Competences */}
+                        {h.custom_skills?.length > 0 && (
+                          <div className="flex flex-wrap gap-1">
+                            {(h.custom_skills as string[]).slice(0, 2).map((c: string) => (
+                              <span key={c} className="text-xs bg-muted text-foreground/70 px-2 py-0.5 rounded-full border border-border">
+                                {c}
+                              </span>
+                            ))}
+                            {h.custom_skills.length > 2 && (
+                              <span className="text-xs bg-muted text-foreground/70 px-2 py-0.5 rounded-full border border-border">
+                                +{h.custom_skills.length - 2}
+                              </span>
+                            )}
+                          </div>
                         )}
                         <button
                           onClick={() => navigate(`/profil/${h.id}`)}
@@ -566,6 +605,23 @@ const SmallMissions = () => {
           </div>
         </footer>
       </div>
+
+      {/* Propose exchange dialog */}
+      {dialogMission && dialogTarget && (
+        <ProposeExchangeDialog
+          open={!!dialogMission}
+          onClose={() => { setDialogMission(null); setDialogTarget(null); }}
+          mission={{
+            id: dialogMission.id,
+            title: dialogMission.title,
+            exchange_offer: dialogMission.exchange_offer,
+            date_needed: dialogMission.date_needed,
+            user_id: dialogMission.user_id,
+          }}
+          targetUserId={dialogTarget.id}
+          targetFirstName={dialogTarget.name}
+        />
+      )}
     </>
   );
 };
