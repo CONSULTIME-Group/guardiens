@@ -1,5 +1,5 @@
 import {
-  Send, MessageSquare, Search, ToggleRight, Clock, Shield,
+  Send, MessageSquare, Search, ToggleRight, Shield,
 } from "lucide-react";
 
 const ADVANTAGES = [
