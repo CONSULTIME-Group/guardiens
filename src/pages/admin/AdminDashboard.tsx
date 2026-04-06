@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Users, Megaphone, CalendarCheck, Star, UserPlus, Handshake,
-  ExternalLink, AlertTriangle, ShieldCheck, Briefcase, Flag, CreditCard,
+  ExternalLink, AlertTriangle, ShieldCheck, Briefcase, Flag, CreditCard, Mail,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,6 +13,12 @@ import {
 } from "recharts";
 import { format, subWeeks, startOfWeek, endOfWeek, formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
+import { toast } from "sonner";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 interface Stats {
   totalUsers: number;
