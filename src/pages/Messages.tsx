@@ -150,6 +150,7 @@ const Messages = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [autoOpened, setAutoOpened] = useState(false);
+  const [isEntraideContact, setIsEntraideContact] = useState(false);
 
   const loadConversations = useCallback(async () => {
     if (!user) return;
