@@ -104,41 +104,54 @@ Deno.serve(async (req) => {
 
     const origin = req.headers.get("origin") || "https://guardiens.fr";
 
-    // Resolve a price: try lookup_keys first, then fallback to finding
-    // the first active price of the right type on any product matching the name.
+    // Known Stripe product/price IDs for the Guardiens account
+    const KNOWN_PRICES = {
+      monthly: "price_1TIPaZIR9gPuLbxmwV01tgwa",      // prod_UGxVLMe7B4zx8B
+      one_shot_product: "prod_UHqvbEHJSHCz4R",         // Accès un mois
+      prorata_product: "prod_UHqyDi8FdX1qLT",          // Accès 2026
+    };
+
+    // Resolve price: try lookup_key, then hardcoded fallback, then product search
     const resolveActivePrice = async (
       lookupKeys: string[],
-      productNameHint: string,
+      fallbackPriceId: string | null,
+      fallbackProductId: string | null,
       priceType: "recurring" | "one_time" = "recurring",
     ) => {
-      // 1. Try lookup_keys (works when they're set in Stripe)
-      const byLookup = await stripe.prices.list({
-        lookup_keys: lookupKeys,
-        active: true,
-        limit: 5,
-      });
-      if (byLookup.data.length > 0) {
-        console.log(`[create-checkout-session] Found price via lookup_key: ${byLookup.data[0].id}`);
-        return byLookup.data[0];
+      // 1. Try lookup_keys
+      try {
+        const byLookup = await stripe.prices.list({ lookup_keys: lookupKeys, active: true, limit: 5 });
+        if (byLookup.data.length > 0) {
+          console.log(`[create-checkout-session] Found price via lookup_key: ${byLookup.data[0].id}`);
+          return byLookup.data[0];
+        }
+      } catch (e) {
+        console.warn(`[create-checkout-session] lookup_key search failed: ${e}`);
       }
 
-      // 2. Fallback: search products by name, then find matching price
-      console.warn(`[create-checkout-session] No price for lookup_keys [${lookupKeys.join(",")}], searching by product name "${productNameHint}"`);
-      const products = await stripe.products.search({
-        query: `name~"${productNameHint}"`,
-        limit: 5,
-      });
-      for (const product of products.data) {
-        if (!product.active) continue;
-        const prices = await stripe.prices.list({
-          product: product.id,
-          active: true,
-          type: priceType,
-          limit: 5,
-        });
-        if (prices.data.length > 0) {
-          console.log(`[create-checkout-session] Found price ${prices.data[0].id} on product ${product.id} (${product.name})`);
-          return prices.data[0];
+      // 2. Try hardcoded price ID
+      if (fallbackPriceId) {
+        try {
+          const price = await stripe.prices.retrieve(fallbackPriceId);
+          if (price && price.active) {
+            console.log(`[create-checkout-session] Using hardcoded price: ${price.id}`);
+            return price;
+          }
+        } catch (e) {
+          console.warn(`[create-checkout-session] Hardcoded price ${fallbackPriceId} not found: ${e}`);
+        }
+      }
+
+      // 3. Try listing prices on fallback product
+      if (fallbackProductId) {
+        try {
+          const prices = await stripe.prices.list({ product: fallbackProductId, active: true, type: priceType, limit: 5 });
+          if (prices.data.length > 0) {
+            console.log(`[create-checkout-session] Found price ${prices.data[0].id} on product ${fallbackProductId}`);
+            return prices.data[0];
+          }
+        } catch (e) {
+          console.warn(`[create-checkout-session] Product price search failed: ${e}`);
         }
       }
 
@@ -163,7 +176,8 @@ Deno.serve(async (req) => {
 
       const monthlyPrice = await resolveActivePrice(
         ["gardien_mensuel"],
-        "Abonnement Gardien",
+        KNOWN_PRICES.monthly,
+        null,
         "recurring",
       );
       if (!monthlyPrice) {
@@ -202,7 +216,8 @@ Deno.serve(async (req) => {
     if (formulaType === "one_shot") {
       const oneShotPrice = await resolveActivePrice(
         ["gardien_oneshot", "gardien_one_shot"],
-        "Accès un mois",
+        null,
+        KNOWN_PRICES.one_shot_product,
         "one_time",
       );
       if (!oneShotPrice) {
@@ -250,7 +265,8 @@ Deno.serve(async (req) => {
 
       const prorataPrice = await resolveActivePrice(
         ["gardien_prorata_2026"],
-        "Accès 2026",
+        null,
+        KNOWN_PRICES.prorata_product,
         "one_time",
       );
       if (!prorataPrice) {
