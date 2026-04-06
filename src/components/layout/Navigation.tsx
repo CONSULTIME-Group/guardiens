@@ -2,7 +2,7 @@ import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import {
   Home, Search, Calendar, MessageSquare, User, LogOut, Settings,
   PawPrint, Newspaper, Shield, Compass, Handshake, Menu, Star,
-  MoreHorizontal, Crown,
+  MoreHorizontal, Crown, Plus,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAdmin } from "@/hooks/useAdmin";
@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import FeedbackDialog from "@/components/feedback/FeedbackDialog";
 import { useSubscriptionAccess } from "@/hooks/useSubscriptionAccess";
 import PremiumGateDialog from "@/components/premium/PremiumGateDialog";
+import ActivateRoleDialog from "@/components/premium/ActivateRoleDialog";
 
 // ── Sidebar group label ──
 const GroupLabel = ({ label }: { label: string }) => (
