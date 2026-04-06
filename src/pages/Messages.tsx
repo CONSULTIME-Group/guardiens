@@ -267,7 +267,7 @@ const Messages = () => {
           const { data: newConv, error } = await supabase
             .from("conversations")
             .insert({ owner_id: user.id, sitter_id: gardienId })
-            .select("*, sit:sits(title, status, property_id, start_date, end_date)")
+            .select("*")
             .single();
           if (error || !newConv) return;
 
@@ -320,7 +320,7 @@ const Messages = () => {
           try {
             const { data: fetchedConv } = await supabase
               .from("conversations")
-              .select("*, sit:sits(title, status, property_id, start_date, end_date)")
+              .select("*")
               .eq("id", convId)
               .single();
             if (!fetchedConv) return;
