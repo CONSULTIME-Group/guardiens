@@ -304,8 +304,51 @@ const Messages = () => {
         setActiveConv(target);
         searchParams.delete("conversation");
         searchParams.delete("conv");
+        searchParams.delete("conversationId");
         setSearchParams(searchParams, { replace: true });
         setAutoOpened(true);
+        return;
+      }
+      // Conversation not yet in local state — fetch it directly
+      if (!autoOpened) {
+        (async () => {
+          try {
+            const { data: fetchedConv } = await supabase
+              .from("conversations")
+              .select("*, sit:sits(title, status, property_id, start_date, end_date)")
+              .eq("id", convId)
+              .single();
+            if (!fetchedConv) return;
+            const otherId = fetchedConv.owner_id === user?.id ? fetchedConv.sitter_id : fetchedConv.owner_id;
+            const { data: profileData } = await supabase
+              .from("profiles")
+              .select("id, first_name, avatar_url, identity_verified, city, is_founder")
+              .eq("id", otherId)
+              .single();
+            const enriched: Conversation = {
+              ...fetchedConv,
+              archived_by: fetchedConv.archived_by || [],
+              other_user: profileData || null,
+              last_message: null,
+              unread_count: 0,
+              application_status: null,
+              other_user_rating: 0,
+              other_user_is_emergency: false,
+            };
+            setConversations(prev => {
+              if (prev.some(c => c.id === enriched.id)) return prev;
+              return [enriched, ...prev];
+            });
+            setActiveConv(enriched);
+            searchParams.delete("conversation");
+            searchParams.delete("conv");
+            searchParams.delete("conversationId");
+            setSearchParams(searchParams, { replace: true });
+            setAutoOpened(true);
+          } catch {
+            // silently fail
+          }
+        })();
         return;
       }
     }
