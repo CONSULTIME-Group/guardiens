@@ -163,7 +163,8 @@ Deno.serve(async (req) => {
 
       const monthlyPrice = await resolveActivePrice(
         ["gardien_mensuel"],
-        "price_1TIPaZIR9gPuLbxmwV01tgwa",
+        "Abonnement Gardien",
+        "recurring",
       );
       if (!monthlyPrice) {
         return new Response(JSON.stringify({ error: "Prix gardien_mensuel introuvable" }), {
