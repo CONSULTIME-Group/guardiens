@@ -235,9 +235,12 @@ export const BottomNav = () => {
   const location = useLocation();
   const { user, activeRole, setActiveRole, logout } = useAuth();
   const { isAdmin } = useAdmin();
+  const { hasAccess } = useSubscriptionAccess();
   const [unreadCount, setUnreadCount] = useState(0);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [feedbackOpen, setFeedbackOpen] = useState(false);
+  const [gateOpen, setGateOpen] = useState(false);
+  const [gateFeature, setGateFeature] = useState("");
 
   const effectiveRole = user?.role === "both" ? activeRole : user?.role;
 
