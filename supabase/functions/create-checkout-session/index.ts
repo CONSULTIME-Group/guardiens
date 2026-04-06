@@ -176,7 +176,8 @@ Deno.serve(async (req) => {
 
       const monthlyPrice = await resolveActivePrice(
         ["gardien_mensuel"],
-        "Abonnement Gardien",
+        KNOWN_PRICES.monthly,
+        null,
         "recurring",
       );
       if (!monthlyPrice) {
@@ -215,7 +216,8 @@ Deno.serve(async (req) => {
     if (formulaType === "one_shot") {
       const oneShotPrice = await resolveActivePrice(
         ["gardien_oneshot", "gardien_one_shot"],
-        "Accès un mois",
+        null,
+        KNOWN_PRICES.one_shot_product,
         "one_time",
       );
       if (!oneShotPrice) {
@@ -263,7 +265,8 @@ Deno.serve(async (req) => {
 
       const prorataPrice = await resolveActivePrice(
         ["gardien_prorata_2026"],
-        "Accès 2026",
+        null,
+        KNOWN_PRICES.prorata_product,
         "one_time",
       );
       if (!prorataPrice) {
