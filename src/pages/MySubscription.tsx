@@ -87,7 +87,7 @@ const MySubscription = () => {
     const now = new Date();
     const isFounder =
       profile.is_founder || (profile.created_at && new Date(profile.created_at) < LAUNCH_DATE);
-    const statut = sub?.statut || null;
+    const currentStatus = sub?.status || null;
 
     if (effectiveRole === "owner") {
       setView("proprio");
@@ -143,14 +143,11 @@ const MySubscription = () => {
 
   // Active sub calculations
   const subscribedDays = sub?.created_at ? differenceInDays(now, new Date(sub.created_at)) : 0;
-  const daysUntilRenewal = sub?.current_period_end
-    ? differenceInDays(new Date(sub.current_period_end), now)
+  const daysUntilRenewal = sub?.expires_at
+    ? differenceInDays(new Date(sub.expires_at), now)
     : null;
-  const trialEndFormatted = sub?.trial_end
-    ? format(new Date(sub.trial_end), "dd/MM/yyyy", { locale: fr })
-    : "\u2014";
-  const renewalFormatted = sub?.current_period_end
-    ? format(new Date(sub.current_period_end), "dd/MM/yyyy", { locale: fr })
+  const renewalFormatted = sub?.expires_at
+    ? format(new Date(sub.expires_at), "dd/MM/yyyy", { locale: fr })
     : "\u2014";
 
   return (
@@ -257,7 +254,7 @@ const MySubscription = () => {
           </div>
 
           {/* Trial banner */}
-          {sub?.statut === "trial" && (
+          {sub?.status === "active" && daysUntilRenewal !== null && daysUntilRenewal <= 30 && (
             <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 flex items-start gap-2 text-sm font-body text-foreground/70">
               <Clock className="h-4 w-4 text-amber-500 shrink-0 mt-0.5" />
               <span>
