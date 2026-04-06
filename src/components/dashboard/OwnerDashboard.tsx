@@ -13,7 +13,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Button } from "@/components/ui/button";
 import { format, differenceInDays } from "date-fns";
 import { fr } from "date-fns/locale";
-import BadgeShield from "@/components/badges/BadgeShield";
+
 import { TooltipProvider } from "@/components/ui/tooltip";
 import RoleActivationBanner from "./RoleActivationBanner";
 
@@ -330,11 +330,7 @@ const OwnerDashboard = () => {
                     )}
                     {badges.length > 0 && (
                       <TooltipProvider>
-                        <div className="flex gap-1">
-                          {badges.map((b: any) => (
-                            <BadgeShield key={b.badge_key} badgeKey={b.badge_key} count={b.count} size="sm" showLabel={false} />
-                          ))}
-                        </div>
+                        {/* Badges — migration en cours */}
                       </TooltipProvider>
                     )}
                   </div>

@@ -10,16 +10,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Helmet } from "react-helmet-async";
 import PageMeta from "@/components/PageMeta";
-import BadgeShieldGrid from "@/components/badges/BadgeShieldGrid";
-import BadgeShield from "@/components/badges/BadgeShield";
-import StatusShield from "@/components/badges/StatusShield";
 import ReviewsDisplay from "@/components/reviews/ReviewsDisplay";
 import ReportButton from "@/components/reports/ReportButton";
 import PublicGallery from "@/components/profile/PublicGallery";
 import PublicExperiences from "@/components/profile/PublicExperiences";
 import PublicOwnerGallery from "@/components/profile/PublicOwnerGallery";
 import OwnerHighlights from "@/components/profile/OwnerHighlights";
-import { getBadgeDef } from "@/components/badges/badgeDefinitions";
+
 import EntraideSection from "@/components/missions/EntraideSection";
 import PublicSkills from "@/components/profile/PublicSkills";
 import EnvironmentPills from "@/components/shared/EnvironmentPills";
@@ -131,7 +128,7 @@ const PublicProfile = () => {
   const verifiedExpCount = externalExperiences.filter((e: any) => e.verification_status === "verified").length;
   const totalSits = completedSits + verifiedExpCount;
   const firstName = profile.first_name || "Membre";
-  const topBadge = badgeCounts.length > 0 ? getBadgeDef(badgeCounts.sort((a, b) => b.count - a.count)[0].badge_key)?.label : "";
+  const topBadge = "";
   const shouldIndex = (profile.profile_completion || 0) >= 60;
 
   const metaTitle = isSitter
@@ -203,9 +200,7 @@ const PublicProfile = () => {
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
                 <h1 className="font-heading text-2xl font-bold text-foreground">{firstName}</h1>
-                {profile.identity_verified && <StatusShield type="verified" />}
-                {profile.is_founder && <StatusShield type="founder" />}
-                {isEmergencySitter && <StatusShield type="emergency" />}
+                {/* Status badges — migration en cours */}
               </div>
 
               <div className="flex items-center gap-3 text-sm mt-1 flex-wrap text-muted-foreground">
@@ -277,11 +272,7 @@ const PublicProfile = () => {
           )}
 
           {/* === BADGES === */}
-          {badgeCounts.length > 0 && (
-            <div className="rounded-xl border border-border bg-white p-5 shadow-sm">
-              <BadgeShieldGrid badges={badgeCounts} title={isSitter ? "Ses badges" : "Ses badges"} />
-            </div>
-          )}
+          {/* Badges — migration en cours */}
 
           {/* === TABS === */}
           <Tabs defaultValue={isSitter ? "sitter" : "owner"} className="w-full">

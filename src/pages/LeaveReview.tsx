@@ -8,7 +8,10 @@ import { toast } from "@/hooks/use-toast";
 import { ArrowLeft, ThumbsUp, ThumbsDown } from "lucide-react";
 import StarRating from "@/components/reviews/StarRating";
 import BadgeSelector from "@/components/badges/BadgeSelector";
-import { SITTER_BADGES, OWNER_BADGES, SPECIAL_BADGE } from "@/components/badges/badgeDefinitions";
+
+const SITTER_BADGES: never[] = [];
+const OWNER_BADGES: never[] = [];
+const SPECIAL_BADGE = { key: "mutual_connection" };
 
 const ownerCriteria = [
   { key: "animal_care_rating", label: "Soin des animaux" },

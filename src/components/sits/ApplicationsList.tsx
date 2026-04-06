@@ -12,7 +12,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import VerifiedBadge from "@/components/profile/VerifiedBadge";
 import EmergencyBadge from "@/components/profile/EmergencyBadge";
-import BadgeShield from "@/components/badges/BadgeShield";
+
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -259,11 +259,7 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
         {/* LINE 2 — Badges */}
         {app.badgeCounts && app.badgeCounts.length > 0 && (
           <TooltipProvider>
-            <div className="mt-3 flex gap-1.5">
-              {app.badgeCounts.slice(0, 3).map((b: any) => (
-                <BadgeShield key={b.badge_key} badgeKey={b.badge_key} count={b.count} size="sm" showLabel={false} />
-              ))}
-            </div>
+            {/* Badges — migration en cours */}
           </TooltipProvider>
         )}
 
