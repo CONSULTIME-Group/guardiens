@@ -76,7 +76,7 @@ Deno.serve(async (req) => {
     const freeMonths = profile?.free_months_credit ?? 0;
 
     // 4. Stripe customer
-    const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY")!, {
+    const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY_FULL") ?? Deno.env.get("STRIPE_SECRET_KEY")!, {
       apiVersion: "2025-08-27.basil",
     });
 
