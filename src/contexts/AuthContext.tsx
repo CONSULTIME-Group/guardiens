@@ -42,9 +42,17 @@ const mapProfile = (profile: any, authEmail?: string): Profile => ({
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<Profile | null>(null);
-  const [activeRole, setActiveRole] = useState<ActiveRole>("sitter");
+  const [activeRole, setActiveRoleState] = useState<ActiveRole>(() => {
+    const saved = localStorage.getItem('guardiens_active_role');
+    return (saved === 'owner' || saved === 'sitter') ? saved : 'sitter';
+  });
   const [loading, setLoading] = useState(true);
   const [roleInitialized, setRoleInitialized] = useState(false);
+
+  const setActiveRole = useCallback((role: ActiveRole) => {
+    setActiveRoleState(role);
+    localStorage.setItem('guardiens_active_role', role);
+  }, []);
 
   const checkFounderExpiry = useCallback(async (userId: string, isFounder: boolean) => {
     if (!isFounder) return;
@@ -78,8 +86,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       // Only set activeRole on first load, never override user's manual selection
       if (!roleInitialized) {
-        if (profile.role === "owner") setActiveRole("owner");
-        else setActiveRole("sitter");
+        const saved = localStorage.getItem('guardiens_active_role');
+        if (saved === 'owner' || saved === 'sitter') {
+          setActiveRoleState(saved);
+        } else if (profile.role === 'owner') {
+          setActiveRoleState('owner');
+          localStorage.setItem('guardiens_active_role', 'owner');
+        } else {
+          setActiveRoleState('sitter');
+          localStorage.setItem('guardiens_active_role', 'sitter');
+        }
         setRoleInitialized(true);
       }
 
