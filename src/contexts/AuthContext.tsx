@@ -86,8 +86,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       // Only set activeRole on first load, never override user's manual selection
       if (!roleInitialized) {
-        if (profile.role === "owner") setActiveRole("owner");
-        else setActiveRole("sitter");
+        const saved = localStorage.getItem('guardiens_active_role');
+        if (saved === 'owner' || saved === 'sitter') {
+          setActiveRoleState(saved);
+        } else if (profile.role === 'owner') {
+          setActiveRoleState('owner');
+          localStorage.setItem('guardiens_active_role', 'owner');
+        } else {
+          setActiveRoleState('sitter');
+          localStorage.setItem('guardiens_active_role', 'sitter');
+        }
         setRoleInitialized(true);
       }
 
