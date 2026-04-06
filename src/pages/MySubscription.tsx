@@ -56,20 +56,20 @@ const calculateProrata = () => {
 // ──── ADVANTAGES ────
 const FOUNDER_ADVANTAGES = [
   "Postuler aux gardes",
-  "Messagerie avec les propri\u00e9taires",
-  "Appara\u00eetre dans la recherche",
-  "Mode \u00abJe suis disponible\u00bb",
-  "Fiches races compl\u00e8tes",
-  "Guides locaux d\u00e9taill\u00e9s",
-  "Articles en acc\u00e8s complet",
-  "Gardes longue dur\u00e9e (+ frais de service)",
-  "\u00c9cussons et m\u00e9triques de fiabilit\u00e9",
+  "Messagerie avec les propriétaires",
+  "Apparaître dans la recherche",
+  "Mode «Je suis disponible»",
+  "Fiches races complètes",
+  "Guides locaux détaillés",
+  "Articles en accès complet",
+  "Gardes longue durée (+ frais de service)",
+  "Écussons et métriques de fiabilité",
 ];
 
 const EXPIRED_HIGHLIGHTS = [
-  { icon: Send, label: "Postuler aux gardes pr\u00e8s de chez vous" },
-  { icon: SearchIcon, label: "Appara\u00eetre dans la recherche des propri\u00e9taires" },
-  { icon: MessageSquare, label: "Messagerie illimit\u00e9e avec les propri\u00e9taires" },
+  { icon: Send, label: "Postuler aux gardes près de chez vous" },
+  { icon: SearchIcon, label: "Apparaître dans la recherche des propriétaires" },
+  { icon: MessageSquare, label: "Messagerie illimitée avec les propriétaires" },
 ];
 
 // ──── GA4 TRACK ────
@@ -103,7 +103,7 @@ function PricingCardsNew() {
       if (data?.url) window.location.href = data.url;
       else throw new Error(data?.error || "no url");
     } catch {
-      toast.error("Une erreur est survenue. Veuillez r\u00e9essayer.");
+      toast.error("Une erreur est survenue. Veuillez réessayer.");
     } finally {
       setLoading(null);
     }
@@ -113,24 +113,24 @@ function PricingCardsNew() {
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
       <div className="bg-card border border-border rounded-xl p-5 flex flex-col">
         <p className="font-heading text-lg font-semibold mb-2">Un mois</p>
-        <p className="mb-1"><span className="text-3xl font-heading font-bold">12\u20ac</span><span className="text-sm text-muted-foreground font-body">/mois</span></p>
-        <p className="text-xs text-muted-foreground font-body mb-4">Paiement imm\u00e9diat. Sans renouvellement.</p>
+        <p className="mb-1"><span className="text-3xl font-heading font-bold">12€</span><span className="text-sm text-muted-foreground font-body">/mois</span></p>
+        <p className="text-xs text-muted-foreground font-body mb-4">Paiement immédiat. Sans renouvellement.</p>
         <ul className="text-sm font-body space-y-2 mb-6 flex-1">
-          <li className="flex items-center gap-2"><Check className="h-3.5 w-3.5 text-primary shrink-0" /> Acc\u00e8s complet 30 jours</li>
+          <li className="flex items-center gap-2"><Check className="h-3.5 w-3.5 text-primary shrink-0" /> Accès complet 30 jours</li>
           <li className="flex items-center gap-2"><Check className="h-3.5 w-3.5 text-primary shrink-0" /> Aucun engagement</li>
-          <li className="flex items-center gap-2"><Check className="h-3.5 w-3.5 text-primary shrink-0" /> Aucune CB m\u00e9moris\u00e9e</li>
+          <li className="flex items-center gap-2"><Check className="h-3.5 w-3.5 text-primary shrink-0" /> Aucune CB mémorisée</li>
         </ul>
         <Button variant="outline" className="w-full font-body" onClick={() => handleCheckout("oneshot")} disabled={loading !== null}>
-          {loading === "oneshot" ? <Loader2 className="h-4 w-4 animate-spin" /> : "Acc\u00e9der un mois"}
+          {loading === "oneshot" ? <Loader2 className="h-4 w-4 animate-spin" /> : "Accéder un mois"}
         </Button>
       </div>
 
       <div className="relative flex flex-col">
         <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground text-xs px-3 py-0.5 rounded-full font-medium font-body z-10">Le plus choisi</span>
         <div className="bg-card border-2 border-primary rounded-xl p-5 flex flex-col flex-1">
-          <p className="font-heading text-lg font-semibold mb-2">Mois apr\u00e8s mois</p>
-          <p className="mb-1"><span className="text-3xl font-heading font-bold">9\u20ac</span><span className="text-sm text-muted-foreground font-body">/mois</span></p>
-          <p className="text-xs text-muted-foreground font-body mb-4">7 jours d'essai. Annulable \u00e0 tout moment.</p>
+          <p className="font-heading text-lg font-semibold mb-2">Mois après mois</p>
+          <p className="mb-1"><span className="text-3xl font-heading font-bold">9€</span><span className="text-sm text-muted-foreground font-body">/mois</span></p>
+          <p className="text-xs text-muted-foreground font-body mb-4">7 jours d'essai. Annulable à tout moment.</p>
           <ul className="text-sm font-body space-y-2 mb-6 flex-1">
             <li className="flex items-center gap-2"><Check className="h-3.5 w-3.5 text-primary shrink-0" /> 7 jours d'essai offerts</li>
             <li className="flex items-center gap-2"><Check className="h-3.5 w-3.5 text-primary shrink-0" /> Sans engagement</li>
@@ -144,11 +144,11 @@ function PricingCardsNew() {
 
       <div className="bg-card border border-border rounded-xl p-5 flex flex-col">
         <span className="inline-flex self-start bg-green-100 text-green-700 text-xs px-2 py-0.5 rounded-full font-medium font-body mb-2">Offre 2026</span>
-        <p className="font-heading text-lg font-semibold mb-2">Jusqu'\u00e0 la fin 2026</p>
-        <p className="mb-1"><span className="text-3xl font-heading font-bold">{prorataPrice}\u20ac</span><span className="text-sm text-muted-foreground font-body"> pour {months} mois</span></p>
-        <p className="text-xs text-green-600 font-medium font-body mb-4">\u00c9conomie de {savings}\u20ac</p>
+        <p className="font-heading text-lg font-semibold mb-2">Jusqu'à la fin 2026</p>
+        <p className="mb-1"><span className="text-3xl font-heading font-bold">{prorataPrice}€</span><span className="text-sm text-muted-foreground font-body"> pour {months} mois</span></p>
+        <p className="text-xs text-green-600 font-medium font-body mb-4">Économie de {savings}€</p>
         <ul className="text-sm font-body space-y-2 mb-6 flex-1">
-          <li className="flex items-center gap-2"><Check className="h-3.5 w-3.5 text-primary shrink-0" /> Acc\u00e8s au 31 d\u00e9cembre</li>
+          <li className="flex items-center gap-2"><Check className="h-3.5 w-3.5 text-primary shrink-0" /> Accès au 31 décembre</li>
           <li className="flex items-center gap-2"><Check className="h-3.5 w-3.5 text-primary shrink-0" /> -20% sur le tarif mensuel</li>
           <li className="flex items-center gap-2"><Check className="h-3.5 w-3.5 text-primary shrink-0" /> Pas de renouvellement en 2027</li>
         </ul>
@@ -177,7 +177,7 @@ function ReferralSection({ referralCode, userId }: { referralCode: string | null
   const handleCopy = () => {
     if (!url) return;
     navigator.clipboard.writeText(url);
-    toast.success("Lien copi\u00e9 !");
+    toast.success("Lien copié !");
   };
 
   if (!code) return null;
@@ -187,7 +187,7 @@ function ReferralSection({ referralCode, userId }: { referralCode: string | null
       <h3 className="font-heading text-lg font-semibold mb-1">Parrainez un proche.</h3>
       <p className="text-sm text-foreground/70 font-body mb-4">
         Si quelqu'un s'inscrit avec votre lien et active son compte,
-        vous recevez tous les deux un mois d'acc\u00e8s offert.
+        vous recevez tous les deux un mois d'accès offert.
       </p>
       <div className="flex gap-2">
         <input
@@ -200,7 +200,7 @@ function ReferralSection({ referralCode, userId }: { referralCode: string | null
         </Button>
       </div>
       <p className="text-xs text-foreground/40 font-body mt-2">
-        Le mois offert est cr\u00e9dit\u00e9 d\u00e8s que votre filleul active son compte.
+        Le mois offert est crédité dès que votre filleul active son compte.
       </p>
     </div>
   );
@@ -209,28 +209,28 @@ function ReferralSection({ referralCode, userId }: { referralCode: string | null
 // ──── PRE-LAUNCH ADVANTAGES ────
 const PRE_LAUNCH_ADVANTAGES: { label: string; href: string | null }[] = [
   { label: "Postuler aux gardes", href: "/recherche" },
-  { label: "Messagerie avec les propri\u00e9taires", href: null },
-  { label: "Appara\u00eetre dans la recherche", href: null },
-  { label: "Mode \u00abJe suis disponible\u00bb", href: "/dashboard" },
-  { label: "Fiches races compl\u00e8tes", href: "/actualites" },
-  { label: "Guides locaux d\u00e9taill\u00e9s", href: "/guides" },
-  { label: "Articles en acc\u00e8s complet", href: "/actualites" },
-  { label: "Gardes longue dur\u00e9e", href: null },
-  { label: "\u00c9cussons et m\u00e9triques", href: null },
+  { label: "Messagerie avec les propriétaires", href: null },
+  { label: "Apparaître dans la recherche", href: null },
+  { label: "Mode «Je suis disponible»", href: "/dashboard" },
+  { label: "Fiches races complètes", href: "/actualites" },
+  { label: "Guides locaux détaillés", href: "/guides" },
+  { label: "Articles en accès complet", href: "/actualites" },
+  { label: "Gardes longue durée", href: null },
+  { label: "Écussons et métriques", href: null },
 ];
 
 const FOUNDER_FAQ = [
   {
-    q: "C\u2019est vraiment gratuit jusqu\u2019au 13 juin\u00a0?",
-    a: "Oui. Aucune carte bancaire demand\u00e9e avant le 13 juin. Apr\u00e8s cette date, vous choisissez librement une formule \u2014 rien ne d\u00e9marre automatiquement.",
+    q: "C’est vraiment gratuit jusqu’au 13 juin ?",
+    a: "Oui. Aucune carte bancaire demandée avant le 13 juin. Après cette date, vous choisissez librement une formule — rien ne démarre automatiquement.",
   },
   {
-    q: "Que se passe-t-il apr\u00e8s le 13 juin\u00a0?",
-    a: "Trois options : 12\u20ac pour un mois, 9\u20ac/mois sans engagement, ou un tarif annuel r\u00e9duit. Vous d\u00e9cidez au moment voulu.",
+    q: "Que se passe-t-il après le 13 juin ?",
+    a: "Trois options : 12€ pour un mois, 9€/mois sans engagement, ou un tarif annuel réduit. Vous décidez au moment voulu.",
   },
   {
-    q: "Qu\u2019est-ce que le badge Fondateur\u00a0?",
-    a: "Un \u00e9cusson permanent visible sur votre profil public. Il distingue les membres qui ont rejoint Guardiens d\u00e8s le d\u00e9but.",
+    q: "Qu’est-ce que le badge Fondateur ?",
+    a: "Un écusson permanent visible sur votre profil public. Il distingue les membres qui ont rejoint Guardiens dès le début.",
   },
 ];
 
@@ -279,7 +279,7 @@ const MySubscription = () => {
         document.body.removeChild(el);
       } catch { /* silencieux */ }
     }
-    setCopyLabel("Lien copi\u00e9 \u2713");
+    setCopyLabel("Lien copié ✓");
     trackEvent("referral_link_copied", { source: "pre_launch_page" });
     setTimeout(() => setCopyLabel("Copier mon lien"), 2500);
   };
@@ -379,15 +379,15 @@ const MySubscription = () => {
     if (searchParams.get("success") === "true") {
       const formula = searchParams.get("formula");
       const messages: Record<string, string> = {
-        monthly: "Votre essai de 7 jours d\u00e9marre \u2014 bienvenue chez Guardiens.",
-        one_shot: "Votre acc\u00e8s d'un mois est actif. Bonne garde !",
-        prorata: "Votre acc\u00e8s 2026 est activ\u00e9. Merci pour votre soutien.",
+        monthly: "Votre essai de 7 jours démarre — bienvenue chez Guardiens.",
+        one_shot: "Votre accès d'un mois est actif. Bonne garde !",
+        prorata: "Votre accès 2026 est activé. Merci pour votre soutien.",
       };
-      toast.success(messages[formula || ""] || "Votre abonnement est activ\u00e9 !");
+      toast.success(messages[formula || ""] || "Votre abonnement est activé !");
       setTimeout(() => loadData(), 2000);
       window.history.replaceState({}, "", "/mon-abonnement");
     } else if (searchParams.get("cancelled") === "true") {
-      toast("Paiement annul\u00e9 \u2014 vous pouvez choisir une formule \u00e0 tout moment.");
+      toast("Paiement annulé — vous pouvez choisir une formule à tout moment.");
       window.history.replaceState({}, "", "/mon-abonnement");
     }
   }, [searchParams, loadData]);
@@ -409,7 +409,7 @@ const MySubscription = () => {
   if (view === "loading") {
     return (
       <div className="p-6 md:p-10 max-w-3xl mx-auto space-y-6">
-        <PageMeta title="Mon abonnement | Guardiens" description="G\u00e9rez votre abonnement Guardiens." noindex />
+        <PageMeta title="Mon abonnement | Guardiens" description="Gérez votre abonnement Guardiens." noindex />
         <Skeleton className="h-8 w-64" />
         <Skeleton className="h-40 w-full rounded-2xl" />
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -422,10 +422,10 @@ const MySubscription = () => {
   }
 
   const isFounder = !!profile?.is_founder;
-  const renewalFormatted = sub?.expires_at ? format(new Date(sub.expires_at), "d MMMM yyyy", { locale: fr }) : "\u2014";
+  const renewalFormatted = sub?.expires_at ? format(new Date(sub.expires_at), "d MMMM yyyy", { locale: fr }) : "—";
   const planLabel = sub?.plan === "monthly" ? "Formule mensuelle"
-    : sub?.plan === "oneshot" ? "Acc\u00e8s un mois"
-    : sub?.plan === "yearly" ? "Acc\u00e8s 2026"
+    : sub?.plan === "oneshot" ? "Accès un mois"
+    : sub?.plan === "yearly" ? "Accès 2026"
     : "Abonnement";
   const showReferral = effectiveRole !== "owner";
 
@@ -438,16 +438,16 @@ const MySubscription = () => {
 
   return (
     <div className="p-6 md:p-10 max-w-3xl mx-auto animate-fade-in space-y-8">
-      <PageMeta title="Mon abonnement | Guardiens" description="G\u00e9rez votre abonnement Guardiens." noindex />
+      <PageMeta title="Mon abonnement | Guardiens" description="Gérez votre abonnement Guardiens." noindex />
 
       {/* ══ VUE — PRE_LAUNCH ══ */}
       {view === "pre_launch" && (
         <>
           <Helmet>
-            <title>Guardiens {"\u00B7"} Acc\u00e8s fondateur \u2014 b\u00eata</title>
-            <meta name="description" content="Guardiens est en pr\u00e9-lancement. Toutes les fonctionnalit\u00e9s sont gratuites jusqu'au 13 mai 2026. Rejoignez les Fondateurs." />
-            <meta property="og:title" content="Guardiens \u00B7 Acc\u00e8s fondateur b\u00eata" />
-            <meta property="og:description" content="Acc\u00e8s complet gratuit jusqu'au 13 mai. Badge Fondateur \u00e0 vie pour les premiers membres." />
+            <title>Guardiens {"·"} Accès fondateur — bêta</title>
+            <meta name="description" content="Guardiens est en pré-lancement. Toutes les fonctionnalités sont gratuites jusqu'au 13 mai 2026. Rejoignez les Fondateurs." />
+            <meta property="og:title" content="Guardiens · Accès fondateur bêta" />
+            <meta property="og:description" content="Accès complet gratuit jusqu'au 13 mai. Badge Fondateur à vie pour les premiers membres." />
             <meta property="og:url" content="https://guardiens.fr/mon-abonnement" />
             <meta property="og:type" content="website" />
             <meta name="robots" content="noindex, follow" />
@@ -457,10 +457,10 @@ const MySubscription = () => {
             {/* Welcome message */}
             {isNewMember && (
               <div className="bg-primary/10 border border-primary/20 rounded-xl px-5 py-4 flex items-start gap-3" role="status" aria-live="polite">
-                <span className="text-primary text-lg mt-0.5 flex-shrink-0" aria-hidden="true">{"\u2713"}</span>
+                <span className="text-primary text-lg mt-0.5 flex-shrink-0" aria-hidden="true">{"✓"}</span>
                 <div>
                   <p className="text-sm font-semibold text-primary font-body">Bienvenue chez Guardiens.</p>
-                  <p className="text-sm text-foreground/70 font-body mt-0.5">Votre compte est actif. Toutes les fonctionnalit\u00e9s sont disponibles jusqu'au 13 mai.</p>
+                  <p className="text-sm text-foreground/70 font-body mt-0.5">Votre compte est actif. Toutes les fonctionnalités sont disponibles jusqu'au 13 mai.</p>
                 </div>
               </div>
             )}
@@ -470,22 +470,22 @@ const MySubscription = () => {
               {/* Header */}
               <div className="px-6 sm:px-8 pt-7 pb-6 flex flex-col items-center text-center space-y-3 border-b border-border/50">
                 <span className="inline-flex items-center gap-1.5 bg-primary/10 text-primary text-[11px] font-medium px-3 py-1.5 rounded-full font-body tracking-widest uppercase select-none">
-                  Pr\u00e9-lancement {"\u00B7"} B\u00eata
+                  Pré-lancement {"·"} Bêta
                 </span>
                 <h1 className="font-heading text-2xl sm:text-3xl font-semibold text-foreground leading-tight">
                   Tout est gratuit jusqu'au 13 mai.
                 </h1>
                 <p className="text-base text-foreground/70 font-body max-w-sm leading-relaxed">
-                  Guardiens est en version b\u00eata. Toutes les fonctionnalit\u00e9s sont ouvertes \u2014 sans restriction.
+                  Guardiens est en version bêta. Toutes les fonctionnalités sont ouvertes — sans restriction.
                 </p>
                 {memberCount !== null && memberCount > 0 && memberCount < 200 && (
                   <p className="text-xs text-foreground/50 font-body" aria-live="polite">
-                    Vous \u00eates parmi les {memberCount} premiers membres.
+                    Vous êtes parmi les {memberCount} premiers membres.
                   </p>
                 )}
                 {memberCount !== null && memberCount >= 200 && (
                   <p className="text-xs text-foreground/50 font-body" aria-live="polite">
-                    {memberCount} membres ont d\u00e9j\u00e0 rejoint Guardiens.
+                    {memberCount} membres ont déjà rejoint Guardiens.
                   </p>
                 )}
               </div>
@@ -495,10 +495,10 @@ const MySubscription = () => {
                 <div className="flex items-start justify-between gap-2 relative" role="list" aria-label="Calendrier du lancement">
                   <div className="absolute top-3 left-8 right-8 h-px bg-border" aria-hidden="true" />
                   {[
-                    { label: "Maintenant", sub: "Acc\u00e8s complet", active: true, amber: false },
+                    { label: "Maintenant", sub: "Accès complet", active: true, amber: false },
                     { label: "13 mai", sub: "Badge Fondateur", active: false, amber: true },
-                    { label: "13 juin", sub: "Fin de gr\u00e2ce", active: false, amber: false },
-                    { label: "Ensuite", sub: "9\u20ac/mois", active: false, amber: false },
+                    { label: "13 juin", sub: "Fin de grâce", active: false, amber: false },
+                    { label: "Ensuite", sub: "9€/mois", active: false, amber: false },
                   ].map(({ label, sub: subText, active, amber }) => (
                     <div key={label} role="listitem" className="flex flex-col items-center gap-1.5 z-10 flex-1">
                       <div className={[
@@ -541,12 +541,12 @@ const MySubscription = () => {
               {profileCompletion < 60 && (
                 <div className="px-6 sm:px-8 py-4 border-b border-border/50 bg-muted/30 flex items-center justify-between gap-4 flex-wrap">
                   <div className="space-y-1.5 flex-1 min-w-0">
-                    <p className="text-sm font-medium text-foreground font-body">Compl\u00e9tez votre profil pour \u00eatre visible le 13 mai.</p>
+                    <p className="text-sm font-medium text-foreground font-body">Complétez votre profil pour être visible le 13 mai.</p>
                     <div className="flex items-center gap-2">
                       <div className="w-24 bg-border rounded-full h-1.5 overflow-hidden flex-shrink-0">
                         <div className="bg-primary h-1.5 rounded-full transition-all" ref={(el) => { if (el) el.style.width = `${profileCompletion}%`; }} />
                       </div>
-                      <span className="text-xs text-foreground/50 font-body whitespace-nowrap">{profileCompletion}\u00a0% compl\u00e9t\u00e9</span>
+                      <span className="text-xs text-foreground/50 font-body whitespace-nowrap">{profileCompletion} % complété</span>
                     </div>
                   </div>
                   <a
@@ -554,14 +554,14 @@ const MySubscription = () => {
                     className="text-sm font-medium text-primary font-body hover:underline whitespace-nowrap flex-shrink-0"
                     onClick={() => trackEvent("cta_complete_profile", { source: "pre_launch_nudge" })}
                   >
-                    Compl\u00e9ter {"\u2192"}
+                    Compléter {"→"}
                   </a>
                 </div>
               )}
 
               {/* Advantages */}
               <div className="px-6 sm:px-8 py-6 border-b border-border/50 space-y-4">
-                <p className="text-xs uppercase tracking-widest text-foreground/50 font-body">Tout ce que vous d\u00e9bloquez</p>
+                <p className="text-xs uppercase tracking-widest text-foreground/50 font-body">Tout ce que vous débloquez</p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-3">
                   {PRE_LAUNCH_ADVANTAGES.map(({ label, href }) => (
                     <div key={label} className="flex items-center gap-2.5 min-w-0 group">
@@ -588,7 +588,7 @@ const MySubscription = () => {
                   <div className="space-y-2.5">
                     <p className="text-sm font-semibold text-amber-800 font-body">Vous devenez Fondateur le 13 mai.</p>
                     <p className="text-sm text-amber-700 font-body leading-relaxed">
-                      Chaque membre inscrit avant le 13 mai b\u00e9n\u00e9ficie d'un mois suppl\u00e9mentaire gratuit jusqu'au 13 juin, et re\u00e7oit le badge Fondateur \u00e0 vie, visible sur son profil public.
+                      Chaque membre inscrit avant le 13 mai bénéficie d'un mois supplémentaire gratuit jusqu'au 13 juin, et reçoit le badge Fondateur à vie, visible sur son profil public.
                     </p>
                     <div className="mt-4 space-y-2 border-t border-amber-200/70 pt-4">
                       {FOUNDER_FAQ.map(({ q, a }) => (
@@ -624,13 +624,13 @@ const MySubscription = () => {
               <div className="space-y-1">
                 <p className="font-heading text-base font-semibold text-foreground">Invitez quelqu'un du coin.</p>
                 <p className="text-sm text-foreground/70 font-body leading-relaxed">
-                  Si un proche s'inscrit avec votre lien et active son compte, vous recevez tous les deux un mois d'acc\u00e8s offert.
+                  Si un proche s'inscrit avec votre lien et active son compte, vous recevez tous les deux un mois d'accès offert.
                 </p>
               </div>
               <div className="flex items-stretch gap-2">
                 <input
                   readOnly
-                  value={referralUrl || "Chargement\u2026"}
+                  value={referralUrl || "Chargement…"}
                   aria-label="Votre lien de parrainage"
                   onFocus={(e) => {
                     const input = e.target as HTMLInputElement;
@@ -645,7 +645,7 @@ const MySubscription = () => {
                 <button
                   type="button"
                   onClick={handleCopyReferral}
-                  disabled={!referralUrl || referralUrl === "Chargement\u2026"}
+                  disabled={!referralUrl || referralUrl === "Chargement…"}
                   className="shrink-0 inline-flex items-center gap-1.5 font-body text-sm font-medium px-4 py-2.5 rounded-lg border border-primary text-primary hover:bg-primary/5 transition-colors disabled:opacity-40 disabled:pointer-events-none min-h-[44px] whitespace-nowrap"
                 >
                   <Copy className="w-3.5 h-3.5" aria-hidden="true" />
@@ -653,23 +653,23 @@ const MySubscription = () => {
                 </button>
               </div>
               <p className="text-xs text-foreground/40 font-body italic">
-                Le mois offert est cr\u00e9dit\u00e9 d\u00e8s que votre filleul active son compte.
+                Le mois offert est crédité dès que votre filleul active son compte.
               </p>
             </div>
           </div>
         </>
       )}
 
-      {/* ══ VUE — PROPRI\u00c9TAIRE ══ */}
+      {/* ══ VUE — PROPRIÉTAIRE ══ */}
       {view === "owner" && (
         <>
           <div className="bg-card border border-border rounded-xl p-8 max-w-2xl mx-auto space-y-4">
             <div className="flex items-center gap-3">
               <Home className="h-7 w-7 text-primary" />
-              <h2 className="text-2xl font-heading font-semibold">Guardiens est gratuit pour les propri\u00e9taires.</h2>
+              <h2 className="text-2xl font-heading font-semibold">Guardiens est gratuit pour les propriétaires.</h2>
             </div>
             <p className="text-sm text-foreground/70 font-body">
-              Publiez vos annonces, recevez des candidatures et \u00e9changez avec les gardiens \u2014 sans frais, pour toujours.
+              Publiez vos annonces, recevez des candidatures et échangez avec les gardiens — sans frais, pour toujours.
             </p>
           </div>
           <ReferralSection referralCode={profile?.referral_code} userId={user!.id} />
@@ -682,20 +682,20 @@ const MySubscription = () => {
           <div className="bg-card border border-amber-200 rounded-2xl shadow-sm p-6 sm:p-8 space-y-6 w-full">
             <div className="flex flex-col items-center text-center space-y-3">
               <BadgeSceauLarge id="fondateur" size={52} />
-              <h2 className="font-heading text-2xl font-semibold text-foreground">Vous \u00eates Fondateur Guardiens.</h2>
-              <p className="text-base text-foreground/70 font-body">Votre acc\u00e8s complet est gratuit jusqu'au 13 juin 2026.</p>
+              <h2 className="font-heading text-2xl font-semibold text-foreground">Vous êtes Fondateur Guardiens.</h2>
+              <p className="text-base text-foreground/70 font-body">Votre accès complet est gratuit jusqu'au 13 juin 2026.</p>
             </div>
 
             <div className="bg-amber-50 rounded-xl py-4 px-6 space-y-2">
-              <p className="text-sm font-medium text-amber-800 font-body">Il reste {daysLeft} jour{daysLeft > 1 ? "s" : ""} sur votre p\u00e9riode fondateur</p>
+              <p className="text-sm font-medium text-amber-800 font-body">Il reste {daysLeft} jour{daysLeft > 1 ? "s" : ""} sur votre période fondateur</p>
               <div className="w-full bg-amber-200 rounded-full h-2 overflow-hidden">
                 <div className="bg-amber-400 h-2 rounded-full transition-all duration-500" ref={(el) => { if (el) el.style.width = `${progressPct}%`; }} />
               </div>
-              <p className="text-xs text-amber-600 font-body">Acc\u00e8s gratuit jusqu'au 13 juin 2026</p>
+              <p className="text-xs text-amber-600 font-body">Accès gratuit jusqu'au 13 juin 2026</p>
             </div>
 
             <div className="bg-muted/30 rounded-xl p-5">
-              <p className="text-xs uppercase tracking-widest text-foreground/50 font-body mb-4">Ce que vous d\u00e9bloquez</p>
+              <p className="text-xs uppercase tracking-widest text-foreground/50 font-body mb-4">Ce que vous débloquez</p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2">
                 {FOUNDER_ADVANTAGES.map((a) => (
                   <div key={a} className="flex items-center gap-2">
@@ -711,12 +711,12 @@ const MySubscription = () => {
                 Soutenir Guardiens maintenant
               </Button>
               <p className="text-xs text-foreground/50 italic text-center max-w-xs font-body">
-                Votre abonnement d\u00e9marrera le 14 juin \u2014 vous ne perdrez pas un seul jour.
+                Votre abonnement démarrera le 14 juin — vous ne perdrez pas un seul jour.
               </p>
             </div>
 
             <p className="text-xs text-foreground/40 italic text-center font-body">
-              Votre badge Fondateur reste \u00e0 vie, quelle que soit votre situation future.
+              Votre badge Fondateur reste à vie, quelle que soit votre situation future.
             </p>
           </div>
 
@@ -728,7 +728,7 @@ const MySubscription = () => {
                 <DialogTitle className="font-heading text-xl">Choisissez votre formule</DialogTitle>
               </DialogHeader>
               <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 text-sm text-amber-800 font-body mb-4">
-                En choisissant maintenant, votre abonnement d\u00e9marrera le 14 juin 2026. Votre acc\u00e8s fondateur reste intact jusqu'\u00e0 cette date.
+                En choisissant maintenant, votre abonnement démarrera le 14 juin 2026. Votre accès fondateur reste intact jusqu'à cette date.
               </div>
               <PricingCardsNew />
             </DialogContent>
@@ -736,26 +736,26 @@ const MySubscription = () => {
         </div>
       )}
 
-      {/* ══ VUE — FONDATEUR POST-GR\u00c2CE ══ */}
+      {/* ══ VUE — FONDATEUR POST-GRÂCE ══ */}
       {view === "founder_post_grace" && (
         <div className="max-w-2xl mx-auto w-full px-4 space-y-6">
           <div className="flex flex-col items-center text-center space-y-3">
             <BadgeSceauLarge id="fondateur" size={52} />
-            <h2 className="font-heading text-2xl font-semibold text-foreground">Votre p\u00e9riode fondateur est termin\u00e9e.</h2>
-            <p className="text-sm text-foreground/70 font-body">Merci d'avoir \u00e9t\u00e9 l\u00e0 d\u00e8s le premier jour. Choisissez votre formule.</p>
+            <h2 className="font-heading text-2xl font-semibold text-foreground">Votre période fondateur est terminée.</h2>
+            <p className="text-sm text-foreground/70 font-body">Merci d'avoir été là dès le premier jour. Choisissez votre formule.</p>
           </div>
           <PricingCardsNew />
-          <p className="text-xs text-amber-700 italic text-center mt-2 font-body">Votre badge Fondateur reste permanent \u00e0 vie.</p>
+          <p className="text-xs text-amber-700 italic text-center mt-2 font-body">Votre badge Fondateur reste permanent à vie.</p>
           {showReferral && <ReferralSection referralCode={profile?.referral_code} userId={user!.id} />}
         </div>
       )}
 
-      {/* ══ VUE — NON ABONN\u00c9 ══ */}
+      {/* ══ VUE — NON ABONNÉ ══ */}
       {view === "never_subscribed" && (
         <>
           <div className="space-y-2 mb-2">
             <p className="text-xs uppercase tracking-widest text-primary/60 font-body">Votre abonnement</p>
-            <h2 className="text-2xl font-heading font-semibold">Acc\u00e9dez \u00e0 toutes les gardes.</h2>
+            <h2 className="text-2xl font-heading font-semibold">Accédez à toutes les gardes.</h2>
             <p className="text-sm text-foreground/70 font-body">Choisissez ce qui vous convient.</p>
           </div>
           <PricingCardsNew />
@@ -763,7 +763,7 @@ const MySubscription = () => {
         </>
       )}
 
-      {/* ══ VUE — ABONN\u00c9 ACTIF ══ */}
+      {/* ══ VUE — ABONNÉ ACTIF ══ */}
       {view === "subscribed" && (
         <>
           <div className="bg-card border border-border rounded-xl p-6 space-y-4 max-w-2xl mx-auto">
@@ -773,14 +773,14 @@ const MySubscription = () => {
               <p className="text-sm text-foreground/70 font-body">Prochain renouvellement le <span className="font-medium text-foreground">{renewalFormatted}</span></p>
             )}
             {sub?.plan === "oneshot" && (
-              <p className="text-sm text-foreground/70 font-body">Acc\u00e8s jusqu'au <span className="font-medium text-foreground">{renewalFormatted}</span></p>
+              <p className="text-sm text-foreground/70 font-body">Accès jusqu'au <span className="font-medium text-foreground">{renewalFormatted}</span></p>
             )}
             {sub?.plan === "yearly" && (
-              <p className="text-sm text-foreground/70 font-body">Acc\u00e8s jusqu'au <span className="font-medium text-foreground">31 d\u00e9cembre 2026</span></p>
+              <p className="text-sm text-foreground/70 font-body">Accès jusqu'au <span className="font-medium text-foreground">31 décembre 2026</span></p>
             )}
             <Button variant="outline" className="w-full font-body" onClick={openPortal} disabled={portalLoading}>
               {portalLoading && <Loader2 className="h-4 w-4 animate-spin" />}
-              G\u00e9rer mon abonnement
+              Gérer mon abonnement
             </Button>
             {sub?.plan === "monthly" && (
               <button onClick={openPortal} className="w-full text-sm text-foreground/50 hover:text-foreground transition-colors text-center font-body">
@@ -797,13 +797,13 @@ const MySubscription = () => {
         </>
       )}
 
-      {/* ══ VUE — EXPIR\u00c9 ══ */}
+      {/* ══ VUE — EXPIRÉ ══ */}
       {view === "expired" && (
         <>
           <div className="text-center space-y-3 mb-4">
             <Clock className="h-10 w-10 text-muted-foreground mx-auto" />
-            <h2 className="text-2xl font-heading font-semibold">Votre acc\u00e8s est termin\u00e9.</h2>
-            <p className="text-sm text-foreground/70 font-body">Reprenez l\u00e0 o\u00f9 vous en \u00e9tiez.</p>
+            <h2 className="text-2xl font-heading font-semibold">Votre accès est terminé.</h2>
+            <p className="text-sm text-foreground/70 font-body">Reprenez là où vous en étiez.</p>
           </div>
           <div className="flex flex-col gap-3 max-w-md mx-auto mb-6">
             {EXPIRED_HIGHLIGHTS.map(h => (
@@ -816,7 +816,7 @@ const MySubscription = () => {
           <PricingCardsNew />
           {isFounder && (
             <div className="bg-amber-50 border border-amber-200 rounded-lg px-4 py-3 text-sm text-foreground/70 text-center font-body">
-              Votre badge Fondateur reste permanent \u00e0 vie.
+              Votre badge Fondateur reste permanent à vie.
             </div>
           )}
           {showReferral && <ReferralSection referralCode={profile?.referral_code} userId={user!.id} />}
@@ -825,7 +825,7 @@ const MySubscription = () => {
 
       {loadError && (
         <p className="text-xs text-foreground/40 text-center mt-4 font-body">
-          Impossible de charger votre statut \u2014 r\u00e9essayez.
+          Impossible de charger votre statut — réessayez.
         </p>
       )}
     </div>
