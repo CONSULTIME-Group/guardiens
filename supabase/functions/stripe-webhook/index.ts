@@ -33,44 +33,120 @@ Deno.serve(async (req) => {
         const sub = event.data.object as Stripe.Subscription;
         const user_id = sub.metadata?.user_id;
         if (!user_id) break;
-        await supabase.from("abonnements").upsert({
+
+        // Map Stripe status to our status
+        let statut: string;
+        switch (sub.status) {
+          case "trialing": statut = "trial"; break;
+          case "active": statut = "active"; break;
+          case "past_due": statut = "past_due"; break;
+          case "paused": statut = "trial"; break; // Keep access on pause
+          case "canceled": statut = "expired"; break;
+          default: statut = "expired"; break;
+        }
+
+        await supabase.from("subscriptions").upsert({
           user_id,
           stripe_subscription_id: sub.id,
           stripe_customer_id: sub.customer as string,
-          statut: sub.status === "trialing" ? "trial" : sub.status === "active" ? "active" : "expired",
+          status: statut,
+          plan: sub.metadata?.formula_type || "monthly",
+          subscription_type: sub.metadata?.formula_type || "monthly",
           trial_end: sub.trial_end ? new Date(sub.trial_end * 1000).toISOString() : null,
-          current_period_end: new Date(sub.current_period_end * 1000).toISOString(),
-          updated_at: new Date().toISOString(),
+          current_period_start: new Date(sub.current_period_start * 1000).toISOString(),
+          expires_at: new Date(sub.current_period_end * 1000).toISOString(),
+          started_at: new Date().toISOString(),
         }, { onConflict: "user_id" });
         break;
       }
+
       case "customer.subscription.deleted": {
         const sub = event.data.object as Stripe.Subscription;
         const user_id = sub.metadata?.user_id;
         if (!user_id) break;
-        await supabase.from("abonnements").upsert({
+        await supabase.from("subscriptions").upsert({
           user_id,
-          statut: "expired",
-          updated_at: new Date().toISOString(),
+          status: "expired",
+          stripe_subscription_id: sub.id,
+          started_at: new Date().toISOString(),
         }, { onConflict: "user_id" });
         break;
       }
+
       case "invoice.payment_succeeded": {
         const invoice = event.data.object as Stripe.Invoice;
         const sub_id = invoice.subscription as string;
         if (!sub_id) break;
-        await supabase.from("abonnements")
-          .update({ statut: "active", updated_at: new Date().toISOString() })
+        await supabase.from("subscriptions")
+          .update({ status: "active" })
           .eq("stripe_subscription_id", sub_id);
         break;
       }
+
       case "invoice.payment_failed": {
         const invoice = event.data.object as Stripe.Invoice;
         const sub_id = invoice.subscription as string;
         if (!sub_id) break;
-        await supabase.from("abonnements")
-          .update({ statut: "past_due", updated_at: new Date().toISOString() })
+        await supabase.from("subscriptions")
+          .update({ status: "past_due" })
           .eq("stripe_subscription_id", sub_id);
+        break;
+      }
+
+      case "checkout.session.completed": {
+        const session = event.data.object as Stripe.Checkout.Session;
+        const userId = session.metadata?.user_id;
+        const formulaType = session.metadata?.formula_type;
+        const freeMonthsCredit = parseInt(session.metadata?.free_months_credit ?? "0");
+
+        // Monthly subscriptions are handled by customer.subscription.created
+        if (!userId || formulaType === "monthly") break;
+
+        console.log(`[stripe-webhook] checkout.session.completed: userId=${userId}, formula=${formulaType}`);
+
+        const now = new Date();
+        const startDate = now.toISOString();
+        let endDate: string;
+
+        if (formulaType === "one_shot") {
+          const end = new Date(now);
+          end.setDate(end.getDate() + 30);
+          if (freeMonthsCredit > 0) end.setMonth(end.getMonth() + freeMonthsCredit);
+          endDate = end.toISOString();
+        } else if (formulaType === "prorata") {
+          const end = new Date(now.getFullYear(), 11, 31, 23, 59, 59);
+          if (freeMonthsCredit > 0) end.setMonth(end.getMonth() + freeMonthsCredit);
+          endDate = end.toISOString();
+        } else {
+          break;
+        }
+
+        // Upsert subscription
+        await supabase.from("subscriptions").upsert({
+          user_id: userId,
+          subscription_type: formulaType,
+          status: "active",
+          plan: formulaType === "one_shot" ? "one_shot" : "prorata",
+          stripe_customer_id: session.customer as string,
+          stripe_subscription_id: null,
+          trial_end: null,
+          current_period_start: startDate,
+          expires_at: endDate,
+          started_at: startDate,
+        }, { onConflict: "user_id" });
+
+        // Decrement free months credit if used
+        if (freeMonthsCredit > 0) {
+          await supabase.from("profiles").update({ free_months_credit: 0 }).eq("id", userId);
+        }
+
+        // Apply referral reward
+        try {
+          await supabase.rpc("apply_referral_reward", { p_referred_id: userId });
+        } catch (e) {
+          console.error("Referral reward error:", e);
+        }
+
         break;
       }
     }
