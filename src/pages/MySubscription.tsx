@@ -485,7 +485,13 @@ const MySubscription = () => {
           )}
 
           {showReferral && <ReferralSection referralCode={profile?.referral_code} userId={user!.id} />}
-        </>
+      </>
+      )}
+
+      {loadError && (
+        <p className="text-xs text-foreground/40 text-center mt-4">
+          Impossible de charger votre statut — réessayez.
+        </p>
       )}
     </div>
   );
