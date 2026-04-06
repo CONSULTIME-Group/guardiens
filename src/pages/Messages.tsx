@@ -688,6 +688,10 @@ const Messages = () => {
             otherUserRating={activeConv.other_user_rating}
             isFounder={activeConv.other_user?.is_founder || false}
             isEmergencySitter={activeConv.other_user_is_emergency}
+            onBlock={() => {
+              setActiveConv(null);
+              loadConversations();
+            }}
           />
 
           {/* Messages with day separators */}
