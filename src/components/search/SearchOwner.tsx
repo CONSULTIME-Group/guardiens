@@ -128,7 +128,7 @@ const SearchOwner = () => {
         return;
       }
       const { data: conv, error } = await supabase
-        .from("conversations").insert({ owner_id: user.id, sitter_id: sitterId })
+        .from("conversations").insert({ owner_id: user.id, sitter_id: sitterId, sit_id: null, small_mission_id: null })
         .select("id").single();
       if (error) throw error;
       if (!conv?.id) throw new Error("no_conv");
