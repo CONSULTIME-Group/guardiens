@@ -174,6 +174,9 @@ const ConversationHeader = ({
               </Button>
             </Link>
           )}
+          <button onClick={() => setReportOpen(true)} className="p-2 rounded-lg hover:bg-accent text-muted-foreground" title="Signaler" aria-label="Signaler">
+            <Flag className="h-4 w-4" />
+          </button>
           <button onClick={onArchive} className="p-2 rounded-lg hover:bg-accent text-muted-foreground" title="Archiver" aria-label="Archiver">
             <Archive className="h-4 w-4" />
           </button>
