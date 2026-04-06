@@ -1,5 +1,7 @@
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
-import { BADGE_DEFINITIONS, getTier, type BadgeTier } from './badge-definitions'
+import { BADGE_DEFINITIONS, getTier, isBadgeActive, type BadgeTier } from './badge-definitions'
+import { format } from 'date-fns'
+import { fr } from 'date-fns/locale'
 
 interface BadgeSceauProps {
   id: string
@@ -8,6 +10,7 @@ interface BadgeSceauProps {
   size?: 'normal' | 'compact'
   showCount?: boolean
   className?: string
+  obtainedAt?: string
 }
 
 function TierRing({ tier, r }: { tier: BadgeTier; r: number }) {
@@ -25,17 +28,17 @@ function TierRing({ tier, r }: { tier: BadgeTier; r: number }) {
       </>
     )
   }
-  // steel
   return <circle cx="26" cy="26" r={r} fill="none" stroke="#8A8A8A" strokeWidth="2" strokeDasharray="3 2" />
 }
 
 export function BadgeSceau({
   id,
   count = 1,
-  active = true,
+  active,
   size = 'normal',
   showCount = true,
   className = '',
+  obtainedAt,
 }: BadgeSceauProps) {
   const def = BADGE_DEFINITIONS[id]
 
@@ -47,6 +50,9 @@ export function BadgeSceau({
       </svg>
     )
   }
+
+  // Auto-determine active state from obtainedAt if not explicitly set
+  const isActive = active !== undefined ? active : (obtainedAt ? isBadgeActive(id, obtainedAt) : true)
 
   const tier = getTier(id, count)
   const sz = size === 'normal' ? 52 : 34
@@ -62,22 +68,17 @@ export function BadgeSceau({
         aria-label={def.label}
         role="img"
         style={{
-          filter: active ? 'none' : 'grayscale(100%)',
-          opacity: active ? 1 : 0.3,
+          filter: isActive ? 'none' : 'grayscale(100%)',
+          opacity: isActive ? 1 : 0.3,
           transition: 'filter 0.3s, opacity 0.3s',
         }}
       >
-        {/* Fond */}
         <circle cx="26" cy="26" r="22" fill={def.bg} />
-        {/* Anneau décoratif intérieur */}
         <circle cx="26" cy="26" r="18" fill="none" stroke={def.iconColor} strokeWidth="0.5" opacity="0.2" />
-        {/* Icône SVG — offset pour centrer dans viewBox 52 */}
         <g transform="translate(6, 6)" dangerouslySetInnerHTML={{ __html: def.svgIcon }} />
-        {/* Anneau de tier */}
         <TierRing tier={tier} r={24} />
       </svg>
 
-      {/* Pastille count */}
       {showPastille && (
         <span
           className="absolute -top-1 -right-1 flex items-center justify-center rounded-full text-[10px] font-bold leading-none"
@@ -95,6 +96,10 @@ export function BadgeSceau({
     </span>
   )
 
+  const dateLabel = obtainedAt
+    ? format(new Date(obtainedAt), "d MMMM yyyy", { locale: fr })
+    : null
+
   return (
     <TooltipProvider>
       <Tooltip>
@@ -104,11 +109,14 @@ export function BadgeSceau({
         <TooltipContent side="top" className="max-w-[220px] text-center">
           <p className="font-semibold text-sm">{def.label}</p>
           <p className="text-xs text-muted-foreground mt-1">{def.tooltip}</p>
-          {!active && (
-            <p className="text-xs text-muted-foreground/60 mt-1 italic">
-              Obtenu {count} fois — expiré
+          {dateLabel && (
+            <p className="text-xs text-muted-foreground/80 mt-1">
+              Obtenu le {dateLabel}
             </p>
           )}
+          <p className="text-xs mt-0.5 font-medium" style={{ color: isActive ? 'hsl(var(--primary))' : 'hsl(var(--muted-foreground))' }}>
+            {isActive ? 'Actif' : 'Expiré'}
+          </p>
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>
