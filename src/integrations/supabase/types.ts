@@ -2967,58 +2967,46 @@ export type Database = {
           available_for_help: boolean | null
           avatar_url: string | null
           bio: string | null
-          cancellation_count: number | null
-          cancellations_as_proprio: number | null
           city: string | null
           completed_sits_count: number | null
           created_at: string | null
-          custom_skills: Json | null
           first_name: string | null
           id: string | null
           identity_verified: boolean | null
           is_founder: boolean | null
-          postal_code: string | null
+          last_name: string | null
           profile_completion: number | null
           role: Database["public"]["Enums"]["user_role"] | null
-          skill_categories: string[] | null
         }
         Insert: {
           available_for_help?: boolean | null
           avatar_url?: string | null
           bio?: string | null
-          cancellation_count?: number | null
-          cancellations_as_proprio?: number | null
           city?: string | null
           completed_sits_count?: number | null
           created_at?: string | null
-          custom_skills?: Json | null
           first_name?: string | null
           id?: string | null
           identity_verified?: boolean | null
           is_founder?: boolean | null
-          postal_code?: string | null
+          last_name?: string | null
           profile_completion?: number | null
           role?: Database["public"]["Enums"]["user_role"] | null
-          skill_categories?: string[] | null
         }
         Update: {
           available_for_help?: boolean | null
           avatar_url?: string | null
           bio?: string | null
-          cancellation_count?: number | null
-          cancellations_as_proprio?: number | null
           city?: string | null
           completed_sits_count?: number | null
           created_at?: string | null
-          custom_skills?: Json | null
           first_name?: string | null
           id?: string | null
           identity_verified?: boolean | null
           is_founder?: boolean | null
-          postal_code?: string | null
+          last_name?: string | null
           profile_completion?: number | null
           role?: Database["public"]["Enums"]["user_role"] | null
-          skill_categories?: string[] | null
         }
         Relationships: []
       }
