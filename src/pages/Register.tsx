@@ -55,11 +55,22 @@ const Register = () => {
     }
 
     setIsLoading(true);
+    const timeoutPromise = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error("timeout")), 8000)
+    );
+
     try {
-      await register(email, password, selectedRole);
+      await Promise.race([
+        register(email, password, selectedRole),
+        timeoutPromise,
+      ]);
       setStep("confirmation");
     } catch (error: any) {
-      if (error.message?.includes("already registered") || error.message?.includes("already been registered")) {
+      if (error.message === "timeout") {
+        setFormError(
+          "L'inscription prend plus de temps que prévu. Si vous n'avez pas reçu d'email de confirmation dans 2 minutes, réessayez."
+        );
+      } else if (error.message?.includes("already registered") || error.message?.includes("already been registered")) {
         setExistingAccountOpen(true);
       } else {
         toast({
