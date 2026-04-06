@@ -1777,6 +1777,7 @@ export type Database = {
           last_name: string | null
           postal_code: string | null
           profile_completion: number | null
+          referral_code: string | null
           role: Database["public"]["Enums"]["user_role"]
           skill_categories: string[] | null
           updated_at: string
@@ -1805,6 +1806,7 @@ export type Database = {
           last_name?: string | null
           postal_code?: string | null
           profile_completion?: number | null
+          referral_code?: string | null
           role?: Database["public"]["Enums"]["user_role"]
           skill_categories?: string[] | null
           updated_at?: string
@@ -1833,6 +1835,7 @@ export type Database = {
           last_name?: string | null
           postal_code?: string | null
           profile_completion?: number | null
+          referral_code?: string | null
           role?: Database["public"]["Enums"]["user_role"]
           skill_categories?: string[] | null
           updated_at?: string
