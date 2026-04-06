@@ -296,7 +296,7 @@ const MySubscription = () => {
       }
 
       const [profileRes, subRes] = await Promise.all([
-        supabase.from("profiles").select("is_founder, created_at, role, active_role, referral_code, profile_completion, identity_verified").eq("id", user.id).maybeSingle(),
+        supabase.from("profiles").select("is_founder, created_at, role, referral_code, profile_completion, identity_verified").eq("id", user.id).maybeSingle(),
         supabase.from("subscriptions").select("status, plan, expires_at, stripe_subscription_id").eq("user_id", user.id).order("created_at", { ascending: false }).limit(1).maybeSingle(),
       ]);
 
@@ -306,13 +306,14 @@ const MySubscription = () => {
         return;
       }
 
-      const p = profileRes.data ?? { is_founder: false, referral_code: null, profile_completion: 0, role: null, active_role: null };
-      setProfile(p);
+      const p = profileRes.data;
+      const pData = p ?? { is_founder: false, referral_code: null, profile_completion: 0, role: null };
+      setProfile(pData);
       setSub(subRes.data);
-      setProfileCompletion(p.profile_completion ?? 0);
+      setProfileCompletion((p?.profile_completion as number) ?? 0);
 
       // Referral URL
-      const code = p.referral_code ?? "";
+      const code = (p?.referral_code as string) ?? "";
       setReferralUrl(code ? `https://guardiens.fr/inscription?ref=${code}` : "https://guardiens.fr/inscription");
 
       // Member count
@@ -322,8 +323,7 @@ const MySubscription = () => {
       // Determine role
       const isOwner =
         effectiveRole === "owner" ||
-        p.role === "owner" ||
-        p.active_role === "owner";
+        (p?.role as string) === "owner";
 
       // Pre-launch check
       const isPrelaunched = new Date() < LAUNCH_DATE;
