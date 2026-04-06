@@ -238,7 +238,7 @@ const Messages = () => {
     if (autoOpened) return;
 
     const gardienId = searchParams.get("gardien");
-    const convId = searchParams.get("conversation") || searchParams.get("conv");
+    const convId = searchParams.get("conversation") || searchParams.get("conv") || searchParams.get("conversationId");
 
     // Handle ?gardien= param: find or create conversation with this user
     if (gardienId && user && !loading) {

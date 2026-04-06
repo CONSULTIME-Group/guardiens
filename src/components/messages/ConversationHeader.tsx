@@ -1,6 +1,9 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Archive, ExternalLink, CheckCircle2, Star, Home, Handshake, Calendar, MapPin } from "lucide-react";
+import { ArrowLeft, Archive, ExternalLink, CheckCircle2, Star, Home, Handshake, Calendar, MapPin, Flag } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
 import HelpButton from "./HelpButton";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -42,6 +45,10 @@ const ConversationHeader = ({
   conv, userId, userRole, isMobile, onBack, onArchive, onActionDone,
   otherUserRating, isFounder, isEmergencySitter,
 }: ConversationHeaderProps) => {
+  const [reportOpen, setReportOpen] = useState(false);
+  const [reportReason, setReportReason] = useState("");
+  const [reportSending, setReportSending] = useState(false);
+
   const isOwner = conv.owner_id === userId;
   const isPendingApp = conv.application_status === "pending" || conv.application_status === "discussing";
   const isConfirmed = conv.sit?.status === "confirmed";
@@ -55,6 +62,28 @@ const ConversationHeader = ({
   const annonceLinkHref = conv.sit_id
     ? (isOwner ? `/sits/${conv.sit_id}` : `/annonces/${conv.sit_id}`)
     : null;
+
+  const reportedUserId = conv.owner_id === userId ? conv.sitter_id : conv.owner_id;
+
+  const handleReport = async () => {
+    if (!userId || !reportReason.trim()) return;
+    setReportSending(true);
+    const { error } = await supabase.from("reports").insert({
+      reporter_id: userId,
+      target_type: "user",
+      target_id: reportedUserId,
+      report_type: "inappropriate",
+      reason: reportReason.trim(),
+    });
+    setReportSending(false);
+    if (error) {
+      toast.error("Une erreur est survenue, réessayez.");
+      return;
+    }
+    toast.success("Signalement envoyé. On examine ça dans les 24h.");
+    setReportOpen(false);
+    setReportReason("");
+  };
 
   const handleAcceptApplication = async () => {
     if (!conv.sit_id) return;
@@ -145,6 +174,9 @@ const ConversationHeader = ({
               </Button>
             </Link>
           )}
+          <button onClick={() => setReportOpen(true)} className="p-2 rounded-lg hover:bg-accent text-muted-foreground" title="Signaler" aria-label="Signaler">
+            <Flag className="h-4 w-4" />
+          </button>
           <button onClick={onArchive} className="p-2 rounded-lg hover:bg-accent text-muted-foreground" title="Archiver" aria-label="Archiver">
             <Archive className="h-4 w-4" />
           </button>
@@ -199,7 +231,30 @@ const ConversationHeader = ({
         <div className="bg-accent border-t border-border px-4 py-2.5 flex items-center justify-between">
           <div className="flex items-center gap-2 text-sm font-medium">
             <CheckCircle2 className="h-4 w-4 text-muted-foreground" /> Garde terminée
+      <Dialog open={reportOpen} onOpenChange={setReportOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Signaler ce membre</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-2">
+            <Textarea
+              placeholder="Décris le problème en quelques mots"
+              value={reportReason}
+              onChange={e => setReportReason(e.target.value.slice(0, 300))}
+              maxLength={300}
+              className="min-h-[100px]"
+            />
+            <p className="text-xs text-muted-foreground text-right">{reportReason.length}/300</p>
           </div>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setReportOpen(false)}>Annuler</Button>
+            <Button onClick={handleReport} disabled={reportSending || !reportReason.trim()}>
+              Envoyer le signalement
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
           <Link to={`/review/${conv.sit_id}`} className="text-xs font-medium text-primary hover:underline flex items-center gap-1">
             <Star className="h-3.5 w-3.5" /> Laisser un avis
           </Link>
