@@ -358,7 +358,7 @@ const MySubscription = () => {
       setLoadError(true);
       setView("never_subscribed");
     }
-  }, [user, effectiveRole]);
+  }, [user, activeRole]);
 
   useEffect(() => { loadData(); }, [loadData]);
 
