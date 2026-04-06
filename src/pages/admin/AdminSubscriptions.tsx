@@ -143,10 +143,10 @@ const AdminSubscriptions = () => {
     let count = 0;
     for (const f of (founders || [])) {
       const { data: sub } = await supabase
-        .from("abonnements")
-        .select("statut")
+        .from("subscriptions")
+        .select("status")
         .eq("user_id", f.id)
-        .in("statut", ["trial", "active"])
+        .eq("status", "active")
         .limit(1);
       if (!sub || sub.length === 0) count++;
     }
