@@ -338,6 +338,25 @@ const AdminUsers = () => {
                         <Button
                           variant="ghost"
                           size="icon"
+                          title={user.is_manual_super ? "Retirer Super Gardien" : "Promouvoir Super Gardien"}
+                          onClick={async () => {
+                            const newVal = !user.is_manual_super;
+                            const { error } = await supabase
+                              .from("profiles")
+                              .update({ is_manual_super: newVal } as any)
+                              .eq("id", user.id);
+                            if (!error) {
+                              toast(newVal ? "Super Gardien activé" : "Override retiré");
+                              loadUsers();
+                            } else {
+                              toast.error("Erreur lors de la mise à jour");
+                            }
+                          }}
+                        >
+                          <Crown className={`h-4 w-4 ${user.is_manual_super ? 'text-amber-500' : ''}`} />
+                        </Button>
+                          variant="ghost"
+                          size="icon"
                           title="Note interne"
                           onClick={() => setNoteModal({
                             open: true,
