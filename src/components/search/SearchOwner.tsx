@@ -108,7 +108,15 @@ const SearchOwner = () => {
 
   // Contact handler
   const handleContact = async (sitterId: string) => {
-    if (!user) return;
+    if (!user) {
+      toast.error("Connectez-vous pour contacter un gardien");
+      navigate("/login");
+      return;
+    }
+    if (sitterId === user.id) {
+      toast.error("Vous ne pouvez pas vous contacter vous-même");
+      return;
+    }
     setContactingId(sitterId);
     try {
       const { data: existing } = await supabase
@@ -119,9 +127,14 @@ const SearchOwner = () => {
         .from("conversations").insert({ owner_id: user.id, sitter_id: sitterId })
         .select("id").single();
       if (error) throw error;
+      if (!conv?.id) throw new Error("no_conv");
       navigate(`/messages?conversation=${conv.id}`);
-    } catch { toast.error("Impossible de démarrer la conversation"); }
-    finally { setContactingId(null); }
+    } catch (err: any) {
+      console.error("handleContact error:", err);
+      toast.error("Impossible de démarrer la conversation. Réessayez.");
+    } finally {
+      setContactingId(null);
+    }
   };
 
   // Search logic
@@ -130,7 +143,7 @@ const SearchOwner = () => {
 
     const { data: sitters } = await supabase
       .from("sitter_profiles")
-      .select("*, profile:profiles!sitter_profiles_user_id_fkey(first_name, last_name, avatar_url, city, postal_code, profile_completion, identity_verified, completed_sits_count)");
+      .select("*, profile:profiles!sitter_profiles_user_id_fkey(first_name, last_name, avatar_url, city, postal_code, profile_completion, identity_verified, completed_sits_count, bio)");
 
     let items = (sitters || []).filter((s: any) => s.profile?.profile_completion >= 60);
 
@@ -483,80 +496,82 @@ const SearchOwner = () => {
               <p className="text-sm mt-1">Essayez d'élargir vos filtres.</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {results.map((s: any) => {
                 const profile = s.profile;
                 const sitterAnimalTypes: string[] = s.animal_types || [];
                 const firstName = profile?.first_name || "Gardien";
+                const bio = profile?.bio ? (profile.bio.length > 60 ? profile.bio.slice(0, 60) + "…" : profile.bio) : null;
+                const distLabel = s._dist !== null && s._dist !== undefined && s._dist !== Infinity ? `${s._dist} km` : null;
 
                 return (
-                  <div key={s.id} className="bg-card rounded-2xl overflow-hidden border border-border cursor-pointer hover:shadow-md transition-shadow">
-                    {/* Photo */}
+                  <div key={s.id} className="bg-card rounded-xl overflow-hidden border border-border hover:shadow-md transition-shadow flex flex-col">
+                    {/* Photo — compact 16:9 */}
                     <Link to={`/profil/${s.user_id}`} className="block relative">
                       {profile?.avatar_url ? (
-                        <img src={profile.avatar_url} alt={firstName} className="h-48 w-full object-cover" />
+                        <img src={profile.avatar_url} alt={firstName} className="h-32 w-full object-cover object-top" />
                       ) : (
-                        <div className="h-48 w-full bg-primary/10 flex items-center justify-center">
-                          <span className="text-4xl text-primary font-heading font-bold">{firstName.charAt(0)}</span>
+                        <div className="h-32 w-full bg-primary/10 flex items-center justify-center">
+                          <span className="text-3xl text-primary font-heading font-bold">{firstName.charAt(0)}</span>
                         </div>
                       )}
                       {s.isEmergency && (
-                        <span className="absolute top-3 left-3 flex items-center gap-1 bg-card/90 rounded-full px-2 py-1 text-xs text-amber-700 font-medium">
-                          <Zap className="h-3 w-3" /> Urgence
-                        </span>
-                      )}
-                      {profile?.identity_verified && (
-                        <span className="absolute top-3 right-3 flex items-center gap-1 bg-card/90 rounded-full px-2 py-1 text-xs text-primary">
-                          <ShieldCheck className="h-3 w-3" /> Vérifié
+                        <span className="absolute top-2 left-2 flex items-center gap-1 bg-card/90 rounded-full px-2 py-0.5 text-[11px] font-medium">
+                          <Zap className="h-3 w-3 text-amber-500" /> Urgence
                         </span>
                       )}
                     </Link>
 
                     {/* Body */}
-                    <div className="p-4">
+                    <div className="p-3 flex flex-col flex-1">
+                      {/* Line 1: name + city + distance */}
                       <Link to={`/profil/${s.user_id}`}>
-                        <h3 className="text-base font-semibold mb-1">{firstName}{profile?.city ? ` · ${profile.city}` : ""}</h3>
+                        <p className="text-sm font-semibold truncate">
+                          {firstName}
+                          {profile?.city && <span className="text-muted-foreground font-normal"> · {profile.city}</span>}
+                          {distLabel && <span className="text-muted-foreground font-normal"> · {distLabel}</span>}
+                        </p>
                       </Link>
-                      {s._dist !== null && s._dist !== undefined && s._dist !== Infinity && (
-                        <p className="text-sm text-muted-foreground mb-1">📍 {s._dist} km</p>
-                      )}
 
-                      {/* Metrics */}
-                      <div className="flex gap-4 mb-2 text-sm">
-                        {(profile?.completed_sits_count || 0) > 0 && (
-                          <span>{profile.completed_sits_count} garde{profile.completed_sits_count > 1 ? "s" : ""}</span>
-                        )}
+                      {/* Line 2: badges + rating */}
+                      <div className="flex items-center gap-2 mt-1">
+                        {profile?.identity_verified && <VerifiedBadge size="sm" />}
                         {s.avgRating !== null && (
-                          <span className="flex items-center gap-1">
-                            <Star className="h-3.5 w-3.5 text-yellow-500 fill-yellow-500" />
+                          <span className="flex items-center gap-0.5 text-xs text-muted-foreground">
+                            <Star className="h-3 w-3 text-yellow-500 fill-yellow-500" />
                             {s.avgRating.toFixed(1)}
                           </span>
                         )}
+                        {(profile?.completed_sits_count || 0) > 0 && (
+                          <span className="text-xs text-muted-foreground">{profile.completed_sits_count} garde{profile.completed_sits_count > 1 ? "s" : ""}</span>
+                        )}
                       </div>
 
-                      {/* Badges */}
-                      {/* Badges — migration en cours */}
-
-                      {/* Animal types */}
+                      {/* Line 3: animal pills */}
                       {sitterAnimalTypes.length > 0 && (
-                        <div className="flex flex-wrap gap-1.5 mb-3">
+                        <div className="flex flex-wrap gap-1 mt-1.5">
                           {sitterAnimalTypes.slice(0, 3).map((a: string) => (
-                            <span key={a} className="text-xs bg-muted rounded-full px-2 py-1">{a}</span>
+                            <span key={a} className="text-[11px] bg-muted rounded-full px-2 py-0.5">{a}</span>
                           ))}
                           {sitterAnimalTypes.length > 3 && (
-                            <span className="text-xs bg-muted rounded-full px-2 py-1">+{sitterAnimalTypes.length - 3}</span>
+                            <span className="text-[11px] text-muted-foreground">+{sitterAnimalTypes.length - 3}</span>
                           )}
                         </div>
                       )}
 
+                      {/* Line 4: bio truncated */}
+                      {bio && <p className="text-xs text-muted-foreground mt-1.5 line-clamp-1">{bio}</p>}
+
                       {/* CTA */}
-                      <button
+                      <Button
+                        size="sm"
                         onClick={(e) => { e.preventDefault(); handleContact(s.user_id); }}
                         disabled={contactingId === s.user_id}
-                        className="w-full py-2 text-sm text-center bg-primary text-primary-foreground rounded-xl font-medium mt-1 hover:bg-primary/90 transition-colors"
+                        className="w-full mt-auto pt-2"
                       >
+                        <MessageCircle className="h-3.5 w-3.5" />
                         {contactingId === s.user_id ? "..." : `Contacter ${firstName}`}
-                      </button>
+                      </Button>
                     </div>
                   </div>
                 );
