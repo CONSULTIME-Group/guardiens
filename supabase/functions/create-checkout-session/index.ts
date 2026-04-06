@@ -202,7 +202,8 @@ Deno.serve(async (req) => {
     if (formulaType === "one_shot") {
       const oneShotPrice = await resolveActivePrice(
         ["gardien_oneshot", "gardien_one_shot"],
-        "price_1TJHDhIR9gPuLbxmKScyHEoq",
+        "Accès un mois",
+        "one_time",
       );
       if (!oneShotPrice) {
         return new Response(JSON.stringify({ error: "Prix gardien_oneshot introuvable" }), {
@@ -249,7 +250,8 @@ Deno.serve(async (req) => {
 
       const prorataPrice = await resolveActivePrice(
         ["gardien_prorata_2026"],
-        "price_1TJHGSIR9gPuLbxmWVvgB2rQ",
+        "Accès 2026",
+        "one_time",
       );
       if (!prorataPrice) {
         return new Response(JSON.stringify({ error: "Prix gardien_prorata_2026 introuvable" }), {
