@@ -5,6 +5,12 @@ import { useSubscriptionAccess } from "@/hooks/useSubscriptionAccess";
 import { Link, useNavigate } from "react-router-dom";
 import EmergencyDashSection from "./EmergencyDashSection";
 import MissionsNearbySection from "./MissionsNearbySection";
+import { differenceInMonths } from 'date-fns';
+import { BadgeSceau } from '@/components/badges/BadgeSceau';
+import { StatutGardienBadge } from '@/components/profile/StatutGardienBadge';
+import { useProfileReputation, useUserBadges } from '@/hooks/useProfileReputation';
+import { GARDIEN_BADGE_IDS, SPECIAL_BADGE_IDS } from '@/components/badges/badge-definitions';
+import { Separator } from '@/components/ui/separator';
 
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import {
@@ -23,6 +29,18 @@ const SitterDashboard = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { hasAccess: hasSubscription } = useSubscriptionAccess();
+
+  const { data: reputation } = useProfileReputation(user?.id);
+  const { data: userBadges } = useUserBadges(user?.id);
+
+  const activeBadgeCount = (userBadges ?? []).filter(b =>
+    GARDIEN_BADGE_IDS.includes(b.badge_id) &&
+    differenceInMonths(new Date(), new Date(b.created_at)) < 12
+  ).length;
+
+  const specialBadges = (userBadges ?? []).filter(b =>
+    SPECIAL_BADGE_IDS.includes(b.badge_id)
+  );
 
   const [loading, setLoading] = useState(true);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -313,7 +331,7 @@ const SitterDashboard = () => {
             </div>
             <div className="text-center">
               <p className="text-2xl font-heading font-bold text-foreground">{badgeCount}</p>
-              <p className="text-xs text-muted-foreground font-sans">Écussons</p>
+              <p className="text-xs text-muted-foreground font-sans">Badges</p>
             </div>
             <div className="text-center">
               <p className="text-2xl font-heading font-bold text-foreground">{totalApps}</p>
@@ -329,37 +347,55 @@ const SitterDashboard = () => {
 
         {/* Zone 3 — STATUT D'URGENCE */}
         <div className="p-4 md:p-5">
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <p className="text-xs uppercase tracking-widest text-muted-foreground font-sans mb-3 inline-flex items-center gap-1 cursor-default">
-                  Statut d'urgence
-                  <Info className="h-[13px] w-[13px] text-foreground/40" />
-                </p>
-              </TooltipTrigger>
-              <TooltipContent side="top" className="max-w-[220px] text-xs text-center">
-                Les gardiens d'urgence sont disponibles sous 48h pour intervenir quand un proprio se retrouve sans solution. Un statut visible, prioritaire dans la recherche, et reconnu par la communauté.
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-          <div className="h-1.5 bg-muted rounded-full mb-1">
-            <div
-              className="h-1.5 bg-amber-400 rounded-full transition-all duration-500"
-              style={{ width: `${(emergencyDone / 5) * 100}%` }}
-            />
+          <p className="text-xs uppercase tracking-widest text-muted-foreground font-sans mb-3">
+            Mon Statut
+          </p>
+
+          {/* Étiquette statut actuel */}
+          <div className="mb-4">
+            {reputation && reputation.statut_gardien !== 'novice' ? (
+              <StatutGardienBadge statut={reputation.statut_gardien as 'novice' | 'confirme' | 'super_gardien'} />
+            ) : (
+              <span className="text-xs text-muted-foreground font-sans">Novice</span>
+            )}
           </div>
-          <p className="text-xs text-amber-600 font-sans mb-3">
-            {emergencyDone}/5 conditions remplies
+
+          {/* Progression Super Gardien */}
+          <p className="text-xs font-medium text-foreground mb-2">
+            Progression Super Gardien
           </p>
           <div className="flex flex-col gap-1.5">
-            {emergencyConditions.map((c, i) => (
-              <div key={i} className="flex items-center gap-2">
-                <div className={`w-2 h-2 rounded-full shrink-0 ${c.ok ? 'bg-primary' : 'bg-muted'}`} />
-                <span className={`text-xs font-sans ${c.ok ? 'text-muted-foreground line-through' : 'text-foreground/70'}`}>
-                  {c.label}
-                </span>
-              </div>
-            ))}
+            <div className="flex items-center gap-2">
+              <div className={`w-2 h-2 rounded-full shrink-0 ${(reputation?.completed_sits ?? 0) >= 3 ? 'bg-primary' : 'bg-muted-foreground/30'}`} />
+              <span className={`text-xs font-sans ${(reputation?.completed_sits ?? 0) >= 3 ? 'line-through text-muted-foreground' : 'text-foreground/70'}`}>
+                3 gardes réalisées ({reputation?.completed_sits ?? 0}/3)
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className={`w-2 h-2 rounded-full shrink-0 ${(reputation?.active_badges ?? 0) >= 5 ? 'bg-primary' : 'bg-muted-foreground/30'}`} />
+              <span className={`text-xs font-sans ${(reputation?.active_badges ?? 0) >= 5 ? 'line-through text-muted-foreground' : 'text-foreground/70'}`}>
+                5 badges actifs différents ({reputation?.active_badges ?? 0}/5)
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className={`w-2 h-2 rounded-full shrink-0 ${(reputation?.note_moyenne ?? 0) >= 4.8 ? 'bg-primary' : 'bg-muted-foreground/30'}`} />
+              <span className={`text-xs font-sans ${(reputation?.note_moyenne ?? 0) >= 4.8 ? 'line-through text-muted-foreground' : 'text-foreground/70'}`}>
+                Note ≥ 4.8 ({reputation?.note_moyenne ? Number(reputation.note_moyenne).toFixed(1) : '—'}/4.8)
+              </span>
+            </div>
+          </div>
+
+          <Separator className="my-3" />
+
+          {/* Gardien d'Urgence — secondaire */}
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-xs font-medium text-foreground">Gardien d'Urgence</p>
+              <p className="text-xs text-muted-foreground">Statut distinct — 5 conditions</p>
+            </div>
+            <Link to="/urgence" className="text-xs text-primary font-sans">
+              En savoir plus →
+            </Link>
           </div>
         </div>
       </div>
@@ -376,7 +412,56 @@ const SitterDashboard = () => {
           Découvrez les gardes disponibles →
         </button>
 
-        {/* MES BADGES — migration en cours, sera implémenté étape 5 */}
+        {/* ═══ MES BADGES ═══ */}
+        <div className="flex items-baseline justify-between mb-3">
+          <h2 className="text-sm font-semibold text-foreground">Mes Badges</h2>
+          <span className="text-xs text-muted-foreground">
+            {activeBadgeCount} actif{activeBadgeCount > 1 ? 's' : ''} sur 12
+          </span>
+        </div>
+
+        {/* Grille 12 badges gardien */}
+        <div className="grid grid-cols-6 gap-2 mb-4">
+          {GARDIEN_BADGE_IDS.map(id => {
+            const userBadge = userBadges?.find(b => b.badge_id === id);
+            const count = userBadge?.count ?? 0;
+            const isActive = count > 0 && userBadge
+              ? differenceInMonths(new Date(), new Date(userBadge.created_at)) < 12
+              : false;
+            return (
+              <BadgeSceau
+                key={id}
+                id={id}
+                count={count}
+                active={isActive}
+                size="compact"
+                showCount={false}
+                obtainedAt={userBadge?.created_at}
+              />
+            );
+          })}
+        </div>
+
+        {/* Badges spéciaux obtenus */}
+        {specialBadges.length > 0 && (
+          <div className="mt-3">
+            <p className="text-xs text-muted-foreground font-sans mb-2">
+              Badges spéciaux
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {specialBadges.map(b => (
+                <BadgeSceau
+                  key={b.badge_id}
+                  id={b.badge_id}
+                  count={b.count}
+                  active
+                  size="compact"
+                  obtainedAt={b.created_at}
+                />
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* ═══ 4. CHECKLIST ═══ */}
