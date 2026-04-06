@@ -9,6 +9,14 @@ const corsHeaders = {
 
 const JUNE_14_2026_UTC = new Date("2026-06-14T00:00:00Z");
 
+const PRICE_IDS = {
+  monthly:  "price_1TGZmdEbGS9RIjqFbnm4XbKi",
+  one_shot: "price_1TJKw9EbGS9RIjqFjRSGwnsQ",
+  prorata:  "price_1TJKwgEbGS9RIjqFBUfno6Lr",
+};
+
+const PRORATA_PRODUCT_ID = "prod_UHumwgYhIdF6BV";
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
@@ -40,14 +48,12 @@ Deno.serve(async (req) => {
 
     // 2. Parse body
     let formulaType = "monthly";
-    let lookupKey = "gardien_mensuel";
     try {
       const body = await req.json();
       if (body?.formula_type) {
         formulaType = body.formula_type;
       } else if (body?.lookup_key) {
-        // Backwards compatibility
-        lookupKey = body.lookup_key;
+        const lookupKey = body.lookup_key;
         if (lookupKey === "gardien_oneshot") formulaType = "one_shot";
         else if (lookupKey === "gardien_annuel_2026" || lookupKey === "gardien_prorata_2026") formulaType = "prorata";
         else formulaType = "monthly";
@@ -104,60 +110,6 @@ Deno.serve(async (req) => {
 
     const origin = req.headers.get("origin") || "https://guardiens.fr";
 
-    // Known Stripe product/price IDs for the Guardiens account
-    const KNOWN_PRICES = {
-      monthly: "price_1TIPaZIR9gPuLbxmwV01tgwa",      // prod_UGxVLMe7B4zx8B
-      one_shot_product: "prod_UHqvbEHJSHCz4R",         // Accès un mois
-      prorata_product: "prod_UHqyDi8FdX1qLT",          // Accès 2026
-    };
-
-    // Resolve price: try lookup_key, then hardcoded fallback, then product search
-    const resolveActivePrice = async (
-      lookupKeys: string[],
-      fallbackPriceId: string | null,
-      fallbackProductId: string | null,
-      priceType: "recurring" | "one_time" = "recurring",
-    ) => {
-      // 1. Try lookup_keys
-      try {
-        const byLookup = await stripe.prices.list({ lookup_keys: lookupKeys, active: true, limit: 5 });
-        if (byLookup.data.length > 0) {
-          console.log(`[create-checkout-session] Found price via lookup_key: ${byLookup.data[0].id}`);
-          return byLookup.data[0];
-        }
-      } catch (e) {
-        console.warn(`[create-checkout-session] lookup_key search failed: ${e}`);
-      }
-
-      // 2. Try hardcoded price ID
-      if (fallbackPriceId) {
-        try {
-          const price = await stripe.prices.retrieve(fallbackPriceId);
-          if (price && price.active) {
-            console.log(`[create-checkout-session] Using hardcoded price: ${price.id}`);
-            return price;
-          }
-        } catch (e) {
-          console.warn(`[create-checkout-session] Hardcoded price ${fallbackPriceId} not found: ${e}`);
-        }
-      }
-
-      // 3. Try listing prices on fallback product
-      if (fallbackProductId) {
-        try {
-          const prices = await stripe.prices.list({ product: fallbackProductId, active: true, type: priceType, limit: 5 });
-          if (prices.data.length > 0) {
-            console.log(`[create-checkout-session] Found price ${prices.data[0].id} on product ${fallbackProductId}`);
-            return prices.data[0];
-          }
-        } catch (e) {
-          console.warn(`[create-checkout-session] Product price search failed: ${e}`);
-        }
-      }
-
-      return null;
-    };
-
     // ─── MONTHLY ───
     if (formulaType === "monthly") {
       const now = new Date();
@@ -174,23 +126,10 @@ Deno.serve(async (req) => {
         trialEnd = Math.floor(endDate.getTime() / 1000);
       }
 
-      const monthlyPrice = await resolveActivePrice(
-        ["gardien_mensuel"],
-        KNOWN_PRICES.monthly,
-        null,
-        "recurring",
-      );
-      if (!monthlyPrice) {
-        return new Response(JSON.stringify({ error: "Prix gardien_mensuel introuvable" }), {
-          status: 500,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-
       const session = await stripe.checkout.sessions.create({
         mode: "subscription",
         customer: customerId,
-        line_items: [{ price: monthlyPrice.id, quantity: 1 }],
+        line_items: [{ price: PRICE_IDS.monthly, quantity: 1 }],
         subscription_data: {
           trial_end: trialEnd,
           metadata: { user_id: user.id, formula_type: "monthly" },
@@ -214,23 +153,10 @@ Deno.serve(async (req) => {
 
     // ─── ONE_SHOT ───
     if (formulaType === "one_shot") {
-      const oneShotPrice = await resolveActivePrice(
-        ["gardien_oneshot", "gardien_one_shot"],
-        null,
-        KNOWN_PRICES.one_shot_product,
-        "one_time",
-      );
-      if (!oneShotPrice) {
-        return new Response(JSON.stringify({ error: "Prix gardien_oneshot introuvable" }), {
-          status: 500,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-
       const session = await stripe.checkout.sessions.create({
         mode: "payment",
         customer: customerId,
-        line_items: [{ price: oneShotPrice.id, quantity: 1 }],
+        line_items: [{ price: PRICE_IDS.one_shot, quantity: 1 }],
         locale: "fr",
         success_url: `${origin}/mon-abonnement?success=true&formula=one_shot`,
         cancel_url: `${origin}/mon-abonnement?cancelled=true`,
@@ -263,26 +189,13 @@ Deno.serve(async (req) => {
       const montantEuros = Math.ceil(moisRestants * 9 * 0.8);
       const montantCents = montantEuros * 100;
 
-      const prorataPrice = await resolveActivePrice(
-        ["gardien_prorata_2026"],
-        null,
-        KNOWN_PRICES.prorata_product,
-        "one_time",
-      );
-      if (!prorataPrice) {
-        return new Response(JSON.stringify({ error: "Prix gardien_prorata_2026 introuvable" }), {
-          status: 500,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-
       const session = await stripe.checkout.sessions.create({
         mode: "payment",
         customer: customerId,
         line_items: [{
           price_data: {
             currency: "eur",
-            product: prorataPrice.product as string,
+            product: PRORATA_PRODUCT_ID,
             unit_amount: montantCents,
           },
           quantity: 1,
