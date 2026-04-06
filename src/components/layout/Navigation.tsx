@@ -1,8 +1,8 @@
-import { NavLink, useLocation } from "react-router-dom";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import {
   Home, Search, Calendar, MessageSquare, User, LogOut, Settings,
   PawPrint, Newspaper, Shield, Compass, Handshake, Menu, Star,
-  MoreHorizontal,
+  MoreHorizontal, Crown,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAdmin } from "@/hooks/useAdmin";
@@ -13,6 +13,8 @@ import NotificationBell from "./NotificationBell";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import FeedbackDialog from "@/components/feedback/FeedbackDialog";
+import { useSubscriptionAccess } from "@/hooks/useSubscriptionAccess";
+import PremiumGateDialog from "@/components/premium/PremiumGateDialog";
 
 // ── Sidebar group label ──
 const GroupLabel = ({ label }: { label: string }) => (
@@ -51,8 +53,12 @@ const SidebarItem = ({
 export const Sidebar = () => {
   const { user, logout, activeRole, setActiveRole } = useAuth();
   const { isAdmin } = useAdmin();
+  const navigate = useNavigate();
+  const { hasAccess } = useSubscriptionAccess();
   const [unreadCount, setUnreadCount] = useState(0);
   const [feedbackOpen, setFeedbackOpen] = useState(false);
+  const [gateOpen, setGateOpen] = useState(false);
+  const [gateFeature, setGateFeature] = useState("");
 
   const effectiveRole = user?.role === "both" ? activeRole : user?.role;
 
@@ -89,6 +95,7 @@ export const Sidebar = () => {
         <NotificationBell />
       </div>
       <FeedbackDialog open={feedbackOpen} onOpenChange={setFeedbackOpen} />
+      <PremiumGateDialog open={gateOpen} onClose={() => setGateOpen(false)} featureName={gateFeature} />
 
       {/* Role toggle */}
       {user?.role === "both" && (
@@ -124,19 +131,69 @@ export const Sidebar = () => {
 
       {/* Nav groups */}
       <nav className="flex-1 px-3 overflow-y-auto">
-        <GroupLabel label="Mon activité" />
-        <SidebarItem to="/dashboard" icon={Home} label="Dashboard" />
-        <SidebarItem to="/sits" icon={Calendar} label={effectiveRole === "owner" ? "Mes annonces" : "Mes gardes"} />
-        <SidebarItem to="/messages" icon={MessageSquare} label="Messagerie" badge={unreadCount} />
-        <SidebarItem to={effectiveRole === "owner" ? "/owner-profile" : "/profile"} icon={User} label="Mon profil" />
+        {(() => {
+          const isSitterLocked = effectiveRole === "sitter" && !hasAccess;
+          const premiumItems = [
+            { to: "/search", label: effectiveRole === "owner" ? "Recherche gardiens" : "Recherche", featureName: "la recherche d'annonces" },
+            { to: "/messages", label: "Messagerie", featureName: "la messagerie" },
+          ];
 
-        <GroupLabel label="Découvrir" />
-        <SidebarItem to="/search" icon={Search} label={effectiveRole === "owner" ? "Recherche gardiens" : "Recherche"} />
-        <SidebarItem to="/petites-missions" icon={Handshake} label="Petites missions" />
+          const handlePremiumClick = (featureName: string) => {
+            setGateFeature(featureName);
+            setGateOpen(true);
+          };
 
-        <GroupLabel label="Ressources" />
-        <SidebarItem to="/actualites" icon={Newspaper} label="Guides & Conseils" />
-        <SidebarItem to="/guides" icon={Compass} label="Guides locaux" />
+          return (
+            <>
+              <GroupLabel label="Mon activité" />
+              <SidebarItem to="/dashboard" icon={Home} label="Dashboard" />
+              <SidebarItem to="/sits" icon={Calendar} label={effectiveRole === "owner" ? "Mes annonces" : "Mes gardes"} />
+
+              {isSitterLocked ? (
+                <button
+                  type="button"
+                  onClick={() => handlePremiumClick("la messagerie")}
+                  className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors text-muted-foreground hover:bg-accent hover:text-foreground w-full text-left relative"
+                >
+                  <MessageSquare className="h-[18px] w-[18px]" strokeWidth={1.8} />
+                  Messagerie
+                  <Crown className="h-[11px] w-[11px] text-amber-500 ml-1" />
+                  {unreadCount > 0 && (
+                    <span className="absolute right-3 bg-destructive text-destructive-foreground text-[10px] rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1 font-semibold">
+                      {unreadCount > 99 ? "99+" : unreadCount}
+                    </span>
+                  )}
+                </button>
+              ) : (
+                <SidebarItem to="/messages" icon={MessageSquare} label="Messagerie" badge={unreadCount} />
+              )}
+
+              <SidebarItem to={effectiveRole === "owner" ? "/owner-profile" : "/profile"} icon={User} label="Mon profil" />
+
+              <GroupLabel label="Découvrir" />
+
+              {isSitterLocked ? (
+                <button
+                  type="button"
+                  onClick={() => handlePremiumClick("la recherche d'annonces")}
+                  className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors text-muted-foreground hover:bg-accent hover:text-foreground w-full text-left"
+                >
+                  <Search className="h-[18px] w-[18px]" strokeWidth={1.8} />
+                  Recherche
+                  <Crown className="h-[11px] w-[11px] text-amber-500 ml-1" />
+                </button>
+              ) : (
+                <SidebarItem to="/search" icon={Search} label={effectiveRole === "owner" ? "Recherche gardiens" : "Recherche"} />
+              )}
+
+              <SidebarItem to="/petites-missions" icon={Handshake} label="Petites missions" />
+
+              <GroupLabel label="Ressources" />
+              <SidebarItem to="/actualites" icon={Newspaper} label="Guides & Conseils" />
+              <SidebarItem to="/guides" icon={Compass} label="Guides locaux" />
+            </>
+          );
+        })()}
       </nav>
 
       {/* Bottom section */}
@@ -178,9 +235,12 @@ export const BottomNav = () => {
   const location = useLocation();
   const { user, activeRole, setActiveRole, logout } = useAuth();
   const { isAdmin } = useAdmin();
+  const { hasAccess } = useSubscriptionAccess();
   const [unreadCount, setUnreadCount] = useState(0);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [feedbackOpen, setFeedbackOpen] = useState(false);
+  const [gateOpen, setGateOpen] = useState(false);
+  const [gateFeature, setGateFeature] = useState("");
 
   const effectiveRole = user?.role === "both" ? activeRole : user?.role;
 
@@ -215,17 +275,47 @@ export const BottomNav = () => {
   return (
     <>
       <FeedbackDialog open={feedbackOpen} onOpenChange={setFeedbackOpen} />
+      <PremiumGateDialog open={gateOpen} onClose={() => setGateOpen(false)} featureName={gateFeature} />
       <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-card border-t border-border z-50">
         <div className="flex justify-around items-center h-16 px-1">
           {tabs.map((item) => {
             const isActive = location.pathname === item.to || location.pathname.startsWith(item.to + "/");
+            const isSitterLocked = effectiveRole === "sitter" && !hasAccess;
+            const isGated = isSitterLocked && (item.to === "/search" || item.to === "/messages");
+            const featureName = item.to === "/search" ? "la recherche d'annonces" : "la messagerie";
+
+            if (isGated) {
+              return (
+                <button
+                  key={item.to}
+                  type="button"
+                  onClick={() => { setGateFeature(featureName); setGateOpen(true); }}
+                  className={cn(
+                    "flex flex-col items-center gap-0.5 px-2 py-1 text-[10px] transition-colors relative min-w-[56px]",
+                    "text-muted-foreground"
+                  )}
+                >
+                  <div className="relative">
+                    <item.icon className="h-5 w-5" strokeWidth={1.8} />
+                    <Crown className="h-[9px] w-[9px] text-amber-500 absolute -top-1 -right-1.5" />
+                    {item.badge !== undefined && item.badge > 0 && (
+                      <span className="absolute -top-1 -right-2 bg-destructive text-destructive-foreground text-[8px] rounded-full min-w-[14px] h-[14px] flex items-center justify-center px-0.5 font-bold">
+                        {item.badge > 99 ? "99+" : item.badge}
+                      </span>
+                    )}
+                  </div>
+                  <span className="font-medium">{item.label}</span>
+                </button>
+              );
+            }
+
             return (
               <NavLink
                 key={item.to}
                 to={item.to}
                 className={cn(
                   "flex flex-col items-center gap-0.5 px-2 py-1 text-[10px] transition-colors relative min-w-[56px]",
-                  isActive ? "text-[#2D6A4F]" : "text-[#9A958A]"
+                  isActive ? "text-primary" : "text-muted-foreground"
                 )}
               >
                 <div className="relative">

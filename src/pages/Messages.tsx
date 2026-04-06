@@ -587,18 +587,17 @@ const Messages = () => {
             onSelect={(text) => setNewMessage(text)}
           />
 
-          {/* Input or Paywall */}
-          {effectiveRole === "sitter" && !hasAccess ? (
-            <div className="border-t border-border bg-amber-50 dark:bg-amber-900/20 p-4 mb-16 md:mb-0">
+          {/* Input or Paywall — only gate sit conversations for non-subscribed sitters */}
+          {effectiveRole === "sitter" && !hasAccess && !activeConv.small_mission_id ? (
+            <div className="border-t border-border bg-muted/50 p-4 mb-16 md:mb-0">
               <div className="flex items-center gap-3">
-                <Lock className="h-5 w-5 text-amber-600 shrink-0" />
+                <Lock className="h-5 w-5 text-muted-foreground shrink-0" />
                 <div className="flex-1">
-                  <p className="text-sm font-semibold text-amber-900 dark:text-amber-200">Abonnez-vous pour répondre</p>
-                  <p className="text-xs text-amber-700 dark:text-amber-300">L'accès à la messagerie nécessite un abonnement — 49€/an</p>
+                  <p className="text-sm text-muted-foreground">
+                    Abonnez-vous pour répondre à cette conversation.{" "}
+                    <Link to="/mon-abonnement" className="text-primary hover:underline">S'abonner →</Link>
+                  </p>
                 </div>
-                <Button size="sm" className="bg-primary hover:bg-primary/90 text-primary-foreground shrink-0" onClick={() => navigate("/mon-abonnement")}>
-                  S'abonner
-                </Button>
               </div>
             </div>
           ) : (
