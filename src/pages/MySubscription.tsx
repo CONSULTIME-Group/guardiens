@@ -335,7 +335,7 @@ const MySubscription = () => {
 
       // Post-launch view determination
       const isFounder = p.is_founder === true;
-      const subStatut = subRes.data?.status ?? null;
+      const subStatut = (subRes.data?.status as string) ?? null;
       const now = new Date();
 
       if (isOwner) {
