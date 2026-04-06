@@ -114,6 +114,24 @@ export default function PublicSitterProfile() {
           const sum = reviewsRes.data.reduce((a: number, r: any) => a + (r.overall_rating || 0), 0);
           setAvgRating(Math.round((sum / reviewsRes.data.length) * 10) / 10);
         }
+
+        // Load badge attributions linked to sit_ids from reviews
+        const sitIdsFromReviews = reviewsRes.data
+          .map((r: any) => r.sit_id)
+          .filter((sid: string | null): sid is string => sid !== null);
+        if (sitIdsFromReviews.length > 0) {
+          const { data: badgeAttrData } = await supabase
+            .from("badge_attributions")
+            .select("badge_id, sit_id")
+            .in("sit_id", sitIdsFromReviews)
+            .eq("user_id", id);
+          const grouped: Record<string, string[]> = {};
+          (badgeAttrData || []).forEach((b: any) => {
+            if (!grouped[b.sit_id]) grouped[b.sit_id] = [];
+            grouped[b.sit_id].push(b.badge_id);
+          });
+          setBadgesBySitId(grouped);
+        }
       }
 
       setLoading(false);
