@@ -288,7 +288,62 @@ const ConversationHeader = ({
           )}
         </div>
       )}
-      {isSmallMission && (
+      {/* Small mission contextual banners */}
+      {isSmallMission && missionData && responseData && responseData.status === "pending" && (
+        <div className="px-4 py-3 bg-muted/50 border-t border-border">
+          <p className="text-xs text-muted-foreground mb-0.5">Mission</p>
+          <p className="text-sm font-medium text-foreground">{missionData.title}</p>
+          <p className="text-xs text-muted-foreground mt-0.5 mb-2">
+            En échange : {missionData.exchange_offer}
+          </p>
+          {isRecipient && (
+            <div className="flex gap-2">
+              <Button size="sm" onClick={handleAcceptExchange}>Accepter l'échange</Button>
+              <Button size="sm" variant="outline" onClick={handleDeclineExchange}>Décliner</Button>
+            </div>
+          )}
+          {isInitiator && (
+            <p className="text-xs text-muted-foreground italic">En attente de réponse…</p>
+          )}
+        </div>
+      )}
+      {isSmallMission && missionData && responseData && responseData.status === "accepted" && (
+        <div className="px-4 py-2 bg-green-50 border-t border-green-200 flex items-center gap-2">
+          <CheckCircle className="text-green-600 w-4 h-4 shrink-0" />
+          <span className="text-sm text-green-700 font-medium">Échange accepté ✓</span>
+          {missionData.date_needed && isPast(new Date(missionData.date_needed)) && (
+            <Button
+              size="sm"
+              variant="outline"
+              className="ml-auto border-green-300 text-green-700 hover:bg-green-100"
+              onClick={handleMarkDone}
+            >
+              Marquer comme terminé
+            </Button>
+          )}
+        </div>
+      )}
+      {isSmallMission && missionData && responseData && responseData.status === "declined" && (
+        <div className="px-4 py-2 bg-muted border-t border-border flex items-center gap-2">
+          <XCircle className="text-muted-foreground w-4 h-4 shrink-0" />
+          <span className="text-sm text-muted-foreground">Échange décliné</span>
+        </div>
+      )}
+      {isSmallMission && missionData && responseData && responseData.status === "completed" && (
+        <div className="px-4 py-2 bg-primary/5 border-t border-primary/20 flex items-center gap-2">
+          <CheckCircle className="text-primary w-4 h-4 shrink-0" />
+          <span className="text-sm text-primary font-medium">Échange terminé</span>
+          <Button
+            size="sm"
+            variant="ghost"
+            className="ml-auto text-primary hover:bg-primary/10"
+            onClick={handleLeaveReview}
+          >
+            Laisser un avis →
+          </Button>
+        </div>
+      )}
+      {isSmallMission && !responseData && (
         <div className="px-4 py-2 border-t border-border/50 bg-accent/30 text-xs text-muted-foreground">
           🌿 Petite mission
         </div>
@@ -316,6 +371,14 @@ const ConversationHeader = ({
         <div className="bg-accent border-t border-border px-4 py-2.5 flex items-center justify-between">
           <div className="flex items-center gap-2 text-sm font-medium">
             <CheckCircle2 className="h-4 w-4 text-muted-foreground" /> Garde terminée
+          </div>
+          <Link to={`/review/${conv.sit_id}`} className="text-xs font-medium text-primary hover:underline flex items-center gap-1">
+            <Star className="h-3.5 w-3.5" /> Laisser un avis
+          </Link>
+        </div>
+      )}
+
+      {/* Report dialog */}
       <Dialog open={reportOpen} onOpenChange={setReportOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
@@ -339,12 +402,6 @@ const ConversationHeader = ({
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
-          <Link to={`/review/${conv.sit_id}`} className="text-xs font-medium text-primary hover:underline flex items-center gap-1">
-            <Star className="h-3.5 w-3.5" /> Laisser un avis
-          </Link>
-        </div>
-      )}
     </div>
   );
 };
