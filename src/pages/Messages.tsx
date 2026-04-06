@@ -94,7 +94,7 @@ const entraideContactSuggestions = [
 ];
 
 const SuggestedMessages = ({
-  messages: msgs, userId, activeConv, onSelect,
+  messages: msgs, userId, activeConv, onSelect, isEntraideContact,
 }: {
   messages: Message[]; userId?: string; activeConv: Conversation;
   onSelect: (text: string) => void; isEntraideContact?: boolean;
