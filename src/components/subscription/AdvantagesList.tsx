@@ -7,7 +7,7 @@ const ADVANTAGES = [
   { icon: MessageSquare, label: "Messagerie gardes" },
   { icon: Search, label: "Apparaître dans la recherche des propriétaires" },
   { icon: ToggleRight, label: 'Mode "Disponible"' },
-  { icon: Clock, label: "Accès aux gardes longue durée" },
+  
   { icon: Shield, label: "Écussons et métriques de fiabilité" },
 ];
 

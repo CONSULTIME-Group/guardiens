@@ -731,7 +731,7 @@ const IdentityVerificationSection = ({ user }: { user: any }) => {
     not_submitted: {
       icon: Upload,
       label: "Non vérifiée",
-      desc: "Envoyez une pièce d'identité pour débloquer les fonctionnalités avancées (gardes longue durée, badge vérifié).",
+      desc: "Envoyez une pièce d'identité pour débloquer les fonctionnalités avancées (badge vérifié).",
       color: "text-muted-foreground",
     },
     pending: {

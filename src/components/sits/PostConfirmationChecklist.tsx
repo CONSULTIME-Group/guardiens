@@ -233,21 +233,6 @@ const PostConfirmationChecklist = ({
         )}
       </div>
 
-      {/* Long stay deposit reminder */}
-      {isLongStay && (
-        <div className="mt-2 p-3 rounded-lg bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-800">
-          <div className="flex items-start gap-2">
-            <Shield className="h-4 w-4 text-amber-600 mt-0.5 shrink-0" />
-            <div>
-              <p className="text-xs font-medium text-amber-800 dark:text-amber-300">Caution recommandée pour les longues durées</p>
-              <p className="text-xs text-amber-700/80 dark:text-amber-400/80 mt-0.5">
-                Pour les gardes de 30+ jours, nous recommandons de convenir d'une caution partagée entre les deux parties.
-                Discutez-en en messagerie pour fixer le montant ensemble.
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* All done celebration */}
       {completedCount === items.length && (
