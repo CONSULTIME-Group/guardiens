@@ -5,8 +5,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import PageMeta from "@/components/PageMeta";
 import { BadgeRow } from "@/components/badges/BadgeRow";
+import { BadgeSceau } from "@/components/badges/BadgeSceau";
 import { StatutGardienBadge } from "@/components/profile/StatutGardienBadge";
 import { useProfileReputation, useUserBadges } from "@/hooks/useProfileReputation";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { format } from "date-fns";
+import { fr } from "date-fns/locale";
 
 import { Skeleton } from "@/components/ui/skeleton";
 import { buildAbsoluteUrl } from "@/lib/seo";
@@ -64,6 +68,7 @@ export default function PublicSitterProfile() {
   const [emergencyActive, setEmergencyActive] = useState(false);
   const [hasActiveSubscription, setHasActiveSubscription] = useState(false);
   const [lightboxIdx, setLightboxIdx] = useState<number | null>(null);
+  const [badgesBySitId, setBadgesBySitId] = useState<Record<string, string[]>>({});
 
   useEffect(() => {
     if (!id) return;
@@ -108,6 +113,24 @@ export default function PublicSitterProfile() {
         if (reviewsRes.data.length > 0) {
           const sum = reviewsRes.data.reduce((a: number, r: any) => a + (r.overall_rating || 0), 0);
           setAvgRating(Math.round((sum / reviewsRes.data.length) * 10) / 10);
+        }
+
+        // Load badge attributions linked to sit_ids from reviews
+        const sitIdsFromReviews = reviewsRes.data
+          .map((r: any) => r.sit_id)
+          .filter((sid: string | null): sid is string => sid !== null);
+        if (sitIdsFromReviews.length > 0) {
+          const { data: badgeAttrData } = await supabase
+            .from("badge_attributions")
+            .select("badge_id, sit_id")
+            .in("sit_id", sitIdsFromReviews)
+            .eq("user_id", id);
+          const grouped: Record<string, string[]> = {};
+          (badgeAttrData || []).forEach((b: any) => {
+            if (!grouped[b.sit_id]) grouped[b.sit_id] = [];
+            grouped[b.sit_id].push(b.badge_id);
+          });
+          setBadgesBySitId(grouped);
         }
       }
 
@@ -190,7 +213,8 @@ export default function PublicSitterProfile() {
 
   const totalBadgeCount = badges.reduce((s: any, b: any) => s + b.count, 0);
 
-  const visibleReviews = reviews.slice(0, 5);
+  const gardeReviews = reviews.filter((r: any) => r.sit_id !== null);
+  const missionReviews = reviews.filter((r: any) => r.sit_id === null);
   const visibleGallery = gallery.slice(0, 9);
 
   const showCTA = !(isOwn || (isAuthenticated && isSitter));
@@ -591,41 +615,110 @@ export default function PublicSitterProfile() {
               Avis{reviewCount > 0 ? ` (${reviewCount})` : ""}
             </p>
             {reviewCount > 0 ? (
-              <>
-                <div className="space-y-3">
-                  {visibleReviews.map((r: any) => (
-                    <div key={r.id} className="bg-card border border-border rounded-2xl p-4">
-                      <div className="flex items-center gap-2 mb-2">
-                        <Avatar className="w-8 h-8">
-                          {r.reviewer?.avatar_url ? (
-                            <AvatarImage src={r.reviewer.avatar_url} />
-                          ) : null}
-                          <AvatarFallback className="text-xs bg-muted">
-                            {capitalize(r.reviewer?.first_name || "?").charAt(0)}
-                          </AvatarFallback>
-                        </Avatar>
-                        <span className="text-sm font-medium text-foreground">
-                          {capitalize(r.reviewer?.first_name || "")}
-                        </span>
-                        <span className="text-xs text-muted-foreground">
-                          {relativeDate(r.created_at)}
-                        </span>
-                        {r.overall_rating && (
-                          <span className="text-xs text-primary ml-auto">★ {r.overall_rating}/5</span>
-                        )}
-                      </div>
-                      {r.comment && (
-                        <p className="text-sm text-foreground/80">{r.comment}</p>
-                      )}
+              <Tabs defaultValue="gardes" className="w-full">
+                <TabsList className="mb-4">
+                  <TabsTrigger value="gardes">
+                    Gardes{gardeReviews.length > 0 ? ` (${gardeReviews.length})` : ""}
+                  </TabsTrigger>
+                  <TabsTrigger value="missions">
+                    Missions{missionReviews.length > 0 ? ` (${missionReviews.length})` : ""}
+                  </TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="gardes" forceMount>
+                  {gardeReviews.length === 0 ? (
+                    <p className="text-sm text-muted-foreground italic py-4">
+                      Ce gardien n'a pas encore reçu d'avis de garde sur Guardiens.
+                    </p>
+                  ) : (
+                    <div className="space-y-3">
+                      {gardeReviews.map((r: any) => {
+                        const authorName = capitalize(r.reviewer?.first_name || "Membre");
+                        const avatarUrl = r.reviewer?.avatar_url || null;
+                        const reviewBadges = r.sit_id ? (badgesBySitId[r.sit_id] || []) : [];
+                        return (
+                          <div key={r.id} className="bg-card border border-border rounded-2xl p-4">
+                            <div className="flex items-center justify-between mb-2">
+                              <div className="flex items-center gap-2">
+                                <Avatar className="w-8 h-8">
+                                  {avatarUrl ? <AvatarImage src={avatarUrl} /> : null}
+                                  <AvatarFallback className="text-xs bg-muted">
+                                    {authorName.charAt(0).toUpperCase()}
+                                  </AvatarFallback>
+                                </Avatar>
+                                <span className="text-sm font-medium text-foreground">{authorName}</span>
+                              </div>
+                              <span className="text-xs text-muted-foreground">
+                                {format(new Date(r.created_at), "MMMM yyyy", { locale: fr })}
+                              </span>
+                            </div>
+                            {r.overall_rating !== null && (
+                              <div className="flex items-center gap-0.5 mb-2">
+                                {[1, 2, 3, 4, 5].map(i => (
+                                  <span key={i} className={`text-sm ${i <= r.overall_rating ? "text-primary" : "text-muted"}`}>★</span>
+                                ))}
+                              </div>
+                            )}
+                            {r.comment && (
+                              <p className="text-sm text-foreground/80">{r.comment}</p>
+                            )}
+                            {reviewBadges.length > 0 && (
+                              <div className="flex flex-wrap gap-1.5 mt-3">
+                                {reviewBadges.map((badgeId: string) => (
+                                  <BadgeSceau key={badgeId} id={badgeId} size="compact" showCount={false} />
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
                     </div>
-                  ))}
-                </div>
-                {reviewCount > 5 && (
-                  <p className="text-xs text-primary hover:underline mt-3 cursor-pointer">
-                    Voir tous les avis →
-                  </p>
-                )}
-              </>
+                  )}
+                </TabsContent>
+
+                <TabsContent value="missions" forceMount>
+                  {missionReviews.length === 0 ? (
+                    <p className="text-sm text-muted-foreground italic py-4">
+                      Ce gardien n'a pas encore reçu d'avis de mission.
+                    </p>
+                  ) : (
+                    <div className="space-y-3">
+                      {missionReviews.map((r: any) => {
+                        const authorName = capitalize(r.reviewer?.first_name || "Membre");
+                        const avatarUrl = r.reviewer?.avatar_url || null;
+                        return (
+                          <div key={r.id} className="bg-card border border-border rounded-2xl p-4">
+                            <div className="flex items-center justify-between mb-2">
+                              <div className="flex items-center gap-2">
+                                <Avatar className="w-8 h-8">
+                                  {avatarUrl ? <AvatarImage src={avatarUrl} /> : null}
+                                  <AvatarFallback className="text-xs bg-muted">
+                                    {authorName.charAt(0).toUpperCase()}
+                                  </AvatarFallback>
+                                </Avatar>
+                                <span className="text-sm font-medium text-foreground">{authorName}</span>
+                              </div>
+                              <span className="text-xs text-muted-foreground">
+                                {format(new Date(r.created_at), "MMMM yyyy", { locale: fr })}
+                              </span>
+                            </div>
+                            {r.overall_rating !== null && (
+                              <div className="flex items-center gap-0.5 mb-2">
+                                {[1, 2, 3, 4, 5].map(i => (
+                                  <span key={i} className={`text-sm ${i <= r.overall_rating ? "text-primary" : "text-muted"}`}>★</span>
+                                ))}
+                              </div>
+                            )}
+                            {r.comment && (
+                              <p className="text-sm text-foreground/80">{r.comment}</p>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </TabsContent>
+              </Tabs>
             ) : (
               <div className="border border-border rounded-xl p-5 bg-card text-sm text-muted-foreground italic">
                 Les avis apparaîtront ici après la première garde.

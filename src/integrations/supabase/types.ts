@@ -1992,6 +1992,7 @@ export type Database = {
           id: string
           instructions_clarity_rating: number | null
           listing_accuracy_rating: number | null
+          mission_id: string | null
           moderation_status: string
           overall_rating: number
           published: boolean | null
@@ -2001,7 +2002,7 @@ export type Database = {
           review_type: string | null
           reviewee_id: string
           reviewer_id: string
-          sit_id: string
+          sit_id: string | null
           welcome_rating: number | null
           would_recommend: boolean | null
         }
@@ -2018,6 +2019,7 @@ export type Database = {
           id?: string
           instructions_clarity_rating?: number | null
           listing_accuracy_rating?: number | null
+          mission_id?: string | null
           moderation_status?: string
           overall_rating: number
           published?: boolean | null
@@ -2027,7 +2029,7 @@ export type Database = {
           review_type?: string | null
           reviewee_id: string
           reviewer_id: string
-          sit_id: string
+          sit_id?: string | null
           welcome_rating?: number | null
           would_recommend?: boolean | null
         }
@@ -2044,6 +2046,7 @@ export type Database = {
           id?: string
           instructions_clarity_rating?: number | null
           listing_accuracy_rating?: number | null
+          mission_id?: string | null
           moderation_status?: string
           overall_rating?: number
           published?: boolean | null
@@ -2053,11 +2056,18 @@ export type Database = {
           review_type?: string | null
           reviewee_id?: string
           reviewer_id?: string
-          sit_id?: string
+          sit_id?: string | null
           welcome_rating?: number | null
           would_recommend?: boolean | null
         }
         Relationships: [
+          {
+            foreignKeyName: "reviews_mission_id_fkey"
+            columns: ["mission_id"]
+            isOneToOne: false
+            referencedRelation: "small_missions"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "reviews_reviewee_id_fkey"
             columns: ["reviewee_id"]
