@@ -605,6 +605,23 @@ const SmallMissions = () => {
           </div>
         </footer>
       </div>
+
+      {/* Propose exchange dialog */}
+      {dialogMission && dialogTarget && (
+        <ProposeExchangeDialog
+          open={!!dialogMission}
+          onClose={() => { setDialogMission(null); setDialogTarget(null); }}
+          mission={{
+            id: dialogMission.id,
+            title: dialogMission.title,
+            exchange_offer: dialogMission.exchange_offer,
+            date_needed: dialogMission.date_needed,
+            user_id: dialogMission.user_id,
+          }}
+          targetUserId={dialogTarget.id}
+          targetFirstName={dialogTarget.name}
+        />
+      )}
     </>
   );
 };
