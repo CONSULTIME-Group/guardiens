@@ -24,46 +24,65 @@ export const useSubscriptionAccess = () => {
   const effectiveRole = user?.role === "both" ? activeRole : user?.role;
 
   useEffect(() => {
-    if (!user) { setLoading(false); return; }
+    if (!user) {
+      setStatus("never");
+      setHasAccess(false);
+      setLoading(false);
+      return;
+    }
+
+    // Safety timeout — never stay loading forever
+    const timeout = setTimeout(() => setLoading(false), 5000);
 
     const load = async () => {
-      const [profileRes, subRes] = await Promise.all([
-        supabase.from("profiles").select("is_founder, created_at, role").eq("id", user.id).single(),
-        supabase.from("subscriptions").select("status, expires_at").eq("user_id", user.id).maybeSingle(),
-      ]);
+      try {
+        const [profileRes, subRes] = await Promise.all([
+          supabase.from("profiles").select("is_founder, created_at, role").eq("id", user.id).maybeSingle(),
+          supabase.from("subscriptions").select("status, expires_at").eq("user_id", user.id).maybeSingle(),
+        ]);
 
-      const p = profileRes.data;
-      const now = new Date();
-      const createdDate = p?.created_at ? new Date(p.created_at) : new Date();
-      const isFounder = p?.is_founder || createdDate < LAUNCH_DATE;
+        const p = profileRes.data;
+        const now = new Date();
+        const createdDate = p?.created_at ? new Date(p.created_at) : new Date();
+        const isFounder = p?.is_founder || createdDate < LAUNCH_DATE;
 
-      // Check subscription from DB
-      const sub = subRes.data;
-      const hasActiveSub = sub?.status === "active" || sub?.status === "trial"
-        || (sub?.expires_at && new Date(sub.expires_at) > now);
+        // Check subscription from DB — data can be null (never subscribed)
+        const sub = subRes.data;
+        const hasActiveSub = sub != null && (
+          sub.status === "active" || sub.status === "trial"
+          || (sub.expires_at && new Date(sub.expires_at) > now)
+        );
 
-      if (effectiveRole === "owner") {
-        setStatus("owner");
-        setHasAccess(true);
-      } else if (now < LAUNCH_DATE) {
-        setStatus("pre_launch");
-        setHasAccess(true);
-      } else if (hasActiveSub) {
-        setStatus("premium");
-        setHasAccess(true);
-      } else if (isFounder && now < GRACE_END_DATE) {
-        setStatus("founder_grace");
-        setHasAccess(true);
-      } else if (isFounder && !hasActiveSub) {
-        setStatus("founder_expired");
-        setHasAccess(false);
-      } else {
+        if (effectiveRole === "owner") {
+          setStatus("owner");
+          setHasAccess(true);
+        } else if (now < LAUNCH_DATE) {
+          setStatus("pre_launch");
+          setHasAccess(true);
+        } else if (hasActiveSub) {
+          setStatus("premium");
+          setHasAccess(true);
+        } else if (isFounder && now < GRACE_END_DATE) {
+          setStatus("founder_grace");
+          setHasAccess(true);
+        } else if (isFounder && !hasActiveSub) {
+          setStatus("founder_expired");
+          setHasAccess(false);
+        } else {
+          setStatus("never");
+          setHasAccess(false);
+        }
+      } catch (err) {
+        console.error("[useSubscriptionAccess] error:", err);
         setStatus("never");
         setHasAccess(false);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
     load();
+
+    return () => clearTimeout(timeout);
   }, [user, effectiveRole]);
 
   return { status, hasAccess, loading };
