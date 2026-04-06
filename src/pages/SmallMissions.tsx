@@ -506,10 +506,11 @@ const SmallMissions = () => {
                           </div>
                         )}
                         <button
-                          onClick={() => navigate(`/profil/${h.id}`)}
-                          className="text-sm text-primary font-semibold hover:underline"
+                          onClick={() => handleContactHelper(h.id)}
+                          disabled={contactingHelperId === h.id}
+                          className="text-sm text-primary font-semibold hover:underline disabled:opacity-50"
                         >
-                          Proposer un échange →
+                          {contactingHelperId === h.id ? "…" : "Contacter →"}
                         </button>
                       </div>
                     );
