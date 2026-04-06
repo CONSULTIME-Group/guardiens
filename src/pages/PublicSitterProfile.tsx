@@ -95,7 +95,7 @@ export default function PublicSitterProfile() {
       if (badgesRes.data) {
         const map: Record<string, number> = {};
         badgesRes.data.forEach((b: any) => {
-          map[b.badge_key] = (map[b.badge_key] || 0) + 1;
+          map[b.badge_id] = (map[b.badge_id] || 0) + 1;
         });
         setBadges(Object.entries(map).map(([badge_key, count]) => ({ badge_key, count })));
       }
