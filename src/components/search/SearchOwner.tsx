@@ -506,12 +506,14 @@ const SearchOwner = () => {
 
                 return (
                   <div key={s.id} className="bg-card rounded-xl overflow-hidden border border-border hover:shadow-md transition-shadow flex flex-col max-w-sm">
-                    {/* Photo — compact 16:9 */}
-                    <Link to={`/profil/${s.user_id}`} className="block relative">
+                    {/* Photo — carré, visage en haut */}
+                    <Link to={`/profil/${s.user_id}`} className="block relative overflow-hidden rounded-t-lg">
                       {profile?.avatar_url ? (
-                        <img src={profile.avatar_url} alt={firstName} className="h-32 w-full object-cover object-center" />
+                        <div className="aspect-square w-full overflow-hidden">
+                          <img src={profile.avatar_url} alt={firstName} className="w-full h-full object-cover object-top" />
+                        </div>
                       ) : (
-                        <div className="h-32 w-full bg-primary/10 flex items-center justify-center">
+                        <div className="aspect-square w-full bg-primary/10 flex items-center justify-center">
                           <span className="text-3xl text-primary font-heading font-bold">{firstName.charAt(0)}</span>
                         </div>
                       )}
