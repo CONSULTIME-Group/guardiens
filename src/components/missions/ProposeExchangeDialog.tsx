@@ -95,7 +95,7 @@ const ProposeExchangeDialog = ({
         user_id: targetUserId,
         type: "mission_proposal",
         title: "Nouvelle proposition d'échange",
-        body: `${user.first_name} vous propose un échange pour "${mission.title}"`,
+        body: `${(user as any).first_name || "Un membre"} vous propose un échange pour "${mission.title}"`,
         link: `/messages?conversationId=${convId}`,
       });
 
