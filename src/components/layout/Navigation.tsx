@@ -211,7 +211,7 @@ export const Sidebar = () => {
             <>
               <GroupLabel label="Mon activité" />
               <SidebarItem to="/dashboard" icon={Home} label="Dashboard" />
-              <SidebarItem to="/sits" icon={Calendar} label={effectiveRole === "owner" ? "Mes annonces" : "Mes gardes"} />
+              <SidebarItem to="/sits" icon={Calendar} label={effectiveRole === "owner" ? "Mes annonces" : "Mes gardes"} badge={pendingAppsCount} />
 
               {isSitterLocked ? (
                 <button
@@ -250,7 +250,7 @@ export const Sidebar = () => {
                 <SidebarItem to="/search" icon={Search} label={effectiveRole === "owner" ? "Recherche gardiens" : "Recherche"} />
               )}
 
-              <SidebarItem to="/petites-missions" icon={Handshake} label="Petites missions" />
+              <SidebarItem to="/petites-missions" icon={Handshake} label="Petites missions" badge={missionBadgeCount} />
 
               <GroupLabel label="Ressources" />
               <SidebarItem to="/actualites" icon={Newspaper} label="Guides & Conseils" />
