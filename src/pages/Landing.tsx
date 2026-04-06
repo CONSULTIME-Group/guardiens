@@ -620,7 +620,7 @@ const Landing = () => {
               </p>
             </div>
             <div className="flex flex-wrap gap-4 text-sm text-white/40 font-body">
-              <span>© 2026 Guardiens</span>
+              <span className="text-xs text-white/40 font-body">Guardiens {'\u00B7'} Version b\u00eata {'\u00B7'} 2026</span>
               <span className="text-white/20">·</span>
               <Link to="/cgu" className="hover:text-white transition-colors">CGU</Link>
               <span className="text-white/20">·</span>
