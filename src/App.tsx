@@ -192,6 +192,7 @@ const AppRoutes = () => (
       <Route path="/settings" element={<Settings />} />
       <Route path="/mon-abonnement" element={<MySubscription />} />
     </Route>
+    <Route path="/planche-badges" element={<PlancheBadges />} />
     <Route path="/unsubscribe" element={<Unsubscribe />} />
     <Route path="*" element={<NotFound />} />
   </Routes>
