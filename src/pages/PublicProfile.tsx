@@ -121,7 +121,8 @@ const PublicProfile = () => {
   if (loading) return <div className="p-6 md:p-10 text-muted-foreground">Chargement...</div>;
   if (!profile) return <div className="p-6 md:p-10 text-muted-foreground">Profil introuvable.</div>;
 
-  const memberSince = format(new Date(profile.created_at), "MMMM yyyy", { locale: fr });
+  const createdDate = new Date(profile.created_at);
+  const memberSince = !isNaN(createdDate.getTime()) ? format(createdDate, "MMMM yyyy", { locale: fr }) : "";
   const isSitter = profile.role === "sitter" || profile.role === "both";
   const isOwner = profile.role === "owner" || profile.role === "both";
   const isOwnProfile = user?.id === id;
