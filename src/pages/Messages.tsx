@@ -87,6 +87,11 @@ const missionSuggestions = [
   "Quand seriez-vous disponible ?",
   "Qu'attendez-vous en échange ?",
 ];
+const entraideContactSuggestions = [
+  "Bonjour ! J'ai vu que tu étais disponible pour aider.",
+  "Quel type d'aide proposes-tu ?",
+  "On pourrait en discuter ?",
+];
 
 const SuggestedMessages = ({
   messages: msgs, userId, activeConv, onSelect,
