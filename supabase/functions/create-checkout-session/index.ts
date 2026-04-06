@@ -76,7 +76,9 @@ Deno.serve(async (req) => {
     const freeMonths = profile?.free_months_credit ?? 0;
 
     // 4. Stripe customer
-    const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY_FULL") ?? Deno.env.get("STRIPE_SECRET_KEY")!, {
+    const stripeKey =
+      Deno.env.get("STRIPE_SECRET_KEY_FULL") ?? Deno.env.get("STRIPE_SECRET_KEY")!;
+    const stripe = new Stripe(stripeKey, {
       apiVersion: "2025-08-27.basil",
     });
 
@@ -101,6 +103,38 @@ Deno.serve(async (req) => {
     }
 
     const origin = req.headers.get("origin") || "https://guardiens.fr";
+    const isTestStripeKey = stripeKey.startsWith("sk_test_") || stripeKey.startsWith("rk_test_");
+
+    const resolveActivePrice = async (
+      lookupKeys: string[],
+      fallbackPriceId?: string,
+    ) => {
+      const prices = await stripe.prices.list({
+        lookup_keys: lookupKeys,
+        active: true,
+        limit: Math.max(lookupKeys.length, 1),
+      });
+
+      if (prices.data.length > 0) {
+        return (
+          prices.data.find((price) =>
+            price.lookup_key ? lookupKeys.includes(price.lookup_key) : false,
+          ) ?? prices.data[0]
+        );
+      }
+
+      if (isTestStripeKey && fallbackPriceId) {
+        console.warn(
+          `[create-checkout-session] lookup_keys introuvables (${lookupKeys.join(", ")}), fallback sur ${fallbackPriceId}`,
+        );
+        const fallbackPrice = await stripe.prices.retrieve(fallbackPriceId);
+        if (!("deleted" in fallbackPrice) && fallbackPrice.active) {
+          return fallbackPrice;
+        }
+      }
+
+      return null;
+    };
 
     // ─── MONTHLY ───
     if (formulaType === "monthly") {
@@ -118,8 +152,11 @@ Deno.serve(async (req) => {
         trialEnd = Math.floor(endDate.getTime() / 1000);
       }
 
-      const prices = await stripe.prices.list({ lookup_keys: ["gardien_mensuel"], active: true });
-      if (!prices.data.length) {
+      const monthlyPrice = await resolveActivePrice(
+        ["gardien_mensuel"],
+        "price_1TIPaZIR9gPuLbxmwV01tgwa",
+      );
+      if (!monthlyPrice) {
         return new Response(JSON.stringify({ error: "Prix gardien_mensuel introuvable" }), {
           status: 500,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -129,7 +166,7 @@ Deno.serve(async (req) => {
       const session = await stripe.checkout.sessions.create({
         mode: "subscription",
         customer: customerId,
-        line_items: [{ price: prices.data[0].id, quantity: 1 }],
+        line_items: [{ price: monthlyPrice.id, quantity: 1 }],
         subscription_data: {
           trial_end: trialEnd,
           metadata: { user_id: user.id, formula_type: "monthly" },
@@ -153,8 +190,11 @@ Deno.serve(async (req) => {
 
     // ─── ONE_SHOT ───
     if (formulaType === "one_shot") {
-      const prices = await stripe.prices.list({ lookup_keys: ["gardien_oneshot"], active: true });
-      if (!prices.data.length) {
+      const oneShotPrice = await resolveActivePrice(
+        ["gardien_oneshot", "gardien_one_shot"],
+        "price_1TJHDhIR9gPuLbxmKScyHEoq",
+      );
+      if (!oneShotPrice) {
         return new Response(JSON.stringify({ error: "Prix gardien_oneshot introuvable" }), {
           status: 500,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -164,7 +204,7 @@ Deno.serve(async (req) => {
       const session = await stripe.checkout.sessions.create({
         mode: "payment",
         customer: customerId,
-        line_items: [{ price: prices.data[0].id, quantity: 1 }],
+        line_items: [{ price: oneShotPrice.id, quantity: 1 }],
         locale: "fr",
         success_url: `${origin}/mon-abonnement?success=true&formula=one_shot`,
         cancel_url: `${origin}/mon-abonnement?cancelled=true`,
@@ -197,8 +237,11 @@ Deno.serve(async (req) => {
       const montantEuros = Math.ceil(moisRestants * 9 * 0.8);
       const montantCents = montantEuros * 100;
 
-      const prices = await stripe.prices.list({ lookup_keys: ["gardien_prorata_2026"], active: true });
-      if (!prices.data.length) {
+      const prorataPrice = await resolveActivePrice(
+        ["gardien_prorata_2026"],
+        "price_1TJHGSIR9gPuLbxmWVvgB2rQ",
+      );
+      if (!prorataPrice) {
         return new Response(JSON.stringify({ error: "Prix gardien_prorata_2026 introuvable" }), {
           status: 500,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -211,7 +254,7 @@ Deno.serve(async (req) => {
         line_items: [{
           price_data: {
             currency: "eur",
-            product: prices.data[0].product as string,
+            product: prorataPrice.product as string,
             unit_amount: montantCents,
           },
           quantity: 1,
