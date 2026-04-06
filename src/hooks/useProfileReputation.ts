@@ -5,8 +5,8 @@ export function useProfileReputation(userId: string | undefined) {
   return useQuery({
     queryKey: ['profile_reputation', userId],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('profile_reputation' as any)
+      const { data, error } = await (supabase as any)
+        .from('profile_reputation')
         .select('*')
         .eq('user_id', userId!)
         .single()
