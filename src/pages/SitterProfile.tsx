@@ -11,7 +11,7 @@ import StepSkills from "@/components/profile/StepSkills";
 import SitterGallery from "@/components/profile/SitterGallery";
 import ExternalExperiences from "@/components/profile/ExternalExperiences";
 import ProfileSidebar, { type SidebarSection } from "@/components/profile/ProfileSidebar";
-import BadgeShield from "@/components/badges/BadgeShield";
+
 import { useSitterProfile, type SitterProfileData } from "@/hooks/useSitterProfile";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";

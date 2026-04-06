@@ -4,7 +4,7 @@ import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import PageMeta from "@/components/PageMeta";
-import BadgeTimbre, { TIMBRES_ORDER } from "@/components/badges/BadgeTimbre";
+
 import { Skeleton } from "@/components/ui/skeleton";
 import { buildAbsoluteUrl } from "@/lib/seo";
 import {
@@ -183,15 +183,7 @@ export default function PublicSitterProfile() {
   const frequencyLabel = FREQUENCY_LABELS[preferredFrequency] || "";
   const noticeLabel = NOTICE_LABELS[minNotice] || "";
 
-  const badgeMap: Record<string, boolean> = {};
-  badges.forEach(b => { badgeMap[b.badge_key] = true; });
-  if (profile?.identity_verified) badgeMap["id_verifiee"] = true;
-  if (profile?.is_founder) badgeMap["fondateur"] = true;
-  if (emergencyActive) badgeMap["gardien_urgence"] = true;
-  const unlockedCount = TIMBRES_ORDER.filter(k => badgeMap[k]).length;
-  const totalBadgeCount = badges.reduce((s, b) => s + b.count, 0);
-
-  const activeBadgeKeys = ["id_verifiee", "fondateur", "gardien_urgence"].filter(k => badgeMap[k]);
+  const totalBadgeCount = badges.reduce((s: any, b: any) => s + b.count, 0);
 
   const visibleReviews = reviews.slice(0, 5);
   const visibleGallery = gallery.slice(0, 9);
@@ -395,24 +387,24 @@ export default function PublicSitterProfile() {
                 </p>
               )}
 
-              {(activeBadgeKeys.length > 0 || hasActiveSubscription) && (
+              {(profile?.identity_verified || profile?.is_founder || emergencyActive || hasActiveSubscription) && (
                 <div className="flex items-center gap-2 flex-wrap">
                   {hasActiveSubscription && (
                     <span className="inline-flex items-center gap-1 text-xs text-muted-foreground border border-border rounded-full px-2 py-0.5 bg-white/80">
-                      <BadgeCheck size={11} className="text-primary" /> Abonne
+                      <BadgeCheck size={11} className="text-primary" /> Abonné
                     </span>
                   )}
-                  {badgeMap["id_verifiee"] && (
+                  {profile?.identity_verified && (
                     <span className="inline-flex items-center gap-1 text-xs text-muted-foreground border border-border rounded-full px-2 py-0.5 bg-white/80">
-                      <Shield size={11} className="text-primary" /> ID verifiee
+                      <Shield size={11} className="text-primary" /> ID vérifiée
                     </span>
                   )}
-                  {badgeMap["fondateur"] && (
+                  {profile?.is_founder && (
                     <span className="inline-flex items-center gap-1 text-xs text-muted-foreground border border-border rounded-full px-2 py-0.5 bg-white/80">
                       <Star size={11} className="text-primary" /> Fondateur
                     </span>
                   )}
-                  {badgeMap["gardien_urgence"] && (
+                  {emergencyActive && (
                     <span className="inline-flex items-center gap-1 text-xs text-muted-foreground border border-border rounded-full px-2 py-0.5 bg-white/80">
                       <Shield size={11} className="text-primary" /> Gardien d'urgence
                     </span>
@@ -635,23 +627,7 @@ export default function PublicSitterProfile() {
 
           <hr className="border-border" />
 
-          {/* Collection de timbres */}
-          <div>
-            <p className="text-xs uppercase tracking-widest text-muted-foreground mb-3">Sa collection</p>
-            <div className="grid grid-cols-6 gap-3">
-              {TIMBRES_ORDER.map(key => (
-                <div key={key} className="flex justify-center">
-                  <BadgeTimbre id={key} unlocked={!!badgeMap[key]} size="compact" showTooltip />
-                </div>
-              ))}
-            </div>
-            <p className="text-xs text-muted-foreground mt-2">
-              {unlockedCount} timbre{unlockedCount > 1 ? "s" : ""} sur 12
-            </p>
-            <p className="text-xs text-muted-foreground mt-1">
-              Les écussons sont attribués par les propriétaires après chaque garde.
-            </p>
-          </div>
+          {/* Badges gardien — migration en cours */}
 
           {/* Galerie */}
           {gallery.length > 0 && (

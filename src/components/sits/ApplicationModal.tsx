@@ -7,7 +7,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "@/hooks/use-toast";
 import { Send, Star, MapPin, Shield, CheckCircle2, Calendar } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import BadgeShield from "@/components/badges/BadgeShield";
+
 import { TooltipProvider } from "@/components/ui/tooltip";
 
 interface ApplicationModalProps {
@@ -185,15 +185,7 @@ const ApplicationModal = ({
               )}
 
               {/* Badges */}
-              {sitterInfo.badgeCounts.length > 0 && (
-                <TooltipProvider>
-                  <div className="flex gap-1.5">
-                    {sitterInfo.badgeCounts.slice(0, 3).map((b: any) => (
-                      <BadgeShield key={b.badge_key} badgeKey={b.badge_key} count={b.count} size="sm" showLabel={false} />
-                    ))}
-                  </div>
-                </TooltipProvider>
-              )}
+              {/* Badges — migration en cours */}
 
               {/* Mini gallery */}
               {sitterInfo.gallery.length > 0 && (

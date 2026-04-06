@@ -5,7 +5,7 @@ import { useSubscriptionAccess } from "@/hooks/useSubscriptionAccess";
 import { Link, useNavigate } from "react-router-dom";
 import EmergencyDashSection from "./EmergencyDashSection";
 import MissionsNearbySection from "./MissionsNearbySection";
-import BadgeTimbre, { TIMBRES_ORDER } from "@/components/badges/BadgeTimbre";
+
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import {
   Home, Search, CheckCircle, Circle, ChevronRight,
@@ -195,15 +195,6 @@ const SitterDashboard = () => {
   ];
   const emergencyDone = emergencyConditions.filter(c => c.ok).length;
 
-  // Badges unlocked set
-  const unlockedSet: Record<string, boolean> = {};
-  if (identityVerified) unlockedSet["id_verifiee"] = true;
-  if (isFounder) unlockedSet["fondateur"] = true;
-  badges.forEach((b: any) => {
-    const key = b.badge_key || b.id;
-    if (key) unlockedSet[key] = true;
-  });
-  const unlockedCount = TIMBRES_ORDER.filter(k => unlockedSet[k]).length;
 
   // Checklist
   const checklistItems = [
@@ -385,22 +376,7 @@ const SitterDashboard = () => {
           Découvrez les gardes disponibles →
         </button>
 
-        <div className="bg-card border border-border rounded-2xl p-4 md:p-5">
-          <p className="text-xs uppercase tracking-widest text-muted-foreground font-sans mb-3">
-            Mes écussons
-          </p>
-          <div className="grid grid-cols-4 md:grid-cols-6 gap-2.5 mb-3">
-            {TIMBRES_ORDER.map((key) => (
-              <div key={key} className="flex justify-center">
-                <BadgeTimbre id={key} unlocked={!!unlockedSet[key]} size="compact" />
-              </div>
-            ))}
-          </div>
-          <p className="text-xs text-muted-foreground font-sans text-center">
-            {unlockedCount} timbre(s) sur 12 débloqué(s)
-            {unlockedCount === 0 && " — continuez à garder pour en collecter."}
-          </p>
-        </div>
+        {/* MES BADGES — migration en cours, sera implémenté étape 5 */}
       </div>
 
       {/* ═══ 4. CHECKLIST ═══ */}

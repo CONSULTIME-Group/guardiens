@@ -7,7 +7,7 @@ import { Progress } from "@/components/ui/progress";
 import PricingCards from "@/components/subscription/PricingCards";
 import AdvantagesList from "@/components/subscription/AdvantagesList";
 import SubscriptionFAQ from "@/components/subscription/SubscriptionFAQ";
-import BadgeTimbre from "@/components/badges/BadgeTimbre";
+
 import {
   Star, BadgeCheck, Home, AlertCircle, Clock, Loader2,
   Check, X, FileText,
@@ -194,9 +194,7 @@ const MySubscription = () => {
       {/* ══ VUE FONDATEUR GRACE ══ */}
       {view === "founder_grace" && (
         <div className="bg-amber-50 border border-amber-200 rounded-2xl p-8 max-w-xl mx-auto space-y-6 text-center">
-          <div className="flex justify-center">
-            <BadgeTimbre id="fondateur" unlocked={true} size="normal" />
-          </div>
+          {/* Badge Fondateur — migration en cours */}
           <span className="inline-flex items-center gap-1.5 text-xs font-body bg-amber-100 text-amber-700 px-3 py-1 rounded-full">
             <Star className="h-3 w-3" fill="currentColor" /> Fondateur
           </span>
@@ -231,9 +229,7 @@ const MySubscription = () => {
       {view === "founder_switch" && (
         <div className="max-w-xl mx-auto space-y-6">
           <div className="text-center space-y-3">
-            <div className="flex justify-center">
-              <BadgeTimbre id="fondateur" unlocked={true} size="normal" />
-            </div>
+            {/* Badge Fondateur — migration en cours */}
             <span className="inline-flex items-center gap-1.5 text-xs font-body bg-amber-100 text-amber-700 px-3 py-1 rounded-full">
               <Star className="h-3 w-3" fill="currentColor" /> Fondateur
             </span>

@@ -8,7 +8,7 @@ import { Calendar, MapPin, Star, PawPrint, Home, CheckCircle2 } from "lucide-rea
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import VerifiedBadge from "@/components/profile/VerifiedBadge";
-import BadgeShield from "@/components/badges/BadgeShield";
+
 import { TooltipProvider } from "@/components/ui/tooltip";
 import ApplicationModal from "@/components/sits/ApplicationModal";
 import { useSubscriptionAccess } from "@/hooks/useSubscriptionAccess";
@@ -192,15 +192,7 @@ const PublicSitDetail = () => {
                 </span>
               )}
             </div>
-            {badges.length > 0 && (
-              <TooltipProvider>
-                <div className="flex gap-1">
-                  {badges.slice(0, 3).map(b => (
-                    <BadgeShield key={b.badge_key} badgeKey={b.badge_key} count={b.count} size="sm" showLabel={false} />
-                  ))}
-                </div>
-              </TooltipProvider>
-            )}
+            {/* Badges — migration en cours */}
           </div>
         )}
 
