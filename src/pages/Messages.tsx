@@ -97,7 +97,7 @@ const SuggestedMessages = ({
   messages: msgs, userId, activeConv, onSelect,
 }: {
   messages: Message[]; userId?: string; activeConv: Conversation;
-  onSelect: (text: string) => void;
+  onSelect: (text: string) => void; isEntraideContact?: boolean;
 }) => {
   const userMsgs = msgs.filter(m => m.sender_id === userId && !m.is_system);
   if (userMsgs.length > 0) return null;
@@ -106,7 +106,9 @@ const SuggestedMessages = ({
   const isMission = !!activeConv.small_mission_id;
 
   let suggestions: string[];
-  if (isMission) {
+  if (isEntraideContact) {
+    suggestions = entraideContactSuggestions;
+  } else if (isMission) {
     suggestions = missionSuggestions;
   } else if (isOwner) {
     suggestions = ownerGardeSuggestions;
