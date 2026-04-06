@@ -114,13 +114,13 @@ const OwnerDashboard = () => {
         const sitterIds = [...new Set((apps || []).map((a: any) => a.sitter?.id).filter(Boolean))];
         if (sitterIds.length > 0) {
           const [{ data: badgeData }, { data: sitterReviews }] = await Promise.all([
-            supabase.from("badge_attributions").select("receiver_id, badge_key").in("receiver_id", sitterIds),
+            supabase.from("badge_attributions").select("user_id, badge_id").in("user_id", sitterIds),
             supabase.from("reviews").select("reviewee_id, overall_rating").in("reviewee_id", sitterIds).eq("published", true),
           ]);
           const grouped: Record<string, Record<string, number>> = {};
           (badgeData || []).forEach((b: any) => {
-            if (!grouped[b.receiver_id]) grouped[b.receiver_id] = {};
-            grouped[b.receiver_id][b.badge_key] = (grouped[b.receiver_id][b.badge_key] || 0) + 1;
+            if (!grouped[b.user_id]) grouped[b.user_id] = {};
+            grouped[b.user_id][b.badge_id] = (grouped[b.user_id][b.badge_id] || 0) + 1;
           });
           const result: Record<string, { badge_key: string; count: number }[]> = {};
           Object.entries(grouped).forEach(([uid, badges]) => {

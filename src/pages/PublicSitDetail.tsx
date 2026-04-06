@@ -51,7 +51,7 @@ const PublicSitDetail = () => {
         supabase.from("profiles").select("id, first_name, city, avatar_url, identity_verified, bio").eq("id", sitData.user_id).single(),
         supabase.from("properties").select("*").eq("id", sitData.property_id).single(),
         supabase.from("reviews").select("overall_rating").eq("reviewee_id", sitData.user_id).eq("published", true),
-        supabase.from("badge_attributions").select("badge_key").eq("receiver_id", sitData.user_id),
+        supabase.from("badge_attributions").select("badge_id").eq("user_id", sitData.user_id),
       ]);
 
       setOwner(ownerRes.data);

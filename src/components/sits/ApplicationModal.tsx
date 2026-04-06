@@ -43,7 +43,7 @@ const ApplicationModal = ({
         supabase.from("profiles").select("first_name, avatar_url, city, identity_verified").eq("id", user.id).single(),
         supabase.from("sitter_profiles").select("experience_years, animal_types").eq("user_id", user.id).maybeSingle(),
         supabase.from("reviews").select("overall_rating").eq("reviewee_id", user.id).eq("published", true),
-        supabase.from("badge_attributions").select("badge_key").eq("receiver_id", user.id),
+        supabase.from("badge_attributions").select("badge_id").eq("user_id", user.id),
         supabase.from("sitter_gallery").select("photo_url").eq("user_id", user.id).limit(4),
       ]);
 

@@ -183,7 +183,7 @@ const SearchOwner = () => {
     // Enrich with reviews + badges + emergency
     const userIds = items.map((s: any) => s.user_id);
     const [allBadgesRes, emergencyRes] = await Promise.all([
-      supabase.from("badge_attributions").select("receiver_id, badge_key").in("receiver_id", userIds.length > 0 ? userIds : ["__none__"]),
+      supabase.from("badge_attributions").select("user_id, badge_id").in("user_id", userIds.length > 0 ? userIds : ["__none__"]),
       supabase.from("emergency_sitter_profiles").select("user_id, is_active").in("user_id", userIds.length > 0 ? userIds : ["__none__"]).eq("is_active", true),
     ]);
 
@@ -192,9 +192,9 @@ const SearchOwner = () => {
 
     const badgeMap = new Map<string, Map<string, number>>();
     (allBadgesRes.data || []).forEach((b: any) => {
-      if (!badgeMap.has(b.receiver_id)) badgeMap.set(b.receiver_id, new Map());
-      const m = badgeMap.get(b.receiver_id)!;
-      m.set(b.badge_key, (m.get(b.badge_key) || 0) + 1);
+      if (!badgeMap.has(b.user_id)) badgeMap.set(b.user_id, new Map());
+      const m = badgeMap.get(b.user_id)!;
+      m.set(b.badge_id, (m.get(b.badge_id) || 0) + 1);
     });
 
     const enriched = await Promise.all(

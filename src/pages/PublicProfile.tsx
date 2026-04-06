@@ -94,7 +94,7 @@ const PublicProfile = () => {
         supabase.from("external_experiences").select("*").eq("user_id", id).order("created_at", { ascending: false }),
         supabase.from("owner_gallery").select("*").eq("user_id", id).order("created_at", { ascending: false }),
         supabase.from("owner_highlights").select("*, sitter:sitter_id(first_name, avatar_url)").eq("owner_id", id).eq("hidden", false).order("created_at", { ascending: false }),
-        supabase.from("badge_attributions").select("badge_key").eq("receiver_id", id),
+        supabase.from("badge_attributions").select("badge_id").eq("user_id", id),
         supabase.from("emergency_sitter_profiles").select("is_active").eq("user_id", id).eq("is_active", true).maybeSingle(),
         supabase.from("sits").select("id, title").eq("user_id", id).in("status", ["published", "confirmed"]).limit(1).maybeSingle(),
       ]);

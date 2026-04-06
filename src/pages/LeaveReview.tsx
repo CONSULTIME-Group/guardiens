@@ -124,11 +124,11 @@ const LeaveReview = () => {
 
     // Save badge attributions
     if (selectedBadges.length > 0 && reviewee) {
-      const badgeRows = selectedBadges.map(badge_key => ({
+      const badgeRows = selectedBadges.map(badge_id => ({
         sit_id: sitId!,
         giver_id: user.id,
-        receiver_id: reviewee.id,
-        badge_key,
+        user_id: reviewee.id,
+        badge_id,
       }));
       await supabase.from("badge_attributions").insert(badgeRows as any);
 
@@ -138,7 +138,7 @@ const LeaveReview = () => {
         .select("id")
         .eq("sit_id", sitId)
         .eq("giver_id", reviewee.id)
-        .eq("receiver_id", user.id);
+        .eq("user_id", user.id);
 
       const otherGaveCount = otherBadges?.length || 0;
       if (otherGaveCount >= 2 && selectedBadges.length >= 2) {
@@ -147,14 +147,14 @@ const LeaveReview = () => {
           .from("badge_attributions")
           .select("id")
           .eq("sit_id", sitId)
-          .eq("badge_key", mutualKey)
-          .eq("receiver_id", user.id)
+          .eq("badge_id", mutualKey)
+          .eq("user_id", user.id)
           .maybeSingle();
 
         if (!existing) {
           await supabase.from("badge_attributions").insert([
-            { sit_id: sitId, giver_id: reviewee.id, receiver_id: user.id, badge_key: mutualKey },
-            { sit_id: sitId, giver_id: user.id, receiver_id: reviewee.id, badge_key: mutualKey },
+            { sit_id: sitId, giver_id: reviewee.id, user_id: user.id, badge_id: mutualKey },
+            { sit_id: sitId, giver_id: user.id, user_id: reviewee.id, badge_id: mutualKey },
           ] as any);
         }
       }

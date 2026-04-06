@@ -256,14 +256,14 @@ const SearchSitter = () => {
         const [{ data: pets }, { data: reviews }, { data: ownerBadges }, { data: ownerProf }] = await Promise.all([
           supabase.from("pets").select("species, name").eq("property_id", sit.property_id),
           supabase.from("reviews").select("overall_rating").eq("reviewee_id", sit.user_id).eq("published", true),
-          supabase.from("badge_attributions").select("badge_key").eq("receiver_id", sit.user_id),
+          supabase.from("badge_attributions").select("badge_id").eq("user_id", sit.user_id),
           supabase.from("owner_profiles").select("environments").eq("user_id", sit.user_id).maybeSingle(),
         ]);
         const avgRating = reviews && reviews.length > 0
           ? (reviews.reduce((s: number, r: any) => s + r.overall_rating, 0) / reviews.length).toFixed(1) : null;
         const badgeCounts = new Map<string, number>();
-        (ownerBadges || []).forEach((b: any) => badgeCounts.set(b.badge_key, (badgeCounts.get(b.badge_key) || 0) + 1));
-        const topBadges = Array.from(badgeCounts.entries()).map(([badge_key, count]) => ({ badge_key, count })).sort((a, b) => b.count - a.count).slice(0, 2);
+        (ownerBadges || []).forEach((b: any) => badgeCounts.set(b.badge_id, (badgeCounts.get(b.badge_id) || 0) + 1));
+        const topBadges = Array.from(badgeCounts.entries()).map(([badge_id, count]) => ({ badge_key: badge_id, count })).sort((a, b) => b.count - a.count).slice(0, 2);
         const petSpecies = (pets || []).map((p: any) => p.species);
         if (animalTypes.length > 0) {
           const wantedSpecies = animalTypes.map(a => animalChipToSpecies[a]).filter(Boolean);

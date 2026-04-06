@@ -68,7 +68,7 @@ export default function PublicSitterProfile() {
         await Promise.all([
           supabase.from("public_profiles").select("*").eq("id", id).single(),
           supabase.from("sitter_profiles").select("*").eq("user_id", id).single(),
-          supabase.from("badge_attributions").select("badge_key").eq("receiver_id", id),
+          supabase.from("badge_attributions").select("badge_id").eq("user_id", id),
           supabase
             .from("reviews")
             .select("*, reviewer:profiles!reviews_reviewer_id_fkey(first_name, avatar_url)")
