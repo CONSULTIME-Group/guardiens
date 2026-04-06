@@ -85,7 +85,7 @@ export default function PublicSitterProfile() {
             .limit(10),
           supabase.from("sitter_gallery").select("*").eq("user_id", id).order("created_at", { ascending: false }),
           supabase.from("emergency_sitter_profiles").select("is_active").eq("user_id", id).single(),
-          supabase.from("abonnements").select("statut").eq("user_id", id).in("statut", ["trial", "active"]).limit(1),
+          supabase.from("subscriptions").select("status").eq("user_id", id).eq("status", "active").limit(1),
         ]);
 
       if (profileRes.data) setProfile(profileRes.data);

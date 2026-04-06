@@ -30,9 +30,8 @@ type ViewState =
   | "loading";
 
 interface SubRow {
-  statut: string | null;
-  trial_end: string | null;
-  current_period_end: string | null;
+  status: string | null;
+  expires_at: string | null;
   created_at: string | null;
 }
 
@@ -55,8 +54,8 @@ const MySubscription = () => {
         .eq("id", user.id)
         .single(),
       supabase
-        .from("abonnements")
-        .select("statut, trial_end, current_period_end, created_at")
+        .from("subscriptions")
+        .select("status, expires_at, created_at")
         .eq("user_id", user.id)
         .order("created_at", { ascending: false })
         .limit(1)
@@ -88,17 +87,17 @@ const MySubscription = () => {
     const now = new Date();
     const isFounder =
       profile.is_founder || (profile.created_at && new Date(profile.created_at) < LAUNCH_DATE);
-    const statut = sub?.statut || null;
+    const currentStatus = sub?.status || null;
 
     if (effectiveRole === "owner") {
       setView("proprio");
-    } else if (isFounder && now < GRACE_END && !["trial", "active"].includes(statut as string)) {
+    } else if (isFounder && now < GRACE_END && currentStatus !== "active") {
       setView("founder_grace");
-    } else if (isFounder && now >= GRACE_END && !["trial", "active"].includes(statut as string)) {
+    } else if (isFounder && now >= GRACE_END && currentStatus !== "active") {
       setView("founder_switch");
-    } else if (["trial", "active"].includes(statut as string)) {
+    } else if (currentStatus === "active") {
       setView("active");
-    } else if (statut === "expired" && !isFounder) {
+    } else if (currentStatus === "expired" && !isFounder) {
       setView("expired");
     } else {
       setView("start");
@@ -144,14 +143,11 @@ const MySubscription = () => {
 
   // Active sub calculations
   const subscribedDays = sub?.created_at ? differenceInDays(now, new Date(sub.created_at)) : 0;
-  const daysUntilRenewal = sub?.current_period_end
-    ? differenceInDays(new Date(sub.current_period_end), now)
+  const daysUntilRenewal = sub?.expires_at
+    ? differenceInDays(new Date(sub.expires_at), now)
     : null;
-  const trialEndFormatted = sub?.trial_end
-    ? format(new Date(sub.trial_end), "dd/MM/yyyy", { locale: fr })
-    : "\u2014";
-  const renewalFormatted = sub?.current_period_end
-    ? format(new Date(sub.current_period_end), "dd/MM/yyyy", { locale: fr })
+  const renewalFormatted = sub?.expires_at
+    ? format(new Date(sub.expires_at), "dd/MM/yyyy", { locale: fr })
     : "\u2014";
 
   return (
@@ -257,19 +253,18 @@ const MySubscription = () => {
             )}
           </div>
 
-          {/* Trial banner */}
-          {sub?.statut === "trial" && (
+          {/* Renewal soon banner */}
+          {sub?.status === "active" && daysUntilRenewal !== null && daysUntilRenewal <= 30 && daysUntilRenewal > 7 && (
             <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 flex items-start gap-2 text-sm font-body text-foreground/70">
               <Clock className="h-4 w-4 text-amber-500 shrink-0 mt-0.5" />
               <span>
-                Période d'essai — premier prélèvement le {trialEndFormatted}.
-                Aucun montant débité avant cette date.
+                Renouvellement prévu le {renewalFormatted}.
               </span>
             </div>
           )}
 
           {/* Renewal warning */}
-          {sub?.statut === "active" && daysUntilRenewal !== null && daysUntilRenewal <= 7 && (
+          {sub?.status === "active" && daysUntilRenewal !== null && daysUntilRenewal <= 7 && (
             <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 flex items-start gap-2 text-sm font-body text-foreground/70">
               <AlertCircle className="h-4 w-4 text-amber-500 shrink-0 mt-0.5" />
               <div>
@@ -300,7 +295,7 @@ const MySubscription = () => {
                 <p className="text-muted-foreground mb-1">Montant</p>
                 <p className="font-medium">9&nbsp;€/mois</p>
               </div>
-              {sub?.statut === "active" && daysUntilRenewal !== null && daysUntilRenewal > 7 && (
+              {sub?.status === "active" && daysUntilRenewal !== null && daysUntilRenewal > 7 && (
                 <div>
                   <p className="text-muted-foreground mb-1">Accès garanti encore</p>
                   <p className="font-medium">{daysUntilRenewal} jour{daysUntilRenewal > 1 ? "s" : ""}</p>
