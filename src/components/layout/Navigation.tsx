@@ -2,7 +2,7 @@ import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import {
   Home, Search, Calendar, MessageSquare, User, LogOut, Settings,
   PawPrint, Newspaper, Shield, Compass, Handshake, Menu, Star,
-  MoreHorizontal, Crown,
+  MoreHorizontal, Crown, Plus,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAdmin } from "@/hooks/useAdmin";
@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import FeedbackDialog from "@/components/feedback/FeedbackDialog";
 import { useSubscriptionAccess } from "@/hooks/useSubscriptionAccess";
 import PremiumGateDialog from "@/components/premium/PremiumGateDialog";
+import ActivateRoleDialog from "@/components/premium/ActivateRoleDialog";
 
 // ── Sidebar group label ──
 const GroupLabel = ({ label }: { label: string }) => (
@@ -59,6 +60,8 @@ export const Sidebar = () => {
   const [feedbackOpen, setFeedbackOpen] = useState(false);
   const [gateOpen, setGateOpen] = useState(false);
   const [gateFeature, setGateFeature] = useState("");
+  const [roleDialogOpen, setRoleDialogOpen] = useState(false);
+  const [roleDialogTarget, setRoleDialogTarget] = useState<"gardien" | "proprio">("proprio");
 
   const effectiveRole = user?.role === "both" ? activeRole : user?.role;
 
@@ -96,38 +99,57 @@ export const Sidebar = () => {
       </div>
       <FeedbackDialog open={feedbackOpen} onOpenChange={setFeedbackOpen} />
       <PremiumGateDialog open={gateOpen} onClose={() => setGateOpen(false)} featureName={gateFeature} />
+      <ActivateRoleDialog open={roleDialogOpen} onClose={() => setRoleDialogOpen(false)} targetRole={roleDialogTarget} />
 
       {/* Role toggle */}
-      {user?.role === "both" && (
-        <div className="px-3 pb-2">
-          <div className="flex items-center bg-accent rounded-lg p-1 gap-1">
-            <button
-              onClick={() => setActiveRole("owner")}
-              className={cn(
-                "flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-md text-xs font-medium transition-colors",
-                activeRole === "owner"
-                  ? "bg-primary text-primary-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
-              )}
-            >
-              <PawPrint className="h-3.5 w-3.5" />
-              Propriétaire
-            </button>
-            <button
-              onClick={() => setActiveRole("sitter")}
-              className={cn(
-                "flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-md text-xs font-medium transition-colors",
-                activeRole === "sitter"
-                  ? "bg-primary text-primary-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
-              )}
-            >
-              <User className="h-3.5 w-3.5" />
-              Gardien
-            </button>
-          </div>
+      <div className="px-3 pb-2">
+        <div className="flex items-center bg-accent rounded-lg p-1 gap-1">
+          <button
+            onClick={() => {
+              if (user?.role === "both" || user?.role === "owner") {
+                setActiveRole("owner");
+              } else {
+                setRoleDialogTarget("proprio");
+                setRoleDialogOpen(true);
+              }
+            }}
+            className={cn(
+              "flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-md text-xs font-medium transition-colors",
+              (user?.role === "both" || user?.role === "owner") && activeRole === "owner"
+                ? "bg-primary text-primary-foreground shadow-sm"
+                : user?.role === "sitter"
+                ? "text-muted-foreground/60 hover:text-muted-foreground"
+                : "text-muted-foreground hover:text-foreground"
+            )}
+          >
+            <PawPrint className="h-3.5 w-3.5" />
+            Propriétaire
+            {user?.role === "sitter" && <Plus className="h-[11px] w-[11px]" />}
+          </button>
+          <button
+            onClick={() => {
+              if (user?.role === "both" || user?.role === "sitter") {
+                setActiveRole("sitter");
+              } else {
+                setRoleDialogTarget("gardien");
+                setRoleDialogOpen(true);
+              }
+            }}
+            className={cn(
+              "flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-md text-xs font-medium transition-colors",
+              (user?.role === "both" || user?.role === "sitter") && activeRole === "sitter"
+                ? "bg-primary text-primary-foreground shadow-sm"
+                : user?.role === "owner"
+                ? "text-muted-foreground/60 hover:text-muted-foreground"
+                : "text-muted-foreground hover:text-foreground"
+            )}
+          >
+            <User className="h-3.5 w-3.5" />
+            Gardien
+            {user?.role === "owner" && <Plus className="h-[11px] w-[11px]" />}
+          </button>
         </div>
-      )}
+      </div>
 
       {/* Nav groups */}
       <nav className="flex-1 px-3 overflow-y-auto">
@@ -241,6 +263,8 @@ export const BottomNav = () => {
   const [feedbackOpen, setFeedbackOpen] = useState(false);
   const [gateOpen, setGateOpen] = useState(false);
   const [gateFeature, setGateFeature] = useState("");
+  const [roleDialogOpen, setRoleDialogOpen] = useState(false);
+  const [roleDialogTarget, setRoleDialogTarget] = useState<"gardien" | "proprio">("proprio");
 
   const effectiveRole = user?.role === "both" ? activeRole : user?.role;
 
@@ -276,6 +300,7 @@ export const BottomNav = () => {
     <>
       <FeedbackDialog open={feedbackOpen} onOpenChange={setFeedbackOpen} />
       <PremiumGateDialog open={gateOpen} onClose={() => setGateOpen(false)} featureName={gateFeature} />
+      <ActivateRoleDialog open={roleDialogOpen} onClose={() => setRoleDialogOpen(false)} targetRole={roleDialogTarget} />
       <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-card border-t border-border z-50">
         <div className="flex justify-around items-center h-16 px-1">
           {tabs.map((item) => {
@@ -341,31 +366,55 @@ export const BottomNav = () => {
             </SheetTrigger>
             <SheetContent side="bottom" className="rounded-t-2xl max-h-[80vh] overflow-y-auto">
               {/* Role switcher */}
-              {user?.role === "both" && (
-                <div className="mb-4">
-                  <p className="text-xs text-muted-foreground mb-2 font-medium">Profil actif</p>
-                  <div className="flex items-center bg-accent rounded-lg p-1 gap-1">
-                    <button
-                      onClick={() => setActiveRole("owner")}
-                      className={cn(
-                        "flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-md text-sm font-medium transition-colors",
-                        activeRole === "owner" ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground"
-                      )}
-                    >
-                      <PawPrint className="h-4 w-4" /> Propriétaire
-                    </button>
-                    <button
-                      onClick={() => setActiveRole("sitter")}
-                      className={cn(
-                        "flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-md text-sm font-medium transition-colors",
-                        activeRole === "sitter" ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground"
-                      )}
-                    >
-                      <User className="h-4 w-4" /> Gardien
-                    </button>
-                  </div>
+              <div className="mb-4">
+                <p className="text-xs text-muted-foreground mb-2 font-medium">Profil actif</p>
+                <div className="flex items-center bg-accent rounded-lg p-1 gap-1">
+                  <button
+                    onClick={() => {
+                      if (user?.role === "both" || user?.role === "owner") {
+                        setActiveRole("owner");
+                      } else {
+                        setSheetOpen(false);
+                        setRoleDialogTarget("proprio");
+                        setRoleDialogOpen(true);
+                      }
+                    }}
+                    className={cn(
+                      "flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-md text-sm font-medium transition-colors",
+                      (user?.role === "both" || user?.role === "owner") && activeRole === "owner"
+                        ? "bg-primary text-primary-foreground shadow-sm"
+                        : user?.role === "sitter"
+                        ? "text-muted-foreground/60"
+                        : "text-muted-foreground"
+                    )}
+                  >
+                    <PawPrint className="h-4 w-4" /> Propriétaire
+                    {user?.role === "sitter" && <Plus className="h-[11px] w-[11px]" />}
+                  </button>
+                  <button
+                    onClick={() => {
+                      if (user?.role === "both" || user?.role === "sitter") {
+                        setActiveRole("sitter");
+                      } else {
+                        setSheetOpen(false);
+                        setRoleDialogTarget("gardien");
+                        setRoleDialogOpen(true);
+                      }
+                    }}
+                    className={cn(
+                      "flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-md text-sm font-medium transition-colors",
+                      (user?.role === "both" || user?.role === "sitter") && activeRole === "sitter"
+                        ? "bg-primary text-primary-foreground shadow-sm"
+                        : user?.role === "owner"
+                        ? "text-muted-foreground/60"
+                        : "text-muted-foreground"
+                    )}
+                  >
+                    <User className="h-4 w-4" /> Gardien
+                    {user?.role === "owner" && <Plus className="h-[11px] w-[11px]" />}
+                  </button>
                 </div>
-              )}
+              </div>
 
               <div className="space-y-1">
                 {[

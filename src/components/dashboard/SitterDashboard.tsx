@@ -14,6 +14,7 @@ import {
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { format, differenceInDays, differenceInHours } from "date-fns";
 import { fr } from "date-fns/locale";
+import RoleActivationBanner from "./RoleActivationBanner";
 
 const capitalize = (name: string) =>
   name ? name.charAt(0).toUpperCase() + name.slice(1).toLowerCase() : "";
@@ -220,7 +221,10 @@ const SitterDashboard = () => {
 
   return (
     <div className="space-y-0">
-      {/* ═══ 1. HEADER — VERT FONCÉ ═══ */}
+      {/* Role activation banner */}
+      <div className="px-5 md:px-8 mb-4">
+        <RoleActivationBanner userRole={user?.role || "sitter"} />
+      </div>
       <div className="relative overflow-hidden bg-[#1a4a35] rounded-b-3xl px-5 md:px-10 pt-6 md:pt-8 pb-5 md:pb-6 mb-6 md:mb-8">
         <div className="absolute right-0 top-0 opacity-[0.07] pointer-events-none">
           <svg width="300" height="200" viewBox="0 0 300 200">

@@ -15,6 +15,7 @@ import { format, differenceInDays } from "date-fns";
 import { fr } from "date-fns/locale";
 import BadgeShield from "@/components/badges/BadgeShield";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import RoleActivationBanner from "./RoleActivationBanner";
 
 const speciesLabel: Record<string, string> = {
   dog: "Chien", cat: "Chat", horse: "Cheval", bird: "Oiseau",
@@ -241,7 +242,10 @@ const OwnerDashboard = () => {
 
   return (
     <div className="space-y-8">
-      {/* ═══ 1. HEADER VERT ═══ */}
+      {/* Role activation banner */}
+      <div className="px-5 md:px-8">
+        <RoleActivationBanner userRole={user?.role || "owner"} />
+      </div>
       <div className="relative overflow-hidden bg-primary rounded-b-3xl px-5 md:px-10 pt-6 md:pt-8 pb-5 md:pb-6 mb-6 md:mb-8">
         <div className="absolute right-0 top-0 opacity-[0.06] pointer-events-none">
           <svg width="280" height="200" viewBox="0 0 280 200">

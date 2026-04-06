@@ -24,6 +24,16 @@ const Dashboard = () => {
         window.history.replaceState({}, "", "/dashboard");
       }
     }
+    // Handle role activation query params
+    const activated = searchParams.get("activated");
+    const cancelled = searchParams.get("cancelled");
+    if (activated === "true") {
+      toast({ title: "Bienvenue dans l'espace gardien !" });
+      window.history.replaceState({}, "", "/dashboard");
+    } else if (cancelled === "true") {
+      toast({ title: "Vous avez annulé. Vous pouvez activer l'espace gardien quand vous voulez." });
+      window.history.replaceState({}, "", "/dashboard");
+    }
   }, [toast]);
 
   useEffect(() => {
