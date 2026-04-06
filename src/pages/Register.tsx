@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Helmet } from "react-helmet-async";
 import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -44,6 +44,14 @@ const Register = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
+  // Capture referral code from URL
+  useEffect(() => {
+    const ref = searchParams.get("ref");
+    if (ref) {
+      sessionStorage.setItem("guardiens_ref", ref);
+    }
+  }, [searchParams]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedRole) return;
@@ -60,10 +68,42 @@ const Register = () => {
     );
 
     try {
-      await Promise.race([
+      const result = await Promise.race([
         register(email, password, selectedRole),
         timeoutPromise,
-      ]);
+      ]) as any;
+
+      // Process referral code after successful signup
+      const storedRef = sessionStorage.getItem("guardiens_ref");
+      if (storedRef && result?.user?.id) {
+        try {
+          const { data: referrer } = await supabase
+            .from("profiles")
+            .select("id")
+            .eq("referral_code", storedRef)
+            .maybeSingle();
+
+          if (referrer && referrer.id !== result.user.id) {
+            await supabase
+              .from("profiles")
+              .update({ referred_by: referrer.id } as any)
+              .eq("id", result.user.id);
+
+            await supabase
+              .from("referrals")
+              .insert({
+                referrer_id: referrer.id,
+                referred_id: result.user.id,
+                status: "pending",
+              } as any);
+          }
+        } catch (refErr) {
+          console.error("Referral linking error:", refErr);
+        } finally {
+          sessionStorage.removeItem("guardiens_ref");
+        }
+      }
+
       setStep("confirmation");
     } catch (error: any) {
       if (error.message === "timeout") {

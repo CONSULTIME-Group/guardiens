@@ -7,9 +7,7 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-const logStep = (step: string, details?: unknown) => {
-  console.log(`[create-checkout-session] ${step}${details ? ` - ${JSON.stringify(details)}` : ""}`);
-};
+const JUNE_14_2026_UTC = new Date("2026-06-14T00:00:00Z");
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -17,89 +15,233 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const supabaseClient = createClient(
-      Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_ANON_KEY") ?? ""
+    const supabaseAdmin = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
 
+    // 1. Auth
     const authHeader = req.headers.get("Authorization");
-    if (!authHeader) throw new Error("Non authentifie");
-
+    if (!authHeader) {
+      return new Response(JSON.stringify({ error: "Non authentifié" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
     const token = authHeader.replace("Bearer ", "");
-    const { data: userData, error: userError } = await supabaseClient.auth.getUser(token);
-    if (userError || !userData.user?.email) throw new Error("Utilisateur non authentifie");
-
+    const { data: userData, error: authError } = await supabaseAdmin.auth.getUser(token);
+    if (authError || !userData.user) {
+      return new Response(JSON.stringify({ error: "Token invalide" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
     const user = userData.user;
 
-    // Parse body for lookup_key (defaults to gardien_mensuel)
+    // 2. Parse body
+    let formulaType = "monthly";
     let lookupKey = "gardien_mensuel";
     try {
       const body = await req.json();
-      if (body?.lookup_key) lookupKey = body.lookup_key;
+      if (body?.formula_type) {
+        formulaType = body.formula_type;
+      } else if (body?.lookup_key) {
+        // Backwards compatibility
+        lookupKey = body.lookup_key;
+        if (lookupKey === "gardien_oneshot") formulaType = "one_shot";
+        else if (lookupKey === "gardien_annuel_2026" || lookupKey === "gardien_prorata_2026") formulaType = "prorata";
+        else formulaType = "monthly";
+      }
     } catch {
-      // No body or invalid JSON — use default
+      // No body — default monthly
     }
 
-    logStep("Lookup key", { lookupKey });
+    if (!["monthly", "one_shot", "prorata"].includes(formulaType)) {
+      return new Response(JSON.stringify({ error: "formula_type invalide" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
+    console.log(`[create-checkout-session] formula_type=${formulaType}, user=${user.id}`);
+
+    // 3. Profile data
+    const { data: profile } = await supabaseAdmin
+      .from("profiles")
+      .select("is_founder, free_months_credit, referral_code")
+      .eq("id", user.id)
+      .single();
+
+    const isFounder = profile?.is_founder ?? false;
+    const freeMonths = profile?.free_months_credit ?? 0;
+
+    // 4. Stripe customer
     const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY")!, {
       apiVersion: "2025-08-27.basil",
     });
 
-    // Look up the price by lookup_key
-    const prices = await stripe.prices.list({
-      lookup_keys: [lookupKey],
-      expand: ["data.product"],
-    });
+    const { data: existingSub } = await supabaseAdmin
+      .from("subscriptions")
+      .select("stripe_customer_id")
+      .eq("user_id", user.id)
+      .maybeSingle();
 
-    if (!prices.data.length) {
-      throw new Error(`Prix '${lookupKey}' introuvable dans Stripe`);
+    let customerId = existingSub?.stripe_customer_id;
+    if (!customerId) {
+      const customers = await stripe.customers.list({ email: user.email, limit: 1 });
+      if (customers.data.length > 0) {
+        customerId = customers.data[0].id;
+      } else {
+        const customer = await stripe.customers.create({
+          email: user.email,
+          metadata: { user_id: user.id },
+        });
+        customerId = customer.id;
+      }
     }
-
-    const price = prices.data[0];
-    logStep("Price found", { priceId: price.id, type: price.type });
-
-    // Check existing Stripe customer
-    const customers = await stripe.customers.list({ email: user.email, limit: 1 });
-    const customerId = customers.data.length > 0 ? customers.data[0].id : undefined;
 
     const origin = req.headers.get("origin") || "https://guardiens.fr";
-    const isRecurring = price.recurring !== null;
 
-    const sessionParams: Stripe.Checkout.SessionCreateParams = {
-      customer: customerId,
-      customer_email: customerId ? undefined : user.email,
-      line_items: [{ price: price.id, quantity: 1 }],
-      mode: isRecurring ? "subscription" : "payment",
-      success_url: `${origin}/mon-abonnement?success=true`,
-      cancel_url: `${origin}/mon-abonnement?cancelled=true`,
-      metadata: { user_id: user.id, lookup_key: lookupKey },
-    };
+    // ─── MONTHLY ───
+    if (formulaType === "monthly") {
+      const now = new Date();
+      let trialEnd: number;
 
-    // Add trial for monthly subscriptions
-    if (isRecurring && lookupKey === "gardien_mensuel") {
-      sessionParams.subscription_data = {
-        trial_period_days: 30,
-        metadata: { user_id: user.id, plan: "monthly" },
-      };
-    } else if (isRecurring) {
-      sessionParams.subscription_data = {
-        metadata: { user_id: user.id, plan: lookupKey },
-      };
+      if (isFounder && now < JUNE_14_2026_UTC) {
+        const endDate = new Date(JUNE_14_2026_UTC);
+        if (freeMonths > 0) endDate.setMonth(endDate.getMonth() + freeMonths);
+        trialEnd = Math.floor(endDate.getTime() / 1000);
+      } else {
+        const endDate = new Date(now);
+        endDate.setDate(endDate.getDate() + 7);
+        if (freeMonths > 0) endDate.setMonth(endDate.getMonth() + freeMonths);
+        trialEnd = Math.floor(endDate.getTime() / 1000);
+      }
+
+      const prices = await stripe.prices.list({ lookup_keys: ["gardien_mensuel"], active: true });
+      if (!prices.data.length) {
+        return new Response(JSON.stringify({ error: "Prix gardien_mensuel introuvable" }), {
+          status: 500,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      const session = await stripe.checkout.sessions.create({
+        mode: "subscription",
+        customer: customerId,
+        line_items: [{ price: prices.data[0].id, quantity: 1 }],
+        subscription_data: {
+          trial_end: trialEnd,
+          metadata: { user_id: user.id, formula_type: "monthly" },
+        },
+        payment_method_collection: "always",
+        locale: "fr",
+        success_url: `${origin}/mon-abonnement?success=true&formula=monthly`,
+        cancel_url: `${origin}/mon-abonnement?cancelled=true`,
+        metadata: { user_id: user.id, formula_type: "monthly" },
+      });
+
+      if (freeMonths > 0) {
+        await supabaseAdmin.from("profiles").update({ free_months_credit: 0 }).eq("id", user.id);
+      }
+
+      return new Response(JSON.stringify({ url: session.url }), {
+        status: 200,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
-    const session = await stripe.checkout.sessions.create(sessionParams);
+    // ─── ONE_SHOT ───
+    if (formulaType === "one_shot") {
+      const prices = await stripe.prices.list({ lookup_keys: ["gardien_oneshot"], active: true });
+      if (!prices.data.length) {
+        return new Response(JSON.stringify({ error: "Prix gardien_oneshot introuvable" }), {
+          status: 500,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
 
-    logStep("Checkout session created", { url: session.url });
-    return new Response(JSON.stringify({ url: session.url }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-      status: 200,
-    });
-  } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    console.error("[create-checkout-session] ERROR:", message);
-    return new Response(JSON.stringify({ error: message }), {
+      const session = await stripe.checkout.sessions.create({
+        mode: "payment",
+        customer: customerId,
+        line_items: [{ price: prices.data[0].id, quantity: 1 }],
+        locale: "fr",
+        success_url: `${origin}/mon-abonnement?success=true&formula=one_shot`,
+        cancel_url: `${origin}/mon-abonnement?cancelled=true`,
+        metadata: {
+          user_id: user.id,
+          formula_type: "one_shot",
+          free_months_credit: freeMonths.toString(),
+        },
+      });
+
+      return new Response(JSON.stringify({ url: session.url }), {
+        status: 200,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // ─── PRORATA ───
+    if (formulaType === "prorata") {
+      const now = new Date();
+      const currentMonth = now.getMonth();
+      const moisRestants = 11 - currentMonth;
+
+      if (moisRestants <= 0) {
+        return new Response(JSON.stringify({ error: "Formule 2026 non disponible en décembre" }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      const montantEuros = Math.ceil(moisRestants * 9 * 0.8);
+      const montantCents = montantEuros * 100;
+
+      const prices = await stripe.prices.list({ lookup_keys: ["gardien_prorata_2026"], active: true });
+      if (!prices.data.length) {
+        return new Response(JSON.stringify({ error: "Prix gardien_prorata_2026 introuvable" }), {
+          status: 500,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      const session = await stripe.checkout.sessions.create({
+        mode: "payment",
+        customer: customerId,
+        line_items: [{
+          price_data: {
+            currency: "eur",
+            product: prices.data[0].product as string,
+            unit_amount: montantCents,
+          },
+          quantity: 1,
+        }],
+        locale: "fr",
+        success_url: `${origin}/mon-abonnement?success=true&formula=prorata`,
+        cancel_url: `${origin}/mon-abonnement?cancelled=true`,
+        metadata: {
+          user_id: user.id,
+          formula_type: "prorata",
+          mois_restants: moisRestants.toString(),
+          montant_euros: montantEuros.toString(),
+          free_months_credit: freeMonths.toString(),
+        },
+      });
+
+      return new Response(JSON.stringify({ url: session.url }), {
+        status: 200,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    return new Response(JSON.stringify({ error: "formula_type invalide" }), {
       status: 400,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  } catch (err) {
+    console.error("[create-checkout-session] ERROR:", err);
+    return new Response(JSON.stringify({ error: err instanceof Error ? err.message : "Erreur serveur" }), {
+      status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }

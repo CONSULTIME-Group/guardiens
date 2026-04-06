@@ -66,13 +66,13 @@ function PricingCardsNew({ context }: { context?: "founder" }) {
   const handleCheckout = async (type: "oneshot" | "monthly" | "prorata") => {
     setLoading(type);
     try {
-      const lookupMap: Record<string, string> = {
-        oneshot: "gardien_oneshot",
-        monthly: "gardien_mensuel",
-        prorata: "gardien_annuel_2026",
+      const formulaMap: Record<string, string> = {
+        oneshot: "one_shot",
+        monthly: "monthly",
+        prorata: "prorata",
       };
       const { data, error } = await supabase.functions.invoke("create-checkout-session", {
-        body: { lookup_key: lookupMap[type] },
+        body: { formula_type: formulaMap[type] },
       });
       if (error) throw error;
       if (data?.url) window.location.href = data.url;
@@ -234,11 +234,18 @@ const MySubscription = () => {
   // Toast on return from Stripe
   useEffect(() => {
     if (searchParams.get("success") === "true") {
-      toast.success("Votre abonnement est activé !");
-      loadData();
+      const formula = searchParams.get("formula");
+      const messages: Record<string, string> = {
+        monthly: "Votre essai de 7 jours démarre — bienvenue chez Guardiens.",
+        one_shot: "Votre accès d'un mois est actif. Bonne garde !",
+        prorata: "Votre accès 2026 est activé. Merci pour votre soutien.",
+      };
+      toast.success(messages[formula || ""] || "Votre abonnement est activé !");
+      // Re-fetch after 2s to let webhook process
+      setTimeout(() => loadData(), 2000);
       window.history.replaceState({}, "", "/mon-abonnement");
     } else if (searchParams.get("cancelled") === "true") {
-      toast("Retour à votre espace abonnement");
+      toast("Paiement annulé — vous pouvez choisir une formule à tout moment.");
       window.history.replaceState({}, "", "/mon-abonnement");
     }
   }, [searchParams, loadData]);
