@@ -78,7 +78,7 @@ const AdminListings = () => {
         user_id: listing.user_id, type: "listing_hidden",
         title: "Annonce masquée par l'admin",
         body: `Votre annonce "${listing.title || "Sans titre"}" a été masquée de la recherche par un administrateur.`,
-        link: filterType === "sits" ? `/sits/${id}` : `/long-stays/${id}`,
+        link: `/sits/${id}`,
       });
     }
     toast.success("Annonce masquée"); setHideModal(null); fetchListings();
@@ -208,7 +208,7 @@ const AdminListings = () => {
                   <TableCell><Badge variant={s.variant}>{s.label}</Badge></TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-1">
-                      <Button variant="ghost" size="icon" title="Voir" onClick={() => navigate(filterType === "sits" ? `/sits/${listing.id}` : `/long-stays/${listing.id}`)}>
+                      <Button variant="ghost" size="icon" title="Voir" onClick={() => navigate(`/sits/${listing.id}`)}>
                         <Eye className="h-4 w-4" />
                       </Button>
                       {listing.status !== "cancelled" ? (
