@@ -4,6 +4,9 @@ import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import PageMeta from "@/components/PageMeta";
+import { BadgeRow } from "@/components/badges/BadgeRow";
+import { StatutGardienBadge } from "@/components/profile/StatutGardienBadge";
+import { useProfileReputation, useUserBadges } from "@/hooks/useProfileReputation";
 
 import { Skeleton } from "@/components/ui/skeleton";
 import { buildAbsoluteUrl } from "@/lib/seo";
@@ -47,6 +50,8 @@ const ENV_LABELS: Record<string, string> = {
 export default function PublicSitterProfile() {
   const { id } = useParams<{ id: string }>();
   const auth = useAuth();
+  const { data: reputation } = useProfileReputation(id);
+  const { data: userBadges } = useUserBadges(id);
 
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState<any>(null);
@@ -92,7 +97,7 @@ export default function PublicSitterProfile() {
       if (badgesRes.data) {
         const map: Record<string, number> = {};
         badgesRes.data.forEach((b: any) => {
-          map[b.badge_key] = (map[b.badge_key] || 0) + 1;
+          map[b.badge_id] = (map[b.badge_id] || 0) + 1;
         });
         setBadges(Object.entries(map).map(([badge_key, count]) => ({ badge_key, count })));
       }
@@ -361,12 +366,17 @@ export default function PublicSitterProfile() {
           {/* Flex photo + infos */}
           <div className="flex items-end gap-6">
             {/* Photo grande */}
-            <div className="shrink-0">
+            <div className="shrink-0 relative">
               <img
                 src={profile.avatar_url || "/placeholder.svg"}
                 alt={firstName}
                 className="w-28 h-28 md:w-40 md:h-40 rounded-full object-cover object-center border-4 border-white shadow-md ring-2 ring-primary ring-offset-2"
               />
+              {reputation && reputation.statut_gardien !== 'novice' && (
+                <div className="absolute -bottom-2 -right-2">
+                  <StatutGardienBadge statut={reputation.statut_gardien} />
+                </div>
+              )}
             </div>
 
             {/* Infos */}
@@ -627,7 +637,12 @@ export default function PublicSitterProfile() {
 
           <hr className="border-border" />
 
-          {/* Badges gardien — migration en cours */}
+          {userBadges && userBadges.length > 0 && (
+            <div className="space-y-2">
+              <h3 className="text-sm font-semibold text-foreground">Badges</h3>
+              <BadgeRow badges={userBadges} />
+            </div>
+          )}
 
           {/* Galerie */}
           {gallery.length > 0 && (
