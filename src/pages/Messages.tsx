@@ -229,11 +229,12 @@ const Messages = () => {
   useEffect(() => {
     if (conversations.length === 0 || autoOpened) return;
 
-    const convId = searchParams.get("conv");
+    const convId = searchParams.get("conversation") || searchParams.get("conv");
     if (convId) {
       const target = conversations.find(c => c.id === convId);
       if (target) {
         setActiveConv(target);
+        searchParams.delete("conversation");
         searchParams.delete("conv");
         setSearchParams(searchParams, { replace: true });
         setAutoOpened(true);

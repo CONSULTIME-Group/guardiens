@@ -44,6 +44,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<Profile | null>(null);
   const [activeRole, setActiveRole] = useState<ActiveRole>("sitter");
   const [loading, setLoading] = useState(true);
+  const [roleInitialized, setRoleInitialized] = useState(false);
 
   const checkFounderExpiry = useCallback(async (userId: string, isFounder: boolean) => {
     if (!isFounder) return;
@@ -74,13 +75,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (data) {
       const profile = mapProfile(data, supabaseUser.email);
       setUser(profile);
-      if (profile.role === "owner") setActiveRole("owner");
-      else setActiveRole("sitter");
+
+      // Only set activeRole on first load, never override user's manual selection
+      if (!roleInitialized) {
+        if (profile.role === "owner") setActiveRole("owner");
+        else setActiveRole("sitter");
+        setRoleInitialized(true);
+      }
 
       // Check founder expiry in background
       checkFounderExpiry(data.id, data.is_founder).catch(console.warn);
     }
-  }, [checkFounderExpiry]);
+  }, [checkFounderExpiry, roleInitialized]);
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -93,6 +99,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           }, 0);
         } else {
           setUser(null);
+          setRoleInitialized(false);
           setLoading(false);
         }
       }
