@@ -56,25 +56,6 @@ const Register = () => {
 
     setIsLoading(true);
     try {
-      // Pre-check: detect existing account before calling signUp
-      const { error: checkError } = await supabase.auth.signInWithPassword({
-        email,
-        password: "CHECK_EXISTENCE_ONLY_" + Math.random(),
-      });
-
-      if (checkError?.message === "Invalid login credentials") {
-        setExistingAccountOpen(true);
-        setIsLoading(false);
-        return;
-      }
-
-      if (checkError?.message?.includes("Email not confirmed")) {
-        // Account exists but unconfirmed → show confirmation screen with resend
-        setStep("confirmation");
-        setIsLoading(false);
-        return;
-      }
-
       await register(email, password, selectedRole);
       setStep("confirmation");
     } catch (error: any) {
