@@ -231,7 +231,30 @@ const ConversationHeader = ({
         <div className="bg-accent border-t border-border px-4 py-2.5 flex items-center justify-between">
           <div className="flex items-center gap-2 text-sm font-medium">
             <CheckCircle2 className="h-4 w-4 text-muted-foreground" /> Garde terminée
+      <Dialog open={reportOpen} onOpenChange={setReportOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Signaler ce membre</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-2">
+            <Textarea
+              placeholder="Décris le problème en quelques mots"
+              value={reportReason}
+              onChange={e => setReportReason(e.target.value.slice(0, 300))}
+              maxLength={300}
+              className="min-h-[100px]"
+            />
+            <p className="text-xs text-muted-foreground text-right">{reportReason.length}/300</p>
           </div>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setReportOpen(false)}>Annuler</Button>
+            <Button onClick={handleReport} disabled={reportSending || !reportReason.trim()}>
+              Envoyer le signalement
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
           <Link to={`/review/${conv.sit_id}`} className="text-xs font-medium text-primary hover:underline flex items-center gap-1">
             <Star className="h-3.5 w-3.5" /> Laisser un avis
           </Link>
