@@ -504,7 +504,7 @@ export default function PublicSitterProfile() {
               )}
               {isAuthenticated && isOwner && (
                 <Link
-                  to={`/messagerie?gardien=${id}`}
+                  to={`/messages?gardien=${id}`}
                   className="block bg-primary text-primary-foreground rounded-xl py-3 text-sm font-medium w-full text-center"
                 >
                   Contacter {firstName}

@@ -87,12 +87,17 @@ const missionSuggestions = [
   "Quand seriez-vous disponible ?",
   "Qu'attendez-vous en échange ?",
 ];
+const entraideContactSuggestions = [
+  "Bonjour ! J'ai vu que tu étais disponible pour aider.",
+  "Quel type d'aide proposes-tu ?",
+  "On pourrait en discuter ?",
+];
 
 const SuggestedMessages = ({
-  messages: msgs, userId, activeConv, onSelect,
+  messages: msgs, userId, activeConv, onSelect, isEntraideContact,
 }: {
   messages: Message[]; userId?: string; activeConv: Conversation;
-  onSelect: (text: string) => void;
+  onSelect: (text: string) => void; isEntraideContact?: boolean;
 }) => {
   const userMsgs = msgs.filter(m => m.sender_id === userId && !m.is_system);
   if (userMsgs.length > 0) return null;
@@ -101,7 +106,9 @@ const SuggestedMessages = ({
   const isMission = !!activeConv.small_mission_id;
 
   let suggestions: string[];
-  if (isMission) {
+  if (isEntraideContact) {
+    suggestions = entraideContactSuggestions;
+  } else if (isMission) {
     suggestions = missionSuggestions;
   } else if (isOwner) {
     suggestions = ownerGardeSuggestions;
@@ -143,6 +150,7 @@ const Messages = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [autoOpened, setAutoOpened] = useState(false);
+  const [isEntraideContact, setIsEntraideContact] = useState(false);
 
   const loadConversations = useCallback(async () => {
     if (!user) return;
@@ -227,9 +235,69 @@ const Messages = () => {
 
   // Auto-open unread or from query param
   useEffect(() => {
-    if (conversations.length === 0 || autoOpened) return;
+    if (autoOpened) return;
 
+    const gardienId = searchParams.get("gardien");
     const convId = searchParams.get("conversation") || searchParams.get("conv");
+
+    // Handle ?gardien= param: find or create conversation with this user
+    if (gardienId && user && !loading) {
+      const existing = conversations.find(c => {
+        const otherId = c.owner_id === user.id ? c.sitter_id : c.owner_id;
+        return otherId === gardienId && !c.sit_id && !c.small_mission_id;
+      });
+
+      if (existing) {
+        setActiveConv(existing);
+        setIsEntraideContact(true);
+        searchParams.delete("gardien");
+        setSearchParams(searchParams, { replace: true });
+        setAutoOpened(true);
+        return;
+      }
+
+      // Create a new conversation (owner = current user, sitter = gardienId)
+      (async () => {
+        try {
+          const { data: newConv, error } = await supabase
+            .from("conversations")
+            .insert({ owner_id: user.id, sitter_id: gardienId })
+            .select("*, sit:sits(title, status, property_id, start_date, end_date)")
+            .single();
+          if (error || !newConv) return;
+
+          const { data: profileData } = await supabase
+            .from("profiles")
+            .select("id, first_name, avatar_url, identity_verified, city, is_founder")
+            .eq("id", gardienId)
+            .single();
+
+          const enriched: Conversation = {
+            ...newConv,
+            archived_by: newConv.archived_by || [],
+            other_user: profileData || null,
+            last_message: null,
+            unread_count: 0,
+            application_status: null,
+            other_user_rating: 0,
+            other_user_is_emergency: false,
+          };
+
+          setConversations(prev => [enriched, ...prev]);
+          setActiveConv(enriched);
+          setIsEntraideContact(true);
+          searchParams.delete("gardien");
+          setSearchParams(searchParams, { replace: true });
+          setAutoOpened(true);
+        } catch {
+          // silently fail
+        }
+      })();
+      return;
+    }
+
+    if (conversations.length === 0) return;
+
     if (convId) {
       const target = conversations.find(c => c.id === convId);
       if (target) {
@@ -248,7 +316,7 @@ const Messages = () => {
       setActiveConv(unread);
     }
     setAutoOpened(true);
-  }, [conversations, searchParams, autoOpened, setSearchParams, user]);
+  }, [conversations, searchParams, autoOpened, setSearchParams, user, loading]);
 
   const loadMessages = useCallback(async (convId: string) => {
     const { data } = await supabase
@@ -586,6 +654,7 @@ const Messages = () => {
             userId={user?.id}
             activeConv={activeConv}
             onSelect={(text) => setNewMessage(text)}
+            isEntraideContact={isEntraideContact}
           />
 
           {/* Input or Paywall — only gate sit conversations for non-subscribed sitters */}
