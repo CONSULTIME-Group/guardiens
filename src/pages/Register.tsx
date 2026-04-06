@@ -56,16 +56,30 @@ const Register = () => {
 
     setIsLoading(true);
     try {
+      // Pre-check: detect existing account before calling signUp
+      const { error: checkError } = await supabase.auth.signInWithPassword({
+        email,
+        password: "CHECK_EXISTENCE_ONLY_" + Math.random(),
+      });
+
+      if (checkError?.message === "Invalid login credentials") {
+        setExistingAccountOpen(true);
+        setIsLoading(false);
+        return;
+      }
+
+      if (checkError?.message?.includes("Email not confirmed")) {
+        // Account exists but unconfirmed → show confirmation screen with resend
+        setStep("confirmation");
+        setIsLoading(false);
+        return;
+      }
+
       await register(email, password, selectedRole);
       setStep("confirmation");
     } catch (error: any) {
       if (error.message?.includes("already registered") || error.message?.includes("already been registered")) {
         setExistingAccountOpen(true);
-      } else if (error.message?.includes("network") || error.message?.includes("fetch")) {
-        toast({
-          variant: "destructive",
-          title: "Une erreur est survenue. Réessayez dans quelques instants.",
-        });
       } else {
         toast({
           variant: "destructive",
