@@ -225,7 +225,7 @@ const Messages = () => {
 
     const emergencySet = new Set((emergencyRes.data || []).map((e: any) => e.user_id));
 
-    const enriched = convs.map((conv: any) => {
+    const enriched = filteredConvs.map((conv: any) => {
       const otherId = conv.owner_id === user.id ? conv.sitter_id : conv.owner_id;
       const sitterId = conv.sitter_id;
       const appStatus = conv.sit_id ? appMap.get(`${conv.sit_id}-${sitterId}`) : null;
