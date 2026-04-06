@@ -108,7 +108,15 @@ const SearchOwner = () => {
 
   // Contact handler
   const handleContact = async (sitterId: string) => {
-    if (!user) return;
+    if (!user) {
+      toast.error("Connectez-vous pour contacter un gardien");
+      navigate("/login");
+      return;
+    }
+    if (sitterId === user.id) {
+      toast.error("Vous ne pouvez pas vous contacter vous-même");
+      return;
+    }
     setContactingId(sitterId);
     try {
       const { data: existing } = await supabase
@@ -119,9 +127,14 @@ const SearchOwner = () => {
         .from("conversations").insert({ owner_id: user.id, sitter_id: sitterId })
         .select("id").single();
       if (error) throw error;
+      if (!conv?.id) throw new Error("no_conv");
       navigate(`/messages?conversation=${conv.id}`);
-    } catch { toast.error("Impossible de démarrer la conversation"); }
-    finally { setContactingId(null); }
+    } catch (err: any) {
+      console.error("handleContact error:", err);
+      toast.error("Impossible de démarrer la conversation. Réessayez.");
+    } finally {
+      setContactingId(null);
+    }
   };
 
   // Search logic
