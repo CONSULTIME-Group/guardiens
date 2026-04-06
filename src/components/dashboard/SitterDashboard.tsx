@@ -5,6 +5,12 @@ import { useSubscriptionAccess } from "@/hooks/useSubscriptionAccess";
 import { Link, useNavigate } from "react-router-dom";
 import EmergencyDashSection from "./EmergencyDashSection";
 import MissionsNearbySection from "./MissionsNearbySection";
+import { differenceInMonths } from 'date-fns';
+import { BadgeSceau } from '@/components/badges/BadgeSceau';
+import { StatutGardienBadge } from '@/components/profile/StatutGardienBadge';
+import { useProfileReputation, useUserBadges } from '@/hooks/useProfileReputation';
+import { GARDIEN_BADGE_IDS, SPECIAL_BADGE_IDS } from '@/components/badges/badge-definitions';
+import { Separator } from '@/components/ui/separator';
 
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import {
