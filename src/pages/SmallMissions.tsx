@@ -178,6 +178,18 @@ const SmallMissions = () => {
       if (!data) return [];
 
       const helperIds = data.map((h: any) => h.id);
+
+      // Fetch sitter_profiles competences
+      const { data: sitterProfiles } = await supabase
+        .from("sitter_profiles")
+        .select("user_id, competences")
+        .in("user_id", helperIds);
+
+      const competenceMap = new Map<string, string[]>();
+      (sitterProfiles || []).forEach((sp: any) => {
+        if (sp.competences?.length) competenceMap.set(sp.user_id, sp.competences);
+      });
+
       const { data: reviews } = await supabase
         .from("reviews")
         .select("reviewee_id, overall_rating")
@@ -207,6 +219,7 @@ const SmallMissions = () => {
           const rev = reviewMap.get(h.id);
           return {
             ...h,
+            competences: competenceMap.get(h.id) || [],
             review_avg: rev ? rev.total / rev.count : 0,
             review_count: rev?.count || 0,
             sits_count: sitsMap.get(h.id) || 0,
