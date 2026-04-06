@@ -95,6 +95,7 @@ export const Sidebar = () => {
         <NotificationBell />
       </div>
       <FeedbackDialog open={feedbackOpen} onOpenChange={setFeedbackOpen} />
+      <PremiumGateDialog open={gateOpen} onClose={() => setGateOpen(false)} featureName={gateFeature} />
 
       {/* Role toggle */}
       {user?.role === "both" && (
@@ -130,19 +131,69 @@ export const Sidebar = () => {
 
       {/* Nav groups */}
       <nav className="flex-1 px-3 overflow-y-auto">
-        <GroupLabel label="Mon activité" />
-        <SidebarItem to="/dashboard" icon={Home} label="Dashboard" />
-        <SidebarItem to="/sits" icon={Calendar} label={effectiveRole === "owner" ? "Mes annonces" : "Mes gardes"} />
-        <SidebarItem to="/messages" icon={MessageSquare} label="Messagerie" badge={unreadCount} />
-        <SidebarItem to={effectiveRole === "owner" ? "/owner-profile" : "/profile"} icon={User} label="Mon profil" />
+        {(() => {
+          const isSitterLocked = effectiveRole === "sitter" && !hasAccess;
+          const premiumItems = [
+            { to: "/search", label: effectiveRole === "owner" ? "Recherche gardiens" : "Recherche", featureName: "la recherche d'annonces" },
+            { to: "/messages", label: "Messagerie", featureName: "la messagerie" },
+          ];
 
-        <GroupLabel label="Découvrir" />
-        <SidebarItem to="/search" icon={Search} label={effectiveRole === "owner" ? "Recherche gardiens" : "Recherche"} />
-        <SidebarItem to="/petites-missions" icon={Handshake} label="Petites missions" />
+          const handlePremiumClick = (featureName: string) => {
+            setGateFeature(featureName);
+            setGateOpen(true);
+          };
 
-        <GroupLabel label="Ressources" />
-        <SidebarItem to="/actualites" icon={Newspaper} label="Guides & Conseils" />
-        <SidebarItem to="/guides" icon={Compass} label="Guides locaux" />
+          return (
+            <>
+              <GroupLabel label="Mon activité" />
+              <SidebarItem to="/dashboard" icon={Home} label="Dashboard" />
+              <SidebarItem to="/sits" icon={Calendar} label={effectiveRole === "owner" ? "Mes annonces" : "Mes gardes"} />
+
+              {isSitterLocked ? (
+                <button
+                  type="button"
+                  onClick={() => handlePremiumClick("la messagerie")}
+                  className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors text-muted-foreground hover:bg-accent hover:text-foreground w-full text-left relative"
+                >
+                  <MessageSquare className="h-[18px] w-[18px]" strokeWidth={1.8} />
+                  Messagerie
+                  <Crown className="h-[11px] w-[11px] text-amber-500 ml-1" />
+                  {unreadCount > 0 && (
+                    <span className="absolute right-3 bg-destructive text-destructive-foreground text-[10px] rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1 font-semibold">
+                      {unreadCount > 99 ? "99+" : unreadCount}
+                    </span>
+                  )}
+                </button>
+              ) : (
+                <SidebarItem to="/messages" icon={MessageSquare} label="Messagerie" badge={unreadCount} />
+              )}
+
+              <SidebarItem to={effectiveRole === "owner" ? "/owner-profile" : "/profile"} icon={User} label="Mon profil" />
+
+              <GroupLabel label="Découvrir" />
+
+              {isSitterLocked ? (
+                <button
+                  type="button"
+                  onClick={() => handlePremiumClick("la recherche d'annonces")}
+                  className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors text-muted-foreground hover:bg-accent hover:text-foreground w-full text-left"
+                >
+                  <Search className="h-[18px] w-[18px]" strokeWidth={1.8} />
+                  Recherche
+                  <Crown className="h-[11px] w-[11px] text-amber-500 ml-1" />
+                </button>
+              ) : (
+                <SidebarItem to="/search" icon={Search} label={effectiveRole === "owner" ? "Recherche gardiens" : "Recherche"} />
+              )}
+
+              <SidebarItem to="/petites-missions" icon={Handshake} label="Petites missions" />
+
+              <GroupLabel label="Ressources" />
+              <SidebarItem to="/actualites" icon={Newspaper} label="Guides & Conseils" />
+              <SidebarItem to="/guides" icon={Compass} label="Guides locaux" />
+            </>
+          );
+        })()}
       </nav>
 
       {/* Bottom section */}
