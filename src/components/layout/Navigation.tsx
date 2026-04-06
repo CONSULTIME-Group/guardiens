@@ -57,6 +57,8 @@ export const Sidebar = () => {
   const navigate = useNavigate();
   const { hasAccess } = useSubscriptionAccess();
   const [unreadCount, setUnreadCount] = useState(0);
+  const [pendingAppsCount, setPendingAppsCount] = useState(0);
+  const [missionBadgeCount, setMissionBadgeCount] = useState(0);
   const [feedbackOpen, setFeedbackOpen] = useState(false);
   const [gateOpen, setGateOpen] = useState(false);
   const [gateFeature, setGateFeature] = useState("");
@@ -67,23 +69,62 @@ export const Sidebar = () => {
 
   useEffect(() => {
     if (!user) return;
-    const loadUnread = async () => {
+    const loadCounts = async () => {
+      // Unread messages
       const { data: convs } = await supabase
         .from("conversations")
         .select("id")
         .or(`owner_id.eq.${user.id},sitter_id.eq.${user.id}`);
-      if (!convs?.length) return;
-      const convIds = convs.map((c: any) => c.id);
-      const { count } = await supabase
-        .from("messages")
-        .select("id", { count: "exact", head: true })
-        .in("conversation_id", convIds)
-        .neq("sender_id", user.id)
-        .is("read_at", null);
-      setUnreadCount(count || 0);
+      if (convs?.length) {
+        const convIds = convs.map((c: any) => c.id);
+        const { count } = await supabase
+          .from("messages")
+          .select("id", { count: "exact", head: true })
+          .in("conversation_id", convIds)
+          .neq("sender_id", user.id)
+          .is("read_at", null);
+        setUnreadCount(count || 0);
+      } else {
+        setUnreadCount(0);
+      }
+
+      // Pending applications on user's sits (owner view)
+      const { data: userSits } = await supabase
+        .from("sits")
+        .select("id")
+        .eq("user_id", user.id);
+      if (userSits?.length) {
+        const { count: appCount } = await supabase
+          .from("applications")
+          .select("id", { count: "exact", head: true })
+          .in("sit_id", userSits.map((s: any) => s.id))
+          .eq("status", "pending");
+        setPendingAppsCount(appCount || 0);
+      } else {
+        setPendingAppsCount(0);
+      }
+
+      // Mission conversations with unread messages
+      const { data: missionConvs } = await supabase
+        .from("conversations")
+        .select("id, small_mission_id")
+        .or(`owner_id.eq.${user.id},sitter_id.eq.${user.id}`)
+        .not("small_mission_id", "is", null);
+      if (missionConvs?.length) {
+        const mConvIds = missionConvs.map((c: any) => c.id);
+        const { count: mCount } = await supabase
+          .from("messages")
+          .select("id", { count: "exact", head: true })
+          .in("conversation_id", mConvIds)
+          .neq("sender_id", user.id)
+          .is("read_at", null);
+        setMissionBadgeCount(mCount || 0);
+      } else {
+        setMissionBadgeCount(0);
+      }
     };
-    loadUnread();
-    const interval = setInterval(loadUnread, 15000);
+    loadCounts();
+    const interval = setInterval(loadCounts, 15000);
     return () => clearInterval(interval);
   }, [user]);
 
