@@ -347,7 +347,7 @@ const AdminUsers = () => {
                               .eq("id", user.id);
                             if (!error) {
                               toast(newVal ? "Super Gardien activé" : "Override retiré");
-                              loadUsers();
+                              fetchUsers();
                             } else {
                               toast.error("Erreur lors de la mise à jour");
                             }
