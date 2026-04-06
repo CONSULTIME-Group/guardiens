@@ -320,10 +320,8 @@ const MySubscription = () => {
       const { count } = await supabase.from("profiles").select("*", { count: "exact", head: true });
       if (typeof count === "number") setMemberCount(count);
 
-      // Determine role
-      const isOwner =
-        effectiveRole === "owner" ||
-        (p?.role as string) === "owner";
+      // Determine role — use activeRole for pre_launch, not DB role
+      const isOwner = effectiveRole === "owner";
 
       // Pre-launch check
       const isPrelaunched = new Date() < LAUNCH_DATE;
