@@ -2803,6 +2803,7 @@ export type Database = {
       }
       small_mission_responses: {
         Row: {
+          conversation_id: string | null
           created_at: string
           id: string
           message: string
@@ -2811,6 +2812,7 @@ export type Database = {
           status: Database["public"]["Enums"]["small_mission_response_status"]
         }
         Insert: {
+          conversation_id?: string | null
           created_at?: string
           id?: string
           message?: string
@@ -2819,6 +2821,7 @@ export type Database = {
           status?: Database["public"]["Enums"]["small_mission_response_status"]
         }
         Update: {
+          conversation_id?: string | null
           created_at?: string
           id?: string
           message?: string
@@ -2827,6 +2830,13 @@ export type Database = {
           status?: Database["public"]["Enums"]["small_mission_response_status"]
         }
         Relationships: [
+          {
+            foreignKeyName: "small_mission_responses_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "small_mission_responses_mission_id_fkey"
             columns: ["mission_id"]
