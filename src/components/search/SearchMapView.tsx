@@ -125,12 +125,9 @@ const SearchMapView = ({
             petGroups[p.species].push(p.name);
           });
           const isDemo = !!activeItem.is_demo;
-          const isLongStay = tab === "long_stays";
           const linkTo = isDemo
             ? null
-            : isLongStay
-              ? sitterEligible ? `/long-stays/${activeItem.id}` : null
-              : `/sits/${activeItem.id}`;
+            : `/sits/${activeItem.id}`;
 
           return (
             <div

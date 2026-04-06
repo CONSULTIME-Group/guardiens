@@ -261,7 +261,7 @@ const LongStayDetail = () => {
             endDate={longStay.end_date}
             ownerCity={owner?.city}
             isOwner={isOwner}
-            isLongStay={true}
+            
           />
         </div>
       )}

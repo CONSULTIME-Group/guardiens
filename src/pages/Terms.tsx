@@ -47,7 +47,7 @@ const Terms = () => {
             <li><strong className="text-foreground">Gardien</strong> : utilisateur postulant pour effectuer une garde.</li>
             <li><strong className="text-foreground">Garde</strong> : période durant laquelle un gardien occupe le logement d'un propriétaire et prend soin de ses animaux.</li>
             <li><strong className="text-foreground">Petite mission</strong> : entraide ponctuelle entre membres, sans échange d'argent.</li>
-            <li><strong className="text-foreground">Garde longue durée</strong> : garde d'une durée égale ou supérieure à 30 jours.</li>
+            
           </ul>
 
           <h2 className="font-heading text-xl font-bold text-foreground pt-4">3. Inscription et compte</h2>
@@ -72,10 +72,10 @@ const Terms = () => {
           <ul className="list-disc pl-6 space-y-1">
             <li><strong className="text-foreground">Propriétaires</strong> : accès gratuit (en 2026).</li>
             <li><strong className="text-foreground">Gardiens</strong> : abonnement annuel de 49€ TTC. Les utilisateurs inscrits avant le 13 mai 2026 bénéficient d'un an d'accès gratuit.</li>
-            <li><strong className="text-foreground">Gardes longue durée (≥ 30 jours)</strong> : frais de service de 70€ TTC par partie (propriétaire et gardien) à la confirmation.</li>
+            
           </ul>
           <p>
-            Aucune commission n'est prélevée sur les gardes classiques (moins de 30 jours).
+            Aucune commission n'est prélevée sur les gardes.
           </p>
 
           <h2 className="font-heading text-xl font-bold text-foreground pt-4">5. Nature de la relation</h2>

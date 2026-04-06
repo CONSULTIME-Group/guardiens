@@ -32,12 +32,6 @@ const typeIcons: Record<string, string> = {
   reminder_7days: "📅",
   reminder_48h: "⏰",
   info: "ℹ️",
-  long_stay_confirmed: "🏡",
-  long_stay_cancelled: "❌",
-  long_stay_application_accepted: "🎉",
-  long_stay_application_cancelled: "🚫",
-  long_stay_application_rejected: "😔",
-  new_long_stay_application: "📩",
 };
 
 const Notifications = () => {

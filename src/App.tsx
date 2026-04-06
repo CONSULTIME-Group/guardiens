@@ -28,9 +28,6 @@ import LeaveReview from "./pages/LeaveReview";
 import Notifications from "./pages/Notifications";
 import Settings from "./pages/Settings";
 import OwnerProfile from "./pages/OwnerProfile";
-import CreateLongStay from "./pages/CreateLongStay";
-import LongStayDetail from "./pages/LongStayDetail";
-import EditLongStay from "./pages/EditLongStay";
 import News from "./pages/News";
 import ArticleDetail from "./pages/ArticleDetail";
 import About from "./pages/About";
@@ -193,9 +190,6 @@ const AppRoutes = () => (
       <Route path="/owner-profile" element={<OwnerProfile />} />
       <Route path="/settings" element={<Settings />} />
       <Route path="/mon-abonnement" element={<MySubscription />} />
-      <Route path="/long-stays/create" element={<CreateLongStay />} />
-      <Route path="/long-stays/:id" element={<LongStayDetail />} />
-      <Route path="/long-stays/:id/edit" element={<EditLongStay />} />
     </Route>
     <Route path="/unsubscribe" element={<Unsubscribe />} />
     <Route path="*" element={<NotFound />} />

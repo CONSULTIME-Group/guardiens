@@ -36,7 +36,7 @@ const speciesIcon: Record<string, typeof PawPrint> = {
 const RADIUS_SHORTCUTS = [5, 10, 15, 30, 50];
 
 type SortOption = "closest" | "recent" | "rating";
-type SearchTab = "sits" | "long_stays" | "missions";
+type SearchTab = "sits" | "missions";
 type MissionSubTab = "published" | "members";
 type ViewMode = "list" | "map";
 type HousingFilter = "all" | "house" | "apartment" | "farm";
@@ -179,8 +179,6 @@ const SearchSitter = () => {
     }
     if (tab === "sits") {
       await searchSits(searchCoords);
-    } else if (tab === "long_stays") {
-      await searchLongStays(searchCoords);
     } else {
       if (missionSubTab === "members") {
         await searchAvailableMembers(searchCoords);
@@ -322,47 +320,6 @@ const SearchSitter = () => {
     setResults(final);
   };
 
-  const searchLongStays = async (searchCoords: { lat: number; lng: number } | null) => {
-    let query = supabase
-      .from("long_stays")
-      .select("*, owner:profiles!long_stays_user_id_fkey(first_name, avatar_url, city, identity_verified), property:properties!long_stays_property_id_fkey(type, photos)")
-      .eq("status", "published")
-      .order("created_at", { ascending: false });
-    if (startDate) query = query.gte("end_date", startDate);
-    if (endDate) query = query.lte("start_date", endDate);
-    const { data } = await query;
-    let items = data || [];
-    if (housingType !== "all") items = items.filter((s: any) => s.property?.type === housingType);
-    if (verifiedOnly) items = items.filter((s: any) => s.owner?.identity_verified);
-    const { items: locFiltered, cityCoords } = await filterByLocation(items, (s: any) => s.owner?.city, searchCoords);
-    items = locFiltered;
-    const enriched = await Promise.all(
-      items.map(async (ls: any) => {
-        const [{ data: pets }, { data: reviews }, { data: ownerBadges }] = await Promise.all([
-          supabase.from("pets").select("species, name").eq("property_id", ls.property_id),
-          supabase.from("reviews").select("overall_rating").eq("reviewee_id", ls.user_id).eq("published", true),
-          supabase.from("badge_attributions").select("badge_key").eq("receiver_id", ls.user_id),
-        ]);
-        const petSpecies = (pets || []).map((p: any) => p.species);
-        if (animalTypes.length > 0) {
-          const wantedSpecies = animalTypes.map(a => animalChipToSpecies[a]).filter(Boolean);
-          if (!petSpecies.some((s: string) => wantedSpecies.includes(s))) return null;
-        }
-        const avgRating = reviews && reviews.length > 0
-          ? (reviews.reduce((s: number, r: any) => s + r.overall_rating, 0) / reviews.length).toFixed(1) : null;
-        const badgeCounts = new Map<string, number>();
-        (ownerBadges || []).forEach((b: any) => badgeCounts.set(b.badge_key, (badgeCounts.get(b.badge_key) || 0) + 1));
-        const topBadges = Array.from(badgeCounts.entries()).map(([badge_key, count]) => ({ badge_key, count })).sort((a, b) => b.count - a.count).slice(0, 2);
-        const dist = searchCoords && ls.owner?.city ? computeDistance(ls.owner.city, cityCoords, searchCoords) : null;
-        const isNew = differenceInHours(new Date(), new Date(ls.created_at)) < 48;
-        const days = ls.start_date && ls.end_date ? differenceInDays(new Date(ls.end_date), new Date(ls.start_date)) : 0;
-        return { ...ls, pets: pets || [], avgRating, reviewCount: reviews?.length || 0, topBadges, distance: dist, isNew, durationDays: days };
-      })
-    );
-    let final = enriched.filter(Boolean);
-    final = sortResults(final, sort);
-    setResults(final);
-  };
 
   const searchMissions = async (searchCoords: { lat: number; lng: number } | null) => {
     let query = supabase
@@ -532,10 +489,9 @@ const SearchSitter = () => {
       if (!petGroups[p.species]) petGroups[p.species] = [];
       petGroups[p.species].push(p.name);
     });
-    const isLongStay = tab === "long_stays";
     const isMission = tab === "missions";
     const isDemo = !!item.is_demo;
-    const linkTo = isMission ? `/petites-missions/${item.id}` : isLongStay ? (sitterEligible ? `/long-stays/${item.id}` : "#") : `/sits/${item.id}`;
+    const linkTo = isMission ? `/petites-missions/${item.id}` : `/sits/${item.id}`;
 
     const showCTA = !hasAccess;
     const isClickable = hasAccess && !isDemo;
@@ -623,7 +579,6 @@ const SearchSitter = () => {
         <div className="flex gap-6">
           {([
             { key: "sits" as SearchTab, label: "Gardes" },
-            { key: "long_stays" as SearchTab, label: "Longue durée" },
             { key: "missions" as SearchTab, label: "Petites missions" },
           ]).map(({ key, label }) => (
             <button
@@ -976,20 +931,6 @@ const SearchSitter = () => {
         <div className="p-6">
           {loading ? (
             <p className="text-muted-foreground py-10 text-center">Recherche en cours...</p>
-          ) : tab === "long_stays" ? (
-            /* Long stay coming soon message */
-            <div className="text-center py-16 space-y-4 max-w-md mx-auto">
-              <Search className="h-12 w-12 mx-auto text-primary/30" />
-              <p className="font-heading font-semibold text-lg text-foreground">Les gardes longue durée (30j+) arrivent bientôt.</p>
-              <p className="text-sm text-muted-foreground">
-                Complète ton profil pour être parmi les premiers à y avoir accès.
-              </p>
-              <Link to="/profile" className="inline-block">
-                <Button className="gap-2">
-                  <Sparkles className="h-4 w-4" /> Compléter mon profil
-                </Button>
-              </Link>
-            </div>
           ) : tab === "missions" && missionSubTab === "members" ? (
             availableMembers.length === 0 ? (
               <div className="text-center py-16 space-y-3">
