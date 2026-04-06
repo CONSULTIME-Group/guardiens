@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Archive, ExternalLink, CheckCircle2, Star, Home, Handshake, Calendar, MapPin, Flag, CheckCircle, XCircle, Loader2 } from "lucide-react";
+import { ArrowLeft, Archive, ExternalLink, CheckCircle2, Star, Home, Handshake, Calendar, MapPin, Flag, CheckCircle, XCircle, Loader2, Ban } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import HelpButton from "./HelpButton";
@@ -18,6 +18,7 @@ interface ConversationHeaderProps {
   onBack: () => void;
   onArchive: () => void;
   onActionDone: () => void;
+  onBlock?: () => void;
   otherUserRating?: number;
   isFounder?: boolean;
   isEmergencySitter?: boolean;
@@ -42,13 +43,15 @@ const formatShortDate = (d: string) => {
 };
 
 const ConversationHeader = ({
-  conv, userId, userRole, isMobile, onBack, onArchive, onActionDone,
+  conv, userId, userRole, isMobile, onBack, onArchive, onActionDone, onBlock,
   otherUserRating, isFounder, isEmergencySitter,
 }: ConversationHeaderProps) => {
   const navigate = useNavigate();
   const [reportOpen, setReportOpen] = useState(false);
   const [reportReason, setReportReason] = useState("");
   const [reportSending, setReportSending] = useState(false);
+  const [blockOpen, setBlockOpen] = useState(false);
+  const [blockSending, setBlockSending] = useState(false);
   const [missionData, setMissionData] = useState<any>(null);
   const [responseData, setResponseData] = useState<any>(null);
 
@@ -262,6 +265,9 @@ const ConversationHeader = ({
           <button onClick={() => setReportOpen(true)} className="p-2 rounded-lg hover:bg-accent text-muted-foreground" title="Signaler" aria-label="Signaler">
             <Flag className="h-4 w-4" />
           </button>
+          <button onClick={() => setBlockOpen(true)} className="p-2 rounded-lg hover:bg-accent text-destructive" title="Bloquer" aria-label="Bloquer">
+            <Ban className="h-4 w-4" />
+          </button>
           <button onClick={onArchive} className="p-2 rounded-lg hover:bg-accent text-muted-foreground" title="Archiver" aria-label="Archiver">
             <Archive className="h-4 w-4" />
           </button>
@@ -398,6 +404,48 @@ const ConversationHeader = ({
             <Button variant="ghost" onClick={() => setReportOpen(false)}>Annuler</Button>
             <Button onClick={handleReport} disabled={reportSending || !reportReason.trim()}>
               Envoyer le signalement
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Block dialog */}
+      <Dialog open={blockOpen} onOpenChange={setBlockOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Bloquer {capitalize(conv.other_user?.first_name)} ?</DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-muted-foreground">
+            Cette personne ne pourra plus vous envoyer de messages et n'apparaîtra plus dans vos conversations.
+          </p>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setBlockOpen(false)}>Annuler</Button>
+            <Button
+              variant="destructive"
+              disabled={blockSending}
+              onClick={async () => {
+                if (!userId || !reportedUserId) return;
+                setBlockSending(true);
+                const { error } = await supabase.from("blocked_users").insert({
+                  blocker_id: userId,
+                  blocked_id: reportedUserId,
+                } as any);
+                setBlockSending(false);
+                if (error) {
+                  if (error.code === "23505") {
+                    toast.info("Ce membre est déjà bloqué");
+                  } else {
+                    toast.error("Erreur, réessayez.");
+                  }
+                  setBlockOpen(false);
+                  return;
+                }
+                toast.success(`${capitalize(conv.other_user?.first_name)} a été bloqué(e)`);
+                setBlockOpen(false);
+                onBlock?.();
+              }}
+            >
+              {blockSending ? "…" : "Bloquer"}
             </Button>
           </DialogFooter>
         </DialogContent>

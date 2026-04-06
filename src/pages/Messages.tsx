@@ -162,9 +162,28 @@ const Messages = () => {
 
     if (!convs) { setLoading(false); return; }
 
-    const otherIds = convs.map((conv: any) => conv.owner_id === user.id ? conv.sitter_id : conv.owner_id);
-    const convIds = convs.map((conv: any) => conv.id);
-    const sitIds = convs.map((conv: any) => conv.sit_id).filter(Boolean);
+    // Fetch blocked users to filter them out
+    const { data: blockedRows } = await supabase
+      .from("blocked_users")
+      .select("blocked_id")
+      .eq("blocker_id", user.id);
+    const blockedSet = new Set((blockedRows || []).map((b: any) => b.blocked_id));
+
+    // Also fetch users who blocked us (hide their convs too)
+    const { data: blockedByRows } = await supabase
+      .from("blocked_users")
+      .select("blocker_id")
+      .eq("blocked_id", user.id);
+    const blockedBySet = new Set((blockedByRows || []).map((b: any) => b.blocker_id));
+
+    const filteredConvs = convs.filter((conv: any) => {
+      const otherId = conv.owner_id === user.id ? conv.sitter_id : conv.owner_id;
+      return !blockedSet.has(otherId) && !blockedBySet.has(otherId);
+    });
+
+    const otherIds = filteredConvs.map((conv: any) => conv.owner_id === user.id ? conv.sitter_id : conv.owner_id);
+    const convIds = filteredConvs.map((conv: any) => conv.id);
+    const sitIds = filteredConvs.map((conv: any) => conv.sit_id).filter(Boolean);
 
     const [profilesRes, allLastMsgsRes, allUnreadRes, ratingsRes, emergencyRes, sitsRes, applicationsRes] = await Promise.all([
       supabase.from("profiles").select("id, first_name, avatar_url, identity_verified, city, is_founder").in("id", otherIds),
@@ -206,7 +225,7 @@ const Messages = () => {
 
     const emergencySet = new Set((emergencyRes.data || []).map((e: any) => e.user_id));
 
-    const enriched = convs.map((conv: any) => {
+    const enriched = filteredConvs.map((conv: any) => {
       const otherId = conv.owner_id === user.id ? conv.sitter_id : conv.owner_id;
       const sitterId = conv.sitter_id;
       const appStatus = conv.sit_id ? appMap.get(`${conv.sit_id}-${sitterId}`) : null;
@@ -669,6 +688,10 @@ const Messages = () => {
             otherUserRating={activeConv.other_user_rating}
             isFounder={activeConv.other_user?.is_founder || false}
             isEmergencySitter={activeConv.other_user_is_emergency}
+            onBlock={() => {
+              setActiveConv(null);
+              loadConversations();
+            }}
           />
 
           {/* Messages with day separators */}
