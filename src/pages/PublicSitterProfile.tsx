@@ -95,6 +95,28 @@ export default function PublicSitterProfile() {
   const [missionsPublished, setMissionsPublished] = useState<any[]>([]);
   const [missionsHelped, setMissionsHelped] = useState<any[]>([]);
 
+  // Show-more states for list truncation
+  const [showAllGardeReviews, setShowAllGardeReviews] = useState(false);
+  const [showAllMissionReviewsTab, setShowAllMissionReviewsTab] = useState(false);
+  const [showAllOwnerSits, setShowAllOwnerSits] = useState(false);
+  const [showAllOwnerReviews, setShowAllOwnerReviews] = useState(false);
+  const [showAllOwnerFeedbacks, setShowAllOwnerFeedbacks] = useState(false);
+  const [showAllMissionsPublished, setShowAllMissionsPublished] = useState(false);
+  const [showAllMissionsHelped, setShowAllMissionsHelped] = useState(false);
+  const [showAllEntraideFeedbacks, setShowAllEntraideFeedbacks] = useState(false);
+
+  const VISIBLE_COUNT = 3;
+  const ShowMoreBtn = ({ items, showAll, setShowAll }: { items: any[]; showAll: boolean; setShowAll: (v: boolean) => void }) =>
+    items.length > VISIBLE_COUNT ? (
+      <button
+        type="button"
+        onClick={() => setShowAll(!showAll)}
+        className="text-sm text-primary hover:underline font-body mt-2"
+      >
+        {showAll ? 'Voir moins' : `Voir les ${items.length - VISIBLE_COUNT} autres`}
+      </button>
+    ) : null;
+
   const handleTabChange = (tab: ProfileTab) => {
     setActiveTab(tab);
     setSearchParams({ tab }, { replace: true });
@@ -856,7 +878,7 @@ export default function PublicSitterProfile() {
                       </p>
                     ) : (
                       <div className="space-y-3">
-                        {gardeReviews.map((r: any) => {
+                        {(showAllGardeReviews ? gardeReviews : gardeReviews.slice(0, VISIBLE_COUNT)).map((r: any) => {
                           const authorName = capitalize(r.reviewer?.first_name || "Membre");
                           const avatarUrl = r.reviewer?.avatar_url || null;
                           const reviewBadges = r.sit_id ? (badgesBySitId[r.sit_id] || []) : [];
@@ -896,6 +918,7 @@ export default function PublicSitterProfile() {
                             </div>
                           );
                         })}
+                        <ShowMoreBtn items={gardeReviews} showAll={showAllGardeReviews} setShowAll={setShowAllGardeReviews} />
                       </div>
                     )}
                   </TabsContent>
@@ -907,7 +930,7 @@ export default function PublicSitterProfile() {
                       </p>
                     ) : (
                       <div className="space-y-3">
-                        {missionReviews.map((r: any) => {
+                        {(showAllMissionReviewsTab ? missionReviews : missionReviews.slice(0, VISIBLE_COUNT)).map((r: any) => {
                           const authorName = capitalize(r.reviewer?.first_name || "Membre");
                           const avatarUrl = r.reviewer?.avatar_url || null;
                           return (
@@ -939,6 +962,7 @@ export default function PublicSitterProfile() {
                             </div>
                           );
                         })}
+                        <ShowMoreBtn items={missionReviews} showAll={showAllMissionReviewsTab} setShowAll={setShowAllMissionReviewsTab} />
                       </div>
                     )}
                   </TabsContent>
@@ -1048,7 +1072,7 @@ export default function PublicSitterProfile() {
             </p>
             {ownerSits.length > 0 ? (
               <div className="space-y-2">
-                {ownerSits.map((sit) => {
+                {(showAllOwnerSits ? ownerSits : ownerSits.slice(0, VISIBLE_COUNT)).map((sit) => {
                   const statusMap: Record<string, { label: string; style: string }> = {
                     active: { label: 'Active', style: 'bg-primary/10 text-primary' },
                     confirmed: { label: 'Confirmée', style: 'bg-primary/10 text-primary' },
@@ -1075,6 +1099,7 @@ export default function PublicSitterProfile() {
                     </div>
                   );
                 })}
+                <ShowMoreBtn items={ownerSits} showAll={showAllOwnerSits} setShowAll={setShowAllOwnerSits} />
               </div>
             ) : (
               <p className="text-sm text-foreground/50 font-body italic">Aucune garde publiée pour l'instant.</p>
@@ -1088,7 +1113,7 @@ export default function PublicSitterProfile() {
             </p>
             {ownerReviews.length > 0 ? (
               <div className="space-y-3">
-                {ownerReviews.map((review) => {
+                {(showAllOwnerReviews ? ownerReviews : ownerReviews.slice(0, VISIBLE_COUNT)).map((review) => {
                   const stars = Math.min(5, Math.max(0, Number(review.overall_rating) || 0));
                   return (
                     <div key={review.id} className="bg-card border border-border rounded-xl p-4 space-y-2">
@@ -1114,6 +1139,7 @@ export default function PublicSitterProfile() {
                     </div>
                   );
                 })}
+                <ShowMoreBtn items={ownerReviews} showAll={showAllOwnerReviews} setShowAll={setShowAllOwnerReviews} />
               </div>
             ) : (
               <p className="text-sm text-foreground/50 font-body italic">Les avis des gardiens apparaîtront ici après la première garde.</p>
@@ -1127,7 +1153,7 @@ export default function PublicSitterProfile() {
             </p>
             {missionFeedbacks.length > 0 ? (
               <div className="space-y-3">
-                {missionFeedbacks.map((fb) => (
+                {(showAllOwnerFeedbacks ? missionFeedbacks : missionFeedbacks.slice(0, VISIBLE_COUNT)).map((fb) => (
                   <div key={fb.id} className="bg-card border border-border rounded-xl p-4 space-y-2">
                     <div className="flex items-center gap-2.5 flex-wrap">
                       <div className="w-8 h-8 rounded-full bg-muted flex-shrink-0" />
@@ -1143,6 +1169,7 @@ export default function PublicSitterProfile() {
                     )}
                   </div>
                 ))}
+                <ShowMoreBtn items={missionFeedbacks} showAll={showAllOwnerFeedbacks} setShowAll={setShowAllOwnerFeedbacks} />
               </div>
             ) : (
               <p className="text-sm text-foreground/50 font-body italic">Les avis d'entraide apparaîtront ici après la première mission.</p>
@@ -1177,7 +1204,7 @@ export default function PublicSitterProfile() {
             </p>
             {missionsPublished.length > 0 ? (
               <div className="space-y-2">
-                {missionsPublished.map((m) => {
+                {(showAllMissionsPublished ? missionsPublished : missionsPublished.slice(0, VISIBLE_COUNT)).map((m) => {
                   const statusMap: Record<string, { label: string; style: string }> = {
                     open: { label: 'Ouverte', style: 'bg-primary/10 text-primary' },
                     matched: { label: 'Pourvue', style: 'bg-muted text-foreground/60' },
@@ -1202,6 +1229,7 @@ export default function PublicSitterProfile() {
                     </div>
                   );
                 })}
+                <ShowMoreBtn items={missionsPublished} showAll={showAllMissionsPublished} setShowAll={setShowAllMissionsPublished} />
               </div>
             ) : (
               <p className="text-sm text-foreground/50 font-body italic">Aucune mission publiée pour l'instant.</p>
@@ -1214,7 +1242,7 @@ export default function PublicSitterProfile() {
             </p>
             {missionsHelped.length > 0 ? (
               <div className="space-y-2">
-                {missionsHelped.map((r) => {
+                {(showAllMissionsHelped ? missionsHelped : missionsHelped.slice(0, VISIBLE_COUNT)).map((r) => {
                   const m = r.small_missions;
                   return (
                     <div key={r.id} className="flex items-center gap-3 bg-card border border-border rounded-xl px-4 py-3">
@@ -1228,6 +1256,7 @@ export default function PublicSitterProfile() {
                     </div>
                   );
                 })}
+                <ShowMoreBtn items={missionsHelped} showAll={showAllMissionsHelped} setShowAll={setShowAllMissionsHelped} />
               </div>
             ) : (
               <p className="text-sm text-foreground/50 font-body italic">Aucun coup de main enregistré pour l'instant.</p>
@@ -1240,7 +1269,7 @@ export default function PublicSitterProfile() {
             </p>
             {missionFeedbacks.length > 0 ? (
               <div className="space-y-3">
-                {missionFeedbacks.map((fb) => (
+                {(showAllEntraideFeedbacks ? missionFeedbacks : missionFeedbacks.slice(0, VISIBLE_COUNT)).map((fb) => (
                   <div key={fb.id} className="bg-card border border-border rounded-xl p-4 space-y-2">
                     <div className="flex items-center gap-2.5 flex-wrap">
                       <div className="w-8 h-8 rounded-full bg-muted flex-shrink-0" />
@@ -1256,6 +1285,7 @@ export default function PublicSitterProfile() {
                     )}
                   </div>
                 ))}
+                <ShowMoreBtn items={missionFeedbacks} showAll={showAllEntraideFeedbacks} setShowAll={setShowAllEntraideFeedbacks} />
               </div>
             ) : (
               <p className="text-sm text-foreground/50 font-body italic">Les avis d'entraide apparaîtront ici après la première mission.</p>
