@@ -126,9 +126,10 @@ export default function PublicSitterProfile() {
     if (!id) return;
     const load = async () => {
       setLoading(true);
-      const [profileRes, sitterRes, badgesRes, reviewsRes, galleryRes, emergencyRes, subRes, ownerRes, missionsRes] =
+      const [profileRes, baseProfileRes, sitterRes, badgesRes, reviewsRes, galleryRes, emergencyRes, subRes, ownerRes, missionsRes] =
         await Promise.all([
-          supabase.from("public_profiles").select("*").eq("id", id).single(),
+          supabase.from("public_profiles").select("*").eq("id", id).maybeSingle(),
+          supabase.from("profiles").select("id, first_name, last_name, avatar_url, bio, city, postal_code, created_at, identity_verified, profile_completion, completed_sits_count, cancellation_count").eq("id", id).maybeSingle(),
           supabase.from("sitter_profiles").select("*").eq("user_id", id).maybeSingle(),
           supabase.from("badge_attributions").select("badge_id").eq("user_id", id),
           supabase
@@ -155,7 +156,7 @@ export default function PublicSitterProfile() {
         ]);
 
       // Store in local variables before setState
-      const fetchedPublicProfile = profileRes?.data;
+      const fetchedPublicProfile = profileRes?.data ?? baseProfileRes?.data ?? null;
       const fetchedSitterProfile = sitterRes?.data ?? null;
       const fetchedOwnerProfile = (ownerRes?.data as OwnerProfileData | null) ?? null;
       const fetchedEmergencyProfile = emergencyRes?.data ?? null;
@@ -335,7 +336,7 @@ export default function PublicSitterProfile() {
     );
   }
 
-  if (!profile) {
+  if (!profile && !ownerProfile) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
@@ -348,15 +349,15 @@ export default function PublicSitterProfile() {
     );
   }
 
-  const firstName = capitalize(profile.first_name || "");
-  const city = profile.city || "";
-  const bio = profile.bio || "";
+  const firstName = capitalize(profile?.first_name || "");
+  const city = profile?.city || "";
+  const bio = profile?.bio || "";
   const motivation = sitterProfile?.motivation || "";
   const animalTypes: string[] = sitterProfile?.animal_types || [];
   const hasVehicle = sitterProfile?.has_vehicle || false;
   const rawRadius = sitterProfile?.geographic_radius;
-  const completedSits = profile.completed_sits_count || 0;
-  const cancellations = profile.cancellation_count || 0;
+  const completedSits = profile?.completed_sits_count || 0;
+  const cancellations = profile?.cancellation_count || 0;
   const radius = rawRadius && rawRadius > 0 ? rawRadius : null;
   const isOwn = auth?.user?.id === id;
   const isAuthenticated = auth?.isAuthenticated;
@@ -404,7 +405,7 @@ export default function PublicSitterProfile() {
   const pageTitle = rawTitle;
   const pageDesc = ((bio || motivation || "") as string).slice(0, 160) || `${firstName} garde des ${animalLabels || "animaux"} à ${city || "France"}. Profil vérifié sur Guardiens.fr.`;
   const pageUrl = buildAbsoluteUrl(`/gardiens/${id}`);
-  const shouldNoindex = !profile.identity_verified || (profile.profile_completion ?? 0) < 60;
+  const shouldNoindex = !profile?.identity_verified || (profile?.profile_completion ?? 0) < 60;
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -465,7 +466,7 @@ export default function PublicSitterProfile() {
         title={pageTitle}
         description={pageDesc}
         path={`/gardiens/${id}`}
-        image={profile.avatar_url || undefined}
+        image={profile?.avatar_url || undefined}
         type="website"
         noindex={shouldNoindex}
       />
