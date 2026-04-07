@@ -126,7 +126,7 @@ export default function PublicSitterProfile() {
     if (!id) return;
     const load = async () => {
       setLoading(true);
-      const [profileRes, sitterRes, badgesRes, reviewsRes, galleryRes, emergencyRes, subRes, ownerRes, missionsRes] =
+      const [profileRes, baseProfileRes, sitterRes, badgesRes, reviewsRes, galleryRes, emergencyRes, subRes, ownerRes, missionsRes] =
         await Promise.all([
           supabase.from("public_profiles").select("*").eq("id", id).maybeSingle(),
           supabase.from("profiles").select("id, first_name, last_name, avatar_url, bio, city, postal_code, created_at, identity_verified, profile_completion, completed_sits_count, cancellation_count").eq("id", id).maybeSingle(),
@@ -156,7 +156,7 @@ export default function PublicSitterProfile() {
         ]);
 
       // Store in local variables before setState
-      const fetchedPublicProfile = profileRes?.data;
+      const fetchedPublicProfile = profileRes?.data ?? baseProfileRes?.data ?? null;
       const fetchedSitterProfile = sitterRes?.data ?? null;
       const fetchedOwnerProfile = (ownerRes?.data as OwnerProfileData | null) ?? null;
       const fetchedEmergencyProfile = emergencyRes?.data ?? null;
