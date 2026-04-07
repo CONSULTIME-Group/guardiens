@@ -2,9 +2,12 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Users, Megaphone, CalendarCheck, Star, UserPlus, Handshake,
   ExternalLink, AlertTriangle, ShieldCheck, Briefcase, Flag, CreditCard, Mail,
+  ListChecks, Clock, MessageSquare, BookOpen, ThumbsUp,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -45,6 +48,14 @@ interface ActivityItem {
   text: string;
   time: string;
   link: string;
+  type: "inscription" | "annonce" | "avis" | "candidature";
+}
+
+interface ActionCard {
+  label: string;
+  count: number;
+  link: string;
+  icon: React.ElementType;
 }
 
 interface WeeklySignup { week: string; sitters: number; owners: number }
@@ -78,12 +89,10 @@ function postalToDept(postalCode: string | null | undefined): string {
   if (!postalCode) return "Non renseigné";
   const cp = postalCode.trim();
   if (cp.length < 4) return "Non renseigné";
-  // DOM-TOM: 3 first digits
   if (cp.startsWith("97")) {
     const code = cp.substring(0, 3);
     return DEPT_NAMES[code] ? `${code} ${DEPT_NAMES[code]}` : "Non renseigné";
   }
-  // Corse
   if (cp.startsWith("20")) {
     const num = parseInt(cp.substring(0, 5), 10);
     if (num >= 20000 && num <= 20190) return "2A Corse-du-Sud";
@@ -101,6 +110,13 @@ const CHART_COLORS = [
   "hsl(var(--primary) / 0.25)",
 ];
 
+const ACTIVITY_BADGE: Record<ActivityItem["type"], { label: string; variant: "secondary" | "outline" }> = {
+  inscription: { label: "Inscription", variant: "secondary" },
+  annonce: { label: "Annonce", variant: "outline" },
+  avis: { label: "Avis", variant: "secondary" },
+  candidature: { label: "Candidature", variant: "outline" },
+};
+
 const AdminDashboard = () => {
   const navigate = useNavigate();
   const [stats, setStats] = useState<Stats | null>(null);
@@ -110,10 +126,19 @@ const AdminDashboard = () => {
   const [deptData, setDeptData] = useState<DeptData[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // "À traiter" and "En retard" states
+  const [actionCards, setActionCards] = useState<ActionCard[]>([]);
+  const [lateCards, setLateCards] = useState<ActionCard[]>([]);
+
   useEffect(() => {
     const fetchAll = async () => {
       const oneWeekAgo = new Date();
       oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+
+      const now = new Date();
+      const ago24h = new Date(now.getTime() - 24 * 60 * 60 * 1000).toISOString();
+      const ago48h = new Date(now.getTime() - 48 * 60 * 60 * 1000).toISOString();
+      const ago72h = new Date(now.getTime() - 72 * 60 * 60 * 1000).toISOString();
 
       const [
         { count: totalUsers },
@@ -133,6 +158,14 @@ const AdminDashboard = () => {
         { data: recentReviews },
         { data: recentApplications },
         { count: activeSubscriptions },
+        // Additional counts for "À traiter"
+        { count: pendingContactMessages },
+        { count: pendingSkills },
+        { count: pendingReviewModeration },
+        // "En retard" counts
+        { count: lateVerifications },
+        { count: lateContactMessages },
+        { count: lateReports },
       ] = await Promise.all([
         supabase.from("profiles").select("id", { count: "exact", head: true }),
         supabase.from("profiles").select("id", { count: "exact", head: true }).eq("role", "owner"),
@@ -151,6 +184,14 @@ const AdminDashboard = () => {
         supabase.from("reviews").select("id, overall_rating, created_at, reviewer_id, reviewee_id, sit_id, reviewer:profiles!reviews_reviewer_id_fkey(first_name), reviewee:profiles!reviews_reviewee_id_fkey(first_name)").order("created_at", { ascending: false }).limit(5),
         supabase.from("applications").select("id, created_at, sit_id, sitter_id, sitter:profiles!applications_sitter_id_fkey(first_name), sit:sits!applications_sit_id_fkey(title)").order("created_at", { ascending: false }).limit(5),
         supabase.from("subscriptions").select("id", { count: "exact", head: true }).eq("status", "active"),
+        // New queries for "À traiter"
+        supabase.from("contact_messages").select("id", { count: "exact", head: true }).eq("status", "new"),
+        supabase.from("skills_library").select("id", { count: "exact", head: true }).eq("status", "pending"),
+        supabase.from("reviews").select("id", { count: "exact", head: true }).eq("moderation_status", "pending"),
+        // "En retard" queries
+        supabase.from("profiles").select("id", { count: "exact", head: true }).eq("identity_verification_status", "pending").lt("created_at", ago24h),
+        supabase.from("contact_messages").select("id", { count: "exact", head: true }).eq("status", "new").lt("created_at", ago48h),
+        supabase.from("reports").select("id", { count: "exact", head: true }).eq("status", "pending").lt("created_at", ago72h),
       ]);
 
       const totalReviews = reviewsData?.length || 0;
@@ -158,7 +199,6 @@ const AdminDashboard = () => {
         ? reviewsData!.reduce((sum, r) => sum + r.overall_rating, 0) / totalReviews
         : 0;
 
-      // Calculate revenue (simplified: active premium subs * 49€)
       const monthRevenue = (activeSubscriptions || 0) * 49;
 
       setStats({
@@ -174,20 +214,31 @@ const AdminDashboard = () => {
         monthRevenue,
       });
 
-      // Alerts
+      // "À traiter" cards
+      const actions: ActionCard[] = [];
+      if ((pendingVerifications || 0) > 0) actions.push({ label: "Vérifications ID", count: pendingVerifications || 0, link: "/admin/verifications", icon: ShieldCheck });
+      if ((pendingExperiences || 0) > 0) actions.push({ label: "Expériences", count: pendingExperiences || 0, link: "/admin/experiences", icon: Briefcase });
+      if ((pendingReports || 0) > 0) actions.push({ label: "Signalements", count: pendingReports || 0, link: "/admin/reports", icon: Flag });
+      if ((pendingContactMessages || 0) > 0) actions.push({ label: "Messages contact", count: pendingContactMessages || 0, link: "/admin/contact-messages", icon: MessageSquare });
+      if ((pendingSkills || 0) > 0) actions.push({ label: "Compétences", count: pendingSkills || 0, link: "/admin/skills", icon: BookOpen });
+      if ((pendingReviewModeration || 0) > 0) actions.push({ label: "Avis en attente", count: pendingReviewModeration || 0, link: "/admin/reviews", icon: ThumbsUp });
+      setActionCards(actions);
+
+      // "En retard" cards
+      const late: ActionCard[] = [];
+      if ((lateVerifications || 0) > 0) late.push({ label: "Vérifications > 24h", count: lateVerifications || 0, link: "/admin/verifications", icon: ShieldCheck });
+      if ((lateContactMessages || 0) > 0) late.push({ label: "Messages > 48h", count: lateContactMessages || 0, link: "/admin/contact-messages", icon: MessageSquare });
+      if ((lateReports || 0) > 0) late.push({ label: "Signalements > 72h", count: lateReports || 0, link: "/admin/reports", icon: Flag });
+      setLateCards(late);
+
+      // Alerts (kept as-is)
       const alertList: Alert[] = [];
-      if ((pendingVerifications || 0) > 0) {
-        alertList.push({ label: "vérifications ID en attente", count: pendingVerifications || 0, link: "/admin/verifications", icon: ShieldCheck });
-      }
-      if ((pendingExperiences || 0) > 0) {
-        alertList.push({ label: "expériences à vérifier", count: pendingExperiences || 0, link: "/admin/experiences", icon: Briefcase });
-      }
-      if ((pendingReports || 0) > 0) {
-        alertList.push({ label: "signalements non traités", count: pendingReports || 0, link: "/admin/reports", icon: Flag });
-      }
+      if ((pendingVerifications || 0) > 0) alertList.push({ label: "vérifications ID en attente", count: pendingVerifications || 0, link: "/admin/verifications", icon: ShieldCheck });
+      if ((pendingExperiences || 0) > 0) alertList.push({ label: "expériences à vérifier", count: pendingExperiences || 0, link: "/admin/experiences", icon: Briefcase });
+      if ((pendingReports || 0) > 0) alertList.push({ label: "signalements non traités", count: pendingReports || 0, link: "/admin/reports", icon: Flag });
       setAlerts(alertList);
 
-      // Weekly signups (last 12 weeks) split by role
+      // Weekly signups (last 12 weeks)
       const weeks: WeeklySignup[] = [];
       for (let i = 11; i >= 0; i--) {
         const weekStart = startOfWeek(subWeeks(new Date(), i), { weekStartsOn: 1 });
@@ -210,7 +261,6 @@ const AdminDashboard = () => {
         const dept = postalToDept((p as any).postal_code);
         deptMap[dept] = (deptMap[dept] || 0) + 1;
       });
-      // Remove "Non renseigné" from chart, add at end if present
       const nonRenseigne = deptMap["Non renseigné"] || 0;
       delete deptMap["Non renseigné"];
       const sorted = Object.entries(deptMap)
@@ -220,7 +270,7 @@ const AdminDashboard = () => {
       if (nonRenseigne > 0) sorted.push({ dept: "Non renseigné", count: nonRenseigne });
       setDeptData(sorted);
 
-      // Activity timeline — merge and sort recent events
+      // Activity timeline
       const activityItems: ActivityItem[] = [];
 
       (recentProfiles || []).forEach(p => {
@@ -230,6 +280,7 @@ const AdminDashboard = () => {
           text: `${p.first_name || "Quelqu'un"} s'est inscrit(e) (${roleLabel})`,
           time: p.created_at,
           link: `/admin/users`,
+          type: "inscription",
         });
       });
 
@@ -242,6 +293,7 @@ const AdminDashboard = () => {
             text: `${ownerName} a publié une annonce${city ? ` à ${city}` : ""}`,
             time: s.created_at,
             link: `/admin/listings`,
+            type: "annonce",
           });
         }
       });
@@ -254,6 +306,7 @@ const AdminDashboard = () => {
           text: `${reviewerName} a laissé un avis ${r.overall_rating}/5 à ${revieweeName}`,
           time: r.created_at,
           link: `/admin/reviews`,
+          type: "avis",
         });
       });
 
@@ -265,10 +318,10 @@ const AdminDashboard = () => {
           text: `Nouvelle candidature de ${sitterName} pour ${sitTitle}`,
           time: a.created_at,
           link: `/admin/sits-management`,
+          type: "candidature",
         });
       });
 
-      // Sort by time desc, take top 10
       activityItems.sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime());
       setActivity(activityItems.slice(0, 10));
 
@@ -279,7 +332,17 @@ const AdminDashboard = () => {
   }, []);
 
   if (loading) {
-    return <div className="text-muted-foreground">Chargement des statistiques…</div>;
+    return (
+      <div className="space-y-6">
+        <Skeleton className="h-8 w-48" />
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {[1, 2, 3].map(i => <Skeleton key={i} className="h-24 rounded-xl" />)}
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+          {[1, 2, 3, 4, 5, 6].map(i => <Skeleton key={i} className="h-28 rounded-lg" />)}
+        </div>
+      </div>
+    );
   }
 
   if (!stats) return null;
@@ -331,17 +394,127 @@ const AdminDashboard = () => {
 
   return (
     <div className="space-y-8">
+      {/* Header + Google Analytics link */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <h1 className="font-body text-2xl font-bold">Dashboard</h1>
         <Button variant="outline" size="sm" asChild>
-            <a href="https://analytics.google.com/analytics/web/#/p/G-9JP4VR1RRP" target="_blank" rel="noopener noreferrer">
+          <a href="https://analytics.google.com/analytics/web/#/p/G-9JP4VR1RRP" target="_blank" rel="noopener noreferrer">
             <ExternalLink className="h-4 w-4 mr-2" />
             Google Analytics
           </a>
         </Button>
       </div>
 
-      {/* KPI cards — clickable */}
+      {/* 1. BLOC "À TRAITER MAINTENANT" */}
+      {actionCards.length > 0 && (
+        <div className="space-y-3">
+          <h2 className="flex items-center gap-2 text-lg font-semibold">
+            <ListChecks className="h-5 w-5 text-primary" />
+            À traiter
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+            {actionCards.map((card) => (
+              <button
+                key={card.link + card.label}
+                onClick={() => navigate(card.link)}
+                className="flex items-center gap-4 rounded-xl border border-border bg-card p-4 text-left hover:shadow-md transition-shadow"
+              >
+                <div className="rounded-lg bg-primary/10 p-2">
+                  <card.icon className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold text-primary">{card.count}</p>
+                  <p className="text-sm text-muted-foreground">{card.label}</p>
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* 2. BLOC "EN RETARD" */}
+      {lateCards.length > 0 && (
+        <div className="space-y-3">
+          <h2 className="flex items-center gap-2 text-lg font-semibold">
+            <Clock className="h-5 w-5 text-orange-600" />
+            En retard
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+            {lateCards.map((card) => (
+              <button
+                key={card.link + card.label}
+                onClick={() => navigate(card.link)}
+                className="flex items-center gap-4 rounded-xl border border-orange-200 bg-orange-50 p-4 text-left hover:bg-orange-100 transition-colors"
+              >
+                <div className="rounded-lg bg-orange-100 p-2">
+                  <card.icon className="h-5 w-5 text-orange-600" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold text-orange-700">{card.count}</p>
+                  <p className="text-sm text-orange-600">{card.label}</p>
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* 3. Alertes orange existantes */}
+      {alerts.length > 0 && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          {alerts.map((alert) => (
+            <button
+              key={alert.link}
+              onClick={() => navigate(alert.link)}
+              className="flex items-center gap-3 p-4 rounded-xl bg-orange-50 border border-orange-200 text-left hover:bg-orange-100 transition-colors"
+            >
+              <div className="p-2 rounded-lg bg-orange-100">
+                <AlertTriangle className="h-4 w-4 text-orange-600" />
+              </div>
+              <span className="text-sm font-medium text-orange-800">
+                <strong>{alert.count}</strong> {alert.label}
+              </span>
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* 4. Timeline activité récente (enrichie avec badges) */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Activité récente</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {activity.length === 0 ? (
+            <p className="text-sm text-muted-foreground">Aucune activité récente.</p>
+          ) : (
+            <div className="space-y-0">
+              {activity.map((item) => (
+                <button
+                  key={item.id}
+                  onClick={() => navigate(item.link)}
+                  className="flex items-start gap-3 w-full text-left py-3 px-2 rounded-lg hover:bg-accent/50 transition-colors"
+                >
+                  <div className="mt-1.5 w-2 h-2 rounded-full bg-primary shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <Badge variant={ACTIVITY_BADGE[item.type].variant} className="text-[10px] px-1.5 py-0">
+                        {ACTIVITY_BADGE[item.type].label}
+                      </Badge>
+                      <p className="text-sm text-foreground">{item.text}</p>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      {formatDistanceToNow(new Date(item.time), { addSuffix: true, locale: fr })}
+                    </p>
+                  </div>
+                </button>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* 5. KPI cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
         {cards.map((card) => (
           <Card
@@ -363,29 +536,8 @@ const AdminDashboard = () => {
         ))}
       </div>
 
-      {/* Alerts */}
-      {alerts.length > 0 && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-          {alerts.map((alert) => (
-            <button
-              key={alert.link}
-              onClick={() => navigate(alert.link)}
-              className="flex items-center gap-3 p-4 rounded-xl bg-orange-50 border border-orange-200 text-left hover:bg-orange-100 transition-colors"
-            >
-              <div className="p-2 rounded-lg bg-orange-100">
-                <AlertTriangle className="h-4 w-4 text-orange-600" />
-              </div>
-              <span className="text-sm font-medium text-orange-800">
-                <strong>{alert.count}</strong> {alert.label}
-              </span>
-            </button>
-          ))}
-        </div>
-      )}
-
-      {/* Charts row */}
+      {/* 6. Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Weekly signups by role */}
         <Card>
           <CardHeader>
             <CardTitle className="text-base">Inscriptions par semaine</CardTitle>
@@ -416,29 +568,14 @@ const AdminDashboard = () => {
                     }}
                     labelFormatter={(l) => `Semaine du ${l}`}
                   />
-                  <Line
-                    type="monotone"
-                    dataKey="sitters"
-                    name="Gardiens"
-                    stroke="hsl(var(--primary))"
-                    strokeWidth={2.5}
-                    dot={{ fill: "hsl(var(--primary))", r: 3 }}
-                  />
-                  <Line
-                    type="monotone"
-                    dataKey="owners"
-                    name="Propriétaires"
-                    stroke="hsl(45, 93%, 47%)"
-                    strokeWidth={2.5}
-                    dot={{ fill: "hsl(45, 93%, 47%)", r: 3 }}
-                  />
+                  <Line type="monotone" dataKey="sitters" name="Gardiens" stroke="hsl(var(--primary))" strokeWidth={2.5} dot={{ fill: "hsl(var(--primary))", r: 3 }} />
+                  <Line type="monotone" dataKey="owners" name="Propriétaires" stroke="hsl(45, 93%, 47%)" strokeWidth={2.5} dot={{ fill: "hsl(45, 93%, 47%)", r: 3 }} />
                 </LineChart>
               </ResponsiveContainer>
             </div>
           </CardContent>
         </Card>
 
-        {/* Geographic distribution by department */}
         <Card>
           <CardHeader>
             <CardTitle className="text-base">Répartition par département (top 10)</CardTitle>
@@ -477,7 +614,7 @@ const AdminDashboard = () => {
         </Card>
       </div>
 
-      {/* Onboarding J+1 manual trigger */}
+      {/* 7. Rappels onboarding J+1 */}
       <Card>
         <CardHeader>
           <CardTitle className="text-base flex items-center gap-2">
@@ -521,36 +658,6 @@ const AdminDashboard = () => {
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
-        </CardContent>
-      </Card>
-
-      {/* Activity timeline */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Activité récente</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {activity.length === 0 ? (
-            <p className="text-sm text-muted-foreground">Aucune activité récente.</p>
-          ) : (
-            <div className="space-y-0">
-              {activity.map((item, i) => (
-                <button
-                  key={item.id}
-                  onClick={() => navigate(item.link)}
-                  className="flex items-start gap-3 w-full text-left py-3 px-2 rounded-lg hover:bg-accent/50 transition-colors"
-                >
-                  <div className="mt-1.5 w-2 h-2 rounded-full bg-primary shrink-0" />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm text-foreground">{item.text}</p>
-                    <p className="text-xs text-muted-foreground mt-0.5">
-                      {formatDistanceToNow(new Date(item.time), { addSuffix: true, locale: fr })}
-                    </p>
-                  </div>
-                </button>
-              ))}
-            </div>
-          )}
         </CardContent>
       </Card>
     </div>
