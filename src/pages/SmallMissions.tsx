@@ -566,9 +566,9 @@ const SmallMissions = () => {
                   <p className="text-sm text-foreground font-medium">
                     Déclarez vos compétences pour voir en priorité les échanges qui vous correspondent.
                   </p>
-                  <Link to="/profile" className="text-sm text-primary font-semibold mt-1 inline-block">
-                    Compléter mon profil →
-                  </Link>
+                  <button onClick={openOfferDialog} className="text-sm text-primary font-semibold mt-1 inline-block hover:underline">
+                    Déclarer mes compétences →
+                  </button>
                 </div>
                 <button onClick={dismissSkillPrompt} className="text-muted-foreground hover:text-foreground shrink-0">
                   <X className="h-4 w-4" />
