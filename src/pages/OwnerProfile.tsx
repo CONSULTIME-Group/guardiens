@@ -7,9 +7,9 @@ import OwnerStepHousing from "@/components/owner-profile/OwnerStepHousing";
 import OwnerStepAnimals from "@/components/owner-profile/OwnerStepAnimals";
 import OwnerStepRules from "@/components/owner-profile/OwnerStepRules";
 import OwnerStepCommunication from "@/components/owner-profile/OwnerStepCommunication";
-import OwnerStepCalendar from "@/components/owner-profile/OwnerStepCalendar";
 import OwnerGallery from "@/components/owner-profile/OwnerGallery";
 import OwnerExperiences from "@/components/owner-profile/OwnerExperiences";
+import OwnerHouseGuideForm from "@/components/owner-profile/OwnerHouseGuideForm";
 import OwnerStepSkills from "@/components/owner-profile/OwnerStepSkills";
 import ProfileSidebar, { type SidebarSection } from "@/components/profile/ProfileSidebar";
 import { useOwnerProfile, type OwnerProfileData } from "@/hooks/useOwnerProfile";
@@ -22,9 +22,8 @@ const SECTIONS_META = [
   { id: "rules", num: 4, label: "Attentes", subtitle: "Ce que vous cherchez" },
   { id: "communication", num: 5, label: "Accueil", subtitle: "Comment vous accueillez" },
   { id: "skills", num: 6, label: "Compétences", subtitle: "Ce que vous pouvez offrir" },
-  { id: "calendar", num: 7, label: "Calendrier", subtitle: "Vos disponibilités" },
-  { id: "gallery", num: 8, label: "Galerie", subtitle: "Photos de votre maison" },
-  { id: "guide", num: 9, label: "Guide de la maison", subtitle: "Codes et contacts" },
+  { id: "gallery", num: 7, label: "Galerie", subtitle: "Photos de votre maison" },
+  { id: "guide", num: 8, label: "Guide de la maison", subtitle: "Codes et contacts" },
 ];
 
 function sectionComplete(num: number, d: OwnerProfileData, petsCount: number): boolean {
@@ -178,7 +177,14 @@ const OwnerProfilePage = () => {
               {activeSection === "housing" && <OwnerStepHousing data={mergedData} onChange={handleChange} onUploadPhoto={uploadPhoto} />}
               {activeSection === "animals" && <OwnerStepAnimals pets={pets} onAddPet={addPet} onUpdatePet={updatePet} onRemovePet={removePet} />}
               {activeSection === "rules" && <OwnerStepRules data={mergedData} onChange={handleChange} />}
-              {activeSection === "communication" && <OwnerStepCommunication data={mergedData} onChange={handleChange} />}
+              {activeSection === "communication" && (
+                <div className="space-y-8">
+                  <OwnerStepCommunication data={mergedData} onChange={handleChange} />
+                  <div className="border-t border-border pt-6">
+                    <OwnerHouseGuideForm />
+                  </div>
+                </div>
+              )}
               {activeSection === "skills" && (
                 <OwnerStepSkills
                   competences={mergedData.owner_competences || []}
@@ -187,7 +193,6 @@ const OwnerProfilePage = () => {
                   onChange={(partial) => handleChange(partial as any)}
                 />
               )}
-              {activeSection === "calendar" && <OwnerStepCalendar />}
               {activeSection === "gallery" && <OwnerGallery />}
               {activeSection === "guide" && <OwnerExperiences />}
             </div>

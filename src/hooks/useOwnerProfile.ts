@@ -170,23 +170,20 @@ export function useOwnerProfile() {
 
   const computeCompletion = useCallback((d: OwnerProfileData, petsCount: number): number => {
     let total = 0;
-    // Step 1 (20%): avatar, first_name, last_name, city, bio
+    // Step 1 (25%): avatar, first_name, last_name, city, bio
     const s1 = [d.avatar_url, d.first_name, d.last_name, d.city, d.bio].filter(Boolean).length / 5;
-    total += s1 * 20;
-    // Step 2 (20%): property_type, environment, description
+    total += s1 * 25;
+    // Step 2 (25%): property_type, environment, description
     const s2 = [d.property_type, d.environment, d.description].filter(Boolean).length / 3;
-    total += s2 * 20;
-    // Step 3 (20%): at least one pet
-    total += petsCount > 0 ? 20 : 0;
-    // Step 4 (20%): presence_expected, visits_allowed
+    total += s2 * 25;
+    // Step 3 (25%): at least one pet
+    total += petsCount > 0 ? 25 : 0;
+    // Step 4 (15%): presence_expected, visits_allowed
     const s4 = [d.presence_expected, d.visits_allowed].filter(Boolean).length / 2;
-    total += s4 * 20;
+    total += s4 * 15;
     // Step 5 (10%): meeting_preference, news_frequency
     const s5 = [d.meeting_preference.length > 0, d.news_frequency].filter(Boolean).length / 2;
     total += s5 * 10;
-    // Step 6 (10%): calendar - check if a draft/published sit exists (computed externally)
-    // We give 10% if any data was saved at step 6 (handled by hasSitDates flag)
-    total += 10; // Always grant calendar points since it's optional
     return Math.round(total);
   }, []);
 
