@@ -9,7 +9,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { Mail, Eye, CheckCircle2, Clock, MessageSquare, XCircle, Send, Loader2 } from "lucide-react";
+import { Mail, Eye, CheckCircle2, Clock, MessageSquare, XCircle, Send, Loader2, AlertCircle } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 const escapeHtml = (text: string): string =>
   text
