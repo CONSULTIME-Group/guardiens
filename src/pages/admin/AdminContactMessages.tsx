@@ -11,6 +11,15 @@ import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Mail, Eye, CheckCircle2, Clock, MessageSquare, XCircle, Send, Loader2 } from "lucide-react";
 
+const escapeHtml = (text: string): string =>
+  text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;')
+    .replace(/\n/g, '<br/>');
+
 type StatusFilter = "all" | "new" | "read" | "replied" | "closed";
 
 const AdminContactMessages = () => {
