@@ -15,6 +15,7 @@ import { useSubscriptionAccess } from "@/hooks/useSubscriptionAccess";
 import { useAccessLevel } from "@/hooks/useAccessLevel";
 import AccessGateBanner from "@/components/access/AccessGateBanner";
 import ProposeExchangeDialog from "@/components/missions/ProposeExchangeDialog";
+import ProposeHelperExchangeDialog from "@/components/missions/ProposeHelperExchangeDialog";
 import { geocodeCity, haversineDistance } from "@/lib/geocode";
 import CompetenceAutocomplete from "@/components/profile/CompetenceAutocomplete";
 
@@ -102,6 +103,7 @@ const SmallMissions = () => {
     try { return localStorage.getItem("guardiens_skill_prompt_dismissed") === "true"; } catch { return false; }
   });
   const [contactingHelperId, setContactingHelperId] = useState<string | null>(null);
+  const [helperDialogTarget, setHelperDialogTarget] = useState<any>(null);
 
   // ── User profile query (must be before offer dialog) ──
   const { data: currentUserProfile, refetch: refetchProfile } = useQuery({
@@ -853,11 +855,13 @@ const SmallMissions = () => {
                         })()}
                         <div className="flex items-center justify-between gap-2 pt-1">
                           <button
-                            onClick={() => handleContactHelper(h.id)}
-                            disabled={contactingHelperId === h.id}
-                            className="text-sm text-primary font-semibold hover:underline disabled:opacity-50"
+                            onClick={() => {
+                              if (!isAuthenticated) { navigate("/register"); return; }
+                              setHelperDialogTarget(h);
+                            }}
+                            className="text-sm text-primary font-semibold hover:underline"
                           >
-                            {contactingHelperId === h.id ? "…" : "Proposer un échange →"}
+                            Proposer un échange →
                           </button>
                           <button
                             onClick={() => navigate(`/profil/${h.id}`)}
@@ -1009,6 +1013,21 @@ const SmallMissions = () => {
           }}
           targetUserId={dialogTarget.id}
           targetFirstName={dialogTarget.name}
+        />
+      )}
+
+      {/* Helper exchange dialog */}
+      {helperDialogTarget && (
+        <ProposeHelperExchangeDialog
+          open={!!helperDialogTarget}
+          onClose={() => setHelperDialogTarget(null)}
+          helper={{
+            id: helperDialogTarget.id,
+            first_name: helperDialogTarget.first_name,
+            city: helperDialogTarget.city,
+            competences: helperDialogTarget.competences,
+            custom_skills: helperDialogTarget.custom_skills,
+          }}
         />
       )}
 

@@ -5,6 +5,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { isPast } from "date-fns";
@@ -28,13 +30,13 @@ const ProposeExchangeDialog = ({
 }: ProposeExchangeDialogProps) => {
   const { user, switchRole } = useAuth();
   const navigate = useNavigate();
-  const [message, setMessage] = useState(
-    `Bonjour ${targetFirstName}, je suis intéressé(e) par votre mission. En échange je peux...`
-  );
+  const [exchangeOffer, setExchangeOffer] = useState("");
+  const [needDescription, setNeedDescription] = useState("");
+  const [exchangeDate, setExchangeDate] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async () => {
-    if (!message.trim() || loading || !user) return;
+    if (!exchangeOffer.trim() || loading || !user) return;
     setLoading(true);
 
     try {
@@ -65,25 +67,35 @@ const ProposeExchangeDialog = ({
         convId = conv.id;
       }
 
-      // 3. Send message
+      // 3. Build and send message
+      const messageContent = [
+        `💡 Proposition d'échange pour « ${mission.title} »`,
+        `\n🎁 Ce que je propose : ${exchangeOffer.trim()}`,
+        needDescription.trim() ? `\n🔍 Ce dont j'ai besoin : ${needDescription.trim()}` : "",
+        exchangeDate ? `\n📅 Date proposée : ${exchangeDate}` : "",
+      ].filter(Boolean).join("");
+
       const { error: msgError } = await supabase
         .from("messages")
         .insert({
           conversation_id: convId,
           sender_id: user.id,
-          content: message.trim(),
+          content: messageContent,
           is_system: false,
         });
       if (msgError) throw msgError;
 
-      // 4. Create/upsert small_mission_responses
+      // 4. Create/upsert small_mission_responses with new fields
       await supabase
         .from("small_mission_responses")
         .upsert(
           {
             mission_id: mission.id,
             responder_id: user.id,
-            message: message.trim(),
+            message: exchangeOffer.trim(),
+            exchange_offer: exchangeOffer.trim(),
+            need_description: needDescription.trim(),
+            exchange_date: exchangeDate || null,
             status: "pending" as any,
             conversation_id: convId,
           },
@@ -136,17 +148,41 @@ const ProposeExchangeDialog = ({
             )}
           </div>
 
-          {/* Message */}
-          <div>
+          {/* What I offer */}
+          <div className="space-y-1.5">
+            <Label htmlFor="exchange-offer">Ce que je propose en échange *</Label>
             <Textarea
-              value={message}
-              onChange={(e) => setMessage(e.target.value.slice(0, 300))}
-              placeholder={`Bonjour ${targetFirstName}, je suis intéressé(e) par votre mission. En échange je peux...`}
-              rows={4}
+              id="exchange-offer"
+              value={exchangeOffer}
+              onChange={(e) => setExchangeOffer(e.target.value.slice(0, 300))}
+              placeholder="Ex : Un bon repas, un coup de main au jardin, une promenade avec votre chien…"
+              rows={3}
             />
-            <p className="text-xs text-right text-muted-foreground mt-1">
-              {message.length}/300
-            </p>
+            <p className="text-xs text-right text-muted-foreground">{exchangeOffer.length}/300</p>
+          </div>
+
+          {/* What I need */}
+          <div className="space-y-1.5">
+            <Label htmlFor="need-desc">Ce dont j'ai besoin (optionnel)</Label>
+            <Textarea
+              id="need-desc"
+              value={needDescription}
+              onChange={(e) => setNeedDescription(e.target.value.slice(0, 300))}
+              placeholder="Ex : J'aurais aussi besoin d'un coup de main pour…"
+              rows={2}
+            />
+            <p className="text-xs text-right text-muted-foreground">{needDescription.length}/300</p>
+          </div>
+
+          {/* Date */}
+          <div className="space-y-1.5">
+            <Label htmlFor="exchange-date">Date proposée (optionnel)</Label>
+            <Input
+              id="exchange-date"
+              type="date"
+              value={exchangeDate}
+              onChange={(e) => setExchangeDate(e.target.value)}
+            />
           </div>
         </div>
 
@@ -156,7 +192,7 @@ const ProposeExchangeDialog = ({
           </Button>
           <Button
             onClick={handleSubmit}
-            disabled={loading || !message.trim()}
+            disabled={loading || !exchangeOffer.trim()}
           >
             {loading && <Loader2 className="animate-spin w-4 h-4 mr-2" />}
             Envoyer ma proposition

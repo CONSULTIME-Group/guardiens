@@ -2826,27 +2826,36 @@ export type Database = {
         Row: {
           conversation_id: string | null
           created_at: string
+          exchange_date: string | null
+          exchange_offer: string | null
           id: string
           message: string
           mission_id: string
+          need_description: string | null
           responder_id: string
           status: Database["public"]["Enums"]["small_mission_response_status"]
         }
         Insert: {
           conversation_id?: string | null
           created_at?: string
+          exchange_date?: string | null
+          exchange_offer?: string | null
           id?: string
           message?: string
           mission_id: string
+          need_description?: string | null
           responder_id: string
           status?: Database["public"]["Enums"]["small_mission_response_status"]
         }
         Update: {
           conversation_id?: string | null
           created_at?: string
+          exchange_date?: string | null
+          exchange_offer?: string | null
           id?: string
           message?: string
           mission_id?: string
+          need_description?: string | null
           responder_id?: string
           status?: Database["public"]["Enums"]["small_mission_response_status"]
         }
