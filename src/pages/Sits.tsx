@@ -450,6 +450,102 @@ const Sits = () => {
         </div>
       )}
 
+      {/* Guide detail view */}
+      {openGuideId && (
+        <div className="bg-card border border-border rounded-xl overflow-hidden mt-4">
+          <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-muted/30">
+            <div className="flex items-center gap-2">
+              <BookOpen className="w-4 h-4 text-primary" />
+              <span className="text-sm font-semibold text-foreground">Guide de la maison</span>
+              <span className="text-xs text-muted-foreground">
+                · {sits.find(s => s.id === openGuideId)?.owner?.first_name || sits.find(s => s.id === openGuideId)?.acceptedSitter?.first_name}
+              </span>
+            </div>
+            <Button
+              size="sm"
+              variant="ghost"
+              className="text-muted-foreground h-8 w-8 p-0"
+              onClick={() => setOpenGuideId(null)}
+            >
+              <X className="w-4 h-4" />
+            </Button>
+          </div>
+
+          {guideLoading && (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+            </div>
+          )}
+
+          {!guideLoading && openGuide && (
+            <div className="p-4 space-y-4">
+              {openGuide.owner_message && (
+                <div className="bg-primary/5 border border-primary/20 rounded-lg p-4">
+                  <p className="text-xs text-primary font-medium mb-1">
+                    Un mot de {sits.find(s => s.id === openGuideId)?.owner?.first_name || "votre hôte"}
+                  </p>
+                  <p className="text-sm text-foreground italic">
+                    "{openGuide.owner_message}"
+                  </p>
+                </div>
+              )}
+
+              <GuideSection title="Accès & logistique" icon={KeyRound}>
+                <GuideField label="Adresse" value={openGuide.exact_address} />
+                <GuideField label="Instructions clés" value={openGuide.key_instructions} />
+                <GuideField label="Codes d'accès" value={openGuide.access_codes} copyable />
+                <GuideField
+                  label="Wifi"
+                  value={openGuide.wifi_name && openGuide.wifi_password
+                    ? `${openGuide.wifi_name} — ${openGuide.wifi_password}`
+                    : openGuide.wifi_name ?? null}
+                  copyable
+                />
+                <GuideField label="Instructions Wifi" value={openGuide.wifi_instructions} />
+                <GuideField label="Parking" value={openGuide.parking_instructions} />
+                <GuideField label="Poubelles" value={openGuide.trash_days} />
+              </GuideSection>
+
+              <GuideSection title="Logement" icon={Home}>
+                <GuideField label="Chauffage" value={openGuide.heating_instructions} />
+                <GuideField label="Électroménager" value={openGuide.appliance_notes} />
+                <GuideField label="Zones interdites" value={openGuide.forbidden_zones} />
+                <GuideField label="Plantes" value={openGuide.plants_watering} />
+                <GuideField label="Courrier" value={openGuide.mail_instructions} />
+              </GuideSection>
+
+              <GuideSection title="Contacts d'urgence" icon={AlertTriangle}>
+                <GuideField label="Vétérinaire" value={openGuide.vet_name} />
+                <GuideField label="Tél. vétérinaire" value={openGuide.vet_phone} copyable />
+                <GuideField label="Adresse vétérinaire" value={openGuide.vet_address} />
+                <GuideField label="Voisin de confiance" value={openGuide.neighbor_name} />
+                <GuideField label="Tél. voisin" value={openGuide.neighbor_phone} copyable />
+                <GuideField label="Contact d'urgence proprio" value={openGuide.emergency_contact_name} />
+                <GuideField label="Tél. urgence" value={openGuide.emergency_contact_phone} copyable />
+                <GuideField label="Plombier" value={openGuide.plumber_phone} copyable />
+                <GuideField label="Électricien" value={openGuide.electrician_phone} copyable />
+              </GuideSection>
+
+              {openGuide.detailed_instructions && (
+                <GuideSection title="Instructions générales" icon={ClipboardList}>
+                  <p className="text-sm text-foreground/80 whitespace-pre-wrap leading-relaxed">
+                    {openGuide.detailed_instructions}
+                  </p>
+                </GuideSection>
+              )}
+            </div>
+          )}
+
+          {!guideLoading && !openGuide && (
+            <div className="py-8 text-center">
+              <p className="text-sm text-muted-foreground">
+                Le guide n'est pas encore disponible.
+              </p>
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Archived section */}
       {activeRole === "owner" && archivedSits.length > 0 && (
         <div className="mt-10 border-t border-border pt-6">
@@ -869,6 +965,71 @@ const ActionsMenu = ({
         )}
       </DropdownMenuContent>
     </DropdownMenu>
+  );
+};
+
+/* ── Guide section ── */
+const GuideSection = ({
+  title,
+  icon: SectionIcon,
+  children,
+}: {
+  title: string;
+  icon: LucideIcon;
+  children: React.ReactNode;
+}) => (
+  <div className="space-y-2">
+    <div className="flex items-center gap-1.5">
+      <SectionIcon className="w-3.5 h-3.5 text-muted-foreground" />
+      <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+        {title}
+      </p>
+    </div>
+    <div className="bg-muted/30 rounded-lg p-3 space-y-3">
+      {children}
+    </div>
+  </div>
+);
+
+/* ── Guide field ── */
+const GuideField = ({
+  label,
+  value,
+  copyable = false,
+}: {
+  label: string;
+  value: string | null | undefined;
+  copyable?: boolean;
+}) => {
+  const [copied, setCopied] = useState(false);
+
+  if (!value?.trim()) return null;
+
+  const handleCopy = async () => {
+    await navigator.clipboard.writeText(value);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  return (
+    <div className="flex items-start justify-between gap-3">
+      <div className="flex-1 min-w-0">
+        <p className="text-xs text-muted-foreground mb-0.5">{label}</p>
+        <p className="text-sm text-foreground break-words">{value}</p>
+      </div>
+      {copyable && (
+        <button
+          onClick={handleCopy}
+          className="shrink-0 mt-3 p-1 rounded text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+          title="Copier"
+        >
+          {copied
+            ? <Check className="w-3.5 h-3.5 text-primary" />
+            : <Copy className="w-3.5 h-3.5" />
+          }
+        </button>
+      )}
+    </div>
   );
 };
 
