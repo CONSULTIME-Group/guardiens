@@ -8,7 +8,7 @@ import OwnerDashboard from "@/components/dashboard/OwnerDashboard";
 import SitterDashboard from "@/components/dashboard/SitterDashboard";
 
 const Dashboard = () => {
-  const { activeRole } = useAuth();
+  const { activeRole, user } = useAuth();
   const { toast } = useToast();
   const [searchParams] = useSearchParams();
   const [displayedRole, setDisplayedRole] = useState(activeRole);
