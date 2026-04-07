@@ -466,7 +466,7 @@ export default function PublicSitterProfile() {
         title={pageTitle}
         description={pageDesc}
         path={`/gardiens/${id}`}
-        image={profile.avatar_url || undefined}
+        image={profile?.avatar_url || undefined}
         type="website"
         noindex={shouldNoindex}
       />
