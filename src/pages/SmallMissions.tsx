@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Dog, Flower2, Handshake, ArrowRight, Lock, X, Sprout, PawPrint, GraduationCap, Star, MapPin, Search as SearchIcon, Check } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
 import PageMeta from "@/components/PageMeta";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -750,23 +751,33 @@ const SmallMissions = () => {
             )}
 
             {/* ═══ Section 2 — Disponibles pour aider ═══ */}
-            {(helperCount > 0 || (currentUserProfile as any)?.available_for_help) && (
+            {(helperCount > 0 || isAuthenticated) && (
               <div className="mt-10">
-                {/* Self indicator */}
-                {isAuthenticated && (currentUserProfile as any)?.available_for_help && (
+                {/* Toggle dispo */}
+                {isAuthenticated && (
                   <div className="bg-primary/5 border border-primary/20 rounded-xl p-3 mb-4 flex items-center justify-between">
-                    <p className="text-sm text-foreground">
-                      <Check className="inline h-4 w-4 text-primary mr-1" />
-                      Vous êtes visible dans cette section.
-                    </p>
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2">
+                      <Switch
+                        checked={!!(currentUserProfile as any)?.available_for_help}
+                        onCheckedChange={async (checked) => {
+                          if (checked) {
+                            openOfferDialog();
+                          } else {
+                            await handleWithdrawOffer();
+                          }
+                        }}
+                      />
+                      <p className="text-sm text-foreground">
+                        {(currentUserProfile as any)?.available_for_help
+                          ? "Vous êtes visible — disponible pour aider"
+                          : "Indiquez-vous comme disponible pour aider"}
+                      </p>
+                    </div>
+                    {(currentUserProfile as any)?.available_for_help && (
                       <button onClick={openOfferDialog} className="text-xs text-primary font-semibold hover:underline">
                         Modifier
                       </button>
-                      <button onClick={handleWithdrawOffer} className="text-xs text-destructive font-semibold hover:underline">
-                        Retirer mon offre
-                      </button>
-                    </div>
+                    )}
                   </div>
                 )}
                 <h2 className="text-base font-semibold text-foreground mb-4 flex items-center gap-2">
