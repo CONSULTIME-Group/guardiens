@@ -864,7 +864,7 @@ const SmallMissions = () => {
                             Proposer un échange →
                           </button>
                           <button
-                            onClick={() => navigate(`/profil/${h.id}`)}
+                            onClick={() => navigate(`/gardiens/${h.id}`)}
                             className="text-xs text-muted-foreground hover:text-foreground hover:underline"
                           >
                             Voir le profil

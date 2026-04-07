@@ -310,7 +310,7 @@ const AdminSubscriptions = () => {
                   <TableCell>{sub.profile?.is_founder ? <Crown className="h-4 w-4 text-amber-500" /> : "—"}</TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-1">
-                      <Button variant="ghost" size="icon" title="Voir profil" onClick={() => navigate(`/profil/${sub.user_id}`)}>
+                      <Button variant="ghost" size="icon" title="Voir profil" onClick={() => navigate(`/gardiens/${sub.user_id}`)}>
                         <Eye className="h-4 w-4" />
                       </Button>
                       <Button variant="ghost" size="icon" title="Offrir Premium" onClick={() => setActionModal({ open: true, sub, action: "offer_premium", duration: "1", motif: "" })}>
