@@ -8,7 +8,7 @@ import OwnerStepAnimals from "@/components/owner-profile/OwnerStepAnimals";
 import OwnerStepRules from "@/components/owner-profile/OwnerStepRules";
 import OwnerStepCommunication from "@/components/owner-profile/OwnerStepCommunication";
 import OwnerGallery from "@/components/owner-profile/OwnerGallery";
-import OwnerExperiences from "@/components/owner-profile/OwnerExperiences";
+
 import OwnerHouseGuideForm from "@/components/owner-profile/OwnerHouseGuideForm";
 import OwnerStepSkills from "@/components/owner-profile/OwnerStepSkills";
 import ProfileSidebar, { type SidebarSection } from "@/components/profile/ProfileSidebar";
@@ -20,10 +20,9 @@ const SECTIONS_META = [
   { id: "housing", num: 2, label: "Logement", subtitle: "Votre maison" },
   { id: "animals", num: 3, label: "Animaux", subtitle: "Vos animaux" },
   { id: "rules", num: 4, label: "Attentes", subtitle: "Ce que vous cherchez" },
-  { id: "communication", num: 5, label: "Accueil", subtitle: "Comment vous accueillez" },
+  { id: "communication", num: 5, label: "Accueil", subtitle: "Accueil & guide" },
   { id: "skills", num: 6, label: "Compétences", subtitle: "Ce que vous pouvez offrir" },
   { id: "gallery", num: 7, label: "Galerie", subtitle: "Photos de votre maison" },
-  { id: "guide", num: 8, label: "Guide de la maison", subtitle: "Codes et contacts" },
 ];
 
 function sectionComplete(num: number, d: OwnerProfileData, petsCount: number): boolean {
@@ -194,7 +193,6 @@ const OwnerProfilePage = () => {
                 />
               )}
               {activeSection === "gallery" && <OwnerGallery />}
-              {activeSection === "guide" && <OwnerExperiences />}
             </div>
           </div>
         </div>
