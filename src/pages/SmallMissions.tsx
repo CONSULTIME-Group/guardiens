@@ -100,7 +100,7 @@ const SmallMissions = () => {
 
   // ── Distance filter state ──
   const [postalCodeInput, setPostalCodeInput] = useState("");
-  const [radiusKm, setRadiusKm] = useState(30);
+  const [radiusKm, setRadiusKm] = useState(15);
   const [originCoords, setOriginCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [geocodingOrigin, setGeocodingOrigin] = useState(false);
 
