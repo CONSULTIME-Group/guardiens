@@ -209,8 +209,64 @@ export default function PublicSitterProfile() {
     };
     load();
   }, [id]);
+  useEffect(() => {
+    if (activeTab !== 'proprio') return;
+    if (!id || loading) return;
 
-  if (loading) {
+    const loadOwnerData = async () => {
+      // Query 1 — Animaux via properties
+      let fetchedPets: any[] = [];
+      const { data: userProperties } = await supabase
+        .from('properties')
+        .select('id')
+        .eq('user_id', id);
+      const propertyIds = (userProperties || []).map((p: any) => p.id);
+      if (propertyIds.length > 0) {
+        const { data: petsData, error: petsErr } = await supabase
+          .from('pets')
+          .select('id, name, species, breed, age, photo_url, character')
+          .in('property_id', propertyIds);
+        if (petsErr) console.error('[pets]', petsErr);
+        else fetchedPets = petsData ?? [];
+      }
+      setPets(fetchedPets);
+
+      // Query 2 — Annonces publiées
+      const { data: sitsData, error: sitsErr } = await supabase
+        .from('sits')
+        .select('id, title, start_date, end_date, status, created_at')
+        .eq('user_id', id)
+        .order('created_at', { ascending: false })
+        .limit(10);
+      if (sitsErr) console.error('[sits]', sitsErr);
+      setOwnerSits(sitsData ?? []);
+
+      // Query 3 — Avis reçus en tant que proprio
+      const { data: revData, error: revErr } = await supabase
+        .from('reviews')
+        .select('id, overall_rating, comment, created_at, review_type, reviewer:profiles!reviews_reviewer_id_fkey(first_name, avatar_url)')
+        .eq('reviewee_id', id)
+        .eq('published', true)
+        .eq('moderation_status', 'valide')
+        .in('review_type', ['proprio', 'owner'])
+        .order('created_at', { ascending: false });
+      if (revErr) console.error('[ownerReviews]', revErr);
+      setOwnerReviews(revData ?? []);
+
+      // Query 4 — Feedbacks missions
+      const { data: fbData, error: fbErr } = await supabase
+        .from('mission_feedbacks')
+        .select('id, positive, comment, created_at, badge_key')
+        .eq('receiver_id', id)
+        .order('created_at', { ascending: false });
+      if (fbErr && fbErr.code !== 'PGRST116') console.error('[missionFeedbacks]', fbErr);
+      setMissionFeedbacks(fbData ?? []);
+    };
+
+    loadOwnerData();
+  }, [activeTab, id, loading]);
+
+
     return (
       <div className="min-h-screen bg-background">
         <div className="max-w-5xl mx-auto px-6 py-10 space-y-6">
