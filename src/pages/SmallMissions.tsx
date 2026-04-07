@@ -1016,6 +1016,21 @@ const SmallMissions = () => {
         />
       )}
 
+      {/* Helper exchange dialog */}
+      {helperDialogTarget && (
+        <ProposeHelperExchangeDialog
+          open={!!helperDialogTarget}
+          onClose={() => setHelperDialogTarget(null)}
+          helper={{
+            id: helperDialogTarget.id,
+            first_name: helperDialogTarget.first_name,
+            city: helperDialogTarget.city,
+            competences: helperDialogTarget.competences,
+            custom_skills: helperDialogTarget.custom_skills,
+          }}
+        />
+      )}
+
       {/* ── Proposer mon aide dialog ── */}
       <Dialog open={offerDialogOpen} onOpenChange={setOfferDialogOpen}>
         <DialogContent className="sm:max-w-lg max-h-[85vh] overflow-y-auto">
