@@ -80,6 +80,7 @@ export function useSitterProfile() {
   const [data, setData] = useState<SitterProfileData>(defaultData);
   const [pastAnimals, setPastAnimals] = useState<PastAnimal[]>([]);
   const [sitterProfileId, setSitterProfileId] = useState<string | null>(null);
+  const [lastSyncedAt, setLastSyncedAt] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
@@ -89,7 +90,7 @@ export function useSitterProfile() {
 
     const [profileRes, sitterRes] = await Promise.all([
       supabase.from("profiles").select("*").eq("id", user.id).single(),
-      supabase.from("sitter_profiles").select("*").eq("user_id", user.id).single(),
+      supabase.from("sitter_profiles").select("*").eq("user_id", user.id).maybeSingle(),
     ]);
 
     const p = profileRes.data;
@@ -138,6 +139,11 @@ export function useSitterProfile() {
     };
 
     setData(merged);
+    setLastSyncedAt(
+      [p?.updated_at, s?.updated_at]
+        .filter((value): value is string => Boolean(value))
+        .sort((a, b) => new Date(b).getTime() - new Date(a).getTime())[0] ?? null,
+    );
 
     if (s) {
       setSitterProfileId(s.id);
@@ -146,6 +152,9 @@ export function useSitterProfile() {
         .select("*")
         .eq("sitter_profile_id", s.id);
       setPastAnimals(animals?.map(a => ({ id: a.id, species: a.species, name: a.name, breed: (a as any).breed || undefined, photo_url: a.photo_url || undefined })) || []);
+    } else {
+      setSitterProfileId(null);
+      setPastAnimals([]);
     }
 
     setLoading(false);
@@ -311,7 +320,7 @@ export function useSitterProfile() {
   }, [user, toast, data, computeCompletion]);
 
   return {
-    data, pastAnimals, loading, saving, sitterProfileId,
+    data, pastAnimals, loading, saving, sitterProfileId, lastSyncedAt,
     saveStep, addPastAnimal, removePastAnimal, uploadAvatar,
     completion: computeCompletion(data),
     missingFields: computeMissingFields(data),
