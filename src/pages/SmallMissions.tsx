@@ -109,6 +109,48 @@ const SmallMissions = () => {
   // ── Competence search state ──
   const [competenceSearch, setCompetenceSearch] = useState("");
 
+  // ── "Proposer mon aide" dialog state ──
+  const [offerDialogOpen, setOfferDialogOpen] = useState(false);
+  const [offerSkills, setOfferSkills] = useState<string[]>([]);
+  const [offerText, setOfferText] = useState("");
+  const [offerSaving, setOfferSaving] = useState(false);
+  const [offerSaved, setOfferSaved] = useState(false);
+
+  const openOfferDialog = useCallback(() => {
+    // Pre-fill with existing data
+    setOfferSkills(mySkills.length > 0 ? [...mySkills] : []);
+    setOfferText("");
+    setOfferSaved(false);
+    setOfferDialogOpen(true);
+  }, [mySkills]);
+
+  const toggleOfferSkill = (key: string) => {
+    setOfferSkills((prev) =>
+      prev.includes(key) ? prev.filter((s) => s !== key) : [...prev, key]
+    );
+  };
+
+  const handleSaveOffer = useCallback(async () => {
+    if (!user || offerSkills.length === 0) return;
+    setOfferSaving(true);
+    try {
+      const updates: Record<string, any> = {
+        skill_categories: offerSkills,
+        available_for_help: true,
+      };
+      // Save free text as custom_skills entry if provided
+      if (offerText.trim()) {
+        updates.custom_skills = [offerText.trim()];
+      }
+      await supabase.from("profiles").update(updates).eq("id", user.id);
+      setOfferSaved(true);
+      setTimeout(() => setOfferDialogOpen(false), 1200);
+    } catch {
+      // silent
+    } finally {
+      setOfferSaving(false);
+    }
+  }, [user, offerSkills, offerText]);
   // ── Load user's postal code as default origin ──
   useEffect(() => {
     if (!user) return;
