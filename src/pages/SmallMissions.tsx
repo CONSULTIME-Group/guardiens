@@ -237,21 +237,6 @@ const SmallMissions = () => {
     }
   }, [isAuthenticated, user, navigate, switchRole]);
 
-  const { data: currentUserProfile } = useQuery({
-    queryKey: ["my-profile-skills", user?.id],
-    queryFn: async () => {
-      if (!user) return null;
-      const { data } = await supabase
-        .from("profiles")
-        .select("skill_categories, available_for_help")
-        .eq("id", user.id)
-        .single();
-      return data;
-    },
-    enabled: !!user,
-  });
-
-  const mySkills: string[] = (currentUserProfile as any)?.skill_categories || [];
 
   const { data: allMissions } = useQuery({
     queryKey: ["small-missions-all"],
