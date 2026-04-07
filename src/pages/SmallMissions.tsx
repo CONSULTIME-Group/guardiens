@@ -1,9 +1,9 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect, useMemo } from "react";
 import entraideHeader from "@/assets/entraide-header.jpg";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Dog, Flower2, Handshake, ArrowRight, Lock, X, Sprout, PawPrint, GraduationCap, Star } from "lucide-react";
+import { Dog, Flower2, Handshake, ArrowRight, Lock, X, Sprout, PawPrint, GraduationCap, Star, MapPin, Search as SearchIcon } from "lucide-react";
 import PageMeta from "@/components/PageMeta";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -12,6 +12,7 @@ import { useSubscriptionAccess } from "@/hooks/useSubscriptionAccess";
 import { useAccessLevel } from "@/hooks/useAccessLevel";
 import AccessGateBanner from "@/components/access/AccessGateBanner";
 import ProposeExchangeDialog from "@/components/missions/ProposeExchangeDialog";
+import { geocodeCity, haversineDistance } from "@/lib/geocode";
 
 const CATEGORY_META: Record<string, { label: string; icon: typeof Dog; colorClass: string }> = {
   animals: { label: "Animaux", icon: Dog, colorClass: "text-primary" },
@@ -47,6 +48,14 @@ const DURATION_LABELS: Record<string, string> = {
   week: "Semaine",
 };
 
+const RADIUS_OPTIONS = [
+  { value: 15, label: "15 km" },
+  { value: 30, label: "30 km" },
+  { value: 50, label: "50 km" },
+  { value: 100, label: "100 km" },
+  { value: 0, label: "Partout" },
+];
+
 function formatCity(city: string): string {
   return city.replace(/\b\w/g, (c) => c.toUpperCase());
 }
@@ -70,6 +79,18 @@ const EXAMPLES = [
 type CategoryFilter = "all" | "animals" | "garden" | "skills" | "coups_de_main" | "mine";
 type ModeFilter = "need" | "offer";
 
+// Geocode cache to avoid repeated API calls
+const geoCache = new Map<string, { lat: number; lng: number } | null>();
+
+async function geocodeCached(city: string): Promise<{ lat: number; lng: number } | null> {
+  const key = city.toLowerCase().trim();
+  if (geoCache.has(key)) return geoCache.get(key)!;
+  const result = await geocodeCity(city);
+  const coords = result ? { lat: result.lat, lng: result.lng } : null;
+  geoCache.set(key, coords);
+  return coords;
+}
+
 const SmallMissions = () => {
   const { isAuthenticated, user, switchRole } = useAuth();
   const navigate = useNavigate();
@@ -83,6 +104,15 @@ const SmallMissions = () => {
     try { return localStorage.getItem("guardiens_skill_prompt_dismissed") === "true"; } catch { return false; }
   });
   const [contactingHelperId, setContactingHelperId] = useState<string | null>(null);
+
+  // ── Distance filter state ──
+  const [postalCodeInput, setPostalCodeInput] = useState("");
+  const [radiusKm, setRadiusKm] = useState(30);
+  const [originCoords, setOriginCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const [geocodingOrigin, setGeocodingOrigin] = useState(false);
+
+  // ── Competence search state ──
+  const [competenceSearch, setCompetenceSearch] = useState("");
 
   const handleContactHelper = useCallback(async (helperId: string) => {
     if (!isAuthenticated || !user) { navigate("/register"); return; }
