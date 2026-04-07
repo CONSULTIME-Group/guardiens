@@ -105,6 +105,18 @@ export default function PublicSitterProfile() {
   const [showAllMissionsHelped, setShowAllMissionsHelped] = useState(false);
   const [showAllEntraideFeedbacks, setShowAllEntraideFeedbacks] = useState(false);
 
+  const VISIBLE_COUNT = 3;
+  const ShowMoreBtn = ({ items, showAll, setShowAll }: { items: any[]; showAll: boolean; setShowAll: (v: boolean) => void }) =>
+    items.length > VISIBLE_COUNT ? (
+      <button
+        type="button"
+        onClick={() => setShowAll(!showAll)}
+        className="text-sm text-primary hover:underline font-body mt-2"
+      >
+        {showAll ? 'Voir moins' : `Voir les ${items.length - VISIBLE_COUNT} autres`}
+      </button>
+    ) : null;
+
   const handleTabChange = (tab: ProfileTab) => {
     setActiveTab(tab);
     setSearchParams({ tab }, { replace: true });
