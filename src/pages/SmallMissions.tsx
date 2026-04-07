@@ -979,11 +979,11 @@ const SmallMissions = () => {
 
       {/* ── Proposer mon aide dialog ── */}
       <Dialog open={offerDialogOpen} onOpenChange={setOfferDialogOpen}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-lg max-h-[85vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="font-heading text-lg">Proposer mon aide</DialogTitle>
             <DialogDescription className="text-sm text-muted-foreground">
-              Indiquez dans quels domaines vous pouvez aider et décrivez ce que vous proposez.
+              Indiquez dans quels domaines vous pouvez aider, ajoutez vos compétences spécifiques et décrivez ce que vous proposez.
             </DialogDescription>
           </DialogHeader>
 
@@ -1023,9 +1023,18 @@ const SmallMissions = () => {
                 </div>
               </div>
 
+              {/* Competences autocomplete */}
+              <CompetenceAutocomplete
+                competences={offerCompetences}
+                validatedLabels={offerValidatedLabels}
+                activeCategory={offerSkills.length === 1 ? offerSkills[0] : null}
+                onAdd={handleAddOfferCompetence}
+                onRemove={handleRemoveOfferCompetence}
+              />
+
               {/* Free text */}
               <div className="space-y-2">
-                <p className="text-sm font-medium text-foreground">Décrivez votre aide</p>
+                <p className="text-sm font-medium text-foreground">Description libre (optionnel)</p>
                 <Textarea
                   value={offerText}
                   onChange={(e) => setOfferText(e.target.value)}
