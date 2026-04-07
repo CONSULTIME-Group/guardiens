@@ -141,7 +141,7 @@ export function useOwnerProfile() {
       owner_skill_categories: (p as any)?.skill_categories || [],
     });
     setLastSyncedAt(
-      [p?.updated_at, prop?.updated_at, o?.updated_at]
+      [p?.updated_at, o?.updated_at]
         .filter((value): value is string => Boolean(value))
         .sort((a, b) => new Date(b).getTime() - new Date(a).getTime())[0] ?? null,
     );
