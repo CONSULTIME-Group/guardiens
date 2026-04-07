@@ -967,18 +967,26 @@ export type Database = {
           emergency_contact_name: string | null
           emergency_contact_phone: string | null
           exact_address: string | null
+          forbidden_zones: string | null
           heating_instructions: string | null
           id: string
+          key_instructions: string | null
+          mail_instructions: string | null
           neighbor_name: string | null
           neighbor_phone: string | null
+          owner_message: string | null
+          parking_instructions: string | null
+          plants_watering: string | null
           plumber_phone: string | null
           property_id: string
+          published: boolean | null
           trash_days: string | null
           updated_at: string
           user_id: string
           vet_address: string | null
           vet_name: string | null
           vet_phone: string | null
+          wifi_instructions: string | null
           wifi_name: string | null
           wifi_password: string | null
         }
@@ -991,18 +999,26 @@ export type Database = {
           emergency_contact_name?: string | null
           emergency_contact_phone?: string | null
           exact_address?: string | null
+          forbidden_zones?: string | null
           heating_instructions?: string | null
           id?: string
+          key_instructions?: string | null
+          mail_instructions?: string | null
           neighbor_name?: string | null
           neighbor_phone?: string | null
+          owner_message?: string | null
+          parking_instructions?: string | null
+          plants_watering?: string | null
           plumber_phone?: string | null
           property_id: string
+          published?: boolean | null
           trash_days?: string | null
           updated_at?: string
           user_id: string
           vet_address?: string | null
           vet_name?: string | null
           vet_phone?: string | null
+          wifi_instructions?: string | null
           wifi_name?: string | null
           wifi_password?: string | null
         }
@@ -1015,18 +1031,26 @@ export type Database = {
           emergency_contact_name?: string | null
           emergency_contact_phone?: string | null
           exact_address?: string | null
+          forbidden_zones?: string | null
           heating_instructions?: string | null
           id?: string
+          key_instructions?: string | null
+          mail_instructions?: string | null
           neighbor_name?: string | null
           neighbor_phone?: string | null
+          owner_message?: string | null
+          parking_instructions?: string | null
+          plants_watering?: string | null
           plumber_phone?: string | null
           property_id?: string
+          published?: boolean | null
           trash_days?: string | null
           updated_at?: string
           user_id?: string
           vet_address?: string | null
           vet_name?: string | null
           vet_phone?: string | null
+          wifi_instructions?: string | null
           wifi_name?: string | null
           wifi_password?: string | null
         }

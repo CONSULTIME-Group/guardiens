@@ -90,6 +90,7 @@ export function useOwnerProfile() {
   const [pets, setPets] = useState<Pet[]>([]);
   const [propertyId, setPropertyId] = useState<string | null>(null);
   const [ownerProfileId, setOwnerProfileId] = useState<string | null>(null);
+  const [lastSyncedAt, setLastSyncedAt] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
@@ -139,6 +140,11 @@ export function useOwnerProfile() {
       owner_competences_disponible: (o as any)?.competences_disponible || false,
       owner_skill_categories: (p as any)?.skill_categories || [],
     });
+    setLastSyncedAt(
+      [p?.updated_at, o?.updated_at]
+        .filter((value): value is string => Boolean(value))
+        .sort((a, b) => new Date(b).getTime() - new Date(a).getTime())[0] ?? null,
+    );
 
     if (prop) {
       setPropertyId(prop.id);
@@ -151,8 +157,11 @@ export function useOwnerProfile() {
         activity_level: a.activity_level || "moderate",
         owner_breed_note: (a as any).owner_breed_note || "",
       })) || []);
+    } else {
+      setPropertyId(null);
+      setPets([]);
     }
-    if (o) setOwnerProfileId(o.id);
+    setOwnerProfileId(o?.id ?? null);
 
     setLoading(false);
   }, [user]);
@@ -350,7 +359,7 @@ export function useOwnerProfile() {
   }, [user, toast, data, pets.length, computeCompletion]);
 
   return {
-    data, pets, loading, saving, propertyId,
+    data, pets, loading, saving, propertyId, lastSyncedAt,
     saveStep, addPet, updatePet, removePet, uploadPhoto,
     completion: computeCompletion(data, pets.length),
     missingFields: computeMissingFields(data, pets.length),

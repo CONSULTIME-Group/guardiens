@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { Helmet } from "react-helmet-async";
 import { Check, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -42,10 +42,15 @@ function countMissing(num: number, allMissing: { step: number; label: string }[]
   return allMissing.filter(m => m.step === num).length;
 }
 
+type ProfileDraft<T> = {
+  updatedAt: string;
+  values: Partial<T>;
+};
+
 const OwnerProfilePage = () => {
   const { user } = useAuth();
   const {
-    data, pets, loading, saving, completion, missingFields,
+    data, pets, loading, saving, completion, missingFields, lastSyncedAt,
     saveStep, addPet, updatePet, removePet, uploadPhoto,
   } = useOwnerProfile();
 
@@ -54,6 +59,7 @@ const OwnerProfilePage = () => {
   const [dirty, setDirty] = useState(false);
   const [saved, setSaved] = useState(false);
   const draftKey = user ? `guardiens_owner_profile_draft_${user.id}` : null;
+  const draftHydratedRef = useRef(false);
 
   const mergedData = { ...data, ...localData } as OwnerProfileData;
 
@@ -64,29 +70,51 @@ const OwnerProfilePage = () => {
   }, []);
 
   useEffect(() => {
-    if (!draftKey) return;
+    if (!draftKey || loading || draftHydratedRef.current) return;
+    draftHydratedRef.current = true;
+
     const rawDraft = localStorage.getItem(draftKey);
     if (!rawDraft) return;
 
     try {
-      const parsedDraft = JSON.parse(rawDraft) as Partial<OwnerProfileData>;
-      if (Object.keys(parsedDraft).length > 0) {
-        setLocalData(parsedDraft);
+      const parsedDraft = JSON.parse(rawDraft) as ProfileDraft<OwnerProfileData>;
+      if (!parsedDraft || typeof parsedDraft !== "object" || !("values" in parsedDraft) || !("updatedAt" in parsedDraft)) {
+        localStorage.removeItem(draftKey);
+        return;
+      }
+
+      if (lastSyncedAt && new Date(parsedDraft.updatedAt).getTime() <= new Date(lastSyncedAt).getTime()) {
+        localStorage.removeItem(draftKey);
+        return;
+      }
+
+      if (Object.keys(parsedDraft.values).length > 0) {
+        setLocalData(parsedDraft.values);
         setDirty(true);
       }
     } catch {
       localStorage.removeItem(draftKey);
     }
-  }, [draftKey]);
+  }, [draftKey, lastSyncedAt, loading]);
 
   useEffect(() => {
     if (!draftKey) return;
     if (Object.keys(localData).length > 0) {
-      localStorage.setItem(draftKey, JSON.stringify(localData));
+      const draft: ProfileDraft<OwnerProfileData> = {
+        values: localData,
+        updatedAt: new Date().toISOString(),
+      };
+      localStorage.setItem(draftKey, JSON.stringify(draft));
     } else {
       localStorage.removeItem(draftKey);
     }
   }, [draftKey, localData]);
+
+  useEffect(() => {
+    if (Object.keys(localData).length === 0) {
+      setDirty(false);
+    }
+  }, [localData]);
 
   const handleSave = useCallback(async () => {
     if (Object.keys(localData).length === 0) return;
@@ -97,6 +125,20 @@ const OwnerProfilePage = () => {
     setSaved(true);
     if (draftKey) localStorage.removeItem(draftKey);
   }, [draftKey, localData, saveStep]);
+
+  const handleUploadPhoto = useCallback(async (file: File, bucket: string) => {
+    const url = await uploadPhoto(file, bucket);
+    if (!url || bucket !== "avatars") return url;
+
+    setLocalData(prev => {
+      if (!("avatar_url" in prev)) return prev;
+      const next = { ...prev };
+      delete next.avatar_url;
+      return next;
+    });
+    setSaved(true);
+    return url;
+  }, [uploadPhoto]);
 
   const sidebarSections: SidebarSection[] = SECTIONS_META.map(s => ({
     ...s,
@@ -132,7 +174,7 @@ const OwnerProfilePage = () => {
           {/* Right content */}
           <div className="flex-1 min-w-0 pb-32">
             <div className="bg-card rounded-xl border border-border p-5 md:p-8">
-              {activeSection === "identity" && <OwnerStepIdentity data={mergedData} onChange={handleChange} onUploadPhoto={uploadPhoto} />}
+              {activeSection === "identity" && <OwnerStepIdentity data={mergedData} onChange={handleChange} onUploadPhoto={handleUploadPhoto} />}
               {activeSection === "housing" && <OwnerStepHousing data={mergedData} onChange={handleChange} onUploadPhoto={uploadPhoto} />}
               {activeSection === "animals" && <OwnerStepAnimals pets={pets} onAddPet={addPet} onUpdatePet={updatePet} onRemovePet={removePet} />}
               {activeSection === "rules" && <OwnerStepRules data={mergedData} onChange={handleChange} />}

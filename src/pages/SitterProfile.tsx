@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { Check, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -41,10 +41,15 @@ function countMissing(num: number, d: SitterProfileData, allMissing: { step: num
   return allMissing.filter(m => m.step === num).length;
 }
 
+type ProfileDraft<T> = {
+  updatedAt: string;
+  values: Partial<T>;
+};
+
 const SitterProfile = () => {
   const { user } = useAuth();
   const {
-    data, pastAnimals, loading, saving, completion, missingFields,
+    data, pastAnimals, loading, saving, completion, missingFields, lastSyncedAt,
     saveStep, addPastAnimal, removePastAnimal, uploadAvatar,
   } = useSitterProfile();
 
@@ -54,6 +59,7 @@ const SitterProfile = () => {
   const [dirty, setDirty] = useState(false);
   const [saved, setSaved] = useState(false);
   const draftKey = user ? `guardiens_sitter_profile_draft_${user.id}` : null;
+  const draftHydratedRef = useRef(false);
 
   useEffect(() => {
     if (!user) return;
@@ -66,29 +72,51 @@ const SitterProfile = () => {
   }, [user]);
 
   useEffect(() => {
-    if (!draftKey) return;
+    if (!draftKey || loading || draftHydratedRef.current) return;
+    draftHydratedRef.current = true;
+
     const rawDraft = localStorage.getItem(draftKey);
     if (!rawDraft) return;
 
     try {
-      const parsedDraft = JSON.parse(rawDraft) as Partial<SitterProfileData>;
-      if (Object.keys(parsedDraft).length > 0) {
-        setLocalData(parsedDraft);
+      const parsedDraft = JSON.parse(rawDraft) as ProfileDraft<SitterProfileData>;
+      if (!parsedDraft || typeof parsedDraft !== "object" || !("values" in parsedDraft) || !("updatedAt" in parsedDraft)) {
+        localStorage.removeItem(draftKey);
+        return;
+      }
+
+      if (lastSyncedAt && new Date(parsedDraft.updatedAt).getTime() <= new Date(lastSyncedAt).getTime()) {
+        localStorage.removeItem(draftKey);
+        return;
+      }
+
+      if (Object.keys(parsedDraft.values).length > 0) {
+        setLocalData(parsedDraft.values);
         setDirty(true);
       }
     } catch {
       localStorage.removeItem(draftKey);
     }
-  }, [draftKey]);
+  }, [draftKey, lastSyncedAt, loading]);
 
   useEffect(() => {
     if (!draftKey) return;
     if (Object.keys(localData).length > 0) {
-      localStorage.setItem(draftKey, JSON.stringify(localData));
+      const draft: ProfileDraft<SitterProfileData> = {
+        values: localData,
+        updatedAt: new Date().toISOString(),
+      };
+      localStorage.setItem(draftKey, JSON.stringify(draft));
     } else {
       localStorage.removeItem(draftKey);
     }
   }, [draftKey, localData]);
+
+  useEffect(() => {
+    if (Object.keys(localData).length === 0) {
+      setDirty(false);
+    }
+  }, [localData]);
 
   const mergedData = { ...data, ...localData } as SitterProfileData;
 
@@ -110,6 +138,20 @@ const SitterProfile = () => {
     setSaved(true);
     if (draftKey) localStorage.removeItem(draftKey);
   }, [draftKey, localData, saveStep]);
+
+  const handleUploadAvatar = useCallback(async (file: File) => {
+    const url = await uploadAvatar(file);
+    if (!url) return null;
+
+    setLocalData(prev => {
+      if (!("avatar_url" in prev)) return prev;
+      const next = { ...prev };
+      delete next.avatar_url;
+      return next;
+    });
+    setSaved(true);
+    return url;
+  }, [uploadAvatar]);
 
   const sidebarSections: SidebarSection[] = SECTIONS_META.map(s => ({
     ...s,
@@ -148,7 +190,7 @@ const SitterProfile = () => {
           <div className="flex-1 min-w-0 pb-32">
             <div className="bg-card rounded-xl border border-border p-5 md:p-8">
               {activeSection === "identity" && (
-                <StepIdentity data={mergedData} onChange={handleChange} onUploadAvatar={uploadAvatar} />
+                <StepIdentity data={mergedData} onChange={handleChange} onUploadAvatar={handleUploadAvatar} />
               )}
               {activeSection === "sitter" && (
                 <StepSitterProfile data={mergedData} onChange={handleChange} />
