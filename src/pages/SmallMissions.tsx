@@ -48,13 +48,6 @@ const DURATION_LABELS: Record<string, string> = {
   week: "Semaine",
 };
 
-const RADIUS_OPTIONS = [
-  { value: 15, label: "15 km" },
-  { value: 30, label: "30 km" },
-  { value: 50, label: "50 km" },
-  { value: 100, label: "100 km" },
-  { value: 0, label: "Partout" },
-];
 
 function formatCity(city: string): string {
   return city.replace(/\b\w/g, (c) => c.toUpperCase());
