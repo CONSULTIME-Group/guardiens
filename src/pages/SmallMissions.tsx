@@ -216,6 +216,13 @@ const SmallMissions = () => {
       setOfferSaving(false);
     }
   }, [user, offerSkills, offerText, offerCompetences, refetchProfile, queryClient]);
+
+  const handleWithdrawOffer = useCallback(async () => {
+    if (!user) return;
+    await supabase.from("profiles").update({ available_for_help: false }).eq("id", user.id);
+    await refetchProfile();
+    await queryClient.invalidateQueries({ queryKey: ["available-helpers"] });
+  }, [user, refetchProfile, queryClient]);
   // ── Load user's postal code as default origin ──
   useEffect(() => {
     if (!user) return;
@@ -752,9 +759,14 @@ const SmallMissions = () => {
                       <Check className="inline h-4 w-4 text-primary mr-1" />
                       Vous êtes visible dans cette section.
                     </p>
-                    <button onClick={openOfferDialog} className="text-xs text-primary font-semibold hover:underline">
-                      Modifier →
-                    </button>
+                    <div className="flex items-center gap-3">
+                      <button onClick={openOfferDialog} className="text-xs text-primary font-semibold hover:underline">
+                        Modifier
+                      </button>
+                      <button onClick={handleWithdrawOffer} className="text-xs text-destructive font-semibold hover:underline">
+                        Retirer mon offre
+                      </button>
+                    </div>
                   </div>
                 )}
                 <h2 className="text-base font-semibold text-foreground mb-4 flex items-center gap-2">
