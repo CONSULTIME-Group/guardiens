@@ -53,6 +53,7 @@ const OwnerProfilePage = () => {
   const [activeSection, setActiveSection] = useState("identity");
   const [dirty, setDirty] = useState(false);
   const [saved, setSaved] = useState(false);
+  const draftKey = user ? `guardiens_owner_profile_draft_${user.id}` : null;
 
   const mergedData = { ...data, ...localData } as OwnerProfileData;
 
@@ -62,14 +63,40 @@ const OwnerProfilePage = () => {
     setSaved(false);
   }, []);
 
-  const handleSave = useCallback(async () => {
-    if (Object.keys(localData).length > 0) {
-      await saveStep(localData);
-      setLocalData({});
+  useEffect(() => {
+    if (!draftKey) return;
+    const rawDraft = localStorage.getItem(draftKey);
+    if (!rawDraft) return;
+
+    try {
+      const parsedDraft = JSON.parse(rawDraft) as Partial<OwnerProfileData>;
+      if (Object.keys(parsedDraft).length > 0) {
+        setLocalData(parsedDraft);
+        setDirty(true);
+      }
+    } catch {
+      localStorage.removeItem(draftKey);
     }
+  }, [draftKey]);
+
+  useEffect(() => {
+    if (!draftKey) return;
+    if (Object.keys(localData).length > 0) {
+      localStorage.setItem(draftKey, JSON.stringify(localData));
+    } else {
+      localStorage.removeItem(draftKey);
+    }
+  }, [draftKey, localData]);
+
+  const handleSave = useCallback(async () => {
+    if (Object.keys(localData).length === 0) return;
+    const success = await saveStep(localData);
+    if (!success) return;
+    setLocalData({});
     setDirty(false);
     setSaved(true);
-  }, [localData, saveStep]);
+    if (draftKey) localStorage.removeItem(draftKey);
+  }, [draftKey, localData, saveStep]);
 
   const sidebarSections: SidebarSection[] = SECTIONS_META.map(s => ({
     ...s,

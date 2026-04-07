@@ -19,12 +19,16 @@ const StepIdentity = ({ data, onChange, onUploadAvatar }: Props) => {
   const [uploading, setUploading] = useState(false);
 
   const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
+    const input = e.currentTarget;
+    const file = input.files?.[0];
     if (!file) return;
     setUploading(true);
-    const url = await onUploadAvatar(file);
-    if (url) onChange({ avatar_url: url });
-    setUploading(false);
+    try {
+      await onUploadAvatar(file);
+    } finally {
+      input.value = "";
+      setUploading(false);
+    }
   };
 
   const motivationLen = (data.motivation || "").length;

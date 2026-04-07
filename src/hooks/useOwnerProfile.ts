@@ -199,9 +199,10 @@ export function useOwnerProfile() {
     return missing;
   }, []);
 
-  const saveStep = useCallback(async (stepData: Partial<OwnerProfileData>) => {
-    if (!user) return;
+  const saveStep = useCallback(async (stepData: Partial<OwnerProfileData>): Promise<boolean> => {
+    if (!user) return false;
     setSaving(true);
+    const previousData = data;
     const newData = { ...data, ...stepData };
     setData(newData);
 
@@ -212,7 +213,8 @@ export function useOwnerProfile() {
       profileFields.forEach(f => { if (f in stepData) profileUpdate[f] = (stepData as any)[f]; });
       profileUpdate.profile_completion = computeCompletion(newData, pets.length);
       if (Object.keys(profileUpdate).length > 0) {
-        await supabase.from("profiles").update(profileUpdate).eq("id", user.id);
+        const { error } = await supabase.from("profiles").update(profileUpdate).eq("id", user.id);
+        if (error) throw error;
       }
 
       // Property fields
@@ -229,10 +231,12 @@ export function useOwnerProfile() {
       });
       if (Object.keys(propUpdate).length > 0) {
         if (propertyId) {
-          await supabase.from("properties").update(propUpdate).eq("id", propertyId);
+          const { error } = await supabase.from("properties").update(propUpdate).eq("id", propertyId);
+          if (error) throw error;
         } else {
-          const { data: newProp } = await supabase
+          const { data: newProp, error } = await supabase
             .from("properties").insert({ ...propUpdate, user_id: user.id }).select("id").single();
+          if (error) throw error;
           if (newProp) setPropertyId(newProp.id);
         }
       }
@@ -252,17 +256,23 @@ export function useOwnerProfile() {
       if ("owner_competences_disponible" in stepData) ownerUpdate.competences_disponible = (stepData as any).owner_competences_disponible;
       if (Object.keys(ownerUpdate).length > 0) {
         if (ownerProfileId) {
-          await supabase.from("owner_profiles").update(ownerUpdate).eq("id", ownerProfileId);
+          const { error } = await supabase.from("owner_profiles").update(ownerUpdate).eq("id", ownerProfileId);
+          if (error) throw error;
         } else {
-          const { data: newOwner } = await supabase
+          const { data: newOwner, error } = await supabase
             .from("owner_profiles").insert({ ...ownerUpdate, user_id: user.id }).select("id").single();
+          if (error) throw error;
           if (newOwner) setOwnerProfileId(newOwner.id);
         }
       }
 
       toast({ title: "Sauvegardé", description: "Vos modifications ont été enregistrées." });
-    } catch {
+      return true;
+    } catch (error) {
+      console.error("Failed to save owner profile", error);
+      setData(previousData);
       toast({ variant: "destructive", title: "Erreur", description: "Impossible de sauvegarder." });
+      return false;
     } finally {
       setSaving(false);
     }
@@ -309,12 +319,35 @@ export function useOwnerProfile() {
   const uploadPhoto = useCallback(async (file: File, bucket: string): Promise<string | null> => {
     if (!user) return null;
     const ext = file.name.split(".").pop();
-    const path = `${user.id}/${Date.now()}.${ext}`;
-    const { error } = await supabase.storage.from(bucket).upload(path, file, { upsert: true });
+    const path = bucket === "avatars"
+      ? `${user.id}/avatar-${Date.now()}.${ext}`
+      : `${user.id}/${Date.now()}.${ext}`;
+    const { error } = await supabase.storage.from(bucket).upload(path, file, { upsert: false });
     if (error) { toast({ variant: "destructive", title: "Erreur", description: "Upload échoué." }); return null; }
     const { data: urlData } = supabase.storage.from(bucket).getPublicUrl(path);
-    return urlData.publicUrl;
-  }, [user, toast]);
+    const publicUrl = urlData.publicUrl;
+
+    if (bucket === "avatars") {
+      const nextData = { ...data, avatar_url: publicUrl };
+      const { error: updateError } = await supabase
+        .from("profiles")
+        .update({
+          avatar_url: publicUrl,
+          profile_completion: computeCompletion(nextData, pets.length),
+        })
+        .eq("id", user.id);
+
+      if (updateError) {
+        console.error("Failed to persist owner avatar", updateError);
+        toast({ variant: "destructive", title: "Erreur", description: "Photo envoyée mais non sauvegardée." });
+        return null;
+      }
+
+      setData(nextData);
+    }
+
+    return publicUrl;
+  }, [user, toast, data, pets.length, computeCompletion]);
 
   return {
     data, pets, loading, saving, propertyId,

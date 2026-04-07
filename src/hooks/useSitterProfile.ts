@@ -196,9 +196,10 @@ export function useSitterProfile() {
     return missing;
   }, []);
 
-  const saveStep = useCallback(async (stepData: Partial<SitterProfileData>) => {
-    if (!user) return;
+  const saveStep = useCallback(async (stepData: Partial<SitterProfileData>): Promise<boolean> => {
+    if (!user) return false;
     setSaving(true);
+    const previousData = data;
 
     const newData = { ...data, ...stepData };
     setData(newData);
@@ -213,7 +214,8 @@ export function useSitterProfile() {
       profileUpdate.profile_completion = completion;
 
       if (Object.keys(profileUpdate).length > 0) {
-        await supabase.from("profiles").update(profileUpdate).eq("id", user.id);
+        const { error } = await supabase.from("profiles").update(profileUpdate).eq("id", user.id);
+        if (error) throw error;
       }
 
       // Save sitter profile fields
@@ -232,20 +234,26 @@ export function useSitterProfile() {
 
       if (Object.keys(sitterUpdate).length > 0) {
         if (sitterProfileId) {
-          await supabase.from("sitter_profiles").update(sitterUpdate).eq("id", sitterProfileId);
+          const { error } = await supabase.from("sitter_profiles").update(sitterUpdate).eq("id", sitterProfileId);
+          if (error) throw error;
         } else {
-          const { data: newProfile } = await supabase
+          const { data: newProfile, error } = await supabase
             .from("sitter_profiles")
             .insert({ ...sitterUpdate, user_id: user.id })
             .select("id")
             .single();
+          if (error) throw error;
           if (newProfile) setSitterProfileId(newProfile.id);
         }
       }
 
       toast({ title: "Sauvegardé", description: "Vos modifications ont été enregistrées." });
-    } catch {
+      return true;
+    } catch (error) {
+      console.error("Failed to save sitter profile", error);
+      setData(previousData);
       toast({ variant: "destructive", title: "Erreur", description: "Impossible de sauvegarder." });
+      return false;
     } finally {
       setSaving(false);
     }
@@ -275,15 +283,32 @@ export function useSitterProfile() {
   const uploadAvatar = useCallback(async (file: File): Promise<string | null> => {
     if (!user) return null;
     const ext = file.name.split(".").pop();
-    const path = `${user.id}/avatar.${ext}`;
-    const { error } = await supabase.storage.from("avatars").upload(path, file, { upsert: true });
+    const path = `${user.id}/avatar-${Date.now()}.${ext}`;
+    const { error } = await supabase.storage.from("avatars").upload(path, file, { upsert: false });
     if (error) {
       toast({ variant: "destructive", title: "Erreur", description: "Impossible de télécharger la photo." });
       return null;
     }
     const { data: urlData } = supabase.storage.from("avatars").getPublicUrl(path);
-    return urlData.publicUrl;
-  }, [user, toast]);
+    const publicUrl = urlData.publicUrl;
+    const nextData = { ...data, avatar_url: publicUrl };
+    const { error: updateError } = await supabase
+      .from("profiles")
+      .update({
+        avatar_url: publicUrl,
+        profile_completion: computeCompletion(nextData),
+      })
+      .eq("id", user.id);
+
+    if (updateError) {
+      console.error("Failed to persist sitter avatar", updateError);
+      toast({ variant: "destructive", title: "Erreur", description: "Photo envoyée mais non sauvegardée." });
+      return null;
+    }
+
+    setData(nextData);
+    return publicUrl;
+  }, [user, toast, data, computeCompletion]);
 
   return {
     data, pastAnimals, loading, saving, sitterProfileId,
