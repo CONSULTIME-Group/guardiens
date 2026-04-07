@@ -855,11 +855,13 @@ const SmallMissions = () => {
                         })()}
                         <div className="flex items-center justify-between gap-2 pt-1">
                           <button
-                            onClick={() => handleContactHelper(h.id)}
-                            disabled={contactingHelperId === h.id}
-                            className="text-sm text-primary font-semibold hover:underline disabled:opacity-50"
+                            onClick={() => {
+                              if (!isAuthenticated) { navigate("/register"); return; }
+                              setHelperDialogTarget(h);
+                            }}
+                            className="text-sm text-primary font-semibold hover:underline"
                           >
-                            {contactingHelperId === h.id ? "…" : "Proposer un échange →"}
+                            Proposer un échange →
                           </button>
                           <button
                             onClick={() => navigate(`/profil/${h.id}`)}
