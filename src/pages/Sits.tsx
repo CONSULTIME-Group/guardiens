@@ -4,12 +4,12 @@ import {
   Plus, Calendar, MessageSquare, Star, Users, Eye, BookOpen,
   MapPin, Clock, MoreHorizontal, XCircle, CheckCircle,
   Image as ImageIcon, ChevronRight, Archive, Trash2, RefreshCw,
-  AlertTriangle, Pencil,
+  AlertTriangle, Pencil, Lock, MessageCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState, useMemo, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { format, differenceInDays, isAfter, isBefore, isToday, parseISO } from "date-fns";
+import { format, differenceInDays, isAfter, isBefore, isToday, parseISO, isWithinInterval, startOfDay, endOfDay } from "date-fns";
 import { fr } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import {
@@ -102,6 +102,7 @@ const Sits = () => {
   const [showArchived, setShowArchived] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const [archiveConfirm, setArchiveConfirm] = useState<string | null>(null);
+  const [openGuideId, setOpenGuideId] = useState<string | null>(null);
 
   const loadSits = useCallback(async () => {
     if (!user) return;
@@ -184,6 +185,38 @@ const Sits = () => {
         });
       }
 
+      // For accepted sits (confirmed/in_progress), load guide + conversation
+      const acceptedSits = (data || []).filter((a: any) =>
+        a.status === "accepted" && ["confirmed", "in_progress"].includes(a.sit?.status)
+      );
+
+      const guideMap: Record<string, { id: string; published: boolean } | null> = {};
+      const convMap: Record<string, string | null> = {};
+
+      await Promise.all(acceptedSits.map(async (a: any) => {
+        const sitId = a.sit?.id;
+        const ownerId = a.sit?.user_id;
+        if (!sitId || !ownerId) return;
+
+        const [guideRes, convRes] = await Promise.all([
+          supabase
+            .from("house_guides")
+            .select("id, published")
+            .eq("user_id", ownerId)
+            .eq("published", true)
+            .maybeSingle(),
+          supabase
+            .from("conversations")
+            .select("id")
+            .eq("sit_id", sitId)
+            .or(`owner_id.eq.${ownerId},sitter_id.eq.${user.id}`)
+            .maybeSingle(),
+        ]);
+
+        guideMap[sitId] = guideRes.data || null;
+        convMap[sitId] = convRes.data?.id || null;
+      }));
+
       setSits(
         data?.map((a: any) => ({
           ...a.sit,
@@ -193,6 +226,8 @@ const Sits = () => {
           owner: a.sit?.owner || null,
           hasReviewed: reviewedSitIds.includes(a.sit?.id),
           pets: petsByProperty[a.sit?.property_id] || [],
+          houseGuide: guideMap[a.sit?.id] || null,
+          conversationId: convMap[a.sit?.id] || null,
         })) || []
       );
     }
@@ -383,6 +418,7 @@ const Sits = () => {
               onArchive={() => setArchiveConfirm(sit.id)}
               onDelete={() => setDeleteConfirm(sit.id)}
               onRepublish={() => handleRepublish(sit.id)}
+              onOpenGuide={(id) => setOpenGuideId(id)}
             />
           ))}
         </div>
@@ -408,6 +444,7 @@ const Sits = () => {
                   onArchive={() => {}}
                   onDelete={() => setDeleteConfirm(sit.id)}
                   onRepublish={() => handleRepublish(sit.id)}
+                  onOpenGuide={(id) => setOpenGuideId(id)}
                 />
               ))}
             </div>
@@ -455,10 +492,10 @@ const Sits = () => {
 
 /* ── Card ── */
 const SitCard = ({
-  sit, isOwner, onArchive, onDelete, onRepublish,
+  sit, isOwner, onArchive, onDelete, onRepublish, onOpenGuide,
 }: {
   sit: any; isOwner: boolean;
-  onArchive: () => void; onDelete: () => void; onRepublish: () => void;
+  onArchive: () => void; onDelete: () => void; onRepublish: () => void; onOpenGuide: (id: string) => void;
 }) => {
   const effectiveStatus = sit.effectiveStatus || sit.status;
   const duration = getDuration(sit.start_date, sit.end_date);
@@ -594,7 +631,7 @@ const SitCard = ({
 
           {/* Quick actions */}
           <div className="flex items-center gap-2 mt-3 flex-wrap">
-            <QuickActions sit={sit} isOwner={isOwner} effectiveStatus={effectiveStatus} onRepublish={onRepublish} />
+            <QuickActions sit={sit} isOwner={isOwner} effectiveStatus={effectiveStatus} onRepublish={onRepublish} onOpenGuide={onOpenGuide} />
           </div>
         </div>
       </div>
@@ -604,13 +641,53 @@ const SitCard = ({
 
 /* ── Quick actions ── */
 const QuickActions = ({
-  sit, isOwner, effectiveStatus, onRepublish,
+  sit, isOwner, effectiveStatus, onRepublish, onOpenGuide,
 }: {
-  sit: any; isOwner: boolean; effectiveStatus: string; onRepublish: () => void;
+  sit: any; isOwner: boolean; effectiveStatus: string; onRepublish: () => void; onOpenGuide: (id: string) => void;
 }) => {
   const btnClass = "text-xs font-medium flex items-center gap-1 px-2.5 py-1.5 rounded-lg transition-colors";
 
-  if (effectiveStatus === "in_progress") {
+  if (!isOwner && (effectiveStatus === "in_progress" || effectiveStatus === "confirmed") && sit.application_status === "accepted") {
+    const startDate = sit.start_date ? new Date(sit.start_date) : null;
+    const endDate = sit.end_date ? new Date(sit.end_date) : null;
+    const today = new Date();
+    const guideExists = !!sit.houseGuide?.published;
+    const guideAccessible = startDate && endDate && isWithinInterval(today, {
+      start: startOfDay(startDate),
+      end: endOfDay(endDate),
+    });
+
+    return (
+      <>
+        <button
+          onClick={() => sit.conversationId && window.location.assign(`/messages?conversationId=${sit.conversationId}`)}
+          className={cn(btnClass, "bg-primary/10 text-primary hover:bg-primary/20", !sit.conversationId && "opacity-50 cursor-not-allowed")}
+          disabled={!sit.conversationId}
+        >
+          <MessageCircle className="h-3.5 w-3.5" /> Message
+        </button>
+
+        {!guideExists ? (
+          <span className={cn(btnClass, "border border-border text-muted-foreground cursor-default")}>
+            <BookOpen className="h-3.5 w-3.5" /> Pas de guide
+          </span>
+        ) : guideAccessible ? (
+          <button
+            onClick={() => onOpenGuide(sit.id)}
+            className={cn(btnClass, "bg-primary text-primary-foreground hover:bg-primary/90")}
+          >
+            <BookOpen className="h-3.5 w-3.5" /> Guide de la maison
+          </button>
+        ) : startDate ? (
+          <span className={cn(btnClass, "border border-border text-muted-foreground cursor-default")}>
+            <Lock className="h-3.5 w-3.5" /> Dispo le {format(startDate, 'dd MMM', { locale: fr })}
+          </span>
+        ) : null}
+      </>
+    );
+  }
+
+  if (effectiveStatus === "in_progress" && isOwner) {
     return (
       <>
         <Link to="/messages" className={cn(btnClass, "bg-primary/10 text-primary hover:bg-primary/20")}>
@@ -625,7 +702,7 @@ const QuickActions = ({
     );
   }
 
-  if (effectiveStatus === "confirmed") {
+  if (effectiveStatus === "confirmed" && isOwner) {
     return (
       <>
         <Link to={`/sits/${sit.id}`} className={cn(btnClass, "bg-primary/10 text-primary hover:bg-primary/20")}>
