@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { format } from "date-fns";
+import { format, formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Eye, EyeOff, Trash2, Search, Mail, Sparkles, ExternalLink } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -26,7 +26,7 @@ const AdminListings = () => {
   const [listings, setListings] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
-  const [filterStatus, setFilterStatus] = useState("all");
+  const [filterStatus, setFilterStatus] = useState("no_draft");
   const [filterType, setFilterType] = useState<"sits" | "long_stays">("sits");
   const [filterCity, setFilterCity] = useState("");
   const [appCounts, setAppCounts] = useState<Record<string, number>>({});
@@ -39,7 +39,11 @@ const AdminListings = () => {
     const table = filterType === "sits" ? "sits" : "long_stays";
     const fk = filterType === "sits" ? "sits_user_id_fkey" : "long_stays_user_id_fkey";
     let q = supabase.from(table).select(`*, owner:profiles!${fk}(first_name, last_name, city, avatar_url)`).order("created_at", { ascending: false });
-    if (filterStatus !== "all") q = q.eq("status", filterStatus as any);
+    if (filterStatus === "no_draft") {
+      q = q.neq("status", "draft" as any);
+    } else if (filterStatus !== "all") {
+      q = q.eq("status", filterStatus as any);
+    }
     const { data, error } = await q;
     if (error) toast.error("Erreur de chargement");
     else {
@@ -123,6 +127,15 @@ const AdminListings = () => {
     return true;
   });
 
+  const formatLastActivity = (dateStr: string | null | undefined) => {
+    if (!dateStr) return "—";
+    try {
+      return formatDistanceToNow(new Date(dateStr), { addSuffix: true, locale: fr });
+    } catch {
+      return "—";
+    }
+  };
+
   return (
     <div className="space-y-6">
       <h1 className="font-body text-2xl font-bold">Annonces</h1>
@@ -142,8 +155,9 @@ const AdminListings = () => {
         <Select value={filterStatus} onValueChange={setFilterStatus}>
           <SelectTrigger className="w-[160px]"><SelectValue /></SelectTrigger>
           <SelectContent>
+            <SelectItem value="no_draft">Sans brouillons</SelectItem>
             <SelectItem value="all">Tous statuts</SelectItem>
-            <SelectItem value="draft">Brouillon</SelectItem>
+            <SelectItem value="draft">Brouillons</SelectItem>
             <SelectItem value="published">Publiée</SelectItem>
             <SelectItem value="confirmed">Confirmée</SelectItem>
             <SelectItem value="completed">Terminée</SelectItem>
@@ -172,6 +186,7 @@ const AdminListings = () => {
               <TableHead>Ville</TableHead>
               <TableHead>Type</TableHead>
               <TableHead>Dates</TableHead>
+              <TableHead>Dernière activité</TableHead>
               <TableHead>Candidatures</TableHead>
               <TableHead>Statut</TableHead>
               <TableHead className="text-right">Actions</TableHead>
@@ -179,9 +194,9 @@ const AdminListings = () => {
           </TableHeader>
           <TableBody>
             {loading ? (
-              <TableRow><TableCell colSpan={8} className="text-center py-8 text-muted-foreground">Chargement…</TableCell></TableRow>
+              <TableRow><TableCell colSpan={9} className="text-center py-8 text-muted-foreground">Chargement…</TableCell></TableRow>
             ) : filtered.length === 0 ? (
-              <TableRow><TableCell colSpan={8} className="text-center py-8 text-muted-foreground">Aucune annonce</TableCell></TableRow>
+              <TableRow><TableCell colSpan={9} className="text-center py-8 text-muted-foreground">Aucune annonce</TableCell></TableRow>
             ) : filtered.map((listing) => {
               const s = statusLabels[listing.status] || statusLabels.draft;
               return (
@@ -203,6 +218,9 @@ const AdminListings = () => {
                     {listing.start_date ? format(new Date(listing.start_date), "d MMM", { locale: fr }) : "—"}
                     {" → "}
                     {listing.end_date ? format(new Date(listing.end_date), "d MMM yy", { locale: fr }) : "—"}
+                  </TableCell>
+                  <TableCell className="text-sm text-muted-foreground whitespace-nowrap">
+                    {formatLastActivity(listing.updated_at)}
                   </TableCell>
                   <TableCell className="text-sm font-medium">{appCounts[listing.id] || 0}</TableCell>
                   <TableCell><Badge variant={s.variant}>{s.label}</Badge></TableCell>
