@@ -9,12 +9,13 @@ import { Textarea } from "@/components/ui/textarea";
 import PageMeta from "@/components/PageMeta";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useSubscriptionAccess } from "@/hooks/useSubscriptionAccess";
 import { useAccessLevel } from "@/hooks/useAccessLevel";
 import AccessGateBanner from "@/components/access/AccessGateBanner";
 import ProposeExchangeDialog from "@/components/missions/ProposeExchangeDialog";
 import { geocodeCity, haversineDistance } from "@/lib/geocode";
+import CompetenceAutocomplete from "@/components/profile/CompetenceAutocomplete";
 
 const CATEGORY_META: Record<string, { label: string; icon: typeof Dog; colorClass: string }> = {
   animals: { label: "Animaux", icon: Dog, colorClass: "text-primary" },
@@ -89,6 +90,7 @@ async function geocodeCached(city: string): Promise<{ lat: number; lng: number }
 const SmallMissions = () => {
   const { isAuthenticated, user, switchRole } = useAuth();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { hasAccess, status: subStatus } = useSubscriptionAccess();
   const { level: accessLevel, profileCompletion, canApplyMissions } = useAccessLevel();
   const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>("all");
@@ -129,23 +131,53 @@ const SmallMissions = () => {
   const [offerDialogOpen, setOfferDialogOpen] = useState(false);
   const [offerSkills, setOfferSkills] = useState<string[]>([]);
   const [offerText, setOfferText] = useState("");
+  const [offerCompetences, setOfferCompetences] = useState<string[]>([]);
+  const [offerValidatedLabels, setOfferValidatedLabels] = useState<string[]>([]);
   const [offerSaving, setOfferSaving] = useState(false);
   const [offerSaved, setOfferSaved] = useState(false);
 
-  const openOfferDialog = useCallback(() => {
+  // Load validated competence labels for autocomplete
+  useEffect(() => {
+    supabase
+      .from("competences_validees")
+      .select("label")
+      .then(({ data }) => {
+        setOfferValidatedLabels((data || []).map((d: any) => d.label));
+      });
+  }, []);
+
+  const openOfferDialog = useCallback(async () => {
     const existing: string[] = (currentUserProfile as any)?.skill_categories || [];
     const existingCustom: string[] = (currentUserProfile as any)?.custom_skills || [];
     setOfferSkills(existing.length > 0 ? [...existing] : []);
     setOfferText(existingCustom.length > 0 ? existingCustom[0] : "");
+    // Load existing competences from sitter_profiles
+    if (user) {
+      const { data: sp } = await supabase
+        .from("sitter_profiles")
+        .select("competences")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      setOfferCompetences(sp?.competences || []);
+    }
     setOfferSaved(false);
     setOfferDialogOpen(true);
-  }, [currentUserProfile]);
+  }, [currentUserProfile, user]);
 
   const toggleOfferSkill = (key: string) => {
     setOfferSkills((prev) =>
       prev.includes(key) ? prev.filter((s) => s !== key) : [...prev, key]
     );
   };
+
+  const handleAddOfferCompetence = useCallback((label: string) => {
+    if (offerCompetences.includes(label)) return;
+    setOfferCompetences(prev => [...prev, label]);
+  }, [offerCompetences]);
+
+  const handleRemoveOfferCompetence = useCallback((label: string) => {
+    setOfferCompetences(prev => prev.filter(c => c !== label));
+  }, []);
 
   const handleSaveOffer = useCallback(async () => {
     if (!user || offerSkills.length === 0) return;
@@ -161,7 +193,21 @@ const SmallMissions = () => {
         updates.custom_skills = [];
       }
       await supabase.from("profiles").update(updates).eq("id", user.id);
+      // Also save competences to sitter_profiles
+      if (offerCompetences.length > 0) {
+        const { data: existing } = await supabase
+          .from("sitter_profiles")
+          .select("id")
+          .eq("user_id", user.id)
+          .maybeSingle();
+        if (existing) {
+          await supabase.from("sitter_profiles").update({ competences: offerCompetences }).eq("user_id", user.id);
+        } else {
+          await supabase.from("sitter_profiles").insert({ user_id: user.id, competences: offerCompetences });
+        }
+      }
       await refetchProfile();
+      await queryClient.invalidateQueries({ queryKey: ["available-helpers"] });
       setOfferSaved(true);
       setTimeout(() => setOfferDialogOpen(false), 1200);
     } catch {
@@ -169,7 +215,7 @@ const SmallMissions = () => {
     } finally {
       setOfferSaving(false);
     }
-  }, [user, offerSkills, offerText, refetchProfile]);
+  }, [user, offerSkills, offerText, offerCompetences, refetchProfile, queryClient]);
   // ── Load user's postal code as default origin ──
   useEffect(() => {
     if (!user) return;
@@ -521,9 +567,9 @@ const SmallMissions = () => {
                   <p className="text-sm text-foreground font-medium">
                     Déclarez vos compétences pour voir en priorité les échanges qui vous correspondent.
                   </p>
-                  <Link to="/profile" className="text-sm text-primary font-semibold mt-1 inline-block">
-                    Compléter mon profil →
-                  </Link>
+                  <button onClick={openOfferDialog} className="text-sm text-primary font-semibold mt-1 inline-block hover:underline">
+                    Déclarer mes compétences →
+                  </button>
                 </div>
                 <button onClick={dismissSkillPrompt} className="text-muted-foreground hover:text-foreground shrink-0">
                   <X className="h-4 w-4" />
@@ -697,8 +743,20 @@ const SmallMissions = () => {
             )}
 
             {/* ═══ Section 2 — Disponibles pour aider ═══ */}
-            {helperCount > 0 && (
+            {(helperCount > 0 || (currentUserProfile as any)?.available_for_help) && (
               <div className="mt-10">
+                {/* Self indicator */}
+                {isAuthenticated && (currentUserProfile as any)?.available_for_help && (
+                  <div className="bg-primary/5 border border-primary/20 rounded-xl p-3 mb-4 flex items-center justify-between">
+                    <p className="text-sm text-foreground">
+                      <Check className="inline h-4 w-4 text-primary mr-1" />
+                      Vous êtes visible dans cette section.
+                    </p>
+                    <button onClick={openOfferDialog} className="text-xs text-primary font-semibold hover:underline">
+                      Modifier →
+                    </button>
+                  </div>
+                )}
                 <h2 className="text-base font-semibold text-foreground mb-4 flex items-center gap-2">
                   Disponibles pour aider
                   <span className="text-xs font-normal bg-muted text-muted-foreground px-2 py-0.5 rounded-full">
@@ -933,11 +991,11 @@ const SmallMissions = () => {
 
       {/* ── Proposer mon aide dialog ── */}
       <Dialog open={offerDialogOpen} onOpenChange={setOfferDialogOpen}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-lg max-h-[85vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="font-heading text-lg">Proposer mon aide</DialogTitle>
             <DialogDescription className="text-sm text-muted-foreground">
-              Indiquez dans quels domaines vous pouvez aider et décrivez ce que vous proposez.
+              Indiquez dans quels domaines vous pouvez aider, ajoutez vos compétences spécifiques et décrivez ce que vous proposez.
             </DialogDescription>
           </DialogHeader>
 
@@ -977,9 +1035,18 @@ const SmallMissions = () => {
                 </div>
               </div>
 
+              {/* Competences autocomplete */}
+              <CompetenceAutocomplete
+                competences={offerCompetences}
+                validatedLabels={offerValidatedLabels}
+                activeCategory={offerSkills.length === 1 ? offerSkills[0] : null}
+                onAdd={handleAddOfferCompetence}
+                onRemove={handleRemoveOfferCompetence}
+              />
+
               {/* Free text */}
               <div className="space-y-2">
-                <p className="text-sm font-medium text-foreground">Décrivez votre aide</p>
+                <p className="text-sm font-medium text-foreground">Description libre (optionnel)</p>
                 <Textarea
                   value={offerText}
                   onChange={(e) => setOfferText(e.target.value)}
