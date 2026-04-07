@@ -127,7 +127,7 @@ export default function PublicSitterProfile() {
           supabase
             .from("small_missions")
             .select("id", { count: "exact", head: true })
-            .or(`user_id.eq.${id},assigned_to.eq.${id}`),
+            .eq("user_id", id),
         ]);
 
       // Store in local variables before setState
