@@ -1,12 +1,13 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Key, Home, AlertTriangle, ClipboardList, Heart, Check, Circle } from "lucide-react";
+import { Key, Home, AlertTriangle, ClipboardList, Heart, Check, Circle, CheckCircle, Loader2 } from "lucide-react";
 
 interface GuideData {
   exact_address: string;
@@ -33,6 +34,7 @@ interface GuideData {
   electrician_phone: string;
   detailed_instructions: string;
   owner_message: string;
+  published: boolean;
 }
 
 const emptyGuide: GuideData = {
@@ -46,6 +48,7 @@ const emptyGuide: GuideData = {
   emergency_contact_name: "", emergency_contact_phone: "",
   plumber_phone: "", electrician_phone: "",
   detailed_instructions: "", owner_message: "",
+  published: false,
 };
 
 const ACCORDION_SECTIONS = [
@@ -87,11 +90,12 @@ function isSectionComplete(guide: GuideData, fields: string[]): boolean {
 
 const OwnerHouseGuideForm = () => {
   const { user } = useAuth();
-  const { toast } = useToast();
   const [guide, setGuide] = useState<GuideData>(emptyGuide);
   const [propertyId, setPropertyId] = useState<string | null>(null);
   const [guideId, setGuideId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [publishLoading, setPublishLoading] = useState(false);
+  const [unpublishLoading, setUnpublishLoading] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const guideRef = useRef(guide);
   const propertyIdRef = useRef(propertyId);
@@ -101,6 +105,12 @@ const OwnerHouseGuideForm = () => {
   propertyIdRef.current = propertyId;
   guideIdRef.current = guideId;
 
+  const isPublishable = !!(
+    guide.exact_address?.trim() &&
+    guide.access_codes?.trim() &&
+    guide.emergency_contact_phone?.trim()
+  );
+
   useEffect(() => {
     if (!user) return;
     const load = async () => {
@@ -108,37 +118,38 @@ const OwnerHouseGuideForm = () => {
         .from("properties").select("id").eq("user_id", user.id).limit(1).maybeSingle();
       if (prop) {
         setPropertyId(prop.id);
-        const { data: hg } = await supabase
-          .from("house_guides").select("*").eq("user_id", user.id).limit(1).maybeSingle();
-        if (hg) {
-          setGuideId(hg.id);
-          setGuide({
-            exact_address: hg.exact_address || "",
-            key_instructions: hg.key_instructions || "",
-            access_codes: hg.access_codes || "",
-            wifi_name: hg.wifi_name || "",
-            wifi_password: hg.wifi_password || "",
-            wifi_instructions: hg.wifi_instructions || "",
-            parking_instructions: hg.parking_instructions || "",
-            trash_days: hg.trash_days || "",
-            heating_instructions: hg.heating_instructions || "",
-            appliance_notes: hg.appliance_notes || "",
-            forbidden_zones: hg.forbidden_zones || "",
-            plants_watering: hg.plants_watering || "",
-            mail_instructions: hg.mail_instructions || "",
-            vet_name: hg.vet_name || "",
-            vet_phone: hg.vet_phone || "",
-            vet_address: hg.vet_address || "",
-            neighbor_name: hg.neighbor_name || "",
-            neighbor_phone: hg.neighbor_phone || "",
-            emergency_contact_name: hg.emergency_contact_name || "",
-            emergency_contact_phone: hg.emergency_contact_phone || "",
-            plumber_phone: hg.plumber_phone || "",
-            electrician_phone: hg.electrician_phone || "",
-            detailed_instructions: hg.detailed_instructions || "",
-            owner_message: hg.owner_message || "",
-          });
-        }
+      }
+      const { data: hg } = await supabase
+        .from("house_guides").select("*").eq("user_id", user.id).limit(1).maybeSingle();
+      if (hg) {
+        setGuideId(hg.id);
+        setGuide({
+          exact_address: hg.exact_address || "",
+          key_instructions: hg.key_instructions || "",
+          access_codes: hg.access_codes || "",
+          wifi_name: hg.wifi_name || "",
+          wifi_password: hg.wifi_password || "",
+          wifi_instructions: hg.wifi_instructions || "",
+          parking_instructions: hg.parking_instructions || "",
+          trash_days: hg.trash_days || "",
+          heating_instructions: hg.heating_instructions || "",
+          appliance_notes: hg.appliance_notes || "",
+          forbidden_zones: hg.forbidden_zones || "",
+          plants_watering: hg.plants_watering || "",
+          mail_instructions: hg.mail_instructions || "",
+          vet_name: hg.vet_name || "",
+          vet_phone: hg.vet_phone || "",
+          vet_address: hg.vet_address || "",
+          neighbor_name: hg.neighbor_name || "",
+          neighbor_phone: hg.neighbor_phone || "",
+          emergency_contact_name: hg.emergency_contact_name || "",
+          emergency_contact_phone: hg.emergency_contact_phone || "",
+          plumber_phone: hg.plumber_phone || "",
+          electrician_phone: hg.electrician_phone || "",
+          detailed_instructions: hg.detailed_instructions || "",
+          owner_message: hg.owner_message || "",
+          published: hg.published ?? false,
+        });
       }
       setLoading(false);
     };
@@ -159,7 +170,36 @@ const OwnerHouseGuideForm = () => {
       propertyIdRef.current = pid;
     }
 
-    const payload = { ...current, user_id: user.id, property_id: pid };
+    const payload = {
+      user_id: user.id,
+      property_id: pid,
+      exact_address: current.exact_address || null,
+      key_instructions: current.key_instructions || null,
+      access_codes: current.access_codes || null,
+      wifi_name: current.wifi_name || null,
+      wifi_password: current.wifi_password || null,
+      wifi_instructions: current.wifi_instructions || null,
+      parking_instructions: current.parking_instructions || null,
+      trash_days: current.trash_days || null,
+      heating_instructions: current.heating_instructions || null,
+      appliance_notes: current.appliance_notes || null,
+      forbidden_zones: current.forbidden_zones || null,
+      plants_watering: current.plants_watering || null,
+      mail_instructions: current.mail_instructions || null,
+      vet_name: current.vet_name || null,
+      vet_phone: current.vet_phone || null,
+      vet_address: current.vet_address || null,
+      neighbor_name: current.neighbor_name || null,
+      neighbor_phone: current.neighbor_phone || null,
+      emergency_contact_name: current.emergency_contact_name || null,
+      emergency_contact_phone: current.emergency_contact_phone || null,
+      plumber_phone: current.plumber_phone || null,
+      electrician_phone: current.electrician_phone || null,
+      detailed_instructions: current.detailed_instructions || null,
+      owner_message: current.owner_message || null,
+      published: current.published,
+      updated_at: new Date().toISOString(),
+    };
 
     if (guideIdRef.current) {
       await supabase.from("house_guides").update(payload).eq("id", guideIdRef.current);
@@ -178,6 +218,103 @@ const OwnerHouseGuideForm = () => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => saveGuide(), 800);
   }, [saveGuide]);
+
+  const handlePublish = async () => {
+    if (!user) return;
+    setPublishLoading(true);
+    try {
+      // Flush pending save first
+      if (debounceRef.current) {
+        clearTimeout(debounceRef.current);
+        await saveGuide();
+      }
+
+      let pid = propertyIdRef.current;
+      if (!pid) {
+        const { data: newProp } = await supabase
+          .from("properties").insert({ user_id: user.id }).select("id").single();
+        if (!newProp) throw new Error("no property");
+        pid = newProp.id;
+        setPropertyId(pid);
+        propertyIdRef.current = pid;
+      }
+
+      const current = guideRef.current;
+      const { error } = await supabase
+        .from("house_guides")
+        .upsert({
+          user_id: user.id,
+          property_id: pid,
+          exact_address: current.exact_address || null,
+          key_instructions: current.key_instructions || null,
+          access_codes: current.access_codes || null,
+          wifi_name: current.wifi_name || null,
+          wifi_password: current.wifi_password || null,
+          wifi_instructions: current.wifi_instructions || null,
+          parking_instructions: current.parking_instructions || null,
+          trash_days: current.trash_days || null,
+          heating_instructions: current.heating_instructions || null,
+          appliance_notes: current.appliance_notes || null,
+          forbidden_zones: current.forbidden_zones || null,
+          plants_watering: current.plants_watering || null,
+          mail_instructions: current.mail_instructions || null,
+          vet_name: current.vet_name || null,
+          vet_phone: current.vet_phone || null,
+          vet_address: current.vet_address || null,
+          neighbor_name: current.neighbor_name || null,
+          neighbor_phone: current.neighbor_phone || null,
+          emergency_contact_name: current.emergency_contact_name || null,
+          emergency_contact_phone: current.emergency_contact_phone || null,
+          plumber_phone: current.plumber_phone || null,
+          electrician_phone: current.electrician_phone || null,
+          detailed_instructions: current.detailed_instructions || null,
+          owner_message: current.owner_message || null,
+          published: true,
+          updated_at: new Date().toISOString(),
+        }, { onConflict: "user_id" });
+
+      if (error) throw error;
+
+      setGuide(prev => ({ ...prev, published: true }));
+      toast.success("Guide publié ✓", {
+        description: "Votre gardien y aura accès à partir du premier jour de garde.",
+        duration: 3000,
+      });
+    } catch {
+      toast.error("Erreur", {
+        description: "Impossible de publier le guide. Réessaie.",
+        duration: 5000,
+      });
+    } finally {
+      setPublishLoading(false);
+    }
+  };
+
+  const handleUnpublish = async () => {
+    if (!user) return;
+    setUnpublishLoading(true);
+    try {
+      const { error } = await supabase
+        .from("house_guides")
+        .update({ published: false, updated_at: new Date().toISOString() })
+        .eq("user_id", user.id);
+
+      if (error) throw error;
+
+      setGuide(prev => ({ ...prev, published: false }));
+      toast.success("Guide dépublié", {
+        description: "Votre gardien n'y a plus accès. Modifiez et republiez quand vous voulez.",
+        duration: 3000,
+      });
+    } catch {
+      toast.error("Erreur", {
+        description: "Impossible de dépublier. Réessaie.",
+        duration: 5000,
+      });
+    } finally {
+      setUnpublishLoading(false);
+    }
+  };
 
   useEffect(() => {
     return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
@@ -226,9 +363,67 @@ const OwnerHouseGuideForm = () => {
           );
         })}
       </Accordion>
+
+      {/* Publish state */}
+      <div className="space-y-3 pt-2">
+        {guide.published ? (
+          <div className="flex items-center gap-3 p-4 bg-primary/5 rounded-xl border border-primary/20">
+            <CheckCircle className="w-5 h-5 text-primary shrink-0" />
+            <div className="flex-1">
+              <p className="text-sm font-medium text-primary">Guide publié</p>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Accessible à votre gardien à partir du premier jour de garde.
+              </p>
+            </div>
+            <Button
+              size="sm"
+              variant="ghost"
+              className="text-muted-foreground hover:text-foreground shrink-0"
+              onClick={handleUnpublish}
+              disabled={unpublishLoading}
+            >
+              {unpublishLoading
+                ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                : "Modifier"
+              }
+            </Button>
+          </div>
+        ) : (
+          <>
+            {!isPublishable && (
+              <div className="p-3 bg-muted/50 rounded-lg border border-border space-y-1">
+                <p className="text-xs font-medium text-foreground/70">
+                  Pour publier, complétez au minimum :
+                </p>
+                {!guide.exact_address?.trim() && (
+                  <p className="text-xs text-muted-foreground">· Adresse complète — section Accès & logistique</p>
+                )}
+                {!guide.access_codes?.trim() && (
+                  <p className="text-xs text-muted-foreground">· Codes d'accès — section Accès & logistique</p>
+                )}
+                {!guide.emergency_contact_phone?.trim() && (
+                  <p className="text-xs text-muted-foreground">· Contact d'urgence — section Contacts d'urgence</p>
+                )}
+              </div>
+            )}
+            <Button
+              onClick={handlePublish}
+              disabled={!isPublishable || publishLoading}
+              className="w-full"
+            >
+              {publishLoading
+                ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Publication en cours…</>
+                : "Publier le guide"
+              }
+            </Button>
+          </>
+        )}
+      </div>
     </div>
   );
 };
+
+/* --- Field sub-components (unchanged) --- */
 
 interface FieldProps {
   guide: GuideData;
@@ -240,7 +435,7 @@ const Field = ({ label, field, guide, onChange, type = "input", rows = 2, placeh
     <Label className="text-sm font-medium text-foreground">{label}</Label>
     {type === "textarea" ? (
       <Textarea
-        value={guide[field]}
+        value={guide[field] as string}
         onChange={e => onChange(field, e.target.value)}
         placeholder={placeholder}
         rows={rows}
@@ -248,7 +443,7 @@ const Field = ({ label, field, guide, onChange, type = "input", rows = 2, placeh
       />
     ) : (
       <Input
-        value={guide[field]}
+        value={guide[field] as string}
         onChange={e => onChange(field, e.target.value)}
         placeholder={placeholder}
         className="bg-background border border-border rounded-md px-3 py-2 text-sm w-full"
