@@ -94,8 +94,8 @@ const OwnerHouseGuideForm = () => {
   const [propertyId, setPropertyId] = useState<string | null>(null);
   const [guideId, setGuideId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-  const [publishLoading, setPublishLoading] = useState(false);
-  const [unpublishLoading, setUnpublishLoading] = useState(false);
+  const [finalizeLoading, setFinalizeLoading] = useState(false);
+  const [unfinalizeLoading, setUnfinalizeLoading] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const guideRef = useRef(guide);
   const propertyIdRef = useRef(propertyId);
@@ -219,9 +219,9 @@ const OwnerHouseGuideForm = () => {
     debounceRef.current = setTimeout(() => saveGuide(), 800);
   }, [saveGuide]);
 
-  const handlePublish = async () => {
+  const handleFinalize = async () => {
     if (!user) return;
-    setPublishLoading(true);
+    setFinalizeLoading(true);
     try {
       // Flush pending save first
       if (debounceRef.current) {
@@ -276,23 +276,23 @@ const OwnerHouseGuideForm = () => {
       if (error) throw error;
 
       setGuide(prev => ({ ...prev, published: true }));
-      toast.success("Guide publié ✓", {
-        description: "Votre gardien y aura accès à partir du premier jour de garde.",
+      toast.success("Guide enregistré ✓", {
+        description: "Guide enregistré. Il sera visible uniquement par votre gardien confirmé, pendant la durée de la garde.",
         duration: 3000,
       });
     } catch {
       toast.error("Erreur", {
-        description: "Impossible de publier le guide. Réessaie.",
+        description: "Impossible d'enregistrer le guide. Réessaie.",
         duration: 5000,
       });
     } finally {
-      setPublishLoading(false);
+      setFinalizeLoading(false);
     }
   };
 
-  const handleUnpublish = async () => {
+  const handleUnfinalize = async () => {
     if (!user) return;
-    setUnpublishLoading(true);
+    setUnfinalizeLoading(true);
     try {
       const { error } = await supabase
         .from("house_guides")
@@ -302,17 +302,17 @@ const OwnerHouseGuideForm = () => {
       if (error) throw error;
 
       setGuide(prev => ({ ...prev, published: false }));
-      toast.success("Guide dépublié", {
-        description: "Votre gardien n'y a plus accès. Modifiez et republiez quand vous voulez.",
+      toast.success("Guide repassé en brouillon", {
+        description: "Guide repassé en brouillon. Vous pouvez le modifier et le finaliser à nouveau.",
         duration: 3000,
       });
     } catch {
       toast.error("Erreur", {
-        description: "Impossible de dépublier. Réessaie.",
+        description: "Impossible de modifier le statut. Réessaie.",
         duration: 5000,
       });
     } finally {
-      setUnpublishLoading(false);
+      setUnfinalizeLoading(false);
     }
   };
 
@@ -327,7 +327,7 @@ const OwnerHouseGuideForm = () => {
       <div>
         <h3 className="text-lg font-semibold text-foreground mb-1">Guide de la maison</h3>
         <p className="text-sm text-muted-foreground mb-4">
-          Complétez ce guide maintenant. Votre gardien y aura accès à partir du premier jour de garde.
+          Ce guide est strictement confidentiel. Il ne sera jamais public. Seul le gardien que vous aurez choisi pourra le consulter — uniquement pendant la durée de sa garde, pas avant, pas après.
         </p>
       </div>
 
@@ -370,19 +370,19 @@ const OwnerHouseGuideForm = () => {
           <div className="flex items-center gap-3 p-4 bg-primary/5 rounded-xl border border-primary/20">
             <CheckCircle className="w-5 h-5 text-primary shrink-0" />
             <div className="flex-1">
-              <p className="text-sm font-medium text-primary">Guide publié</p>
+              <p className="text-sm font-medium text-primary">Guide finalisé</p>
               <p className="text-xs text-muted-foreground mt-0.5">
-                Accessible à votre gardien à partir du premier jour de garde.
+                Confidentiel. Visible uniquement par votre gardien confirmé, du premier au dernier jour de garde.
               </p>
             </div>
             <Button
               size="sm"
               variant="ghost"
               className="text-muted-foreground hover:text-foreground shrink-0"
-              onClick={handleUnpublish}
-              disabled={unpublishLoading}
+              onClick={handleUnfinalize}
+              disabled={unfinalizeLoading}
             >
-              {unpublishLoading
+              {unfinalizeLoading
                 ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
                 : "Modifier"
               }
@@ -393,7 +393,7 @@ const OwnerHouseGuideForm = () => {
             {!isPublishable && (
               <div className="p-3 bg-muted/50 rounded-lg border border-border space-y-1">
                 <p className="text-xs font-medium text-foreground/70">
-                  Pour publier, complétez au minimum :
+                  Pour enregistrer, complétez au minimum :
                 </p>
                 {!guide.exact_address?.trim() && (
                   <p className="text-xs text-muted-foreground">· Adresse complète — section Accès & logistique</p>
@@ -407,13 +407,13 @@ const OwnerHouseGuideForm = () => {
               </div>
             )}
             <Button
-              onClick={handlePublish}
-              disabled={!isPublishable || publishLoading}
+              onClick={handleFinalize}
+              disabled={!isPublishable || finalizeLoading}
               className="w-full"
             >
-              {publishLoading
-                ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Publication en cours…</>
-                : "Publier le guide"
+              {finalizeLoading
+                ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Enregistrement en cours…</>
+                : "Enregistrer le guide"
               }
             </Button>
           </>
