@@ -743,8 +743,20 @@ const SmallMissions = () => {
             )}
 
             {/* ═══ Section 2 — Disponibles pour aider ═══ */}
-            {helperCount > 0 && (
+            {(helperCount > 0 || (currentUserProfile as any)?.available_for_help) && (
               <div className="mt-10">
+                {/* Self indicator */}
+                {isAuthenticated && (currentUserProfile as any)?.available_for_help && (
+                  <div className="bg-primary/5 border border-primary/20 rounded-xl p-3 mb-4 flex items-center justify-between">
+                    <p className="text-sm text-foreground">
+                      <Check className="inline h-4 w-4 text-primary mr-1" />
+                      Vous êtes visible dans cette section.
+                    </p>
+                    <button onClick={openOfferDialog} className="text-xs text-primary font-semibold hover:underline">
+                      Modifier →
+                    </button>
+                  </div>
+                )}
                 <h2 className="text-base font-semibold text-foreground mb-4 flex items-center gap-2">
                   Disponibles pour aider
                   <span className="text-xs font-normal bg-muted text-muted-foreground px-2 py-0.5 rounded-full">
