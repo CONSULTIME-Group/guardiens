@@ -187,10 +187,13 @@ const AdminSitsManagement = () => {
         <Select value={filterStatus} onValueChange={setFilterStatus}>
           <SelectTrigger className="w-[160px]"><SelectValue /></SelectTrigger>
           <SelectContent>
+            <SelectItem value="no_draft">Sans brouillons</SelectItem>
             <SelectItem value="all">Tous statuts</SelectItem>
             <SelectItem value="confirmed">Confirmées</SelectItem>
             <SelectItem value="completed">Terminées</SelectItem>
             <SelectItem value="cancelled">Annulées</SelectItem>
+            <SelectItem value="published">Publiées</SelectItem>
+            <SelectItem value="draft">Brouillons</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -204,6 +207,7 @@ const AdminSitsManagement = () => {
               <TableHead>Gardien</TableHead>
               <TableHead>Ville</TableHead>
               <TableHead>Dates</TableHead>
+              <TableHead>Dernière activité</TableHead>
               <TableHead>Type</TableHead>
               <TableHead>Statut</TableHead>
               <TableHead>Avis</TableHead>
@@ -242,6 +246,9 @@ const AdminSitsManagement = () => {
                     {sit.start_date ? format(new Date(sit.start_date), "d MMM", { locale: fr }) : "—"}
                     {" → "}
                     {sit.end_date ? format(new Date(sit.end_date), "d MMM yy", { locale: fr }) : "—"}
+                  </TableCell>
+                  <TableCell className="text-sm text-muted-foreground whitespace-nowrap">
+                    {sit.updated_at ? formatDistanceToNow(new Date(sit.updated_at), { addSuffix: true, locale: fr }) : "—"}
                   </TableCell>
                   <TableCell>
                     <Badge variant="outline" className="text-xs">{sit._type === "sit" ? "Classique" : "Longue durée"}</Badge>
