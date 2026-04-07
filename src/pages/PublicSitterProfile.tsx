@@ -18,7 +18,7 @@ import {
   Car, MapPin, X, BadgeCheck,
   ChevronLeft, ChevronRight,
   Shield, Star, PawPrint,
-  Home, KeyRound, Handshake,
+  Home, KeyRound, Handshake, Heart,
 } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
@@ -92,6 +92,8 @@ export default function PublicSitterProfile() {
   const [ownerSits, setOwnerSits] = useState<any[]>([]);
   const [ownerReviews, setOwnerReviews] = useState<any[]>([]);
   const [missionFeedbacks, setMissionFeedbacks] = useState<any[]>([]);
+  const [missionsPublished, setMissionsPublished] = useState<any[]>([]);
+  const [missionsHelped, setMissionsHelped] = useState<any[]>([]);
 
   const handleTabChange = (tab: ProfileTab) => {
     setActiveTab(tab);
@@ -265,6 +267,34 @@ export default function PublicSitterProfile() {
 
     loadOwnerData();
   }, [activeTab, id, loading]);
+
+  // Load entraide data on demand
+  useEffect(() => {
+    if (activeTab !== 'entraide') return;
+    if (!id) return;
+
+    const loadEntraideData = async () => {
+      const { data: published } = await supabase
+        .from('small_missions')
+        .select('id, title, category, status, created_at, exchange_offer')
+        .eq('user_id', id)
+        .order('created_at', { ascending: false })
+        .limit(20);
+
+      const helpedResult = await supabase
+        .from('small_mission_responses')
+        .select('id, status, created_at, small_missions(id, title, category, status, created_at)')
+        .eq('responder_id', id)
+        .eq('status', 'accepted')
+        .order('created_at', { ascending: false })
+        .limit(20);
+
+      setMissionsPublished(published ?? []);
+      setMissionsHelped(!helpedResult.error ? (helpedResult.data ?? []) : []);
+    };
+
+    loadEntraideData();
+  }, [activeTab, id]);
 
   if (loading) {
     return (
@@ -1123,10 +1153,121 @@ export default function PublicSitterProfile() {
 
       {/* ── ONGLET ENTRAIDE ── */}
       {activeTab === 'entraide' && (
-        <div className="max-w-4xl mx-auto px-4 py-8">
-          <p className="text-sm text-foreground/50 font-body text-center py-12">
-            Historique d'entraide en cours de chargement…
-          </p>
+        <div className="max-w-4xl mx-auto px-4 py-8 space-y-10">
+
+          {(missionsPublished.length > 0 || missionsHelped.length > 0 || missionFeedbacks.length > 0) && (
+            <div className="grid grid-cols-3 gap-3">
+              {[
+                { value: missionsPublished.length, label: 'Mission' + (missionsPublished.length > 1 ? 's publiées' : ' publiée') },
+                { value: missionsHelped.length, label: 'Coup' + (missionsHelped.length > 1 ? 's de main donnés' : ' de main donné') },
+                { value: missionFeedbacks.length, label: 'Avis reçu' + (missionFeedbacks.length > 1 ? 's' : '') },
+              ].map(({ value, label }) => (
+                <div key={label} className="bg-card border border-border rounded-xl px-4 py-4 text-center">
+                  <p className="font-heading text-2xl font-bold text-foreground">{value}</p>
+                  <p className="text-xs text-foreground/50 font-body mt-0.5">{label}</p>
+                </div>
+              ))}
+            </div>
+          )}
+
+          <div className="space-y-3">
+            <p className="text-xs uppercase tracking-widest text-foreground/50 font-body">
+              Missions publiées{missionsPublished.length > 0 && ` (${missionsPublished.length})`}
+            </p>
+            {missionsPublished.length > 0 ? (
+              <div className="space-y-2">
+                {missionsPublished.map((m) => {
+                  const statusMap: Record<string, { label: string; style: string }> = {
+                    open: { label: 'Ouverte', style: 'bg-primary/10 text-primary' },
+                    matched: { label: 'Pourvue', style: 'bg-muted text-foreground/60' },
+                    completed: { label: 'Terminée', style: 'bg-muted text-foreground/60' },
+                    closed: { label: 'Fermée', style: 'bg-muted text-foreground/40' },
+                  };
+                  const s = statusMap[m.status] ?? { label: m.status ?? '—', style: 'bg-muted text-foreground/40' };
+                  return (
+                    <div key={m.id} className="flex items-center justify-between gap-4 bg-card border border-border rounded-xl px-4 py-3">
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium text-foreground font-body truncate">{m.title || m.category || 'Mission'}</p>
+                        {m.exchange_offer && (
+                          <p className="text-xs text-foreground/50 font-body mt-0.5 truncate italic">En échange : {m.exchange_offer}</p>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-2 flex-shrink-0">
+                        {m.category && (
+                          <span className="text-xs bg-muted text-foreground/60 px-2 py-0.5 rounded-full font-body hidden sm:inline">{m.category}</span>
+                        )}
+                        <span className={['text-xs font-medium', 'px-2.5 py-1 rounded-full', 'font-body whitespace-nowrap', s.style].join(' ')}>{s.label}</span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <p className="text-sm text-foreground/50 font-body italic">Aucune mission publiée pour l'instant.</p>
+            )}
+          </div>
+
+          <div className="space-y-3">
+            <p className="text-xs uppercase tracking-widest text-foreground/50 font-body">
+              Coups de main donnés{missionsHelped.length > 0 && ` (${missionsHelped.length})`}
+            </p>
+            {missionsHelped.length > 0 ? (
+              <div className="space-y-2">
+                {missionsHelped.map((r) => {
+                  const m = r.small_missions;
+                  return (
+                    <div key={r.id} className="flex items-center gap-3 bg-card border border-border rounded-xl px-4 py-3">
+                      <Heart className="w-4 h-4 text-primary flex-shrink-0" aria-hidden="true" />
+                      <p className="text-sm font-medium text-foreground font-body truncate min-w-0">{m?.title || m?.category || 'Coup de main'}</p>
+                      {r.created_at && (
+                        <p className="text-xs text-foreground/40 font-body ml-auto flex-shrink-0 whitespace-nowrap">
+                          {new Date(r.created_at).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })}
+                        </p>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <p className="text-sm text-foreground/50 font-body italic">Aucun coup de main enregistré pour l'instant.</p>
+            )}
+          </div>
+
+          <div className="space-y-3 border-t border-border/50 pt-8">
+            <p className="text-xs uppercase tracking-widest text-foreground/50 font-body">
+              Avis d'entraide reçus{missionFeedbacks.length > 0 && ` (${missionFeedbacks.length})`}
+            </p>
+            {missionFeedbacks.length > 0 ? (
+              <div className="space-y-3">
+                {missionFeedbacks.map((fb) => (
+                  <div key={fb.id} className="bg-card border border-border rounded-xl p-4 space-y-2">
+                    <div className="flex items-center gap-2.5 flex-wrap">
+                      <div className="w-8 h-8 rounded-full bg-muted flex-shrink-0" />
+                      <span className={`text-xs px-2 py-0.5 rounded-full font-body flex-shrink-0 ${fb.positive ? 'bg-primary/10 text-primary' : 'bg-muted text-foreground/50'}`}>
+                        {fb.positive ? 'Recommande' : 'Mitigé'}
+                      </span>
+                      <span className="text-xs text-foreground/40 font-body ml-auto">
+                        {new Date(fb.created_at).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })}
+                      </span>
+                    </div>
+                    {fb.comment && (
+                      <p className="text-sm text-foreground/70 font-body leading-relaxed">{fb.comment}</p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-foreground/50 font-body italic">Les avis d'entraide apparaîtront ici après la première mission.</p>
+            )}
+          </div>
+
+          {missionsPublished.length === 0 && missionsHelped.length === 0 && missionFeedbacks.length === 0 && (
+            <div className="text-center py-12 space-y-2">
+              <p className="text-base text-foreground/50 font-body">Pas encore de missions d'entraide.</p>
+              <p className="text-sm text-foreground/40 font-body italic">Les échanges de services apparaîtront ici après la première mission.</p>
+            </div>
+          )}
+
         </div>
       )}
 
