@@ -9,7 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { Mail, Eye, CheckCircle2, Clock, MessageSquare, XCircle } from "lucide-react";
+import { Mail, Eye, CheckCircle2, Clock, MessageSquare, XCircle, Send, Loader2 } from "lucide-react";
 
 type StatusFilter = "all" | "new" | "read" | "replied" | "closed";
 
@@ -22,7 +22,9 @@ const AdminContactMessages = () => {
   const PAGE_SIZE = 20;
 
   const [viewModal, setViewModal] = useState<{ open: boolean; msg: any | null }>({ open: false, msg: null });
-  const [replyNote, setReplyNote] = useState("");
+  const [adminNotes, setAdminNotes] = useState("");
+  const [replyText, setReplyText] = useState("");
+  const [sendLoading, setSendLoading] = useState(false);
 
   const fetchMessages = useCallback(async () => {
     setLoading(true);
@@ -58,15 +60,21 @@ const AdminContactMessages = () => {
 
   const handleView = async (msg: any) => {
     setViewModal({ open: true, msg });
-    setReplyNote(msg.admin_notes || "");
+    setAdminNotes(msg.admin_notes || "");
+    setReplyText("");
     if (msg.status === "new") {
       await updateStatus(msg.id, "read");
     }
   };
 
-  const handleReply = async () => {
+  const handleSendReply = async () => {
+    // Implémenté à l'étape 2
+    return;
+  };
+
+  const handleMarkReplied = async () => {
     if (!viewModal.msg) return;
-    await updateStatus(viewModal.msg.id, "replied", replyNote);
+    await updateStatus(viewModal.msg.id, "replied", adminNotes);
     setViewModal({ open: false, msg: null });
   };
 
@@ -176,30 +184,56 @@ const AdminContactMessages = () => {
       <Dialog open={viewModal.open} onOpenChange={(o) => !o && setViewModal({ open: false, msg: null })}>
         <DialogContent className="max-w-xl">
           <DialogHeader><DialogTitle>Message de {viewModal.msg?.name}</DialogTitle></DialogHeader>
-          {viewModal.msg && (
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-2 text-sm">
-                <div><span className="text-muted-foreground">Email :</span> <a href={`mailto:${viewModal.msg.email}`} className="text-primary hover:underline">{viewModal.msg.email}</a></div>
-                <div><span className="text-muted-foreground">Date :</span> {format(new Date(viewModal.msg.created_at), "d MMMM yyyy à HH:mm", { locale: fr })}</div>
+          {viewModal.msg && (() => {
+            const recipientFirstName = viewModal.msg.name?.split(' ')[0]?.trim() || null;
+            return (
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-2 text-sm">
+                  <div><span className="text-muted-foreground">Email :</span> <a href={`mailto:${viewModal.msg.email}`} className="text-primary hover:underline">{viewModal.msg.email}</a></div>
+                  <div><span className="text-muted-foreground">Date :</span> {format(new Date(viewModal.msg.created_at), "d MMMM yyyy à HH:mm", { locale: fr })}</div>
+                </div>
+                <div>
+                  <p className="text-xs font-medium text-muted-foreground uppercase mb-1">Sujet</p>
+                  <p className="font-medium">{viewModal.msg.subject}</p>
+                </div>
+                <div>
+                  <p className="text-xs font-medium text-muted-foreground uppercase mb-1">Message</p>
+                  <div className="bg-muted rounded-lg p-4 text-sm whitespace-pre-wrap">{viewModal.msg.message}</div>
+                </div>
+
+                <div className="border-t border-border my-4" />
+
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Notes internes</label>
+                  <Textarea placeholder="Notes internes ou actions effectuées..." value={adminNotes} onChange={e => setAdminNotes(e.target.value)} className="min-h-[72px] text-sm resize-none" />
+                  <p className="text-xs text-muted-foreground">Visible uniquement par l'équipe Guardiens. Jamais envoyé.</p>
+                </div>
+
+                <div className="border-t border-border my-4" />
+
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Répondre à {viewModal.msg.name ?? viewModal.msg.email}</label>
+                  <Textarea
+                    placeholder={recipientFirstName ? `Bonjour ${recipientFirstName}, merci pour votre message...` : "Bonjour, merci pour votre message..."}
+                    value={replyText}
+                    onChange={e => setReplyText(e.target.value)}
+                    className="min-h-[100px] text-sm resize-none"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Sera envoyé à{" "}<span className="text-foreground font-medium">{viewModal.msg.email}</span>{" "}depuis notify.guardiens.fr
+                  </p>
+                </div>
+
+                <div className="flex gap-2 pt-2">
+                  <Button variant="outline" onClick={() => setViewModal({ open: false, msg: null })} className="flex-1" disabled={sendLoading}>Fermer</Button>
+                  <Button variant="outline" onClick={handleMarkReplied} disabled={sendLoading} className="shrink-0 text-muted-foreground" title="Marquer comme répondu sans envoyer d'email">Marquer répondu</Button>
+                  <Button onClick={handleSendReply} disabled={!replyText.trim() || sendLoading} className="flex-1">
+                    {sendLoading ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Envoi…</> : <><Send className="w-4 h-4 mr-2" />Envoyer</>}
+                  </Button>
+                </div>
               </div>
-              <div>
-                <p className="text-xs font-medium text-muted-foreground uppercase mb-1">Sujet</p>
-                <p className="font-medium">{viewModal.msg.subject}</p>
-              </div>
-              <div>
-                <p className="text-xs font-medium text-muted-foreground uppercase mb-1">Message</p>
-                <div className="bg-muted rounded-lg p-4 text-sm whitespace-pre-wrap">{viewModal.msg.message}</div>
-              </div>
-              <div>
-                <p className="text-xs font-medium text-muted-foreground uppercase mb-1">Notes admin</p>
-                <Textarea value={replyNote} onChange={e => setReplyNote(e.target.value)} placeholder="Notes internes ou réponse envoyée…" rows={3} />
-              </div>
-            </div>
-          )}
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setViewModal({ open: false, msg: null })}>Fermer</Button>
-            <Button onClick={handleReply} className="gap-1.5"><Mail className="h-4 w-4" /> Marquer répondu</Button>
-          </DialogFooter>
+            );
+          })()}
         </DialogContent>
       </Dialog>
     </div>
