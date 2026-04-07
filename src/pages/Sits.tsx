@@ -673,7 +673,7 @@ const QuickActions = ({
           </span>
         ) : guideAccessible ? (
           <button
-            onClick={() => setOpenGuideId(sit.id)}
+            onClick={() => onOpenGuide(sit.id)}
             className={cn(btnClass, "bg-primary text-primary-foreground hover:bg-primary/90")}
           >
             <BookOpen className="h-3.5 w-3.5" /> Guide de la maison
