@@ -483,22 +483,82 @@ const SmallMissions = () => {
               </div>
             )}
 
-            {/* Category filter pills */}
-            <div className="flex flex-wrap items-center gap-2 justify-center">
-              {FILTER_PILLS.map(({ key, label, icon: Icon }) => (
-                <button
-                  key={key}
-                  onClick={() => setCategoryFilter(key)}
-                  className={`flex items-center gap-1.5 rounded-full border px-4 py-2 text-sm transition-colors ${
-                    categoryFilter === key
-                      ? "bg-primary text-primary-foreground border-primary"
-                      : "bg-muted text-foreground border-border hover:border-primary/40"
-                  }`}
-                >
-                  {Icon && <Icon className="h-3.5 w-3.5" />}
-                  {label}
-                </button>
-              ))}
+            {/* ── Filter bar: distance + competence + category ── */}
+            <div className="space-y-3">
+              {/* Distance + competence row */}
+              <div className="flex flex-col sm:flex-row gap-3">
+                {/* Postal code + radius */}
+                <div className="flex items-center gap-2 flex-1 min-w-0">
+                  <div className="relative flex-1 min-w-0 max-w-[200px]">
+                    <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <input
+                      type="text"
+                      value={postalCodeInput}
+                      onChange={(e) => setPostalCodeInput(e.target.value)}
+                      onBlur={handlePostalCodeSearch}
+                      onKeyDown={(e) => e.key === "Enter" && handlePostalCodeSearch()}
+                      placeholder="Code postal"
+                      className="w-full pl-9 pr-3 py-2 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30"
+                    />
+                  </div>
+                  <div className="flex items-center gap-1">
+                    {RADIUS_OPTIONS.map((r) => (
+                      <button
+                        key={r.value}
+                        onClick={() => setRadiusKm(r.value)}
+                        className={`px-2.5 py-1.5 text-xs rounded-md border transition-colors whitespace-nowrap ${
+                          radiusKm === r.value
+                            ? "bg-primary text-primary-foreground border-primary"
+                            : "bg-muted text-muted-foreground border-border hover:border-primary/40"
+                        }`}
+                      >
+                        {r.label}
+                      </button>
+                    ))}
+                  </div>
+                  {geocodingOrigin && (
+                    <span className="text-xs text-muted-foreground animate-pulse">…</span>
+                  )}
+                </div>
+
+                {/* Competence search */}
+                <div className="relative flex-1 min-w-0 max-w-[300px]">
+                  <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <input
+                    type="text"
+                    value={competenceSearch}
+                    onChange={(e) => setCompetenceSearch(e.target.value)}
+                    placeholder="Rechercher une compétence (ex: arroser jardin)"
+                    className="w-full pl-9 pr-3 py-2 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30"
+                  />
+                  {competenceSearch && (
+                    <button
+                      onClick={() => setCompetenceSearch("")}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                    >
+                      <X className="h-3.5 w-3.5" />
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* Category filter pills */}
+              <div className="flex flex-wrap items-center gap-2 justify-center">
+                {FILTER_PILLS.map(({ key, label, icon: Icon }) => (
+                  <button
+                    key={key}
+                    onClick={() => setCategoryFilter(key)}
+                    className={`flex items-center gap-1.5 rounded-full border px-4 py-2 text-sm transition-colors ${
+                      categoryFilter === key
+                        ? "bg-primary text-primary-foreground border-primary"
+                        : "bg-muted text-foreground border-border hover:border-primary/40"
+                    }`}
+                  >
+                    {Icon && <Icon className="h-3.5 w-3.5" />}
+                    {label}
+                  </button>
+                ))}
+              </div>
             </div>
 
             {/* ═══ Section 1 — Missions près de chez toi ═══ */}
