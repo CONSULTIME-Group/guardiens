@@ -192,7 +192,13 @@ const AdminContactMessages = () => {
     }
   };
 
-  const totalPages = Math.ceil(total / PAGE_SIZE);
+  const isOverdue = (msg: any) => {
+    if (!msg.created_at) return false;
+    if (msg.status !== "new" && msg.status !== "read") return false;
+    const elapsed = Date.now() - new Date(msg.created_at).getTime();
+    return elapsed > 48 * 60 * 60 * 1000;
+  };
+
 
   if (loading) return <div className="text-muted-foreground py-8 text-center">Chargement…</div>;
 
@@ -242,7 +248,8 @@ const AdminContactMessages = () => {
                   <TableHead>Sujet</TableHead>
                   <TableHead>Date</TableHead>
                   <TableHead>Statut</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                   <TableHead>Assigné</TableHead>
+                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -252,8 +259,22 @@ const AdminContactMessages = () => {
                     <TableCell className="text-sm text-muted-foreground">{msg.email}</TableCell>
                     <TableCell className="max-w-[200px] truncate">{msg.subject}</TableCell>
                     <TableCell className="text-sm">{format(new Date(msg.created_at), "d MMM yyyy HH:mm", { locale: fr })}</TableCell>
-                    <TableCell>{statusBadge(msg.status)}</TableCell>
                     <TableCell>
+                      <div className="flex items-center gap-1.5">
+                        {statusBadge(msg.status)}
+                        {isOverdue(msg) && (
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Clock className="h-4 w-4 text-orange-600 shrink-0" />
+                              </TooltipTrigger>
+                              <TooltipContent><p>Sans réponse depuis plus de 48h</p></TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-sm text-muted-foreground">—</TableCell>
                       <div className="flex items-center justify-end gap-1">
                         <Button size="sm" variant="ghost" className="h-8 gap-1 text-xs" onClick={() => handleView(msg)}>
                           <Eye className="h-3.5 w-3.5" /> Lire
