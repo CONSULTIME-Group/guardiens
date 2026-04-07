@@ -126,16 +126,20 @@ export default function PublicSitterProfile() {
             .or(`user_id.eq.${id},assigned_to.eq.${id}`),
         ]);
 
-      if (profileRes.data) setProfile(profileRes.data);
-      if (sitterRes.data) setSitterProfile(sitterRes.data);
-      if (galleryRes.data) setGallery(galleryRes.data);
-      if (emergencyRes.data) setEmergencyActive(emergencyRes.data.is_active);
-      setHasActiveSubscription(!!(subRes.data && (subRes.data as any[]).length > 0));
+      // Store in local variables before setState
+      const fetchedPublicProfile = profileRes?.data;
+      const fetchedSitterProfile = sitterRes?.data ?? null;
+      const fetchedOwnerProfile = (ownerRes?.data as OwnerProfileData | null) ?? null;
+      const fetchedEmergencyProfile = emergencyRes?.data ?? null;
+      const fetchedMissionCount = missionsRes?.count ?? 0;
 
-      const loadedOwner = ownerRes.data as OwnerProfileData | null;
-      setOwnerProfile(loadedOwner);
-      const loadedMissionCount = missionsRes.count ?? 0;
-      setMissionCount(loadedMissionCount);
+      if (fetchedPublicProfile) setProfile(fetchedPublicProfile);
+      if (fetchedSitterProfile) setSitterProfile(fetchedSitterProfile);
+      if (galleryRes.data) setGallery(galleryRes.data);
+      if (fetchedEmergencyProfile) setEmergencyActive(fetchedEmergencyProfile.is_active);
+      setHasActiveSubscription(!!(subRes.data && (subRes.data as any[]).length > 0));
+      setOwnerProfile(fetchedOwnerProfile);
+      setMissionCount(fetchedMissionCount);
 
       if (badgesRes.data) {
         const map: Record<string, number> = {};
@@ -171,37 +175,37 @@ export default function PublicSitterProfile() {
         }
       }
 
-      console.log('[DEBUG profil]', {
-        hasSitterProfile: !!sitterRes.data,
-        hasOwnerProfile: !!loadedOwner,
-        missionCount: loadedMissionCount,
-        tabParam,
-      });
-
-      // Calculate default tab
-      const hasSitter = !!sitterRes.data;
-      const hasOwner = !!loadedOwner;
-      const hasEntraide = loadedMissionCount > 0;
+      // Calculate default tab from fetched data
+      const hasSitterProfile = fetchedSitterProfile !== null;
+      const hasOwnerProfile = fetchedOwnerProfile !== null;
+      const hasEntraide = fetchedMissionCount > 0;
+      const currentTabParam = searchParams.get('tab');
 
       let defaultTab: ProfileTab = 'gardien';
-      if (tabParam === 'gardien' && hasSitter) {
+      if (currentTabParam === 'gardien' && hasSitterProfile) {
         defaultTab = 'gardien';
-      } else if (tabParam === 'proprio' && hasOwner) {
+      } else if (currentTabParam === 'proprio' && hasOwnerProfile) {
         defaultTab = 'proprio';
-      } else if (tabParam === 'entraide' && hasEntraide) {
+      } else if (currentTabParam === 'entraide' && hasEntraide) {
         defaultTab = 'entraide';
-      } else if (hasSitter) {
+      } else if (hasSitterProfile) {
         defaultTab = 'gardien';
-      } else if (hasOwner) {
+      } else if (hasOwnerProfile) {
         defaultTab = 'proprio';
       } else if (hasEntraide) {
         defaultTab = 'entraide';
       }
 
       setActiveTab(defaultTab);
-      if (!tabParam || tabParam !== defaultTab) {
-        setSearchParams({ tab: defaultTab }, { replace: true });
-      }
+
+      console.log('[DEBUG onglets]', {
+        hasSitterProfile,
+        hasOwnerProfile,
+        hasEntraide,
+        defaultTab,
+        ownerUserId: fetchedOwnerProfile?.user_id ?? null,
+        missionCount: fetchedMissionCount,
+      });
 
       setLoading(false);
       window.prerenderReady = true;
