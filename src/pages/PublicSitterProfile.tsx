@@ -100,7 +100,7 @@ export default function PublicSitterProfile() {
       setLoading(true);
       const [profileRes, sitterRes, badgesRes, reviewsRes, galleryRes, emergencyRes, subRes, ownerRes, missionsRes] =
         await Promise.all([
-          supabase.from("public_profiles").select("*").eq("id", id).maybeSingle(),
+          supabase.from("public_profiles").select("*").eq("id", id).single(),
           supabase.from("sitter_profiles").select("*").eq("user_id", id).maybeSingle(),
           supabase.from("badge_attributions").select("badge_id").eq("user_id", id),
           supabase
