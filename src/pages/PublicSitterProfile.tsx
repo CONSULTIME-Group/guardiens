@@ -958,10 +958,166 @@ export default function PublicSitterProfile() {
 
       {/* ── ONGLET PROPRIO ── */}
       {activeTab === 'proprio' && (
-        <div className="max-w-4xl mx-auto px-4 py-8">
-          <p className="text-sm text-foreground/50 font-body text-center py-12">
-            Profil propriétaire en cours de chargement…
-          </p>
+        <div className="max-w-4xl mx-auto px-4 py-8 space-y-10">
+
+          {/* ── DESCRIPTION + ENVIRONNEMENTS ── */}
+          {(ownerProfile?.environments?.length ?? 0) > 0 && (
+            <div className="space-y-4">
+              <div className="flex flex-wrap gap-2">
+                {ownerProfile?.environments?.map((env: string) => (
+                  <span key={env} className="text-sm bg-muted text-foreground/70 px-3 py-1 rounded-full font-body">
+                    {ENV_LABELS[env] || env}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* ── ANIMAUX ── */}
+          <div className="space-y-3">
+            <p className="text-xs uppercase tracking-widest text-foreground/50 font-body">
+              {pets.length > 0 ? `Ses animaux (${pets.length})` : 'Ses animaux'}
+            </p>
+            {pets.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {pets.map((pet) => {
+                  const ageNum = parseInt(String(pet.age ?? ''));
+                  const ageLabel = !isNaN(ageNum) ? `${ageNum} an${ageNum > 1 ? 's' : ''}` : null;
+                  return (
+                    <div key={pet.id} className="flex items-center gap-3 bg-card border border-border rounded-xl p-4">
+                      {pet.photo_url ? (
+                        <img src={pet.photo_url} alt={pet.name} className="w-12 h-12 rounded-full object-cover flex-shrink-0" />
+                      ) : (
+                        <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
+                          <PawPrint className="w-5 h-5 text-foreground/30" aria-hidden="true" />
+                        </div>
+                      )}
+                      <div className="min-w-0">
+                        <p className="font-heading font-semibold text-foreground text-sm truncate">{pet.name}</p>
+                        <p className="text-xs text-foreground/60 font-body truncate">
+                          {[pet.species, pet.breed, ageLabel].filter(Boolean).join(' · ')}
+                        </p>
+                        {pet.character && (
+                          <p className="text-xs text-foreground/50 font-body mt-0.5 truncate italic">{pet.character}</p>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <p className="text-sm text-foreground/50 font-body italic">Aucun animal renseigné pour l'instant.</p>
+            )}
+          </div>
+
+          {/* ── ANNONCES ── */}
+          <div className="space-y-3">
+            <p className="text-xs uppercase tracking-widest text-foreground/50 font-body">
+              Gardes publiées{ownerSits.length > 0 && ` (${ownerSits.length})`}
+            </p>
+            {ownerSits.length > 0 ? (
+              <div className="space-y-2">
+                {ownerSits.map((sit) => {
+                  const statusMap: Record<string, { label: string; style: string }> = {
+                    active: { label: 'Active', style: 'bg-primary/10 text-primary' },
+                    confirmed: { label: 'Confirmée', style: 'bg-primary/10 text-primary' },
+                    completed: { label: 'Terminée', style: 'bg-muted text-foreground/60' },
+                    finished: { label: 'Terminée', style: 'bg-muted text-foreground/60' },
+                    archived: { label: 'Archivée', style: 'bg-muted text-foreground/40' },
+                    pending: { label: 'En attente', style: 'bg-muted text-foreground/60' },
+                  };
+                  const s = statusMap[sit.status] ?? { label: sit.status ?? '—', style: 'bg-muted text-foreground/40' };
+                  const fmt = (d: string) => new Date(d).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
+                  return (
+                    <div key={sit.id} className="flex items-center justify-between gap-4 bg-card border border-border rounded-xl px-4 py-3">
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium text-foreground font-body truncate">{sit.title || 'Garde'}</p>
+                        {(sit.start_date || sit.end_date) && (
+                          <p className="text-xs text-foreground/50 font-body mt-0.5">
+                            {sit.start_date && fmt(sit.start_date)}{sit.end_date && ` → ${fmt(sit.end_date)}`}
+                          </p>
+                        )}
+                      </div>
+                      <span className={`text-xs font-medium px-2.5 py-1 rounded-full flex-shrink-0 font-body whitespace-nowrap ${s.style}`}>
+                        {s.label}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <p className="text-sm text-foreground/50 font-body italic">Aucune garde publiée pour l'instant.</p>
+            )}
+          </div>
+
+          {/* ── AVIS GARDES ── */}
+          <div className="space-y-3">
+            <p className="text-xs uppercase tracking-widest text-foreground/50 font-body">
+              Avis des gardiens{ownerReviews.length > 0 && ` (${ownerReviews.length})`}
+            </p>
+            {ownerReviews.length > 0 ? (
+              <div className="space-y-3">
+                {ownerReviews.map((review) => {
+                  const stars = Math.min(5, Math.max(0, Number(review.overall_rating) || 0));
+                  return (
+                    <div key={review.id} className="bg-card border border-border rounded-xl p-4 space-y-2">
+                      <div className="flex items-center gap-2.5 flex-wrap">
+                        {review.reviewer?.avatar_url ? (
+                          <img src={review.reviewer.avatar_url} alt={review.reviewer.first_name} className="w-8 h-8 rounded-full object-cover flex-shrink-0" />
+                        ) : (
+                          <div className="w-8 h-8 rounded-full bg-muted flex-shrink-0" />
+                        )}
+                        <span className="text-sm font-medium text-foreground font-body">{review.reviewer?.first_name}</span>
+                        {stars > 0 && (
+                          <span className="text-xs text-amber-500 font-body tracking-wider" aria-label={`${stars} étoiles sur 5`}>
+                            {'★'.repeat(stars)}{'☆'.repeat(5 - stars)}
+                          </span>
+                        )}
+                        <span className="text-xs text-foreground/40 font-body ml-auto">
+                          {new Date(review.created_at).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })}
+                        </span>
+                      </div>
+                      {review.comment && (
+                        <p className="text-sm text-foreground/70 font-body leading-relaxed">{review.comment}</p>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <p className="text-sm text-foreground/50 font-body italic">Les avis des gardiens apparaîtront ici après la première garde.</p>
+            )}
+          </div>
+
+          {/* ── AVIS MISSIONS ── */}
+          <div className="space-y-3 border-t border-border/50 pt-8">
+            <p className="text-xs uppercase tracking-widest text-foreground/50 font-body">
+              Avis d'entraide{missionFeedbacks.length > 0 && ` (${missionFeedbacks.length})`}
+            </p>
+            {missionFeedbacks.length > 0 ? (
+              <div className="space-y-3">
+                {missionFeedbacks.map((fb) => (
+                  <div key={fb.id} className="bg-card border border-border rounded-xl p-4 space-y-2">
+                    <div className="flex items-center gap-2.5 flex-wrap">
+                      <div className="w-8 h-8 rounded-full bg-muted flex-shrink-0" />
+                      <span className={`text-xs px-2 py-0.5 rounded-full font-body flex-shrink-0 ${fb.positive ? 'bg-primary/10 text-primary' : 'bg-muted text-foreground/50'}`}>
+                        {fb.positive ? 'Recommande' : 'Mitigé'}
+                      </span>
+                      <span className="text-xs text-foreground/40 font-body ml-auto">
+                        {new Date(fb.created_at).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })}
+                      </span>
+                    </div>
+                    {fb.comment && (
+                      <p className="text-sm text-foreground/70 font-body leading-relaxed">{fb.comment}</p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-foreground/50 font-body italic">Les avis d'entraide apparaîtront ici après la première mission.</p>
+            )}
+          </div>
+
         </div>
       )}
 
