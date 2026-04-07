@@ -134,8 +134,9 @@ const SmallMissions = () => {
 
   const openOfferDialog = useCallback(() => {
     const existing: string[] = (currentUserProfile as any)?.skill_categories || [];
+    const existingCustom: string[] = (currentUserProfile as any)?.custom_skills || [];
     setOfferSkills(existing.length > 0 ? [...existing] : []);
-    setOfferText("");
+    setOfferText(existingCustom.length > 0 ? existingCustom[0] : "");
     setOfferSaved(false);
     setOfferDialogOpen(true);
   }, [currentUserProfile]);
@@ -154,11 +155,13 @@ const SmallMissions = () => {
         skill_categories: offerSkills,
         available_for_help: true,
       };
-      // Save free text as custom_skills entry if provided
       if (offerText.trim()) {
         updates.custom_skills = [offerText.trim()];
+      } else {
+        updates.custom_skills = [];
       }
       await supabase.from("profiles").update(updates).eq("id", user.id);
+      await refetchProfile();
       setOfferSaved(true);
       setTimeout(() => setOfferDialogOpen(false), 1200);
     } catch {
@@ -166,7 +169,7 @@ const SmallMissions = () => {
     } finally {
       setOfferSaving(false);
     }
-  }, [user, offerSkills, offerText]);
+  }, [user, offerSkills, offerText, refetchProfile]);
   // ── Load user's postal code as default origin ──
   useEffect(() => {
     if (!user) return;
