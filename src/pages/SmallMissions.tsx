@@ -89,6 +89,7 @@ async function geocodeCached(city: string): Promise<{ lat: number; lng: number }
 const SmallMissions = () => {
   const { isAuthenticated, user, switchRole } = useAuth();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { hasAccess, status: subStatus } = useSubscriptionAccess();
   const { level: accessLevel, profileCompletion, canApplyMissions } = useAccessLevel();
   const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>("all");
