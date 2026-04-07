@@ -95,6 +95,16 @@ export default function PublicSitterProfile() {
   const [missionsPublished, setMissionsPublished] = useState<any[]>([]);
   const [missionsHelped, setMissionsHelped] = useState<any[]>([]);
 
+  // Show-more states for list truncation
+  const [showAllGardeReviews, setShowAllGardeReviews] = useState(false);
+  const [showAllMissionReviewsTab, setShowAllMissionReviewsTab] = useState(false);
+  const [showAllOwnerSits, setShowAllOwnerSits] = useState(false);
+  const [showAllOwnerReviews, setShowAllOwnerReviews] = useState(false);
+  const [showAllOwnerFeedbacks, setShowAllOwnerFeedbacks] = useState(false);
+  const [showAllMissionsPublished, setShowAllMissionsPublished] = useState(false);
+  const [showAllMissionsHelped, setShowAllMissionsHelped] = useState(false);
+  const [showAllEntraideFeedbacks, setShowAllEntraideFeedbacks] = useState(false);
+
   const handleTabChange = (tab: ProfileTab) => {
     setActiveTab(tab);
     setSearchParams({ tab }, { replace: true });
