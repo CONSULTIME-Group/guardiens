@@ -418,6 +418,7 @@ const Sits = () => {
               onArchive={() => setArchiveConfirm(sit.id)}
               onDelete={() => setDeleteConfirm(sit.id)}
               onRepublish={() => handleRepublish(sit.id)}
+              onOpenGuide={(id) => setOpenGuideId(id)}
             />
           ))}
         </div>
@@ -443,6 +444,7 @@ const Sits = () => {
                   onArchive={() => {}}
                   onDelete={() => setDeleteConfirm(sit.id)}
                   onRepublish={() => handleRepublish(sit.id)}
+                  onOpenGuide={(id) => setOpenGuideId(id)}
                 />
               ))}
             </div>
@@ -490,10 +492,10 @@ const Sits = () => {
 
 /* ── Card ── */
 const SitCard = ({
-  sit, isOwner, onArchive, onDelete, onRepublish,
+  sit, isOwner, onArchive, onDelete, onRepublish, onOpenGuide,
 }: {
   sit: any; isOwner: boolean;
-  onArchive: () => void; onDelete: () => void; onRepublish: () => void;
+  onArchive: () => void; onDelete: () => void; onRepublish: () => void; onOpenGuide: (id: string) => void;
 }) => {
   const effectiveStatus = sit.effectiveStatus || sit.status;
   const duration = getDuration(sit.start_date, sit.end_date);
@@ -629,7 +631,7 @@ const SitCard = ({
 
           {/* Quick actions */}
           <div className="flex items-center gap-2 mt-3 flex-wrap">
-            <QuickActions sit={sit} isOwner={isOwner} effectiveStatus={effectiveStatus} onRepublish={onRepublish} />
+            <QuickActions sit={sit} isOwner={isOwner} effectiveStatus={effectiveStatus} onRepublish={onRepublish} onOpenGuide={onOpenGuide} />
           </div>
         </div>
       </div>
@@ -639,9 +641,9 @@ const SitCard = ({
 
 /* ── Quick actions ── */
 const QuickActions = ({
-  sit, isOwner, effectiveStatus, onRepublish,
+  sit, isOwner, effectiveStatus, onRepublish, onOpenGuide,
 }: {
-  sit: any; isOwner: boolean; effectiveStatus: string; onRepublish: () => void;
+  sit: any; isOwner: boolean; effectiveStatus: string; onRepublish: () => void; onOpenGuide: (id: string) => void;
 }) => {
   const btnClass = "text-xs font-medium flex items-center gap-1 px-2.5 py-1.5 rounded-lg transition-colors";
 
