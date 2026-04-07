@@ -114,6 +114,43 @@ const SmallMissions = () => {
   // ── Competence search state ──
   const [competenceSearch, setCompetenceSearch] = useState("");
 
+  // ── Load user's postal code as default origin ──
+  useEffect(() => {
+    if (!user) return;
+    (async () => {
+      const { data: p } = await supabase
+        .from("profiles")
+        .select("postal_code, city")
+        .eq("id", user.id)
+        .single();
+      if (p?.postal_code) {
+        setPostalCodeInput(p.postal_code);
+        setGeocodingOrigin(true);
+        const coords = await geocodeCached(p.city || p.postal_code);
+        setOriginCoords(coords);
+        setGeocodingOrigin(false);
+      } else if (p?.city) {
+        setPostalCodeInput(p.city);
+        setGeocodingOrigin(true);
+        const coords = await geocodeCached(p.city);
+        setOriginCoords(coords);
+        setGeocodingOrigin(false);
+      }
+    })();
+  }, [user]);
+
+  // ── Geocode on postal code change ──
+  const handlePostalCodeSearch = useCallback(async () => {
+    if (!postalCodeInput.trim()) { setOriginCoords(null); return; }
+    setGeocodingOrigin(true);
+    const coords = await geocodeCached(postalCodeInput.trim());
+    setOriginCoords(coords);
+    setGeocodingOrigin(false);
+  }, [postalCodeInput]);
+
+  // ── Geocode missions & helpers cities (batch) ──
+  const [missionCoords, setMissionCoords] = useState<Map<string, { lat: number; lng: number }>>(new Map());
+  const [helperCoords, setHelperCoords] = useState<Map<string, { lat: number; lng: number }>>(new Map());
   const handleContactHelper = useCallback(async (helperId: string) => {
     if (!isAuthenticated || !user) { navigate("/register"); return; }
     if (helperId === user.id) return;
