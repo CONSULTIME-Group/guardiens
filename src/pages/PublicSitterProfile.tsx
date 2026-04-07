@@ -349,15 +349,15 @@ export default function PublicSitterProfile() {
     );
   }
 
-  const firstName = capitalize(profile.first_name || "");
-  const city = profile.city || "";
-  const bio = profile.bio || "";
+  const firstName = capitalize(profile?.first_name || "");
+  const city = profile?.city || "";
+  const bio = profile?.bio || "";
   const motivation = sitterProfile?.motivation || "";
   const animalTypes: string[] = sitterProfile?.animal_types || [];
   const hasVehicle = sitterProfile?.has_vehicle || false;
   const rawRadius = sitterProfile?.geographic_radius;
-  const completedSits = profile.completed_sits_count || 0;
-  const cancellations = profile.cancellation_count || 0;
+  const completedSits = profile?.completed_sits_count || 0;
+  const cancellations = profile?.cancellation_count || 0;
   const radius = rawRadius && rawRadius > 0 ? rawRadius : null;
   const isOwn = auth?.user?.id === id;
   const isAuthenticated = auth?.isAuthenticated;
@@ -405,7 +405,7 @@ export default function PublicSitterProfile() {
   const pageTitle = rawTitle;
   const pageDesc = ((bio || motivation || "") as string).slice(0, 160) || `${firstName} garde des ${animalLabels || "animaux"} à ${city || "France"}. Profil vérifié sur Guardiens.fr.`;
   const pageUrl = buildAbsoluteUrl(`/gardiens/${id}`);
-  const shouldNoindex = !profile.identity_verified || (profile.profile_completion ?? 0) < 60;
+  const shouldNoindex = !profile?.identity_verified || (profile?.profile_completion ?? 0) < 60;
 
   const jsonLd = {
     "@context": "https://schema.org",
