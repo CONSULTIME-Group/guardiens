@@ -125,6 +125,12 @@ const RedirectProfil = () => {
   return <Navigate to={`/gardiens/${id}`} replace />;
 };
 
+const RedirectProprietaire = () => {
+  const { id } = useParams();
+  if (!id) return <Navigate to="/" replace />;
+  return <Navigate to={`/gardiens/${id}?tab=proprio`} replace />;
+};
+
 const AppRoutes = () => (
   <Routes>
     <Route path="/" element={<Landing />} />
