@@ -88,31 +88,15 @@ const AdminContactMessages = () => {
         'send-transactional-email',
         {
           body: {
-            to: msg.email,
-            subject: `Re: ${msg.subject?.trim() || 'Votre message à Guardiens'}`,
-            html: `
-              <div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:24px;">
-                <p style="color:#1a1a1a;font-size:15px;margin-bottom:16px;">
-                  Bonjour ${escapeHtml(firstName)},
-                </p>
-                <p style="color:#1a1a1a;font-size:15px;margin-bottom:16px;">
-                  Merci pour votre message.
-                </p>
-                <blockquote style="border-left:3px solid #e5e7eb;padding:8px 16px;color:#6b7280;margin:16px 0;font-size:14px;">
-                  ${escapeHtml(msg.message ?? '')}
-                </blockquote>
-                <p style="color:#1a1a1a;font-size:15px;margin-top:16px;">
-                  ${escapeHtml(replyText.trim())}
-                </p>
-                <hr style="border:none;border-top:1px solid #e5e7eb;margin:24px 0;" />
-                <p style="color:#6b7280;font-size:13px;margin:0;">
-                  L'équipe Guardiens —
-                  <a href="https://guardiens.fr" style="color:#2D6A4F;text-decoration:none;">
-                    guardiens.fr
-                  </a>
-                </p>
-              </div>
-            `
+            templateName: 'contact-reply',
+            recipientEmail: msg.email,
+            idempotencyKey: `contact-reply-${msg.id}-${Date.now()}`,
+            templateData: {
+              firstName,
+              originalMessage: msg.message ?? '',
+              replyBody: replyText.trim(),
+              subject: `Re: ${msg.subject?.trim() || 'Votre message à Guardiens'}`,
+            },
           }
         }
       );

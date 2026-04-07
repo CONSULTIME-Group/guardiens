@@ -27,6 +27,7 @@ import { template as cancellationBySitter } from './cancellation-by-sitter.tsx'
 import { template as cancellationReviewPublished } from './cancellation-review-published.tsx'
 import { template as cancellationResponsePublished } from './cancellation-response-published.tsx'
 import { template as onboardingJ1 } from './onboarding-j1.tsx'
+import { template as contactReply } from './contact-reply.tsx'
 
 export const TEMPLATES: Record<string, TemplateEntry> = {
   'report-resolved': reportResolved,
@@ -47,4 +48,5 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'cancellation-review-published': cancellationReviewPublished,
   'cancellation-response-published': cancellationResponsePublished,
   'onboarding-j1': onboardingJ1,
+  'contact-reply': contactReply,
 }
