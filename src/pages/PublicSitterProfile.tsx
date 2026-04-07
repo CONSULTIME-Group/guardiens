@@ -878,7 +878,7 @@ export default function PublicSitterProfile() {
                       </p>
                     ) : (
                       <div className="space-y-3">
-                        {gardeReviews.map((r: any) => {
+                        {(showAllGardeReviews ? gardeReviews : gardeReviews.slice(0, VISIBLE_COUNT)).map((r: any) => {
                           const authorName = capitalize(r.reviewer?.first_name || "Membre");
                           const avatarUrl = r.reviewer?.avatar_url || null;
                           const reviewBadges = r.sit_id ? (badgesBySitId[r.sit_id] || []) : [];
@@ -918,6 +918,7 @@ export default function PublicSitterProfile() {
                             </div>
                           );
                         })}
+                        <ShowMoreBtn items={gardeReviews} showAll={showAllGardeReviews} setShowAll={setShowAllGardeReviews} />
                       </div>
                     )}
                   </TabsContent>
@@ -929,7 +930,7 @@ export default function PublicSitterProfile() {
                       </p>
                     ) : (
                       <div className="space-y-3">
-                        {missionReviews.map((r: any) => {
+                        {(showAllMissionReviewsTab ? missionReviews : missionReviews.slice(0, VISIBLE_COUNT)).map((r: any) => {
                           const authorName = capitalize(r.reviewer?.first_name || "Membre");
                           const avatarUrl = r.reviewer?.avatar_url || null;
                           return (
@@ -961,6 +962,7 @@ export default function PublicSitterProfile() {
                             </div>
                           );
                         })}
+                        <ShowMoreBtn items={missionReviews} showAll={showAllMissionReviewsTab} setShowAll={setShowAllMissionReviewsTab} />
                       </div>
                     )}
                   </TabsContent>
@@ -1070,7 +1072,7 @@ export default function PublicSitterProfile() {
             </p>
             {ownerSits.length > 0 ? (
               <div className="space-y-2">
-                {ownerSits.map((sit) => {
+                {(showAllOwnerSits ? ownerSits : ownerSits.slice(0, VISIBLE_COUNT)).map((sit) => {
                   const statusMap: Record<string, { label: string; style: string }> = {
                     active: { label: 'Active', style: 'bg-primary/10 text-primary' },
                     confirmed: { label: 'Confirmée', style: 'bg-primary/10 text-primary' },
@@ -1097,6 +1099,7 @@ export default function PublicSitterProfile() {
                     </div>
                   );
                 })}
+                <ShowMoreBtn items={ownerSits} showAll={showAllOwnerSits} setShowAll={setShowAllOwnerSits} />
               </div>
             ) : (
               <p className="text-sm text-foreground/50 font-body italic">Aucune garde publiée pour l'instant.</p>
@@ -1110,7 +1113,7 @@ export default function PublicSitterProfile() {
             </p>
             {ownerReviews.length > 0 ? (
               <div className="space-y-3">
-                {ownerReviews.map((review) => {
+                {(showAllOwnerReviews ? ownerReviews : ownerReviews.slice(0, VISIBLE_COUNT)).map((review) => {
                   const stars = Math.min(5, Math.max(0, Number(review.overall_rating) || 0));
                   return (
                     <div key={review.id} className="bg-card border border-border rounded-xl p-4 space-y-2">
@@ -1136,6 +1139,7 @@ export default function PublicSitterProfile() {
                     </div>
                   );
                 })}
+                <ShowMoreBtn items={ownerReviews} showAll={showAllOwnerReviews} setShowAll={setShowAllOwnerReviews} />
               </div>
             ) : (
               <p className="text-sm text-foreground/50 font-body italic">Les avis des gardiens apparaîtront ici après la première garde.</p>
