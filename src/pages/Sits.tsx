@@ -645,7 +645,47 @@ const QuickActions = ({
 }) => {
   const btnClass = "text-xs font-medium flex items-center gap-1 px-2.5 py-1.5 rounded-lg transition-colors";
 
-  if (effectiveStatus === "in_progress") {
+  if (!isOwner && (effectiveStatus === "in_progress" || effectiveStatus === "confirmed") && sit.application_status === "accepted") {
+    const startDate = sit.start_date ? new Date(sit.start_date) : null;
+    const endDate = sit.end_date ? new Date(sit.end_date) : null;
+    const today = new Date();
+    const guideExists = !!sit.houseGuide?.published;
+    const guideAccessible = startDate && endDate && isWithinInterval(today, {
+      start: startOfDay(startDate),
+      end: endOfDay(endDate),
+    });
+
+    return (
+      <>
+        <button
+          onClick={() => sit.conversationId && window.location.assign(`/messages?conversationId=${sit.conversationId}`)}
+          className={cn(btnClass, "bg-primary/10 text-primary hover:bg-primary/20", !sit.conversationId && "opacity-50 cursor-not-allowed")}
+          disabled={!sit.conversationId}
+        >
+          <MessageCircle className="h-3.5 w-3.5" /> Message
+        </button>
+
+        {!guideExists ? (
+          <span className={cn(btnClass, "border border-border text-muted-foreground cursor-default")}>
+            <BookOpen className="h-3.5 w-3.5" /> Pas de guide
+          </span>
+        ) : guideAccessible ? (
+          <button
+            onClick={() => setOpenGuideId(sit.id)}
+            className={cn(btnClass, "bg-primary text-primary-foreground hover:bg-primary/90")}
+          >
+            <BookOpen className="h-3.5 w-3.5" /> Guide de la maison
+          </button>
+        ) : startDate ? (
+          <span className={cn(btnClass, "border border-border text-muted-foreground cursor-default")}>
+            <Lock className="h-3.5 w-3.5" /> Dispo le {format(startDate, 'dd MMM', { locale: fr })}
+          </span>
+        ) : null}
+      </>
+    );
+  }
+
+  if (effectiveStatus === "in_progress" && isOwner) {
     return (
       <>
         <Link to="/messages" className={cn(btnClass, "bg-primary/10 text-primary hover:bg-primary/20")}>
@@ -660,7 +700,7 @@ const QuickActions = ({
     );
   }
 
-  if (effectiveStatus === "confirmed") {
+  if (effectiveStatus === "confirmed" && isOwner) {
     return (
       <>
         <Link to={`/sits/${sit.id}`} className={cn(btnClass, "bg-primary/10 text-primary hover:bg-primary/20")}>
