@@ -100,7 +100,23 @@ const SmallMissions = () => {
   });
   const [contactingHelperId, setContactingHelperId] = useState<string | null>(null);
 
-  // ── Distance filter state ──
+  // ── User profile query (must be before offer dialog) ──
+  const { data: currentUserProfile, refetch: refetchProfile } = useQuery({
+    queryKey: ["my-profile-skills", user?.id],
+    queryFn: async () => {
+      if (!user) return null;
+      const { data } = await supabase
+        .from("profiles")
+        .select("skill_categories, available_for_help, custom_skills")
+        .eq("id", user.id)
+        .single();
+      return data;
+    },
+    enabled: !!user,
+  });
+
+  const mySkills: string[] = (currentUserProfile as any)?.skill_categories || [];
+
   const [postalCodeInput, setPostalCodeInput] = useState("");
   const [radiusKm, setRadiusKm] = useState(15);
   const [originCoords, setOriginCoords] = useState<{ lat: number; lng: number } | null>(null);
