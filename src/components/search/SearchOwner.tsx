@@ -512,7 +512,7 @@ const SearchOwner = () => {
                 return (
                   <div key={s.id} className="bg-card rounded-xl overflow-hidden border border-border hover:shadow-md transition-shadow flex flex-col max-w-sm">
                     {/* Photo — carré, visage en haut */}
-                    <Link to={`/profil/${s.user_id}`} className="block relative">
+                    <Link to={`/gardiens/${s.user_id}`} className="block relative">
                       {profile?.avatar_url ? (
                         <div className="aspect-square w-full overflow-hidden rounded-t-lg">
                           <img src={profile.avatar_url} alt={firstName} className="w-full h-full object-cover object-top" />
@@ -532,7 +532,7 @@ const SearchOwner = () => {
                     {/* Body */}
                     <div className="p-3 flex flex-col flex-1">
                       {/* Line 1: name + verified pill + city + distance */}
-                      <Link to={`/profil/${s.user_id}`}>
+                      <Link to={`/gardiens/${s.user_id}`}>
                         <p className="text-sm font-semibold truncate">
                           {firstName}
                           {profile?.identity_verified && (
@@ -595,7 +595,7 @@ const SearchOwner = () => {
               const profile = s.profile;
               const firstName = profile?.first_name || "Gardien";
               return (
-                <div key={s.id} className="flex gap-3 p-3 rounded-xl border border-border hover:shadow-sm transition-shadow cursor-pointer" onClick={() => navigate(`/profil/${s.user_id}`)}>
+                <div key={s.id} className="flex gap-3 p-3 rounded-xl border border-border hover:shadow-sm transition-shadow cursor-pointer" onClick={() => navigate(`/gardiens/${s.user_id}`)}>
                   {profile?.avatar_url ? (
                     <img src={profile.avatar_url} alt={firstName} className="h-14 w-14 rounded-xl object-cover shrink-0" />
                   ) : (
