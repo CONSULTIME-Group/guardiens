@@ -1074,14 +1074,17 @@ export default function PublicSitterProfile() {
               <div className="space-y-2">
                 {(showAllOwnerSits ? ownerSits : ownerSits.slice(0, VISIBLE_COUNT)).map((sit) => {
                   const statusMap: Record<string, { label: string; style: string }> = {
+                    published: { label: 'Publiée', style: 'bg-primary/10 text-primary' },
                     active: { label: 'Active', style: 'bg-primary/10 text-primary' },
                     confirmed: { label: 'Confirmée', style: 'bg-primary/10 text-primary' },
                     completed: { label: 'Terminée', style: 'bg-muted text-foreground/60' },
                     finished: { label: 'Terminée', style: 'bg-muted text-foreground/60' },
+                    cancelled: { label: 'Annulée', style: 'bg-destructive/10 text-destructive' },
+                    draft: { label: 'Brouillon', style: 'bg-muted text-foreground/40' },
                     archived: { label: 'Archivée', style: 'bg-muted text-foreground/40' },
                     pending: { label: 'En attente', style: 'bg-muted text-foreground/60' },
                   };
-                  const s = statusMap[sit.status] ?? { label: sit.status ?? '—', style: 'bg-muted text-foreground/40' };
+                  const s = statusMap[sit.status] ?? { label: '—', style: 'bg-muted text-foreground/40' };
                   const fmt = (d: string) => new Date(d).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
                   return (
                     <div key={sit.id} className="flex items-center justify-between gap-4 bg-card border border-border rounded-xl px-4 py-3">
