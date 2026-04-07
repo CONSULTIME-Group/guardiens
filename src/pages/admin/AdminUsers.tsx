@@ -9,7 +9,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { format } from "date-fns";
+import { format, formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Eye, Ban, ShieldCheck, StickyNote, RotateCcw, Trash2, AlertTriangle, Crown } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
@@ -252,6 +252,7 @@ const AdminUsers = () => {
               <TableHead>Code postal</TableHead>
               <TableHead>Département</TableHead>
               <TableHead>Inscription</TableHead>
+              <TableHead>Dernière activité</TableHead>
               <TableHead>Profil</TableHead>
               <TableHead>Vérification</TableHead>
               <TableHead>Statut</TableHead>
@@ -261,13 +262,13 @@ const AdminUsers = () => {
           <TableBody>
             {loading ? (
               <TableRow>
-                <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+                <TableCell colSpan={10} className="text-center py-8 text-muted-foreground">
                   Chargement…
                 </TableCell>
               </TableRow>
             ) : filtered.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+                <TableCell colSpan={10} className="text-center py-8 text-muted-foreground">
                   Aucun utilisateur trouvé
                 </TableCell>
               </TableRow>
@@ -306,6 +307,11 @@ const AdminUsers = () => {
                     </TableCell>
                     <TableCell className="text-sm text-muted-foreground">
                       {format(new Date(user.created_at), "d MMM yyyy", { locale: fr })}
+                    </TableCell>
+                    <TableCell className="text-sm text-muted-foreground">
+                      {user.updated_at
+                        ? formatDistanceToNow(new Date(user.updated_at), { addSuffix: true, locale: fr })
+                        : "—"}
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-1.5">
