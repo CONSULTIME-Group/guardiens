@@ -1,9 +1,8 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { useRef, useEffect, useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { useToast } from "@/hooks/use-toast";
-import { Eye } from "lucide-react";
 import OwnerDashboard from "@/components/dashboard/OwnerDashboard";
 import SitterDashboard from "@/components/dashboard/SitterDashboard";
 
@@ -53,25 +52,9 @@ const Dashboard = () => {
     }
   }, [activeRole]);
 
-  const publicProfileUrl = displayedRole === "owner"
-    ? `/proprietaires/${user?.id}`
-    : `/gardiens/${user?.id}`;
-
   return (
     <div className="p-6 md:p-10 max-w-4xl mx-auto">
       <Helmet><meta name="robots" content="noindex, nofollow" /></Helmet>
-
-      {user && (
-        <div className="flex justify-end mb-4">
-          <Link
-            to={publicProfileUrl}
-            target="_blank"
-            className="inline-flex items-center gap-2 border border-border rounded-full px-4 py-2 text-sm text-foreground hover:border-primary transition-colors"
-          >
-            <Eye className="h-3.5 w-3.5" /> Voir mon profil public →
-          </Link>
-        </div>
-      )}
 
       <div
         key={displayedRole}
