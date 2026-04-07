@@ -117,12 +117,11 @@ const SmallMissions = () => {
   const [offerSaved, setOfferSaved] = useState(false);
 
   const openOfferDialog = useCallback(() => {
-    // Pre-fill with existing data
-    setOfferSkills(mySkills.length > 0 ? [...mySkills] : []);
+    setOfferSkills([]);
     setOfferText("");
     setOfferSaved(false);
     setOfferDialogOpen(true);
-  }, [mySkills]);
+  }, []);
 
   const toggleOfferSkill = (key: string) => {
     setOfferSkills((prev) =>
