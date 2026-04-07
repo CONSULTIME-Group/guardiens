@@ -17,7 +17,7 @@ import { buildAbsoluteUrl } from "@/lib/seo";
 import {
   Car, MapPin, X, BadgeCheck,
   ChevronLeft, ChevronRight,
-  Shield, Star,
+  Shield, Star, PawPrint,
   Home, KeyRound, Handshake,
 } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
