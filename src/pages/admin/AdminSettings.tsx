@@ -65,7 +65,7 @@ const AdminSettings = () => {
             </div>
             <div>
               <label className="text-xs font-medium text-muted-foreground">Domaine d'envoi email</label>
-              <p className="text-sm font-medium">notify.guardiens.fr</p>
+              <p className="text-sm font-medium">guardiens.fr</p>
             </div>
             <div>
               <label className="text-xs font-medium text-muted-foreground">Éditeur</label>
@@ -169,7 +169,7 @@ const AdminSettings = () => {
               <div>
                 <p className="text-sm font-medium">Auto-confirmation email</p>
                 <p className="text-xs text-muted-foreground">
-                  Activé temporairement (DNS en attente pour notify.guardiens.fr).
+                  Activé temporairement (DNS en attente pour guardiens.fr).
                 </p>
               </div>
               <Badge variant="outline" className="text-xs border-yellow-500 text-yellow-700">Temporaire</Badge>
@@ -191,7 +191,7 @@ const AdminSettings = () => {
             {[
               { name: "Google Analytics", id: "G-9JP4VR1RRP", status: "connecté" },
               { name: "Nominatim (Géocodage)", id: "OpenStreetMap", status: "connecté" },
-              { name: "Domaine email", id: "notify.guardiens.fr", status: "DNS en attente" },
+              { name: "Domaine email", id: "guardiens.fr", status: "DNS en attente" },
             ].map((service) => (
               <div key={service.name} className="flex items-center justify-between py-1">
                 <div>
