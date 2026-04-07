@@ -100,8 +100,8 @@ export default function PublicSitterProfile() {
       setLoading(true);
       const [profileRes, sitterRes, badgesRes, reviewsRes, galleryRes, emergencyRes, subRes, ownerRes, missionsRes] =
         await Promise.all([
-          supabase.from("public_profiles").select("*").eq("id", id).single(),
-          supabase.from("sitter_profiles").select("*").eq("user_id", id).single(),
+          supabase.from("public_profiles").select("*").eq("id", id).maybeSingle(),
+          supabase.from("sitter_profiles").select("*").eq("user_id", id).maybeSingle(),
           supabase.from("badge_attributions").select("badge_id").eq("user_id", id),
           supabase
             .from("reviews")
@@ -113,7 +113,7 @@ export default function PublicSitterProfile() {
             .order("created_at", { ascending: false })
             .limit(10),
           supabase.from("sitter_gallery").select("*").eq("user_id", id).order("created_at", { ascending: false }),
-          supabase.from("emergency_sitter_profiles").select("is_active").eq("user_id", id).single(),
+          supabase.from("emergency_sitter_profiles").select("is_active").eq("user_id", id).maybeSingle(),
           supabase.from("subscriptions").select("status").eq("user_id", id).eq("status", "active").limit(1),
           supabase
             .from("owner_profiles")
