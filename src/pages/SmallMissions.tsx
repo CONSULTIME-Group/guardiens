@@ -332,31 +332,65 @@ const SmallMissions = () => {
     })();
   }, [availableHelpers]);
 
-  const filteredMissions = (allMissions || [])
-    .filter((m: any) => {
-      if (m.category === "house") return false;
-      if (categoryFilter === "mine") return m.user_id === user?.id;
-      if (categoryFilter !== "all" && m.category !== categoryFilter) return false;
-      return true;
-    })
-    .sort((a: any, b: any) => {
-      const order: Record<string, number> = { open: 0, in_progress: 1, completed: 2 };
-      const diff = (order[a.status] ?? 9) - (order[b.status] ?? 9);
-      if (diff !== 0) return diff;
-      if (mySkills.length > 0) {
-        const aMatches = mySkills.some(s => SKILL_TO_MISSION[s] === a.category);
-        const bMatches = mySkills.some(s => SKILL_TO_MISSION[s] === b.category);
-        if (aMatches && !bMatches) return -1;
-        if (!aMatches && bMatches) return 1;
-      }
-      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
-    });
+  const filteredMissions = useMemo(() => {
+    return (allMissions || [])
+      .filter((m: any) => {
+        if (m.category === "house") return false;
+        if (categoryFilter === "mine") return m.user_id === user?.id;
+        if (categoryFilter !== "all" && m.category !== categoryFilter) return false;
+        // Distance filter
+        if (originCoords && radiusKm > 0) {
+          const mc = missionCoords.get(m.id);
+          if (mc) {
+            const dist = haversineDistance(originCoords.lat, originCoords.lng, mc.lat, mc.lng);
+            if (dist > radiusKm) return false;
+          }
+          // If no coords for mission, keep it (can't filter)
+        }
+        return true;
+      })
+      .sort((a: any, b: any) => {
+        const order: Record<string, number> = { open: 0, in_progress: 1, completed: 2 };
+        const diff = (order[a.status] ?? 9) - (order[b.status] ?? 9);
+        if (diff !== 0) return diff;
+        if (mySkills.length > 0) {
+          const aMatches = mySkills.some(s => SKILL_TO_MISSION[s] === a.category);
+          const bMatches = mySkills.some(s => SKILL_TO_MISSION[s] === b.category);
+          if (aMatches && !bMatches) return -1;
+          if (!aMatches && bMatches) return 1;
+        }
+        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+      });
+  }, [allMissions, categoryFilter, user?.id, originCoords, radiusKm, missionCoords, mySkills]);
 
-  const filteredHelpers = (availableHelpers || []).filter((h: any) => {
-    if (categoryFilter === "all" || categoryFilter === "mine") return true;
-    const skillKey = MISSION_TO_SKILL[categoryFilter];
-    return h.skill_categories?.includes(skillKey);
-  });
+  const normalizedSearch = competenceSearch.toLowerCase().trim();
+
+  const filteredHelpers = useMemo(() => {
+    return (availableHelpers || []).filter((h: any) => {
+      // Category filter
+      if (categoryFilter !== "all" && categoryFilter !== "mine") {
+        const skillKey = MISSION_TO_SKILL[categoryFilter];
+        if (!h.skill_categories?.includes(skillKey)) return false;
+      }
+      // Distance filter
+      if (originCoords && radiusKm > 0) {
+        const hc = helperCoords.get(h.id);
+        if (hc) {
+          const dist = haversineDistance(originCoords.lat, originCoords.lng, hc.lat, hc.lng);
+          if (dist > radiusKm) return false;
+        }
+      }
+      // Competence search filter (specific skills only)
+      if (normalizedSearch) {
+        const comps: string[] = h.competences || [];
+        const customs: string[] = h.custom_skills || [];
+        const allComps = [...comps, ...customs];
+        const matches = allComps.some((c: string) => c.toLowerCase().includes(normalizedSearch));
+        if (!matches) return false;
+      }
+      return true;
+    });
+  }, [availableHelpers, categoryFilter, originCoords, radiusKm, helperCoords, normalizedSearch]);
 
   const missionCount = filteredMissions.length;
   const helperCount = filteredHelpers.length;
