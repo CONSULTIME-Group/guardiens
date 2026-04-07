@@ -1153,7 +1153,7 @@ export default function PublicSitterProfile() {
             </p>
             {missionFeedbacks.length > 0 ? (
               <div className="space-y-3">
-                {missionFeedbacks.map((fb) => (
+                {(showAllOwnerFeedbacks ? missionFeedbacks : missionFeedbacks.slice(0, VISIBLE_COUNT)).map((fb) => (
                   <div key={fb.id} className="bg-card border border-border rounded-xl p-4 space-y-2">
                     <div className="flex items-center gap-2.5 flex-wrap">
                       <div className="w-8 h-8 rounded-full bg-muted flex-shrink-0" />
@@ -1169,6 +1169,7 @@ export default function PublicSitterProfile() {
                     )}
                   </div>
                 ))}
+                <ShowMoreBtn items={missionFeedbacks} showAll={showAllOwnerFeedbacks} setShowAll={setShowAllOwnerFeedbacks} />
               </div>
             ) : (
               <p className="text-sm text-foreground/50 font-body italic">Les avis d'entraide apparaîtront ici après la première mission.</p>
@@ -1203,7 +1204,7 @@ export default function PublicSitterProfile() {
             </p>
             {missionsPublished.length > 0 ? (
               <div className="space-y-2">
-                {missionsPublished.map((m) => {
+                {(showAllMissionsPublished ? missionsPublished : missionsPublished.slice(0, VISIBLE_COUNT)).map((m) => {
                   const statusMap: Record<string, { label: string; style: string }> = {
                     open: { label: 'Ouverte', style: 'bg-primary/10 text-primary' },
                     matched: { label: 'Pourvue', style: 'bg-muted text-foreground/60' },
@@ -1228,6 +1229,7 @@ export default function PublicSitterProfile() {
                     </div>
                   );
                 })}
+                <ShowMoreBtn items={missionsPublished} showAll={showAllMissionsPublished} setShowAll={setShowAllMissionsPublished} />
               </div>
             ) : (
               <p className="text-sm text-foreground/50 font-body italic">Aucune mission publiée pour l'instant.</p>
@@ -1240,7 +1242,7 @@ export default function PublicSitterProfile() {
             </p>
             {missionsHelped.length > 0 ? (
               <div className="space-y-2">
-                {missionsHelped.map((r) => {
+                {(showAllMissionsHelped ? missionsHelped : missionsHelped.slice(0, VISIBLE_COUNT)).map((r) => {
                   const m = r.small_missions;
                   return (
                     <div key={r.id} className="flex items-center gap-3 bg-card border border-border rounded-xl px-4 py-3">
@@ -1254,6 +1256,7 @@ export default function PublicSitterProfile() {
                     </div>
                   );
                 })}
+                <ShowMoreBtn items={missionsHelped} showAll={showAllMissionsHelped} setShowAll={setShowAllMissionsHelped} />
               </div>
             ) : (
               <p className="text-sm text-foreground/50 font-body italic">Aucun coup de main enregistré pour l'instant.</p>
@@ -1266,7 +1269,7 @@ export default function PublicSitterProfile() {
             </p>
             {missionFeedbacks.length > 0 ? (
               <div className="space-y-3">
-                {missionFeedbacks.map((fb) => (
+                {(showAllEntraideFeedbacks ? missionFeedbacks : missionFeedbacks.slice(0, VISIBLE_COUNT)).map((fb) => (
                   <div key={fb.id} className="bg-card border border-border rounded-xl p-4 space-y-2">
                     <div className="flex items-center gap-2.5 flex-wrap">
                       <div className="w-8 h-8 rounded-full bg-muted flex-shrink-0" />
@@ -1282,6 +1285,7 @@ export default function PublicSitterProfile() {
                     )}
                   </div>
                 ))}
+                <ShowMoreBtn items={missionFeedbacks} showAll={showAllEntraideFeedbacks} setShowAll={setShowAllEntraideFeedbacks} />
               </div>
             ) : (
               <p className="text-sm text-foreground/50 font-body italic">Les avis d'entraide apparaîtront ici après la première mission.</p>
