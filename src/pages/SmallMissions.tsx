@@ -15,6 +15,7 @@ import { useAccessLevel } from "@/hooks/useAccessLevel";
 import AccessGateBanner from "@/components/access/AccessGateBanner";
 import ProposeExchangeDialog from "@/components/missions/ProposeExchangeDialog";
 import { geocodeCity, haversineDistance } from "@/lib/geocode";
+import CompetenceAutocomplete from "@/components/profile/CompetenceAutocomplete";
 
 const CATEGORY_META: Record<string, { label: string; icon: typeof Dog; colorClass: string }> = {
   animals: { label: "Animaux", icon: Dog, colorClass: "text-primary" },
