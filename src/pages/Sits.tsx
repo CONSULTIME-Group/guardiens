@@ -4,12 +4,12 @@ import {
   Plus, Calendar, MessageSquare, Star, Users, Eye, BookOpen,
   MapPin, Clock, MoreHorizontal, XCircle, CheckCircle,
   Image as ImageIcon, ChevronRight, Archive, Trash2, RefreshCw,
-  AlertTriangle, Pencil,
+  AlertTriangle, Pencil, Lock, MessageCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState, useMemo, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { format, differenceInDays, isAfter, isBefore, isToday, parseISO } from "date-fns";
+import { format, differenceInDays, isAfter, isBefore, isToday, parseISO, isWithinInterval, startOfDay, endOfDay } from "date-fns";
 import { fr } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import {
@@ -102,6 +102,7 @@ const Sits = () => {
   const [showArchived, setShowArchived] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const [archiveConfirm, setArchiveConfirm] = useState<string | null>(null);
+  const [openGuideId, setOpenGuideId] = useState<string | null>(null);
 
   const loadSits = useCallback(async () => {
     if (!user) return;
@@ -184,6 +185,38 @@ const Sits = () => {
         });
       }
 
+      // For accepted sits (confirmed/in_progress), load guide + conversation
+      const acceptedSits = (data || []).filter((a: any) =>
+        a.status === "accepted" && ["confirmed", "in_progress"].includes(a.sit?.status)
+      );
+
+      const guideMap: Record<string, { id: string; published: boolean } | null> = {};
+      const convMap: Record<string, string | null> = {};
+
+      await Promise.all(acceptedSits.map(async (a: any) => {
+        const sitId = a.sit?.id;
+        const ownerId = a.sit?.user_id;
+        if (!sitId || !ownerId) return;
+
+        const [guideRes, convRes] = await Promise.all([
+          supabase
+            .from("house_guides")
+            .select("id, published")
+            .eq("user_id", ownerId)
+            .eq("published", true)
+            .maybeSingle(),
+          supabase
+            .from("conversations")
+            .select("id")
+            .eq("sit_id", sitId)
+            .or(`owner_id.eq.${ownerId},sitter_id.eq.${user.id}`)
+            .maybeSingle(),
+        ]);
+
+        guideMap[sitId] = guideRes.data || null;
+        convMap[sitId] = convRes.data?.id || null;
+      }));
+
       setSits(
         data?.map((a: any) => ({
           ...a.sit,
@@ -193,6 +226,8 @@ const Sits = () => {
           owner: a.sit?.owner || null,
           hasReviewed: reviewedSitIds.includes(a.sit?.id),
           pets: petsByProperty[a.sit?.property_id] || [],
+          houseGuide: guideMap[a.sit?.id] || null,
+          conversationId: convMap[a.sit?.id] || null,
         })) || []
       );
     }
