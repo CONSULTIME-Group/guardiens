@@ -323,7 +323,7 @@ const AdminContactMessages = () => {
                     className="min-h-[100px] text-sm resize-none"
                   />
                   <p className="text-xs text-muted-foreground">
-                    Sera envoyé à{" "}<span className="text-foreground font-medium">{viewModal.msg.email}</span>{" "}depuis notify.guardiens.fr
+                    Sera envoyé à{" "}<span className="text-foreground font-medium">{viewModal.msg.email}</span>{" "}depuis guardiens.fr
                   </p>
                 </div>
 
