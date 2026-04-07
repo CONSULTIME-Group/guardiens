@@ -238,10 +238,10 @@ const SmallMissions = () => {
     queryFn: async () => {
       const { data } = await supabase
         .from("profiles")
-        .select("id, first_name, avatar_url, city, skill_categories, available_for_help, custom_skills")
+        .select("id, first_name, avatar_url, city, postal_code, skill_categories, available_for_help, custom_skills")
         .eq("available_for_help", true)
         .not("skill_categories", "eq", "{}")
-        .limit(20);
+        .limit(50);
       if (!data) return [];
 
       const helperIds = data.map((h: any) => h.id);
@@ -295,6 +295,42 @@ const SmallMissions = () => {
     },
     enabled: isAuthenticated,
   });
+
+  // ── Geocode missions when loaded ──
+  useEffect(() => {
+    if (!allMissions?.length) return;
+    const toGeocode = allMissions.filter((m: any) => m.city && !missionCoords.has(m.id));
+    if (toGeocode.length === 0) return;
+    (async () => {
+      const newMap = new Map(missionCoords);
+      for (const m of toGeocode) {
+        if (m.latitude && m.longitude) {
+          newMap.set(m.id, { lat: m.latitude, lng: m.longitude });
+        } else if (m.city) {
+          const c = await geocodeCached(m.city);
+          if (c) newMap.set(m.id, c);
+        }
+      }
+      setMissionCoords(newMap);
+    })();
+  }, [allMissions]);
+
+  // ── Geocode helpers when loaded ──
+  useEffect(() => {
+    if (!availableHelpers?.length) return;
+    const toGeocode = availableHelpers.filter((h: any) => h.city && !helperCoords.has(h.id));
+    if (toGeocode.length === 0) return;
+    (async () => {
+      const newMap = new Map(helperCoords);
+      for (const h of toGeocode) {
+        if (h.city) {
+          const c = await geocodeCached(h.city);
+          if (c) newMap.set(h.id, c);
+        }
+      }
+      setHelperCoords(newMap);
+    })();
+  }, [availableHelpers]);
 
   const filteredMissions = (allMissions || [])
     .filter((m: any) => {
