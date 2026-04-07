@@ -9,7 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { format, isPast, isFuture, differenceInDays } from "date-fns";
+import { format, isPast, isFuture, differenceInDays, formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
 import { AlertTriangle, Search, Eye, XCircle, Star, StickyNote, RotateCcw } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -18,7 +18,7 @@ const AdminSitsManagement = () => {
   const navigate = useNavigate();
   const [sits, setSits] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filterStatus, setFilterStatus] = useState("all");
+  const [filterStatus, setFilterStatus] = useState("no_draft");
   const [filterType, setFilterType] = useState<"all" | "sits" | "long_stays">("all");
   const [search, setSearch] = useState("");
   const [sitters, setSitters] = useState<Record<string, { name: string; avatar: string | null }>>({});
@@ -29,22 +29,25 @@ const AdminSitsManagement = () => {
   const fetchSits = useCallback(async () => {
     setLoading(true);
     const results: any[] = [];
-    type SitStatus = "confirmed" | "completed" | "cancelled";
-    type LSStatus = "confirmed" | "completed" | "cancelled";
-    const sitStatuses: SitStatus[] = filterStatus === "all" ? ["confirmed", "completed", "cancelled"] : [filterStatus as SitStatus];
-    const lsStatuses: LSStatus[] = filterStatus === "all" ? ["confirmed", "completed", "cancelled"] : [filterStatus as LSStatus];
+
+    const getStatuses = () => {
+      if (filterStatus === "no_draft") return ["confirmed", "completed", "cancelled", "published"];
+      if (filterStatus === "all") return ["draft", "confirmed", "completed", "cancelled", "published"];
+      return [filterStatus];
+    };
+    const statuses = getStatuses();
 
     if (filterType !== "long_stays") {
-      const { data } = await supabase.from("sits").select("*, owner:profiles!sits_user_id_fkey(first_name, last_name, avatar_url, city)").in("status", sitStatuses).order("start_date", { ascending: false });
+      const { data } = await supabase.from("sits").select("*, owner:profiles!sits_user_id_fkey(first_name, last_name, avatar_url, city)").in("status", statuses as any).order("created_at", { ascending: false });
       (data || []).forEach(d => results.push({ ...d, _type: "sit" }));
     }
 
     if (filterType !== "sits") {
-      const { data } = await supabase.from("long_stays").select("*, owner:profiles!long_stays_user_id_fkey(first_name, last_name, avatar_url, city)").in("status", lsStatuses).order("start_date", { ascending: false });
+      const { data } = await supabase.from("long_stays").select("*, owner:profiles!long_stays_user_id_fkey(first_name, last_name, avatar_url, city)").in("status", statuses as any).order("created_at", { ascending: false });
       (data || []).forEach(d => results.push({ ...d, _type: "long_stay" }));
     }
 
-    results.sort((a, b) => new Date(b.start_date || b.created_at).getTime() - new Date(a.start_date || a.created_at).getTime());
+    results.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
     setSits(results);
     setLoading(false);
   }, [filterStatus, filterType]);
@@ -184,10 +187,13 @@ const AdminSitsManagement = () => {
         <Select value={filterStatus} onValueChange={setFilterStatus}>
           <SelectTrigger className="w-[160px]"><SelectValue /></SelectTrigger>
           <SelectContent>
+            <SelectItem value="no_draft">Sans brouillons</SelectItem>
             <SelectItem value="all">Tous statuts</SelectItem>
             <SelectItem value="confirmed">Confirmées</SelectItem>
             <SelectItem value="completed">Terminées</SelectItem>
             <SelectItem value="cancelled">Annulées</SelectItem>
+            <SelectItem value="published">Publiées</SelectItem>
+            <SelectItem value="draft">Brouillons</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -201,6 +207,7 @@ const AdminSitsManagement = () => {
               <TableHead>Gardien</TableHead>
               <TableHead>Ville</TableHead>
               <TableHead>Dates</TableHead>
+              <TableHead>Dernière activité</TableHead>
               <TableHead>Type</TableHead>
               <TableHead>Statut</TableHead>
               <TableHead>Avis</TableHead>
@@ -209,9 +216,9 @@ const AdminSitsManagement = () => {
           </TableHeader>
           <TableBody>
             {loading ? (
-              <TableRow><TableCell colSpan={9} className="text-center py-8 text-muted-foreground">Chargement…</TableCell></TableRow>
+              <TableRow><TableCell colSpan={10} className="text-center py-8 text-muted-foreground">Chargement…</TableCell></TableRow>
             ) : filtered.length === 0 ? (
-              <TableRow><TableCell colSpan={9} className="text-center py-8 text-muted-foreground">Aucune garde</TableCell></TableRow>
+              <TableRow><TableCell colSpan={10} className="text-center py-8 text-muted-foreground">Aucune garde</TableCell></TableRow>
             ) : filtered.map((sit) => {
               const timing = getTimingStatus(sit);
               const sitter = sitters[sit.id];
@@ -239,6 +246,9 @@ const AdminSitsManagement = () => {
                     {sit.start_date ? format(new Date(sit.start_date), "d MMM", { locale: fr }) : "—"}
                     {" → "}
                     {sit.end_date ? format(new Date(sit.end_date), "d MMM yy", { locale: fr }) : "—"}
+                  </TableCell>
+                  <TableCell className="text-sm text-muted-foreground whitespace-nowrap">
+                    {sit.updated_at ? formatDistanceToNow(new Date(sit.updated_at), { addSuffix: true, locale: fr }) : "—"}
                   </TableCell>
                   <TableCell>
                     <Badge variant="outline" className="text-xs">{sit._type === "sit" ? "Classique" : "Longue durée"}</Badge>
