@@ -19,12 +19,16 @@ const OwnerStepIdentity = ({ data, onChange, onUploadPhoto }: Props) => {
   const [uploading, setUploading] = useState(false);
 
   const handleAvatar = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
+    const input = e.currentTarget;
+    const file = input.files?.[0];
     if (!file) return;
     setUploading(true);
-    const url = await onUploadPhoto(file, "avatars");
-    if (url) onChange({ avatar_url: url });
-    setUploading(false);
+    try {
+      await onUploadPhoto(file, "avatars");
+    } finally {
+      input.value = "";
+      setUploading(false);
+    }
   };
 
   return (
