@@ -198,14 +198,7 @@ export default function PublicSitterProfile() {
 
       setActiveTab(defaultTab);
 
-      console.log('[DEBUG onglets]', {
-        hasSitterProfile,
-        hasOwnerProfile,
-        hasEntraide,
-        defaultTab,
-        ownerUserId: fetchedOwnerProfile?.user_id ?? null,
-        missionCount: fetchedMissionCount,
-      });
+      // debug removed
 
       setLoading(false);
       window.prerenderReady = true;
