@@ -8,7 +8,7 @@ import OwnerStepAnimals from "@/components/owner-profile/OwnerStepAnimals";
 import OwnerStepRules from "@/components/owner-profile/OwnerStepRules";
 import OwnerStepCommunication from "@/components/owner-profile/OwnerStepCommunication";
 import OwnerGallery from "@/components/owner-profile/OwnerGallery";
-import OwnerExperiences from "@/components/owner-profile/OwnerExperiences";
+
 import OwnerHouseGuideForm from "@/components/owner-profile/OwnerHouseGuideForm";
 import OwnerStepSkills from "@/components/owner-profile/OwnerStepSkills";
 import ProfileSidebar, { type SidebarSection } from "@/components/profile/ProfileSidebar";
