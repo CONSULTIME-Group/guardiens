@@ -60,15 +60,21 @@ const AdminContactMessages = () => {
 
   const handleView = async (msg: any) => {
     setViewModal({ open: true, msg });
-    setReplyNote(msg.admin_notes || "");
+    setAdminNotes(msg.admin_notes || "");
+    setReplyText("");
     if (msg.status === "new") {
       await updateStatus(msg.id, "read");
     }
   };
 
-  const handleReply = async () => {
+  const handleSendReply = async () => {
+    // Implémenté à l'étape 2
+    return;
+  };
+
+  const handleMarkReplied = async () => {
     if (!viewModal.msg) return;
-    await updateStatus(viewModal.msg.id, "replied", replyNote);
+    await updateStatus(viewModal.msg.id, "replied", adminNotes);
     setViewModal({ open: false, msg: null });
   };
 
