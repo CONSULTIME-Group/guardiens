@@ -3,7 +3,9 @@ import entraideHeader from "@/assets/entraide-header.jpg";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Dog, Flower2, Handshake, ArrowRight, Lock, X, Sprout, PawPrint, GraduationCap, Star, MapPin, Search as SearchIcon } from "lucide-react";
+import { Dog, Flower2, Handshake, ArrowRight, Lock, X, Sprout, PawPrint, GraduationCap, Star, MapPin, Search as SearchIcon, Check } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
 import PageMeta from "@/components/PageMeta";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -98,7 +100,23 @@ const SmallMissions = () => {
   });
   const [contactingHelperId, setContactingHelperId] = useState<string | null>(null);
 
-  // ── Distance filter state ──
+  // ── User profile query (must be before offer dialog) ──
+  const { data: currentUserProfile, refetch: refetchProfile } = useQuery({
+    queryKey: ["my-profile-skills", user?.id],
+    queryFn: async () => {
+      if (!user) return null;
+      const { data } = await supabase
+        .from("profiles")
+        .select("skill_categories, available_for_help, custom_skills")
+        .eq("id", user.id)
+        .single();
+      return data;
+    },
+    enabled: !!user,
+  });
+
+  const mySkills: string[] = (currentUserProfile as any)?.skill_categories || [];
+
   const [postalCodeInput, setPostalCodeInput] = useState("");
   const [radiusKm, setRadiusKm] = useState(15);
   const [originCoords, setOriginCoords] = useState<{ lat: number; lng: number } | null>(null);
@@ -107,6 +125,51 @@ const SmallMissions = () => {
   // ── Competence search state ──
   const [competenceSearch, setCompetenceSearch] = useState("");
 
+  // ── "Proposer mon aide" dialog state ──
+  const [offerDialogOpen, setOfferDialogOpen] = useState(false);
+  const [offerSkills, setOfferSkills] = useState<string[]>([]);
+  const [offerText, setOfferText] = useState("");
+  const [offerSaving, setOfferSaving] = useState(false);
+  const [offerSaved, setOfferSaved] = useState(false);
+
+  const openOfferDialog = useCallback(() => {
+    const existing: string[] = (currentUserProfile as any)?.skill_categories || [];
+    const existingCustom: string[] = (currentUserProfile as any)?.custom_skills || [];
+    setOfferSkills(existing.length > 0 ? [...existing] : []);
+    setOfferText(existingCustom.length > 0 ? existingCustom[0] : "");
+    setOfferSaved(false);
+    setOfferDialogOpen(true);
+  }, [currentUserProfile]);
+
+  const toggleOfferSkill = (key: string) => {
+    setOfferSkills((prev) =>
+      prev.includes(key) ? prev.filter((s) => s !== key) : [...prev, key]
+    );
+  };
+
+  const handleSaveOffer = useCallback(async () => {
+    if (!user || offerSkills.length === 0) return;
+    setOfferSaving(true);
+    try {
+      const updates: Record<string, any> = {
+        skill_categories: offerSkills,
+        available_for_help: true,
+      };
+      if (offerText.trim()) {
+        updates.custom_skills = [offerText.trim()];
+      } else {
+        updates.custom_skills = [];
+      }
+      await supabase.from("profiles").update(updates).eq("id", user.id);
+      await refetchProfile();
+      setOfferSaved(true);
+      setTimeout(() => setOfferDialogOpen(false), 1200);
+    } catch {
+      // silent
+    } finally {
+      setOfferSaving(false);
+    }
+  }, [user, offerSkills, offerText, refetchProfile]);
   // ── Load user's postal code as default origin ──
   useEffect(() => {
     if (!user) return;
@@ -177,21 +240,6 @@ const SmallMissions = () => {
     }
   }, [isAuthenticated, user, navigate, switchRole]);
 
-  const { data: currentUserProfile } = useQuery({
-    queryKey: ["my-profile-skills", user?.id],
-    queryFn: async () => {
-      if (!user) return null;
-      const { data } = await supabase
-        .from("profiles")
-        .select("skill_categories, available_for_help")
-        .eq("id", user.id)
-        .single();
-      return data;
-    },
-    enabled: !!user,
-  });
-
-  const mySkills: string[] = (currentUserProfile as any)?.skill_categories || [];
 
   const { data: allMissions } = useQuery({
     queryKey: ["small-missions-all"],
@@ -447,12 +495,19 @@ const SmallMissions = () => {
 
             {isAuthenticated && canApplyMissions && (
               <div className="text-center">
-                <Link to={mode === "need" ? "/petites-missions/creer" : "/profile"}>
-                  <Button variant="hero" size="lg">
-                    {mode === "need" ? "Poster une mission" : "Proposer mon aide"}
+                {mode === "need" ? (
+                  <Link to="/petites-missions/creer">
+                    <Button variant="hero" size="lg">
+                      Poster une mission
+                      <ArrowRight className="ml-2 h-4 w-4" />
+                    </Button>
+                  </Link>
+                ) : (
+                  <Button variant="hero" size="lg" onClick={openOfferDialog}>
+                    Proposer mon aide
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
-                </Link>
+                )}
               </div>
             )}
             {isAuthenticated && (accessLevel === 1 || accessLevel === 2) && (
@@ -875,6 +930,81 @@ const SmallMissions = () => {
           targetFirstName={dialogTarget.name}
         />
       )}
+
+      {/* ── Proposer mon aide dialog ── */}
+      <Dialog open={offerDialogOpen} onOpenChange={setOfferDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="font-heading text-lg">Proposer mon aide</DialogTitle>
+            <DialogDescription className="text-sm text-muted-foreground">
+              Indiquez dans quels domaines vous pouvez aider et décrivez ce que vous proposez.
+            </DialogDescription>
+          </DialogHeader>
+
+          {offerSaved ? (
+            <div className="flex flex-col items-center gap-3 py-6">
+              <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+                <Check className="h-6 w-6 text-primary" />
+              </div>
+              <p className="text-sm font-medium text-foreground">Votre disponibilité est enregistrée</p>
+              <p className="text-xs text-muted-foreground">Les membres du coin peuvent maintenant vous trouver.</p>
+            </div>
+          ) : (
+            <div className="space-y-5 pt-2">
+              {/* Skill categories */}
+              <div className="space-y-2">
+                <p className="text-sm font-medium text-foreground">Domaines de compétences</p>
+                <div className="flex flex-wrap gap-2">
+                  {Object.entries(SKILL_PILL_META).map(([key, { label, icon: SkIcon }]) => {
+                    const selected = offerSkills.includes(key);
+                    return (
+                      <button
+                        key={key}
+                        type="button"
+                        onClick={() => toggleOfferSkill(key)}
+                        className={`flex items-center gap-1.5 rounded-full border px-3.5 py-2 text-sm transition-colors ${
+                          selected
+                            ? "bg-primary text-primary-foreground border-primary"
+                            : "bg-muted text-foreground border-border hover:border-primary/40"
+                        }`}
+                      >
+                        <SkIcon className="h-3.5 w-3.5" />
+                        {label}
+                        {selected && <Check className="h-3 w-3" />}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Free text */}
+              <div className="space-y-2">
+                <p className="text-sm font-medium text-foreground">Décrivez votre aide</p>
+                <Textarea
+                  value={offerText}
+                  onChange={(e) => setOfferText(e.target.value)}
+                  placeholder="Ex: Je peux arroser les plantes, promener un chien, donner un coup de main pour du bricolage…"
+                  rows={3}
+                  className="resize-none text-sm"
+                  maxLength={300}
+                />
+                <p className="text-xs text-muted-foreground text-right">{offerText.length}/300</p>
+              </div>
+
+              <Button
+                onClick={handleSaveOffer}
+                disabled={offerSkills.length === 0 || offerSaving}
+                className="w-full min-h-[44px]"
+              >
+                {offerSaving ? "Enregistrement…" : "Je suis disponible pour aider"}
+              </Button>
+              {offerSkills.length === 0 && (
+                <p className="text-xs text-destructive text-center">Sélectionnez au moins un domaine</p>
+              )}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </>
   );
 };
