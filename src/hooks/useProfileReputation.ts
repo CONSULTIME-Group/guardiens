@@ -9,7 +9,7 @@ export function useProfileReputation(userId: string | undefined) {
         .from('profile_reputation')
         .select('*')
         .eq('user_id', userId!)
-        .single()
+        .maybeSingle()
       if (error) throw error
       return data as {
         user_id: string
