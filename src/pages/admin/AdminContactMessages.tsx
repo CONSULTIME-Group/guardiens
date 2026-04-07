@@ -77,14 +77,108 @@ const AdminContactMessages = () => {
   };
 
   const handleSendReply = async () => {
-    // Implémenté à l'étape 2
-    return;
+    if (!viewModal.msg || !replyText.trim() || sendLoading) return;
+    setSendLoading(true);
+    const msg = viewModal.msg;
+    const firstName = msg.name?.split(' ')[0]?.trim() || '';
+
+    try {
+      const { error: emailError } = await supabase.functions.invoke(
+        'send-transactional-email',
+        {
+          body: {
+            to: msg.email,
+            subject: `Re: ${msg.subject?.trim() || 'Votre message à Guardiens'}`,
+            html: `
+              <div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:24px;">
+                <p style="color:#1a1a1a;font-size:15px;margin-bottom:16px;">
+                  Bonjour ${escapeHtml(firstName)},
+                </p>
+                <p style="color:#1a1a1a;font-size:15px;margin-bottom:16px;">
+                  Merci pour votre message.
+                </p>
+                <blockquote style="border-left:3px solid #e5e7eb;padding:8px 16px;color:#6b7280;margin:16px 0;font-size:14px;">
+                  ${escapeHtml(msg.message ?? '')}
+                </blockquote>
+                <p style="color:#1a1a1a;font-size:15px;margin-top:16px;">
+                  ${escapeHtml(replyText.trim())}
+                </p>
+                <hr style="border:none;border-top:1px solid #e5e7eb;margin:24px 0;" />
+                <p style="color:#6b7280;font-size:13px;margin:0;">
+                  L'équipe Guardiens —
+                  <a href="https://guardiens.fr" style="color:#2D6A4F;text-decoration:none;">
+                    guardiens.fr
+                  </a>
+                </p>
+              </div>
+            `
+          }
+        }
+      );
+
+      if (emailError) throw emailError;
+
+      const replyLog = `[Réponse envoyée le ${new Date().toLocaleString('fr-FR')}]\n${replyText.trim()}`;
+
+      const { error: dbError } = await supabase
+        .from('contact_messages')
+        .update({
+          status: 'replied',
+          admin_notes: adminNotes?.trim()
+            ? `${adminNotes.trim()}\n\n${replyLog}`
+            : replyLog,
+          resolved_at: new Date().toISOString()
+        })
+        .eq('id', msg.id);
+
+      if (dbError) throw dbError;
+
+      toast.success("Réponse envoyée ✓", {
+        description: `Email envoyé à ${msg.email}`,
+        duration: 3000
+      });
+
+      setViewModal({ open: false, msg: null });
+      fetchMessages();
+      window.dispatchEvent(new Event("admin-badges-refresh"));
+    } catch {
+      toast.error("Erreur d'envoi", {
+        description: "Impossible d'envoyer l'email. Vérifie la configuration email.",
+        duration: 5000
+      });
+    } finally {
+      setSendLoading(false);
+    }
   };
 
   const handleMarkReplied = async () => {
     if (!viewModal.msg) return;
-    await updateStatus(viewModal.msg.id, "replied", adminNotes);
-    setViewModal({ open: false, msg: null });
+    try {
+      const { error } = await supabase
+        .from('contact_messages')
+        .update({
+          status: 'replied',
+          admin_notes: adminNotes?.trim() || null,
+          resolved_at: new Date().toISOString()
+        })
+        .eq('id', viewModal.msg.id);
+
+      if (error) throw error;
+
+      toast.success("Marqué comme répondu", {
+        description: "Aucun email envoyé.",
+        duration: 2000
+      });
+
+      setViewModal({ open: false, msg: null });
+      fetchMessages();
+      window.dispatchEvent(new Event("admin-badges-refresh"));
+    } catch {
+      toast.error("Erreur", {
+        description: "Impossible de mettre à jour le statut. Réessaie.",
+        duration: 5000
+      });
+    }
   };
 
   const statusBadge = (status: string) => {
