@@ -280,6 +280,14 @@ const OwnerDashboard = () => {
             <p className="text-sm text-white/75 font-sans">
               {getSubtitle()}
             </p>
+            <Link
+              to={`/proprietaires/${user?.id}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 text-xs font-body text-white/70 hover:text-white transition-colors mt-2"
+            >
+              <Eye className="w-3 h-3" /> Voir mon profil public →
+            </Link>
           </div>
           <button
             onClick={() => navigate("/sits/create")}
