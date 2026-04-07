@@ -199,6 +199,9 @@ const AdminContactMessages = () => {
     return elapsed > 48 * 60 * 60 * 1000;
   };
 
+  const totalPages = Math.ceil(total / PAGE_SIZE);
+
+
 
   if (loading) return <div className="text-muted-foreground py-8 text-center">Chargement…</div>;
 
