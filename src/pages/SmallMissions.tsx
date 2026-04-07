@@ -48,13 +48,6 @@ const DURATION_LABELS: Record<string, string> = {
   week: "Semaine",
 };
 
-const RADIUS_OPTIONS = [
-  { value: 15, label: "15 km" },
-  { value: 30, label: "30 km" },
-  { value: 50, label: "50 km" },
-  { value: 100, label: "100 km" },
-  { value: 0, label: "Partout" },
-];
 
 function formatCity(city: string): string {
   return city.replace(/\b\w/g, (c) => c.toUpperCase());
@@ -107,7 +100,7 @@ const SmallMissions = () => {
 
   // ── Distance filter state ──
   const [postalCodeInput, setPostalCodeInput] = useState("");
-  const [radiusKm, setRadiusKm] = useState(30);
+  const [radiusKm, setRadiusKm] = useState(15);
   const [originCoords, setOriginCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [geocodingOrigin, setGeocodingOrigin] = useState(false);
 
@@ -488,8 +481,8 @@ const SmallMissions = () => {
               {/* Distance + competence row */}
               <div className="flex flex-col sm:flex-row gap-3">
                 {/* Postal code + radius */}
-                <div className="flex items-center gap-2 flex-1 min-w-0">
-                  <div className="relative flex-1 min-w-0 max-w-[200px]">
+                <div className="flex items-center gap-3 flex-1 min-w-0">
+                  <div className="relative min-w-0 w-[170px] shrink-0">
                     <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <input
                       type="text"
@@ -501,20 +494,22 @@ const SmallMissions = () => {
                       className="w-full pl-9 pr-3 py-2 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30"
                     />
                   </div>
-                  <div className="flex items-center gap-1">
-                    {RADIUS_OPTIONS.map((r) => (
-                      <button
-                        key={r.value}
-                        onClick={() => setRadiusKm(r.value)}
-                        className={`px-2.5 py-1.5 text-xs rounded-md border transition-colors whitespace-nowrap ${
-                          radiusKm === r.value
-                            ? "bg-primary text-primary-foreground border-primary"
-                            : "bg-muted text-muted-foreground border-border hover:border-primary/40"
-                        }`}
-                      >
-                        {r.label}
-                      </button>
-                    ))}
+                  <div className="flex items-center gap-2 flex-1 min-w-0 max-w-[280px]">
+                    <input
+                      type="range"
+                      min={1}
+                      max={100}
+                      step={1}
+                      value={radiusKm === 0 ? 100 : radiusKm}
+                      onChange={(e) => {
+                        const v = Number(e.target.value);
+                        setRadiusKm(v >= 100 ? 0 : v);
+                      }}
+                      className="flex-1 h-2 accent-[hsl(var(--primary))] cursor-pointer"
+                    />
+                    <span className="text-xs font-medium text-foreground whitespace-nowrap min-w-[50px] text-right">
+                      {radiusKm === 0 ? "∞" : `${radiusKm} km`}
+                    </span>
                   </div>
                   {geocodingOrigin && (
                     <span className="text-xs text-muted-foreground animate-pulse">…</span>
