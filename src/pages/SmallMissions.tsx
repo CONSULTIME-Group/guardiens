@@ -495,12 +495,19 @@ const SmallMissions = () => {
 
             {isAuthenticated && canApplyMissions && (
               <div className="text-center">
-                <Link to={mode === "need" ? "/petites-missions/creer" : "/profile"}>
-                  <Button variant="hero" size="lg">
-                    {mode === "need" ? "Poster une mission" : "Proposer mon aide"}
+                {mode === "need" ? (
+                  <Link to="/petites-missions/creer">
+                    <Button variant="hero" size="lg">
+                      Poster une mission
+                      <ArrowRight className="ml-2 h-4 w-4" />
+                    </Button>
+                  </Link>
+                ) : (
+                  <Button variant="hero" size="lg" onClick={openOfferDialog}>
+                    Proposer mon aide
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
-                </Link>
+                )}
               </div>
             )}
             {isAuthenticated && (accessLevel === 1 || accessLevel === 2) && (
