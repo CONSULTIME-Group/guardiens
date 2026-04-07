@@ -40,32 +40,41 @@ const AdminSubscriptions = () => {
     setLoading(true);
     let query = supabase
       .from("subscriptions")
-      .select("*, profile:profiles!subscriptions_user_id_fkey(first_name, last_name, avatar_url, role, is_founder)")
+      .select("*")
       .order("expires_at", { ascending: true });
 
     if (filterPlan !== "all") query = query.eq("plan", filterPlan as any);
 
     const { data, error } = await query;
-    if (error) toast.error("Erreur de chargement");
-    else {
-      let subs = data || [];
-      if (filterExpiring) {
-        const in30days = new Date(Date.now() + 30 * 86400000);
-        subs = subs.filter(s => s.status === "active" && s.expires_at && new Date(s.expires_at) <= in30days);
-      }
-      setSubscriptions(subs);
+    if (error) { toast.error("Erreur de chargement"); setLoading(false); return; }
 
-      // Compute metrics
-      const allData = data || [];
-      const now = new Date();
-      const monthAgo = new Date(Date.now() - 30 * 86400000);
-      setMetrics({
-        active: allData.filter(s => s.status === "active").length,
-        founders: allData.filter(s => s.plan === "founder_free" && s.status === "active").length,
-        expiredMonth: allData.filter(s => s.status === "expired" && s.expires_at && new Date(s.expires_at) >= monthAgo).length,
-        revenue: allData.filter(s => s.plan === "annual_sitter" && s.status === "active").length * 49,
-      });
+    const allData = data || [];
+
+    // Fetch profiles for all user_ids
+    const userIds = [...new Set(allData.map(s => s.user_id))];
+    const profileMap: Record<string, any> = {};
+    if (userIds.length > 0) {
+      const { data: profiles } = await supabase
+        .from("profiles")
+        .select("id, first_name, last_name, avatar_url, role, is_founder")
+        .in("id", userIds);
+      (profiles || []).forEach(p => { profileMap[p.id] = p; });
     }
+
+    let subs = allData.map(s => ({ ...s, profile: profileMap[s.user_id] || null }));
+    if (filterExpiring) {
+      const in30days = new Date(Date.now() + 30 * 86400000);
+      subs = subs.filter(s => s.status === "active" && s.expires_at && new Date(s.expires_at) <= in30days);
+    }
+    setSubscriptions(subs);
+
+    const monthAgo = new Date(Date.now() - 30 * 86400000);
+    setMetrics({
+      active: allData.filter(s => s.status === "active").length,
+      founders: allData.filter(s => s.plan === "founder_free" && s.status === "active").length,
+      expiredMonth: allData.filter(s => s.status === "expired" && s.expires_at && new Date(s.expires_at) >= monthAgo).length,
+      revenue: allData.filter(s => s.plan === "annual_sitter" && s.status === "active").length * 49,
+    });
     setLoading(false);
   }, [filterPlan, filterExpiring]);
 
