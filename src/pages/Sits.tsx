@@ -5,7 +5,9 @@ import {
   MapPin, Clock, MoreHorizontal, XCircle, CheckCircle,
   Image as ImageIcon, ChevronRight, Archive, Trash2, RefreshCw,
   AlertTriangle, Pencil, Lock, MessageCircle,
+  KeyRound, Home, ClipboardList, X, Copy, Check, Loader2,
 } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState, useMemo, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -103,6 +105,30 @@ const Sits = () => {
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const [archiveConfirm, setArchiveConfirm] = useState<string | null>(null);
   const [openGuideId, setOpenGuideId] = useState<string | null>(null);
+  const [openGuide, setOpenGuide] = useState<any | null>(null);
+  const [guideLoading, setGuideLoading] = useState(false);
+
+  // Load full guide when openGuideId is set
+  useEffect(() => {
+    if (!openGuideId) {
+      setOpenGuide(null);
+      return;
+    }
+    const sit = sits.find(s => s.id === openGuideId);
+    if (!sit) return;
+
+    setGuideLoading(true);
+    supabase
+      .from("house_guides")
+      .select("*")
+      .eq("user_id", sit.user_id || sit.owner?.id)
+      .eq("published", true)
+      .maybeSingle()
+      .then(({ data }) => {
+        setOpenGuide(data);
+        setGuideLoading(false);
+      });
+  }, [openGuideId, sits]);
 
   const loadSits = useCallback(async () => {
     if (!user) return;
