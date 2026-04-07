@@ -1,9 +1,9 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect, useMemo } from "react";
 import entraideHeader from "@/assets/entraide-header.jpg";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Dog, Flower2, Handshake, ArrowRight, Lock, X, Sprout, PawPrint, GraduationCap, Star } from "lucide-react";
+import { Dog, Flower2, Handshake, ArrowRight, Lock, X, Sprout, PawPrint, GraduationCap, Star, MapPin, Search as SearchIcon } from "lucide-react";
 import PageMeta from "@/components/PageMeta";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -12,6 +12,7 @@ import { useSubscriptionAccess } from "@/hooks/useSubscriptionAccess";
 import { useAccessLevel } from "@/hooks/useAccessLevel";
 import AccessGateBanner from "@/components/access/AccessGateBanner";
 import ProposeExchangeDialog from "@/components/missions/ProposeExchangeDialog";
+import { geocodeCity, haversineDistance } from "@/lib/geocode";
 
 const CATEGORY_META: Record<string, { label: string; icon: typeof Dog; colorClass: string }> = {
   animals: { label: "Animaux", icon: Dog, colorClass: "text-primary" },
@@ -47,6 +48,14 @@ const DURATION_LABELS: Record<string, string> = {
   week: "Semaine",
 };
 
+const RADIUS_OPTIONS = [
+  { value: 15, label: "15 km" },
+  { value: 30, label: "30 km" },
+  { value: 50, label: "50 km" },
+  { value: 100, label: "100 km" },
+  { value: 0, label: "Partout" },
+];
+
 function formatCity(city: string): string {
   return city.replace(/\b\w/g, (c) => c.toUpperCase());
 }
@@ -70,6 +79,18 @@ const EXAMPLES = [
 type CategoryFilter = "all" | "animals" | "garden" | "skills" | "coups_de_main" | "mine";
 type ModeFilter = "need" | "offer";
 
+// Geocode cache to avoid repeated API calls
+const geoCache = new Map<string, { lat: number; lng: number } | null>();
+
+async function geocodeCached(city: string): Promise<{ lat: number; lng: number } | null> {
+  const key = city.toLowerCase().trim();
+  if (geoCache.has(key)) return geoCache.get(key)!;
+  const result = await geocodeCity(city);
+  const coords = result ? { lat: result.lat, lng: result.lng } : null;
+  geoCache.set(key, coords);
+  return coords;
+}
+
 const SmallMissions = () => {
   const { isAuthenticated, user, switchRole } = useAuth();
   const navigate = useNavigate();
@@ -84,6 +105,52 @@ const SmallMissions = () => {
   });
   const [contactingHelperId, setContactingHelperId] = useState<string | null>(null);
 
+  // ── Distance filter state ──
+  const [postalCodeInput, setPostalCodeInput] = useState("");
+  const [radiusKm, setRadiusKm] = useState(30);
+  const [originCoords, setOriginCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const [geocodingOrigin, setGeocodingOrigin] = useState(false);
+
+  // ── Competence search state ──
+  const [competenceSearch, setCompetenceSearch] = useState("");
+
+  // ── Load user's postal code as default origin ──
+  useEffect(() => {
+    if (!user) return;
+    (async () => {
+      const { data: p } = await supabase
+        .from("profiles")
+        .select("postal_code, city")
+        .eq("id", user.id)
+        .single();
+      if (p?.postal_code) {
+        setPostalCodeInput(p.postal_code);
+        setGeocodingOrigin(true);
+        const coords = await geocodeCached(p.city || p.postal_code);
+        setOriginCoords(coords);
+        setGeocodingOrigin(false);
+      } else if (p?.city) {
+        setPostalCodeInput(p.city);
+        setGeocodingOrigin(true);
+        const coords = await geocodeCached(p.city);
+        setOriginCoords(coords);
+        setGeocodingOrigin(false);
+      }
+    })();
+  }, [user]);
+
+  // ── Geocode on postal code change ──
+  const handlePostalCodeSearch = useCallback(async () => {
+    if (!postalCodeInput.trim()) { setOriginCoords(null); return; }
+    setGeocodingOrigin(true);
+    const coords = await geocodeCached(postalCodeInput.trim());
+    setOriginCoords(coords);
+    setGeocodingOrigin(false);
+  }, [postalCodeInput]);
+
+  // ── Geocode missions & helpers cities (batch) ──
+  const [missionCoords, setMissionCoords] = useState<Map<string, { lat: number; lng: number }>>(new Map());
+  const [helperCoords, setHelperCoords] = useState<Map<string, { lat: number; lng: number }>>(new Map());
   const handleContactHelper = useCallback(async (helperId: string) => {
     if (!isAuthenticated || !user) { navigate("/register"); return; }
     if (helperId === user.id) return;
@@ -171,10 +238,10 @@ const SmallMissions = () => {
     queryFn: async () => {
       const { data } = await supabase
         .from("profiles")
-        .select("id, first_name, avatar_url, city, skill_categories, available_for_help, custom_skills")
+        .select("id, first_name, avatar_url, city, postal_code, skill_categories, available_for_help, custom_skills")
         .eq("available_for_help", true)
         .not("skill_categories", "eq", "{}")
-        .limit(20);
+        .limit(50);
       if (!data) return [];
 
       const helperIds = data.map((h: any) => h.id);
@@ -229,31 +296,101 @@ const SmallMissions = () => {
     enabled: isAuthenticated,
   });
 
-  const filteredMissions = (allMissions || [])
-    .filter((m: any) => {
-      if (m.category === "house") return false;
-      if (categoryFilter === "mine") return m.user_id === user?.id;
-      if (categoryFilter !== "all" && m.category !== categoryFilter) return false;
-      return true;
-    })
-    .sort((a: any, b: any) => {
-      const order: Record<string, number> = { open: 0, in_progress: 1, completed: 2 };
-      const diff = (order[a.status] ?? 9) - (order[b.status] ?? 9);
-      if (diff !== 0) return diff;
-      if (mySkills.length > 0) {
-        const aMatches = mySkills.some(s => SKILL_TO_MISSION[s] === a.category);
-        const bMatches = mySkills.some(s => SKILL_TO_MISSION[s] === b.category);
-        if (aMatches && !bMatches) return -1;
-        if (!aMatches && bMatches) return 1;
+  // ── Geocode missions when loaded ──
+  useEffect(() => {
+    if (!allMissions?.length) return;
+    const toGeocode = allMissions.filter((m: any) => m.city && !missionCoords.has(m.id));
+    if (toGeocode.length === 0) return;
+    (async () => {
+      const newMap = new Map(missionCoords);
+      for (const m of toGeocode) {
+        if (m.latitude && m.longitude) {
+          newMap.set(m.id, { lat: m.latitude, lng: m.longitude });
+        } else if (m.city) {
+          const c = await geocodeCached(m.city);
+          if (c) newMap.set(m.id, c);
+        }
       }
-      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
-    });
+      setMissionCoords(newMap);
+    })();
+  }, [allMissions]);
 
-  const filteredHelpers = (availableHelpers || []).filter((h: any) => {
-    if (categoryFilter === "all" || categoryFilter === "mine") return true;
-    const skillKey = MISSION_TO_SKILL[categoryFilter];
-    return h.skill_categories?.includes(skillKey);
-  });
+  // ── Geocode helpers when loaded ──
+  useEffect(() => {
+    if (!availableHelpers?.length) return;
+    const toGeocode = availableHelpers.filter((h: any) => h.city && !helperCoords.has(h.id));
+    if (toGeocode.length === 0) return;
+    (async () => {
+      const newMap = new Map(helperCoords);
+      for (const h of toGeocode) {
+        if (h.city) {
+          const c = await geocodeCached(h.city);
+          if (c) newMap.set(h.id, c);
+        }
+      }
+      setHelperCoords(newMap);
+    })();
+  }, [availableHelpers]);
+
+  const filteredMissions = useMemo(() => {
+    return (allMissions || [])
+      .filter((m: any) => {
+        if (m.category === "house") return false;
+        if (categoryFilter === "mine") return m.user_id === user?.id;
+        if (categoryFilter !== "all" && m.category !== categoryFilter) return false;
+        // Distance filter
+        if (originCoords && radiusKm > 0) {
+          const mc = missionCoords.get(m.id);
+          if (mc) {
+            const dist = haversineDistance(originCoords.lat, originCoords.lng, mc.lat, mc.lng);
+            if (dist > radiusKm) return false;
+          }
+          // If no coords for mission, keep it (can't filter)
+        }
+        return true;
+      })
+      .sort((a: any, b: any) => {
+        const order: Record<string, number> = { open: 0, in_progress: 1, completed: 2 };
+        const diff = (order[a.status] ?? 9) - (order[b.status] ?? 9);
+        if (diff !== 0) return diff;
+        if (mySkills.length > 0) {
+          const aMatches = mySkills.some(s => SKILL_TO_MISSION[s] === a.category);
+          const bMatches = mySkills.some(s => SKILL_TO_MISSION[s] === b.category);
+          if (aMatches && !bMatches) return -1;
+          if (!aMatches && bMatches) return 1;
+        }
+        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+      });
+  }, [allMissions, categoryFilter, user?.id, originCoords, radiusKm, missionCoords, mySkills]);
+
+  const normalizedSearch = competenceSearch.toLowerCase().trim();
+
+  const filteredHelpers = useMemo(() => {
+    return (availableHelpers || []).filter((h: any) => {
+      // Category filter
+      if (categoryFilter !== "all" && categoryFilter !== "mine") {
+        const skillKey = MISSION_TO_SKILL[categoryFilter];
+        if (!h.skill_categories?.includes(skillKey)) return false;
+      }
+      // Distance filter
+      if (originCoords && radiusKm > 0) {
+        const hc = helperCoords.get(h.id);
+        if (hc) {
+          const dist = haversineDistance(originCoords.lat, originCoords.lng, hc.lat, hc.lng);
+          if (dist > radiusKm) return false;
+        }
+      }
+      // Competence search filter (specific skills only)
+      if (normalizedSearch) {
+        const comps: string[] = h.competences || [];
+        const customs: string[] = h.custom_skills || [];
+        const allComps = [...comps, ...customs];
+        const matches = allComps.some((c: string) => c.toLowerCase().includes(normalizedSearch));
+        if (!matches) return false;
+      }
+      return true;
+    });
+  }, [availableHelpers, categoryFilter, originCoords, radiusKm, helperCoords, normalizedSearch]);
 
   const missionCount = filteredMissions.length;
   const helperCount = filteredHelpers.length;
@@ -346,22 +483,82 @@ const SmallMissions = () => {
               </div>
             )}
 
-            {/* Category filter pills */}
-            <div className="flex flex-wrap items-center gap-2 justify-center">
-              {FILTER_PILLS.map(({ key, label, icon: Icon }) => (
-                <button
-                  key={key}
-                  onClick={() => setCategoryFilter(key)}
-                  className={`flex items-center gap-1.5 rounded-full border px-4 py-2 text-sm transition-colors ${
-                    categoryFilter === key
-                      ? "bg-primary text-primary-foreground border-primary"
-                      : "bg-muted text-foreground border-border hover:border-primary/40"
-                  }`}
-                >
-                  {Icon && <Icon className="h-3.5 w-3.5" />}
-                  {label}
-                </button>
-              ))}
+            {/* ── Filter bar: distance + competence + category ── */}
+            <div className="space-y-3">
+              {/* Distance + competence row */}
+              <div className="flex flex-col sm:flex-row gap-3">
+                {/* Postal code + radius */}
+                <div className="flex items-center gap-2 flex-1 min-w-0">
+                  <div className="relative flex-1 min-w-0 max-w-[200px]">
+                    <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <input
+                      type="text"
+                      value={postalCodeInput}
+                      onChange={(e) => setPostalCodeInput(e.target.value)}
+                      onBlur={handlePostalCodeSearch}
+                      onKeyDown={(e) => e.key === "Enter" && handlePostalCodeSearch()}
+                      placeholder="Code postal"
+                      className="w-full pl-9 pr-3 py-2 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30"
+                    />
+                  </div>
+                  <div className="flex items-center gap-1">
+                    {RADIUS_OPTIONS.map((r) => (
+                      <button
+                        key={r.value}
+                        onClick={() => setRadiusKm(r.value)}
+                        className={`px-2.5 py-1.5 text-xs rounded-md border transition-colors whitespace-nowrap ${
+                          radiusKm === r.value
+                            ? "bg-primary text-primary-foreground border-primary"
+                            : "bg-muted text-muted-foreground border-border hover:border-primary/40"
+                        }`}
+                      >
+                        {r.label}
+                      </button>
+                    ))}
+                  </div>
+                  {geocodingOrigin && (
+                    <span className="text-xs text-muted-foreground animate-pulse">…</span>
+                  )}
+                </div>
+
+                {/* Competence search */}
+                <div className="relative flex-1 min-w-0 max-w-[300px]">
+                  <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <input
+                    type="text"
+                    value={competenceSearch}
+                    onChange={(e) => setCompetenceSearch(e.target.value)}
+                    placeholder="Rechercher une compétence (ex: arroser jardin)"
+                    className="w-full pl-9 pr-3 py-2 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30"
+                  />
+                  {competenceSearch && (
+                    <button
+                      onClick={() => setCompetenceSearch("")}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                    >
+                      <X className="h-3.5 w-3.5" />
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* Category filter pills */}
+              <div className="flex flex-wrap items-center gap-2 justify-center">
+                {FILTER_PILLS.map(({ key, label, icon: Icon }) => (
+                  <button
+                    key={key}
+                    onClick={() => setCategoryFilter(key)}
+                    className={`flex items-center gap-1.5 rounded-full border px-4 py-2 text-sm transition-colors ${
+                      categoryFilter === key
+                        ? "bg-primary text-primary-foreground border-primary"
+                        : "bg-muted text-foreground border-border hover:border-primary/40"
+                    }`}
+                  >
+                    {Icon && <Icon className="h-3.5 w-3.5" />}
+                    {label}
+                  </button>
+                ))}
+              </div>
             </div>
 
             {/* ═══ Section 1 — Missions près de chez toi ═══ */}
