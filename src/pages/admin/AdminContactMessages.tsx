@@ -22,7 +22,9 @@ const AdminContactMessages = () => {
   const PAGE_SIZE = 20;
 
   const [viewModal, setViewModal] = useState<{ open: boolean; msg: any | null }>({ open: false, msg: null });
-  const [replyNote, setReplyNote] = useState("");
+  const [adminNotes, setAdminNotes] = useState("");
+  const [replyText, setReplyText] = useState("");
+  const [sendLoading, setSendLoading] = useState(false);
 
   const fetchMessages = useCallback(async () => {
     setLoading(true);
