@@ -238,6 +238,7 @@ export default function PublicSitterProfile() {
         .from('sits')
         .select('id, title, start_date, end_date, status, created_at')
         .eq('user_id', id)
+        .in('status', ['published', 'confirmed', 'completed'])
         .order('created_at', { ascending: false })
         .limit(10);
       if (sitsErr) console.error('[sits]', sitsErr);
