@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -18,6 +18,7 @@ import {
   Car, MapPin, X, BadgeCheck,
   ChevronLeft, ChevronRight,
   Shield, Star,
+  Home, KeyRound, Handshake,
 } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
@@ -51,15 +52,32 @@ const ENV_LABELS: Record<string, string> = {
   sea: "Bord de mer", suburb: "Banlieue",
 };
 
+type ProfileTab = 'gardien' | 'proprio' | 'entraide';
+
+interface OwnerProfileData {
+  id: string;
+  user_id: string;
+  description: string | null;
+  property_type: string | null;
+  environments: string[];
+  competences: string[] | null;
+  competences_disponible: boolean | null;
+}
+
 export default function PublicSitterProfile() {
   const { id } = useParams<{ id: string }>();
   const auth = useAuth();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const tabParam = searchParams.get('tab');
+
   const { data: reputation } = useProfileReputation(id);
   const { data: userBadges } = useUserBadges(id);
 
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState<any>(null);
   const [sitterProfile, setSitterProfile] = useState<any>(null);
+  const [ownerProfile, setOwnerProfile] = useState<OwnerProfileData | null>(null);
+  const [missionCount, setMissionCount] = useState<number>(0);
   const [badges, setBadges] = useState<{ badge_key: string; count: number }[]>([]);
   const [reviews, setReviews] = useState<any[]>([]);
   const [reviewCount, setReviewCount] = useState(0);
@@ -69,12 +87,18 @@ export default function PublicSitterProfile() {
   const [hasActiveSubscription, setHasActiveSubscription] = useState(false);
   const [lightboxIdx, setLightboxIdx] = useState<number | null>(null);
   const [badgesBySitId, setBadgesBySitId] = useState<Record<string, string[]>>({});
+  const [activeTab, setActiveTab] = useState<ProfileTab>('gardien');
+
+  const handleTabChange = (tab: ProfileTab) => {
+    setActiveTab(tab);
+    setSearchParams({ tab }, { replace: true });
+  };
 
   useEffect(() => {
     if (!id) return;
     const load = async () => {
       setLoading(true);
-      const [profileRes, sitterRes, badgesRes, reviewsRes, galleryRes, emergencyRes, subRes] =
+      const [profileRes, sitterRes, badgesRes, reviewsRes, galleryRes, emergencyRes, subRes, ownerRes, missionsRes] =
         await Promise.all([
           supabase.from("public_profiles").select("*").eq("id", id).single(),
           supabase.from("sitter_profiles").select("*").eq("user_id", id).single(),
@@ -91,6 +115,15 @@ export default function PublicSitterProfile() {
           supabase.from("sitter_gallery").select("*").eq("user_id", id).order("created_at", { ascending: false }),
           supabase.from("emergency_sitter_profiles").select("is_active").eq("user_id", id).single(),
           supabase.from("subscriptions").select("status").eq("user_id", id).eq("status", "active").limit(1),
+          supabase
+            .from("owner_profiles")
+            .select("id, user_id, environments, competences, competences_disponible")
+            .eq("user_id", id)
+            .maybeSingle(),
+          supabase
+            .from("small_missions")
+            .select("id", { count: "exact", head: true })
+            .or(`user_id.eq.${id},assigned_to.eq.${id}`),
         ]);
 
       if (profileRes.data) setProfile(profileRes.data);
@@ -98,6 +131,11 @@ export default function PublicSitterProfile() {
       if (galleryRes.data) setGallery(galleryRes.data);
       if (emergencyRes.data) setEmergencyActive(emergencyRes.data.is_active);
       setHasActiveSubscription(!!(subRes.data && (subRes.data as any[]).length > 0));
+
+      const loadedOwner = ownerRes.data as OwnerProfileData | null;
+      setOwnerProfile(loadedOwner);
+      const loadedMissionCount = missionsRes.count ?? 0;
+      setMissionCount(loadedMissionCount);
 
       if (badgesRes.data) {
         const map: Record<string, number> = {};
@@ -115,7 +153,6 @@ export default function PublicSitterProfile() {
           setAvgRating(Math.round((sum / reviewsRes.data.length) * 10) / 10);
         }
 
-        // Load badge attributions linked to sit_ids from reviews
         const sitIdsFromReviews = reviewsRes.data
           .map((r: any) => r.sit_id)
           .filter((sid: string | null): sid is string => sid !== null);
@@ -132,6 +169,31 @@ export default function PublicSitterProfile() {
           });
           setBadgesBySitId(grouped);
         }
+      }
+
+      // Calculate default tab
+      const hasSitter = !!sitterRes.data;
+      const hasOwner = !!loadedOwner;
+      const hasEntraide = loadedMissionCount > 0;
+
+      let defaultTab: ProfileTab = 'gardien';
+      if (tabParam === 'gardien' && hasSitter) {
+        defaultTab = 'gardien';
+      } else if (tabParam === 'proprio' && hasOwner) {
+        defaultTab = 'proprio';
+      } else if (tabParam === 'entraide' && hasEntraide) {
+        defaultTab = 'entraide';
+      } else if (hasSitter) {
+        defaultTab = 'gardien';
+      } else if (hasOwner) {
+        defaultTab = 'proprio';
+      } else if (hasEntraide) {
+        defaultTab = 'entraide';
+      }
+
+      setActiveTab(defaultTab);
+      if (!tabParam || tabParam !== defaultTab) {
+        setSearchParams({ tab: defaultTab }, { replace: true });
       }
 
       setLoading(false);
@@ -262,6 +324,12 @@ export default function PublicSitterProfile() {
     const years = Math.floor(months / 12);
     return `il y a ${years} an${years > 1 ? "s" : ""}`;
   };
+
+  // Tab visibility
+  const hasSitterProfile = sitterProfile !== null;
+  const hasOwnerProfile = ownerProfile !== null;
+  const hasEntraide = missionCount > 0;
+  const availableTabs = [hasSitterProfile, hasOwnerProfile, hasEntraide].filter(Boolean).length;
 
   return (
     <div className="min-h-screen bg-background">
@@ -459,308 +527,388 @@ export default function PublicSitterProfile() {
         </div>
       </div>
 
-      {/* ── SÉPARATEUR ── */}
-      <hr className="border-border max-w-5xl mx-auto" />
-
-      {/* ── BODY — TWO COLUMNS ── */}
-      <div className="max-w-5xl mx-auto px-6 py-8 flex flex-col md:flex-row gap-8 md:gap-12 items-start">
-
-        {/* ── LEFT COLUMN ── */}
-        <div className="w-full md:w-[260px] md:shrink-0 md:sticky md:top-8 space-y-6">
-
-          {/* Lifestyle */}
-          {lifestyle.length > 0 && (
-            <div className="border-b border-border pb-4 mb-4">
-              <p className="text-xs uppercase tracking-widest text-muted-foreground mb-2">Style de vie</p>
-              <div className="flex flex-wrap gap-1.5">
-                {lifestyle.map(l => (
-                  <span key={l} className="border border-border rounded-full text-xs px-2.5 py-0.5 text-foreground">
-                    {l}
-                  </span>
-                ))}
-              </div>
-            </div>
+      {/* ── BARRE D'ONGLETS — visible si ≥ 2 onglets ── */}
+      {availableTabs > 1 && (
+        <div className="flex border-b border-border bg-card sticky top-0 z-10 max-w-5xl mx-auto">
+          {hasSitterProfile && (
+            <button
+              type="button"
+              onClick={() => handleTabChange('gardien')}
+              className={[
+                'flex items-center gap-2 px-5 py-3.5',
+                'text-sm font-medium font-body',
+                'border-b-2 transition-all',
+                'focus-visible:outline-none',
+                activeTab === 'gardien'
+                  ? 'border-primary text-primary bg-primary/5'
+                  : 'border-transparent text-foreground/60 hover:text-foreground hover:bg-muted/50',
+              ].join(' ')}
+            >
+              <Home className="w-4 h-4" aria-hidden="true" />
+              Gardien
+            </button>
           )}
-
-          {/* Profile info */}
-          {(typeLine || durationLabel) && (
-            <div className="border-b border-border pb-4 mb-4">
-              <p className="text-xs uppercase tracking-widest text-muted-foreground mb-2">Profil</p>
-              <div className="text-sm text-foreground/70 space-y-0.5">
-               {typeLine && <p>{typeLine}</p>}
-                {durationLabel && <p>{durationLabel}</p>}
-                {frequencyLabel && <p>{frequencyLabel}</p>}
-                {noticeLabel && <p>{noticeLabel}</p>}
-              </div>
-            </div>
+          {hasOwnerProfile && (
+            <button
+              type="button"
+              onClick={() => handleTabChange('proprio')}
+              className={[
+                'flex items-center gap-2 px-5 py-3.5',
+                'text-sm font-medium font-body',
+                'border-b-2 transition-all',
+                'focus-visible:outline-none',
+                activeTab === 'proprio'
+                  ? 'border-primary text-primary bg-primary/5'
+                  : 'border-transparent text-foreground/60 hover:text-foreground hover:bg-muted/50',
+              ].join(' ')}
+            >
+              <KeyRound className="w-4 h-4" aria-hidden="true" />
+              Propriétaire
+            </button>
           )}
-
-          {/* Preferred environments */}
-          {preferredEnvironments.length > 0 && (
-            <div className="border-b border-border pb-4 mb-4">
-              <p className="text-xs uppercase tracking-widest text-muted-foreground mb-2">Environnements</p>
-              <div className="flex flex-wrap gap-1.5">
-                {preferredEnvironments.map(e => (
-                  <span key={e} className="border border-border rounded-full text-xs px-2.5 py-0.5 text-foreground">
-                    {ENV_LABELS[e] || e}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* CTA */}
-          {showCTA && (
-            <>
-              <hr className="border-border" />
-              {!isAuthenticated && (
-                <>
-                  <Link
-                    to={`/inscription?redirect=/gardiens/${id}`}
-                    className="block bg-primary text-primary-foreground rounded-xl py-3 text-sm font-medium w-full text-center"
-                  >
-                    S'inscrire pour contacter
-                  </Link>
-                  <p className="text-xs text-muted-foreground text-center mt-2">
-                    Gratuit pour les propriétaires.
-                  </p>
-                </>
-              )}
-              {isAuthenticated && isOwner && (
-                <Link
-                  to={`/messages?gardien=${id}`}
-                  className="block bg-primary text-primary-foreground rounded-xl py-3 text-sm font-medium w-full text-center"
-                >
-                  Contacter {firstName}
-                </Link>
-              )}
-            </>
+          {hasEntraide && (
+            <button
+              type="button"
+              onClick={() => handleTabChange('entraide')}
+              className={[
+                'flex items-center gap-2 px-5 py-3.5',
+                'text-sm font-medium font-body',
+                'border-b-2 transition-all',
+                'focus-visible:outline-none',
+                activeTab === 'entraide'
+                  ? 'border-primary text-primary bg-primary/5'
+                  : 'border-transparent text-foreground/60 hover:text-foreground hover:bg-muted/50',
+              ].join(' ')}
+            >
+              <Handshake className="w-4 h-4" aria-hidden="true" />
+              Entraide
+            </button>
           )}
         </div>
+      )}
 
-        {/* ── RIGHT COLUMN ── */}
-        <div className="flex-1 space-y-10 min-w-0">
+      {/* ── SÉPARATEUR ── */}
+      {availableTabs <= 1 && <hr className="border-border max-w-5xl mx-auto" />}
 
-          {/* Motivation */}
-          {motivation && (
-            <p className="text-base font-normal leading-loose text-foreground/80">
-              {motivation}
-            </p>
-          )}
+      {/* ── ONGLET GARDIEN ── */}
+      {activeTab === 'gardien' && (
+        <div className="max-w-5xl mx-auto px-6 py-8 flex flex-col md:flex-row gap-8 md:gap-12 items-start">
 
-          {/* Bio */}
-          {bio && (
-            <>
-              <p className="text-sm italic text-muted-foreground mt-3">{bio}</p>
-              <hr className="border-border" />
-            </>
-          )}
+          {/* ── LEFT COLUMN ── */}
+          <div className="w-full md:w-[260px] md:shrink-0 md:sticky md:top-8 space-y-6">
 
-          {/* Animaux acceptés */}
-          {animalTypes.length > 0 && (
-            <div>
-              <p className="text-xs uppercase tracking-widest text-muted-foreground mb-3">Animaux acceptés</p>
-              <div className="flex flex-wrap gap-2">
-                {animalTypes.map(a => (
-                  <span key={a} className="border border-border rounded-full text-sm px-3 py-1 text-foreground">
-                    {ANIMAL_LABELS[a] || a}
-                  </span>
-                ))}
-                {sitterProfile?.farm_animals_ok && (
-                  <span className="border border-primary text-primary rounded-full text-sm px-3 py-1">
-                    Races exigeantes
-                  </span>
-                )}
-              </div>
-              <div className="mt-3 flex items-center gap-2 text-sm text-muted-foreground">
-                {hasVehicle ? (
-                  <>
-                    <Car className="w-4 h-4" />
-                    <span>Avec véhicule{radius ? ` — rayon ${radius}km` : ""}</span>
-                  </>
-                ) : radius ? (
-                  <>
-                    <MapPin className="w-4 h-4" />
-                    <span>Rayon {radius}km</span>
-                  </>
-                ) : (
-                  <span className="text-muted-foreground">Rayon : Non renseigné</span>
-                )}
-              </div>
-            </div>
-          )}
-
-          {/* Compétences */}
-          {competences.length > 0 && (
-            <>
-              <hr className="border-border" />
-              <div>
-                <p className="text-xs uppercase tracking-widest text-muted-foreground mb-3">Compétences</p>
-                <div className="flex flex-wrap gap-2">
-                  {competences.map(c => (
-                    <span key={c} className="border border-border rounded-full text-sm px-3 py-1 text-foreground/80">
-                      {c}
+            {/* Lifestyle */}
+            {lifestyle.length > 0 && (
+              <div className="border-b border-border pb-4 mb-4">
+                <p className="text-xs uppercase tracking-widest text-muted-foreground mb-2">Style de vie</p>
+                <div className="flex flex-wrap gap-1.5">
+                  {lifestyle.map(l => (
+                    <span key={l} className="border border-border rounded-full text-xs px-2.5 py-0.5 text-foreground">
+                      {l}
                     </span>
                   ))}
                 </div>
               </div>
-            </>
-          )}
+            )}
 
-          <hr className="border-border" />
-
-          {/* Avis */}
-          <div>
-            <p className="text-xs uppercase tracking-widest text-muted-foreground mb-3">
-              Avis{reviewCount > 0 ? ` (${reviewCount})` : ""}
-            </p>
-            {reviewCount > 0 ? (
-              <Tabs defaultValue="gardes" className="w-full">
-                <TabsList className="mb-4">
-                  <TabsTrigger value="gardes">
-                    Gardes{gardeReviews.length > 0 ? ` (${gardeReviews.length})` : ""}
-                  </TabsTrigger>
-                  <TabsTrigger value="missions">
-                    Missions{missionReviews.length > 0 ? ` (${missionReviews.length})` : ""}
-                  </TabsTrigger>
-                </TabsList>
-
-                <TabsContent value="gardes" forceMount>
-                  {gardeReviews.length === 0 ? (
-                    <p className="text-sm text-muted-foreground italic py-4">
-                      Ce gardien n'a pas encore reçu d'avis de garde sur Guardiens.
-                    </p>
-                  ) : (
-                    <div className="space-y-3">
-                      {gardeReviews.map((r: any) => {
-                        const authorName = capitalize(r.reviewer?.first_name || "Membre");
-                        const avatarUrl = r.reviewer?.avatar_url || null;
-                        const reviewBadges = r.sit_id ? (badgesBySitId[r.sit_id] || []) : [];
-                        return (
-                          <div key={r.id} className="bg-card border border-border rounded-2xl p-4">
-                            <div className="flex items-center justify-between mb-2">
-                              <div className="flex items-center gap-2">
-                                <Avatar className="w-8 h-8">
-                                  {avatarUrl ? <AvatarImage src={avatarUrl} /> : null}
-                                  <AvatarFallback className="text-xs bg-muted">
-                                    {authorName.charAt(0).toUpperCase()}
-                                  </AvatarFallback>
-                                </Avatar>
-                                <span className="text-sm font-medium text-foreground">{authorName}</span>
-                              </div>
-                              <span className="text-xs text-muted-foreground">
-                                {format(new Date(r.created_at), "MMMM yyyy", { locale: fr })}
-                              </span>
-                            </div>
-                            {r.overall_rating !== null && (
-                              <div className="flex items-center gap-0.5 mb-2">
-                                {[1, 2, 3, 4, 5].map(i => (
-                                  <span key={i} className={`text-sm ${i <= r.overall_rating ? "text-primary" : "text-muted"}`}>★</span>
-                                ))}
-                              </div>
-                            )}
-                            {r.comment && (
-                              <p className="text-sm text-foreground/80">{r.comment}</p>
-                            )}
-                            {reviewBadges.length > 0 && (
-                              <div className="flex flex-wrap gap-1.5 mt-3">
-                                {reviewBadges.map((badgeId: string) => (
-                                  <BadgeSceau key={badgeId} id={badgeId} size="compact" showCount={false} />
-                                ))}
-                              </div>
-                            )}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
-                </TabsContent>
-
-                <TabsContent value="missions" forceMount>
-                  {missionReviews.length === 0 ? (
-                    <p className="text-sm text-muted-foreground italic py-4">
-                      Ce gardien n'a pas encore reçu d'avis de mission.
-                    </p>
-                  ) : (
-                    <div className="space-y-3">
-                      {missionReviews.map((r: any) => {
-                        const authorName = capitalize(r.reviewer?.first_name || "Membre");
-                        const avatarUrl = r.reviewer?.avatar_url || null;
-                        return (
-                          <div key={r.id} className="bg-card border border-border rounded-2xl p-4">
-                            <div className="flex items-center justify-between mb-2">
-                              <div className="flex items-center gap-2">
-                                <Avatar className="w-8 h-8">
-                                  {avatarUrl ? <AvatarImage src={avatarUrl} /> : null}
-                                  <AvatarFallback className="text-xs bg-muted">
-                                    {authorName.charAt(0).toUpperCase()}
-                                  </AvatarFallback>
-                                </Avatar>
-                                <span className="text-sm font-medium text-foreground">{authorName}</span>
-                              </div>
-                              <span className="text-xs text-muted-foreground">
-                                {format(new Date(r.created_at), "MMMM yyyy", { locale: fr })}
-                              </span>
-                            </div>
-                            {r.overall_rating !== null && (
-                              <div className="flex items-center gap-0.5 mb-2">
-                                {[1, 2, 3, 4, 5].map(i => (
-                                  <span key={i} className={`text-sm ${i <= r.overall_rating ? "text-primary" : "text-muted"}`}>★</span>
-                                ))}
-                              </div>
-                            )}
-                            {r.comment && (
-                              <p className="text-sm text-foreground/80">{r.comment}</p>
-                            )}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
-                </TabsContent>
-              </Tabs>
-            ) : (
-              <div className="border border-border rounded-xl p-5 bg-card text-sm text-muted-foreground italic">
-                Les avis apparaîtront ici après la première garde.
-                Chaque propriétaire évalue le gardien et peut attribuer
-                jusqu'à 3 écussons.
+            {/* Profile info */}
+            {(typeLine || durationLabel) && (
+              <div className="border-b border-border pb-4 mb-4">
+                <p className="text-xs uppercase tracking-widest text-muted-foreground mb-2">Profil</p>
+                <div className="text-sm text-foreground/70 space-y-0.5">
+                 {typeLine && <p>{typeLine}</p>}
+                  {durationLabel && <p>{durationLabel}</p>}
+                  {frequencyLabel && <p>{frequencyLabel}</p>}
+                  {noticeLabel && <p>{noticeLabel}</p>}
+                </div>
               </div>
+            )}
+
+            {/* Preferred environments */}
+            {preferredEnvironments.length > 0 && (
+              <div className="border-b border-border pb-4 mb-4">
+                <p className="text-xs uppercase tracking-widest text-muted-foreground mb-2">Environnements</p>
+                <div className="flex flex-wrap gap-1.5">
+                  {preferredEnvironments.map(e => (
+                    <span key={e} className="border border-border rounded-full text-xs px-2.5 py-0.5 text-foreground">
+                      {ENV_LABELS[e] || e}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* CTA */}
+            {showCTA && (
+              <>
+                <hr className="border-border" />
+                {!isAuthenticated && (
+                  <>
+                    <Link
+                      to={`/inscription?redirect=/gardiens/${id}`}
+                      className="block bg-primary text-primary-foreground rounded-xl py-3 text-sm font-medium w-full text-center"
+                    >
+                      S'inscrire pour contacter
+                    </Link>
+                    <p className="text-xs text-muted-foreground text-center mt-2">
+                      Gratuit pour les propriétaires.
+                    </p>
+                  </>
+                )}
+                {isAuthenticated && isOwner && (
+                  <Link
+                    to={`/messages?gardien=${id}`}
+                    className="block bg-primary text-primary-foreground rounded-xl py-3 text-sm font-medium w-full text-center"
+                  >
+                    Contacter {firstName}
+                  </Link>
+                )}
+              </>
             )}
           </div>
 
-          <hr className="border-border" />
+          {/* ── RIGHT COLUMN ── */}
+          <div className="flex-1 space-y-10 min-w-0">
 
-          {userBadges && userBadges.length > 0 && (
-            <div className="space-y-2">
-              <h3 className="text-sm font-semibold text-foreground">Badges</h3>
-              <BadgeRow badges={userBadges} />
-            </div>
-          )}
+            {/* Motivation */}
+            {motivation && (
+              <p className="text-base font-normal leading-loose text-foreground/80">
+                {motivation}
+              </p>
+            )}
 
-          {/* Galerie */}
-          {gallery.length > 0 && (
-            <div>
-              <p className="text-xs uppercase tracking-widest text-muted-foreground mb-3">Galerie</p>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                {visibleGallery.map((g, i) => (
-                  <img
-                    key={g.id}
-                    src={g.photo_url}
-                    alt={g.caption || "Photo"}
-                    className="aspect-square object-cover rounded-xl cursor-pointer hover:opacity-90 transition-opacity"
-                    onClick={() => setLightboxIdx(i)}
-                  />
-                ))}
+            {/* Bio */}
+            {bio && (
+              <>
+                <p className="text-sm italic text-muted-foreground mt-3">{bio}</p>
+                <hr className="border-border" />
+              </>
+            )}
+
+            {/* Animaux acceptés */}
+            {animalTypes.length > 0 && (
+              <div>
+                <p className="text-xs uppercase tracking-widest text-muted-foreground mb-3">Animaux acceptés</p>
+                <div className="flex flex-wrap gap-2">
+                  {animalTypes.map(a => (
+                    <span key={a} className="border border-border rounded-full text-sm px-3 py-1 text-foreground">
+                      {ANIMAL_LABELS[a] || a}
+                    </span>
+                  ))}
+                  {sitterProfile?.farm_animals_ok && (
+                    <span className="border border-primary text-primary rounded-full text-sm px-3 py-1">
+                      Races exigeantes
+                    </span>
+                  )}
+                </div>
+                <div className="mt-3 flex items-center gap-2 text-sm text-muted-foreground">
+                  {hasVehicle ? (
+                    <>
+                      <Car className="w-4 h-4" />
+                      <span>Avec véhicule{radius ? ` — rayon ${radius}km` : ""}</span>
+                    </>
+                  ) : radius ? (
+                    <>
+                      <MapPin className="w-4 h-4" />
+                      <span>Rayon {radius}km</span>
+                    </>
+                  ) : (
+                    <span className="text-muted-foreground">Rayon : Non renseigné</span>
+                  )}
+                </div>
               </div>
-              {gallery.length > 9 && (
-                <p className="text-xs text-primary hover:underline mt-3 cursor-pointer">
-                  Voir toutes les photos →
-                </p>
+            )}
+
+            {/* Compétences */}
+            {competences.length > 0 && (
+              <>
+                <hr className="border-border" />
+                <div>
+                  <p className="text-xs uppercase tracking-widest text-muted-foreground mb-3">Compétences</p>
+                  <div className="flex flex-wrap gap-2">
+                    {competences.map(c => (
+                      <span key={c} className="border border-border rounded-full text-sm px-3 py-1 text-foreground/80">
+                        {c}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </>
+            )}
+
+            <hr className="border-border" />
+
+            {/* Avis */}
+            <div>
+              <p className="text-xs uppercase tracking-widest text-muted-foreground mb-3">
+                Avis{reviewCount > 0 ? ` (${reviewCount})` : ""}
+              </p>
+              {reviewCount > 0 ? (
+                <Tabs defaultValue="gardes" className="w-full">
+                  <TabsList className="mb-4">
+                    <TabsTrigger value="gardes">
+                      Gardes{gardeReviews.length > 0 ? ` (${gardeReviews.length})` : ""}
+                    </TabsTrigger>
+                    <TabsTrigger value="missions">
+                      Missions{missionReviews.length > 0 ? ` (${missionReviews.length})` : ""}
+                    </TabsTrigger>
+                  </TabsList>
+
+                  <TabsContent value="gardes" forceMount>
+                    {gardeReviews.length === 0 ? (
+                      <p className="text-sm text-muted-foreground italic py-4">
+                        Ce gardien n'a pas encore reçu d'avis de garde sur Guardiens.
+                      </p>
+                    ) : (
+                      <div className="space-y-3">
+                        {gardeReviews.map((r: any) => {
+                          const authorName = capitalize(r.reviewer?.first_name || "Membre");
+                          const avatarUrl = r.reviewer?.avatar_url || null;
+                          const reviewBadges = r.sit_id ? (badgesBySitId[r.sit_id] || []) : [];
+                          return (
+                            <div key={r.id} className="bg-card border border-border rounded-2xl p-4">
+                              <div className="flex items-center justify-between mb-2">
+                                <div className="flex items-center gap-2">
+                                  <Avatar className="w-8 h-8">
+                                    {avatarUrl ? <AvatarImage src={avatarUrl} /> : null}
+                                    <AvatarFallback className="text-xs bg-muted">
+                                      {authorName.charAt(0).toUpperCase()}
+                                    </AvatarFallback>
+                                  </Avatar>
+                                  <span className="text-sm font-medium text-foreground">{authorName}</span>
+                                </div>
+                                <span className="text-xs text-muted-foreground">
+                                  {format(new Date(r.created_at), "MMMM yyyy", { locale: fr })}
+                                </span>
+                              </div>
+                              {r.overall_rating !== null && (
+                                <div className="flex items-center gap-0.5 mb-2">
+                                  {[1, 2, 3, 4, 5].map(i => (
+                                    <span key={i} className={`text-sm ${i <= r.overall_rating ? "text-primary" : "text-muted"}`}>★</span>
+                                  ))}
+                                </div>
+                              )}
+                              {r.comment && (
+                                <p className="text-sm text-foreground/80">{r.comment}</p>
+                              )}
+                              {reviewBadges.length > 0 && (
+                                <div className="flex flex-wrap gap-1.5 mt-3">
+                                  {reviewBadges.map((badgeId: string) => (
+                                    <BadgeSceau key={badgeId} id={badgeId} size="compact" showCount={false} />
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </TabsContent>
+
+                  <TabsContent value="missions" forceMount>
+                    {missionReviews.length === 0 ? (
+                      <p className="text-sm text-muted-foreground italic py-4">
+                        Ce gardien n'a pas encore reçu d'avis de mission.
+                      </p>
+                    ) : (
+                      <div className="space-y-3">
+                        {missionReviews.map((r: any) => {
+                          const authorName = capitalize(r.reviewer?.first_name || "Membre");
+                          const avatarUrl = r.reviewer?.avatar_url || null;
+                          return (
+                            <div key={r.id} className="bg-card border border-border rounded-2xl p-4">
+                              <div className="flex items-center justify-between mb-2">
+                                <div className="flex items-center gap-2">
+                                  <Avatar className="w-8 h-8">
+                                    {avatarUrl ? <AvatarImage src={avatarUrl} /> : null}
+                                    <AvatarFallback className="text-xs bg-muted">
+                                      {authorName.charAt(0).toUpperCase()}
+                                    </AvatarFallback>
+                                  </Avatar>
+                                  <span className="text-sm font-medium text-foreground">{authorName}</span>
+                                </div>
+                                <span className="text-xs text-muted-foreground">
+                                  {format(new Date(r.created_at), "MMMM yyyy", { locale: fr })}
+                                </span>
+                              </div>
+                              {r.overall_rating !== null && (
+                                <div className="flex items-center gap-0.5 mb-2">
+                                  {[1, 2, 3, 4, 5].map(i => (
+                                    <span key={i} className={`text-sm ${i <= r.overall_rating ? "text-primary" : "text-muted"}`}>★</span>
+                                  ))}
+                                </div>
+                              )}
+                              {r.comment && (
+                                <p className="text-sm text-foreground/80">{r.comment}</p>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </TabsContent>
+                </Tabs>
+              ) : (
+                <div className="border border-border rounded-xl p-5 bg-card text-sm text-muted-foreground italic">
+                  Les avis apparaîtront ici après la première garde.
+                  Chaque propriétaire évalue le gardien et peut attribuer
+                  jusqu'à 3 écussons.
+                </div>
               )}
             </div>
-          )}
+
+            <hr className="border-border" />
+
+            {userBadges && userBadges.length > 0 && (
+              <div className="space-y-2">
+                <h3 className="text-sm font-semibold text-foreground">Badges</h3>
+                <BadgeRow badges={userBadges} />
+              </div>
+            )}
+
+            {/* Galerie */}
+            {gallery.length > 0 && (
+              <div>
+                <p className="text-xs uppercase tracking-widest text-muted-foreground mb-3">Galerie</p>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                  {visibleGallery.map((g, i) => (
+                    <img
+                      key={g.id}
+                      src={g.photo_url}
+                      alt={g.caption || "Photo"}
+                      className="aspect-square object-cover rounded-xl cursor-pointer hover:opacity-90 transition-opacity"
+                      onClick={() => setLightboxIdx(i)}
+                    />
+                  ))}
+                </div>
+                {gallery.length > 9 && (
+                  <p className="text-xs text-primary hover:underline mt-3 cursor-pointer">
+                    Voir toutes les photos →
+                  </p>
+                )}
+              </div>
+            )}
+          </div>
         </div>
-      </div>
+      )}
+
+      {/* ── ONGLET PROPRIO ── */}
+      {activeTab === 'proprio' && (
+        <div className="max-w-4xl mx-auto px-4 py-8">
+          <p className="text-sm text-foreground/50 font-body text-center py-12">
+            Profil propriétaire en cours de chargement…
+          </p>
+        </div>
+      )}
+
+      {/* ── ONGLET ENTRAIDE ── */}
+      {activeTab === 'entraide' && (
+        <div className="max-w-4xl mx-auto px-4 py-8">
+          <p className="text-sm text-foreground/50 font-body text-center py-12">
+            Historique d'entraide en cours de chargement…
+          </p>
+        </div>
+      )}
 
       {/* ── Lightbox ── */}
       {lightboxIdx !== null && (
