@@ -88,6 +88,10 @@ export default function PublicSitterProfile() {
   const [lightboxIdx, setLightboxIdx] = useState<number | null>(null);
   const [badgesBySitId, setBadgesBySitId] = useState<Record<string, string[]>>({});
   const [activeTab, setActiveTab] = useState<ProfileTab>('gardien');
+  const [pets, setPets] = useState<any[]>([]);
+  const [ownerSits, setOwnerSits] = useState<any[]>([]);
+  const [ownerReviews, setOwnerReviews] = useState<any[]>([]);
+  const [missionFeedbacks, setMissionFeedbacks] = useState<any[]>([]);
 
   const handleTabChange = (tab: ProfileTab) => {
     setActiveTab(tab);
@@ -198,20 +202,69 @@ export default function PublicSitterProfile() {
 
       setActiveTab(defaultTab);
 
-      console.log('[DEBUG onglets]', {
-        hasSitterProfile,
-        hasOwnerProfile,
-        hasEntraide,
-        defaultTab,
-        ownerUserId: fetchedOwnerProfile?.user_id ?? null,
-        missionCount: fetchedMissionCount,
-      });
+      // debug removed
 
       setLoading(false);
       window.prerenderReady = true;
     };
     load();
   }, [id]);
+  useEffect(() => {
+    if (activeTab !== 'proprio') return;
+    if (!id || loading) return;
+
+    const loadOwnerData = async () => {
+      // Query 1 — Animaux via properties
+      let fetchedPets: any[] = [];
+      const { data: userProperties } = await supabase
+        .from('properties')
+        .select('id')
+        .eq('user_id', id);
+      const propertyIds = (userProperties || []).map((p: any) => p.id);
+      if (propertyIds.length > 0) {
+        const { data: petsData, error: petsErr } = await supabase
+          .from('pets')
+          .select('id, name, species, breed, age, photo_url, character')
+          .in('property_id', propertyIds);
+        if (petsErr) console.error('[pets]', petsErr);
+        else fetchedPets = petsData ?? [];
+      }
+      setPets(fetchedPets);
+
+      // Query 2 — Annonces publiées
+      const { data: sitsData, error: sitsErr } = await supabase
+        .from('sits')
+        .select('id, title, start_date, end_date, status, created_at')
+        .eq('user_id', id)
+        .order('created_at', { ascending: false })
+        .limit(10);
+      if (sitsErr) console.error('[sits]', sitsErr);
+      setOwnerSits(sitsData ?? []);
+
+      // Query 3 — Avis reçus en tant que proprio
+      const { data: revData, error: revErr } = await supabase
+        .from('reviews')
+        .select('id, overall_rating, comment, created_at, review_type, reviewer:profiles!reviews_reviewer_id_fkey(first_name, avatar_url)')
+        .eq('reviewee_id', id)
+        .eq('published', true)
+        .eq('moderation_status', 'valide')
+        .in('review_type', ['proprio', 'owner'])
+        .order('created_at', { ascending: false });
+      if (revErr) console.error('[ownerReviews]', revErr);
+      setOwnerReviews(revData ?? []);
+
+      // Query 4 — Feedbacks missions
+      const { data: fbData, error: fbErr } = await supabase
+        .from('mission_feedbacks')
+        .select('id, positive, comment, created_at, badge_key')
+        .eq('receiver_id', id)
+        .order('created_at', { ascending: false });
+      if (fbErr && fbErr.code !== 'PGRST116') console.error('[missionFeedbacks]', fbErr);
+      setMissionFeedbacks(fbData ?? []);
+    };
+
+    loadOwnerData();
+  }, [activeTab, id, loading]);
 
   if (loading) {
     return (
