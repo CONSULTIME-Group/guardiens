@@ -41,7 +41,7 @@ const AdminSubscriptions = () => {
     let query = supabase
       .from("subscriptions")
       .select("*")
-      .order("expires_at", { ascending: true });
+      .order("current_period_end", { ascending: true });
 
     if (filterPlan !== "all") query = query.eq("plan", filterPlan as any);
 
