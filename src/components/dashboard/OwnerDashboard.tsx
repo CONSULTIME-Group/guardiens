@@ -7,7 +7,7 @@ import NearbyEmergencySitters from "./NearbyEmergencySitters";
 import ResourceSection from "@/components/shared/ResourceSection";
 import type { ResourceItem } from "@/components/shared/ResourceCard";
 import {
-  ChevronRight, Plus, PawPrint, Users, Handshake, ChevronDown,
+  ChevronRight, Plus, PawPrint, Users, Handshake, ChevronDown, Eye,
 } from "lucide-react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
