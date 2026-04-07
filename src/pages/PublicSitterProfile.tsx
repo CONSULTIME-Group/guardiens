@@ -88,6 +88,10 @@ export default function PublicSitterProfile() {
   const [lightboxIdx, setLightboxIdx] = useState<number | null>(null);
   const [badgesBySitId, setBadgesBySitId] = useState<Record<string, string[]>>({});
   const [activeTab, setActiveTab] = useState<ProfileTab>('gardien');
+  const [pets, setPets] = useState<any[]>([]);
+  const [ownerSits, setOwnerSits] = useState<any[]>([]);
+  const [ownerReviews, setOwnerReviews] = useState<any[]>([]);
+  const [missionFeedbacks, setMissionFeedbacks] = useState<any[]>([]);
 
   const handleTabChange = (tab: ProfileTab) => {
     setActiveTab(tab);
