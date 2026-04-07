@@ -125,6 +125,12 @@ const RedirectProfil = () => {
   return <Navigate to={`/gardiens/${id}`} replace />;
 };
 
+const RedirectProprietaire = () => {
+  const { id } = useParams();
+  if (!id) return <Navigate to="/" replace />;
+  return <Navigate to={`/gardiens/${id}?tab=proprio`} replace />;
+};
+
 const AppRoutes = () => (
   <Routes>
     <Route path="/" element={<Landing />} />
@@ -154,6 +160,7 @@ const AppRoutes = () => (
     <Route path="/petites-missions/creer" element={<ProtectedRoute><CreateSmallMission /></ProtectedRoute>} />
     <Route path="/petites-missions/:id" element={<SmallMissionDetail />} />
     <Route path="/profil/:id" element={<RedirectProfil />} />
+    <Route path="/proprietaires/:id" element={<RedirectProprietaire />} />
     <Route path="/annonces/:id" element={<PublicSitDetail />} />
     <Route path="/gardiens/:id" element={<PublicSitterProfile />} />
     <Route element={<AdminLayout />}>
