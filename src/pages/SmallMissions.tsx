@@ -130,23 +130,53 @@ const SmallMissions = () => {
   const [offerDialogOpen, setOfferDialogOpen] = useState(false);
   const [offerSkills, setOfferSkills] = useState<string[]>([]);
   const [offerText, setOfferText] = useState("");
+  const [offerCompetences, setOfferCompetences] = useState<string[]>([]);
+  const [offerValidatedLabels, setOfferValidatedLabels] = useState<string[]>([]);
   const [offerSaving, setOfferSaving] = useState(false);
   const [offerSaved, setOfferSaved] = useState(false);
 
-  const openOfferDialog = useCallback(() => {
+  // Load validated competence labels for autocomplete
+  useEffect(() => {
+    supabase
+      .from("competences_validees")
+      .select("label")
+      .then(({ data }) => {
+        setOfferValidatedLabels((data || []).map((d: any) => d.label));
+      });
+  }, []);
+
+  const openOfferDialog = useCallback(async () => {
     const existing: string[] = (currentUserProfile as any)?.skill_categories || [];
     const existingCustom: string[] = (currentUserProfile as any)?.custom_skills || [];
     setOfferSkills(existing.length > 0 ? [...existing] : []);
     setOfferText(existingCustom.length > 0 ? existingCustom[0] : "");
+    // Load existing competences from sitter_profiles
+    if (user) {
+      const { data: sp } = await supabase
+        .from("sitter_profiles")
+        .select("competences")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      setOfferCompetences(sp?.competences || []);
+    }
     setOfferSaved(false);
     setOfferDialogOpen(true);
-  }, [currentUserProfile]);
+  }, [currentUserProfile, user]);
 
   const toggleOfferSkill = (key: string) => {
     setOfferSkills((prev) =>
       prev.includes(key) ? prev.filter((s) => s !== key) : [...prev, key]
     );
   };
+
+  const handleAddOfferCompetence = useCallback((label: string) => {
+    if (offerCompetences.includes(label)) return;
+    setOfferCompetences(prev => [...prev, label]);
+  }, [offerCompetences]);
+
+  const handleRemoveOfferCompetence = useCallback((label: string) => {
+    setOfferCompetences(prev => prev.filter(c => c !== label));
+  }, []);
 
   const handleSaveOffer = useCallback(async () => {
     if (!user || offerSkills.length === 0) return;
@@ -162,7 +192,21 @@ const SmallMissions = () => {
         updates.custom_skills = [];
       }
       await supabase.from("profiles").update(updates).eq("id", user.id);
+      // Also save competences to sitter_profiles
+      if (offerCompetences.length > 0) {
+        const { data: existing } = await supabase
+          .from("sitter_profiles")
+          .select("id")
+          .eq("user_id", user.id)
+          .maybeSingle();
+        if (existing) {
+          await supabase.from("sitter_profiles").update({ competences: offerCompetences }).eq("user_id", user.id);
+        } else {
+          await supabase.from("sitter_profiles").insert({ user_id: user.id, competences: offerCompetences });
+        }
+      }
       await refetchProfile();
+      await queryClient.invalidateQueries({ queryKey: ["available-helpers"] });
       setOfferSaved(true);
       setTimeout(() => setOfferDialogOpen(false), 1200);
     } catch {
@@ -170,7 +214,7 @@ const SmallMissions = () => {
     } finally {
       setOfferSaving(false);
     }
-  }, [user, offerSkills, offerText, refetchProfile]);
+  }, [user, offerSkills, offerText, offerCompetences, refetchProfile, queryClient]);
   // ── Load user's postal code as default origin ──
   useEffect(() => {
     if (!user) return;
