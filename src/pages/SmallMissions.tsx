@@ -15,6 +15,7 @@ import { useSubscriptionAccess } from "@/hooks/useSubscriptionAccess";
 import { useAccessLevel } from "@/hooks/useAccessLevel";
 import AccessGateBanner from "@/components/access/AccessGateBanner";
 import ProposeExchangeDialog from "@/components/missions/ProposeExchangeDialog";
+import ProposeHelperExchangeDialog from "@/components/missions/ProposeHelperExchangeDialog";
 import { geocodeCity, haversineDistance } from "@/lib/geocode";
 import CompetenceAutocomplete from "@/components/profile/CompetenceAutocomplete";
 
