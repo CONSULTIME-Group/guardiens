@@ -153,6 +153,45 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
       await supabase.from("conversations").update({ updated_at: new Date().toISOString() }).eq("id", acceptedConv.id);
     }
 
+    // Send notification to sitter — with dedup guard
+    const { data: existingNotif } = await supabase
+      .from("notifications")
+      .select("id")
+      .eq("user_id", sitterId)
+      .eq("type", "sit_confirmed")
+      .eq("link", `/mes-gardes`)
+      .maybeSingle();
+
+    if (!existingNotif) {
+      const { data: proprio } = await supabase
+        .from("profiles")
+        .select("first_name")
+        .eq("id", user!.id)
+        .single();
+
+      const { data: guideCheck } = await supabase
+        .from("house_guides")
+        .select("id")
+        .eq("user_id", user!.id)
+        .eq("published", true)
+        .maybeSingle();
+
+      const startFormatted = startDate
+        ? format(parseISO(startDate), "dd MMMM", { locale: fr })
+        : "";
+
+      await supabase.from("notifications").insert({
+        user_id: sitterId,
+        type: "sit_confirmed",
+        title: "Garde confirmée 🎉",
+        body: guideCheck
+          ? `Votre garde chez ${proprio?.first_name ?? "votre hôte"} est confirmée. Le guide de la maison sera disponible dans votre espace à partir du ${startFormatted}.`
+          : `Votre garde chez ${proprio?.first_name ?? "votre hôte"} est confirmée. Rendez-vous dans "Mes gardes" pour les détails.`,
+        link: `/mes-gardes`,
+      });
+    }
+
+
     if (rejectedApps && user) {
       for (const ra of rejectedApps) {
         const { data: rejConv } = await supabase
