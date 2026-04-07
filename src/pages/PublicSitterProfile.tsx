@@ -171,6 +171,13 @@ export default function PublicSitterProfile() {
         }
       }
 
+      console.log('[DEBUG profil]', {
+        hasSitterProfile: !!sitterRes.data,
+        hasOwnerProfile: !!loadedOwner,
+        missionCount: loadedMissionCount,
+        tabParam,
+      });
+
       // Calculate default tab
       const hasSitter = !!sitterRes.data;
       const hasOwner = !!loadedOwner;
