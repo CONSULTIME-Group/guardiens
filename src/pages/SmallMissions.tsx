@@ -103,6 +103,7 @@ const SmallMissions = () => {
     try { return localStorage.getItem("guardiens_skill_prompt_dismissed") === "true"; } catch { return false; }
   });
   const [contactingHelperId, setContactingHelperId] = useState<string | null>(null);
+  const [helperDialogTarget, setHelperDialogTarget] = useState<any>(null);
 
   // ── User profile query (must be before offer dialog) ──
   const { data: currentUserProfile, refetch: refetchProfile } = useQuery({
