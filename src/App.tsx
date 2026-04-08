@@ -72,6 +72,7 @@ import AdminSEO from "./pages/admin/AdminSEO";
 import AdminSkills from "./pages/admin/AdminSkills";
 
 import EmergencySitter from "./pages/EmergencySitter";
+import { AccordDeGardePreview as TestAccord } from "./components/gardes/AccordDeGarde";
 import MySubscription from "./pages/MySubscription";
 import PublicSitDetail from "./pages/PublicSitDetail";
 import PublicSitterProfile from "./pages/PublicSitterProfile";
