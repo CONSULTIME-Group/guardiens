@@ -98,10 +98,6 @@ export function useOwnerProfile() {
     if (!user) return;
     setLoading(true);
 
-    console.log("[DEBUG] user.id =", user?.id);
-    const authUser = await supabase.auth.getUser();
-    console.log("[DEBUG] supabase auth uid =", authUser.data?.user?.id);
-
     const [profileRes, propertyRes, ownerRes] = await Promise.all([
       supabase.from("profiles").select("*").eq("id", user.id).single(),
       supabase.from("properties").select("*").eq("user_id", user.id).limit(1).maybeSingle(),
