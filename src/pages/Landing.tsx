@@ -334,16 +334,20 @@ const Landing = () => {
 
             <div className="flex flex-row justify-center sm:justify-start gap-12 mt-12 animate-hero-fade-up animation-delay-1100">
               <div className="border-r border-white/20 pr-12">
-                <span className="block text-3xl font-heading font-bold text-white">37</span>
+                <span className="block text-3xl font-heading font-bold text-white">{kpiMaisons}</span>
                 <span className="text-xs font-body text-white/50 tracking-wide uppercase mt-1 block">maisons gardées</span>
               </div>
               <div className="border-r border-white/20 pr-12">
-                <span className="block text-3xl font-heading font-bold text-white">234</span>
+                <span className="block text-3xl font-heading font-bold text-white">{kpiAnimaux}</span>
                 <span className="text-xs font-body text-white/50 tracking-wide uppercase mt-1 block">animaux accompagnés</span>
               </div>
+              <div className="border-r border-white/20 pr-12">
+                <span className="block text-3xl font-heading font-bold text-white">{kpiInscrits}</span>
+                <span className="text-xs font-body text-white/50 tracking-wide uppercase mt-1 block">inscrits</span>
+              </div>
               <div>
-                <span className="block text-3xl font-heading font-bold text-white">5 ans</span>
-                <span className="text-xs font-body text-white/50 tracking-wide uppercase mt-1 block">en Auvergne-Rhône-Alpes</span>
+                <span className="block text-3xl font-heading font-bold text-white">{kpiMissions}</span>
+                <span className="text-xs font-body text-white/50 tracking-wide uppercase mt-1 block">entraide</span>
               </div>
             </div>
           </div>
