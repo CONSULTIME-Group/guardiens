@@ -3278,6 +3278,7 @@ export type Database = {
       }
       public_stats: {
         Row: {
+          animaux_accompagnes: number | null
           maisons_gardees: number | null
           missions_entraide: number | null
           total_inscrits: number | null
