@@ -86,6 +86,10 @@ const PageMeta = ({
     } else {
       removeMetaTag({ attr: "property", key: "article:author" });
     }
+
+
+    // Signal to Prerender.io that SEO-critical content is ready
+    (window as any).prerenderReady = true;
   }, [author, currentUrl, fullTitle, image, metaDescription, noindex, publishedAt, type]);
 
   return (
