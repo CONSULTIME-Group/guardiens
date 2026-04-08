@@ -143,7 +143,7 @@ const FAQ = () => {
                           <AccordionContent className="text-muted-foreground leading-relaxed pb-5">
                             <div
                               className="prose prose-sm max-w-none text-muted-foreground prose-a:text-primary prose-strong:text-foreground"
-                              dangerouslySetInnerHTML={{ __html: marked.parse(entry.answer, { async: false }) as string }}
+                              dangerouslySetInnerHTML={{ __html: marked.parse(entry.answer, { async: false, ...faqMarkedOptions }) as string }}
                             />
                           </AccordionContent>
                         </AccordionItem>
