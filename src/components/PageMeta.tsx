@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
 import { buildAbsoluteUrl, normalizePathname } from "@/lib/seo";
 
 const DEFAULT_IMAGE = "https://guardiens.fr/og-default.jpg";
@@ -29,7 +30,6 @@ const PageMeta = ({
   const location = useLocation();
   const currentPath = normalizePathname(path || location.pathname);
   const currentUrl = buildAbsoluteUrl(currentPath);
-  const metaTitle = title.trim();
   const metaDescription = description.trim();
   const titleWithoutSuffix = title.replace(/\s*\|\s*Guardiens\s*$/i, "").replace(/\s*—\s*Guardiens\s*$/i, "");
   const fullTitle = currentPath === "/" ? titleWithoutSuffix : `${titleWithoutSuffix} | ${SITE_NAME}`;
@@ -59,13 +59,10 @@ const PageMeta = ({
       document.head.appendChild(link);
     };
 
-    document.title = fullTitle || metaTitle;
-
-    upsertMetaTag({ attr: "name", key: "description", content: metaDescription });
     upsertMetaTag({ attr: "name", key: "robots", content: noindex ? "noindex, follow" : "index, follow" });
     upsertCanonical(currentUrl);
 
-    upsertMetaTag({ attr: "property", key: "og:title", content: fullTitle || metaTitle });
+    upsertMetaTag({ attr: "property", key: "og:title", content: fullTitle });
     upsertMetaTag({ attr: "property", key: "og:description", content: metaDescription });
     upsertMetaTag({ attr: "property", key: "og:url", content: currentUrl });
     upsertMetaTag({ attr: "property", key: "og:image", content: image });
@@ -74,10 +71,9 @@ const PageMeta = ({
     upsertMetaTag({ attr: "property", key: "og:locale", content: "fr_FR" });
 
     upsertMetaTag({ attr: "name", key: "twitter:card", content: "summary_large_image" });
-    upsertMetaTag({ attr: "name", key: "twitter:title", content: fullTitle || metaTitle });
+    upsertMetaTag({ attr: "name", key: "twitter:title", content: fullTitle });
     upsertMetaTag({ attr: "name", key: "twitter:description", content: metaDescription });
     upsertMetaTag({ attr: "name", key: "twitter:image", content: image });
-
 
     if (type === "article" && publishedAt) {
       upsertMetaTag({ attr: "property", key: "article:published_time", content: publishedAt });
@@ -90,9 +86,14 @@ const PageMeta = ({
     } else {
       removeMetaTag({ attr: "property", key: "article:author" });
     }
-  }, [author, currentUrl, fullTitle, image, metaDescription, metaTitle, noindex, publishedAt, type]);
+  }, [author, currentUrl, fullTitle, image, metaDescription, noindex, publishedAt, type]);
 
-  return null;
+  return (
+    <Helmet>
+      <title>{fullTitle}</title>
+      <meta name="description" content={metaDescription} />
+    </Helmet>
+  );
 };
 
 export default PageMeta;
