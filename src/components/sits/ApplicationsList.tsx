@@ -499,7 +499,7 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
             >
               Contacter →
             </button>
-            {app.status === "rejected" && sitStatus === "published" && (
+            {app.status === "rejected" && (
               <Button
                 variant="outline"
                 size="sm"
