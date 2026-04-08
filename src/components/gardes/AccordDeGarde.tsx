@@ -258,7 +258,7 @@ export default function AccordDeGarde({ garde, onClose }: AccordDeGardeProps) {
         </p>
         <button
           disabled
-          className="w-full bg-primary text-primary-foreground rounded-md py-2 text-sm opacity-50 cursor-not-allowed"
+          className="w-full py-2 rounded-md text-sm font-medium bg-muted text-muted-foreground opacity-50 cursor-not-allowed"
         >
           C'est bon pour moi →
         </button>
