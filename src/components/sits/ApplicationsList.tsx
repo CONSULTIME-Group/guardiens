@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import AccordDeGarde from "@/components/gardes/AccordDeGarde";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -54,7 +55,8 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
   const [declineCustom, setDeclineCustom] = useState(false);
   const [declinedOpen, setDeclinedOpen] = useState(false);
   const navigate = useNavigate();
-
+  const [showAccord, setShowAccord] = useState(false);
+  const [accordData, setAccordData] = useState<any>(null);
   const declineTemplates = [
     "Merci pour votre candidature ! J'ai trouvé un gardien dont le profil correspondait davantage à mes besoins cette fois-ci. N'hésitez pas à postuler à mes prochaines annonces !",
     "Merci de votre intérêt ! Les dates ne correspondent malheureusement pas tout à fait. J'espère qu'on pourra collaborer une prochaine fois !",
