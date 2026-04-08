@@ -1,4 +1,6 @@
+import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { marked } from "marked";
 import { supabase } from "@/integrations/supabase/client";
 import PageMeta from "@/components/PageMeta";
 import {
@@ -125,7 +127,10 @@ const FAQ = () => {
                             {entry.question}
                           </AccordionTrigger>
                           <AccordionContent className="text-muted-foreground leading-relaxed pb-5">
-                            {entry.answer}
+                            <div
+                              className="prose prose-sm max-w-none text-muted-foreground prose-a:text-primary prose-strong:text-foreground"
+                              dangerouslySetInnerHTML={{ __html: marked.parse(entry.answer, { async: false }) as string }}
+                            />
                           </AccordionContent>
                         </AccordionItem>
                       ))}
