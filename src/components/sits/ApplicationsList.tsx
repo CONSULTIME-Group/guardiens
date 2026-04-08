@@ -47,6 +47,7 @@ const statusOrder: Record<string, number> = {
 };
 
 const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, propertyId, sitStatus }: ApplicationsListProps) => {
+  console.log("sitStatus reçu:", sitStatus);
   const { user } = useAuth();
   const [applications, setApplications] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
