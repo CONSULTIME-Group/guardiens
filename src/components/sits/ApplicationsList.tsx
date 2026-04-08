@@ -586,6 +586,17 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
           </DialogContent>
         </Dialog>
       )}
+
+      {showAccord && accordData && (
+        <Dialog open={showAccord} onOpenChange={(o) => { if (!o) setShowAccord(false); }}>
+          <DialogContent className="max-w-2xl p-0 overflow-hidden">
+            <AccordDeGarde
+              garde={accordData}
+              onClose={() => setShowAccord(false)}
+            />
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 };
