@@ -537,6 +537,7 @@ export type Database = {
       contact_messages: {
         Row: {
           admin_notes: string | null
+          assigned_to: string | null
           created_at: string
           email: string
           id: string
@@ -549,6 +550,7 @@ export type Database = {
         }
         Insert: {
           admin_notes?: string | null
+          assigned_to?: string | null
           created_at?: string
           email?: string
           id?: string
@@ -561,6 +563,7 @@ export type Database = {
         }
         Update: {
           admin_notes?: string | null
+          assigned_to?: string | null
           created_at?: string
           email?: string
           id?: string

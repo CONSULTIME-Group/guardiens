@@ -9,7 +9,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { Mail, Eye, CheckCircle2, Clock, MessageSquare, XCircle, Send, Loader2, AlertCircle } from "lucide-react";
+import { Mail, Eye, CheckCircle2, Clock, MessageSquare, XCircle, Send, Loader2, AlertCircle, PlayCircle } from "lucide-react";
+import { Input } from "@/components/ui/input";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 const escapeHtml = (text: string): string =>
@@ -21,7 +22,7 @@ const escapeHtml = (text: string): string =>
     .replace(/'/g, '&#039;')
     .replace(/\n/g, '<br/>');
 
-type StatusFilter = "all" | "new" | "read" | "replied" | "closed";
+type StatusFilter = "all" | "new" | "en_cours" | "replied" | "closed";
 
 const AdminContactMessages = () => {
   const [messages, setMessages] = useState<any[]>([]);
