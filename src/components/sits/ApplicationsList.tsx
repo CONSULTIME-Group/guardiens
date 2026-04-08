@@ -215,15 +215,9 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
     }
 
     // Fetch data for AccordDeGarde
-    const { data: propertyData } = await supabase
-      .from("properties")
-      .select("address, city")
-      .eq("id", propertyId)
-      .maybeSingle();
-
     const { data: proprioProfile } = await supabase
       .from("profiles")
-      .select("first_name, phone")
+      .select("first_name, city")
       .eq("id", user!.id)
       .maybeSingle();
 
@@ -231,12 +225,10 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
       gardeId: sitId,
       dateDebut: startDate ?? "",
       dateFin: endDate ?? "",
-      adresse: propertyData
-        ? `${propertyData.address ?? ""}, ${propertyData.city ?? ""}`.trim()
-        : "",
+      adresse: proprioProfile?.city ?? "",
       proprio: {
         prenom: proprioProfile?.first_name ?? "Le propriétaire",
-        telephone: (proprioProfile as any)?.phone ?? "",
+        telephone: "",
       },
       gardien: {
         prenom: app.sitter?.first_name ?? "Le gardien",
