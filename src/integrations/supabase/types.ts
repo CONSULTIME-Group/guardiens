@@ -3276,6 +3276,14 @@ export type Database = {
         }
         Relationships: []
       }
+      public_stats: {
+        Row: {
+          maisons_gardees: number | null
+          missions_entraide: number | null
+          total_inscrits: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       apply_referral_reward: {
