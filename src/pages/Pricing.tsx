@@ -120,7 +120,7 @@ const Pricing = () => {
           {/* H1 */}
           <section className="text-center space-y-4">
             <h1 className="font-heading text-4xl md:text-5xl font-bold text-foreground">
-              Des tarifs simples et honnêtes
+              Tarifs du house-sitting et de la garde d'animaux
             </h1>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto font-body">
               Pas de frais cachés, pas de commission sur les gardes. Un abonnement mensuel pour les gardiens, résiliable à tout moment.
