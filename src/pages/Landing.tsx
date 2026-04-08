@@ -95,47 +95,19 @@ const Landing = () => {
 
   useEffect(() => {
     const loadKPIs = async () => {
-      const { count: sitsCount } = await supabase
-        .from('sits')
-        .select('*', { count: 'exact', head: true })
-        .eq('status', 'completed');
-      if (typeof sitsCount === 'number') {
-        setKpiMaisons(sitsCount + 37);
-      }
-
-      const { count: profilesCount } = await supabase
-        .from('profiles')
-        .select('*', { count: 'exact', head: true });
-      if (typeof profilesCount === 'number') {
-        setKpiInscrits(profilesCount);
-      }
-
-      const { count: missionsCount } = await supabase
-        .from('small_missions')
-        .select('*', { count: 'exact', head: true })
-        .eq('status', 'completed');
-      if (typeof missionsCount === 'number') {
-        setKpiMissions(missionsCount);
-      }
-
-      const { data: completedSits } = await supabase
-        .from('sits')
-        .select('property_id')
-        .eq('status', 'completed');
-      if (completedSits && completedSits.length > 0) {
-        const propertyIds = [
-          ...new Set(
-            completedSits
-              .filter(s => s.property_id)
-              .map(s => s.property_id)
-          )
-        ];
-        const { count: petCount } = await supabase
-          .from('pets')
-          .select('*', { count: 'exact', head: true })
-          .in('property_id', propertyIds);
-        if (typeof petCount === 'number') {
-          setKpiAnimaux(234 + petCount);
+      const { data } = await supabase
+        .from('public_stats')
+        .select('*')
+        .single();
+      if (data) {
+        if (typeof data.maisons_gardees === 'number') {
+          setKpiMaisons(data.maisons_gardees + 37);
+        }
+        if (typeof data.total_inscrits === 'number') {
+          setKpiInscrits(data.total_inscrits);
+        }
+        if (typeof data.missions_entraide === 'number') {
+          setKpiMissions(data.missions_entraide);
         }
       }
     };
