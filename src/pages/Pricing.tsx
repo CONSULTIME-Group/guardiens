@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import ReactMarkdown from "react-markdown";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
@@ -46,19 +47,55 @@ const promiseLines = [
 const faqItems = [
   {
     q: "Pourquoi c'est gratuit pour les propriétaires ?",
-    a: "Parce qu'on ne facture pas l'accès à ceux qui ouvrent leur maison. Publier une annonce, recevoir des candidatures, choisir un gardien, laisser un avis — tout ça reste gratuit, pour toujours. Les propriétaires font confiance en ouvrant leur porte. On ne fait pas payer ça.",
+    a: `Parce qu'on ne facture pas l'accès à ceux qui ouvrent leur maison.
+
+Publier une annonce, recevoir des candidatures, échanger avec les gardiens, laisser un avis — tout ça reste gratuit, pour toujours. Ce n'est pas une offre d'appel : c'est une décision de fond sur le modèle économique.
+
+Guardiens gagne de l'argent uniquement sur l'abonnement des gardiens. Les propriétaires n'ont aucune raison de payer pour accéder à des gens de confiance qui veulent garder leur maison — c'est l'échange qui a de la valeur, pas l'accès.
+
+Pour comprendre comment fonctionne la mise en relation : [Comment bien choisir son gardien →](/actualites/choisir-gardien-bons-criteres)`,
   },
   {
     q: "Pourquoi le 13 mai ?",
-    a: "C'est l'anniversaire de Jérémie, cofondateur de Guardiens. Il a préféré offrir l'accès à la communauté plutôt que recevoir des cadeaux. Les inscrits avant cette date reçoivent le badge Fondateur à vie — une marque de première heure qui ne sera plus jamais attribuée.",
+    a: `C'est l'anniversaire de Jérémie, cofondateur de Guardiens.
+
+Quand on a fixé la date de lancement, il aurait pu choisir une date "stratégique". Il a préféré son anniversaire. Et plutôt que de recevoir des cadeaux, il a décidé d'offrir l'accès gratuit à ceux qui nous rejoignent avant cette date.
+
+Les inscrits avant le 13 mai 2026 deviennent **Fondateurs** : accès gratuit jusqu'au 13 juin pour choisir leur formule, badge Fondateur affiché à vie sur leur profil. Ce badge ne sera plus jamais attribué après cette date.
+
+Pourquoi le 13 juin et pas le 13 mai ? Un mois de grâce. Le lancement, c'est le début d'une aventure — pas d'une facture.
+
+Toutes les questions sur les formules : [FAQ complète →](/faq)`,
   },
   {
     q: "Que se passe-t-il après le 13 mai pour les Fondateurs ?",
-    a: "Votre accès reste gratuit jusqu'au 13 juin 2026. Trois formules sont ensuite proposées : 12 € pour un mois, 9 €/mois avec 7 jours d'essai, ou un tarif 2026 en paiement unique à -20 %. Rien ne démarre automatiquement. Votre badge Fondateur reste à vie.",
+    a: `Votre accès reste gratuit jusqu'au 13 juin 2026. Rien ne démarre automatiquement.
+
+Avant le 13 juin, vous choisissez la formule qui vous convient depuis votre espace abonnement :
+
+- **Accès un mois — 12 €** : paiement immédiat, aucun renouvellement
+- **Mensuel — 9 €/mois** : 7 jours d'essai offerts, annulable à tout moment
+- **Formule 2026 — tarif réduit** : paiement unique jusqu'au 31 décembre, -20 % sur le mensuel
+
+Votre badge Fondateur reste affiché à vie sur votre profil, quelle que soit la formule choisie ensuite.
+
+Si vous attendez après le 13 juin sans avoir souscrit, votre accès s'interrompt temporairement. Votre profil, vos avis et votre historique sont conservés.
+
+Pour bien démarrer en tant que gardien : [Créer un profil qui attire des missions →](/actualites/creer-profil-gardien-attractif)`,
   },
   {
     q: "Y a-t-il des frais cachés ?",
-    a: "Non. L'accès gardien : 9 €/mois, 12 € pour un mois, ou la formule 2026 à -20 %. L'accès propriétaire : gratuit en permanence. Aucune commission sur les gardes. Un prix. Transparent.",
+    a: `Non. Et on préfère l'expliquer clairement plutôt que de le promettre.
+
+**Ce que paient les gardiens :** 9 €/mois, 12 € pour un mois, ou la formule 2026 à -20 %. C'est tout. L'abonnement donne accès à la plateforme — postuler aux gardes, envoyer des messages, apparaître dans les résultats.
+
+**Ce que paient les propriétaires :** Rien. Publier, recevoir des candidatures, choisir, évaluer — gratuit en permanence.
+
+**Ce qu'on ne prend pas :** Aucune commission sur les gardes. L'échange entre gardien et propriétaire se décide entre eux, sans que Guardiens ne touche quoi que ce soit.
+
+Pas d'assurance obligatoire, pas de booking fee, pas de frais de mise en relation. Un abonnement. Transparent.
+
+Pour comprendre le bien-être de vos animaux pendant la garde : [Bien-être animal pendant votre absence →](/actualites/bien-etre-animal-pendant-absence)`,
   },
 ];
 
@@ -409,7 +446,21 @@ const Pricing = () => {
                     {item.q}
                   </AccordionTrigger>
                   <AccordionContent className="text-sm font-body text-foreground/65 leading-relaxed pt-1 pb-4">
-                    {item.a}
+                    <ReactMarkdown
+                      components={{
+                        p: ({ children }) => <p className="mb-3 last:mb-0 font-body text-foreground/65 leading-relaxed">{children}</p>,
+                        strong: ({ children }) => <strong className="font-semibold text-foreground/80">{children}</strong>,
+                        a: ({ href, children }) => (
+                          <Link to={href || "/"} className="text-primary hover:text-primary/80 underline underline-offset-2 transition-colors">
+                            {children}
+                          </Link>
+                        ),
+                        ul: ({ children }) => <ul className="list-disc pl-5 space-y-1.5 mb-3 text-sm font-body text-foreground/65">{children}</ul>,
+                        li: ({ children }) => <li className="leading-relaxed">{children}</li>,
+                      }}
+                    >
+                      {item.a}
+                    </ReactMarkdown>
                   </AccordionContent>
                 </AccordionItem>
               ))}
