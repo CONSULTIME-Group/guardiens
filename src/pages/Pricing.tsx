@@ -3,24 +3,13 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
-import { Check, Star, Gift, MapPin, ShieldCheck, Map, PawPrint, Heart, Siren } from "lucide-react";
+import { Check, Star, Gift, MapPin, ShieldCheck, Map, PawPrint, Heart, Siren, BadgeCheck, CreditCard } from "lucide-react";
 import PageMeta from "@/components/PageMeta";
 
-const LAUNCH_DATE = new Date("2026-05-13T00:00:00");
+const LAUNCH_DATE = new Date("2026-05-14T00:00:00Z");
 const GRACE_END = new Date("2026-06-13T00:00:00");
 const isBeforeLaunch = () => new Date() < LAUNCH_DATE;
 const isInGracePeriod = () => { const n = new Date(); return n >= LAUNCH_DATE && n < GRACE_END; };
-
-const calculateYearlyProrata = (): { price: number; months: number } => {
-  const now = new Date();
-  const endOfYear = new Date(2026, 11, 31);
-  const months = Math.ceil(
-    (endOfYear.getTime() - now.getTime()) / (1000 * 60 * 60 * 24 * 30.44)
-  );
-  const fullPrice = months * 9;
-  const discounted = Math.round(fullPrice * 0.8);
-  return { price: discounted, months };
-};
 
 const ownerFeatures = [
   "Créer votre profil complet",
@@ -74,11 +63,11 @@ const faqItems = [
   },
   {
     q: "Que se passe-t-il après le 13 mai pour les Fondateurs ?",
-    a: "Les Fondateurs (inscrits avant le 13 mai) conservent un accès gratuit jusqu'au 13 juin 2026 — un mois de grâce pour décider. Après le 13 juin, l'abonnement à 9€/mois est nécessaire pour garder l'accès complet. Le badge Fondateur reste à vie dans tous les cas.",
+    a: "Votre accès reste gratuit jusqu'au 13 juin 2026. Après cette date, trois formules sont disponibles : 12€ pour un mois sans renouvellement, 9€/mois avec 7 jours d'essai annulable à tout moment, ou un tarif 2026 en paiement unique avec -20% sur le mensuel. Rien ne démarre automatiquement.",
   },
   {
     q: "Est-ce que 9€/mois c'est rentable ?",
-    a: "Un seul week-end en house-sitting, c'est 0€ de logement. Comparez avec un Airbnb à 80€/nuit ou un hôtel : 9€/mois c'est rentabilisé dès la première garde.",
+    a: "Un séjour en chenil pour un chien coûte entre 20 et 40€ par nuit. Guardiens ne facture rien sur la garde — vous et le gardien décidez ensemble des modalités. L'abonnement donne accès à la plateforme, pas à un prix fixé.",
   },
   {
     q: "Y a-t-il des frais cachés ?",
@@ -94,7 +83,10 @@ const faqItems = [
 const Pricing = () => {
   const before = isBeforeLaunch();
   const grace = isInGracePeriod();
-  const { price: prorataPrice, months: prorataMonths } = calculateYearlyProrata();
+
+  const msLeft = Math.max(0, LAUNCH_DATE.getTime() - new Date().getTime());
+  const daysLeft = Math.ceil(msLeft / 86400000);
+
   return (
     <>
       <PageMeta
@@ -130,40 +122,71 @@ const Pricing = () => {
             <h1 className="font-heading text-4xl md:text-5xl font-bold text-foreground">
               Des tarifs simples et honnêtes
             </h1>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto font-body">
               Pas de frais cachés, pas de commission sur les gardes. Un abonnement mensuel pour les gardiens, résiliable à tout moment.
             </p>
           </section>
 
           {/* Founder Banner */}
           {before && (
-            <section
-              className="rounded-2xl p-6 md:p-8 text-center space-y-4 border-2"
-              style={{
-                backgroundColor: "hsl(45 100% 96%)",
-                borderColor: "hsl(24 36% 60%)",
-              }}
-            >
-              <div className="flex items-center justify-center gap-2">
-                <Star className="h-6 w-6" style={{ color: "hsl(24 36% 60%)" }} fill="hsl(24 36% 60%)" />
-                <h2 className="font-heading text-2xl font-bold text-foreground">Inscrivez-vous avant le 13 mai 2026</h2>
-                <Star className="h-6 w-6" style={{ color: "hsl(24 36% 60%)" }} fill="hsl(24 36% 60%)" />
+            <section>
+              <div className="w-full max-w-3xl mx-auto bg-amber-50 border border-amber-200 rounded-2xl overflow-hidden">
+                {/* Bande supérieure */}
+                <div className="bg-amber-100 px-6 py-3 flex items-center justify-center gap-2">
+                  <Star className="w-4 h-4 text-amber-500" aria-hidden="true" />
+                  <span className="text-sm font-medium text-amber-800 font-body tracking-wide">
+                    Offre Fondateur — jusqu'au 13 mai 2026
+                  </span>
+                  <Star className="w-4 h-4 text-amber-500" aria-hidden="true" />
+                </div>
+
+                {/* Corps */}
+                <div className="px-6 sm:px-10 py-8 space-y-6 text-center">
+                  {/* Compte à rebours */}
+                  <div className="space-y-1">
+                    <p className="font-heading text-5xl font-bold text-amber-700 tabular-nums">
+                      {daysLeft}
+                    </p>
+                    <p className="text-sm text-amber-600 font-body">
+                      jour{daysLeft > 1 ? 's' : ''} restants pour rejoindre les Fondateurs
+                    </p>
+                  </div>
+
+                  {/* 3 avantages en ligne */}
+                  <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-8">
+                    <div className="flex items-center gap-2 text-sm text-amber-800 font-body">
+                      <BadgeCheck className="w-4 h-4 text-amber-600 flex-shrink-0" aria-hidden="true" />
+                      Badge Fondateur à vie
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-amber-800 font-body">
+                      <Gift className="w-4 h-4 text-amber-600 flex-shrink-0" aria-hidden="true" />
+                      Accès gratuit jusqu'au 13 juin
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-amber-800 font-body">
+                      <CreditCard className="w-4 h-4 text-amber-600 flex-shrink-0" aria-hidden="true" />
+                      Sans carte bancaire
+                    </div>
+                  </div>
+
+                  {/* Anecdote */}
+                  <p className="text-sm text-amber-700/80 font-body italic max-w-md mx-auto leading-relaxed">
+                    Pourquoi le 13 mai ? C'est l'anniversaire de Jérémie, cofondateur de Guardiens.
+                    Il préfère offrir l'accès plutôt que recevoir des chaussettes.
+                  </p>
+
+                  {/* CTA */}
+                  <Link
+                    to="/register"
+                    className="inline-flex items-center gap-2 bg-primary text-white font-body font-medium text-sm px-8 py-3.5 rounded-xl hover:bg-primary/90 transition-colors min-h-[44px]"
+                  >
+                    S'inscrire avant le 13 mai
+                  </Link>
+                </div>
               </div>
-              <p className="text-muted-foreground max-w-2xl mx-auto">
-                Badge Fondateur à vie + accès gratuit jusqu'au 13 juin 2026 (1 mois de grâce après le lancement).
-                Pourquoi le 13 mai ? C'est l'anniversaire de Jérémie, cofondateur de Guardiens.
-                Et comme cadeau, il préfère vous offrir l'accès gratuit plutôt que recevoir des chaussettes.
-              </p>
-              <Link to="/register">
-                <Button variant="hero" size="xl" className="mt-2">
-                  <Gift className="h-5 w-5 mr-2" />
-                  En profiter avant le 13 mai
-                </Button>
-              </Link>
             </section>
           )}
 
-          {/* Grace period banner (between May 13 and June 13) */}
+          {/* Grace period banner (between May 14 and June 13) */}
           {grace && (
             <section
               className="rounded-2xl p-6 md:p-8 text-center space-y-4 border-2"
@@ -177,7 +200,7 @@ const Pricing = () => {
                 <h2 className="font-heading text-2xl font-bold text-foreground">Les Fondateurs ont jusqu'au 13 juin</h2>
                 <Star className="h-6 w-6" style={{ color: "hsl(24 36% 60%)" }} fill="hsl(24 36% 60%)" />
               </div>
-              <p className="text-muted-foreground max-w-2xl mx-auto">
+              <p className="text-muted-foreground max-w-2xl mx-auto font-body">
                 Les membres inscrits avant le 13 mai conservent un accès gratuit jusqu'au 13 juin.
                 Après cette date, l'abonnement à 9€/mois sera nécessaire. Le badge Fondateur reste à vie.
               </p>
@@ -189,21 +212,21 @@ const Pricing = () => {
             {/* Owner Card */}
             <Card className="border-border">
               <CardHeader className="text-center pb-2">
-                <div className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-2">Propriétaire</div>
+                <div className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-2 font-body">Propriétaire</div>
                 <CardTitle className="font-heading text-4xl font-bold text-foreground">Gratuit</CardTitle>
-                <p className="text-muted-foreground text-sm mt-1">Gratuit en 2026. Pas de piège.</p>
+                <p className="text-muted-foreground text-sm mt-1 font-body">Gratuit en 2026. Pas de piège.</p>
               </CardHeader>
               <CardContent className="space-y-4 pt-4">
                 <ul className="space-y-3">
                   {ownerFeatures.map((f) => (
                     <li key={f} className="flex items-start gap-2.5 text-sm">
                       <Check className="h-4 w-4 text-primary mt-0.5 shrink-0" />
-                      <span className="text-foreground">{f}</span>
+                      <span className="text-foreground font-body">{f}</span>
                     </li>
                   ))}
                 </ul>
                 <Link to="/register" className="block">
-                  <Button className="w-full" size="lg">S'inscrire gratuitement</Button>
+                  <Button className="w-full min-h-[44px]" size="lg">S'inscrire gratuitement</Button>
                 </Link>
               </CardContent>
             </Card>
@@ -212,7 +235,7 @@ const Pricing = () => {
             <Card className="border-primary border-2 relative shadow-lg md:scale-105">
               {before && (
                 <div
-                  className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full text-sm font-semibold flex items-center gap-1.5"
+                  className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full text-sm font-semibold flex items-center gap-1.5 font-body"
                   style={{ backgroundColor: "hsl(24 36% 60%)", color: "white" }}
                 >
                   <Star className="h-3.5 w-3.5" fill="white" />
@@ -220,17 +243,33 @@ const Pricing = () => {
                 </div>
               )}
               <CardHeader className="text-center pb-2 pt-8">
-                <div className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-2">Gardien</div>
+                <div className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-2 font-body">Gardien</div>
                 {before ? (
-                  <div className="space-y-1">
-                    <span className="text-sm font-semibold text-primary uppercase">GRATUIT jusqu'au 13 juin</span>
-                    <CardTitle className="font-heading text-4xl font-bold text-muted-foreground line-through">9€/mois</CardTitle>
-                    <p className="text-xs text-muted-foreground">Inscription avant le 13 mai → accès gratuit jusqu'au 13 juin 2026</p>
+                  <div className="text-center space-y-1 py-2">
+                    <p className="text-xs uppercase tracking-widest text-primary font-body font-medium">
+                      Gratuit jusqu'au 13 juin
+                    </p>
+                    <p className="font-heading text-4xl font-bold text-foreground">
+                      à partir de 9€
+                      <span className="text-base font-body font-normal text-foreground/60 ml-1">
+                        /mois
+                      </span>
+                    </p>
+                    <p className="text-xs text-foreground/50 font-body">
+                      Sans engagement · Résiliable à tout moment
+                    </p>
                   </div>
                 ) : (
-                  <div className="space-y-1">
-                    <CardTitle className="font-heading text-4xl font-bold text-foreground">9€<span className="text-lg font-normal text-muted-foreground"> / mois</span></CardTitle>
-                    <p className="text-sm text-muted-foreground">Sans engagement · ou {prorataPrice}€ pour finir 2026 (-20%)</p>
+                  <div className="text-center space-y-1 py-2">
+                    <p className="font-heading text-4xl font-bold text-foreground">
+                      à partir de 9€
+                      <span className="text-base font-body font-normal text-foreground/60 ml-1">
+                        /mois
+                      </span>
+                    </p>
+                    <p className="text-xs text-foreground/50 font-body">
+                      Sans engagement · Résiliable à tout moment
+                    </p>
                   </div>
                 )}
               </CardHeader>
@@ -239,15 +278,72 @@ const Pricing = () => {
                   {sitterFeatures.map((f) => (
                     <li key={f} className="flex items-start gap-2.5 text-sm">
                       <Check className="h-4 w-4 text-primary mt-0.5 shrink-0" />
-                      <span className="text-foreground">{f}</span>
+                      <span className="text-foreground font-body">{f}</span>
                     </li>
                   ))}
                 </ul>
-                <Link to="/register" className="block">
-                  <Button className="w-full" variant="hero" size="lg">
-                    {before ? "S'inscrire gratuitement" : "Commencer à 9€/mois"}
-                  </Button>
-                </Link>
+
+                {/* Bloc formules */}
+                <div className="bg-muted/50 rounded-xl px-5 py-4 space-y-3 text-left">
+                  <p className="text-xs uppercase tracking-widest text-foreground/50 font-body">
+                    Trois formules
+                  </p>
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium text-foreground font-body">
+                        Accès un mois
+                      </p>
+                      <p className="text-xs text-foreground/50 font-body">
+                        Paiement immédiat · Sans renouvellement
+                      </p>
+                    </div>
+                    <span className="text-sm font-semibold text-foreground font-body flex-shrink-0">
+                      12€
+                    </span>
+                  </div>
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium text-foreground font-body">
+                        Mensuel
+                      </p>
+                      <p className="text-xs text-foreground/50 font-body">
+                        7 jours d'essai · Annulable à tout moment
+                      </p>
+                    </div>
+                    <span className="text-sm font-semibold text-primary font-body flex-shrink-0">
+                      9€/mois
+                    </span>
+                  </div>
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium text-foreground font-body">
+                        Jusqu'au 31 décembre 2026
+                      </p>
+                      <p className="text-xs text-foreground/50 font-body">
+                        Paiement unique · -20% sur le mensuel
+                      </p>
+                    </div>
+                    <span className="text-sm font-semibold text-primary font-body flex-shrink-0">
+                      Offre 2026
+                    </span>
+                  </div>
+                </div>
+
+                {/* CTA */}
+                <div className="space-y-2 pt-2">
+                  <Link
+                    to="/register"
+                    className="w-full inline-flex items-center justify-center bg-primary text-white font-body font-medium text-sm px-6 py-3.5 rounded-xl hover:bg-primary/90 transition-colors min-h-[44px]"
+                  >
+                    S'inscrire gratuitement
+                  </Link>
+                  <Link
+                    to="/faq#formules"
+                    className="w-full inline-flex items-center justify-center text-sm font-body text-foreground/60 hover:text-foreground transition-colors py-2"
+                  >
+                    Questions sur les formules →
+                  </Link>
+                </div>
               </CardContent>
             </Card>
           </section>
@@ -264,7 +360,7 @@ const Pricing = () => {
                       <block.icon className="h-5 w-5 text-primary" />
                     </div>
                     <h3 className="font-heading font-bold text-foreground">{block.title}</h3>
-                    <p className="text-sm text-muted-foreground leading-relaxed">{block.desc}</p>
+                    <p className="text-sm text-muted-foreground leading-relaxed font-body">{block.desc}</p>
                   </CardContent>
                 </Card>
               ))}
@@ -276,7 +372,7 @@ const Pricing = () => {
             <h2 className="font-heading text-2xl font-bold text-foreground">Notre promesse — Simple, honnête, et c'est tout</h2>
             <div className="space-y-4">
               {promiseLines.map((line) => (
-                <p key={line} className="text-lg text-foreground/80 leading-relaxed">{line}</p>
+                <p key={line} className="text-lg text-foreground/80 leading-relaxed font-body">{line}</p>
               ))}
             </div>
           </section>
@@ -287,8 +383,8 @@ const Pricing = () => {
             <Accordion type="single" collapsible className="w-full">
               {faqItems.map((item, i) => (
                 <AccordionItem key={i} value={`faq-${i}`}>
-                  <AccordionTrigger className="text-left font-medium">{item.q}</AccordionTrigger>
-                  <AccordionContent className="text-muted-foreground">{item.a}</AccordionContent>
+                  <AccordionTrigger className="text-left font-medium font-body">{item.q}</AccordionTrigger>
+                  <AccordionContent className="text-muted-foreground font-body">{item.a}</AccordionContent>
                 </AccordionItem>
               ))}
             </Accordion>
@@ -296,13 +392,13 @@ const Pricing = () => {
 
           {/* CTA final */}
           <section className="text-center space-y-4 py-8">
-            <p className="text-lg text-muted-foreground max-w-xl mx-auto">
+            <p className="text-lg text-muted-foreground max-w-xl mx-auto font-body">
               {before
                 ? "Inscrivez-vous maintenant — accès gratuit jusqu'au 13 juin + badge Fondateur à vie."
                 : "9€/mois pour les gardiens. Gratuit pour les propriétaires. Sans engagement."}
             </p>
             <Link to="/register">
-              <Button variant="hero" size="xl">S'inscrire</Button>
+              <Button variant="hero" size="xl" className="min-h-[44px]">S'inscrire</Button>
             </Link>
           </section>
 
