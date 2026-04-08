@@ -47,9 +47,9 @@ const strengthBlocks = [
 ];
 
 const promiseLines = [
-  "L'échange entre le propriétaire et le gardien se décide entre vous.",
-  "Guardiens fournit l'espace — pas la transaction.",
-  "Un prix. Transparent. C'est tout.",
+  { text: "L'échange entre le propriétaire et le gardien se décide entre vous.", weight: "text-lg font-medium text-foreground/80" },
+  { text: "Guardiens fournit l'espace — pas la transaction.", weight: "text-base text-foreground/60" },
+  { text: "Un prix. Transparent. C'est tout.", weight: "text-lg font-semibold text-foreground" },
 ];
 
 const faqItems = [
@@ -108,21 +108,21 @@ const Pricing = () => {
           </div>
         </header>
 
-        <main className="max-w-6xl mx-auto px-4 py-12 space-y-16">
-          {/* H1 */}
-          <section className="text-center space-y-4">
-             <h1 className="font-heading text-4xl md:text-5xl font-bold text-foreground">
-               Des tarifs simples et honnêtes
-             </h1>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto font-body">
+        <main className="max-w-6xl mx-auto px-4">
+          {/* ═══ ZONE 1 — Compréhension rapide ═══ */}
+          <section className="text-center py-20 md:py-28 space-y-5">
+            <h1 className="font-heading text-4xl md:text-5xl font-bold text-foreground leading-tight">
+              Des tarifs simples et honnêtes
+            </h1>
+            <p className="text-lg font-body text-foreground/60 max-w-xl mx-auto">
               Pas de frais cachés, pas de commission sur les gardes. Un abonnement mensuel pour les gardiens, résiliable à tout moment.
             </p>
           </section>
 
           {/* Founder Banner */}
           {before && (
-            <section>
-              <div className="w-full max-w-3xl mx-auto bg-amber-50 border border-amber-200 rounded-2xl overflow-hidden">
+            <section className="mt-0 mb-16 md:mb-24">
+              <div className="w-full max-w-3xl mx-auto bg-amber-50 border border-amber-200/60 rounded-2xl overflow-hidden">
                 {/* Bande supérieure */}
                 <div className="bg-amber-100 px-6 py-3 flex items-center justify-center gap-2">
                   <Star className="w-4 h-4 text-amber-500" aria-hidden="true" />
@@ -133,19 +133,19 @@ const Pricing = () => {
                 </div>
 
                 {/* Corps */}
-                <div className="px-6 sm:px-10 py-8 space-y-6 text-center">
+                <div className="px-6 sm:px-10 py-10 space-y-7 text-center">
                   {/* Compte à rebours */}
                   <div className="space-y-1">
-                    <p className="font-heading text-5xl font-bold text-amber-700 tabular-nums">
+                    <p className="font-heading text-6xl md:text-7xl font-bold text-amber-700 tabular-nums">
                       {daysLeft}
                     </p>
-                    <p className="text-sm text-amber-600 font-body">
+                    <p className="text-sm text-amber-600/80 font-body">
                       jour{daysLeft > 1 ? 's' : ''} restants pour rejoindre les Fondateurs
                     </p>
                   </div>
 
                   {/* 3 avantages en ligne */}
-                  <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-8">
+                  <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-8">
                     <div className="flex items-center gap-2 text-sm text-amber-800 font-body">
                       <BadgeCheck className="w-4 h-4 text-amber-600 flex-shrink-0" aria-hidden="true" />
                       Badge Fondateur à vie
@@ -161,7 +161,7 @@ const Pricing = () => {
                   </div>
 
                   {/* Anecdote */}
-                  <p className="text-sm text-amber-700/80 font-body italic max-w-md mx-auto leading-relaxed">
+                  <p className="text-sm italic text-amber-700/70 font-body max-w-sm mx-auto leading-relaxed">
                     Pourquoi le 13 mai ? C'est l'anniversaire de Jérémie, cofondateur de Guardiens.
                     Il préfère offrir l'accès plutôt que recevoir des chaussettes.
                   </p>
@@ -169,7 +169,7 @@ const Pricing = () => {
                   {/* CTA */}
                   <Link
                     to="/register"
-                    className="inline-flex items-center gap-2 bg-primary text-white font-body font-medium text-sm px-8 py-3.5 rounded-xl hover:bg-primary/90 transition-colors min-h-[44px]"
+                    className="inline-flex items-center gap-2 bg-primary text-primary-foreground font-body font-medium text-sm px-8 py-3.5 rounded-xl hover:bg-primary/90 transition-colors min-h-[44px]"
                   >
                     S'inscrire avant le 13 mai
                   </Link>
@@ -181,7 +181,7 @@ const Pricing = () => {
           {/* Grace period banner (between May 14 and June 13) */}
           {grace && (
             <section
-              className="rounded-2xl p-6 md:p-8 text-center space-y-4 border-2"
+              className="rounded-2xl p-6 md:p-8 text-center space-y-4 border-2 mb-16 md:mb-24"
               style={{
                 backgroundColor: "hsl(45 100% 96%)",
                 borderColor: "hsl(24 36% 60%)",
@@ -199,51 +199,48 @@ const Pricing = () => {
             </section>
           )}
 
-          {/* 2 Pricing Cards */}
-          <section className="grid md:grid-cols-2 gap-6 md:gap-8 items-start">
+          {/* ═══ ZONE 2 — Détail des offres ═══ */}
+          <section className="grid md:grid-cols-2 gap-6 md:gap-8 items-start mb-16 md:mb-24">
             {/* Owner Card */}
-            <Card className="border-border">
-              <CardHeader className="text-center pb-2">
-                <div className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-2 font-body">Propriétaire</div>
-                <CardTitle className="font-heading text-4xl font-bold text-foreground">Gratuit</CardTitle>
-                <p className="text-muted-foreground text-sm mt-1 font-body">Gratuit en 2026. C'est une décision de fond.</p>
+            <Card className="border-border rounded-2xl">
+              <CardHeader className="text-center pb-2 p-8">
+                <div className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-3 font-body">Propriétaire</div>
+                <CardTitle className="font-heading text-5xl font-bold text-foreground">Gratuit</CardTitle>
+                <p className="text-sm font-body text-foreground/60 italic mt-2">Gratuit en 2026. C'est une décision de fond.</p>
               </CardHeader>
-              <CardContent className="space-y-4 pt-4">
+              <CardContent className="space-y-5 px-8 pb-8 pt-2">
                 <ul className="space-y-3">
-                  {ownerFeatures.map((f) => (
+                  {ownerFeatures.map((f, i) => (
                     <li key={f} className="flex items-start gap-2.5 text-sm">
                       <Check className="h-4 w-4 text-primary mt-0.5 shrink-0" />
-                      <span className="text-foreground font-body">{f}</span>
+                      <span className={`font-body ${i === ownerFeatures.length - 1 ? "text-primary font-medium" : "text-foreground/70"}`}>{f}</span>
                     </li>
                   ))}
                 </ul>
                 <Link to="/register" className="block">
-                  <Button className="w-full min-h-[44px]" size="lg">S'inscrire gratuitement</Button>
+                  <Button variant="outline" className="w-full min-h-[44px] font-body" size="lg">S'inscrire gratuitement</Button>
                 </Link>
               </CardContent>
             </Card>
 
             {/* Sitter Card — highlighted */}
-            <Card className="border-primary border-2 relative shadow-lg md:scale-105">
+            <Card className="border-2 border-primary/30 relative shadow-xl rounded-2xl md:scale-105">
               {before && (
-                <div
-                  className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full text-sm font-semibold flex items-center gap-1.5 font-body"
-                  style={{ backgroundColor: "hsl(24 36% 60%)", color: "white" }}
-                >
-                  <Star className="h-3.5 w-3.5" fill="white" />
+                <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-amber-100 text-amber-800 text-xs font-body font-medium px-3 py-1 rounded-full flex items-center gap-1.5">
+                  <Star className="h-3 w-3" fill="currentColor" />
                   Badge Fondateur à vie
                 </div>
               )}
-              <CardHeader className="text-center pb-2 pt-8">
-                <div className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-2 font-body">Gardien</div>
+              <CardHeader className="text-center pb-2 p-8 pt-10">
+                <div className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-3 font-body">Gardien</div>
                 {before ? (
-                  <div className="text-center space-y-1 py-2">
-                    <p className="text-xs uppercase tracking-widest text-primary font-body font-medium">
+                  <div className="text-center space-y-1.5 py-2">
+                    <p className="text-xs uppercase tracking-widest text-primary font-body font-semibold">
                       Gratuit jusqu'au 13 juin
                     </p>
-                    <p className="font-heading text-4xl font-bold text-foreground">
-                      à partir de 9€
-                      <span className="text-base font-body font-normal text-foreground/60 ml-1">
+                    <p className="font-heading text-5xl font-bold text-foreground">
+                      9€
+                      <span className="text-lg font-body font-normal text-foreground/60 ml-1">
                         /mois
                       </span>
                     </p>
@@ -252,10 +249,10 @@ const Pricing = () => {
                     </p>
                   </div>
                 ) : (
-                  <div className="text-center space-y-1 py-2">
-                    <p className="font-heading text-4xl font-bold text-foreground">
-                      à partir de 9€
-                      <span className="text-base font-body font-normal text-foreground/60 ml-1">
+                  <div className="text-center space-y-1.5 py-2">
+                    <p className="font-heading text-5xl font-bold text-foreground">
+                      9€
+                      <span className="text-lg font-body font-normal text-foreground/60 ml-1">
                         /mois
                       </span>
                     </p>
@@ -265,18 +262,18 @@ const Pricing = () => {
                   </div>
                 )}
               </CardHeader>
-              <CardContent className="space-y-4 pt-4">
+              <CardContent className="space-y-5 px-8 pb-8 pt-2">
                 <ul className="space-y-3">
                   {sitterFeatures.map((f) => (
                     <li key={f} className="flex items-start gap-2.5 text-sm">
                       <Check className="h-4 w-4 text-primary mt-0.5 shrink-0" />
-                      <span className="text-foreground font-body">{f}</span>
+                      <span className="text-foreground/70 font-body">{f}</span>
                     </li>
                   ))}
                 </ul>
 
                 {/* Bloc formules */}
-                <div className="bg-muted/50 rounded-xl px-5 py-4 space-y-3 text-left">
+                <div className="bg-background border border-border/50 rounded-xl p-4 space-y-3 text-left">
                   <p className="text-xs uppercase tracking-widest text-foreground/50 font-body">
                     Trois formules
                   </p>
@@ -295,9 +292,12 @@ const Pricing = () => {
                   </div>
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
-                      <p className="text-sm font-medium text-foreground font-body">
-                        Mensuel
-                      </p>
+                      <div className="flex items-center gap-2">
+                        <p className="text-sm font-medium text-foreground font-body">
+                          Mensuel
+                        </p>
+                        <span className="text-xs font-body text-primary/70">Le plus choisi</span>
+                      </div>
                       <p className="text-xs text-foreground/50 font-body">
                         7 jours d'essai · Annulable à tout moment
                       </p>
@@ -322,13 +322,16 @@ const Pricing = () => {
                 </div>
 
                 {/* CTA */}
-                <div className="space-y-2 pt-2">
+                <div className="space-y-1 pt-2">
                   <Link
                     to="/register"
-                    className="w-full inline-flex items-center justify-center bg-primary text-white font-body font-medium text-sm px-6 py-3.5 rounded-xl hover:bg-primary/90 transition-colors min-h-[44px]"
+                    className="w-full inline-flex items-center justify-center bg-primary text-primary-foreground font-body font-medium text-sm px-6 py-3.5 rounded-xl hover:bg-primary/90 transition-colors min-h-[44px]"
                   >
                     S'inscrire gratuitement
                   </Link>
+                  <p className="text-xs font-body text-foreground/40 text-center mt-2">
+                    Aucune carte bancaire requise pendant la période fondateur
+                  </p>
                   <Link
                     to="/faq#formules"
                     className="w-full inline-flex items-center justify-center text-sm font-body text-foreground/60 hover:text-foreground transition-colors py-2"
@@ -340,39 +343,38 @@ const Pricing = () => {
             </Card>
           </section>
 
+          {/* ═══ ZONE 3 — Réassurance + action ═══ */}
 
           {/* Strengths Grid */}
-          <section className="space-y-6">
-            <h2 className="font-heading text-2xl font-bold text-foreground text-center">Tout ça, c'est Guardiens</h2>
+          <section className="mb-16 md:mb-24">
+            <h2 className="font-heading text-2xl md:text-3xl font-semibold text-foreground text-center mb-12">Tout ça, c'est Guardiens</h2>
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
               {strengthBlocks.map((block) => (
-                <Card key={block.title} className="border-border">
-                  <CardContent className="pt-6 space-y-3">
-                    <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                      <block.icon className="h-5 w-5 text-primary" />
-                    </div>
-                    <h3 className="font-heading font-bold text-foreground">{block.title}</h3>
-                    <p className="text-sm text-muted-foreground leading-relaxed font-body">{block.desc}</p>
-                  </CardContent>
-                </Card>
+                <div key={block.title} className="bg-card border border-border/40 rounded-2xl p-6 space-y-3 hover:border-border/80 transition-colors duration-200">
+                  <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                    <block.icon className="h-5 w-5 text-primary" />
+                  </div>
+                  <h3 className="text-base font-heading font-semibold text-foreground">{block.title}</h3>
+                  <p className="text-sm font-body text-foreground/60 leading-relaxed">{block.desc}</p>
+                </div>
               ))}
             </div>
           </section>
 
           {/* Promise */}
-          <section className="max-w-2xl mx-auto space-y-6 text-center">
-            <h2 className="font-heading text-2xl font-bold text-foreground">Notre promesse — Simple, honnête, et c'est tout</h2>
-            <div className="space-y-4">
+          <section className="max-w-2xl mx-auto text-center mb-16 md:mb-24">
+            <h2 className="font-heading text-2xl font-bold text-foreground mb-6">Notre promesse — Simple, honnête, et c'est tout</h2>
+            <div className="space-y-3">
               {promiseLines.map((line) => (
-                <p key={line} className="text-lg text-foreground/80 leading-relaxed font-body">{line}</p>
+                <p key={line.text} className={`leading-relaxed font-body ${line.weight}`}>{line.text}</p>
               ))}
             </div>
           </section>
 
           {/* Internal links — city pages + urgence */}
-          <section className="max-w-3xl mx-auto space-y-4">
-            <h2 className="font-heading text-xl font-bold text-foreground text-center">House-sitting par ville</h2>
-            <p className="text-sm text-muted-foreground text-center font-body">
+          <section className="max-w-3xl mx-auto mb-16 md:mb-24">
+            <h2 className="font-heading text-xl font-bold text-foreground text-center mb-4">House-sitting par ville</h2>
+            <p className="text-sm text-muted-foreground text-center font-body mb-6">
               Découvrez les gardiens vérifiés disponibles dans votre ville. Un imprévu ? Nos{" "}
               <Link to="/gardien-urgence" className="text-primary hover:underline">gardiens d'urgence</Link>{" "}
               sont mobilisables en quelques heures.
@@ -387,34 +389,48 @@ const Pricing = () => {
               <Link to="/house-sitting/grenoble" className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg border border-border text-sm font-body text-foreground hover:border-primary/40 hover:text-primary transition-colors">
                 <MapPin className="h-3.5 w-3.5" /> Grenoble
               </Link>
-               <Link to="/house-sitting/valence" className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg border border-border text-sm font-body text-foreground hover:border-primary/40 hover:text-primary transition-colors">
-                 <MapPin className="h-3.5 w-3.5" /> Valence
-               </Link>
+              <Link to="/house-sitting/valence" className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg border border-border text-sm font-body text-foreground hover:border-primary/40 hover:text-primary transition-colors">
+                <MapPin className="h-3.5 w-3.5" /> Valence
+              </Link>
             </div>
           </section>
 
           {/* FAQ */}
-          <section className="max-w-3xl mx-auto space-y-6">
-            <h2 className="font-heading text-2xl font-bold text-foreground text-center">Questions fréquentes</h2>
+          <section className="max-w-3xl mx-auto mb-16 md:mb-24">
+            <h2 className="font-heading text-2xl font-bold text-foreground text-center mb-3">Questions fréquentes</h2>
+            <p className="text-sm font-body text-foreground/60 text-center mb-8">
+              Des questions sur le modèle ? Voici les réponses directes.
+            </p>
             <Accordion type="single" collapsible className="w-full">
               {faqItems.map((item, i) => (
-                <AccordionItem key={i} value={`faq-${i}`}>
-                  <AccordionTrigger className="text-left font-medium font-body">{item.q}</AccordionTrigger>
-                  <AccordionContent className="text-muted-foreground font-body">{item.a}</AccordionContent>
+                <AccordionItem key={i} value={`faq-${i}`} className="border-b border-border/40 py-1">
+                  <AccordionTrigger className="text-left text-base font-body font-medium text-foreground hover:text-primary transition-colors py-5">
+                    {item.q}
+                  </AccordionTrigger>
+                  <AccordionContent className="text-sm font-body text-foreground/65 leading-relaxed pt-1 pb-4">
+                    {item.a}
+                  </AccordionContent>
                 </AccordionItem>
               ))}
             </Accordion>
           </section>
 
           {/* CTA final */}
-          <section className="text-center space-y-4 py-8">
-            <p className="text-lg text-muted-foreground max-w-xl mx-auto font-body">
+          <section className="text-center py-20 md:py-28 bg-muted/30 rounded-2xl mb-16">
+            <p className="text-lg md:text-xl font-heading font-semibold text-foreground text-center mb-2">
               {before
-                ? "Rejoignez les Fondateurs avant le 13 mai — badge à vie, accès jusqu'au 13 juin."
+                ? "Rejoignez les Fondateurs avant le 13 mai"
+                : "Prêt à rejoindre Guardiens ?"}
+            </p>
+            <p className="text-sm font-body text-foreground/60 text-center mb-8">
+              {before
+                ? "Badge à vie, accès jusqu'au 13 juin."
                 : "9€/mois pour les gardiens. Gratuit pour les propriétaires. Sans engagement."}
             </p>
             <Link to="/register">
-              <Button variant="hero" size="xl" className="min-h-[44px]">S'inscrire</Button>
+              <Button className="bg-primary text-primary-foreground font-body font-medium px-10 py-4 rounded-xl text-base hover:bg-primary/90 transition-colors min-h-[52px]" size="xl">
+                S'inscrire
+              </Button>
             </Link>
           </section>
 
