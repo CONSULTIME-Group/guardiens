@@ -317,7 +317,7 @@ const GuideDetail = () => {
                 {nearbyGuides.map((ng) => (
                   <Link
                     key={ng.id}
-                    to={`/guide/${ng.slug}`}
+                    to={`/guides/${ng.slug}`}
                     className="flex items-center gap-2 p-3 rounded-lg border border-border hover:bg-accent/50 transition-colors"
                   >
                     <MapPin className="h-4 w-4 text-primary shrink-0" />
@@ -379,7 +379,7 @@ const GuideDetail = () => {
               itemListElement: [
                 { "@type": "ListItem", position: 1, name: "Guardiens", item: "https://guardiens.fr" },
                 { "@type": "ListItem", position: 2, name: "Guides", item: "https://guardiens.fr/guides" },
-                { "@type": "ListItem", position: 3, name: guide.city, item: `https://guardiens.fr/guide/${guide.slug}` },
+                { "@type": "ListItem", position: 3, name: guide.city, item: `https://guardiens.fr/guides/${guide.slug}` },
               ],
             }),
           }}
@@ -394,7 +394,7 @@ const GuideDetail = () => {
               "@type": "TouristDestination",
               name: `${guide.city} — Guide pet sitting`,
               description: `Guide pratique pour les gardiens d'animaux à ${guide.city}. ${guide.intro}`,
-              url: `https://guardiens.fr/guide/${guide.slug}`,
+              url: `https://guardiens.fr/guides/${guide.slug}`,
               touristType: ["Pet sitter", "House sitter", "Gardien d'animaux"],
               containedInPlace: {
                 "@type": "AdministrativeArea",
