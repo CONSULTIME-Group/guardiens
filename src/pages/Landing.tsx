@@ -3,6 +3,7 @@ import notreHistoirePanorama from "@/assets/story-photo.jpeg";
 import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, ArrowLeft, Home, Key, Handshake } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 import PageMeta from "@/components/PageMeta";
 import useEmblaCarousel from "embla-carousel-react";
@@ -86,6 +87,60 @@ const RevealSection = ({ children, className = "", delay = 0 }: { children: Reac
 
 const Landing = () => {
   const navigate = useNavigate();
+
+  const [kpiMaisons, setKpiMaisons] = useState<number>(37);
+  const [kpiAnimaux, setKpiAnimaux] = useState<number>(234);
+  const [kpiInscrits, setKpiInscrits] = useState<number>(0);
+  const [kpiMissions, setKpiMissions] = useState<number>(0);
+
+  useEffect(() => {
+    const loadKPIs = async () => {
+      const { count: sitsCount } = await supabase
+        .from('sits')
+        .select('*', { count: 'exact', head: true })
+        .eq('status', 'completed');
+      if (typeof sitsCount === 'number') {
+        setKpiMaisons(sitsCount + 37);
+      }
+
+      const { count: profilesCount } = await supabase
+        .from('profiles')
+        .select('*', { count: 'exact', head: true });
+      if (typeof profilesCount === 'number') {
+        setKpiInscrits(profilesCount);
+      }
+
+      const { count: missionsCount } = await supabase
+        .from('small_missions')
+        .select('*', { count: 'exact', head: true })
+        .eq('status', 'completed');
+      if (typeof missionsCount === 'number') {
+        setKpiMissions(missionsCount);
+      }
+
+      const { data: completedSits } = await supabase
+        .from('sits')
+        .select('property_id')
+        .eq('status', 'completed');
+      if (completedSits && completedSits.length > 0) {
+        const propertyIds = [
+          ...new Set(
+            completedSits
+              .filter(s => s.property_id)
+              .map(s => s.property_id)
+          )
+        ];
+        const { count: petCount } = await supabase
+          .from('pets')
+          .select('*', { count: 'exact', head: true })
+          .in('property_id', propertyIds);
+        if (typeof petCount === 'number') {
+          setKpiAnimaux(234 + petCount);
+        }
+      }
+    };
+    loadKPIs();
+  }, []);
 
   /* ── Embla carousel for testimonials ── */
   const [emblaRef, emblaApi] = useEmblaCarousel({
@@ -279,16 +334,20 @@ const Landing = () => {
 
             <div className="flex flex-row justify-center sm:justify-start gap-12 mt-12 animate-hero-fade-up animation-delay-1100">
               <div className="border-r border-white/20 pr-12">
-                <span className="block text-3xl font-heading font-bold text-white">37</span>
+                <span className="block text-3xl font-heading font-bold text-white">{kpiMaisons}</span>
                 <span className="text-xs font-body text-white/50 tracking-wide uppercase mt-1 block">maisons gardées</span>
               </div>
               <div className="border-r border-white/20 pr-12">
-                <span className="block text-3xl font-heading font-bold text-white">234</span>
+                <span className="block text-3xl font-heading font-bold text-white">{kpiAnimaux}</span>
                 <span className="text-xs font-body text-white/50 tracking-wide uppercase mt-1 block">animaux accompagnés</span>
               </div>
+              <div className="border-r border-white/20 pr-12">
+                <span className="block text-3xl font-heading font-bold text-white">{kpiInscrits}</span>
+                <span className="text-xs font-body text-white/50 tracking-wide uppercase mt-1 block">inscrits</span>
+              </div>
               <div>
-                <span className="block text-3xl font-heading font-bold text-white">5 ans</span>
-                <span className="text-xs font-body text-white/50 tracking-wide uppercase mt-1 block">en Auvergne-Rhône-Alpes</span>
+                <span className="block text-3xl font-heading font-bold text-white">{kpiMissions}</span>
+                <span className="text-xs font-body text-white/50 tracking-wide uppercase mt-1 block">entraide</span>
               </div>
             </div>
           </div>
