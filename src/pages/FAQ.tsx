@@ -1,6 +1,20 @@
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { marked } from "marked";
+import { marked, Renderer } from "marked";
+
+const faqRenderer = new Renderer();
+faqRenderer.link = ({ href, text }: { href: string; text: string }) => {
+  const isExternal = href.startsWith("http");
+  const attrs = isExternal
+    ? ` target="_blank" rel="noopener noreferrer"`
+    : "";
+  return `<a href="${href}" class="text-primary underline hover:text-primary/80"${attrs}>${text}</a>`;
+};
+faqRenderer.paragraph = ({ text }: { text: string }) => {
+  return `<p class="mb-3 last:mb-0">${text}</p>`;
+};
+
+const faqMarkedOptions = { renderer: faqRenderer, gfm: true, breaks: false };
 import { supabase } from "@/integrations/supabase/client";
 import PageMeta from "@/components/PageMeta";
 import {
@@ -129,7 +143,7 @@ const FAQ = () => {
                           <AccordionContent className="text-muted-foreground leading-relaxed pb-5">
                             <div
                               className="prose prose-sm max-w-none text-muted-foreground prose-a:text-primary prose-strong:text-foreground"
-                              dangerouslySetInnerHTML={{ __html: marked.parse(entry.answer, { async: false }) as string }}
+                              dangerouslySetInnerHTML={{ __html: marked.parse(entry.answer, { async: false, ...faqMarkedOptions }) as string }}
                             />
                           </AccordionContent>
                         </AccordionItem>
