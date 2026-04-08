@@ -104,6 +104,7 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
   useEffect(() => { load(); }, [sitId]);
 
   const handleAccept = async (app: any) => {
+    try {
     const sitterName = app.sitter?.first_name || "Ce gardien";
     const sitterId = app.sitter_id;
 
@@ -260,6 +261,14 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
     toast({ title: "Garde confirmée !", description: `${sitterName} a été choisi(e) pour cette garde.` });
     setConfirmApp(null);
     load();
+    } catch (error) {
+      console.error('handleAccept error:', error);
+      toast({
+        title: "Erreur",
+        description: "Une erreur est survenue lors de la confirmation.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleDecline = async (app: any, message?: string) => {
