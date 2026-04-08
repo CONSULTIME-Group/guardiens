@@ -145,7 +145,7 @@ export default function AccordDeGarde({ garde, onClose }: AccordDeGardeProps) {
         <div>
           <p className="font-semibold text-sm mb-2">Si un animal ne va pas bien</p>
           <p className="text-sm mb-3">
-            Même avec les meilleurs soins, ça arrive. Ce qui a été convenu ici évite d'avoir à improviser au mauvais moment.
+            Même avec les meilleurs soins, un imprévu peut arriver. Ce qui a été convenu ici évite d'avoir à improviser au mauvais moment.
           </p>
           <div className="bg-muted rounded-lg p-4 text-sm space-y-1">
             <p>Joindre {p} en premier : {garde.proprio.telephone}</p>
