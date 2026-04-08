@@ -12,29 +12,20 @@ const isBeforeLaunch = () => new Date() < LAUNCH_DATE;
 const isInGracePeriod = () => { const n = new Date(); return n >= LAUNCH_DATE && n < GRACE_END; };
 
 const ownerFeatures = [
-  "Créer votre profil complet",
-  "Publier vos annonces de garde",
-  "Recevoir des candidatures",
-  "Messagerie illimitée",
-  "Avis croisés détaillés",
-  "Guide de la maison intégré",
-  "Accès aux gardiens vérifiés",
-  "Guides locaux (parcs, vétos, balades)",
-  "Support",
+  "Publiez une annonce en 5 minutes",
+  "Recevez des candidatures de gardiens dont l'identité est vérifiée",
+  "Échangez avec eux avant de choisir",
+  "Vos animaux restent dans leur maison, leurs habitudes, leurs repères",
+  "Laissez un avis après chaque garde",
 ];
 
 const sitterFeatures = [
-  "Créer votre profil complet",
-  "Accéder à toutes les annonces en détail",
-  "Postuler aux gardes",
-  "Messagerie illimitée",
-  "Avis croisés détaillés",
-  "Mode « Je suis disponible »",
-  "Fiches races complètes (caractère, conseils de garde)",
-  "Guides locaux complets (parcs, vétos, balades, cafés)",
-  "Articles du blog en accès complet",
-  "Badges et métriques de fiabilité",
-  "Support",
+  "Postulez aux gardes près de chez vous",
+  "Accédez aux annonces complètes (animaux, maison, dates, attentes)",
+  "Messagerie directe avec les propriétaires",
+  "Profil de confiance avec avis croisés et écussons",
+  "Mode « Je suis disponible » pour être trouvé sans chercher",
+  "Guides locaux et fiches races complètes",
 ];
 
 const strengthBlocks = [
@@ -202,24 +193,31 @@ const Pricing = () => {
           {/* ═══ ZONE 2 — Détail des offres ═══ */}
           <section className="grid md:grid-cols-2 gap-6 md:gap-8 items-stretch mb-16 md:mb-24">
             {/* Owner Card */}
-            <Card className="border-border rounded-2xl h-full flex flex-col">
-              <CardHeader className="text-center pb-2 p-8">
+            <Card className="border-border rounded-2xl h-full flex flex-col relative">
+              {before && (
+                <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-amber-100 text-amber-800 text-xs font-body font-medium px-3 py-1 rounded-full flex items-center gap-1.5">
+                  <Star className="h-3 w-3" fill="currentColor" />
+                  Badge Fondateur à vie
+                </div>
+              )}
+              <CardHeader className={`text-center pb-2 p-8 ${before ? 'pt-10' : ''}`}>
                 <div className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-3 font-body">Propriétaire</div>
                 <CardTitle className="font-heading text-5xl font-bold text-foreground">Gratuit</CardTitle>
-                <p className="text-sm font-body text-foreground/60 italic mt-2">Gratuit en 2026. C'est une décision de fond.</p>
+                <p className="text-sm font-body text-foreground/60 italic mt-2">Parce qu'on ne facture pas ceux qui ouvrent leur maison.</p>
               </CardHeader>
               <CardContent className="space-y-5 px-8 pb-8 pt-2 flex-1 flex flex-col">
                 <ul className="space-y-3 flex-1">
-                  {ownerFeatures.map((f, i) => (
+                  {ownerFeatures.map((f) => (
                     <li key={f} className="flex items-start gap-2.5 text-sm">
                       <Check className="h-4 w-4 text-primary mt-0.5 shrink-0" />
-                      <span className={`font-body ${i === ownerFeatures.length - 1 ? "text-primary font-medium" : "text-foreground/70"}`}>{f}</span>
+                      <span className="font-body text-foreground/70">{f}</span>
                     </li>
                   ))}
                 </ul>
+                <p className="text-xs font-body text-foreground/50 text-center italic">Gratuit maintenant, gratuit toujours.</p>
                 <div className="mt-auto">
                   <Link to="/register" className="block">
-                    <Button variant="outline" className="w-full min-h-[44px] font-body" size="lg">S'inscrire gratuitement</Button>
+                    <Button variant="outline" className="w-full min-h-[44px] font-body border-2 border-foreground/25 hover:border-foreground/50 text-foreground/70 hover:text-foreground bg-transparent transition-colors duration-200" size="lg">S'inscrire gratuitement</Button>
                   </Link>
                 </div>
               </CardContent>
@@ -241,6 +239,7 @@ const Pricing = () => {
                       Gratuit jusqu'au 13 juin
                     </p>
                     <p className="font-heading text-5xl font-bold text-foreground">
+                      <span className="text-lg font-body font-normal text-foreground/60 mr-1">à partir de</span>
                       9€
                       <span className="text-lg font-body font-normal text-foreground/60 ml-1">
                         /mois
@@ -253,6 +252,7 @@ const Pricing = () => {
                 ) : (
                   <div className="text-center space-y-1.5 py-2">
                     <p className="font-heading text-5xl font-bold text-foreground">
+                      <span className="text-lg font-body font-normal text-foreground/60 mr-1">à partir de</span>
                       9€
                       <span className="text-lg font-body font-normal text-foreground/60 ml-1">
                         /mois
