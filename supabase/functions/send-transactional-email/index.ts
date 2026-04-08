@@ -329,22 +329,28 @@ Deno.serve(async (req) => {
     metadata: { idempotency_key: idempotencyKey },
   })
 
+  const emailPayload: Record<string, unknown> = {
+    message_id: messageId,
+    to: effectiveRecipient,
+    from: `${SITE_NAME} <noreply@${FROM_DOMAIN}>`,
+    sender_domain: SENDER_DOMAIN,
+    subject: resolvedSubject,
+    html,
+    text: plainText,
+    purpose: 'transactional',
+    label: templateName,
+    idempotency_key: idempotencyKey,
+    unsubscribe_token: unsubscribeToken,
+    queued_at: new Date().toISOString(),
+  }
+
+  if (templateName === 'contact-reply') {
+    emailPayload.reply_to = 'contact.guardiens@gmail.com'
+  }
+
   const { error: enqueueError } = await supabase.rpc('enqueue_email', {
     queue_name: 'transactional_emails',
-    payload: {
-      message_id: messageId,
-      to: effectiveRecipient,
-      from: `${SITE_NAME} <noreply@${FROM_DOMAIN}>`,
-      sender_domain: SENDER_DOMAIN,
-      subject: resolvedSubject,
-      html,
-      text: plainText,
-      purpose: 'transactional',
-      label: templateName,
-      idempotency_key: idempotencyKey,
-      unsubscribe_token: unsubscribeToken,
-      queued_at: new Date().toISOString(),
-    },
+    payload: emailPayload,
   })
 
   if (enqueueError) {
