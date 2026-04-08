@@ -72,6 +72,7 @@ import AdminSEO from "./pages/admin/AdminSEO";
 import AdminSkills from "./pages/admin/AdminSkills";
 
 import EmergencySitter from "./pages/EmergencySitter";
+import { AccordDeGardePreview as TestAccord } from "./components/gardes/AccordDeGarde";
 import MySubscription from "./pages/MySubscription";
 import PublicSitDetail from "./pages/PublicSitDetail";
 import PublicSitterProfile from "./pages/PublicSitterProfile";
@@ -155,6 +156,7 @@ const AppRoutes = () => (
     <Route path="/house-sitting/:slug" element={<CityPage />} />
     <Route path="/departement/:slug" element={<DepartmentPage />} />
     <Route path="/tarifs" element={<Pricing />} />
+    <Route path="/test-accord" element={<div className="p-6 bg-background min-h-screen"><TestAccord /></div>} />
     <Route path="/gardien-urgence" element={<EmergencySitter />} />
     <Route path="/petites-missions" element={<SmallMissionsRoute />} />
     <Route path="/petites-missions/creer" element={<ProtectedRoute><CreateSmallMission /></ProtectedRoute>} />
