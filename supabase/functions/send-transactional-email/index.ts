@@ -317,10 +317,24 @@ Deno.serve(async (req) => {
       ? template.subject(templateData)
       : template.subject
 
-  // 5. Enqueue the pre-rendered email for async processing by the dispatcher.
-  // The dispatcher (process-email-queue) handles sending, retries, and rate-limit backoff.
+  // 5. Send email directly via Resend (bypasses broken Lovable email queue)
+  const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY')
+  if (!RESEND_API_KEY) {
+    console.error('RESEND_API_KEY is not configured')
+    await supabase.from('email_send_log').insert({
+      message_id: messageId,
+      template_name: templateName,
+      recipient_email: effectiveRecipient,
+      status: 'failed',
+      error_message: 'RESEND_API_KEY not configured',
+    })
+    return new Response(JSON.stringify({ error: 'Email service not configured' }), {
+      status: 500,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    })
+  }
 
-  // Log pending BEFORE enqueue so we have a record even if enqueue crashes
+  // Log pending
   await supabase.from('email_send_log').insert({
     message_id: messageId,
     template_name: templateName,
@@ -329,58 +343,71 @@ Deno.serve(async (req) => {
     metadata: { idempotency_key: idempotencyKey },
   })
 
-  const emailPayload: Record<string, unknown> = {
-    message_id: messageId,
-    to: effectiveRecipient,
+  const resendPayload: Record<string, unknown> = {
     from: `${SITE_NAME} <noreply@${FROM_DOMAIN}>`,
-    sender_domain: SENDER_DOMAIN,
+    to: [effectiveRecipient],
     subject: resolvedSubject,
     html,
     text: plainText,
-    purpose: 'transactional',
-    label: templateName,
-    idempotency_key: idempotencyKey,
-    unsubscribe_token: unsubscribeToken,
-    queued_at: new Date().toISOString(),
   }
 
   if (templateName === 'contact-reply') {
-    emailPayload.reply_to = 'contact.guardiens@gmail.com'
+    resendPayload.reply_to = 'contact.guardiens@gmail.com'
   }
 
-  const { error: enqueueError } = await supabase.rpc('enqueue_email', {
-    queue_name: 'transactional_emails',
-    payload: emailPayload,
-  })
-
-  if (enqueueError) {
-    console.error('Failed to enqueue email', {
-      error: enqueueError,
-      templateName,
-      effectiveRecipient,
+  try {
+    const resendRes = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${RESEND_API_KEY}`,
+      },
+      body: JSON.stringify(resendPayload),
     })
 
+    const resendData = await resendRes.json()
+
+    if (!resendRes.ok) {
+      console.error('Resend API error', { status: resendRes.status, data: resendData })
+      await supabase.from('email_send_log').insert({
+        message_id: messageId,
+        template_name: templateName,
+        recipient_email: effectiveRecipient,
+        status: 'failed',
+        error_message: `Resend ${resendRes.status}: ${resendData.message || 'Unknown error'}`,
+      })
+      return new Response(JSON.stringify({ error: 'Failed to send email' }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
+
+    // Log success
+    await supabase.from('email_send_log').insert({
+      message_id: messageId,
+      template_name: templateName,
+      recipient_email: effectiveRecipient,
+      status: 'sent',
+    })
+
+    console.log('Transactional email sent via Resend', { templateName, effectiveRecipient, resendId: resendData.id })
+
+    return new Response(
+      JSON.stringify({ success: true, sent: true, resendId: resendData.id }),
+      { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    )
+  } catch (sendError) {
+    console.error('Resend fetch error', sendError)
     await supabase.from('email_send_log').insert({
       message_id: messageId,
       template_name: templateName,
       recipient_email: effectiveRecipient,
       status: 'failed',
-      error_message: 'Failed to enqueue email',
+      error_message: sendError.message || 'Network error sending via Resend',
     })
-
-    return new Response(JSON.stringify({ error: 'Failed to enqueue email' }), {
+    return new Response(JSON.stringify({ error: 'Failed to send email' }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })
   }
-
-  console.log('Transactional email enqueued', { templateName, effectiveRecipient })
-
-  return new Response(
-    JSON.stringify({ success: true, queued: true }),
-    {
-      status: 200,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    }
-  )
 })

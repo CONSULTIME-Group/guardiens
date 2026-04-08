@@ -1,5 +1,3 @@
-import { createClient } from 'npm:@supabase/supabase-js@2'
-
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers':
@@ -12,34 +10,12 @@ Deno.serve(async (req) => {
   }
 
   try {
-    // Verify caller is authenticated
-    const authHeader = req.headers.get('Authorization')
-    if (!authHeader) {
-      return new Response(JSON.stringify({ error: 'Missing authorization' }), {
-        status: 401,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      })
-    }
-
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!
-    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')!
-    const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-      global: { headers: { Authorization: authHeader } },
-    })
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    if (authError || !user) {
-      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
-        status: 401,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      })
-    }
-
     const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY')
     if (!RESEND_API_KEY) {
       throw new Error('RESEND_API_KEY is not configured')
     }
 
-    const { to, subject, html, from } = await req.json()
+    const { to, subject, html, text, from, reply_to } = await req.json()
 
     if (!to || !subject || !html) {
       return new Response(
@@ -48,18 +24,22 @@ Deno.serve(async (req) => {
       )
     }
 
+    const payload: Record<string, unknown> = {
+      from: from || 'Guardiens <noreply@guardiens.fr>',
+      to: Array.isArray(to) ? to : [to],
+      subject,
+      html,
+    }
+    if (text) payload.text = text
+    if (reply_to) payload.reply_to = reply_to
+
     const response = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${RESEND_API_KEY}`,
       },
-      body: JSON.stringify({
-        from: from || 'Guardiens <noreply@guardiens.fr>',
-        to: Array.isArray(to) ? to : [to],
-        subject,
-        html,
-      }),
+      body: JSON.stringify(payload),
     })
 
     const data = await response.json()
