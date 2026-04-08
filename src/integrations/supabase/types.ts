@@ -3441,6 +3441,14 @@ export type Database = {
         Args: { p_user_id: string }
         Returns: undefined
       }
+      reinvite_candidat: {
+        Args: {
+          p_application_id: string
+          p_sit_id: string
+          p_sitter_id: string
+        }
+        Returns: undefined
+      }
       repondre_avis_annulation: {
         Args: {
           p_respondent_id: string
