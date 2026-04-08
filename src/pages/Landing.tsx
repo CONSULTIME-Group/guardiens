@@ -319,7 +319,7 @@ const Landing = () => {
               </div>
               <div>
                 <span className="block text-3xl font-heading font-bold text-white">{kpiMissions}</span>
-                <span className="text-xs font-body text-white/50 tracking-wide uppercase mt-1 block">entraide</span>
+                <span className="text-xs font-body text-white/50 tracking-wide uppercase mt-1 block">entraides</span>
               </div>
             </div>
           </div>
