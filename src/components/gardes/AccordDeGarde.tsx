@@ -130,7 +130,8 @@ export default function AccordDeGarde({ garde, onClose }: AccordDeGardeProps) {
           <p className="font-semibold text-sm mb-2">Les animaux concernés</p>
           {garde.animaux.map((a, i) => (
             <p key={i} className="text-sm">
-              {a.prenom} · {a.espece}
+              {a.prenom}
+              {a.espece ? ` · ${a.espece}` : ""}
               {a.race ? ` · ${a.race}` : ""}
               {a.age ? ` · ${a.age}` : ""}
             </p>

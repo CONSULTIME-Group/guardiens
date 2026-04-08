@@ -604,6 +604,7 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
       {showAccord && accordData && (
         <Dialog open={showAccord} onOpenChange={(o) => { if (!o) setShowAccord(false); }}>
           <DialogContent className="max-w-2xl p-0 overflow-hidden">
+            <DialogTitle className="sr-only">Accord de garde</DialogTitle>
             <AccordDeGarde
               garde={accordData}
               onClose={() => setShowAccord(false)}
