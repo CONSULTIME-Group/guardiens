@@ -167,7 +167,6 @@ export function useOwnerProfile() {
   }, [user]);
 
   useEffect(() => { fetchData(); }, [fetchData]);
-  }, [fetchData]);
 
   const computeCompletion = useCallback((d: OwnerProfileData, petsCount: number): number => {
     let total = 0;
