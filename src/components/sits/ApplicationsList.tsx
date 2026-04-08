@@ -178,9 +178,14 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
         .eq("published", true)
         .maybeSingle();
 
-      const startFormatted = startDate
-        ? format(parseISO(startDate), "dd MMMM", { locale: fr })
-        : "";
+      let startFormatted = "";
+      if (startDate) {
+        try {
+          startFormatted = format(parseISO(startDate), "dd MMMM", { locale: fr });
+        } catch {
+          startFormatted = startDate;
+        }
+      }
 
       await supabase.from("notifications").insert({
         user_id: sitterId,
