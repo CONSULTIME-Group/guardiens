@@ -39,10 +39,34 @@ const PRIORITY_ARTICLES = [
 ];
 
 const PRIORITY_BADGES = {
-  high: { label: "🔴 Haute", className: "bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300" },
-  medium: { label: "🟠 Moyenne", className: "bg-orange-100 text-orange-700 dark:bg-orange-900 dark:text-orange-300" },
-  low: { label: "🟡 Basse", className: "bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300" },
+  high: { label: "🔴 Haute", className: "bg-red-100 text-red-700" },
+  medium: { label: "🟠 Moyenne", className: "bg-orange-100 text-orange-700" },
+  low: { label: "🟡 Basse", className: "bg-yellow-100 text-yellow-700" },
 };
+
+const SLUG_LABELS: Record<string, string> = {
+  "house-sitting-clermont-ferrand": "Clermont-Ferrand",
+  "house-sitting-saint-etienne": "Saint-Étienne",
+  "house-sitting-valence": "Valence",
+  "house-sitting-bourg-en-bresse": "Bourg-en-Bresse",
+  "house-sitting-croix-rousse-lyon": "Croix-Rousse (Lyon)",
+  "house-sitting-vieux-lyon": "Vieux-Lyon",
+  "house-sitting-presqu-ile-lyon": "Presqu'île (Lyon)",
+  "husky-guide-race": "Husky",
+  "yorkshire-terrier-guide-race": "Yorkshire Terrier",
+  "beagle-guide-race": "Beagle",
+  "maine-coon-guide-race": "Maine Coon",
+  "jardinage-echange-service-voisin-grenoble": "Jardinage & échange — Grenoble",
+  "aide-courses-voisin-annecy": "Aide courses — Annecy",
+  "bricolage-voisin-chambery": "Bricolage — Chambéry",
+};
+
+function humanizeSlug(slug: string): string {
+  if (SLUG_LABELS[slug]) return SLUG_LABELS[slug];
+  return slug
+    .replace(/-/g, " ")
+    .replace(/\b\w/g, (c) => c.toUpperCase());
+}
 
 const StatusIcon = ({ status }: { status: "done" | "warn" | "fail" }) => {
   if (status === "done") return <CheckCircle2 className="h-5 w-5 text-emerald-600" />;
@@ -88,6 +112,8 @@ const ContentToCreate = () => {
     return acc;
   }, {});
 
+  const missingCount = PRIORITY_ARTICLES.filter((a) => !existingSlugs.has(a.slug)).length;
+
   if (loading) return null;
 
   return (
@@ -124,7 +150,7 @@ const ContentToCreate = () => {
                     </TableCell>
                     <TableCell className="text-center">
                       {status === "done" ? (
-                        <Badge className="bg-emerald-100 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-300 text-[10px]">
+                        <Badge className="bg-emerald-100 text-emerald-700 text-[10px]">
                           ✅ Atteint
                         </Badge>
                       ) : (
@@ -153,14 +179,15 @@ const ContentToCreate = () => {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {items.map((item) => {
                   const exists = existingSlugs.has(item.slug);
+                  const label = humanizeSlug(item.slug);
                   return (
                     <div
                       key={item.slug}
                       className={`border rounded-lg p-3 flex items-center justify-between gap-2 ${exists ? "opacity-50 bg-muted/30" : "bg-card"}`}
                     >
                       <div className="min-w-0">
-                        <p className="text-sm font-medium truncate">{item.slug}</p>
-                        <p className="text-xs text-muted-foreground">{item.type}</p>
+                        <p className="text-sm font-medium truncate">{label}</p>
+                        <p className="text-xs text-muted-foreground truncate">{item.slug}</p>
                       </div>
                       {exists ? (
                         <span className="text-xs text-primary font-medium shrink-0">✅ Créé</span>
@@ -186,4 +213,5 @@ const ContentToCreate = () => {
   );
 };
 
+export { PRIORITY_ARTICLES };
 export default ContentToCreate;
