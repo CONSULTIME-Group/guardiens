@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import AccordDeGarde from "@/components/gardes/AccordDeGarde";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -54,7 +55,8 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
   const [declineCustom, setDeclineCustom] = useState(false);
   const [declinedOpen, setDeclinedOpen] = useState(false);
   const navigate = useNavigate();
-
+  const [showAccord, setShowAccord] = useState(false);
+  const [accordData, setAccordData] = useState<any>(null);
   const declineTemplates = [
     "Merci pour votre candidature ! J'ai trouvé un gardien dont le profil correspondait davantage à mes besoins cette fois-ci. N'hésitez pas à postuler à mes prochaines annonces !",
     "Merci de votre intérêt ! Les dates ne correspondent malheureusement pas tout à fait. J'espère qu'on pourra collaborer une prochaine fois !",
@@ -211,6 +213,44 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
         }
       }
     }
+
+    // Fetch data for AccordDeGarde
+    const { data: proprioProfile } = await supabase
+      .from("profiles")
+      .select("first_name, city")
+      .eq("id", user!.id)
+      .maybeSingle();
+
+    setAccordData({
+      gardeId: sitId,
+      dateDebut: startDate ?? "",
+      dateFin: endDate ?? "",
+      adresse: proprioProfile?.city ?? "",
+      proprio: {
+        prenom: proprioProfile?.first_name ?? "Le propriétaire",
+        telephone: "",
+      },
+      gardien: {
+        prenom: app.sitter?.first_name ?? "Le gardien",
+      },
+      animaux: petNames.map((name: string) => ({
+        prenom: name,
+        espece: "",
+      })),
+      reglesVie: {
+        animauxPartout: null,
+        invites: null,
+        tabac: null,
+        autresPrecisions: null,
+      },
+      voisinConfiance: null,
+      urgences: null,
+      montantVetMax: null,
+      montantLogementMax: null,
+      estLongueDuree: false,
+      contributionCharges: null,
+    });
+    setShowAccord(true);
 
     toast({ title: "Garde confirmée !", description: `${sitterName} a été choisi(e) pour cette garde.` });
     setConfirmApp(null);
@@ -543,6 +583,17 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
                 Confirmer le déclin
               </Button>
             </div>
+          </DialogContent>
+        </Dialog>
+      )}
+
+      {showAccord && accordData && (
+        <Dialog open={showAccord} onOpenChange={(o) => { if (!o) setShowAccord(false); }}>
+          <DialogContent className="max-w-2xl p-0 overflow-hidden">
+            <AccordDeGarde
+              garde={accordData}
+              onClose={() => setShowAccord(false)}
+            />
           </DialogContent>
         </Dialog>
       )}
