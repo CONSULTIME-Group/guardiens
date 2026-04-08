@@ -33,6 +33,7 @@ const AdminSEO = () => {
   const [articleStats, setArticleStats] = useState<{ published: number; total: number } | null>(null);
   const [profileCount, setProfileCount] = useState<number | null>(null);
   const [existingSlugs, setExistingSlugs] = useState<Set<string>>(new Set());
+  const [publishedArticles, setPublishedArticles] = useState<{ slug: string; published_at: string | null }[]>([]);
 
   useEffect(() => {
     const fetchArticleStats = async () => {
@@ -52,8 +53,11 @@ const AdminSEO = () => {
       setProfileCount(count ?? 0);
     };
     const fetchExistingSlugs = async () => {
-      const { data } = await supabase.from("articles").select("slug");
-      if (data) setExistingSlugs(new Set(data.map((a) => a.slug)));
+      const { data } = await supabase.from("articles").select("slug, published_at, published");
+      if (data) {
+        setExistingSlugs(new Set(data.map((a) => a.slug)));
+        setPublishedArticles(data.filter((a) => a.published).map((a) => ({ slug: a.slug, published_at: a.published_at })));
+      }
     };
     fetchArticleStats();
     fetchProfileCount();
@@ -101,10 +105,20 @@ const AdminSEO = () => {
     ? gsc.topPages.filter((p) => p.impressions > 0).length
     : null;
 
-  // Compute KPI 3: Content without impressions after 7 days
-  // We use topPages to find articles that appear with 0 impressions — but actually
-  // articles NOT in topPages at all are the ones with 0 impressions.
-  // This is computed in PriorityActions already, so we show a simplified version here.
+  // Compute KPI 3: Published articles >7 days old with 0 GSC impressions
+  const noImpressionCount = (() => {
+    if (!gscAvailable || !gsc?.topPages) return null;
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+    const pagesWithImpressions = new Set(gsc.topPages.filter((p) => p.impressions > 0).map((p) => {
+      const url = p.keys?.[0] || "";
+      try { return new URL(url).pathname.replace(/^\/articles\//, "").replace(/\/$/, ""); } catch { return url; }
+    }));
+    return publishedArticles.filter((a) => {
+      if (!a.published_at) return false;
+      return new Date(a.published_at) < sevenDaysAgo && !pagesWithImpressions.has(a.slug);
+    }).length;
+  })();
 
   // Compute KPI 4: Priority articles to create
   const priorityToCreate = PRIORITY_ARTICLES.filter((a) => !existingSlugs.has(a.slug)).length;
@@ -147,10 +161,10 @@ const AdminSEO = () => {
             subtitle={gscAvailable ? "Pages avec ≥1 impression · GSC" : "GSC non disponible"}
           />
           <MetricCard
-            title="Articles publiés"
+            title="Sans impression après 7j"
             icon={<FileText className="h-4 w-4 text-primary" />}
-            value={articleStats ? `${articleStats.published}` : "—"}
-            subtitle={articleStats ? `${articleStats.total} au total` : ""}
+            value={noImpressionCount !== null ? noImpressionCount.toString() : "—"}
+            subtitle={noImpressionCount !== null ? "Contenus publiés >7j sans impression · GSC" : "GSC non disponible"}
           />
           <MetricCard
             title="Contenus à créer"
