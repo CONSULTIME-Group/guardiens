@@ -119,7 +119,7 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
       .update({ status: "rejected" as any })
       .eq("sit_id", sitId)
       .neq("id", app.id);
-    await supabase.from("sits").update({ status: "confirmed" as any }).eq("id", sitId);
+    const { error: sitError } = await supabase.from("sits").update({ status: "confirmed" as any }).eq("id", sitId);
 
     const petNamesStr = petNames.join(", ");
     const confirmMsg = `🎉 La garde est confirmée ! Vous avez été choisi(e) pour garder ${petNamesStr} du ${startDate} au ${endDate}.`;
@@ -256,7 +256,9 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
       estLongueDuree: false,
       contributionCharges: null,
     });
-    setShowAccord(true);
+    if (!sitError) {
+      setShowAccord(true);
+    }
 
     toast({ title: "Garde confirmée !", description: `${sitterName} a été choisi(e) pour cette garde.` });
     setConfirmApp(null);
