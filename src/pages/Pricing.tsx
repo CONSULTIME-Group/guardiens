@@ -47,9 +47,9 @@ const strengthBlocks = [
 ];
 
 const promiseLines = [
-  { text: "L'échange entre le propriétaire et le gardien se décide entre vous.", weight: "text-lg font-medium text-foreground/80" },
-  { text: "Guardiens fournit l'espace — pas la transaction.", weight: "text-base text-foreground/60" },
-  { text: "Un prix. Transparent. C'est tout.", weight: "text-lg font-semibold text-foreground" },
+  { text: "L'échange entre le propriétaire et le gardien se décide entre vous.", weight: "text-base md:text-lg font-medium text-foreground/80" },
+  { text: "Guardiens fournit l'espace — pas la transaction.", weight: "text-sm text-foreground/60" },
+  { text: "Un prix. Transparent. C'est tout.", weight: "text-base font-heading font-semibold text-foreground mt-2" },
 ];
 
 const faqItems = [
@@ -200,16 +200,16 @@ const Pricing = () => {
           )}
 
           {/* ═══ ZONE 2 — Détail des offres ═══ */}
-          <section className="grid md:grid-cols-2 gap-6 md:gap-8 items-start mb-16 md:mb-24">
+          <section className="grid md:grid-cols-2 gap-6 md:gap-8 items-stretch mb-16 md:mb-24">
             {/* Owner Card */}
-            <Card className="border-border rounded-2xl">
+            <Card className="border-border rounded-2xl h-full flex flex-col">
               <CardHeader className="text-center pb-2 p-8">
                 <div className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-3 font-body">Propriétaire</div>
                 <CardTitle className="font-heading text-5xl font-bold text-foreground">Gratuit</CardTitle>
                 <p className="text-sm font-body text-foreground/60 italic mt-2">Gratuit en 2026. C'est une décision de fond.</p>
               </CardHeader>
-              <CardContent className="space-y-5 px-8 pb-8 pt-2">
-                <ul className="space-y-3">
+              <CardContent className="space-y-5 px-8 pb-8 pt-2 flex-1 flex flex-col">
+                <ul className="space-y-3 flex-1">
                   {ownerFeatures.map((f, i) => (
                     <li key={f} className="flex items-start gap-2.5 text-sm">
                       <Check className="h-4 w-4 text-primary mt-0.5 shrink-0" />
@@ -217,14 +217,16 @@ const Pricing = () => {
                     </li>
                   ))}
                 </ul>
-                <Link to="/register" className="block">
-                  <Button variant="outline" className="w-full min-h-[44px] font-body" size="lg">S'inscrire gratuitement</Button>
-                </Link>
+                <div className="mt-auto">
+                  <Link to="/register" className="block">
+                    <Button variant="outline" className="w-full min-h-[44px] font-body" size="lg">S'inscrire gratuitement</Button>
+                  </Link>
+                </div>
               </CardContent>
             </Card>
 
             {/* Sitter Card — highlighted */}
-            <Card className="border-2 border-primary/30 relative shadow-xl rounded-2xl md:scale-105">
+            <Card className="border-2 border-primary/30 relative shadow-xl rounded-2xl md:scale-105 h-full flex flex-col">
               {before && (
                 <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-amber-100 text-amber-800 text-xs font-body font-medium px-3 py-1 rounded-full flex items-center gap-1.5">
                   <Star className="h-3 w-3" fill="currentColor" />
@@ -262,7 +264,7 @@ const Pricing = () => {
                   </div>
                 )}
               </CardHeader>
-              <CardContent className="space-y-5 px-8 pb-8 pt-2">
+              <CardContent className="space-y-5 px-8 pb-8 pt-2 flex-1 flex flex-col">
                 <ul className="space-y-3">
                   {sitterFeatures.map((f) => (
                     <li key={f} className="flex items-start gap-2.5 text-sm">
@@ -322,7 +324,7 @@ const Pricing = () => {
                 </div>
 
                 {/* CTA */}
-                <div className="space-y-1 pt-2">
+                <div className="space-y-1 pt-2 mt-auto">
                   <Link
                     to="/register"
                     className="w-full inline-flex items-center justify-center bg-primary text-primary-foreground font-body font-medium text-sm px-6 py-3.5 rounded-xl hover:bg-primary/90 transition-colors min-h-[44px]"
@@ -350,12 +352,12 @@ const Pricing = () => {
             <h2 className="font-heading text-2xl md:text-3xl font-semibold text-foreground text-center mb-12">Tout ça, c'est Guardiens</h2>
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
               {strengthBlocks.map((block) => (
-                <div key={block.title} className="bg-card border border-border/40 rounded-2xl p-6 space-y-3 hover:border-border/80 transition-colors duration-200">
+                <div key={block.title} className="bg-card border border-border/40 rounded-2xl p-6 space-y-3 hover:border-border/80 transition-colors duration-200 h-full flex flex-col">
                   <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
                     <block.icon className="h-5 w-5 text-primary" />
                   </div>
                   <h3 className="text-base font-heading font-semibold text-foreground">{block.title}</h3>
-                  <p className="text-sm font-body text-foreground/60 leading-relaxed">{block.desc}</p>
+                  <p className="text-sm font-body text-foreground/60 leading-relaxed flex-1">{block.desc}</p>
                 </div>
               ))}
             </div>
