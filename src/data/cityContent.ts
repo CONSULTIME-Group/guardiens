@@ -176,25 +176,68 @@ Le house-sitting à Lyon, c'est confier sa maison et ses animaux à un voisin v�
       {
         id: "pourquoi",
         title: "Pourquoi le house-sitting à Grenoble ?",
-        content: `Grenoble, ceinturée par trois massifs montagneux, attire des passionnés d'outdoor. Mais quand on part randonner, skier ou voyager, qui garde la maison et les animaux ?
+        content: `Grenoble, ceinturée par trois massifs montagneux — Chartreuse, Vercors, Belledonne — attire des passionnés d'outdoor. Mais quand on part randonner, skier ou voyager, qui garde la maison et les animaux ?
 
-Le house-sitting à Grenoble, c'est la réponse locale : un gardien vérifié s'installe chez vous, s'occupe de vos animaux, et veille sur votre logement. **Gratuit pour le propriétaire.**`,
+Le house-sitting à Grenoble, c'est la réponse locale : un gardien vérifié s'installe chez vous, s'occupe de vos animaux dans leur environnement, et veille sur votre logement. **Gratuit pour le propriétaire.**
+
+La cuvette grenobloise crée des contraintes spécifiques : pics de pollution en hiver, chaleur estivale concentrée, et quartiers en pente parfois difficiles d'accès par temps de neige. Un gardien local connaît ces réalités.`,
+      },
+      {
+        id: "securite",
+        title: "Pollution, montagne et vigilance : les réflexes d'un gardien grenoblois",
+        content: `Grenoble est régulièrement touchée par des épisodes de pollution aux particules fines, surtout entre novembre et février. Un house-sitter averti sait :
+
+- **Limiter les sorties** des animaux lors des alertes pollution (seuil PM10)
+- **Fermer les fenêtres** et utiliser la VMC en mode recirculation
+- **Adapter les promenades** vers les hauteurs mieux ventilées (Bastille, Meylan)
+
+En hiver, les quartiers en pente de La Tronche, Corenc ou Eybens peuvent geler. Un gardien grenoblois anticipe le salage, connaît les parkings en contrebas et sait gérer un chauffage collectif.
+
+En été, la cuvette concentre la chaleur : un bon gardien maintient les volets fermés la journée et aère en soirée — un réflexe vital pour les animaux sensibles.`,
+      },
+      {
+        id: "match",
+        title: "Pension vs Guardiens à Grenoble",
+        content: `Les pensions pour chiens autour de Grenoble facturent entre 25 et 40 €/jour. Pour un chat, comptez 15 à 20 €.
+
+| | Pension | Guardiens |
+|---|---|---|
+| **Coût** | 25-40 €/jour | Gratuit |
+| **Environnement** | Cage / box | Chez vous |
+| **Stress animal** | Élevé | Minimal |
+| **Maison surveillée** | Non | Oui |
+| **Jardin entretenu** | Non | Oui |
+
+Pour un séjour ski de 10 jours avec un chien, **vous économisez 250 à 400 €** et votre animal reste dans son environnement.`,
+      },
+      {
+        id: "quartiers",
+        title: "Grenoble quartier par quartier",
+        content: `Chaque quartier grenoblois a ses spécificités pour le house-sitting :
+
+- **Centre-ville / Championnet** : appartements, copropriétés strictes, sorties chien au Parc Paul Mistral
+- **Île Verte** : résidentiel calme, proximité Isère, idéal familles avec jardin
+- **Bastille / Saint-Laurent** : logements en pente, vue exceptionnelle, accès parfois compliqué en hiver
+- **Eybens / Échirolles** : maisons avec jardin, parking facile, quartiers familiaux
+- **Meylan / La Tronche** : résidentiel chic, grands jardins, altitude = meilleur air mais risque verglas
+
+Nos gardiens grenoblois connaissent ces spécificités et adaptent leur approche en conséquence.`,
       },
     ],
     pois: [
       {
         title: "Bastille & sentiers",
-        description: "Réseau de randonnées accessible depuis le centre-ville. Parfait pour les gardiens avec chien.",
+        description: "Réseau de randonnées accessible depuis le centre-ville. Montée à pied ou en téléphérique. Parfait pour les gardiens avec chien actif.",
         icon: "mountain",
       },
       {
         title: "Parc Paul Mistral",
-        description: "Grand parc urbain avec espaces verts — idéal pour les promenades quotidiennes.",
+        description: "Grand parc urbain central avec pelouses et zones ombragées — le poumon vert des gardiens en ville.",
         icon: "tree",
       },
       {
         title: "Urgences vétérinaires 38",
-        description: "Clinique vétérinaire de garde à Échirolles — urgences 24h/24.",
+        description: "Clinique vétérinaire de garde à Échirolles — urgences 24h/24. Clinique du Drac à Fontaine en journée.",
         icon: "stethoscope",
       },
     ],
@@ -207,6 +250,8 @@ Le house-sitting à Grenoble, c'est la réponse locale : un gardien vérifié s'
       "La Tronche",
       "Corenc",
       "Voiron",
+      "Eybens",
+      "Seyssinet-Pariset",
     ],
   },
 };
