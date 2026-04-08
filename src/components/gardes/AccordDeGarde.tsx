@@ -57,26 +57,28 @@ export default function AccordDeGarde({ garde, onClose }: AccordDeGardeProps) {
   return (
     <div className="max-w-2xl mx-auto bg-card border rounded-xl shadow-sm flex flex-col max-h-[90vh] overflow-hidden">
       {/* EN-TÊTE */}
-      <div className="shrink-0 px-6 py-4 border-b relative">
-        <p className="font-semibold text-lg">Notre accord de garde</p>
-        <p className="text-sm text-muted-foreground">
-          Garde du {garde.dateDebut} au {garde.dateFin} · {garde.adresse}
-        </p>
+      <div className="shrink-0 px-6 py-4 border-b flex items-start gap-4">
+        <div className="min-w-0">
+          <p className="font-semibold text-lg">Notre accord de garde</p>
+          <p className="text-sm text-muted-foreground">
+            Garde du {garde.dateDebut} au {garde.dateFin} · {garde.adresse}
+          </p>
+        </div>
         {onClose && (
           <button
             onClick={onClose}
-            className="absolute top-4 right-4 text-sm text-muted-foreground hover:text-foreground transition-colors"
+            className="text-xl text-muted-foreground hover:text-foreground transition-colors ml-auto shrink-0"
           >
-            Fermer
+            ×
           </button>
         )}
       </div>
 
       {/* CORPS */}
-      <div className="flex-1 overflow-y-auto px-6 py-5 space-y-6">
+      <div className="flex-1 overflow-y-auto px-6 py-5 space-y-8">
         {/* Intro */}
         <p className="italic text-sm text-muted-foreground">
-          Ce document est un récapitulatif écrit, conservé et daté de ce que {p} et {g} ont prévu ensemble. Il sert de référence commune si une question se pose pendant ou après la garde.
+          Ce document résume ce que {p} et {g} ont prévu ensemble. Il sert de référence commune si une question se pose pendant ou après la garde.
         </p>
 
         {/* Animaux */}
