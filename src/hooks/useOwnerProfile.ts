@@ -102,6 +102,7 @@ export function useOwnerProfile() {
     const session = sessionData?.session;
     if (!session?.access_token) {
       console.warn("[OWNER_HOOK] No active session, skipping fetch");
+      setLoading(false);
       return;
     }
     console.log("[OWNER_HOOK] Session OK, fetching…", { uid: session.user.id, tokenPresent: !!session.access_token });
