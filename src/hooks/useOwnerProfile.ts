@@ -96,6 +96,16 @@ export function useOwnerProfile() {
 
   const fetchData = useCallback(async () => {
     if (!user) return;
+
+    // Gate: wait for a valid Supabase session before querying RLS-protected tables
+    const { data: sessionData } = await supabase.auth.getSession();
+    const session = sessionData?.session;
+    if (!session?.access_token) {
+      console.warn("[OWNER_HOOK] No active session, skipping fetch");
+      return;
+    }
+    console.log("[OWNER_HOOK] Session OK, fetching…", { uid: session.user.id, tokenPresent: !!session.access_token });
+
     setLoading(true);
 
     const [profileRes, propertyRes, ownerRes] = await Promise.all([
@@ -103,6 +113,13 @@ export function useOwnerProfile() {
       supabase.from("properties").select("*").eq("user_id", user.id).limit(1).maybeSingle(),
       supabase.from("owner_profiles").select("*").eq("user_id", user.id).maybeSingle(),
     ]);
+
+    // Handle fetch error (e.g. 403 from stale token)
+    if (profileRes.error) {
+      console.error("[OWNER_HOOK] PROFILE_FETCH_ERROR", profileRes.error);
+      setLoading(false);
+      return;
+    }
 
     const p = profileRes.data;
     const prop = propertyRes.data;
@@ -169,7 +186,18 @@ export function useOwnerProfile() {
     setLoading(false);
   }, [user]);
 
+  // Re-fetch when user changes, and also listen for auth state changes to retry after session restore
   useEffect(() => { fetchData(); }, [fetchData]);
+
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+      if (event === "TOKEN_REFRESHED" || event === "SIGNED_IN") {
+        console.log("[OWNER_HOOK] Auth event:", event, "— re-fetching");
+        fetchData();
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, [fetchData]);
 
   const computeCompletion = useCallback((d: OwnerProfileData, petsCount: number): number => {
     let total = 0;
