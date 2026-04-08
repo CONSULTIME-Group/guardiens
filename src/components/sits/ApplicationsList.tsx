@@ -256,7 +256,9 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
       estLongueDuree: false,
       contributionCharges: null,
     });
-    setShowAccord(true);
+    if (!sitError) {
+      setShowAccord(true);
+    }
 
     toast({ title: "Garde confirmée !", description: `${sitterName} a été choisi(e) pour cette garde.` });
     setConfirmApp(null);
