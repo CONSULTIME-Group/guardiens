@@ -38,7 +38,7 @@ const sitterFeatures = [
 ];
 
 const strengthBlocks = [
-  { icon: MapPin, title: "Gardiens de proximité", desc: "Vos gardiens sont dans votre quartier — pas à l'autre bout du pays. Un problème ? Quelqu'un est à 15 minutes." },
+  { icon: MapPin, title: "Gardiens de proximité", desc: "Vos gardiens sont près de chez vous — pas à l'autre bout du pays. Un problème ? Quelqu'un est à 15 minutes." },
   { icon: ShieldCheck, title: "Profils vérifiés", desc: "Identité vérifiée, avis croisés détaillés, écussons qualitatifs. Vous savez à qui vous confiez vos animaux." },
   { icon: Map, title: "Guides locaux", desc: "Parcs, vétérinaires, balades, cafés dog-friendly — tout ce qu'il faut pour que votre gardien se sente chez lui." },
   { icon: PawPrint, title: "Fiches races", desc: "Caractère, besoins, conseils de garde — votre gardien sait exactement comment s'occuper de votre animal." },
@@ -410,7 +410,7 @@ const Pricing = () => {
           <section className="text-center space-y-4 py-8">
             <p className="text-lg text-muted-foreground max-w-xl mx-auto font-body">
               {before
-                ? "Rejoignez les Fondateurs avant le 13 mai — badge à vie, premier mois offert."
+                ? "Rejoignez les Fondateurs avant le 13 mai — badge à vie, accès jusqu'au 13 juin."
                 : "9€/mois pour les gardiens. Gratuit pour les propriétaires. Sans engagement."}
             </p>
             <Link to="/register">
