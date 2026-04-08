@@ -1,20 +1,5 @@
-import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { marked, Renderer } from "marked";
-
-const faqRenderer = new Renderer();
-faqRenderer.link = ({ href, text }: { href: string; text: string }) => {
-  const isExternal = href.startsWith("http");
-  const attrs = isExternal
-    ? ` target="_blank" rel="noopener noreferrer"`
-    : "";
-  return `<a href="${href}" class="text-primary underline hover:text-primary/80"${attrs}>${text}</a>`;
-};
-faqRenderer.paragraph = ({ text }: { text: string }) => {
-  return `<p class="mb-3 last:mb-0">${text}</p>`;
-};
-
-const faqMarkedOptions = { renderer: faqRenderer, gfm: true, breaks: false };
+import ReactMarkdown from "react-markdown";
 import { supabase } from "@/integrations/supabase/client";
 import PageMeta from "@/components/PageMeta";
 import {
@@ -140,11 +125,39 @@ const FAQ = () => {
                           <AccordionTrigger className="text-left font-medium text-foreground hover:no-underline py-4">
                             {entry.question}
                           </AccordionTrigger>
-                          <AccordionContent className="text-muted-foreground leading-relaxed pb-5">
-                            <div
-                              className="prose prose-sm max-w-none text-muted-foreground prose-a:text-primary prose-strong:text-foreground"
-                              dangerouslySetInnerHTML={{ __html: marked.parse(entry.answer, { async: false, ...faqMarkedOptions }) as string }}
-                            />
+                          <AccordionContent className="leading-relaxed pb-5">
+                            <ReactMarkdown
+                              components={{
+                                p: ({ children }) => (
+                                  <p className="mb-3 text-sm text-muted-foreground leading-relaxed last:mb-0">
+                                    {children}
+                                  </p>
+                                ),
+                                strong: ({ children }) => (
+                                  <strong className="font-semibold text-foreground">{children}</strong>
+                                ),
+                                a: ({ href, children }) => {
+                                  const isExternal = href?.startsWith("http");
+                                  return (
+                                    <a
+                                      href={href}
+                                      className="text-primary underline hover:text-primary/80 transition-colors"
+                                      {...(isExternal ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+                                    >
+                                      {children}
+                                    </a>
+                                  );
+                                },
+                                ul: ({ children }) => (
+                                  <ul className="list-disc pl-4 mb-3 space-y-1 text-sm text-muted-foreground">{children}</ul>
+                                ),
+                                li: ({ children }) => (
+                                  <li className="leading-relaxed">{children}</li>
+                                ),
+                              }}
+                            >
+                              {entry.answer}
+                            </ReactMarkdown>
                           </AccordionContent>
                         </AccordionItem>
                       ))}
