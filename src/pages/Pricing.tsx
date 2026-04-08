@@ -1,10 +1,11 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import ReactMarkdown from "react-markdown";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
-import { Check, Star, Gift, MapPin, ShieldCheck, Map, PawPrint, Heart, Siren, BadgeCheck, CreditCard } from "lucide-react";
+import { Check, CheckCircle, Star, Gift, MapPin, ShieldCheck, Map, PawPrint, Heart, Siren, BadgeCheck, CreditCard } from "lucide-react";
 import PageMeta from "@/components/PageMeta";
 
 const LAUNCH_DATE = new Date("2026-05-14T00:00:00Z");
@@ -103,9 +104,16 @@ Pour comprendre le bien-être de vos animaux pendant la garde : [Bien-être anim
 const Pricing = () => {
   const before = isBeforeLaunch();
   const grace = isInGracePeriod();
+  const [formule, setFormule] = useState<'one_shot' | 'mensuel' | 'prorata'>('mensuel');
 
   const msLeft = Math.max(0, LAUNCH_DATE.getTime() - new Date().getTime());
   const daysLeft = Math.ceil(msLeft / 86400000);
+
+  const ctaLabels: Record<typeof formule, string> = {
+    one_shot: "Accéder un mois — 12€",
+    mensuel: "Commencer — 7 jours offerts",
+    prorata: "Choisir le prorata 2026",
+  };
 
   return (
     <>
@@ -227,13 +235,13 @@ const Pricing = () => {
           )}
 
           {/* ═══ ZONE 2 — Détail des offres ═══ */}
-          <section className="grid md:grid-cols-2 gap-6 md:gap-8 items-stretch mb-10 md:mb-14">
+          <section className="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-5xl mx-auto items-stretch mb-10 md:mb-14">
             {/* Owner Card */}
             <Card className="bg-card border border-border/40 rounded-2xl h-full flex flex-col relative">
               {before && (
-                <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-amber-100 text-amber-800 text-xs font-body font-medium px-3 py-1 rounded-full flex items-center gap-1.5">
-                  <Star className="h-3 w-3" fill="currentColor" />
-                  Badge Fondateur à vie
+                <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-primary/10 text-primary text-xs font-body font-medium px-3 py-1 rounded-full flex items-center gap-1.5">
+                  <CheckCircle className="h-3 w-3" />
+                  Gratuit pour toujours
                 </div>
               )}
               <CardHeader className={`text-center pb-2 p-8 ${before ? 'pt-10' : ''}`}>
@@ -315,7 +323,10 @@ const Pricing = () => {
                   <p className="text-xs uppercase tracking-widest text-foreground/50 font-body">
                     Trois formules
                   </p>
-                  <div className="flex items-start justify-between gap-3">
+                  <div
+                    onClick={() => setFormule('one_shot')}
+                    className={`flex items-start justify-between gap-3 border rounded-lg p-3 cursor-pointer transition-all ${formule === 'one_shot' ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/40'}`}
+                  >
                     <div className="min-w-0">
                       <p className="text-sm font-medium text-foreground font-body">
                         Accès un mois
@@ -328,7 +339,10 @@ const Pricing = () => {
                       12€
                     </span>
                   </div>
-                  <div className="flex items-start justify-between gap-3">
+                  <div
+                    onClick={() => setFormule('mensuel')}
+                    className={`flex items-start justify-between gap-3 border rounded-lg p-3 cursor-pointer transition-all ${formule === 'mensuel' ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/40'}`}
+                  >
                     <div className="min-w-0">
                       <div className="flex items-center gap-2">
                         <p className="text-sm font-medium text-foreground font-body">
@@ -344,7 +358,10 @@ const Pricing = () => {
                       9€/mois
                     </span>
                   </div>
-                  <div className="flex items-start justify-between gap-3">
+                  <div
+                    onClick={() => setFormule('prorata')}
+                    className={`flex items-start justify-between gap-3 border rounded-lg p-3 cursor-pointer transition-all ${formule === 'prorata' ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/40'}`}
+                  >
                     <div className="min-w-0">
                       <p className="text-sm font-medium text-foreground font-body">
                         Prorata 2026
@@ -368,16 +385,16 @@ const Pricing = () => {
                     to="/register"
                     className="w-full inline-flex items-center justify-center bg-primary text-primary-foreground font-body font-medium text-sm px-6 py-3.5 rounded-xl hover:bg-primary/90 transition-colors min-h-[44px]"
                   >
-                    S'inscrire gratuitement
+                    {ctaLabels[formule]}
                   </Link>
-                  <p className="text-xs font-body text-foreground/40 text-center mt-2">
+                  <p className="text-xs font-body text-foreground/50 text-center mt-2">
                     Inscription sans carte bancaire. L'abonnement mensuel inclut 7 jours d'essai offerts.
                   </p>
                   <Link
-                    to="/faq#formules"
+                    to="/faq"
                     className="w-full inline-flex items-center justify-center text-sm font-body text-foreground/60 hover:text-foreground transition-colors py-2"
                   >
-                    Questions sur les formules →
+                    Consulter la FAQ →
                   </Link>
                 </div>
               </CardContent>
