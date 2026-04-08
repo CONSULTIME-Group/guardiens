@@ -119,7 +119,7 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
       .update({ status: "rejected" as any })
       .eq("sit_id", sitId)
       .neq("id", app.id);
-    const { error: sitError } = await supabase.from("sits").update({ status: "confirmed" as any }).eq("id", sitId);
+    await supabase.from("sits").update({ status: "confirmed" as any }).eq("id", sitId);
 
     const petNamesStr = petNames.join(", ");
     const confirmMsg = `🎉 La garde est confirmée ! Vous avez été choisi(e) pour garder ${petNamesStr} du ${startDate} au ${endDate}.`;
@@ -256,13 +256,10 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
       estLongueDuree: false,
       contributionCharges: null,
     });
-    if (!sitError) {
-      setShowAccord(true);
-    }
+    setShowAccord(true);
 
     toast({ title: "Garde confirmée !", description: `${sitterName} a été choisi(e) pour cette garde.` });
     setConfirmApp(null);
-    load();
     } catch (error) {
       console.error('handleAccept error:', error);
       toast({
@@ -604,12 +601,12 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
       )}
 
       {showAccord && accordData && (
-        <Dialog open={showAccord} onOpenChange={(o) => { if (!o) setShowAccord(false); }}>
+        <Dialog open={showAccord} onOpenChange={(o) => { if (!o) { setShowAccord(false); setConfirmApp(null); load(); } }}>
           <DialogContent className="max-w-2xl p-0 overflow-hidden">
             <DialogTitle className="sr-only">Accord de garde</DialogTitle>
             <AccordDeGarde
               garde={accordData}
-              onClose={() => setShowAccord(false)}
+              onClose={() => { setShowAccord(false); setConfirmApp(null); load(); }}
             />
           </DialogContent>
         </Dialog>
