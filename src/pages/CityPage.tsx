@@ -19,15 +19,19 @@ import {
   ArrowRight,
   Compass,
   Building2,
+  Siren,
+  CheckCircle2,
 } from "lucide-react";
 
 import { CITIES } from "@/data/cities";
 import { useCityStats } from "@/hooks/useCityStats";
+import { getCityContent } from "@/data/cityContent";
 import CityPageMeta from "@/components/seo/CityPageMeta";
 import CitySchemaOrg from "@/components/seo/CitySchemaOrg";
 import LocalExpertise from "@/components/seo/LocalExpertise";
 import LocalSpotsGrid from "@/components/seo/LocalSpotsGrid";
 import LocalNetworkGrid from "@/components/seo/LocalNetworkGrid";
+import CityArticleBody from "@/components/city/CityArticleBody";
 import StickyCTA from "@/components/seo/StickyCTA";
 
 const CityPage = () => {
@@ -109,6 +113,8 @@ const CityPage = () => {
 
   // ── STATIC CITY DATA PATH ──
   if (cityData) {
+    const content = getCityContent(cityData.slug);
+
     const faqItems = [
       {
         q: `Comment trouver un gardien de maison à ${cityData.name} ?`,
@@ -120,7 +126,15 @@ const CityPage = () => {
       },
       {
         q: `Que se passe-t-il en cas d'urgence pendant la garde à ${cityData.name} ?`,
-        a: "Guardiens dispose d'un réseau de Gardiens d'Urgence dans chaque zone, disponibles sous 15 minutes. En cas d'imprévu — animal malade, problème technique — le gardien en poste peut déclencher une alerte directement depuis l'application.",
+        a: `Guardiens dispose d'un réseau de Gardiens d'Urgence dans chaque zone, disponibles sous 15 minutes. En cas d'imprévu — animal malade, problème technique — le gardien en poste peut déclencher une alerte directement depuis l'application.`,
+      },
+      {
+        q: `Combien coûte une pension pour animaux à ${cityData.name} ?`,
+        a: `Les pensions autour de ${cityData.name} facturent en moyenne 25 à 45 € par nuit et par animal. Sur Guardiens, c'est gratuit pour le propriétaire : le gardien s'installe chez vous, s'occupe de vos animaux dans leur environnement habituel, et veille sur votre maison.`,
+      },
+      {
+        q: `Comment devenir gardien à ${cityData.name} ?`,
+        a: `Inscrivez-vous gratuitement, complétez votre profil et faites vérifier votre identité. Vous pourrez ensuite postuler aux gardes disponibles en ${cityData.department}. L'abonnement gardien est de 9€/mois, résiliable à tout moment.`,
       },
     ];
 
@@ -135,6 +149,11 @@ const CityPage = () => {
             <h1 className="font-serif text-3xl md:text-5xl font-bold text-foreground mb-6">
               {cityData.h1}
             </h1>
+            {content && (
+              <p className="text-lg text-foreground/80 max-w-3xl leading-relaxed mb-4 font-body">
+                {content.subtitle}
+              </p>
+            )}
             <p className="text-lg text-muted-foreground max-w-3xl leading-relaxed mb-6">
               {stats.guardiansCount > 0
                 ? `${stats.guardiansCount} gardien${stats.guardiansCount > 1 ? "s" : ""} vérifié${stats.guardiansCount > 1 ? "s" : ""} en ${cityData.department}`
@@ -160,13 +179,19 @@ const CityPage = () => {
                   <ArrowRight className="h-4 w-4" />
                 </Button>
               </Link>
+              <Link to="/gardien-urgence">
+                <Button size="lg" variant="outline" className="gap-2">
+                  <Siren className="h-4 w-4" />
+                  Gardien d'urgence
+                </Button>
+              </Link>
             </div>
           </section>
 
           {/* Cross-links */}
           {cityGuide && (
             <section className="max-w-5xl mx-auto px-4 py-6">
-              <Link to={`/guide/${cityGuide.slug}`}>
+              <Link to={`/guides/${cityGuide.slug}`}>
                 <Card className="hover:shadow-md transition-shadow">
                   <CardContent className="p-4 flex items-center gap-3">
                     <Compass className="h-5 w-5 text-primary" />
@@ -185,11 +210,67 @@ const CityPage = () => {
             </section>
           )}
 
+          {/* Rich editorial content from cityContent */}
+          {content && content.articleSections.length > 0 && (
+            <section className="max-w-5xl mx-auto px-4 py-12 border-t border-border">
+              <CityArticleBody sections={content.articleSections} />
+            </section>
+          )}
+
+          {/* Reassurance */}
+          <section className="max-w-5xl mx-auto px-4 py-12 border-t border-border">
+            <h2 className="font-serif text-2xl font-bold text-foreground mb-6">
+              Pourquoi choisir Guardiens à {cityData.name} ?
+            </h2>
+            <div className="grid md:grid-cols-3 gap-6">
+              <div className="space-y-3">
+                <ShieldCheck className="h-6 w-6 text-primary" />
+                <h3 className="font-semibold text-foreground">Gardiens vérifiés</h3>
+                <p className="text-sm text-muted-foreground">
+                  Identité vérifiée manuellement, avis croisés détaillés, écussons de fiabilité. Vous savez exactement à qui vous confiez vos clés.
+                </p>
+              </div>
+              <div className="space-y-3">
+                <Heart className="h-6 w-6 text-primary" />
+                <h3 className="font-semibold text-foreground">Gratuit pour les propriétaires</h3>
+                <p className="text-sm text-muted-foreground">
+                  Aucun frais, aucune commission. Le gardien vit chez vous et s'occupe de vos animaux dans leur environnement.
+                </p>
+              </div>
+              <div className="space-y-3">
+                <Siren className="h-6 w-6 text-primary" />
+                <h3 className="font-semibold text-foreground">Filet de sécurité local</h3>
+                <p className="text-sm text-muted-foreground">
+                  Des <Link to="/gardien-urgence" className="text-primary hover:underline">gardiens d'urgence</Link> à {cityData.name}, mobilisables en quelques heures en cas d'imprévu.
+                </p>
+              </div>
+            </div>
+          </section>
+
           {/* Expertise */}
           <LocalExpertise city={cityData} />
 
           {/* Spots */}
           <LocalSpotsGrid city={cityData} />
+
+          {/* Nearby towns from cityContent */}
+          {content && content.nearbyTowns.length > 0 && (
+            <section className="max-w-5xl mx-auto px-4 py-12 border-t border-border">
+              <h2 className="font-serif text-2xl font-bold text-foreground mb-4">
+                Aussi disponible autour de {cityData.name}
+              </h2>
+              <p className="text-sm text-muted-foreground mb-4">
+                Les gardiens Guardiens couvrent {cityData.name} et ses communes voisines.
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {content.nearbyTowns.map((town) => (
+                  <Badge key={town} variant="outline" className="text-sm px-3 py-1">
+                    {town}
+                  </Badge>
+                ))}
+              </div>
+            </section>
+          )}
 
           {/* Network */}
           <LocalNetworkGrid current={cityData} allCities={CITIES} />
@@ -239,6 +320,16 @@ const CityPage = () => {
               </div>
             </section>
           )}
+
+          {/* Internal links */}
+          <section className="max-w-5xl mx-auto px-4 py-8 border-t border-border">
+            <div className="flex flex-wrap justify-center gap-4 text-sm">
+              <Link to="/tarifs" className="text-primary hover:underline">Voir les tarifs →</Link>
+              <Link to="/gardien-urgence" className="text-primary hover:underline">Gardiens d'urgence →</Link>
+              <Link to="/faq" className="text-primary hover:underline">FAQ complète →</Link>
+              <Link to="/guides" className="text-primary hover:underline">Tous les guides locaux →</Link>
+            </div>
+          </section>
 
           {/* Final CTA */}
           <section className="max-w-5xl mx-auto px-4 py-16 text-center border-t border-border">
