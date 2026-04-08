@@ -34,6 +34,7 @@ const AdminContactMessages = () => {
 
   const [viewModal, setViewModal] = useState<{ open: boolean; msg: any | null }>({ open: false, msg: null });
   const [adminNotes, setAdminNotes] = useState("");
+  const [assignedTo, setAssignedTo] = useState("");
   const [replyText, setReplyText] = useState("");
   const [sendLoading, setSendLoading] = useState(false);
 
@@ -72,10 +73,26 @@ const AdminContactMessages = () => {
   const handleView = async (msg: any) => {
     setViewModal({ open: true, msg });
     setAdminNotes(msg.admin_notes || "");
+    setAssignedTo(msg.assigned_to || "");
     setReplyText("");
     if (msg.status === "new") {
-      await updateStatus(msg.id, "read");
+      await updateStatus(msg.id, "en_cours");
     }
+  };
+
+  const handleSaveAssignment = async () => {
+    if (!viewModal.msg) return;
+    const value = assignedTo.trim() || null;
+    const { error } = await supabase
+      .from("contact_messages")
+      .update({ assigned_to: value })
+      .eq("id", viewModal.msg.id);
+    if (error) {
+      toast.error("Erreur lors de l'assignation");
+      return;
+    }
+    toast.success("Assignation sauvegardée");
+    fetchMessages();
   };
 
   const handleSendReply = async () => {
@@ -169,9 +186,9 @@ const AdminContactMessages = () => {
 
   const statusBadge = (status: string) => {
     switch (status) {
-      case "new": return <Badge className="bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-300 border-0"><Clock className="h-3 w-3 mr-1" />Nouveau</Badge>;
-      case "read": return <Badge className="bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300 border-0"><Eye className="h-3 w-3 mr-1" />Lu</Badge>;
-      case "replied": return <Badge className="bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300 border-0"><CheckCircle2 className="h-3 w-3 mr-1" />Répondu</Badge>;
+      case "new": return <Badge className="bg-yellow-100 text-yellow-800 border-0"><Clock className="h-3 w-3 mr-1" />Nouveau</Badge>;
+      case "en_cours": return <Badge variant="secondary"><PlayCircle className="h-3 w-3 mr-1" />En cours</Badge>;
+      case "replied": return <Badge className="bg-green-100 text-green-800 border-0"><CheckCircle2 className="h-3 w-3 mr-1" />Répondu</Badge>;
       case "closed": return <Badge className="bg-muted text-muted-foreground border-0"><XCircle className="h-3 w-3 mr-1" />Fermé</Badge>;
       default: return <Badge variant="outline">{status}</Badge>;
     }
@@ -179,14 +196,12 @@ const AdminContactMessages = () => {
 
   const isOverdue = (msg: any) => {
     if (!msg.created_at) return false;
-    if (msg.status !== "new" && msg.status !== "read") return false;
+    if (msg.status !== "new" && msg.status !== "en_cours") return false;
     const elapsed = Date.now() - new Date(msg.created_at).getTime();
     return elapsed > 48 * 60 * 60 * 1000;
   };
 
   const totalPages = Math.ceil(total / PAGE_SIZE);
-
-
 
   if (loading) return <div className="text-muted-foreground py-8 text-center">Chargement…</div>;
 
@@ -195,9 +210,9 @@ const AdminContactMessages = () => {
       <div className="flex items-center justify-between">
         <h1 className="font-body text-2xl font-bold">Messages contact</h1>
         <div className="flex gap-2">
-          {(["all", "new", "read", "replied", "closed"] as StatusFilter[]).map(f => (
+          {(["all", "new", "en_cours", "replied", "closed"] as StatusFilter[]).map(f => (
             <Button key={f} size="sm" variant={filter === f ? "default" : "outline"} onClick={() => { setFilter(f); setPage(0); }}>
-              {{ all: "Tous", new: "Nouveaux", read: "Lus", replied: "Répondus", closed: "Fermés" }[f]}
+              {{ all: "Tous", new: "Nouveaux", en_cours: "En cours", replied: "Répondus", closed: "Fermés" }[f]}
             </Button>
           ))}
         </div>
@@ -206,10 +221,10 @@ const AdminContactMessages = () => {
       {/* Stats */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         {[
-          { label: "Nouveaux", icon: Clock, filter: "new" as const, color: "yellow" },
-          { label: "Lus", icon: Eye, filter: "read" as const, color: "blue" },
-          { label: "Répondus", icon: CheckCircle2, filter: "replied" as const, color: "green" },
-          { label: "Fermés", icon: XCircle, filter: "closed" as const, color: "gray" },
+          { label: "Nouveaux", icon: Clock, filter: "new" as const },
+          { label: "En cours", icon: PlayCircle, filter: "en_cours" as const },
+          { label: "Répondus", icon: CheckCircle2, filter: "replied" as const },
+          { label: "Fermés", icon: XCircle, filter: "closed" as const },
         ].map(s => (
           <Card key={s.label} className="cursor-pointer hover:shadow-sm transition-shadow" onClick={() => { setFilter(s.filter); setPage(0); }}>
             <CardContent className="p-3 flex items-center gap-2">
@@ -236,8 +251,8 @@ const AdminContactMessages = () => {
                   <TableHead>Sujet</TableHead>
                   <TableHead>Date</TableHead>
                   <TableHead>Statut</TableHead>
-                   <TableHead>Assigné</TableHead>
-                   <TableHead className="text-right">Actions</TableHead>
+                  <TableHead>Assigné</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -262,12 +277,17 @@ const AdminContactMessages = () => {
                         )}
                       </div>
                     </TableCell>
-                    <TableCell className="text-sm text-muted-foreground">—</TableCell>
+                    <TableCell className="text-sm text-muted-foreground">{msg.assigned_to || "—"}</TableCell>
                     <TableCell>
                       <div className="flex items-center justify-end gap-1">
                         <Button size="sm" variant="ghost" className="h-8 gap-1 text-xs" onClick={() => handleView(msg)}>
                           <Eye className="h-3.5 w-3.5" /> Lire
                         </Button>
+                        {(msg.status === "new") && (
+                          <Button size="sm" variant="ghost" className="h-8 gap-1 text-xs" onClick={() => updateStatus(msg.id, "en_cours")}>
+                            <PlayCircle className="h-3.5 w-3.5" /> En cours
+                          </Button>
+                        )}
                         {msg.status !== "closed" && (
                           <Button size="sm" variant="ghost" className="h-8 gap-1 text-xs" onClick={() => updateStatus(msg.id, "closed")}>
                             <XCircle className="h-3.5 w-3.5" /> Fermer
@@ -317,6 +337,20 @@ const AdminContactMessages = () => {
 
                 <div className="border-t border-border my-4" />
 
+                {/* Assignation */}
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Assigné à</label>
+                  <div className="flex gap-2">
+                    <Input
+                      placeholder="Nom de la personne assignée…"
+                      value={assignedTo}
+                      onChange={e => setAssignedTo(e.target.value)}
+                      className="text-sm"
+                    />
+                    <Button size="sm" variant="outline" onClick={handleSaveAssignment}>Sauver</Button>
+                  </div>
+                </div>
+
                 <div className="space-y-1.5">
                   <label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Notes internes</label>
                   <Textarea placeholder="Notes internes ou actions effectuées..." value={adminNotes} onChange={e => setAdminNotes(e.target.value)} className="min-h-[72px] text-sm resize-none" />
@@ -324,6 +358,13 @@ const AdminContactMessages = () => {
                 </div>
 
                 <div className="border-t border-border my-4" />
+
+                {/* Status shortcut */}
+                {viewModal.msg.status !== "en_cours" && viewModal.msg.status !== "replied" && viewModal.msg.status !== "closed" && (
+                  <Button size="sm" variant="secondary" className="gap-1" onClick={() => { updateStatus(viewModal.msg.id, "en_cours"); setViewModal(v => ({ ...v, msg: { ...v.msg, status: "en_cours" } })); }}>
+                    <PlayCircle className="h-3.5 w-3.5" /> Passer en cours
+                  </Button>
+                )}
 
                 <div className="space-y-1.5">
                   <label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Répondre à {viewModal.msg.name ?? viewModal.msg.email}</label>
