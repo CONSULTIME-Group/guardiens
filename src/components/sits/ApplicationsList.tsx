@@ -30,6 +30,7 @@ interface ApplicationsListProps {
   startDate: string;
   endDate: string;
   propertyId: string;
+  sitStatus?: string;
 }
 
 const statusStyles: Record<string, { label: string; className: string }> = {
@@ -45,7 +46,7 @@ const statusOrder: Record<string, number> = {
   pending: 0, viewed: 0, discussing: 1, accepted: 2, rejected: 3, cancelled: 4,
 };
 
-const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, propertyId }: ApplicationsListProps) => {
+const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, propertyId, sitStatus }: ApplicationsListProps) => {
   const { user } = useAuth();
   const [applications, setApplications] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -475,6 +476,15 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
             >
               Contacter →
             </button>
+            {app.status === "rejected" && sitStatus === "published" && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handleReinvite(app)}
+              >
+                Inviter à nouveau
+              </Button>
+            )}
           </div>
         )}
       </div>
