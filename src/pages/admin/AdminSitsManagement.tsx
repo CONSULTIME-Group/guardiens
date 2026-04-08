@@ -7,11 +7,14 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { format, isPast, isFuture, differenceInDays, formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
-import { AlertTriangle, Search, Eye, XCircle, Star, StickyNote, RotateCcw } from "lucide-react";
+import { AlertTriangle, Search, Eye, XCircle, Star, StickyNote, RotateCcw, User, Calendar, MapPin, ChevronRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 const AdminSitsManagement = () => {
@@ -25,6 +28,13 @@ const AdminSitsManagement = () => {
   const [reviews, setReviews] = useState<Record<string, { owner: boolean; sitter: boolean }>>({});
   const [cancelModal, setCancelModal] = useState<{ open: boolean; id: string; type: string; reason: string }>({ open: false, id: "", type: "", reason: "" });
   const [noteModal, setNoteModal] = useState<{ open: boolean; id: string; note: string }>({ open: false, id: "", note: "" });
+
+  // Sheet state
+  const [selectedSit, setSelectedSit] = useState<any | null>(null);
+  const [sheetOpen, setSheetOpen] = useState(false);
+  const [sheetApplications, setSheetApplications] = useState<any[]>([]);
+  const [sheetAppsLoading, setSheetAppsLoading] = useState(false);
+  const [showAllApps, setShowAllApps] = useState(false);
 
   const fetchSits = useCallback(async () => {
     setLoading(true);
@@ -114,16 +124,65 @@ const AdminSitsManagement = () => {
     const table = sit._type === "sit" ? "sits" : "long_stays";
     await supabase.from(table).update({ status: "cancelled" as any, cancellation_reason: cancelModal.reason } as any).eq("id", cancelModal.id);
 
-    // Notify both parties
     if (sit.user_id) {
       await supabase.from("notifications").insert({ user_id: sit.user_id, type: "sit_cancelled", title: "Garde annulée par l'admin", body: `La garde "${sit.title}" a été annulée. Motif : ${cancelModal.reason}`, link: `/sits/${sit.id}` });
     }
-    const sitter = sitters[sit.id];
-    // We don't have sitter user_id easily — the notification triggers will handle it
 
     toast.success("Garde annulée");
     setCancelModal({ open: false, id: "", type: "", reason: "" });
     fetchSits();
+  };
+
+  // Sheet: open sit detail
+  const openSitSheet = async (sit: any) => {
+    setSelectedSit(sit);
+    setSheetOpen(true);
+    setShowAllApps(false);
+    setSheetAppsLoading(true);
+
+    let data: any[] | null = null;
+    if (sit._type === "sit") {
+      const res = await supabase
+        .from("applications")
+        .select("id, status, created_at, sitter_id, sitter:profiles!applications_sitter_id_fkey(first_name, avatar_url)")
+        .eq("sit_id", sit.id)
+        .order("created_at", { ascending: false });
+      data = res.data;
+    } else {
+      const res = await supabase
+        .from("long_stay_applications")
+        .select("id, status, created_at, sitter_id, sitter:profiles!long_stay_applications_sitter_id_fkey(first_name, avatar_url)")
+        .eq("long_stay_id", sit.id)
+        .order("created_at", { ascending: false });
+      data = res.data;
+    }
+
+    setSheetApplications(data || []);
+    setSheetAppsLoading(false);
+  };
+
+  // Sheet: admin status transitions
+  const handleSheetTransition = async (newStatus: string) => {
+    if (!selectedSit) return;
+    const table = selectedSit._type === "sit" ? "sits" : "long_stays";
+    const { error } = await supabase.from(table).update({ status: newStatus as any }).eq("id", selectedSit.id);
+    if (error) {
+      toast.error("Erreur lors de la mise à jour");
+      return;
+    }
+    toast.success(newStatus === "ongoing" ? "Garde marquée en cours" : "Garde marquée terminée");
+    setSelectedSit((prev: any) => prev ? { ...prev, status: newStatus } : null);
+    fetchSits();
+  };
+
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case "pending": return <Badge variant="outline">En attente</Badge>;
+      case "accepted": return <Badge variant="default">Acceptée</Badge>;
+      case "rejected": return <Badge variant="destructive">Refusée</Badge>;
+      case "withdrawn": return <Badge variant="secondary">Retirée</Badge>;
+      default: return <Badge variant="outline">{status}</Badge>;
+    }
   };
 
   // Alerts
@@ -137,6 +196,8 @@ const AdminSitsManagement = () => {
     return s.title?.toLowerCase().includes(q) || s.owner?.first_name?.toLowerCase().includes(q) || s.owner?.city?.toLowerCase().includes(q) || sitters[s.id]?.name?.toLowerCase().includes(q);
   });
 
+  const visibleApps = showAllApps ? sheetApplications : sheetApplications.slice(0, 3);
+
   return (
     <div className="space-y-6">
       <h1 className="font-body text-2xl font-bold">Gardes</h1>
@@ -145,7 +206,7 @@ const AdminSitsManagement = () => {
       {(overdueConfirmed.length > 0 || missingReviews14d.length > 0 || cancelledThisWeek.length > 0) && (
         <div className="space-y-2">
           {overdueConfirmed.length > 0 && (
-            <Card className="border-orange-200 bg-orange-50 dark:bg-orange-900/10 dark:border-orange-800">
+            <Card className="border-orange-200 bg-orange-50">
               <CardContent className="p-3 flex items-center gap-3">
                 <AlertTriangle className="h-5 w-5 text-orange-500 shrink-0" />
                 <p className="text-sm flex-1">{overdueConfirmed.length} garde{overdueConfirmed.length > 1 ? "s" : ""} avec dates passées mais encore "confirmée{overdueConfirmed.length > 1 ? "s" : ""}"</p>
@@ -153,7 +214,7 @@ const AdminSitsManagement = () => {
             </Card>
           )}
           {missingReviews14d.length > 0 && (
-            <Card className="border-orange-200 bg-orange-50 dark:bg-orange-900/10 dark:border-orange-800">
+            <Card className="border-orange-200 bg-orange-50">
               <CardContent className="p-3 flex items-center gap-3">
                 <Star className="h-5 w-5 text-orange-500 shrink-0" />
                 <p className="text-sm flex-1">{missingReviews14d.length} garde{missingReviews14d.length > 1 ? "s" : ""} avec avis manquant depuis +14 jours</p>
@@ -161,7 +222,7 @@ const AdminSitsManagement = () => {
             </Card>
           )}
           {cancelledThisWeek.length > 0 && (
-            <Card className="border-yellow-200 bg-yellow-50 dark:bg-yellow-900/10 dark:border-yellow-800">
+            <Card className="border-yellow-200 bg-yellow-50">
               <CardContent className="p-3 flex items-center gap-3">
                 <XCircle className="h-5 w-5 text-yellow-600 shrink-0" />
                 <p className="text-sm flex-1">{cancelledThisWeek.length} annulation{cancelledThisWeek.length > 1 ? "s" : ""} cette semaine</p>
@@ -225,7 +286,11 @@ const AdminSitsManagement = () => {
               const rev = reviews[sit.id] || { owner: false, sitter: false };
               const isOverdue = sit.status === "confirmed" && sit.end_date && isPast(new Date(sit.end_date));
               return (
-                <TableRow key={`${sit._type}-${sit.id}`} className={isOverdue ? "bg-orange-50/50 dark:bg-orange-900/5" : ""}>
+                <TableRow
+                  key={`${sit._type}-${sit.id}`}
+                  className={`cursor-pointer transition-colors hover:bg-muted/50 ${isOverdue ? "bg-orange-50/50" : ""}`}
+                  onClick={() => openSitSheet(sit)}
+                >
                   <TableCell className="font-medium max-w-[160px] truncate">{sit.title || "Sans titre"}</TableCell>
                   <TableCell className="text-sm">
                     <div className="flex items-center gap-2">
@@ -263,7 +328,7 @@ const AdminSitsManagement = () => {
                     ) : "—"}
                   </TableCell>
                   <TableCell className="text-right">
-                    <div className="flex justify-end gap-1">
+                    <div className="flex justify-end gap-1" onClick={(e) => e.stopPropagation()}>
                       <Button variant="ghost" size="icon" title="Voir" onClick={() => navigate(`/sits/${sit.id}`)}>
                         <Eye className="h-4 w-4" />
                       </Button>
@@ -298,6 +363,165 @@ const AdminSitsManagement = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Sit detail Sheet */}
+      <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
+        <SheetContent side="right" className="w-full sm:max-w-md overflow-y-auto">
+          <SheetHeader>
+            <SheetTitle className="text-lg font-semibold">
+              {selectedSit?.title || "Sans titre"}
+            </SheetTitle>
+          </SheetHeader>
+
+          {selectedSit && (
+            <div className="mt-6 space-y-6">
+              {/* Section 1: Récapitulatif */}
+              <div className="space-y-4">
+                <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Récapitulatif</h3>
+
+                <div className="space-y-3">
+                  {/* Owner */}
+                  <div className="flex items-center gap-3">
+                    <Avatar className="h-8 w-8">
+                      {selectedSit.owner?.avatar_url ? (
+                        <AvatarImage src={selectedSit.owner.avatar_url} />
+                      ) : null}
+                      <AvatarFallback><User className="h-4 w-4" /></AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <p className="text-xs text-muted-foreground">Propriétaire</p>
+                      <p className="text-sm font-medium">
+                        {selectedSit.owner?.first_name || "—"}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Sitter */}
+                  <div className="flex items-center gap-3">
+                    <Avatar className="h-8 w-8">
+                      {sitters[selectedSit.id]?.avatar ? (
+                        <AvatarImage src={sitters[selectedSit.id].avatar!} />
+                      ) : null}
+                      <AvatarFallback><User className="h-4 w-4" /></AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <p className="text-xs text-muted-foreground">Gardien assigné</p>
+                      <p className="text-sm font-medium">
+                        {sitters[selectedSit.id]?.name || "—"}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Dates */}
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-muted">
+                      <Calendar className="h-4 w-4 text-muted-foreground" />
+                    </div>
+                    <div>
+                      <p className="text-xs text-muted-foreground">Dates</p>
+                      <p className="text-sm font-medium">
+                        {selectedSit.start_date ? format(new Date(selectedSit.start_date), "d MMM yyyy", { locale: fr }) : "—"}
+                        {" → "}
+                        {selectedSit.end_date ? format(new Date(selectedSit.end_date), "d MMM yyyy", { locale: fr }) : "—"}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Status + Type */}
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-muted">
+                      <MapPin className="h-4 w-4 text-muted-foreground" />
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Badge variant={getTimingStatus(selectedSit).variant}>
+                        {getTimingStatus(selectedSit).label}
+                      </Badge>
+                      <Badge variant="outline" className="text-xs">
+                        {selectedSit._type === "sit" ? "Classique" : "Longue durée"}
+                      </Badge>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <Separator />
+
+              {/* Section 2: Candidatures */}
+              <div className="space-y-3">
+                <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+                  Candidatures ({sheetApplications.length})
+                </h3>
+
+                {sheetAppsLoading ? (
+                  <p className="text-sm text-muted-foreground py-4 text-center">Chargement…</p>
+                ) : sheetApplications.length === 0 ? (
+                  <p className="text-sm text-muted-foreground py-4 text-center">Aucune candidature</p>
+                ) : (
+                  <div className="space-y-2">
+                    {visibleApps.map((app: any) => (
+                      <div key={app.id} className="flex items-center justify-between rounded-lg border p-3">
+                        <div className="flex items-center gap-3">
+                          <Avatar className="h-7 w-7">
+                            {app.sitter?.avatar_url ? (
+                              <AvatarImage src={app.sitter.avatar_url} />
+                            ) : null}
+                            <AvatarFallback className="text-xs"><User className="h-3 w-3" /></AvatarFallback>
+                          </Avatar>
+                          <span className="text-sm font-medium">
+                            {app.sitter?.first_name || "—"}
+                          </span>
+                        </div>
+                        {getStatusBadge(app.status)}
+                      </div>
+                    ))}
+
+                    {sheetApplications.length > 3 && !showAllApps && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="w-full text-primary"
+                        onClick={() => setShowAllApps(true)}
+                      >
+                        Afficher toutes ({sheetApplications.length})
+                        <ChevronRight className="h-4 w-4 ml-1" />
+                      </Button>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              <Separator />
+
+              {/* Section 3: Actions admin */}
+              <div className="space-y-3">
+                <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Actions</h3>
+
+                {selectedSit.status === "confirmed" && (
+                  <Button
+                    className="w-full"
+                    onClick={() => handleSheetTransition("ongoing")}
+                  >
+                    Marquer en cours
+                  </Button>
+                )}
+
+                {selectedSit.status === "ongoing" && (
+                  <Button
+                    className="w-full"
+                    onClick={() => handleSheetTransition("completed")}
+                  >
+                    Marquer terminée
+                  </Button>
+                )}
+
+                {selectedSit.status !== "confirmed" && selectedSit.status !== "ongoing" && (
+                  <p className="text-sm text-muted-foreground text-center py-2">Aucune action disponible</p>
+                )}
+              </div>
+            </div>
+          )}
+        </SheetContent>
+      </Sheet>
     </div>
   );
 };
