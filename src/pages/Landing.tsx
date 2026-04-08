@@ -109,6 +109,9 @@ const Landing = () => {
         if (typeof data.missions_entraide === 'number') {
           setKpiMissions(data.missions_entraide);
         }
+        if (typeof data.animaux_accompagnes === 'number') {
+          setKpiAnimaux(234 + data.animaux_accompagnes);
+        }
       }
     };
     loadKPIs();
