@@ -30,12 +30,12 @@ const sitterFeatures = [
 ];
 
 const strengthBlocks = [
-  { icon: MapPin, title: "Gardiens de proximité", desc: "Vos gardiens sont près de chez vous — pas à l'autre bout du pays. Un problème ? Quelqu'un est à 15 minutes." },
-  { icon: ShieldCheck, title: "Profils vérifiés", desc: "Identité vérifiée, avis croisés détaillés, écussons qualitatifs. Vous savez à qui vous confiez vos animaux." },
-  { icon: Map, title: "Guides locaux", desc: "Parcs, vétérinaires, balades, cafés dog-friendly — tout ce qu'il faut pour que votre gardien se sente chez lui." },
-  { icon: PawPrint, title: "Fiches races", desc: "Caractère, besoins, conseils de garde — votre gardien sait exactement comment s'occuper de votre animal." },
+  { icon: MapPin, title: "Gardiens de proximité", desc: "Tes gardiens sont des gens du coin — pas à l'autre bout du pays. Un problème ? Quelqu'un est à 15 minutes." },
+  { icon: ShieldCheck, title: "Identités confirmées", desc: "Identité confirmée, avis croisés détaillés, écussons qualitatifs. Tu sais à qui tu confies tes animaux." },
+  { icon: Map, title: "Guides locaux", desc: "Parcs, vétérinaires, balades, cafés dog-friendly — tout ce qu'il faut pour que ton gardien se sente chez lui." },
+  { icon: PawPrint, title: "Fiches races", desc: "Caractère, besoins, conseils de garde — ton gardien sait exactement comment s'occuper de ton animal." },
   { icon: Heart, title: "Petites missions", desc: "Des coups de main entre gens du coin. Promener un chien, arroser un potager. En échange : un repas, un service rendu. Jamais d'argent." },
-  { icon: Siren, title: "Gardiens d'urgence", desc: "Des gardiens expérimentés, mobilisables rapidement parce qu'ils sont à côté. Le filet de sécurité que vous méritez." },
+  { icon: Siren, title: "Gardiens d'urgence", desc: "Des gardiens expérimentés, mobilisables rapidement parce qu'ils sont à côté. Le filet de sécurité que tu mérites." },
 ];
 
 const promiseLines = [
