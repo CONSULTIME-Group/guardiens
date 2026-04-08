@@ -101,8 +101,8 @@ const Pricing = () => {
 
         <main className="max-w-6xl mx-auto px-4">
           {/* ═══ ZONE 1 — Compréhension rapide ═══ */}
-          <section className="text-center py-20 md:py-28 space-y-5">
-            <h1 className="font-heading text-4xl md:text-5xl font-bold text-foreground leading-tight">
+          <section className="text-center py-12 md:py-16 space-y-4">
+            <h1 className="font-heading text-3xl md:text-4xl font-bold text-foreground leading-tight">
               Des tarifs simples et honnêtes
             </h1>
             <p className="text-lg font-body text-foreground/60 max-w-xl mx-auto">
@@ -112,7 +112,7 @@ const Pricing = () => {
 
           {/* Founder Banner */}
           {before && (
-            <section className="mt-0 mb-16 md:mb-24">
+            <section className="mt-0 mb-10 md:mb-14">
               <div className="w-full max-w-3xl mx-auto bg-amber-50 border border-amber-200/60 rounded-2xl overflow-hidden">
                 {/* Bande supérieure */}
                 <div className="bg-amber-100 px-6 py-3 flex items-center justify-center gap-2">
@@ -191,9 +191,9 @@ const Pricing = () => {
           )}
 
           {/* ═══ ZONE 2 — Détail des offres ═══ */}
-          <section className="grid md:grid-cols-2 gap-6 md:gap-8 items-stretch mb-16 md:mb-24">
+          <section className="grid md:grid-cols-2 gap-6 md:gap-8 items-stretch mb-10 md:mb-14">
             {/* Owner Card */}
-            <Card className="border-border rounded-2xl h-full flex flex-col relative">
+            <Card className="bg-card border border-border/40 rounded-2xl h-full flex flex-col relative">
               {before && (
                 <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-amber-100 text-amber-800 text-xs font-body font-medium px-3 py-1 rounded-full flex items-center gap-1.5">
                   <Star className="h-3 w-3" fill="currentColor" />
@@ -217,14 +217,14 @@ const Pricing = () => {
                 <p className="text-xs font-body text-foreground/50 text-center italic">Gratuit maintenant, gratuit toujours.</p>
                 <div className="mt-auto">
                   <Link to="/register" className="block">
-                    <Button variant="outline" className="w-full min-h-[44px] font-body border-2 border-foreground/25 hover:border-foreground/50 text-foreground/70 hover:text-foreground bg-transparent transition-colors duration-200" size="lg">S'inscrire gratuitement</Button>
+                    <Button variant="outline" className="w-full min-h-[44px] font-body border-2 border-foreground/20 hover:border-foreground/40 text-foreground/60 hover:text-foreground bg-transparent transition-colors duration-200" size="lg">S'inscrire gratuitement</Button>
                   </Link>
                 </div>
               </CardContent>
             </Card>
 
             {/* Sitter Card — highlighted */}
-            <Card className="border-2 border-primary/30 relative shadow-xl rounded-2xl md:scale-105 h-full flex flex-col">
+            <Card className="border-2 border-primary/20 relative shadow-xl rounded-2xl md:scale-105 h-full flex flex-col bg-primary/5">
               {before && (
                 <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-amber-100 text-amber-800 text-xs font-body font-medium px-3 py-1 rounded-full flex items-center gap-1.5">
                   <Star className="h-3 w-3" fill="currentColor" />
@@ -348,7 +348,7 @@ const Pricing = () => {
           {/* ═══ ZONE 3 — Réassurance + action ═══ */}
 
           {/* Strengths Grid */}
-          <section className="mb-16 md:mb-24">
+          <section className="mb-10 md:mb-14">
             <h2 className="font-heading text-2xl md:text-3xl font-semibold text-foreground text-center mb-12">Tout ça, c'est Guardiens</h2>
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
               {strengthBlocks.map((block) => (
@@ -364,7 +364,7 @@ const Pricing = () => {
           </section>
 
           {/* Promise */}
-          <section className="max-w-2xl mx-auto text-center mb-16 md:mb-24">
+          <section className="max-w-2xl mx-auto text-center mb-10 md:mb-14">
             <h2 className="font-heading text-2xl font-bold text-foreground mb-6">Notre promesse — Simple, honnête, et c'est tout</h2>
             <div className="space-y-3">
               {promiseLines.map((line) => (
@@ -374,7 +374,7 @@ const Pricing = () => {
           </section>
 
           {/* Internal links — city pages + urgence */}
-          <section className="max-w-3xl mx-auto mb-16 md:mb-24">
+          <section className="max-w-3xl mx-auto mb-10 md:mb-14">
             <h2 className="font-heading text-xl font-bold text-foreground text-center mb-4">House-sitting par ville</h2>
             <p className="text-sm text-muted-foreground text-center font-body mb-6">
               Découvrez les gardiens vérifiés disponibles dans votre ville. Un imprévu ? Nos{" "}
@@ -398,7 +398,7 @@ const Pricing = () => {
           </section>
 
           {/* FAQ */}
-          <section className="max-w-3xl mx-auto mb-16 md:mb-24">
+          <section className="max-w-3xl mx-auto mb-10 md:mb-14">
             <h2 className="font-heading text-2xl font-bold text-foreground text-center mb-3">Questions fréquentes</h2>
             <p className="text-sm font-body text-foreground/60 text-center mb-8">
               Des questions sur le modèle ? Voici les réponses directes.
@@ -418,7 +418,7 @@ const Pricing = () => {
           </section>
 
           {/* CTA final */}
-          <section className="text-center py-20 md:py-28 bg-muted/30 rounded-2xl mb-16">
+          <section className="text-center py-10 md:py-14 bg-muted/30 rounded-2xl mb-10">
             <p className="text-lg md:text-xl font-heading font-semibold text-foreground text-center mb-2">
               {before
                 ? "Rejoignez les Fondateurs avant le 13 mai"
