@@ -140,17 +140,22 @@ const AdminSitsManagement = () => {
     setShowAllApps(false);
     setSheetAppsLoading(true);
 
-    const table = sit._type === "sit" ? "applications" : "long_stay_applications";
-    const fk = sit._type === "sit" ? "sit_id" : "long_stay_id";
-    const profileFk = sit._type === "sit"
-      ? "sitter:profiles!applications_sitter_id_fkey(first_name, avatar_url)"
-      : "sitter:profiles!long_stay_applications_sitter_id_fkey(first_name, avatar_url)";
-
-    const { data } = await supabase
-      .from(table)
-      .select(`id, status, created_at, sitter_id, ${profileFk}`)
-      .eq(fk, sit.id)
-      .order("created_at", { ascending: false });
+    let data: any[] | null = null;
+    if (sit._type === "sit") {
+      const res = await supabase
+        .from("applications")
+        .select("id, status, created_at, sitter_id, sitter:profiles!applications_sitter_id_fkey(first_name, avatar_url)")
+        .eq("sit_id", sit.id)
+        .order("created_at", { ascending: false });
+      data = res.data;
+    } else {
+      const res = await supabase
+        .from("long_stay_applications")
+        .select("id, status, created_at, sitter_id, sitter:profiles!long_stay_applications_sitter_id_fkey(first_name, avatar_url)")
+        .eq("long_stay_id", sit.id)
+        .order("created_at", { ascending: false });
+      data = res.data;
+    }
 
     setSheetApplications(data || []);
     setSheetAppsLoading(false);
