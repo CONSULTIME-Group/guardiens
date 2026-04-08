@@ -377,6 +377,30 @@ const Pricing = () => {
             </div>
           </section>
 
+          {/* Internal links — city pages + urgence */}
+          <section className="max-w-3xl mx-auto space-y-4">
+            <h2 className="font-heading text-xl font-bold text-foreground text-center">House-sitting par ville</h2>
+            <p className="text-sm text-muted-foreground text-center font-body">
+              Découvrez les gardiens vérifiés disponibles dans votre ville. Un imprévu ? Nos{" "}
+              <Link to="/gardien-urgence" className="text-primary hover:underline">gardiens d'urgence</Link>{" "}
+              sont mobilisables en quelques heures.
+            </p>
+            <div className="flex flex-wrap justify-center gap-3">
+              <Link to="/house-sitting/lyon" className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg border border-border text-sm font-body text-foreground hover:border-primary/40 hover:text-primary transition-colors">
+                <MapPin className="h-3.5 w-3.5" /> Lyon
+              </Link>
+              <Link to="/house-sitting/annecy" className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg border border-border text-sm font-body text-foreground hover:border-primary/40 hover:text-primary transition-colors">
+                <MapPin className="h-3.5 w-3.5" /> Annecy
+              </Link>
+              <Link to="/house-sitting/grenoble" className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg border border-border text-sm font-body text-foreground hover:border-primary/40 hover:text-primary transition-colors">
+                <MapPin className="h-3.5 w-3.5" /> Grenoble
+              </Link>
+              <Link to="/house-sitting/chambery" className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg border border-border text-sm font-body text-foreground hover:border-primary/40 hover:text-primary transition-colors">
+                <MapPin className="h-3.5 w-3.5" /> Chambéry
+              </Link>
+            </div>
+          </section>
+
           {/* FAQ */}
           <section className="max-w-3xl mx-auto space-y-6">
             <h2 className="font-heading text-2xl font-bold text-foreground text-center">Questions fréquentes</h2>

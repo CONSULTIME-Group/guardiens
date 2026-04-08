@@ -523,6 +523,67 @@ const Landing = () => {
         </div>
       </section>
 
+      {/* ═══════════════ SECTION 5b — VILLES PRIORITAIRES ═══════════════ */}
+      <section className="py-24 md:py-32 bg-muted/30">
+        <div className="max-w-5xl mx-auto px-6">
+          <RevealSection>
+            <span className="text-xs tracking-widest uppercase text-primary/60 font-body mb-4 block text-center">
+              Proches de chez vous
+            </span>
+            <h2 className="text-4xl md:text-5xl font-heading font-semibold leading-snug text-foreground text-center mb-6">
+              House-sitting près de chez vous
+            </h2>
+            <p className="text-center text-foreground/60 font-body max-w-2xl mx-auto mb-16">
+              Des gardiens vérifiés dans votre ville, disponibles rapidement. Gratuit pour les propriétaires.
+            </p>
+          </RevealSection>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <RevealSection delay={0.1}>
+              <Link to="/house-sitting/lyon" className="group block">
+                <div className="bg-card rounded-2xl p-8 shadow-sm text-left h-full border border-border group-hover:border-primary/30 transition-colors">
+                  <h3 className="text-xl font-heading font-semibold text-foreground mb-3">House-sitting à Lyon</h3>
+                  <p className="text-base font-body leading-relaxed text-foreground/70 mb-4">
+                    Des gardiens dans chaque arrondissement. Du Vieux Lyon à la Croix-Rousse, quelqu'un de confiance est toujours à côté.
+                  </p>
+                  <span className="text-sm font-body text-primary font-medium group-hover:underline inline-flex items-center gap-1">
+                    Voir les gardiens à Lyon <ArrowRight className="h-3.5 w-3.5" />
+                  </span>
+                </div>
+              </Link>
+            </RevealSection>
+
+            <RevealSection delay={0.2}>
+              <Link to="/house-sitting/annecy" className="group block">
+                <div className="bg-card rounded-2xl p-8 shadow-sm text-left h-full border border-border group-hover:border-primary/30 transition-colors">
+                  <h3 className="text-xl font-heading font-semibold text-foreground mb-3">House-sitting à Annecy</h3>
+                  <p className="text-base font-body leading-relaxed text-foreground/70 mb-4">
+                    Lac, montagne, résidences secondaires. Des gardiens locaux qui connaissent le gel, les accès et les vétos de Haute-Savoie.
+                  </p>
+                  <span className="text-sm font-body text-primary font-medium group-hover:underline inline-flex items-center gap-1">
+                    Voir les gardiens à Annecy <ArrowRight className="h-3.5 w-3.5" />
+                  </span>
+                </div>
+              </Link>
+            </RevealSection>
+
+            <RevealSection delay={0.3}>
+              <Link to="/house-sitting/grenoble" className="group block">
+                <div className="bg-card rounded-2xl p-8 shadow-sm text-left h-full border border-border group-hover:border-primary/30 transition-colors">
+                  <h3 className="text-xl font-heading font-semibold text-foreground mb-3">House-sitting à Grenoble</h3>
+                  <p className="text-base font-body leading-relaxed text-foreground/70 mb-4">
+                    Au pied de trois massifs. Des gardiens qui connaissent la cuvette, la pollution, et les sentiers de la Bastille.
+                  </p>
+                  <span className="text-sm font-body text-primary font-medium group-hover:underline inline-flex items-center gap-1">
+                    Voir les gardiens à Grenoble <ArrowRight className="h-3.5 w-3.5" />
+                  </span>
+                </div>
+              </Link>
+            </RevealSection>
+          </div>
+        </div>
+      </section>
+
       {/* ═══════════════ SECTION 6 — PETITES MISSIONS ═══════════════ */}
       <section className="py-24 md:py-32 bg-background">
         <div className="max-w-5xl mx-auto px-6">

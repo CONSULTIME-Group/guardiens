@@ -223,6 +223,31 @@ const EmergencySitter = () => {
         </div>
       </section>
 
+      {/* Villes couvertes */}
+      <section className="max-w-4xl mx-auto px-4 py-12 border-t border-border">
+        <h2 className="font-heading text-xl font-bold text-center mb-3">Gardiens d'urgence par ville</h2>
+        <p className="text-sm text-muted-foreground text-center mb-6">
+          Le réseau d'urgence couvre l'ensemble de la région Auvergne-Rhône-Alpes. Voici les villes où nos gardiens sont les plus actifs.
+        </p>
+        <div className="flex flex-wrap justify-center gap-3">
+          <Link to="/house-sitting/lyon" className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg border border-border text-sm hover:border-primary/40 hover:text-primary transition-colors">
+            <MapPin className="h-3.5 w-3.5" /> Lyon
+          </Link>
+          <Link to="/house-sitting/annecy" className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg border border-border text-sm hover:border-primary/40 hover:text-primary transition-colors">
+            <MapPin className="h-3.5 w-3.5" /> Annecy
+          </Link>
+          <Link to="/house-sitting/grenoble" className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg border border-border text-sm hover:border-primary/40 hover:text-primary transition-colors">
+            <MapPin className="h-3.5 w-3.5" /> Grenoble
+          </Link>
+          <Link to="/house-sitting/chambery" className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg border border-border text-sm hover:border-primary/40 hover:text-primary transition-colors">
+            <MapPin className="h-3.5 w-3.5" /> Chambéry
+          </Link>
+          <Link to="/tarifs" className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg border border-border text-sm hover:border-primary/40 hover:text-primary transition-colors">
+            Voir les tarifs
+          </Link>
+        </div>
+      </section>
+
       {/* Footer CTA */}
       <section className="py-12 text-center">
         <p className="text-muted-foreground text-sm mb-4">Guardiens © {new Date().getFullYear()}</p>
