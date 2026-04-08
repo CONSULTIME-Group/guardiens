@@ -96,6 +96,8 @@ export function useSitterProfile() {
     const p = profileRes.data;
     const s = sitterRes.data;
 
+    console.log("[SITTER_HOOK] FETCH_RESULT", { profile: p, sitter: s });
+    console.log("[SITTER_HOOK] AVATAR_FROM_DB", p?.avatar_url);
     const merged: SitterProfileData = {
       first_name: p?.first_name || "",
       last_name: p?.last_name || "",
@@ -157,6 +159,7 @@ export function useSitterProfile() {
       setPastAnimals([]);
     }
 
+    console.log("[SITTER_HOOK] LOADING=false, data set");
     setLoading(false);
   }, [user]);
 
