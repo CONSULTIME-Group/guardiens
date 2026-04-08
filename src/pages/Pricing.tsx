@@ -42,7 +42,7 @@ const strengthBlocks = [
   { icon: ShieldCheck, title: "Profils vérifiés", desc: "Identité vérifiée, avis croisés détaillés, écussons qualitatifs. Vous savez à qui vous confiez vos animaux." },
   { icon: Map, title: "Guides locaux", desc: "Parcs, vétérinaires, balades, cafés dog-friendly — tout ce qu'il faut pour que votre gardien se sente chez lui." },
   { icon: PawPrint, title: "Fiches races", desc: "Caractère, besoins, conseils de garde — votre gardien sait exactement comment s'occuper de votre animal." },
-  { icon: Heart, title: "Petites missions", desc: "Entraide entre voisins : promener un chien, arroser un jardin. Pas d'argent — un bon repas, un coup de main, du lien." },
+  { icon: Heart, title: "Petites missions", desc: "Des coups de main entre gens du coin. Promener un chien, arroser un potager. En échange : un repas, un service rendu. Jamais d'argent." },
   { icon: Siren, title: "Gardiens d'urgence", desc: "Des gardiens expérimentés, mobilisables rapidement parce qu'ils sont à côté. Le filet de sécurité que vous méritez." },
 ];
 
@@ -55,27 +55,19 @@ const promiseLines = [
 const faqItems = [
   {
     q: "Pourquoi c'est gratuit pour les propriétaires ?",
-    a: "Plus il y a d'annonces, plus les gardiens ont de choix, plus la communauté est vivante. Les propriétaires alimentent la plateforme — c'est logique qu'ils publient gratuitement.",
+    a: "Parce qu'on ne facture pas l'accès à ceux qui ouvrent leur maison. Publier une annonce, recevoir des candidatures, choisir un gardien, laisser un avis — tout ça reste gratuit, pour toujours. Les propriétaires font confiance en ouvrant leur porte. On ne fait pas payer ça.",
   },
   {
     q: "Pourquoi le 13 mai ?",
-    a: "C'est l'anniversaire de Jérémie, cofondateur de Guardiens. Il a préféré offrir l'accès gratuit à la communauté plutôt que recevoir des chaussettes. Les inscrits avant cette date reçoivent le badge Fondateur et un accès gratuit jusqu'au 13 juin.",
+    a: "C'est l'anniversaire de Jérémie, cofondateur de Guardiens. Il a préféré offrir l'accès à la communauté plutôt que recevoir des cadeaux. Les inscrits avant cette date reçoivent le badge Fondateur à vie — une marque de première heure qui ne sera plus jamais attribuée.",
   },
   {
     q: "Que se passe-t-il après le 13 mai pour les Fondateurs ?",
-    a: "Votre accès reste gratuit jusqu'au 13 juin 2026. Après cette date, trois formules sont disponibles : 12€ pour un mois sans renouvellement, 9€/mois avec 7 jours d'essai annulable à tout moment, ou un tarif 2026 en paiement unique avec -20% sur le mensuel. Rien ne démarre automatiquement.",
-  },
-  {
-    q: "Est-ce que 9€/mois c'est rentable ?",
-    a: "Un séjour en chenil pour un chien coûte entre 20 et 40€ par nuit. Guardiens ne facture rien sur la garde — vous et le gardien décidez ensemble des modalités. L'abonnement donne accès à la plateforme, pas à un prix fixé.",
+    a: "Votre accès reste gratuit jusqu'au 13 juin 2026. Trois formules sont ensuite proposées : 12 € pour un mois, 9 €/mois avec 7 jours d'essai, ou un tarif 2026 en paiement unique à -20 %. Rien ne démarre automatiquement. Votre badge Fondateur reste à vie.",
   },
   {
     q: "Y a-t-il des frais cachés ?",
-    a: "Non. 9€/mois pour les gardiens (ou moins avec le tarif annuel proratisé), gratuit pour les propriétaires, aucune commission sur les gardes classiques. Le seul supplément : 70€ par partie pour les gardes longue durée de 30 jours et plus.",
-  },
-  {
-    q: "Pourquoi pas d'assurance ou de protection logement ?",
-    a: "Les couvertures proposées par d'autres plateformes reposent en réalité sur l'assurance habitation que vous avez déjà — avec des conditions, des plafonds, et des formulaires. On préfère être honnêtes : votre assurance habitation vous couvre. Ce qu'on vous offre en plus, c'est un réseau de gardiens locaux mobilisables, un annuaire de vétos partenaires, et la tranquillité de savoir que quelqu'un de confiance est à 15 minutes de chez vous.",
+    a: "Non. L'accès gardien : 9 €/mois, 12 € pour un mois, ou la formule 2026 à -20 %. L'accès propriétaire : gratuit en permanence. Aucune commission sur les gardes. Un prix. Transparent.",
   },
 ];
 
@@ -119,9 +111,9 @@ const Pricing = () => {
         <main className="max-w-6xl mx-auto px-4 py-12 space-y-16">
           {/* H1 */}
           <section className="text-center space-y-4">
-            <h1 className="font-heading text-4xl md:text-5xl font-bold text-foreground">
-              Tarifs du house-sitting et de la garde d'animaux
-            </h1>
+             <h1 className="font-heading text-4xl md:text-5xl font-bold text-foreground">
+               Des tarifs simples et honnêtes
+             </h1>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto font-body">
               Pas de frais cachés, pas de commission sur les gardes. Un abonnement mensuel pour les gardiens, résiliable à tout moment.
             </p>
@@ -214,7 +206,7 @@ const Pricing = () => {
               <CardHeader className="text-center pb-2">
                 <div className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-2 font-body">Propriétaire</div>
                 <CardTitle className="font-heading text-4xl font-bold text-foreground">Gratuit</CardTitle>
-                <p className="text-muted-foreground text-sm mt-1 font-body">Gratuit en 2026. Pas de piège.</p>
+                <p className="text-muted-foreground text-sm mt-1 font-body">Gratuit en 2026. C'est une décision de fond.</p>
               </CardHeader>
               <CardContent className="space-y-4 pt-4">
                 <ul className="space-y-3">
@@ -395,9 +387,9 @@ const Pricing = () => {
               <Link to="/house-sitting/grenoble" className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg border border-border text-sm font-body text-foreground hover:border-primary/40 hover:text-primary transition-colors">
                 <MapPin className="h-3.5 w-3.5" /> Grenoble
               </Link>
-              <Link to="/house-sitting/chambery" className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg border border-border text-sm font-body text-foreground hover:border-primary/40 hover:text-primary transition-colors">
-                <MapPin className="h-3.5 w-3.5" /> Chambéry
-              </Link>
+               <Link to="/house-sitting/valence" className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg border border-border text-sm font-body text-foreground hover:border-primary/40 hover:text-primary transition-colors">
+                 <MapPin className="h-3.5 w-3.5" /> Valence
+               </Link>
             </div>
           </section>
 
@@ -418,7 +410,7 @@ const Pricing = () => {
           <section className="text-center space-y-4 py-8">
             <p className="text-lg text-muted-foreground max-w-xl mx-auto font-body">
               {before
-                ? "Inscrivez-vous maintenant — accès gratuit jusqu'au 13 juin + badge Fondateur à vie."
+                ? "Rejoignez les Fondateurs avant le 13 mai — badge à vie, premier mois offert."
                 : "9€/mois pour les gardiens. Gratuit pour les propriétaires. Sans engagement."}
             </p>
             <Link to="/register">
