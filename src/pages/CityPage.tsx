@@ -19,15 +19,19 @@ import {
   ArrowRight,
   Compass,
   Building2,
+  Siren,
+  CheckCircle2,
 } from "lucide-react";
 
 import { CITIES } from "@/data/cities";
 import { useCityStats } from "@/hooks/useCityStats";
+import { getCityContent } from "@/data/cityContent";
 import CityPageMeta from "@/components/seo/CityPageMeta";
 import CitySchemaOrg from "@/components/seo/CitySchemaOrg";
 import LocalExpertise from "@/components/seo/LocalExpertise";
 import LocalSpotsGrid from "@/components/seo/LocalSpotsGrid";
 import LocalNetworkGrid from "@/components/seo/LocalNetworkGrid";
+import CityArticleBody from "@/components/city/CityArticleBody";
 import StickyCTA from "@/components/seo/StickyCTA";
 
 const CityPage = () => {
