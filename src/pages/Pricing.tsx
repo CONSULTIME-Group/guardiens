@@ -347,14 +347,17 @@ const Pricing = () => {
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
                       <p className="text-sm font-medium text-foreground font-body">
-                        Jusqu'au 31 décembre 2026
+                        Prorata 2026
                       </p>
                       <p className="text-xs text-foreground/50 font-body">
-                        Paiement unique · -20% sur le mensuel
+                        Mois restants en 2026 × 9€ × 0,8 — paiement unique
+                      </p>
+                      <p className="text-xs text-foreground/40 italic font-body">
+                        Ex. en mai : 7 mois × 9€ × 0,8 = 50,40€
                       </p>
                     </div>
                     <span className="text-sm font-semibold text-primary font-body flex-shrink-0">
-                      Offre 2026
+                      -20%
                     </span>
                   </div>
                 </div>
@@ -368,7 +371,7 @@ const Pricing = () => {
                     S'inscrire gratuitement
                   </Link>
                   <p className="text-xs font-body text-foreground/40 text-center mt-2">
-                    Aucune carte bancaire requise pendant la période fondateur
+                    Inscription sans carte bancaire. L'abonnement mensuel inclut 7 jours d'essai offerts.
                   </p>
                   <Link
                     to="/faq#formules"
@@ -426,9 +429,6 @@ const Pricing = () => {
               </Link>
               <Link to="/house-sitting/grenoble" className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg border border-border text-sm font-body text-foreground hover:border-primary/40 hover:text-primary transition-colors">
                 <MapPin className="h-3.5 w-3.5" /> Grenoble
-              </Link>
-              <Link to="/house-sitting/valence" className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg border border-border text-sm font-body text-foreground hover:border-primary/40 hover:text-primary transition-colors">
-                <MapPin className="h-3.5 w-3.5" /> Valence
               </Link>
             </div>
           </section>
