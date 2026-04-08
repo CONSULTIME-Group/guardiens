@@ -111,7 +111,8 @@ const AdminSEO = () => {
     const sevenDaysAgo = new Date();
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
     const pagesWithImpressions = new Set(gsc.topPages.filter((p) => p.impressions > 0).map((p) => {
-      try { return new URL(p.page).pathname.replace(/^\/articles\//, "").replace(/\/$/, ""); } catch { return p.page; }
+      const url = p.keys?.[0] || "";
+      try { return new URL(url).pathname.replace(/^\/articles\//, "").replace(/\/$/, ""); } catch { return url; }
     }));
     return publishedArticles.filter((a) => {
       if (!a.published_at) return false;
