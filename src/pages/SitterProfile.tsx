@@ -120,6 +120,16 @@ const SitterProfile = () => {
 
   const mergedData = { ...data, ...localData } as SitterProfileData;
 
+  useEffect(() => {
+    console.log("[SITTER_PAGE] TAB_CHANGE", activeSection);
+    console.log("[SITTER_PAGE] DATA", data);
+    console.log("[SITTER_PAGE] LOCAL_DATA", localData);
+    console.log("[SITTER_PAGE] MERGED_DATA", mergedData);
+    console.log("[SITTER_PAGE] AVATAR_FROM_DATA", data?.avatar_url);
+    console.log("[SITTER_PAGE] AVATAR_FROM_LOCAL", localData?.avatar_url);
+    console.log("[SITTER_PAGE] AVATAR_MERGED", mergedData?.avatar_url);
+  }, [activeSection, data, localData]);
+
   const handleChange = useCallback((partial: Partial<SitterProfileData>) => {
     setLocalData(prev => ({ ...prev, ...partial }));
     setDirty(true);

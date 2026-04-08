@@ -61,6 +61,16 @@ const OwnerProfilePage = () => {
 
   const mergedData = { ...data, ...localData } as OwnerProfileData;
 
+  useEffect(() => {
+    console.log("[OWNER_PAGE] TAB_CHANGE", activeSection);
+    console.log("[OWNER_PAGE] DATA", data);
+    console.log("[OWNER_PAGE] LOCAL_DATA", localData);
+    console.log("[OWNER_PAGE] MERGED_DATA", mergedData);
+    console.log("[OWNER_PAGE] AVATAR_FROM_DATA", data?.avatar_url);
+    console.log("[OWNER_PAGE] AVATAR_FROM_LOCAL", localData?.avatar_url);
+    console.log("[OWNER_PAGE] AVATAR_MERGED", mergedData?.avatar_url);
+  }, [activeSection, data, localData]);
+
   const handleChange = useCallback((partial: Partial<OwnerProfileData>) => {
     setLocalData(prev => ({ ...prev, ...partial }));
     setDirty(true);

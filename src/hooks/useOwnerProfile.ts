@@ -108,6 +108,8 @@ export function useOwnerProfile() {
     const prop = propertyRes.data;
     const o = ownerRes.data;
 
+    console.log("[OWNER_HOOK] FETCH_RESULT", { profile: p, property: prop, ownerProfile: o });
+    console.log("[OWNER_HOOK] AVATAR_FROM_DB", p?.avatar_url);
     setData({
       first_name: p?.first_name || "", last_name: p?.last_name || "",
       city: p?.city || "", postal_code: p?.postal_code || "",
@@ -163,6 +165,7 @@ export function useOwnerProfile() {
     }
     setOwnerProfileId(o?.id ?? null);
 
+    console.log("[OWNER_HOOK] LOADING=false, data set");
     setLoading(false);
   }, [user]);
 
