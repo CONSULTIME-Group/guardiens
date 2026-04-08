@@ -933,6 +933,71 @@ export type Database = {
         }
         Relationships: []
       }
+      garde_accords: {
+        Row: {
+          accepted: boolean
+          accepted_at: string | null
+          created_at: string
+          document_content: Json | null
+          document_hash: string
+          garde_id: string
+          id: string
+          ip_address: string | null
+          user_id: string
+        }
+        Insert: {
+          accepted?: boolean
+          accepted_at?: string | null
+          created_at?: string
+          document_content?: Json | null
+          document_hash: string
+          garde_id: string
+          id?: string
+          ip_address?: string | null
+          user_id: string
+        }
+        Update: {
+          accepted?: boolean
+          accepted_at?: string | null
+          created_at?: string
+          document_content?: Json | null
+          document_hash?: string
+          garde_id?: string
+          id?: string
+          ip_address?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "garde_accords_garde_id_fkey"
+            columns: ["garde_id"]
+            isOneToOne: false
+            referencedRelation: "sits"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "garde_accords_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profile_reputation"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "garde_accords_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "garde_accords_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       geocode_cache: {
         Row: {
           city_name: string
@@ -3287,6 +3352,15 @@ export type Database = {
       }
     }
     Functions: {
+      accept_garde_accord: {
+        Args: {
+          p_document_content: Json
+          p_document_hash: string
+          p_garde_id: string
+          p_ip_address?: string
+        }
+        Returns: undefined
+      }
       apply_referral_reward: {
         Args: { p_referred_id: string }
         Returns: undefined
