@@ -155,6 +155,7 @@ const AppRoutes = () => (
     <Route path="/house-sitting/:slug" element={<CityPage />} />
     <Route path="/departement/:slug" element={<DepartmentPage />} />
     <Route path="/tarifs" element={<Pricing />} />
+    <Route path="/test-accord" element={<div className="p-6 bg-background min-h-screen"><TestAccord /></div>} />
     <Route path="/gardien-urgence" element={<EmergencySitter />} />
     <Route path="/petites-missions" element={<SmallMissionsRoute />} />
     <Route path="/petites-missions/creer" element={<ProtectedRoute><CreateSmallMission /></ProtectedRoute>} />
