@@ -123,20 +123,19 @@ const Pricing = () => {
                   <Star className="w-4 h-4 text-amber-500" aria-hidden="true" />
                 </div>
 
-                {/* Corps */}
-                <div className="px-6 sm:px-10 py-10 space-y-7 text-center">
-                  {/* Compte à rebours */}
-                  <div className="space-y-1">
-                    <p className="font-heading text-6xl md:text-7xl font-bold text-amber-700 tabular-nums">
+                <div className="px-6 sm:px-10 py-8 flex flex-col md:flex-row items-center md:items-start gap-6 md:gap-8">
+                  {/* Colonne gauche — Compte à rebours */}
+                  <div className="flex-1 text-center space-y-1">
+                    <p className="font-heading text-4xl font-bold text-amber-700 tabular-nums">
                       {daysLeft}
                     </p>
-                    <p className="text-sm text-amber-600/80 font-body">
-                      jour{daysLeft > 1 ? 's' : ''} restants pour rejoindre les Fondateurs
+                    <p className="text-xs text-amber-600/80 font-body">
+                      jour{daysLeft > 1 ? 's' : ''} restants
                     </p>
                   </div>
 
-                  {/* 3 avantages en ligne */}
-                  <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-8">
+                  {/* Colonne centre — 3 avantages */}
+                  <div className="flex-1 flex flex-col items-center md:items-start gap-3">
                     <div className="flex items-center gap-2 text-sm text-amber-800 font-body">
                       <BadgeCheck className="w-4 h-4 text-amber-600 flex-shrink-0" aria-hidden="true" />
                       Badge Fondateur à vie
@@ -151,19 +150,19 @@ const Pricing = () => {
                     </div>
                   </div>
 
-                  {/* Anecdote */}
-                  <p className="text-sm italic text-amber-700/70 font-body max-w-sm mx-auto leading-relaxed">
-                    Pourquoi le 13 mai ? C'est l'anniversaire de Jérémie, cofondateur de Guardiens.
-                    Il préfère offrir l'accès plutôt que recevoir des chaussettes.
-                  </p>
-
-                  {/* CTA */}
-                  <Link
-                    to="/register"
-                    className="inline-flex items-center gap-2 bg-primary text-primary-foreground font-body font-medium text-sm px-8 py-3.5 rounded-xl hover:bg-primary/90 transition-colors min-h-[44px]"
-                  >
-                    S'inscrire avant le 13 mai
-                  </Link>
+                  {/* Colonne droite — Anecdote + CTA */}
+                  <div className="flex-1 flex flex-col items-center gap-4 text-center">
+                    <p className="text-xs italic text-amber-700/70 font-body max-w-xs leading-relaxed">
+                      Pourquoi le 13 mai ? C'est l'anniversaire de Jérémie, cofondateur de Guardiens.
+                      Il préfère offrir l'accès plutôt que recevoir des chaussettes.
+                    </p>
+                    <Link
+                      to="/register"
+                      className="inline-flex items-center gap-2 bg-primary text-primary-foreground font-body font-medium text-sm px-8 py-3.5 rounded-xl hover:bg-primary/90 transition-colors min-h-[44px]"
+                    >
+                      S'inscrire avant le 13 mai
+                    </Link>
+                  </div>
                 </div>
               </div>
             </section>
@@ -399,11 +398,11 @@ const Pricing = () => {
 
           {/* FAQ */}
           <section className="max-w-3xl mx-auto mb-10 md:mb-14">
-            <h2 className="font-heading text-2xl font-bold text-foreground text-center mb-3">Questions fréquentes</h2>
+            <h2 className="text-2xl font-heading font-semibold text-foreground text-center mb-3">Questions fréquentes</h2>
             <p className="text-sm font-body text-foreground/60 text-center mb-8">
               Des questions sur le modèle ? Voici les réponses directes.
             </p>
-            <Accordion type="single" collapsible className="w-full">
+            <Accordion type="single" collapsible className="w-full list-none">
               {faqItems.map((item, i) => (
                 <AccordionItem key={i} value={`faq-${i}`} className="border-b border-border/40 py-1">
                   <AccordionTrigger className="text-left text-base font-body font-medium text-foreground hover:text-primary transition-colors py-5">
