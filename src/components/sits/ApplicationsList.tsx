@@ -308,6 +308,28 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
     load();
   };
 
+  const handleReinvite = async (app: any) => {
+    try {
+      const { error } = await supabase.rpc('reinvite_candidat', {
+        p_application_id: app.id,
+        p_sit_id: sitId,
+        p_sitter_id: app.sitter_id,
+      } as any);
+      if (error) throw error;
+      toast({
+        title: "Invitation envoyée",
+        description: `${app.sitter?.first_name ?? "Le gardien"} a été invité à reconsidérer sa candidature.`,
+      });
+      load();
+    } catch (err: any) {
+      toast({
+        title: "Erreur",
+        description: err?.message ?? "Une erreur est survenue.",
+        variant: "destructive",
+      });
+    }
+  };
+
   const duration = startDate && endDate
     ? differenceInDays(parseISO(endDate), parseISO(startDate))
     : null;

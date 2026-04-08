@@ -362,6 +362,7 @@ const SitDetail = () => {
               startDate={formatDate(sit.start_date)}
               endDate={formatDate(sit.end_date)}
               propertyId={sit.property_id}
+              sitStatus={sit.status}
             />
           </TabsContent>
         )}
