@@ -1,3 +1,7 @@
+import { useRef, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+
 type AccordDeGardeData = {
   gardeId: string;
   dateDebut: string;
@@ -53,6 +57,46 @@ function BoolDisplay({ value }: { value: boolean | null | undefined }) {
 export default function AccordDeGarde({ garde, onClose }: AccordDeGardeProps) {
   const p = garde.proprio.prenom;
   const g = garde.gardien.prenom;
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [hasScrolled, setHasScrolled] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleScroll = () => {
+    const el = scrollRef.current;
+    if (!el) return;
+    if (el.scrollTop + el.clientHeight >= el.scrollHeight - 20) {
+      setHasScrolled(true);
+    }
+  };
+
+  const generateHash = async (data: AccordDeGardeData) => {
+    const encoder = new TextEncoder();
+    const content = JSON.stringify(data);
+    const buffer = await crypto.subtle.digest("SHA-256", encoder.encode(content));
+    return Array.from(new Uint8Array(buffer))
+      .map((b) => b.toString(16).padStart(2, "0"))
+      .join("");
+  };
+
+  const handleAccept = async () => {
+    setIsLoading(true);
+    try {
+      const hash = await generateHash(garde);
+      const { error } = await supabase.rpc("accept_garde_accord", {
+        p_garde_id: garde.gardeId,
+        p_document_hash: hash,
+        p_document_content: garde as any,
+        p_ip_address: null,
+      });
+      if (error) throw error;
+      toast("Accord confirmé — vous recevrez le PDF par email.");
+      onClose?.();
+    } catch {
+      toast.error("Une erreur est survenue — réessaie dans un instant.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div className="max-w-2xl mx-auto bg-card border rounded-xl shadow-sm flex flex-col max-h-[90vh] overflow-hidden">
@@ -75,7 +119,7 @@ export default function AccordDeGarde({ garde, onClose }: AccordDeGardeProps) {
       </div>
 
       {/* CORPS */}
-      <div className="flex-1 overflow-y-auto px-6 py-5 space-y-8">
+      <div ref={scrollRef} onScroll={handleScroll} className="flex-1 overflow-y-auto px-6 py-5 space-y-8">
         {/* Intro */}
         <p className="italic text-sm text-muted-foreground">
           Ce document résume ce que {p} et {g} ont prévu ensemble. Il sert de référence commune si une question se pose pendant ou après la garde.
@@ -260,10 +304,19 @@ export default function AccordDeGarde({ garde, onClose }: AccordDeGardeProps) {
           J'ai lu cet accord et je confirme que son contenu correspond à ce que nous avons prévu.
         </p>
         <button
-          disabled
-          className="w-full py-2 rounded-md text-sm font-medium bg-muted text-muted-foreground opacity-50 cursor-not-allowed"
+          disabled={!hasScrolled || isLoading}
+          onClick={hasScrolled && !isLoading ? handleAccept : undefined}
+          className={`w-full py-2 rounded-md text-sm font-medium ${
+            hasScrolled
+              ? "bg-primary text-primary-foreground cursor-pointer"
+              : "bg-muted text-muted-foreground opacity-50 cursor-not-allowed"
+          }`}
         >
-          C'est bon pour moi →
+          {isLoading ? (
+            <span className="inline-block w-4 h-4 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin" />
+          ) : (
+            "C'est bon pour moi →"
+          )}
         </button>
         <button
           onClick={onClose ?? undefined}
