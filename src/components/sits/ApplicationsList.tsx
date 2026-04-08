@@ -214,6 +214,52 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
       }
     }
 
+    // Fetch data for AccordDeGarde
+    const { data: propertyData } = await supabase
+      .from("properties")
+      .select("address, city")
+      .eq("id", propertyId)
+      .maybeSingle();
+
+    const { data: proprioProfile } = await supabase
+      .from("profiles")
+      .select("first_name, phone")
+      .eq("id", user!.id)
+      .maybeSingle();
+
+    setAccordData({
+      gardeId: sitId,
+      dateDebut: startDate ?? "",
+      dateFin: endDate ?? "",
+      adresse: propertyData
+        ? `${propertyData.address ?? ""}, ${propertyData.city ?? ""}`.trim()
+        : "",
+      proprio: {
+        prenom: proprioProfile?.first_name ?? "Le propriétaire",
+        telephone: (proprioProfile as any)?.phone ?? "",
+      },
+      gardien: {
+        prenom: app.sitter?.first_name ?? "Le gardien",
+      },
+      animaux: petNames.map((name: string) => ({
+        prenom: name,
+        espece: "",
+      })),
+      reglesVie: {
+        animauxPartout: null,
+        invites: null,
+        tabac: null,
+        autresPrecisions: null,
+      },
+      voisinConfiance: null,
+      urgences: null,
+      montantVetMax: null,
+      montantLogementMax: null,
+      estLongueDuree: false,
+      contributionCharges: null,
+    });
+    setShowAccord(true);
+
     toast({ title: "Garde confirmée !", description: `${sitterName} a été choisi(e) pour cette garde.` });
     setConfirmApp(null);
     load();
