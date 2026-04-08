@@ -462,7 +462,6 @@ const Pricing = () => {
                       {item.a}
                     </ReactMarkdown>
                   </AccordionContent>
-                  </AccordionContent>
                 </AccordionItem>
               ))}
             </Accordion>
