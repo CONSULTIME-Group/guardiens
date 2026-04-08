@@ -88,6 +88,60 @@ const RevealSection = ({ children, className = "", delay = 0 }: { children: Reac
 const Landing = () => {
   const navigate = useNavigate();
 
+  const [kpiMaisons, setKpiMaisons] = useState<number>(37);
+  const [kpiAnimaux, setKpiAnimaux] = useState<number>(234);
+  const [kpiInscrits, setKpiInscrits] = useState<number>(0);
+  const [kpiMissions, setKpiMissions] = useState<number>(0);
+
+  useEffect(() => {
+    const loadKPIs = async () => {
+      const { count: sitsCount } = await supabase
+        .from('sits')
+        .select('*', { count: 'exact', head: true })
+        .eq('status', 'completed');
+      if (typeof sitsCount === 'number') {
+        setKpiMaisons(sitsCount + 37);
+      }
+
+      const { count: profilesCount } = await supabase
+        .from('profiles')
+        .select('*', { count: 'exact', head: true });
+      if (typeof profilesCount === 'number') {
+        setKpiInscrits(profilesCount);
+      }
+
+      const { count: missionsCount } = await supabase
+        .from('small_missions')
+        .select('*', { count: 'exact', head: true })
+        .eq('status', 'completed');
+      if (typeof missionsCount === 'number') {
+        setKpiMissions(missionsCount);
+      }
+
+      const { data: completedSits } = await supabase
+        .from('sits')
+        .select('property_id')
+        .eq('status', 'completed');
+      if (completedSits && completedSits.length > 0) {
+        const propertyIds = [
+          ...new Set(
+            completedSits
+              .filter(s => s.property_id)
+              .map(s => s.property_id)
+          )
+        ];
+        const { count: petCount } = await supabase
+          .from('pets')
+          .select('*', { count: 'exact', head: true })
+          .in('property_id', propertyIds);
+        if (typeof petCount === 'number') {
+          setKpiAnimaux(234 + petCount);
+        }
+      }
+    };
+    loadKPIs();
+  }, []);
+
   /* ── Embla carousel for testimonials ── */
   const [emblaRef, emblaApi] = useEmblaCarousel({
     align: "start",
