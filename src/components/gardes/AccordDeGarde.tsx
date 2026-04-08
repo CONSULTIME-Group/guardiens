@@ -145,7 +145,7 @@ export default function AccordDeGarde({ garde, onClose }: AccordDeGardeProps) {
         <div>
           <p className="font-semibold text-sm mb-2">Si un animal ne va pas bien</p>
           <p className="text-sm mb-3">
-            Même avec les meilleurs soins, ça arrive. Ce qui a été convenu ici évite d'avoir à improviser au mauvais moment.
+            Même avec les meilleurs soins, un imprévu peut arriver. Ce qui a été convenu ici évite d'avoir à improviser au mauvais moment.
           </p>
           <div className="bg-muted rounded-lg p-4 text-sm space-y-1">
             <p>Joindre {p} en premier : {garde.proprio.telephone}</p>
@@ -206,9 +206,6 @@ export default function AccordDeGarde({ garde, onClose }: AccordDeGardeProps) {
           <p className="text-sm">
             Cette garde est réalisée dans un esprit d'échange et de confiance mutuelle. {g} ne reçoit aucune rémunération. Ce n'est ni un contrat de travail, ni un bail d'habitation.
           </p>
-          <p className="italic text-xs text-muted-foreground mt-2">
-            Ces précisions définissent la relation entre les deux parties — et c'est ce cadre qui rend le house-sitting possible.
-          </p>
         </div>
 
         {/* Assurance */}
@@ -217,8 +214,14 @@ export default function AccordDeGarde({ garde, onClose }: AccordDeGardeProps) {
           <p className="text-sm">
             Le logement de {p} est couvert par son assurance habitation pour les sinistres liés au bâtiment. {g} vérifie que sa responsabilité civile personnelle est active avant la garde. En cas de doute, un appel à son assureur avant le départ règle la question.
           </p>
+          <p className="text-sm mt-3">
+            Si un animal causait un dommage à une tierce personne pendant la garde, c'est l'assurance habitation de {p} qui a vocation à intervenir — pas la responsabilité de {g}. Un point à vérifier avec son assureur avant de partir.
+          </p>
+          <p className="text-sm mt-3">
+            Si {g} se blessait dans le logement, chaque partie reste couverte par sa propre assurance. On recommande à {g} de vérifier sa couverture accidents personnelle avant la garde — ça prend cinq minutes.
+          </p>
           <p className="italic text-xs text-muted-foreground mt-2">
-            Guardiens ne peut pas se substituer aux assurances des parties.
+            Cet accord ne remplace pas vos assurances respectives.
           </p>
         </div>
 
