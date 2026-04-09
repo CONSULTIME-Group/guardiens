@@ -78,6 +78,10 @@ const SitDetail = () => {
   const [logementOverride, setLogementOverride] = useState("");
   const [animauxOverride, setAnimauxOverride] = useState("");
   const overrideSaveTimeout = useRef<NodeJS.Timeout | null>(null);
+  const [ownerAccordSigned, setOwnerAccordSigned] = useState(false);
+  const [sitterAccordSigned, setSitterAccordSigned] = useState<{ accepted_at: string } | null>(null);
+  const [accordOpen, setAccordOpen] = useState(false);
+  const [accordData, setAccordData] = useState<any>(null);
 
   useEffect(() => {
     if (!id) return;
