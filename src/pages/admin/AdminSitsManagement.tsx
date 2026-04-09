@@ -170,7 +170,7 @@ const AdminSitsManagement = () => {
       toast.error("Erreur lors de la mise à jour");
       return;
     }
-    toast.success(newStatus === "ongoing" ? "Garde marquée en cours" : "Garde marquée terminée");
+    toast.success(newStatus === "in_progress" ? "Garde marquée en cours" : "Garde marquée terminée");
     setSelectedSit((prev: any) => prev ? { ...prev, status: newStatus } : null);
     fetchSits();
   };
