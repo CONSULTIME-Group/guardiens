@@ -112,14 +112,26 @@ const AdminUsers = () => {
     else {
       // Fetch emails for admin via RPC
       const userIds = (data || []).map((u: any) => u.id);
+      let emailMap = new Map<string, string>();
+      let modMap = new Map<string, { admin_notes: string | null; is_manual_super: boolean }>();
       if (userIds.length > 0) {
-        const { data: emailData } = await supabase.rpc("get_user_emails_admin", { p_user_ids: userIds });
-        const emailMap = new Map((emailData || []).map((e: any) => [e.id, e.email]));
-        const usersWithEmail = (data || []).map((u: any) => ({ ...u, email: emailMap.get(u.id) || "" }));
-        setUsers(usersWithEmail);
-      } else {
-        setUsers(data || []);
+        const [emailRes, modRes] = await Promise.all([
+          supabase.rpc("get_user_emails_admin", { p_user_ids: userIds }),
+          supabase.from("profile_moderation").select("profile_id, admin_notes, is_manual_super"),
+        ]);
+        emailMap = new Map((emailRes.data || []).map((e: any) => [e.id, e.email]));
+        modMap = new Map((modRes.data || []).map((m: any) => [m.profile_id, { admin_notes: m.admin_notes, is_manual_super: m.is_manual_super }]));
       }
+      const enriched = (data || []).map((u: any) => {
+        const mod = modMap.get(u.id);
+        return {
+          ...u,
+          email: emailMap.get(u.id) || "",
+          admin_notes: mod?.admin_notes || null,
+          is_manual_super: mod?.is_manual_super || false,
+        };
+      });
+      setUsers(enriched);
     }
     setLoading(false);
   }, [filterRole, filterVerification]);
@@ -150,8 +162,14 @@ const AdminUsers = () => {
   const handleSuspend = async () => {
     const { error } = await supabase
       .from("profiles")
-      .update({ account_status: "suspended", admin_notes: suspendModal.reason })
+      .update({ account_status: "suspended" })
       .eq("id", suspendModal.userId);
+    if (!error && suspendModal.reason) {
+      await supabase.from("profile_moderation").upsert({
+        profile_id: suspendModal.userId,
+        admin_notes: suspendModal.reason,
+      }, { onConflict: "profile_id" });
+    }
     if (error) toast.error("Erreur");
     else { toast.success("Compte suspendu"); fetchUsers(); }
     setSuspendModal({ open: false, userId: "", reason: "" });
@@ -177,9 +195,11 @@ const AdminUsers = () => {
 
   const handleSaveNote = async () => {
     const { error } = await supabase
-      .from("profiles")
-      .update({ admin_notes: noteModal.currentNote })
-      .eq("id", noteModal.userId);
+      .from("profile_moderation")
+      .upsert({
+        profile_id: noteModal.userId,
+        admin_notes: noteModal.currentNote,
+      }, { onConflict: "profile_id" })
     if (error) toast.error("Erreur");
     else { toast.success("Note enregistrée"); fetchUsers(); }
     setNoteModal({ open: false, userId: "", currentNote: "" });
@@ -348,9 +368,11 @@ const AdminUsers = () => {
                           onClick={async () => {
                             const newVal = !user.is_manual_super;
                             const { error } = await supabase
-                              .from("profiles")
-                              .update({ is_manual_super: newVal } as any)
-                              .eq("id", user.id);
+                              .from("profile_moderation")
+                              .upsert({
+                                profile_id: user.id,
+                                is_manual_super: newVal,
+                              }, { onConflict: "profile_id" });
                             if (!error) {
                               toast(newVal ? "Super Gardien activé" : "Override retiré");
                               fetchUsers();
