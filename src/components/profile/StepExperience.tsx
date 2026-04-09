@@ -14,7 +14,7 @@ import ChipSelect from "./ChipSelect";
 import HintBubble from "./HintBubble";
 import type { SitterProfileData, PastAnimal } from "@/hooks/useSitterProfile";
 
-const ANIMAL_TYPES = ["Chiens", "Chats", "Chevaux", "Oiseaux", "Animaux de ferme", "NAC"];
+const ANIMAL_TYPES = ["Tous", "Chiens", "Chats", "Chevaux", "Oiseaux", "Animaux de ferme", "NAC"];
 const EXPERIENCE_OPTIONS = ["Débutant", "1-3 ans", "3-5 ans", "5+ ans"];
 const SPECIES_OPTIONS = ["Chien", "Chat", "Cheval", "Oiseau", "Animal de ferme", "NAC"];
 const DOG_SIZES = ["Petit (< 10kg)", "Moyen (10-25kg)", "Grand (> 25kg)", "Toutes tailles"];
@@ -73,7 +73,17 @@ const StepExperience = ({ data, pastAnimals, onChange, onAddAnimal, onRemoveAnim
     <div className="space-y-6">
       <div className="space-y-2">
         <Label>Types d'animaux gérés</Label>
-        <ChipSelect options={ANIMAL_TYPES} selected={data.animal_types} onChange={v => onChange({ animal_types: v })} />
+        <ChipSelect options={ANIMAL_TYPES} selected={data.animal_types} onChange={v => {
+          const prev = data.animal_types;
+          const added = v.find(x => !prev.includes(x));
+          if (added === "Tous") {
+            onChange({ animal_types: ["Tous"] });
+          } else if (added && prev.includes("Tous")) {
+            onChange({ animal_types: [added] });
+          } else {
+            onChange({ animal_types: v.filter(x => x !== "Tous") });
+          }
+        }} />
       </div>
 
       {/* Dog-specific */}
