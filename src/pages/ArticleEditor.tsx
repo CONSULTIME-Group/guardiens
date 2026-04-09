@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { ArrowLeft, Sparkles, Loader2 } from "lucide-react";
+import { ArrowLeft, Sparkles, Loader2, ImagePlus, X } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { toast } from "sonner";
 
@@ -199,9 +199,42 @@ const ArticleEditor = () => {
         <div>
           <Label>Image de couverture</Label>
           {form.cover_image_url && (
-            <img src={form.cover_image_url} alt="" className="w-full h-48 object-cover rounded-lg mb-2" />
+            <div className="relative mb-2">
+              <img src={form.cover_image_url} alt="" className="w-full h-48 object-cover rounded-lg" />
+              <div className="absolute bottom-2 right-2 flex gap-2">
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="sm"
+                  className="bg-background/90 backdrop-blur-sm"
+                  onClick={() => document.getElementById("cover-upload")?.click()}
+                >
+                  Changer l'image
+                </Button>
+                <Button
+                  type="button"
+                  variant="destructive"
+                  size="sm"
+                  className="bg-background/90 backdrop-blur-sm"
+                  onClick={() => updateField("cover_image_url", "")}
+                >
+                  <X className="h-3.5 w-3.5" />
+                </Button>
+              </div>
+            </div>
           )}
-          <Input type="file" accept="image/*" onChange={handleImageUpload} />
+          {!form.cover_image_url && (
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full h-32 border-dashed flex flex-col gap-1"
+              onClick={() => document.getElementById("cover-upload")?.click()}
+            >
+              <ImagePlus className="h-6 w-6 text-muted-foreground" />
+              <span className="text-sm text-muted-foreground">Ajouter une image de couverture</span>
+            </Button>
+          )}
+          <input id="cover-upload" type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
         </div>
 
         <div>
