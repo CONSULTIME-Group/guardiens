@@ -1947,10 +1947,55 @@ export type Database = {
           },
         ]
       }
+      profile_moderation: {
+        Row: {
+          admin_notes: string | null
+          created_at: string
+          is_manual_super: boolean
+          profile_id: string
+          updated_at: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          created_at?: string
+          is_manual_super?: boolean
+          profile_id: string
+          updated_at?: string
+        }
+        Update: {
+          admin_notes?: string | null
+          created_at?: string
+          is_manual_super?: boolean
+          profile_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profile_moderation_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: true
+            referencedRelation: "profile_reputation"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "profile_moderation_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profile_moderation_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: true
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           account_status: string
-          admin_notes: string | null
           available_for_help: boolean | null
           avatar_url: string | null
           bio: string | null
@@ -1969,7 +2014,6 @@ export type Database = {
           identity_verification_status: string | null
           identity_verified: boolean
           is_founder: boolean
-          is_manual_super: boolean | null
           last_name: string | null
           postal_code: string | null
           profile_completion: number | null
@@ -1981,7 +2025,6 @@ export type Database = {
         }
         Insert: {
           account_status?: string
-          admin_notes?: string | null
           available_for_help?: boolean | null
           avatar_url?: string | null
           bio?: string | null
@@ -2000,7 +2043,6 @@ export type Database = {
           identity_verification_status?: string | null
           identity_verified?: boolean
           is_founder?: boolean
-          is_manual_super?: boolean | null
           last_name?: string | null
           postal_code?: string | null
           profile_completion?: number | null
@@ -2012,7 +2054,6 @@ export type Database = {
         }
         Update: {
           account_status?: string
-          admin_notes?: string | null
           available_for_help?: boolean | null
           avatar_url?: string | null
           bio?: string | null
@@ -2031,7 +2072,6 @@ export type Database = {
           identity_verification_status?: string | null
           identity_verified?: boolean
           is_founder?: boolean
-          is_manual_super?: boolean | null
           last_name?: string | null
           postal_code?: string | null
           profile_completion?: number | null
@@ -3172,9 +3212,6 @@ export type Database = {
       avis_publics: {
         Row: {
           animal_care_rating: number | null
-          cancellation_reason: string | null
-          cancellation_response: string | null
-          cancelled_by_role: string | null
           comment: string | null
           communication_rating: number | null
           created_at: string | null
@@ -3187,8 +3224,6 @@ export type Database = {
           overall_rating: number | null
           published: boolean | null
           reliability_rating: number | null
-          response_status: string | null
-          response_submitted_at: string | null
           review_type: string | null
           reviewee_id: string | null
           reviewer_id: string | null
@@ -3198,9 +3233,6 @@ export type Database = {
         }
         Insert: {
           animal_care_rating?: number | null
-          cancellation_reason?: string | null
-          cancellation_response?: string | null
-          cancelled_by_role?: string | null
           comment?: string | null
           communication_rating?: number | null
           created_at?: string | null
@@ -3213,8 +3245,6 @@ export type Database = {
           overall_rating?: number | null
           published?: boolean | null
           reliability_rating?: number | null
-          response_status?: string | null
-          response_submitted_at?: string | null
           review_type?: string | null
           reviewee_id?: string | null
           reviewer_id?: string | null
@@ -3224,9 +3254,6 @@ export type Database = {
         }
         Update: {
           animal_care_rating?: number | null
-          cancellation_reason?: string | null
-          cancellation_response?: string | null
-          cancelled_by_role?: string | null
           comment?: string | null
           communication_rating?: number | null
           created_at?: string | null
@@ -3239,8 +3266,6 @@ export type Database = {
           overall_rating?: number | null
           published?: boolean | null
           reliability_rating?: number | null
-          response_status?: string | null
-          response_submitted_at?: string | null
           review_type?: string | null
           reviewee_id?: string | null
           reviewer_id?: string | null
@@ -3304,7 +3329,6 @@ export type Database = {
         Row: {
           active_badges: number | null
           completed_sits: number | null
-          is_manual_super: boolean | null
           note_moyenne: number | null
           statut_gardien: string | null
           user_id: string | null
