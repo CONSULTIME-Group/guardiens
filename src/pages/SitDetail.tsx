@@ -651,6 +651,42 @@ const SitDetail = () => {
         </div>
       )}
 
+      {/* Accord de garde — sitter view */}
+      {!isOwner && ownerAccordSigned && ["confirmed", "in_progress", "completed"].includes(sit.status) && (
+        <div className="mt-8">
+          {accordOpen && accordData ? (
+            <AccordDeGarde
+              garde={{ ...accordData, gardeId: sit.id }}
+              role="gardien"
+              onClose={() => setAccordOpen(false)}
+            />
+          ) : sitterAccordSigned ? (
+            <div className="bg-card rounded-xl border border-border p-5 flex items-center gap-3">
+              <CheckCircle2 className="h-5 w-5 text-primary shrink-0" />
+              <div>
+                <p className="text-sm font-medium">Accord de garde accepté ✓</p>
+                <p className="text-xs text-muted-foreground">
+                  Signé le{" "}
+                  {sitterAccordSigned.accepted_at
+                    ? format(new Date(sitterAccordSigned.accepted_at), "d MMMM yyyy", { locale: fr })
+                    : "—"}
+                </p>
+              </div>
+            </div>
+          ) : (
+            <div className="bg-card rounded-xl border border-border p-5 space-y-3">
+              <p className="font-heading font-semibold text-sm">📋 Notre accord de garde</p>
+              <p className="text-sm text-muted-foreground">
+                Le propriétaire a validé cet accord. Lisez-le et confirmez votre acceptation pour finaliser la garde.
+              </p>
+              <Button onClick={() => setAccordOpen(true)} className="gap-2">
+                Voir et signer l'accord
+              </Button>
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Cancel button */}
       {sit && user && (sit.status === "confirmed" || sit.status === "published") && (
         (isOwner || (hasApplied && sit.status === "confirmed")) && (
