@@ -138,6 +138,54 @@ const SitDetail = () => {
     load();
   }, [id, user]);
 
+  // Check accord de garde status for sitter view
+  useEffect(() => {
+    if (!id || !user || !sit || !owner || !property) return;
+    const isSitter = sit.user_id !== user.id;
+    const showAccord = ["confirmed", "in_progress", "completed"].includes(sit.status);
+    if (!isSitter || !showAccord) return;
+
+    const checkAccord = async () => {
+      // Check if owner signed
+      const { data: ownerAcc } = await supabase
+        .from("garde_accords")
+        .select("id")
+        .eq("garde_id", id)
+        .eq("role", "proprio")
+        .eq("accepted", true)
+        .maybeSingle();
+
+      if (!ownerAcc) return;
+      setOwnerAccordSigned(true);
+
+      // Check if sitter already signed
+      const { data: sitterAcc } = await supabase
+        .from("garde_accords")
+        .select("accepted_at")
+        .eq("garde_id", id)
+        .eq("user_id", user.id)
+        .eq("role", "gardien")
+        .eq("accepted", true)
+        .maybeSingle();
+
+      if (sitterAcc) setSitterAccordSigned(sitterAcc);
+
+      // Build accord data from owner's signed document
+      const { data: ownerDoc } = await supabase
+        .from("garde_accords")
+        .select("document_content")
+        .eq("garde_id", id)
+        .eq("role", "proprio")
+        .eq("accepted", true)
+        .maybeSingle();
+
+      if (ownerDoc?.document_content) {
+        setAccordData(ownerDoc.document_content);
+      }
+    };
+    checkAccord();
+  }, [id, user, sit, owner, property]);
+
   const isOwnerCheck = sit?.user_id === user?.id;
   const saveOverride = useCallback((field: "logement_override" | "animaux_override", value: string) => {
     if (!sit || !isOwnerCheck) return;
