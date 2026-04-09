@@ -150,6 +150,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
     if (error) throw error;
 
+    // Supabase returns a user with empty identities for repeated signups
+    const isRepeatedSignup =
+      data.user &&
+      (!data.user.identities || data.user.identities.length === 0);
+
+    if (isRepeatedSignup) {
+      throw new Error("User already registered");
+    }
+
     if (data.user) {
       await supabase
         .from("profiles")
@@ -171,6 +180,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         },
       }).catch((err) => console.warn("Welcome email failed:", err));
     }
+
+    return data;
   }, []);
 
   const logout = useCallback(async () => {
