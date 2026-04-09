@@ -776,12 +776,13 @@ export default function PublicSitterProfile() {
                 {isAuthenticated && isOwner && (
                   <button
                     onClick={async () => {
-                      if (!user) return;
+                      if (!auth?.user?.id) return;
+                      const uid = auth.user.id;
                       const { data: convs } = await supabase
                         .from("conversations")
                         .select("id, sit_id, updated_at")
                         .or(
-                          `and(owner_id.eq.${user.id},sitter_id.eq.${id}),and(owner_id.eq.${id},sitter_id.eq.${user.id})`
+                          `and(owner_id.eq.${uid},sitter_id.eq.${id}),and(owner_id.eq.${id},sitter_id.eq.${uid})`
                         );
                       if (convs && convs.length > 0) {
                         const best = convs.sort((a, b) => {
