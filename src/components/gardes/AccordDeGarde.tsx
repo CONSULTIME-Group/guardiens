@@ -1,6 +1,10 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
+import { CheckCircle2 } from "lucide-react";
+import { format } from "date-fns";
+import { fr } from "date-fns/locale";
 
 type AccordDeGardeData = {
   gardeId: string;
@@ -45,6 +49,7 @@ type AccordDeGardeData = {
 
 interface AccordDeGardeProps {
   garde: AccordDeGardeData;
+  role?: "proprio" | "gardien";
   onClose?: () => void;
 }
 
@@ -54,12 +59,31 @@ function BoolDisplay({ value }: { value: boolean | null | undefined }) {
   return <span className="italic text-muted-foreground">À confirmer</span>;
 }
 
-export default function AccordDeGarde({ garde, onClose }: AccordDeGardeProps) {
+export default function AccordDeGarde({ garde, role = "proprio", onClose }: AccordDeGardeProps) {
   const p = garde.proprio.prenom;
   const g = garde.gardien.prenom;
   const scrollRef = useRef<HTMLDivElement>(null);
   const [hasScrolled, setHasScrolled] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [alreadySigned, setAlreadySigned] = useState<{ accepted_at: string } | null>(null);
+  const { user } = useAuth();
+
+  // Check if gardien already signed
+  useEffect(() => {
+    if (role !== "gardien" || !user) return;
+    const check = async () => {
+      const { data } = await supabase
+        .from("garde_accords")
+        .select("accepted_at")
+        .eq("garde_id", garde.gardeId)
+        .eq("user_id", user.id)
+        .eq("role", "gardien")
+        .eq("accepted", true)
+        .maybeSingle();
+      if (data) setAlreadySigned(data);
+    };
+    check();
+  }, [role, user, garde.gardeId]);
 
   const handleScroll = () => {
     const el = scrollRef.current;
@@ -79,24 +103,83 @@ export default function AccordDeGarde({ garde, onClose }: AccordDeGardeProps) {
   };
 
   const handleAccept = async () => {
+    if (!user) return;
     setIsLoading(true);
     try {
       const hash = await generateHash(garde);
-      const { error } = await supabase.rpc("accept_garde_accord", {
-        p_garde_id: garde.gardeId,
-        p_document_hash: hash,
-        p_document_content: garde as any,
-        p_ip_address: null,
-      });
-      if (error) throw error;
-      toast("Accord confirmé — vous recevrez le PDF par email.");
-      onClose?.();
+
+      if (role === "gardien") {
+        // Fetch IP
+        let ipAddress: string | null = null;
+        try {
+          const ipRes = await fetch("https://api.ipify.org?format=json");
+          const ipData = await ipRes.json();
+          ipAddress = ipData.ip || null;
+        } catch {
+          // IP fetch failed, proceed without
+        }
+
+        const { error } = await supabase.from("garde_accords").insert({
+          garde_id: garde.gardeId,
+          user_id: user.id,
+          role: "gardien",
+          accepted: true,
+          accepted_at: new Date().toISOString(),
+          document_hash: hash,
+          document_content: garde as any,
+          ip_address: ipAddress,
+        });
+        if (error) throw error;
+        toast("Accord confirmé — merci !");
+        setAlreadySigned({ accepted_at: new Date().toISOString() });
+        onClose?.();
+      } else {
+        // Proprio flow (existing RPC)
+        const { error } = await supabase.rpc("accept_garde_accord", {
+          p_garde_id: garde.gardeId,
+          p_document_hash: hash,
+          p_document_content: garde as any,
+          p_ip_address: null,
+        });
+        if (error) throw error;
+        toast("Accord confirmé — vous recevrez le PDF par email.");
+        onClose?.();
+      }
     } catch {
       toast.error("Une erreur est survenue — réessaie dans un instant.");
     } finally {
       setIsLoading(false);
     }
   };
+
+  // If gardien already signed, show confirmation
+  if (role === "gardien" && alreadySigned) {
+    return (
+      <div className="max-w-2xl mx-auto bg-card border rounded-xl shadow-sm p-6 text-center space-y-3">
+        <CheckCircle2 className="h-10 w-10 text-primary mx-auto" />
+        <p className="font-semibold text-lg">Vous avez accepté cet accord</p>
+        <p className="text-sm text-muted-foreground">
+          Signé le{" "}
+          {alreadySigned.accepted_at
+            ? format(new Date(alreadySigned.accepted_at), "d MMMM yyyy 'à' HH:mm", { locale: fr })
+            : "—"}
+        </p>
+        {onClose && (
+          <button
+            onClick={onClose}
+            className="text-sm text-muted-foreground hover:text-foreground transition-colors mt-2"
+          >
+            Fermer
+          </button>
+        )}
+      </div>
+    );
+  }
+
+  const buttonLabel =
+    role === "gardien"
+      ? "C'est bon pour moi — j'ai lu et j'accepte"
+      : "C'est bon pour moi →";
 
   return (
     <div className="max-w-2xl mx-auto bg-card border rounded-xl shadow-sm flex flex-col max-h-[90vh] overflow-hidden">
@@ -316,7 +399,7 @@ export default function AccordDeGarde({ garde, onClose }: AccordDeGardeProps) {
           {isLoading ? (
             <span className="inline-block w-4 h-4 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin" />
           ) : (
-            "C'est bon pour moi →"
+            buttonLabel
           )}
         </button>
         <button

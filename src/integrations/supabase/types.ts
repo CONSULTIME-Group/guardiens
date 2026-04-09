@@ -943,6 +943,7 @@ export type Database = {
           garde_id: string
           id: string
           ip_address: string | null
+          role: string | null
           user_id: string
         }
         Insert: {
@@ -954,6 +955,7 @@ export type Database = {
           garde_id: string
           id?: string
           ip_address?: string | null
+          role?: string | null
           user_id: string
         }
         Update: {
@@ -965,6 +967,7 @@ export type Database = {
           garde_id?: string
           id?: string
           ip_address?: string | null
+          role?: string | null
           user_id?: string
         }
         Relationships: [

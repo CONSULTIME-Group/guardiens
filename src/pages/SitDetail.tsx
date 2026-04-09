@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
+import AccordDeGarde from "@/components/gardes/AccordDeGarde";
 import { useParams, Link, useNavigate, Navigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
@@ -77,6 +78,10 @@ const SitDetail = () => {
   const [logementOverride, setLogementOverride] = useState("");
   const [animauxOverride, setAnimauxOverride] = useState("");
   const overrideSaveTimeout = useRef<NodeJS.Timeout | null>(null);
+  const [ownerAccordSigned, setOwnerAccordSigned] = useState(false);
+  const [sitterAccordSigned, setSitterAccordSigned] = useState<{ accepted_at: string } | null>(null);
+  const [accordOpen, setAccordOpen] = useState(false);
+  const [accordData, setAccordData] = useState<any>(null);
 
   useEffect(() => {
     if (!id) return;
@@ -132,6 +137,54 @@ const SitDetail = () => {
     };
     load();
   }, [id, user]);
+
+  // Check accord de garde status for sitter view
+  useEffect(() => {
+    if (!id || !user || !sit || !owner || !property) return;
+    const isSitter = sit.user_id !== user.id;
+    const showAccord = ["confirmed", "in_progress", "completed"].includes(sit.status);
+    if (!isSitter || !showAccord) return;
+
+    const checkAccord = async () => {
+      // Check if owner signed
+      const { data: ownerAcc } = await supabase
+        .from("garde_accords")
+        .select("id")
+        .eq("garde_id", id)
+        .eq("role", "proprio")
+        .eq("accepted", true)
+        .maybeSingle();
+
+      if (!ownerAcc) return;
+      setOwnerAccordSigned(true);
+
+      // Check if sitter already signed
+      const { data: sitterAcc } = await supabase
+        .from("garde_accords")
+        .select("accepted_at")
+        .eq("garde_id", id)
+        .eq("user_id", user.id)
+        .eq("role", "gardien")
+        .eq("accepted", true)
+        .maybeSingle();
+
+      if (sitterAcc) setSitterAccordSigned(sitterAcc);
+
+      // Build accord data from owner's signed document
+      const { data: ownerDoc } = await supabase
+        .from("garde_accords")
+        .select("document_content")
+        .eq("garde_id", id)
+        .eq("role", "proprio")
+        .eq("accepted", true)
+        .maybeSingle();
+
+      if (ownerDoc?.document_content) {
+        setAccordData(ownerDoc.document_content);
+      }
+    };
+    checkAccord();
+  }, [id, user, sit, owner, property]);
 
   const isOwnerCheck = sit?.user_id === user?.id;
   const saveOverride = useCallback((field: "logement_override" | "animaux_override", value: string) => {
@@ -595,6 +648,42 @@ const SitDetail = () => {
               <Button variant="outline" size="sm">Modifier</Button>
             </Link>
           </div>
+        </div>
+      )}
+
+      {/* Accord de garde — sitter view */}
+      {!isOwner && ownerAccordSigned && ["confirmed", "in_progress", "completed"].includes(sit.status) && (
+        <div className="mt-8">
+          {accordOpen && accordData ? (
+            <AccordDeGarde
+              garde={{ ...accordData, gardeId: sit.id }}
+              role="gardien"
+              onClose={() => setAccordOpen(false)}
+            />
+          ) : sitterAccordSigned ? (
+            <div className="bg-card rounded-xl border border-border p-5 flex items-center gap-3">
+              <CheckCircle2 className="h-5 w-5 text-primary shrink-0" />
+              <div>
+                <p className="text-sm font-medium">Accord de garde accepté ✓</p>
+                <p className="text-xs text-muted-foreground">
+                  Signé le{" "}
+                  {sitterAccordSigned.accepted_at
+                    ? format(new Date(sitterAccordSigned.accepted_at), "d MMMM yyyy", { locale: fr })
+                    : "—"}
+                </p>
+              </div>
+            </div>
+          ) : (
+            <div className="bg-card rounded-xl border border-border p-5 space-y-3">
+              <p className="font-heading font-semibold text-sm">📋 Notre accord de garde</p>
+              <p className="text-sm text-muted-foreground">
+                Le propriétaire a validé cet accord. Lisez-le et confirmez votre acceptation pour finaliser la garde.
+              </p>
+              <Button onClick={() => setAccordOpen(true)} className="gap-2">
+                Voir et signer l'accord
+              </Button>
+            </div>
+          )}
         </div>
       )}
 
