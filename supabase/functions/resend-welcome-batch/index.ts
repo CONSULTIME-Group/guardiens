@@ -18,30 +18,36 @@ Deno.serve(async (req) => {
   const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
   const supabase = createClient(supabaseUrl, serviceKey)
 
+  // Helper: paginated fetch to avoid 1000-row limit
+  async function fetchAllEmails(table: string, column: string, filters: Record<string, string>): Promise<string[]> {
+    const all: string[] = []
+    let from = 0
+    const pageSize = 1000
+    while (true) {
+      let q = supabase.from(table).select(column).range(from, from + pageSize - 1)
+      for (const [k, v] of Object.entries(filters)) {
+        q = q.eq(k, v)
+      }
+      const { data } = await q
+      if (!data || data.length === 0) break
+      all.push(...data.map((r: any) => r[column]))
+      if (data.length < pageSize) break
+      from += pageSize
+    }
+    return all
+  }
+
   // 1. Get all DLQ welcome emails
-  const { data: dlqRows } = await supabase
-    .from('email_send_log')
-    .select('recipient_email')
-    .eq('template_name', 'welcome')
-    .eq('status', 'dlq')
+  const dlqEmailsRaw = await fetchAllEmails('email_send_log', 'recipient_email', { template_name: 'welcome', status: 'dlq' })
+  const dlqEmails = [...new Set(dlqEmailsRaw)]
 
-  const dlqEmails = [...new Set((dlqRows || []).map(r => r.recipient_email))]
-
-  // 2. Exclude already successfully sent
-  const { data: sentRows } = await supabase
-    .from('email_send_log')
-    .select('recipient_email')
-    .eq('template_name', 'welcome')
-    .eq('status', 'sent')
-
-  const sentSet = new Set((sentRows || []).map(r => r.recipient_email))
+  // 2. Exclude already successfully sent (any template_name='welcome' + status='sent')
+  const sentEmailsRaw = await fetchAllEmails('email_send_log', 'recipient_email', { template_name: 'welcome', status: 'sent' })
+  const sentSet = new Set(sentEmailsRaw)
 
   // 3. Exclude suppressed
-  const { data: suppRows } = await supabase
-    .from('suppressed_emails')
-    .select('email')
-
-  const suppSet = new Set((suppRows || []).map(r => r.email))
+  const suppEmailsRaw = await fetchAllEmails('suppressed_emails', 'email', {})
+  const suppSet = new Set(suppEmailsRaw.map(e => e.toLowerCase()))
 
   // 4. Filter test emails
   const testPatterns = ['yopmail.com', 'test@guardiens.fr']
