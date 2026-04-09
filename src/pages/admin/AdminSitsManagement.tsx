@@ -170,7 +170,7 @@ const AdminSitsManagement = () => {
       toast.error("Erreur lors de la mise à jour");
       return;
     }
-    toast.success(newStatus === "ongoing" ? "Garde marquée en cours" : "Garde marquée terminée");
+    toast.success(newStatus === "in_progress" ? "Garde marquée en cours" : "Garde marquée terminée");
     setSelectedSit((prev: any) => prev ? { ...prev, status: newStatus } : null);
     fetchSits();
   };
@@ -288,8 +288,7 @@ const AdminSitsManagement = () => {
               return (
                 <TableRow
                   key={`${sit._type}-${sit.id}`}
-                  className={`cursor-pointer transition-colors hover:bg-muted/50 ${isOverdue ? "bg-orange-50/50" : ""}`}
-                  onClick={() => openSitSheet(sit)}
+                  className={`transition-colors hover:bg-muted/50 ${isOverdue ? "bg-orange-50/50" : ""}`}
                 >
                   <TableCell className="font-medium max-w-[160px] truncate">{sit.title || "Sans titre"}</TableCell>
                   <TableCell className="text-sm">
@@ -328,8 +327,8 @@ const AdminSitsManagement = () => {
                     ) : "—"}
                   </TableCell>
                   <TableCell className="text-right">
-                    <div className="flex justify-end gap-1" onClick={(e) => e.stopPropagation()}>
-                      <Button variant="ghost" size="icon" title="Voir" onClick={() => navigate(`/sits/${sit.id}`)}>
+                    <div className="flex justify-end gap-1">
+                      <Button variant="ghost" size="icon" title="Voir le dossier" onClick={() => openSitSheet(sit)}>
                         <Eye className="h-4 w-4" />
                       </Button>
                       {isOverdue && (
@@ -499,13 +498,13 @@ const AdminSitsManagement = () => {
                 {selectedSit.status === "confirmed" && (
                   <Button
                     className="w-full"
-                    onClick={() => handleSheetTransition("ongoing")}
+                    onClick={() => handleSheetTransition("in_progress")}
                   >
                     Marquer en cours
                   </Button>
                 )}
 
-                {selectedSit.status === "ongoing" && (
+                {selectedSit.status === "in_progress" && (
                   <Button
                     className="w-full"
                     onClick={() => handleSheetTransition("completed")}
@@ -514,7 +513,7 @@ const AdminSitsManagement = () => {
                   </Button>
                 )}
 
-                {selectedSit.status !== "confirmed" && selectedSit.status !== "ongoing" && (
+                {selectedSit.status !== "confirmed" && selectedSit.status !== "in_progress" && (
                   <p className="text-sm text-muted-foreground text-center py-2">Aucune action disponible</p>
                 )}
               </div>
