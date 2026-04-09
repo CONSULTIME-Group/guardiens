@@ -774,12 +774,30 @@ export default function PublicSitterProfile() {
                   </>
                 )}
                 {isAuthenticated && isOwner && (
-                  <Link
-                    to={`/messages?gardien=${id}`}
-                    className="block bg-primary text-primary-foreground rounded-xl py-3 text-sm font-medium w-full text-center"
+                  <button
+                    onClick={async () => {
+                      if (!user) return;
+                      const { data: convs } = await supabase
+                        .from("conversations")
+                        .select("id, sit_id, updated_at")
+                        .or(
+                          `and(owner_id.eq.${user.id},sitter_id.eq.${id}),and(owner_id.eq.${id},sitter_id.eq.${user.id})`
+                        );
+                      if (convs && convs.length > 0) {
+                        const best = convs.sort((a, b) => {
+                          if (a.sit_id && !b.sit_id) return -1;
+                          if (!a.sit_id && b.sit_id) return 1;
+                          return new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime();
+                        })[0];
+                        window.location.href = `/messages?conversation=${best.id}`;
+                      } else {
+                        window.location.href = `/messages?gardien=${id}`;
+                      }
+                    }}
+                    className="block bg-primary text-primary-foreground rounded-xl py-3 text-sm font-medium w-full text-center cursor-pointer"
                   >
                     Contacter {firstName}
-                  </Link>
+                  </button>
                 )}
               </>
             )}

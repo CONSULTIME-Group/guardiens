@@ -266,10 +266,18 @@ const Messages = () => {
 
     // Handle ?gardien= param: find or create conversation with this user
     if (gardienId && user && !loading) {
-      const existing = conversations.find(c => {
+      // Find any existing conversation with this user, prioritising one linked to a sit
+      const candidates = conversations.filter(c => {
         const otherId = c.owner_id === user.id ? c.sitter_id : c.owner_id;
-        return otherId === gardienId && !c.sit_id && !c.small_mission_id;
+        return otherId === gardienId;
       });
+      const existing = candidates.sort((a, b) => {
+        // Prioritise conversation with sit_id
+        if (a.sit_id && !b.sit_id) return -1;
+        if (!a.sit_id && b.sit_id) return 1;
+        // Then most recent
+        return new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime();
+      })[0] || null;
 
       if (existing) {
         setActiveConv(existing);
