@@ -335,21 +335,21 @@ const SitterSlide4 = () => (
         <div className="rounded-full bg-primary/10 h-8 w-8 flex-shrink-0" />
         <div>
           <p className="text-sm font-medium">Promener un chien</p>
-          <p className="text-xs text-muted-foreground">Lyon 6e · Ce soir</p>
+          <p className="text-xs text-muted-foreground">Lyon 6e · Ce soir — contre un plat maison</p>
         </div>
       </div>
       <div className="flex items-center gap-3 py-2 border-b border-border">
         <div className="rounded-full bg-primary/10 h-8 w-8 flex-shrink-0" />
         <div>
           <p className="text-sm font-medium">Arroser le potager</p>
-          <p className="text-xs text-muted-foreground">Caluire · Ce week-end</p>
+          <p className="text-xs text-muted-foreground">Caluire · Ce week-end — contre un panier de légumes</p>
         </div>
       </div>
       <div className="flex items-center gap-3 py-2">
         <div className="rounded-full bg-primary/10 h-8 w-8 flex-shrink-0" />
         <div>
           <p className="text-sm font-medium">Conseils véto</p>
-          <p className="text-xs text-muted-foreground">Grenoble · Flexible</p>
+          <p className="text-xs text-muted-foreground">Grenoble · Flexible — contre un cours de cuisine</p>
         </div>
       </div>
       <p className="text-xs text-muted-foreground text-center mt-3">L'échange se décide entre vous. Jamais d'argent.</p>
@@ -519,21 +519,21 @@ const OwnerSlide4Entraide = () => (
         <div className="rounded-full bg-primary/10 h-8 w-8 flex-shrink-0" />
         <div>
           <p className="text-sm font-medium">Taille de haie proposée</p>
-          <p className="text-xs text-muted-foreground">Par un gardien · Écully</p>
+          <p className="text-xs text-muted-foreground">Par un gardien · Écully — contre des œufs du jardin</p>
         </div>
       </div>
       <div className="flex items-center gap-3 py-2 border-b border-border">
         <div className="rounded-full bg-primary/10 h-8 w-8 flex-shrink-0" />
         <div>
           <p className="text-sm font-medium">Relève du courrier</p>
-          <p className="text-xs text-muted-foreground">Proposée par vous · Ce mois-ci</p>
+          <p className="text-xs text-muted-foreground">Proposée par vous · Ce mois-ci — contre un repas</p>
         </div>
       </div>
       <div className="flex items-center gap-3 py-2">
         <div className="rounded-full bg-primary/10 h-8 w-8 flex-shrink-0" />
         <div>
           <p className="text-sm font-medium">Conseils jardinage</p>
-          <p className="text-xs text-muted-foreground">Compétence partagée · Lyon 5e</p>
+          <p className="text-xs text-muted-foreground">Lyon 5e · Flexible — contre une balade avec le chien</p>
         </div>
       </div>
       <p className="text-xs text-muted-foreground text-center mt-3">
