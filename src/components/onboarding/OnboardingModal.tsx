@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import { X, Send, MessageCircle, CheckCircle, Star, User, Circle, PawPrint, MapPin } from "lucide-react";
+import { X, Send, MessageCircle, CheckCircle, Star, User, Circle, PawPrint, MapPin, Leaf } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 type ActiveTab = "gardien" | "proprio";
@@ -479,30 +479,73 @@ const SitterSlide4 = () => (
       Entre des gens du coin qui se choisissent. Jamais d'argent. Juste du
       concret.
     </p>
-    <div className="bg-muted rounded-xl p-4 w-full pointer-events-none select-none mt-4">
-      <p className="text-xs uppercase tracking-widest text-primary/60 mb-3">Petites missions d'entraide</p>
-      <div className="flex items-center gap-3 py-2 border-b border-border">
-        <div className="rounded-full bg-primary/10 h-8 w-8 flex-shrink-0" />
-        <div>
-          <p className="text-sm font-medium">Promener un chien</p>
-          <p className="text-xs text-muted-foreground">Lyon 6e · Ce soir — contre un plat maison</p>
+    {/* Mock missions + entraide */}
+    <div className="pointer-events-none select-none mt-4 rounded-xl overflow-hidden border border-border shadow-sm bg-card">
+      {/* Header */}
+      <div className="border-b border-border px-4 py-2.5 flex items-center justify-between">
+        <p className="text-xs font-semibold">Petites missions</p>
+        <div className="bg-primary/10 text-primary text-xs px-2 py-0.5 rounded-full">1 mission</div>
+      </div>
+
+      {/* Mission card */}
+      <div className="p-3 border-b border-border">
+        <div className="flex items-start gap-3">
+          <div className="bg-primary/10 rounded-lg p-2 flex-shrink-0">
+            <Leaf className="w-4 h-4 text-primary" />
+          </div>
+          <div>
+            <p className="text-xs font-semibold mb-0.5">M'aider à ramasser les légumes du potager</p>
+            <p className="text-xs text-muted-foreground mb-1">Poleymieux · Demi-journée</p>
+            <p className="text-xs text-muted-foreground italic">En échange : un gros panier de légumes du jardin</p>
+          </div>
         </div>
       </div>
-      <div className="flex items-center gap-3 py-2 border-b border-border">
-        <div className="rounded-full bg-primary/10 h-8 w-8 flex-shrink-0" />
-        <div>
-          <p className="text-sm font-medium">Arroser le potager</p>
-          <p className="text-xs text-muted-foreground">Caluire · Ce week-end — contre un panier de légumes</p>
+
+      {/* Disponibles pour aider */}
+      <div className="px-4 py-2 border-b border-border">
+        <div className="flex items-center justify-between">
+          <p className="text-xs font-semibold">Disponibles pour aider</p>
+          <div className="bg-muted text-muted-foreground text-xs px-2 py-0.5 rounded-full">5 membres</div>
         </div>
       </div>
-      <div className="flex items-center gap-3 py-2">
-        <div className="rounded-full bg-primary/10 h-8 w-8 flex-shrink-0" />
-        <div>
-          <p className="text-sm font-medium">Conseils véto</p>
-          <p className="text-xs text-muted-foreground">Grenoble · Flexible — contre un cours de cuisine</p>
+
+      <div className="p-3 grid grid-cols-2 gap-2">
+        {/* Carte 1 */}
+        <div className="bg-muted rounded-lg p-2">
+          <div className="flex items-center gap-2 mb-1.5">
+            <div className="w-7 h-7 rounded-full bg-primary/20 flex items-center justify-center">
+              <User className="w-3.5 h-3.5 text-primary/40" />
+            </div>
+            <div>
+              <p className="text-xs font-semibold">Marie</p>
+              <p className="text-xs text-muted-foreground">Lyon</p>
+            </div>
+          </div>
+          <div className="flex flex-wrap gap-1 mb-1.5">
+            <span className="bg-primary/10 text-primary text-xs px-1.5 py-0.5 rounded-full">Animaux</span>
+            <span className="bg-primary/10 text-primary text-xs px-1.5 py-0.5 rounded-full">Jardin</span>
+          </div>
+          <p className="text-xs text-primary font-medium">Proposer un échange →</p>
+        </div>
+
+        {/* Carte 2 */}
+        <div className="bg-muted rounded-lg p-2">
+          <div className="flex items-center gap-2 mb-1.5">
+            <div className="w-7 h-7 rounded-full bg-primary/20 flex items-center justify-center">
+              <User className="w-3.5 h-3.5 text-primary/40" />
+            </div>
+            <div>
+              <p className="text-xs font-semibold">Lilit</p>
+              <p className="text-xs text-muted-foreground">Collonges</p>
+            </div>
+          </div>
+          <div className="flex flex-wrap gap-1 mb-1.5">
+            <span className="bg-primary/10 text-primary text-xs px-1.5 py-0.5 rounded-full">Animaux</span>
+            <span className="bg-primary/10 text-primary text-xs px-1.5 py-0.5 rounded-full">Cuisine</span>
+          </div>
+          <p className="text-xs text-primary font-medium">Proposer un échange →</p>
         </div>
       </div>
-      <p className="text-xs text-muted-foreground text-center mt-3">L'échange se décide entre vous. Jamais d'argent.</p>
     </div>
   </div>
 );
