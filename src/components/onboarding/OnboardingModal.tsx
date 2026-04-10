@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import { X, Send, MessageCircle, CheckCircle, Star, User, Circle, PawPrint, MapPin, Leaf, ShieldCheck, Home, Calendar, Plus, Zap, Activity, Heart, BookOpen, Key, Wifi, Phone } from "lucide-react";
+import { X, Send, MessageCircle, CheckCircle, Star, User, Circle, PawPrint, MapPin, Leaf, ShieldCheck, Home, Calendar, Plus, Zap, Activity, Heart, BookOpen, Key, Wifi, Phone, Wrench, ChefHat } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 type ActiveTab = "gardien" | "proprio";
@@ -970,43 +970,81 @@ const OwnerSlide3 = () => (
 const OwnerSlide4Entraide = () => (
   <div className="space-y-4">
     <h2 className="font-heading text-2xl font-bold text-foreground">
-      Et au-delà des gardes.
+      Vous aussi, vous avez quelque chose à offrir.
     </h2>
     <p className="text-base text-foreground/80 leading-relaxed">
-      L'échange ne s'arrête pas à la porte d'entrée. Votre jardin à entretenir,
-      une compétence à partager, un service à rendre — tout ça a de la valeur
-      pour les gens du coin. Vous proposez une mission, vous mettez une
-      compétence en avant sur votre profil. Les gardiens font de même. C'est
-      dans les deux sens, toujours.
+      Jardinage, soins animaliers, cuisine, coups de main.
+      Vos compétences apparaissent sur votre profil.
+      Les gardiens les voient. L'échange va dans les deux
+      sens — toujours.
     </p>
-    <div className="bg-muted rounded-xl p-4 w-full pointer-events-none select-none mt-4">
-      <p className="text-xs uppercase tracking-widest text-primary/60 mb-3">
-        Échanges autour de vous
-      </p>
-      <div className="flex items-center gap-3 py-2 border-b border-border">
-        <div className="rounded-full bg-primary/10 h-8 w-8 flex-shrink-0" />
-        <div>
-          <p className="text-sm font-medium">Taille de haie proposée</p>
-          <p className="text-xs text-muted-foreground">Par un gardien · Écully — contre des œufs du jardin</p>
+
+    <div className="pointer-events-none select-none mt-4 space-y-3">
+      {/* Bloc compétences */}
+      <div className="rounded-xl overflow-hidden border border-border shadow-sm bg-card">
+        <div className="px-4 py-3 border-b border-border">
+          <p className="text-xs uppercase tracking-widest text-primary/60 mb-3">CE QUE JE SAIS FAIRE</p>
+          <div className="flex flex-wrap gap-2 mb-3">
+            <span className="bg-primary text-primary-foreground text-xs px-3 py-1.5 rounded-full flex items-center gap-1.5">
+              <Leaf className="w-3 h-3" /> Jardin
+            </span>
+            <span className="bg-primary text-primary-foreground text-xs px-3 py-1.5 rounded-full flex items-center gap-1.5">
+              <PawPrint className="w-3 h-3" /> Animaux
+            </span>
+            <span className="bg-primary text-primary-foreground text-xs px-3 py-1.5 rounded-full flex items-center gap-1.5">
+              <Wrench className="w-3 h-3" /> Coups de main
+            </span>
+            <span className="bg-primary text-primary-foreground text-xs px-3 py-1.5 rounded-full flex items-center gap-1.5">
+              <ChefHat className="w-3 h-3" /> Cuisine
+            </span>
+          </div>
+          <div className="bg-muted rounded-lg px-3 py-2 flex items-center justify-between">
+            <p className="text-xs text-muted-foreground">Ex : Soins chats, cuisine végétarienne...</p>
+            <div className="bg-primary text-primary-foreground text-xs px-2 py-1 rounded-md">+ Ajouter</div>
+          </div>
+        </div>
+        <div className="px-4 py-3 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-4 bg-primary rounded-full relative">
+              <div className="absolute right-0.5 top-0.5 w-3 h-3 bg-white rounded-full" />
+            </div>
+            <p className="text-xs font-medium">Disponible pour aider</p>
+          </div>
+          <p className="text-xs text-muted-foreground">Visible sur votre profil</p>
         </div>
       </div>
-      <div className="flex items-center gap-3 py-2 border-b border-border">
-        <div className="rounded-full bg-primary/10 h-8 w-8 flex-shrink-0" />
-        <div>
-          <p className="text-sm font-medium">Relève du courrier</p>
-          <p className="text-xs text-muted-foreground">Proposée par vous · Ce mois-ci — contre un repas</p>
+
+      {/* Bloc missions */}
+      <div className="rounded-xl overflow-hidden border border-border shadow-sm bg-card">
+        <div className="px-4 py-2.5 border-b border-border flex items-center justify-between">
+          <p className="text-xs font-semibold">Mes petites missions</p>
+          <p className="text-xs text-primary">Voir tout →</p>
+        </div>
+        <div className="divide-y divide-border">
+          <div className="px-4 py-2.5 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className="w-1.5 h-1.5 rounded-full bg-muted-foreground/30 flex-shrink-0" />
+              <p className="text-xs text-muted-foreground line-through">M'aider à ramasser les légumes du potager</p>
+            </div>
+            <p className="text-xs text-muted-foreground flex-shrink-0">Terminée</p>
+          </div>
+          <div className="px-4 py-2.5 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className="w-1.5 h-1.5 rounded-full bg-muted-foreground/30 flex-shrink-0" />
+              <p className="text-xs text-muted-foreground line-through">Repeindre ma salle de bain</p>
+            </div>
+            <p className="text-xs text-muted-foreground flex-shrink-0">Terminée</p>
+          </div>
+        </div>
+        <div className="px-4 py-2.5 flex gap-2">
+          <div className="flex-1 bg-primary text-primary-foreground text-xs px-3 py-1.5 rounded-lg text-center">
+            Publier un besoin
+          </div>
+          <div className="flex-1 border border-primary text-primary text-xs px-3 py-1.5 rounded-lg text-center">
+            Proposer mon aide
+          </div>
         </div>
       </div>
-      <div className="flex items-center gap-3 py-2">
-        <div className="rounded-full bg-primary/10 h-8 w-8 flex-shrink-0" />
-        <div>
-          <p className="text-sm font-medium">Conseils jardinage</p>
-          <p className="text-xs text-muted-foreground">Lyon 5e · Flexible — contre une balade avec le chien</p>
-        </div>
-      </div>
-      <p className="text-xs text-muted-foreground text-center mt-3">
-        L'échange se décide entre vous. Jamais d'argent.
-      </p>
     </div>
   </div>
 );
