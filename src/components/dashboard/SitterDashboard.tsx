@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { useSearchParams } from "react-router-dom";
+import OnboardingModal from "@/components/onboarding/OnboardingModal";
 import { useSubscriptionAccess } from "@/hooks/useSubscriptionAccess";
 import { Link, useNavigate } from "react-router-dom";
 import EmergencyDashSection from "./EmergencyDashSection";
@@ -28,7 +30,9 @@ const capitalize = (name: string) =>
 const SitterDashboard = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { hasAccess: hasSubscription } = useSubscriptionAccess();
+  const [showOnboardingModal, setShowOnboardingModal] = useState(false);
 
   const { data: reputation } = useProfileReputation(user?.id);
   const { data: userBadges } = useUserBadges(user?.id);
@@ -175,6 +179,25 @@ const SitterDashboard = () => {
     return () => { supabase.removeChannel(channel); };
   }, [user]);
 
+  // Onboarding modal trigger
+  useEffect(() => {
+    if (!user) return;
+    if (searchParams.get("tour") === "true") {
+      setShowOnboardingModal(true);
+      return;
+    }
+    supabase
+      .from("profiles")
+      .select("onboarding_completed")
+      .eq("id", user.id)
+      .single()
+      .then(({ data }) => {
+        if (data && !data.onboarding_completed) {
+          setShowOnboardingModal(true);
+        }
+      });
+  }, [user, searchParams]);
+
   const toggleAvailability = async () => {
     const newVal = !isAvailable;
     setIsAvailable(newVal);
@@ -230,6 +253,13 @@ const SitterDashboard = () => {
 
   return (
     <div className="space-y-0">
+      <OnboardingModal
+        open={showOnboardingModal}
+        onClose={() => {
+          setShowOnboardingModal(false);
+          setSearchParams({});
+        }}
+      />
       {/* Role activation banner */}
       <div className="px-5 md:px-8 mb-4">
         <RoleActivationBanner userRole={user?.role || "sitter"} />
@@ -281,6 +311,16 @@ const SitterDashboard = () => {
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Revoir la présentation */}
+      <div className="px-5 md:px-8 -mt-4 mb-2">
+        <button
+          onClick={() => setSearchParams({ tour: "true" })}
+          className="text-xs text-muted-foreground underline-offset-4 hover:underline"
+        >
+          Revoir la présentation
+        </button>
       </div>
 
       {/* ═══ 2. BARRE DE STATUT UNIFIÉE ═══ */}

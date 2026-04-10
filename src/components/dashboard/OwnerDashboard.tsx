@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import OnboardingModal from "@/components/onboarding/OnboardingModal";
 import OnboardingWelcome from "./OnboardingWelcome";
 import NearbyEmergencySitters from "./NearbyEmergencySitters";
 import ResourceSection from "@/components/shared/ResourceSection";
@@ -39,8 +40,10 @@ const capitalizeWords = (s: string | null | undefined) => {
 const OwnerDashboard = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [sits, setSits] = useState<any[]>([]);
   const { data: userBadges } = useUserBadges(user?.id);
+  const [showOnboardingModal, setShowOnboardingModal] = useState(false);
 
   const PROPRIO_SPECIAL_IDS = ['fondateur', 'id_verifiee', 'courant_passe'];
 
@@ -183,6 +186,25 @@ const OwnerDashboard = () => {
     load();
   }, [user]);
 
+  // Onboarding modal trigger
+  useEffect(() => {
+    if (!user) return;
+    if (searchParams.get("tour") === "true") {
+      setShowOnboardingModal(true);
+      return;
+    }
+    supabase
+      .from("profiles")
+      .select("onboarding_completed")
+      .eq("id", user.id)
+      .single()
+      .then(({ data }) => {
+        if (data && !data.onboarding_completed) {
+          setShowOnboardingModal(true);
+        }
+      });
+  }, [user, searchParams]);
+
   if (loading) return <div className="p-6 text-muted-foreground">Chargement...</div>;
 
   if (showOnboarding) {
@@ -257,6 +279,13 @@ const OwnerDashboard = () => {
 
   return (
     <div className="space-y-8">
+      <OnboardingModal
+        open={showOnboardingModal}
+        onClose={() => {
+          setShowOnboardingModal(false);
+          setSearchParams({});
+        }}
+      />
       {/* Role activation banner */}
       <div className="px-5 md:px-8">
         <RoleActivationBanner userRole={user?.role || "owner"} />
@@ -296,6 +325,16 @@ const OwnerDashboard = () => {
             + Publier une annonce
           </button>
         </div>
+      </div>
+
+      {/* Revoir la présentation */}
+      <div className="px-5 md:px-8 -mt-4 mb-2">
+        <button
+          onClick={() => setSearchParams({ tour: "true" })}
+          className="text-xs text-muted-foreground underline-offset-4 hover:underline"
+        >
+          Revoir la présentation
+        </button>
       </div>
 
       {/* ═══ Banner ═══ */}

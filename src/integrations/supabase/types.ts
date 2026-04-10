@@ -2079,6 +2079,8 @@ export type Database = {
           identity_verified: boolean
           is_founder: boolean
           last_name: string | null
+          onboarding_completed: boolean
+          onboarding_dismissed_at: string | null
           postal_code: string | null
           profile_completion: number | null
           referral_code: string | null
@@ -2108,6 +2110,8 @@ export type Database = {
           identity_verified?: boolean
           is_founder?: boolean
           last_name?: string | null
+          onboarding_completed?: boolean
+          onboarding_dismissed_at?: string | null
           postal_code?: string | null
           profile_completion?: number | null
           referral_code?: string | null
@@ -2137,6 +2141,8 @@ export type Database = {
           identity_verified?: boolean
           is_founder?: boolean
           last_name?: string | null
+          onboarding_completed?: boolean
+          onboarding_dismissed_at?: string | null
           postal_code?: string | null
           profile_completion?: number | null
           referral_code?: string | null
