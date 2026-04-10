@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import { X, Send, MessageCircle, CheckCircle, Star } from "lucide-react";
+import { X, Send, MessageCircle, CheckCircle, Star, User, Circle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 type ActiveTab = "gardien" | "proprio";
@@ -323,6 +323,73 @@ const SitterSlide2 = ({ completionRate }: { completionRate: number }) => (
           Quelques minutes suffisent pour apparaître dans les recherches.
         </p>
       )}
+    </div>
+
+    {/* Mock profil gardien */}
+    <div className="pointer-events-none select-none mt-4 rounded-xl overflow-hidden border border-border shadow-sm">
+      <div className="bg-card p-4">
+        <div className="flex items-start gap-4 mb-4">
+          {/* Colonne gauche — avatar */}
+          <div className="flex flex-col items-center gap-2 w-28 flex-shrink-0">
+            <div className="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center">
+              <User className="w-8 h-8 text-primary/40" />
+            </div>
+            <p className="text-sm font-semibold">Sophie</p>
+            <p className="text-xs text-muted-foreground">Lyon</p>
+          </div>
+
+          {/* Colonne droite — sections */}
+          <div className="flex-1 space-y-1.5">
+            <div className="flex items-center justify-between py-1 border-b border-border">
+              <div className="flex items-center gap-2">
+                <CheckCircle className="w-3.5 h-3.5 text-primary" />
+                <p className="text-xs font-medium">Identité</p>
+              </div>
+              <p className="text-xs text-primary">Complété ✓</p>
+            </div>
+            <div className="flex items-center justify-between py-1 border-b border-border">
+              <div className="flex items-center gap-2">
+                <CheckCircle className="w-3.5 h-3.5 text-primary" />
+                <p className="text-xs font-medium">Profil gardien</p>
+              </div>
+              <p className="text-xs text-primary">Complété ✓</p>
+            </div>
+            <div className="flex items-center justify-between py-1 border-b border-border">
+              <div className="flex items-center gap-2">
+                <CheckCircle className="w-3.5 h-3.5 text-primary" />
+                <p className="text-xs font-medium">Animaux</p>
+              </div>
+              <p className="text-xs text-primary">Complété ✓</p>
+            </div>
+            <div className="flex items-center justify-between py-1 border-b border-border">
+              <div className="flex items-center gap-2">
+                <Circle className="w-3.5 h-3.5 text-muted-foreground" />
+                <p className="text-xs text-muted-foreground">Galerie</p>
+              </div>
+              <p className="text-xs text-muted-foreground">Optionnel</p>
+            </div>
+            <div className="flex items-center justify-between py-1">
+              <div className="flex items-center gap-2">
+                <Circle className="w-3.5 h-3.5 text-muted-foreground" />
+                <p className="text-xs text-muted-foreground">Compétences</p>
+              </div>
+              <p className="text-xs text-muted-foreground">Optionnel</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Style de vie */}
+        <div className="border-t border-border pt-3">
+          <p className="text-xs text-muted-foreground uppercase tracking-widest mb-2">Style de vie</p>
+          <div className="flex flex-wrap gap-1.5">
+            <span className="bg-primary text-primary-foreground text-xs px-2.5 py-1 rounded-full">Sportif / grandes balades</span>
+            <span className="bg-primary text-primary-foreground text-xs px-2.5 py-1 rounded-full">Tranquille / casanier</span>
+            <span className="bg-primary text-primary-foreground text-xs px-2.5 py-1 rounded-full">Lève-tôt</span>
+            <span className="bg-primary text-primary-foreground text-xs px-2.5 py-1 rounded-full">En télétravail</span>
+            <span className="bg-primary text-primary-foreground text-xs px-2.5 py-1 rounded-full">Famille</span>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 );
