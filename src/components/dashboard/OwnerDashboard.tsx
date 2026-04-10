@@ -40,8 +40,10 @@ const capitalizeWords = (s: string | null | undefined) => {
 const OwnerDashboard = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [sits, setSits] = useState<any[]>([]);
   const { data: userBadges } = useUserBadges(user?.id);
+  const [showOnboardingModal, setShowOnboardingModal] = useState(false);
 
   const PROPRIO_SPECIAL_IDS = ['fondateur', 'id_verifiee', 'courant_passe'];
 
