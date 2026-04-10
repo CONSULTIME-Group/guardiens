@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -388,6 +389,29 @@ const Settings = () => {
         </p>
         <Button variant="outline" onClick={handleExport} disabled={exporting}>
           {exporting ? "Export en cours..." : "Exporter mes données (JSON)"}
+        </Button>
+      </section>
+
+      <Separator />
+
+      {/* Présentation de Guardiens */}
+      <section className="my-8">
+        <h3 className="text-sm font-semibold">Présentation de Guardiens</h3>
+        <p className="text-xs text-muted-foreground mb-3">
+          Revoyez la présentation complète de la plateforme — parcours gardien et propriétaire.
+        </p>
+        <Button
+          variant="outline"
+          className="w-full text-sm"
+          onClick={() => {
+            const sp = new URLSearchParams(window.location.search);
+            sp.set("tour", "true");
+            window.history.replaceState({}, "", `${window.location.pathname}?${sp.toString()}`);
+            window.dispatchEvent(new PopStateEvent("popstate"));
+            window.location.search = sp.toString();
+          }}
+        >
+          Revoir la présentation →
         </Button>
       </section>
 
