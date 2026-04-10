@@ -327,6 +327,16 @@ const OwnerDashboard = () => {
         </div>
       </div>
 
+      {/* Revoir la présentation */}
+      <div className="px-5 md:px-8 -mt-4 mb-2">
+        <button
+          onClick={() => setSearchParams({ tour: "true" })}
+          className="text-xs text-muted-foreground underline-offset-4 hover:underline"
+        >
+          Revoir la présentation
+        </button>
+      </div>
+
       {/* ═══ Banner ═══ */}
       {banner && (
         <div className="px-5 md:px-8 -mt-4 mb-4">
