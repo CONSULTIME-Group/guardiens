@@ -186,6 +186,25 @@ const OwnerDashboard = () => {
     load();
   }, [user]);
 
+  // Onboarding modal trigger
+  useEffect(() => {
+    if (!user) return;
+    if (searchParams.get("tour") === "true") {
+      setShowOnboardingModal(true);
+      return;
+    }
+    supabase
+      .from("profiles")
+      .select("onboarding_completed")
+      .eq("id", user.id)
+      .single()
+      .then(({ data }) => {
+        if (data && !data.onboarding_completed) {
+          setShowOnboardingModal(true);
+        }
+      });
+  }, [user, searchParams]);
+
   if (loading) return <div className="p-6 text-muted-foreground">Chargement...</div>;
 
   if (showOnboarding) {
