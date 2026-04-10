@@ -1054,7 +1054,7 @@ const OwnerSlide5 = () => (
     <h2 className="font-heading text-2xl font-bold text-foreground">
       Notre accord de garde.
       <br />
-      Pas un contrat — une conversation écrite.
+      Un engagement mutuel, généré automatiquement.
     </h2>
     <p className="text-base text-foreground/80 leading-relaxed">
       Quand la garde est confirmée, Guardiens génère
