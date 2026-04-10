@@ -15,7 +15,7 @@ export default function FounderBadge({ size = 'md', className = '' }: FounderBad
       <img
         src="https://erhccyqevdyevpyctsjj.supabase.co/storage/v1/object/public/badges/fondateur.png"
         alt="Badge Fondateur"
-        className={`${sizeClasses[size]} mix-blend-multiply ${className}`}
+        className={`${sizeClasses[size]} ${className}`}
       />
       <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-foreground text-background text-xs rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
         Membre Fondateur — inscrit avant le 13 mai 2026
