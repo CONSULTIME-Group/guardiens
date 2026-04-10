@@ -1380,6 +1380,70 @@ export type Database = {
           },
         ]
       }
+      mass_emails: {
+        Row: {
+          body: string
+          created_at: string
+          cta_label: string | null
+          cta_url: string | null
+          filters: Json | null
+          id: string
+          recipients_count: number
+          segment: string
+          sent_by: string | null
+          status: string
+          subject: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          cta_label?: string | null
+          cta_url?: string | null
+          filters?: Json | null
+          id?: string
+          recipients_count?: number
+          segment: string
+          sent_by?: string | null
+          status?: string
+          subject: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          cta_label?: string | null
+          cta_url?: string | null
+          filters?: Json | null
+          id?: string
+          recipients_count?: number
+          segment?: string
+          sent_by?: string | null
+          status?: string
+          subject?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mass_emails_sent_by_fkey"
+            columns: ["sent_by"]
+            isOneToOne: false
+            referencedRelation: "profile_reputation"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "mass_emails_sent_by_fkey"
+            columns: ["sent_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mass_emails_sent_by_fkey"
+            columns: ["sent_by"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       messages: {
         Row: {
           content: string
