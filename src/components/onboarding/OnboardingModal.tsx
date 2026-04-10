@@ -169,7 +169,7 @@ const OnboardingModal = ({ open, onClose }: OnboardingModalProps) => {
                 Précédent
               </Button>
             )}
-            {slide > 0 && slide < TOTAL_SLIDES - 1 && (
+            {slide < TOTAL_SLIDES - 1 && (
               <Button size="sm" onClick={() => setSlide((s) => s + 1)}>
                 Suivant
               </Button>
