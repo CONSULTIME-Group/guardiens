@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import { X, Send, MessageCircle, CheckCircle, Star, User, Circle, PawPrint, MapPin, Leaf, ShieldCheck, Home, Calendar } from "lucide-react";
+import { X, Send, MessageCircle, CheckCircle, Star, User, Circle, PawPrint, MapPin, Leaf, ShieldCheck, Home, Calendar, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 type ActiveTab = "gardien" | "proprio";
@@ -705,6 +705,49 @@ const OwnerSlide1 = () => (
     <p className="text-base text-foreground/80 leading-relaxed">
       Vous partez. Eux, ils veillent. Et vos animaux restent chez eux.
     </p>
+
+    {/* Simulation dashboard proprio */}
+    <div className="pointer-events-none select-none mt-6 rounded-xl overflow-hidden border border-border shadow-sm">
+      {/* Header */}
+      <div className="bg-primary text-primary-foreground p-4 flex items-start justify-between">
+        <div>
+          <p className="text-xs uppercase tracking-widest opacity-60 mb-1 font-body">ESPACE PROPRIÉTAIRE</p>
+          <p className="text-xl font-heading font-bold">Bonjour, Claire !</p>
+          <p className="text-sm opacity-70 mt-0.5">Votre prochaine garde commence dans 12 jours.</p>
+        </div>
+        <button className="bg-card text-primary text-xs font-semibold px-3 py-2 rounded-lg flex items-center gap-1.5 flex-shrink-0">
+          <Plus className="w-3 h-3" />
+          <span>Publier une annonce</span>
+        </button>
+      </div>
+      {/* Stats */}
+      <div className="bg-card grid grid-cols-4 divide-x divide-border border-t border-border">
+        <div className="p-3 text-center">
+          <p className="text-lg font-bold">3</p>
+          <p className="text-xs text-muted-foreground uppercase tracking-widest mt-0.5">Gardes réalisées</p>
+        </div>
+        <div className="p-3 text-center">
+          <p className="text-lg font-bold text-primary">4.9</p>
+          <p className="text-xs text-muted-foreground uppercase tracking-widest mt-0.5">Note moyenne</p>
+        </div>
+        <div className="p-3 text-center">
+          <p className="text-lg font-bold">1</p>
+          <p className="text-xs text-muted-foreground uppercase tracking-widest mt-0.5">Annonces actives</p>
+        </div>
+        <div className="p-3 text-center">
+          <p className="text-lg font-bold">2</p>
+          <p className="text-xs text-muted-foreground uppercase tracking-widest mt-0.5">Gardiens de confiance</p>
+        </div>
+      </div>
+      {/* Candidatures */}
+      <div className="bg-card border-t border-border px-4 py-3 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <div className="w-2 h-2 rounded-full bg-primary" />
+          <p className="text-xs font-medium">2 candidatures reçues</p>
+        </div>
+        <p className="text-xs text-primary font-medium">Voir tout →</p>
+      </div>
+    </div>
   </div>
 );
 
