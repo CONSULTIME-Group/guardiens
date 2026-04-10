@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import FounderBadge from "@/components/badges/FounderBadge";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Archive, ExternalLink, CheckCircle2, Star, Home, Handshake, Calendar, MapPin, Flag, CheckCircle, XCircle, Loader2, Ban } from "lucide-react";
@@ -221,6 +222,7 @@ const ConversationHeader = ({
               <Link to={`/profil/${conv.other_user?.id}`} className="font-semibold text-base hover:text-primary transition-colors capitalize">
                 {capitalize(conv.other_user?.first_name)}
               </Link>
+              {isFounder && <FounderBadge size="sm" />}
               {/* MOD 3/7 — Application status badge in header */}
               {appBadge && !isSmallMission && (
                 <span className={`${appBadge.className} rounded-full px-2 py-0.5 text-xs shrink-0`}>

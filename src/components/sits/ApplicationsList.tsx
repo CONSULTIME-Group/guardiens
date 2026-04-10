@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import FounderBadge from "@/components/badges/FounderBadge";
 import AccordDeGarde from "@/components/gardes/AccordDeGarde";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -358,9 +359,12 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
             )}
           </Link>
           <div className="flex-1 min-w-0">
-            <Link to={`/profil/${app.sitter_id}`} className="text-base font-semibold text-foreground hover:underline">
-              {sitter?.first_name || "Gardien"}
-            </Link>
+            <div className="flex items-center gap-2">
+              <Link to={`/profil/${app.sitter_id}`} className="text-base font-semibold text-foreground hover:underline">
+                {sitter?.first_name || "Gardien"}
+              </Link>
+              {sitter?.is_founder && <FounderBadge size="sm" />}
+            </div>
             <div className="flex items-center gap-3 text-sm text-muted-foreground flex-wrap">
               {sitter?.city && <span>📍 {sitter.city}</span>}
               <span>{completedSits} garde{completedSits !== 1 ? "s" : ""} sur Guardiens</span>

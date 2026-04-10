@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef, lazy, Suspense } from "react";
+import FounderBadge from "@/components/badges/FounderBadge";
 import ReportButton from "@/components/reports/ReportButton";
 import { Sprout, PawPrint, GraduationCap, Handshake as HandshakeIcon, LayoutGrid, Map as MapIcon, Cat, Bird, SlidersHorizontal, ShieldCheck, Crosshair } from "lucide-react";
 import EnvironmentPills from "@/components/shared/EnvironmentPills";
@@ -519,8 +520,12 @@ const SearchSitter = () => {
           </div>
         )}
         <div className="p-4">
-          <h3 className="text-base font-semibold text-foreground leading-snug mb-1 line-clamp-2">
-            {item.title || "Sans titre"}
+          <div className="flex items-center gap-2">
+            <h3 className="text-base font-semibold text-foreground leading-snug line-clamp-2">
+              {item.title || "Sans titre"}
+            </h3>
+            {item.owner?.is_founder && <FounderBadge size="sm" />}
+          </div>
           </h3>
           <p className="text-sm text-muted-foreground mb-2 flex items-center gap-1">
             <MapPin className="h-3.5 w-3.5" />
@@ -975,7 +980,10 @@ const SearchSitter = () => {
                         </div>
                       )}
                       <div className="flex-1 min-w-0">
-                        <p className="text-base font-heading font-semibold text-foreground">{member.first_name || "Membre"}</p>
+                        <div className="flex items-center gap-2">
+                          <p className="text-base font-heading font-semibold text-foreground">{member.first_name || "Membre"}</p>
+                          {member.is_founder && <FounderBadge size="sm" />}
+                        </div>
                         {member.city && <p className="text-xs text-muted-foreground">{member.city}{member.distance != null ? ` · à ${Math.round(member.distance)} km` : ""}</p>}
                         <div className="flex flex-wrap gap-1.5 mt-1.5">
                           {visibleSkills.map((s: string) => {
