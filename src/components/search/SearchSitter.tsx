@@ -520,7 +520,7 @@ const SearchSitter = () => {
           </div>
         )}
         <div className="p-4">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 mb-1">
             <h3 className="text-base font-semibold text-foreground leading-snug line-clamp-2">
               {item.title || "Sans titre"}
             </h3>
