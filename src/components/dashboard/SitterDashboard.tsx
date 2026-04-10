@@ -30,7 +30,9 @@ const capitalize = (name: string) =>
 const SitterDashboard = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { hasAccess: hasSubscription } = useSubscriptionAccess();
+  const [showOnboardingModal, setShowOnboardingModal] = useState(false);
 
   const { data: reputation } = useProfileReputation(user?.id);
   const { data: userBadges } = useUserBadges(user?.id);
