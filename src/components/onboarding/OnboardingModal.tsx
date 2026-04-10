@@ -228,7 +228,7 @@ const SitterSlide1 = () => (
         <div className="flex flex-col items-end gap-1">
           <div className="bg-primary-foreground/10 rounded-lg px-3 py-2 flex items-center gap-2">
             <p className="text-xs font-medium">Je suis disponible</p>
-            <div className="w-8 h-4 bg-green-400 rounded-full relative flex-shrink-0">
+            <div className="w-8 h-4 bg-primary rounded-full relative flex-shrink-0">
               <div className="absolute right-0.5 top-0.5 w-3 h-3 bg-white rounded-full" />
             </div>
           </div>
