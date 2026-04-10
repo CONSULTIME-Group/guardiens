@@ -67,7 +67,7 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
   const load = async () => {
     const { data } = await supabase
       .from("applications")
-      .select("*, sitter:profiles!applications_sitter_id_fkey(id, first_name, last_name, city, avatar_url, bio, identity_verified, completed_sits_count)")
+      .select("*, sitter:profiles!applications_sitter_id_fkey(id, first_name, last_name, city, avatar_url, bio, identity_verified, completed_sits_count, is_founder)")
       .eq("sit_id", sitId)
       .order("created_at", { ascending: false });
 

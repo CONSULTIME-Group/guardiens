@@ -232,7 +232,7 @@ const SearchSitter = () => {
   const searchSits = async (searchCoords: { lat: number; lng: number } | null) => {
     let query = supabase
       .from("sits")
-      .select("*, owner:profiles!sits_user_id_fkey(first_name, avatar_url, city, identity_verified), property:properties!sits_property_id_fkey(type, environment, photos)")
+      .select("*, owner:profiles!sits_user_id_fkey(first_name, avatar_url, city, identity_verified, is_founder), property:properties!sits_property_id_fkey(type, environment, photos)")
       .eq("status", "published")
       .order("created_at", { ascending: false });
     if (startDate) query = query.gte("end_date", startDate);
@@ -324,7 +324,7 @@ const SearchSitter = () => {
   const searchMissions = async (searchCoords: { lat: number; lng: number } | null) => {
     let query = supabase
       .from("small_missions")
-      .select("*, owner:profiles!small_missions_user_id_fkey(first_name, avatar_url, city, identity_verified)")
+      .select("*, owner:profiles!small_missions_user_id_fkey(first_name, avatar_url, city, identity_verified, is_founder)")
       .eq("status", "open")
       .order("created_at", { ascending: false });
     const { data } = await query;
@@ -372,7 +372,7 @@ const SearchSitter = () => {
   const searchAvailableMembers = async (searchCoords: { lat: number; lng: number } | null) => {
     const { data } = await supabase
       .from("profiles")
-      .select("id, first_name, avatar_url, city, skill_categories, available_for_help")
+      .select("id, first_name, avatar_url, city, skill_categories, available_for_help, is_founder")
       .eq("available_for_help", true)
       .not("skill_categories", "eq", "{}");
     let items = (data || []).filter((m: any) => m.id !== user?.id);
