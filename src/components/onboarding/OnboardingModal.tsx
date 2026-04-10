@@ -1049,52 +1049,104 @@ const OwnerSlide4Entraide = () => (
   </div>
 );
 
-const OwnerSlide5 = () => {
-  const steps = [
-    {
-      icon: Send,
-      title: "Vous publiez une annonce",
-      desc: "Les dates, vos animaux, votre logement. Les gardiens proches reçoivent une notification.",
-    },
-    {
-      icon: MessageCircle,
-      title: "Vous recevez des candidatures",
-      desc: "Photo, note, écussons, message. Vous choisissez à votre rythme.",
-    },
-    {
-      icon: CheckCircle,
-      title: "Vous confirmez",
-      desc: "Un accord de garde est généré automatiquement. Chacun valide de son côté avant le départ.",
-    },
-    {
-      icon: Star,
-      title: "Vous vous évaluez mutuellement",
-      desc: "Un avis croisé, des écussons choisis. Une relation qui peut durer.",
-    },
-  ];
+const OwnerSlide5 = () => (
+  <div className="space-y-4">
+    <h2 className="font-heading text-2xl font-bold text-foreground">
+      Notre accord de garde.
+      <br />
+      Pas un contrat — une conversation écrite.
+    </h2>
+    <p className="text-base text-foreground/80 leading-relaxed">
+      Quand la garde est confirmée, Guardiens génère
+      automatiquement un document qui résume ce que vous
+      avez prévu ensemble. Ce que le gardien prend en charge.
+      Ce que vous vous engagez à transmettre. Les règles de vie.
+      Les contacts d'urgence.
+    </p>
+    <p className="text-base text-foreground/80 leading-relaxed">
+      Chacun lit. Chacun valide. Vous partez l'esprit léger.
+    </p>
 
-  return (
-    <div className="space-y-4">
-      <h2 className="font-heading text-2xl font-bold text-foreground">
-        Une garde, c'est simple.
-      </h2>
-      <div className="flex flex-col gap-4 mt-2">
-        {steps.map((s, i) => {
-          const Icon = s.icon;
-          return (
-            <div key={i} className="flex items-start gap-3">
-              <Icon className="h-6 w-6 text-primary shrink-0 mt-0.5" />
-              <div>
-                <p className="font-semibold text-sm text-foreground">{s.title}</p>
-                <p className="text-xs text-muted-foreground">{s.desc}</p>
-              </div>
-            </div>
-          );
-        })}
+    <div className="pointer-events-none select-none mt-4 rounded-xl overflow-hidden border border-border shadow-sm bg-card">
+      {/* Header accord */}
+      <div className="px-4 py-3 border-b border-border flex items-center justify-between">
+        <div>
+          <p className="text-sm font-semibold">Notre accord de garde</p>
+          <p className="text-xs text-muted-foreground mt-0.5">Garde du 14 mai 2026 au 21 mai 2026</p>
+        </div>
+        <div className="bg-primary/10 text-primary text-xs px-2 py-1 rounded-full">
+          Généré automatiquement
+        </div>
+      </div>
+
+      {/* Animaux concernés */}
+      <div className="px-4 py-2.5 border-b border-border">
+        <p className="text-xs font-semibold mb-1.5">Les animaux concernés</p>
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1.5">
+            <PawPrint className="w-3 h-3 text-primary" />
+            <p className="text-xs text-muted-foreground">Rex · Chien · Berger Australien · 3 ans</p>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <PawPrint className="w-3 h-3 text-primary" />
+            <p className="text-xs text-muted-foreground">Resa · Chat · Main Coon · 4 ans</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Ce que le gardien prend en charge */}
+      <div className="px-4 py-2.5 border-b border-border">
+        <p className="text-xs font-semibold mb-2">Ce que le gardien prend en charge</p>
+        <div className="space-y-1">
+          <div className="flex items-start gap-2">
+            <CheckCircle className="w-3 h-3 text-primary flex-shrink-0 mt-0.5" />
+            <p className="text-xs text-muted-foreground">Prendre soin des animaux selon leurs habitudes.</p>
+          </div>
+          <div className="flex items-start gap-2">
+            <CheckCircle className="w-3 h-3 text-primary flex-shrink-0 mt-0.5" />
+            <p className="text-xs text-muted-foreground">Donner des nouvelles — une photo par jour.</p>
+          </div>
+          <div className="flex items-start gap-2">
+            <CheckCircle className="w-3 h-3 text-primary flex-shrink-0 mt-0.5" />
+            <p className="text-xs text-muted-foreground">Laisser le logement propre et en bon état.</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Règles de vie */}
+      <div className="px-4 py-2.5 border-b border-border">
+        <p className="text-xs font-semibold mb-2">Règles de vie dans le logement</p>
+        <div className="grid grid-cols-3 gap-2">
+          <div className="bg-muted rounded-lg p-2 text-center">
+            <p className="text-xs text-muted-foreground">Animaux dans toutes les pièces</p>
+            <p className="text-xs font-semibold mt-1">Oui</p>
+          </div>
+          <div className="bg-muted rounded-lg p-2 text-center">
+            <p className="text-xs text-muted-foreground">Invités</p>
+            <p className="text-xs font-semibold mt-1">Non</p>
+          </div>
+          <div className="bg-muted rounded-lg p-2 text-center">
+            <p className="text-xs text-muted-foreground">Tabac</p>
+            <p className="text-xs font-semibold mt-1">À confirmer</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Validation clickwrap */}
+      <div className="px-4 py-3 bg-primary/5">
+        <p className="text-xs text-muted-foreground text-center mb-2">
+          J'ai lu cet accord et je confirme que son contenu correspond à ce que nous avons prévu.
+        </p>
+        <div className="bg-primary text-primary-foreground text-xs font-semibold py-2.5 rounded-lg text-center">
+          C'est bon pour moi →
+        </div>
+        <p className="text-xs text-muted-foreground text-center mt-2">
+          En attente de validation des deux parties
+        </p>
       </div>
     </div>
-  );
-};
+  </div>
+);
 
 const OwnerSlide6 = ({ onComplete }: { onComplete: () => void }) => (
   <div className="space-y-4">
