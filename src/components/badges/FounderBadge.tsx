@@ -13,7 +13,7 @@ export default function FounderBadge({ size = 'md', className = '' }: FounderBad
   return (
     <div className="relative group">
       <img
-        src="/badges/fondateur.png"
+        src="https://erhccyqevdyevpyctsjj.supabase.co/storage/v1/object/public/badges/fondateur.png"
         alt="Badge Fondateur"
         className={`${sizeClasses[size]} ${className}`}
       />
