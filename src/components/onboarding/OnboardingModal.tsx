@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import { X, Send, MessageCircle, CheckCircle, Star, User, Circle, PawPrint, MapPin, Leaf, ShieldCheck, Home, Calendar, Plus, Zap, Activity, Heart } from "lucide-react";
+import { X, Send, MessageCircle, CheckCircle, Star, User, Circle, PawPrint, MapPin, Leaf, ShieldCheck, Home, Calendar, Plus, Zap, Activity, Heart, BookOpen, Key, Wifi, Phone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 type ActiveTab = "gardien" | "proprio";
@@ -868,36 +868,100 @@ const OwnerSlide3 = () => (
     <h2 className="font-heading text-2xl font-bold text-foreground">
       Votre guide de la maison.
       <br />
-      Prêt à la confirmation.
+      Transmis à la confirmation.
     </h2>
     <p className="text-base text-foreground/80 leading-relaxed">
-      Contacts d'urgence, habitudes des animaux, code wifi, adresses utiles du
-      quartier. Tout se génère automatiquement quand vous confirmez une garde.
+      Adresse exacte, codes d'accès, WiFi, véto, contacts
+      d'urgence. Tout se remplit une fois. Tout est partagé
+      automatiquement quand vous confirmez une garde.
     </p>
     <p className="text-base text-foreground/80 leading-relaxed">
-      Le gardien reçoit tout. Vous n'avez rien à réexpliquer à chaque fois. Et
-      le guide du quartier — parcs, vétos, balades — est préparé pour eux dès
-      leur arrivée.
+      Le gardien a tout. Vous pouvez partir.
     </p>
-    <div className="flex flex-col gap-4 md:flex-row mt-4">
-      <div className="bg-muted rounded-xl p-4 w-full pointer-events-none select-none">
-        <p className="text-xs uppercase tracking-widest text-primary/60 mb-2">
-          Guide maison
-        </p>
-        <div className="bg-primary/10 rounded-lg h-14 w-full mb-3" />
-        <p className="text-sm font-semibold mb-2">Accès et consignes</p>
-        <div className="bg-muted-foreground/20 rounded h-2 mb-1.5" />
-        <div className="bg-muted-foreground/20 rounded h-2 mb-1.5" />
-        <div className="bg-muted-foreground/20 rounded h-2 mb-1.5" />
+
+    <div className="pointer-events-none select-none mt-4 rounded-xl overflow-hidden border border-border shadow-sm bg-card">
+      {/* Header */}
+      <div className="px-4 py-3 border-b border-border flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <BookOpen className="w-4 h-4 text-primary" />
+          <p className="text-sm font-semibold">Guide de la maison</p>
+        </div>
+        <div className="bg-primary/10 text-primary text-xs px-2 py-0.5 rounded-full">
+          Partagé à la confirmation
+        </div>
       </div>
-      <div className="bg-muted rounded-xl p-4 w-full pointer-events-none select-none">
-        <p className="text-xs uppercase tracking-widest text-primary/60 mb-2">
-          Missions d'entraide
-        </p>
-        <div className="bg-primary/10 rounded-lg h-14 w-full mb-3" />
-        <p className="text-sm font-semibold mb-2">Arroser les plantes</p>
-        <div className="bg-muted-foreground/20 rounded h-2 mb-1.5" />
-        <div className="bg-muted-foreground/20 rounded h-2 mb-1.5" />
+
+      {/* Sections accordéon */}
+      <div className="divide-y divide-border">
+        <div className="px-4 py-2.5 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Key className="w-3.5 h-3.5 text-primary" />
+            <p className="text-xs font-medium">Accès &amp; logistique</p>
+          </div>
+          <div className="flex items-center gap-2">
+            <CheckCircle className="w-3.5 h-3.5 text-primary" />
+            <p className="text-xs text-primary">Complété</p>
+          </div>
+        </div>
+
+        <div className="px-4 py-2.5 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Wifi className="w-3.5 h-3.5 text-primary" />
+            <p className="text-xs font-medium">WiFi</p>
+          </div>
+          <div className="flex items-center gap-2">
+            <CheckCircle className="w-3.5 h-3.5 text-primary" />
+            <p className="text-xs text-primary">Complété</p>
+          </div>
+        </div>
+
+        <div className="px-4 py-2.5 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Phone className="w-3.5 h-3.5 text-primary" />
+            <p className="text-xs font-medium">Contacts d'urgence</p>
+          </div>
+          <div className="flex items-center gap-2">
+            <CheckCircle className="w-3.5 h-3.5 text-primary" />
+            <p className="text-xs text-primary">Complété</p>
+          </div>
+        </div>
+
+        <div className="px-4 py-2.5 flex items-center justify-between bg-muted/50">
+          <div className="flex items-center gap-2">
+            <Home className="w-3.5 h-3.5 text-muted-foreground" />
+            <p className="text-xs font-medium text-muted-foreground">Instructions générales</p>
+          </div>
+          <div className="flex items-center gap-2">
+            <Circle className="w-3.5 h-3.5 text-muted-foreground" />
+            <p className="text-xs text-muted-foreground">À compléter</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Checklist préparation */}
+      <div className="border-t border-border px-4 py-3 bg-primary/5">
+        <div className="flex items-center gap-2 mb-2">
+          <CheckCircle className="w-3.5 h-3.5 text-primary" />
+          <p className="text-xs font-semibold text-primary">Préparez l'arrivée — J-12</p>
+        </div>
+        <div className="space-y-1.5">
+          <div className="flex items-center gap-2">
+            <div className="w-3.5 h-3.5 rounded-full border-2 border-primary bg-primary flex-shrink-0" />
+            <p className="text-xs text-muted-foreground line-through">Compléter le guide de la maison</p>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-3.5 h-3.5 rounded-full border-2 border-primary bg-primary flex-shrink-0" />
+            <p className="text-xs text-muted-foreground line-through">Contacter le gardien</p>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-3.5 h-3.5 rounded-full border-2 border-border flex-shrink-0" />
+            <p className="text-xs text-foreground/80">Appel ou rencontre avant la garde</p>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-3.5 h-3.5 rounded-full border-2 border-border flex-shrink-0" />
+            <p className="text-xs text-foreground/80">Préparer la remise des clés</p>
+          </div>
+        </div>
       </div>
     </div>
   </div>
