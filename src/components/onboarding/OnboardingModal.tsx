@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -20,6 +20,8 @@ const OnboardingModal = ({ open, onClose }: OnboardingModalProps) => {
   const [slide, setSlide] = useState(0);
   const [activeTab, setActiveTab] = useState<ActiveTab>("gardien");
   const [completionRate, setCompletionRate] = useState(0);
+  const [dontShowAgain, setDontShowAgain] = useState(false);
+  const dontShowRef = useRef(false);
 
   // Load completion rate
   useEffect(() => {
@@ -38,7 +40,11 @@ const OnboardingModal = ({ open, onClose }: OnboardingModalProps) => {
 
   // Reset slide on open
   useEffect(() => {
-    if (open) setSlide(0);
+    if (open) {
+      setSlide(0);
+      setDontShowAgain(false);
+      dontShowRef.current = false;
+    }
   }, [open]);
 
   // Keyboard navigation
@@ -58,9 +64,15 @@ const OnboardingModal = ({ open, onClose }: OnboardingModalProps) => {
 
   const dismiss = useCallback(async () => {
     if (user) {
+      const updates: Record<string, any> = {
+        onboarding_dismissed_at: new Date().toISOString(),
+      };
+      if (dontShowRef.current) {
+        updates.onboarding_completed = true;
+      }
       await supabase
         .from("profiles")
-        .update({ onboarding_dismissed_at: new Date().toISOString() })
+        .update(updates)
         .eq("id", user.id);
     }
     onClose();
@@ -139,12 +151,31 @@ const OnboardingModal = ({ open, onClose }: OnboardingModalProps) => {
         </div>
 
         <div className="flex items-center justify-between mt-8">
-          <button
-            onClick={dismiss}
-            className="text-xs text-muted-foreground underline-offset-4 hover:underline transition-colors"
-          >
-            Reprendre plus tard
-          </button>
+          <div className="flex flex-col gap-1.5">
+            <div className="flex items-center gap-2">
+              <label className="flex items-center gap-1.5 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={dontShowAgain}
+                  onChange={(e) => {
+                    setDontShowAgain(e.target.checked);
+                    dontShowRef.current = e.target.checked;
+                  }}
+                  className="accent-primary w-3.5 h-3.5"
+                />
+                <span className="text-xs text-muted-foreground">Ne plus afficher au démarrage</span>
+              </label>
+              <button
+                onClick={dismiss}
+                className="text-xs text-muted-foreground underline-offset-4 hover:underline transition-colors ml-2"
+              >
+                Reprendre plus tard
+              </button>
+            </div>
+            <p className="text-xs text-muted-foreground italic">
+              Retrouvez cette présentation à tout moment dans Paramètres.
+            </p>
+          </div>
 
           {slide > 0 && (
             <div className="flex gap-1.5">
