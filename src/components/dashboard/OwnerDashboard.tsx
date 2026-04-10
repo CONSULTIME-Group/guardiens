@@ -279,6 +279,13 @@ const OwnerDashboard = () => {
 
   return (
     <div className="space-y-8">
+      <OnboardingModal
+        open={showOnboardingModal}
+        onClose={() => {
+          setShowOnboardingModal(false);
+          setSearchParams({});
+        }}
+      />
       {/* Role activation banner */}
       <div className="px-5 md:px-8">
         <RoleActivationBanner userRole={user?.role || "owner"} />
