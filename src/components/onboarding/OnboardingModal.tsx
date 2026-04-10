@@ -215,6 +215,84 @@ const SitterSlide1 = () => (
     <p className="text-base text-foreground/80 leading-relaxed">
       On collectionnait des vies, ici. La vôtre commence maintenant.
     </p>
+
+    {/* Mock dashboard gardien */}
+    <div className="pointer-events-none select-none mt-6 rounded-xl overflow-hidden border border-border shadow-sm">
+      {/* Header */}
+      <div className="bg-primary text-primary-foreground p-4 flex items-start justify-between">
+        <div>
+          <p className="text-xs uppercase tracking-widest opacity-60 mb-1 font-body">ESPACE GARDIEN</p>
+          <p className="text-xl font-heading font-bold">Bonjour, Sophie !</p>
+          <p className="text-sm opacity-70 mt-0.5">Explorez les annonces près de chez vous.</p>
+        </div>
+        <div className="flex flex-col items-end gap-1">
+          <div className="bg-primary-foreground/10 rounded-lg px-3 py-2 flex items-center gap-2">
+            <p className="text-xs font-medium">Je suis disponible</p>
+            <div className="w-8 h-4 bg-green-400 rounded-full relative flex-shrink-0">
+              <div className="absolute right-0.5 top-0.5 w-3 h-3 bg-white rounded-full" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Stats */}
+      <div className="bg-card grid grid-cols-3 divide-x divide-border border-t border-border">
+        {/* Colonne 1 — Mon profil */}
+        <div className="p-3">
+          <p className="text-xs text-muted-foreground uppercase tracking-widest mb-2">MON PROFIL</p>
+          <div className="w-full bg-muted rounded-full h-1.5 mb-1.5">
+            <div className="bg-primary h-1.5 rounded-full" style={{ width: '100%' }} />
+          </div>
+          <p className="text-xs font-semibold text-primary">100% complété</p>
+          <div className="mt-1.5 bg-primary/10 text-primary text-xs rounded-full px-2 py-0.5 inline-block">
+            Visible par les proprios
+          </div>
+        </div>
+
+        {/* Colonne 2 — Mes stats */}
+        <div className="p-3">
+          <p className="text-xs text-muted-foreground uppercase tracking-widest mb-2">MES STATS</p>
+          <div className="grid grid-cols-2 gap-x-2 gap-y-1">
+            <div className="text-center">
+              <p className="text-lg font-bold">4</p>
+              <p className="text-xs text-muted-foreground">Gardes</p>
+            </div>
+            <div className="text-center">
+              <p className="text-lg font-bold">4.8</p>
+              <p className="text-xs text-muted-foreground">Note</p>
+            </div>
+            <div className="text-center">
+              <p className="text-lg font-bold">3</p>
+              <p className="text-xs text-muted-foreground">Badges</p>
+            </div>
+            <div className="text-center">
+              <p className="text-lg font-bold">2</p>
+              <p className="text-xs text-muted-foreground">Candidatures</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Colonne 3 — Mon statut */}
+        <div className="p-3">
+          <p className="text-xs text-muted-foreground uppercase tracking-widest mb-2">MON STATUT</p>
+          <p className="text-xs font-semibold mb-2">Gardien actif</p>
+          <div className="space-y-1">
+            <div className="flex items-center gap-1.5">
+              <div className="w-2 h-2 rounded-full bg-primary flex-shrink-0" />
+              <p className="text-xs text-muted-foreground">4 gardes réalisées (4/5)</p>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <div className="w-2 h-2 rounded-full bg-primary flex-shrink-0" />
+              <p className="text-xs text-muted-foreground">3 badges actifs (3/5)</p>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <div className="w-2 h-2 rounded-full bg-primary flex-shrink-0" />
+              <p className="text-xs text-muted-foreground">Note ≥ 4.8 ✓</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 );
 
