@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import { X, Send, MessageCircle, CheckCircle, Star, User, Circle, PawPrint, MapPin, Leaf } from "lucide-react";
+import { X, Send, MessageCircle, CheckCircle, Star, User, Circle, PawPrint, MapPin, Leaf, ShieldCheck, Home, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 type ActiveTab = "gardien" | "proprio";
@@ -592,6 +592,75 @@ const SitterSlide5 = () => {
             </div>
           );
         })}
+      </div>
+
+      {/* Search page simulation */}
+      <div className="pointer-events-none select-none mt-4 rounded-xl overflow-hidden border border-border shadow-sm bg-card">
+        {/* Filter bar */}
+        <div className="border-b border-border px-3 py-2 flex items-center gap-2 flex-wrap">
+          <div className="flex items-center gap-1 bg-muted text-xs px-2.5 py-1 rounded-full text-muted-foreground">
+            <MapPin className="w-3 h-3" />
+            <span>Lyon</span>
+          </div>
+          <div className="flex items-center gap-1 bg-muted text-xs px-2.5 py-1 rounded-full text-muted-foreground">
+            <div className="w-3 h-3 bg-muted-foreground/30 rounded" />
+            <span>15 km</span>
+          </div>
+          <div className="flex items-center gap-1 bg-muted text-xs px-2.5 py-1 rounded-full text-muted-foreground">
+            <Calendar className="w-3 h-3" />
+            <span>Dates</span>
+          </div>
+          <div className="flex items-center gap-1 bg-muted text-xs px-2.5 py-1 rounded-full text-muted-foreground">
+            <PawPrint className="w-3 h-3" />
+            <span>Animaux</span>
+          </div>
+          <div className="ml-auto text-xs text-muted-foreground">3 gardes disponibles</div>
+        </div>
+
+        {/* Listing cards */}
+        <div className="grid grid-cols-2 gap-0 divide-x divide-border">
+          {/* Card 1 */}
+          <div className="p-3">
+            <div className="rounded-lg overflow-hidden h-20 bg-primary/10 mb-2 relative">
+              <div className="absolute top-1.5 left-1.5 bg-white/90 text-xs px-1.5 py-0.5 rounded-full flex items-center gap-1">
+                <ShieldCheck className="w-3 h-3 text-primary" />
+                <span>Vérifié</span>
+              </div>
+            </div>
+            <p className="text-xs font-semibold leading-tight mb-1">Maison avec jardin, Laïka et ses deux compères</p>
+            <div className="flex items-center gap-1 text-muted-foreground mb-1">
+              <MapPin className="w-3 h-3" />
+              <p className="text-xs">Lyon 6e</p>
+            </div>
+            <div className="flex gap-1">
+              <PawPrint className="w-3 h-3 text-primary" />
+              <span className="text-xs text-muted-foreground">×1</span>
+              <Home className="w-3 h-3 text-primary ml-1" />
+              <span className="text-xs text-muted-foreground">×2</span>
+            </div>
+          </div>
+
+          {/* Card 2 */}
+          <div className="p-3">
+            <div className="rounded-lg overflow-hidden h-20 bg-primary/15 mb-2 relative">
+              <div className="absolute top-1.5 left-1.5 bg-white/90 text-xs px-1.5 py-0.5 rounded-full flex items-center gap-1">
+                <ShieldCheck className="w-3 h-3 text-primary" />
+                <span>Vérifié</span>
+              </div>
+            </div>
+            <p className="text-xs font-semibold leading-tight mb-1">Maison en bois face au lac, potager et basse-cour</p>
+            <div className="flex items-center gap-1 text-muted-foreground mb-1">
+              <MapPin className="w-3 h-3" />
+              <p className="text-xs">Annecy</p>
+            </div>
+            <div className="flex gap-1">
+              <PawPrint className="w-3 h-3 text-primary" />
+              <span className="text-xs text-muted-foreground">×3</span>
+              <Home className="w-3 h-3 text-primary ml-1" />
+              <span className="text-xs text-muted-foreground">×1</span>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
