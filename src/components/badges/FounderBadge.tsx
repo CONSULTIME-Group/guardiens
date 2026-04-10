@@ -4,9 +4,9 @@ interface FounderBadgeProps {
 }
 
 const sizeClasses = {
-  sm: 'h-5 w-auto drop-shadow-lg object-contain',
-  md: 'h-8 w-auto drop-shadow-lg object-contain',
-  lg: 'h-14 w-auto drop-shadow-lg object-contain',
+  sm: 'h-5 w-auto object-contain',
+  md: 'h-8 w-auto object-contain',
+  lg: 'h-14 w-auto object-contain',
 } as const;
 
 export default function FounderBadge({ size = 'md', className = '' }: FounderBadgeProps) {
