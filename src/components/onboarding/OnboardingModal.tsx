@@ -13,7 +13,7 @@ interface OnboardingModalProps {
   onClose: () => void;
 }
 
-const TOTAL_SLIDES = 6; // 0..5
+const TOTAL_SLIDES = 7; // 0..6
 
 const OnboardingModal = ({ open, onClose }: OnboardingModalProps) => {
   const { user } = useAuth();
@@ -87,9 +87,7 @@ const OnboardingModal = ({ open, onClose }: OnboardingModalProps) => {
     if (role === "both") setActiveTab("gardien");
 
     if (user) {
-      // Map to DB enum
       const dbRole = role === "gardien" ? "sitter" : role === "proprio" ? "owner" : "both";
-      // Only update if role was null/default
       const { data } = await supabase
         .from("profiles")
         .select("role")
@@ -115,16 +113,14 @@ const OnboardingModal = ({ open, onClose }: OnboardingModalProps) => {
 
   if (!open) return null;
 
-  // Determine which slides to show based on active tab for "both" users
   const viewingRole: ActiveTab =
     currentRole === "both" ? activeTab : currentRole === "proprio" ? "proprio" : "gardien";
 
-  const slideCount = TOTAL_SLIDES - 1; // dots exclude slide 0
+  const slideCount = TOTAL_SLIDES - 1;
 
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center backdrop-blur-sm bg-background/80">
       <div className="max-w-2xl w-full mx-auto mt-16 bg-card rounded-2xl shadow-xl p-8 md:p-12 relative">
-        {/* Close button */}
         <button
           onClick={dismiss}
           className="absolute right-4 top-4 rounded-sm text-muted-foreground hover:text-foreground transition-colors"
@@ -132,7 +128,6 @@ const OnboardingModal = ({ open, onClose }: OnboardingModalProps) => {
           <X className="h-5 w-5" />
         </button>
 
-        {/* Toggle for "both" users on slides 1-5 */}
         {slide > 0 && currentRole === "both" && (
           <div className="flex justify-center gap-1 mb-6">
             <button
@@ -158,7 +153,6 @@ const OnboardingModal = ({ open, onClose }: OnboardingModalProps) => {
           </div>
         )}
 
-        {/* Slide content */}
         <div className="min-h-[340px]">
           {slide === 0 && <Slide0 currentRole={currentRole} onSelect={selectRole} />}
           {slide === 1 && viewingRole === "gardien" && <SitterSlide1 />}
@@ -169,17 +163,16 @@ const OnboardingModal = ({ open, onClose }: OnboardingModalProps) => {
           {slide === 3 && viewingRole === "proprio" && <OwnerSlide3 />}
           {slide === 4 && viewingRole === "gardien" && <SitterSlide4 />}
           {slide === 4 && viewingRole === "proprio" && <OwnerSlide4 />}
-          {slide === 5 && viewingRole === "gardien" && (
-            <SitterSlide5 onComplete={() => completeOnboarding("/recherche")} />
-          )}
+          {slide === 5 && viewingRole === "gardien" && <SitterSlide5 />}
           {slide === 5 && viewingRole === "proprio" && (
             <OwnerSlide5 onComplete={() => completeOnboarding("/sits/create")} />
           )}
+          {slide === 6 && viewingRole === "gardien" && (
+            <SitterSlide6 onComplete={() => completeOnboarding("/recherche")} />
+          )}
         </div>
 
-        {/* Navigation */}
         <div className="flex items-center justify-between mt-8">
-          {/* Dismiss link */}
           <button
             onClick={dismiss}
             className="text-xs text-muted-foreground underline-offset-4 hover:underline transition-colors"
@@ -187,7 +180,6 @@ const OnboardingModal = ({ open, onClose }: OnboardingModalProps) => {
             Reprendre plus tard
           </button>
 
-          {/* Dots */}
           {slide > 0 && (
             <div className="flex gap-1.5">
               {Array.from({ length: slideCount }).map((_, i) => (
@@ -201,7 +193,6 @@ const OnboardingModal = ({ open, onClose }: OnboardingModalProps) => {
             </div>
           )}
 
-          {/* Prev/Next */}
           <div className="flex gap-2">
             {slide > 0 && (
               <Button
@@ -279,9 +270,13 @@ const SitterSlide1 = () => (
       Bienvenue parmi les gardiens.
     </h2>
     <p className="text-base text-foreground/80 leading-relaxed">
-      Vous allez garder des maisons, accompagner des animaux, découvrir des
-      endroits que vous habitiez sans vraiment les connaître. On collectionnait
-      des vies, ici. La vôtre commence maintenant.
+      Trois chats à Caluire. Un cocker à Collonges. Une maison en Ardèche avec
+      un potager qui déborde. Vous allez garder des endroits que vous n'auriez
+      jamais connus autrement. Accompagner des animaux qui vous attendront à la
+      porte. Vivre dans des maisons qui ont une histoire — et en rapporter une.
+    </p>
+    <p className="text-base text-foreground/80 leading-relaxed">
+      On collectionnait des vies, ici. La vôtre commence maintenant.
     </p>
   </div>
 );
@@ -292,8 +287,11 @@ const SitterSlide2 = ({ completionRate }: { completionRate: number }) => (
       Votre profil, c'est votre première impression.
     </h2>
     <p className="text-base text-foreground/80 leading-relaxed">
-      Une photo, quelques lignes sur qui vous êtes. Les propriétaires
-      choisissent — donnez-leur de quoi dire oui.
+      Les propriétaires ne vous connaissent pas encore. Ils vont regarder votre
+      photo, lire vos quelques lignes, sentir si vous êtes la bonne personne
+      pour leurs animaux. Une bio honnête vaut mieux que dix gardes sans avis.
+      Dites qui vous êtes, pourquoi vous êtes là, ce que vous aimez dans une
+      maison qui vit. Dix minutes suffisent.
     </p>
     <div className="mt-4">
       <div className="w-full bg-muted rounded-full h-2">
@@ -317,22 +315,25 @@ const SitterSlide2 = ({ completionRate }: { completionRate: number }) => (
 const SitterSlide3 = () => (
   <div className="space-y-4">
     <h2 className="font-heading text-2xl font-bold text-foreground">
-      Quand vous gardez, vous n'arrivez jamais les mains vides.
+      On vous prépare le terrain.
     </h2>
     <p className="text-base text-foreground/80 leading-relaxed">
-      On vous prépare les conseils sur la race des animaux que vous allez garder
-      — et le guide du quartier autour de la maison. Les parcs, les adresses
-      utiles, les balades. Et au-delà des gardes : les petites missions
-      d'entraide vous permettent d'échanger un service, un coup de main, une
-      compétence — avec les gens du coin.
+      Avant chaque garde, Guardiens génère automatiquement les conseils sur la
+      race des animaux que vous allez retrouver. Leur caractère, leurs besoins,
+      ce qui les rassure et ce qui les perturbe.
     </p>
-    <div className="flex flex-col gap-4 md:flex-row mt-4">
+    <p className="text-base text-foreground/80 leading-relaxed">
+      Et sur votre profil : vos compétences et centres d'intérêt — jardinage,
+      bricolage, soins animaliers — visibles par tous les propriétaires qui vous
+      découvrent. Ce que vous savez faire compte autant que vos gardes.
+    </p>
+    <div className="flex flex-col gap-4 mt-4">
       {/* Mock 1 — Breed card */}
       <div className="bg-muted rounded-xl p-4 w-full pointer-events-none select-none">
         <p className="text-xs uppercase tracking-widest text-primary/60 mb-2">
           Conseils race
         </p>
-        <div className="bg-primary/10 rounded-lg h-14 w-full mb-3" />
+        <div className="bg-primary/10 rounded-lg h-12 w-full mb-3" />
         <p className="text-sm font-semibold mb-2">Berger Australien</p>
         <div className="bg-muted-foreground/20 rounded h-2 mb-1.5" />
         <div className="bg-muted-foreground/20 rounded h-2 mb-1.5" />
@@ -343,38 +344,78 @@ const SitterSlide3 = () => (
         <p className="text-xs uppercase tracking-widest text-primary/60 mb-2">
           Guide du quartier
         </p>
-        <div className="bg-primary/10 rounded-lg h-14 w-full mb-3" />
+        <div className="bg-primary/10 rounded-lg h-12 w-full mb-3" />
         <p className="text-sm font-semibold mb-2">Lyon 6e — Brotteaux</p>
         <div className="bg-muted-foreground/20 rounded h-2 mb-1.5" />
         <div className="bg-muted-foreground/20 rounded h-2 mb-1.5" />
         <div className="bg-muted-foreground/20 rounded h-2 mb-1.5" />
         <div className="bg-muted-foreground/20 rounded h-2 mb-1.5" />
       </div>
+      {/* Mock 3 — Compétences */}
+      <div className="bg-muted rounded-xl p-4 w-full pointer-events-none select-none">
+        <p className="text-xs uppercase tracking-widest text-primary/60 mb-3">
+          Vos compétences sur votre profil
+        </p>
+        <div className="flex flex-wrap gap-2 mb-3">
+          <span className="bg-primary/10 text-primary text-xs font-medium px-3 py-1 rounded-full">Jardinage</span>
+          <span className="bg-primary/10 text-primary text-xs font-medium px-3 py-1 rounded-full">Bricolage</span>
+          <span className="bg-primary/10 text-primary text-xs font-medium px-3 py-1 rounded-full">Soins animaliers</span>
+          <span className="bg-primary/10 text-primary text-xs font-medium px-3 py-1 rounded-full">Cuisine</span>
+        </div>
+        <div className="border-t border-border my-2" />
+        <div className="flex items-center justify-between">
+          <span className="text-sm text-foreground/80">Disponible pour aider</span>
+          <div className="w-9 h-5 bg-primary rounded-full relative">
+            <div className="absolute right-1 top-0.5 w-4 h-4 bg-white rounded-full" />
+          </div>
+        </div>
+        <p className="text-xs text-muted-foreground mt-2">
+          Visible sur votre profil public
+        </p>
+      </div>
     </div>
   </div>
 );
 
-const SitterSlide4 = () => {
+const SitterSlide4 = () => (
+  <div className="space-y-4">
+    <h2 className="font-heading text-2xl font-bold text-foreground">
+      Et au-delà des gardes.
+    </h2>
+    <p className="text-base text-foreground/80 leading-relaxed">
+      Promener un chien ce soir. Arroser un potager le week-end. Partager un
+      conseil sur une race que vous connaissez bien.
+    </p>
+    <p className="text-base text-foreground/80 leading-relaxed">
+      Les petites missions d'entraide, c'est l'échange au quotidien — vos
+      compétences contre un repas, un service rendu, une connexion qui dure.
+      Entre des gens du coin qui se choisissent. Jamais d'argent. Juste du
+      concret.
+    </p>
+  </div>
+);
+
+const SitterSlide5 = () => {
   const steps = [
     {
       icon: Send,
       title: "Vous postulez",
-      desc: "Un message au propriétaire. Une première impression.",
+      desc: "Un message sincère et direct. C'est votre première impression.",
     },
     {
       icon: MessageCircle,
       title: "Vous échangez",
-      desc: "Une conversation, quelques questions, une rencontre.",
+      desc: "Une conversation, quelques questions. Souvent une rencontre avant le départ.",
     },
     {
       icon: CheckCircle,
       title: "La garde est confirmée",
-      desc: "Un accord de garde est généré automatiquement. Chacun valide de son côté.",
+      desc: "Un accord de garde est généré automatiquement. Chacun valide à son rythme.",
     },
     {
       icon: Star,
       title: "Vous vous évaluez mutuellement",
-      desc: "Un avis croisé, des écussons. Une relation qui dure.",
+      desc: "Un avis croisé, des écussons choisis. Une relation qui peut durer.",
     },
   ];
 
@@ -401,14 +442,14 @@ const SitterSlide4 = () => {
   );
 };
 
-const SitterSlide5 = ({ onComplete }: { onComplete: () => void }) => (
+const SitterSlide6 = ({ onComplete }: { onComplete: () => void }) => (
   <div className="space-y-4">
     <h2 className="font-heading text-2xl font-bold text-foreground">
       C'est à vous.
     </h2>
     <p className="text-base text-foreground/80 leading-relaxed">
-      Explorez les annonces autour de vous. Trouvez une garde qui vous
-      ressemble.
+      Les annonces sont là. Les propriétaires attendent quelqu'un en qui avoir
+      confiance. Trouvez une garde qui vous ressemble.
     </p>
     <Button className="w-full mt-4" onClick={onComplete}>
       Explorer les annonces →
