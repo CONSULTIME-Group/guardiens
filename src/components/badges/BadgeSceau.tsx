@@ -1,5 +1,8 @@
+import { useState } from 'react'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
+import { Dialog, DialogContent } from '@/components/ui/dialog'
 import { BADGE_DEFINITIONS, getTier, isBadgeActive, type BadgeTier } from './badge-definitions'
+import { BadgeSceauLarge } from './BadgeSceauLarge'
 import { format } from 'date-fns'
 import { fr } from 'date-fns/locale'
 
@@ -40,6 +43,7 @@ export function BadgeSceau({
   className = '',
   obtainedAt,
 }: BadgeSceauProps) {
+  const [dialogOpen, setDialogOpen] = useState(false)
   const def = BADGE_DEFINITIONS[id]
 
   if (!def) {
@@ -51,16 +55,22 @@ export function BadgeSceau({
     )
   }
 
-  // Auto-determine active state from obtainedAt if not explicitly set
   const isActive = active !== undefined ? active : (obtainedAt ? isBadgeActive(id, obtainedAt) : true)
-
   const tier = getTier(id, count)
   const sz = size === 'normal' ? 52 : 34
   const showPastille = showCount && count > 1 && size === 'normal'
   const pastilleLabel = count > 99 ? '99+' : `×${count}`
 
+  const dateLabel = obtainedAt
+    ? format(new Date(obtainedAt), "d MMMM yyyy", { locale: fr })
+    : null
+
   const svgElement = (
-    <span className={`relative inline-block ${className}`} style={{ width: sz, height: sz }}>
+    <span
+      className={`relative inline-block cursor-pointer ${className}`}
+      style={{ width: sz, height: sz }}
+      onClick={() => setDialogOpen(true)}
+    >
       <svg
         width={sz}
         height={sz}
@@ -96,30 +106,48 @@ export function BadgeSceau({
     </span>
   )
 
-  const dateLabel = obtainedAt
-    ? format(new Date(obtainedAt), "d MMMM yyyy", { locale: fr })
-    : null
-
   return (
-    <TooltipProvider>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          {svgElement}
-        </TooltipTrigger>
-        <TooltipContent side="top" className="max-w-[220px] text-center">
-          <p className="font-semibold text-sm">{def.label}</p>
-          <p className="text-xs text-muted-foreground mt-1">{def.tooltip}</p>
-          {dateLabel && (
-            <p className="text-xs text-muted-foreground/80 mt-1">
-              Obtenu le {dateLabel}
+    <>
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            {svgElement}
+          </TooltipTrigger>
+          <TooltipContent side="top" className="max-w-[220px] text-center">
+            <p className="font-semibold text-sm">{def.label}</p>
+            <p className="text-xs text-muted-foreground mt-1">{def.tooltip}</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogContent className="max-w-xs text-center p-6 space-y-3">
+          <div className="flex justify-center">
+            <BadgeSceauLarge id={id} size={96} />
+          </div>
+          <h3 className="font-heading font-bold text-lg">{def.label}</h3>
+          <p className="text-sm text-muted-foreground leading-relaxed">
+            {def.tooltip}
+          </p>
+          {count > 0 && (
+            <p className="text-sm font-semibold" style={{ color: def.iconColor }}>
+              Obtenu {count} fois
             </p>
           )}
-          <p className="text-xs mt-0.5 font-medium" style={{ color: isActive ? 'hsl(var(--primary))' : 'hsl(var(--muted-foreground))' }}>
-            {isActive ? 'Actif' : 'Expiré'}
+          {dateLabel && (
+            <p className="text-xs text-muted-foreground/70 italic">
+              Dernière obtention : {dateLabel}
+            </p>
+          )}
+          <p
+            className="text-xs font-medium"
+            style={{ color: isActive ? 'hsl(var(--primary))' : 'hsl(var(--muted-foreground))' }}
+          >
+            {isActive ? '✓ Actif' : 'Expiré'}
           </p>
-        </TooltipContent>
-      </Tooltip>
-    </TooltipProvider>
+        </DialogContent>
+      </Dialog>
+    </>
   )
 }
 
