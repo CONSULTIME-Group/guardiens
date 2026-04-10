@@ -109,6 +109,21 @@ const AdminMassEmails = () => {
     const timer = setTimeout(async () => {
       setCountLoading(true);
       try {
+        // If filtering by active subscribers, first get their user_ids
+        let subscriberIds: string[] | null = null;
+        if (abonnesActifs) {
+          const { data: subs } = await supabase
+            .from("subscriptions")
+            .select("user_id")
+            .in("status", ["active", "trial"]);
+          subscriberIds = (subs || []).map((s: any) => s.user_id);
+          if (subscriberIds.length === 0) {
+            setRecipientCount(0);
+            setCountLoading(false);
+            return;
+          }
+        }
+
         let query = supabase.from("profiles").select("id", { count: "exact", head: true });
 
         if (segment === "gardiens") query = query.in("role", ["sitter", "both"]);
@@ -116,9 +131,9 @@ const AdminMassEmails = () => {
         else if (segment === "fondateurs") query = query.eq("is_founder", true);
 
         if (idVerifiee) query = query.eq("identity_verified", true);
+        if (subscriberIds) query = query.in("id", subscriberIds);
 
         const { count } = await query;
-        // Note: abonnes_actifs filter is done server-side, approximate here
         setRecipientCount(count ?? 0);
       } catch {
         setRecipientCount(null);
