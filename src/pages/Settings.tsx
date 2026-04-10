@@ -404,11 +404,9 @@ const Settings = () => {
           variant="outline"
           className="w-full text-sm"
           onClick={() => {
-            const sp = new URLSearchParams(window.location.search);
-            sp.set("tour", "true");
-            window.history.replaceState({}, "", `${window.location.pathname}?${sp.toString()}`);
-            window.dispatchEvent(new PopStateEvent("popstate"));
-            window.location.search = sp.toString();
+            const params = new URLSearchParams(window.location.search);
+            params.set("tour", "true");
+            window.location.search = params.toString();
           }}
         >
           Revoir la présentation →
