@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-
+import FounderBadge from "@/components/badges/FounderBadge";
 import { useParams, Link, useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
@@ -602,7 +602,7 @@ export default function PublicSitterProfile() {
                 <h1 className="text-4xl md:text-5xl font-heading font-bold text-foreground leading-tight capitalize">
                   {firstName}
                 </h1>
-                
+                {profile?.is_founder && <FounderBadge size="lg" />}
               </div>
 
               {city && (
