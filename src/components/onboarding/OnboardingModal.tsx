@@ -544,13 +544,10 @@ const OwnerSlide4Entraide = () => (
       Et au-delà des gardes.
     </h2>
     <p className="text-base text-foreground/80 leading-relaxed">
-      Proposer une mission d'entraide. Se rendre disponible avec ses
-      compétences. Échanger un coup de main contre un service, un repas, un
-      conseil. L'entraide fonctionne dans les deux sens — propriétaires comme
-      gardiens.
-    </p>
-    <p className="text-base text-foreground/80 leading-relaxed">
-      Jamais d'argent. Juste du concret, entre voisins qui se choisissent.
+      Vous n'êtes pas que bénéficiaire. Votre jardin, vos compétences, un
+      service que vous pouvez rendre — tout ça a de la valeur pour les gens du
+      coin. Proposez une mission, mettez une compétence en avant, rendez ce que
+      vous recevez.
     </p>
   </div>
 );
