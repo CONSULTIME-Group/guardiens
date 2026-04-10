@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import { X, Send, MessageCircle, CheckCircle, Star, User, Circle } from "lucide-react";
+import { X, Send, MessageCircle, CheckCircle, Star, User, Circle, PawPrint, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 type ActiveTab = "gardien" | "proprio";
@@ -409,51 +409,56 @@ const SitterSlide3 = () => (
       bricolage, soins animaliers — visibles par tous les propriétaires qui vous
       découvrent. Ce que vous savez faire compte autant que vos gardes.
     </p>
-    <div className="flex flex-col gap-4 mt-4">
-      {/* Mock 1 — Breed card */}
-      <div className="bg-muted rounded-xl p-4 w-full pointer-events-none select-none">
-        <p className="text-xs uppercase tracking-widest text-primary/60 mb-2">
-          Conseils race
-        </p>
-        <div className="bg-primary/10 rounded-lg h-12 w-full mb-3" />
-        <p className="text-sm font-semibold mb-2">Berger Australien</p>
-        <div className="bg-muted-foreground/20 rounded h-2 mb-1.5" />
-        <div className="bg-muted-foreground/20 rounded h-2 mb-1.5" />
-        <div className="bg-muted-foreground/20 rounded h-2 mb-1.5" />
-      </div>
-      {/* Mock 2 — Local guide */}
-      <div className="bg-muted rounded-xl p-4 w-full pointer-events-none select-none">
-        <p className="text-xs uppercase tracking-widest text-primary/60 mb-2">
-          Guide du quartier
-        </p>
-        <div className="bg-primary/10 rounded-lg h-12 w-full mb-3" />
-        <p className="text-sm font-semibold mb-2">Lyon 6e — Brotteaux</p>
-        <div className="bg-muted-foreground/20 rounded h-2 mb-1.5" />
-        <div className="bg-muted-foreground/20 rounded h-2 mb-1.5" />
-        <div className="bg-muted-foreground/20 rounded h-2 mb-1.5" />
-        <div className="bg-muted-foreground/20 rounded h-2 mb-1.5" />
-      </div>
-      {/* Mock 3 — Compétences */}
-      <div className="bg-muted rounded-xl p-4 w-full pointer-events-none select-none">
-        <p className="text-xs uppercase tracking-widest text-primary/60 mb-3">
-          Vos compétences sur votre profil
-        </p>
-        <div className="flex flex-wrap gap-2 mb-3">
-          <span className="bg-primary/10 text-primary text-xs font-medium px-3 py-1 rounded-full">Jardinage</span>
-          <span className="bg-primary/10 text-primary text-xs font-medium px-3 py-1 rounded-full">Bricolage</span>
-          <span className="bg-primary/10 text-primary text-xs font-medium px-3 py-1 rounded-full">Soins animaliers</span>
-          <span className="bg-primary/10 text-primary text-xs font-medium px-3 py-1 rounded-full">Cuisine</span>
+    {/* Mocks fiche race + guide local */}
+    <div className="pointer-events-none select-none mt-4 grid grid-cols-2 gap-3">
+      {/* Mock 1 — Fiche race */}
+      <div className="rounded-xl overflow-hidden border border-border shadow-sm bg-card">
+        <div className="bg-primary/10 h-16 w-full flex items-center justify-center">
+          <PawPrint className="w-8 h-8 text-primary/40" />
         </div>
-        <div className="border-t border-border my-2" />
-        <div className="flex items-center justify-between">
-          <span className="text-sm text-foreground/80">Disponible pour aider</span>
-          <div className="w-9 h-5 bg-primary rounded-full relative">
-            <div className="absolute right-1 top-0.5 w-4 h-4 bg-white rounded-full" />
+        <div className="p-3">
+          <p className="text-xs uppercase tracking-widest text-primary/60 mb-1">Fiche race</p>
+          <p className="text-sm font-heading font-semibold mb-2">Berger Australien</p>
+          <div className="flex items-start gap-1.5 mb-1">
+            <div className="w-1 h-1 rounded-full bg-primary mt-1.5 flex-shrink-0" />
+            <p className="text-xs text-muted-foreground">Très énergique — 2h de sortie/jour</p>
+          </div>
+          <div className="flex items-start gap-1.5 mb-1">
+            <div className="w-1 h-1 rounded-full bg-primary mt-1.5 flex-shrink-0" />
+            <p className="text-xs text-muted-foreground">Sensible aux séparations</p>
+          </div>
+          <div className="flex items-start gap-1.5 mb-1">
+            <div className="w-1 h-1 rounded-full bg-primary mt-1.5 flex-shrink-0" />
+            <p className="text-xs text-muted-foreground">Aime les routines stables</p>
           </div>
         </div>
-        <p className="text-xs text-muted-foreground mt-2">
-          Visible sur votre profil public
-        </p>
+      </div>
+
+      {/* Mock 2 — Guide local */}
+      <div className="rounded-xl overflow-hidden border border-border shadow-sm bg-card">
+        <div className="bg-primary/10 h-16 w-full flex items-center justify-center">
+          <MapPin className="w-8 h-8 text-primary/40" />
+        </div>
+        <div className="p-3">
+          <p className="text-xs uppercase tracking-widest text-primary/60 mb-1">Guide du quartier</p>
+          <p className="text-sm font-heading font-semibold mb-2">Lyon 6e — Brotteaux</p>
+          <div className="flex items-center gap-1.5 mb-1">
+            <div className="w-1.5 h-1.5 rounded-full bg-green-500 flex-shrink-0" />
+            <p className="text-xs text-muted-foreground">Parc de la Tête d'Or</p>
+          </div>
+          <div className="flex items-center gap-1.5 mb-1">
+            <div className="w-1.5 h-1.5 rounded-full bg-yellow-500 flex-shrink-0" />
+            <p className="text-xs text-muted-foreground">Balade des berges</p>
+          </div>
+          <div className="flex items-center gap-1.5 mb-1">
+            <div className="w-1.5 h-1.5 rounded-full bg-red-400 flex-shrink-0" />
+            <p className="text-xs text-muted-foreground">Véto Saint-Clair</p>
+          </div>
+          <div className="flex items-center gap-1.5 mb-1">
+            <div className="w-1.5 h-1.5 rounded-full bg-orange-400 flex-shrink-0" />
+            <p className="text-xs text-muted-foreground">Café Sully dog-friendly</p>
+          </div>
+        </div>
       </div>
     </div>
   </div>
