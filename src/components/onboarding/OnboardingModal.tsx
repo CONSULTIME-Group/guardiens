@@ -538,7 +538,24 @@ const OwnerSlide3 = () => (
   </div>
 );
 
-const OwnerSlide4 = () => {
+const OwnerSlide4Entraide = () => (
+  <div className="space-y-4">
+    <h2 className="font-heading text-2xl font-bold text-foreground">
+      Et au-delà des gardes.
+    </h2>
+    <p className="text-base text-foreground/80 leading-relaxed">
+      Proposer une mission d'entraide. Se rendre disponible avec ses
+      compétences. Échanger un coup de main contre un service, un repas, un
+      conseil. L'entraide fonctionne dans les deux sens — propriétaires comme
+      gardiens.
+    </p>
+    <p className="text-base text-foreground/80 leading-relaxed">
+      Jamais d'argent. Juste du concret, entre voisins qui se choisissent.
+    </p>
+  </div>
+);
+
+const OwnerSlide5 = () => {
   const steps = [
     {
       icon: Send,
@@ -585,7 +602,7 @@ const OwnerSlide4 = () => {
   );
 };
 
-const OwnerSlide5 = ({ onComplete }: { onComplete: () => void }) => (
+const OwnerSlide6 = ({ onComplete }: { onComplete: () => void }) => (
   <div className="space-y-4">
     <h2 className="font-heading text-2xl font-bold text-foreground">
       C'est à vous.
