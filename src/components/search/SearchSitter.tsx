@@ -526,7 +526,6 @@ const SearchSitter = () => {
             </h3>
             {item.owner?.is_founder && <FounderBadge size="sm" />}
           </div>
-          </h3>
           <p className="text-sm text-muted-foreground mb-2 flex items-center gap-1">
             <MapPin className="h-3.5 w-3.5" />
             {item.owner?.city || ""}
