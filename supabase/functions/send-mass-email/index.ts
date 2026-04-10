@@ -145,44 +145,41 @@ Deno.serve(async (req) => {
     const html = buildHtml(subject, body, cta_label, cta_url);
     let sent = 0;
     let errors = 0;
-    const BATCH_SIZE = 50;
+    const BATCH_SIZE = 100;
 
-    for (let i = 0; i < recipients.length; i += BATCH_SIZE) {
-      const batch = recipients.slice(i, i + BATCH_SIZE);
-      
-      const promises = batch.map(async (email) => {
-        try {
-          const res = await fetch("https://api.resend.com/emails", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${RESEND_API_KEY}`,
-            },
-            body: JSON.stringify({
-              from: "Guardiens <bonjour@guardiens.fr>",
-              to: [email],
-              subject,
-              html,
-            }),
-          });
-          const resBody = await res.text();
-          if (res.ok) {
-            sent++;
-          } else {
-            console.error(`Failed for ${email}: ${res.status} ${resBody}`);
-            errors++;
-          }
-        } catch (e) {
-          console.error(`Error sending to ${email}:`, e);
-          errors++;
+    const emailObjects = recipients.map((email) => ({
+      from: "Guardiens <bonjour@guardiens.fr>",
+      to: [email],
+      subject,
+      html,
+    }));
+
+    for (let i = 0; i < emailObjects.length; i += BATCH_SIZE) {
+      const batch = emailObjects.slice(i, i + BATCH_SIZE);
+
+      try {
+        const res = await fetch("https://api.resend.com/emails/batch", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${RESEND_API_KEY}`,
+          },
+          body: JSON.stringify(batch),
+        });
+        const resBody = await res.text();
+        if (res.ok) {
+          sent += batch.length;
+        } else {
+          console.error(`Batch failed (${i}-${i + batch.length}): ${res.status} ${resBody}`);
+          errors += batch.length;
         }
-      });
+      } catch (e) {
+        console.error(`Batch error (${i}-${i + batch.length}):`, e);
+        errors += batch.length;
+      }
 
-      await Promise.all(promises);
-
-      // Wait between batches
-      if (i + BATCH_SIZE < recipients.length) {
-        await new Promise((r) => setTimeout(r, 100));
+      if (i + BATCH_SIZE < emailObjects.length) {
+        await new Promise((r) => setTimeout(r, 1000));
       }
     }
 
