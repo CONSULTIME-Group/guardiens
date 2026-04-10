@@ -196,11 +196,11 @@ const OwnerDashboard = () => {
     }
     supabase
       .from("profiles")
-      .select("onboarding_completed")
+      .select("onboarding_completed, onboarding_dismissed_at")
       .eq("id", user.id)
       .single()
       .then(({ data }) => {
-        if (data && !data.onboarding_completed) {
+        if (data && !data.onboarding_completed && !data.onboarding_dismissed_at) {
           setShowOnboardingModal(true);
         }
       });
