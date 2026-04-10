@@ -393,6 +393,27 @@ const Settings = () => {
 
       <Separator />
 
+      {/* Présentation de Guardiens */}
+      <section className="my-8">
+        <h3 className="text-sm font-semibold">Présentation de Guardiens</h3>
+        <p className="text-xs text-muted-foreground mb-3">
+          Revoyez la présentation complète de la plateforme — parcours gardien et propriétaire.
+        </p>
+        <Button
+          variant="outline"
+          className="w-full text-sm"
+          onClick={() => {
+            const params = new URLSearchParams(window.location.search);
+            params.set("tour", "true");
+            window.location.search = params.toString();
+          }}
+        >
+          Revoir la présentation →
+        </Button>
+      </section>
+
+      <Separator />
+
       {/* Suppression compte */}
       <section className="my-8">
         <div className="flex items-center gap-2 mb-4">
