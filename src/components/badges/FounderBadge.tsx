@@ -3,17 +3,22 @@ interface FounderBadgeProps {
 }
 
 const sizeClasses = {
-  sm: 'w-6 h-6',
-  md: 'w-10 h-10',
-  lg: 'w-16 h-16',
+  sm: 'h-5 w-auto drop-shadow-lg object-contain',
+  md: 'h-8 w-auto drop-shadow-lg object-contain',
+  lg: 'h-14 w-auto drop-shadow-lg object-contain',
 } as const;
 
 export default function FounderBadge({ size = 'md' }: FounderBadgeProps) {
   return (
-    <img
-      src="/badges/fondateur.png"
-      alt="Badge Fondateur"
-      className={`${sizeClasses[size]} drop-shadow-lg object-contain`}
-    />
+    <div className="relative group">
+      <img
+        src="/badges/fondateur.png"
+        alt="Badge Fondateur"
+        className={sizeClasses[size]}
+      />
+      <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-foreground text-background text-xs rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
+        Membre Fondateur — inscrit avant le 13 mai 2026
+      </div>
+    </div>
   );
 }
