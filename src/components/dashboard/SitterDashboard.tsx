@@ -253,6 +253,13 @@ const SitterDashboard = () => {
 
   return (
     <div className="space-y-0">
+      <OnboardingModal
+        open={showOnboardingModal}
+        onClose={() => {
+          setShowOnboardingModal(false);
+          setSearchParams({});
+        }}
+      />
       {/* Role activation banner */}
       <div className="px-5 md:px-8 mb-4">
         <RoleActivationBanner userRole={user?.role || "sitter"} />
@@ -304,6 +311,16 @@ const SitterDashboard = () => {
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Revoir la présentation */}
+      <div className="px-5 md:px-8 -mt-4 mb-2">
+        <button
+          onClick={() => setSearchParams({ tour: "true" })}
+          className="text-xs text-muted-foreground underline-offset-4 hover:underline"
+        >
+          Revoir la présentation
+        </button>
       </div>
 
       {/* ═══ 2. BARRE DE STATUT UNIFIÉE ═══ */}
