@@ -162,13 +162,14 @@ const OnboardingModal = ({ open, onClose }: OnboardingModalProps) => {
           {slide === 3 && viewingRole === "gardien" && <SitterSlide3 />}
           {slide === 3 && viewingRole === "proprio" && <OwnerSlide3 />}
           {slide === 4 && viewingRole === "gardien" && <SitterSlide4 />}
-          {slide === 4 && viewingRole === "proprio" && <OwnerSlide4 />}
+          {slide === 4 && viewingRole === "proprio" && <OwnerSlide4Entraide />}
           {slide === 5 && viewingRole === "gardien" && <SitterSlide5 />}
-          {slide === 5 && viewingRole === "proprio" && (
-            <OwnerSlide5 onComplete={() => completeOnboarding("/sits/create")} />
-          )}
+          {slide === 5 && viewingRole === "proprio" && <OwnerSlide5 />}
           {slide === 6 && viewingRole === "gardien" && (
             <SitterSlide6 onComplete={() => completeOnboarding("/recherche")} />
+          )}
+          {slide === 6 && viewingRole === "proprio" && (
+            <OwnerSlide6 onComplete={() => completeOnboarding("/sits/create")} />
           )}
         </div>
 
