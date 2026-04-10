@@ -54,6 +54,7 @@ const adminNavGroups: NavGroup[] = [
       { to: "/admin/reviews", icon: Star, label: "Avis" },
       { to: "/admin/reports", icon: Flag, label: "Signalements", badgeKey: "reports" },
       { to: "/admin/contact-messages", icon: MessageSquare, label: "Messages contact", badgeKey: "contactMessages" },
+      { to: "/admin/envois-groupes", icon: Mail, label: "Envois groupés" },
     ],
   },
   {

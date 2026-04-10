@@ -70,6 +70,7 @@ import AdminSettings from "./pages/admin/AdminSettings";
 import AdminContactMessages from "./pages/admin/AdminContactMessages";
 import AdminSEO from "./pages/admin/AdminSEO";
 import AdminSkills from "./pages/admin/AdminSkills";
+import AdminMassEmails from "./pages/admin/AdminMassEmails";
 
 import EmergencySitter from "./pages/EmergencySitter";
 import { AccordDeGardePreview as TestAccord } from "./components/gardes/AccordDeGarde";
@@ -188,6 +189,7 @@ const AppRoutes = () => (
       <Route path="/admin/contact-messages" element={<AdminContactMessages />} />
       <Route path="/admin/seo" element={<AdminSEO />} />
       <Route path="/admin/skills" element={<AdminSkills />} />
+      <Route path="/admin/envois-groupes" element={<AdminMassEmails />} />
     </Route>
     {/* App routes */}
     <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
