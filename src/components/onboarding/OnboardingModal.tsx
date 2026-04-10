@@ -5,7 +5,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { X, Send, MessageCircle, CheckCircle, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-type OnboardingRole = "gardien" | "proprio" | "both";
 type ActiveTab = "gardien" | "proprio";
 
 interface OnboardingModalProps {
@@ -19,7 +18,6 @@ const OnboardingModal = ({ open, onClose }: OnboardingModalProps) => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [slide, setSlide] = useState(0);
-  const [currentRole, setCurrentRole] = useState<OnboardingRole | null>(null);
   const [activeTab, setActiveTab] = useState<ActiveTab>("gardien");
   const [completionRate, setCompletionRate] = useState(0);
 
@@ -36,21 +34,7 @@ const OnboardingModal = ({ open, onClose }: OnboardingModalProps) => {
       });
   }, [user]);
 
-  // Pre-select role from profile
-  useEffect(() => {
-    if (!user) return;
-    const roleMap: Record<string, OnboardingRole> = {
-      sitter: "gardien",
-      owner: "proprio",
-      both: "both",
-    };
-    if (user.role && roleMap[user.role]) {
-      setCurrentRole(roleMap[user.role]);
-      if (roleMap[user.role] === "both") {
-        setActiveTab("gardien");
-      }
-    }
-  }, [user]);
+  // No longer pre-select role — toggle is always visible
 
   // Reset slide on open
   useEffect(() => {
@@ -61,7 +45,7 @@ const OnboardingModal = ({ open, onClose }: OnboardingModalProps) => {
   useEffect(() => {
     if (!open) return;
     const handler = (e: KeyboardEvent) => {
-      if (e.key === "ArrowRight" && slide < TOTAL_SLIDES - 1 && (slide === 0 ? currentRole !== null : true)) {
+      if (e.key === "ArrowRight" && slide < TOTAL_SLIDES - 1) {
         setSlide((s) => Math.min(s + 1, TOTAL_SLIDES - 1));
       }
       if (e.key === "ArrowLeft" && slide > 0) {
@@ -70,7 +54,7 @@ const OnboardingModal = ({ open, onClose }: OnboardingModalProps) => {
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [open, slide, currentRole]);
+  }, [open, slide]);
 
   const dismiss = useCallback(async () => {
     if (user) {
@@ -82,23 +66,7 @@ const OnboardingModal = ({ open, onClose }: OnboardingModalProps) => {
     onClose();
   }, [user, onClose]);
 
-  const selectRole = async (role: OnboardingRole) => {
-    setCurrentRole(role);
-    if (role === "both") setActiveTab("gardien");
-
-    if (user) {
-      const dbRole = role === "gardien" ? "sitter" : role === "proprio" ? "owner" : "both";
-      const { data } = await supabase
-        .from("profiles")
-        .select("role")
-        .eq("id", user.id)
-        .single();
-      if (!data?.role || data.role === "sitter") {
-        await supabase.from("profiles").update({ role: dbRole }).eq("id", user.id);
-      }
-    }
-    setSlide(1);
-  };
+  // No more selectRole — role selection removed from slide 0
 
   const completeOnboarding = async (destination: string) => {
     if (user) {
@@ -113,8 +81,7 @@ const OnboardingModal = ({ open, onClose }: OnboardingModalProps) => {
 
   if (!open) return null;
 
-  const viewingRole: ActiveTab =
-    currentRole === "both" ? activeTab : currentRole === "proprio" ? "proprio" : "gardien";
+  const viewingRole: ActiveTab = activeTab;
 
   const slideCount = TOTAL_SLIDES - 1;
 
@@ -128,33 +95,31 @@ const OnboardingModal = ({ open, onClose }: OnboardingModalProps) => {
           <X className="h-5 w-5" />
         </button>
 
-        {slide > 0 && currentRole === "both" && (
-          <div className="flex justify-center gap-1 mb-6">
-            <button
-              onClick={() => setActiveTab("gardien")}
-              className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
-                activeTab === "gardien"
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-muted text-muted-foreground"
-              }`}
-            >
-              Parcours gardien
-            </button>
-            <button
-              onClick={() => setActiveTab("proprio")}
-              className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
-                activeTab === "proprio"
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-muted text-muted-foreground"
-              }`}
-            >
-              Parcours propriétaire
-            </button>
-          </div>
-        )}
+        <div className="flex justify-center gap-1 mb-6">
+          <button
+            onClick={() => setActiveTab("gardien")}
+            className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
+              activeTab === "gardien"
+                ? "bg-primary text-primary-foreground"
+                : "bg-muted text-muted-foreground"
+            }`}
+          >
+            Parcours gardien
+          </button>
+          <button
+            onClick={() => setActiveTab("proprio")}
+            className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
+              activeTab === "proprio"
+                ? "bg-primary text-primary-foreground"
+                : "bg-muted text-muted-foreground"
+            }`}
+          >
+            Parcours propriétaire
+          </button>
+        </div>
 
         <div className="min-h-[340px]">
-          {slide === 0 && <Slide0 currentRole={currentRole} onSelect={selectRole} />}
+          {slide === 0 && <Slide0 />}
           {slide === 1 && viewingRole === "gardien" && <SitterSlide1 />}
           {slide === 1 && viewingRole === "proprio" && <OwnerSlide1 />}
           {slide === 2 && viewingRole === "gardien" && <SitterSlide2 completionRate={completionRate} />}
@@ -204,7 +169,7 @@ const OnboardingModal = ({ open, onClose }: OnboardingModalProps) => {
                 Précédent
               </Button>
             )}
-            {slide > 0 && slide < TOTAL_SLIDES - 1 && (
+            {slide < TOTAL_SLIDES - 1 && (
               <Button size="sm" onClick={() => setSlide((s) => s + 1)}>
                 Suivant
               </Button>
@@ -216,49 +181,20 @@ const OnboardingModal = ({ open, onClose }: OnboardingModalProps) => {
   );
 };
 
-/* ─── SLIDE 0 — Role selection ─── */
-const Slide0 = ({
-  currentRole,
-  onSelect,
-}: {
-  currentRole: OnboardingRole | null;
-  onSelect: (r: OnboardingRole) => void;
-}) => {
-  const options: { role: OnboardingRole; label: string }[] = [
-    { role: "gardien", label: "Garder des maisons et des animaux" },
-    { role: "proprio", label: "Trouver quelqu\u2019un de confiance pour ma maison" },
-    { role: "both", label: "Les deux" },
-  ];
-
-  return (
-    <div className="space-y-6">
-      <h2 className="font-heading text-2xl font-bold text-foreground">
-        Vous êtes ici pour…
-      </h2>
-      <div className="flex flex-col gap-3">
-        {options.map((o) => (
-          <button
-            key={o.role}
-            onClick={() => onSelect(o.role)}
-            className={`w-full text-left px-5 py-4 rounded-xl border text-sm font-medium transition-colors ${
-              currentRole === o.role
-                ? "border-primary bg-primary/5 text-foreground"
-                : "border-border bg-card text-foreground hover:border-primary/40"
-            }`}
-          >
-            {o.label}
-          </button>
-        ))}
-      </div>
-      {currentRole === "both" && (
-        <p className="text-xs text-muted-foreground text-center mt-2">
-          Pas de panique — vous pourrez revoir chaque parcours quand vous voulez
-          via le bouton dédié sur votre tableau de bord.
-        </p>
-      )}
-    </div>
-  );
-};
+/* ─── SLIDE 0 — Welcome ─── */
+const Slide0 = () => (
+  <div className="space-y-6">
+    <h2 className="font-heading text-2xl font-bold text-foreground">
+      Bienvenue sur Guardiens.
+    </h2>
+    <p className="text-base text-foreground/80 leading-relaxed mb-6">
+      Ici on garde des maisons, on accompagne des animaux, on échange des
+      services entre gens du coin. Choisissez le parcours que vous voulez
+      découvrir — vous pouvez changer à tout moment grâce au toggle en haut de
+      chaque page.
+    </p>
+  </div>
+);
 
 /* ─── SITTER SLIDES ─── */
 const SitterSlide1 = () => (
@@ -544,11 +480,41 @@ const OwnerSlide4Entraide = () => (
       Et au-delà des gardes.
     </h2>
     <p className="text-base text-foreground/80 leading-relaxed">
-      Vous n'êtes pas que bénéficiaire. Votre jardin, vos compétences, un
-      service que vous pouvez rendre — tout ça a de la valeur pour les gens du
-      coin. Proposez une mission, mettez une compétence en avant, rendez ce que
-      vous recevez.
+      L'échange ne s'arrête pas à la porte d'entrée. Votre jardin à entretenir,
+      une compétence à partager, un service à rendre — tout ça a de la valeur
+      pour les gens du coin. Vous proposez une mission, vous mettez une
+      compétence en avant sur votre profil. Les gardiens font de même. C'est
+      dans les deux sens, toujours.
     </p>
+    <div className="bg-muted rounded-xl p-4 w-full pointer-events-none select-none mt-4">
+      <p className="text-xs uppercase tracking-widest text-primary/60 mb-3">
+        Échanges autour de vous
+      </p>
+      <div className="flex items-center gap-3 py-2 border-b border-border">
+        <div className="rounded-full bg-primary/10 h-8 w-8 flex-shrink-0" />
+        <div>
+          <p className="text-sm font-medium">Taille de haie proposée</p>
+          <p className="text-xs text-muted-foreground">Par un gardien · Écully</p>
+        </div>
+      </div>
+      <div className="flex items-center gap-3 py-2 border-b border-border">
+        <div className="rounded-full bg-primary/10 h-8 w-8 flex-shrink-0" />
+        <div>
+          <p className="text-sm font-medium">Relève du courrier</p>
+          <p className="text-xs text-muted-foreground">Proposée par vous · Ce mois-ci</p>
+        </div>
+      </div>
+      <div className="flex items-center gap-3 py-2">
+        <div className="rounded-full bg-primary/10 h-8 w-8 flex-shrink-0" />
+        <div>
+          <p className="text-sm font-medium">Conseils jardinage</p>
+          <p className="text-xs text-muted-foreground">Compétence partagée · Lyon 5e</p>
+        </div>
+      </div>
+      <p className="text-xs text-muted-foreground text-center mt-3">
+        L'échange se décide entre vous. Jamais d'argent.
+      </p>
+    </div>
   </div>
 );
 
