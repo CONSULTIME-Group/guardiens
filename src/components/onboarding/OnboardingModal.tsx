@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import { X, Send, MessageCircle, CheckCircle, Star, User, Circle, PawPrint, MapPin, Leaf, ShieldCheck, Home, Calendar, Plus } from "lucide-react";
+import { X, Send, MessageCircle, CheckCircle, Star, User, Circle, PawPrint, MapPin, Leaf, ShieldCheck, Home, Calendar, Plus, Zap, Activity, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 type ActiveTab = "gardien" | "proprio";
@@ -754,18 +754,18 @@ const OwnerSlide1 = () => (
 const OwnerSlide2 = ({ completionRate }: { completionRate: number }) => (
   <div className="space-y-4">
     <h2 className="font-heading text-2xl font-bold text-foreground">
-      Vos animaux sur votre profil.
+      Vos animaux, présentés une fois.
       <br />
-      Les conseils, automatiquement.
+      Compris à chaque garde.
     </h2>
     <p className="text-base text-foreground/80 leading-relaxed">
-      Renseignez la race de vos animaux une seule fois. Guardiens génère
-      automatiquement leur fiche conseil — caractère, besoins, habitudes —
-      visible par tous les gardiens qui postulent chez vous.
+      Renseignez Rex, Resa, leurs habitudes. Guardiens génère
+      automatiquement leur fiche race — caractère, besoins,
+      ce qui les rassure. Le gardien la lit avant même de vous
+      rencontrer.
     </p>
     <p className="text-base text-foreground/80 leading-relaxed">
-      Ils arrivent en sachant à qui ils ont affaire. Vous partez en sachant
-      qu'ils savent.
+      Vous n'avez pas à tout réexpliquer. Il arrive en sachant.
     </p>
     <div className="mt-4">
       <div className="w-full bg-muted rounded-full h-2">
@@ -782,6 +782,83 @@ const OwnerSlide2 = ({ completionRate }: { completionRate: number }) => (
           Quelques minutes suffisent pour recevoir vos premières candidatures.
         </p>
       )}
+    </div>
+
+    <div className="pointer-events-none select-none mt-4 rounded-xl overflow-hidden border border-border shadow-sm bg-card">
+      {/* Header animal */}
+      <div className="flex items-center gap-3 p-3 border-b border-border">
+        <div className="relative">
+          <img
+            src="https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=80&q=80"
+            alt=""
+            className="w-10 h-10 rounded-full object-cover"
+          />
+          <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-primary rounded-full border-2 border-card flex items-center justify-center">
+            <CheckCircle className="w-2.5 h-2.5 text-primary-foreground" />
+          </div>
+        </div>
+        <div>
+          <p className="text-sm font-semibold">Rex</p>
+          <p className="text-xs text-muted-foreground">Chien · Malinois · 3 ans</p>
+        </div>
+        <div className="ml-auto bg-primary/10 text-primary text-xs px-2 py-1 rounded-full">
+          Garde confirmée ✓
+        </div>
+      </div>
+
+      {/* Fiche race auto-générée */}
+      <div className="p-3">
+        <div className="flex items-center gap-2 mb-3">
+          <div className="w-1.5 h-1.5 rounded-full bg-primary" />
+          <p className="text-xs font-semibold uppercase tracking-widest text-primary/70">
+            Fiche race — Malinois · générée automatiquement
+          </p>
+        </div>
+
+        <div className="flex items-start gap-2 mb-2">
+          <Zap className="w-3.5 h-3.5 text-primary flex-shrink-0 mt-0.5" />
+          <div>
+            <p className="text-xs font-semibold">Caractère</p>
+            <p className="text-xs text-muted-foreground">
+              Très énergique, loyal, nécessite une stimulation mentale et physique constante.
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-start gap-2 mb-2">
+          <Activity className="w-3.5 h-3.5 text-primary flex-shrink-0 mt-0.5" />
+          <div>
+            <p className="text-xs font-semibold">Exercice</p>
+            <p className="text-xs text-muted-foreground">
+              Minimum 2h d'activité intense par jour. Excelle dans les longues balades dynamiques.
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-start gap-2">
+          <Heart className="w-3.5 h-3.5 text-primary flex-shrink-0 mt-0.5" />
+          <div>
+            <p className="text-xs font-semibold">Ce qui le rassure</p>
+            <p className="text-xs text-muted-foreground">
+              Les routines stables. Être occupé. Un gardien calme et présent.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Second animal */}
+      <div className="border-t border-border p-3 flex items-center gap-3">
+        <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
+          <p className="text-xs font-bold text-primary">R</p>
+        </div>
+        <div>
+          <p className="text-xs font-semibold">Resa</p>
+          <p className="text-xs text-muted-foreground">Chat · Main Coon · 4 ans</p>
+        </div>
+        <div className="ml-auto bg-primary/10 text-primary text-xs px-2 py-1 rounded-full">
+          Fiche race prête ✓
+        </div>
+      </div>
     </div>
   </div>
 );
