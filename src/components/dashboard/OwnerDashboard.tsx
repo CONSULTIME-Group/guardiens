@@ -308,7 +308,7 @@ const OwnerDashboard = () => {
               <h1 className="text-2xl md:text-4xl font-heading font-bold text-white leading-tight mb-1">
                 Bonjour{user?.firstName ? `, ${capitalize(user.firstName)}` : ""} !
               </h1>
-              {user?.isFounder && <FounderBadge size="md" />}
+              {user?.isFounder && <FounderBadge size="sm" className="mix-blend-multiply" />}
             </div>
             <p className="text-sm text-white/75 font-sans">
               {getSubtitle()}
