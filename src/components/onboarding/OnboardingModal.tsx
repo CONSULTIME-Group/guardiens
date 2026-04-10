@@ -134,7 +134,7 @@ const OnboardingModal = ({ open, onClose }: OnboardingModalProps) => {
             <SitterSlide6 onComplete={() => completeOnboarding("/recherche")} />
           )}
           {slide === 6 && viewingRole === "proprio" && (
-            <OwnerSlide6 onComplete={() => completeOnboarding("/sits/create")} />
+            <OwnerSlide6 onComplete={() => completeOnboarding("/mes-annonces")} />
           )}
         </div>
 
@@ -427,12 +427,19 @@ const OwnerSlide1 = () => (
       présentation sur ordinateur.
     </p>
     <h2 className="font-heading text-2xl font-bold text-foreground">
-      Bienvenue chez vous.
+      Bienvenue parmi les propriétaires.
     </h2>
     <p className="text-base text-foreground/80 leading-relaxed">
-      Vous cherchez quelqu'un de confiance pour veiller sur votre maison et vos
-      animaux. Ici, vous trouverez des gardiens passionnés, vérifiés, prêts à
-      prendre soin de ce qui compte pour vous.
+      Votre maison. Vos animaux. Leurs habitudes, leurs coins préférés, ce qui
+      les rassure quand vous n'êtes pas là.
+    </p>
+    <p className="text-base text-foreground/80 leading-relaxed">
+      Guardiens met en relation des propriétaires avec des gens du coin qui se
+      choisissent — des personnes proches, que vous avez rencontrées avant de
+      confier vos clés.
+    </p>
+    <p className="text-base text-foreground/80 leading-relaxed">
+      Vous partez. Eux, ils veillent. Et vos animaux restent chez eux.
     </p>
   </div>
 );
@@ -440,11 +447,18 @@ const OwnerSlide1 = () => (
 const OwnerSlide2 = ({ completionRate }: { completionRate: number }) => (
   <div className="space-y-4">
     <h2 className="font-heading text-2xl font-bold text-foreground">
-      Votre profil rassure les gardiens.
+      Vos animaux sur votre profil.
+      <br />
+      Les conseils, automatiquement.
     </h2>
     <p className="text-base text-foreground/80 leading-relaxed">
-      Décrivez votre logement, présentez vos animaux. Plus votre profil est
-      complet, plus les gardiens auront envie de postuler.
+      Renseignez la race de vos animaux une seule fois. Guardiens génère
+      automatiquement leur fiche conseil — caractère, besoins, habitudes —
+      visible par tous les gardiens qui postulent chez vous.
+    </p>
+    <p className="text-base text-foreground/80 leading-relaxed">
+      Ils arrivent en sachant à qui ils ont affaire. Vous partez en sachant
+      qu'ils savent.
     </p>
     <div className="mt-4">
       <div className="w-full bg-muted rounded-full h-2">
@@ -468,12 +482,18 @@ const OwnerSlide2 = ({ completionRate }: { completionRate: number }) => (
 const OwnerSlide3 = () => (
   <div className="space-y-4">
     <h2 className="font-heading text-2xl font-bold text-foreground">
-      Tout est prévu pour faciliter la garde.
+      Votre guide de la maison.
+      <br />
+      Prêt à la confirmation.
     </h2>
     <p className="text-base text-foreground/80 leading-relaxed">
-      Créez un guide de la maison pour que le gardien sache tout : les clés, le
-      vétérinaire, les habitudes de vos animaux. Et les petites missions
-      d'entraide permettent de rester connecté avec votre voisinage.
+      Contacts d'urgence, habitudes des animaux, code wifi, adresses utiles du
+      quartier. Tout se génère automatiquement quand vous confirmez une garde.
+    </p>
+    <p className="text-base text-foreground/80 leading-relaxed">
+      Le gardien reçoit tout. Vous n'avez rien à réexpliquer à chaque fois. Et
+      le guide du quartier — parcs, vétos, balades — est préparé pour eux dès
+      leur arrivée.
     </p>
     <div className="flex flex-col gap-4 md:flex-row mt-4">
       <div className="bg-muted rounded-xl p-4 w-full pointer-events-none select-none">
@@ -548,29 +568,29 @@ const OwnerSlide5 = () => {
     {
       icon: Send,
       title: "Vous publiez une annonce",
-      desc: "Décrivez votre besoin : dates, animaux, logement.",
+      desc: "Les dates, vos animaux, votre logement. Les gardiens proches reçoivent une notification.",
     },
     {
       icon: MessageCircle,
       title: "Vous recevez des candidatures",
-      desc: "Les gardiens postulent. Vous échangez, vous choisissez.",
+      desc: "Photo, note, écussons, message. Vous choisissez à votre rythme.",
     },
     {
       icon: CheckCircle,
-      title: "La garde est confirmée",
-      desc: "Un accord de garde est généré automatiquement. Chacun valide de son côté.",
+      title: "Vous confirmez",
+      desc: "Un accord de garde est généré automatiquement. Chacun valide de son côté avant le départ.",
     },
     {
       icon: Star,
       title: "Vous vous évaluez mutuellement",
-      desc: "Un avis croisé, des écussons. Une relation qui dure.",
+      desc: "Un avis croisé, des écussons choisis. Une relation qui peut durer.",
     },
   ];
 
   return (
     <div className="space-y-4">
       <h2 className="font-heading text-2xl font-bold text-foreground">
-        Publier une garde, c'est simple.
+        Une garde, c'est simple.
       </h2>
       <div className="flex flex-col gap-4 mt-2">
         {steps.map((s, i) => {
@@ -596,8 +616,11 @@ const OwnerSlide6 = ({ onComplete }: { onComplete: () => void }) => (
       C'est à vous.
     </h2>
     <p className="text-base text-foreground/80 leading-relaxed">
-      Publiez votre première annonce et recevez des candidatures en quelques
-      heures.
+      Publiez votre première annonce. Les gardiens proches de chez vous sont
+      déjà là.
+    </p>
+    <p className="text-base text-foreground/80 leading-relaxed">
+      Vous partez. Eux, ils veillent.
     </p>
     <Button className="w-full mt-4" onClick={onComplete}>
       Publier une annonce →
