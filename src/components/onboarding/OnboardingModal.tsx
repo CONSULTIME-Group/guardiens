@@ -329,6 +329,31 @@ const SitterSlide4 = () => (
       Entre des gens du coin qui se choisissent. Jamais d'argent. Juste du
       concret.
     </p>
+    <div className="bg-muted rounded-xl p-4 w-full pointer-events-none select-none mt-4">
+      <p className="text-xs uppercase tracking-widest text-primary/60 mb-3">Petites missions d'entraide</p>
+      <div className="flex items-center gap-3 py-2 border-b border-border">
+        <div className="rounded-full bg-primary/10 h-8 w-8 flex-shrink-0" />
+        <div>
+          <p className="text-sm font-medium">Promener un chien</p>
+          <p className="text-xs text-muted-foreground">Lyon 6e · Ce soir</p>
+        </div>
+      </div>
+      <div className="flex items-center gap-3 py-2 border-b border-border">
+        <div className="rounded-full bg-primary/10 h-8 w-8 flex-shrink-0" />
+        <div>
+          <p className="text-sm font-medium">Arroser le potager</p>
+          <p className="text-xs text-muted-foreground">Caluire · Ce week-end</p>
+        </div>
+      </div>
+      <div className="flex items-center gap-3 py-2">
+        <div className="rounded-full bg-primary/10 h-8 w-8 flex-shrink-0" />
+        <div>
+          <p className="text-sm font-medium">Conseils véto</p>
+          <p className="text-xs text-muted-foreground">Grenoble · Flexible</p>
+        </div>
+      </div>
+      <p className="text-xs text-muted-foreground text-center mt-3">L'échange se décide entre vous. Jamais d'argent.</p>
+    </div>
   </div>
 );
 
