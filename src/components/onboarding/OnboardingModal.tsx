@@ -621,7 +621,8 @@ const SitterSlide5 = () => {
         <div className="grid grid-cols-2 gap-0 divide-x divide-border">
           {/* Card 1 */}
           <div className="p-3">
-            <div className="rounded-lg overflow-hidden h-20 bg-primary/10 mb-2 relative">
+            <div className="rounded-lg overflow-hidden h-20 mb-2 relative">
+              <img src="https://images.unsplash.com/photo-1568702846914-96b305d2aaeb?w=400&q=80" alt="" className="w-full h-full object-cover" />
               <div className="absolute top-1.5 left-1.5 bg-white/90 text-xs px-1.5 py-0.5 rounded-full flex items-center gap-1">
                 <ShieldCheck className="w-3 h-3 text-primary" />
                 <span>Vérifié</span>
@@ -642,7 +643,8 @@ const SitterSlide5 = () => {
 
           {/* Card 2 */}
           <div className="p-3">
-            <div className="rounded-lg overflow-hidden h-20 bg-primary/15 mb-2 relative">
+            <div className="rounded-lg overflow-hidden h-20 mb-2 relative">
+              <img src="https://images.unsplash.com/photo-1601758124510-52d02ddb7cbd?w=400&q=80" alt="" className="w-full h-full object-cover" />
               <div className="absolute top-1.5 left-1.5 bg-white/90 text-xs px-1.5 py-0.5 rounded-full flex items-center gap-1">
                 <ShieldCheck className="w-3 h-3 text-primary" />
                 <span>Vérifié</span>
