@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import FounderBadge from "@/components/badges/FounderBadge";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSearchParams } from "react-router-dom";
@@ -277,9 +278,12 @@ const SitterDashboard = () => {
             <p className="text-xs uppercase tracking-[3px] text-white/60 font-sans mb-1">
               Espace gardien
             </p>
-            <h1 className="text-2xl md:text-4xl font-heading font-bold text-white leading-tight mb-1">
-              Bonjour{user?.firstName ? `, ${capitalize(user.firstName)}` : ""} !
-            </h1>
+            <div className="flex items-center gap-3">
+              <h1 className="text-2xl md:text-4xl font-heading font-bold text-white leading-tight mb-1">
+                Bonjour{user?.firstName ? `, ${capitalize(user.firstName)}` : ""} !
+              </h1>
+              {user?.isFounder && <FounderBadge size="md" />}
+            </div>
             <p className="text-sm text-white/75 font-sans">
               {subtitle}
             </p>

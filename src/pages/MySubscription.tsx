@@ -6,6 +6,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { BadgeSceauLarge } from "@/components/badges/BadgeSceauLarge";
+import FounderBadge from "@/components/badges/FounderBadge";
 import { Helmet } from "react-helmet-async";
 
 import {
@@ -782,7 +783,7 @@ const MySubscription = () => {
           </div>
           {isFounder && (
             <div className="bg-amber-50 border border-amber-200 rounded-lg px-4 py-3 text-sm text-foreground/70 text-center flex items-center justify-center gap-2 font-body">
-              <Star className="h-4 w-4 text-amber-500" fill="currentColor" /> Badge Fondateur permanent
+              <FounderBadge size="lg" /> Badge Fondateur permanent
             </div>
           )}
           {showReferral && <ReferralSection referralCode={profile?.referral_code} userId={user!.id} />}
