@@ -213,12 +213,17 @@ function buildDigestEmail(
   sits: any[],
   missions: any[]
 ): string {
+  const speciesLabel: Record<string, string> = { dog: "Chien", cat: "Chat", bird: "Oiseau", fish: "Poisson", reptile: "Reptile", rodent: "Rongeur", other: "Autre" };
+
   const sitsHtml = sits.slice(0, 10).map((s: any) => {
     const photoUrl = s.properties?.photos?.[0] || null;
     const city = (s.profiles as any)?.city || "";
     const pets: any[] = s.properties?.pets || [];
     const petSummary = pets.length > 0
-      ? pets.map((p: any) => `${p.name} (${p.species === 'dog' ? '🐕' : p.species === 'cat' ? '🐱' : '🐾'})`).join(", ")
+      ? pets.map((p: any) => p.name).join(", ")
+      : "";
+    const petSpecies = pets.length > 0
+      ? [...new Set(pets.map((p: any) => speciesLabel[p.species] || p.species))].join(", ")
       : "";
     const propertyType = s.properties?.type || "";
     const typeLabel: Record<string, string> = { apartment: "Appartement", house: "Maison", farm: "Ferme", other: "Autre" };
@@ -229,35 +234,40 @@ function buildDigestEmail(
       const start = new Date(s.start_date);
       const end = new Date(s.end_date);
       const days = Math.round((end.getTime() - start.getTime()) / 86400000);
-      dateStr = `${start.toLocaleDateString("fr-FR", { day: "numeric", month: "short" })} → ${end.toLocaleDateString("fr-FR", { day: "numeric", month: "short" })} (${days}j)`;
+      dateStr = `Du ${start.toLocaleDateString("fr-FR", { day: "numeric", month: "long" })} au ${end.toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}`;
+      if (days > 0) dateStr += `<br/><span style="color:#9ca3af;font-size:12px;">${days} jour${days > 1 ? "s" : ""}</span>`;
     } else if (s.start_date) {
-      dateStr = new Date(s.start_date).toLocaleDateString("fr-FR");
+      dateStr = `À partir du ${new Date(s.start_date).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}`;
     }
 
-    const imageBlock = photoUrl
-      ? `<tr><td style="padding:0;">
+    const imageCol = photoUrl
+      ? `<td width="180" valign="top" style="padding:0;">
            <a href="https://guardiens.fr/sits/${s.id}" style="text-decoration:none;">
-             <img src="${photoUrl}" width="520" height="200" alt="" style="display:block;width:100%;height:200px;object-fit:cover;border:0;border-radius:8px 8px 0 0;" />
+             <img src="${photoUrl}" width="180" height="160" alt="" style="display:block;width:180px;height:160px;object-fit:cover;border:0;border-radius:6px;" />
            </a>
-         </td></tr>`
+         </td>
+         <td width="16" style="font-size:0;line-height:0;">&nbsp;</td>`
       : '';
 
-    const metaParts = [city, typeLabel[propertyType] || ""].filter(Boolean).join(" · ");
-
     return `
-    <tr><td style="padding:12px 0;">
-      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border:1px solid #e5e7eb;border-radius:8px;overflow:hidden;">
-        ${imageBlock}
-        <tr><td style="padding:14px 16px;">
-          <a href="https://guardiens.fr/sits/${s.id}" style="text-decoration:none;">
-            <strong style="color:#1A3C34;font-size:16px;line-height:1.3;">${s.title}</strong>
-          </a>
-          ${s.is_urgent ? `<span style="display:inline-block;margin-left:8px;background:#fef2f2;color:#dc2626;font-size:12px;padding:2px 8px;border-radius:4px;font-weight:600;">Urgent</span>` : ""}
-          <br/>
-          <span style="color:#6b7280;font-size:13px;">📍 ${metaParts}</span><br/>
-          <span style="color:#6b7280;font-size:13px;">📅 ${dateStr}</span>
-          ${petSummary ? `<br/><span style="color:#6b7280;font-size:13px;">🐾 ${petSummary}</span>` : ""}
-        </td></tr>
+    <tr><td style="padding:12px 0;border-bottom:1px solid #f0ece4;">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          ${imageCol}
+          <td valign="top" style="padding:${photoUrl ? '4px 0' : '0'};">
+            <a href="https://guardiens.fr/sits/${s.id}" style="text-decoration:none;">
+              <strong style="color:#1A3C34;font-size:16px;line-height:1.3;">${city}</strong>
+            </a>
+            ${s.is_urgent ? `<br/><span style="display:inline-block;margin-top:4px;background:#fef2f2;color:#dc2626;font-size:11px;padding:2px 8px;border-radius:4px;font-weight:600;">⚡ Urgent</span>` : ""}
+            <br/>
+            <span style="color:#6b7280;font-size:13px;line-height:1.5;">
+              ${typeLabel[propertyType] ? typeLabel[propertyType] : ""}
+            </span>
+            <br/>
+            <span style="color:#6b7280;font-size:13px;line-height:1.5;">${dateStr}</span>
+            ${petSpecies ? `<br/><span style="font-weight:600;color:#1A3C34;font-size:13px;margin-top:4px;display:inline-block;">${petSpecies}</span>` : ""}
+          </td>
+        </tr>
       </table>
     </td></tr>`;
   }).join("");
