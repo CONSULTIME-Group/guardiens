@@ -3626,6 +3626,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_profile_ready_for_action: {
+        Args: { p_user_id?: string }
+        Returns: boolean
+      }
       move_to_dlq: {
         Args: {
           dlq_name: string
