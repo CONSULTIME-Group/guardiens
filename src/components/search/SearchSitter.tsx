@@ -123,9 +123,10 @@ const SearchSitter = () => {
     }, 250);
   };
 
-  const handleCitySelect = (name: string) => {
+  const handleCitySelect = (name: string, postalCode?: string) => {
     setCityInput(name);
     setCity(name);
+    setCityPostalCode(postalCode ?? null);
     setCitySuggestions([]);
     setEditingCity(false);
   };
