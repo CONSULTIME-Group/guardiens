@@ -294,6 +294,16 @@ const OwnerDashboard = () => {
         onClose={() => {
           setShowOnboardingModal(false);
           setSearchParams({});
+          if (!minimalCompleted) {
+            setShowMinimal(true);
+          }
+        }}
+      />
+      <MinimalOnboardingDialog
+        open={showMinimal}
+        onComplete={() => {
+          setShowMinimal(false);
+          setMinimalCompleted(true);
         }}
       />
       {/* Role activation banner */}
