@@ -142,6 +142,7 @@ const AppRoutes = () => (
     <Route path="/register" element={<PublicOnlyRoute><Register /></PublicOnlyRoute>} />
     <Route path="/forgot-password" element={<PublicOnlyRoute><ForgotPassword /></PublicOnlyRoute>} />
     <Route path="/reset-password" element={<ResetPassword />} />
+    <Route path="/onboarding" element={<ProtectedRoute><OnboardingPage /></ProtectedRoute>} />
     <Route path="/actualites" element={<News />} />
     <Route path="/actualites/:slug" element={<ArticleDetail />} />
     <Route path="/blog" element={<Navigate to="/actualites" replace />} />
