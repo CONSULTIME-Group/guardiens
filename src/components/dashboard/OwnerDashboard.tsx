@@ -46,6 +46,8 @@ const OwnerDashboard = () => {
   const [sits, setSits] = useState<any[]>([]);
   const { data: userBadges } = useUserBadges(user?.id);
   const [showOnboardingModal, setShowOnboardingModal] = useState(false);
+  const [showMinimal, setShowMinimal] = useState(false);
+  const [minimalCompleted, setMinimalCompleted] = useState(true);
 
   const PROPRIO_SPECIAL_IDS = ['fondateur', 'id_verifiee', 'courant_passe'];
 

@@ -35,6 +35,8 @@ const SitterDashboard = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const { hasAccess: hasSubscription } = useSubscriptionAccess();
   const [showOnboardingModal, setShowOnboardingModal] = useState(false);
+  const [showMinimal, setShowMinimal] = useState(false);
+  const [minimalCompleted, setMinimalCompleted] = useState(true);
 
   const { data: reputation } = useProfileReputation(user?.id);
   const { data: userBadges } = useUserBadges(user?.id);
