@@ -13,6 +13,7 @@ import PostalCodeCityFields from "@/components/profile/PostalCodeCityFields";
 const AVATAR_BUCKET = "avatars";
 
 const OnboardingPage = () => {
+  const { user, refreshProfile } = useAuth();
   const { user } = useAuth();
   const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -36,10 +37,6 @@ const OnboardingPage = () => {
         .eq("id", user.id)
         .single();
       if (data) {
-        if (data.onboarding_completed) {
-          navigate("/dashboard", { replace: true });
-          return;
-        }
         setFirstName(data.first_name ?? "");
         setAvatarUrl(data.avatar_url ?? null);
         setPostalCode(data.postal_code ?? "");
@@ -122,6 +119,7 @@ const OnboardingPage = () => {
         }
         return;
       }
+      await refreshProfile();
       toast.success("Profil complété", { description: "Bienvenue dans la communauté Guardiens." });
       navigate("/dashboard", { replace: true });
     } finally {
