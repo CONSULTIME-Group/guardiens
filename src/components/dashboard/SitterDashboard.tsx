@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSearchParams } from "react-router-dom";
 import OnboardingModal from "@/components/onboarding/OnboardingModal";
+import MinimalOnboardingDialog from "@/components/onboarding/MinimalOnboardingDialog";
 import { useSubscriptionAccess } from "@/hooks/useSubscriptionAccess";
 import { Link, useNavigate } from "react-router-dom";
 import EmergencyDashSection from "./EmergencyDashSection";
@@ -34,6 +35,8 @@ const SitterDashboard = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const { hasAccess: hasSubscription } = useSubscriptionAccess();
   const [showOnboardingModal, setShowOnboardingModal] = useState(false);
+  const [showMinimal, setShowMinimal] = useState(false);
+  const [minimalCompleted, setMinimalCompleted] = useState(true);
 
   const { data: reputation } = useProfileReputation(user?.id);
   const { data: userBadges } = useUserBadges(user?.id);
@@ -189,12 +192,17 @@ const SitterDashboard = () => {
     }
     supabase
       .from("profiles")
-      .select("onboarding_completed, onboarding_dismissed_at")
+      .select("onboarding_completed, onboarding_dismissed_at, onboarding_minimal_completed")
       .eq("id", user.id)
       .single()
       .then(({ data }) => {
-        if (data && !data.onboarding_completed && !data.onboarding_dismissed_at) {
+        if (!data) return;
+        const mc = (data as any).onboarding_minimal_completed ?? false;
+        setMinimalCompleted(mc);
+        if (!data.onboarding_completed && !data.onboarding_dismissed_at) {
           setShowOnboardingModal(true);
+        } else if (!mc) {
+          setShowMinimal(true);
         }
       });
   }, [user, searchParams]);
@@ -259,6 +267,16 @@ const SitterDashboard = () => {
         onClose={() => {
           setShowOnboardingModal(false);
           setSearchParams({});
+          if (!minimalCompleted) {
+            setShowMinimal(true);
+          }
+        }}
+      />
+      <MinimalOnboardingDialog
+        open={showMinimal}
+        onComplete={() => {
+          setShowMinimal(false);
+          setMinimalCompleted(true);
         }}
       />
       {/* Role activation banner */}
