@@ -412,9 +412,7 @@ const Settings = () => {
           variant="outline"
           className="w-full text-sm"
           onClick={() => {
-            const params = new URLSearchParams(window.location.search);
-            params.set("tour", "true");
-            window.location.search = params.toString();
+            window.location.href = "/dashboard?tour=true";
           }}
         >
           Revoir la présentation →
