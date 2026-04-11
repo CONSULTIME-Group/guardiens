@@ -14,7 +14,6 @@ const AVATAR_BUCKET = "avatars";
 
 const OnboardingPage = () => {
   const { user, refreshProfile } = useAuth();
-  const { user } = useAuth();
   const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
