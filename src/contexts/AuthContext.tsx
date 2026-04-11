@@ -15,6 +15,7 @@ interface Profile {
   profileCompletion: number;
   identityVerified: boolean;
   isFounder: boolean;
+  onboardingCompleted: boolean;
 }
 
 interface AuthContextType {
@@ -27,6 +28,7 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<void>;
   register: (email: string, password: string, role: Role) => Promise<any>;
   logout: () => void;
+  refreshProfile: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -41,6 +43,7 @@ const mapProfile = (profile: any, authEmail?: string): Profile => ({
   profileCompletion: profile.profile_completion || 0,
   identityVerified: profile.identity_verified || false,
   isFounder: profile.is_founder || false,
+  onboardingCompleted: profile.onboarding_completed || false,
 });
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -78,7 +81,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const fetchProfile = useCallback(async (supabaseUser: SupabaseUser) => {
     const { data } = await supabase
       .from("profiles")
-      .select("id, role, first_name, last_name, avatar_url, profile_completion, identity_verified, is_founder")
+      .select("id, role, first_name, last_name, avatar_url, profile_completion, identity_verified, is_founder, onboarding_completed")
       .eq("id", supabaseUser.id)
       .single();
 
