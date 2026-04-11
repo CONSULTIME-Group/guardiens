@@ -199,12 +199,18 @@ const OwnerDashboard = () => {
     }
     supabase
       .from("profiles")
-      .select("onboarding_completed, onboarding_dismissed_at")
+      .select("onboarding_completed, onboarding_dismissed_at, onboarding_minimal_completed")
       .eq("id", user.id)
       .single()
       .then(({ data }) => {
-        if (data && !data.onboarding_completed && !data.onboarding_dismissed_at) {
+        if (!data) return;
+        const mc = (data as any).onboarding_minimal_completed ?? false;
+        setMinimalCompleted(mc);
+        if (!data.onboarding_completed && !data.onboarding_dismissed_at) {
           setShowOnboardingModal(true);
+        } else if (!mc) {
+          // Guided onboarding already done/dismissed but minimal not completed
+          setShowMinimal(true);
         }
       });
   }, [user, searchParams]);
