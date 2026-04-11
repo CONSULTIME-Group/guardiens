@@ -120,6 +120,79 @@ export type Database = {
           },
         ]
       }
+      alert_preferences: {
+        Row: {
+          active: boolean
+          alert_types: string[]
+          city: string | null
+          created_at: string
+          departement: string | null
+          frequence: string
+          heure_envoi: string
+          id: string
+          label: string
+          postal_code: string | null
+          radius_km: number | null
+          region_code: string | null
+          user_id: string
+          zone_type: string
+        }
+        Insert: {
+          active?: boolean
+          alert_types?: string[]
+          city?: string | null
+          created_at?: string
+          departement?: string | null
+          frequence?: string
+          heure_envoi?: string
+          id?: string
+          label?: string
+          postal_code?: string | null
+          radius_km?: number | null
+          region_code?: string | null
+          user_id: string
+          zone_type: string
+        }
+        Update: {
+          active?: boolean
+          alert_types?: string[]
+          city?: string | null
+          created_at?: string
+          departement?: string | null
+          frequence?: string
+          heure_envoi?: string
+          id?: string
+          label?: string
+          postal_code?: string | null
+          radius_km?: number | null
+          region_code?: string | null
+          user_id?: string
+          zone_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "alert_preferences_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profile_reputation"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "alert_preferences_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "alert_preferences_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       applications: {
         Row: {
           created_at: string
@@ -3475,6 +3548,42 @@ export type Database = {
       calculate_profile_completion: {
         Args: { p_user_id: string }
         Returns: number
+      }
+      create_alert_preference: {
+        Args: {
+          p_alert_types?: string[]
+          p_city?: string
+          p_departement?: string
+          p_frequence?: string
+          p_heure_envoi?: string
+          p_label: string
+          p_postal_code?: string
+          p_radius_km?: number
+          p_region_code?: string
+          p_zone_type: string
+        }
+        Returns: {
+          active: boolean
+          alert_types: string[]
+          city: string | null
+          created_at: string
+          departement: string | null
+          frequence: string
+          heure_envoi: string
+          id: string
+          label: string
+          postal_code: string | null
+          radius_km: number | null
+          region_code: string | null
+          user_id: string
+          zone_type: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "alert_preferences"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       create_avis_annulation: {
         Args: {
