@@ -79,7 +79,7 @@ Deno.serve(async (req) => {
             id, title, start_date, end_date, is_urgent,
             profiles:user_id (city, postal_code)
           `)
-          .eq("status", "open")
+          .eq("status", "published")
           .gte("created_at", sinceISO)
           .limit(10);
 
