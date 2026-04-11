@@ -2143,6 +2143,7 @@ export type Database = {
           created_at: string
           custom_skills: Json | null
           email: string | null
+          email_preferences: Json
           first_name: string | null
           free_months_credit: number | null
           id: string
@@ -2174,6 +2175,7 @@ export type Database = {
           created_at?: string
           custom_skills?: Json | null
           email?: string | null
+          email_preferences?: Json
           first_name?: string | null
           free_months_credit?: number | null
           id: string
@@ -2205,6 +2207,7 @@ export type Database = {
           created_at?: string
           custom_skills?: Json | null
           email?: string | null
+          email_preferences?: Json
           first_name?: string | null
           free_months_credit?: number | null
           id?: string
