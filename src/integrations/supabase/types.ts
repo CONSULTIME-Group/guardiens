@@ -2157,6 +2157,7 @@ export type Database = {
           last_name: string | null
           onboarding_completed: boolean
           onboarding_dismissed_at: string | null
+          onboarding_minimal_completed: boolean
           postal_code: string | null
           profile_completion: number | null
           referral_code: string | null
@@ -2191,6 +2192,7 @@ export type Database = {
           last_name?: string | null
           onboarding_completed?: boolean
           onboarding_dismissed_at?: string | null
+          onboarding_minimal_completed?: boolean
           postal_code?: string | null
           profile_completion?: number | null
           referral_code?: string | null
@@ -2225,6 +2227,7 @@ export type Database = {
           last_name?: string | null
           onboarding_completed?: boolean
           onboarding_dismissed_at?: string | null
+          onboarding_minimal_completed?: boolean
           postal_code?: string | null
           profile_completion?: number | null
           referral_code?: string | null
