@@ -12,13 +12,16 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
 
 Deno.serve(async (req) => {
   try {
+    const url = new URL(req.url);
+    const forceMode = url.searchParams.get("force") === "true";
+
     const now = new Date();
     const currentHour = now.getUTCHours() + 2; // Europe/Paris (+2 été)
     const currentHourStr = `${String(currentHour).padStart(2, "0")}:00`;
     const dayOfWeek = now.getDay(); // 0=dim, 1=lun
 
     // 1. Récupérer toutes les préférences actives correspondant à l'heure
-    const { data: prefs, error: prefsError } = await supabase
+    let prefsQuery = supabase
       .from("alert_preferences")
       .select(`
         *,
@@ -26,8 +29,13 @@ Deno.serve(async (req) => {
           id, first_name, email, city, postal_code, role
         )
       `)
-      .eq("active", true)
-      .eq("heure_envoi", currentHourStr);
+      .eq("active", true);
+
+    if (!forceMode) {
+      prefsQuery = prefsQuery.eq("heure_envoi", currentHourStr);
+    }
+
+    const { data: prefs, error: prefsError } = await prefsQuery;
 
     if (prefsError) throw prefsError;
     if (!prefs || prefs.length === 0) {
