@@ -3552,6 +3552,16 @@ export type Database = {
         Args: { p_user_id: string }
         Returns: number
       }
+      complete_onboarding: {
+        Args: {
+          p_avatar_url: string
+          p_bio?: string
+          p_city: string
+          p_first_name: string
+          p_postal_code: string
+        }
+        Returns: boolean
+      }
       create_alert_from_search: {
         Args: { p_city: string; p_postal_code: string; p_radius_km: number }
         Returns: string
