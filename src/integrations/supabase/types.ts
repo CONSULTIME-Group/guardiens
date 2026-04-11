@@ -3561,12 +3561,12 @@ export type Database = {
       complete_onboarding: {
         Args: {
           p_animal_experience?: string
-          p_avatar_url: string
+          p_avatar_url?: string
           p_bio?: string
-          p_city: string
+          p_city?: string
           p_date_of_birth?: string
           p_first_name: string
-          p_postal_code: string
+          p_postal_code?: string
         }
         Returns: boolean
       }
