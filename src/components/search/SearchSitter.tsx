@@ -50,6 +50,8 @@ const SearchSitter = () => {
   const { user } = useAuth();
   const { hasAccess } = useSubscriptionAccess();
   const isMobile = useIsMobile();
+  const navigate = useNavigate();
+  const { toast } = useToast();
   const [searchParams] = useSearchParams();
   const [tab, setTab] = useState<SearchTab>("sits");
   const [missionSubTab, setMissionSubTab] = useState<MissionSubTab>("published");
