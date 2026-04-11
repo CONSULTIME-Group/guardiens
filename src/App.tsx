@@ -1,5 +1,6 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Route, Routes, Navigate, useParams } from "react-router-dom";
+import { Loader2 } from "lucide-react";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { Sidebar, BottomNav } from "./components/layout/Navigation";
@@ -83,9 +84,18 @@ import PublicSitterProfile from "./pages/PublicSitterProfile";
 const queryClient = new QueryClient();
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const { isAuthenticated, loading } = useAuth();
-  if (loading) return <div className="min-h-screen flex items-center justify-center text-muted-foreground">Chargement...</div>;
+  const { isAuthenticated, user, loading } = useAuth();
+  if (loading) return <div className="min-h-screen flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-muted-foreground" /></div>;
   if (!isAuthenticated) return <Navigate to="/login" replace />;
+  if (user && user.onboardingCompleted === false) return <Navigate to="/onboarding" replace />;
+  return <>{children}</>;
+};
+
+const OnboardingProtection = ({ children }: { children: React.ReactNode }) => {
+  const { isAuthenticated, user, loading } = useAuth();
+  if (loading) return <div className="min-h-screen flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-muted-foreground" /></div>;
+  if (!isAuthenticated) return <Navigate to="/login" replace />;
+  if (user && user.onboardingCompleted === true) return <Navigate to="/dashboard" replace />;
   return <>{children}</>;
 };
 
