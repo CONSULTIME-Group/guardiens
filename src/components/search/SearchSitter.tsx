@@ -971,6 +971,55 @@ const SearchSitter = () => {
             ))}
           </div>
         </div>
+        {tab === "sits" && user && (
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                {isMobile ? (
+                  <Button
+                    variant={alertCreated ? "secondary" : "outline"}
+                    size="icon"
+                    disabled={!city || isCreatingAlert}
+                    onClick={alertCreated ? () => navigate("/parametres") : handleCreateAlert}
+                    className="shrink-0 mr-2"
+                  >
+                    {isCreatingAlert ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : alertCreated ? (
+                      <BellRing className="h-4 w-4" />
+                    ) : (
+                      <Bell className="h-4 w-4" />
+                    )}
+                  </Button>
+                ) : (
+                  <Button
+                    variant={alertCreated ? "secondary" : "outline"}
+                    size="sm"
+                    disabled={!city || isCreatingAlert}
+                    onClick={alertCreated ? () => navigate("/parametres") : handleCreateAlert}
+                    className="ml-auto mr-2 shrink-0"
+                  >
+                    {isCreatingAlert ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : alertCreated ? (
+                      <BellRing className="h-4 w-4" />
+                    ) : (
+                      <Bell className="h-4 w-4" />
+                    )}
+                    {isCreatingAlert ? "Création…" : alertCreated ? "Alerte créée" : "Créer une alerte"}
+                  </Button>
+                )}
+              </TooltipTrigger>
+              <TooltipContent>
+                {!city
+                  ? "Sélectionnez une ville pour créer une alerte"
+                  : alertCreated
+                  ? "Gérer vos alertes dans les paramètres"
+                  : "Créer une alerte pour cette recherche"}
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        )}
         <div className="flex border border-border rounded-lg overflow-hidden shrink-0">
           <button
             onClick={() => setViewMode("list")}
