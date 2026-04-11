@@ -1,9 +1,12 @@
 import { useState, useEffect, useCallback, useRef, lazy, Suspense } from "react";
 import FounderBadge from "@/components/badges/FounderBadge";
 import ReportButton from "@/components/reports/ReportButton";
-import { Sprout, PawPrint, GraduationCap, Handshake as HandshakeIcon, LayoutGrid, Map as MapIcon, Cat, Bird, SlidersHorizontal, ShieldCheck, Crosshair } from "lucide-react";
+import { Sprout, PawPrint, GraduationCap, Handshake as HandshakeIcon, LayoutGrid, Map as MapIcon, Cat, Bird, SlidersHorizontal, ShieldCheck, Crosshair, Bell, BellRing, Loader2 } from "lucide-react";
 import EnvironmentPills from "@/components/shared/EnvironmentPills";
 import { Link, useSearchParams, useNavigate } from "react-router-dom";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { useToast } from "@/hooks/use-toast";
+import { ToastAction } from "@/components/ui/toast";
 
 const SearchMapView = lazy(() => import("@/components/search/SearchMapView"));
 import { DEMO_SITS, DEMO_MISSIONS, DEMO_THRESHOLD } from "@/data/demoListings";
