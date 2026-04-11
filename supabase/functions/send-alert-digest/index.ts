@@ -86,7 +86,7 @@ Deno.serve(async (req) => {
           .select(`
             id, title, start_date, end_date, is_urgent,
             profiles:user_id (city, postal_code),
-            properties:property_id (photos)
+            properties:property_id (photos, type, pets (name, species))
           `)
           .eq("status", "published")
           .gte("created_at", sinceISO)
@@ -215,31 +215,51 @@ function buildDigestEmail(
 ): string {
   const sitsHtml = sits.slice(0, 10).map((s: any) => {
     const photoUrl = s.properties?.photos?.[0] || null;
+    const city = (s.profiles as any)?.city || "";
+    const pets: any[] = s.properties?.pets || [];
+    const petSummary = pets.length > 0
+      ? pets.map((p: any) => `${p.name} (${p.species === 'dog' ? '🐕' : p.species === 'cat' ? '🐱' : '🐾'})`).join(", ")
+      : "";
+    const propertyType = s.properties?.type || "";
+    const typeLabel: Record<string, string> = { apartment: "Appartement", house: "Maison", farm: "Ferme", other: "Autre" };
 
-    const imageCell = photoUrl
-      ? `<td width="80" valign="top" style="padding:8px 12px 8px 0;">
-           <img src="${photoUrl}" width="80" height="60" alt="" style="display:block;width:80px;height:60px;object-fit:cover;border:0;border-radius:6px;" />
-         </td>`
+    // Dates
+    let dateStr = "Dates flexibles";
+    if (s.start_date && s.end_date) {
+      const start = new Date(s.start_date);
+      const end = new Date(s.end_date);
+      const days = Math.round((end.getTime() - start.getTime()) / 86400000);
+      dateStr = `${start.toLocaleDateString("fr-FR", { day: "numeric", month: "short" })} → ${end.toLocaleDateString("fr-FR", { day: "numeric", month: "short" })} (${days}j)`;
+    } else if (s.start_date) {
+      dateStr = new Date(s.start_date).toLocaleDateString("fr-FR");
+    }
+
+    const imageBlock = photoUrl
+      ? `<tr><td style="padding:0;">
+           <a href="https://guardiens.fr/sits/${s.id}" style="text-decoration:none;">
+             <img src="${photoUrl}" width="520" height="200" alt="" style="display:block;width:100%;height:200px;object-fit:cover;border:0;border-radius:8px 8px 0 0;" />
+           </a>
+         </td></tr>`
       : '';
 
+    const metaParts = [city, typeLabel[propertyType] || ""].filter(Boolean).join(" · ");
+
     return `
-    <tr>
-      <td style="padding:8px 0;border-bottom:1px solid #f0ece4;">
-        <table width="100%" cellpadding="0" cellspacing="0" border="0">
-          <tr>
-            ${imageCell}
-            <td valign="top">
-              <strong style="color:#1A3C34;font-size:15px;">${s.title}</strong><br>
-              <span style="color:#6b7280;font-size:14px;">
-                ${(s.profiles as any)?.city || ""} · 
-                ${s.start_date ? new Date(s.start_date).toLocaleDateString("fr-FR") : "Dates flexibles"}
-                ${s.is_urgent ? " · <span style='color:#dc2626'>Urgent</span>" : ""}
-              </span>
-            </td>
-          </tr>
-        </table>
-      </td>
-    </tr>`;
+    <tr><td style="padding:12px 0;">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border:1px solid #e5e7eb;border-radius:8px;overflow:hidden;">
+        ${imageBlock}
+        <tr><td style="padding:14px 16px;">
+          <a href="https://guardiens.fr/sits/${s.id}" style="text-decoration:none;">
+            <strong style="color:#1A3C34;font-size:16px;line-height:1.3;">${s.title}</strong>
+          </a>
+          ${s.is_urgent ? `<span style="display:inline-block;margin-left:8px;background:#fef2f2;color:#dc2626;font-size:12px;padding:2px 8px;border-radius:4px;font-weight:600;">Urgent</span>` : ""}
+          <br/>
+          <span style="color:#6b7280;font-size:13px;">📍 ${metaParts}</span><br/>
+          <span style="color:#6b7280;font-size:13px;">📅 ${dateStr}</span>
+          ${petSummary ? `<br/><span style="color:#6b7280;font-size:13px;">🐾 ${petSummary}</span>` : ""}
+        </td></tr>
+      </table>
+    </td></tr>`;
   }).join("");
 
   const missionsHtml = missions.slice(0, 10).map((m: any) => `
