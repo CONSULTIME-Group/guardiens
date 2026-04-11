@@ -733,7 +733,7 @@ const SearchSitter = () => {
                   {citySuggestions.map((s, i) => (
                     <button
                       key={i}
-                      onClick={() => handleCitySelect(s.nom)}
+                      onClick={() => handleCitySelect(s.nom, s.codesPostaux?.[0])}
                       className="w-full text-left px-3 py-2 text-sm text-foreground hover:bg-accent transition-colors"
                     >
                       {s.nom}
