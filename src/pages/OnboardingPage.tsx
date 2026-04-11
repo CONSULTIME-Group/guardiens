@@ -67,7 +67,7 @@ const OnboardingPage = () => {
         fileType: "image/jpeg",
       });
 
-      const path = `${user.id}.jpg`;
+      const path = `${user.id}/avatar.jpg`;
       const { error: uploadError } = await supabase.storage
         .from(AVATAR_BUCKET)
         .upload(path, compressedFile, { upsert: true, contentType: "image/jpeg" });
