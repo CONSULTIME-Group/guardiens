@@ -3565,28 +3565,7 @@ export type Database = {
           p_region_code?: string
           p_zone_type: string
         }
-        Returns: {
-          active: boolean
-          alert_types: string[]
-          city: string | null
-          created_at: string
-          departement: string | null
-          frequence: string
-          heure_envoi: string
-          id: string
-          label: string
-          postal_code: string | null
-          radius_km: number | null
-          region_code: string | null
-          user_id: string
-          zone_type: string
-        }
-        SetofOptions: {
-          from: "*"
-          to: "alert_preferences"
-          isOneToOne: true
-          isSetofReturn: false
-        }
+        Returns: string
       }
       create_avis_annulation: {
         Args: {
