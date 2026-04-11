@@ -238,7 +238,7 @@ const SearchSitter = () => {
           variant: "destructive",
           title: "Maximum atteint",
           description: "Vous avez déjà 3 alertes actives. Supprimez-en une dans vos paramètres.",
-          action: <ToastAction altText="Gérer mes alertes" onClick={() => navigate("/parametres")}>Gérer</ToastAction>,
+          action: <ToastAction altText="Gérer mes alertes" onClick={() => navigate("/settings")}>Gérer</ToastAction>,
         });
       } else if (msg.includes("INVALID_CITY")) {
         toast({ variant: "destructive", title: "Ville requise", description: "Sélectionnez une ville avant de créer une alerte." });
@@ -251,7 +251,7 @@ const SearchSitter = () => {
       toast({
         title: "Alerte créée",
         description: `Vous recevrez chaque matin les nouvelles gardes près de ${city}.`,
-        action: <ToastAction altText="Personnaliser" onClick={() => navigate("/parametres")}>Personnaliser</ToastAction>,
+        action: <ToastAction altText="Personnaliser" onClick={() => navigate("/settings")}>Personnaliser</ToastAction>,
       });
       setAlertCreated(true);
     }
@@ -980,7 +980,7 @@ const SearchSitter = () => {
                     variant={alertCreated ? "secondary" : "outline"}
                     size="icon"
                     disabled={!city || isCreatingAlert}
-                    onClick={alertCreated ? () => navigate("/parametres") : handleCreateAlert}
+                    onClick={alertCreated ? () => navigate("/settings") : handleCreateAlert}
                     className="shrink-0 mr-2"
                   >
                     {isCreatingAlert ? (
@@ -996,7 +996,7 @@ const SearchSitter = () => {
                     variant={alertCreated ? "secondary" : "outline"}
                     size="sm"
                     disabled={!city || isCreatingAlert}
-                    onClick={alertCreated ? () => navigate("/parametres") : handleCreateAlert}
+                    onClick={alertCreated ? () => navigate("/settings") : handleCreateAlert}
                     className="ml-auto mr-2 shrink-0"
                   >
                     {isCreatingAlert ? (
