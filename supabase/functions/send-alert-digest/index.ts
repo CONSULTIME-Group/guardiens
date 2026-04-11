@@ -86,7 +86,7 @@ Deno.serve(async (req) => {
           .select(`
             id, title, start_date, end_date, is_urgent,
             profiles:user_id (city, postal_code),
-            properties:property_id (photos)
+            properties:property_id (photos, type, pets (name, species))
           `)
           .eq("status", "published")
           .gte("created_at", sinceISO)
