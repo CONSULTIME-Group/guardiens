@@ -3552,6 +3552,10 @@ export type Database = {
         Args: { p_user_id: string }
         Returns: number
       }
+      create_alert_from_search: {
+        Args: { p_city: string; p_postal_code: string; p_radius_km: number }
+        Returns: string
+      }
       create_alert_preference: {
         Args: {
           p_alert_types?: string[]

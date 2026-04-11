@@ -1,9 +1,12 @@
 import { useState, useEffect, useCallback, useRef, lazy, Suspense } from "react";
 import FounderBadge from "@/components/badges/FounderBadge";
 import ReportButton from "@/components/reports/ReportButton";
-import { Sprout, PawPrint, GraduationCap, Handshake as HandshakeIcon, LayoutGrid, Map as MapIcon, Cat, Bird, SlidersHorizontal, ShieldCheck, Crosshair } from "lucide-react";
+import { Sprout, PawPrint, GraduationCap, Handshake as HandshakeIcon, LayoutGrid, Map as MapIcon, Cat, Bird, SlidersHorizontal, ShieldCheck, Crosshair, Bell, BellRing, Loader2 } from "lucide-react";
 import EnvironmentPills from "@/components/shared/EnvironmentPills";
 import { Link, useSearchParams, useNavigate } from "react-router-dom";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { useToast } from "@/hooks/use-toast";
+import { ToastAction } from "@/components/ui/toast";
 
 const SearchMapView = lazy(() => import("@/components/search/SearchMapView"));
 import { DEMO_SITS, DEMO_MISSIONS, DEMO_THRESHOLD } from "@/data/demoListings";
@@ -47,6 +50,8 @@ const SearchSitter = () => {
   const { user } = useAuth();
   const { hasAccess } = useSubscriptionAccess();
   const isMobile = useIsMobile();
+  const navigate = useNavigate();
+  const { toast } = useToast();
   const [searchParams] = useSearchParams();
   const [tab, setTab] = useState<SearchTab>("sits");
   const [missionSubTab, setMissionSubTab] = useState<MissionSubTab>("published");
@@ -66,6 +71,9 @@ const SearchSitter = () => {
   const [emergencyOnly, setEmergencyOnly] = useState(searchParams.get("emergency") === "true");
   const [sort, setSort] = useState<SortOption>("closest");
   const [viewMode, setViewMode] = useState<ViewMode>("list");
+  const [cityPostalCode, setCityPostalCode] = useState<string | null>(null);
+  const [alertCreated, setAlertCreated] = useState(false);
+  const [isCreatingAlert, setIsCreatingAlert] = useState(false);
 
   const [results, setResults] = useState<any[]>([]);
   const [resultCoords, setResultCoords] = useState<Map<string, { lat: number; lng: number }>>(new Map());
@@ -115,9 +123,10 @@ const SearchSitter = () => {
     }, 250);
   };
 
-  const handleCitySelect = (name: string) => {
+  const handleCitySelect = (name: string, postalCode?: string) => {
     setCityInput(name);
     setCity(name);
+    setCityPostalCode(postalCode ?? null);
     setCitySuggestions([]);
     setEditingCity(false);
   };
@@ -204,6 +213,49 @@ const SearchSitter = () => {
       doSearch();
     }
   }, [userCoords, user, userCity]);
+
+  // Reset alert state when city or radius changes
+  useEffect(() => {
+    setAlertCreated(false);
+  }, [city, radius]);
+
+  const handleCreateAlert = async () => {
+    if (!city || alertCreated || isCreatingAlert) return;
+    setIsCreatingAlert(true);
+    const { data, error } = await supabase.rpc("create_alert_from_search", {
+      p_city: city,
+      p_postal_code: cityPostalCode ?? null,
+      p_radius_km: radius[0],
+    });
+    setIsCreatingAlert(false);
+    if (error) {
+      const msg = error.message || "";
+      if (msg.includes("DOUBLON")) {
+        toast({ title: "Vous avez déjà cette alerte", description: "Une alerte identique existe déjà pour cette zone." });
+        setAlertCreated(true);
+      } else if (msg.includes("MAX_ZONES")) {
+        toast({
+          variant: "destructive",
+          title: "Maximum atteint",
+          description: "Vous avez déjà 3 alertes actives. Supprimez-en une dans vos paramètres.",
+          action: <ToastAction altText="Gérer mes alertes" onClick={() => navigate("/parametres")}>Gérer</ToastAction>,
+        });
+      } else if (msg.includes("INVALID_CITY")) {
+        toast({ variant: "destructive", title: "Ville requise", description: "Sélectionnez une ville avant de créer une alerte." });
+      } else if (msg.includes("INVALID_RADIUS")) {
+        toast({ variant: "destructive", title: "Rayon invalide", description: "Le rayon doit être 5, 15, 30, 50 ou 100 km." });
+      } else {
+        toast({ variant: "destructive", title: "Erreur", description: "Une erreur est survenue. Veuillez réessayer." });
+      }
+    } else {
+      toast({
+        title: "Alerte créée",
+        description: `Vous recevrez chaque matin les nouvelles gardes près de ${city}.`,
+        action: <ToastAction altText="Personnaliser" onClick={() => navigate("/parametres")}>Personnaliser</ToastAction>,
+      });
+      setAlertCreated(true);
+    }
+  };
 
   const computeDistance = (ownerCity: string, cityCoords: Map<string, { lat: number; lng: number }>, searchCoords: { lat: number; lng: number } | null) => {
     if (!searchCoords) return null;
@@ -681,7 +733,7 @@ const SearchSitter = () => {
                   {citySuggestions.map((s, i) => (
                     <button
                       key={i}
-                      onClick={() => handleCitySelect(s.nom)}
+                      onClick={() => handleCitySelect(s.nom, s.codesPostaux?.[0])}
                       className="w-full text-left px-3 py-2 text-sm text-foreground hover:bg-accent transition-colors"
                     >
                       {s.nom}
@@ -919,6 +971,55 @@ const SearchSitter = () => {
             ))}
           </div>
         </div>
+        {tab === "sits" && user && (
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                {isMobile ? (
+                  <Button
+                    variant={alertCreated ? "secondary" : "outline"}
+                    size="icon"
+                    disabled={!city || isCreatingAlert}
+                    onClick={alertCreated ? () => navigate("/parametres") : handleCreateAlert}
+                    className="shrink-0 mr-2"
+                  >
+                    {isCreatingAlert ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : alertCreated ? (
+                      <BellRing className="h-4 w-4" />
+                    ) : (
+                      <Bell className="h-4 w-4" />
+                    )}
+                  </Button>
+                ) : (
+                  <Button
+                    variant={alertCreated ? "secondary" : "outline"}
+                    size="sm"
+                    disabled={!city || isCreatingAlert}
+                    onClick={alertCreated ? () => navigate("/parametres") : handleCreateAlert}
+                    className="ml-auto mr-2 shrink-0"
+                  >
+                    {isCreatingAlert ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : alertCreated ? (
+                      <BellRing className="h-4 w-4" />
+                    ) : (
+                      <Bell className="h-4 w-4" />
+                    )}
+                    {isCreatingAlert ? "Création…" : alertCreated ? "Alerte créée" : "Créer une alerte"}
+                  </Button>
+                )}
+              </TooltipTrigger>
+              <TooltipContent>
+                {!city
+                  ? "Sélectionnez une ville pour créer une alerte"
+                  : alertCreated
+                  ? "Gérer vos alertes dans les paramètres"
+                  : "Créer une alerte pour cette recherche"}
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        )}
         <div className="flex border border-border rounded-lg overflow-hidden shrink-0">
           <button
             onClick={() => setViewMode("list")}
