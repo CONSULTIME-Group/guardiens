@@ -214,6 +214,49 @@ const SearchSitter = () => {
     }
   }, [userCoords, user, userCity]);
 
+  // Reset alert state when city or radius changes
+  useEffect(() => {
+    setAlertCreated(false);
+  }, [city, radius]);
+
+  const handleCreateAlert = async () => {
+    if (!city || alertCreated || isCreatingAlert) return;
+    setIsCreatingAlert(true);
+    const { data, error } = await supabase.rpc("create_alert_from_search", {
+      p_city: city,
+      p_postal_code: cityPostalCode ?? null,
+      p_radius_km: radius[0],
+    });
+    setIsCreatingAlert(false);
+    if (error) {
+      const msg = error.message || "";
+      if (msg.includes("DOUBLON")) {
+        toast({ title: "Vous avez déjà cette alerte", description: "Une alerte identique existe déjà pour cette zone." });
+        setAlertCreated(true);
+      } else if (msg.includes("MAX_ZONES")) {
+        toast({
+          variant: "destructive",
+          title: "Maximum atteint",
+          description: "Vous avez déjà 3 alertes actives. Supprimez-en une dans vos paramètres.",
+          action: <ToastAction altText="Gérer mes alertes" onClick={() => navigate("/parametres")}>Gérer</ToastAction>,
+        });
+      } else if (msg.includes("INVALID_CITY")) {
+        toast({ variant: "destructive", title: "Ville requise", description: "Sélectionnez une ville avant de créer une alerte." });
+      } else if (msg.includes("INVALID_RADIUS")) {
+        toast({ variant: "destructive", title: "Rayon invalide", description: "Le rayon doit être 5, 15, 30, 50 ou 100 km." });
+      } else {
+        toast({ variant: "destructive", title: "Erreur", description: "Une erreur est survenue. Veuillez réessayer." });
+      }
+    } else {
+      toast({
+        title: "Alerte créée",
+        description: `Vous recevrez chaque matin les nouvelles gardes près de ${city}.`,
+        action: <ToastAction altText="Personnaliser" onClick={() => navigate("/parametres")}>Personnaliser</ToastAction>,
+      });
+      setAlertCreated(true);
+    }
+  };
+
   const computeDistance = (ownerCity: string, cityCoords: Map<string, { lat: number; lng: number }>, searchCoords: { lat: number; lng: number } | null) => {
     if (!searchCoords) return null;
     const coords = cityCoords.get(ownerCity);
