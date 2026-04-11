@@ -85,7 +85,8 @@ Deno.serve(async (req) => {
           .from("sits")
           .select(`
             id, title, start_date, end_date, is_urgent,
-            profiles:user_id (city, postal_code)
+            profiles:user_id (city, postal_code),
+            properties:property_id (photos)
           `)
           .eq("status", "published")
           .gte("created_at", sinceISO)
@@ -212,17 +213,34 @@ function buildDigestEmail(
   sits: any[],
   missions: any[]
 ): string {
-  const sitsHtml = sits.slice(0, 10).map((s: any) => `
+  const sitsHtml = sits.slice(0, 10).map((s: any) => {
+    const photoUrl = s.properties?.photos?.[0] || null;
+
+    const imageCell = photoUrl
+      ? `<td width="80" valign="top" style="padding:8px 12px 8px 0;">
+           <img src="${photoUrl}" width="80" height="60" alt="" style="display:block;width:80px;height:60px;object-fit:cover;border:0;border-radius:6px;" />
+         </td>`
+      : '';
+
+    return `
     <tr>
-      <td style="padding:12px 0;border-bottom:1px solid #f0f0f0">
-        <strong style="color:#1a1a1a;font-size:15px">${s.title}</strong><br/>
-        <span style="color:#666;font-size:13px">
-          ${(s.profiles as any)?.city || ""} · 
-          ${s.start_date ? new Date(s.start_date).toLocaleDateString("fr-FR") : "Dates flexibles"}
-          ${s.is_urgent ? ' · <span style="color:#dc2626;font-weight:600">Urgent</span>' : ""}
-        </span>
+      <td style="padding:8px 0;border-bottom:1px solid #f0ece4;">
+        <table width="100%" cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            ${imageCell}
+            <td valign="top">
+              <strong style="color:#1A3C34;font-size:15px;">${s.title}</strong><br>
+              <span style="color:#6b7280;font-size:14px;">
+                ${(s.profiles as any)?.city || ""} · 
+                ${s.start_date ? new Date(s.start_date).toLocaleDateString("fr-FR") : "Dates flexibles"}
+                ${s.is_urgent ? " · <span style='color:#dc2626'>Urgent</span>" : ""}
+              </span>
+            </td>
+          </tr>
+        </table>
       </td>
-    </tr>`).join("");
+    </tr>`;
+  }).join("");
 
   const missionsHtml = missions.slice(0, 10).map((m: any) => `
     <tr>
