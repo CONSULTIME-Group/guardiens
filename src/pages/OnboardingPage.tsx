@@ -5,10 +5,19 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Camera, Loader2 } from "lucide-react";
+import { Camera, Loader2, CalendarIcon } from "lucide-react";
 import { toast } from "sonner";
 import imageCompression from "browser-image-compression";
 import PostalCodeCityFields from "@/components/profile/PostalCodeCityFields";
+import { format, differenceInYears } from "date-fns";
+import { fr } from "date-fns/locale";
+import { cn } from "@/lib/utils";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
 const AVATAR_BUCKET = "avatars";
 
@@ -22,6 +31,8 @@ const OnboardingPage = () => {
   const [postalCode, setPostalCode] = useState("");
   const [city, setCity] = useState("");
   const [bio, setBio] = useState("");
+  const [dateOfBirth, setDateOfBirth] = useState<Date | undefined>(undefined);
+  const [animalExperience, setAnimalExperience] = useState("");
 
   const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -32,7 +43,7 @@ const OnboardingPage = () => {
     (async () => {
       const { data } = await supabase
         .from("profiles")
-        .select("first_name, avatar_url, postal_code, city, bio, onboarding_completed")
+        .select("first_name, avatar_url, postal_code, city, bio, onboarding_completed, date_of_birth, animal_experience")
         .eq("id", user.id)
         .single();
       if (data) {
@@ -41,6 +52,10 @@ const OnboardingPage = () => {
         setPostalCode(data.postal_code ?? "");
         setCity(data.city ?? "");
         setBio(data.bio ?? "");
+        if (data.date_of_birth) {
+          setDateOfBirth(new Date(data.date_of_birth + "T00:00:00"));
+        }
+        setAnimalExperience(data.animal_experience ?? "");
       }
       setLoaded(true);
     })();
@@ -83,17 +98,23 @@ const OnboardingPage = () => {
     }
   };
 
+  const isAdult = dateOfBirth ? differenceInYears(new Date(), dateOfBirth) >= 18 : false;
+
   const canSubmit =
     firstName.trim().length > 0 &&
     avatarUrl !== null &&
     postalCode.length === 5 &&
     city.trim().length > 0 &&
     bio.length <= 200 &&
+    dateOfBirth !== undefined &&
+    isAdult &&
+    animalExperience.trim().length >= 10 &&
+    animalExperience.trim().length <= 300 &&
     !isSubmitting &&
     !isUploadingPhoto;
 
   const handleSubmit = async () => {
-    if (!canSubmit) return;
+    if (!canSubmit || !dateOfBirth) return;
     setIsSubmitting(true);
     try {
       const { data, error } = await supabase.rpc("complete_onboarding", {
@@ -102,6 +123,8 @@ const OnboardingPage = () => {
         p_postal_code: postalCode.trim(),
         p_city: city.trim(),
         p_bio: bio.trim() || null,
+        p_date_of_birth: format(dateOfBirth, "yyyy-MM-dd"),
+        p_animal_experience: animalExperience.trim(),
       });
       if (error) {
         const msg = error.message || "";
@@ -113,6 +136,14 @@ const OnboardingPage = () => {
           toast.error("Code postal requis");
         } else if (msg.includes("INVALID_CITY")) {
           toast.error("Ville requise — sélectionnez votre ville dans la liste");
+        } else if (msg.includes("UNDERAGE_USER")) {
+          toast.error("Vous devez avoir au moins 18 ans");
+        } else if (msg.includes("INVALID_DATE_OF_BIRTH")) {
+          toast.error("Date de naissance requise");
+        } else if (msg.includes("INVALID_ANIMAL_EXPERIENCE")) {
+          toast.error("Décrivez votre expérience avec les animaux (10 caractères minimum)");
+        } else if (msg.includes("ANIMAL_EXPERIENCE_TOO_LONG")) {
+          toast.error("Expérience trop longue (300 caractères maximum)");
         } else {
           toast.error("Erreur", { description: "Une erreur est survenue, veuillez réessayer." });
         }
@@ -146,7 +177,7 @@ const OnboardingPage = () => {
           Bienvenue chez Guardiens
         </h1>
         <p className="text-center text-muted-foreground mt-2 mb-8">
-          Avant de continuer, complétez ces quelques informations essentielles. Ça prend 90 secondes.
+          Avant de continuer, complétez ces quelques informations essentielles. Ça prend 2 minutes.
         </p>
 
         <div className="space-y-6">
@@ -207,7 +238,52 @@ const OnboardingPage = () => {
             </div>
           </div>
 
-          {/* ── Champ 3 : Code postal / Ville ── */}
+          {/* ── Champ 3 : Date de naissance ── */}
+          <div>
+            <label className="block text-sm font-medium mb-2">Votre date de naissance</label>
+            <p className="text-sm text-muted-foreground mb-3">
+              Pour vérifier que vous avez au moins 18 ans. Non affichée publiquement.
+            </p>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className={cn(
+                    "w-full justify-start text-left font-normal",
+                    !dateOfBirth && "text-muted-foreground"
+                  )}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {dateOfBirth
+                    ? format(dateOfBirth, "d MMMM yyyy", { locale: fr })
+                    : "Sélectionnez votre date de naissance"}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={dateOfBirth}
+                  onSelect={setDateOfBirth}
+                  disabled={(date) =>
+                    date > new Date() || date < new Date("1920-01-01")
+                  }
+                  defaultMonth={dateOfBirth || new Date(1990, 0)}
+                  captionLayout="dropdown-buttons"
+                  fromYear={1920}
+                  toYear={new Date().getFullYear()}
+                  initialFocus
+                  className={cn("p-3 pointer-events-auto")}
+                />
+              </PopoverContent>
+            </Popover>
+            {dateOfBirth && !isAdult && (
+              <p className="text-xs text-destructive mt-1">
+                Vous devez avoir au moins 18 ans pour utiliser Guardiens.
+              </p>
+            )}
+          </div>
+
+          {/* ── Champ 4 : Code postal / Ville ── */}
           <div>
             <label className="block text-sm font-medium mb-2">Votre code postal</label>
             <p className="text-sm text-muted-foreground mb-3">
@@ -224,7 +300,36 @@ const OnboardingPage = () => {
             />
           </div>
 
-          {/* ── Champ 4 : Bio ── */}
+          {/* ── Champ 5 : Expérience animaux ── */}
+          <div>
+            <label className="block text-sm font-medium mb-2">
+              Votre expérience avec les animaux
+            </label>
+            <p className="text-sm text-muted-foreground mb-3">
+              Décrivez brièvement votre relation avec les animaux. Ça aide les autres membres à vous connaître.
+            </p>
+            <Textarea
+              value={animalExperience}
+              onChange={(e) => setAnimalExperience(e.target.value)}
+              placeholder="J'ai eu des chats toute mon enfance et j'ai gardé le chien de ma sœur l'été dernier. J'adore les animaux !"
+              rows={3}
+            />
+            <p className={cn(
+              "text-xs text-right mt-1",
+              animalExperience.trim().length > 0 && animalExperience.trim().length < 10
+                ? "text-destructive"
+                : animalExperience.length > 300
+                  ? "text-destructive"
+                  : "text-muted-foreground"
+            )}>
+              {animalExperience.length}/300
+              {animalExperience.trim().length > 0 && animalExperience.trim().length < 10 && (
+                <span> — 10 caractères minimum</span>
+              )}
+            </p>
+          </div>
+
+          {/* ── Champ 6 : Bio (optionnel) ── */}
           <div>
             <label className="block text-sm font-medium mb-2">
               En quelques mots, qui êtes-vous ?
@@ -235,7 +340,7 @@ const OnboardingPage = () => {
             <Textarea
               value={bio}
               onChange={(e) => setBio(e.target.value)}
-              placeholder="Lyonnaise, 30 ans, j'aime les chats et les longues balades. Disponible les week-ends."
+              placeholder="Lyonnaise, 30 ans, disponible les week-ends."
               rows={3}
             />
             <p className={`text-xs text-right mt-1 ${bio.length > 200 ? "text-destructive" : "text-muted-foreground"}`}>
