@@ -93,7 +93,7 @@ const OnboardingPage = () => {
   const handleSubmit = async () => {
     setIsSubmitting(true);
 
-    const { data, error } = await supabase.rpc("complete_onboarding", {
+    const { data, error } = await (supabase.rpc as any)("complete_onboarding", {
       p_first_name: firstName.trim(),
       p_avatar_url: avatarUrl,
       p_postal_code: postalCode,
