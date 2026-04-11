@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import OnboardingModal from "@/components/onboarding/OnboardingModal";
+import MinimalOnboardingDialog from "@/components/onboarding/MinimalOnboardingDialog";
 import OnboardingWelcome from "./OnboardingWelcome";
 import NearbyEmergencySitters from "./NearbyEmergencySitters";
 import ResourceSection from "@/components/shared/ResourceSection";
