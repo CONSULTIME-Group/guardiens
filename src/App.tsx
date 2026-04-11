@@ -71,6 +71,7 @@ import AdminContactMessages from "./pages/admin/AdminContactMessages";
 import AdminSEO from "./pages/admin/AdminSEO";
 import AdminSkills from "./pages/admin/AdminSkills";
 import AdminMassEmails from "./pages/admin/AdminMassEmails";
+import AdminMessages from "./pages/admin/AdminMessages";
 
 import EmergencySitter from "./pages/EmergencySitter";
 import { AccordDeGardePreview as TestAccord } from "./components/gardes/AccordDeGarde";
