@@ -74,6 +74,7 @@ import AdminMassEmails from "./pages/admin/AdminMassEmails";
 import AdminMessages from "./pages/admin/AdminMessages";
 
 import EmergencySitter from "./pages/EmergencySitter";
+import OnboardingPage from "./pages/OnboardingPage";
 import { AccordDeGardePreview as TestAccord } from "./components/gardes/AccordDeGarde";
 import MySubscription from "./pages/MySubscription";
 import PublicSitDetail from "./pages/PublicSitDetail";
