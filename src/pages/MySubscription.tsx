@@ -9,6 +9,7 @@ import { BadgeSceauLarge } from "@/components/badges/BadgeSceauLarge";
 import FounderBadge from "@/components/badges/FounderBadge";
 import { Helmet } from "react-helmet-async";
 import EntraideLibreBanner from "@/components/subscription/EntraideLibreBanner";
+import PricingCardsCheckout from "@/components/subscription/PricingCardsCheckout";
 
 import {
   Star, Home, Clock, Loader2, Check, Copy,
