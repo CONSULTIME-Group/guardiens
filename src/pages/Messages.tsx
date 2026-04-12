@@ -88,8 +88,8 @@ const missionSuggestions = [
   "Qu'attendez-vous en échange ?",
 ];
 const entraideContactSuggestions = [
-  "Bonjour ! J'ai vu que tu étais disponible pour aider.",
-  "Quel type d'aide proposes-tu ?",
+  "Bonjour ! J'ai vu que vous étiez disponible pour aider.",
+  "Quel type d'aide proposez-vous ?",
   "On pourrait en discuter ?",
 ];
 

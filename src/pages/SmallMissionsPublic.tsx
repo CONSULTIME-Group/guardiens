@@ -64,7 +64,7 @@ const SmallMissionsPublic = () => {
 
             <Reveal delay={0.1}>
               <h1 className="font-heading text-5xl md:text-6xl font-bold text-foreground leading-tight max-w-2xl mx-auto">
-                Ce que tu as contre ce que<br /> tu n'as pas encore vécu.
+                Ce que vous avez contre ce que<br /> vous n'avez pas encore vécu.
               </h1>
             </Reveal>
 
@@ -84,7 +84,7 @@ const SmallMissionsPublic = () => {
                 </Button>
               </div>
               <p className="text-xs text-foreground/50 mt-4">
-                Gratuit. Accessible dès que ton profil est complété.
+                Gratuit. Accessible dès que votre profil est complété.
               </p>
             </Reveal>
           </div>
@@ -100,7 +100,7 @@ const SmallMissionsPublic = () => {
             </Reveal>
             <Reveal delay={0.1}>
               <p className="text-lg font-heading italic leading-relaxed text-foreground/85 text-center mb-7">
-                Tes bras pour planter les légumes ce week-end. Ses tomates cet été. Peut-être son aide pour repeindre la cuisine en septembre. L'échange n'a pas besoin d'être immédiat pour être juste.
+                Vos bras pour planter les légumes ce week-end. Ses tomates cet été. Peut-être son aide pour repeindre la cuisine en septembre. L'échange n'a pas besoin d'être immédiat pour être juste.
               </p>
             </Reveal>
             <Reveal delay={0.2}>
@@ -128,16 +128,16 @@ const SmallMissionsPublic = () => {
               <Reveal delay={0.1}>
                 <div className="bg-card border border-border rounded-2xl p-10 md:p-12 border-t-4 border-t-primary h-full flex flex-col">
                   <p className="text-xs font-body font-semibold tracking-widest uppercase text-primary mb-6">
-                    Tu as besoin d'un coup de main
+                    Vous avez besoin d'un coup de main
                   </p>
                   <h3 className="font-heading text-xl md:text-2xl font-semibold text-foreground mb-8 leading-tight">
-                    Tu publies ce dont tu as besoin.
+                    Vous publiez ce dont vous avez besoin.
                   </h3>
                   <div className="space-y-9 flex-1">
                     {[
-                      { n: "01", t: "Tu décris la mission — tonte, bricolage, promener le chien, réceptionner un colis." },
-                      { n: "02", t: "Tu proposes ce que tu donnes en échange — un repas, des légumes, une bouteille." },
-                      { n: "03", t: "Des gens du coin voient ta mission et proposent leur aide. Tu choisis. Vous vous rencontrez." },
+                      { n: "01", t: "Vous décrivez la mission — tonte, bricolage, promener le chien, réceptionner un colis." },
+                      { n: "02", t: "Vous proposez ce que vous donnez en échange — un repas, des légumes, une bouteille." },
+                      { n: "03", t: "Des gens du coin voient votre mission et proposent leur aide. Vous choisissez. Vous vous rencontrez." },
                     ].map((s) => (
                       <div key={s.n}>
                         <span className="font-heading text-6xl text-primary/20 font-bold leading-none block">{s.n}</span>
@@ -155,16 +155,16 @@ const SmallMissionsPublic = () => {
               <Reveal delay={0.2}>
                 <div className="bg-card border border-border rounded-2xl p-10 md:p-12 border-t-4 border-t-secondary h-full flex flex-col">
                   <p className="text-xs font-body font-semibold tracking-widest uppercase text-secondary mb-6">
-                    Tu veux donner un coup de main
+                    Vous voulez donner un coup de main
                   </p>
                   <h3 className="font-heading text-xl md:text-2xl font-semibold text-foreground mb-8 leading-tight">
-                    Tu publies ce que tu proposes.
+                    Vous publiez ce que vous proposez.
                   </h3>
                   <div className="space-y-9 flex-1">
                     {[
-                      { n: "01", t: "Tu décris ce que tu sais faire — jardinage, montage meubles, cuisine, aide aux courses." },
-                      { n: "02", t: "Tu dis ce que tu aimerais en échange — ou tu laisses l'autre proposer." },
-                      { n: "03", t: "Quelqu'un a besoin exactement de ça. Il te contacte. L'échange commence." },
+                      { n: "01", t: "Vous décrivez ce que vous savez faire — jardinage, montage meubles, cuisine, aide aux courses." },
+                      { n: "02", t: "Vous dites ce que vous aimeriez en échange — ou vous laissez l'autre proposer." },
+                      { n: "03", t: "Quelqu'un a besoin exactement de ça. Il vous contacte. L'échange commence." },
                     ].map((s) => (
                       <div key={s.n}>
                         <span className="font-heading text-6xl text-secondary/20 font-bold leading-none block">{s.n}</span>
@@ -227,7 +227,7 @@ const SmallMissionsPublic = () => {
                 },
                 {
                   title: "Entre gens du coin.",
-                  text: "Les missions sont visibles uniquement aux membres dans un rayon proche de chez toi.",
+                  text: "Les missions sont visibles uniquement aux membres dans un rayon proche de chez vous.",
                 },
                 {
                   title: "En lien avec la maison.",
