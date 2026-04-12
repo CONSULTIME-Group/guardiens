@@ -3,6 +3,7 @@ import { HelmetProvider } from "react-helmet-async";
 import App from "./App.tsx";
 import "./index.css";
 import reportWebVitals from "./lib/webVitals";
+import { installGlobalErrorHandlers } from "./lib/logger";
 
 const root = createRoot(document.getElementById("root")!);
 root.render(
@@ -18,3 +19,6 @@ requestIdleCallback?.(() => { window.prerenderReady = true; }) ??
 
 // Collect Core Web Vitals (CLS, INP, FCP, LCP, TTFB)
 reportWebVitals();
+
+// Catch unhandled errors globally
+installGlobalErrorHandlers();
