@@ -25,6 +25,8 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { format, differenceInDays, differenceInHours } from "date-fns";
 import { fr } from "date-fns/locale";
 import RoleActivationBanner from "./RoleActivationBanner";
+import AccessGateBanner from "@/components/access/AccessGateBanner";
+import { useAccessLevel } from "@/hooks/useAccessLevel";
 
 const capitalize = (name: string) =>
   name ? name.charAt(0).toUpperCase() + name.slice(1).toLowerCase() : "";
