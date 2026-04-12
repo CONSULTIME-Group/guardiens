@@ -255,7 +255,7 @@ const SmallMissionsPublic = () => {
             </Reveal>
             <Reveal delay={0.1}>
               <p className="font-body text-lg text-white/85 leading-relaxed mb-10">
-                Gratuit. Entre gens du coin qui se choisissent. Accessible dès que ton profil est complété à 60%.
+                Gratuit. Entre gens du coin qui se choisissent. Accessible dès que votre profil est complété à 60%.
               </p>
             </Reveal>
             <Reveal delay={0.2}>

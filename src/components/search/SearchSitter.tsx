@@ -1056,7 +1056,7 @@ const SearchSitter = () => {
               <div className="text-center py-16 space-y-3">
                 <Search className="h-12 w-12 mx-auto text-primary/30" />
                 <p className="font-heading font-semibold text-lg text-foreground">Aucun membre disponible dans ce rayon</p>
-                <p className="text-sm text-muted-foreground">Élargis ton rayon de recherche.</p>
+                <p className="text-sm text-muted-foreground">Élargissez votre rayon de recherche.</p>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
