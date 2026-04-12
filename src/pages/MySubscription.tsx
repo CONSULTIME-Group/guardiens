@@ -8,6 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { BadgeSceauLarge } from "@/components/badges/BadgeSceauLarge";
 import FounderBadge from "@/components/badges/FounderBadge";
 import { Helmet } from "react-helmet-async";
+import EntraideLibreBanner from "@/components/subscription/EntraideLibreBanner";
 
 import {
   Star, Home, Clock, Loader2, Check, Copy,
@@ -737,6 +738,7 @@ const MySubscription = () => {
             <h2 className="font-heading text-2xl font-semibold text-foreground">Votre période fondateur est terminée.</h2>
             <p className="text-sm text-foreground/70 font-body">Merci d'avoir été là dès le premier jour. Choisissez votre formule.</p>
           </div>
+          <EntraideLibreBanner />
           <PricingCardsNew />
           <p className="text-xs text-amber-700 italic text-center mt-2 font-body">Votre badge Fondateur reste permanent à vie.</p>
           {showReferral && <ReferralSection referralCode={profile?.referral_code} userId={user!.id} />}
@@ -751,6 +753,7 @@ const MySubscription = () => {
             <h2 className="text-2xl font-heading font-semibold">Accédez à toutes les gardes.</h2>
             <p className="text-sm text-foreground/70 font-body">Choisissez ce qui vous convient.</p>
           </div>
+          <EntraideLibreBanner />
           <PricingCardsNew />
           {showReferral && <ReferralSection referralCode={profile?.referral_code} userId={user!.id} />}
         </>
@@ -805,6 +808,7 @@ const MySubscription = () => {
               </div>
             ))}
           </div>
+          <EntraideLibreBanner />
           <PricingCardsNew />
           {isFounder && (
             <div className="bg-amber-50 border border-amber-200 rounded-lg px-4 py-3 text-sm text-foreground/70 text-center font-body">
