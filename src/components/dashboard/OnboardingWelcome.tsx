@@ -154,7 +154,7 @@ const OnboardingWelcome = ({ role, checks, onDismiss }: OnboardingWelcomeProps) 
           <Sparkles className="h-8 w-8 text-primary" />
         </div>
         <h1 className="font-heading text-2xl md:text-3xl font-bold">
-          Bienvenue{user?.firstName ? `, ${user.firstName}` : ""} ! 🎉
+          Bienvenue{user?.firstName ? `, ${user.firstName.charAt(0).toUpperCase() + user.firstName.slice(1)}` : ""} !
         </h1>
         <p className="text-muted-foreground text-sm max-w-md mx-auto">
           {role === "sitter"
@@ -175,6 +175,9 @@ const OnboardingWelcome = ({ role, checks, onDismiss }: OnboardingWelcomeProps) 
             style={{ width: `${progress}%` }}
           />
         </div>
+        <p className="text-xs text-muted-foreground text-right">
+          À 60%, vous pourrez publier votre première annonce
+        </p>
       </div>
 
       {/* Steps */}

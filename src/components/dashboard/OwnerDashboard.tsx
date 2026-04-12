@@ -107,7 +107,7 @@ const OwnerDashboard = () => {
       setOnboardingChecks({ hasName, hasAvatar, hasBio, hasIdentity, hasProperty, hasPets: false, hasSit });
 
       const dismissed = localStorage.getItem("onboarding_owner_dismissed");
-      if (!dismissed && user.profileCompletion < 50) {
+      if (!dismissed && user.profileCompletion < 60) {
         setShowOnboarding(true);
       }
 
