@@ -3,6 +3,7 @@ import { HelmetProvider } from "react-helmet-async";
 import App from "./App.tsx";
 import "./index.css";
 import reportWebVitals from "./lib/webVitals";
+import { installGlobalErrorHandlers } from "./lib/logger";
 
 const root = createRoot(document.getElementById("root")!);
 root.render(
