@@ -353,7 +353,10 @@ const OwnerDashboard = () => {
         </div>
       </div>
 
-      {/* Revoir la présentation */}
+      <div className="px-5 md:px-8 mt-4">
+        <AccessGateBanner level={level} profileCompletion={accessProfileCompletion} context="guard" />
+      </div>
+
       <div className="px-5 md:px-8 -mt-4 mb-2">
         <button
           onClick={() => setSearchParams({ tour: "true" })}
