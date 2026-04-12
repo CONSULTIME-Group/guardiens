@@ -1,10 +1,24 @@
 User-agent: *
 Allow: /
+
+# Pages privées
 Disallow: /admin
 Disallow: /dashboard
 Disallow: /messages
 Disallow: /mon-profil
 Disallow: /mon-abonnement
 Disallow: /parametres
+Disallow: /profil/
+Disallow: /notifications
+Disallow: /mes-gardes
+Disallow: /creer-annonce
+Disallow: /modifier-annonce
+Disallow: /laisser-avis
+Disallow: /gardien-profil
+Disallow: /proprietaire-profil
+Disallow: /guide-maison
+
+# Crawl rate
+Crawl-delay: 1
 
 Sitemap: https://guardiens.fr/sitemap.xml
