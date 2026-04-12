@@ -8,11 +8,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Check, CheckCircle, Star, Gift, MapPin, ShieldCheck, Map, PawPrint, Heart, Siren, BadgeCheck, CreditCard } from "lucide-react";
 import PageMeta from "@/components/PageMeta";
 import EntraideLibreBanner from "@/components/subscription/EntraideLibreBanner";
-
-const LAUNCH_DATE = new Date("2026-05-14T00:00:00Z");
-const GRACE_END = new Date("2026-06-13T00:00:00");
-const isBeforeLaunch = () => new Date() < LAUNCH_DATE;
-const isInGracePeriod = () => { const n = new Date(); return n >= LAUNCH_DATE && n < GRACE_END; };
+import { LAUNCH_DATE, GRACE_END, isBeforeLaunch, isInGracePeriod } from "@/lib/constants";
 
 const ownerFeatures = [
   "Publiez une annonce en 5 minutes",
