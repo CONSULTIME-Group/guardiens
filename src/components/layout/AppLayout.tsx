@@ -1,6 +1,7 @@
 import { Outlet } from "react-router-dom";
 import { Sidebar, BottomNav } from "./Navigation";
 import { BackButton } from "./BackButton";
+import Breadcrumbs from "./Breadcrumbs";
 
 export const AppLayout = () => {
   return (
@@ -8,6 +9,7 @@ export const AppLayout = () => {
       <Sidebar />
       <main className="flex-1 pb-20 md:pb-0">
         <BackButton />
+        <Breadcrumbs />
         <Outlet />
       </main>
       <BottomNav />
