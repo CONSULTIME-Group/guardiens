@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { FOUNDER_START, GRACE_END } from "@/lib/constants";
 
-const LAUNCH_DATE = new Date("2026-05-13T00:00:00Z");
-const GRACE_END_DATE = new Date("2026-06-13T00:00:00Z");
+const LAUNCH_DATE = FOUNDER_START;
+const GRACE_END_DATE = GRACE_END;
 
 export type SubStatus = "founder_grace" | "founder_expired" | "premium" | "expired" | "never" | "owner" | "pre_launch";
 

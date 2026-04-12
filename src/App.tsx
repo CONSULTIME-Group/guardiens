@@ -95,7 +95,16 @@ const TestAccordLazy = lazy(() =>
   }))
 );
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60 * 1000,   // 5 min avant refetch
+      gcTime: 10 * 60 * 1000,     // 10 min en cache
+      refetchOnWindowFocus: false,
+      retry: 1,
+    },
+  },
+});
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated, user, loading } = useAuth();

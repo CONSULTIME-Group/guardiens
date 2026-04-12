@@ -21,10 +21,7 @@ import { fr } from "date-fns/locale";
 import { toast } from "sonner";
 import { useSearchParams } from "react-router-dom";
 
-const LAUNCH_DATE = new Date("2026-05-14T00:00:00Z");
-const LAUNCH_START = new Date("2026-04-07T00:00:00Z");
-const GRACE_END = new Date("2026-06-14T00:00:00Z");
-const FOUNDER_START = new Date("2026-05-13T00:00:00Z");
+import { LAUNCH_DATE, LAUNCH_START, GRACE_END, FOUNDER_START } from "@/lib/constants";
 
 function calcCountdown() {
   const now = new Date();
