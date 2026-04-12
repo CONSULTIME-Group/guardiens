@@ -2,6 +2,7 @@ import { createRoot } from "react-dom/client";
 import { HelmetProvider } from "react-helmet-async";
 import App from "./App.tsx";
 import "./index.css";
+import reportWebVitals from "./lib/webVitals";
 
 const root = createRoot(document.getElementById("root")!);
 root.render(
@@ -14,3 +15,6 @@ root.render(
 // Pages with async data set prerenderReady = true themselves after fetch.
 requestIdleCallback?.(() => { window.prerenderReady = true; }) ??
   setTimeout(() => { window.prerenderReady = true; }, 500);
+
+// Collect Core Web Vitals (CLS, INP, FCP, LCP, TTFB)
+reportWebVitals();

@@ -553,7 +553,7 @@ const SearchSitter = () => {
       <div className={`bg-card rounded-2xl overflow-hidden border border-border transition-shadow ${isClickable ? "cursor-pointer hover:shadow-md" : ""}`}>
         {photos.length > 0 && (
           <div className="h-52 relative">
-            <img src={photos[0]} alt="" className="w-full h-full object-cover" />
+            <img src={photos[0]} alt="" className="w-full h-full object-cover" loading="lazy" />
             {item.owner?.identity_verified && (
               <span className="absolute top-3 left-3 flex items-center gap-1 bg-white/90 backdrop-blur-sm rounded-full px-2 py-1 text-xs text-primary font-medium">
                 <ShieldCheck className="h-3 w-3" /> Vérifié
@@ -1073,7 +1073,7 @@ const SearchSitter = () => {
                   return (
                     <div key={member.id} className="bg-card rounded-2xl border border-border p-4 flex items-center gap-4">
                       {member.avatar_url ? (
-                        <img src={member.avatar_url} alt="" className="w-12 h-12 rounded-full object-cover shrink-0" />
+                        <img src={member.avatar_url} alt="" className="w-12 h-12 rounded-full object-cover shrink-0" loading="lazy" />
                       ) : (
                         <div className="w-12 h-12 rounded-full bg-accent flex items-center justify-center text-sm font-bold shrink-0 text-foreground">
                           {member.first_name?.charAt(0) || "?"}

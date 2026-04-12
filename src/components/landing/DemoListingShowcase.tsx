@@ -44,7 +44,7 @@ const DemoListingCard = ({
 }: typeof DEMO_LISTINGS[0]) => (
   <div className="bg-card rounded-2xl overflow-hidden border border-border shadow-sm flex flex-col">
     <div className="relative">
-      <img src={photo} alt={title} className="w-full h-48 object-cover" />
+      <img src={photo} alt={title} className="w-full h-48 object-cover" loading="lazy" />
       <span className="absolute top-3 left-3 bg-white/90 text-foreground/50 text-xs font-body font-medium px-3 py-1 rounded-full border border-border/60">
         Bientôt disponible
       </span>
@@ -68,7 +68,7 @@ const DemoListingCard = ({
       <p className="text-sm font-body text-foreground/70 line-clamp-2">{description}</p>
 
       <div className="flex items-center gap-3 mt-auto pt-3 border-t border-border">
-        <img src={ownerPhoto} alt={ownerName} className="w-9 h-9 rounded-full object-cover" />
+        <img src={ownerPhoto} alt={ownerName} className="w-9 h-9 rounded-full object-cover" loading="lazy" />
         <div className="flex-1 min-w-0">
           <p className="text-sm font-body font-medium text-foreground/90 truncate">{ownerName}</p>
           <div className="flex gap-1 flex-wrap">
