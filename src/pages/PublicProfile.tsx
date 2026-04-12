@@ -21,6 +21,7 @@ import EntraideSection from "@/components/missions/EntraideSection";
 import PublicSkills from "@/components/profile/PublicSkills";
 import EnvironmentPills from "@/components/shared/EnvironmentPills";
 import CancellationReviewsSection from "@/components/reviews/CancellationReviewsSection";
+import ProfileSkeleton from "@/components/skeletons/ProfileSkeleton";
 
 const speciesLabels: Record<string, string> = {
   dog: "🐕 Chiens", cat: "🐱 Chats", horse: "🐴 Chevaux", bird: "🐦 Oiseaux",
@@ -118,7 +119,7 @@ const PublicProfile = () => {
     load();
   }, [id]);
 
-  if (loading) return <div className="p-6 md:p-10 text-muted-foreground">Chargement...</div>;
+  if (loading) return <ProfileSkeleton />;
   if (!profile) return <div className="p-6 md:p-10 text-muted-foreground">Profil introuvable.</div>;
 
   const createdDate = new Date(profile.created_at);
