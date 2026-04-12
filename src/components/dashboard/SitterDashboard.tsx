@@ -34,6 +34,7 @@ const capitalize = (name: string) =>
 const SitterDashboard = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { level, profileCompletion: accessProfileCompletion } = useAccessLevel();
   const [searchParams, setSearchParams] = useSearchParams();
   const { hasAccess: hasSubscription } = useSubscriptionAccess();
   const [showOnboardingModal, setShowOnboardingModal] = useState(false);

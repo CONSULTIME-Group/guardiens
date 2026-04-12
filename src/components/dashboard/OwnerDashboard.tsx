@@ -44,6 +44,7 @@ const capitalizeWords = (s: string | null | undefined) => {
 const OwnerDashboard = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { level, profileCompletion: accessProfileCompletion } = useAccessLevel();
   const [searchParams, setSearchParams] = useSearchParams();
   const [sits, setSits] = useState<any[]>([]);
   const { data: userBadges } = useUserBadges(user?.id);
