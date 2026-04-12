@@ -13,6 +13,8 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import SkipToContent from "@/components/layout/SkipToContent";
+import OfflineBanner from "@/components/layout/OfflineBanner";
+import ScrollToTop from "@/components/layout/ScrollToTop";
 import { toast } from "sonner";
 
 // ──── Critical routes (eager) ────
@@ -266,6 +268,8 @@ const App = () => (
             <Toaster />
             <Sonner />
             <BrowserRouter>
+              <ScrollToTop />
+              <OfflineBanner />
               <AppRoutes />
             </BrowserRouter>
           </AuthProvider>
