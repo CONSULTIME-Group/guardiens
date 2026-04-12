@@ -98,7 +98,7 @@ const PublicSitDetail = () => {
 
       {/* Hero photo */}
       {photos.length > 0 && (
-        <img src={photos[0]} alt="Logement" className="w-full h-64 md:h-80 object-cover" />
+        <img src={photos[0]} alt="Logement" className="w-full h-64 md:h-80 object-cover" loading="eager" />
       )}
 
       <div className="p-6 md:p-10">
@@ -175,7 +175,7 @@ const PublicSitDetail = () => {
         {owner && (
           <div className="flex items-center gap-3 mb-8 p-4 bg-card rounded-xl border border-border">
             {owner.avatar_url ? (
-              <img src={owner.avatar_url} alt={owner.first_name} className="w-14 h-14 rounded-full object-cover" />
+              <img src={owner.avatar_url} alt={owner.first_name} className="w-14 h-14 rounded-full object-cover" loading="lazy" />
             ) : (
               <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center font-heading text-lg font-bold text-primary">
                 {owner.first_name?.charAt(0) || "?"}
