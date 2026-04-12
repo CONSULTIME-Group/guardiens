@@ -75,7 +75,7 @@ import AdminMassEmails from "./pages/admin/AdminMassEmails";
 import AdminMessages from "./pages/admin/AdminMessages";
 
 import EmergencySitter from "./pages/EmergencySitter";
-import OnboardingPage from "./pages/OnboardingPage";
+
 import { AccordDeGardePreview as TestAccord } from "./components/gardes/AccordDeGarde";
 import MySubscription from "./pages/MySubscription";
 import PublicSitDetail from "./pages/PublicSitDetail";
@@ -87,17 +87,10 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated, user, loading } = useAuth();
   if (loading) return <div className="min-h-screen flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-muted-foreground" /></div>;
   if (!isAuthenticated) return <Navigate to="/login" replace />;
-  if (user && user.onboardingCompleted === false) return <Navigate to="/onboarding" replace />;
+  
   return <>{children}</>;
 };
 
-const OnboardingProtection = ({ children }: { children: React.ReactNode }) => {
-  const { isAuthenticated, user, loading } = useAuth();
-  if (loading) return <div className="min-h-screen flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-muted-foreground" /></div>;
-  if (!isAuthenticated) return <Navigate to="/login" replace />;
-  if (user && user.onboardingCompleted === true) return <Navigate to="/dashboard" replace />;
-  return <>{children}</>;
-};
 
 const PublicOnlyRoute = ({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated, loading } = useAuth();
@@ -152,7 +145,7 @@ const AppRoutes = () => (
     <Route path="/register" element={<PublicOnlyRoute><Register /></PublicOnlyRoute>} />
     <Route path="/forgot-password" element={<PublicOnlyRoute><ForgotPassword /></PublicOnlyRoute>} />
     <Route path="/reset-password" element={<ResetPassword />} />
-    <Route path="/onboarding" element={<OnboardingProtection><OnboardingPage /></OnboardingProtection>} />
+    
     <Route path="/actualites" element={<News />} />
     <Route path="/actualites/:slug" element={<ArticleDetail />} />
     <Route path="/blog" element={<Navigate to="/actualites" replace />} />
