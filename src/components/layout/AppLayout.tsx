@@ -7,7 +7,7 @@ export const AppLayout = () => {
   return (
     <div className="flex min-h-screen bg-background">
       <Sidebar />
-      <main className="flex-1 pb-20 md:pb-0">
+      <main id="main-content" className="flex-1 pb-20 md:pb-0" role="main">
         <BackButton />
         <Breadcrumbs />
         <Outlet />
