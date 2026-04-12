@@ -116,11 +116,29 @@ const Pricing = () => {
     prorata: "Choisir le prorata 2026",
   };
 
+  const faqJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: faqItems.map((item) => ({
+      "@type": "Question",
+      name: item.q,
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: item.a.replace(/\[.*?\]\(.*?\)/g, "").replace(/\*\*/g, ""),
+      },
+    })),
+  };
+
   return (
     <>
       <PageMeta
         title="Tarifs Guardiens — 9€/mois pour les gardiens"
         description="Gratuit pour les propriétaires. 9€/mois pour les gardiens avec 30 jours d'essai offerts."
+      />
+
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
       />
 
       <div className="min-h-screen bg-background">
