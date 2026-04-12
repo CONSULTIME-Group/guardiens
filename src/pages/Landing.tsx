@@ -613,10 +613,10 @@ const Landing = () => {
             <span className="font-body text-xs text-white uppercase tracking-widest">Fondateurs</span>
           </div>
           <h2 className="font-heading text-4xl md:text-5xl font-bold text-white leading-snug mb-6">
-            Inscris-toi avant le 13 mai.
+            Inscrivez-vous avant le 13 mai.
           </h2>
           <p className="font-body text-lg text-white/85 leading-relaxed mb-10">
-            Badge Fondateur à vie. Accès gratuit jusqu'au 13 juin. Et surtout, tu seras parmi les premiers à vivre ça. Pourquoi le 13 mai ? C'est l'anniversaire de Jérémie. Il préfère offrir l'accès plutôt que recevoir des chaussettes.
+            Badge Fondateur à vie. Accès gratuit jusqu'au 13 juin. Et surtout, vous serez parmi les premiers à vivre ça. Pourquoi le 13 mai ? C'est l'anniversaire de Jérémie. Il préfère offrir l'accès plutôt que recevoir des chaussettes.
           </p>
           <button
             onClick={() => navigate("/register")}
@@ -632,10 +632,10 @@ const Landing = () => {
       <section className="py-24 md:py-32 bg-foreground">
         <RevealSection className="max-w-2xl mx-auto px-6 text-center">
           <h2 className="font-heading text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight mb-6">
-            Ton histoire commence ici.
+            Votre histoire commence ici.
           </h2>
           <p className="font-body text-lg text-white/70 leading-relaxed max-w-lg mx-auto mb-10">
-            Gratuit pour les propriétaires, pour toujours. Ce que tu vas vivre ne l'est pas.
+            Gratuit pour les propriétaires, pour toujours. Ce que vous allez vivre ne l'est pas.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <button

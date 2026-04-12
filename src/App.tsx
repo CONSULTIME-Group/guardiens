@@ -1,3 +1,4 @@
+import { lazy, Suspense } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Route, Routes, Navigate, useParams } from "react-router-dom";
 import { Loader2 } from "lucide-react";
@@ -10,82 +11,95 @@ import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { AdminLayout } from "@/components/admin/AdminLayout";
+
+// ──── Critical routes (eager) ────
 import Landing from "./pages/Landing";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
-import ForgotPassword from "./pages/ForgotPassword";
-import ResetPassword from "./pages/ResetPassword";
 import Dashboard from "./pages/Dashboard";
-import Profile from "./pages/Profile";
-import SearchPage from "./pages/SearchPage";
-import SearchOwner from "./components/search/SearchOwner";
-import Messages from "./pages/Messages";
-import Sits from "./pages/Sits";
-import CreateSit from "./pages/CreateSit";
-import SitDetail from "./pages/SitDetail";
-import EditSit from "./pages/EditSit";
-import HouseGuide from "./pages/HouseGuide";
-import LeaveReview from "./pages/LeaveReview";
-import Notifications from "./pages/Notifications";
-import Settings from "./pages/Settings";
-import OwnerProfile from "./pages/OwnerProfile";
-import News from "./pages/News";
-import ArticleDetail from "./pages/ArticleDetail";
-import About from "./pages/About";
-import Contact from "./pages/Contact";
-import Terms from "./pages/Terms";
-import Privacy from "./pages/Privacy";
-import AdminArticles from "./pages/AdminArticles";
-import ArticleEditor from "./pages/ArticleEditor";
-import AdminDashboard from "./pages/admin/AdminDashboard";
-import AdminUsers from "./pages/admin/AdminUsers";
-import AdminListings from "./pages/admin/AdminListings";
-import AdminSitsManagement from "./pages/admin/AdminSitsManagement";
-import AdminReviews from "./pages/admin/AdminReviews";
-import AdminReports from "./pages/admin/AdminReports";
-import AdminVerifications from "./pages/admin/AdminVerifications";
-import AdminEmails from "./pages/admin/AdminEmails";
-import AdminExperienceVerification from "./pages/admin/AdminExperienceVerification";
 import NotFound from "./pages/NotFound";
-import PlancheBadges from "./pages/PlancheBadges";
-import Unsubscribe from "./pages/Unsubscribe";
-import CityPage from "./pages/CityPage";
-import AdminCityPages from "./pages/admin/AdminCityPages";
-import FAQ from "./pages/FAQ";
-import AdminFAQ from "./pages/admin/AdminFAQ";
-import GuidesListing from "./pages/GuidesListing";
-import GuideDetail from "./pages/GuideDetail";
-import AdminGuides from "./pages/admin/AdminGuides";
-import AdminDepartments from "./pages/admin/AdminDepartments";
-import DepartmentPage from "./pages/DepartmentPage";
-import Pricing from "./pages/Pricing";
-import SmallMissions from "./pages/SmallMissions";
-import SmallMissionsPublic from "./pages/SmallMissionsPublic";
-import SmallMissionDetail from "./pages/SmallMissionDetail";
-import CreateSmallMission from "./pages/CreateSmallMission";
-import MentionsLegales from "./pages/MentionsLegales";
-import AdminSmallMissions from "./pages/admin/AdminSmallMissions";
-import AdminSubscriptions from "./pages/admin/AdminSubscriptions";
-import AdminLegal from "./pages/admin/AdminLegal";
-import AdminSettings from "./pages/admin/AdminSettings";
-import AdminContactMessages from "./pages/admin/AdminContactMessages";
-import AdminSEO from "./pages/admin/AdminSEO";
-import AdminSkills from "./pages/admin/AdminSkills";
-import AdminMassEmails from "./pages/admin/AdminMassEmails";
-import AdminMessages from "./pages/admin/AdminMessages";
 
-import EmergencySitter from "./pages/EmergencySitter";
+// ──── Lazy-loaded routes ────
+const FallbackSpinner = () => (
+  <div className="min-h-screen flex items-center justify-center">
+    <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+  </div>
+);
 
-import { AccordDeGardePreview as TestAccord } from "./components/gardes/AccordDeGarde";
-import MySubscription from "./pages/MySubscription";
-import PublicSitDetail from "./pages/PublicSitDetail";
-import PublicSitterProfile from "./pages/PublicSitterProfile";
+const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
+const ResetPassword = lazy(() => import("./pages/ResetPassword"));
+const Profile = lazy(() => import("./pages/Profile"));
+const SearchPage = lazy(() => import("./pages/SearchPage"));
+const SearchOwner = lazy(() => import("./components/search/SearchOwner"));
+const Messages = lazy(() => import("./pages/Messages"));
+const Sits = lazy(() => import("./pages/Sits"));
+const CreateSit = lazy(() => import("./pages/CreateSit"));
+const SitDetail = lazy(() => import("./pages/SitDetail"));
+const EditSit = lazy(() => import("./pages/EditSit"));
+const HouseGuide = lazy(() => import("./pages/HouseGuide"));
+const LeaveReview = lazy(() => import("./pages/LeaveReview"));
+const Notifications = lazy(() => import("./pages/Notifications"));
+const Settings = lazy(() => import("./pages/Settings"));
+const OwnerProfile = lazy(() => import("./pages/OwnerProfile"));
+const News = lazy(() => import("./pages/News"));
+const ArticleDetail = lazy(() => import("./pages/ArticleDetail"));
+const About = lazy(() => import("./pages/About"));
+const Contact = lazy(() => import("./pages/Contact"));
+const Terms = lazy(() => import("./pages/Terms"));
+const Privacy = lazy(() => import("./pages/Privacy"));
+const AdminArticles = lazy(() => import("./pages/AdminArticles"));
+const ArticleEditor = lazy(() => import("./pages/ArticleEditor"));
+const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
+const AdminUsers = lazy(() => import("./pages/admin/AdminUsers"));
+const AdminListings = lazy(() => import("./pages/admin/AdminListings"));
+const AdminSitsManagement = lazy(() => import("./pages/admin/AdminSitsManagement"));
+const AdminReviews = lazy(() => import("./pages/admin/AdminReviews"));
+const AdminReports = lazy(() => import("./pages/admin/AdminReports"));
+const AdminVerifications = lazy(() => import("./pages/admin/AdminVerifications"));
+const AdminEmails = lazy(() => import("./pages/admin/AdminEmails"));
+const AdminExperienceVerification = lazy(() => import("./pages/admin/AdminExperienceVerification"));
+const PlancheBadges = lazy(() => import("./pages/PlancheBadges"));
+const Unsubscribe = lazy(() => import("./pages/Unsubscribe"));
+const CityPage = lazy(() => import("./pages/CityPage"));
+const AdminCityPages = lazy(() => import("./pages/admin/AdminCityPages"));
+const FAQ = lazy(() => import("./pages/FAQ"));
+const AdminFAQ = lazy(() => import("./pages/admin/AdminFAQ"));
+const GuidesListing = lazy(() => import("./pages/GuidesListing"));
+const GuideDetail = lazy(() => import("./pages/GuideDetail"));
+const AdminGuides = lazy(() => import("./pages/admin/AdminGuides"));
+const AdminDepartments = lazy(() => import("./pages/admin/AdminDepartments"));
+const DepartmentPage = lazy(() => import("./pages/DepartmentPage"));
+const Pricing = lazy(() => import("./pages/Pricing"));
+const SmallMissions = lazy(() => import("./pages/SmallMissions"));
+const SmallMissionsPublic = lazy(() => import("./pages/SmallMissionsPublic"));
+const SmallMissionDetail = lazy(() => import("./pages/SmallMissionDetail"));
+const CreateSmallMission = lazy(() => import("./pages/CreateSmallMission"));
+const MentionsLegales = lazy(() => import("./pages/MentionsLegales"));
+const AdminSmallMissions = lazy(() => import("./pages/admin/AdminSmallMissions"));
+const AdminSubscriptions = lazy(() => import("./pages/admin/AdminSubscriptions"));
+const AdminLegal = lazy(() => import("./pages/admin/AdminLegal"));
+const AdminSettings = lazy(() => import("./pages/admin/AdminSettings"));
+const AdminContactMessages = lazy(() => import("./pages/admin/AdminContactMessages"));
+const AdminSEO = lazy(() => import("./pages/admin/AdminSEO"));
+const AdminSkills = lazy(() => import("./pages/admin/AdminSkills"));
+const AdminMassEmails = lazy(() => import("./pages/admin/AdminMassEmails"));
+const AdminMessages = lazy(() => import("./pages/admin/AdminMessages"));
+const EmergencySitter = lazy(() => import("./pages/EmergencySitter"));
+const MySubscription = lazy(() => import("./pages/MySubscription"));
+const PublicSitDetail = lazy(() => import("./pages/PublicSitDetail"));
+const PublicSitterProfile = lazy(() => import("./pages/PublicSitterProfile"));
+
+const TestAccordLazy = lazy(() =>
+  import("./components/gardes/AccordDeGarde").then((m) => ({
+    default: m.AccordDeGardePreview,
+  }))
+);
 
 const queryClient = new QueryClient();
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated, user, loading } = useAuth();
-  if (loading) return <div className="min-h-screen flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-muted-foreground" /></div>;
+  if (loading) return <FallbackSpinner />;
   if (!isAuthenticated) return <Navigate to="/login" replace />;
   
   return <>{children}</>;
@@ -139,87 +153,89 @@ const RedirectProprietaire = () => {
 };
 
 const AppRoutes = () => (
-  <Routes>
-    <Route path="/" element={<Landing />} />
-    <Route path="/login" element={<PublicOnlyRoute><Login /></PublicOnlyRoute>} />
-    <Route path="/register" element={<PublicOnlyRoute><Register /></PublicOnlyRoute>} />
-    <Route path="/forgot-password" element={<PublicOnlyRoute><ForgotPassword /></PublicOnlyRoute>} />
-    <Route path="/reset-password" element={<ResetPassword />} />
-    
-    <Route path="/actualites" element={<News />} />
-    <Route path="/actualites/:slug" element={<ArticleDetail />} />
-    <Route path="/blog" element={<Navigate to="/actualites" replace />} />
-    <Route path="/blog/:slug" element={<NavigateBlogSlug />} />
-    <Route path="/a-propos" element={<About />} />
-    <Route path="/contact" element={<Contact />} />
-    <Route path="/cgu" element={<Terms />} />
-    <Route path="/confidentialite" element={<Privacy />} />
-    <Route path="/mentions-legales" element={<MentionsLegales />} />
-    <Route path="/faq" element={<FAQ />} />
-    <Route path="/guides" element={<GuidesListing />} />
-    <Route path="/guides/:slug" element={<GuideDetail />} />
-    <Route path="/guide" element={<Navigate to="/guides" replace />} />
-    <Route path="/guide/:slug" element={<NavigateGuideSlug />} />
-    <Route path="/house-sitting/:slug" element={<CityPage />} />
-    <Route path="/departement/:slug" element={<DepartmentPage />} />
-    <Route path="/tarifs" element={<Pricing />} />
-    <Route path="/test-accord" element={<div className="p-6 bg-background min-h-screen"><TestAccord /></div>} />
-    <Route path="/gardien-urgence" element={<EmergencySitter />} />
-    <Route path="/petites-missions" element={<SmallMissionsRoute />} />
-    <Route path="/petites-missions/creer" element={<ProtectedRoute><CreateSmallMission /></ProtectedRoute>} />
-    <Route path="/petites-missions/:id" element={<SmallMissionDetail />} />
-    <Route path="/profil/:id" element={<RedirectProfil />} />
-    <Route path="/proprietaires/:id" element={<RedirectProprietaire />} />
-    <Route path="/annonces/:id" element={<PublicSitDetail />} />
-    <Route path="/gardiens/:id" element={<PublicSitterProfile />} />
-    <Route element={<AdminLayout />}>
-      <Route path="/admin" element={<AdminDashboard />} />
-      <Route path="/admin/subscriptions" element={<AdminSubscriptions />} />
-      <Route path="/admin/users" element={<AdminUsers />} />
-      <Route path="/admin/listings" element={<AdminListings />} />
-      <Route path="/admin/sits-management" element={<AdminSitsManagement />} />
-      <Route path="/admin/reviews" element={<AdminReviews />} />
-      <Route path="/admin/reports" element={<AdminReports />} />
-      <Route path="/admin/verifications" element={<AdminVerifications />} />
-      <Route path="/admin/emails" element={<AdminEmails />} />
-      <Route path="/admin/experiences" element={<AdminExperienceVerification />} />
-      <Route path="/admin/articles" element={<AdminArticles />} />
-      <Route path="/admin/articles/:id" element={<ArticleEditor />} />
-      <Route path="/admin/city-pages" element={<AdminCityPages />} />
-      <Route path="/admin/guides" element={<AdminGuides />} />
-      <Route path="/admin/departments" element={<AdminDepartments />} />
-      <Route path="/admin/faq" element={<AdminFAQ />} />
-      <Route path="/admin/small-missions" element={<AdminSmallMissions />} />
-      <Route path="/admin/legal" element={<AdminLegal />} />
-      <Route path="/admin/settings" element={<AdminSettings />} />
-      <Route path="/admin/contact-messages" element={<AdminContactMessages />} />
-      <Route path="/admin/seo" element={<AdminSEO />} />
-      <Route path="/admin/skills" element={<AdminSkills />} />
-      <Route path="/admin/envois-groupes" element={<AdminMassEmails />} />
-      <Route path="/admin/messages" element={<AdminMessages />} />
-    </Route>
-    {/* App routes */}
-    <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
-      <Route path="/dashboard" element={<Dashboard />} />
-      <Route path="/profile" element={<Profile />} />
-      <Route path="/search" element={<SearchPage />} />
-      <Route path="/recherche-gardiens" element={<SearchOwner />} />
-      <Route path="/messages" element={<Messages />} />
-      <Route path="/sits" element={<Sits />} />
-      <Route path="/sits/create" element={<CreateSit />} />
-      <Route path="/sits/:id" element={<SitDetail />} />
-      <Route path="/sits/:id/edit" element={<EditSit />} />
-      <Route path="/review/:sitId" element={<LeaveReview />} />
-      <Route path="/notifications" element={<Notifications />} />
-      <Route path="/house-guide/:propertyId" element={<HouseGuide />} />
-      <Route path="/owner-profile" element={<OwnerProfile />} />
-      <Route path="/settings" element={<Settings />} />
-      <Route path="/mon-abonnement" element={<MySubscription />} />
-    </Route>
-    <Route path="/planche-badges" element={<PlancheBadges />} />
-    <Route path="/unsubscribe" element={<Unsubscribe />} />
-    <Route path="*" element={<NotFound />} />
-  </Routes>
+  <Suspense fallback={<FallbackSpinner />}>
+    <Routes>
+      <Route path="/" element={<Landing />} />
+      <Route path="/login" element={<PublicOnlyRoute><Login /></PublicOnlyRoute>} />
+      <Route path="/register" element={<PublicOnlyRoute><Register /></PublicOnlyRoute>} />
+      <Route path="/forgot-password" element={<PublicOnlyRoute><ForgotPassword /></PublicOnlyRoute>} />
+      <Route path="/reset-password" element={<ResetPassword />} />
+      
+      <Route path="/actualites" element={<News />} />
+      <Route path="/actualites/:slug" element={<ArticleDetail />} />
+      <Route path="/blog" element={<Navigate to="/actualites" replace />} />
+      <Route path="/blog/:slug" element={<NavigateBlogSlug />} />
+      <Route path="/a-propos" element={<About />} />
+      <Route path="/contact" element={<Contact />} />
+      <Route path="/cgu" element={<Terms />} />
+      <Route path="/confidentialite" element={<Privacy />} />
+      <Route path="/mentions-legales" element={<MentionsLegales />} />
+      <Route path="/faq" element={<FAQ />} />
+      <Route path="/guides" element={<GuidesListing />} />
+      <Route path="/guides/:slug" element={<GuideDetail />} />
+      <Route path="/guide" element={<Navigate to="/guides" replace />} />
+      <Route path="/guide/:slug" element={<NavigateGuideSlug />} />
+      <Route path="/house-sitting/:slug" element={<CityPage />} />
+      <Route path="/departement/:slug" element={<DepartmentPage />} />
+      <Route path="/tarifs" element={<Pricing />} />
+      <Route path="/test-accord" element={<div className="p-6 bg-background min-h-screen"><TestAccordLazy /></div>} />
+      <Route path="/gardien-urgence" element={<EmergencySitter />} />
+      <Route path="/petites-missions" element={<SmallMissionsRoute />} />
+      <Route path="/petites-missions/creer" element={<ProtectedRoute><CreateSmallMission /></ProtectedRoute>} />
+      <Route path="/petites-missions/:id" element={<SmallMissionDetail />} />
+      <Route path="/profil/:id" element={<RedirectProfil />} />
+      <Route path="/proprietaires/:id" element={<RedirectProprietaire />} />
+      <Route path="/annonces/:id" element={<PublicSitDetail />} />
+      <Route path="/gardiens/:id" element={<PublicSitterProfile />} />
+      <Route element={<AdminLayout />}>
+        <Route path="/admin" element={<AdminDashboard />} />
+        <Route path="/admin/subscriptions" element={<AdminSubscriptions />} />
+        <Route path="/admin/users" element={<AdminUsers />} />
+        <Route path="/admin/listings" element={<AdminListings />} />
+        <Route path="/admin/sits-management" element={<AdminSitsManagement />} />
+        <Route path="/admin/reviews" element={<AdminReviews />} />
+        <Route path="/admin/reports" element={<AdminReports />} />
+        <Route path="/admin/verifications" element={<AdminVerifications />} />
+        <Route path="/admin/emails" element={<AdminEmails />} />
+        <Route path="/admin/experiences" element={<AdminExperienceVerification />} />
+        <Route path="/admin/articles" element={<AdminArticles />} />
+        <Route path="/admin/articles/:id" element={<ArticleEditor />} />
+        <Route path="/admin/city-pages" element={<AdminCityPages />} />
+        <Route path="/admin/guides" element={<AdminGuides />} />
+        <Route path="/admin/departments" element={<AdminDepartments />} />
+        <Route path="/admin/faq" element={<AdminFAQ />} />
+        <Route path="/admin/small-missions" element={<AdminSmallMissions />} />
+        <Route path="/admin/legal" element={<AdminLegal />} />
+        <Route path="/admin/settings" element={<AdminSettings />} />
+        <Route path="/admin/contact-messages" element={<AdminContactMessages />} />
+        <Route path="/admin/seo" element={<AdminSEO />} />
+        <Route path="/admin/skills" element={<AdminSkills />} />
+        <Route path="/admin/envois-groupes" element={<AdminMassEmails />} />
+        <Route path="/admin/messages" element={<AdminMessages />} />
+      </Route>
+      {/* App routes */}
+      <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/profile" element={<Profile />} />
+        <Route path="/search" element={<SearchPage />} />
+        <Route path="/recherche-gardiens" element={<SearchOwner />} />
+        <Route path="/messages" element={<Messages />} />
+        <Route path="/sits" element={<Sits />} />
+        <Route path="/sits/create" element={<CreateSit />} />
+        <Route path="/sits/:id" element={<SitDetail />} />
+        <Route path="/sits/:id/edit" element={<EditSit />} />
+        <Route path="/review/:sitId" element={<LeaveReview />} />
+        <Route path="/notifications" element={<Notifications />} />
+        <Route path="/house-guide/:propertyId" element={<HouseGuide />} />
+        <Route path="/owner-profile" element={<OwnerProfile />} />
+        <Route path="/settings" element={<Settings />} />
+        <Route path="/mon-abonnement" element={<MySubscription />} />
+      </Route>
+      <Route path="/planche-badges" element={<PlancheBadges />} />
+      <Route path="/unsubscribe" element={<Unsubscribe />} />
+      <Route path="*" element={<NotFound />} />
+    </Routes>
+  </Suspense>
 );
 
 const App = () => (

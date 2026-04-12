@@ -667,9 +667,9 @@ const SmallMissions = () => {
               </div>
             </div>
 
-            {/* ═══ Section 1 — Missions près de chez toi ═══ */}
+            {/* ═══ Section 1 — Missions près de chez vous ═══ */}
             <h2 className="text-base font-semibold text-foreground mb-4 flex items-center gap-2">
-              Missions près de chez toi
+              Missions près de chez vous
               <span className="text-xs font-normal bg-muted text-muted-foreground px-2 py-0.5 rounded-full">
                 {missionCount} mission{missionCount > 1 ? "s" : ""}
               </span>
@@ -744,10 +744,10 @@ const SmallMissions = () => {
             ) : (
               <div>
                 <p className="text-sm text-muted-foreground">
-                  Aucune mission publiée près de chez toi.
+                  Aucune mission publiée près de chez vous.
                 </p>
                 <Link to="/petites-missions/creer" className="text-sm text-primary underline mt-1 inline-block">
-                  Publie la tienne →
+                  Publiez la vôtre →
                 </Link>
               </div>
             )}
