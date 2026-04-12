@@ -45,17 +45,6 @@ interface SubRow {
   stripe_subscription_id: string | null;
 }
 
-// ──── Pricing helpers ────
-const calculateProrata = () => {
-  const now = new Date();
-  const nextMonth = now.getMonth() + 1;
-  const monthsRemaining = Math.max(0, 12 - nextMonth);
-  const fullPrice = monthsRemaining * 9;
-  const discountedPrice = Math.round(fullPrice * 0.8);
-  const savings = fullPrice - discountedPrice;
-  return { months: monthsRemaining, price: discountedPrice, savings };
-};
-
 // ──── ADVANTAGES ────
 const FOUNDER_ADVANTAGES = [
   "Postuler aux gardes",
