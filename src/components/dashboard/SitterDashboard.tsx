@@ -25,6 +25,8 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { format, differenceInDays, differenceInHours } from "date-fns";
 import { fr } from "date-fns/locale";
 import RoleActivationBanner from "./RoleActivationBanner";
+import AccessGateBanner from "@/components/access/AccessGateBanner";
+import { useAccessLevel } from "@/hooks/useAccessLevel";
 
 const capitalize = (name: string) =>
   name ? name.charAt(0).toUpperCase() + name.slice(1).toLowerCase() : "";
@@ -32,6 +34,7 @@ const capitalize = (name: string) =>
 const SitterDashboard = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { level, profileCompletion: accessProfileCompletion } = useAccessLevel();
   const [searchParams, setSearchParams] = useSearchParams();
   const { hasAccess: hasSubscription } = useSubscriptionAccess();
   const [showOnboardingModal, setShowOnboardingModal] = useState(false);
@@ -335,7 +338,10 @@ const SitterDashboard = () => {
         </div>
       </div>
 
-      {/* Revoir la présentation */}
+      <div className="px-5 md:px-8 mt-4">
+        <AccessGateBanner level={level} profileCompletion={accessProfileCompletion} context="guard" />
+      </div>
+
       <div className="px-5 md:px-8 -mt-4 mb-2">
         <button
           onClick={() => setSearchParams({ tour: "true" })}

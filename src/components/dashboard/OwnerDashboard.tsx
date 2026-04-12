@@ -19,6 +19,8 @@ import { fr } from "date-fns/locale";
 
 import { TooltipProvider } from "@/components/ui/tooltip";
 import RoleActivationBanner from "./RoleActivationBanner";
+import AccessGateBanner from "@/components/access/AccessGateBanner";
+import { useAccessLevel } from "@/hooks/useAccessLevel";
 import { BadgeSceau } from '@/components/badges/BadgeSceau';
 import { useUserBadges } from '@/hooks/useProfileReputation';
 import { PROPRIO_BADGE_IDS } from '@/components/badges/badge-definitions';
@@ -42,6 +44,7 @@ const capitalizeWords = (s: string | null | undefined) => {
 const OwnerDashboard = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { level, profileCompletion: accessProfileCompletion } = useAccessLevel();
   const [searchParams, setSearchParams] = useSearchParams();
   const [sits, setSits] = useState<any[]>([]);
   const { data: userBadges } = useUserBadges(user?.id);
@@ -350,7 +353,10 @@ const OwnerDashboard = () => {
         </div>
       </div>
 
-      {/* Revoir la présentation */}
+      <div className="px-5 md:px-8 mt-4">
+        <AccessGateBanner level={level} profileCompletion={accessProfileCompletion} context="guard" />
+      </div>
+
       <div className="px-5 md:px-8 -mt-4 mb-2">
         <button
           onClick={() => setSearchParams({ tour: "true" })}
