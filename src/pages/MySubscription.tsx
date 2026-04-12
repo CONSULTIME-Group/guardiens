@@ -638,7 +638,7 @@ const MySubscription = () => {
               <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 text-sm text-amber-800 font-body mb-4">
                 En choisissant maintenant, votre abonnement démarrera le 14 juin 2026. Votre accès fondateur reste intact jusqu'à cette date.
               </div>
-              <PricingCardsNew />
+              <PricingCardsCheckout />
             </DialogContent>
           </Dialog>
         </div>
@@ -653,7 +653,7 @@ const MySubscription = () => {
             <p className="text-sm text-foreground/70 font-body">Merci d'avoir été là dès le premier jour. Choisissez votre formule.</p>
           </div>
           <EntraideLibreBanner />
-          <PricingCardsNew />
+          <PricingCardsCheckout />
           <p className="text-xs text-amber-700 italic text-center mt-2 font-body">Votre badge Fondateur reste permanent à vie.</p>
           {showReferral && <ReferralSection referralCode={profile?.referral_code} userId={user!.id} />}
         </div>
@@ -668,7 +668,7 @@ const MySubscription = () => {
             <p className="text-sm text-foreground/70 font-body">Choisissez ce qui vous convient.</p>
           </div>
           <EntraideLibreBanner />
-          <PricingCardsNew />
+          <PricingCardsCheckout />
           {showReferral && <ReferralSection referralCode={profile?.referral_code} userId={user!.id} />}
         </>
       )}
@@ -723,7 +723,7 @@ const MySubscription = () => {
             ))}
           </div>
           <EntraideLibreBanner />
-          <PricingCardsNew />
+          <PricingCardsCheckout />
           {isFounder && (
             <div className="bg-amber-50 border border-amber-200 rounded-lg px-4 py-3 text-sm text-foreground/70 text-center font-body">
               Votre badge Fondateur reste permanent à vie.
