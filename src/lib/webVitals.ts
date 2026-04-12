@@ -8,10 +8,10 @@ import type { Metric } from "web-vitals";
 const reportWebVitals = (onPerfEntry?: (metric: Metric) => void) => {
   if (typeof window === "undefined") return;
 
-  import("web-vitals").then(({ onCLS, onFID, onFCP, onLCP, onTTFB }) => {
+  import("web-vitals").then(({ onCLS, onINP, onFCP, onLCP, onTTFB }) => {
     const handler = onPerfEntry ?? logMetric;
     onCLS(handler);
-    onFID(handler);
+    onINP(handler);
     onFCP(handler);
     onLCP(handler);
     onTTFB(handler);
