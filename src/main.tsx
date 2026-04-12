@@ -19,3 +19,6 @@ requestIdleCallback?.(() => { window.prerenderReady = true; }) ??
 
 // Collect Core Web Vitals (CLS, INP, FCP, LCP, TTFB)
 reportWebVitals();
+
+// Catch unhandled errors globally
+installGlobalErrorHandlers();
