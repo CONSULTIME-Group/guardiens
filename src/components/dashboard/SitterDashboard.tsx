@@ -685,6 +685,11 @@ const SitterDashboard = () => {
         </div>
       </div>
 
+      {/* Éligibilité gardien d'urgence */}
+      <div className="px-5 md:px-8 mb-6 md:mb-8">
+        <EmergencyEligibility />
+      </div>
+
       {/* Conseils */}
       {articles.length > 0 && (
         <div className="px-5 md:px-8 mb-6 md:mb-8">
