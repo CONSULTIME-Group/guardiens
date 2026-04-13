@@ -119,7 +119,7 @@ const Favorites = () => {
                             to={`/gardiens/${sitter.id}`}
                             className="font-medium text-foreground hover:text-primary transition-colors"
                           >
-                            {sitter.first_name} {sitter.last_name?.[0] ? `${sitter.last_name[0]}.` : ""}
+                            {sitter.first_name || "Membre"}
                           </Link>
                           {sitter.city && (
                             <p className="text-sm text-muted-foreground flex items-center gap-1 mt-0.5">
