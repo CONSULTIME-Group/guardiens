@@ -54,10 +54,11 @@ const advantages = [
 const EmergencySitter = () => {
   return (
     <div className="min-h-screen bg-background">
-      <PublicHeader />
+      <PageMeta
         title="Gardien d'urgence — Intervention rapide en AURA"
         description="Besoin d'un gardien en urgence ? Des gardiens vérifiés disponibles rapidement en Auvergne-Rhône-Alpes."
       />
+      <PublicHeader />
 
       {/* Hero */}
       <section className="relative overflow-hidden bg-gradient-to-br from-amber-50 via-background to-green-50/30 dark:from-amber-950/20 dark:via-background dark:to-green-950/10 py-16 md:py-24">
@@ -263,6 +264,7 @@ const EmergencySitter = () => {
           <Link to="/faq" className="text-sm text-primary hover:underline">FAQ complète</Link>
         </div>
       </section>
+      <PublicFooter />
     </div>
   );
 };
