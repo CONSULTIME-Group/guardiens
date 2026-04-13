@@ -8,6 +8,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Check, CheckCircle, Star, Gift, MapPin, ShieldCheck, Map, PawPrint, Heart, Siren, BadgeCheck, CreditCard } from "lucide-react";
 import PageMeta from "@/components/PageMeta";
 import PublicHeader from "@/components/layout/PublicHeader";
+import PublicFooter from "@/components/layout/PublicFooter";
 import EntraideLibreBanner from "@/components/subscription/EntraideLibreBanner";
 import { LAUNCH_DATE, GRACE_END, isBeforeLaunch, isInGracePeriod } from "@/lib/constants";
 
@@ -520,16 +521,7 @@ const Pricing = () => {
           />
         </main>
 
-        {/* Footer */}
-        <footer className="border-t border-border py-8 text-center text-sm text-muted-foreground">
-          <div className="max-w-6xl mx-auto px-4 flex flex-wrap justify-center gap-4">
-            <Link to="/a-propos" className="hover:text-foreground">À propos</Link>
-            <Link to="/contact" className="hover:text-foreground">Contact</Link>
-            <Link to="/cgu" className="hover:text-foreground">CGU</Link>
-            <Link to="/confidentialite" className="hover:text-foreground">Confidentialité</Link>
-            <Link to="/mentions-legales" className="hover:text-foreground">Mentions légales</Link>
-          </div>
-        </footer>
+        <PublicFooter />
       </div>
     </>
   );
