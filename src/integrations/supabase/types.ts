@@ -916,7 +916,7 @@ export type Database = {
           platform_name: string
           screenshot_urls: string[]
           summary: string
-          user_id: string
+          user_id: string | null
           verification_status: Database["public"]["Enums"]["verification_status"]
         }
         Insert: {
@@ -931,7 +931,7 @@ export type Database = {
           platform_name?: string
           screenshot_urls?: string[]
           summary?: string
-          user_id: string
+          user_id?: string | null
           verification_status?: Database["public"]["Enums"]["verification_status"]
         }
         Update: {
@@ -946,7 +946,7 @@ export type Database = {
           platform_name?: string
           screenshot_urls?: string[]
           summary?: string
-          user_id?: string
+          user_id?: string | null
           verification_status?: Database["public"]["Enums"]["verification_status"]
         }
         Relationships: [
