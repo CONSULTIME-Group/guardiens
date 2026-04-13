@@ -106,8 +106,8 @@ const AdminSkills = () => {
     const validatedSet = new Set((validatedData || []).map((d: any) => d.label));
 
     const [sitterRes, ownerRes] = await Promise.all([
-      supabase.from("sitter_profiles").select("competences").not("competences", "eq", "{}"),
-      supabase.from("owner_profiles").select("competences").not("competences", "eq", "{}"),
+      supabase.from("sitter_profiles").select("competences").not("competences", "is", null),
+      supabase.from("owner_profiles").select("competences").not("competences", "is", null),
     ]);
 
     const countMap = new Map<string, number>();
