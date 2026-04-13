@@ -2,6 +2,8 @@ import { Zap, Bell, Home, Heart, Shield, Clock, Star, MapPin, CheckCircle2 } fro
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import PageMeta from "@/components/PageMeta";
+import PublicHeader from "@/components/layout/PublicHeader";
+import PublicFooter from "@/components/layout/PublicFooter";
 
 const steps = [
   {
@@ -56,6 +58,7 @@ const EmergencySitter = () => {
         title="Gardien d'urgence — Intervention rapide en AURA"
         description="Besoin d'un gardien en urgence ? Des gardiens vérifiés disponibles rapidement en Auvergne-Rhône-Alpes."
       />
+      <PublicHeader />
 
       {/* Hero */}
       <section className="relative overflow-hidden bg-gradient-to-br from-amber-50 via-background to-green-50/30 dark:from-amber-950/20 dark:via-background dark:to-green-950/10 py-16 md:py-24">
@@ -261,6 +264,7 @@ const EmergencySitter = () => {
           <Link to="/faq" className="text-sm text-primary hover:underline">FAQ complète</Link>
         </div>
       </section>
+      <PublicFooter />
     </div>
   );
 };

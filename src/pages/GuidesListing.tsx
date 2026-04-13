@@ -2,6 +2,8 @@ import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import PageMeta from "@/components/PageMeta";
+import PublicHeader from "@/components/layout/PublicHeader";
+import PublicFooter from "@/components/layout/PublicFooter";
 import { Link, useNavigate } from "react-router-dom";
 import { MapPin, Search, ArrowLeft } from "lucide-react";
 import guideHeaderImg from "@/assets/guide-header.jpg";
@@ -92,15 +94,7 @@ const GuidesListing = () => {
       />
 
       <div className="min-h-screen bg-background">
-        <div className="max-w-5xl mx-auto px-4 pt-6">
-          <button
-            onClick={() => navigate(-1)}
-            className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors mb-4"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Retour
-          </button>
-        </div>
+        <PublicHeader />
         <header className="relative border-b border-border overflow-hidden">
           <div className="absolute inset-0">
             <img src={guideHeaderImg} alt="Guide local Guardiens" className="w-full h-full object-cover" />
@@ -226,6 +220,7 @@ const GuidesListing = () => {
             }),
           }}
         />
+        <PublicFooter />
       </div>
     </>
   );

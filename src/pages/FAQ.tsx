@@ -3,6 +3,7 @@ import ReactMarkdown from "react-markdown";
 import { supabase } from "@/integrations/supabase/client";
 import PageMeta from "@/components/PageMeta";
 import PublicHeader from "@/components/layout/PublicHeader";
+import PublicFooter from "@/components/layout/PublicFooter";
 import {
   Accordion,
   AccordionContent,
@@ -196,6 +197,7 @@ const FAQ = () => {
             }),
           }}
         />
+        <PublicFooter />
       </div>
     </>
   );
