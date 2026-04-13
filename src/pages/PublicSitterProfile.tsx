@@ -25,6 +25,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import PublicExperiences from "@/components/profile/PublicExperiences";
 import TrustScore from "@/components/profile/TrustScore";
 import FavoriteButton from "@/components/shared/FavoriteButton";
+import ProfileSchemaOrg from "@/components/seo/ProfileSchemaOrg";
 
 const capitalize = (name: string) =>
   name ? name.charAt(0).toUpperCase() + name.slice(1).toLowerCase() : "";
@@ -462,6 +463,18 @@ export default function PublicSitterProfile() {
 
   return (
     <div className="min-h-screen bg-background">
+      {/* JSON-LD */}
+      {profile && (
+        <ProfileSchemaOrg
+          name={firstName}
+          city={city || undefined}
+          avatarUrl={profile.avatar_url || undefined}
+          bio={bio || undefined}
+          avgRating={avgRating}
+          reviewCount={reviewCount}
+          url={`https://guardiens.fr/gardiens/${id}`}
+        />
+      )}
       {/* Bandes latérales décoratives */}
       <div style={{ position: 'fixed', left: 0, top: 0, bottom: 0, width: '56px', background: 'linear-gradient(to right, rgba(45,106,79,0.06), transparent)', pointerEvents: 'none', zIndex: 0 }} />
       <div style={{ position: 'fixed', right: 0, top: 0, bottom: 0, width: '56px', background: 'linear-gradient(to left, rgba(45,106,79,0.06), transparent)', pointerEvents: 'none', zIndex: 0 }} />
