@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -6,12 +6,19 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { CheckCircle2, XCircle, Clock, MessageSquare, Image } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { CheckCircle2, XCircle, Clock, MessageSquare, Image, Briefcase } from "lucide-react";
 import { toast } from "sonner";
+import { format } from "date-fns";
+import { fr } from "date-fns/locale";
+
+type StatusFilter = "pending" | "verified" | "rejected";
 
 const AdminExperienceVerification = () => {
   const [experiences, setExperiences] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState<StatusFilter>("pending");
+  const [counts, setCounts] = useState({ pending: 0, verified: 0, rejected: 0 });
   const [rejectModal, setRejectModal] = useState<{ open: boolean; id: string; reason: string; customReason: string }>({
     open: false, id: "", reason: "", customReason: ""
   });
@@ -29,15 +36,23 @@ const AdminExperienceVerification = () => {
     return url;
   };
 
-  const fetchExperiences = async () => {
+  const fetchCounts = useCallback(async () => {
+    const [p, v, r] = await Promise.all([
+      supabase.from("external_experiences").select("id", { count: "exact", head: true }).eq("verification_status", "pending"),
+      supabase.from("external_experiences").select("id", { count: "exact", head: true }).eq("verification_status", "verified"),
+      supabase.from("external_experiences").select("id", { count: "exact", head: true }).eq("verification_status", "rejected"),
+    ]);
+    setCounts({ pending: p.count || 0, verified: v.count || 0, rejected: r.count || 0 });
+  }, []);
+
+  const fetchExperiences = useCallback(async () => {
     setLoading(true);
     const { data } = await supabase
       .from("external_experiences")
       .select("*, profile:profiles!external_experiences_user_id_fkey(first_name, last_name, avatar_url, role)")
-      .eq("verification_status", "pending")
-      .order("created_at", { ascending: true });
+      .eq("verification_status", activeTab)
+      .order("created_at", { ascending: activeTab === "pending" });
     const exps = data || [];
-    // Pre-fetch signed URLs for all screenshots
     for (const exp of exps) {
       for (const path of (exp.screenshot_urls || [])) {
         getSignedUrl(path);
@@ -45,9 +60,9 @@ const AdminExperienceVerification = () => {
     }
     setExperiences(exps);
     setLoading(false);
-  };
+  }, [activeTab]);
 
-  useEffect(() => { fetchExperiences(); }, []);
+  useEffect(() => { fetchExperiences(); fetchCounts(); }, [fetchExperiences, fetchCounts]);
 
   const handleVerify = async (id: string, userId: string) => {
     const { error } = await supabase.from("external_experiences").update({ verification_status: "verified" }).eq("id", id);
@@ -59,6 +74,7 @@ const AdminExperienceVerification = () => {
       link: "/profile",
     });
     setExperiences(prev => prev.filter(e => e.id !== id));
+    setCounts(prev => ({ ...prev, pending: prev.pending - 1, verified: prev.verified + 1 }));
     toast.success("Expérience validée !");
   };
 
@@ -77,6 +93,7 @@ const AdminExperienceVerification = () => {
       });
     }
     setExperiences(prev => prev.filter(e => e.id !== rejectModal.id));
+    setCounts(prev => ({ ...prev, pending: prev.pending - 1, rejected: prev.rejected + 1 }));
     setRejectModal({ open: false, id: "", reason: "", customReason: "" });
     toast.success("Expérience rejetée.");
   };
@@ -95,119 +112,157 @@ const AdminExperienceVerification = () => {
 
   const rejectionReasons = ["Screenshot illisible", "Contenu incohérent", "Autre"];
 
-  if (loading) return <div className="text-muted-foreground py-8 text-center">Chargement…</div>;
+  const renderExperienceCard = (exp: any, idx: number) => (
+    <Card key={exp.id} className="overflow-hidden">
+      <CardContent className="p-5 space-y-4">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            {exp.profile?.avatar_url ? (
+              <img src={exp.profile.avatar_url} alt="" className="w-10 h-10 rounded-full object-cover" />
+            ) : (
+              <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center font-bold text-sm">
+                {exp.profile?.first_name?.charAt(0) || "?"}
+              </div>
+            )}
+            <div>
+              <p className="font-medium text-sm">{exp.profile?.first_name} {exp.profile?.last_name}</p>
+              <p className="text-xs text-muted-foreground capitalize">{exp.profile?.role || "—"}</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <Badge variant={activeTab === "verified" ? "default" : activeTab === "rejected" ? "destructive" : "secondary"} className="text-xs">
+              {activeTab === "verified" && <><CheckCircle2 className="h-3 w-3 mr-1" /> Validée</>}
+              {activeTab === "rejected" && <><XCircle className="h-3 w-3 mr-1" /> Refusée</>}
+              {activeTab === "pending" && <><Clock className="h-3 w-3 mr-1" /> #{idx + 1}</>}
+            </Badge>
+          </div>
+        </div>
+
+        {/* Info grid */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
+          <div>
+            <p className="text-xs text-muted-foreground uppercase tracking-wide">Plateforme</p>
+            <p className="font-medium">{exp.platform_name || "—"}</p>
+          </div>
+          <div>
+            <p className="text-xs text-muted-foreground uppercase tracking-wide">Durée</p>
+            <p className="font-medium">{exp.duration || "—"}</p>
+          </div>
+          <div>
+            <p className="text-xs text-muted-foreground uppercase tracking-wide">Date</p>
+            <p className="font-medium">{exp.experience_date || "—"}</p>
+          </div>
+          <div>
+            <p className="text-xs text-muted-foreground uppercase tracking-wide">Lieu</p>
+            <p className="font-medium">{[exp.city, exp.country].filter(Boolean).join(", ") || "—"}</p>
+          </div>
+        </div>
+
+        <div>
+          <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Animaux</p>
+          <p className="text-sm">{exp.animal_types || "—"}</p>
+        </div>
+
+        <div>
+          <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Résumé</p>
+          <p className="text-sm whitespace-pre-line bg-muted/50 p-3 rounded-lg">{exp.summary}</p>
+        </div>
+
+        {/* Admin note for rejected */}
+        {exp.admin_note && activeTab === "rejected" && (
+          <div className="bg-destructive/5 border border-destructive/20 rounded-lg p-3">
+            <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Motif de refus</p>
+            <p className="text-sm text-destructive">{exp.admin_note}</p>
+          </div>
+        )}
+
+        {/* Submitted date */}
+        <p className="text-xs text-muted-foreground">
+          Soumise le {format(new Date(exp.created_at), "dd MMMM yyyy", { locale: fr })}
+        </p>
+
+        {/* Screenshots */}
+        {exp.screenshot_urls?.length > 0 && (
+          <div>
+            <p className="text-xs text-muted-foreground uppercase tracking-wide mb-2 flex items-center gap-1">
+              <Image className="h-3 w-3" /> Screenshots ({exp.screenshot_urls.length})
+            </p>
+            <div className="flex gap-3 overflow-x-auto pb-2">
+              {exp.screenshot_urls.map((path: string, i: number) => {
+                const url = signedUrls[path];
+                if (!url) return <div key={i} className="h-52 w-40 bg-muted rounded-lg animate-pulse" />;
+                return (
+                  <img
+                    key={i}
+                    src={url}
+                    alt={`Screenshot ${i + 1}`}
+                    className="h-52 rounded-lg border border-border object-contain bg-muted cursor-pointer hover:opacity-80 transition-opacity"
+                    onClick={() => setZoomedImg(url)}
+                  />
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* Actions — only for pending */}
+        {activeTab === "pending" && (
+          <div className="flex items-center gap-3 pt-2 border-t border-border">
+            <Button size="sm" className="gap-1.5" onClick={() => handleVerify(exp.id, exp.user_id)}>
+              <CheckCircle2 className="h-4 w-4" /> Valider
+            </Button>
+            <Button size="sm" variant="destructive" className="gap-1.5" onClick={() => setRejectModal({ open: true, id: exp.id, reason: "", customReason: "" })}>
+              <XCircle className="h-4 w-4" /> Refuser
+            </Button>
+            <Button size="sm" variant="outline" className="gap-1.5" onClick={() => setComplementModal({ open: true, id: exp.id, userId: exp.user_id, message: "" })}>
+              <MessageSquare className="h-4 w-4" /> Demander un complément
+            </Button>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
 
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-3">
-        <h1 className="font-body text-2xl font-bold">Expériences à vérifier</h1>
-        {experiences.length > 0 && <Badge variant="destructive">{experiences.length}</Badge>}
+        <h1 className="font-body text-2xl font-bold">Expériences externes</h1>
       </div>
 
-      {experiences.length === 0 ? (
-        <div className="text-center py-12 text-muted-foreground">
-          <CheckCircle2 className="h-12 w-12 mx-auto mb-3 text-primary/40" />
-          <p className="font-medium">Aucune expérience en attente</p>
-          <p className="text-sm">Tout a été traité 🎉</p>
-        </div>
-      ) : (
-        <div className="space-y-6">
-          {experiences.map((exp, idx) => (
-            <Card key={exp.id} className="overflow-hidden">
-              <CardContent className="p-5 space-y-4">
-                {/* Header */}
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    {exp.profile?.avatar_url ? (
-                      <img src={exp.profile.avatar_url} alt="" className="w-10 h-10 rounded-full object-cover" />
-                    ) : (
-                      <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center font-bold text-sm">
-                        {exp.profile?.first_name?.charAt(0) || "?"}
-                      </div>
-                    )}
-                    <div>
-                      <p className="font-medium text-sm">{exp.profile?.first_name} {exp.profile?.last_name}</p>
-                      <p className="text-xs text-muted-foreground capitalize">{exp.profile?.role || "—"}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Badge variant="secondary" className="text-xs">
-                      <Clock className="h-3 w-3 mr-1" /> #{idx + 1}
-                    </Badge>
-                  </div>
-                </div>
+      <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as StatusFilter)}>
+        <TabsList>
+          <TabsTrigger value="pending" className="gap-1.5">
+            <Clock className="h-3.5 w-3.5" /> En attente
+            {counts.pending > 0 && <Badge variant="destructive" className="ml-1 h-5 px-1.5 text-xs">{counts.pending}</Badge>}
+          </TabsTrigger>
+          <TabsTrigger value="verified" className="gap-1.5">
+            <CheckCircle2 className="h-3.5 w-3.5" /> Validées ({counts.verified})
+          </TabsTrigger>
+          <TabsTrigger value="rejected" className="gap-1.5">
+            <XCircle className="h-3.5 w-3.5" /> Refusées ({counts.rejected})
+          </TabsTrigger>
+        </TabsList>
 
-                {/* Info grid */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
-                  <div>
-                    <p className="text-xs text-muted-foreground uppercase tracking-wide">Plateforme</p>
-                    <p className="font-medium">{exp.platform_name || "—"}</p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground uppercase tracking-wide">Durée</p>
-                    <p className="font-medium">{exp.duration || "—"}</p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground uppercase tracking-wide">Date</p>
-                    <p className="font-medium">{exp.experience_date || "—"}</p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground uppercase tracking-wide">Lieu</p>
-                    <p className="font-medium">{[exp.city, exp.country].filter(Boolean).join(", ") || "—"}</p>
-                  </div>
-                </div>
-
-                <div>
-                  <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Animaux</p>
-                  <p className="text-sm">{exp.animal_types || "—"}</p>
-                </div>
-
-                <div>
-                  <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Résumé</p>
-                  <p className="text-sm whitespace-pre-line bg-muted/50 p-3 rounded-lg">{exp.summary}</p>
-                </div>
-
-                {/* Screenshots */}
-                {exp.screenshot_urls?.length > 0 && (
-                  <div>
-                    <p className="text-xs text-muted-foreground uppercase tracking-wide mb-2 flex items-center gap-1">
-                      <Image className="h-3 w-3" /> Screenshots ({exp.screenshot_urls.length})
-                    </p>
-                    <div className="flex gap-3 overflow-x-auto pb-2">
-                      {exp.screenshot_urls.map((path: string, i: number) => {
-                        const url = signedUrls[path];
-                        if (!url) return <div key={i} className="h-52 w-40 bg-muted rounded-lg animate-pulse" />;
-                        return (
-                          <img
-                            key={i}
-                            src={url}
-                            alt={`Screenshot ${i + 1}`}
-                            className="h-52 rounded-lg border border-border object-contain bg-muted cursor-pointer hover:opacity-80 transition-opacity"
-                            onClick={() => setZoomedImg(url)}
-                          />
-                        );
-                      })}
-                    </div>
-                  </div>
-                )}
-
-                {/* Actions */}
-                <div className="flex items-center gap-3 pt-2 border-t border-border">
-                  <Button size="sm" className="gap-1.5" onClick={() => handleVerify(exp.id, exp.user_id)}>
-                    <CheckCircle2 className="h-4 w-4" /> Valider
-                  </Button>
-                  <Button size="sm" variant="destructive" className="gap-1.5" onClick={() => setRejectModal({ open: true, id: exp.id, reason: "", customReason: "" })}>
-                    <XCircle className="h-4 w-4" /> Refuser
-                  </Button>
-                  <Button size="sm" variant="outline" className="gap-1.5" onClick={() => setComplementModal({ open: true, id: exp.id, userId: exp.user_id, message: "" })}>
-                    <MessageSquare className="h-4 w-4" /> Demander un complément
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      )}
+        <TabsContent value={activeTab} className="mt-4">
+          {loading ? (
+            <div className="text-muted-foreground py-8 text-center">Chargement…</div>
+          ) : experiences.length === 0 ? (
+            <div className="text-center py-12 text-muted-foreground">
+              <Briefcase className="h-12 w-12 mx-auto mb-3 opacity-30" />
+              <p className="font-medium">
+                {activeTab === "pending" && "Aucune expérience en attente 🎉"}
+                {activeTab === "verified" && "Aucune expérience validée pour le moment"}
+                {activeTab === "rejected" && "Aucune expérience refusée"}
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-6">
+              {experiences.map((exp, idx) => renderExperienceCard(exp, idx))}
+            </div>
+          )}
+        </TabsContent>
+      </Tabs>
 
       {/* Zoomed image modal */}
       <Dialog open={!!zoomedImg} onOpenChange={(o) => !o && setZoomedImg(null)}>
