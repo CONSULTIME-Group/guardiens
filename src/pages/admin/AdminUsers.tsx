@@ -352,6 +352,14 @@ const AdminUsers = () => {
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-1">
+                         <Button
+                          variant="ghost"
+                          size="icon"
+                          title="Voir le profil"
+                          onClick={() => window.open(`/profil/${user.id}`, "_blank")}
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Button>
                         <Button
                           variant="ghost"
                           size="icon"
