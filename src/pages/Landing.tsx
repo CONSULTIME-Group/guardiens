@@ -263,7 +263,7 @@ const Landing = () => {
             {/* CTAs */}
             <div className="flex flex-col sm:flex-row gap-3 mb-4 animate-hero-fade-up animation-delay-900">
               <button
-                onClick={() => navigate("/search")}
+                onClick={() => navigate("/register?role=owner")}
                 className="font-body text-sm font-semibold tracking-wide rounded-full px-10 py-4 bg-primary text-primary-foreground hover:brightness-90 hover:scale-[1.02] transition-all duration-200"
               >
                 Je cherche un gardien
@@ -330,7 +330,7 @@ const Landing = () => {
                 <p className="text-base font-body leading-relaxed text-foreground/70 mb-4">
                   Trouvez quelqu'un du coin pour garder votre maison et vos animaux. Vous le rencontrez avant. Vous choisissez. Gratuit pour les propriétaires.
                 </p>
-                <Link to="/search" className="text-sm font-body text-primary font-medium hover:underline">
+                <Link to="/register?role=owner" className="text-sm font-body text-primary font-medium hover:underline">
                   Je cherche un gardien →
                 </Link>
               </div>
