@@ -9,6 +9,7 @@ import PageMeta from "@/components/PageMeta";
 import useEmblaCarousel from "embla-carousel-react";
 import heroDogBbq from "@/assets/hero-landing.png";
 import DemoListingShowcase from "@/components/landing/DemoListingShowcase";
+import PublicHeader from "@/components/layout/PublicHeader";
 
 
 
