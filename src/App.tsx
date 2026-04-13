@@ -91,6 +91,7 @@ const AdminMassEmails = lazy(() => import("./pages/admin/AdminMassEmails"));
 const AdminMessages = lazy(() => import("./pages/admin/AdminMessages"));
 const EmergencySitter = lazy(() => import("./pages/EmergencySitter"));
 const MySubscription = lazy(() => import("./pages/MySubscription"));
+const Favorites = lazy(() => import("./pages/Favorites"));
 const PublicSitDetail = lazy(() => import("./pages/PublicSitDetail"));
 const PublicSitterProfile = lazy(() => import("./pages/PublicSitterProfile"));
 
@@ -250,6 +251,7 @@ const AppRoutes = () => (
         <Route path="/owner-profile" element={<OwnerProfile />} />
         <Route path="/settings" element={<Settings />} />
         <Route path="/mon-abonnement" element={<MySubscription />} />
+        <Route path="/favoris" element={<Favorites />} />
       </Route>
       <Route path="/planche-badges" element={<PlancheBadges />} />
       <Route path="/unsubscribe" element={<Unsubscribe />} />

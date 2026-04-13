@@ -2,7 +2,7 @@ import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import {
   Home, Search, Calendar, MessageSquare, User, LogOut, Settings,
   PawPrint, Newspaper, Shield, Compass, Handshake, Menu, Star,
-  MoreHorizontal, Crown, Plus,
+  MoreHorizontal, Crown, Plus, Heart,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAdmin } from "@/hooks/useAdmin";
@@ -233,6 +233,7 @@ export const Sidebar = () => {
               )}
 
               <SidebarItem to={effectiveRole === "owner" ? "/owner-profile" : "/profile"} icon={User} label="Mon profil" />
+              <SidebarItem to="/favoris" icon={Heart} label="Mes favoris" />
 
               <GroupLabel label="Découvrir" />
 
