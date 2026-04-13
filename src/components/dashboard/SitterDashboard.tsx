@@ -27,6 +27,7 @@ import { fr } from "date-fns/locale";
 import RoleActivationBanner from "./RoleActivationBanner";
 import AccessGateBanner from "@/components/access/AccessGateBanner";
 import { useAccessLevel } from "@/hooks/useAccessLevel";
+import EmergencyEligibility from "./EmergencyEligibility";
 
 const capitalize = (name: string) =>
   name ? name.charAt(0).toUpperCase() + name.slice(1).toLowerCase() : "";

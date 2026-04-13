@@ -559,13 +559,18 @@ const SearchSitter = () => {
                 <ShieldCheck className="h-3 w-3" /> Vérifié
               </span>
             )}
+            {!isDemo && !isMission && (
+              <span className="absolute top-3 right-3 z-10" onClick={(e) => e.preventDefault()}>
+                <FavoriteButton targetType="sit" targetId={item.id} size="sm" />
+              </span>
+            )}
             {isDemo && (
               <span className="absolute top-3 right-3 bg-black/50 text-white rounded-full px-2 py-1 text-xs">
                 Annonce type
               </span>
             )}
             {item.isNew && !isDemo && (
-              <span className="absolute top-3 right-3 bg-primary text-primary-foreground rounded-full px-2 py-1 text-xs flex items-center gap-1">
+              <span className="absolute top-3 left-3 mt-8 bg-primary text-primary-foreground rounded-full px-2 py-1 text-xs flex items-center gap-1">
                 <Sparkles className="h-3 w-3" /> Nouveau
               </span>
             )}
