@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Menu, X } from "lucide-react";
 
@@ -13,7 +13,10 @@ const NAV_LINKS = [
 
 export default function PublicHeader() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [open, setOpen] = useState(false);
+
+  const isActive = (path: string) => location.pathname === path || location.pathname.startsWith(path + "/");
 
   return (
     <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b border-border/50">
@@ -25,7 +28,13 @@ export default function PublicHeader() {
         {/* Desktop nav */}
         <nav className="hidden sm:flex gap-1 items-center">
           {NAV_LINKS.map((l) => (
-            <Button key={l.to} variant="ghost" size="sm" onClick={() => navigate(l.to)}>
+            <Button
+              key={l.to}
+              variant="ghost"
+              size="sm"
+              onClick={() => navigate(l.to)}
+              className={isActive(l.to) ? "text-primary font-semibold" : ""}
+            >
               {l.label}
             </Button>
           ))}
@@ -56,7 +65,11 @@ export default function PublicHeader() {
               key={l.to}
               to={l.to}
               onClick={() => setOpen(false)}
-              className="block py-2.5 px-3 rounded-lg text-sm font-medium text-foreground hover:bg-accent transition-colors"
+              className={`block py-2.5 px-3 rounded-lg text-sm font-medium transition-colors ${
+                isActive(l.to)
+                  ? "text-primary bg-primary/5 font-semibold"
+                  : "text-foreground hover:bg-accent"
+              }`}
             >
               {l.label}
             </Link>
