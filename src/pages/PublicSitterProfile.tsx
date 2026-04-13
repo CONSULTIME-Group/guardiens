@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import PublicExperiences from "@/components/profile/PublicExperiences";
+import TrustScore from "@/components/profile/TrustScore";
 
 const capitalize = (name: string) =>
   name ? name.charAt(0).toUpperCase() + name.slice(1).toLowerCase() : "";
@@ -643,6 +644,17 @@ export default function PublicSitterProfile() {
                   )}
                 </div>
               )}
+
+              {/* Trust Score */}
+              <TrustScore
+                identityVerified={profile?.identity_verified || false}
+                avgRating={avgRating}
+                reviewCount={reviewCount}
+                completedSits={completedSits}
+                externalExperiencesCount={externalExperiences.length}
+                memberSince={profile?.created_at || new Date().toISOString()}
+                isFounder={profile?.is_founder || false}
+              />
 
               <div className="flex items-center gap-4 text-sm text-muted-foreground mt-1">
                 {statsItems.map((s, i) => (
