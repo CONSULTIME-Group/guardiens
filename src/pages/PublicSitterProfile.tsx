@@ -177,6 +177,7 @@ export default function PublicSitterProfile() {
       setHasActiveSubscription(!!(subRes.data && (subRes.data as any[]).length > 0));
       setOwnerProfile(fetchedOwnerProfile);
       setMissionCount(fetchedMissionCount);
+      setExternalExperiences(extExpRes?.data || []);
 
       if (badgesRes.data) {
         const map: Record<string, number> = {};
