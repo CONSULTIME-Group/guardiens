@@ -197,26 +197,34 @@ const AdminSkills = () => {
   };
 
   const handleRejectCompetence = async (label: string) => {
-    // Remove from all sitter and owner profiles
+    // Remove from all sitter and owner profiles that contain this competence
     const [sitterRes, ownerRes] = await Promise.all([
-      supabase.from("sitter_profiles").select("id, competences").not("competences", "eq", "{}"),
-      supabase.from("owner_profiles").select("id, competences").not("competences", "eq", "{}"),
+      supabase.from("sitter_profiles").select("id, competences").contains("competences", [label]),
+      supabase.from("owner_profiles").select("id, competences").contains("competences", [label]),
     ]);
+
+    let updatedCount = 0;
 
     for (const p of (sitterRes.data || [])) {
       const comps = ((p as any).competences || []).filter((c: string) => c !== label);
-      if (comps.length !== ((p as any).competences || []).length) {
-        await supabase.from("sitter_profiles").update({ competences: comps } as any).eq("id", p.id);
+      const { error } = await supabase.from("sitter_profiles").update({ competences: comps } as any).eq("id", p.id);
+      if (error) {
+        console.error("Error updating sitter_profile:", p.id, error);
+      } else {
+        updatedCount++;
       }
     }
     for (const p of (ownerRes.data || [])) {
       const comps = ((p as any).competences || []).filter((c: string) => c !== label);
-      if (comps.length !== ((p as any).competences || []).length) {
-        await supabase.from("owner_profiles").update({ competences: comps } as any).eq("id", p.id);
+      const { error } = await supabase.from("owner_profiles").update({ competences: comps } as any).eq("id", p.id);
+      if (error) {
+        console.error("Error updating owner_profile:", p.id, error);
+      } else {
+        updatedCount++;
       }
     }
 
-    toast({ description: `"${label}" refusée et retirée des profils.` });
+    toast({ description: `"${label}" refusée et retirée de ${updatedCount} profil(s).` });
     fetchPendingCompetences();
   };
 
