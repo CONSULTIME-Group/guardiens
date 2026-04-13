@@ -26,6 +26,7 @@ import { format, differenceInDays, differenceInHours } from "date-fns";
 import { fr } from "date-fns/locale";
 import { geocodeCity, haversineDistance } from "@/lib/geocode";
 import { useSubscriptionAccess } from "@/hooks/useSubscriptionAccess";
+import FavoriteButton from "@/components/shared/FavoriteButton";
 
 const animalChips = ["Chiens", "Chats", "Chevaux", "Animaux de ferme", "NAC"];
 const animalChipToSpecies: Record<string, string> = {
