@@ -96,6 +96,7 @@ export default function PublicSitterProfile() {
   const [missionFeedbacks, setMissionFeedbacks] = useState<any[]>([]);
   const [missionsPublished, setMissionsPublished] = useState<any[]>([]);
   const [missionsHelped, setMissionsHelped] = useState<any[]>([]);
+  const [externalExperiences, setExternalExperiences] = useState<any[]>([]);
 
   // Show-more states for list truncation
   const [showAllGardeReviews, setShowAllGardeReviews] = useState(false);
