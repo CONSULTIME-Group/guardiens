@@ -9,6 +9,7 @@ import PageMeta from "@/components/PageMeta";
 import useEmblaCarousel from "embla-carousel-react";
 import heroDogBbq from "@/assets/hero-landing.png";
 import DemoListingShowcase from "@/components/landing/DemoListingShowcase";
+import PublicHeader from "@/components/layout/PublicHeader";
 
 
 
@@ -230,29 +231,7 @@ const Landing = () => {
       />
 
       {/* ═══════════════ NAVBAR ═══════════════ */}
-      <header className="flex items-center justify-between px-[5%] md:px-[8%] py-5 sticky top-0 bg-background/80 backdrop-blur-md z-50 border-b border-border/50">
-        <h2 className="font-heading text-xl md:text-2xl font-bold cursor-pointer" onClick={() => navigate("/")}>
-          <span className="text-primary">g</span>uardiens
-        </h2>
-        <div className="flex gap-2 md:gap-3 items-center">
-          <Button variant="ghost" size="sm" className="hidden sm:inline-flex" onClick={() => navigate("/petites-missions")}>
-            Entraide
-          </Button>
-          <Button variant="ghost" size="sm" className="hidden sm:inline-flex" onClick={() => navigate("/guides")}>
-            Guides locaux
-          </Button>
-          <Button variant="ghost" size="sm" className="hidden sm:inline-flex" onClick={() => navigate("/tarifs")}>
-            Tarifs
-          </Button>
-          <Button variant="ghost" size="sm" className="hidden sm:inline-flex" onClick={() => navigate("/actualites")}>
-            Articles
-          </Button>
-          <Button variant="ghost" size="sm" onClick={() => navigate("/login")}>
-            Connexion
-          </Button>
-          <Button size="sm" onClick={() => navigate("/register")}>S'inscrire</Button>
-        </div>
-      </header>
+      <PublicHeader />
 
       {/* ═══════════════ SECTION 1 — HERO ═══════════════ */}
       <section className="relative w-full min-h-screen flex items-center overflow-hidden">
@@ -715,7 +694,7 @@ const Landing = () => {
               </p>
             </div>
             <div className="flex flex-wrap gap-4 text-sm text-white/40 font-body">
-              <span className="text-xs text-white/40 font-body">Guardiens {'\u00B7'} Version b\u00eata {'\u00B7'} 2026</span>
+              <span className="text-xs text-white/40 font-body">Guardiens · Version bêta · 2026</span>
               <span className="text-white/20">·</span>
               <Link to="/cgu" className="hover:text-white transition-colors">CGU</Link>
               <span className="text-white/20">·</span>

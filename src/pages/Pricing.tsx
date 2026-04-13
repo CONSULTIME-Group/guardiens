@@ -7,6 +7,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 
 import { Check, CheckCircle, Star, Gift, MapPin, ShieldCheck, Map, PawPrint, Heart, Siren, BadgeCheck, CreditCard } from "lucide-react";
 import PageMeta from "@/components/PageMeta";
+import PublicHeader from "@/components/layout/PublicHeader";
 import EntraideLibreBanner from "@/components/subscription/EntraideLibreBanner";
 import { LAUNCH_DATE, GRACE_END, isBeforeLaunch, isInGracePeriod } from "@/lib/constants";
 
@@ -139,25 +140,7 @@ const Pricing = () => {
 
       <div className="min-h-screen bg-background">
         {/* Header */}
-        <header className="border-b border-border bg-card">
-          <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
-            <Link to="/" className="font-heading text-2xl font-bold tracking-tight">
-              <span className="text-primary">g</span>
-              <span className="text-foreground">uardiens</span>
-            </Link>
-            <div className="flex items-center gap-3">
-              <Link to="/actualites" className="text-sm text-muted-foreground hover:text-foreground hidden sm:inline">Guides & Conseils</Link>
-              <Link to="/guides" className="text-sm text-muted-foreground hover:text-foreground hidden sm:inline">Guides</Link>
-              <Link to="/faq" className="text-sm text-muted-foreground hover:text-foreground hidden sm:inline">FAQ</Link>
-              <Link to="/login">
-                <Button variant="outline" size="sm">Connexion</Button>
-              </Link>
-              <Link to="/register">
-                <Button size="sm">S'inscrire</Button>
-              </Link>
-            </div>
-          </div>
-        </header>
+        <PublicHeader />
 
         <main className="max-w-6xl mx-auto px-4">
           {/* ═══ ZONE 1 — Compréhension rapide ═══ */}
