@@ -1,8 +1,8 @@
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
 import PageMeta from "@/components/PageMeta";
 import PublicHeader from "@/components/layout/PublicHeader";
+import PublicFooter from "@/components/layout/PublicFooter";
 
 const About = () => {
   const navigate = useNavigate();
@@ -17,9 +17,6 @@ const About = () => {
       <PublicHeader />
 
       <main className="px-6 md:px-12 py-16 max-w-3xl mx-auto">
-        <Button variant="ghost" size="sm" className="mb-8" onClick={() => navigate(-1 as any)}>
-          <ArrowLeft className="h-4 w-4 mr-2" /> Retour
-        </Button>
 
         <h1 className="font-heading text-3xl md:text-4xl font-bold mb-8">À propos de Guardiens</h1>
 
@@ -65,10 +62,7 @@ const About = () => {
           </p>
         </div>
       </main>
-
-      <footer className="border-t border-border px-6 md:px-12 py-8 text-center text-muted-foreground text-xs">
-        © 2026 Guardiens — House-sitting de proximité en Auvergne-Rhône-Alpes
-      </footer>
+      <PublicFooter />
     </div>
   );
 };

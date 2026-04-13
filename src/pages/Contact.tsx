@@ -4,12 +4,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { ArrowLeft, Mail, MapPin, Send, CheckCircle2 } from "lucide-react";
+import { Mail, MapPin, Send, CheckCircle2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { z } from "zod";
 import PageMeta from "@/components/PageMeta";
 import PublicHeader from "@/components/layout/PublicHeader";
+import PublicFooter from "@/components/layout/PublicFooter";
 
 const contactSchema = z.object({
   name: z.string().trim().min(1, "Veuillez entrer votre nom").max(100, "100 caractères max"),
@@ -70,9 +71,6 @@ const Contact = () => {
       <PublicHeader />
 
       <main className="px-6 md:px-12 py-16 max-w-3xl mx-auto">
-        <Button variant="ghost" size="sm" className="mb-8" onClick={() => navigate(-1 as any)}>
-          <ArrowLeft className="h-4 w-4 mr-2" /> Retour
-        </Button>
 
         <h1 className="font-heading text-3xl md:text-4xl font-bold mb-8">Contact</h1>
 
@@ -152,9 +150,7 @@ const Contact = () => {
         </div>
       </main>
 
-      <footer className="border-t border-border px-6 md:px-12 py-8 text-center text-muted-foreground text-xs">
-        © 2026 Guardiens — House-sitting de proximité en Auvergne-Rhône-Alpes
-      </footer>
+      <PublicFooter />
     </div>
   );
 };
