@@ -24,6 +24,7 @@ import {
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import PublicExperiences from "@/components/profile/PublicExperiences";
 import TrustScore from "@/components/profile/TrustScore";
+import FavoriteButton from "@/components/shared/FavoriteButton";
 
 const capitalize = (name: string) =>
   name ? name.charAt(0).toUpperCase() + name.slice(1).toLowerCase() : "";
@@ -612,6 +613,7 @@ export default function PublicSitterProfile() {
                   {firstName}
                 </h1>
                 {profile?.is_founder && <FounderBadge size="lg" />}
+                {id && <FavoriteButton targetType="sitter" targetId={id} size="md" />}
               </div>
 
               {city && (
