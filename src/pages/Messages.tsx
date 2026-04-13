@@ -5,6 +5,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Send, Image as ImageIcon, Archive, X, Home, HeartHandshake, MessageSquare, Info, Search } from "lucide-react";
+import EmptyState from "@/components/shared/EmptyState";
 import { format, isToday, isYesterday, isSameDay } from "date-fns";
 import { fr } from "date-fns/locale";
 import { useSearchParams, Link } from "react-router-dom";
@@ -665,8 +666,12 @@ const Messages = () => {
 
           <div className="flex-1 overflow-y-auto">
             {displayConversations.length === 0 ? (
-              <div className="p-6 text-center text-sm text-muted-foreground">
-                {pill === "archived" ? "Aucune conversation archivée." : "Aucune conversation pour le moment."}
+              <div className="p-4">
+                {pill === "archived" ? (
+                  <EmptyState illustration="sleepingCat" title="Aucune conversation archivée" description="Vos conversations archivées apparaîtront ici." />
+                ) : (
+                  <EmptyState illustration="emptyMailbox" title="Aucun message" description="Vos conversations avec les gardiens et propriétaires apparaîtront ici." actionLabel="Découvrir les annonces" actionTo="/search" />
+                )}
               </div>
             ) : (
               <>
