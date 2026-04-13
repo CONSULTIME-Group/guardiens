@@ -1111,12 +1111,17 @@ const SearchSitter = () => {
                           </p>
                         )}
                       </div>
-                      <Link
-                        to={`/messages?new=true&to=${member.id}&context=entraide`}
-                        className="text-sm text-primary font-semibold shrink-0 hover:underline"
-                      >
-                        Contacter →
-                      </Link>
+                      <div className="flex flex-col items-end gap-2 shrink-0">
+                        <span onClick={(e) => e.stopPropagation()}>
+                          <FavoriteButton targetType="sitter" targetId={member.id} size="sm" />
+                        </span>
+                        <Link
+                          to={`/messages?new=true&to=${member.id}&context=entraide`}
+                          className="text-sm text-primary font-semibold hover:underline"
+                        >
+                          Contacter →
+                        </Link>
+                      </div>
                     </div>
                   );
                 })}
