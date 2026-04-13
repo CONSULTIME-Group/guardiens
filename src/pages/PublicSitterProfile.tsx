@@ -1039,6 +1039,9 @@ export default function PublicSitterProfile() {
                 )}
               </div>
             )}
+
+            {/* Expériences vérifiées */}
+            <PublicExperiences experiences={externalExperiences} />
           </div>
         </div>
       )}
