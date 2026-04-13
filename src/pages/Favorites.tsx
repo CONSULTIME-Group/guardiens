@@ -154,11 +154,6 @@ const Favorites = () => {
                             {sit.title || "Annonce de garde"}
                           </Link>
                           <div className="flex items-center gap-3 mt-0.5 text-sm text-muted-foreground">
-                            {sit.city && (
-                              <span className="flex items-center gap-1">
-                                <MapPin className="h-3 w-3" /> {sit.city}
-                              </span>
-                            )}
                             {sit.start_date && (
                               <span>
                                 {new Date(sit.start_date).toLocaleDateString("fr-FR", { day: "numeric", month: "short" })}
