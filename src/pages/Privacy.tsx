@@ -1,11 +1,8 @@
-import { useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
 import PageMeta from "@/components/PageMeta";
+import PublicHeader from "@/components/layout/PublicHeader";
+import PublicFooter from "@/components/layout/PublicFooter";
 
 const Privacy = () => {
-  const navigate = useNavigate();
-
   return (
     <div className="min-h-screen bg-background text-foreground">
       <PageMeta
@@ -13,20 +10,9 @@ const Privacy = () => {
         description="Découvrez comment Guardiens protège vos données personnelles et respecte votre vie privée conformément au RGPD."
         path="/confidentialite"
       />
-      <header className="flex items-center justify-between px-6 md:px-12 py-5 sticky top-0 bg-background/80 backdrop-blur-md z-50 border-b border-border/50">
-        <h2 className="font-heading text-2xl font-bold cursor-pointer" onClick={() => navigate("/")}>
-          <span className="text-primary">g</span>uardiens
-        </h2>
-        <div className="flex gap-3">
-          <Button variant="ghost" onClick={() => navigate("/login")}>Connexion</Button>
-          <Button onClick={() => navigate("/register")}>S'inscrire</Button>
-        </div>
-      </header>
+      <PublicHeader />
 
       <main className="px-6 md:px-12 py-16 max-w-3xl mx-auto">
-        <Button variant="ghost" size="sm" className="mb-8" onClick={() => navigate(-1 as any)}>
-          <ArrowLeft className="h-4 w-4 mr-2" /> Retour
-        </Button>
 
         <h1 className="font-heading text-3xl md:text-4xl font-bold mb-8">Politique de confidentialité</h1>
 
@@ -172,9 +158,7 @@ const Privacy = () => {
         </div>
       </main>
 
-      <footer className="border-t border-border px-6 md:px-12 py-8 text-center text-muted-foreground text-xs">
-        © 2026 Guardiens — House-sitting de proximité en Auvergne-Rhône-Alpes
-      </footer>
+      <PublicFooter />
     </div>
   );
 };

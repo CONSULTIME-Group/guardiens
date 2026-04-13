@@ -34,6 +34,7 @@ export default function PublicHeader() {
               size="sm"
               onClick={() => navigate(l.to)}
               className={isActive(l.to) ? "text-primary font-semibold" : ""}
+              aria-current={isActive(l.to) ? "page" : undefined}
             >
               {l.label}
             </Button>
@@ -65,6 +66,7 @@ export default function PublicHeader() {
               key={l.to}
               to={l.to}
               onClick={() => setOpen(false)}
+              aria-current={isActive(l.to) ? "page" : undefined}
               className={`block py-2.5 px-3 rounded-lg text-sm font-medium transition-colors ${
                 isActive(l.to)
                   ? "text-primary bg-primary/5 font-semibold"
