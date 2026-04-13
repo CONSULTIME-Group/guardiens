@@ -25,7 +25,7 @@ const Favorites = () => {
       if (!sitterIds.length) return [];
       const { data, error } = await supabase
         .from("public_profiles")
-        .select("id, first_name, last_name, avatar_url, city, role")
+        .select("id, first_name, avatar_url, city")
         .in("id", sitterIds);
       if (error) throw error;
       return data || [];
@@ -40,7 +40,7 @@ const Favorites = () => {
       if (!sitIds.length) return [];
       const { data, error } = await supabase
         .from("sits")
-        .select("id, title, city, start_date, end_date, status")
+        .select("id, title, start_date, end_date, status")
         .in("id", sitIds);
       if (error) throw error;
       return data || [];
@@ -119,7 +119,7 @@ const Favorites = () => {
                             to={`/gardiens/${sitter.id}`}
                             className="font-medium text-foreground hover:text-primary transition-colors"
                           >
-                            {sitter.first_name} {sitter.last_name?.[0] ? `${sitter.last_name[0]}.` : ""}
+                            {sitter.first_name || "Membre"}
                           </Link>
                           {sitter.city && (
                             <p className="text-sm text-muted-foreground flex items-center gap-1 mt-0.5">
@@ -154,11 +154,6 @@ const Favorites = () => {
                             {sit.title || "Annonce de garde"}
                           </Link>
                           <div className="flex items-center gap-3 mt-0.5 text-sm text-muted-foreground">
-                            {sit.city && (
-                              <span className="flex items-center gap-1">
-                                <MapPin className="h-3 w-3" /> {sit.city}
-                              </span>
-                            )}
                             {sit.start_date && (
                               <span>
                                 {new Date(sit.start_date).toLocaleDateString("fr-FR", { day: "numeric", month: "short" })}
