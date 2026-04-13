@@ -26,6 +26,7 @@ import { format, differenceInDays, differenceInHours } from "date-fns";
 import { fr } from "date-fns/locale";
 import { geocodeCity, haversineDistance } from "@/lib/geocode";
 import { useSubscriptionAccess } from "@/hooks/useSubscriptionAccess";
+import FavoriteButton from "@/components/shared/FavoriteButton";
 
 const animalChips = ["Chiens", "Chats", "Chevaux", "Animaux de ferme", "NAC"];
 const animalChipToSpecies: Record<string, string> = {
@@ -559,13 +560,18 @@ const SearchSitter = () => {
                 <ShieldCheck className="h-3 w-3" /> Vérifié
               </span>
             )}
+            {!isDemo && !isMission && (
+              <span className="absolute top-3 right-3 z-10" onClick={(e) => e.preventDefault()}>
+                <FavoriteButton targetType="sit" targetId={item.id} size="sm" />
+              </span>
+            )}
             {isDemo && (
               <span className="absolute top-3 right-3 bg-black/50 text-white rounded-full px-2 py-1 text-xs">
                 Annonce type
               </span>
             )}
             {item.isNew && !isDemo && (
-              <span className="absolute top-3 right-3 bg-primary text-primary-foreground rounded-full px-2 py-1 text-xs flex items-center gap-1">
+              <span className="absolute top-3 left-3 mt-8 bg-primary text-primary-foreground rounded-full px-2 py-1 text-xs flex items-center gap-1">
                 <Sparkles className="h-3 w-3" /> Nouveau
               </span>
             )}
@@ -1105,12 +1111,17 @@ const SearchSitter = () => {
                           </p>
                         )}
                       </div>
-                      <Link
-                        to={`/messages?new=true&to=${member.id}&context=entraide`}
-                        className="text-sm text-primary font-semibold shrink-0 hover:underline"
-                      >
-                        Contacter →
-                      </Link>
+                      <div className="flex flex-col items-end gap-2 shrink-0">
+                        <span onClick={(e) => e.stopPropagation()}>
+                          <FavoriteButton targetType="sitter" targetId={member.id} size="sm" />
+                        </span>
+                        <Link
+                          to={`/messages?new=true&to=${member.id}&context=entraide`}
+                          className="text-sm text-primary font-semibold hover:underline"
+                        >
+                          Contacter →
+                        </Link>
+                      </div>
                     </div>
                   );
                 })}
