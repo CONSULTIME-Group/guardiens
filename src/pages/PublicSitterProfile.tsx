@@ -22,6 +22,7 @@ import {
   Home, KeyRound, Handshake, Heart,
 } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import PublicExperiences from "@/components/profile/PublicExperiences";
 
 const capitalize = (name: string) =>
   name ? name.charAt(0).toUpperCase() + name.slice(1).toLowerCase() : "";
