@@ -356,7 +356,7 @@ const AdminUsers = () => {
                           variant="ghost"
                           size="icon"
                           title="Voir le profil"
-                          onClick={() => window.open(`/profil/${user.id}`, "_blank")}
+                          onClick={() => window.open(`/gardiens/${user.id}`, "_blank")}
                         >
                           <Eye className="h-4 w-4" />
                         </Button>
