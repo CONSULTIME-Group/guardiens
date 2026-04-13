@@ -129,7 +129,7 @@ export default function PublicSitterProfile() {
     if (!id) return;
     const load = async () => {
       setLoading(true);
-      const [profileRes, baseProfileRes, sitterRes, badgesRes, reviewsRes, galleryRes, emergencyRes, subRes, ownerRes, missionsRes] =
+      const [profileRes, baseProfileRes, sitterRes, badgesRes, reviewsRes, galleryRes, emergencyRes, subRes, ownerRes, missionsRes, extExpRes] =
         await Promise.all([
           supabase.from("public_profiles").select("*").eq("id", id).maybeSingle(),
           supabase.from("profiles").select("id, first_name, last_name, avatar_url, bio, city, postal_code, created_at, identity_verified, is_founder, profile_completion, completed_sits_count, cancellation_count").eq("id", id).maybeSingle(),
@@ -156,6 +156,11 @@ export default function PublicSitterProfile() {
             .from("small_missions")
             .select("id", { count: "exact", head: true })
             .eq("user_id", id),
+          supabase
+            .from("external_experiences")
+            .select("id, platform_name, summary, animal_types, city, country, duration, experience_date, verification_status")
+            .eq("user_id", id)
+            .eq("verification_status", "verified"),
         ]);
 
       // Store in local variables before setState
