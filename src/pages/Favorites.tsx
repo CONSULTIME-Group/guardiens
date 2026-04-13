@@ -40,7 +40,7 @@ const Favorites = () => {
       if (!sitIds.length) return [];
       const { data, error } = await supabase
         .from("sits")
-        .select("id, title, city, start_date, end_date, status")
+        .select("id, title, start_date, end_date, status")
         .in("id", sitIds);
       if (error) throw error;
       return data || [];
