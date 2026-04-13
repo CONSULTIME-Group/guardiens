@@ -25,7 +25,7 @@ const Favorites = () => {
       if (!sitterIds.length) return [];
       const { data, error } = await supabase
         .from("public_profiles")
-        .select("id, first_name, last_name, avatar_url, city, role")
+        .select("id, first_name, avatar_url, city")
         .in("id", sitterIds);
       if (error) throw error;
       return data || [];
