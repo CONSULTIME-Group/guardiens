@@ -2,13 +2,14 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useFavorites } from "@/hooks/useFavorites";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
-import { Heart, User, Calendar, MapPin, ArrowRight, Loader2 } from "lucide-react";
+import { Heart, User, Calendar, MapPin, ArrowRight, Loader2, Search } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import FavoriteButton from "@/components/shared/FavoriteButton";
+import EmptyState from "@/components/shared/EmptyState";
 import PageMeta from "@/components/PageMeta";
 
 const Favorites = () => {
@@ -70,21 +71,14 @@ const Favorites = () => {
         </div>
 
         {!hasAny ? (
-          <div className="text-center py-16 space-y-4">
-            <Heart className="h-12 w-12 mx-auto text-muted-foreground/30" />
-            <p className="text-muted-foreground">
-              Vous n'avez pas encore de favoris.
-            </p>
-            <p className="text-sm text-muted-foreground/70">
-              Parcourez les profils de gardiens ou les annonces pour en ajouter.
-            </p>
-            <Link
-              to="/search"
-              className="inline-flex items-center gap-2 text-primary font-medium text-sm hover:underline mt-2"
-            >
-              Explorer les gardiens <ArrowRight className="h-4 w-4" />
-            </Link>
-          </div>
+          <EmptyState
+            illustration="heartBookmark"
+            title="Aucun favori pour l'instant"
+            description="Parcourez les profils de gardiens ou les annonces et cliquez sur le ❤️ pour les retrouver ici."
+            actionLabel="Explorer les gardiens"
+            actionTo="/search"
+            actionIcon={Search}
+          />
         ) : (
           <Tabs defaultValue={hasSitters ? "sitters" : "sits"} className="space-y-6">
             <TabsList>
@@ -100,7 +94,7 @@ const Favorites = () => {
 
             <TabsContent value="sitters" className="space-y-3">
               {!hasSitters ? (
-                <p className="text-center py-8 text-muted-foreground text-sm">Aucun gardien en favori.</p>
+                <EmptyState illustration="walkingDog" title="Aucun gardien en favori" description="Trouvez des gardiens de confiance et sauvegardez-les." actionLabel="Chercher un gardien" actionTo="/search" actionIcon={Search} />
               ) : (
                 sitters!.map((sitter: any) => (
                   <Card key={sitter.id} className="group hover:shadow-md transition-shadow">
@@ -137,7 +131,7 @@ const Favorites = () => {
 
             <TabsContent value="sits" className="space-y-3">
               {!hasSits ? (
-                <p className="text-center py-8 text-muted-foreground text-sm">Aucune annonce en favori.</p>
+                <EmptyState illustration="emptyCalendar" title="Aucune annonce en favori" description="Sauvegardez des annonces pour les retrouver facilement." actionLabel="Voir les annonces" actionTo="/search" actionIcon={Search} />
               ) : (
                 sits!.map((sit: any) => (
                   <Card key={sit.id} className="group hover:shadow-md transition-shadow">

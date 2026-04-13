@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import EmptyState from "@/components/shared/EmptyState";
 import { useEffect, useState, useMemo, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { format, differenceInDays, isAfter, isBefore, isToday, parseISO, isWithinInterval, startOfDay, endOfDay } from "date-fns";
@@ -405,35 +406,37 @@ const Sits = () => {
           ))}
         </div>
       ) : filteredSits.length === 0 ? (
-        <div className="text-center py-20">
-          <Calendar className="h-12 w-12 mx-auto text-muted-foreground/30 mb-4" />
-          <p className="text-muted-foreground font-medium mb-1">
-            {activeTab === "upcoming" && "Aucune garde à venir"}
-            {activeTab === "in_progress" && "Aucune garde en cours"}
-            {activeTab === "completed" && "Aucune garde passée"}
-            {activeTab === "cancelled" && "Aucune garde annulée"}
-          </p>
+        <>
           {activeTab === "upcoming" && activeRole === "owner" && (
-            <>
-              <p className="text-muted-foreground/60 text-sm">Vous n'avez pas encore publié d'annonce.</p>
-              <Link to="/sits/create">
-                <Button variant="outline" className="mt-4 gap-2">
-                  <Plus className="h-4 w-4" /> Publier ma première annonce
-                </Button>
-              </Link>
-            </>
+            <EmptyState
+              illustration="emptyCalendar"
+              title="Aucune annonce à venir"
+              description="Publiez votre première annonce pour trouver un gardien de confiance près de chez vous."
+              actionLabel="Publier une annonce"
+              actionTo="/sits/create"
+              actionIcon={Plus}
+            />
           )}
           {activeTab === "upcoming" && activeRole === "sitter" && (
-            <>
-              <p className="text-muted-foreground/60 text-sm">Consultez les annonces pour postuler.</p>
-              <Link to="/search">
-                <Button variant="outline" className="mt-4 gap-2">
-                  <Eye className="h-4 w-4" /> Voir les annonces
-                </Button>
-              </Link>
-            </>
+            <EmptyState
+              illustration="walkingDog"
+              title="Aucune garde à venir"
+              description="Consultez les annonces disponibles et postulez pour votre prochaine garde."
+              actionLabel="Voir les annonces"
+              actionTo="/search"
+              actionIcon={Eye}
+            />
           )}
-        </div>
+          {activeTab === "in_progress" && (
+            <EmptyState illustration="sleepingCat" title="Aucune garde en cours" description="Vos gardes en cours apparaîtront ici." />
+          )}
+          {activeTab === "completed" && (
+            <EmptyState illustration="sleepingCat" title="Aucune garde passée" description="Vos gardes terminées apparaîtront ici." />
+          )}
+          {activeTab === "cancelled" && (
+            <EmptyState illustration="sleepingCat" title="Aucune garde annulée" description="Tant mieux ! Aucune annulation pour le moment." />
+          )}
+        </>
       ) : (
         <div className="space-y-3">
           {filteredSits.map((sit: any) => (
