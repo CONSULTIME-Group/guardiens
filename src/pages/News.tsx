@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { useSearchParams, Link } from "react-router-dom";
 import PageMeta from "@/components/PageMeta";
+import PublicHeader from "@/components/layout/PublicHeader";
+import PublicFooter from "@/components/layout/PublicFooter";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -134,10 +136,8 @@ export default function News() {
         description="Articles, témoignages et guides pratiques pour le house-sitting en Auvergne-Rhône-Alpes. Conseils pour gardiens et propriétaires."
         path="/actualites"
       />
+    <PublicHeader />
     <div className="max-w-4xl mx-auto px-4 py-8 animate-fade-in">
-      <Link to="/" className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground mb-6 gap-1">
-        ← Retour au site
-      </Link>
       <header className="mb-8">
         <h1 className="text-3xl md:text-4xl font-heading font-bold text-foreground mb-2">
           Guides & Conseils
@@ -321,6 +321,7 @@ export default function News() {
         </>
       )}
     </div>
+    <PublicFooter />
     </>
   );
 }

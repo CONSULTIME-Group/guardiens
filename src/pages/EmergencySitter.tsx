@@ -2,6 +2,8 @@ import { Zap, Bell, Home, Heart, Shield, Clock, Star, MapPin, CheckCircle2 } fro
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import PageMeta from "@/components/PageMeta";
+import PublicHeader from "@/components/layout/PublicHeader";
+import PublicFooter from "@/components/layout/PublicFooter";
 
 const steps = [
   {
@@ -52,7 +54,7 @@ const advantages = [
 const EmergencySitter = () => {
   return (
     <div className="min-h-screen bg-background">
-      <PageMeta
+      <PublicHeader />
         title="Gardien d'urgence — Intervention rapide en AURA"
         description="Besoin d'un gardien en urgence ? Des gardiens vérifiés disponibles rapidement en Auvergne-Rhône-Alpes."
       />
