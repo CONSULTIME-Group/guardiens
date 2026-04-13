@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import PageMeta from "@/components/PageMeta";
+import PublicHeader from "@/components/layout/PublicHeader";
 
 const About = () => {
   const navigate = useNavigate();
@@ -13,15 +14,7 @@ const About = () => {
         description="Découvrez l'histoire de Guardiens, née d'une passion pour les animaux et le house-sitting de proximité en Auvergne-Rhône-Alpes."
         path="/a-propos"
       />
-      <header className="flex items-center justify-between px-6 md:px-12 py-5 sticky top-0 bg-background/80 backdrop-blur-md z-50 border-b border-border/50">
-        <h2 className="font-heading text-2xl font-bold cursor-pointer" onClick={() => navigate("/")}>
-          <span className="text-primary">g</span>uardiens
-        </h2>
-        <div className="flex gap-3">
-          <Button variant="ghost" onClick={() => navigate("/login")}>Connexion</Button>
-          <Button onClick={() => navigate("/register")}>S'inscrire</Button>
-        </div>
-      </header>
+      <PublicHeader />
 
       <main className="px-6 md:px-12 py-16 max-w-3xl mx-auto">
         <Button variant="ghost" size="sm" className="mb-8" onClick={() => navigate(-1 as any)}>
