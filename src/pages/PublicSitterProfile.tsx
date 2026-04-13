@@ -22,6 +22,7 @@ import {
   Home, KeyRound, Handshake, Heart,
 } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import PublicExperiences from "@/components/profile/PublicExperiences";
 
 const capitalize = (name: string) =>
   name ? name.charAt(0).toUpperCase() + name.slice(1).toLowerCase() : "";
@@ -95,6 +96,7 @@ export default function PublicSitterProfile() {
   const [missionFeedbacks, setMissionFeedbacks] = useState<any[]>([]);
   const [missionsPublished, setMissionsPublished] = useState<any[]>([]);
   const [missionsHelped, setMissionsHelped] = useState<any[]>([]);
+  const [externalExperiences, setExternalExperiences] = useState<any[]>([]);
 
   // Show-more states for list truncation
   const [showAllGardeReviews, setShowAllGardeReviews] = useState(false);
@@ -127,7 +129,7 @@ export default function PublicSitterProfile() {
     if (!id) return;
     const load = async () => {
       setLoading(true);
-      const [profileRes, baseProfileRes, sitterRes, badgesRes, reviewsRes, galleryRes, emergencyRes, subRes, ownerRes, missionsRes] =
+      const [profileRes, baseProfileRes, sitterRes, badgesRes, reviewsRes, galleryRes, emergencyRes, subRes, ownerRes, missionsRes, extExpRes] =
         await Promise.all([
           supabase.from("public_profiles").select("*").eq("id", id).maybeSingle(),
           supabase.from("profiles").select("id, first_name, last_name, avatar_url, bio, city, postal_code, created_at, identity_verified, is_founder, profile_completion, completed_sits_count, cancellation_count").eq("id", id).maybeSingle(),
@@ -154,6 +156,11 @@ export default function PublicSitterProfile() {
             .from("small_missions")
             .select("id", { count: "exact", head: true })
             .eq("user_id", id),
+          supabase
+            .from("external_experiences")
+            .select("id, platform_name, summary, animal_types, city, country, duration, experience_date, verification_status")
+            .eq("user_id", id)
+            .eq("verification_status", "verified"),
         ]);
 
       // Store in local variables before setState
@@ -170,6 +177,7 @@ export default function PublicSitterProfile() {
       setHasActiveSubscription(!!(subRes.data && (subRes.data as any[]).length > 0));
       setOwnerProfile(fetchedOwnerProfile);
       setMissionCount(fetchedMissionCount);
+      setExternalExperiences(extExpRes?.data || []);
 
       if (badgesRes.data) {
         const map: Record<string, number> = {};
@@ -1031,6 +1039,9 @@ export default function PublicSitterProfile() {
                 )}
               </div>
             )}
+
+            {/* Expériences vérifiées */}
+            <PublicExperiences experiences={externalExperiences} />
           </div>
         </div>
       )}
