@@ -418,7 +418,37 @@ const SitDetail = () => {
 
         {/* Candidatures tab (owner only) */}
         {isOwner && (
-          <TabsContent value="candidatures" className="mt-6">
+          <TabsContent value="candidatures" className="mt-6 space-y-4">
+            {/* Max applications status banner */}
+            {!sit.accepting_applications && (
+              <div className="rounded-xl border border-primary/20 bg-primary/5 p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                <div>
+                  <p className="text-sm font-semibold text-foreground">Candidatures closes</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    {sit.max_applications
+                      ? `Le maximum de ${sit.max_applications} candidature${sit.max_applications > 1 ? "s" : ""} a été atteint.`
+                      : "Vous avez fermé les candidatures."}
+                    {" "}Si vous refusez des candidatures, vous pourrez rouvrir les places libérées.
+                  </p>
+                </div>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={async () => {
+                    await supabase.from("sits").update({ accepting_applications: true } as any).eq("id", sit.id);
+                    setSit({ ...sit, accepting_applications: true });
+                    toast({ title: "Candidatures rouvertes", description: "Les gardiens peuvent à nouveau postuler." });
+                  }}
+                >
+                  Rouvrir les candidatures
+                </Button>
+              </div>
+            )}
+            {sit.accepting_applications && sit.max_applications && (
+              <p className="text-xs text-muted-foreground">
+                {appCount}/{sit.max_applications} candidature{sit.max_applications > 1 ? "s" : ""} reçue{appCount > 1 ? "s" : ""}
+              </p>
+            )}
             <ApplicationsList
               sitId={sit.id}
               sitTitle={sit.title}
@@ -754,7 +784,18 @@ const SitDetail = () => {
         city={owner?.city || ""}
         startDate={formatDate(sit.start_date)}
         endDate={formatDate(sit.end_date)}
-        onSuccess={() => setHasApplied(true)}
+        onSuccess={async () => {
+          setHasApplied(true);
+          // Auto-close if max_applications reached
+          if (sit.max_applications) {
+            const newCount = appCount + 1;
+            setAppCount(newCount);
+            if (newCount >= sit.max_applications) {
+              await supabase.from("sits").update({ accepting_applications: false } as any).eq("id", sit.id);
+              setSit({ ...sit, accepting_applications: false });
+            }
+          }
+        }}
       />
 
       {sit && (
