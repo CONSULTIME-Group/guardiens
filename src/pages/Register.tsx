@@ -273,7 +273,43 @@ const Register = () => {
                 </div>
                 {formError && <p className="text-sm text-destructive">{formError}</p>}
               </div>
-              <Button type="submit" className="w-full" size="lg" disabled={isLoading}>
+
+              {/* Transparency info for sitter roles */}
+              {(selectedRole === "sitter" || selectedRole === "both") && (
+                <div className="flex gap-2.5 p-3 rounded-lg bg-accent text-sm text-muted-foreground">
+                  <Info className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                  <div className="space-y-1">
+                    <p>
+                      <strong className="text-foreground">Gratuit jusqu'au 13 mai 2026</strong> — aucune carte bancaire demandée.
+                      Les fondateurs inscrits avant cette date profitent d'un mois supplémentaire offert jusqu'au 13 juin.
+                    </p>
+                    <p>
+                      Ensuite, l'abonnement gardien est à 9&nbsp;€/mois (résiliable en 1 clic).
+                    </p>
+                    <p>
+                      <strong className="text-foreground">L'entraide reste gratuite pour tous, pour toujours.</strong>
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {/* CGU checkbox */}
+              <div className="flex items-start gap-2">
+                <Checkbox
+                  id="terms"
+                  checked={acceptedTerms}
+                  onCheckedChange={(v) => setAcceptedTerms(v === true)}
+                  className="mt-0.5"
+                />
+                <label htmlFor="terms" className="text-sm text-muted-foreground leading-snug cursor-pointer">
+                  J'accepte les{" "}
+                  <Link to="/cgu" target="_blank" className="text-primary hover:underline">conditions d'utilisation</Link>
+                  {" "}et la{" "}
+                  <Link to="/confidentialite" target="_blank" className="text-primary hover:underline">politique de confidentialité</Link>.
+                </label>
+              </div>
+
+              <Button type="submit" className="w-full" size="lg" disabled={isLoading || !acceptedTerms}>
                 {isLoading ? "Création..." : "Créer mon compte"}
               </Button>
             </form>
