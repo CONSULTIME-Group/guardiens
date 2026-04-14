@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import FounderBadge from "@/components/badges/FounderBadge";
-import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSearchParams } from "react-router-dom";
 import OnboardingModal from "@/components/onboarding/OnboardingModal";
@@ -8,21 +7,20 @@ import MinimalOnboardingDialog from "@/components/onboarding/MinimalOnboardingDi
 import { useSubscriptionAccess } from "@/hooks/useSubscriptionAccess";
 import { Link, useNavigate } from "react-router-dom";
 import EmergencyDashSection from "./EmergencyDashSection";
-import MissionsNearbySection from "./MissionsNearbySection";
-import { differenceInMonths } from 'date-fns';
-import { BadgeSceau } from '@/components/badges/BadgeSceau';
-import { StatutGardienBadge } from '@/components/profile/StatutGardienBadge';
-import { useProfileReputation, useUserBadges } from '@/hooks/useProfileReputation';
-import { GARDIEN_BADGE_IDS, SPECIAL_BADGE_IDS } from '@/components/badges/badge-definitions';
-import { Separator } from '@/components/ui/separator';
+import { differenceInMonths } from "date-fns";
+import { BadgeSceau } from "@/components/badges/BadgeSceau";
+import { StatutGardienBadge } from "@/components/profile/StatutGardienBadge";
+import { useProfileReputation, useUserBadges } from "@/hooks/useProfileReputation";
+import { GARDIEN_BADGE_IDS, SPECIAL_BADGE_IDS } from "@/components/badges/badge-definitions";
+import { Separator } from "@/components/ui/separator";
+import { useSitterDashboardData } from "@/hooks/useSitterDashboardData";
 
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import {
   Home, Search, CheckCircle, Circle, ChevronRight,
   Newspaper, Info, AlertCircle,
 } from "lucide-react";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { format, differenceInDays, differenceInHours } from "date-fns";
+import { format, differenceInHours } from "date-fns";
 import { fr } from "date-fns/locale";
 import RoleActivationBanner from "./RoleActivationBanner";
 import AccessGateBanner from "@/components/access/AccessGateBanner";
@@ -49,9 +47,18 @@ const SitterDashboard = () => {
   const { level, profileCompletion: accessProfileCompletion } = useAccessLevel();
   const [searchParams, setSearchParams] = useSearchParams();
   const { hasAccess: hasSubscription } = useSubscriptionAccess();
-  const [showOnboardingModal, setShowOnboardingModal] = useState(false);
-  const [showMinimal, setShowMinimal] = useState(false);
-  const [minimalCompleted, setMinimalCompleted] = useState(true);
+
+  // ── Single data hook replaces 22 useState ──
+  const {
+    loading, profileCompletion, identityVerified, identityStatus,
+    completedSits, avgRating, badgeCount, totalApps, cancellations,
+    pendingAppsCount, unreadCount, isAvailable, isFounder,
+    postalCode, avatarUrl, bio, hasAnimalExperience,
+    hasEmergencyProfile, hasAcceptedRecent, nextGuard,
+    nearbyListings, articles, badges,
+    onboardingCompleted, onboardingDismissed, minimalCompleted,
+    setPartial, toggleAvailability,
+  } = useSitterDashboardData(user?.id);
 
   const { data: reputation } = useProfileReputation(user?.id);
   const { data: userBadges } = useUserBadges(user?.id);
@@ -65,178 +72,25 @@ const SitterDashboard = () => {
     SPECIAL_BADGE_IDS.includes(b.badge_id)
   );
 
-  const [loading, setLoading] = useState(true);
-  const [unreadCount, setUnreadCount] = useState(0);
-  const [pendingAppsCount, setPendingAppsCount] = useState(0);
-  const [nextGuard, setNextGuard] = useState<any>(null);
-  const [profileCompletion, setProfileCompletion] = useState(0);
-  const [identityVerified, setIdentityVerified] = useState(false);
-  const [completedSits, setCompletedSits] = useState(0);
-  const [avgRating, setAvgRating] = useState(0);
-  const [badgeCount, setBadgeCount] = useState(0);
-  const [totalApps, setTotalApps] = useState(0);
-  const [cancellations, setCancellations] = useState(0);
-  const [badges, setBadges] = useState<any[]>([]);
-  const [isAvailable, setIsAvailable] = useState(false);
-  const [nearbyListings, setNearbyListings] = useState<any[]>([]);
-  const [isFounder, setIsFounder] = useState(false);
-  const [articles, setArticles] = useState<any[]>([]);
-  const [hasEmergencyProfile, setHasEmergencyProfile] = useState(false);
-  const [hasAcceptedRecent, setHasAcceptedRecent] = useState(false);
-  const [postalCode, setPostalCode] = useState<string | null>(null);
-  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
-  const [bio, setBio] = useState<string | null>(null);
-  const [hasAnimalExperience, setHasAnimalExperience] = useState(false);
-  const [cpBannerDismissed, setCpBannerDismissed] = useState(() => sessionStorage.getItem("cp_banner_dismissed") === "1");
-
-  const [onboardingChecks, setOnboardingChecks] = useState({
-    profileComplete: false,
-    identityVerified: false,
-    firstSearch: false,
-    availableMode: false,
-  });
+  // ── Onboarding modals ──
+  const [showOnboardingModal, setShowOnboardingModal] = useState(false);
+  const [showMinimal, setShowMinimal] = useState(false);
+  const [cpBannerDismissed, setCpBannerDismissed] = useState(
+    () => sessionStorage.getItem("cp_banner_dismissed") === "1"
+  );
 
   useEffect(() => {
-    if (!user) return;
-    const load = async () => {
-      const [
-        appsRes, sitterRes, profileRes, reviewsRes, listingsRes,
-        badgesRes, articlesRes, unreadRes, badgeDetailsRes,
-      ] = await Promise.all([
-        supabase.from("applications").select("*, sit:sits(id, title, start_date, end_date, status, user_id, property_id, properties:property_id(photos))").eq("sitter_id", user.id).order("created_at", { ascending: false }),
-        supabase.from("sitter_profiles").select("is_available, experience_years, animal_types").eq("user_id", user.id).single(),
-        supabase.from("profiles").select("identity_verification_status, profile_completion, identity_verified, cancellation_count, is_founder, postal_code, avatar_url, bio").eq("id", user.id).single(),
-        supabase.from("reviews").select("overall_rating").eq("reviewee_id", user.id).eq("published", true),
-        supabase.from("sits").select("id, title, start_date, end_date, user_id, property_id, status, created_at, is_urgent, properties:property_id(photos, type, environment)").eq("status", "published").order("created_at", { ascending: false }).limit(6),
-        supabase.from("badge_attributions").select("id").eq("user_id", user.id),
-        supabase.from("articles").select("id, title, slug, cover_image_url, excerpt, category").eq("published", true).eq("category", "conseil_gardien").order("published_at", { ascending: false }).limit(3),
-        supabase.from("messages").select("id", { count: "exact", head: true }).neq("sender_id", user.id).is("read_at", null),
-        supabase.from("badge_attributions").select("id, badge_id, created_at").eq("user_id", user.id).order("created_at", { ascending: false }).limit(6),
-      ]);
-
-      const pCompletion = profileRes.data?.profile_completion || 0;
-      const idVerified = profileRes.data?.identity_verified || false;
-      const vStatus = profileRes.data?.identity_verification_status || "not_submitted";
-      setProfileCompletion(pCompletion);
-      setIdentityVerified(idVerified);
-      setCancellations(profileRes.data?.cancellation_count || 0);
-      setIsFounder(profileRes.data?.is_founder || false);
-      setPostalCode(profileRes.data?.postal_code || null);
-      setAvatarUrl(profileRes.data?.avatar_url || null);
-      setBio(profileRes.data?.bio || null);
-      setIsAvailable(sitterRes.data?.is_available || false);
-      setHasAnimalExperience(!!(sitterRes.data?.experience_years && (sitterRes.data?.animal_types as any)?.length > 0));
-
-      const apps = appsRes.data || [];
-      const acceptedApps = apps.filter((a: any) => a.status === "accepted");
-      const completed = acceptedApps.filter((a: any) => a.sit?.status === "completed").length;
-      setCompletedSits(completed);
-      setTotalApps(apps.length);
-
-      // Check for recently accepted application (last 7 days)
-      const recentAccepted = acceptedApps.some((a: any) => {
-        const created = new Date(a.created_at);
-        return differenceInDays(new Date(), created) <= 7;
-      });
-      setHasAcceptedRecent(recentAccepted);
-
-      const pending = apps.filter((a: any) => ["pending", "viewed", "discussing"].includes(a.status)).length;
-      setPendingAppsCount(pending);
-
-      const reviews = reviewsRes.data || [];
-      const avg = reviews.length > 0 ? reviews.reduce((s: number, r: any) => s + r.overall_rating, 0) / reviews.length : 0;
-      setAvgRating(Math.round(avg * 10) / 10);
-
-      setBadgeCount(badgesRes.data?.length || 0);
-      setBadges(badgeDetailsRes.data || []);
-      setUnreadCount(unreadRes.count || 0);
-
-      // Next confirmed guard
-      const now = new Date();
-      const futureGuards = acceptedApps
-        .filter((a: any) => a.sit?.start_date && new Date(a.sit.start_date) > now)
-        .sort((a: any, b: any) => new Date(a.sit.start_date).getTime() - new Date(b.sit.start_date).getTime());
-
-      if (futureGuards.length > 0) {
-        const g = futureGuards[0];
-        const ownerRes = await supabase.from("profiles").select("first_name").eq("id", g.sit.user_id).single();
-        const petsRes = await supabase.from("pets").select("species").eq("property_id", g.sit.property_id);
-        setNextGuard({
-          ...g.sit,
-          ownerName: ownerRes.data?.first_name || "",
-          daysUntil: differenceInDays(new Date(g.sit.start_date), now),
-          pets: petsRes.data || [],
-        });
-      }
-
-      setNearbyListings((listingsRes.data || []).filter((s: any) => s.user_id !== user.id).slice(0, 4));
-      setArticles(articlesRes.data || []);
-
-      setOnboardingChecks({
-        profileComplete: pCompletion >= 100,
-        identityVerified: vStatus === "verified" || idVerified,
-        firstSearch: false,
-        availableMode: sitterRes.data?.is_available || false,
-      });
-
-      const { data: emProfile } = await supabase.from("emergency_sitter_profiles").select("id").eq("user_id", user.id).maybeSingle();
-      setHasEmergencyProfile(!!emProfile);
-
-      setLoading(false);
-    };
-    load();
-  }, [user]);
-
-  // Realtime sync for is_available toggle
-  useEffect(() => {
-    if (!user) return;
-    const channel = supabase
-      .channel('sitter-availability')
-      .on('postgres_changes', {
-        event: 'UPDATE',
-        schema: 'public',
-        table: 'sitter_profiles',
-        filter: `user_id=eq.${user.id}`,
-      }, (payload) => {
-        if (typeof payload.new?.is_available === 'boolean') {
-          setIsAvailable(payload.new.is_available);
-          setOnboardingChecks(prev => ({ ...prev, availableMode: payload.new.is_available }));
-        }
-      })
-      .subscribe();
-    return () => { supabase.removeChannel(channel); };
-  }, [user]);
-
-  // Onboarding modal trigger
-  useEffect(() => {
-    if (!user) return;
+    if (loading || !user) return;
     if (searchParams.get("tour") === "true") {
       setShowOnboardingModal(true);
       return;
     }
-    supabase
-      .from("profiles")
-      .select("onboarding_completed, onboarding_dismissed_at, onboarding_minimal_completed")
-      .eq("id", user.id)
-      .single()
-      .then(({ data }) => {
-        if (!data) return;
-        const mc = (data as any).onboarding_minimal_completed ?? false;
-        setMinimalCompleted(mc);
-        if (!data.onboarding_completed && !data.onboarding_dismissed_at) {
-          setShowOnboardingModal(true);
-        } else if (!mc) {
-          setShowMinimal(true);
-        }
-      });
-  }, [user, searchParams]);
-
-  const toggleAvailability = async () => {
-    const newVal = !isAvailable;
-    setIsAvailable(newVal);
-    setOnboardingChecks(prev => ({ ...prev, availableMode: newVal }));
-    await supabase.from("sitter_profiles").update({ is_available: newVal }).eq("user_id", user!.id);
-  };
+    if (!onboardingCompleted && !onboardingDismissed) {
+      setShowOnboardingModal(true);
+    } else if (!minimalCompleted) {
+      setShowMinimal(true);
+    }
+  }, [loading, user, searchParams, onboardingCompleted, onboardingDismissed, minimalCompleted]);
 
   if (loading) return (
     <div className="p-8 flex items-center justify-center">
@@ -267,10 +121,14 @@ const SitterDashboard = () => {
     { label: "Identité vérifiée", ok: identityVerified },
     { label: "Abonnement actif", ok: !!hasSubscription },
   ];
-  const emergencyDone = emergencyConditions.filter(c => c.ok).length;
 
+  // ── Unified checklist (single source of truth) ──
+  const onboardingChecks = {
+    profileComplete: profileCompletion >= 100,
+    identityVerified: identityStatus === "verified" || identityVerified,
+    availableMode: isAvailable,
+  };
 
-  // Checklist
   const checklistItems = [
     { done: onboardingChecks.profileComplete, label: `Compléter mon profil (${profileCompletion}%)`, to: "/profile" },
     { done: onboardingChecks.identityVerified, label: "Vérifier mon identité", to: "/profile#identite" },
@@ -300,7 +158,7 @@ const SitterDashboard = () => {
         open={showMinimal}
         onComplete={() => {
           setShowMinimal(false);
-          setMinimalCompleted(true);
+          setPartial({ minimalCompleted: true });
         }}
       />
 
@@ -318,7 +176,7 @@ const SitterDashboard = () => {
               <Button
                 variant="default"
                 size="sm"
-                onClick={() => navigate('/profile?focus=postal_code')}
+                onClick={() => navigate("/profile?focus=postal_code")}
               >
                 Ajouter mon CP
               </Button>
@@ -339,7 +197,9 @@ const SitterDashboard = () => {
       <div className="px-4 sm:px-5 md:px-8 mb-4">
         <RoleActivationBanner userRole={user?.role || "sitter"} />
       </div>
-      <div className="relative overflow-hidden bg-[#1a4a35] rounded-b-3xl px-4 sm:px-5 md:px-10 pt-5 sm:pt-6 md:pt-8 pb-4 sm:pb-5 md:pb-6 mb-6 md:mb-8">
+
+      {/* ═══ HERO HEADER ═══ */}
+      <div className="relative overflow-hidden bg-sitter-hero rounded-b-3xl px-4 sm:px-5 md:px-10 pt-5 sm:pt-6 md:pt-8 pb-4 sm:pb-5 md:pb-6 mb-6 md:mb-8">
         <div className="absolute right-0 top-0 opacity-[0.07] pointer-events-none">
           <svg width="300" height="200" viewBox="0 0 300 200">
             <circle cx="250" cy="50" r="120" fill="white"/>
@@ -382,9 +242,9 @@ const SitterDashboard = () => {
               </div>
               <button
                 onClick={toggleAvailability}
-                className={`relative w-11 h-6 rounded-full transition-colors duration-200 ${isAvailable ? 'bg-green-400' : 'bg-white/20'}`}
+                className={`relative w-11 h-6 rounded-full transition-colors duration-200 ${isAvailable ? "bg-toggle-active" : "bg-white/20"}`}
               >
-                <span className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-all duration-200 ${isAvailable ? 'left-5' : 'left-0.5'}`} />
+                <span className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-all duration-200 ${isAvailable ? "left-5" : "left-0.5"}`} />
               </button>
             </div>
           </div>
@@ -411,21 +271,21 @@ const SitterDashboard = () => {
                 <ChecklistItem
                   label="Ajouter une photo de profil"
                   ctaLabel="Ajouter"
-                  onClick={() => navigate('/profile?section=identite')}
+                  onClick={() => navigate("/profile?section=identite")}
                 />
               )}
               {(!bio || bio.length < 50) && (
                 <ChecklistItem
                   label="Écrire votre bio (motivation, expérience)"
                   ctaLabel="Rédiger"
-                  onClick={() => navigate('/profile?section=profil')}
+                  onClick={() => navigate("/profile?section=profil")}
                 />
               )}
               {!hasAnimalExperience && (
                 <ChecklistItem
                   label="Indiquer au moins une expérience avec un animal"
                   ctaLabel="Ajouter"
-                  onClick={() => navigate('/profile?section=experience')}
+                  onClick={() => navigate("/profile?section=experience")}
                 />
               )}
             </CardContent>
@@ -510,43 +370,40 @@ const SitterDashboard = () => {
             Mon Statut
           </p>
 
-          {/* Étiquette statut actuel */}
           <div className="mb-4">
-            {reputation && reputation.statut_gardien !== 'novice' ? (
-              <StatutGardienBadge statut={reputation.statut_gardien as 'novice' | 'confirme' | 'super_gardien'} />
+            {reputation && reputation.statut_gardien !== "novice" ? (
+              <StatutGardienBadge statut={reputation.statut_gardien as "novice" | "confirme" | "super_gardien"} />
             ) : (
               <span className="text-xs text-muted-foreground font-sans">Novice</span>
             )}
           </div>
 
-          {/* Progression Super Gardien */}
           <p className="text-xs font-medium text-foreground mb-2">
             Progression Super Gardien
           </p>
           <div className="flex flex-col gap-1.5">
             <div className="flex items-center gap-2">
-              <div className={`w-2 h-2 rounded-full shrink-0 ${(reputation?.completed_sits ?? 0) >= 3 ? 'bg-primary' : 'bg-muted-foreground/30'}`} />
-              <span className={`text-xs font-sans ${(reputation?.completed_sits ?? 0) >= 3 ? 'line-through text-muted-foreground' : 'text-foreground/70'}`}>
+              <div className={`w-2 h-2 rounded-full shrink-0 ${(reputation?.completed_sits ?? 0) >= 3 ? "bg-primary" : "bg-muted-foreground/30"}`} />
+              <span className={`text-xs font-sans ${(reputation?.completed_sits ?? 0) >= 3 ? "line-through text-muted-foreground" : "text-foreground/70"}`}>
                 3 gardes réalisées ({reputation?.completed_sits ?? 0}/3)
               </span>
             </div>
             <div className="flex items-center gap-2">
-              <div className={`w-2 h-2 rounded-full shrink-0 ${(reputation?.active_badges ?? 0) >= 5 ? 'bg-primary' : 'bg-muted-foreground/30'}`} />
-              <span className={`text-xs font-sans ${(reputation?.active_badges ?? 0) >= 5 ? 'line-through text-muted-foreground' : 'text-foreground/70'}`}>
+              <div className={`w-2 h-2 rounded-full shrink-0 ${(reputation?.active_badges ?? 0) >= 5 ? "bg-primary" : "bg-muted-foreground/30"}`} />
+              <span className={`text-xs font-sans ${(reputation?.active_badges ?? 0) >= 5 ? "line-through text-muted-foreground" : "text-foreground/70"}`}>
                 5 badges actifs différents ({reputation?.active_badges ?? 0}/5)
               </span>
             </div>
             <div className="flex items-center gap-2">
-              <div className={`w-2 h-2 rounded-full shrink-0 ${(reputation?.note_moyenne ?? 0) >= 4.8 ? 'bg-primary' : 'bg-muted-foreground/30'}`} />
-              <span className={`text-xs font-sans ${(reputation?.note_moyenne ?? 0) >= 4.8 ? 'line-through text-muted-foreground' : 'text-foreground/70'}`}>
-                Note ≥ 4.8 ({reputation?.note_moyenne ? Number(reputation.note_moyenne).toFixed(1) : '—'}/4.8)
+              <div className={`w-2 h-2 rounded-full shrink-0 ${(reputation?.note_moyenne ?? 0) >= 4.8 ? "bg-primary" : "bg-muted-foreground/30"}`} />
+              <span className={`text-xs font-sans ${(reputation?.note_moyenne ?? 0) >= 4.8 ? "line-through text-muted-foreground" : "text-foreground/70"}`}>
+                Note ≥ 4.8 ({reputation?.note_moyenne ? Number(reputation.note_moyenne).toFixed(1) : "—"}/4.8)
               </span>
             </div>
           </div>
 
           <Separator className="my-3" />
 
-          {/* Gardien d'Urgence — secondaire */}
           <div className="flex items-center justify-between">
             <div>
               <p className="text-xs font-medium text-foreground">Gardien d'Urgence</p>
@@ -565,8 +422,8 @@ const SitterDashboard = () => {
       {/* ═══ 3. CTA + TIMBRES ═══ */}
       <div className="px-4 sm:px-5 md:px-8 mb-6 md:mb-8">
         <button
-          onClick={() => navigate('/search')}
-          className="w-full bg-primary text-white rounded-2xl py-3 sm:py-4 text-sm sm:text-base font-sans font-semibold mb-6 hover:bg-primary/90 transition-colors"
+          onClick={() => navigate("/search")}
+          className="w-full bg-primary text-primary-foreground rounded-2xl py-3 sm:py-4 text-sm sm:text-base font-sans font-semibold mb-6 hover:bg-primary/90 transition-colors"
         >
           Découvrez les gardes disponibles →
         </button>
@@ -575,11 +432,10 @@ const SitterDashboard = () => {
         <div className="flex items-baseline justify-between mb-3">
           <h2 className="text-sm font-semibold text-foreground">Mes Badges</h2>
           <span className="text-xs text-muted-foreground">
-            {activeBadgeCount} actif{activeBadgeCount > 1 ? 's' : ''} sur 12
+            {activeBadgeCount} actif{activeBadgeCount > 1 ? "s" : ""} sur 12
           </span>
         </div>
 
-        {/* Grille 12 badges gardien */}
         <div className="grid grid-cols-4 sm:grid-cols-6 gap-2 mb-4">
           {GARDIEN_BADGE_IDS.map(id => {
             const userBadge = userBadges?.find(b => b.badge_id === id);
@@ -601,7 +457,6 @@ const SitterDashboard = () => {
           })}
         </div>
 
-        {/* Badges spéciaux obtenus */}
         {specialBadges.length > 0 && (
           <div className="mt-3">
             <p className="text-xs text-muted-foreground font-sans mb-2">
@@ -623,7 +478,7 @@ const SitterDashboard = () => {
         )}
       </div>
 
-      {/* ═══ 4. CHECKLIST ═══ */}
+      {/* ═══ 4. CHECKLIST (unique, unified) ═══ */}
       <div className="px-4 sm:px-5 md:px-8 mb-6 md:mb-8">
         {incompleteItems.length > 0 && (
           <div className="mb-4">
@@ -640,9 +495,9 @@ const SitterDashboard = () => {
                     </div>
                     <button
                       onClick={toggleAvailability}
-                      className={`relative w-11 h-6 rounded-full transition-colors duration-200 ${isAvailable ? 'bg-green-400' : 'bg-muted'}`}
+                      className={`relative w-11 h-6 rounded-full transition-colors duration-200 ${isAvailable ? "bg-toggle-active" : "bg-muted"}`}
                     >
-                      <span className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-all duration-200 ${isAvailable ? 'left-5' : 'left-0.5'}`} />
+                      <span className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-all duration-200 ${isAvailable ? "left-5" : "left-0.5"}`} />
                     </button>
                   </div>
                 ) : (
@@ -725,7 +580,7 @@ const SitterDashboard = () => {
                     <p className="text-xs text-foreground/80 font-sans leading-snug">
                       {sit.title}
                       {isNew && (
-                        <span className="ml-2 text-xs bg-primary text-white rounded px-1.5 py-0.5">
+                        <span className="ml-2 text-xs bg-primary text-primary-foreground rounded px-1.5 py-0.5">
                           Nouveau
                         </span>
                       )}
@@ -757,13 +612,13 @@ const SitterDashboard = () => {
           </p>
           <div className="flex flex-col gap-2 mb-4">
             <button
-              onClick={() => navigate('/petites-missions')}
-              className="w-full bg-primary text-white rounded-xl py-2.5 text-xs font-sans font-medium"
+              onClick={() => navigate("/petites-missions")}
+              className="w-full bg-primary text-primary-foreground rounded-xl py-2.5 text-xs font-sans font-medium"
             >
               Publier un besoin →
             </button>
             <button
-              onClick={() => navigate('/petites-missions')}
+              onClick={() => navigate("/petites-missions")}
               className="w-full border border-primary text-primary rounded-xl py-2.5 text-xs font-sans font-medium"
             >
               Proposer mon aide →
@@ -787,7 +642,7 @@ const SitterDashboard = () => {
             <h2 className="font-heading text-lg font-semibold">Conseils pour vous</h2>
             <Link to="/actualites" className="text-xs text-primary hover:underline font-medium">Voir tout →</Link>
           </div>
-          <div className="flex gap-3 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-hide" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+          <div className="flex gap-3 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-hide">
             {articles.map((a: any) => (
               <a key={a.id} href={`/actualites/${a.slug}`} className="flex-shrink-0 w-[70vw] sm:w-64 rounded-xl border border-border bg-card overflow-hidden hover:shadow-md transition-shadow cursor-pointer">
                 {a.cover_image_url ? (
