@@ -328,7 +328,7 @@ const SmallMissionDetail = () => {
           {mission.date_needed && (
             <span className="flex items-center gap-1.5"><Calendar className="h-4 w-4" />{format(new Date(mission.date_needed), "d MMMM yyyy", { locale: fr })}</span>
           )}
-          <span className="flex items-center gap-1.5"><Clock className="h-4 w-4" />{mission.duration_estimate}</span>
+          <span className="flex items-center gap-1.5"><Clock className="h-4 w-4" />{DURATION_LABELS[mission.duration_estimate] || mission.duration_estimate}</span>
           <span className="flex items-center gap-1.5"><Users className="h-4 w-4" />{responses.length} proposition{responses.length > 1 ? "s" : ""}</span>
         </div>
 
