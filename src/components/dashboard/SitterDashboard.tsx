@@ -10,7 +10,6 @@ import EmergencyDashSection from "./EmergencyDashSection";
 import { differenceInMonths } from "date-fns";
 import { BadgeSceau } from "@/components/badges/BadgeSceau";
 import { StatutGardienBadge } from "@/components/profile/StatutGardienBadge";
-import { useProfileReputation, useUserBadges } from "@/hooks/useProfileReputation";
 import { GARDIEN_BADGE_IDS, SPECIAL_BADGE_IDS } from "@/components/badges/badge-definitions";
 import { Separator } from "@/components/ui/separator";
 import { useSitterDashboardData } from "@/hooks/useSitterDashboardData";
@@ -58,17 +57,15 @@ const SitterDashboard = () => {
     nearbyListings, articles, badges,
     onboardingCompleted, onboardingDismissed, minimalCompleted,
     setPartial, toggleAvailability,
+    reputation, groupedBadges,
   } = useSitterDashboardData(user?.id);
 
-  const { data: reputation } = useProfileReputation(user?.id);
-  const { data: userBadges } = useUserBadges(user?.id);
-
-  const activeBadgeCount = (userBadges ?? []).filter(b =>
+  const activeBadgeCount = groupedBadges.filter(b =>
     GARDIEN_BADGE_IDS.includes(b.badge_id) &&
     differenceInMonths(new Date(), new Date(b.created_at)) < 12
   ).length;
 
-  const specialBadges = (userBadges ?? []).filter(b =>
+  const specialBadges = groupedBadges.filter(b =>
     SPECIAL_BADGE_IDS.includes(b.badge_id)
   );
 
