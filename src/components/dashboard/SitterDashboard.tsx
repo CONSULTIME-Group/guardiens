@@ -604,26 +604,68 @@ const SitterDashboard = () => {
               Voir tout →
             </Link>
           </div>
-          <p className="text-xs text-muted-foreground font-sans mb-3">
-            En priorité : les échanges qui correspondent à vos compétences.
-          </p>
-          <div className="flex flex-col gap-2 mb-4">
-            <button
-              onClick={() => navigate("/petites-missions")}
-              className="w-full bg-primary text-primary-foreground rounded-xl py-2.5 text-xs font-sans font-medium"
-            >
-              Publier un besoin →
-            </button>
-            <button
-              onClick={() => navigate("/petites-missions")}
-              className="w-full border border-primary text-primary rounded-xl py-2.5 text-xs font-sans font-medium"
-            >
-              Proposer mon aide →
-            </button>
-          </div>
-          <p className="text-xs text-muted-foreground font-sans italic text-center">
-            Pas encore d'échange dans votre zone.
-          </p>
+          {nearbyMissions.length === 0 ? (
+            <>
+              <p className="text-xs text-muted-foreground font-sans mb-3">
+                En priorité : les échanges qui correspondent à vos compétences.
+              </p>
+              <div className="flex flex-col gap-2 mb-4">
+                <Button
+                  onClick={() => navigate("/creer-mission")}
+                  className="w-full rounded-xl text-xs font-medium"
+                >
+                  Publier un besoin →
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => navigate("/petites-missions")}
+                  className="w-full rounded-xl text-xs font-medium"
+                >
+                  Proposer mon aide →
+                </Button>
+              </div>
+              <p className="text-xs text-muted-foreground font-sans italic text-center">
+                {postalCode ? "Pas encore d'échange dans votre zone." : "Ajoutez votre code postal pour voir les échanges proches."}
+              </p>
+            </>
+          ) : (
+            <>
+              {nearbyMissions.map((m: any) => (
+                <Link
+                  key={m.id}
+                  to={`/petites-missions/${m.id}`}
+                  className="flex items-start gap-3 py-2.5 border-b border-border last:border-0"
+                >
+                  <div className="w-2 h-2 rounded-full bg-accent-foreground/40 shrink-0 mt-1.5" />
+                  <div className="flex-1">
+                    <p className="text-xs text-foreground/80 font-sans leading-snug">
+                      {m.title}
+                    </p>
+                    <p className="text-xs text-muted-foreground font-sans mt-0.5">
+                      {m.city}{m.date_needed ? ` · ${format(new Date(m.date_needed), "d MMM", { locale: fr })}` : ""}
+                    </p>
+                  </div>
+                </Link>
+              ))}
+              <div className="flex gap-2 mt-3">
+                <Button
+                  size="sm"
+                  onClick={() => navigate("/creer-mission")}
+                  className="flex-1 rounded-xl text-xs"
+                >
+                  Publier un besoin
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => navigate("/petites-missions")}
+                  className="flex-1 rounded-xl text-xs"
+                >
+                  Voir tout
+                </Button>
+              </div>
+            </>
+          )}
         </div>
       </div>
 
