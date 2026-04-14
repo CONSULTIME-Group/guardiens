@@ -2,6 +2,20 @@ import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { differenceInDays, differenceInHours } from "date-fns";
 
+export interface GroupedBadge {
+  badge_id: string;
+  created_at: string;
+  count: number;
+}
+
+export interface ReputationData {
+  completed_sits: number;
+  active_badges: number;
+  note_moyenne: number;
+  is_manual_super: boolean;
+  statut_gardien: "novice" | "confirme" | "super_gardien";
+}
+
 export interface SitterDashboardData {
   loading: boolean;
   profileCompletion: number;
@@ -29,6 +43,8 @@ export interface SitterDashboardData {
   onboardingCompleted: boolean;
   onboardingDismissed: boolean;
   minimalCompleted: boolean;
+  reputation: ReputationData | null;
+  groupedBadges: GroupedBadge[];
 }
 
 const INITIAL_STATE: SitterDashboardData = {
@@ -58,6 +74,8 @@ const INITIAL_STATE: SitterDashboardData = {
   onboardingCompleted: false,
   onboardingDismissed: false,
   minimalCompleted: false,
+  reputation: null,
+  groupedBadges: [],
 };
 
 export function useSitterDashboardData(userId: string | undefined) {
@@ -74,8 +92,8 @@ export function useSitterDashboardData(userId: string | undefined) {
 
     const load = async () => {
       const [
-        appsRes, sitterRes, profileRes, reviewsRes, listingsRes,
-        badgesRes, articlesRes, unreadRes, badgeDetailsRes, emProfileRes,
+        appsRes, sitterRes, profileRes, reviewsRes,
+        badgesRes, articlesRes, unreadRes, allBadgesRes, emProfileRes, reputationRes,
       ] = await Promise.all([
         supabase.from("applications")
           .select("*, sit:sits(id, title, start_date, end_date, status, user_id, property_id, properties:property_id(photos))")
@@ -88,9 +106,6 @@ export function useSitterDashboardData(userId: string | undefined) {
           .eq("id", userId).single(),
         supabase.from("reviews")
           .select("overall_rating").eq("reviewee_id", userId).eq("published", true),
-        supabase.from("sits")
-          .select("id, title, start_date, end_date, user_id, property_id, status, created_at, is_urgent, properties:property_id(photos, type, environment)")
-          .eq("status", "published").order("created_at", { ascending: false }).limit(6),
         supabase.from("badge_attributions").select("id").eq("user_id", userId),
         supabase.from("articles")
           .select("id, title, slug, cover_image_url, excerpt, category")
@@ -99,11 +114,15 @@ export function useSitterDashboardData(userId: string | undefined) {
         supabase.from("messages")
           .select("id", { count: "exact", head: true })
           .neq("sender_id", userId).is("read_at", null),
+        // Single badge query — replaces both badgeDetailsRes AND useUserBadges
         supabase.from("badge_attributions")
-          .select("id, badge_id, created_at").eq("user_id", userId)
-          .order("created_at", { ascending: false }).limit(6),
+          .select("badge_id, created_at").eq("user_id", userId)
+          .order("created_at", { ascending: false }),
         supabase.from("emergency_sitter_profiles")
           .select("id").eq("user_id", userId).maybeSingle(),
+        // Reputation — replaces useProfileReputation
+        (supabase as any).from("profile_reputation")
+          .select("*").eq("user_id", userId).maybeSingle(),
       ]);
 
       const profile = profileRes.data;
@@ -121,7 +140,34 @@ export function useSitterDashboardData(userId: string | undefined) {
         return differenceInDays(new Date(), created) <= 7;
       });
 
-      // Next guard — inline (no waterfall: batch the 2 queries)
+      // Group badges (replaces useUserBadges)
+      const allBadges = allBadgesRes.data || [];
+      const grouped = allBadges.reduce((acc: Record<string, GroupedBadge>, b: any) => {
+        if (!acc[b.badge_id]) acc[b.badge_id] = { badge_id: b.badge_id, created_at: b.created_at, count: 0 };
+        acc[b.badge_id].count++;
+        return acc;
+      }, {} as Record<string, GroupedBadge>);
+      const groupedBadges: GroupedBadge[] = Object.values(grouped);
+
+      // Reputation (replaces useProfileReputation)
+      const reputation: ReputationData | null = reputationRes.data ?? null;
+
+      // Nearby listings — filtered by department (first 2 chars of postal code)
+      const userDept = profile?.postal_code?.slice(0, 2);
+      let nearbyListings: any[] = [];
+      if (userDept) {
+        const { data: deptListings } = await supabase
+          .from("sits")
+          .select("id, title, start_date, end_date, user_id, property_id, status, created_at, is_urgent, properties:property_id(photos, type, environment, postal_code)")
+          .eq("status", "published")
+          .order("created_at", { ascending: false })
+          .limit(20);
+        nearbyListings = (deptListings || [])
+          .filter((s: any) => s.user_id !== userId && (s.properties as any)?.postal_code?.startsWith(userDept))
+          .slice(0, 4);
+      }
+
+      // Next guard
       let nextGuard: any = null;
       const now = new Date();
       const futureGuards = acceptedApps
@@ -163,12 +209,14 @@ export function useSitterDashboardData(userId: string | undefined) {
         hasEmergencyProfile: !!emProfileRes.data,
         hasAcceptedRecent: recentAccepted,
         nextGuard,
-        nearbyListings: (listingsRes.data || []).filter((s: any) => s.user_id !== userId).slice(0, 4),
+        nearbyListings,
         articles: articlesRes.data || [],
-        badges: badgeDetailsRes.data || [],
+        badges: allBadges,
         onboardingCompleted: (profile as any)?.onboarding_completed || false,
         onboardingDismissed: !!(profile as any)?.onboarding_dismissed_at,
         minimalCompleted: (profile as any)?.onboarding_minimal_completed ?? false,
+        reputation,
+        groupedBadges,
       });
     };
 
