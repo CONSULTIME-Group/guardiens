@@ -104,7 +104,7 @@ const SitterDashboard = () => {
       ] = await Promise.all([
         supabase.from("applications").select("*, sit:sits(id, title, start_date, end_date, status, user_id, property_id, properties:property_id(photos))").eq("sitter_id", user.id).order("created_at", { ascending: false }),
         supabase.from("sitter_profiles").select("is_available").eq("user_id", user.id).single(),
-        supabase.from("profiles").select("identity_verification_status, profile_completion, identity_verified, cancellation_count, is_founder").eq("id", user.id).single(),
+        supabase.from("profiles").select("identity_verification_status, profile_completion, identity_verified, cancellation_count, is_founder, postal_code, avatar_url, bio").eq("id", user.id).single(),
         supabase.from("reviews").select("overall_rating").eq("reviewee_id", user.id).eq("published", true),
         supabase.from("sits").select("id, title, start_date, end_date, user_id, property_id, status, created_at, is_urgent, properties:property_id(photos, type, environment)").eq("status", "published").order("created_at", { ascending: false }).limit(6),
         supabase.from("badge_attributions").select("id").eq("user_id", user.id),
