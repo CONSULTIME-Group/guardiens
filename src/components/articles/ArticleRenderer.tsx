@@ -46,6 +46,7 @@ import gardeAnimauxCroixRousse from "@/assets/garde-animaux-croix-rousse-lyon.jp
 import gardeAnimalHospitalisation from "@/assets/garde-animal-hospitalisation-cover.jpg";
 import gardeChatDomicileLyon from "@/assets/garde-chat-domicile-lyon.jpg";
 import gardeChatPresquileLyon from "@/assets/garde-chat-presquile-lyon.jpg";
+import sAbsenterAnimalGuideCover from "@/assets/s-absenter-animal-guide-cover.jpg";
 
 const ARTICLE_IMAGES: Record<string, string> = {
   "/images/lyon-hero-quais.jpg": lyonHeroQuais,
