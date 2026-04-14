@@ -17,6 +17,19 @@ Disallow: /laisser-avis
 Disallow: /gardien-profil
 Disallow: /proprietaire-profil
 Disallow: /guide-maison
+Disallow: /sits
+Disallow: /search
+Disallow: /recherche-gardiens
+Disallow: /review/
+Disallow: /house-guide/
+Disallow: /profile
+Disallow: /forgot-password
+Disallow: /reset-password
+Disallow: /login
+Disallow: /register
+Disallow: /unsubscribe
+Disallow: /test-accord
+Disallow: /favoris
 
 # Crawl rate
 Crawl-delay: 1

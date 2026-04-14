@@ -10,6 +10,8 @@ const staticPages = [
   { loc: "/petites-missions", priority: "0.8", changefreq: "weekly" },
   { loc: "/gardien-urgence", priority: "0.8", changefreq: "weekly" },
   { loc: "/guides", priority: "0.8", changefreq: "weekly" },
+  { loc: "/actualites", priority: "0.8", changefreq: "daily" },
+  { loc: "/a-propos", priority: "0.6", changefreq: "monthly" },
 ];
 
 const cityPages = [
