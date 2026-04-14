@@ -12,13 +12,13 @@ const SKILL_TO_MISSION: Record<string, string> = {
   animaux: "animals",
   jardin: "garden",
   competences: "skills",
-  coups_de_main: "coups_de_main",
+  coups_de_main: "house",
 };
 
 const CATEGORY_META: Record<string, { label: string; icon: typeof Sprout; colorClass: string; badgeType: string }> = {
   animals: { label: "Animaux", icon: PawPrint, colorClass: "text-orange-500", badgeType: "Besoin" },
   garden: { label: "Jardin", icon: Sprout, colorClass: "text-green-600", badgeType: "Besoin" },
-  house: { label: "Coups de main", icon: Handshake, colorClass: "text-blue-500", badgeType: "Besoin" },
+  house: { label: "Maison", icon: Handshake, colorClass: "text-blue-500", badgeType: "Besoin" },
   skills: { label: "Compétences", icon: GraduationCap, colorClass: "text-amber-600", badgeType: "Besoin" },
 };
 

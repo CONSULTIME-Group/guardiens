@@ -24,27 +24,27 @@ const CATEGORY_META: Record<string, { label: string; icon: typeof Dog; colorClas
   garden: { label: "Jardin", icon: Flower2, colorClass: "text-primary" },
   house: { label: "Maison", icon: Handshake, colorClass: "text-primary" },
   skills: { label: "Compétences", icon: Handshake, colorClass: "text-primary" },
-  coups_de_main: { label: "Coups de main", icon: Handshake, colorClass: "text-primary" },
+  
 };
 
 const MISSION_TO_SKILL: Record<string, string> = {
   animals: "animaux",
   garden: "jardin",
   skills: "competences",
-  coups_de_main: "coups_de_main",
+  house: "house",
 };
 const SKILL_TO_MISSION: Record<string, string> = {
   animaux: "animals",
   jardin: "garden",
   competences: "skills",
-  coups_de_main: "coups_de_main",
+  coups_de_main: "house",
 };
 
 const SKILL_PILL_META: Record<string, { label: string; icon: typeof Sprout }> = {
   jardin: { label: "Jardin", icon: Sprout },
   animaux: { label: "Animaux", icon: PawPrint },
   competences: { label: "Compétences", icon: GraduationCap },
-  coups_de_main: { label: "Coups de main", icon: Handshake },
+  house: { label: "Maison", icon: Handshake },
 };
 
 const DURATION_LABELS: Record<string, string> = {
@@ -77,7 +77,7 @@ const EXAMPLES = [
   { cat: "skills", title: "Dog-training : les bases (rappel, marche en laisse)", exchange: "Un bon café et une balade ensemble" },
 ];
 
-type CategoryFilter = "all" | "animals" | "garden" | "skills" | "coups_de_main" | "mine";
+type CategoryFilter = "all" | "animals" | "garden" | "house" | "skills" | "mine";
 type ModeFilter = "need" | "offer";
 
 // Geocode cache to avoid repeated API calls
@@ -513,7 +513,7 @@ const SmallMissions = () => {
     { key: "garden", label: "Jardin", icon: Sprout },
     { key: "animals", label: "Animaux", icon: PawPrint },
     { key: "skills", label: "Compétences", icon: GraduationCap },
-    { key: "coups_de_main", label: "Coups de main", icon: Handshake },
+    { key: "house", label: "Maison", icon: Handshake },
     { key: "mine", label: "Mes missions", icon: null },
   ];
 
