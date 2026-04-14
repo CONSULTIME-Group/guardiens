@@ -170,11 +170,26 @@ const SitterProfile = () => {
     if (Object.keys(localData).length === 0) return;
     const success = await saveStep(localData);
     if (!success) return;
+
+    // Track cp_recovered event when postal_code was saved via email relance
+    if (
+      "postal_code" in localData &&
+      localData.postal_code &&
+      searchParams.get("focus") === "postal_code" &&
+      user
+    ) {
+      supabase.from("analytics_events").insert({
+        user_id: user.id,
+        event_type: "cp_recovered",
+        source: "email_relance",
+      }).then(() => {});
+    }
+
     setLocalData({});
     setDirty(false);
     setSaved(true);
     if (draftKey) localStorage.removeItem(draftKey);
-  }, [draftKey, localData, saveStep]);
+  }, [draftKey, localData, saveStep, searchParams, user]);
 
   const handleUploadAvatar = useCallback(async (file: File) => {
     const url = await uploadAvatar(file);
