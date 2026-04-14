@@ -723,7 +723,11 @@ const SitDetail = () => {
       {activeRole === "sitter" && !isOwner && sit.status === "published" && (
         <div className="fixed bottom-0 left-0 right-0 md:left-64 bg-card border-t border-border p-4 z-40 md:pb-4 pb-20">
           <div className="max-w-4xl mx-auto">
-            {(accessLevel === 1 || accessLevel === 2) ? (
+            {!sit.accepting_applications ? (
+              <Button className="w-full h-12 text-base font-semibold" disabled>
+                Candidatures en cours d'analyse
+              </Button>
+            ) : (accessLevel === 1 || accessLevel === 2) ? (
               <AccessGateBanner level={accessLevel} profileCompletion={profileCompletion} context="guard" />
             ) : hasApplied ? (
               <Button className="w-full h-12 text-base font-semibold" disabled>
