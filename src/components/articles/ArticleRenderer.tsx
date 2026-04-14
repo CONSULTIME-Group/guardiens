@@ -92,6 +92,7 @@ const ARTICLE_IMAGES: Record<string, string> = {
   "/images/garde-animal-hospitalisation-cover.jpg": gardeAnimalHospitalisation,
   "/images/garde-chat-domicile-lyon.jpg": gardeChatDomicileLyon,
   "/images/garde-chat-presquile-lyon.jpg": gardeChatPresquileLyon,
+  "/images/s-absenter-animal-guide-cover.jpg": sAbsenterAnimalGuideCover,
 };
 
 export function resolveImagePath(path: string): string {
