@@ -316,7 +316,7 @@ const SitterDashboard = () => {
             <Button
               variant="default"
               size="sm"
-              onClick={() => navigate('/mon-profil?focus=postal_code')}
+              onClick={() => navigate('/profile?focus=postal_code')}
             >
               Ajouter mon CP
             </Button>
@@ -400,21 +400,21 @@ const SitterDashboard = () => {
                 <ChecklistItem
                   label="Ajouter une photo de profil"
                   ctaLabel="Ajouter"
-                  onClick={() => navigate('/mon-profil?section=identite')}
+                  onClick={() => navigate('/profile?section=identite')}
                 />
               )}
               {(!bio || bio.length < 50) && (
                 <ChecklistItem
                   label="Écrire votre bio (motivation, expérience)"
                   ctaLabel="Rédiger"
-                  onClick={() => navigate('/mon-profil?section=profil')}
+                  onClick={() => navigate('/profile?section=profil')}
                 />
               )}
               {!hasAnimalExperience && (
                 <ChecklistItem
                   label="Indiquer au moins une expérience avec un animal"
                   ctaLabel="Ajouter"
-                  onClick={() => navigate('/mon-profil?section=experience')}
+                  onClick={() => navigate('/profile?section=experience')}
                 />
               )}
             </CardContent>
