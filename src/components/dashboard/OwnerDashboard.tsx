@@ -195,7 +195,7 @@ const OwnerDashboard = () => {
           supabase.from("reviews").select("overall_rating").eq("reviewee_id", user.id).eq("published", true),
           supabase.from("profiles").select("first_name, avatar_url, bio, identity_verification_status").eq("id", user.id).single(),
           supabase.from("owner_highlights").select("*, sitter:profiles!owner_highlights_sitter_id_fkey(first_name, avatar_url)").eq("owner_id", user.id).eq("hidden", false).order("created_at", { ascending: false }).limit(5),
-          supabase.from("small_missions").select("id, title, category, exchange, city, created_at").eq("status", "open").order("created_at", { ascending: false }).limit(2),
+          supabase.from("small_missions").select("id, title, category, city, created_at").eq("status", "open").order("created_at", { ascending: false }).limit(2),
         ]);
 
         if (cancelled) return;
