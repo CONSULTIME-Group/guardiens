@@ -2,6 +2,20 @@ import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { differenceInDays, differenceInHours } from "date-fns";
 
+export interface GroupedBadge {
+  badge_id: string;
+  created_at: string;
+  count: number;
+}
+
+export interface ReputationData {
+  completed_sits: number;
+  active_badges: number;
+  note_moyenne: number;
+  is_manual_super: boolean;
+  statut_gardien: "novice" | "confirme" | "super_gardien";
+}
+
 export interface SitterDashboardData {
   loading: boolean;
   profileCompletion: number;
@@ -29,6 +43,8 @@ export interface SitterDashboardData {
   onboardingCompleted: boolean;
   onboardingDismissed: boolean;
   minimalCompleted: boolean;
+  reputation: ReputationData | null;
+  groupedBadges: GroupedBadge[];
 }
 
 const INITIAL_STATE: SitterDashboardData = {
