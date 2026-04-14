@@ -430,6 +430,8 @@ const SmallMissions = () => {
     })();
   }, [availableHelpers]);
 
+  const normalizedSearch = competenceSearch.toLowerCase().trim();
+
   const filteredMissions = useMemo(() => {
     return (allMissions || [])
       .filter((m: any) => {
@@ -466,8 +468,6 @@ const SmallMissions = () => {
         return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
       });
   }, [allMissions, categoryFilter, user?.id, originCoords, radiusKm, missionCoords, mySkills, normalizedSearch]);
-
-  const normalizedSearch = competenceSearch.toLowerCase().trim();
 
   const filteredHelpers = useMemo(() => {
     return (availableHelpers || []).filter((h: any) => {
