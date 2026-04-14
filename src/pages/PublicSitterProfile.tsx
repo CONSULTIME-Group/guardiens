@@ -413,7 +413,7 @@ export default function PublicSitterProfile() {
 
    // SEO
   const animalLabels = animalTypes.map(a => ANIMAL_LABELS[a] || a).join(", ");
-  const rawTitle = `${firstName} — Gardien de maison en AURA`;
+  const rawTitle = city ? `${firstName} — Gardien à ${city}` : `${firstName} — Gardien de maison`;
   const pageTitle = rawTitle;
   const pageDesc = ((bio || motivation || "") as string).slice(0, 160) || `${firstName} garde des ${animalLabels || "animaux"} à ${city || "France"}. Profil vérifié sur Guardiens.fr.`;
   const pageUrl = buildAbsoluteUrl(`/gardiens/${id}`);

@@ -80,6 +80,7 @@ export default function News() {
         .from("articles")
         .select("id, title, slug, excerpt, cover_image_url, category, tags, city, region, author_name, published_at", { count: "exact" })
         .eq("published", true)
+        .or("noindex.is.null,noindex.eq.false")
         .order("published_at", { ascending: false })
         .range(from, to);
 

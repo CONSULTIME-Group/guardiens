@@ -57,7 +57,7 @@ const NotFound = () => {
 
   return (
     <>
-      <PageMeta title="Page introuvable | Guardiens" description="La page que vous cherchez n'existe pas." />
+      <PageMeta title="Page introuvable | Guardiens" description="La page que vous cherchez n'existe pas." noindex />
       <div className="flex min-h-screen items-center justify-center px-4 bg-background">
         <div className="text-center max-w-lg space-y-6">
           <DiggingDogSvg />
