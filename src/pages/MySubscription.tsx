@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { BadgeSceauLarge } from "@/components/badges/BadgeSceauLarge";
 import FounderBadge from "@/components/badges/FounderBadge";
-import { Helmet } from "react-helmet-async";
+// Helmet removed — PageMeta handles all meta tags
 import EntraideLibreBanner from "@/components/subscription/EntraideLibreBanner";
 import PricingCardsCheckout from "@/components/subscription/PricingCardsCheckout";
 
@@ -348,16 +348,6 @@ const MySubscription = () => {
       {/* ══ VUE — PRE_LAUNCH ══ */}
       {view === "pre_launch" && (
         <>
-          <Helmet>
-            <title>Guardiens {"·"} Accès fondateur — bêta</title>
-            <meta name="description" content="Guardiens est en pré-lancement. Toutes les fonctionnalités sont gratuites jusqu'au 13 mai 2026. Rejoignez les Fondateurs." />
-            <meta property="og:title" content="Guardiens · Accès fondateur bêta" />
-            <meta property="og:description" content="Accès complet gratuit jusqu'au 13 mai. Badge Fondateur à vie pour les premiers membres." />
-            <meta property="og:url" content="https://guardiens.fr/mon-abonnement" />
-            <meta property="og:type" content="website" />
-            <meta name="robots" content="noindex, follow" />
-          </Helmet>
-
           <div className="max-w-2xl mx-auto w-full px-0 pb-12 space-y-5 bg-background">
             {/* Welcome message */}
             {isNewMember && (
@@ -451,7 +441,7 @@ const MySubscription = () => {
                       <div className="w-24 bg-border rounded-full h-1.5 overflow-hidden flex-shrink-0">
                         <div className="bg-primary h-1.5 rounded-full transition-all" ref={(el) => { if (el) el.style.width = `${profileCompletion}%`; }} />
                       </div>
-                      <span className="text-xs text-foreground/50 font-body whitespace-nowrap">{profileCompletion} % complété</span>
+                      <span className="text-xs text-foreground/50 font-body whitespace-nowrap">{profileCompletion} % complété</span>
                     </div>
                   </div>
                   <a
@@ -664,8 +654,35 @@ const MySubscription = () => {
             <h2 className="text-2xl font-heading font-semibold">Accédez à toutes les gardes.</h2>
             <p className="text-sm text-foreground/70 font-body">Choisissez ce qui vous convient.</p>
           </div>
+
+          {/* Trial highlight */}
+          <div className="bg-primary/5 border border-primary/20 rounded-xl px-5 py-4 flex items-center gap-3">
+            <Star className="h-5 w-5 text-primary flex-shrink-0" />
+            <div>
+              <p className="text-sm font-semibold text-foreground font-body">7 jours d'essai offerts sur le mensuel</p>
+              <p className="text-xs text-foreground/60 font-body">Testez tout sans engagement. Annulable en un clic.</p>
+            </div>
+          </div>
+
+          {/* Key benefits recap */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            {EXPIRED_HIGHLIGHTS.map(h => (
+              <div key={h.label} className="flex items-center gap-2.5 bg-card border border-border/40 rounded-xl px-4 py-3">
+                <h.icon className="h-4 w-4 text-primary shrink-0" />
+                <span className="text-sm text-foreground/70 font-body">{h.label}</span>
+              </div>
+            ))}
+          </div>
+
           <EntraideLibreBanner />
           <PricingCardsCheckout />
+
+          {isFounder && (
+            <div className="bg-amber-50 border border-amber-200 rounded-lg px-4 py-3 text-sm text-foreground/70 text-center flex items-center justify-center gap-2 font-body">
+              <FounderBadge size="lg" /> Badge Fondateur permanent
+            </div>
+          )}
+
           {showReferral && <ReferralSection referralCode={profile?.referral_code} userId={user!.id} />}
         </>
       )}
@@ -673,59 +690,106 @@ const MySubscription = () => {
       {/* ══ VUE — ABONNÉ ACTIF ══ */}
       {view === "subscribed" && (
         <>
-          <div className="bg-card border border-border rounded-xl p-6 space-y-4 max-w-2xl mx-auto">
-            <h2 className="font-heading text-2xl font-semibold">Abonnement actif.</h2>
-            <p className="text-sm text-foreground/70 font-body">Formule : <span className="font-medium text-foreground">{planLabel}</span></p>
-            {sub?.plan === "monthly" && (
-              <p className="text-sm text-foreground/70 font-body">Prochain renouvellement le <span className="font-medium text-foreground">{renewalFormatted}</span></p>
-            )}
-            {sub?.plan === "oneshot" && (
-              <p className="text-sm text-foreground/70 font-body">Accès jusqu'au <span className="font-medium text-foreground">{renewalFormatted}</span></p>
-            )}
-            {sub?.plan === "yearly" && (
-              <p className="text-sm text-foreground/70 font-body">Accès jusqu'au <span className="font-medium text-foreground">31 décembre 2026</span></p>
-            )}
+          <div className="bg-card border border-border rounded-xl p-6 space-y-5 max-w-2xl mx-auto">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                <Check className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <h2 className="font-heading text-xl font-semibold">Abonnement actif</h2>
+                <p className="text-sm text-foreground/60 font-body">{planLabel}</p>
+              </div>
+            </div>
+
+            <div className="bg-muted/30 rounded-xl p-4 space-y-2">
+              {sub?.plan === "monthly" && (
+                <div className="flex justify-between text-sm font-body">
+                  <span className="text-foreground/60">Prochain renouvellement</span>
+                  <span className="font-medium text-foreground">{renewalFormatted}</span>
+                </div>
+              )}
+              {sub?.plan === "oneshot" && (
+                <div className="flex justify-between text-sm font-body">
+                  <span className="text-foreground/60">Accès jusqu'au</span>
+                  <span className="font-medium text-foreground">{renewalFormatted}</span>
+                </div>
+              )}
+              {sub?.plan === "yearly" && (
+                <div className="flex justify-between text-sm font-body">
+                  <span className="text-foreground/60">Accès jusqu'au</span>
+                  <span className="font-medium text-foreground">31 décembre 2026</span>
+                </div>
+              )}
+              <div className="flex justify-between text-sm font-body">
+                <span className="text-foreground/60">Tarif</span>
+                <span className="font-medium text-foreground">
+                  {sub?.plan === "monthly" ? "9€/mois" : sub?.plan === "oneshot" ? "12€ (paiement unique)" : "Formule 2026"}
+                </span>
+              </div>
+            </div>
+
             <Button variant="outline" className="w-full font-body" onClick={openPortal} disabled={portalLoading}>
               {portalLoading && <Loader2 className="h-4 w-4 animate-spin" />}
               Gérer mon abonnement
             </Button>
+
             {sub?.plan === "monthly" && (
-              <button onClick={openPortal} className="w-full text-sm text-foreground/50 hover:text-foreground transition-colors text-center font-body">
+              <button
+                onClick={openPortal}
+                className="w-full text-xs text-destructive/60 hover:text-destructive transition-colors text-center font-body py-1"
+              >
                 Annuler l'abonnement
               </button>
             )}
           </div>
-          {showReferral && <ReferralSection referralCode={profile?.referral_code} userId={user!.id} />}
-        </>
-      )}
+
           {isFounder && (
             <div className="bg-amber-50 border border-amber-200 rounded-lg px-4 py-3 text-sm text-foreground/70 text-center flex items-center justify-center gap-2 font-body">
               <FounderBadge size="lg" /> Badge Fondateur permanent
             </div>
           )}
+
+          {showReferral && <ReferralSection referralCode={profile?.referral_code} userId={user!.id} />}
+        </>
+      )}
+
       {/* ══ VUE — EXPIRÉ ══ */}
       {view === "expired" && (
         <>
           <div className="text-center space-y-3 mb-4">
             <Clock className="h-10 w-10 text-muted-foreground mx-auto" />
             <h2 className="text-2xl font-heading font-semibold">Votre accès est terminé.</h2>
-            <p className="text-sm text-foreground/70 font-body">Reprenez là où vous en étiez.</p>
+            <p className="text-sm text-foreground/70 font-body">Votre profil n'est plus visible et vos candidatures sont suspendues.</p>
           </div>
-          <div className="flex flex-col gap-3 max-w-md mx-auto mb-6">
-            {EXPIRED_HIGHLIGHTS.map(h => (
-              <div key={h.label} className="flex items-center gap-3 text-sm text-foreground/70 font-body">
-                <h.icon className="h-5 w-5 text-primary shrink-0" />
-                {h.label}
+
+          {/* What you're missing */}
+          <div className="bg-destructive/5 border border-destructive/20 rounded-xl p-5 space-y-3 max-w-md mx-auto">
+            <p className="text-xs uppercase tracking-widest text-destructive/60 font-body font-medium">Ce que vous perdez sans abonnement</p>
+            <div className="space-y-2">
+              <div className="flex items-center gap-2.5 text-sm text-foreground/70 font-body">
+                <SearchIcon className="h-4 w-4 text-destructive/50 shrink-0" />
+                Invisible dans les résultats de recherche
               </div>
-            ))}
+              <div className="flex items-center gap-2.5 text-sm text-foreground/70 font-body">
+                <Send className="h-4 w-4 text-destructive/50 shrink-0" />
+                Plus de candidatures aux gardes
+              </div>
+              <div className="flex items-center gap-2.5 text-sm text-foreground/70 font-body">
+                <MessageSquare className="h-4 w-4 text-destructive/50 shrink-0" />
+                Messagerie désactivée
+              </div>
+            </div>
           </div>
+
           <EntraideLibreBanner />
           <PricingCardsCheckout />
+
           {isFounder && (
-            <div className="bg-amber-50 border border-amber-200 rounded-lg px-4 py-3 text-sm text-foreground/70 text-center font-body">
-              Votre badge Fondateur reste permanent à vie.
+            <div className="bg-amber-50 border border-amber-200 rounded-lg px-4 py-3 text-sm text-foreground/70 text-center flex items-center justify-center gap-2 font-body">
+              <FounderBadge size="lg" /> Badge Fondateur permanent à vie
             </div>
           )}
+
           {showReferral && <ReferralSection referralCode={profile?.referral_code} userId={user!.id} />}
         </>
       )}
