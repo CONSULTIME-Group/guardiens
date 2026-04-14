@@ -177,9 +177,17 @@ function adaptCTAsForRole(html: string, role?: "owner" | "sitter" | "both"): str
   return html;
 }
 
+/** Strip leading H1 from content to avoid double-H1 (ArticleDetail already renders the title) */
+function stripLeadingH1(md: string): string {
+  return md.replace(/^#\s+.+\n+/, "");
+}
+
 export default function ArticleRenderer({ content, userRole }: ArticleRendererProps) {
+  // Strip leading H1 to prevent double-H1 with ArticleDetail header
+  const withoutH1 = stripLeadingH1(content);
+  
   // Pre-process markdown for custom blocks
-  const preprocessed = transformFactBoxes(content);
+  const preprocessed = transformFactBoxes(withoutH1);
   
   // Parse to HTML
   let html = marked.parse(preprocessed, { async: false }) as string;
