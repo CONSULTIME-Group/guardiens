@@ -49,9 +49,11 @@ export const BadgeSceau = forwardRef<HTMLSpanElement, BadgeSceauProps>(function 
   if (!def) {
     const sz = size === 'normal' ? 52 : 34
     return (
-      <svg width={sz} height={sz} viewBox="0 0 52 52" className={className}>
-        <circle cx="26" cy="26" r="22" fill="hsl(var(--muted))" />
-      </svg>
+      <span ref={ref} className={className}>
+        <svg width={sz} height={sz} viewBox="0 0 52 52">
+          <circle cx="26" cy="26" r="22" fill="hsl(var(--muted))" />
+        </svg>
+      </span>
     )
   }
 
