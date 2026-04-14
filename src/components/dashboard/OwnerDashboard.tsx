@@ -220,7 +220,7 @@ const OwnerDashboard = () => {
 
   if (loading) return <div className="p-6 text-muted-foreground">Chargement...</div>;
 
-  if (showOnboarding) {
+  if (showOnboarding && minimalCompleted) {
     return (
       <OnboardingWelcome
         role="owner"
