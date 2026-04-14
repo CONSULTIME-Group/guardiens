@@ -117,12 +117,9 @@ async function main() {
     "house-sitting-saint-etienne-guide", "border-collie-lyon-guide-race",
     "bouledogue-francais-lyon-guide-race", "malinois-lyon-guide-race",
     "golden-retriever-lyon-guide-race", "berger-australien-guide",
-    "conseil-gardien-creer-profil-attractif-lyon", "conseils-garder-chien",
-    "accueillir-gardien-bonnes-pratiques", "preparer-maison-avant-vacances",
-    "gardes-longue-duree-guide", "devenir-pet-sitter-guide-debutant",
-    "garde-chat-domicile-house-sitting", "garde-chien-lyon-solutions",
-    "boom-pet-sitting-lyon-2026", "house-sitting-noel-fetes-fin-annee",
-    "house-sitting-week-end-court-sejour-aura",
+    "conseil-gardien-creer-profil-attractif-lyon", "preparer-maison-avant-vacances",
+    "gardes-longue-duree-guide", "garde-chien-lyon-solutions",
+    "boom-pet-sitting-lyon-2026",
   ]);
 
   // Articles → /actualites/{slug}
