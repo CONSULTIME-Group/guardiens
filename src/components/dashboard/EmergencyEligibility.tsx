@@ -11,6 +11,7 @@ const EmergencyEligibility = () => {
     avgRating: number;
     recentCancellations: number;
     identityVerified: boolean;
+    hasSubscription: boolean;
   } | null>(null);
 
   useEffect(() => {
@@ -19,24 +20,31 @@ const EmergencyEligibility = () => {
       const sixMonthsAgo = new Date();
       sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
 
-      const [appsRes, reviewsRes, profileRes, cancellationsRes] = await Promise.all([
+      const [appsRes, reviewsRes, profileRes, cancellationsRes, subRes] = await Promise.all([
         supabase.from("applications").select("id, sit:sits!inner(status)").eq("sitter_id", user.id).eq("status", "accepted"),
         supabase.from("reviews").select("overall_rating").eq("reviewee_id", user.id).eq("published", true),
         supabase.from("profiles").select("identity_verified").eq("id", user.id).single(),
-        // Count cancellations in last 6 months only
         supabase.from("sits")
           .select("id")
           .eq("cancelled_by", user.id)
           .gte("cancelled_at", sixMonthsAgo.toISOString()),
+        supabase.from("subscriptions").select("status, expires_at").eq("user_id", user.id).maybeSingle(),
       ]);
       const completedSits = (appsRes.data || []).filter((a: any) => a.sit?.status === "completed").length;
       const reviews = reviewsRes.data || [];
       const avgRating = reviews.length > 0 ? reviews.reduce((s: number, r: any) => s + r.overall_rating, 0) / reviews.length : 0;
+      const sub = subRes.data;
+      const now = new Date();
+      const hasSubscription = sub != null && (
+        sub.status === "active" || sub.status === "trial"
+        || (sub.expires_at && new Date(sub.expires_at) > now)
+      );
       setChecks({
         completedSits,
         avgRating: Math.round(avgRating * 10) / 10,
         recentCancellations: cancellationsRes.data?.length || 0,
         identityVerified: profileRes.data?.identity_verified || false,
+        hasSubscription,
       });
     };
     load();
@@ -49,6 +57,7 @@ const EmergencyEligibility = () => {
     { label: `Note : ${checks.avgRating || "—"}/4.7`, ok: checks.avgRating >= 4.7 },
     { label: `Annulations (6 mois) : ${checks.recentCancellations}`, ok: checks.recentCancellations === 0 },
     { label: "ID vérifiée", ok: checks.identityVerified },
+    { label: "Abonnement actif", ok: checks.hasSubscription },
   ];
 
   const doneCount = items.filter(i => i.ok).length;

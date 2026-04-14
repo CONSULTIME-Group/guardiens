@@ -21,6 +21,7 @@ interface CancelSitModalProps {
   otherPartyName?: string;
   startDate?: string;
   endDate?: string;
+  sitCity?: string;
   onCancelled: () => void;
 }
 
@@ -33,6 +34,7 @@ const CancelSitModal = ({
   otherPartyName,
   startDate,
   endDate,
+  sitCity,
   onCancelled,
 }: CancelSitModalProps) => {
   const { user } = useAuth();
@@ -79,12 +81,23 @@ const CancelSitModal = ({
 
       if (rpcError) throw rpcError;
 
-      // If sitter cancelled, re-publish the sit
+      // If sitter cancelled, re-publish the sit and alert emergency sitters
       if (isSitterCancelling) {
         await supabase
           .from("sits")
           .update({ status: "published" as any })
           .eq("id", sitId);
+
+        // Alert nearby emergency sitters automatically
+        if (sitCity) {
+          try {
+            await supabase.functions.invoke("alert-emergency-sitters", {
+              body: { sitId, sitCity },
+            });
+          } catch {
+            // Non-blocking
+          }
+        }
       }
 
       // Cancel accepted applications

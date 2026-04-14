@@ -751,6 +751,7 @@ const SitDetail = () => {
           sitOwnerId={sit.user_id}
           startDate={formatDate(sit.start_date)}
           endDate={formatDate(sit.end_date)}
+          sitCity={owner?.city}
           onCancelled={() => {
             setSit({ ...sit, status: "cancelled" });
             setCancelOpen(false);
