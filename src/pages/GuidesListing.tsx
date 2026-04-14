@@ -2,6 +2,7 @@ import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import PageMeta from "@/components/PageMeta";
+import PageBreadcrumb from "@/components/seo/PageBreadcrumb";
 import PublicHeader from "@/components/layout/PublicHeader";
 import PublicFooter from "@/components/layout/PublicFooter";
 import { Link, useNavigate } from "react-router-dom";
@@ -95,6 +96,7 @@ const GuidesListing = () => {
 
       <div className="min-h-screen bg-background">
         <PublicHeader />
+        <PageBreadcrumb items={[{ label: "Guides locaux" }]} />
         <header className="relative border-b border-border overflow-hidden">
           <div className="absolute inset-0">
             <img src={guideHeaderImg} alt="Guide local Guardiens" className="w-full h-full object-cover" />
