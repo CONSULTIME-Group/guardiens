@@ -19,7 +19,7 @@ import SitterBadgesSection from "./sitter/SitterBadgesSection";
 import SitterBottomColumns from "./sitter/SitterBottomColumns";
 
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { CheckCircle, Circle, ChevronRight, Newspaper, AlertCircle } from "lucide-react";
+import { CheckCircle, Circle, ChevronRight, Newspaper, AlertCircle, MessageSquare, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -156,6 +156,27 @@ const SitterDashboard = () => {
         onToggleAvailability={toggleAvailability}
       />
 
+      {/* Next guard card */}
+      {nextGuard && <SitterNextGuard nextGuard={nextGuard} />}
+
+      {/* Quick action badges for pending apps / unread messages */}
+      {(pendingAppsCount > 0 || unreadCount > 0) && (
+        <div className="flex gap-3 px-4 sm:px-5 md:px-8 mb-4">
+          {pendingAppsCount > 0 && (
+            <Link to="/sits" className="flex items-center gap-2 bg-accent/50 border border-border rounded-xl px-3 py-2 text-xs font-medium text-foreground hover:bg-accent transition-colors">
+              <FileText className="h-4 w-4 text-primary" />
+              {pendingAppsCount} candidature{pendingAppsCount > 1 ? "s" : ""} en attente
+            </Link>
+          )}
+          {unreadCount > 0 && (
+            <Link to="/messages" className="flex items-center gap-2 bg-accent/50 border border-border rounded-xl px-3 py-2 text-xs font-medium text-foreground hover:bg-accent transition-colors">
+              <MessageSquare className="h-4 w-4 text-primary" />
+              {unreadCount} message{unreadCount > 1 ? "s" : ""} non lu{unreadCount > 1 ? "s" : ""}
+            </Link>
+          )}
+        </div>
+      )}
+
       <div className="px-4 sm:px-5 md:px-8 mt-4">
         <AccessGateBanner level={level} profileCompletion={accessProfileCompletion} context="guard" />
       </div>
@@ -224,6 +245,9 @@ const SitterDashboard = () => {
                       <span className="text-sm text-foreground ml-3">Activer le mode disponible</span>
                     </div>
                     <button
+                      role="switch"
+                      aria-checked={isAvailable}
+                      aria-label="Basculer la disponibilité"
                       onClick={toggleAvailability}
                       className={`relative w-11 h-6 rounded-full transition-colors duration-200 ${isAvailable ? "bg-toggle-active" : "bg-muted"}`}
                     >
