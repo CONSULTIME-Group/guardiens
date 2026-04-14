@@ -161,7 +161,7 @@ const SitterDashboard = () => {
 
       {/* Postal code missing banner — highest priority */}
       {!postalCode && !cpBannerDismissed && (
-        <div className="sticky top-0 z-40 bg-destructive/10 border-b border-destructive/30 px-4 py-3">
+        <div className="sticky top-14 z-30 bg-destructive/10 border-b border-destructive/30 px-4 py-3">
           <div className="container mx-auto flex items-center justify-between gap-4">
             <div className="flex items-center gap-3">
               <AlertCircle className="h-5 w-5 text-destructive shrink-0" />
@@ -221,12 +221,12 @@ const SitterDashboard = () => {
           </div>
 
           <div className="flex flex-col items-start md:items-end gap-3 shrink-0">
-            <a
-              href={`/gardiens/${user?.id}`}
+            <Link
+              to={`/gardiens/${user?.id}`}
               className="text-xs text-white/70 font-sans flex items-center gap-1 hover:text-white/90"
             >
               Voir votre profil public ↗
-            </a>
+            </Link>
 
             <div className="flex items-center gap-3 bg-white/10 border border-white/20 rounded-xl px-4 py-2.5 w-full md:w-auto">
               <div className="flex-1 md:flex-none">
@@ -641,7 +641,7 @@ const SitterDashboard = () => {
           </div>
           <div className="flex gap-3 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-hide">
             {articles.map((a: any) => (
-              <a key={a.id} href={`/actualites/${a.slug}`} className="flex-shrink-0 w-[70vw] sm:w-64 rounded-xl border border-border bg-card overflow-hidden hover:shadow-md transition-shadow cursor-pointer">
+              <Link key={a.id} to={`/actualites/${a.slug}`} className="flex-shrink-0 w-[70vw] sm:w-64 rounded-xl border border-border bg-card overflow-hidden hover:shadow-md transition-shadow cursor-pointer">
                 {a.cover_image_url ? (
                   <img src={a.cover_image_url} alt="" className="w-full h-28 object-cover" />
                 ) : (
@@ -653,7 +653,7 @@ const SitterDashboard = () => {
                   <p className="text-sm font-semibold line-clamp-2">{a.title}</p>
                   <p className="text-xs text-muted-foreground line-clamp-2 mt-1">{a.excerpt}</p>
                 </div>
-              </a>
+              </Link>
             ))}
           </div>
         </div>
