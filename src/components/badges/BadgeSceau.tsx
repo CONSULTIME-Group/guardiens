@@ -67,6 +67,7 @@ export const BadgeSceau = forwardRef<HTMLSpanElement, BadgeSceauProps>(function 
 
   const svgElement = (
     <span
+      ref={ref}
       className={`relative inline-block cursor-pointer ${className}`}
       style={{ width: sz, height: sz }}
       onClick={() => setDialogOpen(true)}
@@ -149,6 +150,6 @@ export const BadgeSceau = forwardRef<HTMLSpanElement, BadgeSceauProps>(function 
       </Dialog>
     </>
   )
-}
+})
 
 export default BadgeSceau
