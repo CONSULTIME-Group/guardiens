@@ -413,7 +413,23 @@ const AdminUsers = () => {
         </Table>
       </div>
 
-      {/* Suspend Modal */}
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between">
+          <p className="text-sm text-muted-foreground">
+            {filtered.length} utilisateur{filtered.length > 1 ? "s" : ""} · page {page + 1}/{totalPages}
+          </p>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" disabled={page === 0} onClick={() => setPage(p => p - 1)}>
+              <ChevronLeft className="h-4 w-4 mr-1" /> Précédent
+            </Button>
+            <Button variant="outline" size="sm" disabled={page >= totalPages - 1} onClick={() => setPage(p => p + 1)}>
+              Suivant <ChevronRight className="h-4 w-4 ml-1" />
+            </Button>
+          </div>
+        </div>
+      )}
+
       <Dialog open={suspendModal.open} onOpenChange={(o) => !o && setSuspendModal({ open: false, userId: "", reason: "" })}>
         <DialogContent>
           <DialogHeader>
