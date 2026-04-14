@@ -165,7 +165,7 @@ const OwnerProfilePage = () => {
             sections={sidebarSections}
             activeSection={activeSection}
             onSectionClick={setActiveSection}
-            publicProfileUrl={user ? `/proprietaires/${user.id}` : "#"}
+            publicProfileUrl={user ? `/proprietaires/${user.id}?tab=proprio` : "#"}
             role="owner"
           />
 
