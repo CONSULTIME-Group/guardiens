@@ -12,7 +12,7 @@ const SKILL_TO_MISSION: Record<string, string> = {
   animaux: "animals",
   jardin: "garden",
   competences: "skills",
-  coups_de_main: "house",
+  coups_de_main: "coups_de_main",
 };
 
 const CATEGORY_META: Record<string, { label: string; icon: typeof Sprout; colorClass: string; badgeType: string }> = {
