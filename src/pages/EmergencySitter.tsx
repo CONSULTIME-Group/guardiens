@@ -105,12 +105,7 @@ const EmergencySitter = () => {
 
       {/* Breadcrumbs */}
       <div className="max-w-5xl mx-auto px-4 pt-4">
-        <Breadcrumbs
-          items={[
-            { label: "Accueil", to: "/" },
-            { label: "Gardiens d'urgence" },
-          ]}
-        />
+        <Breadcrumbs />
       </div>
 
       {/* Hero */}
