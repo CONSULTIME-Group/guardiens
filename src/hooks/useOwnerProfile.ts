@@ -200,8 +200,8 @@ export function useOwnerProfile() {
     if (petsCount === 0) missing.push({ step: 3, label: "Ajouter un animal" });
     if (!d.presence_expected) missing.push({ step: 4, label: "Présence attendue" });
     if (!d.visits_allowed) missing.push({ step: 4, label: "Visites autorisées" });
-    if (d.meeting_preference.length === 0) missing.push({ step: 5, label: "Préférence de rencontre" });
-    if (!d.news_frequency) missing.push({ step: 5, label: "Fréquence des nouvelles" });
+    if (d.meeting_preference.length === 0) missing.push({ step: 4, label: "Préférence de rencontre" });
+    if (!d.news_frequency) missing.push({ step: 4, label: "Fréquence des nouvelles" });
     return missing;
   }, []);
 
