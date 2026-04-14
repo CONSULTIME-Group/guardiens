@@ -82,6 +82,7 @@ const CreateSmallMission = () => {
       postal_code: postalCode.trim(),
       date_needed: dateNeeded || null,
       duration_estimate: duration,
+      mission_type: missionType,
       photos,
     } as any);
 
@@ -129,10 +130,26 @@ const CreateSmallMission = () => {
 
         <Card>
           <CardHeader>
-            <CardTitle className="font-heading">Proposer une petite mission</CardTitle>
+            <CardTitle className="font-heading">
+              {missionType === "offre" ? "Proposer mon aide" : "Publier un besoin"}
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-5 pb-32">
+              {/* Type toggle */}
+              <div className="space-y-2">
+                <Label>Type de mission *</Label>
+                <div className="flex gap-2">
+                  <Button type="button" variant={missionType === "besoin" ? "default" : "outline"} size="sm" className="flex-1"
+                    onClick={() => setMissionType("besoin")}>
+                    🔍 J'ai besoin d'aide
+                  </Button>
+                  <Button type="button" variant={missionType === "offre" ? "default" : "outline"} size="sm" className="flex-1"
+                    onClick={() => setMissionType("offre")}>
+                    🤝 Je propose mon aide
+                  </Button>
+                </div>
+              </div>
               {/* Catégorie */}
               <div className="space-y-2">
                 <Label>Catégorie *</Label>
