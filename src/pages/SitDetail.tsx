@@ -17,6 +17,7 @@ import ApplicationsList from "@/components/sits/ApplicationsList";
 import ReviewsDisplay from "@/components/reviews/ReviewsDisplay";
 import CancelSitModal from "@/components/sits/CancelSitModal";
 import BreedProfileCard from "@/components/breeds/BreedProfileCard";
+import EmergencyAlertBanner from "@/components/sits/EmergencyAlertBanner";
 import ReportButton from "@/components/reports/ReportButton";
 import VerifiedBadge from "@/components/profile/VerifiedBadge";
 import LocationProfileCard from "@/components/location/LocationProfileCard";
@@ -265,7 +266,15 @@ const SitDetail = () => {
         </div>
       )}
 
-      {/* Sitter match badges */}
+      {/* Emergency sitter alert — owner only, published sit starting within 15 days */}
+      {isOwner && sit.status === "published" && owner?.city && (
+        <EmergencyAlertBanner
+          sitId={sit.id}
+          sitCity={owner.city}
+          startDate={sit.start_date}
+        />
+      )}
+
       {badges.length > 0 && (
         <div className="flex flex-wrap gap-2 mb-4">
           {badges.map(b => (
@@ -751,7 +760,6 @@ const SitDetail = () => {
           sitOwnerId={sit.user_id}
           startDate={formatDate(sit.start_date)}
           endDate={formatDate(sit.end_date)}
-          sitCity={owner?.city}
           onCancelled={() => {
             setSit({ ...sit, status: "cancelled" });
             setCancelOpen(false);
