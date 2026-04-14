@@ -109,7 +109,7 @@ const CreateSit = () => {
   const [isUrgent, setIsUrgent] = useState(false);
   const [sitEnvironments, setSitEnvironments] = useState<string[]>([]);
   const [minGardienSits, setMinGardienSits] = useState(0);
-  const [maxApplications, setMaxApplications] = useState<number | null>(null);
+  const [maxApplications, setMaxApplications] = useState<number | null>(10);
 
   const [property, setProperty] = useState<PropertySummary | null>(null);
   const [pets, setPets] = useState<PetSummary[]>([]);
@@ -376,22 +376,43 @@ const CreateSit = () => {
 
         {/* Max candidatures */}
         <div>
-          <Label className="text-sm font-medium text-foreground mb-1 block">Nombre max de candidatures (optionnel)</Label>
+          <Label className="text-sm font-medium text-foreground mb-1 block">Nombre max de candidatures</Label>
           <p className="text-xs text-muted-foreground mb-3">
-            Une fois le max atteint, l'annonce cesse d'accepter de nouvelles candidatures. Laissez vide pour illimité.
+            Une fois le max atteint, l'annonce cesse d'accepter de nouvelles candidatures.
           </p>
-          <Input
-            type="number"
-            min={1}
-            max={50}
-            placeholder="Illimité"
-            value={maxApplications ?? ""}
-            onChange={e => {
-              const v = e.target.value;
-              setMaxApplications(v ? Math.max(1, Math.min(50, parseInt(v))) : null);
-            }}
-            className="w-32"
-          />
+          <div className="flex items-center gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              size="icon"
+              className="h-9 w-9 shrink-0"
+              onClick={() => setMaxApplications(prev => Math.max(1, (prev ?? 10) - 1))}
+              disabled={maxApplications !== null && maxApplications <= 1}
+            >
+              −
+            </Button>
+            <Input
+              type="number"
+              min={1}
+              max={50}
+              value={maxApplications ?? ""}
+              onChange={e => {
+                const v = e.target.value;
+                setMaxApplications(v ? Math.max(1, Math.min(50, parseInt(v))) : null);
+              }}
+              className="w-20 text-center"
+            />
+            <Button
+              type="button"
+              variant="outline"
+              size="icon"
+              className="h-9 w-9 shrink-0"
+              onClick={() => setMaxApplications(prev => Math.min(50, (prev ?? 10) + 1))}
+              disabled={maxApplications !== null && maxApplications >= 50}
+            >
+              +
+            </Button>
+          </div>
         </div>
 
         <div>
