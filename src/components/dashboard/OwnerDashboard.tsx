@@ -79,18 +79,7 @@ const OwnerDashboard = () => {
   /* ── Badges (react-query) ── */
   const { data: userBadges } = useUserBadges(user?.id);
 
-  const activeBadgeCount = useMemo(() =>
-    (userBadges ?? []).filter(b =>
-      PROPRIO_BADGE_IDS.includes(b.badge_id) &&
-      differenceInMonths(new Date(), new Date(b.created_at)) < 12
-    ).length,
-    [userBadges]
-  );
-
-  const specialBadges = useMemo(() =>
-    (userBadges ?? []).filter(b => PROPRIO_SPECIAL_IDS.includes(b.badge_id)),
-    [userBadges]
-  );
+  // Badge counts now handled by BadgeGridSection
 
   /* ── Derived values (stable `now` per render cycle, not stale memo) ── */
   const now = new Date();
