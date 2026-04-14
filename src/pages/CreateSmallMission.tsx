@@ -35,9 +35,12 @@ const DURATIONS = [
 const CreateSmallMission = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { toast } = useToast();
   const { level: accessLevel, profileCompletion, canApplyMissions, loading: accessLoading } = useAccessLevel();
 
+  const typeParam = searchParams.get("type"); // "besoin" or "offre"
+  const [missionType, setMissionType] = useState<"besoin" | "offre">(typeParam === "offre" ? "offre" : "besoin");
   const [category, setCategory] = useState("animals");
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
