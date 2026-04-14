@@ -377,7 +377,7 @@ const OwnerDashboard = () => {
             </div>
             <p className="text-sm text-primary-foreground/75 font-sans">{subtitle}</p>
             <Link
-              to={`/proprietaires/${user?.id}`}
+              to={`/proprietaires/${user?.id}?tab=proprio`}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-1.5 text-xs font-body text-primary-foreground/70 hover:text-primary-foreground transition-colors mt-2"
