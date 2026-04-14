@@ -253,11 +253,14 @@ const Landing = () => {
             </div>
 
             {/* H1 with staggered animation */}
-            <h1 className="font-heading text-5xl md:text-6xl lg:text-7xl font-bold text-white leading-tight mb-4 animate-hero-fade-up animation-delay-400">
+            <h1 className="font-heading text-5xl md:text-6xl lg:text-7xl font-bold text-white leading-tight mb-2 animate-hero-fade-up animation-delay-400">
               Quelqu'un du coin veille sur votre maison.
             </h1>
-            <p className="font-body text-lg md:text-xl text-white/80 max-w-lg mb-10 leading-relaxed animate-hero-fade-up animation-delay-700">
-              Confiez vos animaux à un gardien de votre quartier. Échangez un service entre voisins. Osez demander. Osez proposer.
+            <p className="font-heading text-2xl md:text-3xl lg:text-4xl italic text-white/85 leading-snug mb-6 animate-hero-fade-up animation-delay-700">
+              Et l'entraide entre voisins redevient naturelle.
+            </p>
+            <p className="font-body text-base md:text-lg text-white/70 max-w-lg mb-10 leading-relaxed animate-hero-fade-up animation-delay-700">
+              Confiez vos animaux à un gardien de votre quartier. Osez demander un coup de main. Osez en proposer un.
             </p>
 
             {/* CTAs */}
@@ -309,6 +312,18 @@ const Landing = () => {
         </div>
       </section>
 
+      {/* ═══════════════ BANDEAU ENTRAIDE ═══════════════ */}
+      <section className="bg-primary/5 border-y border-primary/10">
+        <div className="max-w-5xl mx-auto px-6 py-5 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-6 text-center sm:text-left">
+          <Handshake className="h-5 w-5 text-primary shrink-0" />
+          <p className="font-body text-sm md:text-base text-foreground/80">
+            <strong className="text-foreground">L'entraide entre gens du coin est gratuite.</strong> Pour tous. Pour toujours. C'est l'esprit de Guardiens.
+          </p>
+          <Link to="/petites-missions" className="text-sm font-body text-primary font-medium hover:underline whitespace-nowrap shrink-0">
+            En savoir plus →
+          </Link>
+        </div>
+      </section>
 
       {/* ═══════════════ SECTION 2 — CE QU'ON FAIT ENSEMBLE ═══════════════ */}
       <section className="py-24 md:py-32 bg-background">
@@ -353,11 +368,14 @@ const Landing = () => {
             </RevealSection>
 
             <RevealSection delay={0.3}>
-              <div className="bg-card rounded-2xl p-8 shadow-sm text-left h-full">
+              <div className="bg-card rounded-2xl p-8 shadow-sm text-left h-full border-2 border-primary/20 relative overflow-hidden">
+                <div className="absolute top-0 right-0 bg-primary text-primary-foreground text-[10px] font-body font-bold uppercase tracking-wider px-3 py-1 rounded-bl-lg">
+                  Gratuit pour tous
+                </div>
                 <Handshake className="h-8 w-8 text-primary mb-4" />
                 <h3 className="text-xl font-heading font-semibold text-foreground mb-3">Un coup de main. Un échange.</h3>
                 <p className="text-base font-body leading-relaxed text-foreground/70 mb-4">
-                  Arroser un potager, promener un chien, partager une compétence. Sans argent. Gratuit pour tous, pour toujours.
+                  Arroser un potager, promener un chien, partager une compétence. Sans argent. C'est l'âme de Guardiens — et ça ne changera jamais.
                 </p>
                 <Link to="/petites-missions" className="text-sm font-body text-primary font-medium hover:underline">
                   Découvrir l'entraide →
@@ -530,10 +548,12 @@ const Landing = () => {
             <h2 className="text-4xl md:text-5xl font-heading font-semibold leading-snug text-foreground text-center mb-6">
               Osez demander un coup de main.
             </h2>
+            <p className="text-center text-foreground/70 font-body max-w-2xl mx-auto mb-6 text-lg leading-relaxed">
+              Avant, il y avait le voisin qui passait arroser le jardin. La grand-mère d'à côté qui gardait le chien.
+              Le bricoleur du quartier qui venait fixer un volet. Personne ne demandait rien en échange — c'était normal.
+            </p>
             <p className="text-center text-foreground/70 font-body max-w-2xl mx-auto mb-16 text-lg leading-relaxed">
-              Demander à un voisin d'arroser ses plantes. Proposer de promener le chien de quelqu'un.
-              Échanger un savoir-faire contre un panier de légumes.
-              Ce n'est pas du passé — c'est ce qu'on reconstruit ici.
+              Ce n'est pas du passé. C'est juste qu'on n'ose plus demander. Guardiens est le prétexte pour recommencer.
             </p>
           </RevealSection>
 
@@ -545,7 +565,7 @@ const Landing = () => {
                 </h3>
                 <p className="text-base font-body leading-relaxed text-foreground/70 mb-4">
                   Votre potager pendant les vacances. Vos poules ce weekend. Promener votre chien après une opération.
-                  Publiez ce dont vous avez besoin — quelqu'un près de chez vous répondra.
+                  Ce n'est pas un aveu de faiblesse — c'est un acte de confiance. Et quelqu'un près de chez vous n'attend que ça.
                 </p>
                 <p className="text-sm font-body font-medium text-primary">
                   Pas d'argent. Pas d'abonnement. Jamais.
@@ -560,7 +580,7 @@ const Landing = () => {
                 </h3>
                 <p className="text-base font-body leading-relaxed text-foreground/70 mb-4">
                   Vous savez tailler des rosiers. Vous adorez les chiens. Vous avez du temps samedi matin.
-                  Proposez — et découvrez des gens que vous n'auriez jamais croisés autrement.
+                  Proposez — et vivez quelque chose que vous n'auriez jamais vécu sans cette rencontre.
                 </p>
                 <p className="text-sm font-body font-medium text-primary">
                   C'est comme ça que le tissu local se recrée.
@@ -572,15 +592,23 @@ const Landing = () => {
           <RevealSection delay={0.3} className="text-center mt-12">
             <div className="border-l-4 border-primary pl-6 max-w-xl mx-auto text-left mb-10">
               <p className="text-xl md:text-2xl font-heading font-semibold italic text-foreground leading-snug">
-                La vie de village n'a pas disparu. Elle attendait un prétexte pour recommencer.
+                La vie de village n'a pas disparu. Elle attendait juste qu'on ose la première question.
               </p>
             </div>
-            <Link
-              to="/petites-missions"
-              className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-8 py-4 rounded-full font-body font-medium text-sm hover:bg-primary/90 transition-colors"
-            >
-              Découvrir les petites missions <ArrowRight className="h-4 w-4" />
-            </Link>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <Link
+                to="/petites-missions"
+                className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-8 py-4 rounded-full font-body font-medium text-sm hover:bg-primary/90 transition-colors"
+              >
+                Découvrir les petites missions <ArrowRight className="h-4 w-4" />
+              </Link>
+              <Link
+                to="/register"
+                className="inline-flex items-center gap-2 bg-card text-foreground border border-border px-8 py-4 rounded-full font-body font-medium text-sm hover:bg-muted transition-colors"
+              >
+                Créer mon compte — c'est gratuit
+              </Link>
+            </div>
           </RevealSection>
         </div>
       </section>
@@ -811,9 +839,9 @@ const Landing = () => {
             Votre histoire commence ici.
           </h2>
           <p className="font-body text-lg text-white/70 leading-relaxed max-w-lg mx-auto mb-10">
-            Gratuit pour les propriétaires, pour toujours. L'entraide, gratuite pour tous. Ce que vous allez vivre ne l'est pas.
+            Garder une maison. Donner un coup de main. Recevoir de l'aide. Ce sont des gestes simples — mais ils changent tout.
           </p>
-          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+          <div className="flex flex-col sm:flex-row gap-3 justify-center mb-6">
             <button
               onClick={() => navigate("/register?role=owner")}
               className="font-body text-sm font-semibold tracking-wide rounded-full px-10 py-4 bg-primary text-primary-foreground hover:brightness-90 hover:scale-[1.02] transition-all duration-200"
@@ -827,14 +855,14 @@ const Landing = () => {
               Je veux garder
             </button>
           </div>
-          <Link
-            to="/petites-missions"
-            className="inline-flex items-center gap-1 text-white/50 text-sm mt-6 hover:text-white/70 transition-colors"
+          <button
+            onClick={() => navigate("/petites-missions")}
+            className="font-body text-sm font-medium tracking-wide rounded-full px-8 py-3 bg-white/10 text-white border border-white/20 hover:bg-white/20 transition-all duration-200"
           >
-            Ou découvrir l'entraide entre voisins <ArrowRight className="h-3.5 w-3.5" />
-          </Link>
-          <p className="mt-6 text-xs text-white/40 font-body">
-            Badge Fondateur à vie · Accès gratuit jusqu'au 13 juin
+            Découvrir l'entraide — gratuit pour tous
+          </button>
+          <p className="mt-8 text-xs text-white/40 font-body">
+            Badge Fondateur à vie · Accès gratuit jusqu'au 13 juin · L'entraide reste gratuite pour toujours
           </p>
         </RevealSection>
       </section>
