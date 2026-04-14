@@ -265,7 +265,7 @@ const SitterDashboard = () => {
   const allChecklistDone = completedItems.length === 4;
 
   return (
-    <div className="space-y-0">
+    <div className="space-y-0 overflow-hidden">
       <OnboardingModal
         open={showOnboardingModal}
         onClose={() => {
@@ -476,7 +476,7 @@ const SitterDashboard = () => {
       <div className="px-4 sm:px-5 md:px-8 mb-6 md:mb-8">
         <button
           onClick={() => navigate('/search')}
-          className="w-full bg-primary text-white rounded-2xl py-4 text-base font-sans font-semibold mb-6 hover:bg-primary/90 transition-colors"
+          className="w-full bg-primary text-white rounded-2xl py-3 sm:py-4 text-sm sm:text-base font-sans font-semibold mb-6 hover:bg-primary/90 transition-colors"
         >
           Découvrez les gardes disponibles →
         </button>
@@ -603,7 +603,7 @@ const SitterDashboard = () => {
       {/* ═══ 5. BAS DE PAGE — DEUX COLONNES ═══ */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 px-4 sm:px-5 md:px-8 mb-6 md:mb-8">
         {/* Colonne gauche — Annonces */}
-        <div className="bg-card border border-border rounded-2xl p-5">
+        <div className="bg-card border border-border rounded-2xl p-4 sm:p-5">
           <div className="flex justify-between items-center mb-4">
             <p className="text-sm font-semibold text-foreground">
               Annonces près de chez vous
@@ -653,7 +653,7 @@ const SitterDashboard = () => {
         </div>
 
         {/* Colonne droite — Échanges */}
-        <div className="bg-card border border-border rounded-2xl p-5">
+        <div className="bg-card border border-border rounded-2xl p-4 sm:p-5">
           <div className="flex justify-between items-center mb-4">
             <p className="text-sm font-semibold text-foreground">
               Échanges autour de vous
