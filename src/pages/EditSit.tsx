@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { Helmet } from "react-helmet-async";
 import ChipSelect from "@/components/profile/ChipSelect";
 import { ArrowLeft, AlertCircle, Zap } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -119,6 +120,7 @@ const EditSit = () => {
 
   return (
     <div className="p-6 md:p-10 max-w-3xl mx-auto animate-fade-in pb-40">
+      <Helmet><meta name="robots" content="noindex, nofollow" /></Helmet>
       <Link to={`/sits/${id}`} className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-6">
         <ArrowLeft className="h-4 w-4" /> Retour à l'annonce
       </Link>

@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Link } from "react-router-dom";
 import { Bell, Check, CheckCheck, Trash2 } from "lucide-react";
+import { Helmet } from "react-helmet-async";
 import { Button } from "@/components/ui/button";
 import { formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -99,6 +100,7 @@ const Notifications = () => {
 
   return (
     <div className="p-6 md:p-10 max-w-2xl mx-auto animate-fade-in">
+      <Helmet><meta name="robots" content="noindex, nofollow" /></Helmet>
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="font-heading text-2xl md:text-3xl font-bold flex items-center gap-2">

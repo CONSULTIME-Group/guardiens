@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft } from "lucide-react";
+import { Helmet } from "react-helmet-async";
 import forgotPasswordPhoto from "@/assets/forgot-password-photo.jpg";
 
 const ForgotPassword = () => {
@@ -36,6 +37,7 @@ const ForgotPassword = () => {
 
   return (
     <div className="min-h-screen flex bg-background">
+      <Helmet><meta name="robots" content="noindex, nofollow" /></Helmet>
       {/* Left panel - illustration (hidden on mobile) */}
       <div className="hidden lg:flex lg:w-1/2 bg-accent items-center justify-center p-12 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-secondary/10" />
