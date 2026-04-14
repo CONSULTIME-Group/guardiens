@@ -165,6 +165,7 @@ const Landing = () => {
         description="Garde de maison gratuite entre voisins. Entraide locale, petits services, échanges sans argent. Osez demander. Osez proposer. Rejoignez le mouvement."
         path="/"
         image="https://guardiens.fr/og-default.jpg"
+        preloadImage={heroDogBbq}
       />
       {/* JSON-LD: Organization */}
       <script
@@ -746,6 +747,9 @@ const Landing = () => {
               alt="Une garde en Auvergne-Rhône-Alpes — Guardiens"
               className="w-full h-64 md:h-96 object-cover object-center"
               loading="lazy"
+              width={1920}
+              height={600}
+              decoding="async"
             />
           </div>
         </div>
