@@ -13,6 +13,7 @@ interface MonAnnonceCardProps {
   propertyType: string | null;
   propertyEnvironment: string | null;
   pendingAppCount: number;
+  coverPhoto?: string | null;
 }
 
 const TYPE_LABELS: Record<string, string> = {
@@ -31,7 +32,7 @@ const STATUS_CONFIG: Record<string, { label: string; className: string }> = {
   cancelled: { label: "Annulée", className: "bg-destructive/10 text-destructive" },
 };
 
-const MonAnnonceCard = memo(({ sits, pets, propertyType, propertyEnvironment, pendingAppCount }: MonAnnonceCardProps) => {
+const MonAnnonceCard = memo(({ sits, pets, propertyType, propertyEnvironment, pendingAppCount, coverPhoto }: MonAnnonceCardProps) => {
   const navigate = useNavigate();
   const now = new Date();
 
@@ -111,7 +112,13 @@ const MonAnnonceCard = memo(({ sits, pets, propertyType, propertyEnvironment, pe
     : null;
 
   return (
-    <div className="bg-card border border-border rounded-2xl p-5 space-y-3">
+    <div className="bg-card border border-border rounded-2xl overflow-hidden">
+      {coverPhoto && (
+        <div className="h-32 w-full overflow-hidden">
+          <img src={coverPhoto} alt="Photo du logement" className="w-full h-full object-cover" />
+        </div>
+      )}
+      <div className="p-5 space-y-3">
       <div className="flex items-center justify-between">
         <p className="text-sm font-semibold text-foreground">Mon annonce</p>
         <span className={`text-xs rounded-full px-2.5 py-0.5 font-medium ${statusConf.className}`}>
@@ -171,6 +178,7 @@ const MonAnnonceCard = memo(({ sits, pets, propertyType, propertyEnvironment, pe
             </Button>
           </>
         )}
+        </div>
       </div>
     </div>
   );
