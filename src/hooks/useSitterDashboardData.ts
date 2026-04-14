@@ -74,6 +74,8 @@ const INITIAL_STATE: SitterDashboardData = {
   onboardingCompleted: false,
   onboardingDismissed: false,
   minimalCompleted: false,
+  reputation: null,
+  groupedBadges: [],
 };
 
 export function useSitterDashboardData(userId: string | undefined) {
@@ -90,8 +92,8 @@ export function useSitterDashboardData(userId: string | undefined) {
 
     const load = async () => {
       const [
-        appsRes, sitterRes, profileRes, reviewsRes, listingsRes,
-        badgesRes, articlesRes, unreadRes, badgeDetailsRes, emProfileRes,
+        appsRes, sitterRes, profileRes, reviewsRes,
+        badgesRes, articlesRes, unreadRes, allBadgesRes, emProfileRes, reputationRes,
       ] = await Promise.all([
         supabase.from("applications")
           .select("*, sit:sits(id, title, start_date, end_date, status, user_id, property_id, properties:property_id(photos))")
@@ -104,9 +106,6 @@ export function useSitterDashboardData(userId: string | undefined) {
           .eq("id", userId).single(),
         supabase.from("reviews")
           .select("overall_rating").eq("reviewee_id", userId).eq("published", true),
-        supabase.from("sits")
-          .select("id, title, start_date, end_date, user_id, property_id, status, created_at, is_urgent, properties:property_id(photos, type, environment)")
-          .eq("status", "published").order("created_at", { ascending: false }).limit(6),
         supabase.from("badge_attributions").select("id").eq("user_id", userId),
         supabase.from("articles")
           .select("id, title, slug, cover_image_url, excerpt, category")
@@ -115,11 +114,15 @@ export function useSitterDashboardData(userId: string | undefined) {
         supabase.from("messages")
           .select("id", { count: "exact", head: true })
           .neq("sender_id", userId).is("read_at", null),
+        // Single badge query — replaces both badgeDetailsRes AND useUserBadges
         supabase.from("badge_attributions")
-          .select("id, badge_id, created_at").eq("user_id", userId)
-          .order("created_at", { ascending: false }).limit(6),
+          .select("badge_id, created_at").eq("user_id", userId)
+          .order("created_at", { ascending: false }),
         supabase.from("emergency_sitter_profiles")
           .select("id").eq("user_id", userId).maybeSingle(),
+        // Reputation — replaces useProfileReputation
+        (supabase as any).from("profile_reputation")
+          .select("*").eq("user_id", userId).maybeSingle(),
       ]);
 
       const profile = profileRes.data;
