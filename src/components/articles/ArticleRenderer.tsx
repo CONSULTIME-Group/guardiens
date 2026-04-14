@@ -41,6 +41,7 @@ import gardienBellecour from "@/assets/gardien-bellecour-lyon.jpg";
 import profilGardienLaptop from "@/assets/profil-gardien-laptop-lyon.jpg";
 import villaOuestVide from "@/assets/villa-ouest-lyonnais-vide.jpg";
 import gardienTeletravailOuest from "@/assets/gardien-teletravail-ouest-lyon.jpg";
+import pensionChienAlternativesCover from "@/assets/pension-chien-alternatives-cover.jpg";
 
 const ARTICLE_IMAGES: Record<string, string> = {
   "/images/lyon-hero-quais.jpg": lyonHeroQuais,
@@ -81,7 +82,12 @@ const ARTICLE_IMAGES: Record<string, string> = {
   "/images/profil-gardien-laptop-lyon.jpg": profilGardienLaptop,
   "/images/villa-ouest-lyonnais-vide.jpg": villaOuestVide,
   "/images/gardien-teletravail-ouest-lyon.jpg": gardienTeletravailOuest,
+  "/images/pension-chien-alternatives-cover.jpg": pensionChienAlternativesCover,
 };
+
+export function resolveImagePath(path: string): string {
+  return ARTICLE_IMAGES[path] || path;
+}
 
 function resolveArticleImages(html: string): string {
   return html.replace(/src="(\/images\/[^"]+)"/g, (match, path) => {

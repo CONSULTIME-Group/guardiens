@@ -10,7 +10,7 @@ import PageMeta from "@/components/PageMeta";
 import { Helmet } from "react-helmet-async";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import ArticleRenderer from "@/components/articles/ArticleRenderer";
+import ArticleRenderer, { resolveImagePath } from "@/components/articles/ArticleRenderer";
 
 interface ArticleFull {
   id: string;
@@ -387,7 +387,7 @@ export default function ArticleDetail() {
       {article.cover_image_url && (
         <div className="rounded-xl overflow-hidden mb-8">
           <img
-            src={article.cover_image_url}
+            src={resolveImagePath(article.cover_image_url)}
             alt={altText}
             className="w-full h-auto max-h-96 object-cover"
             loading="eager"
