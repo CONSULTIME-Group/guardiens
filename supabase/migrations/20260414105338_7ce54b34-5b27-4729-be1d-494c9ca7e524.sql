@@ -1,0 +1,3 @@
+ALTER TABLE public.profiles
+ADD COLUMN IF NOT EXISTS cp_relance_count INTEGER DEFAULT 0,
+ADD COLUMN IF NOT EXISTS last_cp_relance_at TIMESTAMPTZ;

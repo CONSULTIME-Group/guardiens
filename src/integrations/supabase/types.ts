@@ -2165,6 +2165,7 @@ export type Database = {
           cancellations_as_proprio: number
           city: string | null
           completed_sits_count: number
+          cp_relance_count: number | null
           created_at: string
           custom_skills: Json | null
           date_of_birth: string | null
@@ -2178,6 +2179,7 @@ export type Database = {
           identity_verification_status: string | null
           identity_verified: boolean
           is_founder: boolean
+          last_cp_relance_at: string | null
           last_name: string | null
           onboarding_completed: boolean
           onboarding_dismissed_at: string | null
@@ -2200,6 +2202,7 @@ export type Database = {
           cancellations_as_proprio?: number
           city?: string | null
           completed_sits_count?: number
+          cp_relance_count?: number | null
           created_at?: string
           custom_skills?: Json | null
           date_of_birth?: string | null
@@ -2213,6 +2216,7 @@ export type Database = {
           identity_verification_status?: string | null
           identity_verified?: boolean
           is_founder?: boolean
+          last_cp_relance_at?: string | null
           last_name?: string | null
           onboarding_completed?: boolean
           onboarding_dismissed_at?: string | null
@@ -2235,6 +2239,7 @@ export type Database = {
           cancellations_as_proprio?: number
           city?: string | null
           completed_sits_count?: number
+          cp_relance_count?: number | null
           created_at?: string
           custom_skills?: Json | null
           date_of_birth?: string | null
@@ -2248,6 +2253,7 @@ export type Database = {
           identity_verification_status?: string | null
           identity_verified?: boolean
           is_founder?: boolean
+          last_cp_relance_at?: string | null
           last_name?: string | null
           onboarding_completed?: boolean
           onboarding_dismissed_at?: string | null
