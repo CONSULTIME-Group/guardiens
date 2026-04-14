@@ -61,6 +61,7 @@ const CATEGORY_COLORS: Record<string, string> = {
 const PAGE_SIZE = 9;
 
 export default function News() {
+  const navigate = useNavigate();
   const [articles, setArticles] = useState<Article[]>([]);
   const [vieLocaleArticles, setVieLocaleArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState(true);
