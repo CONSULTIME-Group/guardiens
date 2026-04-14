@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
-import { Check, CheckCircle, Star, Gift, MapPin, ShieldCheck, Map, PawPrint, Heart, Siren, BadgeCheck, CreditCard } from "lucide-react";
+import { Check, CheckCircle, Star, Gift, MapPin, ShieldCheck, Map, PawPrint, Heart, Siren, BadgeCheck, CreditCard, Quote } from "lucide-react";
 import PageMeta from "@/components/PageMeta";
 import PublicHeader from "@/components/layout/PublicHeader";
 import PublicFooter from "@/components/layout/PublicFooter";
@@ -29,13 +29,13 @@ const sitterFeatures = [
   "Guides locaux et fiches races complètes",
 ];
 
-const strengthBlocks = [
-  { icon: MapPin, title: "Gardiens de proximité", desc: "Vos gardiens sont des gens du coin — pas à l'autre bout du pays. Un problème ? Quelqu'un est à 15 minutes." },
-  { icon: ShieldCheck, title: "Identités confirmées", desc: "Identité confirmée, avis croisés détaillés, écussons qualitatifs. Vous savez à qui vous confiez vos animaux." },
-  { icon: Map, title: "Guides locaux", desc: "Parcs, vétérinaires, balades, cafés dog-friendly — tout ce qu'il faut pour que votre gardien se sente chez lui." },
-  { icon: PawPrint, title: "Fiches races", desc: "Caractère, besoins, conseils de garde — votre gardien sait exactement comment s'occuper de votre animal." },
-  { icon: Heart, title: "Petites missions", desc: "Des coups de main entre gens du coin. Promener un chien, arroser un potager. En échange : un repas, un service rendu. Jamais d'argent." },
-  { icon: Siren, title: "Gardiens d'urgence", desc: "Des gardiens expérimentés, mobilisables rapidement parce qu'ils sont à côté. Le filet de sécurité que vous méritez." },
+const comparisonRows = [
+  { label: "Commission sur la garde", guardiens: "0 %", others: "15 – 25 %" },
+  { label: "Coût pour le propriétaire", guardiens: "Gratuit", others: "Frais de service" },
+  { label: "Gardiens de proximité", guardiens: "Toujours", others: "Rarement garanti" },
+  { label: "Vérification d'identité", guardiens: "Oui", others: "Variable" },
+  { label: "Entraide gratuite", guardiens: "Incluse", others: "Non proposée" },
+  { label: "Gardiens d'urgence locaux", guardiens: "Oui", others: "Non proposé" },
 ];
 
 const promiseLines = [
@@ -99,6 +99,14 @@ Pour comprendre le bien-être de vos animaux pendant la garde : [Bien-être anim
   },
 ];
 
+const cityLinks = [
+  { label: "Lyon", to: "/house-sitting/lyon" },
+  { label: "Annecy", to: "/house-sitting/annecy" },
+  { label: "Grenoble", to: "/house-sitting/grenoble" },
+  { label: "Chambéry", to: "/house-sitting/chambery" },
+  { label: "Caluire", to: "/house-sitting/caluire-et-cuire" },
+  { label: "Villeurbanne", to: "/house-sitting/villeurbanne" },
+];
 
 const Pricing = () => {
   const before = isBeforeLaunch();
@@ -112,6 +120,14 @@ const Pricing = () => {
     one_shot: "Accéder un mois — 12€",
     mensuel: "Commencer — 7 jours offerts",
     prorata: "Choisir le prorata 2026",
+  };
+
+  const registerLink = (role?: string) => {
+    const params = new URLSearchParams();
+    if (role) params.set("role", role);
+    if (formule) params.set("plan", formule);
+    const qs = params.toString();
+    return `/register${qs ? `?${qs}` : ""}`;
   };
 
   const faqJsonLd = {
@@ -131,7 +147,7 @@ const Pricing = () => {
     <>
       <PageMeta
         title="Tarifs Guardiens — 9€/mois pour les gardiens"
-        description="Gratuit pour les propriétaires. 9€/mois pour les gardiens avec 30 jours d'essai offerts."
+        description="Gratuit pour les propriétaires, pour toujours. 9€/mois pour les gardiens avec 7 jours d'essai offerts. Sans commission, sans frais cachés."
       />
 
       <script
@@ -140,7 +156,6 @@ const Pricing = () => {
       />
 
       <div className="min-h-screen bg-background">
-        {/* Header */}
         <PublicHeader />
 
         <main className="max-w-6xl mx-auto px-4">
@@ -158,7 +173,6 @@ const Pricing = () => {
           {before && (
             <section className="mt-0 mb-10 md:mb-14">
               <div className="w-full max-w-3xl mx-auto bg-amber-50 border border-amber-200/60 rounded-2xl overflow-hidden">
-                {/* Bande supérieure */}
                 <div className="bg-amber-100 px-6 py-3 flex items-center justify-center gap-2">
                   <Star className="w-4 h-4 text-amber-500" aria-hidden="true" />
                   <span className="text-sm font-medium text-amber-800 font-body tracking-wide">
@@ -168,7 +182,6 @@ const Pricing = () => {
                 </div>
 
                 <div className="px-6 sm:px-10 py-8 flex flex-col md:flex-row items-center md:items-start gap-6 md:gap-8">
-                  {/* Colonne gauche — Compte à rebours */}
                   <div className="flex-1 text-center space-y-1">
                     <p className="font-heading text-4xl font-bold text-amber-700 tabular-nums">
                       {daysLeft}
@@ -178,7 +191,6 @@ const Pricing = () => {
                     </p>
                   </div>
 
-                  {/* Colonne centre — 3 avantages */}
                   <div className="flex-1 flex flex-col items-center md:items-start gap-3">
                     <div className="flex items-center gap-2 text-sm text-amber-800 font-body">
                       <BadgeCheck className="w-4 h-4 text-amber-600 flex-shrink-0" aria-hidden="true" />
@@ -194,7 +206,6 @@ const Pricing = () => {
                     </div>
                   </div>
 
-                  {/* Colonne droite — Anecdote + CTA */}
                   <div className="flex-1 flex flex-col items-center gap-4 text-center">
                     <p className="text-xs italic text-amber-700/70 font-body max-w-xs leading-relaxed">
                       Pourquoi le 13 mai ? C'est l'anniversaire de Jérémie, cofondateur de Guardiens.
@@ -212,7 +223,7 @@ const Pricing = () => {
             </section>
           )}
 
-          {/* Grace period banner (between May 14 and June 13) */}
+          {/* Grace period banner */}
           {grace && (
             <section
               className="rounded-2xl p-6 md:p-8 text-center space-y-4 border-2 mb-16 md:mb-24"
@@ -261,7 +272,7 @@ const Pricing = () => {
                 </ul>
                 <p className="text-xs font-body text-foreground/50 text-center italic">Gratuit maintenant, gratuit toujours.</p>
                 <div className="mt-auto">
-                  <Link to="/register" className="block">
+                  <Link to={registerLink("owner")} className="block">
                     <Button variant="outline" className="w-full min-h-[44px] font-body border-2 border-foreground/20 hover:border-foreground/40 text-foreground/60 hover:text-foreground bg-transparent transition-colors duration-200" size="lg">S'inscrire gratuitement</Button>
                   </Link>
                 </div>
@@ -286,9 +297,7 @@ const Pricing = () => {
                     <p className="font-heading text-5xl font-bold text-foreground">
                       <span className="text-lg font-body font-normal text-foreground/60 mr-1">à partir de</span>
                       9€
-                      <span className="text-lg font-body font-normal text-foreground/60 ml-1">
-                        /mois
-                      </span>
+                      <span className="text-lg font-body font-normal text-foreground/60 ml-1">/mois</span>
                     </p>
                     <p className="text-xs text-foreground/50 font-body">
                       Sans engagement · Résiliable à tout moment
@@ -299,9 +308,7 @@ const Pricing = () => {
                     <p className="font-heading text-5xl font-bold text-foreground">
                       <span className="text-lg font-body font-normal text-foreground/60 mr-1">à partir de</span>
                       9€
-                      <span className="text-lg font-body font-normal text-foreground/60 ml-1">
-                        /mois
-                      </span>
+                      <span className="text-lg font-body font-normal text-foreground/60 ml-1">/mois</span>
                     </p>
                     <p className="text-xs text-foreground/50 font-body">
                       Sans engagement · Résiliable à tout moment
@@ -329,16 +336,10 @@ const Pricing = () => {
                     className={`flex items-start justify-between gap-3 border rounded-lg p-3 cursor-pointer transition-all ${formule === 'one_shot' ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/40'}`}
                   >
                     <div className="min-w-0">
-                      <p className="text-sm font-medium text-foreground font-body">
-                        Accès un mois
-                      </p>
-                      <p className="text-xs text-foreground/50 font-body">
-                        Paiement immédiat · Sans renouvellement
-                      </p>
+                      <p className="text-sm font-medium text-foreground font-body">Accès un mois</p>
+                      <p className="text-xs text-foreground/50 font-body">Paiement immédiat · Sans renouvellement</p>
                     </div>
-                    <span className="text-sm font-semibold text-foreground font-body flex-shrink-0">
-                      12€
-                    </span>
+                    <span className="text-sm font-semibold text-foreground font-body flex-shrink-0">12€</span>
                   </div>
                   <div
                     onClick={() => setFormule('mensuel')}
@@ -346,44 +347,30 @@ const Pricing = () => {
                   >
                     <div className="min-w-0">
                       <div className="flex items-center gap-2">
-                        <p className="text-sm font-medium text-foreground font-body">
-                          Mensuel
-                        </p>
+                        <p className="text-sm font-medium text-foreground font-body">Mensuel</p>
                         <span className="text-xs font-body text-primary/70">Le plus choisi</span>
                       </div>
-                      <p className="text-xs text-foreground/50 font-body">
-                        7 jours d'essai · Annulable à tout moment
-                      </p>
+                      <p className="text-xs text-foreground/50 font-body">7 jours d'essai · Annulable à tout moment</p>
                     </div>
-                    <span className="text-sm font-semibold text-primary font-body flex-shrink-0">
-                      9€/mois
-                    </span>
+                    <span className="text-sm font-semibold text-primary font-body flex-shrink-0">9€/mois</span>
                   </div>
                   <div
                     onClick={() => setFormule('prorata')}
                     className={`flex items-start justify-between gap-3 border rounded-lg p-3 cursor-pointer transition-all ${formule === 'prorata' ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/40'}`}
                   >
                     <div className="min-w-0">
-                      <p className="text-sm font-medium text-foreground font-body">
-                        Prorata 2026
-                      </p>
-                      <p className="text-xs text-foreground/50 font-body">
-                        Mois restants en 2026 × 9€ × 0,8 — paiement unique
-                      </p>
-                      <p className="text-xs text-foreground/40 italic font-body">
-                        Ex. en mai : 7 mois × 9€ × 0,8 = 50,40€
-                      </p>
+                      <p className="text-sm font-medium text-foreground font-body">Prorata 2026</p>
+                      <p className="text-xs text-foreground/50 font-body">Mois restants en 2026 × 9€ × 0,8 — paiement unique</p>
+                      <p className="text-xs text-foreground/40 italic font-body">Ex. en mai : 7 mois × 9€ × 0,8 = 50,40€</p>
                     </div>
-                    <span className="text-sm font-semibold text-primary font-body flex-shrink-0">
-                      -20%
-                    </span>
+                    <span className="text-sm font-semibold text-primary font-body flex-shrink-0">-20%</span>
                   </div>
                 </div>
 
                 {/* CTA */}
                 <div className="space-y-1 pt-2 mt-auto">
                   <Link
-                    to="/register"
+                    to={registerLink("sitter")}
                     className="w-full inline-flex items-center justify-center bg-primary text-primary-foreground font-body font-medium text-sm px-6 py-3.5 rounded-xl hover:bg-primary/90 transition-colors min-h-[44px]"
                   >
                     {ctaLabels[formule]}
@@ -402,21 +389,48 @@ const Pricing = () => {
             </Card>
           </section>
 
-          {/* ═══ ZONE 3 — Réassurance + action ═══ */}
+          {/* ═══ ZONE 3 — Comparaison vs plateformes classiques ═══ */}
+          <section className="mb-10 md:mb-14 max-w-3xl mx-auto">
+            <h2 className="font-heading text-2xl md:text-3xl font-semibold text-foreground text-center mb-3">
+              Guardiens vs plateformes classiques
+            </h2>
+            <p className="text-sm font-body text-foreground/60 text-center mb-8">
+              Pas de commission, pas de frais cachés. Voici ce qui nous différencie.
+            </p>
+            <div className="overflow-hidden rounded-2xl border border-border/40">
+              <table className="w-full text-sm font-body">
+                <thead>
+                  <tr className="bg-muted/40">
+                    <th className="text-left py-3 px-4 font-medium text-foreground/70"></th>
+                    <th className="text-center py-3 px-4 font-heading font-semibold text-primary">Guardiens</th>
+                    <th className="text-center py-3 px-4 font-medium text-foreground/50">Autres plateformes</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {comparisonRows.map((row, i) => (
+                    <tr key={row.label} className={i % 2 === 0 ? "bg-card" : "bg-muted/20"}>
+                      <td className="py-3 px-4 text-foreground/70">{row.label}</td>
+                      <td className="py-3 px-4 text-center font-medium text-primary">{row.guardiens}</td>
+                      <td className="py-3 px-4 text-center text-foreground/40">{row.others}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </section>
 
-          {/* Strengths Grid */}
-          <section className="mb-10 md:mb-14">
-            <h2 className="font-heading text-2xl md:text-3xl font-semibold text-foreground text-center mb-12">Tout ça, c'est Guardiens</h2>
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-              {strengthBlocks.map((block) => (
-                <div key={block.title} className="bg-card border border-border/40 rounded-2xl p-6 space-y-3 hover:border-border/80 transition-colors duration-200 h-full flex flex-col">
-                  <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-                    <block.icon className="h-5 w-5 text-primary" />
-                  </div>
-                  <h3 className="text-base font-heading font-semibold text-foreground">{block.title}</h3>
-                  <p className="text-sm font-body text-foreground/60 leading-relaxed flex-1">{block.desc}</p>
-                </div>
-              ))}
+          {/* ═══ Témoignage ═══ */}
+          <section className="max-w-2xl mx-auto mb-10 md:mb-14 text-center">
+            <div className="bg-card border border-border/40 rounded-2xl p-8 md:p-10 relative">
+              <Quote className="h-8 w-8 text-primary/20 absolute top-6 left-6" />
+              <blockquote className="font-body text-foreground/80 text-base md:text-lg leading-relaxed italic mb-4">
+                « Je n'aurais jamais cru pouvoir garder des animaux aussi près de chez moi.
+                En trois gardes, j'ai rencontré des gens incroyables et leurs compagnons.
+                C'est bien plus qu'un abonnement — c'est une communauté. »
+              </blockquote>
+              <p className="text-sm font-body text-foreground/50">
+                — Camille, gardienne à Lyon depuis 2026
+              </p>
             </div>
           </section>
 
@@ -439,15 +453,15 @@ const Pricing = () => {
               sont mobilisables en quelques heures.
             </p>
             <div className="flex flex-wrap justify-center gap-3">
-              <Link to="/house-sitting/lyon" className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg border border-border text-sm font-body text-foreground hover:border-primary/40 hover:text-primary transition-colors">
-                <MapPin className="h-3.5 w-3.5" /> Lyon
-              </Link>
-              <Link to="/house-sitting/annecy" className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg border border-border text-sm font-body text-foreground hover:border-primary/40 hover:text-primary transition-colors">
-                <MapPin className="h-3.5 w-3.5" /> Annecy
-              </Link>
-              <Link to="/house-sitting/grenoble" className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg border border-border text-sm font-body text-foreground hover:border-primary/40 hover:text-primary transition-colors">
-                <MapPin className="h-3.5 w-3.5" /> Grenoble
-              </Link>
+              {cityLinks.map((city) => (
+                <Link
+                  key={city.to}
+                  to={city.to}
+                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg border border-border text-sm font-body text-foreground hover:border-primary/40 hover:text-primary transition-colors"
+                >
+                  <MapPin className="h-3.5 w-3.5" /> {city.label}
+                </Link>
+              ))}
             </div>
           </section>
 
@@ -485,40 +499,24 @@ const Pricing = () => {
             </Accordion>
           </section>
 
-          {/* CTA final */}
-          <section className="text-center py-10 md:py-14 bg-muted/30 rounded-2xl mb-10">
-            <p className="text-lg md:text-xl font-heading font-semibold text-foreground text-center mb-2">
+          {/* CTA final — high contrast */}
+          <section className="text-center py-10 md:py-14 bg-primary rounded-2xl mb-10">
+            <p className="text-lg md:text-xl font-heading font-semibold text-primary-foreground text-center mb-2">
               {before
                 ? "Rejoignez les Fondateurs avant le 13 mai"
                 : "Prêt à rejoindre Guardiens ?"}
             </p>
-            <p className="text-sm font-body text-foreground/60 text-center mb-8">
+            <p className="text-sm font-body text-primary-foreground/70 text-center mb-8">
               {before
                 ? "Badge à vie, accès jusqu'au 13 juin."
                 : "9€/mois pour les gardiens. Gratuit pour les propriétaires. Sans engagement."}
             </p>
             <Link to="/register">
-              <Button className="bg-primary text-primary-foreground font-body font-medium px-10 py-4 rounded-xl text-base hover:bg-primary/90 transition-colors min-h-[52px]" size="xl">
+              <Button className="bg-background text-foreground font-body font-medium px-10 py-4 rounded-xl text-base hover:bg-background/90 transition-colors min-h-[52px]" size="xl">
                 S'inscrire
               </Button>
             </Link>
           </section>
-
-          {/* Schema.org FAQPage */}
-          <script
-            type="application/ld+json"
-            dangerouslySetInnerHTML={{
-              __html: JSON.stringify({
-                "@context": "https://schema.org",
-                "@type": "FAQPage",
-                mainEntity: faqItems.map((item) => ({
-                  "@type": "Question",
-                  name: item.q,
-                  acceptedAnswer: { "@type": "Answer", text: item.a },
-                })),
-              }),
-            }}
-          />
         </main>
 
         <PublicFooter />
