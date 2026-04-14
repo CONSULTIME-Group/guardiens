@@ -13,7 +13,7 @@ interface RelanceCpProps {
 
 const RelanceCpManquantEmail = ({ prenom, cta_url }: RelanceCpProps) => {
   const name = prenom || ''
-  const link = cta_url || 'https://guardiens.fr/mon-profil?focus=postal_code'
+  const link = cta_url || 'https://guardiens.fr/profile?focus=postal_code'
 
   return (
     <Html lang="fr" dir="ltr">
@@ -61,7 +61,7 @@ export const template = {
   component: RelanceCpManquantEmail,
   subject: 'Indiquez votre ville pour voir les annonces près de chez vous',
   displayName: 'Relance code postal manquant',
-  previewData: { prenom: 'Marie', cta_url: 'https://guardiens.fr/mon-profil?focus=postal_code' },
+  previewData: { prenom: 'Marie', cta_url: 'https://guardiens.fr/profile?focus=postal_code' },
 } satisfies TemplateEntry
 
 const main = { backgroundColor: '#ffffff', fontFamily: "'Outfit', Arial, sans-serif" }
