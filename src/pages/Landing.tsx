@@ -244,8 +244,8 @@ const Landing = () => {
         />
         <div className="absolute inset-0 bg-gradient-to-r from-black/65 via-black/45 to-black/20" />
 
-        <div className="relative z-10 w-full px-[5%] md:px-[8%] py-24">
-          <div className="max-w-2xl">
+        <div className="relative z-10 w-full max-w-7xl mx-auto px-6 md:px-12 lg:px-16 py-24">
+          <div className="max-w-2xl lg:max-w-3xl">
 
             {/* Badge gratuit */}
             <div className="inline-flex items-center rounded-full px-4 py-1.5 mb-6 bg-white/15 border border-white/30 backdrop-blur-sm animate-hero-fade-up">
