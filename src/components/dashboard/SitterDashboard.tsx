@@ -19,7 +19,7 @@ import { Separator } from '@/components/ui/separator';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import {
   Home, Search, CheckCircle, Circle, ChevronRight,
-  Newspaper, Info,
+  Newspaper, Info, AlertCircle,
 } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { format, differenceInDays, differenceInHours } from "date-fns";
@@ -28,9 +28,20 @@ import RoleActivationBanner from "./RoleActivationBanner";
 import AccessGateBanner from "@/components/access/AccessGateBanner";
 import { useAccessLevel } from "@/hooks/useAccessLevel";
 import EmergencyEligibility from "./EmergencyEligibility";
+import { Button } from "@/components/ui/button";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
 
 const capitalize = (name: string) =>
   name ? name.charAt(0).toUpperCase() + name.slice(1).toLowerCase() : "";
+
+const ChecklistItem = ({ label, ctaLabel, onClick }: { label: string; ctaLabel: string; onClick: () => void }) => (
+  <div className="flex items-center gap-3">
+    <Circle className="h-4 w-4 text-muted-foreground shrink-0" />
+    <p className="text-sm text-foreground flex-1">{label}</p>
+    <Button variant="outline" size="sm" onClick={onClick}>{ctaLabel}</Button>
+  </div>
+);
 
 const SitterDashboard = () => {
   const { user } = useAuth();
