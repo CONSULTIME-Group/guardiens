@@ -45,6 +45,7 @@ export interface SitterDashboardData {
   minimalCompleted: boolean;
   reputation: ReputationData | null;
   groupedBadges: GroupedBadge[];
+  nearbyMissions: any[];
 }
 
 const INITIAL_STATE: SitterDashboardData = {
