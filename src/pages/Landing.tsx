@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import notreHistoirePanorama from "@/assets/story-photo.jpeg";
 import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, ArrowLeft, Home, Key, Handshake } from "lucide-react";
+import { ArrowRight, ArrowLeft, Home, Key, Handshake, ShieldCheck, MessageCircle, Users, ClipboardCheck, Star, BookOpen } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 import PageMeta from "@/components/PageMeta";
@@ -161,8 +161,8 @@ const Landing = () => {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <PageMeta
-        title="Guardiens — Proches de chez vous."
-        description="Des gardes de maison, de l'entraide, des petits services. Entre gens du coin qui se choisissent. Gratuit pour les propriétaires."
+        title="Guardiens — Quelqu'un du coin veille sur votre maison."
+        description="Garde de maison gratuite entre voisins. Entraide locale, petits services, échanges sans argent. Osez demander. Osez proposer. Rejoignez le mouvement."
         path="/"
         image="https://guardiens.fr/og-default.jpg"
       />
@@ -179,7 +179,7 @@ const Landing = () => {
             description: "Plateforme gratuite de pet sitting et house sitting de proximité en Auvergne-Rhône-Alpes.",
             areaServed: { "@type": "AdministrativeArea", name: "Auvergne-Rhône-Alpes" },
             knowsAbout: ["House-sitting", "Pet-sitting", "Garde d'animaux à domicile", "Entraide entre gens du coin", "Petites missions entre gens du coin", "Auvergne-Rhône-Alpes"],
-            slogan: "Proches de chez vous. Partir. Revenir. Recommencer.",
+            slogan: "Quelqu'un du coin veille sur votre maison.",
             founder: [{ "@type": "Person", name: "Jérémie" }, { "@type": "Person", name: "Elisa" }],
             sameAs: [],
           }),
@@ -224,7 +224,7 @@ const Landing = () => {
             "@type": "FAQPage",
             mainEntity: [
               { "@type": "Question", name: "Qu'est-ce que le house sitting ?", acceptedAnswer: { "@type": "Answer", text: "Le house sitting est un échange de services : un gardien habite gratuitement dans votre maison pendant votre absence et prend soin de vos animaux. C'est gratuit pour les deux parties." } },
-              { "@type": "Question", name: "Guardiens est-il gratuit ?", acceptedAnswer: { "@type": "Answer", text: "Oui, Guardiens est 100% gratuit. Pas de commission, pas d'abonnement obligatoire, pas de frais cachés. L'inscription et la mise en relation sont entièrement gratuites." } },
+              { "@type": "Question", name: "Guardiens est-il gratuit ?", acceptedAnswer: { "@type": "Answer", text: "Oui, Guardiens est 100% gratuit pour les propriétaires. Les gardiens bénéficient d'un accès gratuit jusqu'au 13 juin 2026, puis l'abonnement est à 9€/mois. L'entraide reste gratuite pour tous, pour toujours." } },
               { "@type": "Question", name: "Comment trouver un pet sitter près de chez moi ?", acceptedAnswer: { "@type": "Answer", text: "Inscrivez-vous sur Guardiens, publiez votre annonce de garde avec les dates et vos animaux, et recevez des candidatures de gardiens qui habitent près de chez vous." } },
             ],
           }),
@@ -247,17 +247,17 @@ const Landing = () => {
         <div className="relative z-10 w-full px-[5%] md:px-[8%] py-24">
           <div className="max-w-2xl">
 
-
+            {/* Badge gratuit */}
+            <div className="inline-flex items-center rounded-full px-4 py-1.5 mb-6 bg-white/15 border border-white/30 backdrop-blur-sm animate-hero-fade-up">
+              <span className="font-body text-xs text-white tracking-wide">Gratuit pour les propriétaires — pour toujours</span>
+            </div>
 
             {/* H1 with staggered animation */}
-            <h1 className="font-heading text-5xl md:text-6xl lg:text-7xl font-bold text-white leading-tight mb-4 animate-hero-fade-up">
-              Proches de chez vous.
+            <h1 className="font-heading text-5xl md:text-6xl lg:text-7xl font-bold text-white leading-tight mb-4 animate-hero-fade-up animation-delay-400">
+              Quelqu'un du coin veille sur votre maison.
             </h1>
-            <p className="font-heading text-3xl md:text-4xl lg:text-5xl italic text-white/90 leading-tight mb-4 animate-hero-fade-up animation-delay-400">
-              Partir. Revenir. Recommencer.
-            </p>
-            <p className="font-body text-base md:text-xl text-white/75 max-w-lg mb-10 animate-hero-fade-up animation-delay-700">
-              Garder une maison. Échanger un service. Se faire confiance.
+            <p className="font-body text-lg md:text-xl text-white/80 max-w-lg mb-10 leading-relaxed animate-hero-fade-up animation-delay-700">
+              Confiez vos animaux et votre maison à un gardien de votre quartier. Échangez un service entre voisins. Osez demander. Osez proposer.
             </p>
 
             {/* CTAs */}
@@ -280,11 +280,11 @@ const Landing = () => {
               to="/petites-missions"
               className="inline-flex items-center gap-1 text-white/80 text-sm underline underline-offset-4 hover:text-white transition-colors animate-hero-fade-up animation-delay-1000"
             >
-              Découvrir les petites missions <ArrowRight className="h-3.5 w-3.5" />
+              Découvrir l'entraide entre voisins <ArrowRight className="h-3.5 w-3.5" />
             </Link>
 
             <p className="mt-4 text-xs text-white/60 font-body animate-hero-fade-up animation-delay-1100">
-              Gratuit · Badge Fondateur à vie jusqu'au 13 mai.
+              Badge Fondateur à vie pour les inscrits avant le 13 mai.
             </p>
 
             <div className="flex flex-row justify-center sm:justify-start gap-12 mt-12 animate-hero-fade-up animation-delay-1100">
@@ -310,7 +310,7 @@ const Landing = () => {
       </section>
 
 
-      {/* ═══════════════ SECTION 2b — CE QU'ON FAIT ENSEMBLE ═══════════════ */}
+      {/* ═══════════════ SECTION 2 — CE QU'ON FAIT ENSEMBLE ═══════════════ */}
       <section className="py-24 md:py-32 bg-background">
         <div className="max-w-5xl mx-auto px-6">
           <RevealSection>
@@ -328,9 +328,12 @@ const Landing = () => {
                 <Home className="h-8 w-8 text-primary mb-4" />
                 <h3 className="text-xl font-heading font-semibold text-foreground mb-3">Vous partez. Votre maison vit.</h3>
                 <p className="text-base font-body leading-relaxed text-foreground/70 mb-4">
-                  Trouvez quelqu'un du coin pour garder votre maison et vos animaux. Vous le rencontrez avant. Vous choisissez. Gratuit pour les propriétaires.
+                  Trouvez quelqu'un du coin pour garder votre maison et vos animaux. Vous le rencontrez avant. Vous choisissez.
                 </p>
-                <Link to="/register?role=owner" className="text-sm font-body text-primary font-medium hover:underline">
+                <span className="inline-block px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-body font-medium mb-4">
+                  Gratuit pour les propriétaires
+                </span>
+                <Link to="/register?role=owner" className="block text-sm font-body text-primary font-medium hover:underline">
                   Je cherche un gardien →
                 </Link>
               </div>
@@ -354,10 +357,10 @@ const Landing = () => {
                 <Handshake className="h-8 w-8 text-primary mb-4" />
                 <h3 className="text-xl font-heading font-semibold text-foreground mb-3">Un coup de main. Un échange.</h3>
                 <p className="text-base font-body leading-relaxed text-foreground/70 mb-4">
-                  Arroser un potager, promener un chien, partager une compétence. Sans argent. Entre gens qui se font confiance.
+                  Arroser un potager, promener un chien, partager une compétence. Sans argent. Gratuit pour tous, pour toujours.
                 </p>
                 <Link to="/petites-missions" className="text-sm font-body text-primary font-medium hover:underline">
-                  Découvrir les petites missions →
+                  Découvrir l'entraide →
                 </Link>
               </div>
             </RevealSection>
@@ -365,7 +368,210 @@ const Landing = () => {
         </div>
       </section>
 
-      {/* ═══════════════ SECTION 3 — NOTRE HISTOIRE ═══════════════ */}
+
+      {/* ═══════════════ SECTION 2b — COMMENT ÇA MARCHE ═══════════════ */}
+      <section className="py-24 md:py-32 bg-muted/30">
+        <div className="max-w-5xl mx-auto px-6">
+          <RevealSection>
+            <span className="text-xs tracking-widest uppercase text-primary/60 font-body mb-4 block text-center">
+              Simple et transparent
+            </span>
+            <h2 className="text-4xl md:text-5xl font-heading font-semibold leading-snug text-foreground text-center mb-16">
+              Comment ça marche ?
+            </h2>
+          </RevealSection>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <RevealSection delay={0.1}>
+              <div className="text-center">
+                <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-6">
+                  <span className="text-2xl font-heading font-bold text-primary">1</span>
+                </div>
+                <h3 className="text-xl font-heading font-semibold text-foreground mb-3">Décrivez votre garde</h3>
+                <p className="text-base font-body leading-relaxed text-foreground/70">
+                  Vos animaux, vos dates, votre maison. En quelques minutes, votre annonce est en ligne.
+                </p>
+              </div>
+            </RevealSection>
+
+            <RevealSection delay={0.2}>
+              <div className="text-center">
+                <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-6">
+                  <span className="text-2xl font-heading font-bold text-primary">2</span>
+                </div>
+                <h3 className="text-xl font-heading font-semibold text-foreground mb-3">Recevez des candidatures</h3>
+                <p className="text-base font-body leading-relaxed text-foreground/70">
+                  Des gardiens du coin postulent. Consultez leurs profils, lisez les avis, échangez par messagerie. Rencontrez-vous.
+                </p>
+              </div>
+            </RevealSection>
+
+            <RevealSection delay={0.3}>
+              <div className="text-center">
+                <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-6">
+                  <span className="text-2xl font-heading font-bold text-primary">3</span>
+                </div>
+                <h3 className="text-xl font-heading font-semibold text-foreground mb-3">Partez sereinement</h3>
+                <p className="text-base font-body leading-relaxed text-foreground/70">
+                  Signez l'accord de garde. Votre gardien s'installe. Vous recevez des nouvelles. Vous rentrez l'esprit léger.
+                </p>
+              </div>
+            </RevealSection>
+          </div>
+
+          <RevealSection delay={0.4} className="text-center mt-14">
+            <button
+              onClick={() => navigate("/register?role=owner")}
+              className="font-body text-sm font-semibold tracking-wide rounded-full px-10 py-4 bg-primary text-primary-foreground hover:brightness-90 hover:scale-[1.02] transition-all duration-200"
+            >
+              Je cherche un gardien — c'est gratuit
+            </button>
+          </RevealSection>
+        </div>
+      </section>
+
+
+      {/* ═══════════════ SECTION 2c — OUTILS DE CONFIANCE ═══════════════ */}
+      <section className="py-24 md:py-32 bg-background">
+        <div className="max-w-5xl mx-auto px-6">
+          <RevealSection>
+            <span className="text-xs tracking-widest uppercase text-primary/60 font-body mb-4 block text-center">
+              Pas besoin de chance, juste de bons outils
+            </span>
+            <h2 className="text-4xl md:text-5xl font-heading font-semibold leading-snug text-foreground text-center mb-6">
+              Tout pour choisir en confiance.
+            </h2>
+            <p className="text-center text-foreground/60 font-body max-w-2xl mx-auto mb-16">
+              Guardiens vous donne les moyens de connaître, sécuriser et communiquer avec votre gardien — avant, pendant et après la garde.
+            </p>
+          </RevealSection>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {/* Connaître */}
+            <RevealSection delay={0.1}>
+              <div className="bg-card rounded-2xl p-8 shadow-sm h-full border border-border">
+                <Users className="h-8 w-8 text-primary mb-4" />
+                <h3 className="text-lg font-heading font-semibold text-foreground mb-3">Connaître</h3>
+                <ul className="space-y-3 text-sm font-body text-foreground/70 leading-relaxed">
+                  <li className="flex items-start gap-2.5">
+                    <Star className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                    <span><strong className="text-foreground">Avis croisés</strong> — Après chaque garde, chacun note l'autre. Transparent.</span>
+                  </li>
+                  <li className="flex items-start gap-2.5">
+                    <Users className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                    <span><strong className="text-foreground">Profils détaillés</strong> — Compétences, expériences vérifiées, galerie photos.</span>
+                  </li>
+                </ul>
+              </div>
+            </RevealSection>
+
+            {/* Sécuriser */}
+            <RevealSection delay={0.2}>
+              <div className="bg-card rounded-2xl p-8 shadow-sm h-full border border-border">
+                <ShieldCheck className="h-8 w-8 text-primary mb-4" />
+                <h3 className="text-lg font-heading font-semibold text-foreground mb-3">Sécuriser</h3>
+                <ul className="space-y-3 text-sm font-body text-foreground/70 leading-relaxed">
+                  <li className="flex items-start gap-2.5">
+                    <ShieldCheck className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                    <span><strong className="text-foreground">Vérification d'identité</strong> — Badge visible sur le profil de chaque gardien vérifié.</span>
+                  </li>
+                  <li className="flex items-start gap-2.5">
+                    <ClipboardCheck className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                    <span><strong className="text-foreground">Accord de garde</strong> — Un document clair, signé par les deux parties avant le départ.</span>
+                  </li>
+                </ul>
+              </div>
+            </RevealSection>
+
+            {/* Communiquer */}
+            <RevealSection delay={0.3}>
+              <div className="bg-card rounded-2xl p-8 shadow-sm h-full border border-border">
+                <MessageCircle className="h-8 w-8 text-primary mb-4" />
+                <h3 className="text-lg font-heading font-semibold text-foreground mb-3">Communiquer</h3>
+                <ul className="space-y-3 text-sm font-body text-foreground/70 leading-relaxed">
+                  <li className="flex items-start gap-2.5">
+                    <MessageCircle className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                    <span><strong className="text-foreground">Messagerie intégrée</strong> — Échangez avant, pendant et après la garde.</span>
+                  </li>
+                  <li className="flex items-start gap-2.5">
+                    <BookOpen className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                    <span><strong className="text-foreground">Guide de maison</strong> — Vétérinaire, clés, Wi-Fi, habitudes : tout au même endroit.</span>
+                  </li>
+                </ul>
+              </div>
+            </RevealSection>
+          </div>
+        </div>
+      </section>
+
+
+      {/* ═══════════════ SECTION 3 — OSEZ L'ENTRAIDE ═══════════════ */}
+      <section className="py-24 md:py-32 bg-accent">
+        <div className="max-w-5xl mx-auto px-6">
+          <RevealSection>
+            <span className="text-xs tracking-widest uppercase text-primary/60 font-body mb-4 block text-center">
+              Gratuit · Pour tous · Pour toujours
+            </span>
+            <h2 className="text-4xl md:text-5xl font-heading font-semibold leading-snug text-foreground text-center mb-6">
+              Osez demander un coup de main.
+            </h2>
+            <p className="text-center text-foreground/70 font-body max-w-2xl mx-auto mb-16 text-lg leading-relaxed">
+              On a oublié comment faire. Demander à un voisin d'arroser ses plantes.
+              Proposer de promener le chien de quelqu'un. Échanger un savoir-faire contre un panier de légumes.
+              Ce n'est pas du passé — c'est ce qu'on reconstruit ici.
+            </p>
+          </RevealSection>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+            <RevealSection delay={0.1}>
+              <div className="bg-card rounded-2xl p-8 shadow-sm h-full">
+                <h3 className="text-xl font-heading font-semibold text-foreground mb-3">
+                  « J'ai besoin d'aide »
+                </h3>
+                <p className="text-base font-body leading-relaxed text-foreground/70 mb-4">
+                  Votre potager pendant les vacances. Vos poules ce weekend. Promener votre chien après une opération.
+                  Publiez ce dont vous avez besoin — quelqu'un près de chez vous répondra.
+                </p>
+                <p className="text-sm font-body font-medium text-primary">
+                  Pas d'argent. Pas d'abonnement. Jamais.
+                </p>
+              </div>
+            </RevealSection>
+
+            <RevealSection delay={0.2}>
+              <div className="bg-card rounded-2xl p-8 shadow-sm h-full">
+                <h3 className="text-xl font-heading font-semibold text-foreground mb-3">
+                  « Je propose mon aide »
+                </h3>
+                <p className="text-base font-body leading-relaxed text-foreground/70 mb-4">
+                  Vous savez tailler des rosiers. Vous adorez les chiens. Vous avez du temps samedi matin.
+                  Proposez — et découvrez des gens que vous n'auriez jamais croisés autrement.
+                </p>
+                <p className="text-sm font-body font-medium text-primary">
+                  C'est comme ça que le tissu local se recrée.
+                </p>
+              </div>
+            </RevealSection>
+          </div>
+
+          <RevealSection delay={0.3} className="text-center mt-12">
+            <div className="border-l-4 border-primary pl-6 max-w-xl mx-auto text-left mb-10">
+              <p className="text-xl md:text-2xl font-heading font-semibold italic text-foreground leading-snug">
+                La vie de village n'a pas disparu. Elle attendait un prétexte pour recommencer.
+              </p>
+            </div>
+            <Link
+              to="/petites-missions"
+              className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-8 py-4 rounded-full font-body font-medium text-sm hover:bg-primary/90 transition-colors"
+            >
+              Découvrir les petites missions <ArrowRight className="h-4 w-4" />
+            </Link>
+          </RevealSection>
+        </div>
+      </section>
+
+
+      {/* ═══════════════ SECTION 4 — NOTRE HISTOIRE ═══════════════ */}
       <section className="bg-background">
         <div className="max-w-6xl mx-auto px-6 py-24 md:py-32">
           <RevealSection>
@@ -429,17 +635,17 @@ const Landing = () => {
       </section>
 
 
-      {/* ═══════════════ SECTION 4bis — VITRINE DÉMO ═══════════════ */}
+      {/* ═══════════════ SECTION 5 — VITRINE DÉMO ═══════════════ */}
       <RevealSection>
         <DemoListingShowcase />
       </RevealSection>
 
-      {/* ═══════════════ SECTION 5 — TÉMOIGNAGES ═══════════════ */}
+      {/* ═══════════════ SECTION 6 — TÉMOIGNAGES ═══════════════ */}
       <section className="py-24 md:py-32 bg-background">
         <div className="max-w-6xl mx-auto px-6 md:px-12">
           <RevealSection className="text-center mb-16">
             <h2 className="font-heading text-4xl md:text-5xl font-semibold text-foreground leading-snug">
-              Ils ont sauté le pas.
+              Ils ont osé. Voici ce qu'ils en disent.
             </h2>
           </RevealSection>
 
@@ -503,7 +709,7 @@ const Landing = () => {
         </div>
       </section>
 
-      {/* ═══════════════ SECTION 5b — VILLES PRIORITAIRES ═══════════════ */}
+      {/* ═══════════════ SECTION 7 — VILLES PRIORITAIRES ═══════════════ */}
       <section className="py-24 md:py-32 bg-muted/30">
         <div className="max-w-5xl mx-auto px-6">
           <RevealSection>
@@ -564,29 +770,7 @@ const Landing = () => {
         </div>
       </section>
 
-      {/* ═══════════════ SECTION 6 — PETITES MISSIONS ═══════════════ */}
-      <section className="py-24 md:py-32 bg-background">
-        <div className="max-w-5xl mx-auto px-6">
-          <RevealSection>
-            <div className="bg-card rounded-2xl p-12 max-w-3xl mx-auto text-center shadow-sm">
-              <h3 className="font-heading text-2xl md:text-3xl font-semibold text-foreground mb-4">
-                Un jardin à arroser, un coup de main à donner, une compétence à partager.
-              </h3>
-              <p className="font-body text-base md:text-lg text-foreground/75 leading-relaxed max-w-xl mx-auto mb-6">
-                Jardinage, bricolage, courses, coup de main — les petites missions sont là pour ça. L'échange en nature. Entre gens du coin qui se choisissent.
-              </p>
-              <Link
-                to="/petites-missions"
-                className="text-primary font-body font-semibold text-sm underline underline-offset-4 hover:no-underline inline-flex items-center gap-1"
-              >
-                Découvrir les petites missions <ArrowRight className="h-4 w-4" />
-              </Link>
-            </div>
-          </RevealSection>
-        </div>
-      </section>
-
-      {/* ═══════════════ SECTION 7 — ENCART FONDATEUR ═══════════════ */}
+      {/* ═══════════════ SECTION 8 — ENCART FONDATEUR ═══════════════ */}
       <section className="py-24 md:py-32 bg-primary">
         <RevealSection className="max-w-xl mx-auto px-6 text-center">
           <div className="inline-flex items-center rounded-full px-4 py-1.5 mb-6 bg-white/15 border border-white/30">
@@ -608,31 +792,37 @@ const Landing = () => {
       </section>
 
 
-      {/* ═══════════════ SECTION 8 — CTA FINAL ═══════════════ */}
+      {/* ═══════════════ SECTION 9 — CTA FINAL ═══════════════ */}
       <section className="py-24 md:py-32 bg-foreground">
         <RevealSection className="max-w-2xl mx-auto px-6 text-center">
           <h2 className="font-heading text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight mb-6">
             Votre histoire commence ici.
           </h2>
           <p className="font-body text-lg text-white/70 leading-relaxed max-w-lg mx-auto mb-10">
-            Gratuit pour les propriétaires, pour toujours. Ce que vous allez vivre ne l'est pas.
+            Gratuit pour les propriétaires, pour toujours. L'entraide, gratuite pour tous. Ce que vous allez vivre ne l'est pas.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <button
-              onClick={() => navigate("/annonces")}
+              onClick={() => navigate("/register?role=owner")}
               className="font-body text-sm font-semibold tracking-wide rounded-full px-10 py-4 bg-primary text-primary-foreground hover:brightness-90 hover:scale-[1.02] transition-all duration-200"
             >
-              Voir les annonces
+              Je cherche un gardien — gratuit
             </button>
             <button
-              onClick={() => navigate("/tarifs")}
+              onClick={() => navigate("/register?role=sitter")}
               className="font-body text-sm font-semibold tracking-wide rounded-full px-10 py-4 bg-transparent text-white border-2 border-white/40 hover:bg-white/10 transition-all duration-200"
             >
-              Découvrir les tarifs
+              Je veux garder
             </button>
           </div>
+          <Link
+            to="/petites-missions"
+            className="inline-flex items-center gap-1 text-white/50 text-sm mt-6 hover:text-white/70 transition-colors"
+          >
+            Ou découvrir l'entraide entre voisins <ArrowRight className="h-3.5 w-3.5" />
+          </Link>
           <p className="mt-6 text-xs text-white/40 font-body">
-            Gratuit · Badge Fondateur à vie · Accès jusqu'au 13 juin
+            Badge Fondateur à vie · Accès gratuit jusqu'au 13 juin
           </p>
         </RevealSection>
       </section>
