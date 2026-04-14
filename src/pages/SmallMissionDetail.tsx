@@ -30,6 +30,15 @@ const CATEGORY_META: Record<string, { label: string; icon: typeof Dog; colorClas
   skills: { label: "Compétences", icon: Handshake, colorClass: "text-amber-600" },
 };
 
+const DURATION_LABELS: Record<string, string> = {
+  "1-2h": "1-2 heures",
+  half_day: "Demi-journée",
+  full_day: "Journée",
+  several: "Plusieurs jours",
+  weekend: "Week-end",
+  week: "Semaine",
+};
+
 const STATUS_LABELS: Record<string, { label: string; className: string }> = {
   open: { label: "Ouverte", className: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" },
   in_progress: { label: "En cours", className: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400" },
