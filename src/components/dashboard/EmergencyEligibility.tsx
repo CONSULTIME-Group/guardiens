@@ -11,6 +11,7 @@ const EmergencyEligibility = () => {
     avgRating: number;
     recentCancellations: number;
     identityVerified: boolean;
+    hasSubscription: boolean;
   } | null>(null);
 
   useEffect(() => {
@@ -19,15 +20,15 @@ const EmergencyEligibility = () => {
       const sixMonthsAgo = new Date();
       sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
 
-      const [appsRes, reviewsRes, profileRes, cancellationsRes] = await Promise.all([
+      const [appsRes, reviewsRes, profileRes, cancellationsRes, subRes] = await Promise.all([
         supabase.from("applications").select("id, sit:sits!inner(status)").eq("sitter_id", user.id).eq("status", "accepted"),
         supabase.from("reviews").select("overall_rating").eq("reviewee_id", user.id).eq("published", true),
         supabase.from("profiles").select("identity_verified").eq("id", user.id).single(),
-        // Count cancellations in last 6 months only
         supabase.from("sits")
           .select("id")
           .eq("cancelled_by", user.id)
           .gte("cancelled_at", sixMonthsAgo.toISOString()),
+        supabase.from("subscriptions").select("status, expires_at").eq("user_id", user.id).maybeSingle(),
       ]);
       const completedSits = (appsRes.data || []).filter((a: any) => a.sit?.status === "completed").length;
       const reviews = reviewsRes.data || [];
