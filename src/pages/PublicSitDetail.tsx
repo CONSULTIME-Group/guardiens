@@ -199,7 +199,11 @@ const PublicSitDetail = () => {
         {/* CTA */}
         <div className="fixed bottom-0 left-0 right-0 bg-card border-t border-border p-4 z-40 pb-20 md:pb-4">
           <div className="max-w-4xl mx-auto">
-            {!isAuthenticated ? (
+            {!(sit as any).accepting_applications ? (
+              <Button className="w-full h-12 text-base font-semibold" disabled>
+                Candidatures en cours d'analyse
+              </Button>
+            ) : !isAuthenticated ? (
               <Link to="/register?role=sitter">
                 <Button className="w-full h-12 text-base font-semibold">
                   S'inscrire pour postuler — gratuit →
