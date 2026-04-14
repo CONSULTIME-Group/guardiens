@@ -88,6 +88,7 @@ const ARTICLE_IMAGES: Record<string, string> = {
   "/images/pension-chien-alternatives-cover.jpg": pensionChienAlternativesCover,
   "/images/garde-animaux-croix-rousse-lyon.jpg": gardeAnimauxCroixRousse,
   "/images/garde-animal-hospitalisation-cover.jpg": gardeAnimalHospitalisation,
+  "/images/garde-chat-domicile-lyon.jpg": gardeChatDomicileLyon,
 };
 
 export function resolveImagePath(path: string): string {
