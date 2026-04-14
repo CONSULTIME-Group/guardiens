@@ -45,6 +45,7 @@ export interface SitterDashboardData {
   minimalCompleted: boolean;
   reputation: ReputationData | null;
   groupedBadges: GroupedBadge[];
+  nearbyMissions: any[];
 }
 
 const INITIAL_STATE: SitterDashboardData = {
@@ -76,6 +77,7 @@ const INITIAL_STATE: SitterDashboardData = {
   minimalCompleted: false,
   reputation: null,
   groupedBadges: [],
+  nearbyMissions: [],
 };
 
 export function useSitterDashboardData(userId: string | undefined) {
@@ -167,6 +169,20 @@ export function useSitterDashboardData(userId: string | undefined) {
           .slice(0, 4);
       }
 
+      // Nearby missions — filtered by department
+      let nearbyMissions: any[] = [];
+      if (userDept) {
+        const { data: missions } = await supabase
+          .from("small_missions")
+          .select("id, title, category, city, postal_code, date_needed, status, created_at, user_id")
+          .eq("status", "open")
+          .order("created_at", { ascending: false })
+          .limit(20);
+        nearbyMissions = (missions || [])
+          .filter((m: any) => m.user_id !== userId && m.postal_code?.startsWith(userDept))
+          .slice(0, 4);
+      }
+
       // Next guard
       let nextGuard: any = null;
       const now = new Date();
@@ -217,6 +233,7 @@ export function useSitterDashboardData(userId: string | undefined) {
         minimalCompleted: (profile as any)?.onboarding_minimal_completed ?? false,
         reputation,
         groupedBadges,
+        nearbyMissions,
       });
     };
 
