@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, forwardRef } from 'react'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { Dialog, DialogContent } from '@/components/ui/dialog'
 import { BADGE_DEFINITIONS, getTier, isBadgeActive, type BadgeTier } from './badge-definitions'
@@ -34,7 +34,7 @@ function TierRing({ tier, r }: { tier: BadgeTier; r: number }) {
   return <circle cx="26" cy="26" r={r} fill="none" stroke="#8A8A8A" strokeWidth="2" strokeDasharray="3 2" />
 }
 
-export function BadgeSceau({
+export const BadgeSceau = forwardRef<HTMLSpanElement, BadgeSceauProps>(function BadgeSceau({
   id,
   count = 1,
   active,
@@ -42,16 +42,18 @@ export function BadgeSceau({
   showCount = true,
   className = '',
   obtainedAt,
-}: BadgeSceauProps) {
+}, ref) {
   const [dialogOpen, setDialogOpen] = useState(false)
   const def = BADGE_DEFINITIONS[id]
 
   if (!def) {
     const sz = size === 'normal' ? 52 : 34
     return (
-      <svg width={sz} height={sz} viewBox="0 0 52 52" className={className}>
-        <circle cx="26" cy="26" r="22" fill="hsl(var(--muted))" />
-      </svg>
+      <span ref={ref} className={className}>
+        <svg width={sz} height={sz} viewBox="0 0 52 52">
+          <circle cx="26" cy="26" r="22" fill="hsl(var(--muted))" />
+        </svg>
+      </span>
     )
   }
 
@@ -67,6 +69,7 @@ export function BadgeSceau({
 
   const svgElement = (
     <span
+      ref={ref}
       className={`relative inline-block cursor-pointer ${className}`}
       style={{ width: sz, height: sz }}
       onClick={() => setDialogOpen(true)}
@@ -149,6 +152,6 @@ export function BadgeSceau({
       </Dialog>
     </>
   )
-}
+})
 
 export default BadgeSceau
