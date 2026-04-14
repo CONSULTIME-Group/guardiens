@@ -43,7 +43,6 @@ const conditions = [
 const advantages = [
   "Visibilité prioritaire dans les résultats de recherche",
   "Alertes urgentes reçues en premier",
-  "Accès anticipé aux gardes longue durée",
   "Écusson distinctif « Gardien d'urgence »",
   "3 mois d'abonnement offerts par intervention",
 ];
