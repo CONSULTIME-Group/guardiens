@@ -57,7 +57,7 @@ const SitterDashboard = () => {
     nearbyListings, articles, badges,
     onboardingCompleted, onboardingDismissed, minimalCompleted,
     setPartial, toggleAvailability,
-    reputation, groupedBadges,
+    reputation, groupedBadges, nearbyMissions,
   } = useSitterDashboardData(user?.id);
 
   const activeBadgeCount = groupedBadges.filter(b =>
