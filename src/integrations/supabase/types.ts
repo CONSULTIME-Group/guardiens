@@ -3659,6 +3659,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      increment_cp_relance: { Args: { user_ids: string[] }; Returns: undefined }
       is_profile_ready_for_action: {
         Args: { p_user_id?: string }
         Returns: boolean
