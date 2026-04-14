@@ -28,6 +28,7 @@ import { template as cancellationReviewPublished } from './cancellation-review-p
 import { template as cancellationResponsePublished } from './cancellation-response-published.tsx'
 import { template as onboardingJ1 } from './onboarding-j1.tsx'
 import { template as contactReply } from './contact-reply.tsx'
+import { template as relanceCpManquant } from './relance-cp-manquant.tsx'
 
 export const TEMPLATES: Record<string, TemplateEntry> = {
   'report-resolved': reportResolved,
@@ -49,4 +50,5 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'cancellation-response-published': cancellationResponsePublished,
   'onboarding-j1': onboardingJ1,
   'contact-reply': contactReply,
+  'relance-cp-manquant': relanceCpManquant,
 }
