@@ -176,6 +176,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           .upsert({ user_id: data.user.id }, { onConflict: "user_id" });
       }
 
+      if (role === "owner" || role === "both") {
+        await supabase
+          .from("owner_profiles")
+          .upsert({ user_id: data.user.id } as any, { onConflict: "user_id" });
+      }
+
       supabase.functions.invoke("send-transactional-email", {
         body: {
           templateName: "welcome",

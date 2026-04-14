@@ -107,7 +107,7 @@ const OwnerDashboard = () => {
       setOnboardingChecks({ hasName, hasAvatar, hasBio, hasIdentity, hasProperty, hasPets: false, hasSit });
 
       const dismissed = localStorage.getItem("onboarding_owner_dismissed");
-      if (!dismissed && user.profileCompletion < 60) {
+      if (!dismissed && user.profileCompletion < 60 && minimalCompleted) {
         setShowOnboarding(true);
       }
 
@@ -220,7 +220,7 @@ const OwnerDashboard = () => {
 
   if (loading) return <div className="p-6 text-muted-foreground">Chargement...</div>;
 
-  if (showOnboarding) {
+  if (showOnboarding && minimalCompleted) {
     return (
       <OnboardingWelcome
         role="owner"
