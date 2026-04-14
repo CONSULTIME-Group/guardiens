@@ -37,7 +37,7 @@ const MissionsNearbySection = () => {
         supabase.from("profiles").select("skill_categories").eq("id", user.id).single(),
         supabase
           .from("small_missions")
-          .select("id, title, category, city, created_at, mission_type")
+          .select("id, title, category, city, created_at, mission_type, user_id")
           .eq("status", "open")
           .order("created_at", { ascending: false })
           .limit(10),
