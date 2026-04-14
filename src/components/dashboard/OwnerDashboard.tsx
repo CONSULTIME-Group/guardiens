@@ -16,7 +16,7 @@ import { fr } from "date-fns/locale";
 import RoleActivationBanner from "./RoleActivationBanner";
 import AccessGateBanner from "@/components/access/AccessGateBanner";
 import { useAccessLevel } from "@/hooks/useAccessLevel";
-import { BadgeSceau } from "@/components/badges/BadgeSceau";
+import BadgeGridSection from "@/components/badges/BadgeGridSection";
 import { useUserBadges } from "@/hooks/useProfileReputation";
 import { PROPRIO_BADGE_IDS } from "@/components/badges/badge-definitions";
 
