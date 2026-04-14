@@ -21,7 +21,6 @@ interface CancelSitModalProps {
   otherPartyName?: string;
   startDate?: string;
   endDate?: string;
-  sitCity?: string;
   onCancelled: () => void;
 }
 
@@ -34,7 +33,6 @@ const CancelSitModal = ({
   otherPartyName,
   startDate,
   endDate,
-  sitCity,
   onCancelled,
 }: CancelSitModalProps) => {
   const { user } = useAuth();
