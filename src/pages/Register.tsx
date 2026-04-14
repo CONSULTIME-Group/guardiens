@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Helmet } from "react-helmet-async";
 import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -27,6 +27,25 @@ const roles: { value: Role; label: string; description: string }[] = [
   { value: "both", label: "Les deux", description: "Je veux pouvoir garder et faire garder" },
 ];
 
+/* ── Password strength helper ── */
+const getPasswordStrength = (pw: string): { score: 0 | 1 | 2 | 3 | 4; label: string; color: string } => {
+  if (!pw) return { score: 0, label: "", color: "" };
+  let score = 0;
+  if (pw.length >= 8) score++;
+  if (pw.length >= 12) score++;
+  if (/[A-Z]/.test(pw) && /[a-z]/.test(pw)) score++;
+  if (/\d/.test(pw) || /[^A-Za-z0-9]/.test(pw)) score++;
+
+  const map: Record<number, { label: string; color: string }> = {
+    0: { label: "", color: "" },
+    1: { label: "Faible", color: "bg-destructive" },
+    2: { label: "Moyen", color: "bg-orange-400" },
+    3: { label: "Bon", color: "bg-yellow-400" },
+    4: { label: "Fort", color: "bg-green-500" },
+  };
+  return { score: score as 0 | 1 | 2 | 3 | 4, ...map[score] };
+};
+
 const Register = () => {
   const [searchParams] = useSearchParams();
   const presetRole = searchParams.get("role") as Role | null;
@@ -45,6 +64,8 @@ const Register = () => {
   const { register } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  const pwStrength = useMemo(() => getPasswordStrength(password), [password]);
 
   // Capture referral code from URL
   useEffect(() => {
@@ -191,7 +212,7 @@ const Register = () => {
 
           {/* ── Confirmation screen ── */}
           {step === "confirmation" && (
-            <div className="flex flex-col items-center text-center space-y-5 py-6">
+            <div className="flex flex-col items-center text-center space-y-5 py-6 animate-in fade-in-0 slide-in-from-bottom-4 duration-300">
               <MailCheck className="h-12 w-12 text-primary" />
               <h2 className="font-heading text-xl font-semibold text-foreground">Vérifiez votre boîte mail</h2>
               <p className="text-muted-foreground text-sm leading-relaxed max-w-sm">
@@ -217,7 +238,7 @@ const Register = () => {
 
           {/* ── Step 1: role selection ── */}
           {step === 1 && (
-            <div className="space-y-4">
+            <div className="space-y-4 animate-in fade-in-0 slide-in-from-bottom-4 duration-300">
               {roles.map((role) => (
                 <button
                   key={role.value}
@@ -240,7 +261,7 @@ const Register = () => {
 
           {/* ── Step 2: form ── */}
           {step === 2 && (
-            <form onSubmit={handleSubmit} className="space-y-5">
+            <form onSubmit={handleSubmit} className="space-y-5 animate-in fade-in-0 slide-in-from-bottom-4 duration-300">
               <div className="text-center mb-6">
                 <span className="inline-block px-4 py-1.5 rounded-pill bg-primary/10 text-primary text-sm font-medium">
                   {roles.find((r) => r.value === selectedRole)?.label}
@@ -252,7 +273,16 @@ const Register = () => {
 
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
-                <Input id="email" type="email" placeholder="vous@exemple.com" value={email} onChange={(e) => setEmail(e.target.value)} required className="rounded-lg h-12" />
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="vous@exemple.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  autoComplete="email"
+                  className="rounded-lg h-12"
+                />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="password">Mot de passe</Label>
@@ -265,12 +295,34 @@ const Register = () => {
                     onChange={(e) => { setPassword(e.target.value); setFormError(null); }}
                     required
                     minLength={8}
+                    autoComplete="new-password"
                     className="rounded-lg h-12 pr-12"
                   />
                   <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors">
                     {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                   </button>
                 </div>
+
+                {/* Password strength indicator */}
+                {password.length > 0 && (
+                  <div className="space-y-1.5 animate-in fade-in-0 duration-200">
+                    <div className="flex gap-1 h-1.5 rounded-full overflow-hidden bg-muted">
+                      {[1, 2, 3, 4].map((i) => (
+                        <div
+                          key={i}
+                          className={cn(
+                            "flex-1 rounded-full transition-all duration-300",
+                            i <= pwStrength.score ? pwStrength.color : "bg-transparent"
+                          )}
+                        />
+                      ))}
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Force : <span className="font-medium">{pwStrength.label}</span>
+                    </p>
+                  </div>
+                )}
+
                 {formError && <p className="text-sm text-destructive">{formError}</p>}
               </div>
 
