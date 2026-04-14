@@ -50,6 +50,8 @@ interface SitData {
   status: string;
   user_id: string;
   property_id: string;
+  max_applications: number | null;
+  accepting_applications: boolean;
 }
 
 const SitDetail = () => {
