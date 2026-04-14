@@ -83,6 +83,10 @@ const SitterDashboard = () => {
   const [articles, setArticles] = useState<any[]>([]);
   const [hasEmergencyProfile, setHasEmergencyProfile] = useState(false);
   const [hasAcceptedRecent, setHasAcceptedRecent] = useState(false);
+  const [postalCode, setPostalCode] = useState<string | null>(null);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [bio, setBio] = useState<string | null>(null);
+  const [hasAnimalExperience, setHasAnimalExperience] = useState(false);
 
   const [onboardingChecks, setOnboardingChecks] = useState({
     profileComplete: false,
