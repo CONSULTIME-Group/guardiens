@@ -85,7 +85,7 @@ async function main() {
       .select("id, updated_at, postal_code, avatar_url, bio, role")
       .eq("account_status", "active")
       .gte("profile_completion", 60)
-      .in("role", ["gardien", "les_deux"])
+      .in("role", ["sitter", "both"])
       .not("postal_code", "is", null)
       .not("avatar_url", "is", null)
       .not("bio", "is", null)
