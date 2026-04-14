@@ -56,6 +56,9 @@ const SitterHero = ({
             </p>
           </div>
           <button
+            role="switch"
+            aria-checked={isAvailable}
+            aria-label="Basculer la disponibilité"
             onClick={onToggleAvailability}
             className={`relative w-11 h-6 rounded-full transition-colors duration-200 ${isAvailable ? "bg-toggle-active" : "bg-white/20"}`}
           >

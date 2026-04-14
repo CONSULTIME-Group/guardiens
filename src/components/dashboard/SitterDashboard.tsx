@@ -13,6 +13,7 @@ import EmergencyDashSection from "./EmergencyDashSection";
 import EmergencyEligibility from "./EmergencyEligibility";
 
 import SitterHero from "./sitter/SitterHero";
+import SitterNextGuard from "./sitter/SitterNextGuard";
 import SitterStatusBar from "./sitter/SitterStatusBar";
 import SitterBadgesSection from "./sitter/SitterBadgesSection";
 import SitterBottomColumns from "./sitter/SitterBottomColumns";
