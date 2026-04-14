@@ -384,6 +384,44 @@ const SitterDashboard = () => {
         <AccessGateBanner level={level} profileCompletion={accessProfileCompletion} context="guard" />
       </div>
 
+      {/* Profile completion checklist — shown when postal code exists but profile < 60% */}
+      {postalCode && profileCompletion < 60 && (
+        <div className="px-4 sm:px-5 md:px-8 mt-4">
+          <Card className="border-primary/30 bg-primary/5">
+            <CardHeader>
+              <CardTitle className="text-lg">Complétez votre profil pour devenir visible</CardTitle>
+              <CardDescription>
+                Profil à {profileCompletion}%. Les propriétaires consultent uniquement les profils complets.
+              </CardDescription>
+              <Progress value={profileCompletion} className="mt-3" />
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {!avatarUrl && (
+                <ChecklistItem
+                  label="Ajouter une photo de profil"
+                  ctaLabel="Ajouter"
+                  onClick={() => navigate('/mon-profil?section=identite')}
+                />
+              )}
+              {(!bio || bio.length < 50) && (
+                <ChecklistItem
+                  label="Écrire votre bio (motivation, expérience)"
+                  ctaLabel="Rédiger"
+                  onClick={() => navigate('/mon-profil?section=profil')}
+                />
+              )}
+              {!hasAnimalExperience && (
+                <ChecklistItem
+                  label="Indiquer au moins une expérience avec un animal"
+                  ctaLabel="Ajouter"
+                  onClick={() => navigate('/mon-profil?section=experience')}
+                />
+              )}
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
       <div className="px-4 sm:px-5 md:px-8 -mt-4 mb-2">
         <button
           onClick={() => setSearchParams({ tour: "true" })}
