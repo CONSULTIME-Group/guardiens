@@ -48,8 +48,10 @@ const SKILL_PILL_META: Record<string, { label: string; icon: typeof Sprout }> = 
 };
 
 const DURATION_LABELS: Record<string, string> = {
+  "1-2h": "1-2 heures",
   half_day: "Demi-journée",
   full_day: "Journée",
+  several: "Plusieurs jours",
   weekend: "Week-end",
   week: "Semaine",
 };
@@ -435,8 +437,10 @@ const SmallMissions = () => {
   const filteredMissions = useMemo(() => {
     return (allMissions || [])
       .filter((m: any) => {
-        // All categories shown including house
+        // "Mes missions" tab shows all statuses including completed
         if (categoryFilter === "mine") return m.user_id === user?.id;
+        // Public view: hide completed/cancelled missions
+        if (m.status === "completed" || m.status === "cancelled") return false;
         if (categoryFilter !== "all" && m.category !== categoryFilter) return false;
         // Distance filter
         if (originCoords && radiusKm > 0) {

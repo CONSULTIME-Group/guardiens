@@ -30,6 +30,15 @@ const CATEGORY_META: Record<string, { label: string; icon: typeof Dog; colorClas
   skills: { label: "Compétences", icon: Handshake, colorClass: "text-amber-600" },
 };
 
+const DURATION_LABELS: Record<string, string> = {
+  "1-2h": "1-2 heures",
+  half_day: "Demi-journée",
+  full_day: "Journée",
+  several: "Plusieurs jours",
+  weekend: "Week-end",
+  week: "Semaine",
+};
+
 const STATUS_LABELS: Record<string, { label: string; className: string }> = {
   open: { label: "Ouverte", className: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" },
   in_progress: { label: "En cours", className: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400" },
@@ -319,7 +328,7 @@ const SmallMissionDetail = () => {
           {mission.date_needed && (
             <span className="flex items-center gap-1.5"><Calendar className="h-4 w-4" />{format(new Date(mission.date_needed), "d MMMM yyyy", { locale: fr })}</span>
           )}
-          <span className="flex items-center gap-1.5"><Clock className="h-4 w-4" />{mission.duration_estimate}</span>
+          <span className="flex items-center gap-1.5"><Clock className="h-4 w-4" />{DURATION_LABELS[mission.duration_estimate] || mission.duration_estimate}</span>
           <span className="flex items-center gap-1.5"><Users className="h-4 w-4" />{responses.length} proposition{responses.length > 1 ? "s" : ""}</span>
         </div>
 
