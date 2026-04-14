@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CheckCircle, XCircle, Loader2 } from "lucide-react";
+import { Helmet } from "react-helmet-async";
 
 type Status = "loading" | "valid" | "already" | "invalid" | "success" | "error";
 
@@ -47,6 +48,7 @@ const Unsubscribe = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
+      <Helmet><meta name="robots" content="noindex, nofollow" /></Helmet>
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <CardTitle className="font-heading text-xl">Désinscription</CardTitle>

@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/hooks/use-toast";
 import { ArrowLeft, Save, Home, Phone, Key, Wifi, Trash2, Thermometer, Info } from "lucide-react";
+import { Helmet } from "react-helmet-async";
 
 interface GuideData {
   id?: string;
@@ -123,6 +124,7 @@ const HouseGuide = () => {
 
   return (
     <div className="p-6 md:p-10 max-w-2xl mx-auto animate-fade-in pb-32">
+      <Helmet><meta name="robots" content="noindex, nofollow" /></Helmet>
       <Link to="/sits" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-6">
         <ArrowLeft className="h-4 w-4" /> Retour
       </Link>

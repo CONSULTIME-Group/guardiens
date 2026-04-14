@@ -34,6 +34,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
+import { Helmet } from "react-helmet-async";
 
 /* ── Status configs ── */
 const statusConfig: Record<string, { label: string; className: string }> = {
@@ -345,6 +346,7 @@ const Sits = () => {
 
   return (
     <div className="p-4 md:p-10 max-w-4xl mx-auto animate-fade-in pb-24 md:pb-8">
+      <Helmet><meta name="robots" content="noindex, nofollow" /></Helmet>
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
