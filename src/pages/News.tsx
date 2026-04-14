@@ -100,6 +100,7 @@ export default function News() {
         .select("id, title, slug, excerpt, cover_image_url, category, tags, city, region, author_name, published_at")
         .eq("published", true)
         .eq("category", "vie_locale")
+        .or("noindex.is.null,noindex.eq.false")
         .order("published_at", { ascending: false })
         .limit(3);
       setVieLocaleArticles((data as Article[]) || []);
