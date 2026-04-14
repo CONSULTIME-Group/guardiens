@@ -96,6 +96,8 @@ const CreateSit = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const fromSitId = searchParams.get("from");
 
   const [title, setTitle] = useState("");
   const [startDate, setStartDate] = useState("");
@@ -115,19 +117,43 @@ const CreateSit = () => {
   const [profileCompletion, setProfileCompletion] = useState(0);
   const [loading, setLoading] = useState(true);
   const [publishing, setPublishing] = useState(false);
+  const [isRepublish, setIsRepublish] = useState(false);
 
   useEffect(() => {
     if (!user) return;
     const load = async () => {
-      const [propRes, ownerRes, profileRes, galleryRes] = await Promise.all([
+      const queries: Promise<any>[] = [
         supabase.from("properties").select("*").eq("user_id", user.id).limit(1).maybeSingle(),
         supabase.from("owner_profiles").select("*").eq("user_id", user.id).maybeSingle(),
         supabase.from("profiles").select("profile_completion").eq("id", user.id).single(),
         supabase.from("owner_gallery").select("photo_url").eq("user_id", user.id).limit(4),
-      ]);
+      ];
+
+      // If republishing, also fetch the source sit
+      if (fromSitId) {
+        queries.push(
+          supabase.from("sits").select("title, specific_expectations, open_to, environments, min_gardien_sits, flexible_dates").eq("id", fromSitId).single()
+        );
+      }
+
+      const results = await Promise.all(queries);
+      const [propRes, ownerRes, profileRes, galleryRes] = results;
+      const sourceSitRes = fromSitId ? results[4] : null;
 
       setProfileCompletion(profileRes.data?.profile_completion || 0);
       setOwnerPhotos((galleryRes.data || []).map((g: any) => g.photo_url));
+
+      // Pre-fill from previous sit if republishing
+      if (sourceSitRes?.data) {
+        const s = sourceSitRes.data;
+        setTitle(s.title || "");
+        setSpecificExpectations(s.specific_expectations || "");
+        setOpenTo(s.open_to || []);
+        setSitEnvironments(s.environments || []);
+        setMinGardienSits(s.min_gardien_sits || 0);
+        setFlexibleDates(s.flexible_dates || false);
+        setIsRepublish(true);
+      }
 
       if (propRes.data) {
         const p = propRes.data;
@@ -156,12 +182,15 @@ const CreateSit = () => {
           communication_notes: o.communication_notes,
           environments: (o as any).environments || [],
         });
-        setSitEnvironments((o as any).environments || []);
+        // Only set environments from owner profile if NOT republishing (source sit takes priority)
+        if (!fromSitId) {
+          setSitEnvironments((o as any).environments || []);
+        }
       }
       setLoading(false);
     };
     load();
-  }, [user]);
+  }, [user, fromSitId]);
 
   const today = new Date().toISOString().split("T")[0];
   const dateError = startDate && endDate && startDate >= endDate
