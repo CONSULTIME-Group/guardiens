@@ -409,35 +409,10 @@ const CityPage = () => {
       />
 
       <div className="min-h-screen bg-background">
-        {/* Breadcrumb */}
-        <div className="max-w-5xl mx-auto px-4 pt-6">
-          <nav className="text-sm text-muted-foreground" aria-label="Breadcrumb">
-            <ol className="flex items-center gap-1.5">
-              <li>
-                <Link to="/" className="hover:text-primary transition-colors">
-                  Guardiens
-                </Link>
-              </li>
-              <li className="text-muted-foreground/50">/</li>
-              {departmentPage ? (
-                <li>
-                  <Link
-                    to={`/departement/${departmentPage.slug}`}
-                    className="hover:text-primary transition-colors"
-                  >
-                    {dbPage.department}
-                  </Link>
-                </li>
-              ) : (
-                <li className="text-foreground font-medium">
-                  {dbPage.department}
-                </li>
-              )}
-              <li className="text-muted-foreground/50">/</li>
-              <li className="text-foreground font-medium">{dbPage.city}</li>
-            </ol>
-          </nav>
-        </div>
+        <PageBreadcrumb items={[
+          { label: "Nos villes", href: "/house-sitting" },
+          { label: dbPage.city },
+        ]} />
 
         {/* Hero */}
         <section className="max-w-5xl mx-auto px-4 py-12">
