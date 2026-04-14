@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { MapPin, Users, ClipboardList, ShieldCheck, Heart, ArrowRight, Compass, Building2 } from "lucide-react";
+import PageBreadcrumb from "@/components/seo/PageBreadcrumb";
 import { Skeleton } from "@/components/ui/skeleton";
 
 const DepartmentPage = () => {
@@ -95,25 +96,10 @@ const DepartmentPage = () => {
       />
 
       <div className="min-h-screen bg-background">
-        {/* Breadcrumb */}
-        <div className="max-w-5xl mx-auto px-4 pt-6">
-          <nav className="text-sm text-muted-foreground" aria-label="Breadcrumb"
-            itemScope itemType="https://schema.org/BreadcrumbList">
-            <ol className="flex items-center gap-1.5">
-              <li itemProp="itemListElement" itemScope itemType="https://schema.org/ListItem">
-                <Link to="/" className="hover:text-primary transition-colors" itemProp="item">
-                  <span itemProp="name">Guardiens</span>
-                </Link>
-                <meta itemProp="position" content="1" />
-              </li>
-              <li className="text-muted-foreground/50">/</li>
-              <li itemProp="itemListElement" itemScope itemType="https://schema.org/ListItem">
-                <span itemProp="name" className="text-foreground font-medium">{page.department}</span>
-                <meta itemProp="position" content="2" />
-              </li>
-            </ol>
-          </nav>
-        </div>
+        <PageBreadcrumb items={[
+          { label: "Départements" },
+          { label: page.department },
+        ]} />
 
         {/* Hero */}
         <section className="max-w-5xl mx-auto px-4 py-12">
