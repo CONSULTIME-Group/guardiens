@@ -32,6 +32,7 @@ export default function PublicFooter() {
               <li><Link to="/guides" className="font-body text-sm text-white/50 hover:text-white transition-colors">Guides locaux</Link></li>
               <li><Link to="/faq" className="font-body text-sm text-white/50 hover:text-white transition-colors">FAQ</Link></li>
               <li><Link to="/tarifs" className="font-body text-sm text-white/50 hover:text-white transition-colors">Tarifs</Link></li>
+              <li><Link to="/actualites/nouveaux-tarifs-2026" className="font-body text-sm text-white/50 hover:text-white transition-colors">Tarifs 2026 en détail</Link></li>
               <li><Link to="/actualites/c-est-quoi-le-house-sitting" className="font-body text-sm text-white/50 hover:text-white transition-colors">C'est quoi le house-sitting</Link></li>
             </ul>
           </div>
