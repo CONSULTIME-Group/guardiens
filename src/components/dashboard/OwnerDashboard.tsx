@@ -74,7 +74,6 @@ interface SmallMission {
   category: string;
   status?: string;
   city: string | null;
-  exchange: string | null;
   created_at: string;
   small_mission_responses?: { id: string; status: string }[];
 }
