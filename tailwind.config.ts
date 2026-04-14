@@ -52,6 +52,8 @@ export default {
           foreground: "hsl(var(--card-foreground))",
         },
         hint: "hsl(var(--hint))",
+        "sitter-hero": "hsl(var(--sitter-hero))",
+        "toggle-active": "hsl(var(--toggle-active))",
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
           foreground: "hsl(var(--sidebar-foreground))",
