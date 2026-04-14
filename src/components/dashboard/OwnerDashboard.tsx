@@ -150,7 +150,12 @@ const OwnerDashboard = () => {
         const hasAvatar = !!(p?.avatar_url);
         const hasBio = !!(p?.bio && p.bio.length > 10);
         const hasIdentity = verStatus === "verified" || verStatus === "pending";
-        const hasProperty = (propsRes.data || []).length > 0;
+        const propsData = propsRes.data || [];
+        const hasProperty = propsData.length > 0;
+        if (propsData.length > 0) {
+          setPropertyType((propsData[0] as any).type || null);
+          setPropertyEnvironment((propsData[0] as any).environment || null);
+        }
         const hasSit = sitsData.length > 0;
         setOnboardingChecks({ hasName, hasAvatar, hasBio, hasIdentity, hasProperty, hasPets: false, hasSit });
 
