@@ -92,7 +92,7 @@ const Register = () => {
 
     setIsLoading(true);
     const timeoutPromise = new Promise((_, reject) =>
-      setTimeout(() => reject(new Error("timeout")), 8000)
+      setTimeout(() => reject(new Error("timeout")), 15000)
     );
 
     try {
