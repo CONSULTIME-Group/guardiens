@@ -140,6 +140,8 @@ const Register = () => {
         );
       } else if (error.message?.includes("already registered") || error.message?.includes("already been registered")) {
         setExistingAccountOpen(true);
+    } else if (error.message?.includes("weak_password") || error.message?.includes("weak") || error.code === "weak_password") {
+      setFormError("Ce mot de passe est trop courant ou a été compromis. Choisissez un mot de passe plus unique (ex : une phrase de passe).");
       } else {
         toast({
           variant: "destructive",
