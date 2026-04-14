@@ -257,7 +257,7 @@ const Landing = () => {
               Quelqu'un du coin veille sur votre maison.
             </h1>
             <p className="font-body text-lg md:text-xl text-white/80 max-w-lg mb-10 leading-relaxed animate-hero-fade-up animation-delay-700">
-              Confiez vos animaux et votre maison à un gardien de votre quartier. Échangez un service entre voisins. Osez demander. Osez proposer.
+              Confiez vos animaux à un gardien de votre quartier. Échangez un service entre voisins. Osez demander. Osez proposer.
             </p>
 
             {/* CTAs */}
@@ -369,7 +369,7 @@ const Landing = () => {
       </section>
 
 
-      {/* ═══════════════ SECTION 2b — COMMENT ÇA MARCHE ═══════════════ */}
+      {/* ═══════════════ SECTION 3 — COMMENT ÇA MARCHE ═══════════════ */}
       <section className="py-24 md:py-32 bg-muted/30">
         <div className="max-w-5xl mx-auto px-6">
           <RevealSection>
@@ -431,7 +431,13 @@ const Landing = () => {
       </section>
 
 
-      {/* ═══════════════ SECTION 2c — OUTILS DE CONFIANCE ═══════════════ */}
+      {/* ═══════════════ SECTION 4 — VITRINE DÉMO ═══════════════ */}
+      <RevealSection>
+        <DemoListingShowcase />
+      </RevealSection>
+
+
+      {/* ═══════════════ SECTION 5 — OUTILS DE CONFIANCE ═══════════════ */}
       <section className="py-24 md:py-32 bg-background">
         <div className="max-w-5xl mx-auto px-6">
           <RevealSection>
@@ -501,11 +507,20 @@ const Landing = () => {
               </div>
             </RevealSection>
           </div>
+
+          <RevealSection delay={0.4} className="text-center mt-14">
+            <button
+              onClick={() => navigate("/register?role=owner")}
+              className="font-body text-sm font-semibold tracking-wide rounded-full px-10 py-4 bg-primary text-primary-foreground hover:brightness-90 hover:scale-[1.02] transition-all duration-200"
+            >
+              Créer mon compte gratuit
+            </button>
+          </RevealSection>
         </div>
       </section>
 
 
-      {/* ═══════════════ SECTION 3 — OSEZ L'ENTRAIDE ═══════════════ */}
+      {/* ═══════════════ SECTION 6 — OSEZ L'ENTRAIDE ═══════════════ */}
       <section className="py-24 md:py-32 bg-accent">
         <div className="max-w-5xl mx-auto px-6">
           <RevealSection>
@@ -516,8 +531,8 @@ const Landing = () => {
               Osez demander un coup de main.
             </h2>
             <p className="text-center text-foreground/70 font-body max-w-2xl mx-auto mb-16 text-lg leading-relaxed">
-              On a oublié comment faire. Demander à un voisin d'arroser ses plantes.
-              Proposer de promener le chien de quelqu'un. Échanger un savoir-faire contre un panier de légumes.
+              Demander à un voisin d'arroser ses plantes. Proposer de promener le chien de quelqu'un.
+              Échanger un savoir-faire contre un panier de légumes.
               Ce n'est pas du passé — c'est ce qu'on reconstruit ici.
             </p>
           </RevealSection>
@@ -571,76 +586,7 @@ const Landing = () => {
       </section>
 
 
-      {/* ═══════════════ SECTION 4 — NOTRE HISTOIRE ═══════════════ */}
-      <section className="bg-background">
-        <div className="max-w-6xl mx-auto px-6 py-24 md:py-32">
-          <RevealSection>
-            <span className="text-xs tracking-widest uppercase text-primary/60 font-body mb-4 block">
-              Notre histoire
-            </span>
-            <h2 className="text-4xl md:text-5xl font-heading font-semibold leading-snug text-foreground mb-12">
-              Tout a commencé avec un visa.
-            </h2>
-          </RevealSection>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-16 items-start">
-            {/* Colonne gauche */}
-            <RevealSection delay={0.1}>
-              <p className="text-lg font-body leading-relaxed text-foreground/85 mb-7">
-                L'habitude de s'ouvrir aux gens du coin s'est perdue. Par manque de prétexte.
-              </p>
-              <p className="text-lg font-body leading-relaxed text-foreground/85 mb-7">
-                Elisa, ma compagne et co-fondatrice de Guardiens, est arrivée d'Argentine avec un visa qui ne lui permettait pas de travailler. Elle gardait des animaux. Elle rentrait avec des histoires : des gens qui ouvraient leur porte, leur vie, librement. Des inconnus qui finissaient par nous inviter à Noël.
-              </p>
-              <p className="text-lg font-body leading-relaxed text-foreground/85 mb-7">
-                Elisa et moi avons gardé 37 maisons en cinq ans en Auvergne-Rhône-Alpes.
-              </p>
-              <div className="border-l-4 border-primary pl-6 my-8">
-                <p className="text-2xl md:text-3xl font-heading font-semibold italic text-foreground leading-snug">
-                  On n'a jamais gardé des maisons. On a été invités dans des vies.
-                </p>
-              </div>
-            </RevealSection>
-
-            {/* Colonne droite */}
-            <RevealSection delay={0.2}>
-              <p className="text-lg font-body leading-relaxed text-foreground/85 mb-7">
-                C'est ça que le village faisait naturellement.
-              </p>
-              <p className="text-lg font-body leading-relaxed text-foreground/85 mb-7">
-                Guardiens, c'est le prétexte qui manquait. Les petites missions d'abord : un potager arrosé contre un repas, une compétence contre une autre, l'échange en nature entre gens du coin. La garde ensuite : vos clés confiées à quelqu'un que vous avez regardé dans les yeux.
-              </p>
-              <p className="text-lg font-body leading-relaxed text-foreground/85 mb-7">
-                Vous partirez l'esprit léger. Vous rentrerez avec une histoire. Nous, on ne s'attendait pas à ce que ça compte autant.
-              </p>
-              <p className="text-lg font-body leading-relaxed text-foreground/85 mb-7">
-                C'est pour ça qu'on a construit Guardiens. Pour que vous viviez ça aussi.
-              </p>
-              <span className="text-sm font-body italic text-foreground/50 mt-10 block">
-                — Jérémie &amp; Elisa
-              </span>
-            </RevealSection>
-          </div>
-
-          {/* Photo panoramique */}
-          <div className="w-full mt-16 rounded-2xl overflow-hidden">
-            <img
-              src={notreHistoirePanorama}
-              alt="Une garde en Auvergne-Rhône-Alpes — Guardiens"
-              className="w-full h-64 md:h-96 object-cover object-center"
-              loading="lazy"
-            />
-          </div>
-        </div>
-      </section>
-
-
-      {/* ═══════════════ SECTION 5 — VITRINE DÉMO ═══════════════ */}
-      <RevealSection>
-        <DemoListingShowcase />
-      </RevealSection>
-
-      {/* ═══════════════ SECTION 6 — TÉMOIGNAGES ═══════════════ */}
+      {/* ═══════════════ SECTION 7 — TÉMOIGNAGES ═══════════════ */}
       <section className="py-24 md:py-32 bg-background">
         <div className="max-w-6xl mx-auto px-6 md:px-12">
           <RevealSection className="text-center mb-16">
@@ -709,7 +655,72 @@ const Landing = () => {
         </div>
       </section>
 
-      {/* ═══════════════ SECTION 7 — VILLES PRIORITAIRES ═══════════════ */}
+
+      {/* ═══════════════ SECTION 8 — NOTRE HISTOIRE ═══════════════ */}
+      <section className="bg-background">
+        <div className="max-w-6xl mx-auto px-6 py-24 md:py-32">
+          <RevealSection>
+            <span className="text-xs tracking-widest uppercase text-primary/60 font-body mb-4 block">
+              Notre histoire
+            </span>
+            <h2 className="text-4xl md:text-5xl font-heading font-semibold leading-snug text-foreground mb-12">
+              Tout a commencé avec un visa.
+            </h2>
+          </RevealSection>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-16 items-start">
+            {/* Colonne gauche */}
+            <RevealSection delay={0.1}>
+              <p className="text-lg font-body leading-relaxed text-foreground/85 mb-7">
+                L'habitude de s'ouvrir aux gens du coin s'est perdue. Par manque de prétexte.
+              </p>
+              <p className="text-lg font-body leading-relaxed text-foreground/85 mb-7">
+                Elisa, ma compagne et co-fondatrice de Guardiens, est arrivée d'Argentine avec un visa qui ne lui permettait pas de travailler. Elle gardait des animaux. Elle rentrait avec des histoires : des gens qui ouvraient leur porte, leur vie, librement. Des inconnus qui finissaient par nous inviter à Noël.
+              </p>
+              <p className="text-lg font-body leading-relaxed text-foreground/85 mb-7">
+                Elisa et moi avons gardé 37 maisons en cinq ans en Auvergne-Rhône-Alpes.
+              </p>
+              <div className="border-l-4 border-primary pl-6 my-8">
+                <p className="text-2xl md:text-3xl font-heading font-semibold italic text-foreground leading-snug">
+                  On n'a jamais gardé des maisons. On a été invités dans des vies.
+                </p>
+              </div>
+            </RevealSection>
+
+            {/* Colonne droite */}
+            <RevealSection delay={0.2}>
+              <p className="text-lg font-body leading-relaxed text-foreground/85 mb-7">
+                C'est ça que le village faisait naturellement.
+              </p>
+              <p className="text-lg font-body leading-relaxed text-foreground/85 mb-7">
+                Guardiens, c'est le prétexte qui manquait. Les petites missions d'abord : un potager arrosé contre un repas, une compétence contre une autre, l'échange en nature entre gens du coin. La garde ensuite : vos clés confiées à quelqu'un que vous avez regardé dans les yeux.
+              </p>
+              <p className="text-lg font-body leading-relaxed text-foreground/85 mb-7">
+                Vous partirez l'esprit léger. Vous rentrerez avec une histoire. Nous, on ne s'attendait pas à ce que ça compte autant.
+              </p>
+              <p className="text-lg font-body leading-relaxed text-foreground/85 mb-7">
+                C'est pour ça qu'on a construit Guardiens. Pour que vous viviez ça aussi.
+              </p>
+              <span className="text-sm font-body italic text-foreground/50 mt-10 block">
+                — Jérémie &amp; Elisa
+              </span>
+            </RevealSection>
+          </div>
+
+          {/* Photo panoramique */}
+          <div className="w-full mt-16 rounded-2xl overflow-hidden">
+            <img
+              src={notreHistoirePanorama}
+              alt="Une garde en Auvergne-Rhône-Alpes — Guardiens"
+              className="w-full h-64 md:h-96 object-cover object-center"
+              loading="lazy"
+            />
+          </div>
+        </div>
+      </section>
+
+
+      {/* ═══════════════ SECTION 9 — VILLES PRIORITAIRES ═══════════════ */}
       <section className="py-24 md:py-32 bg-muted/30">
         <div className="max-w-5xl mx-auto px-6">
           <RevealSection>
@@ -770,7 +781,8 @@ const Landing = () => {
         </div>
       </section>
 
-      {/* ═══════════════ SECTION 8 — ENCART FONDATEUR ═══════════════ */}
+
+      {/* ═══════════════ SECTION 10 — ENCART FONDATEUR ═══════════════ */}
       <section className="py-24 md:py-32 bg-primary">
         <RevealSection className="max-w-xl mx-auto px-6 text-center">
           <div className="inline-flex items-center rounded-full px-4 py-1.5 mb-6 bg-white/15 border border-white/30">
@@ -792,7 +804,7 @@ const Landing = () => {
       </section>
 
 
-      {/* ═══════════════ SECTION 9 — CTA FINAL ═══════════════ */}
+      {/* ═══════════════ SECTION 11 — CTA FINAL ═══════════════ */}
       <section className="py-24 md:py-32 bg-foreground">
         <RevealSection className="max-w-2xl mx-auto px-6 text-center">
           <h2 className="font-heading text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight mb-6">
