@@ -85,6 +85,10 @@ const ARTICLE_IMAGES: Record<string, string> = {
   "/images/pension-chien-alternatives-cover.jpg": pensionChienAlternativesCover,
 };
 
+export function resolveImagePath(path: string): string {
+  return ARTICLE_IMAGES[path] || path;
+}
+
 function resolveArticleImages(html: string): string {
   return html.replace(/src="(\/images\/[^"]+)"/g, (match, path) => {
     const resolved = ARTICLE_IMAGES[path];
