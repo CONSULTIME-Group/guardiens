@@ -64,6 +64,11 @@ const Register = () => {
       return;
     }
 
+    if (!acceptedTerms) {
+      setFormError("Veuillez accepter les conditions d'utilisation.");
+      return;
+    }
+
     setIsLoading(true);
     const timeoutPromise = new Promise((_, reject) =>
       setTimeout(() => reject(new Error("timeout")), 8000)
