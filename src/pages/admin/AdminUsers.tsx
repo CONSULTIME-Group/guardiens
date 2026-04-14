@@ -11,7 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { format, formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
-import { Eye, Ban, ShieldCheck, StickyNote, RotateCcw, Trash2, AlertTriangle, Crown } from "lucide-react";
+import { Eye, Ban, ShieldCheck, StickyNote, RotateCcw, Trash2, AlertTriangle, Crown, ChevronLeft, ChevronRight } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 
@@ -36,6 +36,8 @@ const statusLabels: Record<string, { label: string; variant: "default" | "second
 
 import { DEPT_NAMES, getDeptCode, getDeptLabel } from "@/lib/departments";
 
+const PAGE_SIZE = 50;
+
 const AdminUsers = () => {
   const [users, setUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -43,7 +45,7 @@ const AdminUsers = () => {
   const [filterRole, setFilterRole] = useState("all");
   const [filterVerification, setFilterVerification] = useState("all");
   const [filterDept, setFilterDept] = useState("all");
-
+  const [page, setPage] = useState(0);
   // Modal states
   const [noteModal, setNoteModal] = useState<{ open: boolean; userId: string; currentNote: string }>({
     open: false, userId: "", currentNote: ""
@@ -114,6 +116,12 @@ const AdminUsers = () => {
     }
     return true;
   });
+
+  // Reset page when filters change
+  useEffect(() => { setPage(0); }, [search, filterRole, filterVerification, filterDept]);
+
+  const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
+  const paginated = filtered.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
 
   // Compute available departments from loaded users for the dropdown
   const availableDepts = Array.from(
