@@ -148,6 +148,7 @@ const Pricing = () => {
       <PageMeta
         title="Tarifs Guardiens — 9€/mois pour les gardiens"
         description="Gratuit pour les propriétaires, pour toujours. 9€/mois pour les gardiens avec 7 jours d'essai offerts. Sans commission, sans frais cachés."
+        path="/tarifs"
       />
 
       <script

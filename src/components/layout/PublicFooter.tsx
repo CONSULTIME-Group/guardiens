@@ -18,7 +18,7 @@ export default function PublicFooter() {
           <div>
             <h4 className="font-body text-xs uppercase tracking-widest text-white/30 mb-4">House-sitting AURA</h4>
             <ul className="space-y-2">
-              <li><Link to="/actualites/house-sitting-auvergne-rhone-alpes" className="font-body text-sm text-white/50 hover:text-white transition-colors">House-sitting en AURA</Link></li>
+              <li><Link to="/actualites/house-sitting-aura-guide-complet" className="font-body text-sm text-white/50 hover:text-white transition-colors">House-sitting en AURA</Link></li>
               <li><Link to="/actualites/parcs-chiens-lyon-guide-complet" className="font-body text-sm text-white/50 hover:text-white transition-colors">Parcs chiens Lyon</Link></li>
               <li><Link to="/actualites/parcs-balades-chiens-annecy-guide" className="font-body text-sm text-white/50 hover:text-white transition-colors">Parcs chiens Annecy</Link></li>
               <li><Link to="/actualites/parcs-balades-chiens-grenoble-guide" className="font-body text-sm text-white/50 hover:text-white transition-colors">Parcs chiens Grenoble</Link></li>

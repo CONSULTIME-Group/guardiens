@@ -96,6 +96,7 @@ const EmergencySitter = () => {
       <PageMeta
         title="Gardien d'urgence — Intervention rapide en AURA"
         description="Besoin d'un gardien en urgence ? Des gardiens vérifiés disponibles rapidement en Auvergne-Rhône-Alpes."
+        path="/gardien-urgence"
       />
       <Helmet>
         <script type="application/ld+json">{JSON.stringify(faqJsonLd)}</script>

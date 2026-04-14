@@ -428,7 +428,7 @@ export default function ArticleDetail() {
             )}
             {cityGuideSlug && (
               <Link
-                to={`/guide/${cityGuideSlug}`}
+                to={`/guides/${cityGuideSlug}`}
                 className="inline-flex items-center gap-1.5 text-sm text-primary hover:underline"
               >
                 <Compass className="h-3.5 w-3.5" />
