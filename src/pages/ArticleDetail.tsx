@@ -289,6 +289,24 @@ export default function ArticleDetail() {
         )}
       </Helmet>
 
+      {/* Product/Offer Schema for pricing articles */}
+      {article.slug === "nouveaux-tarifs-2026" && (
+        <Helmet>
+          <script type="application/ld+json">{JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "Product",
+            "name": "Abonnement Gardien Guardiens",
+            "description": "Abonnement pour devenir gardien de maison et d'animaux sur Guardiens",
+            "brand": { "@type": "Brand", "name": "Guardiens" },
+            "offers": [
+              { "@type": "Offer", "name": "Mensuel sans engagement", "price": "9.00", "priceCurrency": "EUR", "priceSpecification": { "@type": "UnitPriceSpecification", "price": "9.00", "priceCurrency": "EUR", "referenceQuantity": { "@type": "QuantitativeValue", "value": "1", "unitCode": "MON" } }, "availability": "https://schema.org/InStock" },
+              { "@type": "Offer", "name": "One-shot 1 mois", "price": "12.00", "priceCurrency": "EUR", "availability": "https://schema.org/InStock" },
+              { "@type": "Offer", "name": "Annuel -20%", "price": "86.40", "priceCurrency": "EUR", "availability": "https://schema.org/InStock" }
+            ]
+          })}</script>
+        </Helmet>
+      )}
+
       {/* LocalBusiness Schema for geo-targeted guide articles */}
       {article.category === "guide_lieu" && article.city && (
         <Helmet>
