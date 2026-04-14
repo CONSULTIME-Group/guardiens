@@ -45,6 +45,7 @@ import pensionChienAlternativesCover from "@/assets/pension-chien-alternatives-c
 import gardeAnimauxCroixRousse from "@/assets/garde-animaux-croix-rousse-lyon.jpg";
 import gardeAnimalHospitalisation from "@/assets/garde-animal-hospitalisation-cover.jpg";
 import gardeChatDomicileLyon from "@/assets/garde-chat-domicile-lyon.jpg";
+import gardeChatPresquileLyon from "@/assets/garde-chat-presquile-lyon.jpg";
 
 const ARTICLE_IMAGES: Record<string, string> = {
   "/images/lyon-hero-quais.jpg": lyonHeroQuais,
@@ -89,6 +90,7 @@ const ARTICLE_IMAGES: Record<string, string> = {
   "/images/garde-animaux-croix-rousse-lyon.jpg": gardeAnimauxCroixRousse,
   "/images/garde-animal-hospitalisation-cover.jpg": gardeAnimalHospitalisation,
   "/images/garde-chat-domicile-lyon.jpg": gardeChatDomicileLyon,
+  "/images/garde-chat-presquile-lyon.jpg": gardeChatPresquileLyon,
 };
 
 export function resolveImagePath(path: string): string {
