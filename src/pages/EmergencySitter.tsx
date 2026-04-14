@@ -1,31 +1,28 @@
 import { Zap, Bell, Home, Heart, Shield, Clock, Star, MapPin, CheckCircle2 } from "lucide-react";
 import { Link } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
 import { Button } from "@/components/ui/button";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import PageMeta from "@/components/PageMeta";
 import PublicHeader from "@/components/layout/PublicHeader";
 import PublicFooter from "@/components/layout/PublicFooter";
+import Breadcrumbs from "@/components/layout/Breadcrumbs";
 
 const steps = [
   {
     icon: Zap,
     title: "Un proprio a un besoin urgent",
     desc: "Annulation de dernière minute, imprévu familial, départ professionnel… la vie ne prévient pas toujours.",
-    color: "text-amber-500",
-    bg: "bg-amber-100 dark:bg-amber-900/30",
   },
   {
     icon: Bell,
     title: "Les gardiens d'urgence sont alertés",
     desc: "Notification automatique envoyée aux gardiens d'urgence disponibles dans un rayon de 35 km.",
-    color: "text-primary",
-    bg: "bg-primary/10",
   },
   {
     icon: Home,
     title: "La garde est organisée en quelques heures",
     desc: "Échange rapide, confirmation, c'est parti. Les animaux sont entre de bonnes mains.",
-    color: "text-green-600",
-    bg: "bg-green-100 dark:bg-green-900/30",
   },
 ];
 
@@ -51,6 +48,49 @@ const advantages = [
   "3 mois d'abonnement offerts par intervention",
 ];
 
+const faqs = [
+  {
+    q: "Qu'est-ce qu'un gardien d'urgence ?",
+    a: "Un gardien expérimenté : 3+ gardes, note 4.7+, zéro annulation sur 6 mois, ID vérifiée. Disponible rapidement dans son rayon. C'est le plus haut niveau de confiance sur Guardiens.",
+  },
+  {
+    q: "Comment trouver un gardien d'urgence ?",
+    a: "Filtrez la recherche par « Gardiens d'urgence ». Ou utilisez le bouton « Besoin d'aide » pendant une garde — les gardiens d'urgence seront alertés.",
+  },
+  {
+    q: "Comment devenir gardien d'urgence ?",
+    a: "Remplissez les conditions (3 gardes, 4.7+, 0 annulation sur 6 mois, ID vérifiée, abonnement actif). L'invitation apparaît automatiquement sur votre dashboard.",
+  },
+  {
+    q: "Est-ce que le gardien d'urgence est payé plus ?",
+    a: "Non, pas d'échange d'argent. Mais chaque intervention vous offre 3 mois d'abonnement gratuit. Plus la visibilité prioritaire et l'accès anticipé aux gardes longue durée.",
+  },
+  {
+    q: "Que se passe-t-il si je refuse une demande d'urgence ?",
+    a: "Premier refus : pas de conséquence. Deuxième refus : perte du statut pour 6 mois. Les propriétaires comptent sur la disponibilité des gardiens d'urgence.",
+  },
+  {
+    q: "Que se passe-t-il si je perds le statut ?",
+    a: "Note < 4.7 → pause (remontez la note). Annulation → perte, réactivable quand 0 annulation sur 6 mois. 2ᵉ refus urgence → perte 6 mois.",
+  },
+];
+
+const faqJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: faqs.map((f) => ({
+    "@type": "Question",
+    name: f.q,
+    acceptedAnswer: { "@type": "Answer", text: f.a },
+  })),
+};
+
+const stepColors = [
+  { bg: "bg-accent", text: "text-accent-foreground" },
+  { bg: "bg-primary/10", text: "text-primary" },
+  { bg: "bg-primary/5", text: "text-primary" },
+];
+
 const EmergencySitter = () => {
   return (
     <div className="min-h-screen bg-background">
@@ -58,12 +98,20 @@ const EmergencySitter = () => {
         title="Gardien d'urgence — Intervention rapide en AURA"
         description="Besoin d'un gardien en urgence ? Des gardiens vérifiés disponibles rapidement en Auvergne-Rhône-Alpes."
       />
+      <Helmet>
+        <script type="application/ld+json">{JSON.stringify(faqJsonLd)}</script>
+      </Helmet>
       <PublicHeader />
 
+      {/* Breadcrumbs */}
+      <div className="max-w-5xl mx-auto px-4 pt-4">
+        <Breadcrumbs />
+      </div>
+
       {/* Hero */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-amber-50 via-background to-green-50/30 dark:from-amber-950/20 dark:via-background dark:to-green-950/10 py-16 md:py-24">
+      <section className="relative overflow-hidden bg-gradient-to-br from-accent via-background to-primary/5 py-16 md:py-24">
         <div className="max-w-4xl mx-auto px-4 text-center">
-          <div className="inline-flex items-center justify-center h-16 w-16 rounded-full bg-gradient-to-br from-amber-400 to-amber-500 text-white shadow-lg mb-6">
+          <div className="inline-flex items-center justify-center h-16 w-16 rounded-full bg-gradient-to-br from-accent-foreground/80 to-accent-foreground text-accent shadow-lg mb-6">
             <Zap className="h-8 w-8" fill="currentColor" />
           </div>
           <h1 className="font-heading text-3xl md:text-5xl font-bold tracking-tight mb-4">
@@ -85,8 +133,8 @@ const EmergencySitter = () => {
         <div className="grid md:grid-cols-3 gap-8">
           {steps.map((step, i) => (
             <div key={i} className="text-center space-y-4">
-              <div className={`inline-flex items-center justify-center h-14 w-14 rounded-full ${step.bg} mx-auto`}>
-                <step.icon className={`h-7 w-7 ${step.color}`} />
+              <div className={`inline-flex items-center justify-center h-14 w-14 rounded-full ${stepColors[i].bg} mx-auto`}>
+                <step.icon className={`h-7 w-7 ${stepColors[i].text}`} />
               </div>
               <h3 className="font-heading font-semibold text-lg">{step.title}</h3>
               <p className="text-sm text-muted-foreground">{step.desc}</p>
@@ -137,7 +185,7 @@ const EmergencySitter = () => {
             <ul className="space-y-2">
               {conditions.map((c, i) => (
                 <li key={i} className="flex items-center gap-2 text-sm">
-                  <CheckCircle2 className="h-4 w-4 text-green-500 shrink-0" />
+                  <CheckCircle2 className="h-4 w-4 text-primary shrink-0" />
                   {c}
                 </li>
               ))}
@@ -145,12 +193,12 @@ const EmergencySitter = () => {
           </div>
           <div className="space-y-4">
             <h3 className="font-heading font-semibold text-lg flex items-center gap-2">
-              <Star className="h-5 w-5 text-amber-500" /> Avantages
+              <Star className="h-5 w-5 text-accent-foreground" /> Avantages
             </h3>
             <ul className="space-y-2">
               {advantages.map((a, i) => (
                 <li key={i} className="flex items-center gap-2 text-sm">
-                  <Zap className="h-4 w-4 text-amber-500 shrink-0" />
+                  <Zap className="h-4 w-4 text-accent-foreground shrink-0" />
                   {a}
                 </li>
               ))}
@@ -170,9 +218,9 @@ const EmergencySitter = () => {
 
       {/* Engagement */}
       <section className="max-w-3xl mx-auto px-4 pb-16">
-        <div className="rounded-xl border border-amber-200 dark:border-amber-800 bg-amber-50/50 dark:bg-amber-950/20 p-6 space-y-3">
+        <div className="rounded-xl border border-border bg-accent/30 p-6 space-y-3">
           <h3 className="font-heading font-semibold flex items-center gap-2">
-            <Heart className="h-5 w-5 text-amber-600" />
+            <Heart className="h-5 w-5 text-destructive" />
             Un engagement, pas juste un badge
           </h3>
           <p className="text-sm text-muted-foreground">
@@ -186,43 +234,22 @@ const EmergencySitter = () => {
         </div>
       </section>
 
-      {/* FAQ */}
+      {/* FAQ — Accordion */}
       <section className="bg-muted/50 py-16">
         <div className="max-w-3xl mx-auto px-4">
           <h2 className="font-heading text-2xl font-bold text-center mb-10">Questions fréquentes</h2>
-          <div className="space-y-6">
-            {[
-              {
-                q: "Qu'est-ce qu'un gardien d'urgence ?",
-                a: "Un gardien expérimenté : 3+ gardes, note 4.7+, zéro annulation sur 6 mois, ID vérifiée. Disponible rapidement dans son rayon. C'est le plus haut niveau de confiance sur Guardiens."
-              },
-              {
-                q: "Comment trouver un gardien d'urgence ?",
-                a: "Filtrez la recherche par « Gardiens d'urgence ». Ou utilisez le bouton « Besoin d'aide » pendant une garde — les gardiens d'urgence seront alertés."
-              },
-              {
-                q: "Comment devenir gardien d'urgence ?",
-                a: "Remplissez les conditions (3 gardes, 4.7+, 0 annulation sur 6 mois, ID vérifiée, abonnement actif). L'invitation apparaît automatiquement sur votre dashboard."
-              },
-              {
-                q: "Est-ce que le gardien d'urgence est payé plus ?",
-                a: "Non, pas d'échange d'argent. Mais chaque intervention vous offre 3 mois d'abonnement gratuit. Plus la visibilité prioritaire et l'accès anticipé aux gardes longue durée."
-              },
-              {
-                q: "Que se passe-t-il si je refuse une demande d'urgence ?",
-                a: "Premier refus : pas de conséquence. Deuxième refus : perte du statut pour 6 mois. Les propriétaires comptent sur la disponibilité des gardiens d'urgence."
-              },
-              {
-                q: "Que se passe-t-il si je perds le statut ?",
-                a: "Note < 4.7 → pause (remontez la note). Annulation → perte, réactivable quand 0 annulation sur 6 mois. 2ᵉ refus urgence → perte 6 mois."
-              },
-            ].map((faq, i) => (
-              <div key={i} className="space-y-1.5">
-                <h3 className="font-semibold text-sm">{faq.q}</h3>
-                <p className="text-sm text-muted-foreground">{faq.a}</p>
-              </div>
+          <Accordion type="single" collapsible className="space-y-2">
+            {faqs.map((faq, i) => (
+              <AccordionItem key={i} value={`faq-${i}`} className="bg-card border border-border rounded-xl px-4">
+                <AccordionTrigger className="text-sm font-semibold text-left hover:no-underline py-4">
+                  {faq.q}
+                </AccordionTrigger>
+                <AccordionContent className="text-sm text-muted-foreground pb-4">
+                  {faq.a}
+                </AccordionContent>
+              </AccordionItem>
             ))}
-          </div>
+          </Accordion>
         </div>
       </section>
 
@@ -233,27 +260,31 @@ const EmergencySitter = () => {
           Le réseau d'urgence couvre l'ensemble de la région Auvergne-Rhône-Alpes. Voici les villes où nos gardiens sont les plus actifs.
         </p>
         <div className="flex flex-wrap justify-center gap-3">
-          <Link to="/house-sitting/lyon" className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg border border-border text-sm hover:border-primary/40 hover:text-primary transition-colors">
-            <MapPin className="h-3.5 w-3.5" /> Lyon
-          </Link>
-          <Link to="/house-sitting/annecy" className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg border border-border text-sm hover:border-primary/40 hover:text-primary transition-colors">
-            <MapPin className="h-3.5 w-3.5" /> Annecy
-          </Link>
-          <Link to="/house-sitting/grenoble" className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg border border-border text-sm hover:border-primary/40 hover:text-primary transition-colors">
-            <MapPin className="h-3.5 w-3.5" /> Grenoble
-          </Link>
-          <Link to="/house-sitting/chambery" className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg border border-border text-sm hover:border-primary/40 hover:text-primary transition-colors">
-            <MapPin className="h-3.5 w-3.5" /> Chambéry
-          </Link>
-          <Link to="/tarifs" className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg border border-border text-sm hover:border-primary/40 hover:text-primary transition-colors">
+          {[
+            { label: "Lyon", to: "/house-sitting/lyon" },
+            { label: "Annecy", to: "/house-sitting/annecy" },
+            { label: "Grenoble", to: "/house-sitting/grenoble" },
+            { label: "Chambéry", to: "/house-sitting/chambery" },
+          ].map((city) => (
+            <Link
+              key={city.label}
+              to={city.to}
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg border border-border text-sm hover:border-primary/40 hover:text-primary transition-colors"
+            >
+              <MapPin className="h-3.5 w-3.5" /> {city.label}
+            </Link>
+          ))}
+          <Link
+            to="/tarifs"
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg border border-border text-sm hover:border-primary/40 hover:text-primary transition-colors"
+          >
             Voir les tarifs
           </Link>
         </div>
       </section>
 
-      {/* Footer CTA */}
-      <section className="py-12 text-center">
-        <p className="text-muted-foreground text-sm mb-4">Guardiens © {new Date().getFullYear()}</p>
+      {/* Footer CTA — integrated into PublicFooter area */}
+      <section className="py-8 text-center border-t border-border">
         <div className="flex items-center justify-center gap-4 flex-wrap">
           <Link to="/search?emergency=true">
             <Button size="sm">Trouver un gardien d'urgence</Button>
@@ -264,6 +295,7 @@ const EmergencySitter = () => {
           <Link to="/faq" className="text-sm text-primary hover:underline">FAQ complète</Link>
         </div>
       </section>
+
       <PublicFooter />
     </div>
   );
