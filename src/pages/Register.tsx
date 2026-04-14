@@ -292,7 +292,7 @@ const Register = () => {
                   <Input
                     id="password"
                     type={showPassword ? "text" : "password"}
-                    placeholder="Minimum 8 caractères"
+                    placeholder="Ex : MonChat!adore2dormir"
                     value={password}
                     onChange={(e) => { setPassword(e.target.value); setFormError(null); }}
                     required
@@ -304,6 +304,9 @@ const Register = () => {
                     {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                   </button>
                 </div>
+                <p className="text-xs text-muted-foreground">
+                  8 caractères min. · mélangez majuscules, chiffres et symboles · évitez les mots de passe courants (ex : « Password1 »)
+                </p>
 
                 {/* Password strength indicator */}
                 {password.length > 0 && (
