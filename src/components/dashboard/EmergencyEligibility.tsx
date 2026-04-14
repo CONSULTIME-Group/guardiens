@@ -33,11 +33,18 @@ const EmergencyEligibility = () => {
       const completedSits = (appsRes.data || []).filter((a: any) => a.sit?.status === "completed").length;
       const reviews = reviewsRes.data || [];
       const avgRating = reviews.length > 0 ? reviews.reduce((s: number, r: any) => s + r.overall_rating, 0) / reviews.length : 0;
+      const sub = subRes.data;
+      const now = new Date();
+      const hasSubscription = sub != null && (
+        sub.status === "active" || sub.status === "trial"
+        || (sub.expires_at && new Date(sub.expires_at) > now)
+      );
       setChecks({
         completedSits,
         avgRating: Math.round(avgRating * 10) / 10,
         recentCancellations: cancellationsRes.data?.length || 0,
         identityVerified: profileRes.data?.identity_verified || false,
+        hasSubscription,
       });
     };
     load();
@@ -50,6 +57,7 @@ const EmergencyEligibility = () => {
     { label: `Note : ${checks.avgRating || "—"}/4.7`, ok: checks.avgRating >= 4.7 },
     { label: `Annulations (6 mois) : ${checks.recentCancellations}`, ok: checks.recentCancellations === 0 },
     { label: "ID vérifiée", ok: checks.identityVerified },
+    { label: "Abonnement actif", ok: checks.hasSubscription },
   ];
 
   const doneCount = items.filter(i => i.ok).length;
