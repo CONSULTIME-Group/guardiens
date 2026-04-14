@@ -151,7 +151,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
-      options: { emailRedirectTo: `${window.location.origin}/dashboard` },
+      options: {
+        emailRedirectTo: `${window.location.origin}/dashboard`,
+        data: { role },
+      },
     });
     if (error) throw error;
 
@@ -165,22 +168,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
 
     if (data.user) {
-      await supabase
-        .from("profiles")
-        .update({ role })
-        .eq("id", data.user.id);
-
-      if (role === "sitter" || role === "both") {
+      // If there's an active session (auto-confirm enabled), update profile now
+      if (data.session) {
         await supabase
-          .from("sitter_profiles")
-          .upsert({ user_id: data.user.id }, { onConflict: "user_id" });
-      }
+          .from("profiles")
+          .update({ role })
+          .eq("id", data.user.id);
 
-      if (role === "owner" || role === "both") {
-        await supabase
-          .from("owner_profiles")
-          .upsert({ user_id: data.user.id } as any, { onConflict: "user_id" });
+        if (role === "sitter" || role === "both") {
+          await supabase
+            .from("sitter_profiles")
+            .upsert({ user_id: data.user.id }, { onConflict: "user_id" });
+        }
+
+        if (role === "owner" || role === "both") {
+          await supabase
+            .from("owner_profiles")
+            .upsert({ user_id: data.user.id } as any, { onConflict: "user_id" });
+        }
       }
+      // If no session (email confirmation required), role is stored in user metadata
+      // and will be applied when the user confirms their email via handle_new_user_role trigger
 
       supabase.functions.invoke("send-transactional-email", {
         body: {
@@ -190,6 +198,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           templateData: { firstName: "", role },
         },
       }).catch((err) => console.warn("Welcome email failed:", err));
+
       // Pre-set activeRole so the first dashboard load matches the chosen role
       const initialActive: ActiveRole = role === "sitter" ? "sitter" : "owner";
       localStorage.setItem("guardiens_active_role", initialActive);
