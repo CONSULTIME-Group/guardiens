@@ -49,7 +49,8 @@ const Breadcrumbs = () => {
 
   const crumbs = segments.map((seg, i) => {
     const path = "/" + segments.slice(0, i + 1).join("/");
-    const label = SEGMENT_LABELS[seg] || decodeURIComponent(seg).replace(/-/g, " ");
+    const isUuid = UUID_RE.test(seg);
+    const label = SEGMENT_LABELS[seg] || (isUuid ? "Détail" : decodeURIComponent(seg).replace(/-/g, " "));
     const isLast = i === segments.length - 1;
     return { path, label, isLast };
   });
