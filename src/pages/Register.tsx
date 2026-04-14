@@ -40,6 +40,7 @@ const Register = () => {
   const [isResending, setIsResending] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const [existingAccountOpen, setExistingAccountOpen] = useState(false);
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
 
   const { register } = useAuth();
   const navigate = useNavigate();
