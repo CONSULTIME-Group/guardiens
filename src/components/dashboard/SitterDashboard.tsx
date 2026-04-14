@@ -287,7 +287,7 @@ const SitterDashboard = () => {
       <div className="px-5 md:px-8 mb-4">
         <RoleActivationBanner userRole={user?.role || "sitter"} />
       </div>
-      <div className="relative overflow-hidden bg-[#1a4a35] rounded-b-3xl px-5 md:px-10 pt-6 md:pt-8 pb-5 md:pb-6 mb-6 md:mb-8">
+      <div className="relative overflow-hidden bg-[#1a4a35] rounded-b-3xl px-4 sm:px-5 md:px-10 pt-5 sm:pt-6 md:pt-8 pb-4 sm:pb-5 md:pb-6 mb-6 md:mb-8">
         <div className="absolute right-0 top-0 opacity-[0.07] pointer-events-none">
           <svg width="300" height="200" viewBox="0 0 300 200">
             <circle cx="250" cy="50" r="120" fill="white"/>
@@ -301,7 +301,7 @@ const SitterDashboard = () => {
               Espace gardien
             </p>
             <div className="flex items-center gap-3">
-              <h1 className="text-2xl md:text-4xl font-heading font-bold text-white leading-tight mb-1">
+              <h1 className="text-xl sm:text-2xl md:text-4xl font-heading font-bold text-white leading-tight mb-1">
                 Bonjour{user?.firstName ? `, ${capitalize(user.firstName)}` : ""} !
               </h1>
               {user?.isFounder && <FounderBadge size="sm" />}
@@ -490,7 +490,7 @@ const SitterDashboard = () => {
         </div>
 
         {/* Grille 12 badges gardien */}
-        <div className="grid grid-cols-6 gap-2 mb-4">
+        <div className="grid grid-cols-4 sm:grid-cols-6 gap-2 mb-4">
           {GARDIEN_BADGE_IDS.map(id => {
             const userBadge = userBadges?.find(b => b.badge_id === id);
             const count = userBadge?.count ?? 0;
@@ -699,7 +699,7 @@ const SitterDashboard = () => {
           </div>
           <div className="flex gap-3 overflow-x-auto pb-1 -mx-1 px-1">
             {articles.map((a: any) => (
-              <a key={a.id} href={`/actualites/${a.slug}`} className="flex-shrink-0 w-64 rounded-xl border border-border bg-card overflow-hidden hover:shadow-md transition-shadow cursor-pointer">
+              <a key={a.id} href={`/actualites/${a.slug}`} className="flex-shrink-0 w-[70vw] sm:w-64 rounded-xl border border-border bg-card overflow-hidden hover:shadow-md transition-shadow cursor-pointer">
                 {a.cover_image_url ? (
                   <img src={a.cover_image_url} alt="" className="w-full h-28 object-cover" />
                 ) : (
