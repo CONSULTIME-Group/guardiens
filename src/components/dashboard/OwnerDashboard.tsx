@@ -418,6 +418,17 @@ const OwnerDashboard = () => {
         </div>
       )}
 
+      {/* ═══ Mon annonce ═══ */}
+      <div className="px-5 md:px-8">
+        <MonAnnonceCard
+          sits={sits}
+          pets={pets}
+          propertyType={propertyType}
+          propertyEnvironment={propertyEnvironment}
+          pendingAppCount={pendingAppCount}
+        />
+      </div>
+
       {/* ═══ Candidatures ═══ */}
       <div className="px-5 md:px-8">
         <ApplicationsSection
