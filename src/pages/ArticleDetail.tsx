@@ -105,6 +105,13 @@ const ARTICLE_REDIRECTS: Record<string, string> = {
   "conseils-garder-chien": "reussir-premiere-garde-house-sitting",
   "erreurs-premiere-garde": "reussir-premiere-garde-house-sitting",
   "house-sitting-saint-etienne-guide": "pet-sitting-saint-etienne-loire",
+  // Slugs fantômes crawlés par Google (canonical fausses corrigées)
+  "rediger-annonce-garde": "rediger-bonne-annonce-house-sitting",
+  "gardien-urgence-presentation": "devenir-gardien-urgence-guardiens",
+  "house-sitting-noel": "house-sitting-noel-fetes-fin-annee",
+  "10-conseils-garder-chien": "reussir-premiere-garde-house-sitting",
+  "devenir-pet-sitter": "creer-profil-gardien-attractif",
+  "5-erreurs-premiere-garde": "reussir-premiere-garde-house-sitting",
 };
 
 export default function ArticleDetail() {
