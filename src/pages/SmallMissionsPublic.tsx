@@ -1,8 +1,12 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import PageMeta from "@/components/PageMeta";
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import { Apple, Sprout, Egg, PawPrint, Hammer, ChefHat } from "lucide-react";
+import { Apple, Sprout, Egg, PawPrint, Hammer, ChefHat, ArrowLeft, ChevronRight, Home } from "lucide-react";
+import PublicHeader from "@/components/layout/PublicHeader";
+import PublicFooter from "@/components/layout/PublicFooter";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 
 /* ── scroll reveal ── */
 function useScrollReveal(threshold = 0.1) {
@@ -45,17 +49,60 @@ const examples = [
 
 /* ── page ── */
 const SmallMissionsPublic = () => {
+  const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
+
+  /* KPIs */
+  const [kpiMissions, setKpiMissions] = useState<number>(0);
+  const [kpiHelpers, setKpiHelpers] = useState<number>(0);
+
+  useEffect(() => {
+    const load = async () => {
+      const { data } = await supabase.from("public_stats").select("*").single();
+      if (data) {
+        if (typeof data.missions_entraide === "number") setKpiMissions(data.missions_entraide);
+        if (typeof data.total_inscrits === "number") setKpiHelpers(data.total_inscrits);
+      }
+    };
+    load();
+  }, []);
+
+  /** Auth-aware navigation: redirect to register if not logged in */
+  const goToCreate = () => navigate(isAuthenticated ? "/petites-missions/creer" : "/inscription?redirect=/petites-missions/creer");
+  const goToHelp = () => navigate(isAuthenticated ? "/petites-missions?type=offre" : "/inscription?redirect=/petites-missions?type=offre");
+
   return (
     <>
       <PageMeta
-        title="Petites missions d'entraide"
-        description="Échangez des services avec les gens du coin. Jardinage, animaux, coups de main — jamais d'argent."
+        title="Petites missions d'entraide — Guardiens"
+        description="Échangez des services avec les gens du coin. Jardinage, animaux, coups de main — jamais d'argent. Gratuit pour tous."
       />
 
       <div className="min-h-screen bg-background font-body">
+        {/* ═══ HEADER ═══ */}
+        <PublicHeader />
+
+        {/* ═══ BREADCRUMBS + BACK ═══ */}
+        <div className="max-w-7xl mx-auto px-6 pt-4 pb-2 flex items-center gap-4">
+          <button
+            onClick={() => navigate(-1)}
+            className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors shrink-0"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Retour
+          </button>
+          <nav aria-label="Fil d'Ariane" className="flex items-center gap-1 text-xs text-muted-foreground">
+            <Link to="/" className="hover:text-foreground transition-colors" aria-label="Accueil">
+              <Home className="h-3.5 w-3.5" />
+            </Link>
+            <ChevronRight className="h-3 w-3" />
+            <span className="text-foreground font-medium" aria-current="page">Entraide entre voisins</span>
+          </nav>
+        </div>
+
         {/* ═══ SECTION 1 — HERO ═══ */}
         <section className="bg-background">
-          <div className="max-w-2xl mx-auto px-6 py-24 md:py-32 text-center">
+          <div className="max-w-2xl mx-auto px-6 py-20 md:py-28 text-center">
             <Reveal>
               <p className="text-xs font-body font-semibold tracking-widest uppercase text-primary/60 mb-6">
                 Petites missions · Entraide
@@ -76,17 +123,37 @@ const SmallMissionsPublic = () => {
 
             <Reveal delay={0.3}>
               <div className="flex flex-col sm:flex-row gap-4 justify-center mt-10">
-                <Button asChild className="bg-primary text-primary-foreground rounded-full px-9 py-4 h-auto text-sm font-semibold tracking-wide hover:bg-primary/90 transition-all duration-200">
-                  <Link to="/petites-missions/creer">Je propose une mission</Link>
+                <Button onClick={goToCreate} className="bg-primary text-primary-foreground rounded-full px-9 py-4 h-auto text-sm font-semibold tracking-wide hover:bg-primary/90 transition-all duration-200">
+                  Je propose une mission
                 </Button>
-                <Button asChild variant="outline" className="border-2 border-primary text-primary rounded-full px-9 py-4 h-auto text-sm font-semibold tracking-wide hover:bg-primary hover:text-primary-foreground transition-all duration-200">
-                  <Link to="/petites-missions?type=offre">Je veux aider</Link>
+                <Button onClick={goToHelp} variant="outline" className="border-2 border-primary text-primary rounded-full px-9 py-4 h-auto text-sm font-semibold tracking-wide hover:bg-primary hover:text-primary-foreground transition-all duration-200">
+                  Je veux aider
                 </Button>
               </div>
               <p className="text-xs text-foreground/50 mt-4">
-                Gratuit. Accessible dès que votre profil est complété.
+                Gratuit pour tous — pour toujours.
               </p>
             </Reveal>
+
+            {/* ── Social proof KPIs ── */}
+            {(kpiMissions > 0 || kpiHelpers > 0) && (
+              <Reveal delay={0.4}>
+                <div className="flex justify-center gap-12 mt-10 pt-8 border-t border-border">
+                  {kpiMissions > 0 && (
+                    <div className="text-center">
+                      <span className="block text-3xl font-heading font-bold text-foreground">{kpiMissions}</span>
+                      <span className="text-xs text-muted-foreground tracking-wide uppercase">missions réalisées</span>
+                    </div>
+                  )}
+                  {kpiHelpers > 0 && (
+                    <div className="text-center">
+                      <span className="block text-3xl font-heading font-bold text-foreground">{kpiHelpers}</span>
+                      <span className="text-xs text-muted-foreground tracking-wide uppercase">membres actifs</span>
+                    </div>
+                  )}
+                </div>
+              </Reveal>
+            )}
           </div>
         </section>
 
@@ -145,9 +212,9 @@ const SmallMissionsPublic = () => {
                       </div>
                     ))}
                   </div>
-                  <Link to="/petites-missions/creer" className="inline-flex items-center gap-2 text-primary font-semibold text-sm mt-8 hover:gap-3 transition-all duration-200">
+                  <button onClick={goToCreate} className="inline-flex items-center gap-2 text-primary font-semibold text-sm mt-8 hover:gap-3 transition-all duration-200">
                     Publier une mission <span>→</span>
-                  </Link>
+                  </button>
                 </div>
               </Reveal>
 
@@ -172,9 +239,9 @@ const SmallMissionsPublic = () => {
                       </div>
                     ))}
                   </div>
-                  <Link to="/petites-missions?type=offre" className="inline-flex items-center gap-2 text-secondary font-semibold text-sm mt-8 hover:gap-3 transition-all duration-200">
+                  <button onClick={goToHelp} className="inline-flex items-center gap-2 text-secondary font-semibold text-sm mt-8 hover:gap-3 transition-all duration-200">
                     Proposer mon aide <span>→</span>
-                  </Link>
+                  </button>
                 </div>
               </Reveal>
             </div>
@@ -217,7 +284,7 @@ const SmallMissionsPublic = () => {
         </section>
 
         {/* ═══ SECTION 5 — RÈGLES ═══ */}
-        <section className="bg-foreground">
+        <section className="bg-accent-foreground text-accent">
           <div className="max-w-3xl mx-auto px-6 py-24 md:py-32">
             <div className="grid md:grid-cols-3 gap-10 md:gap-0">
               {[
@@ -255,16 +322,16 @@ const SmallMissionsPublic = () => {
             </Reveal>
             <Reveal delay={0.1}>
               <p className="font-body text-lg text-white/85 leading-relaxed mb-10">
-                Gratuit. Entre gens du coin qui se choisissent. Accessible dès que votre profil est complété à 60%.
+                Gratuit. Pour tous. Pour toujours. Entre gens du coin qui se choisissent.
               </p>
             </Reveal>
             <Reveal delay={0.2}>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button asChild className="bg-white text-primary rounded-full px-10 py-4 h-auto text-sm font-bold tracking-wide hover:bg-white/90 hover:scale-[1.02] transition-all duration-200">
-                  <Link to="/petites-missions/creer">Je propose une mission</Link>
+                <Button onClick={goToCreate} className="bg-white text-primary rounded-full px-10 py-4 h-auto text-sm font-bold tracking-wide hover:bg-white/90 hover:scale-[1.02] transition-all duration-200">
+                  Je propose une mission
                 </Button>
-                <Button asChild className="bg-transparent border-2 border-white/70 text-white rounded-full px-10 py-4 h-auto text-sm font-semibold tracking-wide hover:bg-white/15 transition-all duration-200">
-                  <Link to="/petites-missions?type=offre">Je veux aider</Link>
+                <Button onClick={goToHelp} className="bg-transparent border-2 border-white/70 text-white rounded-full px-10 py-4 h-auto text-sm font-semibold tracking-wide hover:bg-white/15 transition-all duration-200">
+                  Je veux aider
                 </Button>
               </div>
               <p className="text-xs text-white/50 mt-6">
@@ -273,6 +340,9 @@ const SmallMissionsPublic = () => {
             </Reveal>
           </div>
         </section>
+
+        {/* ═══ FOOTER ═══ */}
+        <PublicFooter />
 
         {/* Schema.org */}
         <script
