@@ -10,6 +10,9 @@ const SEGMENT_LABELS: Record<string, string> = {
   "profil-gardien": "Profil gardien",
   "profil-proprietaire": "Profil propriétaire",
   annonces: "Annonces",
+  sits: "Mes annonces",
+  create: "Nouvelle annonce",
+  edit: "Modifier",
   messages: "Messages",
   parametres: "Paramètres",
   notifications: "Notifications",
@@ -25,7 +28,13 @@ const SEGMENT_LABELS: Record<string, string> = {
   departement: "Département",
   races: "Races",
   avis: "Avis",
+  "owner-profile": "Profil propriétaire",
+  "sitter-profile": "Profil gardien",
+  favorites: "Mes favoris",
+  settings: "Paramètres",
 };
+
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 const HIDDEN_ROUTES = ["/", "/connexion", "/inscription"];
 
@@ -40,7 +49,8 @@ const Breadcrumbs = () => {
 
   const crumbs = segments.map((seg, i) => {
     const path = "/" + segments.slice(0, i + 1).join("/");
-    const label = SEGMENT_LABELS[seg] || decodeURIComponent(seg).replace(/-/g, " ");
+    const isUuid = UUID_RE.test(seg);
+    const label = SEGMENT_LABELS[seg] || (isUuid ? "Détail" : decodeURIComponent(seg).replace(/-/g, " "));
     const isLast = i === segments.length - 1;
     return { path, label, isLast };
   });
