@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { MapPin, Calendar, Star, PawPrint, Car, Globe, Briefcase, Home, MessageSquare, ArrowLeft, Eye, ChevronRight } from "lucide-react";
+import { MapPin, Calendar, Star, PawPrint, Car, Globe, Briefcase, Home, MessageSquare, ArrowLeft, Eye, ChevronRight, Handshake } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { useAuth } from "@/contexts/AuthContext";
@@ -224,7 +224,7 @@ const PublicProfile = () => {
 
               {/* Skills section */}
               {profile.available_for_help && profile.skill_categories?.length > 0 && (
-                <PublicSkills skillCategories={profile.skill_categories} userId={id!} />
+                <PublicSkills skillCategories={profile.skill_categories} userId={id!} firstName={firstName} city={profile.city} />
               )}
 
               <div className="flex gap-2 mt-2">
@@ -281,6 +281,9 @@ const PublicProfile = () => {
             <TabsList className="w-full bg-white border border-border shadow-sm rounded-xl">
               {isSitter && <TabsTrigger value="sitter" className="flex-1 gap-1.5 data-[state=active]:border-b-2 data-[state=active]:border-primary">Gardien</TabsTrigger>}
               {isOwner && <TabsTrigger value="owner" className="flex-1 gap-1.5 data-[state=active]:border-b-2 data-[state=active]:border-primary">Propriétaire</TabsTrigger>}
+              <TabsTrigger value="entraide" className="flex-1 gap-1.5 data-[state=active]:border-b-2 data-[state=active]:border-primary">
+                <Handshake className="h-3.5 w-3.5" /> Entraide
+              </TabsTrigger>
               <TabsTrigger value="reviews" className="flex-1 gap-1.5 data-[state=active]:border-b-2 data-[state=active]:border-primary">Avis ({reviewStats.count})</TabsTrigger>
               {(galleryPhotos.length > 0 || ownerGalleryPhotos.length > 0) && (
                 <TabsTrigger value="gallery" className="flex-1 gap-1.5 data-[state=active]:border-b-2 data-[state=active]:border-primary">Galerie ({galleryPhotos.length + ownerGalleryPhotos.length})</TabsTrigger>
@@ -464,11 +467,18 @@ const PublicProfile = () => {
               </TabsContent>
             )}
 
+            {/* --- Entraide tab --- */}
+            <TabsContent value="entraide" className="mt-4 space-y-6">
+              {profile.available_for_help && profile.skill_categories?.length > 0 && (
+                <PublicSkills skillCategories={profile.skill_categories} userId={id!} firstName={firstName} city={profile.city} />
+              )}
+              <EntraideSection userId={id!} />
+            </TabsContent>
+
             {/* --- Reviews tab --- */}
             <TabsContent value="reviews" className="mt-4 space-y-8">
               <ReviewsDisplay userId={id!} showAnimalCare={isSitter} />
               <CancellationReviewsSection userId={id!} />
-              <EntraideSection userId={id!} />
             </TabsContent>
 
             {/* --- Gallery tab --- */}
