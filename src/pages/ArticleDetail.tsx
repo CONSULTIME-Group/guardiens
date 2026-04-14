@@ -105,6 +105,7 @@ const ARTICLE_REDIRECTS: Record<string, string> = {
   "conseils-garder-chien": "reussir-premiere-garde-house-sitting",
   "erreurs-premiere-garde": "reussir-premiere-garde-house-sitting",
   "house-sitting-saint-etienne-guide": "pet-sitting-saint-etienne-loire",
+  "jardinage-echange-service-voisin-grenoble": "jardinage-entraide-locale-grenoble",
   // Slugs fantômes crawlés par Google (canonical fausses corrigées)
   "rediger-annonce-garde": "rediger-bonne-annonce-house-sitting",
   "gardien-urgence-presentation": "devenir-gardien-urgence-guardiens",
