@@ -432,7 +432,7 @@ const SmallMissions = () => {
   const filteredMissions = useMemo(() => {
     return (allMissions || [])
       .filter((m: any) => {
-        if (m.category === "house") return false;
+        // All categories shown including house
         if (categoryFilter === "mine") return m.user_id === user?.id;
         if (categoryFilter !== "all" && m.category !== categoryFilter) return false;
         // Distance filter

@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -35,9 +35,12 @@ const DURATIONS = [
 const CreateSmallMission = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { toast } = useToast();
   const { level: accessLevel, profileCompletion, canApplyMissions, loading: accessLoading } = useAccessLevel();
 
+  const typeParam = searchParams.get("type"); // "besoin" or "offre"
+  const [missionType, setMissionType] = useState<"besoin" | "offre">(typeParam === "offre" ? "offre" : "besoin");
   const [category, setCategory] = useState("animals");
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -79,6 +82,7 @@ const CreateSmallMission = () => {
       postal_code: postalCode.trim(),
       date_needed: dateNeeded || null,
       duration_estimate: duration,
+      mission_type: missionType,
       photos,
     } as any);
 
@@ -126,10 +130,26 @@ const CreateSmallMission = () => {
 
         <Card>
           <CardHeader>
-            <CardTitle className="font-heading">Proposer une petite mission</CardTitle>
+            <CardTitle className="font-heading">
+              {missionType === "offre" ? "Proposer mon aide" : "Publier un besoin"}
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-5 pb-32">
+              {/* Type toggle */}
+              <div className="space-y-2">
+                <Label>Type de mission *</Label>
+                <div className="flex gap-2">
+                  <Button type="button" variant={missionType === "besoin" ? "default" : "outline"} size="sm" className="flex-1"
+                    onClick={() => setMissionType("besoin")}>
+                    🔍 J'ai besoin d'aide
+                  </Button>
+                  <Button type="button" variant={missionType === "offre" ? "default" : "outline"} size="sm" className="flex-1"
+                    onClick={() => setMissionType("offre")}>
+                    🤝 Je propose mon aide
+                  </Button>
+                </div>
+              </div>
               {/* Catégorie */}
               <div className="space-y-2">
                 <Label>Catégorie *</Label>

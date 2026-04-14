@@ -142,15 +142,21 @@ const PublicProfile = () => {
 
   const handleContact = async () => {
     if (!user || !id) return;
-    const { data: existingConv } = await supabase
+    // Look for existing private conversation (no sit/mission linked)
+    const { data: existingConvs } = await supabase
       .from("conversations")
-      .select("id")
-      .or(`and(owner_id.eq.${user.id},sitter_id.eq.${id}),and(owner_id.eq.${id},sitter_id.eq.${user.id})`)
-      .maybeSingle();
+      .select("id, sit_id")
+      .or(`and(owner_id.eq.${user.id},sitter_id.eq.${id}),and(owner_id.eq.${id},sitter_id.eq.${user.id})`);
+    // Prefer a private conv (no sit_id), else most recent
+    const privateConv = existingConvs?.find(c => !c.sit_id);
+    const existingConv = privateConv || existingConvs?.[0];
     if (existingConv) {
       navigate(`/messages?conv=${existingConv.id}`);
     } else {
-      const { data: newConv } = await supabase.from("conversations").insert({ owner_id: user.id, sitter_id: id }).select("id").single();
+      const { data: newConv } = await supabase.from("conversations").insert({
+        owner_id: user.id, sitter_id: id,
+        sit_id: null, small_mission_id: null,
+      }).select("id").single();
       if (newConv) navigate(`/messages?conv=${newConv.id}`);
     }
   };
@@ -222,10 +228,7 @@ const PublicProfile = () => {
                 <p className="text-sm italic mt-2 text-muted-foreground">{profile.bio}</p>
               )}
 
-              {/* Skills section */}
-              {profile.available_for_help && profile.skill_categories?.length > 0 && (
-                <PublicSkills skillCategories={profile.skill_categories} userId={id!} firstName={firstName} city={profile.city} />
-              )}
+              {/* Skills shown in Entraide tab only */}
 
               <div className="flex gap-2 mt-2">
                 {isSitter && <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary">🏡 Gardien</span>}
