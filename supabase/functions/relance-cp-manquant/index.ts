@@ -23,7 +23,7 @@ serve(async (req) => {
     const { data: users, error: fetchError } = await supabase
       .from("profiles")
       .select("id, first_name, cp_relance_count, created_at")
-      .is("postal_code", null)
+      .or("postal_code.is.null,postal_code.eq.")
       .lt("cp_relance_count", 3)
       .limit(100);
 

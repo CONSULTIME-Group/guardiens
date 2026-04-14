@@ -87,6 +87,7 @@ const SitterDashboard = () => {
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [bio, setBio] = useState<string | null>(null);
   const [hasAnimalExperience, setHasAnimalExperience] = useState(false);
+  const [cpBannerDismissed, setCpBannerDismissed] = useState(() => sessionStorage.getItem("cp_banner_dismissed") === "1");
 
   const [onboardingChecks, setOnboardingChecks] = useState({
     profileComplete: false,
@@ -304,7 +305,7 @@ const SitterDashboard = () => {
       />
 
       {/* Postal code missing banner — highest priority */}
-      {!postalCode && (
+      {!postalCode && !cpBannerDismissed && (
         <div className="sticky top-0 z-40 bg-destructive/10 border-b border-destructive/30 px-4 py-3">
           <div className="container mx-auto flex items-center justify-between gap-4">
             <div className="flex items-center gap-3">
@@ -313,13 +314,23 @@ const SitterDashboard = () => {
                 <strong>Votre code postal est manquant.</strong> Sans lui, vous ne voyez pas les annonces près de chez vous et n'apparaissez pas dans les recherches des propriétaires.
               </p>
             </div>
-            <Button
-              variant="default"
-              size="sm"
-              onClick={() => navigate('/profile?focus=postal_code')}
-            >
-              Ajouter mon CP
-            </Button>
+            <div className="flex items-center gap-2 shrink-0">
+              <Button
+                variant="default"
+                size="sm"
+                onClick={() => navigate('/profile?focus=postal_code')}
+              >
+                Ajouter mon CP
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-muted-foreground"
+                onClick={() => { setCpBannerDismissed(true); sessionStorage.setItem("cp_banner_dismissed", "1"); }}
+              >
+                ✕
+              </Button>
+            </div>
           </div>
         </div>
       )}
