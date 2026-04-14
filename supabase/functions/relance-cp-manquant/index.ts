@@ -82,7 +82,7 @@ serve(async (req) => {
               templateData: {
                 prenom: user.first_name || "",
                 cta_url:
-                  "https://guardiens.fr/mon-profil?focus=postal_code",
+                  "https://guardiens.fr/profile?focus=postal_code",
               },
             },
           }

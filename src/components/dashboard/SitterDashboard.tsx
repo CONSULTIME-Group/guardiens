@@ -19,7 +19,7 @@ import { Separator } from '@/components/ui/separator';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import {
   Home, Search, CheckCircle, Circle, ChevronRight,
-  Newspaper, Info,
+  Newspaper, Info, AlertCircle,
 } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { format, differenceInDays, differenceInHours } from "date-fns";
@@ -28,9 +28,20 @@ import RoleActivationBanner from "./RoleActivationBanner";
 import AccessGateBanner from "@/components/access/AccessGateBanner";
 import { useAccessLevel } from "@/hooks/useAccessLevel";
 import EmergencyEligibility from "./EmergencyEligibility";
+import { Button } from "@/components/ui/button";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
 
 const capitalize = (name: string) =>
   name ? name.charAt(0).toUpperCase() + name.slice(1).toLowerCase() : "";
+
+const ChecklistItem = ({ label, ctaLabel, onClick }: { label: string; ctaLabel: string; onClick: () => void }) => (
+  <div className="flex items-center gap-3">
+    <Circle className="h-4 w-4 text-muted-foreground shrink-0" />
+    <p className="text-sm text-foreground flex-1">{label}</p>
+    <Button variant="outline" size="sm" onClick={onClick}>{ctaLabel}</Button>
+  </div>
+);
 
 const SitterDashboard = () => {
   const { user } = useAuth();
@@ -72,6 +83,10 @@ const SitterDashboard = () => {
   const [articles, setArticles] = useState<any[]>([]);
   const [hasEmergencyProfile, setHasEmergencyProfile] = useState(false);
   const [hasAcceptedRecent, setHasAcceptedRecent] = useState(false);
+  const [postalCode, setPostalCode] = useState<string | null>(null);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [bio, setBio] = useState<string | null>(null);
+  const [hasAnimalExperience, setHasAnimalExperience] = useState(false);
 
   const [onboardingChecks, setOnboardingChecks] = useState({
     profileComplete: false,
@@ -88,8 +103,8 @@ const SitterDashboard = () => {
         badgesRes, articlesRes, unreadRes, badgeDetailsRes,
       ] = await Promise.all([
         supabase.from("applications").select("*, sit:sits(id, title, start_date, end_date, status, user_id, property_id, properties:property_id(photos))").eq("sitter_id", user.id).order("created_at", { ascending: false }),
-        supabase.from("sitter_profiles").select("is_available").eq("user_id", user.id).single(),
-        supabase.from("profiles").select("identity_verification_status, profile_completion, identity_verified, cancellation_count, is_founder").eq("id", user.id).single(),
+        supabase.from("sitter_profiles").select("is_available, experience_years, animal_types").eq("user_id", user.id).single(),
+        supabase.from("profiles").select("identity_verification_status, profile_completion, identity_verified, cancellation_count, is_founder, postal_code, avatar_url, bio").eq("id", user.id).single(),
         supabase.from("reviews").select("overall_rating").eq("reviewee_id", user.id).eq("published", true),
         supabase.from("sits").select("id, title, start_date, end_date, user_id, property_id, status, created_at, is_urgent, properties:property_id(photos, type, environment)").eq("status", "published").order("created_at", { ascending: false }).limit(6),
         supabase.from("badge_attributions").select("id").eq("user_id", user.id),
@@ -105,7 +120,11 @@ const SitterDashboard = () => {
       setIdentityVerified(idVerified);
       setCancellations(profileRes.data?.cancellation_count || 0);
       setIsFounder(profileRes.data?.is_founder || false);
+      setPostalCode(profileRes.data?.postal_code || null);
+      setAvatarUrl(profileRes.data?.avatar_url || null);
+      setBio(profileRes.data?.bio || null);
       setIsAvailable(sitterRes.data?.is_available || false);
+      setHasAnimalExperience(!!(sitterRes.data?.experience_years && (sitterRes.data?.animal_types as any)?.length > 0));
 
       const apps = appsRes.data || [];
       const acceptedApps = apps.filter((a: any) => a.status === "accepted");
@@ -283,6 +302,28 @@ const SitterDashboard = () => {
           setMinimalCompleted(true);
         }}
       />
+
+      {/* Postal code missing banner — highest priority */}
+      {!postalCode && (
+        <div className="sticky top-0 z-40 bg-destructive/10 border-b border-destructive/30 px-4 py-3">
+          <div className="container mx-auto flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <AlertCircle className="h-5 w-5 text-destructive shrink-0" />
+              <p className="text-sm text-foreground">
+                <strong>Votre code postal est manquant.</strong> Sans lui, vous ne voyez pas les annonces près de chez vous et n'apparaissez pas dans les recherches des propriétaires.
+              </p>
+            </div>
+            <Button
+              variant="default"
+              size="sm"
+              onClick={() => navigate('/profile?focus=postal_code')}
+            >
+              Ajouter mon CP
+            </Button>
+          </div>
+        </div>
+      )}
+
       {/* Role activation banner */}
       <div className="px-4 sm:px-5 md:px-8 mb-4">
         <RoleActivationBanner userRole={user?.role || "sitter"} />
@@ -342,6 +383,44 @@ const SitterDashboard = () => {
       <div className="px-4 sm:px-5 md:px-8 mt-4">
         <AccessGateBanner level={level} profileCompletion={accessProfileCompletion} context="guard" />
       </div>
+
+      {/* Profile completion checklist — shown when postal code exists but profile < 60% */}
+      {postalCode && profileCompletion < 60 && (
+        <div className="px-4 sm:px-5 md:px-8 mt-4">
+          <Card className="border-primary/30 bg-primary/5">
+            <CardHeader>
+              <CardTitle className="text-lg">Complétez votre profil pour devenir visible</CardTitle>
+              <CardDescription>
+                Profil à {profileCompletion}%. Les propriétaires consultent uniquement les profils complets.
+              </CardDescription>
+              <Progress value={profileCompletion} className="mt-3" />
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {!avatarUrl && (
+                <ChecklistItem
+                  label="Ajouter une photo de profil"
+                  ctaLabel="Ajouter"
+                  onClick={() => navigate('/profile?section=identite')}
+                />
+              )}
+              {(!bio || bio.length < 50) && (
+                <ChecklistItem
+                  label="Écrire votre bio (motivation, expérience)"
+                  ctaLabel="Rédiger"
+                  onClick={() => navigate('/profile?section=profil')}
+                />
+              )}
+              {!hasAnimalExperience && (
+                <ChecklistItem
+                  label="Indiquer au moins une expérience avec un animal"
+                  ctaLabel="Ajouter"
+                  onClick={() => navigate('/profile?section=experience')}
+                />
+              )}
+            </CardContent>
+          </Card>
+        </div>
+      )}
 
       <div className="px-4 sm:px-5 md:px-8 -mt-4 mb-2">
         <button

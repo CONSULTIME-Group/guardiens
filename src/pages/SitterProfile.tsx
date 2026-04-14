@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { Check, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import StepIdentity from "@/components/profile/StepIdentity";
@@ -46,8 +46,15 @@ type ProfileDraft<T> = {
   values: Partial<T>;
 };
 
+const SECTION_PARAM_MAP: Record<string, string> = {
+  identite: "identity",
+  profil: "sitter",
+  experience: "experience",
+};
+
 const SitterProfile = () => {
   const { user } = useAuth();
+  const [searchParams] = useSearchParams();
   const {
     data, pastAnimals, loading, saving, completion, missingFields, lastSyncedAt,
     saveStep, addPastAnimal, removePastAnimal, uploadAvatar,
@@ -60,6 +67,36 @@ const SitterProfile = () => {
   const [saved, setSaved] = useState(false);
   const draftKey = user ? `guardiens_sitter_profile_draft_${user.id}` : null;
   const draftHydratedRef = useRef(false);
+  const focusAppliedRef = useRef(false);
+
+  // Handle focus=postal_code and section= query params
+  useEffect(() => {
+    if (loading || focusAppliedRef.current) return;
+    const focus = searchParams.get("focus");
+    const section = searchParams.get("section");
+
+    if (focus === "postal_code") {
+      focusAppliedRef.current = true;
+      setActiveSection("identity");
+      setTimeout(() => {
+        const el = document.querySelector<HTMLInputElement>('[name="postal_code"], [data-field="postal_code"]');
+        if (el) {
+          el.scrollIntoView({ behavior: "smooth", block: "center" });
+          el.focus();
+          el.classList.add("ring-2", "ring-primary");
+          setTimeout(() => el.classList.remove("ring-2", "ring-primary"), 3000);
+        }
+      }, 500);
+    } else if (section && SECTION_PARAM_MAP[section]) {
+      focusAppliedRef.current = true;
+      const mapped = SECTION_PARAM_MAP[section];
+      setActiveSection(mapped);
+      setTimeout(() => {
+        const contentEl = document.querySelector(".bg-card.rounded-xl");
+        contentEl?.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 300);
+    }
+  }, [loading, searchParams]);
 
   useEffect(() => {
     if (!user) return;
