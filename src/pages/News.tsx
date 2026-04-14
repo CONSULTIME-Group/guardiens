@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useSearchParams, Link } from "react-router-dom";
+import { useSearchParams, Link, useNavigate } from "react-router-dom";
 import PageMeta from "@/components/PageMeta";
 import PublicHeader from "@/components/layout/PublicHeader";
 import PublicFooter from "@/components/layout/PublicFooter";
@@ -7,7 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Calendar, MapPin, ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
+import { Calendar, MapPin, ArrowRight, ArrowLeft, ChevronLeft, ChevronRight, Home } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -61,6 +61,7 @@ const CATEGORY_COLORS: Record<string, string> = {
 const PAGE_SIZE = 9;
 
 export default function News() {
+  const navigate = useNavigate();
   const [articles, setArticles] = useState<Article[]>([]);
   const [vieLocaleArticles, setVieLocaleArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState(true);
@@ -138,6 +139,24 @@ export default function News() {
       />
     <PublicHeader />
     <div className="max-w-4xl mx-auto px-4 py-8 animate-fade-in">
+      {/* Breadcrumb */}
+      <nav aria-label="Fil d'Ariane" className="flex items-center gap-1 text-xs text-muted-foreground mb-4">
+        <Link to="/" className="hover:text-foreground transition-colors shrink-0" aria-label="Accueil">
+          <Home className="h-3.5 w-3.5" />
+        </Link>
+        <ChevronRight className="h-3 w-3" />
+        <span className="text-foreground font-medium">Guides & Conseils</span>
+      </nav>
+
+      {/* Back button */}
+      <button
+        onClick={() => navigate(-1)}
+        className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors mb-4"
+      >
+        <ArrowLeft className="h-4 w-4" />
+        Retour
+      </button>
+
       <header className="mb-8">
         <h1 className="text-3xl md:text-4xl font-heading font-bold text-foreground mb-2">
           Guides & Conseils

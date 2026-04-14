@@ -98,15 +98,22 @@ export function useOwnerProfile() {
     if (!user) return;
     setLoading(true);
 
-    const [profileRes, propertyRes, ownerRes] = await Promise.all([
+    const [profileRes, propertyRes, ownerRes, sitterRes] = await Promise.all([
       supabase.from("profiles").select("*").eq("id", user.id).single(),
       supabase.from("properties").select("*").eq("user_id", user.id).limit(1).maybeSingle(),
       supabase.from("owner_profiles").select("*").eq("user_id", user.id).maybeSingle(),
+      supabase.from("sitter_profiles").select("competences, competences_disponible").eq("user_id", user.id).maybeSingle(),
     ]);
 
     const p = profileRes.data;
     const prop = propertyRes.data;
     const o = ownerRes.data;
+    const sitter = sitterRes.data;
+
+    // If owner has no competences yet, pre-populate from sitter profile
+    const ownerCompetences = ((o as any)?.competences || []).length > 0
+      ? (o as any).competences
+      : ((sitter as any)?.competences || []);
 
     setData({
       first_name: p?.first_name || "", last_name: p?.last_name || "",
@@ -136,8 +143,8 @@ export function useOwnerProfile() {
       communication_notes: o?.communication_notes || "",
       skill_categories: (p as any)?.skill_categories || [],
       available_for_help: (p as any)?.available_for_help || false,
-      owner_competences: (o as any)?.competences || [],
-      owner_competences_disponible: (o as any)?.competences_disponible || false,
+      owner_competences: ownerCompetences,
+      owner_competences_disponible: (o as any)?.competences_disponible ?? (sitter as any)?.competences_disponible ?? false,
       owner_skill_categories: (p as any)?.skill_categories || [],
     });
     setLastSyncedAt(
