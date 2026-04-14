@@ -435,7 +435,7 @@ const SitterDashboard = () => {
 
         <div className="grid grid-cols-4 sm:grid-cols-6 gap-2 mb-4">
           {GARDIEN_BADGE_IDS.map(id => {
-            const userBadge = userBadges?.find(b => b.badge_id === id);
+            const userBadge = groupedBadges?.find(b => b.badge_id === id);
             const count = userBadge?.count ?? 0;
             const isActive = count > 0 && userBadge
               ? differenceInMonths(new Date(), new Date(userBadge.created_at)) < 12
