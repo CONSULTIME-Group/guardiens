@@ -120,6 +120,9 @@ const SitterDashboard = () => {
       setIdentityVerified(idVerified);
       setCancellations(profileRes.data?.cancellation_count || 0);
       setIsFounder(profileRes.data?.is_founder || false);
+      setPostalCode(profileRes.data?.postal_code || null);
+      setAvatarUrl(profileRes.data?.avatar_url || null);
+      setBio(profileRes.data?.bio || null);
       setIsAvailable(sitterRes.data?.is_available || false);
 
       const apps = appsRes.data || [];
