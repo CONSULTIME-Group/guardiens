@@ -124,6 +124,7 @@ const SitterDashboard = () => {
       setAvatarUrl(profileRes.data?.avatar_url || null);
       setBio(profileRes.data?.bio || null);
       setIsAvailable(sitterRes.data?.is_available || false);
+      setHasAnimalExperience(!!(sitterRes.data?.experience_years && (sitterRes.data?.animal_types as any)?.length > 0));
 
       const apps = appsRes.data || [];
       const acceptedApps = apps.filter((a: any) => a.status === "accepted");
