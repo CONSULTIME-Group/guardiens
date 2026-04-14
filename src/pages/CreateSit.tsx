@@ -109,6 +109,7 @@ const CreateSit = () => {
   const [isUrgent, setIsUrgent] = useState(false);
   const [sitEnvironments, setSitEnvironments] = useState<string[]>([]);
   const [minGardienSits, setMinGardienSits] = useState(0);
+  const [maxApplications, setMaxApplications] = useState<number | null>(null);
 
   const [property, setProperty] = useState<PropertySummary | null>(null);
   const [pets, setPets] = useState<PetSummary[]>([]);
@@ -147,6 +148,7 @@ const CreateSit = () => {
         setSitEnvironments(s.environments || []);
         setMinGardienSits(s.min_gardien_sits || 0);
         setFlexibleDates(s.flexible_dates || false);
+        setMaxApplications(s.max_applications || null);
         setIsRepublish(true);
       }
 
@@ -222,6 +224,7 @@ const CreateSit = () => {
         status: "published" as any,
         environments: sitEnvironments,
         min_gardien_sits: minGardienSits,
+        max_applications: maxApplications,
       } as any).select("id").single();
 
       if (error) throw error;
