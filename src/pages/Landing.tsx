@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import notreHistoirePanorama from "@/assets/story-photo.jpeg";
+import notreHistoirePanorama from "@/assets/story-photo.webp";
 import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, ArrowLeft, Home, Key, Handshake, ShieldCheck, MessageCircle, Users, ClipboardCheck, Star, BookOpen } from "lucide-react";
@@ -7,7 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 import PageMeta from "@/components/PageMeta";
 import useEmblaCarousel from "embla-carousel-react";
-import heroDogBbq from "@/assets/hero-landing.png";
+import heroDogBbq from "@/assets/hero-landing.webp";
 import DemoListingShowcase from "@/components/landing/DemoListingShowcase";
 import PublicHeader from "@/components/layout/PublicHeader";
 import PublicFooter from "@/components/layout/PublicFooter";

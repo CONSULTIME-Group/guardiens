@@ -1,8 +1,8 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, ShieldCheck, Siren, BadgeCheck, Mountain } from "lucide-react";
-import heroAnnecy from "@/assets/hero-annecy.jpg";
-import heroLyon from "@/assets/hero-lyon.jpg";
+import heroAnnecy from "@/assets/hero-annecy.webp";
+import heroLyon from "@/assets/hero-lyon.webp";
 
 interface CityHeroProps {
   city: string;

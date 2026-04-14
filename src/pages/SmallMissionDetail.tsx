@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/dialog";
 import ReportButton from "@/components/reports/ReportButton";
 import PageMeta from "@/components/PageMeta";
-import entraideHeader from "@/assets/entraide-header.jpg";
+import entraideHeader from "@/assets/entraide-header.webp";
 import { useSubscriptionAccess } from "@/hooks/useSubscriptionAccess";
 import { useAccessLevel } from "@/hooks/useAccessLevel";
 import AccessGateBanner from "@/components/access/AccessGateBanner";

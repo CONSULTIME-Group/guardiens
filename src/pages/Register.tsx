@@ -17,7 +17,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
-import authIllustration from "@/assets/auth-illustration.png";
+import authIllustration from "@/assets/auth-illustration.webp";
 
 type Role = "owner" | "sitter" | "both";
 
