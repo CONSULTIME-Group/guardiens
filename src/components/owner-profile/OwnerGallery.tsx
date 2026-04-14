@@ -78,7 +78,7 @@ const OwnerGallery = () => {
     setUploading(true);
 
     const ext = file.name.split(".").pop();
-    const path = `owner-gallery/${user.id}/${Date.now()}.${ext}`;
+    const path = `${user.id}/owner-gallery/${Date.now()}.${ext}`;
     const { error: uploadErr } = await supabase.storage.from("property-photos").upload(path, file);
     if (uploadErr) {
       toast({ variant: "destructive", title: "Erreur upload" });
