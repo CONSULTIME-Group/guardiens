@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { compressImageFile } from "@/lib/compressImage";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -60,15 +61,16 @@ const OwnerGallery = () => {
 
   useEffect(() => { loadPhotos(); }, [user]);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0];
     if (!f) return;
-    if (f.size > 5 * 1024 * 1024) {
-      toast({ variant: "destructive", title: "Photo trop lourde", description: "Max 5 Mo." });
-      return;
+    try {
+      const compressed = await compressImageFile(f, 5, 1200);
+      setFile(compressed);
+      setPreviewUrl(URL.createObjectURL(compressed));
+    } catch {
+      toast({ variant: "destructive", title: "Impossible de traiter cette image" });
     }
-    setFile(f);
-    setPreviewUrl(URL.createObjectURL(f));
   };
 
   const handleSubmit = async () => {
