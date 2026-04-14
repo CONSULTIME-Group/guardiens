@@ -42,6 +42,7 @@ import profilGardienLaptop from "@/assets/profil-gardien-laptop-lyon.jpg";
 import villaOuestVide from "@/assets/villa-ouest-lyonnais-vide.jpg";
 import gardienTeletravailOuest from "@/assets/gardien-teletravail-ouest-lyon.jpg";
 import pensionChienAlternativesCover from "@/assets/pension-chien-alternatives-cover.jpg";
+import gardeAnimauxCroixRousse from "@/assets/garde-animaux-croix-rousse-lyon.jpg";
 
 const ARTICLE_IMAGES: Record<string, string> = {
   "/images/lyon-hero-quais.jpg": lyonHeroQuais,
@@ -83,6 +84,7 @@ const ARTICLE_IMAGES: Record<string, string> = {
   "/images/villa-ouest-lyonnais-vide.jpg": villaOuestVide,
   "/images/gardien-teletravail-ouest-lyon.jpg": gardienTeletravailOuest,
   "/images/pension-chien-alternatives-cover.jpg": pensionChienAlternativesCover,
+  "/images/garde-animaux-croix-rousse-lyon.jpg": gardeAnimauxCroixRousse,
 };
 
 export function resolveImagePath(path: string): string {
