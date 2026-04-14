@@ -306,7 +306,7 @@ const SmallMissions = () => {
       const { data: missions } = await supabase
         .from("small_missions")
         .select("*, profiles:user_id(first_name, avatar_url)")
-        .in("status", ["open", "in_progress"] as any[])
+        .in("status", ["open", "in_progress", "completed"] as any[])
         .order("created_at", { ascending: false })
         .limit(50);
 
