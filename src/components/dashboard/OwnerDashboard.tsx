@@ -16,7 +16,7 @@ import { fr } from "date-fns/locale";
 import RoleActivationBanner from "./RoleActivationBanner";
 import AccessGateBanner from "@/components/access/AccessGateBanner";
 import { useAccessLevel } from "@/hooks/useAccessLevel";
-import { BadgeSceau } from "@/components/badges/BadgeSceau";
+import BadgeGridSection from "@/components/badges/BadgeGridSection";
 import { useUserBadges } from "@/hooks/useProfileReputation";
 import { PROPRIO_BADGE_IDS } from "@/components/badges/badge-definitions";
 
@@ -79,18 +79,7 @@ const OwnerDashboard = () => {
   /* ── Badges (react-query) ── */
   const { data: userBadges } = useUserBadges(user?.id);
 
-  const activeBadgeCount = useMemo(() =>
-    (userBadges ?? []).filter(b =>
-      PROPRIO_BADGE_IDS.includes(b.badge_id) &&
-      differenceInMonths(new Date(), new Date(b.created_at)) < 12
-    ).length,
-    [userBadges]
-  );
-
-  const specialBadges = useMemo(() =>
-    (userBadges ?? []).filter(b => PROPRIO_SPECIAL_IDS.includes(b.badge_id)),
-    [userBadges]
-  );
+  // Badge counts now handled by BadgeGridSection
 
   /* ── Derived values (stable `now` per render cycle, not stale memo) ── */
   const now = new Date();
@@ -452,42 +441,12 @@ const OwnerDashboard = () => {
 
       {/* ═══ Badges ═══ */}
       <div className="px-5 md:px-8 mb-6 md:mb-8">
-        <div className="flex items-baseline justify-between mb-3">
-          <h2 className="text-sm font-semibold text-foreground">Vos Badges</h2>
-          <span className="text-xs text-muted-foreground">
-            {activeBadgeCount} actif{activeBadgeCount > 1 ? "s" : ""} sur 12
-          </span>
-        </div>
-        <div className="grid grid-cols-6 gap-2 mb-4">
-          {PROPRIO_BADGE_IDS.map(id => {
-            const userBadge = userBadges?.find(b => b.badge_id === id);
-            const count = userBadge?.count ?? 0;
-            const isActive = count > 0 && userBadge
-              ? differenceInMonths(new Date(), new Date(userBadge.created_at)) < 12
-              : false;
-            return (
-              <BadgeSceau
-                key={id}
-                id={id}
-                count={count}
-                active={isActive}
-                size="compact"
-                showCount={false}
-                obtainedAt={userBadge?.created_at}
-              />
-            );
-          })}
-        </div>
-        {specialBadges.length > 0 && (
-          <div className="mt-3">
-            <p className="text-xs text-muted-foreground font-sans mb-2">Badges spéciaux</p>
-            <div className="flex flex-wrap gap-2">
-              {specialBadges.map(b => (
-                <BadgeSceau key={b.badge_id} id={b.badge_id} count={b.count} active size="compact" obtainedAt={b.created_at} />
-              ))}
-            </div>
-          </div>
-        )}
+        <BadgeGridSection
+          title="Vos Badges"
+          badgeIds={PROPRIO_BADGE_IDS}
+          userBadges={userBadges}
+          specialBadgeIds={PROPRIO_SPECIAL_IDS}
+        />
       </div>
 
       {/* ═══ Mes animaux ═══ */}
