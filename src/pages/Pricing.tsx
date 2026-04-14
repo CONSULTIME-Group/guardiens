@@ -502,6 +502,14 @@ const Pricing = () => {
             </Accordion>
           </section>
 
+          {/* Link to detailed pricing article */}
+          <section className="rounded-xl border border-border bg-accent/30 p-6 text-center mb-10">
+            <p className="text-sm text-muted-foreground mb-2">Vous voulez tout comprendre en détail ?</p>
+            <Link to="/actualites/nouveaux-tarifs-2026" className="text-primary font-medium hover:underline text-sm">
+              Découvrir nos tarifs en détail →
+            </Link>
+          </section>
+
           {/* CTA final — high contrast */}
           <section className="text-center py-10 md:py-14 bg-primary rounded-2xl mb-10">
             <p className="text-lg md:text-xl font-heading font-semibold text-primary-foreground text-center mb-2">
