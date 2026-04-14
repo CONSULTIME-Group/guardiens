@@ -18,12 +18,12 @@ import ScrollToTop from "@/components/layout/ScrollToTop";
 import { toast } from "sonner";
 
 // ──── Critical routes (eager) ────
-import Landing from "./pages/Landing";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import NotFound from "./pages/NotFound";
 
 // ──── Heavy routes (lazy) ────
+const Landing = lazy(() => import("./pages/Landing"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 
 // ──── Lazy-loaded routes ────
