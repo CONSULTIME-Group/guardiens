@@ -97,11 +97,21 @@ const ProposeHelperExchangeDialog = ({
           <DialogTitle>Proposer un échange à {helper.first_name}</DialogTitle>
           <DialogDescription>
             {helper.first_name} est disponible pour aider.
-            {helperSkills.length > 0 && (
-              <> Compétences : {helperSkills.slice(0, 3).join(", ")}</>
-            )}
           </DialogDescription>
         </DialogHeader>
+
+        {helperSkills.length > 0 && (
+          <div className="flex flex-wrap gap-1.5 -mt-1">
+            {helperSkills.slice(0, 6).map((skill) => (
+              <span
+                key={skill}
+                className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary border border-primary/20"
+              >
+                {skill}
+              </span>
+            ))}
+          </div>
+        )}
 
         <div className="space-y-4">
           {/* What I need */}
