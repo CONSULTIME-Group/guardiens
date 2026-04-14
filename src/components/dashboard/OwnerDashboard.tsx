@@ -63,6 +63,7 @@ const OwnerDashboard = () => {
   const [trustedSitterCount, setTrustedSitterCount] = useState(0);
   const [propertyType, setPropertyType] = useState<string | null>(null);
   const [propertyEnvironment, setPropertyEnvironment] = useState<string | null>(null);
+  const [propertyCoverPhoto, setPropertyCoverPhoto] = useState<string | null>(null);
 
   /* ── UI state ── */
   const [loading, setLoading] = useState(true);
@@ -116,7 +117,7 @@ const OwnerDashboard = () => {
       try {
         const [sitsRes, propsRes, reviewsRes, profileRes, highlightsRes, missionsRes] = await Promise.all([
           supabase.from("sits").select("*, applications(id, status, sitter_id)").eq("user_id", user.id).order("created_at", { ascending: false }),
-          supabase.from("properties").select("id, type, environment").eq("user_id", user.id),
+          supabase.from("properties").select("id, type, environment, photos").eq("user_id", user.id),
           supabase.from("reviews").select("overall_rating").eq("reviewee_id", user.id).eq("published", true),
           supabase.from("profiles").select("first_name, avatar_url, bio, identity_verification_status, onboarding_completed, onboarding_dismissed_at, onboarding_minimal_completed").eq("id", user.id).single(),
           supabase.from("owner_highlights").select("*, sitter:profiles!owner_highlights_sitter_id_fkey(first_name, avatar_url)").eq("owner_id", user.id).eq("hidden", false).order("created_at", { ascending: false }).limit(5),
@@ -155,6 +156,8 @@ const OwnerDashboard = () => {
         if (propsData.length > 0) {
           setPropertyType((propsData[0] as any).type || null);
           setPropertyEnvironment((propsData[0] as any).environment || null);
+          const photos = (propsData[0] as any).photos;
+          setPropertyCoverPhoto(Array.isArray(photos) && photos.length > 0 ? photos[0] : null);
         }
         const hasSit = sitsData.length > 0;
         setOnboardingChecks({ hasName, hasAvatar, hasBio, hasIdentity, hasProperty, hasPets: false, hasSit });
@@ -374,7 +377,7 @@ const OwnerDashboard = () => {
             </div>
             <p className="text-sm text-primary-foreground/75 font-sans">{subtitle}</p>
             <Link
-              to={`/proprietaires/${user?.id}`}
+              to={`/proprietaires/${user?.id}?tab=proprio`}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-1.5 text-xs font-body text-primary-foreground/70 hover:text-primary-foreground transition-colors mt-2"
@@ -426,6 +429,7 @@ const OwnerDashboard = () => {
           propertyType={propertyType}
           propertyEnvironment={propertyEnvironment}
           pendingAppCount={pendingAppCount}
+          coverPhoto={propertyCoverPhoto}
         />
       </div>
 

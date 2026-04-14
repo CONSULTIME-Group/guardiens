@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams, Link, useNavigate } from "react-router-dom";
+import { useParams, Link, useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { MapPin, Calendar, Star, PawPrint, Car, Globe, Briefcase, Home, MessageSquare, ArrowLeft, Eye, ChevronRight, Handshake } from "lucide-react";
 import { format } from "date-fns";
@@ -38,6 +38,7 @@ const PublicProfile = () => {
   const { id } = useParams<{ id: string }>();
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [profile, setProfile] = useState<any>(null);
   const [sitterProfile, setSitterProfile] = useState<any>(null);
   const [ownerProfile, setOwnerProfile] = useState<any>(null);
@@ -109,7 +110,7 @@ const PublicProfile = () => {
 
       if (badgesRes.data && badgesRes.data.length > 0) {
         const countMap = new Map<string, number>();
-        badgesRes.data.forEach((b: any) => countMap.set(b.badge_key, (countMap.get(b.badge_key) || 0) + 1));
+        badgesRes.data.forEach((b: any) => countMap.set(b.badge_id, (countMap.get(b.badge_id) || 0) + 1));
         setBadgeCounts(Array.from(countMap.entries()).map(([badge_key, count]) => ({ badge_key, count })));
       }
 
@@ -133,9 +134,13 @@ const PublicProfile = () => {
   const topBadge = "";
   const shouldIndex = (profile.profile_completion || 0) >= 60;
 
-  const metaTitle = isSitter
-    ? `${firstName} — Gardien vérifié à ${profile.city || "France"} | Guardiens`
-    : `${firstName} — Propriétaire à ${profile.city || "France"} | Guardiens`;
+  const tabParam = searchParams.get("tab");
+  const defaultTab = tabParam === "proprio" && isOwner ? "owner" : (isSitter ? "sitter" : "owner");
+
+  const roleLabel = isSitter && isOwner
+    ? "Gardien & Propriétaire"
+    : isSitter ? "Gardien vérifié" : "Propriétaire";
+  const metaTitle = `${firstName} — ${roleLabel} à ${profile.city || "France"} | Guardiens`;
   const metaDesc = isSitter
     ? `${firstName}, gardien à ${profile.city || "France"}. ${totalSits} garde${totalSits > 1 ? "s" : ""}, note ${reviewStats.avg.toFixed(1)}/5. ${topBadge ? topBadge + ". " : ""}Contactez-le sur Guardiens.`
     : `${firstName}, propriétaire à ${profile.city || "France"}. ${pets.length} animal${pets.length > 1 ? "ux" : ""}. ${totalSits} garde${totalSits > 1 ? "s" : ""}, note ${reviewStats.avg.toFixed(1)}/5.`;
@@ -245,7 +250,11 @@ const PublicProfile = () => {
 
           {/* === METRICS BAR === */}
           <div className="grid grid-cols-4 divide-x rounded-xl border border-border bg-white p-0 shadow-sm">
-            <MetricCell label="Gardes" value={String(totalSits)} />
+            {defaultTab === "owner" ? (
+              <MetricCell label="Séjours hébergés" value={String(completedSits)} />
+            ) : (
+              <MetricCell label="Gardes" value={String(totalSits)} />
+            )}
             <MetricCell
               label="Note"
               value={reviewStats.count > 0 ? reviewStats.avg.toFixed(1) : "—"}
@@ -280,7 +289,7 @@ const PublicProfile = () => {
           {/* Badges — migration en cours */}
 
           {/* === TABS === */}
-          <Tabs defaultValue={isSitter ? "sitter" : "owner"} className="w-full">
+          <Tabs defaultValue={defaultTab} className="w-full">
             <TabsList className="w-full bg-white border border-border shadow-sm rounded-xl">
               {isSitter && <TabsTrigger value="sitter" className="flex-1 gap-1.5 data-[state=active]:border-b-2 data-[state=active]:border-primary">Gardien</TabsTrigger>}
               {isOwner && <TabsTrigger value="owner" className="flex-1 gap-1.5 data-[state=active]:border-b-2 data-[state=active]:border-primary">Propriétaire</TabsTrigger>}
