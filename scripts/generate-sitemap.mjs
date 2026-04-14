@@ -80,7 +80,16 @@ async function main() {
     supabase.from("city_guides").select("slug, updated_at").eq("published", true),
     supabase.from("seo_department_pages").select("slug, updated_at").eq("published", true),
     supabase.from("breed_profiles").select("breed, species, generated_at"),
-    supabase.from("profiles").select("id, updated_at").eq("account_status", "active").gte("profile_completion", 60).limit(1000),
+    supabase
+      .from("profiles")
+      .select("id, updated_at, postal_code, avatar_url, bio, role")
+      .eq("account_status", "active")
+      .gte("profile_completion", 60)
+      .in("role", ["gardien", "les_deux"])
+      .not("postal_code", "is", null)
+      .not("avatar_url", "is", null)
+      .not("bio", "is", null)
+      .limit(1000),
   ]);
 
   const entries = [];
@@ -154,10 +163,13 @@ async function main() {
     }
   }
 
-  // Public profiles
+  // Public sitter profiles → /gardiens/{id}
   if (publicProfiles) {
     for (const p of publicProfiles) {
-      entries.push(urlEntry(`/profil/${p.id}`, (p.updated_at || today).split("T")[0], "monthly", "0.5"));
+      // Skip ghost profiles: must have postal_code (5 chars), avatar, and bio > 50 chars
+      if (!p.postal_code || p.postal_code.length !== 5) continue;
+      if (!p.avatar_url || !p.bio || p.bio.length <= 50) continue;
+      entries.push(urlEntry(`/gardiens/${p.id}`, (p.updated_at || today).split("T")[0], "monthly", "0.5"));
     }
   }
 
