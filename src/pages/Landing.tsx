@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import notreHistoirePanorama from "@/assets/story-photo.jpeg";
+import notreHistoirePanorama from "@/assets/story-photo.webp";
 import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, ArrowLeft, Home, Key, Handshake, ShieldCheck, MessageCircle, Users, ClipboardCheck, Star, BookOpen } from "lucide-react";
@@ -7,7 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 import PageMeta from "@/components/PageMeta";
 import useEmblaCarousel from "embla-carousel-react";
-import heroDogBbq from "@/assets/hero-landing.png";
+import heroDogBbq from "@/assets/hero-landing.webp";
 import DemoListingShowcase from "@/components/landing/DemoListingShowcase";
 import PublicHeader from "@/components/layout/PublicHeader";
 import PublicFooter from "@/components/layout/PublicFooter";
@@ -165,6 +165,7 @@ const Landing = () => {
         description="Garde de maison gratuite entre voisins. Entraide locale, petits services, échanges sans argent. Osez demander. Osez proposer. Rejoignez le mouvement."
         path="/"
         image="https://guardiens.fr/og-default.jpg"
+        preloadImage={heroDogBbq}
       />
       {/* JSON-LD: Organization */}
       <script
@@ -241,6 +242,10 @@ const Landing = () => {
           alt="Un golden retriever souriant dans un jardin ensoleillé — l'esprit Guardiens"
           className="absolute inset-0 w-full h-full object-cover"
           loading="eager"
+          fetchPriority="high"
+          width={1920}
+          height={1080}
+          decoding="async"
         />
         <div className="absolute inset-0 bg-gradient-to-r from-black/65 via-black/45 to-black/20" />
 
@@ -742,6 +747,9 @@ const Landing = () => {
               alt="Une garde en Auvergne-Rhône-Alpes — Guardiens"
               className="w-full h-64 md:h-96 object-cover object-center"
               loading="lazy"
+              width={1920}
+              height={600}
+              decoding="async"
             />
           </div>
         </div>

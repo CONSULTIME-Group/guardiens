@@ -1,8 +1,8 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, ShieldCheck, Siren, BadgeCheck, Mountain } from "lucide-react";
-import heroAnnecy from "@/assets/hero-annecy.jpg";
-import heroLyon from "@/assets/hero-lyon.jpg";
+import heroAnnecy from "@/assets/hero-annecy.webp";
+import heroLyon from "@/assets/hero-lyon.webp";
 
 interface CityHeroProps {
   city: string;
@@ -49,6 +49,9 @@ export default function CityHero({
             className="absolute inset-0 w-full h-full object-cover"
             width={1920}
             height={800}
+            loading="eager"
+            fetchPriority="high"
+            decoding="async"
           />
         ) : (
           <div className="absolute inset-0 bg-gradient-to-br from-[hsl(210,50%,15%)] to-[hsl(153,42%,20%)]" />
