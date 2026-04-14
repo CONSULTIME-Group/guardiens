@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { BadgeSceauLarge } from "@/components/badges/BadgeSceauLarge";
 import FounderBadge from "@/components/badges/FounderBadge";
-import { Helmet } from "react-helmet-async";
+// Helmet removed — PageMeta handles all meta tags
 import EntraideLibreBanner from "@/components/subscription/EntraideLibreBanner";
 import PricingCardsCheckout from "@/components/subscription/PricingCardsCheckout";
 
