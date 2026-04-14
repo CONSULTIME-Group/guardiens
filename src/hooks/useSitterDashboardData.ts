@@ -140,7 +140,34 @@ export function useSitterDashboardData(userId: string | undefined) {
         return differenceInDays(new Date(), created) <= 7;
       });
 
-      // Next guard — inline (no waterfall: batch the 2 queries)
+      // Group badges (replaces useUserBadges)
+      const allBadges = allBadgesRes.data || [];
+      const grouped = allBadges.reduce((acc: Record<string, GroupedBadge>, b: any) => {
+        if (!acc[b.badge_id]) acc[b.badge_id] = { badge_id: b.badge_id, created_at: b.created_at, count: 0 };
+        acc[b.badge_id].count++;
+        return acc;
+      }, {} as Record<string, GroupedBadge>);
+      const groupedBadges: GroupedBadge[] = Object.values(grouped);
+
+      // Reputation (replaces useProfileReputation)
+      const reputation: ReputationData | null = reputationRes.data ?? null;
+
+      // Nearby listings — filtered by department (first 2 chars of postal code)
+      const userDept = profile?.postal_code?.slice(0, 2);
+      let nearbyListings: any[] = [];
+      if (userDept) {
+        const { data: deptListings } = await supabase
+          .from("sits")
+          .select("id, title, start_date, end_date, user_id, property_id, status, created_at, is_urgent, properties:property_id(photos, type, environment, postal_code)")
+          .eq("status", "published")
+          .order("created_at", { ascending: false })
+          .limit(20);
+        nearbyListings = (deptListings || [])
+          .filter((s: any) => s.user_id !== userId && (s.properties as any)?.postal_code?.startsWith(userDept))
+          .slice(0, 4);
+      }
+
+      // Next guard
       let nextGuard: any = null;
       const now = new Date();
       const futureGuards = acceptedApps
@@ -182,12 +209,14 @@ export function useSitterDashboardData(userId: string | undefined) {
         hasEmergencyProfile: !!emProfileRes.data,
         hasAcceptedRecent: recentAccepted,
         nextGuard,
-        nearbyListings: (listingsRes.data || []).filter((s: any) => s.user_id !== userId).slice(0, 4),
+        nearbyListings,
         articles: articlesRes.data || [],
-        badges: badgeDetailsRes.data || [],
+        badges: allBadges,
         onboardingCompleted: (profile as any)?.onboarding_completed || false,
         onboardingDismissed: !!(profile as any)?.onboarding_dismissed_at,
         minimalCompleted: (profile as any)?.onboarding_minimal_completed ?? false,
+        reputation,
+        groupedBadges,
       });
     };
 
