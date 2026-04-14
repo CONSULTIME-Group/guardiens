@@ -1287,7 +1287,9 @@ export default function PublicSitterProfile() {
                       </div>
                       <div className="flex items-center gap-2 flex-shrink-0">
                         {m.category && (
-                          <span className="text-xs bg-muted text-foreground/60 px-2 py-0.5 rounded-full font-body hidden sm:inline">{m.category}</span>
+                          <span className="text-xs bg-muted text-foreground/60 px-2 py-0.5 rounded-full font-body hidden sm:inline">
+                            {{ animals: "Animaux", garden: "Jardin", house: "Maison", skills: "Compétences", coups_de_main: "Coups de main" }[m.category] || m.category}
+                          </span>
                         )}
                         <span className={['text-xs font-medium', 'px-2.5 py-1 rounded-full', 'font-body whitespace-nowrap', s.style].join(' ')}>{s.label}</span>
                       </div>
