@@ -359,11 +359,14 @@ const Pricing = () => {
                     className={`flex items-start justify-between gap-3 border rounded-lg p-3 cursor-pointer transition-all ${formule === 'prorata' ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/40'}`}
                   >
                     <div className="min-w-0">
-                      <p className="text-sm font-medium text-foreground font-body">Prorata 2026</p>
-                      <p className="text-xs text-foreground/50 font-body">Mois restants en 2026 × 9€ × 0,8 — paiement unique</p>
-                      <p className="text-xs text-foreground/40 italic font-body">Ex. en mai : 7 mois × 9€ × 0,8 = 50,40€</p>
+                      <div className="flex items-center gap-2">
+                        <p className="text-sm font-medium text-foreground font-body">Jusqu'à fin 2026</p>
+                        <span className="text-[10px] font-body font-semibold bg-green-100 text-green-700 px-1.5 py-0.5 rounded-full leading-none">-20%</span>
+                      </div>
+                      <p className="text-xs text-foreground/50 font-body">Un seul paiement pour tous les mois restants en 2026</p>
+                      <p className="text-xs text-foreground/40 italic font-body">Ex. aujourd'hui : ~8 mois → environ 58€ au lieu de 72€</p>
                     </div>
-                    <span className="text-sm font-semibold text-primary font-body flex-shrink-0">-20%</span>
+                    <span className="text-sm font-semibold text-primary font-body flex-shrink-0">7,20€/mois</span>
                   </div>
                 </div>
 
