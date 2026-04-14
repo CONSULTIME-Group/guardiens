@@ -12,54 +12,61 @@ interface BadgeSceauProps {
   active?: boolean
   size?: 'normal' | 'compact'
   showCount?: boolean
+  showLabel?: boolean
   className?: string
   obtainedAt?: string
 }
 
+const TIER_COLORS: Record<BadgeTier, { stroke: string; width: number; glow?: string }> = {
+  bronze: { stroke: '#CD7F32', width: 1.5 },
+  silver: { stroke: '#C0C0C0', width: 2 },
+  gold: { stroke: '#D4AF37', width: 2.5, glow: '#FFE27A' },
+  steel: { stroke: '#8A8A8A', width: 2 },
+}
+
 function TierRing({ tier, r }: { tier: BadgeTier; r: number }) {
-  if (tier === 'bronze') {
-    return <circle cx="26" cy="26" r={r} fill="none" stroke="#CD7F32" strokeWidth="1.5" />
-  }
-  if (tier === 'silver') {
-    return <circle cx="26" cy="26" r={r} fill="none" stroke="#C0C0C0" strokeWidth="2" />
-  }
+  const t = TIER_COLORS[tier]
   if (tier === 'gold') {
     return (
       <>
-        <circle cx="26" cy="26" r={r} fill="none" stroke="#D4AF37" strokeWidth="2.5" />
-        <circle cx="26" cy="26" r={r + 2} fill="none" stroke="#FFE27A" strokeWidth="0.5" opacity="0.5" />
+        <circle cx="26" cy="26" r={r} fill="none" stroke={t.stroke} strokeWidth={t.width} />
+        <circle cx="26" cy="26" r={r + 2} fill="none" stroke={t.glow!} strokeWidth="0.5" opacity="0.5" />
       </>
     )
   }
-  return <circle cx="26" cy="26" r={r} fill="none" stroke="#8A8A8A" strokeWidth="2" strokeDasharray="3 2" />
+  if (tier === 'steel') {
+    return <circle cx="26" cy="26" r={r} fill="none" stroke={t.stroke} strokeWidth={t.width} strokeDasharray="3 2" />
+  }
+  return <circle cx="26" cy="26" r={r} fill="none" stroke={t.stroke} strokeWidth={t.width} />
 }
 
-export const BadgeSceau = forwardRef<HTMLSpanElement, BadgeSceauProps>(function BadgeSceau({
+export const BadgeSceau = forwardRef<HTMLDivElement, BadgeSceauProps>(function BadgeSceau({
   id,
   count = 1,
   active,
   size = 'normal',
   showCount = true,
+  showLabel = false,
   className = '',
   obtainedAt,
 }, ref) {
   const [dialogOpen, setDialogOpen] = useState(false)
   const def = BADGE_DEFINITIONS[id]
 
+  const sz = size === 'normal' ? 52 : 40
+
   if (!def) {
-    const sz = size === 'normal' ? 52 : 34
     return (
-      <span ref={ref} className={className}>
+      <div ref={ref} className={className}>
         <svg width={sz} height={sz} viewBox="0 0 52 52">
           <circle cx="26" cy="26" r="22" fill="hsl(var(--muted))" />
         </svg>
-      </span>
+      </div>
     )
   }
 
   const isActive = active !== undefined ? active : (obtainedAt ? isBadgeActive(id, obtainedAt) : true)
   const tier = getTier(id, count)
-  const sz = size === 'normal' ? 52 : 34
   const showPastille = showCount && count > 1 && size === 'normal'
   const pastilleLabel = count > 99 ? '99+' : `×${count}`
 
@@ -68,45 +75,60 @@ export const BadgeSceau = forwardRef<HTMLSpanElement, BadgeSceauProps>(function 
     : null
 
   const svgElement = (
-    <span
+    <div
       ref={ref}
-      className={`relative inline-block cursor-pointer ${className}`}
-      style={{ width: sz, height: sz }}
+      className={`relative inline-flex flex-col items-center cursor-pointer group ${className}`}
+      style={{ width: showLabel ? undefined : sz }}
       onClick={() => setDialogOpen(true)}
     >
-      <svg
-        width={sz}
-        height={sz}
-        viewBox="0 0 52 52"
-        aria-label={def.label}
-        role="img"
-        style={{
-          filter: isActive ? 'none' : 'grayscale(100%)',
-          opacity: isActive ? 1 : 0.3,
-          transition: 'filter 0.3s, opacity 0.3s',
-        }}
-      >
-        <circle cx="26" cy="26" r="22" fill={def.bg} />
-        <circle cx="26" cy="26" r="18" fill="none" stroke={def.iconColor} strokeWidth="0.5" opacity="0.2" />
-        <g transform="translate(6, 6)" dangerouslySetInnerHTML={{ __html: def.svgIcon }} />
-        <TierRing tier={tier} r={24} />
-      </svg>
-
-      {showPastille && (
-        <span
-          className="absolute -top-1 -right-1 flex items-center justify-center rounded-full text-[10px] font-bold leading-none"
+      <div className="relative" style={{ width: sz, height: sz }}>
+        <svg
+          width={sz}
+          height={sz}
+          viewBox="0 0 52 52"
+          aria-label={def.label}
+          role="img"
+          className="transition-all duration-300 group-hover:scale-110"
           style={{
-            width: 18,
-            height: 18,
-            backgroundColor: def.bg,
-            color: def.iconColor,
-            border: `1.5px solid ${def.iconColor}`,
+            filter: isActive ? 'none' : 'grayscale(80%) brightness(1.1)',
+            opacity: isActive ? 1 : 0.4,
           }}
         >
-          {pastilleLabel}
+          {/* Subtle shadow for depth */}
+          {isActive && <circle cx="27" cy="27" r="22" fill="rgba(0,0,0,0.08)" />}
+          <circle cx="26" cy="26" r="22" fill={def.bg} />
+          {/* Inner ring for texture */}
+          <circle cx="26" cy="26" r="18" fill="none" stroke={def.iconColor} strokeWidth="0.5" opacity="0.15" />
+          <g transform="translate(6, 6)" dangerouslySetInnerHTML={{ __html: def.svgIcon }} />
+          <TierRing tier={tier} r={24} />
+        </svg>
+
+        {showPastille && (
+          <span
+            className="absolute -top-1 -right-1 flex items-center justify-center rounded-full text-[10px] font-bold leading-none shadow-sm"
+            style={{
+              width: 18,
+              height: 18,
+              backgroundColor: def.bg,
+              color: def.iconColor,
+              border: `1.5px solid ${def.iconColor}`,
+            }}
+          >
+            {pastilleLabel}
+          </span>
+        )}
+      </div>
+
+      {showLabel && (
+        <span
+          className="mt-1 text-[10px] leading-tight text-center font-medium max-w-[56px] truncate"
+          style={{ color: isActive ? 'hsl(var(--foreground))' : 'hsl(var(--muted-foreground))' }}
+          title={def.label}
+        >
+          {def.label}
         </span>
       )}
-    </span>
+    </div>
   )
 
   return (
