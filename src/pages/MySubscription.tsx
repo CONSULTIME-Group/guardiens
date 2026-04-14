@@ -393,7 +393,7 @@ const MySubscription = () => {
                     { label: "Maintenant", sub: "Accès complet", active: true, amber: false },
                     { label: "13 mai", sub: "Badge Fondateur", active: false, amber: true },
                     { label: "13 juin", sub: "Fin de grâce", active: false, amber: false },
-                    { label: "Ensuite", sub: "9€/mois", active: false, amber: false },
+                    { label: "Ensuite", sub: "À partir de 9€/mois", active: false, amber: false },
                   ].map(({ label, sub: subText, active, amber }) => (
                     <div key={label} role="listitem" className="flex flex-col items-center gap-1.5 z-10 flex-1">
                       <div className={[
@@ -480,22 +480,25 @@ const MySubscription = () => {
               {/* Founder block */}
               {countdown.daysLeft > 0 && (
                 <div className="px-6 sm:px-8 py-6 border-b border-border/50 bg-amber-50/60">
-                  <div className="space-y-2.5">
-                    <p className="text-sm font-semibold text-amber-800 font-body">Vous devenez Fondateur le 13 mai.</p>
-                    <p className="text-sm text-amber-700 font-body leading-relaxed">
-                      Chaque membre inscrit avant le 13 mai bénéficie d'un mois supplémentaire gratuit jusqu'au 13 juin, et reçoit le badge Fondateur à vie, visible sur son profil public.
-                    </p>
-                    <div className="mt-4 space-y-2 border-t border-amber-200/70 pt-4">
-                      {FOUNDER_FAQ.map(({ q, a }) => (
-                        <details key={q} className="group cursor-pointer">
-                          <summary className="text-xs font-medium text-amber-700 font-body list-none flex items-center gap-1.5 hover:text-amber-900 transition-colors select-none">
-                            <ChevronRight className="w-3 h-3 flex-shrink-0 transition-transform duration-200 group-open:rotate-90" aria-hidden="true" />
-                            {q}
-                          </summary>
-                          <p className="mt-1.5 pl-[18px] text-xs text-amber-700/80 font-body leading-relaxed">{a}</p>
-                        </details>
-                      ))}
+                  <div className="flex items-start gap-3 mb-3">
+                    <FounderBadge size="lg" />
+                    <div className="space-y-1">
+                      <p className="text-sm font-semibold text-amber-800 font-body">Vous devenez Fondateur le 13 mai.</p>
+                      <p className="text-sm text-amber-700 font-body leading-relaxed">
+                        Chaque membre inscrit avant le 13 mai bénéficie d'un mois supplémentaire gratuit jusqu'au 13 juin, et reçoit le badge Fondateur à vie, visible sur son profil public.
+                      </p>
                     </div>
+                  </div>
+                  <div className="mt-4 space-y-2 border-t border-amber-200/70 pt-4">
+                    {FOUNDER_FAQ.map(({ q, a }) => (
+                      <details key={q} className="group cursor-pointer">
+                        <summary className="text-xs font-medium text-amber-700 font-body list-none flex items-center gap-1.5 hover:text-amber-900 transition-colors select-none">
+                          <ChevronRight className="w-3 h-3 flex-shrink-0 transition-transform duration-200 group-open:rotate-90" aria-hidden="true" />
+                          {q}
+                        </summary>
+                        <p className="mt-1.5 pl-[18px] text-xs text-amber-700/80 font-body leading-relaxed">{a}</p>
+                      </details>
+                    ))}
                   </div>
                 </div>
               )}
@@ -513,6 +516,30 @@ const MySubscription = () => {
                 <p className="text-xs text-foreground/40 font-body text-center">Revenez ici le 13 mai pour choisir votre formule.</p>
               </div>
             </div>
+
+            {/* Pricing preview */}
+            <div className="bg-card border border-border/60 rounded-xl p-5 space-y-3">
+              <p className="text-xs uppercase tracking-widest text-foreground/50 font-body">Après le 13 juin — les formules disponibles</p>
+              <div className="grid grid-cols-3 gap-3">
+                <div className="text-center space-y-1">
+                  <p className="font-heading text-xl font-bold text-foreground">12€</p>
+                  <p className="text-[11px] text-foreground/50 font-body">Un mois, sans engagement</p>
+                </div>
+                <div className="text-center space-y-1 border-x border-border/40 px-2">
+                  <p className="font-heading text-xl font-bold text-primary">9€<span className="text-xs font-normal text-foreground/50">/mois</span></p>
+                  <p className="text-[11px] text-foreground/50 font-body">7 jours d'essai offerts</p>
+                </div>
+                <div className="text-center space-y-1">
+                  <span className="inline-flex bg-green-100 text-green-700 text-[10px] px-1.5 py-0.5 rounded-full font-medium font-body">-20%</span>
+                  <p className="font-heading text-xl font-bold text-foreground">~7€<span className="text-xs font-normal text-foreground/50">/mois</span></p>
+                  <p className="text-[11px] text-foreground/50 font-body">Jusqu'à fin 2026</p>
+                </div>
+              </div>
+              <p className="text-xs text-foreground/40 font-body text-center">Aucun prélèvement automatique avant votre choix.</p>
+            </div>
+
+            {/* Entraide banner */}
+            <EntraideLibreBanner />
 
             {/* Referral section */}
             <div className="bg-muted/50 rounded-xl px-5 sm:px-6 py-5 space-y-4">
