@@ -45,6 +45,7 @@ import pensionChienAlternativesCover from "@/assets/pension-chien-alternatives-c
 import gardeAnimauxCroixRousse from "@/assets/garde-animaux-croix-rousse-lyon.jpg";
 import gardeAnimalHospitalisation from "@/assets/garde-animal-hospitalisation-cover.jpg";
 import gardeChatDomicileLyon from "@/assets/garde-chat-domicile-lyon.jpg";
+import gardeChatPresquileLyon from "@/assets/garde-chat-presquile-lyon.jpg";
 
 const ARTICLE_IMAGES: Record<string, string> = {
   "/images/lyon-hero-quais.jpg": lyonHeroQuais,
