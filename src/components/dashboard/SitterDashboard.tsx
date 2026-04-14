@@ -284,10 +284,10 @@ const SitterDashboard = () => {
         }}
       />
       {/* Role activation banner */}
-      <div className="px-5 md:px-8 mb-4">
+      <div className="px-4 sm:px-5 md:px-8 mb-4">
         <RoleActivationBanner userRole={user?.role || "sitter"} />
       </div>
-      <div className="relative overflow-hidden bg-[#1a4a35] rounded-b-3xl px-5 md:px-10 pt-6 md:pt-8 pb-5 md:pb-6 mb-6 md:mb-8">
+      <div className="relative overflow-hidden bg-[#1a4a35] rounded-b-3xl px-4 sm:px-5 md:px-10 pt-5 sm:pt-6 md:pt-8 pb-4 sm:pb-5 md:pb-6 mb-6 md:mb-8">
         <div className="absolute right-0 top-0 opacity-[0.07] pointer-events-none">
           <svg width="300" height="200" viewBox="0 0 300 200">
             <circle cx="250" cy="50" r="120" fill="white"/>
@@ -301,7 +301,7 @@ const SitterDashboard = () => {
               Espace gardien
             </p>
             <div className="flex items-center gap-3">
-              <h1 className="text-2xl md:text-4xl font-heading font-bold text-white leading-tight mb-1">
+              <h1 className="text-xl sm:text-2xl md:text-4xl font-heading font-bold text-white leading-tight mb-1">
                 Bonjour{user?.firstName ? `, ${capitalize(user.firstName)}` : ""} !
               </h1>
               {user?.isFounder && <FounderBadge size="sm" />}
@@ -339,11 +339,11 @@ const SitterDashboard = () => {
         </div>
       </div>
 
-      <div className="px-5 md:px-8 mt-4">
+      <div className="px-4 sm:px-5 md:px-8 mt-4">
         <AccessGateBanner level={level} profileCompletion={accessProfileCompletion} context="guard" />
       </div>
 
-      <div className="px-5 md:px-8 -mt-4 mb-2">
+      <div className="px-4 sm:px-5 md:px-8 -mt-4 mb-2">
         <button
           onClick={() => setSearchParams({ tour: "true" })}
           className="text-xs text-muted-foreground underline-offset-4 hover:underline"
@@ -353,7 +353,7 @@ const SitterDashboard = () => {
       </div>
 
       {/* ═══ 2. BARRE DE STATUT UNIFIÉE ═══ */}
-      <div className="mx-5 md:mx-8 mb-6 md:mb-8 bg-card border border-border rounded-2xl overflow-hidden grid grid-cols-1 md:grid-cols-3">
+      <div className="mx-4 sm:mx-5 md:mx-8 mb-6 md:mb-8 bg-card border border-border rounded-2xl overflow-hidden grid grid-cols-1 md:grid-cols-3">
         {/* Zone 1 — MON PROFIL */}
         <div className="p-4 md:p-5 border-b md:border-b-0 md:border-r border-border">
           <p className="text-xs uppercase tracking-widest text-muted-foreground font-sans mb-3">
@@ -470,10 +470,10 @@ const SitterDashboard = () => {
       </div>
 
       {/* Emergency active section */}
-      {hasEmergencyProfile && <div className="px-5 md:px-8"><EmergencyDashSection /></div>}
+      {hasEmergencyProfile && <div className="px-4 sm:px-5 md:px-8"><EmergencyDashSection /></div>}
 
       {/* ═══ 3. CTA + TIMBRES ═══ */}
-      <div className="px-5 md:px-8 mb-6 md:mb-8">
+      <div className="px-4 sm:px-5 md:px-8 mb-6 md:mb-8">
         <button
           onClick={() => navigate('/search')}
           className="w-full bg-primary text-white rounded-2xl py-4 text-base font-sans font-semibold mb-6 hover:bg-primary/90 transition-colors"
@@ -490,7 +490,7 @@ const SitterDashboard = () => {
         </div>
 
         {/* Grille 12 badges gardien */}
-        <div className="grid grid-cols-6 gap-2 mb-4">
+        <div className="grid grid-cols-4 sm:grid-cols-6 gap-2 mb-4">
           {GARDIEN_BADGE_IDS.map(id => {
             const userBadge = userBadges?.find(b => b.badge_id === id);
             const count = userBadge?.count ?? 0;
@@ -534,7 +534,7 @@ const SitterDashboard = () => {
       </div>
 
       {/* ═══ 4. CHECKLIST ═══ */}
-      <div className="px-5 md:px-8 mb-6 md:mb-8">
+      <div className="px-4 sm:px-5 md:px-8 mb-6 md:mb-8">
         {incompleteItems.length > 0 && (
           <div className="mb-4">
             <p className="text-sm font-medium text-foreground mb-3">
@@ -601,7 +601,7 @@ const SitterDashboard = () => {
       </div>
 
       {/* ═══ 5. BAS DE PAGE — DEUX COLONNES ═══ */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 px-5 md:px-8 mb-6 md:mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 px-4 sm:px-5 md:px-8 mb-6 md:mb-8">
         {/* Colonne gauche — Annonces */}
         <div className="bg-card border border-border rounded-2xl p-5">
           <div className="flex justify-between items-center mb-4">
@@ -686,20 +686,20 @@ const SitterDashboard = () => {
       </div>
 
       {/* Éligibilité gardien d'urgence */}
-      <div className="px-5 md:px-8 mb-6 md:mb-8">
+      <div className="px-4 sm:px-5 md:px-8 mb-6 md:mb-8">
         <EmergencyEligibility />
       </div>
 
       {/* Conseils */}
       {articles.length > 0 && (
-        <div className="px-5 md:px-8 mb-6 md:mb-8">
+        <div className="px-4 sm:px-5 md:px-8 mb-6 md:mb-8">
           <div className="flex items-center justify-between mb-4">
             <h2 className="font-heading text-lg font-semibold">Conseils pour vous</h2>
             <Link to="/actualites" className="text-xs text-primary hover:underline font-medium">Voir tout →</Link>
           </div>
           <div className="flex gap-3 overflow-x-auto pb-1 -mx-1 px-1">
             {articles.map((a: any) => (
-              <a key={a.id} href={`/actualites/${a.slug}`} className="flex-shrink-0 w-64 rounded-xl border border-border bg-card overflow-hidden hover:shadow-md transition-shadow cursor-pointer">
+              <a key={a.id} href={`/actualites/${a.slug}`} className="flex-shrink-0 w-[70vw] sm:w-64 rounded-xl border border-border bg-card overflow-hidden hover:shadow-md transition-shadow cursor-pointer">
                 {a.cover_image_url ? (
                   <img src={a.cover_image_url} alt="" className="w-full h-28 object-cover" />
                 ) : (
