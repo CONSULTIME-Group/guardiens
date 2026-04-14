@@ -122,23 +122,18 @@ const CreateSit = () => {
   useEffect(() => {
     if (!user) return;
     const load = async () => {
-      const queries: Promise<any>[] = [
+      const [propRes, ownerRes, profileRes, galleryRes] = await Promise.all([
         supabase.from("properties").select("*").eq("user_id", user.id).limit(1).maybeSingle(),
         supabase.from("owner_profiles").select("*").eq("user_id", user.id).maybeSingle(),
         supabase.from("profiles").select("profile_completion").eq("id", user.id).single(),
         supabase.from("owner_gallery").select("photo_url").eq("user_id", user.id).limit(4),
-      ];
+      ]);
 
-      // If republishing, also fetch the source sit
+      // If republishing, fetch the source sit in parallel
+      let sourceSitRes: { data: any } | null = null;
       if (fromSitId) {
-        queries.push(
-          supabase.from("sits").select("title, specific_expectations, open_to, environments, min_gardien_sits, flexible_dates").eq("id", fromSitId).single()
-        );
+        sourceSitRes = await supabase.from("sits").select("title, specific_expectations, open_to, environments, min_gardien_sits, flexible_dates").eq("id", fromSitId).single();
       }
-
-      const results = await Promise.all(queries);
-      const [propRes, ownerRes, profileRes, galleryRes] = results;
-      const sourceSitRes = fromSitId ? results[4] : null;
 
       setProfileCompletion(profileRes.data?.profile_completion || 0);
       setOwnerPhotos((galleryRes.data || []).map((g: any) => g.photo_url));
