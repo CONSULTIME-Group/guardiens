@@ -22,6 +22,7 @@ import CompetenceAutocomplete from "@/components/profile/CompetenceAutocomplete"
 const CATEGORY_META: Record<string, { label: string; icon: typeof Dog; colorClass: string }> = {
   animals: { label: "Animaux", icon: Dog, colorClass: "text-primary" },
   garden: { label: "Jardin", icon: Flower2, colorClass: "text-primary" },
+  house: { label: "Maison", icon: Handshake, colorClass: "text-primary" },
   skills: { label: "Compétences", icon: Handshake, colorClass: "text-primary" },
   coups_de_main: { label: "Coups de main", icon: Handshake, colorClass: "text-primary" },
 };
@@ -429,6 +430,8 @@ const SmallMissions = () => {
     })();
   }, [availableHelpers]);
 
+  const normalizedSearch = competenceSearch.toLowerCase().trim();
+
   const filteredMissions = useMemo(() => {
     return (allMissions || [])
       .filter((m: any) => {
@@ -442,7 +445,13 @@ const SmallMissions = () => {
             const dist = haversineDistance(originCoords.lat, originCoords.lng, mc.lat, mc.lng);
             if (dist > radiusKm) return false;
           }
-          // If no coords for mission, keep it (can't filter)
+        }
+        // Competence search also filters missions by title/description
+        if (normalizedSearch) {
+          const titleMatch = m.title?.toLowerCase().includes(normalizedSearch);
+          const descMatch = m.description?.toLowerCase().includes(normalizedSearch);
+          const exchangeMatch = m.exchange_offer?.toLowerCase().includes(normalizedSearch);
+          if (!titleMatch && !descMatch && !exchangeMatch) return false;
         }
         return true;
       })
@@ -458,9 +467,7 @@ const SmallMissions = () => {
         }
         return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
       });
-  }, [allMissions, categoryFilter, user?.id, originCoords, radiusKm, missionCoords, mySkills]);
-
-  const normalizedSearch = competenceSearch.toLowerCase().trim();
+  }, [allMissions, categoryFilter, user?.id, originCoords, radiusKm, missionCoords, mySkills, normalizedSearch]);
 
   const filteredHelpers = useMemo(() => {
     return (availableHelpers || []).filter((h: any) => {
