@@ -190,8 +190,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           templateData: { firstName: "", role },
         },
       }).catch((err) => console.warn("Welcome email failed:", err));
-    }
-
       // Pre-set activeRole so the first dashboard load matches the chosen role
       const initialActive: ActiveRole = role === "sitter" ? "sitter" : "owner";
       localStorage.setItem("guardiens_active_role", initialActive);
