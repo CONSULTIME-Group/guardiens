@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, ShieldCheck, Siren, BadgeCheck, Mountain } from "lucide-react";
 import heroAnnecy from "@/assets/hero-annecy.jpg";
+import heroLyon from "@/assets/hero-lyon.jpg";
 
 interface CityHeroProps {
   city: string;
@@ -15,6 +16,7 @@ interface CityHeroProps {
 
 const CITY_HERO_IMAGES: Record<string, string> = {
   annecy: heroAnnecy,
+  lyon: heroLyon,
 };
 
 const trustSignals = [

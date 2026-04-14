@@ -115,28 +115,24 @@ const CityPage = () => {
   if (cityData) {
     const content = getCityContent(cityData.slug);
 
-    const faqItems = [
-      {
-        q: `Comment trouver un gardien de maison à ${cityData.name} ?`,
-        a: `Sur Guardiens, vous publiez une annonce gratuite et les gardiens disponibles à ${cityData.name} et ses environs postulent directement. Chaque gardien est vérifié manuellement avant d'apparaître sur la plateforme.`,
-      },
-      {
-        q: `Est-ce vraiment gratuit pour les propriétaires à ${cityData.name} ?`,
-        a: "Oui. Guardiens est gratuit pour tous les propriétaires, sans limite dans le temps. Seuls les gardiens paient un abonnement annuel de 49€ pour accéder aux annonces et postuler.",
-      },
-      {
-        q: `Que se passe-t-il en cas d'urgence pendant la garde à ${cityData.name} ?`,
-        a: `Guardiens dispose d'un réseau de Gardiens d'Urgence dans chaque zone, disponibles sous 15 minutes. En cas d'imprévu — animal malade, problème technique — le gardien en poste peut déclencher une alerte directement depuis l'application.`,
-      },
-      {
-        q: `Combien coûte une pension pour animaux à ${cityData.name} ?`,
-        a: `Les pensions autour de ${cityData.name} facturent en moyenne 25 à 45 € par nuit et par animal. Sur Guardiens, c'est gratuit pour le propriétaire : le gardien s'installe chez vous, s'occupe de vos animaux dans leur environnement habituel, et veille sur votre maison.`,
-      },
-      {
-        q: `Comment devenir gardien à ${cityData.name} ?`,
-        a: `Inscrivez-vous gratuitement, complétez votre profil et faites vérifier votre identité. Vous pourrez ensuite postuler aux gardes disponibles en ${cityData.department}. L'abonnement gardien est de 9€/mois, résiliable à tout moment.`,
-      },
-    ];
+    const faqItems = cityData.slug === "lyon"
+      ? [
+          { q: "Comment rencontrer un gardien avant de confier ma maison ?", a: "Après avoir accepté une candidature, vous organisez une rencontre directement via la messagerie Guardiens. La plupart des propriétaires à Lyon choisissent un café de quartier ou une visite du logement. Cette étape est systématique et fortement recommandée." },
+          { q: "Que se passe-t-il en cas d'urgence ou d'imprévu ?", a: "Guardiens dispose d'un réseau de gardiens d'urgence à Lyon, mobilisables rapidement. En cas de problème vétérinaire, le gardien contacte la clinique indiquée dans le guide de la maison. En cas de problème technique, il suit les consignes laissées par le propriétaire." },
+          { q: "Comment sont vérifiés les gardiens à Lyon ?", a: "Chaque gardien fournit une pièce d'identité vérifiée manuellement par l'équipe Guardiens. Les avis croisés après chaque garde et les badges de fiabilité complètent le dispositif de confiance." },
+          { q: "Puis-je publier une annonce pour un chien ET un chat ?", a: "Absolument. Votre annonce peut inclure tous vos animaux. Les gardiens qui postulent voient la composition exacte de votre foyer et décident en connaissance de cause." },
+          { q: "Combien de temps à l'avance faut-il publier mon annonce ?", a: "Pour les vacances d'été à Lyon, nous recommandons un mois à l'avance. Pour un week-end, une à deux semaines suffisent. Plus l'annonce est publiée tôt, plus vous recevez de candidatures de qualité." },
+          { q: "Que faire si mon gardien annule au dernier moment ?", a: "C'est rare mais cela peut arriver. Guardiens active alors le réseau de gardiens d'urgence de votre zone. Le système de fiabilité pénalise les annulations répétées pour garantir la qualité du réseau." },
+          { q: "Comment se passe la remise des clés à Lyon ?", a: "Lors de la rencontre préalable ou le jour du départ, vous remettez les clés en main propre à votre gardien. Certains propriétaires lyonnais laissent un double dans une boîte à clés sécurisée." },
+          { q: "Guardiens fonctionne-t-il pour les gardes de plusieurs semaines ?", a: "Oui. La plateforme est conçue pour les gardes de toute durée, du week-end prolongé aux absences de plusieurs semaines. Les gardiens indiquent leurs disponibilités sur leur profil." },
+        ]
+      : [
+          { q: `Comment trouver un gardien de maison à ${cityData.name} ?`, a: `Sur Guardiens, vous publiez une annonce et les gardiens disponibles à ${cityData.name} et ses environs postulent directement. Chaque gardien est vérifié manuellement avant d'apparaître sur la plateforme.` },
+          { q: `Est-ce vraiment gratuit pour les propriétaires à ${cityData.name} ?`, a: "Oui. Guardiens est sans frais pour tous les propriétaires, sans limite dans le temps. Seuls les gardiens paient un abonnement pour accéder aux annonces et postuler." },
+          { q: `Que se passe-t-il en cas d'urgence pendant la garde à ${cityData.name} ?`, a: `Guardiens dispose d'un réseau de Gardiens d'Urgence dans chaque zone. En cas d'imprévu — animal malade, problème technique — le gardien en poste peut déclencher une alerte.` },
+          { q: `Combien coûte une pension pour animaux à ${cityData.name} ?`, a: `Les pensions autour de ${cityData.name} facturent en moyenne 25 à 45 euros par nuit et par animal. Sur Guardiens, c'est sans frais pour le propriétaire : le gardien s'installe chez vous et s'occupe de vos animaux dans leur environnement habituel.` },
+          { q: `Comment devenir gardien à ${cityData.name} ?`, a: `Inscrivez-vous, complétez votre profil et faites vérifier votre identité. Vous pourrez ensuite postuler aux gardes disponibles en ${cityData.department}. L'abonnement gardien est de 9 euros par mois, résiliable à tout moment.` },
+        ];
 
     return (
       <>
