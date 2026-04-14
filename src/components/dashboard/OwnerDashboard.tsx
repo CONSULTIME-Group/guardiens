@@ -21,6 +21,7 @@ import { useUserBadges } from "@/hooks/useProfileReputation";
 import { PROPRIO_BADGE_IDS } from "@/components/badges/badge-definitions";
 
 /* ── Extracted sub-components ── */
+import MonAnnonceCard from "./owner/MonAnnonceCard";
 import ApplicationsSection from "./owner/ApplicationsSection";
 import ContextualResources from "./owner/ContextualResources";
 import MyMissionsColumn from "./owner/MyMissionsColumn";
@@ -60,6 +61,8 @@ const OwnerDashboard = () => {
   const [sitterBadges, setSitterBadges] = useState<Record<string, { badge_key: string; count: number }[]>>({});
   const [sitterProfiles, setSitterProfiles] = useState<Record<string, SitterInfo>>({});
   const [trustedSitterCount, setTrustedSitterCount] = useState(0);
+  const [propertyType, setPropertyType] = useState<string | null>(null);
+  const [propertyEnvironment, setPropertyEnvironment] = useState<string | null>(null);
 
   /* ── UI state ── */
   const [loading, setLoading] = useState(true);
@@ -113,7 +116,7 @@ const OwnerDashboard = () => {
       try {
         const [sitsRes, propsRes, reviewsRes, profileRes, highlightsRes, missionsRes] = await Promise.all([
           supabase.from("sits").select("*, applications(id, status, sitter_id)").eq("user_id", user.id).order("created_at", { ascending: false }),
-          supabase.from("properties").select("id").eq("user_id", user.id),
+          supabase.from("properties").select("id, type, environment").eq("user_id", user.id),
           supabase.from("reviews").select("overall_rating").eq("reviewee_id", user.id).eq("published", true),
           supabase.from("profiles").select("first_name, avatar_url, bio, identity_verification_status, onboarding_completed, onboarding_dismissed_at, onboarding_minimal_completed").eq("id", user.id).single(),
           supabase.from("owner_highlights").select("*, sitter:profiles!owner_highlights_sitter_id_fkey(first_name, avatar_url)").eq("owner_id", user.id).eq("hidden", false).order("created_at", { ascending: false }).limit(5),
@@ -147,7 +150,12 @@ const OwnerDashboard = () => {
         const hasAvatar = !!(p?.avatar_url);
         const hasBio = !!(p?.bio && p.bio.length > 10);
         const hasIdentity = verStatus === "verified" || verStatus === "pending";
-        const hasProperty = (propsRes.data || []).length > 0;
+        const propsData = propsRes.data || [];
+        const hasProperty = propsData.length > 0;
+        if (propsData.length > 0) {
+          setPropertyType((propsData[0] as any).type || null);
+          setPropertyEnvironment((propsData[0] as any).environment || null);
+        }
         const hasSit = sitsData.length > 0;
         setOnboardingChecks({ hasName, hasAvatar, hasBio, hasIdentity, hasProperty, hasPets: false, hasSit });
 
@@ -409,6 +417,17 @@ const OwnerDashboard = () => {
           </div>
         </div>
       )}
+
+      {/* ═══ Mon annonce ═══ */}
+      <div className="px-5 md:px-8">
+        <MonAnnonceCard
+          sits={sits}
+          pets={pets}
+          propertyType={propertyType}
+          propertyEnvironment={propertyEnvironment}
+          pendingAppCount={pendingAppCount}
+        />
+      </div>
 
       {/* ═══ Candidatures ═══ */}
       <div className="px-5 md:px-8">

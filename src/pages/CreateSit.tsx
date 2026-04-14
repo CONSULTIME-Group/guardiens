@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
@@ -96,6 +96,8 @@ const CreateSit = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const fromSitId = searchParams.get("from");
 
   const [title, setTitle] = useState("");
   const [startDate, setStartDate] = useState("");
@@ -115,6 +117,7 @@ const CreateSit = () => {
   const [profileCompletion, setProfileCompletion] = useState(0);
   const [loading, setLoading] = useState(true);
   const [publishing, setPublishing] = useState(false);
+  const [isRepublish, setIsRepublish] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -126,8 +129,26 @@ const CreateSit = () => {
         supabase.from("owner_gallery").select("photo_url").eq("user_id", user.id).limit(4),
       ]);
 
+      // If republishing, fetch the source sit in parallel
+      let sourceSitRes: { data: any } | null = null;
+      if (fromSitId) {
+        sourceSitRes = await supabase.from("sits").select("title, specific_expectations, open_to, environments, min_gardien_sits, flexible_dates").eq("id", fromSitId).single();
+      }
+
       setProfileCompletion(profileRes.data?.profile_completion || 0);
       setOwnerPhotos((galleryRes.data || []).map((g: any) => g.photo_url));
+
+      // Pre-fill from previous sit if republishing
+      if (sourceSitRes?.data) {
+        const s = sourceSitRes.data;
+        setTitle(s.title || "");
+        setSpecificExpectations(s.specific_expectations || "");
+        setOpenTo(s.open_to || []);
+        setSitEnvironments(s.environments || []);
+        setMinGardienSits(s.min_gardien_sits || 0);
+        setFlexibleDates(s.flexible_dates || false);
+        setIsRepublish(true);
+      }
 
       if (propRes.data) {
         const p = propRes.data;
@@ -156,12 +177,15 @@ const CreateSit = () => {
           communication_notes: o.communication_notes,
           environments: (o as any).environments || [],
         });
-        setSitEnvironments((o as any).environments || []);
+        // Only set environments from owner profile if NOT republishing (source sit takes priority)
+        if (!fromSitId) {
+          setSitEnvironments((o as any).environments || []);
+        }
       }
       setLoading(false);
     };
     load();
-  }, [user]);
+  }, [user, fromSitId]);
 
   const today = new Date().toISOString().split("T")[0];
   const dateError = startDate && endDate && startDate >= endDate
@@ -220,10 +244,16 @@ const CreateSit = () => {
         <ArrowLeft className="h-4 w-4" /> Retour à mes gardes
       </Link>
 
-      <h1 className="font-heading text-3xl font-bold mb-2">Publier une garde</h1>
-      <p className="text-muted-foreground mb-4">Les informations de votre profil sont pré-remplies. Ajoutez les détails spécifiques à cette garde.</p>
+      <h1 className="font-heading text-3xl font-bold mb-2">
+        {isRepublish ? "Republier une garde" : "Publier une garde"}
+      </h1>
+      <p className="text-muted-foreground mb-4">
+        {isRepublish
+          ? "Les informations de votre précédente annonce sont pré-remplies. Ajustez les dates et détails si besoin."
+          : "Les informations de votre profil sont pré-remplies. Ajoutez les détails spécifiques à cette garde."}
+      </p>
 
-      <FirstAnnonceTip />
+      {!isRepublish && <FirstAnnonceTip />}
 
       {profileCompletion < 60 && (
         <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-4 mb-8 flex items-start gap-3">
