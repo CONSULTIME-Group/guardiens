@@ -178,11 +178,11 @@ export function useOwnerProfile() {
     total += s2 * 25;
     // Step 3 (25%): at least one pet
     total += petsCount > 0 ? 25 : 0;
-    // Step 4 (15%): presence_expected, visits_allowed
-    const s4 = [d.presence_expected, d.visits_allowed].filter(Boolean).length / 2;
+    // Step 4 (15%): presence_expected, visits_allowed, meeting_preference, news_frequency
+    const s4 = [d.presence_expected, d.visits_allowed, d.meeting_preference.length > 0, d.news_frequency].filter(Boolean).length / 4;
     total += s4 * 15;
-    // Step 5 (10%): meeting_preference, news_frequency
-    const s5 = [d.meeting_preference.length > 0, d.news_frequency].filter(Boolean).length / 2;
+    // Step 5 (10%): handover_preference, news_format
+    const s5 = [d.handover_preference, d.news_format.length > 0].filter(Boolean).length / 2;
     total += s5 * 10;
     return Math.round(total);
   }, []);
