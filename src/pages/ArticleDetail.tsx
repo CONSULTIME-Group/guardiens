@@ -10,7 +10,7 @@ import PageMeta from "@/components/PageMeta";
 import { Helmet } from "react-helmet-async";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import ArticleRenderer from "@/components/articles/ArticleRenderer";
+import ArticleRenderer, { resolveImagePath } from "@/components/articles/ArticleRenderer";
 
 interface ArticleFull {
   id: string;
