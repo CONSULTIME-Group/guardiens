@@ -78,42 +78,44 @@ export const CITIES: CityData[] = [
     region: "Auvergne-Rhône-Alpes",
     coordinates: { lat: 45.764, lng: 4.8357 },
     zoneProfile: "urbain",
-    keywordPrimary: "house-sitting Lyon",
+    keywordPrimary: "garde chien Lyon",
     keywordSecondary: [
-      "garde maison Lyon",
-      "pet sitting Lyon",
+      "pet sitter Lyon",
+      "home sitting Lyon",
+      "garde animaux Lyon",
       "gardien maison Lyon",
+      "house-sitting Lyon",
     ],
-    h1: "House-sitting à Lyon : un voisin de confiance chez vous",
+    h1: "Garde de chien et de chat à Lyon : la plateforme de confiance des propriétaires",
     metaDescription:
-      "House-sitting et garde d'animaux à Lyon par des gardiens vérifiés de votre quartier. Gratuit pour les propriétaires. Disponible 7j/7.",
+      "Faites garder votre chien, votre chat ou votre maison à Lyon par un gardien de proximité. Inscription gratuite pour les propriétaires. Sans commission.",
     localSpots: [
       {
         name: "Parc de la Tête d'Or",
         type: "parc",
-        tip: "Entrée libre, laisse obligatoire. Évitez les week-ends entre 10h et 17h pour les chiens stressés.",
+        tip: "Entrée libre, laisse obligatoire. 105 hectares de pelouses et sentiers ombragés, idéal pour les promenades matinales.",
       },
       {
         name: "Quais de Saône (rive droite)",
         type: "balade",
-        tip: "3 km piétons sans voiture de Saint-Paul à Île Barbe. Idéal pour les promenades du soir.",
+        tip: "3 km piétons sans voiture de Saint-Paul à Île Barbe. Parfait pour les promenades du soir avec un chien calme.",
       },
       {
-        name: "Presqu'île",
-        type: "quartier",
-        tip: "Certaines copropriétés interdisent les animaux dans les parties communes — vérifier avant mission.",
+        name: "Berges du Rhône",
+        type: "balade",
+        tip: "5 km de promenade aménagée, zones enherbées pour les chiens. Ambiance familiale le week-end.",
       },
     ],
     riskProfile: [
-      "Canicule urbaine : îlot de chaleur persistant juillet–août, logements non climatisés fréquents",
-      "Pics de pollution aux particules : automne-hiver, vigilance pour les animaux asthmatiques",
+      "Canicule urbaine : îlot de chaleur persistant juillet-août, logements non climatisés fréquents",
+      "Pics de pollution aux particules : automne-hiver, vigilance pour les animaux sensibles",
     ],
     expertiseTips: [
       "Nos gardiens lyonnais connaissent les règles de copropriété et les horaires de sorties adaptés à la chaleur urbaine.",
       "Pour les logements en étage sans ascenseur ou sans jardin, nos gardiens adaptent le rythme des sorties.",
     ],
     heroImageAlt:
-      "House-sitting Lyon - Garde maison et animaux à Lyon - Guardiens",
+      "Garde de chien et de chat à Lyon - Vue panoramique depuis Fourvière - Guardiens",
   },
   {
     slug: "grenoble",
