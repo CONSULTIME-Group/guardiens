@@ -262,7 +262,7 @@ const AdminUsers = () => {
                 </TableCell>
               </TableRow>
             ) : (
-              filtered.map((user) => {
+              paginated.map((user) => {
                 const verif = verificationLabels[user.identity_verification_status || "not_submitted"] || verificationLabels.not_submitted;
                 const status = statusLabels[user.account_status || "active"] || statusLabels.active;
 
