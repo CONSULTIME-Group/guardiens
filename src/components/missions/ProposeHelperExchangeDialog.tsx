@@ -37,40 +37,21 @@ const ProposeHelperExchangeDialog = ({
     setLoading(true);
 
     try {
-      // 1. Create a small_mission from the requester
-      const { data: mission, error: missionError } = await supabase
-        .from("small_missions")
-        .insert({
-          user_id: user.id,
-          title: needDescription.trim().slice(0, 120),
-          description: needDescription.trim(),
-          category: "skills" as any,
-          exchange_offer: exchangeOffer.trim(),
-          city: helper.city || "",
-          postal_code: "",
-          duration_estimate: "1-2h",
-          date_needed: exchangeDate || null,
-        } as any)
-        .select("id")
-        .single();
-
-      if (missionError) throw missionError;
-      const missionId = mission.id;
-
-      // 2. Create conversation linked to mission
+      // Create conversation directly (no ghost mission)
       const { data: conv, error: convError } = await supabase
         .from("conversations")
         .insert({
           owner_id: user.id,
           sitter_id: helper.id,
-          small_mission_id: missionId,
+          sit_id: null,
+          small_mission_id: null,
         })
         .select("id")
         .single();
 
       if (convError) throw convError;
 
-      // 3. Send message
+      // Send structured message
       const messageContent = [
         `💡 Proposition d'échange`,
         `\n🔍 Ce dont j'ai besoin : ${needDescription.trim()}`,
@@ -85,19 +66,7 @@ const ProposeHelperExchangeDialog = ({
         is_system: false,
       });
 
-      // 4. Create a response entry (pending) for the helper to accept/refuse
-      await supabase.from("small_mission_responses").insert({
-        mission_id: missionId,
-        responder_id: helper.id,
-        message: exchangeOffer.trim(),
-        exchange_offer: exchangeOffer.trim(),
-        need_description: needDescription.trim(),
-        exchange_date: exchangeDate || null,
-        status: "pending" as any,
-        conversation_id: conv.id,
-      });
-
-      // 5. Notify helper
+      // Notify helper
       await supabase.from("notifications").insert({
         user_id: helper.id,
         type: "mission_proposal",
