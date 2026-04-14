@@ -5,7 +5,7 @@ import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Calendar, MapPin, Star, ShieldCheck, Home, PawPrint, MessageSquare, CheckCircle2, XCircle, Send, Pencil, Heart, LockKeyhole, ExternalLink, ChevronDown } from "lucide-react";
+import { ArrowLeft, Calendar, MapPin, Star, ShieldCheck, Home, PawPrint, MessageSquare, CheckCircle2, XCircle, Send, Pencil, Heart, LockKeyhole, ExternalLink, ChevronDown, Plus, Minus } from "lucide-react";
 import { useSubscriptionAccess } from "@/hooks/useSubscriptionAccess";
 import { useAccessLevel } from "@/hooks/useAccessLevel";
 import AccessGateBanner from "@/components/access/AccessGateBanner";
@@ -85,6 +85,7 @@ const SitDetail = () => {
   const [sitterAccordSigned, setSitterAccordSigned] = useState<{ accepted_at: string } | null>(null);
   const [accordOpen, setAccordOpen] = useState(false);
   const [accordData, setAccordData] = useState<any>(null);
+  const [reopenCount, setReopenCount] = useState(3);
 
   useEffect(() => {
     if (!id) return;
@@ -421,27 +422,41 @@ const SitDetail = () => {
           <TabsContent value="candidatures" className="mt-6 space-y-4">
             {/* Max applications status banner */}
             {!sit.accepting_applications && (
-              <div className="rounded-xl border border-primary/20 bg-primary/5 p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+              <div className="rounded-xl border border-primary/20 bg-primary/5 p-4 space-y-3">
                 <div>
                   <p className="text-sm font-semibold text-foreground">Candidatures closes</p>
                   <p className="text-xs text-muted-foreground mt-0.5">
                     {sit.max_applications
                       ? `Le maximum de ${sit.max_applications} candidature${sit.max_applications > 1 ? "s" : ""} a été atteint.`
                       : "Vous avez fermé les candidatures."}
-                    {" "}Si vous refusez des candidatures, vous pourrez rouvrir les places libérées.
                   </p>
                 </div>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={async () => {
-                    await supabase.from("sits").update({ accepting_applications: true } as any).eq("id", sit.id);
-                    setSit({ ...sit, accepting_applications: true });
-                    toast({ title: "Candidatures rouvertes", description: "Les gardiens peuvent à nouveau postuler." });
-                  }}
-                >
-                  Rouvrir les candidatures
-                </Button>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <div className="flex items-center gap-1">
+                    <Button
+                      type="button" variant="outline" size="icon" className="h-8 w-8"
+                      onClick={() => setReopenCount(c => Math.max(1, c - 1))}
+                      disabled={reopenCount <= 1}
+                    ><Minus className="h-3.5 w-3.5" /></Button>
+                    <span className="w-8 text-center text-sm font-medium">{reopenCount}</span>
+                    <Button
+                      type="button" variant="outline" size="icon" className="h-8 w-8"
+                      onClick={() => setReopenCount(c => Math.min(20, c + 1))}
+                      disabled={reopenCount >= 20}
+                    ><Plus className="h-3.5 w-3.5" /></Button>
+                  </div>
+                  <Button
+                    size="sm"
+                    onClick={async () => {
+                      const newMax = (sit.max_applications || appCount) + reopenCount;
+                      await supabase.from("sits").update({ accepting_applications: true, max_applications: newMax } as any).eq("id", sit.id);
+                      setSit({ ...sit, accepting_applications: true, max_applications: newMax });
+                      toast({ title: "Candidatures rouvertes", description: `${reopenCount} place${reopenCount > 1 ? "s" : ""} supplémentaire${reopenCount > 1 ? "s" : ""} ouverte${reopenCount > 1 ? "s" : ""}.` });
+                    }}
+                  >
+                    Ouvrir {reopenCount} candidature{reopenCount > 1 ? "s" : ""} de plus
+                  </Button>
+                </div>
               </div>
             )}
             {sit.accepting_applications && sit.max_applications && (
