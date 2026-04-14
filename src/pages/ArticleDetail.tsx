@@ -11,6 +11,7 @@ import { Helmet } from "react-helmet-async";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import ArticleRenderer, { resolveImagePath } from "@/components/articles/ArticleRenderer";
+import PageBreadcrumb from "@/components/seo/PageBreadcrumb";
 
 interface ArticleFull {
   id: string;
@@ -335,14 +336,12 @@ export default function ArticleDetail() {
         </Helmet>
       )}
 
+    <PageBreadcrumb items={[
+      { label: "Actualités", href: "/actualites" },
+      { label: article.title },
+    ]} />
+
     <article className="max-w-3xl mx-auto px-4 py-8 animate-fade-in">
-      <Link
-        to="/actualites"
-        className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-primary transition-colors mb-6"
-      >
-        <ArrowLeft className="h-4 w-4" />
-        Retour aux guides
-      </Link>
 
       <header className="mb-8">
         <div className="flex items-center gap-2 mb-3 flex-wrap">

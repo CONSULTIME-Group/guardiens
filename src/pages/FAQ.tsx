@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import ReactMarkdown from "react-markdown";
 import { supabase } from "@/integrations/supabase/client";
 import PageMeta from "@/components/PageMeta";
+import PageBreadcrumb from "@/components/seo/PageBreadcrumb";
 import PublicHeader from "@/components/layout/PublicHeader";
 import PublicFooter from "@/components/layout/PublicFooter";
 import {
@@ -85,6 +86,7 @@ const FAQ = () => {
 
       <div className="min-h-screen bg-background">
         <PublicHeader />
+        <PageBreadcrumb items={[{ label: "FAQ" }]} />
         <header className="bg-primary/5 border-b border-border">
           <div className="max-w-3xl mx-auto px-4 py-12 sm:py-16 text-center">
             <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-primary/10 mb-6">

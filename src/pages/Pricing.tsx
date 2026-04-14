@@ -7,6 +7,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 
 import { Check, CheckCircle, Star, Gift, MapPin, ShieldCheck, Map, PawPrint, Heart, Siren, BadgeCheck, CreditCard, Quote } from "lucide-react";
 import PageMeta from "@/components/PageMeta";
+import PageBreadcrumb from "@/components/seo/PageBreadcrumb";
 import PublicHeader from "@/components/layout/PublicHeader";
 import PublicFooter from "@/components/layout/PublicFooter";
 import EntraideLibreBanner from "@/components/subscription/EntraideLibreBanner";
@@ -158,6 +159,7 @@ const Pricing = () => {
 
       <div className="min-h-screen bg-background">
         <PublicHeader />
+        <PageBreadcrumb items={[{ label: "Tarifs" }]} />
 
         <main className="max-w-6xl mx-auto px-4">
           {/* ═══ ZONE 1 — Compréhension rapide ═══ */}

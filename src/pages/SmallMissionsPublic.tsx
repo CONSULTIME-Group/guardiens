@@ -1,6 +1,7 @@
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import PageMeta from "@/components/PageMeta";
+import PageBreadcrumb from "@/components/seo/PageBreadcrumb";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Apple, Sprout, Egg, PawPrint, Hammer, ChefHat, ArrowLeft, ChevronRight, Home } from "lucide-react";
 import PublicHeader from "@/components/layout/PublicHeader";
@@ -81,24 +82,7 @@ const SmallMissionsPublic = () => {
       <div className="min-h-screen bg-background font-body">
         {/* ═══ HEADER ═══ */}
         <PublicHeader />
-
-        {/* ═══ BREADCRUMBS + BACK ═══ */}
-        <div className="max-w-7xl mx-auto px-6 pt-4 pb-2 flex items-center gap-4">
-          <button
-            onClick={() => navigate(-1)}
-            className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors shrink-0"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Retour
-          </button>
-          <nav aria-label="Fil d'Ariane" className="flex items-center gap-1 text-xs text-muted-foreground">
-            <Link to="/" className="hover:text-foreground transition-colors" aria-label="Accueil">
-              <Home className="h-3.5 w-3.5" />
-            </Link>
-            <ChevronRight className="h-3 w-3" />
-            <span className="text-foreground font-medium" aria-current="page">Entraide entre voisins</span>
-          </nav>
-        </div>
+        <PageBreadcrumb items={[{ label: "Petites missions" }]} />
 
         {/* ═══ SECTION 1 — HERO ═══ */}
         <section className="bg-background">

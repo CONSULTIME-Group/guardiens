@@ -6,7 +6,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import PageMeta from "@/components/PageMeta";
 import PublicHeader from "@/components/layout/PublicHeader";
 import PublicFooter from "@/components/layout/PublicFooter";
-import Breadcrumbs from "@/components/layout/Breadcrumbs";
+import PageBreadcrumb from "@/components/seo/PageBreadcrumb";
 
 const steps = [
   {
@@ -102,11 +102,7 @@ const EmergencySitter = () => {
         <script type="application/ld+json">{JSON.stringify(faqJsonLd)}</script>
       </Helmet>
       <PublicHeader />
-
-      {/* Breadcrumbs */}
-      <div className="max-w-5xl mx-auto px-4 pt-4">
-        <Breadcrumbs />
-      </div>
+      <PageBreadcrumb items={[{ label: "Gardien d'urgence" }]} />
 
       {/* Hero */}
       <section className="relative overflow-hidden bg-gradient-to-br from-accent via-background to-primary/5 py-16 md:py-24">

@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import PageMeta from "@/components/PageMeta";
 import { MapPin, TreePine, Stethoscope, Coffee, Store, Footprints, Droplets, Trees, Star, ArrowRight, ArrowLeft, Search } from "lucide-react";
+import PageBreadcrumb from "@/components/seo/PageBreadcrumb";
 import guideHeaderImg from "@/assets/guide-header.jpg";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -174,25 +175,10 @@ const GuideDetail = () => {
       />
 
       <div className="min-h-screen bg-background">
-        {/* Back button + Breadcrumb */}
-        <div className="max-w-5xl mx-auto px-4 pt-6">
-          <div className="flex items-center gap-3 mb-2">
-            <button
-              onClick={() => navigate(-1)}
-              className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              Retour
-            </button>
-          </div>
-          <nav className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Link to="/" className="hover:text-foreground">Guardiens</Link>
-            <span>/</span>
-            <Link to="/guides" className="hover:text-foreground">Guides</Link>
-            <span>/</span>
-            <span className="text-foreground font-medium">{guide.city}</span>
-          </nav>
-        </div>
+        <PageBreadcrumb items={[
+          { label: "Guides locaux", href: "/guides" },
+          { label: guide.city },
+        ]} />
 
         {/* Header */}
         <header className="relative overflow-hidden border-b border-border">
