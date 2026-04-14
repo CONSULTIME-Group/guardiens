@@ -374,6 +374,26 @@ const CreateSit = () => {
           </div>
         </div>
 
+        {/* Max candidatures */}
+        <div>
+          <Label className="text-sm font-medium text-foreground mb-1 block">Nombre max de candidatures (optionnel)</Label>
+          <p className="text-xs text-muted-foreground mb-3">
+            Une fois le max atteint, l'annonce cesse d'accepter de nouvelles candidatures. Laissez vide pour illimité.
+          </p>
+          <Input
+            type="number"
+            min={1}
+            max={50}
+            placeholder="Illimité"
+            value={maxApplications ?? ""}
+            onChange={e => {
+              const v = e.target.value;
+              setMaxApplications(v ? Math.max(1, Math.min(50, parseInt(v))) : null);
+            }}
+            className="w-32"
+          />
+        </div>
+
         <div>
           <Label className="text-sm font-medium text-foreground mb-1 block">Environnement (optionnel)</Label>
           <p className="text-xs text-muted-foreground mb-3">Par défaut, on utilise l'environnement de votre profil. Vous pouvez le personnaliser pour cette annonce.</p>
