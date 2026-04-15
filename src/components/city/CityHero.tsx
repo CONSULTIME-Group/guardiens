@@ -14,7 +14,7 @@ interface CityHeroProps {
 
 const SB_INLINE = "https://erhccyqevdyevpyctsjj.supabase.co/storage/v1/object/public/property-photos/articles-inline";
 
-const CITY_HERO_IMAGES: Record<string, string> = {
+export const CITY_HERO_IMAGES: Record<string, string> = {
   annecy: `${SB_INLINE}/hero-annecy.webp`,
   lyon: `${SB_INLINE}/hero-lyon.webp`,
 };
