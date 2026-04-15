@@ -34,6 +34,7 @@ import LocalNetworkGrid from "@/components/seo/LocalNetworkGrid";
 import CityArticleBody from "@/components/city/CityArticleBody";
 import StickyCTA from "@/components/seo/StickyCTA";
 import PageBreadcrumb from "@/components/seo/PageBreadcrumb";
+import CityHero, { CITY_HERO_IMAGES } from "@/components/city/CityHero";
 
 const CityPage = () => {
   const { slug } = useParams<{ slug: string }>();
