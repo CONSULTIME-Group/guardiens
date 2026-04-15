@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { getOptimizedImageUrl } from "@/lib/imageOptim";
 import { useSearchParams, Link, useNavigate } from "react-router-dom";
 import PageMeta from "@/components/PageMeta";
 import PageBreadcrumb from "@/components/seo/PageBreadcrumb";

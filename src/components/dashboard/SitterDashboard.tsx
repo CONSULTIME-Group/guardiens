@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { getOptimizedImageUrl } from "@/lib/imageOptim";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSearchParams, Link, useNavigate } from "react-router-dom";
 import { useSubscriptionAccess } from "@/hooks/useSubscriptionAccess";
