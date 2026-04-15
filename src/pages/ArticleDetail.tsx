@@ -12,6 +12,7 @@ import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import ArticleRenderer, { resolveImagePath } from "@/components/articles/ArticleRenderer";
 import PageBreadcrumb from "@/components/seo/PageBreadcrumb";
+import { parseFaqFromMarkdown, buildFaqSchema } from "@/lib/parseFaq";
 import { getOptimizedImageUrl } from "@/lib/imageOptim";
 
 interface ArticleFull {

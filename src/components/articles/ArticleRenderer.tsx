@@ -94,6 +94,41 @@ function transformFactBoxes(content: string): string {
   );
 }
 
+/** Transform :::faq ... ::: blocks into visual Q/A HTML */
+function transformFaqBlocks(content: string): string {
+  return content.replace(
+    /:::faq\s*\n([\s\S]*?):::/g,
+    (_, inner: string) => {
+      const lines = inner.split("\n");
+      let html = '<div class="article-faq-block"><h2 class="article-faq-heading">Foire aux questions</h2>';
+      let currentQ = "";
+      let currentA: string[] = [];
+
+      const flush = () => {
+        if (currentQ && currentA.length) {
+          const answer = marked.parse(currentA.join("\n").trim(), { async: false }) as string;
+          html += `<div class="article-faq-item"><h3 class="article-faq-question">${currentQ}</h3><div class="article-faq-answer">${answer}</div></div>`;
+        }
+        currentQ = "";
+        currentA = [];
+      };
+
+      for (const line of lines) {
+        const qMatch = line.trim().match(/^\*\*(.+?)\*\*\s*$/);
+        if (qMatch) {
+          flush();
+          currentQ = qMatch[1].trim();
+        } else if (currentQ) {
+          currentA.push(line);
+        }
+      }
+      flush();
+      html += '</div>';
+      return html;
+    }
+  );
+}
+
 /** Add banded backgrounds to H2 sections */
 function addBandedSections(html: string): string {
   const parts = html.split(/(?=<h2)/);
