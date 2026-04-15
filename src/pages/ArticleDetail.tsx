@@ -12,6 +12,7 @@ import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import ArticleRenderer, { resolveImagePath } from "@/components/articles/ArticleRenderer";
 import PageBreadcrumb from "@/components/seo/PageBreadcrumb";
+import { getOptimizedImageUrl } from "@/lib/imageOptim";
 
 interface ArticleFull {
   id: string;
@@ -394,7 +395,7 @@ export default function ArticleDetail() {
       {article.cover_image_url && (
         <div className="rounded-xl overflow-hidden mb-8">
           <img
-            src={resolveImagePath(article.cover_image_url)}
+            src={getOptimizedImageUrl(resolveImagePath(article.cover_image_url), 800, 75)}
             alt={altText}
             className="w-full h-auto max-h-96 object-cover"
             loading="eager"

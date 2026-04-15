@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { getOptimizedImageUrl } from "@/lib/imageOptim";
 import { useSearchParams, Link, useNavigate } from "react-router-dom";
 import PageMeta from "@/components/PageMeta";
 import PageBreadcrumb from "@/components/seo/PageBreadcrumb";
@@ -191,7 +192,7 @@ export default function News() {
             {vieLocaleArticles.map((a) => (
               <Link key={a.id} to={`/actualites/${a.slug}`} className="group flex gap-3 bg-background rounded-lg p-3 hover:shadow-md transition-shadow">
                 {a.cover_image_url && (
-                  <img src={a.cover_image_url} alt={a.title} className="w-20 h-20 rounded-lg object-cover flex-shrink-0" loading="lazy" />
+                  <img src={getOptimizedImageUrl(a.cover_image_url, 200, 75)} alt={a.title} className="w-20 h-20 rounded-lg object-cover flex-shrink-0" loading="lazy" width={80} height={80} />
                 )}
                 <div className="min-w-0">
                   <h3 className="font-heading text-sm font-semibold line-clamp-2 group-hover:text-primary transition-colors">{a.title}</h3>
@@ -247,10 +248,12 @@ export default function News() {
                 {article.cover_image_url && (
                   <div className="h-48 overflow-hidden bg-muted">
                     <img
-                      src={article.cover_image_url}
+                      src={getOptimizedImageUrl(article.cover_image_url, 400, 75)}
                       alt={article.title}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                       loading="lazy"
+                      width={400}
+                      height={214}
                     />
                   </div>
                 )}
