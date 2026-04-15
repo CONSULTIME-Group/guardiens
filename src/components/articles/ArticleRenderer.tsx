@@ -28,7 +28,7 @@ import gardienBellecour from "@/assets/gardien-bellecour-lyon.webp";
 import profilGardienLaptop from "@/assets/profil-gardien-laptop-lyon.webp";
 import gardienTeletravailOuest from "@/assets/gardien-teletravail-ouest-lyon.webp";
 import pensionChienAlternativesCover from "@/assets/pension-chien-alternatives-cover.webp";
-import gardeAnimauxCroixRousse from "@/assets/garde-animaux-croix-rousse-lyon.webp";
+import gardeChatPresquileLyon from "@/assets/garde-chat-presquile-lyon.webp";
 import gardeAnimalHospitalisation from "@/assets/garde-animal-hospitalisation-cover.webp";
 import gardeChatDomicileLyon from "@/assets/garde-chat-domicile-lyon.webp";
 import gardeChatPresquileLyon from "@/assets/garde-chat-presquile-lyon.webp";
