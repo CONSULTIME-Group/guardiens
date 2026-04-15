@@ -342,6 +342,7 @@ export default function ArticleDetail() {
         </Helmet>
       )}
 
+    <main id="main-content">
     <PageBreadcrumb items={[
       { label: "Actualités", href: "/actualites" },
       { label: article.title },
@@ -398,6 +399,9 @@ export default function ArticleDetail() {
             className="w-full h-auto max-h-96 object-cover"
             loading="eager"
             fetchPriority="high"
+            decoding="async"
+            width={800}
+            height={427}
           />
         </div>
       )}
@@ -491,6 +495,7 @@ export default function ArticleDetail() {
         </div>
       )}
     </article>
+    </main>
     </>
   );
 }
