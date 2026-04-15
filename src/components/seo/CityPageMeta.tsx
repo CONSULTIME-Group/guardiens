@@ -6,7 +6,7 @@ interface Props {
 }
 
 const META_TITLE_OVERRIDES: Record<string, string> = {
-  lyon: "Garde chien et chat à Lyon | Guardiens",
+  lyon: "Garde chien et chat à Lyon — Home sitter | Guardiens",
 };
 
 const CityPageMeta = ({ city }: Props) => {
