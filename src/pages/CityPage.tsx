@@ -262,7 +262,7 @@ const CityPage = () => {
                 Aussi disponible autour de {cityData.name}
               </h2>
               <p className="text-sm text-muted-foreground mb-4">
-                Les gardiens Guardiens couvrent {cityData.name} et ses communes voisines.
+                Les gardiens Guardiens couvrent {cityData.name} et ses communes alentour.
               </p>
               <div className="flex flex-wrap gap-2">
                 {content.nearbyTowns.map((town) => (

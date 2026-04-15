@@ -486,7 +486,7 @@ const EmergencyFields = ({ guide, onChange }: FieldProps) => (
     </div>
     <Field label="Adresse de la clinique" field="vet_address" guide={guide} onChange={onChange} placeholder="Adresse de la clinique" />
 
-    <Label className="text-sm font-medium text-foreground mt-2">Voisin de confiance</Label>
+    <Label className="text-sm font-medium text-foreground mt-2">Personne de confiance</Label>
     <div className="grid grid-cols-2 gap-3">
       <Field label="Nom" field="neighbor_name" guide={guide} onChange={onChange} placeholder="Marie" />
       <Field label="Téléphone" field="neighbor_phone" guide={guide} onChange={onChange} placeholder="Il/elle a un double des clés" />

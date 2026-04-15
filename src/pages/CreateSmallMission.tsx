@@ -123,7 +123,7 @@ const CreateSmallMission = () => {
             <h2 className="font-heading font-bold text-foreground">L'entraide, c'est l'esprit Guardiens</h2>
           </div>
           <p className="text-sm text-muted-foreground">
-            Les petites missions, c'est l'entraide entre voisins. Pas de l'argent, pas du travail — du lien.
+            Les petites missions, c'est l'entraide de quartier. Pas de l'argent, pas du travail — du lien.
             Vous proposez un coup de main, l'autre vous offre un bon repas, des légumes du jardin, ou simplement sa gratitude.
           </p>
         </div>

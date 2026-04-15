@@ -118,8 +118,8 @@ export const BADGE_DEFINITIONS: Record<string, BadgeDefinition> = {
   },
 
   voisins_adorent: {
-    label: "Allié du voisinage",
-    labelArc: "ALLIÉ DU VOISINAGE",
+    label: "Allié du quartier",
+    labelArc: "ALLIÉ DU QUARTIER",
     category: 'gardien', expirable: true,
     tooltip: "Discrétion absolue et courtoisie exemplaire avec l'entourage.",
     bg: '#1A3C34', iconColor: '#FDF0CC',
@@ -278,7 +278,7 @@ export const BADGE_DEFINITIONS: Record<string, BadgeDefinition> = {
     label: "Havre de paix",
     labelArc: "HAVRE DE PAIX",
     category: 'proprio', expirable: true,
-    tooltip: "Absence totale de nuisances sonores ou de voisinage. Calme absolu.",
+    tooltip: "Absence totale de nuisances sonores. Calme absolu.",
     bg: '#191970', iconColor: '#FDF0CC',
     svgIcon: `<circle cx="20" cy="14" r="4" fill="none" stroke="#FDF0CC" stroke-width="1.5"/><path d="M20 10v-1.5M24.5 11.5l1-1M26 16h1.5M24.5 20.5l1 1M20 22v1.5M15.5 21.5l-1 1M14 16h-1.5M15.5 11.5l-1-1" stroke="#FDF0CC" stroke-width="1.2" stroke-linecap="round"/><path d="M11 27 Q14 24 17 27 Q20 30 23 27 Q26 24 29 27" fill="none" stroke="#FDF0CC" stroke-width="1.5" stroke-linecap="round"/>`,
   },
@@ -337,8 +337,8 @@ export const BADGE_DEFINITIONS: Record<string, BadgeDefinition> = {
   },
 
   super_voisin: {
-    label: "Super voisin(e)",
-    labelArc: "SUPER VOISIN",
+    label: "Personne en or",
+    labelArc: "PERSONNE EN OR",
     category: 'mission', expirable: false, fixedTier: 'bronze',
     tooltip: "Entraide de proximité validée par la communauté.",
     bg: '#2F2F2F', iconColor: '#FDF0CC',

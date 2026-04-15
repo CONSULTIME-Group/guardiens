@@ -185,7 +185,7 @@ export default function News() {
         <div className="mb-10 p-6 rounded-xl" style={{ backgroundColor: "#F9F6F1" }}>
           <h2 className="font-heading text-xl font-bold mb-1">Vie locale & Entraide</h2>
           <p className="text-muted-foreground text-sm mb-5">
-            Des échanges sans argent, des voisins qui se rendent service, une autre façon de vivre ensemble.
+            Des échanges sans argent, des gens du coin qui se rendent service, une autre façon de vivre ensemble.
           </p>
           <div className="grid sm:grid-cols-3 gap-4 mb-4">
             {vieLocaleArticles.map((a) => (

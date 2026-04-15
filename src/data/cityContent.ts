@@ -30,7 +30,7 @@ export interface CityContentData {
 const cityContent: Record<string, CityContentData> = {
   annecy: {
     heroAlt: "Vue panoramique du lac d'Annecy et des montagnes enneigées",
-    subtitle: "Confiez votre maison et vos animaux à des voisins de confiance en Haute-Savoie.",
+    subtitle: "Confiez votre maison et vos animaux à des gardiens de confiance en Haute-Savoie.",
     articleSections: [
       {
         id: "pourquoi",
@@ -41,7 +41,7 @@ Les pensions pour animaux autour d'Annecy coûtent entre 25 et 45 € par jour. 
 
 Le house-sitting, c'est la solution de bon sens : un gardien vérifié vient chez vous, s'occupe de vos animaux dans leur environnement, arrose le jardin, et veille sur la maison. **Gratuit pour le propriétaire. Logement offert pour le gardien.**
 
-À Annecy, cette logique de proximité est naturelle. Les gens se connaissent entre quartiers, l'entraide est dans l'ADN savoyard. Guardiens digitalise cette confiance de voisinage.`,
+À Annecy, cette logique de proximité est naturelle. Les gens se connaissent entre quartiers, l'entraide est dans l'ADN savoyard. Guardiens digitalise cette confiance de proximité.`,
       },
       {
         id: "securite",
@@ -138,7 +138,7 @@ Ce que Guardiens propose concrètement : vous publiez votre annonce, des gardien
 
 Lyon compte plus de 150 000 chiens et chats dans son agglomération. Les Lyonnais sont attachés à leurs compagnons : promenades quotidiennes à la Tête d'Or, terrasses dog-friendly dans le Vieux-Lyon, cliniques vétérinaires de quartier ouvertes le samedi. L'animal n'est pas un accessoire — c'est un membre du foyer.
 
-Pourtant, quand il faut partir, les solutions classiques restent inadaptées : pension collective stressante pour l'animal, voisin de palier peu disponible, ou — solution par défaut — annuler le voyage.
+Pourtant, quand il faut partir, les solutions classiques restent inadaptées : pension collective stressante pour l'animal, personne de l'immeuble peu disponible, ou — solution par défaut — annuler le voyage.
 
 ### Les limites des pensions classiques
 
@@ -150,7 +150,7 @@ Sans compter que votre maison reste vide. Boîte aux lettres qui déborde, plant
 
 Le home sitting existe depuis des décennies dans les pays anglo-saxons. Le principe est simple : un gardien de confiance s'installe chez vous, s'occupe de vos animaux dans leur environnement habituel, et veille sur votre maison. Pas de frais de pension, pas de stress pour l'animal, pas de maison vide.
 
-À Lyon, cette logique de proximité prend tout son sens. Les quartiers ont une identité forte, les personnes du coin se reconnaissent. Guardiens structure cette confiance de voisinage avec des outils de vérification et un cadre clair.`,
+À Lyon, cette logique de proximité prend tout son sens. Les quartiers ont une identité forte, les personnes du coin se reconnaissent. Guardiens structure cette confiance de proximité avec des outils de vérification et un cadre clair.`,
       },
       {
         id: "fonctionnement",

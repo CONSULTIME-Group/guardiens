@@ -310,7 +310,7 @@ export default function AccordDeGarde({ garde, role = "proprio", onClose }: Acco
           )}
           {garde.voisinConfiance != null && (
             <p className="text-sm mt-2">
-              Voisin de confiance : {garde.voisinConfiance.prenom} · {garde.voisinConfiance.telephone}
+              Personne de confiance : {garde.voisinConfiance.prenom} · {garde.voisinConfiance.telephone}
             </p>
           )}
         </div>
