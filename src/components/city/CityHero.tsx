@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { getOptimizedImageUrl } from "@/lib/imageOptim";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, ShieldCheck, Siren, BadgeCheck, Mountain } from "lucide-react";
 interface CityHeroProps {
@@ -43,7 +44,7 @@ export default function CityHero({
       <section className="relative w-full min-h-[420px] md:min-h-[500px] flex items-end overflow-hidden">
         {bgImage ? (
           <img
-            src={bgImage}
+            src={getOptimizedImageUrl(bgImage, 1200, 75)}
             alt={heroAlt}
             className="absolute inset-0 w-full h-full object-cover"
             width={1920}
