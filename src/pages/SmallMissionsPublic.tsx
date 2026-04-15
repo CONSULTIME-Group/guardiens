@@ -75,8 +75,8 @@ const SmallMissionsPublic = () => {
   return (
     <>
       <PageMeta
-        title="Petites missions d'entraide — Guardiens"
-        description="Échangez des services avec les gens du coin. Jardinage, animaux, coups de main — jamais d'argent. Gratuit pour tous."
+        title="Petites missions d'entraide locale — Guardiens"
+        description="Échangez des coups de main entre voisins en Auvergne-Rhône-Alpes. Jardinage, animaux, bricolage — sans argent. Gratuit pour tous, pour toujours."
       />
 
       <div className="min-h-screen bg-background font-body">
@@ -95,8 +95,11 @@ const SmallMissionsPublic = () => {
 
             <Reveal delay={0.1}>
               <h1 className="font-heading text-5xl md:text-6xl font-bold text-foreground leading-tight max-w-2xl mx-auto">
-                Ce que vous avez contre ce que<br /> vous n'avez pas encore vécu.
+                Entraide locale entre voisins —<br /> échangez sans argent.
               </h1>
+              <p className="font-heading text-xl md:text-2xl italic text-foreground/70 mt-3 max-w-lg mx-auto">
+                Ce que vous avez contre ce que vous n'avez pas encore vécu.
+              </p>
             </Reveal>
 
             <Reveal delay={0.2}>

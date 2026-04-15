@@ -282,12 +282,20 @@ const Landing = () => {
               </button>
             </div>
 
-            <Link
-              to="/petites-missions"
-              className="inline-flex items-center gap-1 text-white/80 text-sm underline underline-offset-4 hover:text-white transition-colors animate-hero-fade-up animation-delay-1000"
-            >
-              Découvrir l'entraide de quartier <ArrowRight className="h-3.5 w-3.5" />
-            </Link>
+            <div className="flex flex-col sm:flex-row gap-3 animate-hero-fade-up animation-delay-1000">
+              <Link
+                to="/petites-missions"
+                className="inline-flex items-center gap-1 text-white/80 text-sm underline underline-offset-4 hover:text-white transition-colors"
+              >
+                Découvrir l'entraide de quartier <ArrowRight className="h-3.5 w-3.5" />
+              </Link>
+              <Link
+                to="/gardien-urgence"
+                className="inline-flex items-center gap-1 text-white/80 text-sm underline underline-offset-4 hover:text-white transition-colors"
+              >
+                Gardien d'urgence <ArrowRight className="h-3.5 w-3.5" />
+              </Link>
+            </div>
 
             <p className="mt-4 text-xs text-white/60 font-body animate-hero-fade-up animation-delay-1100">
               Badge Fondateur à vie pour les inscrits avant le 13 mai.
