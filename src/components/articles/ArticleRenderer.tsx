@@ -39,7 +39,7 @@ import saintEtienneChatForez from "@/assets/saint-etienne-chat-forez.webp";
 import valenceParcChien from "@/assets/valence-parc-chien.webp";
 import valenceChatDrome from "@/assets/valence-chat-drome.webp";
 import valenceConfianceCafe from "@/assets/valence-confiance-cafe.webp";
-import bouledogueFrancaisVieuxLyon from "@/assets/bouledogue-francais-vieux-lyon.webp";
+
 
 const ARTICLE_IMAGES: Record<string, string> = {
   // ── LOT 1 – migrated to Supabase Storage ──────────────────
@@ -76,7 +76,7 @@ const ARTICLE_IMAGES: Record<string, string> = {
   "/images/aix-les-bains-villa-lac.jpg": aixLesBainsVillaLac,
   "/images/golden-retriever-quais-lyon.jpg": goldenRetrieverQuaisLyon,
   "/images/border-collie-interieur-croix-rousse.jpg": borderCollieInterieurCroixRousse,
-  "/images/bouledogue-francais-vieux-lyon.jpg": bouledogueFrancaisVieuxLyon,
+  "/images/bouledogue-francais-vieux-lyon.jpg": `${SB}/bouledogue-francais-vieux-lyon.webp`,
   "/images/bouledogue-francais-interieur-lyon6.jpg": bouledogueFrancaisInterieurLyon6,
   "/images/berger-australien-interieur-lyon.jpg": bergerAustralienInterieurLyon,
   "/images/fondateurs-guardiens-quais-lyon.jpg": fondateursGuardiensQuaisLyon,
