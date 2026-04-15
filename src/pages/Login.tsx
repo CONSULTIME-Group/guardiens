@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { ToastAction } from "@/components/ui/toast";
 import { Eye, EyeOff } from "lucide-react";
-import authIllustration from "@/assets/auth-illustration.webp";
+const authIllustration = "https://erhccyqevdyevpyctsjj.supabase.co/storage/v1/object/public/property-photos/misc/auth-illustration.webp";
 
 const Login = () => {
   const [searchParams] = useSearchParams();

@@ -7,7 +7,7 @@ import PublicHeader from "@/components/layout/PublicHeader";
 import PublicFooter from "@/components/layout/PublicFooter";
 import { Link, useNavigate } from "react-router-dom";
 import { MapPin, Search, ArrowLeft } from "lucide-react";
-import guideHeaderImg from "@/assets/guide-header.webp";
+const guideHeaderImg = "https://erhccyqevdyevpyctsjj.supabase.co/storage/v1/object/public/property-photos/misc/guide-header.webp";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
