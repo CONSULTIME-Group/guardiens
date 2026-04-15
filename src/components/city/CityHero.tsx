@@ -1,9 +1,7 @@
 import { Link } from "react-router-dom";
+import { getOptimizedImageUrl } from "@/lib/imageOptim";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, ShieldCheck, Siren, BadgeCheck, Mountain } from "lucide-react";
-import heroAnnecy from "@/assets/hero-annecy.webp";
-import heroLyon from "@/assets/hero-lyon.webp";
-
 interface CityHeroProps {
   city: string;
   h1Title: string;
@@ -14,9 +12,11 @@ interface CityHeroProps {
   departmentSlug?: string;
 }
 
+const SB_INLINE = "https://erhccyqevdyevpyctsjj.supabase.co/storage/v1/object/public/property-photos/articles-inline";
+
 const CITY_HERO_IMAGES: Record<string, string> = {
-  annecy: heroAnnecy,
-  lyon: heroLyon,
+  annecy: `${SB_INLINE}/hero-annecy.webp`,
+  lyon: `${SB_INLINE}/hero-lyon.webp`,
 };
 
 const trustSignals = [
@@ -44,7 +44,7 @@ export default function CityHero({
       <section className="relative w-full min-h-[420px] md:min-h-[500px] flex items-end overflow-hidden">
         {bgImage ? (
           <img
-            src={bgImage}
+            src={getOptimizedImageUrl(bgImage, 1200, 75)}
             alt={heroAlt}
             className="absolute inset-0 w-full h-full object-cover"
             width={1920}

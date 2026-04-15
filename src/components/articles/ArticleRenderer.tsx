@@ -2,19 +2,14 @@ import { Link } from "react-router-dom";
 import { marked } from "marked";
 import { Heart, Search, ShieldCheck, TreePine, Home, Users, MapPin, CheckCircle2, Lightbulb, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { getOptimizedImageUrl } from "@/lib/imageOptim";
 
+// ── Supabase Storage base URL ──────────────────────────────
+const SB = "https://erhccyqevdyevpyctsjj.supabase.co/storage/v1/object/public/property-photos/articles-inline";
+
+// ── Vite imports for images NOT YET migrated ───────────────
 import lyonHeroQuais from "@/assets/lyon-hero-quais.webp";
 import lyonChatFenetre from "@/assets/lyon-chat-fenetre.webp";
-import lyonConfianceCafe from "@/assets/lyon-confiance-cafe.webp";
-import grenobleBastilleChien from "@/assets/grenoble-bastille-chien.webp";
-import grenobleChatChartreuse from "@/assets/grenoble-chat-chartreuse.webp";
-import grenobleConfianceCafe from "@/assets/grenoble-confiance-cafe.webp";
-import saintEtienneParcChien from "@/assets/saint-etienne-parc-chien.webp";
-import saintEtienneChatForez from "@/assets/saint-etienne-chat-forez.webp";
-import saintEtienneConfianceCafe from "@/assets/saint-etienne-confiance-cafe.webp";
-import valenceParcChien from "@/assets/valence-parc-chien.webp";
-import valenceChatDrome from "@/assets/valence-chat-drome.webp";
-import valenceConfianceCafe from "@/assets/valence-confiance-cafe.webp";
 import chamberyElephantsChien from "@/assets/chambery-elephants-chien.webp";
 import chamberyChatBauges from "@/assets/chambery-chat-bauges.webp";
 import chamberyConfianceRue from "@/assets/chambery-confiance-rue.webp";
@@ -23,41 +18,52 @@ import villeurbanneGrattecielChien from "@/assets/villeurbanne-gratteciel-chien.
 import venissieuxParillyChat from "@/assets/venissieux-parilly-chat.webp";
 import aixLesBainsVillaLac from "@/assets/aix-les-bains-villa-lac.webp";
 import goldenRetrieverQuaisLyon from "@/assets/golden-retriever-quais-lyon.webp";
-import goldenRetrieverTeteDorLyon from "@/assets/golden-retriever-tete-dor-lyon.webp";
-import goldenRetrieverInterieurVieuxLyon from "@/assets/golden-retriever-interieur-vieux-lyon.webp";
-import borderCollieFeyssineLyon from "@/assets/border-collie-feyssine-lyon.webp";
 import borderCollieInterieurCroixRousse from "@/assets/border-collie-interieur-croix-rousse.webp";
-import bouledogueFrancaisVieuxLyon from "@/assets/bouledogue-francais-vieux-lyon.webp";
 import bouledogueFrancaisInterieurLyon6 from "@/assets/bouledogue-francais-interieur-lyon6.webp";
-import bergerAustralienFeyssineLyon from "@/assets/berger-australien-feyssine-lyon.webp";
 import bergerAustralienInterieurLyon from "@/assets/berger-australien-interieur-lyon.webp";
 import fondateursGuardiensQuaisLyon from "@/assets/fondateurs-guardiens-quais-lyon.webp";
 import gardeAnimauxAppartementLyon from "@/assets/garde-animaux-appartement-lyon.webp";
-import boomPetsittingConfluence from "@/assets/boom-petsitting-confluence-lyon.webp";
 import boomPetsittingHomeoffice from "@/assets/boom-petsitting-homeoffice-lyon.webp";
-import parcTeteDorChiens from "@/assets/parc-tete-dor-chiens-lyon.webp";
-import parcParillyLabrador from "@/assets/parc-parilly-labrador-lyon.webp";
 import gardienBellecour from "@/assets/gardien-bellecour-lyon.webp";
 import profilGardienLaptop from "@/assets/profil-gardien-laptop-lyon.webp";
-import villaOuestVide from "@/assets/villa-ouest-lyonnais-vide.webp";
 import gardienTeletravailOuest from "@/assets/gardien-teletravail-ouest-lyon.webp";
 import pensionChienAlternativesCover from "@/assets/pension-chien-alternatives-cover.webp";
-import gardeAnimauxCroixRousse from "@/assets/garde-animaux-croix-rousse-lyon.webp";
 import gardeAnimalHospitalisation from "@/assets/garde-animal-hospitalisation-cover.webp";
 import gardeChatDomicileLyon from "@/assets/garde-chat-domicile-lyon.webp";
 import gardeChatPresquileLyon from "@/assets/garde-chat-presquile-lyon.webp";
 import sAbsenterAnimalGuideCover from "@/assets/s-absenter-animal-guide-cover.webp";
+import grenobleBasilleChien from "@/assets/grenoble-bastille-chien.webp";
+import grenobleChatChartreuse from "@/assets/grenoble-chat-chartreuse.webp";
+import saintEtienneParcChien from "@/assets/saint-etienne-parc-chien.webp";
+import saintEtienneChatForez from "@/assets/saint-etienne-chat-forez.webp";
+import valenceParcChien from "@/assets/valence-parc-chien.webp";
+import valenceChatDrome from "@/assets/valence-chat-drome.webp";
+import valenceConfianceCafe from "@/assets/valence-confiance-cafe.webp";
+
 
 const ARTICLE_IMAGES: Record<string, string> = {
+  // ── LOT 1 – migrated to Supabase Storage ──────────────────
+  "/images/parc-tete-dor-chiens-lyon.jpg": `${SB}/parc-tete-dor-chiens-lyon.webp`,
+  "/images/golden-retriever-tete-dor-lyon.jpg": `${SB}/golden-retriever-tete-dor-lyon.webp`,
+  "/images/parc-parilly-labrador-lyon.jpg": `${SB}/parc-parilly-labrador-lyon.webp`,
+  "/images/grenoble-confiance-cafe.jpg": `${SB}/grenoble-confiance-cafe.webp`,
+  "/images/border-collie-feyssine-lyon.jpg": `${SB}/border-collie-feyssine-lyon.webp`,
+  "/images/lyon-confiance-cafe.jpg": `${SB}/lyon-confiance-cafe.webp`,
+  "/images/boom-petsitting-confluence-lyon.jpg": `${SB}/boom-petsitting-confluence-lyon.webp`,
+  "/images/golden-retriever-interieur-vieux-lyon.jpg": `${SB}/golden-retriever-interieur-vieux-lyon.webp`,
+  "/images/villa-ouest-lyonnais-vide.jpg": `${SB}/villa-ouest-lyonnais-vide.webp`,
+  "/images/berger-australien-feyssine-lyon.jpg": `${SB}/berger-australien-feyssine-lyon.webp`,
+  "/images/saint-etienne-confiance-cafe.jpg": `${SB}/saint-etienne-confiance-cafe.webp`,
+  "/images/garde-animaux-croix-rousse-lyon.jpg": `${SB}/garde-animaux-croix-rousse-lyon.webp`,
+  // hero-lyon and hero-annecy are used by CityHero, not in article markdown
+
+  // ── Remaining local imports (future LOT 2+) ────────────────
   "/images/lyon-hero-quais.jpg": lyonHeroQuais,
   "/images/lyon-chat-fenetre.jpg": lyonChatFenetre,
-  "/images/lyon-confiance-cafe.jpg": lyonConfianceCafe,
-  "/images/grenoble-bastille-chien.jpg": grenobleBastilleChien,
+  "/images/grenoble-bastille-chien.jpg": grenobleBasilleChien,
   "/images/grenoble-chat-chartreuse.jpg": grenobleChatChartreuse,
-  "/images/grenoble-confiance-cafe.jpg": grenobleConfianceCafe,
   "/images/saint-etienne-parc-chien.jpg": saintEtienneParcChien,
   "/images/saint-etienne-chat-forez.jpg": saintEtienneChatForez,
-  "/images/saint-etienne-confiance-cafe.jpg": saintEtienneConfianceCafe,
   "/images/valence-parc-chien.jpg": valenceParcChien,
   "/images/valence-chat-drome.jpg": valenceChatDrome,
   "/images/valence-confiance-cafe.jpg": valenceConfianceCafe,
@@ -69,26 +75,17 @@ const ARTICLE_IMAGES: Record<string, string> = {
   "/images/venissieux-parilly-chat.jpg": venissieuxParillyChat,
   "/images/aix-les-bains-villa-lac.jpg": aixLesBainsVillaLac,
   "/images/golden-retriever-quais-lyon.jpg": goldenRetrieverQuaisLyon,
-  "/images/golden-retriever-tete-dor-lyon.jpg": goldenRetrieverTeteDorLyon,
-  "/images/golden-retriever-interieur-vieux-lyon.jpg": goldenRetrieverInterieurVieuxLyon,
-  "/images/border-collie-feyssine-lyon.jpg": borderCollieFeyssineLyon,
   "/images/border-collie-interieur-croix-rousse.jpg": borderCollieInterieurCroixRousse,
-  "/images/bouledogue-francais-vieux-lyon.jpg": bouledogueFrancaisVieuxLyon,
+  "/images/bouledogue-francais-vieux-lyon.jpg": `${SB}/bouledogue-francais-vieux-lyon.webp`,
   "/images/bouledogue-francais-interieur-lyon6.jpg": bouledogueFrancaisInterieurLyon6,
-  "/images/berger-australien-feyssine-lyon.jpg": bergerAustralienFeyssineLyon,
   "/images/berger-australien-interieur-lyon.jpg": bergerAustralienInterieurLyon,
   "/images/fondateurs-guardiens-quais-lyon.jpg": fondateursGuardiensQuaisLyon,
   "/images/garde-animaux-appartement-lyon.jpg": gardeAnimauxAppartementLyon,
-  "/images/boom-petsitting-confluence-lyon.jpg": boomPetsittingConfluence,
   "/images/boom-petsitting-homeoffice-lyon.jpg": boomPetsittingHomeoffice,
-  "/images/parc-tete-dor-chiens-lyon.jpg": parcTeteDorChiens,
-  "/images/parc-parilly-labrador-lyon.jpg": parcParillyLabrador,
   "/images/gardien-bellecour-lyon.jpg": gardienBellecour,
   "/images/profil-gardien-laptop-lyon.jpg": profilGardienLaptop,
-  "/images/villa-ouest-lyonnais-vide.jpg": villaOuestVide,
   "/images/gardien-teletravail-ouest-lyon.jpg": gardienTeletravailOuest,
   "/images/pension-chien-alternatives-cover.jpg": pensionChienAlternativesCover,
-  "/images/garde-animaux-croix-rousse-lyon.jpg": gardeAnimauxCroixRousse,
   "/images/garde-animal-hospitalisation-cover.jpg": gardeAnimalHospitalisation,
   "/images/garde-chat-domicile-lyon.jpg": gardeChatDomicileLyon,
   "/images/garde-chat-presquile-lyon.jpg": gardeChatPresquileLyon,
@@ -102,7 +99,10 @@ export function resolveImagePath(path: string): string {
 function resolveArticleImages(html: string): string {
   return html.replace(/src="(\/images\/[^"]+)"/g, (match, path) => {
     const resolved = ARTICLE_IMAGES[path];
-    return resolved ? `src="${resolved}"` : match;
+    if (!resolved) return match;
+    // Apply Supabase Image Transformations if it's a Supabase URL
+    const optimized = getOptimizedImageUrl(resolved, 800, 75);
+    return `src="${optimized}"`;
   });
 }
 
@@ -128,7 +128,6 @@ function transformFactBoxes(content: string): string {
 
 /** Add banded backgrounds to H2 sections */
 function addBandedSections(html: string): string {
-  // Wrap every other H2 section in a banded div
   const parts = html.split(/(?=<h2)/);
   return parts.map((part, i) => {
     if (i > 0 && i % 2 === 0 && part.startsWith('<h2')) {
@@ -152,10 +151,6 @@ interface ArticleRendererProps {
 function adaptCTAsForRole(html: string, role?: "owner" | "sitter" | "both"): string {
   if (!role) return html;
 
-  const ownerCTA = '<a href="/sits/create" class="article-cta-btn article-cta-btn-primary">Publier une annonce →</a>';
-  const sitterCTA = '<a href="/search" class="article-cta-btn article-cta-btn-primary">Trouver une garde près de chez vous →</a>';
-
-  // Replace inscription links with role-appropriate CTAs
   const ownerPattern = /href="\/register\?role=owner"[^>]*>[^<]*/g;
   const sitterPattern = /href="\/register\?role=guardian"[^>]*>[^<]*/g;
   const genericPattern = /href="\/register"[^>]*>[^<]*/g;
@@ -177,22 +172,16 @@ function adaptCTAsForRole(html: string, role?: "owner" | "sitter" | "both"): str
   return html;
 }
 
-/** Strip leading H1 from content to avoid double-H1 (ArticleDetail already renders the title) */
+/** Strip leading H1 from content to avoid double-H1 */
 function stripLeadingH1(md: string): string {
   return md.replace(/^#\s+.+\n+/, "");
 }
 
 export default function ArticleRenderer({ content, userRole }: ArticleRendererProps) {
-  // Strip leading H1 to prevent double-H1 with ArticleDetail header
   const withoutH1 = stripLeadingH1(content);
-  
-  // Pre-process markdown for custom blocks
   const preprocessed = transformFactBoxes(withoutH1);
-  
-  // Parse to HTML
   let html = marked.parse(preprocessed, { async: false }) as string;
   
-  // Post-process HTML
   html = resolveArticleImages(html);
   html = injectCTA(html);
   html = addBandedSections(html);
