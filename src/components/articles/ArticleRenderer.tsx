@@ -28,7 +28,6 @@ import gardienBellecour from "@/assets/gardien-bellecour-lyon.webp";
 import profilGardienLaptop from "@/assets/profil-gardien-laptop-lyon.webp";
 import gardienTeletravailOuest from "@/assets/gardien-teletravail-ouest-lyon.webp";
 import pensionChienAlternativesCover from "@/assets/pension-chien-alternatives-cover.webp";
-import gardeChatPresquileLyon from "@/assets/garde-chat-presquile-lyon.webp";
 import gardeAnimalHospitalisation from "@/assets/garde-animal-hospitalisation-cover.webp";
 import gardeChatDomicileLyon from "@/assets/garde-chat-domicile-lyon.webp";
 import gardeChatPresquileLyon from "@/assets/garde-chat-presquile-lyon.webp";
@@ -55,7 +54,7 @@ const ARTICLE_IMAGES: Record<string, string> = {
   "/images/villa-ouest-lyonnais-vide.jpg": `${SB}/villa-ouest-lyonnais-vide.webp`,
   "/images/berger-australien-feyssine-lyon.jpg": `${SB}/berger-australien-feyssine-lyon.webp`,
   "/images/saint-etienne-confiance-cafe.jpg": `${SB}/saint-etienne-confiance-cafe.webp`,
-  "/images/garde-animaux-croix-rousse-lyon.jpg": gardeAnimauxCroixRousse,
+  "/images/garde-animaux-croix-rousse-lyon.jpg": `${SB}/garde-animaux-croix-rousse-lyon.webp`,
   // hero-lyon and hero-annecy are used by CityHero, not in article markdown
 
   // ── Remaining local imports (future LOT 2+) ────────────────
