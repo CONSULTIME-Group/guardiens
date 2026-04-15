@@ -331,16 +331,16 @@ Consultez également le [guide complet du gardien à Lyon](/guides/lyon), la pag
 
   grenoble: {
     heroAlt: "Vue de Grenoble avec les Alpes et la Bastille en arrière-plan",
-    subtitle: "House-sitting au pied des Alpes — des gardiens de confiance dans l'agglomération grenobloise.",
+    subtitle: "Trouvez un home sitter de confiance au pied des Alpes — gardiens vérifiés dans l'agglomération grenobloise.",
     articleSections: [
       {
         id: "pourquoi",
         title: "Pourquoi le house-sitting à Grenoble ?",
         content: `Grenoble, ceinturée par trois massifs montagneux — Chartreuse, Vercors, Belledonne — attire des passionnés d'outdoor. Mais quand on part randonner, skier ou voyager, qui garde la maison et les animaux ?
 
-Le house-sitting à Grenoble, c'est la réponse locale : un gardien vérifié s'installe chez vous, s'occupe de vos animaux dans leur environnement, et veille sur votre logement. **Gratuit pour le propriétaire.**
+Le house-sitting (parfois appelé home sitting en français) à Grenoble, c'est la réponse locale : un home sitter vérifié s'installe chez vous, s'occupe de vos animaux dans leur environnement, et veille sur votre logement. **Gratuit pour le propriétaire.**
 
-La cuvette grenobloise crée des contraintes spécifiques : pics de pollution en hiver, chaleur estivale concentrée, et quartiers en pente parfois difficiles d'accès par temps de neige. Un gardien local connaît ces réalités.`,
+La cuvette grenobloise crée des contraintes spécifiques : pics de pollution en hiver, chaleur estivale concentrée, et quartiers en pente parfois difficiles d'accès par temps de neige. Un home sitter local connaît ces réalités.`,
       },
       {
         id: "securite",
