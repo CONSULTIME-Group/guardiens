@@ -212,7 +212,12 @@ export default function ArticleDetail() {
   }
 
   const altText = article.hero_image_alt || generateAltText(article);
-  const internalLinks = (article.internal_links as { text: string; url: string }[] | null) || [];
+  // Normalize internal_links: support both { text, url } and legacy { anchor, slug } formats
+  const rawLinks = (article.internal_links as any[] | null) || [];
+  const internalLinks = rawLinks.map((link: any) => ({
+    text: link.text || link.anchor || "",
+    url: link.url || (link.slug ? `/actualites/${link.slug}` : "#"),
+  })).filter((l: any) => l.text);
 
   // Schema.org Article — CORRECTION 1
   const articleSchema = {

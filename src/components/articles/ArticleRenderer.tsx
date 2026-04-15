@@ -150,26 +150,29 @@ interface ArticleRendererProps {
   userRole?: "owner" | "sitter" | "both";
 }
 
-/** Replace inscription CTAs based on user role */
+/** Replace inscription CTAs based on user role — preserves existing attributes */
 function adaptCTAsForRole(html: string, role?: "owner" | "sitter" | "both"): string {
   if (!role) return html;
 
-  const ownerPattern = /href="\/register\?role=owner"[^>]*>[^<]*/g;
-  const sitterPattern = /href="\/register\?role=guardian"[^>]*>[^<]*/g;
-  const genericPattern = /href="\/register"[^>]*>[^<]*/g;
+  // Replace only the href value and inner text, keeping all other attributes intact
+  const replaceHref = (html: string, fromHref: string, toHref: string, newText: string) =>
+    html.replace(
+      new RegExp(`(<a\\s[^>]*?)href="${fromHref.replace(/[?]/g, '\\$&')}"([^>]*>)[^<]*`, 'g'),
+      `$1href="${toHref}"$2${newText}`
+    );
 
   if (role === "owner") {
-    html = html.replace(ownerPattern, `href="/sits/create">Publier une annonce →`);
-    html = html.replace(sitterPattern, `href="/search">Trouver une garde près de chez vous →`);
-    html = html.replace(genericPattern, `href="/sits/create">Publier une annonce →`);
+    html = replaceHref(html, "/register\\?role=owner", "/sits/create", "Publier une annonce →");
+    html = replaceHref(html, "/register\\?role=guardian", "/search", "Trouver une garde près de chez vous →");
+    html = replaceHref(html, "/register", "/sits/create", "Publier une annonce →");
   } else if (role === "sitter") {
-    html = html.replace(sitterPattern, `href="/search">Trouver une garde près de chez vous →`);
-    html = html.replace(ownerPattern, `href="/sits/create">Publier une annonce →`);
-    html = html.replace(genericPattern, `href="/search">Trouver une garde près de chez vous →`);
+    html = replaceHref(html, "/register\\?role=guardian", "/search", "Trouver une garde près de chez vous →");
+    html = replaceHref(html, "/register\\?role=owner", "/sits/create", "Publier une annonce →");
+    html = replaceHref(html, "/register", "/search", "Trouver une garde près de chez vous →");
   } else if (role === "both") {
-    html = html.replace(ownerPattern, `href="/sits/create">Publier une annonce →`);
-    html = html.replace(sitterPattern, `href="/search">Trouver une garde près de chez vous →`);
-    html = html.replace(genericPattern, `href="/sits/create">Publier une annonce →`);
+    html = replaceHref(html, "/register\\?role=owner", "/sits/create", "Publier une annonce →");
+    html = replaceHref(html, "/register\\?role=guardian", "/search", "Trouver une garde près de chez vous →");
+    html = replaceHref(html, "/register", "/sits/create", "Publier une annonce →");
   }
 
   return html;
