@@ -12,6 +12,7 @@ import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import ArticleRenderer, { resolveImagePath } from "@/components/articles/ArticleRenderer";
 import PageBreadcrumb from "@/components/seo/PageBreadcrumb";
+import { parseFaqFromMarkdown, buildFaqSchema } from "@/lib/parseFaq";
 import { getOptimizedImageUrl } from "@/lib/imageOptim";
 
 interface ArticleFull {
@@ -242,36 +243,9 @@ export default function ArticleDetail() {
     },
   };
 
-  // FAQ schema extraction
-  const faqItems: { question: string; answer: string }[] = [];
-  if (article.content.includes("### ") && article.content.includes("?")) {
-    const lines = article.content.split("\n");
-    let currentQ = "";
-    let currentA = "";
-    for (let i = 0; i < lines.length; i++) {
-      const line = lines[i];
-      if (line.startsWith("### ") && line.includes("?")) {
-        if (currentQ && currentA.trim()) {
-          faqItems.push({ question: currentQ, answer: currentA.trim() });
-        }
-        currentQ = line.replace("### ", "").trim();
-        currentA = "";
-      } else if (currentQ) {
-        if (line.startsWith("## ") || line.startsWith("# ")) {
-          if (currentA.trim()) {
-            faqItems.push({ question: currentQ, answer: currentA.trim() });
-          }
-          currentQ = "";
-          currentA = "";
-        } else {
-          currentA += line + " ";
-        }
-      }
-    }
-    if (currentQ && currentA.trim()) {
-      faqItems.push({ question: currentQ, answer: currentA.trim() });
-    }
-  }
+  // FAQ schema — parsed from :::faq blocks
+  const faqItems = parseFaqFromMarkdown(article.content);
+  const faqSchema = buildFaqSchema(faqItems);
 
   return (
     <>
@@ -289,19 +263,8 @@ export default function ArticleDetail() {
       {/* CORRECTION 1 — Schema.org Article */}
       <Helmet>
         <script type="application/ld+json">{JSON.stringify(articleSchema)}</script>
-        {faqItems.length > 0 && (
-          <script type="application/ld+json">{JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "FAQPage",
-            "mainEntity": faqItems.map(faq => ({
-              "@type": "Question",
-              "name": faq.question,
-              "acceptedAnswer": {
-                "@type": "Answer",
-                "text": faq.answer.replace(/\*\*/g, "").replace(/\[.*?\]\(.*?\)/g, "").trim()
-              }
-            }))
-          })}</script>
+        {faqSchema && (
+          <script type="application/ld+json">{JSON.stringify(faqSchema)}</script>
         )}
       </Helmet>
 

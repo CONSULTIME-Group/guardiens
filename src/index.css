@@ -347,7 +347,46 @@
     @apply mb-0;
   }
 
-  /* End CTA */
+  /* FAQ block */
+  .article-faq-block {
+    @apply my-10 py-8 px-6 rounded-xl border;
+    border-color: hsl(var(--border));
+    background: hsl(var(--muted) / 0.3);
+  }
+
+  .article-faq-heading {
+    @apply text-2xl font-heading font-bold mb-6;
+    color: hsl(var(--foreground));
+  }
+
+  .article-faq-item {
+    @apply py-4;
+    border-bottom: 1px solid hsl(var(--border));
+  }
+
+  .article-faq-item:last-child {
+    @apply border-b-0 pb-0;
+  }
+
+  .article-faq-question {
+    @apply text-base font-semibold mb-2;
+    color: hsl(var(--foreground));
+  }
+
+  .article-faq-answer {
+    @apply text-sm leading-relaxed;
+    color: hsl(var(--muted-foreground));
+  }
+
+  .article-faq-answer p {
+    @apply mb-2;
+  }
+
+  .article-faq-answer p:last-child {
+    @apply mb-0;
+  }
+
+
   .article-cta-end {
     @apply mt-12;
     background: linear-gradient(135deg, hsl(var(--primary) / 0.1), hsl(var(--primary) / 0.04));
