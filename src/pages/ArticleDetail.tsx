@@ -107,6 +107,12 @@ const ARTICLE_REDIRECTS: Record<string, string> = {
   "erreurs-premiere-garde": "reussir-premiere-garde-house-sitting",
   "house-sitting-saint-etienne-guide": "pet-sitting-saint-etienne-loire",
   "jardinage-echange-service-voisin-grenoble": "jardinage-entraide-quartier-grenoble",
+  "jardinage-echange-service-voisin-annecy": "jardinage-entraide-quartier-annecy",
+  "jardinage-echange-service-voisin-lyon": "jardinage-entraide-quartier-lyon",
+  "demenagement-coup-main-voisin-aura": "demenagement-entraide-locale-aura",
+  "bricolage-montage-meubles-voisin-grenoble-lyon": "bricolage-montage-meubles-entraide-grenoble-lyon",
+  "courses-aide-domicile-voisin-senior-lyon": "courses-aide-domicile-entraide-senior-lyon",
+  "reseau-voisinage-quartier-lyon-aura": "reseau-entraide-quartier-lyon-aura",
   // Slugs fantômes crawlés par Google (canonical fausses corrigées)
   "rediger-annonce-garde": "rediger-bonne-annonce-house-sitting",
   "gardien-urgence-presentation": "devenir-gardien-urgence-guardiens",
