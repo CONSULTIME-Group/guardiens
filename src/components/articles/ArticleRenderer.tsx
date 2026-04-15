@@ -182,7 +182,7 @@ function stripLeadingH1(md: string): string {
 
 export default function ArticleRenderer({ content, userRole }: ArticleRendererProps) {
   const withoutH1 = stripLeadingH1(content);
-  const preprocessed = transformFactBoxes(withoutH1);
+  const preprocessed = transformFaqBlocks(transformFactBoxes(withoutH1));
   let html = marked.parse(preprocessed, { async: false }) as string;
   
   html = resolveArticleImages(html);
