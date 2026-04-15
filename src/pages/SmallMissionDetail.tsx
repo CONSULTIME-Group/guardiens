@@ -48,7 +48,7 @@ const STATUS_LABELS: Record<string, { label: string; className: string }> = {
 
 const PUBLISHER_BADGES = [
   { key: "coup_de_main_en_or", label: "Coup de main en or", icon: Star, iconColor: "text-amber-500", bgColor: "bg-amber-50 dark:bg-amber-900/20", borderColor: "border-amber-300 dark:border-amber-700", selectedBg: "bg-amber-100 dark:bg-amber-900/40" },
-  { key: "super_voisin", label: "Super voisin(e)", icon: Heart, iconColor: "text-green-500", bgColor: "bg-green-50 dark:bg-green-900/20", borderColor: "border-green-300 dark:border-green-700", selectedBg: "bg-green-100 dark:bg-green-900/40" },
+  { key: "super_voisin", label: "Personne en or", icon: Heart, iconColor: "text-green-500", bgColor: "bg-green-50 dark:bg-green-900/20", borderColor: "border-green-300 dark:border-green-700", selectedBg: "bg-green-100 dark:bg-green-900/40" },
   { key: "on_remet_ca", label: "On remet ça", icon: RotateCcw, iconColor: "text-blue-500", bgColor: "bg-blue-50 dark:bg-blue-900/20", borderColor: "border-blue-300 dark:border-blue-700", selectedBg: "bg-blue-100 dark:bg-blue-900/40" },
 ];
 

@@ -22,7 +22,7 @@ const MISSION_BADGES = [
   },
   {
     key: "super_voisin",
-    label: "Super voisin(e)",
+    label: "Personne en or",
     description: "Sympa, ponctuel, agréable",
     icon: Heart,
     bgColor: "bg-green-50 dark:bg-green-900/20",

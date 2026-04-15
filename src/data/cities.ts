@@ -176,7 +176,7 @@ export const CITIES: CityData[] = [
       "pet sitting nord Lyon",
       "gardien maison Caluire",
     ],
-    h1: "House-sitting à Caluire-et-Cuire : votre voisin de confiance",
+    h1: "House-sitting à Caluire-et-Cuire : votre gardien de confiance",
     metaDescription:
       "Garde de maison et animaux à Caluire-et-Cuire. Gardiens vérifiés à 15 min. Résidences avec jardin, chiens et chats bienvenus. Gratuit propriétaires.",
     localSpots: [

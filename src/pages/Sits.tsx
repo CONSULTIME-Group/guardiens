@@ -523,8 +523,8 @@ const Sits = () => {
                 <GuideField label="Vétérinaire" value={openGuide.vet_name} />
                 <GuideField label="Tél. vétérinaire" value={openGuide.vet_phone} copyable />
                 <GuideField label="Adresse vétérinaire" value={openGuide.vet_address} />
-                <GuideField label="Voisin de confiance" value={openGuide.neighbor_name} />
-                <GuideField label="Tél. voisin" value={openGuide.neighbor_phone} copyable />
+                <GuideField label="Personne de confiance" value={openGuide.neighbor_name} />
+                <GuideField label="Tél. personne de confiance" value={openGuide.neighbor_phone} copyable />
                 <GuideField label="Contact d'urgence proprio" value={openGuide.emergency_contact_name} />
                 <GuideField label="Tél. urgence" value={openGuide.emergency_contact_phone} copyable />
                 <GuideField label="Plombier" value={openGuide.plumber_phone} copyable />

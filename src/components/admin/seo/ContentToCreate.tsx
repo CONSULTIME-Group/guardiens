@@ -33,9 +33,9 @@ const PRIORITY_ARTICLES = [
   { slug: "yorkshire-terrier-guide-race", type: "guide_race", group: "Races manquantes" },
   { slug: "maine-coon-guide-race", type: "guide_race", group: "Races manquantes" },
   { slug: "beagle-guide-race", type: "guide_race", group: "Races manquantes" },
-  { slug: "jardinage-echange-service-voisin-grenoble", type: "vie_locale", group: "Vie locale nouvelles villes" },
-  { slug: "aide-courses-voisin-annecy", type: "vie_locale", group: "Vie locale nouvelles villes" },
-  { slug: "bricolage-voisin-chambery", type: "vie_locale", group: "Vie locale nouvelles villes" },
+  { slug: "jardinage-entraide-quartier-grenoble", type: "vie_locale", group: "Vie locale nouvelles villes" },
+  { slug: "aide-courses-entraide-annecy", type: "vie_locale", group: "Vie locale nouvelles villes" },
+  { slug: "bricolage-entraide-chambery", type: "vie_locale", group: "Vie locale nouvelles villes" },
 ];
 
 const PRIORITY_BADGES = {
@@ -56,9 +56,9 @@ const SLUG_LABELS: Record<string, string> = {
   "yorkshire-terrier-guide-race": "Yorkshire Terrier",
   "beagle-guide-race": "Beagle",
   "maine-coon-guide-race": "Maine Coon",
-  "jardinage-echange-service-voisin-grenoble": "Jardinage & échange — Grenoble",
-  "aide-courses-voisin-annecy": "Aide courses — Annecy",
-  "bricolage-voisin-chambery": "Bricolage — Chambéry",
+  "jardinage-entraide-quartier-grenoble": "Jardinage & échange — Grenoble",
+  "aide-courses-entraide-annecy": "Aide courses — Annecy",
+  "bricolage-entraide-chambery": "Bricolage — Chambéry",
 };
 
 function humanizeSlug(slug: string): string {

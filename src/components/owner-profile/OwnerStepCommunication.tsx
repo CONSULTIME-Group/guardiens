@@ -6,7 +6,7 @@ import HintBubble from "../profile/HintBubble";
 import AiSuggestButton from "../profile/AiSuggestButton";
 import type { OwnerProfileData } from "@/hooks/useOwnerProfile";
 
-const HANDOVER = ["La veille avec nuit commune", "Le jour du départ", "À distance — clés chez un voisin ou boîte à clé"];
+const HANDOVER = ["La veille avec nuit commune", "Le jour du départ", "À distance — clés chez une personne de confiance ou boîte à clé"];
 const FORMAT = ["Photos + texte court", "Simple message texte", "Appel vidéo ponctuel"];
 const TIME = ["Matin", "Soir", "Pas de préférence"];
 

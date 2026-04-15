@@ -796,7 +796,7 @@ const SmallMissions = () => {
                 <h2 className="text-base font-semibold text-foreground mb-4 flex items-center gap-2">
                   Disponibles pour aider
                   <span className="text-xs font-normal bg-muted text-muted-foreground px-2 py-0.5 rounded-full">
-                    {helperCount} voisin{helperCount > 1 ? "s" : ""}
+                    {helperCount} personne{helperCount > 1 ? "s" : ""} du coin
                   </span>
                 </h2>
                 <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">

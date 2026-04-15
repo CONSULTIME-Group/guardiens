@@ -156,11 +156,11 @@ const HouseGuide = () => {
 
         <p className="text-xs text-muted-foreground mt-3">Contact d'urgence</p>
         <div className="grid grid-cols-2 gap-3">
-          <Field label="Nom" value={guide.emergency_contact_name} onChange={v => update("emergency_contact_name", v)} placeholder="Marie (voisine)" />
+          <Field label="Nom" value={guide.emergency_contact_name} onChange={v => update("emergency_contact_name", v)} placeholder="Marie (proche)" />
           <Field label="Téléphone" value={guide.emergency_contact_phone} onChange={v => update("emergency_contact_phone", v)} placeholder="06 12 34 56 78" />
         </div>
 
-        <p className="text-xs text-muted-foreground mt-3">Voisin</p>
+        <p className="text-xs text-muted-foreground mt-3">Personne de confiance</p>
         <div className="grid grid-cols-2 gap-3">
           <Field label="Nom" value={guide.neighbor_name} onChange={v => update("neighbor_name", v)} placeholder="Jean (2ème étage)" />
           <Field label="Téléphone" value={guide.neighbor_phone} onChange={v => update("neighbor_phone", v)} placeholder="06 98 76 54 32" />

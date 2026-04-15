@@ -83,7 +83,7 @@ const HouseGuideBlock = ({ propertyId }: HouseGuideBlockProps) => {
                 <ContactRow label="Urgence" name={guide.emergency_contact_name} phone={guide.emergency_contact_phone} />
               )}
               {guide.neighbor_name && (
-                <ContactRow label="Voisin" name={guide.neighbor_name} phone={guide.neighbor_phone} />
+                <ContactRow label="Personne de confiance" name={guide.neighbor_name} phone={guide.neighbor_phone} />
               )}
               {guide.plumber_phone && (
                 <ContactRow label="Plombier" name="" phone={guide.plumber_phone} />
