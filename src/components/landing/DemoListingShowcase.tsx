@@ -3,38 +3,38 @@ import { Link } from "react-router-dom";
 const DEMO_LISTINGS = [
   {
     id: "demo-1",
-    photo: "https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=800&q=80",
+    photo: "/images/landing/annonce-maison-jardin.webp",
     city: "Lyon 6e",
     animals: ["1 chien", "2 chats"],
     dates: "14 → 28 juil.",
     title: "Maison avec jardin, Laïka et ses deux compères",
     description: "Belle maison en briques avec terrasse ensoleillée. Laïka (labrador 4 ans) adore les balades au parc de la Tête d'Or. Les deux chats sont indépendants.",
     ownerName: "Nadia",
-    ownerPhoto: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&q=80",
+    ownerPhoto: "/images/landing/avatar-nadia.webp",
     badges: ["ID vérifiée", "Fondatrice"],
   },
   {
     id: "demo-2",
-    photo: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&q=80",
+    photo: "/images/landing/annonce-maison-lac.webp",
     city: "Annecy",
     animals: ["3 poules", "1 chat"],
     dates: "2 → 16 août",
     title: "Maison en bois face au lac, potager et basse-cour",
     description: "Vue imprenable sur le lac d'Annecy. Trois poules pondeuses (les œufs sont pour vous), un chat discret, un potager à arroser.",
     ownerName: "Rania",
-    ownerPhoto: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=200&q=80",
+    ownerPhoto: "/images/landing/avatar-rania.webp",
     badges: ["ID vérifiée", "3 gardes"],
   },
   {
     id: "demo-3",
-    photo: "https://images.unsplash.com/photo-1598928636135-d146006ff4be?w=800&q=80",
+    photo: "/images/landing/annonce-appartement-chats.webp",
     city: "Grenoble",
     animals: ["2 chats"],
     dates: "20 sept. → 4 oct.",
     title: "Appartement calme, deux chats aux habitudes bien rodées",
     description: "Appartement lumineux au pied du Vercors. Milo et Louane sont habitués aux gardiens — une semaine et ils vous ont adopté. Quartier animé, tout à pied.",
     ownerName: "Giulia",
-    ownerPhoto: "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=200&q=80",
+    ownerPhoto: "/images/landing/avatar-giulia.webp",
     badges: ["ID vérifiée", "Fondatrice"],
   },
 ];
@@ -44,7 +44,7 @@ const DemoListingCard = ({
 }: typeof DEMO_LISTINGS[0]) => (
   <div className="bg-card rounded-2xl overflow-hidden border border-border shadow-sm flex flex-col">
     <div className="relative">
-      <img src={photo} alt={title} className="w-full h-48 object-cover" loading="lazy" />
+      <img src={photo} alt={title} className="w-full h-48 object-cover" loading="lazy" width={700} height={467} />
       <span className="absolute top-3 left-3 bg-white/90 text-foreground/50 text-xs font-body font-medium px-3 py-1 rounded-full border border-border/60">
         Bientôt disponible
       </span>
@@ -68,7 +68,7 @@ const DemoListingCard = ({
       <p className="text-sm font-body text-foreground/70 line-clamp-2">{description}</p>
 
       <div className="flex items-center gap-3 mt-auto pt-3 border-t border-border">
-        <img src={ownerPhoto} alt={ownerName} className="w-9 h-9 rounded-full object-cover" loading="lazy" />
+        <img src={ownerPhoto} alt={ownerName} className="w-9 h-9 rounded-full object-cover" loading="lazy" width={80} height={80} />
         <div className="flex-1 min-w-0">
           <p className="text-sm font-body font-medium text-foreground/90 truncate">{ownerName}</p>
           <div className="flex gap-1 flex-wrap">
