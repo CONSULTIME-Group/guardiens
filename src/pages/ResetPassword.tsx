@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Eye, EyeOff } from "lucide-react";
 import { Helmet } from "react-helmet-async";
-import authIllustration from "@/assets/auth-illustration.webp";
+const authIllustration = "https://erhccyqevdyevpyctsjj.supabase.co/storage/v1/object/public/property-photos/misc/auth-illustration.webp";
 
 const ResetPassword = () => {
   const [password, setPassword] = useState("");

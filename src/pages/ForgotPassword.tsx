@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft } from "lucide-react";
 import { Helmet } from "react-helmet-async";
-import forgotPasswordPhoto from "@/assets/forgot-password-photo.webp";
+const forgotPasswordPhoto = "https://erhccyqevdyevpyctsjj.supabase.co/storage/v1/object/public/property-photos/misc/forgot-password-photo.webp";
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState("");
