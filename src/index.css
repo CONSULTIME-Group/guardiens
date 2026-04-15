@@ -204,6 +204,12 @@
   .article-rich-content a:hover {
     text-decoration: underline;
   }
+  .article-rich-content .article-cta-btn-primary {
+    color: white !important;
+  }
+  .article-rich-content .article-cta-btn-secondary {
+    color: hsl(var(--primary)) !important;
+  }
 
   .article-rich-content ul, .article-rich-content ol {
     @apply my-5 pl-0;
