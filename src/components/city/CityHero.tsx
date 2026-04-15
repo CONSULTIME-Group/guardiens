@@ -106,7 +106,7 @@ export default function CityHero({
               </Button>
             </Link>
             <Link to="/register">
-              <Button size="lg" variant="outline" className="gap-2 border-white/40 text-white hover:bg-white/10">
+              <Button size="lg" variant="outline" className="gap-2 border-white text-white bg-white/15 backdrop-blur-sm hover:bg-white/25">
                 Devenir gardien à {city}
               </Button>
             </Link>
