@@ -8,23 +8,14 @@ import { getOptimizedImageUrl } from "@/lib/imageOptim";
 const SB = "https://erhccyqevdyevpyctsjj.supabase.co/storage/v1/object/public/property-photos/articles-inline";
 
 // ── Vite imports for images NOT YET migrated ───────────────
-import lyonHeroQuais from "@/assets/lyon-hero-quais.webp";
-import lyonChatFenetre from "@/assets/lyon-chat-fenetre.webp";
-import chamberyElephantsChien from "@/assets/chambery-elephants-chien.webp";
-import chamberyChatBauges from "@/assets/chambery-chat-bauges.webp";
 import chamberyConfianceRue from "@/assets/chambery-confiance-rue.webp";
-import clermontJaudeChien from "@/assets/clermont-jaude-chien.webp";
-import villeurbanneGrattecielChien from "@/assets/villeurbanne-gratteciel-chien.webp";
-import venissieuxParillyChat from "@/assets/venissieux-parilly-chat.webp";
-import aixLesBainsVillaLac from "@/assets/aix-les-bains-villa-lac.webp";
-import goldenRetrieverQuaisLyon from "@/assets/golden-retriever-quais-lyon.webp";
+import chamberyChatBauges from "@/assets/chambery-chat-bauges.webp";
+import grenobleBasilleChien from "@/assets/grenoble-bastille-chien.webp";
+import grenobleChatChartreuse from "@/assets/grenoble-chat-chartreuse.webp";
+import saintEtienneChatForez from "@/assets/saint-etienne-chat-forez.webp";
 import borderCollieInterieurCroixRousse from "@/assets/border-collie-interieur-croix-rousse.webp";
 import bouledogueFrancaisInterieurLyon6 from "@/assets/bouledogue-francais-interieur-lyon6.webp";
-import bergerAustralienInterieurLyon from "@/assets/berger-australien-interieur-lyon.webp";
 import fondateursGuardiensQuaisLyon from "@/assets/fondateurs-guardiens-quais-lyon.webp";
-import gardeAnimauxAppartementLyon from "@/assets/garde-animaux-appartement-lyon.webp";
-import boomPetsittingHomeoffice from "@/assets/boom-petsitting-homeoffice-lyon.webp";
-import gardienBellecour from "@/assets/gardien-bellecour-lyon.webp";
 import profilGardienLaptop from "@/assets/profil-gardien-laptop-lyon.webp";
 import gardienTeletravailOuest from "@/assets/gardien-teletravail-ouest-lyon.webp";
 import pensionChienAlternativesCover from "@/assets/pension-chien-alternatives-cover.webp";
@@ -32,13 +23,7 @@ import gardeAnimalHospitalisation from "@/assets/garde-animal-hospitalisation-co
 import gardeChatDomicileLyon from "@/assets/garde-chat-domicile-lyon.webp";
 import gardeChatPresquileLyon from "@/assets/garde-chat-presquile-lyon.webp";
 import sAbsenterAnimalGuideCover from "@/assets/s-absenter-animal-guide-cover.webp";
-import grenobleBasilleChien from "@/assets/grenoble-bastille-chien.webp";
-import grenobleChatChartreuse from "@/assets/grenoble-chat-chartreuse.webp";
-import saintEtienneParcChien from "@/assets/saint-etienne-parc-chien.webp";
-import saintEtienneChatForez from "@/assets/saint-etienne-chat-forez.webp";
-import valenceParcChien from "@/assets/valence-parc-chien.webp";
-import valenceChatDrome from "@/assets/valence-chat-drome.webp";
-import valenceConfianceCafe from "@/assets/valence-confiance-cafe.webp";
+import aixLesBainsVillaLac from "@/assets/aix-les-bains-villa-lac.webp";
 
 
 const ARTICLE_IMAGES: Record<string, string> = {
@@ -55,34 +40,35 @@ const ARTICLE_IMAGES: Record<string, string> = {
   "/images/berger-australien-feyssine-lyon.jpg": `${SB}/berger-australien-feyssine-lyon.webp`,
   "/images/saint-etienne-confiance-cafe.jpg": `${SB}/saint-etienne-confiance-cafe.webp`,
   "/images/garde-animaux-croix-rousse-lyon.jpg": `${SB}/garde-animaux-croix-rousse-lyon.webp`,
-  // hero-lyon and hero-annecy are used by CityHero, not in article markdown
 
-  // ── Remaining local imports (future LOT 2+) ────────────────
-  "/images/lyon-hero-quais.jpg": lyonHeroQuais,
-  "/images/lyon-chat-fenetre.jpg": lyonChatFenetre,
+  // ── LOT 2 – migrated to Supabase Storage ──────────────────
+  "/images/lyon-hero-quais.jpg": `${SB}/lyon-hero-quais.webp`,
+  "/images/lyon-chat-fenetre.jpg": `${SB}/lyon-chat-fenetre.webp`,
+  "/images/venissieux-parilly-chat.jpg": `${SB}/venissieux-parilly-chat.webp`,
+  "/images/chambery-elephants-chien.jpg": `${SB}/chambery-elephants-chien.webp`,
+  "/images/saint-etienne-parc-chien.jpg": `${SB}/saint-etienne-parc-chien.webp`,
+  "/images/golden-retriever-quais-lyon.jpg": `${SB}/golden-retriever-quais-lyon.webp`,
+  "/images/valence-chat-drome.jpg": `${SB}/valence-chat-drome.webp`,
+  "/images/garde-animaux-appartement-lyon.jpg": `${SB}/garde-animaux-appartement-lyon.webp`,
+  "/images/valence-confiance-cafe.jpg": `${SB}/valence-confiance-cafe.webp`,
+  "/images/berger-australien-interieur-lyon.jpg": `${SB}/berger-australien-interieur-lyon.webp`,
+  "/images/gardien-bellecour-lyon.jpg": `${SB}/gardien-bellecour-lyon.webp`,
+  "/images/clermont-jaude-chien.jpg": `${SB}/clermont-jaude-chien.webp`,
+  "/images/boom-petsitting-homeoffice-lyon.jpg": `${SB}/boom-petsitting-homeoffice-lyon.webp`,
+  "/images/valence-parc-chien.jpg": `${SB}/valence-parc-chien.webp`,
+  "/images/villeurbanne-gratteciel-chien.jpg": `${SB}/villeurbanne-gratteciel-chien.webp`,
+
+  // ── Remaining local imports (future LOT 3+) ────────────────
   "/images/grenoble-bastille-chien.jpg": grenobleBasilleChien,
   "/images/grenoble-chat-chartreuse.jpg": grenobleChatChartreuse,
-  "/images/saint-etienne-parc-chien.jpg": saintEtienneParcChien,
   "/images/saint-etienne-chat-forez.jpg": saintEtienneChatForez,
-  "/images/valence-parc-chien.jpg": valenceParcChien,
-  "/images/valence-chat-drome.jpg": valenceChatDrome,
-  "/images/valence-confiance-cafe.jpg": valenceConfianceCafe,
-  "/images/chambery-elephants-chien.jpg": chamberyElephantsChien,
   "/images/chambery-chat-bauges.jpg": chamberyChatBauges,
   "/images/chambery-confiance-rue.jpg": chamberyConfianceRue,
-  "/images/clermont-jaude-chien.jpg": clermontJaudeChien,
-  "/images/villeurbanne-gratteciel-chien.jpg": villeurbanneGrattecielChien,
-  "/images/venissieux-parilly-chat.jpg": venissieuxParillyChat,
   "/images/aix-les-bains-villa-lac.jpg": aixLesBainsVillaLac,
-  "/images/golden-retriever-quais-lyon.jpg": goldenRetrieverQuaisLyon,
   "/images/border-collie-interieur-croix-rousse.jpg": borderCollieInterieurCroixRousse,
   "/images/bouledogue-francais-vieux-lyon.jpg": `${SB}/bouledogue-francais-vieux-lyon.webp`,
   "/images/bouledogue-francais-interieur-lyon6.jpg": bouledogueFrancaisInterieurLyon6,
-  "/images/berger-australien-interieur-lyon.jpg": bergerAustralienInterieurLyon,
   "/images/fondateurs-guardiens-quais-lyon.jpg": fondateursGuardiensQuaisLyon,
-  "/images/garde-animaux-appartement-lyon.jpg": gardeAnimauxAppartementLyon,
-  "/images/boom-petsitting-homeoffice-lyon.jpg": boomPetsittingHomeoffice,
-  "/images/gardien-bellecour-lyon.jpg": gardienBellecour,
   "/images/profil-gardien-laptop-lyon.jpg": profilGardienLaptop,
   "/images/gardien-teletravail-ouest-lyon.jpg": gardienTeletravailOuest,
   "/images/pension-chien-alternatives-cover.jpg": pensionChienAlternativesCover,
