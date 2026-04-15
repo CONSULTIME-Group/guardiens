@@ -1,9 +1,6 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, ShieldCheck, Siren, BadgeCheck, Mountain } from "lucide-react";
-import heroAnnecy from "@/assets/hero-annecy.webp";
-import heroLyon from "@/assets/hero-lyon.webp";
-
 interface CityHeroProps {
   city: string;
   h1Title: string;
@@ -14,9 +11,11 @@ interface CityHeroProps {
   departmentSlug?: string;
 }
 
+const SB_INLINE = "https://erhccyqevdyevpyctsjj.supabase.co/storage/v1/object/public/property-photos/articles-inline";
+
 const CITY_HERO_IMAGES: Record<string, string> = {
-  annecy: heroAnnecy,
-  lyon: heroLyon,
+  annecy: `${SB_INLINE}/hero-annecy.webp`,
+  lyon: `${SB_INLINE}/hero-lyon.webp`,
 };
 
 const trustSignals = [
