@@ -310,7 +310,7 @@ const SitterDashboard = () => {
             {articles.map((a: any) => (
               <Link key={a.id} to={`/actualites/${a.slug}`} className="flex-shrink-0 w-[70vw] sm:w-64 rounded-xl border border-border bg-card overflow-hidden hover:shadow-md transition-shadow cursor-pointer">
                 {a.cover_image_url ? (
-                  <img src={a.cover_image_url} alt="" className="w-full h-28 object-cover" />
+                  <img src={getOptimizedImageUrl(a.cover_image_url, 300, 75)} alt="" className="w-full h-28 object-cover" width={300} height={112} />
                 ) : (
                   <div className="w-full h-28 bg-accent flex items-center justify-center">
                     <Newspaper className="h-8 w-8 text-muted-foreground/40" />
