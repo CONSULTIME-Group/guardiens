@@ -34,6 +34,7 @@ import LocalNetworkGrid from "@/components/seo/LocalNetworkGrid";
 import CityArticleBody from "@/components/city/CityArticleBody";
 import StickyCTA from "@/components/seo/StickyCTA";
 import PageBreadcrumb from "@/components/seo/PageBreadcrumb";
+import CityHero, { CITY_HERO_IMAGES } from "@/components/city/CityHero";
 
 const CityPage = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -140,55 +141,83 @@ const CityPage = () => {
         <CityPageMeta city={cityData} />
         <CitySchemaOrg city={cityData} stats={stats} />
 
-        <PageBreadcrumb items={[
-          { label: "Nos villes", href: "/house-sitting" },
-          { label: cityData.name },
-        ]} />
+        {(() => {
+          const cityKey = cityData.slug;
+          const hasHeroImage = !!CITY_HERO_IMAGES[cityKey];
+
+          if (hasHeroImage) {
+            return (
+              <CityHero
+                city={cityData.name}
+                h1Title={cityData.h1}
+                subtitle={
+                  content?.subtitle ||
+                  (stats.guardiansCount > 0
+                    ? `${stats.guardiansCount} gardien${stats.guardiansCount > 1 ? "s" : ""} vérifié${stats.guardiansCount > 1 ? "s" : ""} en ${cityData.department} · Gratuit pour les propriétaires`
+                    : `Gardiens vérifiés en ${cityData.department} · Gratuit pour les propriétaires`)
+                }
+                heroAlt={cityData.heroImageAlt || `House-sitting à ${cityData.name}`}
+                department={cityData.department}
+              />
+            );
+          }
+
+          return (
+            <>
+              <PageBreadcrumb items={[
+                { label: "Nos villes", href: "/house-sitting" },
+                { label: cityData.name },
+              ]} />
+            </>
+          );
+        })()}
 
         <div className="min-h-screen bg-background relative">
-          {/* Hero */}
-          <section className="max-w-5xl mx-auto px-4 py-16">
-            <h1 className="font-serif text-3xl md:text-5xl font-bold text-foreground mb-6">
-              {cityData.h1}
-            </h1>
-            {content && (
-              <p className="text-lg text-foreground/80 max-w-3xl leading-relaxed mb-4 font-body">
-                {content.subtitle}
+          {/* Text hero — only when no image hero */}
+          {!CITY_HERO_IMAGES[cityData.slug] && (
+            <section className="max-w-5xl mx-auto px-4 py-16">
+              <h1 className="font-serif text-3xl md:text-5xl font-bold text-foreground mb-6">
+                {cityData.h1}
+              </h1>
+              {content && (
+                <p className="text-lg text-foreground/80 max-w-3xl leading-relaxed mb-4 font-body">
+                  {content.subtitle}
+                </p>
+              )}
+              <p className="text-lg text-muted-foreground max-w-3xl leading-relaxed mb-6">
+                {stats.guardiansCount > 0
+                  ? `${stats.guardiansCount} gardien${stats.guardiansCount > 1 ? "s" : ""} vérifié${stats.guardiansCount > 1 ? "s" : ""} en ${cityData.department}`
+                  : `Gardiens vérifiés en ${cityData.department}`}
+                {" · Gratuit pour les propriétaires"}
               </p>
-            )}
-            <p className="text-lg text-muted-foreground max-w-3xl leading-relaxed mb-6">
-              {stats.guardiansCount > 0
-                ? `${stats.guardiansCount} gardien${stats.guardiansCount > 1 ? "s" : ""} vérifié${stats.guardiansCount > 1 ? "s" : ""} en ${cityData.department}`
-                : `Gardiens vérifiés en ${cityData.department}`}
-              {" · Gratuit pour les propriétaires"}
-            </p>
 
-            <div className="flex flex-wrap gap-3 mb-8">
-              <Badge variant="secondary" className="text-sm px-4 py-2 gap-2">
-                <ShieldCheck className="h-4 w-4" />
-                Vérification d'identité manuelle
-              </Badge>
-              <Badge variant="outline" className="text-sm px-4 py-2 gap-2">
-                <Heart className="h-4 w-4" />
-                Gratuit propriétaires
-              </Badge>
-            </div>
+              <div className="flex flex-wrap gap-3 mb-8">
+                <Badge variant="secondary" className="text-sm px-4 py-2 gap-2">
+                  <ShieldCheck className="h-4 w-4" />
+                  Vérification d'identité manuelle
+                </Badge>
+                <Badge variant="outline" className="text-sm px-4 py-2 gap-2">
+                  <Heart className="h-4 w-4" />
+                  Gratuit propriétaires
+                </Badge>
+              </div>
 
-            <div className="flex flex-col sm:flex-row gap-3">
-              <Link to={`/search?ville=${cityData.slug}`}>
-                <Button size="lg" className="gap-2">
-                  Voir les gardiens à {cityData.name}
-                  <ArrowRight className="h-4 w-4" />
-                </Button>
-              </Link>
-              <Link to="/gardien-urgence">
-                <Button size="lg" variant="outline" className="gap-2">
-                  <Siren className="h-4 w-4" />
-                  Gardien d'urgence
-                </Button>
-              </Link>
-            </div>
-          </section>
+              <div className="flex flex-col sm:flex-row gap-3">
+                <Link to={`/search?ville=${cityData.slug}`}>
+                  <Button size="lg" className="gap-2">
+                    Voir les gardiens à {cityData.name}
+                    <ArrowRight className="h-4 w-4" />
+                  </Button>
+                </Link>
+                <Link to="/gardien-urgence">
+                  <Button size="lg" variant="outline" className="gap-2">
+                    <Siren className="h-4 w-4" />
+                    Gardien d'urgence
+                  </Button>
+                </Link>
+              </div>
+            </section>
+          )}
 
           {/* Cross-links */}
           {cityGuide && (
