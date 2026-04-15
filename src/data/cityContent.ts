@@ -30,7 +30,7 @@ export interface CityContentData {
 const cityContent: Record<string, CityContentData> = {
   annecy: {
     heroAlt: "Vue panoramique du lac d'Annecy et des montagnes enneigées",
-    subtitle: "Confiez votre maison et vos animaux à des gardiens de confiance en Haute-Savoie.",
+    subtitle: "Confiez votre maison et vos animaux à un home sitter de confiance en Haute-Savoie.",
     articleSections: [
       {
         id: "pourquoi",
@@ -39,7 +39,7 @@ const cityContent: Record<string, CityContentData> = {
 
 Les pensions pour animaux autour d'Annecy coûtent entre 25 et 45 € par jour. Pour deux semaines, ça fait vite 350 à 600 €. Et votre chat qui déteste les cages ? Votre chien qui a besoin de son jardin ?
 
-Le house-sitting, c'est la solution de bon sens : un gardien vérifié vient chez vous, s'occupe de vos animaux dans leur environnement, arrose le jardin, et veille sur la maison. **Gratuit pour le propriétaire. Logement offert pour le gardien.**
+Le house-sitting (parfois appelé home sitting en français), c'est la solution de bon sens : un gardien vérifié vient chez vous, s'occupe de vos animaux dans leur environnement, arrose le jardin, et veille sur la maison. **Gratuit pour le propriétaire. Logement offert pour le gardien.**
 
 À Annecy, cette logique de proximité est naturelle. Les gens se connaissent entre quartiers, l'entraide est dans l'ADN savoyard. Guardiens digitalise cette confiance de proximité.`,
       },
@@ -118,7 +118,7 @@ Tout est sur la plateforme : messagerie, avis croisés, guide de la maison, et m
 
   lyon: {
     heroAlt: "Garde de chien et de chat à Lyon - Vue panoramique depuis Fourvière au coucher du soleil - Guardiens",
-    subtitle: "Faites garder votre chien, votre chat ou votre maison à Lyon par un gardien de proximité vérifié. Sans commission, sans frais de pension.",
+    subtitle: "Faites garder votre chien, votre chat ou votre maison à Lyon par un home sitter de proximité vérifié. Sans commission, sans frais de pension.",
     articleSections: [
       {
         id: "introduction",

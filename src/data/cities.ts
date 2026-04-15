@@ -38,10 +38,11 @@ export const CITIES: CityData[] = [
       "garde maison Annecy",
       "pet sitting Haute-Savoie",
       "gardien de maison Annecy",
+      "home sitter Annecy",
     ],
     h1: "House-sitting à Annecy : partez l'esprit libre",
     metaDescription:
-      "Trouvez un gardien de confiance à Annecy et en Haute-Savoie. Vérifiés, locaux, disponibles en 15 min. Gratuit pour les propriétaires.",
+      "Trouvez un home sitter de confiance à Annecy et en Haute-Savoie. Gardiens vérifiés, locaux, disponibles en 15 min. Gratuit pour les propriétaires.",
     localSpots: [
       {
         name: "Lac d'Annecy",
@@ -82,13 +83,14 @@ export const CITIES: CityData[] = [
     keywordSecondary: [
       "pet sitter Lyon",
       "home sitting Lyon",
+      "home sitter Lyon",
       "garde animaux Lyon",
       "gardien maison Lyon",
       "house-sitting Lyon",
     ],
     h1: "Garde de chien et de chat à Lyon : la plateforme de confiance des propriétaires",
     metaDescription:
-      "Faites garder votre chien, votre chat ou votre maison à Lyon par un gardien de proximité. Inscription gratuite pour les propriétaires. Sans commission.",
+      "Faites garder votre chien ou votre chat à Lyon par un home sitter de proximité vérifié. Inscription gratuite pour les propriétaires. Sans commission.",
     localSpots: [
       {
         name: "Parc de la Tête d'Or",
