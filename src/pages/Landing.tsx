@@ -7,7 +7,6 @@ import { supabase } from "@/integrations/supabase/client";
 
 import PageMeta from "@/components/PageMeta";
 import useEmblaCarousel from "embla-carousel-react";
-import heroDogBbq from "@/assets/hero-landing.webp";
 import DemoListingShowcase from "@/components/landing/DemoListingShowcase";
 import PublicHeader from "@/components/layout/PublicHeader";
 import PublicFooter from "@/components/layout/PublicFooter";
@@ -165,7 +164,6 @@ const Landing = () => {
         description="Garde de maison gratuite et entraide de quartier. Petits services, échanges sans argent. Osez demander. Osez proposer. Rejoignez le mouvement."
         path="/"
         image="https://guardiens.fr/og-default.jpg"
-        preloadImage={heroDogBbq}
       />
       {/* JSON-LD: Organization */}
       <script
@@ -238,7 +236,7 @@ const Landing = () => {
       {/* ═══════════════ SECTION 1 — HERO ═══════════════ */}
       <section className="relative w-full min-h-screen flex items-center overflow-hidden">
         <img
-          src={heroDogBbq}
+          src="/hero-landing.webp"
           alt="Un golden retriever souriant dans un jardin ensoleillé — l'esprit Guardiens"
           className="absolute inset-0 w-full h-full object-cover"
           loading="eager"

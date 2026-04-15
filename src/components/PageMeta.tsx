@@ -15,8 +15,6 @@ interface PageMetaProps {
   publishedAt?: string;
   author?: string;
   noindex?: boolean;
-  /** Vite-resolved asset URL to preload as LCP image */
-  preloadImage?: string;
 }
 
 const PageMeta = ({
@@ -28,7 +26,6 @@ const PageMeta = ({
   publishedAt,
   author,
   noindex = false,
-  preloadImage,
 }: PageMetaProps) => {
   const location = useLocation();
   const currentPath = normalizePathname(path || location.pathname);
@@ -99,9 +96,6 @@ const PageMeta = ({
     <Helmet>
       <title>{fullTitle}</title>
       <meta name="description" content={metaDescription} />
-      {preloadImage && (
-        <link rel="preload" as="image" href={preloadImage} type="image/webp" fetchPriority="high" />
-      )}
     </Helmet>
   );
 };

@@ -42,12 +42,12 @@
         <a href="/gardien-urgence">Gardiens d'urgence</a> |
         <a href="/contact">Contact</a>
       </nav>
-      <p>Gratuit pour les propriétaires. 49€/an pour les gardiens. Inscrivez-vous avant le 13 mai 2026 pour le badge Fondateur.</p>
+      <p>Gratuit pour les propriétaires. À partir de 9€/mois pour les gardiens. Inscrivez-vous avant le 13 mai 2026 pour le badge Fondateur.</p>
     </noscript>
     <script type="module" src="/src/main.tsx"></script>
     <!-- GA4: loaded after load event to avoid blocking LCP -->
     <script>
-      window.addEventListener('load',function(){
+      setTimeout(function(){
         var s=document.createElement('script');
         s.src='https://www.googletagmanager.com/gtag/js?id=G-9JP4VR1RRP';
         s.async=true;
@@ -59,7 +59,7 @@
           gtag('js',new Date());
           gtag('config','G-9JP4VR1RRP',{send_page_view:true});
         };
-      });
+      }, 5000);
     </script>
   </body>
 </html>
