@@ -17,7 +17,7 @@ export const staticRoutes: SiteRoute[] = [
     path: "/",
     title: "Guardiens — House-sitting de confiance en Auvergne-Rhône-Alpes",
     metaDescription: "Trouvez un gardien de maison et d'animaux près de chez vous en Auvergne-Rhône-Alpes. Gardiens vérifiés, proximité, confiance. Gratuit.",
-    h1: "Guardiens — Comme confier ses clés à un voisin",
+    h1: "Guardiens — Comme confier ses clés à quelqu'un du coin",
     sitemapPriority: "1.0",
     changeFreq: "weekly",
   },
@@ -48,7 +48,7 @@ export const staticRoutes: SiteRoute[] = [
   {
     path: "/petites-missions",
     title: "Petites missions — Entraide communautaire | Guardiens",
-    metaDescription: "Coups de main entre voisins : arrosage, promenade, nourrissage. L'entraide de proximité, sans argent.",
+    metaDescription: "Coups de main de quartier : arrosage, promenade, nourrissage. L'entraide de proximité, sans argent.",
     h1: "Petites missions",
     sitemapPriority: "0.7",
     changeFreq: "daily",

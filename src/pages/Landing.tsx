@@ -162,7 +162,7 @@ const Landing = () => {
     <div className="min-h-screen bg-background text-foreground">
       <PageMeta
         title="Guardiens — Quelqu'un du coin veille sur votre maison."
-        description="Garde de maison gratuite entre voisins. Entraide locale, petits services, échanges sans argent. Osez demander. Osez proposer. Rejoignez le mouvement."
+        description="Garde de maison gratuite et entraide de quartier. Petits services, échanges sans argent. Osez demander. Osez proposer. Rejoignez le mouvement."
         path="/"
         image="https://guardiens.fr/og-default.jpg"
         preloadImage={heroDogBbq}
@@ -262,7 +262,7 @@ const Landing = () => {
               Quelqu'un du coin veille sur votre maison.
             </h1>
             <p className="font-heading text-2xl md:text-3xl lg:text-4xl italic text-white/85 leading-snug mb-6 animate-hero-fade-up animation-delay-700">
-              Et l'entraide entre voisins redevient naturelle.
+              Et l'entraide de quartier redevient naturelle.
             </p>
             <p className="font-body text-base md:text-lg text-white/70 max-w-lg mb-10 leading-relaxed animate-hero-fade-up animation-delay-700">
               Confiez vos animaux à un gardien de votre quartier. Osez demander un coup de main. Osez en proposer un.
@@ -288,7 +288,7 @@ const Landing = () => {
               to="/petites-missions"
               className="inline-flex items-center gap-1 text-white/80 text-sm underline underline-offset-4 hover:text-white transition-colors animate-hero-fade-up animation-delay-1000"
             >
-              Découvrir l'entraide entre voisins <ArrowRight className="h-3.5 w-3.5" />
+              Découvrir l'entraide de quartier <ArrowRight className="h-3.5 w-3.5" />
             </Link>
 
             <p className="mt-4 text-xs text-white/60 font-body animate-hero-fade-up animation-delay-1100">
@@ -554,7 +554,7 @@ const Landing = () => {
               Osez demander un coup de main.
             </h2>
             <p className="text-center text-foreground/70 font-body max-w-2xl mx-auto mb-6 text-lg leading-relaxed">
-              Avant, il y avait le voisin qui passait arroser le jardin. La grand-mère d'à côté qui gardait le chien.
+              Avant, il y avait quelqu'un du coin qui passait arroser le jardin. La grand-mère d'à côté qui gardait le chien.
               Le bricoleur du quartier qui venait fixer un volet. Personne ne demandait rien en échange — c'était normal.
             </p>
             <p className="text-center text-foreground/70 font-body max-w-2xl mx-auto mb-16 text-lg leading-relaxed">
