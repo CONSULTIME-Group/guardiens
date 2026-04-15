@@ -100,7 +100,7 @@ const PageMeta = ({
       <title>{fullTitle}</title>
       <meta name="description" content={metaDescription} />
       {preloadImage && (
-        <link rel="preload" as="image" href={preloadImage} type="image/webp" />
+        <link rel="preload" as="image" href={preloadImage} type="image/webp" fetchpriority="high" />
       )}
     </Helmet>
   );
