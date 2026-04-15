@@ -7,24 +7,6 @@ import { getOptimizedImageUrl } from "@/lib/imageOptim";
 // ── Supabase Storage base URL ──────────────────────────────
 const SB = "https://erhccyqevdyevpyctsjj.supabase.co/storage/v1/object/public/property-photos/articles-inline";
 
-// ── Vite imports for images NOT YET migrated ───────────────
-import chamberyConfianceRue from "@/assets/chambery-confiance-rue.webp";
-import chamberyChatBauges from "@/assets/chambery-chat-bauges.webp";
-import grenobleBasilleChien from "@/assets/grenoble-bastille-chien.webp";
-import grenobleChatChartreuse from "@/assets/grenoble-chat-chartreuse.webp";
-import saintEtienneChatForez from "@/assets/saint-etienne-chat-forez.webp";
-import borderCollieInterieurCroixRousse from "@/assets/border-collie-interieur-croix-rousse.webp";
-import bouledogueFrancaisInterieurLyon6 from "@/assets/bouledogue-francais-interieur-lyon6.webp";
-import fondateursGuardiensQuaisLyon from "@/assets/fondateurs-guardiens-quais-lyon.webp";
-import profilGardienLaptop from "@/assets/profil-gardien-laptop-lyon.webp";
-import gardienTeletravailOuest from "@/assets/gardien-teletravail-ouest-lyon.webp";
-import pensionChienAlternativesCover from "@/assets/pension-chien-alternatives-cover.webp";
-import gardeAnimalHospitalisation from "@/assets/garde-animal-hospitalisation-cover.webp";
-import gardeChatDomicileLyon from "@/assets/garde-chat-domicile-lyon.webp";
-import gardeChatPresquileLyon from "@/assets/garde-chat-presquile-lyon.webp";
-import sAbsenterAnimalGuideCover from "@/assets/s-absenter-animal-guide-cover.webp";
-import aixLesBainsVillaLac from "@/assets/aix-les-bains-villa-lac.webp";
-
 
 const ARTICLE_IMAGES: Record<string, string> = {
   // ── LOT 1 – migrated to Supabase Storage ──────────────────
@@ -58,24 +40,24 @@ const ARTICLE_IMAGES: Record<string, string> = {
   "/images/valence-parc-chien.jpg": `${SB}/valence-parc-chien.webp`,
   "/images/villeurbanne-gratteciel-chien.jpg": `${SB}/villeurbanne-gratteciel-chien.webp`,
 
-  // ── Remaining local imports (future LOT 3+) ────────────────
-  "/images/grenoble-bastille-chien.jpg": grenobleBasilleChien,
-  "/images/grenoble-chat-chartreuse.jpg": grenobleChatChartreuse,
-  "/images/saint-etienne-chat-forez.jpg": saintEtienneChatForez,
-  "/images/chambery-chat-bauges.jpg": chamberyChatBauges,
-  "/images/chambery-confiance-rue.jpg": chamberyConfianceRue,
-  "/images/aix-les-bains-villa-lac.jpg": aixLesBainsVillaLac,
-  "/images/border-collie-interieur-croix-rousse.jpg": borderCollieInterieurCroixRousse,
+  // ── LOT 3 – migrated to Supabase Storage ──────────────────
+  "/images/grenoble-bastille-chien.jpg": `${SB}/grenoble-bastille-chien.webp`,
+  "/images/grenoble-chat-chartreuse.jpg": `${SB}/grenoble-chat-chartreuse.webp`,
+  "/images/saint-etienne-chat-forez.jpg": `${SB}/saint-etienne-chat-forez.webp`,
+  "/images/chambery-chat-bauges.jpg": `${SB}/chambery-chat-bauges.webp`,
+  "/images/chambery-confiance-rue.jpg": `${SB}/chambery-confiance-rue.webp`,
+  "/images/aix-les-bains-villa-lac.jpg": `${SB}/aix-les-bains-villa-lac.webp`,
+  "/images/border-collie-interieur-croix-rousse.jpg": `${SB}/border-collie-interieur-croix-rousse.webp`,
   "/images/bouledogue-francais-vieux-lyon.jpg": `${SB}/bouledogue-francais-vieux-lyon.webp`,
-  "/images/bouledogue-francais-interieur-lyon6.jpg": bouledogueFrancaisInterieurLyon6,
-  "/images/fondateurs-guardiens-quais-lyon.jpg": fondateursGuardiensQuaisLyon,
-  "/images/profil-gardien-laptop-lyon.jpg": profilGardienLaptop,
-  "/images/gardien-teletravail-ouest-lyon.jpg": gardienTeletravailOuest,
-  "/images/pension-chien-alternatives-cover.jpg": pensionChienAlternativesCover,
-  "/images/garde-animal-hospitalisation-cover.jpg": gardeAnimalHospitalisation,
-  "/images/garde-chat-domicile-lyon.jpg": gardeChatDomicileLyon,
-  "/images/garde-chat-presquile-lyon.jpg": gardeChatPresquileLyon,
-  "/images/s-absenter-animal-guide-cover.jpg": sAbsenterAnimalGuideCover,
+  "/images/bouledogue-francais-interieur-lyon6.jpg": `${SB}/bouledogue-francais-interieur-lyon6.webp`,
+  "/images/fondateurs-guardiens-quais-lyon.jpg": `${SB}/fondateurs-guardiens-quais-lyon.webp`,
+  "/images/profil-gardien-laptop-lyon.jpg": `${SB}/profil-gardien-laptop-lyon.webp`,
+  "/images/gardien-teletravail-ouest-lyon.jpg": `${SB}/gardien-teletravail-ouest-lyon.webp`,
+  "/images/pension-chien-alternatives-cover.jpg": `${SB}/pension-chien-alternatives-cover.webp`,
+  "/images/garde-animal-hospitalisation-cover.jpg": `${SB}/garde-animal-hospitalisation-cover.webp`,
+  "/images/garde-chat-domicile-lyon.jpg": `${SB}/garde-chat-domicile-lyon.webp`,
+  "/images/garde-chat-presquile-lyon.jpg": `${SB}/garde-chat-presquile-lyon.webp`,
+  "/images/s-absenter-animal-guide-cover.jpg": `${SB}/s-absenter-animal-guide-cover.webp`,
 };
 
 export function resolveImagePath(path: string): string {
