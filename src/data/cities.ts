@@ -132,10 +132,12 @@ export const CITIES: CityData[] = [
       "garde maison Grenoble",
       "pet sitting Isère",
       "house sitter Grenoble",
+      "home sitter Grenoble",
+      "home sitting Grenoble",
     ],
     h1: "House-sitting à Grenoble : des gardiens dans votre quartier",
     metaDescription:
-      "House-sitting à Grenoble et en Isère. Gardiens vérifiés, locaux, disponibles rapidement. Gratuit pour les propriétaires sur Guardiens.",
+      "Home sitting à Grenoble : trouvez un home sitter de confiance en Isère. Gardiens vérifiés, locaux, disponibles rapidement. Gratuit pour les propriétaires.",
     localSpots: [
       {
         name: "Parc Paul Mistral",
@@ -222,10 +224,12 @@ export const CITIES: CityData[] = [
       "garde maison Chambéry",
       "pet sitting Savoie",
       "gardien maison Chambéry",
+      "home sitter Chambéry",
+      "home sitting Chambéry",
     ],
     h1: "House-sitting à Chambéry : partez sans inquiétude",
     metaDescription:
-      "House-sitting à Chambéry et en Savoie. Gardiens vérifiés, locaux, disponibles rapidement. Gratuit pour les propriétaires sur Guardiens.",
+      "Home sitting à Chambéry : trouvez un home sitter de confiance en Savoie. Gardiens vérifiés, locaux, disponibles rapidement. Gratuit pour les propriétaires.",
     localSpots: [
       {
         name: "Lac du Bourget (rive sud)",
