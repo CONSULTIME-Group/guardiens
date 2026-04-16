@@ -468,6 +468,21 @@ const ConversationHeader = ({
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Mission feedback modal */}
+      {isSmallMission && missionData && (
+        <MissionFeedbackModal
+          open={feedbackOpen}
+          onOpenChange={setFeedbackOpen}
+          missionId={missionData.id}
+          receiverId={conv.other_user?.id || (isOwner ? conv.sitter_id : conv.owner_id)}
+          receiverName={capitalize(conv.other_user?.first_name) || "ce membre"}
+          onSubmitted={() => {
+            setHasFeedback(true);
+            onActionDone();
+          }}
+        />
+      )}
     </div>
   );
 };
