@@ -504,14 +504,16 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <Label>Mon style de vie</Label>
-                <ChipSelect
-                  options={LIFESTYLE_OPTIONS}
-                  selected={lifestyle}
-                  onChange={setLifestyle}
-                />
-              </div>
+              {!isOwner && (
+                <div className="space-y-2">
+                  <Label>Mon style de vie</Label>
+                  <ChipSelect
+                    options={LIFESTYLE_OPTIONS}
+                    selected={lifestyle}
+                    onChange={setLifestyle}
+                  />
+                </div>
+              )}
 
               {/* Live mock preview */}
               <div className="bg-muted/50 rounded-xl p-4 border border-border">
