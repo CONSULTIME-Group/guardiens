@@ -44,7 +44,11 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
   );
   const [dontShowAgain, setDontShowAgain] = useState(false);
   const dontShowRef = useRef(false);
-  const isOwner = activeRole === "owner";
+  // Use the actual profile role for scoring logic, not activeRole
+  // DB uses sitter scoring for "both" role users
+  const userRole = user?.role || "sitter";
+  const usesSitterScoring = userRole === "sitter" || userRole === "both";
+  const isOwnerOnly = userRole === "owner";
 
   // ── Slide 0: mandatory fields ──
   const [firstName, setFirstName] = useState("");
