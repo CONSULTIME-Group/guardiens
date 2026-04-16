@@ -508,7 +508,7 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
                 </div>
               </div>
 
-              {!isOwnerOnly && (
+              {usesSitterScoring && (
                 <div className="space-y-2">
                   <Label>Mon style de vie</Label>
                   <ChipSelect
@@ -523,7 +523,7 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
               <div className="bg-muted/50 rounded-xl p-4 border border-border">
                 <p className="text-xs text-muted-foreground uppercase tracking-widest mb-3">Sur votre profil public</p>
                 <div className="flex flex-wrap gap-1.5">
-                  {skillCategories.length === 0 && (!isOwnerOnly ? lifestyle.length === 0 : true) && (
+                  {skillCategories.length === 0 && (usesSitterScoring ? lifestyle.length === 0 : true) && (
                     <p className="text-xs text-muted-foreground italic">Sélectionnez pour voir l'aperçu…</p>
                   )}
                   {skillCategories.map((key) => {
@@ -534,7 +534,7 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
                       </span>
                     );
                   })}
-                  {!isOwnerOnly && lifestyle.map((l) => (
+                  {usesSitterScoring && lifestyle.map((l) => (
                     <span key={l} className="bg-primary/10 text-primary text-xs px-2.5 py-1 rounded-full">
                       {l}
                     </span>
@@ -588,7 +588,7 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
                     {skillCategories.length > 0 ? <CheckCircle className="w-3.5 h-3.5 text-primary" /> : <Circle className="w-3.5 h-3.5 text-muted-foreground" />}
                     <span className={skillCategories.length > 0 ? "text-foreground" : "text-muted-foreground"}>Compétences</span>
                   </div>
-                  {!isOwnerOnly && (
+                  {usesSitterScoring && (
                     <div className="flex items-center gap-1.5">
                       {lifestyle.length > 0 ? <CheckCircle className="w-3.5 h-3.5 text-primary" /> : <Circle className="w-3.5 h-3.5 text-muted-foreground" />}
                       <span className={lifestyle.length > 0 ? "text-foreground" : "text-muted-foreground"}>Style de vie</span>
