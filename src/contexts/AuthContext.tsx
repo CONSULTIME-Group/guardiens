@@ -17,6 +17,7 @@ interface Profile {
   isFounder: boolean;
   onboardingCompleted: boolean;
   onboardingMinimalCompleted: boolean;
+  onboardingDismissedAt: string | null;
 }
 
 interface AuthContextType {
