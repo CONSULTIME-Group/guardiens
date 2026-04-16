@@ -15,6 +15,7 @@ interface Props {
   className?: string;
   inputClassName?: string;
   required?: boolean;
+  disabled?: boolean;
 }
 
 const PostalCodeCityFields = ({
@@ -28,6 +29,7 @@ const PostalCodeCityFields = ({
   className = "grid grid-cols-1 sm:grid-cols-2 gap-4",
   inputClassName = "rounded-lg h-12",
   required = false,
+  disabled = false,
 }: Props) => {
   const { handlePostalCodeChange, selectCity, cities, loading, error } =
     usePostalCodeCity(onChange);
