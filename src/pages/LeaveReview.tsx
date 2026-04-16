@@ -194,7 +194,7 @@ const LeaveReview = () => {
     // Send email to the other party inviting them to leave their review
     try {
       const { data: revieweeProfile } = await supabase
-        .from("profiles")
+        .from("public_profiles" as any)
         .select("first_name")
         .eq("id", reviewee.id)
         .maybeSingle();
