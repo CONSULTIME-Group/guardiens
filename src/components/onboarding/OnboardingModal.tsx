@@ -151,39 +151,53 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
 
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center backdrop-blur-sm bg-background/80">
-      <div className="max-w-2xl w-full mx-auto mt-16 bg-card rounded-2xl shadow-xl p-8 md:p-12 relative">
-        <button
-          onClick={dismiss}
-          className="absolute right-4 top-4 rounded-sm text-muted-foreground hover:text-foreground transition-colors"
-        >
-          <X className="h-5 w-5" />
-        </button>
+      <div className="max-w-2xl w-full mx-auto mt-16 bg-card rounded-2xl shadow-xl p-8 md:p-12 relative max-h-[85vh] overflow-y-auto">
+        {canDismiss && (
+          <button
+            onClick={dismiss}
+            className="absolute right-4 top-4 rounded-sm text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <X className="h-5 w-5" />
+          </button>
+        )}
 
-        <div className="flex justify-center gap-1 mb-6">
-          <button
-            onClick={() => setActiveTab("gardien")}
-            className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
-              activeTab === "gardien"
-                ? "bg-primary text-primary-foreground"
-                : "bg-muted text-muted-foreground"
-            }`}
-          >
-            Parcours gardien
-          </button>
-          <button
-            onClick={() => setActiveTab("proprio")}
-            className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
-              activeTab === "proprio"
-                ? "bg-primary text-primary-foreground"
-                : "bg-muted text-muted-foreground"
-            }`}
-          >
-            Parcours propriétaire
-          </button>
-        </div>
+        {slide > 0 && (
+          <div className="flex justify-center gap-1 mb-6">
+            <button
+              onClick={() => setActiveTab("gardien")}
+              className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
+                activeTab === "gardien"
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-muted text-muted-foreground"
+              }`}
+            >
+              Parcours gardien
+            </button>
+            <button
+              onClick={() => setActiveTab("proprio")}
+              className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
+                activeTab === "proprio"
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-muted text-muted-foreground"
+              }`}
+            >
+              Parcours propriétaire
+            </button>
+          </div>
+        )}
 
         <div className="min-h-[340px]">
-          {slide === 0 && <Slide0 />}
+          {slide === 0 && (
+            <Slide0WithFields
+              firstName={firstName}
+              postalCode={postalCode}
+              city={city}
+              minimalSaved={minimalSaved}
+              onFirstNameChange={setFirstName}
+              onPostalCodeChange={setPostalCode}
+              onCityChange={setCity}
+            />
+          )}
           {slide === 1 && viewingRole === "gardien" && <SitterSlide1 />}
           {slide === 1 && viewingRole === "proprio" && <OwnerSlide1 />}
           {slide === 2 && viewingRole === "gardien" && <SitterSlide2 completionRate={completionRate} />}
@@ -200,33 +214,47 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
           {slide === 6 && viewingRole === "proprio" && (
             <OwnerSlide6 onComplete={() => completeOnboarding("/mes-annonces")} />
           )}
+          {slide === 7 && viewingRole === "gardien" && (
+            <SitterSlide6 onComplete={() => completeOnboarding("/recherche")} />
+          )}
+          {slide === 7 && viewingRole === "proprio" && (
+            <OwnerSlide6 onComplete={() => completeOnboarding("/mes-annonces")} />
+          )}
         </div>
 
         <div className="flex items-center justify-between mt-8">
           <div className="flex flex-col gap-1.5">
-            <div className="flex items-center gap-2">
-              <label className="flex items-center gap-1.5 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={dontShowAgain}
-                  onChange={(e) => {
-                    setDontShowAgain(e.target.checked);
-                    dontShowRef.current = e.target.checked;
-                  }}
-                  className="accent-primary w-3.5 h-3.5"
-                />
-                <span className="text-xs text-muted-foreground">Ne plus afficher au démarrage</span>
-              </label>
-              <button
-                onClick={dismiss}
-                className="text-xs text-muted-foreground underline-offset-4 hover:underline transition-colors ml-2"
-              >
-                Reprendre plus tard
-              </button>
-            </div>
-            <p className="text-xs text-muted-foreground italic">
-              Retrouvez cette présentation à tout moment dans Paramètres.
-            </p>
+            {canDismiss ? (
+              <>
+                <div className="flex items-center gap-2">
+                  <label className="flex items-center gap-1.5 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={dontShowAgain}
+                      onChange={(e) => {
+                        setDontShowAgain(e.target.checked);
+                        dontShowRef.current = e.target.checked;
+                      }}
+                      className="accent-primary w-3.5 h-3.5"
+                    />
+                    <span className="text-xs text-muted-foreground">Ne plus afficher au démarrage</span>
+                  </label>
+                  <button
+                    onClick={dismiss}
+                    className="text-xs text-muted-foreground underline-offset-4 hover:underline transition-colors ml-2"
+                  >
+                    Reprendre plus tard
+                  </button>
+                </div>
+                <p className="text-xs text-muted-foreground italic">
+                  Retrouvez cette présentation à tout moment dans Paramètres.
+                </p>
+              </>
+            ) : (
+              <p className="text-xs text-muted-foreground italic">
+                Complétez ces informations pour continuer.
+              </p>
+            )}
           </div>
 
           {slide > 0 && (
@@ -253,8 +281,12 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
               </Button>
             )}
             {slide < TOTAL_SLIDES - 1 && (
-              <Button size="sm" onClick={() => setSlide((s) => s + 1)}>
-                Suivant
+              <Button
+                size="sm"
+                onClick={handleNext}
+                disabled={slide === 0 && !fieldsValid && !minimalSaved}
+              >
+                {slide === 0 && !minimalSaved ? (saving ? "Enregistrement…" : "C'est parti →") : "Suivant"}
               </Button>
             )}
           </div>
