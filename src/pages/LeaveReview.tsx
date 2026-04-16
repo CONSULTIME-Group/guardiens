@@ -224,7 +224,6 @@ const LeaveReview = () => {
               reviewerName: reviewerProfile?.first_name || "",
               sitTitle: sit.title || "",
               sitId,
-              overallRating,
             },
           },
         });
