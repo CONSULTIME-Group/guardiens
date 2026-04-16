@@ -8,8 +8,9 @@ const corsHeaders = {
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
-  const supabase = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
-  const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY")!;
+  const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+  const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+  const supabase = createClient(supabaseUrl, supabaseKey);
 
   const now = new Date();
   const d5ago = new Date(now.getTime() - 5 * 24 * 60 * 60 * 1000).toISOString().split("T")[0];
@@ -35,16 +36,23 @@ Deno.serve(async (req) => {
 
     const sitterId = apps?.[0]?.sitter_id;
 
-    const { data: ownerProfile } = await supabase.from("profiles").select("first_name, email").eq("id", sit.user_id).single();
-    const sitterProfile = sitterId ? (await supabase.from("profiles").select("first_name, email").eq("id", sitterId).single()).data : null;
+    const { data: ownerProfile } = await supabase
+      .from("profiles")
+      .select("first_name, email")
+      .eq("id", sit.user_id)
+      .single();
 
-    // Check if reviews already exist
+    const sitterProfile = sitterId
+      ? (await supabase.from("profiles").select("first_name, email").eq("id", sitterId).single()).data
+      : null;
+
     const parties = [
-      { id: sit.user_id, profile: ownerProfile, role: "owner" },
-      ...(sitterId && sitterProfile ? [{ id: sitterId, profile: sitterProfile, role: "sitter" }] : []),
+      { id: sit.user_id, profile: ownerProfile, isOwner: true },
+      ...(sitterId && sitterProfile ? [{ id: sitterId, profile: sitterProfile, isOwner: false }] : []),
     ];
 
     for (const party of parties) {
+      // Skip if already reviewed
       const { data: existingReview } = await supabase
         .from("reviews")
         .select("id")
@@ -54,28 +62,24 @@ Deno.serve(async (req) => {
 
       if (existingReview && existingReview.length > 0) continue;
 
-      const otherName = party.role === "owner"
-        ? (sitterProfile?.first_name || "votre gardien")
-        : (ownerProfile?.first_name || "votre propriétaire");
-
-      const prefix = party.role === "owner"
-        ? `Vous n'avez pas encore laissé d'avis sur votre garde avec ${otherName}. Cela ne prend que 2 minutes et aide vraiment la communauté.`
-        : `Vous n'avez pas encore laissé d'avis sur votre garde chez ${otherName}. Deux minutes suffisent.`;
+      const otherName = party.isOwner
+        ? (sitterProfile?.first_name || "")
+        : (ownerProfile?.first_name || "");
 
       if (party.profile?.email) {
-        await fetch("https://api.resend.com/emails", {
-          method: "POST",
-          headers: { "Content-Type": "application/json", Authorization: `Bearer ${RESEND_API_KEY}` },
-          body: JSON.stringify({
-            from: "Guardiens <noreply@guardiens.fr>",
-            to: [party.profile.email],
-            subject: "Un dernier rappel pour votre avis",
-            html: `<p>Bonjour ${party.profile.first_name || ""},</p>
-<p>${prefix}</p>
-<p><a href="https://guardiens.fr/review/${sit.id}">Laisser un avis →</a></p>
-<p>À bientôt,</p>
-<p>L'équipe Guardiens</p>`,
-          }),
+        await supabase.functions.invoke("send-transactional-email", {
+          body: {
+            templateName: "review-reminder",
+            recipientEmail: party.profile.email,
+            idempotencyKey: `review-j5-${party.id}-${sit.id}`,
+            templateData: {
+              firstName: party.profile.first_name || "",
+              sitTitle: sit.title || "",
+              revieweeName: otherName,
+              sitId: sit.id,
+              isOwner: party.isOwner,
+            },
+          },
         });
         count++;
       }
@@ -84,5 +88,7 @@ Deno.serve(async (req) => {
     await supabase.from("sits").update({ review_j5_sent: true }).eq("id", sit.id);
   }
 
-  return new Response(JSON.stringify({ sent: count }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+  return new Response(JSON.stringify({ sent: count }), {
+    headers: { ...corsHeaders, "Content-Type": "application/json" },
+  });
 });
