@@ -72,8 +72,8 @@ export const template = {
   component: ReviewReminderEmail,
   subject: (data: Record<string, any>) =>
     data.revieweeName
-      ? `Comment s'est passée la garde avec ${data.revieweeName} ?`
-      : 'Comment s'est passée la garde ? ⭐',
+      ? `Comment s\u2019est passée la garde avec ${data.revieweeName} ?`
+      : "Comment s\u2019est passée la garde ? ⭐",
   displayName: 'Relance avis (J+5)',
   previewData: { firstName: 'Marie', sitTitle: 'Garde chat Paris 11e', revieweeName: 'Thomas', sitId: 'abc-123', isOwner: true },
 } satisfies TemplateEntry
