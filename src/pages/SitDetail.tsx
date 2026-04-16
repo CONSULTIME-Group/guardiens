@@ -680,14 +680,19 @@ const SitDetail = () => {
         {/* Reviews tab */}
         <TabsContent value="reviews" className="mt-6">
           <ReviewsDisplay userId={sit.user_id} showAnimalCare={false} />
-          {sit.status === "completed" && user && (
+          {sit.status === "completed" && user && !hasReviewedThisSit && (
             <div className="mt-4">
               <Link to={`/review/${sit.id}`}>
                 <Button variant="outline" className="w-full gap-2">
-                  <Star className="h-4 w-4" /> {sit.user_id === user.id ? "Laisser un avis sur le gardien" : "Laisser un avis"}
+                  <Star className="h-4 w-4" /> {sit.user_id === user.id ? "Laisser un avis sur le gardien" : "Laisser un avis sur le propriétaire"}
                 </Button>
               </Link>
             </div>
+          )}
+          {sit.status === "completed" && hasReviewedThisSit && (
+            <p className="text-sm text-muted-foreground mt-4 flex items-center gap-1.5">
+              <CheckCircle2 className="h-4 w-4 text-primary" /> Vous avez déjà laissé votre avis pour cette garde.
+            </p>
           )}
         </TabsContent>
       </Tabs>
