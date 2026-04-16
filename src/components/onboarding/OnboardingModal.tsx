@@ -268,7 +268,7 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
 
   if (!open) return null;
 
-  const viewingRole: ActiveTab = activeTab;
+  
 
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center backdrop-blur-sm bg-background/80">
@@ -528,8 +528,8 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
           {slide === 3 && <EntraideSlide />}
 
           {/* ── Slide 4: Parcours de garde (read-only) ── */}
-          {slide === 4 && viewingRole === "gardien" && <SitterParcoursSlide />}
-          {slide === 4 && viewingRole === "proprio" && <OwnerParcoursSlide />}
+          {slide === 4 && activeTab === "gardien" && <SitterParcoursSlide />}
+          {slide === 4 && activeTab === "proprio" && <OwnerParcoursSlide />}
 
           {/* ── Slide 5: CTA final ── */}
           {slide === 5 && (
