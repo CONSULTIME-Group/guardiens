@@ -106,15 +106,26 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
         if (p.bio) setBio(p.bio);
         if (p.onboarding_minimal_completed) setMinimalSaved(true);
       }
-      // Load sitter profile data
-      const { data: sp } = await supabase
-        .from("sitter_profiles")
-        .select("lifestyle, competences")
-        .eq("user_id", user.id)
-        .maybeSingle();
-      if (sp) {
-        if (sp.lifestyle && Array.isArray(sp.lifestyle)) setLifestyle(sp.lifestyle as string[]);
-        // Map competences back to skill categories if available
+      // Load role-specific profile data
+      if (activeRole === "owner") {
+        const { data: op } = await supabase
+          .from("owner_profiles")
+          .select("competences")
+          .eq("user_id", user.id)
+          .maybeSingle();
+        if (op?.competences && Array.isArray(op.competences)) {
+          setSkillCategories(op.competences as string[]);
+        }
+      } else {
+        const { data: sp } = await supabase
+          .from("sitter_profiles")
+          .select("lifestyle, competences")
+          .eq("user_id", user.id)
+          .maybeSingle();
+        if (sp) {
+          if (sp.lifestyle && Array.isArray(sp.lifestyle)) setLifestyle(sp.lifestyle as string[]);
+          if (sp.competences && Array.isArray(sp.competences)) setSkillCategories(sp.competences as string[]);
+        }
       }
     };
     load();
@@ -178,20 +189,23 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
 
   const saveCompetencesAndLifestyle = async () => {
     if (!user) return;
-    // Upsert sitter_profiles
-    const updates: Record<string, any> = {};
-    if (lifestyle.length > 0) updates.lifestyle = lifestyle;
-    if (skillCategories.length > 0) updates.competences = skillCategories;
-    if (Object.keys(updates).length > 0) {
-      await supabase
-        .from("sitter_profiles")
-        .upsert({ user_id: user.id, ...updates }, { onConflict: "user_id" });
-    }
-    // Also save for owner_profiles if relevant
-    if (skillCategories.length > 0) {
-      await supabase
-        .from("owner_profiles")
-        .upsert({ user_id: user.id, competences: skillCategories } as any, { onConflict: "user_id" });
+    if (isOwner) {
+      // Owner: save competences to owner_profiles only
+      if (skillCategories.length > 0) {
+        await supabase
+          .from("owner_profiles")
+          .upsert({ user_id: user.id, competences: skillCategories } as any, { onConflict: "user_id" });
+      }
+    } else {
+      // Sitter: save competences + lifestyle to sitter_profiles
+      const updates: Record<string, any> = {};
+      if (lifestyle.length > 0) updates.lifestyle = lifestyle;
+      if (skillCategories.length > 0) updates.competences = skillCategories;
+      if (Object.keys(updates).length > 0) {
+        await supabase
+          .from("sitter_profiles")
+          .upsert({ user_id: user.id, ...updates }, { onConflict: "user_id" });
+      }
     }
   };
 
@@ -490,20 +504,22 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <Label>Mon style de vie</Label>
-                <ChipSelect
-                  options={LIFESTYLE_OPTIONS}
-                  selected={lifestyle}
-                  onChange={setLifestyle}
-                />
-              </div>
+              {!isOwner && (
+                <div className="space-y-2">
+                  <Label>Mon style de vie</Label>
+                  <ChipSelect
+                    options={LIFESTYLE_OPTIONS}
+                    selected={lifestyle}
+                    onChange={setLifestyle}
+                  />
+                </div>
+              )}
 
               {/* Live mock preview */}
               <div className="bg-muted/50 rounded-xl p-4 border border-border">
                 <p className="text-xs text-muted-foreground uppercase tracking-widest mb-3">Sur votre profil public</p>
                 <div className="flex flex-wrap gap-1.5">
-                  {skillCategories.length === 0 && lifestyle.length === 0 && (
+                  {skillCategories.length === 0 && (!isOwner ? lifestyle.length === 0 : true) && (
                     <p className="text-xs text-muted-foreground italic">Sélectionnez pour voir l'aperçu…</p>
                   )}
                   {skillCategories.map((key) => {
@@ -514,7 +530,7 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
                       </span>
                     );
                   })}
-                  {lifestyle.map((l) => (
+                  {!isOwner && lifestyle.map((l) => (
                     <span key={l} className="bg-primary/10 text-primary text-xs px-2.5 py-1 rounded-full">
                       {l}
                     </span>
