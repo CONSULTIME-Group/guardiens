@@ -80,7 +80,7 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
     let score = 0;
     if (firstName.trim() && postalCode) score += 10;
     if (avatarUrl) score += 20;
-    if (isOwner) {
+    if (isOwnerOnly) {
       // Owner scoring: bio=10, compétences=10 (max collectible here = 50)
       if (bio.length >= 50) score += 10;
       if (skillCategories.length > 0) score += 10;
@@ -91,7 +91,7 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
       if (lifestyle.length > 0) score += 10;
     }
     setLiveCompletion(score);
-  }, [firstName, postalCode, avatarUrl, bio, skillCategories, lifestyle, isOwner]);
+  }, [firstName, postalCode, avatarUrl, bio, skillCategories, lifestyle, isOwnerOnly]);
 
   // Load profile data on mount
   useEffect(() => {
@@ -193,7 +193,7 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
 
   const saveCompetencesAndLifestyle = async () => {
     if (!user) return;
-    if (isOwner) {
+    if (isOwnerOnly) {
       // Owner: save competences to owner_profiles only
       if (skillCategories.length > 0) {
         await supabase
@@ -397,7 +397,7 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
             <div className="space-y-5">
               <div>
                 <h2 className="font-heading text-2xl font-bold text-foreground">
-                  {isOwner
+                  {isOwnerOnly
                     ? "Les gardiens regardent votre photo et votre bio en premier."
                     : "Les propriétaires regardent votre photo et votre bio en premier."}
                 </h2>
@@ -475,7 +475,7 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
                   Vos compétences apparaissent sur votre profil.
                 </h2>
                 <p className="text-base text-foreground/80 leading-relaxed mt-2">
-                  {isOwner
+                  {isOwnerOnly
                     ? "Les gardiens les voient avant même de vous écrire. Sélectionnez ce qui vous correspond."
                     : "Les propriétaires les voient avant même de vous écrire. Sélectionnez ce qui vous correspond."}
                 </p>
@@ -508,7 +508,7 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
                 </div>
               </div>
 
-              {!isOwner && (
+              {!isOwnerOnly && (
                 <div className="space-y-2">
                   <Label>Mon style de vie</Label>
                   <ChipSelect
@@ -523,7 +523,7 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
               <div className="bg-muted/50 rounded-xl p-4 border border-border">
                 <p className="text-xs text-muted-foreground uppercase tracking-widest mb-3">Sur votre profil public</p>
                 <div className="flex flex-wrap gap-1.5">
-                  {skillCategories.length === 0 && (!isOwner ? lifestyle.length === 0 : true) && (
+                  {skillCategories.length === 0 && (!isOwnerOnly ? lifestyle.length === 0 : true) && (
                     <p className="text-xs text-muted-foreground italic">Sélectionnez pour voir l'aperçu…</p>
                   )}
                   {skillCategories.map((key) => {
@@ -534,7 +534,7 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
                       </span>
                     );
                   })}
-                  {!isOwner && lifestyle.map((l) => (
+                  {!isOwnerOnly && lifestyle.map((l) => (
                     <span key={l} className="bg-primary/10 text-primary text-xs px-2.5 py-1 rounded-full">
                       {l}
                     </span>
@@ -559,7 +559,7 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
               </h2>
               <p className="text-base text-foreground/80 leading-relaxed">
                 {liveCompletion >= 60
-                  ? isOwner
+                  ? isOwnerOnly
                     ? "Bravo ! Votre profil est déjà bien rempli. Les gardiens peuvent vous découvrir."
                     : "Bravo ! Votre profil est déjà bien rempli. Les propriétaires peuvent vous découvrir."
                   : "Vous pouvez encore améliorer votre profil depuis vos paramètres. En attendant, explorez !"}
@@ -588,7 +588,7 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
                     {skillCategories.length > 0 ? <CheckCircle className="w-3.5 h-3.5 text-primary" /> : <Circle className="w-3.5 h-3.5 text-muted-foreground" />}
                     <span className={skillCategories.length > 0 ? "text-foreground" : "text-muted-foreground"}>Compétences</span>
                   </div>
-                  {!isOwner && (
+                  {!isOwnerOnly && (
                     <div className="flex items-center gap-1.5">
                       {lifestyle.length > 0 ? <CheckCircle className="w-3.5 h-3.5 text-primary" /> : <Circle className="w-3.5 h-3.5 text-muted-foreground" />}
                       <span className={lifestyle.length > 0 ? "text-foreground" : "text-muted-foreground"}>Style de vie</span>
@@ -598,7 +598,7 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
               </div>
 
               <div className="flex flex-col gap-2">
-                {isOwner ? (
+                {isOwnerOnly ? (
                   <Button className="w-full" onClick={() => completeOnboarding("/sits")}>
                     Publier une annonce →
                   </Button>
