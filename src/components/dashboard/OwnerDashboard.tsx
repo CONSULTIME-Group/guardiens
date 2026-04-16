@@ -122,12 +122,7 @@ const OwnerDashboard = () => {
         const verStatus = p?.identity_verification_status || "not_submitted";
         setVerificationStatus(verStatus);
 
-        // Onboarding
-        if (searchParams.get("tour") === "true") {
-          setShowOnboardingModal(true);
-        } else if (p && !p.onboarding_completed && !p.onboarding_dismissed_at) {
-          setShowOnboardingModal(true);
-        }
+        // Onboarding is now handled by AppLayout
 
         const hasName = !!(p?.first_name);
         const hasAvatar = !!(p?.avatar_url);
@@ -317,13 +312,6 @@ const OwnerDashboard = () => {
 
   return (
     <div className="space-y-8">
-      <OnboardingModal
-        open={showOnboardingModal}
-        onClose={() => {
-          setShowOnboardingModal(false);
-          setSearchParams({});
-        }}
-      />
 
       {/* Role activation banner */}
       <div className="px-5 md:px-8">
