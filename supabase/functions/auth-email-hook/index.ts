@@ -17,12 +17,12 @@ const corsHeaders = {
 }
 
 const EMAIL_SUBJECTS: Record<string, string> = {
-  signup: 'Confirm your email',
-  invite: "You've been invited",
-  magiclink: 'Your login link',
-  recovery: 'Reset your password',
-  email_change: 'Confirm your new email',
-  reauthentication: 'Your verification code',
+  signup: 'Confirmez votre email — Guardiens',
+  invite: 'Vous êtes invité(e) sur Guardiens',
+  magiclink: 'Votre lien de connexion — Guardiens',
+  recovery: 'Réinitialisation de votre mot de passe — Guardiens',
+  email_change: 'Confirmez votre nouvel email — Guardiens',
+  reauthentication: 'Votre code de vérification — Guardiens',
 }
 
 // Template mapping
@@ -36,7 +36,7 @@ const EMAIL_TEMPLATES: Record<string, React.ComponentType<any>> = {
 }
 
 // Configuration
-const SITE_NAME = "guardiens"
+const SITE_NAME = "Guardiens"
 const SENDER_DOMAIN = "notify.guardiens.fr"
 const ROOT_DOMAIN = "guardiens.fr"
 const FROM_DOMAIN = "guardiens.fr" // Domain shown in From address (may be root or sender subdomain)
