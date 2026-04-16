@@ -605,7 +605,7 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
               <div className="flex flex-col gap-2">
                 {userRole === "both" ? (
                   <>
-                    <Button className="w-full" onClick={() => completeOnboarding("/recherche")}>
+                    <Button className="w-full" onClick={() => completeOnboarding("/search")}>
                       Explorer les annonces →
                     </Button>
                     <Button variant="outline" className="w-full" onClick={() => completeOnboarding("/sits")}>
@@ -617,7 +617,7 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
                     Publier une annonce →
                   </Button>
                 ) : (
-                  <Button className="w-full" onClick={() => completeOnboarding("/recherche")}>
+                  <Button className="w-full" onClick={() => completeOnboarding("/search")}>
                     Explorer les annonces →
                   </Button>
                 )}
