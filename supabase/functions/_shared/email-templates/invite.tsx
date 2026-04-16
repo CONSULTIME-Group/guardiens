@@ -37,17 +37,15 @@ export const InviteEmail = ({
         <Text style={text}>
           Vous avez été invité(e) à rejoindre{' '}
           <Link href={siteUrl} style={link}>
-            <strong>guardiens</strong>
+            <strong>{siteName}</strong>
           </Link>
-          . Cliquez sur le bouton ci-dessous pour accepter l'invitation et
-          créer votre compte.
+          . Cliquez sur le bouton ci-dessous pour accepter l'invitation et créer votre compte.
         </Text>
         <Button style={button} href={confirmationUrl}>
           Accepter l'invitation
         </Button>
         <Text style={footer}>
-          Si vous n'attendiez pas cette invitation, vous pouvez ignorer cet
-          email.
+          Si vous n'attendiez pas cette invitation, vous pouvez ignorer cet email.
         </Text>
       </Container>
     </Body>

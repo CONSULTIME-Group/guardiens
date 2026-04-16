@@ -32,7 +32,7 @@ export const MagicLinkEmail = ({
         </Heading>
         <Heading style={h1}>Votre lien de connexion</Heading>
         <Text style={text}>
-          Cliquez sur le bouton ci-dessous pour vous connecter à guardiens.
+          Cliquez sur le bouton ci-dessous pour vous connecter à {siteName}.
           Ce lien expire dans quelques minutes.
         </Text>
         <Button style={button} href={confirmationUrl}>

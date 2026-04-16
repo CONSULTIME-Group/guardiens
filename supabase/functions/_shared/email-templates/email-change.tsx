@@ -37,7 +37,7 @@ export const EmailChangeEmail = ({
         </Heading>
         <Heading style={h1}>Changement d'adresse email</Heading>
         <Text style={text}>
-          Vous avez demandé à changer votre adresse email de{' '}
+          Vous avez demandé à changer votre adresse email pour {siteName} de{' '}
           <Link href={`mailto:${email}`} style={link}>
             {email}
           </Link>{' '}
@@ -54,8 +54,7 @@ export const EmailChangeEmail = ({
           Confirmer le changement
         </Button>
         <Text style={footer}>
-          Si vous n'avez pas demandé ce changement, sécurisez votre compte
-          immédiatement.
+          Si vous n'avez pas demandé ce changement, sécurisez votre compte immédiatement.
         </Text>
       </Container>
     </Body>

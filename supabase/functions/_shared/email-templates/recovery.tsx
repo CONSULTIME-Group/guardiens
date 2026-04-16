@@ -32,7 +32,7 @@ export const RecoveryEmail = ({
         </Heading>
         <Heading style={h1}>Réinitialiser votre mot de passe</Heading>
         <Text style={text}>
-          Vous avez demandé à réinitialiser votre mot de passe sur guardiens.
+          Vous avez demandé à réinitialiser votre mot de passe sur {siteName}.
           Cliquez sur le bouton ci-dessous pour choisir un nouveau mot de passe.
         </Text>
         <Button style={button} href={confirmationUrl}>

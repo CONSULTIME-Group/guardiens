@@ -29,8 +29,7 @@ export const ReauthenticationEmail = ({ token }: ReauthenticationEmailProps) => 
         <Text style={text}>Utilisez le code ci-dessous pour confirmer votre identité :</Text>
         <Text style={codeStyle}>{token}</Text>
         <Text style={footer}>
-          Ce code expire dans quelques minutes. Si vous n'avez pas fait cette
-          demande, ignorez cet email.
+          Ce code expire dans quelques minutes. Si vous n'avez pas fait cette demande, ignorez cet email.
         </Text>
       </Container>
     </Body>

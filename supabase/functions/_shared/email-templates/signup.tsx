@@ -35,15 +35,26 @@ export const SignupEmail = ({
         <Heading style={logo}>
           <span style={{ color: '#3d7a5f' }}>g</span>uardiens
         </Heading>
-        <Heading style={h1}>Vous venez de rejoindre Guardiens.</Heading>
+        <Heading style={h1}>Vous venez de rejoindre {siteName}.</Heading>
         <Text style={text}>
-          Pour activer votre compte, confirmez votre adresse email en cliquant sur le bouton ci-dessous.
+          Merci pour votre inscription sur{' '}
+          <Link href={siteUrl} style={link}>
+            <strong>{siteName}</strong>
+          </Link>
+          .
+        </Text>
+        <Text style={text}>
+          Pour activer votre compte, confirmez votre adresse email (
+          <Link href={`mailto:${recipient}`} style={link}>
+            {recipient}
+          </Link>
+          ) en cliquant sur le bouton ci-dessous.
         </Text>
         <Button style={button} href={confirmationUrl}>
           Confirmer mon email
         </Button>
         <Text style={footer}>
-          Si vous n'avez pas créé de compte, ignorez cet email.
+          Si vous n'avez pas créé de compte, ignorez simplement cet email.
         </Text>
       </Container>
     </Body>
@@ -74,6 +85,7 @@ const text = {
   lineHeight: '1.6',
   margin: '0 0 25px',
 }
+const link = { color: '#3d7a5f', textDecoration: 'underline' }
 const button = {
   backgroundColor: '#3d7a5f',
   color: '#f7f5f2',
