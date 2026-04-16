@@ -110,7 +110,7 @@ const LeaveReview = () => {
 
       const [{ data: profile, error: profileError }, { data: existingReview }] = await Promise.all([
         supabase
-          .from("profiles")
+          .from("public_profiles" as any)
           .select("id, first_name, avatar_url")
           .eq("id", revieweeId)
           .maybeSingle(),
