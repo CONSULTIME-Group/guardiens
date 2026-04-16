@@ -19,8 +19,8 @@ interface OnboardingModalProps {
 
 const TOTAL_SLIDES = 8; // 0=welcome+fields, 1-7=presentation
 
-const OnboardingModal = ({ open, onClose }: OnboardingModalProps) => {
-  const { user } = useAuth();
+const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalProps) => {
+  const { user, refreshProfile } = useAuth();
   const navigate = useNavigate();
   const [slide, setSlide] = useState(0);
   const [activeTab, setActiveTab] = useState<ActiveTab>("gardien");
@@ -28,20 +28,36 @@ const OnboardingModal = ({ open, onClose }: OnboardingModalProps) => {
   const [dontShowAgain, setDontShowAgain] = useState(false);
   const dontShowRef = useRef(false);
 
-  // Load completion rate
+  // Mandatory fields state
+  const [firstName, setFirstName] = useState("");
+  const [postalCode, setPostalCode] = useState("");
+  const [city, setCity] = useState("");
+  const [minimalSaved, setMinimalSaved] = useState(false);
+  const [saving, setSaving] = useState(false);
+
+  const fieldsValid =
+    firstName.trim().length > 0 &&
+    postalCode.length === 5 &&
+    city.trim().length > 0;
+
+  // Load profile data on mount
   useEffect(() => {
-    if (!user) return;
+    if (!user || !open) return;
     supabase
       .from("profiles")
-      .select("profile_completion")
+      .select("profile_completion, first_name, postal_code, city, onboarding_minimal_completed")
       .eq("id", user.id)
       .single()
       .then(({ data }) => {
-        if (data) setCompletionRate(data.profile_completion || 0);
+        if (data) {
+          setCompletionRate(data.profile_completion || 0);
+          if (data.first_name) setFirstName(data.first_name);
+          if (data.postal_code) setPostalCode(data.postal_code);
+          if (data.city) setCity(data.city);
+          if (data.onboarding_minimal_completed) setMinimalSaved(true);
+        }
       });
-  }, [user]);
-
-  // No longer pre-select role — toggle is always visible
+  }, [user, open]);
 
   // Reset slide on open
   useEffect(() => {
@@ -56,18 +72,50 @@ const OnboardingModal = ({ open, onClose }: OnboardingModalProps) => {
   useEffect(() => {
     if (!open) return;
     const handler = (e: KeyboardEvent) => {
-      if (e.key === "ArrowRight" && slide < TOTAL_SLIDES - 1) {
-        setSlide((s) => Math.min(s + 1, TOTAL_SLIDES - 1));
-      }
-      if (e.key === "ArrowLeft" && slide > 0) {
-        setSlide((s) => Math.max(s - 1, 0));
-      }
+      if (e.key === "ArrowRight") handleNext();
+      if (e.key === "ArrowLeft" && slide > 0) setSlide((s) => Math.max(s - 1, 0));
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [open, slide]);
+  }, [open, slide, fieldsValid, minimalSaved]);
+
+  const saveMinimalFields = async () => {
+    if (!user || saving) return false;
+    setSaving(true);
+    const { error } = await supabase
+      .from("profiles")
+      .update({
+        first_name: firstName.trim(),
+        postal_code: postalCode,
+        city: city.trim(),
+        onboarding_minimal_completed: true,
+      } as any)
+      .eq("id", user.id);
+    setSaving(false);
+    if (error) {
+      toast.error("Erreur", { description: "Veuillez réessayer." });
+      return false;
+    }
+    toast.success("Bienvenue chez Guardiens !");
+    setMinimalSaved(true);
+    refreshProfile();
+    onMinimalComplete?.();
+    return true;
+  };
+
+  const handleNext = async () => {
+    if (slide === 0 && !minimalSaved) {
+      if (!fieldsValid) return;
+      const ok = await saveMinimalFields();
+      if (!ok) return;
+    }
+    if (slide < TOTAL_SLIDES - 1) setSlide((s) => s + 1);
+  };
+
+  const canDismiss = minimalSaved;
 
   const dismiss = useCallback(async () => {
+    if (!canDismiss) return;
     if (user) {
       const updates: Record<string, any> = {
         onboarding_dismissed_at: new Date().toISOString(),
@@ -79,11 +127,10 @@ const OnboardingModal = ({ open, onClose }: OnboardingModalProps) => {
         .from("profiles")
         .update(updates)
         .eq("id", user.id);
+      refreshProfile();
     }
     onClose();
-  }, [user, onClose]);
-
-  // No more selectRole — role selection removed from slide 0
+  }, [user, onClose, canDismiss, refreshProfile]);
 
   const completeOnboarding = async (destination: string) => {
     if (user) {
@@ -91,6 +138,7 @@ const OnboardingModal = ({ open, onClose }: OnboardingModalProps) => {
         .from("profiles")
         .update({ onboarding_completed: true })
         .eq("id", user.id);
+      refreshProfile();
     }
     onClose();
     navigate(destination);
@@ -99,7 +147,6 @@ const OnboardingModal = ({ open, onClose }: OnboardingModalProps) => {
   if (!open) return null;
 
   const viewingRole: ActiveTab = activeTab;
-
   const slideCount = TOTAL_SLIDES - 1;
 
   return (
