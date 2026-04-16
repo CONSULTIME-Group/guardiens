@@ -378,7 +378,9 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
             <div className="space-y-5">
               <div>
                 <h2 className="font-heading text-2xl font-bold text-foreground">
-                  Les propriétaires regardent votre photo et votre bio en premier.
+                  {isOwner
+                    ? "Les gardiens regardent votre photo et votre bio en premier."
+                    : "Les propriétaires regardent votre photo et votre bio en premier."}
                 </h2>
                 <p className="text-base text-foreground/80 leading-relaxed mt-2">
                   Montrez qui vous êtes. Une photo nette et quelques mots sincères suffisent.
@@ -454,7 +456,9 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
                   Vos compétences apparaissent sur votre profil.
                 </h2>
                 <p className="text-base text-foreground/80 leading-relaxed mt-2">
-                  Les propriétaires les voient avant même de vous écrire. Sélectionnez ce qui vous correspond.
+                  {isOwner
+                    ? "Les gardiens les voient avant même de vous écrire. Sélectionnez ce qui vous correspond."
+                    : "Les propriétaires les voient avant même de vous écrire. Sélectionnez ce qui vous correspond."}
                 </p>
               </div>
 
@@ -534,7 +538,9 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
               </h2>
               <p className="text-base text-foreground/80 leading-relaxed">
                 {liveCompletion >= 60
-                  ? "Bravo ! Votre profil est déjà bien rempli. Les propriétaires peuvent vous découvrir."
+                  ? isOwner
+                    ? "Bravo ! Votre profil est déjà bien rempli. Les gardiens peuvent vous découvrir."
+                    : "Bravo ! Votre profil est déjà bien rempli. Les propriétaires peuvent vous découvrir."
                   : "Vous pouvez encore améliorer votre profil depuis vos paramètres. En attendant, explorez !"}
               </p>
 
