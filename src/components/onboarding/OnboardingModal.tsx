@@ -17,7 +17,7 @@ interface OnboardingModalProps {
   onMinimalComplete?: () => void;
 }
 
-const TOTAL_SLIDES = 8; // 0=welcome+fields, 1-7=presentation
+const TOTAL_SLIDES = 7; // 0=welcome+fields, 1-5=presentation, 6=CTA
 
 const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalProps) => {
   const { user, refreshProfile } = useAuth();
@@ -212,12 +212,6 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
             <SitterSlide6 onComplete={() => completeOnboarding("/recherche")} />
           )}
           {slide === 6 && viewingRole === "proprio" && (
-            <OwnerSlide6 onComplete={() => completeOnboarding("/mes-annonces")} />
-          )}
-          {slide === 7 && viewingRole === "gardien" && (
-            <SitterSlide6 onComplete={() => completeOnboarding("/recherche")} />
-          )}
-          {slide === 7 && viewingRole === "proprio" && (
             <OwnerSlide6 onComplete={() => completeOnboarding("/mes-annonces")} />
           )}
         </div>
