@@ -8,14 +8,14 @@ const corsHeaders = {
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
-  const supabase = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
-  const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY")!;
+  const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+  const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+  const supabase = createClient(supabaseUrl, supabaseKey);
 
   const now = new Date();
   const h24ago = new Date(now.getTime() - 24 * 60 * 60 * 1000).toISOString().split("T")[0];
   const h48ago = new Date(now.getTime() - 48 * 60 * 60 * 1000).toISOString().split("T")[0];
 
-  // end_date between 48h ago and 24h ago (i.e. ended yesterday)
   const { data: sits } = await supabase
     .from("sits")
     .select("id, title, end_date, user_id, status")
@@ -35,48 +35,55 @@ Deno.serve(async (req) => {
 
     const sitterId = apps?.[0]?.sitter_id;
 
-    const { data: ownerProfile } = await supabase.from("profiles").select("first_name, email").eq("id", sit.user_id).single();
-    const sitterProfile = sitterId ? (await supabase.from("profiles").select("first_name, email").eq("id", sitterId).single()).data : null;
+    const { data: ownerProfile } = await supabase
+      .from("profiles")
+      .select("first_name, email")
+      .eq("id", sit.user_id)
+      .single();
+
+    const sitterProfile = sitterId
+      ? (await supabase.from("profiles").select("first_name, email").eq("id", sitterId).single()).data
+      : null;
 
     // Transition to completed if still confirmed
     if (sit.status === "confirmed") {
       await supabase.from("sits").update({ status: "completed" }).eq("id", sit.id);
     }
 
-    // Email proprio
+    // Email owner via transactional email system
     if (ownerProfile?.email) {
-      await fetch("https://api.resend.com/emails", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${RESEND_API_KEY}` },
-        body: JSON.stringify({
-          from: "Guardiens <noreply@guardiens.fr>",
-          to: [ownerProfile.email],
-          subject: "Comment s'est passée votre garde ?",
-          html: `<p>Bonjour ${ownerProfile.first_name || ""},</p>
-<p>Votre garde avec ${sitterProfile?.first_name || "votre gardien"} est terminée.</p>
-<p>Laissez-lui un avis — cela l'aide à trouver de nouvelles gardes et renforce la confiance dans la communauté.</p>
-<p><a href="https://guardiens.fr/review/${sit.id}">Laisser un avis →</a></p>
-<p>L'équipe Guardiens</p>`,
-        }),
+      await supabase.functions.invoke("send-transactional-email", {
+        body: {
+          templateName: "review-reminder",
+          recipientEmail: ownerProfile.email,
+          idempotencyKey: `review-j1-owner-${sit.id}`,
+          templateData: {
+            firstName: ownerProfile.first_name || "",
+            sitTitle: sit.title || "",
+            revieweeName: sitterProfile?.first_name || "",
+            sitId: sit.id,
+            isOwner: true,
+          },
+        },
       });
       count++;
     }
 
-    // Email gardien
+    // Email sitter via transactional email system
     if (sitterProfile?.email) {
-      await fetch("https://api.resend.com/emails", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${RESEND_API_KEY}` },
-        body: JSON.stringify({
-          from: "Guardiens <noreply@guardiens.fr>",
-          to: [sitterProfile.email],
-          subject: "Comment s'est passée votre garde ?",
-          html: `<p>Bonjour ${sitterProfile.first_name || ""},</p>
-<p>Votre garde chez ${ownerProfile?.first_name || "votre propriétaire"} est terminée.</p>
-<p>Laissez un avis — cela aide les propriétaires à choisir en confiance.</p>
-<p><a href="https://guardiens.fr/review/${sit.id}">Laisser un avis →</a></p>
-<p>L'équipe Guardiens</p>`,
-        }),
+      await supabase.functions.invoke("send-transactional-email", {
+        body: {
+          templateName: "review-reminder",
+          recipientEmail: sitterProfile.email,
+          idempotencyKey: `review-j1-sitter-${sit.id}`,
+          templateData: {
+            firstName: sitterProfile.first_name || "",
+            sitTitle: sit.title || "",
+            revieweeName: ownerProfile?.first_name || "",
+            sitId: sit.id,
+            isOwner: false,
+          },
+        },
       });
       count++;
     }
@@ -84,5 +91,7 @@ Deno.serve(async (req) => {
     await supabase.from("sits").update({ review_j1_sent: true }).eq("id", sit.id);
   }
 
-  return new Response(JSON.stringify({ sent: count }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+  return new Response(JSON.stringify({ sent: count }), {
+    headers: { ...corsHeaders, "Content-Type": "application/json" },
+  });
 });
