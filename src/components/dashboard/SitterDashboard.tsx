@@ -6,7 +6,7 @@ import { useSubscriptionAccess } from "@/hooks/useSubscriptionAccess";
 import { useAccessLevel } from "@/hooks/useAccessLevel";
 import { useSitterDashboardData } from "@/hooks/useSitterDashboardData";
 
-import OnboardingModal from "@/components/onboarding/OnboardingModal";
+
 
 import RoleActivationBanner from "./RoleActivationBanner";
 import AccessGateBanner from "@/components/access/AccessGateBanner";
@@ -52,23 +52,9 @@ const SitterDashboard = () => {
     reputation, groupedBadges,
   } = useSitterDashboardData(user?.id);
 
-  // ── Onboarding modals ──
-  const [showOnboardingModal, setShowOnboardingModal] = useState(false);
-  
   const [cpBannerDismissed, setCpBannerDismissed] = useState(
     () => sessionStorage.getItem("cp_banner_dismissed") === "1"
   );
-
-  useEffect(() => {
-    if (loading || !user) return;
-    if (searchParams.get("tour") === "true") {
-      setShowOnboardingModal(true);
-      return;
-    }
-    if (!onboardingCompleted && !onboardingDismissed) {
-      setShowOnboardingModal(true);
-    }
-  }, [loading, user, searchParams, onboardingCompleted, onboardingDismissed, minimalCompleted]);
 
   if (loading) return (
     <div className="p-8 flex items-center justify-center">
@@ -109,13 +95,6 @@ const SitterDashboard = () => {
 
   return (
     <div className="space-y-0 overflow-hidden">
-      <OnboardingModal
-        open={showOnboardingModal}
-        onClose={() => {
-          setShowOnboardingModal(false);
-          setSearchParams({});
-        }}
-      />
 
       {/* Postal code missing banner */}
       {!postalCode && !cpBannerDismissed && (

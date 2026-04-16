@@ -4,18 +4,23 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { X, Send, MessageCircle, CheckCircle, Star, User, Circle, PawPrint, MapPin, Leaf, ShieldCheck, Home, Calendar, Plus, Zap, Activity, Heart, BookOpen, Key, Wifi, Phone, Wrench, ChefHat } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { toast } from "sonner";
+import PostalCodeCityFields from "@/components/profile/PostalCodeCityFields";
 
 type ActiveTab = "gardien" | "proprio";
 
 interface OnboardingModalProps {
   open: boolean;
   onClose: () => void;
+  onMinimalComplete?: () => void;
 }
 
-const TOTAL_SLIDES = 7; // 0..6
+const TOTAL_SLIDES = 7; // 0=welcome+fields, 1-5=presentation, 6=CTA
 
-const OnboardingModal = ({ open, onClose }: OnboardingModalProps) => {
-  const { user } = useAuth();
+const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalProps) => {
+  const { user, refreshProfile } = useAuth();
   const navigate = useNavigate();
   const [slide, setSlide] = useState(0);
   const [activeTab, setActiveTab] = useState<ActiveTab>("gardien");
@@ -23,20 +28,36 @@ const OnboardingModal = ({ open, onClose }: OnboardingModalProps) => {
   const [dontShowAgain, setDontShowAgain] = useState(false);
   const dontShowRef = useRef(false);
 
-  // Load completion rate
+  // Mandatory fields state
+  const [firstName, setFirstName] = useState("");
+  const [postalCode, setPostalCode] = useState("");
+  const [city, setCity] = useState("");
+  const [minimalSaved, setMinimalSaved] = useState(false);
+  const [saving, setSaving] = useState(false);
+
+  const fieldsValid =
+    firstName.trim().length > 0 &&
+    postalCode.length === 5 &&
+    city.trim().length > 0;
+
+  // Load profile data on mount
   useEffect(() => {
-    if (!user) return;
+    if (!user || !open) return;
     supabase
       .from("profiles")
-      .select("profile_completion")
+      .select("profile_completion, first_name, postal_code, city, onboarding_minimal_completed")
       .eq("id", user.id)
       .single()
       .then(({ data }) => {
-        if (data) setCompletionRate(data.profile_completion || 0);
+        if (data) {
+          setCompletionRate(data.profile_completion || 0);
+          if (data.first_name) setFirstName(data.first_name);
+          if (data.postal_code) setPostalCode(data.postal_code);
+          if (data.city) setCity(data.city);
+          if (data.onboarding_minimal_completed) setMinimalSaved(true);
+        }
       });
-  }, [user]);
-
-  // No longer pre-select role — toggle is always visible
+  }, [user, open]);
 
   // Reset slide on open
   useEffect(() => {
@@ -51,18 +72,50 @@ const OnboardingModal = ({ open, onClose }: OnboardingModalProps) => {
   useEffect(() => {
     if (!open) return;
     const handler = (e: KeyboardEvent) => {
-      if (e.key === "ArrowRight" && slide < TOTAL_SLIDES - 1) {
-        setSlide((s) => Math.min(s + 1, TOTAL_SLIDES - 1));
-      }
-      if (e.key === "ArrowLeft" && slide > 0) {
-        setSlide((s) => Math.max(s - 1, 0));
-      }
+      if (e.key === "ArrowRight") handleNext();
+      if (e.key === "ArrowLeft" && slide > 0) setSlide((s) => Math.max(s - 1, 0));
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [open, slide]);
+  }, [open, slide, fieldsValid, minimalSaved]);
+
+  const saveMinimalFields = async () => {
+    if (!user || saving) return false;
+    setSaving(true);
+    const { error } = await supabase
+      .from("profiles")
+      .update({
+        first_name: firstName.trim(),
+        postal_code: postalCode,
+        city: city.trim(),
+        onboarding_minimal_completed: true,
+      } as any)
+      .eq("id", user.id);
+    setSaving(false);
+    if (error) {
+      toast.error("Erreur", { description: "Veuillez réessayer." });
+      return false;
+    }
+    toast.success("Bienvenue chez Guardiens !");
+    setMinimalSaved(true);
+    refreshProfile();
+    onMinimalComplete?.();
+    return true;
+  };
+
+  const handleNext = async () => {
+    if (slide === 0 && !minimalSaved) {
+      if (!fieldsValid) return;
+      const ok = await saveMinimalFields();
+      if (!ok) return;
+    }
+    if (slide < TOTAL_SLIDES - 1) setSlide((s) => s + 1);
+  };
+
+  const canDismiss = minimalSaved;
 
   const dismiss = useCallback(async () => {
+    if (!canDismiss) return;
     if (user) {
       const updates: Record<string, any> = {
         onboarding_dismissed_at: new Date().toISOString(),
@@ -74,11 +127,10 @@ const OnboardingModal = ({ open, onClose }: OnboardingModalProps) => {
         .from("profiles")
         .update(updates)
         .eq("id", user.id);
+      refreshProfile();
     }
     onClose();
-  }, [user, onClose]);
-
-  // No more selectRole — role selection removed from slide 0
+  }, [user, onClose, canDismiss, refreshProfile]);
 
   const completeOnboarding = async (destination: string) => {
     if (user) {
@@ -86,6 +138,7 @@ const OnboardingModal = ({ open, onClose }: OnboardingModalProps) => {
         .from("profiles")
         .update({ onboarding_completed: true })
         .eq("id", user.id);
+      refreshProfile();
     }
     onClose();
     navigate(destination);
@@ -94,44 +147,57 @@ const OnboardingModal = ({ open, onClose }: OnboardingModalProps) => {
   if (!open) return null;
 
   const viewingRole: ActiveTab = activeTab;
-
   const slideCount = TOTAL_SLIDES - 1;
 
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center backdrop-blur-sm bg-background/80">
-      <div className="max-w-2xl w-full mx-auto mt-16 bg-card rounded-2xl shadow-xl p-8 md:p-12 relative">
-        <button
-          onClick={dismiss}
-          className="absolute right-4 top-4 rounded-sm text-muted-foreground hover:text-foreground transition-colors"
-        >
-          <X className="h-5 w-5" />
-        </button>
+      <div className="max-w-2xl w-full mx-auto mt-16 bg-card rounded-2xl shadow-xl p-8 md:p-12 relative max-h-[85vh] overflow-y-auto">
+        {canDismiss && (
+          <button
+            onClick={dismiss}
+            className="absolute right-4 top-4 rounded-sm text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <X className="h-5 w-5" />
+          </button>
+        )}
 
-        <div className="flex justify-center gap-1 mb-6">
-          <button
-            onClick={() => setActiveTab("gardien")}
-            className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
-              activeTab === "gardien"
-                ? "bg-primary text-primary-foreground"
-                : "bg-muted text-muted-foreground"
-            }`}
-          >
-            Parcours gardien
-          </button>
-          <button
-            onClick={() => setActiveTab("proprio")}
-            className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
-              activeTab === "proprio"
-                ? "bg-primary text-primary-foreground"
-                : "bg-muted text-muted-foreground"
-            }`}
-          >
-            Parcours propriétaire
-          </button>
-        </div>
+        {slide > 0 && (
+          <div className="flex justify-center gap-1 mb-6">
+            <button
+              onClick={() => setActiveTab("gardien")}
+              className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
+                activeTab === "gardien"
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-muted text-muted-foreground"
+              }`}
+            >
+              Parcours gardien
+            </button>
+            <button
+              onClick={() => setActiveTab("proprio")}
+              className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
+                activeTab === "proprio"
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-muted text-muted-foreground"
+              }`}
+            >
+              Parcours propriétaire
+            </button>
+          </div>
+        )}
 
         <div className="min-h-[340px]">
-          {slide === 0 && <Slide0 />}
+          {slide === 0 && (
+            <Slide0WithFields
+              firstName={firstName}
+              postalCode={postalCode}
+              city={city}
+              minimalSaved={minimalSaved}
+              onFirstNameChange={setFirstName}
+              onPostalCodeChange={setPostalCode}
+              onCityChange={setCity}
+            />
+          )}
           {slide === 1 && viewingRole === "gardien" && <SitterSlide1 />}
           {slide === 1 && viewingRole === "proprio" && <OwnerSlide1 />}
           {slide === 2 && viewingRole === "gardien" && <SitterSlide2 completionRate={completionRate} />}
@@ -152,29 +218,37 @@ const OnboardingModal = ({ open, onClose }: OnboardingModalProps) => {
 
         <div className="flex items-center justify-between mt-8">
           <div className="flex flex-col gap-1.5">
-            <div className="flex items-center gap-2">
-              <label className="flex items-center gap-1.5 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={dontShowAgain}
-                  onChange={(e) => {
-                    setDontShowAgain(e.target.checked);
-                    dontShowRef.current = e.target.checked;
-                  }}
-                  className="accent-primary w-3.5 h-3.5"
-                />
-                <span className="text-xs text-muted-foreground">Ne plus afficher au démarrage</span>
-              </label>
-              <button
-                onClick={dismiss}
-                className="text-xs text-muted-foreground underline-offset-4 hover:underline transition-colors ml-2"
-              >
-                Reprendre plus tard
-              </button>
-            </div>
-            <p className="text-xs text-muted-foreground italic">
-              Retrouvez cette présentation à tout moment dans Paramètres.
-            </p>
+            {canDismiss ? (
+              <>
+                <div className="flex items-center gap-2">
+                  <label className="flex items-center gap-1.5 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={dontShowAgain}
+                      onChange={(e) => {
+                        setDontShowAgain(e.target.checked);
+                        dontShowRef.current = e.target.checked;
+                      }}
+                      className="accent-primary w-3.5 h-3.5"
+                    />
+                    <span className="text-xs text-muted-foreground">Ne plus afficher au démarrage</span>
+                  </label>
+                  <button
+                    onClick={dismiss}
+                    className="text-xs text-muted-foreground underline-offset-4 hover:underline transition-colors ml-2"
+                  >
+                    Reprendre plus tard
+                  </button>
+                </div>
+                <p className="text-xs text-muted-foreground italic">
+                  Retrouvez cette présentation à tout moment dans Paramètres.
+                </p>
+              </>
+            ) : (
+              <p className="text-xs text-muted-foreground italic">
+                Complétez ces informations pour continuer.
+              </p>
+            )}
           </div>
 
           {slide > 0 && (
@@ -201,8 +275,12 @@ const OnboardingModal = ({ open, onClose }: OnboardingModalProps) => {
               </Button>
             )}
             {slide < TOTAL_SLIDES - 1 && (
-              <Button size="sm" onClick={() => setSlide((s) => s + 1)}>
-                Suivant
+              <Button
+                size="sm"
+                onClick={handleNext}
+                disabled={slide === 0 && !fieldsValid && !minimalSaved}
+              >
+                {slide === 0 && !minimalSaved ? (saving ? "Enregistrement…" : "C'est parti →") : "Suivant"}
               </Button>
             )}
           </div>
@@ -212,17 +290,67 @@ const OnboardingModal = ({ open, onClose }: OnboardingModalProps) => {
   );
 };
 
-/* ─── SLIDE 0 — Welcome ─── */
-const Slide0 = () => (
+/* ─── SLIDE 0 — Welcome + Mandatory Fields ─── */
+interface Slide0Props {
+  firstName: string;
+  postalCode: string;
+  city: string;
+  minimalSaved: boolean;
+  onFirstNameChange: (v: string) => void;
+  onPostalCodeChange: (v: string) => void;
+  onCityChange: (v: string) => void;
+}
+
+const Slide0WithFields = ({
+  firstName, postalCode, city, minimalSaved,
+  onFirstNameChange, onPostalCodeChange, onCityChange,
+}: Slide0Props) => (
   <div className="space-y-6">
     <h2 className="font-heading text-2xl font-bold text-foreground">
       Bienvenue sur Guardiens.
     </h2>
-    <p className="text-base text-foreground/80 leading-relaxed mb-6">
+    <p className="text-base text-foreground/80 leading-relaxed">
       Ici on garde des maisons, on accompagne des animaux, on échange des
-      services entre gens du coin. Choisissez le parcours que vous voulez
-      découvrir — vous pouvez changer à tout moment grâce au toggle en haut de
-      chaque page.
+      services entre gens du coin. Commençons par faire connaissance.
+    </p>
+
+    <div className="space-y-4 bg-muted/50 rounded-xl p-5 border border-border">
+      <div className="space-y-2">
+        <Label htmlFor="onb-firstname">Votre prénom</Label>
+        <Input
+          id="onb-firstname"
+          placeholder="Ex : Marie"
+          autoFocus
+          maxLength={50}
+          value={firstName}
+          onChange={(e) => onFirstNameChange(e.target.value)}
+          className="rounded-lg h-12"
+          disabled={minimalSaved}
+        />
+      </div>
+
+      <PostalCodeCityFields
+        city={city}
+        postalCode={postalCode}
+        onChange={(partial) => {
+          if (partial.city !== undefined) onCityChange(partial.city);
+          if (partial.postal_code !== undefined) onPostalCodeChange(partial.postal_code);
+        }}
+        cityLabel="Votre ville"
+        postalLabel="Code postal"
+        className="grid grid-cols-1 sm:grid-cols-2 gap-4"
+        inputClassName="rounded-lg h-12"
+      />
+
+      {minimalSaved && (
+        <p className="text-sm text-primary font-medium flex items-center gap-1.5">
+          <CheckCircle className="w-4 h-4" /> Informations enregistrées
+        </p>
+      )}
+    </div>
+
+    <p className="text-sm text-muted-foreground">
+      Vous pourrez ensuite découvrir le parcours gardien ou propriétaire.
     </p>
   </div>
 );

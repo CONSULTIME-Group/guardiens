@@ -3,7 +3,7 @@ import FounderBadge from "@/components/badges/FounderBadge";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import OnboardingModal from "@/components/onboarding/OnboardingModal";
+
 
 import OnboardingWelcome from "./OnboardingWelcome";
 import NearbyEmergencySitters from "./NearbyEmergencySitters";
@@ -68,7 +68,6 @@ const OwnerDashboard = () => {
   /* ── UI state ── */
   const [loading, setLoading] = useState(true);
   const [showOnboarding, setShowOnboarding] = useState(false);
-  const [showOnboardingModal, setShowOnboardingModal] = useState(false);
   const [onboardingChecks, setOnboardingChecks] = useState<OnboardingChecks>({
     hasName: false, hasAvatar: false, hasBio: false,
     hasIdentity: false, hasProperty: false, hasPets: false, hasSit: false,
@@ -123,12 +122,7 @@ const OwnerDashboard = () => {
         const verStatus = p?.identity_verification_status || "not_submitted";
         setVerificationStatus(verStatus);
 
-        // Onboarding
-        if (searchParams.get("tour") === "true") {
-          setShowOnboardingModal(true);
-        } else if (p && !p.onboarding_completed && !p.onboarding_dismissed_at) {
-          setShowOnboardingModal(true);
-        }
+        // Onboarding is now handled by AppLayout
 
         const hasName = !!(p?.first_name);
         const hasAvatar = !!(p?.avatar_url);
@@ -318,13 +312,6 @@ const OwnerDashboard = () => {
 
   return (
     <div className="space-y-8">
-      <OnboardingModal
-        open={showOnboardingModal}
-        onClose={() => {
-          setShowOnboardingModal(false);
-          setSearchParams({});
-        }}
-      />
 
       {/* Role activation banner */}
       <div className="px-5 md:px-8">
