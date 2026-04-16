@@ -41,8 +41,8 @@ const PostalCodeCityFields = ({
           {cityLabel}
           {required && " *"}
         </Label>
-        {cities.length > 1 ? (
-          <Select value={city} onValueChange={(v) => selectCity(v)}>
+        {cities.length > 1 && !disabled ? (
+          <Select value={city} onValueChange={(v) => selectCity(v)} disabled={disabled}>
             <SelectTrigger className={inputClassName}>
               <SelectValue placeholder="Choisir la ville…" />
             </SelectTrigger>
@@ -61,6 +61,7 @@ const PostalCodeCityFields = ({
             onChange={(e) => onChange({ city: e.target.value })}
             className={inputClassName}
             maxLength={100}
+            disabled={disabled}
           />
         )}
       </div>
@@ -82,6 +83,7 @@ const PostalCodeCityFields = ({
             className={inputClassName}
             maxLength={5}
             placeholder="69001"
+            disabled={disabled}
           />
           {loading && (
             <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-muted-foreground" />
