@@ -53,7 +53,12 @@ const ReportResolvedEmail = ({ reason, status, adminNotes }: ReportResolvedProps
         <Text style={text}>
           Merci de contribuer à la sécurité de notre communauté. Si vous avez des questions, n'hésitez pas à nous contacter.
         </Text>
-        <Text style={footer}>L'équipe {SITE_NAME}</Text>
+        <Text style={legal}>
+          Cet e-mail vous est envoyé par {SITE_NAME} (Jérémie Martinot, SIRET 894 864 040 00015)
+          dans le cadre de l'intérêt légitime lié à la modération de la communauté (art. 6.1.f RGPD).
+          Pour exercer vos droits : contact@guardiens.fr.
+        </Text>
+        <Text style={footer}>L'équipe {SITE_NAME} 🐾</Text>
       </Container>
     </Body>
   </Html>
@@ -73,4 +78,5 @@ const text = { fontSize: '14px', color: 'hsl(37, 7%, 43%)', lineHeight: '1.6', m
 const hr = { borderColor: 'hsl(37, 22%, 89%)', margin: '20px 0' }
 const noteLabel = { fontSize: '13px', fontWeight: 'bold' as const, color: 'hsl(40, 12%, 10%)', margin: '0 0 6px' }
 const noteText = { fontSize: '14px', color: 'hsl(40, 12%, 10%)', lineHeight: '1.5', margin: '0 0 16px', padding: '12px 16px', backgroundColor: 'hsl(37, 22%, 93%)', borderRadius: '8px' }
-const footer = { fontSize: '12px', color: 'hsl(37, 7%, 60%)', margin: '30px 0 0' }
+const legal = { fontSize: '10px', color: 'hsl(37, 7%, 60%)', lineHeight: '1.5', margin: '0 0 12px' }
+const footer = { fontSize: '12px', color: 'hsl(37, 7%, 60%)', margin: '10px 0 0' }

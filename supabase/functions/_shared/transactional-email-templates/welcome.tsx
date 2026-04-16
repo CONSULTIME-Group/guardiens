@@ -72,11 +72,17 @@ const WelcomeEmail = ({ firstName, role }: WelcomeProps) => {
           <Hr style={hr} />
 
           <Text style={text}>
-            Si vous avez la moindre question, n'hésitez pas à consulter notre FAQ ou à nous contacter. 
+            Si vous avez la moindre question, n'hésitez pas à consulter notre FAQ ou à nous contacter.
             La communauté est là pour vous !
           </Text>
 
-          <Text style={footer}>À très vite,{'\n'}L'équipe {SITE_NAME} 🐾</Text>
+          <Text style={legal}>
+            Cet e-mail vous est envoyé par {SITE_NAME} (Jérémie Martinot, SIRET 894 864 040 00015)
+            suite à la création de votre compte (art. 6.1.b RGPD — exécution du contrat).
+            Pour exercer vos droits (accès, rectification, suppression) : contact@guardiens.fr.
+          </Text>
+
+          <Text style={footer}>L'équipe {SITE_NAME} 🐾</Text>
         </Container>
       </Body>
     </Html>
@@ -113,4 +119,5 @@ const button = {
   textDecoration: 'none',
   display: 'inline-block',
 }
-const footer = { fontSize: '12px', color: 'hsl(37, 7%, 60%)', margin: '30px 0 0', whiteSpace: 'pre-line' as const }
+const legal = { fontSize: '10px', color: 'hsl(37, 7%, 60%)', lineHeight: '1.5', margin: '0 0 12px' }
+const footer = { fontSize: '12px', color: 'hsl(37, 7%, 60%)', margin: '10px 0 0' }
