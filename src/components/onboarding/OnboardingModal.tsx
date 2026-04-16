@@ -44,7 +44,11 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
   );
   const [dontShowAgain, setDontShowAgain] = useState(false);
   const dontShowRef = useRef(false);
-  const isOwner = activeRole === "owner";
+  // Use the actual profile role for scoring logic, not activeRole
+  // DB uses sitter scoring for "both" role users
+  const userRole = user?.role || "sitter";
+  const usesSitterScoring = userRole === "sitter" || userRole === "both";
+  const isOwnerOnly = userRole === "owner";
 
   // ── Slide 0: mandatory fields ──
   const [firstName, setFirstName] = useState("");
@@ -71,23 +75,23 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
     postalCode.length === 5 &&
     city.trim().length > 0;
 
-  // Calculate live completion estimate
+  // Calculate live completion estimate — must match DB function
   useEffect(() => {
     let score = 0;
     if (firstName.trim() && postalCode) score += 10;
     if (avatarUrl) score += 20;
-    if (isOwner) {
-      // Owner scoring: bio=10, compétences=10 (max collectible here = 50)
-      if (bio.length >= 50) score += 10;
-      if (skillCategories.length > 0) score += 10;
-    } else {
-      // Sitter scoring: bio=15, compétences=10, lifestyle=10 (max collectible here = 65)
+    if (usesSitterScoring) {
+      // Sitter/Both scoring: bio=15, compétences=10, lifestyle=10 (max here = 65)
       if (bio.length >= 50) score += 15;
       if (skillCategories.length > 0) score += 10;
       if (lifestyle.length > 0) score += 10;
+    } else {
+      // Owner-only scoring: bio=10, compétences=10 (max here = 50)
+      if (bio.length >= 50) score += 10;
+      if (skillCategories.length > 0) score += 10;
     }
     setLiveCompletion(score);
-  }, [firstName, postalCode, avatarUrl, bio, skillCategories, lifestyle, isOwner]);
+  }, [firstName, postalCode, avatarUrl, bio, skillCategories, lifestyle, usesSitterScoring]);
 
   // Load profile data on mount
   useEffect(() => {
@@ -106,17 +110,8 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
         if (p.bio) setBio(p.bio);
         if (p.onboarding_minimal_completed) setMinimalSaved(true);
       }
-      // Load role-specific profile data
-      if (activeRole === "owner") {
-        const { data: op } = await supabase
-          .from("owner_profiles")
-          .select("competences")
-          .eq("user_id", user.id)
-          .maybeSingle();
-        if (op?.competences && Array.isArray(op.competences)) {
-          setSkillCategories(op.competences as string[]);
-        }
-      } else {
+      // Load role-specific profile data — for "both", load sitter data (used for scoring)
+      if (usesSitterScoring) {
         const { data: sp } = await supabase
           .from("sitter_profiles")
           .select("lifestyle, competences")
@@ -125,6 +120,15 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
         if (sp) {
           if (sp.lifestyle && Array.isArray(sp.lifestyle)) setLifestyle(sp.lifestyle as string[]);
           if (sp.competences && Array.isArray(sp.competences)) setSkillCategories(sp.competences as string[]);
+        }
+      } else {
+        const { data: op } = await supabase
+          .from("owner_profiles")
+          .select("competences")
+          .eq("user_id", user.id)
+          .maybeSingle();
+        if (op?.competences && Array.isArray(op.competences)) {
+          setSkillCategories(op.competences as string[]);
         }
       }
     };
@@ -189,22 +193,22 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
 
   const saveCompetencesAndLifestyle = async () => {
     if (!user) return;
-    if (isOwner) {
-      // Owner: save competences to owner_profiles only
+    // For "both" role, save to both tables to keep them in sync
+    if (userRole === "both" || userRole === "sitter") {
+      const sitterUpdates: Record<string, any> = {};
+      if (lifestyle.length > 0) sitterUpdates.lifestyle = lifestyle;
+      if (skillCategories.length > 0) sitterUpdates.competences = skillCategories;
+      if (Object.keys(sitterUpdates).length > 0) {
+        await supabase
+          .from("sitter_profiles")
+          .upsert({ user_id: user.id, ...sitterUpdates }, { onConflict: "user_id" });
+      }
+    }
+    if (userRole === "both" || userRole === "owner") {
       if (skillCategories.length > 0) {
         await supabase
           .from("owner_profiles")
           .upsert({ user_id: user.id, competences: skillCategories } as any, { onConflict: "user_id" });
-      }
-    } else {
-      // Sitter: save competences + lifestyle to sitter_profiles
-      const updates: Record<string, any> = {};
-      if (lifestyle.length > 0) updates.lifestyle = lifestyle;
-      if (skillCategories.length > 0) updates.competences = skillCategories;
-      if (Object.keys(updates).length > 0) {
-        await supabase
-          .from("sitter_profiles")
-          .upsert({ user_id: user.id, ...updates }, { onConflict: "user_id" });
       }
     }
   };
@@ -377,6 +381,7 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
                   postalLabel="Code postal"
                   className="grid grid-cols-1 sm:grid-cols-2 gap-4"
                   inputClassName="rounded-lg h-12"
+                  disabled={minimalSaved}
                 />
 
                 {minimalSaved && (
@@ -393,9 +398,11 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
             <div className="space-y-5">
               <div>
                 <h2 className="font-heading text-2xl font-bold text-foreground">
-                  {isOwner
-                    ? "Les gardiens regardent votre photo et votre bio en premier."
-                    : "Les propriétaires regardent votre photo et votre bio en premier."}
+                  {userRole === "both"
+                    ? "Votre photo et votre bio sont la première chose que les autres voient."
+                    : isOwnerOnly
+                      ? "Les gardiens regardent votre photo et votre bio en premier."
+                      : "Les propriétaires regardent votre photo et votre bio en premier."}
                 </h2>
                 <p className="text-base text-foreground/80 leading-relaxed mt-2">
                   Montrez qui vous êtes. Une photo nette et quelques mots sincères suffisent.
@@ -471,9 +478,11 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
                   Vos compétences apparaissent sur votre profil.
                 </h2>
                 <p className="text-base text-foreground/80 leading-relaxed mt-2">
-                  {isOwner
-                    ? "Les gardiens les voient avant même de vous écrire. Sélectionnez ce qui vous correspond."
-                    : "Les propriétaires les voient avant même de vous écrire. Sélectionnez ce qui vous correspond."}
+                  {userRole === "both"
+                    ? "Gardiens et propriétaires les voient avant même de vous écrire. Sélectionnez ce qui vous correspond."
+                    : isOwnerOnly
+                      ? "Les gardiens les voient avant même de vous écrire. Sélectionnez ce qui vous correspond."
+                      : "Les propriétaires les voient avant même de vous écrire. Sélectionnez ce qui vous correspond."}
                 </p>
               </div>
 
@@ -504,7 +513,7 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
                 </div>
               </div>
 
-              {!isOwner && (
+              {usesSitterScoring && (
                 <div className="space-y-2">
                   <Label>Mon style de vie</Label>
                   <ChipSelect
@@ -519,7 +528,7 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
               <div className="bg-muted/50 rounded-xl p-4 border border-border">
                 <p className="text-xs text-muted-foreground uppercase tracking-widest mb-3">Sur votre profil public</p>
                 <div className="flex flex-wrap gap-1.5">
-                  {skillCategories.length === 0 && (!isOwner ? lifestyle.length === 0 : true) && (
+                  {skillCategories.length === 0 && (usesSitterScoring ? lifestyle.length === 0 : true) && (
                     <p className="text-xs text-muted-foreground italic">Sélectionnez pour voir l'aperçu…</p>
                   )}
                   {skillCategories.map((key) => {
@@ -530,7 +539,7 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
                       </span>
                     );
                   })}
-                  {!isOwner && lifestyle.map((l) => (
+                  {usesSitterScoring && lifestyle.map((l) => (
                     <span key={l} className="bg-primary/10 text-primary text-xs px-2.5 py-1 rounded-full">
                       {l}
                     </span>
@@ -555,9 +564,7 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
               </h2>
               <p className="text-base text-foreground/80 leading-relaxed">
                 {liveCompletion >= 60
-                  ? isOwner
-                    ? "Bravo ! Votre profil est déjà bien rempli. Les gardiens peuvent vous découvrir."
-                    : "Bravo ! Votre profil est déjà bien rempli. Les propriétaires peuvent vous découvrir."
+                  ? "Bravo ! Votre profil est déjà bien rempli. La communauté peut vous découvrir."
                   : "Vous pouvez encore améliorer votre profil depuis vos paramètres. En attendant, explorez !"}
               </p>
 
@@ -584,7 +591,7 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
                     {skillCategories.length > 0 ? <CheckCircle className="w-3.5 h-3.5 text-primary" /> : <Circle className="w-3.5 h-3.5 text-muted-foreground" />}
                     <span className={skillCategories.length > 0 ? "text-foreground" : "text-muted-foreground"}>Compétences</span>
                   </div>
-                  {!isOwner && (
+                  {usesSitterScoring && (
                     <div className="flex items-center gap-1.5">
                       {lifestyle.length > 0 ? <CheckCircle className="w-3.5 h-3.5 text-primary" /> : <Circle className="w-3.5 h-3.5 text-muted-foreground" />}
                       <span className={lifestyle.length > 0 ? "text-foreground" : "text-muted-foreground"}>Style de vie</span>
@@ -594,7 +601,16 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
               </div>
 
               <div className="flex flex-col gap-2">
-                {isOwner ? (
+                {userRole === "both" ? (
+                  <>
+                    <Button className="w-full" onClick={() => completeOnboarding("/recherche")}>
+                      Explorer les annonces →
+                    </Button>
+                    <Button variant="outline" className="w-full" onClick={() => completeOnboarding("/sits")}>
+                      Publier une annonce →
+                    </Button>
+                  </>
+                ) : isOwnerOnly ? (
                   <Button className="w-full" onClick={() => completeOnboarding("/sits")}>
                     Publier une annonce →
                   </Button>
