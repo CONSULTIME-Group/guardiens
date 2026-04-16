@@ -28,8 +28,13 @@ const SubscriptionExpires30dEmail = ({ firstName = '' }: { firstName?: string })
           Gérer mon abonnement
         </Button>
         <Hr style={hr} />
-        <Text style={footer}>À très bientôt sur {SITE_NAME},</Text>
-        <Text style={footer}>Jérémie & Elisa 🐾</Text>
+        <Text style={legal}>
+          Cet e-mail vous est envoyé par {SITE_NAME} (Jérémie Martinot, SIRET 894 864 040 00015)
+          dans le cadre de la gestion de votre abonnement (art. 6.1.b RGPD — exécution du contrat).
+          Conformément à l'article L. 215-1 du Code de la consommation, vous êtes informé(e) du renouvellement
+          automatique de votre abonnement. Pour exercer vos droits : contact@guardiens.fr.
+        </Text>
+        <Text style={footer}>L'équipe {SITE_NAME} 🐾</Text>
       </Container>
     </Body>
   </Html>
@@ -48,4 +53,5 @@ const h1 = { fontSize: '24px', fontWeight: 'bold' as const, color: 'hsl(153, 42%
 const text = { fontSize: '14px', color: 'hsl(37, 7%, 43%)', lineHeight: '1.6', margin: '0 0 16px' }
 const hr = { borderColor: 'hsl(37, 22%, 89%)', margin: '20px 0' }
 const button = { backgroundColor: 'hsl(153, 42%, 30%)', color: '#ffffff', padding: '12px 28px', borderRadius: '8px', fontSize: '15px', fontWeight: '600' as const, textDecoration: 'none', display: 'inline-block' }
-const footer = { fontSize: '12px', color: 'hsl(37, 7%, 60%)', margin: '4px 0' }
+const legal = { fontSize: '10px', color: 'hsl(37, 7%, 60%)', lineHeight: '1.5', margin: '0 0 12px' }
+const footer = { fontSize: '12px', color: 'hsl(37, 7%, 60%)', margin: '10px 0 0' }
