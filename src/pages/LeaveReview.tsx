@@ -191,6 +191,49 @@ const LeaveReview = () => {
       return;
     }
 
+    // Send email to the other party inviting them to leave their review
+    try {
+      const { data: revieweeProfile } = await supabase
+        .from("profiles")
+        .select("first_name")
+        .eq("id", reviewee.id)
+        .maybeSingle();
+
+      const { data: reviewerProfile } = await supabase
+        .from("profiles")
+        .select("first_name")
+        .eq("id", user.id)
+        .maybeSingle();
+
+      // Get reviewee's email via auth — we need to find it from the conversation or profile
+      // The reviewee email is fetched from auth.users via edge function
+      const revieweeEmail = await (async () => {
+        // We can get email from the profiles table if available, otherwise skip
+        const { data: authData } = await supabase.rpc("get_user_email_for_notification" as any, { target_user_id: reviewee.id });
+        return authData as string | null;
+      })().catch(() => null);
+
+      if (revieweeEmail) {
+        await supabase.functions.invoke("send-transactional-email", {
+          body: {
+            templateName: "review-received",
+            recipientEmail: revieweeEmail,
+            idempotencyKey: `review-received-${sitId}-${reviewee.id}`,
+            templateData: {
+              firstName: revieweeProfile?.first_name || "",
+              reviewerName: reviewerProfile?.first_name || "",
+              sitTitle: sit.title || "",
+              sitId,
+              overallRating,
+            },
+          },
+        });
+      }
+    } catch (e) {
+      // Non-blocking: don't prevent the review from being submitted
+      console.warn("Email notification failed:", e);
+    }
+
     const { data: conv } = await supabase
       .from("conversations")
       .select("id")
@@ -202,7 +245,7 @@ const LeaveReview = () => {
       await supabase.from("messages").insert({
         conversation_id: conv.id,
         sender_id: user.id,
-        content: `⭐ ${user.firstName} a laissé un avis. ${wouldRecommend ? "Recommandation positive !" : ""}`,
+        content: `⭐ Un avis a été laissé. ${wouldRecommend ? "Recommandation positive !" : ""}`,
         is_system: true,
       } as any);
     }
@@ -346,6 +389,18 @@ const LeaveReview = () => {
         />
         <p className={`text-xs mt-1 ${comment.trim().length >= 50 ? "text-primary" : "text-muted-foreground"}`}>
           {comment.trim().length}/50 caractères minimum
+        </p>
+      </div>
+
+      {/* Legal RGPD notice */}
+      <div className="rounded-lg bg-muted/40 border border-border p-3 mb-8">
+        <p className="text-[10px] text-muted-foreground leading-relaxed">
+          <strong>Informations légales :</strong> En soumettant cet avis, vous acceptez qu'il soit publié sur la plateforme
+          après modération, conformément aux articles L. 111-7-2 du Code de la consommation et au décret n° 2017-1436
+          relatif aux obligations d'information sur les avis en ligne. Les avis sont publiés simultanément pour les deux
+          parties (système « double aveugle »). Vos données sont traitées sur la base de l'intérêt légitime (art. 6.1.f RGPD).
+          L'autre partie sera notifiée par e-mail de votre dépôt d'avis, sans en voir le contenu avant publication.
+          Vous disposez d'un droit d'accès, de rectification et de suppression (contact@guardiens.fr).
         </p>
       </div>
 
