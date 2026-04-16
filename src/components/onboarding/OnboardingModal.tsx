@@ -76,11 +76,18 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
     let score = 0;
     if (firstName.trim() && postalCode) score += 10;
     if (avatarUrl) score += 20;
-    if (bio.length >= 50) score += 15;
-    if (skillCategories.length > 0) score += 10;
-    if (lifestyle.length > 0) score += 10;
+    if (isOwner) {
+      // Owner scoring: bio=10, compétences=10 (max collectible here = 50)
+      if (bio.length >= 50) score += 10;
+      if (skillCategories.length > 0) score += 10;
+    } else {
+      // Sitter scoring: bio=15, compétences=10, lifestyle=10 (max collectible here = 65)
+      if (bio.length >= 50) score += 15;
+      if (skillCategories.length > 0) score += 10;
+      if (lifestyle.length > 0) score += 10;
+    }
     setLiveCompletion(score);
-  }, [firstName, postalCode, avatarUrl, bio, skillCategories, lifestyle]);
+  }, [firstName, postalCode, avatarUrl, bio, skillCategories, lifestyle, isOwner]);
 
   // Load profile data on mount
   useEffect(() => {
