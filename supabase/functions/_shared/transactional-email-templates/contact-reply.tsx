@@ -29,8 +29,13 @@ const ContactReplyEmail = ({ firstName, originalMessage, replyBody }: ContactRep
           <Text style={text}>{replyBody}</Text>
         ) : null}
         <Hr style={hr} />
+        <Text style={legal}>
+          Cet e-mail vous est envoyé par {SITE_NAME} (Jérémie Martinot, SIRET 894 864 040 00015)
+          en réponse à votre demande de contact (art. 6.1.b RGPD — exécution d'une mesure précontractuelle).
+          Pour exercer vos droits (accès, rectification, suppression) : contact@guardiens.fr.
+        </Text>
         <Text style={footer}>
-          L'équipe {SITE_NAME} —{' '}
+          L'équipe {SITE_NAME} 🐾 —{' '}
           <Link href="https://guardiens.fr" style={link}>guardiens.fr</Link>
         </Text>
       </Container>
@@ -51,14 +56,15 @@ export const template = {
   },
 } satisfies TemplateEntry
 
-const main = { backgroundColor: '#ffffff', fontFamily: 'Arial, sans-serif' }
-const container = { padding: '20px 25px', maxWidth: '600px', margin: '0 auto' }
-const h1 = { fontSize: '20px', fontWeight: 'bold' as const, color: '#1a1a1a', margin: '0 0 20px' }
-const text = { fontSize: '15px', color: '#1a1a1a', lineHeight: '1.6', margin: '0 0 16px' }
+const main = { backgroundColor: '#ffffff', fontFamily: "'Outfit', Arial, sans-serif" }
+const container = { padding: '24px 28px', maxWidth: '560px', margin: '0 auto' }
+const h1 = { fontSize: '22px', fontWeight: 'bold' as const, color: 'hsl(153, 42%, 30%)', margin: '0 0 20px' }
+const text = { fontSize: '14px', color: 'hsl(37, 7%, 43%)', lineHeight: '1.6', margin: '0 0 16px' }
 const blockquote = {
-  fontSize: '14px', color: '#6b7280', lineHeight: '1.5',
-  borderLeft: '3px solid #e5e7eb', padding: '8px 16px', margin: '16px 0',
+  fontSize: '13px', color: 'hsl(37, 7%, 55%)', lineHeight: '1.5',
+  borderLeft: '3px solid hsl(37, 22%, 89%)', padding: '8px 16px', margin: '16px 0',
 }
-const hr = { border: 'none', borderTop: '1px solid #e5e7eb', margin: '24px 0' }
-const footer = { fontSize: '13px', color: '#6b7280', margin: '0' }
-const link = { color: '#2D6A4F', textDecoration: 'none' }
+const hr = { borderColor: 'hsl(37, 22%, 89%)', margin: '20px 0' }
+const legal = { fontSize: '10px', color: 'hsl(37, 7%, 60%)', lineHeight: '1.5', margin: '0 0 12px' }
+const footer = { fontSize: '12px', color: 'hsl(37, 7%, 60%)', margin: '10px 0 0' }
+const link = { color: 'hsl(153, 42%, 30%)', textDecoration: 'none' }

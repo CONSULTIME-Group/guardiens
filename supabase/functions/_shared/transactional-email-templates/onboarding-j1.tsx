@@ -1,6 +1,6 @@
 import * as React from 'npm:react@18.3.1'
 import {
-  Body, Container, Head, Heading, Html, Preview, Text, Button, Hr,Section,
+  Body, Container, Head, Heading, Html, Preview, Text, Button, Hr, Section,
 } from 'npm:@react-email/components@0.0.22'
 import type { TemplateEntry } from './registry.ts'
 
@@ -12,23 +12,23 @@ interface OnboardingJ1Props {
 }
 
 const OnboardingJ1Email = ({ firstName }: OnboardingJ1Props) => {
-  const name = firstName || 'toi'
+  const name = firstName || ''
 
   return (
     <Html lang="fr" dir="ltr">
       <Head />
-      <Preview>Ton profil {SITE_NAME} t'attend — 5 minutes suffisent</Preview>
+      <Preview>Votre profil {SITE_NAME} vous attend — 5 minutes suffisent</Preview>
       <Body style={main}>
         <Container style={container}>
-          <Heading style={h1}>Bonjour {name},</Heading>
+          <Heading style={h1}>{name ? `Bonjour ${name},` : 'Bonjour,'}</Heading>
 
           <Text style={text}>
-            Tu t'es inscrit(e) sur {SITE_NAME} hier — bienvenue dans la communauté.
+            Vous vous êtes inscrit(e) sur {SITE_NAME} hier — bienvenue dans la communauté !
           </Text>
 
           <Text style={text}>
-            Pour accéder aux annonces de garde et aux petites missions près de chez toi, 
-            ton profil doit être complété à 60% minimum. Il te manque peut-être juste 
+            Pour accéder aux annonces de garde et aux petites missions près de chez vous,
+            votre profil doit être complété à 60 % minimum. Il vous manque peut-être juste
             une photo et une courte bio.
           </Text>
 
@@ -40,9 +40,13 @@ const OnboardingJ1Email = ({ firstName }: OnboardingJ1Props) => {
 
           <Hr style={hr} />
 
-          <Text style={footer}>
-            À très vite,{'\n'}Jérémie & Elisa — {SITE_NAME}
+          <Text style={legal}>
+            Cet e-mail vous est envoyé par {SITE_NAME} (Jérémie Martinot, SIRET 894 864 040 00015)
+            dans le cadre de l'intérêt légitime lié au bon fonctionnement de votre compte (art. 6.1.f RGPD).
+            Pour exercer vos droits (accès, rectification, suppression) : contact@guardiens.fr.
           </Text>
+
+          <Text style={footer}>L'équipe {SITE_NAME} 🐾</Text>
         </Container>
       </Body>
     </Html>
@@ -51,7 +55,7 @@ const OnboardingJ1Email = ({ firstName }: OnboardingJ1Props) => {
 
 export const template = {
   component: OnboardingJ1Email,
-  subject: 'Ton profil Guardiens t\'attend — 5 minutes suffisent',
+  subject: 'Votre profil Guardiens vous attend — 5 minutes suffisent',
   displayName: 'Onboarding J+1 — Compléter le profil',
   previewData: { firstName: 'Marie' },
 } satisfies TemplateEntry
@@ -72,4 +76,5 @@ const button = {
   textDecoration: 'none',
   display: 'inline-block',
 }
-const footer = { fontSize: '12px', color: 'hsl(37, 7%, 60%)', margin: '30px 0 0', whiteSpace: 'pre-line' as const }
+const legal = { fontSize: '10px', color: 'hsl(37, 7%, 60%)', lineHeight: '1.5', margin: '0 0 12px' }
+const footer = { fontSize: '12px', color: 'hsl(37, 7%, 60%)', margin: '10px 0 0' }
