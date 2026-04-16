@@ -69,8 +69,6 @@ const OwnerDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [showOnboardingModal, setShowOnboardingModal] = useState(false);
-  const [showMinimal, setShowMinimal] = useState(false);
-  const [minimalCompleted, setMinimalCompleted] = useState(true);
   const [onboardingChecks, setOnboardingChecks] = useState<OnboardingChecks>({
     hasName: false, hasAvatar: false, hasBio: false,
     hasIdentity: false, hasProperty: false, hasPets: false, hasSit: false,
@@ -125,15 +123,11 @@ const OwnerDashboard = () => {
         const verStatus = p?.identity_verification_status || "not_submitted";
         setVerificationStatus(verStatus);
 
-        // Onboarding — merged from the second useEffect to avoid duplicate profile fetch
-        const mc = (p as Record<string, unknown>)?.onboarding_minimal_completed as boolean ?? false;
-        setMinimalCompleted(mc);
+        // Onboarding
         if (searchParams.get("tour") === "true") {
           setShowOnboardingModal(true);
         } else if (p && !p.onboarding_completed && !p.onboarding_dismissed_at) {
           setShowOnboardingModal(true);
-        } else if (!mc) {
-          setShowMinimal(true);
         }
 
         const hasName = !!(p?.first_name);

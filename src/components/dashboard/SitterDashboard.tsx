@@ -54,7 +54,7 @@ const SitterDashboard = () => {
 
   // ── Onboarding modals ──
   const [showOnboardingModal, setShowOnboardingModal] = useState(false);
-  const [showMinimal, setShowMinimal] = useState(false);
+  
   const [cpBannerDismissed, setCpBannerDismissed] = useState(
     () => sessionStorage.getItem("cp_banner_dismissed") === "1"
   );
@@ -67,8 +67,6 @@ const SitterDashboard = () => {
     }
     if (!onboardingCompleted && !onboardingDismissed) {
       setShowOnboardingModal(true);
-    } else if (!minimalCompleted) {
-      setShowMinimal(true);
     }
   }, [loading, user, searchParams, onboardingCompleted, onboardingDismissed, minimalCompleted]);
 
