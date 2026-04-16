@@ -567,21 +567,23 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
                     {skillCategories.length > 0 ? <CheckCircle className="w-3.5 h-3.5 text-primary" /> : <Circle className="w-3.5 h-3.5 text-muted-foreground" />}
                     <span className={skillCategories.length > 0 ? "text-foreground" : "text-muted-foreground"}>Compétences</span>
                   </div>
-                  <div className="flex items-center gap-1.5">
-                    {lifestyle.length > 0 ? <CheckCircle className="w-3.5 h-3.5 text-primary" /> : <Circle className="w-3.5 h-3.5 text-muted-foreground" />}
-                    <span className={lifestyle.length > 0 ? "text-foreground" : "text-muted-foreground"}>Style de vie</span>
-                  </div>
+                  {!isOwner && (
+                    <div className="flex items-center gap-1.5">
+                      {lifestyle.length > 0 ? <CheckCircle className="w-3.5 h-3.5 text-primary" /> : <Circle className="w-3.5 h-3.5 text-muted-foreground" />}
+                      <span className={lifestyle.length > 0 ? "text-foreground" : "text-muted-foreground"}>Style de vie</span>
+                    </div>
+                  )}
                 </div>
               </div>
 
               <div className="flex flex-col gap-2">
-                {viewingRole === "gardien" ? (
-                  <Button className="w-full" onClick={() => completeOnboarding("/recherche")}>
-                    Explorer les annonces →
+                {isOwner ? (
+                  <Button className="w-full" onClick={() => completeOnboarding("/sits")}>
+                    Publier une annonce →
                   </Button>
                 ) : (
-                  <Button className="w-full" onClick={() => completeOnboarding("/mes-annonces")}>
-                    Publier une annonce →
+                  <Button className="w-full" onClick={() => completeOnboarding("/recherche")}>
+                    Explorer les annonces →
                   </Button>
                 )}
               </div>
