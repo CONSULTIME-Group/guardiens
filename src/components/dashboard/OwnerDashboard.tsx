@@ -146,6 +146,7 @@ const OwnerDashboard = () => {
         setOnboardingChecks({ hasName, hasAvatar, hasBio, hasIdentity, hasProperty, hasPets: false, hasSit });
 
         const dismissed = localStorage.getItem("onboarding_owner_dismissed");
+        const mc = (p as Record<string, unknown>)?.onboarding_minimal_completed as boolean ?? false;
         if (!dismissed && user.profileCompletion < 60 && mc) {
           setShowOnboarding(true);
         }
@@ -302,7 +303,7 @@ const OwnerDashboard = () => {
 
   if (loading) return <DashboardSkeleton />;
 
-  if (showOnboarding && minimalCompleted) {
+  if (showOnboarding && user?.onboardingMinimalCompleted) {
     return (
       <OnboardingWelcome
         role="owner"
