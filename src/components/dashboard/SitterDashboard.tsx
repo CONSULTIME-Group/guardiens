@@ -52,23 +52,9 @@ const SitterDashboard = () => {
     reputation, groupedBadges,
   } = useSitterDashboardData(user?.id);
 
-  // ── Onboarding modals ──
-  const [showOnboardingModal, setShowOnboardingModal] = useState(false);
-  
   const [cpBannerDismissed, setCpBannerDismissed] = useState(
     () => sessionStorage.getItem("cp_banner_dismissed") === "1"
   );
-
-  useEffect(() => {
-    if (loading || !user) return;
-    if (searchParams.get("tour") === "true") {
-      setShowOnboardingModal(true);
-      return;
-    }
-    if (!onboardingCompleted && !onboardingDismissed) {
-      setShowOnboardingModal(true);
-    }
-  }, [loading, user, searchParams, onboardingCompleted, onboardingDismissed, minimalCompleted]);
 
   if (loading) return (
     <div className="p-8 flex items-center justify-center">
