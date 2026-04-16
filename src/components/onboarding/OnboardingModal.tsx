@@ -254,7 +254,6 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
   };
   // Keep ref in sync for keyboard handler
   useEffect(() => { handleNextRef.current = handleNext; });
-  };
 
   const canDismiss = minimalSaved;
 
