@@ -564,9 +564,7 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
               </h2>
               <p className="text-base text-foreground/80 leading-relaxed">
                 {liveCompletion >= 60
-                  ? isOwnerOnly
-                    ? "Bravo ! Votre profil est déjà bien rempli. Les gardiens peuvent vous découvrir."
-                    : "Bravo ! Votre profil est déjà bien rempli. Les propriétaires peuvent vous découvrir."
+                  ? "Bravo ! Votre profil est déjà bien rempli. La communauté peut vous découvrir."
                   : "Vous pouvez encore améliorer votre profil depuis vos paramètres. En attendant, explorez !"}
               </p>
 
