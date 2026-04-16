@@ -75,23 +75,23 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
     postalCode.length === 5 &&
     city.trim().length > 0;
 
-  // Calculate live completion estimate
+  // Calculate live completion estimate — must match DB function
   useEffect(() => {
     let score = 0;
     if (firstName.trim() && postalCode) score += 10;
     if (avatarUrl) score += 20;
-    if (isOwnerOnly) {
-      // Owner scoring: bio=10, compétences=10 (max collectible here = 50)
-      if (bio.length >= 50) score += 10;
-      if (skillCategories.length > 0) score += 10;
-    } else {
-      // Sitter scoring: bio=15, compétences=10, lifestyle=10 (max collectible here = 65)
+    if (usesSitterScoring) {
+      // Sitter/Both scoring: bio=15, compétences=10, lifestyle=10 (max here = 65)
       if (bio.length >= 50) score += 15;
       if (skillCategories.length > 0) score += 10;
       if (lifestyle.length > 0) score += 10;
+    } else {
+      // Owner-only scoring: bio=10, compétences=10 (max here = 50)
+      if (bio.length >= 50) score += 10;
+      if (skillCategories.length > 0) score += 10;
     }
     setLiveCompletion(score);
-  }, [firstName, postalCode, avatarUrl, bio, skillCategories, lifestyle, isOwnerOnly]);
+  }, [firstName, postalCode, avatarUrl, bio, skillCategories, lifestyle, usesSitterScoring]);
 
   // Load profile data on mount
   useEffect(() => {
