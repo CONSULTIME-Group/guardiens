@@ -35,7 +35,11 @@ const Login = () => {
         setPasswordError("Email ou mot de passe incorrect.");
       } else if (msg === "Email not confirmed") {
         const handleResend = async () => {
-          const { error: resendError } = await supabase.auth.resend({ type: "signup", email });
+          const { error: resendError } = await supabase.auth.resend({
+            type: "signup",
+            email,
+            options: { emailRedirectTo: `${window.location.origin}/auth/confirm?next=/dashboard` },
+          });
           toast({
             title: resendError ? "Erreur" : "Email envoyé !",
             description: resendError
