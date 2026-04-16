@@ -290,17 +290,67 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
   );
 };
 
-/* ─── SLIDE 0 — Welcome ─── */
-const Slide0 = () => (
+/* ─── SLIDE 0 — Welcome + Mandatory Fields ─── */
+interface Slide0Props {
+  firstName: string;
+  postalCode: string;
+  city: string;
+  minimalSaved: boolean;
+  onFirstNameChange: (v: string) => void;
+  onPostalCodeChange: (v: string) => void;
+  onCityChange: (v: string) => void;
+}
+
+const Slide0WithFields = ({
+  firstName, postalCode, city, minimalSaved,
+  onFirstNameChange, onPostalCodeChange, onCityChange,
+}: Slide0Props) => (
   <div className="space-y-6">
     <h2 className="font-heading text-2xl font-bold text-foreground">
       Bienvenue sur Guardiens.
     </h2>
-    <p className="text-base text-foreground/80 leading-relaxed mb-6">
+    <p className="text-base text-foreground/80 leading-relaxed">
       Ici on garde des maisons, on accompagne des animaux, on échange des
-      services entre gens du coin. Choisissez le parcours que vous voulez
-      découvrir — vous pouvez changer à tout moment grâce au toggle en haut de
-      chaque page.
+      services entre gens du coin. Commençons par faire connaissance.
+    </p>
+
+    <div className="space-y-4 bg-muted/50 rounded-xl p-5 border border-border">
+      <div className="space-y-2">
+        <Label htmlFor="onb-firstname">Votre prénom</Label>
+        <Input
+          id="onb-firstname"
+          placeholder="Ex : Marie"
+          autoFocus
+          maxLength={50}
+          value={firstName}
+          onChange={(e) => onFirstNameChange(e.target.value)}
+          className="rounded-lg h-12"
+          disabled={minimalSaved}
+        />
+      </div>
+
+      <PostalCodeCityFields
+        city={city}
+        postalCode={postalCode}
+        onChange={(partial) => {
+          if (partial.city !== undefined) onCityChange(partial.city);
+          if (partial.postal_code !== undefined) onPostalCodeChange(partial.postal_code);
+        }}
+        cityLabel="Votre ville"
+        postalLabel="Code postal"
+        className="grid grid-cols-1 sm:grid-cols-2 gap-4"
+        inputClassName="rounded-lg h-12"
+      />
+
+      {minimalSaved && (
+        <p className="text-sm text-primary font-medium flex items-center gap-1.5">
+          <CheckCircle className="w-4 h-4" /> Informations enregistrées
+        </p>
+      )}
+    </div>
+
+    <p className="text-sm text-muted-foreground">
+      Vous pourrez ensuite découvrir le parcours gardien ou propriétaire.
     </p>
   </div>
 );
