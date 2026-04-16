@@ -1,98 +1,162 @@
-import { useState, useEffect } from "react";
-import { useParams, useSearchParams, Link, useNavigate } from "react-router-dom";
+import { useState, useEffect, useMemo } from "react";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/hooks/use-toast";
-import { ArrowLeft, ThumbsUp, ThumbsDown } from "lucide-react";
+import { ArrowLeft, ThumbsUp, ThumbsDown, CheckCircle2 } from "lucide-react";
 import StarRating from "@/components/reviews/StarRating";
-import BadgeSelector from "@/components/badges/BadgeSelector";
 import { Helmet } from "react-helmet-async";
 
-const SITTER_BADGES: never[] = [];
-const OWNER_BADGES: never[] = [];
-const SPECIAL_BADGE = { key: "mutual_connection" };
+type ReviewDirection = "owner_to_sitter" | "sitter_to_owner";
 
 const ownerCriteria = [
   { key: "animal_care_rating", label: "Soin des animaux" },
   { key: "communication_rating", label: "Communication pendant la garde" },
   { key: "housing_respect_rating", label: "Respect du logement" },
   { key: "reliability_rating", label: "Ponctualité / fiabilité" },
-];
+] as const;
 
 const sitterCriteria = [
   { key: "listing_accuracy_rating", label: "Exactitude de l'annonce" },
   { key: "welcome_rating", label: "Accueil et passage de relais" },
   { key: "instructions_clarity_rating", label: "Clarté des consignes" },
   { key: "housing_condition_rating", label: "État du logement" },
-];
+] as const;
 
 const LeaveReview = () => {
   const { sitId } = useParams<{ sitId: string }>();
-  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const { user, activeRole } = useAuth();
+  const { user } = useAuth();
   const [sit, setSit] = useState<any>(null);
   const [reviewee, setReviewee] = useState<any>(null);
   const [alreadyReviewed, setAlreadyReviewed] = useState(false);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   const [overallRating, setOverallRating] = useState(0);
   const [subRatings, setSubRatings] = useState<Record<string, number>>({});
   const [wouldRecommend, setWouldRecommend] = useState<boolean | null>(null);
   const [comment, setComment] = useState("");
-  const [selectedBadges, setSelectedBadges] = useState<string[]>([]);
 
-  // Determine if current user is owner or sitter for this sit
-  const [reviewType, setReviewType] = useState<"owner_to_sitter" | "sitter_to_owner">("owner_to_sitter");
+  const [reviewDirection, setReviewDirection] = useState<ReviewDirection>("owner_to_sitter");
 
   useEffect(() => {
     if (!sitId || !user) return;
+
     const load = async () => {
-      const { data: sitData } = await supabase.from("sits").select("*").eq("id", sitId).single();
-      if (!sitData) { setLoading(false); return; }
+      setLoading(true);
+      setLoadError(null);
+
+      const { data: sitData, error: sitError } = await supabase
+        .from("sits")
+        .select("id, status, title, user_id")
+        .eq("id", sitId)
+        .maybeSingle();
+
+      if (sitError || !sitData) {
+        setLoadError("Cette garde est introuvable.");
+        setLoading(false);
+        return;
+      }
+
       setSit(sitData);
 
-      // Only allow reviews on completed sits
       if (sitData.status !== "completed") {
         setLoading(false);
         return;
       }
 
       const isOwner = sitData.user_id === user.id;
-      const type = isOwner ? "owner_to_sitter" : "sitter_to_owner";
-      setReviewType(type);
+      const nextDirection: ReviewDirection = isOwner ? "owner_to_sitter" : "sitter_to_owner";
+      setReviewDirection(nextDirection);
 
-      // Find the other party
-      let revieweeId: string;
+      let revieweeId = "";
+
       if (isOwner) {
-        // Find the accepted sitter
-        const { data: app } = await supabase.from("applications").select("sitter_id").eq("sit_id", sitId).eq("status", "accepted").maybeSingle();
-        revieweeId = app?.sitter_id || "";
+        const { data: acceptedApplication, error: appError } = await supabase
+          .from("applications")
+          .select("sitter_id")
+          .eq("sit_id", sitId)
+          .eq("status", "accepted")
+          .maybeSingle();
+
+        if (appError || !acceptedApplication?.sitter_id) {
+          setLoadError("Impossible de retrouver le gardien associé à cette garde.");
+          setLoading(false);
+          return;
+        }
+
+        revieweeId = acceptedApplication.sitter_id;
       } else {
+        const { data: myAcceptedApplication, error: myAppError } = await supabase
+          .from("applications")
+          .select("sitter_id")
+          .eq("sit_id", sitId)
+          .eq("sitter_id", user.id)
+          .eq("status", "accepted")
+          .maybeSingle();
+
+        if (myAppError || !myAcceptedApplication) {
+          setLoadError("Vous ne pouvez laisser un avis que pour une garde que vous avez réellement effectuée.");
+          setLoading(false);
+          return;
+        }
+
         revieweeId = sitData.user_id;
       }
 
-      if (revieweeId) {
-        const { data: profile } = await supabase.from("profiles").select("id, first_name, avatar_url").eq("id", revieweeId).single();
-        setReviewee(profile);
+      const [{ data: profile, error: profileError }, { data: existingReview }] = await Promise.all([
+        supabase
+          .from("profiles")
+          .select("id, first_name, avatar_url")
+          .eq("id", revieweeId)
+          .maybeSingle(),
+        supabase
+          .from("reviews")
+          .select("id")
+          .eq("sit_id", sitId)
+          .eq("reviewer_id", user.id)
+          .maybeSingle(),
+      ]);
+
+      if (profileError || !profile) {
+        setLoadError("Impossible de charger la personne à évaluer.");
+        setLoading(false);
+        return;
       }
 
-      // Check if already reviewed
-      const { data: existing } = await supabase.from("reviews").select("id").eq("sit_id", sitId).eq("reviewer_id", user.id).maybeSingle();
-      if (existing) setAlreadyReviewed(true);
-
+      setReviewee(profile);
+      setAlreadyReviewed(!!existingReview);
       setLoading(false);
     };
+
     load();
   }, [sitId, user]);
 
-  const criteria = reviewType === "owner_to_sitter" ? ownerCriteria : sitterCriteria;
-  const placeholder = reviewType === "owner_to_sitter"
-    ? "Racontez comment s'est passée la garde. Les détails aident les futurs propriétaires à choisir."
-    : "Décrivez votre expérience. Votre avis aide les futurs gardiens.";
+  const isOwnerReview = reviewDirection === "owner_to_sitter";
+  const criteria = isOwnerReview ? ownerCriteria : sitterCriteria;
+  const dbReviewType = "garde";
+
+  const intro = useMemo(() => {
+    if (isOwnerReview) {
+      return {
+        title: "Votre retour sur le gardien",
+        subtitle: "Dites en quoi cette garde avec ce gardien s'est bien passée — ou non.",
+        recommendation: "Recommanderiez-vous ce gardien ?",
+        placeholder: "Expliquez concrètement comment la garde s'est passée : échanges, soin des animaux, fiabilité, respect du logement…",
+      };
+    }
+
+    return {
+      title: "Votre retour sur le propriétaire",
+      subtitle: "Partagez votre expérience chez ce propriétaire pour aider les prochains gardiens.",
+      recommendation: "Recommanderiez-vous ce propriétaire ?",
+      placeholder: "Décrivez l'expérience vécue : annonce fidèle, accueil, clarté des consignes, état du logement…",
+    };
+  }, [isOwnerReview]);
 
   const canSubmit = overallRating > 0 && comment.trim().length >= 50 && wouldRecommend !== null;
 
@@ -100,68 +164,33 @@ const LeaveReview = () => {
     if (!canSubmit || !user || !reviewee || !sitId) return;
     setSubmitting(true);
 
-    const payload: any = {
+    const payload: Record<string, unknown> = {
       sit_id: sitId,
       reviewer_id: user.id,
       reviewee_id: reviewee.id,
       overall_rating: overallRating,
       comment: comment.trim(),
       would_recommend: wouldRecommend,
-      review_type: reviewType,
-      published: false, // will be auto-published by trigger when both exist
+      review_type: dbReviewType,
+      published: false,
     };
 
-    // Add sub-criteria
-    criteria.forEach(c => {
-      if (subRatings[c.key]) payload[c.key] = subRatings[c.key];
+    criteria.forEach((criterion) => {
+      if (subRatings[criterion.key]) payload[criterion.key] = subRatings[criterion.key];
     });
 
     const { error } = await supabase.from("reviews").insert(payload as any);
+
     if (error) {
-      toast({ title: "Erreur", description: "Impossible de soumettre l'avis.", variant: "destructive" });
+      toast({
+        title: "Erreur",
+        description: error.message || "Impossible de soumettre l'avis.",
+        variant: "destructive",
+      });
       setSubmitting(false);
       return;
     }
 
-    // Save badge attributions
-    if (selectedBadges.length > 0 && reviewee) {
-      const badgeRows = selectedBadges.map(badge_id => ({
-        sit_id: sitId!,
-        giver_id: user.id,
-        user_id: reviewee.id,
-        badge_id,
-      }));
-      await supabase.from("badge_attributions").insert(badgeRows as any);
-
-      // Check for mutual badges → "Le courant passe"
-      const { data: otherBadges } = await supabase
-        .from("badge_attributions")
-        .select("id")
-        .eq("sit_id", sitId)
-        .eq("giver_id", reviewee.id)
-        .eq("user_id", user.id);
-
-      const otherGaveCount = otherBadges?.length || 0;
-      if (otherGaveCount >= 2 && selectedBadges.length >= 2) {
-        const mutualKey = SPECIAL_BADGE.key;
-        const { data: existing } = await supabase
-          .from("badge_attributions")
-          .select("id")
-          .eq("sit_id", sitId)
-          .eq("badge_id", mutualKey)
-          .eq("user_id", user.id)
-          .maybeSingle();
-
-        if (!existing) {
-          await supabase.from("badge_attributions").insert([
-            { sit_id: sitId, giver_id: reviewee.id, user_id: user.id, badge_id: mutualKey },
-            { sit_id: sitId, giver_id: user.id, user_id: reviewee.id, badge_id: mutualKey },
-          ] as any);
-        }
-      }
-    }
-
-    // Send system message in conversation
     const { data: conv } = await supabase
       .from("conversations")
       .select("id")
@@ -175,21 +204,39 @@ const LeaveReview = () => {
         sender_id: user.id,
         content: `⭐ ${user.firstName} a laissé un avis. ${wouldRecommend ? "Recommandation positive !" : ""}`,
         is_system: true,
-      });
+      } as any);
     }
 
-    toast({ title: "Avis envoyé !", description: "Il sera publié quand les deux parties auront donné le leur." });
+    toast({
+      title: "Avis envoyé !",
+      description: "Il sera publié quand les deux parties auront donné le leur.",
+    });
     navigate(`/sits/${sitId}`);
   };
 
   if (loading) return <div className="p-6 text-muted-foreground">Chargement...</div>;
+
+  if (loadError) {
+    return (
+      <div className="p-6 md:p-10 max-w-2xl mx-auto text-center space-y-4">
+        <p className="text-lg font-heading font-semibold">Impossible de laisser cet avis</p>
+        <p className="text-sm text-muted-foreground">{loadError}</p>
+        <div className="flex justify-center gap-3">
+          <Link to="/messages"><Button variant="outline">Retour à la messagerie</Button></Link>
+          {sitId && <Link to={`/sits/${sitId}`}><Button>Voir la garde</Button></Link>}
+        </div>
+      </div>
+    );
+  }
+
   if (!sit || !reviewee) return <div className="p-6">Garde introuvable.</div>;
+
   if (sit.status !== "completed") {
     return (
       <div className="p-6 md:p-10 max-w-2xl mx-auto text-center">
         <p className="text-lg font-heading font-semibold mb-2">Garde non terminée</p>
         <p className="text-sm text-muted-foreground mb-4">Vous pourrez laisser un avis une fois la garde terminée.</p>
-        <Link to={`/sits/${sitId}`}><Button variant="outline">Retour à l'annonce</Button></Link>
+        <Link to={`/sits/${sitId}`}><Button variant="outline">Retour à la garde</Button></Link>
       </div>
     );
   }
@@ -199,7 +246,7 @@ const LeaveReview = () => {
       <div className="p-6 md:p-10 max-w-2xl mx-auto text-center">
         <p className="text-lg font-heading font-semibold mb-2">Avis déjà envoyé ✓</p>
         <p className="text-sm text-muted-foreground mb-4">Vous avez déjà laissé un avis pour cette garde.</p>
-        <Link to={`/sits/${sitId}`}><Button variant="outline">Retour à l'annonce</Button></Link>
+        <Link to={`/sits/${sitId}`}><Button variant="outline">Retour à la garde</Button></Link>
       </div>
     );
   }
@@ -207,53 +254,67 @@ const LeaveReview = () => {
   return (
     <div className="p-6 md:p-10 max-w-2xl mx-auto animate-fade-in pb-32">
       <Helmet><meta name="robots" content="noindex, nofollow" /></Helmet>
+
       <Link to={`/sits/${sitId}`} className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-6">
         <ArrowLeft className="h-4 w-4" /> Retour
       </Link>
 
-      <h1 className="font-heading text-2xl font-bold mb-1">Laisser un avis</h1>
-      <div className="flex items-center gap-3 mb-8">
-        {reviewee.avatar_url ? (
-          <img src={reviewee.avatar_url} alt="" className="w-10 h-10 rounded-full object-cover" />
-        ) : (
-          <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center font-heading font-bold">
-            {reviewee.first_name?.charAt(0) || "?"}
+      <h1 className="font-heading text-2xl font-bold mb-1">{intro.title}</h1>
+      <p className="text-sm text-muted-foreground mb-6">{intro.subtitle}</p>
+
+      <div className="rounded-2xl border border-border bg-muted/30 p-4 mb-8">
+        <div className="flex items-center gap-3 mb-2">
+          {reviewee.avatar_url ? (
+            <img src={reviewee.avatar_url} alt="" className="w-10 h-10 rounded-full object-cover" />
+          ) : (
+            <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center font-heading font-bold">
+              {reviewee.first_name?.charAt(0) || "?"}
+            </div>
+          )}
+          <div>
+            <p className="font-medium">{reviewee.first_name}</p>
+            <p className="text-xs text-muted-foreground">{sit.title}</p>
           </div>
-        )}
-        <div>
-          <p className="font-medium">{reviewee.first_name}</p>
-          <p className="text-xs text-muted-foreground">{sit.title}</p>
+        </div>
+        <div className="flex items-start gap-2 text-xs text-muted-foreground">
+          <CheckCircle2 className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+          <span>
+            {isOwnerReview
+              ? "Vous notez ici le gardien qui a réalisé la garde."
+              : "Vous notez ici le propriétaire chez qui la garde a eu lieu."}
+          </span>
         </div>
       </div>
 
-      {/* Overall rating */}
       <div className="mb-6">
         <label className="text-sm font-medium mb-2 block">Note globale</label>
         <StarRating value={overallRating} onChange={setOverallRating} size="lg" />
       </div>
 
-      {/* Sub-criteria */}
       <div className="space-y-4 mb-6">
         <label className="text-sm font-medium block">Détail par critère</label>
-        {criteria.map(c => (
-          <div key={c.key} className="flex items-center justify-between">
-            <span className="text-sm text-muted-foreground">{c.label}</span>
-            <StarRating value={subRatings[c.key] || 0} onChange={v => setSubRatings(prev => ({ ...prev, [c.key]: v }))} size="sm" />
+        {criteria.map((criterion) => (
+          <div key={criterion.key} className="flex items-center justify-between gap-4">
+            <span className="text-sm text-muted-foreground">{criterion.label}</span>
+            <StarRating
+              value={subRatings[criterion.key] || 0}
+              onChange={(value) => setSubRatings((prev) => ({ ...prev, [criterion.key]: value }))}
+              size="sm"
+            />
           </div>
         ))}
       </div>
 
-      {/* Recommendation */}
       <div className="mb-6">
-        <label className="text-sm font-medium mb-2 block">
-          {reviewType === "owner_to_sitter" ? "Recommanderiez-vous ce gardien ?" : "Recommanderiez-vous ce propriétaire ?"}
-        </label>
+        <label className="text-sm font-medium mb-2 block">{intro.recommendation}</label>
         <div className="flex gap-3">
           <button
             type="button"
             onClick={() => setWouldRecommend(true)}
             className={`flex items-center gap-2 px-4 py-2.5 rounded-lg border text-sm font-medium transition-colors ${
-              wouldRecommend === true ? "bg-green-50 border-green-300 text-green-700" : "border-border text-muted-foreground hover:bg-accent"
+              wouldRecommend === true
+                ? "bg-accent text-primary border-primary/30"
+                : "border-border text-muted-foreground hover:bg-accent"
             }`}
           >
             <ThumbsUp className="h-4 w-4" /> Oui
@@ -262,7 +323,9 @@ const LeaveReview = () => {
             type="button"
             onClick={() => setWouldRecommend(false)}
             className={`flex items-center gap-2 px-4 py-2.5 rounded-lg border text-sm font-medium transition-colors ${
-              wouldRecommend === false ? "bg-destructive/10 border-destructive/30 text-destructive" : "border-border text-muted-foreground hover:bg-accent"
+              wouldRecommend === false
+                ? "bg-destructive/10 border-destructive/30 text-destructive"
+                : "border-border text-muted-foreground hover:bg-accent"
             }`}
           >
             <ThumbsDown className="h-4 w-4" /> Non
@@ -270,24 +333,22 @@ const LeaveReview = () => {
         </div>
       </div>
 
-      {/* Comment */}
       <div className="mb-6">
-        <label className="text-sm font-medium mb-2 block">Commentaire <span className="text-muted-foreground font-normal">(min. 50 caractères)</span></label>
+        <label className="text-sm font-medium mb-2 block">
+          Commentaire <span className="text-muted-foreground font-normal">(min. 50 caractères)</span>
+        </label>
         <Textarea
           value={comment}
-          onChange={e => setComment(e.target.value)}
-          placeholder={placeholder}
-          rows={5}
+          onChange={(e) => setComment(e.target.value)}
+          placeholder={intro.placeholder}
+          rows={6}
           className="text-sm"
         />
-        <p className={`text-xs mt-1 ${comment.trim().length >= 50 ? "text-green-600" : "text-muted-foreground"}`}>
+        <p className={`text-xs mt-1 ${comment.trim().length >= 50 ? "text-primary" : "text-muted-foreground"}`}>
           {comment.trim().length}/50 caractères minimum
         </p>
       </div>
 
-      {/* Badge selection — migration en cours */}
-
-      {/* Submit */}
       <div className="fixed bottom-0 left-0 right-0 md:left-64 bg-card border-t border-border p-4 z-40 md:pb-4 pb-20">
         <div className="max-w-2xl mx-auto">
           <Button className="w-full h-12 text-base font-semibold" onClick={handleSubmit} disabled={!canSubmit || submitting}>

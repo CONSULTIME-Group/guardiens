@@ -2,90 +2,90 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://guardiens.fr/</loc>
-    <lastmod>2026-04-14</lastmod>
+    <lastmod>2026-04-16</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
     <loc>https://guardiens.fr/tarifs</loc>
-    <lastmod>2026-04-14</lastmod>
+    <lastmod>2026-04-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://guardiens.fr/faq</loc>
-    <lastmod>2026-04-14</lastmod>
+    <lastmod>2026-04-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://guardiens.fr/contact</loc>
-    <lastmod>2026-04-14</lastmod>
+    <lastmod>2026-04-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://guardiens.fr/petites-missions</loc>
-    <lastmod>2026-04-14</lastmod>
+    <lastmod>2026-04-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://guardiens.fr/gardien-urgence</loc>
-    <lastmod>2026-04-14</lastmod>
+    <lastmod>2026-04-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://guardiens.fr/guides</loc>
-    <lastmod>2026-04-14</lastmod>
+    <lastmod>2026-04-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://guardiens.fr/house-sitting/annecy</loc>
-    <lastmod>2026-04-14</lastmod>
+    <lastmod>2026-04-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://guardiens.fr/house-sitting/lyon</loc>
-    <lastmod>2026-04-14</lastmod>
+    <lastmod>2026-04-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://guardiens.fr/house-sitting/grenoble</loc>
-    <lastmod>2026-04-14</lastmod>
+    <lastmod>2026-04-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://guardiens.fr/house-sitting/caluire-et-cuire</loc>
-    <lastmod>2026-04-14</lastmod>
+    <lastmod>2026-04-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://guardiens.fr/house-sitting/chambery</loc>
-    <lastmod>2026-04-14</lastmod>
+    <lastmod>2026-04-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://guardiens.fr/house-sitting/aura</loc>
-    <lastmod>2026-04-14</lastmod>
+    <lastmod>2026-04-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/actualites/arroser-plantes-vacances-grenoble</loc>
-    <lastmod>2026-04-05</lastmod>
+    <loc>https://guardiens.fr/actualites/devenir-gardien-urgence-guardiens</loc>
+    <lastmod>2026-04-14</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
+    <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/actualites/devenir-gardien-urgence-guardiens</loc>
+    <loc>https://guardiens.fr/actualites/gerer-animaux-difficiles-garde</loc>
     <lastmod>2026-04-14</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
@@ -103,28 +103,16 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/actualites/arroser-plantes-vacances-lyon</loc>
-    <lastmod>2026-04-05</lastmod>
+    <loc>https://guardiens.fr/actualites/jardinage-entraide-quartier-lyon</loc>
+    <lastmod>2026-03-28</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/actualites/jardinage-echange-service-voisin-annecy</loc>
-    <lastmod>2026-04-05</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://guardiens.fr/actualites/house-sitting-noel-fetes-fin-annee</loc>
+    <loc>https://guardiens.fr/actualites/bien-etre-animal-pendant-absence</loc>
     <lastmod>2026-04-14</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://guardiens.fr/actualites/house-sitting-lyon</loc>
-    <lastmod>2026-03-27</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.9</priority>
   </url>
   <url>
     <loc>https://guardiens.fr/actualites/nouveaux-tarifs-2026</loc>
@@ -135,18 +123,6 @@
   <url>
     <loc>https://guardiens.fr/actualites/devenir-pet-sitter-guide-debutant</loc>
     <lastmod>2026-03-26</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://guardiens.fr/actualites/cavalier-king-charles-guide-race</loc>
-    <lastmod>2026-04-14</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://guardiens.fr/actualites/conseils-garder-chien</loc>
-    <lastmod>2026-03-25</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -163,10 +139,40 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://guardiens.fr/actualites/conseils-garder-chien</loc>
+    <lastmod>2026-03-25</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/actualites/cavalier-king-charles-guide-race</loc>
+    <lastmod>2026-04-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://guardiens.fr/actualites/securite-confiance-house-sitting</loc>
     <lastmod>2026-04-14</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/actualites/arroser-plantes-vacances-grenoble</loc>
+    <lastmod>2026-04-05</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/actualites/house-sitting-week-end-court-sejour-aura</loc>
+    <lastmod>2026-04-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/actualites/arroser-plantes-vacances-lyon</loc>
+    <lastmod>2026-04-05</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
   </url>
   <url>
     <loc>https://guardiens.fr/actualites/que-faire-probleme-pendant-garde</loc>
@@ -175,8 +181,8 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/actualites/garde-chat-domicile-house-sitting</loc>
-    <lastmod>2026-03-26</lastmod>
+    <loc>https://guardiens.fr/actualites/house-sitting-ete-aura-guide</loc>
+    <lastmod>2026-04-14</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -193,6 +199,12 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://guardiens.fr/actualites/garde-chat-domicile-house-sitting</loc>
+    <lastmod>2026-03-26</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://guardiens.fr/actualites/bengal-guide-race</loc>
     <lastmod>2026-04-05</lastmod>
     <changefreq>monthly</changefreq>
@@ -205,7 +217,13 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/actualites/labrador-retriever-guide-race</loc>
+    <loc>https://guardiens.fr/actualites/house-sitting-grenoble</loc>
+    <lastmod>2026-03-27</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/actualites/veterinaire-urgence-grenoble-isere</loc>
     <lastmod>2026-04-14</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
@@ -217,28 +235,10 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/actualites/house-sitting-chambery</loc>
-    <lastmod>2026-03-27</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>https://guardiens.fr/actualites/house-sitting-ete-aura-guide</loc>
-    <lastmod>2026-04-14</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://guardiens.fr/actualites/veterinaire-urgence-grenoble-isere</loc>
+    <loc>https://guardiens.fr/actualites/labrador-retriever-guide-race</loc>
     <lastmod>2026-04-14</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://guardiens.fr/actualites/jardinage-echange-service-voisin-lyon</loc>
-    <lastmod>2026-03-28</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
   </url>
   <url>
     <loc>https://guardiens.fr/actualites/c-est-quoi-le-house-sitting</loc>
@@ -247,19 +247,13 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/actualites/preparer-maison-avant-garde</loc>
-    <lastmod>2026-04-14</lastmod>
+    <loc>https://guardiens.fr/actualites/jardinage-entraide-quartier-annecy</loc>
+    <lastmod>2026-04-15</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
+    <priority>0.7</priority>
   </url>
   <url>
     <loc>https://guardiens.fr/actualites/erreurs-premiere-garde</loc>
-    <lastmod>2026-04-14</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://guardiens.fr/actualites/gerer-animaux-difficiles-garde</loc>
     <lastmod>2026-04-14</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
@@ -283,22 +277,16 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/actualites/house-sitting-aura-guide-complet</loc>
-    <lastmod>2026-04-14</lastmod>
+    <loc>https://guardiens.fr/actualites/garde-animaux-savoie-guide</loc>
+    <lastmod>2026-04-15</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
+    <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/actualites/checklist-partir-vacances-animaux</loc>
-    <lastmod>2026-04-14</lastmod>
+    <loc>https://guardiens.fr/actualites/garde-animaux-haute-savoie-guide</loc>
+    <lastmod>2026-04-15</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://guardiens.fr/actualites/faire-garder-animal-pendant-hospitalisation</loc>
-    <lastmod>2026-04-14</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
+    <priority>0.8</priority>
   </url>
   <url>
     <loc>https://guardiens.fr/actualites/berger-allemand-guide-race</loc>
@@ -313,16 +301,10 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/actualites/garde-chat-domicile-lyon</loc>
+    <loc>https://guardiens.fr/actualites/faire-garder-animal-pendant-hospitalisation</loc>
     <lastmod>2026-04-14</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://guardiens.fr/actualites/veterinaire-urgence-annecy-haute-savoie</loc>
-    <lastmod>2026-04-14</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
   </url>
   <url>
     <loc>https://guardiens.fr/actualites/house-sitting-vs-pension-comparatif</loc>
@@ -331,10 +313,10 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/actualites/parcs-balades-chiens-annecy-guide</loc>
+    <loc>https://guardiens.fr/actualites/garde-chat-domicile-lyon</loc>
     <lastmod>2026-04-14</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.6</priority>
   </url>
   <url>
     <loc>https://guardiens.fr/actualites/choisir-gardien-bons-criteres</loc>
@@ -355,19 +337,19 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/actualites/reussir-premiere-garde-house-sitting</loc>
-    <lastmod>2026-04-14</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://guardiens.fr/actualites/bien-etre-animal-pendant-absence</loc>
-    <lastmod>2026-04-14</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://guardiens.fr/actualites/s-absenter-avec-animal-guide-solutions-2026</loc>
+    <lastmod>2026-04-15</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/actualites/parcs-balades-chiens-annecy-guide</loc>
+    <lastmod>2026-04-15</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/actualites/reussir-premiere-garde-house-sitting</loc>
     <lastmod>2026-04-14</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
@@ -379,7 +361,61 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/actualites/house-sitting-week-end-court-sejour-aura</loc>
+    <loc>https://guardiens.fr/actualites/veterinaire-urgence-annecy-haute-savoie</loc>
+    <lastmod>2026-04-15</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/actualites/maine-coon-guide-race</loc>
+    <lastmod>2026-04-05</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/actualites/siamois-guide-race</loc>
+    <lastmod>2026-04-05</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/actualites/arroser-plantes-vacances-annecy</loc>
+    <lastmod>2026-04-15</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/actualites/house-sitting-aura-guide-complet</loc>
+    <lastmod>2026-04-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/actualites/house-sitting-chambery</loc>
+    <lastmod>2026-04-15</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/actualites/house-sitting-lyon</loc>
+    <lastmod>2026-04-15</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/actualites/house-sitting-noel-fetes-fin-annee</loc>
+    <lastmod>2026-04-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/actualites/checklist-partir-vacances-animaux</loc>
+    <lastmod>2026-04-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/actualites/preparer-maison-avant-garde</loc>
     <lastmod>2026-04-14</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
@@ -392,33 +428,9 @@
   </url>
   <url>
     <loc>https://guardiens.fr/actualites/house-sitting-annecy</loc>
-    <lastmod>2026-03-27</lastmod>
+    <lastmod>2026-04-15</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>https://guardiens.fr/actualites/house-sitting-grenoble</loc>
-    <lastmod>2026-03-27</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>https://guardiens.fr/actualites/siamois-guide-race</loc>
-    <lastmod>2026-04-05</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://guardiens.fr/actualites/maine-coon-guide-race</loc>
-    <lastmod>2026-04-05</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://guardiens.fr/actualites/arroser-plantes-vacances-annecy</loc>
-    <lastmod>2026-04-05</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
   </url>
   <url>
     <loc>https://guardiens.fr/house-sitting/lyon</loc>
@@ -835,182 +847,20 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/gardiens/9061a538-f044-4162-b73c-ce5648ed49ca</loc>
-    <lastmod>2026-04-13</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://guardiens.fr/gardiens/8ba5acb7-d341-4ce1-82dc-8ad1755a3618</loc>
-    <lastmod>2026-04-11</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://guardiens.fr/gardiens/64916f17-6410-4f63-bce4-46a8f472119d</loc>
-    <lastmod>2026-04-11</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://guardiens.fr/gardiens/a2fb2118-088f-4b41-a8ca-c73e9381c91d</loc>
-    <lastmod>2026-04-11</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://guardiens.fr/gardiens/2411ecd1-73f1-4181-b62b-a437b392ba4c</loc>
-    <lastmod>2026-04-11</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://guardiens.fr/gardiens/3e8e71fa-f9ba-476e-a7fb-0ebb76f55a30</loc>
-    <lastmod>2026-04-11</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://guardiens.fr/gardiens/52cb7629-99a5-478c-b7da-3a0794031eb4</loc>
-    <lastmod>2026-04-11</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://guardiens.fr/gardiens/cc89b3a6-2aa5-47d7-bc52-9a0baeb82a8e</loc>
-    <lastmod>2026-04-11</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://guardiens.fr/gardiens/744dad15-d256-4915-9f61-19b43fa01951</loc>
-    <lastmod>2026-04-11</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://guardiens.fr/gardiens/d593fac5-cf87-4696-8041-70fd3a8d3c76</loc>
-    <lastmod>2026-04-11</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://guardiens.fr/gardiens/7bf29905-d372-4669-93b1-ec7def9b06d5</loc>
-    <lastmod>2026-04-14</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://guardiens.fr/gardiens/80203243-78dd-40b0-bc43-073134bb9959</loc>
-    <lastmod>2026-04-11</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://guardiens.fr/gardiens/3fe3e004-360d-4da9-9a91-9a8da130960e</loc>
-    <lastmod>2026-04-11</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://guardiens.fr/gardiens/0a03d85d-1d3d-426c-accb-3eeb09bae919</loc>
-    <lastmod>2026-04-11</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://guardiens.fr/gardiens/245d6e5d-bfdc-4622-954d-f1b36990b7e8</loc>
-    <lastmod>2026-04-11</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://guardiens.fr/gardiens/50e4a512-d30d-4f8c-b210-1b7b6ed365e9</loc>
-    <lastmod>2026-04-11</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://guardiens.fr/gardiens/52e27e6e-a111-4b13-817f-63f2d2c686bb</loc>
-    <lastmod>2026-04-11</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://guardiens.fr/gardiens/ccbed3df-2975-4925-a4ba-f1c7dc0dbe92</loc>
-    <lastmod>2026-04-11</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://guardiens.fr/gardiens/de406602-d9c5-4fe5-a2de-9e81a6b13893</loc>
-    <lastmod>2026-04-11</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://guardiens.fr/gardiens/03504b3b-4473-41d4-be55-ec5abe8c1b27</loc>
-    <lastmod>2026-04-11</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://guardiens.fr/gardiens/f951adcf-5640-4983-a91c-1792b2ec2ea9</loc>
-    <lastmod>2026-04-11</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://guardiens.fr/gardiens/3a40e8b4-308b-4600-b825-25b68e5e88cf</loc>
-    <lastmod>2026-04-11</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://guardiens.fr/gardiens/1799f59e-4cd3-4f11-b0fd-87b3b23a41f9</loc>
-    <lastmod>2026-04-11</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://guardiens.fr/gardiens/8ebf4068-d521-46e1-9914-98cf5c74f639</loc>
-    <lastmod>2026-04-11</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://guardiens.fr/gardiens/73f03334-58f2-44c9-a010-c430c2d51dfa</loc>
-    <lastmod>2026-04-13</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://guardiens.fr/gardiens/ce1c4c51-5187-4e8d-8444-73734d34f68a</loc>
-    <lastmod>2026-04-12</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://guardiens.fr/gardiens/e1ebbc14-6b05-4b06-abed-00f57757881b</loc>
-    <lastmod>2026-04-13</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
     <loc>https://guardiens.fr/cgu</loc>
-    <lastmod>2026-04-14</lastmod>
+    <lastmod>2026-04-16</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
     <loc>https://guardiens.fr/confidentialite</loc>
-    <lastmod>2026-04-14</lastmod>
+    <lastmod>2026-04-16</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
     <loc>https://guardiens.fr/mentions-legales</loc>
-    <lastmod>2026-04-14</lastmod>
+    <lastmod>2026-04-16</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>

@@ -90,12 +90,17 @@ const AdminSitsManagement = () => {
     if (!sits.length) return;
     const ids = sits.filter(s => s._type === "sit").map(s => s.id);
     if (!ids.length) return;
-    supabase.from("reviews").select("sit_id, review_type").in("sit_id", ids).then(({ data }) => {
+    supabase.from("reviews").select("sit_id, reviewer_id, reviewee_id, review_type").in("sit_id", ids).then(({ data }) => {
       const map: Record<string, { owner: boolean; sitter: boolean }> = {};
       data?.forEach((r: any) => {
         if (!map[r.sit_id]) map[r.sit_id] = { owner: false, sitter: false };
-        if (r.review_type === "owner_to_sitter") map[r.sit_id].owner = true;
-        if (r.review_type === "sitter_to_owner") map[r.sit_id].sitter = true;
+        if (r.review_type === "garde") {
+          if (sitters[r.sit_id]?.name && r.reviewee_id) {
+            // fallback handled by reviewer/reviewee pairing below when UI loads
+          }
+          if (r.reviewer_id === sits.find((s) => s.id === r.sit_id)?.user_id) map[r.sit_id].owner = true;
+          else map[r.sit_id].sitter = true;
+        }
       });
       setReviews(map);
     });

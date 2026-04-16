@@ -445,7 +445,7 @@ const AdminReviews = () => {
                 {detailReview.reviewee?.avatar_url && <img src={detailReview.reviewee.avatar_url} className="w-8 h-8 rounded-full object-cover" />}
                 <div><strong>Pour :</strong> {detailReview.reviewee?.first_name} {detailReview.reviewee?.last_name}</div>
               </div>
-              <div><strong>Type :</strong> {detailReview.review_type === "owner_to_sitter" ? "Proprio → Gardien" : "Gardien → Proprio"}</div>
+              <div><strong>Type :</strong> {detailReview.review_type === "annulation" ? "Avis d'annulation" : detailReview.reviewer_id === detailReview.sit?.user_id ? "Proprio → Gardien" : "Gardien → Proprio"}</div>
               <div className="flex items-center gap-2"><strong>Note globale :</strong> {renderStars(detailReview.overall_rating)} <span className="text-muted-foreground">({detailReview.overall_rating}/5)</span></div>
               {detailReview.communication_rating && <div><strong>Communication :</strong> {detailReview.communication_rating}/5</div>}
               {detailReview.reliability_rating && <div><strong>Fiabilité :</strong> {detailReview.reliability_rating}/5</div>}
