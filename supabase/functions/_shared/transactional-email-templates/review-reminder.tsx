@@ -61,6 +61,13 @@ const ReviewReminderEmail = ({ firstName, sitTitle, revieweeName, sitId, isOwner
           </Text>
 
           <Hr style={hr} />
+
+          <Text style={legalNote}>
+            Conformément au RGPD (art. 6.1.f), cet e-mail est envoyé dans le cadre de l'intérêt légitime
+            lié au bon fonctionnement du service d'avis. Les avis publiés sur {SITE_NAME} sont modérés
+            conformément aux articles L. 111-7-2 du Code de la consommation et au décret n° 2017-1436.
+          </Text>
+
           <Text style={footer}>L'équipe {SITE_NAME} 🐾</Text>
         </Container>
       </Body>
@@ -106,4 +113,5 @@ const button = {
 }
 const note = { fontSize: '12px', color: 'hsl(37, 7%, 55%)', lineHeight: '1.5', margin: '0 0 16px', fontStyle: 'italic' as const, textAlign: 'center' as const }
 const hr = { borderColor: 'hsl(37, 22%, 89%)', margin: '20px 0' }
+const legalNote = { fontSize: '10px', color: 'hsl(37, 7%, 60%)', lineHeight: '1.5', margin: '0 0 12px' }
 const footer = { fontSize: '12px', color: 'hsl(37, 7%, 60%)', margin: '10px 0 0' }
