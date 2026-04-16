@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
+import { getRecoveryRedirectUrl } from "@/lib/authRedirect";
 import { ArrowLeft } from "lucide-react";
 import { Helmet } from "react-helmet-async";
 const forgotPasswordPhoto = "https://erhccyqevdyevpyctsjj.supabase.co/storage/v1/object/public/property-photos/misc/forgot-password-photo.webp";
@@ -20,7 +21,7 @@ const ForgotPassword = () => {
     setIsLoading(true);
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/auth/confirm?next=/reset-password`,
+        redirectTo: getRecoveryRedirectUrl(),
       });
       if (error) throw error;
       setSent(true);
