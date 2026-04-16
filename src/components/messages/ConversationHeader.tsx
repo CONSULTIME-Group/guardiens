@@ -6,6 +6,7 @@ import { ArrowLeft, Archive, ExternalLink, CheckCircle2, Star, Home, Handshake, 
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import HelpButton from "./HelpButton";
+import MissionFeedbackModal from "@/components/missions/MissionFeedbackModal";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { format, isPast } from "date-fns";
@@ -55,6 +56,8 @@ const ConversationHeader = ({
   const [blockSending, setBlockSending] = useState(false);
   const [missionData, setMissionData] = useState<any>(null);
   const [responseData, setResponseData] = useState<any>(null);
+  const [feedbackOpen, setFeedbackOpen] = useState(false);
+  const [hasFeedback, setHasFeedback] = useState(false);
 
   const isOwner = conv.owner_id === userId;
   const isPendingApp = conv.application_status === "pending" || conv.application_status === "discussing";
@@ -143,9 +146,16 @@ const ConversationHeader = ({
     setResponseData((prev: any) => ({ ...prev, status: "completed" }));
   };
 
-  const handleLeaveReview = () => {
-    navigate(`/avis-mission?missionId=${missionData?.id}&conversationId=${conv.id}`);
-  };
+  // Check if user already left feedback for this mission
+  useEffect(() => {
+    if (!missionData?.id || !userId) return;
+    supabase.from("mission_feedbacks")
+      .select("id")
+      .eq("mission_id", missionData.id)
+      .eq("giver_id", userId)
+      .maybeSingle()
+      .then(({ data }) => setHasFeedback(!!data));
+  }, [missionData?.id, userId]);
 
   // Determine "Voir l'annonce" link
   const annonceLinkHref = conv.sit_id
@@ -341,14 +351,20 @@ const ConversationHeader = ({
         <div className="px-4 py-2 bg-primary/5 border-t border-primary/20 flex items-center gap-2">
           <CheckCircle className="text-primary w-4 h-4 shrink-0" />
           <span className="text-sm text-primary font-medium">Échange terminé</span>
-          <Button
-            size="sm"
-            variant="ghost"
-            className="ml-auto text-primary hover:bg-primary/10"
-            onClick={handleLeaveReview}
-          >
-            Laisser un avis →
-          </Button>
+          {hasFeedback ? (
+            <span className="ml-auto text-xs text-muted-foreground flex items-center gap-1">
+              <CheckCircle2 className="h-3.5 w-3.5 text-primary" /> Avis envoyé
+            </span>
+          ) : (
+            <Button
+              size="sm"
+              variant="ghost"
+              className="ml-auto text-primary hover:bg-primary/10"
+              onClick={() => setFeedbackOpen(true)}
+            >
+              Laisser un avis →
+            </Button>
+          )}
         </div>
       )}
       {isSmallMission && !responseData && (
@@ -452,6 +468,21 @@ const ConversationHeader = ({
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Mission feedback modal */}
+      {isSmallMission && missionData && (
+        <MissionFeedbackModal
+          open={feedbackOpen}
+          onOpenChange={setFeedbackOpen}
+          missionId={missionData.id}
+          receiverId={conv.other_user?.id || (isOwner ? conv.sitter_id : conv.owner_id)}
+          receiverName={capitalize(conv.other_user?.first_name) || "ce membre"}
+          onSubmitted={() => {
+            setHasFeedback(true);
+            onActionDone();
+          }}
+        />
+      )}
     </div>
   );
 };
