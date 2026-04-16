@@ -598,7 +598,16 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
               </div>
 
               <div className="flex flex-col gap-2">
-                {isOwnerOnly ? (
+                {userRole === "both" ? (
+                  <>
+                    <Button className="w-full" onClick={() => completeOnboarding("/recherche")}>
+                      Explorer les annonces →
+                    </Button>
+                    <Button variant="outline" className="w-full" onClick={() => completeOnboarding("/sits")}>
+                      Publier une annonce →
+                    </Button>
+                  </>
+                ) : isOwnerOnly ? (
                   <Button className="w-full" onClick={() => completeOnboarding("/sits")}>
                     Publier une annonce →
                   </Button>
