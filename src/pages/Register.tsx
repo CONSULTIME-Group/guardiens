@@ -229,6 +229,9 @@ const Register = () => {
                 <span className="font-medium text-foreground">{email}</span>.
                 Cliquez dessus pour activer votre compte.
               </p>
+              <p className="text-muted-foreground/70 text-xs leading-relaxed max-w-sm">
+                💡 Pensez à vérifier vos <strong>spams</strong> ou l'onglet <strong>Promotions</strong> si vous ne trouvez pas l'email.
+              </p>
               <button
                 onClick={handleResendEmail}
                 disabled={isResending}
