@@ -145,9 +145,7 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
     }
   }, [open, activeRole]);
 
-  // Stable ref for handleNext to avoid stale closures in keyboard handler
-  const handleNextRef = useRef(handleNext);
-  useEffect(() => { handleNextRef.current = handleNext; });
+  const handleNextRef = useRef<() => Promise<void>>(async () => {});
 
   // Keyboard navigation
   useEffect(() => {
@@ -253,6 +251,9 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
       await saveCompetencesAndLifestyle();
     }
     if (slide < TOTAL_SLIDES - 1) setSlide((s) => s + 1);
+  };
+  // Keep ref in sync for keyboard handler
+  useEffect(() => { handleNextRef.current = handleNext; });
   };
 
   const canDismiss = minimalSaved;
