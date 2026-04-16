@@ -21,6 +21,7 @@ import { toast } from "sonner";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import NotFound from "./pages/NotFound";
+import AuthConfirm from "./pages/AuthConfirm";
 
 // ──── Heavy routes (lazy) ────
 const Landing = lazy(() => import("./pages/Landing"));
@@ -181,6 +182,7 @@ const AppRoutes = () => (
       <Route path="/" element={<Landing />} />
       <Route path="/login" element={<PublicOnlyRoute><Login /></PublicOnlyRoute>} />
       <Route path="/register" element={<PublicOnlyRoute><Register /></PublicOnlyRoute>} />
+      <Route path="/auth/confirm" element={<AuthConfirm />} />
       <Route path="/forgot-password" element={<PublicOnlyRoute><ForgotPassword /></PublicOnlyRoute>} />
       <Route path="/reset-password" element={<ResetPassword />} />
       
