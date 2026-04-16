@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import OnboardingModal from "@/components/onboarding/OnboardingModal";
-import MinimalOnboardingDialog from "@/components/onboarding/MinimalOnboardingDialog";
+
 import OnboardingWelcome from "./OnboardingWelcome";
 import NearbyEmergencySitters from "./NearbyEmergencySitters";
 import DashboardSkeleton from "@/components/skeletons/DashboardSkeleton";
@@ -328,14 +328,6 @@ const OwnerDashboard = () => {
         onClose={() => {
           setShowOnboardingModal(false);
           setSearchParams({});
-          if (!minimalCompleted) setShowMinimal(true);
-        }}
-      />
-      <MinimalOnboardingDialog
-        open={showMinimal}
-        onComplete={() => {
-          setShowMinimal(false);
-          setMinimalCompleted(true);
         }}
       />
 

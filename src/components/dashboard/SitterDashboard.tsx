@@ -7,7 +7,7 @@ import { useAccessLevel } from "@/hooks/useAccessLevel";
 import { useSitterDashboardData } from "@/hooks/useSitterDashboardData";
 
 import OnboardingModal from "@/components/onboarding/OnboardingModal";
-import MinimalOnboardingDialog from "@/components/onboarding/MinimalOnboardingDialog";
+
 import RoleActivationBanner from "./RoleActivationBanner";
 import AccessGateBanner from "@/components/access/AccessGateBanner";
 import EmergencyDashSection from "./EmergencyDashSection";
@@ -116,12 +116,7 @@ const SitterDashboard = () => {
         onClose={() => {
           setShowOnboardingModal(false);
           setSearchParams({});
-          if (!minimalCompleted) setShowMinimal(true);
         }}
-      />
-      <MinimalOnboardingDialog
-        open={showMinimal}
-        onComplete={() => { setShowMinimal(false); setPartial({ minimalCompleted: true }); }}
       />
 
       {/* Postal code missing banner */}
