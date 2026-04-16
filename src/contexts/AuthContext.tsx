@@ -16,6 +16,7 @@ interface Profile {
   identityVerified: boolean;
   isFounder: boolean;
   onboardingCompleted: boolean;
+  onboardingMinimalCompleted: boolean;
 }
 
 interface AuthContextType {
@@ -44,6 +45,7 @@ const mapProfile = (profile: any, authEmail?: string): Profile => ({
   identityVerified: profile.identity_verified || false,
   isFounder: profile.is_founder || false,
   onboardingCompleted: profile.onboarding_completed || false,
+  onboardingMinimalCompleted: profile.onboarding_minimal_completed ?? false,
 });
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -81,7 +83,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const fetchProfile = useCallback(async (supabaseUser: SupabaseUser) => {
     const { data } = await supabase
       .from("profiles")
-      .select("id, role, first_name, last_name, avatar_url, profile_completion, identity_verified, is_founder, onboarding_completed")
+      .select("id, role, first_name, last_name, avatar_url, profile_completion, identity_verified, is_founder, onboarding_completed, onboarding_minimal_completed")
       .eq("id", supabaseUser.id)
       .single();
 
