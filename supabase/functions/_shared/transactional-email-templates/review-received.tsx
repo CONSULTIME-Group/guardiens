@@ -12,14 +12,12 @@ interface Props {
   reviewerName?: string
   sitTitle?: string
   sitId?: string
-  overallRating?: number
 }
 
-const ReviewReceivedEmail = ({ firstName, reviewerName, sitTitle, sitId, overallRating }: Props) => {
+const ReviewReceivedEmail = ({ firstName, reviewerName, sitTitle, sitId }: Props) => {
   const greeting = firstName ? `Bonjour ${firstName},` : 'Bonjour,'
   const reviewer = reviewerName || 'votre partenaire de garde'
   const reviewUrl = sitId ? `${SITE_URL}/review/${sitId}` : `${SITE_URL}/sits`
-  const stars = overallRating ? '⭐'.repeat(Math.min(overallRating, 5)) : '⭐⭐⭐⭐⭐'
 
   return (
     <Html lang="fr" dir="ltr">
@@ -28,7 +26,7 @@ const ReviewReceivedEmail = ({ firstName, reviewerName, sitTitle, sitId, overall
       <Body style={main}>
         <Container style={container}>
           <Section style={starsSection}>
-            <Text style={starsText}>{stars}</Text>
+            <Text style={starsText}>📝</Text>
           </Section>
 
           <Heading style={h1}>Un avis vous attend</Heading>
@@ -91,7 +89,6 @@ export const template = {
     reviewerName: 'Thomas',
     sitTitle: 'Garde chat Paris 11e',
     sitId: 'abc-123',
-    overallRating: 4,
   },
 } satisfies TemplateEntry
 
