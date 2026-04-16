@@ -56,6 +56,8 @@ const ConversationHeader = ({
   const [blockSending, setBlockSending] = useState(false);
   const [missionData, setMissionData] = useState<any>(null);
   const [responseData, setResponseData] = useState<any>(null);
+  const [feedbackOpen, setFeedbackOpen] = useState(false);
+  const [hasFeedback, setHasFeedback] = useState(false);
 
   const isOwner = conv.owner_id === userId;
   const isPendingApp = conv.application_status === "pending" || conv.application_status === "discussing";
