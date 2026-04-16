@@ -36,12 +36,15 @@ const SKILL_CATEGORIES = [
 ];
 
 const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalProps) => {
-  const { user, refreshProfile } = useAuth();
+  const { user, activeRole, refreshProfile } = useAuth();
   const navigate = useNavigate();
   const [slide, setSlide] = useState(0);
-  const [activeTab, setActiveTab] = useState<ActiveTab>("gardien");
+  const [activeTab, setActiveTab] = useState<ActiveTab>(() =>
+    activeRole === "owner" ? "proprio" : "gardien"
+  );
   const [dontShowAgain, setDontShowAgain] = useState(false);
   const dontShowRef = useRef(false);
+  const isOwner = activeRole === "owner";
 
   // ── Slide 0: mandatory fields ──
   const [firstName, setFirstName] = useState("");
