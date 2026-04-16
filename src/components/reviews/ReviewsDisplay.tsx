@@ -84,7 +84,7 @@ const ReviewsDisplay = ({ userId, showAnimalCare = false }: ReviewsDisplayProps)
               {r.comment && <p className="text-sm text-muted-foreground whitespace-pre-line">{r.comment}</p>}
               <div className="flex items-center justify-between mt-2">
                 {r.would_recommend && (
-                  <div className="flex items-center gap-1 text-xs text-green-600 font-medium">
+                  <div className="flex items-center gap-1 text-xs text-primary font-medium">
                     <ThumbsUp className="h-3 w-3" /> Recommandé
                   </div>
                 )}
