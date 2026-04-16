@@ -1,72 +1,44 @@
 
 
-## Audit Expert — Parcours Échange de Services & Petites Missions
+## Diagnostic — État actuel
 
----
+Le flux est correctement câblé côté code :
 
-### [M] MÉTIER — Réalité terrain
+1. **Inscription** (`AuthContext.register`) → `signUp` avec `emailRedirectTo: /auth/confirm?next=/dashboard` et `data: { role }` en metadata
+2. **Email** → `auth-email-hook` rend le template `signup.tsx` avec `confirmationUrl` (le lien Supabase)
+3. **Clic lien** → arrive sur `/auth/confirm` → `AuthConfirm.tsx` écoute `onAuthStateChange` + tente `verifyOtp` si `token_hash` en query params
+4. **Trigger DB** (`apply_role_from_metadata`) → quand `email_confirmed_at` passe de NULL à non-NULL, applique le rôle + crée `sitter_profiles` / `owner_profiles`
 
-**Le parcours fonctionne, mais il y a 7 problèmes concrets :**
+Le trigger a été corrigé avec le cast `::public.user_role` dans la migration précédente. L'`auto_confirm_email` avait été activé comme palliatif.
 
-1. **Deux dialogues d'échange avec des logiques différentes** : `ProposeExchangeDialog` (depuis une mission) et `ProposeHelperExchangeDialog` (depuis un profil/helper). Le second crée une mission fantôme (titre = la description tronquée), ce qui pollue la liste des missions. Un utilisateur qui propose un échange à un helper se retrouve avec une mission publiée à son nom qu'il n'a pas demandée.
+## Plan d'exécution
 
-2. **Pas de bouton "Marquer comme terminée"** : L'auteur peut accepter une proposition → mission passe en `in_progress`. Mais pour passer à `completed`, il n'y a aucun bouton visible. Le feedback n'apparaît que quand `status === "completed"`. **Le cycle de vie est cassé.**
+### Étape 1 — Désactiver auto-confirm email
+Utiliser `cloud--configure_auth` pour remettre `auto_confirm_email: false`. Cela rétablit le flux normal : inscription → email de confirmation → clic → activation.
 
-3. **Le CTA "Proposer mon aide" dans le dashboard redirige vers `/petites-missions/creer?type=offre`** mais CreateSmallMission ne gère pas le paramètre `type`. L'utilisateur tombe sur le formulaire standard sans comprendre la différence.
+### Étape 2 — Vérifier le trigger en base
+Exécuter une requête `read_query` pour confirmer que le trigger `apply_role_from_metadata` est bien attaché à `auth.users` et que le corps de la fonction contient le cast `::public.user_role`.
 
-4. **Sur le profil public**, le `PublicSkills` est affiché deux fois : une fois dans le header (ligne 226-228) et une fois dans l'onglet Entraide (ligne 472-473). Doublon visible.
+### Étape 3 — Vérifier la cohérence du code front
+- `Register.tsx` affiche bien l'écran "Vérifiez votre boîte mail" (`step === "confirmation"`) quand `data.session` est null
+- `AuthConfirm.tsx` gère correctement les 3 cas : `SIGNED_IN`, `PASSWORD_RECOVERY`, timeout 15s
+- `emailRedirectTo` pointe bien vers `/auth/confirm?next=/dashboard`
 
-5. **`handleContact` dans PublicProfile** crée une conversation privée (sans `small_mission_id`) mais ne force pas `sit_id = null` ni `small_mission_id = null`. Risque de collision si une conv existe déjà avec un `sit_id`.
+→ Tout est déjà correct dans le code actuel, aucune modification front nécessaire.
 
-6. **La recherche par compétence** dans SmallMissions ne filtre que les helpers, pas les missions. Incohérent.
+### Étape 4 — Test end-to-end via le navigateur
+1. Naviguer vers `/register`
+2. Créer un compte test (rôle gardien)
+3. Vérifier que l'écran de confirmation s'affiche (pas de redirection directe au dashboard)
+4. Vérifier dans les logs edge function que l'email de confirmation part bien
+5. Vérifier dans la base que le profil n'a PAS encore de `sitter_profiles` (car non confirmé)
 
-7. **Catégorie `house` vs `coups_de_main`** : confusion. `CreateSmallMission` propose `house`, `SmallMissions` filtre `coups_de_main`, et le mapping `SKILL_TO_MISSION` dans MissionsNearbySection mappe `coups_de_main → house`. Les missions catégorie `house` sont filtrées en dur (`if (m.category === "house") return false` ligne 435). **Certaines missions créées sont invisibles.**
+### Résumé des actions
+| Action | Outil | Risque |
+|--------|-------|--------|
+| Désactiver auto-confirm | `configure_auth` | Aucun — rétablit le flux normal |
+| Vérifier trigger DB | `read_query` | Lecture seule |
+| Test navigateur | Browser tools | Aucun |
 
----
-
-### [P] PRODUIT — Faisabilité et correctifs
-
-**Correctifs prioritaires (par impact) :**
-
-| # | Problème | Correctif | Complexité |
-|---|----------|-----------|------------|
-| 1 | Cycle de vie cassé (pas de "Terminer") | Ajouter bouton "Mission terminée" dans SmallMissionDetail quand `status === "in_progress"` et `isAuthor` | Simple |
-| 2 | Doublon PublicSkills | Retirer l'affichage dans le header (ligne 226-228 de PublicProfile) — garder uniquement dans l'onglet Entraide | Simple |
-| 3 | Catégorie house invisible | Renommer `house` → afficher dans la liste OU retirer le filtre ligne 435 | Simple |
-| 4 | Mission fantôme créée par ProposeHelperExchangeDialog | Refactorer pour ne plus créer de `small_mission` — juste créer une conversation + message structuré + notification | Moyen |
-| 5 | CTA "Proposer mon aide" → formulaire sans contexte | Soit ouvrir le dialogue local (comme dans SmallMissions), soit gérer `?type=offre` dans CreateSmallMission | Simple |
-| 6 | handleContact sans null explicite | Forcer `sit_id: null, small_mission_id: null` dans l'insert | Trivial |
-| 7 | Recherche compétence ne filtre pas les missions | Appliquer le même filtre textuel aux titres/descriptions de missions | Simple |
-
----
-
-### [C] COMMERCIAL — Impact conversion
-
-**Le problème #1 (pas de bouton "Terminer") bloque directement la boucle de feedback.** Sans feedback, pas de badges, pas de preuve sociale, pas de rétention. C'est le frein le plus critique à l'engagement.
-
-**Le problème #4 (mission fantôme)** dégrade la qualité perçue de la liste de missions. Un visiteur voit des missions avec des titres tronqués et sans contexte.
-
----
-
-### Fichiers modifiés
-
-- `src/pages/SmallMissionDetail.tsx` — bouton "Terminer la mission"
-- `src/pages/PublicProfile.tsx` — retirer doublon PublicSkills du header
-- `src/pages/SmallMissions.tsx` — retirer filtre `house`, harmoniser catégories
-- `src/components/missions/ProposeHelperExchangeDialog.tsx` — refactorer (plus de mission fantôme)
-- `src/pages/CreateSmallMission.tsx` — gérer `?type=offre`
-- `src/components/dashboard/MissionsNearbySection.tsx` — corriger le CTA
-- `src/pages/PublicProfile.tsx` — forcer null dans handleContact
-
----
-
-### JURY
-
-| | |
-|---|---|
-| ⚠ **LE POINT QUI NE TIENT PAS** | Le cycle de vie `open → in_progress → ???` est cassé. Aucun utilisateur ne peut terminer une mission. Les feedbacks sont inaccessibles. Tout le système de réputation d'entraide est mort-né. |
-| 🔍 **L'ANGLE MORT** | La catégorie `house` créée par le formulaire est filtrée par la liste. Des missions existent en base mais sont **invisibles**. Si un utilisateur a posté une mission "house", elle a disparu sans explication. |
-| 💡 **L'ALTERNATIVE RADICALE** | Supprimer `ProposeHelperExchangeDialog` entièrement. Un helper = un profil avec compétences. L'échange commence par un message libre, pas par un formulaire qui crée une mission fantôme. Simplifier au lieu d'ajouter de la mécanique. |
-| ✅ **L'AJUSTEMENT ACTIONNABLE** | Ajouter le bouton "Terminer la mission" maintenant — c'est 15 lignes de code et ça débloque toute la chaîne de valeur. |
-| → Si j'étais Jérémie, je changerais : | J'ajouterais le bouton "Terminer" et je supprimerais la création de mission fantôme dans ProposeHelperExchangeDialog — dans cet ordre, aujourd'hui. |
+Aucune modification de fichier nécessaire. Le code front et le trigger sont déjà prêts pour le flux avec confirmation email.
 
