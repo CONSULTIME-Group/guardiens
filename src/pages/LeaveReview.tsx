@@ -191,6 +191,49 @@ const LeaveReview = () => {
       return;
     }
 
+    // Send email to the other party inviting them to leave their review
+    try {
+      const { data: revieweeProfile } = await supabase
+        .from("profiles")
+        .select("first_name")
+        .eq("id", reviewee.id)
+        .maybeSingle();
+
+      const { data: reviewerProfile } = await supabase
+        .from("profiles")
+        .select("first_name")
+        .eq("id", user.id)
+        .maybeSingle();
+
+      // Get reviewee's email via auth — we need to find it from the conversation or profile
+      // The reviewee email is fetched from auth.users via edge function
+      const revieweeEmail = await (async () => {
+        // We can get email from the profiles table if available, otherwise skip
+        const { data: authData } = await supabase.rpc("get_user_email_for_notification" as any, { target_user_id: reviewee.id });
+        return authData as string | null;
+      })().catch(() => null);
+
+      if (revieweeEmail) {
+        await supabase.functions.invoke("send-transactional-email", {
+          body: {
+            templateName: "review-received",
+            recipientEmail: revieweeEmail,
+            idempotencyKey: `review-received-${sitId}-${reviewee.id}`,
+            templateData: {
+              firstName: revieweeProfile?.first_name || "",
+              reviewerName: reviewerProfile?.first_name || "",
+              sitTitle: sit.title || "",
+              sitId,
+              overallRating,
+            },
+          },
+        });
+      }
+    } catch (e) {
+      // Non-blocking: don't prevent the review from being submitted
+      console.warn("Email notification failed:", e);
+    }
+
     const { data: conv } = await supabase
       .from("conversations")
       .select("id")
@@ -202,7 +245,7 @@ const LeaveReview = () => {
       await supabase.from("messages").insert({
         conversation_id: conv.id,
         sender_id: user.id,
-        content: `⭐ ${user.firstName} a laissé un avis. ${wouldRecommend ? "Recommandation positive !" : ""}`,
+        content: `⭐ ${reviewerProfile?.first_name || "Un membre"} a laissé un avis. ${wouldRecommend ? "Recommandation positive !" : ""}`,
         is_system: true,
       } as any);
     }
