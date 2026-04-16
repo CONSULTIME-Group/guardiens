@@ -6,6 +6,7 @@ import { ArrowLeft, Archive, ExternalLink, CheckCircle2, Star, Home, Handshake, 
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import HelpButton from "./HelpButton";
+import MissionFeedbackModal from "@/components/missions/MissionFeedbackModal";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { format, isPast } from "date-fns";
