@@ -351,14 +351,20 @@ const ConversationHeader = ({
         <div className="px-4 py-2 bg-primary/5 border-t border-primary/20 flex items-center gap-2">
           <CheckCircle className="text-primary w-4 h-4 shrink-0" />
           <span className="text-sm text-primary font-medium">Échange terminé</span>
-          <Button
-            size="sm"
-            variant="ghost"
-            className="ml-auto text-primary hover:bg-primary/10"
-            onClick={handleLeaveReview}
-          >
-            Laisser un avis →
-          </Button>
+          {hasFeedback ? (
+            <span className="ml-auto text-xs text-muted-foreground flex items-center gap-1">
+              <CheckCircle2 className="h-3.5 w-3.5 text-primary" /> Avis envoyé
+            </span>
+          ) : (
+            <Button
+              size="sm"
+              variant="ghost"
+              className="ml-auto text-primary hover:bg-primary/10"
+              onClick={() => setFeedbackOpen(true)}
+            >
+              Laisser un avis →
+            </Button>
+          )}
         </div>
       )}
       {isSmallMission && !responseData && (
