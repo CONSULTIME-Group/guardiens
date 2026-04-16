@@ -11,6 +11,12 @@ import { Helmet } from "react-helmet-async";
 
 type ReviewDirection = "owner_to_sitter" | "sitter_to_owner";
 
+type PublicProfilePreview = {
+  id: string;
+  first_name: string | null;
+  avatar_url: string | null;
+};
+
 const ownerCriteria = [
   { key: "animal_care_rating", label: "Soin des animaux" },
   { key: "communication_rating", label: "Communication pendant la garde" },
@@ -108,9 +114,9 @@ const LeaveReview = () => {
         revieweeId = sitData.user_id;
       }
 
-      const [{ data: profile, error: profileError }, { data: existingReview }] = await Promise.all([
+      const [{ data: rawProfile, error: profileError }, { data: existingReview }] = await Promise.all([
         supabase
-          .from("profiles")
+          .from("public_profiles" as any)
           .select("id, first_name, avatar_url")
           .eq("id", revieweeId)
           .maybeSingle(),
@@ -121,6 +127,8 @@ const LeaveReview = () => {
           .eq("reviewer_id", user.id)
           .maybeSingle(),
       ]);
+
+      const profile = rawProfile as unknown as PublicProfilePreview | null;
 
       if (profileError || !profile) {
         setLoadError("Impossible de charger la personne à évaluer.");
@@ -193,11 +201,13 @@ const LeaveReview = () => {
 
     // Send email to the other party inviting them to leave their review
     try {
-      const { data: revieweeProfile } = await supabase
-        .from("profiles")
+      const { data: rawRevieweeProfile } = await supabase
+        .from("public_profiles" as any)
         .select("first_name")
         .eq("id", reviewee.id)
         .maybeSingle();
+
+      const revieweeProfile = rawRevieweeProfile as unknown as Pick<PublicProfilePreview, "first_name"> | null;
 
       const { data: reviewerProfile } = await supabase
         .from("profiles")
