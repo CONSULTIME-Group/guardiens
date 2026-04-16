@@ -86,6 +86,7 @@ const SitDetail = () => {
   const [accordOpen, setAccordOpen] = useState(false);
   const [accordData, setAccordData] = useState<any>(null);
   const [reopenCount, setReopenCount] = useState(3);
+  const [hasReviewedThisSit, setHasReviewedThisSit] = useState(false);
 
   useEffect(() => {
     if (!id) return;
