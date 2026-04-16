@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import OnboardingModal from "@/components/onboarding/OnboardingModal";
-import MinimalOnboardingDialog from "@/components/onboarding/MinimalOnboardingDialog";
+
 import OnboardingWelcome from "./OnboardingWelcome";
 import NearbyEmergencySitters from "./NearbyEmergencySitters";
 import DashboardSkeleton from "@/components/skeletons/DashboardSkeleton";
@@ -69,8 +69,6 @@ const OwnerDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [showOnboardingModal, setShowOnboardingModal] = useState(false);
-  const [showMinimal, setShowMinimal] = useState(false);
-  const [minimalCompleted, setMinimalCompleted] = useState(true);
   const [onboardingChecks, setOnboardingChecks] = useState<OnboardingChecks>({
     hasName: false, hasAvatar: false, hasBio: false,
     hasIdentity: false, hasProperty: false, hasPets: false, hasSit: false,
@@ -125,15 +123,11 @@ const OwnerDashboard = () => {
         const verStatus = p?.identity_verification_status || "not_submitted";
         setVerificationStatus(verStatus);
 
-        // Onboarding — merged from the second useEffect to avoid duplicate profile fetch
-        const mc = (p as Record<string, unknown>)?.onboarding_minimal_completed as boolean ?? false;
-        setMinimalCompleted(mc);
+        // Onboarding
         if (searchParams.get("tour") === "true") {
           setShowOnboardingModal(true);
         } else if (p && !p.onboarding_completed && !p.onboarding_dismissed_at) {
           setShowOnboardingModal(true);
-        } else if (!mc) {
-          setShowMinimal(true);
         }
 
         const hasName = !!(p?.first_name);
@@ -152,6 +146,7 @@ const OwnerDashboard = () => {
         setOnboardingChecks({ hasName, hasAvatar, hasBio, hasIdentity, hasProperty, hasPets: false, hasSit });
 
         const dismissed = localStorage.getItem("onboarding_owner_dismissed");
+        const mc = (p as Record<string, unknown>)?.onboarding_minimal_completed as boolean ?? false;
         if (!dismissed && user.profileCompletion < 60 && mc) {
           setShowOnboarding(true);
         }
@@ -308,7 +303,7 @@ const OwnerDashboard = () => {
 
   if (loading) return <DashboardSkeleton />;
 
-  if (showOnboarding && minimalCompleted) {
+  if (showOnboarding && user?.onboardingMinimalCompleted) {
     return (
       <OnboardingWelcome
         role="owner"
@@ -328,14 +323,6 @@ const OwnerDashboard = () => {
         onClose={() => {
           setShowOnboardingModal(false);
           setSearchParams({});
-          if (!minimalCompleted) setShowMinimal(true);
-        }}
-      />
-      <MinimalOnboardingDialog
-        open={showMinimal}
-        onComplete={() => {
-          setShowMinimal(false);
-          setMinimalCompleted(true);
         }}
       />
 
