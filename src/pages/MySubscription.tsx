@@ -121,7 +121,7 @@ function ReferralSection({ referralCode, userId }: { referralCode: string | null
 
 // ──── PRE-LAUNCH ADVANTAGES ────
 const PRE_LAUNCH_ADVANTAGES: { label: string; href: string | null }[] = [
-  { label: "Postuler aux gardes", href: "/recherche" },
+  { label: "Postuler aux gardes", href: "/search" },
   { label: "Messagerie avec les propriétaires", href: null },
   { label: "Apparaître dans la recherche", href: null },
   { label: "Mode «Je suis disponible»", href: "/dashboard" },
@@ -506,7 +506,7 @@ const MySubscription = () => {
               {/* Main CTA */}
               <div className="px-6 sm:px-8 py-6 flex flex-col items-center gap-2">
                 <a
-                  href="/recherche"
+                  href="/search"
                   className="w-full inline-flex items-center justify-center gap-2 bg-primary text-primary-foreground font-body font-medium text-sm px-6 py-3.5 rounded-xl hover:bg-primary/90 transition-colors min-h-[44px]"
                   onClick={() => trackEvent("cta_prelaunched_explore", { source: "pre_launch_main_cta" })}
                 >
