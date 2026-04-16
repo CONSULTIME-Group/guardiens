@@ -95,13 +95,6 @@ const SitterDashboard = () => {
 
   return (
     <div className="space-y-0 overflow-hidden">
-      <OnboardingModal
-        open={showOnboardingModal}
-        onClose={() => {
-          setShowOnboardingModal(false);
-          setSearchParams({});
-        }}
-      />
 
       {/* Postal code missing banner */}
       {!postalCode && !cpBannerDismissed && (

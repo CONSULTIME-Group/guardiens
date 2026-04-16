@@ -68,7 +68,6 @@ const OwnerDashboard = () => {
   /* ── UI state ── */
   const [loading, setLoading] = useState(true);
   const [showOnboarding, setShowOnboarding] = useState(false);
-  const [showOnboardingModal, setShowOnboardingModal] = useState(false);
   const [onboardingChecks, setOnboardingChecks] = useState<OnboardingChecks>({
     hasName: false, hasAvatar: false, hasBio: false,
     hasIdentity: false, hasProperty: false, hasPets: false, hasSit: false,
