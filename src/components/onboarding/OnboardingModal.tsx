@@ -189,20 +189,23 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
 
   const saveCompetencesAndLifestyle = async () => {
     if (!user) return;
-    // Upsert sitter_profiles
-    const updates: Record<string, any> = {};
-    if (lifestyle.length > 0) updates.lifestyle = lifestyle;
-    if (skillCategories.length > 0) updates.competences = skillCategories;
-    if (Object.keys(updates).length > 0) {
-      await supabase
-        .from("sitter_profiles")
-        .upsert({ user_id: user.id, ...updates }, { onConflict: "user_id" });
-    }
-    // Also save for owner_profiles if relevant
-    if (skillCategories.length > 0) {
-      await supabase
-        .from("owner_profiles")
-        .upsert({ user_id: user.id, competences: skillCategories } as any, { onConflict: "user_id" });
+    if (isOwner) {
+      // Owner: save competences to owner_profiles only
+      if (skillCategories.length > 0) {
+        await supabase
+          .from("owner_profiles")
+          .upsert({ user_id: user.id, competences: skillCategories } as any, { onConflict: "user_id" });
+      }
+    } else {
+      // Sitter: save competences + lifestyle to sitter_profiles
+      const updates: Record<string, any> = {};
+      if (lifestyle.length > 0) updates.lifestyle = lifestyle;
+      if (skillCategories.length > 0) updates.competences = skillCategories;
+      if (Object.keys(updates).length > 0) {
+        await supabase
+          .from("sitter_profiles")
+          .upsert({ user_id: user.id, ...updates }, { onConflict: "user_id" });
+      }
     }
   };
 
