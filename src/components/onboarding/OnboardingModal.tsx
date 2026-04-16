@@ -126,8 +126,9 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
       setSlide(0);
       setDontShowAgain(false);
       dontShowRef.current = false;
+      setActiveTab(activeRole === "owner" ? "proprio" : "gardien");
     }
-  }, [open]);
+  }, [open, activeRole]);
 
   // Keyboard navigation
   useEffect(() => {
