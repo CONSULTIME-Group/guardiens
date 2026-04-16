@@ -3681,6 +3681,10 @@ export type Database = {
         Returns: string[]
       }
       get_own_email: { Args: never; Returns: string }
+      get_user_email_for_notification: {
+        Args: { target_user_id: string }
+        Returns: string
+      }
       get_user_emails_admin: {
         Args: { p_user_ids: string[] }
         Returns: {

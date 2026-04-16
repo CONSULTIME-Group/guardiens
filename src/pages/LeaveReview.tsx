@@ -392,6 +392,18 @@ const LeaveReview = () => {
         </p>
       </div>
 
+      {/* Legal RGPD notice */}
+      <div className="rounded-lg bg-muted/40 border border-border p-3 mb-8">
+        <p className="text-[10px] text-muted-foreground leading-relaxed">
+          <strong>Informations légales :</strong> En soumettant cet avis, vous acceptez qu'il soit publié sur la plateforme
+          après modération, conformément aux articles L. 111-7-2 du Code de la consommation et au décret n° 2017-1436
+          relatif aux obligations d'information sur les avis en ligne. Les avis sont publiés simultanément pour les deux
+          parties (système « double aveugle »). Vos données sont traitées sur la base de l'intérêt légitime (art. 6.1.f RGPD).
+          L'autre partie sera notifiée par e-mail de votre dépôt d'avis, sans en voir le contenu avant publication.
+          Vous disposez d'un droit d'accès, de rectification et de suppression (contact@guardiens.fr).
+        </p>
+      </div>
+
       <div className="fixed bottom-0 left-0 right-0 md:left-64 bg-card border-t border-border p-4 z-40 md:pb-4 pb-20">
         <div className="max-w-2xl mx-auto">
           <Button className="w-full h-12 text-base font-semibold" onClick={handleSubmit} disabled={!canSubmit || submitting}>
