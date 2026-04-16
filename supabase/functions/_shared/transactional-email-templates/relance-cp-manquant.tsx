@@ -48,9 +48,13 @@ const RelanceCpManquantEmail = ({ prenom, cta_url }: RelanceCpProps) => {
 
           <Hr style={hr} />
 
-          <Text style={footer}>
-            À très vite,{'\n'}Jérémie & Elisa — {SITE_NAME}
+          <Text style={legal}>
+            Cet e-mail vous est envoyé par {SITE_NAME} (Jérémie Martinot, SIRET 894 864 040 00015)
+            dans le cadre de l'intérêt légitime lié au bon fonctionnement de votre compte (art. 6.1.f RGPD).
+            Pour exercer vos droits : contact@guardiens.fr.
           </Text>
+
+          <Text style={footer}>L'équipe {SITE_NAME} 🐾</Text>
         </Container>
       </Body>
     </Html>
@@ -81,4 +85,5 @@ const button = {
   textDecoration: 'none',
   display: 'inline-block',
 }
-const footer = { fontSize: '12px', color: 'hsl(37, 7%, 60%)', margin: '30px 0 0', whiteSpace: 'pre-line' as const }
+const legal = { fontSize: '10px', color: 'hsl(37, 7%, 60%)', lineHeight: '1.5', margin: '0 0 12px' }
+const footer = { fontSize: '12px', color: 'hsl(37, 7%, 60%)', margin: '10px 0 0' }
