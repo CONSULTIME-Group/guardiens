@@ -14,9 +14,10 @@ type ActiveTab = "gardien" | "proprio";
 interface OnboardingModalProps {
   open: boolean;
   onClose: () => void;
+  onMinimalComplete?: () => void;
 }
 
-const TOTAL_SLIDES = 7; // 0..6
+const TOTAL_SLIDES = 8; // 0=welcome+fields, 1-7=presentation
 
 const OnboardingModal = ({ open, onClose }: OnboardingModalProps) => {
   const { user } = useAuth();
