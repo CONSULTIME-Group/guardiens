@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { Helmet } from "react-helmet-async";
 import { Link, useNavigate } from "react-router-dom";
 import { Loader2, MailCheck } from "lucide-react";
@@ -8,68 +8,78 @@ import { useToast } from "@/hooks/use-toast";
 const AuthConfirm = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const handled = useRef(false);
 
   useEffect(() => {
-    let mounted = true;
+    if (handled.current) return;
+    handled.current = true;
 
-    const finalizeAuth = async () => {
-      const url = new URL(window.location.href);
-      const tokenHash = url.searchParams.get("token_hash");
-      const type = url.searchParams.get("type");
-      const next = url.searchParams.get("next") || "/dashboard";
+    const url = new URL(window.location.href);
+    const next = url.searchParams.get("next") || "/dashboard";
 
-      try {
-        if (tokenHash && (type === "signup" || type === "email" || type === "recovery")) {
-          const { error } = await supabase.auth.verifyOtp({
-            token_hash: tokenHash,
-            type,
-          });
+    // Listen for the auth state change triggered by Supabase processing
+    // the tokens in the URL (hash fragment or query params).
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        if (
+          event === "SIGNED_IN" ||
+          event === "PASSWORD_RECOVERY" ||
+          event === "TOKEN_REFRESHED"
+        ) {
+          subscription.unsubscribe();
 
-          if (error) throw error;
-
-          if (!mounted) return;
-          toast({
-            title: type === "recovery" ? "Lien validé" : "Email confirmé",
-            description:
-              type === "recovery"
-                ? "Vous pouvez maintenant choisir un nouveau mot de passe."
-                : "Votre compte est activé. Vous pouvez vous connecter.",
-          });
-
-          navigate(type === "recovery" ? "/reset-password" : next, { replace: true });
-          return;
+          if (event === "PASSWORD_RECOVERY") {
+            toast({
+              title: "Lien validé",
+              description: "Vous pouvez maintenant choisir un nouveau mot de passe.",
+            });
+            navigate("/reset-password", { replace: true });
+          } else {
+            toast({
+              title: "Email confirmé",
+              description: "Votre compte est activé !",
+            });
+            navigate(next, { replace: true });
+          }
         }
-
-        const { data, error } = await supabase.auth.getSession();
-        if (error) throw error;
-
-        if (!mounted) return;
-        if (data.session) {
-          navigate(next, { replace: true });
-          return;
-        }
-
-        toast({
-          variant: "destructive",
-          title: "Lien invalide ou expiré",
-          description: "Demandez un nouvel email de confirmation puis réessayez.",
-        });
-        navigate("/login", { replace: true });
-      } catch (error) {
-        if (!mounted) return;
-        toast({
-          variant: "destructive",
-          title: "Impossible de valider le lien",
-          description: "Le lien de confirmation semble invalide ou expiré.",
-        });
-        navigate("/login", { replace: true });
       }
-    };
+    );
 
-    finalizeAuth();
+    // Also try explicit OTP verification for token_hash in query params
+    const tokenHash = url.searchParams.get("token_hash");
+    const type = url.searchParams.get("type");
+
+    if (tokenHash && (type === "signup" || type === "email" || type === "recovery")) {
+      supabase.auth.verifyOtp({ token_hash: tokenHash, type }).then(({ error }) => {
+        if (error) {
+          console.error("OTP verification failed:", error.message);
+          // Don't navigate away — the onAuthStateChange listener
+          // might still fire from a hash-based redirect.
+        }
+        // Success is handled by the onAuthStateChange listener above.
+      });
+    }
+
+    // Timeout: if nothing happens after 15s, check session one more time
+    const timeout = setTimeout(async () => {
+      const { data } = await supabase.auth.getSession();
+      if (data.session) {
+        subscription.unsubscribe();
+        navigate(next, { replace: true });
+        return;
+      }
+      subscription.unsubscribe();
+      toast({
+        variant: "destructive",
+        title: "Lien invalide ou expiré",
+        description: "Demandez un nouvel email de confirmation puis réessayez.",
+      });
+      navigate("/login", { replace: true });
+    }, 15000);
 
     return () => {
-      mounted = false;
+      clearTimeout(timeout);
+      subscription.unsubscribe();
     };
   }, [navigate, toast]);
 
