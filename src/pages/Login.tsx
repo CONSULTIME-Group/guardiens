@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { ToastAction } from "@/components/ui/toast";
+import { getSignupRedirectUrl } from "@/lib/authRedirect";
 import { Eye, EyeOff } from "lucide-react";
 const authIllustration = "https://erhccyqevdyevpyctsjj.supabase.co/storage/v1/object/public/property-photos/misc/auth-illustration.webp";
 
@@ -38,7 +39,7 @@ const Login = () => {
           const { error: resendError } = await supabase.auth.resend({
             type: "signup",
             email,
-            options: { emailRedirectTo: `${window.location.origin}/auth/confirm?next=/dashboard` },
+            options: { emailRedirectTo: getSignupRedirectUrl() },
           });
           toast({
             title: resendError ? "Erreur" : "Email envoyé !",

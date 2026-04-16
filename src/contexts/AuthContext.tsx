@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useCallback, useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { User as SupabaseUser } from "@supabase/supabase-js";
+import { getSignupRedirectUrl } from "@/lib/authRedirect";
 
 type Role = "owner" | "sitter" | "both";
 type ActiveRole = "owner" | "sitter";
@@ -156,7 +157,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       email,
       password,
       options: {
-        emailRedirectTo: `${window.location.origin}/auth/confirm?next=/dashboard`,
+        emailRedirectTo: getSignupRedirectUrl(),
         data: { role },
       },
     });

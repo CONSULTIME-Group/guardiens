@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
+import { getSignupRedirectUrl } from "@/lib/authRedirect";
 import { useToast } from "@/hooks/use-toast";
 import { Eye, EyeOff, MailCheck, Info } from "lucide-react";
 import {
@@ -159,7 +160,7 @@ const Register = () => {
       type: "signup",
       email,
       options: {
-        emailRedirectTo: `${window.location.origin}/auth/confirm?next=/dashboard`,
+        emailRedirectTo: getSignupRedirectUrl(),
       },
     });
     toast({
