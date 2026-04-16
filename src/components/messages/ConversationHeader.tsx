@@ -146,9 +146,16 @@ const ConversationHeader = ({
     setResponseData((prev: any) => ({ ...prev, status: "completed" }));
   };
 
-  const handleLeaveReview = () => {
-    navigate(`/avis-mission?missionId=${missionData?.id}&conversationId=${conv.id}`);
-  };
+  // Check if user already left feedback for this mission
+  useEffect(() => {
+    if (!missionData?.id || !userId) return;
+    supabase.from("mission_feedbacks")
+      .select("id")
+      .eq("mission_id", missionData.id)
+      .eq("giver_id", userId)
+      .maybeSingle()
+      .then(({ data }) => setHasFeedback(!!data));
+  }, [missionData?.id, userId]);
 
   // Determine "Voir l'annonce" link
   const annonceLinkHref = conv.sit_id
