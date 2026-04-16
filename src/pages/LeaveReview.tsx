@@ -128,7 +128,7 @@ const LeaveReview = () => {
           .maybeSingle(),
       ]);
 
-      const profile = rawProfile as PublicProfilePreview | null;
+      const profile = rawProfile as unknown as PublicProfilePreview | null;
 
       if (profileError || !profile) {
         setLoadError("Impossible de charger la personne à évaluer.");
@@ -207,7 +207,7 @@ const LeaveReview = () => {
         .eq("id", reviewee.id)
         .maybeSingle();
 
-      const revieweeProfile = rawRevieweeProfile as Pick<PublicProfilePreview, "first_name"> | null;
+      const revieweeProfile = rawRevieweeProfile as unknown as Pick<PublicProfilePreview, "first_name"> | null;
 
       const { data: reviewerProfile } = await supabase
         .from("profiles")
