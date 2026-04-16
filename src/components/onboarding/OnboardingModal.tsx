@@ -145,17 +145,20 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
     }
   }, [open, activeRole]);
 
+  // Stable ref for handleNext to avoid stale closures in keyboard handler
+  const handleNextRef = useRef(handleNext);
+  useEffect(() => { handleNextRef.current = handleNext; });
+
   // Keyboard navigation
   useEffect(() => {
     if (!open) return;
     const handler = (e: KeyboardEvent) => {
-      if (e.key === "ArrowRight") handleNext();
-      if (e.key === "ArrowLeft" && slide > 0) setSlide((s) => Math.max(s - 1, 0));
+      if (e.key === "ArrowRight") handleNextRef.current();
+      if (e.key === "ArrowLeft") setSlide((s) => Math.max(s - 1, 0));
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open, slide, fieldsValid, minimalSaved]);
+  }, [open]);
 
   // ── Save functions ──
 
@@ -270,8 +273,7 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
       refreshProfile();
     }
     onClose();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user, onClose, canDismiss, refreshProfile, slide, bio, lifestyle, skillCategories]);
+  }, [user, onClose, canDismiss, refreshProfile, slide, bio, lifestyle, skillCategories, avatarUrl]);
 
   const completeOnboarding = async (destination: string) => {
     if (user) {
