@@ -36,12 +36,15 @@ const SKILL_CATEGORIES = [
 ];
 
 const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalProps) => {
-  const { user, refreshProfile } = useAuth();
+  const { user, activeRole, refreshProfile } = useAuth();
   const navigate = useNavigate();
   const [slide, setSlide] = useState(0);
-  const [activeTab, setActiveTab] = useState<ActiveTab>("gardien");
+  const [activeTab, setActiveTab] = useState<ActiveTab>(() =>
+    activeRole === "owner" ? "proprio" : "gardien"
+  );
   const [dontShowAgain, setDontShowAgain] = useState(false);
   const dontShowRef = useRef(false);
+  const isOwner = activeRole === "owner";
 
   // ── Slide 0: mandatory fields ──
   const [firstName, setFirstName] = useState("");
@@ -73,11 +76,18 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
     let score = 0;
     if (firstName.trim() && postalCode) score += 10;
     if (avatarUrl) score += 20;
-    if (bio.length >= 50) score += 15;
-    if (skillCategories.length > 0) score += 10;
-    if (lifestyle.length > 0) score += 10;
+    if (isOwner) {
+      // Owner scoring: bio=10, compétences=10 (max collectible here = 50)
+      if (bio.length >= 50) score += 10;
+      if (skillCategories.length > 0) score += 10;
+    } else {
+      // Sitter scoring: bio=15, compétences=10, lifestyle=10 (max collectible here = 65)
+      if (bio.length >= 50) score += 15;
+      if (skillCategories.length > 0) score += 10;
+      if (lifestyle.length > 0) score += 10;
+    }
     setLiveCompletion(score);
-  }, [firstName, postalCode, avatarUrl, bio, skillCategories, lifestyle]);
+  }, [firstName, postalCode, avatarUrl, bio, skillCategories, lifestyle, isOwner]);
 
   // Load profile data on mount
   useEffect(() => {
@@ -116,8 +126,9 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
       setSlide(0);
       setDontShowAgain(false);
       dontShowRef.current = false;
+      setActiveTab(activeRole === "owner" ? "proprio" : "gardien");
     }
-  }, [open]);
+  }, [open, activeRole]);
 
   // Keyboard navigation
   useEffect(() => {
@@ -257,7 +268,7 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
 
   if (!open) return null;
 
-  const viewingRole: ActiveTab = activeTab;
+  
 
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center backdrop-blur-sm bg-background/80">
@@ -368,7 +379,9 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
             <div className="space-y-5">
               <div>
                 <h2 className="font-heading text-2xl font-bold text-foreground">
-                  Les propriétaires regardent votre photo et votre bio en premier.
+                  {isOwner
+                    ? "Les gardiens regardent votre photo et votre bio en premier."
+                    : "Les propriétaires regardent votre photo et votre bio en premier."}
                 </h2>
                 <p className="text-base text-foreground/80 leading-relaxed mt-2">
                   Montrez qui vous êtes. Une photo nette et quelques mots sincères suffisent.
@@ -444,7 +457,9 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
                   Vos compétences apparaissent sur votre profil.
                 </h2>
                 <p className="text-base text-foreground/80 leading-relaxed mt-2">
-                  Les propriétaires les voient avant même de vous écrire. Sélectionnez ce qui vous correspond.
+                  {isOwner
+                    ? "Les gardiens les voient avant même de vous écrire. Sélectionnez ce qui vous correspond."
+                    : "Les propriétaires les voient avant même de vous écrire. Sélectionnez ce qui vous correspond."}
                 </p>
               </div>
 
@@ -513,8 +528,8 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
           {slide === 3 && <EntraideSlide />}
 
           {/* ── Slide 4: Parcours de garde (read-only) ── */}
-          {slide === 4 && viewingRole === "gardien" && <SitterParcoursSlide />}
-          {slide === 4 && viewingRole === "proprio" && <OwnerParcoursSlide />}
+          {slide === 4 && activeTab === "gardien" && <SitterParcoursSlide />}
+          {slide === 4 && activeTab === "proprio" && <OwnerParcoursSlide />}
 
           {/* ── Slide 5: CTA final ── */}
           {slide === 5 && (
@@ -524,7 +539,9 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
               </h2>
               <p className="text-base text-foreground/80 leading-relaxed">
                 {liveCompletion >= 60
-                  ? "Bravo ! Votre profil est déjà bien rempli. Les propriétaires peuvent vous découvrir."
+                  ? isOwner
+                    ? "Bravo ! Votre profil est déjà bien rempli. Les gardiens peuvent vous découvrir."
+                    : "Bravo ! Votre profil est déjà bien rempli. Les propriétaires peuvent vous découvrir."
                   : "Vous pouvez encore améliorer votre profil depuis vos paramètres. En attendant, explorez !"}
               </p>
 
@@ -551,21 +568,23 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
                     {skillCategories.length > 0 ? <CheckCircle className="w-3.5 h-3.5 text-primary" /> : <Circle className="w-3.5 h-3.5 text-muted-foreground" />}
                     <span className={skillCategories.length > 0 ? "text-foreground" : "text-muted-foreground"}>Compétences</span>
                   </div>
-                  <div className="flex items-center gap-1.5">
-                    {lifestyle.length > 0 ? <CheckCircle className="w-3.5 h-3.5 text-primary" /> : <Circle className="w-3.5 h-3.5 text-muted-foreground" />}
-                    <span className={lifestyle.length > 0 ? "text-foreground" : "text-muted-foreground"}>Style de vie</span>
-                  </div>
+                  {!isOwner && (
+                    <div className="flex items-center gap-1.5">
+                      {lifestyle.length > 0 ? <CheckCircle className="w-3.5 h-3.5 text-primary" /> : <Circle className="w-3.5 h-3.5 text-muted-foreground" />}
+                      <span className={lifestyle.length > 0 ? "text-foreground" : "text-muted-foreground"}>Style de vie</span>
+                    </div>
+                  )}
                 </div>
               </div>
 
               <div className="flex flex-col gap-2">
-                {viewingRole === "gardien" ? (
-                  <Button className="w-full" onClick={() => completeOnboarding("/recherche")}>
-                    Explorer les annonces →
+                {isOwner ? (
+                  <Button className="w-full" onClick={() => completeOnboarding("/sits")}>
+                    Publier une annonce →
                   </Button>
                 ) : (
-                  <Button className="w-full" onClick={() => completeOnboarding("/mes-annonces")}>
-                    Publier une annonce →
+                  <Button className="w-full" onClick={() => completeOnboarding("/recherche")}>
+                    Explorer les annonces →
                   </Button>
                 )}
               </div>
