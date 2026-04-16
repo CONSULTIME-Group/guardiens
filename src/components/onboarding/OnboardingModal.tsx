@@ -478,9 +478,11 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
                   Vos compétences apparaissent sur votre profil.
                 </h2>
                 <p className="text-base text-foreground/80 leading-relaxed mt-2">
-                  {isOwnerOnly
-                    ? "Les gardiens les voient avant même de vous écrire. Sélectionnez ce qui vous correspond."
-                    : "Les propriétaires les voient avant même de vous écrire. Sélectionnez ce qui vous correspond."}
+                  {userRole === "both"
+                    ? "Gardiens et propriétaires les voient avant même de vous écrire. Sélectionnez ce qui vous correspond."
+                    : isOwnerOnly
+                      ? "Les gardiens les voient avant même de vous écrire. Sélectionnez ce qui vous correspond."
+                      : "Les propriétaires les voient avant même de vous écrire. Sélectionnez ce qui vous correspond."}
                 </p>
               </div>
 
