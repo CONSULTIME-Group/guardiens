@@ -110,17 +110,8 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
         if (p.bio) setBio(p.bio);
         if (p.onboarding_minimal_completed) setMinimalSaved(true);
       }
-      // Load role-specific profile data
-      if (activeRole === "owner") {
-        const { data: op } = await supabase
-          .from("owner_profiles")
-          .select("competences")
-          .eq("user_id", user.id)
-          .maybeSingle();
-        if (op?.competences && Array.isArray(op.competences)) {
-          setSkillCategories(op.competences as string[]);
-        }
-      } else {
+      // Load role-specific profile data — for "both", load sitter data (used for scoring)
+      if (usesSitterScoring) {
         const { data: sp } = await supabase
           .from("sitter_profiles")
           .select("lifestyle, competences")
@@ -129,6 +120,15 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
         if (sp) {
           if (sp.lifestyle && Array.isArray(sp.lifestyle)) setLifestyle(sp.lifestyle as string[]);
           if (sp.competences && Array.isArray(sp.competences)) setSkillCategories(sp.competences as string[]);
+        }
+      } else {
+        const { data: op } = await supabase
+          .from("owner_profiles")
+          .select("competences")
+          .eq("user_id", user.id)
+          .maybeSingle();
+        if (op?.competences && Array.isArray(op.competences)) {
+          setSkillCategories(op.competences as string[]);
         }
       }
     };
