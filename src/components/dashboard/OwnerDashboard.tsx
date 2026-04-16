@@ -3,7 +3,7 @@ import FounderBadge from "@/components/badges/FounderBadge";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import OnboardingModal from "@/components/onboarding/OnboardingModal";
+
 
 import OnboardingWelcome from "./OnboardingWelcome";
 import NearbyEmergencySitters from "./NearbyEmergencySitters";
