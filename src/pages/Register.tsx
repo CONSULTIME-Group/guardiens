@@ -155,7 +155,13 @@ const Register = () => {
 
   const handleResendEmail = async () => {
     setIsResending(true);
-    const { error } = await supabase.auth.resend({ type: "signup", email });
+    const { error } = await supabase.auth.resend({
+      type: "signup",
+      email,
+      options: {
+        emailRedirectTo: `${window.location.origin}/auth/confirm?next=/dashboard`,
+      },
+    });
     toast({
       title: error ? "Erreur" : "Email renvoyé !",
       description: error
