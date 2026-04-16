@@ -114,15 +114,12 @@ const LeaveReview = () => {
         revieweeId = sitData.user_id;
       }
 
-      const [{ data: profile, error: profileError }, { data: existingReview }] = await Promise.all([
-        (supabase
+      const [{ data: rawProfile, error: profileError }, { data: existingReview }] = await Promise.all([
+        supabase
           .from("public_profiles" as any)
           .select("id, first_name, avatar_url")
           .eq("id", revieweeId)
-          .maybeSingle() as Promise<{
-            data: PublicProfilePreview | null;
-            error: { message?: string } | null;
-          }>),
+          .maybeSingle(),
         supabase
           .from("reviews")
           .select("id")
@@ -130,6 +127,8 @@ const LeaveReview = () => {
           .eq("reviewer_id", user.id)
           .maybeSingle(),
       ]);
+
+      const profile = rawProfile as PublicProfilePreview | null;
 
       if (profileError || !profile) {
         setLoadError("Impossible de charger la personne à évaluer.");
@@ -202,14 +201,13 @@ const LeaveReview = () => {
 
     // Send email to the other party inviting them to leave their review
     try {
-      const { data: revieweeProfile } = await (supabase
+      const { data: rawRevieweeProfile } = await supabase
         .from("public_profiles" as any)
         .select("first_name")
         .eq("id", reviewee.id)
-        .maybeSingle() as Promise<{
-          data: Pick<PublicProfilePreview, "first_name"> | null;
-          error: { message?: string } | null;
-        }>);
+        .maybeSingle();
+
+      const revieweeProfile = rawRevieweeProfile as Pick<PublicProfilePreview, "first_name"> | null;
 
       const { data: reviewerProfile } = await supabase
         .from("profiles")
