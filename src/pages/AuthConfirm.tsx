@@ -1,14 +1,18 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { Link, useNavigate } from "react-router-dom";
-import { Loader2, MailCheck } from "lucide-react";
+import { Loader2, MailCheck, AlertTriangle, RefreshCw } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { Button } from "@/components/ui/button";
 
 const AuthConfirm = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const handled = useRef(false);
+  const [error, setError] = useState<string | null>(null);
+  const [resending, setResending] = useState(false);
+  const [resent, setResent] = useState(false);
 
   useEffect(() => {
     if (handled.current) return;
@@ -17,8 +21,14 @@ const AuthConfirm = () => {
     const url = new URL(window.location.href);
     const next = url.searchParams.get("next") || "/dashboard";
 
-    // Listen for the auth state change triggered by Supabase processing
-    // the tokens in the URL (hash fragment or query params).
+    // Check for error in hash fragment (Supabase redirects errors there)
+    const hashParams = new URLSearchParams(window.location.hash.replace("#", ""));
+    const hashError = hashParams.get("error_description") || hashParams.get("error");
+    if (hashError) {
+      setError(hashError);
+      return; // Don't set up listeners — show error UI immediately
+    }
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
         if (
@@ -45,7 +55,7 @@ const AuthConfirm = () => {
       }
     );
 
-    // Also try explicit OTP verification for token_hash in query params
+    // Try explicit OTP verification for token_hash in query params
     const tokenHash = url.searchParams.get("token_hash");
     const type = url.searchParams.get("type");
 
@@ -53,10 +63,8 @@ const AuthConfirm = () => {
       supabase.auth.verifyOtp({ token_hash: tokenHash, type }).then(({ error }) => {
         if (error) {
           console.error("OTP verification failed:", error.message);
-          // Don't navigate away — the onAuthStateChange listener
-          // might still fire from a hash-based redirect.
+          setError(error.message);
         }
-        // Success is handled by the onAuthStateChange listener above.
       });
     }
 
@@ -69,12 +77,7 @@ const AuthConfirm = () => {
         return;
       }
       subscription.unsubscribe();
-      toast({
-        variant: "destructive",
-        title: "Lien invalide ou expiré",
-        description: "Demandez un nouvel email de confirmation puis réessayez.",
-      });
-      navigate("/login", { replace: true });
+      setError("Le lien a expiré. Demandez un nouvel email de confirmation.");
     }, 15000);
 
     return () => {
@@ -82,6 +85,65 @@ const AuthConfirm = () => {
       subscription.unsubscribe();
     };
   }, [navigate, toast]);
+
+  const handleResend = async () => {
+    setResending(true);
+    // Try to get email from a previous session or prompt user
+    const email = window.prompt("Entrez votre adresse email pour recevoir un nouveau lien :");
+    if (!email) {
+      setResending(false);
+      return;
+    }
+    const { error: resendError } = await supabase.auth.resend({
+      type: "signup",
+      email,
+    });
+    setResending(false);
+    if (resendError) {
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: resendError.message,
+      });
+    } else {
+      setResent(true);
+      toast({
+        title: "Email renvoyé",
+        description: "Vérifiez votre boîte de réception.",
+      });
+    }
+  };
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background px-6">
+        <Helmet><meta name="robots" content="noindex, nofollow" /></Helmet>
+        <div className="w-full max-w-md rounded-3xl border border-border bg-card p-8 text-center shadow-sm">
+          <AlertTriangle className="mx-auto mb-4 h-10 w-10 text-destructive" />
+          <h1 className="font-heading text-2xl font-semibold text-foreground">Lien invalide ou expiré</h1>
+          <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+            {error.includes("expired")
+              ? "Ce lien de confirmation a expiré. Demandez-en un nouveau ci-dessous."
+              : error}
+          </p>
+          <div className="mt-6 flex flex-col gap-3">
+            {!resent && (
+              <Button onClick={handleResend} disabled={resending} className="gap-2">
+                <RefreshCw className={`h-4 w-4 ${resending ? "animate-spin" : ""}`} />
+                Renvoyer un email de confirmation
+              </Button>
+            )}
+            {resent && (
+              <p className="text-sm text-primary font-medium">✓ Email renvoyé — vérifiez votre boîte.</p>
+            )}
+            <Link to="/login" className="text-sm text-muted-foreground hover:text-foreground">
+              Retour à la connexion
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background px-6">
