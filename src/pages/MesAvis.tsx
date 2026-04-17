@@ -149,7 +149,7 @@ const ReviewsList = ({ reviews, mode }: { reviews: any[]; mode: "received" | "gi
                   </span>
                 )}
                 {isPending && (
-                  <span className="ml-2 inline-flex items-center rounded-full bg-amber-500/10 text-amber-700 dark:text-amber-400 px-2 py-0.5 text-[10px]">
+                  <span className="ml-2 inline-flex items-center rounded-full bg-warning/10 text-warning px-2 py-0.5 text-[10px]">
                     En attente de publication
                   </span>
                 )}
