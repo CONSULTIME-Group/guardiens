@@ -124,8 +124,7 @@ const AdminReviewDisputes = () => {
     // Notification email au contestataire (best-effort)
     try {
       const disputerId = resolveTarget.dispute.disputer_id;
-      const { data: emailData } = await supabase.rpc("get_user_email", { p_user_id: disputerId });
-      const recipientEmail = (emailData as any)?.[0]?.email || (emailData as any)?.email;
+      const { data: recipientEmail } = await supabase.rpc("admin_get_user_email", { p_user_id: disputerId });
       if (recipientEmail) {
         await supabase.functions.invoke("send-transactional-email", {
           body: {
