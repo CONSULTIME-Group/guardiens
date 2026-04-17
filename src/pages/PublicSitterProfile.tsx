@@ -417,7 +417,8 @@ export default function PublicSitterProfile() {
   const pageTitle = rawTitle;
   const pageDesc = ((bio || motivation || "") as string).slice(0, 160) || `${firstName} garde des ${animalLabels || "animaux"} à ${city || "France"}. Profil vérifié sur Guardiens.fr.`;
   const pageUrl = buildAbsoluteUrl(`/gardiens/${id}`);
-  const shouldNoindex = !profile?.identity_verified || (profile?.profile_completion ?? 0) < 60;
+  // Politique : tous les profils gardiens en noindex (RGPD + données personnelles + thin content)
+  const shouldNoindex = true;
 
   const jsonLd = {
     "@context": "https://schema.org",

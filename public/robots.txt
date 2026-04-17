@@ -30,6 +30,7 @@ Disallow: /register
 Disallow: /unsubscribe
 Disallow: /test-accord
 Disallow: /favoris
+Disallow: /gardiens/
 
 # Crawl rate
 Crawl-delay: 1
