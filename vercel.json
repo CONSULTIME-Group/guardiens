@@ -1,17 +1,6 @@
 {
   "rewrites": [
     {
-      "source": "/:path*",
-      "destination": "https://erhccyqevdyevpyctsjj.supabase.co/functions/v1/ssr-prerender?path=/:path*",
-      "has": [
-        {
-          "type": "header",
-          "key": "user-agent",
-          "value": ".*(googlebot|bingbot|slurp|duckduckbot|yandex|baiduspider|applebot|chatgpt-user|gptbot|claudebot|claude-web|anthropic-ai|perplexitybot|perplexity-user|bytespider|facebookexternalhit|facebot|twitterbot|linkedinbot|slackbot|whatsapp|telegrambot|discordbot|pinterestbot|redditbot|embedly|quora link preview|showyoubot|outbrain|vkShare|W3C_Validator|ahrefsbot|semrushbot|mj12bot|dotbot).*"
-        }
-      ]
-    },
-    {
       "source": "/(.*)",
       "destination": "/index.html"
     }
