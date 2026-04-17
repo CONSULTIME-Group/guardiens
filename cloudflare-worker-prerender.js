@@ -37,7 +37,7 @@ function detectBot(request) {
   const reasons = [];
 
   if (IGNORED_EXTENSIONS.test(url.pathname)) reasons.push('static-asset');
-  if (request.method !== 'GET') reasons.push('non-get');
+  if (request.method !== 'GET' && request.method !== 'HEAD') reasons.push('non-get');
   if (request.headers.get('x-prerender')) reasons.push('loop-guard');
 
   const isBot = BOT_REGEX.test(ua);
