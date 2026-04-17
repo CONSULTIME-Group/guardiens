@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { Plus, Pencil, Trash2, Eye, ArrowLeft, CheckCircle2, AlertTriangle, XCircle } from "lucide-react";
+import { Plus, Pencil, Trash2, Eye, ArrowLeft, CheckCircle2, AlertTriangle, XCircle, Link2, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -80,6 +80,27 @@ const AdminArticles = () => {
   const [filterSeo, setFilterSeo] = useState("all");
   const [search, setSearch] = useState("");
   const [selectedArticle, setSelectedArticle] = useState<any | null>(null);
+  const [autoLinking, setAutoLinking] = useState(false);
+
+  const runAutoLinks = async (dryRun: boolean) => {
+    setAutoLinking(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("auto-internal-links", {
+        body: { dryRun, onlyMissing: true },
+      });
+      if (error) throw error;
+      if (dryRun) {
+        toast.success(`Aperçu : ${data.targets} articles à enrichir`);
+      } else {
+        toast.success(`✅ ${data.updated} articles enrichis avec liens internes`);
+        fetchArticles();
+      }
+    } catch (e: any) {
+      toast.error(`Erreur : ${e.message}`);
+    } finally {
+      setAutoLinking(false);
+    }
+  };
 
   const fetchArticles = async () => {
     setLoading(true);
@@ -130,9 +151,20 @@ const AdminArticles = () => {
           </Button>
           <h1 className="font-heading text-2xl font-bold">Articles</h1>
         </div>
-        <Button onClick={() => navigate("/admin/articles/new")}>
-          <Plus className="h-4 w-4 mr-2" /> Nouvel article
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            onClick={() => runAutoLinks(false)}
+            disabled={autoLinking || seoStats.orange === 0}
+            title="Insère 3-4 liens internes contextuels sur les articles qui n'en ont pas"
+          >
+            {autoLinking ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Link2 className="h-4 w-4 mr-2" />}
+            Maillage auto ({seoStats.orange})
+          </Button>
+          <Button onClick={() => navigate("/admin/articles/new")}>
+            <Plus className="h-4 w-4 mr-2" /> Nouvel article
+          </Button>
+        </div>
       </div>
 
       {/* SEO summary badges */}
