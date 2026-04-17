@@ -46,6 +46,7 @@ const SitDetail = lazy(() => import("./pages/SitDetail"));
 const EditSit = lazy(() => import("./pages/EditSit"));
 const HouseGuide = lazy(() => import("./pages/HouseGuide"));
 const LeaveReview = lazy(() => import("./pages/LeaveReview"));
+const MesAvis = lazy(() => import("./pages/MesAvis"));
 const Notifications = lazy(() => import("./pages/Notifications"));
 const Settings = lazy(() => import("./pages/Settings"));
 const OwnerProfile = lazy(() => import("./pages/OwnerProfile"));
@@ -251,6 +252,7 @@ const AppRoutes = () => (
         <Route path="/sits/:id" element={<SitDetail />} />
         <Route path="/sits/:id/edit" element={<EditSit />} />
         <Route path="/review/:sitId" element={<LeaveReview />} />
+        <Route path="/mes-avis" element={<MesAvis />} />
         <Route path="/notifications" element={<Notifications />} />
         <Route path="/house-guide/:propertyId" element={<HouseGuide />} />
         <Route path="/owner-profile" element={<OwnerProfile />} />

@@ -5,6 +5,7 @@ import { Star, ThumbsUp } from "lucide-react";
 import ReportButton from "@/components/reports/ReportButton";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
+import { hydrateReviewers } from "@/lib/hydrateReviewers";
 
 interface ReviewsDisplayProps {
   userId: string;
@@ -19,11 +20,13 @@ const ReviewsDisplay = ({ userId, showAnimalCare = false }: ReviewsDisplayProps)
     const load = async () => {
       const { data } = await supabase
         .from("reviews")
-        .select("*, reviewer:profiles!reviews_reviewer_id_fkey(first_name, avatar_url)")
+        .select("*")
         .eq("reviewee_id", userId)
         .eq("published", true)
         .order("created_at", { ascending: false });
-      setReviews(data || []);
+
+      const enriched = await hydrateReviewers(data || []);
+      setReviews(enriched);
       setLoading(false);
     };
     load();

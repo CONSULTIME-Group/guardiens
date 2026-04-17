@@ -233,6 +233,7 @@ export const Sidebar = () => {
               )}
 
               <SidebarItem to={effectiveRole === "owner" ? "/owner-profile" : "/profile"} icon={User} label="Mon profil" />
+              <SidebarItem to="/mes-avis" icon={Star} label="Mes avis" />
               <SidebarItem to="/favoris" icon={Heart} label="Mes favoris" />
 
               <GroupLabel label="Découvrir" />

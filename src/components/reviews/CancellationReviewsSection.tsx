@@ -19,16 +19,15 @@ const CancellationReviewsSection = ({ userId }: CancellationReviewsSectionProps)
     const load = async () => {
       const { data } = await supabase
         .from("reviews")
-        .select(`
-          *,
-          reviewer:profiles!reviews_reviewer_id_fkey(first_name, avatar_url),
-          reviewee:profiles!reviews_reviewee_id_fkey(first_name, avatar_url)
-        `)
+        .select("*")
         .eq("reviewee_id", userId)
         .eq("review_type", "annulation")
         .eq("moderation_status", "valide")
         .order("created_at", { ascending: false });
-      setReviews(data || []);
+
+      const { hydrateReviewers } = await import("@/lib/hydrateReviewers");
+      const enriched = await hydrateReviewers(data || [], { includeReviewee: true });
+      setReviews(enriched);
       setLoading(false);
     };
     load();
