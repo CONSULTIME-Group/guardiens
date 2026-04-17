@@ -26,6 +26,7 @@ import PublicExperiences from "@/components/profile/PublicExperiences";
 import TrustScore from "@/components/profile/TrustScore";
 import FavoriteButton from "@/components/shared/FavoriteButton";
 import ProfileSchemaOrg from "@/components/seo/ProfileSchemaOrg";
+import { hydrateReviewers } from "@/lib/hydrateReviewers";
 
 const capitalize = (name: string) =>
   name ? name.charAt(0).toUpperCase() + name.slice(1).toLowerCase() : "";
@@ -191,7 +192,8 @@ export default function PublicSitterProfile() {
       }
 
       if (reviewsRes.data) {
-        setReviews(reviewsRes.data);
+        const enrichedReviews = await hydrateReviewers(reviewsRes.data as any[]);
+        setReviews(enrichedReviews);
         setReviewCount(reviewsRes.data.length);
         if (reviewsRes.data.length > 0) {
           const sum = reviewsRes.data.reduce((a: number, r: any) => a + (r.overall_rating || 0), 0);
@@ -282,14 +284,15 @@ export default function PublicSitterProfile() {
       // Query 3 — Avis reçus en tant que proprio
       const { data: revData, error: revErr } = await supabase
         .from('reviews')
-        .select('id, overall_rating, comment, created_at, review_type, reviewer:profiles!reviews_reviewer_id_fkey(first_name, avatar_url)')
+        .select('id, overall_rating, comment, created_at, review_type, reviewer_id')
         .eq('reviewee_id', id)
         .eq('published', true)
         .eq('moderation_status', 'valide')
         .in('review_type', ['proprio', 'owner'])
         .order('created_at', { ascending: false });
       if (revErr) console.error('[ownerReviews]', revErr);
-      setOwnerReviews(revData ?? []);
+      const enrichedOwnerReviews = await hydrateReviewers((revData ?? []) as any[]);
+      setOwnerReviews(enrichedOwnerReviews);
 
       // Query 4 — Feedbacks missions
       const { data: fbData, error: fbErr } = await supabase
