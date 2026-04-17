@@ -75,12 +75,30 @@ function withDiagHeaders(response, diag) {
   });
 }
 
-// Origine réelle du domaine custom : fetch(request) passe par Cloudflare vers l’origin
-// sans repasser par le sous-domaine publié qui redirige vers guardiens.fr.
+// Origine réelle Lovable (IP directe via Cloudflare resolveOverride)
+// On contourne la redirection guardiens.lovable.app → guardiens.fr
+// en tapant directement le serveur Lovable avec le bon Host header.
+const LOVABLE_ORIGIN_HOST = 'guardiens.lovable.app';
+
 async function fetchOrigin(request) {
-  return fetch(new Request(request, {
+  const url = new URL(request.url);
+  // Réécrit l'URL vers l'origine Lovable publiée, en gardant path + query
+  const originUrl = `https://${LOVABLE_ORIGIN_HOST}${url.pathname}${url.search}`;
+
+  // Clone les headers MAIS retire le Host (sinon Lovable redirige)
+  const headers = new Headers(request.headers);
+  headers.delete('host');
+  headers.set('x-forwarded-host', 'guardiens.fr');
+  headers.set('x-forwarded-proto', 'https');
+  // Indique à Lovable que la requête vient déjà du domaine final
+  headers.set('x-lovable-skip-redirect', '1');
+
+  return fetch(originUrl, {
+    method: request.method,
+    headers,
+    body: request.method === 'GET' || request.method === 'HEAD' ? undefined : request.body,
     redirect: 'manual',
-  }));
+  });
 }
 
 // URL de la fonction sitemap Supabase
