@@ -5,6 +5,7 @@ import { Star, ThumbsUp } from "lucide-react";
 import ReportButton from "@/components/reports/ReportButton";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
+import { hydrateReviewers } from "@/lib/hydrateReviewers";
 
 interface ReviewsDisplayProps {
   userId: string;
@@ -24,22 +25,7 @@ const ReviewsDisplay = ({ userId, showAnimalCare = false }: ReviewsDisplayProps)
         .eq("published", true)
         .order("created_at", { ascending: false });
 
-      const reviewerIds = Array.from(new Set((data || []).map((r: any) => r.reviewer_id).filter(Boolean)));
-      let profilesMap: Record<string, { first_name: string | null; avatar_url: string | null }> = {};
-      if (reviewerIds.length > 0) {
-        const { data: profs } = await supabase
-          .from("public_profiles" as any)
-          .select("id, first_name, avatar_url")
-          .in("id", reviewerIds);
-        (profs as any[] | null)?.forEach((p: any) => {
-          profilesMap[p.id] = { first_name: p.first_name, avatar_url: p.avatar_url };
-        });
-      }
-
-      const enriched = (data || []).map((r: any) => ({
-        ...r,
-        reviewer: profilesMap[r.reviewer_id] || null,
-      }));
+      const enriched = await hydrateReviewers(data || []);
       setReviews(enriched);
       setLoading(false);
     };
