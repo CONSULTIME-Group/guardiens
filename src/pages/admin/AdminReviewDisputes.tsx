@@ -120,6 +120,31 @@ const AdminReviewDisputes = () => {
       toast.error(error.message || "Erreur lors de la résolution");
       return;
     }
+
+    // Notification email au contestataire (best-effort)
+    try {
+      const disputerId = resolveTarget.dispute.disputer_id;
+      const { data: emailData } = await supabase.rpc("get_user_email", { p_user_id: disputerId });
+      const recipientEmail = (emailData as any)?.[0]?.email || (emailData as any)?.email;
+      if (recipientEmail) {
+        await supabase.functions.invoke("send-transactional-email", {
+          body: {
+            templateName: "dispute-resolved",
+            recipientEmail,
+            idempotencyKey: `dispute-resolved-${resolveTarget.dispute.id}-${resolveTarget.action}`,
+            templateData: {
+              firstName: resolveTarget.dispute.disputer?.first_name || undefined,
+              decision: resolveTarget.action,
+              category: resolveTarget.dispute.category,
+              adminNote: adminNote.trim() || undefined,
+            },
+          },
+        });
+      }
+    } catch (e) {
+      console.error("[dispute-resolved] email send failed", e);
+    }
+
     toast.success(
       resolveTarget.action === "accepted"
         ? "Contestation acceptée — l'avis a été dépublié"
