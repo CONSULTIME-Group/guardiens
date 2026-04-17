@@ -2532,6 +2532,63 @@ export type Database = {
         }
         Relationships: []
       }
+      review_disputes: {
+        Row: {
+          admin_note: string | null
+          category: string
+          created_at: string
+          disputer_id: string
+          id: string
+          reason: string
+          resolved_at: string | null
+          resolved_by: string | null
+          review_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          admin_note?: string | null
+          category: string
+          created_at?: string
+          disputer_id: string
+          id?: string
+          reason: string
+          resolved_at?: string | null
+          resolved_by?: string | null
+          review_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          admin_note?: string | null
+          category?: string
+          created_at?: string
+          disputer_id?: string
+          id?: string
+          reason?: string
+          resolved_at?: string | null
+          resolved_by?: string | null
+          review_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "review_disputes_review_id_fkey"
+            columns: ["review_id"]
+            isOneToOne: false
+            referencedRelation: "avis_publics"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "review_disputes_review_id_fkey"
+            columns: ["review_id"]
+            isOneToOne: false
+            referencedRelation: "reviews"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       reviews: {
         Row: {
           animal_care_rating: number | null
@@ -3668,6 +3725,10 @@ export type Database = {
         }
         Returns: string
       }
+      create_review_dispute: {
+        Args: { p_category: string; p_reason: string; p_review_id: string }
+        Returns: string
+      }
       delete_email: {
         Args: { message_id: number; queue_name: string }
         Returns: boolean
@@ -3742,6 +3803,14 @@ export type Database = {
           p_respondent_id: string
           p_response: string
           p_review_id: string
+        }
+        Returns: undefined
+      }
+      resolve_review_dispute: {
+        Args: {
+          p_admin_note?: string
+          p_decision: string
+          p_dispute_id: string
         }
         Returns: undefined
       }
