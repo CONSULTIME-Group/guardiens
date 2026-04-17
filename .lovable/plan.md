@@ -1,37 +1,45 @@
 
-Le Worker est bien configuré sur `guardiens.fr/*` ET `*guardiens.fr/*` (les deux routes couvrent tout le trafic, y compris `www`). Le token Prerender est en place. La config Cloudflare est correcte.
+## Plan: Réponse "prix des instances Cloud"
 
-Il faut maintenant **tester en conditions réelles** que le Worker intercepte bien Googlebot et renvoie le HTML prérendu.
+C'est une question pure d'information, pas de code. Aucun fichier à modifier.
 
-## Plan de vérification
+### Ce que dit la doc officielle Lovable (vérifié)
 
-**1. Tests curl avec User-Agent Googlebot**
-Lancer 3 requêtes en parallèle sur des URLs critiques :
-- Page d'accueil : `https://guardiens.fr/`
-- Article : `https://guardiens.fr/actualites/s-absenter-avec-animal-guide-solutions-2026`
-- Profil ville : `https://guardiens.fr/house-sitting/lyon`
+**Lovable ne publie PAS de tarif fixe par taille d'instance** (Tiny / Mini / Small / Medium / Large). C'est volontaire : le modèle est **100% à l'usage**, calculé en temps réel sur :
+- L'activité (nombre d'utilisateurs, requêtes)
+- Le transfert de données (uploads/downloads)
+- La taille d'instance choisie (multiplicateur)
 
-Vérifier dans les réponses :
-- Header `X-Prerender-Status: hit` (= Worker actif + Prerender.io répond)
-- Header `cf-worker` ou similaire (= Worker exécuté)
-- `<title>` réel de la page (pas le shell générique de 3.9KB)
-- Présence du contenu textuel (h1, paragraphes)
+### Ce qu'on peut affirmer avec certitude
 
-**2. Comparaison avec User-Agent navigateur normal**
-Même URL, UA Chrome → doit renvoyer le shell React standard (pas de prérendu). Confirme que le bypass fonctionne.
+| Info | Valeur officielle |
+|---|---|
+| Crédit Cloud offert/mois (tous plans) | **25 $** |
+| Crédit AI offert/mois | **1 $** |
+| Reset | 1er du mois à 00:00 UTC, **non cumulable** |
+| Offre temporaire jusqu'à fin mai 2026 | 25 $ Cloud + 1 $ AI même sur plan Free |
+| Top-up minimum (plans payants) | 10 $ |
 
-**3. Diagnostic selon résultats**
+### Exemples officiels de coût mensuel total (extraits doc)
 
-| Résultat | Diagnostic | Action |
-|----------|-----------|--------|
-| `X-Prerender-Status: hit` + contenu HTML | ✅ Tout fonctionne | Soumettre sitemap à Google Search Console |
-| Header présent mais HTML vide/erreur | Token Prerender invalide ou quota dépassé | Vérifier compte prerender.io |
-| Aucun header Prerender | Worker pas déclenché malgré la route | Vérifier ordre des routes / cache Vercel |
-| Shell React 3.9KB renvoyé | Worker bypass le bot | Vérifier regex `BOT_AGENTS` |
+| Type d'app | Cloud | AI | Coût net |
+|---|---|---|---|
+| Blog perso (500 visites) | 1 $ | 1 $ | **0 $** (couvert par les 25$ offerts) |
+| Site PME (5 000 visites) | 5 $ | 2 $ | **1 $** |
+| Outil équipe (10 000 visites, 20 users) | 15 $ | 5 $ | **4 $** |
+| E-commerce (10 000 visites, 500 ventes) | 65 $ | 10 $ | **49 $** |
 
-**4. Si tout est OK**
-- Tester Google Rich Results : `https://search.google.com/test/rich-results`
-- Soumettre 5 URLs prioritaires dans GSC pour indexation accélérée
-- Documenter le statut dans le mémoire SEO
+### Estimation honnête pour Guardiens (Medium)
 
-**Aucune modification de code prévue à ce stade** — uniquement diagnostic. Si un problème est détecté, je proposerai un correctif ciblé.
+Votre profil = entre "outil équipe" et "e-commerce" à cause du SEO + edge functions + bots. Estimation réaliste : **15–30 $/mois Cloud net après crédit gratuit de 25 $**, soit **probablement gratuit à payant léger**.
+
+### Réponse que je vais formater pour vous
+
+1. Dire clairement qu'**il n'y a pas de prix fixe par taille** — c'est de l'usage
+2. Donner les 25 $ offerts comme repère
+3. Montrer le tableau d'exemples de la doc
+4. Estimer Guardiens en Medium
+5. Recommander : passez Medium, surveillez 1 semaine **Settings → Cloud & AI balance**, ajustez si besoin
+6. Lien vers la page de monitoring exacte
+
+**Aucun fichier modifié. Réponse texte uniquement.**
