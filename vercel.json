@@ -1,16 +1,15 @@
 {
   "rewrites": [
     {
-      "source": "/(.*)",
-      "destination": "https://service.prerender.io/$1",
+      "source": "/:path*",
+      "destination": "https://erhccyqevdyevpyctsjj.supabase.co/functions/v1/ssr-prerender?path=/:path*",
       "has": [
         {
           "type": "header",
           "key": "user-agent",
-          "value": ".*(googlebot|bingbot|yandex|baiduspider|facebookexternalhit|twitterbot|rogerbot|linkedinbot|embedly|quora link preview|showyoubot|outbrain|pinterest|slackbot|vkShare|W3C_Validator).*"
+          "value": ".*(googlebot|bingbot|slurp|duckduckbot|yandex|baiduspider|applebot|chatgpt-user|gptbot|claudebot|claude-web|anthropic-ai|perplexitybot|perplexity-user|bytespider|facebookexternalhit|facebot|twitterbot|linkedinbot|slackbot|whatsapp|telegrambot|discordbot|pinterestbot|redditbot|embedly|quora link preview|showyoubot|outbrain|vkShare|W3C_Validator|ahrefsbot|semrushbot|mj12bot|dotbot).*"
         }
-      ],
-      "missing": []
+      ]
     },
     {
       "source": "/(.*)",
@@ -39,10 +38,6 @@
     {
       "source": "/(.*)",
       "headers": [
-        {
-          "key": "X-Prerender-Token",
-          "value": "P7riC8MFdBNYlNYGa8oz"
-        },
         {
           "key": "X-Frame-Options",
           "value": "DENY"
