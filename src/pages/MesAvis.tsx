@@ -19,34 +19,50 @@ const MesAvis = () => {
   const [received, setReceived] = useState<any[]>([]);
   const [given, setGiven] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [disputes, setDisputes] = useState<Record<string, DisputeInfo>>({});
+
+  const loadAll = async () => {
+    if (!user) return;
+    setLoading(true);
+    const [recRes, givRes, dispRes] = await Promise.all([
+      supabase
+        .from("reviews")
+        .select("*")
+        .eq("reviewee_id", user.id)
+        .eq("published", true)
+        .eq("moderation_status", "valide")
+        .order("created_at", { ascending: false }),
+      supabase
+        .from("reviews")
+        .select("*")
+        .eq("reviewer_id", user.id)
+        .order("created_at", { ascending: false }),
+      supabase
+        .from("review_disputes")
+        .select("review_id, status")
+        .eq("disputer_id", user.id),
+    ]);
+
+    const enrichedReceived = await hydrateReviewers(recRes.data || [], { includeReviewee: true });
+    const enrichedGiven = await hydrateReviewers(givRes.data || [], { includeReviewee: true });
+
+    const dispMap: Record<string, DisputeInfo> = {};
+    (dispRes.data || []).forEach((d: any) => {
+      // garde le plus récent (pending > resolved)
+      if (!dispMap[d.review_id] || d.status === "pending") {
+        dispMap[d.review_id] = { status: d.status };
+      }
+    });
+
+    setReceived(enrichedReceived);
+    setGiven(enrichedGiven);
+    setDisputes(dispMap);
+    setLoading(false);
+  };
 
   useEffect(() => {
-    if (!user) return;
-    const load = async () => {
-      setLoading(true);
-      const [recRes, givRes] = await Promise.all([
-        supabase
-          .from("reviews")
-          .select("*")
-          .eq("reviewee_id", user.id)
-          .eq("published", true)
-          .eq("moderation_status", "valide")
-          .order("created_at", { ascending: false }),
-        supabase
-          .from("reviews")
-          .select("*")
-          .eq("reviewer_id", user.id)
-          .order("created_at", { ascending: false }),
-      ]);
-
-      const enrichedReceived = await hydrateReviewers(recRes.data || [], { includeReviewee: true });
-      const enrichedGiven = await hydrateReviewers(givRes.data || [], { includeReviewee: true });
-
-      setReceived(enrichedReceived);
-      setGiven(enrichedGiven);
-      setLoading(false);
-    };
-    load();
+    loadAll();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   if (!user) {
