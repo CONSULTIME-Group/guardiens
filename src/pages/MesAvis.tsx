@@ -7,8 +7,12 @@ import StarRating from "@/components/reviews/StarRating";
 import { Helmet } from "react-helmet-async";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { ThumbsUp, Star, Inbox, Send } from "lucide-react";
+import { ThumbsUp, Star, Inbox, Send, AlertTriangle, Clock, CheckCircle2, XCircle } from "lucide-react";
 import { hydrateReviewers } from "@/lib/hydrateReviewers";
+import DisputeReviewDialog from "@/components/reviews/DisputeReviewDialog";
+
+type DisputeStatus = "pending" | "accepted" | "rejected";
+interface DisputeInfo { status: DisputeStatus; }
 
 const MesAvis = () => {
   const { user } = useAuth();
