@@ -137,78 +137,139 @@ const EmptyMessage = ({ title, subtitle }: { title: string; subtitle: string }) 
   </div>
 );
 
-const ReviewsList = ({ reviews, mode }: { reviews: any[]; mode: "received" | "given" }) => (
-  <div className="space-y-3">
-    {reviews.map((r) => {
-      const otherParty = mode === "received" ? r.reviewer : r.reviewee;
-      const otherName = otherParty?.first_name || "Membre";
-      const otherAvatar = otherParty?.avatar_url;
-      const labelPrefix = mode === "received" ? "Par" : "Pour";
-      const isPending = mode === "given" && !r.published;
+const ReviewsList = ({
+  reviews,
+  mode,
+  disputes,
+  onDisputeChange,
+}: {
+  reviews: any[];
+  mode: "received" | "given";
+  disputes: Record<string, DisputeInfo>;
+  onDisputeChange?: () => void;
+}) => {
+  const [disputeReviewId, setDisputeReviewId] = useState<string | null>(null);
 
-      return (
-        <div key={r.id} className="rounded-xl border border-border bg-card p-4">
-          <div className="flex items-center gap-3 mb-2">
-            {otherAvatar ? (
-              <img src={otherAvatar} alt="" className="w-10 h-10 rounded-full object-cover" />
-            ) : (
-              <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-sm font-bold text-muted-foreground">
-                {otherName.charAt(0).toUpperCase()}
+  return (
+    <div className="space-y-3">
+      {reviews.map((r) => {
+        const otherParty = mode === "received" ? r.reviewer : r.reviewee;
+        const otherName = otherParty?.first_name || "Membre";
+        const otherAvatar = otherParty?.avatar_url;
+        const labelPrefix = mode === "received" ? "Par" : "Pour";
+        const isPending = mode === "given" && !r.published;
+        const dispute = disputes[r.id];
+        const ageMs = Date.now() - new Date(r.created_at).getTime();
+        const canDispute =
+          mode === "received" &&
+          !dispute &&
+          ageMs < 30 * 24 * 60 * 60 * 1000;
+
+        return (
+          <div key={r.id} className="rounded-xl border border-border bg-card p-4">
+            <div className="flex items-center gap-3 mb-2">
+              {otherAvatar ? (
+                <img src={otherAvatar} alt="" className="w-10 h-10 rounded-full object-cover" />
+              ) : (
+                <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-sm font-bold text-muted-foreground">
+                  {otherName.charAt(0).toUpperCase()}
+                </div>
+              )}
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-foreground">
+                  <span className="text-muted-foreground font-normal">{labelPrefix} </span>
+                  {otherName}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  {format(new Date(r.created_at), "d MMMM yyyy", { locale: fr })}
+                  {r.review_type === "annulation" && (
+                    <span className="ml-2 inline-flex items-center rounded-full bg-muted px-2 py-0.5 text-[10px]">
+                      Annulation
+                    </span>
+                  )}
+                  {isPending && (
+                    <span className="ml-2 inline-flex items-center rounded-full bg-warning/10 text-warning px-2 py-0.5 text-[10px]">
+                      En attente de publication
+                    </span>
+                  )}
+                </p>
+              </div>
+              {r.overall_rating ? <StarRating value={r.overall_rating} readonly size="sm" /> : null}
+            </div>
+
+            {r.cancellation_reason && (
+              <p className="text-sm text-foreground/80 italic mt-2">{r.cancellation_reason}</p>
+            )}
+            {r.comment && (
+              <p className="text-sm text-foreground/80 whitespace-pre-line mt-2">{r.comment}</p>
+            )}
+
+            {r.would_recommend && (
+              <div className="flex items-center gap-1 text-xs text-primary font-medium mt-2">
+                <ThumbsUp className="h-3 w-3" /> Recommandé
               </div>
             )}
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-foreground">
-                <span className="text-muted-foreground font-normal">{labelPrefix} </span>
-                {otherName}
+
+            {mode === "given" && isPending && (
+              <p className="text-xs text-muted-foreground mt-3 italic">
+                Cet avis sera publié dès que l'autre partie aura déposé le sien (système double-aveugle).
               </p>
-              <p className="text-xs text-muted-foreground">
-                {format(new Date(r.created_at), "d MMMM yyyy", { locale: fr })}
-                {r.review_type === "annulation" && (
-                  <span className="ml-2 inline-flex items-center rounded-full bg-muted px-2 py-0.5 text-[10px]">
-                    Annulation
-                  </span>
-                )}
-                {isPending && (
-                  <span className="ml-2 inline-flex items-center rounded-full bg-warning/10 text-warning px-2 py-0.5 text-[10px]">
-                    En attente de publication
-                  </span>
-                )}
-              </p>
+            )}
+
+            {/* Statut de contestation */}
+            {dispute?.status === "pending" && (
+              <div className="flex items-center gap-1.5 text-xs text-warning mt-3 bg-warning/5 rounded-md px-2.5 py-1.5">
+                <Clock className="h-3.5 w-3.5" />
+                Contestation en cours d'examen
+              </div>
+            )}
+            {dispute?.status === "accepted" && (
+              <div className="flex items-center gap-1.5 text-xs text-success mt-3 bg-success/5 rounded-md px-2.5 py-1.5">
+                <CheckCircle2 className="h-3.5 w-3.5" />
+                Contestation acceptée — l'avis a été retiré
+              </div>
+            )}
+            {dispute?.status === "rejected" && (
+              <div className="flex items-center gap-1.5 text-xs text-muted-foreground mt-3 bg-muted/50 rounded-md px-2.5 py-1.5">
+                <XCircle className="h-3.5 w-3.5" />
+                Contestation refusée par la modération
+              </div>
+            )}
+
+            <div className="flex items-center justify-between mt-3 gap-2 flex-wrap">
+              {r.sit_id ? (
+                <Link
+                  to={`/sits/${r.sit_id}`}
+                  className="text-xs text-primary hover:underline"
+                >
+                  Voir la garde concernée →
+                </Link>
+              ) : <span />}
+
+              {canDispute && (
+                <button
+                  onClick={() => setDisputeReviewId(r.id)}
+                  className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-destructive transition-colors"
+                >
+                  <AlertTriangle className="h-3 w-3" />
+                  Contester cet avis
+                </button>
+              )}
             </div>
-            {r.overall_rating ? <StarRating value={r.overall_rating} readonly size="sm" /> : null}
           </div>
+        );
+      })}
 
-          {r.cancellation_reason && (
-            <p className="text-sm text-foreground/80 italic mt-2">{r.cancellation_reason}</p>
-          )}
-          {r.comment && (
-            <p className="text-sm text-foreground/80 whitespace-pre-line mt-2">{r.comment}</p>
-          )}
-
-          {r.would_recommend && (
-            <div className="flex items-center gap-1 text-xs text-primary font-medium mt-2">
-              <ThumbsUp className="h-3 w-3" /> Recommandé
-            </div>
-          )}
-
-          {mode === "given" && isPending && (
-            <p className="text-xs text-muted-foreground mt-3 italic">
-              Cet avis sera publié dès que l'autre partie aura déposé le sien (système double-aveugle).
-            </p>
-          )}
-
-          {r.sit_id && (
-            <Link
-              to={`/sits/${r.sit_id}`}
-              className="text-xs text-primary hover:underline mt-3 inline-block"
-            >
-              Voir la garde concernée →
-            </Link>
-          )}
-        </div>
-      );
-    })}
-  </div>
-);
+      {disputeReviewId && (
+        <DisputeReviewDialog
+          open={!!disputeReviewId}
+          onOpenChange={(o) => !o && setDisputeReviewId(null)}
+          reviewId={disputeReviewId}
+          onSubmitted={onDisputeChange}
+        />
+      )}
+    </div>
+  );
+};
 
 export default MesAvis;
