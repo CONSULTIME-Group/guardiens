@@ -75,20 +75,38 @@ function withDiagHeaders(response, diag) {
   });
 }
 
+// Origine Lovable réelle (bypass de la boucle de redirection 302)
+const ORIGIN_HOST = 'guardiens.lovable.app';
+
+async function fetchOrigin(request) {
+  const originUrl = new URL(request.url);
+  originUrl.hostname = ORIGIN_HOST;
+  // Override Host header pour que Lovable ne redirige pas vers guardiens.fr
+  const originRequest = new Request(originUrl.toString(), {
+    method: request.method,
+    headers: request.headers,
+    body: request.body,
+    redirect: 'manual',
+  });
+  originRequest.headers.set('Host', ORIGIN_HOST);
+  originRequest.headers.set('X-Forwarded-Host', new URL(request.url).hostname);
+  return fetch(originRequest);
+}
+
 export default {
   async fetch(request, env, ctx) {
     const { shouldPrerender, isBot, ua, reasons } = detectBot(request);
     const url = request.url;
 
     const baseDiag = {
-      'X-Prerender-Worker': 'guardiens-prerender-v2',
+      'X-Prerender-Worker': 'guardiens-prerender-v3',
       'X-Prerender-Bot-Detected': String(isBot),
       'X-Prerender-UA': ua || '(empty)',
       'X-Prerender-Skip-Reasons': reasons.join(',') || 'none',
     };
 
     if (!shouldPrerender) {
-      const originResp = await fetch(request);
+      const originResp = await fetchOrigin(request);
       return withDiagHeaders(originResp, {
         ...baseDiag,
         'X-Prerender-Status': 'bypass',
@@ -109,7 +127,7 @@ export default {
       }
 
       console.log('[Prerender] Error ' + prerenderResponse.status + ' for ' + url);
-      const originResp = await fetch(request);
+      const originResp = await fetchOrigin(request);
       return withDiagHeaders(originResp, {
         ...baseDiag,
         'X-Prerender-Status': 'fallback-upstream-error',
@@ -117,7 +135,7 @@ export default {
       });
     } catch (err) {
       console.log('[Prerender] Failed for ' + url + ': ' + err.message);
-      const originResp = await fetch(request);
+      const originResp = await fetchOrigin(request);
       return withDiagHeaders(originResp, {
         ...baseDiag,
         'X-Prerender-Status': 'fallback-exception',
