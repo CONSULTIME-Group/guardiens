@@ -108,7 +108,7 @@ const MesAvis = () => {
               subtitle="Vos avis apparaîtront ici dès qu'un membre en aura laissé un sur votre profil."
             />
           ) : (
-            <ReviewsList reviews={received} mode="received" />
+            <ReviewsList reviews={received} mode="received" disputes={disputes} onDisputeChange={loadAll} />
           )}
         </TabsContent>
 
@@ -121,7 +121,7 @@ const MesAvis = () => {
               subtitle="Après chaque garde terminée, vous pourrez évaluer l'autre partie depuis la fiche de la garde."
             />
           ) : (
-            <ReviewsList reviews={given} mode="given" />
+            <ReviewsList reviews={given} mode="given" disputes={{}} />
           )}
         </TabsContent>
       </Tabs>
