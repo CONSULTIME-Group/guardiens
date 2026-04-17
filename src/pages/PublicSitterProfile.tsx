@@ -140,7 +140,7 @@ export default function PublicSitterProfile() {
           supabase.from("badge_attributions").select("badge_id").eq("user_id", id),
           supabase
             .from("reviews")
-            .select("*, reviewer:profiles!reviews_reviewer_id_fkey(first_name, avatar_url)")
+            .select("*")
             .eq("reviewee_id", id)
             .eq("published", true)
             .eq("moderation_status", "valide")
