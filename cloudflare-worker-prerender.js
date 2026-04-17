@@ -1,8 +1,11 @@
 /**
  * Cloudflare Worker — Prerender.io proxy for guardiens.fr
  * ========================================================
- * Deploy: Cloudflare Dashboard > Workers & Pages > Create Worker > paste this code
- * Route:  *guardiens.fr/*
+ * Deploy: Cloudflare Dashboard > Workers & Pages > guardiens-prerender > Edit code
+ * Route:  guardiens.fr/* + *guardiens.fr/*
+ *
+ * DIAGNOSTIC VERSION — adds X-Prerender-* headers on every response
+ * so you can curl and see exactly what the Worker decided.
  */
 
 const PRERENDER_TOKEN = 'P7riC8MFdBNYlNYGa8oz';
@@ -28,12 +31,19 @@ const BOT_AGENTS = [
 
 const BOT_REGEX = new RegExp(BOT_AGENTS.join('|'), 'i');
 
-function shouldPrerender(request) {
+function detectBot(request) {
   const url = new URL(request.url);
-  if (IGNORED_EXTENSIONS.test(url.pathname)) return false;
-  if (request.method !== 'GET') return false;
-  if (request.headers.get('x-prerender')) return false;
-  return BOT_REGEX.test(request.headers.get('user-agent') || '');
+  const ua = request.headers.get('user-agent') || '';
+  const reasons = [];
+
+  if (IGNORED_EXTENSIONS.test(url.pathname)) reasons.push('static-asset');
+  if (request.method !== 'GET') reasons.push('non-get');
+  if (request.headers.get('x-prerender')) reasons.push('loop-guard');
+
+  const isBot = BOT_REGEX.test(ua);
+  if (!isBot) reasons.push('not-a-bot');
+
+  return { shouldPrerender: reasons.length === 0 && isBot, isBot, ua, reasons };
 }
 
 async function fetchPrerender(url) {
@@ -53,33 +63,66 @@ async function fetchPrerender(url) {
   }
 }
 
+function withDiagHeaders(response, diag) {
+  const headers = new Headers(response.headers);
+  for (const [k, v] of Object.entries(diag)) {
+    headers.set(k, String(v).slice(0, 200));
+  }
+  return new Response(response.body, {
+    status: response.status,
+    statusText: response.statusText,
+    headers,
+  });
+}
+
 export default {
   async fetch(request, env, ctx) {
-    if (!shouldPrerender(request)) {
-      return fetch(request);
+    const { shouldPrerender, isBot, ua, reasons } = detectBot(request);
+    const url = request.url;
+
+    const baseDiag = {
+      'X-Prerender-Worker': 'guardiens-prerender-v2',
+      'X-Prerender-Bot-Detected': String(isBot),
+      'X-Prerender-UA': ua || '(empty)',
+      'X-Prerender-Skip-Reasons': reasons.join(',') || 'none',
+    };
+
+    if (!shouldPrerender) {
+      const originResp = await fetch(request);
+      return withDiagHeaders(originResp, {
+        ...baseDiag,
+        'X-Prerender-Status': 'bypass',
+      });
     }
 
-    const ua = request.headers.get('user-agent') || '';
-    const url = request.url;
-    console.log('[Prerender] Bot detected — UA: "' + ua + '" — URL: ' + url);
+    console.log('[Prerender] Bot — UA: "' + ua + '" — URL: ' + url);
 
     try {
       const prerenderResponse = await fetchPrerender(url);
 
       if (prerenderResponse.ok) {
-        const headers = new Headers(prerenderResponse.headers);
-        headers.set('X-Prerender-Status', 'hit');
-        return new Response(prerenderResponse.body, {
-          status: prerenderResponse.status,
-          headers,
+        return withDiagHeaders(prerenderResponse, {
+          ...baseDiag,
+          'X-Prerender-Status': 'hit',
+          'X-Prerender-Upstream-Status': prerenderResponse.status,
         });
       }
 
-      console.log('[Prerender] Error ' + prerenderResponse.status + ' for ' + url + ' — fallback to origin');
-      return fetch(request);
+      console.log('[Prerender] Error ' + prerenderResponse.status + ' for ' + url);
+      const originResp = await fetch(request);
+      return withDiagHeaders(originResp, {
+        ...baseDiag,
+        'X-Prerender-Status': 'fallback-upstream-error',
+        'X-Prerender-Upstream-Status': prerenderResponse.status,
+      });
     } catch (err) {
-      console.log('[Prerender] Failed for ' + url + ': ' + err.message + ' — fallback to origin');
-      return fetch(request);
+      console.log('[Prerender] Failed for ' + url + ': ' + err.message);
+      const originResp = await fetch(request);
+      return withDiagHeaders(originResp, {
+        ...baseDiag,
+        'X-Prerender-Status': 'fallback-exception',
+        'X-Prerender-Error': err.message,
+      });
     }
   },
 };
