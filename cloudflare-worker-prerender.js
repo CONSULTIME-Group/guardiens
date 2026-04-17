@@ -93,8 +93,54 @@ async function fetchOrigin(request) {
   return fetch(originRequest);
 }
 
+// URL de la fonction sitemap Supabase
+const SITEMAP_URL = 'https://erhccyqevdyevpyctsjj.supabase.co/functions/v1/sitemap';
+
+// robots.txt servi en dur (rapide, fiable)
+const ROBOTS_TXT = `User-agent: *
+Allow: /
+
+Sitemap: https://guardiens.fr/sitemap.xml
+`;
+
 export default {
   async fetch(request, env, ctx) {
+    const urlObj = new URL(request.url);
+    const pathname = urlObj.pathname;
+
+    // === Routes spéciales servies par le Worker ===
+    if (pathname === '/robots.txt') {
+      return new Response(ROBOTS_TXT, {
+        status: 200,
+        headers: {
+          'content-type': 'text/plain; charset=utf-8',
+          'cache-control': 'public, max-age=3600',
+          'x-prerender-worker': 'guardiens-prerender-v3',
+          'x-prerender-status': 'worker-served',
+        },
+      });
+    }
+
+    if (pathname === '/sitemap.xml') {
+      try {
+        const sitemapResp = await fetch(SITEMAP_URL, {
+          headers: { 'accept': 'application/xml' },
+        });
+        const body = await sitemapResp.text();
+        return new Response(body, {
+          status: sitemapResp.status,
+          headers: {
+            'content-type': 'application/xml; charset=utf-8',
+            'cache-control': 'public, max-age=3600',
+            'x-prerender-worker': 'guardiens-prerender-v3',
+            'x-prerender-status': 'sitemap-proxy',
+          },
+        });
+      } catch (err) {
+        return new Response('Sitemap unavailable', { status: 503 });
+      }
+    }
+
     const { shouldPrerender, isBot, ua, reasons } = detectBot(request);
     const url = request.url;
 
