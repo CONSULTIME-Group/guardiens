@@ -112,8 +112,8 @@ const AdminReviewDisputes = () => {
     setSubmitting(true);
     const { error } = await supabase.rpc("resolve_review_dispute", {
       p_dispute_id: resolveTarget.dispute.id,
-      p_status: resolveTarget.action,
-      p_admin_note: adminNote.trim() || null,
+      p_decision: resolveTarget.action,
+      p_admin_note: adminNote.trim() || undefined,
     });
     setSubmitting(false);
     if (error) {

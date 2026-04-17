@@ -4,7 +4,7 @@ import {
   LayoutDashboard, Users, Megaphone, CalendarCheck, Star, Flag,
   ShieldCheck, Mail, FileText, LogOut, ArrowLeft, MapPin, HelpCircle,
   Compass, Handshake, Briefcase, CreditCard, MessageSquare, ScrollText, Settings,
-  Lightbulb,
+  Lightbulb, AlertTriangle,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
@@ -52,6 +52,7 @@ const adminNavGroups: NavGroup[] = [
     label: "MODÉRATION",
     items: [
       { to: "/admin/reviews", icon: Star, label: "Avis" },
+      { to: "/admin/review-disputes", icon: AlertTriangle, label: "Contestations d'avis", badgeKey: "reviewDisputes" },
       { to: "/admin/reports", icon: Flag, label: "Signalements", badgeKey: "reports" },
       { to: "/admin/contact-messages", icon: MessageSquare, label: "Messages contact", badgeKey: "contactMessages" },
       { to: "/admin/messages", icon: MessageSquare, label: "Messagerie" },
@@ -102,6 +103,7 @@ export const AdminSidebar = () => {
         supabase.from("reports").select("id", { count: "exact", head: true }).eq("status", "new"),
         supabase.from("contact_messages").select("id", { count: "exact", head: true }).eq("status", "new"),
         supabase.from("skills_library").select("id", { count: "exact", head: true }).eq("status", "pending"),
+        supabase.from("review_disputes").select("id", { count: "exact", head: true }).eq("status", "pending"),
       ]);
       setBadges({
         verifications: results[0].count || 0,
@@ -109,6 +111,7 @@ export const AdminSidebar = () => {
         reports: results[2].count || 0,
         contactMessages: results[3].count || 0,
         skills: results[4].count || 0,
+        reviewDisputes: results[5].count || 0,
       });
     };
     fetchBadges();
