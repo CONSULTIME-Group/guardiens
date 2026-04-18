@@ -97,6 +97,7 @@ const AdminSkills = lazy(() => import("./pages/admin/AdminSkills"));
 const AdminMassEmails = lazy(() => import("./pages/admin/AdminMassEmails"));
 const AdminMessages = lazy(() => import("./pages/admin/AdminMessages"));
 const AdminAnalytics = lazy(() => import("./pages/admin/AdminAnalytics"));
+const AdminErrors = lazy(() => import("./pages/admin/AdminErrors"));
 const EmergencySitter = lazy(() => import("./pages/EmergencySitter"));
 const MySubscription = lazy(() => import("./pages/MySubscription"));
 const Favorites = lazy(() => import("./pages/Favorites"));
@@ -245,6 +246,7 @@ const AppRoutes = () => (
         <Route path="/admin/envois-groupes" element={<AdminMassEmails />} />
         <Route path="/admin/messages" element={<AdminMessages />} />
         <Route path="/admin/analytics" element={<AdminAnalytics />} />
+        <Route path="/admin/errors" element={<AdminErrors />} />
       </Route>
       {/* App routes */}
       <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>

@@ -4,7 +4,7 @@ import {
   LayoutDashboard, Users, Megaphone, CalendarCheck, Star, Flag,
   ShieldCheck, Mail, FileText, LogOut, ArrowLeft, MapPin, HelpCircle,
   Compass, Handshake, Briefcase, CreditCard, MessageSquare, ScrollText, Settings,
-  Lightbulb, AlertTriangle,
+  Lightbulb, AlertTriangle, Bug,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
@@ -79,6 +79,7 @@ const adminNavGroups: NavGroup[] = [
     items: [
       { to: "/admin/seo", icon: MapPin, label: "Dashboard SEO" },
       { to: "/admin/analytics", icon: LayoutDashboard, label: "Analytics" },
+      { to: "/admin/errors", icon: Bug, label: "Erreurs", badgeKey: "errors" },
     ],
   },
   {
@@ -105,6 +106,7 @@ export const AdminSidebar = () => {
         supabase.from("contact_messages").select("id", { count: "exact", head: true }).eq("status", "new"),
         supabase.from("skills_library").select("id", { count: "exact", head: true }).eq("status", "pending"),
         supabase.from("review_disputes").select("id", { count: "exact", head: true }).eq("status", "pending"),
+        supabase.from("error_logs").select("id", { count: "exact", head: true }).is("resolved_at", null),
       ]);
       setBadges({
         verifications: results[0].count || 0,
@@ -113,6 +115,7 @@ export const AdminSidebar = () => {
         contactMessages: results[3].count || 0,
         skills: results[4].count || 0,
         reviewDisputes: results[5].count || 0,
+        errors: results[6].count || 0,
       });
     };
     fetchBadges();
