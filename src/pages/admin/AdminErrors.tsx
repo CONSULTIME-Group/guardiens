@@ -191,7 +191,7 @@ const AdminErrors = () => {
             <div className="p-8 text-center text-muted-foreground">Chargement…</div>
           ) : filtered.length === 0 ? (
             <div className="p-8 text-center text-muted-foreground">
-              <CheckCircle2 className="h-10 w-10 mx-auto mb-2 text-emerald-500" />
+              <CheckCircle2 className="h-10 w-10 mx-auto mb-2 text-primary" />
               Aucune erreur à afficher.
             </div>
           ) : (
@@ -210,7 +210,7 @@ const AdminErrors = () => {
                         </Badge>
                         <Badge variant="outline">×{e.occurrences}</Badge>
                         {e.resolved_at && (
-                          <Badge variant="outline" className="text-emerald-600 border-emerald-600">
+                          <Badge variant="outline" className="text-primary border-primary">
                             résolue
                           </Badge>
                         )}
