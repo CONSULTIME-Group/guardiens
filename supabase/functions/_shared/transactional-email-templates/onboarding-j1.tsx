@@ -5,7 +5,7 @@ import {
 import type { TemplateEntry } from './registry.ts'
 
 const SITE_NAME = "Guardiens"
-const SITE_URL = "https://guardiens.lovable.app"
+const SITE_URL = "https://guardiens.fr"
 
 interface OnboardingJ1Props {
   firstName?: string
@@ -33,7 +33,7 @@ const OnboardingJ1Email = ({ firstName }: OnboardingJ1Props) => {
           </Text>
 
           <Section style={ctaSection}>
-            <Button style={button} href={`${SITE_URL}/mon-profil`}>
+            <Button style={button} href={`${SITE_URL}/profile`}>
               Compléter mon profil
             </Button>
           </Section>
