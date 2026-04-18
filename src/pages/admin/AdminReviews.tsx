@@ -123,7 +123,7 @@ const AdminReviews = () => {
               recipientUserId: review.reviewee_id,
               data: {
                 targetFirstName: review.reviewee?.first_name || "membre",
-                profileUrl: `https://guardiens.lovable.app/sitter/${review.reviewee_id}`,
+                profileUrl: `https://guardiens.fr/gardiens/${review.reviewee_id}`,
               },
             },
           });
@@ -134,7 +134,7 @@ const AdminReviews = () => {
               recipientUserId: review.reviewer_id,
               data: {
                 responderFirstName: review.reviewee?.first_name || "membre",
-                profileUrl: `https://guardiens.lovable.app/sitter/${review.reviewee_id}`,
+                profileUrl: `https://guardiens.fr/gardiens/${review.reviewee_id}`,
               },
             },
           });
