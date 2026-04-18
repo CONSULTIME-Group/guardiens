@@ -78,6 +78,7 @@ const adminNavGroups: NavGroup[] = [
     label: "SEO & TRAFIC",
     items: [
       { to: "/admin/seo", icon: MapPin, label: "Dashboard SEO" },
+      { to: "/admin/analytics", icon: LayoutDashboard, label: "Analytics" },
     ],
   },
   {
