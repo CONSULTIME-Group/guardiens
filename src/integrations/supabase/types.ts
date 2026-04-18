@@ -933,6 +933,75 @@ export type Database = {
           },
         ]
       }
+      error_logs: {
+        Row: {
+          admin_notes: string | null
+          col_no: number | null
+          context: Json | null
+          created_at: string
+          fingerprint: string
+          first_seen_at: string
+          id: string
+          last_seen_at: string
+          line_no: number | null
+          message: string
+          occurrences: number
+          resolved_at: string | null
+          resolved_by: string | null
+          severity: string
+          source: string | null
+          stack: string | null
+          url: string | null
+          user_agent: string | null
+          user_email: string | null
+          user_id: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          col_no?: number | null
+          context?: Json | null
+          created_at?: string
+          fingerprint: string
+          first_seen_at?: string
+          id?: string
+          last_seen_at?: string
+          line_no?: number | null
+          message: string
+          occurrences?: number
+          resolved_at?: string | null
+          resolved_by?: string | null
+          severity?: string
+          source?: string | null
+          stack?: string | null
+          url?: string | null
+          user_agent?: string | null
+          user_email?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          col_no?: number | null
+          context?: Json | null
+          created_at?: string
+          fingerprint?: string
+          first_seen_at?: string
+          id?: string
+          last_seen_at?: string
+          line_no?: number | null
+          message?: string
+          occurrences?: number
+          resolved_at?: string | null
+          resolved_by?: string | null
+          severity?: string
+          source?: string | null
+          stack?: string | null
+          url?: string | null
+          user_agent?: string | null
+          user_email?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       external_experiences: {
         Row: {
           admin_note: string | null
@@ -3765,6 +3834,22 @@ export type Database = {
       is_profile_ready_for_action: {
         Args: { p_user_id?: string }
         Returns: boolean
+      }
+      log_client_error: {
+        Args: {
+          _col_no?: number
+          _context?: Json
+          _fingerprint: string
+          _line_no?: number
+          _message: string
+          _severity?: string
+          _source?: string
+          _stack?: string
+          _url?: string
+          _user_agent?: string
+          _user_email?: string
+        }
+        Returns: string
       }
       move_to_dlq: {
         Args: {

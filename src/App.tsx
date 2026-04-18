@@ -17,6 +17,7 @@ import OfflineBanner from "@/components/layout/OfflineBanner";
 import ScrollToTop from "@/components/layout/ScrollToTop";
 import PageViewTracker from "@/components/analytics/PageViewTracker";
 import { toast } from "sonner";
+import { reportError } from "@/lib/errorLogger";
 
 // ──── Critical routes (eager) ────
 import Login from "./pages/Login";
@@ -96,6 +97,7 @@ const AdminSkills = lazy(() => import("./pages/admin/AdminSkills"));
 const AdminMassEmails = lazy(() => import("./pages/admin/AdminMassEmails"));
 const AdminMessages = lazy(() => import("./pages/admin/AdminMessages"));
 const AdminAnalytics = lazy(() => import("./pages/admin/AdminAnalytics"));
+const AdminErrors = lazy(() => import("./pages/admin/AdminErrors"));
 const EmergencySitter = lazy(() => import("./pages/EmergencySitter"));
 const MySubscription = lazy(() => import("./pages/MySubscription"));
 const Favorites = lazy(() => import("./pages/Favorites"));
@@ -119,6 +121,7 @@ const queryClient = new QueryClient({
     mutations: {
       onError: (error) => {
         console.error("[Mutation error]", error);
+        reportError(error, { source: "react-query-mutation" });
         toast.error("Une erreur est survenue. Veuillez réessayer.");
       },
     },
@@ -243,6 +246,7 @@ const AppRoutes = () => (
         <Route path="/admin/envois-groupes" element={<AdminMassEmails />} />
         <Route path="/admin/messages" element={<AdminMessages />} />
         <Route path="/admin/analytics" element={<AdminAnalytics />} />
+        <Route path="/admin/errors" element={<AdminErrors />} />
       </Route>
       {/* App routes */}
       <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
