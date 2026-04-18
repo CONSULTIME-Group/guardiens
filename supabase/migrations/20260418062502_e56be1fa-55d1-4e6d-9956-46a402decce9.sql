@@ -1,0 +1,1 @@
+DELETE FROM public.error_logs WHERE fingerprint LIKE 'test_e2e_fp_%' OR fingerprint LIKE 'dedup_test_%';
