@@ -22,18 +22,14 @@ interface TrackOptions {
 
 /**
  * Track un événement de manière non-bloquante.
- * Inclut automatiquement le user_id si l'utilisateur est connecté.
+ * Fonctionne aussi bien pour les visiteurs anonymes que connectés.
  */
 export async function trackEvent(eventType: EventType, opts: TrackOptions = {}) {
   try {
     const { data: { user } } = await supabase.auth.getUser();
 
-    // RLS exige user_id pour les anonymes → on skip côté client si non auth.
-    // (Pour le tracking anonyme, il faudrait une edge function.)
-    if (!user) return;
-
     await supabase.from("analytics_events").insert({
-      user_id: user.id,
+      user_id: user?.id ?? null,
       event_type: eventType,
       source: opts.source ?? null,
       metadata: opts.metadata ?? null,
