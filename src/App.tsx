@@ -17,6 +17,7 @@ import OfflineBanner from "@/components/layout/OfflineBanner";
 import ScrollToTop from "@/components/layout/ScrollToTop";
 import PageViewTracker from "@/components/analytics/PageViewTracker";
 import { toast } from "sonner";
+import { reportError } from "@/lib/errorLogger";
 
 // ──── Critical routes (eager) ────
 import Login from "./pages/Login";
@@ -119,6 +120,7 @@ const queryClient = new QueryClient({
     mutations: {
       onError: (error) => {
         console.error("[Mutation error]", error);
+        reportError(error, { source: "react-query-mutation" });
         toast.error("Une erreur est survenue. Veuillez réessayer.");
       },
     },
