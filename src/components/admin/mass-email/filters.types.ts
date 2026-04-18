@@ -14,7 +14,8 @@ export interface MassEmailFilters {
   abonnes_actifs?: boolean;
   id_verifiee?: boolean;
   onboarding_complete?: boolean;
-  profile_completion_min?: number; // 0-100
+  profile_completion_min?: number; // 0-100 (≥)
+  profile_completion_max?: number; // 0-100 (≤) — cibler profils peu remplis
   has_completed_sits?: "any" | "yes" | "no"; // a déjà gardé / pas encore
 
   // Cycle de vie
@@ -42,6 +43,13 @@ export interface DormantPreset {
 }
 
 export const DORMANT_PRESETS: DormantPreset[] = [
+  {
+    key: "profil_incomplet",
+    label: "Profils incomplets",
+    description: "Profil rempli à moins de 30% (à relancer en priorité)",
+    segment: "tous",
+    filters: { profile_completion_max: 30 },
+  },
   {
     key: "inactifs_30j",
     label: "Inactifs 30j",
@@ -102,6 +110,7 @@ export function countActiveFilters(f: MassEmailFilters): number {
   if (f.id_verifiee) n++;
   if (f.onboarding_complete) n++;
   if (f.profile_completion_min) n++;
+  if (f.profile_completion_max !== undefined && f.profile_completion_max < 100) n++;
   if (f.has_completed_sits && f.has_completed_sits !== "any") n++;
   if (f.inscrits_depuis_jours) n++;
   if (f.inscrits_avant_jours) n++;
