@@ -5,7 +5,7 @@ import {
 import type { TemplateEntry } from './registry.ts'
 
 const SITE_NAME = "Guardiens"
-const SITE_URL = "https://guardiens.lovable.app"
+const SITE_URL = "https://guardiens.fr"
 
 interface Props { responderFirstName?: string; missionTitle?: string }
 

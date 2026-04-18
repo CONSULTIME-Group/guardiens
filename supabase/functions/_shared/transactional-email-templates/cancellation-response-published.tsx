@@ -5,7 +5,7 @@ import {
 import type { TemplateEntry } from './registry.ts'
 
 const SITE_NAME = "Guardiens"
-const SITE_URL = "https://guardiens.lovable.app"
+const SITE_URL = "https://guardiens.fr"
 
 interface Props {
   responderFirstName?: string
@@ -42,7 +42,7 @@ export const template = {
   subject: (data: Record<string, any>) =>
     `${data.responderFirstName || 'Un membre'} a répondu à votre avis`,
   displayName: 'Réponse à avis d\'annulation publiée',
-  previewData: { responderFirstName: 'Lucas', profileUrl: 'https://guardiens.lovable.app/sitter/456' },
+  previewData: { responderFirstName: 'Lucas', profileUrl: 'https://guardiens.fr/sitter/456' },
 } satisfies TemplateEntry
 
 const main = { backgroundColor: '#ffffff', fontFamily: "'Outfit', Arial, sans-serif" }

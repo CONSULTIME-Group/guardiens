@@ -5,7 +5,7 @@ import {
 import type { TemplateEntry } from './registry.ts'
 
 const SITE_NAME = "Guardiens"
-const SITE_URL = "https://guardiens.lovable.app"
+const SITE_URL = "https://guardiens.fr"
 
 interface Props {
   cancellerFirstName?: string
@@ -31,7 +31,7 @@ const CancellationBySitterEmail = ({ cancellerFirstName, sitTitle, startDate, re
         <Text style={text}>
           Votre annonce a été automatiquement remise en ligne. Un avis d'annulation sera soumis à modération.
         </Text>
-        <Button style={button} href={`${SITE_URL}/search-sitter`}>
+        <Button style={button} href={`${SITE_URL}/recherche-gardiens`}>
           Trouver un autre gardien
         </Button>
         <Hr style={hr} />
