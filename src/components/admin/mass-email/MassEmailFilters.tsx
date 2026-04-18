@@ -6,9 +6,10 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Slider } from "@/components/ui/slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { MapPin, Activity, Clock, Award } from "lucide-react";
+import { MapPin, Activity, Clock, Award, Moon, Zap } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import type { MassEmailFilters, Segment } from "./filters.types";
-import { SEGMENT_OPTIONS, countActiveFilters } from "./filters.types";
+import { SEGMENT_OPTIONS, countActiveFilters, DORMANT_PRESETS } from "./filters.types";
 
 interface Props {
   segment: Segment;
@@ -21,8 +22,41 @@ export const MassEmailFiltersPanel = ({ segment, setSegment, filters, setFilters
   const update = (patch: Partial<MassEmailFilters>) => setFilters({ ...filters, ...patch });
   const activeCount = countActiveFilters(filters);
 
+  const applyPreset = (preset: typeof DORMANT_PRESETS[number]) => {
+    setSegment(preset.segment);
+    setFilters(preset.filters);
+  };
+
   return (
     <div className="space-y-4">
+      {/* Présets rapides — Dormants */}
+      <Card className="border-amber-200/60 bg-amber-50/30 dark:bg-amber-950/10 dark:border-amber-900/30">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base flex items-center gap-2">
+            <Zap className="h-4 w-4 text-amber-600" />
+            Présets : réveiller les dormants
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="flex flex-wrap gap-2">
+          {DORMANT_PRESETS.map((preset) => (
+            <Button
+              key={preset.key}
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => applyPreset(preset)}
+              className="h-auto py-1.5 px-3 flex flex-col items-start gap-0.5 text-left"
+              title={preset.description}
+            >
+              <span className="text-xs font-medium">{preset.label}</span>
+              <span className="text-[10px] text-muted-foreground font-normal leading-tight">
+                {preset.description}
+              </span>
+            </Button>
+          ))}
+        </CardContent>
+      </Card>
+
       {/* Segment principal */}
       <Card>
         <CardHeader className="pb-3">
