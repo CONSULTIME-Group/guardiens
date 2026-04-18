@@ -245,6 +245,48 @@ export const MassEmailFiltersPanel = ({ segment, setSegment, filters, setFilters
                 </div>
               </AccordionContent>
             </AccordionItem>
+
+            {/* ── DORMANTS / INACTIFS ── */}
+            <AccordionItem value="dormants" className="border-b-0">
+              <AccordionTrigger className="hover:no-underline py-2">
+                <span className="flex items-center gap-2 text-sm font-medium">
+                  <Moon className="h-4 w-4 text-muted-foreground" />
+                  Dormants / inactifs
+                </span>
+              </AccordionTrigger>
+              <AccordionContent className="space-y-3 pt-2">
+                <div className="space-y-1.5">
+                  <Label htmlFor="no-signin" className="text-xs">
+                    Pas connectés depuis plus de … jours
+                  </Label>
+                  <Input
+                    id="no-signin" type="number" min={1} max={365}
+                    placeholder="Ex : 30 (inactifs 1 mois)"
+                    value={filters.no_signin_since_days || ""}
+                    onChange={(e) => update({ no_signin_since_days: e.target.value ? Number(e.target.value) : undefined })}
+                    className="h-9"
+                  />
+                  <p className="text-[11px] text-muted-foreground">
+                    Inclut ceux qui ne se sont jamais connectés
+                  </p>
+                </div>
+                <CheckboxRow
+                  id="no-app" label="Gardiens n'ayant jamais postulé"
+                  checked={!!filters.no_application_ever}
+                  onChange={(c) => update({ no_application_ever: c })}
+                />
+                <CheckboxRow
+                  id="no-sit" label="Proprios n'ayant jamais publié d'annonce"
+                  checked={!!filters.no_sit_published_ever}
+                  onChange={(c) => update({ no_sit_published_ever: c })}
+                />
+                <CheckboxRow
+                  id="no-conv" label="Aucune conversation initiée ou reçue"
+                  checked={!!filters.no_conversation_ever}
+                  onChange={(c) => update({ no_conversation_ever: c })}
+                />
+              </AccordionContent>
+            </AccordionItem>
           </Accordion>
         </CardContent>
       </Card>
