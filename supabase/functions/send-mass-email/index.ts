@@ -130,16 +130,80 @@ async function fetchTargetedProfiles(
   }
 
   // Filtre abonnés actifs (cross-table)
+  let result = all;
   if (filters.abonnes_actifs) {
     const { data: subs } = await serviceClient
       .from("subscriptions")
       .select("user_id")
       .in("status", ["active", "trial"]);
     const activeIds = new Set((subs || []).map((s: any) => s.user_id));
-    return all.filter((p) => activeIds.has(p.id));
+    result = result.filter((p) => activeIds.has(p.id));
   }
 
-  return all;
+  // === Filtres dormants/inactifs (cross-table) ===
+
+  // Aucune candidature jamais envoyée
+  if (filters.no_application_ever) {
+    const { data: appSitters } = await serviceClient
+      .from("applications")
+      .select("sitter_id");
+    const withApp = new Set((appSitters || []).map((a: any) => a.sitter_id));
+    result = result.filter((p) => !withApp.has(p.id));
+  }
+
+  // Aucune annonce jamais publiée
+  if (filters.no_sit_published_ever) {
+    const { data: sitOwners } = await serviceClient
+      .from("sits")
+      .select("user_id");
+    const withSit = new Set((sitOwners || []).map((s: any) => s.user_id));
+    result = result.filter((p) => !withSit.has(p.id));
+  }
+
+  // Aucune conversation jamais (ni owner ni sitter)
+  if (filters.no_conversation_ever) {
+    const { data: convs } = await serviceClient
+      .from("conversations")
+      .select("owner_id, sitter_id");
+    const withConv = new Set<string>();
+    for (const c of (convs || []) as any[]) {
+      if (c.owner_id) withConv.add(c.owner_id);
+      if (c.sitter_id) withConv.add(c.sitter_id);
+    }
+    result = result.filter((p) => !withConv.has(p.id));
+  }
+
+  // Pas connecté depuis N jours (auth.users via admin API)
+  if (filters.no_signin_since_days && filters.no_signin_since_days > 0) {
+    const cutoff = Date.now() - filters.no_signin_since_days * 86400000;
+    // listUsers paginé — on récupère tout
+    const inactiveIds = new Set<string>();
+    let page = 1;
+    const perPage = 1000;
+    while (true) {
+      const { data: usersPage, error: uErr } = await (serviceClient.auth as any).admin.listUsers({
+        page, perPage,
+      });
+      if (uErr) {
+        console.error("listUsers error:", uErr);
+        break;
+      }
+      const users = usersPage?.users || [];
+      for (const u of users) {
+        const lastSignIn = u.last_sign_in_at ? new Date(u.last_sign_in_at).getTime() : null;
+        // Inactif si jamais connecté OU dernière connexion antérieure au cutoff
+        if (lastSignIn === null || lastSignIn < cutoff) {
+          inactiveIds.add(u.id);
+        }
+      }
+      if (users.length < perPage) break;
+      page++;
+      if (page > 50) break; // garde-fou : max 50k users
+    }
+    result = result.filter((p) => inactiveIds.has(p.id));
+  }
+
+  return result;
 }
 
 Deno.serve(async (req) => {
