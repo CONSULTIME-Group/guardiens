@@ -30,10 +30,10 @@ export const MassEmailFiltersPanel = ({ segment, setSegment, filters, setFilters
   return (
     <div className="space-y-4">
       {/* Présets rapides — Dormants */}
-      <Card className="border-amber-200/60 bg-amber-50/30 dark:bg-amber-950/10 dark:border-amber-900/30">
+      <Card className="border-primary/30 bg-primary/5">
         <CardHeader className="pb-3">
           <CardTitle className="text-base flex items-center gap-2">
-            <Zap className="h-4 w-4 text-amber-600" />
+            <Zap className="h-4 w-4 text-primary" />
             Présets : réveiller les dormants
           </CardTitle>
         </CardHeader>
