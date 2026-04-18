@@ -5,7 +5,7 @@ import {
 import type { TemplateEntry } from './registry.ts'
 
 const SITE_NAME = "Guardiens"
-const SITE_URL = "https://guardiens.lovable.app"
+const SITE_URL = "https://guardiens.fr"
 
 interface Props {
   targetFirstName?: string
@@ -45,7 +45,7 @@ export const template = {
   component: CancellationReviewPublishedEmail,
   subject: "Un avis d'annulation a été publié sur votre profil",
   displayName: 'Avis d\'annulation publié',
-  previewData: { targetFirstName: 'Marie', profileUrl: 'https://guardiens.lovable.app/sitter/123' },
+  previewData: { targetFirstName: 'Marie', profileUrl: 'https://guardiens.fr/sitter/123' },
 } satisfies TemplateEntry
 
 const main = { backgroundColor: '#ffffff', fontFamily: "'Outfit', Arial, sans-serif" }

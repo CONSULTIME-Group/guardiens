@@ -5,7 +5,7 @@ import {
 import type { TemplateEntry } from './registry.ts'
 
 const SITE_NAME = "Guardiens"
-const SITE_URL = "https://guardiens.lovable.app"
+const SITE_URL = "https://guardiens.fr"
 
 const SubscriptionExpires30dEmail = ({ firstName = '' }: { firstName?: string }) => (
   <Html lang="fr" dir="ltr">
