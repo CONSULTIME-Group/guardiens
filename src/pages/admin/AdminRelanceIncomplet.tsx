@@ -118,7 +118,6 @@ export default function AdminRelanceIncomplet() {
             </Button>
           </CardContent>
         </Card>
-      </div>
-    </AdminLayout>
+    </div>
   );
 }
