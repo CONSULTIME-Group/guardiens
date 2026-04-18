@@ -4,6 +4,7 @@ import App from "./App.tsx";
 import "./index.css";
 import reportWebVitals from "./lib/webVitals";
 import { installGlobalErrorHandlers } from "./lib/logger";
+import { installGlobalErrorLogger } from "./lib/errorLogger";
 
 const root = createRoot(document.getElementById("root")!);
 root.render(
@@ -22,3 +23,5 @@ reportWebVitals();
 
 // Catch unhandled errors globally
 installGlobalErrorHandlers();
+// Persist errors to DB for admin dashboard
+installGlobalErrorLogger();
