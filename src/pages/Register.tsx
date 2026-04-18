@@ -10,6 +10,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
 import { getSignupRedirectUrl } from "@/lib/authRedirect";
 import { useToast } from "@/hooks/use-toast";
+import { trackEvent, trackEventWithUserId } from "@/lib/analytics";
 import { Eye, EyeOff, MailCheck, Info } from "lucide-react";
 import {
   Dialog,
