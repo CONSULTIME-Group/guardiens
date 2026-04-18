@@ -10,8 +10,32 @@ const THROTTLE_MS = 30_000; // n'envoie pas le même fp plus d'1x toutes les 30s
 const MAX_PER_SESSION = 50;
 let sessionCount = 0;
 
+/**
+ * Patterns d'erreurs non actionnables — ignorés silencieusement.
+ * - "Script error." : cross-origin sans stack (pixel FB, GA…)
+ * - chunks périmés : déjà gérés par lazyWithRetry
+ * - ResizeObserver : warning bénin
+ * - réseau utilisateur / navigation annulée : non actionnable
+ */
+const IGNORED_PATTERNS: RegExp[] = [
+  /^Script error\.?$/i,
+  /Failed to fetch dynamically imported module/i,
+  /ChunkLoadError/i,
+  /Loading chunk \d+ failed/i,
+  /ResizeObserver loop/i,
+  /Non-Error promise rejection captured/i,
+  /NetworkError when attempting to fetch resource/i,
+  /The (user|operation) (aborted|was aborted)/i,
+  /AbortError/i,
+  /Load failed/i,
+];
+
+function shouldIgnore(message: string): boolean {
+  if (!message) return true;
+  return IGNORED_PATTERNS.some((re) => re.test(message));
+}
+
 function fingerprint(message: string, source?: string, line?: number): string {
-  // Hash simple stable
   const base = `${message}|${source ?? ""}|${line ?? ""}`.slice(0, 500);
   let hash = 0;
   for (let i = 0; i < base.length; i++) {
