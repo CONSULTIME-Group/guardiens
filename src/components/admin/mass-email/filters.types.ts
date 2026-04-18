@@ -107,5 +107,9 @@ export function countActiveFilters(f: MassEmailFilters): number {
   if (f.inscrits_avant_jours) n++;
   if (f.fondateur_only) n++;
   if (f.min_completed_sits) n++;
+  if (f.no_signin_since_days) n++;
+  if (f.no_application_ever) n++;
+  if (f.no_sit_published_ever) n++;
+  if (f.no_conversation_ever) n++;
   return n;
 }
