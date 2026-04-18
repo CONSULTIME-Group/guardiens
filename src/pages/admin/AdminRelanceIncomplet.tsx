@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Loader2, AlertTriangle, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
-import { AdminLayout } from "@/components/admin/AdminLayout";
+
 
 export default function AdminRelanceIncomplet() {
   const [loading, setLoading] = useState<"dry" | "send" | null>(null);
@@ -30,8 +30,7 @@ export default function AdminRelanceIncomplet() {
   };
 
   return (
-    <AdminLayout>
-      <div className="max-w-3xl mx-auto p-6 space-y-6">
+    <div className="max-w-3xl mx-auto p-6 space-y-6">
         <div>
           <h1 className="text-2xl font-bold">Relance profils incomplets — J+2</h1>
           <p className="text-muted-foreground mt-1">
