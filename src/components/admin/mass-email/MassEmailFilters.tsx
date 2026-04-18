@@ -17,7 +17,7 @@ interface Props {
   setFilters: (f: MassEmailFilters) => void;
 }
 
-export const MassEmailFilters = ({ segment, setSegment, filters, setFilters }: Props) => {
+export const MassEmailFiltersPanel = ({ segment, setSegment, filters, setFilters }: Props) => {
   const update = (patch: Partial<MassEmailFilters>) => setFilters({ ...filters, ...patch });
   const activeCount = countActiveFilters(filters);
 
