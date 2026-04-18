@@ -44,7 +44,7 @@ const RelanceProfilIncompletEmail = ({ firstName }: RelanceProfilIncompletProps)
           <Text style={listItem}>✅ Une courte présentation (3 lignes)</Text>
 
           <Section style={ctaSection}>
-            <Button style={button} href={`${SITE_URL}/mon-profil`}>
+            <Button style={button} href={`${SITE_URL}/profile`}>
               Compléter mon profil maintenant
             </Button>
           </Section>
