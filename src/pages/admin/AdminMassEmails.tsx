@@ -1,61 +1,29 @@
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { Checkbox } from "@/components/ui/checkbox";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-  DialogDescription,
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
 } from "@/components/ui/dialog";
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
+  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Send, Eye, Loader2 } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-
-type Segment = "tous" | "gardiens" | "proprios" | "fondateurs";
-
-const SEGMENT_OPTIONS: { value: Segment; label: string }[] = [
-  { value: "tous", label: "Tous les inscrits" },
-  { value: "gardiens", label: "Gardiens uniquement" },
-  { value: "proprios", label: "Proprios uniquement" },
-  { value: "fondateurs", label: "Fondateurs uniquement" },
-];
-
-const SEGMENT_LABELS: Record<string, string> = {
-  tous: "Tous",
-  gardiens: "Gardiens",
-  proprios: "Proprios",
-  fondateurs: "Fondateurs",
-};
+import { MassEmailFiltersPanel } from "@/components/admin/mass-email/MassEmailFilters";
+import type { MassEmailFilters, Segment } from "@/components/admin/mass-email/filters.types";
+import { SEGMENT_LABELS } from "@/components/admin/mass-email/filters.types";
 
 interface MassEmail {
   id: string;
@@ -67,12 +35,9 @@ interface MassEmail {
 }
 
 const AdminMassEmails = () => {
-  const { user } = useAuth();
-
   // Form state
   const [segment, setSegment] = useState<Segment>("tous");
-  const [abonnesActifs, setAbonnesActifs] = useState(false);
-  const [idVerifiee, setIdVerifiee] = useState(false);
+  const [filters, setFilters] = useState<MassEmailFilters>({});
   const [subject, setSubject] = useState("");
   const [body, setBody] = useState("");
   const [ctaEnabled, setCtaEnabled] = useState(false);
@@ -90,7 +55,6 @@ const AdminMassEmails = () => {
   const [history, setHistory] = useState<MassEmail[]>([]);
   const [historyLoading, setHistoryLoading] = useState(true);
 
-  // Load history
   const loadHistory = useCallback(async () => {
     setHistoryLoading(true);
     const { data } = await supabase
@@ -109,39 +73,18 @@ const AdminMassEmails = () => {
     const timer = setTimeout(async () => {
       setCountLoading(true);
       try {
-        // If filtering by active subscribers, first get their user_ids
-        let subscriberIds: string[] | null = null;
-        if (abonnesActifs) {
-          const { data: subs } = await supabase
-            .from("subscriptions")
-            .select("user_id")
-            .in("status", ["active", "trial"]);
-          subscriberIds = (subs || []).map((s: any) => s.user_id);
-          if (subscriberIds.length === 0) {
-            setRecipientCount(0);
-            setCountLoading(false);
-            return;
-          }
-        }
-
-        let query = supabase.from("profiles").select("id", { count: "exact", head: true });
-
-        if (segment === "gardiens") query = query.in("role", ["sitter", "both"]);
-        else if (segment === "proprios") query = query.in("role", ["owner", "both"]);
-        else if (segment === "fondateurs") query = query.eq("is_founder", true);
-
-        if (idVerifiee) query = query.eq("identity_verified", true);
-        if (subscriberIds) query = query.in("id", subscriberIds);
-
-        const { count } = await query;
-        setRecipientCount(count ?? 0);
+        const { data, error } = await supabase.functions.invoke("send-mass-email", {
+          body: { mode: "count", segment, filters },
+        });
+        if (error) throw error;
+        setRecipientCount(data?.count ?? 0);
       } catch {
         setRecipientCount(null);
       }
       setCountLoading(false);
-    }, 400);
+    }, 500);
     return () => clearTimeout(timer);
-  }, [segment, abonnesActifs, idVerifiee]);
+  }, [segment, filters]);
 
   const isValid =
     subject.trim().length > 0 &&
@@ -155,8 +98,9 @@ const AdminMassEmails = () => {
     try {
       const { data, error } = await supabase.functions.invoke("send-mass-email", {
         body: {
+          mode: "send",
           segment,
-          filters: { abonnes_actifs: abonnesActifs, id_verifiee: idVerifiee },
+          filters,
           subject: subject.trim(),
           body: body.trim(),
           cta_label: ctaEnabled ? ctaLabel.trim() : undefined,
@@ -165,12 +109,7 @@ const AdminMassEmails = () => {
       });
       if (error) throw error;
       toast.success(`Envoi lancé — ${data.sent} emails en cours d'expédition`);
-      // Reset form
-      setSubject("");
-      setBody("");
-      setCtaEnabled(false);
-      setCtaLabel("");
-      setCtaUrl("");
+      setSubject(""); setBody(""); setCtaEnabled(false); setCtaLabel(""); setCtaUrl("");
       loadHistory();
     } catch (err: any) {
       toast.error(err.message || "Erreur lors de l'envoi");
@@ -186,60 +125,27 @@ const AdminMassEmails = () => {
       <h1 className="text-2xl font-bold text-foreground">Envois groupés</h1>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left column – Form */}
+        {/* Left column */}
         <div className="lg:col-span-2 space-y-6">
-          {/* Destinataires */}
+          <MassEmailFiltersPanel
+            segment={segment}
+            setSegment={setSegment}
+            filters={filters}
+            setFilters={setFilters}
+          />
+
           <Card>
-            <CardHeader><CardTitle className="text-base">Destinataires</CardTitle></CardHeader>
-            <CardContent className="space-y-4">
-              <RadioGroup
-                value={segment}
-                onValueChange={(v) => setSegment(v as Segment)}
-                className="grid grid-cols-2 gap-3"
-              >
-                {SEGMENT_OPTIONS.map((opt) => (
-                  <div key={opt.value} className="flex items-center space-x-2">
-                    <RadioGroupItem value={opt.value} id={`seg-${opt.value}`} />
-                    <Label htmlFor={`seg-${opt.value}`} className="cursor-pointer text-sm">
-                      {opt.label}
-                    </Label>
-                  </div>
-                ))}
-              </RadioGroup>
-
-              <div className="space-y-2 pt-2 border-t border-border">
-                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                  Filtres optionnels
-                </p>
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="abonnes"
-                    checked={abonnesActifs}
-                    onCheckedChange={(c) => setAbonnesActifs(!!c)}
-                  />
-                  <Label htmlFor="abonnes" className="text-sm cursor-pointer">
-                    Abonnés actifs uniquement
-                  </Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="verified"
-                    checked={idVerifiee}
-                    onCheckedChange={(c) => setIdVerifiee(!!c)}
-                  />
-                  <Label htmlFor="verified" className="text-sm cursor-pointer">
-                    Identité vérifiée uniquement
-                  </Label>
-                </div>
-              </div>
-
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base">Estimation</CardTitle>
+            </CardHeader>
+            <CardContent>
               <p className="text-sm font-medium text-primary">
                 {countLoading ? (
                   <span className="flex items-center gap-1">
                     <Loader2 className="h-3 w-3 animate-spin" /> Calcul…
                   </span>
                 ) : (
-                  `→ ${recipientCount ?? "—"} destinataires estimés`
+                  `→ ${recipientCount ?? "—"} destinataires correspondent à ces critères`
                 )}
               </p>
             </CardContent>
@@ -276,9 +182,7 @@ const AdminMassEmails = () => {
               </div>
 
               <div className="flex items-center justify-between pt-2 border-t border-border">
-                <Label htmlFor="cta-toggle" className="text-sm">
-                  Ajouter un bouton CTA
-                </Label>
+                <Label htmlFor="cta-toggle" className="text-sm">Ajouter un bouton CTA</Label>
                 <Switch id="cta-toggle" checked={ctaEnabled} onCheckedChange={setCtaEnabled} />
               </div>
 
@@ -286,21 +190,11 @@ const AdminMassEmails = () => {
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1.5">
                     <Label htmlFor="cta-label">Libellé du bouton</Label>
-                    <Input
-                      id="cta-label"
-                      placeholder="Découvrir"
-                      value={ctaLabel}
-                      onChange={(e) => setCtaLabel(e.target.value)}
-                    />
+                    <Input id="cta-label" placeholder="Découvrir" value={ctaLabel} onChange={(e) => setCtaLabel(e.target.value)} />
                   </div>
                   <div className="space-y-1.5">
                     <Label htmlFor="cta-url">URL cible</Label>
-                    <Input
-                      id="cta-url"
-                      placeholder="https://guardiens.fr/..."
-                      value={ctaUrl}
-                      onChange={(e) => setCtaUrl(e.target.value)}
-                    />
+                    <Input id="cta-url" placeholder="https://guardiens.fr/..." value={ctaUrl} onChange={(e) => setCtaUrl(e.target.value)} />
                     {ctaUrl && !ctaUrl.startsWith("https://") && (
                       <p className="text-xs text-destructive">L'URL doit commencer par https://</p>
                     )}
@@ -310,27 +204,13 @@ const AdminMassEmails = () => {
             </CardContent>
           </Card>
 
-          {/* Action buttons */}
           <div className="space-y-3">
-            <Button
-              variant="outline"
-              className="w-full"
-              onClick={() => setPreviewOpen(true)}
-              disabled={!subject.trim()}
-            >
+            <Button variant="outline" className="w-full" onClick={() => setPreviewOpen(true)} disabled={!subject.trim()}>
               <Eye className="h-4 w-4 mr-2" />
               Prévisualiser l'email
             </Button>
-            <Button
-              className="w-full"
-              disabled={!isValid || sending}
-              onClick={() => setConfirmOpen(true)}
-            >
-              {sending ? (
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-              ) : (
-                <Send className="h-4 w-4 mr-2" />
-              )}
+            <Button className="w-full" disabled={!isValid || sending} onClick={() => setConfirmOpen(true)}>
+              {sending ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Send className="h-4 w-4 mr-2" />}
               Envoyer à {recipientCount ?? 0} destinataires
             </Button>
           </div>
@@ -342,13 +222,9 @@ const AdminMassEmails = () => {
             <CardHeader><CardTitle className="text-base">Envois précédents</CardTitle></CardHeader>
             <CardContent>
               {historyLoading ? (
-                <div className="flex justify-center py-8">
-                  <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-                </div>
+                <div className="flex justify-center py-8"><Loader2 className="h-5 w-5 animate-spin text-muted-foreground" /></div>
               ) : history.length === 0 ? (
-                <p className="text-sm text-muted-foreground text-center py-8">
-                  Aucun envoi pour l'instant.
-                </p>
+                <p className="text-sm text-muted-foreground text-center py-8">Aucun envoi pour l'instant.</p>
               ) : (
                 <Table>
                   <TableHeader>
@@ -366,15 +242,9 @@ const AdminMassEmails = () => {
                         <TableCell className="text-xs whitespace-nowrap">
                           {format(new Date(row.created_at), "dd MMM yyyy", { locale: fr })}
                         </TableCell>
-                        <TableCell className="text-xs">
-                          {SEGMENT_LABELS[row.segment] || row.segment}
-                        </TableCell>
-                        <TableCell className="text-xs max-w-[120px] truncate">
-                          {row.subject}
-                        </TableCell>
-                        <TableCell className="text-xs text-right">
-                          {row.recipients_count}
-                        </TableCell>
+                        <TableCell className="text-xs">{SEGMENT_LABELS[row.segment] || row.segment}</TableCell>
+                        <TableCell className="text-xs max-w-[120px] truncate">{row.subject}</TableCell>
+                        <TableCell className="text-xs text-right">{row.recipients_count}</TableCell>
                         <TableCell>
                           <Badge variant={row.status === "sent" ? "default" : "destructive"} className="text-[10px]">
                             {row.status === "sent" ? "Envoyé" : "Erreur"}
@@ -397,10 +267,7 @@ const AdminMassEmails = () => {
             <DialogTitle>Prévisualisation</DialogTitle>
             <DialogDescription>Aperçu de l'email tel qu'il sera reçu.</DialogDescription>
           </DialogHeader>
-          <div
-            className="border border-border rounded-lg overflow-hidden"
-            dangerouslySetInnerHTML={{ __html: previewHtml }}
-          />
+          <div className="border border-border rounded-lg overflow-hidden" dangerouslySetInnerHTML={{ __html: previewHtml }} />
         </DialogContent>
       </Dialog>
 

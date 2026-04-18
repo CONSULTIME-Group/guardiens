@@ -15,6 +15,7 @@ import { ErrorBoundary } from "@/components/ErrorBoundary";
 import SkipToContent from "@/components/layout/SkipToContent";
 import OfflineBanner from "@/components/layout/OfflineBanner";
 import ScrollToTop from "@/components/layout/ScrollToTop";
+import PageViewTracker from "@/components/analytics/PageViewTracker";
 import { toast } from "sonner";
 
 // ──── Critical routes (eager) ────
@@ -94,6 +95,7 @@ const AdminSEO = lazy(() => import("./pages/admin/AdminSEO"));
 const AdminSkills = lazy(() => import("./pages/admin/AdminSkills"));
 const AdminMassEmails = lazy(() => import("./pages/admin/AdminMassEmails"));
 const AdminMessages = lazy(() => import("./pages/admin/AdminMessages"));
+const AdminAnalytics = lazy(() => import("./pages/admin/AdminAnalytics"));
 const EmergencySitter = lazy(() => import("./pages/EmergencySitter"));
 const MySubscription = lazy(() => import("./pages/MySubscription"));
 const Favorites = lazy(() => import("./pages/Favorites"));
@@ -240,6 +242,7 @@ const AppRoutes = () => (
         <Route path="/admin/skills" element={<AdminSkills />} />
         <Route path="/admin/envois-groupes" element={<AdminMassEmails />} />
         <Route path="/admin/messages" element={<AdminMessages />} />
+        <Route path="/admin/analytics" element={<AdminAnalytics />} />
       </Route>
       {/* App routes */}
       <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
@@ -280,6 +283,7 @@ const App = () => (
             <Sonner />
             <BrowserRouter>
               <ScrollToTop />
+              <PageViewTracker />
               <OfflineBanner />
               <AppRoutes />
             </BrowserRouter>
