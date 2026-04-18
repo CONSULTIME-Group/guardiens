@@ -42,7 +42,7 @@ export const template = {
   subject: (data: Record<string, any>) =>
     `${data.responderFirstName || 'Un membre'} a répondu à votre avis`,
   displayName: 'Réponse à avis d\'annulation publiée',
-  previewData: { responderFirstName: 'Lucas', profileUrl: 'https://guardiens.fr/sitter/456' },
+  previewData: { responderFirstName: 'Lucas', profileUrl: 'https://guardiens.fr/gardiens/456' },
 } satisfies TemplateEntry
 
 const main = { backgroundColor: '#ffffff', fontFamily: "'Outfit', Arial, sans-serif" }
