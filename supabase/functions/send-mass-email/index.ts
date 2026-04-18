@@ -6,6 +6,20 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type",
 };
 
+interface MassEmailFilters {
+  postal_prefix?: string;
+  city?: string;
+  abonnes_actifs?: boolean;
+  id_verifiee?: boolean;
+  onboarding_complete?: boolean;
+  profile_completion_min?: number;
+  has_completed_sits?: "any" | "yes" | "no";
+  inscrits_depuis_jours?: number;
+  inscrits_avant_jours?: number;
+  fondateur_only?: boolean;
+  min_completed_sits?: number;
+}
+
 function buildHtml(subject: string, body: string, ctaLabel?: string, ctaUrl?: string): string {
   const ctaBlock = ctaLabel && ctaUrl
     ? `<tr><td style="padding:24px 0 0"><a href="${ctaUrl}" style="display:inline-block;padding:12px 28px;background-color:#16a34a;color:#ffffff;text-decoration:none;border-radius:8px;font-weight:600;font-size:16px">${ctaLabel}</a></td></tr>`
@@ -33,6 +47,97 @@ ${ctaBlock}
 </body></html>`;
 }
 
+/**
+ * Applique tous les filtres et retourne la liste de profils correspondants {id, email}.
+ * Logique côté serveur — utilise le service-role client.
+ */
+async function fetchTargetedProfiles(
+  serviceClient: ReturnType<typeof createClient>,
+  segment: string,
+  filters: MassEmailFilters,
+): Promise<{ id: string; email: string }[]> {
+  let query = serviceClient
+    .from("profiles")
+    .select("id, email, postal_code, city, identity_verified, profile_completion, completed_sits_count, is_founder, created_at, role");
+
+  // Segment
+  if (segment === "gardiens") query = query.in("role", ["sitter", "both"]);
+  else if (segment === "proprios") query = query.in("role", ["owner", "both"]);
+  else if (segment === "fondateurs") query = query.eq("is_founder", true);
+
+  // Géo
+  if (filters.postal_prefix) {
+    query = query.like("postal_code", `${filters.postal_prefix}%`);
+  }
+  if (filters.city) {
+    query = query.ilike("city", `%${filters.city}%`);
+  }
+
+  // ID vérifiée
+  if (filters.id_verifiee) query = query.eq("identity_verified", true);
+
+  // Complétion min
+  if (filters.profile_completion_min && filters.profile_completion_min > 0) {
+    query = query.gte("profile_completion", filters.profile_completion_min);
+  }
+
+  // Onboarding complete (≥ 80%)
+  if (filters.onboarding_complete) query = query.gte("profile_completion", 80);
+
+  // Fondateur
+  if (filters.fondateur_only) query = query.eq("is_founder", true);
+
+  // Min completed sits
+  if (filters.min_completed_sits && filters.min_completed_sits > 0) {
+    query = query.gte("completed_sits_count", filters.min_completed_sits);
+  }
+
+  // Cycle de vie : inscrits depuis < N jours (nouveaux)
+  if (filters.inscrits_depuis_jours && filters.inscrits_depuis_jours > 0) {
+    const since = new Date(Date.now() - filters.inscrits_depuis_jours * 86400000).toISOString();
+    query = query.gte("created_at", since);
+  }
+  // Cycle de vie : inscrits avant > N jours (anciens)
+  if (filters.inscrits_avant_jours && filters.inscrits_avant_jours > 0) {
+    const before = new Date(Date.now() - filters.inscrits_avant_jours * 86400000).toISOString();
+    query = query.lte("created_at", before);
+  }
+
+  // has_completed_sits
+  if (filters.has_completed_sits === "yes") {
+    query = query.gt("completed_sits_count", 0);
+  } else if (filters.has_completed_sits === "no") {
+    query = query.or("completed_sits_count.is.null,completed_sits_count.eq.0");
+  }
+
+  // Pagination — Supabase limite à 1000 par défaut, on récupère tout
+  const all: { id: string; email: string }[] = [];
+  const PAGE = 1000;
+  let from = 0;
+  while (true) {
+    const { data, error } = await query.range(from, from + PAGE - 1);
+    if (error) throw error;
+    if (!data || data.length === 0) break;
+    for (const p of data as any[]) {
+      if (p.email) all.push({ id: p.id, email: p.email });
+    }
+    if (data.length < PAGE) break;
+    from += PAGE;
+  }
+
+  // Filtre abonnés actifs (cross-table)
+  if (filters.abonnes_actifs) {
+    const { data: subs } = await serviceClient
+      .from("subscriptions")
+      .select("user_id")
+      .in("status", ["active", "trial"]);
+    const activeIds = new Set((subs || []).map((s: any) => s.user_id));
+    return all.filter((p) => activeIds.has(p.id));
+  }
+
+  return all;
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
@@ -44,16 +149,13 @@ Deno.serve(async (req) => {
     const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY")!;
 
-    if (!RESEND_API_KEY) throw new Error("RESEND_API_KEY not configured");
-
-    // Auth check
+    // Auth
     const authHeader = req.headers.get("Authorization");
     if (!authHeader?.startsWith("Bearer ")) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
         status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
-
     const userClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
       global: { headers: { Authorization: authHeader } },
     });
@@ -73,68 +175,37 @@ Deno.serve(async (req) => {
       .eq("user_id", userId)
       .eq("role", "admin")
       .maybeSingle();
-
     if (!roleData) {
       return new Response(JSON.stringify({ error: "Admin access required" }), {
         status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    const { segment, filters, subject, body, cta_label, cta_url } = await req.json();
+    const payload = await req.json();
+    const mode: "count" | "send" = payload.mode || "send";
+    const segment: string = payload.segment || "tous";
+    const filters: MassEmailFilters = payload.filters || {};
 
-    if (!segment || !subject || !body) {
-      return new Response(JSON.stringify({ error: "Missing required fields" }), {
+    // Mode COUNT — estimation rapide, pas d'envoi
+    if (mode === "count") {
+      const profiles = await fetchTargetedProfiles(serviceClient, segment, filters);
+      const uniqueEmails = new Set(profiles.map((p) => p.email));
+      return new Response(JSON.stringify({ count: uniqueEmails.size }), {
+        status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Mode SEND
+    if (!RESEND_API_KEY) throw new Error("RESEND_API_KEY not configured");
+    const { subject, body, cta_label, cta_url } = payload;
+    if (!subject || !body) {
+      return new Response(JSON.stringify({ error: "Missing subject/body" }), {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    // Build query for recipients
-    let query = serviceClient.from("profiles").select("email");
-
-    if (segment === "gardiens") {
-      query = query.in("role", ["sitter", "both"]);
-    } else if (segment === "proprios") {
-      query = query.in("role", ["owner", "both"]);
-    } else if (segment === "fondateurs") {
-      query = query.eq("is_founder", true);
-    }
-    // 'tous' → no role filter
-
-    if (filters?.id_verifiee) {
-      query = query.eq("identity_verified", true);
-    }
-
-    const { data: profiles, error: profilesErr } = await query;
-    if (profilesErr) throw profilesErr;
-
-    let recipients = (profiles || []).map((p) => p.email).filter(Boolean);
-
-    // Filter active subscribers if needed
-    if (filters?.abonnes_actifs) {
-      const { data: subs } = await serviceClient
-        .from("subscriptions")
-        .select("user_id")
-        .in("status", ["active", "trial"]);
-      const activeUserIds = new Set((subs || []).map((s) => s.user_id));
-      
-      // Need user_ids to cross-reference
-      const { data: profilesWithIds } = await serviceClient
-        .from("profiles")
-        .select("id, email");
-      
-      const emailToId = new Map<string, string>();
-      (profilesWithIds || []).forEach((p) => {
-        if (p.email) emailToId.set(p.email, p.id);
-      });
-      
-      recipients = recipients.filter((email) => {
-        const uid = emailToId.get(email);
-        return uid && activeUserIds.has(uid);
-      });
-    }
-
-    // Deduplicate
-    recipients = [...new Set(recipients)];
+    const profiles = await fetchTargetedProfiles(serviceClient, segment, filters);
+    const recipients = [...new Set(profiles.map((p) => p.email))];
 
     if (recipients.length === 0) {
       return new Response(JSON.stringify({ error: "No recipients found" }), {
@@ -156,7 +227,6 @@ Deno.serve(async (req) => {
 
     for (let i = 0; i < emailObjects.length; i += BATCH_SIZE) {
       const batch = emailObjects.slice(i, i + BATCH_SIZE);
-
       try {
         const res = await fetch("https://api.resend.com/emails/batch", {
           method: "POST",
@@ -170,23 +240,21 @@ Deno.serve(async (req) => {
         if (res.ok) {
           sent += batch.length;
         } else {
-          console.error(`Batch failed (${i}-${i + batch.length}): ${res.status} ${resBody}`);
+          console.error(`Batch failed (${i}): ${res.status} ${resBody}`);
           errors += batch.length;
         }
       } catch (e) {
-        console.error(`Batch error (${i}-${i + batch.length}):`, e);
+        console.error(`Batch error (${i}):`, e);
         errors += batch.length;
       }
-
       if (i + BATCH_SIZE < emailObjects.length) {
         await new Promise((r) => setTimeout(r, 1000));
       }
     }
 
-    // Log the send
     await serviceClient.from("mass_emails").insert({
       segment,
-      filters: filters || {},
+      filters: filters as any,
       subject,
       body,
       cta_label: cta_label || null,
