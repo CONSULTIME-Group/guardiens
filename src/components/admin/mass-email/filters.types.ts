@@ -14,7 +14,8 @@ export interface MassEmailFilters {
   abonnes_actifs?: boolean;
   id_verifiee?: boolean;
   onboarding_complete?: boolean;
-  profile_completion_min?: number; // 0-100
+  profile_completion_min?: number; // 0-100 (≥)
+  profile_completion_max?: number; // 0-100 (≤) — cibler profils peu remplis
   has_completed_sits?: "any" | "yes" | "no"; // a déjà gardé / pas encore
 
   // Cycle de vie
