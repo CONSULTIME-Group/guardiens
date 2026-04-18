@@ -31,6 +31,7 @@ import { template as contactReply } from './contact-reply.tsx'
 import { template as relanceCpManquant } from './relance-cp-manquant.tsx'
 import { template as reviewReceived } from './review-received.tsx'
 import { template as disputeResolved } from './dispute-resolved.tsx'
+import { template as relanceProfilIncomplet } from './relance-profil-incomplet.tsx'
 
 export const TEMPLATES: Record<string, TemplateEntry> = {
   'dispute-resolved': disputeResolved,
@@ -55,4 +56,5 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'contact-reply': contactReply,
   'relance-cp-manquant': relanceCpManquant,
   'review-received': reviewReceived,
+  'relance-profil-incomplet': relanceProfilIncomplet,
 }
