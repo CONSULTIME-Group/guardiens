@@ -110,6 +110,7 @@ export function countActiveFilters(f: MassEmailFilters): number {
   if (f.id_verifiee) n++;
   if (f.onboarding_complete) n++;
   if (f.profile_completion_min) n++;
+  if (f.profile_completion_max !== undefined && f.profile_completion_max < 100) n++;
   if (f.has_completed_sits && f.has_completed_sits !== "any") n++;
   if (f.inscrits_depuis_jours) n++;
   if (f.inscrits_avant_jours) n++;
