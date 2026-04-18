@@ -44,6 +44,13 @@ export interface DormantPreset {
 
 export const DORMANT_PRESETS: DormantPreset[] = [
   {
+    key: "profil_incomplet",
+    label: "Profils incomplets",
+    description: "Profil rempli à moins de 30% (à relancer en priorité)",
+    segment: "tous",
+    filters: { profile_completion_max: 30 },
+  },
+  {
     key: "inactifs_30j",
     label: "Inactifs 30j",
     description: "N'ont pas ouvert l'app depuis 30 jours",
