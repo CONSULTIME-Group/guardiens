@@ -24,7 +24,60 @@ export interface MassEmailFilters {
   // Réputation
   fondateur_only?: boolean;
   min_completed_sits?: number;        // ≥ N gardes terminées
+
+  // Dormants / inactifs
+  no_signin_since_days?: number;      // last_sign_in_at < now - N jours (ou null)
+  no_application_ever?: boolean;      // gardien n'ayant jamais postulé
+  no_sit_published_ever?: boolean;    // proprio n'ayant jamais publié d'annonce
+  no_conversation_ever?: boolean;     // n'a jamais initié de conversation
 }
+
+/** Présets rapides "dormants" — un clic pour appliquer un combo de filtres. */
+export interface DormantPreset {
+  key: string;
+  label: string;
+  description: string;
+  segment: Segment;
+  filters: MassEmailFilters;
+}
+
+export const DORMANT_PRESETS: DormantPreset[] = [
+  {
+    key: "inactifs_30j",
+    label: "Inactifs 30j",
+    description: "N'ont pas ouvert l'app depuis 30 jours",
+    segment: "tous",
+    filters: { no_signin_since_days: 30 },
+  },
+  {
+    key: "gardiens_jamais_postule",
+    label: "Gardiens silencieux",
+    description: "Inscrits comme gardiens mais n'ont jamais postulé",
+    segment: "gardiens",
+    filters: { no_application_ever: true },
+  },
+  {
+    key: "proprios_sans_annonce",
+    label: "Proprios sans annonce",
+    description: "Inscrits comme proprios mais n'ont jamais publié de garde",
+    segment: "proprios",
+    filters: { no_sit_published_ever: true },
+  },
+  {
+    key: "jamais_engage",
+    label: "Jamais engagés",
+    description: "N'ont jamais initié ni reçu de conversation",
+    segment: "tous",
+    filters: { no_conversation_ever: true },
+  },
+  {
+    key: "fondateurs_dormants",
+    label: "Fondateurs dormants",
+    description: "Fondateurs sans aucune garde réalisée",
+    segment: "fondateurs",
+    filters: { has_completed_sits: "no" },
+  },
+];
 
 export const SEGMENT_OPTIONS: { value: Segment; label: string; description: string }[] = [
   { value: "tous", label: "Tous les inscrits", description: "Tous rôles confondus" },
@@ -54,5 +107,9 @@ export function countActiveFilters(f: MassEmailFilters): number {
   if (f.inscrits_avant_jours) n++;
   if (f.fondateur_only) n++;
   if (f.min_completed_sits) n++;
+  if (f.no_signin_since_days) n++;
+  if (f.no_application_ever) n++;
+  if (f.no_sit_published_ever) n++;
+  if (f.no_conversation_ever) n++;
   return n;
 }

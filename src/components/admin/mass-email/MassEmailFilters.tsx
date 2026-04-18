@@ -6,9 +6,10 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Slider } from "@/components/ui/slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { MapPin, Activity, Clock, Award } from "lucide-react";
+import { MapPin, Activity, Clock, Award, Moon, Zap } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import type { MassEmailFilters, Segment } from "./filters.types";
-import { SEGMENT_OPTIONS, countActiveFilters } from "./filters.types";
+import { SEGMENT_OPTIONS, countActiveFilters, DORMANT_PRESETS } from "./filters.types";
 
 interface Props {
   segment: Segment;
@@ -21,8 +22,41 @@ export const MassEmailFiltersPanel = ({ segment, setSegment, filters, setFilters
   const update = (patch: Partial<MassEmailFilters>) => setFilters({ ...filters, ...patch });
   const activeCount = countActiveFilters(filters);
 
+  const applyPreset = (preset: typeof DORMANT_PRESETS[number]) => {
+    setSegment(preset.segment);
+    setFilters(preset.filters);
+  };
+
   return (
     <div className="space-y-4">
+      {/* Présets rapides — Dormants */}
+      <Card className="border-primary/30 bg-primary/5">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base flex items-center gap-2">
+            <Zap className="h-4 w-4 text-primary" />
+            Présets : réveiller les dormants
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="flex flex-wrap gap-2">
+          {DORMANT_PRESETS.map((preset) => (
+            <Button
+              key={preset.key}
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => applyPreset(preset)}
+              className="h-auto py-1.5 px-3 flex flex-col items-start gap-0.5 text-left"
+              title={preset.description}
+            >
+              <span className="text-xs font-medium">{preset.label}</span>
+              <span className="text-[10px] text-muted-foreground font-normal leading-tight">
+                {preset.description}
+              </span>
+            </Button>
+          ))}
+        </CardContent>
+      </Card>
+
       {/* Segment principal */}
       <Card>
         <CardHeader className="pb-3">
@@ -209,6 +243,48 @@ export const MassEmailFiltersPanel = ({ segment, setSegment, filters, setFilters
                     className="h-9"
                   />
                 </div>
+              </AccordionContent>
+            </AccordionItem>
+
+            {/* ── DORMANTS / INACTIFS ── */}
+            <AccordionItem value="dormants" className="border-b-0">
+              <AccordionTrigger className="hover:no-underline py-2">
+                <span className="flex items-center gap-2 text-sm font-medium">
+                  <Moon className="h-4 w-4 text-muted-foreground" />
+                  Dormants / inactifs
+                </span>
+              </AccordionTrigger>
+              <AccordionContent className="space-y-3 pt-2">
+                <div className="space-y-1.5">
+                  <Label htmlFor="no-signin" className="text-xs">
+                    Pas connectés depuis plus de … jours
+                  </Label>
+                  <Input
+                    id="no-signin" type="number" min={1} max={365}
+                    placeholder="Ex : 30 (inactifs 1 mois)"
+                    value={filters.no_signin_since_days || ""}
+                    onChange={(e) => update({ no_signin_since_days: e.target.value ? Number(e.target.value) : undefined })}
+                    className="h-9"
+                  />
+                  <p className="text-[11px] text-muted-foreground">
+                    Inclut ceux qui ne se sont jamais connectés
+                  </p>
+                </div>
+                <CheckboxRow
+                  id="no-app" label="Gardiens n'ayant jamais postulé"
+                  checked={!!filters.no_application_ever}
+                  onChange={(c) => update({ no_application_ever: c })}
+                />
+                <CheckboxRow
+                  id="no-sit" label="Proprios n'ayant jamais publié d'annonce"
+                  checked={!!filters.no_sit_published_ever}
+                  onChange={(c) => update({ no_sit_published_ever: c })}
+                />
+                <CheckboxRow
+                  id="no-conv" label="Aucune conversation initiée ou reçue"
+                  checked={!!filters.no_conversation_ever}
+                  onChange={(c) => update({ no_conversation_ever: c })}
+                />
               </AccordionContent>
             </AccordionItem>
           </Accordion>
