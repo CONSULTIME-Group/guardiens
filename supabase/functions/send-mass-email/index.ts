@@ -18,6 +18,10 @@ interface MassEmailFilters {
   inscrits_avant_jours?: number;
   fondateur_only?: boolean;
   min_completed_sits?: number;
+  no_signin_since_days?: number;
+  no_application_ever?: boolean;
+  no_sit_published_ever?: boolean;
+  no_conversation_ever?: boolean;
 }
 
 function buildHtml(subject: string, body: string, ctaLabel?: string, ctaUrl?: string): string {
