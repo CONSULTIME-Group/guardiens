@@ -69,13 +69,19 @@ const Register = () => {
 
   const pwStrength = useMemo(() => getPasswordStrength(password), [password]);
 
-  // Capture referral code from URL
+  // Capture referral code from URL + track signup_started
   useEffect(() => {
     const ref = searchParams.get("ref");
     if (ref) {
       sessionStorage.setItem("guardiens_ref", ref);
     }
-  }, [searchParams]);
+    // Fire-and-forget — fonctionne aussi en anonyme via insertion locale temp
+    trackEvent("signup_started", {
+      source: "/register",
+      metadata: { has_ref: !!ref, preset_role: presetRole || null },
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -135,7 +141,17 @@ const Register = () => {
       }
 
       setStep("confirmation");
+      // Track signup completed (avec user_id explicite car session pas encore propagée)
+      trackEventWithUserId(result?.user?.id ?? null, "signup_completed", {
+        source: "/register",
+        metadata: { role: selectedRole },
+      });
     } catch (error: any) {
+      // Track échec signup
+      trackEvent("signup_failed", {
+        source: "/register",
+        metadata: { reason: error.message?.slice(0, 100) || "unknown", role: selectedRole },
+      });
       if (error.message === "timeout") {
         setFormError(
           "L'inscription prend plus de temps que prévu. Si vous n'avez pas reçu d'email de confirmation dans 2 minutes, réessayez."
@@ -258,6 +274,10 @@ const Register = () => {
                   onClick={() => {
                     setSelectedRole(role.value);
                     setStep(2);
+                    trackEvent("signup_role_selected", {
+                      source: "/register",
+                      metadata: { role: role.value },
+                    });
                   }}
                   className={cn(
                     "w-full text-left p-5 rounded-lg border-2 transition-all",
