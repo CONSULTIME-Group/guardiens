@@ -170,6 +170,20 @@ export const MassEmailFiltersPanel = ({ segment, setSegment, filters, setFilters
                   />
                 </div>
 
+                <div className="space-y-2 pt-1">
+                  <div className="flex items-center justify-between">
+                    <Label className="text-xs">Complétion du profil ≤ {filters.profile_completion_max ?? 100}%</Label>
+                  </div>
+                  <Slider
+                    value={[filters.profile_completion_max ?? 100]}
+                    onValueChange={([v]) => update({ profile_completion_max: v < 100 ? v : undefined })}
+                    min={0} max={100} step={10}
+                  />
+                  <p className="text-[11px] text-muted-foreground">
+                    Cibler les profils peu remplis (ex : ≤ 30% pour relancer)
+                  </p>
+                </div>
+
                 <div className="space-y-1.5">
                   <Label className="text-xs">A déjà effectué une garde</Label>
                   <Select

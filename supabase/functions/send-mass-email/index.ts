@@ -13,6 +13,7 @@ interface MassEmailFilters {
   id_verifiee?: boolean;
   onboarding_complete?: boolean;
   profile_completion_min?: number;
+  profile_completion_max?: number;
   has_completed_sits?: "any" | "yes" | "no";
   inscrits_depuis_jours?: number;
   inscrits_avant_jours?: number;
@@ -83,6 +84,11 @@ async function fetchTargetedProfiles(
   // Complétion min
   if (filters.profile_completion_min && filters.profile_completion_min > 0) {
     query = query.gte("profile_completion", filters.profile_completion_min);
+  }
+
+  // Complétion max — cibler profils peu remplis
+  if (filters.profile_completion_max !== undefined && filters.profile_completion_max < 100) {
+    query = query.lte("profile_completion", filters.profile_completion_max);
   }
 
   // Onboarding complete (≥ 80%)
