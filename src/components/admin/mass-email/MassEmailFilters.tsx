@@ -172,15 +172,29 @@ export const MassEmailFiltersPanel = ({ segment, setSegment, filters, setFilters
 
                 <div className="space-y-2 pt-1">
                   <div className="flex items-center justify-between">
-                    <Label className="text-xs">Complétion du profil ≤ {filters.profile_completion_max ?? 100}%</Label>
+                    <Label className="text-xs">
+                      Complétion du profil ≤ {filters.profile_completion_max ?? 100}%
+                      {filters.profile_completion_max !== undefined && filters.profile_completion_max < 100 && (
+                        <span className="ml-2 text-[10px] px-1.5 py-0.5 rounded bg-primary/10 text-primary">actif</span>
+                      )}
+                    </Label>
+                    {filters.profile_completion_max !== undefined && filters.profile_completion_max < 100 && (
+                      <button
+                        type="button"
+                        onClick={() => update({ profile_completion_max: undefined })}
+                        className="text-[11px] text-muted-foreground hover:text-foreground underline"
+                      >
+                        Réinitialiser
+                      </button>
+                    )}
                   </div>
                   <Slider
                     value={[filters.profile_completion_max ?? 100]}
                     onValueChange={([v]) => update({ profile_completion_max: v < 100 ? v : undefined })}
-                    min={0} max={100} step={10}
+                    min={0} max={100} step={5}
                   />
                   <p className="text-[11px] text-muted-foreground">
-                    Cibler les profils peu remplis (ex : ≤ 30% pour relancer)
+                    Cibler les profils peu remplis (ex : ≤ 60% pour relancer ceux qui ont commencé sans finir)
                   </p>
                 </div>
 
