@@ -95,7 +95,7 @@ export default function BadgeGridSection({
 
       {/* Link to full badge page */}
       <Link
-        to="/badges"
+        to="/planche-badges"
         className="mt-3 flex items-center justify-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors py-1.5"
       >
         Voir tous les badges <ChevronRight className="h-3 w-3" />

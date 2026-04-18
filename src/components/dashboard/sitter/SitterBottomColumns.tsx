@@ -58,7 +58,7 @@ const SitterBottomColumns = ({ nearbyListings, nearbyMissions, postalCode }: Sit
           <>
             <p className="text-xs text-muted-foreground font-sans mb-3">En priorité : les échanges qui correspondent à vos compétences.</p>
             <div className="flex flex-col gap-2 mb-4">
-              <Button onClick={() => navigate("/creer-mission")} className="w-full rounded-xl text-xs font-medium">Publier un besoin →</Button>
+              <Button onClick={() => navigate("/petites-missions/creer")} className="w-full rounded-xl text-xs font-medium">Publier un besoin →</Button>
               <Button variant="outline" onClick={() => navigate("/petites-missions")} className="w-full rounded-xl text-xs font-medium">Proposer mon aide →</Button>
             </div>
             <p className="text-xs text-muted-foreground font-sans italic text-center">
@@ -79,7 +79,7 @@ const SitterBottomColumns = ({ nearbyListings, nearbyMissions, postalCode }: Sit
               </Link>
             ))}
             <div className="flex gap-2 mt-3">
-              <Button size="sm" onClick={() => navigate("/creer-mission")} className="flex-1 rounded-xl text-xs">Publier un besoin</Button>
+              <Button size="sm" onClick={() => navigate("/petites-missions/creer")} className="flex-1 rounded-xl text-xs">Publier un besoin</Button>
               <Button size="sm" variant="outline" onClick={() => navigate("/petites-missions")} className="flex-1 rounded-xl text-xs">Voir tout</Button>
             </div>
           </>
