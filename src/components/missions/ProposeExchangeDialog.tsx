@@ -134,7 +134,7 @@ const ProposeExchangeDialog = ({
       switchRole('sitter');
       navigate(`/messages?conversationId=${convId}`);
     } catch (err: any) {
-      console.error("[ProposeExchangeDialog]", err);
+      logger.error("[ProposeExchangeDialog]", { err: String(err) });
       toast.error(err?.message || "Impossible d'envoyer la proposition. Réessayez.", {
         duration: 5000,
       });
