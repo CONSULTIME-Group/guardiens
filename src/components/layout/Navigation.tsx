@@ -374,11 +374,21 @@ export const BottomNav = () => {
 
   const totalBadge = unreadCount + pendingAppsCount + missionBadgeCount;
 
+  // Adapt tabs to active role
+  const isOwnerView = effectiveRole === "owner";
   const tabs = [
     { to: "/dashboard", icon: Home, label: "Accueil", badge: pendingAppsCount },
-    { to: "/search", icon: Search, label: "Recherche" },
+    {
+      to: isOwnerView ? "/recherche-gardiens" : "/search",
+      icon: Search,
+      label: isOwnerView ? "Gardiens" : "Recherche",
+    },
     { to: "/messages", icon: MessageSquare, label: "Messages", badge: unreadCount },
-    { to: "/profile", icon: User, label: "Profil" },
+    {
+      to: isOwnerView ? "/owner-profile" : "/profile",
+      icon: User,
+      label: "Profil",
+    },
   ];
 
   return (
@@ -390,6 +400,7 @@ export const BottomNav = () => {
         <div className="flex justify-around items-center h-16 px-1">
           {tabs.map((item) => {
             const isActive = location.pathname === item.to || location.pathname.startsWith(item.to + "/");
+            // Sitter-locked applies only to actual sitters (not owners viewing search-gardiens)
             const isSitterLocked = effectiveRole === "sitter" && !hasAccess;
             const isGated = isSitterLocked && (item.to === "/search" || item.to === "/messages");
             const featureName = item.to === "/search" ? "la recherche d'annonces" : "la messagerie";
