@@ -693,8 +693,16 @@ const SmallMissions = () => {
                   const Icon = meta.icon;
                   const isCompleted = m.status === "completed";
                   const isMine = m.user_id === user?.id;
+                  const goToDetail = () => navigate(isAuthenticated ? `/petites-missions/${m.id}` : "/register");
                   return (
-                    <Link key={`m-${m.id}`} to={isAuthenticated ? `/petites-missions/${m.id}` : "/register"}>
+                    <div
+                      key={`m-${m.id}`}
+                      role="button"
+                      tabIndex={0}
+                      onClick={goToDetail}
+                      onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); goToDetail(); } }}
+                      className="cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-lg"
+                    >
                       <Card className={`border-border transition-colors h-full ${isCompleted ? "opacity-50 grayscale" : "hover:border-primary/30"}`}>
                         <CardContent className="p-4 space-y-2">
                           <div className="flex items-center justify-between">
@@ -748,7 +756,7 @@ const SmallMissions = () => {
                           )}
                         </CardContent>
                       </Card>
-                    </Link>
+                    </div>
                   );
                 })}
               </div>
