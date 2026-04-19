@@ -46,21 +46,6 @@
       <p>Gratuit pour les propriétaires. À partir de 9€/mois pour les gardiens. Inscrivez-vous avant le 13 mai 2026 pour le badge Fondateur.</p>
     </noscript>
     <script type="module" src="/src/main.tsx"></script>
-    <!-- GA4: loaded after load event to avoid blocking LCP -->
-    <script>
-      setTimeout(function(){
-        var s=document.createElement('script');
-        s.src='https://www.googletagmanager.com/gtag/js?id=G-9JP4VR1RRP';
-        s.async=true;
-        document.head.appendChild(s);
-        s.onload=function(){
-          window.dataLayer=window.dataLayer||[];
-          function gtag(){dataLayer.push(arguments);}
-          window.gtag=gtag;
-          gtag('js',new Date());
-          gtag('config','G-9JP4VR1RRP',{send_page_view:true});
-        };
-      }, 5000);
-    </script>
+    <!-- GA4 chargé conditionnellement après consentement RGPD via src/lib/cookieConsent.ts -->
   </body>
 </html>
