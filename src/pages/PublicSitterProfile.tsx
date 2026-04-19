@@ -130,7 +130,7 @@ export default function PublicSitterProfile() {
   };
 
   useEffect(() => {
-    if (!id) return;
+    if (!id || id === "undefined" || id === "null") { setLoading(false); return; }
     const load = async () => {
       setLoading(true);
       const [profileRes, baseProfileRes, sitterRes, badgesRes, reviewsRes, galleryRes, emergencyRes, subRes, ownerRes, missionsRes, extExpRes] =
