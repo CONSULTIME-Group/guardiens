@@ -53,7 +53,7 @@ const ApplicationModal = ({
         : null;
 
       const badgeMap = new Map<string, number>();
-      (badgeRes.data || []).forEach((b: any) => badgeMap.set(b.badge_key, (badgeMap.get(b.badge_key) || 0) + 1));
+      (badgeRes.data || []).forEach((b: any) => badgeMap.set(b.badge_id, (badgeMap.get(b.badge_id) || 0) + 1));
       const badgeCounts = Array.from(badgeMap.entries())
         .map(([badge_key, count]) => ({ badge_key, count }))
         .sort((a, b) => b.count - a.count);
@@ -74,6 +74,23 @@ const ApplicationModal = ({
     if (!user || !message.trim()) return;
     setSending(true);
 
+    // Garde-fou : vérifier que l'annonce accepte encore les candidatures
+    const { data: sitCheck } = await supabase
+      .from("sits")
+      .select("status, accepting_applications, max_applications")
+      .eq("id", sitId)
+      .single();
+    if (!sitCheck || sitCheck.status !== "published" || !sitCheck.accepting_applications) {
+      setSending(false);
+      toast({
+        title: "Candidatures fermées",
+        description: "Cette annonce n'accepte plus de candidatures.",
+        variant: "destructive",
+      });
+      onOpenChange(false);
+      return;
+    }
+
     const { error } = await supabase.from("applications").insert({
       sit_id: sitId,
       sitter_id: user.id,
@@ -84,6 +101,18 @@ const ApplicationModal = ({
       setSending(false);
       toast({ title: "Erreur", description: "Impossible d'envoyer la candidature.", variant: "destructive" });
       return;
+    }
+
+    // Vérifier si on doit fermer les candidatures (max atteint)
+    if (sitCheck.max_applications) {
+      const { count } = await supabase
+        .from("applications")
+        .select("id", { count: "exact", head: true })
+        .eq("sit_id", sitId)
+        .not("status", "in", "(rejected,cancelled)");
+      if (count !== null && count >= sitCheck.max_applications) {
+        await supabase.from("sits").update({ accepting_applications: false } as any).eq("id", sitId);
+      }
     }
 
     const { data: existingConv } = await supabase

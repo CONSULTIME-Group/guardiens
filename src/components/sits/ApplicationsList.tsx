@@ -390,7 +390,7 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
       <div key={app.id} className="bg-card border border-border rounded-2xl p-5 mb-4">
         {/* LINE 1 — Identity */}
         <div className="flex items-center gap-3">
-          <Link to={`/profil/${app.sitter_id}`} className="shrink-0">
+          <Link to={`/gardiens/${app.sitter_id}`} className="shrink-0">
             {sitter?.avatar_url ? (
               <img src={sitter.avatar_url} alt={sitter.first_name} className="w-12 h-12 rounded-full object-cover border border-border" />
             ) : (
@@ -401,7 +401,7 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
           </Link>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
-              <Link to={`/profil/${app.sitter_id}`} className="text-base font-semibold text-foreground hover:underline">
+              <Link to={`/gardiens/${app.sitter_id}`} className="text-base font-semibold text-foreground hover:underline">
                 {sitter?.first_name || "Gardien"}
               </Link>
               {sitter?.is_founder && <FounderBadge size="sm" />}
@@ -430,7 +430,7 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
         {(app.status === "pending" || app.status === "viewed") && (
           <div className="flex items-center gap-2 mt-4 flex-wrap">
             <Link
-              to={`/profil/${app.sitter_id}`}
+              to={`/gardiens/${app.sitter_id}`}
               target="_blank"
               className="border border-border rounded-full px-4 py-2 text-sm text-foreground hover:border-primary transition-colors"
             >
@@ -476,7 +476,7 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
         {app.status === "discussing" && (
           <div className="flex items-center gap-2 mt-4 flex-wrap">
             <Link
-              to={`/profil/${app.sitter_id}`}
+              to={`/gardiens/${app.sitter_id}`}
               target="_blank"
               className="border border-border rounded-full px-4 py-2 text-sm text-foreground hover:border-primary transition-colors"
             >
@@ -518,7 +518,7 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
         {(app.status === "rejected" || app.status === "cancelled") && (
           <div className="flex gap-4 items-center mt-3">
             <Link
-              to={`/profil/${app.sitter_id}`}
+              to={`/gardiens/${app.sitter_id}`}
               target="_blank"
               className="text-xs text-primary hover:underline"
             >
