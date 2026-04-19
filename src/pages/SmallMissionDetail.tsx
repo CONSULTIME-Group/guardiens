@@ -453,22 +453,10 @@ const SmallMissionDetail = () => {
                 <Button
                   size="sm"
                   className="gap-2"
-                  onClick={async () => {
-                    await supabase.from("small_missions").update({ status: "completed" as any }).eq("id", id!);
-                    setMission((prev: any) => ({ ...prev, status: "completed" }));
-                    // Notify accepted responders
-                    for (const r of acceptedResponses) {
-                      await supabase.from("notifications").insert({
-                        user_id: r.responder_id, type: "mission_completed",
-                        title: "Mission terminée",
-                        body: `La mission "${mission.title}" est terminée. Laissez un avis !`,
-                        link: `/petites-missions/${id}`,
-                      });
-                    }
-                    toast({ title: "Mission marquée comme terminée !" });
-                  }}
+                  onClick={handleMarkCompleted}
+                  disabled={completing}
                 >
-                  <CheckCircle2 className="h-4 w-4" /> Mission terminée
+                  <CheckCircle2 className="h-4 w-4" /> {completing ? "Validation…" : "Mission terminée"}
                 </Button>
               </div>
             )}
