@@ -1,38 +1,36 @@
 User-agent: *
 Allow: /
 
-# Pages privées
+# Pages privées (espace authentifié)
 Disallow: /admin
 Disallow: /dashboard
 Disallow: /messages
-Disallow: /mon-profil
 Disallow: /mon-abonnement
-Disallow: /parametres
-Disallow: /profil/
 Disallow: /notifications
-Disallow: /mes-gardes
-Disallow: /creer-annonce
-Disallow: /modifier-annonce
-Disallow: /laisser-avis
-Disallow: /gardien-profil
-Disallow: /proprietaire-profil
-Disallow: /guide-maison
 Disallow: /sits
 Disallow: /search
+Disallow: /recherche
 Disallow: /recherche-gardiens
 Disallow: /review/
 Disallow: /house-guide/
 Disallow: /profile
+Disallow: /owner-profile
+Disallow: /favoris
+Disallow: /mes-avis
+Disallow: /settings
 Disallow: /forgot-password
 Disallow: /reset-password
 Disallow: /login
 Disallow: /register
 Disallow: /unsubscribe
 Disallow: /test-accord
-Disallow: /favoris
-Disallow: /gardiens/
+Disallow: /auth/
+
+# Profils publics : /gardiens/:id reste indexable.
+# Le sitemap filtre déjà les profils non-publics (politique : seuls sitter/both publics).
 
 # Crawl rate
 Crawl-delay: 1
 
 Sitemap: https://guardiens.fr/sitemap.xml
+

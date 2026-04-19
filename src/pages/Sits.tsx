@@ -815,9 +815,10 @@ const QuickActions = ({
   }
 
   if (effectiveStatus === "in_progress" && isOwner) {
+    const messageHref = sit.conversationId ? `/messages?conv=${sit.conversationId}` : "/messages";
     return (
       <>
-        <Link to="/messages" className={cn(btnClass, "bg-primary/10 text-primary hover:bg-primary/20")}>
+        <Link to={messageHref} className={cn(btnClass, "bg-primary/10 text-primary hover:bg-primary/20")}>
           <MessageSquare className="h-3.5 w-3.5" /> Contacter
         </Link>
         {sit.property_id && (
@@ -830,12 +831,13 @@ const QuickActions = ({
   }
 
   if (effectiveStatus === "confirmed" && isOwner) {
+    const messageHref = sit.conversationId ? `/messages?conv=${sit.conversationId}` : "/messages";
     return (
       <>
         <Link to={`/sits/${sit.id}`} className={cn(btnClass, "bg-primary/10 text-primary hover:bg-primary/20")}>
           <ChevronRight className="h-3.5 w-3.5" /> Voir la garde
         </Link>
-        <Link to="/messages" className={cn(btnClass, "bg-accent text-muted-foreground hover:text-foreground")}>
+        <Link to={messageHref} className={cn(btnClass, "bg-accent text-muted-foreground hover:text-foreground")}>
           <MessageSquare className="h-3.5 w-3.5" /> Contacter
         </Link>
       </>

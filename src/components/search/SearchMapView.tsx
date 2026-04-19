@@ -136,7 +136,7 @@ const SearchMapView = ({
               style={{ width: 240, top: "50%", left: "50%", transform: "translate(-50%, -50%)" }}
             >
               {photos.length > 0 && (
-                <img src={photos[0]} alt="" className="w-full h-[120px] object-cover" />
+                <img src={photos[0]} alt="Aperçu de l'annonce" loading="lazy" className="w-full h-[120px] object-cover" />
               )}
               <div className="p-3">
                 <h4 className="text-sm font-semibold text-foreground line-clamp-2 mb-1">

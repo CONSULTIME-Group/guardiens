@@ -86,7 +86,7 @@ const MessageBubble = ({ msg, isMe, readerRole = "gardien" }: MessageBubbleProps
         >
           {msg.photo_url && (
             <button onClick={() => setLightboxOpen(true)} className="block mb-1 focus:outline-none">
-              <img src={msg.photo_url} alt="" className="max-w-full max-h-48 rounded-lg object-cover hover:opacity-90 transition-opacity cursor-zoom-in" />
+              <img src={msg.photo_url} alt="Photo partagée" loading="lazy" className="max-w-full max-h-48 rounded-lg object-cover hover:opacity-90 transition-opacity cursor-zoom-in" />
             </button>
           )}
           {msg.content && <p className="text-sm whitespace-pre-line break-words text-foreground">{msg.content}</p>}
@@ -104,7 +104,7 @@ const MessageBubble = ({ msg, isMe, readerRole = "gardien" }: MessageBubbleProps
       {msg.photo_url && (
         <Dialog open={lightboxOpen} onOpenChange={setLightboxOpen}>
           <DialogContent className="max-w-3xl p-2 bg-background border-none">
-            <img src={msg.photo_url} alt="" className="w-full h-auto max-h-[80vh] object-contain rounded-lg" />
+            <img src={msg.photo_url} alt="Photo partagée en grand" className="w-full h-auto max-h-[80vh] object-contain rounded-lg" />
           </DialogContent>
         </Dialog>
       )}

@@ -455,7 +455,7 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
                 <div className="flex items-start gap-3">
                   <div className="w-12 h-12 rounded-full bg-muted border border-border flex items-center justify-center overflow-hidden flex-shrink-0">
                     {avatarUrl ? (
-                      <img src={avatarUrl} alt="" className="w-full h-full object-cover" />
+                      <img src={avatarUrl} alt="Votre photo de profil" className="w-full h-full object-cover" />
                     ) : (
                       <User className="w-5 h-5 text-muted-foreground/50" />
                     )}

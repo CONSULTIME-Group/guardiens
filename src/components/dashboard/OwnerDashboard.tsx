@@ -507,7 +507,7 @@ const OwnerDashboard = () => {
               {highlights.slice(0, 3).map(h => (
                 <div key={h.id} className="flex items-start gap-3 p-3 rounded-xl bg-card border border-border">
                   {h.sitter?.avatar_url ? (
-                    <img src={h.sitter.avatar_url} alt="" className="w-10 h-10 rounded-full object-cover shrink-0" />
+                    <img src={h.sitter.avatar_url} alt={`Photo de ${h.sitter.first_name || 'gardien'}`} loading="lazy" className="w-10 h-10 rounded-full object-cover shrink-0" />
                   ) : (
                     <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-sm font-bold shrink-0">
                       {h.sitter?.first_name?.charAt(0) || "?"}
@@ -517,7 +517,7 @@ const OwnerDashboard = () => {
                     <p className="text-xs font-medium">{capitalize(h.sitter?.first_name)}</p>
                     <p className="text-sm text-muted-foreground mt-0.5">{h.text}</p>
                   </div>
-                  {h.photo_url && <img src={h.photo_url} alt="" className="w-16 h-12 rounded-lg object-cover shrink-0" />}
+                  {h.photo_url && <img src={h.photo_url} alt="Photo de garde" loading="lazy" className="w-16 h-12 rounded-lg object-cover shrink-0" />}
                 </div>
               ))}
             </div>

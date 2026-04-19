@@ -26,7 +26,7 @@ const AppCard = memo(({ app, sitterProfiles }: { app: AppRow; sitterProfiles: Re
     <div className="bg-card border border-border rounded-2xl p-4 flex gap-4">
       <div className="w-12 h-12 rounded-full bg-primary/15 text-primary font-bold flex items-center justify-center text-lg font-sans shrink-0 overflow-hidden">
         {sitter?.avatar_url ? (
-          <img src={sitter.avatar_url} alt="" className="w-full h-full rounded-full object-cover" />
+          <img src={sitter.avatar_url} alt={`Photo de ${sitter.first_name || 'gardien'}`} className="w-full h-full rounded-full object-cover" />
         ) : (
           sitter?.first_name?.charAt(0)?.toUpperCase() || "?"
         )}

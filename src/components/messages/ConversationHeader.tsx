@@ -220,7 +220,7 @@ const ConversationHeader = ({
           )}
           <Link to={`/gardiens/${conv.other_user?.id}`} className="shrink-0">
             {conv.other_user?.avatar_url ? (
-              <img src={conv.other_user.avatar_url} alt="" className="w-10 h-10 rounded-full object-cover hover:ring-2 hover:ring-primary/50 transition-all" />
+              <img src={conv.other_user.avatar_url} alt={`Photo de ${conv.other_user.first_name || 'utilisateur'}`} className="w-10 h-10 rounded-full object-cover hover:ring-2 hover:ring-primary/50 transition-all" />
             ) : (
               <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-medium text-sm hover:ring-2 hover:ring-primary/50 transition-all">
                 {conv.other_user?.first_name?.charAt(0)?.toUpperCase() || "?"}

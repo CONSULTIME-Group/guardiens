@@ -164,7 +164,7 @@ const EntraideSection = ({ userId }: EntraideSectionProps) => {
           {comments.map((c, i) => (
             <div key={i} className="flex items-start gap-3">
               {c.giverAvatar ? (
-                <img src={c.giverAvatar} alt="" className="w-8 h-8 rounded-full object-cover shrink-0" />
+                <img src={c.giverAvatar} alt={`Photo de ${c.giverName || 'membre'}`} loading="lazy" className="w-8 h-8 rounded-full object-cover shrink-0" />
               ) : (
                 <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-xs font-bold shrink-0">
                   {c.giverName.charAt(0)}
