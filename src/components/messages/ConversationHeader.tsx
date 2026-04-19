@@ -218,7 +218,7 @@ const ConversationHeader = ({
               <ArrowLeft className="h-5 w-5" />
             </button>
           )}
-          <Link to={`/profil/${conv.other_user?.id}`} className="shrink-0">
+          <Link to={`/gardiens/${conv.other_user?.id}`} className="shrink-0">
             {conv.other_user?.avatar_url ? (
               <img src={conv.other_user.avatar_url} alt="" className="w-10 h-10 rounded-full object-cover hover:ring-2 hover:ring-primary/50 transition-all" />
             ) : (
@@ -229,7 +229,7 @@ const ConversationHeader = ({
           </Link>
           <div className="min-w-0">
             <div className="flex items-center gap-2">
-              <Link to={`/profil/${conv.other_user?.id}`} className="font-semibold text-base hover:text-primary transition-colors capitalize">
+              <Link to={`/gardiens/${conv.other_user?.id}`} className="font-semibold text-base hover:text-primary transition-colors capitalize">
                 {capitalize(conv.other_user?.first_name)}
               </Link>
               {isFounder && <FounderBadge size="sm" />}
