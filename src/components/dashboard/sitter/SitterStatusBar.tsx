@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { Separator } from "@/components/ui/separator";
 import { StatutGardienBadge } from "@/components/profile/StatutGardienBadge";
+import { useAuth } from "@/contexts/AuthContext";
 import type { ReputationData } from "@/hooks/useSitterDashboardData";
 
 interface SitterStatusBarProps {
@@ -14,7 +15,10 @@ interface SitterStatusBarProps {
 
 const SitterStatusBar = ({
   profileCompletion, completedSits, avgRating, badgeCount, totalApps, reputation,
-}: SitterStatusBarProps) => (
+}: SitterStatusBarProps) => {
+  const { user, activeRole } = useAuth();
+  const profilePath = (user?.role === "both" ? activeRole : user?.role) === "owner" ? "/owner-profile" : "/profile";
+  return (
   <div className="mx-4 sm:mx-5 md:mx-8 mb-6 md:mb-8 bg-card border border-border rounded-2xl overflow-hidden grid grid-cols-1 md:grid-cols-3">
     {/* Zone 1 — MON PROFIL */}
     <div className="p-4 md:p-5 border-b md:border-b-0 md:border-r border-border">
@@ -27,7 +31,7 @@ const SitterStatusBar = ({
         <span className="text-xs font-sans bg-primary/10 text-primary rounded-md px-2 py-0.5 inline-block mb-3">Visible par les proprios</span>
       )}
       {profileCompletion < 100 && (
-        <Link to="/profile" className="text-xs text-primary font-sans block">Compléter →</Link>
+        <Link to={profilePath} className="text-xs text-primary font-sans block">Compléter →</Link>
       )}
     </div>
 
@@ -96,6 +100,7 @@ const SitterStatusBar = ({
       </div>
     </div>
   </div>
-);
+  );
+};
 
 export default SitterStatusBar;
