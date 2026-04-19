@@ -1258,15 +1258,122 @@ const SearchSitter = () => {
               </div>
             )
           ) : results.length === 0 ? (
-            <div className="text-center py-16 space-y-4">
-              <Search className="h-12 w-12 mx-auto text-primary/30" />
-              <p className="font-heading font-semibold text-lg text-foreground">Pas encore d'annonce dans votre zone</p>
-              <p className="text-sm text-muted-foreground max-w-md mx-auto">
-                Activez le mode Disponible pour être contacté directement par les propriétaires !
-              </p>
-              <Button onClick={handleActivateAvailable} className="gap-2">
-                <Sparkles className="h-4 w-4" /> Activer le mode disponible
-              </Button>
+            <div className="max-w-2xl mx-auto py-12 px-4 space-y-6">
+              {/* Hero empty state */}
+              <div className="text-center space-y-3">
+                <div className="inline-flex items-center justify-center h-16 w-16 rounded-full bg-primary/10">
+                  <Search className="h-8 w-8 text-primary/60" />
+                </div>
+                <h3 className="font-heading font-semibold text-xl text-foreground">
+                  {tab === "sits" ? "Pas encore d'annonce de garde dans votre zone" : "Pas encore de mission dans votre zone"}
+                </h3>
+                <p className="text-sm text-muted-foreground max-w-md mx-auto">
+                  La communauté grandit chaque jour. Voici comment ne rien rater et tirer profit de votre temps dès maintenant.
+                </p>
+              </div>
+
+              {/* Action 1 — Suggestion d'élargir si pertinent */}
+              {zoneMode !== "france" && (densityCounts.dept > densityCounts.radius || densityCounts.region > densityCounts.dept || densityCounts.france > 0) && (
+                <div className="rounded-xl border border-primary/30 bg-primary/5 p-4 space-y-2">
+                  <div className="flex items-start gap-3">
+                    <MapPin className="h-5 w-5 text-primary mt-0.5 shrink-0" />
+                    <div className="flex-1">
+                      <p className="font-medium text-sm text-foreground">Élargissez votre recherche</p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {densityCounts.france > 0 && `${densityCounts.france} ${tab === "sits" ? "annonces" : "missions"} disponibles partout en France.`}
+                      </p>
+                      <div className="flex flex-wrap gap-2 mt-3">
+                        {densityCounts.dept > densityCounts.radius && (
+                          <Button size="sm" variant="outline" onClick={() => setZoneMode("dept")}>
+                            Mon département ({densityCounts.dept})
+                          </Button>
+                        )}
+                        {densityCounts.region > densityCounts.dept && (
+                          <Button size="sm" variant="outline" onClick={() => setZoneMode("region")}>
+                            Ma région ({densityCounts.region})
+                          </Button>
+                        )}
+                        {densityCounts.france > 0 && (
+                          <Button size="sm" variant="outline" onClick={() => setZoneMode("france")}>
+                            Toute la France ({densityCounts.france})
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Action 2 — Créer une alerte */}
+              {city && !alertCreated && (
+                <div className="rounded-xl border border-border bg-card p-4 space-y-2">
+                  <div className="flex items-start gap-3">
+                    <Bell className="h-5 w-5 text-foreground mt-0.5 shrink-0" />
+                    <div className="flex-1">
+                      <p className="font-medium text-sm text-foreground">Soyez prévenu en premier</p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Créez une alerte sur {city} et recevez un email dès qu'une annonce est publiée.
+                      </p>
+                      <Button
+                        size="sm"
+                        className="mt-3 gap-2"
+                        onClick={handleCreateAlert}
+                        disabled={isCreatingAlert}
+                      >
+                        {isCreatingAlert ? <Loader2 className="h-4 w-4 animate-spin" /> : <BellRing className="h-4 w-4" />}
+                        Créer mon alerte
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              )}
+              {alertCreated && (
+                <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/5 p-4">
+                  <div className="flex items-center gap-3">
+                    <BellRing className="h-5 w-5 text-emerald-600 shrink-0" />
+                    <p className="text-sm text-foreground">Alerte créée. On vous prévient dès qu'une annonce arrive !</p>
+                  </div>
+                </div>
+              )}
+
+              {/* Action 3 — Cross-sell missions d'entraide (si onglet sits) */}
+              {tab === "sits" && (
+                <div className="rounded-xl border border-border bg-card p-4 space-y-2">
+                  <div className="flex items-start gap-3">
+                    <HandshakeIcon className="h-5 w-5 text-foreground mt-0.5 shrink-0" />
+                    <div className="flex-1">
+                      <p className="font-medium text-sm text-foreground">Donnez un coup de main près de chez vous</p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        L'entraide entre voisins reste libre pour tous : promener un chien, nourrir un chat, arroser des plantes…
+                      </p>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="mt-3 gap-2"
+                        onClick={() => setTab("missions")}
+                      >
+                        Voir les petites missions
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Action 4 — Mode disponible */}
+              <div className="rounded-xl border border-border bg-card p-4 space-y-2">
+                <div className="flex items-start gap-3">
+                  <Sparkles className="h-5 w-5 text-foreground mt-0.5 shrink-0" />
+                  <div className="flex-1">
+                    <p className="font-medium text-sm text-foreground">Soyez visible des propriétaires</p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Activez votre disponibilité pour apparaître en haut des recherches et être contacté directement.
+                    </p>
+                    <Button size="sm" variant="outline" className="mt-3 gap-2" onClick={handleActivateAvailable}>
+                      <Sparkles className="h-4 w-4" /> Activer le mode disponible
+                    </Button>
+                  </div>
+                </div>
+              </div>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
