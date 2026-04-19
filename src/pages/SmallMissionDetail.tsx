@@ -153,6 +153,8 @@ const SmallMissionDetail = () => {
   const [hasResponded, setHasResponded] = useState(false);
   const [closeModalOpen, setCloseModalOpen] = useState(false);
   const [closingNoSelect, setClosingNoSelect] = useState(false);
+  const [processingResponseId, setProcessingResponseId] = useState<string | null>(null);
+  const [completing, setCompleting] = useState(false);
 
   // Per-person feedback tracking: receiverId → submitted
   const [feedbackSent, setFeedbackSent] = useState<Record<string, boolean>>({});
@@ -203,84 +205,181 @@ const SmallMissionDetail = () => {
   useEffect(() => { load(); }, [load]);
 
   const handleRespond = async () => {
-    if (!user || !id || !message.trim()) return;
+    if (!user || !id || !message.trim() || submitting) return;
     setSubmitting(true);
-    const { error } = await supabase.from("small_mission_responses").insert({
-      mission_id: id, responder_id: user.id, message: message.trim(),
-    });
-    setSubmitting(false);
-    if (error) { toast({ variant: "destructive", title: "Erreur", description: "Impossible d'envoyer votre proposition." }); return; }
-    setHasResponded(true);
-    setMessage("");
-    toast({ title: "Proposition envoyée !", description: "Le publieur va être notifié." });
-    load();
+    try {
+      const { error } = await supabase.from("small_mission_responses").insert({
+        mission_id: id, responder_id: user.id, message: message.trim(),
+      });
+      if (error) {
+        if (error.code === "23505") {
+          toast({ variant: "destructive", title: "Déjà envoyé", description: "Vous avez déjà proposé votre aide pour cette mission." });
+        } else {
+          throw error;
+        }
+      } else {
+        // Notify mission author
+        await supabase.from("notifications").insert({
+          user_id: mission.user_id, type: "mission_proposal",
+          title: "Nouvelle proposition d'aide",
+          body: `${(user as any).first_name || "Un membre"} propose son aide pour "${mission.title}"`,
+          link: `/petites-missions/${id}`,
+        });
+        setHasResponded(true);
+        setMessage("");
+        toast({ title: "Proposition envoyée !", description: "Le publieur va être notifié." });
+        load();
+      }
+    } catch (err: any) {
+      console.error("[handleRespond]", err);
+      toast({ variant: "destructive", title: "Erreur", description: err?.message || "Impossible d'envoyer votre proposition." });
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const handleAcceptResponse = async (responseId: string) => {
+    if (processingResponseId) return;
     const resp = responses.find(r => r.id === responseId);
     if (!resp) return;
+    setProcessingResponseId(responseId);
+    try {
+      // Server-side guard: re-check status
+      const { data: freshMission } = await supabase
+        .from("small_missions").select("status").eq("id", id!).single();
+      if (freshMission?.status === "cancelled" || freshMission?.status === "completed") {
+        toast({ variant: "destructive", title: "Mission clôturée", description: "Cette mission n'accepte plus de candidatures." });
+        return;
+      }
 
-    // Accept this response
-    await supabase.from("small_mission_responses").update({ status: "accepted" as any }).eq("id", responseId);
+      const { error: updErr } = await supabase
+        .from("small_mission_responses").update({ status: "accepted" as any }).eq("id", responseId);
+      if (updErr) throw updErr;
 
-    // If mission is still open, move to in_progress
-    if (mission.status === "open") {
-      await supabase.from("small_missions").update({ status: "in_progress" as any }).eq("id", id!);
-      setMission((prev: any) => ({ ...prev, status: "in_progress" }));
+      if (mission.status === "open") {
+        await supabase.from("small_missions").update({ status: "in_progress" as any }).eq("id", id!);
+        setMission((prev: any) => ({ ...prev, status: "in_progress" }));
+      }
+
+      setResponses(prev => prev.map(r => r.id === responseId ? { ...r, status: "accepted" } : r));
+
+      // Reuse existing conversation if any (responder may have already proposed via dialog)
+      const { data: existingConv } = await supabase
+        .from("conversations")
+        .select("id")
+        .eq("small_mission_id", id!)
+        .or(`and(owner_id.eq.${mission.user_id},sitter_id.eq.${resp.responder_id}),and(owner_id.eq.${resp.responder_id},sitter_id.eq.${mission.user_id})`)
+        .maybeSingle();
+
+      if (!existingConv) {
+        await supabase.from("conversations").insert({
+          owner_id: mission.user_id,
+          sitter_id: resp.responder_id,
+          small_mission_id: id,
+        });
+      }
+
+      await supabase.from("notifications").insert({
+        user_id: resp.responder_id, type: "mission_accepted",
+        title: "Proposition acceptée",
+        body: `Votre proposition pour "${mission.title}" a été acceptée. Vous pouvez maintenant échanger par messagerie.`,
+        link: `/messages`,
+      });
+
+      toast({ title: "Proposition acceptée !" });
+    } catch (err: any) {
+      console.error("[handleAcceptResponse]", err);
+      toast({ variant: "destructive", title: "Erreur", description: err?.message || "Impossible d'accepter cette proposition." });
+      // Rollback optimistic UI
+      setResponses(prev => prev.map(r => r.id === responseId ? { ...r, status: "pending" } : r));
+    } finally {
+      setProcessingResponseId(null);
     }
-
-    setResponses(prev => prev.map(r => r.id === responseId ? { ...r, status: "accepted" } : r));
-
-    // Create conversation
-    await supabase.from("conversations").insert({
-      owner_id: mission.user_id,
-      sitter_id: resp.responder_id,
-      small_mission_id: id,
-    });
-
-    // Notify accepted candidate
-    await supabase.from("notifications").insert({
-      user_id: resp.responder_id, type: "mission_accepted",
-      title: "Proposition acceptée",
-      body: `Votre proposition pour "${mission.title}" a été acceptée. Vous pouvez maintenant échanger par messagerie.`,
-      link: `/messages`,
-    });
-
-    toast({ title: "Proposition acceptée !" });
   };
 
   const handleDeclineResponse = async (responseId: string) => {
+    if (processingResponseId) return;
     const resp = responses.find(r => r.id === responseId);
-    await supabase.from("small_mission_responses").update({ status: "declined" as any }).eq("id", responseId);
-    setResponses(prev => prev.map(r => r.id === responseId ? { ...r, status: "declined" } : r));
+    if (!resp) return;
+    setProcessingResponseId(responseId);
+    try {
+      const { error } = await supabase
+        .from("small_mission_responses").update({ status: "declined" as any }).eq("id", responseId);
+      if (error) throw error;
+      setResponses(prev => prev.map(r => r.id === responseId ? { ...r, status: "declined" } : r));
 
-    if (resp) {
       await supabase.from("notifications").insert({
         user_id: resp.responder_id, type: "mission_declined",
         title: "Proposition non retenue",
         body: `Une autre organisation a été choisie pour "${mission.title}". Merci pour votre proposition.`,
       });
+    } catch (err: any) {
+      console.error("[handleDeclineResponse]", err);
+      toast({ variant: "destructive", title: "Erreur", description: err?.message || "Impossible de décliner." });
+    } finally {
+      setProcessingResponseId(null);
     }
   };
 
   const handleCloseNoSelect = async () => {
+    if (closingNoSelect) return;
     setClosingNoSelect(true);
-    // Notify all pending candidates
-    const pending = responses.filter(r => r.status === "pending");
-    for (const r of pending) {
-      await supabase.from("small_mission_responses").update({ status: "declined" as any }).eq("id", r.id);
-      await supabase.from("notifications").insert({
-        user_id: r.responder_id, type: "mission_cancelled",
-        title: "Mission annulée",
-        body: `La mission "${mission.title}" a été clôturée sans sélection.`,
-      });
+    try {
+      const pending = responses.filter(r => r.status === "pending");
+      if (pending.length > 0) {
+        const ids = pending.map(r => r.id);
+        // Batch update
+        await supabase.from("small_mission_responses")
+          .update({ status: "declined" as any })
+          .in("id", ids);
+        // Batch notifications
+        await supabase.from("notifications").insert(
+          pending.map(r => ({
+            user_id: r.responder_id, type: "mission_cancelled",
+            title: "Mission annulée",
+            body: `La mission "${mission.title}" a été clôturée sans sélection.`,
+          }))
+        );
+      }
+      await supabase.from("small_missions").update({ status: "cancelled" as any }).eq("id", id!);
+      setMission((prev: any) => ({ ...prev, status: "cancelled" }));
+      setResponses(prev => prev.map(r => r.status === "pending" ? { ...r, status: "declined" } : r));
+      setCloseModalOpen(false);
+      toast({ title: "Mission clôturée" });
+    } catch (err: any) {
+      console.error("[handleCloseNoSelect]", err);
+      toast({ variant: "destructive", title: "Erreur", description: err?.message || "Impossible de clôturer." });
+    } finally {
+      setClosingNoSelect(false);
     }
-    await supabase.from("small_missions").update({ status: "cancelled" as any }).eq("id", id!);
-    setMission((prev: any) => ({ ...prev, status: "cancelled" }));
-    setResponses(prev => prev.map(r => r.status === "pending" ? { ...r, status: "declined" } : r));
-    setClosingNoSelect(false);
-    setCloseModalOpen(false);
-    toast({ title: "Mission clôturée" });
+  };
+
+  const handleMarkCompleted = async () => {
+    if (completing) return;
+    setCompleting(true);
+    try {
+      const { error } = await supabase.from("small_missions").update({ status: "completed" as any }).eq("id", id!);
+      if (error) throw error;
+      setMission((prev: any) => ({ ...prev, status: "completed" }));
+      // Batch notifications to accepted responders (compute inline to avoid forward-ref)
+      const accepted = responses.filter(r => r.status === "accepted");
+      if (accepted.length > 0) {
+        await supabase.from("notifications").insert(
+          accepted.map(r => ({
+            user_id: r.responder_id, type: "mission_completed",
+            title: "Mission terminée",
+            body: `La mission "${mission.title}" est terminée. Laissez un avis !`,
+            link: `/petites-missions/${id}`,
+          }))
+        );
+      }
+      toast({ title: "Mission marquée comme terminée !" });
+    } catch (err: any) {
+      console.error("[handleMarkCompleted]", err);
+      toast({ variant: "destructive", title: "Erreur", description: err?.message || "Impossible de terminer la mission." });
+    } finally {
+      setCompleting(false);
+    }
   };
 
   if (loading) return <div className="p-6 md:p-10 text-muted-foreground">Chargement...</div>;
@@ -354,22 +453,10 @@ const SmallMissionDetail = () => {
                 <Button
                   size="sm"
                   className="gap-2"
-                  onClick={async () => {
-                    await supabase.from("small_missions").update({ status: "completed" as any }).eq("id", id!);
-                    setMission((prev: any) => ({ ...prev, status: "completed" }));
-                    // Notify accepted responders
-                    for (const r of acceptedResponses) {
-                      await supabase.from("notifications").insert({
-                        user_id: r.responder_id, type: "mission_completed",
-                        title: "Mission terminée",
-                        body: `La mission "${mission.title}" est terminée. Laissez un avis !`,
-                        link: `/petites-missions/${id}`,
-                      });
-                    }
-                    toast({ title: "Mission marquée comme terminée !" });
-                  }}
+                  onClick={handleMarkCompleted}
+                  disabled={completing}
                 >
-                  <CheckCircle2 className="h-4 w-4" /> Mission terminée
+                  <CheckCircle2 className="h-4 w-4" /> {completing ? "Validation…" : "Mission terminée"}
                 </Button>
               </div>
             )}
@@ -469,8 +556,22 @@ const SmallMissionDetail = () => {
                           <div className="flex gap-2 shrink-0 items-center">
                             {r.status === "pending" && (
                               <>
-                                <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white" onClick={() => handleAcceptResponse(r.id)}>Accepter</Button>
-                                <Button size="sm" variant="outline" onClick={() => handleDeclineResponse(r.id)}>Décliner</Button>
+                                <Button
+                                  size="sm"
+                                  className="bg-green-600 hover:bg-green-700 text-white"
+                                  onClick={() => handleAcceptResponse(r.id)}
+                                  disabled={!!processingResponseId}
+                                >
+                                  {processingResponseId === r.id ? "…" : "Accepter"}
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => handleDeclineResponse(r.id)}
+                                  disabled={!!processingResponseId}
+                                >
+                                  Décliner
+                                </Button>
                               </>
                             )}
                             {r.status === "accepted" && (
