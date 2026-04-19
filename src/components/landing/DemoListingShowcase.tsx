@@ -1,3 +1,4 @@
+import React from "react";
 import { Link } from "react-router-dom";
 
 const DEMO_LISTINGS = [
@@ -89,8 +90,8 @@ const DemoListingCard = ({
   </div>
 );
 
-const DemoListingShowcase = () => (
-  <section className="py-24 md:py-32 bg-muted/30">
+const DemoListingShowcase = React.forwardRef<HTMLElement>((_props, ref) => (
+  <section ref={ref} className="py-24 md:py-32 bg-muted/30">
     <div className="max-w-6xl mx-auto px-4">
       <p className="text-xs tracking-widest uppercase text-primary/60 font-body text-center mb-4">
         Ce qui vous attend
@@ -120,6 +121,7 @@ const DemoListingShowcase = () => (
       </div>
     </div>
   </section>
-);
+));
+DemoListingShowcase.displayName = "DemoListingShowcase";
 
 export default DemoListingShowcase;
