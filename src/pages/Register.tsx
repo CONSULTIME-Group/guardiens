@@ -3,6 +3,7 @@ import { Helmet } from "react-helmet-async";
 import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
+import { logger } from "@/lib/logger";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -135,7 +136,7 @@ const Register = () => {
               } as any);
           }
         } catch (refErr) {
-          console.error("Referral linking error:", refErr);
+          logger.error("Referral linking error", { err: String(refErr) });
         } finally {
           sessionStorage.removeItem("guardiens_ref");
         }

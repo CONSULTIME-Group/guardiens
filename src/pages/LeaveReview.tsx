@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { logger } from "@/lib/logger";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/hooks/use-toast";
@@ -240,7 +241,7 @@ const LeaveReview = () => {
       }
     } catch (e) {
       // Non-blocking: don't prevent the review from being submitted
-      console.warn("Email notification failed:", e);
+      logger.warn("Email notification failed", { err: String(e) });
     }
 
     const { data: conv } = await supabase

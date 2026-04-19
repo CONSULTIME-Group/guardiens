@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Helmet } from "react-helmet-async";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
+import { logger } from "@/lib/logger";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -708,7 +709,7 @@ const IdentityVerificationSection = ({ user }: { user: any }) => {
       }
       setUploadProgress(100);
     } catch (err) {
-      console.error(err);
+      logger.error("Settings upload error", { err: String(err) });
       toast.error("Votre fichier n'a pas pu être envoyé. Vérifiez le format (JPG, PNG, PDF, HEIC) et la taille (max 10 Mo).");
       setPreviewUrl(null);
     }
