@@ -306,7 +306,7 @@ const SearchSitter = () => {
   };
 
   // Reference postal code for dept/region zone modes (selected city if available, else user CP)
-  const getZoneRefPostalCode = (): string | null => userPostalCode;
+  const getZoneRefPostalCode = (): string | null => cityPostalCode ?? userPostalCode;
 
   const filterByLocation = async (
     items: any[],

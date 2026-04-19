@@ -13,11 +13,17 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import {
   MapPin, Star, SlidersHorizontal, MessageCircle, Zap,
-  LayoutGrid, Map as MapIcon, ShieldCheck, Crosshair, CircleDot, Car, Calendar
+  LayoutGrid, Map as MapIcon, ShieldCheck, Crosshair, CircleDot, Car, Calendar,
+  Bell, BellRing, Loader2, Share2
 } from "lucide-react";
 import { toast } from "sonner";
+import { useToast } from "@/hooks/use-toast";
+import { ToastAction } from "@/components/ui/toast";
 import VerifiedBadge from "@/components/profile/VerifiedBadge";
 import EmergencyBadge from "@/components/profile/EmergencyBadge";
+import { getDeptCode, DEPT_NAMES } from "@/lib/departments";
+import { getRegionCode, getRegionName } from "@/lib/regions";
+import { trackEvent } from "@/lib/analytics";
 
 import { TooltipProvider } from "@/components/ui/tooltip";
 
@@ -33,16 +39,22 @@ const RADIUS_SHORTCUTS = [5, 10, 15, 30, 50];
 
 type SortOption = "closest" | "rating" | "experience";
 type ViewMode = "list" | "map";
+type ZoneMode = "radius" | "dept" | "region" | "france";
 
 const SearchOwner = () => {
   const { user, switchRole } = useAuth();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
+  const { toast: toastUi } = useToast();
 
   // Filter state
   const [city, setCity] = useState("");
+  const [cityPostalCode, setCityPostalCode] = useState<string | null>(null);
+  const [userPostalCode, setUserPostalCode] = useState<string | null>(null);
   const [citySuggestions, setCitySuggestions] = useState<any[]>([]);
   const [radius, setRadius] = useState([15]);
+  const [zoneMode, setZoneMode] = useState<ZoneMode>("radius");
+  const [densityCounts, setDensityCounts] = useState<{ radius: number; dept: number; region: number; france: number }>({ radius: 0, dept: 0, region: 0, france: 0 });
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [animalTypes, setAnimalTypes] = useState<string[]>([]);
@@ -60,6 +72,11 @@ const SearchOwner = () => {
   const [contactingId, setContactingId] = useState<string | null>(null);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [initialLoaded, setInitialLoaded] = useState(false);
+
+  // Empty state intelligence
+  const [alertCreated, setAlertCreated] = useState(false);
+  const [isCreatingAlert, setIsCreatingAlert] = useState(false);
+  const [franceTotalSitters, setFranceTotalSitters] = useState<number | null>(null);
 
   // Popover open states (only one at a time)
   const [openPop, setOpenPop] = useState<string | null>(null);
@@ -87,24 +104,48 @@ const SearchOwner = () => {
     navigator.geolocation.getCurrentPosition(
       async (pos) => {
         try {
-          const res = await fetch(`https://geo.api.gouv.fr/communes?lat=${pos.coords.latitude}&lon=${pos.coords.longitude}&fields=nom&limit=1`);
+          const res = await fetch(`https://geo.api.gouv.fr/communes?lat=${pos.coords.latitude}&lon=${pos.coords.longitude}&fields=nom,codesPostaux&limit=1`);
           const data = await res.json();
-          if (data?.[0]) { setCity(data[0].nom); setCitySuggestions([]); }
+          if (data?.[0]) {
+            setCity(data[0].nom);
+            setCityPostalCode(data[0].codesPostaux?.[0] ?? null);
+            setCitySuggestions([]);
+          }
         } catch { toast.error("Impossible de déterminer votre ville"); }
       },
       () => toast.error("Géolocalisation refusée")
     );
   }, []);
 
-  // Load owner city on mount
+  // Load owner city + postal code on mount
   useEffect(() => {
     if (!user) return;
     (async () => {
-      const { data } = await supabase.from("profiles").select("city").eq("id", user.id).single();
+      const { data } = await supabase.from("profiles").select("city, postal_code").eq("id", user.id).single();
       if (data?.city) setCity(data.city);
+      if (data?.postal_code) {
+        setUserPostalCode(data.postal_code);
+        setCityPostalCode(data.postal_code);
+      }
       setInitialLoaded(true);
     })();
   }, [user]);
+
+  // Fetch true France-wide sitter count (for unbiased counter + launch detection)
+  useEffect(() => {
+    (async () => {
+      const { count } = await supabase
+        .from("sitter_profiles")
+        .select("user_id", { count: "exact", head: true });
+      setFranceTotalSitters(count ?? 0);
+    })();
+  }, []);
+
+  // Reset alert state when zone changes
+  useEffect(() => { setAlertCreated(false); }, [city, radius, zoneMode]);
+
+  // Reference postal code (selected city if available, else user CP)
+  const getZoneRefPostalCode = (): string | null => cityPostalCode ?? userPostalCode;
 
   // Contact handler
   const handleContact = async (sitterId: string) => {
@@ -142,6 +183,61 @@ const SearchOwner = () => {
     }
   };
 
+  // Create sitter alert
+  const handleCreateAlert = async () => {
+    if (!city || alertCreated || isCreatingAlert) return;
+    setIsCreatingAlert(true);
+    trackEvent("search_empty_action", { source: "owner", metadata: { action: "create_alert", zone_mode: zoneMode } });
+    const { data, error } = await supabase.rpc("create_alert_from_search", {
+      p_city: city,
+      p_postal_code: cityPostalCode ?? null,
+      p_radius_km: radius[0],
+    });
+    setIsCreatingAlert(false);
+    if (error) {
+      const msg = error.message || "";
+      if (msg.includes("DOUBLON")) {
+        toastUi({ title: "Vous avez déjà cette alerte", description: "Une alerte identique existe déjà pour cette zone." });
+        setAlertCreated(true);
+      } else if (msg.includes("MAX_ZONES")) {
+        toastUi({
+          variant: "destructive",
+          title: "Maximum atteint",
+          description: "Vous avez déjà 3 alertes actives. Supprimez-en une dans vos paramètres.",
+          action: <ToastAction altText="Gérer mes alertes" onClick={() => navigate("/settings")}>Gérer</ToastAction>,
+        });
+      } else if (msg.includes("INVALID_CITY")) {
+        toastUi({ variant: "destructive", title: "Ville requise", description: "Sélectionnez une ville avant de créer une alerte." });
+      } else if (msg.includes("INVALID_RADIUS")) {
+        toastUi({ variant: "destructive", title: "Rayon invalide", description: "Le rayon doit être 5, 15, 30, 50 ou 100 km." });
+      } else {
+        toastUi({ variant: "destructive", title: "Erreur", description: "Une erreur est survenue. Veuillez réessayer." });
+      }
+    } else {
+      toastUi({
+        title: "Alerte créée",
+        description: `Vous serez prévenu·e dès qu'un nouveau gardien rejoint la zone autour de ${city}.`,
+        action: <ToastAction altText="Personnaliser" onClick={() => navigate("/settings")}>Personnaliser</ToastAction>,
+      });
+      setAlertCreated(true);
+    }
+  };
+
+  // Share invite link
+  const handleShareInvite = async () => {
+    trackEvent("search_empty_action", { source: "owner", metadata: { action: "share_invite", zone_mode: zoneMode } });
+    const url = `${window.location.origin}/inscription?role=sitter`;
+    const shareText = `Je cherche un gardien d'animaux près de ${city || "chez moi"} sur Guardiens. Tu peux t'inscrire ici :`;
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: "Guardiens — devenez gardien", text: shareText, url });
+      } catch { /* user cancelled */ }
+    } else {
+      await navigator.clipboard.writeText(`${shareText} ${url}`);
+      toast.success("Lien copié — partagez-le à un voisin de confiance.");
+    }
+  };
+
   // Search logic
   const handleSearch = useCallback(async () => {
     setLoading(true);
@@ -152,17 +248,47 @@ const SearchOwner = () => {
 
     let items = (sitters || []).filter((s: any) => s.profile?.profile_completion >= 60);
 
-    // Geocoded radius filter
+    // Geocode all sitter cities once (needed for radius mode + density counter)
+    const uniqueCities = [...new Set(items.map((s: any) => s.profile?.city).filter(Boolean))] as string[];
+    const cityCoords = new Map<string, { lat: number; lng: number }>();
+    await Promise.all(uniqueCities.map(async (c) => {
+      const coords = await geocodeCity(c);
+      if (coords) cityCoords.set(c, { lat: coords.lat, lng: coords.lng });
+    }));
+
+    // Reference postal code for dept/region zones
+    const refPostalCode = cityPostalCode ?? userPostalCode;
+    const refDept = getDeptCode(refPostalCode);
+    const refRegion = getRegionCode(refDept);
+
+    // Resolve search coords (for radius mode + distance display)
     let searchCoords: { lat: number; lng: number } | null = null;
     if (city) {
       searchCoords = await geocodeCity(city);
+    }
+
+    // Compute density counters (always — drives the zone selector UI)
+    const radiusCount = searchCoords ? items.filter((s: any) => {
+      const c = s.profile?.city; if (!c) return false;
+      const co = cityCoords.get(c); if (!co) return false;
+      return haversineDistance(searchCoords!.lat, searchCoords!.lng, co.lat, co.lng) <= radius[0];
+    }).length : 0;
+    const deptCount = refDept ? items.filter((s: any) => {
+      const cp = s.profile?.postal_code; return cp ? getDeptCode(cp) === refDept : false;
+    }).length : 0;
+    const regionCount = refRegion ? items.filter((s: any) => {
+      const cp = s.profile?.postal_code; return cp ? getRegionCode(getDeptCode(cp)) === refRegion : false;
+    }).length : 0;
+    setDensityCounts({
+      radius: radiusCount,
+      dept: deptCount,
+      region: regionCount,
+      france: franceTotalSitters ?? items.length,
+    });
+
+    // Apply selected zone filter + compute distance
+    if (zoneMode === "radius") {
       if (searchCoords) {
-        const uniqueCities = [...new Set(items.map((s: any) => s.profile?.city).filter(Boolean))] as string[];
-        const cityCoords = new Map<string, { lat: number; lng: number }>();
-        await Promise.all(uniqueCities.map(async (c) => {
-          const coords = await geocodeCity(c);
-          if (coords) cityCoords.set(c, { lat: coords.lat, lng: coords.lng });
-        }));
         items = items.map((s: any) => {
           const sitterCity = s.profile?.city;
           if (!sitterCity) return { ...s, _dist: Infinity };
@@ -171,11 +297,42 @@ const SearchOwner = () => {
           const dist = haversineDistance(searchCoords!.lat, searchCoords!.lng, coords.lat, coords.lng);
           return { ...s, _dist: Math.round(dist) };
         }).filter((s: any) => s._dist <= radius[0]);
-      } else {
+      } else if (city) {
+        // Fallback: name match
         items = items.filter((s: any) => s.profile?.city?.toLowerCase().includes(city.toLowerCase())).map((s: any) => ({ ...s, _dist: null }));
+      } else {
+        items = items.map((s: any) => ({ ...s, _dist: null }));
       }
+    } else if (zoneMode === "dept" && refDept) {
+      items = items
+        .filter((s: any) => {
+          const cp = s.profile?.postal_code; return cp ? getDeptCode(cp) === refDept : false;
+        })
+        .map((s: any) => {
+          const sitterCity = s.profile?.city;
+          const coords = sitterCity ? cityCoords.get(sitterCity) : null;
+          const dist = coords && searchCoords ? Math.round(haversineDistance(searchCoords.lat, searchCoords.lng, coords.lat, coords.lng)) : null;
+          return { ...s, _dist: dist };
+        });
+    } else if (zoneMode === "region" && refRegion) {
+      items = items
+        .filter((s: any) => {
+          const cp = s.profile?.postal_code; return cp ? getRegionCode(getDeptCode(cp)) === refRegion : false;
+        })
+        .map((s: any) => {
+          const sitterCity = s.profile?.city;
+          const coords = sitterCity ? cityCoords.get(sitterCity) : null;
+          const dist = coords && searchCoords ? Math.round(haversineDistance(searchCoords.lat, searchCoords.lng, coords.lat, coords.lng)) : null;
+          return { ...s, _dist: dist };
+        });
     } else {
-      items = items.map((s: any) => ({ ...s, _dist: null }));
+      // france
+      items = items.map((s: any) => {
+        const sitterCity = s.profile?.city;
+        const coords = sitterCity ? cityCoords.get(sitterCity) : null;
+        const dist = coords && searchCoords ? Math.round(haversineDistance(searchCoords.lat, searchCoords.lng, coords.lat, coords.lng)) : null;
+        return { ...s, _dist: dist };
+      });
     }
 
     // Filter: vehicle
@@ -258,7 +415,7 @@ const SearchOwner = () => {
 
     setResults(final);
     setLoading(false);
-  }, [city, radius, animalTypes, vehicled, availableOnly, verifiedOnly, emergencyOnly, minSits, minRating, sort]);
+  }, [city, cityPostalCode, userPostalCode, radius, zoneMode, animalTypes, vehicled, availableOnly, verifiedOnly, emergencyOnly, minSits, minRating, sort, franceTotalSitters]);
 
   // Auto-search on filter change (debounced)
   useEffect(() => {
@@ -266,10 +423,34 @@ const SearchOwner = () => {
     clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => { handleSearch(); }, 400);
     return () => clearTimeout(debounceRef.current);
-  }, [initialLoaded, city, radius, animalTypes, vehicled, availableOnly, verifiedOnly, emergencyOnly, minSits, minRating, sort]);
+  }, [initialLoaded, city, cityPostalCode, radius, zoneMode, animalTypes, vehicled, availableOnly, verifiedOnly, emergencyOnly, minSits, minRating, sort, handleSearch]);
 
   const hasActiveFilters = vehicled || availableOnly || verifiedOnly || emergencyOnly || minSits !== "all" || minRating !== "all";
   const hasAnyRating = results.some((s: any) => s.avgRating !== null);
+
+  // Zone helpers
+  const refDept = getDeptCode(getZoneRefPostalCode());
+  const refRegion = getRegionCode(refDept);
+  const deptLabel = refDept ? `${refDept} ${DEPT_NAMES[refDept] || ""}`.trim() : "Département";
+  const regionLabel = refRegion ? getRegionName(refDept) : "Région";
+
+  // Suggest expanding when current zone is empty and a wider zone has results
+  const suggestExpansion = (): { target: ZoneMode; count: number; label: string } | null => {
+    if (results.length > 0) return null;
+    if (zoneMode === "radius" && densityCounts.dept > 0) {
+      return { target: "dept", count: densityCounts.dept, label: deptLabel };
+    }
+    if ((zoneMode === "radius" || zoneMode === "dept") && densityCounts.region > 0) {
+      return { target: "region", count: densityCounts.region, label: regionLabel || "votre région" };
+    }
+    if (zoneMode !== "france" && densityCounts.france > 0) {
+      return { target: "france", count: densityCounts.france, label: "France entière" };
+    }
+    return null;
+  };
+
+  const expansion = suggestExpansion();
+  const isLaunchMode = (franceTotalSitters ?? 0) === 0;
 
   const resetFilters = () => {
     setVehicled(false);
@@ -299,6 +480,14 @@ const SearchOwner = () => {
   const sortPillBase = "rounded-full px-3 py-1 text-xs border border-border text-muted-foreground cursor-pointer hover:border-primary transition-colors";
   const sortPillActive = "rounded-full px-3 py-1 text-xs bg-foreground text-background cursor-pointer";
 
+  // Zone mode chips
+  const zoneChips: Array<{ key: ZoneMode; label: string; count: number; disabled?: boolean }> = [
+    { key: "radius", label: `${radius[0]} km`, count: densityCounts.radius, disabled: !city },
+    { key: "dept", label: refDept ? `Dép. ${refDept}` : "Département", count: densityCounts.dept, disabled: !refDept },
+    { key: "region", label: refRegion ? (getRegionName(refDept) ?? "Région") : "Région", count: densityCounts.region, disabled: !refRegion },
+    { key: "france", label: "France", count: densityCounts.france },
+  ];
+
   return (
     <div className="animate-fade-in">
       {/* Title */}
@@ -308,7 +497,7 @@ const SearchOwner = () => {
       </div>
 
       {/* Sticky search bar */}
-      <div className="sticky top-0 z-10 bg-background border-b border-border px-6 py-3">
+      <div className="sticky top-0 z-10 bg-background border-b border-border px-6 py-3 space-y-3">
         <div className="flex items-center gap-2 overflow-x-auto no-scrollbar">
           {/* PILL 1 — Localisation */}
           <Popover open={openPop === "loc"} onOpenChange={(o) => setOpenPop(o ? "loc" : null)}>
@@ -333,7 +522,16 @@ const SearchOwner = () => {
               {citySuggestions.length > 0 && (
                 <div className="space-y-1">
                   {citySuggestions.map((s: any, i: number) => (
-                    <button key={i} className="w-full text-left px-3 py-2 rounded-lg text-sm hover:bg-muted transition-colors" onClick={() => { setCity(s.nom); setCitySuggestions([]); setOpenPop(null); }}>
+                    <button
+                      key={i}
+                      className="w-full text-left px-3 py-2 rounded-lg text-sm hover:bg-muted transition-colors"
+                      onClick={() => {
+                        setCity(s.nom);
+                        setCityPostalCode(s.codesPostaux?.[0] ?? null);
+                        setCitySuggestions([]);
+                        setOpenPop(null);
+                      }}
+                    >
                       <span className="font-medium">{s.nom}</span>
                       {s.codesPostaux?.[0] && <span className="text-muted-foreground ml-1">({s.codesPostaux[0]})</span>}
                     </button>
@@ -343,21 +541,23 @@ const SearchOwner = () => {
             </PopoverContent>
           </Popover>
 
-          {/* PILL 2 — Rayon */}
-          <Popover open={openPop === "rad"} onOpenChange={(o) => setOpenPop(o ? "rad" : null)}>
-            <PopoverTrigger asChild>
-              <button className={pillBase}>{radius[0]} km</button>
-            </PopoverTrigger>
-            <PopoverContent align="start" className="w-64 p-3 space-y-3">
-              <div className="flex gap-2 flex-wrap">
-                {RADIUS_SHORTCUTS.map(r => (
-                  <button key={r} onClick={() => setRadius([r])} className={`rounded-full px-3 py-1 text-xs border transition-colors ${radius[0] === r ? "bg-primary text-primary-foreground border-primary" : "border-border text-muted-foreground hover:border-primary"}`}>{r} km</button>
-                ))}
-              </div>
-              <Slider value={radius} onValueChange={setRadius} min={5} max={100} step={5} />
-              <p className="text-xs text-muted-foreground text-center">{radius[0]} km</p>
-            </PopoverContent>
-          </Popover>
+          {/* PILL 2 — Rayon (only meaningful in radius zone mode) */}
+          {zoneMode === "radius" && (
+            <Popover open={openPop === "rad"} onOpenChange={(o) => setOpenPop(o ? "rad" : null)}>
+              <PopoverTrigger asChild>
+                <button className={pillBase}>{radius[0]} km</button>
+              </PopoverTrigger>
+              <PopoverContent align="start" className="w-64 p-3 space-y-3">
+                <div className="flex gap-2 flex-wrap">
+                  {RADIUS_SHORTCUTS.map(r => (
+                    <button key={r} onClick={() => setRadius([r])} className={`rounded-full px-3 py-1 text-xs border transition-colors ${radius[0] === r ? "bg-primary text-primary-foreground border-primary" : "border-border text-muted-foreground hover:border-primary"}`}>{r} km</button>
+                  ))}
+                </div>
+                <Slider value={radius} onValueChange={setRadius} min={5} max={100} step={5} />
+                <p className="text-xs text-muted-foreground text-center">{radius[0]} km</p>
+              </PopoverContent>
+            </Popover>
+          )}
 
           {/* PILL 3 — Dates */}
           <Popover open={openPop === "dates"} onOpenChange={(o) => setOpenPop(o ? "dates" : null)}>
@@ -472,6 +672,35 @@ const SearchOwner = () => {
             </SheetContent>
           </Sheet>
         </div>
+
+        {/* Zone mode selector with density counters */}
+        <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar">
+          <span className="text-xs text-muted-foreground shrink-0 mr-1">Zone&nbsp;:</span>
+          {zoneChips.map((z) => {
+            const active = zoneMode === z.key;
+            return (
+              <button
+                key={z.key}
+                onClick={() => {
+                  if (z.disabled) return;
+                  setZoneMode(z.key);
+                  trackEvent("search_empty_action", { source: "owner", metadata: { action: "change_zone", zone_mode: z.key } });
+                }}
+                disabled={z.disabled}
+                className={`shrink-0 rounded-full px-3 py-1 text-xs border transition-colors ${
+                  active
+                    ? "bg-primary text-primary-foreground border-primary"
+                    : z.disabled
+                      ? "border-border text-muted-foreground/50 cursor-not-allowed"
+                      : "border-border text-muted-foreground hover:border-primary"
+                }`}
+                title={z.disabled ? "Renseignez une ville" : undefined}
+              >
+                {z.label} <span className="opacity-70">({z.count})</span>
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {/* Sort bar + view toggle */}
@@ -496,9 +725,100 @@ const SearchOwner = () => {
           {loading ? (
             <p className="text-muted-foreground py-10 text-center">Recherche en cours...</p>
           ) : results.length === 0 ? (
-            <div className="text-center py-20 text-muted-foreground">
-              <p className="font-medium">Aucun gardien ne correspond à ces critères.</p>
-              <p className="text-sm mt-1">Essayez d'élargir vos filtres.</p>
+            <div className="max-w-2xl mx-auto py-10 space-y-4">
+              <div className="text-center">
+                <h2 className="font-heading text-xl font-semibold mb-2">
+                  {isLaunchMode
+                    ? "Soyez parmi les premiers propriétaires"
+                    : "Aucun gardien dans cette zone pour l'instant"}
+                </h2>
+                <p className="text-sm text-muted-foreground">
+                  {isLaunchMode
+                    ? "La communauté de gardiens se construit. Créez une alerte pour être prévenu·e dès qu'un gardien rejoint votre zone."
+                    : "Voici comment trouver le bon gardien quand même."}
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {/* Carte 1 — Élargir la zone (si une zone plus large a des résultats) */}
+                {expansion && (
+                  <button
+                    onClick={() => {
+                      setZoneMode(expansion.target);
+                      trackEvent("search_empty_action", { source: "owner", metadata: { action: "expand_zone", from: zoneMode, to: expansion.target } });
+                    }}
+                    className="text-left p-4 rounded-xl border border-primary bg-primary/5 hover:bg-primary/10 transition-colors"
+                  >
+                    <div className="flex items-center gap-2 mb-1">
+                      <MapPin className="h-4 w-4 text-primary" />
+                      <span className="font-medium text-sm">Élargir à {expansion.label}</span>
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      {expansion.count} gardien{expansion.count > 1 ? "s" : ""} disponible{expansion.count > 1 ? "s" : ""}.
+                    </p>
+                  </button>
+                )}
+
+                {/* Carte 2 — Créer une alerte */}
+                <button
+                  onClick={handleCreateAlert}
+                  disabled={!city || alertCreated || isCreatingAlert}
+                  className="text-left p-4 rounded-xl border border-border bg-card hover:border-primary transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                >
+                  <div className="flex items-center gap-2 mb-1">
+                    {alertCreated ? <BellRing className="h-4 w-4 text-primary" /> : isCreatingAlert ? <Loader2 className="h-4 w-4 animate-spin" /> : <Bell className="h-4 w-4 text-primary" />}
+                    <span className="font-medium text-sm">
+                      {alertCreated ? "Alerte créée" : "Me prévenir par e-mail"}
+                    </span>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    {!city
+                      ? "Renseignez une ville pour activer l'alerte."
+                      : alertCreated
+                        ? `Vous serez alerté·e dès qu'un gardien rejoint la zone autour de ${city}.`
+                        : `Recevez un e-mail dès qu'un gardien s'inscrit près de ${city}.`}
+                  </p>
+                </button>
+
+                {/* Carte 3 — Inviter un voisin */}
+                <button
+                  onClick={handleShareInvite}
+                  className="text-left p-4 rounded-xl border border-border bg-card hover:border-primary transition-colors"
+                >
+                  <div className="flex items-center gap-2 mb-1">
+                    <Share2 className="h-4 w-4 text-primary" />
+                    <span className="font-medium text-sm">Inviter un voisin de confiance</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Vous connaissez quelqu'un de fiable près de chez vous ? Invitez-le à rejoindre Guardiens.
+                  </p>
+                </button>
+
+                {/* Carte 4 — Publier annonce visible */}
+                <button
+                  onClick={() => {
+                    trackEvent("search_empty_action", { source: "owner", metadata: { action: "create_sit", zone_mode: zoneMode } });
+                    navigate("/creer-une-garde");
+                  }}
+                  className="text-left p-4 rounded-xl border border-border bg-card hover:border-primary transition-colors"
+                >
+                  <div className="flex items-center gap-2 mb-1">
+                    <Calendar className="h-4 w-4 text-primary" />
+                    <span className="font-medium text-sm">Publier une annonce de garde</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Les gardiens reçoivent une alerte dès qu'une garde s'ouvre dans leur zone.
+                  </p>
+                </button>
+              </div>
+
+              {hasActiveFilters && (
+                <div className="text-center pt-2">
+                  <button onClick={resetFilters} className="text-xs text-primary hover:underline">
+                    Réinitialiser les filtres avancés
+                  </button>
+                </div>
+              )}
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
