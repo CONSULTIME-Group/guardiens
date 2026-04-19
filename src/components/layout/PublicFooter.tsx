@@ -1,8 +1,9 @@
+import React from "react";
 import { Link } from "react-router-dom";
 
-export default function PublicFooter() {
+const PublicFooter = React.forwardRef<HTMLElement>((_props, ref) => {
   return (
-    <footer className="bg-foreground border-t border-white/10">
+    <footer ref={ref} className="bg-foreground border-t border-white/10">
       <div className="max-w-6xl mx-auto px-6 md:px-12 py-16">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-10 mb-12">
           <div>
@@ -72,4 +73,7 @@ export default function PublicFooter() {
       </div>
     </footer>
   );
-}
+});
+PublicFooter.displayName = "PublicFooter";
+
+export default PublicFooter;

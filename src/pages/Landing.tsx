@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import notreHistoirePanorama from "@/assets/story-photo.webp";
 import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
