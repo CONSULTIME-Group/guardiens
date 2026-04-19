@@ -50,7 +50,7 @@ export default function CityHero({
             width={1920}
             height={800}
             loading="eager"
-            fetchPriority="high"
+            fetchpriority="high"
             decoding="async"
           />
         ) : (
