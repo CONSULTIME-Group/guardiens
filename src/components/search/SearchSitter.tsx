@@ -230,6 +230,36 @@ const SearchSitter = () => {
     setAlertCreated(false);
   }, [city, radius]);
 
+  // Compute cross-tab count + global launch count when results are empty
+  useEffect(() => {
+    if (loading || results.length > 0) {
+      setCrossTabCount(null);
+      setLaunchModeCount(null);
+      return;
+    }
+    let cancelled = false;
+    (async () => {
+      try {
+        const [otherTabRes, sitsAllRes, missionsAllRes] = await Promise.all([
+          tab === "sits"
+            ? supabase.from("small_missions").select("id", { count: "exact", head: true }).eq("status", "open")
+            : supabase.from("sits").select("id", { count: "exact", head: true }).eq("status", "published"),
+          supabase.from("sits").select("id", { count: "exact", head: true }).eq("status", "published"),
+          supabase.from("small_missions").select("id", { count: "exact", head: true }).eq("status", "open"),
+        ]);
+        if (cancelled) return;
+        setCrossTabCount(otherTabRes.count ?? 0);
+        setLaunchModeCount((sitsAllRes.count ?? 0) + (missionsAllRes.count ?? 0));
+      } catch {
+        if (!cancelled) {
+          setCrossTabCount(0);
+          setLaunchModeCount(0);
+        }
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [loading, results.length, tab]);
+
   const handleCreateAlert = async () => {
     if (!city || alertCreated || isCreatingAlert) return;
     setIsCreatingAlert(true);
