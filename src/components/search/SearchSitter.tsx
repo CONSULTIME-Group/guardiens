@@ -346,7 +346,7 @@ const SearchSitter = () => {
       });
     }
     if (verifiedOnly) items = items.filter((s: any) => s.owner?.identity_verified);
-    const { items: locFiltered, cityCoords } = await filterByLocation(items, (s: any) => s.owner?.city, searchCoords);
+    const { items: locFiltered, cityCoords } = await filterByLocation(items, (s: any) => s.owner?.city, searchCoords, (s: any) => s.owner?.postal_code);
     items = locFiltered;
     const enriched = await Promise.all(
       items.map(async (sit: any) => {
