@@ -7,16 +7,14 @@ import { ChevronRight, Home } from "lucide-react";
 const SEGMENT_LABELS: Record<string, string> = {
   dashboard: "Tableau de bord",
   "mon-abonnement": "Mon abonnement",
-  "profil-gardien": "Profil gardien",
-  "profil-proprietaire": "Profil propriétaire",
   annonces: "Annonces",
   sits: "Mes annonces",
   create: "Nouvelle annonce",
   edit: "Modifier",
   messages: "Messages",
-  parametres: "Paramètres",
   notifications: "Notifications",
   "petites-missions": "Petites missions",
+  creer: "Créer",
   "gardien-urgence": "Gardien d'urgence",
   actualites: "Actualités",
   guides: "Guides",
@@ -24,19 +22,23 @@ const SEGMENT_LABELS: Record<string, string> = {
   faq: "FAQ",
   contact: "Contact",
   recherche: "Recherche",
+  "recherche-gardiens": "Recherche gardiens",
+  search: "Recherche",
   "house-sitting": "House-sitting",
   departement: "Département",
-  races: "Races",
-  avis: "Avis",
+  gardiens: "Gardien",
   "owner-profile": "Profil propriétaire",
-  "sitter-profile": "Profil gardien",
-  favorites: "Mes favoris",
+  profile: "Mon profil",
+  favoris: "Mes favoris",
+  "mes-avis": "Mes avis",
   settings: "Paramètres",
+  "house-guide": "Guide de la maison",
+  review: "Laisser un avis",
 };
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-const HIDDEN_ROUTES = ["/", "/connexion", "/inscription"];
+const HIDDEN_ROUTES = ["/", "/login", "/register"];
 
 const Breadcrumbs = () => {
   const location = useLocation();

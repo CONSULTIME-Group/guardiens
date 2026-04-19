@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { Lock, User, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
+import { useAuth } from "@/contexts/AuthContext";
 import type { AccessLevel } from "@/hooks/useAccessLevel";
 
 interface AccessGateBannerProps {
@@ -12,6 +13,8 @@ interface AccessGateBannerProps {
 }
 
 const AccessGateBanner = ({ level, profileCompletion, context = "guard" }: AccessGateBannerProps) => {
+  const { user, activeRole } = useAuth();
+  const profilePath = (user?.role === "both" ? activeRole : user?.role) === "owner" ? "/owner-profile" : "/profile";
   if (level === 0) {
     return (
       <div
@@ -64,7 +67,7 @@ const AccessGateBanner = ({ level, profileCompletion, context = "guard" }: Acces
               Complétez votre profil pour accéder aux annonces et missions.
             </p>
             <Button size="sm" asChild>
-              <Link to="/profile">Compléter mon profil →</Link>
+              <Link to={profilePath}>Compléter mon profil →</Link>
             </Button>
           </div>
         </div>
