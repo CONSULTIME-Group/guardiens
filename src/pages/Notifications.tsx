@@ -37,20 +37,25 @@ const typeIcons: Record<string, string> = {
 
 const Notifications = () => {
   const { user } = useAuth();
+  const userId = user?.id;
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
 
   const load = useCallback(async () => {
-    if (!user) return;
+    if (!userId) {
+      setNotifications([]);
+      setLoading(false);
+      return;
+    }
     const { data } = await supabase
       .from("notifications")
       .select("*")
-      .eq("user_id", user.id)
+      .eq("user_id", userId)
       .order("created_at", { ascending: false })
       .limit(50);
     setNotifications((data as Notification[]) || []);
     setLoading(false);
-  }, [user]);
+  }, [userId]);
 
   useEffect(() => {
     load();
@@ -58,20 +63,21 @@ const Notifications = () => {
 
   // Realtime
   useEffect(() => {
-    if (!user) return;
+    if (!userId) return;
+    const notificationFilter = `user_id=eq.${userId}`;
     const channel = supabase
-      .channel("notifs-page")
+      .channel(`notifications-page-${userId}-${crypto.randomUUID()}`)
       .on("postgres_changes", {
         event: "INSERT",
         schema: "public",
         table: "notifications",
-        filter: `user_id=eq.${user.id}`,
+        filter: notificationFilter,
       }, (payload) => {
         setNotifications((prev) => [payload.new as Notification, ...prev]);
       })
       .subscribe();
     return () => { supabase.removeChannel(channel); };
-  }, [user]);
+  }, [userId]);
 
   const markRead = async (id: string) => {
     await supabase.from("notifications").update({ read_at: new Date().toISOString() }).eq("id", id);
