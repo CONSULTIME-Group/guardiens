@@ -27,6 +27,8 @@ import { fr } from "date-fns/locale";
 import { geocodeCity, haversineDistance } from "@/lib/geocode";
 import { useSubscriptionAccess } from "@/hooks/useSubscriptionAccess";
 import FavoriteButton from "@/components/shared/FavoriteButton";
+import { getDeptCode, DEPT_NAMES } from "@/lib/departments";
+import { getRegionCode, getRegionName, getDeptsInRegion } from "@/lib/regions";
 
 const animalChips = ["Chiens", "Chats", "Chevaux", "Animaux de ferme", "NAC"];
 const animalChipToSpecies: Record<string, string> = {
@@ -46,6 +48,7 @@ type MissionSubTab = "published" | "members";
 type ViewMode = "list" | "map";
 type HousingFilter = "all" | "house" | "apartment" | "farm";
 type ExperienceFilter = "all" | "1" | "3";
+type ZoneMode = "radius" | "dept" | "region" | "france";
 
 const SearchSitter = () => {
   const { user } = useAuth();
@@ -61,6 +64,9 @@ const SearchSitter = () => {
   const [availableMembers, setAvailableMembers] = useState<any[]>([]);
   const [city, setCity] = useState("");
   const [radius, setRadius] = useState([15]);
+  const [zoneMode, setZoneMode] = useState<ZoneMode>("radius");
+  const [densityCounts, setDensityCounts] = useState<{ radius: number; dept: number; region: number; france: number }>({ radius: 0, dept: 0, region: 0, france: 0 });
+  const [userPostalCode, setUserPostalCode] = useState<string | null>(null);
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [animalTypes, setAnimalTypes] = useState<string[]>([]);
