@@ -1,0 +1,1 @@
+DELETE FROM public.error_logs WHERE message ~* '^\s*Script error\.?\s*$';
