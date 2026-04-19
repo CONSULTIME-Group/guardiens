@@ -99,13 +99,14 @@ const Register = () => {
     }
 
     setIsLoading(true);
+    const cleanEmail = email.trim().toLowerCase();
     const timeoutPromise = new Promise((_, reject) =>
       setTimeout(() => reject(new Error("timeout")), 15000)
     );
 
     try {
       const result = await Promise.race([
-        register(email, password, selectedRole),
+        register(cleanEmail, password, selectedRole),
         timeoutPromise,
       ]) as any;
 
@@ -138,6 +139,16 @@ const Register = () => {
         } finally {
           sessionStorage.removeItem("guardiens_ref");
         }
+      }
+
+      // If auto-confirm enabled (session already created), go straight to dashboard
+      if (result?.session) {
+        trackEventWithUserId(result?.user?.id ?? null, "signup_completed", {
+          source: "/register",
+          metadata: { role: selectedRole, auto_confirmed: true },
+        });
+        navigate("/dashboard");
+        return;
       }
 
       setStep("confirmation");

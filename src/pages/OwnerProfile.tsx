@@ -31,7 +31,7 @@ function sectionComplete(num: number, d: OwnerProfileData, petsCount: number): b
     case 2: return !!(d.property_type && d.environment && d.description);
     case 3: return petsCount > 0;
     case 4: return !!(d.presence_expected && d.visits_allowed && d.meeting_preference.length > 0 && d.news_frequency);
-    case 5: return !!(d.handover_preference || d.news_format.length > 0);
+    case 5: return !!(d.handover_preference && d.news_format.length > 0);
     default: return false;
   }
 }
@@ -165,7 +165,7 @@ const OwnerProfilePage = () => {
             sections={sidebarSections}
             activeSection={activeSection}
             onSectionClick={setActiveSection}
-            publicProfileUrl={user ? `/proprietaires/${user.id}?tab=proprio` : "#"}
+            publicProfileUrl={user ? `/gardiens/${user.id}?tab=proprio` : "#"}
             role="owner"
           />
 
