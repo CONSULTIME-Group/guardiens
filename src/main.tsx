@@ -5,6 +5,7 @@ import "./index.css";
 import reportWebVitals from "./lib/webVitals";
 import { installGlobalErrorHandlers } from "./lib/logger";
 import { installGlobalErrorLogger } from "./lib/errorLogger";
+import { initConsent } from "./lib/cookieConsent";
 
 const root = createRoot(document.getElementById("root")!);
 root.render(
@@ -25,3 +26,5 @@ reportWebVitals();
 installGlobalErrorHandlers();
 // Persist errors to DB for admin dashboard
 installGlobalErrorLogger();
+// Initialise GA si l'utilisateur a déjà consenti (RGPD)
+initConsent();
