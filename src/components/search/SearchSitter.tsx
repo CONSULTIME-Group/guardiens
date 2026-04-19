@@ -1328,9 +1328,9 @@ const SearchSitter = () => {
                 </div>
               )}
               {alertCreated && (
-                <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/5 p-4">
+                <div className="rounded-xl border border-primary/30 bg-primary/5 p-4">
                   <div className="flex items-center gap-3">
-                    <BellRing className="h-5 w-5 text-emerald-600 shrink-0" />
+                    <BellRing className="h-5 w-5 text-primary shrink-0" />
                     <p className="text-sm text-foreground">Alerte créée. On vous prévient dès qu'une annonce arrive !</p>
                   </div>
                 </div>
