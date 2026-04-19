@@ -161,7 +161,7 @@ const SearchSitter = () => {
     if (!user) return;
     const load = async () => {
       const [profileRes, spRes, eligRes, reviewsRes, myProfileRes] = await Promise.all([
-        supabase.from("profiles").select("city").eq("id", user.id).single(),
+        supabase.from("profiles").select("city, postal_code").eq("id", user.id).single(),
         supabase.from("sitter_profiles").select("*").eq("user_id", user.id).maybeSingle(),
         supabase.from("applications").select("id, sit:sits!inner(status)").eq("sitter_id", user.id).eq("status", "accepted"),
         supabase.from("reviews").select("overall_rating").eq("reviewee_id", user.id).eq("published", true),
@@ -169,6 +169,7 @@ const SearchSitter = () => {
       ]);
       const uc = profileRes.data?.city || "";
       setUserCity(uc);
+      setUserPostalCode(profileRes.data?.postal_code || null);
       setSitterProfile(spRes.data);
       if (uc) {
         setCity(uc);
@@ -204,7 +205,7 @@ const SearchSitter = () => {
       }
     }
     setLoading(false);
-  }, [tab, missionSubTab, city, radius, startDate, endDate, animalTypes, housingType, duration, verifiedOnly, emergencyOnly, sort, userCoords, userCity, missionTypeFilter, missionCategoryFilter, withPhotosOnly, minExperience, environments]);
+  }, [tab, missionSubTab, city, radius, zoneMode, startDate, endDate, animalTypes, housingType, duration, verifiedOnly, emergencyOnly, sort, userCoords, userCity, userPostalCode, missionTypeFilter, missionCategoryFilter, withPhotosOnly, minExperience, environments]);
 
   useEffect(() => {
     if (!initialLoadDone.current) return;
