@@ -40,10 +40,10 @@ const DEMO_LISTINGS = [
   },
 ];
 
-const DemoListingCard = ({
+const DemoListingCard = React.forwardRef<HTMLDivElement, typeof DEMO_LISTINGS[0]>(({
   photo, city, animals, dates, title, description, ownerName, ownerPhoto, badges,
-}: typeof DEMO_LISTINGS[0]) => (
-  <div className="bg-card rounded-2xl overflow-hidden border border-border shadow-sm flex flex-col">
+}, ref) => (
+  <div ref={ref} className="bg-card rounded-2xl overflow-hidden border border-border shadow-sm flex flex-col">
     <div className="relative">
       <img src={photo} alt={title} className="w-full h-48 object-cover" loading="lazy" width={700} height={467} />
       <span className="absolute top-3 left-3 bg-white/90 text-foreground/50 text-xs font-body font-medium px-3 py-1 rounded-full border border-border/60">
@@ -88,7 +88,8 @@ const DemoListingCard = ({
       </Link>
     </div>
   </div>
-);
+));
+DemoListingCard.displayName = "DemoListingCard";
 
 const DemoListingShowcase = React.forwardRef<HTMLElement>((_props, ref) => (
   <section ref={ref} className="py-24 md:py-32 bg-muted/30">

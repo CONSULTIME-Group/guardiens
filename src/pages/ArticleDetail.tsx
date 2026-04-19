@@ -367,7 +367,6 @@ export default function ArticleDetail() {
             alt={altText}
             className="w-full h-auto max-h-96 object-cover"
             loading="eager"
-            fetchPriority="high"
             decoding="async"
             width={800}
             height={427}
