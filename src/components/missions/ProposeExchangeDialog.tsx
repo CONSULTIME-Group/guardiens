@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
@@ -30,6 +31,7 @@ const ProposeExchangeDialog = ({
 }: ProposeExchangeDialogProps) => {
   const { user, switchRole } = useAuth();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [exchangeOffer, setExchangeOffer] = useState("");
   const [needDescription, setNeedDescription] = useState("");
   const [exchangeDate, setExchangeDate] = useState("");
@@ -40,6 +42,19 @@ const ProposeExchangeDialog = ({
     setLoading(true);
 
     try {
+      // 0. Pre-check: mission still open
+      const { data: freshMission, error: mErr } = await supabase
+        .from("small_missions")
+        .select("status")
+        .eq("id", mission.id)
+        .single();
+      if (mErr) throw mErr;
+      if (freshMission?.status === "cancelled" || freshMission?.status === "completed") {
+        toast.error("Cette mission est clôturée — vous ne pouvez plus y répondre.");
+        setLoading(false);
+        return;
+      }
+
       // 1. Check existing conversation for this mission
       const { data: existing } = await supabase
         .from("conversations")
@@ -111,7 +126,10 @@ const ProposeExchangeDialog = ({
         link: `/messages?conversationId=${convId}`,
       });
 
-      // 6. Close + switch role + navigate
+      // 6. Invalidate caches so the list reflects "already_proposed"
+      await queryClient.invalidateQueries({ queryKey: ["small-missions-all"] });
+
+      // 7. Close + switch role + navigate
       onClose();
       switchRole('sitter');
       navigate(`/messages?conversationId=${convId}`);

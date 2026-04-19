@@ -208,21 +208,38 @@ const SmallMissionDetail = () => {
     if (!user || !id || !message.trim() || submitting) return;
     setSubmitting(true);
     try {
+      // Pre-check: re-read mission status to avoid responding to a closed mission
+      const { data: fresh } = await supabase
+        .from("small_missions")
+        .select("status, user_id, title")
+        .eq("id", id)
+        .single();
+      if (!fresh) throw new Error("Mission introuvable.");
+      if (fresh.status !== "open") {
+        toast({ variant: "destructive", title: "Mission clôturée", description: "Cette mission n'accepte plus de propositions." });
+        return;
+      }
+      if (fresh.user_id === user.id) {
+        toast({ variant: "destructive", title: "Action impossible", description: "Vous ne pouvez pas postuler à votre propre mission." });
+        return;
+      }
+
       const { error } = await supabase.from("small_mission_responses").insert({
         mission_id: id, responder_id: user.id, message: message.trim(),
       });
       if (error) {
         if (error.code === "23505") {
           toast({ variant: "destructive", title: "Déjà envoyé", description: "Vous avez déjà proposé votre aide pour cette mission." });
+          setHasResponded(true);
         } else {
           throw error;
         }
       } else {
         // Notify mission author
         await supabase.from("notifications").insert({
-          user_id: mission.user_id, type: "mission_proposal",
+          user_id: fresh.user_id, type: "mission_proposal",
           title: "Nouvelle proposition d'aide",
-          body: `${(user as any).first_name || "Un membre"} propose son aide pour "${mission.title}"`,
+          body: `${(user as any).first_name || "Un membre"} propose son aide pour "${fresh.title}"`,
           link: `/petites-missions/${id}`,
         });
         setHasResponded(true);
@@ -244,10 +261,11 @@ const SmallMissionDetail = () => {
     if (!resp) return;
     setProcessingResponseId(responseId);
     try {
-      // Server-side guard: re-check status
+      // Server-side guard: re-check mission status
       const { data: freshMission } = await supabase
         .from("small_missions").select("status").eq("id", id!).single();
-      if (freshMission?.status === "cancelled" || freshMission?.status === "completed") {
+      if (!freshMission) throw new Error("Mission introuvable");
+      if (freshMission.status === "cancelled" || freshMission.status === "completed") {
         toast({ variant: "destructive", title: "Mission clôturée", description: "Cette mission n'accepte plus de candidatures." });
         return;
       }
@@ -256,7 +274,7 @@ const SmallMissionDetail = () => {
         .from("small_mission_responses").update({ status: "accepted" as any }).eq("id", responseId);
       if (updErr) throw updErr;
 
-      if (mission.status === "open") {
+      if (freshMission.status === "open") {
         await supabase.from("small_missions").update({ status: "in_progress" as any }).eq("id", id!);
         setMission((prev: any) => ({ ...prev, status: "in_progress" }));
       }
@@ -271,11 +289,28 @@ const SmallMissionDetail = () => {
         .or(`and(owner_id.eq.${mission.user_id},sitter_id.eq.${resp.responder_id}),and(owner_id.eq.${resp.responder_id},sitter_id.eq.${mission.user_id})`)
         .maybeSingle();
 
-      if (!existingConv) {
-        await supabase.from("conversations").insert({
-          owner_id: mission.user_id,
-          sitter_id: resp.responder_id,
-          small_mission_id: id,
+      let convId = existingConv?.id;
+      if (!convId) {
+        const { data: newConv, error: convErr } = await supabase
+          .from("conversations")
+          .insert({
+            owner_id: mission.user_id,
+            sitter_id: resp.responder_id,
+            small_mission_id: id,
+          })
+          .select("id")
+          .single();
+        if (convErr) throw convErr;
+        convId = newConv.id;
+      }
+
+      // Add a system message to materialize the acceptance in the chat
+      if (convId) {
+        await supabase.from("messages").insert({
+          conversation_id: convId,
+          sender_id: user!.id,
+          content: `✅ Proposition acceptée pour « ${mission.title} ». Vous pouvez maintenant échanger pour organiser l'entraide.`,
+          is_system: true,
         });
       }
 
@@ -283,7 +318,7 @@ const SmallMissionDetail = () => {
         user_id: resp.responder_id, type: "mission_accepted",
         title: "Proposition acceptée",
         body: `Votre proposition pour "${mission.title}" a été acceptée. Vous pouvez maintenant échanger par messagerie.`,
-        link: `/messages`,
+        link: convId ? `/messages?conversationId=${convId}` : `/messages`,
       });
 
       toast({ title: "Proposition acceptée !" });

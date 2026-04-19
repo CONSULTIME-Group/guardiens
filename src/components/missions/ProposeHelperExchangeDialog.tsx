@@ -82,12 +82,20 @@ const ProposeHelperExchangeDialog = ({
       });
       if (msgError) throw msgError;
 
+      // Resolve sender display name from profiles for safer notification body
+      let senderName = (user as any).first_name as string | undefined;
+      if (!senderName) {
+        const { data: me } = await supabase
+          .from("profiles").select("first_name").eq("id", user.id).maybeSingle();
+        senderName = me?.first_name || "Un membre";
+      }
+
       // Notify helper (non-blocking)
       await supabase.from("notifications").insert({
         user_id: helper.id,
         type: "mission_proposal",
         title: "Proposition d'échange",
-        body: `${(user as any).first_name || "Un membre"} vous propose un échange : "${needDescription.trim().slice(0, 60)}"`,
+        body: `${senderName} vous propose un échange : "${needDescription.trim().slice(0, 60)}"`,
         link: `/messages?conversationId=${convId}`,
       });
 

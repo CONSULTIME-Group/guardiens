@@ -11,10 +11,12 @@ import { Dog, Flower2, Home, Handshake, Heart, ChevronLeft, Lock } from "lucide-
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useQueryClient } from "@tanstack/react-query";
 import PageMeta from "@/components/PageMeta";
 import { useAccessLevel } from "@/hooks/useAccessLevel";
 import AccessGateBanner from "@/components/access/AccessGateBanner";
 import MissionPhotoUpload from "@/components/missions/MissionPhotoUpload";
+import { geocodeCity } from "@/lib/geocode";
 
 const EURO_REGEX = /\d+\s*[€]|[€]\s*\d+|\d+\s*euro/i;
 
@@ -37,6 +39,7 @@ const CreateSmallMission = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const { level: accessLevel, profileCompletion, canApplyMissions, loading: accessLoading } = useAccessLevel();
 
   const typeParam = searchParams.get("type"); // "besoin" or "offre"
@@ -66,12 +69,22 @@ const CreateSmallMission = () => {
     e.preventDefault();
     if (!user) return;
     if (EURO_REGEX.test(exchangeOffer)) return;
+    if (submitting) return;
     if (!title.trim() || !description.trim() || !exchangeOffer.trim() || !city.trim() || !duration) {
       toast({ title: "Champs requis", description: "Remplissez tous les champs obligatoires.", variant: "destructive" });
       return;
     }
 
     setSubmitting(true);
+
+    // Pre-geocode (best effort) so the list filters by distance immediately
+    let coords: { lat: number; lng: number } | null = null;
+    try {
+      coords = await geocodeCity(city.trim());
+    } catch {
+      coords = null;
+    }
+
     const { error } = await supabase.from("small_missions").insert({
       user_id: user.id,
       title: title.trim(),
@@ -82,14 +95,17 @@ const CreateSmallMission = () => {
       postal_code: postalCode.trim(),
       date_needed: dateNeeded || null,
       duration_estimate: duration,
-      mission_type: missionType,
       photos,
+      latitude: coords?.lat ?? null,
+      longitude: coords?.lng ?? null,
     } as any);
 
     setSubmitting(false);
     if (error) {
       toast({ title: "Erreur", description: error.message, variant: "destructive" });
     } else {
+      // Refresh the public list so the new mission shows up immediately
+      await queryClient.invalidateQueries({ queryKey: ["small-missions-all"] });
       toast({ title: "Mission publiée !", description: "Votre petite mission est en ligne." });
       navigate("/petites-missions");
     }
