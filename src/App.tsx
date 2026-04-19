@@ -17,6 +17,7 @@ import SkipToContent from "@/components/layout/SkipToContent";
 import OfflineBanner from "@/components/layout/OfflineBanner";
 import ScrollToTop from "@/components/layout/ScrollToTop";
 import PageViewTracker from "@/components/analytics/PageViewTracker";
+import CookieConsent from "@/components/layout/CookieConsent";
 import { toast } from "sonner";
 import { reportError } from "@/lib/errorLogger";
 
@@ -293,6 +294,7 @@ const App = () => (
               <PageViewTracker />
               <OfflineBanner />
               <AppRoutes />
+              <CookieConsent />
             </BrowserRouter>
           </AuthProvider>
         </TooltipProvider>

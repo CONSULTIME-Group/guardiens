@@ -1,4 +1,5 @@
 import { useState, useRef } from "react";
+import { logger } from "@/lib/logger";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -103,7 +104,7 @@ const OwnerStepAnimals = ({ pets, onAddPet, onUpdatePet, onRemovePet }: Props) =
       const path = `${userId}/pets/${Date.now()}_${Math.random().toString(36).slice(2)}.jpg`;
       const { error } = await supabase.storage.from("property-photos").upload(path, uploadFile, { contentType: "image/jpeg" });
       if (error) {
-        console.error("Storage upload error:", error);
+        logger.error("Storage upload error", { error: String(error) });
         toast.error("Erreur lors de l'upload : " + (error.message || "réessayez"));
       } else {
         const { data: urlData } = supabase.storage.from("property-photos").getPublicUrl(path);
@@ -111,7 +112,7 @@ const OwnerStepAnimals = ({ pets, onAddPet, onUpdatePet, onRemovePet }: Props) =
         toast.success("Photo ajoutée !");
       }
     } catch (err) {
-      console.error("Photo processing error:", err);
+      logger.error("Photo processing error", { err: String(err) });
       toast.error("Format d'image non supporté ou fichier corrompu");
     }
     setUploading(false);

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { logger } from "@/lib/logger";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -154,7 +155,7 @@ const CancelSitModal = ({
       onCancelled();
       onOpenChange(false);
     } catch (err: any) {
-      console.error(err);
+      logger.error("CancelSitModal error", { err: String(err) });
       toast.error(err?.message || "Erreur lors de l'annulation.");
     }
 

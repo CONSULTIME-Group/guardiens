@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { logger } from "@/lib/logger";
 import FounderBadge from "@/components/badges/FounderBadge";
 import AccordDeGarde from "@/components/gardes/AccordDeGarde";
 import { Link } from "react-router-dom";
@@ -292,7 +293,7 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
     toast({ title: "Garde confirmée !", description: `${sitterName} a été choisi(e) pour cette garde.` });
     setConfirmApp(null);
     } catch (error) {
-      console.error('handleAccept error:', error);
+      logger.error('handleAccept error', { error: String(error) });
       toast({
         title: "Erreur",
         description: "Une erreur est survenue lors de la confirmation.",
@@ -341,7 +342,7 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
       setDeclineCustom(false);
       load();
     } catch (error) {
-      console.error('handleDecline error:', error);
+      logger.error('handleDecline error', { error: String(error) });
       toast({
         title: "Erreur",
         description: "Impossible de décliner la candidature.",

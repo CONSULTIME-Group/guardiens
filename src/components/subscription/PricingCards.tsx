@@ -2,6 +2,7 @@ import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { CheckCircle2, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { logger } from "@/lib/logger";
 
 const calculateYearlyProrata = (): { price: number; months: number; savings: number } => {
   const now = new Date();
@@ -34,7 +35,7 @@ export default function PricingCards() {
       }
     } catch (e: any) {
       toast.error("Impossible de lancer le paiement. Veuillez reessayer.");
-      console.error("Erreur checkout:", e);
+      logger.error("Erreur checkout", { err: String(e) });
     } finally {
       setLoading(null);
     }

@@ -204,9 +204,9 @@ const PublicProfile = () => {
           {/* === HEADER === */}
           <div className="flex flex-col sm:flex-row items-start gap-5">
             {profile.avatar_url ? (
-              <img src={profile.avatar_url} alt={`Photo de ${firstName}`} className="w-24 h-24 rounded-full object-cover shadow-md border-2 border-white shrink-0" />
+              <img src={profile.avatar_url} alt={`Photo de ${firstName}`} className="w-24 h-24 rounded-full object-cover shadow-md border-2 border-background shrink-0" />
             ) : (
-              <div className="w-24 h-24 rounded-full bg-white border-2 border-border flex items-center justify-center font-heading text-3xl font-bold shrink-0 shadow-sm text-foreground">
+              <div className="w-24 h-24 rounded-full bg-card border-2 border-border flex items-center justify-center font-heading text-3xl font-bold shrink-0 shadow-sm text-foreground">
                 {firstName.charAt(0)}
               </div>
             )}
@@ -249,7 +249,7 @@ const PublicProfile = () => {
           </div>
 
           {/* === METRICS BAR === */}
-          <div className="grid grid-cols-4 divide-x rounded-xl border border-border bg-white p-0 shadow-sm">
+          <div className="grid grid-cols-4 divide-x rounded-xl border border-border bg-card p-0 shadow-sm">
             {defaultTab === "owner" ? (
               <MetricCell label="Séjours hébergés" value={String(completedSits)} />
             ) : (
@@ -290,7 +290,7 @@ const PublicProfile = () => {
 
           {/* === TABS === */}
           <Tabs defaultValue={defaultTab} className="w-full">
-            <TabsList className="w-full bg-white border border-border shadow-sm rounded-xl">
+            <TabsList className="w-full bg-card border border-border shadow-sm rounded-xl">
               {isSitter && <TabsTrigger value="sitter" className="flex-1 gap-1.5 data-[state=active]:border-b-2 data-[state=active]:border-primary">Gardien</TabsTrigger>}
               {isOwner && <TabsTrigger value="owner" className="flex-1 gap-1.5 data-[state=active]:border-b-2 data-[state=active]:border-primary">Propriétaire</TabsTrigger>}
               <TabsTrigger value="entraide" className="flex-1 gap-1.5 data-[state=active]:border-b-2 data-[state=active]:border-primary">
@@ -503,7 +503,7 @@ const PublicProfile = () => {
 
         {/* === STICKY CTA === */}
         {!isOwnProfile && user && (
-          <div className="fixed bottom-0 left-0 right-0 z-40 border-t bg-white/95 backdrop-blur-sm shadow-[0_-2px_10px_rgba(0,0,0,0.05)]">
+          <div className="fixed bottom-0 left-0 right-0 z-40 border-t bg-card/95 backdrop-blur-sm shadow-[0_-2px_10px_rgba(0,0,0,0.05)]">
             <div className="max-w-3xl mx-auto px-4 py-3 flex gap-3">
               {activeSit && (
                 <Button variant="outline" className="flex-1 gap-1.5" asChild>
@@ -525,7 +525,7 @@ const PublicProfile = () => {
 
 /* Helpers */
 const Card = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
-  <div className={`rounded-xl border border-border bg-white p-4 shadow-sm ${className}`}>
+  <div className={`rounded-xl border border-border bg-card p-4 shadow-sm ${className}`}>
     {children}
   </div>
 );
@@ -540,7 +540,7 @@ const MetricCell = ({ label, value, suffix, variant }: { label: string; value: s
 );
 
 const InfoCell = ({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) => (
-  <div className="rounded-xl border border-border bg-white p-3 shadow-sm">
+  <div className="rounded-xl border border-border bg-card p-3 shadow-sm">
     <div className="flex items-center gap-2 mb-1 text-muted-foreground">
       {icon}
       <span className="text-xs">{label}</span>

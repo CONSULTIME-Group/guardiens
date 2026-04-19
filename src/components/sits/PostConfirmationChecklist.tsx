@@ -179,7 +179,7 @@ const PostConfirmationChecklist = ({
                 "flex items-start gap-3 p-3 rounded-lg border transition-colors cursor-pointer",
                 done
                   ? "bg-green-100/50 dark:bg-green-900/10 border-green-200 dark:border-green-800"
-                  : "bg-white dark:bg-card border-border hover:border-green-300"
+                  : "bg-card border-border hover:border-green-300"
               )}
               onClick={() => toggle(item.id)}
             >

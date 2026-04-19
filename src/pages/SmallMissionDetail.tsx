@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { logger } from "@/lib/logger";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -248,7 +249,7 @@ const SmallMissionDetail = () => {
         load();
       }
     } catch (err: any) {
-      console.error("[handleRespond]", err);
+      logger.error("[handleRespond]", { err: String(err) });
       toast({ variant: "destructive", title: "Erreur", description: err?.message || "Impossible d'envoyer votre proposition." });
     } finally {
       setSubmitting(false);
@@ -323,7 +324,7 @@ const SmallMissionDetail = () => {
 
       toast({ title: "Proposition acceptée !" });
     } catch (err: any) {
-      console.error("[handleAcceptResponse]", err);
+      logger.error("[handleAcceptResponse]", { err: String(err) });
       toast({ variant: "destructive", title: "Erreur", description: err?.message || "Impossible d'accepter cette proposition." });
       // Rollback optimistic UI
       setResponses(prev => prev.map(r => r.id === responseId ? { ...r, status: "pending" } : r));
@@ -349,7 +350,7 @@ const SmallMissionDetail = () => {
         body: `Une autre organisation a été choisie pour "${mission.title}". Merci pour votre proposition.`,
       });
     } catch (err: any) {
-      console.error("[handleDeclineResponse]", err);
+      logger.error("[handleDeclineResponse]", { err: String(err) });
       toast({ variant: "destructive", title: "Erreur", description: err?.message || "Impossible de décliner." });
     } finally {
       setProcessingResponseId(null);
@@ -382,7 +383,7 @@ const SmallMissionDetail = () => {
       setCloseModalOpen(false);
       toast({ title: "Mission clôturée" });
     } catch (err: any) {
-      console.error("[handleCloseNoSelect]", err);
+      logger.error("[handleCloseNoSelect]", { err: String(err) });
       toast({ variant: "destructive", title: "Erreur", description: err?.message || "Impossible de clôturer." });
     } finally {
       setClosingNoSelect(false);
@@ -410,7 +411,7 @@ const SmallMissionDetail = () => {
       }
       toast({ title: "Mission marquée comme terminée !" });
     } catch (err: any) {
-      console.error("[handleMarkCompleted]", err);
+      logger.error("[handleMarkCompleted]", { err: String(err) });
       toast({ variant: "destructive", title: "Erreur", description: err?.message || "Impossible de terminer la mission." });
     } finally {
       setCompleting(false);
