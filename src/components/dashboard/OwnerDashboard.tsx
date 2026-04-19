@@ -517,7 +517,7 @@ const OwnerDashboard = () => {
                     <p className="text-xs font-medium">{capitalize(h.sitter?.first_name)}</p>
                     <p className="text-sm text-muted-foreground mt-0.5">{h.text}</p>
                   </div>
-                  {h.photo_url && <img src={h.photo_url} alt={h.title || "Photo de garde"} loading="lazy" className="w-16 h-12 rounded-lg object-cover shrink-0" />}
+                  {h.photo_url && <img src={h.photo_url} alt="Photo de garde" loading="lazy" className="w-16 h-12 rounded-lg object-cover shrink-0" />}
                 </div>
               ))}
             </div>
