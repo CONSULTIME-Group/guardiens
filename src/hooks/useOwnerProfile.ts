@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+import { logger } from "@/lib/logger";
 
 export interface OwnerProfileData {
   // Step 1 - Identity (profiles table)
@@ -282,7 +283,7 @@ export function useOwnerProfile() {
       toast({ title: "Sauvegardé", description: "Vos modifications ont été enregistrées." });
       return true;
     } catch (error) {
-      console.error("Failed to save owner profile", error);
+      logger.error("Failed to save owner profile", { error: String(error) });
       setData(previousData);
       toast({ variant: "destructive", title: "Erreur", description: "Impossible de sauvegarder." });
       return false;
@@ -351,7 +352,7 @@ export function useOwnerProfile() {
         .eq("id", user.id);
 
       if (updateError) {
-        console.error("Failed to persist owner avatar", updateError);
+        logger.error("Failed to persist owner avatar", { error: String(updateError) });
         toast({ variant: "destructive", title: "Erreur", description: "Photo envoyée mais non sauvegardée." });
         return null;
       }

@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
+import { logger } from "@/lib/logger";
 import { useNavigate, Link } from "react-router-dom";
 import ReportButton from "@/components/reports/ReportButton";
 import { supabase } from "@/integrations/supabase/client";
@@ -176,7 +177,7 @@ const SearchOwner = () => {
       switchRole('owner');
       navigate(`/messages?conversation=${conv.id}`);
     } catch (err: any) {
-      console.error("handleContact error:", err);
+      logger.error("handleContact error", { err: String(err) });
       toast.error("Impossible de démarrer la conversation. Réessayez.");
     } finally {
       setContactingId(null);
