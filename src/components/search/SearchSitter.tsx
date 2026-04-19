@@ -1305,6 +1305,22 @@ const SearchSitter = () => {
                 </p>
               </div>
 
+              {/* Action 0 — Mode Lancement (si plateforme globalement vide) */}
+              {launchModeCount === 0 && (
+                <div className="rounded-xl border border-primary/40 bg-gradient-to-br from-primary/10 to-primary/5 p-5 space-y-2">
+                  <div className="flex items-start gap-3">
+                    <Sparkles className="h-5 w-5 text-primary mt-0.5 shrink-0" />
+                    <div className="flex-1">
+                      <p className="font-heading font-semibold text-sm text-foreground">Vous êtes parmi les premiers</p>
+                      <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                        Guardiens vient de lancer. Les premières annonces arrivent en ce moment.
+                        En tant que membre fondateur, vous serez notifié dès qu'une mission près de chez vous est publiée — et vous gardez votre statut à vie.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {/* Action 1 — Suggestion d'élargir si pertinent */}
               {zoneMode !== "france" && (densityCounts.dept > densityCounts.radius || densityCounts.region > densityCounts.dept || densityCounts.france > 0) && (
                 <div className="rounded-xl border border-primary/30 bg-primary/5 p-4 space-y-2">
@@ -1317,17 +1333,17 @@ const SearchSitter = () => {
                       </p>
                       <div className="flex flex-wrap gap-2 mt-3">
                         {densityCounts.dept > densityCounts.radius && (
-                          <Button size="sm" variant="outline" onClick={() => setZoneMode("dept")}>
+                          <Button size="sm" variant="outline" onClick={() => { trackEvent("search_empty_action", { source: "search_empty", metadata: { action: "expand_zone", to: "dept", tab, zone_mode: zoneMode } }); setZoneMode("dept"); }}>
                             Mon département ({densityCounts.dept})
                           </Button>
                         )}
                         {densityCounts.region > densityCounts.dept && (
-                          <Button size="sm" variant="outline" onClick={() => setZoneMode("region")}>
+                          <Button size="sm" variant="outline" onClick={() => { trackEvent("search_empty_action", { source: "search_empty", metadata: { action: "expand_zone", to: "region", tab, zone_mode: zoneMode } }); setZoneMode("region"); }}>
                             Ma région ({densityCounts.region})
                           </Button>
                         )}
                         {densityCounts.france > 0 && (
-                          <Button size="sm" variant="outline" onClick={() => setZoneMode("france")}>
+                          <Button size="sm" variant="outline" onClick={() => { trackEvent("search_empty_action", { source: "search_empty", metadata: { action: "expand_zone", to: "france", tab, zone_mode: zoneMode } }); setZoneMode("france"); }}>
                             Toute la France ({densityCounts.france})
                           </Button>
                         )}
@@ -1350,7 +1366,7 @@ const SearchSitter = () => {
                       <Button
                         size="sm"
                         className="mt-3 gap-2"
-                        onClick={handleCreateAlert}
+                        onClick={() => { trackEvent("search_empty_action", { source: "search_empty", metadata: { action: "create_alert", tab, city } }); handleCreateAlert(); }}
                         disabled={isCreatingAlert}
                       >
                         {isCreatingAlert ? <Loader2 className="h-4 w-4 animate-spin" /> : <BellRing className="h-4 w-4" />}
@@ -1369,44 +1385,60 @@ const SearchSitter = () => {
                 </div>
               )}
 
-              {/* Action 3 — Cross-sell missions d'entraide (si onglet sits) */}
-              {tab === "sits" && (
+              {/* Action 3 — Cross-sell vers l'autre onglet (uniquement si l'autre onglet a du contenu) */}
+              {crossTabCount !== null && crossTabCount > 0 && (
                 <div className="rounded-xl border border-border bg-card p-4 space-y-2">
                   <div className="flex items-start gap-3">
                     <HandshakeIcon className="h-5 w-5 text-foreground mt-0.5 shrink-0" />
                     <div className="flex-1">
-                      <p className="font-medium text-sm text-foreground">Donnez un coup de main près de chez vous</p>
+                      <p className="font-medium text-sm text-foreground">
+                        {tab === "sits"
+                          ? `${crossTabCount} mission${crossTabCount > 1 ? "s" : ""} d'entraide ${crossTabCount > 1 ? "disponibles" : "disponible"}`
+                          : `${crossTabCount} annonce${crossTabCount > 1 ? "s" : ""} de garde ${crossTabCount > 1 ? "disponibles" : "disponible"}`}
+                      </p>
                       <p className="text-xs text-muted-foreground mt-1">
-                        L'entraide entre voisins reste libre pour tous : promener un chien, nourrir un chat, arroser des plantes…
+                        {tab === "sits"
+                          ? "L'entraide entre voisins reste libre pour tous : promener un chien, nourrir un chat, arroser des plantes…"
+                          : "Découvrez les annonces de garde près de chez vous."}
                       </p>
                       <Button
                         size="sm"
                         variant="outline"
                         className="mt-3 gap-2"
-                        onClick={() => setTab("missions")}
+                        onClick={() => {
+                          trackEvent("search_empty_action", { source: "search_empty", metadata: { action: "switch_tab", to: tab === "sits" ? "missions" : "sits", count: crossTabCount } });
+                          setTab(tab === "sits" ? "missions" : "sits");
+                        }}
                       >
-                        Voir les petites missions
+                        {tab === "sits" ? "Voir les petites missions" : "Voir les annonces de garde"}
                       </Button>
                     </div>
                   </div>
                 </div>
               )}
 
-              {/* Action 4 — Mode disponible */}
-              <div className="rounded-xl border border-border bg-card p-4 space-y-2">
-                <div className="flex items-start gap-3">
-                  <Sparkles className="h-5 w-5 text-foreground mt-0.5 shrink-0" />
-                  <div className="flex-1">
-                    <p className="font-medium text-sm text-foreground">Soyez visible des propriétaires</p>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Activez votre disponibilité pour apparaître en haut des recherches et être contacté directement.
-                    </p>
-                    <Button size="sm" variant="outline" className="mt-3 gap-2" onClick={handleActivateAvailable}>
-                      <Sparkles className="h-4 w-4" /> Activer le mode disponible
-                    </Button>
+              {/* Action 4 — Mode disponible (uniquement si pas déjà actif) */}
+              {!sitterProfile?.is_available && (
+                <div className="rounded-xl border border-border bg-card p-4 space-y-2">
+                  <div className="flex items-start gap-3">
+                    <Sparkles className="h-5 w-5 text-foreground mt-0.5 shrink-0" />
+                    <div className="flex-1">
+                      <p className="font-medium text-sm text-foreground">Soyez visible des propriétaires</p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Activez votre disponibilité pour apparaître en haut des recherches et être contacté directement.
+                      </p>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="mt-3 gap-2"
+                        onClick={() => { trackEvent("search_empty_action", { source: "search_empty", metadata: { action: "activate_availability", tab } }); handleActivateAvailable(); }}
+                      >
+                        <Sparkles className="h-4 w-4" /> Activer le mode disponible
+                      </Button>
+                    </div>
                   </div>
                 </div>
-              </div>
+              )}
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
