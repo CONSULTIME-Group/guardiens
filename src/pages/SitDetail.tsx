@@ -214,7 +214,7 @@ const SitDetail = () => {
   const isDraft = sit.status === "draft";
 
   const badges: string[] = [];
-  if (sitterProfile && activeRole === "sitter") {
+  if (sitterProfile && (activeRole === "sitter" || user?.role === "sitter" || user?.role === "both")) {
     const sitterAnimals: string[] = sitterProfile.animal_types || [];
     const petSpecies = pets.map((p: any) => p.species);
     const matchAnimal = petSpecies.some((s: string) => sitterAnimals.includes(s));
