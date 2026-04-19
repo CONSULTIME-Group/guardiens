@@ -361,10 +361,11 @@ const SmallMissionDetail = () => {
       const { error } = await supabase.from("small_missions").update({ status: "completed" as any }).eq("id", id!);
       if (error) throw error;
       setMission((prev: any) => ({ ...prev, status: "completed" }));
-      // Batch notifications to accepted responders
-      if (acceptedResponses.length > 0) {
+      // Batch notifications to accepted responders (compute inline to avoid forward-ref)
+      const accepted = responses.filter(r => r.status === "accepted");
+      if (accepted.length > 0) {
         await supabase.from("notifications").insert(
-          acceptedResponses.map(r => ({
+          accepted.map(r => ({
             user_id: r.responder_id, type: "mission_completed",
             title: "Mission terminée",
             body: `La mission "${mission.title}" est terminée. Laissez un avis !`,
