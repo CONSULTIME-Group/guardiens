@@ -44,12 +44,14 @@ const AppCard = memo(({ app, sitterProfiles }: { app: AppRow; sitterProfiles: Re
           )}
         </div>
         <div className="flex gap-2 mt-3">
-          <button
-            onClick={() => navigate(`/gardiens/${sitter?.id}`)}
-            className="border border-border text-muted-foreground rounded-xl px-3 py-1.5 text-xs font-sans hover:bg-accent transition-colors"
-          >
-            Voir le profil
-          </button>
+          {sitter?.id ? (
+            <button
+              onClick={() => navigate(`/gardiens/${sitter.id}`)}
+              className="border border-border text-muted-foreground rounded-xl px-3 py-1.5 text-xs font-sans hover:bg-accent transition-colors"
+            >
+              Voir le profil
+            </button>
+          ) : null}
           <button
             onClick={() => navigate("/messages")}
             className="bg-primary text-primary-foreground rounded-xl px-4 py-1.5 text-xs font-sans font-medium hover:bg-primary/90 transition-colors"
