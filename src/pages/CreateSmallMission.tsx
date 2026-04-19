@@ -95,7 +95,6 @@ const CreateSmallMission = () => {
       postal_code: postalCode.trim(),
       date_needed: dateNeeded || null,
       duration_estimate: duration,
-      mission_type: missionType,
       photos,
       latitude: coords?.lat ?? null,
       longitude: coords?.lng ?? null,
