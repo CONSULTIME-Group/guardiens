@@ -13,7 +13,8 @@ export type EventType =
   | "signup_failed"
   | "cta_click"
   | "login_completed"
-  | "cp_recovered";
+  | "cp_recovered"
+  | "search_empty_action";
 
 interface TrackOptions {
   source?: string;
