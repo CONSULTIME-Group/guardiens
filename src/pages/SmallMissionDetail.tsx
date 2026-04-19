@@ -556,8 +556,22 @@ const SmallMissionDetail = () => {
                           <div className="flex gap-2 shrink-0 items-center">
                             {r.status === "pending" && (
                               <>
-                                <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white" onClick={() => handleAcceptResponse(r.id)}>Accepter</Button>
-                                <Button size="sm" variant="outline" onClick={() => handleDeclineResponse(r.id)}>Décliner</Button>
+                                <Button
+                                  size="sm"
+                                  className="bg-green-600 hover:bg-green-700 text-white"
+                                  onClick={() => handleAcceptResponse(r.id)}
+                                  disabled={!!processingResponseId}
+                                >
+                                  {processingResponseId === r.id ? "…" : "Accepter"}
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => handleDeclineResponse(r.id)}
+                                  disabled={!!processingResponseId}
+                                >
+                                  Décliner
+                                </Button>
                               </>
                             )}
                             {r.status === "accepted" && (
