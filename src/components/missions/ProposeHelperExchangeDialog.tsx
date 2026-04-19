@@ -37,19 +37,34 @@ const ProposeHelperExchangeDialog = ({
     setLoading(true);
 
     try {
-      // Create conversation directly (no ghost mission)
-      const { data: conv, error: convError } = await supabase
+      // 1. Check existing private conversation between the two users (no mission, no sit)
+      const { data: existing } = await supabase
         .from("conversations")
-        .insert({
-          owner_id: user.id,
-          sitter_id: helper.id,
-          sit_id: null,
-          small_mission_id: null,
-        })
         .select("id")
-        .single();
+        .or(
+          `and(owner_id.eq.${user.id},sitter_id.eq.${helper.id}),and(owner_id.eq.${helper.id},sitter_id.eq.${user.id})`
+        )
+        .is("sit_id", null)
+        .is("small_mission_id", null)
+        .maybeSingle();
 
-      if (convError) throw convError;
+      let convId = existing?.id;
+
+      // 2. Create only if none exists
+      if (!convId) {
+        const { data: conv, error: convError } = await supabase
+          .from("conversations")
+          .insert({
+            owner_id: user.id,
+            sitter_id: helper.id,
+            sit_id: null,
+            small_mission_id: null,
+          })
+          .select("id")
+          .single();
+        if (convError) throw convError;
+        convId = conv.id;
+      }
 
       // Send structured message
       const messageContent = [
@@ -59,27 +74,29 @@ const ProposeHelperExchangeDialog = ({
         exchangeDate ? `\n📅 Date proposée : ${exchangeDate}` : "",
       ].filter(Boolean).join("");
 
-      await supabase.from("messages").insert({
-        conversation_id: conv.id,
+      const { error: msgError } = await supabase.from("messages").insert({
+        conversation_id: convId,
         sender_id: user.id,
         content: messageContent,
         is_system: false,
       });
+      if (msgError) throw msgError;
 
-      // Notify helper
+      // Notify helper (non-blocking)
       await supabase.from("notifications").insert({
         user_id: helper.id,
         type: "mission_proposal",
         title: "Proposition d'échange",
         body: `${(user as any).first_name || "Un membre"} vous propose un échange : "${needDescription.trim().slice(0, 60)}"`,
-        link: `/messages?conversationId=${conv.id}`,
+        link: `/messages?conversationId=${convId}`,
       });
 
       onClose();
       switchRole("owner");
-      navigate(`/messages?conversationId=${conv.id}`);
-    } catch (err) {
-      toast.error("Impossible d'envoyer la proposition. Réessaie.");
+      navigate(`/messages?conversationId=${convId}`);
+    } catch (err: any) {
+      console.error("[ProposeHelperExchangeDialog]", err);
+      toast.error(err?.message || "Impossible d'envoyer la proposition. Réessayez.");
     } finally {
       setLoading(false);
     }
