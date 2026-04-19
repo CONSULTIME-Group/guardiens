@@ -22,8 +22,13 @@ export const AppLayout = () => {
     <div className="flex min-h-screen bg-background">
       <Sidebar />
       <main id="main-content" className="flex-1 pb-20 md:pb-0 overflow-x-hidden" role="main">
-        <BackButton />
-        <Breadcrumbs />
+        {/* Single navigation aid: BackButton on mobile, Breadcrumbs on desktop */}
+        <div className="md:hidden">
+          <BackButton />
+        </div>
+        <div className="hidden md:block">
+          <Breadcrumbs />
+        </div>
         <Outlet />
       </main>
       <BottomNav />
