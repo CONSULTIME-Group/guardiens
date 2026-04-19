@@ -798,7 +798,7 @@ const SearchOwner = () => {
                 <button
                   onClick={() => {
                     trackEvent("search_empty_action", { source: "owner", metadata: { action: "create_sit", zone_mode: zoneMode } });
-                    navigate("/creer-une-garde");
+                    navigate("/sits/create");
                   }}
                   className="text-left p-4 rounded-xl border border-border bg-card hover:border-primary transition-colors"
                 >
