@@ -53,7 +53,7 @@ const SitterDashboard = () => {
   } = useSitterDashboardData(user?.id);
 
   const [cpBannerDismissed, setCpBannerDismissed] = useState(
-    () => sessionStorage.getItem("cp_banner_dismissed") === "1"
+    () => localStorage.getItem("cp_banner_dismissed") === "1"
   );
 
   if (loading) return (
@@ -98,17 +98,17 @@ const SitterDashboard = () => {
 
       {/* Postal code missing banner */}
       {!postalCode && !cpBannerDismissed && (
-        <div className="sticky top-14 z-30 bg-destructive/10 border-b border-destructive/30 px-4 py-3">
-          <div className="container mx-auto flex items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
-              <AlertCircle className="h-5 w-5 text-destructive shrink-0" />
+        <div className="bg-destructive/10 border-b border-destructive/30 px-4 py-3">
+          <div className="container mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="flex items-start sm:items-center gap-3">
+              <AlertCircle className="h-5 w-5 text-destructive shrink-0 mt-0.5 sm:mt-0" />
               <p className="text-sm text-foreground">
                 <strong>Votre code postal est manquant.</strong> Sans lui, vous ne voyez pas les annonces près de chez vous.
               </p>
             </div>
-            <div className="flex items-center gap-2 shrink-0">
+            <div className="flex items-center gap-2 shrink-0 self-end sm:self-auto">
               <Button variant="default" size="sm" onClick={() => navigate("/profile?focus=postal_code")}>Ajouter mon CP</Button>
-              <Button variant="ghost" size="sm" className="text-muted-foreground" onClick={() => { setCpBannerDismissed(true); sessionStorage.setItem("cp_banner_dismissed", "1"); }}>✕</Button>
+              <Button variant="ghost" size="sm" className="text-muted-foreground" onClick={() => { setCpBannerDismissed(true); localStorage.setItem("cp_banner_dismissed", "1"); }}>✕</Button>
             </div>
           </div>
         </div>
