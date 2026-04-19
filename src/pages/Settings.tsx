@@ -57,7 +57,8 @@ const defaultPrefs: NotifPrefs = {
 };
 
 const Settings = () => {
-  const { user } = useAuth();
+  const { user, activeRole } = useAuth();
+  const profileHref = (user?.role === "both" ? activeRole : user?.role) === "owner" ? "/owner-profile" : "/profile";
   const [prefs, setPrefs] = useState<NotifPrefs>(defaultPrefs);
   const [loading, setLoading] = useState(true);
   const [savingPrefs, setSavingPrefs] = useState(false);
@@ -282,7 +283,7 @@ const Settings = () => {
 
           <div>
             <Button variant="outline" size="sm" asChild>
-              <a href="/profile">Modifier ma photo de profil →</a>
+              <a href={profileHref}>Modifier ma photo de profil →</a>
             </Button>
           </div>
         </div>
