@@ -235,7 +235,7 @@ const OwnerDashboard = () => {
           setLoading(false);
         }
       } catch (err) {
-        console.error("[OwnerDashboard] load error:", err);
+        logger.error("[OwnerDashboard] load error", { err: String(err) });
         if (!cancelled) setLoading(false);
       }
     };
