@@ -243,7 +243,6 @@ const Landing = () => {
           alt="Un golden retriever souriant dans un jardin ensoleillé — l'esprit Guardiens"
           className="absolute inset-0 w-full h-full object-cover"
           loading="eager"
-          fetchpriority="high"
           width={1920}
           height={1080}
           decoding="async"
