@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { FOUNDER_START, GRACE_END } from "@/lib/constants";
+import { logger } from "@/lib/logger";
 
 const LAUNCH_DATE = FOUNDER_START;
 const GRACE_END_DATE = GRACE_END;
@@ -74,7 +75,7 @@ export const useSubscriptionAccess = () => {
           setHasAccess(false);
         }
       } catch (err) {
-        console.error("[useSubscriptionAccess] error:", err);
+        logger.error("[useSubscriptionAccess] error", { err: String(err) });
         setStatus("never");
         setHasAccess(false);
       } finally {
