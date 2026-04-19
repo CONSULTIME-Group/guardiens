@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Bell } from "lucide-react";
@@ -26,28 +26,35 @@ const NotificationBell = () => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [open, setOpen] = useState(false);
+  const channelTopicRef = useRef(`notifications-bell-${crypto.randomUUID()}`);
 
   const load = useCallback(async () => {
-    if (!user) return;
+    if (!user) {
+      setNotifications([]);
+      setUnreadCount(0);
+      return;
+    }
+
     const { data } = await supabase
       .from("notifications")
       .select("*")
       .eq("user_id", user.id)
       .order("created_at", { ascending: false })
       .limit(20);
+
     const items = (data as Notification[]) || [];
     setNotifications(items);
     setUnreadCount(items.filter((n) => !n.read_at).length);
   }, [user]);
 
   useEffect(() => {
-    load();
+    void load();
   }, [load]);
 
-  // Realtime subscription
   useEffect(() => {
     if (!user) return;
-    const channel = supabase.channel(`notifications-realtime-${user.id}`);
+
+    const channel = supabase.channel(channelTopicRef.current);
 
     channel.on(
       "postgres_changes",
@@ -103,7 +110,7 @@ const NotificationBell = () => {
     channel.subscribe();
 
     return () => {
-      supabase.removeChannel(channel);
+      void supabase.removeChannel(channel);
     };
   }, [user]);
 
