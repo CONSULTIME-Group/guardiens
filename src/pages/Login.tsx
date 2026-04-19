@@ -28,7 +28,7 @@ const Login = () => {
     setIsLoading(true);
     setPasswordError(null);
     try {
-      await login(email, password);
+      await login(email.trim().toLowerCase(), password);
       navigate("/dashboard");
     } catch (error: any) {
       const msg = error.message;

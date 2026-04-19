@@ -23,10 +23,15 @@ export function usePostalCodeCity(
   const handlePostalCodeChange = useCallback(
     async (value: string) => {
       onChange({ postal_code: value });
+      // Always reset cached cities when CP changes (avoids stale dropdown)
       setPostalState({ cities: [], loading: false, error: null });
 
       // French postal codes are 5 digits
-      if (!/^\d{5}$/.test(value)) return;
+      if (!/^\d{5}$/.test(value)) {
+        // Clear city if CP becomes invalid (less than 5 digits)
+        if (value.length === 0) onChange({ city: "" });
+        return;
+      }
 
       setPostalState({ cities: [], loading: true, error: null });
 

@@ -164,7 +164,10 @@ const SitterProfile = () => {
   }, []);
 
   const motivationLength = (mergedData.motivation || "").length;
-  const canSave = !saving && dirty && motivationLength >= 50;
+  // Block save only if user is editing motivation specifically and it's < 50
+  const motivationBeingEdited = "motivation" in localData;
+  const motivationBlocks = motivationBeingEdited && motivationLength > 0 && motivationLength < 50;
+  const canSave = !saving && dirty && !motivationBlocks;
 
   const handleSave = useCallback(async () => {
     if (Object.keys(localData).length === 0) return;
