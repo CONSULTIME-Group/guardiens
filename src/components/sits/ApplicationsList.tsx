@@ -105,23 +105,52 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
 
   useEffect(() => { load(); }, [sitId]);
 
+  const [accepting, setAccepting] = useState(false);
+
   const handleAccept = async (app: any) => {
+    if (accepting) return;
+    setAccepting(true);
     try {
     const sitterName = app.sitter?.first_name || "Ce gardien";
     const sitterId = app.sitter_id;
 
-    await supabase.from("applications").update({ status: "accepted" as any }).eq("id", app.id);
+    // Vérification serveur : la garde n'est-elle pas déjà confirmée/annulée ?
+    const { data: currentSit } = await supabase
+      .from("sits").select("status").eq("id", sitId).single();
+    if (!currentSit || ["confirmed", "in_progress", "completed", "cancelled"].includes(currentSit.status)) {
+      toast({
+        title: "Action impossible",
+        description: "Cette garde n'accepte plus de nouvelles confirmations.",
+        variant: "destructive",
+      });
+      setAccepting(false);
+      setConfirmApp(null);
+      load();
+      return;
+    }
+
+    const { error: acceptErr } = await supabase.from("applications").update({ status: "accepted" as any }).eq("id", app.id);
+    if (acceptErr) throw acceptErr;
+
     const { data: rejectedApps } = await supabase
       .from("applications")
       .select("sitter_id")
       .eq("sit_id", sitId)
-      .neq("id", app.id);
+      .neq("id", app.id)
+      .not("status", "in", "(rejected,cancelled)");
+
     await supabase
       .from("applications")
       .update({ status: "rejected" as any })
       .eq("sit_id", sitId)
-      .neq("id", app.id);
-    await supabase.from("sits").update({ status: "confirmed" as any }).eq("id", sitId);
+      .neq("id", app.id)
+      .not("status", "in", "(rejected,cancelled)");
+
+    // Confirmer la garde ET fermer les candidatures
+    await supabase.from("sits").update({
+      status: "confirmed" as any,
+      accepting_applications: false,
+    } as any).eq("id", sitId);
 
     const petNamesStr = petNames.join(", ");
     const confirmMsg = `🎉 La garde est confirmée ! Vous avez été choisi(e) pour garder ${petNamesStr} du ${startDate} au ${endDate}.`;
@@ -269,11 +298,15 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
         description: "Une erreur est survenue lors de la confirmation.",
         variant: "destructive",
       });
+    } finally {
+      setAccepting(false);
     }
   };
 
   const handleDecline = async (app: any, message?: string) => {
-    await supabase.from("applications").update({ status: "rejected" as any }).eq("id", app.id);
+    try {
+      const { error: declineErr } = await supabase.from("applications").update({ status: "rejected" as any }).eq("id", app.id);
+      if (declineErr) throw declineErr;
 
     if (user) {
       const { data: rejConv } = await supabase
@@ -302,11 +335,19 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
       }
     }
 
-    toast({ title: "Candidature déclinée" });
-    setDeclineApp(null);
-    setDeclineMessage("");
-    setDeclineCustom(false);
-    load();
+      toast({ title: "Candidature déclinée" });
+      setDeclineApp(null);
+      setDeclineMessage("");
+      setDeclineCustom(false);
+      load();
+    } catch (error) {
+      console.error('handleDecline error:', error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de décliner la candidature.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleReinvite = async (app: any) => {
@@ -349,7 +390,7 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
       <div key={app.id} className="bg-card border border-border rounded-2xl p-5 mb-4">
         {/* LINE 1 — Identity */}
         <div className="flex items-center gap-3">
-          <Link to={`/profil/${app.sitter_id}`} className="shrink-0">
+          <Link to={`/gardiens/${app.sitter_id}`} className="shrink-0">
             {sitter?.avatar_url ? (
               <img src={sitter.avatar_url} alt={sitter.first_name} className="w-12 h-12 rounded-full object-cover border border-border" />
             ) : (
@@ -360,7 +401,7 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
           </Link>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
-              <Link to={`/profil/${app.sitter_id}`} className="text-base font-semibold text-foreground hover:underline">
+              <Link to={`/gardiens/${app.sitter_id}`} className="text-base font-semibold text-foreground hover:underline">
                 {sitter?.first_name || "Gardien"}
               </Link>
               {sitter?.is_founder && <FounderBadge size="sm" />}
@@ -389,7 +430,7 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
         {(app.status === "pending" || app.status === "viewed") && (
           <div className="flex items-center gap-2 mt-4 flex-wrap">
             <Link
-              to={`/profil/${app.sitter_id}`}
+              to={`/gardiens/${app.sitter_id}`}
               target="_blank"
               className="border border-border rounded-full px-4 py-2 text-sm text-foreground hover:border-primary transition-colors"
             >
@@ -435,7 +476,7 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
         {app.status === "discussing" && (
           <div className="flex items-center gap-2 mt-4 flex-wrap">
             <Link
-              to={`/profil/${app.sitter_id}`}
+              to={`/gardiens/${app.sitter_id}`}
               target="_blank"
               className="border border-border rounded-full px-4 py-2 text-sm text-foreground hover:border-primary transition-colors"
             >
@@ -477,7 +518,7 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
         {(app.status === "rejected" || app.status === "cancelled") && (
           <div className="flex gap-4 items-center mt-3">
             <Link
-              to={`/profil/${app.sitter_id}`}
+              to={`/gardiens/${app.sitter_id}`}
               target="_blank"
               className="text-xs text-primary hover:underline"
             >

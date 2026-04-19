@@ -121,10 +121,10 @@ const SitDetail = () => {
         setPets(petsData || []);
       }
 
-      // Fetch application counts
+      // Fetch application counts (active = non rejetées/annulées ; pending = à traiter)
       const [allAppsRes, pendingAppsRes] = await Promise.all([
-        supabase.from("applications").select("id", { count: "exact", head: true }).eq("sit_id", id!),
-        supabase.from("applications").select("id", { count: "exact", head: true }).eq("sit_id", id!).in("status", ["pending", "viewed"]),
+        supabase.from("applications").select("id", { count: "exact", head: true }).eq("sit_id", id!).not("status", "in", "(rejected,cancelled)"),
+        supabase.from("applications").select("id", { count: "exact", head: true }).eq("sit_id", id!).in("status", ["pending", "viewed", "discussing"]),
       ]);
       setAppCount(allAppsRes.count || 0);
       setPendingAppCount(pendingAppsRes.count || 0);
@@ -214,7 +214,7 @@ const SitDetail = () => {
   const isDraft = sit.status === "draft";
 
   const badges: string[] = [];
-  if (sitterProfile && activeRole === "sitter") {
+  if (sitterProfile && (activeRole === "sitter" || user?.role === "sitter" || user?.role === "both")) {
     const sitterAnimals: string[] = sitterProfile.animal_types || [];
     const petSpecies = pets.map((p: any) => p.species);
     const matchAnimal = petSpecies.some((s: string) => sitterAnimals.includes(s));

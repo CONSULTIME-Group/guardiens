@@ -84,6 +84,18 @@ const EditSit = () => {
 
   const handleSave = async () => {
     if (!user || !id || !canSave) return;
+
+    // Garde-fou : si la garde est confirmée et qu'on modifie les dates, prévenir
+    if (sitStatus === "confirmed") {
+      const datesChanged = !flexibleDates && (startDate || endDate);
+      if (datesChanged) {
+        const ok = window.confirm(
+          "Cette garde est confirmée. Modifier les dates n'enverra PAS de notification automatique au gardien — pensez à le prévenir via la messagerie. Continuer ?"
+        );
+        if (!ok) return;
+      }
+    }
+
     setSaving(true);
 
     let expectations = specificExpectations;
