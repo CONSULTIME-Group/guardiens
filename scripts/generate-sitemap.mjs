@@ -1,6 +1,8 @@
 /**
  * Generates a static public/sitemap.xml at build time.
- * Run: node scripts/generate-sitemap.mjs
+ * INCREMENTAL: caches per-source updated_at in .sitemap-cache.json
+ * Re-fetches only sources whose head changed since last build.
+ * Force full rebuild: SITEMAP_FORCE=1 node scripts/generate-sitemap.mjs
  */
 import { createClient } from "@supabase/supabase-js";
 import fs from "fs";
@@ -9,6 +11,8 @@ import { fileURLToPath } from "url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const SITE_URL = "https://guardiens.fr";
+const CACHE_PATH = path.resolve(__dirname, "../.sitemap-cache.json");
+const FORCE = process.env.SITEMAP_FORCE === "1";
 
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL || "https://erhccyqevdyevpyctsjj.supabase.co";
 const SUPABASE_KEY = process.env.VITE_SUPABASE_PUBLISHABLE_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVyaGNjeXFldmR5ZXZweWN0c2pqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0MjMzMzQsImV4cCI6MjA4OTk5OTMzNH0.ltBQtcouoqd5tuv_wQXb92x5Q5YYa9mkEQvZUx0wLTY";
@@ -64,47 +68,54 @@ function urlEntry(loc, lastmod, changefreq, priority) {
   </url>`;
 }
 
+function loadCache() {
+  if (FORCE) return { sources: {}, entries: {} };
+  try {
+    return JSON.parse(fs.readFileSync(CACHE_PATH, "utf-8"));
+  } catch {
+    return { sources: {}, entries: {} };
+  }
+}
+
+function saveCache(cache) {
+  try {
+    fs.writeFileSync(CACHE_PATH, JSON.stringify(cache, null, 2), "utf-8");
+  } catch (e) {
+    console.warn("⚠️ Failed to write sitemap cache:", e.message);
+  }
+}
+
+/**
+ * Returns the most recent updated_at for a table (head-only, fast).
+ * Returns null on error so we fall back to refetching.
+ */
+async function maxUpdatedAt(table, column = "updated_at", filter = null) {
+  let q = supabase.from(table).select(column).order(column, { ascending: false }).limit(1);
+  if (filter) q = filter(q);
+  const { data, error } = await q;
+  if (error || !data?.[0]) return null;
+  return data[0][column] || null;
+}
+
+async function fetchOrCache(key, cache, headProbe, fetcher, builder) {
+  const head = await headProbe();
+  const cached = cache.sources[key];
+  if (!FORCE && cached && cached.head === head && cache.entries[key]) {
+    console.log(`  ↳ ${key}: cached (${cache.entries[key].length} URLs)`);
+    return cache.entries[key];
+  }
+  const rows = await fetcher();
+  const entries = builder(rows || []);
+  cache.sources[key] = { head, fetchedAt: new Date().toISOString() };
+  cache.entries[key] = entries;
+  console.log(`  ↳ ${key}: refreshed (${entries.length} URLs)`);
+  return entries;
+}
+
 async function main() {
   const today = new Date().toISOString().split("T")[0];
+  const cache = loadCache();
 
-  const [
-    { data: articles },
-    { data: seoCityPages },
-    { data: cityGuides },
-    { data: departmentPages },
-    { data: breedProfiles },
-    { data: publicProfiles },
-  ] = await Promise.all([
-    supabase.from("articles").select("slug, category, updated_at, published_at").eq("published", true).or("noindex.is.null,noindex.eq.false"),
-    supabase.from("seo_city_pages").select("slug, updated_at").eq("published", true),
-    supabase.from("city_guides").select("slug, updated_at").eq("published", true),
-    supabase.from("seo_department_pages").select("slug, updated_at").eq("published", true),
-    supabase.from("breed_profiles").select("breed, species, generated_at"),
-    supabase
-      .from("profiles")
-      .select("id, updated_at, postal_code, avatar_url, bio, role")
-      .eq("account_status", "active")
-      .gte("profile_completion", 60)
-      .in("role", ["sitter", "both"])
-      .not("postal_code", "is", null)
-      .not("avatar_url", "is", null)
-      .not("bio", "is", null)
-      .limit(1000),
-  ]);
-
-  const entries = [];
-
-  // Static pages
-  for (const page of staticPages) {
-    entries.push(urlEntry(page.loc, today, page.changefreq, page.priority));
-  }
-
-  // City landing pages
-  for (const slug of cityLandingPages) {
-    entries.push(urlEntry(`/house-sitting/${slug}`, today, "weekly", "0.9"));
-  }
-
-  // Excluded article slugs (noindex)
   const excludedSlugs = new Set([
     "guide-house-sitting-lyon", "guide-lieu-meilleurs-parcs-chiens-lyon",
     "house-sitting-aix-les-bains", "house-sitting-haute-savoie-annecy-megeve",
@@ -122,55 +133,91 @@ async function main() {
     "boom-pet-sitting-lyon-2026",
   ]);
 
-  // Articles → /actualites/{slug}
-  if (articles) {
-    for (const a of articles) {
-      if (excludedSlugs.has(a.slug)) continue;
-      const priority = PRIORITY_MAP[a.category] || "0.7";
-      entries.push(urlEntry(`/actualites/${a.slug}`, (a.updated_at || a.published_at || today).split("T")[0], "monthly", priority));
-    }
-  }
+  console.log("🗺️  Sitemap incremental build…");
 
-  // SEO city pages from DB
-  if (seoCityPages) {
-    for (const cp of seoCityPages) {
-      entries.push(urlEntry(`/house-sitting/${cp.slug}`, (cp.updated_at || today).split("T")[0], "weekly", "0.8"));
-    }
-  }
+  const [articles, seoCity, guides, depts, breeds, profiles] = await Promise.all([
+    fetchOrCache(
+      "articles", cache,
+      () => maxUpdatedAt("articles", "updated_at", q => q.eq("published", true)),
+      async () => (await supabase.from("articles").select("slug, category, updated_at, published_at").eq("published", true).or("noindex.is.null,noindex.eq.false")).data,
+      rows => rows.filter(a => !excludedSlugs.has(a.slug)).map(a => ({
+        loc: `/actualites/${a.slug}`,
+        lastmod: (a.updated_at || a.published_at || today).split("T")[0],
+        changefreq: "monthly",
+        priority: PRIORITY_MAP[a.category] || "0.7",
+      }))
+    ),
+    fetchOrCache(
+      "seo_city_pages", cache,
+      () => maxUpdatedAt("seo_city_pages", "updated_at", q => q.eq("published", true)),
+      async () => (await supabase.from("seo_city_pages").select("slug, updated_at").eq("published", true)).data,
+      rows => rows.map(cp => ({
+        loc: `/house-sitting/${cp.slug}`,
+        lastmod: (cp.updated_at || today).split("T")[0],
+        changefreq: "weekly",
+        priority: "0.8",
+      }))
+    ),
+    fetchOrCache(
+      "city_guides", cache,
+      () => maxUpdatedAt("city_guides", "updated_at", q => q.eq("published", true)),
+      async () => (await supabase.from("city_guides").select("slug, updated_at").eq("published", true)).data,
+      rows => rows.map(cg => ({
+        loc: `/guides/${cg.slug}`,
+        lastmod: (cg.updated_at || today).split("T")[0],
+        changefreq: "weekly",
+        priority: "0.7",
+      }))
+    ),
+    fetchOrCache(
+      "seo_department_pages", cache,
+      () => maxUpdatedAt("seo_department_pages", "updated_at", q => q.eq("published", true)),
+      async () => (await supabase.from("seo_department_pages").select("slug, updated_at").eq("published", true)).data,
+      rows => rows.map(dp => ({
+        loc: `/departement/${dp.slug}`,
+        lastmod: (dp.updated_at || today).split("T")[0],
+        changefreq: "weekly",
+        priority: "0.8",
+      }))
+    ),
+    fetchOrCache(
+      "breed_profiles", cache,
+      () => maxUpdatedAt("breed_profiles", "generated_at"),
+      async () => (await supabase.from("breed_profiles").select("breed, species, generated_at")).data,
+      rows => rows.map(bp => ({
+        loc: `/races/${bp.species.toLowerCase()}-${bp.breed.toLowerCase().replace(/\s+/g, "-")}`,
+        lastmod: (bp.generated_at || today).split("T")[0],
+        changefreq: "monthly",
+        priority: "0.6",
+      }))
+    ),
+    fetchOrCache(
+      "public_profiles", cache,
+      () => maxUpdatedAt("profiles", "updated_at", q => q.eq("account_status", "active").gte("profile_completion", 60).in("role", ["sitter", "both"])),
+      async () => (await supabase.from("profiles").select("id, updated_at, postal_code, avatar_url, bio, role").eq("account_status", "active").gte("profile_completion", 60).in("role", ["sitter", "both"]).not("postal_code", "is", null).not("avatar_url", "is", null).not("bio", "is", null).limit(1000)).data,
+      rows => rows.filter(p => p.postal_code?.length === 5 && p.avatar_url && p.bio && p.bio.length > 50).map(p => ({
+        loc: `/gardiens/${p.id}`,
+        lastmod: (p.updated_at || today).split("T")[0],
+        changefreq: "monthly",
+        priority: "0.5",
+      }))
+    ),
+  ]);
 
-  // City guides
-  if (cityGuides) {
-    for (const cg of cityGuides) {
-      entries.push(urlEntry(`/guides/${cg.slug}`, (cg.updated_at || today).split("T")[0], "weekly", "0.7"));
-    }
-  }
+  const entries = [];
 
-  // Department pages
-  if (departmentPages) {
-    for (const dp of departmentPages) {
-      entries.push(urlEntry(`/departement/${dp.slug}`, (dp.updated_at || today).split("T")[0], "weekly", "0.8"));
-    }
+  for (const page of staticPages) {
+    entries.push(urlEntry(page.loc, today, page.changefreq, page.priority));
   }
-
-  // Breed profiles
-  if (breedProfiles) {
-    for (const bp of breedProfiles) {
-      const slug = `${bp.species.toLowerCase()}-${bp.breed.toLowerCase().replace(/\s+/g, "-")}`;
-      entries.push(urlEntry(`/races/${slug}`, (bp.generated_at || today).split("T")[0], "monthly", "0.6"));
-    }
+  for (const slug of cityLandingPages) {
+    entries.push(urlEntry(`/house-sitting/${slug}`, today, "weekly", "0.9"));
   }
-
-  // Public sitter profiles → /gardiens/{id}
-  if (publicProfiles) {
-    for (const p of publicProfiles) {
-      // Skip ghost profiles: must have postal_code (5 chars), avatar, and bio > 50 chars
-      if (!p.postal_code || p.postal_code.length !== 5) continue;
-      if (!p.avatar_url || !p.bio || p.bio.length <= 50) continue;
-      entries.push(urlEntry(`/gardiens/${p.id}`, (p.updated_at || today).split("T")[0], "monthly", "0.5"));
-    }
-  }
-
-  // Legal pages
+  for (const e of articles) entries.push(urlEntry(e.loc, e.lastmod, e.changefreq, e.priority));
+  for (const e of seoCity) entries.push(urlEntry(e.loc, e.lastmod, e.changefreq, e.priority));
+  for (const e of guides) entries.push(urlEntry(e.loc, e.lastmod, e.changefreq, e.priority));
+  for (const e of depts) entries.push(urlEntry(e.loc, e.lastmod, e.changefreq, e.priority));
+  for (const e of breeds) entries.push(urlEntry(e.loc, e.lastmod, e.changefreq, e.priority));
+  for (const e of profiles) entries.push(urlEntry(e.loc, e.lastmod, e.changefreq, e.priority));
   for (const page of legalPages) {
     entries.push(urlEntry(page.loc, today, page.changefreq, page.priority));
   }
@@ -182,9 +229,10 @@ ${entries.join("\n")}
 
   const outPath = path.resolve(__dirname, "../public/sitemap.xml");
   fs.writeFileSync(outPath, xml, "utf-8");
-  console.log(`✅ Sitemap generated: ${entries.length} URLs → ${outPath}`);
-  console.log(`\nSitemap mis à jour : ${entries.length} URLs incluses.`);
-  console.log(`Action manuelle requise : soumettre le sitemap dans Google Search Console → Sitemaps → https://guardiens.fr/sitemap.xml`);
+  saveCache(cache);
+
+  console.log(`\n✅ Sitemap generated: ${entries.length} URLs → ${outPath}`);
+  console.log(`   Cache: ${CACHE_PATH}${FORCE ? " (forced)" : ""}`);
 }
 
 main().catch((err) => {
