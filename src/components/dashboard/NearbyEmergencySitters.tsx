@@ -58,7 +58,7 @@ const NearbyEmergencySitters = () => {
         {sitters.map((s: any) => (
           <Link key={s.id} to={`/gardiens/${s.id}`} className="flex items-center gap-3 p-3 rounded-xl bg-card border border-border hover:bg-accent/50 transition-colors">
             {s.avatar_url ? (
-              <img src={s.avatar_url} alt="" className="w-12 h-12 rounded-full object-cover shrink-0" />
+              <img src={s.avatar_url} alt={`Photo de ${s.first_name || 'gardien'}`} className="w-12 h-12 rounded-full object-cover shrink-0" />
             ) : (
               <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center text-sm font-bold shrink-0">
                 {s.first_name?.charAt(0) || "?"}
