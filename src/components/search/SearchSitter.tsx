@@ -27,6 +27,8 @@ import { fr } from "date-fns/locale";
 import { geocodeCity, haversineDistance } from "@/lib/geocode";
 import { useSubscriptionAccess } from "@/hooks/useSubscriptionAccess";
 import FavoriteButton from "@/components/shared/FavoriteButton";
+import { getDeptCode, DEPT_NAMES } from "@/lib/departments";
+import { getRegionCode, getRegionName, getDeptsInRegion } from "@/lib/regions";
 
 const animalChips = ["Chiens", "Chats", "Chevaux", "Animaux de ferme", "NAC"];
 const animalChipToSpecies: Record<string, string> = {
@@ -46,6 +48,7 @@ type MissionSubTab = "published" | "members";
 type ViewMode = "list" | "map";
 type HousingFilter = "all" | "house" | "apartment" | "farm";
 type ExperienceFilter = "all" | "1" | "3";
+type ZoneMode = "radius" | "dept" | "region" | "france";
 
 const SearchSitter = () => {
   const { user } = useAuth();
@@ -61,6 +64,9 @@ const SearchSitter = () => {
   const [availableMembers, setAvailableMembers] = useState<any[]>([]);
   const [city, setCity] = useState("");
   const [radius, setRadius] = useState([15]);
+  const [zoneMode, setZoneMode] = useState<ZoneMode>("radius");
+  const [densityCounts, setDensityCounts] = useState<{ radius: number; dept: number; region: number; france: number }>({ radius: 0, dept: 0, region: 0, france: 0 });
+  const [userPostalCode, setUserPostalCode] = useState<string | null>(null);
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [animalTypes, setAnimalTypes] = useState<string[]>([]);
@@ -155,7 +161,7 @@ const SearchSitter = () => {
     if (!user) return;
     const load = async () => {
       const [profileRes, spRes, eligRes, reviewsRes, myProfileRes] = await Promise.all([
-        supabase.from("profiles").select("city").eq("id", user.id).single(),
+        supabase.from("profiles").select("city, postal_code").eq("id", user.id).single(),
         supabase.from("sitter_profiles").select("*").eq("user_id", user.id).maybeSingle(),
         supabase.from("applications").select("id, sit:sits!inner(status)").eq("sitter_id", user.id).eq("status", "accepted"),
         supabase.from("reviews").select("overall_rating").eq("reviewee_id", user.id).eq("published", true),
@@ -163,6 +169,7 @@ const SearchSitter = () => {
       ]);
       const uc = profileRes.data?.city || "";
       setUserCity(uc);
+      setUserPostalCode(profileRes.data?.postal_code || null);
       setSitterProfile(spRes.data);
       if (uc) {
         setCity(uc);
@@ -198,7 +205,7 @@ const SearchSitter = () => {
       }
     }
     setLoading(false);
-  }, [tab, missionSubTab, city, radius, startDate, endDate, animalTypes, housingType, duration, verifiedOnly, emergencyOnly, sort, userCoords, userCity, missionTypeFilter, missionCategoryFilter, withPhotosOnly, minExperience, environments]);
+  }, [tab, missionSubTab, city, radius, zoneMode, startDate, endDate, animalTypes, housingType, duration, verifiedOnly, emergencyOnly, sort, userCoords, userCity, userPostalCode, missionTypeFilter, missionCategoryFilter, withPhotosOnly, minExperience, environments]);
 
   useEffect(() => {
     if (!initialLoadDone.current) return;
@@ -265,28 +272,64 @@ const SearchSitter = () => {
     return haversineDistance(searchCoords.lat, searchCoords.lng, coords.lat, coords.lng);
   };
 
-  const filterByLocation = async (items: any[], getCityFn: (item: any) => string | undefined, searchCoords: { lat: number; lng: number } | null) => {
-    if (!searchCoords) return { items, cityCoords: new Map<string, { lat: number; lng: number }>() };
-    const uniqueCities = [...new Set(items.map(getCityFn).filter(Boolean))] as string[];
+  // Reference postal code for dept/region zone modes (selected city if available, else user CP)
+  const getZoneRefPostalCode = (): string | null => userPostalCode;
+
+  const filterByLocation = async (
+    items: any[],
+    getCityFn: (item: any) => string | undefined,
+    searchCoords: { lat: number; lng: number } | null,
+    getPostalCodeFn?: (item: any) => string | undefined,
+  ) => {
     const cityCoords = new Map<string, { lat: number; lng: number }>();
+    const uniqueCities = [...new Set(items.map(getCityFn).filter(Boolean))] as string[];
     await Promise.all(uniqueCities.map(async (c) => {
       const coords = await geocodeCity(c);
       if (coords) cityCoords.set(c, { lat: coords.lat, lng: coords.lng });
     }));
-    const filtered = items.filter((s) => {
-      const ownerCity = getCityFn(s);
-      if (!ownerCity) return false;
-      const coords = cityCoords.get(ownerCity);
-      if (!coords) return false;
-      return haversineDistance(searchCoords.lat, searchCoords.lng, coords.lat, coords.lng) <= radius[0];
-    });
+
+    // Compute density counts for each zone mode (always, for the counter UI)
+    const refDept = getDeptCode(getZoneRefPostalCode());
+    const refRegion = getRegionCode(refDept);
+    const radiusCount = searchCoords ? items.filter((s) => {
+      const c = getCityFn(s); if (!c) return false;
+      const co = cityCoords.get(c); if (!co) return false;
+      return haversineDistance(searchCoords.lat, searchCoords.lng, co.lat, co.lng) <= radius[0];
+    }).length : 0;
+    const deptCount = refDept ? items.filter((s) => {
+      const cp = getPostalCodeFn?.(s); return cp ? getDeptCode(cp) === refDept : false;
+    }).length : 0;
+    const regionCount = refRegion ? items.filter((s) => {
+      const cp = getPostalCodeFn?.(s); return cp ? getRegionCode(getDeptCode(cp)) === refRegion : false;
+    }).length : 0;
+    setDensityCounts({ radius: radiusCount, dept: deptCount, region: regionCount, france: items.length });
+
+    // Apply the selected zone filter
+    let filtered = items;
+    if (zoneMode === "radius") {
+      if (!searchCoords) return { items, cityCoords };
+      filtered = items.filter((s) => {
+        const ownerCity = getCityFn(s); if (!ownerCity) return false;
+        const coords = cityCoords.get(ownerCity); if (!coords) return false;
+        return haversineDistance(searchCoords.lat, searchCoords.lng, coords.lat, coords.lng) <= radius[0];
+      });
+    } else if (zoneMode === "dept" && refDept) {
+      filtered = items.filter((s) => {
+        const cp = getPostalCodeFn?.(s); return cp ? getDeptCode(cp) === refDept : false;
+      });
+    } else if (zoneMode === "region" && refRegion) {
+      filtered = items.filter((s) => {
+        const cp = getPostalCodeFn?.(s); return cp ? getRegionCode(getDeptCode(cp)) === refRegion : false;
+      });
+    }
+    // zoneMode === "france" → no filter
     return { items: filtered, cityCoords };
   };
 
   const searchSits = async (searchCoords: { lat: number; lng: number } | null) => {
     let query = supabase
       .from("sits")
-      .select("*, owner:profiles!sits_user_id_fkey(first_name, avatar_url, city, identity_verified, is_founder), property:properties!sits_property_id_fkey(type, environment, photos)")
+      .select("*, owner:profiles!sits_user_id_fkey(first_name, avatar_url, city, postal_code, identity_verified, is_founder), property:properties!sits_property_id_fkey(type, environment, photos)")
       .eq("status", "published")
       .order("created_at", { ascending: false });
     if (startDate) query = query.gte("end_date", startDate);
@@ -303,7 +346,7 @@ const SearchSitter = () => {
       });
     }
     if (verifiedOnly) items = items.filter((s: any) => s.owner?.identity_verified);
-    const { items: locFiltered, cityCoords } = await filterByLocation(items, (s: any) => s.owner?.city, searchCoords);
+    const { items: locFiltered, cityCoords } = await filterByLocation(items, (s: any) => s.owner?.city, searchCoords, (s: any) => s.owner?.postal_code);
     items = locFiltered;
     const enriched = await Promise.all(
       items.map(async (sit: any) => {
@@ -757,33 +800,78 @@ const SearchSitter = () => {
             </PopoverContent>
           </Popover>
 
-          {/* Radius pill */}
+          {/* Zone pill (radius / dept / region / france) */}
           <Popover>
             <PopoverTrigger asChild>
               <button className={pillClass}>
-                <span className="text-foreground">{radius[0]} km</span>
+                <span className="text-foreground">
+                  {zoneMode === "radius" && `${radius[0]} km`}
+                  {zoneMode === "dept" && (() => {
+                    const d = getDeptCode(userPostalCode);
+                    return d ? `Dépt ${d}` : "Mon département";
+                  })()}
+                  {zoneMode === "region" && (getRegionName(getDeptCode(userPostalCode)) || "Ma région")}
+                  {zoneMode === "france" && "Toute la France"}
+                </span>
               </button>
             </PopoverTrigger>
-            <PopoverContent className="w-64 p-4" align="start">
-              <div className="flex flex-wrap gap-1.5 mb-4">
-                {RADIUS_SHORTCUTS.map(r => (
-                  <button
-                    key={r}
-                    onClick={() => setRadius([r])}
-                    className={`rounded-full px-3 py-1 text-xs transition-colors ${
-                      radius[0] === r
-                        ? "bg-primary text-primary-foreground"
-                        : "border border-border text-muted-foreground hover:border-primary"
-                    }`}
-                  >
-                    {r === 50 ? "50 km+" : `${r} km`}
-                  </button>
-                ))}
+            <PopoverContent className="w-72 p-3" align="start">
+              <div className="space-y-1 mb-3">
+                <button
+                  onClick={() => setZoneMode("radius")}
+                  className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors ${zoneMode === "radius" ? "bg-primary/10 text-primary font-medium" : "hover:bg-accent text-foreground"}`}
+                >
+                  📍 Autour de moi <span className="text-xs text-muted-foreground">({radius[0]} km · {densityCounts.radius} {densityCounts.radius > 1 ? "résultats" : "résultat"})</span>
+                </button>
+                <button
+                  onClick={() => setZoneMode("dept")}
+                  disabled={!getDeptCode(userPostalCode)}
+                  className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${zoneMode === "dept" ? "bg-primary/10 text-primary font-medium" : "hover:bg-accent text-foreground"}`}
+                >
+                  🏛️ Mon département {getDeptCode(userPostalCode) && (
+                    <span className="text-xs text-muted-foreground">
+                      ({getDeptCode(userPostalCode)} {DEPT_NAMES[getDeptCode(userPostalCode)!]} · {densityCounts.dept})
+                    </span>
+                  )}
+                </button>
+                <button
+                  onClick={() => setZoneMode("region")}
+                  disabled={!getRegionCode(getDeptCode(userPostalCode))}
+                  className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${zoneMode === "region" ? "bg-primary/10 text-primary font-medium" : "hover:bg-accent text-foreground"}`}
+                >
+                  🗺️ Ma région {getRegionName(getDeptCode(userPostalCode)) && (
+                    <span className="text-xs text-muted-foreground">
+                      ({getRegionName(getDeptCode(userPostalCode))} · {densityCounts.region})
+                    </span>
+                  )}
+                </button>
+                <button
+                  onClick={() => setZoneMode("france")}
+                  className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors ${zoneMode === "france" ? "bg-primary/10 text-primary font-medium" : "hover:bg-accent text-foreground"}`}
+                >
+                  🇫🇷 Toute la France <span className="text-xs text-muted-foreground">({densityCounts.france})</span>
+                </button>
               </div>
-              <Slider value={radius} onValueChange={setRadius} min={5} max={100} step={5} />
-              <p className="text-xs text-muted-foreground mt-3">
-                {loading ? "Calcul…" : `${resultCount} garde${resultCount > 1 ? "s" : ""} dans ce rayon`}
-              </p>
+              {zoneMode === "radius" && (
+                <div className="border-t border-border pt-3 space-y-3">
+                  <div className="flex flex-wrap gap-1.5">
+                    {RADIUS_SHORTCUTS.map(r => (
+                      <button
+                        key={r}
+                        onClick={() => setRadius([r])}
+                        className={`rounded-full px-3 py-1 text-xs transition-colors ${
+                          radius[0] === r
+                            ? "bg-primary text-primary-foreground"
+                            : "border border-border text-muted-foreground hover:border-primary"
+                        }`}
+                      >
+                        {r === 50 ? "50 km+" : `${r} km`}
+                      </button>
+                    ))}
+                  </div>
+                  <Slider value={radius} onValueChange={setRadius} min={5} max={100} step={5} />
+                </div>
+              )}
             </PopoverContent>
           </Popover>
 
@@ -1043,6 +1131,48 @@ const SearchSitter = () => {
           </button>
         </div>
       </div>
+
+      {/* ─── Density counter (helps users understand they can widen the search) ─── */}
+      {tab === "sits" && !loading && userPostalCode && (densityCounts.dept > 0 || densityCounts.region > 0 || densityCounts.france > 0) && (
+        <div className="mx-6 mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
+          <span className="font-medium text-foreground">Densité :</span>
+          <button
+            onClick={() => setZoneMode("radius")}
+            className={`underline-offset-2 hover:underline ${zoneMode === "radius" ? "text-primary font-medium" : ""}`}
+          >
+            {densityCounts.radius} dans {radius[0]} km
+          </button>
+          <span>·</span>
+          <button
+            onClick={() => setZoneMode("dept")}
+            className={`underline-offset-2 hover:underline ${zoneMode === "dept" ? "text-primary font-medium" : ""}`}
+          >
+            {densityCounts.dept} dans le {getDeptCode(userPostalCode)}
+          </button>
+          <span>·</span>
+          <button
+            onClick={() => setZoneMode("region")}
+            className={`underline-offset-2 hover:underline ${zoneMode === "region" ? "text-primary font-medium" : ""}`}
+          >
+            {densityCounts.region} en {getRegionName(getDeptCode(userPostalCode)) || "région"}
+          </button>
+          <span>·</span>
+          <button
+            onClick={() => setZoneMode("france")}
+            className={`underline-offset-2 hover:underline ${zoneMode === "france" ? "text-primary font-medium" : ""}`}
+          >
+            {densityCounts.france} en France
+          </button>
+          {zoneMode === "radius" && densityCounts.radius < 5 && densityCounts.dept > densityCounts.radius && (
+            <button
+              onClick={() => setZoneMode("dept")}
+              className="ml-auto rounded-full bg-primary/10 text-primary px-3 py-1 text-xs font-medium hover:bg-primary/20 transition-colors"
+            >
+              Élargir au département ({densityCounts.dept}) →
+            </button>
+          )}
+        </div>
+      )}
 
       {/* ─── No city warning ─── */}
       {!userCity && (
