@@ -72,7 +72,7 @@ const ReviewsDisplay = ({ userId, showAnimalCare = false }: ReviewsDisplayProps)
             <div key={r.id} className="p-4 rounded-xl bg-card border border-border">
               <div className="flex items-center gap-2.5 mb-2">
                 {r.reviewer?.avatar_url ? (
-                  <img src={r.reviewer.avatar_url} alt="" className="w-8 h-8 rounded-full object-cover" />
+                  <img src={r.reviewer.avatar_url} alt={`Photo de ${r.reviewer.first_name || 'utilisateur'}`} loading="lazy" className="w-8 h-8 rounded-full object-cover" />
                 ) : (
                   <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-xs font-bold">
                     {r.reviewer?.first_name?.charAt(0) || "?"}
