@@ -340,14 +340,16 @@ const OwnerDashboard = () => {
               {user?.isFounder && <FounderBadge size="sm" />}
             </div>
             <p className="text-sm text-primary-foreground/75 font-sans">{subtitle}</p>
-            <Link
-              to={`/gardiens/${user?.id}?tab=proprio`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 text-xs font-body text-primary-foreground/70 hover:text-primary-foreground transition-colors mt-2"
-            >
-              <Eye className="w-3 h-3" /> Voir mon profil public →
-            </Link>
+            {user?.id ? (
+              <Link
+                to={`/gardiens/${user.id}?tab=proprio`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 text-xs font-body text-primary-foreground/70 hover:text-primary-foreground transition-colors mt-2"
+              >
+                <Eye className="w-3 h-3" /> Voir mon profil public →
+              </Link>
+            ) : null}
           </div>
           <button
             onClick={() => navigate("/sits/create")}
