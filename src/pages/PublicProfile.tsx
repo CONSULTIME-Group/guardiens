@@ -167,6 +167,16 @@ const PublicProfile = () => {
     }
   };
 
+  const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
+  const ogImageUrl = isSitter && shouldIndex && id
+    ? `https://${projectId}.functions.supabase.co/og-profile?id=${id}`
+    : profile.avatar_url || undefined;
+
+  const knowsAboutList = [
+    ...(sitterProfile?.competences || []),
+    ...(ownerProfile?.competences || []),
+  ].filter((v: string, i: number, a: string[]) => a.indexOf(v) === i);
+
   return (
     <TooltipProvider>
       {/* SEO */}
@@ -174,25 +184,24 @@ const PublicProfile = () => {
         title={metaTitle}
         description={metaDesc}
         path={`/profil/${id}`}
-        image={profile.avatar_url || undefined}
+        image={ogImageUrl}
         type="website"
         noindex={!shouldIndex}
       />
-      <Helmet>
-        <script type="application/ld+json">{JSON.stringify({
-          "@context": "https://schema.org",
-          "@type": "Person",
-          name: firstName,
-          ...(profile.city && { address: { "@type": "PostalAddress", addressLocality: profile.city } }),
-          ...(profile.identity_verified && { hasCredential: { "@type": "EducationalOccupationalCredential", credentialCategory: "Identity Verified" } }),
-          ...((sitterProfile?.competences?.length > 0 || ownerProfile?.competences?.length > 0) && {
-            knowsAbout: [
-              ...(sitterProfile?.competences || []),
-              ...((ownerProfile?.competences_disponible && ownerProfile?.competences) || []),
-            ].filter((v: string, i: number, a: string[]) => a.indexOf(v) === i),
-          }),
-        })}</script>
-      </Helmet>
+      <ProfileSchemaOrg
+        name={firstName}
+        city={profile.city || undefined}
+        postalCode={profile.postal_code || undefined}
+        avatarUrl={profile.avatar_url || undefined}
+        bio={profile.bio || undefined}
+        avgRating={reviewStats.avg}
+        reviewCount={reviewStats.count}
+        completedSits={totalSits}
+        identityVerified={!!profile.identity_verified}
+        knowsAbout={knowsAboutList}
+        url={`https://guardiens.fr/gardiens/${id}`}
+        role={profile.role}
+      />
 
       <div className="min-h-screen bg-background">
         <div className="max-w-3xl mx-auto px-4 py-6 md:py-10 pb-24 space-y-6">
