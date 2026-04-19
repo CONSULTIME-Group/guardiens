@@ -272,28 +272,64 @@ const SearchSitter = () => {
     return haversineDistance(searchCoords.lat, searchCoords.lng, coords.lat, coords.lng);
   };
 
-  const filterByLocation = async (items: any[], getCityFn: (item: any) => string | undefined, searchCoords: { lat: number; lng: number } | null) => {
-    if (!searchCoords) return { items, cityCoords: new Map<string, { lat: number; lng: number }>() };
-    const uniqueCities = [...new Set(items.map(getCityFn).filter(Boolean))] as string[];
+  // Reference postal code for dept/region zone modes (selected city if available, else user CP)
+  const getZoneRefPostalCode = (): string | null => userPostalCode;
+
+  const filterByLocation = async (
+    items: any[],
+    getCityFn: (item: any) => string | undefined,
+    searchCoords: { lat: number; lng: number } | null,
+    getPostalCodeFn?: (item: any) => string | undefined,
+  ) => {
     const cityCoords = new Map<string, { lat: number; lng: number }>();
+    const uniqueCities = [...new Set(items.map(getCityFn).filter(Boolean))] as string[];
     await Promise.all(uniqueCities.map(async (c) => {
       const coords = await geocodeCity(c);
       if (coords) cityCoords.set(c, { lat: coords.lat, lng: coords.lng });
     }));
-    const filtered = items.filter((s) => {
-      const ownerCity = getCityFn(s);
-      if (!ownerCity) return false;
-      const coords = cityCoords.get(ownerCity);
-      if (!coords) return false;
-      return haversineDistance(searchCoords.lat, searchCoords.lng, coords.lat, coords.lng) <= radius[0];
-    });
+
+    // Compute density counts for each zone mode (always, for the counter UI)
+    const refDept = getDeptCode(getZoneRefPostalCode());
+    const refRegion = getRegionCode(refDept);
+    const radiusCount = searchCoords ? items.filter((s) => {
+      const c = getCityFn(s); if (!c) return false;
+      const co = cityCoords.get(c); if (!co) return false;
+      return haversineDistance(searchCoords.lat, searchCoords.lng, co.lat, co.lng) <= radius[0];
+    }).length : 0;
+    const deptCount = refDept ? items.filter((s) => {
+      const cp = getPostalCodeFn?.(s); return cp ? getDeptCode(cp) === refDept : false;
+    }).length : 0;
+    const regionCount = refRegion ? items.filter((s) => {
+      const cp = getPostalCodeFn?.(s); return cp ? getRegionCode(getDeptCode(cp)) === refRegion : false;
+    }).length : 0;
+    setDensityCounts({ radius: radiusCount, dept: deptCount, region: regionCount, france: items.length });
+
+    // Apply the selected zone filter
+    let filtered = items;
+    if (zoneMode === "radius") {
+      if (!searchCoords) return { items, cityCoords };
+      filtered = items.filter((s) => {
+        const ownerCity = getCityFn(s); if (!ownerCity) return false;
+        const coords = cityCoords.get(ownerCity); if (!coords) return false;
+        return haversineDistance(searchCoords.lat, searchCoords.lng, coords.lat, coords.lng) <= radius[0];
+      });
+    } else if (zoneMode === "dept" && refDept) {
+      filtered = items.filter((s) => {
+        const cp = getPostalCodeFn?.(s); return cp ? getDeptCode(cp) === refDept : false;
+      });
+    } else if (zoneMode === "region" && refRegion) {
+      filtered = items.filter((s) => {
+        const cp = getPostalCodeFn?.(s); return cp ? getRegionCode(getDeptCode(cp)) === refRegion : false;
+      });
+    }
+    // zoneMode === "france" → no filter
     return { items: filtered, cityCoords };
   };
 
   const searchSits = async (searchCoords: { lat: number; lng: number } | null) => {
     let query = supabase
       .from("sits")
-      .select("*, owner:profiles!sits_user_id_fkey(first_name, avatar_url, city, identity_verified, is_founder), property:properties!sits_property_id_fkey(type, environment, photos)")
+      .select("*, owner:profiles!sits_user_id_fkey(first_name, avatar_url, city, postal_code, identity_verified, is_founder), property:properties!sits_property_id_fkey(type, environment, photos)")
       .eq("status", "published")
       .order("created_at", { ascending: false });
     if (startDate) query = query.gte("end_date", startDate);
