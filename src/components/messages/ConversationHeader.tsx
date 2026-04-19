@@ -235,7 +235,7 @@ const ConversationHeader = ({
                     {capitalize(conv.other_user?.first_name)}
                   </Link>
                   {isFounder && <FounderBadge size="sm" />}
-            "
+          </>
           ) : (
             <>
               {conv.other_user?.avatar_url ? (
@@ -251,7 +251,7 @@ const ConversationHeader = ({
                     {capitalize(conv.other_user?.first_name)}
                   </span>
                   {isFounder && <FounderBadge size="sm" />}
-            </>
+          </>
           )}
               {/* MOD 3/7 — Application status badge in header */}
               {appBadge && !isSmallMission && (
