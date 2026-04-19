@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { Outlet, useSearchParams } from "react-router-dom";
+import { Outlet, useSearchParams, Link } from "react-router-dom";
 import { Sidebar, BottomNav } from "./Navigation";
 import { BackButton } from "./BackButton";
 import Breadcrumbs from "./Breadcrumbs";
+import NotificationBell from "./NotificationBell";
 import { useAuth } from "@/contexts/AuthContext";
 import OnboardingModal from "@/components/onboarding/OnboardingModal";
 
@@ -22,6 +23,14 @@ export const AppLayout = () => {
     <div className="flex min-h-screen bg-background">
       <Sidebar />
       <main id="main-content" className="flex-1 pb-20 md:pb-0 overflow-x-hidden" role="main">
+        {/* Mobile top bar : logo + notification bell */}
+        <div className="md:hidden sticky top-0 z-40 flex items-center justify-between px-4 py-2 bg-background/95 backdrop-blur border-b border-border">
+          <Link to="/dashboard" className="font-heading text-lg font-bold tracking-tight">
+            <span className="text-primary">g</span>
+            <span className="text-foreground">uardiens</span>
+          </Link>
+          <NotificationBell />
+        </div>
         {/* Single navigation aid: BackButton on mobile, Breadcrumbs on desktop */}
         <div className="md:hidden">
           <BackButton />
