@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Bell } from "lucide-react";
@@ -23,13 +23,13 @@ interface Notification {
 
 const NotificationBell = () => {
   const { user } = useAuth();
+  const userId = user?.id;
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [open, setOpen] = useState(false);
-  const channelTopicRef = useRef(`notifications-bell-${crypto.randomUUID()}`);
 
   const load = useCallback(async () => {
-    if (!user) {
+    if (!userId) {
       setNotifications([]);
       setUnreadCount(0);
       return;
@@ -38,23 +38,24 @@ const NotificationBell = () => {
     const { data } = await supabase
       .from("notifications")
       .select("*")
-      .eq("user_id", user.id)
+      .eq("user_id", userId)
       .order("created_at", { ascending: false })
       .limit(20);
 
     const items = (data as Notification[]) || [];
     setNotifications(items);
     setUnreadCount(items.filter((n) => !n.read_at).length);
-  }, [user]);
+  }, [userId]);
 
   useEffect(() => {
     void load();
   }, [load]);
 
   useEffect(() => {
-    if (!user) return;
+    if (!userId) return;
 
-    const channel = supabase.channel(channelTopicRef.current);
+    const channel = supabase.channel(`notifications-realtime-${userId}-${crypto.randomUUID()}`);
+    const notificationFilter = `user_id=eq.${userId}`;
 
     channel.on(
       "postgres_changes",
@@ -62,7 +63,7 @@ const NotificationBell = () => {
         event: "INSERT",
         schema: "public",
         table: "notifications",
-        filter: `user_id=eq.${user.id}`,
+        filter: notificationFilter,
       },
       (payload) => {
         const newNotif = payload.new as Notification;
@@ -77,7 +78,7 @@ const NotificationBell = () => {
         event: "UPDATE",
         schema: "public",
         table: "notifications",
-        filter: `user_id=eq.${user.id}`,
+        filter: notificationFilter,
       },
       (payload) => {
         const updated = payload.new as Notification;
@@ -95,7 +96,7 @@ const NotificationBell = () => {
         event: "DELETE",
         schema: "public",
         table: "notifications",
-        filter: `user_id=eq.${user.id}`,
+        filter: notificationFilter,
       },
       (payload) => {
         const deletedId = (payload.old as Notification).id;
@@ -112,10 +113,10 @@ const NotificationBell = () => {
     return () => {
       void supabase.removeChannel(channel);
     };
-  }, [user]);
+  }, [userId]);
 
   const markAllRead = async () => {
-    if (!user || unreadCount === 0) return;
+    if (!userId || unreadCount === 0) return;
     const unreadIds = notifications.filter((n) => !n.read_at).map((n) => n.id);
     await supabase
       .from("notifications")
