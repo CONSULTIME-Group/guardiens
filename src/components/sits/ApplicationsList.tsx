@@ -105,23 +105,52 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
 
   useEffect(() => { load(); }, [sitId]);
 
+  const [accepting, setAccepting] = useState(false);
+
   const handleAccept = async (app: any) => {
+    if (accepting) return;
+    setAccepting(true);
     try {
     const sitterName = app.sitter?.first_name || "Ce gardien";
     const sitterId = app.sitter_id;
 
-    await supabase.from("applications").update({ status: "accepted" as any }).eq("id", app.id);
+    // Vérification serveur : la garde n'est-elle pas déjà confirmée/annulée ?
+    const { data: currentSit } = await supabase
+      .from("sits").select("status").eq("id", sitId).single();
+    if (!currentSit || ["confirmed", "in_progress", "completed", "cancelled"].includes(currentSit.status)) {
+      toast({
+        title: "Action impossible",
+        description: "Cette garde n'accepte plus de nouvelles confirmations.",
+        variant: "destructive",
+      });
+      setAccepting(false);
+      setConfirmApp(null);
+      load();
+      return;
+    }
+
+    const { error: acceptErr } = await supabase.from("applications").update({ status: "accepted" as any }).eq("id", app.id);
+    if (acceptErr) throw acceptErr;
+
     const { data: rejectedApps } = await supabase
       .from("applications")
       .select("sitter_id")
       .eq("sit_id", sitId)
-      .neq("id", app.id);
+      .neq("id", app.id)
+      .not("status", "in", "(rejected,cancelled)");
+
     await supabase
       .from("applications")
       .update({ status: "rejected" as any })
       .eq("sit_id", sitId)
-      .neq("id", app.id);
-    await supabase.from("sits").update({ status: "confirmed" as any }).eq("id", sitId);
+      .neq("id", app.id)
+      .not("status", "in", "(rejected,cancelled)");
+
+    // Confirmer la garde ET fermer les candidatures
+    await supabase.from("sits").update({
+      status: "confirmed" as any,
+      accepting_applications: false,
+    } as any).eq("id", sitId);
 
     const petNamesStr = petNames.join(", ");
     const confirmMsg = `🎉 La garde est confirmée ! Vous avez été choisi(e) pour garder ${petNamesStr} du ${startDate} au ${endDate}.`;
@@ -269,11 +298,15 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
         description: "Une erreur est survenue lors de la confirmation.",
         variant: "destructive",
       });
+    } finally {
+      setAccepting(false);
     }
   };
 
   const handleDecline = async (app: any, message?: string) => {
-    await supabase.from("applications").update({ status: "rejected" as any }).eq("id", app.id);
+    try {
+      const { error: declineErr } = await supabase.from("applications").update({ status: "rejected" as any }).eq("id", app.id);
+      if (declineErr) throw declineErr;
 
     if (user) {
       const { data: rejConv } = await supabase
