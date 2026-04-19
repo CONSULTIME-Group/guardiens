@@ -32,7 +32,11 @@ const IGNORED_PATTERNS: RegExp[] = [
 
 function shouldIgnore(message: string): boolean {
   if (!message) return true;
-  return IGNORED_PATTERNS.some((re) => re.test(message));
+  // Trim pour éviter de laisser passer des variantes avec espaces de bord
+  // (vu en prod sur WebViews Facebook in-app : "Script error. " avec espace final)
+  const normalized = message.trim();
+  if (!normalized) return true;
+  return IGNORED_PATTERNS.some((re) => re.test(normalized));
 }
 
 function fingerprint(message: string, source?: string, line?: number): string {
