@@ -19,8 +19,13 @@ const ResetPassword = () => {
   const { toast } = useToast();
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
-      if (event === "PASSWORD_RECOVERY") {
+    // Check if user already has a recovery session (arrived via /auth/confirm redirect)
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) setIsRecovery(true);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === "PASSWORD_RECOVERY" || (event === "SIGNED_IN" && session)) {
         setIsRecovery(true);
       }
     });
