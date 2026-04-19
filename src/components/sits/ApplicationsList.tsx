@@ -335,11 +335,19 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
       }
     }
 
-    toast({ title: "Candidature déclinée" });
-    setDeclineApp(null);
-    setDeclineMessage("");
-    setDeclineCustom(false);
-    load();
+      toast({ title: "Candidature déclinée" });
+      setDeclineApp(null);
+      setDeclineMessage("");
+      setDeclineCustom(false);
+      load();
+    } catch (error) {
+      console.error('handleDecline error:', error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de décliner la candidature.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleReinvite = async (app: any) => {
