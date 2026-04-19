@@ -13,7 +13,7 @@ const ADVANTAGES = [
 
 export default function AdvantagesList({ title = "Ce que vous débloquez" }: { title?: string }) {
   return (
-    <div className="bg-white/60 border border-amber-100 rounded-xl p-5">
+    <div className="bg-card/60 border border-border rounded-xl p-5">
       <p className="text-sm font-body font-semibold text-foreground mb-3">{title}</p>
       <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2">
         {ADVANTAGES.map((a) => (
