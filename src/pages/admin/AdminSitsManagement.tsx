@@ -22,7 +22,7 @@ const AdminSitsManagement = () => {
   const [sits, setSits] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [filterStatus, setFilterStatus] = useState("no_draft");
-  const [filterType, setFilterType] = useState<"all" | "sits" | "long_stays">("all");
+  // filterType supprimé : "garde longue durée" n'existe plus
   const [search, setSearch] = useState("");
   const [sitters, setSitters] = useState<Record<string, { name: string; avatar: string | null }>>({});
   const [reviews, setReviews] = useState<Record<string, { owner: boolean; sitter: boolean }>>({});
@@ -47,20 +47,13 @@ const AdminSitsManagement = () => {
     };
     const statuses = getStatuses();
 
-    if (filterType !== "long_stays") {
-      const { data } = await supabase.from("sits").select("*, owner:profiles!sits_user_id_fkey(first_name, last_name, avatar_url, city)").in("status", statuses as any).order("created_at", { ascending: false });
-      (data || []).forEach(d => results.push({ ...d, _type: "sit" }));
-    }
-
-    if (filterType !== "sits") {
-      const { data } = await supabase.from("long_stays").select("*, owner:profiles!long_stays_user_id_fkey(first_name, last_name, avatar_url, city)").in("status", statuses as any).order("created_at", { ascending: false });
-      (data || []).forEach(d => results.push({ ...d, _type: "long_stay" }));
-    }
+    const { data } = await supabase.from("sits").select("*, owner:profiles!sits_user_id_fkey(first_name, last_name, avatar_url, city)").in("status", statuses as any).order("created_at", { ascending: false });
+    (data || []).forEach(d => results.push({ ...d, _type: "sit" }));
 
     results.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
     setSits(results);
     setLoading(false);
-  }, [filterStatus, filterType]);
+  }, [filterStatus]);
 
   useEffect(() => { fetchSits(); }, [fetchSits]);
 
@@ -69,16 +62,11 @@ const AdminSitsManagement = () => {
     if (!sits.length) return;
     const fetchSitterData = async () => {
       const map: Record<string, { name: string; avatar: string | null }> = {};
-      const sitIds = sits.filter(s => s._type === "sit").map(s => s.id);
-      const lsIds = sits.filter(s => s._type === "long_stay").map(s => s.id);
+      const sitIds = sits.map(s => s.id);
 
       if (sitIds.length) {
         const { data } = await supabase.from("applications").select("sit_id, sitter:profiles!applications_sitter_id_fkey(first_name, last_name, avatar_url)").in("sit_id", sitIds).eq("status", "accepted");
         data?.forEach((a: any) => { if (a.sitter) map[a.sit_id] = { name: `${a.sitter.first_name || ""} ${a.sitter.last_name || ""}`.trim(), avatar: a.sitter.avatar_url }; });
-      }
-      if (lsIds.length) {
-        const { data } = await supabase.from("long_stay_applications").select("long_stay_id, sitter:profiles!long_stay_applications_sitter_id_fkey(first_name, last_name, avatar_url)").in("long_stay_id", lsIds).eq("status", "accepted");
-        data?.forEach((a: any) => { if (a.sitter) map[a.long_stay_id] = { name: `${a.sitter.first_name || ""} ${a.sitter.last_name || ""}`.trim(), avatar: a.sitter.avatar_url }; });
       }
       setSitters(map);
     };
@@ -118,16 +106,14 @@ const AdminSitsManagement = () => {
   };
 
   const forceComplete = async (sit: any) => {
-    const table = sit._type === "sit" ? "sits" : "long_stays";
-    await supabase.from(table).update({ status: "completed" as any }).eq("id", sit.id);
+    await supabase.from("sits").update({ status: "completed" as any }).eq("id", sit.id);
     toast.success("Garde marquée terminée"); fetchSits();
   };
 
   const handleCancel = async () => {
     const sit = sits.find(s => s.id === cancelModal.id);
     if (!sit) return;
-    const table = sit._type === "sit" ? "sits" : "long_stays";
-    await supabase.from(table).update({ status: "cancelled" as any, cancellation_reason: cancelModal.reason } as any).eq("id", cancelModal.id);
+    await supabase.from("sits").update({ status: "cancelled" as any, cancellation_reason: cancelModal.reason } as any).eq("id", cancelModal.id);
 
     if (sit.user_id) {
       await supabase.from("notifications").insert({ user_id: sit.user_id, type: "sit_cancelled", title: "Garde annulée par l'admin", body: `La garde "${sit.title}" a été annulée. Motif : ${cancelModal.reason}`, link: `/sits/${sit.id}` });
@@ -145,22 +131,12 @@ const AdminSitsManagement = () => {
     setShowAllApps(false);
     setSheetAppsLoading(true);
 
-    let data: any[] | null = null;
-    if (sit._type === "sit") {
-      const res = await supabase
-        .from("applications")
-        .select("id, status, created_at, sitter_id, sitter:profiles!applications_sitter_id_fkey(first_name, avatar_url)")
-        .eq("sit_id", sit.id)
-        .order("created_at", { ascending: false });
-      data = res.data;
-    } else {
-      const res = await supabase
-        .from("long_stay_applications")
-        .select("id, status, created_at, sitter_id, sitter:profiles!long_stay_applications_sitter_id_fkey(first_name, avatar_url)")
-        .eq("long_stay_id", sit.id)
-        .order("created_at", { ascending: false });
-      data = res.data;
-    }
+    const res = await supabase
+      .from("applications")
+      .select("id, status, created_at, sitter_id, sitter:profiles!applications_sitter_id_fkey(first_name, avatar_url)")
+      .eq("sit_id", sit.id)
+      .order("created_at", { ascending: false });
+    const data = res.data;
 
     setSheetApplications(data || []);
     setSheetAppsLoading(false);
@@ -169,8 +145,7 @@ const AdminSitsManagement = () => {
   // Sheet: admin status transitions
   const handleSheetTransition = async (newStatus: string) => {
     if (!selectedSit) return;
-    const table = selectedSit._type === "sit" ? "sits" : "long_stays";
-    const { error } = await supabase.from(table).update({ status: newStatus as any }).eq("id", selectedSit.id);
+    const { error } = await supabase.from("sits").update({ status: newStatus as any }).eq("id", selectedSit.id);
     if (error) {
       toast.error("Erreur lors de la mise à jour");
       return;
