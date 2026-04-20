@@ -74,6 +74,7 @@ export default function PublicSitterProfile() {
   const { id } = useParams<{ id: string }>();
   const auth = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
   const tabParam = searchParams.get('tab');
 
   const { data: reputation } = useProfileReputation(id);
@@ -827,7 +828,7 @@ export default function PublicSitterProfile() {
                         context: "sitter_inquiry",
                       });
                       if (conversationId) {
-                        window.location.href = `/messages?c=${conversationId}`;
+                        navigate(`/messages?c=${conversationId}`);
                       } else if (error?.includes("propositions spontanées")) {
                         const { toast } = await import("sonner");
                         toast.error("Ce membre ne reçoit pas de propositions spontanées.");
