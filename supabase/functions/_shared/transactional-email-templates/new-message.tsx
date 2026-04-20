@@ -7,7 +7,7 @@ import type { TemplateEntry } from './registry.ts'
 const SITE_NAME = "Guardiens"
 const SITE_URL = "https://guardiens.fr"
 
-type Context = 'sit_application' | 'sitter_inquiry' | 'mission_help' | 'owner_pitch' | 'long_stay' | undefined
+type Context = 'sit_application' | 'sitter_inquiry' | 'mission_help' | 'owner_pitch' | undefined
 
 interface Props {
   senderFirstName?: string
@@ -23,7 +23,6 @@ const labelByContext = (ctx: Context): { emoji: string; title: string } => {
     case 'sitter_inquiry':  return { emoji: '💬', title: 'Demande de disponibilité' }
     case 'mission_help':    return { emoji: '🤝', title: 'Proposition d\'entraide' }
     case 'owner_pitch':     return { emoji: '✋', title: 'Un gardien vous contacte' }
-    case 'long_stay':       return { emoji: '📆', title: 'Candidature longue durée' }
     default:                return { emoji: '💬', title: 'Nouveau message' }
   }
 }
@@ -80,7 +79,6 @@ export const template = {
       case 'sitter_inquiry':  return `${sender} vous demande votre disponibilité`
       case 'mission_help':    return `${sender} propose son aide pour votre mission`
       case 'owner_pitch':     return `${sender} souhaite vous proposer ses services`
-      case 'long_stay':       return `${sender} candidate à votre garde longue durée`
       default:                return `Vous avez un nouveau message de ${sender}`
     }
   },

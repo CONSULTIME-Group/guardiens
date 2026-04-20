@@ -18,7 +18,7 @@ const SubscriptionExpiredEmail = () => (
           Votre abonnement {SITE_NAME} a expiré. Vous n'avez plus accès aux fonctionnalités premium.
         </Text>
         <Text style={text}>
-          Renouvelez votre abonnement pour retrouver l'accès à la messagerie, aux candidatures et aux gardes longue durée.
+          Renouvelez votre abonnement pour retrouver l'accès à la messagerie et aux candidatures.
         </Text>
         <Button style={button} href={`${SITE_URL}/mon-abonnement`}>
           Renouveler mon abonnement

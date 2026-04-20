@@ -1,7 +1,7 @@
 // Cron quotidien : relance contextuelle pour conversations sans réponse.
 // - sit_application : J+1, on relance le PROPRIÉTAIRE (candidature en attente)
 // - sitter_inquiry  : J+2, on relance le GARDIEN (sondage proprio)
-// - mission_help / owner_pitch / long_stay : aucune relance (tu te calmes)
+// - mission_help / owner_pitch : aucune relance
 // 1 relance max par conversation (champ reminder_sent_at).
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
@@ -20,7 +20,6 @@ interface ConversationRow {
   reminder_sent_at: string | null;
   sit_id: string | null;
   small_mission_id: string | null;
-  long_stay_id: string | null;
 }
 
 Deno.serve(async (req) => {
@@ -40,7 +39,7 @@ Deno.serve(async (req) => {
     // a entre 24h (J+1) et 7 jours, pas encore relancées, et limitées aux 2 contextes utiles.
     const { data: convs, error } = await supabase
       .from("conversations")
-      .select("id, context_type, owner_id, sitter_id, last_message_at, reminder_sent_at, sit_id, small_mission_id, long_stay_id")
+      .select("id, context_type, owner_id, sitter_id, last_message_at, reminder_sent_at, sit_id, small_mission_id")
       .in("context_type", ["sit_application", "sitter_inquiry"])
       .is("reminder_sent_at", null)
       .gte("last_message_at", j7)
