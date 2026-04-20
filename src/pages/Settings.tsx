@@ -388,6 +388,11 @@ const Settings = () => {
 
       <Separator />
 
+      {/* Section pitches spontanés — owners uniquement */}
+      <OwnerPitchSettings user={user} />
+
+      <Separator />
+
       {/* Export données */}
       <section className="my-8">
         <div className="flex items-center gap-2 mb-4">
