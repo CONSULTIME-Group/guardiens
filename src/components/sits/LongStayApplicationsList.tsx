@@ -68,27 +68,14 @@ const LongStayApplicationsList = ({
 
   const getOrCreateConversation = async (sitterId: string) => {
     if (!user) return null;
-    // Check existing conversation for this long stay
-    const { data: existing } = await (supabase
-      .from("conversations")
-      .select("id") as any)
-      .eq("long_stay_id", longStayId)
-      .eq("sitter_id", sitterId)
-      .maybeSingle();
-
-    if (existing) return existing.id;
-
-    const { data: created } = await (supabase
-      .from("conversations")
-      .insert({
-        long_stay_id: longStayId,
-        owner_id: user.id,
-        sitter_id: sitterId,
-      } as any)
-      .select("id") as any)
-      .single();
-
-    return created?.id || null;
+    // RPC atomique : déduplique + valide les permissions côté serveur
+    const { startConversation } = await import("@/lib/conversation");
+    const { conversationId } = await startConversation({
+      otherUserId: sitterId,
+      context: "long_stay",
+      longStayId,
+    });
+    return conversationId;
   };
 
   const handleAccept = async (appId: string, sitterName: string, sitterId: string) => {
@@ -142,7 +129,7 @@ const LongStayApplicationsList = ({
         });
       }
 
-      await supabase.from("conversations").update({ updated_at: new Date().toISOString() }).eq("id", convId);
+      // last_message_at + updated_at gérés automatiquement par trigger DB
     }
 
     // Send rejection messages to other applicants
@@ -156,7 +143,7 @@ const LongStayApplicationsList = ({
             content: "Le propriétaire a choisi un autre gardien pour cette garde longue durée. Merci pour votre candidature !",
             is_system: true,
           });
-          await supabase.from("conversations").update({ updated_at: new Date().toISOString() }).eq("id", rejConvId);
+          // trigger DB met à jour automatiquement
         }
       }
     }
