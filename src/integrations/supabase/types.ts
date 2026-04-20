@@ -3953,6 +3953,7 @@ export type Database = {
         | "mission_help"
         | "owner_pitch"
         | "long_stay"
+        | "helper_inquiry"
       gallery_source: "guardiens" | "external"
       guide_place_category:
         | "dog_park"
@@ -4165,6 +4166,7 @@ export const Constants = {
         "mission_help",
         "owner_pitch",
         "long_stay",
+        "helper_inquiry",
       ],
       gallery_source: ["guardiens", "external"],
       guide_place_category: [

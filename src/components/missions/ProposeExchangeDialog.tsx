@@ -124,7 +124,7 @@ const ProposeExchangeDialog = ({
         type: "mission_proposal",
         title: "Nouvelle proposition d'échange",
         body: `${(user as any).first_name || "Un membre"} vous propose un échange pour "${mission.title}"`,
-        link: `/messages?conversationId=${convId}`,
+        link: `/messages?c=${convId}`,
       });
 
       // 6. Invalidate caches so the list reflects "already_proposed"
@@ -133,7 +133,7 @@ const ProposeExchangeDialog = ({
       // 7. Close + switch role + navigate
       onClose();
       switchRole('sitter');
-      navigate(`/messages?conversationId=${convId}`);
+      navigate(`/messages?c=${convId}`);
     } catch (err: any) {
       logger.error("[ProposeExchangeDialog]", { err: String(err) });
       toast.error(err?.message || "Impossible d'envoyer la proposition. Réessayez.", {

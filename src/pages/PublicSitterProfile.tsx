@@ -819,23 +819,21 @@ export default function PublicSitterProfile() {
                 {isAuthenticated && isOwner && (
                   <button
                     onClick={async () => {
-                      if (!auth?.user?.id) return;
-                      const uid = auth.user.id;
-                      const { data: convs } = await supabase
-                        .from("conversations")
-                        .select("id, sit_id, updated_at")
-                        .or(
-                          `and(owner_id.eq.${uid},sitter_id.eq.${id}),and(owner_id.eq.${id},sitter_id.eq.${uid})`
-                        );
-                      if (convs && convs.length > 0) {
-                        const best = convs.sort((a, b) => {
-                          if (a.sit_id && !b.sit_id) return -1;
-                          if (!a.sit_id && b.sit_id) return 1;
-                          return new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime();
-                        })[0];
-                        window.location.href = `/messages?conversation=${best.id}`;
+                      if (!auth?.user?.id || !id) return;
+                      // RPC atomique : crée/récupère la conv selon le contexte sitter_inquiry
+                      const { startConversation } = await import("@/lib/conversation");
+                      const { conversationId, error } = await startConversation({
+                        otherUserId: id,
+                        context: "sitter_inquiry",
+                      });
+                      if (conversationId) {
+                        window.location.href = `/messages?c=${conversationId}`;
+                      } else if (error?.includes("propositions spontanées")) {
+                        const { toast } = await import("sonner");
+                        toast.error("Ce membre ne reçoit pas de propositions spontanées.");
                       } else {
-                        window.location.href = `/messages?gardien=${id}`;
+                        const { toast } = await import("sonner");
+                        toast.error("Impossible d'ouvrir la conversation.");
                       }
                     }}
                     className="block bg-primary text-primary-foreground rounded-xl py-3 text-sm font-medium w-full text-center cursor-pointer"

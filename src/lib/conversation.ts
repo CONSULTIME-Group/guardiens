@@ -14,11 +14,12 @@ import { logger } from "@/lib/logger";
 import { toast } from "sonner";
 
 export type ConversationContext =
-  | "sit_application"
-  | "sitter_inquiry"
-  | "mission_help"
-  | "owner_pitch"
-  | "long_stay";
+  | "sit_application"   // candidature à une annonce de garde (sit_id requis)
+  | "sitter_inquiry"    // proprio sonde un gardien (pas d'annonce)
+  | "mission_help"      // gardien/voisin se propose sur une mission précise (small_mission_id requis)
+  | "helper_inquiry"    // proprio sonde un aidant entraide hors mission précise
+  | "owner_pitch"       // gardien démarche un proprio (pitch spontané — bloqué par défaut)
+  | "long_stay";        // candidature à une garde longue durée (long_stay_id requis)
 
 interface StartConversationOptions {
   otherUserId: string;
@@ -117,6 +118,11 @@ export function buildFirstMessageDraft(args: {
       return `${greet}\n\nJe peux vous aider pour${
         args.missionTitle ? ` « ${args.missionTitle} »` : " votre mission d'entraide"
       }${args.missionDate ? ` le ${args.missionDate}` : ""}. N'hésitez pas à me dire comment je peux être utile.`;
+
+    case "helper_inquiry":
+      return `${greet}\n\nJ'ai vu que vous étiez disponible pour donner un coup de main${
+        args.city ? ` à ${args.city}` : ""
+      }. J'aurais peut-être besoin de votre aide bientôt — pourrait-on en discuter ?\n\nMerci !`;
 
     case "owner_pitch":
       return `${greet}\n\nJe suis gardien(ne)${

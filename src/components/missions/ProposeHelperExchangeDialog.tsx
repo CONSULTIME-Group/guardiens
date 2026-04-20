@@ -97,12 +97,12 @@ const ProposeHelperExchangeDialog = ({
         type: "mission_proposal",
         title: "Proposition d'échange",
         body: `${senderName} vous propose un échange : "${needDescription.trim().slice(0, 60)}"`,
-        link: `/messages?conversationId=${convId}`,
+        link: `/messages?c=${convId}`,
       });
 
       onClose();
       switchRole("owner");
-      navigate(`/messages?conversationId=${convId}`);
+      navigate(`/messages?c=${convId}`);
     } catch (err: any) {
       logger.error("[ProposeHelperExchangeDialog]", { err: String(err) });
       toast.error(err?.message || "Impossible d'envoyer la proposition. Réessayez.");
