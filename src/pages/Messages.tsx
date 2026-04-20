@@ -721,6 +721,20 @@ const Messages = () => {
             }}
           />
 
+          {/* Presence + Context card */}
+          {activeConv.other_user?.last_seen_at && (
+            <div className="px-4 py-1 border-b border-border/50 bg-card/50">
+              <PresenceBadge lastSeenAt={activeConv.other_user.last_seen_at} />
+            </div>
+          )}
+          <ContextHeaderCard
+            contextType={activeConv.context_type}
+            isOwner={activeConv.owner_id === user?.id}
+            sit={activeConv.sit ? { ...activeConv.sit, id: activeConv.sit_id || undefined } : null}
+            otherFirstName={activeConv.other_user?.first_name}
+            otherCity={activeConv.other_user?.city}
+          />
+
           {/* Messages with day separators */}
           <div className="flex-1 overflow-y-auto space-y-0 pb-20 md:pb-4" style={{ background: "hsl(var(--background))" }}>
             {(activeConv.sit?.status === "confirmed" || activeConv.sit?.status === "in_progress") && activeConv.sit?.property_id && (
