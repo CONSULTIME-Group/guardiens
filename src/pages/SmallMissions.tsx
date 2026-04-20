@@ -562,7 +562,7 @@ const SmallMissions = () => {
                 )}
               </div>
             )}
-            {isAuthenticated && (accessLevel === 1 || accessLevel === 2) && (
+            {isAuthenticated && accessLevel === 1 && (
               <AccessGateBanner level={accessLevel} profileCompletion={profileCompletion} context="mission" />
             )}
 
