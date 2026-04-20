@@ -19,6 +19,7 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [passwordError, setPasswordError] = useState<string | null>(null);
+  const [failedAttempts, setFailedAttempts] = useState(0);
   const { login } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -34,6 +35,7 @@ const Login = () => {
       const msg = error.message;
       if (msg === "Invalid login credentials") {
         setPasswordError("Email ou mot de passe incorrect.");
+        setFailedAttempts((n) => n + 1);
       } else if (msg === "Email not confirmed") {
         const handleResend = async () => {
           const { error: resendError } = await supabase.auth.resend({
@@ -124,13 +126,29 @@ const Login = () => {
                   {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                 </button>
               </div>
-              {passwordError && <p className="text-sm text-destructive">{passwordError}</p>}
+              {passwordError && (
+                <div className="space-y-2">
+                  <p className="text-sm text-destructive">{passwordError}</p>
+                  <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm">
+                    <Link to="/forgot-password" className="text-primary hover:underline">
+                      Mot de passe oublié ?
+                    </Link>
+                    {failedAttempts >= 2 && (
+                      <Link to={`/register${email ? `?email=${encodeURIComponent(email)}` : ""}`} className="text-primary hover:underline">
+                        Pas encore de compte ? Inscrivez-vous
+                      </Link>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
-            <div className="flex justify-end">
-              <Link to="/forgot-password" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                Mot de passe oublié ?
-              </Link>
-            </div>
+            {!passwordError && (
+              <div className="flex justify-end">
+                <Link to="/forgot-password" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                  Mot de passe oublié ?
+                </Link>
+              </div>
+            )}
             <Button type="submit" className="w-full" size="lg" disabled={isLoading}>
               {isLoading ? "Connexion..." : "Se connecter"}
             </Button>
