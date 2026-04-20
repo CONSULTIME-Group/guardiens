@@ -1,11 +1,13 @@
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { useAccessLevel } from "@/hooks/useAccessLevel";
 import { toast } from "@/hooks/use-toast";
-import { Send, Star, MapPin, Shield, CheckCircle2, Calendar } from "lucide-react";
+import { Send, Star, MapPin, Shield, ShieldCheck, CheckCircle2, Calendar } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -28,6 +30,7 @@ const ApplicationModal = ({
   petNames, city, startDate, endDate, onSuccess,
 }: ApplicationModalProps) => {
   const { user } = useAuth();
+  const { identityRecommended } = useAccessLevel();
   const animalText = petNames.length > 0 ? petNames.join(", ") : "vos animaux";
   const defaultMessage = `Bonjour ${ownerFirstName || ""},\n\nVotre annonce pour ${animalText} à ${city || "votre ville"} m'intéresse beaucoup.\n\n\n\nJe serais disponible du ${startDate} au ${endDate}.`;
 
@@ -148,6 +151,29 @@ const ApplicationModal = ({
           <DialogTitle className="font-heading">Postuler à cette garde</DialogTitle>
           <DialogDescription>Le propriétaire verra votre profil ci-dessous en plus de votre message.</DialogDescription>
         </DialogHeader>
+
+        {identityRecommended && (
+          <div
+            className="rounded-lg p-3 flex items-start gap-2.5 mt-1"
+            style={{
+              backgroundColor: "hsl(40 33% 96%)",
+              borderLeft: "3px solid hsl(153 42% 30%)",
+            }}
+          >
+            <ShieldCheck className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+            <div className="space-y-1 flex-1">
+              <p className="text-xs font-semibold text-foreground">
+                Conseil — vérifiez votre identité pour être plus souvent retenu
+              </p>
+              <p className="text-xs text-muted-foreground">
+                Les propriétaires acceptent en priorité les profils vérifiés. Vous pouvez postuler dès maintenant et vérifier votre identité plus tard.
+              </p>
+              <Link to="/profile?focus=identite" className="text-xs text-primary font-medium hover:underline inline-block mt-0.5">
+                Vérifier mon identité (1 min) →
+              </Link>
+            </div>
+          </div>
+        )}
 
         <div className="grid md:grid-cols-[1fr_220px] gap-4">
           {/* Left: message */}

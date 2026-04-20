@@ -765,8 +765,8 @@ const SmallMissionDetail = () => {
           </div>
         )}
 
-        {/* Non-author: access gate */}
-        {user && !isAuthor && !myResponse && mission.status === "open" && (accessLevel === 1 || accessLevel === 2) && (
+        {/* Non-author: access gate (uniquement si profil incomplet) */}
+        {user && !isAuthor && !myResponse && mission.status === "open" && accessLevel === 1 && (
           <div className="fixed bottom-0 left-0 right-0 md:left-64 bg-card border-t border-border p-4 z-40 md:pb-4 pb-20">
             <div className="max-w-3xl mx-auto">
               <AccessGateBanner level={accessLevel} profileCompletion={profileCompletion} context="mission" />
