@@ -217,14 +217,7 @@ const AdminSitsManagement = () => {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input placeholder="Rechercher…" value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9" />
         </div>
-        <Select value={filterType} onValueChange={(v) => setFilterType(v as any)}>
-          <SelectTrigger className="w-[160px]"><SelectValue /></SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Tous types</SelectItem>
-            <SelectItem value="sits">Classique</SelectItem>
-            <SelectItem value="long_stays">Longue durée</SelectItem>
-          </SelectContent>
-        </Select>
+        {/* filterType retiré (long-stay supprimé) */}
         <Select value={filterStatus} onValueChange={setFilterStatus}>
           <SelectTrigger className="w-[160px]"><SelectValue /></SelectTrigger>
           <SelectContent>
@@ -249,7 +242,6 @@ const AdminSitsManagement = () => {
               <TableHead>Ville</TableHead>
               <TableHead>Dates</TableHead>
               <TableHead>Dernière activité</TableHead>
-              <TableHead>Type</TableHead>
               <TableHead>Statut</TableHead>
               <TableHead>Avis</TableHead>
               <TableHead className="text-right">Actions</TableHead>
