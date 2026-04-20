@@ -787,7 +787,7 @@ const QuickActions = ({
     return (
       <>
         <button
-          onClick={() => sit.conversationId && window.location.assign(`/messages?conversationId=${sit.conversationId}`)}
+          onClick={() => sit.conversationId && window.location.assign(`/messages?c=${sit.conversationId}`)}
           className={cn(btnClass, "bg-primary/10 text-primary hover:bg-primary/20", !sit.conversationId && "opacity-50 cursor-not-allowed")}
           disabled={!sit.conversationId}
         >
@@ -815,7 +815,7 @@ const QuickActions = ({
   }
 
   if (effectiveStatus === "in_progress" && isOwner) {
-    const messageHref = sit.conversationId ? `/messages?conv=${sit.conversationId}` : "/messages";
+    const messageHref = sit.conversationId ? `/messages?c=${sit.conversationId}` : "/messages";
     return (
       <>
         <Link to={messageHref} className={cn(btnClass, "bg-primary/10 text-primary hover:bg-primary/20")}>
@@ -831,7 +831,7 @@ const QuickActions = ({
   }
 
   if (effectiveStatus === "confirmed" && isOwner) {
-    const messageHref = sit.conversationId ? `/messages?conv=${sit.conversationId}` : "/messages";
+    const messageHref = sit.conversationId ? `/messages?c=${sit.conversationId}` : "/messages";
     return (
       <>
         <Link to={`/sits/${sit.id}`} className={cn(btnClass, "bg-primary/10 text-primary hover:bg-primary/20")}>

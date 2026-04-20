@@ -819,24 +819,14 @@ export default function PublicSitterProfile() {
                 {isAuthenticated && isOwner && (
                   <button
                     onClick={async () => {
-                      if (!auth?.user?.id) return;
-                      const uid = auth.user.id;
-                      const { data: convs } = await supabase
-                        .from("conversations")
-                        .select("id, sit_id, updated_at")
-                        .or(
-                          `and(owner_id.eq.${uid},sitter_id.eq.${id}),and(owner_id.eq.${id},sitter_id.eq.${uid})`
-                        );
-                      if (convs && convs.length > 0) {
-                        const best = convs.sort((a, b) => {
-                          if (a.sit_id && !b.sit_id) return -1;
-                          if (!a.sit_id && b.sit_id) return 1;
-                          return new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime();
-                        })[0];
-                        window.location.href = `/messages?conversation=${best.id}`;
-                      } else {
-                        window.location.href = `/messages?gardien=${id}`;
-                      }
+                      if (!auth?.user?.id || !id) return;
+                      // Utilise le helper centralisé : RPC atomique + URL standardisée ?c=
+                      const { startConversationAndNavigate } = await import("@/lib/conversation");
+                      // Visiteur qui contacte un gardien depuis sa fiche publique → sondage proprio
+                      await startConversationAndNavigate(
+                        { otherUserId: id, context: "sitter_inquiry" },
+                        (path: string) => { window.location.href = path; },
+                      );
                     }}
                     className="block bg-primary text-primary-foreground rounded-xl py-3 text-sm font-medium w-full text-center cursor-pointer"
                   >
