@@ -5,7 +5,6 @@
  *  - sitter_inquiry  : badge "Demande de disponibilité" + CTA proprio "Créer mon annonce"
  *  - mission_help    : carte mission compacte (déjà gérée dans ConversationHeader)
  *  - owner_pitch     : alerte "Contact spontané"
- *  - long_stay       : badge garde longue durée
  */
 
 import { Link } from "react-router-dom";
