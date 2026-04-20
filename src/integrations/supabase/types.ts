@@ -691,6 +691,7 @@ export type Database = {
           last_message_at: string | null
           long_stay_id: string | null
           owner_id: string
+          reminder_sent_at: string | null
           sit_id: string | null
           sitter_id: string
           small_mission_id: string | null
@@ -707,6 +708,7 @@ export type Database = {
           last_message_at?: string | null
           long_stay_id?: string | null
           owner_id: string
+          reminder_sent_at?: string | null
           sit_id?: string | null
           sitter_id: string
           small_mission_id?: string | null
@@ -723,6 +725,7 @@ export type Database = {
           last_message_at?: string | null
           long_stay_id?: string | null
           owner_id?: string
+          reminder_sent_at?: string | null
           sit_id?: string | null
           sitter_id?: string
           small_mission_id?: string | null
@@ -2298,6 +2301,7 @@ export type Database = {
           is_founder: boolean
           last_cp_relance_at: string | null
           last_name: string | null
+          last_seen_at: string | null
           onboarding_completed: boolean
           onboarding_dismissed_at: string | null
           onboarding_minimal_completed: boolean
@@ -2335,6 +2339,7 @@ export type Database = {
           is_founder?: boolean
           last_cp_relance_at?: string | null
           last_name?: string | null
+          last_seen_at?: string | null
           onboarding_completed?: boolean
           onboarding_dismissed_at?: string | null
           onboarding_minimal_completed?: boolean
@@ -2372,6 +2377,7 @@ export type Database = {
           is_founder?: boolean
           last_cp_relance_at?: string | null
           last_name?: string | null
+          last_seen_at?: string | null
           onboarding_completed?: boolean
           onboarding_dismissed_at?: string | null
           onboarding_minimal_completed?: boolean
@@ -3879,6 +3885,7 @@ export type Database = {
         }
         Returns: string
       }
+      mark_user_seen: { Args: never; Returns: undefined }
       move_to_dlq: {
         Args: {
           dlq_name: string
