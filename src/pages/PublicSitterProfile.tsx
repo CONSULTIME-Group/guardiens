@@ -820,13 +820,21 @@ export default function PublicSitterProfile() {
                   <button
                     onClick={async () => {
                       if (!auth?.user?.id || !id) return;
-                      // Utilise le helper centralisé : RPC atomique + URL standardisée ?c=
-                      const { startConversationAndNavigate } = await import("@/lib/conversation");
-                      // Visiteur qui contacte un gardien depuis sa fiche publique → sondage proprio
-                      await startConversationAndNavigate(
-                        { otherUserId: id, context: "sitter_inquiry" },
-                        (path: string) => { window.location.href = path; },
-                      );
+                      // RPC atomique : crée/récupère la conv selon le contexte sitter_inquiry
+                      const { startConversation } = await import("@/lib/conversation");
+                      const { conversationId, error } = await startConversation({
+                        otherUserId: id,
+                        context: "sitter_inquiry",
+                      });
+                      if (conversationId) {
+                        window.location.href = `/messages?c=${conversationId}`;
+                      } else if (error?.includes("propositions spontanées")) {
+                        const { toast } = await import("sonner");
+                        toast.error("Ce membre ne reçoit pas de propositions spontanées.");
+                      } else {
+                        const { toast } = await import("sonner");
+                        toast.error("Impossible d'ouvrir la conversation.");
+                      }
                     }}
                     className="block bg-primary text-primary-foreground rounded-xl py-3 text-sm font-medium w-full text-center cursor-pointer"
                   >
