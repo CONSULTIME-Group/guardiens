@@ -25,7 +25,7 @@ import { useNavigate } from "react-router-dom";
 interface Conversation {
   id: string;
   sit_id: string | null;
-  long_stay_id: string | null;
+  long_stay_id?: string | null;
   small_mission_id: string | null;
   owner_id: string;
   sitter_id: string;
@@ -534,7 +534,7 @@ const Messages = () => {
       if (effectiveRole === "sitter" && conv.sitter_id !== user.id) return false;
     }
 
-    if (pill === "garde") return !!(conv.sit_id || conv.long_stay_id);
+    if (pill === "garde") return !!conv.sit_id;
     if (pill === "mission") return isMission;
     return true; // "all"
   });
