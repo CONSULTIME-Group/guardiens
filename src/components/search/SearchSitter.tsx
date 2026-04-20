@@ -612,7 +612,8 @@ const SearchSitter = () => {
     ? `${format(new Date(startDate), "d MMM", { locale: fr })} → ${format(new Date(endDate), "d MMM", { locale: fr })}`
     : "Dates";
 
-  const resultCount = tab === "missions" && missionSubTab === "members" ? availableMembers.length : results.length;
+  const availableSitsCount = results.filter((r: any) => !r.isAssigned).length;
+  const resultCount = tab === "missions" && missionSubTab === "members" ? availableMembers.length : availableSitsCount;
   const countLabel = tab === "missions" && missionSubTab === "members"
     ? `${resultCount} membre${resultCount > 1 ? "s" : ""} disponible${resultCount > 1 ? "s" : ""}`
     : `${resultCount} garde${resultCount > 1 ? "s" : ""} disponible${resultCount > 1 ? "s" : ""} près de vous`;
