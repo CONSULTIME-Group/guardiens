@@ -787,7 +787,7 @@ const QuickActions = ({
     return (
       <>
         <button
-          onClick={() => sit.conversationId && window.location.assign(`/messages?c=${sit.conversationId}`)}
+          onClick={() => sit.conversationId && navigate(`/messages?c=${sit.conversationId}`)}
           className={cn(btnClass, "bg-primary/10 text-primary hover:bg-primary/20", !sit.conversationId && "opacity-50 cursor-not-allowed")}
           disabled={!sit.conversationId}
         >

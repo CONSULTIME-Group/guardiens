@@ -480,7 +480,7 @@ const Messages = () => {
     if (!user || !activeConv || !newMessage.trim()) return;
     setSending(true);
     await supabase.from("messages").insert({ conversation_id: activeConv.id, sender_id: user.id, content: newMessage.trim() });
-    await supabase.from("conversations").update({ updated_at: new Date().toISOString() }).eq("id", activeConv.id);
+    // last_message_at + first_message_sent gérés automatiquement par trigger DB
     setNewMessage("");
     setSending(false);
     loadConversations();
@@ -832,7 +832,7 @@ const Messages = () => {
           </p>
           {pill !== "archived" && (
             <Link
-              to={pill === "mission" ? "/small-missions" : "/search"}
+              to={pill === "mission" ? "/petites-missions" : "/search"}
               className="border border-border rounded-full px-4 py-2 text-sm hover:border-primary transition-colors"
             >
               {pill === "mission" ? "Rechercher une mission →" : "Rechercher une annonce →"}
