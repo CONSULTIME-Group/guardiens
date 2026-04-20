@@ -101,7 +101,7 @@ const AccessGateBanner = ({ level, profileCompletion, context = "guard", showIde
               Les profils vérifiés inspirent davantage confiance et sont contactés bien plus souvent. Cela ne prend qu'une minute.
             </p>
             <Button size="sm" variant="outline" asChild>
-              <Link to="/profile?focus=identite">Vérifier mon identité</Link>
+              <Link to="/settings#verification">Vérifier mon identité</Link>
             </Button>
           </div>
         </div>

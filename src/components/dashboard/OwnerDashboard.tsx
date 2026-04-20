@@ -264,7 +264,7 @@ const OwnerDashboard = () => {
 
   const banner = useMemo(() => {
     if (verificationStatus !== "verified" && verificationStatus !== "pending")
-      return { variant: "warning" as const, label: "Vérifiez votre identité pour publier une annonce et recevoir des candidatures.", to: "/settings#verification", ctaLabel: "Vérifier mon identité →" };
+      return { variant: "info" as const, label: "Recommandé : vérifiez votre identité pour rassurer les gardiens qui consultent votre annonce.", to: "/settings#verification", ctaLabel: "Vérifier mon identité →" };
     if (ongoingSit) {
       const acceptedApp = (ongoingSit.applications || []).find(a => a.status === "accepted");
       const sitterName = acceptedApp?.sitter_id && sitterProfiles[acceptedApp.sitter_id]?.first_name;

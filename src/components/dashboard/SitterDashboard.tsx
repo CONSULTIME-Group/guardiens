@@ -85,7 +85,7 @@ const SitterDashboard = () => {
   };
   const allItems = [
     { done: onboardingChecks.profileComplete, label: `Compléter mon profil (${profileCompletion}%)`, to: "/profile" },
-    { done: onboardingChecks.identityVerified, label: "Vérifier mon identité", to: "/profile#identite" },
+    { done: onboardingChecks.identityVerified, label: "Vérifier mon identité (recommandé)", to: "/settings#verification" },
     { done: false, label: "Découvrez les gardes disponibles", to: "/search" },
     { done: onboardingChecks.availableMode, label: "Activer le mode disponible", to: "", isToggle: true },
   ];
