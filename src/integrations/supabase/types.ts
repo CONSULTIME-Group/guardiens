@@ -682,8 +682,13 @@ export type Database = {
       conversations: {
         Row: {
           archived_by: string[] | null
+          context_type:
+            | Database["public"]["Enums"]["conversation_context"]
+            | null
           created_at: string
+          first_message_sent: boolean
           id: string
+          last_message_at: string | null
           long_stay_id: string | null
           owner_id: string
           sit_id: string | null
@@ -693,8 +698,13 @@ export type Database = {
         }
         Insert: {
           archived_by?: string[] | null
+          context_type?:
+            | Database["public"]["Enums"]["conversation_context"]
+            | null
           created_at?: string
+          first_message_sent?: boolean
           id?: string
+          last_message_at?: string | null
           long_stay_id?: string | null
           owner_id: string
           sit_id?: string | null
@@ -704,8 +714,13 @@ export type Database = {
         }
         Update: {
           archived_by?: string[] | null
+          context_type?:
+            | Database["public"]["Enums"]["conversation_context"]
+            | null
           created_at?: string
+          first_message_sent?: boolean
           id?: string
+          last_message_at?: string | null
           long_stay_id?: string | null
           owner_id?: string
           sit_id?: string | null
@@ -2009,6 +2024,7 @@ export type Database = {
       }
       owner_profiles: {
         Row: {
+          accept_unsolicited_pitches: boolean
           communication_notes: string | null
           competences: string[] | null
           competences_disponible: boolean | null
@@ -2034,6 +2050,7 @@ export type Database = {
           welcome_notes: string | null
         }
         Insert: {
+          accept_unsolicited_pitches?: boolean
           communication_notes?: string | null
           competences?: string[] | null
           competences_disponible?: boolean | null
@@ -2059,6 +2076,7 @@ export type Database = {
           welcome_notes?: string | null
         }
         Update: {
+          accept_unsolicited_pitches?: boolean
           communication_notes?: string | null
           competences?: string[] | null
           competences_disponible?: boolean | null
@@ -3811,6 +3829,16 @@ export type Database = {
         Args: { p_garde_id: string }
         Returns: string[]
       }
+      get_or_create_conversation: {
+        Args: {
+          p_context_type: Database["public"]["Enums"]["conversation_context"]
+          p_long_stay_id?: string
+          p_other_user_id: string
+          p_sit_id?: string
+          p_small_mission_id?: string
+        }
+        Returns: string
+      }
       get_own_email: { Args: never; Returns: string }
       get_user_email_for_notification: {
         Args: { target_user_id: string }
@@ -3912,6 +3940,12 @@ export type Database = {
         | "accepted"
         | "rejected"
         | "cancelled"
+      conversation_context:
+        | "sit_application"
+        | "sitter_inquiry"
+        | "mission_help"
+        | "owner_pitch"
+        | "long_stay"
       gallery_source: "guardiens" | "external"
       guide_place_category:
         | "dog_park"
@@ -4117,6 +4151,13 @@ export const Constants = {
         "accepted",
         "rejected",
         "cancelled",
+      ],
+      conversation_context: [
+        "sit_application",
+        "sitter_inquiry",
+        "mission_help",
+        "owner_pitch",
+        "long_stay",
       ],
       gallery_source: ["guardiens", "external"],
       guide_place_category: [

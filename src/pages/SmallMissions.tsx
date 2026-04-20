@@ -271,29 +271,14 @@ const SmallMissions = () => {
     if (helperId === user.id) return;
     setContactingHelperId(helperId);
     try {
-      // Check existing conversation (either direction)
-      const { data: existing } = await supabase
-        .from("conversations")
-        .select("id, owner_id")
-        .or(`and(owner_id.eq.${user.id},sitter_id.eq.${helperId}),and(owner_id.eq.${helperId},sitter_id.eq.${user.id})`)
-        .is("sit_id", null)
-        .is("small_mission_id", null)
-        .maybeSingle();
-      if (existing) {
-        switchRole(existing.owner_id === user.id ? "owner" : "sitter");
-        navigate(`/messages?conversationId=${existing.id}`);
-        return;
-      }
-      const { data: conv, error } = await supabase
-        .from("conversations")
-        .insert({ owner_id: user.id, sitter_id: helperId, sit_id: null, small_mission_id: null })
-        .select("id")
-        .single();
-      if (error) throw error;
+      const { startConversationAndNavigate } = await import("@/lib/conversation");
+      // Contact d'un aidant entraide → context: mission_help (sans mission_id liée car c'est un sondage)
+      // On utilise sitter_inquiry pour rester sur le canal "discussion privée"
       switchRole("owner");
-      navigate(`/messages?conversationId=${conv!.id}`);
-    } catch {
-      // silent fail — toast could be added
+      await startConversationAndNavigate(
+        { otherUserId: helperId, context: "sitter_inquiry" },
+        navigate,
+      );
     } finally {
       setContactingHelperId(null);
     }

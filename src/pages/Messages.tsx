@@ -258,25 +258,26 @@ const Messages = () => {
 
   useEffect(() => { loadConversations(); }, [loadConversations]);
 
-  // Auto-open unread or from query param
+  // Auto-open conversation from query param (URL standardisée: ?c=, anciens params supportés)
   useEffect(() => {
     if (autoOpened) return;
 
     const gardienId = searchParams.get("gardien");
-    const convId = searchParams.get("conversation") || searchParams.get("conv") || searchParams.get("conversationId");
+    const convId =
+      searchParams.get("c") ||
+      searchParams.get("conversation") ||
+      searchParams.get("conv") ||
+      searchParams.get("conversationId");
 
-    // Handle ?gardien= param: find or create conversation with this user
+    // Handle ?gardien= : créer/récupérer conversation via RPC atomique
     if (gardienId && user && !loading) {
-      // Find any existing conversation with this user, prioritising one linked to a sit
       const candidates = conversations.filter(c => {
         const otherId = c.owner_id === user.id ? c.sitter_id : c.owner_id;
         return otherId === gardienId;
       });
       const existing = candidates.sort((a, b) => {
-        // Prioritise conversation with sit_id
         if (a.sit_id && !b.sit_id) return -1;
         if (!a.sit_id && b.sit_id) return 1;
-        // Then most recent
         return new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime();
       })[0] || null;
 
@@ -289,15 +290,21 @@ const Messages = () => {
         return;
       }
 
-      // Create a new conversation (owner = current user, sitter = gardienId)
+      // RPC atomique : sondage (sitter_inquiry) — pas de risque de pitch refusé ici
       (async () => {
         try {
-          const { data: newConv, error } = await supabase
-            .from("conversations")
-            .insert({ owner_id: user.id, sitter_id: gardienId })
-            .select("*")
-            .single();
-          if (error || !newConv) return;
+          const { data: newConvId, error: rpcErr } = await supabase.rpc("get_or_create_conversation", {
+            p_other_user_id: gardienId,
+            p_context_type: "sitter_inquiry",
+            p_sit_id: null,
+            p_small_mission_id: null,
+            p_long_stay_id: null,
+          });
+          if (rpcErr || !newConvId) return;
+
+          const { data: newConv } = await supabase
+            .from("conversations").select("*").eq("id", newConvId as string).single();
+          if (!newConv) return;
 
           const { data: profileData } = await supabase
             .from("profiles")
@@ -335,10 +342,13 @@ const Messages = () => {
       const target = conversations.find(c => c.id === convId);
       if (target) {
         setActiveConv(target);
-        searchParams.delete("conversation");
-        searchParams.delete("conv");
-        searchParams.delete("conversationId");
-        setSearchParams(searchParams, { replace: true });
+        // Normaliser l'URL : ?c=<id> uniquement
+        const next = new URLSearchParams(searchParams);
+        next.delete("conversation");
+        next.delete("conv");
+        next.delete("conversationId");
+        next.set("c", convId);
+        setSearchParams(next, { replace: true });
         setAutoOpened(true);
         return;
       }

@@ -1,0 +1,131 @@
+/**
+ * Helper centralisé pour créer/récupérer une conversation de manière atomique.
+ * Utilise la RPC `get_or_create_conversation` (server-side) qui :
+ *  - bloque l'auto-discussion (owner = sitter)
+ *  - déduplique selon le contexte
+ *  - vérifie les permissions (ex: pitch spontané sur owner_pitch)
+ *
+ * URL standard : `/messages?c=<id>` (les anciens params restent supportés en lecture).
+ */
+
+import { supabase } from "@/integrations/supabase/client";
+import type { NavigateFunction } from "react-router-dom";
+import { logger } from "@/lib/logger";
+import { toast } from "sonner";
+
+export type ConversationContext =
+  | "sit_application"
+  | "sitter_inquiry"
+  | "mission_help"
+  | "owner_pitch"
+  | "long_stay";
+
+interface StartConversationOptions {
+  otherUserId: string;
+  context: ConversationContext;
+  sitId?: string | null;
+  smallMissionId?: string | null;
+  longStayId?: string | null;
+}
+
+interface StartConversationResult {
+  conversationId: string | null;
+  error?: string;
+}
+
+/**
+ * Crée ou récupère une conversation. NE crée PAS de message —
+ * c'est l'envoi du premier message qui marquera la conv comme "active".
+ */
+export async function startConversation(
+  opts: StartConversationOptions,
+): Promise<StartConversationResult> {
+  try {
+    const { data, error } = await supabase.rpc("get_or_create_conversation", {
+      p_other_user_id: opts.otherUserId,
+      p_context_type: opts.context,
+      p_sit_id: opts.sitId ?? null,
+      p_small_mission_id: opts.smallMissionId ?? null,
+      p_long_stay_id: opts.longStayId ?? null,
+    });
+
+    if (error) {
+      logger.error("startConversation rpc error", { error: error.message, opts });
+      return { conversationId: null, error: error.message };
+    }
+
+    return { conversationId: data as string };
+  } catch (err: any) {
+    logger.error("startConversation exception", { err: String(err), opts });
+    return { conversationId: null, error: String(err?.message ?? err) };
+  }
+}
+
+/**
+ * Helper UI : démarre une conversation et navigue vers /messages?c=<id>.
+ * Affiche un toast d'erreur en cas de problème (notamment pitch refusé).
+ */
+export async function startConversationAndNavigate(
+  opts: StartConversationOptions,
+  navigate: NavigateFunction,
+): Promise<string | null> {
+  const { conversationId, error } = await startConversation(opts);
+  if (!conversationId) {
+    if (error?.includes("propositions spontanées")) {
+      toast.error("Ce membre ne reçoit pas de propositions spontanées. Consultez plutôt ses annonces.");
+    } else if (error?.includes("soi-même")) {
+      toast.error("Vous ne pouvez pas vous contacter vous-même.");
+    } else {
+      toast.error("Impossible d'ouvrir la conversation. Réessayez dans un instant.");
+    }
+    return null;
+  }
+  navigate(`/messages?c=${conversationId}`);
+  return conversationId;
+}
+
+/**
+ * Pré-remplit un brouillon de premier message selon le contexte.
+ * Sert à réduire la friction du 1er échange.
+ */
+export function buildFirstMessageDraft(args: {
+  context: ConversationContext;
+  recipientFirstName?: string | null;
+  city?: string | null;
+  sitTitle?: string | null;
+  sitDates?: string | null;
+  missionTitle?: string | null;
+  missionDate?: string | null;
+}): string {
+  const name = args.recipientFirstName?.trim() || "";
+  const greet = name ? `Bonjour ${name},` : "Bonjour,";
+
+  switch (args.context) {
+    case "sit_application":
+      return `${greet}\n\nJe suis intéressé(e) par votre garde${
+        args.sitTitle ? ` « ${args.sitTitle} »` : ""
+      }${args.sitDates ? ` du ${args.sitDates}` : ""}${
+        args.city ? ` à ${args.city}` : ""
+      }. Je serais ravi(e) d'échanger avec vous pour vous présenter mon profil.\n\nÀ très vite !`;
+
+    case "sitter_inquiry":
+      return `${greet}\n\nJ'aurai prochainement besoin d'un(e) gardien(ne)${
+        args.city ? ` à ${args.city}` : ""
+      }. Votre profil m'a beaucoup plu — seriez-vous disponible pour en discuter ?\n\nMerci d'avance.`;
+
+    case "mission_help":
+      return `${greet}\n\nJe peux vous aider pour${
+        args.missionTitle ? ` « ${args.missionTitle} »` : " votre mission d'entraide"
+      }${args.missionDate ? ` le ${args.missionDate}` : ""}. N'hésitez pas à me dire comment je peux être utile.`;
+
+    case "owner_pitch":
+      return `${greet}\n\nJe suis gardien(ne)${
+        args.city ? ` à ${args.city}` : ""
+      } et je vous contacte pour vous proposer mes services pour vos prochaines absences. N'hésitez pas à consulter mon profil.\n\nÀ bientôt !`;
+
+    case "long_stay":
+      return `${greet}\n\nVotre projet de garde longue durée${
+        args.sitTitle ? ` « ${args.sitTitle} »` : ""
+      } m'intéresse beaucoup. J'aimerais en discuter plus en détail avec vous.\n\nÀ très vite !`;
+  }
+}

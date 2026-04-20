@@ -440,19 +440,13 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
             <button
               onClick={async () => {
                 if (!user) return;
-                const { data: existingConv } = await supabase
-                  .from("conversations").select("id")
-                  .eq("sit_id", sitId).eq("sitter_id", app.sitter_id).maybeSingle();
-                if (existingConv) {
-                  navigate(`/messages?conv=${existingConv.id}`);
-                } else {
-                  const { data: newConv } = await supabase
-                    .from("conversations").insert({ sit_id: sitId, owner_id: user.id, sitter_id: app.sitter_id })
-                    .select("id").single();
-                  if (newConv) {
-                    await supabase.from("applications").update({ status: "discussing" as any }).eq("id", app.id);
-                    navigate(`/messages?conv=${newConv.id}`);
-                  }
+                const { startConversationAndNavigate } = await import("@/lib/conversation");
+                const convId = await startConversationAndNavigate(
+                  { otherUserId: app.sitter_id, context: "sit_application", sitId },
+                  navigate,
+                );
+                if (convId) {
+                  await supabase.from("applications").update({ status: "discussing" as any }).eq("id", app.id);
                 }
               }}
               className="border border-primary text-primary rounded-full px-4 py-2 text-sm hover:bg-primary/10 transition-colors"
@@ -506,7 +500,7 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
                 const { data: conv } = await supabase
                   .from("conversations").select("id")
                   .eq("sit_id", sitId).eq("sitter_id", app.sitter_id).maybeSingle();
-                if (conv) navigate(`/messages?conv=${conv.id}`);
+                if (conv) navigate(`/messages?c=${conv.id}`);
                 else navigate("/messages");
               }}
               className="inline-block border border-border rounded-full px-4 py-2 text-sm text-foreground hover:border-primary transition-colors"
@@ -528,17 +522,11 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
             <button
               onClick={async () => {
                 if (!user) return;
-                const { data: existingConv } = await supabase
-                  .from("conversations").select("id")
-                  .eq("sit_id", sitId).eq("sitter_id", app.sitter_id).maybeSingle();
-                if (existingConv) {
-                  navigate(`/messages?conv=${existingConv.id}`);
-                } else {
-                  const { data: newConv } = await supabase
-                    .from("conversations").insert({ sit_id: sitId, owner_id: user.id, sitter_id: app.sitter_id })
-                    .select("id").single();
-                  if (newConv) navigate(`/messages?conv=${newConv.id}`);
-                }
+                const { startConversationAndNavigate } = await import("@/lib/conversation");
+                await startConversationAndNavigate(
+                  { otherUserId: app.sitter_id, context: "sit_application", sitId },
+                  navigate,
+                );
               }}
               className="text-xs text-primary hover:underline"
             >

@@ -115,24 +115,18 @@ const ApplicationModal = ({
       }
     }
 
-    const { data: existingConv } = await supabase
-      .from("conversations")
-      .select("id")
-      .eq("sit_id", sitId)
-      .eq("sitter_id", user.id)
-      .maybeSingle();
+    // Candidature à une garde — RPC atomique (context: sit_application)
+    const { data: convId, error: convErr } = await supabase.rpc("get_or_create_conversation", {
+      p_other_user_id: ownerId,
+      p_context_type: "sit_application",
+      p_sit_id: sitId,
+      p_small_mission_id: null,
+      p_long_stay_id: null,
+    });
 
-    let convId = existingConv?.id;
-    if (!convId) {
-      const { data: conv } = await supabase.from("conversations").insert({
-        sit_id: sitId, owner_id: ownerId, sitter_id: user.id,
-      }).select("id").single();
-      convId = conv?.id;
-    }
-
-    if (convId) {
+    if (!convErr && convId) {
       await supabase.from("messages").insert({
-        conversation_id: convId, sender_id: user.id, content: message.trim(),
+        conversation_id: convId as string, sender_id: user.id, content: message.trim(),
       });
     }
 
