@@ -481,7 +481,7 @@ const SmallMissionDetail = () => {
             {isAuthor && (
               <div className="flex flex-wrap gap-2 mt-3">
                 {acceptedResponses.map(r => (
-                  <Button key={r.id} variant="outline" size="sm" onClick={() => navigate("/messages")} className="gap-2 border-green-300 text-green-700 dark:border-green-700 dark:text-green-400">
+                  <Button key={r.id} variant="outline" size="sm" onClick={() => navigate(r.conversation_id ? `/messages?c=${r.conversation_id}` : "/messages")} className="gap-2 border-green-300 text-green-700 dark:border-green-700 dark:text-green-400">
                     {r.responder?.avatar_url ? <img src={r.responder.avatar_url} className="w-5 h-5 rounded-full object-cover" /> : null}
                     {r.responder?.first_name} — Messagerie
                   </Button>

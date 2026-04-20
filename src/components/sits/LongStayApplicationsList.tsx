@@ -178,7 +178,7 @@ const LongStayApplicationsList = ({
         content: "Votre candidature a été déclinée pour cette garde longue durée. N'hésitez pas à postuler à d'autres annonces !",
         is_system: true,
       });
-      await supabase.from("conversations").update({ updated_at: new Date().toISOString() }).eq("id", convId);
+      // last_message_at géré automatiquement par trigger DB
     }
 
     toast({ title: "Candidature déclinée" });
@@ -188,6 +188,8 @@ const LongStayApplicationsList = ({
   const handleMessage = async (sitterId: string) => {
     const convId = await getOrCreateConversation(sitterId);
     if (convId) {
+      navigate(`/messages?c=${convId}`);
+    } else {
       navigate("/messages");
     }
   };
