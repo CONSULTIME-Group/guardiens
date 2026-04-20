@@ -6,9 +6,11 @@ import Breadcrumbs from "./Breadcrumbs";
 import NotificationBell from "./NotificationBell";
 import { useAuth } from "@/contexts/AuthContext";
 import OnboardingModal from "@/components/onboarding/OnboardingModal";
+import { usePresenceHeartbeat } from "@/hooks/usePresenceHeartbeat";
 
 export const AppLayout = () => {
   const { user, refreshProfile } = useAuth();
+  usePresenceHeartbeat();
   const [searchParams, setSearchParams] = useSearchParams();
   const [dismissed, setDismissed] = useState(false);
 

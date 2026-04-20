@@ -12,8 +12,11 @@ import { useSearchParams, Link } from "react-router-dom";
 import { useIsMobile } from "@/hooks/use-mobile";
 import HouseGuideBlock from "@/components/messages/HouseGuideBlock";
 import ConversationHeader from "@/components/messages/ConversationHeader";
+import ContextHeaderCard from "@/components/messages/ContextHeaderCard";
+import PresenceBadge from "@/components/messages/PresenceBadge";
 import DaySeparator from "@/components/messages/DaySeparator";
 import MessageBubble from "@/components/messages/MessageBubble";
+import { buildFirstMessageDraft, type ConversationContext } from "@/lib/conversation";
 import { useToast } from "@/hooks/use-toast";
 import { useSubscriptionAccess } from "@/hooks/useSubscriptionAccess";
 import { Lock } from "lucide-react";
@@ -28,8 +31,9 @@ interface Conversation {
   sitter_id: string;
   updated_at: string;
   archived_by: string[];
+  context_type: string | null;
   sit?: { title: string; status: string; property_id: string; start_date?: string | null; end_date?: string | null } | null;
-  other_user?: { id: string; first_name: string; avatar_url: string | null; identity_verified: boolean; city?: string | null; is_founder?: boolean } | null;
+  other_user?: { id: string; first_name: string; avatar_url: string | null; identity_verified: boolean; city?: string | null; is_founder?: boolean; last_seen_at?: string | null; show_last_seen?: boolean } | null;
   last_message?: { content: string; created_at: string; sender_id: string } | null;
   unread_count: number;
   application_status?: string | null;
@@ -186,8 +190,8 @@ const Messages = () => {
     const convIds = filteredConvs.map((conv: any) => conv.id);
     const sitIds = filteredConvs.map((conv: any) => conv.sit_id).filter(Boolean);
 
-    const [profilesRes, allLastMsgsRes, allUnreadRes, ratingsRes, emergencyRes, sitsRes, applicationsRes] = await Promise.all([
-      supabase.from("profiles").select("id, first_name, avatar_url, identity_verified, city, is_founder").in("id", otherIds),
+    const [profilesRes, allLastMsgsRes, allUnreadRes, ratingsRes, emergencyRes, sitsRes, applicationsRes, prefsRes] = await Promise.all([
+      supabase.from("profiles").select("id, first_name, avatar_url, identity_verified, city, is_founder, last_seen_at").in("id", otherIds),
       supabase.from("messages").select("conversation_id, content, created_at, sender_id").in("conversation_id", convIds).order("created_at", { ascending: false }),
       supabase.from("messages").select("conversation_id, id").in("conversation_id", convIds).neq("sender_id", user.id).is("read_at", null),
       supabase.from("reviews").select("reviewee_id, overall_rating").in("reviewee_id", otherIds).eq("published", true),
