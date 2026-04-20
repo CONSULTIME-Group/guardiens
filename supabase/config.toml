@@ -15,3 +15,5 @@ project_id = "erhccyqevdyevpyctsjj"
     verify_jwt = false
   [functions.og-profile]
     verify_jwt = false
+  [functions.notify-new-message]
+    verify_jwt = false

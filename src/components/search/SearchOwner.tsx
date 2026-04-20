@@ -148,7 +148,7 @@ const SearchOwner = () => {
   // Reference postal code (selected city if available, else user CP)
   const getZoneRefPostalCode = (): string | null => cityPostalCode ?? userPostalCode;
 
-  // Contact handler
+  // Contact handler — propriétaire qui sonde un gardien (context: sitter_inquiry)
   const handleContact = async (sitterId: string) => {
     if (!user) {
       toast.error("Connectez-vous pour contacter un gardien");
@@ -161,21 +161,12 @@ const SearchOwner = () => {
     }
     setContactingId(sitterId);
     try {
-      const { data: existing } = await supabase
-        .from("conversations").select("id, owner_id")
-        .eq("owner_id", user.id).eq("sitter_id", sitterId).maybeSingle();
-      if (existing) {
-        switchRole(existing.owner_id === user.id ? 'owner' : 'sitter');
-        navigate(`/messages?conversation=${existing.id}`);
-        return;
-      }
-      const { data: conv, error } = await supabase
-        .from("conversations").insert({ owner_id: user.id, sitter_id: sitterId, sit_id: null, small_mission_id: null })
-        .select("id").single();
-      if (error) throw error;
-      if (!conv?.id) throw new Error("no_conv");
+      const { startConversationAndNavigate } = await import("@/lib/conversation");
       switchRole('owner');
-      navigate(`/messages?conversation=${conv.id}`);
+      await startConversationAndNavigate(
+        { otherUserId: sitterId, context: "sitter_inquiry" },
+        navigate,
+      );
     } catch (err: any) {
       logger.error("handleContact error", { err: String(err) });
       toast.error("Impossible de démarrer la conversation. Réessayez.");

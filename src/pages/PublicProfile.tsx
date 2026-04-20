@@ -148,23 +148,15 @@ const PublicProfile = () => {
 
   const handleContact = async () => {
     if (!user || !id) return;
-    // Look for existing private conversation (no sit/mission linked)
-    const { data: existingConvs } = await supabase
-      .from("conversations")
-      .select("id, sit_id")
-      .or(`and(owner_id.eq.${user.id},sitter_id.eq.${id}),and(owner_id.eq.${id},sitter_id.eq.${user.id})`);
-    // Prefer a private conv (no sit_id), else most recent
-    const privateConv = existingConvs?.find(c => !c.sit_id);
-    const existingConv = privateConv || existingConvs?.[0];
-    if (existingConv) {
-      navigate(`/messages?conv=${existingConv.id}`);
-    } else {
-      const { data: newConv } = await supabase.from("conversations").insert({
-        owner_id: user.id, sitter_id: id,
-        sit_id: null, small_mission_id: null,
-      }).select("id").single();
-      if (newConv) navigate(`/messages?conv=${newConv.id}`);
-    }
+    // PublicProfile = profil propriétaire vu par un visiteur
+    // → si le visiteur est gardien, c'est un pitch spontané (owner_pitch)
+    // → sinon, on tombe sur un sondage entre propriétaires (sitter_inquiry par défaut)
+    const { startConversationAndNavigate } = await import("@/lib/conversation");
+    const visitorIsSitter = user.role === "sitter" || user.role === "both";
+    await startConversationAndNavigate(
+      { otherUserId: id, context: visitorIsSitter ? "owner_pitch" : "sitter_inquiry" },
+      navigate,
+    );
   };
 
   const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
