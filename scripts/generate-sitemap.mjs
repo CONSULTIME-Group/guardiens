@@ -129,7 +129,7 @@ async function main() {
     "bouledogue-francais-lyon-guide-race", "malinois-lyon-guide-race",
     "golden-retriever-lyon-guide-race", "berger-australien-guide",
     "conseil-gardien-creer-profil-attractif-lyon", "preparer-maison-avant-vacances",
-    "gardes-longue-duree-guide", "garde-chien-lyon-solutions",
+    "garde-chien-lyon-solutions",
     "boom-pet-sitting-lyon-2026",
   ]);
 

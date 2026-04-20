@@ -11,8 +11,6 @@ const json = (body: unknown, status = 200) =>
     headers: { ...corsHeaders, "Content-Type": "application/json" },
   });
 
-type ListingType = "sits" | "long_stays";
-
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
@@ -45,54 +43,47 @@ Deno.serve(async (req) => {
 
     const {
       listingId,
-      listingType,
       ownerUserId,
       listingTitle,
     } = (await req.json()) as {
       listingId?: string;
-      listingType?: ListingType;
+      listingType?: string; // legacy, ignoré
       ownerUserId?: string | null;
       listingTitle?: string;
     };
 
-    if (!listingId || !listingType || !["sits", "long_stays"].includes(listingType)) {
-      return json({ error: "listingId et listingType sont requis" }, 400);
+    if (!listingId) {
+      return json({ error: "listingId est requis" }, 400);
     }
 
     const adminClient = createClient(supabaseUrl, serviceRoleKey);
-    const isSit = listingType === "sits";
-    const listingTable = isSit ? "sits" : "long_stays";
-    const applicationsTable = isSit ? "applications" : "long_stay_applications";
-    const applicationsFk = isSit ? "sit_id" : "long_stay_id";
-    const conversationsFk = isSit ? "sit_id" : "long_stay_id";
 
-    if (isSit) {
-      const { error: reviewsError } = await adminClient.from("reviews").delete().eq("sit_id", listingId);
-      if (reviewsError) return json({ error: reviewsError.message }, 500);
+    // Cleanup dépendances liées à un sit
+    const { error: reviewsError } = await adminClient.from("reviews").delete().eq("sit_id", listingId);
+    if (reviewsError) return json({ error: reviewsError.message }, 500);
 
-      const { error: badgesError } = await adminClient
-        .from("badge_attributions")
-        .delete()
-        .eq("sit_id", listingId);
-      if (badgesError) return json({ error: badgesError.message }, 500);
+    const { error: badgesError } = await adminClient
+      .from("badge_attributions")
+      .delete()
+      .eq("sit_id", listingId);
+    if (badgesError) return json({ error: badgesError.message }, 500);
 
-      const { error: highlightsError } = await adminClient
-        .from("owner_highlights")
-        .delete()
-        .eq("sit_id", listingId);
-      if (highlightsError) return json({ error: highlightsError.message }, 500);
-    }
+    const { error: highlightsError } = await adminClient
+      .from("owner_highlights")
+      .delete()
+      .eq("sit_id", listingId);
+    if (highlightsError) return json({ error: highlightsError.message }, 500);
 
     const { error: applicationsError } = await adminClient
-      .from(applicationsTable)
+      .from("applications")
       .delete()
-      .eq(applicationsFk, listingId);
+      .eq("sit_id", listingId);
     if (applicationsError) return json({ error: applicationsError.message }, 500);
 
     const { data: conversations, error: conversationsSelectError } = await adminClient
       .from("conversations")
       .select("id")
-      .eq(conversationsFk, listingId);
+      .eq("sit_id", listingId);
     if (conversationsSelectError) return json({ error: conversationsSelectError.message }, 500);
 
     const conversationIds = (conversations ?? []).map((c) => c.id);
@@ -107,11 +98,11 @@ Deno.serve(async (req) => {
     const { error: conversationsDeleteError } = await adminClient
       .from("conversations")
       .delete()
-      .eq(conversationsFk, listingId);
+      .eq("sit_id", listingId);
     if (conversationsDeleteError) return json({ error: conversationsDeleteError.message }, 500);
 
     const { error: listingDeleteError, count } = await adminClient
-      .from(listingTable)
+      .from("sits")
       .delete({ count: "exact" })
       .eq("id", listingId);
 
