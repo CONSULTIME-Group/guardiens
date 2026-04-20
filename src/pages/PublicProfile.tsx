@@ -146,13 +146,18 @@ const PublicProfile = () => {
     ? `${firstName}, gardien à ${profile.city || "France"}. ${totalSits} garde${totalSits > 1 ? "s" : ""}, note ${reviewStats.avg.toFixed(1)}/5. ${topBadge ? topBadge + ". " : ""}Contactez-le sur Guardiens.`
     : `${firstName}, propriétaire à ${profile.city || "France"}. ${pets.length} animal${pets.length > 1 ? "ux" : ""}. ${totalSits} garde${totalSits > 1 ? "s" : ""}, note ${reviewStats.avg.toFixed(1)}/5.`;
 
+  // Pitch refusé : visiteur gardien + propriétaire ayant désactivé les contacts spontanés
+  const visitorIsSitter = !!user && (user.role === "sitter" || user.role === "both");
+  const targetIsOwner = profile?.role === "owner" || profile?.role === "both";
+  const pitchBlocked = visitorIsSitter && targetIsOwner && ownerProfile?.accept_unsolicited_pitches === false && !activeSit;
+
   const handleContact = async () => {
     if (!user || !id) return;
+    if (pitchBlocked) return; // garde-fou UI
     // PublicProfile = profil propriétaire vu par un visiteur
     // → si le visiteur est gardien, c'est un pitch spontané (owner_pitch)
     // → sinon, on tombe sur un sondage entre propriétaires (sitter_inquiry par défaut)
     const { startConversationAndNavigate } = await import("@/lib/conversation");
-    const visitorIsSitter = user.role === "sitter" || user.role === "both";
     await startConversationAndNavigate(
       { otherUserId: id, context: visitorIsSitter ? "owner_pitch" : "sitter_inquiry" },
       navigate,
@@ -506,17 +511,29 @@ const PublicProfile = () => {
         {/* === STICKY CTA === */}
         {!isOwnProfile && user && (
           <div className="fixed bottom-0 left-0 right-0 z-40 border-t bg-card/95 backdrop-blur-sm shadow-[0_-2px_10px_rgba(0,0,0,0.05)]">
-            <div className="max-w-3xl mx-auto px-4 py-3 flex gap-3">
-              {activeSit && (
-                <Button variant="outline" className="flex-1 gap-1.5" asChild>
-                  <Link to={`/sits/${activeSit.id}`}>
-                    <Eye className="h-4 w-4" /> Voir l'annonce
-                  </Link>
-                </Button>
+            <div className="max-w-3xl mx-auto px-4 py-3 flex flex-col gap-2">
+              {pitchBlocked && (
+                <p className="text-xs text-muted-foreground text-center">
+                  {firstName} ne reçoit pas de propositions spontanées. Consultez plutôt ses annonces actives.
+                </p>
               )}
-              <Button className="flex-1 gap-1.5" onClick={handleContact}>
-                <MessageSquare className="h-4 w-4" /> Contacter {firstName}
-              </Button>
+              <div className="flex gap-3">
+                {activeSit && (
+                  <Button variant="outline" className="flex-1 gap-1.5" asChild>
+                    <Link to={`/sits/${activeSit.id}`}>
+                      <Eye className="h-4 w-4" /> Voir l'annonce
+                    </Link>
+                  </Button>
+                )}
+                <Button
+                  className="flex-1 gap-1.5"
+                  onClick={handleContact}
+                  disabled={pitchBlocked}
+                  title={pitchBlocked ? "Ce membre ne reçoit pas de propositions spontanées" : undefined}
+                >
+                  <MessageSquare className="h-4 w-4" /> Contacter {firstName}
+                </Button>
+              </div>
             </div>
           </div>
         )}
