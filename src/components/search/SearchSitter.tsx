@@ -1279,10 +1279,10 @@ const SearchSitter = () => {
                           <FavoriteButton targetType="sitter" targetId={member.id} size="sm" />
                         </span>
                         <Link
-                          to={`/messages?new=true&to=${member.id}&context=entraide`}
+                          to={`/gardiens/${member.id}`}
                           className="text-sm text-primary font-semibold hover:underline"
                         >
-                          Contacter →
+                          Voir le profil →
                         </Link>
                       </div>
                     </div>
