@@ -272,11 +272,11 @@ const SmallMissions = () => {
     setContactingHelperId(helperId);
     try {
       const { startConversationAndNavigate } = await import("@/lib/conversation");
-      // Contact d'un aidant entraide → context: mission_help (sans mission_id liée car c'est un sondage)
-      // On utilise sitter_inquiry pour rester sur le canal "discussion privée"
+      // Contact spontané d'un aidant d'entraide (pas de mission précise rattachée)
+      // → context dédié `helper_inquiry` (différent de sit_application / sitter_inquiry)
       switchRole("owner");
       await startConversationAndNavigate(
-        { otherUserId: helperId, context: "sitter_inquiry" },
+        { otherUserId: helperId, context: "helper_inquiry" },
         navigate,
       );
     } finally {

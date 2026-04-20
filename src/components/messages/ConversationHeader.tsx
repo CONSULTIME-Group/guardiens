@@ -118,7 +118,7 @@ const ConversationHeader = ({
       type: "mission_accepted",
       title: "Échange accepté !",
       body: `${capitalize(conv.other_user?.first_name) || "Un membre"} a accepté votre proposition pour "${missionData?.title}"`,
-      link: `/messages?conversationId=${conv.id}`,
+      link: `/messages?c=${conv.id}`,
     });
     setResponseData((prev: any) => ({ ...prev, status: "accepted" }));
   };
@@ -133,7 +133,7 @@ const ConversationHeader = ({
       type: "mission_declined",
       title: "Échange décliné",
       body: `${capitalize(conv.other_user?.first_name) || "Un membre"} n'est pas disponible pour "${missionData?.title}"`,
-      link: `/messages?conversationId=${conv.id}`,
+      link: `/messages?c=${conv.id}`,
     });
     setResponseData((prev: any) => ({ ...prev, status: "declined" }));
   };

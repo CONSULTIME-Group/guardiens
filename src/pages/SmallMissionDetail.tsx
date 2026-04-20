@@ -319,7 +319,7 @@ const SmallMissionDetail = () => {
         user_id: resp.responder_id, type: "mission_accepted",
         title: "Proposition acceptée",
         body: `Votre proposition pour "${mission.title}" a été acceptée. Vous pouvez maintenant échanger par messagerie.`,
-        link: convId ? `/messages?conversationId=${convId}` : `/messages`,
+        link: convId ? `/messages?c=${convId}` : `/messages`,
       });
 
       toast({ title: "Proposition acceptée !" });
