@@ -3,14 +3,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { format, formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
-import { Eye, EyeOff, Trash2, Search, Mail, Sparkles, ExternalLink } from "lucide-react";
+import { Eye, EyeOff, Trash2, Search, Sparkles } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 const statusLabels: Record<string, { label: string; variant: "default" | "secondary" | "outline" | "destructive" }> = {
@@ -27,7 +26,6 @@ const AdminListings = () => {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState("no_draft");
-  const [filterType, setFilterType] = useState<"sits" | "long_stays">("sits");
   const [filterCity, setFilterCity] = useState("");
   const [appCounts, setAppCounts] = useState<Record<string, number>>({});
   const [cities, setCities] = useState<string[]>([]);
@@ -36,9 +34,7 @@ const AdminListings = () => {
 
   const fetchListings = useCallback(async () => {
     setLoading(true);
-    const table = filterType === "sits" ? "sits" : "long_stays";
-    const fk = filterType === "sits" ? "sits_user_id_fkey" : "long_stays_user_id_fkey";
-    let q = supabase.from(table).select(`*, owner:profiles!${fk}(first_name, last_name, city, avatar_url)`).order("created_at", { ascending: false });
+    let q = supabase.from("sits").select(`*, owner:profiles!sits_user_id_fkey(first_name, last_name, city, avatar_url)`).order("created_at", { ascending: false });
     if (filterStatus === "no_draft") {
       q = q.neq("status", "draft" as any);
     } else if (filterStatus !== "all") {
@@ -52,7 +48,7 @@ const AdminListings = () => {
       setCities(uniqueCities as string[]);
     }
     setLoading(false);
-  }, [filterType, filterStatus]);
+  }, [filterStatus]);
 
   useEffect(() => { fetchListings(); }, [fetchListings]);
 
@@ -61,21 +57,15 @@ const AdminListings = () => {
     const ids = listings.map((l) => l.id);
     const fetchCounts = async () => {
       const counts: Record<string, number> = {};
-      if (filterType === "sits") {
-        const { data } = await supabase.from("applications").select("id, sit_id").in("sit_id", ids);
-        data?.forEach((a: any) => { counts[a.sit_id] = (counts[a.sit_id] || 0) + 1; });
-      } else {
-        const { data } = await supabase.from("long_stay_applications").select("id, long_stay_id").in("long_stay_id", ids);
-        data?.forEach((a: any) => { counts[a.long_stay_id] = (counts[a.long_stay_id] || 0) + 1; });
-      }
+      const { data } = await supabase.from("applications").select("id, sit_id").in("sit_id", ids);
+      data?.forEach((a: any) => { counts[a.sit_id] = (counts[a.sit_id] || 0) + 1; });
       setAppCounts(counts);
     };
     fetchCounts();
-  }, [listings, filterType]);
+  }, [listings]);
 
   const handleHide = async (id: string) => {
-    const table = filterType === "sits" ? "sits" : "long_stays";
-    await supabase.from(table).update({ status: "cancelled" as any }).eq("id", id);
+    await supabase.from("sits").update({ status: "cancelled" as any }).eq("id", id);
     const listing = listings.find(l => l.id === id);
     if (listing?.owner) {
       await supabase.from("notifications").insert({
@@ -89,8 +79,7 @@ const AdminListings = () => {
   };
 
   const handleRestore = async (id: string) => {
-    const table = filterType === "sits" ? "sits" : "long_stays";
-    await supabase.from(table).update({ status: "published" as any }).eq("id", id);
+    await supabase.from("sits").update({ status: "published" as any }).eq("id", id);
     toast.success("Annonce remise en ligne"); fetchListings();
   };
 
@@ -100,7 +89,7 @@ const AdminListings = () => {
       const { data, error } = await supabase.functions.invoke("admin-delete-listing", {
         body: {
           listingId: id,
-          listingType: filterType,
+          listingType: "sits",
           ownerUserId: listing?.user_id ?? null,
           listingTitle: listing?.title ?? "Sans titre",
         },
@@ -123,7 +112,7 @@ const AdminListings = () => {
 
   const filtered = listings.filter((l) => {
     if (search && !l.title?.toLowerCase().includes(search.toLowerCase()) && !l.owner?.first_name?.toLowerCase().includes(search.toLowerCase())) return false;
-    if (filterCity && l.owner?.city !== filterCity) return false;
+    if (filterCity && filterCity !== "all_cities" && l.owner?.city !== filterCity) return false;
     return true;
   });
 
@@ -145,13 +134,6 @@ const AdminListings = () => {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input placeholder="Rechercher titre ou proprio…" value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9" />
         </div>
-        <Select value={filterType} onValueChange={(v) => setFilterType(v as any)}>
-          <SelectTrigger className="w-[160px]"><SelectValue /></SelectTrigger>
-          <SelectContent>
-            <SelectItem value="sits">Classique</SelectItem>
-            <SelectItem value="long_stays">Longue durée</SelectItem>
-          </SelectContent>
-        </Select>
         <Select value={filterStatus} onValueChange={setFilterStatus}>
           <SelectTrigger className="w-[160px]"><SelectValue /></SelectTrigger>
           <SelectContent>
@@ -184,7 +166,6 @@ const AdminListings = () => {
               <TableHead>Titre</TableHead>
               <TableHead>Proprio</TableHead>
               <TableHead>Ville</TableHead>
-              <TableHead>Type</TableHead>
               <TableHead>Dates</TableHead>
               <TableHead>Dernière activité</TableHead>
               <TableHead>Candidatures</TableHead>
@@ -194,9 +175,9 @@ const AdminListings = () => {
           </TableHeader>
           <TableBody>
             {loading ? (
-              <TableRow><TableCell colSpan={9} className="text-center py-8 text-muted-foreground">Chargement…</TableCell></TableRow>
+              <TableRow><TableCell colSpan={8} className="text-center py-8 text-muted-foreground">Chargement…</TableCell></TableRow>
             ) : filtered.length === 0 ? (
-              <TableRow><TableCell colSpan={9} className="text-center py-8 text-muted-foreground">Aucune annonce</TableCell></TableRow>
+              <TableRow><TableCell colSpan={8} className="text-center py-8 text-muted-foreground">Aucune annonce</TableCell></TableRow>
             ) : filtered.map((listing) => {
               const s = statusLabels[listing.status] || statusLabels.draft;
               return (
@@ -209,11 +190,6 @@ const AdminListings = () => {
                     </div>
                   </TableCell>
                   <TableCell className="text-sm text-muted-foreground">{listing.owner?.city || "—"}</TableCell>
-                  <TableCell>
-                    <Badge variant="outline" className="text-xs">
-                      {filterType === "sits" ? "Classique" : "Longue durée"}
-                    </Badge>
-                  </TableCell>
                   <TableCell className="text-sm text-muted-foreground whitespace-nowrap">
                     {listing.start_date ? format(new Date(listing.start_date), "d MMM", { locale: fr }) : "—"}
                     {" → "}

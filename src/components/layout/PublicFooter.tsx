@@ -23,7 +23,6 @@ const PublicFooter = React.forwardRef<HTMLElement>((_props, ref) => {
               <li><Link to="/actualites/parcs-chiens-lyon-guide-complet" className="font-body text-sm text-white/50 hover:text-white transition-colors">Parcs chiens Lyon</Link></li>
               <li><Link to="/actualites/parcs-balades-chiens-annecy-guide" className="font-body text-sm text-white/50 hover:text-white transition-colors">Parcs chiens Annecy</Link></li>
               <li><Link to="/actualites/parcs-balades-chiens-grenoble-guide" className="font-body text-sm text-white/50 hover:text-white transition-colors">Parcs chiens Grenoble</Link></li>
-              <li><Link to="/actualites/gardes-longue-duree-guide" className="font-body text-sm text-white/50 hover:text-white transition-colors">Gardes longue durée</Link></li>
             </ul>
           </div>
           <div>

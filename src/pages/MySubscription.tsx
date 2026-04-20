@@ -51,7 +51,6 @@ const FOUNDER_ADVANTAGES = [
   "Fiches races complètes",
   "Guides locaux détaillés",
   "Articles en accès complet",
-  "Gardes longue durée (+ frais de service)",
   "Écussons et métriques de fiabilité",
 ];
 
@@ -128,7 +127,6 @@ const PRE_LAUNCH_ADVANTAGES: { label: string; href: string | null }[] = [
   { label: "Fiches races complètes", href: "/actualites" },
   { label: "Guides locaux détaillés", href: "/guides" },
   { label: "Articles en accès complet", href: "/actualites" },
-  { label: "Gardes longue durée", href: null },
   { label: "Écussons et métriques", href: null },
 ];
 

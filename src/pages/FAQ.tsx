@@ -51,7 +51,6 @@ const FAQ = () => {
     "Pendant la garde": "Pendant la garde",
     "Confiance et sécurité": "Confiance & sécurité",
     "Gardien d'urgence": "Gardien d'urgence",
-    "Gardes longue durée": "Gardes longue durée",
     "Petites missions": "Petites missions",
     "Mon compte": "Mon compte",
   };
