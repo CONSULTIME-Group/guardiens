@@ -60,7 +60,7 @@ Deno.serve(async (req) => {
   // 1. Charger la conversation + contexte
   const { data: conv, error: convErr } = await supabase
     .from('conversations')
-    .select('id, owner_id, sitter_id, sit_id, small_mission_id, long_stay_id, context_type')
+    .select('id, owner_id, sitter_id, sit_id, small_mission_id, context_type')
     .eq('id', payload.conversation_id)
     .single()
 
@@ -127,9 +127,6 @@ Deno.serve(async (req) => {
     } else if (conv.small_mission_id) {
       const { data: m } = await supabase.from('small_missions').select('title').eq('id', conv.small_mission_id).maybeSingle()
       if (m?.title) contextLabel = `la mission « ${m.title} »`
-    } else if (conv.long_stay_id) {
-      const { data: ls } = await supabase.from('long_stays').select('title').eq('id', conv.long_stay_id).maybeSingle()
-      if (ls?.title) contextLabel = `votre garde longue durée « ${ls.title} »`
     }
   } catch (e) {
     console.warn('context_label_failed', { err: String(e) })
