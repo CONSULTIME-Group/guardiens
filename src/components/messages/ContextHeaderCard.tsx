@@ -36,8 +36,8 @@ const fmt = (d?: string | null) => {
 const ContextHeaderCard = ({ contextType, isOwner, sit, otherFirstName, otherCity }: Props) => {
   if (!contextType) return null;
 
-  // sit_application & long_stay → la carte annonce est déjà gérée par ConversationHeader
-  if (contextType === "sit_application" || contextType === "long_stay") return null;
+  // sit_application → la carte annonce est déjà gérée par ConversationHeader
+  if (contextType === "sit_application") return null;
 
   // mission_help → géré par les bannières mission existantes
   if (contextType === "mission_help") return null;

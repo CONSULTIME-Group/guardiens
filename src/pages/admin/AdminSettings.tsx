@@ -149,14 +149,6 @@ const AdminSettings = () => {
             <Separator />
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium">Frais longue durée</p>
-                <p className="text-xs text-muted-foreground">70 € de frais de service pour les gardes de 30+ jours.</p>
-              </div>
-              <Badge variant="secondary" className="text-xs">70 €</Badge>
-            </div>
-            <Separator />
-            <div className="flex items-center justify-between">
-              <div>
                 <p className="text-sm font-medium">Publication croisée des avis</p>
                 <p className="text-xs text-muted-foreground">
                   Les avis ne sont publiés que lorsque les deux parties ont déposé le leur.

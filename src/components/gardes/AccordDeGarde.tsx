@@ -315,19 +315,6 @@ export default function AccordDeGarde({ garde, role = "proprio", onClose }: Acco
           )}
         </div>
 
-        {/* Longue durée */}
-        {garde.estLongueDuree && (
-          <div>
-            <p className="font-semibold text-sm mb-2">Pour cette garde de plus de 30 jours</p>
-            <p className="text-sm">
-              Une contribution aux charges courantes peut avoir été convenue entre les parties en dehors de la plateforme. Cette contribution ne constitue pas un loyer au sens juridique et ne crée aucune relation locative.
-            </p>
-            {garde.contributionCharges != null && (
-              <p className="text-sm mt-1">Contribution convenue : {garde.contributionCharges}</p>
-            )}
-          </div>
-        )}
-
         {/* Nature de la garde */}
         <div>
           <p className="font-semibold text-sm mb-2">Ce que cette garde est vraiment</p>

@@ -18,15 +18,13 @@ export type ConversationContext =
   | "sitter_inquiry"    // proprio sonde un gardien (pas d'annonce)
   | "mission_help"      // gardien/voisin se propose sur une mission précise (small_mission_id requis)
   | "helper_inquiry"    // proprio sonde un aidant entraide hors mission précise
-  | "owner_pitch"       // gardien démarche un proprio (pitch spontané — bloqué par défaut)
-  | "long_stay";        // candidature à une garde longue durée (long_stay_id requis)
+  | "owner_pitch";      // gardien démarche un proprio (pitch spontané — bloqué par défaut)
 
 interface StartConversationOptions {
   otherUserId: string;
   context: ConversationContext;
   sitId?: string | null;
   smallMissionId?: string | null;
-  longStayId?: string | null;
 }
 
 interface StartConversationResult {
@@ -47,7 +45,7 @@ export async function startConversation(
       p_context_type: opts.context,
       p_sit_id: opts.sitId ?? null,
       p_small_mission_id: opts.smallMissionId ?? null,
-      p_long_stay_id: opts.longStayId ?? null,
+      p_long_stay_id: null,
     });
 
     if (error) {
@@ -128,10 +126,5 @@ export function buildFirstMessageDraft(args: {
       return `${greet}\n\nJe suis gardien(ne)${
         args.city ? ` à ${args.city}` : ""
       } et je vous contacte pour vous proposer mes services pour vos prochaines absences. N'hésitez pas à consulter mon profil.\n\nÀ bientôt !`;
-
-    case "long_stay":
-      return `${greet}\n\nVotre projet de garde longue durée${
-        args.sitTitle ? ` « ${args.sitTitle} »` : ""
-      } m'intéresse beaucoup. J'aimerais en discuter plus en détail avec vous.\n\nÀ très vite !`;
   }
 }

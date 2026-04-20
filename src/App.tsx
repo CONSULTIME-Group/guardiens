@@ -218,8 +218,9 @@ const AppRoutes = () => (
       <Route path="/petites-missions" element={<SmallMissionsRoute />} />
       <Route path="/petites-missions/creer" element={<ProtectedRoute><CreateSmallMission /></ProtectedRoute>} />
       <Route path="/petites-missions/:id" element={<SmallMissionDetail />} />
-      {/* Long stays : pas de page detail publique — redirige vers la liste où l'utilisateur les retrouve */}
+      {/* Legacy: garde longue durée supprimée — redirige vers la liste */}
       <Route path="/long-stays/:id" element={<Navigate to="/sits" replace />} />
+      <Route path="/actualites/gardes-longue-duree-guide" element={<Navigate to="/actualites" replace />} />
       <Route path="/profil/:id" element={<RedirectProfil />} />
       <Route path="/proprietaires/:id" element={<RedirectProprietaire />} />
       <Route path="/annonces/:id" element={<PublicSitDetail />} />
