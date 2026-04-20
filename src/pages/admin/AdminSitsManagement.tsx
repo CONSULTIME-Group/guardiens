@@ -249,9 +249,9 @@ const AdminSitsManagement = () => {
           </TableHeader>
           <TableBody>
             {loading ? (
-              <TableRow><TableCell colSpan={10} className="text-center py-8 text-muted-foreground">Chargement…</TableCell></TableRow>
+              <TableRow><TableCell colSpan={9} className="text-center py-8 text-muted-foreground">Chargement…</TableCell></TableRow>
             ) : filtered.length === 0 ? (
-              <TableRow><TableCell colSpan={10} className="text-center py-8 text-muted-foreground">Aucune garde</TableCell></TableRow>
+              <TableRow><TableCell colSpan={9} className="text-center py-8 text-muted-foreground">Aucune garde</TableCell></TableRow>
             ) : filtered.map((sit) => {
               const timing = getTimingStatus(sit);
               const sitter = sitters[sit.id];
@@ -259,7 +259,7 @@ const AdminSitsManagement = () => {
               const isOverdue = sit.status === "confirmed" && sit.end_date && isPast(new Date(sit.end_date));
               return (
                 <TableRow
-                  key={`${sit._type}-${sit.id}`}
+                  key={sit.id}
                   className={`transition-colors hover:bg-muted/50 ${isOverdue ? "bg-orange-50/50" : ""}`}
                 >
                   <TableCell className="font-medium max-w-[160px] truncate">{sit.title || "Sans titre"}</TableCell>
@@ -286,17 +286,10 @@ const AdminSitsManagement = () => {
                   <TableCell className="text-sm text-muted-foreground whitespace-nowrap">
                     {sit.updated_at ? formatDistanceToNow(new Date(sit.updated_at), { addSuffix: true, locale: fr }) : "—"}
                   </TableCell>
-                  <TableCell>
-                    <Badge variant="outline" className="text-xs">{sit._type === "sit" ? "Classique" : "Longue durée"}</Badge>
-                  </TableCell>
                   <TableCell><Badge variant={timing.variant}>{timing.label}</Badge></TableCell>
                   <TableCell className="text-xs">
-                    {sit._type === "sit" ? (
-                      <>
-                        <div>P: {rev.owner ? "✅" : "❌"}</div>
-                        <div>G: {rev.sitter ? "✅" : "❌"}</div>
-                      </>
-                    ) : "—"}
+                    <div>P: {rev.owner ? "✅" : "❌"}</div>
+                    <div>G: {rev.sitter ? "✅" : "❌"}</div>
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-1">
@@ -406,9 +399,6 @@ const AdminSitsManagement = () => {
                     <div className="flex items-center gap-2">
                       <Badge variant={getTimingStatus(selectedSit).variant}>
                         {getTimingStatus(selectedSit).label}
-                      </Badge>
-                      <Badge variant="outline" className="text-xs">
-                        {selectedSit._type === "sit" ? "Classique" : "Longue durée"}
                       </Badge>
                     </div>
                   </div>
