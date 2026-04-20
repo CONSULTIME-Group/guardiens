@@ -563,6 +563,8 @@ const SearchSitter = () => {
     if (sortBy === "closest") sorted.sort((a, b) => (a.distance ?? 9999) - (b.distance ?? 9999));
     else if (sortBy === "recent") sorted.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
     else if (sortBy === "rating") sorted.sort((a, b) => parseFloat(b.avgRating || "0") - parseFloat(a.avgRating || "0"));
+    // Always push assigned (greyed-out) sits to the bottom, regardless of sort
+    sorted.sort((a, b) => Number(!!a.isAssigned) - Number(!!b.isAssigned));
     return sorted;
   };
 
