@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Lock, User, Star } from "lucide-react";
+import { Lock, User, Star, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { useAuth } from "@/contexts/AuthContext";
@@ -10,9 +10,13 @@ interface AccessGateBannerProps {
   profileCompletion: number;
   /** "mission" | "guard" — changes the wording */
   context?: "mission" | "guard";
+  /** Si true, affiche le bandeau de recommandation ID au level 2.
+   *  Par défaut false : la vérification n'étant plus bloquante,
+   *  on n'affiche plus de bandeau gênant — on utilise un encart léger ailleurs. */
+  showIdentityRecommendation?: boolean;
 }
 
-const AccessGateBanner = ({ level, profileCompletion, context = "guard" }: AccessGateBannerProps) => {
+const AccessGateBanner = ({ level, profileCompletion, context = "guard", showIdentityRecommendation = false }: AccessGateBannerProps) => {
   const { user, activeRole } = useAuth();
   const profilePath = (user?.role === "both" ? activeRole : user?.role) === "owner" ? "/owner-profile" : "/profile";
   if (level === 0) {
@@ -75,26 +79,29 @@ const AccessGateBanner = ({ level, profileCompletion, context = "guard" }: Acces
     );
   }
 
-  if (level === 2) {
+  // Level 2 = ID non vérifié. La vérification est désormais NON-BLOQUANTE.
+  // On n'affiche un bandeau qu'à la demande explicite (`showIdentityRecommendation`),
+  // et il prend la forme d'une recommandation douce, jamais d'un blocage.
+  if (level === 2 && showIdentityRecommendation) {
     return (
       <div
-        className="rounded-lg p-5 space-y-3"
+        className="rounded-lg p-4 space-y-2"
         style={{
           backgroundColor: "hsl(40 33% 96%)",
           borderLeft: "3px solid hsl(153 42% 30%)",
         }}
       >
         <div className="flex items-start gap-3">
-          <Lock className="h-5 w-5 text-primary mt-0.5 shrink-0" />
-          <div className="space-y-2">
-            <p className="font-semibold text-[15px] text-foreground">
-              Une dernière étape
+          <ShieldCheck className="h-5 w-5 text-primary mt-0.5 shrink-0" />
+          <div className="space-y-2 w-full">
+            <p className="font-semibold text-[14px] text-foreground">
+              Recommandé : vérifiez votre identité
             </p>
-            <p className="text-sm text-muted-foreground">
-              Vérifiez votre identité pour postuler aux missions et publier des annonces.
+            <p className="text-xs text-muted-foreground">
+              Les profils vérifiés inspirent davantage confiance et sont contactés bien plus souvent. Cela ne prend qu'une minute.
             </p>
-            <Button size="sm" asChild>
-              <Link to="/settings">Vérifier mon identité →</Link>
+            <Button size="sm" variant="outline" asChild>
+              <Link to="/profile?focus=identite">Vérifier mon identité</Link>
             </Button>
           </div>
         </div>
