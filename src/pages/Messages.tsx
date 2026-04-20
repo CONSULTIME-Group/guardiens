@@ -431,6 +431,27 @@ const Messages = () => {
     loadMessages(activeConv.id);
   }, [activeConv, loadMessages]);
 
+  // Pré-remplir le 1er message selon le contexte si conv vide et input vide
+  useEffect(() => {
+    if (!activeConv || !user) return;
+    if (newMessage.trim() !== "") return;
+    const userMsgs = messages.filter(m => !m.is_system && m.sender_id === user.id);
+    if (userMsgs.length > 0) return;
+    const ctx = (activeConv.context_type || "sitter_inquiry") as ConversationContext;
+    const sitDates = activeConv.sit?.start_date && activeConv.sit?.end_date
+      ? `${new Date(activeConv.sit.start_date).toLocaleDateString("fr-FR")} → ${new Date(activeConv.sit.end_date).toLocaleDateString("fr-FR")}`
+      : null;
+    const draft = buildFirstMessageDraft({
+      context: ctx,
+      recipientFirstName: activeConv.other_user?.first_name,
+      city: activeConv.other_user?.city,
+      sitTitle: activeConv.sit?.title || null,
+      sitDates,
+    });
+    setNewMessage(draft);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeConv?.id, messages.length]);
+
   // Realtime
   useEffect(() => {
     if (!activeConv) return;
