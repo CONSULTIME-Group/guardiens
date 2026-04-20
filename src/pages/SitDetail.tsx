@@ -780,13 +780,14 @@ const SitDetail = () => {
               <Button className="w-full h-12 text-base font-semibold" disabled>
                 Candidatures en cours d'analyse
               </Button>
-            ) : (accessLevel === 1 || accessLevel === 2) ? (
+            ) : accessLevel === 1 ? (
               <AccessGateBanner level={accessLevel} profileCompletion={profileCompletion} context="guard" />
             ) : hasApplied ? (
               <Button className="w-full h-12 text-base font-semibold" disabled>
                 <CheckCircle2 className="h-5 w-5 mr-2" /> Candidature envoyée ✓
               </Button>
             ) : !canApplyGuards ? (
+              // Sitter sans abonnement (3A) — gardes verrouillées par l'abonnement, pas par l'ID
               <AccessGateBanner level="3A" profileCompletion={profileCompletion} context="guard" />
             ) : (
               <Button className="w-full h-12 text-base font-semibold" onClick={() => setApplyOpen(true)}>
