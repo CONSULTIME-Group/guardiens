@@ -360,15 +360,22 @@ const SearchSitter = () => {
   };
 
   const searchSits = async (searchCoords: { lat: number; lng: number } | null) => {
+    // Show published + assigned (confirmed/in_progress) so members see "Gardiennage attribué" cards
+    // Completed sits are excluded — they belong to history, not the public search
     let query = supabase
       .from("sits")
       .select("*, owner:profiles!sits_user_id_fkey(first_name, avatar_url, city, postal_code, identity_verified, is_founder), property:properties!sits_property_id_fkey(type, environment, photos)")
-      .eq("status", "published")
+      .in("status", ["published", "confirmed", "in_progress"])
       .order("created_at", { ascending: false });
     if (startDate) query = query.gte("end_date", startDate);
     if (endDate) query = query.lte("start_date", endDate);
     const { data } = await query;
     let items = data || [];
+    // Mark assigned sits (will be rendered greyed-out, non-clickable)
+    items = items.map((s: any) => ({
+      ...s,
+      isAssigned: s.status === "confirmed" || s.status === "in_progress",
+    }));
     if (housingType !== "all") items = items.filter((s: any) => s.property?.type === housingType);
     if (withPhotosOnly) items = items.filter((s: any) => s.property?.photos?.length > 0);
     if (duration !== "all") {
