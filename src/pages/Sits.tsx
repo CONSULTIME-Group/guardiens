@@ -786,13 +786,18 @@ const QuickActions = ({
 
     return (
       <>
-        <button
-          onClick={() => sit.conversationId && navigate(`/messages?c=${sit.conversationId}`)}
-          className={cn(btnClass, "bg-primary/10 text-primary hover:bg-primary/20", !sit.conversationId && "opacity-50 cursor-not-allowed")}
-          disabled={!sit.conversationId}
-        >
-          <MessageCircle className="h-3.5 w-3.5" /> Message
-        </button>
+        {sit.conversationId ? (
+          <Link
+            to={`/messages?c=${sit.conversationId}`}
+            className={cn(btnClass, "bg-primary/10 text-primary hover:bg-primary/20")}
+          >
+            <MessageCircle className="h-3.5 w-3.5" /> Message
+          </Link>
+        ) : (
+          <span className={cn(btnClass, "bg-primary/10 text-primary opacity-50 cursor-not-allowed")}>
+            <MessageCircle className="h-3.5 w-3.5" /> Message
+          </span>
+        )}
 
         {!guideExists ? (
           <span className={cn(btnClass, "border border-border text-muted-foreground cursor-default")}>
