@@ -35,6 +35,7 @@ const Login = () => {
       const msg = error.message;
       if (msg === "Invalid login credentials") {
         setPasswordError("Email ou mot de passe incorrect.");
+        setFailedAttempts((n) => n + 1);
       } else if (msg === "Email not confirmed") {
         const handleResend = async () => {
           const { error: resendError } = await supabase.auth.resend({
