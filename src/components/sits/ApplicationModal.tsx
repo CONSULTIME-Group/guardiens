@@ -152,6 +152,29 @@ const ApplicationModal = ({
           <DialogDescription>Le propriétaire verra votre profil ci-dessous en plus de votre message.</DialogDescription>
         </DialogHeader>
 
+        {identityRecommended && (
+          <div
+            className="rounded-lg p-3 flex items-start gap-2.5 mt-1"
+            style={{
+              backgroundColor: "hsl(40 33% 96%)",
+              borderLeft: "3px solid hsl(153 42% 30%)",
+            }}
+          >
+            <ShieldCheck className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+            <div className="space-y-1 flex-1">
+              <p className="text-xs font-semibold text-foreground">
+                Conseil — vérifiez votre identité pour être plus souvent retenu
+              </p>
+              <p className="text-xs text-muted-foreground">
+                Les propriétaires acceptent en priorité les profils vérifiés. Vous pouvez postuler dès maintenant et vérifier votre identité plus tard.
+              </p>
+              <Link to="/profile?focus=identite" className="text-xs text-primary font-medium hover:underline inline-block mt-0.5">
+                Vérifier mon identité (1 min) →
+              </Link>
+            </div>
+          </div>
+        )}
+
         <div className="grid md:grid-cols-[1fr_220px] gap-4">
           {/* Left: message */}
           <div className="space-y-3">
