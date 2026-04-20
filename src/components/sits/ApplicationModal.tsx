@@ -1,11 +1,13 @@
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { useAccessLevel } from "@/hooks/useAccessLevel";
 import { toast } from "@/hooks/use-toast";
-import { Send, Star, MapPin, Shield, CheckCircle2, Calendar } from "lucide-react";
+import { Send, Star, MapPin, Shield, ShieldCheck, CheckCircle2, Calendar } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -28,6 +30,7 @@ const ApplicationModal = ({
   petNames, city, startDate, endDate, onSuccess,
 }: ApplicationModalProps) => {
   const { user } = useAuth();
+  const { identityRecommended } = useAccessLevel();
   const animalText = petNames.length > 0 ? petNames.join(", ") : "vos animaux";
   const defaultMessage = `Bonjour ${ownerFirstName || ""},\n\nVotre annonce pour ${animalText} à ${city || "votre ville"} m'intéresse beaucoup.\n\n\n\nJe serais disponible du ${startDate} au ${endDate}.`;
 
