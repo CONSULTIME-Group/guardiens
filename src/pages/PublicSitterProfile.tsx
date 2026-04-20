@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import FounderBadge from "@/components/badges/FounderBadge";
-import { useParams, Link, useSearchParams } from "react-router-dom";
+import { useParams, Link, useSearchParams, useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
