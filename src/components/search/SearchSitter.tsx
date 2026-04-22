@@ -65,7 +65,11 @@ const SearchSitter = () => {
   const [availableMembers, setAvailableMembers] = useState<any[]>([]);
   const [city, setCity] = useState("");
   const [radius, setRadius] = useState([15]);
-  const [zoneMode, setZoneMode] = useState<ZoneMode>("radius");
+  const [zoneMode, setZoneMode] = useState<ZoneMode>(() => {
+    if (typeof window === "undefined") return "radius";
+    const saved = localStorage.getItem("search.zoneMode");
+    return saved === "radius" || saved === "dept" || saved === "region" || saved === "france" ? saved : "radius";
+  });
   const [densityCounts, setDensityCounts] = useState<{ radius: number; dept: number; region: number; france: number }>({ radius: 0, dept: 0, region: 0, france: 0 });
   const [userPostalCode, setUserPostalCode] = useState<string | null>(null);
   const [startDate, setStartDate] = useState("");
@@ -229,6 +233,12 @@ const SearchSitter = () => {
   useEffect(() => {
     setAlertCreated(false);
   }, [city, radius]);
+
+  // Persist zone mode preference for next visit
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    try { localStorage.setItem("search.zoneMode", zoneMode); } catch { /* ignore quota */ }
+  }, [zoneMode]);
 
   // Compute cross-tab count + global launch count when results are empty
   useEffect(() => {
