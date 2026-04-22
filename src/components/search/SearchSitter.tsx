@@ -1233,6 +1233,35 @@ const SearchSitter = () => {
         </div>
       )}
 
+      {/* ─── Out-of-zone banner (proéminent quand des annonces existent hors du rayon) ─── */}
+      {tab === "sits" && !loading && userPostalCode && zoneMode !== "france" && densityCounts.france > densityCounts.radius && (
+        <div className="mx-6 mt-4 rounded-xl border border-primary/30 bg-primary/5 p-3 sm:p-4 flex items-start sm:items-center gap-3 flex-col sm:flex-row">
+          <div className="flex items-start gap-3 flex-1 min-w-0">
+            <div className="h-9 w-9 rounded-full bg-primary/15 flex items-center justify-center shrink-0">
+              <MapPin className="h-4 w-4 text-primary" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="font-medium text-sm text-foreground">
+                {densityCounts.france - densityCounts.radius} annonce{densityCounts.france - densityCounts.radius > 1 ? "s" : ""} hors de votre zone
+              </p>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Élargissez la recherche pour les voir, ou créez une alerte pour ne rien rater près de chez vous.
+              </p>
+            </div>
+          </div>
+          <div className="flex flex-wrap gap-2 shrink-0 w-full sm:w-auto">
+            {densityCounts.region > densityCounts.radius && (
+              <Button size="sm" variant="outline" onClick={() => { trackEvent("search_empty_action", { source: "search_outofzone", metadata: { action: "expand_zone", to: "region" } }); setZoneMode("region"); }}>
+                Ma région ({densityCounts.region})
+              </Button>
+            )}
+            <Button size="sm" onClick={() => { trackEvent("search_empty_action", { source: "search_outofzone", metadata: { action: "expand_zone", to: "france" } }); setZoneMode("france"); }}>
+              Toute la France ({densityCounts.france})
+            </Button>
+          </div>
+        </div>
+      )}
+
       {/* ─── No city warning ─── */}
       {!userCity && (
         <div className="mx-6 mt-4 bg-accent border border-border rounded-lg p-3 text-sm">
