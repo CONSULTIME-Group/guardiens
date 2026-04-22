@@ -1261,6 +1261,28 @@ const SearchSitter = () => {
             <Button size="sm" className="shadow-sm" onClick={() => { trackEvent("search_empty_action", { source: "search_outofzone", metadata: { action: "expand_zone", to: "france" } }); setZoneMode("france"); }}>
               Toute la France ({densityCounts.france})
             </Button>
+            {city && (
+              <Button
+                size="sm"
+                variant={alertCreated ? "secondary" : "outline"}
+                className="bg-card gap-1.5"
+                disabled={isCreatingAlert || alertCreated}
+                onClick={() => {
+                  trackEvent("search_empty_action", { source: "search_outofzone", metadata: { action: "create_alert", city, radius_km: radius[0] } });
+                  if (alertCreated) navigate("/settings");
+                  else handleCreateAlert();
+                }}
+              >
+                {isCreatingAlert ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : alertCreated ? (
+                  <BellRing className="h-4 w-4" />
+                ) : (
+                  <Bell className="h-4 w-4" />
+                )}
+                {isCreatingAlert ? "Création…" : alertCreated ? "Alerte créée" : `Alerte ${radius[0]} km`}
+              </Button>
+            )}
           </div>
         </div>
       )}
