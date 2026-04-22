@@ -15,6 +15,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Link } from "react-router-dom";
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
+import { hasMedication } from "@/lib/medication";
 
 interface PropertySummary {
   id: string;
@@ -496,7 +497,7 @@ const CreateSit = () => {
                       {[
                         pet.walk_duration && pet.walk_duration !== "none" ? walkLabels[pet.walk_duration] + " de balade" : null,
                         pet.alone_duration ? aloneLabels[pet.alone_duration] : null,
-                        pet.medication ? "Médication" : "Pas de médication",
+                        hasMedication(pet.medication) ? "Médication" : null,
                       ].filter(Boolean).join(" · ")}
                     </p>
                   </div>

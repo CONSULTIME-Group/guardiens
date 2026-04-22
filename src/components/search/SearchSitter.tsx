@@ -1327,7 +1327,9 @@ const SearchSitter = () => {
                   {tab === "sits" ? "Pas encore d'annonce de garde dans votre zone" : "Pas encore de mission dans votre zone"}
                 </h3>
                 <p className="text-sm text-muted-foreground max-w-md mx-auto">
-                  La communauté grandit chaque jour. Voici comment ne rien rater et tirer profit de votre temps dès maintenant.
+                  {densityCounts.france > 0
+                    ? `Mais ${densityCounts.france} ${tab === "sits" ? "annonce" : "mission"}${densityCounts.france > 1 ? "s sont publiées" : " est publiée"} ailleurs en France. Élargissez la zone ou créez une alerte pour ne rien rater près de chez vous.`
+                    : "La communauté grandit chaque jour. Voici comment ne rien rater et tirer profit de votre temps dès maintenant."}
                 </p>
               </div>
 

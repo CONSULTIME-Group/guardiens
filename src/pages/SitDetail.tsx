@@ -23,6 +23,7 @@ import VerifiedBadge from "@/components/profile/VerifiedBadge";
 import LocationProfileCard from "@/components/location/LocationProfileCard";
 import { useToast } from "@/hooks/use-toast";
 import { geocodeCity } from "@/lib/geocode";
+import { hasMedication } from "@/lib/medication";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const envLabels: Record<string, string> = {
@@ -502,7 +503,7 @@ const SitDetail = () => {
                         {pet.alone_duration && (
                           <span className="px-2 py-0.5 rounded-full bg-accent text-xs">🕐 {aloneLabels[pet.alone_duration]}</span>
                         )}
-                        {pet.medication && (
+                        {hasMedication(pet.medication) && (
                           <span className="px-2 py-0.5 rounded-full bg-destructive/10 text-destructive text-xs">💊 Médication</span>
                         )}
                       </div>
