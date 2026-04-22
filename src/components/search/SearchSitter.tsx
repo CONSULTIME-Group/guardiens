@@ -240,6 +240,32 @@ const SearchSitter = () => {
     try { localStorage.setItem("search.zoneMode", zoneMode); } catch { /* ignore quota */ }
   }, [zoneMode]);
 
+  // Track out-of-zone banner impression (déduplique par tab+zoneMode dans la session)
+  const outOfZoneTrackedRef = useRef<Set<string>>(new Set());
+  useEffect(() => {
+    if (loading || tab !== "sits" || !userPostalCode || zoneMode === "france") return;
+    const delta = densityCounts.france - densityCounts.radius;
+    if (delta <= 0) return;
+    const key = `${tab}|${zoneMode}|${delta}`;
+    if (outOfZoneTrackedRef.current.has(key)) return;
+    outOfZoneTrackedRef.current.add(key);
+    trackEvent("search_outofzone_impression", {
+      source: "search_outofzone",
+      metadata: {
+        tab,
+        zone_mode: zoneMode,
+        radius_km: radius[0],
+        count_radius: densityCounts.radius,
+        count_dept: densityCounts.dept,
+        count_region: densityCounts.region,
+        count_france: densityCounts.france,
+        delta,
+        has_local: densityCounts.radius > 0,
+        city: city || null,
+      },
+    });
+  }, [loading, tab, zoneMode, userPostalCode, densityCounts, radius, city]);
+
   // Compute cross-tab count + global launch count when results are empty
   useEffect(() => {
     if (loading || results.length > 0) {
