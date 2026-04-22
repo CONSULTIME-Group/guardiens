@@ -1251,11 +1251,11 @@ const SearchSitter = () => {
           </div>
           <div className="flex flex-wrap gap-2 shrink-0 w-full sm:w-auto">
             {densityCounts.region > densityCounts.radius && (
-              <Button size="sm" variant="outline" onClick={() => { trackEvent("search_outofzone_action", { source: "search_outofzone", metadata: { action: "expand_zone", to: "region" } }); setZoneMode("region"); }}>
+              <Button size="sm" variant="outline" onClick={() => { trackEvent("search_empty_action", { source: "search_outofzone", metadata: { action: "expand_zone", to: "region" } }); setZoneMode("region"); }}>
                 Ma région ({densityCounts.region})
               </Button>
             )}
-            <Button size="sm" onClick={() => { trackEvent("search_outofzone_action", { source: "search_outofzone", metadata: { action: "expand_zone", to: "france" } }); setZoneMode("france"); }}>
+            <Button size="sm" onClick={() => { trackEvent("search_empty_action", { source: "search_outofzone", metadata: { action: "expand_zone", to: "france" } }); setZoneMode("france"); }}>
               Toute la France ({densityCounts.france})
             </Button>
           </div>
