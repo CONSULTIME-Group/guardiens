@@ -502,7 +502,7 @@ const SitDetail = () => {
                         {pet.alone_duration && (
                           <span className="px-2 py-0.5 rounded-full bg-accent text-xs">🕐 {aloneLabels[pet.alone_duration]}</span>
                         )}
-                        {pet.medication && (
+                        {hasMedication(pet.medication) && (
                           <span className="px-2 py-0.5 rounded-full bg-destructive/10 text-destructive text-xs">💊 Médication</span>
                         )}
                       </div>

@@ -496,7 +496,7 @@ const CreateSit = () => {
                       {[
                         pet.walk_duration && pet.walk_duration !== "none" ? walkLabels[pet.walk_duration] + " de balade" : null,
                         pet.alone_duration ? aloneLabels[pet.alone_duration] : null,
-                        pet.medication ? "Médication" : "Pas de médication",
+                        hasMedication(pet.medication) ? "Médication" : null,
                       ].filter(Boolean).join(" · ")}
                     </p>
                   </div>
