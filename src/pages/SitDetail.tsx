@@ -23,6 +23,7 @@ import VerifiedBadge from "@/components/profile/VerifiedBadge";
 import LocationProfileCard from "@/components/location/LocationProfileCard";
 import { useToast } from "@/hooks/use-toast";
 import { geocodeCity } from "@/lib/geocode";
+import { hasMedication } from "@/lib/medication";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const envLabels: Record<string, string> = {
