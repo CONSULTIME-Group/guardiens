@@ -240,6 +240,32 @@ const SearchSitter = () => {
     try { localStorage.setItem("search.zoneMode", zoneMode); } catch { /* ignore quota */ }
   }, [zoneMode]);
 
+  // Track out-of-zone banner impression (déduplique par tab+zoneMode dans la session)
+  const outOfZoneTrackedRef = useRef<Set<string>>(new Set());
+  useEffect(() => {
+    if (loading || tab !== "sits" || !userPostalCode || zoneMode === "france") return;
+    const delta = densityCounts.france - densityCounts.radius;
+    if (delta <= 0) return;
+    const key = `${tab}|${zoneMode}|${delta}`;
+    if (outOfZoneTrackedRef.current.has(key)) return;
+    outOfZoneTrackedRef.current.add(key);
+    trackEvent("search_outofzone_impression", {
+      source: "search_outofzone",
+      metadata: {
+        tab,
+        zone_mode: zoneMode,
+        radius_km: radius[0],
+        count_radius: densityCounts.radius,
+        count_dept: densityCounts.dept,
+        count_region: densityCounts.region,
+        count_france: densityCounts.france,
+        delta,
+        has_local: densityCounts.radius > 0,
+        city: city || null,
+      },
+    });
+  }, [loading, tab, zoneMode, userPostalCode, densityCounts, radius, city]);
+
   // Compute cross-tab count + global launch count when results are empty
   useEffect(() => {
     if (loading || results.length > 0) {
@@ -1309,11 +1335,17 @@ const SearchSitter = () => {
             </div>
             <div className="flex flex-wrap gap-2 shrink-0 w-full sm:w-auto">
               {densityCounts.region > densityCounts.radius && (
-                <Button size="sm" variant="outline" className="bg-card" onClick={() => { trackEvent("search_empty_action", { source: "search_outofzone", metadata: { action: "expand_zone", to: "region", has_local: hasLocal } }); setZoneMode("region"); }}>
+                <Button size="sm" variant="outline" className="bg-card" onClick={() => {
+                  trackEvent("search_outofzone_click", { source: "search_outofzone", metadata: { action: "expand_zone", to: "region", previous_mode: zoneMode, delta: elsewhere, count_radius: densityCounts.radius, count_region: densityCounts.region, count_france: densityCounts.france, has_local: hasLocal } });
+                  setZoneMode("region");
+                }}>
                   Ma région ({densityCounts.region})
                 </Button>
               )}
-              <Button size="sm" variant={hasLocal ? "outline" : "default"} className={hasLocal ? "bg-card" : "shadow-sm"} onClick={() => { trackEvent("search_empty_action", { source: "search_outofzone", metadata: { action: "expand_zone", to: "france", has_local: hasLocal } }); setZoneMode("france"); }}>
+              <Button size="sm" variant={hasLocal ? "outline" : "default"} className={hasLocal ? "bg-card" : "shadow-sm"} onClick={() => {
+                trackEvent("search_outofzone_click", { source: "search_outofzone", metadata: { action: "expand_zone", to: "france", previous_mode: zoneMode, delta: elsewhere, count_radius: densityCounts.radius, count_region: densityCounts.region, count_france: densityCounts.france, has_local: hasLocal } });
+                setZoneMode("france");
+              }}>
                 Toute la France ({densityCounts.france})
               </Button>
               {city && (
@@ -1323,7 +1355,7 @@ const SearchSitter = () => {
                   className="bg-card gap-1.5"
                   disabled={isCreatingAlert || alertCreated}
                   onClick={() => {
-                    trackEvent("search_empty_action", { source: "search_outofzone", metadata: { action: "create_alert", city, radius_km: radius[0], has_local: hasLocal } });
+                    trackEvent("search_outofzone_click", { source: "search_outofzone", metadata: { action: "create_alert", previous_mode: zoneMode, city, radius_km: radius[0], delta: elsewhere, has_local: hasLocal } });
                     if (alertCreated) navigate("/settings");
                     else handleCreateAlert();
                   }}

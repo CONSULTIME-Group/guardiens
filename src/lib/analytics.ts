@@ -14,7 +14,9 @@ export type EventType =
   | "cta_click"
   | "login_completed"
   | "cp_recovered"
-  | "search_empty_action";
+  | "search_empty_action"
+  | "search_outofzone_impression"
+  | "search_outofzone_click";
 
 interface TrackOptions {
   source?: string;
