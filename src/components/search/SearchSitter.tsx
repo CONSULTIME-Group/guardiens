@@ -234,6 +234,12 @@ const SearchSitter = () => {
     setAlertCreated(false);
   }, [city, radius]);
 
+  // Persist zone mode preference for next visit
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    try { localStorage.setItem("search.zoneMode", zoneMode); } catch { /* ignore quota */ }
+  }, [zoneMode]);
+
   // Compute cross-tab count + global launch count when results are empty
   useEffect(() => {
     if (loading || results.length > 0) {
