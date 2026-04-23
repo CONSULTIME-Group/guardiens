@@ -40,7 +40,7 @@ function TierRing({ tier, r }: { tier: BadgeTier; r: number }) {
   return <circle cx="26" cy="26" r={r} fill="none" stroke={t.stroke} strokeWidth={t.width} />
 }
 
-export const BadgeSceau = forwardRef<HTMLDivElement, BadgeSceauProps>(function BadgeSceau({
+export const BadgeSceau = forwardRef<HTMLButtonElement, BadgeSceauProps>(function BadgeSceau({
   id,
   count = 1,
   active,
@@ -57,7 +57,7 @@ export const BadgeSceau = forwardRef<HTMLDivElement, BadgeSceauProps>(function B
 
   if (!def) {
     return (
-      <div ref={ref} className={className}>
+      <div className={className} aria-hidden="true">
         <svg width={sz} height={sz} viewBox="0 0 52 52">
           <circle cx="26" cy="26" r="22" fill="hsl(var(--muted))" />
         </svg>
