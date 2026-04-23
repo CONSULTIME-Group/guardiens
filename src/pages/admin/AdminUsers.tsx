@@ -218,6 +218,8 @@ const AdminUsers = () => {
       navigate(`/messages?conversation=${convId}`);
     }
   };
+
+  return (
     <div className="space-y-6">
       <h1 className="font-body text-2xl font-bold">Utilisateurs</h1>
 
