@@ -78,7 +78,7 @@ export const BadgeSceau = forwardRef<HTMLButtonElement, BadgeSceauProps>(functio
 
   const svgElement = (
     <button
-      ref={ref as React.Ref<HTMLButtonElement>}
+      ref={ref}
       type="button"
       aria-label={accessibleLabel}
       aria-haspopup="dialog"
