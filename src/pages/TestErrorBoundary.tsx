@@ -104,6 +104,31 @@ const SCENARIOS: Array<{
 const TestErrorBoundary = () => {
   const [scenario, setScenario] = useState<Scenario>("none");
   const [resetKey, setResetKey] = useState(0);
+  const [snapshot, setSnapshot] = useState<{
+    topCount: number | null;
+    bottomCount: number | null;
+    topMounts: number | null;
+    bottomMounts: number | null;
+  } | null>(null);
+
+  const readWitnessState = () => {
+    const get = (id: string) => {
+      const el = document.querySelector<HTMLElement>(`[data-testid="${id}"]`);
+      const n = el ? Number(el.textContent) : NaN;
+      return Number.isFinite(n) ? n : null;
+    };
+    return {
+      topCount: get("witness-top-count"),
+      bottomCount: get("witness-bottom-count"),
+      topMounts: get("witness-top-mounts"),
+      bottomMounts: get("witness-bottom-mounts"),
+    };
+  };
+
+  const triggerScenario = (key: Exclude<Scenario, "none">) => {
+    setSnapshot(readWitnessState());
+    setScenario(key);
+  };
 
   const renderScenario = () => {
     switch (scenario) {
@@ -122,6 +147,37 @@ const TestErrorBoundary = () => {
         );
     }
   };
+
+  // Vérification : on relit l'état des témoins après chaque crash et on compare
+  // au snapshot pris juste avant. Si counts/mounts sont identiques, l'isolation
+  // a fonctionné et l'état React des témoins a été préservé.
+  const verification = (() => {
+    if (!snapshot || scenario === "none") return null;
+    const current = readWitnessState();
+    const checks = [
+      {
+        label: "Compteur témoin haut préservé",
+        ok: current.topCount === snapshot.topCount,
+        detail: `${snapshot.topCount} → ${current.topCount}`,
+      },
+      {
+        label: "Compteur témoin bas préservé",
+        ok: current.bottomCount === snapshot.bottomCount,
+        detail: `${snapshot.bottomCount} → ${current.bottomCount}`,
+      },
+      {
+        label: "Témoin haut non remonté",
+        ok: current.topMounts === snapshot.topMounts,
+        detail: `${snapshot.topMounts} → ${current.topMounts} montage(s)`,
+      },
+      {
+        label: "Témoin bas non remonté",
+        ok: current.bottomMounts === snapshot.bottomMounts,
+        detail: `${snapshot.bottomMounts} → ${current.bottomMounts} montage(s)`,
+      },
+    ];
+    return { checks, allOk: checks.every((c) => c.ok) };
+  })();
 
   return (
     <main className="min-h-screen bg-background p-6">
