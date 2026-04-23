@@ -8,9 +8,9 @@ const calculateProrata = () => {
   const now = new Date();
   const nextMonth = now.getMonth() + 1;
   const monthsRemaining = Math.max(0, 12 - nextMonth);
-  const fullPrice = monthsRemaining * 9;
-  const discountedPrice = Math.round(fullPrice * 0.8);
-  const savings = fullPrice - discountedPrice;
+  const fullPrice = monthsRemaining * 6.99;
+  const discountedPrice = Math.round(fullPrice * 0.8 * 100) / 100;
+  const savings = Math.round((fullPrice - discountedPrice) * 100) / 100;
   return { months: monthsRemaining, price: discountedPrice, savings };
 };
 
@@ -59,7 +59,7 @@ export default function PricingCardsCheckout() {
         <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground text-xs px-3 py-0.5 rounded-full font-medium font-body z-10">Le plus choisi</span>
         <div className="bg-card border-2 border-primary rounded-xl p-5 flex flex-col flex-1">
           <p className="font-heading text-lg font-semibold mb-2">Mois après mois</p>
-          <p className="mb-1"><span className="text-3xl font-heading font-bold">9€</span><span className="text-sm text-muted-foreground font-body">/mois</span></p>
+          <p className="mb-1"><span className="text-3xl font-heading font-bold">6,99€</span><span className="text-sm text-muted-foreground font-body">/mois</span></p>
           <p className="text-xs text-muted-foreground font-body mb-4">7 jours d'essai. Annulable à tout moment.</p>
           <ul className="text-sm font-body space-y-2 mb-6 flex-1">
             <li className="flex items-center gap-2"><Check className="h-3.5 w-3.5 text-primary shrink-0" /> 7 jours d'essai offerts</li>

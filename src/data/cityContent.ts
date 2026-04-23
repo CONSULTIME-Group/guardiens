@@ -235,7 +235,7 @@ Tous passent par le même processus de vérification : identité contrôlée, pr
 
 **Propriétaires : sans frais.** Vous publiez votre annonce, vous recevez des candidatures, vous choisissez votre gardien. Tout cela sans débourser un centime, toute l'année 2026.
 
-**Gardiens : trois formules au choix.** L'abonnement mensuel à 9 euros par mois (résiliable à tout moment), la formule ponctuelle à 12 euros (pour une garde unique), ou l'abonnement annuel avec une réduction de 20 pour cent. [Consultez le détail des formules sur la page tarifs](/tarifs).
+**Gardiens : trois formules au choix.** L'abonnement mensuel à 6,99 euros par mois (résiliable à tout moment), la formule ponctuelle à 12 euros (pour une garde unique), ou l'abonnement annuel avec une réduction de 20 pour cent. [Consultez le détail des formules sur la page tarifs](/tarifs).
 
 **Aucune commission par garde.** Contrairement aux plateformes qui prélèvent 15 à 20 pour cent sur chaque transaction, Guardiens ne touche rien sur les gardes elles-mêmes. Le gardien paie son abonnement, le propriétaire ne paie rien. C'est tout.`,
       },

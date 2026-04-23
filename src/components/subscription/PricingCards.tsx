@@ -10,9 +10,10 @@ const calculateYearlyProrata = (): { price: number; months: number; savings: num
   const months = Math.max(0, Math.floor(
     (endOfYear.getTime() - now.getTime()) / (1000 * 60 * 60 * 24 * 30.44)
   ));
-  const fullPrice = months * 9;
-  const discounted = Math.floor(fullPrice * 0.8);
-  return { price: discounted, months, savings: Math.floor(fullPrice * 0.2) };
+  const fullPrice = months * 6.99;
+  const discounted = Math.round(fullPrice * 0.8 * 100) / 100;
+  const savings = Math.round(fullPrice * 0.2 * 100) / 100;
+  return { price: discounted, months, savings };
 };
 
 export default function PricingCards() {
@@ -48,7 +49,7 @@ export default function PricingCards() {
         <p className="text-xs tracking-widest uppercase text-muted-foreground font-body mb-3">
           Mensuel
         </p>
-        <p className="text-3xl font-heading font-bold mb-1">9&#8364;</p>
+        <p className="text-3xl font-heading font-bold mb-1">6,99&#8364;</p>
         <p className="text-sm font-body text-muted-foreground mb-4">
           / mois — sans engagement
         </p>
@@ -90,10 +91,10 @@ export default function PricingCards() {
         </p>
         <p className="text-3xl font-heading font-bold mb-1">{prorataPrice}&#8364;</p>
         <p className="text-sm font-body text-white/70 mb-1">
-          {months} mois x 9&#8364; x 0.8 = {prorataPrice}&#8364; pour finir 2026
+          {months} mois x 6,99&#8364; x 0,8 = {prorataPrice}&#8364; pour finir 2026
         </p>
         <p className="text-xs font-body text-white/50 mb-4">
-          Renouvellement au 1er janvier 2027 a 9&#8364;/mois
+          Renouvellement au 1er janvier 2027 a 6,99&#8364;/mois
         </p>
         <ul className="text-sm font-body text-white/80 space-y-2 mb-6 flex-1">
           <li className="flex items-center gap-2">
@@ -120,7 +121,7 @@ export default function PricingCards() {
       </div>
 
       <p className="text-xs font-body text-muted-foreground text-center md:col-span-2">
-        Renouvellement automatique au 1er janvier 2027 a 9&#8364;/mois sauf resiliation avant cette date.
+        Renouvellement automatique au 1er janvier 2027 a 6,99&#8364;/mois sauf resiliation avant cette date.
         Vous recevrez un rappel 30 jours avant.
       </p>
     </div>

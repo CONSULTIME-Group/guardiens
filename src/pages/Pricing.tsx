@@ -75,7 +75,7 @@ Toutes les questions sur les formules : [FAQ complète →](/faq)`,
 Avant le 13 juin, vous choisissez la formule qui vous convient depuis votre espace abonnement :
 
 - **Accès un mois — 12 €** : paiement immédiat, aucun renouvellement
-- **Mensuel — 9 €/mois** : 7 jours d'essai offerts, annulable à tout moment
+- **Mensuel — 6,99 €/mois** : 7 jours d'essai offerts, annulable à tout moment
 - **Formule 2026 — tarif réduit** : paiement unique jusqu'au 31 décembre, -20 % sur le mensuel
 
 Votre badge Fondateur reste affiché à vie sur votre profil, quelle que soit la formule choisie ensuite.
@@ -88,7 +88,7 @@ Pour bien démarrer en tant que gardien : [Créer un profil qui attire des missi
     q: "Y a-t-il des frais cachés ?",
     a: `Non. Et on préfère l'expliquer clairement plutôt que de le promettre.
 
-**Ce que paient les gardiens :** 9 €/mois, 12 € pour un mois, ou la formule 2026 à -20 %. C'est tout. L'abonnement donne accès à la plateforme — postuler aux gardes, envoyer des messages, apparaître dans les résultats.
+**Ce que paient les gardiens :** 6,99 €/mois, 12 € pour un mois, ou la formule 2026 à -20 %. C'est tout. L'abonnement donne accès à la plateforme — postuler aux gardes, envoyer des messages, apparaître dans les résultats.
 
 **Ce que paient les propriétaires :** Rien. Publier, recevoir des candidatures, choisir, évaluer — gratuit en permanence.
 
@@ -147,8 +147,8 @@ const Pricing = () => {
   return (
     <>
       <PageMeta
-        title="Tarifs Guardiens — 9€/mois pour les gardiens"
-        description="Gratuit pour les propriétaires, pour toujours. 9€/mois pour les gardiens avec 7 jours d'essai offerts. Sans commission, sans frais cachés."
+        title="Tarifs Guardiens — 6,99€/mois pour les gardiens"
+        description="Gratuit pour les propriétaires, pour toujours. 6,99€/mois pour les gardiens avec 7 jours d'essai offerts. Sans commission, sans frais cachés."
         path="/tarifs"
       />
 
@@ -242,7 +242,7 @@ const Pricing = () => {
               </div>
               <p className="text-muted-foreground max-w-2xl mx-auto font-body">
                 Les membres inscrits avant le 13 mai conservent un accès gratuit jusqu'au 13 juin.
-                Après cette date, l'abonnement à 9€/mois sera nécessaire. Le badge Fondateur reste à vie.
+                Après cette date, l'abonnement à 6,99€/mois sera nécessaire. Le badge Fondateur reste à vie.
               </p>
             </section>
           )}
@@ -299,7 +299,7 @@ const Pricing = () => {
                     </p>
                     <p className="font-heading text-5xl font-bold text-foreground">
                       <span className="text-lg font-body font-normal text-foreground/60 mr-1">à partir de</span>
-                      9€
+                      6,99€
                       <span className="text-lg font-body font-normal text-foreground/60 ml-1">/mois</span>
                     </p>
                     <p className="text-xs text-foreground/50 font-body">
@@ -310,7 +310,7 @@ const Pricing = () => {
                   <div className="text-center space-y-1.5 py-2">
                     <p className="font-heading text-5xl font-bold text-foreground">
                       <span className="text-lg font-body font-normal text-foreground/60 mr-1">à partir de</span>
-                      9€
+                      6,99€
                       <span className="text-lg font-body font-normal text-foreground/60 ml-1">/mois</span>
                     </p>
                     <p className="text-xs text-foreground/50 font-body">
@@ -355,7 +355,7 @@ const Pricing = () => {
                       </div>
                       <p className="text-xs text-foreground/50 font-body">7 jours d'essai · Annulable à tout moment</p>
                     </div>
-                    <span className="text-sm font-semibold text-primary font-body flex-shrink-0">9€/mois</span>
+                    <span className="text-sm font-semibold text-primary font-body flex-shrink-0">6,99€/mois</span>
                   </div>
                   <div
                     onClick={() => setFormule('prorata')}
@@ -367,9 +367,9 @@ const Pricing = () => {
                         <span className="text-[10px] font-body font-semibold bg-green-100 text-green-700 px-1.5 py-0.5 rounded-full leading-none">-20%</span>
                       </div>
                       <p className="text-xs text-foreground/50 font-body">Un seul paiement pour tous les mois restants en 2026</p>
-                      <p className="text-xs text-foreground/40 italic font-body">Ex. aujourd'hui : ~8 mois → environ 58€ au lieu de 72€</p>
+                      <p className="text-xs text-foreground/40 italic font-body">Ex. aujourd'hui : ~8 mois → environ 45€ au lieu de 56€</p>
                     </div>
-                    <span className="text-sm font-semibold text-primary font-body flex-shrink-0">7,20€/mois</span>
+                    <span className="text-sm font-semibold text-primary font-body flex-shrink-0">5,59€/mois</span>
                   </div>
                 </div>
 
@@ -523,7 +523,7 @@ const Pricing = () => {
             <p className="text-sm font-body text-primary-foreground/70 text-center mb-8">
               {before
                 ? "Badge à vie, accès jusqu'au 13 juin."
-                : "9€/mois pour les gardiens. Gratuit pour les propriétaires. Sans engagement."}
+                : "6,99€/mois pour les gardiens. Gratuit pour les propriétaires. Sans engagement."}
             </p>
             <Link to="/register">
               <Button className="bg-background text-foreground font-body font-medium px-10 py-4 rounded-xl text-base hover:bg-background/90 transition-colors min-h-[52px]" size="xl">

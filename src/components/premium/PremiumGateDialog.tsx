@@ -27,7 +27,7 @@ const PremiumGateDialog = ({ open, onClose, featureName }: PremiumGateDialogProp
           <DialogDescription className="text-sm text-muted-foreground text-center">
             Abonnez-vous pour accéder à {featureName}.
             <br />
-            30 jours gratuits, sans engagement. 9&nbsp;€/mois ensuite.
+            30 jours gratuits, sans engagement. 6,99&nbsp;€/mois ensuite.
           </DialogDescription>
         </DialogHeader>
         <div className="flex flex-col gap-2 pt-2">

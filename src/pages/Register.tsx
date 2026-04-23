@@ -384,7 +384,7 @@ const Register = () => {
                       Les fondateurs inscrits avant cette date profitent d'un mois supplémentaire offert jusqu'au 13 juin.
                     </p>
                     <p>
-                      Ensuite, l'abonnement gardien est à 9&nbsp;€/mois (résiliable en 1 clic).
+                      Ensuite, l'abonnement gardien est à 6,99&nbsp;€/mois (résiliable en 1 clic).
                     </p>
                     <p>
                       <strong className="text-foreground">L'entraide reste gratuite pour tous, pour toujours.</strong>
