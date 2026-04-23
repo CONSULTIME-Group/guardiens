@@ -80,7 +80,17 @@ const VIEWPORTS: Array<{ label: string; width: number; vp: ViewportKey }> = [
   { label: 'desktop', width: 1920, vp: 'desktop' },
 ]
 
-type CaptureItem = { name: string; dataUrl: string }
+type CaptureKind = 'grille' | 'modale'
+type CaptureItem = {
+  name: string
+  dataUrl: string
+  kind: CaptureKind
+  vp: ViewportKey
+  vpLabel: string
+  width: number
+  badgeId: string | null
+  index: number // ordre de génération
+}
 
 export default function TestBadgesLongLabels() {
   // Injection one-shot des libellés de test
