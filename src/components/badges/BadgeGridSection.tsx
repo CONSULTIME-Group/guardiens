@@ -4,6 +4,7 @@ import { Link } from "react-router-dom"
 import { Award, ChevronRight } from "lucide-react"
 import { BadgeSceau } from "@/components/badges/BadgeSceau"
 import { BADGE_DEFINITIONS, SPECIAL_BADGE_IDS } from "@/components/badges/badge-definitions"
+import { SpecialBadgeHighlight } from "@/components/badges/SpecialBadgeHighlight"
 
 interface BadgeGridSectionProps {
   title: string
