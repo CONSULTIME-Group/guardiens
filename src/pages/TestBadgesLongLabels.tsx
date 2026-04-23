@@ -72,11 +72,13 @@ const TEST_CASES: Array<{
   },
 ]
 
-const VIEWPORTS = [
-  { label: 'mobile', width: 375 },
-  { label: 'tablette', width: 768 },
-  { label: 'desktop', width: 1920 },
-] as const
+type ViewportKey = 'mobile' | 'tablet' | 'desktop'
+
+const VIEWPORTS: Array<{ label: string; width: number; vp: ViewportKey }> = [
+  { label: 'mobile', width: 375, vp: 'mobile' },
+  { label: 'tablette', width: 768, vp: 'tablet' },
+  { label: 'desktop', width: 1920, vp: 'desktop' },
+]
 
 type CaptureItem = { name: string; dataUrl: string }
 
@@ -101,9 +103,18 @@ export default function TestBadgesLongLabels() {
   const [stageBadgeId, setStageBadgeId] = useState<string | null>(null)
   // Largeur manuelle choisie par l'utilisateur pour tester en direct
   const [manualWidth, setManualWidth] = useState<number | null>(null)
+  // Mode "viewport strict" : applique aussi les styles responsive (sm/md)
+  // de Tailwind selon la largeur cible, indépendamment de la fenêtre réelle
+  const [strictMode, setStrictMode] = useState(true)
+  // Viewport actif pendant la capture (pour basculer les classes responsive)
+  const [activeVp, setActiveVp] = useState<ViewportKey | null>(null)
+  // Viewport manuel pour tester le mode strict en direct
+  const [manualVp, setManualVp] = useState<ViewportKey | null>(null)
 
   // Largeur effective du conteneur : capture (priorité) > manuelle > 100%
   const effectiveWidth = stageWidth ?? manualWidth ?? null
+  // Viewport effectif pour le mode strict
+  const effectiveVp = activeVp ?? (strictMode ? manualVp : null)
 
   const stageRef = useRef<HTMLDivElement>(null)
 
@@ -176,20 +187,24 @@ export default function TestBadgesLongLabels() {
     try {
       for (const vp of VIEWPORTS) {
         // 1) Capture de la grille à cette largeur
-        setProgress(`Grille ${vp.label} (${vp.width}px)…`)
+        setProgress(`Grille ${vp.label} (${vp.width}px)${strictMode ? ' • strict' : ''}…`)
         setStageWidth(vp.width)
+        if (strictMode) setActiveVp(vp.vp)
         setStageBadgeId(null)
         // Laisse le Dialog précédent (s'il y en a) se démonter complètement
         await wait(150)
         await nextPaint()
         if (stageRef.current) {
           const dataUrl = await captureNode(stageRef.current, vp.width)
-          results.push({ name: `grille-${vp.label}-${vp.width}px.png`, dataUrl })
+          results.push({
+            name: `grille-${vp.label}-${vp.width}px${strictMode ? '-strict' : ''}.png`,
+            dataUrl,
+          })
         }
 
         // 2) Capture de chaque modale ouverte à cette largeur
         for (const tc of TEST_CASES) {
-          setProgress(`Modale « ${tc.id} » — ${vp.label}…`)
+          setProgress(`Modale « ${tc.id} » — ${vp.label}${strictMode ? ' • strict' : ''}…`)
           // Toujours fermer la modale précédente avant d'ouvrir la suivante
           // pour éviter tout chevauchement d'animation Radix
           setStageBadgeId(null)
@@ -211,7 +226,7 @@ export default function TestBadgesLongLabels() {
 
           const dataUrl = await captureNode(dialog, Math.min(vp.width, 480))
           results.push({
-            name: `modale-${tc.id}-${vp.label}-${vp.width}px.png`,
+            name: `modale-${tc.id}-${vp.label}-${vp.width}px${strictMode ? '-strict' : ''}.png`,
             dataUrl,
           })
         }
@@ -224,6 +239,7 @@ export default function TestBadgesLongLabels() {
       toast.error('Erreur pendant la capture — voir la console')
     } finally {
       setStageWidth(null)
+      setActiveVp(null)
       setStageBadgeId(null)
       setProgress('')
       setIsCapturing(false)
@@ -291,7 +307,7 @@ export default function TestBadgesLongLabels() {
         </div>
 
         {/* Sélecteur de largeur du conteneur (test responsive en direct) */}
-        <div className="mb-8 flex flex-wrap items-center gap-2 px-1">
+        <div className="mb-3 flex flex-wrap items-center gap-2 px-1">
           <span className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground mr-1">
             <Maximize2 className="w-3.5 h-3.5" />
             Largeur du conteneur :
@@ -330,8 +346,88 @@ export default function TestBadgesLongLabels() {
           )}
         </div>
 
+        {/* Mode "viewport strict" : applique aussi les styles responsive
+            (mobile/tablette/desktop) indépendamment de la fenêtre réelle */}
+        <div className="mb-8 flex flex-wrap items-center gap-2 px-1 pt-2 border-t border-border/50">
+          <label className="inline-flex items-center gap-2 text-xs font-medium text-foreground cursor-pointer select-none">
+            <input
+              type="checkbox"
+              checked={strictMode}
+              onChange={e => setStrictMode(e.target.checked)}
+              disabled={isCapturing}
+              className="h-3.5 w-3.5 rounded border-border accent-primary"
+            />
+            Viewport strict
+          </label>
+          <span className="text-[11px] text-muted-foreground mr-2">
+            (force aussi le layout responsive, pas seulement la largeur)
+          </span>
+          {strictMode && (
+            <>
+              {(['mobile', 'tablet', 'desktop'] as const).map(v => {
+                const active = manualVp === v
+                const label =
+                  v === 'mobile' ? 'Mobile' : v === 'tablet' ? 'Tablette' : 'Desktop'
+                return (
+                  <Button
+                    key={v}
+                    size="sm"
+                    variant={active ? 'default' : 'outline'}
+                    onClick={() => setManualVp(active ? null : v)}
+                    disabled={isCapturing}
+                    className="h-7 px-2.5 text-xs"
+                    aria-pressed={active}
+                  >
+                    {label}
+                  </Button>
+                )
+              })}
+              <Button
+                size="sm"
+                variant={manualVp === null ? 'default' : 'outline'}
+                onClick={() => setManualVp(null)}
+                disabled={isCapturing}
+                className="h-7 px-2.5 text-xs"
+                aria-pressed={manualVp === null}
+              >
+                Auto (fenêtre)
+              </Button>
+              {effectiveVp && (
+                <span className="text-[11px] text-muted-foreground ml-1">
+                  VP actif : <strong>{effectiveVp}</strong>
+                  {activeVp && ' (capture)'}
+                </span>
+              )}
+            </>
+          )}
+        </div>
+
+        {/* Feuille de style scopée au stage : réécrit le layout grille
+            selon data-vp pour ignorer les media queries du vrai viewport. */}
+        <style>{`
+          /* Quand data-vp est présent, on neutralise les classes Tailwind sm:/md: utilisées dans la grille
+             et on applique la version souhaitée explicitement. Scoping strict via [data-vp]. */
+          [data-stage-vp] .test-badge-grid {
+            display: grid;
+            gap: 1rem;
+          }
+          [data-stage-vp="mobile"] .test-badge-grid {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 1rem;
+          }
+          [data-stage-vp="tablet"] .test-badge-grid {
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 1rem;
+          }
+          [data-stage-vp="desktop"] .test-badge-grid {
+            grid-template-columns: repeat(6, minmax(0, 1fr));
+            gap: 1.5rem;
+          }
+        `}</style>
+
         {/* Stage de capture — grille hébergée dans un conteneur redimensionnable.
-            Quand stageWidth (capture) ou manualWidth (manuel) est défini, on force la largeur. */}
+            Quand stageWidth (capture) ou manualWidth (manuel) est défini, on force la largeur.
+            Quand data-stage-vp est défini, on applique aussi le layout responsive correspondant. */}
         <section className="mb-12">
           <h2 className="text-lg font-heading font-semibold text-foreground mb-4 border-b border-border pb-2">
             1. Grille de sceaux (capturée par le bouton)
@@ -342,9 +438,16 @@ export default function TestBadgesLongLabels() {
               width: effectiveWidth ?? '100%',
               maxWidth: effectiveWidth ?? '100%',
             }}
+            data-stage-vp={effectiveVp ?? undefined}
           >
             <div ref={stageRef} className="bg-background p-4">
-              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-4 md:gap-6">
+              <div
+                className={
+                  effectiveVp
+                    ? 'test-badge-grid'
+                    : 'grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-4 md:gap-6'
+                }
+              >
                 {TEST_CASES.map((tc, i) => (
                   <div
                     key={`grid-${tc.id}-${i}`}
