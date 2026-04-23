@@ -1,7 +1,16 @@
+import { Suspense } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Helmet } from "react-helmet-async";
-import SearchSitter from "@/components/search/SearchSitter";
-import SearchOwner from "@/components/search/SearchOwner";
+import { lazyWithRetry } from "@/lib/lazyWithRetry";
+
+const SearchSitter = lazyWithRetry(
+  () => import("@/components/search/SearchSitter"),
+  "SearchSitter",
+);
+const SearchOwner = lazyWithRetry(
+  () => import("@/components/search/SearchOwner"),
+  "SearchOwner",
+);
 
 const SearchPage = () => {
   const { activeRole } = useAuth();
@@ -11,7 +20,9 @@ const SearchPage = () => {
       <Helmet>
         <meta name="robots" content="noindex, nofollow" />
       </Helmet>
-      {activeRole === "sitter" ? <SearchSitter /> : <SearchOwner />}
+      <Suspense fallback={null}>
+        {activeRole === "sitter" ? <SearchSitter /> : <SearchOwner />}
+      </Suspense>
     </>
   );
 };
