@@ -122,6 +122,40 @@ export default function TestBadgesLongLabels() {
 
   const wait = (ms: number) => new Promise<void>(r => setTimeout(r, ms))
 
+  // Attend deux frames d'animation pour s'assurer que le layout est stable
+  const nextPaint = () =>
+    new Promise<void>(r =>
+      requestAnimationFrame(() => requestAnimationFrame(() => r()))
+    )
+
+  /**
+   * Attend que la modale du badge attendu soit montée, ouverte (data-state=open),
+   * et que son contenu corresponde au libellé du badge ciblé. Évite ainsi
+   * de capturer un état d'animation ou la mauvaise modale.
+   */
+  const waitForStagedDialog = async (
+    badgeId: string,
+    expectedLabel: string,
+    timeoutMs = 1500
+  ): Promise<HTMLElement | null> => {
+    const deadline = Date.now() + timeoutMs
+    while (Date.now() < deadline) {
+      const dialog = document.querySelector<HTMLElement>(
+        `[data-staged-badge="${badgeId}"][data-state="open"]`
+      )
+      if (dialog) {
+        const heading = dialog.querySelector('h3')?.textContent?.trim() ?? ''
+        if (heading === expectedLabel.trim()) {
+          // Layout stabilisé
+          await nextPaint()
+          return dialog
+        }
+      }
+      await wait(40)
+    }
+    return null
+  }
+
   const captureNode = async (node: HTMLElement, width: number): Promise<string> => {
     const canvas = await html2canvas(node, {
       backgroundColor: '#ffffff',
@@ -145,7 +179,9 @@ export default function TestBadgesLongLabels() {
         setProgress(`Grille ${vp.label} (${vp.width}px)…`)
         setStageWidth(vp.width)
         setStageBadgeId(null)
-        await wait(250)
+        // Laisse le Dialog précédent (s'il y en a) se démonter complètement
+        await wait(150)
+        await nextPaint()
         if (stageRef.current) {
           const dataUrl = await captureNode(stageRef.current, vp.width)
           results.push({ name: `grille-${vp.label}-${vp.width}px.png`, dataUrl })
@@ -154,19 +190,30 @@ export default function TestBadgesLongLabels() {
         // 2) Capture de chaque modale ouverte à cette largeur
         for (const tc of TEST_CASES) {
           setProgress(`Modale « ${tc.id} » — ${vp.label}…`)
-          setStageBadgeId(tc.id)
-          await wait(350) // laisse le Dialog se monter + animer
-          // Le DialogContent de shadcn est porté hors du stage → on cible le portail
-          const dialog = document.querySelector('[role="dialog"]') as HTMLElement | null
-          if (dialog) {
-            const dataUrl = await captureNode(dialog, Math.min(vp.width, 480))
-            results.push({
-              name: `modale-${tc.id}-${vp.label}-${vp.width}px.png`,
-              dataUrl,
-            })
-          }
+          // Toujours fermer la modale précédente avant d'ouvrir la suivante
+          // pour éviter tout chevauchement d'animation Radix
           setStageBadgeId(null)
-          await wait(150)
+          await wait(120)
+          await nextPaint()
+
+          setStageBadgeId(tc.id)
+
+          const expectedDef = BADGE_DEFINITIONS[tc.id]
+          const expectedLabel = tc.overrideLabel ?? expectedDef?.label ?? ''
+          const dialog = await waitForStagedDialog(tc.id, expectedLabel)
+
+          if (!dialog) {
+            console.warn(
+              `[TestBadgesLongLabels] modale "${tc.id}" introuvable ou contenu non synchronisé`
+            )
+            continue
+          }
+
+          const dataUrl = await captureNode(dialog, Math.min(vp.width, 480))
+          results.push({
+            name: `modale-${tc.id}-${vp.label}-${vp.width}px.png`,
+            dataUrl,
+          })
         }
       }
 
