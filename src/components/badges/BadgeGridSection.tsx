@@ -108,6 +108,7 @@ export default function BadgeGridSection({
       >
         Voir tous les badges <ChevronRight className="h-3 w-3" />
       </Link>
+      </div>
     </div>
   )
 }
