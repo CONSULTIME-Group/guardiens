@@ -10,8 +10,6 @@ import { BackButton } from "./components/layout/BackButton";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
-import { AppLayout } from "@/components/layout/AppLayout";
-import { AdminLayout } from "@/components/admin/AdminLayout";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import SkipToContent from "@/components/layout/SkipToContent";
 import OfflineBanner from "@/components/layout/OfflineBanner";
@@ -29,7 +27,6 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import NotFound from "./pages/NotFound";
 import AuthConfirm from "./pages/AuthConfirm";
-import Dashboard from "./pages/Dashboard";
 
 // ──── Lazy-loaded routes ────
 const FallbackSpinner = () => (
@@ -37,6 +34,9 @@ const FallbackSpinner = () => (
     <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
   </div>
 );
+const Dashboard = lazy(() => import("./pages/Dashboard"));
+const AppLayout = lazy(() => import("@/components/layout/AppLayout").then((m) => ({ default: m.AppLayout })));
+const AdminLayout = lazy(() => import("@/components/admin/AdminLayout").then((m) => ({ default: m.AdminLayout })));
 const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const Profile = lazy(() => import("./pages/Profile"));
