@@ -6,8 +6,14 @@ import { BadgeSceauLarge } from '@/components/badges/BadgeSceauLarge'
 import { BADGE_DEFINITIONS } from '@/components/badges/badge-definitions'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent } from '@/components/ui/dialog'
-import { Camera, Loader2, Download } from 'lucide-react'
+import { Camera, Loader2, Download, Maximize2 } from 'lucide-react'
 import { toast } from 'sonner'
+
+const WIDTH_PRESETS = [
+  { value: 320, label: '320 px' },
+  { value: 480, label: '480 px' },
+  { value: 640, label: '640 px' },
+] as const
 
 /**
  * Page de test interne — vérifie que les sceaux de badges et leurs libellés
@@ -93,6 +99,11 @@ export default function TestBadgesLongLabels() {
   const [captures, setCaptures] = useState<CaptureItem[]>([])
   const [stageWidth, setStageWidth] = useState<number | null>(null)
   const [stageBadgeId, setStageBadgeId] = useState<string | null>(null)
+  // Largeur manuelle choisie par l'utilisateur pour tester en direct
+  const [manualWidth, setManualWidth] = useState<number | null>(null)
+
+  // Largeur effective du conteneur : capture (priorité) > manuelle > 100%
+  const effectiveWidth = stageWidth ?? manualWidth ?? null
 
   const stageRef = useRef<HTMLDivElement>(null)
 
@@ -207,7 +218,7 @@ export default function TestBadgesLongLabels() {
         </p>
 
         {/* Barre d'actions */}
-        <div className="sticky top-0 z-10 -mx-4 md:mx-0 mb-8 bg-background/95 backdrop-blur border-y border-border md:border md:rounded-lg px-4 py-3 flex flex-wrap items-center gap-3">
+        <div className="sticky top-0 z-10 -mx-4 md:mx-0 mb-4 bg-background/95 backdrop-blur border-y border-border md:border md:rounded-lg px-4 py-3 flex flex-wrap items-center gap-3">
           <Button onClick={handleGenerate} disabled={isCapturing} size="sm">
             {isCapturing ? (
               <>
@@ -232,8 +243,48 @@ export default function TestBadgesLongLabels() {
           )}
         </div>
 
+        {/* Sélecteur de largeur du conteneur (test responsive en direct) */}
+        <div className="mb-8 flex flex-wrap items-center gap-2 px-1">
+          <span className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground mr-1">
+            <Maximize2 className="w-3.5 h-3.5" />
+            Largeur du conteneur :
+          </span>
+          {WIDTH_PRESETS.map(p => {
+            const active = manualWidth === p.value
+            return (
+              <Button
+                key={p.value}
+                size="sm"
+                variant={active ? 'default' : 'outline'}
+                onClick={() => setManualWidth(active ? null : p.value)}
+                disabled={isCapturing}
+                className="h-7 px-2.5 text-xs"
+                aria-pressed={active}
+              >
+                {p.label}
+              </Button>
+            )
+          })}
+          <Button
+            size="sm"
+            variant={manualWidth === null ? 'default' : 'outline'}
+            onClick={() => setManualWidth(null)}
+            disabled={isCapturing}
+            className="h-7 px-2.5 text-xs"
+            aria-pressed={manualWidth === null}
+          >
+            Auto (100 %)
+          </Button>
+          {effectiveWidth && (
+            <span className="text-[11px] text-muted-foreground ml-2">
+              Actif : <strong>{effectiveWidth} px</strong>
+              {stageWidth && ' (capture)'}
+            </span>
+          )}
+        </div>
+
         {/* Stage de capture — grille hébergée dans un conteneur redimensionnable.
-            Quand stageWidth est défini, on force la largeur pour simuler un viewport. */}
+            Quand stageWidth (capture) ou manualWidth (manuel) est défini, on force la largeur. */}
         <section className="mb-12">
           <h2 className="text-lg font-heading font-semibold text-foreground mb-4 border-b border-border pb-2">
             1. Grille de sceaux (capturée par le bouton)
@@ -241,8 +292,8 @@ export default function TestBadgesLongLabels() {
           <div
             className="mx-auto overflow-hidden border border-dashed border-border rounded-lg transition-all"
             style={{
-              width: stageWidth ?? '100%',
-              maxWidth: stageWidth ?? '100%',
+              width: effectiveWidth ?? '100%',
+              maxWidth: effectiveWidth ?? '100%',
             }}
           >
             <div ref={stageRef} className="bg-background p-4">
