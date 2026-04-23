@@ -852,6 +852,50 @@ const AdminUsers = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Détail d'une erreur d'envoi admin */}
+      <Dialog
+        open={errorDetailModal.open}
+        onOpenChange={(o) => !o && setErrorDetailModal({ open: false, recipient: "", sentAt: "", error: "", content: "" })}
+      >
+        <DialogContent className="max-w-xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-destructive" />
+              Détail de l'erreur d'envoi
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 text-sm">
+            <div>
+              <div className="text-xs uppercase tracking-wide text-muted-foreground mb-1">Destinataire</div>
+              <div className="font-medium">{errorDetailModal.recipient}</div>
+            </div>
+            {errorDetailModal.sentAt && (
+              <div>
+                <div className="text-xs uppercase tracking-wide text-muted-foreground mb-1">Tentative</div>
+                <div>{new Date(errorDetailModal.sentAt).toLocaleString("fr-FR", { dateStyle: "long", timeStyle: "short" })}</div>
+              </div>
+            )}
+            <div>
+              <div className="text-xs uppercase tracking-wide text-muted-foreground mb-1">Erreur</div>
+              <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-3 text-destructive whitespace-pre-wrap break-words">
+                {errorDetailModal.error}
+              </div>
+            </div>
+            <div>
+              <div className="text-xs uppercase tracking-wide text-muted-foreground mb-1">Message tenté</div>
+              <div className="rounded-lg border bg-muted/40 p-3 whitespace-pre-wrap max-h-48 overflow-y-auto">
+                {errorDetailModal.content || "(vide)"}
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button onClick={() => setErrorDetailModal({ open: false, recipient: "", sentAt: "", error: "", content: "" })}>
+              Fermer
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
