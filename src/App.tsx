@@ -23,13 +23,13 @@ import { toast } from "sonner";
 import { reportError } from "@/lib/errorLogger";
 
 // ──── Critical routes (eager) ────
+import Landing from "./pages/Landing";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import NotFound from "./pages/NotFound";
 import AuthConfirm from "./pages/AuthConfirm";
 
 // ──── Heavy routes (lazy) ────
-const Landing = lazy(() => import("./pages/Landing"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 
 // ──── Lazy-loaded routes ────
