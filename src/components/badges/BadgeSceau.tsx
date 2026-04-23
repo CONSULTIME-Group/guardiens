@@ -158,12 +158,12 @@ export const BadgeSceau = forwardRef<HTMLDivElement, BadgeSceauProps>(function B
               {def.tooltip}
             </p>
             {count > 0 && (
-              <p className="text-sm font-semibold" style={{ color: def.iconColor }}>
+              <p className="text-sm font-semibold mb-1" style={{ color: def.iconColor }}>
                 Obtenu {count} fois
               </p>
             )}
             {dateLabel && (
-              <p className="text-xs text-muted-foreground/70 italic">
+              <p className="text-xs text-muted-foreground/70 italic mb-2">
                 Dernière obtention : {dateLabel}
               </p>
             )}
