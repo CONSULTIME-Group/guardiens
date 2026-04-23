@@ -28,9 +28,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import NotFound from "./pages/NotFound";
 import AuthConfirm from "./pages/AuthConfirm";
-
-// ──── Heavy routes (lazy) ────
-const Dashboard = lazy(() => import("./pages/Dashboard"));
+import Dashboard from "./pages/Dashboard";
 
 // ──── Lazy-loaded routes ────
 const FallbackSpinner = () => (
