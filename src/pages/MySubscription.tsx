@@ -138,7 +138,7 @@ const FOUNDER_FAQ = [
   },
   {
     q: "Que se passe-t-il après le 13 juin ?",
-    a: "Trois options : 12€ pour un mois, 9€/mois sans engagement, ou un tarif annuel réduit. Vous décidez au moment voulu.",
+    a: "Trois options : 12€ pour un mois, 6,99€/mois sans engagement, ou un tarif annuel réduit. Vous décidez au moment voulu.",
   },
   {
     q: "Qu’est-ce que le badge Fondateur ?",
@@ -392,7 +392,7 @@ const MySubscription = () => {
                     { label: "Maintenant", sub: "Accès complet", active: true, amber: false },
                     { label: "13 mai", sub: "Badge Fondateur", active: false, amber: true },
                     { label: "13 juin", sub: "Fin de grâce", active: false, amber: false },
-                    { label: "Ensuite", sub: "À partir de 9€/mois", active: false, amber: false },
+                    { label: "Ensuite", sub: "À partir de 6,99€/mois", active: false, amber: false },
                   ].map(({ label, sub: subText, active, amber }) => (
                     <div key={label} role="listitem" className="flex flex-col items-center gap-1.5 z-10 flex-1">
                       <div className={[
@@ -749,7 +749,7 @@ const MySubscription = () => {
               <div className="flex justify-between text-sm font-body">
                 <span className="text-foreground/60">Tarif</span>
                 <span className="font-medium text-foreground">
-                  {sub?.plan === "monthly" ? "9€/mois" : sub?.plan === "oneshot" ? "12€ (paiement unique)" : "Formule 2026"}
+                  {sub?.plan === "monthly" ? "6,99€/mois" : sub?.plan === "oneshot" ? "12€ (paiement unique)" : "Formule 2026"}
                 </span>
               </div>
             </div>

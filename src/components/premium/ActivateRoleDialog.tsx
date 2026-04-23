@@ -103,7 +103,7 @@ const ActivateRoleDialog = ({ open, onClose, targetRole }: ActivateRoleDialogPro
             Envie de garder des maisons aussi ?
           </DialogTitle>
           <DialogDescription className="text-sm text-muted-foreground text-center">
-            L'abonnement gardien est à 9&nbsp;€/mois. Vous avez 30 jours gratuits pour tester — sans engagement. Vous pouvez vous désabonner à tout moment depuis vos paramètres.
+            L'abonnement gardien est à 6,99&nbsp;€/mois. Vous avez 30 jours gratuits pour tester — sans engagement. Vous pouvez vous désabonner à tout moment depuis vos paramètres.
           </DialogDescription>
         </DialogHeader>
         <div className="flex flex-col gap-2 pt-2">

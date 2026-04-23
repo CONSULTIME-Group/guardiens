@@ -50,7 +50,7 @@ Deno.serve(async (req) => {
           <p>Bonjour ${founder.first_name || ''},</p>
           <p>Merci d'avoir rejoint Guardiens dès le début.</p>
           <p>Votre période d'accès fondateur se termine le <strong>13 juin 2026</strong>.</p>
-          <p>Après cette date, un abonnement à 9€/mois sera nécessaire pour continuer à postuler aux gardes.</p>
+          <p>Après cette date, un abonnement à 6,99€/mois sera nécessaire pour continuer à postuler aux gardes.</p>
           <p>Votre badge Fondateur reste à vie, quelle que soit votre décision.</p>
           <p style="margin: 24px 0;">
             <a href="https://guardiens.fr/mon-abonnement" style="display: inline-block; background-color: #16a34a; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600;">

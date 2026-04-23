@@ -211,7 +211,7 @@ const Landing = () => {
             "@type": "FAQPage",
             mainEntity: [
               { "@type": "Question", name: "Qu'est-ce que le house sitting ?", acceptedAnswer: { "@type": "Answer", text: "Le house sitting est un échange de services : un gardien habite gratuitement dans votre maison pendant votre absence et prend soin de vos animaux. C'est gratuit pour les deux parties." } },
-              { "@type": "Question", name: "Guardiens est-il gratuit ?", acceptedAnswer: { "@type": "Answer", text: "Oui, Guardiens est 100% gratuit pour les propriétaires. Les gardiens bénéficient d'un accès gratuit jusqu'au 13 juin 2026, puis l'abonnement est à 9€/mois. L'entraide reste gratuite pour tous, pour toujours." } },
+              { "@type": "Question", name: "Guardiens est-il gratuit ?", acceptedAnswer: { "@type": "Answer", text: "Oui, Guardiens est 100% gratuit pour les propriétaires. Les gardiens bénéficient d'un accès gratuit jusqu'au 13 juin 2026, puis l'abonnement est à 6,99€/mois. L'entraide reste gratuite pour tous, pour toujours." } },
               { "@type": "Question", name: "Comment trouver un pet sitter près de chez moi ?", acceptedAnswer: { "@type": "Answer", text: "Inscrivez-vous sur Guardiens, publiez votre annonce de garde avec les dates et vos animaux, et recevez des candidatures de gardiens qui habitent près de chez vous." } },
             ],
           }),
