@@ -65,6 +65,15 @@ const AdminUsers = () => {
   const [historyModal, setHistoryModal] = useState<{ open: boolean; loading: boolean; items: Array<{ conversation_id: string; content: string; created_at: string; recipient_id: string; recipient_name: string; recipient_avatar: string | null }> }>({
     open: false, loading: false, items: [],
   });
+  const [lastMessageModal, setLastMessageModal] = useState<{
+    open: boolean;
+    loading: boolean;
+    userName: string;
+    userId: string;
+    conversationId: string | null;
+    content: string | null;
+    sentAt: string | null;
+  }>({ open: false, loading: false, userName: "", userId: "", conversationId: null, content: null, sentAt: null });
   const navigate = useNavigate();
 
   const openHistory = async () => {
