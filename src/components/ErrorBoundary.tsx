@@ -38,6 +38,15 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   handleReset = () => {
+    const isDynamicImportFailure = this.state.error?.message?.includes(
+      "Failed to fetch dynamically imported module",
+    );
+
+    if (isDynamicImportFailure) {
+      window.location.reload();
+      return;
+    }
+
     this.setState({ hasError: false, error: null, reportSent: false, errorId: null });
   };
 
