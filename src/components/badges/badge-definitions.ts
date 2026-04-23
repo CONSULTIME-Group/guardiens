@@ -48,7 +48,7 @@ export const PROPRIO_BADGE_IDS: string[] = [
 ]
 
 export const SPECIAL_BADGE_IDS: string[] = [
-  'fondateur', 'id_verifiee', 'gardien_urgence', 'courant_passe',
+  'fondateur', 'premiere_annonce', 'id_verifiee', 'gardien_urgence', 'courant_passe',
 ]
 
 export const MISSION_BADGE_IDS: string[] = [
@@ -312,6 +312,15 @@ export const BADGE_DEFINITIONS: Record<string, BadgeDefinition> = {
     tooltip: "Identité et documents officiels validés par nos services de sécurité.",
     bg: '#4A4A4A', iconColor: '#FDF0CC',
     svgIcon: `<path d="M20 11l9.5 3.5v7.5c0 4.5-4 7.5-9.5 8-5.5-.5-9.5-3.5-9.5-8v-7.5z" fill="none" stroke="#FDF0CC" stroke-width="1.5" stroke-linejoin="round"/><path d="M15.5 20.5l3.5 3.5 6-6" stroke="#FDF0CC" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>`,
+  },
+
+  premiere_annonce: {
+    label: "À jamais la 1ère",
+    labelArc: "À JAMAIS LA 1ÈRE",
+    category: 'special', expirable: false, fixedTier: 'gold',
+    tooltip: "Première annonce publiée sur Guardiens — merci pour votre confiance dès les tout débuts.",
+    bg: '#7A5200', iconColor: '#FFE27A',
+    svgIcon: `<text x="20" y="26" text-anchor="middle" font-family="Georgia, serif" font-size="18" font-weight="bold" fill="#FFE27A">1</text><path d="M14 11l1 2.5 2.5.5-2 1.8.5 2.7-2-1.4-2 1.4.5-2.7-2-1.8 2.5-.5z" fill="#FFE27A" opacity="0.9"/><path d="M26 11l1 2.5 2.5.5-2 1.8.5 2.7-2-1.4-2 1.4.5-2.7-2-1.8 2.5-.5z" fill="#FFE27A" opacity="0.9"/>`,
   },
 
   courant_passe: {
