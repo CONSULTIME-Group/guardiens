@@ -10,7 +10,7 @@ const corsHeaders = {
 const JUNE_14_2026_UTC = new Date("2026-06-14T00:00:00Z");
 
 const PRICE_IDS = {
-  monthly:  "price_1TGZmdEbGS9RIjqFbnm4XbKi",
+  monthly:  "price_1TPPawIR9gPuLbxmH9vC614f", // 6,99€/mois récurrent (prod_UOByEwqFtArM7W)
   one_shot: "price_1TJKw9EbGS9RIjqFjRSGwnsQ",
   prorata:  "price_1TJKwgEbGS9RIjqFBUfno6Lr",
 };
@@ -186,8 +186,8 @@ Deno.serve(async (req) => {
         });
       }
 
-      const montantEuros = Math.ceil(moisRestants * 9 * 0.8);
-      const montantCents = montantEuros * 100;
+      const montantEuros = Math.round(moisRestants * 6.99 * 0.8 * 100) / 100;
+      const montantCents = Math.round(montantEuros * 100);
 
       const session = await stripe.checkout.sessions.create({
         mode: "payment",
@@ -207,7 +207,7 @@ Deno.serve(async (req) => {
           user_id: user.id,
           formula_type: "prorata",
           mois_restants: moisRestants.toString(),
-          montant_euros: montantEuros.toString(),
+          montant_euros: montantEuros.toFixed(2),
           free_months_credit: freeMonths.toString(),
         },
       });
