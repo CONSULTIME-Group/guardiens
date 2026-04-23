@@ -146,13 +146,15 @@ export const BadgeSceau = forwardRef<HTMLDivElement, BadgeSceauProps>(function B
       </TooltipProvider>
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-xs p-6">
-          <div className="flex flex-col items-center text-center gap-3">
-            <div className="flex justify-center pt-2">
+        <DialogContent className="max-w-sm p-6 sm:p-8">
+          <div className="flex flex-col items-center text-center">
+            <div className="flex justify-center pt-4 pb-5 shrink-0">
               <BadgeSceauLarge id={id} size={96} />
             </div>
-            <h3 className="font-heading font-bold text-lg leading-tight">{def.label}</h3>
-            <p className="text-sm text-muted-foreground leading-relaxed">
+            <h3 className="font-heading font-bold text-lg leading-snug px-2 mb-3 break-words hyphens-auto w-full">
+              {def.label}
+            </h3>
+            <p className="text-sm text-muted-foreground leading-relaxed mb-3">
               {def.tooltip}
             </p>
             {count > 0 && (
