@@ -37,9 +37,9 @@ export function SpecialBadgeHighlight({
   const heading = specials.length > 1 ? `${title}s` : title
 
   return (
-    <div className="rounded-xl border border-amber-300/50 bg-gradient-to-br from-amber-50/80 via-card to-card p-4 md:p-5 shadow-sm dark:from-amber-950/20 dark:border-amber-700/30">
+    <div className="rounded-xl border border-primary/30 bg-gradient-to-br from-primary/5 via-card to-card p-4 md:p-5 shadow-sm">
       <div className="flex items-center gap-2 mb-3">
-        <Sparkles className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+        <Sparkles className="h-4 w-4 text-primary" />
         <h2 className="text-sm font-semibold text-foreground">{heading}</h2>
       </div>
 
