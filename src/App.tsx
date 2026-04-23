@@ -31,6 +31,12 @@ import NotFound from "./pages/NotFound";
 import AuthConfirm from "./pages/AuthConfirm";
 
 // ──── Lazy-loaded routes ────
+const FallbackSpinner = () => (
+  <div className="min-h-screen flex items-center justify-center">
+    <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+  </div>
+);
+
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
