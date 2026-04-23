@@ -6,8 +6,14 @@ import { BadgeSceauLarge } from '@/components/badges/BadgeSceauLarge'
 import { BADGE_DEFINITIONS } from '@/components/badges/badge-definitions'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent } from '@/components/ui/dialog'
-import { Camera, Loader2, Download } from 'lucide-react'
+import { Camera, Loader2, Download, Maximize2 } from 'lucide-react'
 import { toast } from 'sonner'
+
+const WIDTH_PRESETS = [
+  { value: 320, label: '320 px' },
+  { value: 480, label: '480 px' },
+  { value: 640, label: '640 px' },
+] as const
 
 /**
  * Page de test interne — vérifie que les sceaux de badges et leurs libellés
