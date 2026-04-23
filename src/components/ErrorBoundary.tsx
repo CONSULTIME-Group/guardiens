@@ -1,5 +1,5 @@
 import { Component, type ErrorInfo, type ReactNode } from "react";
-import { AlertTriangle, RefreshCw, Send, Home } from "lucide-react";
+import { AlertTriangle, RefreshCw, Send, Home, PuzzleIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { reportError } from "@/lib/errorLogger";
 
@@ -64,6 +64,54 @@ export class ErrorBoundary extends Component<Props, State> {
   render() {
     if (this.state.hasError) {
       if (this.props.fallback) return this.props.fallback;
+
+      const message = this.state.error?.message ?? "";
+      const isBadComponent =
+        message.includes("Component is not a function") ||
+        message.includes("Element type is invalid") ||
+        message.includes("is not a function") && message.includes("Component");
+
+      if (isBadComponent) {
+        return (
+          <div
+            className="min-h-[40vh] flex flex-col items-center justify-center gap-4 p-6 text-center bg-background"
+            role="alert"
+            aria-live="polite"
+          >
+            <div className="rounded-full bg-muted p-3">
+              <PuzzleIcon className="h-8 w-8 text-muted-foreground" />
+            </div>
+            <div className="space-y-1.5 max-w-md">
+              <h2 className="font-heading text-lg font-semibold text-foreground">
+                Cette section n'a pas pu s'afficher
+              </h2>
+              <p className="text-sm text-muted-foreground">
+                Un composant n'a pas été chargé correctement. Le reste de la page reste accessible.
+              </p>
+              {this.state.errorId && (
+                <p className="text-xs text-muted-foreground/60 font-mono pt-1">
+                  Référence : {this.state.errorId}
+                </p>
+              )}
+            </div>
+            <div className="flex flex-col sm:flex-row gap-2">
+              <Button variant="outline" size="sm" onClick={this.handleReset} className="gap-2">
+                <RefreshCw className="h-4 w-4" /> Réessayer
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={this.handleReport}
+                disabled={this.state.reportSent}
+                className="gap-2"
+              >
+                <Send className="h-4 w-4" />
+                {this.state.reportSent ? "Signalé" : "Signaler"}
+              </Button>
+            </div>
+          </div>
+        );
+      }
 
       return (
         <div
