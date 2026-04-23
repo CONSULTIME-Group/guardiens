@@ -29,6 +29,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import NotFound from "./pages/NotFound";
 import AuthConfirm from "./pages/AuthConfirm";
+import Dashboard from "./pages/Dashboard";
 
 // ──── Lazy-loaded routes ────
 const FallbackSpinner = () => (
@@ -36,8 +37,6 @@ const FallbackSpinner = () => (
     <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
   </div>
 );
-
-const Dashboard = lazy(() => import("./pages/Dashboard"));
 const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const Profile = lazy(() => import("./pages/Profile"));
