@@ -121,6 +121,12 @@ export default function TestBadgesLongLabels() {
   // Viewport manuel pour tester le mode strict en direct
   const [manualVp, setManualVp] = useState<ViewportKey | null>(null)
 
+  // Filtres + tri de la galerie de captures
+  const [filterKind, setFilterKind] = useState<CaptureKind | 'all'>('all')
+  const [filterVp, setFilterVp] = useState<ViewportKey | 'all'>('all')
+  const [filterBadge, setFilterBadge] = useState<string>('all')
+  const [sortBy, setSortBy] = useState<'order' | 'name' | 'width-asc' | 'width-desc'>('order')
+
   // Largeur effective du conteneur : capture (priorité) > manuelle > 100%
   const effectiveWidth = stageWidth ?? manualWidth ?? null
   // Viewport effectif pour le mode strict
