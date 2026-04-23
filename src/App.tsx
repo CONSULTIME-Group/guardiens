@@ -16,6 +16,7 @@ import { ErrorBoundary } from "@/components/ErrorBoundary";
 import SkipToContent from "@/components/layout/SkipToContent";
 import OfflineBanner from "@/components/layout/OfflineBanner";
 import NetworkErrorMonitor from "@/components/layout/NetworkErrorMonitor";
+import { PreviewDiagnosticBanner } from "@/components/PreviewDiagnosticBanner";
 import ScrollToTop from "@/components/layout/ScrollToTop";
 import PageViewTracker from "@/components/analytics/PageViewTracker";
 import CookieConsent from "@/components/layout/CookieConsent";
@@ -300,6 +301,7 @@ const App = () => (
               <PageViewTracker />
               <OfflineBanner />
               <NetworkErrorMonitor />
+              <PreviewDiagnosticBanner />
               <AppRoutes />
               <CookieConsent />
             </BrowserRouter>
