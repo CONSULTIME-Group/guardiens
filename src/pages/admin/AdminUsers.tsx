@@ -84,7 +84,7 @@ const AdminUsers = () => {
     // Source de vérité : journal d'audit côté back-office
     const { data: logs, error: logErr } = await supabase
       .from("admin_message_logs")
-      .select("conversation_id, message_id, content, sent_at, recipient_id, recipient_email, recipient_name")
+      .select("id, conversation_id, message_id, content, sent_at, recipient_id, recipient_email, recipient_name, status, error_message")
       .order("sent_at", { ascending: false })
       .limit(200);
     if (logErr) {
@@ -102,12 +102,15 @@ const AdminUsers = () => {
       avatarMap = new Map((profs || []).map((p: any) => [p.id, p.avatar_url]));
     }
     const items = (logs || []).map((l: any) => ({
+      id: l.id,
       conversation_id: l.conversation_id,
       content: l.content,
       created_at: l.sent_at,
       recipient_id: l.recipient_id,
       recipient_name: l.recipient_name || l.recipient_email || "Utilisateur",
       recipient_avatar: avatarMap.get(l.recipient_id) || null,
+      status: (l.status === "failed" ? "failed" : "success") as "success" | "failed",
+      error_message: l.error_message ?? null,
     }));
     setHistoryModal({ open: true, loading: false, items });
   };
