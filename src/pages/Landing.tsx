@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import notreHistoirePanorama from "@/assets/story-photo.webp";
 import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -6,7 +6,6 @@ import { ArrowRight, ArrowLeft, Home, Key, Handshake, ShieldCheck, MessageCircle
 import { supabase } from "@/integrations/supabase/client";
 
 import PageMeta from "@/components/PageMeta";
-import useEmblaCarousel from "embla-carousel-react";
 import DemoListingShowcase from "@/components/landing/DemoListingShowcase";
 import PublicHeader from "@/components/layout/PublicHeader";
 import PublicFooter from "@/components/layout/PublicFooter";
@@ -121,43 +120,29 @@ const Landing = () => {
     loadKPIs();
   }, []);
 
-  /* ── Embla carousel for testimonials ── */
-  const [emblaRef, emblaApi] = useEmblaCarousel({
-    align: "start",
-    loop: true,
-    slidesToScroll: 1,
-  });
+  /* ── Local testimonial slider (no external runtime dependency) ── */
+  const testimonialPages = Array.from(
+    { length: Math.ceil(testimonials.length / 3) },
+    (_, index) => testimonials.slice(index * 3, index * 3 + 3)
+  );
   const [selectedIndex, setSelectedIndex] = useState(0);
-  const [scrollSnaps, setScrollSnaps] = useState<number[]>([]);
+  const [isTestimonialsHovered, setIsTestimonialsHovered] = useState(false);
 
-  const onEmblaSelect = useCallback(() => {
-    if (!emblaApi) return;
-    setSelectedIndex(emblaApi.selectedScrollSnap());
-  }, [emblaApi]);
-
-  useEffect(() => {
-    if (!emblaApi) return;
-    setScrollSnaps(emblaApi.scrollSnapList());
-    emblaApi.on("select", onEmblaSelect);
-    onEmblaSelect();
-    return () => { emblaApi.off("select", onEmblaSelect); };
-  }, [emblaApi, onEmblaSelect]);
-
-  /* Autoplay every 5s, pause on hover */
-  const autoplayRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const [isHovered, setIsHovered] = useState(false);
+  const goToTestimonialPage = (index: number) => {
+    const totalPages = testimonialPages.length;
+    if (totalPages <= 1) return;
+    setSelectedIndex((index + totalPages) % totalPages);
+  };
 
   useEffect(() => {
-    if (!emblaApi) return;
-    if (isHovered) {
-      if (autoplayRef.current) clearInterval(autoplayRef.current);
-      return;
-    }
-    autoplayRef.current = setInterval(() => {
-      emblaApi.scrollNext();
+    if (testimonialPages.length <= 1 || isTestimonialsHovered) return;
+
+    const intervalId = window.setInterval(() => {
+      setSelectedIndex((prev) => (prev + 1) % testimonialPages.length);
     }, 5000);
-    return () => { if (autoplayRef.current) clearInterval(autoplayRef.current); };
-  }, [emblaApi, isHovered]);
+
+    return () => window.clearInterval(intervalId);
+  }, [isTestimonialsHovered, testimonialPages.length]);
 
 
   return (
@@ -636,34 +621,32 @@ const Landing = () => {
             </h2>
           </RevealSection>
 
-          <div className="relative">
+          <div
+            className="relative"
+            onMouseEnter={() => setIsTestimonialsHovered(true)}
+            onMouseLeave={() => setIsTestimonialsHovered(false)}
+          >
             <button
-              onClick={() => emblaApi?.scrollPrev()}
-              className="absolute -left-2 md:-left-6 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full border border-foreground/20 flex items-center justify-center hover:bg-foreground/5 transition-colors text-foreground/40 hover:text-foreground/70"
+              onClick={() => goToTestimonialPage(selectedIndex - 1)}
+              className="absolute -left-2 md:-left-6 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full border border-foreground/20 flex items-center justify-center hover:bg-foreground/5 transition-colors text-foreground/40 hover:text-foreground/70 disabled:opacity-40 disabled:hover:bg-transparent"
               aria-label="Témoignage précédent"
+              disabled={testimonialPages.length <= 1}
             >
               <ArrowLeft className="h-4 w-4" />
             </button>
             <button
-              onClick={() => emblaApi?.scrollNext()}
-              className="absolute -right-2 md:-right-6 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full border border-foreground/20 flex items-center justify-center hover:bg-foreground/5 transition-colors text-foreground/40 hover:text-foreground/70"
+              onClick={() => goToTestimonialPage(selectedIndex + 1)}
+              className="absolute -right-2 md:-right-6 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full border border-foreground/20 flex items-center justify-center hover:bg-foreground/5 transition-colors text-foreground/40 hover:text-foreground/70 disabled:opacity-40 disabled:hover:bg-transparent"
               aria-label="Témoignage suivant"
+              disabled={testimonialPages.length <= 1}
             >
               <ArrowRight className="h-4 w-4" />
             </button>
 
-            <div
-              ref={emblaRef}
-              className="overflow-hidden"
-              onMouseEnter={() => setIsHovered(true)}
-              onMouseLeave={() => setIsHovered(false)}
-            >
-              <div className="flex">
-                {testimonials.map((t) => (
-                  <div
-                    key={t.name}
-                    className="flex-[0_0_100%] md:flex-[0_0_33.333%] min-w-0 px-3"
-                  >
+            <div className="overflow-hidden px-3">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {(testimonialPages[selectedIndex] ?? []).map((t) => (
+                  <div key={t.name} className="min-w-0">
                     <div className="rounded-2xl p-10 h-full bg-card border border-border shadow-sm">
                       <span className="block font-heading text-7xl leading-none mb-3 select-none text-primary/40">
                         "
@@ -681,14 +664,14 @@ const Landing = () => {
             </div>
 
             <div className="flex justify-center gap-2 mt-10">
-              {scrollSnaps.map((_, i) => (
+              {testimonialPages.map((_, i) => (
                 <button
                   key={i}
-                  onClick={() => emblaApi?.scrollTo(i)}
+                  onClick={() => goToTestimonialPage(i)}
                   className={`w-2.5 h-2.5 rounded-full transition-colors ${
                     i === selectedIndex ? "bg-primary" : "bg-foreground/20"
                   }`}
-                  aria-label={`Aller au témoignage ${i + 1}`}
+                  aria-label={`Aller à la page de témoignages ${i + 1}`}
                 />
               ))}
             </div>
