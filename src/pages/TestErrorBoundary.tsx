@@ -259,12 +259,61 @@ const TestErrorBoundary = () => {
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Seconde section stable</CardTitle>
+            <CardTitle className="text-base">Seconde section stable (témoin bas)</CardTitle>
           </CardHeader>
-          <CardContent className="text-sm text-muted-foreground">
-            Cette section reste interactive même si la zone à risque a planté.
+          <CardContent>
+            <WitnessSection
+              label="Incrémentez aussi ce compteur AVANT de déclencher une erreur."
+              testId="witness-bottom"
+            />
           </CardContent>
         </Card>
+
+        {verification && (
+          <Card
+            className={
+              verification.allOk
+                ? "border-primary/40 bg-primary/5"
+                : "border-destructive/40 bg-destructive/5"
+            }
+            data-testid="verification-panel"
+            data-all-ok={verification.allOk}
+          >
+            <CardHeader>
+              <CardTitle className="text-base flex items-center gap-2">
+                {verification.allOk ? (
+                  <CheckCircle2 className="h-4 w-4 text-primary" />
+                ) : (
+                  <XCircle className="h-4 w-4 text-destructive" />
+                )}
+                Vérification automatique des témoins
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ul className="space-y-1.5 text-sm">
+                {verification.checks.map((c) => (
+                  <li key={c.label} className="flex items-start gap-2">
+                    {c.ok ? (
+                      <CheckCircle2 className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+                    ) : (
+                      <XCircle className="h-4 w-4 text-destructive mt-0.5 shrink-0" />
+                    )}
+                    <span className="text-foreground">
+                      {c.label}{" "}
+                      <span className="text-muted-foreground font-mono text-xs">
+                        ({c.detail})
+                      </span>
+                    </span>
+                  </li>
+                ))}
+              </ul>
+              <p className="mt-3 text-xs text-muted-foreground">
+                Snapshot pris au moment du déclenchement, comparé à l'état
+                actuel des témoins après le crash isolé par l'ErrorBoundary.
+              </p>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </main>
   );
