@@ -187,20 +187,24 @@ export default function TestBadgesLongLabels() {
     try {
       for (const vp of VIEWPORTS) {
         // 1) Capture de la grille à cette largeur
-        setProgress(`Grille ${vp.label} (${vp.width}px)…`)
+        setProgress(`Grille ${vp.label} (${vp.width}px)${strictMode ? ' • strict' : ''}…`)
         setStageWidth(vp.width)
+        if (strictMode) setActiveVp(vp.vp)
         setStageBadgeId(null)
         // Laisse le Dialog précédent (s'il y en a) se démonter complètement
         await wait(150)
         await nextPaint()
         if (stageRef.current) {
           const dataUrl = await captureNode(stageRef.current, vp.width)
-          results.push({ name: `grille-${vp.label}-${vp.width}px.png`, dataUrl })
+          results.push({
+            name: `grille-${vp.label}-${vp.width}px${strictMode ? '-strict' : ''}.png`,
+            dataUrl,
+          })
         }
 
         // 2) Capture de chaque modale ouverte à cette largeur
         for (const tc of TEST_CASES) {
-          setProgress(`Modale « ${tc.id} » — ${vp.label}…`)
+          setProgress(`Modale « ${tc.id} » — ${vp.label}${strictMode ? ' • strict' : ''}…`)
           // Toujours fermer la modale précédente avant d'ouvrir la suivante
           // pour éviter tout chevauchement d'animation Radix
           setStageBadgeId(null)
@@ -222,7 +226,7 @@ export default function TestBadgesLongLabels() {
 
           const dataUrl = await captureNode(dialog, Math.min(vp.width, 480))
           results.push({
-            name: `modale-${tc.id}-${vp.label}-${vp.width}px.png`,
+            name: `modale-${tc.id}-${vp.label}-${vp.width}px${strictMode ? '-strict' : ''}.png`,
             dataUrl,
           })
         }
@@ -235,6 +239,7 @@ export default function TestBadgesLongLabels() {
       toast.error('Erreur pendant la capture — voir la console')
     } finally {
       setStageWidth(null)
+      setActiveVp(null)
       setStageBadgeId(null)
       setProgress('')
       setIsCapturing(false)
