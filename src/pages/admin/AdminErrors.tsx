@@ -18,6 +18,7 @@ import {
 import { formatDistanceToNow, format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { toast } from "sonner";
+import NetworkErrorsSection from "@/components/admin/NetworkErrorsSection";
 
 interface ErrorLog {
   id: string;
@@ -153,6 +154,9 @@ const AdminErrors = () => {
           <CardContent><p className="text-3xl font-bold">{stats.affected}</p></CardContent>
         </Card>
       </div>
+
+      {/* Section dédiée aux erreurs réseau (NetworkErrorMonitor) */}
+      <NetworkErrorsSection />
 
       {/* Filtres */}
       <div className="flex flex-wrap gap-3 items-center">
