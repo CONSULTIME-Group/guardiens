@@ -686,8 +686,12 @@ const AdminUsers = () => {
                     </Avatar>
                     <div className="flex-1 min-w-0">
                       <div className="font-medium text-sm truncate">{it.recipient_name}</div>
-                      <div className="text-xs text-muted-foreground">
+                      <div
+                        className="text-xs text-muted-foreground"
+                        title={new Date(it.created_at).toLocaleString("fr-FR")}
+                      >
                         {formatDistanceToNow(new Date(it.created_at), { addSuffix: true, locale: fr })}
+                        <span className="ml-2 opacity-60">· {new Date(it.created_at).toLocaleString("fr-FR", { dateStyle: "short", timeStyle: "short" })}</span>
                       </div>
                     </div>
                   </div>
