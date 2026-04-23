@@ -73,6 +73,7 @@ const AdminEmails = lazy(() => import("./pages/admin/AdminEmails"));
 const AdminExperienceVerification = lazy(() => import("./pages/admin/AdminExperienceVerification"));
 const PlancheBadges = lazy(() => import("./pages/PlancheBadges"));
 const TestBadgesLongLabels = lazy(() => import("./pages/TestBadgesLongLabels"));
+const TestErrorBoundary = lazy(() => import("./pages/TestErrorBoundary"));
 const Unsubscribe = lazy(() => import("./pages/Unsubscribe"));
 const CityPage = lazy(() => import("./pages/CityPage"));
 const AdminCityPages = lazy(() => import("./pages/admin/AdminCityPages"));
@@ -278,6 +279,7 @@ const AppRoutes = () => (
       </Route>
       <Route path="/planche-badges" element={<PlancheBadges />} />
       <Route path="/test/badges-long-labels" element={<TestBadgesLongLabels />} />
+      <Route path="/test/error-boundary" element={<TestErrorBoundary />} />
       <Route path="/unsubscribe" element={<Unsubscribe />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
