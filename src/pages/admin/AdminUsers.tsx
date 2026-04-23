@@ -195,7 +195,29 @@ const AdminUsers = () => {
     setDeleteConfirm({ open: false, userId: "", userName: "" });
   };
 
-  return (
+  const handleSendMessage = async () => {
+    const content = messageModal.content.trim();
+    if (!content) {
+      toast.error("Le message ne peut pas être vide");
+      return;
+    }
+    setSendingMessage(true);
+    const { data, error } = await supabase.rpc("admin_send_message_to_user", {
+      p_target_user_id: messageModal.userId,
+      p_content: content,
+    });
+    setSendingMessage(false);
+    if (error) {
+      toast.error(error.message || "Erreur lors de l'envoi");
+      return;
+    }
+    toast.success("Message envoyé");
+    const convId = data as string;
+    setMessageModal({ open: false, userId: "", userName: "", content: "" });
+    if (convId) {
+      navigate(`/messages?conversation=${convId}`);
+    }
+  };
     <div className="space-y-6">
       <h1 className="font-body text-2xl font-bold">Utilisateurs</h1>
 
