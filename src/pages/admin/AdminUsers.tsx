@@ -62,8 +62,11 @@ const AdminUsers = () => {
     open: false, userId: "", userName: "", content: "", step: "edit"
   });
   const [sendingMessage, setSendingMessage] = useState(false);
-  const [historyModal, setHistoryModal] = useState<{ open: boolean; loading: boolean; items: Array<{ conversation_id: string; content: string; created_at: string; recipient_id: string; recipient_name: string; recipient_avatar: string | null }> }>({
+  const [historyModal, setHistoryModal] = useState<{ open: boolean; loading: boolean; items: Array<{ id: string; conversation_id: string | null; content: string; created_at: string; recipient_id: string; recipient_name: string; recipient_avatar: string | null; status: "success" | "failed"; error_message: string | null }> }>({
     open: false, loading: false, items: [],
+  });
+  const [errorDetailModal, setErrorDetailModal] = useState<{ open: boolean; recipient: string; sentAt: string; error: string; content: string }>({
+    open: false, recipient: "", sentAt: "", error: "", content: "",
   });
   const [lastMessageModal, setLastMessageModal] = useState<{
     open: boolean;
@@ -81,7 +84,7 @@ const AdminUsers = () => {
     // Source de vérité : journal d'audit côté back-office
     const { data: logs, error: logErr } = await supabase
       .from("admin_message_logs")
-      .select("conversation_id, message_id, content, sent_at, recipient_id, recipient_email, recipient_name")
+      .select("id, conversation_id, message_id, content, sent_at, recipient_id, recipient_email, recipient_name, status, error_message")
       .order("sent_at", { ascending: false })
       .limit(200);
     if (logErr) {
@@ -99,12 +102,15 @@ const AdminUsers = () => {
       avatarMap = new Map((profs || []).map((p: any) => [p.id, p.avatar_url]));
     }
     const items = (logs || []).map((l: any) => ({
+      id: l.id,
       conversation_id: l.conversation_id,
       content: l.content,
       created_at: l.sent_at,
       recipient_id: l.recipient_id,
       recipient_name: l.recipient_name || l.recipient_email || "Utilisateur",
       recipient_avatar: avatarMap.get(l.recipient_id) || null,
+      status: (l.status === "failed" ? "failed" : "success") as "success" | "failed",
+      error_message: l.error_message ?? null,
     }));
     setHistoryModal({ open: true, loading: false, items });
   };
@@ -278,6 +284,14 @@ const AdminUsers = () => {
     });
     setSendingMessage(false);
     if (error) {
+      // Journalise l'échec côté back-office (best-effort, ne bloque pas le toast)
+      try {
+        await supabase.rpc("admin_log_message_failure", {
+          p_target_user_id: messageModal.userId,
+          p_content: content,
+          p_error_message: error.message || "Erreur inconnue",
+        });
+      } catch { /* noop */ }
       toast.error(error.message || "Erreur lors de l'envoi");
       return;
     }
@@ -713,36 +727,71 @@ const AdminUsers = () => {
             <p className="text-sm text-muted-foreground py-6 text-center">Aucun message envoyé pour le moment.</p>
           ) : (
             <div className="max-h-[60vh] overflow-y-auto space-y-3 pr-1">
-              {historyModal.items.map((it) => (
-                <button
-                  key={it.conversation_id}
-                  onClick={() => {
-                    setHistoryModal({ open: false, loading: false, items: [] });
-                    navigate(`/messages?conversation=${it.conversation_id}`);
-                  }}
-                  className="w-full text-left rounded-lg border bg-card hover:bg-accent/40 transition p-3"
-                >
-                  <div className="flex items-center gap-3 mb-2">
-                    <Avatar className="h-8 w-8">
-                      <AvatarImage src={it.recipient_avatar || undefined} />
-                      <AvatarFallback className="text-xs">
-                        {it.recipient_name.split(" ").map((n) => n[0]).slice(0, 2).join("").toUpperCase()}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1 min-w-0">
-                      <div className="font-medium text-sm truncate">{it.recipient_name}</div>
-                      <div
-                        className="text-xs text-muted-foreground"
-                        title={new Date(it.created_at).toLocaleString("fr-FR")}
-                      >
-                        {formatDistanceToNow(new Date(it.created_at), { addSuffix: true, locale: fr })}
-                        <span className="ml-2 opacity-60">· {new Date(it.created_at).toLocaleString("fr-FR", { dateStyle: "short", timeStyle: "short" })}</span>
+              {historyModal.items.map((it) => {
+                const failed = it.status === "failed";
+                return (
+                  <div
+                    key={it.id}
+                    className={`rounded-lg border p-3 transition ${failed ? "bg-destructive/5 border-destructive/30" : "bg-card hover:bg-accent/40"}`}
+                  >
+                    <div className="flex items-center gap-3 mb-2">
+                      <Avatar className="h-8 w-8">
+                        <AvatarImage src={it.recipient_avatar || undefined} />
+                        <AvatarFallback className="text-xs">
+                          {it.recipient_name.split(" ").map((n) => n[0]).slice(0, 2).join("").toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <div className="font-medium text-sm truncate">{it.recipient_name}</div>
+                          <Badge variant={failed ? "destructive" : "default"} className="shrink-0 text-[10px] px-1.5 py-0">
+                            {failed ? "Échec" : "Envoyé"}
+                          </Badge>
+                        </div>
+                        <div
+                          className="text-xs text-muted-foreground"
+                          title={new Date(it.created_at).toLocaleString("fr-FR")}
+                        >
+                          {formatDistanceToNow(new Date(it.created_at), { addSuffix: true, locale: fr })}
+                          <span className="ml-2 opacity-60">· {new Date(it.created_at).toLocaleString("fr-FR", { dateStyle: "short", timeStyle: "short" })}</span>
+                        </div>
                       </div>
                     </div>
+                    <p className="text-sm text-muted-foreground line-clamp-3 whitespace-pre-wrap">{it.content || "(message vide)"}</p>
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      {failed ? (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setErrorDetailModal({
+                            open: true,
+                            recipient: it.recipient_name,
+                            sentAt: it.created_at,
+                            error: it.error_message || "Erreur non détaillée",
+                            content: it.content || "",
+                          })}
+                        >
+                          <AlertTriangle className="h-3.5 w-3.5 mr-1.5" />
+                          Voir le détail de l'erreur
+                        </Button>
+                      ) : it.conversation_id ? (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            const convId = it.conversation_id;
+                            setHistoryModal({ open: false, loading: false, items: [] });
+                            navigate(`/messages?conversation=${convId}`);
+                          }}
+                        >
+                          <MessageSquare className="h-3.5 w-3.5 mr-1.5" />
+                          Ouvrir la conversation
+                        </Button>
+                      ) : null}
+                    </div>
                   </div>
-                  <p className="text-sm text-muted-foreground line-clamp-3 whitespace-pre-wrap">{it.content}</p>
-                </button>
-              ))}
+                );
+              })}
             </div>
           )}
           <DialogFooter>
@@ -798,6 +847,50 @@ const AdminUsers = () => {
             <Button
               onClick={() => setLastMessageModal({ open: false, loading: false, userName: "", userId: "", conversationId: null, content: null, sentAt: null })}
             >
+              Fermer
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Détail d'une erreur d'envoi admin */}
+      <Dialog
+        open={errorDetailModal.open}
+        onOpenChange={(o) => !o && setErrorDetailModal({ open: false, recipient: "", sentAt: "", error: "", content: "" })}
+      >
+        <DialogContent className="max-w-xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-destructive" />
+              Détail de l'erreur d'envoi
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 text-sm">
+            <div>
+              <div className="text-xs uppercase tracking-wide text-muted-foreground mb-1">Destinataire</div>
+              <div className="font-medium">{errorDetailModal.recipient}</div>
+            </div>
+            {errorDetailModal.sentAt && (
+              <div>
+                <div className="text-xs uppercase tracking-wide text-muted-foreground mb-1">Tentative</div>
+                <div>{new Date(errorDetailModal.sentAt).toLocaleString("fr-FR", { dateStyle: "long", timeStyle: "short" })}</div>
+              </div>
+            )}
+            <div>
+              <div className="text-xs uppercase tracking-wide text-muted-foreground mb-1">Erreur</div>
+              <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-3 text-destructive whitespace-pre-wrap break-words">
+                {errorDetailModal.error}
+              </div>
+            </div>
+            <div>
+              <div className="text-xs uppercase tracking-wide text-muted-foreground mb-1">Message tenté</div>
+              <div className="rounded-lg border bg-muted/40 p-3 whitespace-pre-wrap max-h-48 overflow-y-auto">
+                {errorDetailModal.content || "(vide)"}
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button onClick={() => setErrorDetailModal({ open: false, recipient: "", sentAt: "", error: "", content: "" })}>
               Fermer
             </Button>
           </DialogFooter>
