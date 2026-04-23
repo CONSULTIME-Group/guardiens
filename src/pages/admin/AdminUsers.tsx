@@ -609,39 +609,121 @@ const AdminUsers = () => {
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Send Message Modal */}
+      {/* Send Message Modal — édition + prévisualisation */}
       <Dialog
         open={messageModal.open}
-        onOpenChange={(o) => !o && !sendingMessage && setMessageModal({ open: false, userId: "", userName: "", content: "" })}
+        onOpenChange={(o) => !o && !sendingMessage && setMessageModal({ open: false, userId: "", userName: "", content: "", step: "edit" })}
       >
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Envoyer un message à {messageModal.userName}</DialogTitle>
+            <DialogTitle>
+              {messageModal.step === "edit" ? "Rédiger un message à " : "Prévisualisation — message à "}
+              {messageModal.userName}
+            </DialogTitle>
           </DialogHeader>
-          <div className="space-y-2">
-            <Textarea
-              placeholder="Votre message…"
-              value={messageModal.content}
-              onChange={(e) => setMessageModal((s) => ({ ...s, content: e.target.value }))}
-              rows={6}
-              maxLength={5000}
-              disabled={sendingMessage}
-            />
-            <div className="flex items-center justify-between text-xs text-muted-foreground">
-              <span>Le message sera envoyé en votre nom dans la messagerie de l'utilisateur.</span>
-              <span>{messageModal.content.length}/5000</span>
+          {messageModal.step === "edit" ? (
+            <div className="space-y-2">
+              <Textarea
+                placeholder="Votre message…"
+                value={messageModal.content}
+                onChange={(e) => setMessageModal((s) => ({ ...s, content: e.target.value }))}
+                rows={6}
+                maxLength={5000}
+                disabled={sendingMessage}
+              />
+              <div className="flex items-center justify-between text-xs text-muted-foreground">
+                <span>Le message sera envoyé en votre nom dans la messagerie de l'utilisateur.</span>
+                <span>{messageModal.content.length}/5000</span>
+              </div>
             </div>
-          </div>
+          ) : (
+            <div className="space-y-3">
+              <div className="rounded-lg border bg-muted/40 p-4 whitespace-pre-wrap text-sm leading-relaxed">
+                {messageModal.content || <span className="text-muted-foreground italic">Message vide</span>}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Vérifiez le contenu, le ton et l'orthographe. Une fois envoyé, le message apparaîtra immédiatement dans la messagerie de <strong>{messageModal.userName}</strong>.
+              </p>
+            </div>
+          )}
+          <DialogFooter className="gap-2 sm:gap-2">
+            {messageModal.step === "edit" ? (
+              <>
+                <Button
+                  variant="outline"
+                  onClick={() => setMessageModal({ open: false, userId: "", userName: "", content: "", step: "edit" })}
+                  disabled={sendingMessage}
+                >
+                  Annuler
+                </Button>
+                <Button
+                  onClick={() => setMessageModal((s) => ({ ...s, step: "preview" }))}
+                  disabled={!messageModal.content.trim()}
+                >
+                  Prévisualiser →
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button
+                  variant="outline"
+                  onClick={() => setMessageModal((s) => ({ ...s, step: "edit" }))}
+                  disabled={sendingMessage}
+                >
+                  ← Modifier
+                </Button>
+                <Button onClick={handleSendMessage} disabled={sendingMessage || !messageModal.content.trim()}>
+                  {sendingMessage ? "Envoi…" : "Confirmer & envoyer"}
+                </Button>
+              </>
+            )}
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Historique des messages admin envoyés */}
+      <Dialog open={historyModal.open} onOpenChange={(o) => !o && setHistoryModal({ open: false, loading: false, items: [] })}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Historique de mes messages admin</DialogTitle>
+          </DialogHeader>
+          {historyModal.loading ? (
+            <p className="text-sm text-muted-foreground py-6 text-center">Chargement…</p>
+          ) : historyModal.items.length === 0 ? (
+            <p className="text-sm text-muted-foreground py-6 text-center">Aucun message envoyé pour le moment.</p>
+          ) : (
+            <div className="max-h-[60vh] overflow-y-auto space-y-3 pr-1">
+              {historyModal.items.map((it) => (
+                <button
+                  key={it.conversation_id}
+                  onClick={() => {
+                    setHistoryModal({ open: false, loading: false, items: [] });
+                    navigate(`/messages?conversation=${it.conversation_id}`);
+                  }}
+                  className="w-full text-left rounded-lg border bg-card hover:bg-accent/40 transition p-3"
+                >
+                  <div className="flex items-center gap-3 mb-2">
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage src={it.recipient_avatar || undefined} />
+                      <AvatarFallback className="text-xs">
+                        {it.recipient_name.split(" ").map((n) => n[0]).slice(0, 2).join("").toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1 min-w-0">
+                      <div className="font-medium text-sm truncate">{it.recipient_name}</div>
+                      <div className="text-xs text-muted-foreground">
+                        {formatDistanceToNow(new Date(it.created_at), { addSuffix: true, locale: fr })}
+                      </div>
+                    </div>
+                  </div>
+                  <p className="text-sm text-muted-foreground line-clamp-3 whitespace-pre-wrap">{it.content}</p>
+                </button>
+              ))}
+            </div>
+          )}
           <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setMessageModal({ open: false, userId: "", userName: "", content: "" })}
-              disabled={sendingMessage}
-            >
-              Annuler
-            </Button>
-            <Button onClick={handleSendMessage} disabled={sendingMessage || !messageModal.content.trim()}>
-              {sendingMessage ? "Envoi…" : "Envoyer"}
+            <Button variant="outline" onClick={() => setHistoryModal({ open: false, loading: false, items: [] })}>
+              Fermer
             </Button>
           </DialogFooter>
         </DialogContent>
