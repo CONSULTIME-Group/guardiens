@@ -155,6 +155,9 @@ const AdminErrors = () => {
         </Card>
       </div>
 
+      {/* Section dédiée aux erreurs réseau (NetworkErrorMonitor) */}
+      <NetworkErrorsSection />
+
       {/* Filtres */}
       <div className="flex flex-wrap gap-3 items-center">
         <Select value={filter} onValueChange={(v: any) => setFilter(v)}>
