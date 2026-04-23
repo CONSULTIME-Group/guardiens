@@ -427,6 +427,7 @@ const AdminUsers = () => {
                             userId: user.id,
                             userName: `${user.first_name || ""} ${user.last_name || ""}`.trim() || user.email || "cet utilisateur",
                             content: "",
+                            step: "edit",
                           })}
                         >
                           <MessageSquare className="h-4 w-4" />
