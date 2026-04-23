@@ -37,15 +37,41 @@ function canUseStorage(storage: Storage | undefined) {
   }
 }
 
+export function getSafeLocalStorage(): StorageLike {
+  if (typeof window === "undefined") {
+    return createMemoryStorage();
+  }
+
+  try {
+    if (canUseStorage(window.localStorage)) {
+      return window.localStorage;
+    }
+  } catch {}
+
+  return createMemoryStorage();
+}
+
+export function getSafeSessionStorage(): StorageLike {
+  if (typeof window === "undefined") {
+    return createMemoryStorage();
+  }
+
+  try {
+    if (canUseStorage(window.sessionStorage)) {
+      return window.sessionStorage;
+    }
+  } catch {}
+
+  return createMemoryStorage();
+}
+
 export function installStorageFallback() {
   if (typeof window === "undefined") return;
-
-  const memoryStorage = createMemoryStorage();
 
   if (!canUseStorage(window.localStorage)) {
     Object.defineProperty(window, "localStorage", {
       configurable: true,
-      value: memoryStorage,
+      value: createMemoryStorage(),
     });
   }
 
