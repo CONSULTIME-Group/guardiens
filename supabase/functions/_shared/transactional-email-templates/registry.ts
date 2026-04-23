@@ -32,8 +32,10 @@ import { template as relanceCpManquant } from './relance-cp-manquant.tsx'
 import { template as reviewReceived } from './review-received.tsx'
 import { template as disputeResolved } from './dispute-resolved.tsx'
 import { template as relanceProfilIncomplet } from './relance-profil-incomplet.tsx'
+import { template as nearbySitAlert } from './nearby-sit-alert.tsx'
 
 export const TEMPLATES: Record<string, TemplateEntry> = {
+  'nearby-sit-alert': nearbySitAlert,
   'dispute-resolved': disputeResolved,
   'report-resolved': reportResolved,
   'welcome': welcome,
