@@ -244,6 +244,7 @@ const TestErrorBoundary = () => {
                 onClick={() => {
                   setScenario("none");
                   setResetKey((k) => k + 1);
+                  setSnapshot(null);
                 }}
               >
                 Réinitialiser la zone
