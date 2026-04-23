@@ -1,37 +1,73 @@
 import { lazy, type ComponentType } from "react";
 
+const RELOAD_TTL_MS = 30_000;
+
+const getReloadKey = (chunkName?: string, fallbackId?: string) =>
+  `chunk-reload-${chunkName ?? fallbackId ?? "anonymous-chunk"}`;
+
+const getLastReloadAt = (reloadKey: string) => {
+  try {
+    const value = sessionStorage.getItem(reloadKey);
+    if (!value) return null;
+
+    const timestamp = Number(value);
+    return Number.isFinite(timestamp) ? timestamp : 0;
+  } catch {
+    return null;
+  }
+};
+
+const markReload = (reloadKey: string) => {
+  try {
+    sessionStorage.setItem(reloadKey, String(Date.now()));
+  } catch {
+    // Ignore storage errors (private mode, quota, etc.)
+  }
+};
+
+const clearReloadMark = (reloadKey: string) => {
+  try {
+    sessionStorage.removeItem(reloadKey);
+  } catch {
+    // Ignore storage errors
+  }
+};
+
 /**
  * Wrapper autour de React.lazy qui :
  * 1. Retente une fois en cas d'échec réseau transitoire
  * 2. Si toujours en échec après un déploiement (chunk hash périmé),
- *    force un rechargement complet de la page une seule fois
- *    (flag stocké en sessionStorage pour éviter les boucles).
+ *    force un rechargement complet de la page une seule fois par fenêtre courte
+ *    pour éviter les boucles, sans bloquer définitivement les futurs rechargements.
  */
 export function lazyWithRetry<T extends ComponentType<any>>(
   factory: () => Promise<{ default: T }>,
   chunkName?: string,
 ) {
   return lazy(async () => {
-    const reloadKey = `chunk-reload-${chunkName ?? factory.toString().slice(0, 50)}`;
+    const reloadKey = getReloadKey(chunkName, factory.toString().slice(0, 50));
+
     try {
-      return await factory();
-    } catch (err) {
-      // Premier essai raté → on retente après un court délai (réseau flaky)
+      const module = await factory();
+      clearReloadMark(reloadKey);
+      return module;
+    } catch {
       try {
-        await new Promise((r) => setTimeout(r, 400));
-        return await factory();
-      } catch (err2) {
-        // Deuxième essai raté → probablement un chunk périmé après déploiement
-        const alreadyReloaded = sessionStorage.getItem(reloadKey);
-        if (!alreadyReloaded) {
-          sessionStorage.setItem(reloadKey, "1");
-          // Petit toast invisible : on recharge proprement
+        await new Promise((resolve) => setTimeout(resolve, 400));
+        const module = await factory();
+        clearReloadMark(reloadKey);
+        return module;
+      } catch (error) {
+        const lastReloadAt = getLastReloadAt(reloadKey);
+        const canReload = !lastReloadAt || Date.now() - lastReloadAt > RELOAD_TTL_MS;
+
+        if (canReload) {
+          markReload(reloadKey);
           window.location.reload();
-          // Renvoyer une promise jamais résolue le temps du reload
           return new Promise(() => {}) as never;
         }
-        // Déjà rechargé une fois → on laisse l'ErrorBoundary prendre le relais
-        throw err2;
+
+        throw error;
       }
     }
   });
