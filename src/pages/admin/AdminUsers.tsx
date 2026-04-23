@@ -62,8 +62,11 @@ const AdminUsers = () => {
     open: false, userId: "", userName: "", content: "", step: "edit"
   });
   const [sendingMessage, setSendingMessage] = useState(false);
-  const [historyModal, setHistoryModal] = useState<{ open: boolean; loading: boolean; items: Array<{ conversation_id: string; content: string; created_at: string; recipient_id: string; recipient_name: string; recipient_avatar: string | null }> }>({
+  const [historyModal, setHistoryModal] = useState<{ open: boolean; loading: boolean; items: Array<{ id: string; conversation_id: string | null; content: string; created_at: string; recipient_id: string; recipient_name: string; recipient_avatar: string | null; status: "success" | "failed"; error_message: string | null }> }>({
     open: false, loading: false, items: [],
+  });
+  const [errorDetailModal, setErrorDetailModal] = useState<{ open: boolean; recipient: string; sentAt: string; error: string; content: string }>({
+    open: false, recipient: "", sentAt: "", error: "", content: "",
   });
   const [lastMessageModal, setLastMessageModal] = useState<{
     open: boolean;
@@ -278,6 +281,14 @@ const AdminUsers = () => {
     });
     setSendingMessage(false);
     if (error) {
+      // Journalise l'échec côté back-office (best-effort, ne bloque pas le toast)
+      try {
+        await supabase.rpc("admin_log_message_failure", {
+          p_target_user_id: messageModal.userId,
+          p_content: content,
+          p_error_message: error.message || "Erreur inconnue",
+        });
+      } catch { /* noop */ }
       toast.error(error.message || "Erreur lors de l'envoi");
       return;
     }
