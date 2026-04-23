@@ -4,6 +4,7 @@ import { compressImageFile } from "@/lib/compressImage";
 import { ImagePlus, X, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Progress } from "@/components/ui/progress";
+import { safeUUID } from "@/lib/uuid";
 
 const ACCEPTED = ".jpg,.jpeg,.png,.webp";
 const MAX_PHOTOS = 3;
@@ -41,7 +42,7 @@ const MissionPhotoUpload = ({ userId, photos, onChange }: MissionPhotoUploadProp
         setProgress(Math.round(((i) / toProcess) * 80));
         const compressed = await compressImageFile(file, 0.3, 1200);
         const ext = compressed.name.split(".").pop() || "webp";
-        const path = `${userId}/${crypto.randomUUID()}.${ext}`;
+        const path = `${userId}/${safeUUID()}.${ext}`;
 
         setProgress(Math.round(((i + 0.5) / toProcess) * 80));
         const { error } = await supabase.storage.from("mission-photos").upload(path, compressed);

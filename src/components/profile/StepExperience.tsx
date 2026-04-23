@@ -13,6 +13,7 @@ import { toast } from "sonner";
 import ChipSelect from "./ChipSelect";
 import HintBubble from "./HintBubble";
 import type { SitterProfileData, PastAnimal } from "@/hooks/useSitterProfile";
+import { safeUUID } from "@/lib/uuid";
 
 const ANIMAL_TYPES = ["Tous", "Chiens", "Chats", "Chevaux", "Oiseaux", "Animaux de ferme", "NAC"];
 const EXPERIENCE_OPTIONS = ["Débutant", "1-3 ans", "3-5 ans", "5+ ans"];
@@ -53,7 +54,7 @@ const StepExperience = ({ data, pastAnimals, onChange, onAddAnimal, onRemoveAnim
   const uploadAnimalPhoto = async (file: File): Promise<string | null> => {
     if (!user) return null;
     const ext = file.name.split(".").pop();
-    const path = `${user.id}/past-animals/${crypto.randomUUID()}.${ext}`;
+    const path = `${user.id}/past-animals/${safeUUID()}.${ext}`;
     const { error } = await supabase.storage.from("sitter-gallery").upload(path, file, { upsert: true });
     if (error) { toast.error("Impossible d'uploader la photo"); return null; }
     const { data: urlData } = supabase.storage.from("sitter-gallery").getPublicUrl(path);
