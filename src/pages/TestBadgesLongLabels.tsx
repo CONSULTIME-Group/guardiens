@@ -244,6 +244,12 @@ export default function TestBadgesLongLabels() {
           results.push({
             name: `modale-${tc.id}-${vp.label}-${vp.width}px${strictMode ? '-strict' : ''}.png`,
             dataUrl,
+            kind: 'modale',
+            vp: vp.vp,
+            vpLabel: vp.label,
+            width: vp.width,
+            badgeId: tc.id,
+            index: results.length,
           })
         }
       }
