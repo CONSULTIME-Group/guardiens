@@ -307,7 +307,7 @@ export default function TestBadgesLongLabels() {
         </div>
 
         {/* Sélecteur de largeur du conteneur (test responsive en direct) */}
-        <div className="mb-8 flex flex-wrap items-center gap-2 px-1">
+        <div className="mb-3 flex flex-wrap items-center gap-2 px-1">
           <span className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground mr-1">
             <Maximize2 className="w-3.5 h-3.5" />
             Largeur du conteneur :
@@ -346,8 +346,88 @@ export default function TestBadgesLongLabels() {
           )}
         </div>
 
+        {/* Mode "viewport strict" : applique aussi les styles responsive
+            (mobile/tablette/desktop) indépendamment de la fenêtre réelle */}
+        <div className="mb-8 flex flex-wrap items-center gap-2 px-1 pt-2 border-t border-border/50">
+          <label className="inline-flex items-center gap-2 text-xs font-medium text-foreground cursor-pointer select-none">
+            <input
+              type="checkbox"
+              checked={strictMode}
+              onChange={e => setStrictMode(e.target.checked)}
+              disabled={isCapturing}
+              className="h-3.5 w-3.5 rounded border-border accent-primary"
+            />
+            Viewport strict
+          </label>
+          <span className="text-[11px] text-muted-foreground mr-2">
+            (force aussi le layout responsive, pas seulement la largeur)
+          </span>
+          {strictMode && (
+            <>
+              {(['mobile', 'tablet', 'desktop'] as const).map(v => {
+                const active = manualVp === v
+                const label =
+                  v === 'mobile' ? 'Mobile' : v === 'tablet' ? 'Tablette' : 'Desktop'
+                return (
+                  <Button
+                    key={v}
+                    size="sm"
+                    variant={active ? 'default' : 'outline'}
+                    onClick={() => setManualVp(active ? null : v)}
+                    disabled={isCapturing}
+                    className="h-7 px-2.5 text-xs"
+                    aria-pressed={active}
+                  >
+                    {label}
+                  </Button>
+                )
+              })}
+              <Button
+                size="sm"
+                variant={manualVp === null ? 'default' : 'outline'}
+                onClick={() => setManualVp(null)}
+                disabled={isCapturing}
+                className="h-7 px-2.5 text-xs"
+                aria-pressed={manualVp === null}
+              >
+                Auto (fenêtre)
+              </Button>
+              {effectiveVp && (
+                <span className="text-[11px] text-muted-foreground ml-1">
+                  VP actif : <strong>{effectiveVp}</strong>
+                  {activeVp && ' (capture)'}
+                </span>
+              )}
+            </>
+          )}
+        </div>
+
+        {/* Feuille de style scopée au stage : réécrit le layout grille
+            selon data-vp pour ignorer les media queries du vrai viewport. */}
+        <style>{`
+          /* Quand data-vp est présent, on neutralise les classes Tailwind sm:/md: utilisées dans la grille
+             et on applique la version souhaitée explicitement. Scoping strict via [data-vp]. */
+          [data-stage-vp] .test-badge-grid {
+            display: grid;
+            gap: 1rem;
+          }
+          [data-stage-vp="mobile"] .test-badge-grid {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 1rem;
+          }
+          [data-stage-vp="tablet"] .test-badge-grid {
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 1rem;
+          }
+          [data-stage-vp="desktop"] .test-badge-grid {
+            grid-template-columns: repeat(6, minmax(0, 1fr));
+            gap: 1.5rem;
+          }
+        `}</style>
+
         {/* Stage de capture — grille hébergée dans un conteneur redimensionnable.
-            Quand stageWidth (capture) ou manualWidth (manuel) est défini, on force la largeur. */}
+            Quand stageWidth (capture) ou manualWidth (manuel) est défini, on force la largeur.
+            Quand data-stage-vp est défini, on applique aussi le layout responsive correspondant. */}
         <section className="mb-12">
           <h2 className="text-lg font-heading font-semibold text-foreground mb-4 border-b border-border pb-2">
             1. Grille de sceaux (capturée par le bouton)
@@ -358,9 +438,16 @@ export default function TestBadgesLongLabels() {
               width: effectiveWidth ?? '100%',
               maxWidth: effectiveWidth ?? '100%',
             }}
+            data-stage-vp={effectiveVp ?? undefined}
           >
             <div ref={stageRef} className="bg-background p-4">
-              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-4 md:gap-6">
+              <div
+                className={
+                  effectiveVp
+                    ? 'test-badge-grid'
+                    : 'grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-4 md:gap-6'
+                }
+              >
                 {TEST_CASES.map((tc, i) => (
                   <div
                     key={`grid-${tc.id}-${i}`}
