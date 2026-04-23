@@ -30,11 +30,13 @@ export class ErrorBoundary extends Component<Props, State> {
     const errorId = Math.random().toString(36).slice(2, 10).toUpperCase();
 
     // Cadre console clair, regroupé et collapsé pour éviter de polluer le reste
-    const title = `🛑 [ErrorBoundary] ${error.name}: ${error.message}`;
+    const errorName = error?.name || "Unknown error";
+    const errorMessage = error?.message || "Unknown error message";
+    const title = `🛑 [ErrorBoundary] ${errorName}: ${errorMessage}`;
     if (typeof console.groupCollapsed === "function") {
       console.groupCollapsed(`%c${title}`, "color:#dc2626;font-weight:bold;");
       console.error("Référence :", errorId);
-      console.error("Message   :", error.message);
+      console.error("Message   :", errorMessage);
       if (error.stack) console.error("Stack     :\n" + error.stack);
       if (info.componentStack)
         console.error("Component stack :" + info.componentStack);

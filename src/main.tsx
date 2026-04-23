@@ -16,8 +16,15 @@ root.render(
 
 // Fallback: mark prerender ready after initial render for static pages.
 // Pages with async data set prerenderReady = true themselves after fetch.
-requestIdleCallback?.(() => { window.prerenderReady = true; }) ??
-  setTimeout(() => { window.prerenderReady = true; }, 500);
+const markPrerenderReady = () => {
+  window.prerenderReady = true;
+};
+
+if (typeof window !== "undefined" && typeof window.requestIdleCallback === "function") {
+  window.requestIdleCallback(markPrerenderReady);
+} else {
+  window.setTimeout(markPrerenderReady, 500);
+}
 
 // Collect Core Web Vitals (CLS, INP, FCP, LCP, TTFB)
 reportWebVitals();
