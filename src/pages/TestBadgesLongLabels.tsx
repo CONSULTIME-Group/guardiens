@@ -209,6 +209,12 @@ export default function TestBadgesLongLabels() {
           results.push({
             name: `grille-${vp.label}-${vp.width}px${strictMode ? '-strict' : ''}.png`,
             dataUrl,
+            kind: 'grille',
+            vp: vp.vp,
+            vpLabel: vp.label,
+            width: vp.width,
+            badgeId: null,
+            index: results.length,
           })
         }
 
