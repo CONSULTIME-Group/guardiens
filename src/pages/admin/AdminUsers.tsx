@@ -441,6 +441,17 @@ const AdminUsers = () => {
                         >
                           <MessageSquare className="h-4 w-4" />
                         </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          title="Voir le contenu du dernier message envoyé"
+                          onClick={() => openLastMessage(
+                            user.id,
+                            `${user.first_name || ""} ${user.last_name || ""}`.trim() || user.email || "cet utilisateur",
+                          )}
+                        >
+                          <FileText className="h-4 w-4" />
+                        </Button>
                          <Button
                           variant="ghost"
                           size="icon"
