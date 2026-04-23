@@ -354,6 +354,19 @@ const AdminUsers = () => {
                          <Button
                           variant="ghost"
                           size="icon"
+                          title="Envoyer un message"
+                          onClick={() => setMessageModal({
+                            open: true,
+                            userId: user.id,
+                            userName: `${user.first_name || ""} ${user.last_name || ""}`.trim() || user.email || "cet utilisateur",
+                            content: "",
+                          })}
+                        >
+                          <MessageSquare className="h-4 w-4" />
+                        </Button>
+                         <Button
+                          variant="ghost"
+                          size="icon"
                           title="Voir le profil"
                           onClick={() => window.open(`/gardiens/${user.id}`, "_blank")}
                         >
