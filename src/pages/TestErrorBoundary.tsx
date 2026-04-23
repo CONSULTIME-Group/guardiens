@@ -1,8 +1,53 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
-import { CheckCircle2 } from "lucide-react";
+import { CheckCircle2, XCircle } from "lucide-react";
+
+/**
+ * Témoin avec état local + compteur de montages.
+ * - `count` prouve que l'état React n'est pas réinitialisé.
+ * - `mountCountRef` prouve que le composant n'a pas été démonté/remonté.
+ */
+const WitnessSection = ({ label, testId }: { label: string; testId: string }) => {
+  const [count, setCount] = useState(0);
+  const mountCountRef = useRef(0);
+
+  useEffect(() => {
+    mountCountRef.current += 1;
+  }, []);
+
+  return (
+    <div className="space-y-3" data-testid={testId}>
+      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+        <CheckCircle2 className="h-4 w-4 text-primary" />
+        <span>{label}</span>
+      </div>
+      <div className="flex flex-wrap items-center gap-3">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => setCount((c) => c + 1)}
+          data-testid={`${testId}-increment`}
+        >
+          Incrémenter
+        </Button>
+        <span className="text-sm text-foreground">
+          Compteur :{" "}
+          <strong data-testid={`${testId}-count`} className="font-mono">
+            {count}
+          </strong>
+        </span>
+        <span className="text-xs text-muted-foreground">
+          Montages :{" "}
+          <strong data-testid={`${testId}-mounts`} className="font-mono">
+            {mountCountRef.current || 1}
+          </strong>
+        </span>
+      </div>
+    </div>
+  );
+};
 
 type Scenario = "none" | "bad-component" | "element-invalid" | "type-error";
 
@@ -59,6 +104,31 @@ const SCENARIOS: Array<{
 const TestErrorBoundary = () => {
   const [scenario, setScenario] = useState<Scenario>("none");
   const [resetKey, setResetKey] = useState(0);
+  const [snapshot, setSnapshot] = useState<{
+    topCount: number | null;
+    bottomCount: number | null;
+    topMounts: number | null;
+    bottomMounts: number | null;
+  } | null>(null);
+
+  const readWitnessState = () => {
+    const get = (id: string) => {
+      const el = document.querySelector<HTMLElement>(`[data-testid="${id}"]`);
+      const n = el ? Number(el.textContent) : NaN;
+      return Number.isFinite(n) ? n : null;
+    };
+    return {
+      topCount: get("witness-top-count"),
+      bottomCount: get("witness-bottom-count"),
+      topMounts: get("witness-top-mounts"),
+      bottomMounts: get("witness-bottom-mounts"),
+    };
+  };
+
+  const triggerScenario = (key: Exclude<Scenario, "none">) => {
+    setSnapshot(readWitnessState());
+    setScenario(key);
+  };
 
   const renderScenario = () => {
     switch (scenario) {
@@ -78,6 +148,37 @@ const TestErrorBoundary = () => {
     }
   };
 
+  // Vérification : on relit l'état des témoins après chaque crash et on compare
+  // au snapshot pris juste avant. Si counts/mounts sont identiques, l'isolation
+  // a fonctionné et l'état React des témoins a été préservé.
+  const verification = (() => {
+    if (!snapshot || scenario === "none") return null;
+    const current = readWitnessState();
+    const checks = [
+      {
+        label: "Compteur témoin haut préservé",
+        ok: current.topCount === snapshot.topCount,
+        detail: `${snapshot.topCount} → ${current.topCount}`,
+      },
+      {
+        label: "Compteur témoin bas préservé",
+        ok: current.bottomCount === snapshot.bottomCount,
+        detail: `${snapshot.bottomCount} → ${current.bottomCount}`,
+      },
+      {
+        label: "Témoin haut non remonté",
+        ok: current.topMounts === snapshot.topMounts,
+        detail: `${snapshot.topMounts} → ${current.topMounts} montage(s)`,
+      },
+      {
+        label: "Témoin bas non remonté",
+        ok: current.bottomMounts === snapshot.bottomMounts,
+        detail: `${snapshot.bottomMounts} → ${current.bottomMounts} montage(s)`,
+      },
+    ];
+    return { checks, allOk: checks.every((c) => c.ok) };
+  })();
+
   return (
     <main className="min-h-screen bg-background p-6">
       <div className="max-w-3xl mx-auto space-y-6">
@@ -94,12 +195,13 @@ const TestErrorBoundary = () => {
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Section stable (témoin)</CardTitle>
+            <CardTitle className="text-base">Section stable (témoin haut)</CardTitle>
           </CardHeader>
-          <CardContent className="flex items-center gap-2 text-sm text-muted-foreground">
-            <CheckCircle2 className="h-4 w-4 text-primary" />
-            Si vous voyez ce bloc après avoir déclenché l'erreur, l'isolation
-            fonctionne correctement.
+          <CardContent>
+            <WitnessSection
+              label="Incrémentez ce compteur AVANT de déclencher une erreur."
+              testId="witness-top"
+            />
           </CardContent>
         </Card>
 
@@ -125,7 +227,7 @@ const TestErrorBoundary = () => {
                   <Button
                     variant={scenario === s.key ? "secondary" : "destructive"}
                     size="sm"
-                    onClick={() => setScenario(s.key)}
+                    onClick={() => triggerScenario(s.key)}
                     disabled={scenario === s.key}
                     className="shrink-0"
                   >
@@ -142,6 +244,7 @@ const TestErrorBoundary = () => {
                 onClick={() => {
                   setScenario("none");
                   setResetKey((k) => k + 1);
+                  setSnapshot(null);
                 }}
               >
                 Réinitialiser la zone
@@ -156,12 +259,61 @@ const TestErrorBoundary = () => {
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Seconde section stable</CardTitle>
+            <CardTitle className="text-base">Seconde section stable (témoin bas)</CardTitle>
           </CardHeader>
-          <CardContent className="text-sm text-muted-foreground">
-            Cette section reste interactive même si la zone à risque a planté.
+          <CardContent>
+            <WitnessSection
+              label="Incrémentez aussi ce compteur AVANT de déclencher une erreur."
+              testId="witness-bottom"
+            />
           </CardContent>
         </Card>
+
+        {verification && (
+          <Card
+            className={
+              verification.allOk
+                ? "border-primary/40 bg-primary/5"
+                : "border-destructive/40 bg-destructive/5"
+            }
+            data-testid="verification-panel"
+            data-all-ok={verification.allOk}
+          >
+            <CardHeader>
+              <CardTitle className="text-base flex items-center gap-2">
+                {verification.allOk ? (
+                  <CheckCircle2 className="h-4 w-4 text-primary" />
+                ) : (
+                  <XCircle className="h-4 w-4 text-destructive" />
+                )}
+                Vérification automatique des témoins
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ul className="space-y-1.5 text-sm">
+                {verification.checks.map((c) => (
+                  <li key={c.label} className="flex items-start gap-2">
+                    {c.ok ? (
+                      <CheckCircle2 className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+                    ) : (
+                      <XCircle className="h-4 w-4 text-destructive mt-0.5 shrink-0" />
+                    )}
+                    <span className="text-foreground">
+                      {c.label}{" "}
+                      <span className="text-muted-foreground font-mono text-xs">
+                        ({c.detail})
+                      </span>
+                    </span>
+                  </li>
+                ))}
+              </ul>
+              <p className="mt-3 text-xs text-muted-foreground">
+                Snapshot pris au moment du déclenchement, comparé à l'état
+                actuel des témoins après le crash isolé par l'ErrorBoundary.
+              </p>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </main>
   );
