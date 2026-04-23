@@ -136,9 +136,33 @@ const NetworkErrorMonitor = () => {
           if (!last || last.key !== dedupeKey || now - last.ts > 5000) {
             lastAlertRef.current = { key: dedupeKey, ts: now };
 
+            // Action "Réessayer" :
+            //  - GET idempotent → on rejoue silencieusement la même requête.
+            //    Si elle réussit (2xx/3xx), on confirme. Sinon, on recharge.
+            //  - Autres méthodes (POST/PUT/PATCH/DELETE) → reload page direct
+            //    pour éviter tout double-effet (paiement, message, etc.).
+            const handleRetry = async () => {
+              if (method === "GET") {
+                try {
+                  const retryRes = await originalFetch(...args);
+                  if (retryRes.ok) {
+                    toast.success("Connexion rétablie", { duration: 3000 });
+                    return;
+                  }
+                } catch {
+                  // ignore — fallback reload
+                }
+              }
+              window.location.reload();
+            };
+
             toast.error("Problème de connexion au service", {
               description: `Une requête a échoué (statut ${status}). Veuillez réessayer.`,
-              duration: 6000,
+              duration: 8000,
+              action: {
+                label: "Réessayer",
+                onClick: () => { void handleRetry(); },
+              },
             });
 
             reportError(
