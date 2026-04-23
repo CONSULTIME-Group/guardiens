@@ -431,7 +431,10 @@ export default function TestBadgesLongLabels() {
           sans interaction utilisateur. */}
       {stagedDef && stagedCase && (
         <Dialog open onOpenChange={() => setStageBadgeId(null)}>
-          <DialogContent className="max-w-sm p-6 sm:p-8">
+          <DialogContent
+            className="max-w-sm p-6 sm:p-8"
+            data-staged-badge={stagedCase.id}
+          >
             <div className="flex flex-col items-center text-center">
               <div className="flex justify-center pt-4 pb-5 shrink-0">
                 <BadgeSceauLarge id={stagedCase.id} size={96} />
