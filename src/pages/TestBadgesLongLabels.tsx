@@ -93,6 +93,11 @@ export default function TestBadgesLongLabels() {
   const [captures, setCaptures] = useState<CaptureItem[]>([])
   const [stageWidth, setStageWidth] = useState<number | null>(null)
   const [stageBadgeId, setStageBadgeId] = useState<string | null>(null)
+  // Largeur manuelle choisie par l'utilisateur pour tester en direct
+  const [manualWidth, setManualWidth] = useState<number | null>(null)
+
+  // Largeur effective du conteneur : capture (priorité) > manuelle > 100%
+  const effectiveWidth = stageWidth ?? manualWidth ?? null
 
   const stageRef = useRef<HTMLDivElement>(null)
 
