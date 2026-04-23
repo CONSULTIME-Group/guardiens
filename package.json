@@ -11,7 +11,9 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "test:e2e:badges": "playwright test tests/badges-long-labels.spec.ts",
+    "test:e2e:badges:update": "playwright test tests/badges-long-labels.spec.ts --update-snapshots"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
