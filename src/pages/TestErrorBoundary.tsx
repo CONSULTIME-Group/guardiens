@@ -227,7 +227,7 @@ const TestErrorBoundary = () => {
                   <Button
                     variant={scenario === s.key ? "secondary" : "destructive"}
                     size="sm"
-                    onClick={() => setScenario(s.key)}
+                    onClick={() => triggerScenario(s.key)}
                     disabled={scenario === s.key}
                     className="shrink-0"
                   >
