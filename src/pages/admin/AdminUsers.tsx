@@ -11,7 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { format, formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
-import { Eye, Ban, ShieldCheck, StickyNote, RotateCcw, Trash2, AlertTriangle, Crown, ChevronLeft, ChevronRight, MessageSquare } from "lucide-react";
+import { Eye, Ban, ShieldCheck, StickyNote, RotateCcw, Trash2, AlertTriangle, Crown, ChevronLeft, ChevronRight, MessageSquare, FileText } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Switch } from "@/components/ui/switch";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
