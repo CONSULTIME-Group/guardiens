@@ -1,3 +1,4 @@
+import "./lib/storageFallback";
 import { createRoot } from "react-dom/client";
 import { HelmetProvider } from "react-helmet-async";
 import App from "./App.tsx";
@@ -6,6 +7,9 @@ import reportWebVitals from "./lib/webVitals";
 import { installGlobalErrorHandlers } from "./lib/logger";
 import { installGlobalErrorLogger } from "./lib/errorLogger";
 import { initConsent } from "./lib/cookieConsent";
+import { installStorageFallback } from "./lib/storageFallback";
+
+installStorageFallback();
 
 const root = createRoot(document.getElementById("root")!);
 root.render(
