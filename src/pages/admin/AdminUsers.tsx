@@ -58,6 +58,11 @@ const AdminUsers = () => {
     open: false, userId: "", userName: ""
   });
   const [deleting, setDeleting] = useState(false);
+  const [messageModal, setMessageModal] = useState<{ open: boolean; userId: string; userName: string; content: string }>({
+    open: false, userId: "", userName: "", content: ""
+  });
+  const [sendingMessage, setSendingMessage] = useState(false);
+  const navigate = useNavigate();
 
   const fetchUsers = useCallback(async () => {
     setLoading(true);
