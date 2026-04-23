@@ -3760,6 +3760,10 @@ export type Database = {
         Returns: undefined
       }
       admin_get_user_email: { Args: { p_user_id: string }; Returns: string }
+      admin_send_message_to_user: {
+        Args: { p_content: string; p_target_user_id: string }
+        Returns: string
+      }
       apply_referral_reward: {
         Args: { p_referred_id: string }
         Returns: undefined
