@@ -290,7 +290,7 @@ const SearchSitter = () => {
           supabase.from("sits").select("id", { count: "exact", head: true }).eq("status", "published"),
           supabase.from("small_missions").select("id", { count: "exact", head: true }).eq("status", "open"),
           tab === "sits"
-            ? supabase.from("sits").select("postal_code, owner:profiles!sits_owner_id_fkey(postal_code)").eq("status", "published").limit(500)
+            ? supabase.from("sits").select("owner:profiles!sits_user_id_fkey(postal_code)").in("status", ["published", "confirmed", "in_progress"]).limit(500)
             : supabase.from("small_missions").select("postal_code").eq("status", "open").limit(500),
         ]);
         if (cancelled) return;
