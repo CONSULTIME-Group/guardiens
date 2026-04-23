@@ -1041,9 +1041,12 @@ export default function PublicSitterProfile() {
             <hr className="border-border" />
 
             {userBadges && userBadges.length > 0 && (
-              <div className="space-y-2">
-                <h3 className="text-sm font-semibold text-foreground">Badges</h3>
-                <BadgeRow badges={userBadges} />
+              <div className="space-y-3">
+                <SpecialBadgeHighlight userBadges={userBadges} />
+                <div className="space-y-2">
+                  <h3 className="text-sm font-semibold text-foreground">Badges</h3>
+                  <BadgeRow badges={userBadges} />
+                </div>
               </div>
             )}
 
