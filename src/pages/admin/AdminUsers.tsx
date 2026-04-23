@@ -280,7 +280,7 @@ const AdminUsers = () => {
     }
     toast.success("Message envoyé");
     const convId = data as string;
-    setMessageModal({ open: false, userId: "", userName: "", content: "" });
+    setMessageModal({ open: false, userId: "", userName: "", content: "", step: "edit" });
     if (convId) {
       navigate(`/messages?conversation=${convId}`);
     }
