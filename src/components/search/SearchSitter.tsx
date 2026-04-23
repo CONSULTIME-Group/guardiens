@@ -1521,12 +1521,88 @@ const SearchSitter = () => {
                 <h3 className="font-heading font-semibold text-xl text-foreground">
                   {tab === "sits" ? "Pas encore d'annonce de garde dans votre zone" : "Pas encore de mission dans votre zone"}
                 </h3>
+
+                {/* Compteur clair : 0 dans la zone · X ailleurs */}
+                {densityCounts.france > 0 && (
+                  <div className="inline-flex flex-wrap items-center justify-center gap-2 text-sm">
+                    <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1 text-foreground/80">
+                      <span className="font-semibold text-foreground">0</span>
+                      <span className="text-muted-foreground">dans votre zone</span>
+                    </span>
+                    <span className="text-muted-foreground">·</span>
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-primary">
+                      <span className="font-semibold">{densityCounts.france}</span>
+                      <span>{tab === "sits" ? (densityCounts.france > 1 ? "annonces" : "annonce") : (densityCounts.france > 1 ? "missions" : "mission")} ailleurs en France</span>
+                    </span>
+                  </div>
+                )}
+
                 <p className="text-sm text-muted-foreground max-w-md mx-auto">
                   {densityCounts.france > 0
-                    ? `Mais ${densityCounts.france} ${tab === "sits" ? "annonce" : "mission"}${densityCounts.france > 1 ? "s sont publiées" : " est publiée"} ailleurs en France. Élargissez la zone ou créez une alerte pour ne rien rater près de chez vous.`
+                    ? "Élargissez la zone, explorez les régions voisines ou créez une alerte pour ne rien rater près de chez vous."
                     : "La communauté grandit chaque jour. Voici comment ne rien rater et tirer profit de votre temps dès maintenant."}
                 </p>
               </div>
+
+              {/* Régions / départements voisins disponibles */}
+              {(nearbyRegions.length > 0 || nearbyZones.length > 0) && densityCounts.france > 0 && (
+                <div className="rounded-xl border border-border bg-card p-4 space-y-3">
+                  <div className="flex items-start gap-3">
+                    <MapPin className="h-5 w-5 text-foreground mt-0.5 shrink-0" />
+                    <div className="flex-1 space-y-3">
+                      <p className="font-medium text-sm text-foreground">
+                        Disponible ailleurs en France
+                      </p>
+
+                      {nearbyRegions.length > 0 && (
+                        <div>
+                          <p className="text-xs text-muted-foreground mb-1.5">Régions où il y en a le plus</p>
+                          <div className="flex flex-wrap gap-2">
+                            {nearbyRegions.map((r) => (
+                              <button
+                                key={r.regionCode}
+                                type="button"
+                                className="inline-flex items-center gap-1.5 rounded-full border border-border bg-background hover:border-primary/50 hover:bg-primary/5 px-3 py-1 text-xs text-foreground transition-colors"
+                                onClick={() => {
+                                  trackEvent("search_empty_action", { source: "search_empty", metadata: { action: "browse_region", region: r.regionCode, count: r.count, tab } });
+                                  setZoneMode("france");
+                                }}
+                              >
+                                <span className="font-medium">{r.regionName}</span>
+                                <span className="text-muted-foreground">·</span>
+                                <span className="text-primary font-semibold">{r.count}</span>
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {nearbyZones.length > 0 && (
+                        <div>
+                          <p className="text-xs text-muted-foreground mb-1.5">Départements actifs</p>
+                          <div className="flex flex-wrap gap-2">
+                            {nearbyZones.map((d) => (
+                              <button
+                                key={d.deptCode}
+                                type="button"
+                                className="inline-flex items-center gap-1.5 rounded-full border border-border bg-background hover:border-primary/50 hover:bg-primary/5 px-3 py-1 text-xs text-foreground transition-colors"
+                                onClick={() => {
+                                  trackEvent("search_empty_action", { source: "search_empty", metadata: { action: "browse_dept", dept: d.deptCode, count: d.count, tab } });
+                                  setZoneMode("france");
+                                }}
+                              >
+                                <span className="font-medium">{d.deptCode} · {d.deptName}</span>
+                                <span className="text-muted-foreground">·</span>
+                                <span className="text-primary font-semibold">{d.count}</span>
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {/* Action 0 — Mode Lancement (si plateforme globalement vide) */}
               {launchModeCount === 0 && (
