@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import PageMeta from "@/components/PageMeta";
 import { BadgeRow } from "@/components/badges/BadgeRow";
+import { SpecialBadgeHighlight } from "@/components/badges/SpecialBadgeHighlight";
 import { BadgeSceau } from "@/components/badges/BadgeSceau";
 import { StatutGardienBadge } from "@/components/profile/StatutGardienBadge";
 import { useProfileReputation, useUserBadges } from "@/hooks/useProfileReputation";
@@ -1041,9 +1042,12 @@ export default function PublicSitterProfile() {
             <hr className="border-border" />
 
             {userBadges && userBadges.length > 0 && (
-              <div className="space-y-2">
-                <h3 className="text-sm font-semibold text-foreground">Badges</h3>
-                <BadgeRow badges={userBadges} />
+              <div className="space-y-3">
+                <SpecialBadgeHighlight userBadges={userBadges} />
+                <div className="space-y-2">
+                  <h3 className="text-sm font-semibold text-foreground">Badges</h3>
+                  <BadgeRow badges={userBadges} />
+                </div>
               </div>
             )}
 

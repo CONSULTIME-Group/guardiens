@@ -4,6 +4,7 @@ import { Link } from "react-router-dom"
 import { Award, ChevronRight } from "lucide-react"
 import { BadgeSceau } from "@/components/badges/BadgeSceau"
 import { BADGE_DEFINITIONS, SPECIAL_BADGE_IDS } from "@/components/badges/badge-definitions"
+import { SpecialBadgeHighlight } from "@/components/badges/SpecialBadgeHighlight"
 
 interface BadgeGridSectionProps {
   title: string
@@ -34,7 +35,14 @@ export default function BadgeGridSection({
   )
 
   return (
-    <div className="rounded-xl border border-border/60 bg-card/50 p-4 md:p-5">
+    <div className="space-y-4">
+      {/* Raccourci visuel : badges spéciaux mis en avant (ex: « À jamais la 1ère ») */}
+      <SpecialBadgeHighlight
+        userBadges={userBadges}
+        specialBadgeIds={specialBadgeIds}
+      />
+
+      <div className="rounded-xl border border-border/60 bg-card/50 p-4 md:p-5">
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
@@ -100,6 +108,7 @@ export default function BadgeGridSection({
       >
         Voir tous les badges <ChevronRight className="h-3 w-3" />
       </Link>
+      </div>
     </div>
   )
 }
