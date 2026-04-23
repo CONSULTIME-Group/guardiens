@@ -74,10 +74,15 @@ export const BadgeSceau = forwardRef<HTMLDivElement, BadgeSceauProps>(function B
     ? format(new Date(obtainedAt), "d MMMM yyyy", { locale: fr })
     : null
 
+  const accessibleLabel = `${def.label}${count > 1 ? ` — obtenu ${count} fois` : ''}${isActive ? '' : ' (expiré)'}`
+
   const svgElement = (
-    <div
-      ref={ref}
-      className={`relative inline-flex flex-col items-center cursor-pointer group ${className}`}
+    <button
+      ref={ref as React.Ref<HTMLButtonElement>}
+      type="button"
+      aria-label={accessibleLabel}
+      aria-haspopup="dialog"
+      className={`relative inline-flex flex-col items-center cursor-pointer group bg-transparent border-0 p-0 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${className}`}
       style={{ width: showLabel ? undefined : sz }}
       onClick={() => setDialogOpen(true)}
     >
@@ -86,8 +91,8 @@ export const BadgeSceau = forwardRef<HTMLDivElement, BadgeSceauProps>(function B
           width={sz}
           height={sz}
           viewBox="0 0 52 52"
-          aria-label={def.label}
-          role="img"
+          aria-hidden="true"
+          focusable="false"
           className="transition-all duration-300 group-hover:scale-110"
           style={{
             filter: isActive ? 'none' : 'grayscale(80%) brightness(1.1)',
@@ -105,6 +110,7 @@ export const BadgeSceau = forwardRef<HTMLDivElement, BadgeSceauProps>(function B
 
         {showPastille && (
           <span
+            aria-hidden="true"
             className="absolute -top-1 -right-1 flex items-center justify-center rounded-full text-[10px] font-bold leading-none shadow-sm"
             style={{
               width: 18,
@@ -121,6 +127,7 @@ export const BadgeSceau = forwardRef<HTMLDivElement, BadgeSceauProps>(function B
 
       {showLabel && (
         <span
+          aria-hidden="true"
           className="mt-1 text-[10px] leading-tight text-center font-medium max-w-[56px] truncate"
           style={{ color: isActive ? 'hsl(var(--foreground))' : 'hsl(var(--muted-foreground))' }}
           title={def.label}
@@ -128,7 +135,7 @@ export const BadgeSceau = forwardRef<HTMLDivElement, BadgeSceauProps>(function B
           {def.label}
         </span>
       )}
-    </div>
+    </button>
   )
 
   return (
