@@ -48,6 +48,34 @@ const IGNORED_URL_PATTERNS: RegExp[] = [
  */
 const IGNORED_STATUSES = new Set([401, 403, 404, 409, 422]);
 
+/**
+ * Extensions d'assets statiques. Les échecs sur ces ressources n'ont pas
+ * besoin d'alerter l'utilisateur (fallbacks UI, lazyWithRetry, polices système…).
+ */
+const ASSET_EXTENSION_RE =
+  /\.(png|jpe?g|gif|webp|avif|svg|ico|bmp|tiff?|js|mjs|css|map|woff2?|ttf|otf|eot|mp3|mp4|webm|ogg|wav|m4a|pdf|zip|wasm)(\?.*)?(#.*)?$/i;
+
+/**
+ * Destinations Request indiquant un asset (Fetch spec `request.destination`).
+ */
+const ASSET_DESTINATIONS = new Set([
+  "image", "script", "style", "font", "audio", "video", "track",
+  "object", "embed", "manifest", "worker", "sharedworker", "serviceworker",
+]);
+
+const isAssetRequest = (url: string, input: RequestInfo | URL): boolean => {
+  if (input instanceof Request && input.destination && ASSET_DESTINATIONS.has(input.destination)) {
+    return true;
+  }
+  try {
+    const u = new URL(url, typeof window !== "undefined" ? window.location.href : "http://x");
+    if (ASSET_EXTENSION_RE.test(u.pathname)) return true;
+  } catch {
+    if (ASSET_EXTENSION_RE.test(url)) return true;
+  }
+  return false;
+};
+
 const isCriticalRoute = (pathname: string) =>
   CRITICAL_ROUTE_PATTERNS.some((re) => re.test(pathname));
 
@@ -96,6 +124,7 @@ const NetworkErrorMonitor = () => {
         if (
           isCriticalRoute(path) &&
           !shouldIgnoreUrl(url) &&
+          !isAssetRequest(url, input) &&
           !IGNORED_STATUSES.has(status) &&
           (status >= 400 || status === 0) &&
           status < 600
