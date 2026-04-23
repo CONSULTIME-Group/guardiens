@@ -30,7 +30,7 @@ const Login = () => {
     setPasswordError(null);
     try {
       await login(email.trim().toLowerCase(), password);
-      navigate("/dashboard");
+      navigate("/dashboard", { replace: true });
     } catch (error: any) {
       const msg = error.message;
       if (msg === "Invalid login credentials") {
