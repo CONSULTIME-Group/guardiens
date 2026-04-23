@@ -103,9 +103,18 @@ export default function TestBadgesLongLabels() {
   const [stageBadgeId, setStageBadgeId] = useState<string | null>(null)
   // Largeur manuelle choisie par l'utilisateur pour tester en direct
   const [manualWidth, setManualWidth] = useState<number | null>(null)
+  // Mode "viewport strict" : applique aussi les styles responsive (sm/md)
+  // de Tailwind selon la largeur cible, indépendamment de la fenêtre réelle
+  const [strictMode, setStrictMode] = useState(true)
+  // Viewport actif pendant la capture (pour basculer les classes responsive)
+  const [activeVp, setActiveVp] = useState<ViewportKey | null>(null)
+  // Viewport manuel pour tester le mode strict en direct
+  const [manualVp, setManualVp] = useState<ViewportKey | null>(null)
 
   // Largeur effective du conteneur : capture (priorité) > manuelle > 100%
   const effectiveWidth = stageWidth ?? manualWidth ?? null
+  // Viewport effectif pour le mode strict
+  const effectiveVp = activeVp ?? (strictMode ? manualVp : null)
 
   const stageRef = useRef<HTMLDivElement>(null)
 
