@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { forwardRef, useState } from 'react'
 import { isBadgeActive } from './badge-definitions'
 import { BadgeSceau } from './BadgeSceau'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
@@ -16,7 +16,10 @@ interface BadgeRowProps {
 
 const PRIORITY_ORDER = ['fondateur', 'id_verifiee']
 
-export function BadgeRow({ badges, size = 'normal', maxVisible = 6 }: BadgeRowProps) {
+export const BadgeRow = forwardRef<HTMLDivElement, BadgeRowProps>(function BadgeRow(
+  { badges, size = 'normal', maxVisible = 6 },
+  ref
+) {
   const [showAll, setShowAll] = useState(false)
 
   const active = badges
