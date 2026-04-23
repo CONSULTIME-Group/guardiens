@@ -195,12 +195,13 @@ const TestErrorBoundary = () => {
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Section stable (témoin)</CardTitle>
+            <CardTitle className="text-base">Section stable (témoin haut)</CardTitle>
           </CardHeader>
-          <CardContent className="flex items-center gap-2 text-sm text-muted-foreground">
-            <CheckCircle2 className="h-4 w-4 text-primary" />
-            Si vous voyez ce bloc après avoir déclenché l'erreur, l'isolation
-            fonctionne correctement.
+          <CardContent>
+            <WitnessSection
+              label="Incrémentez ce compteur AVANT de déclencher une erreur."
+              testId="witness-top"
+            />
           </CardContent>
         </Card>
 
