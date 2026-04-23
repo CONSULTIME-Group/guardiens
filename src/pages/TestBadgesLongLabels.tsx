@@ -524,32 +524,211 @@ export default function TestBadgesLongLabels() {
           </div>
         </section>
 
-        {/* Galerie des captures générées */}
-        {captures.length > 0 && (
-          <section className="mb-12">
-            <h2 className="text-lg font-heading font-semibold text-foreground mb-4 border-b border-border pb-2">
-              3. Captures générées ({captures.length})
-            </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {captures.map((c, i) => (
-                <figure
-                  key={`cap-${i}`}
-                  className="border border-border rounded-lg overflow-hidden bg-card"
-                >
-                  <img
-                    src={c.dataUrl}
-                    alt={c.name}
-                    className="w-full h-auto block"
-                    loading="lazy"
-                  />
-                  <figcaption className="p-2 text-[11px] text-muted-foreground break-all border-t border-border">
-                    {c.name}
-                  </figcaption>
-                </figure>
-              ))}
-            </div>
-          </section>
-        )}
+        {/* Galerie des captures générées — avec filtres et tri */}
+        {captures.length > 0 && (() => {
+          // Liste des badges présents dans les captures (préserve l'ordre)
+          const badgeIdsInCaptures = Array.from(
+            new Set(
+              captures
+                .filter(c => c.badgeId)
+                .map(c => c.badgeId as string)
+            )
+          )
+
+          // Application des filtres
+          let filtered = captures.filter(c => {
+            if (filterKind !== 'all' && c.kind !== filterKind) return false
+            if (filterVp !== 'all' && c.vp !== filterVp) return false
+            if (filterBadge !== 'all') {
+              if (filterBadge === '__none__') {
+                if (c.badgeId !== null) return false
+              } else if (c.badgeId !== filterBadge) {
+                return false
+              }
+            }
+            return true
+          })
+
+          // Tri
+          filtered = [...filtered].sort((a, b) => {
+            switch (sortBy) {
+              case 'name':
+                return a.name.localeCompare(b.name)
+              case 'width-asc':
+                return a.width - b.width || a.index - b.index
+              case 'width-desc':
+                return b.width - a.width || a.index - b.index
+              case 'order':
+              default:
+                return a.index - b.index
+            }
+          })
+
+          const resetFilters = () => {
+            setFilterKind('all')
+            setFilterVp('all')
+            setFilterBadge('all')
+            setSortBy('order')
+          }
+
+          const hasActiveFilter =
+            filterKind !== 'all' ||
+            filterVp !== 'all' ||
+            filterBadge !== 'all' ||
+            sortBy !== 'order'
+
+          return (
+            <section className="mb-12">
+              <h2 className="text-lg font-heading font-semibold text-foreground mb-4 border-b border-border pb-2">
+                3. Captures générées ({filtered.length}
+                {filtered.length !== captures.length && ` / ${captures.length}`})
+              </h2>
+
+              {/* Barre de filtres */}
+              <div className="mb-4 flex flex-wrap items-end gap-3 p-3 rounded-lg border border-border bg-card/50">
+                <div className="flex flex-col gap-1">
+                  <label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide">
+                    Type
+                  </label>
+                  <div className="flex gap-1">
+                    {(['all', 'grille', 'modale'] as const).map(k => (
+                      <Button
+                        key={k}
+                        size="sm"
+                        variant={filterKind === k ? 'default' : 'outline'}
+                        onClick={() => setFilterKind(k)}
+                        className="h-7 px-2.5 text-xs capitalize"
+                        aria-pressed={filterKind === k}
+                      >
+                        {k === 'all' ? 'Tout' : k}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="flex flex-col gap-1">
+                  <label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide">
+                    Viewport
+                  </label>
+                  <div className="flex gap-1">
+                    {(
+                      [
+                        { v: 'all', l: 'Tout' },
+                        { v: 'mobile', l: 'Mobile' },
+                        { v: 'tablet', l: 'Tablette' },
+                        { v: 'desktop', l: 'Desktop' },
+                      ] as const
+                    ).map(({ v, l }) => (
+                      <Button
+                        key={v}
+                        size="sm"
+                        variant={filterVp === v ? 'default' : 'outline'}
+                        onClick={() => setFilterVp(v as ViewportKey | 'all')}
+                        className="h-7 px-2.5 text-xs"
+                        aria-pressed={filterVp === v}
+                      >
+                        {l}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="flex flex-col gap-1 min-w-[140px]">
+                  <label
+                    htmlFor="filter-badge"
+                    className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide"
+                  >
+                    Badge
+                  </label>
+                  <select
+                    id="filter-badge"
+                    value={filterBadge}
+                    onChange={e => setFilterBadge(e.target.value)}
+                    className="h-7 rounded-md border border-input bg-background px-2 text-xs"
+                  >
+                    <option value="all">Tous</option>
+                    <option value="__none__">— Sans badge (grilles)</option>
+                    {badgeIdsInCaptures.map(id => (
+                      <option key={id} value={id}>
+                        {BADGE_DEFINITIONS[id]?.label?.slice(0, 40) ?? id}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="flex flex-col gap-1 min-w-[160px]">
+                  <label
+                    htmlFor="sort-by"
+                    className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide"
+                  >
+                    Tri
+                  </label>
+                  <select
+                    id="sort-by"
+                    value={sortBy}
+                    onChange={e => setSortBy(e.target.value as typeof sortBy)}
+                    className="h-7 rounded-md border border-input bg-background px-2 text-xs"
+                  >
+                    <option value="order">Ordre de génération</option>
+                    <option value="name">Nom (A → Z)</option>
+                    <option value="width-asc">Largeur croissante</option>
+                    <option value="width-desc">Largeur décroissante</option>
+                  </select>
+                </div>
+
+                {hasActiveFilter && (
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={resetFilters}
+                    className="h-7 px-2.5 text-xs ml-auto"
+                  >
+                    Réinitialiser
+                  </Button>
+                )}
+              </div>
+
+              {filtered.length === 0 ? (
+                <p className="text-sm text-muted-foreground italic text-center py-8">
+                  Aucune capture ne correspond aux filtres actifs.
+                </p>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {filtered.map(c => (
+                    <figure
+                      key={`cap-${c.index}`}
+                      className="border border-border rounded-lg overflow-hidden bg-card"
+                    >
+                      <img
+                        src={c.dataUrl}
+                        alt={c.name}
+                        className="w-full h-auto block"
+                        loading="lazy"
+                      />
+                      <figcaption className="p-2 text-[11px] text-muted-foreground border-t border-border">
+                        <div className="flex items-center gap-1.5 mb-1 flex-wrap">
+                          <span
+                            className={`inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-semibold uppercase tracking-wide ${
+                              c.kind === 'grille'
+                                ? 'bg-primary/10 text-primary'
+                                : 'bg-accent text-accent-foreground'
+                            }`}
+                          >
+                            {c.kind}
+                          </span>
+                          <span className="inline-flex items-center px-1.5 py-0.5 rounded bg-muted text-[9px] font-medium">
+                            {c.vpLabel} {c.width}px
+                          </span>
+                        </div>
+                        <span className="break-all">{c.name}</span>
+                      </figcaption>
+                    </figure>
+                  ))}
+                </div>
+              )}
+            </section>
+          )
+        })()}
 
         <p className="text-xs text-muted-foreground italic text-center mt-8">
           Les libellés affichés ici sont volontairement exagérés pour le QA — ils
