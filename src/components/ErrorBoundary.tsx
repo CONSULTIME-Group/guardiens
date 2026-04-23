@@ -26,9 +26,23 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, info: ErrorInfo) {
-    console.error("[ErrorBoundary]", error, info.componentStack);
     // Generate a short ID the user can quote in support
     const errorId = Math.random().toString(36).slice(2, 10).toUpperCase();
+
+    // Cadre console clair, regroupé et collapsé pour éviter de polluer le reste
+    const title = `🛑 [ErrorBoundary] ${error.name}: ${error.message}`;
+    if (typeof console.groupCollapsed === "function") {
+      console.groupCollapsed(`%c${title}`, "color:#dc2626;font-weight:bold;");
+      console.error("Référence :", errorId);
+      console.error("Message   :", error.message);
+      if (error.stack) console.error("Stack     :\n" + error.stack);
+      if (info.componentStack)
+        console.error("Component stack :" + info.componentStack);
+      console.groupEnd();
+    } else {
+      console.error(title, { errorId, stack: error.stack, componentStack: info.componentStack });
+    }
+
     this.setState({ errorId });
     reportError(error, {
       source: "ErrorBoundary",
