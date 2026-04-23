@@ -1,8 +1,53 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
-import { CheckCircle2 } from "lucide-react";
+import { CheckCircle2, XCircle } from "lucide-react";
+
+/**
+ * Témoin avec état local + compteur de montages.
+ * - `count` prouve que l'état React n'est pas réinitialisé.
+ * - `mountCountRef` prouve que le composant n'a pas été démonté/remonté.
+ */
+const WitnessSection = ({ label, testId }: { label: string; testId: string }) => {
+  const [count, setCount] = useState(0);
+  const mountCountRef = useRef(0);
+
+  useEffect(() => {
+    mountCountRef.current += 1;
+  }, []);
+
+  return (
+    <div className="space-y-3" data-testid={testId}>
+      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+        <CheckCircle2 className="h-4 w-4 text-primary" />
+        <span>{label}</span>
+      </div>
+      <div className="flex flex-wrap items-center gap-3">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => setCount((c) => c + 1)}
+          data-testid={`${testId}-increment`}
+        >
+          Incrémenter
+        </Button>
+        <span className="text-sm text-foreground">
+          Compteur :{" "}
+          <strong data-testid={`${testId}-count`} className="font-mono">
+            {count}
+          </strong>
+        </span>
+        <span className="text-xs text-muted-foreground">
+          Montages :{" "}
+          <strong data-testid={`${testId}-mounts`} className="font-mono">
+            {mountCountRef.current || 1}
+          </strong>
+        </span>
+      </div>
+    </div>
+  );
+};
 
 type Scenario = "none" | "bad-component" | "element-invalid" | "type-error";
 
