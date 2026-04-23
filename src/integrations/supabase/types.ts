@@ -46,34 +46,40 @@ export type Database = {
           admin_id: string
           content: string
           conversation_id: string | null
+          error_message: string | null
           id: string
           message_id: string | null
           recipient_email: string | null
           recipient_id: string
           recipient_name: string | null
           sent_at: string
+          status: string
         }
         Insert: {
           admin_id: string
           content: string
           conversation_id?: string | null
+          error_message?: string | null
           id?: string
           message_id?: string | null
           recipient_email?: string | null
           recipient_id: string
           recipient_name?: string | null
           sent_at?: string
+          status?: string
         }
         Update: {
           admin_id?: string
           content?: string
           conversation_id?: string | null
+          error_message?: string | null
           id?: string
           message_id?: string | null
           recipient_email?: string | null
           recipient_id?: string
           recipient_name?: string | null
           sent_at?: string
+          status?: string
         }
         Relationships: []
       }
@@ -3796,6 +3802,14 @@ export type Database = {
         Returns: undefined
       }
       admin_get_user_email: { Args: { p_user_id: string }; Returns: string }
+      admin_log_message_failure: {
+        Args: {
+          p_content: string
+          p_error_message: string
+          p_target_user_id: string
+        }
+        Returns: string
+      }
       admin_send_message_to_user: {
         Args: { p_content: string; p_target_user_id: string }
         Returns: string
