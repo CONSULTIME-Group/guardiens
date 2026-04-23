@@ -158,10 +158,16 @@ export const BadgeSceau = forwardRef<HTMLButtonElement, BadgeSceauProps>(functio
             <div className="flex justify-center pt-4 pb-5 shrink-0">
               <BadgeSceauLarge id={id} size={96} />
             </div>
-            <h3 className="font-heading font-bold text-lg leading-snug px-2 mb-3 break-words hyphens-auto w-full">
+            <h3
+              className="font-heading font-bold text-lg leading-snug px-2 mb-3 hyphens-auto w-full max-w-full"
+              style={{ overflowWrap: 'anywhere', wordBreak: 'break-word' }}
+            >
               {def.label}
             </h3>
-            <p className="text-sm text-muted-foreground leading-relaxed mb-3">
+            <p
+              className="text-sm text-muted-foreground leading-relaxed mb-3 max-w-full"
+              style={{ overflowWrap: 'anywhere', wordBreak: 'break-word' }}
+            >
               {def.tooltip}
             </p>
             {count > 0 && (
