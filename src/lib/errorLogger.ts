@@ -28,6 +28,9 @@ const IGNORED_PATTERNS: RegExp[] = [
   /The (user|operation) (aborted|was aborted)/i,
   /AbortError/i,
   /Load failed/i,
+  // Supabase Auth navigator.locks : verrou volé par un autre onglet — bénin, géré en interne par le SDK
+  /Lock ".*" was (released|not granted) because/i,
+  /lock:sb-.*-auth-token/i,
 ];
 
 function shouldIgnore(message: string): boolean {
