@@ -74,40 +74,51 @@ export class ErrorBoundary extends Component<Props, State> {
       if (isBadComponent) {
         return (
           <div
-            className="min-h-[40vh] flex flex-col items-center justify-center gap-4 p-6 text-center bg-background"
+            className="w-full rounded-lg border border-border bg-muted/30 px-4 py-4 sm:px-5 sm:py-5"
             role="alert"
             aria-live="polite"
           >
-            <div className="rounded-full bg-muted p-3">
-              <PuzzleIcon className="h-8 w-8 text-muted-foreground" />
-            </div>
-            <div className="space-y-1.5 max-w-md">
-              <h2 className="font-heading text-lg font-semibold text-foreground">
-                Cette section n'a pas pu s'afficher
-              </h2>
-              <p className="text-sm text-muted-foreground">
-                Un composant n'a pas été chargé correctement. Le reste de la page reste accessible.
-              </p>
-              {this.state.errorId && (
-                <p className="text-xs text-muted-foreground/60 font-mono pt-1">
-                  Référence : {this.state.errorId}
-                </p>
-              )}
-            </div>
-            <div className="flex flex-col sm:flex-row gap-2">
-              <Button variant="outline" size="sm" onClick={this.handleReset} className="gap-2">
-                <RefreshCw className="h-4 w-4" /> Réessayer
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={this.handleReport}
-                disabled={this.state.reportSent}
-                className="gap-2"
-              >
-                <Send className="h-4 w-4" />
-                {this.state.reportSent ? "Signalé" : "Signaler"}
-              </Button>
+            <div className="flex items-start gap-3 sm:gap-4">
+              <div className="shrink-0 rounded-full bg-muted p-2 sm:p-2.5">
+                <PuzzleIcon className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground" aria-hidden="true" />
+              </div>
+
+              <div className="flex-1 min-w-0 space-y-2">
+                <div className="space-y-0.5">
+                  <h2 className="font-heading text-sm sm:text-base font-semibold text-foreground leading-tight">
+                    Cette section n'a pas pu s'afficher
+                  </h2>
+                  <p className="text-xs sm:text-sm text-muted-foreground">
+                    Un composant n'a pas été chargé correctement. Le reste de la page reste accessible.
+                  </p>
+                  {this.state.errorId && (
+                    <p className="text-[10px] sm:text-xs text-muted-foreground/60 font-mono pt-0.5">
+                      Référence : {this.state.errorId}
+                    </p>
+                  )}
+                </div>
+
+                <div className="flex flex-wrap gap-1.5 pt-0.5">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={this.handleReset}
+                    className="h-7 px-2.5 text-xs gap-1.5"
+                  >
+                    <RefreshCw className="h-3.5 w-3.5" /> Réessayer
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={this.handleReport}
+                    disabled={this.state.reportSent}
+                    className="h-7 px-2.5 text-xs gap-1.5"
+                  >
+                    <Send className="h-3.5 w-3.5" />
+                    {this.state.reportSent ? "Signalé" : "Signaler"}
+                  </Button>
+                </div>
+              </div>
             </div>
           </div>
         );
