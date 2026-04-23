@@ -1,4 +1,4 @@
-import { forwardRef, useState } from 'react'
+import { useState } from 'react'
 import { isBadgeActive } from './badge-definitions'
 import { BadgeSceau } from './BadgeSceau'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
@@ -16,10 +16,7 @@ interface BadgeRowProps {
 
 const PRIORITY_ORDER = ['fondateur', 'id_verifiee']
 
-export const BadgeRow = forwardRef<HTMLDivElement, BadgeRowProps>(function BadgeRow(
-  { badges, size = 'normal', maxVisible = 6 },
-  ref
-) {
+export function BadgeRow({ badges, size = 'normal', maxVisible = 6 }: BadgeRowProps) {
   const [showAll, setShowAll] = useState(false)
 
   const active = badges
@@ -41,8 +38,7 @@ export const BadgeRow = forwardRef<HTMLDivElement, BadgeRowProps>(function Badge
   if (active.length === 0 && expired.length === 0) return null
 
   return (
-    <div ref={ref} className="space-y-3">
-      {/* Active badges */}
+    <div className="space-y-3">
       <div className="flex flex-wrap items-center gap-2">
         {visible.map(b => (
           <BadgeSceau
@@ -65,7 +61,6 @@ export const BadgeRow = forwardRef<HTMLDivElement, BadgeRowProps>(function Badge
         )}
       </div>
 
-      {/* Expired badges accordion */}
       {expired.length > 0 && (
         <Accordion type="single" collapsible className="w-full">
           <AccordionItem value="heritage" className="border-none">
@@ -90,7 +85,6 @@ export const BadgeRow = forwardRef<HTMLDivElement, BadgeRowProps>(function Badge
         </Accordion>
       )}
 
-      {/* Dialog for all active badges */}
       <Dialog open={showAll} onOpenChange={setShowAll}>
         <DialogContent className="max-w-sm">
           <DialogHeader>
@@ -112,6 +106,6 @@ export const BadgeRow = forwardRef<HTMLDivElement, BadgeRowProps>(function Badge
       </Dialog>
     </div>
   )
-})
+}
 
 export default BadgeRow

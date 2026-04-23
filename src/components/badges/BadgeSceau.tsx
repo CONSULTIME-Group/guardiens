@@ -1,4 +1,4 @@
-import { useState, forwardRef } from 'react'
+import { useState } from 'react'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { Dialog, DialogContent } from '@/components/ui/dialog'
 import { BADGE_DEFINITIONS, getTier, isBadgeActive, type BadgeTier } from './badge-definitions'
@@ -40,7 +40,7 @@ function TierRing({ tier, r }: { tier: BadgeTier; r: number }) {
   return <circle cx="26" cy="26" r={r} fill="none" stroke={t.stroke} strokeWidth={t.width} />
 }
 
-export const BadgeSceau = forwardRef<HTMLButtonElement, BadgeSceauProps>(function BadgeSceau({
+export function BadgeSceau({
   id,
   count = 1,
   active,
@@ -49,7 +49,7 @@ export const BadgeSceau = forwardRef<HTMLButtonElement, BadgeSceauProps>(functio
   showLabel = false,
   className = '',
   obtainedAt,
-}, ref) {
+}: BadgeSceauProps) {
   const [dialogOpen, setDialogOpen] = useState(false)
   const def = BADGE_DEFINITIONS[id]
 
@@ -78,7 +78,6 @@ export const BadgeSceau = forwardRef<HTMLButtonElement, BadgeSceauProps>(functio
 
   const svgElement = (
     <button
-      ref={ref}
       type="button"
       aria-label={accessibleLabel}
       aria-haspopup="dialog"
@@ -99,10 +98,8 @@ export const BadgeSceau = forwardRef<HTMLButtonElement, BadgeSceauProps>(functio
             opacity: isActive ? 1 : 0.4,
           }}
         >
-          {/* Subtle shadow for depth */}
           {isActive && <circle cx="27" cy="27" r="22" fill="rgba(0,0,0,0.08)" />}
           <circle cx="26" cy="26" r="22" fill={def.bg} />
-          {/* Inner ring for texture */}
           <circle cx="26" cy="26" r="18" fill="none" stroke={def.iconColor} strokeWidth="0.5" opacity="0.15" />
           <g transform="translate(6, 6)" dangerouslySetInnerHTML={{ __html: def.svgIcon }} />
           <TierRing tier={tier} r={24} />
@@ -191,6 +188,6 @@ export const BadgeSceau = forwardRef<HTMLButtonElement, BadgeSceauProps>(functio
       </Dialog>
     </>
   )
-})
+}
 
 export default BadgeSceau
