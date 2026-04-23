@@ -356,6 +356,108 @@ const TestErrorBoundary = () => {
           </CardContent>
         </Card>
 
+        <Card data-testid="storage-diagnostic">
+          <CardHeader>
+            <CardTitle className="text-base flex items-center gap-2">
+              <HardDrive className="h-4 w-4 text-muted-foreground" />
+              Diagnostic stockage navigateur
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              Vérifie l'accès en écriture / lecture / suppression sur{" "}
+              <code className="font-mono text-xs">localStorage</code> et{" "}
+              <code className="font-mono text-xs">sessionStorage</code>. Utile
+              pour confirmer si le shim mémoire de fallback est actif (preview
+              iframe sandboxée, navigation privée, etc.).
+            </p>
+
+            <div className="flex flex-wrap items-center gap-3">
+              <Button
+                onClick={runStorageDiagnostic}
+                size="sm"
+                data-testid="run-storage-diagnostic"
+              >
+                Lancer le diagnostic
+              </Button>
+              {storageRanAt && (
+                <span className="text-xs text-muted-foreground">
+                  Dernière exécution : {storageRanAt}
+                </span>
+              )}
+            </div>
+
+            {storageResults && (
+              <div className="space-y-3" data-testid="storage-results">
+                {storageResults.map((r) => {
+                  const allOk = r.available && r.roundtripOk && r.canRemove;
+                  return (
+                    <div
+                      key={r.name}
+                      className={
+                        "rounded-md border p-3 " +
+                        (allOk
+                          ? "border-primary/40 bg-primary/5"
+                          : "border-destructive/40 bg-destructive/5")
+                      }
+                      data-testid={`storage-result-${r.name}`}
+                      data-ok={allOk}
+                    >
+                      <div className="flex items-center gap-2 mb-2">
+                        {allOk ? (
+                          <CheckCircle2 className="h-4 w-4 text-primary" />
+                        ) : (
+                          <XCircle className="h-4 w-4 text-destructive" />
+                        )}
+                        <span className="font-mono text-sm font-semibold text-foreground">
+                          {r.name}
+                        </span>
+                        {r.isMemoryShim && (
+                          <span className="text-[10px] uppercase tracking-wide px-1.5 py-0.5 rounded bg-muted text-muted-foreground font-mono">
+                            shim mémoire
+                          </span>
+                        )}
+                      </div>
+
+                      <ul className="space-y-1 text-xs">
+                        {[
+                          ["API disponible", r.available],
+                          ["Écriture (setItem)", r.canWrite],
+                          ["Lecture (getItem)", r.canRead],
+                          ["Aller-retour identique", r.roundtripOk],
+                          ["Suppression (removeItem)", r.canRemove],
+                        ].map(([label, ok]) => (
+                          <li
+                            key={label as string}
+                            className="flex items-center gap-2"
+                          >
+                            {ok ? (
+                              <CheckCircle2 className="h-3.5 w-3.5 text-primary" />
+                            ) : (
+                              <XCircle className="h-3.5 w-3.5 text-destructive" />
+                            )}
+                            <span className="text-foreground">{label as string}</span>
+                          </li>
+                        ))}
+                      </ul>
+
+                      {r.error && (
+                        <p className="mt-2 text-xs font-mono text-destructive break-all">
+                          {r.error}
+                        </p>
+                      )}
+                    </div>
+                  );
+                })}
+                <p className="text-xs text-muted-foreground">
+                  Détails complets également disponibles dans la console
+                  navigateur (groupe « Storage Diagnostic »).
+                </p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
         {verification && (
           <Card
             className={
