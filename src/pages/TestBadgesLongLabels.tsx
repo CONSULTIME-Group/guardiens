@@ -72,11 +72,13 @@ const TEST_CASES: Array<{
   },
 ]
 
-const VIEWPORTS = [
-  { label: 'mobile', width: 375 },
-  { label: 'tablette', width: 768 },
-  { label: 'desktop', width: 1920 },
-] as const
+type ViewportKey = 'mobile' | 'tablet' | 'desktop'
+
+const VIEWPORTS: Array<{ label: string; width: number; vp: ViewportKey }> = [
+  { label: 'mobile', width: 375, vp: 'mobile' },
+  { label: 'tablette', width: 768, vp: 'tablet' },
+  { label: 'desktop', width: 1920, vp: 'desktop' },
+]
 
 type CaptureItem = { name: string; dataUrl: string }
 
