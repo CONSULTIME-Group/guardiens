@@ -41,6 +41,42 @@ export type Database = {
         }
         Relationships: []
       }
+      admin_message_logs: {
+        Row: {
+          admin_id: string
+          content: string
+          conversation_id: string | null
+          id: string
+          message_id: string | null
+          recipient_email: string | null
+          recipient_id: string
+          recipient_name: string | null
+          sent_at: string
+        }
+        Insert: {
+          admin_id: string
+          content: string
+          conversation_id?: string | null
+          id?: string
+          message_id?: string | null
+          recipient_email?: string | null
+          recipient_id: string
+          recipient_name?: string | null
+          sent_at?: string
+        }
+        Update: {
+          admin_id?: string
+          content?: string
+          conversation_id?: string | null
+          id?: string
+          message_id?: string | null
+          recipient_email?: string | null
+          recipient_id?: string
+          recipient_name?: string | null
+          sent_at?: string
+        }
+        Relationships: []
+      }
       admin_subscription_logs: {
         Row: {
           action: string
