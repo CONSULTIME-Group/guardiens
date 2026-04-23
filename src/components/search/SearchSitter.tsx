@@ -88,6 +88,8 @@ const SearchSitter = () => {
   const [isCreatingAlert, setIsCreatingAlert] = useState(false);
   const [crossTabCount, setCrossTabCount] = useState<number | null>(null);
   const [launchModeCount, setLaunchModeCount] = useState<number | null>(null);
+  const [nearbyZones, setNearbyZones] = useState<{ deptCode: string; deptName: string; regionCode: string; regionName: string; count: number }[]>([]);
+  const [nearbyRegions, setNearbyRegions] = useState<{ regionCode: string; regionName: string; count: number }[]>([]);
 
   const [results, setResults] = useState<any[]>([]);
   const [resultCoords, setResultCoords] = useState<Map<string, { lat: number; lng: number }>>(new Map());
@@ -266,35 +268,86 @@ const SearchSitter = () => {
     });
   }, [loading, tab, zoneMode, userPostalCode, densityCounts, radius, city]);
 
-  // Compute cross-tab count + global launch count when results are empty
+  // Compute cross-tab count + global launch count + nearby zones breakdown when results are empty
   useEffect(() => {
     if (loading || results.length > 0) {
       setCrossTabCount(null);
       setLaunchModeCount(null);
+      setNearbyZones([]);
+      setNearbyRegions([]);
       return;
     }
     let cancelled = false;
     (async () => {
       try {
-        const [otherTabRes, sitsAllRes, missionsAllRes] = await Promise.all([
+        const refDept = getDeptCode(getZoneRefPostalCode());
+        const refRegion = getRegionCode(refDept);
+
+        const [otherTabRes, sitsAllRes, missionsAllRes, breakdownRes] = await Promise.all([
           tab === "sits"
             ? supabase.from("small_missions").select("id", { count: "exact", head: true }).eq("status", "open")
             : supabase.from("sits").select("id", { count: "exact", head: true }).eq("status", "published"),
           supabase.from("sits").select("id", { count: "exact", head: true }).eq("status", "published"),
           supabase.from("small_missions").select("id", { count: "exact", head: true }).eq("status", "open"),
+          tab === "sits"
+            ? supabase.from("sits").select("owner:profiles!sits_user_id_fkey(postal_code)").in("status", ["published", "confirmed", "in_progress"]).limit(500)
+            : supabase.from("small_missions").select("postal_code").eq("status", "open").limit(500),
         ]);
         if (cancelled) return;
         setCrossTabCount(otherTabRes.count ?? 0);
         setLaunchModeCount((sitsAllRes.count ?? 0) + (missionsAllRes.count ?? 0));
+
+        // Aggregate by dept / region, excluding the user's own zone
+        const deptAgg = new Map<string, number>();
+        const regionAgg = new Map<string, number>();
+        for (const row of (breakdownRes.data || []) as any[]) {
+          const cp = row?.postal_code || row?.owner?.postal_code || null;
+          const dept = getDeptCode(cp);
+          if (!dept) continue;
+          const region = getRegionCode(dept);
+          if (!region) continue;
+          if (refDept && dept === refDept) continue; // skip current dept
+          deptAgg.set(dept, (deptAgg.get(dept) || 0) + 1);
+          regionAgg.set(region, (regionAgg.get(region) || 0) + 1);
+        }
+
+        const topDepts = Array.from(deptAgg.entries())
+          .map(([deptCode, count]) => {
+            const regionCode = getRegionCode(deptCode) || "";
+            return {
+              deptCode,
+              deptName: DEPT_NAMES[deptCode] || deptCode,
+              regionCode,
+              regionName: getRegionName(deptCode) || "",
+              count,
+            };
+          })
+          .sort((a, b) => b.count - a.count)
+          .slice(0, 4);
+
+        const topRegions = Array.from(regionAgg.entries())
+          .filter(([code]) => !refRegion || code !== refRegion)
+          .map(([regionCode, count]) => ({
+            regionCode,
+            regionName: getRegionName(getDeptsInRegion(regionCode)[0] || null) || regionCode,
+            count,
+          }))
+          .sort((a, b) => b.count - a.count)
+          .slice(0, 4);
+
+        setNearbyZones(topDepts);
+        setNearbyRegions(topRegions);
       } catch {
         if (!cancelled) {
           setCrossTabCount(0);
           setLaunchModeCount(0);
+          setNearbyZones([]);
+          setNearbyRegions([]);
         }
       }
     })();
     return () => { cancelled = true; };
-  }, [loading, results.length, tab]);
+  }, [loading, results.length, tab, cityPostalCode, userPostalCode]);
 
   const handleCreateAlert = async () => {
     if (!city || alertCreated || isCreatingAlert) return;
@@ -1468,12 +1521,88 @@ const SearchSitter = () => {
                 <h3 className="font-heading font-semibold text-xl text-foreground">
                   {tab === "sits" ? "Pas encore d'annonce de garde dans votre zone" : "Pas encore de mission dans votre zone"}
                 </h3>
+
+                {/* Compteur clair : 0 dans la zone · X ailleurs */}
+                {densityCounts.france > 0 && (
+                  <div className="inline-flex flex-wrap items-center justify-center gap-2 text-sm">
+                    <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1 text-foreground/80">
+                      <span className="font-semibold text-foreground">0</span>
+                      <span className="text-muted-foreground">dans votre zone</span>
+                    </span>
+                    <span className="text-muted-foreground">·</span>
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-primary">
+                      <span className="font-semibold">{densityCounts.france}</span>
+                      <span>{tab === "sits" ? (densityCounts.france > 1 ? "annonces" : "annonce") : (densityCounts.france > 1 ? "missions" : "mission")} ailleurs en France</span>
+                    </span>
+                  </div>
+                )}
+
                 <p className="text-sm text-muted-foreground max-w-md mx-auto">
                   {densityCounts.france > 0
-                    ? `Mais ${densityCounts.france} ${tab === "sits" ? "annonce" : "mission"}${densityCounts.france > 1 ? "s sont publiées" : " est publiée"} ailleurs en France. Élargissez la zone ou créez une alerte pour ne rien rater près de chez vous.`
+                    ? "Élargissez la zone, explorez les régions voisines ou créez une alerte pour ne rien rater près de chez vous."
                     : "La communauté grandit chaque jour. Voici comment ne rien rater et tirer profit de votre temps dès maintenant."}
                 </p>
               </div>
+
+              {/* Régions / départements voisins disponibles */}
+              {(nearbyRegions.length > 0 || nearbyZones.length > 0) && densityCounts.france > 0 && (
+                <div className="rounded-xl border border-border bg-card p-4 space-y-3">
+                  <div className="flex items-start gap-3">
+                    <MapPin className="h-5 w-5 text-foreground mt-0.5 shrink-0" />
+                    <div className="flex-1 space-y-3">
+                      <p className="font-medium text-sm text-foreground">
+                        Disponible ailleurs en France
+                      </p>
+
+                      {nearbyRegions.length > 0 && (
+                        <div>
+                          <p className="text-xs text-muted-foreground mb-1.5">Régions où il y en a le plus</p>
+                          <div className="flex flex-wrap gap-2">
+                            {nearbyRegions.map((r) => (
+                              <button
+                                key={r.regionCode}
+                                type="button"
+                                className="inline-flex items-center gap-1.5 rounded-full border border-border bg-background hover:border-primary/50 hover:bg-primary/5 px-3 py-1 text-xs text-foreground transition-colors"
+                                onClick={() => {
+                                  trackEvent("search_empty_action", { source: "search_empty", metadata: { action: "browse_region", region: r.regionCode, count: r.count, tab } });
+                                  setZoneMode("france");
+                                }}
+                              >
+                                <span className="font-medium">{r.regionName}</span>
+                                <span className="text-muted-foreground">·</span>
+                                <span className="text-primary font-semibold">{r.count}</span>
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {nearbyZones.length > 0 && (
+                        <div>
+                          <p className="text-xs text-muted-foreground mb-1.5">Départements actifs</p>
+                          <div className="flex flex-wrap gap-2">
+                            {nearbyZones.map((d) => (
+                              <button
+                                key={d.deptCode}
+                                type="button"
+                                className="inline-flex items-center gap-1.5 rounded-full border border-border bg-background hover:border-primary/50 hover:bg-primary/5 px-3 py-1 text-xs text-foreground transition-colors"
+                                onClick={() => {
+                                  trackEvent("search_empty_action", { source: "search_empty", metadata: { action: "browse_dept", dept: d.deptCode, count: d.count, tab } });
+                                  setZoneMode("france");
+                                }}
+                              >
+                                <span className="font-medium">{d.deptCode} · {d.deptName}</span>
+                                <span className="text-muted-foreground">·</span>
+                                <span className="text-primary font-semibold">{d.count}</span>
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {/* Action 0 — Mode Lancement (si plateforme globalement vide) */}
               {launchModeCount === 0 && (
