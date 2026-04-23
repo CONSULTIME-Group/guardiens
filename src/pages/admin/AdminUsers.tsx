@@ -11,7 +11,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { format, formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
-import { Eye, Ban, ShieldCheck, StickyNote, RotateCcw, Trash2, AlertTriangle, Crown, ChevronLeft, ChevronRight } from "lucide-react";
+import { Eye, Ban, ShieldCheck, StickyNote, RotateCcw, Trash2, AlertTriangle, Crown, ChevronLeft, ChevronRight, MessageSquare } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { Switch } from "@/components/ui/switch";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 
@@ -57,6 +58,11 @@ const AdminUsers = () => {
     open: false, userId: "", userName: ""
   });
   const [deleting, setDeleting] = useState(false);
+  const [messageModal, setMessageModal] = useState<{ open: boolean; userId: string; userName: string; content: string }>({
+    open: false, userId: "", userName: "", content: ""
+  });
+  const [sendingMessage, setSendingMessage] = useState(false);
+  const navigate = useNavigate();
 
   const fetchUsers = useCallback(async () => {
     setLoading(true);
@@ -187,6 +193,30 @@ const AdminUsers = () => {
     }
     setDeleting(false);
     setDeleteConfirm({ open: false, userId: "", userName: "" });
+  };
+
+  const handleSendMessage = async () => {
+    const content = messageModal.content.trim();
+    if (!content) {
+      toast.error("Le message ne peut pas être vide");
+      return;
+    }
+    setSendingMessage(true);
+    const { data, error } = await supabase.rpc("admin_send_message_to_user", {
+      p_target_user_id: messageModal.userId,
+      p_content: content,
+    });
+    setSendingMessage(false);
+    if (error) {
+      toast.error(error.message || "Erreur lors de l'envoi");
+      return;
+    }
+    toast.success("Message envoyé");
+    const convId = data as string;
+    setMessageModal({ open: false, userId: "", userName: "", content: "" });
+    if (convId) {
+      navigate(`/messages?conversation=${convId}`);
+    }
   };
 
   return (
@@ -321,6 +351,19 @@ const AdminUsers = () => {
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-1">
+                         <Button
+                          variant="ghost"
+                          size="icon"
+                          title="Envoyer un message"
+                          onClick={() => setMessageModal({
+                            open: true,
+                            userId: user.id,
+                            userName: `${user.first_name || ""} ${user.last_name || ""}`.trim() || user.email || "cet utilisateur",
+                            content: "",
+                          })}
+                        >
+                          <MessageSquare className="h-4 w-4" />
+                        </Button>
                          <Button
                           variant="ghost"
                           size="icon"
@@ -497,6 +540,44 @@ const AdminUsers = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Send Message Modal */}
+      <Dialog
+        open={messageModal.open}
+        onOpenChange={(o) => !o && !sendingMessage && setMessageModal({ open: false, userId: "", userName: "", content: "" })}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Envoyer un message à {messageModal.userName}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-2">
+            <Textarea
+              placeholder="Votre message…"
+              value={messageModal.content}
+              onChange={(e) => setMessageModal((s) => ({ ...s, content: e.target.value }))}
+              rows={6}
+              maxLength={5000}
+              disabled={sendingMessage}
+            />
+            <div className="flex items-center justify-between text-xs text-muted-foreground">
+              <span>Le message sera envoyé en votre nom dans la messagerie de l'utilisateur.</span>
+              <span>{messageModal.content.length}/5000</span>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setMessageModal({ open: false, userId: "", userName: "", content: "" })}
+              disabled={sendingMessage}
+            >
+              Annuler
+            </Button>
+            <Button onClick={handleSendMessage} disabled={sendingMessage || !messageModal.content.trim()}>
+              {sendingMessage ? "Envoi…" : "Envoyer"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
