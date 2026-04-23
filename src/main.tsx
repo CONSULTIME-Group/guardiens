@@ -1,3 +1,8 @@
+import { installFatalErrorOverlay, showFatalError } from "./lib/fatalErrorOverlay";
+
+// Install FIRST so we capture any error during the rest of the bootstrap.
+installFatalErrorOverlay();
+
 import { createRoot } from "react-dom/client";
 import { HelmetProvider } from "react-helmet-async";
 import App from "./App.tsx";
@@ -10,12 +15,20 @@ import { installStorageFallback } from "./lib/storageFallback";
 
 installStorageFallback();
 
-const root = createRoot(document.getElementById("root")!);
-root.render(
-  <HelmetProvider>
-    <App />
-  </HelmetProvider>
-);
+try {
+  const container = document.getElementById("root");
+  if (!container) {
+    throw new Error("Élément #root introuvable dans le DOM");
+  }
+  const root = createRoot(container);
+  root.render(
+    <HelmetProvider>
+      <App />
+    </HelmetProvider>
+  );
+} catch (err) {
+  showFatalError(err, "main.tsx:bootstrap");
+}
 
 // Fallback: mark prerender ready after initial render for static pages.
 // Pages with async data set prerenderReady = true themselves after fetch.
