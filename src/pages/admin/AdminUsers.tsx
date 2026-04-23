@@ -540,6 +540,44 @@ const AdminUsers = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Send Message Modal */}
+      <Dialog
+        open={messageModal.open}
+        onOpenChange={(o) => !o && !sendingMessage && setMessageModal({ open: false, userId: "", userName: "", content: "" })}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Envoyer un message à {messageModal.userName}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-2">
+            <Textarea
+              placeholder="Votre message…"
+              value={messageModal.content}
+              onChange={(e) => setMessageModal((s) => ({ ...s, content: e.target.value }))}
+              rows={6}
+              maxLength={5000}
+              disabled={sendingMessage}
+            />
+            <div className="flex items-center justify-between text-xs text-muted-foreground">
+              <span>Le message sera envoyé en votre nom dans la messagerie de l'utilisateur.</span>
+              <span>{messageModal.content.length}/5000</span>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setMessageModal({ open: false, userId: "", userName: "", content: "" })}
+              disabled={sendingMessage}
+            >
+              Annuler
+            </Button>
+            <Button onClick={handleSendMessage} disabled={sendingMessage || !messageModal.content.trim()}>
+              {sendingMessage ? "Envoi…" : "Envoyer"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
