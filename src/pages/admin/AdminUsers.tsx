@@ -752,6 +752,57 @@ const AdminUsers = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Voir le contenu du dernier message admin envoyé à l'utilisateur */}
+      <Dialog
+        open={lastMessageModal.open}
+        onOpenChange={(o) => !o && setLastMessageModal({ open: false, loading: false, userName: "", userId: "", conversationId: null, content: null, sentAt: null })}
+      >
+        <DialogContent className="max-w-xl">
+          <DialogHeader>
+            <DialogTitle>Dernier message envoyé à {lastMessageModal.userName}</DialogTitle>
+          </DialogHeader>
+          {lastMessageModal.loading ? (
+            <p className="text-sm text-muted-foreground py-6 text-center">Chargement…</p>
+          ) : !lastMessageModal.content ? (
+            <p className="text-sm text-muted-foreground py-6 text-center">
+              Aucun message admin envoyé à cet utilisateur pour le moment.
+            </p>
+          ) : (
+            <div className="space-y-3">
+              {lastMessageModal.sentAt && (
+                <p className="text-xs text-muted-foreground">
+                  Envoyé {formatDistanceToNow(new Date(lastMessageModal.sentAt), { addSuffix: true, locale: fr })}
+                  {" · "}
+                  {new Date(lastMessageModal.sentAt).toLocaleString("fr-FR", { dateStyle: "short", timeStyle: "short" })}
+                </p>
+              )}
+              <div className="rounded-lg border bg-muted/40 p-4 text-sm whitespace-pre-wrap max-h-[50vh] overflow-y-auto">
+                {lastMessageModal.content}
+              </div>
+            </div>
+          )}
+          <DialogFooter className="gap-2 sm:gap-2">
+            {lastMessageModal.conversationId && (
+              <Button
+                variant="outline"
+                onClick={() => {
+                  const convId = lastMessageModal.conversationId;
+                  setLastMessageModal({ open: false, loading: false, userName: "", userId: "", conversationId: null, content: null, sentAt: null });
+                  navigate(`/messages?conversation=${convId}`);
+                }}
+              >
+                Ouvrir la conversation
+              </Button>
+            )}
+            <Button
+              onClick={() => setLastMessageModal({ open: false, loading: false, userName: "", userId: "", conversationId: null, content: null, sentAt: null })}
+            >
+              Fermer
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
