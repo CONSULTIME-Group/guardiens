@@ -69,65 +69,34 @@ const AdminUsers = () => {
 
   const openHistory = async () => {
     setHistoryModal({ open: true, loading: true, items: [] });
-    const { data: { user: me } } = await supabase.auth.getUser();
-    if (!me) {
-      setHistoryModal({ open: false, loading: false, items: [] });
-      toast.error("Session introuvable");
-      return;
-    }
-    // Conversations "directes admin" : context_type IS NULL, owner_id = admin
-    const { data: convs, error: convErr } = await supabase
-      .from("conversations")
-      .select("id, sitter_id, last_message_at, created_at")
-      .is("context_type", null)
-      .eq("owner_id", me.id)
-      .order("last_message_at", { ascending: false, nullsFirst: false })
-      .limit(100);
-    if (convErr) {
-      toast.error("Erreur de chargement de l'historique");
+    // Source de vérité : journal d'audit côté back-office
+    const { data: logs, error: logErr } = await supabase
+      .from("admin_message_logs")
+      .select("conversation_id, message_id, content, sent_at, recipient_id, recipient_email, recipient_name")
+      .order("sent_at", { ascending: false })
+      .limit(200);
+    if (logErr) {
+      toast.error("Erreur de chargement du journal");
       setHistoryModal({ open: false, loading: false, items: [] });
       return;
     }
-    const convIds = (convs || []).map((c: any) => c.id);
-    const recipientIds = Array.from(new Set((convs || []).map((c: any) => c.sitter_id)));
-    if (convIds.length === 0) {
-      setHistoryModal({ open: true, loading: false, items: [] });
-      return;
-    }
-    const [msgRes, profRes] = await Promise.all([
-      supabase
-        .from("messages")
-        .select("conversation_id, content, created_at, sender_id")
-        .in("conversation_id", convIds)
-        .eq("sender_id", me.id)
-        .order("created_at", { ascending: false }),
-      supabase
+    const recipientIds = Array.from(new Set((logs || []).map((l: any) => l.recipient_id)));
+    let avatarMap = new Map<string, string | null>();
+    if (recipientIds.length > 0) {
+      const { data: profs } = await supabase
         .from("profiles")
-        .select("id, first_name, last_name, avatar_url")
-        .in("id", recipientIds),
-    ]);
-    const profMap = new Map((profRes.data || []).map((p: any) => [p.id, p]));
-    // Garder le dernier message admin par conversation
-    const lastByConv = new Map<string, any>();
-    for (const m of (msgRes.data || [])) {
-      if (!lastByConv.has(m.conversation_id)) lastByConv.set(m.conversation_id, m);
+        .select("id, avatar_url")
+        .in("id", recipientIds);
+      avatarMap = new Map((profs || []).map((p: any) => [p.id, p.avatar_url]));
     }
-    const items = (convs || [])
-      .map((c: any) => {
-        const last = lastByConv.get(c.id);
-        if (!last) return null;
-        const p = profMap.get(c.sitter_id);
-        const name = p ? `${p.first_name || ""} ${p.last_name || ""}`.trim() || "Utilisateur" : "Utilisateur";
-        return {
-          conversation_id: c.id,
-          content: last.content,
-          created_at: last.created_at,
-          recipient_id: c.sitter_id,
-          recipient_name: name,
-          recipient_avatar: p?.avatar_url || null,
-        };
-      })
-      .filter(Boolean) as any[];
+    const items = (logs || []).map((l: any) => ({
+      conversation_id: l.conversation_id,
+      content: l.content,
+      created_at: l.sent_at,
+      recipient_id: l.recipient_id,
+      recipient_name: l.recipient_name || l.recipient_email || "Utilisateur",
+      recipient_avatar: avatarMap.get(l.recipient_id) || null,
+    }));
     setHistoryModal({ open: true, loading: false, items });
   };
 
