@@ -1,8 +1,13 @@
 import { Helmet } from 'react-helmet-async'
-import { useState } from 'react'
+import { useRef, useState } from 'react'
+import html2canvas from 'html2canvas'
 import BadgeSceau from '@/components/badges/BadgeSceau'
 import { BadgeSceauLarge } from '@/components/badges/BadgeSceauLarge'
 import { BADGE_DEFINITIONS } from '@/components/badges/badge-definitions'
+import { Button } from '@/components/ui/button'
+import { Dialog, DialogContent } from '@/components/ui/dialog'
+import { Camera, Loader2, Download } from 'lucide-react'
+import { toast } from 'sonner'
 
 /**
  * Page de test interne — vérifie que les sceaux de badges et leurs libellés
@@ -12,7 +17,6 @@ import { BADGE_DEFINITIONS } from '@/components/badges/badge-definitions'
  * Accessible uniquement via /test/badges-long-labels (noindex).
  */
 
-// Cas de test avec libellés volontairement variés
 const TEST_CASES: Array<{
   id: string
   overrideLabel?: string
@@ -52,7 +56,7 @@ const TEST_CASES: Array<{
     overrideLabel: "Coup de main exceptionnel rendu avec une diligence remarquable",
     count: 2,
     obtainedAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 30).toISOString(),
-    note: 'Libellé long + date d\'obtention',
+    note: "Libellé long + date d'obtention",
   },
   {
     id: 'id_verifiee',
@@ -62,8 +66,16 @@ const TEST_CASES: Array<{
   },
 ]
 
+const VIEWPORTS = [
+  { label: 'mobile', width: 375 },
+  { label: 'tablette', width: 768 },
+  { label: 'desktop', width: 1920 },
+] as const
+
+type CaptureItem = { name: string; dataUrl: string }
+
 export default function TestBadgesLongLabels() {
-  // On clone temporairement les définitions pour injecter les libellés de test
+  // Injection one-shot des libellés de test
   const [originalDefs] = useState(() => {
     const snapshot: Record<string, { label: string; tooltip: string }> = {}
     TEST_CASES.forEach(tc => {
@@ -76,8 +88,15 @@ export default function TestBadgesLongLabels() {
     return snapshot
   })
 
-  // Restauration au démontage pour ne pas polluer les autres pages
-  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const [isCapturing, setIsCapturing] = useState(false)
+  const [progress, setProgress] = useState<string>('')
+  const [captures, setCaptures] = useState<CaptureItem[]>([])
+  const [stageWidth, setStageWidth] = useState<number | null>(null)
+  const [stageBadgeId, setStageBadgeId] = useState<string | null>(null)
+
+  const stageRef = useRef<HTMLDivElement>(null)
+
+  // Restauration au démontage
   useState(() => {
     return () => {
       Object.entries(originalDefs).forEach(([id, snap]) => {
@@ -90,6 +109,86 @@ export default function TestBadgesLongLabels() {
     }
   })
 
+  const wait = (ms: number) => new Promise<void>(r => setTimeout(r, ms))
+
+  const captureNode = async (node: HTMLElement, width: number): Promise<string> => {
+    const canvas = await html2canvas(node, {
+      backgroundColor: '#ffffff',
+      scale: 1,
+      width,
+      windowWidth: width,
+      useCORS: true,
+      logging: false,
+    })
+    return canvas.toDataURL('image/png')
+  }
+
+  const handleGenerate = async () => {
+    setIsCapturing(true)
+    setCaptures([])
+    const results: CaptureItem[] = []
+
+    try {
+      for (const vp of VIEWPORTS) {
+        // 1) Capture de la grille à cette largeur
+        setProgress(`Grille ${vp.label} (${vp.width}px)…`)
+        setStageWidth(vp.width)
+        setStageBadgeId(null)
+        await wait(250)
+        if (stageRef.current) {
+          const dataUrl = await captureNode(stageRef.current, vp.width)
+          results.push({ name: `grille-${vp.label}-${vp.width}px.png`, dataUrl })
+        }
+
+        // 2) Capture de chaque modale ouverte à cette largeur
+        for (const tc of TEST_CASES) {
+          setProgress(`Modale « ${tc.id} » — ${vp.label}…`)
+          setStageBadgeId(tc.id)
+          await wait(350) // laisse le Dialog se monter + animer
+          // Le DialogContent de shadcn est porté hors du stage → on cible le portail
+          const dialog = document.querySelector('[role="dialog"]') as HTMLElement | null
+          if (dialog) {
+            const dataUrl = await captureNode(dialog, Math.min(vp.width, 480))
+            results.push({
+              name: `modale-${tc.id}-${vp.label}-${vp.width}px.png`,
+              dataUrl,
+            })
+          }
+          setStageBadgeId(null)
+          await wait(150)
+        }
+      }
+
+      setCaptures(results)
+      toast.success(`${results.length} captures générées`)
+    } catch (err) {
+      console.error('[TestBadgesLongLabels] capture error', err)
+      toast.error('Erreur pendant la capture — voir la console')
+    } finally {
+      setStageWidth(null)
+      setStageBadgeId(null)
+      setProgress('')
+      setIsCapturing(false)
+    }
+  }
+
+  const downloadAll = () => {
+    captures.forEach((c, i) => {
+      setTimeout(() => {
+        const a = document.createElement('a')
+        a.href = c.dataUrl
+        a.download = c.name
+        document.body.appendChild(a)
+        a.click()
+        document.body.removeChild(a)
+      }, i * 120)
+    })
+  }
+
+  // Badge ouvert programmatiquement pour la capture
+  const stagedCase = stageBadgeId ? TEST_CASES.find(t => t.id === stageBadgeId) : null
+  const stagedDef = stagedCase ? BADGE_DEFINITIONS[stagedCase.id] : null
+
   return (
     <div className="min-h-screen bg-background px-4 py-10 md:px-8">
       <Helmet>
@@ -101,40 +200,78 @@ export default function TestBadgesLongLabels() {
         <h1 className="text-2xl md:text-3xl font-heading font-bold text-foreground mb-2">
           Test — badges à libellés longs
         </h1>
-        <p className="text-sm text-muted-foreground mb-8 max-w-2xl">
-          Page interne de QA. Cliquez sur chaque sceau pour ouvrir la modale et
-          vérifier que le titre reste lisible sur mobile, tablette et desktop.
+        <p className="text-sm text-muted-foreground mb-6 max-w-2xl">
+          Page interne de QA. Cliquez sur chaque sceau pour ouvrir la modale, ou
+          utilisez le bouton ci-dessous pour générer automatiquement toutes les
+          captures aux trois breakpoints de référence.
         </p>
 
-        {/* Section 1 — Sceaux compacts en grille (vue dashboard) */}
+        {/* Barre d'actions */}
+        <div className="sticky top-0 z-10 -mx-4 md:mx-0 mb-8 bg-background/95 backdrop-blur border-y border-border md:border md:rounded-lg px-4 py-3 flex flex-wrap items-center gap-3">
+          <Button onClick={handleGenerate} disabled={isCapturing} size="sm">
+            {isCapturing ? (
+              <>
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                Capture en cours…
+              </>
+            ) : (
+              <>
+                <Camera className="w-4 h-4 mr-2" />
+                Générer captures (mobile / tablette / desktop)
+              </>
+            )}
+          </Button>
+          {captures.length > 0 && !isCapturing && (
+            <Button onClick={downloadAll} size="sm" variant="outline">
+              <Download className="w-4 h-4 mr-2" />
+              Télécharger les {captures.length} images
+            </Button>
+          )}
+          {progress && (
+            <span className="text-xs text-muted-foreground">{progress}</span>
+          )}
+        </div>
+
+        {/* Stage de capture — grille hébergée dans un conteneur redimensionnable.
+            Quand stageWidth est défini, on force la largeur pour simuler un viewport. */}
         <section className="mb-12">
           <h2 className="text-lg font-heading font-semibold text-foreground mb-4 border-b border-border pb-2">
-            1. Sceaux compacts en grille (40-52 px)
+            1. Grille de sceaux (capturée par le bouton)
           </h2>
-          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-4 md:gap-6">
-            {TEST_CASES.map((tc, i) => (
-              <div
-                key={`compact-${tc.id}-${i}`}
-                className="flex flex-col items-center text-center gap-2 p-3 rounded-lg border border-border bg-card"
-              >
-                <BadgeSceau
-                  id={tc.id}
-                  count={tc.count}
-                  showLabel
-                  obtainedAt={tc.obtainedAt}
-                />
-                <p className="text-[10px] text-muted-foreground leading-tight">
-                  {tc.note}
-                </p>
+          <div
+            className="mx-auto overflow-hidden border border-dashed border-border rounded-lg transition-all"
+            style={{
+              width: stageWidth ?? '100%',
+              maxWidth: stageWidth ?? '100%',
+            }}
+          >
+            <div ref={stageRef} className="bg-background p-4">
+              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-4 md:gap-6">
+                {TEST_CASES.map((tc, i) => (
+                  <div
+                    key={`grid-${tc.id}-${i}`}
+                    className="flex flex-col items-center text-center gap-2 p-3 rounded-lg border border-border bg-card"
+                  >
+                    <BadgeSceau
+                      id={tc.id}
+                      count={tc.count}
+                      showLabel
+                      obtainedAt={tc.obtainedAt}
+                    />
+                    <p className="text-[10px] text-muted-foreground leading-tight">
+                      {tc.note}
+                    </p>
+                  </div>
+                ))}
               </div>
-            ))}
+            </div>
           </div>
         </section>
 
-        {/* Section 2 — Sceaux larges (planche / page profil) */}
+        {/* Sceaux larges (vue planche) */}
         <section className="mb-12">
           <h2 className="text-lg font-heading font-semibold text-foreground mb-4 border-b border-border pb-2">
-            2. Sceaux larges (96 px) avec libellés sous le badge
+            2. Sceaux larges (96 px) — référence visuelle
           </h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
             {TEST_CASES.map((tc, i) => {
@@ -152,54 +289,71 @@ export default function TestBadgesLongLabels() {
                   <p className="text-[11px] text-muted-foreground leading-snug break-words">
                     {def.tooltip}
                   </p>
-                  <p className="text-[10px] text-muted-foreground/70 italic mt-1">
-                    {tc.note}
-                  </p>
                 </div>
               )
             })}
           </div>
         </section>
 
-        {/* Section 3 — Test responsive : largeurs simulées */}
-        <section className="mb-12">
-          <h2 className="text-lg font-heading font-semibold text-foreground mb-4 border-b border-border pb-2">
-            3. Vérification responsive — modale dans conteneurs étroits
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {[
-              { label: 'Mobile (320px)', width: 320 },
-              { label: 'Tablette (480px)', width: 480 },
-              { label: 'Desktop (640px)', width: 640 },
-            ].map(({ label, width }) => (
-              <div
-                key={label}
-                className="border border-dashed border-border rounded-lg p-4 bg-muted/30"
-                style={{ maxWidth: width }}
-              >
-                <p className="text-xs font-semibold text-muted-foreground mb-3">
-                  {label}
-                </p>
-                <div className="flex gap-3 flex-wrap">
-                  {TEST_CASES.slice(0, 3).map((tc, i) => (
-                    <BadgeSceau
-                      key={`resp-${tc.id}-${i}`}
-                      id={tc.id}
-                      count={tc.count}
-                      obtainedAt={tc.obtainedAt}
-                    />
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
+        {/* Galerie des captures générées */}
+        {captures.length > 0 && (
+          <section className="mb-12">
+            <h2 className="text-lg font-heading font-semibold text-foreground mb-4 border-b border-border pb-2">
+              3. Captures générées ({captures.length})
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {captures.map((c, i) => (
+                <figure
+                  key={`cap-${i}`}
+                  className="border border-border rounded-lg overflow-hidden bg-card"
+                >
+                  <img
+                    src={c.dataUrl}
+                    alt={c.name}
+                    className="w-full h-auto block"
+                    loading="lazy"
+                  />
+                  <figcaption className="p-2 text-[11px] text-muted-foreground break-all border-t border-border">
+                    {c.name}
+                  </figcaption>
+                </figure>
+              ))}
+            </div>
+          </section>
+        )}
 
         <p className="text-xs text-muted-foreground italic text-center mt-8">
           Les libellés affichés ici sont volontairement exagérés pour le QA — ils
           ne reflètent pas les libellés réels des badges en production.
         </p>
       </div>
+
+      {/* Modale contrôlée pour la capture automatique.
+          On reproduit le contenu de BadgeSceau.Dialog pour pouvoir l'ouvrir
+          sans interaction utilisateur. */}
+      {stagedDef && stagedCase && (
+        <Dialog open onOpenChange={() => setStageBadgeId(null)}>
+          <DialogContent className="max-w-sm p-6 sm:p-8">
+            <div className="flex flex-col items-center text-center">
+              <div className="flex justify-center pt-4 pb-5 shrink-0">
+                <BadgeSceauLarge id={stagedCase.id} size={96} />
+              </div>
+              <h3 className="font-heading font-bold text-lg leading-snug px-2 mb-3 break-words hyphens-auto w-full">
+                {stagedDef.label}
+              </h3>
+              <p className="text-sm text-muted-foreground leading-relaxed mb-3">
+                {stagedDef.tooltip}
+              </p>
+              {stagedCase.count > 0 && (
+                <p className="text-sm font-semibold mb-1" style={{ color: stagedDef.iconColor }}>
+                  Obtenu {stagedCase.count} fois
+                </p>
+              )}
+              <p className="text-xs font-medium text-primary">✓ Actif</p>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   )
 }
