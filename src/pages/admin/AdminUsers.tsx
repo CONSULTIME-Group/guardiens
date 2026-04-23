@@ -109,6 +109,31 @@ const AdminUsers = () => {
     setHistoryModal({ open: true, loading: false, items });
   };
 
+  const openLastMessage = async (userId: string, userName: string) => {
+    setLastMessageModal({ open: true, loading: true, userName, userId, conversationId: null, content: null, sentAt: null });
+    const { data, error } = await supabase
+      .from("admin_message_logs")
+      .select("conversation_id, content, sent_at")
+      .eq("recipient_id", userId)
+      .order("sent_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (error) {
+      toast.error("Erreur de chargement");
+      setLastMessageModal({ open: false, loading: false, userName: "", userId: "", conversationId: null, content: null, sentAt: null });
+      return;
+    }
+    setLastMessageModal({
+      open: true,
+      loading: false,
+      userName,
+      userId,
+      conversationId: data?.conversation_id ?? null,
+      content: data?.content ?? null,
+      sentAt: data?.sent_at ?? null,
+    });
+  };
+
   const fetchUsers = useCallback(async () => {
     setLoading(true);
     let query = supabase
