@@ -146,30 +146,32 @@ export const BadgeSceau = forwardRef<HTMLDivElement, BadgeSceauProps>(function B
       </TooltipProvider>
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-xs text-center p-6 space-y-3">
-          <div className="flex justify-center">
-            <BadgeSceauLarge id={id} size={96} />
+        <DialogContent className="max-w-xs p-6">
+          <div className="flex flex-col items-center text-center gap-3">
+            <div className="flex justify-center pt-2">
+              <BadgeSceauLarge id={id} size={96} />
+            </div>
+            <h3 className="font-heading font-bold text-lg leading-tight">{def.label}</h3>
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              {def.tooltip}
+            </p>
+            {count > 0 && (
+              <p className="text-sm font-semibold" style={{ color: def.iconColor }}>
+                Obtenu {count} fois
+              </p>
+            )}
+            {dateLabel && (
+              <p className="text-xs text-muted-foreground/70 italic">
+                Dernière obtention : {dateLabel}
+              </p>
+            )}
+            <p
+              className="text-xs font-medium"
+              style={{ color: isActive ? 'hsl(var(--primary))' : 'hsl(var(--muted-foreground))' }}
+            >
+              {isActive ? '✓ Actif' : 'Expiré'}
+            </p>
           </div>
-          <h3 className="font-heading font-bold text-lg">{def.label}</h3>
-          <p className="text-sm text-muted-foreground leading-relaxed">
-            {def.tooltip}
-          </p>
-          {count > 0 && (
-            <p className="text-sm font-semibold" style={{ color: def.iconColor }}>
-              Obtenu {count} fois
-            </p>
-          )}
-          {dateLabel && (
-            <p className="text-xs text-muted-foreground/70 italic">
-              Dernière obtention : {dateLabel}
-            </p>
-          )}
-          <p
-            className="text-xs font-medium"
-            style={{ color: isActive ? 'hsl(var(--primary))' : 'hsl(var(--muted-foreground))' }}
-          >
-            {isActive ? '✓ Actif' : 'Expiré'}
-          </p>
         </DialogContent>
       </Dialog>
     </>
