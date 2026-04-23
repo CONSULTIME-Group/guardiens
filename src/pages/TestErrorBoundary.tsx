@@ -2,7 +2,63 @@ import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
-import { CheckCircle2, XCircle } from "lucide-react";
+import { CheckCircle2, XCircle, HardDrive } from "lucide-react";
+
+type StorageProbeResult = {
+  name: "localStorage" | "sessionStorage";
+  available: boolean;
+  isMemoryShim: boolean;
+  canWrite: boolean;
+  canRead: boolean;
+  canRemove: boolean;
+  roundtripOk: boolean;
+  error?: string;
+};
+
+const probeStorage = (
+  name: "localStorage" | "sessionStorage",
+): StorageProbeResult => {
+  const result: StorageProbeResult = {
+    name,
+    available: false,
+    isMemoryShim: false,
+    canWrite: false,
+    canRead: false,
+    canRemove: false,
+    roundtripOk: false,
+  };
+
+  try {
+    const storage = (window as any)[name] as Storage | undefined;
+    if (!storage) {
+      result.error = "API indisponible (window." + name + " = undefined)";
+      return result;
+    }
+    result.available = true;
+
+    // Le shim mémoire installé par installStorageFallback() est un objet
+    // littéral, pas une instance de Storage. On le détecte ainsi.
+    result.isMemoryShim =
+      typeof Storage === "undefined" || !(storage instanceof Storage);
+
+    const probeKey = "__guardiens_probe_" + Date.now();
+    const probeValue = "ok-" + Math.random().toString(36).slice(2, 8);
+
+    storage.setItem(probeKey, probeValue);
+    result.canWrite = true;
+
+    const readBack = storage.getItem(probeKey);
+    result.canRead = readBack !== null;
+    result.roundtripOk = readBack === probeValue;
+
+    storage.removeItem(probeKey);
+    result.canRemove = storage.getItem(probeKey) === null;
+  } catch (err) {
+    result.error = err instanceof Error ? err.message : String(err);
+  }
+
+  return result;
+};
 
 /**
  * Témoin avec état local + compteur de montages.
@@ -110,6 +166,37 @@ const TestErrorBoundary = () => {
     topMounts: number | null;
     bottomMounts: number | null;
   } | null>(null);
+  const [storageResults, setStorageResults] = useState<StorageProbeResult[] | null>(null);
+  const [storageRanAt, setStorageRanAt] = useState<string | null>(null);
+
+  const runStorageDiagnostic = () => {
+    const results = [probeStorage("localStorage"), probeStorage("sessionStorage")];
+    setStorageResults(results);
+    setStorageRanAt(new Date().toLocaleTimeString());
+
+    // Log cadré et lisible dans la console
+    if (typeof console.groupCollapsed === "function") {
+      console.groupCollapsed(
+        "%c[Storage Diagnostic] Résultats",
+        "color:#2563eb;font-weight:bold;",
+      );
+      results.forEach((r) => {
+        const status = r.available && r.roundtripOk ? "✅ OK" : "⚠️ Problème";
+        console.log(`${status} — ${r.name}`, {
+          available: r.available,
+          isMemoryShim: r.isMemoryShim,
+          canWrite: r.canWrite,
+          canRead: r.canRead,
+          canRemove: r.canRemove,
+          roundtripOk: r.roundtripOk,
+          error: r.error,
+        });
+      });
+      console.groupEnd();
+    } else {
+      console.log("[Storage Diagnostic]", results);
+    }
+  };
 
   const readWitnessState = () => {
     const get = (id: string) => {
@@ -266,6 +353,108 @@ const TestErrorBoundary = () => {
               label="Incrémentez aussi ce compteur AVANT de déclencher une erreur."
               testId="witness-bottom"
             />
+          </CardContent>
+        </Card>
+
+        <Card data-testid="storage-diagnostic">
+          <CardHeader>
+            <CardTitle className="text-base flex items-center gap-2">
+              <HardDrive className="h-4 w-4 text-muted-foreground" />
+              Diagnostic stockage navigateur
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              Vérifie l'accès en écriture / lecture / suppression sur{" "}
+              <code className="font-mono text-xs">localStorage</code> et{" "}
+              <code className="font-mono text-xs">sessionStorage</code>. Utile
+              pour confirmer si le shim mémoire de fallback est actif (preview
+              iframe sandboxée, navigation privée, etc.).
+            </p>
+
+            <div className="flex flex-wrap items-center gap-3">
+              <Button
+                onClick={runStorageDiagnostic}
+                size="sm"
+                data-testid="run-storage-diagnostic"
+              >
+                Lancer le diagnostic
+              </Button>
+              {storageRanAt && (
+                <span className="text-xs text-muted-foreground">
+                  Dernière exécution : {storageRanAt}
+                </span>
+              )}
+            </div>
+
+            {storageResults && (
+              <div className="space-y-3" data-testid="storage-results">
+                {storageResults.map((r) => {
+                  const allOk = r.available && r.roundtripOk && r.canRemove;
+                  return (
+                    <div
+                      key={r.name}
+                      className={
+                        "rounded-md border p-3 " +
+                        (allOk
+                          ? "border-primary/40 bg-primary/5"
+                          : "border-destructive/40 bg-destructive/5")
+                      }
+                      data-testid={`storage-result-${r.name}`}
+                      data-ok={allOk}
+                    >
+                      <div className="flex items-center gap-2 mb-2">
+                        {allOk ? (
+                          <CheckCircle2 className="h-4 w-4 text-primary" />
+                        ) : (
+                          <XCircle className="h-4 w-4 text-destructive" />
+                        )}
+                        <span className="font-mono text-sm font-semibold text-foreground">
+                          {r.name}
+                        </span>
+                        {r.isMemoryShim && (
+                          <span className="text-[10px] uppercase tracking-wide px-1.5 py-0.5 rounded bg-muted text-muted-foreground font-mono">
+                            shim mémoire
+                          </span>
+                        )}
+                      </div>
+
+                      <ul className="space-y-1 text-xs">
+                        {[
+                          ["API disponible", r.available],
+                          ["Écriture (setItem)", r.canWrite],
+                          ["Lecture (getItem)", r.canRead],
+                          ["Aller-retour identique", r.roundtripOk],
+                          ["Suppression (removeItem)", r.canRemove],
+                        ].map(([label, ok]) => (
+                          <li
+                            key={label as string}
+                            className="flex items-center gap-2"
+                          >
+                            {ok ? (
+                              <CheckCircle2 className="h-3.5 w-3.5 text-primary" />
+                            ) : (
+                              <XCircle className="h-3.5 w-3.5 text-destructive" />
+                            )}
+                            <span className="text-foreground">{label as string}</span>
+                          </li>
+                        ))}
+                      </ul>
+
+                      {r.error && (
+                        <p className="mt-2 text-xs font-mono text-destructive break-all">
+                          {r.error}
+                        </p>
+                      )}
+                    </div>
+                  );
+                })}
+                <p className="text-xs text-muted-foreground">
+                  Détails complets également disponibles dans la console
+                  navigateur (groupe « Storage Diagnostic »).
+                </p>
+              </div>
+            )}
           </CardContent>
         </Card>
 
