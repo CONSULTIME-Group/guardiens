@@ -54,7 +54,12 @@ const mapProfile = (profile: any, authEmail?: string): Profile => ({
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<Profile | null>(null);
   const [activeRole, setActiveRoleState] = useState<ActiveRole>(() => {
-    const saved = localStorage.getItem('guardiens_active_role');
+    let saved: string | null = null;
+    try {
+      saved = localStorage.getItem('guardiens_active_role');
+    } catch {
+      saved = null;
+    }
     return (saved === 'owner' || saved === 'sitter') ? saved : 'sitter';
   });
   const [loading, setLoading] = useState(true);
@@ -62,7 +67,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const switchRole = useCallback((role: ActiveRole) => {
     setActiveRoleState(role);
-    localStorage.setItem('guardiens_active_role', role);
+    try {
+      localStorage.setItem('guardiens_active_role', role);
+    } catch {}
   }, []);
 
   // Keep setActiveRole as alias for backward compat
@@ -97,7 +104,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       // Only initialize role ONCE per session — never override user's manual choice
       if (!roleInitialized.current) {
         roleInitialized.current = true;
-        const saved = localStorage.getItem('guardiens_active_role') as ActiveRole | null;
+        let saved: ActiveRole | null = null;
+        try {
+          saved = localStorage.getItem('guardiens_active_role') as ActiveRole | null;
+        } catch {
+          saved = null;
+        }
 
         if (saved === 'owner' || saved === 'sitter') {
           // Verify saved role is compatible with profile
@@ -107,13 +119,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             // Saved role incompatible — use profile default
             const defaultRole: ActiveRole = profile.role === 'sitter' ? 'sitter' : 'owner';
             setActiveRoleState(defaultRole);
-            localStorage.setItem('guardiens_active_role', defaultRole);
+            try {
+              localStorage.setItem('guardiens_active_role', defaultRole);
+            } catch {}
           }
         } else {
           // No saved choice — default based on profile
           const defaultRole: ActiveRole = profile.role === 'sitter' ? 'sitter' : 'owner';
           setActiveRoleState(defaultRole);
-          localStorage.setItem('guardiens_active_role', defaultRole);
+          try {
+            localStorage.setItem('guardiens_active_role', defaultRole);
+          } catch {}
         }
       }
 
@@ -206,7 +222,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       // Pre-set activeRole so the first dashboard load matches the chosen role
       const initialActive: ActiveRole = role === "sitter" ? "sitter" : "owner";
-      localStorage.setItem("guardiens_active_role", initialActive);
+      try {
+        localStorage.setItem("guardiens_active_role", initialActive);
+      } catch {}
       setActiveRoleState(initialActive);
     }
 
@@ -214,7 +232,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const logout = useCallback(async () => {
-    localStorage.removeItem('guardiens_active_role');
+    try {
+      localStorage.removeItem('guardiens_active_role');
+    } catch {}
     setUser(null);
     roleInitialized.current = false;
     await supabase.auth.signOut();

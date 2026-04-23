@@ -18,7 +18,11 @@ function getSystemTheme(): "light" | "dark" {
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setThemeState] = useState<Theme>(() => {
     if (typeof window === "undefined") return "system";
-    return (localStorage.getItem("guardiens-theme") as Theme) || "light";
+    try {
+      return (localStorage.getItem("guardiens-theme") as Theme) || "light";
+    } catch {
+      return "light";
+    }
   });
 
   const resolvedTheme = theme === "system" ? getSystemTheme() : theme;
@@ -43,7 +47,9 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 
   const setTheme = (t: Theme) => {
     setThemeState(t);
-    localStorage.setItem("guardiens-theme", t);
+    try {
+      localStorage.setItem("guardiens-theme", t);
+    } catch {}
   };
 
   return (

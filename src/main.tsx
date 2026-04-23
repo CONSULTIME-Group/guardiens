@@ -6,6 +6,9 @@ import reportWebVitals from "./lib/webVitals";
 import { installGlobalErrorHandlers } from "./lib/logger";
 import { installGlobalErrorLogger } from "./lib/errorLogger";
 import { initConsent } from "./lib/cookieConsent";
+import { installStorageFallback } from "./lib/storageFallback";
+
+installStorageFallback();
 
 const root = createRoot(document.getElementById("root")!);
 root.render(
