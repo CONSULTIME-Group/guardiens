@@ -11,7 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { format, formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
-import { Eye, Ban, ShieldCheck, StickyNote, RotateCcw, Trash2, AlertTriangle, Crown, ChevronLeft, ChevronRight, MessageSquare } from "lucide-react";
+import { Eye, Ban, ShieldCheck, StickyNote, RotateCcw, Trash2, AlertTriangle, Crown, ChevronLeft, ChevronRight, MessageSquare, FileText } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Switch } from "@/components/ui/switch";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
@@ -65,6 +65,15 @@ const AdminUsers = () => {
   const [historyModal, setHistoryModal] = useState<{ open: boolean; loading: boolean; items: Array<{ conversation_id: string; content: string; created_at: string; recipient_id: string; recipient_name: string; recipient_avatar: string | null }> }>({
     open: false, loading: false, items: [],
   });
+  const [lastMessageModal, setLastMessageModal] = useState<{
+    open: boolean;
+    loading: boolean;
+    userName: string;
+    userId: string;
+    conversationId: string | null;
+    content: string | null;
+    sentAt: string | null;
+  }>({ open: false, loading: false, userName: "", userId: "", conversationId: null, content: null, sentAt: null });
   const navigate = useNavigate();
 
   const openHistory = async () => {
@@ -98,6 +107,31 @@ const AdminUsers = () => {
       recipient_avatar: avatarMap.get(l.recipient_id) || null,
     }));
     setHistoryModal({ open: true, loading: false, items });
+  };
+
+  const openLastMessage = async (userId: string, userName: string) => {
+    setLastMessageModal({ open: true, loading: true, userName, userId, conversationId: null, content: null, sentAt: null });
+    const { data, error } = await supabase
+      .from("admin_message_logs")
+      .select("conversation_id, content, sent_at")
+      .eq("recipient_id", userId)
+      .order("sent_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (error) {
+      toast.error("Erreur de chargement");
+      setLastMessageModal({ open: false, loading: false, userName: "", userId: "", conversationId: null, content: null, sentAt: null });
+      return;
+    }
+    setLastMessageModal({
+      open: true,
+      loading: false,
+      userName,
+      userId,
+      conversationId: data?.conversation_id ?? null,
+      content: data?.content ?? null,
+      sentAt: data?.sent_at ?? null,
+    });
   };
 
   const fetchUsers = useCallback(async () => {
@@ -407,6 +441,17 @@ const AdminUsers = () => {
                         >
                           <MessageSquare className="h-4 w-4" />
                         </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          title="Voir le contenu du dernier message envoyé"
+                          onClick={() => openLastMessage(
+                            user.id,
+                            `${user.first_name || ""} ${user.last_name || ""}`.trim() || user.email || "cet utilisateur",
+                          )}
+                        >
+                          <FileText className="h-4 w-4" />
+                        </Button>
                          <Button
                           variant="ghost"
                           size="icon"
@@ -702,6 +747,57 @@ const AdminUsers = () => {
           )}
           <DialogFooter>
             <Button variant="outline" onClick={() => setHistoryModal({ open: false, loading: false, items: [] })}>
+              Fermer
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Voir le contenu du dernier message admin envoyé à l'utilisateur */}
+      <Dialog
+        open={lastMessageModal.open}
+        onOpenChange={(o) => !o && setLastMessageModal({ open: false, loading: false, userName: "", userId: "", conversationId: null, content: null, sentAt: null })}
+      >
+        <DialogContent className="max-w-xl">
+          <DialogHeader>
+            <DialogTitle>Dernier message envoyé à {lastMessageModal.userName}</DialogTitle>
+          </DialogHeader>
+          {lastMessageModal.loading ? (
+            <p className="text-sm text-muted-foreground py-6 text-center">Chargement…</p>
+          ) : !lastMessageModal.content ? (
+            <p className="text-sm text-muted-foreground py-6 text-center">
+              Aucun message admin envoyé à cet utilisateur pour le moment.
+            </p>
+          ) : (
+            <div className="space-y-3">
+              {lastMessageModal.sentAt && (
+                <p className="text-xs text-muted-foreground">
+                  Envoyé {formatDistanceToNow(new Date(lastMessageModal.sentAt), { addSuffix: true, locale: fr })}
+                  {" · "}
+                  {new Date(lastMessageModal.sentAt).toLocaleString("fr-FR", { dateStyle: "short", timeStyle: "short" })}
+                </p>
+              )}
+              <div className="rounded-lg border bg-muted/40 p-4 text-sm whitespace-pre-wrap max-h-[50vh] overflow-y-auto">
+                {lastMessageModal.content}
+              </div>
+            </div>
+          )}
+          <DialogFooter className="gap-2 sm:gap-2">
+            {lastMessageModal.conversationId && (
+              <Button
+                variant="outline"
+                onClick={() => {
+                  const convId = lastMessageModal.conversationId;
+                  setLastMessageModal({ open: false, loading: false, userName: "", userId: "", conversationId: null, content: null, sentAt: null });
+                  navigate(`/messages?conversation=${convId}`);
+                }}
+              >
+                Ouvrir la conversation
+              </Button>
+            )}
+            <Button
+              onClick={() => setLastMessageModal({ open: false, loading: false, userName: "", userId: "", conversationId: null, content: null, sentAt: null })}
+            >
               Fermer
             </Button>
           </DialogFooter>
