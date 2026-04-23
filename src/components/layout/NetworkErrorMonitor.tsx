@@ -124,6 +124,7 @@ const NetworkErrorMonitor = () => {
         if (
           isCriticalRoute(path) &&
           !shouldIgnoreUrl(url) &&
+          !isAssetRequest(url, input) &&
           !IGNORED_STATUSES.has(status) &&
           (status >= 400 || status === 0) &&
           status < 600
