@@ -2,7 +2,63 @@ import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
-import { CheckCircle2, XCircle } from "lucide-react";
+import { CheckCircle2, XCircle, HardDrive } from "lucide-react";
+
+type StorageProbeResult = {
+  name: "localStorage" | "sessionStorage";
+  available: boolean;
+  isMemoryShim: boolean;
+  canWrite: boolean;
+  canRead: boolean;
+  canRemove: boolean;
+  roundtripOk: boolean;
+  error?: string;
+};
+
+const probeStorage = (
+  name: "localStorage" | "sessionStorage",
+): StorageProbeResult => {
+  const result: StorageProbeResult = {
+    name,
+    available: false,
+    isMemoryShim: false,
+    canWrite: false,
+    canRead: false,
+    canRemove: false,
+    roundtripOk: false,
+  };
+
+  try {
+    const storage = (window as any)[name] as Storage | undefined;
+    if (!storage) {
+      result.error = "API indisponible (window." + name + " = undefined)";
+      return result;
+    }
+    result.available = true;
+
+    // Le shim mémoire installé par installStorageFallback() est un objet
+    // littéral, pas une instance de Storage. On le détecte ainsi.
+    result.isMemoryShim =
+      typeof Storage === "undefined" || !(storage instanceof Storage);
+
+    const probeKey = "__guardiens_probe_" + Date.now();
+    const probeValue = "ok-" + Math.random().toString(36).slice(2, 8);
+
+    storage.setItem(probeKey, probeValue);
+    result.canWrite = true;
+
+    const readBack = storage.getItem(probeKey);
+    result.canRead = readBack !== null;
+    result.roundtripOk = readBack === probeValue;
+
+    storage.removeItem(probeKey);
+    result.canRemove = storage.getItem(probeKey) === null;
+  } catch (err) {
+    result.error = err instanceof Error ? err.message : String(err);
+  }
+
+  return result;
+};
 
 /**
  * Témoin avec état local + compteur de montages.
@@ -110,6 +166,37 @@ const TestErrorBoundary = () => {
     topMounts: number | null;
     bottomMounts: number | null;
   } | null>(null);
+  const [storageResults, setStorageResults] = useState<StorageProbeResult[] | null>(null);
+  const [storageRanAt, setStorageRanAt] = useState<string | null>(null);
+
+  const runStorageDiagnostic = () => {
+    const results = [probeStorage("localStorage"), probeStorage("sessionStorage")];
+    setStorageResults(results);
+    setStorageRanAt(new Date().toLocaleTimeString());
+
+    // Log cadré et lisible dans la console
+    if (typeof console.groupCollapsed === "function") {
+      console.groupCollapsed(
+        "%c[Storage Diagnostic] Résultats",
+        "color:#2563eb;font-weight:bold;",
+      );
+      results.forEach((r) => {
+        const status = r.available && r.roundtripOk ? "✅ OK" : "⚠️ Problème";
+        console.log(`${status} — ${r.name}`, {
+          available: r.available,
+          isMemoryShim: r.isMemoryShim,
+          canWrite: r.canWrite,
+          canRead: r.canRead,
+          canRemove: r.canRemove,
+          roundtripOk: r.roundtripOk,
+          error: r.error,
+        });
+      });
+      console.groupEnd();
+    } else {
+      console.log("[Storage Diagnostic]", results);
+    }
+  };
 
   const readWitnessState = () => {
     const get = (id: string) => {
