@@ -41,7 +41,7 @@ export const BadgeRow = forwardRef<HTMLDivElement, BadgeRowProps>(function Badge
   if (active.length === 0 && expired.length === 0) return null
 
   return (
-    <div className="space-y-3">
+    <div ref={ref} className="space-y-3">
       {/* Active badges */}
       <div className="flex flex-wrap items-center gap-2">
         {visible.map(b => (
@@ -112,6 +112,6 @@ export const BadgeRow = forwardRef<HTMLDivElement, BadgeRowProps>(function Badge
       </Dialog>
     </div>
   )
-}
+})
 
 export default BadgeRow
