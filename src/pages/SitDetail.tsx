@@ -356,7 +356,7 @@ const SitDetail = () => {
       {/* Owner card */}
       {owner && (
         <div className="flex items-center gap-3 mb-8 p-4 bg-card rounded-xl border border-border">
-          <Link to={`/sitter/${owner.id}`}>
+          <Link to={`/gardiens/${owner.id}`}>
             {owner.avatar_url ? (
               <img src={owner.avatar_url} alt={owner.first_name} className="w-14 h-14 rounded-full object-cover hover:ring-2 hover:ring-primary/30 transition-all" />
             ) : (
@@ -366,7 +366,7 @@ const SitDetail = () => {
             )}
           </Link>
           <div className="flex-1 min-w-0">
-            <Link to={`/sitter/${owner.id}`} className="font-medium flex items-center gap-1.5 hover:underline">
+            <Link to={`/gardiens/${owner.id}`} className="font-medium flex items-center gap-1.5 hover:underline">
               {owner.first_name}
               {owner.identity_verified && <VerifiedBadge />}
             </Link>
@@ -375,7 +375,7 @@ const SitDetail = () => {
             </p>
           </div>
           {!isOwner && (
-            <Link to={`/sitter/${owner.id}`}>
+            <Link to={`/gardiens/${owner.id}`}>
               <Button variant="outline" size="sm">Voir le profil</Button>
             </Link>
           )}
