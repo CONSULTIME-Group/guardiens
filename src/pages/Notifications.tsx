@@ -7,6 +7,7 @@ import { Helmet } from "react-helmet-async";
 import { Button } from "@/components/ui/button";
 import { formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
+import { safeUUID } from "@/lib/uuid";
 
 interface Notification {
   id: string;
@@ -66,7 +67,7 @@ const Notifications = () => {
     if (!userId) return;
     const notificationFilter = `user_id=eq.${userId}`;
     const channel = supabase
-      .channel(`notifications-page-${userId}-${crypto.randomUUID()}`)
+      .channel(`notifications-page-${userId}-${safeUUID()}`)
       .on("postgres_changes", {
         event: "INSERT",
         schema: "public",

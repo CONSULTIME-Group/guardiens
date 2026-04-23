@@ -10,6 +10,7 @@ import FounderBadge from "@/components/badges/FounderBadge";
 // Helmet removed — PageMeta handles all meta tags
 import EntraideLibreBanner from "@/components/subscription/EntraideLibreBanner";
 import PricingCardsCheckout from "@/components/subscription/PricingCardsCheckout";
+import { safeUUID } from "@/lib/uuid";
 
 import {
   Star, Home, Clock, Loader2, Check, Copy,
@@ -78,7 +79,7 @@ function ReferralSection({ referralCode, userId }: { referralCode: string | null
 
   useEffect(() => {
     if (code) return;
-    const generated = crypto.randomUUID().replace(/-/g, "").slice(0, 8);
+    const generated = safeUUID().replace(/-/g, "").slice(0, 8);
     supabase.from("profiles").update({ referral_code: generated }).eq("id", userId).then(() => {
       setCode(generated);
     });

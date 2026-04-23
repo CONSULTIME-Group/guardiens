@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/popover";
 import { formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
+import { safeUUID } from "@/lib/uuid";
 
 interface Notification {
   id: string;
@@ -54,7 +55,7 @@ const NotificationBell = () => {
   useEffect(() => {
     if (!userId) return;
 
-    const channel = supabase.channel(`notifications-realtime-${userId}-${crypto.randomUUID()}`);
+    const channel = supabase.channel(`notifications-realtime-${userId}-${safeUUID()}`);
     const notificationFilter = `user_id=eq.${userId}`;
 
     channel.on(
