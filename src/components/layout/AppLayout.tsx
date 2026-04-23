@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { Outlet, useSearchParams, Link } from "react-router-dom";
 import { Sidebar, BottomNav } from "./Navigation";
 import { BackButton } from "./BackButton";
@@ -8,7 +8,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import OnboardingModal from "@/components/onboarding/OnboardingModal";
 import { usePresenceHeartbeat } from "@/hooks/usePresenceHeartbeat";
 
-export const AppLayout = () => {
+export const AppLayout = ({ children }: { children?: ReactNode }) => {
   const { user, refreshProfile } = useAuth();
   usePresenceHeartbeat();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -40,7 +40,7 @@ export const AppLayout = () => {
         <div className="hidden md:block">
           <Breadcrumbs />
         </div>
-        <Outlet />
+        {children ?? <Outlet />}
       </main>
       <BottomNav />
 

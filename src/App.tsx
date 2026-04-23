@@ -36,6 +36,13 @@ const FallbackSpinner = () => (
     <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
   </div>
 );
+const DashboardRouteShell = () => (
+  <ProtectedRoute>
+    <AppLayout>
+      <Dashboard />
+    </AppLayout>
+  </ProtectedRoute>
+);
 const AdminLayout = lazy(() => import("@/components/admin/AdminLayout").then((m) => ({ default: m.AdminLayout })));
 const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
@@ -257,8 +264,8 @@ const AppRoutes = () => (
         <Route path="/admin/errors" element={<AdminErrors />} />
       </Route>
       {/* App routes */}
+      <Route path="/dashboard" element={<DashboardRouteShell />} />
       <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
-        <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/search" element={<SearchPage />} />
         <Route path="/recherche" element={<SearchPage />} />
