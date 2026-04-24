@@ -248,7 +248,7 @@ function HeroCard({
         : "50% 42%";
 
   return (
-    <article className="rounded-lg overflow-hidden border border-border bg-card shadow-sm">
+    <article className="notebook-card notebook-card-paper relative">
       {/* Vignette image cliquable → ouvre le zoom plein écran */}
       <button
         type="button"
