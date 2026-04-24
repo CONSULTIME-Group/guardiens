@@ -75,6 +75,17 @@ const dynamicLimit = dynamicLimitArg
   ? Math.max(0, parseInt(dynamicLimitArg.slice("--dynamic-limit=".length), 10) || 0)
   : 20;
 
+// Rapports : --report-json[=path] et --report-html[=path]
+function parseReportFlag(prefix, defaultPath) {
+  const arg = cliArgs.find((a) => a === prefix || a.startsWith(`${prefix}=`));
+  if (!arg) return null;
+  if (arg === prefix) return defaultPath;
+  const v = arg.slice(prefix.length + 1).trim();
+  return v || defaultPath;
+}
+const reportJsonPath = parseReportFlag("--report-json", "reports/og-report.json");
+const reportHtmlPath = parseReportFlag("--report-html", "reports/og-report.html");
+
 // Checks disponibles et filtrage --only / --skip
 const ALL_CHECKS = ["og", "canonical", "schema", "sitemap", "robots", "meta-robots"];
 const onlySet = onlyArg
