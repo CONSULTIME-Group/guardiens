@@ -99,7 +99,7 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
     const load = async () => {
       const { data: p } = await supabase
         .from("profiles")
-        .select("first_name, postal_code, city, avatar_url, bio, onboarding_minimal_completed")
+        .select("first_name, postal_code, city, avatar_url, bio, onboarding_minimal_completed, skill_categories")
         .eq("id", user.id)
         .single();
       if (p) {
@@ -109,26 +109,19 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
         if (p.avatar_url) setAvatarUrl(p.avatar_url);
         if (p.bio) setBio(p.bio);
         if (p.onboarding_minimal_completed) setMinimalSaved(true);
+        if (Array.isArray((p as any).skill_categories)) {
+          setSkillCategories((p as any).skill_categories as string[]);
+        }
       }
-      // Load role-specific profile data — for "both", load sitter data (used for scoring)
+      // Lifestyle reste propre au profil gardien
       if (usesSitterScoring) {
         const { data: sp } = await supabase
           .from("sitter_profiles")
-          .select("lifestyle, competences")
+          .select("lifestyle")
           .eq("user_id", user.id)
           .maybeSingle();
-        if (sp) {
-          if (sp.lifestyle && Array.isArray(sp.lifestyle)) setLifestyle(sp.lifestyle as string[]);
-          if (sp.competences && Array.isArray(sp.competences)) setSkillCategories(sp.competences as string[]);
-        }
-      } else {
-        const { data: op } = await supabase
-          .from("owner_profiles")
-          .select("competences")
-          .eq("user_id", user.id)
-          .maybeSingle();
-        if (op?.competences && Array.isArray(op.competences)) {
-          setSkillCategories(op.competences as string[]);
+        if (sp?.lifestyle && Array.isArray(sp.lifestyle)) {
+          setLifestyle(sp.lifestyle as string[]);
         }
       }
     };
@@ -194,23 +187,21 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
 
   const saveCompetencesAndLifestyle = async () => {
     if (!user) return;
-    // For "both" role, save to both tables to keep them in sync
-    if (userRole === "both" || userRole === "sitter") {
-      const sitterUpdates: Record<string, any> = {};
-      if (lifestyle.length > 0) sitterUpdates.lifestyle = lifestyle;
-      if (skillCategories.length > 0) sitterUpdates.competences = skillCategories;
-      if (Object.keys(sitterUpdates).length > 0) {
-        await supabase
-          .from("sitter_profiles")
-          .upsert({ user_id: user.id, ...sitterUpdates }, { onConflict: "user_id" });
-      }
+    // Catégories d'entraide → profiles.skill_categories (pas dans competences,
+    // qui est réservé aux compétences précises validées/en validation).
+    const profileUpdates: Record<string, any> = {
+      skill_categories: skillCategories,
+    };
+    if (skillCategories.length > 0) {
+      profileUpdates.available_for_help = true;
     }
-    if (userRole === "both" || userRole === "owner") {
-      if (skillCategories.length > 0) {
-        await supabase
-          .from("owner_profiles")
-          .upsert({ user_id: user.id, competences: skillCategories } as any, { onConflict: "user_id" });
-      }
+    await supabase.from("profiles").update(profileUpdates).eq("id", user.id);
+
+    // Lifestyle reste sur sitter_profiles (gardien / both uniquement).
+    if ((userRole === "both" || userRole === "sitter") && lifestyle.length > 0) {
+      await supabase
+        .from("sitter_profiles")
+        .upsert({ user_id: user.id, lifestyle }, { onConflict: "user_id" });
     }
   };
 
