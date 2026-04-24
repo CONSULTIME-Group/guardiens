@@ -923,7 +923,7 @@ export default function PublicSitterProfile() {
 
       {/* ── ONGLET GARDIEN (refonte "outil de décision") ───────────────── */}
       {activeTab === 'gardien' && (
-        <div className="max-w-5xl mx-auto px-4 md:px-6 py-6 md:py-8 pb-24 md:pb-8">
+        <div className="max-w-5xl mx-auto px-4 md:px-6 py-6 md:py-8 pb-36 md:pb-8" style={{ paddingBottom: 'calc(9rem + env(safe-area-inset-bottom))' }}>
 
           {/* ── A. BANDEAU DE QUALIFICATION RAPIDE (4 tuiles + CTA) ──── */}
           <section
