@@ -5,13 +5,14 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
-import { Check, CheckCircle, Star, Gift, MapPin, ShieldCheck, Map, PawPrint, Heart, Siren, BadgeCheck, CreditCard, Quote } from "lucide-react";
+import { Check, CheckCircle, Star, Gift, MapPin, BadgeCheck, CreditCard, Quote, Clock, ShieldCheck, Sparkles } from "lucide-react";
 import PageMeta from "@/components/PageMeta";
 import PageBreadcrumb from "@/components/seo/PageBreadcrumb";
 import PublicHeader from "@/components/layout/PublicHeader";
 import PublicFooter from "@/components/layout/PublicFooter";
 import EntraideLibreBanner from "@/components/subscription/EntraideLibreBanner";
-import { LAUNCH_DATE, GRACE_END, isBeforeLaunch, isInGracePeriod } from "@/lib/constants";
+import SecurityTrustSection from "@/components/subscription/SecurityTrustSection";
+import { LAUNCH_DATE, isBeforeLaunch, isInGracePeriod } from "@/lib/constants";
 
 const ownerFeatures = [
   "Publiez une annonce en 5 minutes",
@@ -39,12 +40,6 @@ const comparisonRows = [
   { label: "Gardiens d'urgence locaux", guardiens: "Oui", others: "Non proposé" },
 ];
 
-const promiseLines = [
-  { text: "L'échange entre le propriétaire et le gardien se décide entre vous.", weight: "text-base md:text-lg font-medium text-foreground/80" },
-  { text: "Guardiens fournit l'espace — pas la transaction.", weight: "text-sm text-foreground/60" },
-  { text: "Un prix. Transparent. C'est tout.", weight: "text-base font-heading font-semibold text-foreground mt-2" },
-];
-
 const faqItems = [
   {
     q: "Pourquoi c'est gratuit pour les propriétaires ?",
@@ -57,46 +52,28 @@ Guardiens gagne de l'argent uniquement sur l'abonnement des gardiens. Les propri
 Pour comprendre comment fonctionne la mise en relation : [Comment bien choisir son gardien →](/actualites/choisir-gardien-bons-criteres)`,
   },
   {
+    q: "Comment fonctionne l'essai gratuit de 7 jours ?",
+    a: `Vous vous inscrivez en tant que gardien, sans carte bancaire. Pendant 7 jours, vous accédez à toutes les fonctionnalités : postuler aux gardes, échanger avec les propriétaires, créer votre profil de confiance.
+
+Aucun prélèvement automatique. À la fin de l'essai, vous choisissez si vous souhaitez activer l'abonnement à 6,99€/mois. Si vous ne faites rien, l'accès s'interrompt sans frais.
+
+C'est l'occasion de tester sereinement, sans engagement.`,
+  },
+  {
     q: "Pourquoi le 13 mai ?",
     a: `C'est l'anniversaire de Jérémie, cofondateur de Guardiens.
 
-Quand on a fixé la date de lancement, il aurait pu choisir une date "stratégique". Il a préféré son anniversaire. Et plutôt que de recevoir des cadeaux, il a décidé d'offrir l'accès gratuit à ceux qui nous rejoignent avant cette date.
+Plutôt que de recevoir des cadeaux, il a décidé d'offrir l'accès gratuit à ceux qui nous rejoignent avant cette date.
 
-Les inscrits avant le 13 mai 2026 deviennent **Fondateurs** : accès gratuit jusqu'au 13 juin pour choisir leur formule, badge Fondateur affiché à vie sur leur profil. Ce badge ne sera plus jamais attribué après cette date.
-
-Pourquoi le 13 juin et pas le 13 mai ? Un mois de grâce. Le lancement, c'est le début d'une aventure — pas d'une facture.
-
-Toutes les questions sur les formules : [FAQ complète →](/faq)`,
-  },
-  {
-    q: "Que se passe-t-il après le 13 mai pour les Fondateurs ?",
-    a: `Votre accès reste gratuit jusqu'au 13 juin 2026. Rien ne démarre automatiquement.
-
-Avant le 13 juin, vous choisissez la formule qui vous convient depuis votre espace abonnement :
-
-- **Accès un mois — 12 €** : paiement immédiat, aucun renouvellement
-- **Mensuel — 6,99 €/mois** : 7 jours d'essai offerts, annulable à tout moment
-- **Formule 2026 — tarif réduit** : paiement unique jusqu'au 31 décembre, -20 % sur le mensuel
-
-Votre badge Fondateur reste affiché à vie sur votre profil, quelle que soit la formule choisie ensuite.
-
-Si vous attendez après le 13 juin sans avoir souscrit, votre accès s'interrompt temporairement. Votre profil, vos avis et votre historique sont conservés.
-
-Pour bien démarrer en tant que gardien : [Créer un profil qui attire des missions →](/actualites/creer-profil-gardien-attractif)`,
+Les inscrits avant le 13 mai 2026 deviennent **Fondateurs** : accès gratuit jusqu'au 13 juin, badge Fondateur affiché à vie. Ce badge ne sera plus jamais attribué après cette date.`,
   },
   {
     q: "Y a-t-il des frais cachés ?",
-    a: `Non. Et on préfère l'expliquer clairement plutôt que de le promettre.
-
-**Ce que paient les gardiens :** 6,99 €/mois, 12 € pour un mois, ou la formule 2026 à -20 %. C'est tout. L'abonnement donne accès à la plateforme — postuler aux gardes, envoyer des messages, apparaître dans les résultats.
+    a: `Non. **Ce que paient les gardiens :** 6,99€/mois, 12€ pour un mois, ou la formule 2026 à -20%. C'est tout.
 
 **Ce que paient les propriétaires :** Rien. Publier, recevoir des candidatures, choisir, évaluer — gratuit en permanence.
 
-**Ce qu'on ne prend pas :** Aucune commission sur les gardes. L'échange entre gardien et propriétaire se décide entre eux, sans que Guardiens ne touche quoi que ce soit.
-
-Pas d'assurance obligatoire, pas de booking fee, pas de frais de mise en relation. Un abonnement. Transparent.
-
-Pour comprendre le bien-être de vos animaux pendant la garde : [Bien-être animal pendant votre absence →](/actualites/bien-etre-animal-pendant-absence)`,
+**Ce qu'on ne prend pas :** Aucune commission sur les gardes. Pas d'assurance obligatoire, pas de booking fee, pas de frais de mise en relation.`,
   },
 ];
 
@@ -162,74 +139,124 @@ const Pricing = () => {
         <PageBreadcrumb items={[{ label: "Tarifs" }]} />
 
         <main className="max-w-6xl mx-auto px-4">
-          {/* ═══ ZONE 1 — Compréhension rapide ═══ */}
-          <section className="text-center py-12 md:py-16 space-y-4">
-            <h1 className="font-heading text-3xl md:text-4xl font-bold text-foreground leading-tight">
-              Des tarifs simples et honnêtes
-            </h1>
-            <p className="text-lg font-body text-foreground/60 max-w-xl mx-auto">
-              Pas de frais cachés, pas de commission sur les gardes. Un abonnement mensuel pour les gardiens, résiliable à tout moment.
-            </p>
+          {/* ═══ HERO 50/50 ═══ */}
+          <section className="py-10 md:py-14">
+            <div className="text-center max-w-2xl mx-auto mb-10">
+              <div className="inline-flex items-center gap-1.5 bg-primary/10 text-primary text-xs font-body font-semibold uppercase tracking-wider px-3 py-1.5 rounded-full mb-4">
+                <Sparkles className="h-3.5 w-3.5" />
+                Sans commission, sans frais cachés
+              </div>
+              <h1 className="font-heading text-3xl md:text-5xl font-bold text-foreground leading-tight mb-4">
+                Un seul prix. <span className="text-primary">Transparent.</span>
+              </h1>
+              <p className="text-base md:text-lg font-body text-foreground/65 leading-relaxed">
+                Gratuit pour les propriétaires, à vie. 6,99€/mois pour les gardiens, avec 7 jours d'essai offerts. C'est tout.
+              </p>
+            </div>
+
+            {/* Twin value props */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-4xl mx-auto">
+              <Link
+                to={registerLink("owner")}
+                className="group bg-card border border-border/40 rounded-2xl p-5 hover:border-primary/40 hover:shadow-md transition-all"
+              >
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-primary/10 text-primary">
+                    <Gift className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <p className="text-xs uppercase tracking-wider text-foreground/50 font-body font-semibold">Propriétaire</p>
+                    <p className="font-heading text-xl font-bold text-foreground">100 % gratuit</p>
+                  </div>
+                </div>
+                <p className="text-sm font-body text-foreground/65 leading-relaxed">
+                  Publiez votre annonce et recevez des candidatures sans débourser un centime.
+                </p>
+                <p className="text-sm font-body text-primary mt-3 font-semibold group-hover:underline">
+                  Publier mon annonce →
+                </p>
+              </Link>
+
+              <Link
+                to={registerLink("sitter")}
+                className="group bg-primary/5 border-2 border-primary/30 rounded-2xl p-5 hover:border-primary hover:shadow-md transition-all relative"
+              >
+                <div className="absolute -top-2.5 right-4 bg-primary text-primary-foreground text-[10px] font-body font-bold uppercase tracking-wider px-2 py-1 rounded-full">
+                  7 jours offerts
+                </div>
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-primary/15 text-primary">
+                    <Star className="h-5 w-5" fill="currentColor" />
+                  </div>
+                  <div>
+                    <p className="text-xs uppercase tracking-wider text-foreground/50 font-body font-semibold">Gardien</p>
+                    <p className="font-heading text-xl font-bold text-foreground">6,99€<span className="text-sm font-normal text-foreground/60">/mois</span></p>
+                  </div>
+                </div>
+                <p className="text-sm font-body text-foreground/65 leading-relaxed">
+                  Essai gratuit, sans carte bancaire. Annulable à tout moment.
+                </p>
+                <p className="text-sm font-body text-primary mt-3 font-semibold group-hover:underline">
+                  Tester gratuitement →
+                </p>
+              </Link>
+            </div>
           </section>
 
-          {/* Founder Banner */}
+          {/* Founder Banner — urgence */}
           {before && (
-            <section className="mt-0 mb-10 md:mb-14">
-              <div className="w-full max-w-3xl mx-auto bg-amber-50 border border-amber-200/60 rounded-2xl overflow-hidden">
-                <div className="bg-amber-100 px-6 py-3 flex items-center justify-center gap-2">
-                  <Star className="w-4 h-4 text-amber-500" aria-hidden="true" />
+            <section className="mb-12 md:mb-16">
+              <div className="w-full max-w-5xl mx-auto bg-gradient-to-br from-amber-50 to-amber-100/50 border border-amber-200/60 rounded-2xl overflow-hidden">
+                <div className="bg-amber-100 px-6 py-2.5 flex items-center justify-center gap-2">
+                  <Star className="w-4 h-4 text-amber-500" fill="currentColor" />
                   <span className="text-sm font-medium text-amber-800 font-body tracking-wide">
                     Offre Fondateur — jusqu'au 13 mai 2026
                   </span>
-                  <Star className="w-4 h-4 text-amber-500" aria-hidden="true" />
+                  <Star className="w-4 h-4 text-amber-500" fill="currentColor" />
                 </div>
 
-                <div className="px-6 sm:px-10 py-8 flex flex-col md:flex-row items-center md:items-start gap-6 md:gap-8">
-                  <div className="flex-1 text-center space-y-1">
-                    <p className="font-heading text-4xl font-bold text-amber-700 tabular-nums">
-                      {daysLeft}
-                    </p>
-                    <p className="text-xs text-amber-600/80 font-body">
-                      jour{daysLeft > 1 ? 's' : ''} restants
-                    </p>
+                <div className="px-6 sm:px-10 py-6 flex flex-col md:flex-row items-center gap-6">
+                  <div className="flex items-center gap-4">
+                    <Clock className="w-10 h-10 text-amber-600 shrink-0" />
+                    <div>
+                      <p className="font-heading text-3xl font-bold text-amber-700 tabular-nums leading-none">
+                        {daysLeft} jour{daysLeft > 1 ? 's' : ''}
+                      </p>
+                      <p className="text-xs text-amber-600/80 font-body mt-1">
+                        avant la fin de l'offre
+                      </p>
+                    </div>
                   </div>
 
-                  <div className="flex-1 flex flex-col items-center md:items-start gap-3">
-                    <div className="flex items-center gap-2 text-sm text-amber-800 font-body">
-                      <BadgeCheck className="w-4 h-4 text-amber-600 flex-shrink-0" aria-hidden="true" />
+                  <div className="flex-1 grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm">
+                    <div className="flex items-center gap-2 text-amber-800 font-body">
+                      <BadgeCheck className="w-4 h-4 text-amber-600 shrink-0" />
                       Badge Fondateur à vie
                     </div>
-                    <div className="flex items-center gap-2 text-sm text-amber-800 font-body">
-                      <Gift className="w-4 h-4 text-amber-600 flex-shrink-0" aria-hidden="true" />
-                      Accès gratuit jusqu'au 13 juin
+                    <div className="flex items-center gap-2 text-amber-800 font-body">
+                      <Gift className="w-4 h-4 text-amber-600 shrink-0" />
+                      Gratuit jusqu'au 13 juin
                     </div>
-                    <div className="flex items-center gap-2 text-sm text-amber-800 font-body">
-                      <CreditCard className="w-4 h-4 text-amber-600 flex-shrink-0" aria-hidden="true" />
+                    <div className="flex items-center gap-2 text-amber-800 font-body">
+                      <CreditCard className="w-4 h-4 text-amber-600 shrink-0" />
                       Sans carte bancaire
                     </div>
                   </div>
 
-                  <div className="flex-1 flex flex-col items-center gap-4 text-center">
-                    <p className="text-xs italic text-amber-700/70 font-body max-w-xs leading-relaxed">
-                      Pourquoi le 13 mai ? C'est l'anniversaire de Jérémie, cofondateur de Guardiens.
-                      Il préfère offrir l'accès plutôt que recevoir des chaussettes.
-                    </p>
-                    <Link
-                      to="/register"
-                      className="inline-flex items-center gap-2 bg-primary text-primary-foreground font-body font-medium text-sm px-8 py-3.5 rounded-xl hover:bg-primary/90 transition-colors min-h-[44px]"
-                    >
-                      S'inscrire avant le 13 mai
-                    </Link>
-                  </div>
+                  <Link
+                    to="/register"
+                    className="shrink-0 inline-flex items-center gap-2 bg-primary text-primary-foreground font-body font-medium text-sm px-6 py-3 rounded-xl hover:bg-primary/90 transition-colors min-h-[44px] whitespace-nowrap"
+                  >
+                    Devenir Fondateur
+                  </Link>
                 </div>
               </div>
             </section>
           )}
 
-          {/* Grace period banner */}
           {grace && (
             <section
-              className="rounded-2xl p-6 md:p-8 text-center space-y-4 border-2 mb-16 md:mb-24"
+              className="rounded-2xl p-6 md:p-8 text-center space-y-4 border-2 mb-12 max-w-5xl mx-auto"
               style={{
                 backgroundColor: "hsl(45 100% 96%)",
                 borderColor: "hsl(24 36% 60%)",
@@ -249,17 +276,15 @@ const Pricing = () => {
 
           <EntraideLibreBanner />
 
-          {/* ═══ ZONE 2 — Détail des offres ═══ */}
-          <section className="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-5xl mx-auto items-stretch mb-10 md:mb-14">
+          {/* ═══ Cartes pricing détaillées ═══ */}
+          <section className="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-5xl mx-auto items-stretch mb-12 md:mb-16">
             {/* Owner Card */}
             <Card className="bg-card border border-border/40 rounded-2xl h-full flex flex-col relative">
-              {before && (
-                <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-primary/10 text-primary text-xs font-body font-medium px-3 py-1 rounded-full flex items-center gap-1.5">
-                  <CheckCircle className="h-3 w-3" />
-                  Gratuit pour toujours
-                </div>
-              )}
-              <CardHeader className={`text-center pb-2 p-8 ${before ? 'pt-10' : ''}`}>
+              <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-primary/10 text-primary text-xs font-body font-medium px-3 py-1 rounded-full flex items-center gap-1.5">
+                <CheckCircle className="h-3 w-3" />
+                Gratuit pour toujours
+              </div>
+              <CardHeader className="text-center pb-2 p-8 pt-10">
                 <div className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-3 font-body">Propriétaire</div>
                 <CardTitle className="font-heading text-5xl font-bold text-foreground">Gratuit</CardTitle>
                 <p className="text-sm font-body text-foreground/60 italic mt-2">Parce qu'on ne facture pas ceux qui ouvrent leur maison.</p>
@@ -282,42 +307,29 @@ const Pricing = () => {
               </CardContent>
             </Card>
 
-            {/* Sitter Card — highlighted */}
-            <Card className="border-2 border-primary/20 relative shadow-xl rounded-2xl md:scale-105 h-full flex flex-col bg-primary/5">
-              {before && (
-                <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-amber-100 text-amber-800 text-xs font-body font-medium px-3 py-1 rounded-full flex items-center gap-1.5">
-                  <Star className="h-3 w-3" fill="currentColor" />
-                  Badge Fondateur à vie
-                </div>
-              )}
+            {/* Sitter Card */}
+            <Card className="border-2 border-primary/30 relative shadow-xl rounded-2xl md:scale-105 h-full flex flex-col bg-primary/5">
+              <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-amber-100 text-amber-800 text-xs font-body font-medium px-3 py-1 rounded-full flex items-center gap-1.5">
+                <Star className="h-3 w-3" fill="currentColor" />
+                Le plus choisi
+              </div>
               <CardHeader className="text-center pb-2 p-8 pt-10">
                 <div className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-3 font-body">Gardien</div>
-                {before ? (
-                  <div className="text-center space-y-1.5 py-2">
+                <div className="text-center space-y-1.5 py-2">
+                  {before && (
                     <p className="text-xs uppercase tracking-widest text-primary font-body font-semibold">
                       Gratuit jusqu'au 13 juin
                     </p>
-                    <p className="font-heading text-5xl font-bold text-foreground">
-                      <span className="text-lg font-body font-normal text-foreground/60 mr-1">à partir de</span>
-                      6,99€
-                      <span className="text-lg font-body font-normal text-foreground/60 ml-1">/mois</span>
-                    </p>
-                    <p className="text-xs text-foreground/50 font-body">
-                      Sans engagement · Résiliable à tout moment
-                    </p>
-                  </div>
-                ) : (
-                  <div className="text-center space-y-1.5 py-2">
-                    <p className="font-heading text-5xl font-bold text-foreground">
-                      <span className="text-lg font-body font-normal text-foreground/60 mr-1">à partir de</span>
-                      6,99€
-                      <span className="text-lg font-body font-normal text-foreground/60 ml-1">/mois</span>
-                    </p>
-                    <p className="text-xs text-foreground/50 font-body">
-                      Sans engagement · Résiliable à tout moment
-                    </p>
-                  </div>
-                )}
+                  )}
+                  <p className="font-heading text-5xl font-bold text-foreground">
+                    <span className="text-lg font-body font-normal text-foreground/60 mr-1">à partir de</span>
+                    6,99€
+                    <span className="text-lg font-body font-normal text-foreground/60 ml-1">/mois</span>
+                  </p>
+                  <p className="text-xs text-foreground/50 font-body">
+                    7 jours d'essai · Sans CB · Résiliable à tout moment
+                  </p>
+                </div>
               </CardHeader>
               <CardContent className="space-y-5 px-8 pb-8 pt-2 flex-1 flex flex-col">
                 <ul className="space-y-3">
@@ -384,25 +396,24 @@ const Pricing = () => {
                   <p className="text-xs font-body text-foreground/50 text-center mt-2">
                     Inscription sans carte bancaire. L'abonnement mensuel inclut 7 jours d'essai offerts.
                   </p>
-                  <Link
-                    to="/faq"
-                    className="w-full inline-flex items-center justify-center text-sm font-body text-foreground/60 hover:text-foreground transition-colors py-2"
-                  >
-                    Consulter la FAQ →
-                  </Link>
                 </div>
               </CardContent>
             </Card>
           </section>
 
-          {/* ═══ ZONE 3 — Comparaison vs plateformes classiques ═══ */}
-          <section className="mb-10 md:mb-14 max-w-3xl mx-auto">
-            <h2 className="font-heading text-2xl md:text-3xl font-semibold text-foreground text-center mb-3">
-              Guardiens vs plateformes classiques
-            </h2>
-            <p className="text-sm font-body text-foreground/60 text-center mb-8">
-              Pas de commission, pas de frais cachés. Voici ce qui nous différencie.
-            </p>
+          {/* ═══ SÉCURITÉ & VÉRIFICATIONS ═══ */}
+          <SecurityTrustSection />
+
+          {/* ═══ Comparatif ═══ */}
+          <section className="mb-12 md:mb-16 max-w-3xl mx-auto">
+            <div className="text-center mb-8">
+              <h2 className="font-heading text-2xl md:text-3xl font-semibold text-foreground mb-3">
+                Guardiens vs plateformes classiques
+              </h2>
+              <p className="text-sm font-body text-foreground/60">
+                Pas de commission, pas de frais cachés. Voici ce qui nous différencie.
+              </p>
+            </div>
             <div className="overflow-hidden rounded-2xl border border-border/40">
               <table className="w-full text-sm font-body">
                 <thead>
@@ -426,7 +437,7 @@ const Pricing = () => {
           </section>
 
           {/* ═══ Témoignage ═══ */}
-          <section className="max-w-2xl mx-auto mb-10 md:mb-14 text-center">
+          <section className="max-w-2xl mx-auto mb-12 md:mb-16 text-center">
             <div className="bg-card border border-border/40 rounded-2xl p-8 md:p-10 relative">
               <Quote className="h-8 w-8 text-primary/20 absolute top-6 left-6" />
               <blockquote className="font-body text-foreground/80 text-base md:text-lg leading-relaxed italic mb-4">
@@ -440,18 +451,8 @@ const Pricing = () => {
             </div>
           </section>
 
-          {/* Promise */}
-          <section className="max-w-2xl mx-auto text-center mb-10 md:mb-14">
-            <h2 className="font-heading text-2xl font-bold text-foreground mb-6">Notre promesse — Simple, honnête, et c'est tout</h2>
-            <div className="space-y-3">
-              {promiseLines.map((line) => (
-                <p key={line.text} className={`leading-relaxed font-body ${line.weight}`}>{line.text}</p>
-              ))}
-            </div>
-          </section>
-
-          {/* Internal links — city pages + urgence */}
-          <section className="max-w-3xl mx-auto mb-10 md:mb-14">
+          {/* ═══ Internal links — villes ═══ */}
+          <section className="max-w-3xl mx-auto mb-12 md:mb-16">
             <h2 className="font-heading text-xl font-bold text-foreground text-center mb-4">House-sitting par ville</h2>
             <p className="text-sm text-muted-foreground text-center font-body mb-6">
               Découvrez les gardiens vérifiés disponibles dans votre ville. Un imprévu ? Nos{" "}
@@ -471,8 +472,8 @@ const Pricing = () => {
             </div>
           </section>
 
-          {/* FAQ */}
-          <section className="max-w-3xl mx-auto mb-10 md:mb-14">
+          {/* ═══ FAQ ═══ */}
+          <section className="max-w-3xl mx-auto mb-12 md:mb-16">
             <h2 className="text-2xl font-heading font-semibold text-foreground text-center mb-3">Questions fréquentes</h2>
             <p className="text-sm font-body text-foreground/60 text-center mb-8">
               Des questions sur le modèle ? Voici les réponses directes.
@@ -503,33 +504,46 @@ const Pricing = () => {
                 </AccordionItem>
               ))}
             </Accordion>
+            <div className="text-center mt-6">
+              <Link to="/faq" className="text-sm font-body text-primary hover:underline">
+                Voir toutes les questions →
+              </Link>
+            </div>
           </section>
 
-          {/* Link to detailed pricing article */}
-          <section className="rounded-xl border border-border bg-accent/30 p-6 text-center mb-10">
+          {/* ═══ Lien article détaillé ═══ */}
+          <section className="rounded-xl border border-border bg-accent/30 p-6 text-center mb-12 max-w-3xl mx-auto">
             <p className="text-sm text-muted-foreground mb-2">Vous voulez tout comprendre en détail ?</p>
             <Link to="/actualites/nouveaux-tarifs-2026" className="text-primary font-medium hover:underline text-sm">
               Découvrir nos tarifs en détail →
             </Link>
           </section>
 
-          {/* CTA final — high contrast */}
-          <section className="text-center py-10 md:py-14 bg-primary rounded-2xl mb-10">
-            <p className="text-lg md:text-xl font-heading font-semibold text-primary-foreground text-center mb-2">
+          {/* ═══ CTA final ═══ */}
+          <section className="text-center py-10 md:py-14 bg-gradient-to-br from-primary to-primary/85 rounded-2xl mb-12">
+            <ShieldCheck className="h-10 w-10 text-primary-foreground/80 mx-auto mb-4" />
+            <p className="text-xl md:text-2xl font-heading font-semibold text-primary-foreground text-center mb-2 px-4">
               {before
                 ? "Rejoignez les Fondateurs avant le 13 mai"
                 : "Prêt à rejoindre Guardiens ?"}
             </p>
-            <p className="text-sm font-body text-primary-foreground/70 text-center mb-8">
+            <p className="text-sm md:text-base font-body text-primary-foreground/80 text-center mb-8 max-w-xl mx-auto px-4">
               {before
-                ? "Badge à vie, accès jusqu'au 13 juin."
-                : "6,99€/mois pour les gardiens. Gratuit pour les propriétaires. Sans engagement."}
+                ? "Badge à vie, accès gratuit jusqu'au 13 juin, sans carte bancaire."
+                : "6,99€/mois pour les gardiens, 7 jours d'essai offerts. Gratuit pour les propriétaires."}
             </p>
-            <Link to="/register">
-              <Button className="bg-background text-foreground font-body font-medium px-10 py-4 rounded-xl text-base hover:bg-background/90 transition-colors min-h-[52px]" size="xl">
-                S'inscrire
-              </Button>
-            </Link>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center px-4">
+              <Link to={registerLink("sitter")}>
+                <Button className="bg-background text-foreground font-body font-medium px-8 py-4 rounded-xl text-base hover:bg-background/90 transition-colors min-h-[52px] w-full sm:w-auto" size="xl">
+                  Devenir gardien — essai gratuit
+                </Button>
+              </Link>
+              <Link to={registerLink("owner")}>
+                <Button variant="outline" className="bg-transparent text-primary-foreground border-2 border-primary-foreground/30 hover:bg-primary-foreground/10 hover:border-primary-foreground/50 font-body font-medium px-8 py-4 rounded-xl text-base min-h-[52px] w-full sm:w-auto" size="xl">
+                  Publier une annonce — gratuit
+                </Button>
+              </Link>
+            </div>
           </section>
         </main>
 
