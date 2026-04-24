@@ -187,12 +187,36 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
 
   const saveCompetencesAndLifestyle = async () => {
     if (!user) return;
-    // Catégories d'entraide → profiles.skill_categories (pas dans competences,
-    // qui est réservé aux compétences précises validées/en validation).
+
+    // Whitelist stricte des catégories d'entraide pour éviter qu'une valeur
+    // étrangère (ex: une compétence précise) ne soit classée par erreur ici.
+    const ALLOWED_CATEGORIES = SKILL_CATEGORIES.map(c => c.key);
+    const safeCategories = Array.from(
+      new Set(
+        (skillCategories || []).filter(
+          (k): k is string => typeof k === "string" && ALLOWED_CATEGORIES.includes(k)
+        )
+      )
+    );
+
+    // Fallback : relire l'existant en base et fusionner pour ne rien écraser
+    // si profiles.skill_categories est absent / null côté state local.
+    const { data: existing } = await supabase
+      .from("profiles")
+      .select("skill_categories, available_for_help")
+      .eq("id", user.id)
+      .maybeSingle();
+
+    const existingCategories = Array.isArray((existing as any)?.skill_categories)
+      ? ((existing as any).skill_categories as string[]).filter(c => ALLOWED_CATEGORIES.includes(c))
+      : [];
+
+    const mergedCategories = Array.from(new Set([...existingCategories, ...safeCategories]));
+
     const profileUpdates: Record<string, any> = {
-      skill_categories: skillCategories,
+      skill_categories: mergedCategories,
     };
-    if (skillCategories.length > 0) {
+    if (mergedCategories.length > 0 && !(existing as any)?.available_for_help) {
       profileUpdates.available_for_help = true;
     }
     await supabase.from("profiles").update(profileUpdates).eq("id", user.id);
