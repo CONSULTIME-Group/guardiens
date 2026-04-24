@@ -1,0 +1,20 @@
+-- Fix : la policy "Pets are publicly readable via published sits" était limitée
+-- au rôle 'public' (anon), ce qui empêchait les gardiens AUTHENTIFIÉS de voir
+-- les animaux d'une annonce publiée appartenant à un autre propriétaire.
+-- On la remplace par une policy qui couvre 'public' ET 'authenticated'.
+
+DROP POLICY IF EXISTS "Pets are publicly readable via published sits" ON public.pets;
+
+CREATE POLICY "Pets readable via published sits"
+ON public.pets
+FOR SELECT
+TO public, authenticated
+USING (
+  EXISTS (
+    SELECT 1
+    FROM properties p
+    JOIN sits s ON s.property_id = p.id
+    WHERE p.id = pets.property_id
+      AND s.status = 'published'
+  )
+);
