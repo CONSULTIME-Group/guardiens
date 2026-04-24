@@ -392,6 +392,8 @@ const SitDetail = () => {
             sitId={sit.id}
             title={sit.title || `Garde à ${owner?.city || "France"}`}
             city={owner?.city}
+            startDate={sit.start_date}
+            endDate={sit.end_date}
             source="owner_sit_detail"
           />
         </div>
