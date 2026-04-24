@@ -76,7 +76,7 @@ const defaultData: SitterProfileData = {
 };
 
 export function useSitterProfile() {
-  const { user } = useAuth();
+  const { user, refreshProfile } = useAuth();
   const { toast } = useToast();
   const [data, setData] = useState<SitterProfileData>(defaultData);
   const [pastAnimals, setPastAnimals] = useState<PastAnimal[]>([]);
