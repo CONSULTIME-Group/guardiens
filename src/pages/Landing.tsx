@@ -253,17 +253,17 @@ const Landing = () => {
               Confiez vos animaux à un gardien de votre quartier. Osez demander un coup de main. Osez en proposer un.
             </p>
 
-            {/* CTAs */}
+            {/* CTAs — propriétaire mis en avant (priorité business : combler le manque d'annonces) */}
             <div className="flex flex-col sm:flex-row gap-3 mb-4 animate-hero-fade-up animation-delay-900">
               <button
                 onClick={() => navigate("/register?role=owner")}
-                className="font-body text-sm font-semibold tracking-wide rounded-full px-10 py-4 bg-primary text-primary-foreground hover:brightness-90 hover:scale-[1.02] transition-all duration-200"
+                className="font-body text-sm font-semibold tracking-wide rounded-full px-10 py-4 bg-primary text-primary-foreground hover:brightness-90 hover:scale-[1.02] transition-all duration-200 shadow-lg shadow-primary/30"
               >
-                Je cherche un gardien
+                Publier mon annonce — gratuit
               </button>
               <button
                 onClick={() => navigate("/register?role=sitter")}
-                className="font-body text-sm font-semibold tracking-wide rounded-full px-10 py-4 bg-transparent text-white border-2 border-white/70 hover:bg-white/15 transition-all duration-200"
+                className="font-body text-sm font-semibold tracking-wide rounded-full px-8 py-4 bg-transparent text-white border-2 border-white/70 hover:bg-white/15 transition-all duration-200"
               >
                 Je veux garder
               </button>
