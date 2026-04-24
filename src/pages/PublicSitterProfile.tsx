@@ -1247,7 +1247,7 @@ export default function PublicSitterProfile() {
           {/* — MOBILE : flux vertical avec ancres — */}
           <div className="md:hidden space-y-10">
             {/* À propos */}
-            <section aria-label={`À propos de ${firstName}`}>
+            <section id="apropos" aria-label={`À propos de ${firstName}`} className="scroll-mt-24">
               <h2 className="text-xs uppercase tracking-wider text-muted-foreground font-body mb-3">
                 À propos
               </h2>
