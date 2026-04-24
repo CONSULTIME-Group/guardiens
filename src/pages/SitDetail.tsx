@@ -113,9 +113,12 @@ const SitDetail = () => {
       setLogementOverride((sitData as any).logement_override || "");
       setAnimauxOverride((sitData as any).animaux_override || "");
 
+      // Note : on lit `public_profiles` (vue publique sécurisée) et non `profiles`
+      // (RLS restreinte au propriétaire) pour que la fiche reste lisible par
+      // les gardiens connectés. `.maybeSingle()` évite les 406 quand RLS filtre.
       const [ownerRes, propRes, ownerProfRes, reviewsRes] = await Promise.all([
-        supabase.from("profiles").select("*").eq("id", sitData.user_id).single(),
-        supabase.from("properties").select("*").eq("id", sitData.property_id).single(),
+        supabase.from("public_profiles").select("*").eq("id", sitData.user_id).maybeSingle(),
+        supabase.from("properties").select("*").eq("id", sitData.property_id).maybeSingle(),
         supabase.from("owner_profiles").select("*").eq("user_id", sitData.user_id).maybeSingle(),
         supabase.from("reviews").select("*, reviewer:profiles!reviews_reviewer_id_fkey(first_name, avatar_url)").eq("reviewee_id", sitData.user_id).eq("published", true),
       ]);
