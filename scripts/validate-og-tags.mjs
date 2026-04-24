@@ -318,13 +318,110 @@ function printDiffs(diffs, indent = "  ") {
 }
 
 // ──────────────────────────────────────────────────────────────
-// 7. Runner principal
+// 7. Checks origine-level (sitemap.xml, robots.txt)
+// ──────────────────────────────────────────────────────────────
+
+async function fetchText(url) {
+  const res = await fetch(url, {
+    redirect: "follow",
+    headers: { "User-Agent": "Mozilla/5.0 guardiens-validate-og/1.0" },
+  });
+  if (!res.ok) throw new Error(`HTTP ${res.status} ${res.statusText}`);
+  return res.text();
+}
+
+function parseSitemap(xml) {
+  // Extrait [{loc, priority, changefreq}] pour chaque <url>
+  const entries = [];
+  const urlRe = /<url>([\s\S]*?)<\/url>/gi;
+  let m;
+  while ((m = urlRe.exec(xml)) !== null) {
+    const block = m[1];
+    const loc = block.match(/<loc>([\s\S]*?)<\/loc>/)?.[1]?.trim();
+    const priority = block.match(/<priority>([\s\S]*?)<\/priority>/)?.[1]?.trim();
+    const changefreq = block.match(/<changefreq>([\s\S]*?)<\/changefreq>/)?.[1]?.trim();
+    if (loc) entries.push({ loc, priority, changefreq });
+  }
+  return entries;
+}
+
+function parseRobotsTxt(txt) {
+  const disallow = [];
+  const sitemaps = [];
+  let currentUA = "*";
+  for (const line of txt.split(/\r?\n/)) {
+    const clean = line.replace(/#.*$/, "").trim();
+    if (!clean) continue;
+    const [rawKey, ...rest] = clean.split(":");
+    const key = rawKey.trim().toLowerCase();
+    const value = rest.join(":").trim();
+    if (key === "user-agent") currentUA = value;
+    else if (key === "disallow" && currentUA === "*" && value) disallow.push(value);
+    else if (key === "sitemap") sitemaps.push(value);
+  }
+  return { disallow, sitemaps };
+}
+
+async function validateSitemap(origin, routes, siteUrl) {
+  const url = `${origin}/sitemap.xml`;
+  const xml = await fetchText(url);
+  const entries = parseSitemap(xml);
+  const locSet = new Map(entries.map((e) => [e.loc, e]));
+
+  // On s'attend à trouver chaque route publique (sauf /login) avec bonne priorité
+  const EXCLUDED = new Set(["/login"]);
+  const diffs = [];
+  for (const r of routes) {
+    if (EXCLUDED.has(r.path)) continue;
+    const expectedLoc = `${siteUrl}${r.path === "/" ? "" : r.path}`;
+    // Le sitemap sert la home en "https://guardiens.fr/" OU "https://guardiens.fr"
+    const entry = locSet.get(expectedLoc) || locSet.get(`${expectedLoc}/`);
+    if (!entry) {
+      diffs.push({ path: r.path, issue: `absent du sitemap (attendu : ${expectedLoc})` });
+      continue;
+    }
+    if (r.sitemapPriority && entry.priority !== r.sitemapPriority) {
+      diffs.push({ path: r.path, issue: `priorité ${entry.priority} ≠ attendu ${r.sitemapPriority}` });
+    }
+    if (r.changeFreq && entry.changefreq !== r.changeFreq) {
+      diffs.push({ path: r.path, issue: `changefreq ${entry.changefreq} ≠ attendu ${r.changeFreq}` });
+    }
+  }
+  return { url, entriesCount: entries.length, diffs };
+}
+
+async function validateRobots(origin, routes, siteUrl) {
+  const url = `${origin}/robots.txt`;
+  const txt = await fetchText(url);
+  const { disallow, sitemaps } = parseRobotsTxt(txt);
+  const issues = [];
+
+  // Sitemap référencé
+  const expectedSitemap = `${siteUrl}/sitemap.xml`;
+  if (!sitemaps.some((s) => s === expectedSitemap)) {
+    issues.push(`Sitemap absent ou différent (attendu : ${expectedSitemap}, trouvé : ${sitemaps.join(", ") || "(aucun)"})`);
+  }
+
+  // Conflits : route publique indexable mais disallowée
+  const EXCLUDED = new Set(["/login"]);
+  for (const r of routes) {
+    if (EXCLUDED.has(r.path) || r.path === "/") continue;
+    const conflicts = disallow.filter((d) => r.path === d || r.path.startsWith(d.replace(/\/$/, "") + "/"));
+    if (conflicts.length > 0) {
+      issues.push(`${r.path} est dans sitemap mais Disallow: ${conflicts.join(", ")}`);
+    }
+  }
+  return { url, disallow, sitemaps, issues };
+}
+
+// ──────────────────────────────────────────────────────────────
+// 8. Runner principal
 // ──────────────────────────────────────────────────────────────
 
 async function main() {
-  console.log(c("bold", "\n🔎 Validation OG/Twitter — toutes routes publiques\n"));
+  console.log(c("bold", "\n🔎 Validation SEO — OG, canonical, schema, sitemap, robots\n"));
 
-  const { routes } = loadSiteConfig();
+  const { routes, siteUrl } = loadSiteConfig();
   const filteredRoutes = pathFilter
     ? routes.filter((r) => pathFilter.includes(r.path))
     : routes;
@@ -337,32 +434,76 @@ async function main() {
   console.log(c("dim", `Routes à valider : ${filteredRoutes.length}`));
   console.log(c("dim", `Origines cibles  : ${normalizedOrigins.join(", ")}`));
   console.log(c("dim", `Concurrence      : ${concurrency}`));
-  console.log(c("dim", `Mode             : ${strictMode ? "strict (toute divergence = échec)" : "permissif (home stricte, autres = warn)"}\n`));
+  console.log(c("dim", `Checks actifs    : ${[...enabledChecks].join(", ")}`));
+  console.log(c("dim", `Mode             : ${strictMode ? "strict" : "permissif (home stricte, autres = warn)"}\n`));
 
-  let blockingIssues = 0; // home ou --strict
-  let warnings = 0; // routes non-home hors --strict
+  let blockingIssues = 0;
+  let warnings = 0;
   let totalErrors = 0;
 
   // ─── Sanity check local : index.html doit correspondre à la home ─────
-  const homeRoute = filteredRoutes.find((r) => r.path === "/");
-  if (homeRoute) {
-    const indexHtml = readFileSync(resolve(ROOT, "index.html"), "utf8");
-    const indexTags = parseMetaTags(indexHtml);
-    const expected = buildExpectedTags(homeRoute);
-    const diffs = diffTags(indexTags, expected.tags);
-    if (diffs.length > 0) {
-      blockingIssues += diffs.length;
-      console.log(c("yellow", "⚠️  index.html diverge de la route / :"));
-      printDiffs(diffs);
-      console.log(c("dim", '   → lancez `npm run sync-index-html` pour corriger.\n'));
-    } else {
-      console.log(c("green", "✅ index.html synchronisé avec la route /\n"));
+  if (enabledChecks.has("og")) {
+    const homeRoute = filteredRoutes.find((r) => r.path === "/");
+    if (homeRoute) {
+      const indexHtml = readFileSync(resolve(ROOT, "index.html"), "utf8");
+      const { tags: indexTags } = parseMetaTags(indexHtml);
+      const expected = buildExpectedTags(homeRoute);
+      const diffs = diffTags(indexTags, expected.tags);
+      if (diffs.length > 0) {
+        blockingIssues += diffs.length;
+        console.log(c("yellow", "⚠️  index.html diverge de la route / :"));
+        printDiffs(diffs);
+        console.log(c("dim", '   → lancez `npm run sync-index-html` pour corriger.\n'));
+      } else {
+        console.log(c("green", "✅ index.html synchronisé avec la route /\n"));
+      }
     }
   }
 
-  // ─── Pour chaque origine, pour chaque route, fetcher et differ ────────
   for (const origin of normalizedOrigins) {
-    console.log(c("bold", `→ Origine : ${origin}`));
+    console.log(c("bold", `━━━ Origine : ${origin} ━━━`));
+
+    // ─── Sitemap (origine-level) ────────────────────────────────────────
+    if (enabledChecks.has("sitemap")) {
+      try {
+        const { url, entriesCount, diffs } = await validateSitemap(origin, filteredRoutes, siteUrl);
+        if (diffs.length === 0) {
+          console.log(`  ${c("green", "✅")} sitemap.xml (${entriesCount} URLs) ${c("dim", url)}`);
+        } else {
+          blockingIssues += diffs.length;
+          console.log(`  ${c("red", "❌")} sitemap.xml — ${diffs.length} problème(s) ${c("dim", url)}`);
+          for (const d of diffs) console.log(`      • ${c("yellow", d.path)} : ${d.issue}`);
+        }
+      } catch (err) {
+        totalErrors += 1;
+        console.log(`  ${c("red", "💥")} sitemap.xml : ${err.message}`);
+      }
+    }
+
+    // ─── robots.txt (origine-level) ─────────────────────────────────────
+    if (enabledChecks.has("robots")) {
+      try {
+        const { url, issues } = await validateRobots(origin, filteredRoutes, siteUrl);
+        if (issues.length === 0) {
+          console.log(`  ${c("green", "✅")} robots.txt ${c("dim", url)}`);
+        } else {
+          blockingIssues += issues.length;
+          console.log(`  ${c("red", "❌")} robots.txt — ${issues.length} problème(s) ${c("dim", url)}`);
+          for (const i of issues) console.log(`      • ${i}`);
+        }
+      } catch (err) {
+        totalErrors += 1;
+        console.log(`  ${c("red", "💥")} robots.txt : ${err.message}`);
+      }
+    }
+
+    // ─── Checks par route (og, canonical, schema, meta-robots) ──────────
+    const needsPageFetch = ["og", "canonical", "schema", "meta-robots"]
+      .some((k) => enabledChecks.has(k));
+    if (!needsPageFetch) {
+      console.log();
+      continue;
+    }
 
     const results = await runWithConcurrency(
       filteredRoutes,
@@ -371,10 +512,45 @@ async function main() {
         const url = `${origin}${route.path}`;
         try {
           const html = await fetchAsBot(url);
-          const tags = parseMetaTags(html);
+          const { tags, metaRobots } = parseMetaTags(html);
           const expected = buildExpectedTags(route);
-          const diffs = diffTags(tags, expected.tags);
-          return { route, url, ok: true, diffs };
+          const ogDiffs = enabledChecks.has("og") ? diffTags(tags, expected.tags) : [];
+
+          const pageIssues = [];
+
+          if (enabledChecks.has("canonical")) {
+            const canonical = parseCanonical(html);
+            const expectedCanon = `${siteUrl}${route.path === "/" ? "/" : route.path}`;
+            if (!canonical) {
+              pageIssues.push({ kind: "canonical", msg: "absent" });
+            } else if (canonical !== expectedCanon) {
+              pageIssues.push({ kind: "canonical", msg: `${canonical} ≠ attendu ${expectedCanon}` });
+            }
+          }
+
+          if (enabledChecks.has("meta-robots")) {
+            if (metaRobots && /noindex/i.test(metaRobots)) {
+              pageIssues.push({ kind: "meta-robots", msg: `noindex détecté sur route publique (${metaRobots})` });
+            }
+          }
+
+          if (enabledChecks.has("schema") && route.path === "/") {
+            const blocks = parseJsonLd(html);
+            if (blocks.length === 0) {
+              pageIssues.push({ kind: "schema", msg: "aucun bloc JSON-LD trouvé sur la home" });
+            } else {
+              const invalid = blocks.filter((b) => b.error);
+              if (invalid.length > 0) {
+                pageIssues.push({ kind: "schema", msg: `${invalid.length}/${blocks.length} bloc(s) JSON-LD invalide(s) : ${invalid[0].error}` });
+              }
+              const hasOrg = blocks.some((b) => b.parsed?.["@type"] === "Organization");
+              if (!hasOrg) {
+                pageIssues.push({ kind: "schema", msg: "aucun @type=Organization trouvé (attendu sur la home)" });
+              }
+            }
+          }
+
+          return { route, url, ok: true, ogDiffs, pageIssues };
         } catch (err) {
           return { route, url, ok: false, error: err.message };
         }
@@ -388,27 +564,45 @@ async function main() {
         console.log(`  ${c("red", "💥")} ${label}${c("red", r.error)}`);
         continue;
       }
-      if (r.diffs.length === 0) {
+
+      const ogCount = r.ogDiffs.length;
+      const pageCount = r.pageIssues.length;
+      const total = ogCount + pageCount;
+
+      if (total === 0) {
         console.log(`  ${c("green", "✅")} ${label}${c("dim", r.url)}`);
         continue;
       }
-      const isBlocking = strictMode || r.route.path === "/";
-      if (isBlocking) {
-        blockingIssues += r.diffs.length;
-        console.log(`  ${c("red", "❌")} ${label}${c("red", `${r.diffs.length} écart(s)`)} ${c("dim", r.url)}`);
-      } else {
-        warnings += r.diffs.length;
-        console.log(`  ${c("yellow", "⚠️ ")} ${label}${c("yellow", `${r.diffs.length} écart(s) (non bloquant, pas de pré-rendu)`)} ${c("dim", r.url)}`);
+
+      // Règle : OG non-home en mode permissif = warning ; canonical/schema/meta-robots = toujours bloquant
+      const ogBlocking = strictMode || r.route.path === "/";
+      const ogBucket = ogCount > 0
+        ? (ogBlocking ? "block" : "warn")
+        : null;
+      const pageBucket = pageCount > 0 ? "block" : null;
+
+      if (ogBucket === "block") blockingIssues += ogCount;
+      if (ogBucket === "warn") warnings += ogCount;
+      if (pageBucket === "block") blockingIssues += pageCount;
+
+      const parts = [];
+      if (ogCount > 0) parts.push(`${ogCount} OG`);
+      if (pageCount > 0) parts.push(`${pageCount} autre(s)`);
+      const icon = (ogBucket === "block" || pageBucket === "block") ? c("red", "❌") : c("yellow", "⚠️ ");
+      console.log(`  ${icon} ${label}${parts.join(" + ")} ${c("dim", r.url)}`);
+
+      if (ogCount > 0) printDiffs(r.ogDiffs, "      ");
+      for (const pi of r.pageIssues) {
+        console.log(`      • ${c("yellow", pi.kind)} : ${pi.msg}`);
       }
-      printDiffs(r.diffs, "      ");
     }
     console.log();
   }
 
   // ─── Synthèse ────────────────────────────────────────────────────────
   console.log(c("bold", "Synthèse :"));
-  if (blockingIssues > 0) console.log(c("red",    `  ❌ ${blockingIssues} divergence(s) bloquante(s)`));
-  if (warnings > 0)       console.log(c("yellow", `  ⚠️  ${warnings} divergence(s) non bloquante(s) (bots servis par index.html)`));
+  if (blockingIssues > 0) console.log(c("red",    `  ❌ ${blockingIssues} problème(s) bloquant(s)`));
+  if (warnings > 0)       console.log(c("yellow", `  ⚠️  ${warnings} OG non bloquant(s) (bots servis par index.html, pas de pré-rendu)`));
   if (totalErrors > 0)    console.log(c("red",    `  💥 ${totalErrors} erreur(s) réseau`));
 
   if (blockingIssues === 0 && totalErrors === 0) {
@@ -421,7 +615,7 @@ async function main() {
     process.exit(0);
   }
 
-  console.log(c("dim", "\n💡 Si seule la prod diverge sur / : purger Prerender.io / Cloudflare puis relancer.\n"));
+  console.log(c("dim", "\n💡 Si seule la prod diverge : purger Prerender.io / Cloudflare puis relancer.\n"));
   process.exit(1);
 }
 
