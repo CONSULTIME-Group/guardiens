@@ -27,6 +27,29 @@ import { X, ZoomIn, ZoomOut, RotateCcw, ChevronLeft, ChevronRight, Maximize2 } f
 type ViewMode = "rendered" | "raw";
 type AnchorFilter = "all" | HeroAnchor;
 type CategoryFilter = "all" | HeroCategoryName;
+type SortBy = "num-asc" | "num-desc" | "category" | "anchor" | "shuffle";
+
+// Ordre canonique des catégories pour le tri "par thème".
+const CATEGORY_ORDER: Record<HeroCategoryName, number> = {
+  animals: 0,
+  home: 1,
+  mutual_aid: 2,
+  village: 3,
+};
+const ANCHOR_ORDER: Record<HeroAnchor, number> = {
+  left: 0,
+  center: 1,
+  right: 2,
+};
+
+// Hash déterministe pour le mode "shuffle" — même ordre à chaque rendu sans
+// dépendance externe (évite la dépendance à Math.random qui changerait au moindre re-render).
+function stableHash(n: number): number {
+  let h = (n + 0x9e3779b9) | 0;
+  h = Math.imul(h ^ (h >>> 16), 0x85ebca6b);
+  h = Math.imul(h ^ (h >>> 13), 0xc2b2ae35);
+  return (h ^ (h >>> 16)) >>> 0;
+}
 
 const CATEGORY_LABELS: Record<HeroCategoryName, string> = {
   animals: "Animaux & plantes",
@@ -52,6 +75,7 @@ export default function TestHeroGallery() {
   const [viewMode, setViewMode] = useState<ViewMode>("rendered");
   const [anchorFilter, setAnchorFilter] = useState<AnchorFilter>("all");
   const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>("all");
+  const [sortBy, setSortBy] = useState<SortBy>("num-asc");
   const [zoomIdx, setZoomIdx] = useState<number | null>(null);
   const [pageIdx, setPageIdx] = useState<number | null>(null);
 
@@ -70,13 +94,37 @@ export default function TestHeroGallery() {
   );
 
   const filtered = useMemo(
-    () =>
-      items.filter((it) => {
+    () => {
+      const base = items.filter((it) => {
         if (anchorFilter !== "all" && it.anchor !== anchorFilter) return false;
         if (categoryFilter !== "all" && it.category !== categoryFilter) return false;
         return true;
-      }),
-    [items, anchorFilter, categoryFilter]
+      });
+      // Tri (stable via comparateur secondaire sur fileNum).
+      const sorted = [...base].sort((a, b) => {
+        switch (sortBy) {
+          case "num-desc":
+            return b.fileNum - a.fileNum;
+          case "category":
+            return (
+              CATEGORY_ORDER[a.category] - CATEGORY_ORDER[b.category] ||
+              a.fileNum - b.fileNum
+            );
+          case "anchor":
+            return (
+              ANCHOR_ORDER[a.anchor] - ANCHOR_ORDER[b.anchor] ||
+              a.fileNum - b.fileNum
+            );
+          case "shuffle":
+            return stableHash(a.idx) - stableHash(b.idx);
+          case "num-asc":
+          default:
+            return a.fileNum - b.fileNum;
+        }
+      });
+      return sorted;
+    },
+    [items, anchorFilter, categoryFilter, sortBy]
   );
 
   // Stats globales pour le bandeau d'en-tête.
@@ -154,11 +202,11 @@ export default function TestHeroGallery() {
                 onChange={(e) => setCategoryFilter(e.target.value as CategoryFilter)}
                 className="text-xs bg-card border border-border rounded px-2 py-1"
               >
-                <option value="all">Toutes</option>
-                <option value="animals">Animaux & plantes</option>
-                <option value="home">Maison</option>
-                <option value="mutual_aid">Entraide</option>
-                <option value="village">Village & partage</option>
+                <option value="all">Toutes ({items.length})</option>
+                <option value="animals">Animaux & plantes ({stats.byCat.animals})</option>
+                <option value="home">Maison ({stats.byCat.home})</option>
+                <option value="mutual_aid">Entraide ({stats.byCat.mutual_aid})</option>
+                <option value="village">Village & partage ({stats.byCat.village})</option>
               </select>
             </div>
 
@@ -174,6 +222,22 @@ export default function TestHeroGallery() {
                 <option value="left">Left ({stats.byAnchor.left})</option>
                 <option value="center">Center ({stats.byAnchor.center})</option>
                 <option value="right">Right ({stats.byAnchor.right})</option>
+              </select>
+            </div>
+
+            {/* Tri */}
+            <div className="flex items-center gap-1.5">
+              <span className="text-xs text-muted-foreground">Trier :</span>
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value as SortBy)}
+                className="text-xs bg-card border border-border rounded px-2 py-1"
+              >
+                <option value="num-asc">Numéro ↑ (001 → {items.length})</option>
+                <option value="num-desc">Numéro ↓ ({items.length} → 001)</option>
+                <option value="category">Par thème (animaux → village)</option>
+                <option value="anchor">Par ancrage (left → right)</option>
+                <option value="shuffle">Aléatoire stable</option>
               </select>
             </div>
           </div>
