@@ -831,7 +831,8 @@ async function main() {
     for (const r of results) {
       // Paths dynamiques plus longs → padding élargi, tronqué proprement
       const displayPath = r.route.path.length > 40 ? r.route.path.slice(0, 37) + "…" : r.route.path;
-      const label = `${displayPath.padEnd(40)} `;
+      const badge = r.route.isSample ? c("cyan", "[sample] ") : "";
+      const label = `${badge}${displayPath.padEnd(40)} `;
       if (!r.ok) {
         totalErrors += 1;
         console.log(`  ${c("red", "💥")} ${label}${c("red", r.error)}`);
