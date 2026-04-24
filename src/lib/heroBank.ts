@@ -302,3 +302,159 @@ export function getCategoryByBankIndex(idx: number): HeroCategoryName {
   }
   return "animals";
 }
+
+// ============================================================================
+// VALIDATION DE LA BANQUE
+// ----------------------------------------------------------------------------
+// Garde-fou : vérifie que la structure thématique reste cohérente. Une catégorie
+// vide rendrait la sélection stratifiée incohérente (division par zéro côté
+// `getIndex`) ; une catégorie trop déséquilibrée (ex : 1 seule image pour 25 %
+// du trafic) provoquerait une saturation visuelle.
+// ============================================================================
+
+export type HeroBankIssue = {
+  severity: "error" | "warning";
+  category: HeroCategoryName;
+  /** Code court machine-readable. */
+  code:
+    | "empty_category"
+    | "out_of_bounds"
+    | "underpopulated"
+    | "overpopulated";
+  message: string;
+  /** Nombre d'images dans la catégorie au moment du contrôle. */
+  count: number;
+};
+
+export type HeroBankValidationReport = {
+  ok: boolean;
+  totalImages: number;
+  perCategory: Record<HeroCategoryName, number>;
+  issues: HeroBankIssue[];
+};
+
+/** Seuil minimal absolu : une catégorie active doit avoir au moins ce nombre d'images. */
+const MIN_IMAGES_PER_CATEGORY = 3;
+/** Seuil de déséquilibre : on alerte si la part réelle d'images < (poids cible × ce ratio). */
+const UNDERPOPULATION_RATIO = 0.5;
+/** Seuil de surreprésentation : on alerte si une catégorie occupe physiquement >70 % de la banque. */
+const OVERPOPULATION_THRESHOLD = 0.7;
+
+const CATEGORY_LABELS_FR: Record<HeroCategoryName, string> = {
+  animals: "animaux & plantes",
+  home: "maison",
+  mutual_aid: "entraide",
+  village: "village & partage",
+};
+
+/**
+ * Valide la cohérence de la banque par rapport aux poids fournis.
+ *
+ * Erreurs (bloquantes pour la sélection) :
+ *   - une catégorie référencée par les poids n'a aucune image disponible
+ *   - une plage déborde de la banque physique (start/end incohérents)
+ *
+ * Warnings (la sélection fonctionne, mais l'expérience visuelle est mauvaise) :
+ *   - une catégorie a beaucoup moins d'images que ce que son poids exigerait
+ *     (ex : on alloue 25 % du trafic à 2 images → 12,5 % du trafic par image)
+ *   - une catégorie occupe physiquement >70 % de la banque (manque de variété)
+ */
+export function validateHeroBank(
+  weights: HeroWeights = DEFAULT_HERO_WEIGHTS,
+  totalBankSize: number = HERO_BANK.length
+): HeroBankValidationReport {
+  const issues: HeroBankIssue[] = [];
+  const perCategory = {} as Record<HeroCategoryName, number>;
+
+  const totalWeight =
+    weights.animals + weights.home + weights.mutual_aid + weights.village;
+
+  for (const cat of HERO_CATEGORY_RANGES) {
+    const [start, endExclusive] = cat.range;
+    const count = Math.max(0, endExclusive - start);
+    perCategory[cat.name] = count;
+    const label = CATEGORY_LABELS_FR[cat.name];
+
+    // 1. Plage hors-banque
+    if (start < 1 || endExclusive - 1 > totalBankSize || start >= endExclusive) {
+      issues.push({
+        severity: "error",
+        category: cat.name,
+        code: "out_of_bounds",
+        count,
+        message: `Catégorie « ${label} » : plage [${start}–${endExclusive - 1}] invalide (banque de ${totalBankSize} images).`,
+      });
+      continue;
+    }
+
+    // 2. Catégorie vide alors qu'elle a un poids > 0 → erreur bloquante
+    const weight = weights[cat.name];
+    if (count === 0 && weight > 0) {
+      issues.push({
+        severity: "error",
+        category: cat.name,
+        code: "empty_category",
+        count,
+        message: `Catégorie « ${label} » vide mais pondérée à ${weight}. Aucune image ne peut être assignée.`,
+      });
+      continue;
+    }
+
+    // 3. Catégorie active mais sous le seuil minimal → erreur bloquante
+    if (weight > 0 && count > 0 && count < MIN_IMAGES_PER_CATEGORY) {
+      issues.push({
+        severity: "error",
+        category: cat.name,
+        code: "underpopulated",
+        count,
+        message: `Catégorie « ${label} » : seulement ${count} image(s) pour un poids de ${weight}. Minimum requis : ${MIN_IMAGES_PER_CATEGORY}.`,
+      });
+      continue;
+    }
+
+    // 4. Déséquilibre soft : poids élevé / peu d'images → warning
+    if (totalWeight > 0 && weight > 0 && count > 0) {
+      const expectedShare = weight / totalWeight; // part de trafic
+      const actualShare = count / totalBankSize; // part physique
+      if (actualShare < expectedShare * UNDERPOPULATION_RATIO) {
+        issues.push({
+          severity: "warning",
+          category: cat.name,
+          code: "underpopulated",
+          count,
+          message: `Catégorie « ${label} » sous-fournie : ${count} image(s) (${(actualShare * 100).toFixed(1)} % de la banque) pour ${(expectedShare * 100).toFixed(1)} % du trafic visé. Risque de répétition visible.`,
+        });
+      }
+    }
+
+    // 5. Surreprésentation physique (>70 % de la banque)
+    if (count / totalBankSize > OVERPOPULATION_THRESHOLD) {
+      issues.push({
+        severity: "warning",
+        category: cat.name,
+        code: "overpopulated",
+        count,
+        message: `Catégorie « ${label} » occupe ${((count / totalBankSize) * 100).toFixed(0)} % de la banque physique (>70 %). Pensez à enrichir les autres catégories.`,
+      });
+    }
+  }
+
+  // 6. Tous les poids à 0 → erreur globale (catégorie « animals » utilisée par convention)
+  if (totalWeight === 0) {
+    issues.push({
+      severity: "error",
+      category: "animals",
+      code: "empty_category",
+      count: 0,
+      message: "Tous les poids sont à 0 : aucune catégorie ne peut être sélectionnée.",
+    });
+  }
+
+  return {
+    ok: !issues.some((i) => i.severity === "error"),
+    totalImages: totalBankSize,
+    perCategory,
+    issues,
+  };
+}
+
