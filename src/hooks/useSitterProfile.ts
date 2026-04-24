@@ -194,7 +194,6 @@ export function useSitterProfile() {
     if (!d.experience_years) missing.push({ step: 3, label: "Années d'expérience" });
     if (!d.references_text) missing.push({ step: 3, label: "Références" });
     if (!d.has_license && !d.has_vehicle) missing.push({ step: 4, label: "Permis ou véhicule" });
-    if (d.availability_dates.length === 0) missing.push({ step: 4, label: "Dates de disponibilité" });
     if (d.languages.length === 0) missing.push({ step: 5, label: "Langues" });
     if (d.meeting_preference.length === 0) missing.push({ step: 5, label: "Préférence de rencontre" });
     if (!d.handover_preference) missing.push({ step: 5, label: "Préférence de passation" });
