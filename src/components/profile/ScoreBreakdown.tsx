@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ChevronDown, Check, X, Info } from "lucide-react";
+import { ChevronDown, Check, X, Info, Sparkles, RotateCcw } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export interface ScoreCriterion {
@@ -11,10 +11,15 @@ export interface ScoreCriterion {
 
 interface ScoreBreakdownProps {
   role: "sitter" | "owner";
+  /** Score réellement sauvegardé en base (référence). */
   total: number;
   essentials: ScoreCriterion[];
   bonuses: ScoreCriterion[];
   defaultOpen?: boolean;
+  /** Quand un brouillon est en cours, on a un score simulé différent du score sauvegardé. */
+  isDirty?: boolean;
+  /** Réinitialise les modifications locales (annule le brouillon). */
+  onReset?: () => void;
 }
 
 const Row = ({ c }: { c: ScoreCriterion }) => (
@@ -47,7 +52,15 @@ const Row = ({ c }: { c: ScoreCriterion }) => (
   </li>
 );
 
-const ScoreBreakdown = ({ role, total, essentials, bonuses, defaultOpen = false }: ScoreBreakdownProps) => {
+const ScoreBreakdown = ({
+  role,
+  total,
+  essentials,
+  bonuses,
+  defaultOpen = false,
+  isDirty = false,
+  onReset,
+}: ScoreBreakdownProps) => {
   const [open, setOpen] = useState(defaultOpen);
 
   const sumEssentials = essentials.reduce((s, c) => s + (c.ok ? c.points : 0), 0);
@@ -55,8 +68,64 @@ const ScoreBreakdown = ({ role, total, essentials, bonuses, defaultOpen = false 
   const sumBonuses = bonuses.reduce((s, c) => s + (c.ok ? c.points : 0), 0);
   const maxBonuses = bonuses.reduce((s, c) => s + c.points, 0);
 
+  /**
+   * Score simulé à partir des critères live (essentials + bonuses).
+   * Réplique fidèle de la fonction SQL calculate_profile_completion :
+   * la somme des poids des critères vaut 100 par construction (cf. barème v2).
+   */
+  const previewTotal = Math.min(100, Math.max(0, sumEssentials + sumBonuses));
+  const delta = previewTotal - total;
+  const showPreview = isDirty && delta !== 0;
+
   return (
-    <div className="rounded-lg border border-border bg-card/50 overflow-hidden">
+    <div
+      className={cn(
+        "rounded-lg border bg-card/50 overflow-hidden transition-colors",
+        showPreview ? "border-primary/40 shadow-sm" : "border-border"
+      )}
+    >
+      {/* Aperçu badge — visible quand le brouillon change le score */}
+      {showPreview && (
+        <div className="flex items-center justify-between gap-2 px-3 py-2 bg-primary/5 border-b border-primary/20">
+          <div className="flex items-center gap-2 min-w-0">
+            <Sparkles className="h-3.5 w-3.5 text-primary shrink-0" aria-hidden />
+            <p className="text-xs text-foreground truncate">
+              <span className="text-muted-foreground">Aperçu&nbsp;: </span>
+              <span className="tabular-nums font-medium">{total}</span>
+              <span className="text-muted-foreground"> → </span>
+              <span
+                className={cn(
+                  "tabular-nums font-semibold",
+                  delta > 0 ? "text-primary" : "text-destructive"
+                )}
+              >
+                {previewTotal}
+              </span>
+              <span
+                className={cn(
+                  "ml-1.5 text-[11px] tabular-nums",
+                  delta > 0 ? "text-primary" : "text-destructive"
+                )}
+              >
+                ({delta > 0 ? "+" : ""}
+                {delta})
+              </span>
+            </p>
+          </div>
+          {onReset && (
+            <button
+              type="button"
+              onClick={onReset}
+              className="inline-flex items-center gap-1 text-[11px] font-medium text-muted-foreground hover:text-foreground transition-colors shrink-0"
+              aria-label="Annuler les modifications non sauvegardées"
+            >
+              <RotateCcw className="h-3 w-3" aria-hidden />
+              Réinitialiser
+            </button>
+          )}
+        </div>
+      )}
+
       <button
         type="button"
         onClick={() => setOpen(!open)}
@@ -80,9 +149,23 @@ const ScoreBreakdown = ({ role, total, essentials, bonuses, defaultOpen = false 
       {open && (
         <div className="px-3 pb-3 pt-1 space-y-3 border-t border-border">
           <p className="text-[11px] text-muted-foreground leading-snug pt-2">
-            Votre score ({total}/100) suit le barème {role === "sitter" ? "Gardien" : "Propriétaire"}.
-            Les <strong className="text-foreground">essentiels</strong> pèsent l'essentiel des points,
-            les bonus complètent.
+            {showPreview ? (
+              <>
+                Aperçu du score si vous sauvegardez maintenant&nbsp;:
+                {" "}
+                <strong className="text-foreground tabular-nums">{previewTotal}/100</strong>.
+                {" "}
+                Score actuellement enregistré&nbsp;:
+                {" "}
+                <span className="tabular-nums">{total}/100</span>.
+              </>
+            ) : (
+              <>
+                Votre score ({total}/100) suit le barème {role === "sitter" ? "Gardien" : "Propriétaire"}.
+                Les <strong className="text-foreground">essentiels</strong> pèsent l'essentiel des points,
+                les bonus complètent.
+              </>
+            )}
           </p>
 
           {/* Essentiels */}
