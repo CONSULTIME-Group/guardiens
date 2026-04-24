@@ -12,9 +12,11 @@
  *   6. meta robots → aucune route publique en noindex par erreur
  *
  * Usage :
- *   node scripts/validate-og-tags.mjs                         # tout activé, cibles par défaut
+ *   node scripts/validate-og-tags.mjs                         # routes statiques uniquement
+ *   node scripts/validate-og-tags.mjs --include-dynamic       # + routes dynamiques (articles, villes…)
+ *   node scripts/validate-og-tags.mjs --dynamic-limit=5       # max 5 URLs par pattern dynamique
  *   node scripts/validate-og-tags.mjs https://guardiens.fr    # origine explicite
- *   node scripts/validate-og-tags.mjs --paths=/,/tarifs,/faq  # limiter les routes
+ *   node scripts/validate-og-tags.mjs --paths=/,/tarifs,/faq  # limiter les routes (accepte aussi les patterns)
  *   node scripts/validate-og-tags.mjs --concurrency=4         # parallélisme réseau
  *   node scripts/validate-og-tags.mjs --strict                # échec sur toute divergence
  *   node scripts/validate-og-tags.mjs --only=og,canonical     # limiter les checks
@@ -67,6 +69,11 @@ const concurrency = concurrencyArg
   ? Math.max(1, parseInt(concurrencyArg.slice("--concurrency=".length), 10) || 3)
   : 3;
 const strictMode = cliArgs.includes("--strict");
+const includeDynamic = cliArgs.includes("--include-dynamic");
+const dynamicLimitArg = cliArgs.find((a) => a.startsWith("--dynamic-limit="));
+const dynamicLimit = dynamicLimitArg
+  ? Math.max(0, parseInt(dynamicLimitArg.slice("--dynamic-limit=".length), 10) || 0)
+  : 20;
 
 // Checks disponibles et filtrage --only / --skip
 const ALL_CHECKS = ["og", "canonical", "schema", "sitemap", "robots", "meta-robots"];
@@ -112,18 +119,22 @@ function loadSiteConfig() {
     : null;
   if (!defaultOgImage) throw new Error("DEFAULT_OG_IMAGE introuvable");
 
-  // Extraire chaque bloc de route. On reconnaît un bloc par la présence de
-  // path + title + metaDescription + changeFreq + sitemapPriority.
+  // On isole d'abord le bloc staticRoutes pour ne pas mélanger avec dynamicRoutes
+  const staticBlockMatch = src.match(/staticRoutes\s*:\s*SiteRoute\[\]\s*=\s*\[([\s\S]*?)\n\];/);
+  if (!staticBlockMatch) throw new Error("staticRoutes introuvable dans siteRoutes.ts");
+  const staticBody = staticBlockMatch[1];
+
+  // Extraire chaque bloc de route statique.
   const routes = [];
-  const blockRe = /\{\s*path:\s*(["'])([^"']+)\1[\s\S]*?\}/g;
+  const blockRe = /\{\s*path:\s*(["'])([^"']+)\1[\s\S]*?\n\s*\}/g;
   let m;
-  while ((m = blockRe.exec(src)) !== null) {
+  while ((m = blockRe.exec(staticBody)) !== null) {
     const block = m[0];
     const path_ = m[2];
 
     const title = extractStringLiteral(block, "title");
     const description = extractStringLiteral(block, "metaDescription");
-    if (!title || !description) continue; // pas un vrai bloc de route
+    if (!title || !description) continue;
 
     const ogImage = extractStringLiteral(block, "ogImage") || defaultOgImage;
     const sitemapPriority = extractStringLiteral(block, "sitemapPriority");
@@ -139,11 +150,132 @@ function loadSiteConfig() {
       image: ogImage,
       sitemapPriority,
       changeFreq,
+      isDynamic: false,
     });
   }
-  if (routes.length === 0) throw new Error("Aucune route extraite");
+  if (routes.length === 0) throw new Error("Aucune route statique extraite");
 
-  return { siteUrl, defaultOgImage, routes };
+  // Extraire dynamicRoutes (optionnel)
+  const dynamicBlockMatch = src.match(/dynamicRoutes\s*:\s*DynamicRouteConfig\[\]\s*=\s*\[([\s\S]*?)\n\];/);
+  const dynamicConfigs = [];
+  if (dynamicBlockMatch) {
+    const dynBody = dynamicBlockMatch[1];
+    const dynRe = /\{\s*pathPattern:\s*(["'])([^"']+)\1[\s\S]*?\n\s*\}/g;
+    let dm;
+    while ((dm = dynRe.exec(dynBody)) !== null) {
+      const block = dm[0];
+      const pathPattern = dm[2];
+      const title = extractStringLiteral(block, "title");
+      const description = extractStringLiteral(block, "metaDescription");
+      const source = extractStringLiteral(block, "source");
+      const sitemapPriority = extractStringLiteral(block, "sitemapPriority");
+      const ogImage = extractStringLiteral(block, "ogImage") || defaultOgImage;
+      const changeFreqMatch = block.match(
+        /changeFreq:\s*(["'])(daily|weekly|monthly|yearly)\1/,
+      );
+      const dynamicTitle = /dynamicTitle:\s*true/.test(block);
+      const dynamicDescription = /dynamicDescription:\s*true/.test(block);
+      if (!pathPattern || !title || !description || !source) continue;
+      dynamicConfigs.push({
+        pathPattern,
+        source,
+        title,
+        description,
+        image: ogImage,
+        sitemapPriority,
+        changeFreq: changeFreqMatch ? changeFreqMatch[2] : null,
+        dynamicTitle,
+        dynamicDescription,
+      });
+    }
+  }
+
+  return { siteUrl, defaultOgImage, routes, dynamicConfigs };
+}
+
+// ──────────────────────────────────────────────────────────────
+// 1bis. Expansion des routes dynamiques (via sitemap)
+// ──────────────────────────────────────────────────────────────
+
+/**
+ * Convertit "/actualites/:slug" en RegExp + liste des paramètres.
+ */
+function patternToRegex(pattern) {
+  const params = [];
+  const re = pattern.replace(/:[a-zA-Z_][a-zA-Z0-9_]*/g, (tok) => {
+    params.push(tok.slice(1));
+    return "([^/]+)";
+  });
+  return { regex: new RegExp(`^${re}$`), params };
+}
+
+/**
+ * Interpole les `{param}` dans un template avec les valeurs extraites.
+ */
+function interpolateTemplate(template, values) {
+  return template.replace(/\{([a-zA-Z_][a-zA-Z0-9_]*)\}/g, (_, k) => values[k] ?? `{${k}}`);
+}
+
+/**
+ * Pour chaque DynamicRouteConfig, résout les instances et produit des routes
+ * au même format que les routes statiques (prêtes pour buildExpectedTags).
+ */
+async function expandDynamicRoutes(dynamicConfigs, origin, siteUrl, defaultOgImage) {
+  if (!dynamicConfigs || dynamicConfigs.length === 0) return [];
+
+  // On récupère le sitemap une seule fois par origine
+  let sitemapPaths = null;
+  const needSitemap = dynamicConfigs.some((d) => d.source === "sitemap");
+  if (needSitemap) {
+    try {
+      const xml = await fetchText(`${origin}/sitemap.xml`);
+      const entries = parseSitemap(xml);
+      sitemapPaths = entries
+        .map((e) => {
+          try {
+            return new URL(e.loc).pathname;
+          } catch {
+            return null;
+          }
+        })
+        .filter(Boolean);
+    } catch (err) {
+      console.log(c("yellow", `  ⚠️  Impossible de lire le sitemap pour expansion dynamique : ${err.message}`));
+      sitemapPaths = [];
+    }
+  }
+
+  const expanded = [];
+  for (const cfg of dynamicConfigs) {
+    const { regex, params } = patternToRegex(cfg.pathPattern);
+    let paths = [];
+    if (cfg.source === "sitemap") {
+      paths = (sitemapPaths || []).filter((p) => regex.test(p));
+    } else if (cfg.source === "inline" && Array.isArray(cfg.instances)) {
+      paths = cfg.instances.map((vals) =>
+        cfg.pathPattern.replace(/:([a-zA-Z_][a-zA-Z0-9_]*)/g, (_, k) => vals[k] ?? `:${k}`),
+      );
+    }
+
+    for (const p of paths) {
+      const match = p.match(regex);
+      const values = {};
+      params.forEach((name, i) => (values[name] = match?.[i + 1] ?? ""));
+      expanded.push({
+        path: p,
+        rawTitle: interpolateTemplate(cfg.title, values),
+        description: interpolateTemplate(cfg.description, values),
+        image: cfg.image || defaultOgImage,
+        sitemapPriority: cfg.sitemapPriority,
+        changeFreq: cfg.changeFreq,
+        isDynamic: true,
+        pathPattern: cfg.pathPattern,
+        dynamicTitle: cfg.dynamicTitle,
+        dynamicDescription: cfg.dynamicDescription,
+      });
+    }
+  }
+  return expanded;
 }
 
 // ──────────────────────────────────────────────────────────────
@@ -280,17 +412,41 @@ async function runWithConcurrency(items, limit, worker) {
 // 5. Diff attendu vs. observé
 // ──────────────────────────────────────────────────────────────
 
-function diffTags(actualTags, expectedTags) {
+function diffTags(actualTags, expectedTags, options = {}) {
+  const { tolerantKeys = new Set() } = options;
   const diffs = [];
   for (const [key, expected] of Object.entries(expectedTags)) {
     const actual = actualTags[key];
     if (actual == null) {
       diffs.push({ key, status: "MISSING", expected, actual: null });
+    } else if (tolerantKeys.has(key)) {
+      // Mode tolérant : on vérifie juste que la valeur existe et n'est pas vide
+      if (!actual.trim()) {
+        diffs.push({ key, status: "EMPTY", expected: "(valeur non vide attendue)", actual });
+      }
     } else if (actual !== expected) {
       diffs.push({ key, status: "MISMATCH", expected, actual });
     }
   }
   return diffs;
+}
+
+/**
+ * Construit le set de clés à traiter en "tolérant" (présence suffit) pour une
+ * route dynamique avec dynamicTitle / dynamicDescription.
+ */
+function tolerantKeysFor(route) {
+  const keys = new Set();
+  if (!route.isDynamic) return keys;
+  if (route.dynamicTitle) {
+    keys.add("og:title");
+    keys.add("twitter:title");
+  }
+  if (route.dynamicDescription) {
+    keys.add("og:description");
+    keys.add("twitter:description");
+  }
+  return keys;
 }
 
 // ──────────────────────────────────────────────────────────────
@@ -421,17 +577,18 @@ async function validateRobots(origin, routes, siteUrl) {
 async function main() {
   console.log(c("bold", "\n🔎 Validation SEO — OG, canonical, schema, sitemap, robots\n"));
 
-  const { routes, siteUrl } = loadSiteConfig();
-  const filteredRoutes = pathFilter
+  const { routes, siteUrl, defaultOgImage, dynamicConfigs } = loadSiteConfig();
+  const filteredStaticRoutes = pathFilter
     ? routes.filter((r) => pathFilter.includes(r.path))
     : routes;
 
-  if (filteredRoutes.length === 0) {
+  if (filteredStaticRoutes.length === 0) {
     console.error(c("red", "❌ Aucune route ne correspond au filtre --paths."));
     process.exit(2);
   }
 
-  console.log(c("dim", `Routes à valider : ${filteredRoutes.length}`));
+  console.log(c("dim", `Routes statiques : ${filteredStaticRoutes.length}`));
+  console.log(c("dim", `Routes dynamiques: ${includeDynamic ? `activées (${dynamicConfigs.length} pattern(s), limite ${dynamicLimit || "∞"}/pattern)` : "désactivées (--include-dynamic pour activer)"}`));
   console.log(c("dim", `Origines cibles  : ${normalizedOrigins.join(", ")}`));
   console.log(c("dim", `Concurrence      : ${concurrency}`));
   console.log(c("dim", `Checks actifs    : ${[...enabledChecks].join(", ")}`));
@@ -443,7 +600,7 @@ async function main() {
 
   // ─── Sanity check local : index.html doit correspondre à la home ─────
   if (enabledChecks.has("og")) {
-    const homeRoute = filteredRoutes.find((r) => r.path === "/");
+    const homeRoute = filteredStaticRoutes.find((r) => r.path === "/");
     if (homeRoute) {
       const indexHtml = readFileSync(resolve(ROOT, "index.html"), "utf8");
       const { tags: indexTags } = parseMetaTags(indexHtml);
@@ -462,6 +619,36 @@ async function main() {
 
   for (const origin of normalizedOrigins) {
     console.log(c("bold", `━━━ Origine : ${origin} ━━━`));
+
+    // ─── Expansion des routes dynamiques (par origine, via son sitemap) ─
+    let dynamicRoutesExpanded = [];
+    if (includeDynamic && dynamicConfigs.length > 0) {
+      dynamicRoutesExpanded = await expandDynamicRoutes(
+        dynamicConfigs, origin, siteUrl, defaultOgImage,
+      );
+      // Filtrage --paths si fourni
+      if (pathFilter) {
+        dynamicRoutesExpanded = dynamicRoutesExpanded.filter(
+          (r) => pathFilter.includes(r.path) || pathFilter.includes(r.pathPattern),
+        );
+      }
+      // Échantillonnage : on limite à N par pattern pour ne pas exploser le run
+      if (dynamicLimit > 0) {
+        const byPattern = new Map();
+        for (const r of dynamicRoutesExpanded) {
+          if (!byPattern.has(r.pathPattern)) byPattern.set(r.pathPattern, []);
+          byPattern.get(r.pathPattern).push(r);
+        }
+        dynamicRoutesExpanded = [];
+        for (const [, arr] of byPattern) {
+          dynamicRoutesExpanded.push(...arr.slice(0, dynamicLimit));
+        }
+      }
+      if (dynamicRoutesExpanded.length > 0) {
+        console.log(c("dim", `  → ${dynamicRoutesExpanded.length} route(s) dynamique(s) expandée(s)`));
+      }
+    }
+    const filteredRoutes = [...filteredStaticRoutes, ...dynamicRoutesExpanded];
 
     // ─── Sitemap (origine-level) ────────────────────────────────────────
     if (enabledChecks.has("sitemap")) {
@@ -514,7 +701,10 @@ async function main() {
           const html = await fetchAsBot(url);
           const { tags, metaRobots } = parseMetaTags(html);
           const expected = buildExpectedTags(route);
-          const ogDiffs = enabledChecks.has("og") ? diffTags(tags, expected.tags) : [];
+          const tolerantKeys = tolerantKeysFor(route);
+          const ogDiffs = enabledChecks.has("og")
+            ? diffTags(tags, expected.tags, { tolerantKeys })
+            : [];
 
           // Chaque issue a un `severity` : "always" (toujours bloquant) ou
           // "prerender" (dépend du pré-rendu, warn hors --strict sauf home).
@@ -562,7 +752,9 @@ async function main() {
     );
 
     for (const r of results) {
-      const label = `${r.route.path.padEnd(22)} `;
+      // Paths dynamiques plus longs → padding élargi, tronqué proprement
+      const displayPath = r.route.path.length > 40 ? r.route.path.slice(0, 37) + "…" : r.route.path;
+      const label = `${displayPath.padEnd(40)} `;
       if (!r.ok) {
         totalErrors += 1;
         console.log(`  ${c("red", "💥")} ${label}${c("red", r.error)}`);

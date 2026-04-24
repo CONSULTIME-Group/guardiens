@@ -22,6 +22,35 @@ export interface SiteRoute {
   ogImage?: string;
 }
 
+/**
+ * Configuration d'un groupe de routes dynamiques (mêmes patterns de title/description).
+ * Utilisé par le script `validate-og-tags.mjs` pour valider en masse les pages
+ * générées à partir d'un template (articles, villes, profils…).
+ *
+ * - `pathPattern` : pattern avec paramètres nommés, ex. "/actualites/:slug".
+ * - `source`      : d'où tirer les instances concrètes.
+ *     - "sitemap"  : lit `sitemap.xml` et filtre les URLs dont le path correspond au pattern.
+ *     - "inline"   : liste explicite `instances` (ex. [{ slug: "foo" }]).
+ * - `title` / `metaDescription` : templates avec placeholders `{param}` (params du pattern).
+ *   Par défaut, seuls le titre et la description sont interpolés ; si une page
+ *   a réellement un titre unique (ex. titre d'article), mettez `dynamicTitle: true`
+ *   pour indiquer au script de ne vérifier que la présence d'OG (pas la valeur exacte).
+ */
+export interface DynamicRouteConfig {
+  pathPattern: string;
+  source: "sitemap" | "inline";
+  instances?: Record<string, string>[];
+  title: string;
+  metaDescription: string;
+  ogImage?: string;
+  sitemapPriority: string;
+  changeFreq: "daily" | "weekly" | "monthly" | "yearly";
+  /** Si true, le script vérifie la présence des balises OG sans comparer la valeur exacte. */
+  dynamicTitle?: boolean;
+  /** Idem pour la description (ex. extraite du corps de l'article). */
+  dynamicDescription?: boolean;
+}
+
 export const staticRoutes: SiteRoute[] = [
   {
     path: "/",
@@ -143,6 +172,37 @@ export const staticRoutes: SiteRoute[] = [
     h1: "Mentions légales",
     sitemapPriority: "0.3",
     changeFreq: "yearly",
+  },
+];
+
+/**
+ * Routes dynamiques — patterns utilisés par `validate-og-tags.mjs` pour valider
+ * en masse les pages générées (articles de blog, silos géo…).
+ *
+ * Les instances concrètes sont découvertes automatiquement via le sitemap.xml
+ * servi sur l'origine cible, ce qui évite la duplication et reste aligné avec
+ * ce que Google voit effectivement.
+ */
+export const dynamicRoutes: DynamicRouteConfig[] = [
+  {
+    pathPattern: "/actualites/:slug",
+    source: "sitemap",
+    title: "Article", // titre unique par article, non vérifié exactement
+    metaDescription: "Article",
+    sitemapPriority: "0.6",
+    changeFreq: "monthly",
+    dynamicTitle: true,
+    dynamicDescription: true,
+  },
+  {
+    pathPattern: "/house-sitting/:city",
+    source: "sitemap",
+    title: "House-sitting à {city} | Guardiens",
+    metaDescription: "Trouvez un gardien de maison à {city}. House-sitting local, propriétaires et gardiens vérifiés.",
+    sitemapPriority: "0.7",
+    changeFreq: "weekly",
+    dynamicTitle: true, // les pages géo ont un titre SEO précis, non strict
+    dynamicDescription: true,
   },
 ];
 
