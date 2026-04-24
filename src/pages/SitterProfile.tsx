@@ -11,6 +11,7 @@ import StepSkills from "@/components/profile/StepSkills";
 import SitterGallery from "@/components/profile/SitterGallery";
 import ExternalExperiences from "@/components/profile/ExternalExperiences";
 import ProfileSidebar, { type SidebarSection } from "@/components/profile/ProfileSidebar";
+import ScoreBreakdown from "@/components/profile/ScoreBreakdown";
 
 import { useSitterProfile, type SitterProfileData } from "@/hooks/useSitterProfile";
 import { useAuth } from "@/contexts/AuthContext";
@@ -63,6 +64,7 @@ const SitterProfile = () => {
   const [localData, setLocalData] = useState<Partial<SitterProfileData>>({});
   const [activeSection, setActiveSection] = useState("identity");
   const [isFounder, setIsFounder] = useState(false);
+  const [hasGalleryPhoto, setHasGalleryPhoto] = useState(false);
   const [dirty, setDirty] = useState(false);
   const [saved, setSaved] = useState(false);
   const draftKey = user ? `guardiens_sitter_profile_draft_${user.id}` : null;
@@ -105,6 +107,9 @@ const SitterProfile = () => {
         const created = p.created_at ? new Date(p.created_at) : new Date();
         setIsFounder(p.is_founder || created < new Date("2026-05-13T00:00:00Z"));
       }
+    });
+    supabase.from("sitter_gallery").select("id", { count: "exact", head: true }).eq("user_id", user.id).then(({ count }) => {
+      setHasGalleryPhoto((count ?? 0) > 0);
     });
   }, [user]);
 
@@ -239,6 +244,63 @@ const SitterProfile = () => {
             publicProfileUrl={user ? `/gardiens/${user.id}` : "#"}
             role="sitter"
             isFounder={isFounder}
+            scoreBreakdown={
+              <ScoreBreakdown
+                role="sitter"
+                total={completion}
+                essentials={[
+                  {
+                    label: "Prénom + code postal",
+                    points: 15,
+                    ok: !!(mergedData.first_name && mergedData.postal_code),
+                  },
+                  {
+                    label: "Photo de profil",
+                    points: 20,
+                    ok: !!mergedData.avatar_url,
+                    hint: "Ajoutez une photo dans Identité.",
+                  },
+                  {
+                    label: "Au moins 1 compétence",
+                    points: 15,
+                    ok: (mergedData.competences?.length ?? 0) > 0,
+                    hint: "Onglet Compétences.",
+                  },
+                  {
+                    label: "Au moins 1 mode de vie",
+                    points: 15,
+                    ok: (mergedData.lifestyle?.length ?? 0) > 0,
+                    hint: "Onglet Profil gardien.",
+                  },
+                  {
+                    label: "Rayon géographique défini",
+                    points: 15,
+                    ok: (mergedData.geographic_radius ?? 0) > 0,
+                    hint: "Onglet Mobilité & Rayon.",
+                  },
+                ]}
+                bonuses={[
+                  {
+                    label: "Bio ≥ 50 caractères",
+                    points: 10,
+                    ok: (mergedData.bio?.length ?? 0) >= 50,
+                    hint: `${mergedData.bio?.length ?? 0}/50 caractères.`,
+                  },
+                  {
+                    label: "Au moins 1 photo de galerie",
+                    points: 5,
+                    ok: hasGalleryPhoto,
+                    hint: "Onglet Galerie.",
+                  },
+                  {
+                    label: "Identité vérifiée",
+                    points: 5,
+                    ok: !!user?.identityVerified,
+                    hint: "Paramètres → Vérification.",
+                  },
+                ]}
+              />
+            }
           />
 
           {/* Right content */}
