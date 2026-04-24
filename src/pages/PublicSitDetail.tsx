@@ -56,16 +56,18 @@ const PublicSitDetail = () => {
   useEffect(() => {
     if (!id) return;
     const load = async () => {
-      const { data: sitData } = await supabase.from("sits").select("*").eq("id", id).single();
+      const { data: sitData } = await supabase.from("sits").select("*").eq("id", id).maybeSingle();
       if (!sitData) { setLoading(false); return; }
       setSit(sitData);
 
+      // public_profiles : vue publique (RLS de profiles bloque les autres users)
       const [ownerRes, propRes, reviewsRes, badgeRes] = await Promise.all([
-        supabase.from("profiles").select("id, first_name, city, avatar_url, identity_verified, bio").eq("id", sitData.user_id).single(),
-        supabase.from("properties").select("*").eq("id", sitData.property_id).single(),
+        supabase.from("public_profiles").select("id, first_name, city, avatar_url, identity_verified, bio").eq("id", sitData.user_id).maybeSingle(),
+        supabase.from("properties").select("*").eq("id", sitData.property_id).maybeSingle(),
         supabase.from("reviews").select("overall_rating").eq("reviewee_id", sitData.user_id).eq("published", true),
         supabase.from("badge_attributions").select("badge_id").eq("user_id", sitData.user_id),
       ]);
+
 
       setOwner(ownerRes.data);
       setProperty(propRes.data);
