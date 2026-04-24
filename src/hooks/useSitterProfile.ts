@@ -163,26 +163,21 @@ export function useSitterProfile() {
 
   useEffect(() => { fetchData(); }, [fetchData]);
 
-  const computeCompletion = useCallback((d: SitterProfileData): number => {
-    let total = 0;
-    // Step 1 (25%): avatar, first_name, last_name, city, bio, motivation
-    const s1Fields = [d.avatar_url, d.first_name, d.last_name, d.city, d.bio, d.motivation];
-    const s1 = s1Fields.filter(Boolean).length / s1Fields.length;
-    total += s1 * 25;
-    // Step 2 (15%): sitter_type, availability_during, lifestyle
-    const s2 = [d.sitter_type, d.availability_during, d.lifestyle.length > 0].filter(Boolean).length / 3;
-    total += s2 * 15;
-    // Step 3 (20%): animal_types, experience_years, references_text
-    const s3 = [d.animal_types.length > 0, d.experience_years, d.references_text].filter(Boolean).length / 3;
-    total += s3 * 20;
-    // Step 4 (20%): has_license or has_vehicle, availability_dates
-    const s4 = [d.has_license || d.has_vehicle, d.availability_dates.length > 0].filter(Boolean).length / 2;
-    total += s4 * 20;
-    // Step 5 (20%): languages, meeting_preference, handover_preference
-    const s5 = [d.languages.length > 0, d.meeting_preference.length > 0, d.handover_preference].filter(Boolean).length / 3;
-    total += s5 * 20;
-    return Math.round(total);
-  }, []);
+  // Canonical score: read from profiles.profile_completion (computed server-side
+  // by the calculate_profile_completion RPC). Local computeCompletion was removed
+  // because it diverged from the SQL barème (showed 66% in profile vs 40% in dashboard).
+  const [completion, setCompletion] = useState<number>(0);
+  const refreshCompletion = useCallback(async () => {
+    if (!user) return;
+    const { data: row } = await supabase
+      .from("profiles")
+      .select("profile_completion")
+      .eq("id", user.id)
+      .maybeSingle();
+    setCompletion(row?.profile_completion || 0);
+  }, [user]);
+  useEffect(() => { refreshCompletion(); }, [refreshCompletion]);
+
 
   const computeMissingFields = useCallback((d: SitterProfileData): { step: number; label: string }[] => {
     const missing: { step: number; label: string }[] = [];
@@ -220,8 +215,7 @@ export function useSitterProfile() {
       const profileUpdate: any = {};
       profileFields.forEach(f => { if (f in stepData) profileUpdate[f] = (stepData as any)[f]; });
 
-      const completion = computeCompletion(newData);
-      profileUpdate.profile_completion = completion;
+      // profile_completion is recomputed server-side via RPC after writes (canonical barème)
 
       if (Object.keys(profileUpdate).length > 0) {
         const { error } = await supabase.from("profiles").update(profileUpdate).eq("id", user.id);
@@ -257,6 +251,10 @@ export function useSitterProfile() {
         }
       }
 
+      // Recompute canonical completion server-side and refresh local state
+      await supabase.rpc("calculate_profile_completion", { p_user_id: user.id });
+      await refreshCompletion();
+
       toast({ title: "Sauvegardé", description: "Vos modifications ont été enregistrées." });
       return true;
     } catch (error) {
@@ -267,7 +265,7 @@ export function useSitterProfile() {
     } finally {
       setSaving(false);
     }
-  }, [user, data, sitterProfileId, computeCompletion, toast]);
+  }, [user, data, sitterProfileId, refreshCompletion, toast]);
 
   const addPastAnimal = useCallback(async (animal: PastAnimal) => {
     if (!sitterProfileId) return;
@@ -304,10 +302,7 @@ export function useSitterProfile() {
     const nextData = { ...data, avatar_url: publicUrl };
     const { error: updateError } = await supabase
       .from("profiles")
-      .update({
-        avatar_url: publicUrl,
-        profile_completion: computeCompletion(nextData),
-      })
+      .update({ avatar_url: publicUrl })
       .eq("id", user.id);
 
     if (updateError) {
@@ -317,13 +312,15 @@ export function useSitterProfile() {
     }
 
     setData(nextData);
+    await supabase.rpc("calculate_profile_completion", { p_user_id: user.id });
+    await refreshCompletion();
     return publicUrl;
-  }, [user, toast, data, computeCompletion]);
+  }, [user, toast, data, refreshCompletion]);
 
   return {
     data, pastAnimals, loading, saving, sitterProfileId, lastSyncedAt,
     saveStep, addPastAnimal, removePastAnimal, uploadAvatar,
-    completion: computeCompletion(data),
+    completion,
     missingFields: computeMissingFields(data),
   };
 }

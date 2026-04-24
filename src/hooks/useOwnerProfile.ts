@@ -176,24 +176,20 @@ export function useOwnerProfile() {
 
   useEffect(() => { fetchData(); }, [fetchData]);
 
-  const computeCompletion = useCallback((d: OwnerProfileData, petsCount: number): number => {
-    let total = 0;
-    // Step 1 (25%): avatar, first_name, last_name, city, bio
-    const s1 = [d.avatar_url, d.first_name, d.last_name, d.city, d.bio].filter(Boolean).length / 5;
-    total += s1 * 25;
-    // Step 2 (25%): property_type, environment, description
-    const s2 = [d.property_type, d.environment, d.description].filter(Boolean).length / 3;
-    total += s2 * 25;
-    // Step 3 (25%): at least one pet
-    total += petsCount > 0 ? 25 : 0;
-    // Step 4 (15%): presence_expected, visits_allowed, meeting_preference, news_frequency
-    const s4 = [d.presence_expected, d.visits_allowed, d.meeting_preference.length > 0, d.news_frequency].filter(Boolean).length / 4;
-    total += s4 * 15;
-    // Step 5 (10%): handover_preference, news_format
-    const s5 = [d.handover_preference, d.news_format.length > 0].filter(Boolean).length / 2;
-    total += s5 * 10;
-    return Math.round(total);
-  }, []);
+  // Canonical score from profiles.profile_completion (RPC calculate_profile_completion).
+  // Local computeCompletion was removed to avoid divergence with the dashboard.
+  const [completion, setCompletion] = useState<number>(0);
+  const refreshCompletion = useCallback(async () => {
+    if (!user) return;
+    const { data: row } = await supabase
+      .from("profiles")
+      .select("profile_completion")
+      .eq("id", user.id)
+      .maybeSingle();
+    setCompletion(row?.profile_completion || 0);
+  }, [user]);
+  useEffect(() => { refreshCompletion(); }, [refreshCompletion]);
+
 
   const computeMissingFields = useCallback((d: OwnerProfileData, petsCount: number): { step: number; label: string }[] => {
     const missing: { step: number; label: string }[] = [];
@@ -225,7 +221,7 @@ export function useOwnerProfile() {
       const profileFields = ["first_name", "last_name", "city", "postal_code", "bio", "avatar_url", "skill_categories", "available_for_help"] as const;
       const profileUpdate: any = {};
       profileFields.forEach(f => { if (f in stepData) profileUpdate[f] = (stepData as any)[f]; });
-      profileUpdate.profile_completion = computeCompletion(newData, pets.length);
+      // profile_completion is recomputed server-side via RPC after writes (canonical barème)
       if (Object.keys(profileUpdate).length > 0) {
         const { error } = await supabase.from("profiles").update(profileUpdate).eq("id", user.id);
         if (error) throw error;
@@ -280,6 +276,10 @@ export function useOwnerProfile() {
         }
       }
 
+      // Recompute canonical completion server-side and refresh local state
+      await supabase.rpc("calculate_profile_completion", { p_user_id: user.id });
+      await refreshCompletion();
+
       toast({ title: "Sauvegardé", description: "Vos modifications ont été enregistrées." });
       return true;
     } catch (error) {
@@ -290,7 +290,7 @@ export function useOwnerProfile() {
     } finally {
       setSaving(false);
     }
-  }, [user, data, pets.length, propertyId, ownerProfileId, computeCompletion, toast]);
+  }, [user, data, pets.length, propertyId, ownerProfileId, refreshCompletion, toast]);
 
   const addPet = useCallback(async (pet: Pet) => {
     const pid = propertyId;
@@ -345,10 +345,7 @@ export function useOwnerProfile() {
       const nextData = { ...data, avatar_url: publicUrl };
       const { error: updateError } = await supabase
         .from("profiles")
-        .update({
-          avatar_url: publicUrl,
-          profile_completion: computeCompletion(nextData, pets.length),
-        })
+        .update({ avatar_url: publicUrl })
         .eq("id", user.id);
 
       if (updateError) {
@@ -358,15 +355,17 @@ export function useOwnerProfile() {
       }
 
       setData(nextData);
+      await supabase.rpc("calculate_profile_completion", { p_user_id: user.id });
+      await refreshCompletion();
     }
 
     return publicUrl;
-  }, [user, toast, data, pets.length, computeCompletion]);
+  }, [user, toast, data, refreshCompletion]);
 
   return {
     data, pets, loading, saving, propertyId, lastSyncedAt,
     saveStep, addPet, updatePet, removePet, uploadPhoto,
-    completion: computeCompletion(data, pets.length),
+    completion,
     missingFields: computeMissingFields(data, pets.length),
   };
 }
