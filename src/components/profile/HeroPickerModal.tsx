@@ -200,7 +200,7 @@ export function HeroPickerModal({
                 <button
                   key={it.idx}
                   type="button"
-                  onClick={() => handleSelect(it.idx)}
+                  onClick={() => setPreviewIndex(it.idx)}
                   disabled={saving}
                   className={`relative block w-full text-left rounded-md overflow-hidden border-2 transition-all bg-[#FBF6EC] focus:outline-none focus:ring-2 focus:ring-primary disabled:opacity-50 disabled:cursor-wait ${
                     isSelected
