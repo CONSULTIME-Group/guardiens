@@ -1284,6 +1284,36 @@ export type Database = {
         }
         Relationships: []
       }
+      hero_weights: {
+        Row: {
+          id: number
+          updated_at: string
+          updated_by: string | null
+          weight_animals: number
+          weight_home: number
+          weight_mutual_aid: number
+          weight_village: number
+        }
+        Insert: {
+          id?: number
+          updated_at?: string
+          updated_by?: string | null
+          weight_animals?: number
+          weight_home?: number
+          weight_mutual_aid?: number
+          weight_village?: number
+        }
+        Update: {
+          id?: number
+          updated_at?: string
+          updated_by?: string | null
+          weight_animals?: number
+          weight_home?: number
+          weight_mutual_aid?: number
+          weight_village?: number
+        }
+        Relationships: []
+      }
       house_guides: {
         Row: {
           access_codes: string | null

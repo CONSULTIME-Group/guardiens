@@ -19,7 +19,9 @@ import {
   getSitterHeroImage,
   getCategoryByBankIndex,
   type HeroCategoryName,
+  type HeroWeights,
 } from "@/lib/heroBank";
+import { useHeroWeights } from "@/hooks/useHeroWeights";
 
 const CATEGORY_LABELS: Record<HeroCategoryName, string> = {
   animals: "Animaux & plantes",
@@ -38,13 +40,20 @@ const CATEGORY_COLORS: Record<
   village: { bg: "bg-sky-100", text: "text-sky-900", bar: "bg-sky-500" },
 };
 
-// Cibles théoriques de la stratification (poids définis dans heroBank.ts).
-const TARGETS: Record<HeroCategoryName, number> = {
-  animals: 40,
-  home: 20,
-  mutual_aid: 20,
-  village: 20,
-};
+/**
+ * Calcule les cibles théoriques (en %) à partir des poids actifs (lus depuis
+ * la table `hero_weights`). Les poids ne somment pas forcément à 100, donc on
+ * normalise.
+ */
+function computeTargets(w: HeroWeights): Record<HeroCategoryName, number> {
+  const total = w.animals + w.home + w.mutual_aid + w.village || 1;
+  return {
+    animals: (w.animals / total) * 100,
+    home: (w.home / total) * 100,
+    mutual_aid: (w.mutual_aid / total) * 100,
+    village: (w.village / total) * 100,
+  };
+}
 
 const SAMPLE_SIZES = [1_000, 10_000, 50_000, 100_000];
 
@@ -70,7 +79,7 @@ type SimResult = {
   durationMs: number;
 };
 
-function runSimulation(sampleSize: number): SimResult {
+function runSimulation(sampleSize: number, weights: HeroWeights): SimResult {
   const t0 = performance.now();
   const byCategory: Record<HeroCategoryName, number> = {
     animals: 0,
@@ -80,13 +89,11 @@ function runSimulation(sampleSize: number): SimResult {
   };
   const byImage = new Array<number>(HERO_BANK.length).fill(0);
 
-  // On reconstruit l'index à partir de l'URL retournée par getSitterHeroImage,
-  // ce qui valide en plus l'API publique sans dépendre d'internes privés.
   const urlToIdx = new Map<string, number>();
   HERO_BANK.forEach((url, idx) => urlToIdx.set(url, idx));
 
   for (let i = 0; i < sampleSize; i++) {
-    const url = getSitterHeroImage(genUUID());
+    const url = getSitterHeroImage(genUUID(), weights);
     const idx = urlToIdx.get(url);
     if (idx === undefined) continue;
     byImage[idx]++;
@@ -106,12 +113,14 @@ function runSimulation(sampleSize: number): SimResult {
 export default function TestHeroDistribution() {
   const [sampleSize, setSampleSize] = useState<number>(10_000);
   const [seed, setSeed] = useState<number>(0); // bump pour relancer la simu
+  const heroWeights = useHeroWeights();
+  const targets = useMemo(() => computeTargets(heroWeights), [heroWeights]);
 
   const result = useMemo<SimResult>(
-    () => runSimulation(sampleSize),
-    // seed dans la deps list pour forcer un re-run même à taille égale
+    () => runSimulation(sampleSize, heroWeights),
+    // seed force un re-run même à taille/poids constants
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [sampleSize, seed]
+    [sampleSize, seed, heroWeights]
   );
 
   const total = result.sampleSize;
@@ -154,8 +163,13 @@ export default function TestHeroDistribution() {
           </h1>
           <p className="text-sm text-muted-foreground">
             Simule {total.toLocaleString("fr-FR")} sitterId aléatoires et mesure la
-            répartition réelle vs. les cibles théoriques (40 / 20 / 20 / 20).
-            Calcul effectué en {result.durationMs.toFixed(0)} ms.
+            répartition réelle vs. les cibles actives ({targets.animals.toFixed(0)} /{" "}
+            {targets.home.toFixed(0)} / {targets.mutual_aid.toFixed(0)} /{" "}
+            {targets.village.toFixed(0)}). Calcul effectué en {result.durationMs.toFixed(0)} ms.
+            {" · "}
+            <a href="/admin/hero-weights" className="underline hover:text-foreground">
+              Modifier les poids
+            </a>
           </p>
 
           {/* Contrôles */}
@@ -194,7 +208,7 @@ export default function TestHeroDistribution() {
             {(Object.keys(result.byCategory) as HeroCategoryName[]).map((cat) => {
               const count = result.byCategory[cat];
               const pct = (count / total) * 100;
-              const target = TARGETS[cat];
+              const target = targets[cat];
               const delta = pct - target;
               const colors = CATEGORY_COLORS[cat];
 

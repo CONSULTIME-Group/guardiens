@@ -82,6 +82,7 @@ const PlancheBadges = lazy(() => import("./pages/PlancheBadges"));
 const TestBadgesLongLabels = lazy(() => import("./pages/TestBadgesLongLabels"));
 const TestHeroGallery = lazy(() => import("./pages/TestHeroGallery"));
 const TestHeroDistribution = lazy(() => import("./pages/TestHeroDistribution"));
+const AdminHeroWeights = lazy(() => import("./pages/AdminHeroWeights"));
 const TestErrorBoundary = lazy(() => import("./pages/TestErrorBoundary"));
 const Unsubscribe = lazy(() => import("./pages/Unsubscribe"));
 const CityPage = lazy(() => import("./pages/CityPage"));
@@ -297,6 +298,7 @@ const AppRoutes = () => (
       <Route path="/test/badges-long-labels" element={<TestBadgesLongLabels />} />
       <Route path="/test/hero-gallery" element={<TestHeroGallery />} />
       <Route path="/test/hero-distribution" element={<TestHeroDistribution />} />
+      <Route path="/admin/hero-weights" element={<AdminHeroWeights />} />
       <Route path="/test/error-boundary" element={<TestErrorBoundary />} />
       <Route path="/unsubscribe" element={<Unsubscribe />} />
       <Route path="*" element={<NotFound />} />
