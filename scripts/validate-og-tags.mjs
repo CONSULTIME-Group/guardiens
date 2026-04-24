@@ -758,6 +758,7 @@ async function main() {
     if (enabledChecks.has("sitemap")) {
       try {
         const { url, entriesCount, diffs } = await validateSitemap(origin, filteredRoutes, siteUrl);
+        originReport.sitemap = { url, entriesCount, diffs, ok: diffs.length === 0 };
         if (diffs.length === 0) {
           console.log(`  ${c("green", "✅")} sitemap.xml (${entriesCount} URLs) ${c("dim", url)}`);
         } else {
@@ -767,6 +768,7 @@ async function main() {
         }
       } catch (err) {
         totalErrors += 1;
+        originReport.sitemap = { url: `${origin}/sitemap.xml`, error: err.message, ok: false };
         console.log(`  ${c("red", "💥")} sitemap.xml : ${err.message}`);
       }
     }
