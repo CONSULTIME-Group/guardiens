@@ -56,16 +56,18 @@ const PublicSitDetail = () => {
   useEffect(() => {
     if (!id) return;
     const load = async () => {
-      const { data: sitData } = await supabase.from("sits").select("*").eq("id", id).single();
+      const { data: sitData } = await supabase.from("sits").select("*").eq("id", id).maybeSingle();
       if (!sitData) { setLoading(false); return; }
       setSit(sitData);
 
+      // public_profiles : vue publique (RLS de profiles bloque les autres users)
       const [ownerRes, propRes, reviewsRes, badgeRes] = await Promise.all([
-        supabase.from("profiles").select("id, first_name, city, avatar_url, identity_verified, bio").eq("id", sitData.user_id).single(),
-        supabase.from("properties").select("*").eq("id", sitData.property_id).single(),
+        supabase.from("public_profiles").select("id, first_name, city, avatar_url, identity_verified, bio").eq("id", sitData.user_id).maybeSingle(),
+        supabase.from("properties").select("*").eq("id", sitData.property_id).maybeSingle(),
         supabase.from("reviews").select("overall_rating").eq("reviewee_id", sitData.user_id).eq("published", true),
         supabase.from("badge_attributions").select("badge_id").eq("user_id", sitData.user_id),
       ]);
+
 
       setOwner(ownerRes.data);
       setProperty(propRes.data);
@@ -218,17 +220,24 @@ const PublicSitDetail = () => {
         <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>
       </Helmet>
 
-      {/* Barre de retour pour les membres connectés (la page publique n'a pas le header app) */}
+      {/* Mini-barre sticky pour les membres connectés (la page publique n'a pas le header app) */}
       {isAuthenticated && (
-        <div className="bg-card border-b border-border px-4 py-3 flex flex-wrap items-center justify-between gap-2">
-          <Link to="/dashboard" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground">
-            <ArrowLeft className="h-4 w-4" /> Retour au tableau de bord
+        <div className="sticky top-0 z-30 bg-primary/10 backdrop-blur-sm border-b border-primary/20 px-4 py-2 flex flex-wrap items-center justify-between gap-2">
+          <Link
+            to="/dashboard"
+            className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline"
+          >
+            <ArrowLeft className="h-4 w-4" /> Retour au dashboard
           </Link>
-          <Link to={`/sits/${sit.id}`} className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline">
-            Voir la fiche complète <ExternalLink className="h-3.5 w-3.5" />
+          <Link
+            to={`/sits/${sit.id}`}
+            className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground"
+          >
+            Fiche complète <ExternalLink className="h-3 w-3" />
           </Link>
         </div>
       )}
+
 
       {/* Hero photo */}
       {photos.length > 0 && (
