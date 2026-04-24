@@ -81,6 +81,7 @@ export default function PublicSitterProfile() {
 
   const { data: reputation } = useProfileReputation(id);
   const { data: userBadges } = useUserBadges(id);
+  const heroWeights = useHeroWeights();
 
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState<any>(null);
