@@ -189,6 +189,7 @@ export default function TestHeroGallery() {
               item={it}
               viewMode={viewMode}
               onZoom={() => setZoomIdx(i)}
+              onOpenPage={() => setPageIdx(i)}
             />
           ))}
         </div>
@@ -213,6 +214,22 @@ export default function TestHeroGallery() {
             )
           }
           onClose={() => setZoomIdx(null)}
+        />
+      )}
+
+      {/* ── Modal "pleine page" : carnet entier + détails du profil hero ── */}
+      {pageIdx !== null && filtered[pageIdx] && (
+        <HeroFullPageModal
+          item={filtered[pageIdx]}
+          hasPrev={pageIdx > 0}
+          hasNext={pageIdx < filtered.length - 1}
+          onPrev={() => setPageIdx((i) => (i !== null && i > 0 ? i - 1 : i))}
+          onNext={() =>
+            setPageIdx((i) =>
+              i !== null && i < filtered.length - 1 ? i + 1 : i
+            )
+          }
+          onClose={() => setPageIdx(null)}
         />
       )}
     </div>
