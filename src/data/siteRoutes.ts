@@ -15,7 +15,7 @@ export interface SiteRoute {
 export const staticRoutes: SiteRoute[] = [
   {
     path: "/",
-    title: "Guardiens — House-sitting de confiance",
+    title: "House-sitting de confiance | Guardiens",
     metaDescription: "Trouvez un gardien de maison et d'animaux près de chez vous. Gardiens vérifiés, proximité, confiance. Gratuit.",
     h1: "Guardiens — Comme confier ses clés à quelqu'un du coin",
     sitemapPriority: "1.0",
