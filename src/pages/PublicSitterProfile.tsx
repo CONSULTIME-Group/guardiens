@@ -805,7 +805,11 @@ export default function PublicSitterProfile() {
             {/* Infos */}
             <div className="flex flex-col gap-1.5 pb-1 min-w-0 flex-1">
               {isAvailable && (
-                <span className="inline-flex w-fit items-center text-xs bg-primary/15 text-primary px-2.5 py-0.5 rounded-full font-semibold backdrop-blur-sm border border-primary/30">
+                <span className="inline-flex w-fit items-center gap-1.5 text-xs bg-primary text-primary-foreground px-3 py-1 rounded-full font-semibold shadow-md border border-primary/40 backdrop-blur-sm">
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary-foreground opacity-60" />
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-primary-foreground" />
+                  </span>
                   Disponible
                 </span>
               )}
