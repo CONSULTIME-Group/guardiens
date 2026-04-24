@@ -75,11 +75,12 @@ vi.mock("@/integrations/supabase/client", () => {
   };
 });
 
+// IMPORTANT : on retourne TOUJOURS la même référence — sinon useCallback([user])
+// se recrée à chaque render, ce qui réenchaîne fetchData → setData → render → ∞.
+const stableUser = { id: "user-1", email: "t@t.fr", identityVerified: false };
+const stableAuth = { user: stableUser, refreshProfile: vi.fn() };
 vi.mock("@/contexts/AuthContext", () => ({
-  useAuth: () => ({
-    user: { id: "user-1", email: "t@t.fr" },
-    refreshProfile: vi.fn(),
-  }),
+  useAuth: () => stableAuth,
 }));
 
 vi.mock("@/hooks/use-toast", () => ({
