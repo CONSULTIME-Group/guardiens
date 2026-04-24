@@ -112,23 +112,31 @@ const ProfileSidebar = ({
                   (() => {
                     const labels = s.missingLabels!;
                     const isExpanded = !!expandedMissing[s.id];
-                    const summary = labels.join(", ");
+                    const hasMany = labels.length > 1;
+                    // Vue compacte (1 label) : ligne unique avec flèche.
+                    // Vue multiple (≥ 2 labels) : liste à puces, toujours sur
+                    // plusieurs lignes pour ne plus jamais tout concaténer.
                     return (
                       <div className="hidden lg:block mt-0.5">
                         <Tooltip>
                           <TooltipTrigger asChild>
-                            <p
-                              className={cn(
-                                "text-[11px] text-amber-700 leading-snug",
-                                !isExpanded && "truncate"
-                              )}
-                            >
-                              → {isExpanded
-                                ? labels.map((l, i) => (
-                                    <span key={l} className="block">• {l}{i < labels.length - 1 ? "" : ""}</span>
-                                  ))
-                                : summary}
-                            </p>
+                            {hasMany ? (
+                              <ul className="text-[11px] text-amber-700 leading-snug space-y-0.5">
+                                {(isExpanded ? labels : labels.slice(0, 2)).map(l => (
+                                  <li key={l} className="flex gap-1">
+                                    <span aria-hidden>•</span>
+                                    <span className="break-words">{l}</span>
+                                  </li>
+                                ))}
+                                {!isExpanded && labels.length > 2 && (
+                                  <li className="text-muted-foreground">…</li>
+                                )}
+                              </ul>
+                            ) : (
+                              <p className="text-[11px] text-amber-700 leading-snug break-words">
+                                → {labels[0]}
+                              </p>
+                            )}
                           </TooltipTrigger>
                           <TooltipContent side="right" className="max-w-[260px]">
                             <ul className="text-xs space-y-0.5">
@@ -138,7 +146,7 @@ const ProfileSidebar = ({
                             </ul>
                           </TooltipContent>
                         </Tooltip>
-                        {labels.length > 1 && (
+                        {hasMany && (
                           <button
                             type="button"
                             onClick={toggleExpanded(s.id)}
