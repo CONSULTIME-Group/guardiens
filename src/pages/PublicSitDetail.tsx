@@ -229,14 +229,15 @@ const PublicSitDetail = () => {
           >
             <ArrowLeft className="h-4 w-4" /> Retour au dashboard
           </Link>
-          <Link
-            to={`/sits/${sit.id}`}
-            className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground"
-          >
-            Fiche complète <ExternalLink className="h-3 w-3" />
-          </Link>
+          <Button asChild size="sm" className="h-8">
+            <Link to={`/sits/${sit.id}`} className="inline-flex items-center gap-1.5">
+              {viewerType === "owner_of_sit" ? "Aller à mon annonce" : "Voir la fiche complète"}
+              <ExternalLink className="h-3.5 w-3.5" />
+            </Link>
+          </Button>
         </div>
       )}
+
 
 
       {/* Hero photo */}
