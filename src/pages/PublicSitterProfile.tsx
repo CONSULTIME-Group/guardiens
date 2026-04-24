@@ -28,6 +28,7 @@ import TrustScore from "@/components/profile/TrustScore";
 import FavoriteButton from "@/components/shared/FavoriteButton";
 import ProfileSchemaOrg from "@/components/seo/ProfileSchemaOrg";
 import { hydrateReviewers } from "@/lib/hydrateReviewers";
+import { getSitterHeroImage } from "@/lib/heroBank";
 
 const capitalize = (name: string) =>
   name ? name.charAt(0).toUpperCase() + name.slice(1).toLowerCase() : "";
