@@ -358,10 +358,11 @@ export function useOwnerProfile() {
       setData(nextData);
       await supabase.rpc("calculate_profile_completion", { p_user_id: user.id });
       await refreshCompletion();
+      await refreshProfile();
     }
 
     return publicUrl;
-  }, [user, toast, data, refreshCompletion]);
+  }, [user, toast, data, refreshCompletion, refreshProfile]);
 
   return {
     data, pets, loading, saving, propertyId, lastSyncedAt,
