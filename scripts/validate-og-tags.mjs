@@ -112,18 +112,22 @@ function loadSiteConfig() {
     : null;
   if (!defaultOgImage) throw new Error("DEFAULT_OG_IMAGE introuvable");
 
-  // Extraire chaque bloc de route. On reconnaît un bloc par la présence de
-  // path + title + metaDescription + changeFreq + sitemapPriority.
+  // On isole d'abord le bloc staticRoutes pour ne pas mélanger avec dynamicRoutes
+  const staticBlockMatch = src.match(/staticRoutes\s*:\s*SiteRoute\[\]\s*=\s*\[([\s\S]*?)\n\];/);
+  if (!staticBlockMatch) throw new Error("staticRoutes introuvable dans siteRoutes.ts");
+  const staticBody = staticBlockMatch[1];
+
+  // Extraire chaque bloc de route statique.
   const routes = [];
-  const blockRe = /\{\s*path:\s*(["'])([^"']+)\1[\s\S]*?\}/g;
+  const blockRe = /\{\s*path:\s*(["'])([^"']+)\1[\s\S]*?\n\s*\}/g;
   let m;
-  while ((m = blockRe.exec(src)) !== null) {
+  while ((m = blockRe.exec(staticBody)) !== null) {
     const block = m[0];
     const path_ = m[2];
 
     const title = extractStringLiteral(block, "title");
     const description = extractStringLiteral(block, "metaDescription");
-    if (!title || !description) continue; // pas un vrai bloc de route
+    if (!title || !description) continue;
 
     const ogImage = extractStringLiteral(block, "ogImage") || defaultOgImage;
     const sitemapPriority = extractStringLiteral(block, "sitemapPriority");
@@ -139,11 +143,132 @@ function loadSiteConfig() {
       image: ogImage,
       sitemapPriority,
       changeFreq,
+      isDynamic: false,
     });
   }
-  if (routes.length === 0) throw new Error("Aucune route extraite");
+  if (routes.length === 0) throw new Error("Aucune route statique extraite");
 
-  return { siteUrl, defaultOgImage, routes };
+  // Extraire dynamicRoutes (optionnel)
+  const dynamicBlockMatch = src.match(/dynamicRoutes\s*:\s*DynamicRouteConfig\[\]\s*=\s*\[([\s\S]*?)\n\];/);
+  const dynamicConfigs = [];
+  if (dynamicBlockMatch) {
+    const dynBody = dynamicBlockMatch[1];
+    const dynRe = /\{\s*pathPattern:\s*(["'])([^"']+)\1[\s\S]*?\n\s*\}/g;
+    let dm;
+    while ((dm = dynRe.exec(dynBody)) !== null) {
+      const block = dm[0];
+      const pathPattern = dm[2];
+      const title = extractStringLiteral(block, "title");
+      const description = extractStringLiteral(block, "metaDescription");
+      const source = extractStringLiteral(block, "source");
+      const sitemapPriority = extractStringLiteral(block, "sitemapPriority");
+      const ogImage = extractStringLiteral(block, "ogImage") || defaultOgImage;
+      const changeFreqMatch = block.match(
+        /changeFreq:\s*(["'])(daily|weekly|monthly|yearly)\1/,
+      );
+      const dynamicTitle = /dynamicTitle:\s*true/.test(block);
+      const dynamicDescription = /dynamicDescription:\s*true/.test(block);
+      if (!pathPattern || !title || !description || !source) continue;
+      dynamicConfigs.push({
+        pathPattern,
+        source,
+        title,
+        description,
+        image: ogImage,
+        sitemapPriority,
+        changeFreq: changeFreqMatch ? changeFreqMatch[2] : null,
+        dynamicTitle,
+        dynamicDescription,
+      });
+    }
+  }
+
+  return { siteUrl, defaultOgImage, routes, dynamicConfigs };
+}
+
+// ──────────────────────────────────────────────────────────────
+// 1bis. Expansion des routes dynamiques (via sitemap)
+// ──────────────────────────────────────────────────────────────
+
+/**
+ * Convertit "/actualites/:slug" en RegExp + liste des paramètres.
+ */
+function patternToRegex(pattern) {
+  const params = [];
+  const re = pattern.replace(/:[a-zA-Z_][a-zA-Z0-9_]*/g, (tok) => {
+    params.push(tok.slice(1));
+    return "([^/]+)";
+  });
+  return { regex: new RegExp(`^${re}$`), params };
+}
+
+/**
+ * Interpole les `{param}` dans un template avec les valeurs extraites.
+ */
+function interpolateTemplate(template, values) {
+  return template.replace(/\{([a-zA-Z_][a-zA-Z0-9_]*)\}/g, (_, k) => values[k] ?? `{${k}}`);
+}
+
+/**
+ * Pour chaque DynamicRouteConfig, résout les instances et produit des routes
+ * au même format que les routes statiques (prêtes pour buildExpectedTags).
+ */
+async function expandDynamicRoutes(dynamicConfigs, origin, siteUrl, defaultOgImage) {
+  if (!dynamicConfigs || dynamicConfigs.length === 0) return [];
+
+  // On récupère le sitemap une seule fois par origine
+  let sitemapPaths = null;
+  const needSitemap = dynamicConfigs.some((d) => d.source === "sitemap");
+  if (needSitemap) {
+    try {
+      const xml = await fetchText(`${origin}/sitemap.xml`);
+      const entries = parseSitemap(xml);
+      sitemapPaths = entries
+        .map((e) => {
+          try {
+            return new URL(e.loc).pathname;
+          } catch {
+            return null;
+          }
+        })
+        .filter(Boolean);
+    } catch (err) {
+      console.log(c("yellow", `  ⚠️  Impossible de lire le sitemap pour expansion dynamique : ${err.message}`));
+      sitemapPaths = [];
+    }
+  }
+
+  const expanded = [];
+  for (const cfg of dynamicConfigs) {
+    const { regex, params } = patternToRegex(cfg.pathPattern);
+    let paths = [];
+    if (cfg.source === "sitemap") {
+      paths = (sitemapPaths || []).filter((p) => regex.test(p));
+    } else if (cfg.source === "inline" && Array.isArray(cfg.instances)) {
+      paths = cfg.instances.map((vals) =>
+        cfg.pathPattern.replace(/:([a-zA-Z_][a-zA-Z0-9_]*)/g, (_, k) => vals[k] ?? `:${k}`),
+      );
+    }
+
+    for (const p of paths) {
+      const match = p.match(regex);
+      const values = {};
+      params.forEach((name, i) => (values[name] = match?.[i + 1] ?? ""));
+      expanded.push({
+        path: p,
+        rawTitle: interpolateTemplate(cfg.title, values),
+        description: interpolateTemplate(cfg.description, values),
+        image: cfg.image || defaultOgImage,
+        sitemapPriority: cfg.sitemapPriority,
+        changeFreq: cfg.changeFreq,
+        isDynamic: true,
+        pathPattern: cfg.pathPattern,
+        dynamicTitle: cfg.dynamicTitle,
+        dynamicDescription: cfg.dynamicDescription,
+      });
+    }
+  }
+  return expanded;
 }
 
 // ──────────────────────────────────────────────────────────────
