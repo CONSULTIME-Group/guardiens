@@ -146,4 +146,3 @@ export const staticRoutes: SiteRoute[] = [
   },
 ];
 
-export const SITE_URL = "https://guardiens.fr";
