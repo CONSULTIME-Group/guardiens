@@ -811,10 +811,16 @@ export default function PublicSitterProfile() {
               )}
 
               {/* Pastille opaque englobant titre + ville → lisibilité garantie quelle
-                  que soit l'illustration de fond (paille, sépia, vert dense…). */}
-              <div className="self-start max-w-full inline-flex flex-col gap-1 rounded-2xl bg-background/90 backdrop-blur-md border border-border/60 shadow-md px-3 py-2 sm:px-4 sm:py-2.5">
-                <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-                  <h1 className="text-2xl sm:text-4xl md:text-5xl font-heading font-bold text-foreground leading-tight capitalize break-words min-w-0">
+                  que soit l'illustration de fond.
+                  - `max-w-full` + `min-w-0` empêchent tout débordement horizontal.
+                  - La rangée interne passe en `flex-wrap` : si le prénom est très
+                    long, le bouton favori et le badge fondateur descendent à la
+                    ligne au lieu de chevaucher le texte.
+                  - `break-words` + `[overflow-wrap:anywhere]` cassent même les
+                    prénoms composés sans espace (ex. "Marie-Christophe-Alexandre"). */}
+              <div className="self-start max-w-full min-w-0 inline-flex flex-col gap-1 rounded-2xl bg-background/90 backdrop-blur-md border border-border/60 shadow-md px-3 py-2 sm:px-4 sm:py-2.5">
+                <div className="flex flex-wrap items-center gap-x-2 sm:gap-x-3 gap-y-1.5 min-w-0 max-w-full">
+                  <h1 className="text-2xl sm:text-4xl md:text-5xl font-heading font-bold text-foreground leading-tight capitalize break-words [overflow-wrap:anywhere] hyphens-auto min-w-0 max-w-full">
                     {firstName}
                   </h1>
                   {profile?.is_founder && <FounderBadge size="lg" />}
@@ -822,8 +828,9 @@ export default function PublicSitterProfile() {
                 </div>
 
                 {city && (
-                  <p className="text-base text-foreground/85 flex items-center gap-1 font-medium">
-                    <MapPin className="w-3.5 h-3.5" /> Gardien à {city}
+                  <p className="text-base text-foreground/85 flex items-center gap-1 font-medium min-w-0 max-w-full break-words">
+                    <MapPin className="w-3.5 h-3.5 shrink-0" />
+                    <span className="min-w-0 break-words">Gardien à {city}</span>
                   </p>
                 )}
               </div>
