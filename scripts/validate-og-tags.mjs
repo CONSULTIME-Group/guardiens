@@ -21,6 +21,8 @@
  *   node scripts/validate-og-tags.mjs --strict                # échec sur toute divergence
  *   node scripts/validate-og-tags.mjs --only=og,canonical     # limiter les checks
  *   node scripts/validate-og-tags.mjs --skip=sitemap,robots   # exclure des checks
+ *   node scripts/validate-og-tags.mjs --report-json           # écrit reports/og-report.json
+ *   node scripts/validate-og-tags.mjs --report-html=out.html  # rapport HTML custom
  *   TARGET_URL=https://... node scripts/validate-og-tags.mjs
  *
  * Checks disponibles (clés pour --only / --skip) :
