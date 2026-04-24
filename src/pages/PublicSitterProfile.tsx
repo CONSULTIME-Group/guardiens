@@ -1307,7 +1307,7 @@ export default function PublicSitterProfile() {
 
             {/* Galerie */}
             {gallery.length > 0 && (
-              <section aria-label="Galerie">
+              <section id="galerie" aria-label="Galerie" className="scroll-mt-24">
                 <h2 className="text-xs uppercase tracking-wider text-muted-foreground font-body mb-3">
                   Galerie ({gallery.length})
                 </h2>
