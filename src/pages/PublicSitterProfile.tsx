@@ -1285,7 +1285,7 @@ export default function PublicSitterProfile() {
             )}
 
             {/* Pratique */}
-            <section aria-label="Infos pratiques" className="scroll-mt-20">
+            <section id="infos-pratiques" aria-label="Infos pratiques" className="scroll-mt-24">
               <h2 className="text-lg font-semibold text-foreground font-display mb-3">
                 Infos pratiques
               </h2>
