@@ -75,6 +75,7 @@ export default function TestHeroGallery() {
   const [viewMode, setViewMode] = useState<ViewMode>("rendered");
   const [anchorFilter, setAnchorFilter] = useState<AnchorFilter>("all");
   const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>("all");
+  const [sortBy, setSortBy] = useState<SortBy>("num-asc");
   const [zoomIdx, setZoomIdx] = useState<number | null>(null);
   const [pageIdx, setPageIdx] = useState<number | null>(null);
 
@@ -93,13 +94,37 @@ export default function TestHeroGallery() {
   );
 
   const filtered = useMemo(
-    () =>
-      items.filter((it) => {
+    () => {
+      const base = items.filter((it) => {
         if (anchorFilter !== "all" && it.anchor !== anchorFilter) return false;
         if (categoryFilter !== "all" && it.category !== categoryFilter) return false;
         return true;
-      }),
-    [items, anchorFilter, categoryFilter]
+      });
+      // Tri (stable via comparateur secondaire sur fileNum).
+      const sorted = [...base].sort((a, b) => {
+        switch (sortBy) {
+          case "num-desc":
+            return b.fileNum - a.fileNum;
+          case "category":
+            return (
+              CATEGORY_ORDER[a.category] - CATEGORY_ORDER[b.category] ||
+              a.fileNum - b.fileNum
+            );
+          case "anchor":
+            return (
+              ANCHOR_ORDER[a.anchor] - ANCHOR_ORDER[b.anchor] ||
+              a.fileNum - b.fileNum
+            );
+          case "shuffle":
+            return stableHash(a.idx) - stableHash(b.idx);
+          case "num-asc":
+          default:
+            return a.fileNum - b.fileNum;
+        }
+      });
+      return sorted;
+    },
+    [items, anchorFilter, categoryFilter, sortBy]
   );
 
   // Stats globales pour le bandeau d'en-tête.
