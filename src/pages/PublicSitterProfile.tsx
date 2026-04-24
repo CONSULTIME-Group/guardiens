@@ -1024,24 +1024,24 @@ export default function PublicSitterProfile() {
                     </div>
                     {hasTrustSignals ? (
                       <>
-                        <div className="flex items-baseline gap-2 text-sm text-foreground font-body">
+                        <div className="flex items-baseline flex-wrap gap-x-1.5 gap-y-0.5 text-xs sm:text-sm text-foreground font-body">
                           {reviewCount > 0 ? (
                             <>
-                              <span className="font-semibold">{avgRating.toFixed(1)}<span className="text-primary">★</span></span>
-                              <span className="text-muted-foreground text-xs">({reviewCount} avis)</span>
+                              <span className="font-semibold whitespace-nowrap">{avgRating.toFixed(1)}<span className="text-primary">★</span></span>
+                              <span className="text-muted-foreground text-[11px] sm:text-xs">({reviewCount} avis)</span>
                             </>
                           ) : identityVerified ? (
-                            <span className="text-foreground/80 text-xs">Identité vérifiée</span>
+                            <span className="text-foreground/80 text-[11px] sm:text-xs">Identité vérifiée</span>
                           ) : (
-                            <span className="text-muted-foreground text-xs italic">Aucun avis</span>
+                            <span className="text-muted-foreground text-[11px] sm:text-xs italic">Aucun avis</span>
                           )}
                         </div>
-                        <div className="flex flex-wrap gap-x-1.5 gap-y-0.5 text-[11px] text-muted-foreground font-body">
-                          {completedSits > 0 && <span>{completedSits} garde{completedSits > 1 ? 's' : ''}</span>}
+                        <div className="flex flex-wrap gap-x-1 sm:gap-x-1.5 gap-y-0.5 text-[10px] sm:text-[11px] text-muted-foreground font-body">
+                          {completedSits > 0 && <span className="whitespace-nowrap">{completedSits} garde{completedSits > 1 ? 's' : ''}</span>}
                           {completedSits > 0 && totalBadgeCount > 0 && <span aria-hidden="true">·</span>}
-                          {totalBadgeCount > 0 && <span>{totalBadgeCount} écusson{totalBadgeCount > 1 ? 's' : ''}</span>}
+                          {totalBadgeCount > 0 && <span className="whitespace-nowrap">{totalBadgeCount} écusson{totalBadgeCount > 1 ? 's' : ''}</span>}
                           {reviewCount > 0 && identityVerified && (completedSits > 0 || totalBadgeCount > 0) && <span aria-hidden="true">·</span>}
-                          {reviewCount > 0 && identityVerified && <span>ID vérifiée</span>}
+                          {reviewCount > 0 && identityVerified && <span className="whitespace-nowrap">ID vérifiée</span>}
                         </div>
                       </>
                     ) : (
