@@ -598,7 +598,7 @@ async function main() {
 
   // ─── Sanity check local : index.html doit correspondre à la home ─────
   if (enabledChecks.has("og")) {
-    const homeRoute = filteredRoutes.find((r) => r.path === "/");
+    const homeRoute = filteredStaticRoutes.find((r) => r.path === "/");
     if (homeRoute) {
       const indexHtml = readFileSync(resolve(ROOT, "index.html"), "utf8");
       const { tags: indexTags } = parseMetaTags(indexHtml);
