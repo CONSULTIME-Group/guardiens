@@ -144,27 +144,39 @@ const PublicSitDetail = () => {
 
   // ── SEO / OG ──
   const cityForTitle = owner?.city || "France";
-  const startFmt = sit.start_date ? format(new Date(sit.start_date), "d MMM", { locale: fr }) : "";
-  const endFmt = sit.end_date ? format(new Date(sit.end_date), "d MMM yyyy", { locale: fr }) : "";
+  const startFmt = sit.start_date ? format(new Date(sit.start_date), "d MMMM", { locale: fr }) : "";
+  const endFmt = sit.end_date ? format(new Date(sit.end_date), "d MMMM yyyy", { locale: fr }) : "";
   const datesShort = startFmt && endFmt ? `du ${startFmt} au ${endFmt}` : "dates flexibles";
 
   const petsSummary = pets.length > 0
     ? pets.map((p: any) => `${p.name} (${speciesLabel[p.species] || p.species})`).join(", ")
     : "animaux à confier";
 
-  const seoTitle = `${sit.title || `Garde d'animaux à ${cityForTitle}`} — Guardiens`;
-  const truncatedTitle = seoTitle.length > 60 ? seoTitle.slice(0, 57) + "…" : seoTitle;
+  // og:title — titre de l'annonce + suffixe Guardiens
+  const ogTitle = `${sit.title || "Garde de maison et animaux"} — Guardiens`;
+  const truncatedTitle = ogTitle.length > 60 ? ogTitle.slice(0, 57) + "…" : ogTitle;
 
+  // og:description — dates en français + description courte du logement
+  const propertyDescShort = property?.description
+    ? (property.description.length > 80 ? property.description.slice(0, 77) + "…" : property.description)
+    : "";
+  const datesPart = startFmt && endFmt ? `Du ${startFmt} au ${endFmt}.` : "Dates flexibles.";
+  const ogDescription = propertyDescShort
+    ? `${datesPart} ${propertyDescShort} Partagez la confiance entre gens du coin avec Guardiens.`
+    : "Partez l'esprit tranquille avec un gardien de votre région. Guardiens, c'est la confiance entre gens du coin.";
+  const truncatedDesc = ogDescription.length > 200 ? ogDescription.slice(0, 197) + "…" : ogDescription;
+
+  // SEO description (≤160 char) — distincte de og:description
   const seoDescription = `Garde gratuite à ${cityForTitle} ${datesShort}. ${petsSummary}. ${owner?.first_name || "Un membre"} cherche un gardien du coin sur Guardiens — inscription gratuite.`;
-  const truncatedDesc = seoDescription.length > 160 ? seoDescription.slice(0, 157) + "…" : seoDescription;
+  const truncatedSeoDesc = seoDescription.length > 160 ? seoDescription.slice(0, 157) + "…" : seoDescription;
 
   const canonicalUrl = typeof window !== "undefined"
     ? `${window.location.origin}/annonces/${sit.id}`
     : `https://guardiens.fr/annonces/${sit.id}`;
 
-  const ogImageUrl = photos[0]
-    ? photos[0]
-    : `https://erhccyqevdyevpyctsjj.supabase.co/functions/v1/og-sit?id=${sit.id}`;
+  // og:image — photo de l'annonce si dispo, sinon image générique du site
+  const ogImageUrl = photos[0] || "https://guardiens.fr/og-default.jpg";
+  const ogImageAlt = sit.title || "Annonce de garde — Guardiens";
 
   const jsonLd = {
     "@context": "https://schema.org",
