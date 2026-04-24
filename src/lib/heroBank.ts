@@ -201,10 +201,6 @@ export function getSitterHeroSources(sitterId?: string | null): {
   mobile: string;
 } {
   const idx = getIndex(sitterId);
-  // Import dynamique du bank mobile pour éviter un cycle d'import au build.
-  // (heroBankMobile importe heroBank via le système de modules → on isole.)
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const { getMobileByIndex } = require("./heroBankMobile") as typeof import("./heroBankMobile");
   return {
     desktop: HERO_BANK[idx],
     mobile: getMobileByIndex(idx) ?? HERO_BANK[idx],
