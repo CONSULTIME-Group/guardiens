@@ -1271,7 +1271,7 @@ export default function PublicSitterProfile() {
 
             {/* Avis */}
             {reviewCount > 0 && (
-              <section aria-label="Avis reçus">
+              <section id="avis" aria-label="Avis reçus" className="scroll-mt-24">
                 <h2 className="text-xs uppercase tracking-wider text-muted-foreground font-body mb-3">
                   Avis ({reviewCount})
                 </h2>
