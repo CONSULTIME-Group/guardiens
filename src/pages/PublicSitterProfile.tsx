@@ -973,15 +973,15 @@ export default function PublicSitterProfile() {
                     {radius || city ? (
                       <p className="text-sm text-foreground font-body leading-snug">
                         {radius && city ? (
-                          <><span className="font-semibold">{radius} km</span> autour de {city}</>
+                          <><span className="font-semibold">Rayon {radius} km</span> · {city}</>
                         ) : radius ? (
-                          <><span className="font-semibold">{radius} km</span> autour de chez lui</>
+                          <><span className="font-semibold">Rayon {radius} km</span></>
                         ) : (
-                          <>Autour de {city}</>
+                          <>Secteur : <span className="font-semibold">{city}</span></>
                         )}
                       </p>
                     ) : (
-                      <Empty label="Zone non renseignée" />
+                      <Empty label="Non renseigné" />
                     )}
                     <span className={`text-[11px] font-body ${hasVehicle ? 'text-primary' : 'text-muted-foreground/70'}`}>
                       {hasVehicle ? 'Avec véhicule' : 'Sans véhicule'}
