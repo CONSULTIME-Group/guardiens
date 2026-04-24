@@ -1,8 +1,9 @@
 /**
- * Banque de 50 illustrations "carnet de voyage" pour les hero des profils gardiens.
+ * Banque de 70 illustrations "carnet de voyage" pour les hero des profils gardiens.
  * Assignation déterministe : un même sitter.id voit toujours la même image.
  *
  * 3 palettes mixées (terre automnal, vert/crème, or/sépia) — style sketchbook.
+ * Étendue de 50 → 70 pour réduire la probabilité de collision visuelle entre profils.
  */
 
 import hero01 from "@/assets/hero-bank/hero-01.jpg";
@@ -55,6 +56,26 @@ import hero47 from "@/assets/hero-bank/hero-47.jpg";
 import hero48 from "@/assets/hero-bank/hero-48.jpg";
 import hero49 from "@/assets/hero-bank/hero-49.jpg";
 import hero50 from "@/assets/hero-bank/hero-50.jpg";
+import hero51 from "@/assets/hero-bank/hero-51.jpg";
+import hero52 from "@/assets/hero-bank/hero-52.jpg";
+import hero53 from "@/assets/hero-bank/hero-53.jpg";
+import hero54 from "@/assets/hero-bank/hero-54.jpg";
+import hero55 from "@/assets/hero-bank/hero-55.jpg";
+import hero56 from "@/assets/hero-bank/hero-56.jpg";
+import hero57 from "@/assets/hero-bank/hero-57.jpg";
+import hero58 from "@/assets/hero-bank/hero-58.jpg";
+import hero59 from "@/assets/hero-bank/hero-59.jpg";
+import hero60 from "@/assets/hero-bank/hero-60.jpg";
+import hero61 from "@/assets/hero-bank/hero-61.jpg";
+import hero62 from "@/assets/hero-bank/hero-62.jpg";
+import hero63 from "@/assets/hero-bank/hero-63.jpg";
+import hero64 from "@/assets/hero-bank/hero-64.jpg";
+import hero65 from "@/assets/hero-bank/hero-65.jpg";
+import hero66 from "@/assets/hero-bank/hero-66.jpg";
+import hero67 from "@/assets/hero-bank/hero-67.jpg";
+import hero68 from "@/assets/hero-bank/hero-68.jpg";
+import hero69 from "@/assets/hero-bank/hero-69.jpg";
+import hero70 from "@/assets/hero-bank/hero-70.jpg";
 
 export const HERO_BANK: readonly string[] = [
   hero01, hero02, hero03, hero04, hero05, hero06, hero07, hero08, hero09, hero10,
@@ -62,6 +83,8 @@ export const HERO_BANK: readonly string[] = [
   hero21, hero22, hero23, hero24, hero25, hero26, hero27, hero28, hero29, hero30,
   hero31, hero32, hero33, hero34, hero35, hero36, hero37, hero38, hero39, hero40,
   hero41, hero42, hero43, hero44, hero45, hero46, hero47, hero48, hero49, hero50,
+  hero51, hero52, hero53, hero54, hero55, hero56, hero57, hero58, hero59, hero60,
+  hero61, hero62, hero63, hero64, hero65, hero66, hero67, hero68, hero69, hero70,
 ];
 
 /**
@@ -80,7 +103,7 @@ function hashStringToIndex(input: string, modulo: number): number {
 /**
  * Retourne l'URL de l'image hero assignée à un gardien donné.
  * - Stable : un même ID donne toujours la même image.
- * - Bien réparti : hash FNV-1a sur les 50 images.
+ * - Bien réparti : hash FNV-1a sur les 70 images.
  *
  * Fallback : si pas d'ID, on prend la première image.
  */
