@@ -285,6 +285,8 @@ export default function TestHeroGallery() {
       {pageIdx !== null && filtered[pageIdx] && (
         <HeroFullPageModal
           item={filtered[pageIdx]}
+          prevItem={pageIdx > 0 ? filtered[pageIdx - 1] : null}
+          nextItem={pageIdx < filtered.length - 1 ? filtered[pageIdx + 1] : null}
           hasPrev={pageIdx > 0}
           hasNext={pageIdx < filtered.length - 1}
           onPrev={() => setPageIdx((i) => (i !== null && i > 0 ? i - 1 : i))}
