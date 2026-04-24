@@ -154,7 +154,6 @@ const RegisterRedirect = () => {
   return <Navigate to={`/inscription${location.search}${location.hash}`} replace />;
 };
 
-
 const PublicOnlyRoute = ({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated, loading } = useAuth();
   if (loading) return <div className="min-h-screen flex items-center justify-center text-muted-foreground">Chargement...</div>;
