@@ -269,7 +269,7 @@ const SitDetail = () => {
   const status = statusLabel[sit.status] || statusLabel.draft;
 
   return (
-    <div className="p-6 md:p-10 max-w-4xl mx-auto animate-fade-in pb-32">
+    <div className="p-6 md:p-10 max-w-4xl mx-auto animate-fade-in pb-44 md:pb-40">
       <Helmet><meta name="robots" content="noindex, nofollow" /></Helmet>
       <Link to={isOwner ? "/sits" : "/search"} className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-6">
         <ArrowLeft className="h-4 w-4" /> {isOwner ? "Retour à mes annonces" : "Retour à la recherche"}
@@ -851,10 +851,10 @@ const SitDetail = () => {
         <p className="text-xs text-muted-foreground mt-1">Profils vérifiés · Avis croisés · Gardiens d'urgence mobilisables</p>
       </div>
 
-      {/* Sitter apply bar - highlights shown just before */}
+      {/* Sitter apply bar - sticky bottom action bar (full-width on mobile, offset by sidebar on desktop) */}
       {activeRole === "sitter" && !isOwner && sit.status === "published" && (
-        <div className="fixed bottom-0 left-0 right-0 md:left-64 bg-card border-t border-border p-4 z-40 md:pb-4 pb-20">
-          <div className="max-w-4xl mx-auto">
+        <div className="fixed bottom-0 left-0 right-0 md:left-64 z-40 bg-background/95 backdrop-blur-md border-t border-border shadow-[0_-4px_16px_-4px_hsl(var(--foreground)/0.08)] pb-20 md:pb-0 supports-[padding:max(0px)]:pb-[max(env(safe-area-inset-bottom),5rem)] md:supports-[padding:max(0px)]:pb-[max(env(safe-area-inset-bottom),0.75rem)]">
+          <div className="max-w-4xl mx-auto px-4 py-3">
             {!sit.accepting_applications ? (
               <Button className="w-full h-12 text-base font-semibold" disabled>
                 Candidatures en cours d'analyse
