@@ -222,7 +222,75 @@ function getIndex(
   sitterId?: string | null,
   weights: HeroWeights = DEFAULT_HERO_WEIGHTS
 ): number {
-  if (!sitterId) return 0;
+  return resolveSelection(sitterId, weights).index;
+}
+
+/** Index de référence par catégorie utilisé comme fallback déterministe. */
+const CATEGORY_FALLBACK_INDEX: Record<HeroCategoryName, number> = {
+  animals: 0,     // hero-01
+  home: 70,       // hero-71
+  mutual_aid: 80, // hero-81
+  village: 90,    // hero-91
+};
+
+/** True si l'index pointe sur un asset utilisable (string non vide). */
+function isValidAsset(idx: number): boolean {
+  if (idx < 0 || idx >= HERO_BANK.length) return false;
+  const url = HERO_BANK[idx];
+  return typeof url === "string" && url.length > 0;
+}
+
+/** Index de fallback valide pour la catégorie demandée (3 niveaux de repli). */
+function getCategoryFallbackIndex(category: HeroCategoryName): number {
+  const preferred = CATEGORY_FALLBACK_INDEX[category];
+  if (isValidAsset(preferred)) return preferred;
+  const range = HERO_CATEGORY_RANGES.find((c) => c.name === category);
+  if (range) {
+    const [start, endExclusive] = range.range;
+    for (let i = start - 1; i < endExclusive - 1; i++) {
+      if (isValidAsset(i)) return i;
+    }
+  }
+  for (let i = 0; i < HERO_BANK.length; i++) {
+    if (isValidAsset(i)) return i;
+  }
+  return 0;
+}
+
+/** URL de fallback cohérente avec la catégorie (utile pour `<img onError>`). */
+export function getCategoryFallbackImage(category: HeroCategoryName): string {
+  return HERO_BANK[getCategoryFallbackIndex(category)];
+}
+
+/** Résultat complet de la sélection — exposé pour QA et monitoring. */
+export type HeroSelection = {
+  index: number;
+  category: HeroCategoryName;
+  /** True si on a dû tomber sur le fallback de la catégorie. */
+  fellBack: boolean;
+};
+
+/**
+ * Sélection stratifiée déterministe avec fallback thématique.
+ *
+ * Étapes :
+ *   1. Premier hash → choisit la catégorie selon les poids fournis
+ *   2. Second hash (sel différent) → choisit une image dans la catégorie
+ *   3. Si l'asset est manquant → fallback déterministe sur l'image de
+ *      référence de la même catégorie (cohérence thématique préservée).
+ */
+function resolveSelection(
+  sitterId?: string | null,
+  weights: HeroWeights = DEFAULT_HERO_WEIGHTS
+): HeroSelection {
+  // Cas dégénéré : pas d'ID → fallback "animals" (catégorie principale).
+  if (!sitterId) {
+    return {
+      index: getCategoryFallbackIndex("animals"),
+      category: "animals",
+      fellBack: true,
+    };
+  }
 
   const total =
     weights.animals + weights.home + weights.mutual_aid + weights.village;
@@ -247,9 +315,41 @@ function getIndex(
 
   // 2. Choix d'image dans la catégorie via un hash décorrélé.
   const [start, endExclusive] = chosen.range;
-  const span = endExclusive - start;
+  const span = Math.max(0, endExclusive - start);
+
+  // Catégorie vide (config corrompue) → fallback direct.
+  if (span <= 0) {
+    return {
+      index: getCategoryFallbackIndex(chosen.name),
+      category: chosen.name,
+      fellBack: true,
+    };
+  }
+
   const intra = hashStringToIndex(`hero-img:${sitterId}`, span);
-  return start - 1 + intra;
+  const candidate = start - 1 + intra;
+
+  // Asset manquant → fallback dans la même catégorie.
+  if (!isValidAsset(candidate)) {
+    return {
+      index: getCategoryFallbackIndex(chosen.name),
+      category: chosen.name,
+      fellBack: true,
+    };
+  }
+
+  return { index: candidate, category: chosen.name, fellBack: false };
+}
+
+/**
+ * API publique de la sélection complète — utile pour les pages de QA et le
+ * monitoring (savoir si on a dû fallback).
+ */
+export function getSitterHeroSelection(
+  sitterId?: string | null,
+  weights?: HeroWeights
+): HeroSelection {
+  return resolveSelection(sitterId, weights);
 }
 
 /**
