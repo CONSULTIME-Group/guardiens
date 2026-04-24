@@ -82,6 +82,7 @@ const PlancheBadges = lazy(() => import("./pages/PlancheBadges"));
 const TestBadgesLongLabels = lazy(() => import("./pages/TestBadgesLongLabels"));
 const TestHeroGallery = lazy(() => import("./pages/TestHeroGallery"));
 const TestHeroDistribution = lazy(() => import("./pages/TestHeroDistribution"));
+const AdminHeroWeights = lazy(() => import("./pages/AdminHeroWeights"));
 const TestErrorBoundary = lazy(() => import("./pages/TestErrorBoundary"));
 const Unsubscribe = lazy(() => import("./pages/Unsubscribe"));
 const CityPage = lazy(() => import("./pages/CityPage"));
