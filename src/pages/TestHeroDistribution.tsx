@@ -19,7 +19,9 @@ import {
   getSitterHeroImage,
   getCategoryByBankIndex,
   type HeroCategoryName,
+  type HeroWeights,
 } from "@/lib/heroBank";
+import { useHeroWeights } from "@/hooks/useHeroWeights";
 
 const CATEGORY_LABELS: Record<HeroCategoryName, string> = {
   animals: "Animaux & plantes",
