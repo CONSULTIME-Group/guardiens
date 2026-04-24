@@ -276,9 +276,10 @@ export function useOwnerProfile() {
         }
       }
 
-      // Recompute canonical completion server-side and refresh local state
+      // Recompute canonical completion server-side and refresh local + global state
       await supabase.rpc("calculate_profile_completion", { p_user_id: user.id });
       await refreshCompletion();
+      await refreshProfile();
 
       toast({ title: "Sauvegardé", description: "Vos modifications ont été enregistrées." });
       return true;
@@ -290,7 +291,7 @@ export function useOwnerProfile() {
     } finally {
       setSaving(false);
     }
-  }, [user, data, pets.length, propertyId, ownerProfileId, refreshCompletion, toast]);
+  }, [user, data, pets.length, propertyId, ownerProfileId, refreshCompletion, refreshProfile, toast]);
 
   const addPet = useCallback(async (pet: Pet) => {
     const pid = propertyId;
