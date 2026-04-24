@@ -760,7 +760,7 @@ export default function PublicSitterProfile() {
         <div className="absolute bottom-0 left-0 right-0 h-24 z-[1] bg-gradient-to-b from-transparent to-background pointer-events-none" />
 
         {/* Contenu header par-dessus */}
-        <div className="relative z-10 w-full max-w-5xl mx-auto px-6 pb-8 pt-6">
+        <div className="relative z-10 w-full max-w-5xl mx-auto px-4 sm:px-6 pb-8 pt-6">
           {/* Ligne retour */}
           <div className="flex justify-end mb-4">
             <Link
@@ -772,13 +772,13 @@ export default function PublicSitterProfile() {
           </div>
 
           {/* Flex photo + infos */}
-          <div className="flex items-end gap-6">
+          <div className="flex items-end gap-3 sm:gap-6 min-w-0">
             {/* Photo grande */}
             <div className="shrink-0 relative">
               <img
                 src={profile.avatar_url || "/placeholder.svg"}
                 alt={firstName}
-                className="w-28 h-28 md:w-40 md:h-40 rounded-full object-cover object-center border-4 border-white shadow-md ring-2 ring-primary ring-offset-2"
+                className="w-20 h-20 sm:w-28 sm:h-28 md:w-40 md:h-40 rounded-full object-cover object-center border-4 border-white shadow-md ring-2 ring-primary ring-offset-2"
               />
               {reputation && reputation.statut_gardien !== 'novice' && (
                 <div className="absolute -bottom-2 -right-2">
@@ -788,15 +788,15 @@ export default function PublicSitterProfile() {
             </div>
 
             {/* Infos */}
-            <div className="flex flex-col gap-1.5 pb-1">
+            <div className="flex flex-col gap-1.5 pb-1 min-w-0 flex-1">
               {isAvailable && (
                 <span className="inline-flex w-fit items-center text-xs bg-primary/10 text-primary px-2.5 py-0.5 rounded-full font-medium">
                   Disponible
                 </span>
               )}
 
-              <div className="flex items-center gap-3">
-                <h1 className="text-4xl md:text-5xl font-heading font-bold text-foreground leading-tight capitalize">
+              <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+                <h1 className="text-2xl sm:text-4xl md:text-5xl font-heading font-bold text-foreground leading-tight capitalize break-words min-w-0">
                   {firstName}
                 </h1>
                 {profile?.is_founder && <FounderBadge size="lg" />}
@@ -845,10 +845,10 @@ export default function PublicSitterProfile() {
                 isFounder={profile?.is_founder || false}
               />
 
-              <div className="flex items-center gap-4 text-sm text-muted-foreground mt-1">
+              <div className="flex items-center gap-2 sm:gap-4 text-sm text-muted-foreground mt-1 flex-wrap">
                 {statsItems.map((s, i) => (
                   <span key={i} className="flex items-center gap-1">
-                    {i > 0 && <span className="text-border mr-3">·</span>}
+                    {i > 0 && <span className="text-border mr-1 sm:mr-3">·</span>}
                     {s}
                   </span>
                 ))}
