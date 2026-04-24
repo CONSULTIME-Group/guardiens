@@ -140,7 +140,7 @@ export const HERO_BANK: readonly string[] = [
  */
 export type HeroAnchor = "left" | "center" | "right";
 
-const HERO_ANCHORS: readonly HeroAnchor[] = [
+export const HERO_ANCHORS: readonly HeroAnchor[] = [
   "center"  , "center"  , "center"  , "left"    , "center"  , "center"  , "right"   , "right"   , "right"   , "center"  , // 01-10
   "left"    , "center"  , "center"  , "center"  , "center"  , "left"    , "left"    , "right"   , "left"    , "center"  , // 11-20
   "left"    , "right"   , "center"  , "right"   , "right"   , "right"   , "left"    , "right"   , "center"  , "right"   , // 21-30
@@ -256,4 +256,18 @@ export function getSitterHeroSources(sitterId?: string | null): {
     desktop: HERO_BANK[idx],
     mobile: getMobileByIndex(idx) ?? HERO_BANK[idx],
   };
+}
+
+/**
+ * Retourne le nom de catégorie d'une image donnée (par index 0-based de HERO_BANK).
+ * Utile pour la galerie de QA et les statistiques.
+ */
+export type HeroCategoryName = "animals" | "home" | "mutual_aid" | "village";
+export function getCategoryByBankIndex(idx: number): HeroCategoryName {
+  // idx 0-based → numéro de fichier 1-based.
+  const fileNum = idx + 1;
+  for (const cat of HERO_CATEGORIES) {
+    if (fileNum >= cat.range[0] && fileNum < cat.range[1]) return cat.name;
+  }
+  return "animals";
 }
