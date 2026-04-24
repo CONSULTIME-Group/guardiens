@@ -160,12 +160,12 @@ export function useSitterDashboardData(userId: string | undefined) {
       if (userDept) {
         const { data: deptListings } = await supabase
           .from("sits")
-          .select("id, title, start_date, end_date, user_id, property_id, status, created_at, is_urgent, properties:property_id(photos, type, environment, postal_code)")
+          .select("id, title, start_date, end_date, user_id, property_id, status, created_at, is_urgent, properties:property_id(photos, type, environment), owner:profiles!sits_user_id_fkey(postal_code)")
           .eq("status", "published")
           .order("created_at", { ascending: false })
           .limit(20);
         nearbyListings = (deptListings || [])
-          .filter((s: any) => s.user_id !== userId && (s.properties as any)?.postal_code?.startsWith(userDept))
+          .filter((s: any) => s.user_id !== userId && (s.owner as any)?.postal_code?.startsWith(userDept))
           .slice(0, 4);
       }
 
