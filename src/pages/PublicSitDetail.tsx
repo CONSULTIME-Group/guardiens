@@ -150,8 +150,8 @@ const PublicSitDetail = () => {
         <title>{truncatedTitle}</title>
         <meta name="description" content={truncatedDesc} />
         <link rel="canonical" href={canonicalUrl} />
-        {/* Indexable for SEO + social crawlers */}
-        <meta name="robots" content="index, follow" />
+        {/* noindex, follow — thin content protection (V1). Social crawlers (FB/WhatsApp) lisent quand même les balises OG. */}
+        <meta name="robots" content="noindex, follow" />
 
         {/* Open Graph (Facebook, LinkedIn, WhatsApp, iMessage) */}
         <meta property="og:type" content="article" />
