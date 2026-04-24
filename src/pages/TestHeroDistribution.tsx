@@ -79,7 +79,7 @@ type SimResult = {
   durationMs: number;
 };
 
-function runSimulation(sampleSize: number): SimResult {
+function runSimulation(sampleSize: number, weights: HeroWeights): SimResult {
   const t0 = performance.now();
   const byCategory: Record<HeroCategoryName, number> = {
     animals: 0,
@@ -89,13 +89,11 @@ function runSimulation(sampleSize: number): SimResult {
   };
   const byImage = new Array<number>(HERO_BANK.length).fill(0);
 
-  // On reconstruit l'index à partir de l'URL retournée par getSitterHeroImage,
-  // ce qui valide en plus l'API publique sans dépendre d'internes privés.
   const urlToIdx = new Map<string, number>();
   HERO_BANK.forEach((url, idx) => urlToIdx.set(url, idx));
 
   for (let i = 0; i < sampleSize; i++) {
-    const url = getSitterHeroImage(genUUID());
+    const url = getSitterHeroImage(genUUID(), weights);
     const idx = urlToIdx.get(url);
     if (idx === undefined) continue;
     byImage[idx]++;
@@ -115,12 +113,14 @@ function runSimulation(sampleSize: number): SimResult {
 export default function TestHeroDistribution() {
   const [sampleSize, setSampleSize] = useState<number>(10_000);
   const [seed, setSeed] = useState<number>(0); // bump pour relancer la simu
+  const heroWeights = useHeroWeights();
+  const targets = useMemo(() => computeTargets(heroWeights), [heroWeights]);
 
   const result = useMemo<SimResult>(
-    () => runSimulation(sampleSize),
-    // seed dans la deps list pour forcer un re-run même à taille égale
+    () => runSimulation(sampleSize, heroWeights),
+    // seed force un re-run même à taille/poids constants
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [sampleSize, seed]
+    [sampleSize, seed, heroWeights]
   );
 
   const total = result.sampleSize;
