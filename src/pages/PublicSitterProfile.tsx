@@ -1317,9 +1317,9 @@ export default function PublicSitterProfile() {
 
             {/* Confiance */}
             {userBadges && userBadges.length > 0 && (
-              <section aria-label="Gages de confiance">
+              <section aria-label="Confiance et vérifications">
                 <h2 className="text-xs uppercase tracking-wider text-muted-foreground font-body mb-3">
-                  Gages de confiance
+                  Confiance & vérifications
                 </h2>
                 <div className="space-y-4">
                   <SpecialBadgeHighlight userBadges={userBadges} />
