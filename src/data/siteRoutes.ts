@@ -3,6 +3,14 @@
  * Utilisé par : sitemap generator, PageMeta, navigation SEO.
  */
 
+export const SITE_URL = "https://guardiens.fr";
+
+/**
+ * Image OG par défaut utilisée sur toutes les pages sans image dédiée.
+ * Référence unique : doit rester synchronisée avec index.html et PageMeta.tsx.
+ */
+export const DEFAULT_OG_IMAGE = `${SITE_URL}/og-default.jpg`;
+
 export interface SiteRoute {
   path: string;
   title: string;
@@ -10,6 +18,8 @@ export interface SiteRoute {
   h1: string;
   sitemapPriority: string;
   changeFreq: "daily" | "weekly" | "monthly" | "yearly";
+  /** URL absolue de l'image OG. Si omise, DEFAULT_OG_IMAGE est utilisée. */
+  ogImage?: string;
 }
 
 export const staticRoutes: SiteRoute[] = [
@@ -20,6 +30,7 @@ export const staticRoutes: SiteRoute[] = [
     h1: "Guardiens — Comme confier ses clés à quelqu'un du coin",
     sitemapPriority: "1.0",
     changeFreq: "weekly",
+    ogImage: DEFAULT_OG_IMAGE,
   },
   {
     path: "/tarifs",
@@ -135,4 +146,3 @@ export const staticRoutes: SiteRoute[] = [
   },
 ];
 
-export const SITE_URL = "https://guardiens.fr";

@@ -10,6 +10,10 @@ import PageMeta from "@/components/PageMeta";
 import DemoListingShowcase from "@/components/landing/DemoListingShowcase";
 import PublicHeader from "@/components/layout/PublicHeader";
 import PublicFooter from "@/components/layout/PublicFooter";
+import { staticRoutes, DEFAULT_OG_IMAGE } from "@/data/siteRoutes";
+
+const HOME_ROUTE = staticRoutes.find((route) => route.path === "/");
+const HOME_OG_IMAGE = HOME_ROUTE?.ogImage ?? DEFAULT_OG_IMAGE;
 
 
 
@@ -152,7 +156,7 @@ const Landing = () => {
         title="Guardiens — Partez l'esprit tranquille"
         description="Un gardien de votre région s'occupe de votre maison et de vos animaux pendant vos absences. Gratuit pour les propriétaires."
         path="/"
-        image="https://guardiens.fr/og-default.jpg"
+        image={HOME_OG_IMAGE}
       />
       {/* JSON-LD: Organization */}
       <script
