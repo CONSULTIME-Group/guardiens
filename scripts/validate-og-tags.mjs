@@ -19,6 +19,7 @@
  *   node scripts/validate-og-tags.mjs --paths=/,/tarifs,/faq  # limiter les routes (accepte aussi les patterns)
  *   node scripts/validate-og-tags.mjs --concurrency=4         # parallélisme réseau
  *   node scripts/validate-og-tags.mjs --strict                # échec sur toute divergence
+ *   node scripts/validate-og-tags.mjs --check                 # mode CI : exit 1 sur toute divergence (bloque le build)
  *   node scripts/validate-og-tags.mjs --only=og,canonical     # limiter les checks
  *   node scripts/validate-og-tags.mjs --skip=sitemap,robots   # exclure des checks
  *   node scripts/validate-og-tags.mjs --report-json           # écrit reports/og-report.json
