@@ -60,17 +60,11 @@ vi.mock("@/integrations/supabase/client", () => {
   return {
     supabase: {
       from: (table: string) => {
-        // eslint-disable-next-line no-console
-        console.log("[mock] from()", table);
         if (table === "sitter_profiles") return sitterTable();
         if (table === "past_animals") return pastAnimalsTable();
         return profileTable();
       },
-      rpc: async (...args: any[]) => {
-        // eslint-disable-next-line no-console
-        console.log("[mock] rpc()", args[0]);
-        return { data: 60, error: null };
-      },
+      rpc: async () => ({ data: 60, error: null }),
     },
   };
 });
