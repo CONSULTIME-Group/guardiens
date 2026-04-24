@@ -67,6 +67,8 @@ export function HeroPickerModal({
   const { toast } = useToast();
   const [saving, setSaving] = useState(false);
   const [filter, setFilter] = useState<CategoryFilter>("all");
+  /** Index en cours de prévisualisation plein écran (null = pas d'aperçu). */
+  const [previewIndex, setPreviewIndex] = useState<number | null>(null);
 
   // Construit la liste indexée filtrée selon la catégorie sélectionnée.
   const items = HERO_BANK.map((src, idx) => ({
