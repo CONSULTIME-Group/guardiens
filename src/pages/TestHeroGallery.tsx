@@ -916,9 +916,8 @@ function HeroFullPageModal({
       fetch(src, {
         signal: ctrl.signal,
         cache: "force-cache",
-        // @ts-expect-error - `priority` fait partie du Fetch standard mais pas encore typé partout
         priority: "low",
-      })
+      } as RequestInit & { priority?: "high" | "low" | "auto" })
         .then((res) => {
           // Consomme le body pour que le navigateur ait l'image décodable
           // depuis le cache au prochain `<img src>`.
