@@ -722,8 +722,25 @@ export default function PublicSitterProfile() {
         {/* Vignettage très subtil */}
         <div className="absolute inset-0 z-[1] pointer-events-none" style={{ background: 'radial-gradient(ellipse at center, transparent 55%, rgba(90,69,48,0.08) 100%)' }} />
 
-        {/* Dégradé bas */}
-        <div className="absolute bottom-0 left-0 right-0 h-20 z-[1] bg-gradient-to-b from-transparent to-background pointer-events-none" />
+        {/* Scrim de lisibilité — dégradé bas qui remonte derrière le bloc texte.
+            Plus présent (60% de la hauteur) pour garantir le contraste de la h1, ville,
+            badges et stats peu importe la zone de l'illustration. */}
+        <div
+          className="absolute inset-x-0 bottom-0 h-[75%] z-[1] pointer-events-none"
+          style={{
+            background:
+              'linear-gradient(to top, hsl(var(--background)) 0%, hsl(var(--background) / 0.85) 30%, hsl(var(--background) / 0.45) 65%, transparent 100%)',
+          }}
+        />
+
+        {/* Scrim haut très léger pour le lien "Retour aux gardiens" */}
+        <div
+          className="absolute inset-x-0 top-0 h-24 z-[1] pointer-events-none"
+          style={{
+            background:
+              'linear-gradient(to bottom, hsl(var(--background) / 0.55) 0%, transparent 100%)',
+          }}
+        />
 
         {/* Contenu header par-dessus */}
         <div className="relative z-10 w-full max-w-5xl mx-auto px-4 sm:px-6 pb-8 pt-6">
@@ -731,7 +748,7 @@ export default function PublicSitterProfile() {
           <div className="flex justify-end mb-4">
             <Link
               to="/recherche-gardiens"
-              className="text-sm text-muted-foreground hover:text-foreground"
+              className="text-sm text-foreground/80 hover:text-foreground font-medium drop-shadow-sm"
             >
               ← Retour aux gardiens
             </Link>
@@ -756,13 +773,13 @@ export default function PublicSitterProfile() {
             {/* Infos */}
             <div className="flex flex-col gap-1.5 pb-1 min-w-0 flex-1">
               {isAvailable && (
-                <span className="inline-flex w-fit items-center text-xs bg-primary/10 text-primary px-2.5 py-0.5 rounded-full font-medium">
+                <span className="inline-flex w-fit items-center text-xs bg-primary/15 text-primary px-2.5 py-0.5 rounded-full font-semibold backdrop-blur-sm border border-primary/30">
                   Disponible
                 </span>
               )}
 
               <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-                <h1 className="text-2xl sm:text-4xl md:text-5xl font-heading font-bold text-foreground leading-tight capitalize break-words min-w-0">
+                <h1 className="text-2xl sm:text-4xl md:text-5xl font-heading font-bold text-foreground leading-tight capitalize break-words min-w-0 [text-shadow:0_1px_2px_hsl(var(--background)/0.6)]">
                   {firstName}
                 </h1>
                 {profile?.is_founder && <FounderBadge size="lg" />}
@@ -770,7 +787,7 @@ export default function PublicSitterProfile() {
               </div>
 
               {city && (
-                <p className="text-base text-muted-foreground flex items-center gap-1">
+                <p className="text-base text-foreground/85 flex items-center gap-1 font-medium drop-shadow-sm">
                   <MapPin className="w-3.5 h-3.5" /> Gardien à {city}
                 </p>
               )}
@@ -778,22 +795,22 @@ export default function PublicSitterProfile() {
               {(profile?.identity_verified || profile?.is_founder || emergencyActive || hasActiveSubscription) && (
                 <div className="flex items-center gap-2 flex-wrap">
                   {hasActiveSubscription && (
-                    <span className="inline-flex items-center gap-1 text-xs text-muted-foreground border border-border rounded-full px-2 py-0.5 bg-card/80">
+                    <span className="inline-flex items-center gap-1 text-xs text-foreground/85 border border-border/60 rounded-full px-2 py-0.5 bg-background/85 backdrop-blur-sm">
                       <BadgeCheck size={11} className="text-primary" /> Abonné
                     </span>
                   )}
                   {profile?.identity_verified && (
-                    <span className="inline-flex items-center gap-1 text-xs text-muted-foreground border border-border rounded-full px-2 py-0.5 bg-card/80">
+                    <span className="inline-flex items-center gap-1 text-xs text-foreground/85 border border-border/60 rounded-full px-2 py-0.5 bg-background/85 backdrop-blur-sm">
                       <Shield size={11} className="text-primary" /> ID vérifiée
                     </span>
                   )}
                   {profile?.is_founder && (
-                    <span className="inline-flex items-center gap-1 text-xs text-muted-foreground border border-border rounded-full px-2 py-0.5 bg-card/80">
+                    <span className="inline-flex items-center gap-1 text-xs text-foreground/85 border border-border/60 rounded-full px-2 py-0.5 bg-background/85 backdrop-blur-sm">
                       <Star size={11} className="text-primary" /> Fondateur
                     </span>
                   )}
                   {emergencyActive && (
-                    <span className="inline-flex items-center gap-1 text-xs text-muted-foreground border border-border rounded-full px-2 py-0.5 bg-card/80">
+                    <span className="inline-flex items-center gap-1 text-xs text-foreground/85 border border-border/60 rounded-full px-2 py-0.5 bg-background/85 backdrop-blur-sm">
                       <Shield size={11} className="text-primary" /> Gardien d'urgence
                     </span>
                   )}
@@ -813,7 +830,7 @@ export default function PublicSitterProfile() {
                 />
               </div>
 
-              <div className="flex items-center gap-2 sm:gap-4 text-sm text-muted-foreground mt-1 flex-wrap">
+              <div className="flex items-center gap-2 sm:gap-4 text-sm text-foreground/80 mt-1 flex-wrap font-medium drop-shadow-sm">
                 {statsItems.map((s, i) => (
                   <span key={i} className="flex items-center gap-1">
                     {i > 0 && <span className="text-border mr-1 sm:mr-3">·</span>}
