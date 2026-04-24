@@ -18,6 +18,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import PageMeta from "@/components/PageMeta";
 
+// Sections affichées dans la sidebar. `optional: true` = pas de calcul de complétion (purement décoratif).
 const SECTIONS_META = [
   { id: "identity", num: 1, label: "Identité", subtitle: "Qui vous êtes" },
   { id: "sitter", num: 2, label: "Profil gardien", subtitle: "Votre expérience" },
@@ -28,22 +29,21 @@ const SECTIONS_META = [
   { id: "skills", num: 7, label: "Compétences", subtitle: "Ce que vous savez faire" },
 ];
 
-function sectionComplete(num: number, d: SitterProfileData): boolean {
-  switch (num) {
-    case 1: return !!(d.avatar_url && d.first_name && d.last_name && d.city && d.bio && d.motivation);
-    case 2: return !!(d.sitter_type && d.availability_during && d.lifestyle.length > 0);
-    case 3: return !!(d.experience_years && d.animal_types.length > 0 && d.references_text);
-    case 4: return !!(d.has_license || d.has_vehicle);
-    default: return false;
-  }
+/**
+ * Critère de score étendu : inclut la section où l'utilisateur peut le compléter.
+ * Source UNIQUE de vérité — la jauge %, les sections « Complété ✓ » et les labels
+ * « → champ manquant » dérivent tous de la même liste.
+ */
+type ScoredCriterion = ScoreCriterion & { section: string; kind: "essential" | "bonus" };
+
+function sectionComplete(sectionId: string, criteria: ScoredCriterion[]): boolean {
+  const essentialsForSection = criteria.filter(c => c.section === sectionId && c.kind === "essential");
+  if (essentialsForSection.length === 0) return false;
+  return essentialsForSection.every(c => c.ok);
 }
 
-function countMissing(num: number, d: SitterProfileData, allMissing: { step: number; label: string }[]): number {
-  return allMissing.filter(m => m.step === num).length;
-}
-
-function missingLabelsFor(num: number, allMissing: { step: number; label: string }[]): string[] {
-  return allMissing.filter(m => m.step === num).map(m => m.label);
+function missingLabelsFor(sectionId: string, criteria: ScoredCriterion[]): string[] {
+  return criteria.filter(c => c.section === sectionId && !c.ok).map(c => c.label);
 }
 
 type ProfileDraft<T> = {
