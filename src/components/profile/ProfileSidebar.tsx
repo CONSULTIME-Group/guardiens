@@ -180,11 +180,17 @@ const ProfileSidebar = ({
             <p className="text-xs font-medium text-amber-900">
               {active.label} — {labels.length} point{labels.length > 1 ? "s" : ""} manquant{labels.length > 1 ? "s" : ""}
             </p>
-            <ul className="mt-1.5 space-y-0.5">
-              {labels.map(l => (
-                <li key={l} className="text-xs text-amber-800 leading-snug">• {l}</li>
-              ))}
-            </ul>
+            {labels.length === 1 ? (
+              <p className="mt-1.5 text-xs text-amber-800 leading-snug">
+                Il manque : <span className="font-medium">{labels[0]}</span>
+              </p>
+            ) : (
+              <ul className="mt-1.5 space-y-0.5">
+                {labels.map(l => (
+                  <li key={l} className="text-xs text-amber-800 leading-snug">• {l}</li>
+                ))}
+              </ul>
+            )}
           </div>
         );
       })()}
