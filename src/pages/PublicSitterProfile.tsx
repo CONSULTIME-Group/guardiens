@@ -923,7 +923,7 @@ export default function PublicSitterProfile() {
 
       {/* ── ONGLET GARDIEN (refonte "outil de décision") ───────────────── */}
       {activeTab === 'gardien' && (
-        <div className="max-w-5xl mx-auto px-4 md:px-6 py-6 md:py-8 pb-[calc(9rem+env(safe-area-inset-bottom))] md:pb-8">
+        <div className="max-w-5xl mx-auto px-4 md:px-6 py-6 md:py-8 pb-[calc(10.5rem+env(safe-area-inset-bottom))] md:pb-8">
 
           {/* ── A. BANDEAU DE QUALIFICATION RAPIDE (4 tuiles + CTA) ──── */}
           <section
@@ -1331,13 +1331,13 @@ export default function PublicSitterProfile() {
 
           {/* CTA sticky bottom mobile */}
           {showCTA && (
-            <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-background border-t border-border px-4 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] shadow-lg">
+            <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-background border-t border-border px-3 sm:px-4 pt-2.5 sm:pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] shadow-lg">
               {!isAuthenticated && (
                 <Link
                   to={`/inscription?redirect=/gardiens/${id}`}
-                  className="flex items-center justify-center bg-primary text-primary-foreground rounded-lg px-4 py-3 text-sm font-medium w-full"
+                  className="flex items-center justify-center bg-primary text-primary-foreground rounded-lg px-3 sm:px-4 py-3 text-[13px] sm:text-sm font-medium w-full leading-tight text-center break-words"
                 >
-                  S'inscrire pour contacter {firstName}
+                  <span className="line-clamp-2">S'inscrire pour contacter {firstName}</span>
                 </Link>
               )}
               {isAuthenticated && isOwner && (
@@ -1359,9 +1359,9 @@ export default function PublicSitterProfile() {
                       toast.error("Impossible d'ouvrir la conversation.");
                     }
                   }}
-                  className="flex items-center justify-center bg-primary text-primary-foreground rounded-lg px-4 py-3 text-sm font-medium w-full"
+                  className="flex items-center justify-center bg-primary text-primary-foreground rounded-lg px-3 sm:px-4 py-3 text-[13px] sm:text-sm font-medium w-full leading-tight text-center break-words"
                 >
-                  Contacter {firstName}
+                  <span className="line-clamp-2">Contacter {firstName}</span>
                 </button>
               )}
             </div>
