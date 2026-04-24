@@ -61,6 +61,9 @@ const ProfileSidebar = ({
         )}
       </div>
 
+      {/* Score breakdown (optional) */}
+      {scoreBreakdown}
+
       {/* Section nav — vertical on desktop, horizontal scroll on mobile */}
       <nav className="flex lg:flex-col gap-1.5 overflow-x-auto lg:overflow-x-visible pb-2 lg:pb-0 -mx-1 px-1">
         {sections.map((s) => {
