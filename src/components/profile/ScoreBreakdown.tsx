@@ -93,7 +93,7 @@ const ScoreBreakdown = ({
             <Sparkles className="h-3.5 w-3.5 text-primary shrink-0" aria-hidden />
             <p className="text-xs text-foreground truncate">
               <span className="text-muted-foreground">Aperçu&nbsp;: </span>
-              <span className="tabular-nums font-medium">{total}</span>
+              <span className="tabular-nums font-medium">{referenceTotal}</span>
               <span className="text-muted-foreground"> → </span>
               <span
                 className={cn(
