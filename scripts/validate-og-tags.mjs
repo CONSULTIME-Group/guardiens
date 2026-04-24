@@ -276,9 +276,11 @@ async function main() {
 
   console.log(c("dim", `Routes à valider : ${filteredRoutes.length}`));
   console.log(c("dim", `Origines cibles  : ${normalizedOrigins.join(", ")}`));
-  console.log(c("dim", `Concurrence      : ${concurrency}\n`));
+  console.log(c("dim", `Concurrence      : ${concurrency}`));
+  console.log(c("dim", `Mode             : ${strictMode ? "strict (toute divergence = échec)" : "permissif (home stricte, autres = warn)"}\n`));
 
-  let totalDivergences = 0;
+  let blockingIssues = 0; // home ou --strict
+  let warnings = 0; // routes non-home hors --strict
   let totalErrors = 0;
 
   // ─── Sanity check local : index.html doit correspondre à la home ─────
@@ -289,7 +291,7 @@ async function main() {
     const expected = buildExpectedTags(homeRoute);
     const diffs = diffTags(indexTags, expected.tags);
     if (diffs.length > 0) {
-      totalDivergences += diffs.length;
+      blockingIssues += diffs.length;
       console.log(c("yellow", "⚠️  index.html diverge de la route / :"));
       printDiffs(diffs);
       console.log(c("dim", '   → lancez `npm run sync-index-html` pour corriger.\n'));
@@ -328,26 +330,38 @@ async function main() {
       }
       if (r.diffs.length === 0) {
         console.log(`  ${c("green", "✅")} ${label}${c("dim", r.url)}`);
-      } else {
-        totalDivergences += r.diffs.length;
-        console.log(`  ${c("red", "❌")} ${label}${c("red", `${r.diffs.length} écart(s)`)} ${c("dim", r.url)}`);
-        printDiffs(r.diffs, "      ");
+        continue;
       }
+      const isBlocking = strictMode || r.route.path === "/";
+      if (isBlocking) {
+        blockingIssues += r.diffs.length;
+        console.log(`  ${c("red", "❌")} ${label}${c("red", `${r.diffs.length} écart(s)`)} ${c("dim", r.url)}`);
+      } else {
+        warnings += r.diffs.length;
+        console.log(`  ${c("yellow", "⚠️ ")} ${label}${c("yellow", `${r.diffs.length} écart(s) (non bloquant, pas de pré-rendu)`)} ${c("dim", r.url)}`);
+      }
+      printDiffs(r.diffs, "      ");
     }
     console.log();
   }
 
   // ─── Synthèse ────────────────────────────────────────────────────────
-  if (totalDivergences === 0 && totalErrors === 0) {
-    console.log(c("green", "Résultat : toutes les routes sont synchronisées ✅\n"));
+  console.log(c("bold", "Synthèse :"));
+  if (blockingIssues > 0) console.log(c("red",    `  ❌ ${blockingIssues} divergence(s) bloquante(s)`));
+  if (warnings > 0)       console.log(c("yellow", `  ⚠️  ${warnings} divergence(s) non bloquante(s) (bots servis par index.html)`));
+  if (totalErrors > 0)    console.log(c("red",    `  💥 ${totalErrors} erreur(s) réseau`));
+
+  if (blockingIssues === 0 && totalErrors === 0) {
+    if (warnings > 0) {
+      console.log(c("dim", "\n💡 Les routes non-home ne sont pas pré-rendues : les bots sociaux lisent index.html."));
+      console.log(c("dim", "   Activez Prerender.io / SSR pour que FB & LinkedIn voient les bons titres par page.\n"));
+    } else {
+      console.log(c("green", "\n✅ Tout est synchronisé.\n"));
+    }
     process.exit(0);
   }
 
-  const parts = [];
-  if (totalDivergences > 0) parts.push(`${totalDivergences} divergence(s)`);
-  if (totalErrors > 0) parts.push(`${totalErrors} erreur(s) réseau`);
-  console.log(c("red", `Résultat : ${parts.join(" + ")}.`));
-  console.log(c("dim", "💡 Si seule la prod diverge : purger Prerender.io / Cloudflare puis relancer.\n"));
+  console.log(c("dim", "\n💡 Si seule la prod diverge sur / : purger Prerender.io / Cloudflare puis relancer.\n"));
   process.exit(1);
 }
 
