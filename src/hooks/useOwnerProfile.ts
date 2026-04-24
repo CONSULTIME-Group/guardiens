@@ -176,24 +176,20 @@ export function useOwnerProfile() {
 
   useEffect(() => { fetchData(); }, [fetchData]);
 
-  const computeCompletion = useCallback((d: OwnerProfileData, petsCount: number): number => {
-    let total = 0;
-    // Step 1 (25%): avatar, first_name, last_name, city, bio
-    const s1 = [d.avatar_url, d.first_name, d.last_name, d.city, d.bio].filter(Boolean).length / 5;
-    total += s1 * 25;
-    // Step 2 (25%): property_type, environment, description
-    const s2 = [d.property_type, d.environment, d.description].filter(Boolean).length / 3;
-    total += s2 * 25;
-    // Step 3 (25%): at least one pet
-    total += petsCount > 0 ? 25 : 0;
-    // Step 4 (15%): presence_expected, visits_allowed, meeting_preference, news_frequency
-    const s4 = [d.presence_expected, d.visits_allowed, d.meeting_preference.length > 0, d.news_frequency].filter(Boolean).length / 4;
-    total += s4 * 15;
-    // Step 5 (10%): handover_preference, news_format
-    const s5 = [d.handover_preference, d.news_format.length > 0].filter(Boolean).length / 2;
-    total += s5 * 10;
-    return Math.round(total);
-  }, []);
+  // Canonical score from profiles.profile_completion (RPC calculate_profile_completion).
+  // Local computeCompletion was removed to avoid divergence with the dashboard.
+  const [completion, setCompletion] = useState<number>(0);
+  const refreshCompletion = useCallback(async () => {
+    if (!user) return;
+    const { data: row } = await supabase
+      .from("profiles")
+      .select("profile_completion")
+      .eq("id", user.id)
+      .maybeSingle();
+    setCompletion(row?.profile_completion || 0);
+  }, [user]);
+  useEffect(() => { refreshCompletion(); }, [refreshCompletion]);
+
 
   const computeMissingFields = useCallback((d: OwnerProfileData, petsCount: number): { step: number; label: string }[] => {
     const missing: { step: number; label: string }[] = [];
