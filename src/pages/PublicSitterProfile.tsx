@@ -692,22 +692,22 @@ export default function PublicSitterProfile() {
               </linearGradient>
               {/* Hachures fines parallèles */}
               <pattern id="hatchFine" patternUnits="userSpaceOnUse" width="5" height="5" patternTransform="rotate(45)">
-                <line x1="0" y1="0" x2="0" y2="5" stroke="#1F4D38" strokeWidth="0.45"/>
+                <line x1="0" y1="0" x2="0" y2="5" stroke="#163828" strokeWidth="0.6"/>
               </pattern>
               <pattern id="hatchV" patternUnits="userSpaceOnUse" width="6" height="6">
-                <line x1="0" y1="0" x2="0" y2="6" stroke="#1F4D38" strokeWidth="0.5"/>
+                <line x1="0" y1="0" x2="0" y2="6" stroke="#163828" strokeWidth="0.65"/>
               </pattern>
-              {/* Pointillé botanique */}
+              {/* Pointillé botanique — points légèrement plus denses et plus sombres */}
               <pattern id="stipple" patternUnits="userSpaceOnUse" width="9" height="9">
-                <circle cx="2" cy="3" r="0.55" fill="#1F4D38"/>
-                <circle cx="6" cy="6" r="0.45" fill="#1F4D38"/>
-                <circle cx="4" cy="7" r="0.35" fill="#1F4D38"/>
+                <circle cx="2" cy="3" r="0.75" fill="#163828"/>
+                <circle cx="6" cy="6" r="0.65" fill="#163828"/>
+                <circle cx="4" cy="7" r="0.5" fill="#163828"/>
               </pattern>
               {/* Halo solaire */}
               <radialGradient id="sunHalo" cx="50%" cy="50%" r="50%">
-                <stop offset="0%" stopColor="#1F4D38" stopOpacity="0.10"/>
-                <stop offset="70%" stopColor="#1F4D38" stopOpacity="0.02"/>
-                <stop offset="100%" stopColor="#1F4D38" stopOpacity="0"/>
+                <stop offset="0%" stopColor="#163828" stopOpacity="0.14"/>
+                <stop offset="70%" stopColor="#163828" stopOpacity="0.03"/>
+                <stop offset="100%" stopColor="#163828" stopOpacity="0"/>
               </radialGradient>
             </defs>
 
@@ -716,9 +716,9 @@ export default function PublicSitterProfile() {
 
             {/* === SOLEIL ÉDITORIAL — astre central, en haut à droite === */}
             <circle cx="980" cy="78" r="170" fill="url(#sunHalo)"/>
-            <g stroke="#1F4D38" fill="none" opacity="0.85">
-              <circle cx="980" cy="78" r="46" strokeWidth="1.1"/>
-              <circle cx="980" cy="78" r="38" strokeWidth="0.5" opacity="0.6"/>
+            <g stroke="#163828" fill="none" opacity="0.95">
+              <circle cx="980" cy="78" r="46" strokeWidth="1.5"/>
+              <circle cx="980" cy="78" r="38" strokeWidth="0.7" opacity="0.7"/>
               {/* Rayons longs et fins, espacés — gravure ancienne */}
               {Array.from({ length: 16 }).map((_, i) => {
                 const a = (i * Math.PI * 2) / 16;
@@ -726,21 +726,21 @@ export default function PublicSitterProfile() {
                 const y1 = 78 + Math.sin(a) * 56;
                 const x2 = 980 + Math.cos(a) * (i % 2 === 0 ? 96 : 78);
                 const y2 = 78 + Math.sin(a) * (i % 2 === 0 ? 96 : 78);
-                return <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} strokeWidth="0.7"/>;
+                return <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} strokeWidth="0.95"/>;
               })}
             </g>
 
             {/* === LIGNE D'HORIZON SOBRE — un seul trait === */}
-            <g stroke="#1F4D38" fill="none" opacity="0.45">
-              <path d="M0,210 C260,200 480,208 700,202 S1020,208 1200,200" strokeWidth="0.7"/>
+            <g stroke="#163828" fill="none" opacity="0.6">
+              <path d="M0,210 C260,200 480,208 700,202 S1020,208 1200,200" strokeWidth="0.95"/>
             </g>
 
             {/* === GRAND ARBRE — emblème central === */}
             <g transform="translate(600, 230)">
               {/* Tronc — trait double */}
-              <path d="M-6,0 C-7,-40 -4,-80 -3,-130 M6,0 C7,-40 4,-80 3,-130" stroke="#1F4D38" strokeWidth="1.4" fill="none"/>
+              <path d="M-6,0 C-7,-40 -4,-80 -3,-130 M6,0 C7,-40 4,-80 3,-130" stroke="#163828" strokeWidth="1.8" fill="none"/>
               {/* Branches principales */}
-              <g stroke="#1F4D38" strokeWidth="1.1" fill="none" strokeLinecap="round">
+              <g stroke="#163828" strokeWidth="1.4" fill="none" strokeLinecap="round">
                 <path d="M-3,-110 C-30,-118 -52,-128 -72,-148"/>
                 <path d="M3,-115 C28,-122 52,-132 76,-150"/>
                 <path d="M-2,-130 C-18,-148 -28,-164 -38,-180"/>
@@ -751,14 +751,14 @@ export default function PublicSitterProfile() {
                 <path d="M-38,-180 q-6,-6 -12,-6"/>
                 <path d="M42,-184 q6,-6 12,-6"/>
               </g>
-              {/* Couronne — pointillé botanique */}
-              <ellipse cx="0" cy="-178" rx="98" ry="46" fill="url(#stipple)" opacity="0.65"/>
-              <ellipse cx="-44" cy="-160" rx="46" ry="28" fill="url(#stipple)" opacity="0.55"/>
-              <ellipse cx="46" cy="-162" rx="44" ry="26" fill="url(#stipple)" opacity="0.55"/>
+              {/* Couronne — pointillé botanique plus dense */}
+              <ellipse cx="0" cy="-178" rx="98" ry="46" fill="url(#stipple)" opacity="0.85"/>
+              <ellipse cx="-44" cy="-160" rx="46" ry="28" fill="url(#stipple)" opacity="0.75"/>
+              <ellipse cx="46" cy="-162" rx="44" ry="26" fill="url(#stipple)" opacity="0.75"/>
               <path d="M-96,-178 C-92,-210 -50,-228 0,-224 C50,-228 92,-210 96,-178 C96,-156 50,-138 0,-138 C-50,-138 -96,-156 -96,-178 Z"
-                    stroke="#1F4D38" strokeWidth="0.8" fill="none" opacity="0.7"/>
+                    stroke="#163828" strokeWidth="1.1" fill="none" opacity="0.85"/>
               {/* Racines — ancrage local */}
-              <g stroke="#1F4D38" strokeWidth="0.9" fill="none" strokeLinecap="round" opacity="0.75">
+              <g stroke="#163828" strokeWidth="1.15" fill="none" strokeLinecap="round" opacity="0.9">
                 <path d="M-6,-2 C-22,4 -38,6 -54,4"/>
                 <path d="M6,-2 C22,4 38,6 54,4"/>
                 <path d="M-3,0 C-12,8 -22,12 -32,12"/>
@@ -767,40 +767,40 @@ export default function PublicSitterProfile() {
             </g>
 
             {/* === ROSE DES VENTS — emblème à gauche === */}
-            <g transform="translate(200, 130)" stroke="#1F4D38" fill="none" opacity="0.7">
-              <circle r="38" strokeWidth="0.8"/>
-              <circle r="28" strokeWidth="0.4" opacity="0.6"/>
-              <polygon points="0,-50 4,-6 0,0 -4,-6" fill="#1F4D38" stroke="none"/>
-              <polygon points="0,50 4,6 0,0 -4,6" fill="#1F4D38" stroke="none"/>
-              <polygon points="-50,0 -6,-4 0,0 -6,4" fill="#1F4D38" stroke="none"/>
-              <polygon points="50,0 6,-4 0,0 6,4" fill="#1F4D38" stroke="none"/>
-              <g opacity="0.7">
-                <polygon points="-34,-34 -4,-2 0,0 -2,-4" fill="#1F4D38" stroke="none"/>
-                <polygon points="34,-34 4,-2 0,0 2,-4" fill="#1F4D38" stroke="none"/>
-                <polygon points="-34,34 -4,2 0,0 -2,4" fill="#1F4D38" stroke="none"/>
-                <polygon points="34,34 4,2 0,0 2,4" fill="#1F4D38" stroke="none"/>
+            <g transform="translate(200, 130)" stroke="#163828" fill="none" opacity="0.85">
+              <circle r="38" strokeWidth="1.05"/>
+              <circle r="28" strokeWidth="0.55" opacity="0.7"/>
+              <polygon points="0,-50 4,-6 0,0 -4,-6" fill="#163828" stroke="none"/>
+              <polygon points="0,50 4,6 0,0 -4,6" fill="#163828" stroke="none"/>
+              <polygon points="-50,0 -6,-4 0,0 -6,4" fill="#163828" stroke="none"/>
+              <polygon points="50,0 6,-4 0,0 6,4" fill="#163828" stroke="none"/>
+              <g opacity="0.85">
+                <polygon points="-34,-34 -4,-2 0,0 -2,-4" fill="#163828" stroke="none"/>
+                <polygon points="34,-34 4,-2 0,0 2,-4" fill="#163828" stroke="none"/>
+                <polygon points="-34,34 -4,2 0,0 -2,4" fill="#163828" stroke="none"/>
+                <polygon points="34,34 4,2 0,0 2,4" fill="#163828" stroke="none"/>
               </g>
               {Array.from({ length: 24 }).map((_, i) => {
                 const a = (i * Math.PI * 2) / 24;
                 const r1 = 38, r2 = i % 3 === 0 ? 44 : 41;
-                return <line key={i} x1={Math.cos(a)*r1} y1={Math.sin(a)*r1} x2={Math.cos(a)*r2} y2={Math.sin(a)*r2} strokeWidth="0.5"/>;
+                return <line key={i} x1={Math.cos(a)*r1} y1={Math.sin(a)*r1} x2={Math.cos(a)*r2} y2={Math.sin(a)*r2} strokeWidth="0.7"/>;
               })}
             </g>
 
             {/* === CHIEN — pictogramme ultra-simplifié, aplat === */}
-            <g transform="translate(460, 240)" fill="#1F4D38" opacity="0.85">
+            <g transform="translate(460, 240)" fill="#163828" opacity="0.95">
               {/* Corps + tête + queue en une silhouette continue */}
               <path d="M0,8 C0,2 6,0 12,0 L40,0 C44,-2 48,-4 50,-2 C52,0 51,3 48,5 L46,8 L46,14 L42,14 L40,18 L8,18 L6,14 L2,14 Z M-2,4 C-8,2 -12,4 -10,8 Z"/>
             </g>
 
             {/* === CHAT — pictogramme ultra-simplifié, aplat === */}
-            <g transform="translate(740, 226)" fill="#1F4D38" opacity="0.85">
+            <g transform="translate(740, 226)" fill="#163828" opacity="0.95">
               {/* Silhouette assise : oreilles + tête + corps + queue enroulée */}
               <path d="M4,32 C4,18 10,12 18,12 L18,8 L14,2 L22,6 L28,6 L36,2 L32,8 L32,12 C40,12 44,18 44,32 Z M44,32 C52,32 54,28 50,24 C48,22 44,24 42,26 Z"/>
             </g>
 
             {/* === SOL — ligne épurée === */}
-            <line x1="0" y1="258" x2="1200" y2="258" stroke="#1F4D38" strokeWidth="0.5" opacity="0.35"/>
+            <line x1="0" y1="258" x2="1200" y2="258" stroke="#163828" strokeWidth="0.7" opacity="0.5"/>
 
             {/* Fade bas vers la page */}
             <rect width="1200" height="280" fill="url(#fadeBottom)"/>
