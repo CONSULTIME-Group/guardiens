@@ -258,6 +258,9 @@ export function useSitterProfile() {
 
       // Recompute canonical completion server-side and refresh local + global state
       await supabase.rpc("calculate_profile_completion", { p_user_id: user.id });
+      // Re-fetch fresh data from DB so the sidebar / live missing-fields reflect the
+      // committed state immediately (no manual refresh needed after toggling switches).
+      await fetchData();
       await refreshCompletion();
       await refreshProfile();
 
@@ -271,7 +274,7 @@ export function useSitterProfile() {
     } finally {
       setSaving(false);
     }
-  }, [user, data, sitterProfileId, refreshCompletion, refreshProfile, toast]);
+  }, [user, data, sitterProfileId, fetchData, refreshCompletion, refreshProfile, toast]);
 
   const addPastAnimal = useCallback(async (animal: PastAnimal) => {
     if (!sitterProfileId) return;
