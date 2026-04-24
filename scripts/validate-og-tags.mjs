@@ -671,6 +671,19 @@ async function main() {
   let warnings = 0;
   let totalErrors = 0;
 
+  // Collecteur pour les rapports JSON / HTML
+  const report = {
+    generatedAt: new Date().toISOString(),
+    origins: normalizedOrigins,
+    siteUrl,
+    strictMode,
+    includeDynamic,
+    dynamicLimit,
+    enabledChecks: [...enabledChecks],
+    indexHtml: null,       // { ok, diffs }
+    perOrigin: [],         // [{ origin, sitemap, robots, routes: [...] }]
+  };
+
   // ─── Sanity check local : index.html doit correspondre à la home ─────
   if (enabledChecks.has("og")) {
     const homeRoute = filteredStaticRoutes.find((r) => r.path === "/");
