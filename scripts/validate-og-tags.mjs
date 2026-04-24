@@ -126,12 +126,19 @@ function loadSiteConfig() {
     if (!title || !description) continue; // pas un vrai bloc de route
 
     const ogImage = extractStringLiteral(block, "ogImage") || defaultOgImage;
+    const sitemapPriority = extractStringLiteral(block, "sitemapPriority");
+    const changeFreqMatch = block.match(
+      /changeFreq:\s*(["'])(daily|weekly|monthly|yearly)\1/,
+    );
+    const changeFreq = changeFreqMatch ? changeFreqMatch[2] : null;
 
     routes.push({
       path: path_,
       rawTitle: title,
       description,
       image: ogImage,
+      sitemapPriority,
+      changeFreq,
     });
   }
   if (routes.length === 0) throw new Error("Aucune route extraite");
