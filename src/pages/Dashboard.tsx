@@ -6,6 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import OwnerDashboard from "@/components/dashboard/OwnerDashboard";
 import SitterDashboard from "@/components/dashboard/SitterDashboard";
 import { trackEvent } from "@/lib/analytics";
+import { supabase } from "@/integrations/supabase/client";
 
 const Dashboard = () => {
   const { activeRole, user } = useAuth();
