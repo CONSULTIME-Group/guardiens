@@ -155,7 +155,6 @@ const HERO_ANCHORS: readonly HeroAnchor[] = [
 
 /**
  * Hash FNV-1a 32 bits (déterministe, distribution uniforme correcte).
- * Convertit une chaîne (typiquement un UUID) en index dans la banque.
  */
 function hashStringToIndex(input: string, modulo: number): number {
   let hash = 0x811c9dc5;
@@ -166,9 +165,61 @@ function hashStringToIndex(input: string, modulo: number): number {
   return hash % modulo;
 }
 
+/**
+ * Catégories thématiques de la banque, avec poids cibles de répartition.
+ *
+ * La banque physique contient 70 images animaux/plantes + 30 maison/entraide/partage,
+ * mais on ne veut PAS que 70% des profils tombent sur le thème animaux. On stratifie
+ * donc la sélection en deux étapes :
+ *   1. Choix déterministe de la CATÉGORIE selon les poids ci-dessous
+ *   2. Choix déterministe de l'IMAGE à l'intérieur de la catégorie
+ *
+ * Résultat : variété thématique réelle (~40% animaux, ~20% maison, ~20% entraide,
+ * ~20% village/partage) tout en gardant la stabilité par sitter.id.
+ */
+type HeroCategory = {
+  name: "animals" | "home" | "mutual_aid" | "village";
+  range: readonly [number, number]; // [start, endExclusive] dans HERO_BANK (1-indexé inclus → 0-indexé via -1)
+  weight: number;
+};
+
+const HERO_CATEGORIES: readonly HeroCategory[] = [
+  { name: "animals",    range: [1, 71],   weight: 40 }, // hero-01 → hero-70
+  { name: "home",       range: [71, 81],  weight: 20 }, // hero-71 → hero-80
+  { name: "mutual_aid", range: [81, 91],  weight: 20 }, // hero-81 → hero-90
+  { name: "village",    range: [91, 101], weight: 20 }, // hero-91 → hero-100
+];
+
+const HERO_WEIGHT_TOTAL = HERO_CATEGORIES.reduce((s, c) => s + c.weight, 0);
+
+/**
+ * Sélection stratifiée déterministe :
+ *   - Premier hash sur 100 → choisit la catégorie selon les poids
+ *   - Second hash (sel différent) → choisit une image dans la catégorie
+ * Les deux hashs partent du même sitterId mais avec des seeds distinctes,
+ * sinon on aurait une corrélation parasite catégorie↔index intra-catégorie.
+ */
 function getIndex(sitterId?: string | null): number {
   if (!sitterId) return 0;
-  return hashStringToIndex(sitterId, HERO_BANK.length);
+
+  // 1. Choix de catégorie via un hash sur 100, mappé selon les poids cumulés.
+  const catTicket = hashStringToIndex(sitterId, HERO_WEIGHT_TOTAL);
+  let cumulative = 0;
+  let chosen: HeroCategory = HERO_CATEGORIES[0];
+  for (const cat of HERO_CATEGORIES) {
+    cumulative += cat.weight;
+    if (catTicket < cumulative) {
+      chosen = cat;
+      break;
+    }
+  }
+
+  // 2. Choix d'image dans la catégorie via un hash décorrélé (préfixe de seed).
+  const [start, endExclusive] = chosen.range;
+  const span = endExclusive - start; // ex: animals → 70, home → 10
+  const intra = hashStringToIndex(`hero-img:${sitterId}`, span);
+  // start est 1-indexé pour matcher les noms de fichiers ; HERO_BANK est 0-indexé.
+  return start - 1 + intra;
 }
 
 /**
