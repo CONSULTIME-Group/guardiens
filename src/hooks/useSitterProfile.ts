@@ -108,9 +108,9 @@ export function useSitterProfile() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
-  const fetchData = useCallback(async () => {
+  const fetchData = useCallback(async (opts?: { silent?: boolean }) => {
     if (!user) return;
-    setLoading(true);
+    if (!opts?.silent) setLoading(true);
 
     const [profileRes, sitterRes] = await Promise.all([
       supabase.from("profiles").select("*").eq("id", user.id).single(),
