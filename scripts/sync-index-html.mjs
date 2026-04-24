@@ -89,13 +89,16 @@ function textEncode(s) {
  * les doublons côté bots sociaux (FB prend la dernière occurrence).
  */
 function replaceMetaContent(html, { attr, key, value }) {
-  // Accepte attributs dans les deux ordres (property="x" content="y" et inverse)
+  // Accepte les deux ordres d'attributs et gère les apostrophes droites
+  // DANS les valeurs (ex : "Partez l'esprit tranquille").
+  // Astuce : on utilise `.*?` avec backref sur le délimiteur capturé,
+  // et `[^>]*` ne traverse pas de chevron donc on reste dans la balise.
   const re = new RegExp(
-    `(<meta\\s+[^>]*\\b${attr}=(["'])${key}\\2[^>]*\\bcontent=)(["'])([^"']*)\\3([^>]*>)`,
+    `(<meta\\s+[^>]*\\b${attr}=(["'])${key}\\2[^>]*\\bcontent=)(["'])(.*?)\\3([^>]*>)`,
     "i",
   );
   const reReverse = new RegExp(
-    `(<meta\\s+[^>]*\\bcontent=)(["'])([^"']*)\\2([^>]*\\b${attr}=(["'])${key}\\5[^>]*>)`,
+    `(<meta\\s+[^>]*\\bcontent=)(["'])(.*?)\\2([^>]*\\b${attr}=(["'])${key}\\5[^>]*>)`,
     "i",
   );
 
