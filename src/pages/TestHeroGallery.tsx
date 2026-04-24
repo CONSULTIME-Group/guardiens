@@ -53,6 +53,7 @@ export default function TestHeroGallery() {
   const [anchorFilter, setAnchorFilter] = useState<AnchorFilter>("all");
   const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>("all");
   const [zoomIdx, setZoomIdx] = useState<number | null>(null);
+  const [pageIdx, setPageIdx] = useState<number | null>(null);
 
   // On construit une fois la liste indexée (idx 0-based + numéro fichier 1-based).
   const items = useMemo(
