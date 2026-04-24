@@ -11,7 +11,7 @@ import StepSkills from "@/components/profile/StepSkills";
 import SitterGallery from "@/components/profile/SitterGallery";
 import ExternalExperiences from "@/components/profile/ExternalExperiences";
 import ProfileSidebar, { type SidebarSection } from "@/components/profile/ProfileSidebar";
-import ScoreBreakdown from "@/components/profile/ScoreBreakdown";
+import ScoreBreakdown, { type ScoreCriterion } from "@/components/profile/ScoreBreakdown";
 
 import { useSitterProfile, computeSitterMissingFields, type SitterProfileData } from "@/hooks/useSitterProfile";
 import { useAuth } from "@/contexts/AuthContext";
