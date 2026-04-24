@@ -775,16 +775,18 @@ export default function PublicSitterProfile() {
                 </div>
               )}
 
-              {/* Trust Score */}
-              <TrustScore
-                identityVerified={profile?.identity_verified || false}
-                avgRating={avgRating}
-                reviewCount={reviewCount}
-                completedSits={completedSits}
-                externalExperiencesCount={externalExperiences.length}
-                memberSince={profile?.created_at || new Date().toISOString()}
-                isFounder={profile?.is_founder || false}
-              />
+              {/* Trust Score — wrapper self-start pour éviter l'étirement en pleine largeur dans le flex-col */}
+              <div className="self-start">
+                <TrustScore
+                  identityVerified={profile?.identity_verified || false}
+                  avgRating={avgRating}
+                  reviewCount={reviewCount}
+                  completedSits={completedSits}
+                  externalExperiencesCount={externalExperiences.length}
+                  memberSince={profile?.created_at || new Date().toISOString()}
+                  isFounder={profile?.is_founder || false}
+                />
+              </div>
 
               <div className="flex items-center gap-2 sm:gap-4 text-sm text-muted-foreground mt-1 flex-wrap">
                 {statsItems.map((s, i) => (
