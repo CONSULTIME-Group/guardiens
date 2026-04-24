@@ -2,8 +2,9 @@ import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { buildAbsoluteUrl, normalizePathname } from "@/lib/seo";
+import { DEFAULT_OG_IMAGE } from "@/data/siteRoutes";
 
-const DEFAULT_IMAGE = "https://guardiens.fr/og-default.jpg";
+const DEFAULT_IMAGE = DEFAULT_OG_IMAGE;
 const SITE_NAME = "Guardiens";
 
 interface PageMetaProps {
