@@ -302,10 +302,7 @@ export function useSitterProfile() {
     const nextData = { ...data, avatar_url: publicUrl };
     const { error: updateError } = await supabase
       .from("profiles")
-      .update({
-        avatar_url: publicUrl,
-        profile_completion: computeCompletion(nextData),
-      })
+      .update({ avatar_url: publicUrl })
       .eq("id", user.id);
 
     if (updateError) {
@@ -315,13 +312,15 @@ export function useSitterProfile() {
     }
 
     setData(nextData);
+    await supabase.rpc("calculate_profile_completion", { p_user_id: user.id });
+    await refreshCompletion();
     return publicUrl;
-  }, [user, toast, data, computeCompletion]);
+  }, [user, toast, data, refreshCompletion]);
 
   return {
     data, pastAnimals, loading, saving, sitterProfileId, lastSyncedAt,
     saveStep, addPastAnimal, removePastAnimal, uploadAvatar,
-    completion: computeCompletion(data),
+    completion,
     missingFields: computeMissingFields(data),
   };
 }
