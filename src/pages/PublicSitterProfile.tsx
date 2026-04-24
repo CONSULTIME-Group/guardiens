@@ -787,7 +787,7 @@ export default function PublicSitterProfile() {
               </div>
 
               {city && (
-                <p className="text-base text-muted-foreground flex items-center gap-1">
+                <p className="text-base text-foreground/85 flex items-center gap-1 font-medium drop-shadow-sm">
                   <MapPin className="w-3.5 h-3.5" /> Gardien à {city}
                 </p>
               )}
@@ -795,22 +795,22 @@ export default function PublicSitterProfile() {
               {(profile?.identity_verified || profile?.is_founder || emergencyActive || hasActiveSubscription) && (
                 <div className="flex items-center gap-2 flex-wrap">
                   {hasActiveSubscription && (
-                    <span className="inline-flex items-center gap-1 text-xs text-muted-foreground border border-border rounded-full px-2 py-0.5 bg-card/80">
+                    <span className="inline-flex items-center gap-1 text-xs text-foreground/85 border border-border/60 rounded-full px-2 py-0.5 bg-background/85 backdrop-blur-sm">
                       <BadgeCheck size={11} className="text-primary" /> Abonné
                     </span>
                   )}
                   {profile?.identity_verified && (
-                    <span className="inline-flex items-center gap-1 text-xs text-muted-foreground border border-border rounded-full px-2 py-0.5 bg-card/80">
+                    <span className="inline-flex items-center gap-1 text-xs text-foreground/85 border border-border/60 rounded-full px-2 py-0.5 bg-background/85 backdrop-blur-sm">
                       <Shield size={11} className="text-primary" /> ID vérifiée
                     </span>
                   )}
                   {profile?.is_founder && (
-                    <span className="inline-flex items-center gap-1 text-xs text-muted-foreground border border-border rounded-full px-2 py-0.5 bg-card/80">
+                    <span className="inline-flex items-center gap-1 text-xs text-foreground/85 border border-border/60 rounded-full px-2 py-0.5 bg-background/85 backdrop-blur-sm">
                       <Star size={11} className="text-primary" /> Fondateur
                     </span>
                   )}
                   {emergencyActive && (
-                    <span className="inline-flex items-center gap-1 text-xs text-muted-foreground border border-border rounded-full px-2 py-0.5 bg-card/80">
+                    <span className="inline-flex items-center gap-1 text-xs text-foreground/85 border border-border/60 rounded-full px-2 py-0.5 bg-background/85 backdrop-blur-sm">
                       <Shield size={11} className="text-primary" /> Gardien d'urgence
                     </span>
                   )}
@@ -830,7 +830,7 @@ export default function PublicSitterProfile() {
                 />
               </div>
 
-              <div className="flex items-center gap-2 sm:gap-4 text-sm text-muted-foreground mt-1 flex-wrap">
+              <div className="flex items-center gap-2 sm:gap-4 text-sm text-foreground/80 mt-1 flex-wrap font-medium drop-shadow-sm">
                 {statsItems.map((s, i) => (
                   <span key={i} className="flex items-center gap-1">
                     {i > 0 && <span className="text-border mr-1 sm:mr-3">·</span>}
