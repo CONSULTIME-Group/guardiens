@@ -618,6 +618,36 @@ async function main() {
   for (const origin of normalizedOrigins) {
     console.log(c("bold", `━━━ Origine : ${origin} ━━━`));
 
+    // ─── Expansion des routes dynamiques (par origine, via son sitemap) ─
+    let dynamicRoutesExpanded = [];
+    if (includeDynamic && dynamicConfigs.length > 0) {
+      dynamicRoutesExpanded = await expandDynamicRoutes(
+        dynamicConfigs, origin, siteUrl, defaultOgImage,
+      );
+      // Filtrage --paths si fourni
+      if (pathFilter) {
+        dynamicRoutesExpanded = dynamicRoutesExpanded.filter(
+          (r) => pathFilter.includes(r.path) || pathFilter.includes(r.pathPattern),
+        );
+      }
+      // Échantillonnage : on limite à N par pattern pour ne pas exploser le run
+      if (dynamicLimit > 0) {
+        const byPattern = new Map();
+        for (const r of dynamicRoutesExpanded) {
+          if (!byPattern.has(r.pathPattern)) byPattern.set(r.pathPattern, []);
+          byPattern.get(r.pathPattern).push(r);
+        }
+        dynamicRoutesExpanded = [];
+        for (const [, arr] of byPattern) {
+          dynamicRoutesExpanded.push(...arr.slice(0, dynamicLimit));
+        }
+      }
+      if (dynamicRoutesExpanded.length > 0) {
+        console.log(c("dim", `  → ${dynamicRoutesExpanded.length} route(s) dynamique(s) expandée(s)`));
+      }
+    }
+    const filteredRoutes = [...filteredStaticRoutes, ...dynamicRoutesExpanded];
+
     // ─── Sitemap (origine-level) ────────────────────────────────────────
     if (enabledChecks.has("sitemap")) {
       try {
