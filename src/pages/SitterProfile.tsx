@@ -181,6 +181,12 @@ const SitterProfile = () => {
 
   const handleSave = useCallback(async () => {
     if (Object.keys(localData).length === 0) return;
+
+    // Snapshot AVANT save : la section Mobilité était-elle déjà complète ?
+    // (si oui, on ne re-toaste pas inutilement à chaque clic)
+    const radiusBefore = data.geographic_radius ?? 0;
+    const mobilityWasComplete = radiusBefore > 0;
+
     const success = await saveStep(localData);
     if (!success) return;
 
@@ -198,11 +204,23 @@ const SitterProfile = () => {
       }).then(() => {});
     }
 
+    // Toast de confirmation spécifique à l'étape Mobilité (étape 4) :
+    // déclenché uniquement si la section devient complète suite à ce save.
+    if (activeSection === "mobility") {
+      const merged = { ...data, ...localData } as SitterProfileData;
+      const mobilityNowComplete = (merged.geographic_radius ?? 0) > 0;
+      if (mobilityNowComplete && !mobilityWasComplete) {
+        toast.success("Mobilité complétée", {
+          description: "Vos préférences de mobilité sont enregistrées.",
+        });
+      }
+    }
+
     setLocalData({});
     setDirty(false);
     setSaved(true);
     if (draftKey) localStorage.removeItem(draftKey);
-  }, [draftKey, localData, saveStep, searchParams, user]);
+  }, [activeSection, data, draftKey, localData, saveStep, searchParams, user]);
 
   const handleUploadAvatar = useCallback(async (file: File) => {
     const url = await uploadAvatar(file);
