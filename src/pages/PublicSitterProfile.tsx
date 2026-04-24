@@ -676,179 +676,241 @@ export default function PublicSitterProfile() {
       <div className="relative z-[1]">
       {/* ── HERO FUSIONNÉ : SVG + HEADER ── */}
       <div className="relative overflow-hidden w-full min-h-[280px] sm:min-h-[340px] flex items-end bg-[#F0EDE6]">
-        {/* SVG fond — paysage rural assumé */}
+        {/* SVG fond — gravure à la plume, campagne/village */}
         <div className="absolute inset-0 z-0 pointer-events-none">
           <svg viewBox="0 0 1200 280" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice" className="w-full h-full">
             <defs>
-              {/* Ciel chaleureux : bleu-vert pâle → crème doré */}
-              <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#A8C8B8"/>
-                <stop offset="45%" stopColor="#D4D8C8"/>
-                <stop offset="80%" stopColor="#E8E0CC"/>
-                <stop offset="100%" stopColor="#F0EDE6"/>
-              </linearGradient>
-              <radialGradient id="sunGlow" cx="0.18" cy="0.22" r="0.55">
-                <stop offset="0%" stopColor="#F8DC8E" stopOpacity="0.85"/>
-                <stop offset="40%" stopColor="#F5C97A" stopOpacity="0.35"/>
-                <stop offset="100%" stopColor="#F5C97A" stopOpacity="0"/>
-              </radialGradient>
-              {/* Plans de collines */}
-              <linearGradient id="hillFar" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#86A893"/>
-                <stop offset="100%" stopColor="#9DBBA8"/>
-              </linearGradient>
-              <linearGradient id="hillMid" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#5A8A6E"/>
-                <stop offset="100%" stopColor="#6E9C82"/>
-              </linearGradient>
-              <linearGradient id="hillNear" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#3F7A57"/>
-                <stop offset="100%" stopColor="#52916C"/>
-              </linearGradient>
-              {/* Prairie premier plan */}
-              <linearGradient id="meadow" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#5E9B70"/>
-                <stop offset="100%" stopColor="#7DB585"/>
+              {/* Fond papier crème légèrement dégradé */}
+              <linearGradient id="paper" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#EDE7D8"/>
+                <stop offset="60%" stopColor="#F0EDE6"/>
+                <stop offset="100%" stopColor="#F4F1EA"/>
               </linearGradient>
               <linearGradient id="fadeBottom" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="60%" stopColor="#F0EDE6" stopOpacity="0"/>
+                <stop offset="55%" stopColor="#F0EDE6" stopOpacity="0"/>
                 <stop offset="100%" stopColor="#FAF9F6" stopOpacity="1"/>
               </linearGradient>
+              {/* Hachures parallèles serrées — pour ombres ciel et collines */}
+              <pattern id="hatch" patternUnits="userSpaceOnUse" width="6" height="6" patternTransform="rotate(45)">
+                <line x1="0" y1="0" x2="0" y2="6" stroke="#1F4D38" strokeWidth="0.6"/>
+              </pattern>
+              <pattern id="hatchDense" patternUnits="userSpaceOnUse" width="4" height="4" patternTransform="rotate(45)">
+                <line x1="0" y1="0" x2="0" y2="4" stroke="#1F4D38" strokeWidth="0.7"/>
+              </pattern>
+              {/* Hachures croisées pour ombres profondes */}
+              <pattern id="crossHatch" patternUnits="userSpaceOnUse" width="6" height="6">
+                <line x1="0" y1="0" x2="6" y2="6" stroke="#1F4D38" strokeWidth="0.6"/>
+                <line x1="6" y1="0" x2="0" y2="6" stroke="#1F4D38" strokeWidth="0.6"/>
+              </pattern>
+              {/* Pointillé pour textures douces (feuillages) */}
+              <pattern id="stipple" patternUnits="userSpaceOnUse" width="8" height="8">
+                <circle cx="2" cy="2" r="0.6" fill="#1F4D38"/>
+                <circle cx="6" cy="5" r="0.5" fill="#1F4D38"/>
+                <circle cx="3" cy="6" r="0.4" fill="#1F4D38"/>
+              </pattern>
             </defs>
 
-            {/* Ciel + halo soleil */}
-            <rect width="1200" height="280" fill="url(#sky)"/>
-            <rect width="1200" height="280" fill="url(#sunGlow)"/>
+            {/* Papier */}
+            <rect width="1200" height="280" fill="url(#paper)"/>
 
-            {/* Soleil */}
-            <circle cx="220" cy="62" r="36" fill="#F8DC8E" opacity="0.9"/>
-            <circle cx="220" cy="62" r="26" fill="#F5C97A" opacity="0.85"/>
-
-            {/* Nuages doux */}
-            <g fill="#FFFFFF" opacity="0.55">
-              <ellipse cx="480" cy="55" rx="40" ry="9"/>
-              <ellipse cx="510" cy="50" rx="28" ry="8"/>
-              <ellipse cx="900" cy="75" rx="50" ry="10"/>
-              <ellipse cx="940" cy="68" rx="32" ry="9"/>
-              <ellipse cx="1080" cy="45" rx="36" ry="8"/>
+            {/* Hachures de ciel (très légères, en haut à gauche) */}
+            <g opacity="0.10">
+              <rect x="0" y="0" width="600" height="120" fill="url(#hatch)"/>
             </g>
 
-            {/* Oiseaux */}
-            <g opacity="0.55" fill="none" stroke="#3F5C4A" strokeWidth="2" strokeLinecap="round">
-              <path d="M380 95 q7 -7 14 0 q7 -7 14 0"/>
-              <path d="M460 78 q6 -6 12 0 q6 -6 12 0"/>
-              <path d="M820 105 q6 -6 12 0 q6 -6 12 0"/>
+            {/* Soleil — cercle au trait avec rayons */}
+            <g stroke="#1F4D38" strokeWidth="1" fill="none" opacity="0.55">
+              <circle cx="220" cy="68" r="30"/>
+              <circle cx="220" cy="68" r="22" strokeWidth="0.6"/>
+              {/* Petits rayons */}
+              <line x1="220" y1="22" x2="220" y2="32"/>
+              <line x1="220" y1="104" x2="220" y2="114"/>
+              <line x1="174" y1="68" x2="184" y2="68"/>
+              <line x1="256" y1="68" x2="266" y2="68"/>
+              <line x1="187" y1="35" x2="194" y2="42"/>
+              <line x1="246" y1="42" x2="253" y2="35"/>
+              <line x1="187" y1="101" x2="194" y2="94"/>
+              <line x1="246" y1="94" x2="253" y2="101"/>
             </g>
 
-            {/* Collines lointaines (plan 1) */}
-            <path d="M0,180 Q150,140 320,160 T640,150 T960,165 T1200,155 L1200,280 L0,280 Z" fill="url(#hillFar)" opacity="0.85"/>
+            {/* Oiseaux — traits libres */}
+            <g stroke="#1F4D38" strokeWidth="1.2" fill="none" strokeLinecap="round" opacity="0.7">
+              <path d="M380 88 q8 -8 16 0 q8 -8 16 0"/>
+              <path d="M460 70 q6 -6 12 0 q6 -6 12 0"/>
+              <path d="M820 100 q7 -7 14 0 q7 -7 14 0"/>
+              <path d="M1020 60 q5 -5 10 0 q5 -5 10 0"/>
+            </g>
 
-            {/* Collines moyennes (plan 2) */}
-            <path d="M0,200 Q200,165 420,185 T780,175 T1200,185 L1200,280 L0,280 Z" fill="url(#hillMid)" opacity="0.95"/>
+            {/* Nuages — au trait, hachurés */}
+            <g stroke="#1F4D38" strokeWidth="0.9" fill="none" opacity="0.45">
+              <path d="M460 58 q12 -14 30 -8 q14 -10 28 0 q10 -2 14 6 q-4 6 -14 6 l-44 0 q-12 0 -14 -4 z"/>
+              <path d="M880 78 q14 -16 34 -8 q16 -10 30 2 q10 -2 14 6 q-6 6 -16 6 l-48 0 q-12 0 -14 -6 z"/>
+            </g>
+            {/* Hachures intérieures nuages */}
+            <g opacity="0.18">
+              <path d="M460 58 q12 -14 30 -8 q14 -10 28 0 q10 -2 14 6 q-4 6 -14 6 l-44 0 q-12 0 -14 -4 z" fill="url(#hatch)"/>
+            </g>
 
-            {/* Maison gauche (sur colline moyenne) */}
+            {/* Collines lointaines — silhouettes au trait, hachures internes douces */}
+            <path d="M0,180 Q150,148 320,168 T640,158 T960,172 T1200,162 L1200,210 L0,210 Z" fill="url(#hatch)" opacity="0.18"/>
+            <path d="M0,180 Q150,148 320,168 T640,158 T960,172 T1200,162" stroke="#1F4D38" strokeWidth="1" fill="none" opacity="0.55"/>
+
+            {/* Collines moyennes */}
+            <path d="M0,205 Q200,175 420,193 T780,184 T1200,194 L1200,228 L0,228 Z" fill="url(#hatchDense)" opacity="0.20"/>
+            <path d="M0,205 Q200,175 420,193 T780,184 T1200,194" stroke="#1F4D38" strokeWidth="1.1" fill="none" opacity="0.7"/>
+
+            {/* === Maison gauche === */}
+            <g stroke="#1F4D38" strokeWidth="1.2" fill="none">
+              <rect x="80" y="170" width="62" height="42" fill="#F0EDE6"/>
+              <polygon points="74,170 148,170 111,138" fill="#F0EDE6"/>
+              <rect x="102" y="186" width="14" height="26"/>
+              <rect x="88" y="178" width="12" height="12"/>
+              <line x1="94" y1="178" x2="94" y2="190"/>
+              <line x1="88" y1="184" x2="100" y2="184"/>
+              <rect x="124" y="178" width="12" height="12"/>
+              <line x1="130" y1="178" x2="130" y2="190"/>
+              <line x1="124" y1="184" x2="136" y2="184"/>
+              <rect x="128" y="142" width="6" height="14"/>
+            </g>
+            {/* Hachures toit maison gauche */}
+            <polygon points="74,170 148,170 111,138" fill="url(#hatchDense)" opacity="0.45"/>
+            <polygon points="74,170 148,170 111,138" stroke="#1F4D38" strokeWidth="1.2" fill="none"/>
+
+            {/* Arbre près maison gauche — feuillage pointillé */}
             <g>
-              <rect x="80" y="170" width="62" height="42" fill="#E8DCC4"/>
-              <polygon points="74,170 148,170 111,138" fill="#B85E3C"/>
-              <rect x="102" y="186" width="14" height="26" fill="#5A4332"/>
-              <rect x="88" y="178" width="12" height="12" fill="#A8C8E0" opacity="0.85"/>
-              <rect x="124" y="178" width="12" height="12" fill="#A8C8E0" opacity="0.85"/>
-              <rect x="128" y="142" width="6" height="14" fill="#5A4332"/>
-            </g>
-            {/* Arbre près de la maison */}
-            <g>
-              <rect x="172" y="178" width="6" height="34" fill="#5A4332"/>
-              <ellipse cx="175" cy="170" rx="22" ry="26" fill="#3F7A57"/>
-              <ellipse cx="170" cy="164" rx="10" ry="12" fill="#52916C" opacity="0.7"/>
+              <line x1="175" y1="178" x2="175" y2="212" stroke="#1F4D38" strokeWidth="1.4"/>
+              <ellipse cx="175" cy="166" rx="22" ry="26" fill="url(#stipple)" opacity="0.55"/>
+              <ellipse cx="175" cy="166" rx="22" ry="26" stroke="#1F4D38" strokeWidth="1" fill="none"/>
             </g>
 
-            {/* Maison centrale (plus grande, derrière colline proche) */}
-            <g>
-              <rect x="540" y="158" width="84" height="56" fill="#EBE0C8"/>
-              <polygon points="534,158 630,158 582,118" fill="#A8533A"/>
-              <rect x="568" y="186" width="22" height="28" fill="#5A4332"/>
-              <rect x="548" y="170" width="16" height="14" fill="#A8C8E0" opacity="0.9"/>
-              <rect x="600" y="170" width="16" height="14" fill="#A8C8E0" opacity="0.9"/>
-              <rect x="604" y="120" width="8" height="18" fill="#5A4332"/>
-              {/* Fumée */}
-              <ellipse cx="610" cy="108" rx="7" ry="5" fill="#FFFFFF" opacity="0.75"/>
-              <ellipse cx="616" cy="96" rx="9" ry="6" fill="#FFFFFF" opacity="0.55"/>
-              <ellipse cx="622" cy="84" rx="11" ry="6" fill="#FFFFFF" opacity="0.4"/>
+            {/* === Maison centrale (église/grande maison) === */}
+            <g stroke="#1F4D38" strokeWidth="1.3" fill="none">
+              <rect x="540" y="158" width="84" height="56" fill="#F0EDE6"/>
+              <polygon points="534,158 630,158 582,118" fill="#F0EDE6"/>
+              <rect x="568" y="186" width="22" height="28"/>
+              <line x1="579" y1="186" x2="579" y2="214"/>
+              <rect x="548" y="170" width="16" height="14"/>
+              <line x1="556" y1="170" x2="556" y2="184"/>
+              <line x1="548" y1="177" x2="564" y2="177"/>
+              <rect x="600" y="170" width="16" height="14"/>
+              <line x1="608" y1="170" x2="608" y2="184"/>
+              <line x1="600" y1="177" x2="616" y2="177"/>
+              <rect x="604" y="120" width="8" height="18"/>
             </g>
+            <polygon points="534,158 630,158 582,118" fill="url(#hatchDense)" opacity="0.5"/>
+            <polygon points="534,158 630,158 582,118" stroke="#1F4D38" strokeWidth="1.3" fill="none"/>
+            {/* Fumée — volutes au trait */}
+            <g stroke="#1F4D38" strokeWidth="0.9" fill="none" opacity="0.55">
+              <path d="M608 116 q-6 -6 0 -12 q6 -6 0 -12"/>
+              <path d="M610 90 q-5 -5 0 -10 q5 -5 0 -10"/>
+            </g>
+
             {/* Arbres autour */}
             <g>
-              <rect x="488" y="172" width="7" height="42" fill="#5A4332"/>
-              <ellipse cx="491" cy="160" rx="26" ry="30" fill="#3F7A57"/>
-              <ellipse cx="486" cy="154" rx="11" ry="13" fill="#52916C" opacity="0.7"/>
+              <line x1="491" y1="172" x2="491" y2="214" stroke="#1F4D38" strokeWidth="1.5"/>
+              <ellipse cx="491" cy="158" rx="26" ry="30" fill="url(#stipple)" opacity="0.6"/>
+              <ellipse cx="491" cy="158" rx="26" ry="30" stroke="#1F4D38" strokeWidth="1.1" fill="none"/>
             </g>
             <g>
-              <rect x="650" y="180" width="6" height="34" fill="#5A4332"/>
-              <ellipse cx="653" cy="168" rx="20" ry="23" fill="#3F7A57"/>
+              <line x1="653" y1="180" x2="653" y2="214" stroke="#1F4D38" strokeWidth="1.3"/>
+              <ellipse cx="653" cy="166" rx="20" ry="23" fill="url(#stipple)" opacity="0.55"/>
+              <ellipse cx="653" cy="166" rx="20" ry="23" stroke="#1F4D38" strokeWidth="1" fill="none"/>
             </g>
 
-            {/* Maison droite */}
+            {/* === Maison droite === */}
+            <g stroke="#1F4D38" strokeWidth="1.2" fill="none">
+              <rect x="980" y="172" width="58" height="42" fill="#F0EDE6"/>
+              <polygon points="974,172 1044,172 1009,142" fill="#F0EDE6"/>
+              <rect x="999" y="190" width="14" height="24"/>
+              <rect x="986" y="180" width="12" height="12"/>
+              <line x1="992" y1="180" x2="992" y2="192"/>
+              <line x1="986" y1="186" x2="998" y2="186"/>
+              <rect x="1020" y="180" width="12" height="12"/>
+              <line x1="1026" y1="180" x2="1026" y2="192"/>
+              <line x1="1020" y1="186" x2="1032" y2="186"/>
+            </g>
+            <polygon points="974,172 1044,172 1009,142" fill="url(#hatchDense)" opacity="0.45"/>
+            <polygon points="974,172 1044,172 1009,142" stroke="#1F4D38" strokeWidth="1.2" fill="none"/>
             <g>
-              <rect x="980" y="172" width="58" height="42" fill="#E8DCC4"/>
-              <polygon points="974,172 1044,172 1009,142" fill="#B85E3C"/>
-              <rect x="999" y="190" width="14" height="24" fill="#5A4332"/>
-              <rect x="986" y="180" width="12" height="12" fill="#A8C8E0" opacity="0.85"/>
-              <rect x="1020" y="180" width="12" height="12" fill="#A8C8E0" opacity="0.85"/>
+              <line x1="1061" y1="174" x2="1061" y2="214" stroke="#1F4D38" strokeWidth="1.4"/>
+              <ellipse cx="1061" cy="160" rx="24" ry="28" fill="url(#stipple)" opacity="0.55"/>
+              <ellipse cx="1061" cy="160" rx="24" ry="28" stroke="#1F4D38" strokeWidth="1" fill="none"/>
             </g>
+
+            {/* Colline proche — hachurée croisée pour densité */}
+            <path d="M0,228 Q180,210 380,222 T720,218 T1100,225 T1200,220 L1200,280 L0,280 Z" fill="url(#crossHatch)" opacity="0.22"/>
+            <path d="M0,228 Q180,210 380,222 T720,218 T1100,225 T1200,220" stroke="#1F4D38" strokeWidth="1.3" fill="none" opacity="0.85"/>
+
+            {/* Prairie — hachures verticales très douces */}
+            <g opacity="0.16">
+              <rect x="0" y="240" width="1200" height="40" fill="url(#hatchDense)"/>
+            </g>
+
+            {/* Touffes d'herbe au trait */}
+            <g stroke="#1F4D38" strokeWidth="0.9" fill="none" opacity="0.7" strokeLinecap="round">
+              <path d="M50 262 l2 -10 M55 262 l1 -8 M60 262 l3 -11"/>
+              <path d="M250 262 l2 -9 M256 262 l2 -7 M262 262 l3 -10"/>
+              <path d="M530 264 l2 -8 M536 264 l2 -10 M542 264 l2 -7"/>
+              <path d="M880 264 l2 -10 M886 264 l3 -8 M892 264 l2 -11"/>
+              <path d="M1080 263 l2 -8 M1086 263 l3 -10 M1092 263 l2 -7"/>
+            </g>
+
+            {/* Petits buissons — trait + pointillés */}
             <g>
-              <rect x="1058" y="174" width="6" height="40" fill="#5A4332"/>
-              <ellipse cx="1061" cy="162" rx="24" ry="28" fill="#3F7A57"/>
+              <ellipse cx="120" cy="246" rx="32" ry="9" fill="url(#stipple)" opacity="0.5"/>
+              <path d="M88,246 q32,-18 64,0" stroke="#1F4D38" strokeWidth="1" fill="none" opacity="0.7"/>
+              <ellipse cx="350" cy="248" rx="44" ry="10" fill="url(#stipple)" opacity="0.5"/>
+              <path d="M306,248 q44,-20 88,0" stroke="#1F4D38" strokeWidth="1" fill="none" opacity="0.7"/>
+              <ellipse cx="780" cy="250" rx="58" ry="11" fill="url(#stipple)" opacity="0.5"/>
+              <path d="M722,250 q58,-22 116,0" stroke="#1F4D38" strokeWidth="1" fill="none" opacity="0.7"/>
+              <ellipse cx="1130" cy="247" rx="48" ry="10" fill="url(#stipple)" opacity="0.5"/>
+              <path d="M1082,247 q48,-20 96,0" stroke="#1F4D38" strokeWidth="1" fill="none" opacity="0.7"/>
             </g>
 
-            {/* Collines proches (plan 3 - foncées) */}
-            <path d="M0,222 Q180,200 380,215 T720,210 T1100,218 T1200,212 L1200,280 L0,280 Z" fill="url(#hillNear)"/>
-
-            {/* Prairie premier plan */}
-            <path d="M0,238 Q300,228 600,238 T1200,236 L1200,280 L0,280 Z" fill="url(#meadow)"/>
-
-            {/* Petits buissons / haie */}
-            <g fill="#3F7A57" opacity="0.75">
-              <ellipse cx="120" cy="246" rx="32" ry="9"/>
-              <ellipse cx="350" cy="248" rx="44" ry="10"/>
-              <ellipse cx="780" cy="250" rx="58" ry="11"/>
-              <ellipse cx="1130" cy="247" rx="48" ry="10"/>
+            {/* === Chien — silhouette à la plume === */}
+            <g stroke="#1F4D38" strokeWidth="1.3" fill="#F0EDE6" transform="translate(330, 220)">
+              <ellipse cx="34" cy="20" rx="32" ry="13"/>
+              <circle cx="62" cy="13" r="11"/>
+              <ellipse cx="69" cy="8" rx="5" ry="9" transform="rotate(15,69,8)"/>
+              <path d="M2,18 Q-14,9 -10,2" fill="none" strokeLinecap="round"/>
+              <rect x="10" y="30" width="5" height="14" rx="2"/>
+              <rect x="20" y="30" width="5" height="12" rx="2"/>
+              <rect x="38" y="30" width="5" height="14" rx="2"/>
+              <rect x="48" y="30" width="5" height="12" rx="2"/>
+              <circle cx="65" cy="11" r="1.2" fill="#1F4D38" stroke="none"/>
+              <ellipse cx="71" cy="17" rx="2" ry="1.6" fill="#1F4D38" stroke="none"/>
             </g>
-            {/* Touffes d'herbe */}
-            <g fill="#5E9B70" opacity="0.8">
-              <path d="M50,260 l3,-10 l3,10 z"/>
-              <path d="M58,260 l3,-8 l3,8 z"/>
-              <path d="M250,260 l3,-9 l3,9 z"/>
-              <path d="M260,262 l3,-7 l3,7 z"/>
-              <path d="M530,262 l3,-8 l3,8 z"/>
-              <path d="M880,262 l3,-9 l3,9 z"/>
-              <path d="M890,263 l3,-7 l3,7 z"/>
-              <path d="M1080,261 l3,-8 l3,8 z"/>
+            {/* Hachures de volume sur le chien */}
+            <g stroke="#1F4D38" strokeWidth="0.5" opacity="0.55" transform="translate(330, 220)">
+              <line x1="14" y1="22" x2="22" y2="30"/>
+              <line x1="20" y1="22" x2="28" y2="30"/>
+              <line x1="26" y1="22" x2="34" y2="30"/>
+              <line x1="32" y1="22" x2="40" y2="30"/>
+              <line x1="38" y1="22" x2="46" y2="30"/>
+              <line x1="44" y1="22" x2="52" y2="30"/>
             </g>
 
-            {/* Chien (premier plan) */}
-            <g transform="translate(330, 222)">
-              <ellipse cx="34" cy="20" rx="32" ry="13" fill="#8B6F47"/>
-              <circle cx="62" cy="13" r="11" fill="#8B6F47"/>
-              <ellipse cx="69" cy="8" rx="5" ry="9" transform="rotate(15,69,8)" fill="#6B5436"/>
-              <path d="M2,18 Q-14,9 -10,2" stroke="#8B6F47" strokeWidth="3.5" fill="none" strokeLinecap="round"/>
-              <rect x="10" y="30" width="5" height="14" rx="2" fill="#6B5436"/>
-              <rect x="20" y="30" width="5" height="12" rx="2" fill="#6B5436"/>
-              <rect x="38" y="30" width="5" height="14" rx="2" fill="#6B5436"/>
-              <rect x="48" y="30" width="5" height="12" rx="2" fill="#6B5436"/>
-              <ellipse cx="71" cy="17" rx="3" ry="2.5" fill="#1F1A14"/>
-              <circle cx="65" cy="11" r="1.5" fill="#1F1A14"/>
+            {/* === Chat — silhouette à la plume === */}
+            <g stroke="#1F4D38" strokeWidth="1.3" fill="#F0EDE6" transform="translate(820, 222)">
+              <ellipse cx="18" cy="22" rx="16" ry="17"/>
+              <circle cx="18" cy="7" r="11"/>
+              <polygon points="9,1 5,-9 16,-3"/>
+              <polygon points="27,1 31,-9 20,-3"/>
+              <path d="M34,30 Q48,22 44,12" fill="none" strokeLinecap="round"/>
+              <ellipse cx="13" cy="7" rx="1.6" ry="2.2" fill="#1F4D38" stroke="none"/>
+              <ellipse cx="23" cy="7" rx="1.6" ry="2.2" fill="#1F4D38" stroke="none"/>
+              <path d="M16 12 q2 1.5 4 0" fill="none" strokeWidth="0.8"/>
+              {/* Moustaches */}
+              <line x1="6" y1="11" x2="-2" y2="10" strokeWidth="0.5"/>
+              <line x1="6" y1="13" x2="-2" y2="14" strokeWidth="0.5"/>
+              <line x1="30" y1="11" x2="38" y2="10" strokeWidth="0.5"/>
+              <line x1="30" y1="13" x2="38" y2="14" strokeWidth="0.5"/>
             </g>
-
-            {/* Chat (premier plan, à droite) */}
-            <g transform="translate(820, 224)">
-              <ellipse cx="18" cy="22" rx="16" ry="17" fill="#5A4332"/>
-              <circle cx="18" cy="7" r="11" fill="#5A4332"/>
-              <polygon points="9,1 5,-9 16,-3" fill="#5A4332"/>
-              <polygon points="27,1 31,-9 20,-3" fill="#5A4332"/>
-              <path d="M34,30 Q48,22 44,12" stroke="#5A4332" strokeWidth="3" fill="none" strokeLinecap="round"/>
-              <ellipse cx="13" cy="7" rx="2.2" ry="2.8" fill="#F8DC8E"/>
-              <ellipse cx="23" cy="7" rx="2.2" ry="2.8" fill="#F8DC8E"/>
-              <circle cx="13" cy="7" r="0.8" fill="#1F1A14"/>
-              <circle cx="23" cy="7" r="0.8" fill="#1F1A14"/>
+            <g stroke="#1F4D38" strokeWidth="0.5" opacity="0.5" transform="translate(820, 222)">
+              <line x1="6" y1="20" x2="14" y2="32"/>
+              <line x1="12" y1="20" x2="20" y2="32"/>
+              <line x1="18" y1="20" x2="26" y2="32"/>
+              <line x1="24" y1="20" x2="32" y2="32"/>
             </g>
 
             {/* Fade bas vers la page */}
@@ -856,8 +918,8 @@ export default function PublicSitterProfile() {
           </svg>
         </div>
 
-        {/* Vignettage subtil */}
-        <div className="absolute inset-0 z-[1] pointer-events-none" style={{ background: 'radial-gradient(ellipse at center, transparent 50%, rgba(31,42,33,0.10) 100%)' }} />
+        {/* Vignettage très subtil */}
+        <div className="absolute inset-0 z-[1] pointer-events-none" style={{ background: 'radial-gradient(ellipse at center, transparent 55%, rgba(31,77,56,0.07) 100%)' }} />
 
         {/* Dégradé bas */}
         <div className="absolute bottom-0 left-0 right-0 h-20 z-[1] bg-gradient-to-b from-transparent to-background pointer-events-none" />
