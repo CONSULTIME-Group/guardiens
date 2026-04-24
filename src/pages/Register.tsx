@@ -11,7 +11,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
 import { getSignupRedirectUrl } from "@/lib/authRedirect";
 import { useToast } from "@/hooks/use-toast";
-import { trackEvent, trackEventWithUserId } from "@/lib/analytics";
+import { trackEvent, trackEventWithUserId, mapSignupError } from "@/lib/analytics";
 import { Eye, EyeOff, MailCheck, Info } from "lucide-react";
 import {
   Dialog,
@@ -116,7 +116,12 @@ const Register = () => {
 
     if (isObviouslyWeak(password)) {
       setFormError("Ce mot de passe est trop courant. Mélangez plusieurs mots, chiffres ou symboles (par exemple une phrase de passe).");
-      trackEvent("signup_failed", { source: "/register", metadata: { reason: "weak_password_local", role: selectedRole } });
+      try {
+        trackEvent("signup_failed", {
+          source: "/register",
+          metadata: { stage: "auth", error_code: "weak_password", error_message: "weak_password_local", role: selectedRole },
+        });
+      } catch {}
       return;
     }
 
@@ -130,6 +135,14 @@ const Register = () => {
       return;
     }
 
+    // ── signup_form_submitted (après validation client, avant appel Supabase) ──
+    try {
+      trackEvent("signup_form_submitted", {
+        source: "/register",
+        metadata: { role: selectedRole },
+      });
+    } catch {}
+
     setIsLoading(true);
     const cleanEmail = email.trim().toLowerCase();
     const timeoutPromise = new Promise((_, reject) =>
@@ -141,6 +154,49 @@ const Register = () => {
         register(cleanEmail, password, selectedRole),
         timeoutPromise,
       ]) as any;
+
+      // ── Vérification explicite que le profil a bien été créé par le trigger DB ──
+      const newUserId = result?.user?.id ?? null;
+      let profileExists = false;
+      if (newUserId) {
+        const checkProfile = async () => {
+          const { data } = await supabase
+            .from("profiles")
+            .select("id")
+            .eq("id", newUserId)
+            .maybeSingle();
+          return !!data;
+        };
+        profileExists = await checkProfile();
+        if (!profileExists) {
+          // Petit délai pour laisser le trigger handle_new_user s'exécuter
+          await new Promise((r) => setTimeout(r, 500));
+          profileExists = await checkProfile();
+        }
+        if (!profileExists) {
+          try {
+            trackEventWithUserId(newUserId, "signup_failed", {
+              source: "/register",
+              metadata: {
+                stage: "profile_creation",
+                error_code: "trigger_missing",
+                error_message: "Profile row not found after signup",
+                role: selectedRole,
+              },
+            });
+          } catch {}
+          // On ne bloque pas l'UX : on laisse continuer le flow normal,
+          // mais on n'émet PAS signup_completed pour ce parcours.
+        }
+      }
+
+      // Flag pour émettre user_activated lors du premier dashboard
+      try {
+        if (typeof window !== "undefined") {
+          localStorage.setItem("first_dashboard_seen", "pending");
+          if (newUserId) localStorage.setItem("first_dashboard_role", selectedRole);
+        }
+      } catch {}
 
       // Process referral code after successful signup
       const storedRef = sessionStorage.getItem("guardiens_ref");

@@ -9,8 +9,10 @@ export type EventType =
   | "page_view"
   | "signup_started"
   | "signup_role_selected"
+  | "signup_form_submitted"
   | "signup_completed"
   | "signup_failed"
+  | "user_activated"
   | "cta_click"
   | "login_completed"
   | "cp_recovered"
@@ -20,7 +22,11 @@ export type EventType =
   | "sit_view"
   | "sit_apply_clicked"
   | "sit_apply_blocked"
-  | "sit_share_opened";
+  | "sit_share_clicked"
+  | "referral_link_copied"
+  | "page_view_pre_launch"
+  | "cta_complete_profile"
+  | "advantage_link_click";
 
 interface TrackOptions {
   source?: string;
@@ -66,4 +72,24 @@ export async function trackEventWithUserId(
   } catch {
     // silencieux
   }
+}
+
+/**
+ * Normalise une erreur de signup Supabase vers un code stable pour le funnel.
+ */
+export function mapSignupError(message: string | undefined | null): string {
+  const m = (message || "").toLowerCase();
+  if (m.includes("already registered") || m.includes("already been registered") || m.includes("user already")) {
+    return "already_registered";
+  }
+  if (m.includes("password should be at least") || m.includes("weak_password") || m.includes("weak password") || m.includes("password is too weak")) {
+    return "weak_password";
+  }
+  if (m.includes("invalid email") || m.includes("email address") && m.includes("invalid")) {
+    return "invalid_email";
+  }
+  if (m === "timeout") {
+    return "timeout";
+  }
+  return "unknown";
 }
