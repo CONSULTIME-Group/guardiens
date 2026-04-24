@@ -115,9 +115,9 @@ export function useOwnerProfile() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
-  const fetchData = useCallback(async () => {
+  const fetchData = useCallback(async (opts?: { silent?: boolean }) => {
     if (!user) return;
-    setLoading(true);
+    if (!opts?.silent) setLoading(true);
 
     const [profileRes, propertyRes, ownerRes, sitterRes] = await Promise.all([
       supabase.from("profiles").select("*").eq("id", user.id).single(),
@@ -191,7 +191,7 @@ export function useOwnerProfile() {
     }
     setOwnerProfileId(o?.id ?? null);
 
-    setLoading(false);
+    if (!opts?.silent) setLoading(false);
   }, [user]);
 
   useEffect(() => { fetchData(); }, [fetchData]);
@@ -288,6 +288,8 @@ export function useOwnerProfile() {
 
       // Recompute canonical completion server-side and refresh local + global state
       await supabase.rpc("calculate_profile_completion", { p_user_id: user.id });
+      // Re-fetch fresh data from DB so the sidebar reflects committed state immediately.
+      await fetchData({ silent: true });
       await refreshCompletion();
       await refreshProfile();
 
@@ -301,7 +303,7 @@ export function useOwnerProfile() {
     } finally {
       setSaving(false);
     }
-  }, [user, data, pets.length, propertyId, ownerProfileId, refreshCompletion, refreshProfile, toast]);
+  }, [user, data, pets.length, propertyId, ownerProfileId, fetchData, refreshCompletion, refreshProfile, toast]);
 
   const addPet = useCallback(async (pet: Pet) => {
     const pid = propertyId;
