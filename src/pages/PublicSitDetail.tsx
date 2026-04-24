@@ -218,6 +218,18 @@ const PublicSitDetail = () => {
         <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>
       </Helmet>
 
+      {/* Barre de retour pour les membres connectés (la page publique n'a pas le header app) */}
+      {isAuthenticated && (
+        <div className="bg-card border-b border-border px-4 py-3 flex flex-wrap items-center justify-between gap-2">
+          <Link to="/dashboard" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground">
+            <ArrowLeft className="h-4 w-4" /> Retour au tableau de bord
+          </Link>
+          <Link to={`/sits/${sit.id}`} className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline">
+            Voir la fiche complète <ExternalLink className="h-3.5 w-3.5" />
+          </Link>
+        </div>
+      )}
+
       {/* Hero photo */}
       {photos.length > 0 && (
         <img src={photos[0]} alt={`Logement à ${cityForTitle} — annonce de garde Guardiens`} className="w-full h-64 md:h-80 object-cover" loading="eager" />
