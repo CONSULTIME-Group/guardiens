@@ -946,13 +946,16 @@ async function main() {
   if (totalErrors > 0)    console.log(c("red",    `  💥 ${totalErrors} erreur(s) réseau`));
 
   // Complète le résumé dans le rapport
-  report.summary = { blockingIssues, warnings, totalErrors };
+  report.summary = { blockingIssues, warnings, totalErrors, checkMode, strictMode };
 
   // ─── Rapports JSON / HTML ────────────────────────────────────────────
   if (reportJsonPath) writeJsonReport(report, reportJsonPath);
   if (reportHtmlPath) writeHtmlReport(report, reportHtmlPath);
 
-  if (blockingIssues === 0 && totalErrors === 0) {
+  // En mode --check, toute divergence (même un warning pré-rendu) fait échouer.
+  const hasAnyIssue = blockingIssues > 0 || totalErrors > 0 || (checkMode && warnings > 0);
+
+  if (!hasAnyIssue) {
     if (warnings > 0) {
       console.log(c("dim", "\n💡 Les routes non-home ne sont pas pré-rendues : les bots sociaux lisent index.html."));
       console.log(c("dim", "   Activez Prerender.io / SSR pour que FB & LinkedIn voient les bons titres par page.\n"));
@@ -962,7 +965,11 @@ async function main() {
     process.exit(0);
   }
 
-  console.log(c("dim", "\n💡 Si seule la prod diverge : purger Prerender.io / Cloudflare puis relancer.\n"));
+  if (checkMode && warnings > 0 && blockingIssues === 0 && totalErrors === 0) {
+    console.log(c("red", `\n❌ --check : ${warnings} divergence(s) détectée(s) — le build doit être bloqué.\n`));
+  } else {
+    console.log(c("dim", "\n💡 Si seule la prod diverge : purger Prerender.io / Cloudflare puis relancer.\n"));
+  }
   process.exit(1);
 }
 
