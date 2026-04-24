@@ -134,7 +134,7 @@ const ProfileSidebar = ({
                               </ul>
                             ) : (
                               <p className="text-[11px] text-amber-700 leading-snug break-words">
-                                → {labels[0]}
+                                Il manque : <span className="font-medium">{labels[0]}</span>
                               </p>
                             )}
                           </TooltipTrigger>
