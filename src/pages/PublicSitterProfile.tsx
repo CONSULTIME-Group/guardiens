@@ -100,7 +100,6 @@ export default function PublicSitterProfile() {
   const [hasActiveSubscription, setHasActiveSubscription] = useState(false);
   const [lightboxIdx, setLightboxIdx] = useState<number | null>(null);
   const [heroPickerOpen, setHeroPickerOpen] = useState(false);
-  const [heroSaving, setHeroSaving] = useState(false);
   const [badgesBySitId, setBadgesBySitId] = useState<Record<string, string[]>>({});
   const [activeTab, setActiveTab] = useState<ProfileTab>('gardien');
   const [pets, setPets] = useState<any[]>([]);
