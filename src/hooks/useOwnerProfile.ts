@@ -115,9 +115,9 @@ export function useOwnerProfile() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
-  const fetchData = useCallback(async () => {
+  const fetchData = useCallback(async (opts?: { silent?: boolean }) => {
     if (!user) return;
-    setLoading(true);
+    if (!opts?.silent) setLoading(true);
 
     const [profileRes, propertyRes, ownerRes, sitterRes] = await Promise.all([
       supabase.from("profiles").select("*").eq("id", user.id).single(),
@@ -191,7 +191,7 @@ export function useOwnerProfile() {
     }
     setOwnerProfileId(o?.id ?? null);
 
-    setLoading(false);
+    if (!opts?.silent) setLoading(false);
   }, [user]);
 
   useEffect(() => { fetchData(); }, [fetchData]);
