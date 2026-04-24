@@ -294,6 +294,7 @@ const AppRoutes = () => (
       </Route>
       <Route path="/planche-badges" element={<PlancheBadges />} />
       <Route path="/test/badges-long-labels" element={<TestBadgesLongLabels />} />
+      <Route path="/test/hero-gallery" element={<TestHeroGallery />} />
       <Route path="/test/error-boundary" element={<TestErrorBoundary />} />
       <Route path="/unsubscribe" element={<Unsubscribe />} />
       <Route path="*" element={<NotFound />} />
