@@ -107,7 +107,7 @@ const SitDetail = () => {
   useEffect(() => {
     if (!id) return;
     const load = async () => {
-      const { data: sitData } = await supabase.from("sits").select("*").eq("id", id).single();
+      const { data: sitData } = await supabase.from("sits").select("*").eq("id", id).maybeSingle();
       if (!sitData) { setLoading(false); return; }
       setSit(sitData as SitData);
       setLogementOverride((sitData as any).logement_override || "");
