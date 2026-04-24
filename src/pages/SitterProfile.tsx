@@ -217,6 +217,23 @@ const SitterProfile = () => {
   // edits in progress (and doesn't show a stale "1 point manquant" after save/refresh).
   const liveMissingFields = computeSitterMissingFields(mergedData);
 
+  // Critères pesant dans le score (réplique du barème SQL calculate_profile_completion).
+  // Calculés ici pour pouvoir afficher la jauge en LIVE et éviter une divergence avec la valeur DB
+  // mise en cache. Total = 100 par construction (essentiels 80 + bonus 20).
+  const sitterEssentials: ScoreCriterion[] = [
+    { label: "Prénom + code postal", points: 15, ok: !!(mergedData.first_name && mergedData.postal_code) },
+    { label: "Photo de profil", points: 20, ok: !!mergedData.avatar_url, hint: "Ajoutez une photo dans Identité." },
+    { label: "Au moins 1 compétence", points: 15, ok: (mergedData.competences?.length ?? 0) > 0, hint: "Onglet Compétences." },
+    { label: "Au moins 1 mode de vie", points: 15, ok: (mergedData.lifestyle?.length ?? 0) > 0, hint: "Onglet Profil gardien." },
+    { label: "Rayon géographique défini", points: 15, ok: (mergedData.geographic_radius ?? 0) > 0, hint: "Onglet Mobilité & Rayon." },
+  ];
+  const sitterBonuses: ScoreCriterion[] = [
+    { label: "Bio ≥ 50 caractères", points: 10, ok: (mergedData.bio?.length ?? 0) >= 50, hint: `${mergedData.bio?.length ?? 0}/50 caractères.` },
+    { label: "Au moins 1 photo de galerie", points: 5, ok: hasGalleryPhoto, hint: "Onglet Galerie." },
+    { label: "Identité vérifiée", points: 5, ok: !!user?.identityVerified, hint: "Paramètres → Vérification." },
+  ];
+  const liveScore = Math.min(100, [...sitterEssentials, ...sitterBonuses].reduce((s, c) => s + (c.ok ? c.points : 0), 0));
+
   const sidebarSections: SidebarSection[] = SECTIONS_META.map(s => ({
     ...s,
     complete: s.optional ? false : sectionComplete(s.num, mergedData),
