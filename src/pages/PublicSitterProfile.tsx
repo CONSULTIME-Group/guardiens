@@ -678,8 +678,11 @@ export default function PublicSitterProfile() {
       {/* ── HERO FUSIONNÉ : illustration carnet de voyage (banque de 50, hashée par sitter.id) ── */}
       <div className="relative overflow-hidden w-full min-h-[320px] sm:min-h-[360px] md:min-h-[340px] flex items-end bg-[#FBF6EC]">
         {/* Illustration de fond — sketchbook style, déterministe par profil.
-            Zoom + recadrage centre-droit pour éloigner les bords (spirales de carnet,
-            texte parasite parfois présents sur les marges des illustrations IA). */}
+            Recadrage responsive en 3 paliers pour éliminer les artefacts (spirales
+            de carnet, texte parasite) présents sur les marges des illustrations IA :
+              - mobile (<640) : zoom fort 125%, position centrée pour rogner les 4 bords
+              - tablette (≥640) : zoom 115%, légèrement décentré à droite
+              - desktop (≥768) : zoom 108%, recentré (les bords sortent naturellement) */}
         <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
           <img
             src={getSitterHeroImage(id)}
@@ -687,8 +690,7 @@ export default function PublicSitterProfile() {
             aria-hidden="true"
             width={1536}
             height={544}
-            className="w-full h-full object-cover scale-[1.18] sm:scale-110 origin-center"
-            style={{ objectPosition: '60% 45%' }}
+            className="w-full h-full object-cover origin-center scale-[1.25] sm:scale-[1.15] md:scale-[1.08] [object-position:50%_50%] sm:[object-position:58%_45%] md:[object-position:50%_42%]"
           />
         </div>
 
