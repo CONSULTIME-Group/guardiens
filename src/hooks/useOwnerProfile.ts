@@ -345,10 +345,7 @@ export function useOwnerProfile() {
       const nextData = { ...data, avatar_url: publicUrl };
       const { error: updateError } = await supabase
         .from("profiles")
-        .update({
-          avatar_url: publicUrl,
-          profile_completion: computeCompletion(nextData, pets.length),
-        })
+        .update({ avatar_url: publicUrl })
         .eq("id", user.id);
 
       if (updateError) {
@@ -358,15 +355,17 @@ export function useOwnerProfile() {
       }
 
       setData(nextData);
+      await supabase.rpc("calculate_profile_completion", { p_user_id: user.id });
+      await refreshCompletion();
     }
 
     return publicUrl;
-  }, [user, toast, data, pets.length, computeCompletion]);
+  }, [user, toast, data, refreshCompletion]);
 
   return {
     data, pets, loading, saving, propertyId, lastSyncedAt,
     saveStep, addPet, updatePet, removePet, uploadPhoto,
-    completion: computeCompletion(data, pets.length),
+    completion,
     missingFields: computeMissingFields(data, pets.length),
   };
 }
