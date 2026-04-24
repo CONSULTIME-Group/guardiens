@@ -948,15 +948,15 @@ export default function PublicSitterProfile() {
                 reviewCount > 0 || completedSits > 0 || totalBadgeCount > 0 || identityVerified;
 
               return (
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5 md:gap-3">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-2.5 md:gap-3">
                   {/* Tuile 1 — Animaux acceptés */}
-                  <div className="bg-card border border-border rounded-xl p-3.5 md:p-4 flex flex-col gap-1.5 min-h-[92px]">
-                    <div className="flex items-center gap-1.5 text-[11px] uppercase tracking-wider text-muted-foreground font-body">
-                      <PawPrint className="w-3.5 h-3.5 text-primary" aria-hidden="true" />
-                      Animaux
+                  <div className="bg-card border border-border rounded-xl p-2.5 sm:p-3.5 md:p-4 flex flex-col gap-1 sm:gap-1.5 min-h-[88px] sm:min-h-[92px] min-w-0">
+                    <div className="flex items-center gap-1 sm:gap-1.5 text-[10px] sm:text-[11px] uppercase tracking-wider text-muted-foreground font-body">
+                      <PawPrint className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-primary shrink-0" aria-hidden="true" />
+                      <span className="truncate">Animaux</span>
                     </div>
                     {animalTypes.length > 0 ? (
-                      <p className="text-sm text-foreground font-body leading-snug line-clamp-2">
+                      <p className="text-xs sm:text-sm text-foreground font-body leading-snug line-clamp-2 break-words">
                         {animalTypes.map(a => ANIMAL_LABELS[a] || a).join(', ')}
                       </p>
                     ) : (
@@ -965,44 +965,44 @@ export default function PublicSitterProfile() {
                   </div>
 
                   {/* Tuile 2 — Zone d'intervention */}
-                  <div className="bg-card border border-border rounded-xl p-3.5 md:p-4 flex flex-col gap-1.5 min-h-[92px]">
-                    <div className="flex items-center gap-1.5 text-[11px] uppercase tracking-wider text-muted-foreground font-body">
-                      {hasVehicle ? <Car className="w-3.5 h-3.5 text-primary" aria-hidden="true" /> : <MapPin className="w-3.5 h-3.5 text-primary" aria-hidden="true" />}
-                      Zone
+                  <div className="bg-card border border-border rounded-xl p-2.5 sm:p-3.5 md:p-4 flex flex-col gap-1 sm:gap-1.5 min-h-[88px] sm:min-h-[92px] min-w-0">
+                    <div className="flex items-center gap-1 sm:gap-1.5 text-[10px] sm:text-[11px] uppercase tracking-wider text-muted-foreground font-body">
+                      {hasVehicle ? <Car className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-primary shrink-0" aria-hidden="true" /> : <MapPin className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-primary shrink-0" aria-hidden="true" />}
+                      <span className="truncate">Zone</span>
                     </div>
                     {radius || city ? (
-                      <p className="text-sm text-foreground font-body leading-snug">
+                      <p className="text-xs sm:text-sm text-foreground font-body leading-snug break-words">
                         {radius && city ? (
-                          <><span className="font-semibold">Rayon {radius} km</span> · {city}</>
+                          <><span className="font-semibold whitespace-nowrap">Rayon {radius} km</span> <span className="text-muted-foreground">·</span> <span className="break-words">{city}</span></>
                         ) : radius ? (
-                          <><span className="font-semibold">Rayon {radius} km</span></>
+                          <span className="font-semibold whitespace-nowrap">Rayon {radius} km</span>
                         ) : (
-                          <>Secteur : <span className="font-semibold">{city}</span></>
+                          <>Secteur : <span className="font-semibold break-words">{city}</span></>
                         )}
                       </p>
                     ) : (
                       <Empty label="Non renseigné" />
                     )}
-                    <span className={`text-[11px] font-body ${hasVehicle ? 'text-primary' : 'text-muted-foreground/70'}`}>
+                    <span className={`text-[10px] sm:text-[11px] font-body ${hasVehicle ? 'text-primary' : 'text-muted-foreground/70'}`}>
                       {hasVehicle ? 'Avec véhicule' : 'Sans véhicule'}
                     </span>
                   </div>
 
                   {/* Tuile 3 — Disponibilité */}
-                  <div className="bg-card border border-border rounded-xl p-3.5 md:p-4 flex flex-col gap-1.5 min-h-[92px]">
-                    <div className="flex items-center gap-1.5 text-[11px] uppercase tracking-wider text-muted-foreground font-body">
-                      <BadgeCheck className="w-3.5 h-3.5 text-primary" aria-hidden="true" />
-                      Disponibilité
+                  <div className="bg-card border border-border rounded-xl p-2.5 sm:p-3.5 md:p-4 flex flex-col gap-1 sm:gap-1.5 min-h-[88px] sm:min-h-[92px] min-w-0">
+                    <div className="flex items-center gap-1 sm:gap-1.5 text-[10px] sm:text-[11px] uppercase tracking-wider text-muted-foreground font-body">
+                      <BadgeCheck className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-primary shrink-0" aria-hidden="true" />
+                      <span className="truncate">Disponibilité</span>
                     </div>
                     {isAvailable ? (
-                      <p className="text-sm text-foreground font-body leading-snug">
+                      <p className="text-xs sm:text-sm text-foreground font-body leading-snug break-words">
                         <span className="font-semibold text-primary">Disponible</span>
                         {durationLabel && (
                           <span className="text-muted-foreground"> · {durationLabel.replace(' minimum', ' min.')}</span>
                         )}
                       </p>
                     ) : hasAvailabilityHint ? (
-                      <p className="text-sm text-foreground/80 font-body leading-snug">
+                      <p className="text-xs sm:text-sm text-foreground/80 font-body leading-snug break-words">
                         <span className="font-medium">Sur demande</span>
                         {(durationLabel || frequencyLabel) && (
                           <span className="text-muted-foreground"> · {durationLabel || frequencyLabel}</span>
@@ -1012,36 +1012,36 @@ export default function PublicSitterProfile() {
                       <Empty label="Non renseigné" />
                     )}
                     {typeLine && (
-                      <span className="text-[11px] text-muted-foreground font-body line-clamp-1">{typeLine}</span>
+                      <span className="text-[10px] sm:text-[11px] text-muted-foreground font-body line-clamp-1">{typeLine}</span>
                     )}
                   </div>
 
                   {/* Tuile 4 — Confiance / preuves */}
-                  <div className="bg-card border border-border rounded-xl p-3.5 md:p-4 flex flex-col gap-1.5 min-h-[92px]">
-                    <div className="flex items-center gap-1.5 text-[11px] uppercase tracking-wider text-muted-foreground font-body">
-                      <Shield className="w-3.5 h-3.5 text-primary" aria-hidden="true" />
-                      Confiance
+                  <div className="bg-card border border-border rounded-xl p-2.5 sm:p-3.5 md:p-4 flex flex-col gap-1 sm:gap-1.5 min-h-[88px] sm:min-h-[92px] min-w-0">
+                    <div className="flex items-center gap-1 sm:gap-1.5 text-[10px] sm:text-[11px] uppercase tracking-wider text-muted-foreground font-body">
+                      <Shield className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-primary shrink-0" aria-hidden="true" />
+                      <span className="truncate">Confiance</span>
                     </div>
                     {hasTrustSignals ? (
                       <>
-                        <div className="flex items-baseline gap-2 text-sm text-foreground font-body">
+                        <div className="flex items-baseline flex-wrap gap-x-1.5 gap-y-0.5 text-xs sm:text-sm text-foreground font-body">
                           {reviewCount > 0 ? (
                             <>
-                              <span className="font-semibold">{avgRating.toFixed(1)}<span className="text-primary">★</span></span>
-                              <span className="text-muted-foreground text-xs">({reviewCount} avis)</span>
+                              <span className="font-semibold whitespace-nowrap">{avgRating.toFixed(1)}<span className="text-primary">★</span></span>
+                              <span className="text-muted-foreground text-[11px] sm:text-xs">({reviewCount} avis)</span>
                             </>
                           ) : identityVerified ? (
-                            <span className="text-foreground/80 text-xs">Identité vérifiée</span>
+                            <span className="text-foreground/80 text-[11px] sm:text-xs">Identité vérifiée</span>
                           ) : (
-                            <span className="text-muted-foreground text-xs italic">Aucun avis</span>
+                            <span className="text-muted-foreground text-[11px] sm:text-xs italic">Aucun avis</span>
                           )}
                         </div>
-                        <div className="flex flex-wrap gap-x-1.5 gap-y-0.5 text-[11px] text-muted-foreground font-body">
-                          {completedSits > 0 && <span>{completedSits} garde{completedSits > 1 ? 's' : ''}</span>}
+                        <div className="flex flex-wrap gap-x-1 sm:gap-x-1.5 gap-y-0.5 text-[10px] sm:text-[11px] text-muted-foreground font-body">
+                          {completedSits > 0 && <span className="whitespace-nowrap">{completedSits} garde{completedSits > 1 ? 's' : ''}</span>}
                           {completedSits > 0 && totalBadgeCount > 0 && <span aria-hidden="true">·</span>}
-                          {totalBadgeCount > 0 && <span>{totalBadgeCount} écusson{totalBadgeCount > 1 ? 's' : ''}</span>}
+                          {totalBadgeCount > 0 && <span className="whitespace-nowrap">{totalBadgeCount} écusson{totalBadgeCount > 1 ? 's' : ''}</span>}
                           {reviewCount > 0 && identityVerified && (completedSits > 0 || totalBadgeCount > 0) && <span aria-hidden="true">·</span>}
-                          {reviewCount > 0 && identityVerified && <span>ID vérifiée</span>}
+                          {reviewCount > 0 && identityVerified && <span className="whitespace-nowrap">ID vérifiée</span>}
                         </div>
                       </>
                     ) : (
@@ -1087,7 +1087,7 @@ export default function PublicSitterProfile() {
                     Contacter {firstName}
                   </button>
                 )}
-                <p className="text-xs text-muted-foreground font-body sm:ml-2 self-center text-center sm:text-left">
+                <p className="text-[11px] sm:text-xs text-muted-foreground font-body sm:ml-2 self-center text-center sm:text-left leading-snug break-words">
                   Contact direct, sans intermédiaire.
                 </p>
               </div>
