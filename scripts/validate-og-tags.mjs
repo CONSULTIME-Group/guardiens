@@ -575,17 +575,18 @@ async function validateRobots(origin, routes, siteUrl) {
 async function main() {
   console.log(c("bold", "\n🔎 Validation SEO — OG, canonical, schema, sitemap, robots\n"));
 
-  const { routes, siteUrl } = loadSiteConfig();
-  const filteredRoutes = pathFilter
+  const { routes, siteUrl, defaultOgImage, dynamicConfigs } = loadSiteConfig();
+  const filteredStaticRoutes = pathFilter
     ? routes.filter((r) => pathFilter.includes(r.path))
     : routes;
 
-  if (filteredRoutes.length === 0) {
+  if (filteredStaticRoutes.length === 0) {
     console.error(c("red", "❌ Aucune route ne correspond au filtre --paths."));
     process.exit(2);
   }
 
-  console.log(c("dim", `Routes à valider : ${filteredRoutes.length}`));
+  console.log(c("dim", `Routes statiques : ${filteredStaticRoutes.length}`));
+  console.log(c("dim", `Routes dynamiques: ${includeDynamic ? `activées (${dynamicConfigs.length} pattern(s), limite ${dynamicLimit || "∞"}/pattern)` : "désactivées (--include-dynamic pour activer)"}`));
   console.log(c("dim", `Origines cibles  : ${normalizedOrigins.join(", ")}`));
   console.log(c("dim", `Concurrence      : ${concurrency}`));
   console.log(c("dim", `Checks actifs    : ${[...enabledChecks].join(", ")}`));
