@@ -772,13 +772,13 @@ export default function PublicSitterProfile() {
           </div>
 
           {/* Flex photo + infos */}
-          <div className="flex items-end gap-6">
+          <div className="flex items-end gap-3 sm:gap-6 min-w-0">
             {/* Photo grande */}
             <div className="shrink-0 relative">
               <img
                 src={profile.avatar_url || "/placeholder.svg"}
                 alt={firstName}
-                className="w-28 h-28 md:w-40 md:h-40 rounded-full object-cover object-center border-4 border-white shadow-md ring-2 ring-primary ring-offset-2"
+                className="w-20 h-20 sm:w-28 sm:h-28 md:w-40 md:h-40 rounded-full object-cover object-center border-4 border-white shadow-md ring-2 ring-primary ring-offset-2"
               />
               {reputation && reputation.statut_gardien !== 'novice' && (
                 <div className="absolute -bottom-2 -right-2">
