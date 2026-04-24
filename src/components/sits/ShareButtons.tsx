@@ -1,13 +1,18 @@
 import { useState } from "react";
-import { Facebook, Link2, MessageCircle, Mail, Check, Share2 } from "lucide-react";
+import { Facebook, Link2, MessageCircle, Mail, Check, Share2, Calendar, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { trackEvent } from "@/lib/analytics";
+import { formatSitPeriod } from "@/lib/dateRange";
 
 interface ShareButtonsProps {
   sitId: string;
   title: string;
   city?: string | null;
+  /** Date de début (ISO) — affichée en récap pour confirmer ce qui sera partagé */
+  startDate?: string | null;
+  /** Date de fin (ISO) */
+  endDate?: string | null;
   /** Where the share is triggered from — used in analytics */
   source?: string;
   /** Compact icon-only variant for hero/secondary placements */
