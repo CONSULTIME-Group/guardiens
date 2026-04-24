@@ -285,6 +285,8 @@ export default function TestHeroGallery() {
       {pageIdx !== null && filtered[pageIdx] && (
         <HeroFullPageModal
           item={filtered[pageIdx]}
+          prevItem={pageIdx > 0 ? filtered[pageIdx - 1] : null}
+          nextItem={pageIdx < filtered.length - 1 ? filtered[pageIdx + 1] : null}
           hasPrev={pageIdx > 0}
           hasNext={pageIdx < filtered.length - 1}
           onPrev={() => setPageIdx((i) => (i !== null && i > 0 ? i - 1 : i))}
@@ -835,6 +837,8 @@ function HeroZoomModal({
  */
 function HeroFullPageModal({
   item,
+  prevItem,
+  nextItem,
   hasPrev,
   hasNext,
   onPrev,
@@ -842,6 +846,8 @@ function HeroFullPageModal({
   onClose,
 }: {
   item: Item;
+  prevItem: Item | null;
+  nextItem: Item | null;
   hasPrev: boolean;
   hasNext: boolean;
   onPrev: () => void;
@@ -867,6 +873,40 @@ function HeroFullPageModal({
       document.body.style.overflow = prev;
     };
   }, []);
+
+  // ─── Préchargement des héros voisins ───
+  // Dès que l'item courant change, on demande au navigateur de récupérer en
+  // arrière-plan les variantes desktop ET mobile des héros précédent et suivant.
+  // Méthode : objet Image() natif (utilise le cache HTTP standard) — quand
+  // l'utilisateur appuie sur ← ou →, l'image est déjà décodée, latence ~ 0.
+  // On nettoie via `src=""` à la sortie pour permettre au GC de libérer si besoin.
+  useEffect(() => {
+    const sources = [
+      prevItem?.src,
+      prevItem?.mobileSrc,
+      nextItem?.src,
+      nextItem?.mobileSrc,
+    ].filter((s): s is string => Boolean(s));
+
+    if (sources.length === 0) return;
+
+    const preloaders: HTMLImageElement[] = sources.map((src) => {
+      const img = new Image();
+      // `decoding="async"` = ne bloque pas le main thread pendant le décode.
+      img.decoding = "async";
+      // `fetchPriority="low"` = ne concurrence pas l'image courante affichée.
+      (img as HTMLImageElement & { fetchPriority?: string }).fetchPriority = "low";
+      img.src = src;
+      return img;
+    });
+
+    return () => {
+      // Best-effort : casse la référence pour aider le GC si l'utilisateur ferme vite.
+      preloaders.forEach((img) => {
+        img.src = "";
+      });
+    };
+  }, [prevItem?.src, prevItem?.mobileSrc, nextItem?.src, nextItem?.mobileSrc]);
 
   // Détails dérivés
   const fileBaseName = item.src.split("/").pop() ?? item.src;
