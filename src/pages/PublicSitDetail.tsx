@@ -321,10 +321,13 @@ const PublicSitDetail = () => {
             title={sit.title || `Garde à ${owner?.city || "France"}`}
             city={owner?.city}
             source="public_sit_detail"
+            viewerType={viewerType}
           />
         </div>
 
         {/* CTA */}
+        {/* TODO: à ajouter quand le bouton contact direct sera implémenté → sit_contact_clicked
+            (aujourd'hui sit_apply_clicked couvre l'intent contact via candidature) */}
         <div className="fixed bottom-0 left-0 right-0 bg-card border-t border-border p-4 z-40 pb-20 md:pb-4">
           <div className="max-w-4xl mx-auto">
             {!(sit as any).accepting_applications ? (
@@ -334,7 +337,14 @@ const PublicSitDetail = () => {
             ) : !isAuthenticated ? (
               <Link
                 to="/register?role=sitter"
-                onClick={() => trackEvent("sit_apply_blocked", { source: "public_sit_detail", metadata: { sit_id: sit.id, reason: "not_authenticated" } })}
+                onClick={() => {
+                  try {
+                    trackEvent("sit_apply_blocked", {
+                      source: "public_sit_detail",
+                      metadata: { sit_id: sit.id, reason: "not_authenticated", viewer_type: viewerType },
+                    });
+                  } catch {}
+                }}
               >
                 <Button className="w-full h-12 text-base font-semibold">
                   S'inscrire pour postuler — gratuit →
@@ -343,7 +353,14 @@ const PublicSitDetail = () => {
             ) : !hasAccess ? (
               <Link
                 to="/mon-abonnement"
-                onClick={() => trackEvent("sit_apply_blocked", { source: "public_sit_detail", metadata: { sit_id: sit.id, reason: "no_subscription" } })}
+                onClick={() => {
+                  try {
+                    trackEvent("sit_apply_blocked", {
+                      source: "public_sit_detail",
+                      metadata: { sit_id: sit.id, reason: "no_subscription", viewer_type: viewerType },
+                    });
+                  } catch {}
+                }}
               >
                 <Button className="w-full h-12 text-base font-semibold">
                   S'abonner pour postuler
@@ -357,7 +374,12 @@ const PublicSitDetail = () => {
               <Button
                 className="w-full h-12 text-base font-semibold"
                 onClick={() => {
-                  trackEvent("sit_apply_clicked", { source: "public_sit_detail", metadata: { sit_id: sit.id } });
+                  try {
+                    trackEvent("sit_apply_clicked", {
+                      source: "public_sit_detail",
+                      metadata: { sit_id: sit.id, viewer_type: viewerType },
+                    });
+                  } catch {}
                   setApplyOpen(true);
                 }}
               >
