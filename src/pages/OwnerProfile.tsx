@@ -13,7 +13,7 @@ import OwnerHouseGuideForm from "@/components/owner-profile/OwnerHouseGuideForm"
 import OwnerStepSkills from "@/components/owner-profile/OwnerStepSkills";
 import ProfileSidebar, { type SidebarSection } from "@/components/profile/ProfileSidebar";
 import ScoreBreakdown from "@/components/profile/ScoreBreakdown";
-import { useOwnerProfile, type OwnerProfileData } from "@/hooks/useOwnerProfile";
+import { useOwnerProfile, computeOwnerMissingFields, type OwnerProfileData } from "@/hooks/useOwnerProfile";
 import { useAuth } from "@/contexts/AuthContext";
 
 const SECTIONS_META = [
@@ -139,10 +139,14 @@ const OwnerProfilePage = () => {
     return url;
   }, [uploadPhoto]);
 
+  // Recompute missing fields against the LIVE preview state so the sidebar reflects
+  // edits in progress (and doesn't show a stale count after save/refresh).
+  const liveMissingFields = computeOwnerMissingFields(mergedData, pets.length);
+
   const sidebarSections: SidebarSection[] = SECTIONS_META.map(s => ({
     ...s,
     complete: sectionComplete(s.num, mergedData, pets.length),
-    missingCount: countMissing(s.num, missingFields),
+    missingCount: countMissing(s.num, liveMissingFields),
   }));
 
   if (loading) {
