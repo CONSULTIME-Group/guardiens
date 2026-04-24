@@ -58,6 +58,7 @@ const pathFilter = pathsArg
 const concurrency = concurrencyArg
   ? Math.max(1, parseInt(concurrencyArg.slice("--concurrency=".length), 10) || 3)
   : 3;
+const strictMode = cliArgs.includes("--strict");
 
 const origins = originArgs.length > 0
   ? originArgs
