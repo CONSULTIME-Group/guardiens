@@ -143,6 +143,21 @@ const OwnerProfilePage = () => {
   // edits in progress (and doesn't show a stale count after save/refresh).
   const liveMissingFields = computeOwnerMissingFields(mergedData, pets.length);
 
+  // Critères pesant dans le score (réplique du barème SQL).
+  const ownerEssentials: ScoreCriterion[] = [
+    { label: "Prénom + code postal", points: 10, ok: !!(mergedData.first_name && mergedData.postal_code) },
+    { label: "Photo de profil", points: 15, ok: !!mergedData.avatar_url, hint: "Onglet Identité." },
+    { label: "Au moins 1 animal renseigné", points: 20, ok: pets.length > 0, hint: "Onglet Animaux." },
+    { label: "Logement décrit (≥ 50 caractères)", points: 15, ok: (mergedData.description?.length ?? 0) >= 50, hint: `${mergedData.description?.length ?? 0}/50 caractères.` },
+    { label: "Au moins 1 photo du logement", points: 15, ok: (mergedData.photos?.length ?? 0) > 0, hint: "Onglet Logement." },
+  ];
+  const ownerBonuses: ScoreCriterion[] = [
+    { label: "Bio ≥ 50 caractères", points: 10, ok: (mergedData.bio?.length ?? 0) >= 50, hint: `${mergedData.bio?.length ?? 0}/50 caractères.` },
+    { label: "Au moins 1 compétence proprio", points: 10, ok: (mergedData.owner_competences?.length ?? 0) > 0, hint: "Onglet Compétences." },
+    { label: "Identité vérifiée", points: 5, ok: !!user?.identityVerified, hint: "Paramètres → Vérification." },
+  ];
+  const liveScore = Math.min(100, [...ownerEssentials, ...ownerBonuses].reduce((s, c) => s + (c.ok ? c.points : 0), 0));
+
   const sidebarSections: SidebarSection[] = SECTIONS_META.map(s => ({
     ...s,
     complete: sectionComplete(s.num, mergedData, pets.length),
