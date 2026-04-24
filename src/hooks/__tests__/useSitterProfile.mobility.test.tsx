@@ -124,15 +124,15 @@ describe("useSitterProfile — Permis & Véhicule (Mobilité)", () => {
     const { result } = renderHook(() => useSitterProfile());
     await waitFor(() => expect(result.current.loading).toBe(false));
 
-    // Avant : champ manquant détecté
-    let missing = result.current.computeMissingFields(result.current.data);
-    expect(missing.some(m => m.label === "Permis ou véhicule")).toBe(true);
+    // Avant : champ manquant détecté dans missingFields exposé par le hook
+    expect(result.current.missingFields.some(m => m.label === "Permis ou véhicule")).toBe(true);
 
     // Après save de has_license seul → contrainte levée (license OU vehicle suffit)
     await act(async () => {
       await result.current.saveStep({ has_license: true });
     });
-    missing = result.current.computeMissingFields(result.current.data);
-    expect(missing.some(m => m.label === "Permis ou véhicule")).toBe(false);
+    await waitFor(() => {
+      expect(result.current.missingFields.some(m => m.label === "Permis ou véhicule")).toBe(false);
+    });
   });
 });
