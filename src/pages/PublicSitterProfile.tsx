@@ -1331,7 +1331,7 @@ export default function PublicSitterProfile() {
 
           {/* CTA sticky bottom mobile */}
           {showCTA && (
-            <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-background border-t border-border px-4 py-3 shadow-lg">
+            <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-background border-t border-border px-4 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] shadow-lg">
               {!isAuthenticated && (
                 <Link
                   to={`/inscription?redirect=/gardiens/${id}`}
