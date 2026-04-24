@@ -85,7 +85,7 @@ const defaultData: OwnerProfileData = {
 };
 
 export function useOwnerProfile() {
-  const { user } = useAuth();
+  const { user, refreshProfile } = useAuth();
   const { toast } = useToast();
   const [data, setData] = useState<OwnerProfileData>(defaultData);
   const [pets, setPets] = useState<Pet[]>([]);
