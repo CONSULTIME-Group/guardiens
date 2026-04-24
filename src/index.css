@@ -411,4 +411,77 @@
     transform: translateY(-1px);
     text-decoration: none;
   }
+
+  /* ───────────────────────── Notebook card (vignettes en spirale) ─────────────────────────
+     Effet "carnet" pour les vignettes hero : ombre douce projetée, légère rotation
+     possible, et bord droit *déchiré* via un mask SVG (silhouette irrégulière).
+
+     Compose deux éléments :
+       .notebook-card      → ombre + déchirure droite (clip-path)
+       .notebook-card-bg   → couleur papier visible derrière la déchirure (sans clip)
+
+     Comme `clip-path` rogne aussi l'ombre, on duplique la silhouette via un filtre
+     `drop-shadow` plutôt qu'un `box-shadow` (qui serait coupé). */
+  .notebook-card {
+    /* Silhouette : rectangle parfait à gauche, bord droit dentelé/déchiré.
+       Coordonnées en % → s'adapte à toutes les tailles de carte. */
+    --tear: polygon(
+      0% 0%,
+      98.6% 0%,
+      99.4% 4%,
+      98.2% 9%,
+      99.6% 14%,
+      98.8% 19%,
+      99.2% 24%,
+      98.0% 29%,
+      99.5% 34%,
+      98.6% 39%,
+      99.0% 44%,
+      97.8% 49%,
+      99.4% 54%,
+      98.4% 59%,
+      99.2% 64%,
+      98.0% 69%,
+      99.5% 74%,
+      98.6% 79%,
+      99.0% 84%,
+      97.9% 89%,
+      99.3% 94%,
+      98.4% 100%,
+      0% 100%
+    );
+    clip-path: var(--tear);
+    -webkit-clip-path: var(--tear);
+    /* Ombre projetée *après* le clip → suit fidèlement la déchirure. */
+    filter:
+      drop-shadow(0 1px 2px hsl(30 25% 20% / 0.08))
+      drop-shadow(0 6px 14px hsl(30 25% 20% / 0.12));
+    transition: filter 200ms ease, transform 200ms ease;
+  }
+  .notebook-card:hover {
+    filter:
+      drop-shadow(0 2px 3px hsl(30 25% 20% / 0.10))
+      drop-shadow(0 10px 22px hsl(30 25% 20% / 0.18));
+    transform: translateY(-1px);
+  }
+  /* Couleur papier visible sous le clip — prend toute la silhouette déchirée
+     pour éviter qu'un fond blanc ne « déborde » sur le côté droit. */
+  .notebook-card-paper {
+    background-color: #FBF6EC;
+  }
+  /* Petit liseré ambré le long de la déchirure pour matérialiser l'épaisseur du papier. */
+  .notebook-card-edge {
+    pointer-events: none;
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      to right,
+      transparent 0%,
+      transparent 96%,
+      hsl(30 35% 70% / 0.35) 98%,
+      hsl(30 40% 55% / 0.55) 100%
+    );
+    mix-blend-mode: multiply;
+  }
 }
+
