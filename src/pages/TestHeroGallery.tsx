@@ -874,12 +874,21 @@ function HeroFullPageModal({
     };
   }, []);
 
-  // ─── Préchargement des héros voisins ───
-  // Dès que l'item courant change, on demande au navigateur de récupérer en
-  // arrière-plan les variantes desktop ET mobile des héros précédent et suivant.
-  // Méthode : objet Image() natif (utilise le cache HTTP standard) — quand
-  // l'utilisateur appuie sur ← ou →, l'image est déjà décodée, latence ~ 0.
-  // On nettoie via `src=""` à la sortie pour permettre au GC de libérer si besoin.
+  // ─── Préchargement des héros voisins (avec annulation robuste) ───
+  // À chaque changement d'item, on demande au navigateur de récupérer en arrière-
+  // plan les variantes desktop + mobile des héros précédent et suivant. Quand
+  // l'utilisateur appuie sur ← ou →, l'image est déjà dans le cache HTTP → latence ~ 0.
+  //
+  // Robustesse :
+  //   - `fetch()` (au lieu de `new Image()`) car compatible avec un AbortController :
+  //     fermer la modale annule réellement les requêtes encore en vol.
+  //   - Garde `cancelled` qui ignore tout résultat tardif si l'effect est nettoyé.
+  //   - `inFlight` (useRef) : registre persistant des URLs déjà en cours pour ne
+  //     pas relancer un fetch identique à chaque changement d'index (cas typique
+  //     où le précédent voisin devient l'item courant).
+  //   - Au démontage final de la modale, on annule tout ce qui reste en vol.
+  const inFlight = useRef<Map<string, AbortController>>(new Map());
+
   useEffect(() => {
     const sources = [
       prevItem?.src,
@@ -890,23 +899,60 @@ function HeroFullPageModal({
 
     if (sources.length === 0) return;
 
-    const preloaders: HTMLImageElement[] = sources.map((src) => {
-      const img = new Image();
-      // `decoding="async"` = ne bloque pas le main thread pendant le décode.
-      img.decoding = "async";
-      // `fetchPriority="low"` = ne concurrence pas l'image courante affichée.
-      (img as HTMLImageElement & { fetchPriority?: string }).fetchPriority = "low";
-      img.src = src;
-      return img;
-    });
+    let cancelled = false;
+    const startedHere: AbortController[] = [];
+
+    for (const src of sources) {
+      // Déjà en cours ou déjà terminé → on ne re-fetch pas.
+      if (inFlight.current.has(src)) continue;
+
+      const ctrl = new AbortController();
+      inFlight.current.set(src, ctrl);
+      startedHere.push(ctrl);
+
+      // `cache: "force-cache"` : si déjà en cache HTTP, retour immédiat sans round-trip.
+      // `priority: "low"` : ne concurrence pas l'image courante affichée.
+      // `keepalive` non utilisé : on veut justement pouvoir abort.
+      fetch(src, {
+        signal: ctrl.signal,
+        cache: "force-cache",
+        priority: "low",
+      } as RequestInit & { priority?: "high" | "low" | "auto" })
+        .then((res) => {
+          // Consomme le body pour que le navigateur ait l'image décodable
+          // depuis le cache au prochain `<img src>`.
+          if (!cancelled && res.ok) return res.blob();
+          return null;
+        })
+        .catch(() => {
+          // Abort ou erreur réseau : silencieux, c'est du best-effort.
+        })
+        .finally(() => {
+          inFlight.current.delete(src);
+        });
+    }
 
     return () => {
-      // Best-effort : casse la référence pour aider le GC si l'utilisateur ferme vite.
-      preloaders.forEach((img) => {
-        img.src = "";
-      });
+      cancelled = true;
+      // Annule uniquement les fetchs lancés par CET effect (les voisins partagés
+      // avec un effect précédent peuvent être terminés ou réutiles).
+      for (const ctrl of startedHere) {
+        ctrl.abort();
+      }
     };
   }, [prevItem?.src, prevItem?.mobileSrc, nextItem?.src, nextItem?.mobileSrc]);
+
+  // Cleanup global : à la fermeture de la modale, on annule tout ce qui resterait
+  // en vol (sécurité contre la fermeture juste après un changement d'index).
+  useEffect(() => {
+    const registry = inFlight.current;
+    return () => {
+      for (const ctrl of registry.values()) {
+        ctrl.abort();
+      }
+      registry.clear();
+    };
+  }, []);
 
   // Détails dérivés
   const fileBaseName = item.src.split("/").pop() ?? item.src;
