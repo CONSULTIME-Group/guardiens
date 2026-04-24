@@ -32,32 +32,39 @@ const profileRow: Record<string, any> = {
 const sitterUpdates: any[] = []; // capture des payloads UPDATE
 
 vi.mock("@/integrations/supabase/client", () => {
+  // Builder permissif : chaque méthode chaînable retourne un objet exposant
+  // toutes les variantes terminales utilisées par le hook.
+  const buildChain = (resolver: () => Promise<any>): any => ({
+    eq: () => buildChain(resolver),
+    select: () => buildChain(resolver),
+    single: resolver,
+    maybeSingle: resolver,
+    then: (cb: any) => resolver().then(cb),
+  });
+
   const sitterTable = () => ({
-    select: () => ({
-      eq: () => ({
-        maybeSingle: async () => ({ data: { ...sitterRow }, error: null }),
-        single: async () => ({ data: { ...sitterRow }, error: null }),
-      }),
-    }),
+    select: () => buildChain(async () => ({ data: { ...sitterRow }, error: null })),
     update: (payload: any) => {
       sitterUpdates.push(payload);
       Object.assign(sitterRow, payload);
-      return { eq: async () => ({ error: null }) };
+      return buildChain(async () => ({ error: null }));
     },
-    insert: () => ({ select: () => ({ single: async () => ({ data: { id: "sp-1" }, error: null }) }) }),
+    insert: () => buildChain(async () => ({ data: { id: "sp-1" }, error: null })),
   });
   const profileTable = () => ({
-    select: () => ({
-      eq: () => ({
-        single: async () => ({ data: { ...profileRow }, error: null }),
-        maybeSingle: async () => ({ data: { ...profileRow }, error: null }),
-      }),
-    }),
-    update: () => ({ eq: async () => ({ error: null }) }),
+    select: () => buildChain(async () => ({ data: { ...profileRow }, error: null })),
+    update: () => buildChain(async () => ({ error: null })),
+  });
+  const pastAnimalsTable = () => ({
+    select: () => buildChain(async () => ({ data: [], error: null })),
   });
   return {
     supabase: {
-      from: (table: string) => (table === "sitter_profiles" ? sitterTable() : profileTable()),
+      from: (table: string) => {
+        if (table === "sitter_profiles") return sitterTable();
+        if (table === "past_animals") return pastAnimalsTable();
+        return profileTable();
+      },
       rpc: async () => ({ data: 60, error: null }),
     },
   };
