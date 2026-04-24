@@ -675,131 +675,192 @@ export default function PublicSitterProfile() {
       {/* ── Contenu principal z-1 ── */}
       <div className="relative z-[1]">
       {/* ── HERO FUSIONNÉ : SVG + HEADER ── */}
-      <div className="relative overflow-hidden w-full min-h-[260px] sm:min-h-[300px] flex items-end bg-[#F0EDE6]">
-        {/* SVG fond */}
+      <div className="relative overflow-hidden w-full min-h-[280px] sm:min-h-[340px] flex items-end bg-[#F0EDE6]">
+        {/* SVG fond — paysage rural assumé */}
         <div className="absolute inset-0 z-0 pointer-events-none">
-          <svg viewBox="0 0 1200 240" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice" className="w-full h-full">
+          <svg viewBox="0 0 1200 280" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice" className="w-full h-full">
             <defs>
+              {/* Ciel chaleureux : bleu-vert pâle → crème doré */}
               <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#DCEBE0"/>
-                <stop offset="55%" stopColor="#E8E4DC"/>
+                <stop offset="0%" stopColor="#A8C8B8"/>
+                <stop offset="45%" stopColor="#D4D8C8"/>
+                <stop offset="80%" stopColor="#E8E0CC"/>
                 <stop offset="100%" stopColor="#F0EDE6"/>
               </linearGradient>
+              <radialGradient id="sunGlow" cx="0.18" cy="0.22" r="0.55">
+                <stop offset="0%" stopColor="#F8DC8E" stopOpacity="0.85"/>
+                <stop offset="40%" stopColor="#F5C97A" stopOpacity="0.35"/>
+                <stop offset="100%" stopColor="#F5C97A" stopOpacity="0"/>
+              </radialGradient>
+              {/* Plans de collines */}
+              <linearGradient id="hillFar" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#86A893"/>
+                <stop offset="100%" stopColor="#9DBBA8"/>
+              </linearGradient>
+              <linearGradient id="hillMid" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#5A8A6E"/>
+                <stop offset="100%" stopColor="#6E9C82"/>
+              </linearGradient>
+              <linearGradient id="hillNear" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#3F7A57"/>
+                <stop offset="100%" stopColor="#52916C"/>
+              </linearGradient>
+              {/* Prairie premier plan */}
+              <linearGradient id="meadow" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#5E9B70"/>
+                <stop offset="100%" stopColor="#7DB585"/>
+              </linearGradient>
               <linearGradient id="fadeBottom" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="55%" stopColor="#F0EDE6" stopOpacity="0"/>
+                <stop offset="60%" stopColor="#F0EDE6" stopOpacity="0"/>
                 <stop offset="100%" stopColor="#FAF9F6" stopOpacity="1"/>
               </linearGradient>
-              <radialGradient id="sunGlow" cx="0.18" cy="0.2" r="0.5">
-                <stop offset="0%" stopColor="#F5E9C8" stopOpacity="0.55"/>
-                <stop offset="100%" stopColor="#F5E9C8" stopOpacity="0"/>
-              </radialGradient>
-              <radialGradient id="warmGlow" cx="0.85" cy="0.25" r="0.45">
-                <stop offset="0%" stopColor="#E8C9A0" stopOpacity="0.35"/>
-                <stop offset="100%" stopColor="#E8C9A0" stopOpacity="0"/>
-              </radialGradient>
             </defs>
-            <rect width="1200" height="240" fill="url(#sky)"/>
-            <rect width="1200" height="240" fill="url(#sunGlow)"/>
-            <rect width="1200" height="240" fill="url(#warmGlow)"/>
-            {/* Soleil doux */}
-            <circle cx="220" cy="58" r="32" fill="#F5E9C8" opacity="0.55"/>
-            <circle cx="220" cy="58" r="22" fill="#F2DDA8" opacity="0.5"/>
-            {/* Collines lointaines */}
-            <ellipse cx="200" cy="240" rx="320" ry="90" fill="#2D6A4F" opacity="0.13"/>
-            <ellipse cx="900" cy="245" rx="380" ry="100" fill="#2D6A4F" opacity="0.11"/>
-            <ellipse cx="600" cy="255" rx="420" ry="110" fill="#2D6A4F" opacity="0.15"/>
-            {/* Ligne de sol */}
-            <rect x="0" y="208" width="1200" height="32" fill="#2D6A4F" opacity="0.18"/>
-            {/* Maison gauche */}
-            <g opacity="0.32" fill="#2D6A4F">
-              <rect x="80" y="160" width="60" height="50"/>
-              <polygon points="80,160 140,160 110,128"/>
-              <rect x="100" y="180" width="16" height="30"/>
-              <rect x="88" y="168" width="12" height="12"/>
-              <rect x="120" y="168" width="12" height="12"/>
-              <rect x="125" y="130" width="6" height="14"/>
+
+            {/* Ciel + halo soleil */}
+            <rect width="1200" height="280" fill="url(#sky)"/>
+            <rect width="1200" height="280" fill="url(#sunGlow)"/>
+
+            {/* Soleil */}
+            <circle cx="220" cy="62" r="36" fill="#F8DC8E" opacity="0.9"/>
+            <circle cx="220" cy="62" r="26" fill="#F5C97A" opacity="0.85"/>
+
+            {/* Nuages doux */}
+            <g fill="#FFFFFF" opacity="0.55">
+              <ellipse cx="480" cy="55" rx="40" ry="9"/>
+              <ellipse cx="510" cy="50" rx="28" ry="8"/>
+              <ellipse cx="900" cy="75" rx="50" ry="10"/>
+              <ellipse cx="940" cy="68" rx="32" ry="9"/>
+              <ellipse cx="1080" cy="45" rx="36" ry="8"/>
             </g>
-            {/* Arbre */}
-            <g opacity="0.28" fill="#2D6A4F">
-              <rect x="168" y="170" width="6" height="40"/>
-              <ellipse cx="171" cy="160" rx="20" ry="24"/>
+
+            {/* Oiseaux */}
+            <g opacity="0.55" fill="none" stroke="#3F5C4A" strokeWidth="2" strokeLinecap="round">
+              <path d="M380 95 q7 -7 14 0 q7 -7 14 0"/>
+              <path d="M460 78 q6 -6 12 0 q6 -6 12 0"/>
+              <path d="M820 105 q6 -6 12 0 q6 -6 12 0"/>
             </g>
-            {/* Maison centrale (plus grande) */}
-            <g opacity="0.30" fill="#2D6A4F">
-              <rect x="540" y="150" width="80" height="60"/>
-              <polygon points="540,150 620,150 580,115"/>
-              <rect x="565" y="178" width="20" height="32"/>
-              <rect x="548" y="160" width="14" height="14"/>
-              <rect x="598" y="160" width="14" height="14"/>
-              <rect x="600" y="118" width="8" height="16"/>
+
+            {/* Collines lointaines (plan 1) */}
+            <path d="M0,180 Q150,140 320,160 T640,150 T960,165 T1200,155 L1200,280 L0,280 Z" fill="url(#hillFar)" opacity="0.85"/>
+
+            {/* Collines moyennes (plan 2) */}
+            <path d="M0,200 Q200,165 420,185 T780,175 T1200,185 L1200,280 L0,280 Z" fill="url(#hillMid)" opacity="0.95"/>
+
+            {/* Maison gauche (sur colline moyenne) */}
+            <g>
+              <rect x="80" y="170" width="62" height="42" fill="#E8DCC4"/>
+              <polygon points="74,170 148,170 111,138" fill="#B85E3C"/>
+              <rect x="102" y="186" width="14" height="26" fill="#5A4332"/>
+              <rect x="88" y="178" width="12" height="12" fill="#A8C8E0" opacity="0.85"/>
+              <rect x="124" y="178" width="12" height="12" fill="#A8C8E0" opacity="0.85"/>
+              <rect x="128" y="142" width="6" height="14" fill="#5A4332"/>
+            </g>
+            {/* Arbre près de la maison */}
+            <g>
+              <rect x="172" y="178" width="6" height="34" fill="#5A4332"/>
+              <ellipse cx="175" cy="170" rx="22" ry="26" fill="#3F7A57"/>
+              <ellipse cx="170" cy="164" rx="10" ry="12" fill="#52916C" opacity="0.7"/>
+            </g>
+
+            {/* Maison centrale (plus grande, derrière colline proche) */}
+            <g>
+              <rect x="540" y="158" width="84" height="56" fill="#EBE0C8"/>
+              <polygon points="534,158 630,158 582,118" fill="#A8533A"/>
+              <rect x="568" y="186" width="22" height="28" fill="#5A4332"/>
+              <rect x="548" y="170" width="16" height="14" fill="#A8C8E0" opacity="0.9"/>
+              <rect x="600" y="170" width="16" height="14" fill="#A8C8E0" opacity="0.9"/>
+              <rect x="604" y="120" width="8" height="18" fill="#5A4332"/>
               {/* Fumée */}
-              <ellipse cx="606" cy="108" rx="6" ry="4" opacity="0.5"/>
-              <ellipse cx="612" cy="98" rx="7" ry="5" opacity="0.35"/>
+              <ellipse cx="610" cy="108" rx="7" ry="5" fill="#FFFFFF" opacity="0.75"/>
+              <ellipse cx="616" cy="96" rx="9" ry="6" fill="#FFFFFF" opacity="0.55"/>
+              <ellipse cx="622" cy="84" rx="11" ry="6" fill="#FFFFFF" opacity="0.4"/>
             </g>
             {/* Arbres autour */}
-            <g opacity="0.26" fill="#2D6A4F">
-              <rect x="488" y="165" width="7" height="45"/>
-              <ellipse cx="491" cy="152" rx="24" ry="28"/>
+            <g>
+              <rect x="488" y="172" width="7" height="42" fill="#5A4332"/>
+              <ellipse cx="491" cy="160" rx="26" ry="30" fill="#3F7A57"/>
+              <ellipse cx="486" cy="154" rx="11" ry="13" fill="#52916C" opacity="0.7"/>
             </g>
-            <g opacity="0.24" fill="#2D6A4F">
-              <rect x="648" y="172" width="6" height="38"/>
-              <ellipse cx="651" cy="160" rx="19" ry="22"/>
+            <g>
+              <rect x="650" y="180" width="6" height="34" fill="#5A4332"/>
+              <ellipse cx="653" cy="168" rx="20" ry="23" fill="#3F7A57"/>
             </g>
+
             {/* Maison droite */}
-            <g opacity="0.24" fill="#2D6A4F">
-              <rect x="980" y="165" width="55" height="45"/>
-              <polygon points="980,165 1035,165 1007,136"/>
-              <rect x="997" y="185" width="14" height="25"/>
-              <rect x="986" y="173" width="10" height="10"/>
-              <rect x="1015" y="173" width="10" height="10"/>
+            <g>
+              <rect x="980" y="172" width="58" height="42" fill="#E8DCC4"/>
+              <polygon points="974,172 1044,172 1009,142" fill="#B85E3C"/>
+              <rect x="999" y="190" width="14" height="24" fill="#5A4332"/>
+              <rect x="986" y="180" width="12" height="12" fill="#A8C8E0" opacity="0.85"/>
+              <rect x="1020" y="180" width="12" height="12" fill="#A8C8E0" opacity="0.85"/>
             </g>
-            <g opacity="0.22" fill="#2D6A4F">
-              <rect x="1055" y="168" width="6" height="42"/>
-              <ellipse cx="1058" cy="156" rx="22" ry="26"/>
+            <g>
+              <rect x="1058" y="174" width="6" height="40" fill="#5A4332"/>
+              <ellipse cx="1061" cy="162" rx="24" ry="28" fill="#3F7A57"/>
             </g>
-            {/* Petite haie / buissons */}
-            <g opacity="0.18" fill="#2D6A4F">
-              <ellipse cx="350" cy="212" rx="40" ry="8"/>
-              <ellipse cx="780" cy="214" rx="55" ry="9"/>
-              <ellipse cx="1130" cy="213" rx="45" ry="8"/>
+
+            {/* Collines proches (plan 3 - foncées) */}
+            <path d="M0,222 Q180,200 380,215 T720,210 T1100,218 T1200,212 L1200,280 L0,280 Z" fill="url(#hillNear)"/>
+
+            {/* Prairie premier plan */}
+            <path d="M0,238 Q300,228 600,238 T1200,236 L1200,280 L0,280 Z" fill="url(#meadow)"/>
+
+            {/* Petits buissons / haie */}
+            <g fill="#3F7A57" opacity="0.75">
+              <ellipse cx="120" cy="246" rx="32" ry="9"/>
+              <ellipse cx="350" cy="248" rx="44" ry="10"/>
+              <ellipse cx="780" cy="250" rx="58" ry="11"/>
+              <ellipse cx="1130" cy="247" rx="48" ry="10"/>
             </g>
-            {/* Oiseaux */}
-            <g opacity="0.35" fill="none" stroke="#2D6A4F" strokeWidth="2" strokeLinecap="round">
-              <path d="M380 78 q6 -6 12 0 q6 -6 12 0"/>
-              <path d="M460 62 q5 -5 10 0 q5 -5 10 0"/>
-              <path d="M820 88 q5 -5 10 0 q5 -5 10 0"/>
+            {/* Touffes d'herbe */}
+            <g fill="#5E9B70" opacity="0.8">
+              <path d="M50,260 l3,-10 l3,10 z"/>
+              <path d="M58,260 l3,-8 l3,8 z"/>
+              <path d="M250,260 l3,-9 l3,9 z"/>
+              <path d="M260,262 l3,-7 l3,7 z"/>
+              <path d="M530,262 l3,-8 l3,8 z"/>
+              <path d="M880,262 l3,-9 l3,9 z"/>
+              <path d="M890,263 l3,-7 l3,7 z"/>
+              <path d="M1080,261 l3,-8 l3,8 z"/>
             </g>
-            {/* Chien */}
-            <g opacity="0.38" fill="#2D6A4F" transform="translate(340, 178)">
-              <ellipse cx="30" cy="18" rx="28" ry="12"/>
-              <circle cx="56" cy="12" r="10"/>
-              <ellipse cx="62" cy="8" rx="5" ry="8" transform="rotate(15,62,8)"/>
-              <path d="M2,16 Q-12,8 -8,2" stroke="#2D6A4F" strokeWidth="3" fill="none" opacity="0.38"/>
-              <rect x="8" y="28" width="5" height="14" rx="2"/>
-              <rect x="18" y="28" width="5" height="12" rx="2"/>
-              <rect x="35" y="28" width="5" height="14" rx="2"/>
-              <rect x="45" y="28" width="5" height="12" rx="2"/>
-              <ellipse cx="64" cy="16" rx="4" ry="3"/>
+
+            {/* Chien (premier plan) */}
+            <g transform="translate(330, 222)">
+              <ellipse cx="34" cy="20" rx="32" ry="13" fill="#8B6F47"/>
+              <circle cx="62" cy="13" r="11" fill="#8B6F47"/>
+              <ellipse cx="69" cy="8" rx="5" ry="9" transform="rotate(15,69,8)" fill="#6B5436"/>
+              <path d="M2,18 Q-14,9 -10,2" stroke="#8B6F47" strokeWidth="3.5" fill="none" strokeLinecap="round"/>
+              <rect x="10" y="30" width="5" height="14" rx="2" fill="#6B5436"/>
+              <rect x="20" y="30" width="5" height="12" rx="2" fill="#6B5436"/>
+              <rect x="38" y="30" width="5" height="14" rx="2" fill="#6B5436"/>
+              <rect x="48" y="30" width="5" height="12" rx="2" fill="#6B5436"/>
+              <ellipse cx="71" cy="17" rx="3" ry="2.5" fill="#1F1A14"/>
+              <circle cx="65" cy="11" r="1.5" fill="#1F1A14"/>
             </g>
-            {/* Chat */}
-            <g opacity="0.32" fill="#2D6A4F" transform="translate(820, 180)">
-              <ellipse cx="16" cy="20" rx="14" ry="16"/>
-              <circle cx="16" cy="6" r="10"/>
-              <polygon points="8,0 4,-8 14,-2"/>
-              <polygon points="24,0 28,-8 18,-2"/>
-              <path d="M30,28 Q44,20 40,10" stroke="#2D6A4F" strokeWidth="3" fill="none" opacity="0.32"/>
-              <ellipse cx="11" cy="6" rx="2" ry="2.5" fill="#F0EDE6"/>
-              <ellipse cx="21" cy="6" rx="2" ry="2.5" fill="#F0EDE6"/>
+
+            {/* Chat (premier plan, à droite) */}
+            <g transform="translate(820, 224)">
+              <ellipse cx="18" cy="22" rx="16" ry="17" fill="#5A4332"/>
+              <circle cx="18" cy="7" r="11" fill="#5A4332"/>
+              <polygon points="9,1 5,-9 16,-3" fill="#5A4332"/>
+              <polygon points="27,1 31,-9 20,-3" fill="#5A4332"/>
+              <path d="M34,30 Q48,22 44,12" stroke="#5A4332" strokeWidth="3" fill="none" strokeLinecap="round"/>
+              <ellipse cx="13" cy="7" rx="2.2" ry="2.8" fill="#F8DC8E"/>
+              <ellipse cx="23" cy="7" rx="2.2" ry="2.8" fill="#F8DC8E"/>
+              <circle cx="13" cy="7" r="0.8" fill="#1F1A14"/>
+              <circle cx="23" cy="7" r="0.8" fill="#1F1A14"/>
             </g>
-            <rect width="1200" height="240" fill="url(#fadeBottom)"/>
+
+            {/* Fade bas vers la page */}
+            <rect width="1200" height="280" fill="url(#fadeBottom)"/>
           </svg>
         </div>
 
-        {/* Voile vignettage discret pour donner de la profondeur */}
-        <div className="absolute inset-0 z-[1] pointer-events-none" style={{ background: 'radial-gradient(ellipse at center, transparent 55%, rgba(45,106,79,0.06) 100%)' }} />
+        {/* Vignettage subtil */}
+        <div className="absolute inset-0 z-[1] pointer-events-none" style={{ background: 'radial-gradient(ellipse at center, transparent 50%, rgba(31,42,33,0.10) 100%)' }} />
 
         {/* Dégradé bas */}
-        <div className="absolute bottom-0 left-0 right-0 h-24 z-[1] bg-gradient-to-b from-transparent to-background pointer-events-none" />
+        <div className="absolute bottom-0 left-0 right-0 h-20 z-[1] bg-gradient-to-b from-transparent to-background pointer-events-none" />
 
         {/* Contenu header par-dessus */}
         <div className="relative z-10 w-full max-w-5xl mx-auto px-4 sm:px-6 pb-8 pt-6">
