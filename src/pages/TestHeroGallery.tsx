@@ -251,10 +251,12 @@ function HeroCard({
   item,
   viewMode,
   onZoom,
+  onOpenPage,
 }: {
   item: Item;
   viewMode: ViewMode;
   onZoom: () => void;
+  onOpenPage: () => void;
 }) {
   // Reproduit la logique de PublicSitterProfile (desktop, simplifié) pour le mode
   // "rendered". Sinon on affiche l'image en object-contain pour voir tout le cadre.
