@@ -930,84 +930,127 @@ export default function PublicSitterProfile() {
             aria-label="Informations clés pour qualifier le gardien"
             className="mb-8 md:mb-10"
           >
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5 md:gap-3">
-              {/* Tuile 1 — Animaux acceptés */}
-              <div className="bg-card border border-border rounded-xl p-3.5 md:p-4 flex flex-col gap-1.5 min-h-[92px]">
-                <div className="flex items-center gap-1.5 text-[11px] uppercase tracking-wider text-muted-foreground font-body">
-                  <PawPrint className="w-3.5 h-3.5 text-primary" aria-hidden="true" />
-                  Animaux
-                </div>
-                {animalTypes.length > 0 ? (
-                  <p className="text-sm text-foreground font-body leading-snug line-clamp-2">
-                    {animalTypes.map(a => ANIMAL_LABELS[a] || a).join(', ')}
-                  </p>
-                ) : (
-                  <p className="text-sm text-muted-foreground/70 italic font-body">Non renseigné</p>
-                )}
-              </div>
+            {(() => {
+              // Helpers locaux pour des états "non renseigné" propres et homogènes
+              const Empty = ({ label }: { label: string }) => (
+                <p className="text-sm text-muted-foreground/70 italic font-body">{label}</p>
+              );
 
-              {/* Tuile 2 — Zone d'intervention */}
-              <div className="bg-card border border-border rounded-xl p-3.5 md:p-4 flex flex-col gap-1.5 min-h-[92px]">
-                <div className="flex items-center gap-1.5 text-[11px] uppercase tracking-wider text-muted-foreground font-body">
-                  {hasVehicle ? <Car className="w-3.5 h-3.5 text-primary" aria-hidden="true" /> : <MapPin className="w-3.5 h-3.5 text-primary" aria-hidden="true" />}
-                  Zone
-                </div>
-                <p className="text-sm text-foreground font-body leading-snug">
-                  {radius
-                    ? <><span className="font-semibold">{radius} km</span>{city ? <> autour de {city}</> : null}</>
-                    : city
-                      ? <>Autour de {city}</>
-                      : <span className="text-muted-foreground/70 italic">Non renseignée</span>}
-                </p>
-                {hasVehicle && (
-                  <span className="text-[11px] text-primary font-body">Avec véhicule</span>
-                )}
-              </div>
+              // Tuile Disponibilité : on distingue clairement
+              // - Disponible (toggle ON)
+              // - Sur demande (toggle OFF mais préférences renseignées)
+              // - Non renseignée (rien)
+              const hasAvailabilityHint = Boolean(durationLabel || frequencyLabel || noticeLabel);
 
-              {/* Tuile 3 — Disponibilité / type */}
-              <div className="bg-card border border-border rounded-xl p-3.5 md:p-4 flex flex-col gap-1.5 min-h-[92px]">
-                <div className="flex items-center gap-1.5 text-[11px] uppercase tracking-wider text-muted-foreground font-body">
-                  <BadgeCheck className="w-3.5 h-3.5 text-primary" aria-hidden="true" />
-                  Disponibilité
-                </div>
-                {isAvailable ? (
-                  <p className="text-sm text-foreground font-body leading-snug">
-                    <span className="font-semibold text-primary">Disponible</span>
-                    {durationLabel && <span className="text-muted-foreground"> · {durationLabel.replace(' minimum', ' min.')}</span>}
-                  </p>
-                ) : (
-                  <p className="text-sm text-foreground/70 font-body leading-snug">
-                    {durationLabel || frequencyLabel || 'Sur demande'}
-                  </p>
-                )}
-                {typeLine && (
-                  <span className="text-[11px] text-muted-foreground font-body line-clamp-1">{typeLine}</span>
-                )}
-              </div>
+              // Tuile Confiance : on a "quelque chose à dire" si avis OU gardes OU écussons OU identité vérifiée
+              const identityVerified = Boolean(profile?.identity_verified);
+              const hasTrustSignals =
+                reviewCount > 0 || completedSits > 0 || totalBadgeCount > 0 || identityVerified;
 
-              {/* Tuile 4 — Confiance / preuves */}
-              <div className="bg-card border border-border rounded-xl p-3.5 md:p-4 flex flex-col gap-1.5 min-h-[92px]">
-                <div className="flex items-center gap-1.5 text-[11px] uppercase tracking-wider text-muted-foreground font-body">
-                  <Shield className="w-3.5 h-3.5 text-primary" aria-hidden="true" />
-                  Confiance
+              return (
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5 md:gap-3">
+                  {/* Tuile 1 — Animaux acceptés */}
+                  <div className="bg-card border border-border rounded-xl p-3.5 md:p-4 flex flex-col gap-1.5 min-h-[92px]">
+                    <div className="flex items-center gap-1.5 text-[11px] uppercase tracking-wider text-muted-foreground font-body">
+                      <PawPrint className="w-3.5 h-3.5 text-primary" aria-hidden="true" />
+                      Animaux
+                    </div>
+                    {animalTypes.length > 0 ? (
+                      <p className="text-sm text-foreground font-body leading-snug line-clamp-2">
+                        {animalTypes.map(a => ANIMAL_LABELS[a] || a).join(', ')}
+                      </p>
+                    ) : (
+                      <Empty label="Non renseigné" />
+                    )}
+                  </div>
+
+                  {/* Tuile 2 — Zone d'intervention */}
+                  <div className="bg-card border border-border rounded-xl p-3.5 md:p-4 flex flex-col gap-1.5 min-h-[92px]">
+                    <div className="flex items-center gap-1.5 text-[11px] uppercase tracking-wider text-muted-foreground font-body">
+                      {hasVehicle ? <Car className="w-3.5 h-3.5 text-primary" aria-hidden="true" /> : <MapPin className="w-3.5 h-3.5 text-primary" aria-hidden="true" />}
+                      Zone
+                    </div>
+                    {radius || city ? (
+                      <p className="text-sm text-foreground font-body leading-snug">
+                        {radius && city ? (
+                          <><span className="font-semibold">{radius} km</span> autour de {city}</>
+                        ) : radius ? (
+                          <><span className="font-semibold">{radius} km</span> autour de chez lui</>
+                        ) : (
+                          <>Autour de {city}</>
+                        )}
+                      </p>
+                    ) : (
+                      <Empty label="Zone non renseignée" />
+                    )}
+                    <span className={`text-[11px] font-body ${hasVehicle ? 'text-primary' : 'text-muted-foreground/70'}`}>
+                      {hasVehicle ? 'Avec véhicule' : 'Sans véhicule'}
+                    </span>
+                  </div>
+
+                  {/* Tuile 3 — Disponibilité */}
+                  <div className="bg-card border border-border rounded-xl p-3.5 md:p-4 flex flex-col gap-1.5 min-h-[92px]">
+                    <div className="flex items-center gap-1.5 text-[11px] uppercase tracking-wider text-muted-foreground font-body">
+                      <BadgeCheck className="w-3.5 h-3.5 text-primary" aria-hidden="true" />
+                      Disponibilité
+                    </div>
+                    {isAvailable ? (
+                      <p className="text-sm text-foreground font-body leading-snug">
+                        <span className="font-semibold text-primary">Disponible</span>
+                        {durationLabel && (
+                          <span className="text-muted-foreground"> · {durationLabel.replace(' minimum', ' min.')}</span>
+                        )}
+                      </p>
+                    ) : hasAvailabilityHint ? (
+                      <p className="text-sm text-foreground/80 font-body leading-snug">
+                        <span className="font-medium">Sur demande</span>
+                        {(durationLabel || frequencyLabel) && (
+                          <span className="text-muted-foreground"> · {durationLabel || frequencyLabel}</span>
+                        )}
+                      </p>
+                    ) : (
+                      <Empty label="Non renseignée" />
+                    )}
+                    {typeLine && (
+                      <span className="text-[11px] text-muted-foreground font-body line-clamp-1">{typeLine}</span>
+                    )}
+                  </div>
+
+                  {/* Tuile 4 — Confiance / preuves */}
+                  <div className="bg-card border border-border rounded-xl p-3.5 md:p-4 flex flex-col gap-1.5 min-h-[92px]">
+                    <div className="flex items-center gap-1.5 text-[11px] uppercase tracking-wider text-muted-foreground font-body">
+                      <Shield className="w-3.5 h-3.5 text-primary" aria-hidden="true" />
+                      Confiance
+                    </div>
+                    {hasTrustSignals ? (
+                      <>
+                        <div className="flex items-baseline gap-2 text-sm text-foreground font-body">
+                          {reviewCount > 0 ? (
+                            <>
+                              <span className="font-semibold">{avgRating.toFixed(1)}<span className="text-primary">★</span></span>
+                              <span className="text-muted-foreground text-xs">({reviewCount} avis)</span>
+                            </>
+                          ) : identityVerified ? (
+                            <span className="text-foreground/80 text-xs">Identité vérifiée</span>
+                          ) : (
+                            <span className="text-muted-foreground text-xs italic">Pas encore noté</span>
+                          )}
+                        </div>
+                        <div className="flex flex-wrap gap-x-1.5 gap-y-0.5 text-[11px] text-muted-foreground font-body">
+                          {completedSits > 0 && <span>{completedSits} garde{completedSits > 1 ? 's' : ''}</span>}
+                          {completedSits > 0 && totalBadgeCount > 0 && <span aria-hidden="true">·</span>}
+                          {totalBadgeCount > 0 && <span>{totalBadgeCount} écusson{totalBadgeCount > 1 ? 's' : ''}</span>}
+                          {reviewCount > 0 && identityVerified && (completedSits > 0 || totalBadgeCount > 0) && <span aria-hidden="true">·</span>}
+                          {reviewCount > 0 && identityVerified && <span>ID vérifiée</span>}
+                        </div>
+                      </>
+                    ) : (
+                      <Empty label="Nouveau profil" />
+                    )}
+                  </div>
                 </div>
-                <div className="flex items-baseline gap-2 text-sm text-foreground font-body">
-                  {reviewCount > 0 ? (
-                    <>
-                      <span className="font-semibold">{avgRating.toFixed(1)}<span className="text-primary">★</span></span>
-                      <span className="text-muted-foreground text-xs">({reviewCount} avis)</span>
-                    </>
-                  ) : (
-                    <span className="text-muted-foreground text-xs italic">Pas encore noté</span>
-                  )}
-                </div>
-                <div className="flex flex-wrap gap-1 text-[11px] text-muted-foreground font-body">
-                  {completedSits > 0 && <span>{completedSits} garde{completedSits > 1 ? 's' : ''}</span>}
-                  {completedSits > 0 && totalBadgeCount > 0 && <span>·</span>}
-                  {totalBadgeCount > 0 && <span>{totalBadgeCount} écusson{totalBadgeCount > 1 ? 's' : ''}</span>}
-                </div>
-              </div>
-            </div>
+              );
+            })()}
 
             {/* CTA primaire — visible immédiatement */}
             {showCTA && (
