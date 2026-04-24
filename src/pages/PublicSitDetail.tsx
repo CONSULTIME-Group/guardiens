@@ -7,7 +7,7 @@ import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
-import { Calendar, MapPin, Star, PawPrint, Home, CheckCircle2 } from "lucide-react";
+import { Calendar, MapPin, Star, PawPrint, Home, CheckCircle2, ArrowLeft, ExternalLink } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import VerifiedBadge from "@/components/profile/VerifiedBadge";
@@ -217,6 +217,18 @@ const PublicSitDetail = () => {
         {/* JSON-LD : lu par Google après rendu JS, indépendant des OG. */}
         <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>
       </Helmet>
+
+      {/* Barre de retour pour les membres connectés (la page publique n'a pas le header app) */}
+      {isAuthenticated && (
+        <div className="bg-card border-b border-border px-4 py-3 flex flex-wrap items-center justify-between gap-2">
+          <Link to="/dashboard" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground">
+            <ArrowLeft className="h-4 w-4" /> Retour au tableau de bord
+          </Link>
+          <Link to={`/sits/${sit.id}`} className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline">
+            Voir la fiche complète <ExternalLink className="h-3.5 w-3.5" />
+          </Link>
+        </div>
+      )}
 
       {/* Hero photo */}
       {photos.length > 0 && (
