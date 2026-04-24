@@ -140,7 +140,7 @@ export const HERO_BANK: readonly string[] = [
  */
 export type HeroAnchor = "left" | "center" | "right";
 
-const HERO_ANCHORS: readonly HeroAnchor[] = [
+export const HERO_ANCHORS: readonly HeroAnchor[] = [
   "center"  , "center"  , "center"  , "left"    , "center"  , "center"  , "right"   , "right"   , "right"   , "center"  , // 01-10
   "left"    , "center"  , "center"  , "center"  , "center"  , "left"    , "left"    , "right"   , "left"    , "center"  , // 11-20
   "left"    , "right"   , "center"  , "right"   , "right"   , "right"   , "left"    , "right"   , "center"  , "right"   , // 21-30
