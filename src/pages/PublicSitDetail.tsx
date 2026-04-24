@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
@@ -31,6 +31,8 @@ const speciesLabel: Record<string, string> = {
   fish: "poisson", reptile: "reptile", farm_animal: "animal de ferme", nac: "NAC",
 };
 
+type ViewerType = "anonymous" | "gardien" | "proprio" | "owner_of_sit" | "admin";
+
 const PublicSitDetail = () => {
   const { id } = useParams<{ id: string }>();
   const { user, isAuthenticated } = useAuth();
@@ -45,6 +47,8 @@ const PublicSitDetail = () => {
   const [loading, setLoading] = useState(true);
   const [applyOpen, setApplyOpen] = useState(false);
   const [hasApplied, setHasApplied] = useState(false);
+  const [viewerType, setViewerType] = useState<ViewerType>("anonymous");
+  const sitViewFired = useRef(false);
 
   useEffect(() => {
     if (!id) return;
@@ -83,9 +87,47 @@ const PublicSitDetail = () => {
         if (appRes) setHasApplied(true);
       }
 
+      // ── Résolution viewer_type ──
+      let resolvedViewer: ViewerType = "anonymous";
+      if (user) {
+        if (sitData.user_id === user.id) {
+          resolvedViewer = "owner_of_sit";
+        } else {
+          // Check admin role
+          let isAdmin = false;
+          try {
+            const { data: roleRes } = await supabase
+              .from("user_roles")
+              .select("role")
+              .eq("user_id", user.id)
+              .eq("role", "admin")
+              .maybeSingle();
+            isAdmin = !!roleRes;
+          } catch {
+            isAdmin = false;
+          }
+          if (isAdmin) {
+            resolvedViewer = "admin";
+          } else {
+            const role = (user as any).role;
+            if (role === "owner") resolvedViewer = "proprio";
+            else resolvedViewer = "gardien"; // sitter, both, ou défaut
+          }
+        }
+      }
+      setViewerType(resolvedViewer);
+
       setLoading(false);
-      // analytics
-      trackEvent("sit_view", { source: "/annonces/:id", metadata: { sit_id: id } });
+      // analytics — un seul tir grâce au ref (anti double-fire StrictMode)
+      if (!sitViewFired.current) {
+        sitViewFired.current = true;
+        try {
+          trackEvent("sit_view", {
+            source: "/annonces/:id",
+            metadata: { sit_id: id, viewer_type: resolvedViewer },
+          });
+        } catch {}
+      }
     };
     load();
   }, [id, user]);
