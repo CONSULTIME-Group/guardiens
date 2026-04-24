@@ -133,13 +133,13 @@ const DepartmentPage = () => {
 
           {/* CTAs */}
           <div className="flex flex-col sm:flex-row gap-3">
-            <Link to="/register">
+            <Link to="/inscription">
               <Button size="lg" className="gap-2">
                 Trouver un gardien dans le {page.department}
                 <ArrowRight className="h-4 w-4" />
               </Button>
             </Link>
-            <Link to="/register">
+            <Link to="/inscription">
               <Button size="lg" variant="outline" className="gap-2">
                 Devenir gardien dans le {page.department}
                 <ArrowRight className="h-4 w-4" />
@@ -249,7 +249,7 @@ const DepartmentPage = () => {
           <p className="text-muted-foreground mb-8 max-w-xl mx-auto">
             Propriétaire ou gardien, rejoignez un réseau de confiance basé sur la proximité.
           </p>
-          <Link to="/register">
+          <Link to="/inscription">
             <Button size="lg" className="gap-2">
               S'inscrire gratuitement <ArrowRight className="h-4 w-4" />
             </Button>

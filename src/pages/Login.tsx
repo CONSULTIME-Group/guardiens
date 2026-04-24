@@ -134,7 +134,7 @@ const Login = () => {
                       Mot de passe oublié ?
                     </Link>
                     {failedAttempts >= 2 && (
-                      <Link to={`/register${email ? `?email=${encodeURIComponent(email)}` : ""}`} className="text-primary hover:underline">
+                      <Link to={`/inscription${email ? `?email=${encodeURIComponent(email)}` : ""}`} className="text-primary hover:underline">
                         Pas encore de compte ? Inscrivez-vous
                       </Link>
                     )}
@@ -156,7 +156,7 @@ const Login = () => {
 
           <p className="text-center text-sm text-muted-foreground mt-6">
             Pas encore de compte ?{" "}
-            <Link to="/register" className="text-primary font-medium hover:underline">Créer un compte</Link>
+            <Link to="/inscription" className="text-primary font-medium hover:underline">Créer un compte</Link>
           </p>
         </div>
       </div>

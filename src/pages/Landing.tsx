@@ -256,13 +256,13 @@ const Landing = () => {
             {/* CTAs — propriétaire mis en avant (priorité business : combler le manque d'annonces) */}
             <div className="flex flex-col sm:flex-row gap-3 mb-4 animate-hero-fade-up animation-delay-900">
               <button
-                onClick={() => navigate("/register?role=owner")}
+                onClick={() => navigate("/inscription?role=owner")}
                 className="font-body text-sm font-semibold tracking-wide rounded-full px-10 py-4 bg-primary text-primary-foreground hover:brightness-90 hover:scale-[1.02] transition-all duration-200 shadow-lg shadow-primary/30"
               >
                 Publier mon annonce — gratuit
               </button>
               <button
-                onClick={() => navigate("/register?role=sitter")}
+                onClick={() => navigate("/inscription?role=sitter")}
                 className="font-body text-sm font-semibold tracking-wide rounded-full px-8 py-4 bg-transparent text-white border-2 border-white/70 hover:bg-white/15 transition-all duration-200"
               >
                 Je veux garder
@@ -346,7 +346,7 @@ const Landing = () => {
                 <span className="inline-block px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-body font-medium mb-4">
                   Gratuit pour les propriétaires
                 </span>
-                <Link to="/register?role=owner" className="block text-sm font-body text-primary font-medium hover:underline">
+                <Link to="/inscription?role=owner" className="block text-sm font-body text-primary font-medium hover:underline">
                   Je cherche un gardien →
                 </Link>
               </div>
@@ -359,7 +359,7 @@ const Landing = () => {
                 <p className="text-base font-body leading-relaxed text-foreground/70 mb-4">
                   Proposez-vous comme gardien. Vivez dans des maisons, avec des animaux, dans des quartiers que vous n'auriez jamais explorés autrement.
                 </p>
-                <Link to="/register?role=sitter" className="text-sm font-body text-primary font-medium hover:underline">
+                <Link to="/inscription?role=sitter" className="text-sm font-body text-primary font-medium hover:underline">
                   Je veux garder →
                 </Link>
               </div>
@@ -437,7 +437,7 @@ const Landing = () => {
 
           <RevealSection delay={0.4} className="text-center mt-14">
             <button
-              onClick={() => navigate("/register?role=owner")}
+              onClick={() => navigate("/inscription?role=owner")}
               className="font-body text-sm font-semibold tracking-wide rounded-full px-10 py-4 bg-primary text-primary-foreground hover:brightness-90 hover:scale-[1.02] transition-all duration-200"
             >
               Je cherche un gardien — c'est gratuit
@@ -526,7 +526,7 @@ const Landing = () => {
 
           <RevealSection delay={0.4} className="text-center mt-14">
             <button
-              onClick={() => navigate("/register?role=owner")}
+              onClick={() => navigate("/inscription?role=owner")}
               className="font-body text-sm font-semibold tracking-wide rounded-full px-10 py-4 bg-primary text-primary-foreground hover:brightness-90 hover:scale-[1.02] transition-all duration-200"
             >
               Créer mon compte gratuit
@@ -601,7 +601,7 @@ const Landing = () => {
                 Découvrir les petites missions <ArrowRight className="h-4 w-4" />
               </Link>
               <Link
-                to="/register"
+                to="/inscription"
                 className="inline-flex items-center gap-2 bg-card text-foreground border border-border px-8 py-4 rounded-full font-body font-medium text-sm hover:bg-muted transition-colors"
               >
                 Créer mon compte — c'est gratuit
@@ -822,7 +822,7 @@ const Landing = () => {
             Badge Fondateur à vie. Accès gratuit jusqu'au 13 juin. Et surtout, vous serez parmi les premiers à vivre ça. Pourquoi le 13 mai ? C'est l'anniversaire de Jérémie. Il préfère offrir l'accès plutôt que recevoir des chaussettes.
           </p>
           <button
-            onClick={() => navigate("/register")}
+            onClick={() => navigate("/inscription")}
             className="font-body text-sm font-bold tracking-wide rounded-full px-12 py-4 bg-white text-primary hover:bg-background hover:scale-[1.02] transition-all duration-200"
           >
             Rejoindre le mouvement
@@ -842,13 +842,13 @@ const Landing = () => {
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center mb-6">
             <button
-              onClick={() => navigate("/register?role=owner")}
+              onClick={() => navigate("/inscription?role=owner")}
               className="font-body text-sm font-semibold tracking-wide rounded-full px-10 py-4 bg-primary text-primary-foreground hover:brightness-90 hover:scale-[1.02] transition-all duration-200"
             >
               Je cherche un gardien — gratuit
             </button>
             <button
-              onClick={() => navigate("/register?role=sitter")}
+              onClick={() => navigate("/inscription?role=sitter")}
               className="font-body text-sm font-semibold tracking-wide rounded-full px-10 py-4 bg-transparent text-white border-2 border-white/40 hover:bg-white/10 transition-all duration-200"
             >
               Je veux garder

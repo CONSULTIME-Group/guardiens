@@ -52,7 +52,7 @@ export default function CitySidebar({ city, sitters }: CitySidebarProps) {
             </p>
           )}
 
-          <Link to="/register" className="block">
+          <Link to="/inscription" className="block">
             <Button className="w-full gap-2" size="lg">
               Devenir gardien à {city}
               <ArrowRight className="h-4 w-4" />
@@ -70,7 +70,7 @@ export default function CitySidebar({ city, sitters }: CitySidebarProps) {
           <p className="text-sm text-primary-foreground/85 mb-4">
             Publiez votre annonce en 2 minutes. C'est gratuit pour les propriétaires.
           </p>
-          <Link to="/register" className="block">
+          <Link to="/inscription" className="block">
             <Button variant="secondary" className="w-full gap-2 font-semibold">
               Trouver mon gardien
               <ArrowRight className="h-4 w-4" />

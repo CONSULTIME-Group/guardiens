@@ -129,7 +129,7 @@ Mais quand vient le moment de partir — vacances, déplacement professionnel, w
 
 Guardiens est une plateforme de garde d'animaux et de home sitting fondée en Auvergne-Rhône-Alpes par Jérémie et Elisa, installés dans le Vieux-Lyon, rue Juiverie. Après cinq ans de house-sitting en AURA — 37 maisons gardées, 234 animaux accompagnés — ils ont construit un outil pensé pour les propriétaires lyonnais : des gardiens de proximité, une rencontre physique systématique avant chaque garde, et un système de confiance vérifiée.
 
-Ce que Guardiens propose concrètement : vous publiez votre annonce, des gardiens de votre quartier postulent, vous les rencontrez autour d'un café ou lors d'une visite de votre logement, puis vous confirmez la garde. Votre animal reste chez lui, dans ses repères. Votre maison reste vivante. [Inscrivez-vous pour publier votre annonce](/register?role=owner).`,
+Ce que Guardiens propose concrètement : vous publiez votre annonce, des gardiens de votre quartier postulent, vous les rencontrez autour d'un café ou lors d'une visite de votre logement, puis vous confirmez la garde. Votre animal reste chez lui, dans ses repères. Votre maison reste vivante. [Inscrivez-vous pour publier votre annonce](/inscription?role=owner).`,
       },
       {
         id: "pourquoi-proximite",
@@ -286,9 +286,9 @@ Que vous viviez dans le Vieux-Lyon, à la Croix-Rousse, à Monplaisir ou à Vill
 
 Le réseau s'étend progressivement à toute l'Auvergne-Rhône-Alpes : [Annecy](/actualites/house-sitting-annecy), Grenoble, Chambéry, et au-delà. Mais Lyon reste le pilier, la ville de référence, celle où tout a commencé.
 
-[Publiez votre première annonce](/register?role=owner) — c'est sans frais pour les propriétaires.
+[Publiez votre première annonce](/inscription?role=owner) — c'est sans frais pour les propriétaires.
 
-[Devenez gardien à Lyon](/register?role=guardian) — rejoignez le réseau de confiance.
+[Devenez gardien à Lyon](/inscription?role=guardian) — rejoignez le réseau de confiance.
 
 Consultez également le [guide complet du gardien à Lyon](/guides/lyon), la page [département du Rhône](/departement/rhone), ou découvrez [ce qu'est le house-sitting](/actualites/c-est-quoi-le-house-sitting).`,
       },

@@ -42,7 +42,7 @@ export default function PublicHeader() {
           <Button variant="ghost" size="sm" onClick={() => navigate("/login")}>
             Connexion
           </Button>
-          <Button size="sm" onClick={() => navigate("/register")}>
+          <Button size="sm" onClick={() => navigate("/inscription")}>
             S'inscrire
           </Button>
         </nav>
@@ -77,7 +77,7 @@ export default function PublicHeader() {
             </Link>
           ))}
           <div className="pt-2 border-t border-border">
-            <Button className="w-full" size="sm" onClick={() => { setOpen(false); navigate("/register"); }}>
+            <Button className="w-full" size="sm" onClick={() => { setOpen(false); navigate("/inscription"); }}>
               S'inscrire gratuitement
             </Button>
           </div>

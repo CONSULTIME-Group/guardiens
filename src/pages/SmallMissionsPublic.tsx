@@ -72,9 +72,9 @@ const SmallMissionsPublic = () => {
 
   /** Auth-aware navigation: redirect to register if not logged in */
   const goToCreate = () =>
-    navigate(isAuthenticated ? "/petites-missions/creer" : "/register?redirect=/petites-missions/creer");
+    navigate(isAuthenticated ? "/petites-missions/creer" : "/inscription?redirect=/petites-missions/creer");
   const goToHelp = () =>
-    navigate(isAuthenticated ? "/petites-missions?type=offre" : "/register?redirect=/petites-missions?type=offre");
+    navigate(isAuthenticated ? "/petites-missions?type=offre" : "/inscription?redirect=/petites-missions?type=offre");
 
   return (
     <>

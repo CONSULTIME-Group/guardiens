@@ -199,7 +199,8 @@ const AppRoutes = () => (
     <Routes>
       <Route path="/" element={<Landing />} />
       <Route path="/login" element={<PublicOnlyRoute><Login /></PublicOnlyRoute>} />
-      <Route path="/register" element={<PublicOnlyRoute><Register /></PublicOnlyRoute>} />
+      <Route path="/register" element={<Navigate to="/inscription" replace />} />
+      <Route path="/inscription" element={<PublicOnlyRoute><Register /></PublicOnlyRoute>} />
       <Route path="/auth/confirm" element={<AuthConfirm />} />
       <Route path="/forgot-password" element={<PublicOnlyRoute><ForgotPassword /></PublicOnlyRoute>} />
       <Route path="/reset-password" element={<ResetPassword />} />

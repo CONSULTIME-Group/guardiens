@@ -336,7 +336,7 @@ const PublicSitDetail = () => {
               </Button>
             ) : !isAuthenticated ? (
               <Link
-                to="/register?role=sitter"
+                to="/inscription?role=sitter"
                 onClick={() => {
                   try {
                     trackEvent("sit_apply_blocked", {

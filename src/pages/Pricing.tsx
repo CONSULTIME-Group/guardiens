@@ -105,7 +105,7 @@ const Pricing = () => {
     if (role) params.set("role", role);
     if (formule) params.set("plan", formule);
     const qs = params.toString();
-    return `/register${qs ? `?${qs}` : ""}`;
+    return `/inscription${qs ? `?${qs}` : ""}`;
   };
 
   const faqJsonLd = {
@@ -194,7 +194,7 @@ const Pricing = () => {
                   </div>
 
                   <Link
-                    to="/register"
+                    to="/inscription"
                     className="shrink-0 inline-flex items-center gap-2 bg-primary text-primary-foreground font-body font-medium text-sm px-6 py-3 rounded-xl hover:bg-primary/90 transition-colors min-h-[44px] whitespace-nowrap"
                   >
                     Devenir Fondateur
