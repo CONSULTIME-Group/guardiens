@@ -3,6 +3,9 @@
  * INCREMENTAL: caches per-source updated_at in .sitemap-cache.json
  * Re-fetches only sources whose head changed since last build.
  * Force full rebuild: SITEMAP_FORCE=1 node scripts/generate-sitemap.mjs
+ *
+ * Source unique de vérité pour les routes statiques : src/data/siteRoutes.ts
+ * (staticRoutes + SITE_URL). Ne PAS redéclarer ces valeurs ici.
  */
 import { createClient } from "@supabase/supabase-js";
 import fs from "fs";
@@ -10,34 +13,50 @@ import path from "path";
 import { fileURLToPath } from "url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const SITE_URL = "https://guardiens.fr";
 const CACHE_PATH = path.resolve(__dirname, "../.sitemap-cache.json");
 const FORCE = process.env.SITEMAP_FORCE === "1";
 
-const SUPABASE_URL = process.env.VITE_SUPABASE_URL || "https://erhccyqevdyevpyctsjj.supabase.co";
-const SUPABASE_KEY = process.env.VITE_SUPABASE_PUBLISHABLE_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVyaGNjeXFldmR5ZXZweWN0c2pqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0MjMzMzQsImV4cCI6MjA4OTk5OTMzNH0.ltBQtcouoqd5tuv_wQXb92x5Q5YYa9mkEQvZUx0wLTY";
+// ─── Source de vérité : src/data/siteRoutes.ts ───────────────────────
+// Parser le fichier TS pour extraire SITE_URL + staticRoutes sans
+// dépendance TS runtime. Toute modif des routes doit se faire là-bas.
+function loadStaticRoutes() {
+  const filePath = path.resolve(__dirname, "../src/data/siteRoutes.ts");
+  const source = fs.readFileSync(filePath, "utf-8");
 
-const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+  const siteUrlMatch = source.match(/export\s+const\s+SITE_URL\s*=\s*["']([^"']+)["']/);
+  if (!siteUrlMatch) throw new Error("SITE_URL introuvable dans siteRoutes.ts");
+  const siteUrl = siteUrlMatch[1];
 
-const staticPages = [
-  { loc: "/", priority: "1.0", changefreq: "daily" },
-  { loc: "/tarifs", priority: "0.8", changefreq: "weekly" },
-  { loc: "/faq", priority: "0.8", changefreq: "weekly" },
-  { loc: "/contact", priority: "0.8", changefreq: "weekly" },
-  { loc: "/petites-missions", priority: "0.8", changefreq: "weekly" },
-  { loc: "/gardien-urgence", priority: "0.8", changefreq: "weekly" },
-  { loc: "/guides", priority: "0.8", changefreq: "weekly" },
-];
+  const routes = [];
+  const blockRe = /\{\s*path:\s*(["'])([^"']+)\1[\s\S]*?changeFreq:\s*(["'])(daily|weekly|monthly|yearly)\3[\s\S]*?\}/g;
+  let m;
+  while ((m = blockRe.exec(source)) !== null) {
+    const block = m[0];
+    const path_ = m[2];
+    const changefreq = m[4];
+    const priorityMatch = block.match(/sitemapPriority:\s*(["'])([^"']+)\1/);
+    if (!priorityMatch) continue;
+    routes.push({ loc: path_, priority: priorityMatch[2], changefreq });
+  }
+  if (routes.length === 0) throw new Error("Aucune route extraite de staticRoutes");
+  return { siteUrl, routes };
+}
+
+const { siteUrl: SITE_URL, routes: STATIC_ROUTES } = loadStaticRoutes();
+
+// Routes à indexer dans le sitemap : on exclut les pages d'auth peu
+// pertinentes pour le SEO (connexion/inscription sont linkées partout).
+const SITEMAP_EXCLUDE = new Set(["/login"]);
+const staticPages = STATIC_ROUTES.filter((r) => !SITEMAP_EXCLUDE.has(r.loc));
 
 const cityLandingPages = [
   "annecy", "lyon", "grenoble", "caluire-et-cuire", "chambery", "aura",
 ];
 
-const legalPages = [
-  { loc: "/cgu", priority: "0.3", changefreq: "yearly" },
-  { loc: "/confidentialite", priority: "0.3", changefreq: "yearly" },
-  { loc: "/mentions-legales", priority: "0.3", changefreq: "yearly" },
-];
+const SUPABASE_URL = process.env.VITE_SUPABASE_URL || "https://erhccyqevdyevpyctsjj.supabase.co";
+const SUPABASE_KEY = process.env.VITE_SUPABASE_PUBLISHABLE_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVyaGNjeXFldmR5ZXZweWN0c2pqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0MjMzMzQsImV4cCI6MjA4OTk5OTMzNH0.ltBQtcouoqd5tuv_wQXb92x5Q5YYa9mkEQvZUx0wLTY";
+
+const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const PRIORITY_MAP = {
   ville: "0.9",
@@ -218,9 +237,8 @@ async function main() {
   for (const e of depts) entries.push(urlEntry(e.loc, e.lastmod, e.changefreq, e.priority));
   for (const e of breeds) entries.push(urlEntry(e.loc, e.lastmod, e.changefreq, e.priority));
   for (const e of profiles) entries.push(urlEntry(e.loc, e.lastmod, e.changefreq, e.priority));
-  for (const page of legalPages) {
-    entries.push(urlEntry(page.loc, today, page.changefreq, page.priority));
-  }
+  // Pages légales (/cgu, /confidentialite, /mentions-legales) déjà incluses
+  // dans staticPages via staticRoutes — ne pas les ré-ajouter ici.
 
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
