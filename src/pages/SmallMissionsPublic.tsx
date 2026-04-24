@@ -80,7 +80,7 @@ const SmallMissionsPublic = () => {
     <>
       <PageMeta
         title="Petites missions d'entraide locale — Guardiens"
-        description="Échangez des coups de main entre voisins en Auvergne-Rhône-Alpes. Jardinage, animaux, bricolage — sans argent. Gratuit pour tous, pour toujours."
+        description="Échangez des coups de main entre voisins. Jardinage, animaux, bricolage — sans argent. Gratuit pour tous, pour toujours."
       />
 
       <div className="min-h-screen bg-background font-body">
@@ -370,7 +370,7 @@ const SmallMissionsPublic = () => {
               "@type": "Service",
               name: "Petites missions Guardiens",
               description: "Entraide communautaire entre gens du coin. Échanges sans argent autour des animaux, du jardin et de la maison.",
-              areaServed: { "@type": "AdministrativeArea", name: "Auvergne-Rhône-Alpes" },
+              areaServed: { "@type": "Country", name: "France" },
               provider: { "@type": "Organization", name: "Guardiens", url: "https://guardiens.fr" },
             }),
           }}

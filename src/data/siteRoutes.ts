@@ -40,7 +40,7 @@ export const staticRoutes: SiteRoute[] = [
   {
     path: "/actualites",
     title: "Blog — Actualités et conseils | Guardiens",
-    metaDescription: "Conseils house-sitting, guides pratiques et actualités de la communauté Guardiens en Auvergne-Rhône-Alpes.",
+    metaDescription: "Conseils house-sitting, guides pratiques et actualités de la communauté Guardiens.",
     h1: "Actualités",
     sitemapPriority: "0.8",
     changeFreq: "daily",
@@ -72,7 +72,7 @@ export const staticRoutes: SiteRoute[] = [
   {
     path: "/recherche",
     title: "Recherche — Trouver un gardien ou une garde | Guardiens",
-    metaDescription: "Recherchez des gardes disponibles et des gardiens vérifiés près de chez vous en Auvergne-Rhône-Alpes.",
+    metaDescription: "Recherchez des gardes disponibles et des gardiens vérifiés près de chez vous.",
     h1: "Recherche",
     sitemapPriority: "0.7",
     changeFreq: "daily",
@@ -88,7 +88,7 @@ export const staticRoutes: SiteRoute[] = [
   {
     path: "/a-propos",
     title: "À propos | Guardiens",
-    metaDescription: "Découvrez l'histoire de Guardiens, le house-sitting de proximité en Auvergne-Rhône-Alpes.",
+    metaDescription: "Découvrez l'histoire de Guardiens, le house-sitting de proximité et de confiance.",
     h1: "À propos de Guardiens",
     sitemapPriority: "0.5",
     changeFreq: "monthly",

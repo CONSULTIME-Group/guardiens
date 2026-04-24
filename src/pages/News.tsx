@@ -138,7 +138,7 @@ export default function News() {
     <>
       <PageMeta
         title="Guides & Conseils — House-sitting & guides locaux"
-        description="Articles, témoignages et guides pratiques pour le house-sitting en Auvergne-Rhône-Alpes. Conseils pour gardiens et propriétaires."
+        description="Articles, témoignages et guides pratiques pour le house-sitting de proximité. Conseils pour gardiens et propriétaires."
         path="/actualites"
       />
     <PublicHeader />

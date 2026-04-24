@@ -94,8 +94,8 @@ const EmergencySitter = () => {
   return (
     <div className="min-h-screen bg-background">
       <PageMeta
-        title="Gardien d'urgence — Intervention rapide en AURA"
-        description="Besoin d'un gardien en urgence pour vos animaux ? Des gardiens vérifiés, expérimentés et disponibles rapidement près de chez vous en Auvergne-Rhône-Alpes."
+        title="Gardien d'urgence — Intervention rapide | Guardiens"
+        description="Besoin d'un gardien en urgence pour vos animaux ? Des gardiens vérifiés, expérimentés et disponibles rapidement près de chez vous."
         path="/gardien-urgence"
       />
       <Helmet>
@@ -253,7 +253,7 @@ const EmergencySitter = () => {
       <section className="max-w-4xl mx-auto px-4 py-12 border-t border-border">
         <h2 className="font-heading text-xl font-bold text-center mb-3">Gardiens d'urgence par ville</h2>
         <p className="text-sm text-muted-foreground text-center mb-6">
-          Le réseau d'urgence couvre l'ensemble de la région Auvergne-Rhône-Alpes. Voici les villes où nos gardiens sont les plus actifs.
+          Le réseau d'urgence s'appuie sur des gardiens locaux partout en France. Voici les villes où nos gardiens sont les plus actifs.
         </p>
         <div className="flex flex-wrap justify-center gap-3">
           {[
