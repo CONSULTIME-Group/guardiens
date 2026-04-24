@@ -339,9 +339,20 @@ function HeroCard({
         >
           {CATEGORY_LABELS[item.category]}
         </span>
-        <span className="text-muted-foreground font-mono text-[10px] truncate">
-          hero-{String(item.fileNum).padStart(2, "0")}
-        </span>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={onOpenPage}
+            title="Ouvrir en pleine page (carnet entier + détails)"
+            className="inline-flex items-center gap-1 px-2 py-0.5 rounded border border-border text-[10px] font-medium hover:bg-muted transition-colors"
+          >
+            <Maximize2 className="w-3 h-3" />
+            Pleine page
+          </button>
+          <span className="text-muted-foreground font-mono text-[10px] truncate">
+            hero-{String(item.fileNum).padStart(2, "0")}
+          </span>
+        </div>
       </div>
 
       {/* Liseré ambré de tranche le long du bord déchiré (effet épaisseur de papier) */}
