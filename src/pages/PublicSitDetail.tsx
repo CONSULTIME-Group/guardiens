@@ -182,7 +182,7 @@ const PublicSitDetail = () => {
     "@context": "https://schema.org",
     "@type": "Service",
     name: sit.title || `Garde d'animaux à ${cityForTitle}`,
-    description: truncatedDesc,
+    description: truncatedSeoDesc,
     provider: {
       "@type": "Person",
       name: owner?.first_name || "Membre Guardiens",
@@ -202,7 +202,7 @@ const PublicSitDetail = () => {
     <div className="max-w-4xl mx-auto pb-32">
       <Helmet>
         <title>{truncatedTitle}</title>
-        <meta name="description" content={truncatedDesc} />
+        <meta name="description" content={truncatedSeoDesc} />
         <link rel="canonical" href={canonicalUrl} />
         {/* noindex, follow — thin content protection (V1). Social crawlers (FB/WhatsApp) lisent quand même les balises OG. */}
         <meta name="robots" content="noindex, follow" />
@@ -215,6 +215,7 @@ const PublicSitDetail = () => {
         <meta property="og:image" content={ogImageUrl} />
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />
+        <meta property="og:image:alt" content={ogImageAlt} />
         <meta property="og:site_name" content="Guardiens" />
         <meta property="og:locale" content="fr_FR" />
 
@@ -223,6 +224,7 @@ const PublicSitDetail = () => {
         <meta name="twitter:title" content={truncatedTitle} />
         <meta name="twitter:description" content={truncatedDesc} />
         <meta name="twitter:image" content={ogImageUrl} />
+        <meta name="twitter:image:alt" content={ogImageAlt} />
 
         <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>
       </Helmet>
