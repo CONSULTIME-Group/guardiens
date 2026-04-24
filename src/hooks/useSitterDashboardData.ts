@@ -154,19 +154,32 @@ export function useSitterDashboardData(userId: string | undefined) {
       // Reputation (replaces useProfileReputation)
       const reputation: ReputationData | null = reputationRes.data ?? null;
 
-      // Nearby listings — filtered by department (first 2 chars of postal code)
+      // Nearby listings — filtered by owner's department (first 2 chars of postal code)
       const userDept = profile?.postal_code?.slice(0, 2);
       let nearbyListings: any[] = [];
       if (userDept) {
         const { data: deptListings } = await supabase
           .from("sits")
-          .select("id, title, start_date, end_date, user_id, property_id, status, created_at, is_urgent, properties:property_id(photos, type, environment), owner:profiles!sits_user_id_fkey(postal_code)")
+          .select("id, title, start_date, end_date, user_id, property_id, status, created_at, is_urgent, properties:property_id(photos, type, environment)")
           .eq("status", "published")
+          .neq("user_id", userId)
           .order("created_at", { ascending: false })
-          .limit(20);
-        nearbyListings = (deptListings || [])
-          .filter((s: any) => s.user_id !== userId && (s.owner as any)?.postal_code?.startsWith(userDept))
-          .slice(0, 4);
+          .limit(50);
+        const candidateOwnerIds = Array.from(new Set((deptListings || []).map((s: any) => s.user_id)));
+        if (candidateOwnerIds.length > 0) {
+          const { data: owners } = await supabase
+            .from("public_profiles")
+            .select("id, postal_code")
+            .in("id", candidateOwnerIds);
+          const deptOwnerIds = new Set(
+            (owners || [])
+              .filter((o: any) => o.postal_code?.startsWith(userDept))
+              .map((o: any) => o.id)
+          );
+          nearbyListings = (deptListings || [])
+            .filter((s: any) => deptOwnerIds.has(s.user_id))
+            .slice(0, 4);
+        }
       }
 
       // Nearby missions — filtered by department
