@@ -49,6 +49,26 @@ const getPasswordStrength = (pw: string): { score: 0 | 1 | 2 | 3 | 4; label: str
   return { score: score as 0 | 1 | 2 | 3 | 4, ...map[score] };
 };
 
+/* Common compromised passwords / patterns blocked by Supabase HIBP — we pre-check
+   to avoid the very confusing "weak_password" error that costs us many signups. */
+const COMMON_WEAK_PASSWORDS = new Set([
+  "12345678", "123456789", "1234567890", "azertyui", "azerty123",
+  "password", "password1", "password123", "motdepasse", "motdepasse1",
+  "qwertyui", "qwerty123", "iloveyou", "iloveyou1", "guardiens",
+  "guardiens1", "guardiens123", "bonjour1", "bonjour12", "soleil123",
+  "abcdefgh", "abc12345", "111111111", "00000000",
+]);
+
+const isObviouslyWeak = (pw: string): boolean => {
+  const lower = pw.toLowerCase();
+  if (COMMON_WEAK_PASSWORDS.has(lower)) return true;
+  // all same character
+  if (/^(.)\1+$/.test(pw)) return true;
+  // sequential digits like 12345678 / 87654321
+  if (/^(?:0123456789|1234567890|9876543210|0987654321)$/.test(pw)) return true;
+  return false;
+};
+
 const Register = () => {
   const [searchParams] = useSearchParams();
   const presetRole = searchParams.get("role") as Role | null;
@@ -91,6 +111,17 @@ const Register = () => {
 
     if (password.length < 8) {
       setFormError("Votre mot de passe doit contenir au moins 8 caractères.");
+      return;
+    }
+
+    if (isObviouslyWeak(password)) {
+      setFormError("Ce mot de passe est trop courant. Mélangez plusieurs mots, chiffres ou symboles (par exemple une phrase de passe).");
+      trackEvent("signup_failed", { source: "/register", metadata: { reason: "weak_password_local", role: selectedRole } });
+      return;
+    }
+
+    if (pwStrength.score < 2) {
+      setFormError("Mot de passe trop faible. Ajoutez des majuscules, des chiffres ou un caractère spécial.");
       return;
     }
 

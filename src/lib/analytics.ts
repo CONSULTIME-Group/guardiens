@@ -16,7 +16,11 @@ export type EventType =
   | "cp_recovered"
   | "search_empty_action"
   | "search_outofzone_impression"
-  | "search_outofzone_click";
+  | "search_outofzone_click"
+  | "sit_view"
+  | "sit_apply_clicked"
+  | "sit_apply_blocked"
+  | "sit_share_opened";
 
 interface TrackOptions {
   source?: string;

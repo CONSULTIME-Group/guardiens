@@ -8,6 +8,8 @@ import { Calendar, MapPin, Star, PawPrint, Home, CheckCircle2 } from "lucide-rea
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import VerifiedBadge from "@/components/profile/VerifiedBadge";
+import ShareButtons from "@/components/sits/ShareButtons";
+import { trackEvent } from "@/lib/analytics";
 
 import { TooltipProvider } from "@/components/ui/tooltip";
 import ApplicationModal from "@/components/sits/ApplicationModal";
@@ -23,6 +25,10 @@ const typeLabels: Record<string, string> = {
 const speciesEmoji: Record<string, string> = {
   dog: "🐕", cat: "🐈", horse: "🐴", bird: "🐦", rodent: "🐹",
   fish: "🐠", reptile: "🦎", farm_animal: "🐄", nac: "🐾",
+};
+const speciesLabel: Record<string, string> = {
+  dog: "chien", cat: "chat", horse: "cheval", bird: "oiseau", rodent: "rongeur",
+  fish: "poisson", reptile: "reptile", farm_animal: "animal de ferme", nac: "NAC",
 };
 
 const PublicSitDetail = () => {
@@ -78,6 +84,8 @@ const PublicSitDetail = () => {
       }
 
       setLoading(false);
+      // analytics
+      trackEvent("sit_view", { source: "/annonces/:id", metadata: { sit_id: id } });
     };
     load();
   }, [id, user]);
@@ -92,13 +100,82 @@ const PublicSitDetail = () => {
     ? sit.environments
     : (property?.environment ? [property.environment] : []);
 
+  // ── SEO / OG ──
+  const cityForTitle = owner?.city || "France";
+  const startFmt = sit.start_date ? format(new Date(sit.start_date), "d MMM", { locale: fr }) : "";
+  const endFmt = sit.end_date ? format(new Date(sit.end_date), "d MMM yyyy", { locale: fr }) : "";
+  const datesShort = startFmt && endFmt ? `du ${startFmt} au ${endFmt}` : "dates flexibles";
+
+  const petsSummary = pets.length > 0
+    ? pets.map((p: any) => `${p.name} (${speciesLabel[p.species] || p.species})`).join(", ")
+    : "animaux à confier";
+
+  const seoTitle = `${sit.title || `Garde d'animaux à ${cityForTitle}`} — Guardiens`;
+  const truncatedTitle = seoTitle.length > 60 ? seoTitle.slice(0, 57) + "…" : seoTitle;
+
+  const seoDescription = `Garde gratuite à ${cityForTitle} ${datesShort}. ${petsSummary}. ${owner?.first_name || "Un membre"} cherche un gardien du coin sur Guardiens — inscription gratuite.`;
+  const truncatedDesc = seoDescription.length > 160 ? seoDescription.slice(0, 157) + "…" : seoDescription;
+
+  const canonicalUrl = typeof window !== "undefined"
+    ? `${window.location.origin}/annonces/${sit.id}`
+    : `https://guardiens.fr/annonces/${sit.id}`;
+
+  const ogImageUrl = photos[0]
+    ? photos[0]
+    : `https://erhccyqevdyevpyctsjj.supabase.co/functions/v1/og-sit?id=${sit.id}`;
+
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Service",
+    name: sit.title || `Garde d'animaux à ${cityForTitle}`,
+    description: truncatedDesc,
+    provider: {
+      "@type": "Person",
+      name: owner?.first_name || "Membre Guardiens",
+    },
+    areaServed: cityForTitle,
+    offers: {
+      "@type": "Offer",
+      price: "0",
+      priceCurrency: "EUR",
+      availability: "https://schema.org/InStock",
+      validFrom: sit.start_date,
+      validThrough: sit.end_date,
+    },
+  };
+
   return (
     <div className="max-w-4xl mx-auto pb-32">
-      <Helmet><meta name="robots" content="noindex, nofollow" /></Helmet>
+      <Helmet>
+        <title>{truncatedTitle}</title>
+        <meta name="description" content={truncatedDesc} />
+        <link rel="canonical" href={canonicalUrl} />
+        {/* Indexable for SEO + social crawlers */}
+        <meta name="robots" content="index, follow" />
+
+        {/* Open Graph (Facebook, LinkedIn, WhatsApp, iMessage) */}
+        <meta property="og:type" content="article" />
+        <meta property="og:title" content={truncatedTitle} />
+        <meta property="og:description" content={truncatedDesc} />
+        <meta property="og:url" content={canonicalUrl} />
+        <meta property="og:image" content={ogImageUrl} />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        <meta property="og:site_name" content="Guardiens" />
+        <meta property="og:locale" content="fr_FR" />
+
+        {/* Twitter / X */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={truncatedTitle} />
+        <meta name="twitter:description" content={truncatedDesc} />
+        <meta name="twitter:image" content={ogImageUrl} />
+
+        <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>
+      </Helmet>
 
       {/* Hero photo */}
       {photos.length > 0 && (
-        <img src={photos[0]} alt="Logement" className="w-full h-64 md:h-80 object-cover" loading="eager" />
+        <img src={photos[0]} alt={`Logement à ${cityForTitle} — annonce de garde Guardiens`} className="w-full h-64 md:h-80 object-cover" loading="eager" />
       )}
 
       <div className="p-6 md:p-10">
@@ -173,7 +250,7 @@ const PublicSitDetail = () => {
 
         {/* Owner profile card */}
         {owner && (
-          <div className="flex items-center gap-3 mb-8 p-4 bg-card rounded-xl border border-border">
+          <div className="flex items-center gap-3 mb-6 p-4 bg-card rounded-xl border border-border">
             {owner.avatar_url ? (
               <img src={owner.avatar_url} alt={owner.first_name} className="w-14 h-14 rounded-full object-cover" loading="lazy" />
             ) : (
@@ -192,9 +269,18 @@ const PublicSitDetail = () => {
                 </span>
               )}
             </div>
-            {/* Badges — migration en cours */}
           </div>
         )}
+
+        {/* Share buttons — accessible to everyone, including not-yet-logged-in visitors */}
+        <div className="mb-8">
+          <ShareButtons
+            sitId={sit.id}
+            title={sit.title || `Garde à ${owner?.city || "France"}`}
+            city={owner?.city}
+            source="public_sit_detail"
+          />
+        </div>
 
         {/* CTA */}
         <div className="fixed bottom-0 left-0 right-0 bg-card border-t border-border p-4 z-40 pb-20 md:pb-4">
@@ -204,13 +290,19 @@ const PublicSitDetail = () => {
                 Candidatures en cours d'analyse
               </Button>
             ) : !isAuthenticated ? (
-              <Link to="/register?role=sitter">
+              <Link
+                to="/register?role=sitter"
+                onClick={() => trackEvent("sit_apply_blocked", { source: "public_sit_detail", metadata: { sit_id: sit.id, reason: "not_authenticated" } })}
+              >
                 <Button className="w-full h-12 text-base font-semibold">
                   S'inscrire pour postuler — gratuit →
                 </Button>
               </Link>
             ) : !hasAccess ? (
-              <Link to="/mon-abonnement">
+              <Link
+                to="/mon-abonnement"
+                onClick={() => trackEvent("sit_apply_blocked", { source: "public_sit_detail", metadata: { sit_id: sit.id, reason: "no_subscription" } })}
+              >
                 <Button className="w-full h-12 text-base font-semibold">
                   S'abonner pour postuler
                 </Button>
@@ -220,7 +312,13 @@ const PublicSitDetail = () => {
                 <CheckCircle2 className="h-5 w-5 mr-2" /> Candidature envoyée ✓
               </Button>
             ) : (
-              <Button className="w-full h-12 text-base font-semibold" onClick={() => setApplyOpen(true)}>
+              <Button
+                className="w-full h-12 text-base font-semibold"
+                onClick={() => {
+                  trackEvent("sit_apply_clicked", { source: "public_sit_detail", metadata: { sit_id: sit.id } });
+                  setApplyOpen(true);
+                }}
+              >
                 Postuler à cette garde
               </Button>
             )}

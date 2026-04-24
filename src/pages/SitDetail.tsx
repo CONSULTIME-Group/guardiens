@@ -25,6 +25,8 @@ import { useToast } from "@/hooks/use-toast";
 import { geocodeCity } from "@/lib/geocode";
 import { hasMedication } from "@/lib/medication";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import ShareButtons from "@/components/sits/ShareButtons";
+import { trackEvent } from "@/lib/analytics";
 
 const envLabels: Record<string, string> = {
   city_center: "Centre-ville", suburban: "Périurbain", countryside: "Campagne",
@@ -355,7 +357,7 @@ const SitDetail = () => {
 
       {/* Owner card */}
       {owner && (
-        <div className="flex items-center gap-3 mb-8 p-4 bg-card rounded-xl border border-border">
+        <div className="flex items-center gap-3 mb-6 p-4 bg-card rounded-xl border border-border">
           <Link to={`/gardiens/${owner.id}`}>
             {owner.avatar_url ? (
               <img src={owner.avatar_url} alt={owner.first_name} className="w-14 h-14 rounded-full object-cover hover:ring-2 hover:ring-primary/30 transition-all" />
@@ -379,6 +381,18 @@ const SitDetail = () => {
               <Button variant="outline" size="sm">Voir le profil</Button>
             </Link>
           )}
+        </div>
+      )}
+
+      {/* Share buttons — visible to the owner of a published listing so they can broadcast it */}
+      {isOwner && sit.status === "published" && (
+        <div className="mb-8">
+          <ShareButtons
+            sitId={sit.id}
+            title={sit.title || `Garde à ${owner?.city || "France"}`}
+            city={owner?.city}
+            source="owner_sit_detail"
+          />
         </div>
       )}
 
@@ -791,7 +805,13 @@ const SitDetail = () => {
               // Sitter sans abonnement (3A) — gardes verrouillées par l'abonnement, pas par l'ID
               <AccessGateBanner level="3A" profileCompletion={profileCompletion} context="guard" />
             ) : (
-              <Button className="w-full h-12 text-base font-semibold" onClick={() => setApplyOpen(true)}>
+              <Button
+                className="w-full h-12 text-base font-semibold"
+                onClick={() => {
+                  trackEvent("sit_apply_clicked", { source: "sit_detail", metadata: { sit_id: sit.id } });
+                  setApplyOpen(true);
+                }}
+              >
                 Postuler pour cette garde
               </Button>
             )}
