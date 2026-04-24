@@ -684,6 +684,9 @@ export default function PublicSitterProfile() {
         const posMobile = anchor === "left" ? "0% 50%" : anchor === "right" ? "100% 50%" : "50% 50%";
         const posTablet = anchor === "left" ? "12% 45%" : anchor === "right" ? "88% 45%" : "50% 45%";
         const posDesktop = anchor === "left" ? "20% 42%" : anchor === "right" ? "80% 42%" : "50% 42%";
+        // Variantes responsive : WebP 768w (mobile, ~34KB) + JPG 1536w (desktop, ~130KB).
+        // Le navigateur pioche selon `sizes` → bande passante divisée par ~4 sur mobile.
+        const { desktop: heroDesktop, mobile: heroMobile } = getSitterHeroSources(id);
         return (
           <div className="relative overflow-hidden w-full min-h-[320px] sm:min-h-[360px] md:min-h-[340px] flex items-end bg-[#FBF6EC]">
             {/* Illustration de fond — sketchbook style, déterministe par profil.
@@ -692,16 +695,25 @@ export default function PublicSitterProfile() {
                 contenant les artefacts (spirales de carnet, texte parasite). */}
             <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
               <img
-                src={getSitterHeroImage(id)}
+                src={heroDesktop}
+                srcSet={`${heroMobile} 768w, ${heroDesktop} 1536w`}
+                sizes="(max-width: 767px) 100vw, 1536px"
                 alt=""
                 aria-hidden="true"
                 width={1536}
                 height={544}
+                loading="eager"
+                decoding="async"
+                fetchPriority="high"
                 style={{
                   ['--hero-pos-mobile' as string]: posMobile,
                   ['--hero-pos-tablet' as string]: posTablet,
                   ['--hero-pos-desktop' as string]: posDesktop,
                   objectPosition: `var(--hero-pos-current, ${posMobile})`,
+                  // GPU layer : évite les repaints sur le scale-[1.25] mobile.
+                  willChange: 'transform',
+                  transform: 'translateZ(0)',
+                  backfaceVisibility: 'hidden',
                 }}
                 className="w-full h-full object-cover origin-center scale-[1.25] sm:scale-[1.15] md:scale-[1.08] [--hero-pos-current:var(--hero-pos-mobile)] sm:[--hero-pos-current:var(--hero-pos-tablet)] md:[--hero-pos-current:var(--hero-pos-desktop)]"
               />
