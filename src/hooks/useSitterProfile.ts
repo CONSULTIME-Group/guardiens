@@ -76,7 +76,7 @@ const defaultData: SitterProfileData = {
 };
 
 export function useSitterProfile() {
-  const { user } = useAuth();
+  const { user, refreshProfile } = useAuth();
   const { toast } = useToast();
   const [data, setData] = useState<SitterProfileData>(defaultData);
   const [pastAnimals, setPastAnimals] = useState<PastAnimal[]>([]);
@@ -250,9 +250,10 @@ export function useSitterProfile() {
         }
       }
 
-      // Recompute canonical completion server-side and refresh local state
+      // Recompute canonical completion server-side and refresh local + global state
       await supabase.rpc("calculate_profile_completion", { p_user_id: user.id });
       await refreshCompletion();
+      await refreshProfile();
 
       toast({ title: "Sauvegardé", description: "Vos modifications ont été enregistrées." });
       return true;
@@ -264,7 +265,7 @@ export function useSitterProfile() {
     } finally {
       setSaving(false);
     }
-  }, [user, data, sitterProfileId, refreshCompletion, toast]);
+  }, [user, data, sitterProfileId, refreshCompletion, refreshProfile, toast]);
 
   const addPastAnimal = useCallback(async (animal: PastAnimal) => {
     if (!sitterProfileId) return;
@@ -313,8 +314,9 @@ export function useSitterProfile() {
     setData(nextData);
     await supabase.rpc("calculate_profile_completion", { p_user_id: user.id });
     await refreshCompletion();
+    await refreshProfile();
     return publicUrl;
-  }, [user, toast, data, refreshCompletion]);
+  }, [user, toast, data, refreshCompletion, refreshProfile]);
 
   return {
     data, pastAnimals, loading, saving, sitterProfileId, lastSyncedAt,
