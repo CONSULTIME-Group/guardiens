@@ -21,6 +21,8 @@
  *   node scripts/validate-og-tags.mjs --strict                # échec sur toute divergence
  *   node scripts/validate-og-tags.mjs --only=og,canonical     # limiter les checks
  *   node scripts/validate-og-tags.mjs --skip=sitemap,robots   # exclure des checks
+ *   node scripts/validate-og-tags.mjs --report-json           # écrit reports/og-report.json
+ *   node scripts/validate-og-tags.mjs --report-html=out.html  # rapport HTML custom
  *   TARGET_URL=https://... node scripts/validate-og-tags.mjs
  *
  * Checks disponibles (clés pour --only / --skip) :
@@ -37,7 +39,7 @@
  * routes non-home sont donc attendues et signalées en WARN par défaut.
  */
 
-import { readFileSync } from "node:fs";
+import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, resolve } from "node:path";
 
@@ -74,6 +76,17 @@ const dynamicLimitArg = cliArgs.find((a) => a.startsWith("--dynamic-limit="));
 const dynamicLimit = dynamicLimitArg
   ? Math.max(0, parseInt(dynamicLimitArg.slice("--dynamic-limit=".length), 10) || 0)
   : 20;
+
+// Rapports : --report-json[=path] et --report-html[=path]
+function parseReportFlag(prefix, defaultPath) {
+  const arg = cliArgs.find((a) => a === prefix || a.startsWith(`${prefix}=`));
+  if (!arg) return null;
+  if (arg === prefix) return defaultPath;
+  const v = arg.slice(prefix.length + 1).trim();
+  return v || defaultPath;
+}
+const reportJsonPath = parseReportFlag("--report-json", "reports/og-report.json");
+const reportHtmlPath = parseReportFlag("--report-html", "reports/og-report.html");
 
 // Checks disponibles et filtrage --only / --skip
 const ALL_CHECKS = ["og", "canonical", "schema", "sitemap", "robots", "meta-robots"];
@@ -660,6 +673,19 @@ async function main() {
   let warnings = 0;
   let totalErrors = 0;
 
+  // Collecteur pour les rapports JSON / HTML
+  const report = {
+    generatedAt: new Date().toISOString(),
+    origins: normalizedOrigins,
+    siteUrl,
+    strictMode,
+    includeDynamic,
+    dynamicLimit,
+    enabledChecks: [...enabledChecks],
+    indexHtml: null,       // { ok, diffs }
+    perOrigin: [],         // [{ origin, sitemap, robots, routes: [...] }]
+  };
+
   // ─── Sanity check local : index.html doit correspondre à la home ─────
   if (enabledChecks.has("og")) {
     const homeRoute = filteredStaticRoutes.find((r) => r.path === "/");
@@ -668,6 +694,7 @@ async function main() {
       const { tags: indexTags } = parseMetaTags(indexHtml);
       const expected = buildExpectedTags(homeRoute);
       const diffs = diffTags(indexTags, expected.tags);
+      report.indexHtml = { ok: diffs.length === 0, diffs };
       if (diffs.length > 0) {
         blockingIssues += diffs.length;
         console.log(c("yellow", "⚠️  index.html diverge de la route / :"));
@@ -681,6 +708,8 @@ async function main() {
 
   for (const origin of normalizedOrigins) {
     console.log(c("bold", `━━━ Origine : ${origin} ━━━`));
+    const originReport = { origin, sitemap: null, robots: null, routes: [] };
+    report.perOrigin.push(originReport);
 
     // ─── Routes-échantillon (1 par pattern avec sampleParams) ────────────
     // Toujours actives : validation STRICTE d'un slug/id/city représentatif.
@@ -731,6 +760,7 @@ async function main() {
     if (enabledChecks.has("sitemap")) {
       try {
         const { url, entriesCount, diffs } = await validateSitemap(origin, filteredRoutes, siteUrl);
+        originReport.sitemap = { url, entriesCount, diffs, ok: diffs.length === 0 };
         if (diffs.length === 0) {
           console.log(`  ${c("green", "✅")} sitemap.xml (${entriesCount} URLs) ${c("dim", url)}`);
         } else {
@@ -740,6 +770,7 @@ async function main() {
         }
       } catch (err) {
         totalErrors += 1;
+        originReport.sitemap = { url: `${origin}/sitemap.xml`, error: err.message, ok: false };
         console.log(`  ${c("red", "💥")} sitemap.xml : ${err.message}`);
       }
     }
@@ -748,6 +779,7 @@ async function main() {
     if (enabledChecks.has("robots")) {
       try {
         const { url, issues } = await validateRobots(origin, filteredRoutes, siteUrl);
+        originReport.robots = { url, issues, ok: issues.length === 0 };
         if (issues.length === 0) {
           console.log(`  ${c("green", "✅")} robots.txt ${c("dim", url)}`);
         } else {
@@ -757,6 +789,7 @@ async function main() {
         }
       } catch (err) {
         totalErrors += 1;
+        originReport.robots = { url: `${origin}/robots.txt`, error: err.message, ok: false };
         console.log(`  ${c("red", "💥")} robots.txt : ${err.message}`);
       }
     }
@@ -833,8 +866,25 @@ async function main() {
       const displayPath = r.route.path.length > 40 ? r.route.path.slice(0, 37) + "…" : r.route.path;
       const badge = r.route.isSample ? c("cyan", "[sample] ") : "";
       const label = `${badge}${displayPath.padEnd(40)} `;
+
+      // Collecte report : état par route
+      const routeEntry = {
+        path: r.route.path,
+        url: r.url,
+        pathPattern: r.route.pathPattern ?? null,
+        isDynamic: !!r.route.isDynamic,
+        isSample: !!r.route.isSample,
+        status: "ok",             // ok | warn | error | fetch_error
+        fetchError: null,
+        ogDiffs: [],              // [{ key, status, expected, actual }]
+        pageIssues: [],           // [{ kind, severity, msg, blocking }]
+      };
+      originReport.routes.push(routeEntry);
+
       if (!r.ok) {
         totalErrors += 1;
+        routeEntry.status = "fetch_error";
+        routeEntry.fetchError = r.error;
         console.log(`  ${c("red", "💥")} ${label}${c("red", r.error)}`);
         continue;
       }
@@ -862,14 +912,19 @@ async function main() {
         const isBlocking = pi.severity === "always" || strictMode || r.route.path === "/";
         if (isBlocking) pageBlockCount++;
         else pageWarnCount++;
+        routeEntry.pageIssues.push({ ...pi, blocking: isBlocking });
       }
       blockingIssues += pageBlockCount;
       warnings += pageWarnCount;
+
+      // Persiste les diffs OG avec le flag bloquant
+      routeEntry.ogDiffs = r.ogDiffs.map((d) => ({ ...d, blocking: ogBlocking }));
 
       const parts = [];
       if (ogCount > 0) parts.push(`${ogCount} OG`);
       if (pageCount > 0) parts.push(`${pageCount} autre(s)`);
       const anyBlocking = (ogBlocking && ogCount > 0) || pageBlockCount > 0;
+      routeEntry.status = anyBlocking ? "error" : "warn";
       const icon = anyBlocking ? c("red", "❌") : c("yellow", "⚠️ ");
       console.log(`  ${icon} ${label}${parts.join(" + ")} ${c("dim", r.url)}`);
 
@@ -887,6 +942,13 @@ async function main() {
   if (warnings > 0)       console.log(c("yellow", `  ⚠️  ${warnings} OG non bloquant(s) (bots servis par index.html, pas de pré-rendu)`));
   if (totalErrors > 0)    console.log(c("red",    `  💥 ${totalErrors} erreur(s) réseau`));
 
+  // Complète le résumé dans le rapport
+  report.summary = { blockingIssues, warnings, totalErrors };
+
+  // ─── Rapports JSON / HTML ────────────────────────────────────────────
+  if (reportJsonPath) writeJsonReport(report, reportJsonPath);
+  if (reportHtmlPath) writeHtmlReport(report, reportHtmlPath);
+
   if (blockingIssues === 0 && totalErrors === 0) {
     if (warnings > 0) {
       console.log(c("dim", "\n💡 Les routes non-home ne sont pas pré-rendues : les bots sociaux lisent index.html."));
@@ -899,6 +961,179 @@ async function main() {
 
   console.log(c("dim", "\n💡 Si seule la prod diverge : purger Prerender.io / Cloudflare puis relancer.\n"));
   process.exit(1);
+}
+
+// ──────────────────────────────────────────────────────────────
+// 9. Génération des rapports
+// ──────────────────────────────────────────────────────────────
+
+function ensureDirFor(filePath) {
+  const abs = resolve(ROOT, filePath);
+  mkdirSync(dirname(abs), { recursive: true });
+  return abs;
+}
+
+function writeJsonReport(report, filePath) {
+  const abs = ensureDirFor(filePath);
+  writeFileSync(abs, JSON.stringify(report, null, 2), "utf8");
+  console.log(c("cyan", `\n📄 Rapport JSON : ${filePath}`));
+}
+
+function escapeHtml(s) {
+  return String(s ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function writeHtmlReport(report, filePath) {
+  const abs = ensureDirFor(filePath);
+  const { summary = {}, perOrigin = [], indexHtml, generatedAt } = report;
+
+  // Agrège uniquement les routes en erreur/warn pour le tableau principal
+  const errorRows = [];
+  for (const o of perOrigin) {
+    for (const r of o.routes) {
+      if (r.status === "ok") continue;
+      errorRows.push({ origin: o.origin, ...r });
+    }
+  }
+
+  const diffRowsHtml = errorRows.map((r) => {
+    const ogRows = r.ogDiffs.map((d) => `
+      <tr class="diff ${d.blocking ? "blocking" : "warn"}">
+        <td><code>${escapeHtml(d.key)}</code></td>
+        <td><span class="badge ${d.status.toLowerCase()}">${escapeHtml(d.status)}</span></td>
+        <td><pre class="expected">${escapeHtml(d.expected)}</pre></td>
+        <td><pre class="actual">${escapeHtml(d.actual ?? "(absent)")}</pre></td>
+      </tr>`).join("");
+    const pageRows = r.pageIssues.map((pi) => `
+      <tr class="diff ${pi.blocking ? "blocking" : "warn"}">
+        <td><code>${escapeHtml(pi.kind)}</code></td>
+        <td><span class="badge ${pi.severity}">${escapeHtml(pi.severity)}</span></td>
+        <td colspan="2"><pre>${escapeHtml(pi.msg)}</pre></td>
+      </tr>`).join("");
+    const fetchRow = r.fetchError ? `
+      <tr class="diff blocking">
+        <td colspan="4"><strong>Erreur réseau :</strong> ${escapeHtml(r.fetchError)}</td>
+      </tr>` : "";
+    const statusClass = r.status === "error" || r.status === "fetch_error" ? "err" : "warn";
+    const statusLabel = r.status === "fetch_error" ? "réseau" : r.status;
+    return `
+      <section class="route ${statusClass}">
+        <header>
+          <span class="status ${statusClass}">${escapeHtml(statusLabel)}</span>
+          <a href="${escapeHtml(r.url)}" target="_blank" rel="noopener"><code>${escapeHtml(r.path)}</code></a>
+          <span class="meta">${escapeHtml(r.origin)}${r.isSample ? " · sample" : ""}${r.isDynamic ? " · dyn" : ""}</span>
+        </header>
+        <table>
+          <thead><tr><th>Clé</th><th>Statut</th><th>Attendu</th><th>Trouvé</th></tr></thead>
+          <tbody>${ogRows}${pageRows}${fetchRow}</tbody>
+        </table>
+      </section>`;
+  }).join("\n");
+
+  const sitemapSections = perOrigin.map((o) => {
+    const sm = o.sitemap;
+    if (!sm) return "";
+    if (sm.ok) return `<li>✅ <strong>${escapeHtml(o.origin)}</strong> · sitemap (${sm.entriesCount ?? "?"} URLs)</li>`;
+    if (sm.error) return `<li>💥 <strong>${escapeHtml(o.origin)}</strong> · sitemap : ${escapeHtml(sm.error)}</li>`;
+    const issues = (sm.diffs || []).map((d) => `<li><code>${escapeHtml(d.path)}</code> : ${escapeHtml(d.issue)}</li>`).join("");
+    return `<li>❌ <strong>${escapeHtml(o.origin)}</strong> · sitemap <ul>${issues}</ul></li>`;
+  }).join("");
+
+  const robotsSections = perOrigin.map((o) => {
+    const rb = o.robots;
+    if (!rb) return "";
+    if (rb.ok) return `<li>✅ <strong>${escapeHtml(o.origin)}</strong> · robots.txt</li>`;
+    if (rb.error) return `<li>💥 <strong>${escapeHtml(o.origin)}</strong> · robots.txt : ${escapeHtml(rb.error)}</li>`;
+    const issues = (rb.issues || []).map((i) => `<li>${escapeHtml(i)}</li>`).join("");
+    return `<li>❌ <strong>${escapeHtml(o.origin)}</strong> · robots.txt <ul>${issues}</ul></li>`;
+  }).join("");
+
+  const indexHtmlBlock = indexHtml
+    ? (indexHtml.ok
+        ? `<p class="ok">✅ index.html synchronisé avec la route <code>/</code>.</p>`
+        : `<p class="err">⚠️ index.html diverge de la route <code>/</code> — lancez <code>npm run sync-index-html</code>.</p>
+           <table class="compact"><thead><tr><th>Clé</th><th>Statut</th><th>Attendu</th><th>Trouvé</th></tr></thead>
+           <tbody>${indexHtml.diffs.map((d) => `<tr><td><code>${escapeHtml(d.key)}</code></td><td>${escapeHtml(d.status)}</td><td><pre>${escapeHtml(d.expected)}</pre></td><td><pre>${escapeHtml(d.actual ?? "(absent)")}</pre></td></tr>`).join("")}</tbody></table>`)
+    : "";
+
+  const html = `<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Rapport validation OG — Guardiens</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+  :root { --bg:#0f172a; --fg:#e2e8f0; --muted:#94a3b8; --card:#1e293b; --ok:#22c55e; --warn:#eab308; --err:#ef4444; --border:#334155; }
+  * { box-sizing:border-box; }
+  body { margin:0; font:14px/1.5 ui-sans-serif,system-ui,sans-serif; background:var(--bg); color:var(--fg); }
+  header.top { padding:24px; border-bottom:1px solid var(--border); }
+  header.top h1 { margin:0 0 4px; font-size:22px; }
+  header.top .sub { color:var(--muted); font-size:13px; }
+  main { padding:24px; max-width:1200px; margin:0 auto; }
+  section.kpi { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:24px; }
+  .kpi .card { background:var(--card); padding:16px; border-radius:8px; border:1px solid var(--border); }
+  .kpi .n { font-size:28px; font-weight:700; }
+  .kpi .n.err { color:var(--err); } .kpi .n.warn { color:var(--warn); } .kpi .n.ok { color:var(--ok); }
+  h2 { margin:28px 0 12px; font-size:16px; border-bottom:1px solid var(--border); padding-bottom:6px; }
+  section.route { background:var(--card); border:1px solid var(--border); border-radius:8px; margin-bottom:14px; overflow:hidden; }
+  section.route.err { border-left:4px solid var(--err); }
+  section.route.warn { border-left:4px solid var(--warn); }
+  section.route > header { display:flex; align-items:center; gap:10px; padding:10px 14px; background:rgba(255,255,255,0.03); border-bottom:1px solid var(--border); flex-wrap:wrap; }
+  .status { font-size:11px; text-transform:uppercase; padding:2px 6px; border-radius:4px; font-weight:700; }
+  .status.err { background:var(--err); color:#fff; } .status.warn { background:var(--warn); color:#000; }
+  section.route .meta { color:var(--muted); font-size:12px; margin-left:auto; }
+  section.route a { color:var(--fg); text-decoration:none; }
+  table { width:100%; border-collapse:collapse; }
+  th, td { padding:8px 14px; text-align:left; vertical-align:top; border-bottom:1px solid var(--border); }
+  th { background:rgba(255,255,255,0.02); font-size:12px; color:var(--muted); font-weight:600; }
+  pre { margin:0; white-space:pre-wrap; word-break:break-word; font:12px/1.4 ui-monospace,monospace; }
+  pre.expected { color:var(--ok); }
+  pre.actual { color:var(--err); }
+  .badge { display:inline-block; padding:2px 6px; border-radius:4px; font-size:11px; font-weight:700; background:#334155; }
+  .badge.mismatch, .badge.always { background:var(--err); color:#fff; }
+  .badge.missing, .badge.empty { background:var(--warn); color:#000; }
+  .badge.prerender { background:#6366f1; color:#fff; }
+  code { background:rgba(255,255,255,0.06); padding:1px 5px; border-radius:3px; font:12px/1.4 ui-monospace,monospace; }
+  ul { margin:4px 0 4px 18px; padding:0; }
+  .ok { color:var(--ok); } .err { color:var(--err); } .warn { color:var(--warn); }
+  table.compact td, table.compact th { padding:4px 8px; font-size:12px; }
+  p.empty { color:var(--muted); font-style:italic; }
+</style>
+</head>
+<body>
+<header class="top">
+  <h1>Rapport validation OG — Guardiens</h1>
+  <div class="sub">Généré le ${escapeHtml(new Date(generatedAt).toLocaleString("fr-FR"))} · origines : ${perOrigin.map((o) => escapeHtml(o.origin)).join(", ")}</div>
+</header>
+<main>
+  <section class="kpi">
+    <div class="card"><div class="n err">${summary.blockingIssues || 0}</div><div>Problèmes bloquants</div></div>
+    <div class="card"><div class="n warn">${summary.warnings || 0}</div><div>Warnings (pré-rendu)</div></div>
+    <div class="card"><div class="n err">${summary.totalErrors || 0}</div><div>Erreurs réseau</div></div>
+  </section>
+
+  <h2>index.html (source)</h2>
+  ${indexHtmlBlock || '<p class="empty">Non vérifié.</p>'}
+
+  <h2>Routes en erreur ou warning (${errorRows.length})</h2>
+  ${errorRows.length === 0 ? '<p class="ok">✅ Toutes les routes sont synchronisées.</p>' : diffRowsHtml}
+
+  <h2>Sitemap</h2>
+  <ul>${sitemapSections || '<li class="empty">Non vérifié.</li>'}</ul>
+
+  <h2>robots.txt</h2>
+  <ul>${robotsSections || '<li class="empty">Non vérifié.</li>'}</ul>
+</main>
+</body>
+</html>`;
+
+  writeFileSync(abs, html, "utf8");
+  console.log(c("cyan", `📄 Rapport HTML : ${filePath}`));
 }
 
 main().catch((err) => {

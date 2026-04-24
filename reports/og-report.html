@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Rapport validation OG — Guardiens</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+  :root { --bg:#0f172a; --fg:#e2e8f0; --muted:#94a3b8; --card:#1e293b; --ok:#22c55e; --warn:#eab308; --err:#ef4444; --border:#334155; }
+  * { box-sizing:border-box; }
+  body { margin:0; font:14px/1.5 ui-sans-serif,system-ui,sans-serif; background:var(--bg); color:var(--fg); }
+  header.top { padding:24px; border-bottom:1px solid var(--border); }
+  header.top h1 { margin:0 0 4px; font-size:22px; }
+  header.top .sub { color:var(--muted); font-size:13px; }
+  main { padding:24px; max-width:1200px; margin:0 auto; }
+  section.kpi { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:24px; }
+  .kpi .card { background:var(--card); padding:16px; border-radius:8px; border:1px solid var(--border); }
+  .kpi .n { font-size:28px; font-weight:700; }
+  .kpi .n.err { color:var(--err); } .kpi .n.warn { color:var(--warn); } .kpi .n.ok { color:var(--ok); }
+  h2 { margin:28px 0 12px; font-size:16px; border-bottom:1px solid var(--border); padding-bottom:6px; }
+  section.route { background:var(--card); border:1px solid var(--border); border-radius:8px; margin-bottom:14px; overflow:hidden; }
+  section.route.err { border-left:4px solid var(--err); }
+  section.route.warn { border-left:4px solid var(--warn); }
+  section.route > header { display:flex; align-items:center; gap:10px; padding:10px 14px; background:rgba(255,255,255,0.03); border-bottom:1px solid var(--border); flex-wrap:wrap; }
+  .status { font-size:11px; text-transform:uppercase; padding:2px 6px; border-radius:4px; font-weight:700; }
+  .status.err { background:var(--err); color:#fff; } .status.warn { background:var(--warn); color:#000; }
+  section.route .meta { color:var(--muted); font-size:12px; margin-left:auto; }
+  section.route a { color:var(--fg); text-decoration:none; }
+  table { width:100%; border-collapse:collapse; }
+  th, td { padding:8px 14px; text-align:left; vertical-align:top; border-bottom:1px solid var(--border); }
+  th { background:rgba(255,255,255,0.02); font-size:12px; color:var(--muted); font-weight:600; }
+  pre { margin:0; white-space:pre-wrap; word-break:break-word; font:12px/1.4 ui-monospace,monospace; }
+  pre.expected { color:var(--ok); }
+  pre.actual { color:var(--err); }
+  .badge { display:inline-block; padding:2px 6px; border-radius:4px; font-size:11px; font-weight:700; background:#334155; }
+  .badge.mismatch, .badge.always { background:var(--err); color:#fff; }
+  .badge.missing, .badge.empty { background:var(--warn); color:#000; }
+  .badge.prerender { background:#6366f1; color:#fff; }
+  code { background:rgba(255,255,255,0.06); padding:1px 5px; border-radius:3px; font:12px/1.4 ui-monospace,monospace; }
+  ul { margin:4px 0 4px 18px; padding:0; }
+  .ok { color:var(--ok); } .err { color:var(--err); } .warn { color:var(--warn); }
+  table.compact td, table.compact th { padding:4px 8px; font-size:12px; }
+  p.empty { color:var(--muted); font-style:italic; }
+</style>
+</head>
+<body>
+<header class="top">
+  <h1>Rapport validation OG — Guardiens</h1>
+  <div class="sub">Généré le 24/04/2026 15:46:19 · origines : https://guardiens.lovable.app</div>
+</header>
+<main>
+  <section class="kpi">
+    <div class="card"><div class="n err">2</div><div>Problèmes bloquants</div></div>
+    <div class="card"><div class="n warn">0</div><div>Warnings (pré-rendu)</div></div>
+    <div class="card"><div class="n err">0</div><div>Erreurs réseau</div></div>
+  </section>
+
+  <h2>index.html (source)</h2>
+  <p class="ok">✅ index.html synchronisé avec la route <code>/</code>.</p>
+
+  <h2>Routes en erreur ou warning (1)</h2>
+  
+      <section class="route err">
+        <header>
+          <span class="status err">error</span>
+          <a href="https://guardiens.lovable.app/" target="_blank" rel="noopener"><code>/</code></a>
+          <span class="meta">https://guardiens.lovable.app</span>
+        </header>
+        <table>
+          <thead><tr><th>Clé</th><th>Statut</th><th>Attendu</th><th>Trouvé</th></tr></thead>
+          <tbody>
+      <tr class="diff blocking">
+        <td><code>canonical</code></td>
+        <td><span class="badge prerender">prerender</span></td>
+        <td colspan="2"><pre>absent</pre></td>
+      </tr>
+      <tr class="diff blocking">
+        <td><code>schema</code></td>
+        <td><span class="badge prerender">prerender</span></td>
+        <td colspan="2"><pre>aucun bloc JSON-LD trouvé sur la home</pre></td>
+      </tr></tbody>
+        </table>
+      </section>
+
+  <h2>Sitemap</h2>
+  <ul><li class="empty">Non vérifié.</li></ul>
+
+  <h2>robots.txt</h2>
+  <ul><li class="empty">Non vérifié.</li></ul>
+</main>
+</body>
+</html>
