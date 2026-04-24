@@ -23,8 +23,8 @@ export const staticRoutes: SiteRoute[] = [
   },
   {
     path: "/tarifs",
-    title: "Tarifs — Abonnement gardien | Guardiens",
-    metaDescription: "49€/an pour les gardiens. Gratuit pour les propriétaires. Un seul prix, pas de commission, pas de piège.",
+    title: "Tarifs — 6,99€/mois pour les gardiens | Guardiens",
+    metaDescription: "6,99€/mois pour les gardiens, 7 jours d'essai offerts. Gratuit pour les propriétaires. Sans commission, sans frais cachés.",
     h1: "Nos tarifs",
     sitemapPriority: "0.8",
     changeFreq: "monthly",
@@ -104,7 +104,7 @@ export const staticRoutes: SiteRoute[] = [
   {
     path: "/inscription",
     title: "Inscription | Guardiens",
-    metaDescription: "Rejoignez la communauté Guardiens. Inscription gratuite pour les propriétaires, 49€/an pour les gardiens.",
+    metaDescription: "Rejoignez la communauté Guardiens. Inscription gratuite pour les propriétaires, 6,99€/mois pour les gardiens avec 7 jours d'essai.",
     h1: "Créer un compte",
     sitemapPriority: "0.6",
     changeFreq: "monthly",
