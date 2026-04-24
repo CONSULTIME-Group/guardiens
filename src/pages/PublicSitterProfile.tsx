@@ -1285,8 +1285,8 @@ export default function PublicSitterProfile() {
             )}
 
             {/* Pratique */}
-            <section aria-label="Infos pratiques">
-              <h2 className="text-xs uppercase tracking-wider text-muted-foreground font-body mb-3">
+            <section aria-label="Infos pratiques" className="scroll-mt-20">
+              <h2 className="text-lg font-semibold text-foreground font-display mb-3">
                 Infos pratiques
               </h2>
               <PracticalGrid
