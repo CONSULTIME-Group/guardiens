@@ -1317,7 +1317,7 @@ export default function PublicSitterProfile() {
 
             {/* Confiance */}
             {userBadges && userBadges.length > 0 && (
-              <section aria-label="Confiance et vérifications">
+              <section id="confiance" aria-label="Confiance et vérifications" className="scroll-mt-24">
                 <h2 className="text-xs uppercase tracking-wider text-muted-foreground font-body mb-3">
                   Confiance & vérifications
                 </h2>
