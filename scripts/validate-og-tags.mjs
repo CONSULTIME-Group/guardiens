@@ -186,6 +186,7 @@ function buildExpectedTags(route) {
 
 function parseMetaTags(html) {
   const tags = {};
+  let metaRobots = null;
   const metaRe = /<meta\b([^>]*)>/gi;
   let m;
   while ((m = metaRe.exec(html)) !== null) {
@@ -194,12 +195,44 @@ function parseMetaTags(html) {
     const contentMatch = attrs.match(/\bcontent\s*=\s*(["'])([\s\S]*?)\1/i);
     if (!nameMatch || !contentMatch) continue;
     const key = nameMatch[2].toLowerCase();
+    const value = decodeHtmlEntities(contentMatch[2]);
     if (key.startsWith("og:") || key.startsWith("twitter:")) {
-      // Dernière valeur gagne (PageMeta réinjecte après hydratation)
-      tags[key] = decodeHtmlEntities(contentMatch[2]);
+      tags[key] = value; // dernière valeur gagne (PageMeta réinjecte après hydratation)
+    } else if (key === "robots") {
+      metaRobots = value;
     }
   }
-  return tags;
+  return { tags, metaRobots };
+}
+
+function parseCanonical(html) {
+  // Prend la DERNIÈRE <link rel="canonical"> (PageMeta retire puis ré-ajoute)
+  const re = /<link\b[^>]*\brel\s*=\s*(["'])canonical\1[^>]*\bhref\s*=\s*(["'])([\s\S]*?)\2[^>]*>/gi;
+  const reReverse = /<link\b[^>]*\bhref\s*=\s*(["'])([\s\S]*?)\1[^>]*\brel\s*=\s*(["'])canonical\3[^>]*>/gi;
+  let last = null;
+  let m;
+  while ((m = re.exec(html)) !== null) last = decodeHtmlEntities(m[3]);
+  while ((m = reReverse.exec(html)) !== null) last = decodeHtmlEntities(m[2]);
+  return last;
+}
+
+function parseJsonLd(html) {
+  // Extrait tous les blocs <script type="application/ld+json">…</script>
+  const blocks = [];
+  const re = /<script\b[^>]*type\s*=\s*(["'])application\/ld\+json\1[^>]*>([\s\S]*?)<\/script>/gi;
+  let m;
+  while ((m = re.exec(html)) !== null) {
+    const raw = m[2].trim();
+    let parsed = null;
+    let error = null;
+    try {
+      parsed = JSON.parse(raw);
+    } catch (err) {
+      error = err.message;
+    }
+    blocks.push({ raw, parsed, error });
+  }
+  return blocks;
 }
 
 function decodeHtmlEntities(s) {
