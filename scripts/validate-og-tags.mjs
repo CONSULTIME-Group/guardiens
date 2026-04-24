@@ -516,36 +516,40 @@ async function main() {
           const expected = buildExpectedTags(route);
           const ogDiffs = enabledChecks.has("og") ? diffTags(tags, expected.tags) : [];
 
+          // Chaque issue a un `severity` : "always" (toujours bloquant) ou
+          // "prerender" (dépend du pré-rendu, warn hors --strict sauf home).
           const pageIssues = [];
 
           if (enabledChecks.has("canonical")) {
             const canonical = parseCanonical(html);
             const expectedCanon = `${siteUrl}${route.path === "/" ? "/" : route.path}`;
             if (!canonical) {
-              pageIssues.push({ kind: "canonical", msg: "absent" });
+              pageIssues.push({ kind: "canonical", severity: "prerender", msg: "absent" });
             } else if (canonical !== expectedCanon) {
-              pageIssues.push({ kind: "canonical", msg: `${canonical} ≠ attendu ${expectedCanon}` });
+              pageIssues.push({ kind: "canonical", severity: "prerender", msg: `${canonical} ≠ attendu ${expectedCanon}` });
             }
           }
 
           if (enabledChecks.has("meta-robots")) {
+            // Un noindex servi statiquement = vrai bug, toujours bloquant
             if (metaRobots && /noindex/i.test(metaRobots)) {
-              pageIssues.push({ kind: "meta-robots", msg: `noindex détecté sur route publique (${metaRobots})` });
+              pageIssues.push({ kind: "meta-robots", severity: "always", msg: `noindex détecté sur route publique (${metaRobots})` });
             }
           }
 
           if (enabledChecks.has("schema") && route.path === "/") {
             const blocks = parseJsonLd(html);
             if (blocks.length === 0) {
-              pageIssues.push({ kind: "schema", msg: "aucun bloc JSON-LD trouvé sur la home" });
+              pageIssues.push({ kind: "schema", severity: "prerender", msg: "aucun bloc JSON-LD trouvé sur la home" });
             } else {
               const invalid = blocks.filter((b) => b.error);
               if (invalid.length > 0) {
-                pageIssues.push({ kind: "schema", msg: `${invalid.length}/${blocks.length} bloc(s) JSON-LD invalide(s) : ${invalid[0].error}` });
+                // JSON cassé = toujours bloquant (c'est dans le code source)
+                pageIssues.push({ kind: "schema", severity: "always", msg: `${invalid.length}/${blocks.length} bloc(s) JSON-LD invalide(s) : ${invalid[0].error}` });
               }
               const hasOrg = blocks.some((b) => b.parsed?.["@type"] === "Organization");
-              if (!hasOrg) {
-                pageIssues.push({ kind: "schema", msg: "aucun @type=Organization trouvé (attendu sur la home)" });
+              if (!hasOrg && invalid.length === 0) {
+                pageIssues.push({ kind: "schema", severity: "prerender", msg: "aucun @type=Organization trouvé (attendu sur la home)" });
               }
             }
           }
