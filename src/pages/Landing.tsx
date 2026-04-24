@@ -2,7 +2,8 @@ import React, { useState, useEffect, useRef } from "react";
 import notreHistoirePanorama from "@/assets/story-photo.webp";
 import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, ArrowLeft, Home, Key, Handshake, ShieldCheck, MessageCircle, Users, ClipboardCheck, Star, BookOpen } from "lucide-react";
+import { ArrowRight, ArrowLeft, Home, Key, Handshake, ShieldCheck, MessageCircle, Users, ClipboardCheck, Star, BookOpen, Gift, Coffee, MapPin } from "lucide-react";
+import { trackEvent } from "@/lib/analytics";
 import { supabase } from "@/integrations/supabase/client";
 
 import PageMeta from "@/components/PageMeta";
@@ -256,14 +257,20 @@ const Landing = () => {
             {/* CTAs — propriétaire mis en avant (priorité business : combler le manque d'annonces) */}
             <div className="flex flex-col sm:flex-row gap-3 mb-4 animate-hero-fade-up animation-delay-900">
               <button
-                onClick={() => navigate("/inscription?role=owner")}
-                className="font-body text-sm font-semibold tracking-wide rounded-full px-10 py-4 bg-primary text-primary-foreground hover:brightness-90 hover:scale-[1.02] transition-all duration-200 shadow-lg shadow-primary/30"
+                onClick={() => {
+                  trackEvent("cta_proprio_clicked", { metadata: { location: "hero" } });
+                  navigate("/inscription?role=owner");
+                }}
+                className="font-body text-base font-semibold tracking-wide rounded-full px-12 py-4 bg-primary text-primary-foreground hover:brightness-95 hover:scale-[1.03] transition-all duration-200 shadow-xl shadow-primary/40 ring-2 ring-primary-foreground/10"
               >
                 Publier mon annonce — gratuit
               </button>
               <button
-                onClick={() => navigate("/inscription?role=sitter")}
-                className="font-body text-sm font-semibold tracking-wide rounded-full px-8 py-4 bg-transparent text-white border-2 border-white/70 hover:bg-white/15 transition-all duration-200"
+                onClick={() => {
+                  trackEvent("cta_sitter_clicked", { metadata: { location: "hero" } });
+                  navigate("/inscription?role=sitter");
+                }}
+                className="font-body text-sm font-medium tracking-wide rounded-full px-7 py-3 bg-transparent text-white border border-white/60 hover:bg-white/10 transition-all duration-200"
               >
                 Je veux garder
               </button>
