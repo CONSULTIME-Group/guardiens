@@ -212,9 +212,9 @@ export default function PublicSitterProfile() {
         </div>
         <p className="text-sm text-foreground/70 font-body">
           {props.hasVehicle
-            ? `Avec véhicule${props.radius ? ` — rayon ${props.radius} km autour de ${props.city || 'sa ville'}` : ''}`
+            ? `Avec véhicule${props.radius ? ` — rayon ${props.radius} km${props.city ? ` · ${props.city}` : ''}` : ''}`
             : props.radius
-              ? `Rayon ${props.radius} km autour de ${props.city || 'sa ville'}`
+              ? `Rayon ${props.radius} km${props.city ? ` · ${props.city}` : ''}`
               : 'Rayon non renseigné'}
         </p>
       </div>
@@ -973,15 +973,15 @@ export default function PublicSitterProfile() {
                     {radius || city ? (
                       <p className="text-sm text-foreground font-body leading-snug">
                         {radius && city ? (
-                          <><span className="font-semibold">{radius} km</span> autour de {city}</>
+                          <><span className="font-semibold">Rayon {radius} km</span> · {city}</>
                         ) : radius ? (
-                          <><span className="font-semibold">{radius} km</span> autour de chez lui</>
+                          <><span className="font-semibold">Rayon {radius} km</span></>
                         ) : (
-                          <>Autour de {city}</>
+                          <>Secteur : <span className="font-semibold">{city}</span></>
                         )}
                       </p>
                     ) : (
-                      <Empty label="Zone non renseignée" />
+                      <Empty label="Non renseigné" />
                     )}
                     <span className={`text-[11px] font-body ${hasVehicle ? 'text-primary' : 'text-muted-foreground/70'}`}>
                       {hasVehicle ? 'Avec véhicule' : 'Sans véhicule'}
@@ -1009,7 +1009,7 @@ export default function PublicSitterProfile() {
                         )}
                       </p>
                     ) : (
-                      <Empty label="Non renseignée" />
+                      <Empty label="Non renseigné" />
                     )}
                     {typeLine && (
                       <span className="text-[11px] text-muted-foreground font-body line-clamp-1">{typeLine}</span>
@@ -1033,7 +1033,7 @@ export default function PublicSitterProfile() {
                           ) : identityVerified ? (
                             <span className="text-foreground/80 text-xs">Identité vérifiée</span>
                           ) : (
-                            <span className="text-muted-foreground text-xs italic">Pas encore noté</span>
+                            <span className="text-muted-foreground text-xs italic">Aucun avis</span>
                           )}
                         </div>
                         <div className="flex flex-wrap gap-x-1.5 gap-y-0.5 text-[11px] text-muted-foreground font-body">
@@ -1088,7 +1088,7 @@ export default function PublicSitterProfile() {
                   </button>
                 )}
                 <p className="text-xs text-muted-foreground font-body sm:ml-2 self-center text-center sm:text-left">
-                  Réponse directe — pas de frais d'intermédiation.
+                  Contact direct, sans intermédiaire.
                 </p>
               </div>
             )}
@@ -1285,9 +1285,9 @@ export default function PublicSitterProfile() {
             )}
 
             {/* Pratique */}
-            <section aria-label="En pratique">
+            <section aria-label="Infos pratiques">
               <h2 className="text-xs uppercase tracking-wider text-muted-foreground font-body mb-3">
-                En pratique
+                Infos pratiques
               </h2>
               <PracticalGrid
                 animalTypes={animalTypes}
@@ -1317,9 +1317,9 @@ export default function PublicSitterProfile() {
 
             {/* Confiance */}
             {userBadges && userBadges.length > 0 && (
-              <section aria-label="Gages de confiance">
+              <section aria-label="Confiance et vérifications">
                 <h2 className="text-xs uppercase tracking-wider text-muted-foreground font-body mb-3">
-                  Gages de confiance
+                  Confiance & vérifications
                 </h2>
                 <div className="space-y-4">
                   <SpecialBadgeHighlight userBadges={userBadges} />
