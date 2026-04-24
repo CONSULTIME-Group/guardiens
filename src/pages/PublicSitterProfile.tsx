@@ -810,19 +810,23 @@ export default function PublicSitterProfile() {
                 </span>
               )}
 
-              <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-                <h1 className="text-2xl sm:text-4xl md:text-5xl font-heading font-bold text-foreground leading-tight capitalize break-words min-w-0 [text-shadow:0_1px_2px_hsl(var(--background)/0.6)]">
-                  {firstName}
-                </h1>
-                {profile?.is_founder && <FounderBadge size="lg" />}
-                {id && <FavoriteButton targetType="sitter" targetId={id} size="md" />}
-              </div>
+              {/* Pastille opaque englobant titre + ville → lisibilité garantie quelle
+                  que soit l'illustration de fond (paille, sépia, vert dense…). */}
+              <div className="self-start max-w-full inline-flex flex-col gap-1 rounded-2xl bg-background/90 backdrop-blur-md border border-border/60 shadow-md px-3 py-2 sm:px-4 sm:py-2.5">
+                <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+                  <h1 className="text-2xl sm:text-4xl md:text-5xl font-heading font-bold text-foreground leading-tight capitalize break-words min-w-0">
+                    {firstName}
+                  </h1>
+                  {profile?.is_founder && <FounderBadge size="lg" />}
+                  {id && <FavoriteButton targetType="sitter" targetId={id} size="md" />}
+                </div>
 
-              {city && (
-                <p className="text-base text-foreground/85 flex items-center gap-1 font-medium drop-shadow-sm">
-                  <MapPin className="w-3.5 h-3.5" /> Gardien à {city}
-                </p>
-              )}
+                {city && (
+                  <p className="text-base text-foreground/85 flex items-center gap-1 font-medium">
+                    <MapPin className="w-3.5 h-3.5" /> Gardien à {city}
+                  </p>
+                )}
+              </div>
 
               {(profile?.identity_verified || profile?.is_founder || emergencyActive || hasActiveSubscription) && (
                 <div className="flex items-center gap-2 flex-wrap">
