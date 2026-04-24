@@ -32,7 +32,7 @@ function sectionComplete(num: number, d: SitterProfileData): boolean {
     case 1: return !!(d.avatar_url && d.first_name && d.last_name && d.city && d.bio && d.motivation);
     case 2: return !!(d.sitter_type && d.availability_during && d.lifestyle.length > 0);
     case 3: return !!(d.experience_years && d.animal_types.length > 0 && d.references_text);
-    case 4: return !!((d.has_license || d.has_vehicle) && d.availability_dates.length > 0);
+    case 4: return !!(d.has_license || d.has_vehicle);
     default: return false;
   }
 }
