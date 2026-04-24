@@ -11,6 +11,7 @@
  * 3 palettes mixées : terre automnal, vert/crème, or/sépia — style sketchbook plume + lavis.
  */
 
+import { getMobileByIndex } from "./heroBankMobile";
 import hero01 from "@/assets/hero-bank/hero-01.jpg";
 import hero02 from "@/assets/hero-bank/hero-02.jpg";
 import hero03 from "@/assets/hero-bank/hero-03.jpg";
