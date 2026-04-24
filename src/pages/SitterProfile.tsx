@@ -295,7 +295,16 @@ const SitterProfile = () => {
             completion={liveScore}
             sections={sidebarSections}
             activeSection={activeSection}
-            onSectionClick={setActiveSection}
+            onSectionClick={(id) => {
+              setActiveSection(id);
+              // Scroll vers le contenu correspondant — utile sur mobile et quand
+              // la sidebar est sticky : l'utilisateur voit immédiatement le
+              // bloc de formulaire visé (ex: Mobilité & Rayon).
+              requestAnimationFrame(() => {
+                const el = document.getElementById("profile-section-content");
+                if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+              });
+            }}
             publicProfileUrl={user ? `/gardiens/${user.id}` : "#"}
             role="sitter"
             isFounder={isFounder}
