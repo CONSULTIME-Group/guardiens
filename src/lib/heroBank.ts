@@ -1,9 +1,14 @@
 /**
- * Banque de 70 illustrations "carnet de voyage" pour les hero des profils gardiens.
+ * Banque de 100 illustrations "carnet de voyage" pour les hero des profils gardiens.
  * Assignation déterministe : un même sitter.id voit toujours la même image.
  *
- * 3 palettes mixées (terre automnal, vert/crème, or/sépia) — style sketchbook.
- * Étendue de 50 → 70 pour réduire la probabilité de collision visuelle entre profils.
+ * Composition thématique :
+ *   - 01–70  : animaux & plantes (chiens, chats, NAC, jardins, intérieurs habités)
+ *   - 71–80  : maison / lieu de vie (cuisine, véranda, entrée, fauteuil, bureau…)
+ *   - 81–90  : entraide / coup de main (panier déposé, plante passée, clés transmises…)
+ *   - 91–100 : village / quartier / partage (place, marché, tablée, jardin partagé…)
+ *
+ * 3 palettes mixées : terre automnal, vert/crème, or/sépia — style sketchbook plume + lavis.
  */
 
 import hero01 from "@/assets/hero-bank/hero-01.jpg";
@@ -76,20 +81,53 @@ import hero67 from "@/assets/hero-bank/hero-67.jpg";
 import hero68 from "@/assets/hero-bank/hero-68.jpg";
 import hero69 from "@/assets/hero-bank/hero-69.jpg";
 import hero70 from "@/assets/hero-bank/hero-70.jpg";
+import hero71 from "@/assets/hero-bank/hero-71.jpg";
+import hero72 from "@/assets/hero-bank/hero-72.jpg";
+import hero73 from "@/assets/hero-bank/hero-73.jpg";
+import hero74 from "@/assets/hero-bank/hero-74.jpg";
+import hero75 from "@/assets/hero-bank/hero-75.jpg";
+import hero76 from "@/assets/hero-bank/hero-76.jpg";
+import hero77 from "@/assets/hero-bank/hero-77.jpg";
+import hero78 from "@/assets/hero-bank/hero-78.jpg";
+import hero79 from "@/assets/hero-bank/hero-79.jpg";
+import hero80 from "@/assets/hero-bank/hero-80.jpg";
+import hero81 from "@/assets/hero-bank/hero-81.jpg";
+import hero82 from "@/assets/hero-bank/hero-82.jpg";
+import hero83 from "@/assets/hero-bank/hero-83.jpg";
+import hero84 from "@/assets/hero-bank/hero-84.jpg";
+import hero85 from "@/assets/hero-bank/hero-85.jpg";
+import hero86 from "@/assets/hero-bank/hero-86.jpg";
+import hero87 from "@/assets/hero-bank/hero-87.jpg";
+import hero88 from "@/assets/hero-bank/hero-88.jpg";
+import hero89 from "@/assets/hero-bank/hero-89.jpg";
+import hero90 from "@/assets/hero-bank/hero-90.jpg";
+import hero91 from "@/assets/hero-bank/hero-91.jpg";
+import hero92 from "@/assets/hero-bank/hero-92.jpg";
+import hero93 from "@/assets/hero-bank/hero-93.jpg";
+import hero94 from "@/assets/hero-bank/hero-94.jpg";
+import hero95 from "@/assets/hero-bank/hero-95.jpg";
+import hero96 from "@/assets/hero-bank/hero-96.jpg";
+import hero97 from "@/assets/hero-bank/hero-97.jpg";
+import hero98 from "@/assets/hero-bank/hero-98.jpg";
+import hero99 from "@/assets/hero-bank/hero-99.jpg";
+import hero100 from "@/assets/hero-bank/hero-100.jpg";
 
 export const HERO_BANK: readonly string[] = [
-  hero01, hero02, hero03, hero04, hero05, hero06, hero07, hero08, hero09, hero10,
-  hero11, hero12, hero13, hero14, hero15, hero16, hero17, hero18, hero19, hero20,
-  hero21, hero22, hero23, hero24, hero25, hero26, hero27, hero28, hero29, hero30,
-  hero31, hero32, hero33, hero34, hero35, hero36, hero37, hero38, hero39, hero40,
-  hero41, hero42, hero43, hero44, hero45, hero46, hero47, hero48, hero49, hero50,
-  hero51, hero52, hero53, hero54, hero55, hero56, hero57, hero58, hero59, hero60,
-  hero61, hero62, hero63, hero64, hero65, hero66, hero67, hero68, hero69, hero70,
+  hero01,  hero02,  hero03,  hero04,  hero05,  hero06,  hero07,  hero08,  hero09,  hero10,
+  hero11,  hero12,  hero13,  hero14,  hero15,  hero16,  hero17,  hero18,  hero19,  hero20,
+  hero21,  hero22,  hero23,  hero24,  hero25,  hero26,  hero27,  hero28,  hero29,  hero30,
+  hero31,  hero32,  hero33,  hero34,  hero35,  hero36,  hero37,  hero38,  hero39,  hero40,
+  hero41,  hero42,  hero43,  hero44,  hero45,  hero46,  hero47,  hero48,  hero49,  hero50,
+  hero51,  hero52,  hero53,  hero54,  hero55,  hero56,  hero57,  hero58,  hero59,  hero60,
+  hero61,  hero62,  hero63,  hero64,  hero65,  hero66,  hero67,  hero68,  hero69,  hero70,
+  hero71,  hero72,  hero73,  hero74,  hero75,  hero76,  hero77,  hero78,  hero79,  hero80,
+  hero81,  hero82,  hero83,  hero84,  hero85,  hero86,  hero87,  hero88,  hero89,  hero90,
+  hero91,  hero92,  hero93,  hero94,  hero95,  hero96,  hero97,  hero98,  hero99,  hero100,
 ];
 
 /**
  * Ancrage horizontal optimal pour chaque image, calculé hors-ligne par
- * `scripts/analyze_hero_anchors.py` (analyse pixel des bords gauche/droit pour
+ * `/tmp/analyze_hero_anchors.py` (analyse pixel des bords gauche/droit pour
  * détecter spirales de carnet, texte parasite, hachures denses).
  *
  * Sémantique CSS object-position :
@@ -97,18 +135,21 @@ export const HERO_BANK: readonly string[] = [
  *   - 'right'  → object-position: 100% → l'image colle à droite, le crop rogne la GAUCHE
  *   - 'center' → object-position: 50%  → bords équivalents, recadrage symétrique
  *
- * Distribution actuelle : 15 left / 33 center / 22 right (sur 70).
+ * Distribution actuelle : 18 left / 51 center / 31 right (sur 100).
  */
 export type HeroAnchor = "left" | "center" | "right";
 
 const HERO_ANCHORS: readonly HeroAnchor[] = [
-  "center", "center", "center", "left",   "center", "center", "right",  "right",  "right",  "center", // 01-10
-  "left",   "center", "center", "center", "center", "left",   "left",   "right",  "left",   "center", // 11-20
-  "left",   "right",  "center", "right",  "right",  "right",  "left",   "right",  "center", "right",  // 21-30
-  "right",  "right",  "right",  "center", "center", "left",   "center", "right",  "left",   "center", // 31-40
-  "left",   "center", "center", "center", "right",  "right",  "center", "center", "left",   "center", // 41-50
-  "right",  "center", "left",   "center", "right",  "center", "center", "left",   "right",  "left",   // 51-60
-  "center", "center", "center", "center", "center", "left",   "right",  "right",  "right",  "center", // 61-70
+  "center"  , "center"  , "center"  , "left"    , "center"  , "center"  , "right"   , "right"   , "right"   , "center"  , // 01-10
+  "left"    , "center"  , "center"  , "center"  , "center"  , "left"    , "left"    , "right"   , "left"    , "center"  , // 11-20
+  "left"    , "right"   , "center"  , "right"   , "right"   , "right"   , "left"    , "right"   , "center"  , "right"   , // 21-30
+  "right"   , "right"   , "right"   , "center"  , "center"  , "left"    , "center"  , "right"   , "left"    , "center"  , // 31-40
+  "left"    , "center"  , "center"  , "center"  , "right"   , "right"   , "center"  , "center"  , "left"    , "center"  , // 41-50
+  "right"   , "center"  , "left"    , "center"  , "right"   , "center"  , "center"  , "left"    , "right"   , "left"    , // 51-60
+  "center"  , "center"  , "center"  , "center"  , "center"  , "left"    , "right"   , "right"   , "right"   , "center"  , // 61-70
+  "center"  , "center"  , "center"  , "center"  , "center"  , "center"  , "center"  , "center"  , "right"   , "left"    , // 71-80
+  "center"  , "right"   , "center"  , "center"  , "center"  , "center"  , "right"   , "right"   , "center"  , "right"   , // 81-90
+  "center"  , "right"   , "right"   , "left"    , "center"  , "center"  , "center"  , "right"   , "left"    , "right"   , // 91-100
 ];
 
 /**
@@ -132,7 +173,7 @@ function getIndex(sitterId?: string | null): number {
 /**
  * Retourne l'URL de l'image hero assignée à un gardien donné.
  * - Stable : un même ID donne toujours la même image.
- * - Bien réparti : hash FNV-1a sur les 70 images.
+ * - Bien réparti : hash FNV-1a sur les 100 images.
  *
  * Fallback : si pas d'ID, on prend la première image.
  */
@@ -148,4 +189,3 @@ export function getSitterHeroImage(sitterId?: string | null): string {
 export function getSitterHeroAnchor(sitterId?: string | null): HeroAnchor {
   return HERO_ANCHORS[getIndex(sitterId)] ?? "center";
 }
-
