@@ -780,7 +780,7 @@ export default function PublicSitterProfile() {
           <div className="flex justify-end mb-4">
             <Link
               to="/recherche-gardiens"
-              className="text-sm text-foreground/80 hover:text-foreground font-medium drop-shadow-sm"
+              className="inline-flex items-center gap-1 text-sm text-foreground font-medium px-3 py-1.5 rounded-full bg-background/90 backdrop-blur-md border border-border/60 shadow-md hover:bg-background hover:shadow-lg transition-all"
             >
               ← Retour aux gardiens
             </Link>
