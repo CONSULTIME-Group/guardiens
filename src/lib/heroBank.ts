@@ -257,3 +257,17 @@ export function getSitterHeroSources(sitterId?: string | null): {
     mobile: getMobileByIndex(idx) ?? HERO_BANK[idx],
   };
 }
+
+/**
+ * Retourne le nom de catégorie d'une image donnée (par index 0-based de HERO_BANK).
+ * Utile pour la galerie de QA et les statistiques.
+ */
+export type HeroCategoryName = "animals" | "home" | "mutual_aid" | "village";
+export function getCategoryByBankIndex(idx: number): HeroCategoryName {
+  // idx 0-based → numéro de fichier 1-based.
+  const fileNum = idx + 1;
+  for (const cat of HERO_CATEGORIES) {
+    if (fileNum >= cat.range[0] && fileNum < cat.range[1]) return cat.name;
+  }
+  return "animals";
+}
