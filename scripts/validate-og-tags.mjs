@@ -15,9 +15,18 @@
  *   node scripts/validate-og-tags.mjs https://guardiens.fr    # origine explicite
  *   node scripts/validate-og-tags.mjs --paths=/,/tarifs,/faq  # limiter les routes
  *   node scripts/validate-og-tags.mjs --concurrency=4         # parallélisme réseau
+ *   node scripts/validate-og-tags.mjs --strict                # échec sur toute divergence
  *   TARGET_URL=https://... node scripts/validate-og-tags.mjs
  *
- * Exit codes : 0 = OK, 1 = divergence, 2 = erreur fatale.
+ * Exit codes :
+ *   0 = OK (home synchro ; autres routes non strictes ignorées)
+ *   1 = divergence bloquante (home non synchro, ou --strict activé)
+ *   2 = erreur fatale
+ *
+ * Note importante : sans pré-rendu côté hébergeur (Prerender.io, SSR…), les
+ * routes internes servent les balises statiques d'index.html (= celles de la
+ * home) aux bots sociaux, qui n'exécutent pas React. Les divergences sur les
+ * routes non-home sont donc attendues et signalées en WARN par défaut.
  */
 
 import { readFileSync } from "node:fs";
