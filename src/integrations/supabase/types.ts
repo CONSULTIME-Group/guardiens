@@ -2985,6 +2985,50 @@ export type Database = {
         }
         Relationships: []
       }
+      sit_date_changes: {
+        Row: {
+          changed_at: string
+          changed_by: string | null
+          changed_by_role: string | null
+          id: string
+          new_end_date: string | null
+          new_start_date: string | null
+          old_end_date: string | null
+          old_start_date: string | null
+          sit_id: string
+        }
+        Insert: {
+          changed_at?: string
+          changed_by?: string | null
+          changed_by_role?: string | null
+          id?: string
+          new_end_date?: string | null
+          new_start_date?: string | null
+          old_end_date?: string | null
+          old_start_date?: string | null
+          sit_id: string
+        }
+        Update: {
+          changed_at?: string
+          changed_by?: string | null
+          changed_by_role?: string | null
+          id?: string
+          new_end_date?: string | null
+          new_start_date?: string | null
+          old_end_date?: string | null
+          old_start_date?: string | null
+          sit_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sit_date_changes_sit_id_fkey"
+            columns: ["sit_id"]
+            isOneToOne: false
+            referencedRelation: "sits"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       sits: {
         Row: {
           accepting_applications: boolean

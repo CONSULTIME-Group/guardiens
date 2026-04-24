@@ -26,6 +26,7 @@ import { geocodeCity } from "@/lib/geocode";
 import { hasMedication } from "@/lib/medication";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ShareButtons from "@/components/sits/ShareButtons";
+import SitDateHistory from "@/components/sits/SitDateHistory";
 import { trackEvent } from "@/lib/analytics";
 
 const envLabels: Record<string, string> = {
@@ -395,6 +396,9 @@ const SitDetail = () => {
           />
         </div>
       )}
+
+      {/* Historique des modifications de dates — visible au propriétaire */}
+      {isOwner && <SitDateHistory sitId={sit.id} />}
 
       {/* Post-confirmation checklist */}
       {sit && user && (sit.status === "confirmed" || sit.status === "in_progress") && (
