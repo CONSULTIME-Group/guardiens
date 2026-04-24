@@ -1714,6 +1714,19 @@ export default function PublicSitterProfile() {
           />
         </div>
       )}
+
+      {/* Modale de sélection manuelle de l'image hero (visible si on est sur son propre profil) */}
+      {auth.user?.id && id && auth.user.id === id && (
+        <HeroPickerModal
+          open={heroPickerOpen}
+          onClose={() => setHeroPickerOpen(false)}
+          userId={auth.user.id}
+          currentIndex={profile?.hero_image_index ?? null}
+          onSaved={(newIndex) =>
+            setProfile((p: any) => (p ? { ...p, hero_image_index: newIndex } : p))
+          }
+        />
+      )}
       </div>
     </div>
   );
