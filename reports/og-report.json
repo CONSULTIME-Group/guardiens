@@ -1,0 +1,58 @@
+{
+  "generatedAt": "2026-04-24T15:46:19.834Z",
+  "origins": [
+    "https://guardiens.lovable.app"
+  ],
+  "siteUrl": "https://guardiens.fr",
+  "strictMode": false,
+  "includeDynamic": false,
+  "dynamicLimit": 20,
+  "enabledChecks": [
+    "og",
+    "canonical",
+    "schema",
+    "meta-robots"
+  ],
+  "indexHtml": {
+    "ok": true,
+    "diffs": []
+  },
+  "perOrigin": [
+    {
+      "origin": "https://guardiens.lovable.app",
+      "sitemap": null,
+      "robots": null,
+      "routes": [
+        {
+          "path": "/",
+          "url": "https://guardiens.lovable.app/",
+          "pathPattern": null,
+          "isDynamic": false,
+          "isSample": false,
+          "status": "error",
+          "fetchError": null,
+          "ogDiffs": [],
+          "pageIssues": [
+            {
+              "kind": "canonical",
+              "severity": "prerender",
+              "msg": "absent",
+              "blocking": true
+            },
+            {
+              "kind": "schema",
+              "severity": "prerender",
+              "msg": "aucun bloc JSON-LD trouvé sur la home",
+              "blocking": true
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "blockingIssues": 2,
+    "warnings": 0,
+    "totalErrors": 0
+  }
+}
