@@ -722,8 +722,25 @@ export default function PublicSitterProfile() {
         {/* Vignettage très subtil */}
         <div className="absolute inset-0 z-[1] pointer-events-none" style={{ background: 'radial-gradient(ellipse at center, transparent 55%, rgba(90,69,48,0.08) 100%)' }} />
 
-        {/* Dégradé bas */}
-        <div className="absolute bottom-0 left-0 right-0 h-20 z-[1] bg-gradient-to-b from-transparent to-background pointer-events-none" />
+        {/* Scrim de lisibilité — dégradé bas qui remonte derrière le bloc texte.
+            Plus présent (60% de la hauteur) pour garantir le contraste de la h1, ville,
+            badges et stats peu importe la zone de l'illustration. */}
+        <div
+          className="absolute inset-x-0 bottom-0 h-[75%] z-[1] pointer-events-none"
+          style={{
+            background:
+              'linear-gradient(to top, hsl(var(--background)) 0%, hsl(var(--background) / 0.85) 30%, hsl(var(--background) / 0.45) 65%, transparent 100%)',
+          }}
+        />
+
+        {/* Scrim haut très léger pour le lien "Retour aux gardiens" */}
+        <div
+          className="absolute inset-x-0 top-0 h-24 z-[1] pointer-events-none"
+          style={{
+            background:
+              'linear-gradient(to bottom, hsl(var(--background) / 0.55) 0%, transparent 100%)',
+          }}
+        />
 
         {/* Contenu header par-dessus */}
         <div className="relative z-10 w-full max-w-5xl mx-auto px-4 sm:px-6 pb-8 pt-6">
@@ -731,7 +748,7 @@ export default function PublicSitterProfile() {
           <div className="flex justify-end mb-4">
             <Link
               to="/recherche-gardiens"
-              className="text-sm text-muted-foreground hover:text-foreground"
+              className="text-sm text-foreground/80 hover:text-foreground font-medium drop-shadow-sm"
             >
               ← Retour aux gardiens
             </Link>
