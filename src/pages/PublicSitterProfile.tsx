@@ -676,16 +676,19 @@ export default function PublicSitterProfile() {
       {/* ── Contenu principal z-1 ── */}
       <div className="relative z-[1]">
       {/* ── HERO FUSIONNÉ : illustration carnet de voyage (banque de 50, hashée par sitter.id) ── */}
-      <div className="relative overflow-hidden w-full min-h-[280px] sm:min-h-[340px] flex items-end bg-[#FBF6EC]">
-        {/* Illustration de fond — sketchbook style, déterministe par profil */}
-        <div className="absolute inset-0 z-0 pointer-events-none">
+      <div className="relative overflow-hidden w-full min-h-[320px] sm:min-h-[360px] md:min-h-[340px] flex items-end bg-[#FBF6EC]">
+        {/* Illustration de fond — sketchbook style, déterministe par profil.
+            Zoom + recadrage centre-droit pour éloigner les bords (spirales de carnet,
+            texte parasite parfois présents sur les marges des illustrations IA). */}
+        <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
           <img
             src={getSitterHeroImage(id)}
             alt=""
             aria-hidden="true"
             width={1536}
             height={544}
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover scale-[1.18] sm:scale-110 origin-center"
+            style={{ objectPosition: '60% 45%' }}
           />
         </div>
 
