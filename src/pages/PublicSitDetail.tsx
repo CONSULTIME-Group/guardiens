@@ -1,3 +1,6 @@
+// TODO OG dynamique : les meta og:* spécifiques à chaque annonce nécessitent
+// un service de prerender actif (Prerender.io / Cloudflare Worker). À investiguer
+// séparément. Aujourd'hui : OG statiques génériques dans index.html uniquement.
 import { useState, useEffect, useRef } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
@@ -209,28 +212,9 @@ const PublicSitDetail = () => {
         <title>{truncatedTitle}</title>
         <meta name="description" content={truncatedSeoDesc} />
         <link rel="canonical" href={canonicalUrl} />
-        {/* noindex, follow — thin content protection (V1). Social crawlers (FB/WhatsApp) lisent quand même les balises OG. */}
+        {/* noindex, follow — thin content protection (V1). */}
         <meta name="robots" content="noindex, follow" />
-
-        {/* Open Graph (Facebook, LinkedIn, WhatsApp, iMessage) */}
-        <meta property="og:type" content="article" />
-        <meta property="og:title" content={truncatedTitle} />
-        <meta property="og:description" content={truncatedDesc} />
-        <meta property="og:url" content={canonicalUrl} />
-        <meta property="og:image" content={ogImageUrl} />
-        <meta property="og:image:width" content="1200" />
-        <meta property="og:image:height" content="630" />
-        <meta property="og:image:alt" content={ogImageAlt} />
-        <meta property="og:site_name" content="Guardiens" />
-        <meta property="og:locale" content="fr_FR" />
-
-        {/* Twitter / X */}
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content={truncatedTitle} />
-        <meta name="twitter:description" content={truncatedDesc} />
-        <meta name="twitter:image" content={ogImageUrl} />
-        <meta name="twitter:image:alt" content={ogImageAlt} />
-
+        {/* JSON-LD : lu par Google après rendu JS, indépendant des OG. */}
         <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>
       </Helmet>
 
