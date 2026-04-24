@@ -27,6 +27,29 @@ import { X, ZoomIn, ZoomOut, RotateCcw, ChevronLeft, ChevronRight, Maximize2 } f
 type ViewMode = "rendered" | "raw";
 type AnchorFilter = "all" | HeroAnchor;
 type CategoryFilter = "all" | HeroCategoryName;
+type SortBy = "num-asc" | "num-desc" | "category" | "anchor" | "shuffle";
+
+// Ordre canonique des catégories pour le tri "par thème".
+const CATEGORY_ORDER: Record<HeroCategoryName, number> = {
+  animals: 0,
+  home: 1,
+  mutual_aid: 2,
+  village: 3,
+};
+const ANCHOR_ORDER: Record<HeroAnchor, number> = {
+  left: 0,
+  center: 1,
+  right: 2,
+};
+
+// Hash déterministe pour le mode "shuffle" — même ordre à chaque rendu sans
+// dépendance externe (évite la dépendance à Math.random qui changerait au moindre re-render).
+function stableHash(n: number): number {
+  let h = (n + 0x9e3779b9) | 0;
+  h = Math.imul(h ^ (h >>> 16), 0x85ebca6b);
+  h = Math.imul(h ^ (h >>> 13), 0xc2b2ae35);
+  return (h ^ (h >>> 16)) >>> 0;
+}
 
 const CATEGORY_LABELS: Record<HeroCategoryName, string> = {
   animals: "Animaux & plantes",
