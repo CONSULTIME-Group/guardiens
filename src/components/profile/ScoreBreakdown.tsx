@@ -57,6 +57,7 @@ const Row = ({ c }: { c: ScoreCriterion }) => (
 const ScoreBreakdown = ({
   role,
   total,
+  savedTotal,
   essentials,
   bonuses,
   defaultOpen = false,
@@ -70,13 +71,12 @@ const ScoreBreakdown = ({
   const sumBonuses = bonuses.reduce((s, c) => s + (c.ok ? c.points : 0), 0);
   const maxBonuses = bonuses.reduce((s, c) => s + c.points, 0);
 
-  /**
-   * Score simulé à partir des critères live (essentials + bonuses).
-   * Réplique fidèle de la fonction SQL calculate_profile_completion :
-   * la somme des poids des critères vaut 100 par construction (cf. barème v2).
-   */
-  const previewTotal = Math.min(100, Math.max(0, sumEssentials + sumBonuses));
-  const delta = previewTotal - total;
+  // `total` est désormais le score live (essentials + bonuses, déterministe).
+  // `savedTotal` (optionnel) est la valeur enregistrée en base. Le badge d'aperçu
+  // s'affiche dès qu'il y a un brouillon ET un écart entre live et DB.
+  const previewTotal = total;
+  const referenceTotal = savedTotal ?? total;
+  const delta = previewTotal - referenceTotal;
   const showPreview = isDirty && delta !== 0;
 
   return (
