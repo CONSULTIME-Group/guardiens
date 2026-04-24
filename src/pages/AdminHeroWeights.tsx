@@ -24,6 +24,7 @@ import {
   HERO_BANK,
   getSitterHeroImage,
   getCategoryByBankIndex,
+  validateHeroBank,
   type HeroCategoryName,
   type HeroWeights,
   DEFAULT_HERO_WEIGHTS,
@@ -118,7 +119,13 @@ export default function AdminHeroWeights() {
     draft.home !== liveWeights.home ||
     draft.mutual_aid !== liveWeights.mutual_aid ||
     draft.village !== liveWeights.village;
-  const canSave = isDirty && total > 0 && !saving;
+  // Validation : on bloque la sauvegarde tant qu'il reste une erreur bloquante.
+  const validation = useMemo(() => validateHeroBank(draft), [draft]);
+  const hasErrors = validation.issues.some((i) => i.severity === "error");
+  const warnings = validation.issues.filter((i) => i.severity === "warning");
+  const errors = validation.issues.filter((i) => i.severity === "error");
+
+  const canSave = isDirty && total > 0 && !saving && !hasErrors;
 
   // Aperçu : simulation sur 5k UUIDs avec les poids en cours d'édition.
   // Calculée à la demande pour ne pas figer l'UI pendant le drag des sliders.
@@ -164,6 +171,10 @@ export default function AdminHeroWeights() {
 
   /* ── Save ── */
   async function handleSave() {
+    if (hasErrors) {
+      toast.error("Configuration invalide : corrigez les erreurs avant d'enregistrer.");
+      return;
+    }
     setSaving(true);
     const { error } = await supabase
       .from("hero_weights")
@@ -219,6 +230,53 @@ export default function AdminHeroWeights() {
             redistribué).
           </p>
         </header>
+
+        {/* Bannière de validation : erreurs bloquantes + warnings */}
+        {(errors.length > 0 || warnings.length > 0) && (
+          <section
+            className={`rounded-lg border p-4 space-y-2 ${
+              errors.length > 0
+                ? "border-destructive/40 bg-destructive/5"
+                : "border-amber-500/40 bg-amber-500/5"
+            }`}
+            role={errors.length > 0 ? "alert" : "status"}
+          >
+            <div className="flex items-center gap-2">
+              <span
+                className={`text-sm font-semibold ${
+                  errors.length > 0 ? "text-destructive" : "text-amber-700 dark:text-amber-400"
+                }`}
+              >
+                {errors.length > 0
+                  ? `❌ ${errors.length} erreur${errors.length > 1 ? "s" : ""} bloquante${errors.length > 1 ? "s" : ""}`
+                  : `⚠️ ${warnings.length} avertissement${warnings.length > 1 ? "s" : ""}`}
+              </span>
+              {errors.length > 0 && (
+                <span className="text-xs text-muted-foreground">
+                  · sauvegarde désactivée tant que ces erreurs ne sont pas corrigées
+                </span>
+              )}
+            </div>
+            <ul className="text-xs space-y-1 list-disc pl-5">
+              {errors.map((issue, i) => (
+                <li key={`err-${i}`} className="text-destructive">
+                  {issue.message}
+                </li>
+              ))}
+              {warnings.map((issue, i) => (
+                <li key={`warn-${i}`} className="text-amber-700 dark:text-amber-400">
+                  {issue.message}
+                </li>
+              ))}
+            </ul>
+            <p className="text-[11px] text-muted-foreground pt-1 border-t border-border/40">
+              Banque physique : {validation.totalImages} images ·{" "}
+              {(Object.keys(validation.perCategory) as HeroCategoryName[])
+                .map((c) => `${CATEGORY_LABELS[c]} ${validation.perCategory[c]}`)
+                .join(" · ")}
+            </p>
+          </section>
+        )}
 
         {/* Sliders */}
         <section className="space-y-4">
