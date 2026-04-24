@@ -49,6 +49,22 @@ export interface DynamicRouteConfig {
   dynamicTitle?: boolean;
   /** Idem pour la description (ex. extraite du corps de l'article). */
   dynamicDescription?: boolean;
+  /**
+   * Exemple de paramètres (slug/id/city…) pour valider strictement le rendu d'une
+   * instance représentative. Le script construit la page correspondante, interpole
+   * `title` et `metaDescription` avec ces valeurs et compare exactement, même si
+   * `dynamicTitle` / `dynamicDescription` sont à true pour le reste du groupe.
+   * Ex: { slug: "nouveaux-tarifs-2026" } pour /actualites/:slug.
+   */
+  sampleParams?: Record<string, string>;
+  /**
+   * Titre attendu précis pour l'instance `sampleParams`. Si absent, le script
+   * interpole `title` avec `sampleParams`. Utile quand le titre réel diffère du
+   * pattern générique (ex. titre d'article éditorial).
+   */
+  sampleTitle?: string;
+  /** Description attendue précise pour l'instance `sampleParams`. */
+  sampleDescription?: string;
 }
 
 export const staticRoutes: SiteRoute[] = [
@@ -193,6 +209,11 @@ export const dynamicRoutes: DynamicRouteConfig[] = [
     changeFreq: "monthly",
     dynamicTitle: true,
     dynamicDescription: true,
+    // Instance représentative : l'article "nouveaux-tarifs-2026" (contenu stable, pilier SEO)
+    sampleParams: { slug: "nouveaux-tarifs-2026" },
+    // Titre et description réels servis par la page (vérifiés strictement)
+    sampleTitle: "Tarifs Guardiens 2026 — 6,99€/mois, 7 jours offerts | Guardiens",
+    sampleDescription: "Les tarifs officiels Guardiens pour 2026 : 6,99€/mois pour les gardiens avec 7 jours offerts, gratuit pour les propriétaires. Sans commission ni frais cachés.",
   },
   {
     pathPattern: "/house-sitting/:city",
@@ -203,6 +224,8 @@ export const dynamicRoutes: DynamicRouteConfig[] = [
     changeFreq: "weekly",
     dynamicTitle: true, // les pages géo ont un titre SEO précis, non strict
     dynamicDescription: true,
+    // Instance représentative : Lyon (silo géo phare)
+    sampleParams: { city: "lyon" },
   },
 ];
 

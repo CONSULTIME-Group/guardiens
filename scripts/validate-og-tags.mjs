@@ -12,7 +12,7 @@
  *   6. meta robots → aucune route publique en noindex par erreur
  *
  * Usage :
- *   node scripts/validate-og-tags.mjs                         # routes statiques uniquement
+ *   node scripts/validate-og-tags.mjs                         # routes statiques + échantillons dynamiques (sampleParams)
  *   node scripts/validate-og-tags.mjs --include-dynamic       # + routes dynamiques (articles, villes…)
  *   node scripts/validate-og-tags.mjs --dynamic-limit=5       # max 5 URLs par pattern dynamique
  *   node scripts/validate-og-tags.mjs https://guardiens.fr    # origine explicite
@@ -175,6 +175,19 @@ function loadSiteConfig() {
       );
       const dynamicTitle = /dynamicTitle:\s*true/.test(block);
       const dynamicDescription = /dynamicDescription:\s*true/.test(block);
+      const sampleTitle = extractStringLiteral(block, "sampleTitle");
+      const sampleDescription = extractStringLiteral(block, "sampleDescription");
+      // Extraction de sampleParams: { key: "value", ... }
+      const sampleParamsMatch = block.match(/sampleParams\s*:\s*\{([^}]*)\}/);
+      let sampleParams = null;
+      if (sampleParamsMatch) {
+        sampleParams = {};
+        const kvRe = /([a-zA-Z_][a-zA-Z0-9_]*)\s*:\s*(["'])([^"']+)\2/g;
+        let kv;
+        while ((kv = kvRe.exec(sampleParamsMatch[1])) !== null) {
+          sampleParams[kv[1]] = kv[3];
+        }
+      }
       if (!pathPattern || !title || !description || !source) continue;
       dynamicConfigs.push({
         pathPattern,
@@ -186,6 +199,9 @@ function loadSiteConfig() {
         changeFreq: changeFreqMatch ? changeFreqMatch[2] : null,
         dynamicTitle,
         dynamicDescription,
+        sampleParams,
+        sampleTitle,
+        sampleDescription,
       });
     }
   }
@@ -276,6 +292,52 @@ async function expandDynamicRoutes(dynamicConfigs, origin, siteUrl, defaultOgIma
     }
   }
   return expanded;
+}
+
+/**
+ * Pour chaque DynamicRouteConfig avec `sampleParams`, construit UNE route
+ * "sample" en mode strict : le slug/id/city est remplacé par l'exemple fourni,
+ * et le titre/description attendus sont soit `sampleTitle`/`sampleDescription`
+ * explicites, soit interpolés depuis `title`/`metaDescription`.
+ *
+ * Ces routes s'affichent toujours (indépendamment de --include-dynamic) et
+ * valident strictement les balises OG, ce qui permet de détecter toute
+ * régression du rendu dynamique sans scanner le sitemap complet.
+ */
+function buildSampleRoutes(dynamicConfigs, defaultOgImage) {
+  if (!dynamicConfigs || dynamicConfigs.length === 0) return [];
+  const samples = [];
+  for (const cfg of dynamicConfigs) {
+    if (!cfg.sampleParams) continue;
+    const { params } = patternToRegex(cfg.pathPattern);
+    // Vérifie que tous les params du pattern sont fournis dans sampleParams
+    const missing = params.filter((p) => !(p in cfg.sampleParams));
+    if (missing.length > 0) {
+      console.log(c("yellow", `  ⚠️  sampleParams incomplet pour ${cfg.pathPattern} (manque: ${missing.join(", ")})`));
+      continue;
+    }
+    const path_ = cfg.pathPattern.replace(
+      /:([a-zA-Z_][a-zA-Z0-9_]*)/g,
+      (_, k) => cfg.sampleParams[k],
+    );
+    const rawTitle = cfg.sampleTitle ?? interpolateTemplate(cfg.title, cfg.sampleParams);
+    const description = cfg.sampleDescription ?? interpolateTemplate(cfg.description, cfg.sampleParams);
+    samples.push({
+      path: path_,
+      rawTitle,
+      description,
+      image: cfg.image || defaultOgImage,
+      sitemapPriority: cfg.sitemapPriority,
+      changeFreq: cfg.changeFreq,
+      isDynamic: true,
+      isSample: true,             // marque : validation STRICTE (pas de tolérance)
+      pathPattern: cfg.pathPattern,
+      // Important : dynamicTitle/Description à false pour comparer exactement
+      dynamicTitle: false,
+      dynamicDescription: false,
+    });
+  }
+  return samples;
 }
 
 // ──────────────────────────────────────────────────────────────
@@ -620,12 +682,27 @@ async function main() {
   for (const origin of normalizedOrigins) {
     console.log(c("bold", `━━━ Origine : ${origin} ━━━`));
 
-    // ─── Expansion des routes dynamiques (par origine, via son sitemap) ─
+    // ─── Routes-échantillon (1 par pattern avec sampleParams) ────────────
+    // Toujours actives : validation STRICTE d'un slug/id/city représentatif.
+    let sampleRoutes = buildSampleRoutes(dynamicConfigs, defaultOgImage);
+    if (pathFilter) {
+      sampleRoutes = sampleRoutes.filter(
+        (r) => pathFilter.includes(r.path) || pathFilter.includes(r.pathPattern),
+      );
+    }
+    if (sampleRoutes.length > 0) {
+      console.log(c("dim", `  → ${sampleRoutes.length} échantillon(s) dynamique(s) en mode strict : ${sampleRoutes.map((r) => r.path).join(", ")}`));
+    }
+
+    // ─── Expansion complète des routes dynamiques (opt-in via --include-dynamic) ─
     let dynamicRoutesExpanded = [];
     if (includeDynamic && dynamicConfigs.length > 0) {
       dynamicRoutesExpanded = await expandDynamicRoutes(
         dynamicConfigs, origin, siteUrl, defaultOgImage,
       );
+      // On retire les instances déjà couvertes par un échantillon strict
+      const sampleSet = new Set(sampleRoutes.map((r) => r.path));
+      dynamicRoutesExpanded = dynamicRoutesExpanded.filter((r) => !sampleSet.has(r.path));
       // Filtrage --paths si fourni
       if (pathFilter) {
         dynamicRoutesExpanded = dynamicRoutesExpanded.filter(
@@ -645,10 +722,10 @@ async function main() {
         }
       }
       if (dynamicRoutesExpanded.length > 0) {
-        console.log(c("dim", `  → ${dynamicRoutesExpanded.length} route(s) dynamique(s) expandée(s)`));
+        console.log(c("dim", `  → ${dynamicRoutesExpanded.length} route(s) dynamique(s) supplémentaire(s) expandée(s)`));
       }
     }
-    const filteredRoutes = [...filteredStaticRoutes, ...dynamicRoutesExpanded];
+    const filteredRoutes = [...filteredStaticRoutes, ...sampleRoutes, ...dynamicRoutesExpanded];
 
     // ─── Sitemap (origine-level) ────────────────────────────────────────
     if (enabledChecks.has("sitemap")) {
@@ -754,7 +831,8 @@ async function main() {
     for (const r of results) {
       // Paths dynamiques plus longs → padding élargi, tronqué proprement
       const displayPath = r.route.path.length > 40 ? r.route.path.slice(0, 37) + "…" : r.route.path;
-      const label = `${displayPath.padEnd(40)} `;
+      const badge = r.route.isSample ? c("cyan", "[sample] ") : "";
+      const label = `${badge}${displayPath.padEnd(40)} `;
       if (!r.ok) {
         totalErrors += 1;
         console.log(`  ${c("red", "💥")} ${label}${c("red", r.error)}`);
