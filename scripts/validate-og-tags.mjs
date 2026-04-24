@@ -692,6 +692,7 @@ async function main() {
       const { tags: indexTags } = parseMetaTags(indexHtml);
       const expected = buildExpectedTags(homeRoute);
       const diffs = diffTags(indexTags, expected.tags);
+      report.indexHtml = { ok: diffs.length === 0, diffs };
       if (diffs.length > 0) {
         blockingIssues += diffs.length;
         console.log(c("yellow", "⚠️  index.html diverge de la route / :"));
