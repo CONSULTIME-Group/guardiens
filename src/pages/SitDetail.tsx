@@ -28,6 +28,17 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ShareButtons from "@/components/sits/ShareButtons";
 import SitDateHistory from "@/components/sits/SitDateHistory";
 import { trackEvent } from "@/lib/analytics";
+import { formatSitPeriod } from "@/lib/dateRange";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 const envLabels: Record<string, string> = {
   city_center: "Centre-ville", suburban: "Périurbain", countryside: "Campagne",
