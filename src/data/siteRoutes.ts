@@ -65,6 +65,7 @@ export interface DynamicRouteConfig {
   sampleTitle?: string;
   /** Description attendue précise pour l'instance `sampleParams`. */
   sampleDescription?: string;
+}
 
 export const staticRoutes: SiteRoute[] = [
   {
