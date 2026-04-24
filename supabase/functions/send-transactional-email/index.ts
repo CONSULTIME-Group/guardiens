@@ -403,7 +403,7 @@ Deno.serve(async (req) => {
       template_name: templateName,
       recipient_email: effectiveRecipient,
       status: 'failed',
-      error_message: sendError.message || 'Network error sending via Resend',
+      error_message: (sendError instanceof Error ? sendError.message : String(sendError)) || 'Network error sending via Resend',
     })
     return new Response(JSON.stringify({ error: 'Failed to send email' }), {
       status: 500,
