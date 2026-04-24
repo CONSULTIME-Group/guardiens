@@ -349,10 +349,12 @@ const SearchOwner = () => {
 
     // Enrich with reviews + badges + emergency
     const userIds = items.map((s: any) => s.user_id);
-    const [allBadgesRes, emergencyRes] = await Promise.all([
-      supabase.from("badge_attributions").select("user_id, badge_id").in("user_id", userIds.length > 0 ? userIds : ["__none__"]),
-      supabase.from("emergency_sitter_profiles").select("user_id, is_active").in("user_id", userIds.length > 0 ? userIds : ["__none__"]).eq("is_active", true),
-    ]);
+    const [allBadgesRes, emergencyRes] = userIds.length > 0
+      ? await Promise.all([
+          supabase.from("badge_attributions").select("user_id, badge_id").in("user_id", userIds),
+          supabase.from("emergency_sitter_profiles").select("user_id, is_active").in("user_id", userIds).eq("is_active", true),
+        ])
+      : [{ data: [] as any[] }, { data: [] as any[] }] as const;
 
     const emergencySet = new Set((emergencyRes.data || []).map((e: any) => e.user_id));
     if (emergencyOnly) items = items.filter((s: any) => emergencySet.has(s.user_id));
