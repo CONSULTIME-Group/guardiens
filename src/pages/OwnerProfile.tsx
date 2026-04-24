@@ -197,7 +197,13 @@ const OwnerProfilePage = () => {
             completion={liveScore}
             sections={sidebarSections}
             activeSection={activeSection}
-            onSectionClick={setActiveSection}
+            onSectionClick={(id) => {
+              setActiveSection(id);
+              requestAnimationFrame(() => {
+                const el = document.getElementById("profile-section-content");
+                if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+              });
+            }}
             publicProfileUrl={user ? `/gardiens/${user.id}?tab=proprio` : "#"}
             role="owner"
             scoreBreakdown={
