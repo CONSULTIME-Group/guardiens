@@ -149,8 +149,8 @@ const Landing = () => {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <PageMeta
-        title="Guardiens — Quelqu'un du coin veille sur votre maison."
-        description="Garde de maison gratuite et entraide de quartier. Petits services, échanges sans argent. Osez demander. Osez proposer. Rejoignez le mouvement."
+        title="Guardiens — Partez l'esprit tranquille"
+        description="Un gardien de votre région s'occupe de votre maison et de vos animaux pendant vos absences. Gratuit pour les propriétaires."
         path="/"
         image="https://guardiens.fr/og-default.jpg"
       />
