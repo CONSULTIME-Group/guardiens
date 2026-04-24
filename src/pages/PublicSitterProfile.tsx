@@ -1247,7 +1247,7 @@ export default function PublicSitterProfile() {
           {/* — MOBILE : flux vertical avec ancres — */}
           <div className="md:hidden space-y-10">
             {/* À propos */}
-            <section aria-label={`À propos de ${firstName}`}>
+            <section id="apropos" aria-label={`À propos de ${firstName}`} className="scroll-mt-24">
               <h2 className="text-xs uppercase tracking-wider text-muted-foreground font-body mb-3">
                 À propos
               </h2>
@@ -1271,7 +1271,7 @@ export default function PublicSitterProfile() {
 
             {/* Avis */}
             {reviewCount > 0 && (
-              <section aria-label="Avis reçus">
+              <section id="avis" aria-label="Avis reçus" className="scroll-mt-24">
                 <h2 className="text-xs uppercase tracking-wider text-muted-foreground font-body mb-3">
                   Avis ({reviewCount})
                 </h2>
@@ -1285,7 +1285,7 @@ export default function PublicSitterProfile() {
             )}
 
             {/* Pratique */}
-            <section aria-label="Infos pratiques" className="scroll-mt-20">
+            <section id="infos-pratiques" aria-label="Infos pratiques" className="scroll-mt-24">
               <h2 className="text-lg font-semibold text-foreground font-display mb-3">
                 Infos pratiques
               </h2>
@@ -1307,7 +1307,7 @@ export default function PublicSitterProfile() {
 
             {/* Galerie */}
             {gallery.length > 0 && (
-              <section aria-label="Galerie">
+              <section id="galerie" aria-label="Galerie" className="scroll-mt-24">
                 <h2 className="text-xs uppercase tracking-wider text-muted-foreground font-body mb-3">
                   Galerie ({gallery.length})
                 </h2>
@@ -1317,7 +1317,7 @@ export default function PublicSitterProfile() {
 
             {/* Confiance */}
             {userBadges && userBadges.length > 0 && (
-              <section aria-label="Confiance et vérifications">
+              <section id="confiance" aria-label="Confiance et vérifications" className="scroll-mt-24">
                 <h2 className="text-xs uppercase tracking-wider text-muted-foreground font-body mb-3">
                   Confiance & vérifications
                 </h2>
