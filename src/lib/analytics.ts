@@ -41,6 +41,15 @@ export async function trackEvent(eventType: EventType, opts: TrackOptions = {}) 
   try {
     const { data: { user } } = await supabase.auth.getUser();
 
+    if (import.meta.env.DEV) {
+      // eslint-disable-next-line no-console
+      console.debug("[analytics]", eventType, {
+        user_id: user?.id ?? null,
+        source: opts.source ?? null,
+        metadata: opts.metadata ?? null,
+      });
+    }
+
     await supabase.from("analytics_events").insert({
       user_id: user?.id ?? null,
       event_type: eventType,
@@ -63,6 +72,16 @@ export async function trackEventWithUserId(
 ) {
   try {
     if (!userId) return;
+
+    if (import.meta.env.DEV) {
+      // eslint-disable-next-line no-console
+      console.debug("[analytics]", eventType, {
+        user_id: userId,
+        source: opts.source ?? null,
+        metadata: opts.metadata ?? null,
+      });
+    }
+
     await supabase.from("analytics_events").insert({
       user_id: userId,
       event_type: eventType,

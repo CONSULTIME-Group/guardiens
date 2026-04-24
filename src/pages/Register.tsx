@@ -185,12 +185,19 @@ const Register = () => {
               },
             });
           } catch {}
-          // On ne bloque pas l'UX : on laisse continuer le flow normal,
-          // mais on n'émet PAS signup_completed pour ce parcours.
+          // ── Bloquer la finalisation : pas de flag first_dashboard_seen,
+          //    pas de signup_completed, pas de redirection /dashboard.
+          //    L'auth a réussi, l'utilisateur reste connecté côté Supabase,
+          //    on lui affiche un message clair et on arrête ici.
+          setFormError(
+            "Votre compte a été créé mais nous rencontrons un problème technique pour finaliser l'inscription. Rafraîchissez la page dans quelques secondes, ou contactez-nous si le problème persiste."
+          );
+          return;
         }
       }
 
       // Flag pour émettre user_activated lors du premier dashboard
+      // (uniquement si le profil existe bien)
       try {
         if (typeof window !== "undefined") {
           localStorage.setItem("first_dashboard_seen", "pending");
@@ -227,17 +234,6 @@ const Register = () => {
         } finally {
           sessionStorage.removeItem("guardiens_ref");
         }
-      }
-
-      // Si la création de profil a échoué côté trigger, on n'émet PAS signup_completed
-      // (signup_failed stage='profile_creation' a déjà été émis plus haut)
-      if (newUserId && !profileExists) {
-        if (result?.session) {
-          navigate("/dashboard");
-        } else {
-          setStep("confirmation");
-        }
-        return;
       }
 
       // If auto-confirm enabled (session already created), go straight to dashboard
