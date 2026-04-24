@@ -13,36 +13,34 @@ import OwnerHouseGuideForm from "@/components/owner-profile/OwnerHouseGuideForm"
 import OwnerStepSkills from "@/components/owner-profile/OwnerStepSkills";
 import ProfileSidebar, { type SidebarSection } from "@/components/profile/ProfileSidebar";
 import ScoreBreakdown, { type ScoreCriterion } from "@/components/profile/ScoreBreakdown";
-import { useOwnerProfile, computeOwnerMissingFields, type OwnerProfileData } from "@/hooks/useOwnerProfile";
+import { useOwnerProfile, type OwnerProfileData } from "@/hooks/useOwnerProfile";
 import { useAuth } from "@/contexts/AuthContext";
 
 const SECTIONS_META = [
   { id: "identity", num: 1, label: "Identité", subtitle: "Qui vous êtes" },
   { id: "housing", num: 2, label: "Logement", subtitle: "Votre maison" },
   { id: "animals", num: 3, label: "Animaux", subtitle: "Vos animaux" },
-  { id: "rules", num: 4, label: "Attentes", subtitle: "Ce que vous cherchez" },
-  { id: "communication", num: 5, label: "Accueil", subtitle: "Accueil & guide" },
+  { id: "rules", num: 4, label: "Attentes", subtitle: "Ce que vous cherchez", optional: true },
+  { id: "communication", num: 5, label: "Accueil", subtitle: "Accueil & guide", optional: true },
   { id: "skills", num: 6, label: "Compétences", subtitle: "Ce que vous pouvez offrir" },
   { id: "gallery", num: 7, label: "Galerie", subtitle: "Photos de votre maison" },
 ];
 
-function sectionComplete(num: number, d: OwnerProfileData, petsCount: number): boolean {
-  switch (num) {
-    case 1: return !!(d.avatar_url && d.first_name && d.last_name && d.city && d.bio);
-    case 2: return !!(d.property_type && d.environment && d.description);
-    case 3: return petsCount > 0;
-    case 4: return !!(d.presence_expected && d.visits_allowed && d.meeting_preference.length > 0 && d.news_frequency);
-    case 5: return !!(d.handover_preference && d.news_format.length > 0);
-    default: return false;
-  }
+/**
+ * Critère de score étendu : inclut la section où l'utilisateur peut le compléter.
+ * Source UNIQUE de vérité — la jauge %, les sections « Complété ✓ » et les labels
+ * « → champ manquant » dérivent tous de la même liste.
+ */
+type ScoredCriterion = ScoreCriterion & { section: string; kind: "essential" | "bonus" };
+
+function sectionComplete(sectionId: string, criteria: ScoredCriterion[]): boolean {
+  const essentialsForSection = criteria.filter(c => c.section === sectionId && c.kind === "essential");
+  if (essentialsForSection.length === 0) return false;
+  return essentialsForSection.every(c => c.ok);
 }
 
-function countMissing(num: number, allMissing: { step: number; label: string }[]): number {
-  return allMissing.filter(m => m.step === num).length;
-}
-
-function missingLabelsFor(num: number, allMissing: { step: number; label: string }[]): string[] {
-  return allMissing.filter(m => m.step === num).map(m => m.label);
+function missingLabelsFor(sectionId: string, criteria: ScoredCriterion[]): string[] {
+  return criteria.filter(c => c.section === sectionId && !c.ok).map(c => c.label);
 }
 
 type ProfileDraft<T> = {
@@ -143,31 +141,41 @@ const OwnerProfilePage = () => {
     return url;
   }, [uploadPhoto]);
 
-  // Recompute missing fields against the LIVE preview state so the sidebar reflects
-  // edits in progress (and doesn't show a stale count after save/refresh).
-  const liveMissingFields = computeOwnerMissingFields(mergedData, pets.length);
-
-  // Critères pesant dans le score (réplique du barème SQL).
-  const ownerEssentials: ScoreCriterion[] = [
-    { label: "Prénom + code postal", points: 10, ok: !!(mergedData.first_name && mergedData.postal_code) },
-    { label: "Photo de profil", points: 15, ok: !!mergedData.avatar_url, hint: "Onglet Identité." },
-    { label: "Au moins 1 animal renseigné", points: 20, ok: pets.length > 0, hint: "Onglet Animaux." },
-    { label: "Logement décrit (≥ 50 caractères)", points: 15, ok: (mergedData.description?.length ?? 0) >= 50, hint: `${mergedData.description?.length ?? 0}/50 caractères.` },
-    { label: "Au moins 1 photo du logement", points: 15, ok: (mergedData.photos?.length ?? 0) > 0, hint: "Onglet Logement." },
+  // Source UNIQUE pour la jauge ET la sidebar : un seul set de critères pondérés.
+  const scoredCriteria: ScoredCriterion[] = [
+    // Essentiels — 75 pts
+    { section: "identity", kind: "essential", label: "Prénom + code postal", points: 10,
+      ok: !!(mergedData.first_name && mergedData.postal_code) },
+    { section: "identity", kind: "essential", label: "Photo de profil", points: 15,
+      ok: !!mergedData.avatar_url, hint: "Onglet Identité." },
+    { section: "animals", kind: "essential", label: "Au moins 1 animal renseigné", points: 20,
+      ok: pets.length > 0, hint: "Onglet Animaux." },
+    { section: "housing", kind: "essential", label: "Logement décrit (≥ 50 caractères)", points: 15,
+      ok: (mergedData.description?.length ?? 0) >= 50, hint: `${mergedData.description?.length ?? 0}/50 caractères.` },
+    { section: "gallery", kind: "essential", label: "Au moins 1 photo du logement", points: 15,
+      ok: (mergedData.photos?.length ?? 0) > 0, hint: "Onglet Galerie." },
+    // Bonus — 25 pts
+    { section: "identity", kind: "bonus", label: "Bio ≥ 50 caractères", points: 10,
+      ok: (mergedData.bio?.length ?? 0) >= 50, hint: `${mergedData.bio?.length ?? 0}/50 caractères.` },
+    { section: "skills", kind: "bonus", label: "Au moins 1 compétence proprio", points: 10,
+      ok: (mergedData.owner_competences?.length ?? 0) > 0, hint: "Onglet Compétences." },
+    { section: "identity", kind: "bonus", label: "Identité vérifiée", points: 5,
+      ok: !!user?.identityVerified, hint: "Paramètres → Vérification." },
   ];
-  const ownerBonuses: ScoreCriterion[] = [
-    { label: "Bio ≥ 50 caractères", points: 10, ok: (mergedData.bio?.length ?? 0) >= 50, hint: `${mergedData.bio?.length ?? 0}/50 caractères.` },
-    { label: "Au moins 1 compétence proprio", points: 10, ok: (mergedData.owner_competences?.length ?? 0) > 0, hint: "Onglet Compétences." },
-    { label: "Identité vérifiée", points: 5, ok: !!user?.identityVerified, hint: "Paramètres → Vérification." },
-  ];
-  const liveScore = Math.min(100, [...ownerEssentials, ...ownerBonuses].reduce((s, c) => s + (c.ok ? c.points : 0), 0));
 
-  const sidebarSections: SidebarSection[] = SECTIONS_META.map(s => ({
-    ...s,
-    complete: sectionComplete(s.num, mergedData, pets.length),
-    missingCount: countMissing(s.num, liveMissingFields),
-    missingLabels: missingLabelsFor(s.num, liveMissingFields),
-  }));
+  const ownerEssentials = scoredCriteria.filter(c => c.kind === "essential");
+  const ownerBonuses = scoredCriteria.filter(c => c.kind === "bonus");
+  const liveScore = Math.min(100, scoredCriteria.reduce((s, c) => s + (c.ok ? c.points : 0), 0));
+
+  const sidebarSections: SidebarSection[] = SECTIONS_META.map(s => {
+    const labels = missingLabelsFor(s.id, scoredCriteria);
+    return {
+      ...s,
+      complete: s.optional ? false : sectionComplete(s.id, scoredCriteria),
+      missingCount: s.optional ? 0 : labels.length,
+      missingLabels: s.optional ? [] : labels,
+    };
+  });
 
   if (loading) {
     return (
