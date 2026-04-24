@@ -215,8 +215,7 @@ export function useSitterProfile() {
       const profileUpdate: any = {};
       profileFields.forEach(f => { if (f in stepData) profileUpdate[f] = (stepData as any)[f]; });
 
-      const completion = computeCompletion(newData);
-      profileUpdate.profile_completion = completion;
+      // profile_completion is recomputed server-side via RPC after writes (canonical barème)
 
       if (Object.keys(profileUpdate).length > 0) {
         const { error } = await supabase.from("profiles").update(profileUpdate).eq("id", user.id);
