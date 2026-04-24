@@ -777,6 +777,7 @@ async function main() {
     if (enabledChecks.has("robots")) {
       try {
         const { url, issues } = await validateRobots(origin, filteredRoutes, siteUrl);
+        originReport.robots = { url, issues, ok: issues.length === 0 };
         if (issues.length === 0) {
           console.log(`  ${c("green", "✅")} robots.txt ${c("dim", url)}`);
         } else {
@@ -786,6 +787,7 @@ async function main() {
         }
       } catch (err) {
         totalErrors += 1;
+        originReport.robots = { url: `${origin}/robots.txt`, error: err.message, ok: false };
         console.log(`  ${c("red", "💥")} robots.txt : ${err.message}`);
       }
     }
