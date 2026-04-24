@@ -845,10 +845,10 @@ export default function PublicSitterProfile() {
                 isFounder={profile?.is_founder || false}
               />
 
-              <div className="flex items-center gap-4 text-sm text-muted-foreground mt-1">
+              <div className="flex items-center gap-2 sm:gap-4 text-sm text-muted-foreground mt-1 flex-wrap">
                 {statsItems.map((s, i) => (
                   <span key={i} className="flex items-center gap-1">
-                    {i > 0 && <span className="text-border mr-3">·</span>}
+                    {i > 0 && <span className="text-border mr-1 sm:mr-3">·</span>}
                     {s}
                   </span>
                 ))}
