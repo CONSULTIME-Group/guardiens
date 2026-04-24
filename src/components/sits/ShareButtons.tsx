@@ -32,7 +32,7 @@ type ShareChannel = "facebook" | "whatsapp" | "x" | "email" | "copy" | "native";
  * - Copier le lien
  * - Web Share API native (mobile)
  */
-const ShareButtons = ({ sitId, title, city, source = "sit_detail", compact = false, viewerType = "anonymous" }: ShareButtonsProps) => {
+const ShareButtons = ({ sitId, title, city, startDate, endDate, source = "sit_detail", compact = false, viewerType = "anonymous" }: ShareButtonsProps) => {
   const { toast } = useToast();
   const [copied, setCopied] = useState(false);
 
@@ -41,8 +41,10 @@ const ShareButtons = ({ sitId, title, city, source = "sit_detail", compact = fal
     ? `${window.location.origin}/annonces/${sitId}`
     : `https://guardiens.fr/annonces/${sitId}`;
 
+  const periodLabel = formatSitPeriod(startDate, endDate);
   const cityPart = city ? ` à ${city}` : "";
-  const shareText = `${title}${cityPart} — une annonce de garde sur Guardiens. Quelqu'un du coin pour veiller sur la maison ?`;
+  const datePart = periodLabel ? ` (${periodLabel})` : "";
+  const shareText = `${title}${cityPart}${datePart} — une annonce de garde sur Guardiens. Quelqu'un du coin pour veiller sur la maison ?`;
 
   const track = (channel: ShareChannel) => {
     try {
