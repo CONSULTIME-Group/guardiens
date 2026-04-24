@@ -5,6 +5,7 @@ import { Helmet } from "react-helmet-async";
 import { useToast } from "@/hooks/use-toast";
 import OwnerDashboard from "@/components/dashboard/OwnerDashboard";
 import SitterDashboard from "@/components/dashboard/SitterDashboard";
+import { trackEvent } from "@/lib/analytics";
 
 const Dashboard = () => {
   const { activeRole, user } = useAuth();
@@ -14,6 +15,37 @@ const Dashboard = () => {
   const [transitioning, setTransitioning] = useState(false);
   const isFirstRender = useRef(true);
   const welcomeShown = useRef(false);
+  const activationFired = useRef(false);
+
+  // Émettre user_activated UNE fois lors du premier affichage du dashboard
+  // après inscription (flag posé dans Register.tsx).
+  useEffect(() => {
+    if (activationFired.current) return;
+    if (!user?.id) return;
+    try {
+      const flag = typeof window !== "undefined"
+        ? localStorage.getItem("first_dashboard_seen")
+        : null;
+      if (flag === "pending") {
+        activationFired.current = true;
+        const role = (typeof window !== "undefined"
+          ? localStorage.getItem("first_dashboard_role")
+          : null) || user.role || null;
+        try {
+          trackEvent("user_activated", {
+            source: "/dashboard",
+            metadata: { role, user_id: user.id },
+          });
+        } catch {}
+        try {
+          localStorage.removeItem("first_dashboard_seen");
+          localStorage.removeItem("first_dashboard_role");
+        } catch {}
+      }
+    } catch {
+      // silencieux
+    }
+  }, [user?.id]);
 
   useEffect(() => {
     if (!welcomeShown.current) {

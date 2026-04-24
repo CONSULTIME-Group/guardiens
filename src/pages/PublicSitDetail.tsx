@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
@@ -31,6 +31,8 @@ const speciesLabel: Record<string, string> = {
   fish: "poisson", reptile: "reptile", farm_animal: "animal de ferme", nac: "NAC",
 };
 
+type ViewerType = "anonymous" | "gardien" | "proprio" | "owner_of_sit" | "admin";
+
 const PublicSitDetail = () => {
   const { id } = useParams<{ id: string }>();
   const { user, isAuthenticated } = useAuth();
@@ -45,6 +47,8 @@ const PublicSitDetail = () => {
   const [loading, setLoading] = useState(true);
   const [applyOpen, setApplyOpen] = useState(false);
   const [hasApplied, setHasApplied] = useState(false);
+  const [viewerType, setViewerType] = useState<ViewerType>("anonymous");
+  const sitViewFired = useRef(false);
 
   useEffect(() => {
     if (!id) return;
@@ -83,9 +87,47 @@ const PublicSitDetail = () => {
         if (appRes) setHasApplied(true);
       }
 
+      // ── Résolution viewer_type ──
+      let resolvedViewer: ViewerType = "anonymous";
+      if (user) {
+        if (sitData.user_id === user.id) {
+          resolvedViewer = "owner_of_sit";
+        } else {
+          // Check admin role
+          let isAdmin = false;
+          try {
+            const { data: roleRes } = await supabase
+              .from("user_roles")
+              .select("role")
+              .eq("user_id", user.id)
+              .eq("role", "admin")
+              .maybeSingle();
+            isAdmin = !!roleRes;
+          } catch {
+            isAdmin = false;
+          }
+          if (isAdmin) {
+            resolvedViewer = "admin";
+          } else {
+            const role = (user as any).role;
+            if (role === "owner") resolvedViewer = "proprio";
+            else resolvedViewer = "gardien"; // sitter, both, ou défaut
+          }
+        }
+      }
+      setViewerType(resolvedViewer);
+
       setLoading(false);
-      // analytics
-      trackEvent("sit_view", { source: "/annonces/:id", metadata: { sit_id: id } });
+      // analytics — un seul tir grâce au ref (anti double-fire StrictMode)
+      if (!sitViewFired.current) {
+        sitViewFired.current = true;
+        try {
+          trackEvent("sit_view", {
+            source: "/annonces/:id",
+            metadata: { sit_id: id, viewer_type: resolvedViewer },
+          });
+        } catch {}
+      }
     };
     load();
   }, [id, user]);
@@ -279,10 +321,13 @@ const PublicSitDetail = () => {
             title={sit.title || `Garde à ${owner?.city || "France"}`}
             city={owner?.city}
             source="public_sit_detail"
+            viewerType={viewerType}
           />
         </div>
 
         {/* CTA */}
+        {/* TODO: à ajouter quand le bouton contact direct sera implémenté → sit_contact_clicked
+            (aujourd'hui sit_apply_clicked couvre l'intent contact via candidature) */}
         <div className="fixed bottom-0 left-0 right-0 bg-card border-t border-border p-4 z-40 pb-20 md:pb-4">
           <div className="max-w-4xl mx-auto">
             {!(sit as any).accepting_applications ? (
@@ -292,7 +337,14 @@ const PublicSitDetail = () => {
             ) : !isAuthenticated ? (
               <Link
                 to="/register?role=sitter"
-                onClick={() => trackEvent("sit_apply_blocked", { source: "public_sit_detail", metadata: { sit_id: sit.id, reason: "not_authenticated" } })}
+                onClick={() => {
+                  try {
+                    trackEvent("sit_apply_blocked", {
+                      source: "public_sit_detail",
+                      metadata: { sit_id: sit.id, reason: "not_authenticated", viewer_type: viewerType },
+                    });
+                  } catch {}
+                }}
               >
                 <Button className="w-full h-12 text-base font-semibold">
                   S'inscrire pour postuler — gratuit →
@@ -301,7 +353,14 @@ const PublicSitDetail = () => {
             ) : !hasAccess ? (
               <Link
                 to="/mon-abonnement"
-                onClick={() => trackEvent("sit_apply_blocked", { source: "public_sit_detail", metadata: { sit_id: sit.id, reason: "no_subscription" } })}
+                onClick={() => {
+                  try {
+                    trackEvent("sit_apply_blocked", {
+                      source: "public_sit_detail",
+                      metadata: { sit_id: sit.id, reason: "no_subscription", viewer_type: viewerType },
+                    });
+                  } catch {}
+                }}
               >
                 <Button className="w-full h-12 text-base font-semibold">
                   S'abonner pour postuler
@@ -315,7 +374,12 @@ const PublicSitDetail = () => {
               <Button
                 className="w-full h-12 text-base font-semibold"
                 onClick={() => {
-                  trackEvent("sit_apply_clicked", { source: "public_sit_detail", metadata: { sit_id: sit.id } });
+                  try {
+                    trackEvent("sit_apply_clicked", {
+                      source: "public_sit_detail",
+                      metadata: { sit_id: sit.id, viewer_type: viewerType },
+                    });
+                  } catch {}
                   setApplyOpen(true);
                 }}
               >

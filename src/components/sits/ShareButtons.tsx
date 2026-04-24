@@ -12,7 +12,11 @@ interface ShareButtonsProps {
   source?: string;
   /** Compact icon-only variant for hero/secondary placements */
   compact?: boolean;
+  /** Type d'utilisateur consultant la fiche (pour le funnel analytics) */
+  viewerType?: "anonymous" | "gardien" | "proprio" | "owner_of_sit" | "admin";
 }
+
+type ShareChannel = "facebook" | "whatsapp" | "x" | "email" | "copy" | "native";
 
 /**
  * Boutons de partage social pour une annonce de garde.
@@ -23,7 +27,7 @@ interface ShareButtonsProps {
  * - Copier le lien
  * - Web Share API native (mobile)
  */
-const ShareButtons = ({ sitId, title, city, source = "sit_detail", compact = false }: ShareButtonsProps) => {
+const ShareButtons = ({ sitId, title, city, source = "sit_detail", compact = false, viewerType = "anonymous" }: ShareButtonsProps) => {
   const { toast } = useToast();
   const [copied, setCopied] = useState(false);
 
@@ -35,11 +39,15 @@ const ShareButtons = ({ sitId, title, city, source = "sit_detail", compact = fal
   const cityPart = city ? ` à ${city}` : "";
   const shareText = `${title}${cityPart} — une annonce de garde sur Guardiens. Quelqu'un du coin pour veiller sur la maison ?`;
 
-  const track = (channel: string) => {
-    trackEvent("cta_click", {
-      source,
-      metadata: { action: "sit_share", channel, sit_id: sitId },
-    });
+  const track = (channel: ShareChannel) => {
+    try {
+      trackEvent("sit_share_clicked", {
+        source,
+        metadata: { sit_id: sitId, channel, viewer_type: viewerType },
+      });
+    } catch {
+      // silencieux
+    }
   };
 
   const handleFacebook = () => {
@@ -68,7 +76,7 @@ const ShareButtons = ({ sitId, title, city, source = "sit_detail", compact = fal
   };
 
   const handleCopy = async () => {
-    track("copy_link");
+    track("copy");
     try {
       await navigator.clipboard.writeText(shareUrl);
       setCopied(true);
@@ -80,7 +88,7 @@ const ShareButtons = ({ sitId, title, city, source = "sit_detail", compact = fal
   };
 
   const handleNative = async () => {
-    track("native_share");
+    track("native");
     try {
       await navigator.share({ title, text: shareText, url: shareUrl });
     } catch {
