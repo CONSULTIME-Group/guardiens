@@ -71,6 +71,9 @@ const concurrency = concurrencyArg
   ? Math.max(1, parseInt(concurrencyArg.slice("--concurrency=".length), 10) || 3)
   : 3;
 const strictMode = cliArgs.includes("--strict");
+// --check : mode CI — toute divergence (même les warnings "pré-rendu") fait
+// échouer le processus (exit 1). Utile pour bloquer le build.
+const checkMode = cliArgs.includes("--check");
 const includeDynamic = cliArgs.includes("--include-dynamic");
 const dynamicLimitArg = cliArgs.find((a) => a.startsWith("--dynamic-limit="));
 const dynamicLimit = dynamicLimitArg
