@@ -396,6 +396,9 @@ const SitDetail = () => {
         </div>
       )}
 
+      {/* Historique des modifications de dates — visible au propriétaire */}
+      {isOwner && <SitDateHistory sitId={sit.id} />}
+
       {/* Post-confirmation checklist */}
       {sit && user && (sit.status === "confirmed" || sit.status === "in_progress") && (
         <div className="mb-8">
