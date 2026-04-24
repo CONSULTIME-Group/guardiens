@@ -18,7 +18,7 @@
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Loader2, Check, RotateCcw } from "lucide-react";
+import { Loader2, Check, RotateCcw, X, ArrowLeft } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -67,6 +67,8 @@ export function HeroPickerModal({
   const { toast } = useToast();
   const [saving, setSaving] = useState(false);
   const [filter, setFilter] = useState<CategoryFilter>("all");
+  /** Index en cours de prévisualisation plein écran (null = pas d'aperçu). */
+  const [previewIndex, setPreviewIndex] = useState<number | null>(null);
 
   // Construit la liste indexée filtrée selon la catégorie sélectionnée.
   const items = HERO_BANK.map((src, idx) => ({
@@ -107,6 +109,7 @@ export function HeroPickerModal({
       });
 
       onSaved(newIndex);
+      setPreviewIndex(null);
       onClose();
     } catch (err) {
       console.error("Erreur sauvegarde hero_image_index:", err);
@@ -119,6 +122,17 @@ export function HeroPickerModal({
       setSaving(false);
     }
   }
+
+  // Données de l'image en aperçu (si applicable).
+  const previewItem =
+    previewIndex !== null
+      ? {
+          idx: previewIndex,
+          src: HERO_BANK[previewIndex],
+          mobileSrc: getMobileByIndex(previewIndex),
+          category: getCategoryByBankIndex(previewIndex),
+        }
+      : null;
 
   return (
     <Dialog open={open} onOpenChange={(v) => !v && !saving && onClose()}>
@@ -186,7 +200,7 @@ export function HeroPickerModal({
                 <button
                   key={it.idx}
                   type="button"
-                  onClick={() => handleSelect(it.idx)}
+                  onClick={() => setPreviewIndex(it.idx)}
                   disabled={saving}
                   className={`relative block w-full text-left rounded-md overflow-hidden border-2 transition-all bg-[#FBF6EC] focus:outline-none focus:ring-2 focus:ring-primary disabled:opacity-50 disabled:cursor-wait ${
                     isSelected
@@ -238,6 +252,101 @@ export function HeroPickerModal({
             </p>
           )}
         </div>
+
+        {/* Aperçu plein écran avant confirmation */}
+        {previewItem && (
+          <div
+            className="absolute inset-0 z-50 flex flex-col bg-[#1a1a1a]/95 backdrop-blur-sm animate-in fade-in"
+            role="dialog"
+            aria-label="Aperçu de l'illustration"
+          >
+            {/* Barre supérieure : retour + n° + fermer */}
+            <div className="flex items-center justify-between px-4 py-3 border-b border-white/10">
+              <button
+                type="button"
+                onClick={() => !saving && setPreviewIndex(null)}
+                disabled={saving}
+                className="inline-flex items-center gap-1.5 text-white/80 hover:text-white text-sm px-2 py-1 rounded transition-colors disabled:opacity-50"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                Retour à la galerie
+              </button>
+
+              <span
+                className="text-white/90 text-sm font-bold tracking-wide select-none"
+                style={{
+                  fontFamily:
+                    '"Caveat", "Kalam", "Bradley Hand", "Segoe Print", "Comic Sans MS", cursive',
+                }}
+              >
+                n° {String(previewItem.idx + 1).padStart(3, "0")} —{" "}
+                {CATEGORY_LABELS[previewItem.category]}
+              </span>
+
+              <button
+                type="button"
+                onClick={() => !saving && setPreviewIndex(null)}
+                disabled={saving}
+                aria-label="Fermer l'aperçu"
+                className="text-white/80 hover:text-white p-1 rounded transition-colors disabled:opacity-50"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Image en grand, ratio préservé */}
+            <div className="flex-1 flex items-center justify-center p-4 overflow-hidden">
+              <div
+                className="relative w-full max-w-5xl bg-[#FBF6EC] rounded-md shadow-2xl overflow-hidden"
+                style={{ aspectRatio: "1536 / 544" }}
+              >
+                <img
+                  src={previewItem.src}
+                  srcSet={
+                    previewItem.mobileSrc
+                      ? `${previewItem.mobileSrc} 768w, ${previewItem.src} 1536w`
+                      : undefined
+                  }
+                  sizes="(max-width: 1024px) 100vw, 1024px"
+                  alt={`Aperçu illustration ${previewItem.idx + 1}`}
+                  className="w-full h-full object-contain"
+                />
+              </div>
+            </div>
+
+            {/* Barre d'actions de confirmation */}
+            <div className="px-4 py-3 border-t border-white/10 flex items-center justify-end gap-2">
+              <Button
+                variant="outline"
+                onClick={() => setPreviewIndex(null)}
+                disabled={saving}
+              >
+                Annuler
+              </Button>
+              <Button
+                onClick={() => handleSelect(previewItem.idx)}
+                disabled={saving || currentIndex === previewItem.idx}
+              >
+                {saving ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-1.5 animate-spin" />
+                    Enregistrement…
+                  </>
+                ) : currentIndex === previewItem.idx ? (
+                  <>
+                    <Check className="w-4 h-4 mr-1.5" />
+                    Déjà sélectionnée
+                  </>
+                ) : (
+                  <>
+                    <Check className="w-4 h-4 mr-1.5" />
+                    Confirmer ce choix
+                  </>
+                )}
+              </Button>
+            </div>
+          </div>
+        )}
       </DialogContent>
     </Dialog>
   );
