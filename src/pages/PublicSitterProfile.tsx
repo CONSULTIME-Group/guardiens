@@ -680,237 +680,195 @@ export default function PublicSitterProfile() {
         <div className="absolute inset-0 z-0 pointer-events-none">
           <svg viewBox="0 0 1200 280" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice" className="w-full h-full">
             <defs>
-              {/* Fond papier crème légèrement dégradé */}
+              {/* Papier crème dégradé */}
               <linearGradient id="paper" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#EDE7D8"/>
-                <stop offset="60%" stopColor="#F0EDE6"/>
+                <stop offset="0%" stopColor="#E9E2D1"/>
+                <stop offset="55%" stopColor="#F0EDE6"/>
                 <stop offset="100%" stopColor="#F4F1EA"/>
               </linearGradient>
               <linearGradient id="fadeBottom" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="55%" stopColor="#F0EDE6" stopOpacity="0"/>
                 <stop offset="100%" stopColor="#FAF9F6" stopOpacity="1"/>
               </linearGradient>
-              {/* Hachures parallèles serrées — pour ombres ciel et collines */}
-              <pattern id="hatch" patternUnits="userSpaceOnUse" width="6" height="6" patternTransform="rotate(45)">
-                <line x1="0" y1="0" x2="0" y2="6" stroke="#1F4D38" strokeWidth="0.6"/>
+              {/* Hachures fines parallèles */}
+              <pattern id="hatchFine" patternUnits="userSpaceOnUse" width="5" height="5" patternTransform="rotate(45)">
+                <line x1="0" y1="0" x2="0" y2="5" stroke="#1F4D38" strokeWidth="0.45"/>
               </pattern>
-              <pattern id="hatchDense" patternUnits="userSpaceOnUse" width="4" height="4" patternTransform="rotate(45)">
-                <line x1="0" y1="0" x2="0" y2="4" stroke="#1F4D38" strokeWidth="0.7"/>
+              <pattern id="hatchV" patternUnits="userSpaceOnUse" width="6" height="6">
+                <line x1="0" y1="0" x2="0" y2="6" stroke="#1F4D38" strokeWidth="0.5"/>
               </pattern>
-              {/* Hachures croisées pour ombres profondes */}
-              <pattern id="crossHatch" patternUnits="userSpaceOnUse" width="6" height="6">
-                <line x1="0" y1="0" x2="6" y2="6" stroke="#1F4D38" strokeWidth="0.6"/>
-                <line x1="6" y1="0" x2="0" y2="6" stroke="#1F4D38" strokeWidth="0.6"/>
+              {/* Pointillé botanique */}
+              <pattern id="stipple" patternUnits="userSpaceOnUse" width="9" height="9">
+                <circle cx="2" cy="3" r="0.55" fill="#1F4D38"/>
+                <circle cx="6" cy="6" r="0.45" fill="#1F4D38"/>
+                <circle cx="4" cy="7" r="0.35" fill="#1F4D38"/>
               </pattern>
-              {/* Pointillé pour textures douces (feuillages) */}
-              <pattern id="stipple" patternUnits="userSpaceOnUse" width="8" height="8">
-                <circle cx="2" cy="2" r="0.6" fill="#1F4D38"/>
-                <circle cx="6" cy="5" r="0.5" fill="#1F4D38"/>
-                <circle cx="3" cy="6" r="0.4" fill="#1F4D38"/>
-              </pattern>
+              {/* Halo solaire */}
+              <radialGradient id="sunHalo" cx="50%" cy="50%" r="50%">
+                <stop offset="0%" stopColor="#1F4D38" stopOpacity="0.10"/>
+                <stop offset="70%" stopColor="#1F4D38" stopOpacity="0.02"/>
+                <stop offset="100%" stopColor="#1F4D38" stopOpacity="0"/>
+              </radialGradient>
             </defs>
 
             {/* Papier */}
             <rect width="1200" height="280" fill="url(#paper)"/>
 
-            {/* Hachures de ciel (très légères, en haut à gauche) */}
-            <g opacity="0.10">
-              <rect x="0" y="0" width="600" height="120" fill="url(#hatch)"/>
+            {/* === SOLEIL ÉDITORIAL — astre central, en haut à droite === */}
+            <circle cx="980" cy="78" r="170" fill="url(#sunHalo)"/>
+            <g stroke="#1F4D38" fill="none" opacity="0.85">
+              <circle cx="980" cy="78" r="46" strokeWidth="1.1"/>
+              <circle cx="980" cy="78" r="38" strokeWidth="0.5" opacity="0.6"/>
+              {/* Rayons longs et fins, espacés — gravure ancienne */}
+              {Array.from({ length: 16 }).map((_, i) => {
+                const a = (i * Math.PI * 2) / 16;
+                const x1 = 980 + Math.cos(a) * 56;
+                const y1 = 78 + Math.sin(a) * 56;
+                const x2 = 980 + Math.cos(a) * (i % 2 === 0 ? 96 : 78);
+                const y2 = 78 + Math.sin(a) * (i % 2 === 0 ? 96 : 78);
+                return <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} strokeWidth="0.7"/>;
+              })}
             </g>
 
-            {/* Soleil — cercle au trait avec rayons */}
-            <g stroke="#1F4D38" strokeWidth="1" fill="none" opacity="0.55">
-              <circle cx="220" cy="68" r="30"/>
-              <circle cx="220" cy="68" r="22" strokeWidth="0.6"/>
-              {/* Petits rayons */}
-              <line x1="220" y1="22" x2="220" y2="32"/>
-              <line x1="220" y1="104" x2="220" y2="114"/>
-              <line x1="174" y1="68" x2="184" y2="68"/>
-              <line x1="256" y1="68" x2="266" y2="68"/>
-              <line x1="187" y1="35" x2="194" y2="42"/>
-              <line x1="246" y1="42" x2="253" y2="35"/>
-              <line x1="187" y1="101" x2="194" y2="94"/>
-              <line x1="246" y1="94" x2="253" y2="101"/>
+            {/* === LIGNE D'HORIZON SOBRE — abstraite, pas narrative === */}
+            <g stroke="#1F4D38" fill="none" opacity="0.55">
+              <path d="M0,200 C220,188 420,196 620,190 S980,196 1200,188" strokeWidth="0.9"/>
+              <path d="M0,212 C260,202 480,210 700,204 S1020,210 1200,202" strokeWidth="0.6" opacity="0.55"/>
             </g>
 
-            {/* Oiseaux — traits libres */}
-            <g stroke="#1F4D38" strokeWidth="1.2" fill="none" strokeLinecap="round" opacity="0.7">
-              <path d="M380 88 q8 -8 16 0 q8 -8 16 0"/>
-              <path d="M460 70 q6 -6 12 0 q6 -6 12 0"/>
-              <path d="M820 100 q7 -7 14 0 q7 -7 14 0"/>
-              <path d="M1020 60 q5 -5 10 0 q5 -5 10 0"/>
+            {/* === GRAND ARBRE — emblème central, racines & ramure === */}
+            <g transform="translate(600, 230)">
+              {/* Tronc — trait double */}
+              <path d="M-6,0 C-7,-40 -4,-80 -3,-130 M6,0 C7,-40 4,-80 3,-130" stroke="#1F4D38" strokeWidth="1.4" fill="none"/>
+              {/* Branches principales */}
+              <g stroke="#1F4D38" strokeWidth="1.1" fill="none" strokeLinecap="round">
+                <path d="M-3,-110 C-30,-118 -52,-128 -72,-148"/>
+                <path d="M3,-115 C28,-122 52,-132 76,-150"/>
+                <path d="M-2,-130 C-18,-148 -28,-164 -38,-180"/>
+                <path d="M2,-130 C18,-150 30,-164 42,-184"/>
+                <path d="M0,-128 C-4,-152 -2,-176 0,-198"/>
+                {/* Ramures secondaires */}
+                <path d="M-72,-148 q-10,-4 -18,2"/>
+                <path d="M76,-150 q10,-4 18,2"/>
+                <path d="M-38,-180 q-6,-6 -12,-6"/>
+                <path d="M42,-184 q6,-6 12,-6"/>
+              </g>
+              {/* Couronne — pointillé botanique, deux masses */}
+              <ellipse cx="0" cy="-178" rx="98" ry="46" fill="url(#stipple)" opacity="0.65"/>
+              <ellipse cx="-44" cy="-160" rx="46" ry="28" fill="url(#stipple)" opacity="0.55"/>
+              <ellipse cx="46" cy="-162" rx="44" ry="26" fill="url(#stipple)" opacity="0.55"/>
+              {/* Contour ramure — irrégulier, gravure */}
+              <path d="M-96,-178 C-92,-210 -50,-228 0,-224 C50,-228 92,-210 96,-178 C96,-156 50,-138 0,-138 C-50,-138 -96,-156 -96,-178 Z"
+                    stroke="#1F4D38" strokeWidth="0.8" fill="none" opacity="0.7"/>
+              {/* Racines visibles — symbolisent l'ancrage local */}
+              <g stroke="#1F4D38" strokeWidth="0.9" fill="none" strokeLinecap="round" opacity="0.75">
+                <path d="M-6,-2 C-22,4 -38,6 -54,4"/>
+                <path d="M6,-2 C22,4 38,6 54,4"/>
+                <path d="M-3,0 C-12,8 -22,12 -32,12"/>
+                <path d="M3,0 C12,8 22,12 32,12"/>
+              </g>
             </g>
 
-            {/* Nuages — au trait, hachurés */}
-            <g stroke="#1F4D38" strokeWidth="0.9" fill="none" opacity="0.45">
-              <path d="M460 58 q12 -14 30 -8 q14 -10 28 0 q10 -2 14 6 q-4 6 -14 6 l-44 0 q-12 0 -14 -4 z"/>
-              <path d="M880 78 q14 -16 34 -8 q16 -10 30 2 q10 -2 14 6 q-6 6 -16 6 l-48 0 q-12 0 -14 -6 z"/>
-            </g>
-            {/* Hachures intérieures nuages */}
-            <g opacity="0.18">
-              <path d="M460 58 q12 -14 30 -8 q14 -10 28 0 q10 -2 14 6 q-4 6 -14 6 l-44 0 q-12 0 -14 -4 z" fill="url(#hatch)"/>
-            </g>
-
-            {/* Collines lointaines — silhouettes au trait, hachures internes douces */}
-            <path d="M0,180 Q150,148 320,168 T640,158 T960,172 T1200,162 L1200,210 L0,210 Z" fill="url(#hatch)" opacity="0.18"/>
-            <path d="M0,180 Q150,148 320,168 T640,158 T960,172 T1200,162" stroke="#1F4D38" strokeWidth="1" fill="none" opacity="0.55"/>
-
-            {/* Collines moyennes */}
-            <path d="M0,205 Q200,175 420,193 T780,184 T1200,194 L1200,228 L0,228 Z" fill="url(#hatchDense)" opacity="0.20"/>
-            <path d="M0,205 Q200,175 420,193 T780,184 T1200,194" stroke="#1F4D38" strokeWidth="1.1" fill="none" opacity="0.7"/>
-
-            {/* === Maison gauche === */}
-            <g stroke="#1F4D38" strokeWidth="1.2" fill="none">
-              <rect x="80" y="170" width="62" height="42" fill="#F0EDE6"/>
-              <polygon points="74,170 148,170 111,138" fill="#F0EDE6"/>
-              <rect x="102" y="186" width="14" height="26"/>
-              <rect x="88" y="178" width="12" height="12"/>
-              <line x1="94" y1="178" x2="94" y2="190"/>
-              <line x1="88" y1="184" x2="100" y2="184"/>
-              <rect x="124" y="178" width="12" height="12"/>
-              <line x1="130" y1="178" x2="130" y2="190"/>
-              <line x1="124" y1="184" x2="136" y2="184"/>
-              <rect x="128" y="142" width="6" height="14"/>
-            </g>
-            {/* Hachures toit maison gauche */}
-            <polygon points="74,170 148,170 111,138" fill="url(#hatchDense)" opacity="0.45"/>
-            <polygon points="74,170 148,170 111,138" stroke="#1F4D38" strokeWidth="1.2" fill="none"/>
-
-            {/* Arbre près maison gauche — feuillage pointillé */}
-            <g>
-              <line x1="175" y1="178" x2="175" y2="212" stroke="#1F4D38" strokeWidth="1.4"/>
-              <ellipse cx="175" cy="166" rx="22" ry="26" fill="url(#stipple)" opacity="0.55"/>
-              <ellipse cx="175" cy="166" rx="22" ry="26" stroke="#1F4D38" strokeWidth="1" fill="none"/>
+            {/* === ROSE DES VENTS / ÉTOILE — petit emblème à gauche === */}
+            <g transform="translate(200, 110)" stroke="#1F4D38" fill="none" opacity="0.7">
+              <circle r="34" strokeWidth="0.8"/>
+              <circle r="26" strokeWidth="0.4" opacity="0.6"/>
+              {/* 8 pointes */}
+              <polygon points="0,-46 4,-6 0,0 -4,-6" fill="#1F4D38" stroke="none"/>
+              <polygon points="0,46 4,6 0,0 -4,6" fill="#1F4D38" stroke="none"/>
+              <polygon points="-46,0 -6,-4 0,0 -6,4" fill="#1F4D38" stroke="none"/>
+              <polygon points="46,0 6,-4 0,0 6,4" fill="#1F4D38" stroke="none"/>
+              <g opacity="0.7">
+                <polygon points="-32,-32 -4,-2 0,0 -2,-4" fill="#1F4D38" stroke="none"/>
+                <polygon points="32,-32 4,-2 0,0 2,-4" fill="#1F4D38" stroke="none"/>
+                <polygon points="-32,32 -4,2 0,0 -2,4" fill="#1F4D38" stroke="none"/>
+                <polygon points="32,32 4,2 0,0 2,4" fill="#1F4D38" stroke="none"/>
+              </g>
+              {/* Graduations */}
+              {Array.from({ length: 24 }).map((_, i) => {
+                const a = (i * Math.PI * 2) / 24;
+                const r1 = 34, r2 = i % 3 === 0 ? 40 : 37;
+                return <line key={i} x1={Math.cos(a)*r1} y1={Math.sin(a)*r1} x2={Math.cos(a)*r2} y2={Math.sin(a)*r2} strokeWidth="0.5"/>;
+              })}
             </g>
 
-            {/* === Maison centrale (église/grande maison) === */}
-            <g stroke="#1F4D38" strokeWidth="1.3" fill="none">
-              <rect x="540" y="158" width="84" height="56" fill="#F0EDE6"/>
-              <polygon points="534,158 630,158 582,118" fill="#F0EDE6"/>
-              <rect x="568" y="186" width="22" height="28"/>
-              <line x1="579" y1="186" x2="579" y2="214"/>
-              <rect x="548" y="170" width="16" height="14"/>
-              <line x1="556" y1="170" x2="556" y2="184"/>
-              <line x1="548" y1="177" x2="564" y2="177"/>
-              <rect x="600" y="170" width="16" height="14"/>
-              <line x1="608" y1="170" x2="608" y2="184"/>
-              <line x1="600" y1="177" x2="616" y2="177"/>
-              <rect x="604" y="120" width="8" height="18"/>
-            </g>
-            <polygon points="534,158 630,158 582,118" fill="url(#hatchDense)" opacity="0.5"/>
-            <polygon points="534,158 630,158 582,118" stroke="#1F4D38" strokeWidth="1.3" fill="none"/>
-            {/* Fumée — volutes au trait */}
-            <g stroke="#1F4D38" strokeWidth="0.9" fill="none" opacity="0.55">
-              <path d="M608 116 q-6 -6 0 -12 q6 -6 0 -12"/>
-              <path d="M610 90 q-5 -5 0 -10 q5 -5 0 -10"/>
+            {/* === MAISON STYLISÉE — silhouette épurée, gauche-bas === */}
+            <g transform="translate(120, 200)" stroke="#1F4D38" strokeWidth="1.1" fill="none" opacity="0.85">
+              <path d="M0,40 L0,8 L24,-12 L48,8 L48,40 Z" fill="#F0EDE6"/>
+              <path d="M0,8 L24,-12 L48,8" />
+              <rect x="18" y="20" width="12" height="20"/>
+              <line x1="24" y1="20" x2="24" y2="40" strokeWidth="0.6"/>
+              {/* Fenêtre ronde — œil-de-bœuf, accent éditorial */}
+              <circle cx="24" cy="2" r="3.5" strokeWidth="0.8"/>
+              {/* Hachures toit */}
+              <path d="M0,8 L24,-12 L48,8 Z" fill="url(#hatchFine)" opacity="0.55"/>
             </g>
 
-            {/* Arbres autour */}
-            <g>
-              <line x1="491" y1="172" x2="491" y2="214" stroke="#1F4D38" strokeWidth="1.5"/>
-              <ellipse cx="491" cy="158" rx="26" ry="30" fill="url(#stipple)" opacity="0.6"/>
-              <ellipse cx="491" cy="158" rx="26" ry="30" stroke="#1F4D38" strokeWidth="1.1" fill="none"/>
-            </g>
-            <g>
-              <line x1="653" y1="180" x2="653" y2="214" stroke="#1F4D38" strokeWidth="1.3"/>
-              <ellipse cx="653" cy="166" rx="20" ry="23" fill="url(#stipple)" opacity="0.55"/>
-              <ellipse cx="653" cy="166" rx="20" ry="23" stroke="#1F4D38" strokeWidth="1" fill="none"/>
-            </g>
-
-            {/* === Maison droite === */}
-            <g stroke="#1F4D38" strokeWidth="1.2" fill="none">
-              <rect x="980" y="172" width="58" height="42" fill="#F0EDE6"/>
-              <polygon points="974,172 1044,172 1009,142" fill="#F0EDE6"/>
-              <rect x="999" y="190" width="14" height="24"/>
-              <rect x="986" y="180" width="12" height="12"/>
-              <line x1="992" y1="180" x2="992" y2="192"/>
-              <line x1="986" y1="186" x2="998" y2="186"/>
-              <rect x="1020" y="180" width="12" height="12"/>
-              <line x1="1026" y1="180" x2="1026" y2="192"/>
-              <line x1="1020" y1="186" x2="1032" y2="186"/>
-            </g>
-            <polygon points="974,172 1044,172 1009,142" fill="url(#hatchDense)" opacity="0.45"/>
-            <polygon points="974,172 1044,172 1009,142" stroke="#1F4D38" strokeWidth="1.2" fill="none"/>
-            <g>
-              <line x1="1061" y1="174" x2="1061" y2="214" stroke="#1F4D38" strokeWidth="1.4"/>
-              <ellipse cx="1061" cy="160" rx="24" ry="28" fill="url(#stipple)" opacity="0.55"/>
-              <ellipse cx="1061" cy="160" rx="24" ry="28" stroke="#1F4D38" strokeWidth="1" fill="none"/>
+            {/* === BRANCHE FLEURIE — coin haut gauche, accent botanique === */}
+            <g stroke="#1F4D38" fill="none" opacity="0.6" strokeLinecap="round">
+              <path d="M-10,30 C40,40 90,52 140,72" strokeWidth="0.9"/>
+              <g strokeWidth="0.7">
+                <path d="M30,42 q-6,-10 -16,-10"/>
+                <path d="M52,48 q6,-12 18,-10"/>
+                <path d="M78,58 q-6,-12 -18,-12"/>
+                <path d="M104,66 q6,-12 18,-10"/>
+              </g>
+              {/* Petites fleurs — 5 pétales stylisées */}
+              <g fill="#1F4D38" stroke="none" opacity="0.8">
+                <circle cx="14" cy="32" r="1.6"/>
+                <circle cx="70" cy="38" r="1.6"/>
+                <circle cx="60" cy="46" r="1.4"/>
+                <circle cx="122" cy="56" r="1.6"/>
+              </g>
             </g>
 
-            {/* Colline proche — hachurée croisée pour densité */}
-            <path d="M0,228 Q180,210 380,222 T720,218 T1100,225 T1200,220 L1200,280 L0,280 Z" fill="url(#crossHatch)" opacity="0.22"/>
-            <path d="M0,228 Q180,210 380,222 T720,218 T1100,225 T1200,220" stroke="#1F4D38" strokeWidth="1.3" fill="none" opacity="0.85"/>
-
-            {/* Prairie — hachures verticales très douces */}
-            <g opacity="0.16">
-              <rect x="0" y="240" width="1200" height="40" fill="url(#hatchDense)"/>
+            {/* === CHIEN — silhouette ÉPURÉE en contour, posé près de l'arbre === */}
+            <g transform="translate(470, 232)" stroke="#1F4D38" strokeWidth="1.2" fill="#F0EDE6" strokeLinecap="round" strokeLinejoin="round">
+              {/* Corps profilé */}
+              <path d="M0,18 C2,8 14,2 28,2 C40,2 50,4 56,6 C60,4 64,2 68,2 C72,2 74,4 74,8 L74,14 C74,18 72,20 68,20 L62,20 L60,28 L52,28 L52,22 L20,22 L18,30 L10,30 L10,22 C4,22 0,20 0,18 Z"/>
+              {/* Tête */}
+              <path d="M68,2 C72,-2 76,-4 78,-2 C80,0 80,4 78,6" fill="none"/>
+              {/* Œil & truffe */}
+              <circle cx="72" cy="6" r="0.9" fill="#1F4D38" stroke="none"/>
+              <circle cx="78" cy="9" r="1" fill="#1F4D38" stroke="none"/>
+              {/* Queue */}
+              <path d="M0,18 C-6,14 -12,12 -16,16" fill="none"/>
+            </g>
+            {/* Hachures volume chien — très légères */}
+            <g transform="translate(470, 232)" stroke="#1F4D38" strokeWidth="0.4" opacity="0.45">
+              <line x1="20" y1="10" x2="28" y2="18"/>
+              <line x1="28" y1="10" x2="36" y2="18"/>
+              <line x1="36" y1="10" x2="44" y2="18"/>
+              <line x1="44" y1="10" x2="52" y2="18"/>
             </g>
 
-            {/* Touffes d'herbe au trait */}
-            <g stroke="#1F4D38" strokeWidth="0.9" fill="none" opacity="0.7" strokeLinecap="round">
-              <path d="M50 262 l2 -10 M55 262 l1 -8 M60 262 l3 -11"/>
-              <path d="M250 262 l2 -9 M256 262 l2 -7 M262 262 l3 -10"/>
-              <path d="M530 264 l2 -8 M536 264 l2 -10 M542 264 l2 -7"/>
-              <path d="M880 264 l2 -10 M886 264 l3 -8 M892 264 l2 -11"/>
-              <path d="M1080 263 l2 -8 M1086 263 l3 -10 M1092 263 l2 -7"/>
-            </g>
-
-            {/* Petits buissons — trait + pointillés */}
-            <g>
-              <ellipse cx="120" cy="246" rx="32" ry="9" fill="url(#stipple)" opacity="0.5"/>
-              <path d="M88,246 q32,-18 64,0" stroke="#1F4D38" strokeWidth="1" fill="none" opacity="0.7"/>
-              <ellipse cx="350" cy="248" rx="44" ry="10" fill="url(#stipple)" opacity="0.5"/>
-              <path d="M306,248 q44,-20 88,0" stroke="#1F4D38" strokeWidth="1" fill="none" opacity="0.7"/>
-              <ellipse cx="780" cy="250" rx="58" ry="11" fill="url(#stipple)" opacity="0.5"/>
-              <path d="M722,250 q58,-22 116,0" stroke="#1F4D38" strokeWidth="1" fill="none" opacity="0.7"/>
-              <ellipse cx="1130" cy="247" rx="48" ry="10" fill="url(#stipple)" opacity="0.5"/>
-              <path d="M1082,247 q48,-20 96,0" stroke="#1F4D38" strokeWidth="1" fill="none" opacity="0.7"/>
-            </g>
-
-            {/* === Chien — silhouette à la plume === */}
-            <g stroke="#1F4D38" strokeWidth="1.3" fill="#F0EDE6" transform="translate(330, 220)">
-              <ellipse cx="34" cy="20" rx="32" ry="13"/>
-              <circle cx="62" cy="13" r="11"/>
-              <ellipse cx="69" cy="8" rx="5" ry="9" transform="rotate(15,69,8)"/>
-              <path d="M2,18 Q-14,9 -10,2" fill="none" strokeLinecap="round"/>
-              <rect x="10" y="30" width="5" height="14" rx="2"/>
-              <rect x="20" y="30" width="5" height="12" rx="2"/>
-              <rect x="38" y="30" width="5" height="14" rx="2"/>
-              <rect x="48" y="30" width="5" height="12" rx="2"/>
-              <circle cx="65" cy="11" r="1.2" fill="#1F4D38" stroke="none"/>
-              <ellipse cx="71" cy="17" rx="2" ry="1.6" fill="#1F4D38" stroke="none"/>
-            </g>
-            {/* Hachures de volume sur le chien */}
-            <g stroke="#1F4D38" strokeWidth="0.5" opacity="0.55" transform="translate(330, 220)">
-              <line x1="14" y1="22" x2="22" y2="30"/>
-              <line x1="20" y1="22" x2="28" y2="30"/>
-              <line x1="26" y1="22" x2="34" y2="30"/>
-              <line x1="32" y1="22" x2="40" y2="30"/>
-              <line x1="38" y1="22" x2="46" y2="30"/>
-              <line x1="44" y1="22" x2="52" y2="30"/>
-            </g>
-
-            {/* === Chat — silhouette à la plume === */}
-            <g stroke="#1F4D38" strokeWidth="1.3" fill="#F0EDE6" transform="translate(820, 222)">
-              <ellipse cx="18" cy="22" rx="16" ry="17"/>
-              <circle cx="18" cy="7" r="11"/>
-              <polygon points="9,1 5,-9 16,-3"/>
-              <polygon points="27,1 31,-9 20,-3"/>
-              <path d="M34,30 Q48,22 44,12" fill="none" strokeLinecap="round"/>
-              <ellipse cx="13" cy="7" rx="1.6" ry="2.2" fill="#1F4D38" stroke="none"/>
-              <ellipse cx="23" cy="7" rx="1.6" ry="2.2" fill="#1F4D38" stroke="none"/>
-              <path d="M16 12 q2 1.5 4 0" fill="none" strokeWidth="0.8"/>
+            {/* === CHAT — silhouette ÉPURÉE, assise, à droite de l'arbre === */}
+            <g transform="translate(730, 218)" stroke="#1F4D38" strokeWidth="1.2" fill="#F0EDE6" strokeLinecap="round" strokeLinejoin="round">
+              {/* Corps assis — courbe continue */}
+              <path d="M0,42 C0,20 10,12 22,12 C22,4 24,-4 28,-8 C30,-4 30,2 28,8 C32,4 36,2 38,4 C40,6 38,10 34,12 C42,14 46,22 46,32 L46,42 Z"/>
+              {/* Queue enroulée devant */}
+              <path d="M46,42 C56,42 60,36 56,30 C52,26 46,28 44,32" fill="none"/>
+              {/* Œil & nez */}
+              <circle cx="26" cy="4" r="0.9" fill="#1F4D38" stroke="none"/>
+              <circle cx="32" cy="6" r="0.9" fill="#1F4D38" stroke="none"/>
+              <path d="M28 9 q1.5 1 3 0" fill="none" strokeWidth="0.6"/>
               {/* Moustaches */}
-              <line x1="6" y1="11" x2="-2" y2="10" strokeWidth="0.5"/>
-              <line x1="6" y1="13" x2="-2" y2="14" strokeWidth="0.5"/>
-              <line x1="30" y1="11" x2="38" y2="10" strokeWidth="0.5"/>
-              <line x1="30" y1="13" x2="38" y2="14" strokeWidth="0.5"/>
+              <line x1="22" y1="9" x2="16" y2="8" strokeWidth="0.4"/>
+              <line x1="22" y1="11" x2="16" y2="12" strokeWidth="0.4"/>
+              <line x1="36" y1="9" x2="42" y2="8" strokeWidth="0.4"/>
+              <line x1="36" y1="11" x2="42" y2="12" strokeWidth="0.4"/>
             </g>
-            <g stroke="#1F4D38" strokeWidth="0.5" opacity="0.5" transform="translate(820, 222)">
-              <line x1="6" y1="20" x2="14" y2="32"/>
-              <line x1="12" y1="20" x2="20" y2="32"/>
-              <line x1="18" y1="20" x2="26" y2="32"/>
-              <line x1="24" y1="20" x2="32" y2="32"/>
+
+            {/* === SOL — ligne épurée, hachures verticales très légères === */}
+            <g opacity="0.10">
+              <rect x="0" y="248" width="1200" height="32" fill="url(#hatchV)"/>
+            </g>
+            <line x1="0" y1="248" x2="1200" y2="248" stroke="#1F4D38" strokeWidth="0.5" opacity="0.4"/>
+
+            {/* === Petit emblème — étoile filante / hirondelle stylisée, en l'air === */}
+            <g stroke="#1F4D38" strokeWidth="0.9" fill="none" opacity="0.55" strokeLinecap="round">
+              <path d="M340 60 q10 -8 22 0 q10 -8 22 0"/>
+              <path d="M860 130 q8 -6 16 0 q8 -6 16 0"/>
             </g>
 
             {/* Fade bas vers la page */}
