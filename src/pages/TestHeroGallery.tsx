@@ -12,7 +12,7 @@
  * NB : page hors-app, non liée dans la navigation. Accès direct par URL.
  */
 
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   HERO_BANK,
   HERO_ANCHORS,
@@ -22,6 +22,7 @@ import {
 } from "@/lib/heroBank";
 import { getMobileByIndex } from "@/lib/heroBankMobile";
 import { Helmet } from "react-helmet-async";
+import { X, ZoomIn, ZoomOut, RotateCcw, ChevronLeft, ChevronRight } from "lucide-react";
 
 type ViewMode = "rendered" | "raw";
 type AnchorFilter = "all" | HeroAnchor;
