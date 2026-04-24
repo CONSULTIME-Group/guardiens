@@ -209,6 +209,11 @@ export const dynamicRoutes: DynamicRouteConfig[] = [
     changeFreq: "monthly",
     dynamicTitle: true,
     dynamicDescription: true,
+    // Instance représentative : l'article "nouveaux-tarifs-2026" (contenu stable, pilier SEO)
+    sampleParams: { slug: "nouveaux-tarifs-2026" },
+    // Titre et description réels servis par la page (vérifiés strictement)
+    sampleTitle: "Tarifs Guardiens 2026 — 6,99€/mois, 7 jours offerts | Guardiens",
+    sampleDescription: "Les tarifs officiels Guardiens pour 2026 : 6,99€/mois pour les gardiens avec 7 jours offerts, gratuit pour les propriétaires. Sans commission ni frais cachés.",
   },
   {
     pathPattern: "/house-sitting/:city",
@@ -219,6 +224,8 @@ export const dynamicRoutes: DynamicRouteConfig[] = [
     changeFreq: "weekly",
     dynamicTitle: true, // les pages géo ont un titre SEO précis, non strict
     dynamicDescription: true,
+    // Instance représentative : Lyon (silo géo phare)
+    sampleParams: { city: "lyon" },
   },
 ];
 
