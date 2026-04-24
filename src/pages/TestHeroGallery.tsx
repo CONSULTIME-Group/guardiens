@@ -22,7 +22,7 @@ import {
 } from "@/lib/heroBank";
 import { getMobileByIndex } from "@/lib/heroBankMobile";
 import { Helmet } from "react-helmet-async";
-import { X, ZoomIn, ZoomOut, RotateCcw, ChevronLeft, ChevronRight } from "lucide-react";
+import { X, ZoomIn, ZoomOut, RotateCcw, ChevronLeft, ChevronRight, Maximize2 } from "lucide-react";
 
 type ViewMode = "rendered" | "raw";
 type AnchorFilter = "all" | HeroAnchor;
@@ -53,6 +53,7 @@ export default function TestHeroGallery() {
   const [anchorFilter, setAnchorFilter] = useState<AnchorFilter>("all");
   const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>("all");
   const [zoomIdx, setZoomIdx] = useState<number | null>(null);
+  const [pageIdx, setPageIdx] = useState<number | null>(null);
 
   // On construit une fois la liste indexée (idx 0-based + numéro fichier 1-based).
   const items = useMemo(
@@ -188,6 +189,7 @@ export default function TestHeroGallery() {
               item={it}
               viewMode={viewMode}
               onZoom={() => setZoomIdx(i)}
+              onOpenPage={() => setPageIdx(i)}
             />
           ))}
         </div>
@@ -214,6 +216,22 @@ export default function TestHeroGallery() {
           onClose={() => setZoomIdx(null)}
         />
       )}
+
+      {/* ── Modal "pleine page" : carnet entier + détails du profil hero ── */}
+      {pageIdx !== null && filtered[pageIdx] && (
+        <HeroFullPageModal
+          item={filtered[pageIdx]}
+          hasPrev={pageIdx > 0}
+          hasNext={pageIdx < filtered.length - 1}
+          onPrev={() => setPageIdx((i) => (i !== null && i > 0 ? i - 1 : i))}
+          onNext={() =>
+            setPageIdx((i) =>
+              i !== null && i < filtered.length - 1 ? i + 1 : i
+            )
+          }
+          onClose={() => setPageIdx(null)}
+        />
+      )}
     </div>
   );
 }
@@ -233,10 +251,12 @@ function HeroCard({
   item,
   viewMode,
   onZoom,
+  onOpenPage,
 }: {
   item: Item;
   viewMode: ViewMode;
   onZoom: () => void;
+  onOpenPage: () => void;
 }) {
   // Reproduit la logique de PublicSitterProfile (desktop, simplifié) pour le mode
   // "rendered". Sinon on affiche l'image en object-contain pour voir tout le cadre.
@@ -319,9 +339,20 @@ function HeroCard({
         >
           {CATEGORY_LABELS[item.category]}
         </span>
-        <span className="text-muted-foreground font-mono text-[10px] truncate">
-          hero-{String(item.fileNum).padStart(2, "0")}
-        </span>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={onOpenPage}
+            title="Ouvrir en pleine page (carnet entier + détails)"
+            className="inline-flex items-center gap-1 px-2 py-0.5 rounded border border-border text-[10px] font-medium hover:bg-muted transition-colors"
+          >
+            <Maximize2 className="w-3 h-3" />
+            Pleine page
+          </button>
+          <span className="text-muted-foreground font-mono text-[10px] truncate">
+            hero-{String(item.fileNum).padStart(2, "0")}
+          </span>
+        </div>
       </div>
 
       {/* Liseré ambré de tranche le long du bord déchiré (effet épaisseur de papier) */}
@@ -717,6 +748,256 @@ function HeroZoomModal({
           molette / pinch · drag · double-clic · ← → · Échap
         </div>
       </div>
+    </div>
+  );
+}
+
+/* ───────────────────── Modal "Pleine page" : carnet entier + détails ───────────────────── */
+
+/**
+ * HeroFullPageModal
+ * --------------------------------------------------------------------------
+ * Mode contemplatif : présente le carnet hero dans son intégralité (object-contain
+ * sur fond papier #FBF6EC, spirales et marges pleinement visibles), accompagné
+ * d'un panneau "détails du profil" (catégorie, ancrage, dimensions, sources
+ * desktop/mobile, hashing déterministe).
+ *
+ * Différence avec HeroZoomModal : pas de pinch/zoom interactif → on privilégie
+ * la lisibilité globale et la lecture des métadonnées plutôt que l'inspection
+ * pixel par pixel.
+ *
+ * Layout responsive : mobile = carnet en haut + détails en dessous (scroll
+ * vertical) ; desktop ≥ lg = carnet à gauche (2/3) + panneau à droite (1/3).
+ */
+function HeroFullPageModal({
+  item,
+  hasPrev,
+  hasNext,
+  onPrev,
+  onNext,
+  onClose,
+}: {
+  item: Item;
+  hasPrev: boolean;
+  hasNext: boolean;
+  onPrev: () => void;
+  onNext: () => void;
+  onClose: () => void;
+}) {
+  // Raccourcis clavier (← → / Échap)
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+      else if (e.key === "ArrowLeft" && hasPrev) onPrev();
+      else if (e.key === "ArrowRight" && hasNext) onNext();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [hasPrev, hasNext, onPrev, onNext, onClose]);
+
+  // Bloque le scroll du body
+  useEffect(() => {
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, []);
+
+  // Détails dérivés
+  const fileBaseName = item.src.split("/").pop() ?? item.src;
+  const mobileFileName = item.mobileSrc?.split("/").pop();
+
+  return (
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-label={`Pleine page hero #${item.fileNum}`}
+      className="fixed inset-0 z-50 bg-black/90 flex flex-col animate-fade-in"
+    >
+      {/* Toolbar */}
+      <div className="flex items-center justify-between gap-2 px-4 py-2 text-white text-sm border-b border-white/10 bg-black/60">
+        <div className="flex items-center gap-3 min-w-0">
+          <Maximize2 className="w-4 h-4 opacity-70" />
+          <span className="font-medium">Pleine page</span>
+          <span className="text-xs text-white/60 truncate">
+            #{String(item.fileNum).padStart(3, "0")} ·{" "}
+            {CATEGORY_LABELS[item.category]}
+          </span>
+        </div>
+        <button
+          type="button"
+          onClick={onClose}
+          className="p-2 hover:bg-white/10 rounded transition-colors"
+          title="Fermer (Échap)"
+        >
+          <X className="w-5 h-5" />
+        </button>
+      </div>
+
+      {/* Contenu — scrollable sur mobile */}
+      <div className="flex-1 overflow-auto">
+        <div className="min-h-full flex flex-col lg:flex-row">
+          {/* ─── Carnet entier ─── */}
+          <div className="relative flex-1 lg:basis-2/3 flex items-center justify-center p-3 sm:p-6 lg:p-10">
+            {/* Conteneur "page de carnet" : ratio natif + ombre carnet réutilisée */}
+            <div
+              className="relative w-full max-w-5xl notebook-card notebook-card-paper"
+              style={{ aspectRatio: "1536 / 544" }}
+            >
+              <img
+                src={item.src}
+                srcSet={
+                  item.mobileSrc ? `${item.mobileSrc} 768w, ${item.src} 1536w` : undefined
+                }
+                sizes="(max-width: 1023px) 100vw, 66vw"
+                alt={`Hero #${item.fileNum} — vue pleine page`}
+                width={1536}
+                height={544}
+                loading="eager"
+                decoding="async"
+                className="w-full h-full object-contain object-center"
+              />
+
+              {/* Annotation manuscrite réutilisée */}
+              <span
+                className="absolute top-2 left-3 text-[18px] sm:text-[22px] font-bold tracking-wide select-none pointer-events-none"
+                style={{
+                  fontFamily:
+                    '"Caveat", "Kalam", "Bradley Hand", "Segoe Print", "Comic Sans MS", cursive',
+                  color: "hsl(220 70% 35%)",
+                  textShadow: "0 1px 0 hsl(0 0% 100% / 0.6)",
+                  transform: "rotate(-4deg)",
+                  transformOrigin: "left center",
+                }}
+              >
+                n° {String(item.fileNum).padStart(3, "0")}
+                <span className="opacity-60 font-normal"> / {HERO_BANK.length}</span>
+              </span>
+
+              {/* Liseré papier réutilisé */}
+              <span className="notebook-card-edge" aria-hidden="true" />
+            </div>
+
+            {/* Navigation ←/→ */}
+            {hasPrev && (
+              <button
+                type="button"
+                onClick={onPrev}
+                className="absolute left-2 top-1/2 -translate-y-1/2 p-3 bg-black/50 hover:bg-black/70 text-white rounded-full transition-colors"
+                title="Image précédente (←)"
+              >
+                <ChevronLeft className="w-5 h-5" />
+              </button>
+            )}
+            {hasNext && (
+              <button
+                type="button"
+                onClick={onNext}
+                className="absolute right-2 top-1/2 -translate-y-1/2 p-3 bg-black/50 hover:bg-black/70 text-white rounded-full transition-colors"
+                title="Image suivante (→)"
+              >
+                <ChevronRight className="w-5 h-5" />
+              </button>
+            )}
+          </div>
+
+          {/* ─── Panneau détails ─── */}
+          <aside className="lg:basis-1/3 lg:max-w-md w-full bg-card text-foreground border-t lg:border-t-0 lg:border-l border-border p-4 sm:p-6 space-y-5 overflow-y-auto">
+            <header>
+              <p className="text-xs uppercase tracking-wider text-muted-foreground mb-1">
+                Détails du profil hero
+              </p>
+              <h2 className="text-2xl font-heading font-bold">
+                Hero n°{String(item.fileNum).padStart(3, "0")}
+              </h2>
+              <p className="text-sm text-muted-foreground mt-1">
+                {item.fileNum} sur {HERO_BANK.length} illustrations de la banque
+              </p>
+            </header>
+
+            <DetailRow label="Catégorie">
+              <span
+                className={`inline-flex px-2 py-0.5 rounded-full border text-xs font-medium ${CATEGORY_COLORS[item.category]}`}
+              >
+                {CATEGORY_LABELS[item.category]}
+              </span>
+            </DetailRow>
+
+            <DetailRow label="Ancrage horizontal">
+              <span
+                className={`inline-flex px-2 py-0.5 rounded text-xs font-mono border ${
+                  item.anchor === "left"
+                    ? "bg-blue-100 text-blue-900 border-blue-200"
+                    : item.anchor === "right"
+                      ? "bg-purple-100 text-purple-900 border-purple-200"
+                      : "bg-slate-100 text-slate-700 border-slate-200"
+                }`}
+              >
+                {ANCHOR_LABELS[item.anchor]}
+              </span>
+              <p className="text-xs text-muted-foreground mt-1">
+                Détermine `object-position` quand le hero est rogné en mode
+                rendu réel sur la page profil.
+              </p>
+            </DetailRow>
+
+            <DetailRow label="Dimensions natives">
+              <span className="font-mono text-xs">1536 × 544 px</span>
+              <p className="text-xs text-muted-foreground mt-1">
+                Ratio ≈ 2.82 — pleine largeur du hero profil.
+              </p>
+            </DetailRow>
+
+            <DetailRow label="Source desktop">
+              <code className="block text-[11px] font-mono break-all bg-muted px-2 py-1 rounded">
+                {fileBaseName}
+              </code>
+            </DetailRow>
+
+            {mobileFileName && (
+              <DetailRow label="Source mobile (≤768w)">
+                <code className="block text-[11px] font-mono break-all bg-muted px-2 py-1 rounded">
+                  {mobileFileName}
+                </code>
+              </DetailRow>
+            )}
+
+            <DetailRow label="Index banque">
+              <span className="font-mono text-xs">
+                HERO_BANK[{item.idx}] · fichier hero-{String(item.fileNum).padStart(2, "0")}
+              </span>
+              <p className="text-xs text-muted-foreground mt-1">
+                Sélection déterministe par hash du `sitterId` + pondération
+                des catégories configurée dans l'admin.
+              </p>
+            </DetailRow>
+
+            <div className="pt-2 border-t border-border">
+              <p className="text-[11px] text-muted-foreground">
+                Astuce : ← / → pour naviguer · Échap pour fermer.
+              </p>
+            </div>
+          </aside>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function DetailRow({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div>
+      <p className="text-[11px] uppercase tracking-wider text-muted-foreground mb-1.5 font-semibold">
+        {label}
+      </p>
+      <div>{children}</div>
     </div>
   );
 }
