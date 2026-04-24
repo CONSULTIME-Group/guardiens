@@ -260,7 +260,7 @@ export function useSitterProfile() {
       await supabase.rpc("calculate_profile_completion", { p_user_id: user.id });
       // Re-fetch fresh data from DB so the sidebar / live missing-fields reflect the
       // committed state immediately (no manual refresh needed after toggling switches).
-      await fetchData();
+      await fetchData({ silent: true });
       await refreshCompletion();
       await refreshProfile();
 
