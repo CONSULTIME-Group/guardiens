@@ -251,6 +251,10 @@ export function useSitterProfile() {
         }
       }
 
+      // Recompute canonical completion server-side and refresh local state
+      await supabase.rpc("calculate_profile_completion", { p_user_id: user.id });
+      await refreshCompletion();
+
       toast({ title: "Sauvegardé", description: "Vos modifications ont été enregistrées." });
       return true;
     } catch (error) {
@@ -261,7 +265,7 @@ export function useSitterProfile() {
     } finally {
       setSaving(false);
     }
-  }, [user, data, sitterProfileId, computeCompletion, toast]);
+  }, [user, data, sitterProfileId, refreshCompletion, toast]);
 
   const addPastAnimal = useCallback(async (animal: PastAnimal) => {
     if (!sitterProfileId) return;
