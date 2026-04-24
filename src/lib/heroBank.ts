@@ -177,81 +177,114 @@ function hashStringToIndex(input: string, modulo: number): number {
  * Résultat : variété thématique réelle (~40% animaux, ~20% maison, ~20% entraide,
  * ~20% village/partage) tout en gardant la stabilité par sitter.id.
  */
-type HeroCategory = {
-  name: "animals" | "home" | "mutual_aid" | "village";
-  range: readonly [number, number]; // [start, endExclusive] dans HERO_BANK (1-indexé inclus → 0-indexé via -1)
-  weight: number;
+export type HeroCategoryName = "animals" | "home" | "mutual_aid" | "village";
+
+type HeroCategoryRange = {
+  name: HeroCategoryName;
+  range: readonly [number, number]; // [start, endExclusive] (1-indexé fichiers)
 };
 
-const HERO_CATEGORIES: readonly HeroCategory[] = [
-  { name: "animals",    range: [1, 71],   weight: 40 }, // hero-01 → hero-70
-  { name: "home",       range: [71, 81],  weight: 20 }, // hero-71 → hero-80
-  { name: "mutual_aid", range: [81, 91],  weight: 20 }, // hero-81 → hero-90
-  { name: "village",    range: [91, 101], weight: 20 }, // hero-91 → hero-100
+/**
+ * Plages de fichiers par catégorie (figées : reflètent l'organisation physique
+ * de la banque). Les POIDS de répartition sont eux séparés et configurables
+ * dynamiquement (table `hero_weights`, par défaut 40/20/20/20).
+ */
+const HERO_CATEGORY_RANGES: readonly HeroCategoryRange[] = [
+  { name: "animals",    range: [1, 71]   }, // hero-01 → hero-70
+  { name: "home",       range: [71, 81]  }, // hero-71 → hero-80
+  { name: "mutual_aid", range: [81, 91]  }, // hero-81 → hero-90
+  { name: "village",    range: [91, 101] }, // hero-91 → hero-100
 ];
 
-const HERO_WEIGHT_TOTAL = HERO_CATEGORIES.reduce((s, c) => s + c.weight, 0);
+/**
+ * Poids cibles de répartition entre catégories.
+ * Modifiables à chaud via la table `hero_weights` (admin only).
+ */
+export type HeroWeights = Record<HeroCategoryName, number>;
+
+export const DEFAULT_HERO_WEIGHTS: HeroWeights = {
+  animals: 40,
+  home: 20,
+  mutual_aid: 20,
+  village: 20,
+};
 
 /**
  * Sélection stratifiée déterministe :
- *   - Premier hash sur 100 → choisit la catégorie selon les poids
- *   - Second hash (sel différent) → choisit une image dans la catégorie
- * Les deux hashs partent du même sitterId mais avec des seeds distinctes,
- * sinon on aurait une corrélation parasite catégorie↔index intra-catégorie.
+ *   1. Premier hash → choisit la catégorie selon les poids fournis
+ *   2. Second hash (sel différent) → choisit une image dans la catégorie
+ *
+ * `weights` est paramétrable pour permettre l'ajustement à chaud sans rebuild.
+ * Un poids à 0 exclut totalement la catégorie. Si tous les poids sont 0 (cas
+ * pathologique bloqué par le CHECK SQL), on retombe sur les valeurs par défaut.
  */
-function getIndex(sitterId?: string | null): number {
+function getIndex(
+  sitterId?: string | null,
+  weights: HeroWeights = DEFAULT_HERO_WEIGHTS
+): number {
   if (!sitterId) return 0;
 
-  // 1. Choix de catégorie via un hash sur 100, mappé selon les poids cumulés.
-  const catTicket = hashStringToIndex(sitterId, HERO_WEIGHT_TOTAL);
+  const total =
+    weights.animals + weights.home + weights.mutual_aid + weights.village;
+  const safeWeights = total > 0 ? weights : DEFAULT_HERO_WEIGHTS;
+  const safeTotal =
+    safeWeights.animals +
+    safeWeights.home +
+    safeWeights.mutual_aid +
+    safeWeights.village;
+
+  // 1. Choix de catégorie via hash sur la somme des poids.
+  const catTicket = hashStringToIndex(sitterId, safeTotal);
   let cumulative = 0;
-  let chosen: HeroCategory = HERO_CATEGORIES[0];
-  for (const cat of HERO_CATEGORIES) {
-    cumulative += cat.weight;
+  let chosen: HeroCategoryRange = HERO_CATEGORY_RANGES[0];
+  for (const cat of HERO_CATEGORY_RANGES) {
+    cumulative += safeWeights[cat.name];
     if (catTicket < cumulative) {
       chosen = cat;
       break;
     }
   }
 
-  // 2. Choix d'image dans la catégorie via un hash décorrélé (préfixe de seed).
+  // 2. Choix d'image dans la catégorie via un hash décorrélé.
   const [start, endExclusive] = chosen.range;
-  const span = endExclusive - start; // ex: animals → 70, home → 10
+  const span = endExclusive - start;
   const intra = hashStringToIndex(`hero-img:${sitterId}`, span);
-  // start est 1-indexé pour matcher les noms de fichiers ; HERO_BANK est 0-indexé.
   return start - 1 + intra;
 }
 
 /**
  * Retourne l'URL de l'image hero assignée à un gardien donné.
- * - Stable : un même ID donne toujours la même image.
- * - Bien réparti : hash FNV-1a sur les 100 images.
+ * - Stable : un même ID donne toujours la même image (à poids constants).
+ * - `weights` permet d'utiliser une configuration personnalisée (admin live).
  *
  * Fallback : si pas d'ID, on prend la première image.
  */
-export function getSitterHeroImage(sitterId?: string | null): string {
-  return HERO_BANK[getIndex(sitterId)];
+export function getSitterHeroImage(
+  sitterId?: string | null,
+  weights?: HeroWeights
+): string {
+  return HERO_BANK[getIndex(sitterId, weights)];
 }
 
 /**
  * Retourne l'ancrage horizontal optimal pour l'image assignée à ce gardien.
- * À utiliser pour piloter `object-position` afin que les bords sales
- * (spirales/texte parasite) soient rognés en priorité par object-cover.
  */
-export function getSitterHeroAnchor(sitterId?: string | null): HeroAnchor {
-  return HERO_ANCHORS[getIndex(sitterId)] ?? "center";
+export function getSitterHeroAnchor(
+  sitterId?: string | null,
+  weights?: HeroWeights
+): HeroAnchor {
+  return HERO_ANCHORS[getIndex(sitterId, weights)] ?? "center";
 }
 
 /**
  * Retourne les deux URLs (desktop JPG 1536×544 + mobile WebP 768×272) à utiliser
- * conjointement dans un `<img srcset>` pour servir la bonne résolution selon
- * la largeur d'écran. Le navigateur ne télécharge qu'une seule des deux.
+ * conjointement dans un `<img srcset>`.
  */
-export function getSitterHeroSources(sitterId?: string | null): {
-  desktop: string;
-  mobile: string;
-} {
-  const idx = getIndex(sitterId);
+export function getSitterHeroSources(
+  sitterId?: string | null,
+  weights?: HeroWeights
+): { desktop: string; mobile: string } {
+  const idx = getIndex(sitterId, weights);
   return {
     desktop: HERO_BANK[idx],
     mobile: getMobileByIndex(idx) ?? HERO_BANK[idx],
@@ -262,11 +295,9 @@ export function getSitterHeroSources(sitterId?: string | null): {
  * Retourne le nom de catégorie d'une image donnée (par index 0-based de HERO_BANK).
  * Utile pour la galerie de QA et les statistiques.
  */
-export type HeroCategoryName = "animals" | "home" | "mutual_aid" | "village";
 export function getCategoryByBankIndex(idx: number): HeroCategoryName {
-  // idx 0-based → numéro de fichier 1-based.
   const fileNum = idx + 1;
-  for (const cat of HERO_CATEGORIES) {
+  for (const cat of HERO_CATEGORY_RANGES) {
     if (fileNum >= cat.range[0] && fileNum < cat.range[1]) return cat.name;
   }
   return "animals";
