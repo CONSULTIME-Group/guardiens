@@ -812,7 +812,9 @@ export default function PublicSitterProfile() {
             </div>
           </div>
         </div>
-      </div>
+          </div>
+        );
+      })()}
 
       {/* ── BARRE D'ONGLETS — visible si ≥ 2 onglets ── */}
       {availableTabs > 1 && (
