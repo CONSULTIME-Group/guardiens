@@ -730,13 +730,12 @@ export default function PublicSitterProfile() {
               })}
             </g>
 
-            {/* === LIGNE D'HORIZON SOBRE — abstraite, pas narrative === */}
-            <g stroke="#1F4D38" fill="none" opacity="0.55">
-              <path d="M0,200 C220,188 420,196 620,190 S980,196 1200,188" strokeWidth="0.9"/>
-              <path d="M0,212 C260,202 480,210 700,204 S1020,210 1200,202" strokeWidth="0.6" opacity="0.55"/>
+            {/* === LIGNE D'HORIZON SOBRE — un seul trait === */}
+            <g stroke="#1F4D38" fill="none" opacity="0.45">
+              <path d="M0,210 C260,200 480,208 700,202 S1020,208 1200,200" strokeWidth="0.7"/>
             </g>
 
-            {/* === GRAND ARBRE — emblème central, racines & ramure === */}
+            {/* === GRAND ARBRE — emblème central === */}
             <g transform="translate(600, 230)">
               {/* Tronc — trait double */}
               <path d="M-6,0 C-7,-40 -4,-80 -3,-130 M6,0 C7,-40 4,-80 3,-130" stroke="#1F4D38" strokeWidth="1.4" fill="none"/>
@@ -747,20 +746,18 @@ export default function PublicSitterProfile() {
                 <path d="M-2,-130 C-18,-148 -28,-164 -38,-180"/>
                 <path d="M2,-130 C18,-150 30,-164 42,-184"/>
                 <path d="M0,-128 C-4,-152 -2,-176 0,-198"/>
-                {/* Ramures secondaires */}
                 <path d="M-72,-148 q-10,-4 -18,2"/>
                 <path d="M76,-150 q10,-4 18,2"/>
                 <path d="M-38,-180 q-6,-6 -12,-6"/>
                 <path d="M42,-184 q6,-6 12,-6"/>
               </g>
-              {/* Couronne — pointillé botanique, deux masses */}
+              {/* Couronne — pointillé botanique */}
               <ellipse cx="0" cy="-178" rx="98" ry="46" fill="url(#stipple)" opacity="0.65"/>
               <ellipse cx="-44" cy="-160" rx="46" ry="28" fill="url(#stipple)" opacity="0.55"/>
               <ellipse cx="46" cy="-162" rx="44" ry="26" fill="url(#stipple)" opacity="0.55"/>
-              {/* Contour ramure — irrégulier, gravure */}
               <path d="M-96,-178 C-92,-210 -50,-228 0,-224 C50,-228 92,-210 96,-178 C96,-156 50,-138 0,-138 C-50,-138 -96,-156 -96,-178 Z"
                     stroke="#1F4D38" strokeWidth="0.8" fill="none" opacity="0.7"/>
-              {/* Racines visibles — symbolisent l'ancrage local */}
+              {/* Racines — ancrage local */}
               <g stroke="#1F4D38" strokeWidth="0.9" fill="none" strokeLinecap="round" opacity="0.75">
                 <path d="M-6,-2 C-22,4 -38,6 -54,4"/>
                 <path d="M6,-2 C22,4 38,6 54,4"/>
@@ -769,107 +766,41 @@ export default function PublicSitterProfile() {
               </g>
             </g>
 
-            {/* === ROSE DES VENTS / ÉTOILE — petit emblème à gauche === */}
-            <g transform="translate(200, 110)" stroke="#1F4D38" fill="none" opacity="0.7">
-              <circle r="34" strokeWidth="0.8"/>
-              <circle r="26" strokeWidth="0.4" opacity="0.6"/>
-              {/* 8 pointes */}
-              <polygon points="0,-46 4,-6 0,0 -4,-6" fill="#1F4D38" stroke="none"/>
-              <polygon points="0,46 4,6 0,0 -4,6" fill="#1F4D38" stroke="none"/>
-              <polygon points="-46,0 -6,-4 0,0 -6,4" fill="#1F4D38" stroke="none"/>
-              <polygon points="46,0 6,-4 0,0 6,4" fill="#1F4D38" stroke="none"/>
+            {/* === ROSE DES VENTS — emblème à gauche === */}
+            <g transform="translate(200, 130)" stroke="#1F4D38" fill="none" opacity="0.7">
+              <circle r="38" strokeWidth="0.8"/>
+              <circle r="28" strokeWidth="0.4" opacity="0.6"/>
+              <polygon points="0,-50 4,-6 0,0 -4,-6" fill="#1F4D38" stroke="none"/>
+              <polygon points="0,50 4,6 0,0 -4,6" fill="#1F4D38" stroke="none"/>
+              <polygon points="-50,0 -6,-4 0,0 -6,4" fill="#1F4D38" stroke="none"/>
+              <polygon points="50,0 6,-4 0,0 6,4" fill="#1F4D38" stroke="none"/>
               <g opacity="0.7">
-                <polygon points="-32,-32 -4,-2 0,0 -2,-4" fill="#1F4D38" stroke="none"/>
-                <polygon points="32,-32 4,-2 0,0 2,-4" fill="#1F4D38" stroke="none"/>
-                <polygon points="-32,32 -4,2 0,0 -2,4" fill="#1F4D38" stroke="none"/>
-                <polygon points="32,32 4,2 0,0 2,4" fill="#1F4D38" stroke="none"/>
+                <polygon points="-34,-34 -4,-2 0,0 -2,-4" fill="#1F4D38" stroke="none"/>
+                <polygon points="34,-34 4,-2 0,0 2,-4" fill="#1F4D38" stroke="none"/>
+                <polygon points="-34,34 -4,2 0,0 -2,4" fill="#1F4D38" stroke="none"/>
+                <polygon points="34,34 4,2 0,0 2,4" fill="#1F4D38" stroke="none"/>
               </g>
-              {/* Graduations */}
               {Array.from({ length: 24 }).map((_, i) => {
                 const a = (i * Math.PI * 2) / 24;
-                const r1 = 34, r2 = i % 3 === 0 ? 40 : 37;
+                const r1 = 38, r2 = i % 3 === 0 ? 44 : 41;
                 return <line key={i} x1={Math.cos(a)*r1} y1={Math.sin(a)*r1} x2={Math.cos(a)*r2} y2={Math.sin(a)*r2} strokeWidth="0.5"/>;
               })}
             </g>
 
-            {/* === MAISON STYLISÉE — silhouette épurée, gauche-bas === */}
-            <g transform="translate(120, 200)" stroke="#1F4D38" strokeWidth="1.1" fill="none" opacity="0.85">
-              <path d="M0,40 L0,8 L24,-12 L48,8 L48,40 Z" fill="#F0EDE6"/>
-              <path d="M0,8 L24,-12 L48,8" />
-              <rect x="18" y="20" width="12" height="20"/>
-              <line x1="24" y1="20" x2="24" y2="40" strokeWidth="0.6"/>
-              {/* Fenêtre ronde — œil-de-bœuf, accent éditorial */}
-              <circle cx="24" cy="2" r="3.5" strokeWidth="0.8"/>
-              {/* Hachures toit */}
-              <path d="M0,8 L24,-12 L48,8 Z" fill="url(#hatchFine)" opacity="0.55"/>
+            {/* === CHIEN — pictogramme ultra-simplifié, aplat === */}
+            <g transform="translate(460, 240)" fill="#1F4D38" opacity="0.85">
+              {/* Corps + tête + queue en une silhouette continue */}
+              <path d="M0,8 C0,2 6,0 12,0 L40,0 C44,-2 48,-4 50,-2 C52,0 51,3 48,5 L46,8 L46,14 L42,14 L40,18 L8,18 L6,14 L2,14 Z M-2,4 C-8,2 -12,4 -10,8 Z"/>
             </g>
 
-            {/* === BRANCHE FLEURIE — coin haut gauche, accent botanique === */}
-            <g stroke="#1F4D38" fill="none" opacity="0.6" strokeLinecap="round">
-              <path d="M-10,30 C40,40 90,52 140,72" strokeWidth="0.9"/>
-              <g strokeWidth="0.7">
-                <path d="M30,42 q-6,-10 -16,-10"/>
-                <path d="M52,48 q6,-12 18,-10"/>
-                <path d="M78,58 q-6,-12 -18,-12"/>
-                <path d="M104,66 q6,-12 18,-10"/>
-              </g>
-              {/* Petites fleurs — 5 pétales stylisées */}
-              <g fill="#1F4D38" stroke="none" opacity="0.8">
-                <circle cx="14" cy="32" r="1.6"/>
-                <circle cx="70" cy="38" r="1.6"/>
-                <circle cx="60" cy="46" r="1.4"/>
-                <circle cx="122" cy="56" r="1.6"/>
-              </g>
+            {/* === CHAT — pictogramme ultra-simplifié, aplat === */}
+            <g transform="translate(740, 226)" fill="#1F4D38" opacity="0.85">
+              {/* Silhouette assise : oreilles + tête + corps + queue enroulée */}
+              <path d="M4,32 C4,18 10,12 18,12 L18,8 L14,2 L22,6 L28,6 L36,2 L32,8 L32,12 C40,12 44,18 44,32 Z M44,32 C52,32 54,28 50,24 C48,22 44,24 42,26 Z"/>
             </g>
 
-            {/* === CHIEN — silhouette ÉPURÉE en contour, posé près de l'arbre === */}
-            <g transform="translate(470, 232)" stroke="#1F4D38" strokeWidth="1.2" fill="#F0EDE6" strokeLinecap="round" strokeLinejoin="round">
-              {/* Corps profilé */}
-              <path d="M0,18 C2,8 14,2 28,2 C40,2 50,4 56,6 C60,4 64,2 68,2 C72,2 74,4 74,8 L74,14 C74,18 72,20 68,20 L62,20 L60,28 L52,28 L52,22 L20,22 L18,30 L10,30 L10,22 C4,22 0,20 0,18 Z"/>
-              {/* Tête */}
-              <path d="M68,2 C72,-2 76,-4 78,-2 C80,0 80,4 78,6" fill="none"/>
-              {/* Œil & truffe */}
-              <circle cx="72" cy="6" r="0.9" fill="#1F4D38" stroke="none"/>
-              <circle cx="78" cy="9" r="1" fill="#1F4D38" stroke="none"/>
-              {/* Queue */}
-              <path d="M0,18 C-6,14 -12,12 -16,16" fill="none"/>
-            </g>
-            {/* Hachures volume chien — très légères */}
-            <g transform="translate(470, 232)" stroke="#1F4D38" strokeWidth="0.4" opacity="0.45">
-              <line x1="20" y1="10" x2="28" y2="18"/>
-              <line x1="28" y1="10" x2="36" y2="18"/>
-              <line x1="36" y1="10" x2="44" y2="18"/>
-              <line x1="44" y1="10" x2="52" y2="18"/>
-            </g>
-
-            {/* === CHAT — silhouette ÉPURÉE, assise, à droite de l'arbre === */}
-            <g transform="translate(730, 218)" stroke="#1F4D38" strokeWidth="1.2" fill="#F0EDE6" strokeLinecap="round" strokeLinejoin="round">
-              {/* Corps assis — courbe continue */}
-              <path d="M0,42 C0,20 10,12 22,12 C22,4 24,-4 28,-8 C30,-4 30,2 28,8 C32,4 36,2 38,4 C40,6 38,10 34,12 C42,14 46,22 46,32 L46,42 Z"/>
-              {/* Queue enroulée devant */}
-              <path d="M46,42 C56,42 60,36 56,30 C52,26 46,28 44,32" fill="none"/>
-              {/* Œil & nez */}
-              <circle cx="26" cy="4" r="0.9" fill="#1F4D38" stroke="none"/>
-              <circle cx="32" cy="6" r="0.9" fill="#1F4D38" stroke="none"/>
-              <path d="M28 9 q1.5 1 3 0" fill="none" strokeWidth="0.6"/>
-              {/* Moustaches */}
-              <line x1="22" y1="9" x2="16" y2="8" strokeWidth="0.4"/>
-              <line x1="22" y1="11" x2="16" y2="12" strokeWidth="0.4"/>
-              <line x1="36" y1="9" x2="42" y2="8" strokeWidth="0.4"/>
-              <line x1="36" y1="11" x2="42" y2="12" strokeWidth="0.4"/>
-            </g>
-
-            {/* === SOL — ligne épurée, hachures verticales très légères === */}
-            <g opacity="0.10">
-              <rect x="0" y="248" width="1200" height="32" fill="url(#hatchV)"/>
-            </g>
-            <line x1="0" y1="248" x2="1200" y2="248" stroke="#1F4D38" strokeWidth="0.5" opacity="0.4"/>
-
-            {/* === Petit emblème — étoile filante / hirondelle stylisée, en l'air === */}
-            <g stroke="#1F4D38" strokeWidth="0.9" fill="none" opacity="0.55" strokeLinecap="round">
-              <path d="M340 60 q10 -8 22 0 q10 -8 22 0"/>
-              <path d="M860 130 q8 -6 16 0 q8 -6 16 0"/>
-            </g>
+            {/* === SOL — ligne épurée === */}
+            <line x1="0" y1="258" x2="1200" y2="258" stroke="#1F4D38" strokeWidth="0.5" opacity="0.35"/>
 
             {/* Fade bas vers la page */}
             <rect width="1200" height="280" fill="url(#fadeBottom)"/>
