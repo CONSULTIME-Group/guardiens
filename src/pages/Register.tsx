@@ -229,28 +229,51 @@ const Register = () => {
         }
       }
 
+      // Si la création de profil a échoué côté trigger, on n'émet PAS signup_completed
+      // (signup_failed stage='profile_creation' a déjà été émis plus haut)
+      if (newUserId && !profileExists) {
+        if (result?.session) {
+          navigate("/dashboard");
+        } else {
+          setStep("confirmation");
+        }
+        return;
+      }
+
       // If auto-confirm enabled (session already created), go straight to dashboard
       if (result?.session) {
-        trackEventWithUserId(result?.user?.id ?? null, "signup_completed", {
-          source: "/register",
-          metadata: { role: selectedRole, auto_confirmed: true },
-        });
+        try {
+          trackEventWithUserId(newUserId, "signup_completed", {
+            source: "/register",
+            metadata: { role: selectedRole, user_id: newUserId, auto_confirmed: true },
+          });
+        } catch {}
         navigate("/dashboard");
         return;
       }
 
       setStep("confirmation");
       // Track signup completed (avec user_id explicite car session pas encore propagée)
-      trackEventWithUserId(result?.user?.id ?? null, "signup_completed", {
-        source: "/register",
-        metadata: { role: selectedRole },
-      });
+      try {
+        trackEventWithUserId(newUserId, "signup_completed", {
+          source: "/register",
+          metadata: { role: selectedRole, user_id: newUserId },
+        });
+      } catch {}
     } catch (error: any) {
-      // Track échec signup
-      trackEvent("signup_failed", {
-        source: "/register",
-        metadata: { reason: error.message?.slice(0, 100) || "unknown", role: selectedRole },
-      });
+      // Track échec signup (normalisé)
+      const rawMessage = error?.message || "unknown";
+      try {
+        trackEvent("signup_failed", {
+          source: "/register",
+          metadata: {
+            stage: "auth",
+            error_code: mapSignupError(rawMessage),
+            error_message: rawMessage.slice(0, 200),
+            role: selectedRole,
+          },
+        });
+      } catch {}
       if (error.message === "timeout") {
         setFormError(
           "L'inscription prend plus de temps que prévu. Si vous n'avez pas reçu d'email de confirmation dans 2 minutes, réessayez."
