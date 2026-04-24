@@ -788,15 +788,15 @@ export default function PublicSitterProfile() {
             </div>
 
             {/* Infos */}
-            <div className="flex flex-col gap-1.5 pb-1">
+            <div className="flex flex-col gap-1.5 pb-1 min-w-0 flex-1">
               {isAvailable && (
                 <span className="inline-flex w-fit items-center text-xs bg-primary/10 text-primary px-2.5 py-0.5 rounded-full font-medium">
                   Disponible
                 </span>
               )}
 
-              <div className="flex items-center gap-3">
-                <h1 className="text-4xl md:text-5xl font-heading font-bold text-foreground leading-tight capitalize">
+              <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+                <h1 className="text-2xl sm:text-4xl md:text-5xl font-heading font-bold text-foreground leading-tight capitalize break-words min-w-0">
                   {firstName}
                 </h1>
                 {profile?.is_founder && <FounderBadge size="lg" />}
