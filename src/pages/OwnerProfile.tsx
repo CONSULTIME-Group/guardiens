@@ -13,7 +13,7 @@ import OwnerHouseGuideForm from "@/components/owner-profile/OwnerHouseGuideForm"
 import OwnerStepSkills from "@/components/owner-profile/OwnerStepSkills";
 import ProfileSidebar, { type SidebarSection } from "@/components/profile/ProfileSidebar";
 import ScoreBreakdown, { type ScoreCriterion } from "@/components/profile/ScoreBreakdown";
-import { useOwnerProfile, computeOwnerMissingFields, type OwnerProfileData } from "@/hooks/useOwnerProfile";
+import { useOwnerProfile, type OwnerProfileData } from "@/hooks/useOwnerProfile";
 import { useAuth } from "@/contexts/AuthContext";
 
 const SECTIONS_META = [
