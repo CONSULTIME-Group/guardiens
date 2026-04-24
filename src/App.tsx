@@ -147,6 +147,13 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
+// Redirige /register vers /inscription en préservant query string + hash
+// (utile pour les liens externes : Facebook Ads, parrainage ?ref=, UTM, etc.)
+const RegisterRedirect = () => {
+  const location = useLocation();
+  return <Navigate to={`/inscription${location.search}${location.hash}`} replace />;
+};
+
 
 const PublicOnlyRoute = ({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated, loading } = useAuth();
