@@ -480,24 +480,6 @@ const Register = () => {
                 {formError && <p className="text-sm text-destructive">{formError}</p>}
               </div>
 
-              {/* Transparency info for sitter roles */}
-              {(selectedRole === "sitter" || selectedRole === "both") && (
-                <div className="flex gap-2.5 p-3 rounded-lg bg-accent text-sm text-muted-foreground">
-                  <Info className="h-4 w-4 text-primary shrink-0 mt-0.5" />
-                  <div className="space-y-1">
-                    <p>
-                      <strong className="text-foreground">Gratuit jusqu'au 13 mai 2026</strong> — aucune carte bancaire demandée.
-                      Les fondateurs inscrits avant cette date profitent d'un mois supplémentaire offert jusqu'au 13 juin.
-                    </p>
-                    <p>
-                      Ensuite, l'abonnement gardien est à 6,99&nbsp;€/mois (résiliable en 1 clic).
-                    </p>
-                    <p>
-                      <strong className="text-foreground">L'entraide reste gratuite pour tous, pour toujours.</strong>
-                    </p>
-                  </div>
-                </div>
-              )}
 
               {/* CGU checkbox */}
               <div className="flex items-start gap-2">
