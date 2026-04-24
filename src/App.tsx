@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import { lazyWithRetry as lazy } from "@/lib/lazyWithRetry";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Route, Routes, Navigate, useParams } from "react-router-dom";
+import { BrowserRouter, Route, Routes, Navigate, useParams, useLocation } from "react-router-dom";
 import { Loader2 } from "lucide-react";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
@@ -147,6 +147,12 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
+// Redirige /register vers /inscription en préservant query string + hash
+// (utile pour les liens externes : Facebook Ads, parrainage ?ref=, UTM, etc.)
+const RegisterRedirect = () => {
+  const location = useLocation();
+  return <Navigate to={`/inscription${location.search}${location.hash}`} replace />;
+};
 
 const PublicOnlyRoute = ({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated, loading } = useAuth();
@@ -199,7 +205,7 @@ const AppRoutes = () => (
     <Routes>
       <Route path="/" element={<Landing />} />
       <Route path="/login" element={<PublicOnlyRoute><Login /></PublicOnlyRoute>} />
-      <Route path="/register" element={<Navigate to="/inscription" replace />} />
+      <Route path="/register" element={<RegisterRedirect />} />
       <Route path="/inscription" element={<PublicOnlyRoute><Register /></PublicOnlyRoute>} />
       <Route path="/auth/confirm" element={<AuthConfirm />} />
       <Route path="/forgot-password" element={<PublicOnlyRoute><ForgotPassword /></PublicOnlyRoute>} />
