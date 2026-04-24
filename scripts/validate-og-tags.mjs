@@ -405,17 +405,41 @@ async function runWithConcurrency(items, limit, worker) {
 // 5. Diff attendu vs. observé
 // ──────────────────────────────────────────────────────────────
 
-function diffTags(actualTags, expectedTags) {
+function diffTags(actualTags, expectedTags, options = {}) {
+  const { tolerantKeys = new Set() } = options;
   const diffs = [];
   for (const [key, expected] of Object.entries(expectedTags)) {
     const actual = actualTags[key];
     if (actual == null) {
       diffs.push({ key, status: "MISSING", expected, actual: null });
+    } else if (tolerantKeys.has(key)) {
+      // Mode tolérant : on vérifie juste que la valeur existe et n'est pas vide
+      if (!actual.trim()) {
+        diffs.push({ key, status: "EMPTY", expected: "(valeur non vide attendue)", actual });
+      }
     } else if (actual !== expected) {
       diffs.push({ key, status: "MISMATCH", expected, actual });
     }
   }
   return diffs;
+}
+
+/**
+ * Construit le set de clés à traiter en "tolérant" (présence suffit) pour une
+ * route dynamique avec dynamicTitle / dynamicDescription.
+ */
+function tolerantKeysFor(route) {
+  const keys = new Set();
+  if (!route.isDynamic) return keys;
+  if (route.dynamicTitle) {
+    keys.add("og:title");
+    keys.add("twitter:title");
+  }
+  if (route.dynamicDescription) {
+    keys.add("og:description");
+    keys.add("twitter:description");
+  }
+  return keys;
 }
 
 // ──────────────────────────────────────────────────────────────
