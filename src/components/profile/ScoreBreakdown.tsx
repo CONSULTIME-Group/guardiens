@@ -159,13 +159,18 @@ const ScoreBreakdown = ({
                 {" "}
                 Score actuellement enregistré&nbsp;:
                 {" "}
-                <span className="tabular-nums">{total}/100</span>.
+                <span className="tabular-nums">{referenceTotal}/100</span>.
               </>
             ) : (
               <>
-                Votre score ({total}/100) suit le barème {role === "sitter" ? "Gardien" : "Propriétaire"}.
-                Les <strong className="text-foreground">essentiels</strong> pèsent l'essentiel des points,
-                les bonus complètent.
+                Votre score ({previewTotal}/100) suit le barème {role === "sitter" ? "Gardien" : "Propriétaire"}.
+                Les <strong className="text-foreground">essentiels</strong> pèsent {maxEssentials} points,
+                les <strong className="text-foreground">bonus</strong> {maxBonuses} points (total 100).
+                {savedTotal !== undefined && savedTotal !== previewTotal && (
+                  <>
+                    {" "}<span className="text-muted-foreground/80">Dernière valeur enregistrée&nbsp;: {savedTotal}/100.</span>
+                  </>
+                )}
               </>
             )}
           </p>
