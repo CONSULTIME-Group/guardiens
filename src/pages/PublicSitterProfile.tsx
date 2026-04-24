@@ -1009,7 +1009,7 @@ export default function PublicSitterProfile() {
                         )}
                       </p>
                     ) : (
-                      <Empty label="Non renseignée" />
+                      <Empty label="Non renseigné" />
                     )}
                     {typeLine && (
                       <span className="text-[11px] text-muted-foreground font-body line-clamp-1">{typeLine}</span>
