@@ -4,6 +4,29 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { logger } from "@/lib/logger";
 
+// Exported so the page can recompute missing fields against the LIVE preview state
+// (mergedData = data + localData) instead of the stale server snapshot.
+export function computeSitterMissingFields(d: SitterProfileData): { step: number; label: string }[] {
+  const missing: { step: number; label: string }[] = [];
+  if (!d.avatar_url) missing.push({ step: 1, label: "Photo de profil" });
+  if (!d.first_name) missing.push({ step: 1, label: "Prénom" });
+  if (!d.last_name) missing.push({ step: 1, label: "Nom" });
+  if (!d.city) missing.push({ step: 1, label: "Ville" });
+  if (!d.bio) missing.push({ step: 1, label: "Bio" });
+  if (!d.motivation) missing.push({ step: 1, label: "Motivation" });
+  if (!d.sitter_type) missing.push({ step: 2, label: "Type de gardien" });
+  if (!d.availability_during) missing.push({ step: 2, label: "Disponibilité" });
+  if (d.lifestyle.length === 0) missing.push({ step: 2, label: "Mode de vie" });
+  if (d.animal_types.length === 0) missing.push({ step: 3, label: "Types d'animaux" });
+  if (!d.experience_years) missing.push({ step: 3, label: "Années d'expérience" });
+  if (!d.references_text) missing.push({ step: 3, label: "Références" });
+  if (!d.has_license && !d.has_vehicle) missing.push({ step: 4, label: "Permis ou véhicule" });
+  if (d.languages.length === 0) missing.push({ step: 5, label: "Langues" });
+  if (d.meeting_preference.length === 0) missing.push({ step: 5, label: "Préférence de rencontre" });
+  if (!d.handover_preference) missing.push({ step: 5, label: "Préférence de passation" });
+  return missing;
+}
+
 export interface SitterProfileData {
   // Step 1 - Identity (from profiles table)
   first_name: string;
