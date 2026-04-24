@@ -126,6 +126,174 @@ export default function PublicSitterProfile() {
       </button>
     ) : null;
 
+  // ── Helpers de rendu (sous-onglets de l'onglet Gardien) ────────────
+  const ReviewGrid = ({ reviews, showAll, setShowAll, badgesBySitId }: {
+    reviews: any[]; showAll: boolean; setShowAll: (v: boolean) => void; badgesBySitId?: Record<string, string[]>;
+  }) => (
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+      {(showAll ? reviews : reviews.slice(0, 4)).map((r: any) => {
+        const authorName = capitalize(r.reviewer?.first_name || "Membre");
+        const avatarUrl = r.reviewer?.avatar_url || null;
+        const reviewBadges = badgesBySitId && r.sit_id ? (badgesBySitId[r.sit_id] || []) : [];
+        return (
+          <article key={r.id} className="bg-card border border-border rounded-xl p-4 h-full">
+            <header className="flex items-center justify-between mb-2.5">
+              <div className="flex items-center gap-2.5">
+                <Avatar className="w-9 h-9">
+                  {avatarUrl ? <AvatarImage src={avatarUrl} /> : null}
+                  <AvatarFallback className="text-xs bg-muted">{authorName.charAt(0).toUpperCase()}</AvatarFallback>
+                </Avatar>
+                <div className="flex flex-col">
+                  <span className="text-sm font-medium text-foreground leading-tight font-body">{authorName}</span>
+                  <span className="text-[11px] text-muted-foreground leading-tight font-body">
+                    {format(new Date(r.created_at), "MMMM yyyy", { locale: fr })}
+                  </span>
+                </div>
+              </div>
+              {r.overall_rating !== null && (
+                <div className="flex items-center gap-0.5" aria-label={`${r.overall_rating} sur 5`}>
+                  {[1, 2, 3, 4, 5].map(i => (
+                    <span key={i} className={`text-sm ${i <= r.overall_rating ? "text-primary" : "text-border"}`}>★</span>
+                  ))}
+                </div>
+              )}
+            </header>
+            {r.comment && (
+              <p className="text-sm text-foreground/80 leading-relaxed font-body">{r.comment}</p>
+            )}
+            {reviewBadges.length > 0 && (
+              <div className="flex flex-wrap gap-1.5 mt-3 pt-3 border-t border-border">
+                {reviewBadges.map((badgeId: string) => (
+                  <BadgeSceau key={badgeId} id={badgeId} size="compact" showCount={false} />
+                ))}
+              </div>
+            )}
+          </article>
+        );
+      })}
+      {reviews.length > 4 && (
+        <div className="md:col-span-2">
+          <ShowMoreBtn items={reviews} showAll={showAll} setShowAll={setShowAll} />
+        </div>
+      )}
+    </div>
+  );
+
+  const PracticalGrid = (props: {
+    animalTypes: string[]; sitterProfile: any; hasVehicle: boolean; radius: number | null; city: string | null;
+    competences: string[]; lifestyle: string[]; preferredEnvironments: string[];
+    typeLine: string; durationLabel: string; frequencyLabel: string; noticeLabel: string;
+  }) => (
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+      {props.animalTypes.length > 0 && (
+        <div>
+          <div className="flex items-center gap-2 mb-2.5">
+            <PawPrint className="w-4 h-4 text-primary" aria-hidden="true" />
+            <h3 className="text-sm font-semibold text-foreground font-body">Animaux acceptés</h3>
+          </div>
+          <div className="flex flex-wrap gap-1.5">
+            {props.animalTypes.map(a => (
+              <span key={a} className="border border-border bg-card rounded-full text-xs px-2.5 py-1 text-foreground font-body">
+                {ANIMAL_LABELS[a] || a}
+              </span>
+            ))}
+            {props.sitterProfile?.farm_animals_ok && (
+              <span className="border border-primary text-primary rounded-full text-xs px-2.5 py-1 bg-primary/5 font-body">
+                Races exigeantes
+              </span>
+            )}
+          </div>
+        </div>
+      )}
+      <div>
+        <div className="flex items-center gap-2 mb-2.5">
+          {props.hasVehicle ? <Car className="w-4 h-4 text-primary" aria-hidden="true" /> : <MapPin className="w-4 h-4 text-primary" aria-hidden="true" />}
+          <h3 className="text-sm font-semibold text-foreground font-body">Zone d'intervention</h3>
+        </div>
+        <p className="text-sm text-foreground/70 font-body">
+          {props.hasVehicle
+            ? `Avec véhicule${props.radius ? ` — rayon ${props.radius} km autour de ${props.city || 'sa ville'}` : ''}`
+            : props.radius
+              ? `Rayon ${props.radius} km autour de ${props.city || 'sa ville'}`
+              : 'Rayon non renseigné'}
+        </p>
+      </div>
+      {props.competences.length > 0 && (
+        <div>
+          <div className="flex items-center gap-2 mb-2.5">
+            <Heart className="w-4 h-4 text-primary" aria-hidden="true" />
+            <h3 className="text-sm font-semibold text-foreground font-body">Savoir-faire</h3>
+          </div>
+          <div className="flex flex-wrap gap-1.5">
+            {props.competences.map(c => (
+              <span key={c} className="border border-border bg-card rounded-full text-xs px-2.5 py-1 text-foreground/80 font-body">{c}</span>
+            ))}
+          </div>
+        </div>
+      )}
+      {props.lifestyle.length > 0 && (
+        <div>
+          <div className="flex items-center gap-2 mb-2.5">
+            <Star className="w-4 h-4 text-primary" aria-hidden="true" />
+            <h3 className="text-sm font-semibold text-foreground font-body">Style de vie</h3>
+          </div>
+          <div className="flex flex-wrap gap-1.5">
+            {props.lifestyle.map(l => (
+              <span key={l} className="border border-border bg-card rounded-full text-xs px-2.5 py-1 text-foreground font-body">{l}</span>
+            ))}
+          </div>
+        </div>
+      )}
+      {props.preferredEnvironments.length > 0 && (
+        <div>
+          <div className="flex items-center gap-2 mb-2.5">
+            <Home className="w-4 h-4 text-primary" aria-hidden="true" />
+            <h3 className="text-sm font-semibold text-foreground font-body">Environnements préférés</h3>
+          </div>
+          <div className="flex flex-wrap gap-1.5">
+            {props.preferredEnvironments.map(e => (
+              <span key={e} className="border border-border bg-card rounded-full text-xs px-2.5 py-1 text-foreground font-body">{ENV_LABELS[e] || e}</span>
+            ))}
+          </div>
+        </div>
+      )}
+      {(props.typeLine || props.durationLabel || props.frequencyLabel || props.noticeLabel) && (
+        <div>
+          <div className="flex items-center gap-2 mb-2.5">
+            <BadgeCheck className="w-4 h-4 text-primary" aria-hidden="true" />
+            <h3 className="text-sm font-semibold text-foreground font-body">Profil &amp; disponibilité</h3>
+          </div>
+          <div className="text-sm text-foreground/70 font-body space-y-0.5">
+            {props.typeLine && <p>{props.typeLine}</p>}
+            {props.durationLabel && <p>{props.durationLabel}</p>}
+            {props.frequencyLabel && <p>{props.frequencyLabel}</p>}
+            {props.noticeLabel && <p>{props.noticeLabel}</p>}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+
+  const GallerySimple = ({ visibleGallery, setLightboxIdx }: { visibleGallery: any[]; setLightboxIdx: (n: number) => void }) => (
+    <div className="grid grid-cols-2 md:grid-cols-3 gap-2 md:gap-3">
+      {visibleGallery.map((g: any, i: number) => (
+        <button
+          key={g.id}
+          type="button"
+          onClick={() => setLightboxIdx(i)}
+          className="overflow-hidden rounded-xl aspect-square group relative"
+        >
+          <img
+            src={g.photo_url}
+            alt={g.caption || `Photo ${i + 1}`}
+            className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-300"
+            loading="lazy"
+          />
+        </button>
+      ))}
+    </div>
+  );
+
   const handleTabChange = (tab: ProfileTab) => {
     setActiveTab(tab);
     setSearchParams({ tab }, { replace: true });
