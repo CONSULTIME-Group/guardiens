@@ -578,21 +578,29 @@ async function main() {
         continue;
       }
 
-      // Règle : OG non-home en mode permissif = warning ; canonical/schema/meta-robots = toujours bloquant
+      // Bucket OG : bloquant si home ou --strict, sinon warn
       const ogBlocking = strictMode || r.route.path === "/";
-      const ogBucket = ogCount > 0
-        ? (ogBlocking ? "block" : "warn")
-        : null;
-      const pageBucket = pageCount > 0 ? "block" : null;
+      if (ogCount > 0) {
+        if (ogBlocking) blockingIssues += ogCount;
+        else warnings += ogCount;
+      }
 
-      if (ogBucket === "block") blockingIssues += ogCount;
-      if (ogBucket === "warn") warnings += ogCount;
-      if (pageBucket === "block") blockingIssues += pageCount;
+      // Page issues : chacune a sa sévérité ("always" ou "prerender")
+      let pageBlockCount = 0;
+      let pageWarnCount = 0;
+      for (const pi of r.pageIssues) {
+        const isBlocking = pi.severity === "always" || strictMode || r.route.path === "/";
+        if (isBlocking) pageBlockCount++;
+        else pageWarnCount++;
+      }
+      blockingIssues += pageBlockCount;
+      warnings += pageWarnCount;
 
       const parts = [];
       if (ogCount > 0) parts.push(`${ogCount} OG`);
       if (pageCount > 0) parts.push(`${pageCount} autre(s)`);
-      const icon = (ogBucket === "block" || pageBucket === "block") ? c("red", "❌") : c("yellow", "⚠️ ");
+      const anyBlocking = (ogBlocking && ogCount > 0) || pageBlockCount > 0;
+      const icon = anyBlocking ? c("red", "❌") : c("yellow", "⚠️ ");
       console.log(`  ${icon} ${label}${parts.join(" + ")} ${c("dim", r.url)}`);
 
       if (ogCount > 0) printDiffs(r.ogDiffs, "      ");
