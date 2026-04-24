@@ -213,10 +213,14 @@ const SitterProfile = () => {
     return url;
   }, [uploadAvatar]);
 
+  // Recompute missing fields against the LIVE preview state so the sidebar reflects
+  // edits in progress (and doesn't show a stale "1 point manquant" after save/refresh).
+  const liveMissingFields = computeSitterMissingFields(mergedData);
+
   const sidebarSections: SidebarSection[] = SECTIONS_META.map(s => ({
     ...s,
     complete: s.optional ? false : sectionComplete(s.num, mergedData),
-    missingCount: s.optional ? 0 : countMissing(s.num, mergedData, missingFields),
+    missingCount: s.optional ? 0 : countMissing(s.num, mergedData, liveMissingFields),
   }));
 
   if (loading) {
