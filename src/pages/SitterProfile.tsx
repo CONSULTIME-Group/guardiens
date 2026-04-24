@@ -42,6 +42,10 @@ function countMissing(num: number, d: SitterProfileData, allMissing: { step: num
   return allMissing.filter(m => m.step === num).length;
 }
 
+function missingLabelsFor(num: number, allMissing: { step: number; label: string }[]): string[] {
+  return allMissing.filter(m => m.step === num).map(m => m.label);
+}
+
 type ProfileDraft<T> = {
   updatedAt: string;
   values: Partial<T>;
@@ -238,6 +242,7 @@ const SitterProfile = () => {
     ...s,
     complete: s.optional ? false : sectionComplete(s.num, mergedData),
     missingCount: s.optional ? 0 : countMissing(s.num, mergedData, liveMissingFields),
+    missingLabels: s.optional ? [] : missingLabelsFor(s.num, liveMissingFields),
   }));
 
   if (loading) {
