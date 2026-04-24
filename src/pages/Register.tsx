@@ -98,7 +98,7 @@ const Register = () => {
     }
     // Fire-and-forget — fonctionne aussi en anonyme via insertion locale temp
     trackEvent("signup_started", {
-      source: "/register",
+      source: "/inscription",
       metadata: { has_ref: !!ref, preset_role: presetRole || null },
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -118,7 +118,7 @@ const Register = () => {
       setFormError("Ce mot de passe est trop courant. Mélangez plusieurs mots, chiffres ou symboles (par exemple une phrase de passe).");
       try {
         trackEvent("signup_failed", {
-          source: "/register",
+          source: "/inscription",
           metadata: { stage: "auth", error_code: "weak_password", error_message: "weak_password_local", role: selectedRole },
         });
       } catch {}
@@ -138,7 +138,7 @@ const Register = () => {
     // ── signup_form_submitted (après validation client, avant appel Supabase) ──
     try {
       trackEvent("signup_form_submitted", {
-        source: "/register",
+        source: "/inscription",
         metadata: { role: selectedRole },
       });
     } catch {}
@@ -176,7 +176,7 @@ const Register = () => {
         if (!profileExists) {
           try {
             trackEventWithUserId(newUserId, "signup_failed", {
-              source: "/register",
+              source: "/inscription",
               metadata: {
                 stage: "profile_creation",
                 error_code: "trigger_missing",
@@ -240,7 +240,7 @@ const Register = () => {
       if (result?.session) {
         try {
           trackEventWithUserId(newUserId, "signup_completed", {
-            source: "/register",
+            source: "/inscription",
             metadata: { role: selectedRole, user_id: newUserId, auto_confirmed: true },
           });
         } catch {}
@@ -252,7 +252,7 @@ const Register = () => {
       // Track signup completed (avec user_id explicite car session pas encore propagée)
       try {
         trackEventWithUserId(newUserId, "signup_completed", {
-          source: "/register",
+          source: "/inscription",
           metadata: { role: selectedRole, user_id: newUserId },
         });
       } catch {}
@@ -261,7 +261,7 @@ const Register = () => {
       const rawMessage = error?.message || "unknown";
       try {
         trackEvent("signup_failed", {
-          source: "/register",
+          source: "/inscription",
           metadata: {
             stage: "auth",
             error_code: mapSignupError(rawMessage),
@@ -393,7 +393,7 @@ const Register = () => {
                     setSelectedRole(role.value);
                     setStep(2);
                     trackEvent("signup_role_selected", {
-                      source: "/register",
+                      source: "/inscription",
                       metadata: { role: role.value },
                     });
                   }}

@@ -81,7 +81,7 @@ const DemoListingCard = React.forwardRef<HTMLDivElement, typeof DEMO_LISTINGS[0]
       </div>
 
       <Link
-        to="/register?role=owner"
+        to="/inscription?role=owner"
         className="w-full mt-3 py-2.5 rounded-xl bg-primary/10 text-primary font-body font-medium text-sm text-center hover:bg-primary/20 transition-colors block"
       >
         Publier une annonce similaire →
@@ -114,7 +114,7 @@ const DemoListingShowcase = React.forwardRef<HTMLElement>((_props, ref) => (
 
       <div className="text-center">
         <Link
-          to="/register?role=owner"
+          to="/inscription?role=owner"
           className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-8 py-4 rounded-full font-body font-medium text-base hover:bg-primary/90 transition-colors"
         >
           Créer mon compte — gratuit pour les propriétaires

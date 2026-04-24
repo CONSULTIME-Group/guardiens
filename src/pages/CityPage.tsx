@@ -371,14 +371,14 @@ const CityPage = () => {
               Publiez votre annonce en 5 minutes. Gratuit.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <Link to="/register?role=owner">
+              <Link to="/inscription?role=owner">
                 <Button size="lg" className="gap-2">
                   Créer mon annonce
                   <ArrowRight className="h-4 w-4" />
                 </Button>
               </Link>
               <Link
-                to="/register?role=guardian"
+                to="/inscription?role=guardian"
                 className="text-sm text-primary hover:underline"
               >
                 Je suis gardien, je m'inscris →
@@ -466,13 +466,13 @@ const CityPage = () => {
             </Badge>
           </div>
           <div className="flex flex-col sm:flex-row gap-3">
-            <Link to="/register">
+            <Link to="/inscription">
               <Button size="lg" className="gap-2">
                 Je cherche un gardien à {dbPage.city}
                 <ArrowRight className="h-4 w-4" />
               </Button>
             </Link>
-            <Link to="/register">
+            <Link to="/inscription">
               <Button size="lg" variant="outline" className="gap-2">
                 Je veux garder à {dbPage.city}
                 <ArrowRight className="h-4 w-4" />
@@ -534,7 +534,7 @@ const CityPage = () => {
             Que vous soyez propriétaire ou gardien, rejoignez un réseau de
             confiance basé sur la proximité et le partage.
           </p>
-          <Link to="/register">
+          <Link to="/inscription">
             <Button size="lg" className="gap-2">
               S'inscrire gratuitement
               <ArrowRight className="h-4 w-4" />

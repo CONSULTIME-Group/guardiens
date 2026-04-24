@@ -22,7 +22,7 @@ Disallow: /settings
 Disallow: /forgot-password
 Disallow: /reset-password
 Disallow: /login
-Disallow: /register
+Disallow: /inscription
 Disallow: /unsubscribe
 Disallow: /test-accord
 Disallow: /auth/

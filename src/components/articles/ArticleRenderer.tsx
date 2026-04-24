@@ -80,7 +80,7 @@ function injectCTA(html: string): string {
   return html.replace(/<h2/g, (match) => {
     h2Count++;
     if (h2Count === 3) {
-      return `<div class="article-cta-block"><div class="article-cta-inner"><p class="article-cta-text">Vous êtes propriétaire d'animaux ou vous aimez les animaux ?</p><div class="article-cta-buttons"><a href="/register" class="article-cta-btn article-cta-btn-primary">Rejoindre la communauté</a><a href="/search" class="article-cta-btn article-cta-btn-secondary">Trouver un gardien</a></div></div></div>\n${match}`;
+      return `<div class="article-cta-block"><div class="article-cta-inner"><p class="article-cta-text">Vous êtes propriétaire d'animaux ou vous aimez les animaux ?</p><div class="article-cta-buttons"><a href="/inscription" class="article-cta-btn article-cta-btn-primary">Rejoindre la communauté</a><a href="/search" class="article-cta-btn article-cta-btn-secondary">Trouver un gardien</a></div></div></div>\n${match}`;
     }
     return match;
   });
@@ -142,7 +142,7 @@ function addBandedSections(html: string): string {
 
 /** Add end-of-article CTA */
 function addEndCTA(html: string): string {
-  return html + `<div class="article-cta-block article-cta-end"><div class="article-cta-inner"><p class="article-cta-heading">Prêt à rejoindre la communauté ?</p><p class="article-cta-text">Créez votre profil gratuitement et rejoignez les gardiens de votre quartier.</p><div class="article-cta-buttons"><a href="/register" class="article-cta-btn article-cta-btn-primary">Créer mon profil</a></div></div></div>`;
+  return html + `<div class="article-cta-block article-cta-end"><div class="article-cta-inner"><p class="article-cta-heading">Prêt à rejoindre la communauté ?</p><p class="article-cta-text">Créez votre profil gratuitement et rejoignez les gardiens de votre quartier.</p><div class="article-cta-buttons"><a href="/inscription" class="article-cta-btn article-cta-btn-primary">Créer mon profil</a></div></div></div>`;
 }
 
 interface ArticleRendererProps {
@@ -162,17 +162,17 @@ function adaptCTAsForRole(html: string, role?: "owner" | "sitter" | "both"): str
     );
 
   if (role === "owner") {
-    html = replaceHref(html, "/register\\?role=owner", "/sits/create", "Publier une annonce →");
-    html = replaceHref(html, "/register\\?role=guardian", "/search", "Trouver une garde près de chez vous →");
-    html = replaceHref(html, "/register", "/sits/create", "Publier une annonce →");
+    html = replaceHref(html, "/inscription\\?role=owner", "/sits/create", "Publier une annonce →");
+    html = replaceHref(html, "/inscription\\?role=guardian", "/search", "Trouver une garde près de chez vous →");
+    html = replaceHref(html, "/inscription", "/sits/create", "Publier une annonce →");
   } else if (role === "sitter") {
-    html = replaceHref(html, "/register\\?role=guardian", "/search", "Trouver une garde près de chez vous →");
-    html = replaceHref(html, "/register\\?role=owner", "/sits/create", "Publier une annonce →");
-    html = replaceHref(html, "/register", "/search", "Trouver une garde près de chez vous →");
+    html = replaceHref(html, "/inscription\\?role=guardian", "/search", "Trouver une garde près de chez vous →");
+    html = replaceHref(html, "/inscription\\?role=owner", "/sits/create", "Publier une annonce →");
+    html = replaceHref(html, "/inscription", "/search", "Trouver une garde près de chez vous →");
   } else if (role === "both") {
-    html = replaceHref(html, "/register\\?role=owner", "/sits/create", "Publier une annonce →");
-    html = replaceHref(html, "/register\\?role=guardian", "/search", "Trouver une garde près de chez vous →");
-    html = replaceHref(html, "/register", "/sits/create", "Publier une annonce →");
+    html = replaceHref(html, "/inscription\\?role=owner", "/sits/create", "Publier une annonce →");
+    html = replaceHref(html, "/inscription\\?role=guardian", "/search", "Trouver une garde près de chez vous →");
+    html = replaceHref(html, "/inscription", "/sits/create", "Publier une annonce →");
   }
 
   return html;

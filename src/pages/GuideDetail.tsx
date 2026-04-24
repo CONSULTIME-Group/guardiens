@@ -346,7 +346,7 @@ const GuideDetail = () => {
               Vous allez garder à {guide.city} ?
             </p>
             <Link
-              to="/register"
+              to="/inscription"
               className="inline-flex items-center justify-center rounded-lg bg-primary px-6 py-3 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
             >
               Voir les gardes disponibles

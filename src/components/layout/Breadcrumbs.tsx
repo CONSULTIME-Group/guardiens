@@ -38,7 +38,7 @@ const SEGMENT_LABELS: Record<string, string> = {
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-const HIDDEN_ROUTES = ["/", "/login", "/register"];
+const HIDDEN_ROUTES = ["/", "/login", "/inscription"];
 
 const Breadcrumbs = () => {
   const location = useLocation();

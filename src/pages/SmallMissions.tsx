@@ -267,7 +267,7 @@ const SmallMissions = () => {
   const [missionCoords, setMissionCoords] = useState<Map<string, { lat: number; lng: number }>>(new Map());
   const [helperCoords, setHelperCoords] = useState<Map<string, { lat: number; lng: number }>>(new Map());
   const handleContactHelper = useCallback(async (helperId: string) => {
-    if (!isAuthenticated || !user) { navigate("/register"); return; }
+    if (!isAuthenticated || !user) { navigate("/inscription"); return; }
     if (helperId === user.id) return;
     setContactingHelperId(helperId);
     try {
@@ -678,7 +678,7 @@ const SmallMissions = () => {
                   const Icon = meta.icon;
                   const isCompleted = m.status === "completed";
                   const isMine = m.user_id === user?.id;
-                  const goToDetail = () => navigate(isAuthenticated ? `/petites-missions/${m.id}` : "/register");
+                  const goToDetail = () => navigate(isAuthenticated ? `/petites-missions/${m.id}` : "/inscription");
                   return (
                     <div
                       key={`m-${m.id}`}
@@ -730,7 +730,7 @@ const SmallMissions = () => {
                                 onClick={(e) => {
                                   e.preventDefault();
                                   e.stopPropagation();
-                                  if (!isAuthenticated) { navigate("/register"); return; }
+                                  if (!isAuthenticated) { navigate("/inscription"); return; }
                                   setDialogMission(m);
                                   setDialogTarget({ id: m.user_id, name: (m.profiles as any)?.first_name || "ce membre" });
                                 }}
@@ -860,7 +860,7 @@ const SmallMissions = () => {
                         <div className="flex items-center justify-between gap-2 pt-1">
                           <button
                             onClick={() => {
-                              if (!isAuthenticated) { navigate("/register"); return; }
+                              if (!isAuthenticated) { navigate("/inscription"); return; }
                               setHelperDialogTarget(h);
                             }}
                             className="text-sm text-primary font-semibold hover:underline"
@@ -970,7 +970,7 @@ const SmallMissions = () => {
                 </Button>
               </Link>
             ) : (
-              <Link to="/register">
+              <Link to="/inscription">
                 <Button variant="hero" size="xl">S'inscrire gratuitement</Button>
               </Link>
             )}

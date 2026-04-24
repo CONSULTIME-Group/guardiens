@@ -98,13 +98,13 @@ export default function CityHero({
           </p>
 
           <div className="flex flex-col sm:flex-row gap-3">
-            <Link to="/register">
+            <Link to="/inscription">
               <Button size="lg" className="gap-2 bg-white text-foreground hover:bg-white/90 font-semibold shadow-lg">
                 Trouver mon gardien
                 <ArrowRight className="h-4 w-4" />
               </Button>
             </Link>
-            <Link to="/register">
+            <Link to="/inscription">
               <Button size="lg" variant="outline" className="gap-2 border-white text-white bg-white/15 backdrop-blur-sm hover:bg-white/25">
                 Devenir gardien à {city}
               </Button>

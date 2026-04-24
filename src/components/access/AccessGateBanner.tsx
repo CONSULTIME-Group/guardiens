@@ -39,7 +39,7 @@ const AccessGateBanner = ({ level, profileCompletion, context = "guard", showIde
             </p>
             <div className="flex gap-2">
               <Button size="sm" asChild>
-                <Link to="/register">S'inscrire gratuitement</Link>
+                <Link to="/inscription">S'inscrire gratuitement</Link>
               </Button>
               <Button size="sm" variant="outline" asChild>
                 <Link to="/login">Se connecter</Link>

@@ -41,7 +41,7 @@ const PublicFooter = React.forwardRef<HTMLElement>((_props, ref) => {
             <ul className="space-y-2">
               <li><Link to="/a-propos" className="font-body text-sm text-white/50 hover:text-white transition-colors">À propos</Link></li>
               <li><Link to="/contact" className="font-body text-sm text-white/50 hover:text-white transition-colors">Contact</Link></li>
-              <li><Link to="/register" className="font-body text-sm text-white/50 hover:text-white transition-colors">Inscription</Link></li>
+              <li><Link to="/inscription" className="font-body text-sm text-white/50 hover:text-white transition-colors">Inscription</Link></li>
               <li><Link to="/petites-missions" className="font-body text-sm text-white/50 hover:text-white transition-colors">Petites missions</Link></li>
               <li><Link to="/gardien-urgence" className="font-body text-sm text-white/50 hover:text-white transition-colors">Gardien d'urgence</Link></li>
             </ul>

@@ -102,7 +102,7 @@ export const staticRoutes: SiteRoute[] = [
     changeFreq: "monthly",
   },
   {
-    path: "/register",
+    path: "/inscription",
     title: "Inscription | Guardiens",
     metaDescription: "Rejoignez la communauté Guardiens. Inscription gratuite pour les propriétaires, 49€/an pour les gardiens.",
     h1: "Créer un compte",
