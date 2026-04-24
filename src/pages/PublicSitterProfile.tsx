@@ -21,7 +21,9 @@ import {
   ChevronLeft, ChevronRight,
   Shield, Star, PawPrint,
   Home, KeyRound, Handshake, Heart,
+  Image as ImageIcon,
 } from "lucide-react";
+import { HeroPickerModal } from "@/components/profile/HeroPickerModal";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import PublicExperiences from "@/components/profile/PublicExperiences";
 import TrustScore from "@/components/profile/TrustScore";
@@ -97,6 +99,7 @@ export default function PublicSitterProfile() {
   const [emergencyActive, setEmergencyActive] = useState(false);
   const [hasActiveSubscription, setHasActiveSubscription] = useState(false);
   const [lightboxIdx, setLightboxIdx] = useState<number | null>(null);
+  const [heroPickerOpen, setHeroPickerOpen] = useState(false);
   const [badgesBySitId, setBadgesBySitId] = useState<Record<string, string[]>>({});
   const [activeTab, setActiveTab] = useState<ProfileTab>('gardien');
   const [pets, setPets] = useState<any[]>([]);
@@ -309,7 +312,7 @@ export default function PublicSitterProfile() {
       const [profileRes, baseProfileRes, sitterRes, badgesRes, reviewsRes, galleryRes, emergencyRes, subRes, ownerRes, missionsRes, extExpRes] =
         await Promise.all([
           supabase.from("public_profiles").select("*").eq("id", id).maybeSingle(),
-          supabase.from("profiles").select("id, first_name, last_name, avatar_url, bio, city, postal_code, created_at, identity_verified, is_founder, profile_completion, completed_sits_count, cancellation_count").eq("id", id).maybeSingle(),
+          supabase.from("profiles").select("id, first_name, last_name, avatar_url, bio, city, postal_code, created_at, identity_verified, is_founder, profile_completion, completed_sits_count, cancellation_count, hero_image_index").eq("id", id).maybeSingle(),
           supabase.from("sitter_profiles").select("*").eq("user_id", id).maybeSingle(),
           supabase.from("badge_attributions").select("badge_id").eq("user_id", id),
           supabase
@@ -687,8 +690,15 @@ export default function PublicSitterProfile() {
       {(() => {
         // L'ancrage horizontal n'est plus utile en mode contain (toute l'image est visible),
         // mais on conserve le calcul pour pouvoir basculer rapidement entre les deux modes.
-        const anchor = getSitterHeroAnchor(id, heroWeights);
-        const { desktop: heroDesktop, mobile: heroMobile } = getSitterHeroSources(id, heroWeights);
+        // `hero_image_index` (override manuel choisi par le gardien) prend le pas sur le hash.
+        const overrideIndex = profile?.hero_image_index ?? null;
+        const anchor = getSitterHeroAnchor(id, heroWeights, overrideIndex);
+        const { desktop: heroDesktop, mobile: heroMobile } = getSitterHeroSources(
+          id,
+          heroWeights,
+          overrideIndex
+        );
+        const isOwnProfile = !!auth.user?.id && auth.user.id === id;
         return (
           <div
             className="relative overflow-hidden w-full flex items-end bg-[#FBF6EC]"
@@ -718,6 +728,21 @@ export default function PublicSitterProfile() {
                 className="w-full h-full object-contain object-center"
               />
             </div>
+
+            {/* Bouton "Changer l'image" — visible uniquement pour le propriétaire du profil.
+                Position en haut à droite du hero, au-dessus des scrims, en z-20 pour
+                rester cliquable malgré les overlays. */}
+            {isOwnProfile && (
+              <button
+                type="button"
+                onClick={() => setHeroPickerOpen(true)}
+                className="absolute top-3 right-3 z-20 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-background/90 backdrop-blur border border-border text-xs font-medium shadow-sm hover:bg-background transition-colors"
+                title="Choisir une autre illustration de carnet"
+              >
+                <ImageIcon className="w-3.5 h-3.5" />
+                Changer l'image
+              </button>
+            )}
 
         {/* Vignettage très subtil */}
         <div className="absolute inset-0 z-[1] pointer-events-none" style={{ background: 'radial-gradient(ellipse at center, transparent 55%, rgba(90,69,48,0.08) 100%)' }} />
@@ -1688,6 +1713,19 @@ export default function PublicSitterProfile() {
             onClick={(e) => e.stopPropagation()}
           />
         </div>
+      )}
+
+      {/* Modale de sélection manuelle de l'image hero (visible si on est sur son propre profil) */}
+      {auth.user?.id && id && auth.user.id === id && (
+        <HeroPickerModal
+          open={heroPickerOpen}
+          onClose={() => setHeroPickerOpen(false)}
+          userId={auth.user.id}
+          currentIndex={profile?.hero_image_index ?? null}
+          onSaved={(newIndex) =>
+            setProfile((p: any) => (p ? { ...p, hero_image_index: newIndex } : p))
+          }
+        />
       )}
       </div>
     </div>

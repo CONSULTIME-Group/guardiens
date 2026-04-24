@@ -2365,6 +2365,7 @@ export type Database = {
           email_preferences: Json
           first_name: string | null
           free_months_credit: number | null
+          hero_image_index: number | null
           id: string
           identity_document_url: string | null
           identity_selfie_url: string | null
@@ -2403,6 +2404,7 @@ export type Database = {
           email_preferences?: Json
           first_name?: string | null
           free_months_credit?: number | null
+          hero_image_index?: number | null
           id: string
           identity_document_url?: string | null
           identity_selfie_url?: string | null
@@ -2441,6 +2443,7 @@ export type Database = {
           email_preferences?: Json
           first_name?: string | null
           free_months_credit?: number | null
+          hero_image_index?: number | null
           id?: string
           identity_document_url?: string | null
           identity_selfie_url?: string | null
