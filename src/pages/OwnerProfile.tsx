@@ -172,6 +172,13 @@ const OwnerProfilePage = () => {
               <ScoreBreakdown
                 role="owner"
                 total={completion}
+                isDirty={dirty}
+                onReset={() => {
+                  setLocalData({});
+                  setDirty(false);
+                  setSaved(false);
+                  if (draftKey) localStorage.removeItem(draftKey);
+                }}
                 essentials={[
                   {
                     label: "Prénom + code postal",
