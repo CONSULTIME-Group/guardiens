@@ -699,7 +699,10 @@ async function main() {
           const html = await fetchAsBot(url);
           const { tags, metaRobots } = parseMetaTags(html);
           const expected = buildExpectedTags(route);
-          const ogDiffs = enabledChecks.has("og") ? diffTags(tags, expected.tags) : [];
+          const tolerantKeys = tolerantKeysFor(route);
+          const ogDiffs = enabledChecks.has("og")
+            ? diffTags(tags, expected.tags, { tolerantKeys })
+            : [];
 
           // Chaque issue a un `severity` : "always" (toujours bloquant) ou
           // "prerender" (dépend du pré-rendu, warn hors --strict sauf home).
