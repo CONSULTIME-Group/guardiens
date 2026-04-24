@@ -40,13 +40,20 @@ const CATEGORY_COLORS: Record<
   village: { bg: "bg-sky-100", text: "text-sky-900", bar: "bg-sky-500" },
 };
 
-// Cibles théoriques de la stratification (poids définis dans heroBank.ts).
-const TARGETS: Record<HeroCategoryName, number> = {
-  animals: 40,
-  home: 20,
-  mutual_aid: 20,
-  village: 20,
-};
+/**
+ * Calcule les cibles théoriques (en %) à partir des poids actifs (lus depuis
+ * la table `hero_weights`). Les poids ne somment pas forcément à 100, donc on
+ * normalise.
+ */
+function computeTargets(w: HeroWeights): Record<HeroCategoryName, number> {
+  const total = w.animals + w.home + w.mutual_aid + w.village || 1;
+  return {
+    animals: (w.animals / total) * 100,
+    home: (w.home / total) * 100,
+    mutual_aid: (w.mutual_aid / total) * 100,
+    village: (w.village / total) * 100,
+  };
+}
 
 const SAMPLE_SIZES = [1_000, 10_000, 50_000, 100_000];
 
