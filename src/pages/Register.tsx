@@ -155,49 +155,15 @@ const Register = () => {
         timeoutPromise,
       ]) as any;
 
-      // ── Vérification explicite que le profil a bien été créé par le trigger DB ──
+      // Pas de vérification client du profil ici : l'utilisateur n'a pas encore
+      // confirmé son email, donc aucune session active → toute requête
+      // SELECT profiles ou INSERT analytics_events avec user_id renvoie 401
+      // (RLS rôle anon). Le trigger handle_new_user crée le profil côté serveur.
+      // Le filet de sécurité "profil manquant" est posé sur le Dashboard,
+      // au premier login (session active, plus de 401).
       const newUserId = result?.user?.id ?? null;
-      let profileExists = false;
-      if (newUserId) {
-        const checkProfile = async () => {
-          const { data } = await supabase
-            .from("profiles")
-            .select("id")
-            .eq("id", newUserId)
-            .maybeSingle();
-          return !!data;
-        };
-        profileExists = await checkProfile();
-        if (!profileExists) {
-          // Petit délai pour laisser le trigger handle_new_user s'exécuter
-          await new Promise((r) => setTimeout(r, 500));
-          profileExists = await checkProfile();
-        }
-        if (!profileExists) {
-          try {
-            trackEventWithUserId(newUserId, "signup_failed", {
-              source: "/inscription",
-              metadata: {
-                stage: "profile_creation",
-                error_code: "trigger_missing",
-                error_message: "Profile row not found after signup",
-                role: selectedRole,
-              },
-            });
-          } catch {}
-          // ── Bloquer la finalisation : pas de flag first_dashboard_seen,
-          //    pas de signup_completed, pas de redirection /dashboard.
-          //    L'auth a réussi, l'utilisateur reste connecté côté Supabase,
-          //    on lui affiche un message clair et on arrête ici.
-          setFormError(
-            "Votre compte a été créé mais nous rencontrons un problème technique pour finaliser l'inscription. Rafraîchissez la page dans quelques secondes, ou contactez-nous si le problème persiste."
-          );
-          return;
-        }
-      }
 
       // Flag pour émettre user_activated lors du premier dashboard
-      // (uniquement si le profil existe bien)
       try {
         if (typeof window !== "undefined") {
           localStorage.setItem("first_dashboard_seen", "pending");
@@ -238,6 +204,7 @@ const Register = () => {
 
       // If auto-confirm enabled (session already created), go straight to dashboard
       if (result?.session) {
+        // Session active → on peut émettre signup_completed sans 401
         try {
           trackEventWithUserId(newUserId, "signup_completed", {
             source: "/inscription",
@@ -249,13 +216,11 @@ const Register = () => {
       }
 
       setStep("confirmation");
-      // Track signup completed (avec user_id explicite car session pas encore propagée)
-      try {
-        trackEventWithUserId(newUserId, "signup_completed", {
-          source: "/inscription",
-          metadata: { role: selectedRole, user_id: newUserId },
-        });
-      } catch {}
+      // NOTE : pas de signup_completed ici. Sans confirmation email, aucune session
+      // → INSERT analytics_events avec user_id = 401 (RLS rôle anon). Option A retenue :
+      // on s'appuie sur `user_activated` (émis depuis le Dashboard au premier login,
+      // session active) comme proxy de l'inscription complétée. Émission best-effort
+      // côté serveur reportée à un futur webhook Supabase.
     } catch (error: any) {
       // Track échec signup (normalisé)
       const rawMessage = error?.message || "unknown";

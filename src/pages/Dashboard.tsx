@@ -6,6 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import OwnerDashboard from "@/components/dashboard/OwnerDashboard";
 import SitterDashboard from "@/components/dashboard/SitterDashboard";
 import { trackEvent } from "@/lib/analytics";
+import { supabase } from "@/integrations/supabase/client";
 
 const Dashboard = () => {
   const { activeRole, user } = useAuth();
@@ -16,6 +17,7 @@ const Dashboard = () => {
   const isFirstRender = useRef(true);
   const welcomeShown = useRef(false);
   const activationFired = useRef(false);
+  const profileCheckFired = useRef(false);
 
   // Émettre user_activated UNE fois lors du premier affichage du dashboard
   // après inscription (flag posé dans Register.tsx).
@@ -46,6 +48,42 @@ const Dashboard = () => {
       // silencieux
     }
   }, [user?.id]);
+
+  // Filet de sécurité : si la session est active mais que le profil est introuvable
+  // en base (cas catastrophique du trigger handle_new_user cassé), on alerte sans
+  // bloquer l'accès. Sur une inscription normale, le profil existe → aucun toast.
+  useEffect(() => {
+    if (profileCheckFired.current) return;
+    if (!user?.id) return;
+    profileCheckFired.current = true;
+    (async () => {
+      try {
+        const { data, error } = await supabase
+          .from("profiles")
+          .select("id")
+          .eq("id", user.id)
+          .maybeSingle();
+        if (error) return; // erreur réseau / RLS : on ne déclenche pas le filet
+        if (!data) {
+          try {
+            await supabase.from("analytics_events").insert({
+              user_id: user.id,
+              event_type: "signup_failed",
+              source: "/dashboard",
+              metadata: { stage: "profile_creation", error_code: "trigger_missing", missing: "profile" },
+            });
+          } catch {}
+          toast({
+            variant: "destructive",
+            title: "Profil incomplet",
+            description: "Votre profil n'a pas été correctement créé. Contactez-nous à contact@guardiens.fr.",
+          });
+        }
+      } catch {
+        // silencieux
+      }
+    })();
+  }, [user?.id, toast]);
 
   useEffect(() => {
     if (!welcomeShown.current) {
