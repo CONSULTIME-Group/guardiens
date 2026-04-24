@@ -65,7 +65,7 @@ const Contact = () => {
     <div className="min-h-screen bg-background text-foreground">
       <PageMeta
         title="Contact — Guardiens"
-        description="Contactez l'équipe Guardiens pour toute question sur le house-sitting en Auvergne-Rhône-Alpes."
+        description="Contactez l'équipe Guardiens pour toute question sur le house-sitting de proximité."
         path="/contact"
       />
       <PublicHeader />
@@ -90,7 +90,7 @@ const Contact = () => {
             <div className="bg-card rounded-xl p-6">
               <MapPin className="h-6 w-6 text-primary mb-3" />
               <h3 className="font-heading font-semibold text-foreground mb-2">Localisation</h3>
-              <p>Lyon, Auvergne-Rhône-Alpes</p>
+              <p>Lyon, France</p>
             </div>
           </div>
 

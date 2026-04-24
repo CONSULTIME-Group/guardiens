@@ -11,7 +11,7 @@ const About = () => {
     <div className="min-h-screen bg-background text-foreground">
       <PageMeta
         title="À propos de Guardiens"
-        description="Découvrez l'histoire de Guardiens, née d'une passion pour les animaux et le house-sitting de proximité en Auvergne-Rhône-Alpes."
+        description="Découvrez l'histoire de Guardiens, née d'une passion pour les animaux et le house-sitting de proximité."
         path="/a-propos"
       />
       <PublicHeader />
@@ -58,7 +58,7 @@ const About = () => {
             Le problème, c'est que cette communauté restait invisible. Les plateformes internationales mettent en relation des gens qui ne se connaissent pas, à des centaines de kilomètres. Guardiens est né d'une frustration simple : permettre aux gens du coin de se faire confiance et de s'entraider — comme Elisa le fait depuis 2021.
           </p>
           <p>
-            Pas une marketplace anonyme. Un <strong className="text-foreground">réseau local de confiance</strong>, en Auvergne-Rhône-Alpes d'abord, basé à Lyon.
+            Pas une marketplace anonyme. Un <strong className="text-foreground">réseau local de confiance</strong>, basé à Lyon et ouvert à toute la France.
           </p>
         </div>
       </main>
