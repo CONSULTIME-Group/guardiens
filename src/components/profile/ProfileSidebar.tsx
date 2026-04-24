@@ -1,5 +1,6 @@
 import { CheckCircle2, Circle, Eye } from "lucide-react";
 import { Link } from "react-router-dom";
+import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
 
@@ -23,11 +24,13 @@ interface ProfileSidebarProps {
   publicProfileUrl: string;
   role: "sitter" | "owner";
   isFounder?: boolean;
+  scoreBreakdown?: ReactNode;
 }
 
 const ProfileSidebar = ({
   firstName, city, completion, sections,
   activeSection, onSectionClick, publicProfileUrl, role, isFounder,
+  scoreBreakdown,
 }: ProfileSidebarProps) => {
   return (
     <aside className="w-full lg:w-[280px] lg:sticky lg:top-24 lg:self-start space-y-5 shrink-0">
