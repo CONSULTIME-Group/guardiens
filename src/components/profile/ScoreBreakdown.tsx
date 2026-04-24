@@ -11,8 +11,10 @@ export interface ScoreCriterion {
 
 interface ScoreBreakdownProps {
   role: "sitter" | "owner";
-  /** Score réellement sauvegardé en base (référence). */
+  /** Score live calculé sur l'état affiché (mergedData). C'est ce qui pilote la jauge. */
   total: number;
+  /** Score réellement enregistré en base (référence pour la pédagogie). */
+  savedTotal?: number;
   essentials: ScoreCriterion[];
   bonuses: ScoreCriterion[];
   defaultOpen?: boolean;
