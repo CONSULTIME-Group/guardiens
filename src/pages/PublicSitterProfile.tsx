@@ -675,86 +675,128 @@ export default function PublicSitterProfile() {
       {/* ── Contenu principal z-1 ── */}
       <div className="relative z-[1]">
       {/* ── HERO FUSIONNÉ : SVG + HEADER ── */}
-      <div className="relative overflow-hidden w-full min-h-[240px] flex items-end bg-[#F0EDE6]">
+      <div className="relative overflow-hidden w-full min-h-[260px] sm:min-h-[300px] flex items-end bg-[#F0EDE6]">
         {/* SVG fond */}
         <div className="absolute inset-0 z-0 pointer-events-none">
           <svg viewBox="0 0 1200 240" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice" className="w-full h-full">
             <defs>
               <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#E8E4DC"/>
+                <stop offset="0%" stopColor="#DCEBE0"/>
+                <stop offset="55%" stopColor="#E8E4DC"/>
                 <stop offset="100%" stopColor="#F0EDE6"/>
               </linearGradient>
               <linearGradient id="fadeBottom" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="60%" stopColor="#F0EDE6" stopOpacity="0"/>
+                <stop offset="55%" stopColor="#F0EDE6" stopOpacity="0"/>
                 <stop offset="100%" stopColor="#FAF9F6" stopOpacity="1"/>
               </linearGradient>
+              <radialGradient id="sunGlow" cx="0.18" cy="0.2" r="0.5">
+                <stop offset="0%" stopColor="#F5E9C8" stopOpacity="0.55"/>
+                <stop offset="100%" stopColor="#F5E9C8" stopOpacity="0"/>
+              </radialGradient>
+              <radialGradient id="warmGlow" cx="0.85" cy="0.25" r="0.45">
+                <stop offset="0%" stopColor="#E8C9A0" stopOpacity="0.35"/>
+                <stop offset="100%" stopColor="#E8C9A0" stopOpacity="0"/>
+              </radialGradient>
             </defs>
             <rect width="1200" height="240" fill="url(#sky)"/>
-            <ellipse cx="200" cy="260" rx="300" ry="80" fill="#2D6A4F" opacity="0.06"/>
-            <ellipse cx="900" cy="270" rx="350" ry="90" fill="#2D6A4F" opacity="0.05"/>
-            <ellipse cx="600" cy="280" rx="400" ry="100" fill="#2D6A4F" opacity="0.07"/>
-            <rect x="0" y="208" width="1200" height="32" fill="#2D6A4F" opacity="0.08"/>
-            <g opacity="0.18" fill="#2D6A4F">
+            <rect width="1200" height="240" fill="url(#sunGlow)"/>
+            <rect width="1200" height="240" fill="url(#warmGlow)"/>
+            {/* Soleil doux */}
+            <circle cx="220" cy="58" r="32" fill="#F5E9C8" opacity="0.55"/>
+            <circle cx="220" cy="58" r="22" fill="#F2DDA8" opacity="0.5"/>
+            {/* Collines lointaines */}
+            <ellipse cx="200" cy="240" rx="320" ry="90" fill="#2D6A4F" opacity="0.13"/>
+            <ellipse cx="900" cy="245" rx="380" ry="100" fill="#2D6A4F" opacity="0.11"/>
+            <ellipse cx="600" cy="255" rx="420" ry="110" fill="#2D6A4F" opacity="0.15"/>
+            {/* Ligne de sol */}
+            <rect x="0" y="208" width="1200" height="32" fill="#2D6A4F" opacity="0.18"/>
+            {/* Maison gauche */}
+            <g opacity="0.32" fill="#2D6A4F">
               <rect x="80" y="160" width="60" height="50"/>
               <polygon points="80,160 140,160 110,128"/>
               <rect x="100" y="180" width="16" height="30"/>
               <rect x="88" y="168" width="12" height="12"/>
               <rect x="120" y="168" width="12" height="12"/>
+              <rect x="125" y="130" width="6" height="14"/>
             </g>
-            <g opacity="0.15" fill="#2D6A4F">
+            {/* Arbre */}
+            <g opacity="0.28" fill="#2D6A4F">
               <rect x="168" y="170" width="6" height="40"/>
-              <ellipse cx="171" cy="160" rx="18" ry="22"/>
+              <ellipse cx="171" cy="160" rx="20" ry="24"/>
             </g>
-            <g opacity="0.14" fill="#2D6A4F">
+            {/* Maison centrale (plus grande) */}
+            <g opacity="0.30" fill="#2D6A4F">
               <rect x="540" y="150" width="80" height="60"/>
               <polygon points="540,150 620,150 580,115"/>
               <rect x="565" y="178" width="20" height="32"/>
               <rect x="548" y="160" width="14" height="14"/>
               <rect x="598" y="160" width="14" height="14"/>
               <rect x="600" y="118" width="8" height="16"/>
+              {/* Fumée */}
+              <ellipse cx="606" cy="108" rx="6" ry="4" opacity="0.5"/>
+              <ellipse cx="612" cy="98" rx="7" ry="5" opacity="0.35"/>
             </g>
-            <g opacity="0.12" fill="#2D6A4F">
+            {/* Arbres autour */}
+            <g opacity="0.26" fill="#2D6A4F">
               <rect x="488" y="165" width="7" height="45"/>
-              <ellipse cx="491" cy="152" rx="22" ry="26"/>
+              <ellipse cx="491" cy="152" rx="24" ry="28"/>
             </g>
-            <g opacity="0.13" fill="#2D6A4F">
+            <g opacity="0.24" fill="#2D6A4F">
               <rect x="648" y="172" width="6" height="38"/>
-              <ellipse cx="651" cy="160" rx="17" ry="20"/>
+              <ellipse cx="651" cy="160" rx="19" ry="22"/>
             </g>
-            <g opacity="0.12" fill="#2D6A4F">
+            {/* Maison droite */}
+            <g opacity="0.24" fill="#2D6A4F">
               <rect x="980" y="165" width="55" height="45"/>
               <polygon points="980,165 1035,165 1007,136"/>
               <rect x="997" y="185" width="14" height="25"/>
               <rect x="986" y="173" width="10" height="10"/>
               <rect x="1015" y="173" width="10" height="10"/>
             </g>
-            <g opacity="0.11" fill="#2D6A4F">
+            <g opacity="0.22" fill="#2D6A4F">
               <rect x="1055" y="168" width="6" height="42"/>
-              <ellipse cx="1058" cy="156" rx="20" ry="24"/>
+              <ellipse cx="1058" cy="156" rx="22" ry="26"/>
             </g>
-            <g opacity="0.20" fill="#2D6A4F" transform="translate(340, 178)">
+            {/* Petite haie / buissons */}
+            <g opacity="0.18" fill="#2D6A4F">
+              <ellipse cx="350" cy="212" rx="40" ry="8"/>
+              <ellipse cx="780" cy="214" rx="55" ry="9"/>
+              <ellipse cx="1130" cy="213" rx="45" ry="8"/>
+            </g>
+            {/* Oiseaux */}
+            <g opacity="0.35" fill="none" stroke="#2D6A4F" strokeWidth="2" strokeLinecap="round">
+              <path d="M380 78 q6 -6 12 0 q6 -6 12 0"/>
+              <path d="M460 62 q5 -5 10 0 q5 -5 10 0"/>
+              <path d="M820 88 q5 -5 10 0 q5 -5 10 0"/>
+            </g>
+            {/* Chien */}
+            <g opacity="0.38" fill="#2D6A4F" transform="translate(340, 178)">
               <ellipse cx="30" cy="18" rx="28" ry="12"/>
               <circle cx="56" cy="12" r="10"/>
               <ellipse cx="62" cy="8" rx="5" ry="8" transform="rotate(15,62,8)"/>
-              <path d="M2,16 Q-12,8 -8,2" stroke="#2D6A4F" strokeWidth="3" fill="none" opacity="0.20"/>
+              <path d="M2,16 Q-12,8 -8,2" stroke="#2D6A4F" strokeWidth="3" fill="none" opacity="0.38"/>
               <rect x="8" y="28" width="5" height="14" rx="2"/>
               <rect x="18" y="28" width="5" height="12" rx="2"/>
               <rect x="35" y="28" width="5" height="14" rx="2"/>
               <rect x="45" y="28" width="5" height="12" rx="2"/>
               <ellipse cx="64" cy="16" rx="4" ry="3"/>
             </g>
-            <g opacity="0.16" fill="#2D6A4F" transform="translate(820, 180)">
+            {/* Chat */}
+            <g opacity="0.32" fill="#2D6A4F" transform="translate(820, 180)">
               <ellipse cx="16" cy="20" rx="14" ry="16"/>
               <circle cx="16" cy="6" r="10"/>
               <polygon points="8,0 4,-8 14,-2"/>
               <polygon points="24,0 28,-8 18,-2"/>
-              <path d="M30,28 Q44,20 40,10" stroke="#2D6A4F" strokeWidth="3" fill="none" opacity="0.16"/>
+              <path d="M30,28 Q44,20 40,10" stroke="#2D6A4F" strokeWidth="3" fill="none" opacity="0.32"/>
               <ellipse cx="11" cy="6" rx="2" ry="2.5" fill="#F0EDE6"/>
               <ellipse cx="21" cy="6" rx="2" ry="2.5" fill="#F0EDE6"/>
             </g>
             <rect width="1200" height="240" fill="url(#fadeBottom)"/>
           </svg>
         </div>
+
+        {/* Voile vignettage discret pour donner de la profondeur */}
+        <div className="absolute inset-0 z-[1] pointer-events-none" style={{ background: 'radial-gradient(ellipse at center, transparent 55%, rgba(45,106,79,0.06) 100%)' }} />
 
         {/* Dégradé bas */}
         <div className="absolute bottom-0 left-0 right-0 h-24 z-[1] bg-gradient-to-b from-transparent to-background pointer-events-none" />
