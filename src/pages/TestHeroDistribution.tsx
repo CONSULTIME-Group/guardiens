@@ -208,7 +208,7 @@ export default function TestHeroDistribution() {
             {(Object.keys(result.byCategory) as HeroCategoryName[]).map((cat) => {
               const count = result.byCategory[cat];
               const pct = (count / total) * 100;
-              const target = TARGETS[cat];
+              const target = targets[cat];
               const delta = pct - target;
               const colors = CATEGORY_COLORS[cat];
 
