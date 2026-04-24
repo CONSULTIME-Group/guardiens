@@ -119,7 +119,13 @@ export default function AdminHeroWeights() {
     draft.home !== liveWeights.home ||
     draft.mutual_aid !== liveWeights.mutual_aid ||
     draft.village !== liveWeights.village;
-  const canSave = isDirty && total > 0 && !saving;
+  // Validation : on bloque la sauvegarde tant qu'il reste une erreur bloquante.
+  const validation = useMemo(() => validateHeroBank(draft), [draft]);
+  const hasErrors = validation.issues.some((i) => i.severity === "error");
+  const warnings = validation.issues.filter((i) => i.severity === "warning");
+  const errors = validation.issues.filter((i) => i.severity === "error");
+
+  const canSave = isDirty && total > 0 && !saving && !hasErrors;
 
   // Aperçu : simulation sur 5k UUIDs avec les poids en cours d'édition.
   // Calculée à la demande pour ne pas figer l'UI pendant le drag des sliders.
@@ -165,6 +171,10 @@ export default function AdminHeroWeights() {
 
   /* ── Save ── */
   async function handleSave() {
+    if (hasErrors) {
+      toast.error("Configuration invalide : corrigez les erreurs avant d'enregistrer.");
+      return;
+    }
     setSaving(true);
     const { error } = await supabase
       .from("hero_weights")
