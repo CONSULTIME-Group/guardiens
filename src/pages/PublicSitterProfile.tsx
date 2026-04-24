@@ -1285,9 +1285,9 @@ export default function PublicSitterProfile() {
             )}
 
             {/* Pratique */}
-            <section aria-label="En pratique">
+            <section aria-label="Infos pratiques">
               <h2 className="text-xs uppercase tracking-wider text-muted-foreground font-body mb-3">
-                En pratique
+                Infos pratiques
               </h2>
               <PracticalGrid
                 animalTypes={animalTypes}
