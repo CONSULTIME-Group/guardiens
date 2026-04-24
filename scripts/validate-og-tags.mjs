@@ -1,22 +1,28 @@
 #!/usr/bin/env node
 /**
- * Validation OG/Twitter — compare les balises servies par chaque route publique
- * avec la source de vérité (siteRoutes.ts + DEFAULT_OG_IMAGE).
+ * Validation SEO complète — compare ce qui est servi sur chaque route publique
+ * à la source de vérité (siteRoutes.ts + DEFAULT_OG_IMAGE + index.html).
  *
- * Pour la home (`/`), un check supplémentaire compare aussi `index.html`
- * (balises statiques servies aux bots avant hydratation React).
- *
- * Reproduit la logique de PageMeta.tsx :
- *   - titre final = titre brut sans suffixe, puis " | Guardiens" sauf sur "/"
- *   - image = ogImage spécifique de la route, sinon DEFAULT_OG_IMAGE
+ * Checks couverts :
+ *   1. Balises OG / Twitter (titre, description, image, type, locale…)
+ *   2. <link rel="canonical"> → doit pointer vers SITE_URL + path
+ *   3. JSON-LD (Schema.org) → présence et validité JSON sur la home
+ *   4. sitemap.xml → toutes les routes publiques présentes avec bonne priorité
+ *   5. robots.txt → sitemap référencé, pas de conflit Disallow vs sitemap
+ *   6. meta robots → aucune route publique en noindex par erreur
  *
  * Usage :
- *   node scripts/validate-og-tags.mjs                         # cibles par défaut
+ *   node scripts/validate-og-tags.mjs                         # tout activé, cibles par défaut
  *   node scripts/validate-og-tags.mjs https://guardiens.fr    # origine explicite
  *   node scripts/validate-og-tags.mjs --paths=/,/tarifs,/faq  # limiter les routes
  *   node scripts/validate-og-tags.mjs --concurrency=4         # parallélisme réseau
  *   node scripts/validate-og-tags.mjs --strict                # échec sur toute divergence
+ *   node scripts/validate-og-tags.mjs --only=og,canonical     # limiter les checks
+ *   node scripts/validate-og-tags.mjs --skip=sitemap,robots   # exclure des checks
  *   TARGET_URL=https://... node scripts/validate-og-tags.mjs
+ *
+ * Checks disponibles (clés pour --only / --skip) :
+ *   og | canonical | schema | sitemap | robots | meta-robots
  *
  * Exit codes :
  *   0 = OK (home synchro ; autres routes non strictes ignorées)
