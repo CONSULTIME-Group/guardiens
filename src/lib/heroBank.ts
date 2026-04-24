@@ -88,6 +88,30 @@ export const HERO_BANK: readonly string[] = [
 ];
 
 /**
+ * Ancrage horizontal optimal pour chaque image, calculé hors-ligne par
+ * `scripts/analyze_hero_anchors.py` (analyse pixel des bords gauche/droit pour
+ * détecter spirales de carnet, texte parasite, hachures denses).
+ *
+ * Sémantique CSS object-position :
+ *   - 'left'   → object-position: 0%   → l'image colle à gauche, le crop rogne la DROITE
+ *   - 'right'  → object-position: 100% → l'image colle à droite, le crop rogne la GAUCHE
+ *   - 'center' → object-position: 50%  → bords équivalents, recadrage symétrique
+ *
+ * Distribution actuelle : 15 left / 33 center / 22 right (sur 70).
+ */
+export type HeroAnchor = "left" | "center" | "right";
+
+const HERO_ANCHORS: readonly HeroAnchor[] = [
+  "center", "center", "center", "left",   "center", "center", "right",  "right",  "right",  "center", // 01-10
+  "left",   "center", "center", "center", "center", "left",   "left",   "right",  "left",   "center", // 11-20
+  "left",   "right",  "center", "right",  "right",  "right",  "left",   "right",  "center", "right",  // 21-30
+  "right",  "right",  "right",  "center", "center", "left",   "center", "right",  "left",   "center", // 31-40
+  "left",   "center", "center", "center", "right",  "right",  "center", "center", "left",   "center", // 41-50
+  "right",  "center", "left",   "center", "right",  "center", "center", "left",   "right",  "left",   // 51-60
+  "center", "center", "center", "center", "center", "left",   "right",  "right",  "right",  "center", // 61-70
+];
+
+/**
  * Hash FNV-1a 32 bits (déterministe, distribution uniforme correcte).
  * Convertit une chaîne (typiquement un UUID) en index dans la banque.
  */
@@ -100,6 +124,11 @@ function hashStringToIndex(input: string, modulo: number): number {
   return hash % modulo;
 }
 
+function getIndex(sitterId?: string | null): number {
+  if (!sitterId) return 0;
+  return hashStringToIndex(sitterId, HERO_BANK.length);
+}
+
 /**
  * Retourne l'URL de l'image hero assignée à un gardien donné.
  * - Stable : un même ID donne toujours la même image.
@@ -108,7 +137,15 @@ function hashStringToIndex(input: string, modulo: number): number {
  * Fallback : si pas d'ID, on prend la première image.
  */
 export function getSitterHeroImage(sitterId?: string | null): string {
-  if (!sitterId) return HERO_BANK[0];
-  const index = hashStringToIndex(sitterId, HERO_BANK.length);
-  return HERO_BANK[index];
+  return HERO_BANK[getIndex(sitterId)];
 }
+
+/**
+ * Retourne l'ancrage horizontal optimal pour l'image assignée à ce gardien.
+ * À utiliser pour piloter `object-position` afin que les bords sales
+ * (spirales/texte parasite) soient rognés en priorité par object-cover.
+ */
+export function getSitterHeroAnchor(sitterId?: string | null): HeroAnchor {
+  return HERO_ANCHORS[getIndex(sitterId)] ?? "center";
+}
+

@@ -28,7 +28,7 @@ import TrustScore from "@/components/profile/TrustScore";
 import FavoriteButton from "@/components/shared/FavoriteButton";
 import ProfileSchemaOrg from "@/components/seo/ProfileSchemaOrg";
 import { hydrateReviewers } from "@/lib/hydrateReviewers";
-import { getSitterHeroImage } from "@/lib/heroBank";
+import { getSitterHeroImage, getSitterHeroAnchor } from "@/lib/heroBank";
 
 const capitalize = (name: string) =>
   name ? name.charAt(0).toUpperCase() + name.slice(1).toLowerCase() : "";
@@ -676,23 +676,36 @@ export default function PublicSitterProfile() {
       {/* ── Contenu principal z-1 ── */}
       <div className="relative z-[1]">
       {/* ── HERO FUSIONNÉ : illustration carnet de voyage (banque de 50, hashée par sitter.id) ── */}
-      <div className="relative overflow-hidden w-full min-h-[320px] sm:min-h-[360px] md:min-h-[340px] flex items-end bg-[#FBF6EC]">
-        {/* Illustration de fond — sketchbook style, déterministe par profil.
-            Recadrage responsive en 3 paliers pour éliminer les artefacts (spirales
-            de carnet, texte parasite) présents sur les marges des illustrations IA :
-              - mobile (<640) : zoom fort 125%, position centrée pour rogner les 4 bords
-              - tablette (≥640) : zoom 115%, légèrement décentré à droite
-              - desktop (≥768) : zoom 108%, recentré (les bords sortent naturellement) */}
-        <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
-          <img
-            src={getSitterHeroImage(id)}
-            alt=""
-            aria-hidden="true"
-            width={1536}
-            height={544}
-            className="w-full h-full object-cover origin-center scale-[1.25] sm:scale-[1.15] md:scale-[1.08] [object-position:50%_50%] sm:[object-position:58%_45%] md:[object-position:50%_42%]"
-          />
-        </div>
+      {(() => {
+        // Ancrage horizontal pré-calculé pour cette image (analyse pixel des bords).
+        // 'left'/'right' poussent l'image dans cette direction → object-cover rogne le côté opposé.
+        // Sur mobile on accentue (0% / 100%), sur tablette/desktop on adoucit (12% / 88%).
+        const anchor = getSitterHeroAnchor(id);
+        const posMobile = anchor === "left" ? "0% 50%" : anchor === "right" ? "100% 50%" : "50% 50%";
+        const posTablet = anchor === "left" ? "12% 45%" : anchor === "right" ? "88% 45%" : "50% 45%";
+        const posDesktop = anchor === "left" ? "20% 42%" : anchor === "right" ? "80% 42%" : "50% 42%";
+        return (
+          <div className="relative overflow-hidden w-full min-h-[320px] sm:min-h-[360px] md:min-h-[340px] flex items-end bg-[#FBF6EC]">
+            {/* Illustration de fond — sketchbook style, déterministe par profil.
+                Recadrage responsive : zoom + ancrage horizontal dynamique (left/center/right)
+                déterminé hors-ligne par analyse pixel pour rogner en priorité le bord
+                contenant les artefacts (spirales de carnet, texte parasite). */}
+            <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
+              <img
+                src={getSitterHeroImage(id)}
+                alt=""
+                aria-hidden="true"
+                width={1536}
+                height={544}
+                style={{
+                  ['--hero-pos-mobile' as string]: posMobile,
+                  ['--hero-pos-tablet' as string]: posTablet,
+                  ['--hero-pos-desktop' as string]: posDesktop,
+                  objectPosition: `var(--hero-pos-current, ${posMobile})`,
+                }}
+                className="w-full h-full object-cover origin-center scale-[1.25] sm:scale-[1.15] md:scale-[1.08] [--hero-pos-current:var(--hero-pos-mobile)] sm:[--hero-pos-current:var(--hero-pos-tablet)] md:[--hero-pos-current:var(--hero-pos-desktop)]"
+              />
+            </div>
 
         {/* Vignettage très subtil */}
         <div className="absolute inset-0 z-[1] pointer-events-none" style={{ background: 'radial-gradient(ellipse at center, transparent 55%, rgba(90,69,48,0.08) 100%)' }} />
@@ -799,7 +812,9 @@ export default function PublicSitterProfile() {
             </div>
           </div>
         </div>
-      </div>
+          </div>
+        );
+      })()}
 
       {/* ── BARRE D'ONGLETS — visible si ≥ 2 onglets ── */}
       {availableTabs > 1 && (
