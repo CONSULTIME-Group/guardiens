@@ -40,7 +40,15 @@ const ProfileSidebar = ({
   activeSection, onSectionClick, publicProfileUrl, role, isFounder,
   scoreBreakdown,
 }: ProfileSidebarProps) => {
+  const [expandedMissing, setExpandedMissing] = useState<Record<string, boolean>>({});
+
+  const toggleExpanded = (id: string) => (e: MouseEvent) => {
+    e.stopPropagation();
+    setExpandedMissing(prev => ({ ...prev, [id]: !prev[id] }));
+  };
+
   return (
+    <TooltipProvider delayDuration={200}>
     <aside className="w-full lg:w-[280px] lg:sticky lg:top-24 lg:self-start space-y-5 shrink-0">
       {/* Name + city + founder badge */}
       <div className="text-center space-y-1">
