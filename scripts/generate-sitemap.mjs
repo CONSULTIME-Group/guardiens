@@ -237,9 +237,8 @@ async function main() {
   for (const e of depts) entries.push(urlEntry(e.loc, e.lastmod, e.changefreq, e.priority));
   for (const e of breeds) entries.push(urlEntry(e.loc, e.lastmod, e.changefreq, e.priority));
   for (const e of profiles) entries.push(urlEntry(e.loc, e.lastmod, e.changefreq, e.priority));
-  for (const page of legalPages) {
-    entries.push(urlEntry(page.loc, today, page.changefreq, page.priority));
-  }
+  // Pages légales (/cgu, /confidentialite, /mentions-legales) déjà incluses
+  // dans staticPages via staticRoutes — ne pas les ré-ajouter ici.
 
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
