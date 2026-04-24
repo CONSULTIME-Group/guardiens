@@ -109,6 +109,7 @@ export function HeroPickerModal({
       });
 
       onSaved(newIndex);
+      setPreviewIndex(null);
       onClose();
     } catch (err) {
       console.error("Erreur sauvegarde hero_image_index:", err);
@@ -121,6 +122,17 @@ export function HeroPickerModal({
       setSaving(false);
     }
   }
+
+  // Données de l'image en aperçu (si applicable).
+  const previewItem =
+    previewIndex !== null
+      ? {
+          idx: previewIndex,
+          src: HERO_BANK[previewIndex],
+          mobileSrc: getMobileByIndex(previewIndex),
+          category: getCategoryByBankIndex(previewIndex),
+        }
+      : null;
 
   return (
     <Dialog open={open} onOpenChange={(v) => !v && !saving && onClose()}>
