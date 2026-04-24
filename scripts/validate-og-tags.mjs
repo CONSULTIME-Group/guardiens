@@ -294,6 +294,52 @@ async function expandDynamicRoutes(dynamicConfigs, origin, siteUrl, defaultOgIma
   return expanded;
 }
 
+/**
+ * Pour chaque DynamicRouteConfig avec `sampleParams`, construit UNE route
+ * "sample" en mode strict : le slug/id/city est remplacé par l'exemple fourni,
+ * et le titre/description attendus sont soit `sampleTitle`/`sampleDescription`
+ * explicites, soit interpolés depuis `title`/`metaDescription`.
+ *
+ * Ces routes s'affichent toujours (indépendamment de --include-dynamic) et
+ * valident strictement les balises OG, ce qui permet de détecter toute
+ * régression du rendu dynamique sans scanner le sitemap complet.
+ */
+function buildSampleRoutes(dynamicConfigs, defaultOgImage) {
+  if (!dynamicConfigs || dynamicConfigs.length === 0) return [];
+  const samples = [];
+  for (const cfg of dynamicConfigs) {
+    if (!cfg.sampleParams) continue;
+    const { params } = patternToRegex(cfg.pathPattern);
+    // Vérifie que tous les params du pattern sont fournis dans sampleParams
+    const missing = params.filter((p) => !(p in cfg.sampleParams));
+    if (missing.length > 0) {
+      console.log(c("yellow", `  ⚠️  sampleParams incomplet pour ${cfg.pathPattern} (manque: ${missing.join(", ")})`));
+      continue;
+    }
+    const path_ = cfg.pathPattern.replace(
+      /:([a-zA-Z_][a-zA-Z0-9_]*)/g,
+      (_, k) => cfg.sampleParams[k],
+    );
+    const rawTitle = cfg.sampleTitle ?? interpolateTemplate(cfg.title, cfg.sampleParams);
+    const description = cfg.sampleDescription ?? interpolateTemplate(cfg.description, cfg.sampleParams);
+    samples.push({
+      path: path_,
+      rawTitle,
+      description,
+      image: cfg.image || defaultOgImage,
+      sitemapPriority: cfg.sitemapPriority,
+      changeFreq: cfg.changeFreq,
+      isDynamic: true,
+      isSample: true,             // marque : validation STRICTE (pas de tolérance)
+      pathPattern: cfg.pathPattern,
+      // Important : dynamicTitle/Description à false pour comparer exactement
+      dynamicTitle: false,
+      dynamicDescription: false,
+    });
+  }
+  return samples;
+}
+
 // ──────────────────────────────────────────────────────────────
 // 2. Reproduire la logique de titre de PageMeta.tsx
 // ──────────────────────────────────────────────────────────────
