@@ -32,14 +32,13 @@ const profileRow: Record<string, any> = {
 const sitterUpdates: any[] = []; // capture des payloads UPDATE
 
 vi.mock("@/integrations/supabase/client", () => {
-  // Builder permissif : chaque méthode chaînable retourne un objet exposant
-  // toutes les variantes terminales utilisées par le hook.
   const buildChain = (resolver: () => Promise<any>): any => ({
     eq: () => buildChain(resolver),
     select: () => buildChain(resolver),
     single: resolver,
     maybeSingle: resolver,
-    then: (cb: any) => resolver().then(cb),
+    then: (cb: any, errCb?: any) => resolver().then(cb, errCb),
+    catch: (cb: any) => resolver().catch(cb),
   });
 
   const sitterTable = () => ({
@@ -61,11 +60,17 @@ vi.mock("@/integrations/supabase/client", () => {
   return {
     supabase: {
       from: (table: string) => {
+        // eslint-disable-next-line no-console
+        console.log("[mock] from()", table);
         if (table === "sitter_profiles") return sitterTable();
         if (table === "past_animals") return pastAnimalsTable();
         return profileTable();
       },
-      rpc: async () => ({ data: 60, error: null }),
+      rpc: async (...args: any[]) => {
+        // eslint-disable-next-line no-console
+        console.log("[mock] rpc()", args[0]);
+        return { data: 60, error: null };
+      },
     },
   };
 });
