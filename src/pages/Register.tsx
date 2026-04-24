@@ -204,6 +204,7 @@ const Register = () => {
 
       // If auto-confirm enabled (session already created), go straight to dashboard
       if (result?.session) {
+        // Session active → on peut émettre signup_completed sans 401
         try {
           trackEventWithUserId(newUserId, "signup_completed", {
             source: "/inscription",
@@ -215,13 +216,11 @@ const Register = () => {
       }
 
       setStep("confirmation");
-      // Track signup completed (avec user_id explicite car session pas encore propagée)
-      try {
-        trackEventWithUserId(newUserId, "signup_completed", {
-          source: "/inscription",
-          metadata: { role: selectedRole, user_id: newUserId },
-        });
-      } catch {}
+      // NOTE : pas de signup_completed ici. Sans confirmation email, aucune session
+      // → INSERT analytics_events avec user_id = 401 (RLS rôle anon). Option A retenue :
+      // on s'appuie sur `user_activated` (émis depuis le Dashboard au premier login,
+      // session active) comme proxy de l'inscription complétée. Émission best-effort
+      // côté serveur reportée à un futur webhook Supabase.
     } catch (error: any) {
       // Track échec signup (normalisé)
       const rawMessage = error?.message || "unknown";
