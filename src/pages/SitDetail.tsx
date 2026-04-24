@@ -107,40 +107,40 @@ const SitDetail = () => {
   useEffect(() => {
     if (!id) return;
     const load = async () => {
-      const { data: sitData } = await supabase.from("sits").select("*").eq("id", id).maybeSingle();
+      const { data: sitRows } = await supabase.from("sits").select("*").eq("id", id).limit(1);
+      const sitData = sitRows?.[0];
       if (!sitData) { setLoading(false); return; }
       setSit(sitData as SitData);
       setLogementOverride((sitData as any).logement_override || "");
       setAnimauxOverride((sitData as any).animaux_override || "");
 
-      // Note : on lit `public_profiles` (vue publique sécurisée) et non `profiles`
-      // (RLS restreinte au propriétaire) pour que la fiche reste lisible par
-      // les gardiens connectés. `.maybeSingle()` évite les 406 quand RLS filtre.
       const [ownerRes, propRes, ownerProfRes, reviewsRes] = await Promise.all([
-        supabase.from("public_profiles").select("*").eq("id", sitData.user_id).maybeSingle(),
-        supabase.from("properties").select("*").eq("id", sitData.property_id).maybeSingle(),
-        supabase.from("owner_profiles").select("*").eq("user_id", sitData.user_id).maybeSingle(),
+        supabase.from("public_profiles").select("*").eq("id", sitData.user_id).limit(1),
+        supabase.from("properties").select("*").eq("id", sitData.property_id).limit(1),
+        supabase.from("owner_profiles").select("*").eq("user_id", sitData.user_id).limit(1),
         supabase.from("reviews").select("*, reviewer:profiles!reviews_reviewer_id_fkey(first_name, avatar_url)").eq("reviewee_id", sitData.user_id).eq("published", true),
       ]);
 
-      setOwner(ownerRes.data);
-      setProperty(propRes.data);
-      setOwnerProfile(ownerProfRes.data);
+      const ownerData = ownerRes.data?.[0] ?? null;
+      const propertyData = propRes.data?.[0] ?? null;
+      const ownerProfileData = ownerProfRes.data?.[0] ?? null;
+
+      setOwner(ownerData);
+      setProperty(propertyData);
+      setOwnerProfile(ownerProfileData);
       setReviews(reviewsRes.data || []);
 
-      // Geocode city for map
-      if (ownerRes.data?.city) {
-        geocodeCity(ownerRes.data.city).then((result) => {
+      if (ownerData?.city) {
+        geocodeCity(ownerData.city).then((result) => {
           if (result) setCoords({ lat: result.lat, lng: result.lng });
         });
       }
 
-      if (propRes.data) {
-        const { data: petsData } = await supabase.from("pets").select("*").eq("property_id", propRes.data.id);
+      if (propertyData) {
+        const { data: petsData } = await supabase.from("pets").select("*").eq("property_id", propertyData.id);
         setPets(petsData || []);
       }
 
-      // Fetch application counts (active = non rejetées/annulées ; pending = à traiter)
       const [allAppsRes, pendingAppsRes] = await Promise.all([
         supabase.from("applications").select("id", { count: "exact", head: true }).eq("sit_id", id!).not("status", "in", "(rejected,cancelled)"),
         supabase.from("applications").select("id", { count: "exact", head: true }).eq("sit_id", id!).in("status", ["pending", "viewed", "discussing"]),
@@ -150,13 +150,13 @@ const SitDetail = () => {
 
       if (user) {
         const [spRes, appRes, reviewRes] = await Promise.all([
-          supabase.from("sitter_profiles").select("*").eq("user_id", user.id).maybeSingle(),
-          supabase.from("applications").select("id").eq("sit_id", id!).eq("sitter_id", user.id).maybeSingle(),
-          supabase.from("reviews").select("id").eq("sit_id", id!).eq("reviewer_id", user.id).maybeSingle(),
+          supabase.from("sitter_profiles").select("*").eq("user_id", user.id).limit(1),
+          supabase.from("applications").select("id").eq("sit_id", id!).eq("sitter_id", user.id).limit(1),
+          supabase.from("reviews").select("id").eq("sit_id", id!).eq("reviewer_id", user.id).limit(1),
         ]);
-        setSitterProfile(spRes.data);
-        if (appRes.data) setHasApplied(true);
-        setHasReviewedThisSit(!!reviewRes.data);
+        setSitterProfile(spRes.data?.[0] ?? null);
+        if (appRes.data?.[0]) setHasApplied(true);
+        setHasReviewedThisSit(!!reviewRes.data?.[0]);
       }
 
       setLoading(false);

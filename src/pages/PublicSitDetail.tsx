@@ -56,21 +56,24 @@ const PublicSitDetail = () => {
   useEffect(() => {
     if (!id) return;
     const load = async () => {
-      const { data: sitData } = await supabase.from("sits").select("*").eq("id", id).maybeSingle();
+      const { data: sitRows } = await supabase.from("sits").select("*").eq("id", id).limit(1);
+      const sitData = sitRows?.[0];
       if (!sitData) { setLoading(false); return; }
       setSit(sitData);
 
       // public_profiles : vue publique (RLS de profiles bloque les autres users)
       const [ownerRes, propRes, reviewsRes, badgeRes] = await Promise.all([
-        supabase.from("public_profiles").select("id, first_name, city, avatar_url, identity_verified, bio").eq("id", sitData.user_id).maybeSingle(),
-        supabase.from("properties").select("*").eq("id", sitData.property_id).maybeSingle(),
+        supabase.from("public_profiles").select("id, first_name, city, avatar_url, identity_verified, bio").eq("id", sitData.user_id).limit(1),
+        supabase.from("properties").select("*").eq("id", sitData.property_id).limit(1),
         supabase.from("reviews").select("overall_rating").eq("reviewee_id", sitData.user_id).eq("published", true),
         supabase.from("badge_attributions").select("badge_id").eq("user_id", sitData.user_id),
       ]);
 
+      const ownerData = ownerRes.data?.[0] ?? null;
+      const propertyData = propRes.data?.[0] ?? null;
 
-      setOwner(ownerRes.data);
-      setProperty(propRes.data);
+      setOwner(ownerData);
+      setProperty(propertyData);
 
       const reviews = reviewsRes.data || [];
       setReviewCount(reviews.length);
@@ -82,14 +85,14 @@ const PublicSitDetail = () => {
       (badgeRes.data || []).forEach((b: any) => badgeMap.set(b.badge_key, (badgeMap.get(b.badge_key) || 0) + 1));
       setBadges(Array.from(badgeMap.entries()).map(([badge_key, count]) => ({ badge_key, count })).sort((a, b) => b.count - a.count));
 
-      if (propRes.data) {
-        const { data: petsData } = await supabase.from("pets").select("*").eq("property_id", propRes.data.id);
+      if (propertyData) {
+        const { data: petsData } = await supabase.from("pets").select("*").eq("property_id", propertyData.id);
         setPets(petsData || []);
       }
 
       if (user) {
-        const { data: appRes } = await supabase.from("applications").select("id").eq("sit_id", id!).eq("sitter_id", user.id).maybeSingle();
-        if (appRes) setHasApplied(true);
+        const { data: appRows } = await supabase.from("applications").select("id").eq("sit_id", id!).eq("sitter_id", user.id).limit(1);
+        if (appRows?.[0]) setHasApplied(true);
       }
 
       // ── Résolution viewer_type ──
@@ -101,13 +104,13 @@ const PublicSitDetail = () => {
           // Check admin role
           let isAdmin = false;
           try {
-            const { data: roleRes } = await supabase
+            const { data: roleRows } = await supabase
               .from("user_roles")
               .select("role")
               .eq("user_id", user.id)
               .eq("role", "admin")
-              .maybeSingle();
-            isAdmin = !!roleRes;
+              .limit(1);
+            isAdmin = !!roleRows?.[0];
           } catch {
             isAdmin = false;
           }
