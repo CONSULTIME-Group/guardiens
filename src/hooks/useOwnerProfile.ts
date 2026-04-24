@@ -289,7 +289,7 @@ export function useOwnerProfile() {
       // Recompute canonical completion server-side and refresh local + global state
       await supabase.rpc("calculate_profile_completion", { p_user_id: user.id });
       // Re-fetch fresh data from DB so the sidebar reflects committed state immediately.
-      await fetchData();
+      await fetchData({ silent: true });
       await refreshCompletion();
       await refreshProfile();
 
