@@ -126,9 +126,31 @@ const ShareButtons = ({ sitId, title, city, startDate, endDate, source = "sit_de
         <Share2 className="h-4 w-4 text-primary" />
         <p className="font-heading font-semibold text-sm">Partagez cette annonce</p>
       </div>
-      <p className="text-xs text-muted-foreground mb-4">
+      <p className="text-xs text-muted-foreground mb-3">
         Plus elle est vue, plus vite vous trouverez un gardien du coin.
       </p>
+
+      {(periodLabel || city) && (
+        <div className="mb-4 rounded-lg border border-primary/20 bg-primary/5 p-3 text-sm">
+          <p className="text-xs uppercase tracking-wide text-muted-foreground mb-1.5">
+            Vous partagez
+          </p>
+          <div className="space-y-1">
+            {periodLabel && (
+              <div className="flex items-center gap-2 font-medium text-foreground">
+                <Calendar className="h-4 w-4 text-primary shrink-0" />
+                <span>{periodLabel}</span>
+              </div>
+            )}
+            {city && (
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <MapPin className="h-4 w-4 shrink-0" />
+                <span>{city}</span>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2">
         <Button
