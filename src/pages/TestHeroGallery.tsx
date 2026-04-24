@@ -182,8 +182,13 @@ export default function TestHeroGallery() {
       {/* ── Grille ── */}
       <div className="max-w-7xl mx-auto px-4 py-6">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filtered.map((it) => (
-            <HeroCard key={it.idx} item={it} viewMode={viewMode} />
+          {filtered.map((it, i) => (
+            <HeroCard
+              key={it.idx}
+              item={it}
+              viewMode={viewMode}
+              onZoom={() => setZoomIdx(i)}
+            />
           ))}
         </div>
 
@@ -193,6 +198,22 @@ export default function TestHeroGallery() {
           </div>
         )}
       </div>
+
+      {/* ── Modal de zoom plein écran ── */}
+      {zoomIdx !== null && filtered[zoomIdx] && (
+        <HeroZoomModal
+          item={filtered[zoomIdx]}
+          hasPrev={zoomIdx > 0}
+          hasNext={zoomIdx < filtered.length - 1}
+          onPrev={() => setZoomIdx((i) => (i !== null && i > 0 ? i - 1 : i))}
+          onNext={() =>
+            setZoomIdx((i) =>
+              i !== null && i < filtered.length - 1 ? i + 1 : i
+            )
+          }
+          onClose={() => setZoomIdx(null)}
+        />
+      )}
     </div>
   );
 }
