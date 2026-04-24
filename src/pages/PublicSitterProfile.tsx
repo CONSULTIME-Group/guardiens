@@ -212,9 +212,9 @@ export default function PublicSitterProfile() {
         </div>
         <p className="text-sm text-foreground/70 font-body">
           {props.hasVehicle
-            ? `Avec véhicule${props.radius ? ` — rayon ${props.radius} km autour de ${props.city || 'sa ville'}` : ''}`
+            ? `Avec véhicule${props.radius ? ` — rayon ${props.radius} km${props.city ? ` · ${props.city}` : ''}` : ''}`
             : props.radius
-              ? `Rayon ${props.radius} km autour de ${props.city || 'sa ville'}`
+              ? `Rayon ${props.radius} km${props.city ? ` · ${props.city}` : ''}`
               : 'Rayon non renseigné'}
         </p>
       </div>
