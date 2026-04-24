@@ -24,6 +24,7 @@ import {
   HERO_BANK,
   getSitterHeroImage,
   getCategoryByBankIndex,
+  validateHeroBank,
   type HeroCategoryName,
   type HeroWeights,
   DEFAULT_HERO_WEIGHTS,
