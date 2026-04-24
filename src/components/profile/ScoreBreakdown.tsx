@@ -11,8 +11,10 @@ export interface ScoreCriterion {
 
 interface ScoreBreakdownProps {
   role: "sitter" | "owner";
-  /** Score réellement sauvegardé en base (référence). */
+  /** Score live calculé sur l'état affiché (mergedData). C'est ce qui pilote la jauge. */
   total: number;
+  /** Score réellement enregistré en base (référence pour la pédagogie). */
+  savedTotal?: number;
   essentials: ScoreCriterion[];
   bonuses: ScoreCriterion[];
   defaultOpen?: boolean;
@@ -55,6 +57,7 @@ const Row = ({ c }: { c: ScoreCriterion }) => (
 const ScoreBreakdown = ({
   role,
   total,
+  savedTotal,
   essentials,
   bonuses,
   defaultOpen = false,
@@ -68,13 +71,12 @@ const ScoreBreakdown = ({
   const sumBonuses = bonuses.reduce((s, c) => s + (c.ok ? c.points : 0), 0);
   const maxBonuses = bonuses.reduce((s, c) => s + c.points, 0);
 
-  /**
-   * Score simulé à partir des critères live (essentials + bonuses).
-   * Réplique fidèle de la fonction SQL calculate_profile_completion :
-   * la somme des poids des critères vaut 100 par construction (cf. barème v2).
-   */
-  const previewTotal = Math.min(100, Math.max(0, sumEssentials + sumBonuses));
-  const delta = previewTotal - total;
+  // `total` est désormais le score live (essentials + bonuses, déterministe).
+  // `savedTotal` (optionnel) est la valeur enregistrée en base. Le badge d'aperçu
+  // s'affiche dès qu'il y a un brouillon ET un écart entre live et DB.
+  const previewTotal = total;
+  const referenceTotal = savedTotal ?? total;
+  const delta = previewTotal - referenceTotal;
   const showPreview = isDirty && delta !== 0;
 
   return (
@@ -91,7 +93,7 @@ const ScoreBreakdown = ({
             <Sparkles className="h-3.5 w-3.5 text-primary shrink-0" aria-hidden />
             <p className="text-xs text-foreground truncate">
               <span className="text-muted-foreground">Aperçu&nbsp;: </span>
-              <span className="tabular-nums font-medium">{total}</span>
+              <span className="tabular-nums font-medium">{referenceTotal}</span>
               <span className="text-muted-foreground"> → </span>
               <span
                 className={cn(
@@ -157,13 +159,18 @@ const ScoreBreakdown = ({
                 {" "}
                 Score actuellement enregistré&nbsp;:
                 {" "}
-                <span className="tabular-nums">{total}/100</span>.
+                <span className="tabular-nums">{referenceTotal}/100</span>.
               </>
             ) : (
               <>
-                Votre score ({total}/100) suit le barème {role === "sitter" ? "Gardien" : "Propriétaire"}.
-                Les <strong className="text-foreground">essentiels</strong> pèsent l'essentiel des points,
-                les bonus complètent.
+                Votre score ({previewTotal}/100) suit le barème {role === "sitter" ? "Gardien" : "Propriétaire"}.
+                Les <strong className="text-foreground">essentiels</strong> pèsent {maxEssentials} points,
+                les <strong className="text-foreground">bonus</strong> {maxBonuses} points (total 100).
+                {savedTotal !== undefined && savedTotal !== previewTotal && (
+                  <>
+                    {" "}<span className="text-muted-foreground/80">Dernière valeur enregistrée&nbsp;: {savedTotal}/100.</span>
+                  </>
+                )}
               </>
             )}
           </p>
