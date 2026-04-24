@@ -343,8 +343,15 @@ export default function PublicSitterProfile() {
             .eq("verification_status", "verified"),
         ]);
 
-      // Store in local variables before setState
-      const fetchedPublicProfile = profileRes?.data ?? baseProfileRes?.data ?? null;
+      // Store in local variables before setState.
+      // ⚠️ `public_profiles` (vue publique) ne contient PAS `hero_image_index` —
+      // on doit donc le merger explicitement depuis `profiles` pour que la
+      // sélection manuelle survive au reload.
+      const publicData = profileRes?.data ?? null;
+      const baseData = baseProfileRes?.data ?? null;
+      const fetchedPublicProfile = publicData
+        ? { ...publicData, hero_image_index: baseData?.hero_image_index ?? null }
+        : baseData;
       const fetchedSitterProfile = sitterRes?.data ?? null;
       const fetchedOwnerProfile = (ownerRes?.data as OwnerProfileData | null) ?? null;
       const fetchedEmergencyProfile = emergencyRes?.data ?? null;
