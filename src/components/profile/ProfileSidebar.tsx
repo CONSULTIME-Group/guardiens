@@ -1,7 +1,13 @@
 import { CheckCircle2, Circle, Eye } from "lucide-react";
 import { Link } from "react-router-dom";
-import type { ReactNode } from "react";
+import { useState, type ReactNode, type MouseEvent } from "react";
 import { cn } from "@/lib/utils";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 
 export interface SidebarSection {
