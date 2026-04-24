@@ -49,7 +49,22 @@ export interface DynamicRouteConfig {
   dynamicTitle?: boolean;
   /** Idem pour la description (ex. extraite du corps de l'article). */
   dynamicDescription?: boolean;
-}
+  /**
+   * Exemple de paramètres (slug/id/city…) pour valider strictement le rendu d'une
+   * instance représentative. Le script construit la page correspondante, interpole
+   * `title` et `metaDescription` avec ces valeurs et compare exactement, même si
+   * `dynamicTitle` / `dynamicDescription` sont à true pour le reste du groupe.
+   * Ex: { slug: "nouveaux-tarifs-2026" } pour /actualites/:slug.
+   */
+  sampleParams?: Record<string, string>;
+  /**
+   * Titre attendu précis pour l'instance `sampleParams`. Si absent, le script
+   * interpole `title` avec `sampleParams`. Utile quand le titre réel diffère du
+   * pattern générique (ex. titre d'article éditorial).
+   */
+  sampleTitle?: string;
+  /** Description attendue précise pour l'instance `sampleParams`. */
+  sampleDescription?: string;
 
 export const staticRoutes: SiteRoute[] = [
   {
