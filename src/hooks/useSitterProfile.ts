@@ -181,7 +181,7 @@ export function useSitterProfile() {
       setPastAnimals([]);
     }
 
-    setLoading(false);
+    if (!opts?.silent) setLoading(false);
   }, [user]);
 
   useEffect(() => { fetchData(); }, [fetchData]);
