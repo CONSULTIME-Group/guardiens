@@ -54,6 +54,8 @@ const DEFAULT_ORIGINS = [
 const cliArgs = process.argv.slice(2);
 const pathsArg = cliArgs.find((a) => a.startsWith("--paths="));
 const concurrencyArg = cliArgs.find((a) => a.startsWith("--concurrency="));
+const onlyArg = cliArgs.find((a) => a.startsWith("--only="));
+const skipArg = cliArgs.find((a) => a.startsWith("--skip="));
 const originArgs = cliArgs.filter(
   (a) => !a.startsWith("--") && /^https?:\/\//i.test(a),
 );
@@ -65,6 +67,18 @@ const concurrency = concurrencyArg
   ? Math.max(1, parseInt(concurrencyArg.slice("--concurrency=".length), 10) || 3)
   : 3;
 const strictMode = cliArgs.includes("--strict");
+
+// Checks disponibles et filtrage --only / --skip
+const ALL_CHECKS = ["og", "canonical", "schema", "sitemap", "robots", "meta-robots"];
+const onlySet = onlyArg
+  ? new Set(onlyArg.slice("--only=".length).split(",").map((s) => s.trim()).filter(Boolean))
+  : null;
+const skipSet = skipArg
+  ? new Set(skipArg.slice("--skip=".length).split(",").map((s) => s.trim()).filter(Boolean))
+  : new Set();
+const enabledChecks = new Set(
+  ALL_CHECKS.filter((c) => (onlySet ? onlySet.has(c) : true) && !skipSet.has(c)),
+);
 
 const origins = originArgs.length > 0
   ? originArgs
