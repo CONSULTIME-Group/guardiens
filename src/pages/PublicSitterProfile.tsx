@@ -1088,7 +1088,7 @@ export default function PublicSitterProfile() {
                   </button>
                 )}
                 <p className="text-xs text-muted-foreground font-body sm:ml-2 self-center text-center sm:text-left">
-                  Réponse directe — pas de frais d'intermédiation.
+                  Contact direct, sans intermédiaire.
                 </p>
               </div>
             )}
