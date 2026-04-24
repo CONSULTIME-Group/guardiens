@@ -1087,7 +1087,7 @@ export default function PublicSitterProfile() {
                     Contacter {firstName}
                   </button>
                 )}
-                <p className="text-xs text-muted-foreground font-body sm:ml-2 self-center text-center sm:text-left">
+                <p className="text-[11px] sm:text-xs text-muted-foreground font-body sm:ml-2 self-center text-center sm:text-left leading-snug break-words">
                   Contact direct, sans intermédiaire.
                 </p>
               </div>
