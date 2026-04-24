@@ -21,8 +21,9 @@ import {
   ChevronLeft, ChevronRight,
   Shield, Star, PawPrint,
   Home, KeyRound, Handshake, Heart,
-  Image as ImageIcon, Check,
+  Image as ImageIcon,
 } from "lucide-react";
+import { HeroPickerModal } from "@/components/profile/HeroPickerModal";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import PublicExperiences from "@/components/profile/PublicExperiences";
 import TrustScore from "@/components/profile/TrustScore";
