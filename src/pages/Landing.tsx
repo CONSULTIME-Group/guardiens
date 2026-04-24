@@ -317,6 +317,74 @@ const Landing = () => {
         </div>
       </section>
 
+      {/* ═══════════════ SECTION — POURQUOI PUBLIER VOTRE ANNONCE ═══════════════ */}
+      <section className="bg-background py-16 md:py-20">
+        <div className="max-w-6xl mx-auto px-4">
+          <h2 className="text-3xl md:text-4xl font-heading font-bold text-center text-foreground">
+            Pourquoi publier votre annonce sur Guardiens ?
+          </h2>
+          <p className="text-lg text-muted-foreground text-center mt-2 max-w-2xl mx-auto">
+            Des gardiens de votre région, vérifiés, pour partir l'esprit tranquille.
+          </p>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-12">
+            <div className="bg-card border border-border rounded-xl p-6">
+              <Gift className="w-10 h-10 text-primary" />
+              <h3 className="mt-4 font-heading font-semibold text-lg text-foreground">100% gratuit, pour toujours</h3>
+              <p className="mt-2 text-muted-foreground text-sm leading-relaxed">
+                Publier votre annonce, recevoir des candidatures, échanger avec les gardiens : tout est gratuit pour les propriétaires. Sans limite de temps.
+              </p>
+            </div>
+
+            <div className="bg-card border border-border rounded-xl p-6">
+              <Coffee className="w-10 h-10 text-primary" />
+              <h3 className="mt-4 font-heading font-semibold text-lg text-foreground">Une rencontre avant chaque garde</h3>
+              <p className="mt-2 text-muted-foreground text-sm leading-relaxed">
+                Vous choisissez votre gardien après l'avoir rencontré. Un café, une visite du logement, et la confiance s'installe naturellement.
+              </p>
+            </div>
+
+            <div className="bg-card border border-border rounded-xl p-6">
+              <ShieldCheck className="w-10 h-10 text-primary" />
+              <h3 className="mt-4 font-heading font-semibold text-lg text-foreground">Des profils vérifiés</h3>
+              <p className="mt-2 text-muted-foreground text-sm leading-relaxed">
+                Chaque gardien est vérifié par notre équipe : pièce d'identité, avis des propriétaires précédents, historique de gardes réalisées.
+              </p>
+            </div>
+
+            <div className="bg-card border border-border rounded-xl p-6">
+              <MapPin className="w-10 h-10 text-primary" />
+              <h3 className="mt-4 font-heading font-semibold text-lg text-foreground">Des gardiens de votre région</h3>
+              <p className="mt-2 text-muted-foreground text-sm leading-relaxed">
+                En Auvergne-Rhône-Alpes, on privilégie la proximité. Votre gardien habite à quelques kilomètres, jamais à l'autre bout de la France.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ═══════════════ BANDEAU — VOUS PARTEZ CET ÉTÉ ═══════════════ */}
+      <section className="bg-primary/5 py-16">
+        <div className="max-w-3xl mx-auto px-4 text-center">
+          <h2 className="text-3xl md:text-4xl font-heading font-bold text-foreground">Vous partez cet été ?</h2>
+          <p className="text-lg text-muted-foreground mt-4 leading-relaxed">
+            Publiez votre annonce maintenant, gratuitement. Un gardien de votre région s'occupera de votre maison et de vos animaux pendant votre absence.
+          </p>
+          <button
+            onClick={() => {
+              trackEvent("cta_proprio_clicked", { metadata: { location: "banner" } });
+              navigate("/inscription?role=owner");
+            }}
+            className="mt-8 font-body text-base font-semibold tracking-wide rounded-full px-10 py-4 bg-primary text-primary-foreground hover:brightness-95 hover:scale-[1.02] transition-all duration-200 shadow-lg shadow-primary/30"
+          >
+            Publier mon annonce
+          </button>
+          <p className="text-sm text-muted-foreground mt-4">
+            Inscription en 2 minutes. Aucune carte bancaire demandée.
+          </p>
+        </div>
+      </section>
+
       {/* ═══════════════ BANDEAU ENTRAIDE ═══════════════ */}
       <section className="bg-primary/5 border-y border-primary/10">
         <div className="max-w-5xl mx-auto px-6 py-5 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-6 text-center sm:text-left">
