@@ -7,7 +7,7 @@ import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
-import { Calendar, MapPin, Star, PawPrint, Home, CheckCircle2 } from "lucide-react";
+import { Calendar, MapPin, Star, PawPrint, Home, CheckCircle2, ArrowLeft, ExternalLink } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import VerifiedBadge from "@/components/profile/VerifiedBadge";
