@@ -12,9 +12,11 @@
  *   6. meta robots → aucune route publique en noindex par erreur
  *
  * Usage :
- *   node scripts/validate-og-tags.mjs                         # tout activé, cibles par défaut
+ *   node scripts/validate-og-tags.mjs                         # routes statiques uniquement
+ *   node scripts/validate-og-tags.mjs --include-dynamic       # + routes dynamiques (articles, villes…)
+ *   node scripts/validate-og-tags.mjs --dynamic-limit=5       # max 5 URLs par pattern dynamique
  *   node scripts/validate-og-tags.mjs https://guardiens.fr    # origine explicite
- *   node scripts/validate-og-tags.mjs --paths=/,/tarifs,/faq  # limiter les routes
+ *   node scripts/validate-og-tags.mjs --paths=/,/tarifs,/faq  # limiter les routes (accepte aussi les patterns)
  *   node scripts/validate-og-tags.mjs --concurrency=4         # parallélisme réseau
  *   node scripts/validate-og-tags.mjs --strict                # échec sur toute divergence
  *   node scripts/validate-og-tags.mjs --only=og,canonical     # limiter les checks
