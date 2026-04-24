@@ -139,68 +139,18 @@ const Pricing = () => {
         <PageBreadcrumb items={[{ label: "Tarifs" }]} />
 
         <main className="max-w-6xl mx-auto px-4">
-          {/* ═══ HERO 50/50 ═══ */}
-          <section className="py-10 md:py-14">
-            <div className="text-center max-w-2xl mx-auto mb-10">
-              <div className="inline-flex items-center gap-1.5 bg-primary/10 text-primary text-xs font-body font-semibold uppercase tracking-wider px-3 py-1.5 rounded-full mb-4">
-                <Sparkles className="h-3.5 w-3.5" />
-                Sans commission, sans frais cachés
-              </div>
-              <h1 className="font-heading text-3xl md:text-5xl font-bold text-foreground leading-tight mb-4">
-                Un seul prix. <span className="text-primary">Transparent.</span>
-              </h1>
-              <p className="text-base md:text-lg font-body text-foreground/65 leading-relaxed">
-                Gratuit pour les propriétaires, à vie. 6,99€/mois pour les gardiens, avec 7 jours d'essai offerts. C'est tout.
-              </p>
+          {/* ═══ HERO ═══ */}
+          <section className="py-10 md:py-14 text-center max-w-2xl mx-auto">
+            <div className="inline-flex items-center gap-1.5 bg-primary/10 text-primary text-xs font-body font-semibold uppercase tracking-wider px-3 py-1.5 rounded-full mb-4">
+              <Sparkles className="h-3.5 w-3.5" />
+              Sans commission, sans frais cachés
             </div>
-
-            {/* Twin value props */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-4xl mx-auto">
-              <Link
-                to={registerLink("owner")}
-                className="group bg-card border border-border/40 rounded-2xl p-5 hover:border-primary/40 hover:shadow-md transition-all"
-              >
-                <div className="flex items-center gap-3 mb-2">
-                  <div className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-primary/10 text-primary">
-                    <Gift className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <p className="text-xs uppercase tracking-wider text-foreground/50 font-body font-semibold">Propriétaire</p>
-                    <p className="font-heading text-xl font-bold text-foreground">100 % gratuit</p>
-                  </div>
-                </div>
-                <p className="text-sm font-body text-foreground/65 leading-relaxed">
-                  Publiez votre annonce et recevez des candidatures sans débourser un centime.
-                </p>
-                <p className="text-sm font-body text-primary mt-3 font-semibold group-hover:underline">
-                  Publier mon annonce →
-                </p>
-              </Link>
-
-              <Link
-                to={registerLink("sitter")}
-                className="group bg-primary/5 border-2 border-primary/30 rounded-2xl p-5 hover:border-primary hover:shadow-md transition-all relative"
-              >
-                <div className="absolute -top-2.5 right-4 bg-primary text-primary-foreground text-[10px] font-body font-bold uppercase tracking-wider px-2 py-1 rounded-full">
-                  7 jours offerts
-                </div>
-                <div className="flex items-center gap-3 mb-2">
-                  <div className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-primary/15 text-primary">
-                    <Star className="h-5 w-5" fill="currentColor" />
-                  </div>
-                  <div>
-                    <p className="text-xs uppercase tracking-wider text-foreground/50 font-body font-semibold">Gardien</p>
-                    <p className="font-heading text-xl font-bold text-foreground">6,99€<span className="text-sm font-normal text-foreground/60">/mois</span></p>
-                  </div>
-                </div>
-                <p className="text-sm font-body text-foreground/65 leading-relaxed">
-                  Essai gratuit, sans carte bancaire. Annulable à tout moment.
-                </p>
-                <p className="text-sm font-body text-primary mt-3 font-semibold group-hover:underline">
-                  Tester gratuitement →
-                </p>
-              </Link>
-            </div>
+            <h1 className="font-heading text-3xl md:text-5xl font-bold text-foreground leading-tight mb-4">
+              Un seul prix. <span className="text-primary">Transparent.</span>
+            </h1>
+            <p className="text-base md:text-lg font-body text-foreground/65 leading-relaxed">
+              Gratuit pour les propriétaires, à vie. 6,99€/mois pour les gardiens, avec 7 jours d'essai offerts. C'est tout.
+            </p>
           </section>
 
           {/* Founder Banner — urgence */}
