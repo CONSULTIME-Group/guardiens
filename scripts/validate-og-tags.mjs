@@ -37,7 +37,7 @@
  * routes non-home sont donc attendues et signalées en WARN par défaut.
  */
 
-import { readFileSync } from "node:fs";
+import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, resolve } from "node:path";
 
