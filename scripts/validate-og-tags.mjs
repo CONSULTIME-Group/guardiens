@@ -85,18 +85,21 @@ function loadIndexHtmlMetaTags() {
 
 function parseMetaTags(html) {
   const tags = {};
-  // Autoriser attributs dans n'importe quel ordre
+  // Autoriser attributs dans n'importe quel ordre.
+  // Les regex utilisent des backreferences (\1 / \2) pour que la quote fermante
+  // corresponde à l'ouvrante — sinon un contenu comme "Partez l'esprit" est
+  // tronqué sur l'apostrophe droite.
   const metaRe = /<meta\b([^>]*)>/gi;
   let m;
   while ((m = metaRe.exec(html)) !== null) {
     const attrs = m[1];
-    const nameMatch = attrs.match(/\b(?:property|name)\s*=\s*["']([^"']+)["']/i);
-    const contentMatch = attrs.match(/\bcontent\s*=\s*["']([^"']*)["']/i);
+    const nameMatch = attrs.match(/\b(?:property|name)\s*=\s*(["'])(.*?)\1/i);
+    const contentMatch = attrs.match(/\bcontent\s*=\s*(["'])([\s\S]*?)\1/i);
     if (!nameMatch || !contentMatch) continue;
-    const key = nameMatch[1].toLowerCase();
+    const key = nameMatch[2].toLowerCase();
     if (key.startsWith("og:") || key.startsWith("twitter:")) {
       // PageMeta ré-injecte côté client : la dernière valeur gagne (= plus récente)
-      tags[key] = decodeHtmlEntities(contentMatch[1]);
+      tags[key] = decodeHtmlEntities(contentMatch[2]);
     }
   }
   return tags;
