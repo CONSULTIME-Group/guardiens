@@ -229,7 +229,15 @@ type Item = {
   category: HeroCategoryName;
 };
 
-function HeroCard({ item, viewMode }: { item: Item; viewMode: ViewMode }) {
+function HeroCard({
+  item,
+  viewMode,
+  onZoom,
+}: {
+  item: Item;
+  viewMode: ViewMode;
+  onZoom: () => void;
+}) {
   // Reproduit la logique de PublicSitterProfile (desktop, simplifié) pour le mode
   // "rendered". Sinon on affiche l'image en object-contain pour voir tout le cadre.
   const objectPosition =
@@ -241,9 +249,12 @@ function HeroCard({ item, viewMode }: { item: Item; viewMode: ViewMode }) {
 
   return (
     <article className="rounded-lg overflow-hidden border border-border bg-card shadow-sm">
-      {/* Vignette image */}
-      <div
-        className="relative w-full bg-[#FBF6EC] overflow-hidden"
+      {/* Vignette image cliquable → ouvre le zoom plein écran */}
+      <button
+        type="button"
+        onClick={onZoom}
+        title="Cliquer pour zoomer en plein écran"
+        className="relative block w-full bg-[#FBF6EC] overflow-hidden cursor-zoom-in group focus:outline-none focus:ring-2 focus:ring-primary"
         style={{ aspectRatio: "1536 / 340" }}
       >
         <img
@@ -263,6 +274,11 @@ function HeroCard({ item, viewMode }: { item: Item; viewMode: ViewMode }) {
           style={viewMode === "rendered" ? { objectPosition } : undefined}
         />
 
+        {/* Indicateur de zoom au survol */}
+        <span className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
+          <ZoomIn className="w-6 h-6 text-white drop-shadow-lg" />
+        </span>
+
         {/* Numéro en overlay */}
         <span className="absolute top-2 left-2 text-[11px] font-mono font-bold bg-background/90 backdrop-blur px-2 py-0.5 rounded shadow">
           #{String(item.fileNum).padStart(3, "0")}
@@ -280,7 +296,7 @@ function HeroCard({ item, viewMode }: { item: Item; viewMode: ViewMode }) {
         >
           {ANCHOR_LABELS[item.anchor]}
         </span>
-      </div>
+      </button>
 
       {/* Méta */}
       <div className="px-3 py-2 flex items-center justify-between gap-2 text-xs">
@@ -294,5 +310,396 @@ function HeroCard({ item, viewMode }: { item: Item; viewMode: ViewMode }) {
         </span>
       </div>
     </article>
+  );
+}
+
+/* ───────────────────────── Modal de zoom plein écran ───────────────────────── */
+
+/**
+ * HeroZoomModal
+ * --------------------------------------------------------------------------
+ * Affiche l'image en plein écran avec contrôles de zoom :
+ *   - Boutons +/- et Reset
+ *   - Molette de souris (zoom centré sur le curseur)
+ *   - Pinch-to-zoom tactile (deux doigts) + drag à un doigt
+ *   - Drag à la souris quand zoomé
+ *   - Double-clic / double-tap pour toggle 1×/2.5×
+ *   - Flèches ←/→ pour naviguer entre images, Échap pour fermer
+ *
+ * En complément, on superpose les guides d'ancrage (lignes verticales à
+ * 20 % / 50 % / 80 % et ligne horizontale à 42 %) afin de vérifier
+ * précisément le cadrage produit par object-position.
+ */
+function HeroZoomModal({
+  item,
+  hasPrev,
+  hasNext,
+  onPrev,
+  onNext,
+  onClose,
+}: {
+  item: Item;
+  hasPrev: boolean;
+  hasNext: boolean;
+  onPrev: () => void;
+  onNext: () => void;
+  onClose: () => void;
+}) {
+  const MIN_SCALE = 1;
+  const MAX_SCALE = 8;
+
+  const [scale, setScale] = useState(1);
+  const [tx, setTx] = useState(0);
+  const [ty, setTy] = useState(0);
+  const [showGuides, setShowGuides] = useState(true);
+
+  const containerRef = useRef<HTMLDivElement>(null);
+  const imgRef = useRef<HTMLImageElement>(null);
+  const dragRef = useRef<{ startX: number; startY: number; tx0: number; ty0: number } | null>(null);
+  const pinchRef = useRef<{
+    startDist: number;
+    startScale: number;
+    centerX: number;
+    centerY: number;
+    tx0: number;
+    ty0: number;
+  } | null>(null);
+  const lastTapRef = useRef<number>(0);
+
+  // Reset à chaque changement d'image
+  useEffect(() => {
+    setScale(1);
+    setTx(0);
+    setTy(0);
+  }, [item.idx]);
+
+  const reset = useCallback(() => {
+    setScale(1);
+    setTx(0);
+    setTy(0);
+  }, []);
+
+  // Clamp translation pour ne pas faire sortir l'image hors viewport
+  const clamp = useCallback(
+    (nextScale: number, nextTx: number, nextTy: number) => {
+      const el = containerRef.current;
+      if (!el) return { tx: nextTx, ty: nextTy };
+      const w = el.clientWidth;
+      const h = el.clientHeight;
+      const overflowX = (w * (nextScale - 1)) / 2;
+      const overflowY = (h * (nextScale - 1)) / 2;
+      return {
+        tx: Math.max(-overflowX, Math.min(overflowX, nextTx)),
+        ty: Math.max(-overflowY, Math.min(overflowY, nextTy)),
+      };
+    },
+    []
+  );
+
+  // Zoom centré sur un point (clientX/Y) — pour wheel + double-tap
+  const zoomAt = useCallback(
+    (clientX: number, clientY: number, nextScale: number) => {
+      const el = containerRef.current;
+      if (!el) return;
+      const rect = el.getBoundingClientRect();
+      const cx = clientX - rect.left - rect.width / 2;
+      const cy = clientY - rect.top - rect.height / 2;
+      const ratio = nextScale / scale;
+      const newTx = cx - (cx - tx) * ratio;
+      const newTy = cy - (cy - ty) * ratio;
+      const clamped = clamp(nextScale, newTx, newTy);
+      setScale(nextScale);
+      setTx(clamped.tx);
+      setTy(clamped.ty);
+    },
+    [scale, tx, ty, clamp]
+  );
+
+  // Raccourcis clavier
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+      else if (e.key === "ArrowLeft" && hasPrev) onPrev();
+      else if (e.key === "ArrowRight" && hasNext) onNext();
+      else if (e.key === "+" || e.key === "=") {
+        const next = Math.min(MAX_SCALE, scale * 1.4);
+        const el = containerRef.current;
+        if (el) {
+          const r = el.getBoundingClientRect();
+          zoomAt(r.left + r.width / 2, r.top + r.height / 2, next);
+        }
+      } else if (e.key === "-") {
+        const next = Math.max(MIN_SCALE, scale / 1.4);
+        const el = containerRef.current;
+        if (el) {
+          const r = el.getBoundingClientRect();
+          zoomAt(r.left + r.width / 2, r.top + r.height / 2, next);
+        }
+      } else if (e.key === "0") {
+        reset();
+      } else if (e.key === "g" || e.key === "G") {
+        setShowGuides((v) => !v);
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [scale, hasPrev, hasNext, onPrev, onNext, onClose, zoomAt, reset]);
+
+  // Bloquer le scroll du body pendant l'ouverture
+  useEffect(() => {
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, []);
+
+  // Wheel = zoom centré sur le curseur
+  const onWheel = (e: React.WheelEvent) => {
+    e.preventDefault();
+    const factor = e.deltaY < 0 ? 1.15 : 1 / 1.15;
+    const next = Math.max(MIN_SCALE, Math.min(MAX_SCALE, scale * factor));
+    zoomAt(e.clientX, e.clientY, next);
+  };
+
+  // ─── Pointer events (souris + tactile unifiés) ───
+  const activePointers = useRef<Map<number, { x: number; y: number }>>(new Map());
+
+  const onPointerDown = (e: React.PointerEvent) => {
+    (e.target as Element).setPointerCapture(e.pointerId);
+    activePointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
+
+    if (activePointers.current.size === 2) {
+      // Pinch start
+      const pts = Array.from(activePointers.current.values());
+      const dx = pts[1].x - pts[0].x;
+      const dy = pts[1].y - pts[0].y;
+      pinchRef.current = {
+        startDist: Math.hypot(dx, dy),
+        startScale: scale,
+        centerX: (pts[0].x + pts[1].x) / 2,
+        centerY: (pts[0].y + pts[1].y) / 2,
+        tx0: tx,
+        ty0: ty,
+      };
+      dragRef.current = null;
+    } else if (activePointers.current.size === 1) {
+      // Drag (un doigt / souris) — uniquement utile si zoomé
+      dragRef.current = { startX: e.clientX, startY: e.clientY, tx0: tx, ty0: ty };
+
+      // Détection double-tap (tactile)
+      if (e.pointerType === "touch") {
+        const now = Date.now();
+        if (now - lastTapRef.current < 300) {
+          const next = scale > 1.5 ? 1 : 2.5;
+          if (next === 1) reset();
+          else zoomAt(e.clientX, e.clientY, next);
+          lastTapRef.current = 0;
+        } else {
+          lastTapRef.current = now;
+        }
+      }
+    }
+  };
+
+  const onPointerMove = (e: React.PointerEvent) => {
+    if (!activePointers.current.has(e.pointerId)) return;
+    activePointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
+
+    if (pinchRef.current && activePointers.current.size === 2) {
+      const pts = Array.from(activePointers.current.values());
+      const dx = pts[1].x - pts[0].x;
+      const dy = pts[1].y - pts[0].y;
+      const dist = Math.hypot(dx, dy);
+      const ratio = dist / pinchRef.current.startDist;
+      const next = Math.max(
+        MIN_SCALE,
+        Math.min(MAX_SCALE, pinchRef.current.startScale * ratio)
+      );
+      zoomAt(pinchRef.current.centerX, pinchRef.current.centerY, next);
+      return;
+    }
+
+    if (dragRef.current && activePointers.current.size === 1 && scale > 1) {
+      const ndx = e.clientX - dragRef.current.startX;
+      const ndy = e.clientY - dragRef.current.startY;
+      const clamped = clamp(scale, dragRef.current.tx0 + ndx, dragRef.current.ty0 + ndy);
+      setTx(clamped.tx);
+      setTy(clamped.ty);
+    }
+  };
+
+  const onPointerUp = (e: React.PointerEvent) => {
+    activePointers.current.delete(e.pointerId);
+    if (activePointers.current.size < 2) pinchRef.current = null;
+    if (activePointers.current.size === 0) dragRef.current = null;
+  };
+
+  const onDoubleClick = (e: React.MouseEvent) => {
+    const next = scale > 1.5 ? 1 : 2.5;
+    if (next === 1) reset();
+    else zoomAt(e.clientX, e.clientY, next);
+  };
+
+  return (
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-label={`Zoom hero #${item.fileNum}`}
+      className="fixed inset-0 z-50 bg-black/95 flex flex-col"
+    >
+      {/* Toolbar */}
+      <div className="flex items-center justify-between gap-2 px-4 py-2 text-white text-sm border-b border-white/10 bg-black/60">
+        <div className="flex items-center gap-3 min-w-0">
+          <span className="font-mono font-bold">
+            #{String(item.fileNum).padStart(3, "0")}
+          </span>
+          <span className="text-xs text-white/60 truncate">
+            {CATEGORY_LABELS[item.category]} · {ANCHOR_LABELS[item.anchor]}
+          </span>
+        </div>
+
+        <div className="flex items-center gap-1">
+          <button
+            type="button"
+            onClick={() => {
+              const el = containerRef.current;
+              if (!el) return;
+              const r = el.getBoundingClientRect();
+              const next = Math.max(MIN_SCALE, scale / 1.4);
+              zoomAt(r.left + r.width / 2, r.top + r.height / 2, next);
+            }}
+            className="p-2 hover:bg-white/10 rounded transition-colors"
+            title="Zoom arrière (-)"
+          >
+            <ZoomOut className="w-4 h-4" />
+          </button>
+          <span className="text-xs font-mono w-12 text-center tabular-nums">
+            {scale.toFixed(2)}×
+          </span>
+          <button
+            type="button"
+            onClick={() => {
+              const el = containerRef.current;
+              if (!el) return;
+              const r = el.getBoundingClientRect();
+              const next = Math.min(MAX_SCALE, scale * 1.4);
+              zoomAt(r.left + r.width / 2, r.top + r.height / 2, next);
+            }}
+            className="p-2 hover:bg-white/10 rounded transition-colors"
+            title="Zoom avant (+)"
+          >
+            <ZoomIn className="w-4 h-4" />
+          </button>
+          <button
+            type="button"
+            onClick={reset}
+            className="p-2 hover:bg-white/10 rounded transition-colors"
+            title="Réinitialiser (0)"
+          >
+            <RotateCcw className="w-4 h-4" />
+          </button>
+          <button
+            type="button"
+            onClick={() => setShowGuides((v) => !v)}
+            className={`px-2 py-1 ml-1 text-[11px] rounded border transition-colors ${
+              showGuides
+                ? "bg-white/15 border-white/30"
+                : "border-white/20 hover:bg-white/10"
+            }`}
+            title="Afficher / masquer les guides d'ancrage (G)"
+          >
+            Guides
+          </button>
+          <button
+            type="button"
+            onClick={onClose}
+            className="p-2 ml-2 hover:bg-white/10 rounded transition-colors"
+            title="Fermer (Échap)"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+      </div>
+
+      {/* Zone de zoom */}
+      <div
+        ref={containerRef}
+        onWheel={onWheel}
+        onPointerDown={onPointerDown}
+        onPointerMove={onPointerMove}
+        onPointerUp={onPointerUp}
+        onPointerCancel={onPointerUp}
+        onDoubleClick={onDoubleClick}
+        className="relative flex-1 overflow-hidden touch-none select-none"
+        style={{
+          cursor: scale > 1 ? (dragRef.current ? "grabbing" : "grab") : "zoom-in",
+        }}
+      >
+        <div
+          className="absolute inset-0 flex items-center justify-center"
+          style={{
+            transform: `translate(${tx}px, ${ty}px) scale(${scale})`,
+            transformOrigin: "center center",
+            transition: dragRef.current || pinchRef.current ? "none" : "transform 120ms ease-out",
+          }}
+        >
+          <img
+            ref={imgRef}
+            src={item.src}
+            alt={`Hero #${item.fileNum} (zoom)`}
+            draggable={false}
+            className="max-w-full max-h-full object-contain pointer-events-none"
+            style={{ imageRendering: scale > 3 ? "pixelated" : "auto" }}
+          />
+        </div>
+
+        {/* Guides d'ancrage (en dehors de la transform pour rester fixes) */}
+        {showGuides && (
+          <div className="pointer-events-none absolute inset-0">
+            {/* Verticales 20% / 50% / 80% */}
+            <div className="absolute top-0 bottom-0 border-l border-dashed border-blue-400/70" style={{ left: "20%" }} />
+            <div className="absolute top-0 bottom-0 border-l border-dashed border-white/40" style={{ left: "50%" }} />
+            <div className="absolute top-0 bottom-0 border-l border-dashed border-purple-400/70" style={{ left: "80%" }} />
+            {/* Horizontale 42% (object-position Y) */}
+            <div className="absolute left-0 right-0 border-t border-dashed border-emerald-400/70" style={{ top: "42%" }} />
+            {/* Légende */}
+            <div className="absolute bottom-2 left-2 text-[10px] text-white/70 font-mono space-x-3 bg-black/40 px-2 py-1 rounded">
+              <span className="text-blue-300">— 20% (left)</span>
+              <span className="text-white/70">— 50% (center)</span>
+              <span className="text-purple-300">— 80% (right)</span>
+              <span className="text-emerald-300">— 42% Y</span>
+            </div>
+          </div>
+        )}
+
+        {/* Navigation prev/next */}
+        {hasPrev && (
+          <button
+            type="button"
+            onClick={onPrev}
+            className="absolute left-2 top-1/2 -translate-y-1/2 p-3 bg-black/50 hover:bg-black/70 text-white rounded-full transition-colors"
+            title="Image précédente (←)"
+          >
+            <ChevronLeft className="w-5 h-5" />
+          </button>
+        )}
+        {hasNext && (
+          <button
+            type="button"
+            onClick={onNext}
+            className="absolute right-2 top-1/2 -translate-y-1/2 p-3 bg-black/50 hover:bg-black/70 text-white rounded-full transition-colors"
+            title="Image suivante (→)"
+          >
+            <ChevronRight className="w-5 h-5" />
+          </button>
+        )}
+
+        {/* Aide raccourcis */}
+        <div className="absolute bottom-2 right-2 text-[10px] text-white/50 font-mono bg-black/40 px-2 py-1 rounded">
+          molette / pinch · drag · double-clic · ← → · Échap
+        </div>
+      </div>
+    </div>
   );
 }
