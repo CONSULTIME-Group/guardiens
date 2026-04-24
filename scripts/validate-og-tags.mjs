@@ -175,6 +175,19 @@ function loadSiteConfig() {
       );
       const dynamicTitle = /dynamicTitle:\s*true/.test(block);
       const dynamicDescription = /dynamicDescription:\s*true/.test(block);
+      const sampleTitle = extractStringLiteral(block, "sampleTitle");
+      const sampleDescription = extractStringLiteral(block, "sampleDescription");
+      // Extraction de sampleParams: { key: "value", ... }
+      const sampleParamsMatch = block.match(/sampleParams\s*:\s*\{([^}]*)\}/);
+      let sampleParams = null;
+      if (sampleParamsMatch) {
+        sampleParams = {};
+        const kvRe = /([a-zA-Z_][a-zA-Z0-9_]*)\s*:\s*(["'])([^"']+)\2/g;
+        let kv;
+        while ((kv = kvRe.exec(sampleParamsMatch[1])) !== null) {
+          sampleParams[kv[1]] = kv[3];
+        }
+      }
       if (!pathPattern || !title || !description || !source) continue;
       dynamicConfigs.push({
         pathPattern,
@@ -186,6 +199,9 @@ function loadSiteConfig() {
         changeFreq: changeFreqMatch ? changeFreqMatch[2] : null,
         dynamicTitle,
         dynamicDescription,
+        sampleParams,
+        sampleTitle,
+        sampleDescription,
       });
     }
   }
