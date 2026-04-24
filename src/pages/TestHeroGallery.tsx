@@ -279,9 +279,23 @@ function HeroCard({
           <ZoomIn className="w-6 h-6 text-white drop-shadow-lg" />
         </span>
 
-        {/* Numéro en overlay */}
-        <span className="absolute top-2 left-2 text-[11px] font-mono font-bold bg-background/90 backdrop-blur px-2 py-0.5 rounded shadow">
-          #{String(item.fileNum).padStart(3, "0")}
+        {/* Annotation manuscrite "n° 042 / 100" — façon feutre bleu sur le coin du carnet.
+            Police 'cursive' (système) + légère rotation pour casser l'alignement parfait
+            et imiter l'écriture à main levée. Le total est dérivé de HERO_BANK.length. */}
+        <span
+          className="absolute top-1.5 left-2.5 text-[15px] sm:text-[16px] font-bold tracking-wide select-none pointer-events-none"
+          style={{
+            fontFamily:
+              '"Caveat", "Kalam", "Bradley Hand", "Segoe Print", "Comic Sans MS", cursive',
+            color: "hsl(220 70% 35%)",
+            textShadow: "0 1px 0 hsl(0 0% 100% / 0.6)",
+            transform: "rotate(-4deg)",
+            transformOrigin: "left center",
+          }}
+          aria-label={`Hero numéro ${item.fileNum} sur ${HERO_BANK.length}`}
+        >
+          n° {String(item.fileNum).padStart(3, "0")}
+          <span className="opacity-60 font-normal"> / {HERO_BANK.length}</span>
         </span>
 
         {/* Ancrage en overlay (haut droit) */}
