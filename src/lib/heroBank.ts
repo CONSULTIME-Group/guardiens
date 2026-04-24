@@ -353,17 +353,49 @@ export function getSitterHeroSelection(
 }
 
 /**
+ * Helper interne : résout l'index hero final.
+ *
+ * Priorité :
+ *   1. `overrideIndex` (choix manuel du gardien sauvegardé en base) s'il est
+ *      défini ET valide (>= 0 et < HERO_BANK.length).
+ *   2. Sinon, sélection automatique par hash du `sitterId` + pondération
+ *      des catégories (admin live).
+ *
+ * Cette indirection permet aux callers (page publique, OG image, etc.) de
+ * passer simplement `profile.hero_image_index` sans avoir à se soucier de
+ * la validité ou du fallback.
+ */
+function resolveIndex(
+  sitterId?: string | null,
+  weights?: HeroWeights,
+  overrideIndex?: number | null
+): number {
+  if (
+    overrideIndex !== null &&
+    overrideIndex !== undefined &&
+    Number.isInteger(overrideIndex) &&
+    overrideIndex >= 0 &&
+    overrideIndex < HERO_BANK.length
+  ) {
+    return overrideIndex;
+  }
+  return getIndex(sitterId, weights);
+}
+
+/**
  * Retourne l'URL de l'image hero assignée à un gardien donné.
  * - Stable : un même ID donne toujours la même image (à poids constants).
  * - `weights` permet d'utiliser une configuration personnalisée (admin live).
+ * - `overrideIndex` (optionnel) : choix manuel du gardien, prend le pas sur le hash.
  *
- * Fallback : si pas d'ID, on prend la première image.
+ * Fallback : si pas d'ID ni d'override valide, on prend la première image.
  */
 export function getSitterHeroImage(
   sitterId?: string | null,
-  weights?: HeroWeights
+  weights?: HeroWeights,
+  overrideIndex?: number | null
 ): string {
-  return HERO_BANK[getIndex(sitterId, weights)];
+  return HERO_BANK[resolveIndex(sitterId, weights, overrideIndex)];
 }
 
 /**
@@ -371,9 +403,10 @@ export function getSitterHeroImage(
  */
 export function getSitterHeroAnchor(
   sitterId?: string | null,
-  weights?: HeroWeights
+  weights?: HeroWeights,
+  overrideIndex?: number | null
 ): HeroAnchor {
-  return HERO_ANCHORS[getIndex(sitterId, weights)] ?? "center";
+  return HERO_ANCHORS[resolveIndex(sitterId, weights, overrideIndex)] ?? "center";
 }
 
 /**
@@ -382,9 +415,10 @@ export function getSitterHeroAnchor(
  */
 export function getSitterHeroSources(
   sitterId?: string | null,
-  weights?: HeroWeights
+  weights?: HeroWeights,
+  overrideIndex?: number | null
 ): { desktop: string; mobile: string } {
-  const idx = getIndex(sitterId, weights);
+  const idx = resolveIndex(sitterId, weights, overrideIndex);
   return {
     desktop: HERO_BANK[idx],
     mobile: getMobileByIndex(idx) ?? HERO_BANK[idx],
