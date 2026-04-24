@@ -864,8 +864,25 @@ async function main() {
       const displayPath = r.route.path.length > 40 ? r.route.path.slice(0, 37) + "…" : r.route.path;
       const badge = r.route.isSample ? c("cyan", "[sample] ") : "";
       const label = `${badge}${displayPath.padEnd(40)} `;
+
+      // Collecte report : état par route
+      const routeEntry = {
+        path: r.route.path,
+        url: r.url,
+        pathPattern: r.route.pathPattern ?? null,
+        isDynamic: !!r.route.isDynamic,
+        isSample: !!r.route.isSample,
+        status: "ok",             // ok | warn | error | fetch_error
+        fetchError: null,
+        ogDiffs: [],              // [{ key, status, expected, actual }]
+        pageIssues: [],           // [{ kind, severity, msg, blocking }]
+      };
+      originReport.routes.push(routeEntry);
+
       if (!r.ok) {
         totalErrors += 1;
+        routeEntry.status = "fetch_error";
+        routeEntry.fetchError = r.error;
         console.log(`  ${c("red", "💥")} ${label}${c("red", r.error)}`);
         continue;
       }
@@ -893,14 +910,19 @@ async function main() {
         const isBlocking = pi.severity === "always" || strictMode || r.route.path === "/";
         if (isBlocking) pageBlockCount++;
         else pageWarnCount++;
+        routeEntry.pageIssues.push({ ...pi, blocking: isBlocking });
       }
       blockingIssues += pageBlockCount;
       warnings += pageWarnCount;
+
+      // Persiste les diffs OG avec le flag bloquant
+      routeEntry.ogDiffs = r.ogDiffs.map((d) => ({ ...d, blocking: ogBlocking }));
 
       const parts = [];
       if (ogCount > 0) parts.push(`${ogCount} OG`);
       if (pageCount > 0) parts.push(`${pageCount} autre(s)`);
       const anyBlocking = (ogBlocking && ogCount > 0) || pageBlockCount > 0;
+      routeEntry.status = anyBlocking ? "error" : "warn";
       const icon = anyBlocking ? c("red", "❌") : c("yellow", "⚠️ ");
       console.log(`  ${icon} ${label}${parts.join(" + ")} ${c("dim", r.url)}`);
 
