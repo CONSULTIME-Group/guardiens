@@ -16,6 +16,7 @@ const Dashboard = () => {
   const [transitioning, setTransitioning] = useState(false);
   const isFirstRender = useRef(true);
   const welcomeShown = useRef(false);
+  const activationFired = useRef(false);
   const profileCheckFired = useRef(false);
 
   // Émettre user_activated UNE fois lors du premier affichage du dashboard
