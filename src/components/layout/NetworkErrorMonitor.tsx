@@ -43,10 +43,12 @@ const IGNORED_URL_PATTERNS: RegExp[] = [
  * Statuts ignorés (gérés explicitement par le code applicatif).
  *  - 401/403 : auth flows (login, refresh)
  *  - 404 : ressource introuvable (souvent géré par UI)
+ *  - 406 : PostgREST `.single()`/`.maybeSingle()` quand 0 ligne (comportement normal)
  *  - 409 : conflits métier (ex: doublons)
+ *  - 416 : range non satisfaisable (pagination)
  *  - 422 : validation côté serveur
  */
-const IGNORED_STATUSES = new Set([401, 403, 404, 409, 422]);
+const IGNORED_STATUSES = new Set([401, 403, 404, 406, 409, 416, 422]);
 
 /**
  * Extensions d'assets statiques. Les échecs sur ces ressources n'ont pas
