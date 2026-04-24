@@ -682,12 +682,27 @@ async function main() {
   for (const origin of normalizedOrigins) {
     console.log(c("bold", `━━━ Origine : ${origin} ━━━`));
 
-    // ─── Expansion des routes dynamiques (par origine, via son sitemap) ─
+    // ─── Routes-échantillon (1 par pattern avec sampleParams) ────────────
+    // Toujours actives : validation STRICTE d'un slug/id/city représentatif.
+    let sampleRoutes = buildSampleRoutes(dynamicConfigs, defaultOgImage);
+    if (pathFilter) {
+      sampleRoutes = sampleRoutes.filter(
+        (r) => pathFilter.includes(r.path) || pathFilter.includes(r.pathPattern),
+      );
+    }
+    if (sampleRoutes.length > 0) {
+      console.log(c("dim", `  → ${sampleRoutes.length} échantillon(s) dynamique(s) en mode strict : ${sampleRoutes.map((r) => r.path).join(", ")}`));
+    }
+
+    // ─── Expansion complète des routes dynamiques (opt-in via --include-dynamic) ─
     let dynamicRoutesExpanded = [];
     if (includeDynamic && dynamicConfigs.length > 0) {
       dynamicRoutesExpanded = await expandDynamicRoutes(
         dynamicConfigs, origin, siteUrl, defaultOgImage,
       );
+      // On retire les instances déjà couvertes par un échantillon strict
+      const sampleSet = new Set(sampleRoutes.map((r) => r.path));
+      dynamicRoutesExpanded = dynamicRoutesExpanded.filter((r) => !sampleSet.has(r.path));
       // Filtrage --paths si fourni
       if (pathFilter) {
         dynamicRoutesExpanded = dynamicRoutesExpanded.filter(
@@ -707,10 +722,10 @@ async function main() {
         }
       }
       if (dynamicRoutesExpanded.length > 0) {
-        console.log(c("dim", `  → ${dynamicRoutesExpanded.length} route(s) dynamique(s) expandée(s)`));
+        console.log(c("dim", `  → ${dynamicRoutesExpanded.length} route(s) dynamique(s) supplémentaire(s) expandée(s)`));
       }
     }
-    const filteredRoutes = [...filteredStaticRoutes, ...dynamicRoutesExpanded];
+    const filteredRoutes = [...filteredStaticRoutes, ...sampleRoutes, ...dynamicRoutesExpanded];
 
     // ─── Sitemap (origine-level) ────────────────────────────────────────
     if (enabledChecks.has("sitemap")) {
