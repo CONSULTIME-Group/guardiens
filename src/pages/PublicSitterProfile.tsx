@@ -28,6 +28,7 @@ import TrustScore from "@/components/profile/TrustScore";
 import FavoriteButton from "@/components/shared/FavoriteButton";
 import ProfileSchemaOrg from "@/components/seo/ProfileSchemaOrg";
 import { hydrateReviewers } from "@/lib/hydrateReviewers";
+import { getSitterHeroImage } from "@/lib/heroBank";
 
 const capitalize = (name: string) =>
   name ? name.charAt(0).toUpperCase() + name.slice(1).toLowerCase() : "";
@@ -674,181 +675,18 @@ export default function PublicSitterProfile() {
 
       {/* ── Contenu principal z-1 ── */}
       <div className="relative z-[1]">
-      {/* ── HERO FUSIONNÉ : SVG + HEADER ── */}
+      {/* ── HERO FUSIONNÉ : illustration carnet de voyage (banque de 50, hashée par sitter.id) ── */}
       <div className="relative overflow-hidden w-full min-h-[280px] sm:min-h-[340px] flex items-end bg-[#FBF6EC]">
-        {/* SVG fond — aquarelle douce naturaliste, paysage habité */}
+        {/* Illustration de fond — sketchbook style, déterministe par profil */}
         <div className="absolute inset-0 z-0 pointer-events-none">
-          <svg viewBox="0 0 1200 280" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice" className="w-full h-full">
-            <defs>
-              {/* Papier aquarelle — fond crème chaud */}
-              <linearGradient id="paper" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#FBE9D2"/>
-                <stop offset="40%" stopColor="#FBF1DD"/>
-                <stop offset="100%" stopColor="#FBF6EC"/>
-              </linearGradient>
-              <linearGradient id="fadeBottom" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="55%" stopColor="#FBF6EC" stopOpacity="0"/>
-                <stop offset="100%" stopColor="#FAF9F6" stopOpacity="1"/>
-              </linearGradient>
-
-              {/* Filtre aquarelle : turbulence + déplacement → bords irréguliers */}
-              <filter id="watercolor" x="-10%" y="-10%" width="120%" height="120%">
-                <feTurbulence type="fractalNoise" baseFrequency="0.012" numOctaves="2" seed="3" result="noise"/>
-                <feDisplacementMap in="SourceGraphic" in2="noise" scale="6"/>
-              </filter>
-              <filter id="watercolorSoft" x="-10%" y="-10%" width="120%" height="120%">
-                <feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="2" seed="7" result="noise"/>
-                <feDisplacementMap in="SourceGraphic" in2="noise" scale="3"/>
-                <feGaussianBlur stdDeviation="0.4"/>
-              </filter>
-
-              {/* Grain de papier — bruit léger en overlay */}
-              <filter id="paperGrain" x="0" y="0" width="100%" height="100%">
-                <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="4"/>
-                <feColorMatrix values="0 0 0 0 0.45  0 0 0 0 0.30  0 0 0 0 0.15  0 0 0 0.10 0"/>
-              </filter>
-
-              {/* Lavis radiaux — halos doux */}
-              <radialGradient id="sunWash" cx="50%" cy="50%" r="50%">
-                <stop offset="0%" stopColor="#F4A56B" stopOpacity="0.85"/>
-                <stop offset="55%" stopColor="#F4C58E" stopOpacity="0.45"/>
-                <stop offset="100%" stopColor="#F4C58E" stopOpacity="0"/>
-              </radialGradient>
-              <radialGradient id="sunCore" cx="50%" cy="50%" r="50%">
-                <stop offset="0%" stopColor="#E97C3D" stopOpacity="0.75"/>
-                <stop offset="100%" stopColor="#E97C3D" stopOpacity="0"/>
-              </radialGradient>
-              <radialGradient id="skyHaze" cx="50%" cy="0%" r="80%">
-                <stop offset="0%" stopColor="#F2C8B5" stopOpacity="0.55"/>
-                <stop offset="100%" stopColor="#F2C8B5" stopOpacity="0"/>
-              </radialGradient>
-              <radialGradient id="bushWash" cx="50%" cy="50%" r="50%">
-                <stop offset="0%" stopColor="#5C8A5F" stopOpacity="0.55"/>
-                <stop offset="100%" stopColor="#5C8A5F" stopOpacity="0"/>
-              </radialGradient>
-            </defs>
-
-            {/* Papier */}
-            <rect width="1200" height="280" fill="url(#paper)"/>
-            {/* Voile de ciel rosé */}
-            <rect width="1200" height="180" fill="url(#skyHaze)"/>
-
-            {/* === SOLEIL AQUARELLE === */}
-            <g filter="url(#watercolorSoft)">
-              <circle cx="980" cy="80" r="170" fill="url(#sunWash)"/>
-              <circle cx="980" cy="80" r="60" fill="url(#sunCore)"/>
-              <circle cx="980" cy="80" r="38" fill="#F08A45" opacity="0.55"/>
-            </g>
-
-            {/* === COLLINES — 3 plans gradués === */}
-            <g filter="url(#watercolor)">
-              <path d="M0,200 C140,170 280,180 420,178 C560,176 720,196 880,188 C1020,182 1120,196 1200,188 L1200,280 L0,280 Z"
-                    fill="#A9C2A8" opacity="0.55"/>
-              <path d="M0,222 C160,200 320,216 500,212 C680,208 860,228 1040,220 C1120,217 1180,224 1200,222 L1200,280 L0,280 Z"
-                    fill="#7FA77E" opacity="0.65"/>
-              <path d="M0,246 C200,228 420,242 640,240 C860,238 1040,252 1200,244 L1200,280 L0,280 Z"
-                    fill="#5C8A5F" opacity="0.7"/>
-            </g>
-
-            {/* Prairie ocre — voile chaud */}
-            <g filter="url(#watercolorSoft)">
-              <path d="M0,256 C300,248 600,262 900,256 C1050,253 1150,260 1200,258 L1200,280 L0,280 Z"
-                    fill="#D9B27A" opacity="0.35"/>
-            </g>
-
-            {/* === BUISSONS — taches vertes douces === */}
-            <g filter="url(#watercolorSoft)">
-              <ellipse cx="90" cy="248" rx="70" ry="14" fill="url(#bushWash)"/>
-              <ellipse cx="280" cy="252" rx="55" ry="11" fill="url(#bushWash)"/>
-              <ellipse cx="850" cy="250" rx="80" ry="14" fill="url(#bushWash)"/>
-              <ellipse cx="1080" cy="252" rx="65" ry="13" fill="url(#bushWash)"/>
-              <ellipse cx="180" cy="244" rx="22" ry="18" fill="#5C8A5F" opacity="0.55"/>
-              <ellipse cx="320" cy="246" rx="18" ry="15" fill="#7FA77E" opacity="0.6"/>
-              <ellipse cx="930" cy="242" rx="24" ry="20" fill="#5C8A5F" opacity="0.55"/>
-            </g>
-
-            {/* === ARBRE CENTRAL === */}
-            <g transform="translate(600, 250)">
-              <g filter="url(#watercolor)">
-                <path d="M-7,0 C-5,-40 -8,-90 -4,-130 L4,-130 C8,-90 5,-40 7,0 Z" fill="#7A4E2E" opacity="0.85"/>
-              </g>
-              <g stroke="#7A4E2E" strokeWidth="2.2" fill="none" strokeLinecap="round" opacity="0.7" filter="url(#watercolorSoft)">
-                <path d="M-3,-115 C-25,-125 -50,-135 -68,-150"/>
-                <path d="M3,-118 C25,-128 50,-138 70,-152"/>
-                <path d="M-2,-135 C-15,-152 -25,-168 -32,-180"/>
-                <path d="M2,-135 C15,-152 25,-168 36,-182"/>
-                <path d="M0,-130 C-2,-156 0,-180 2,-200"/>
-              </g>
-              <g filter="url(#watercolor)">
-                <ellipse cx="0" cy="-180" rx="100" ry="50" fill="#7FA77E" opacity="0.75"/>
-                <ellipse cx="-40" cy="-168" rx="55" ry="35" fill="#5C8A5F" opacity="0.65"/>
-                <ellipse cx="48" cy="-172" rx="52" ry="32" fill="#5C8A5F" opacity="0.65"/>
-                <ellipse cx="-10" cy="-200" rx="45" ry="28" fill="#A9C2A8" opacity="0.7"/>
-                <ellipse cx="22" cy="-190" rx="40" ry="25" fill="#A9C2A8" opacity="0.55"/>
-                <ellipse cx="-60" cy="-175" rx="18" ry="14" fill="#3F6B45" opacity="0.45"/>
-                <ellipse cx="60" cy="-178" rx="20" ry="14" fill="#3F6B45" opacity="0.4"/>
-                <ellipse cx="0" cy="-160" rx="22" ry="14" fill="#3F6B45" opacity="0.35"/>
-              </g>
-              <g filter="url(#watercolorSoft)">
-                <circle cx="-30" cy="-185" r="3.5" fill="#E08F9A" opacity="0.85"/>
-                <circle cx="20" cy="-175" r="3" fill="#E08F9A" opacity="0.85"/>
-                <circle cx="55" cy="-190" r="2.8" fill="#E08F9A" opacity="0.8"/>
-                <circle cx="-50" cy="-170" r="2.5" fill="#E08F9A" opacity="0.75"/>
-                <circle cx="0" cy="-205" r="3" fill="#F4C58E" opacity="0.85"/>
-              </g>
-            </g>
-
-            {/* === ARBRES SECONDAIRES === */}
-            <g filter="url(#watercolor)">
-              <ellipse cx="370" cy="222" rx="32" ry="26" fill="#7FA77E" opacity="0.7"/>
-              <ellipse cx="370" cy="218" rx="22" ry="18" fill="#5C8A5F" opacity="0.55"/>
-              <rect x="367" y="240" width="6" height="20" fill="#7A4E2E" opacity="0.7"/>
-              <ellipse cx="820" cy="226" rx="36" ry="28" fill="#7FA77E" opacity="0.7"/>
-              <ellipse cx="820" cy="222" rx="24" ry="20" fill="#5C8A5F" opacity="0.55"/>
-              <rect x="817" y="244" width="6" height="22" fill="#7A4E2E" opacity="0.7"/>
-            </g>
-
-            {/* === FLEURS DES CHAMPS === */}
-            <g filter="url(#watercolorSoft)">
-              <circle cx="120" cy="262" r="2.5" fill="#E08F9A" opacity="0.9"/>
-              <circle cx="135" cy="266" r="2" fill="#F4C58E" opacity="0.9"/>
-              <circle cx="240" cy="264" r="2.2" fill="#E08F9A" opacity="0.85"/>
-              <circle cx="430" cy="266" r="2" fill="#C9A8DC" opacity="0.85"/>
-              <circle cx="500" cy="264" r="2.4" fill="#F4C58E" opacity="0.9"/>
-              <circle cx="700" cy="266" r="2" fill="#E08F9A" opacity="0.85"/>
-              <circle cx="780" cy="264" r="2.2" fill="#C9A8DC" opacity="0.8"/>
-              <circle cx="960" cy="266" r="2" fill="#F4C58E" opacity="0.9"/>
-              <circle cx="1050" cy="263" r="2.3" fill="#E08F9A" opacity="0.85"/>
-              <circle cx="1140" cy="266" r="2" fill="#C9A8DC" opacity="0.8"/>
-            </g>
-
-            {/* === OISEAUX === */}
-            <g stroke="#5A4530" strokeWidth="1.5" fill="none" strokeLinecap="round" opacity="0.7" filter="url(#watercolorSoft)">
-              <path d="M340 70 q8 -7 16 0 q8 -7 16 0"/>
-              <path d="M450 90 q6 -5 12 0 q6 -5 12 0"/>
-              <path d="M820 60 q7 -6 14 0 q7 -6 14 0"/>
-            </g>
-
-            {/* === CHIEN === */}
-            <g transform="translate(460, 244)" filter="url(#watercolor)">
-              <path d="M0,12 C0,4 8,0 16,0 L42,0 C46,-3 52,-5 54,-2 C56,2 53,5 50,7 L48,12 L48,18 L42,18 L40,22 L10,22 L8,18 L2,18 Z"
-                    fill="#7A4E2E" opacity="0.78"/>
-              <ellipse cx="22" cy="6" rx="14" ry="3" fill="#C89B6F" opacity="0.55"/>
-            </g>
-
-            {/* === CHAT === */}
-            <g transform="translate(740, 230)" filter="url(#watercolor)">
-              <path d="M4,30 C4,16 10,10 18,10 L18,6 L14,0 L22,4 L28,4 L36,0 L32,6 L32,10 C40,10 44,16 44,30 Z M44,30 C52,30 54,26 50,22 C48,20 44,22 42,24 Z"
-                    fill="#3F3530" opacity="0.78"/>
-              <ellipse cx="24" cy="22" rx="10" ry="5" fill="#A99488" opacity="0.5"/>
-            </g>
-
-            {/* Grain de papier */}
-            <rect width="1200" height="280" filter="url(#paperGrain)" opacity="0.35"/>
-
-            {/* Fade bas vers la page */}
-            <rect width="1200" height="280" fill="url(#fadeBottom)"/>
-          </svg>
+          <img
+            src={getSitterHeroImage(id)}
+            alt=""
+            aria-hidden="true"
+            width={1536}
+            height={544}
+            className="w-full h-full object-cover"
+          />
         </div>
 
         {/* Vignettage très subtil */}
