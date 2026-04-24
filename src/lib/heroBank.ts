@@ -189,3 +189,23 @@ export function getSitterHeroImage(sitterId?: string | null): string {
 export function getSitterHeroAnchor(sitterId?: string | null): HeroAnchor {
   return HERO_ANCHORS[getIndex(sitterId)] ?? "center";
 }
+
+/**
+ * Retourne les deux URLs (desktop JPG 1536×544 + mobile WebP 768×272) à utiliser
+ * conjointement dans un `<img srcset>` pour servir la bonne résolution selon
+ * la largeur d'écran. Le navigateur ne télécharge qu'une seule des deux.
+ */
+export function getSitterHeroSources(sitterId?: string | null): {
+  desktop: string;
+  mobile: string;
+} {
+  const idx = getIndex(sitterId);
+  // Import dynamique du bank mobile pour éviter un cycle d'import au build.
+  // (heroBankMobile importe heroBank via le système de modules → on isole.)
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const { getMobileByIndex } = require("./heroBankMobile") as typeof import("./heroBankMobile");
+  return {
+    desktop: HERO_BANK[idx],
+    mobile: getMobileByIndex(idx) ?? HERO_BANK[idx],
+  };
+}
