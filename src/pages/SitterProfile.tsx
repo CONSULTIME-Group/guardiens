@@ -13,7 +13,7 @@ import ExternalExperiences from "@/components/profile/ExternalExperiences";
 import ProfileSidebar, { type SidebarSection } from "@/components/profile/ProfileSidebar";
 import ScoreBreakdown from "@/components/profile/ScoreBreakdown";
 
-import { useSitterProfile, type SitterProfileData } from "@/hooks/useSitterProfile";
+import { useSitterProfile, computeSitterMissingFields, type SitterProfileData } from "@/hooks/useSitterProfile";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import PageMeta from "@/components/PageMeta";
