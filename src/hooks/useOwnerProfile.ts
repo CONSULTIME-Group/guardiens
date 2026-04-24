@@ -221,6 +221,10 @@ export function useOwnerProfile() {
       const profileFields = ["first_name", "last_name", "city", "postal_code", "bio", "avatar_url", "skill_categories", "available_for_help"] as const;
       const profileUpdate: any = {};
       profileFields.forEach(f => { if (f in stepData) profileUpdate[f] = (stepData as any)[f]; });
+      // Owner skill categories alias → canonical profiles.skill_categories
+      if ("owner_skill_categories" in stepData) {
+        profileUpdate.skill_categories = (stepData as any).owner_skill_categories;
+      }
       // profile_completion is recomputed server-side via RPC after writes (canonical barème)
       if (Object.keys(profileUpdate).length > 0) {
         const { error } = await supabase.from("profiles").update(profileUpdate).eq("id", user.id);
