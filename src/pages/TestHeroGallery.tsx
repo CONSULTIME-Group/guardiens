@@ -309,6 +309,9 @@ function HeroCard({
           hero-{String(item.fileNum).padStart(2, "0")}
         </span>
       </div>
+
+      {/* Liseré ambré de tranche le long du bord déchiré (effet épaisseur de papier) */}
+      <span className="notebook-card-edge" aria-hidden="true" />
     </article>
   );
 }
