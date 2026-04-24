@@ -175,3 +175,34 @@ export const staticRoutes: SiteRoute[] = [
   },
 ];
 
+/**
+ * Routes dynamiques — patterns utilisés par `validate-og-tags.mjs` pour valider
+ * en masse les pages générées (articles de blog, silos géo…).
+ *
+ * Les instances concrètes sont découvertes automatiquement via le sitemap.xml
+ * servi sur l'origine cible, ce qui évite la duplication et reste aligné avec
+ * ce que Google voit effectivement.
+ */
+export const dynamicRoutes: DynamicRouteConfig[] = [
+  {
+    pathPattern: "/actualites/:slug",
+    source: "sitemap",
+    title: "Article", // titre unique par article, non vérifié exactement
+    metaDescription: "Article",
+    sitemapPriority: "0.6",
+    changeFreq: "monthly",
+    dynamicTitle: true,
+    dynamicDescription: true,
+  },
+  {
+    pathPattern: "/house-sitting/:city",
+    source: "sitemap",
+    title: "House-sitting à {city} | Guardiens",
+    metaDescription: "Trouvez un gardien de maison à {city}. House-sitting local, propriétaires et gardiens vérifiés.",
+    sitemapPriority: "0.7",
+    changeFreq: "weekly",
+    dynamicTitle: true, // les pages géo ont un titre SEO précis, non strict
+    dynamicDescription: true,
+  },
+];
+
