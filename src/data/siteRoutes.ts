@@ -22,6 +22,35 @@ export interface SiteRoute {
   ogImage?: string;
 }
 
+/**
+ * Configuration d'un groupe de routes dynamiques (mêmes patterns de title/description).
+ * Utilisé par le script `validate-og-tags.mjs` pour valider en masse les pages
+ * générées à partir d'un template (articles, villes, profils…).
+ *
+ * - `pathPattern` : pattern avec paramètres nommés, ex. "/actualites/:slug".
+ * - `source`      : d'où tirer les instances concrètes.
+ *     - "sitemap"  : lit `sitemap.xml` et filtre les URLs dont le path correspond au pattern.
+ *     - "inline"   : liste explicite `instances` (ex. [{ slug: "foo" }]).
+ * - `title` / `metaDescription` : templates avec placeholders `{param}` (params du pattern).
+ *   Par défaut, seuls le titre et la description sont interpolés ; si une page
+ *   a réellement un titre unique (ex. titre d'article), mettez `dynamicTitle: true`
+ *   pour indiquer au script de ne vérifier que la présence d'OG (pas la valeur exacte).
+ */
+export interface DynamicRouteConfig {
+  pathPattern: string;
+  source: "sitemap" | "inline";
+  instances?: Record<string, string>[];
+  title: string;
+  metaDescription: string;
+  ogImage?: string;
+  sitemapPriority: string;
+  changeFreq: "daily" | "weekly" | "monthly" | "yearly";
+  /** Si true, le script vérifie la présence des balises OG sans comparer la valeur exacte. */
+  dynamicTitle?: boolean;
+  /** Idem pour la description (ex. extraite du corps de l'article). */
+  dynamicDescription?: boolean;
+}
+
 export const staticRoutes: SiteRoute[] = [
   {
     path: "/",
