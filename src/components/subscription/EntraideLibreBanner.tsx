@@ -3,17 +3,16 @@ import { Heart } from "lucide-react";
 export default function EntraideLibreBanner() {
   return (
     <div className="max-w-5xl mx-auto mb-6">
-      <div className="rounded-xl border border-primary/20 bg-primary/5 px-4 py-3 md:px-5 md:py-3.5 flex items-start md:items-center gap-3">
-        <div className="shrink-0 inline-flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary">
-          <Heart className="h-4 w-4" fill="currentColor" />
+      <div className="rounded-xl border border-primary/20 bg-primary/5 px-4 py-4 md:px-6 md:py-5 flex items-start gap-4">
+        <div className="shrink-0 inline-flex items-center justify-center w-10 h-10 rounded-full bg-primary/10 text-primary">
+          <Heart className="h-5 w-5" fill="currentColor" />
         </div>
-        <div className="flex-1 min-w-0">
+        <div className="flex-1 min-w-0 space-y-1.5">
           <p className="font-heading text-sm md:text-base font-semibold text-foreground leading-snug">
-            L'entraide entre gens du coin reste libre pour tous
+            L'entraide entre gens du coin restera toujours gratuite
           </p>
-          <p className="text-xs md:text-sm text-foreground/70 font-body leading-snug mt-0.5">
-            Petites missions ponctuelles (potager, courrier, promenade…) :{" "}
-            <strong className="text-foreground font-semibold">100 % gratuit</strong>, ni avant ni après le 13 mai.
+          <p className="text-xs md:text-sm text-foreground/70 font-body leading-relaxed">
+            Arroser un potager, sortir un chien le weekend, garder des poules le temps d'un marché… Ces coups de main entre voisins font le tissu d'un village et ne devraient jamais avoir de prix. C'est à nous de montrer l'exemple : les <strong className="text-foreground font-semibold">petites missions d'entraide resteront 100 % gratuites à vie</strong>, pour que ce lien continue d'exister indépendamment de toute monétisation.
           </p>
         </div>
       </div>
