@@ -753,332 +753,464 @@ export default function PublicSitterProfile() {
       {/* ── SÉPARATEUR ── */}
       {availableTabs <= 1 && <hr className="border-border max-w-5xl mx-auto" />}
 
-      {/* ── ONGLET GARDIEN ── */}
+      {/* ── ONGLET GARDIEN (refonte éditoriale) ────────────────────────── */}
       {activeTab === 'gardien' && (
-        <div className="max-w-5xl mx-auto px-6 py-8 flex flex-col md:flex-row gap-8 md:gap-12 items-start">
+        <div className="max-w-5xl mx-auto px-4 md:px-6 py-10 md:py-14 space-y-14 md:space-y-16">
 
-          {/* ── LEFT COLUMN ── */}
-          <div className="w-full md:w-[260px] md:shrink-0 md:sticky md:top-8 space-y-6">
-
-            {/* Lifestyle */}
-            {lifestyle.length > 0 && (
-              <div className="border-b border-border pb-4 mb-4">
-                <p className="text-xs uppercase tracking-widest text-muted-foreground mb-2">Style de vie</p>
-                <div className="flex flex-wrap gap-1.5">
-                  {lifestyle.map(l => (
-                    <span key={l} className="border border-border rounded-full text-xs px-2.5 py-0.5 text-foreground">
-                      {l}
-                    </span>
-                  ))}
+          {/* ── 1. STATS VISUELLES (juste sous le hero) ───────────────── */}
+          {(reviewCount > 0 || completedSits > 0 || (radius && radius > 0) || totalBadgeCount > 0) && (
+            <section
+              aria-label="Chiffres clés"
+              className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4"
+            >
+              {reviewCount > 0 && (
+                <div className="bg-card border border-border rounded-2xl px-4 py-5 text-center">
+                  <div className="flex items-baseline justify-center gap-1 font-heading">
+                    <span className="text-3xl md:text-4xl font-bold text-foreground leading-none">{avgRating.toFixed(1)}</span>
+                    <span className="text-primary text-xl leading-none">★</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-2 font-body">
+                    {reviewCount} avis vérifié{reviewCount > 1 ? 's' : ''}
+                  </p>
                 </div>
-              </div>
-            )}
-
-            {/* Profile info */}
-            {(typeLine || durationLabel) && (
-              <div className="border-b border-border pb-4 mb-4">
-                <p className="text-xs uppercase tracking-widest text-muted-foreground mb-2">Profil</p>
-                <div className="text-sm text-foreground/70 space-y-0.5">
-                 {typeLine && <p>{typeLine}</p>}
-                  {durationLabel && <p>{durationLabel}</p>}
-                  {frequencyLabel && <p>{frequencyLabel}</p>}
-                  {noticeLabel && <p>{noticeLabel}</p>}
+              )}
+              {completedSits > 0 && (
+                <div className="bg-card border border-border rounded-2xl px-4 py-5 text-center">
+                  <div className="text-3xl md:text-4xl font-bold text-foreground font-heading leading-none">{completedSits}</div>
+                  <p className="text-xs text-muted-foreground mt-2 font-body">garde{completedSits > 1 ? 's' : ''} réalisée{completedSits > 1 ? 's' : ''}</p>
                 </div>
-              </div>
-            )}
-
-            {/* Preferred environments */}
-            {preferredEnvironments.length > 0 && (
-              <div className="border-b border-border pb-4 mb-4">
-                <p className="text-xs uppercase tracking-widest text-muted-foreground mb-2">Environnements</p>
-                <div className="flex flex-wrap gap-1.5">
-                  {preferredEnvironments.map(e => (
-                    <span key={e} className="border border-border rounded-full text-xs px-2.5 py-0.5 text-foreground">
-                      {ENV_LABELS[e] || e}
-                    </span>
-                  ))}
+              )}
+              {radius && radius > 0 && (
+                <div className="bg-card border border-border rounded-2xl px-4 py-5 text-center">
+                  <div className="text-3xl md:text-4xl font-bold text-foreground font-heading leading-none">{radius}<span className="text-xl font-normal text-muted-foreground">km</span></div>
+                  <p className="text-xs text-muted-foreground mt-2 font-body">rayon d'action</p>
                 </div>
-              </div>
-            )}
+              )}
+              {totalBadgeCount > 0 && (
+                <div className="bg-card border border-border rounded-2xl px-4 py-5 text-center">
+                  <div className="text-3xl md:text-4xl font-bold text-foreground font-heading leading-none">{totalBadgeCount}</div>
+                  <p className="text-xs text-muted-foreground mt-2 font-body">écusson{totalBadgeCount > 1 ? 's' : ''} mérité{totalBadgeCount > 1 ? 's' : ''}</p>
+                </div>
+              )}
+            </section>
+          )}
 
-            {/* CTA */}
-            {showCTA && (
-              <>
-                <hr className="border-border" />
-                {!isAuthenticated && (
-                  <>
-                    <Link
-                      to={`/inscription?redirect=/gardiens/${id}`}
-                      className="block bg-primary text-primary-foreground rounded-xl py-3 text-sm font-medium w-full text-center"
-                    >
-                      S'inscrire pour contacter
-                    </Link>
-                    <p className="text-xs text-muted-foreground text-center mt-2">
-                      Gratuit pour les propriétaires.
-                    </p>
-                  </>
-                )}
-                {isAuthenticated && isOwner && (
+          {/* ── 2. GALERIE ÉDITORIALE (mosaïque asymétrique) ────────────── */}
+          {gallery.length > 0 && (
+            <section aria-label="Galerie">
+              <div className="flex items-end justify-between mb-4">
+                <h2 className="text-xs uppercase tracking-[0.25em] text-muted-foreground font-body">En images</h2>
+                {gallery.length > 5 && (
                   <button
-                    onClick={async () => {
-                      if (!auth?.user?.id || !id) return;
-                      // RPC atomique : crée/récupère la conv selon le contexte sitter_inquiry
-                      const { startConversation } = await import("@/lib/conversation");
-                      const { conversationId, error } = await startConversation({
-                        otherUserId: id,
-                        context: "sitter_inquiry",
-                      });
-                      if (conversationId) {
-                        navigate(`/messages?c=${conversationId}`);
-                      } else if (error?.includes("propositions spontanées")) {
-                        const { toast } = await import("sonner");
-                        toast.error("Ce membre ne reçoit pas de propositions spontanées.");
-                      } else {
-                        const { toast } = await import("sonner");
-                        toast.error("Impossible d'ouvrir la conversation.");
-                      }
-                    }}
-                    className="block bg-primary text-primary-foreground rounded-xl py-3 text-sm font-medium w-full text-center cursor-pointer"
+                    type="button"
+                    onClick={() => setLightboxIdx(0)}
+                    className="text-xs text-primary hover:underline font-body"
                   >
-                    Contacter {firstName}
+                    Voir toutes les photos ({gallery.length}) →
                   </button>
                 )}
-              </>
-            )}
-          </div>
-
-          {/* ── RIGHT COLUMN ── */}
-          <div className="flex-1 space-y-10 min-w-0">
-
-            {/* Motivation */}
-            {motivation && (
-              <p className="text-base font-normal leading-loose text-foreground/80">
-                {motivation}
-              </p>
-            )}
-
-            {/* Bio */}
-            {bio && (
-              <>
-                <p className="text-sm italic text-muted-foreground mt-3">{bio}</p>
-                <hr className="border-border" />
-              </>
-            )}
-
-            {/* Animaux acceptés */}
-            {animalTypes.length > 0 && (
-              <div>
-                <p className="text-xs uppercase tracking-widest text-muted-foreground mb-3">Animaux acceptés</p>
-                <div className="flex flex-wrap gap-2">
-                  {animalTypes.map(a => (
-                    <span key={a} className="border border-border rounded-full text-sm px-3 py-1 text-foreground">
-                      {ANIMAL_LABELS[a] || a}
-                    </span>
+              </div>
+              {/* Mosaïque : 1 grande à gauche + 4 petites à droite (desktop) */}
+              {visibleGallery.length >= 3 ? (
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-2 md:gap-3 md:h-[420px]">
+                  <button
+                    type="button"
+                    onClick={() => setLightboxIdx(0)}
+                    className="md:col-span-2 md:row-span-2 overflow-hidden rounded-2xl group relative"
+                  >
+                    <img
+                      src={visibleGallery[0].photo_url}
+                      alt={visibleGallery[0].caption || `${firstName} en images`}
+                      className="w-full h-64 md:h-full object-cover group-hover:scale-[1.02] transition-transform duration-500"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent pointer-events-none" />
+                  </button>
+                  {visibleGallery.slice(1, 5).map((g, i) => (
+                    <button
+                      key={g.id}
+                      type="button"
+                      onClick={() => setLightboxIdx(i + 1)}
+                      className="overflow-hidden rounded-2xl group hidden md:block"
+                    >
+                      <img
+                        src={g.photo_url}
+                        alt={g.caption || `Photo ${i + 2}`}
+                        className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-500"
+                      />
+                    </button>
                   ))}
-                  {sitterProfile?.farm_animals_ok && (
-                    <span className="border border-primary text-primary rounded-full text-sm px-3 py-1">
-                      Races exigeantes
-                    </span>
-                  )}
+                  {/* Mobile : grille simple des 4 suivantes */}
+                  <div className="grid grid-cols-2 gap-2 md:hidden col-span-full">
+                    {visibleGallery.slice(1, 5).map((g, i) => (
+                      <button
+                        key={g.id}
+                        type="button"
+                        onClick={() => setLightboxIdx(i + 1)}
+                        className="overflow-hidden rounded-2xl aspect-square"
+                      >
+                        <img
+                          src={g.photo_url}
+                          alt={g.caption || `Photo ${i + 2}`}
+                          className="w-full h-full object-cover"
+                        />
+                      </button>
+                    ))}
+                  </div>
                 </div>
-                <div className="mt-3 flex items-center gap-2 text-sm text-muted-foreground">
-                  {hasVehicle ? (
-                    <>
-                      <Car className="w-4 h-4" />
-                      <span>Avec véhicule{radius ? ` — rayon ${radius}km` : ""}</span>
-                    </>
-                  ) : radius ? (
-                    <>
-                      <MapPin className="w-4 h-4" />
-                      <span>Rayon {radius}km</span>
-                    </>
+              ) : (
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-2 md:gap-3">
+                  {visibleGallery.map((g, i) => (
+                    <button
+                      key={g.id}
+                      type="button"
+                      onClick={() => setLightboxIdx(i)}
+                      className="overflow-hidden rounded-2xl aspect-square"
+                    >
+                      <img src={g.photo_url} alt={g.caption || "Photo"} className="w-full h-full object-cover" />
+                    </button>
+                  ))}
+                </div>
+              )}
+            </section>
+          )}
+
+          {/* ── 3. BIO / CITATION ÉDITORIALE ──────────────────────────── */}
+          {(motivation || bio) && (
+            <section aria-label={`À propos de ${firstName}`} className="relative">
+              <h2 className="text-xs uppercase tracking-[0.25em] text-muted-foreground font-body mb-6">
+                À propos de {firstName}
+              </h2>
+              <div className="relative pl-6 md:pl-10 border-l-2 border-primary/30">
+                <span
+                  aria-hidden="true"
+                  className="absolute -left-2 -top-4 text-[5rem] md:text-[7rem] text-primary/15 font-heading leading-none select-none pointer-events-none"
+                >
+                  “
+                </span>
+                {motivation && (
+                  <p className="font-heading text-xl md:text-2xl leading-relaxed text-foreground/90 italic">
+                    {motivation}
+                  </p>
+                )}
+                {bio && (
+                  <p className={`text-sm md:text-base leading-relaxed text-muted-foreground font-body ${motivation ? 'mt-5' : ''}`}>
+                    {bio}
+                  </p>
+                )}
+              </div>
+            </section>
+          )}
+
+          {/* ── 4. AVIS (preuve sociale remontée) ─────────────────────── */}
+          <section aria-label="Avis reçus">
+            <div className="flex items-end justify-between mb-5">
+              <h2 className="text-xs uppercase tracking-[0.25em] text-muted-foreground font-body">
+                Ce qu'on dit de {firstName}{reviewCount > 0 ? ` · ${reviewCount} avis` : ""}
+              </h2>
+            </div>
+            {reviewCount > 0 ? (
+              <Tabs defaultValue="gardes" className="w-full">
+                <TabsList className="mb-4">
+                  <TabsTrigger value="gardes">
+                    Gardes{gardeReviews.length > 0 ? ` (${gardeReviews.length})` : ""}
+                  </TabsTrigger>
+                  <TabsTrigger value="missions">
+                    Missions{missionReviews.length > 0 ? ` (${missionReviews.length})` : ""}
+                  </TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="gardes" forceMount>
+                  {gardeReviews.length === 0 ? (
+                    <p className="text-sm text-muted-foreground italic py-4">
+                      {firstName} n'a pas encore reçu d'avis de garde sur Guardiens.
+                    </p>
                   ) : (
-                    <span className="text-muted-foreground">Rayon : Non renseigné</span>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      {(showAllGardeReviews ? gardeReviews : gardeReviews.slice(0, 4)).map((r: any) => {
+                        const authorName = capitalize(r.reviewer?.first_name || "Membre");
+                        const avatarUrl = r.reviewer?.avatar_url || null;
+                        const reviewBadges = r.sit_id ? (badgesBySitId[r.sit_id] || []) : [];
+                        return (
+                          <article key={r.id} className="bg-card border border-border rounded-2xl p-5 h-full">
+                            <header className="flex items-center justify-between mb-3">
+                              <div className="flex items-center gap-2.5">
+                                <Avatar className="w-9 h-9">
+                                  {avatarUrl ? <AvatarImage src={avatarUrl} /> : null}
+                                  <AvatarFallback className="text-xs bg-muted">
+                                    {authorName.charAt(0).toUpperCase()}
+                                  </AvatarFallback>
+                                </Avatar>
+                                <div className="flex flex-col">
+                                  <span className="text-sm font-medium text-foreground leading-tight">{authorName}</span>
+                                  <span className="text-[11px] text-muted-foreground leading-tight">
+                                    {format(new Date(r.created_at), "MMMM yyyy", { locale: fr })}
+                                  </span>
+                                </div>
+                              </div>
+                              {r.overall_rating !== null && (
+                                <div className="flex items-center gap-0.5" aria-label={`${r.overall_rating} sur 5`}>
+                                  {[1, 2, 3, 4, 5].map(i => (
+                                    <span key={i} className={`text-sm ${i <= r.overall_rating ? "text-primary" : "text-border"}`}>★</span>
+                                  ))}
+                                </div>
+                              )}
+                            </header>
+                            {r.comment && (
+                              <p className="text-sm text-foreground/80 leading-relaxed font-body">{r.comment}</p>
+                            )}
+                            {reviewBadges.length > 0 && (
+                              <div className="flex flex-wrap gap-1.5 mt-3 pt-3 border-t border-border">
+                                {reviewBadges.map((badgeId: string) => (
+                                  <BadgeSceau key={badgeId} id={badgeId} size="compact" showCount={false} />
+                                ))}
+                              </div>
+                            )}
+                          </article>
+                        );
+                      })}
+                      {gardeReviews.length > 4 && (
+                        <div className="md:col-span-2">
+                          <ShowMoreBtn items={gardeReviews} showAll={showAllGardeReviews} setShowAll={setShowAllGardeReviews} />
+                        </div>
+                      )}
+                    </div>
                   )}
-                </div>
+                </TabsContent>
+
+                <TabsContent value="missions" forceMount>
+                  {missionReviews.length === 0 ? (
+                    <p className="text-sm text-muted-foreground italic py-4">
+                      {firstName} n'a pas encore reçu d'avis de mission.
+                    </p>
+                  ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      {(showAllMissionReviewsTab ? missionReviews : missionReviews.slice(0, 4)).map((r: any) => {
+                        const authorName = capitalize(r.reviewer?.first_name || "Membre");
+                        const avatarUrl = r.reviewer?.avatar_url || null;
+                        return (
+                          <article key={r.id} className="bg-card border border-border rounded-2xl p-5">
+                            <header className="flex items-center justify-between mb-3">
+                              <div className="flex items-center gap-2.5">
+                                <Avatar className="w-9 h-9">
+                                  {avatarUrl ? <AvatarImage src={avatarUrl} /> : null}
+                                  <AvatarFallback className="text-xs bg-muted">
+                                    {authorName.charAt(0).toUpperCase()}
+                                  </AvatarFallback>
+                                </Avatar>
+                                <div className="flex flex-col">
+                                  <span className="text-sm font-medium text-foreground leading-tight">{authorName}</span>
+                                  <span className="text-[11px] text-muted-foreground leading-tight">
+                                    {format(new Date(r.created_at), "MMMM yyyy", { locale: fr })}
+                                  </span>
+                                </div>
+                              </div>
+                              {r.overall_rating !== null && (
+                                <div className="flex items-center gap-0.5">
+                                  {[1, 2, 3, 4, 5].map(i => (
+                                    <span key={i} className={`text-sm ${i <= r.overall_rating ? "text-primary" : "text-border"}`}>★</span>
+                                  ))}
+                                </div>
+                              )}
+                            </header>
+                            {r.comment && (
+                              <p className="text-sm text-foreground/80 leading-relaxed font-body">{r.comment}</p>
+                            )}
+                          </article>
+                        );
+                      })}
+                      {missionReviews.length > 4 && (
+                        <div className="md:col-span-2">
+                          <ShowMoreBtn items={missionReviews} showAll={showAllMissionReviewsTab} setShowAll={setShowAllMissionReviewsTab} />
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </TabsContent>
+              </Tabs>
+            ) : (
+              <div className="border border-dashed border-border rounded-2xl p-6 bg-card/50 text-sm text-muted-foreground italic text-center font-body">
+                Les avis apparaîtront ici après la première garde.<br />
+                Chaque propriétaire évalue le gardien et peut attribuer jusqu'à 3 écussons.
               </div>
             )}
+          </section>
 
-            {/* Compétences */}
-            {competences.length > 0 && (
-              <>
-                <hr className="border-border" />
+          {/* ── 5. GAGES DE CONFIANCE (badges regroupés) ──────────────── */}
+          {userBadges && userBadges.length > 0 && (
+            <section aria-label="Gages de confiance" className="bg-accent/40 border border-border rounded-3xl px-5 md:px-8 py-7 md:py-8">
+              <h2 className="text-xs uppercase tracking-[0.25em] text-muted-foreground font-body mb-5">
+                Gages de confiance
+              </h2>
+              <div className="space-y-4">
+                <SpecialBadgeHighlight userBadges={userBadges} />
+                <BadgeRow badges={userBadges} />
+              </div>
+            </section>
+          )}
+
+          {/* ── 6. FACTS REGROUPÉS (2 colonnes) ───────────────────────── */}
+          <section aria-label="Détails pratiques" className="border-t border-border pt-10">
+            <h2 className="text-xs uppercase tracking-[0.25em] text-muted-foreground font-body mb-6">
+              En pratique
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-7">
+              {/* Animaux acceptés */}
+              {animalTypes.length > 0 && (
                 <div>
-                  <p className="text-xs uppercase tracking-widest text-muted-foreground mb-3">Compétences</p>
-                  <div className="flex flex-wrap gap-2">
+                  <div className="flex items-center gap-2 mb-3">
+                    <PawPrint className="w-4 h-4 text-primary" aria-hidden="true" />
+                    <h3 className="text-sm font-semibold text-foreground font-body">Animaux acceptés</h3>
+                  </div>
+                  <div className="flex flex-wrap gap-1.5">
+                    {animalTypes.map(a => (
+                      <span key={a} className="border border-border bg-card rounded-full text-xs px-2.5 py-1 text-foreground">
+                        {ANIMAL_LABELS[a] || a}
+                      </span>
+                    ))}
+                    {sitterProfile?.farm_animals_ok && (
+                      <span className="border border-primary text-primary rounded-full text-xs px-2.5 py-1 bg-primary/5">
+                        Races exigeantes
+                      </span>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Zone d'intervention */}
+              <div>
+                <div className="flex items-center gap-2 mb-3">
+                  {hasVehicle ? <Car className="w-4 h-4 text-primary" aria-hidden="true" /> : <MapPin className="w-4 h-4 text-primary" aria-hidden="true" />}
+                  <h3 className="text-sm font-semibold text-foreground font-body">Zone d'intervention</h3>
+                </div>
+                <p className="text-sm text-foreground/70 font-body">
+                  {hasVehicle
+                    ? `Avec véhicule${radius ? ` — rayon ${radius} km autour de ${city || 'sa ville'}` : ''}`
+                    : radius
+                      ? `Rayon ${radius} km autour de ${city || 'sa ville'}`
+                      : 'Rayon non renseigné'}
+                </p>
+              </div>
+
+              {/* Compétences */}
+              {competences.length > 0 && (
+                <div>
+                  <div className="flex items-center gap-2 mb-3">
+                    <Heart className="w-4 h-4 text-primary" aria-hidden="true" />
+                    <h3 className="text-sm font-semibold text-foreground font-body">Savoir-faire</h3>
+                  </div>
+                  <div className="flex flex-wrap gap-1.5">
                     {competences.map(c => (
-                      <span key={c} className="border border-border rounded-full text-sm px-3 py-1 text-foreground/80">
+                      <span key={c} className="border border-border bg-card rounded-full text-xs px-2.5 py-1 text-foreground/80">
                         {c}
                       </span>
                     ))}
                   </div>
                 </div>
-              </>
-            )}
+              )}
 
-            <hr className="border-border" />
+              {/* Style de vie */}
+              {lifestyle.length > 0 && (
+                <div>
+                  <div className="flex items-center gap-2 mb-3">
+                    <Star className="w-4 h-4 text-primary" aria-hidden="true" />
+                    <h3 className="text-sm font-semibold text-foreground font-body">Style de vie</h3>
+                  </div>
+                  <div className="flex flex-wrap gap-1.5">
+                    {lifestyle.map(l => (
+                      <span key={l} className="border border-border bg-card rounded-full text-xs px-2.5 py-1 text-foreground">
+                        {l}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
 
-            {/* Avis */}
-            <div>
-              <p className="text-xs uppercase tracking-widest text-muted-foreground mb-3">
-                Avis{reviewCount > 0 ? ` (${reviewCount})` : ""}
-              </p>
-              {reviewCount > 0 ? (
-                <Tabs defaultValue="gardes" className="w-full">
-                  <TabsList className="mb-4">
-                    <TabsTrigger value="gardes">
-                      Gardes{gardeReviews.length > 0 ? ` (${gardeReviews.length})` : ""}
-                    </TabsTrigger>
-                    <TabsTrigger value="missions">
-                      Missions{missionReviews.length > 0 ? ` (${missionReviews.length})` : ""}
-                    </TabsTrigger>
-                  </TabsList>
+              {/* Environnements préférés */}
+              {preferredEnvironments.length > 0 && (
+                <div>
+                  <div className="flex items-center gap-2 mb-3">
+                    <Home className="w-4 h-4 text-primary" aria-hidden="true" />
+                    <h3 className="text-sm font-semibold text-foreground font-body">Environnements préférés</h3>
+                  </div>
+                  <div className="flex flex-wrap gap-1.5">
+                    {preferredEnvironments.map(e => (
+                      <span key={e} className="border border-border bg-card rounded-full text-xs px-2.5 py-1 text-foreground">
+                        {ENV_LABELS[e] || e}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
 
-                  <TabsContent value="gardes" forceMount>
-                    {gardeReviews.length === 0 ? (
-                      <p className="text-sm text-muted-foreground italic py-4">
-                        Ce gardien n'a pas encore reçu d'avis de garde sur Guardiens.
-                      </p>
-                    ) : (
-                      <div className="space-y-3">
-                        {(showAllGardeReviews ? gardeReviews : gardeReviews.slice(0, VISIBLE_COUNT)).map((r: any) => {
-                          const authorName = capitalize(r.reviewer?.first_name || "Membre");
-                          const avatarUrl = r.reviewer?.avatar_url || null;
-                          const reviewBadges = r.sit_id ? (badgesBySitId[r.sit_id] || []) : [];
-                          return (
-                            <div key={r.id} className="bg-card border border-border rounded-2xl p-4">
-                              <div className="flex items-center justify-between mb-2">
-                                <div className="flex items-center gap-2">
-                                  <Avatar className="w-8 h-8">
-                                    {avatarUrl ? <AvatarImage src={avatarUrl} /> : null}
-                                    <AvatarFallback className="text-xs bg-muted">
-                                      {authorName.charAt(0).toUpperCase()}
-                                    </AvatarFallback>
-                                  </Avatar>
-                                  <span className="text-sm font-medium text-foreground">{authorName}</span>
-                                </div>
-                                <span className="text-xs text-muted-foreground">
-                                  {format(new Date(r.created_at), "MMMM yyyy", { locale: fr })}
-                                </span>
-                              </div>
-                              {r.overall_rating !== null && (
-                                <div className="flex items-center gap-0.5 mb-2">
-                                  {[1, 2, 3, 4, 5].map(i => (
-                                    <span key={i} className={`text-sm ${i <= r.overall_rating ? "text-primary" : "text-muted"}`}>★</span>
-                                  ))}
-                                </div>
-                              )}
-                              {r.comment && (
-                                <p className="text-sm text-foreground/80">{r.comment}</p>
-                              )}
-                              {reviewBadges.length > 0 && (
-                                <div className="flex flex-wrap gap-1.5 mt-3">
-                                  {reviewBadges.map((badgeId: string) => (
-                                    <BadgeSceau key={badgeId} id={badgeId} size="compact" showCount={false} />
-                                  ))}
-                                </div>
-                              )}
-                            </div>
-                          );
-                        })}
-                        <ShowMoreBtn items={gardeReviews} showAll={showAllGardeReviews} setShowAll={setShowAllGardeReviews} />
-                      </div>
-                    )}
-                  </TabsContent>
-
-                  <TabsContent value="missions" forceMount>
-                    {missionReviews.length === 0 ? (
-                      <p className="text-sm text-muted-foreground italic py-4">
-                        Ce gardien n'a pas encore reçu d'avis de mission.
-                      </p>
-                    ) : (
-                      <div className="space-y-3">
-                        {(showAllMissionReviewsTab ? missionReviews : missionReviews.slice(0, VISIBLE_COUNT)).map((r: any) => {
-                          const authorName = capitalize(r.reviewer?.first_name || "Membre");
-                          const avatarUrl = r.reviewer?.avatar_url || null;
-                          return (
-                            <div key={r.id} className="bg-card border border-border rounded-2xl p-4">
-                              <div className="flex items-center justify-between mb-2">
-                                <div className="flex items-center gap-2">
-                                  <Avatar className="w-8 h-8">
-                                    {avatarUrl ? <AvatarImage src={avatarUrl} /> : null}
-                                    <AvatarFallback className="text-xs bg-muted">
-                                      {authorName.charAt(0).toUpperCase()}
-                                    </AvatarFallback>
-                                  </Avatar>
-                                  <span className="text-sm font-medium text-foreground">{authorName}</span>
-                                </div>
-                                <span className="text-xs text-muted-foreground">
-                                  {format(new Date(r.created_at), "MMMM yyyy", { locale: fr })}
-                                </span>
-                              </div>
-                              {r.overall_rating !== null && (
-                                <div className="flex items-center gap-0.5 mb-2">
-                                  {[1, 2, 3, 4, 5].map(i => (
-                                    <span key={i} className={`text-sm ${i <= r.overall_rating ? "text-primary" : "text-muted"}`}>★</span>
-                                  ))}
-                                </div>
-                              )}
-                              {r.comment && (
-                                <p className="text-sm text-foreground/80">{r.comment}</p>
-                              )}
-                            </div>
-                          );
-                        })}
-                        <ShowMoreBtn items={missionReviews} showAll={showAllMissionReviewsTab} setShowAll={setShowAllMissionReviewsTab} />
-                      </div>
-                    )}
-                  </TabsContent>
-                </Tabs>
-              ) : (
-                <div className="border border-border rounded-xl p-5 bg-card text-sm text-muted-foreground italic">
-                  Les avis apparaîtront ici après la première garde.
-                  Chaque propriétaire évalue le gardien et peut attribuer
-                  jusqu'à 3 écussons.
+              {/* Profil / disponibilité */}
+              {(typeLine || durationLabel || frequencyLabel || noticeLabel) && (
+                <div>
+                  <div className="flex items-center gap-2 mb-3">
+                    <BadgeCheck className="w-4 h-4 text-primary" aria-hidden="true" />
+                    <h3 className="text-sm font-semibold text-foreground font-body">Profil &amp; disponibilité</h3>
+                  </div>
+                  <div className="text-sm text-foreground/70 font-body space-y-0.5">
+                    {typeLine && <p>{typeLine}</p>}
+                    {durationLabel && <p>{durationLabel}</p>}
+                    {frequencyLabel && <p>{frequencyLabel}</p>}
+                    {noticeLabel && <p>{noticeLabel}</p>}
+                  </div>
                 </div>
               )}
             </div>
+          </section>
 
-            <hr className="border-border" />
+          {/* ── 7. EXPÉRIENCES EXTERNES VÉRIFIÉES ─────────────────────── */}
+          <PublicExperiences experiences={externalExperiences} />
 
-            {userBadges && userBadges.length > 0 && (
-              <div className="space-y-3">
-                <SpecialBadgeHighlight userBadges={userBadges} />
-                <div className="space-y-2">
-                  <h3 className="text-sm font-semibold text-foreground">Badges</h3>
-                  <BadgeRow badges={userBadges} />
-                </div>
-              </div>
-            )}
-
-            {/* Galerie */}
-            {gallery.length > 0 && (
-              <div>
-                <p className="text-xs uppercase tracking-widest text-muted-foreground mb-3">Galerie</p>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                  {visibleGallery.map((g, i) => (
-                    <img
-                      key={g.id}
-                      src={g.photo_url}
-                      alt={g.caption || "Photo"}
-                      className="aspect-square object-cover rounded-xl cursor-pointer hover:opacity-90 transition-opacity"
-                      onClick={() => setLightboxIdx(i)}
-                    />
-                  ))}
-                </div>
-                {gallery.length > 9 && (
-                  <p className="text-xs text-primary hover:underline mt-3 cursor-pointer">
-                    Voir toutes les photos →
-                  </p>
-                )}
-              </div>
-            )}
-
-            {/* Expériences vérifiées */}
-            <PublicExperiences experiences={externalExperiences} />
-          </div>
+          {/* ── 8. CTA FINAL (sticky sur mobile) ──────────────────────── */}
+          {showCTA && (
+            <section aria-label="Contact" className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-primary/10 via-primary/5 to-accent/30 border border-primary/20 p-6 md:p-10 text-center">
+              <h2 className="font-heading text-2xl md:text-3xl text-foreground mb-2">
+                Envie d'en savoir plus sur {firstName} ?
+              </h2>
+              <p className="text-sm md:text-base text-muted-foreground mb-6 font-body max-w-xl mx-auto">
+                {isAuthenticated && isOwner
+                  ? `Engagez la conversation — ${firstName} reçoit votre message directement.`
+                  : `Créez votre compte propriétaire gratuit pour échanger avec ${firstName}.`}
+              </p>
+              {!isAuthenticated && (
+                <Link
+                  to={`/inscription?redirect=/gardiens/${id}`}
+                  className="inline-flex items-center justify-center bg-primary text-primary-foreground rounded-full px-8 py-3 text-sm font-medium hover:bg-primary/90 transition-colors"
+                >
+                  S'inscrire pour contacter
+                </Link>
+              )}
+              {isAuthenticated && isOwner && (
+                <button
+                  onClick={async () => {
+                    if (!auth?.user?.id || !id) return;
+                    const { startConversation } = await import("@/lib/conversation");
+                    const { conversationId, error } = await startConversation({
+                      otherUserId: id,
+                      context: "sitter_inquiry",
+                    });
+                    if (conversationId) {
+                      navigate(`/messages?c=${conversationId}`);
+                    } else if (error?.includes("propositions spontanées")) {
+                      const { toast } = await import("sonner");
+                      toast.error("Ce membre ne reçoit pas de propositions spontanées.");
+                    } else {
+                      const { toast } = await import("sonner");
+                      toast.error("Impossible d'ouvrir la conversation.");
+                    }
+                  }}
+                  className="inline-flex items-center justify-center bg-primary text-primary-foreground rounded-full px-8 py-3 text-sm font-medium hover:bg-primary/90 transition-colors cursor-pointer"
+                >
+                  Contacter {firstName}
+                </button>
+              )}
+            </section>
+          )}
         </div>
       )}
+
 
       {/* ── ONGLET PROPRIO ── */}
       {activeTab === 'proprio' && (
