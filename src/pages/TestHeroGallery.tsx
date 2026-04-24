@@ -202,11 +202,11 @@ export default function TestHeroGallery() {
                 onChange={(e) => setCategoryFilter(e.target.value as CategoryFilter)}
                 className="text-xs bg-card border border-border rounded px-2 py-1"
               >
-                <option value="all">Toutes</option>
-                <option value="animals">Animaux & plantes</option>
-                <option value="home">Maison</option>
-                <option value="mutual_aid">Entraide</option>
-                <option value="village">Village & partage</option>
+                <option value="all">Toutes ({items.length})</option>
+                <option value="animals">Animaux & plantes ({stats.byCat.animals})</option>
+                <option value="home">Maison ({stats.byCat.home})</option>
+                <option value="mutual_aid">Entraide ({stats.byCat.mutual_aid})</option>
+                <option value="village">Village & partage ({stats.byCat.village})</option>
               </select>
             </div>
 
@@ -222,6 +222,22 @@ export default function TestHeroGallery() {
                 <option value="left">Left ({stats.byAnchor.left})</option>
                 <option value="center">Center ({stats.byAnchor.center})</option>
                 <option value="right">Right ({stats.byAnchor.right})</option>
+              </select>
+            </div>
+
+            {/* Tri */}
+            <div className="flex items-center gap-1.5">
+              <span className="text-xs text-muted-foreground">Trier :</span>
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value as SortBy)}
+                className="text-xs bg-card border border-border rounded px-2 py-1"
+              >
+                <option value="num-asc">Numéro ↑ (001 → {items.length})</option>
+                <option value="num-desc">Numéro ↓ ({items.length} → 001)</option>
+                <option value="category">Par thème (animaux → village)</option>
+                <option value="anchor">Par ancrage (left → right)</option>
+                <option value="shuffle">Aléatoire stable</option>
               </select>
             </div>
           </div>
