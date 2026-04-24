@@ -10,6 +10,8 @@ export interface SidebarSection {
   label: string;
   subtitle: string;
   missingCount: number;
+  /** Labels exacts des champs manquants pour cette section (ex: ["Permis ou véhicule"]). */
+  missingLabels?: string[];
   complete: boolean;
   optional?: boolean;
 }
@@ -92,6 +94,11 @@ const ProfileSidebar = ({
                 <p className={cn("text-xs hidden lg:block", s.complete ? "text-primary" : "text-muted-foreground")}>
                   {s.complete ? "Complété ✓" : s.missingCount > 0 ? `${s.missingCount} point${s.missingCount > 1 ? "s" : ""} manquant${s.missingCount > 1 ? "s" : ""}` : s.subtitle}
                 </p>
+                {!s.complete && s.missingLabels && s.missingLabels.length > 0 && (
+                  <p className="text-[11px] hidden lg:block text-amber-700 leading-snug mt-0.5 truncate" title={s.missingLabels.join(", ")}>
+                    → {s.missingLabels.join(", ")}
+                  </p>
+                )}
               </div>
             </button>
           );
