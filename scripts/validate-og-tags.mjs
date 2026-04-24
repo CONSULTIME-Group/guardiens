@@ -67,6 +67,11 @@ const concurrency = concurrencyArg
   ? Math.max(1, parseInt(concurrencyArg.slice("--concurrency=".length), 10) || 3)
   : 3;
 const strictMode = cliArgs.includes("--strict");
+const includeDynamic = cliArgs.includes("--include-dynamic");
+const dynamicLimitArg = cliArgs.find((a) => a.startsWith("--dynamic-limit="));
+const dynamicLimit = dynamicLimitArg
+  ? Math.max(0, parseInt(dynamicLimitArg.slice("--dynamic-limit=".length), 10) || 0)
+  : 20;
 
 // Checks disponibles et filtrage --only / --skip
 const ALL_CHECKS = ["og", "canonical", "schema", "sitemap", "robots", "meta-robots"];
