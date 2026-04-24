@@ -152,17 +152,22 @@ const PublicSitDetail = () => {
     ? pets.map((p: any) => `${p.name} (${speciesLabel[p.species] || p.species})`).join(", ")
     : "animaux à confier";
 
-  // og:title — titre de l'annonce + suffixe Guardiens
-  const ogTitle = `${sit.title || "Garde de maison et animaux"} — Guardiens`;
+  // og:title — titre de l'annonce + ville (si dispo) + suffixe Guardiens
+  const ownerCity = owner?.city?.trim() || "";
+  const baseTitle = sit.title || "Garde de maison et animaux";
+  const ogTitle = ownerCity
+    ? `${baseTitle} à ${ownerCity} — Guardiens`
+    : `${baseTitle} — Guardiens`;
   const truncatedTitle = ogTitle.length > 60 ? ogTitle.slice(0, 57) + "…" : ogTitle;
 
-  // og:description — dates en français + description courte du logement
+  // og:description — ville (si dispo) + dates en français + description courte du logement
   const propertyDescShort = property?.description
     ? (property.description.length > 80 ? property.description.slice(0, 77) + "…" : property.description)
     : "";
   const datesPart = startFmt && endFmt ? `Du ${startFmt} au ${endFmt}.` : "Dates flexibles.";
+  const cityPart = ownerCity ? `${ownerCity}. ` : "";
   const ogDescription = propertyDescShort
-    ? `${datesPart} ${propertyDescShort} Partagez la confiance entre gens du coin avec Guardiens.`
+    ? `${cityPart}${datesPart} ${propertyDescShort} Partagez la confiance entre gens du coin avec Guardiens.`
     : "Partez l'esprit tranquille avec un gardien de votre région. Guardiens, c'est la confiance entre gens du coin.";
   const truncatedDesc = ogDescription.length > 200 ? ogDescription.slice(0, 197) + "…" : ogDescription;
 
