@@ -217,33 +217,43 @@ const SitterProfile = () => {
     return url;
   }, [uploadAvatar]);
 
-  // Recompute missing fields against the LIVE preview state so the sidebar reflects
-  // edits in progress (and doesn't show a stale "1 point manquant" after save/refresh).
-  const liveMissingFields = computeSitterMissingFields(mergedData);
-
-  // Critères pesant dans le score (réplique du barème SQL calculate_profile_completion).
-  // Calculés ici pour pouvoir afficher la jauge en LIVE et éviter une divergence avec la valeur DB
-  // mise en cache. Total = 100 par construction (essentiels 80 + bonus 20).
-  const sitterEssentials: ScoreCriterion[] = [
-    { label: "Prénom + code postal", points: 15, ok: !!(mergedData.first_name && mergedData.postal_code) },
-    { label: "Photo de profil", points: 20, ok: !!mergedData.avatar_url, hint: "Ajoutez une photo dans Identité." },
-    { label: "Au moins 1 compétence", points: 15, ok: (mergedData.competences?.length ?? 0) > 0, hint: "Onglet Compétences." },
-    { label: "Au moins 1 mode de vie", points: 15, ok: (mergedData.lifestyle?.length ?? 0) > 0, hint: "Onglet Profil gardien." },
-    { label: "Rayon géographique défini", points: 15, ok: (mergedData.geographic_radius ?? 0) > 0, hint: "Onglet Mobilité & Rayon." },
+  // Source UNIQUE pour la jauge ET la sidebar : un seul set de critères pondérés.
+  // Chaque critère est rattaché à la section où l'utilisateur peut le compléter.
+  // Total = 100 par construction (essentiels 80 + bonus 20). Réplique du SQL.
+  const scoredCriteria: ScoredCriterion[] = [
+    // Essentiels — 80 pts
+    { section: "identity", kind: "essential", label: "Prénom + code postal", points: 15,
+      ok: !!(mergedData.first_name && mergedData.postal_code) },
+    { section: "identity", kind: "essential", label: "Photo de profil", points: 20,
+      ok: !!mergedData.avatar_url, hint: "Ajoutez une photo dans Identité." },
+    { section: "skills", kind: "essential", label: "Au moins 1 compétence", points: 15,
+      ok: (mergedData.competences?.length ?? 0) > 0, hint: "Onglet Compétences." },
+    { section: "sitter", kind: "essential", label: "Au moins 1 mode de vie", points: 15,
+      ok: (mergedData.lifestyle?.length ?? 0) > 0, hint: "Onglet Profil gardien." },
+    { section: "mobility", kind: "essential", label: "Rayon géographique défini", points: 15,
+      ok: (mergedData.geographic_radius ?? 0) > 0, hint: "Onglet Mobilité & Rayon." },
+    // Bonus — 20 pts
+    { section: "identity", kind: "bonus", label: "Bio ≥ 50 caractères", points: 10,
+      ok: (mergedData.bio?.length ?? 0) >= 50, hint: `${mergedData.bio?.length ?? 0}/50 caractères.` },
+    { section: "gallery", kind: "bonus", label: "Au moins 1 photo de galerie", points: 5,
+      ok: hasGalleryPhoto, hint: "Onglet Galerie." },
+    { section: "identity", kind: "bonus", label: "Identité vérifiée", points: 5,
+      ok: !!user?.identityVerified, hint: "Paramètres → Vérification." },
   ];
-  const sitterBonuses: ScoreCriterion[] = [
-    { label: "Bio ≥ 50 caractères", points: 10, ok: (mergedData.bio?.length ?? 0) >= 50, hint: `${mergedData.bio?.length ?? 0}/50 caractères.` },
-    { label: "Au moins 1 photo de galerie", points: 5, ok: hasGalleryPhoto, hint: "Onglet Galerie." },
-    { label: "Identité vérifiée", points: 5, ok: !!user?.identityVerified, hint: "Paramètres → Vérification." },
-  ];
-  const liveScore = Math.min(100, [...sitterEssentials, ...sitterBonuses].reduce((s, c) => s + (c.ok ? c.points : 0), 0));
 
-  const sidebarSections: SidebarSection[] = SECTIONS_META.map(s => ({
-    ...s,
-    complete: s.optional ? false : sectionComplete(s.num, mergedData),
-    missingCount: s.optional ? 0 : countMissing(s.num, mergedData, liveMissingFields),
-    missingLabels: s.optional ? [] : missingLabelsFor(s.num, liveMissingFields),
-  }));
+  const sitterEssentials = scoredCriteria.filter(c => c.kind === "essential");
+  const sitterBonuses = scoredCriteria.filter(c => c.kind === "bonus");
+  const liveScore = Math.min(100, scoredCriteria.reduce((s, c) => s + (c.ok ? c.points : 0), 0));
+
+  const sidebarSections: SidebarSection[] = SECTIONS_META.map(s => {
+    const labels = missingLabelsFor(s.id, scoredCriteria);
+    return {
+      ...s,
+      complete: s.optional ? false : sectionComplete(s.id, scoredCriteria),
+      missingCount: s.optional ? 0 : labels.length,
+      missingLabels: s.optional ? [] : labels,
+    };
+  });
 
   if (loading) {
     return (
