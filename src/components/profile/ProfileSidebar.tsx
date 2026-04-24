@@ -109,9 +109,47 @@ const ProfileSidebar = ({
                   {s.complete ? "Complété ✓" : s.missingCount > 0 ? `${s.missingCount} point${s.missingCount > 1 ? "s" : ""} manquant${s.missingCount > 1 ? "s" : ""}` : s.subtitle}
                 </p>
                 {!s.complete && s.missingLabels && s.missingLabels.length > 0 && (
-                  <p className="text-[11px] hidden lg:block text-amber-700 leading-snug mt-0.5 truncate" title={s.missingLabels.join(", ")}>
-                    → {s.missingLabels.join(", ")}
-                  </p>
+                  (() => {
+                    const labels = s.missingLabels!;
+                    const isExpanded = !!expandedMissing[s.id];
+                    const summary = labels.join(", ");
+                    return (
+                      <div className="hidden lg:block mt-0.5">
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <p
+                              className={cn(
+                                "text-[11px] text-amber-700 leading-snug",
+                                !isExpanded && "truncate"
+                              )}
+                            >
+                              → {isExpanded
+                                ? labels.map((l, i) => (
+                                    <span key={l} className="block">• {l}{i < labels.length - 1 ? "" : ""}</span>
+                                  ))
+                                : summary}
+                            </p>
+                          </TooltipTrigger>
+                          <TooltipContent side="right" className="max-w-[260px]">
+                            <ul className="text-xs space-y-0.5">
+                              {labels.map(l => (
+                                <li key={l}>• {l}</li>
+                              ))}
+                            </ul>
+                          </TooltipContent>
+                        </Tooltip>
+                        {labels.length > 1 && (
+                          <button
+                            type="button"
+                            onClick={toggleExpanded(s.id)}
+                            className="text-[11px] text-primary hover:underline mt-0.5"
+                          >
+                            {isExpanded ? "Réduire" : `Voir tout (${labels.length})`}
+                          </button>
+                        )}
+                      </div>
+                    );
+                  })()
                 )}
               </div>
             </button>
@@ -128,6 +166,7 @@ const ProfileSidebar = ({
         <Eye className="h-3.5 w-3.5" /> Voir mon profil public →
       </Link>
     </aside>
+    </TooltipProvider>
   );
 };
 
