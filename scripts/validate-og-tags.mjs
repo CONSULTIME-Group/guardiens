@@ -706,6 +706,8 @@ async function main() {
 
   for (const origin of normalizedOrigins) {
     console.log(c("bold", `━━━ Origine : ${origin} ━━━`));
+    const originReport = { origin, sitemap: null, robots: null, routes: [] };
+    report.perOrigin.push(originReport);
 
     // ─── Routes-échantillon (1 par pattern avec sampleParams) ────────────
     // Toujours actives : validation STRICTE d'un slug/id/city représentatif.
