@@ -28,6 +28,17 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ShareButtons from "@/components/sits/ShareButtons";
 import SitDateHistory from "@/components/sits/SitDateHistory";
 import { trackEvent } from "@/lib/analytics";
+import { formatSitPeriod } from "@/lib/dateRange";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 const envLabels: Record<string, string> = {
   city_center: "Centre-ville", suburban: "Périurbain", countryside: "Campagne",
@@ -91,6 +102,7 @@ const SitDetail = () => {
   const [accordData, setAccordData] = useState<any>(null);
   const [reopenCount, setReopenCount] = useState(3);
   const [hasReviewedThisSit, setHasReviewedThisSit] = useState(false);
+  const [publishConfirmOpen, setPublishConfirmOpen] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -268,13 +280,56 @@ const SitDetail = () => {
               <p className="font-heading text-base font-semibold">Cette annonce est encore en brouillon</p>
               <p className="text-sm text-muted-foreground">Publie-la pour qu'elle apparaisse dans la recherche.</p>
             </div>
-            <Button onClick={handlePublish} disabled={publishing} className="gap-2 md:self-start">
+            <Button onClick={() => setPublishConfirmOpen(true)} disabled={publishing} className="gap-2 md:self-start">
               <Send className="h-4 w-4" />
               {publishing ? "Publication..." : "Publier l'annonce"}
             </Button>
           </div>
         </div>
       )}
+
+      {/* Confirmation publication — rappel des dates exactes */}
+      <AlertDialog open={publishConfirmOpen} onOpenChange={setPublishConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmer la publication</AlertDialogTitle>
+            <AlertDialogDescription asChild>
+              <div className="space-y-3 pt-2">
+                <p>Vérifiez les informations avant que votre annonce ne devienne visible :</p>
+                <div className="rounded-lg border border-primary/20 bg-primary/5 p-3 text-sm space-y-1.5">
+                  <div className="flex items-center gap-2 text-foreground font-medium">
+                    <Calendar className="h-4 w-4 text-primary shrink-0" />
+                    <span>{formatSitPeriod(sit.start_date, sit.end_date) || "Dates non renseignées"}</span>
+                  </div>
+                  {owner?.city && (
+                    <div className="flex items-center gap-2 text-muted-foreground">
+                      <MapPin className="h-4 w-4 shrink-0" />
+                      <span>{owner.city}</span>
+                    </div>
+                  )}
+                  {sit.flexible_dates && (
+                    <p className="text-xs text-muted-foreground italic">Dates flexibles</p>
+                  )}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Vous pourrez toujours modifier l'annonce après publication.
+                </p>
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annuler</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={async () => {
+                setPublishConfirmOpen(false);
+                await handlePublish();
+              }}
+            >
+              Publier
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* Emergency sitter alert — owner only, published sit starting within 15 days */}
       {isOwner && sit.status === "published" && owner?.city && (
@@ -392,6 +447,8 @@ const SitDetail = () => {
             sitId={sit.id}
             title={sit.title || `Garde à ${owner?.city || "France"}`}
             city={owner?.city}
+            startDate={sit.start_date}
+            endDate={sit.end_date}
             source="owner_sit_detail"
           />
         </div>

@@ -1,13 +1,18 @@
 import { useState } from "react";
-import { Facebook, Link2, MessageCircle, Mail, Check, Share2 } from "lucide-react";
+import { Facebook, Link2, MessageCircle, Mail, Check, Share2, Calendar, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { trackEvent } from "@/lib/analytics";
+import { formatSitPeriod } from "@/lib/dateRange";
 
 interface ShareButtonsProps {
   sitId: string;
   title: string;
   city?: string | null;
+  /** Date de début (ISO) — affichée en récap pour confirmer ce qui sera partagé */
+  startDate?: string | null;
+  /** Date de fin (ISO) */
+  endDate?: string | null;
   /** Where the share is triggered from — used in analytics */
   source?: string;
   /** Compact icon-only variant for hero/secondary placements */
@@ -27,7 +32,7 @@ type ShareChannel = "facebook" | "whatsapp" | "x" | "email" | "copy" | "native";
  * - Copier le lien
  * - Web Share API native (mobile)
  */
-const ShareButtons = ({ sitId, title, city, source = "sit_detail", compact = false, viewerType = "anonymous" }: ShareButtonsProps) => {
+const ShareButtons = ({ sitId, title, city, startDate, endDate, source = "sit_detail", compact = false, viewerType = "anonymous" }: ShareButtonsProps) => {
   const { toast } = useToast();
   const [copied, setCopied] = useState(false);
 
@@ -36,8 +41,10 @@ const ShareButtons = ({ sitId, title, city, source = "sit_detail", compact = fal
     ? `${window.location.origin}/annonces/${sitId}`
     : `https://guardiens.fr/annonces/${sitId}`;
 
+  const periodLabel = formatSitPeriod(startDate, endDate);
   const cityPart = city ? ` à ${city}` : "";
-  const shareText = `${title}${cityPart} — une annonce de garde sur Guardiens. Quelqu'un du coin pour veiller sur la maison ?`;
+  const datePart = periodLabel ? ` (${periodLabel})` : "";
+  const shareText = `${title}${cityPart}${datePart} — une annonce de garde sur Guardiens. Quelqu'un du coin pour veiller sur la maison ?`;
 
   const track = (channel: ShareChannel) => {
     try {
@@ -119,9 +126,31 @@ const ShareButtons = ({ sitId, title, city, source = "sit_detail", compact = fal
         <Share2 className="h-4 w-4 text-primary" />
         <p className="font-heading font-semibold text-sm">Partagez cette annonce</p>
       </div>
-      <p className="text-xs text-muted-foreground mb-4">
+      <p className="text-xs text-muted-foreground mb-3">
         Plus elle est vue, plus vite vous trouverez un gardien du coin.
       </p>
+
+      {(periodLabel || city) && (
+        <div className="mb-4 rounded-lg border border-primary/20 bg-primary/5 p-3 text-sm">
+          <p className="text-xs uppercase tracking-wide text-muted-foreground mb-1.5">
+            Vous partagez
+          </p>
+          <div className="space-y-1">
+            {periodLabel && (
+              <div className="flex items-center gap-2 font-medium text-foreground">
+                <Calendar className="h-4 w-4 text-primary shrink-0" />
+                <span>{periodLabel}</span>
+              </div>
+            )}
+            {city && (
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <MapPin className="h-4 w-4 shrink-0" />
+                <span>{city}</span>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2">
         <Button
