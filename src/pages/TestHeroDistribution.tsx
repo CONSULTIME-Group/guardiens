@@ -163,8 +163,13 @@ export default function TestHeroDistribution() {
           </h1>
           <p className="text-sm text-muted-foreground">
             Simule {total.toLocaleString("fr-FR")} sitterId aléatoires et mesure la
-            répartition réelle vs. les cibles théoriques (40 / 20 / 20 / 20).
-            Calcul effectué en {result.durationMs.toFixed(0)} ms.
+            répartition réelle vs. les cibles actives ({targets.animals.toFixed(0)} /{" "}
+            {targets.home.toFixed(0)} / {targets.mutual_aid.toFixed(0)} /{" "}
+            {targets.village.toFixed(0)}). Calcul effectué en {result.durationMs.toFixed(0)} ms.
+            {" · "}
+            <a href="/admin/hero-weights" className="underline hover:text-foreground">
+              Modifier les poids
+            </a>
           </p>
 
           {/* Contrôles */}
