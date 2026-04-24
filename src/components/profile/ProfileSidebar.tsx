@@ -157,6 +157,30 @@ const ProfileSidebar = ({
         })}
       </nav>
 
+      {/* Mobile-only : panneau détaillé pour la section active.
+          Sur mobile la nav est en scroll horizontal et n'a pas la place
+          d'afficher la liste des champs manquants sous chaque pilule.
+          On affiche donc ici, sous la nav, la liste complète pour la section
+          actuellement sélectionnée (ex: Mobilité & Rayon). */}
+      {(() => {
+        const active = sections.find(s => s.id === activeSection);
+        if (!active) return null;
+        const labels = active.missingLabels ?? [];
+        if (active.complete || labels.length === 0) return null;
+        return (
+          <div className="lg:hidden rounded-lg border border-amber-200 bg-amber-50 px-3 py-2.5">
+            <p className="text-xs font-medium text-amber-900">
+              {active.label} — {labels.length} point{labels.length > 1 ? "s" : ""} manquant{labels.length > 1 ? "s" : ""}
+            </p>
+            <ul className="mt-1.5 space-y-0.5">
+              {labels.map(l => (
+                <li key={l} className="text-xs text-amber-800 leading-snug">• {l}</li>
+              ))}
+            </ul>
+          </div>
+        );
+      })()}
+
       {/* Public profile link */}
       <Link
         to={publicProfileUrl}
