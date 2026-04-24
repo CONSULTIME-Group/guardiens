@@ -2,7 +2,8 @@ import React, { useState, useEffect, useRef } from "react";
 import notreHistoirePanorama from "@/assets/story-photo.webp";
 import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, ArrowLeft, Home, Key, Handshake, ShieldCheck, MessageCircle, Users, ClipboardCheck, Star, BookOpen } from "lucide-react";
+import { ArrowRight, ArrowLeft, Home, Key, Handshake, ShieldCheck, MessageCircle, Users, ClipboardCheck, Star, BookOpen, Gift, Coffee, MapPin } from "lucide-react";
+import { trackEvent } from "@/lib/analytics";
 import { supabase } from "@/integrations/supabase/client";
 
 import PageMeta from "@/components/PageMeta";
@@ -256,14 +257,20 @@ const Landing = () => {
             {/* CTAs — propriétaire mis en avant (priorité business : combler le manque d'annonces) */}
             <div className="flex flex-col sm:flex-row gap-3 mb-4 animate-hero-fade-up animation-delay-900">
               <button
-                onClick={() => navigate("/inscription?role=owner")}
-                className="font-body text-sm font-semibold tracking-wide rounded-full px-10 py-4 bg-primary text-primary-foreground hover:brightness-90 hover:scale-[1.02] transition-all duration-200 shadow-lg shadow-primary/30"
+                onClick={() => {
+                  trackEvent("cta_proprio_clicked", { metadata: { location: "hero" } });
+                  navigate("/inscription?role=owner");
+                }}
+                className="font-body text-base font-semibold tracking-wide rounded-full px-12 py-4 bg-primary text-primary-foreground hover:brightness-95 hover:scale-[1.03] transition-all duration-200 shadow-xl shadow-primary/40 ring-2 ring-primary-foreground/10"
               >
                 Publier mon annonce — gratuit
               </button>
               <button
-                onClick={() => navigate("/inscription?role=sitter")}
-                className="font-body text-sm font-semibold tracking-wide rounded-full px-8 py-4 bg-transparent text-white border-2 border-white/70 hover:bg-white/15 transition-all duration-200"
+                onClick={() => {
+                  trackEvent("cta_sitter_clicked", { metadata: { location: "hero" } });
+                  navigate("/inscription?role=sitter");
+                }}
+                className="font-body text-sm font-medium tracking-wide rounded-full px-7 py-3 bg-transparent text-white border border-white/60 hover:bg-white/10 transition-all duration-200"
               >
                 Je veux garder
               </button>
@@ -307,6 +314,74 @@ const Landing = () => {
               </div>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* ═══════════════ SECTION — POURQUOI PUBLIER VOTRE ANNONCE ═══════════════ */}
+      <section className="bg-background py-16 md:py-20">
+        <div className="max-w-6xl mx-auto px-4">
+          <h2 className="text-3xl md:text-4xl font-heading font-bold text-center text-foreground">
+            Pourquoi publier votre annonce sur Guardiens ?
+          </h2>
+          <p className="text-lg text-muted-foreground text-center mt-2 max-w-2xl mx-auto">
+            Des gardiens de votre région, vérifiés, pour partir l'esprit tranquille.
+          </p>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-12">
+            <div className="bg-card border border-border rounded-xl p-6">
+              <Gift className="w-10 h-10 text-primary" />
+              <h3 className="mt-4 font-heading font-semibold text-lg text-foreground">100% gratuit, pour toujours</h3>
+              <p className="mt-2 text-muted-foreground text-sm leading-relaxed">
+                Publier votre annonce, recevoir des candidatures, échanger avec les gardiens : tout est gratuit pour les propriétaires. Sans limite de temps.
+              </p>
+            </div>
+
+            <div className="bg-card border border-border rounded-xl p-6">
+              <Coffee className="w-10 h-10 text-primary" />
+              <h3 className="mt-4 font-heading font-semibold text-lg text-foreground">Une rencontre avant chaque garde</h3>
+              <p className="mt-2 text-muted-foreground text-sm leading-relaxed">
+                Vous choisissez votre gardien après l'avoir rencontré. Un café, une visite du logement, et la confiance s'installe naturellement.
+              </p>
+            </div>
+
+            <div className="bg-card border border-border rounded-xl p-6">
+              <ShieldCheck className="w-10 h-10 text-primary" />
+              <h3 className="mt-4 font-heading font-semibold text-lg text-foreground">Des profils vérifiés</h3>
+              <p className="mt-2 text-muted-foreground text-sm leading-relaxed">
+                Chaque gardien est vérifié par notre équipe : pièce d'identité, avis des propriétaires précédents, historique de gardes réalisées.
+              </p>
+            </div>
+
+            <div className="bg-card border border-border rounded-xl p-6">
+              <MapPin className="w-10 h-10 text-primary" />
+              <h3 className="mt-4 font-heading font-semibold text-lg text-foreground">Des gardiens de votre région</h3>
+              <p className="mt-2 text-muted-foreground text-sm leading-relaxed">
+                En Auvergne-Rhône-Alpes, on privilégie la proximité. Votre gardien habite à quelques kilomètres, jamais à l'autre bout de la France.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ═══════════════ BANDEAU — VOUS PARTEZ CET ÉTÉ ═══════════════ */}
+      <section className="bg-primary/5 py-16">
+        <div className="max-w-3xl mx-auto px-4 text-center">
+          <h2 className="text-3xl md:text-4xl font-heading font-bold text-foreground">Vous partez cet été ?</h2>
+          <p className="text-lg text-muted-foreground mt-4 leading-relaxed">
+            Publiez votre annonce maintenant, gratuitement. Un gardien de votre région s'occupera de votre maison et de vos animaux pendant votre absence.
+          </p>
+          <button
+            onClick={() => {
+              trackEvent("cta_proprio_clicked", { metadata: { location: "banner" } });
+              navigate("/inscription?role=owner");
+            }}
+            className="mt-8 font-body text-base font-semibold tracking-wide rounded-full px-10 py-4 bg-primary text-primary-foreground hover:brightness-95 hover:scale-[1.02] transition-all duration-200 shadow-lg shadow-primary/30"
+          >
+            Publier mon annonce
+          </button>
+          <p className="text-sm text-muted-foreground mt-4">
+            Inscription en 2 minutes. Aucune carte bancaire demandée.
+          </p>
         </div>
       </section>
 

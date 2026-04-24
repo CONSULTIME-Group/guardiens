@@ -14,6 +14,8 @@ export type EventType =
   | "signup_failed"
   | "user_activated"
   | "cta_click"
+  | "cta_proprio_clicked"
+  | "cta_sitter_clicked"
   | "login_completed"
   | "cp_recovered"
   | "search_empty_action"
