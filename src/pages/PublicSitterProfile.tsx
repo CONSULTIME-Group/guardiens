@@ -760,7 +760,7 @@ export default function PublicSitterProfile() {
         <div className="absolute bottom-0 left-0 right-0 h-24 z-[1] bg-gradient-to-b from-transparent to-background pointer-events-none" />
 
         {/* Contenu header par-dessus */}
-        <div className="relative z-10 w-full max-w-5xl mx-auto px-6 pb-8 pt-6">
+        <div className="relative z-10 w-full max-w-5xl mx-auto px-4 sm:px-6 pb-8 pt-6">
           {/* Ligne retour */}
           <div className="flex justify-end mb-4">
             <Link
