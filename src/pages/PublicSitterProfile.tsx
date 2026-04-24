@@ -1033,7 +1033,7 @@ export default function PublicSitterProfile() {
                           ) : identityVerified ? (
                             <span className="text-foreground/80 text-xs">Identité vérifiée</span>
                           ) : (
-                            <span className="text-muted-foreground text-xs italic">Pas encore noté</span>
+                            <span className="text-muted-foreground text-xs italic">Aucun avis</span>
                           )}
                         </div>
                         <div className="flex flex-wrap gap-x-1.5 gap-y-0.5 text-[11px] text-muted-foreground font-body">
