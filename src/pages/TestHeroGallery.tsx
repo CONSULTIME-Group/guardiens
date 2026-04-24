@@ -22,7 +22,7 @@ import {
 } from "@/lib/heroBank";
 import { getMobileByIndex } from "@/lib/heroBankMobile";
 import { Helmet } from "react-helmet-async";
-import { X, ZoomIn, ZoomOut, RotateCcw, ChevronLeft, ChevronRight } from "lucide-react";
+import { X, ZoomIn, ZoomOut, RotateCcw, ChevronLeft, ChevronRight, Maximize2 } from "lucide-react";
 
 type ViewMode = "rendered" | "raw";
 type AnchorFilter = "all" | HeroAnchor;
