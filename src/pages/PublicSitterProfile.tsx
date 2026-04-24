@@ -682,13 +682,13 @@ export default function PublicSitterProfile() {
         // Ancrage horizontal pré-calculé pour cette image (analyse pixel des bords).
         // 'left'/'right' poussent l'image dans cette direction → object-cover rogne le côté opposé.
         // Sur mobile on accentue (0% / 100%), sur tablette/desktop on adoucit (12% / 88%).
-        const anchor = getSitterHeroAnchor(id);
+        const anchor = getSitterHeroAnchor(id, heroWeights);
         const posMobile = anchor === "left" ? "0% 50%" : anchor === "right" ? "100% 50%" : "50% 50%";
         const posTablet = anchor === "left" ? "12% 45%" : anchor === "right" ? "88% 45%" : "50% 45%";
         const posDesktop = anchor === "left" ? "20% 42%" : anchor === "right" ? "80% 42%" : "50% 42%";
         // Variantes responsive : WebP 768w (mobile, ~34KB) + JPG 1536w (desktop, ~130KB).
         // Le navigateur pioche selon `sizes` → bande passante divisée par ~4 sur mobile.
-        const { desktop: heroDesktop, mobile: heroMobile } = getSitterHeroSources(id);
+        const { desktop: heroDesktop, mobile: heroMobile } = getSitterHeroSources(id, heroWeights);
         return (
           <div className="relative overflow-hidden w-full min-h-[320px] sm:min-h-[360px] md:min-h-[340px] flex items-end bg-[#FBF6EC]">
             {/* Illustration de fond — sketchbook style, déterministe par profil.
