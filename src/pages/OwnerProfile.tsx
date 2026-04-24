@@ -197,7 +197,13 @@ const OwnerProfilePage = () => {
             completion={liveScore}
             sections={sidebarSections}
             activeSection={activeSection}
-            onSectionClick={setActiveSection}
+            onSectionClick={(id) => {
+              setActiveSection(id);
+              requestAnimationFrame(() => {
+                const el = document.getElementById("profile-section-content");
+                if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+              });
+            }}
             publicProfileUrl={user ? `/gardiens/${user.id}?tab=proprio` : "#"}
             role="owner"
             scoreBreakdown={
@@ -220,7 +226,7 @@ const OwnerProfilePage = () => {
 
           {/* Right content */}
           <div className="flex-1 min-w-0 pb-32">
-            <div className="bg-card rounded-xl border border-border p-5 md:p-8">
+            <div id="profile-section-content" className="bg-card rounded-xl border border-border p-5 md:p-8 scroll-mt-24">
               {activeSection === "identity" && <OwnerStepIdentity data={mergedData} onChange={handleChange} onUploadPhoto={handleUploadPhoto} />}
               {activeSection === "housing" && <OwnerStepHousing data={mergedData} onChange={handleChange} onUploadPhoto={uploadPhoto} />}
               {activeSection === "animals" && <OwnerStepAnimals pets={pets} onAddPet={addPet} onUpdatePet={updatePet} onRemovePet={removePet} />}
