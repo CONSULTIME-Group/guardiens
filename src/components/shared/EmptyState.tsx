@@ -18,10 +18,12 @@ import quietLeafImg from "@/assets/empty-states/v2/quiet-leaf.webp";
 
 import { SVG_FALLBACKS } from "./empty-state-fallbacks";
 
-/* Composant générique image — applique le mix-blend-multiply pour
-   intégrer la peinture au fond crème de la page. En cas d'échec de
-   chargement (réseau, 404, blocage), bascule sur un SVG inline léger
-   qui garde la même empreinte visuelle (taille, centrage, blend). */
+/* Composant générique image — délègue TOUTE la logique de fondu
+   (masque radial + blend modes light/dark + filtre dark) à la classe
+   utilitaire `.illustration-blend` définie dans src/index.css.
+   Aucun style de blend/mask/filter n'est dupliqué ici : la classe est
+   la SOURCE UNIQUE de vérité pour tous les composants qui afficheraient
+   ces illustrations aquarelle. */
 const PaintedIllustration = ({
   src,
   alt,
@@ -32,61 +34,18 @@ const PaintedIllustration = ({
   fallbackKey: IllustrationKey;
 }) => {
   const [errored, setErrored] = useState(false);
-  // Tailles +40% par rapport à v1 (w-36 → w-[12.6rem], etc.).
-  //
-  // Stratégie de fondu UNIVERSELLE — fonctionne sur n'importe quel fond
-  // (page crème, carte blanche pure, section grisée, conteneur bleu-gris,
-  // mode clair ou sombre) sans dépendance à un token de couleur.
-  //
-  // Principe : on applique un MASQUE radial (CSS `mask-image`) directement
-  // sur l'image. Le masque est un dégradé alpha (noir → transparent), donc
-  // les bords de l'image deviennent VRAIMENT transparents (et non recouverts
-  // par une couleur). Le vrai fond du parent transparaît, quel qu'il soit.
-  //
-  // Mode clair : `mix-blend-darken` aide les pixels les plus clairs de
-  //   l'aquarelle à se confondre avec le fond, le masque finit le travail.
-  // Mode sombre : `filter: invert(1) hue-rotate(180deg)` transforme le crème
-  //   de l'image en sombre tout en préservant les teintes ; le masque applique
-  //   ensuite la même transparence en bordure.
+
   const wrapperClass =
     "relative block mx-auto h-auto w-[12.6rem] sm:w-[15.4rem] md:w-[18.2rem] lg:w-[19.6rem] max-w-[84vw] aspect-square select-none pointer-events-none motion-safe:animate-painted-reveal motion-reduce:opacity-100";
 
-  // Masque radial — agressivité calibrée pour effacer toute trace du fond
-  // crème de l'aquarelle, même sur conteneur très contrasté (carte blanche
-  // pure, gris-bleu). On démarre la dégradation dès 35 % et on atteint la
-  // transparence totale à 80 % du rayon.
-  const maskImage =
-    "radial-gradient(ellipse at center, " +
-    "rgba(0,0,0,1) 0%, " +
-    "rgba(0,0,0,1) 35%, " +
-    "rgba(0,0,0,0.92) 50%, " +
-    "rgba(0,0,0,0.7) 62%, " +
-    "rgba(0,0,0,0.4) 72%, " +
-    "rgba(0,0,0,0.15) 80%, " +
-    "rgba(0,0,0,0) 88%)";
-
-  const maskStyle: React.CSSProperties = {
-    WebkitMaskImage: maskImage,
-    maskImage,
-    WebkitMaskRepeat: "no-repeat",
-    maskRepeat: "no-repeat",
-    WebkitMaskSize: "100% 100%",
-    maskSize: "100% 100%",
-  };
-
-  // Light : multiply au lieu de darken — sur tout fond clair (blanc pur,
-  //   crème, gris doux), les pixels clairs de l'aquarelle se confondent
-  //   avec le fond car (clair × clair) ≈ clair. Aucun halo visible.
-  // Dark  : invert + hue-rotate transforme le crème en sombre, opacité
-  //   préservée, mask radial pour adoucir les bords.
   const imgClass =
-    "absolute inset-0 w-full h-full object-contain mix-blend-multiply dark:mix-blend-normal dark:[filter:invert(1)_hue-rotate(180deg)_brightness(0.92)_saturate(0.85)] dark:opacity-95";
+    "illustration-blend absolute inset-0 w-full h-full object-contain";
 
   if (errored) {
     const Fallback = SVG_FALLBACKS[fallbackKey];
     return (
       <div className={wrapperClass} role="img" aria-label={alt}>
-        <div className={imgClass} style={maskStyle}>
+        <div className={imgClass}>
           <Fallback />
         </div>
       </div>
@@ -103,7 +62,6 @@ const PaintedIllustration = ({
         height={1024}
         onError={() => setErrored(true)}
         className={imgClass}
-        style={maskStyle}
         draggable={false}
       />
     </div>
