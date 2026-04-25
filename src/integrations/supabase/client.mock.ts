@@ -135,12 +135,122 @@ function makeBuilder(state: QueryState): any {
   return builder;
 }
 
-const fakeChannel = {
-  on() { return fakeChannel; },
-  subscribe() { return fakeChannel; },
-  unsubscribe() { return Promise.resolve("ok"); },
-  send() { return Promise.resolve("ok"); },
-};
+/**
+ * Bus realtime côté mock : permet aux tests Playwright (visuels / a11y) de
+ * déclencher manuellement des events `postgres_changes` reçus par les hooks
+ * `useSitRealtime`, `useSubscriptionStatus`, etc., comme si un AUTRE onglet
+ * (ou le serveur) venait de modifier la donnée.
+ *
+ * Exposé sur `window.__sitRealtime` pour pilotage depuis `page.evaluate()`.
+ *
+ * Modèle : on indexe les callbacks par nom de canal (`sit-detail-${sitId}`).
+ * Chaque appel à `.on('postgres_changes', cfg, cb)` enregistre le callback
+ * dans une liste typée par table. `emitSitUpdate(sitId, patch)` parcourt les
+ * canaux qui matchent et appelle les callbacks `sits` UPDATE avec un payload
+ * `{ new: { ...patch, id: sitId } }`.
+ */
+type RealtimeCb = (payload: { new: any; old?: any; eventType?: string }) => void;
+type ChannelKey = string;
+type TableKey = "sits" | "applications" | string;
+
+interface ChannelRegistration {
+  name: ChannelKey;
+  listeners: Map<TableKey, Array<{ event: string; cb: RealtimeCb; filter?: string }>>;
+}
+
+const _channels = new Map<ChannelKey, ChannelRegistration>();
+
+function makeChannel(name: ChannelKey): any {
+  const existing = _channels.get(name);
+  const reg: ChannelRegistration = existing ?? { name, listeners: new Map() };
+  if (!existing) _channels.set(name, reg);
+
+  const channel: any = {
+    on(_kind: string, cfg: any, cb: RealtimeCb) {
+      const table = (cfg?.table as TableKey) || "_unknown";
+      const event = (cfg?.event as string) || "*";
+      const filter = cfg?.filter as string | undefined;
+      const list = reg.listeners.get(table) || [];
+      list.push({ event, cb, filter });
+      reg.listeners.set(table, list);
+      return channel;
+    },
+    subscribe(cb?: (status: string) => void) {
+      // Notifie le souscripteur que la connexion est OK (comme le vrai client).
+      if (typeof cb === "function") {
+        try { cb("SUBSCRIBED"); } catch { /* noop */ }
+      }
+      return channel;
+    },
+    unsubscribe() {
+      _channels.delete(name);
+      return Promise.resolve("ok");
+    },
+    send() { return Promise.resolve("ok"); },
+  };
+  return channel;
+}
+
+function dispatchTableEvent(
+  channelMatch: (name: ChannelKey) => boolean,
+  table: TableKey,
+  event: "INSERT" | "UPDATE" | "DELETE",
+  payload: { new?: any; old?: any }
+) {
+  for (const [name, reg] of _channels) {
+    if (!channelMatch(name)) continue;
+    const list = reg.listeners.get(table) || [];
+    for (const l of list) {
+      if (l.event !== "*" && l.event !== event) continue;
+      try {
+        l.cb({ new: payload.new, old: payload.old, eventType: event });
+      } catch (err) {
+        // En tests, on veut voir le crash dans la console
+        // eslint-disable-next-line no-console
+        console.error("[mock realtime] callback threw:", err);
+      }
+    }
+  }
+}
+
+// API publique exposée sur window pour pilotage depuis Playwright.
+if (typeof window !== "undefined") {
+  (window as any).__sitRealtime = {
+    /**
+     * Émet un UPDATE sur la table `sits` pour le sit donné. Le patch est
+     * fusionné avec l'id du sit pour produire le `payload.new`.
+     */
+    emitSitUpdate(sitId: string, patch: Record<string, any>) {
+      dispatchTableEvent(
+        (name) => name === `sit-detail-${sitId}`,
+        "sits",
+        "UPDATE",
+        { new: { id: sitId, ...patch } }
+      );
+    },
+    /**
+     * Émet un événement applications (INSERT/UPDATE/DELETE).
+     */
+    emitApplicationEvent(
+      sitId: string,
+      event: "INSERT" | "UPDATE" | "DELETE",
+      row: Record<string, any>
+    ) {
+      dispatchTableEvent(
+        (name) => name === `sit-detail-${sitId}`,
+        "applications",
+        event,
+        event === "DELETE" ? { old: row } : { new: row }
+      );
+    },
+    /** Liste les canaux actifs (debug). */
+    _channels: () =>
+      Array.from(_channels.entries()).map(([name, reg]) => ({
+        name,
+        tables: Array.from(reg.listeners.keys()),
+      })),
+  };
+}
 
 export const supabase: any = {
   from(table: string) {
