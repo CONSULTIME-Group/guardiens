@@ -136,17 +136,23 @@ const MODES: Array<{ id: "light" | "dark"; htmlClass: string }> = [
 ];
 
 // HTML minimal qui ne charge QUE le design system, pas l'app React.
+// Chaque swatch reçoit `font-size` et `font-weight` REELS issus de la paire,
+// pour que la classification large/normal soit pilotée par les métriques
+// effectives lues côté navigateur (et non par une étiquette manuelle).
 function buildHarness(htmlClass: string, pairs: Pair[]): string {
   const swatches = pairs
-    .map(
-      (p, i) => `
+    .map((p, i) => {
+      const fs = p.fontSizePx ?? 16;
+      const fw = p.fontWeight ?? 400;
+      return `
         <div data-pair-idx="${i}"
              data-fg="${p.fg}"
              data-bg="${p.bg}"
-             style="background: hsl(var(--${p.bg})); color: hsl(var(--${p.fg})); padding: 8px 12px; margin: 4px; font-size: 16px;">
+             data-label="${p.label.replace(/"/g, "&quot;")}"
+             style="background: hsl(var(--${p.bg})); color: hsl(var(--${p.fg})); padding: 8px 12px; margin: 4px; font-size: ${fs}px; font-weight: ${fw};">
           ${p.label} — Sample texte 0123 ÉéÀàÇç
-        </div>`
-    )
+        </div>`;
+    })
     .join("");
 
   return `<!doctype html>
@@ -169,8 +175,6 @@ test.describe("Design tokens — contraste WCAG AA (indépendant des pages)", ()
 
   for (const mode of MODES) {
     test(`tokens contrast — ${mode.id}`, async ({ page }) => {
-      // On sert la harness via data: URL n'est pas viable (CSS relatif à charger
-      // depuis Vite), donc on route une URL inexistante et on injecte le HTML.
       const harness = buildHarness(mode.htmlClass, PAIRS);
 
       await page.route("**/__harness", (route) =>
@@ -191,8 +195,11 @@ test.describe("Design tokens — contraste WCAG AA (indépendant des pages)", ()
         return !!bg && bg !== "rgba(0, 0, 0, 0)" && bg !== "transparent";
       });
 
+      // Injection du helper officiel de classification WCAG « large-scale text ».
+      await page.addScriptTag({ content: WCAG_TEXT_SIZE_SCRIPT });
+
       const violations = await page.evaluate(() => {
-        // Helpers WCAG -----------------------------------------------------
+        // --- Helpers contraste ------------------------------------------------
         function parseRgb(input: string): [number, number, number] | null {
           const m = input.match(/rgba?\(([^)]+)\)/i);
           if (!m) return null;
@@ -213,7 +220,18 @@ test.describe("Design tokens — contraste WCAG AA (indépendant des pages)", ()
           const [hi, lo] = la > lb ? [la, lb] : [lb, la];
           return (hi + 0.05) / (lo + 0.05);
         }
-        // ------------------------------------------------------------------
+
+        // Helpers WCAG injectés (cf. wcag-text-size.ts)
+        const w: any = window;
+        const classify = w.__wcagClassifyTextSize as (
+          px: number,
+          weight: string | number
+        ) => "large" | "normal";
+        const aaThreshold = w.__wcagAaThreshold as (
+          c: "large" | "normal"
+        ) => 3.0 | 4.5;
+
+        // --- Scan -------------------------------------------------------------
         const out: Array<{
           label: string;
           fg: string;
@@ -223,34 +241,45 @@ test.describe("Design tokens — contraste WCAG AA (indépendant des pages)", ()
           ratio: number;
           threshold: number;
           deficit: number;
+          fontSizePx: number;
+          fontSizePt: number;
+          fontWeight: string;
+          wcagSizeClass: "large" | "normal";
         }> = [];
 
+        const PX_PER_PT = 96 / 72;
         const els = Array.from(document.querySelectorAll("[data-pair-idx]")) as HTMLElement[];
         for (const el of els) {
           const fg = el.dataset.fg!;
           const bg = el.dataset.bg!;
+          const label = el.dataset.label || `${fg} / ${bg}`;
           const cs = getComputedStyle(el);
+          const fontSizePx = parseFloat(cs.fontSize);
+          const sizeClass = classify(fontSizePx, cs.fontWeight);
+          const threshold = aaThreshold(sizeClass);
           const fgRgb = parseRgb(cs.color);
           const bgRgb = parseRgb(cs.backgroundColor);
           if (!fgRgb || !bgRgb) {
             out.push({
-              label: `${fg} / ${bg}`,
+              label,
               fg,
               bg,
               fgRgb: cs.color,
               bgRgb: cs.backgroundColor,
               ratio: 0,
-              threshold: 4.5,
-              deficit: 4.5,
+              threshold,
+              deficit: threshold,
+              fontSizePx,
+              fontSizePt: Math.round((fontSizePx / PX_PER_PT) * 10) / 10,
+              fontWeight: cs.fontWeight,
+              wcagSizeClass: sizeClass,
             });
             continue;
           }
-          // Le seuil est embarqué via data-threshold sinon défaut 4.5
-          const threshold = parseFloat(el.dataset.threshold || "4.5");
           const r = ratio(fgRgb, bgRgb);
           if (r + 0.001 < threshold) {
             out.push({
-              label: `${fg} / ${bg}`,
+              label,
               fg,
               bg,
               fgRgb: cs.color,
@@ -258,78 +287,15 @@ test.describe("Design tokens — contraste WCAG AA (indépendant des pages)", ()
               ratio: Math.round(r * 100) / 100,
               threshold,
               deficit: Math.round((threshold - r) * 100) / 100,
+              fontSizePx,
+              fontSizePt: Math.round((fontSizePx / PX_PER_PT) * 10) / 10,
+              fontWeight: cs.fontWeight,
+              wcagSizeClass: sizeClass,
             });
           }
         }
         return out;
       });
-
-      // Injecter les seuils "large" côté DOM via data-threshold avant éval :
-      // on refait un eval ciblé pour les paires "large" (3:1) qui auraient
-      // été flaggées à tort avec 4.5.
-      const largeIdx = PAIRS.map((p, i) => (p.size === "large" ? i : -1)).filter((i) => i >= 0);
-      if (largeIdx.length > 0) {
-        await page.evaluate((idxs) => {
-          for (const i of idxs) {
-            const el = document.querySelector(`[data-pair-idx="${i}"]`) as HTMLElement | null;
-            if (el) el.dataset.threshold = "3";
-          }
-        }, largeIdx);
-
-        const reEval = await page.evaluate(() => {
-          function parseRgb(input: string): [number, number, number] | null {
-            const m = input.match(/rgba?\(([^)]+)\)/i);
-            if (!m) return null;
-            const parts = m[1].split(",").map((s) => parseFloat(s.trim()));
-            if (parts.length < 3 || parts.some((n) => Number.isNaN(n))) return null;
-            return [parts[0], parts[1], parts[2]];
-          }
-          function relLum([r, g, b]: [number, number, number]): number {
-            const conv = (c: number) => {
-              const s = c / 255;
-              return s <= 0.03928 ? s / 12.92 : Math.pow((s + 0.055) / 1.055, 2.4);
-            };
-            return 0.2126 * conv(r) + 0.7152 * conv(g) + 0.0722 * conv(b);
-          }
-          function ratio(a: [number, number, number], b: [number, number, number]): number {
-            const la = relLum(a);
-            const lb = relLum(b);
-            const [hi, lo] = la > lb ? [la, lb] : [lb, la];
-            return (hi + 0.05) / (lo + 0.05);
-          }
-          const out: Record<string, { ratio: number; ok: boolean }> = {};
-          const els = Array.from(
-            document.querySelectorAll('[data-pair-idx][data-threshold="3"]')
-          ) as HTMLElement[];
-          for (const el of els) {
-            const cs = getComputedStyle(el);
-            const fgRgb = parseRgb(cs.color);
-            const bgRgb = parseRgb(cs.backgroundColor);
-            const key = `${el.dataset.fg}/${el.dataset.bg}`;
-            if (!fgRgb || !bgRgb) {
-              out[key] = { ratio: 0, ok: false };
-              continue;
-            }
-            const r = ratio(fgRgb, bgRgb);
-            out[key] = { ratio: Math.round(r * 100) / 100, ok: r + 0.001 >= 3 };
-          }
-          return out;
-        });
-
-        // Retirer des violations toutes les paires "large" qui passent à 3:1
-        for (let i = violations.length - 1; i >= 0; i--) {
-          const v = violations[i];
-          const key = `${v.fg}/${v.bg}`;
-          if (reEval[key]?.ok) {
-            violations.splice(i, 1);
-          } else if (reEval[key]) {
-            // Mettre à jour le seuil affiché dans le rapport
-            v.threshold = 3;
-            v.ratio = reEval[key].ratio;
-            v.deficit = Math.round((3 - reEval[key].ratio) * 100) / 100;
-          }
-        }
-      }
 
       if (violations.length > 0) {
         const report =
@@ -339,6 +305,7 @@ test.describe("Design tokens — contraste WCAG AA (indépendant des pages)", ()
               (v, i) =>
                 `\n[#${i + 1}] ${v.label}\n` +
                 `      ratio   = ${v.ratio} (seuil ${v.threshold}, manque ${v.deficit})\n` +
+                `      classe  = ${v.wcagSizeClass} (font ${v.fontSizePx}px ≈ ${v.fontSizePt}pt, weight ${v.fontWeight})\n` +
                 `      fg(rgb) = ${v.fgRgb}\n` +
                 `      bg(rgb) = ${v.bgRgb}`
             )
@@ -349,7 +316,7 @@ test.describe("Design tokens — contraste WCAG AA (indépendant des pages)", ()
       expect(
         violations,
         `Tokens en échec WCAG AA en mode ${mode.id}: ${violations
-          .map((v) => `${v.label}=${v.ratio}/${v.threshold}`)
+          .map((v) => `${v.label}=${v.ratio}/${v.threshold}[${v.wcagSizeClass}]`)
           .join(", ")}`
       ).toEqual([]);
     });
