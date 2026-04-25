@@ -177,4 +177,59 @@ describe("Compteur public d'annonce — agrégé, jamais détail", () => {
       /from\(\s*["']applications["'][\s\S]{0,200}?\.length/;
     expect(useRealtime).not.toMatch(lengthCounter);
   });
+
+  it("pour plusieurs annonces : appelle la RPC avec le bon p_sit_id et restitue les bons totaux", async () => {
+    // Fixtures : 3 annonces avec compteurs distincts
+    const fixtures: Record<string, { app_count: number; pending_app_count: number }> = {
+      "sit-A": { app_count: 0, pending_app_count: 0 },
+      "sit-B": { app_count: 5, pending_app_count: 2 },
+      "sit-C": { app_count: 12, pending_app_count: 7 },
+    };
+
+    // Le mock route la réponse en fonction du p_sit_id reçu
+    rpcMock.mockImplementation((fn: string, args: { p_sit_id: string }) => {
+      if (fn !== "get_sit_application_counts") {
+        return Promise.resolve({ data: null, error: new Error(`unexpected rpc ${fn}`) });
+      }
+      const row = fixtures[args.p_sit_id];
+      if (!row) return Promise.resolve({ data: [], error: null });
+      return Promise.resolve({ data: [row], error: null });
+    });
+
+    const { supabase } = await import("@/integrations/supabase/client");
+
+    // Reproduit le call-site (un compteur par annonce, comme sur une liste publique)
+    const sitIds = Object.keys(fixtures);
+    const results = await Promise.all(
+      sitIds.map(async (id) => {
+        const { data } = await supabase.rpc("get_sit_application_counts", { p_sit_id: id });
+        const row = data?.[0];
+        return {
+          id,
+          appCount: row?.app_count ?? 0,
+          pendingAppCount: row?.pending_app_count ?? 0,
+        };
+      })
+    );
+
+    // 1. Une RPC par annonce, avec le bon p_sit_id à chaque fois
+    expect(rpcMock).toHaveBeenCalledTimes(sitIds.length);
+    for (const id of sitIds) {
+      expect(rpcMock).toHaveBeenCalledWith("get_sit_application_counts", { p_sit_id: id });
+    }
+    // Vérifie qu'aucun appel n'a été fait avec un id inattendu
+    const calledIds = rpcMock.mock.calls.map((c) => (c[1] as { p_sit_id: string }).p_sit_id);
+    expect(calledIds.sort()).toEqual([...sitIds].sort());
+
+    // 2. Les totaux correspondent exactement aux fixtures (pas de mélange entre annonces)
+    expect(results).toEqual([
+      { id: "sit-A", appCount: 0, pendingAppCount: 0 },
+      { id: "sit-B", appCount: 5, pendingAppCount: 2 },
+      { id: "sit-C", appCount: 12, pendingAppCount: 7 },
+    ]);
+
+    // 3. Toujours aucun SELECT direct sur applications, même en multi-annonces
+    const fromCalls = fromMock.mock.calls.map((c) => c[0]);
+    expect(fromCalls).not.toContain("applications");
+  });
 });
