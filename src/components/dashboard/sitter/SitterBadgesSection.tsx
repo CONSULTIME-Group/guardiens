@@ -126,21 +126,24 @@ const SitterBadgesSection = ({ groupedBadges, condensed = false }: SitterBadgesS
           />
         </span>
       </button>
-      <div
-        id="sitter-badges-content"
-        role="region"
-        aria-labelledby="sitter-badges-heading"
-        hidden={!open}
-      >
-        {open && (
+      {open ? (
+        <div
+          id="sitter-badges-content"
+          role="region"
+          aria-labelledby="sitter-badges-heading"
+        >
           <BadgeGridSection
             title="Mes Badges"
             badgeIds={GARDIEN_BADGE_IDS}
             userBadges={groupedBadges}
             specialBadgeIds={SPECIAL_BADGE_IDS}
           />
-        )}
-      </div>
+        </div>
+      ) : (
+        // Conteneur vide pour conserver la cible d'aria-controls sans
+        // exposer de landmark vide aux lecteurs d'écran.
+        <div id="sitter-badges-content" hidden aria-hidden="true" />
+      )}
     </section>
   );
 };
