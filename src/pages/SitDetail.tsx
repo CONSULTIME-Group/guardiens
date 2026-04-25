@@ -458,16 +458,17 @@ const SitDetail = () => {
             </TabsTrigger>
           )}
           <TabsTrigger value="animals" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-2.5 text-sm">
-            🐾 Animaux
+          <TabsTrigger value="animals" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-2.5 text-sm gap-1.5">
+            <PawPrint className="h-3.5 w-3.5" /> Animaux
           </TabsTrigger>
-          <TabsTrigger value="housing" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-2.5 text-sm">
-            🏠 Logement
+          <TabsTrigger value="housing" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-2.5 text-sm gap-1.5">
+            <Home className="h-3.5 w-3.5" /> Logement
           </TabsTrigger>
-          <TabsTrigger value="expectations" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-2.5 text-sm">
-            📋 Attentes
+          <TabsTrigger value="expectations" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-2.5 text-sm gap-1.5">
+            <ClipboardList className="h-3.5 w-3.5" /> Attentes
           </TabsTrigger>
-          <TabsTrigger value="reviews" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-2.5 text-sm">
-            ⭐ Avis ({reviews.length})
+          <TabsTrigger value="reviews" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-2.5 text-sm gap-1.5">
+            <Star className="h-3.5 w-3.5" /> Avis ({reviews.length})
           </TabsTrigger>
         </TabsList>
 
