@@ -109,7 +109,16 @@ const Login = () => {
           <form onSubmit={handleSubmit} className="space-y-5">
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
-              <Input id="email" type="email" placeholder="vous@exemple.com" value={email} onChange={(e) => setEmail(e.target.value)} required className="rounded-lg h-12" />
+              <Input
+                id="email"
+                type="email"
+                placeholder="vous@exemple.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className="rounded-lg h-12"
+                {...getAuthFieldAttrs("email")}
+              />
             </div>
             <div className="space-y-2">
               <Label htmlFor="password">Mot de passe</Label>
@@ -122,6 +131,7 @@ const Login = () => {
                   onChange={(e) => { setPassword(e.target.value); setPasswordError(null); }}
                   required
                   className="rounded-lg h-12 pr-12"
+                  {...getAuthFieldAttrs("password")}
                 />
                 <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors">
                   {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
