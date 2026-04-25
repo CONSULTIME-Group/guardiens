@@ -313,7 +313,7 @@ const OwnerSitView = ({
       )}
 
       {/* Tabbed content */}
-      <Tabs defaultValue="candidatures" className="mt-2">
+      <Tabs defaultValue={defaultTab} className="mt-2">
         <TabsList className="w-full justify-start border-b border-border rounded-none bg-transparent h-auto p-0 gap-0 overflow-x-auto">
           <TabsTrigger
             value="candidatures"
