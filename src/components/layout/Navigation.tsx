@@ -132,11 +132,11 @@ export const Sidebar = () => {
     <aside className="hidden md:flex flex-col w-64 border-r border-border bg-card h-screen sticky top-0">
       {/* Logo + bell */}
       <div className="p-6 pb-4 flex items-center justify-between">
-        <h1 className="font-heading text-2xl font-bold tracking-tight">
-          <span className="text-primary">g</span>
-          <span className="text-foreground">uardiens</span>
-          <span className="ml-1.5 text-[10px] font-medium tracking-wide text-foreground/35 align-middle select-none" aria-label="Version bêta">bêta</span>
-        </h1>
+        <span className="font-heading text-2xl font-bold tracking-tight" aria-label="Guardiens, version bêta">
+          <span className="text-primary" aria-hidden="true">g</span>
+          <span className="text-foreground" aria-hidden="true">uardiens</span>
+          <span className="ml-1.5 text-[10px] font-medium tracking-wide text-foreground/35 align-middle select-none" aria-hidden="true">bêta</span>
+        </span>
         <NotificationBell />
       </div>
       <FeedbackDialog open={feedbackOpen} onOpenChange={setFeedbackOpen} />
