@@ -352,65 +352,11 @@ const OwnerSitView = ({
         {/* Candidatures tab (owner only) */}
         <TabsContent value="candidatures" className="mt-6 space-y-4">
           {!sit.accepting_applications && (
-            <div className="rounded-xl border border-primary/20 bg-primary/5 p-4 space-y-3">
-              <div>
-                <p className="text-sm font-semibold text-foreground">Candidatures closes</p>
-                <p className="text-xs text-muted-foreground mt-0.5">
-                  {sit.max_applications
-                    ? `Le maximum de ${sit.max_applications} candidature${sit.max_applications > 1 ? "s" : ""} a été atteint.`
-                    : "Vous avez fermé les candidatures."}
-                </p>
-              </div>
-              <div className="flex items-center gap-2 flex-wrap">
-                <div className="flex items-center gap-1">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="icon"
-                    className="h-8 w-8"
-                    onClick={() => setReopenCount((c) => Math.max(1, c - 1))}
-                    disabled={reopenCount <= 1}
-                  >
-                    <Minus className="h-3.5 w-3.5" />
-                  </Button>
-                  <span className="w-8 text-center text-sm font-medium">{reopenCount}</span>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="icon"
-                    className="h-8 w-8"
-                    onClick={() => setReopenCount((c) => Math.min(20, c + 1))}
-                    disabled={reopenCount >= 20}
-                  >
-                    <Plus className="h-3.5 w-3.5" />
-                  </Button>
-                </div>
-                <Button
-                  size="sm"
-                  onClick={async () => {
-                    const newMax = (sit.max_applications || internalAppCount) + reopenCount;
-                    await supabase
-                      .from("sits")
-                      .update({
-                        accepting_applications: true,
-                        max_applications: newMax,
-                      } as any)
-                      .eq("id", sit.id);
-                    setSit({
-                      ...sit,
-                      accepting_applications: true,
-                      max_applications: newMax,
-                    });
-                    toast({
-                      title: "Candidatures rouvertes",
-                      description: `${reopenCount} place${reopenCount > 1 ? "s" : ""} supplémentaire${reopenCount > 1 ? "s" : ""} ouverte${reopenCount > 1 ? "s" : ""}.`,
-                    });
-                  }}
-                >
-                  Ouvrir {reopenCount} candidature{reopenCount > 1 ? "s" : ""} de plus
-                </Button>
-              </div>
-            </div>
+            <ReopenApplicationsCard
+              sit={sit}
+              setSit={setSit}
+              internalAppCount={internalAppCount}
+            />
           )}
           {sit.accepting_applications && sit.max_applications && (
             <p className="text-xs text-muted-foreground">
