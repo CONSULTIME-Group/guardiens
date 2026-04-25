@@ -93,22 +93,126 @@ const SitterDashboard = () => {
   const incompleteItems = allItems.filter(c => !c.done);
   const allChecklistDone = completedItems.length === allItems.length;
 
+  // ── Checklist content (extrait pour réutilisation desktop/mobile) ──
+  const ChecklistBlock = (
+    <section aria-labelledby="onboarding-checklist-heading" className="px-4 sm:px-5 md:px-8 mb-6 md:mb-8">
+      <h2 id="onboarding-checklist-heading" className="sr-only">Checklist d'activation</h2>
+      {incompleteItems.length > 0 && (
+        <div className="mb-4">
+          <p className="text-sm font-medium text-foreground mb-3">
+            À compléter ({incompleteItems.length} restante{incompleteItems.length > 1 ? "s" : ""})
+          </p>
+          <div role="list">
+            {incompleteItems.map((item: any, i: number) =>
+              item.isToggle ? (
+                <div key="toggle" role="listitem" className="flex items-center justify-between py-3 border-b border-border last:border-0 px-2">
+                  <div className="flex items-center">
+                    <Circle className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
+                    <span className="text-sm text-foreground ml-3">Activer le mode disponible</span>
+                  </div>
+                  <button
+                    role="switch"
+                    aria-checked={isAvailable}
+                    aria-label="Basculer la disponibilité"
+                    onClick={toggleAvailability}
+                    className={`relative w-11 h-6 rounded-full transition-colors duration-200 ${isAvailable ? "bg-toggle-active" : "bg-muted"}`}
+                  >
+                    <span className={`absolute top-0.5 w-5 h-5 bg-background rounded-full shadow transition-all duration-200 ${isAvailable ? "left-5" : "left-0.5"}`} />
+                  </button>
+                </div>
+              ) : (
+                <Link key={i} to={item.to} role="listitem" className="flex items-center justify-between py-3 border-b border-border last:border-0 cursor-pointer hover:bg-muted/30 rounded-lg px-2 transition-colors">
+                  <div className="flex items-center">
+                    <Circle className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
+                    <span className="text-sm text-foreground ml-3">{item.label}</span>
+                  </div>
+                  <ChevronRight className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
+                </Link>
+              )
+            )}
+          </div>
+        </div>
+      )}
+      {completedItems.length > 0 && (
+        <Accordion type="single" collapsible>
+          <AccordionItem value="done" className="border-none">
+            <AccordionTrigger className="flex items-center justify-between bg-muted/30 rounded-xl px-4 py-3 cursor-pointer hover:no-underline [&[data-state=open]>svg]:rotate-180">
+              <div className="flex items-center gap-2">
+                <CheckCircle className="h-4 w-4 text-primary" aria-hidden="true" />
+                <span className="text-sm font-medium text-primary">
+                  {allChecklistDone ? `${allItems.length}/${allItems.length} étapes complétées` : `${completedItems.length} étape${completedItems.length > 1 ? "s" : ""} déjà complétée${completedItems.length > 1 ? "s" : ""}`}
+                </span>
+              </div>
+            </AccordionTrigger>
+            <AccordionContent className="pt-2 pb-0">
+              {completedItems.map((item: any, i: number) => (
+                <div key={i} className="flex items-center gap-3 py-2 border-b border-border last:border-0">
+                  <CheckCircle className="h-4 w-4 text-primary" aria-hidden="true" />
+                  <span className="text-sm line-through text-foreground/60">{item.label}</span>
+                </div>
+              ))}
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
+      )}
+    </section>
+  );
+
+  const StatusBlock = (
+    <section aria-labelledby="status-heading">
+      <h2 id="status-heading" className="sr-only">Mon statut</h2>
+      <SitterStatusBar
+        profileCompletion={profileCompletion}
+        completedSits={completedSits}
+        avgRating={avgRating}
+        reviewsCount={reviewsCount}
+        badgeCount={badgeCount}
+        totalApps={totalApps}
+        reputation={reputation}
+      />
+    </section>
+  );
+
+  const BadgesBlock = (
+    <div className="px-4 sm:px-5 md:px-8 mb-6 md:mb-8">
+      <SitterBadgesSection groupedBadges={groupedBadges} condensed />
+    </div>
+  );
+
+  const CtaBlock = (
+    <div className="px-4 sm:px-5 md:px-8 mb-6 md:mb-8">
+      <button
+        onClick={() => navigate("/search")}
+        className="w-full bg-primary text-primary-foreground rounded-2xl py-3 sm:py-4 text-sm sm:text-base font-sans font-semibold hover:bg-primary/90 transition-colors"
+      >
+        Découvrez les gardes disponibles →
+      </button>
+    </div>
+  );
+
+  const EmergencyBlock = (
+    <section aria-labelledby="emergency-heading" className="px-4 sm:px-5 md:px-8 mb-6 md:mb-8">
+      <h2 id="emergency-heading" className="sr-only">Éligibilité gardien d'urgence</h2>
+      <EmergencyEligibility />
+    </section>
+  );
+
   return (
     <div className="space-y-0 overflow-hidden">
 
       {/* Postal code missing banner */}
       {!postalCode && !cpBannerDismissed && (
-        <div className="bg-destructive/10 border-b border-destructive/30 px-4 py-3">
+        <div className="bg-destructive/10 border-b border-destructive/30 px-4 py-3" role="alert">
           <div className="container mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div className="flex items-start sm:items-center gap-3">
-              <AlertCircle className="h-5 w-5 text-destructive shrink-0 mt-0.5 sm:mt-0" />
+              <AlertCircle className="h-5 w-5 text-destructive shrink-0 mt-0.5 sm:mt-0" aria-hidden="true" />
               <p className="text-sm text-foreground">
                 <strong>Votre code postal est manquant.</strong> Sans lui, vous ne voyez pas les annonces près de chez vous.
               </p>
             </div>
             <div className="flex items-center gap-2 shrink-0 self-end sm:self-auto">
               <Button variant="default" size="sm" onClick={() => navigate("/profile?focus=postal_code")}>Ajouter mon CP</Button>
-              <Button variant="ghost" size="sm" className="text-muted-foreground" onClick={() => { setCpBannerDismissed(true); localStorage.setItem("cp_banner_dismissed", "1"); }}>✕</Button>
+              <Button variant="ghost" size="sm" className="text-muted-foreground" onClick={() => { setCpBannerDismissed(true); localStorage.setItem("cp_banner_dismissed", "1"); }} aria-label="Fermer la bannière">✕</Button>
             </div>
           </div>
         </div>
@@ -119,7 +223,7 @@ const SitterDashboard = () => {
         <RoleActivationBanner userRole={user?.role || "sitter"} />
       </div>
 
-      {/* ═══ 1. HERO ═══ */}
+      {/* ═══ HERO ═══ */}
       <SitterHero
         userId={user?.id}
         firstName={user?.firstName}
@@ -134,20 +238,20 @@ const SitterDashboard = () => {
 
       {/* Quick action badges for pending apps / unread messages */}
       {(pendingAppsCount > 0 || unreadCount > 0) && (
-        <div className="flex gap-3 px-4 sm:px-5 md:px-8 mb-4">
+        <nav aria-label="Notifications rapides" className="flex gap-3 px-4 sm:px-5 md:px-8 mb-4">
           {pendingAppsCount > 0 && (
             <Link to="/sits" className="flex items-center gap-2 bg-accent/50 border border-border rounded-xl px-3 py-2 text-xs font-medium text-foreground hover:bg-accent transition-colors">
-              <FileText className="h-4 w-4 text-primary" />
+              <FileText className="h-4 w-4 text-primary" aria-hidden="true" />
               {pendingAppsCount} candidature{pendingAppsCount > 1 ? "s" : ""} en attente
             </Link>
           )}
           {unreadCount > 0 && (
             <Link to="/messages" className="flex items-center gap-2 bg-accent/50 border border-border rounded-xl px-3 py-2 text-xs font-medium text-foreground hover:bg-accent transition-colors">
-              <MessageSquare className="h-4 w-4 text-primary" />
+              <MessageSquare className="h-4 w-4 text-primary" aria-hidden="true" />
               {unreadCount} message{unreadCount > 1 ? "s" : ""} non lu{unreadCount > 1 ? "s" : ""}
             </Link>
           )}
-        </div>
+        </nav>
       )}
 
       <div className="px-4 sm:px-5 md:px-8 mt-4">
@@ -178,127 +282,67 @@ const SitterDashboard = () => {
         </button>
       </div>
 
-      {/* ═══ 2. STATUS BAR ═══ */}
-      <SitterStatusBar
-        profileCompletion={profileCompletion}
-        completedSits={completedSits}
-        avgRating={avgRating}
-        reviewsCount={reviewsCount}
-        badgeCount={badgeCount}
-        totalApps={totalApps}
-        reputation={reputation}
-      />
+      {/* ═══ A5: 2-COLUMN LAYOUT ≥ lg ═══
+          Mobile / tablet: tout empilé dans l'ordre actuel (checklist remontée).
+          Desktop ≥ lg : main = checklist + CTA + listings, side = status + badges + emergency. */}
+      <div className="lg:grid lg:grid-cols-3 lg:gap-6 lg:px-2">
+        {/* MAIN COLUMN (2/3) */}
+        <div className="lg:col-span-2 lg:min-w-0">
+          {/* A1 — Checklist remontée juste après le hero */}
+          {ChecklistBlock}
 
-      {/* Emergency section */}
-      {hasEmergencyProfile && <div className="px-4 sm:px-5 md:px-8"><EmergencyDashSection /></div>}
+          {CtaBlock}
 
-      {/* ═══ 3. CTA + BADGES ═══ */}
-      <div className="px-4 sm:px-5 md:px-8 mb-6 md:mb-8">
-        <button
-          onClick={() => navigate("/search")}
-          className="w-full bg-primary text-primary-foreground rounded-2xl py-3 sm:py-4 text-sm sm:text-base font-sans font-semibold mb-6 hover:bg-primary/90 transition-colors"
-        >
-          Découvrez les gardes disponibles →
-        </button>
-        <SitterBadgesSection groupedBadges={groupedBadges} />
-      </div>
+          {/* Listings + Échanges */}
+          <section aria-labelledby="nearby-heading">
+            <h2 id="nearby-heading" className="sr-only">Près de chez vous</h2>
+            <SitterBottomColumns nearbyListings={nearbyListings} nearbyMissions={nearbyMissions} postalCode={postalCode} />
+          </section>
 
-      {/* ═══ 4. CHECKLIST ═══ */}
-      <div className="px-4 sm:px-5 md:px-8 mb-6 md:mb-8">
-        {incompleteItems.length > 0 && (
-          <div className="mb-4">
-            <p className="text-sm font-medium text-foreground mb-3">
-              À compléter ({incompleteItems.length} restante{incompleteItems.length > 1 ? "s" : ""})
-            </p>
-            <div>
-              {incompleteItems.map((item: any, i: number) =>
-                item.isToggle ? (
-                  <div key="toggle" className="flex items-center justify-between py-3 border-b border-border last:border-0 px-2">
-                    <div className="flex items-center">
-                      <Circle className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-sm text-foreground ml-3">Activer le mode disponible</span>
+          {/* Articles */}
+          {articles.length > 0 && (
+            <section aria-labelledby="articles-heading" className="px-4 sm:px-5 md:px-8 mb-6 md:mb-8">
+              <div className="flex items-center justify-between mb-4">
+                <h2 id="articles-heading" className="font-heading text-lg font-semibold">Conseils pour vous</h2>
+                <Link to="/actualites" className="text-xs text-primary hover:underline font-medium">Voir tout →</Link>
+              </div>
+              <div className="flex gap-3 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-hide">
+                {articles.map((a: any) => (
+                  <Link key={a.id} to={`/actualites/${a.slug}`} className="flex-shrink-0 w-[70vw] sm:w-64 rounded-xl border border-border bg-card overflow-hidden hover:shadow-md transition-shadow cursor-pointer">
+                    {a.cover_image_url ? (
+                      <img src={getOptimizedImageUrl(a.cover_image_url, 300, 75)} alt={a.title || "Article"} className="w-full h-28 object-cover" width={300} height={112} loading="lazy" />
+                    ) : (
+                      <div className="w-full h-28 bg-accent flex items-center justify-center">
+                        <Newspaper className="h-8 w-8 text-muted-foreground/40" aria-hidden="true" />
+                      </div>
+                    )}
+                    <div className="p-3">
+                      <h3 className="text-sm font-semibold line-clamp-2">{a.title}</h3>
+                      <p className="text-xs text-muted-foreground line-clamp-2 mt-1">{a.excerpt}</p>
                     </div>
-                    <button
-                      role="switch"
-                      aria-checked={isAvailable}
-                      aria-label="Basculer la disponibilité"
-                      onClick={toggleAvailability}
-                      className={`relative w-11 h-6 rounded-full transition-colors duration-200 ${isAvailable ? "bg-toggle-active" : "bg-muted"}`}
-                    >
-                      <span className={`absolute top-0.5 w-5 h-5 bg-background rounded-full shadow transition-all duration-200 ${isAvailable ? "left-5" : "left-0.5"}`} />
-                    </button>
-                  </div>
-                ) : (
-                  <Link key={i} to={item.to} className="flex items-center justify-between py-3 border-b border-border last:border-0 cursor-pointer hover:bg-muted/30 rounded-lg px-2 transition-colors">
-                    <div className="flex items-center">
-                      <Circle className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-sm text-foreground ml-3">{item.label}</span>
-                    </div>
-                    <ChevronRight className="h-4 w-4 text-muted-foreground" />
                   </Link>
-                )
-              )}
-            </div>
-          </div>
-        )}
-        {completedItems.length > 0 && (
-          <Accordion type="single" collapsible>
-            <AccordionItem value="done" className="border-none">
-              <AccordionTrigger className="flex items-center justify-between bg-muted/30 rounded-xl px-4 py-3 cursor-pointer hover:no-underline [&[data-state=open]>svg]:rotate-180">
-                <div className="flex items-center gap-2">
-                  <CheckCircle className="h-4 w-4 text-primary" />
-                  <span className="text-sm font-medium text-primary">
-                    {allChecklistDone ? `${allItems.length}/${allItems.length} étapes complétées` : `${completedItems.length} étape${completedItems.length > 1 ? "s" : ""} déjà complétée${completedItems.length > 1 ? "s" : ""}`}
-                  </span>
-                </div>
-              </AccordionTrigger>
-              <AccordionContent className="pt-2 pb-0">
-                {completedItems.map((item: any, i: number) => (
-                  <div key={i} className="flex items-center gap-3 py-2 border-b border-border last:border-0">
-                    <CheckCircle className="h-4 w-4 text-primary" />
-                    <span className="text-sm line-through text-muted-foreground">{item.label}</span>
-                  </div>
                 ))}
-              </AccordionContent>
-            </AccordionItem>
-          </Accordion>
-        )}
-      </div>
-
-      {/* ═══ 5. BOTTOM COLUMNS ═══ */}
-      <SitterBottomColumns nearbyListings={nearbyListings} nearbyMissions={nearbyMissions} postalCode={postalCode} />
-
-      {/* Emergency eligibility */}
-      <div className="px-4 sm:px-5 md:px-8 mb-6 md:mb-8">
-        <EmergencyEligibility />
-      </div>
-
-      {/* Articles */}
-      {articles.length > 0 && (
-        <div className="px-4 sm:px-5 md:px-8 mb-6 md:mb-8">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="font-heading text-lg font-semibold">Conseils pour vous</h2>
-            <Link to="/actualites" className="text-xs text-primary hover:underline font-medium">Voir tout →</Link>
-          </div>
-          <div className="flex gap-3 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-hide">
-            {articles.map((a: any) => (
-              <Link key={a.id} to={`/actualites/${a.slug}`} className="flex-shrink-0 w-[70vw] sm:w-64 rounded-xl border border-border bg-card overflow-hidden hover:shadow-md transition-shadow cursor-pointer">
-                {a.cover_image_url ? (
-                  <img src={getOptimizedImageUrl(a.cover_image_url, 300, 75)} alt={a.title || "Article"} className="w-full h-28 object-cover" width={300} height={112} loading="lazy" />
-                ) : (
-                  <div className="w-full h-28 bg-accent flex items-center justify-center">
-                    <Newspaper className="h-8 w-8 text-muted-foreground/40" />
-                  </div>
-                )}
-                <div className="p-3">
-                  <p className="text-sm font-semibold line-clamp-2">{a.title}</p>
-                  <p className="text-xs text-muted-foreground line-clamp-2 mt-1">{a.excerpt}</p>
-                </div>
-              </Link>
-            ))}
-          </div>
+              </div>
+            </section>
+          )}
         </div>
-      )}
+
+        {/* SIDE COLUMN (1/3) */}
+        <aside aria-label="Statut, badges et urgence" className="lg:col-span-1 lg:min-w-0">
+          {StatusBlock}
+
+          {/* Emergency dashboard (déjà actif) */}
+          {hasEmergencyProfile && (
+            <div className="px-4 sm:px-5 md:px-8 mb-6 md:mb-8">
+              <EmergencyDashSection />
+            </div>
+          )}
+
+          {BadgesBlock}
+
+          {EmergencyBlock}
+        </aside>
+      </div>
     </div>
   );
 };
