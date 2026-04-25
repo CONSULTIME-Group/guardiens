@@ -36,7 +36,6 @@ function PublicAppCounter({ sitId, maxApplications }: { sitId: string; maxApplic
 
   useEffect(() => {
     (async () => {
-      const { supabase } = await import("@/integrations/supabase/client");
       const { data } = await supabase.rpc("get_sit_application_counts", { p_sit_id: sitId });
       const row = data?.[0];
       setAppCount(row?.app_count ?? 0);
