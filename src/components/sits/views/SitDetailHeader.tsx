@@ -11,14 +11,21 @@
  * Reste 100% présentationnel : aucune logique métier ici, on reçoit tout via props.
  */
 import { Link } from "react-router-dom";
-import { ArrowLeft, Calendar, MapPin, Star, Pencil, ExternalLink } from "lucide-react";
+import { ArrowLeft, Calendar, MapPin, Star, Pencil, ExternalLink, MoreHorizontal, Flag } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import VerifiedBadge from "@/components/profile/VerifiedBadge";
 import ReportButton from "@/components/reports/ReportButton";
 import SitHero from "@/components/sits/shared/SitHero";
 import { getSitStatusConfig } from "@/components/sits/shared/sitConstants";
+import { sanitizeUserTitle } from "@/lib/sanitizeTitle";
 
 interface SitDetailHeaderProps {
   sitId: string;
