@@ -70,7 +70,7 @@ const EmptyState = ({
   const Illustration = ILLUSTRATIONS[illustration];
 
   return (
-    <div className={`text-center py-12 px-4 space-y-5 animate-fade-in ${className}`}>
+    <div className={`text-center py-12 px-4 space-y-5 motion-safe:animate-soft-fade-in ${className}`}>
       <Illustration />
       <div className="space-y-2">
         <h3 className="font-heading text-lg font-semibold text-foreground">{title}</h3>
