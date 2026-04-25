@@ -10,7 +10,6 @@
  * - Bouton "Annuler ma participation" si gardien candidat sur garde confirmée
  */
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
 import { CheckCircle2, Star, PawPrint, Home, ClipboardList, XCircle } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -200,7 +199,7 @@ const SitterSitView = ({
 
       {/* Tabbed content */}
       <Tabs defaultValue="animals" className="mt-2">
-        <TabsList className="w-full justify-start border-b border-border rounded-none bg-transparent h-auto p-0 gap-0 overflow-x-auto">
+        <TabsList aria-label="Sections de l'annonce" className="w-full justify-start border-b border-border rounded-none bg-transparent h-auto p-0 gap-0 overflow-x-auto">
           <TabsTrigger
             value="animals"
             className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-2.5 text-sm gap-1.5"
@@ -343,7 +342,10 @@ const SitterSitView = ({
 
       {/* Sitter apply bar — sticky bottom action bar */}
       {activeRole === "sitter" && sit.status === "published" && (
-        <div className="fixed bottom-0 left-0 right-0 md:left-64 z-40 bg-background/95 backdrop-blur-md border-t border-border shadow-[0_-4px_16px_-4px_hsl(var(--foreground)/0.08)] pb-20 md:pb-0 supports-[padding:max(0px)]:pb-[max(env(safe-area-inset-bottom),5rem)] md:supports-[padding:max(0px)]:pb-[max(env(safe-area-inset-bottom),0.75rem)]">
+        <aside
+          aria-label="Action de candidature"
+          className="fixed bottom-0 left-0 right-0 md:left-64 z-40 bg-background/95 backdrop-blur-md border-t border-border shadow-[0_-4px_16px_-4px_hsl(var(--foreground)/0.08)] pb-20 md:pb-0 supports-[padding:max(0px)]:pb-[max(env(safe-area-inset-bottom),5rem)] md:supports-[padding:max(0px)]:pb-[max(env(safe-area-inset-bottom),0.75rem)]"
+        >
           <div className="max-w-4xl mx-auto px-4 py-3">
             {!sit.accepting_applications ? (
               <Button className="w-full h-12 text-base font-semibold" disabled>
@@ -357,7 +359,7 @@ const SitterSitView = ({
               />
             ) : hasApplied ? (
               <Button className="w-full h-12 text-base font-semibold" disabled>
-                <CheckCircle2 className="h-5 w-5 mr-2" /> Candidature envoyée ✓
+                <CheckCircle2 className="h-5 w-5 mr-2" aria-hidden="true" /> Candidature envoyée ✓
               </Button>
             ) : !canApplyGuards ? (
               <AccessGateBanner
@@ -380,7 +382,7 @@ const SitterSitView = ({
               </Button>
             )}
           </div>
-        </div>
+        </aside>
       )}
 
       <ApplicationModal

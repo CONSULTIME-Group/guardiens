@@ -39,13 +39,17 @@ const AnimalsTab = ({ pets, ownerFirstName }: AnimalsTabProps) => {
                 className="w-20 h-20 rounded-xl object-cover shrink-0"
               />
             ) : (
-              <div className="w-20 h-20 rounded-xl bg-muted flex items-center justify-center text-3xl shrink-0">
+              <div
+                className="w-20 h-20 rounded-xl bg-muted flex items-center justify-center text-3xl shrink-0"
+                aria-hidden="true"
+              >
                 {speciesEmoji[pet.species] || "🐾"}
               </div>
             )}
             <div className="flex-1 min-w-0">
               <p className="font-heading font-semibold">
-                {speciesEmoji[pet.species]} {pet.name}
+                <span aria-hidden="true">{speciesEmoji[pet.species]} </span>
+                {pet.name}
                 {pet.breed ? ` — ${pet.breed}` : ""}
                 {pet.age ? ` · ${pet.age} ans` : ""}
               </p>
@@ -71,37 +75,49 @@ const AnimalsTab = ({ pets, ownerFirstName }: AnimalsTabProps) => {
               )}
             </div>
           </div>
-          {pet.breed && (
-            <div className="mt-2">
-              <button
-                onClick={() =>
-                  setBreedAccordions((prev) => ({ ...prev, [pet.id]: !prev[pet.id] }))
-                }
-                className="text-sm text-primary hover:underline cursor-pointer inline-flex items-center gap-1"
-              >
-                En savoir plus sur le {pet.breed}
-                <ChevronDown
-                  className={`h-3.5 w-3.5 transition-transform duration-300 ${
-                    breedAccordions[pet.id] ? "rotate-180" : ""
-                  }`}
-                />
-              </button>
-              <div
-                className={`overflow-hidden transition-all duration-300 ${
-                  breedAccordions[pet.id] ? "max-h-[2000px] opacity-100" : "max-h-0 opacity-0"
-                }`}
-              >
-                <div className="pt-4">
-                  <BreedProfileCard
-                    species={pet.species}
-                    breed={pet.breed}
-                    ownerNote={pet.owner_breed_note}
-                    ownerFirstName={ownerFirstName}
+          {pet.breed && (() => {
+            const panelId = `breed-panel-${pet.id}`;
+            const isOpen = !!breedAccordions[pet.id];
+            return (
+              <div className="mt-2">
+                <button
+                  type="button"
+                  onClick={() =>
+                    setBreedAccordions((prev) => ({ ...prev, [pet.id]: !prev[pet.id] }))
+                  }
+                  aria-expanded={isOpen}
+                  aria-controls={panelId}
+                  className="text-sm text-primary hover:underline cursor-pointer inline-flex items-center gap-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded"
+                >
+                  En savoir plus sur le {pet.breed}
+                  <ChevronDown
+                    className={`h-3.5 w-3.5 transition-transform duration-300 ${
+                      isOpen ? "rotate-180" : ""
+                    }`}
+                    aria-hidden="true"
                   />
+                </button>
+                <div
+                  id={panelId}
+                  role="region"
+                  aria-label={`Informations sur la race ${pet.breed}`}
+                  aria-hidden={!isOpen}
+                  className={`overflow-hidden transition-all duration-300 ${
+                    isOpen ? "max-h-[2000px] opacity-100" : "max-h-0 opacity-0 pointer-events-none"
+                  }`}
+                >
+                  <div className="pt-4">
+                    <BreedProfileCard
+                      species={pet.species}
+                      breed={pet.breed}
+                      ownerNote={pet.owner_breed_note}
+                      ownerFirstName={ownerFirstName}
+                    />
+                  </div>
                 </div>
               </div>
-            </div>
-          )}
+            );
+          })()}
         </div>
       ))}
     </div>
