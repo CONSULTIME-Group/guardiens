@@ -87,32 +87,56 @@ const THIRD_PARTY_STACK_PATTERNS: RegExp[] = [
 ];
 
 /**
- * Détecte si une erreur provient de JS hors de notre bundle Vite.
- * On considère "notre code" comme :
- *  - URL contenant /assets/ (chunks Vite buildés)
- *  - même origine que window.location
- *  - extensions .js/.tsx servies par notre domaine
+ * Type de filtrage appliqué à une erreur "tierce".
+ * Permet d'expliquer dans l'admin pourquoi elle est marquée comme ignorée.
  */
-function isThirdPartySource(source?: string | null, stack?: string | null): boolean {
+export type ThirdPartyReason =
+  | "webview_bridge"        // Stack contient une signature de bridge WebView (FB, IG, TikTok…)
+  | "extension"             // Source = chrome-extension:// / moz-extension:// …
+  | "tracking_pixel"        // Source = gtag, fbevents, hotjar, intercom…
+  | "cross_origin_script"   // Source = autre origine que la nôtre
+  | "anonymous_inline"      // Source vide, stack majoritairement anonyme (injection inline)
+  | "empty_source";         // Source vide/blanche
+
+/**
+ * Détecte si une erreur provient de JS hors de notre bundle Vite.
+ * Retourne le motif (pour traçabilité dans l'admin) ou null si l'erreur
+ * vient bien de notre code.
+ */
+export function detectThirdPartySource(
+  source?: string | null,
+  stack?: string | null,
+): ThirdPartyReason | null {
   // 1. Stack signatures fortes (WebView bridges) — verdict immédiat
   if (stack && THIRD_PARTY_STACK_PATTERNS.some((re) => re.test(stack))) {
-    return true;
+    return "webview_bridge";
   }
 
   // 2. Source explicitement tierce
   if (source) {
     const trimmed = source.trim();
-    if (!trimmed) return true;
-    if (THIRD_PARTY_SOURCE_PATTERNS.some((re) => re.test(trimmed))) return true;
+    if (!trimmed) return "empty_source";
+
+    if (/^(chrome|moz|safari(-web)?|web)?-?extension:\/\//i.test(trimmed)) {
+      return "extension";
+    }
+    if (
+      /\/(gtag|gtm|fbevents|fbq|hotjar|intercom|snap_pixel|pixel|tiktok|clarity|hs-scripts)/i.test(trimmed) ||
+      /googletagmanager\.com|google-analytics\.com|connect\.facebook\.net|static\.hotjar\.com|widget\.intercom\.io/i.test(trimmed)
+    ) {
+      return "tracking_pixel";
+    }
+    if (/^<anonymous>|^anonymous$|^about:blank/i.test(trimmed)) {
+      return "anonymous_inline";
+    }
 
     // 3. Source d'une autre origine que la nôtre
     if (typeof window !== "undefined" && /^https?:\/\//i.test(trimmed)) {
       try {
         const srcOrigin = new URL(trimmed).origin;
-        if (srcOrigin !== window.location.origin) return true;
+        if (srcOrigin !== window.location.origin) return "cross_origin_script";
       } catch {
-        // URL invalide → on considère tiers par prudence
-        return true;
+        return "cross_origin_script";
       }
     }
   }
@@ -125,12 +149,20 @@ function isThirdPartySource(source?: string | null, stack?: string | null): bool
       const anonymousFrames = lines.filter((l) =>
         /<anonymous>|\sat\s.*:\d+:\d+\)?$/i.test(l) && !/\/assets\/|\.tsx?:|\.jsx?:/i.test(l)
       ).length;
-      if (anonymousFrames / lines.length > 0.7) return true;
+      if (anonymousFrames / lines.length > 0.7) return "anonymous_inline";
     }
   }
 
-  return false;
+  return null;
 }
+
+/**
+ * @deprecated Conservé pour compat — utiliser detectThirdPartySource qui renvoie le motif.
+ */
+function isThirdPartySource(source?: string | null, stack?: string | null): boolean {
+  return detectThirdPartySource(source, stack) !== null;
+}
+
 
 
 function fingerprint(message: string, source?: string, line?: number): string {
@@ -154,11 +186,28 @@ async function send(payload: {
 }) {
   if (sessionCount >= MAX_PER_SESSION) return;
   if (shouldIgnore(payload.message)) return;
-  // Filtre par source : ignore JS injecté (WebViews FB/IG, extensions, pixels…)
-  if (isThirdPartySource(payload.source, payload.stack)) return;
+
+  // Détection JS tiers (WebViews FB/IG, extensions, pixels…) : on n'abandonne
+  // pas silencieusement — on enregistre avec une sévérité dédiée et un motif,
+  // pour que l'admin sache pourquoi cette erreur n'a pas été retenue comme bug.
+  const thirdPartyReason = detectThirdPartySource(payload.source, payload.stack);
+  let severity = payload.severity ?? "error";
+  let context = payload.context ?? null;
+  if (thirdPartyReason) {
+    severity = "ignored_third_party";
+    context = {
+      ...(context ?? {}),
+      filtered: true,
+      filter_reason: thirdPartyReason,
+    };
+  }
+
   const now = Date.now();
   const last = SENT_FINGERPRINTS.get(payload.fingerprint);
-  if (last && now - last < THROTTLE_MS) return;
+  // Throttle agressif (1h) pour les erreurs tierces — non actionnables, on
+  // veut juste pouvoir les inspecter dans l'admin sans saturer la table.
+  const throttle = thirdPartyReason ? 60 * 60 * 1000 : THROTTLE_MS;
+  if (last && now - last < throttle) return;
   SENT_FINGERPRINTS.set(payload.fingerprint, now);
   sessionCount++;
 
@@ -173,8 +222,8 @@ async function send(payload: {
       _col_no: payload.col_no ?? null,
       _url: typeof window !== "undefined" ? window.location.href.slice(0, 500) : null,
       _user_agent: typeof navigator !== "undefined" ? navigator.userAgent.slice(0, 300) : null,
-      _severity: payload.severity ?? "error",
-      _context: payload.context ?? null,
+      _severity: severity,
+      _context: context,
       _user_email: user?.email ?? null,
     });
   } catch {

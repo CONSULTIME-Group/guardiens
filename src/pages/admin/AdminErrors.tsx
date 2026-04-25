@@ -13,7 +13,7 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
 } from "@/components/ui/dialog";
 import {
-  AlertTriangle, CheckCircle2, RefreshCw, Search, Trash2, ExternalLink, Archive,
+  AlertTriangle, CheckCircle2, RefreshCw, Search, Trash2, ExternalLink, Archive, ShieldAlert, Info,
 } from "lucide-react";
 import { formatDistanceToNow, format } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -41,6 +41,54 @@ interface ErrorLog {
   resolved_by: string | null;
   admin_notes: string | null;
   created_at: string;
+}
+
+/**
+ * Erreurs filtrées automatiquement parce qu'elles proviennent de JS injecté
+ * par une source tierce (WebView in-app, extension, pixel marketing…).
+ * Voir src/lib/errorLogger.ts → detectThirdPartySource.
+ */
+const THIRD_PARTY_REASON_LABELS: Record<string, { label: string; explanation: string }> = {
+  webview_bridge: {
+    label: "Bridge WebView in-app",
+    explanation:
+      "L'erreur a été déclenchée par un script natif injecté par l'application Facebook, Instagram, TikTok… (ex : autofill de contact). Ce code ne fait pas partie de notre bundle et nous ne pouvons pas le corriger.",
+  },
+  extension: {
+    label: "Extension navigateur",
+    explanation:
+      "L'erreur provient d'une extension installée par l'utilisateur (chrome-extension://, moz-extension://…). Hors de notre périmètre.",
+  },
+  tracking_pixel: {
+    label: "Pixel marketing / analytics",
+    explanation:
+      "L'erreur vient d'un script tiers de tracking (Google Tag Manager, Meta Pixel, Hotjar, Intercom…). Non actionnable depuis notre code.",
+  },
+  cross_origin_script: {
+    label: "Script cross-origin",
+    explanation:
+      "L'erreur provient d'un script chargé depuis un autre domaine que le nôtre. Probablement un service tiers intégré.",
+  },
+  anonymous_inline: {
+    label: "Script inline anonyme",
+    explanation:
+      "Aucune source identifiable et stack majoritairement anonyme — typique d'un JS injecté inline par un WebView ou un script tiers.",
+  },
+  empty_source: {
+    label: "Source vide",
+    explanation: "Le navigateur n'a pas fourni de source pour cette erreur (souvent cross-origin masqué).",
+  },
+};
+
+function getThirdPartyInfo(ctx: any): { reason: string; label: string; explanation: string } | null {
+  if (!ctx || ctx.filtered !== true) return null;
+  const reason = typeof ctx.filter_reason === "string" ? ctx.filter_reason : null;
+  if (!reason) return null;
+  const meta = THIRD_PARTY_REASON_LABELS[reason] ?? {
+    label: "Source tierce",
+    explanation: "Erreur ignorée car elle ne provient pas de notre code.",
+  };
+  return { reason, ...meta };
 }
 
 const AdminErrors = () => {
@@ -205,12 +253,13 @@ const AdminErrors = () => {
           </SelectContent>
         </Select>
         <Select value={severityFilter} onValueChange={setSeverityFilter}>
-          <SelectTrigger className="w-[180px]"><SelectValue /></SelectTrigger>
+          <SelectTrigger className="w-[220px]"><SelectValue /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Toutes sévérités</SelectItem>
             <SelectItem value="error">Erreur</SelectItem>
             <SelectItem value="unhandled_rejection">Promise rejetée</SelectItem>
             <SelectItem value="warning">Avertissement</SelectItem>
+            <SelectItem value="ignored_third_party">Ignorée (script tiers)</SelectItem>
           </SelectContent>
         </Select>
         <div className="relative flex-1 min-w-[200px]">
@@ -245,9 +294,25 @@ const AdminErrors = () => {
                   <div className="flex items-start justify-between gap-4">
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2 mb-1 flex-wrap">
-                        <Badge variant={e.severity === "error" ? "destructive" : "secondary"}>
-                          {e.severity}
-                        </Badge>
+                        {(() => {
+                          const tp = getThirdPartyInfo(e.context);
+                          if (tp) {
+                            return (
+                              <Badge
+                                className="bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/40 hover:bg-amber-500/20 gap-1"
+                                title={tp.explanation}
+                              >
+                                <ShieldAlert className="h-3 w-3" />
+                                Ignorée · {tp.label}
+                              </Badge>
+                            );
+                          }
+                          return (
+                            <Badge variant={e.severity === "error" ? "destructive" : "secondary"}>
+                              {e.severity}
+                            </Badge>
+                          );
+                        })()}
                         <Badge variant="outline">×{e.occurrences}</Badge>
                         {e.resolved_at && (
                           <Badge variant="outline" className="text-primary border-primary">
@@ -292,6 +357,31 @@ const AdminErrors = () => {
               </DialogHeader>
 
               <div className="space-y-4 mt-2">
+                {(() => {
+                  const tp = getThirdPartyInfo(selected.context);
+                  if (!tp) return null;
+                  return (
+                    <div className="rounded-lg border border-amber-500/40 bg-amber-500/10 p-4 flex gap-3">
+                      <ShieldAlert className="h-5 w-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+                      <div className="space-y-1.5 text-sm">
+                        <p className="font-semibold text-amber-800 dark:text-amber-200 flex items-center gap-2 flex-wrap">
+                          Erreur ignorée automatiquement
+                          <Badge variant="outline" className="border-amber-500/50 text-amber-700 dark:text-amber-300 font-normal">
+                            {tp.label}
+                          </Badge>
+                        </p>
+                        <p className="text-amber-900/80 dark:text-amber-100/80 leading-relaxed">
+                          {tp.explanation}
+                        </p>
+                        <p className="text-xs text-amber-900/70 dark:text-amber-100/70 flex items-center gap-1 pt-1">
+                          <Info className="h-3 w-3" />
+                          Conservée à titre informatif (1 entrée max par heure et par empreinte). Aucune action requise.
+                        </p>
+                      </div>
+                    </div>
+                  );
+                })()}
+
                 <div>
                   <p className="text-xs uppercase text-muted-foreground mb-1">Message</p>
                   <p className="text-sm font-mono bg-muted p-3 rounded">{selected.message}</p>
