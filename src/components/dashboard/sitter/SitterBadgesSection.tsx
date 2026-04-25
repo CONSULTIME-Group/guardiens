@@ -108,7 +108,7 @@ const SitterBadgesSection = ({ groupedBadges, condensed = false }: SitterBadgesS
               className="mt-1.5 h-1 w-[120px] sm:w-[140px] shrink-0 rounded-full bg-muted overflow-hidden"
             >
               <span
-                className={`block h-full transition-all duration-300 ${
+                className={`block h-full transition-all duration-300 motion-reduce:transition-none ${
                   hasActive ? "bg-primary" : "bg-transparent"
                 }`}
                 style={{ width: `${ratio}%` }}
@@ -121,7 +121,7 @@ const SitterBadgesSection = ({ groupedBadges, condensed = false }: SitterBadgesS
             {open ? "Masquer" : "Afficher"}
           </span>
           <ChevronDown
-            className={`h-4 w-4 text-muted-foreground transition-transform duration-200 ${open ? "rotate-180" : ""}`}
+            className={`h-4 w-4 text-muted-foreground transition-transform duration-200 motion-reduce:transition-none ${open ? "rotate-180" : ""}`}
             aria-hidden="true"
           />
         </span>
