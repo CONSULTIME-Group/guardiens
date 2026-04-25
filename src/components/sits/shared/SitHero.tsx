@@ -51,7 +51,7 @@ const SitHero = ({ photos, city, priority = false }: SitHeroProps) => {
   if (total === 0) return null;
 
   const altFor = (i: number) =>
-    `Photo ${i + 1} sur ${total} du logement à ${cityLabel} — annonce de garde Guardiens`;
+    `Photo ${i + 1} sur ${total} de la garde à ${cityLabel} (logement et animaux) — annonce Guardiens`;
 
   const handleTouchStart = (e: React.TouchEvent) => {
     setTouchStartX(e.touches[0].clientX);
