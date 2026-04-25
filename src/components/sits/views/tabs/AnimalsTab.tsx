@@ -14,6 +14,7 @@
 import { useMemo, useState } from "react";
 import { ChevronDown, Clock, Footprints, Pill } from "lucide-react";
 import BreedProfileCard from "@/components/breeds/BreedProfileCard";
+import PhotoLightbox from "@/components/shared/PhotoLightbox";
 import { hasMedication } from "@/lib/medication";
 import {
   SPECIES_EMOJI as speciesEmoji,
@@ -69,6 +70,9 @@ function uniqueSharedValue<T>(values: (T | null | undefined)[]): T | null {
 
 const AnimalsTab = ({ pets, ownerFirstName }: AnimalsTabProps) => {
   const [breedAccordions, setBreedAccordions] = useState<Record<string, boolean>>({});
+  // Photo pet ouverte en lightbox (null = aucune). Stocke {src, alt} pour
+  // découpler du cycle de vie de la liste pets (évite les flickers).
+  const [lightboxPhoto, setLightboxPhoto] = useState<{ src: string; alt: string } | null>(null);
 
   // Calcule les valeurs partagées par TOUS les animaux pour les hisser en bandeau.
   const sharedAlone = useMemo(
@@ -133,11 +137,24 @@ const AnimalsTab = ({ pets, ownerFirstName }: AnimalsTabProps) => {
           <div key={pet.id}>
             <div className="flex gap-3 p-4 bg-card rounded-xl border border-border">
               {pet.photo_url ? (
-                <img
-                  src={pet.photo_url}
-                  alt={pet.name}
-                  className="w-20 h-20 rounded-xl object-cover shrink-0"
-                />
+                <button
+                  type="button"
+                  onClick={() =>
+                    setLightboxPhoto({
+                      src: pet.photo_url,
+                      alt: `Photo de ${pet.name}${pet.breed ? ` (${pet.breed})` : ""}`,
+                    })
+                  }
+                  className="shrink-0 rounded-xl overflow-hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary group"
+                  aria-label={`Agrandir la photo de ${pet.name}`}
+                >
+                  <img
+                    src={pet.photo_url}
+                    alt={pet.name}
+                    loading="lazy"
+                    className="w-20 h-20 object-cover transition-transform duration-300 group-hover:scale-105"
+                  />
+                </button>
               ) : (
                 <div
                   className="w-20 h-20 rounded-xl bg-muted flex items-center justify-center text-3xl shrink-0"
@@ -231,6 +248,13 @@ const AnimalsTab = ({ pets, ownerFirstName }: AnimalsTabProps) => {
           </div>
         );
       })}
+
+      <PhotoLightbox
+        src={lightboxPhoto?.src ?? ""}
+        alt={lightboxPhoto?.alt ?? ""}
+        open={!!lightboxPhoto}
+        onClose={() => setLightboxPhoto(null)}
+      />
     </div>
   );
 };
