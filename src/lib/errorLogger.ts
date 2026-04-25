@@ -42,6 +42,97 @@ function shouldIgnore(message: string): boolean {
   return IGNORED_PATTERNS.some((re) => re.test(normalized));
 }
 
+/**
+ * Sources tierces non actionnables — JS injecté par WebViews, extensions,
+ * pixels marketing, scripts cross-origin… Une erreur dont la source provient
+ * de l'un de ces patterns n'est pas issue de notre bundle Vite et ne doit
+ * pas être loggée.
+ *
+ * Détection :
+ * - source "<anonymous>" / "" / inline : typique des WebViews FB/IG/TikTok
+ *   qui injectent du JS sans URL réelle (autofill, tracking, bridge natif)
+ * - extensions navigateur (chrome-extension://, moz-extension://, safari-…)
+ * - scripts tiers connus (gtag, fbevents, hotjar, intercom, snap pixel…)
+ * - WebViews in-app via signatures dans le stack (FB_IAB, fbAutofill, etc.)
+ */
+const THIRD_PARTY_SOURCE_PATTERNS: RegExp[] = [
+  /^<anonymous>/i,
+  /^anonymous$/i,
+  /^about:blank/i,
+  /^chrome-extension:\/\//i,
+  /^moz-extension:\/\//i,
+  /^safari-(web-)?extension:\/\//i,
+  /^extension:\/\//i,
+  /\/(gtag|gtm|fbevents|fbq|hotjar|intercom|snap_pixel|pixel|tiktok|clarity|hs-scripts)/i,
+  /googletagmanager\.com/i,
+  /google-analytics\.com/i,
+  /connect\.facebook\.net/i,
+  /static\.hotjar\.com/i,
+  /widget\.intercom\.io/i,
+];
+
+/**
+ * Signatures dans la stack trace qui révèlent du JS injecté par un WebView
+ * in-app, même si "source" est vide ou semble valide.
+ */
+const THIRD_PARTY_STACK_PATTERNS: RegExp[] = [
+  /setContactAutofillValuesFromBridge/i,
+  /fbAutofill/i,
+  /FB_IAB/i,
+  /InstagramBridge/i,
+  /__fbAppBridge/i,
+  /TikTokBridge/i,
+  /WebViewJavascriptBridge/i,
+  /universal_link/i,
+];
+
+/**
+ * Détecte si une erreur provient de JS hors de notre bundle Vite.
+ * On considère "notre code" comme :
+ *  - URL contenant /assets/ (chunks Vite buildés)
+ *  - même origine que window.location
+ *  - extensions .js/.tsx servies par notre domaine
+ */
+function isThirdPartySource(source?: string | null, stack?: string | null): boolean {
+  // 1. Stack signatures fortes (WebView bridges) — verdict immédiat
+  if (stack && THIRD_PARTY_STACK_PATTERNS.some((re) => re.test(stack))) {
+    return true;
+  }
+
+  // 2. Source explicitement tierce
+  if (source) {
+    const trimmed = source.trim();
+    if (!trimmed) return true;
+    if (THIRD_PARTY_SOURCE_PATTERNS.some((re) => re.test(trimmed))) return true;
+
+    // 3. Source d'une autre origine que la nôtre
+    if (typeof window !== "undefined" && /^https?:\/\//i.test(trimmed)) {
+      try {
+        const srcOrigin = new URL(trimmed).origin;
+        if (srcOrigin !== window.location.origin) return true;
+      } catch {
+        // URL invalide → on considère tiers par prudence
+        return true;
+      }
+    }
+  }
+
+  // 4. Pas de source ET stack composé majoritairement de frames anonymes
+  //    → typiquement du JS injecté inline par un WebView
+  if (!source && stack) {
+    const lines = stack.split("\n").filter((l) => l.trim());
+    if (lines.length > 0) {
+      const anonymousFrames = lines.filter((l) =>
+        /<anonymous>|\sat\s.*:\d+:\d+\)?$/i.test(l) && !/\/assets\/|\.tsx?:|\.jsx?:/i.test(l)
+      ).length;
+      if (anonymousFrames / lines.length > 0.7) return true;
+    }
+  }
+
+  return false;
+}
+
+
 function fingerprint(message: string, source?: string, line?: number): string {
   const base = `${message}|${source ?? ""}|${line ?? ""}`.slice(0, 500);
   let hash = 0;
