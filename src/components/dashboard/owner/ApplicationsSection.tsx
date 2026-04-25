@@ -112,10 +112,20 @@ const ApplicationsSection = memo(({ recentApps, sitterProfiles, sitterBadges, lo
   const unread = recentApps.filter(a => a.status === "pending" || a.status === "discussing");
   const read = recentApps.filter(a => a.status !== "pending" && a.status !== "discussing");
 
+  // « Voir toutes » : retiré entièrement de l'UI pendant le chargement,
+  // affiché ensuite uniquement s'il y a des candidatures à consulter.
+  const seeAllAction = loading
+    ? undefined
+    : recentApps.length > 0
+      ? (
+        <Link to="/sits" className="text-xs text-primary hover:underline font-medium">
+          Voir toutes
+        </Link>
+      )
+      : undefined;
+
   return (
-    <DashSection title="Candidatures reçues non lues" action={
-      !loading && recentApps.length > 0 ? <Link to="/sits" className="text-xs text-primary hover:underline font-medium">Voir toutes</Link> : undefined
-    }>
+    <DashSection title="Candidatures reçues non lues" action={seeAllAction}>
       {loading ? (
         <div className="space-y-3" role="status" aria-busy="true" aria-label="Chargement des candidatures reçues">
           <AppCardSkeleton />
