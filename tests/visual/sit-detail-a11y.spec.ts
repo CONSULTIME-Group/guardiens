@@ -325,7 +325,11 @@ test.describe("Accessibilité — /sits/:id", () => {
         const violations: Violation[] = [];
         const seen = new Set<Element>();
 
-        document.querySelectorAll("body *").forEach((el) => {
+        // Limite l'audit à la zone <main> (contenu SitDetail). La sidebar de
+        // navigation et autres chrome globaux sont audités séparément — sortis
+        // du périmètre de cette spec qui cible SitDetail.
+        const root = document.querySelector("main") || document.body;
+        root.querySelectorAll("*").forEach((el) => {
           if (seen.has(el)) return;
           if (el.classList.contains("sr-only")) return;
           // skip media / form controls (native controls : couleurs UA non maîtrisées)
