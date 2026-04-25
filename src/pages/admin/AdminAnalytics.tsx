@@ -41,6 +41,47 @@ interface TopPage {
   views: number;
 }
 
+// Normalise une URL pathname pour regrouper les chemins dynamiques.
+// Ex: /gardiens/<uuid> → /gardiens/:id, /guides/lyon → /guides/:slug
+function normalizeSource(raw: string | null | undefined): string | null {
+  if (!raw) return null;
+  let p = raw.trim();
+  if (!p) return null;
+  // Retire querystring/fragment au cas où
+  p = p.split("?")[0].split("#")[0];
+  // Retire trailing slash sauf racine
+  if (p.length > 1 && p.endsWith("/")) p = p.slice(0, -1);
+
+  const uuidRe = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i;
+
+  // Patterns avec ID dynamique
+  const dynamicPatterns: Array<[RegExp, string]> = [
+    [/^\/gardiens\/.+$/, "/gardiens/:id"],
+    [/^\/proprietaires?\/.+$/, "/proprietaires/:id"],
+    [/^\/profil\/.+$/, "/profil/:id"],
+    [/^\/annonces\/.+$/, "/annonces/:id"],
+    [/^\/sits\/.+$/, "/sits/:id"],
+    [/^\/missions\/.+$/, "/missions/:id"],
+    [/^\/petites-missions\/.+$/, "/petites-missions/:id"],
+    [/^\/messages\/.+$/, "/messages/:id"],
+    [/^\/conversation\/.+$/, "/conversation/:id"],
+    [/^\/guides\/.+$/, "/guides/:slug"],
+    [/^\/actualites\/.+$/, "/actualites/:slug"],
+    [/^\/articles\/.+$/, "/articles/:slug"],
+    [/^\/villes?\/.+$/, "/villes/:slug"],
+    [/^\/departements?\/.+$/, "/departements/:slug"],
+    [/^\/avis\/.+$/, "/avis/:id"],
+  ];
+  for (const [re, repl] of dynamicPatterns) {
+    if (typeof repl === "string" && re.test(p)) return repl;
+  }
+  // UUID résiduel quelque part dans le path
+  if (uuidRe.test(p)) {
+    return p.replace(uuidRe, ":id");
+  }
+  return p;
+}
+
 const AdminAnalytics = () => {
   const [range, setRange] = useState<Range>(7);
   const [roleFilter, setRoleFilter] = useState<RoleFilter>("all");
@@ -182,18 +223,19 @@ const AdminAnalytics = () => {
       });
       setStepDropoffByRole(byRole);
 
-      // ── Top pages ──
+      // ── Top pages (sources normalisées) ──
       const pageCount = new Map<string, number>();
       filteredEvents.forEach((e) => {
-        if (e.event_type === "page_view" && e.source) {
-          pageCount.set(e.source, (pageCount.get(e.source) || 0) + 1);
-        }
+        if (e.event_type !== "page_view") return;
+        const normalized = normalizeSource(e.source);
+        if (!normalized) return;
+        pageCount.set(normalized, (pageCount.get(normalized) || 0) + 1);
       });
       setTopPages(
         Array.from(pageCount.entries())
           .map(([path, views]) => ({ path, views }))
           .sort((a, b) => b.views - a.views)
-          .slice(0, 10)
+          .slice(0, 15)
       );
 
       setLoading(false);
@@ -449,7 +491,10 @@ const AdminAnalytics = () => {
           {/* Top pages */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">Pages les plus vues</CardTitle>
+              <CardTitle className="text-base">Top sources de pages vues</CardTitle>
+              <p className="text-xs text-muted-foreground mt-1">
+                Chemins normalisés (UUID/slug regroupés sous <code className="text-foreground/70">:id</code> / <code className="text-foreground/70">:slug</code>)
+              </p>
             </CardHeader>
             <CardContent>
               {topPages.length === 0 ? (
@@ -457,13 +502,35 @@ const AdminAnalytics = () => {
                   Aucune vue enregistrée sur la période.
                 </p>
               ) : (
-                <div className="space-y-2">
-                  {topPages.map((p) => (
-                    <div key={p.path} className="flex items-center justify-between text-sm py-1.5 border-b border-border last:border-0">
-                      <span className="truncate text-foreground/80 mr-2">{p.path || "/"}</span>
-                      <span className="font-medium tabular-nums">{p.views}</span>
-                    </div>
-                  ))}
+                <div style={{ height: Math.max(240, topPages.length * 32) }}>
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart
+                      data={topPages}
+                      layout="vertical"
+                      margin={{ top: 4, right: 24, left: 8, bottom: 4 }}
+                    >
+                      <CartesianGrid strokeDasharray="3 3" className="stroke-border" horizontal={false} />
+                      <XAxis type="number" className="text-xs" allowDecimals={false} />
+                      <YAxis
+                        type="category"
+                        dataKey="path"
+                        width={220}
+                        tick={{ fontSize: 11 }}
+                        interval={0}
+                      />
+                      <Tooltip
+                        cursor={{ fill: "hsl(var(--muted) / 0.5)" }}
+                        contentStyle={{
+                          background: "hsl(var(--card))",
+                          border: "1px solid hsl(var(--border))",
+                          borderRadius: 8,
+                          fontSize: 12,
+                        }}
+                        formatter={(value: number) => [`${value} vues`, "Pages vues"]}
+                      />
+                      <Bar dataKey="views" fill="hsl(var(--primary))" radius={[0, 4, 4, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
                 </div>
               )}
             </CardContent>
