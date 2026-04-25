@@ -186,11 +186,28 @@ async function send(payload: {
 }) {
   if (sessionCount >= MAX_PER_SESSION) return;
   if (shouldIgnore(payload.message)) return;
-  // Filtre par source : ignore JS injecté (WebViews FB/IG, extensions, pixels…)
-  if (isThirdPartySource(payload.source, payload.stack)) return;
+
+  // Détection JS tiers (WebViews FB/IG, extensions, pixels…) : on n'abandonne
+  // pas silencieusement — on enregistre avec une sévérité dédiée et un motif,
+  // pour que l'admin sache pourquoi cette erreur n'a pas été retenue comme bug.
+  const thirdPartyReason = detectThirdPartySource(payload.source, payload.stack);
+  let severity = payload.severity ?? "error";
+  let context = payload.context ?? null;
+  if (thirdPartyReason) {
+    severity = "ignored_third_party";
+    context = {
+      ...(context ?? {}),
+      filtered: true,
+      filter_reason: thirdPartyReason,
+    };
+  }
+
   const now = Date.now();
   const last = SENT_FINGERPRINTS.get(payload.fingerprint);
-  if (last && now - last < THROTTLE_MS) return;
+  // Throttle agressif (1h) pour les erreurs tierces — non actionnables, on
+  // veut juste pouvoir les inspecter dans l'admin sans saturer la table.
+  const throttle = thirdPartyReason ? 60 * 60 * 1000 : THROTTLE_MS;
+  if (last && now - last < throttle) return;
   SENT_FINGERPRINTS.set(payload.fingerprint, now);
   sessionCount++;
 
@@ -205,8 +222,8 @@ async function send(payload: {
       _col_no: payload.col_no ?? null,
       _url: typeof window !== "undefined" ? window.location.href.slice(0, 500) : null,
       _user_agent: typeof navigator !== "undefined" ? navigator.userAgent.slice(0, 300) : null,
-      _severity: payload.severity ?? "error",
-      _context: payload.context ?? null,
+      _severity: severity,
+      _context: context,
       _user_email: user?.email ?? null,
     });
   } catch {
