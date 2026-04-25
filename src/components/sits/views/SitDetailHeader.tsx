@@ -11,7 +11,7 @@
  * Reste 100% présentationnel : aucune logique métier ici, on reçoit tout via props.
  */
 import { Link } from "react-router-dom";
-import { ArrowLeft, Calendar, MapPin, Star, Pencil, ExternalLink, MoreHorizontal, Flag } from "lucide-react";
+import { ArrowLeft, Calendar, MapPin, Star, Pencil, ExternalLink, MoreHorizontal } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Button } from "@/components/ui/button";
