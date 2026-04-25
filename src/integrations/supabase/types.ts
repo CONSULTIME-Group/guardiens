@@ -3980,6 +3980,13 @@ export type Database = {
         Returns: string
       }
       get_own_email: { Args: never; Returns: string }
+      get_sit_application_counts: {
+        Args: { p_sit_id: string }
+        Returns: {
+          app_count: number
+          pending_app_count: number
+        }[]
+      }
       get_user_email_for_notification: {
         Args: { target_user_id: string }
         Returns: string

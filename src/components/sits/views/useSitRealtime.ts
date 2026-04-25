@@ -32,21 +32,13 @@ export const useSitRealtime = ({
     if (!sitId) return;
 
     const refreshCounts = async () => {
-      const [allRes, pendingRes] = await Promise.all([
-        supabase
-          .from("applications")
-          .select("id", { count: "exact", head: true })
-          .eq("sit_id", sitId)
-          .not("status", "in", "(rejected,cancelled)"),
-        supabase
-          .from("applications")
-          .select("id", { count: "exact", head: true })
-          .eq("sit_id", sitId)
-          .in("status", ["pending", "viewed", "discussing"]),
-      ]);
+      const { data } = await supabase.rpc("get_sit_application_counts", {
+        p_sit_id: sitId,
+      });
+      const counts = data?.[0];
       onApplicationsChange({
-        appCount: allRes.count || 0,
-        pendingAppCount: pendingRes.count || 0,
+        appCount: counts?.app_count || 0,
+        pendingAppCount: counts?.pending_app_count || 0,
       });
     };
 
