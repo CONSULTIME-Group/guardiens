@@ -444,11 +444,15 @@ test.describe("Accessibilité — /sits/:id", () => {
               (n) =>
                 !n.getAttribute("aria-label") && !n.getAttribute("aria-labelledby")
             )
-            .map((n, i) => `nav#${i} (${(n.textContent || "").trim().slice(0, 40)})`);
+            // @ts-ignore
+            .map((n) => (window as any).__describeEl(n));
         });
         expect(
           unlabeledNavs,
-          `Avec ${navCount} <nav>, chacun doit être labellisé (aria-label ou aria-labelledby). Non labellisés:\n${JSON.stringify(unlabeledNavs, null, 2)}`
+          `Avec ${navCount} <nav>, chacun doit être labellisé (aria-label ou aria-labelledby).${fmt(
+            "Landmarks <nav> non labellisés",
+            unlabeledNavs
+          )}`
         ).toEqual([]);
       }
 
