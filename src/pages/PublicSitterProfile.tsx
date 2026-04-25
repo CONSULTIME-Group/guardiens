@@ -1482,8 +1482,12 @@ export default function PublicSitterProfile() {
                   };
                   const s = statusMap[sit.status] ?? { label: '—', style: 'bg-muted text-foreground/40' };
                   const fmt = (d: string) => new Date(d).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
+                  const isPast = ['completed', 'finished', 'cancelled', 'archived'].includes(sit.status);
                   return (
-                    <div key={sit.id} className="flex items-center justify-between gap-4 bg-card border border-border rounded-xl px-4 py-3">
+                    <div
+                      key={sit.id}
+                      className={`flex items-center justify-between gap-4 bg-card border border-border rounded-xl px-4 py-3 ${isPast ? 'opacity-60' : ''}`}
+                    >
                       <div className="min-w-0">
                         <p className="text-sm font-medium text-foreground font-body truncate">{sit.title || 'Garde'}</p>
                         {(sit.start_date || sit.end_date) && (
