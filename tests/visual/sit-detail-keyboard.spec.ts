@@ -244,9 +244,13 @@ test.describe("Navigation clavier — /sits/:id", () => {
 
       // ---------- 5. Sitter sur sit publié : le CTA d'action est focusable ----------
       if (scn.activeRole === "sitter" && scn.data.sit?.status === "published") {
+        currentPhase = "sitter-cta";
         const aside = page.locator('aside[aria-label="Action de candidature"]');
         const cta = aside.locator("button, a").first();
         await cta.focus();
+        currentFocusLog.push(
+          await snapshotFocusEntry(page, currentFocusLog.length + 1, "focus(<sitter CTA>)", "phase=sitter-cta")
+        );
         const focused = await snapshotFocus(page);
         expect(
           focused.tag === "button" || focused.tag === "a",
