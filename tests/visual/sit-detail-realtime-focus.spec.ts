@@ -323,7 +323,8 @@ test.describe("Realtime — focus reste logique après mise à jour exogène", (
       .locator('main button:not([disabled]), main a[href], main [role="button"]:not([aria-disabled="true"])')
       .first();
     expect(await initialTarget.count()).toBeGreaterThan(0);
-    await initialTarget.focus();
+    await pageA.bringToFront();
+    await initialTarget.click({ force: true, position: { x: 4, y: 4 } });
     const focusBefore = await describeActiveElement(pageA);
     expect(focusBefore.isBody).toBe(false);
 
