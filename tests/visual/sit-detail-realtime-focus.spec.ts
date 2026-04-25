@@ -32,6 +32,22 @@
 import { test, expect } from "../../playwright-fixture";
 import { spawn, type ChildProcess } from "node:child_process";
 import { SCENARIOS } from "./fixtures";
+import {
+  captureFailureArtifacts,
+  snapshotFocusEntry,
+  type FocusLogEntry,
+} from "./failure-capture";
+import type { Page } from "@playwright/test";
+
+/**
+ * Contexte partagé pour la capture automatique d'artefacts à l'échec.
+ * Le test realtime opère sur une page custom (pageA) — on la mémorise ici
+ * pour que le afterEach puisse l'inspecter au lieu de la page de la fixture.
+ */
+let currentPageA: Page | null = null;
+let currentFocusLog: FocusLogEntry[] = [];
+let currentScenario: string = "unknown";
+let currentPhase: string = "init";
 
 const PORT = 8768;
 const BASE_URL = `http://localhost:${PORT}`;
