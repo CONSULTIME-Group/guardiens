@@ -10,6 +10,7 @@
 export type ScenarioId =
   | "draft-owner"
   | "published-owner"
+  | "published-sitter"
   | "cancelled-sitter"
   | "completed-sitter";
 
@@ -211,6 +212,30 @@ export const SCENARIOS: Record<ScenarioId, Scenario> = {
           created_at: "2026-04-16T09:00:00Z",
         },
       ],
+    },
+  },
+  "published-sitter": {
+    id: "published-sitter",
+    sitId: "55555555-5555-5555-5555-555555555555",
+    viewer: {
+      id: SITTER_ID,
+      email: "lou@test.local",
+      role: "sitter",
+      firstName: "Lou",
+      lastName: "Petit",
+    },
+    activeRole: "sitter",
+    data: {
+      sit: makeSit({
+        id: "55555555-5555-5555-5555-555555555555",
+        status: "published",
+      }),
+      owner: baseOwner,
+      ownerProfile: baseOwnerProfile,
+      property: baseProperty,
+      pets: basePets,
+      reviews: baseReviews,
+      applications: [],
     },
   },
   "cancelled-sitter": {
