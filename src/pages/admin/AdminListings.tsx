@@ -57,8 +57,13 @@ const AdminListings = () => {
     const ids = listings.map((l) => l.id);
     const fetchCounts = async () => {
       const counts: Record<string, number> = {};
-      const { data } = await supabase.from("applications").select("id, sit_id").in("sit_id", ids);
-      data?.forEach((a: any) => { counts[a.sit_id] = (counts[a.sit_id] || 0) + 1; });
+      // RPC sécurisée : ne retourne que les compteurs (pas le détail des candidatures)
+      const { data, error } = await supabase.rpc("admin_get_application_counts", { p_sit_ids: ids });
+      if (error) {
+        console.error("admin_get_application_counts:", error);
+      } else {
+        (data || []).forEach((row: any) => { counts[row.sit_id] = row.total; });
+      }
       setAppCounts(counts);
     };
     fetchCounts();
