@@ -68,6 +68,8 @@
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
+    /* Variante AA-compliant pour texte rouge sur fond clair (ratio ≥ 4.5:1) */
+    --destructive-text: 0 75% 42%;
 
     --border: 37 22% 89%;
     --input: 37 22% 89%;
