@@ -247,11 +247,13 @@ const AdminAnalytics = () => {
       setStepDropoffByRole(byRole);
 
       // ── Top pages (sources normalisées) ──
+      // normalizeSource() retourne TOUJOURS une chaîne : les sources vides
+      // ou non reconnues sont regroupées sous UNKNOWN_SOURCE_LABEL afin de
+      // ne pas perdre de page_view dans le total.
       const pageCount = new Map<string, number>();
       filteredEvents.forEach((e) => {
         if (e.event_type !== "page_view") return;
         const normalized = normalizeSource(e.source);
-        if (!normalized) return;
         pageCount.set(normalized, (pageCount.get(normalized) || 0) + 1);
       });
       setTopPages(
