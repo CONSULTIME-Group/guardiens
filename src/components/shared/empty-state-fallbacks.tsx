@@ -88,10 +88,28 @@ const HeartBookmarkSvg = () => (
   </svg>
 );
 
+/* SitterReady : sac de voyage avec plaid plié + petite étiquette = gardien prêt à partir */
+const SitterReadySvg = () => (
+  <svg {...baseProps}>
+    <ellipse cx="100" cy="160" rx="70" ry="8" fill={SOFT} stroke="none" />
+    {/* Plaid plié */}
+    <path d="M55 95 L145 95 L145 110 L55 110 Z" fill={WARM} fillOpacity="0.25" />
+    <line x1="80" y1="95" x2="80" y2="110" stroke={WARM} strokeWidth="1.5" />
+    <line x1="120" y1="95" x2="120" y2="110" stroke={WARM} strokeWidth="1.5" />
+    {/* Sac */}
+    <path d="M55 110 L145 110 L140 155 L60 155 Z" fill={WARM} fillOpacity="0.4" />
+    <path d="M85 110 Q85 95 100 95 Q115 95 115 110" stroke={INK} fill="none" />
+    {/* Étiquette */}
+    <line x1="100" y1="135" x2="115" y2="148" stroke={INK} strokeWidth="1.5" />
+    <rect x="113" y="146" width="14" height="10" rx="1.5" fill={ACCENT} fillOpacity="0.5" stroke={ACCENT} />
+  </svg>
+);
+
 export const SVG_FALLBACKS: Record<IllustrationKey, () => JSX.Element> = {
   sleepingCat: SleepingCatSvg,
   emptyMailbox: EmptyMailboxSvg,
   walkingDog: WalkingDogSvg,
   emptyCalendar: EmptyCalendarSvg,
   heartBookmark: HeartBookmarkSvg,
+  sitterReady: SitterReadySvg,
 };
