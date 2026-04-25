@@ -97,6 +97,10 @@ test.describe("Accessibilité — /sits/:id", () => {
       const scn = SCENARIOS[scenarioId];
       const url = `${BASE_URL}/sits/${scn.sitId}?scenario=${scenarioId}`;
 
+      // Init du contexte de capture automatique à l'échec
+      currentFocusLog = [];
+      currentScenario = scenarioId;
+
       await page.setViewportSize({ width: 1280, height: 900 });
       await page.goto(url, { waitUntil: "networkidle" });
 
