@@ -149,9 +149,8 @@ const MonAnnonceCard = memo(({ sits, pets, propertyType, propertyEnvironment, pe
                   {pendingAppCount} candidature{pendingAppCount > 1 ? "s" : ""} en attente
                 </span>
                 <span className="text-xs text-muted-foreground">
-                  {appCount > pendingAppCount
-                    ? `sur ${appCount} reçue${appCount > 1 ? "s" : ""} au total`
-                    : "À examiner dès maintenant"}
+                  sur {appCount} reçue{appCount > 1 ? "s" : ""} au total
+                  {appCount === pendingAppCount ? " — à examiner dès maintenant" : ""}
                 </span>
               </span>
             </span>
