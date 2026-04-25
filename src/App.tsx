@@ -53,6 +53,7 @@ const Messages = lazy(() => import("./pages/Messages"));
 const Sits = lazy(() => import("./pages/Sits"));
 const CreateSit = lazy(() => import("./pages/CreateSit"));
 const SitDetail = lazy(() => import("./pages/SitDetail"));
+const StylePreview = lazy(() => import("./pages/StylePreview"));
 const EditSit = lazy(() => import("./pages/EditSit"));
 const HouseGuide = lazy(() => import("./pages/HouseGuide"));
 const LeaveReview = lazy(() => import("./pages/LeaveReview"));
@@ -301,6 +302,7 @@ const AppRoutes = () => (
       <Route path="/admin/hero-weights" element={<AdminHeroWeights />} />
       <Route path="/test/error-boundary" element={<TestErrorBoundary />} />
       <Route path="/unsubscribe" element={<Unsubscribe />} />
+      <Route path="/preview/illustrations" element={<StylePreview />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   </Suspense>
