@@ -77,7 +77,7 @@ const SitHero = ({ photos, city, priority = false }: SitHeroProps) => {
         <div
           role="img"
           aria-label={`Aucune photo disponible pour cette garde à ${cityLabel}`}
-          className="w-full h-72 md:h-96 rounded-xl bg-muted/50 border border-dashed border-border flex flex-col items-center justify-center text-muted-foreground gap-2"
+          className="w-full h-64 md:h-80 rounded-xl bg-muted/50 border border-dashed border-border flex flex-col items-center justify-center text-muted-foreground gap-2"
         >
           <ImageOff className="h-10 w-10" aria-hidden="true" />
           <p className="text-sm font-medium">Aucune photo pour le moment</p>
@@ -114,7 +114,7 @@ const SitHero = ({ photos, city, priority = false }: SitHeroProps) => {
           aria-label={`Agrandir la photo ${photoIndex + 1} sur ${total}`}
         >
           {brokenIndices.has(photoIndex) ? (
-            <div className="w-full h-72 md:h-96 bg-muted flex flex-col items-center justify-center text-muted-foreground gap-2">
+            <div className="w-full h-64 md:h-80 bg-muted flex flex-col items-center justify-center text-muted-foreground gap-2">
               <ImageOff className="h-8 w-8" aria-hidden="true" />
               <p className="text-xs">Cette photo n'a pas pu être chargée</p>
             </div>
@@ -131,7 +131,7 @@ const SitHero = ({ photos, city, priority = false }: SitHeroProps) => {
                   return next;
                 })
               }
-              className="w-full h-72 md:h-96 object-cover transition-transform duration-500 group-hover:scale-[1.02]"
+              className="w-full h-64 md:h-80 object-cover transition-transform duration-500 group-hover:scale-[1.02]"
             />
           )}
           {/* Overlay icône agrandir */}
