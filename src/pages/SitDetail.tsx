@@ -457,20 +457,6 @@ const SitDetail = () => {
         </div>
       )}
 
-      {/* Share buttons — visible to the owner of a published listing so they can broadcast it */}
-      {isOwner && sit.status === "published" && (
-        <div className="mb-8">
-          <ShareButtons
-            sitId={sit.id}
-            title={sit.title || `Garde à ${owner?.city || "France"}`}
-            city={owner?.city}
-            startDate={sit.start_date}
-            endDate={sit.end_date}
-            source="owner_sit_detail"
-          />
-        </div>
-      )}
-
       {/* Historique des modifications de dates — visible au propriétaire */}
       {isOwner && <SitDateHistory sitId={sit.id} />}
 
