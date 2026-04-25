@@ -43,6 +43,7 @@ import CancelSitModal from "@/components/sits/CancelSitModal";
 import OwnerSitManagement from "@/components/sits/shared/OwnerSitManagement";
 
 import SitDetailHeader from "./SitDetailHeader";
+import SitFooterReassurance from "./SitFooterReassurance";
 import AnimalsTab from "./tabs/AnimalsTab";
 import HousingTab from "./tabs/HousingTab";
 import ExpectationsTab from "./tabs/ExpectationsTab";
