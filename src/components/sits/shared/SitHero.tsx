@@ -5,6 +5,7 @@
  * - Lightbox plein écran au clic, navigation clavier (←/→/Esc) et swipe.
  */
 import { useState, useEffect, useCallback } from "react";
+import { createPortal } from "react-dom";
 import { ChevronLeft, ChevronRight, X, Maximize2 } from "lucide-react";
 
 interface SitHeroProps {
