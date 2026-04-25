@@ -320,7 +320,7 @@ test.describe("Realtime — focus reste logique après mise à jour exogène", (
     // Focus initial sur un élément focusable de la vue owner (via locator
     // pour forcer le focus en headless via CDP).
     const initialTarget = pageA
-      .locator('main button:not([disabled]), main a[href], main [role="button"]:not([aria-disabled="true"])')
+      .locator('main h1 ~ * button:not([disabled]):visible, main h1 ~ * a[href]:visible')
       .first();
     expect(await initialTarget.count()).toBeGreaterThan(0);
     await pageA.bringToFront();
