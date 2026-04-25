@@ -12,7 +12,13 @@ export type EventType =
   | "signup_form_submitted"
   | "signup_completed"
   | "signup_failed"
+  | "signup_email_confirmed"      // Email cliqué + session active
   | "user_activated"
+  | "onboarding_started"          // Modale d'onboarding ouverte
+  | "onboarding_step_completed"   // Étape terminée (metadata.step: 0|1|2)
+  | "onboarding_completed"        // Profil 100% activé
+  | "onboarding_dismissed"        // Modale fermée avant la fin
+  | "first_action"                // Première vraie action (metadata.kind)
   | "cta_click"
   | "cta_proprio_clicked"
   | "cta_sitter_clicked"
@@ -89,6 +95,30 @@ export async function trackEventWithUserId(
       event_type: eventType,
       source: opts.source ?? null,
       metadata: opts.metadata ?? null,
+    });
+  } catch {
+    // silencieux
+  }
+}
+
+/**
+ * Émet `first_action` une seule fois par utilisateur (déduplication via localStorage).
+ * À appeler après une vraie 1ère action métier : création d'annonce, candidature,
+ * 1er message, création mission d'entraide, etc.
+ */
+export async function trackFirstAction(
+  kind: "sit_created" | "application_sent" | "message_sent" | "mission_created" | "long_stay_created",
+  extraMetadata: Record<string, any> = {}
+) {
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user?.id) return;
+    const flagKey = `first_action_tracked_${user.id}`;
+    if (typeof window !== "undefined" && localStorage.getItem(flagKey)) return;
+    if (typeof window !== "undefined") localStorage.setItem(flagKey, "1");
+    await trackEventWithUserId(user.id, "first_action", {
+      source: typeof window !== "undefined" ? window.location.pathname : null,
+      metadata: { kind, ...extraMetadata },
     });
   } catch {
     // silencieux
