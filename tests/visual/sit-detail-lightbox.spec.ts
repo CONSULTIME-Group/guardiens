@@ -155,6 +155,14 @@ test.describe("Lightbox carrousel — /sits/:id", () => {
       "La lightbox est rendue dans document.body via createPortal"
     ).toBe(true);
 
+    // ---------- 4bis. Scroll-lock : body.style.overflow === "hidden" ----------
+    currentPhase = "scroll-lock-on";
+    const overflowOpen = await page.evaluate(() => document.body.style.overflow);
+    expect(
+      overflowOpen,
+      "Pendant que la lightbox est ouverte, le scroll du body est bloqué"
+    ).toBe("hidden");
+
     // ---------- 5. Compteur dans la lightbox : "1 / N" ----------
     currentPhase = "lightbox-counter-initial";
     if (expectedTotal > 1) {
@@ -216,5 +224,13 @@ test.describe("Lightbox carrousel — /sits/:id", () => {
     currentPhase = "close-lightbox";
     await page.keyboard.press("Escape");
     await expect(lightbox).toBeHidden();
+
+    // ---------- 9. Scroll-lock restauré après fermeture ----------
+    currentPhase = "scroll-lock-restored";
+    const overflowClosed = await page.evaluate(() => document.body.style.overflow);
+    expect(
+      overflowClosed,
+      "Après fermeture, le style overflow inline du body est nettoyé"
+    ).toBe("");
   });
 });
