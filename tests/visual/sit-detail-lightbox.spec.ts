@@ -224,5 +224,13 @@ test.describe("Lightbox carrousel — /sits/:id", () => {
     currentPhase = "close-lightbox";
     await page.keyboard.press("Escape");
     await expect(lightbox).toBeHidden();
+
+    // ---------- 9. Scroll-lock restauré après fermeture ----------
+    currentPhase = "scroll-lock-restored";
+    const overflowClosed = await page.evaluate(() => document.body.style.overflow);
+    expect(
+      overflowClosed,
+      "Après fermeture, le style overflow inline du body est nettoyé"
+    ).toBe("");
   });
 });
