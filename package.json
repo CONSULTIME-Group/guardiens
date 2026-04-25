@@ -16,6 +16,8 @@
     "test:watch": "vitest",
     "test:e2e:badges": "playwright test tests/badges-long-labels.spec.ts",
     "test:e2e:badges:update": "playwright test tests/badges-long-labels.spec.ts --update-snapshots",
+    "test:e2e:sit-visual": "playwright test tests/visual/sit-detail.spec.ts",
+    "test:e2e:sit-visual:update": "playwright test tests/visual/sit-detail.spec.ts --update-snapshots",
     "validate:og": "node scripts/validate-og-tags.mjs",
     "validate:og:check": "node scripts/validate-og-tags.mjs --check",
     "validate:og:report": "node scripts/validate-og-tags.mjs --report-json --report-html"
