@@ -66,36 +66,20 @@ const AdminDiagnostics = () => {
     setLoading(true);
     setError(null);
     try {
-      // Requête identique à celle utilisée côté admin pour reproduire
-      // exactement ce que RLS retourne pour auth.uid().
-      const { data, error: err } = await supabase
-        .from("applications")
-        .select(
-          "id, status, created_at, sit_id, sitter_id, " +
-            "sit:sits!applications_sit_id_fkey(title, user_id, status), " +
-            "sitter:profiles!applications_sitter_id_fkey(first_name, last_name)"
-        )
-        .order("created_at", { ascending: false });
+      // RPC sécurisée : retourne uniquement les méta-données admin (pas le contenu des candidatures)
+      const { data, error: err } = await supabase.rpc("admin_get_applications_diagnostic");
 
       if (err) throw err;
 
-      // Charger en parallèle les profils des propriétaires (user_id du sit)
-      const ownerIds = Array.from(
-        new Set(((data as any[]) || []).map((r) => r.sit?.user_id).filter(Boolean))
-      ) as string[];
-
-      let ownersMap = new Map<string, { first_name: string | null; last_name: string | null }>();
-      if (ownerIds.length) {
-        const { data: owners } = await supabase
-          .from("profiles")
-          .select("id, first_name, last_name")
-          .in("id", ownerIds);
-        (owners || []).forEach((o: any) => ownersMap.set(o.id, o));
-      }
-
       const enriched: AppRow[] = ((data as any[]) || []).map((r) => ({
-        ...r,
-        owner: r.sit?.user_id ? ownersMap.get(r.sit.user_id) : null,
+        id: r.id,
+        status: r.status,
+        created_at: r.created_at,
+        sit_id: r.sit_id,
+        sitter_id: r.sitter_id,
+        sit: { title: r.sit_title, user_id: r.sit_user_id, status: r.sit_status },
+        sitter: { first_name: r.sitter_first_name, last_name: r.sitter_last_name },
+        owner: { first_name: r.owner_first_name, last_name: r.owner_last_name },
       }));
 
       setRows(enriched);

@@ -65,8 +65,15 @@ const AdminSitsManagement = () => {
       const sitIds = sits.map(s => s.id);
 
       if (sitIds.length) {
-        const { data } = await supabase.from("applications").select("sit_id, sitter:profiles!applications_sitter_id_fkey(first_name, last_name, avatar_url)").in("sit_id", sitIds).eq("status", "accepted");
-        data?.forEach((a: any) => { if (a.sitter) map[a.sit_id] = { name: `${a.sitter.first_name || ""} ${a.sitter.last_name || ""}`.trim(), avatar: a.sitter.avatar_url }; });
+        // RPC sécurisée : ne retourne que le gardien accepté (pas les candidatures non retenues)
+        const { data, error } = await supabase.rpc("admin_get_accepted_sitters", { p_sit_ids: sitIds });
+        if (error) console.error("admin_get_accepted_sitters:", error);
+        (data || []).forEach((a: any) => {
+          map[a.sit_id] = {
+            name: `${a.first_name || ""} ${a.last_name || ""}`.trim(),
+            avatar: a.avatar_url,
+          };
+        });
       }
       setSitters(map);
     };
@@ -131,14 +138,17 @@ const AdminSitsManagement = () => {
     setShowAllApps(false);
     setSheetAppsLoading(true);
 
-    const res = await supabase
-      .from("applications")
-      .select("id, status, created_at, sitter_id, sitter:profiles!applications_sitter_id_fkey(first_name, avatar_url)")
-      .eq("sit_id", sit.id)
-      .order("created_at", { ascending: false });
-    const data = res.data;
+    // RPC sécurisée : statut + date + gardien (id/prénom/avatar) sans message ni champs internes
+    const res = await supabase.rpc("admin_get_sit_applications", { p_sit_id: sit.id });
+    const data = (res.data || []).map((r: any) => ({
+      id: r.id,
+      status: r.status,
+      created_at: r.created_at,
+      sitter_id: r.sitter_id,
+      sitter: { first_name: r.sitter_first_name, avatar_url: r.sitter_avatar_url },
+    }));
 
-    setSheetApplications(data || []);
+    setSheetApplications(data);
     setSheetAppsLoading(false);
   };
 
