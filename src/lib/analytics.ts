@@ -102,8 +102,28 @@ export async function trackEventWithUserId(
 }
 
 /**
- * Normalise une erreur de signup Supabase vers un code stable pour le funnel.
+ * Émet `first_action` une seule fois par utilisateur (déduplication via localStorage).
+ * À appeler après une vraie 1ère action métier : création d'annonce, candidature,
+ * 1er message, création mission d'entraide, etc.
  */
+export async function trackFirstAction(
+  kind: "sit_created" | "application_sent" | "message_sent" | "mission_created" | "long_stay_created",
+  extraMetadata: Record<string, any> = {}
+) {
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user?.id) return;
+    const flagKey = `first_action_tracked_${user.id}`;
+    if (typeof window !== "undefined" && localStorage.getItem(flagKey)) return;
+    if (typeof window !== "undefined") localStorage.setItem(flagKey, "1");
+    await trackEventWithUserId(user.id, "first_action", {
+      source: typeof window !== "undefined" ? window.location.pathname : null,
+      metadata: { kind, ...extraMetadata },
+    });
+  } catch {
+    // silencieux
+  }
+}
 export function mapSignupError(message: string | undefined | null): string {
   const m = (message || "").toLowerCase();
   if (m.includes("already registered") || m.includes("already been registered") || m.includes("user already")) {
