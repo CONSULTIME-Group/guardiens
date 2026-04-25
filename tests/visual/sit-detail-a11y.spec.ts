@@ -638,16 +638,28 @@ test.describe("Accessibilité — /sits/:id", () => {
       // ---------- 3. Contraste WCAG AA des textes ----------
       // Calcule le ratio de contraste entre la couleur du texte et la couleur
       // de fond effective de chaque élément contenant du texte visible.
-      // Seuils WCAG AA :
-      //   - Texte normal      : ≥ 4.5:1
-      //   - Texte large       : ≥ 3.0:1  (≥ 18pt OU ≥ 14pt + bold)
+      //
+      // Seuils WCAG 2.1 AA — classification « large-scale text » :
+      //   La spec définit large-scale comme ≥ 18pt OU ≥ 14pt + bold.
+      //   Conversion CSS officielle (96 dpi) : 1pt = 96/72 px = 1.3333… px
+      //     → 18pt = 24px exactement
+      //     → 14pt ≈ 18.6667px
+      //   Bold : font-weight numérique ≥ 700 (les mots-clés `bold`/`bolder`
+      //   sont résolus correctement par `__wcagResolveFontWeight`).
+      //
+      //   - Texte normal : ratio ≥ 4.5:1
+      //   - Texte large  : ratio ≥ 3.0:1
+      //
       // Limites assumées :
       //   - On lit la couleur de fond du premier ancêtre opaque (approximation).
       //   - On ignore les images d'arrière-plan (background-image), donc tout
       //     texte posé sur une photo est exclu (impossible à mesurer fiablement).
       //   - Les éléments décoratifs / icônes / aria-hidden sont filtrés via
       //     `window.__shouldSkipContrast` (cf. tests/visual/contrast-skip-rules.ts).
+      //   - La classification large/normal utilise `window.__wcagClassifyTextSize`
+      //     (cf. tests/visual/wcag-text-size.ts).
       await page.addScriptTag({ content: CONTRAST_SKIP_SCRIPT });
+      await page.addScriptTag({ content: WCAG_TEXT_SIZE_SCRIPT });
       const contrastViolations = await page.evaluate(() => {
         const parseRgb = (s: string): [number, number, number, number] | null => {
           const m = s.match(/rgba?\(([^)]+)\)/);
