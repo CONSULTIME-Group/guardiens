@@ -199,7 +199,7 @@ const SitterSitView = ({
 
       {/* Tabbed content */}
       <Tabs defaultValue="animals" className="mt-2">
-        <TabsList className="w-full justify-start border-b border-border rounded-none bg-transparent h-auto p-0 gap-0 overflow-x-auto">
+        <TabsList aria-label="Sections de l'annonce" className="w-full justify-start border-b border-border rounded-none bg-transparent h-auto p-0 gap-0 overflow-x-auto">
           <TabsTrigger
             value="animals"
             className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-2.5 text-sm gap-1.5"
