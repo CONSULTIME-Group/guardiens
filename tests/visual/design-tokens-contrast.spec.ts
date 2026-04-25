@@ -29,6 +29,13 @@
 import { test, expect } from "../../playwright-fixture";
 import { spawn, type ChildProcess } from "node:child_process";
 import { CONTRAST_SKIP_SCRIPT, CONTRAST_SKIP_RULES } from "./contrast-skip-rules";
+import {
+  WCAG_TEXT_SIZE_SCRIPT,
+  classifyWcagTextSize,
+  resolveFontWeight,
+  PT_18_IN_PX,
+  PT_14_IN_PX,
+} from "./wcag-text-size";
 
 const PORT = 8767; // distinct des autres specs visuelles
 const BASE_URL = `http://localhost:${PORT}`;
