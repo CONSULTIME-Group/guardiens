@@ -395,46 +395,13 @@ const OwnerSitView = ({
             </Link>
           </div>
 
-          <div className="bg-card rounded-xl border border-border p-5">
-            <h3 className="text-sm font-medium text-foreground mb-1">
-              Spécifique à cette garde (optionnel)
-            </h3>
-            <p className="text-xs text-muted-foreground mb-3">
-              Ces informations s'appliquent uniquement à cette garde et complètent votre profil.
-            </p>
-            <div className="space-y-4">
-              <div>
-                <label className="text-sm font-medium text-foreground block mb-1">
-                  Précisions sur le logement
-                </label>
-                <textarea
-                  rows={3}
-                  className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                  placeholder="Ex : La chambre d'amis sera fermée, accès jardin uniquement le matin..."
-                  value={logementOverride}
-                  onChange={(e) => {
-                    setLogementOverride(e.target.value);
-                    saveOverride("logement_override", e.target.value);
-                  }}
-                />
-              </div>
-              <div>
-                <label className="text-sm font-medium text-foreground block mb-1">
-                  Précisions sur les animaux
-                </label>
-                <textarea
-                  rows={3}
-                  className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                  placeholder="Ex : Rex aura besoin d'une promenade supplémentaire le soir pendant cette période..."
-                  value={animauxOverride}
-                  onChange={(e) => {
-                    setAnimauxOverride(e.target.value);
-                    saveOverride("animaux_override", e.target.value);
-                  }}
-                />
-              </div>
-            </div>
-          </div>
+          <SitOverridesEditor
+            logementOverride={logementOverride}
+            setLogementOverride={setLogementOverride}
+            animauxOverride={animauxOverride}
+            setAnimauxOverride={setAnimauxOverride}
+            saveOverride={saveOverride}
+          />
 
           <HousingTab property={property} owner={owner} coords={coords} />
         </TabsContent>
