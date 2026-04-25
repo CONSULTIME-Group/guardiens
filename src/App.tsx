@@ -299,6 +299,7 @@ const AppRoutes = () => (
       <Route path="/test/badges-long-labels" element={<TestBadgesLongLabels />} />
       <Route path="/test/hero-gallery" element={<TestHeroGallery />} />
       <Route path="/test/hero-distribution" element={<TestHeroDistribution />} />
+      <Route path="/test/empty-state-bg" element={<TestEmptyStateBg />} />
       <Route path="/admin/hero-weights" element={<AdminHeroWeights />} />
       <Route path="/test/error-boundary" element={<TestErrorBoundary />} />
       <Route path="/unsubscribe" element={<Unsubscribe />} />
