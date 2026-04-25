@@ -253,12 +253,13 @@ const AdminErrors = () => {
           </SelectContent>
         </Select>
         <Select value={severityFilter} onValueChange={setSeverityFilter}>
-          <SelectTrigger className="w-[180px]"><SelectValue /></SelectTrigger>
+          <SelectTrigger className="w-[220px]"><SelectValue /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Toutes sévérités</SelectItem>
             <SelectItem value="error">Erreur</SelectItem>
             <SelectItem value="unhandled_rejection">Promise rejetée</SelectItem>
             <SelectItem value="warning">Avertissement</SelectItem>
+            <SelectItem value="ignored_third_party">Ignorée (script tiers)</SelectItem>
           </SelectContent>
         </Select>
         <div className="relative flex-1 min-w-[200px]">
