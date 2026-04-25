@@ -9,6 +9,7 @@ import { useAccessLevel } from "@/hooks/useAccessLevel";
 import { toast } from "@/hooks/use-toast";
 import { Send, Star, MapPin, Shield, ShieldCheck, CheckCircle2, Calendar } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { trackFirstAction } from "@/lib/analytics";
 
 import { TooltipProvider } from "@/components/ui/tooltip";
 
@@ -105,6 +106,7 @@ const ApplicationModal = ({
       toast({ title: "Erreur", description: "Impossible d'envoyer la candidature.", variant: "destructive" });
       return;
     }
+    try { await trackFirstAction("application_sent", { sit_id: sitId }); } catch {}
 
     // Vérifier si on doit fermer les candidatures (max atteint)
     if (sitCheck.max_applications) {
