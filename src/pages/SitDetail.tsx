@@ -343,6 +343,20 @@ const SitDetail = () => {
         />
       )}
 
+      {/* Share buttons — visible to the owner of a published listing so they can broadcast it */}
+      {isOwner && sit.status === "published" && (
+        <div className="mb-6">
+          <ShareButtons
+            sitId={sit.id}
+            title={sit.title || `Garde à ${owner?.city || "France"}`}
+            city={owner?.city}
+            startDate={sit.start_date}
+            endDate={sit.end_date}
+            source="owner_sit_detail"
+          />
+        </div>
+      )}
+
       {badges.length > 0 && (
         <div className="flex flex-wrap gap-2 mb-4">
           {badges.map(b => (
