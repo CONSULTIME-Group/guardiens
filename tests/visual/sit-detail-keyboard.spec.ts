@@ -447,10 +447,14 @@ test.describe("Navigation clavier — /sits/:id", () => {
         const tabsHandles = page.locator('[role="tab"]');
         const totalTabs = await tabsHandles.count();
         if (totalTabs >= 2) {
+          currentPhase = "panel-switch";
           // Sélection 1er onglet
           await tabsHandles.nth(0).focus();
           await tabsHandles.nth(0).press("Enter");
           await page.waitForTimeout(100);
+          currentFocusLog.push(
+            await snapshotFocusEntry(page, currentFocusLog.length + 1, "Enter (tab #0)", "phase=panel-switch")
+          );
 
           const firstActivePanel = await page.evaluate(() => {
             const tab = document.querySelector<HTMLElement>(
@@ -471,6 +475,9 @@ test.describe("Navigation clavier — /sits/:id", () => {
           await tabsHandles.nth(1).focus();
           await tabsHandles.nth(1).press("Enter");
           await page.waitForTimeout(150);
+          currentFocusLog.push(
+            await snapshotFocusEntry(page, currentFocusLog.length + 1, "Enter (tab #1)", "after=switch")
+          );
 
           const secondActivePanel = await page.evaluate(() => {
             const tab = document.querySelector<HTMLElement>(
