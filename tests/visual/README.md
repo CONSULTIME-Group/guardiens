@@ -55,3 +55,46 @@ Les baselines de référence sont stockées par Playwright à côté du fichier
 - Les tests dépendent d'un environnement Playwright Lovable (présence de
   `lovable-agent-playwright-config`). Pas conçus pour CI standard hors
   plateforme.
+
+---
+
+# Tests de régression visuelle — EmptyState halo
+
+`tests/visual/empty-state-halo.spec.ts` détecte tout retour de halo / bord
+crème autour des illustrations aquarelle (`.illustration-blend`).
+
+## Stratégie
+
+1. **Page de test isolée** — `/test/empty-states` (composant
+   `src/pages/TestEmptyStates.tsx`) rend les 7 illustrations dans 4
+   contextes : page (`--background`), carte (`--card`), modale
+   (`--popover`), section muted (`--muted`).
+
+2. **Diff pixel global** — `toHaveScreenshot()` en viewport mobile
+   (375×812), light + dark. Toute régression visuelle (halo, taille,
+   blend mode) fait échouer.
+
+3. **Échantillonnage de pixels ciblé** — Pour chaque `<img>`, on lit une
+   fine couronne autour du bord et on compare la couleur des pixels au
+   fond calculé du conteneur parent. Tolérance ΔE = 18 (RGB euclidien).
+   En cas d'échec, message explicite :
+   `[sleepingCat / card] ΔE=42.3 expected rgb(255,255,255) got rgb(250,249,246)`.
+
+## Lancer
+
+```bash
+# Le serveur dev doit tourner sur PLAYWRIGHT_BASE_URL (défaut http://localhost:8080)
+npx playwright test tests/visual/empty-state-halo.spec.ts
+
+# Mettre à jour les baselines après un changement délibéré du design
+npx playwright test tests/visual/empty-state-halo.spec.ts --update-snapshots
+```
+
+## Quand mettre à jour la baseline
+
+- Modification volontaire de `.illustration-blend` (mask stops, blend mode).
+- Remplacement d'une illustration `webp`.
+- Changement des tokens `--background`, `--card`, `--popover`, `--muted`.
+
+Sinon, un échec = vraie régression : le halo crème est revenu quelque part.
+

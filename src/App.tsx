@@ -84,6 +84,7 @@ const TestHeroGallery = lazy(() => import("./pages/TestHeroGallery"));
 const TestHeroDistribution = lazy(() => import("./pages/TestHeroDistribution"));
 const AdminHeroWeights = lazy(() => import("./pages/AdminHeroWeights"));
 const TestErrorBoundary = lazy(() => import("./pages/TestErrorBoundary"));
+const TestEmptyStates = lazy(() => import("./pages/TestEmptyStates"));
 const Unsubscribe = lazy(() => import("./pages/Unsubscribe"));
 const CityPage = lazy(() => import("./pages/CityPage"));
 const AdminCityPages = lazy(() => import("./pages/admin/AdminCityPages"));
@@ -300,6 +301,7 @@ const AppRoutes = () => (
       <Route path="/test/hero-distribution" element={<TestHeroDistribution />} />
       <Route path="/admin/hero-weights" element={<AdminHeroWeights />} />
       <Route path="/test/error-boundary" element={<TestErrorBoundary />} />
+      <Route path="/test/empty-states" element={<TestEmptyStates />} />
       <Route path="/unsubscribe" element={<Unsubscribe />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
