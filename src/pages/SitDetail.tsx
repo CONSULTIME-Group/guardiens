@@ -5,7 +5,7 @@ import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Calendar, MapPin, Star, ShieldCheck, Home, PawPrint, MessageSquare, CheckCircle2, XCircle, Send, Pencil, Heart, LockKeyhole, ExternalLink, ChevronDown, Plus, Minus } from "lucide-react";
+import { ArrowLeft, Calendar, MapPin, Star, ShieldCheck, Home, PawPrint, MessageSquare, CheckCircle2, Send, Pencil, ExternalLink, ChevronDown, Plus, Minus, ClipboardList } from "lucide-react";
 import { useSubscriptionAccess } from "@/hooks/useSubscriptionAccess";
 import { useAccessLevel } from "@/hooks/useAccessLevel";
 import AccessGateBanner from "@/components/access/AccessGateBanner";
@@ -27,6 +27,17 @@ import { hasMedication } from "@/lib/medication";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ShareButtons from "@/components/sits/ShareButtons";
 import SitDateHistory from "@/components/sits/SitDateHistory";
+import SitHero from "@/components/sits/shared/SitHero";
+import OwnerSitManagement from "@/components/sits/shared/OwnerSitManagement";
+import SitDetailSkeleton from "@/components/skeletons/SitDetailSkeleton";
+import {
+  ENV_LABELS as envLabels,
+  TYPE_LABELS as typeLabels,
+  SPECIES_EMOJI as speciesEmoji,
+  WALK_LABELS as walkLabels,
+  ALONE_LABELS as aloneLabels,
+  getSitStatusConfig,
+} from "@/components/sits/shared/sitConstants";
 import { trackEvent } from "@/lib/analytics";
 import { formatSitPeriod } from "@/lib/dateRange";
 import {
@@ -39,20 +50,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-
-const envLabels: Record<string, string> = {
-  city_center: "Centre-ville", suburban: "Périurbain", countryside: "Campagne",
-  mountain: "Montagne", seaside: "Bord de mer", forest: "Forêt",
-};
-const typeLabels: Record<string, string> = {
-  apartment: "Appartement", house: "Maison", farm: "Ferme", chalet: "Chalet", other: "Autre",
-};
-const speciesEmoji: Record<string, string> = {
-  dog: "🐕", cat: "🐈", horse: "🐴", bird: "🐦", rodent: "🐹",
-  fish: "🐠", reptile: "🦎", farm_animal: "🐄", nac: "🐾",
-};
-const walkLabels: Record<string, string> = { none: "Aucune balade", "30min": "30 min/jour", "1h": "1h/jour", "2h_plus": "2h+/jour" };
-const aloneLabels: Record<string, string> = { never: "Jamais seul", "2h": "2h max seul", "6h": "6h max seul", all_day: "Peut rester seul toute la journée" };
 
 interface SitData {
   id: string;
