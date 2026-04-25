@@ -2,7 +2,7 @@
 // un service de prerender actif (Prerender.io / Cloudflare Worker). À investiguer
 // séparément. Aujourd'hui : OG statiques génériques dans index.html uniquement.
 import { useState, useEffect, useRef } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -17,22 +17,14 @@ import { trackEvent } from "@/lib/analytics";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import ApplicationModal from "@/components/sits/ApplicationModal";
 import { useSubscriptionAccess } from "@/hooks/useSubscriptionAccess";
-
-const envLabels: Record<string, string> = {
-  city_center: "Centre-ville", suburban: "Périurbain", countryside: "Campagne",
-  mountain: "Montagne", seaside: "Bord de mer", forest: "Forêt",
-};
-const typeLabels: Record<string, string> = {
-  apartment: "Appartement", house: "Maison", farm: "Ferme", chalet: "Chalet", other: "Autre",
-};
-const speciesEmoji: Record<string, string> = {
-  dog: "🐕", cat: "🐈", horse: "🐴", bird: "🐦", rodent: "🐹",
-  fish: "🐠", reptile: "🦎", farm_animal: "🐄", nac: "🐾",
-};
-const speciesLabel: Record<string, string> = {
-  dog: "chien", cat: "chat", horse: "cheval", bird: "oiseau", rodent: "rongeur",
-  fish: "poisson", reptile: "reptile", farm_animal: "animal de ferme", nac: "NAC",
-};
+import SitHero from "@/components/sits/shared/SitHero";
+import OwnerSitManagement from "@/components/sits/shared/OwnerSitManagement";
+import {
+  ENV_LABELS as envLabels,
+  TYPE_LABELS as typeLabels,
+  SPECIES_EMOJI as speciesEmoji,
+  SPECIES_LABEL as speciesLabel,
+} from "@/components/sits/shared/sitConstants";
 
 type ViewerType = "anonymous" | "gardien" | "proprio" | "owner_of_sit" | "admin";
 
