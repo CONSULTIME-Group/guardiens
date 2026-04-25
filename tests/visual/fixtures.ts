@@ -237,6 +237,7 @@ export const SCENARIOS: Record<ScenarioId, Scenario> = {
       pets: basePets,
       reviews: baseReviews,
       applications: [],
+    },
   },
   /**
    * Scénario dédié aux tests de la lightbox / galerie hero.
@@ -280,7 +281,6 @@ export const SCENARIOS: Record<ScenarioId, Scenario> = {
       reviews: baseReviews,
       applications: [],
     },
-  },
   },
   "cancelled-sitter": {
     id: "cancelled-sitter",
