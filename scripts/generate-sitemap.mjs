@@ -44,9 +44,12 @@ function loadStaticRoutes() {
 
 const { siteUrl: SITE_URL, routes: STATIC_ROUTES } = loadStaticRoutes();
 
-// Routes à indexer dans le sitemap : on exclut les pages d'auth peu
-// pertinentes pour le SEO (connexion/inscription sont linkées partout).
-const SITEMAP_EXCLUDE = new Set(["/login"]);
+// Routes à exclure du sitemap : doit rester COHÉRENT avec robots.txt et la
+// balise <meta robots> dans le code de chaque page.
+//   - /login           : disallow (robots.txt) — pas dans sitemap
+//   - /recherche       : disallow + noindex (SearchPage.tsx) — pas dans sitemap
+// /inscription est volontairement INDEXABLE (page de conversion).
+const SITEMAP_EXCLUDE = new Set(["/login", "/recherche"]);
 const staticPages = STATIC_ROUTES.filter((r) => !SITEMAP_EXCLUDE.has(r.loc));
 
 const cityLandingPages = [
