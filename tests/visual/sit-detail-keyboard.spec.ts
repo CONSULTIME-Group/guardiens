@@ -155,6 +155,11 @@ test.describe("Navigation clavier — /sits/:id", () => {
       const scn = SCENARIOS[scenarioId];
       const url = `${BASE_URL}/sits/${scn.sitId}?scenario=${scenarioId}`;
 
+      // Réinit du log de focus partagé avec le afterEach pour capture à l'échec
+      currentFocusLog = [];
+      currentScenario = scenarioId;
+      currentPhase = "navigation-tab";
+
       await page.setViewportSize({ width: 1280, height: 900 });
       await page.goto(url, { waitUntil: "networkidle" });
 
