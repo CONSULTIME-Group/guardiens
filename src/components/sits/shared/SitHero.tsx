@@ -113,13 +113,27 @@ const SitHero = ({ photos, city, priority = false }: SitHeroProps) => {
           className="group relative w-full overflow-hidden rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
           aria-label={`Agrandir la photo ${photoIndex + 1} sur ${total}`}
         >
-          <img
-            src={photos[photoIndex]}
-            alt={altFor(photoIndex)}
-            loading={priority ? "eager" : "lazy"}
-            decoding="async"
-            className="w-full h-72 md:h-96 object-cover transition-transform duration-500 group-hover:scale-[1.02]"
-          />
+          {brokenIndices.has(photoIndex) ? (
+            <div className="w-full h-72 md:h-96 bg-muted flex flex-col items-center justify-center text-muted-foreground gap-2">
+              <ImageOff className="h-8 w-8" aria-hidden="true" />
+              <p className="text-xs">Cette photo n'a pas pu être chargée</p>
+            </div>
+          ) : (
+            <img
+              src={safePhotos[photoIndex]}
+              alt={altFor(photoIndex)}
+              loading={priority ? "eager" : "lazy"}
+              decoding="async"
+              onError={() =>
+                setBrokenIndices((prev) => {
+                  const next = new Set(prev);
+                  next.add(photoIndex);
+                  return next;
+                })
+              }
+              className="w-full h-72 md:h-96 object-cover transition-transform duration-500 group-hover:scale-[1.02]"
+            />
+          )}
           {/* Overlay icône agrandir */}
           <div className="absolute top-3 right-3 bg-background/80 backdrop-blur-sm rounded-full p-2 opacity-0 group-hover:opacity-100 transition-opacity shadow-md">
             <Maximize2 className="h-4 w-4 text-foreground" aria-hidden="true" />
