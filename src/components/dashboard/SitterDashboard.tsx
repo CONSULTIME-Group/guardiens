@@ -152,7 +152,7 @@ const SitterDashboard = () => {
                 </div>
               ))}
             </AccordionContent>
-          </Accordion>
+          </AccordionItem>
         </Accordion>
       )}
     </section>
