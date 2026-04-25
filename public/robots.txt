@@ -1,3 +1,6 @@
+# AUTO-GÉNÉRÉ par scripts/generate-robots.mjs — NE PAS ÉDITER À LA MAIN.
+# Source de vérité : src/data/siteRoutes.ts (privateDisallowPaths + index:false).
+
 User-agent: *
 Allow: /
 
@@ -10,7 +13,6 @@ Disallow: /notifications
 Disallow: /sits
 Disallow: /annonces/
 Disallow: /search
-Disallow: /recherche
 Disallow: /recherche-gardiens
 Disallow: /review/
 Disallow: /house-guide/
@@ -21,11 +23,14 @@ Disallow: /mes-avis
 Disallow: /settings
 Disallow: /forgot-password
 Disallow: /reset-password
-Disallow: /login
-# /inscription : page publique indexable (conversion clé)
 Disallow: /unsubscribe
 Disallow: /test-accord
 Disallow: /auth/
+
+# Routes publiques marquées index:false dans staticRoutes
+# (outils internes / pages d'auth — cohérent avec <meta robots> + sitemap)
+Disallow: /recherche
+Disallow: /login
 
 # Profils publics : /gardiens/:id reste indexable.
 # Le sitemap filtre déjà les profils non-publics (politique : seuls sitter/both publics).
@@ -34,4 +39,3 @@ Disallow: /auth/
 Crawl-delay: 1
 
 Sitemap: https://guardiens.fr/sitemap.xml
-
