@@ -61,19 +61,39 @@ const PaintedIllustration = ({
   const imgClass =
     "absolute inset-0 w-full h-full object-contain mix-blend-darken dark:mix-blend-normal dark:[filter:invert(1)_hue-rotate(180deg)_brightness(0.9)_saturate(0.85)] dark:opacity-90";
 
-  // Overlay radial : fond les bords vers --background.
-  // - Light : transition douce et tardive (le contraste est minime).
-  // - Dark  : transition plus précoce et plus opaque pour absorber les pixels
-  //           résiduels qui ne sont pas parfaitement noirs après inversion.
+  // Overlay radial — courbe finement étalonnée pour rester invisible quel
+  // que soit le fond (crème de page, blanc pur d'une modale, gris-bleu d'une
+  // carte). Trois paliers calés sur 55 % / 75 % / 100 % du rayon :
+  //   - 0 → 55 %   : 100 % transparent → l'illustration est nette
+  //   - 55 → 75 %  : montée très progressive (alpha 0 → 0.35) → aucune bande
+  //                   visible, le crème de l'image se dilue dans le fond
+  //   - 75 → 100 % : convergence finale vers la couleur exacte du contexte
+  // En dark, on resserre les paliers (45/65/95) car le contraste image/fond
+  // est plus violent et nécessite une absorption plus précoce et plus opaque.
   const fadeOverlayStyle: React.CSSProperties = {
-    background:
-      "radial-gradient(ellipse at center, transparent var(--es-fade-start, 50%), hsl(var(--background) / var(--es-fade-mid-alpha, 0.55)) var(--es-fade-mid, 68%), hsl(var(--background)) var(--es-fade-end, 88%))",
+    background: [
+      "radial-gradient(ellipse at center,",
+      "  transparent var(--es-fade-start, 55%),",
+      "  hsl(var(--background) / var(--es-fade-soft-alpha, 0.18)) var(--es-fade-soft, 65%),",
+      "  hsl(var(--background) / var(--es-fade-mid-alpha, 0.55)) var(--es-fade-mid, 75%),",
+      "  hsl(var(--background) / var(--es-fade-near-alpha, 0.88)) var(--es-fade-near, 90%),",
+      "  hsl(var(--background)) var(--es-fade-end, 100%)",
+      ")",
+    ].join(" "),
   };
 
   const renderFade = () => (
     <div
       aria-hidden="true"
-      className="absolute inset-0 pointer-events-none dark:[--es-fade-start:38%] dark:[--es-fade-mid-alpha:0.7] dark:[--es-fade-mid:58%] dark:[--es-fade-end:82%]"
+      className={[
+        "absolute inset-0 pointer-events-none",
+        // Dark mode : paliers resserrés pour absorber le contraste plus fort.
+        "dark:[--es-fade-start:45%]",
+        "dark:[--es-fade-soft:55%] dark:[--es-fade-soft-alpha:0.3]",
+        "dark:[--es-fade-mid:65%] dark:[--es-fade-mid-alpha:0.65]",
+        "dark:[--es-fade-near:80%] dark:[--es-fade-near-alpha:0.92]",
+        "dark:[--es-fade-end:95%]",
+      ].join(" ")}
       style={fadeOverlayStyle}
     />
   );
