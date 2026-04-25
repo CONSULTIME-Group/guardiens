@@ -54,9 +54,9 @@ const SitterBadgesSection = ({ groupedBadges, condensed = false }: SitterBadgesS
         aria-expanded={open}
         aria-controls="sitter-badges-content"
         aria-label={`${actionText}. ${summaryText}.`}
-        className="w-full flex items-center justify-between gap-3 rounded-xl border border-border/60 bg-card/50 px-4 py-3 hover:bg-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring transition-colors"
+        className="w-full flex items-center justify-between gap-2 sm:gap-3 rounded-xl border border-border/60 bg-card/50 px-3 sm:px-4 py-2.5 sm:py-3 hover:bg-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring transition-colors"
       >
-        <span className="flex items-center gap-3 min-w-0 flex-1">
+        <span className="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
           <span
             className={`flex h-8 w-8 items-center justify-center rounded-full shrink-0 ${
               hasActive ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"
@@ -66,13 +66,13 @@ const SitterBadgesSection = ({ groupedBadges, condensed = false }: SitterBadgesS
             <Award className="h-4 w-4" />
           </span>
           <span className="flex flex-col items-start min-w-0 flex-1">
-            <span className="flex items-baseline gap-2">
-              <span aria-hidden="true" className="text-sm font-semibold text-foreground">
+            <span className="flex items-center gap-1.5 sm:gap-2 min-w-0 w-full">
+              <span aria-hidden="true" className="text-sm font-semibold text-foreground truncate">
                 Mes badges
               </span>
               <span
                 aria-hidden="true"
-                className={`text-xs font-medium tabular-nums px-1.5 py-0.5 rounded ${
+                className={`text-[11px] sm:text-xs font-medium tabular-nums px-1.5 py-0.5 rounded shrink-0 ${
                   hasActive ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"
                 }`}
               >
