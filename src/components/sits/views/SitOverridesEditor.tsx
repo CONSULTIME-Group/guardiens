@@ -30,9 +30,9 @@ const SitOverridesEditor = ({
 
   return (
     <div className="bg-card rounded-xl border border-border p-5">
-      <h3 className="text-sm font-medium text-foreground mb-1">
+      <h2 className="text-sm font-medium text-foreground mb-1">
         Spécifique à cette garde (optionnel)
-      </h3>
+      </h2>
       <p className="text-xs text-muted-foreground mb-3">
         Ces informations s'appliquent uniquement à cette garde et complètent votre
         profil.
