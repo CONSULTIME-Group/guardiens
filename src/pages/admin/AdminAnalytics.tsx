@@ -492,7 +492,10 @@ const AdminAnalytics = () => {
           {/* Top pages */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">Pages les plus vues</CardTitle>
+              <CardTitle className="text-base">Top sources de pages vues</CardTitle>
+              <p className="text-xs text-muted-foreground mt-1">
+                Chemins normalisés (UUID/slug regroupés sous <code className="text-foreground/70">:id</code> / <code className="text-foreground/70">:slug</code>)
+              </p>
             </CardHeader>
             <CardContent>
               {topPages.length === 0 ? (
@@ -500,13 +503,35 @@ const AdminAnalytics = () => {
                   Aucune vue enregistrée sur la période.
                 </p>
               ) : (
-                <div className="space-y-2">
-                  {topPages.map((p) => (
-                    <div key={p.path} className="flex items-center justify-between text-sm py-1.5 border-b border-border last:border-0">
-                      <span className="truncate text-foreground/80 mr-2">{p.path || "/"}</span>
-                      <span className="font-medium tabular-nums">{p.views}</span>
-                    </div>
-                  ))}
+                <div style={{ height: Math.max(240, topPages.length * 32) }}>
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart
+                      data={topPages}
+                      layout="vertical"
+                      margin={{ top: 4, right: 24, left: 8, bottom: 4 }}
+                    >
+                      <CartesianGrid strokeDasharray="3 3" className="stroke-border" horizontal={false} />
+                      <XAxis type="number" className="text-xs" allowDecimals={false} />
+                      <YAxis
+                        type="category"
+                        dataKey="path"
+                        width={220}
+                        tick={{ fontSize: 11 }}
+                        interval={0}
+                      />
+                      <Tooltip
+                        cursor={{ fill: "hsl(var(--muted) / 0.5)" }}
+                        contentStyle={{
+                          background: "hsl(var(--card))",
+                          border: "1px solid hsl(var(--border))",
+                          borderRadius: 8,
+                          fontSize: 12,
+                        }}
+                        formatter={(value: number) => [`${value} vues`, "Pages vues"]}
+                      />
+                      <Bar dataKey="views" fill="hsl(var(--primary))" radius={[0, 4, 4, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
                 </div>
               )}
             </CardContent>
