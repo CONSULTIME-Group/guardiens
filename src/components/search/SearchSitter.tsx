@@ -825,6 +825,11 @@ const SearchSitter = () => {
               Cette garde a déjà trouvé son gardien.
             </p>
           )}
+          {isCompleted && (
+            <p className="text-xs text-muted-foreground italic mt-3">
+              Garde déjà réalisée — pour donner un aperçu de l'activité.
+            </p>
+          )}
           {showCTA && (
             <Link
               to="/mon-abonnement"
