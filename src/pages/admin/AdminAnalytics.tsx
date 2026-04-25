@@ -71,7 +71,6 @@ function normalizeSource(raw: string | null | undefined): string | null {
     [/^\/villes?\/.+$/, "/villes/:slug"],
     [/^\/departements?\/.+$/, "/departements/:slug"],
     [/^\/avis\/.+$/, "/avis/:id"],
-    [/^\/admin\/[^/]+\/.+$/, (() => "")[0] as never], // placeholder, géré ci-dessous
   ];
   for (const [re, repl] of dynamicPatterns) {
     if (typeof repl === "string" && re.test(p)) return repl;
