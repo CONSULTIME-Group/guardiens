@@ -105,7 +105,7 @@ const SitterBadgesSection = ({ groupedBadges, condensed = false }: SitterBadgesS
             </span>
             <span
               aria-hidden="true"
-              className="mt-1.5 h-1 w-full max-w-[140px] rounded-full bg-muted overflow-hidden"
+              className="mt-1.5 h-1 w-[120px] sm:w-[140px] shrink-0 rounded-full bg-muted overflow-hidden"
             >
               <span
                 className={`block h-full transition-all duration-300 ${
