@@ -236,12 +236,12 @@ const PublicSitDetail = () => {
 
 
 
-      {/* Hero photo */}
-      {photos.length > 0 && (
-        <img src={photos[0]} alt={`Logement à ${cityForTitle} — annonce de garde Guardiens`} className="w-full h-64 md:h-80 object-cover" loading="eager" />
-      )}
+      {/* Hero photos — composant partagé avec /sits/:id, lightbox plein écran */}
+      <div className="px-4 md:px-10 pt-4 md:pt-6">
+        <SitHero photos={photos} city={owner?.city} priority />
+      </div>
 
-      <div className="p-6 md:p-10">
+      <div className="px-6 md:px-10 pb-6 md:pb-10">
         {/* Title */}
         <h1 className="font-heading text-2xl md:text-3xl font-bold mb-2">
           {sit.title || `Garde à ${owner?.city || "..."}`}
