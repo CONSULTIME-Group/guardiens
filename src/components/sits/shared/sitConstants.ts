@@ -73,7 +73,7 @@ export const SIT_STATUS_CONFIG: Record<string, SitStatusConfig> = {
   confirmed: { label: "Confirmée", className: "bg-primary/15 text-primary" },
   in_progress: { label: "En cours", className: "bg-accent text-accent-foreground" },
   completed: { label: "Terminée", className: "bg-muted text-foreground" },
-  cancelled: { label: "Annulée", className: "bg-destructive/10 text-destructive" },
+  cancelled: { label: "Annulée", className: "bg-destructive/10 text-destructive-text" },
   expired: { label: "Expirée", className: "bg-muted text-foreground" },
 };
 
