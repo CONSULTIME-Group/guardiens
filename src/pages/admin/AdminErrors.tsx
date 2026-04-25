@@ -357,6 +357,31 @@ const AdminErrors = () => {
               </DialogHeader>
 
               <div className="space-y-4 mt-2">
+                {(() => {
+                  const tp = getThirdPartyInfo(selected.context);
+                  if (!tp) return null;
+                  return (
+                    <div className="rounded-lg border border-amber-500/40 bg-amber-500/10 p-4 flex gap-3">
+                      <ShieldAlert className="h-5 w-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+                      <div className="space-y-1.5 text-sm">
+                        <p className="font-semibold text-amber-800 dark:text-amber-200 flex items-center gap-2 flex-wrap">
+                          Erreur ignorée automatiquement
+                          <Badge variant="outline" className="border-amber-500/50 text-amber-700 dark:text-amber-300 font-normal">
+                            {tp.label}
+                          </Badge>
+                        </p>
+                        <p className="text-amber-900/80 dark:text-amber-100/80 leading-relaxed">
+                          {tp.explanation}
+                        </p>
+                        <p className="text-xs text-amber-900/70 dark:text-amber-100/70 flex items-center gap-1 pt-1">
+                          <Info className="h-3 w-3" />
+                          Conservée à titre informatif (1 entrée max par heure et par empreinte). Aucune action requise.
+                        </p>
+                      </div>
+                    </div>
+                  );
+                })()}
+
                 <div>
                   <p className="text-xs uppercase text-muted-foreground mb-1">Message</p>
                   <p className="text-sm font-mono bg-muted p-3 rounded">{selected.message}</p>
