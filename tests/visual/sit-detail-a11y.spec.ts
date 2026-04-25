@@ -87,6 +87,224 @@ test.describe("Accessibilité — /sits/:id", () => {
         { timeout: 15_000 }
       );
 
+      // ---------- Helper de description d'élément (côté browser) ----------
+      // Injecté une fois pour produire un descripteur riche et stable
+      // permettant d'identifier précisément l'élément fautif :
+      //  - selector  : sélecteur CSS unique (ID si présent, sinon chemin nth-of-type)
+      //  - domPath   : chaîne lisible "main > section.card > button.btn-primary"
+      //  - location  : { x, y, width, height } en pixels viewport
+      //  - aria      : tous les attributs aria-* + role + tabindex
+      //  - dataAttrs : data-testid, data-* significatifs
+      //  - parentTag : tag + classes du parent direct (utile pour Tabs/Cards)
+      //  - text      : 60 premiers caractères de textContent
+      //  - tag       : nom du tag
+      await page.addInitScript(() => {
+        // @ts-ignore
+        window.__describeEl = (el: Element | null) => {
+          if (!el) return { tag: "null", selector: "null" };
+
+          const buildSelector = (node: Element): string => {
+            if (node.id) return `#${node.id}`;
+            const parts: string[] = [];
+            let cur: Element | null = node;
+            let depth = 0;
+            while (cur && cur.tagName !== "HTML" && depth < 6) {
+              let part = cur.tagName.toLowerCase();
+              if (cur.id) {
+                parts.unshift(`${part}#${cur.id}`);
+                break;
+              }
+              const cls = (cur.className && typeof cur.className === "string"
+                ? cur.className.split(/\s+/).filter(Boolean).slice(0, 2)
+                : []
+              ).map((c) => `.${CSS.escape(c)}`).join("");
+              part += cls;
+              // nth-of-type pour désambiguïser
+              if (cur.parentElement) {
+                const siblings = Array.from(cur.parentElement.children).filter(
+                  (s) => s.tagName === cur!.tagName
+                );
+                if (siblings.length > 1) {
+                  part += `:nth-of-type(${siblings.indexOf(cur) + 1})`;
+                }
+              }
+              parts.unshift(part);
+              cur = cur.parentElement;
+              depth++;
+            }
+            return parts.join(" > ");
+          };
+
+          const buildDomPath = (node: Element): string => {
+            const parts: string[] = [];
+            let cur: Element | null = node;
+            let depth = 0;
+            while (cur && cur.tagName !== "BODY" && depth < 6) {
+              let part = cur.tagName.toLowerCase();
+              const id = cur.id ? `#${cur.id}` : "";
+              const cls =
+                cur.className && typeof cur.className === "string"
+                  ? "." + cur.className.split(/\s+/).filter(Boolean).slice(0, 1).join(".")
+                  : "";
+              parts.unshift(`${part}${id}${cls}`);
+              cur = cur.parentElement;
+              depth++;
+            }
+            return parts.join(" > ");
+          };
+
+          const aria: Record<string, string> = {};
+          for (const attr of Array.from(el.attributes)) {
+            if (
+              attr.name.startsWith("aria-") ||
+              attr.name === "role" ||
+              attr.name === "tabindex"
+            ) {
+              aria[attr.name] = attr.value;
+            }
+          }
+          const dataAttrs: Record<string, string> = {};
+          for (const attr of Array.from(el.attributes)) {
+            if (attr.name.startsWith("data-") && attr.name !== "data-state") {
+              dataAttrs[attr.name] = attr.value;
+            }
+            if (attr.name === "data-testid") dataAttrs[attr.name] = attr.value;
+          }
+
+          const rect = (el as HTMLElement).getBoundingClientRect();
+          const parent = el.parentElement;
+          const parentTag = parent
+            ? `${parent.tagName.toLowerCase()}${
+                parent.className && typeof parent.className === "string"
+                  ? "." + parent.className.split(/\s+/).filter(Boolean).slice(0, 1).join(".")
+                  : ""
+              }`
+            : null;
+
+          return {
+            tag: el.tagName.toLowerCase(),
+            selector: buildSelector(el),
+            domPath: buildDomPath(el),
+            location: {
+              x: Math.round(rect.left),
+              y: Math.round(rect.top),
+              width: Math.round(rect.width),
+              height: Math.round(rect.height),
+            },
+            aria: Object.keys(aria).length ? aria : undefined,
+            dataAttrs: Object.keys(dataAttrs).length ? dataAttrs : undefined,
+            parentTag,
+            text: (el.textContent || "").trim().slice(0, 60),
+          };
+        };
+      });
+      // Re-trigger : addInitScript ne s'applique qu'aux navigations suivantes,
+      // donc on injecte aussi via evaluate pour la page courante.
+      await page.evaluate(() => {
+        // @ts-ignore — réinjecte le même helper si pas déjà défini
+        if (!(window as any).__describeEl) {
+          (window as any).__describeEl = (el: Element | null) => {
+            if (!el) return { tag: "null", selector: "null" };
+            const buildSelector = (node: Element): string => {
+              if (node.id) return `#${node.id}`;
+              const parts: string[] = [];
+              let cur: Element | null = node;
+              let depth = 0;
+              while (cur && cur.tagName !== "HTML" && depth < 6) {
+                let part = cur.tagName.toLowerCase();
+                if (cur.id) {
+                  parts.unshift(`${part}#${cur.id}`);
+                  break;
+                }
+                const cls = (cur.className && typeof cur.className === "string"
+                  ? cur.className.split(/\s+/).filter(Boolean).slice(0, 2)
+                  : []
+                )
+                  .map((c) => `.${CSS.escape(c)}`)
+                  .join("");
+                part += cls;
+                if (cur.parentElement) {
+                  const siblings = Array.from(cur.parentElement.children).filter(
+                    (s) => s.tagName === cur!.tagName
+                  );
+                  if (siblings.length > 1) {
+                    part += `:nth-of-type(${siblings.indexOf(cur) + 1})`;
+                  }
+                }
+                parts.unshift(part);
+                cur = cur.parentElement;
+                depth++;
+              }
+              return parts.join(" > ");
+            };
+            const buildDomPath = (node: Element): string => {
+              const parts: string[] = [];
+              let cur: Element | null = node;
+              let depth = 0;
+              while (cur && cur.tagName !== "BODY" && depth < 6) {
+                let part = cur.tagName.toLowerCase();
+                const id = cur.id ? `#${cur.id}` : "";
+                const cls =
+                  cur.className && typeof cur.className === "string"
+                    ? "." +
+                      cur.className.split(/\s+/).filter(Boolean).slice(0, 1).join(".")
+                    : "";
+                parts.unshift(`${part}${id}${cls}`);
+                cur = cur.parentElement;
+                depth++;
+              }
+              return parts.join(" > ");
+            };
+            const aria: Record<string, string> = {};
+            const dataAttrs: Record<string, string> = {};
+            for (const attr of Array.from(el.attributes)) {
+              if (
+                attr.name.startsWith("aria-") ||
+                attr.name === "role" ||
+                attr.name === "tabindex"
+              ) {
+                aria[attr.name] = attr.value;
+              }
+              if (attr.name.startsWith("data-") && attr.name !== "data-state") {
+                dataAttrs[attr.name] = attr.value;
+              }
+            }
+            const rect = (el as HTMLElement).getBoundingClientRect();
+            const parent = el.parentElement;
+            return {
+              tag: el.tagName.toLowerCase(),
+              selector: buildSelector(el),
+              domPath: buildDomPath(el),
+              location: {
+                x: Math.round(rect.left),
+                y: Math.round(rect.top),
+                width: Math.round(rect.width),
+                height: Math.round(rect.height),
+              },
+              aria: Object.keys(aria).length ? aria : undefined,
+              dataAttrs: Object.keys(dataAttrs).length ? dataAttrs : undefined,
+              parentTag: parent
+                ? `${parent.tagName.toLowerCase()}${
+                    parent.className && typeof parent.className === "string"
+                      ? "." +
+                        parent.className.split(/\s+/).filter(Boolean).slice(0, 1).join(".")
+                      : ""
+                  }`
+                : null,
+              text: (el.textContent || "").trim().slice(0, 60),
+            };
+          };
+        }
+      });
+
+      // Helper côté Node : formate joliment les violations pour le message d'erreur.
+      const fmt = (header: string, items: unknown[]): string => {
+        if (!items || items.length === 0) return "";
+        return `\n\n=== ${header} (${items.length}) ===\n${items
+          .map((it, i) => `\n[#${i + 1}] ${JSON.stringify(it, null, 2)}`)
+          .join("\n")}\n`;
+      };
+
       // ---------- 1. Focusables piégés sous aria-hidden ----------
       // Règle WCAG : un élément focusable ne doit PAS se retrouver sous un
       // ancêtre aria-hidden="true" (le screen reader le masque mais le clavier
@@ -124,15 +342,13 @@ test.describe("Accessibilité — /sits/:id", () => {
           return false;
         };
 
-        const offending: { tag: string; text: string }[] = [];
+        const offending: any[] = [];
         document.querySelectorAll(selector).forEach((el) => {
           if (el.classList.contains("sr-only")) return;
           if (!isInTabOrder(el)) return;
           if (hasAriaHiddenAncestor(el)) {
-            offending.push({
-              tag: el.tagName.toLowerCase(),
-              text: (el.textContent || "").trim().slice(0, 60),
-            });
+            // @ts-ignore
+            offending.push((window as any).__describeEl(el));
           }
         });
         return offending;
@@ -140,7 +356,10 @@ test.describe("Accessibilité — /sits/:id", () => {
 
       expect(
         ariaHiddenFocusables,
-        `Focusables clavier sous aria-hidden détectés:\n${JSON.stringify(ariaHiddenFocusables, null, 2)}`
+        `Focusables clavier sous aria-hidden détectés.${fmt(
+          "Focusables piégés sous aria-hidden",
+          ariaHiddenFocusables
+        )}`
       ).toEqual([]);
 
       // ---------- 2. Hiérarchie des titres et landmarks ----------
@@ -225,11 +444,15 @@ test.describe("Accessibilité — /sits/:id", () => {
               (n) =>
                 !n.getAttribute("aria-label") && !n.getAttribute("aria-labelledby")
             )
-            .map((n, i) => `nav#${i} (${(n.textContent || "").trim().slice(0, 40)})`);
+            // @ts-ignore
+            .map((n) => (window as any).__describeEl(n));
         });
         expect(
           unlabeledNavs,
-          `Avec ${navCount} <nav>, chacun doit être labellisé (aria-label ou aria-labelledby). Non labellisés:\n${JSON.stringify(unlabeledNavs, null, 2)}`
+          `Avec ${navCount} <nav>, chacun doit être labellisé (aria-label ou aria-labelledby).${fmt(
+            "Landmarks <nav> non labellisés",
+            unlabeledNavs
+          )}`
         ).toEqual([]);
       }
 
@@ -367,13 +590,7 @@ test.describe("Accessibilité — /sits/:id", () => {
           return "";
         };
 
-        type Offender = {
-          tag: string;
-          role: string | null;
-          html: string;
-          classes: string;
-        };
-        const offenders: Offender[] = [];
+        const offenders: any[] = [];
 
         // Sélectionne tous les contrôles interactifs
         const selector = [
@@ -394,11 +611,13 @@ test.describe("Accessibilité — /sits/:id", () => {
 
           const name = computeAccessibleName(el);
           if (!name) {
+            // @ts-ignore
+            const desc = (window as any).__describeEl(el);
             offenders.push({
-              tag: el.tagName.toLowerCase(),
-              role: el.getAttribute("role"),
-              html: (el as HTMLElement).outerHTML.slice(0, 180),
-              classes: ((el as HTMLElement).className || "").toString().slice(0, 80),
+              ...desc,
+              htmlSnippet: (el as HTMLElement).outerHTML.slice(0, 180),
+              hint:
+                "Ajoutez un aria-label, un texte enfant visible, ou un title.",
             });
           }
         });
@@ -408,7 +627,10 @@ test.describe("Accessibilité — /sits/:id", () => {
 
       expect(
         namelessControls,
-        `Boutons/liens sans nom accessible (${namelessControls.length}):\n${JSON.stringify(namelessControls, null, 2)}`
+        `Boutons/liens sans nom accessible.${fmt(
+          "Contrôles sans nom accessible",
+          namelessControls
+        )}`
       ).toEqual([]);
 
       // ---------- 3. Contraste WCAG AA des textes ----------
@@ -560,15 +782,20 @@ test.describe("Accessibilité — /sits/:id", () => {
           const required = isLargeText(style) ? 3.0 : 4.5;
 
           if (ratio < required) {
+            // @ts-ignore
+            const desc = (window as any).__describeEl(el);
             violations.push({
-              tag,
+              ...desc,
               text: text.slice(0, 60),
-              fg: `rgb(${fgComposed.join(",")})`,
-              bg: `rgb(${bg.join(",")})`,
-              ratio: Math.round(ratio * 100) / 100,
-              required,
-              fontSize: style.fontSize,
-              fontWeight: style.fontWeight,
+              contrast: {
+                fg: `rgb(${fgComposed.join(",")})`,
+                bg: `rgb(${bg.join(",")})`,
+                ratio: Math.round(ratio * 100) / 100,
+                required,
+                fontSize: style.fontSize,
+                fontWeight: style.fontWeight,
+                deficit: Math.round((required - ratio) * 100) / 100,
+              },
             });
           }
           seen.add(el);
@@ -579,7 +806,10 @@ test.describe("Accessibilité — /sits/:id", () => {
 
       expect(
         contrastViolations,
-        `Violations contraste WCAG AA (${contrastViolations.length}):\n${JSON.stringify(contrastViolations.slice(0, 20), null, 2)}`
+        `Violations contraste WCAG AA.${fmt(
+          "Violations contraste (limité aux 20 premières)",
+          contrastViolations.slice(0, 20)
+        )}`
       ).toEqual([]);
     });
   }
