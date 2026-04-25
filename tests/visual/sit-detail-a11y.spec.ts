@@ -75,6 +75,13 @@ test.afterAll(async () => {
   }
 });
 
+test.afterEach(async ({ page }, testInfo) => {
+  await captureFailureArtifacts(page, testInfo, {
+    scenarioId: currentScenario,
+    focusLog: currentFocusLog,
+  });
+});
+
 const scenarioIds: ScenarioId[] = [
   "draft-owner",
   "published-owner",
