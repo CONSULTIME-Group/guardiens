@@ -12,8 +12,8 @@
  * - Bloc "Gérer cette garde" (OwnerSitManagement) + modal d'annulation
  */
 import { useState, useEffect, useCallback, useRef } from "react";
+import { Calendar, MapPin, Send, Star, PawPrint, Home, ClipboardList } from "lucide-react";
 import { Link } from "react-router-dom";
-import { Calendar, MapPin, Send, Plus, Minus, Star, PawPrint, Home, ClipboardList } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -26,12 +26,9 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { format } from "date-fns";
-import { fr } from "date-fns/locale";
 
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { trackEvent } from "@/lib/analytics";
 import { formatSitPeriod } from "@/lib/dateRange";
 
 import EmergencyAlertBanner from "@/components/sits/EmergencyAlertBanner";
@@ -44,6 +41,9 @@ import OwnerSitManagement from "@/components/sits/shared/OwnerSitManagement";
 
 import SitDetailHeader from "./SitDetailHeader";
 import SitFooterReassurance from "./SitFooterReassurance";
+import ReopenApplicationsCard from "./ReopenApplicationsCard";
+import SitOverridesEditor from "./SitOverridesEditor";
+import { useSitDerived } from "./useSitDerived";
 import AnimalsTab from "./tabs/AnimalsTab";
 import HousingTab from "./tabs/HousingTab";
 import ExpectationsTab from "./tabs/ExpectationsTab";
