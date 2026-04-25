@@ -118,11 +118,13 @@ const baseReviews = [
     sit_id: "n/a",
     reviewer_id: SITTER_ID,
     reviewee_id: OWNER_ID,
-    rating: 5,
+    // Schéma réel : `overall_rating` (int 1-5), pas `rating`
+    overall_rating: 5,
     comment: "Super accueil, animaux adorables, à recommander !",
     created_at: "2025-08-12T10:00:00Z",
     published: true,
-    type: "garde",
+    review_type: "garde",
+    moderation_status: "approved",
     reviewer: { first_name: "Lou", avatar_url: null },
   },
 ];
