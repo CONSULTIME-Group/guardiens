@@ -93,10 +93,11 @@ describe("EmptyState style isolation", () => {
     });
   }
 
-  it(".illustration-blend exists exactly once in index.css", () => {
+  it(".illustration-blend exists exactly once in index.css (base rule)", () => {
     const css = readFileSync(join(SRC, "index.css"), "utf8");
-    const matches = css.match(/\.illustration-blend\s*\{/g) ?? [];
-    expect(matches.length, "Une seule définition attendue").toBe(1);
+    // Capture la règle de base UNIQUEMENT (exclut `.dark .illustration-blend`).
+    const matches = css.match(/(^|\s)\.illustration-blend\s*\{/gm) ?? [];
+    expect(matches.length, "Une seule définition de base attendue").toBe(1);
   });
 
   it(".illustration-wrapper exists in index.css (defensive bg-transparent)", () => {
