@@ -7,12 +7,13 @@ import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
-import { Calendar, MapPin, Star, PawPrint, Home, CheckCircle2, ArrowLeft, ExternalLink } from "lucide-react";
+import { Calendar, MapPin, Star, PawPrint, Home, CheckCircle2, ArrowLeft, ExternalLink, ShieldCheck, Heart, Users } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import VerifiedBadge from "@/components/profile/VerifiedBadge";
 import ShareButtons from "@/components/sits/ShareButtons";
 import { trackEvent } from "@/lib/analytics";
+import { sanitizeUserTitle } from "@/lib/sanitizeTitle";
 
 import { TooltipProvider } from "@/components/ui/tooltip";
 import ApplicationModal from "@/components/sits/ApplicationModal";
