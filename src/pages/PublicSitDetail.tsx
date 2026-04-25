@@ -118,6 +118,15 @@ const PublicSitDetail = () => {
       }
       setViewerType(resolvedViewer);
 
+      // Auto-redirect : un membre connecté qui arrive sur la page publique d'une
+      // annonce qu'il PEUT consulter en mode complet doit voir la fiche riche.
+      // On garde la version publique uniquement pour les anonymes et les
+      // owners/admins (qui peuvent vouloir prévisualiser le partage).
+      if (resolvedViewer === "gardien" || resolvedViewer === "proprio") {
+        navigate(`/sits/${id}?from=share`, { replace: true });
+        return;
+      }
+
       setLoading(false);
       // analytics — un seul tir grâce au ref (anti double-fire StrictMode)
       if (!sitViewFired.current) {
@@ -131,7 +140,7 @@ const PublicSitDetail = () => {
       }
     };
     load();
-  }, [id, user]);
+  }, [id, user, navigate]);
 
   if (loading) return <div className="p-6 md:p-10 text-muted-foreground">Chargement...</div>;
   if (!sit) return <div className="p-6 md:p-10"><p>Annonce introuvable.</p></div>;
