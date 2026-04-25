@@ -162,7 +162,7 @@ test.describe("Realtime — focus reste logique après mise à jour exogène", (
     // on retombe sur un fallback `dispatchEvent('focus')` si la cible n'est
     // pas trouvée par sélecteur direct.
     const initialTarget = pageA
-      .locator('main button:not([disabled]), main a[href], main [role="button"]:not([aria-disabled="true"])')
+      .locator('main h1 ~ * button:not([disabled]):visible, main h1 ~ * a[href]:visible')
       .first();
     const initialCount = await initialTarget.count();
     expect(
