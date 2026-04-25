@@ -214,6 +214,30 @@ export const SCENARIOS: Record<ScenarioId, Scenario> = {
       ],
     },
   },
+  "published-sitter": {
+    id: "published-sitter",
+    sitId: "55555555-5555-5555-5555-555555555555",
+    viewer: {
+      id: SITTER_ID,
+      email: "lou@test.local",
+      role: "sitter",
+      firstName: "Lou",
+      lastName: "Petit",
+    },
+    activeRole: "sitter",
+    data: {
+      sit: makeSit({
+        id: "55555555-5555-5555-5555-555555555555",
+        status: "published",
+      }),
+      owner: baseOwner,
+      ownerProfile: baseOwnerProfile,
+      property: baseProperty,
+      pets: basePets,
+      reviews: baseReviews,
+      applications: [],
+    },
+  },
   "cancelled-sitter": {
     id: "cancelled-sitter",
     sitId: "33333333-3333-3333-3333-333333333333",
