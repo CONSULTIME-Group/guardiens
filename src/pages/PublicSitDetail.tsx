@@ -433,6 +433,14 @@ const PublicSitDetail = () => {
             (aujourd'hui sit_apply_clicked couvre l'intent contact via candidature) */}
         <div className="fixed bottom-0 left-0 right-0 bg-card border-t border-border p-4 z-40 pb-20 md:pb-4">
           <div className="max-w-4xl mx-auto">
+            {/* Réassurance pré-CTA — visible uniquement pour les anonymes (audience d'acquisition) */}
+            {!isAuthenticated && (sit as any).accepting_applications && (
+              <div className="hidden sm:flex items-center justify-center gap-x-4 text-xs text-muted-foreground mb-2">
+                <span className="flex items-center gap-1"><ShieldCheck className="h-3.5 w-3.5 text-primary" /> Identités vérifiées</span>
+                <span className="flex items-center gap-1"><Heart className="h-3.5 w-3.5 text-primary" /> 100&nbsp;% gratuit</span>
+                <span className="flex items-center gap-1"><Users className="h-3.5 w-3.5 text-primary" /> Entre voisins</span>
+              </div>
+            )}
             {!(sit as any).accepting_applications ? (
               <Button className="w-full h-12 text-base font-semibold" disabled>
                 Candidatures en cours d'analyse
@@ -450,7 +458,9 @@ const PublicSitDetail = () => {
                 }}
               >
                 <Button className="w-full h-12 text-base font-semibold">
-                  S'inscrire pour postuler — gratuit →
+                  {owner?.first_name
+                    ? `M'inscrire pour aider ${owner.first_name} →`
+                    : "M'inscrire pour postuler — gratuit →"}
                 </Button>
               </Link>
             ) : !hasAccess ? (
