@@ -54,13 +54,8 @@ interface SitterSitViewProps {
   hasReviewedThisSit: boolean;
   sitterProfile: any;
   currentUserId: string;
-  activeRole: string | null | undefined;
-  userRole?: string | null;
-  userFirstName?: string | null;
+  activeRole: "owner" | "sitter";
 }
-
-const formatDate = (d: string | null) =>
-  d ? format(new Date(d), "d MMMM yyyy", { locale: fr }) : "";
 
 const SitterSitView = ({
   sit,
