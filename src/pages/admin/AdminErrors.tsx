@@ -294,9 +294,25 @@ const AdminErrors = () => {
                   <div className="flex items-start justify-between gap-4">
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2 mb-1 flex-wrap">
-                        <Badge variant={e.severity === "error" ? "destructive" : "secondary"}>
-                          {e.severity}
-                        </Badge>
+                        {(() => {
+                          const tp = getThirdPartyInfo(e.context);
+                          if (tp) {
+                            return (
+                              <Badge
+                                className="bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/40 hover:bg-amber-500/20 gap-1"
+                                title={tp.explanation}
+                              >
+                                <ShieldAlert className="h-3 w-3" />
+                                Ignorée · {tp.label}
+                              </Badge>
+                            );
+                          }
+                          return (
+                            <Badge variant={e.severity === "error" ? "destructive" : "secondary"}>
+                              {e.severity}
+                            </Badge>
+                          );
+                        })()}
                         <Badge variant="outline">×{e.occurrences}</Badge>
                         {e.resolved_at && (
                           <Badge variant="outline" className="text-primary border-primary">
