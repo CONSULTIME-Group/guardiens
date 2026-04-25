@@ -123,7 +123,7 @@ export function useOwnerProfile() {
       supabase.from("profiles").select("*").eq("id", user.id).single(),
       supabase.from("properties").select("*").eq("user_id", user.id).limit(1).maybeSingle(),
       supabase.from("owner_profiles").select("*").eq("user_id", user.id).maybeSingle(),
-      supabase.from("sitter_profiles").select("competences, competences_disponible").eq("user_id", user.id).maybeSingle(),
+      supabase.from("sitter_profiles").select("competences").eq("user_id", user.id).maybeSingle(),
     ]);
 
     const p = profileRes.data;
