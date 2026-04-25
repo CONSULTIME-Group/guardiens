@@ -738,15 +738,17 @@ const SearchSitter = () => {
     const isMission = tab === "missions";
     const isDemo = !!item.is_demo;
     const isAssigned = !isMission && !!item.isAssigned;
+    const isCompleted = !isMission && !!item.isCompleted;
+    const isInactive = isAssigned || isCompleted;
     const linkTo = isMission ? `/petites-missions/${item.id}` : `/sits/${item.id}`;
 
-    const showCTA = !hasAccess && !isAssigned;
-    const isClickable = hasAccess && !isDemo && !isAssigned;
+    const showCTA = !hasAccess && !isInactive;
+    const isClickable = hasAccess && !isDemo && !isInactive;
 
     const cardContent = (
       <div
-        className={`bg-card rounded-2xl overflow-hidden border border-border transition-shadow ${isClickable ? "cursor-pointer hover:shadow-md" : ""} ${isAssigned ? "opacity-60 grayscale-[40%]" : ""}`}
-        aria-disabled={isAssigned || undefined}
+        className={`bg-card rounded-2xl overflow-hidden border border-border transition-shadow ${isClickable ? "cursor-pointer hover:shadow-md" : ""} ${isInactive ? "opacity-60 grayscale-[40%]" : ""}`}
+        aria-disabled={isInactive || undefined}
       >
         {photos.length > 0 && (
           <div className="h-52 relative">
