@@ -14,6 +14,8 @@
 import EmptyState, { ILLUSTRATIONS, type IllustrationKey } from "@/components/shared/EmptyState";
 import { Card } from "@/components/ui/card";
 
+import { useEffect } from "react";
+
 const KEYS = Object.keys(ILLUSTRATIONS) as IllustrationKey[];
 
 const Block = ({
