@@ -449,15 +449,16 @@ const SearchSitter = () => {
   };
 
   const searchSits = async (searchCoords: { lat: number; lng: number } | null) => {
-    // Show published + assigned (confirmed/in_progress) so members see "Gardiennage attribué" cards
-    // Completed sits are excluded — they belong to history, not the public search
+    // Show published + assigned (confirmed/in_progress) + completed so members see history
+    // and the page feels lived-in. Completed/assigned cards are rendered greyed-out and
+    // non-clickable so they only add volume without polluting actionable results.
     // `profiles` table has restrictive RLS (owner-only) so its embedded join returns null
     // for other owners' sits. We join `properties` (RLS now allows authenticated read for
     // active sits) and fetch owner data separately from the safe `public_profiles` view.
     let query = supabase
       .from("sits")
       .select("*, property:properties!sits_property_id_fkey(type, environment, photos)")
-      .in("status", ["published", "confirmed", "in_progress"])
+      .in("status", ["published", "confirmed", "in_progress", "completed"])
       .order("created_at", { ascending: false });
     if (startDate) query = query.gte("end_date", startDate);
     if (endDate) query = query.lte("start_date", endDate);
@@ -474,10 +475,11 @@ const SearchSitter = () => {
       const ownerMap = new Map((owners || []).map((o: any) => [o.id, o]));
       items = items.map((s: any) => ({ ...s, owner: ownerMap.get(s.user_id) || null }));
     }
-    // Mark assigned sits (will be rendered greyed-out, non-clickable)
+    // Mark assigned/completed sits (will be rendered greyed-out, non-clickable)
     items = items.map((s: any) => ({
       ...s,
       isAssigned: s.status === "confirmed" || s.status === "in_progress",
+      isCompleted: s.status === "completed",
     }));
     if (housingType !== "all") items = items.filter((s: any) => s.property?.type === housingType);
     if (withPhotosOnly) items = items.filter((s: any) => s.property?.photos?.length > 0);
@@ -666,8 +668,9 @@ const SearchSitter = () => {
     if (sortBy === "closest") sorted.sort((a, b) => (a.distance ?? 9999) - (b.distance ?? 9999));
     else if (sortBy === "recent") sorted.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
     else if (sortBy === "rating") sorted.sort((a, b) => parseFloat(b.avgRating || "0") - parseFloat(a.avgRating || "0"));
-    // Always push assigned (greyed-out) sits to the bottom, regardless of sort
-    sorted.sort((a, b) => Number(!!a.isAssigned) - Number(!!b.isAssigned));
+    // Always push assigned (greyed-out) sits to the bottom, then completed (history) at the very end
+    sorted.sort((a, b) => Number(!!a.isAssigned || !!a.isCompleted) - Number(!!b.isAssigned || !!b.isCompleted));
+    sorted.sort((a, b) => Number(!!a.isCompleted) - Number(!!b.isCompleted));
     return sorted;
   };
 
@@ -715,7 +718,7 @@ const SearchSitter = () => {
     ? `${format(new Date(startDate), "d MMM", { locale: fr })} → ${format(new Date(endDate), "d MMM", { locale: fr })}`
     : "Dates";
 
-  const availableSitsCount = results.filter((r: any) => !r.isAssigned).length;
+  const availableSitsCount = results.filter((r: any) => !r.isAssigned && !r.isCompleted).length;
   const resultCount = tab === "missions" && missionSubTab === "members" ? availableMembers.length : availableSitsCount;
   const countLabel = tab === "missions" && missionSubTab === "members"
     ? `${resultCount} membre${resultCount > 1 ? "s" : ""} disponible${resultCount > 1 ? "s" : ""}`
@@ -735,32 +738,34 @@ const SearchSitter = () => {
     const isMission = tab === "missions";
     const isDemo = !!item.is_demo;
     const isAssigned = !isMission && !!item.isAssigned;
+    const isCompleted = !isMission && !!item.isCompleted;
+    const isInactive = isAssigned || isCompleted;
     const linkTo = isMission ? `/petites-missions/${item.id}` : `/sits/${item.id}`;
 
-    const showCTA = !hasAccess && !isAssigned;
-    const isClickable = hasAccess && !isDemo && !isAssigned;
+    const showCTA = !hasAccess && !isInactive;
+    const isClickable = hasAccess && !isDemo && !isInactive;
 
     const cardContent = (
       <div
-        className={`bg-card rounded-2xl overflow-hidden border border-border transition-shadow ${isClickable ? "cursor-pointer hover:shadow-md" : ""} ${isAssigned ? "opacity-60 grayscale-[40%]" : ""}`}
-        aria-disabled={isAssigned || undefined}
+        className={`bg-card rounded-2xl overflow-hidden border border-border transition-shadow ${isClickable ? "cursor-pointer hover:shadow-md" : ""} ${isInactive ? "opacity-60 grayscale-[40%]" : ""}`}
+        aria-disabled={isInactive || undefined}
       >
         {photos.length > 0 && (
           <div className="h-52 relative">
-            <img src={photos[0]} alt="" className={`w-full h-full object-cover ${isAssigned ? "grayscale" : ""}`} loading="lazy" />
-            {isAssigned && (
+            <img src={photos[0]} alt="" className={`w-full h-full object-cover ${isInactive ? "grayscale" : ""}`} loading="lazy" />
+            {(isAssigned || isCompleted) && (
               <span className="absolute inset-0 flex items-center justify-center">
                 <span className="bg-foreground/85 text-background rounded-full px-3 py-1.5 text-xs font-semibold uppercase tracking-wide shadow-md">
-                  Gardiennage attribué
+                  {isCompleted ? "Garde terminée" : "Gardiennage attribué"}
                 </span>
               </span>
             )}
-            {!isAssigned && item.owner?.identity_verified && (
+            {!isInactive && item.owner?.identity_verified && (
               <span className="absolute top-3 left-3 flex items-center gap-1 bg-white/90 backdrop-blur-sm rounded-full px-2 py-1 text-xs text-primary font-medium">
                 <ShieldCheck className="h-3 w-3" /> Vérifié
               </span>
             )}
-            {!isDemo && !isMission && !isAssigned && (
+            {!isDemo && !isMission && !isInactive && (
               <span className="absolute top-3 right-3 z-10" onClick={(e) => e.preventDefault()}>
                 <FavoriteButton targetType="sit" targetId={item.id} size="sm" />
               </span>
@@ -770,7 +775,7 @@ const SearchSitter = () => {
                 Annonce type
               </span>
             )}
-            {item.isNew && !isDemo && !isAssigned && (
+            {item.isNew && !isDemo && !isInactive && (
               <span className="absolute top-3 left-3 mt-8 bg-primary text-primary-foreground rounded-full px-2 py-1 text-xs flex items-center gap-1">
                 <Sparkles className="h-3 w-3" /> Nouveau
               </span>
@@ -818,6 +823,11 @@ const SearchSitter = () => {
           {isAssigned && (
             <p className="text-xs text-muted-foreground italic mt-3">
               Cette garde a déjà trouvé son gardien.
+            </p>
+          )}
+          {isCompleted && (
+            <p className="text-xs text-muted-foreground italic mt-3">
+              Garde déjà réalisée — pour donner un aperçu de l'activité.
             </p>
           )}
           {showCTA && (
