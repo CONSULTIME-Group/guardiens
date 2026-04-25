@@ -4,6 +4,7 @@
  * Fire-and-forget, throttle local pour éviter les boucles.
  */
 import { supabase } from "@/integrations/supabase/client";
+import { isInAppBrowser } from "@/lib/inAppBrowser";
 
 const SENT_FINGERPRINTS = new Map<string, number>();
 const THROTTLE_MS = 30_000; // n'envoie pas le même fp plus d'1x toutes les 30s
