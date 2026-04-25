@@ -105,6 +105,21 @@ const SitterReadySvg = () => (
   </svg>
 );
 
+/* QuietLeaf : feuille morte posée sur un sol — silence apaisé, rien à signaler */
+const QuietLeafSvg = () => (
+  <svg {...baseProps}>
+    <ellipse cx="100" cy="155" rx="70" ry="6" fill={SOFT} stroke="none" />
+    {/* Feuille */}
+    <path
+      d="M70 130 Q60 110 80 100 Q100 95 115 110 Q120 130 100 140 Q80 145 70 130 Z"
+      fill={WARM}
+      fillOpacity="0.4"
+    />
+    <line x1="115" y1="110" x2="125" y2="100" stroke={WARM} strokeWidth="1.5" />
+    <path d="M85 105 L100 135" stroke={WARM} strokeWidth="1" fill="none" opacity="0.5" />
+  </svg>
+);
+
 export const SVG_FALLBACKS: Record<IllustrationKey, () => JSX.Element> = {
   sleepingCat: SleepingCatSvg,
   emptyMailbox: EmptyMailboxSvg,
@@ -112,4 +127,5 @@ export const SVG_FALLBACKS: Record<IllustrationKey, () => JSX.Element> = {
   emptyCalendar: EmptyCalendarSvg,
   heartBookmark: HeartBookmarkSvg,
   sitterReady: SitterReadySvg,
+  quietLeaf: QuietLeafSvg,
 };

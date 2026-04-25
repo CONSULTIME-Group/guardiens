@@ -1,5 +1,5 @@
 import { useAuth } from "@/contexts/AuthContext";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import {
   Plus, Calendar, MessageSquare, Star, Users, Eye, BookOpen,
   MapPin, Clock, MoreHorizontal, XCircle, CheckCircle,
@@ -60,7 +60,7 @@ const appStatusConfig: Record<string, { label: string; className: string }> = {
 type Tab = "upcoming" | "in_progress" | "completed" | "cancelled";
 
 const tabs: { value: Tab; label: string; icon: typeof Calendar }[] = [
-  { value: "upcoming", label: "A venir", icon: Calendar },
+  { value: "upcoming", label: "À venir", icon: Calendar },
   { value: "in_progress", label: "En cours", icon: Clock },
   { value: "completed", label: "Passées", icon: CheckCircle },
   { value: "cancelled", label: "Annulées", icon: XCircle },
@@ -100,9 +100,23 @@ const Sits = () => {
   const { user, activeRole } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [sits, setSits] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<Tab>("upcoming");
+
+  // Onglet actif synchronisé avec l'URL (?tab=...) — partageable, retour navigateur OK
+  const validTabs: Tab[] = ["upcoming", "in_progress", "completed", "cancelled"];
+  const urlTab = searchParams.get("tab") as Tab | null;
+  const activeTab: Tab = urlTab && validTabs.includes(urlTab) ? urlTab : "upcoming";
+  const setActiveTab = useCallback((tab: Tab) => {
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      if (tab === "upcoming") next.delete("tab");
+      else next.set("tab", tab);
+      return next;
+    }, { replace: true });
+  }, [setSearchParams]);
+
   const [showArchived, setShowArchived] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const [archiveConfirm, setArchiveConfirm] = useState<string | null>(null);
@@ -344,25 +358,48 @@ const Sits = () => {
     });
   }, [activeSits, activeRole, activeTab]);
 
+  // Sous-titre contextuel : informations utiles plutôt que générique
+  const headerSubtitle = useMemo(() => {
+    const upcoming = tabCounts.upcoming;
+    const inProgress = tabCounts.in_progress;
+    if (activeRole === "owner") {
+      const pendingApps = activeSits.reduce((sum, s) => sum + (s.pendingApplicationCount || 0), 0);
+      const parts: string[] = [];
+      if (pendingApps > 0) parts.push(`${pendingApps} candidature${pendingApps > 1 ? "s" : ""} en attente`);
+      if (inProgress > 0) parts.push(`${inProgress} garde${inProgress > 1 ? "s" : ""} en cours`);
+      else if (upcoming > 0) parts.push(`${upcoming} annonce${upcoming > 1 ? "s" : ""} active${upcoming > 1 ? "s" : ""}`);
+      return parts.length > 0 ? parts.join(" · ") : "Gérez vos annonces et suivez vos gardes.";
+    } else {
+      const parts: string[] = [];
+      if (inProgress > 0) parts.push(`${inProgress} garde${inProgress > 1 ? "s" : ""} en cours`);
+      if (upcoming > 0) parts.push(`${upcoming} à venir`);
+      return parts.length > 0 ? parts.join(" · ") : "Suivez vos candidatures et gardes.";
+    }
+  }, [tabCounts, activeSits, activeRole]);
+
   return (
-    <div className="p-4 md:p-10 max-w-4xl mx-auto animate-fade-in pb-24 md:pb-8">
+    <div className="p-4 md:p-8 max-w-4xl mx-auto animate-fade-in pb-24 md:pb-8">
       <Helmet><meta name="robots" content="noindex, nofollow" /></Helmet>
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <div>
+      <div className="flex items-center justify-between gap-3 mb-6">
+        <div className="min-w-0">
           <h1 className="font-heading text-2xl md:text-3xl font-bold mb-1">
             {activeRole === "owner" ? "Mes annonces" : "Mes gardes"}
           </h1>
-          <p className="text-muted-foreground text-sm">
-            {activeRole === "owner"
-              ? "Gérez vos annonces et suivez vos gardes."
-              : "Suivez vos candidatures et gardes."}
+          <p className="text-muted-foreground text-sm truncate">
+            {headerSubtitle}
           </p>
         </div>
-        {activeRole === "owner" && (
-          <Link to="/sits/create">
+        {activeRole === "owner" ? (
+          <Link to="/sits/create" className="shrink-0">
             <Button className="gap-2">
               <Plus className="h-4 w-4" /> Publier
+            </Button>
+          </Link>
+        ) : (
+          <Link to="/search" className="shrink-0">
+            <Button variant="outline" className="gap-2">
+              <Eye className="h-4 w-4" /> Voir les annonces
             </Button>
           </Link>
         )}
@@ -430,13 +467,29 @@ const Sits = () => {
             />
           )}
           {activeTab === "in_progress" && (
-            <EmptyState illustration="sleepingCat" title="Aucune garde en cours" description="Vos gardes en cours apparaîtront ici." />
+            <EmptyState
+              illustration="sleepingCat"
+              title="Aucune garde en cours"
+              description={activeRole === "owner"
+                ? "Vos gardes en cours apparaîtront ici dès qu'une période démarre."
+                : "Vos gardes en cours apparaîtront ici dès le jour J."}
+            />
           )}
           {activeTab === "completed" && (
-            <EmptyState illustration="sleepingCat" title="Aucune garde passée" description="Vos gardes terminées apparaîtront ici." />
+            <EmptyState
+              illustration="emptyCalendar"
+              title="Aucune garde passée"
+              description={activeRole === "owner"
+                ? "Vos gardes terminées s'archiveront ici, avec leurs avis."
+                : "Vos gardes terminées s'afficheront ici, avec les avis reçus."}
+            />
           )}
           {activeTab === "cancelled" && (
-            <EmptyState illustration="sleepingCat" title="Aucune garde annulée" description="Tant mieux ! Aucune annulation pour le moment." />
+            <EmptyState
+              illustration="quietLeaf"
+              title="Rien à signaler ici"
+              description="Les annonces et candidatures annulées apparaîtraient à cet endroit."
+            />
           )}
         </>
       ) : (
