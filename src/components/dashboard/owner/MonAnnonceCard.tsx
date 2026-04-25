@@ -4,6 +4,7 @@ import { format, differenceInDays } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Eye, RefreshCw, Plus, PawPrint, Home } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import ShareButtons from "@/components/sits/ShareButtons";
 import { capitalize, SPECIES_LABEL } from "./helpers";
 import type { SitRow, Pet } from "./types";
 
@@ -158,15 +159,25 @@ const MonAnnonceCard = memo(({ sits, pets, propertyType, propertyEnvironment, pe
       )}
 
       {/* Actions */}
-      <div className="flex gap-2 pt-1">
+      <div className="flex flex-wrap gap-2 pt-1">
         {isActive ? (
           <>
-            <Button variant="outline" size="sm" className="flex-1 text-xs" onClick={() => navigate(`/sits/${currentSit.id}`)}>
+            <Button variant="outline" size="sm" className="flex-1 min-w-[110px] text-xs" onClick={() => navigate(`/sits/${currentSit.id}`)}>
               <Eye className="h-3.5 w-3.5 mr-1" /> Voir l'annonce
             </Button>
-            <Button variant="outline" size="sm" className="flex-1 text-xs" onClick={() => navigate(`/sits/${currentSit.id}/edit`)}>
+            <Button variant="outline" size="sm" className="flex-1 min-w-[110px] text-xs" onClick={() => navigate(`/sits/${currentSit.id}/edit`)}>
               Modifier
             </Button>
+            {currentSit.status === "published" && (
+              <ShareButtons
+                sitId={currentSit.id}
+                title={currentSit.title || "Garde"}
+                startDate={currentSit.start_date}
+                endDate={currentSit.end_date}
+                source="owner_dashboard_card"
+                compact
+              />
+            )}
           </>
         ) : (
           <>
