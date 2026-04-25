@@ -822,7 +822,10 @@ test.describe("Accessibilité — /sits/:id", () => {
 
           const fgComposed = composite(fgRaw, bg);
           const ratio = contrastRatio(fgComposed, bg);
-          const required = isLargeText(style) ? 3.0 : 4.5;
+          const fontSizePx = parseFloat(style.fontSize);
+          const sizeClass = classifyTextSize(fontSizePx, style.fontWeight);
+          const required = sizeClass === "large" ? 3.0 : 4.5;
+          const PX_PER_PT = 96 / 72;
 
           if (ratio < required) {
             // @ts-ignore
@@ -836,7 +839,9 @@ test.describe("Accessibilité — /sits/:id", () => {
                 ratio: Math.round(ratio * 100) / 100,
                 required,
                 fontSize: style.fontSize,
+                fontSizePt: Math.round((fontSizePx / PX_PER_PT) * 10) / 10,
                 fontWeight: style.fontWeight,
+                wcagSizeClass: sizeClass,
                 deficit: Math.round((required - ratio) * 100) / 100,
               },
             });
