@@ -405,6 +405,7 @@ const OwnerDashboard = () => {
           recentApps={recentApps}
           sitterProfiles={sitterProfiles}
           sitterBadges={sitterBadges}
+          loading={loading}
         />
       </div>
 
