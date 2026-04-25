@@ -194,14 +194,34 @@ const SitDetailHeader = ({
             >
               {owner.first_name}
               {owner.identity_verified && <VerifiedBadge />}
+              {owner.is_founder && (
+                <span
+                  className="text-[10px] uppercase tracking-wide font-semibold px-1.5 py-0.5 rounded bg-primary/10 text-primary"
+                  title="Membre fondateur"
+                >
+                  Fondateur
+                </span>
+              )}
             </Link>
-            <p className="text-xs text-muted-foreground mt-0.5">
+            {/* Méta : ville + nombre de gardes accomplies (signal de fiabilité) */}
+            <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5">
+              {owner.city && <span>{owner.city}</span>}
+              {owner.city && typeof owner.completed_sits_count === "number" && owner.completed_sits_count > 0 && (
+                <span aria-hidden="true">·</span>
+              )}
+              {typeof owner.completed_sits_count === "number" && owner.completed_sits_count > 0 && (
+                <span>
+                  {owner.completed_sits_count} garde{owner.completed_sits_count > 1 ? "s" : ""} accomplie{owner.completed_sits_count > 1 ? "s" : ""}
+                </span>
+              )}
+            </div>
+            <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
               {owner.bio
-                ? owner.bio.slice(0, 80) + (owner.bio.length > 80 ? "…" : "")
-                : "Propriétaire"}
+                ? owner.bio
+                : "Ce membre n'a pas encore renseigné de présentation."}
             </p>
           </div>
-          <Link to={`/gardiens/${owner.id}`}>
+          <Link to={`/gardiens/${owner.id}`} className="shrink-0">
             <Button variant="outline" size="sm">
               Voir le profil
             </Button>
