@@ -20,7 +20,56 @@ export interface SiteRoute {
   changeFreq: "daily" | "weekly" | "monthly" | "yearly";
   /** URL absolue de l'image OG. Si omise, DEFAULT_OG_IMAGE est utilisée. */
   ogImage?: string;
+  /**
+   * `true` (défaut) : page publique indexable (Allow + présente dans sitemap).
+   * `false`         : page publique mais NON indexable (Disallow dans robots.txt
+   *                   + exclue du sitemap + meta robots noindex côté composant).
+   *                   Sert pour les routes outils (`/recherche`) ou auth (`/login`).
+   *
+   * IMPORTANT : la cohérence triple (robots / sitemap / <meta>) est assurée
+   * par les générateurs (`generate-robots.mjs`, `generate-sitemap.mjs`) qui
+   * lisent ce flag. Toute exception côté composant doit être justifiée.
+   */
+  index?: boolean;
 }
+
+/**
+ * Chemins privés — espace authentifié et endpoints système. Source de vérité
+ * unique consommée par `scripts/generate-robots.mjs` pour générer les règles
+ * `Disallow:`. Ne PAS dupliquer dans `public/robots.txt` (qui est généré).
+ *
+ * Règles d'inclusion :
+ *   - Toute route derrière auth (`/dashboard`, `/messages`, `/profile`…)
+ *   - Toute route avec donnée sensible (`/sits`, `/annonces/`, `/review/`…)
+ *   - Tout endpoint d'auth interne (`/auth/`, `/forgot-password`…)
+ *
+ * Les routes publiques marquées `index: false` dans staticRoutes (ex. `/login`,
+ * `/recherche`) sont automatiquement ajoutées par le générateur — ne pas les
+ * lister ici en double.
+ */
+export const privateDisallowPaths: string[] = [
+  "/admin",
+  "/dashboard",
+  "/messages",
+  "/mon-abonnement",
+  "/notifications",
+  "/sits",
+  "/annonces/",
+  "/search",
+  "/recherche-gardiens",
+  "/review/",
+  "/house-guide/",
+  "/profile",
+  "/owner-profile",
+  "/favoris",
+  "/mes-avis",
+  "/settings",
+  "/forgot-password",
+  "/reset-password",
+  "/unsubscribe",
+  "/test-accord",
+  "/auth/",
+];
 
 /**
  * Configuration d'un groupe de routes dynamiques (mêmes patterns de title/description).
