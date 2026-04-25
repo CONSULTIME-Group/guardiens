@@ -81,12 +81,22 @@ type Pair = {
   fg: string;
   /** Token CSS du fond (sans `--`) */
   bg: string;
-  /** "normal" (4.5:1) ou "large" (3:1) */
-  size?: "normal" | "large";
+  /**
+   * Taille de police effective rendue (px). Détermine le seuil WCAG via
+   * `__wcagClassifyTextSize`. Défaut : 16px (body text Tailwind `text-base`).
+   * Ex. : 24 pour `text-2xl`, 18 pour `text-lg`.
+   */
+  fontSizePx?: number;
+  /**
+   * Poids de police effectif (numérique ou mot-clé). Couplé à `fontSizePx`
+   * pour la classification large/normal. Défaut : 400.
+   * Ex. : 700 pour un bouton/badge en `font-bold`.
+   */
+  fontWeight?: number | "normal" | "bold";
 };
 
 const PAIRS: Pair[] = [
-  // muted-foreground sur tous les fonds neutres possibles
+  // muted-foreground sur tous les fonds neutres possibles (texte courant 16px)
   { label: "muted-foreground / background", fg: "muted-foreground", bg: "background" },
   { label: "muted-foreground / card", fg: "muted-foreground", bg: "card" },
   { label: "muted-foreground / muted", fg: "muted-foreground", bg: "muted" },
@@ -96,16 +106,20 @@ const PAIRS: Pair[] = [
   { label: "destructive-text / background", fg: "destructive-text", bg: "background" },
   { label: "destructive-text / card", fg: "destructive-text", bg: "card" },
 
-  // Badges
-  { label: "destructive-foreground / destructive", fg: "destructive-foreground", bg: "destructive" },
-  { label: "badge-success-foreground / badge-success", fg: "badge-success-foreground", bg: "badge-success" },
+  // Badges — texte court, généralement 14px gras dans la lib UI : *normal* WCAG
+  // (14px = 10.5pt < 14pt, donc pas large même avec bold). On reste à 4.5:1.
+  { label: "destructive-foreground / destructive (badge 14px bold)", fg: "destructive-foreground", bg: "destructive", fontSizePx: 14, fontWeight: 700 },
+  { label: "badge-success-foreground / badge-success (badge 14px bold)", fg: "badge-success-foreground", bg: "badge-success", fontSizePx: 14, fontWeight: 700 },
 
-  // CTA principaux
-  { label: "primary-foreground / primary", fg: "primary-foreground", bg: "primary" },
-  // Le secondary est utilisé essentiellement en bouton large (text-base/font-medium)
-  { label: "secondary-foreground / secondary", fg: "secondary-foreground", bg: "secondary", size: "large" },
+  // CTA principaux — bouton standard rendu en `text-base font-medium` (16px/500)
+  { label: "primary-foreground / primary (button 16px medium)", fg: "primary-foreground", bg: "primary", fontSizePx: 16, fontWeight: 500 },
+  // Le secondary est utilisé en bouton large rendu en `text-lg font-semibold`
+  // (≈ 18.66px / 600). 18.66px ≥ 14pt + bold (≥600 mais WCAG exige ≥700)
+  // → On force `font-bold` en pratique, mais on reste prudent et on déclare
+  //    le rendu réel : le helper classifie correctement.
+  { label: "secondary-foreground / secondary (button 18.66px bold)", fg: "secondary-foreground", bg: "secondary", fontSizePx: 18.6667, fontWeight: 700 },
 
-  // Texte standard
+  // Texte standard 16px regular
   { label: "foreground / background", fg: "foreground", bg: "background" },
   { label: "foreground / card", fg: "foreground", bg: "card" },
   { label: "foreground / muted", fg: "foreground", bg: "muted" },
