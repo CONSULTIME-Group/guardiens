@@ -49,6 +49,28 @@ const Dashboard = () => {
     }
   }, [user?.id]);
 
+  // Émettre signup_email_confirmed quand l'utilisateur arrive sur le dashboard
+  // depuis le lien de confirmation email (hash type=signup ou type=email).
+  // À ce moment la session est active → RLS OK pour insérer dans analytics_events.
+  // Une seule émission par utilisateur grâce au flag localStorage.
+  useEffect(() => {
+    if (!user?.id) return;
+    try {
+      const hash = typeof window !== "undefined" ? window.location.hash : "";
+      const isFromEmailLink = hash.includes("type=signup") || hash.includes("type=email");
+      if (!isFromEmailLink) return;
+      const flagKey = `email_confirmed_tracked_${user.id}`;
+      if (localStorage.getItem(flagKey)) return;
+      localStorage.setItem(flagKey, "1");
+      trackEvent("signup_email_confirmed", {
+        source: "/dashboard",
+        metadata: { role: user.role || null, user_id: user.id },
+      });
+    } catch {
+      // silencieux
+    }
+  }, [user?.id]);
+
   // Filet de sécurité : si la session est active mais que le profil est introuvable
   // en base (cas catastrophique du trigger handle_new_user cassé), on alerte sans
   // bloquer l'accès. Sur une inscription normale, le profil existe → aucun toast.
