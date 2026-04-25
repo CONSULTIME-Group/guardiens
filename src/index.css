@@ -57,16 +57,19 @@
     --primary: 153 42% 30%;
     --primary-foreground: 40 33% 97%;
 
-    --secondary: 27 35% 59%;
+    /* AA: secondary-foreground (clair) sur secondary doit ≥ 3:1 (texte large) */
+    --secondary: 27 38% 42%;
     --secondary-foreground: 40 33% 97%;
 
+    /* AA: muted-foreground sur muted/accent doit ≥ 4.5:1 → assombri à 36% */
     --muted: 37 22% 90%;
-    --muted-foreground: 37 7% 43%;
+    --muted-foreground: 37 10% 36%;
 
     --accent: 37 22% 93%;
     --accent-foreground: 40 12% 10%;
 
-    --destructive: 0 84.2% 60.2%;
+    /* AA: destructive-foreground (blanc) sur destructive doit ≥ 4.5:1 */
+    --destructive: 0 72% 42%;
     --destructive-foreground: 210 40% 98%;
     /* Variante AA-compliant pour texte rouge sur fond clair (ratio ≥ 4.5:1) */
     --destructive-text: 0 75% 42%;
@@ -113,14 +116,16 @@
     --secondary: 27 30% 45%;
     --secondary-foreground: 40 15% 90%;
 
+    /* AA: muted-foreground sur muted/accent doit ≥ 4.5:1 → éclairci à 65% */
     --muted: 160 8% 18%;
-    --muted-foreground: 37 10% 55%;
+    --muted-foreground: 37 12% 65%;
 
     --accent: 160 8% 16%;
     --accent-foreground: 40 15% 90%;
 
-    --destructive: 0 62% 50%;
-    --destructive-foreground: 40 15% 90%;
+    /* AA: destructive-foreground (clair) sur destructive doit ≥ 4.5:1 */
+    --destructive: 0 65% 35%;
+    --destructive-foreground: 40 15% 95%;
     /* En dark mode, le rouge clair contraste mieux sur fond sombre */
     --destructive-text: 0 80% 70%;
 
