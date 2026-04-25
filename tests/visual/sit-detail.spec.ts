@@ -73,8 +73,8 @@ test.afterAll(async () => {
 const scenarioIds: ScenarioId[] = [
   "draft-owner",
   "published-owner",
-  "confirmed-owner",
-  "completed-owner",
+  "cancelled-sitter",
+  "completed-sitter",
 ];
 
 test.describe("Visual regression — /sits/:id", () => {

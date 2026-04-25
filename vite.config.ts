@@ -14,23 +14,30 @@ export default defineConfig(({ mode }) => ({
   },
   plugins: [react(), mode === "development" && componentTagger()].filter(Boolean),
   resolve: {
-    alias: {
-      "@": path.resolve(__dirname, "./src"),
-      // En mode "visual-test" on remplace le client Supabase et le contexte
-      // d'auth par leurs versions mockées (voir tests/visual/).
+    // IMPORTANT : alias sous forme de TABLEAU. Vite évalue dans l'ordre et
+    // le premier match gagne. Les mocks doivent donc précéder l'alias générique
+    // `@/` qui les engloberait sinon.
+    alias: [
       ...(mode === "visual-test"
-        ? {
-            "@/integrations/supabase/client": path.resolve(
-              __dirname,
-              "./src/integrations/supabase/client.mock.ts"
-            ),
-            "@/contexts/AuthContext": path.resolve(
-              __dirname,
-              "./src/contexts/AuthContext.mock.tsx"
-            ),
-          }
-        : {}),
-    },
+        ? [
+            {
+              find: "@/integrations/supabase/client",
+              replacement: path.resolve(
+                __dirname,
+                "./src/integrations/supabase/client.mock.ts",
+              ),
+            },
+            {
+              find: "@/contexts/AuthContext",
+              replacement: path.resolve(
+                __dirname,
+                "./src/contexts/AuthContext.mock.tsx",
+              ),
+            },
+          ]
+        : []),
+      { find: "@", replacement: path.resolve(__dirname, "./src") },
+    ],
     dedupe: ["react", "react-dom", "react/jsx-runtime", "react/jsx-dev-runtime"],
   },
   build: {
