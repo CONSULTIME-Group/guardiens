@@ -3917,6 +3917,14 @@ export type Database = {
           status: string
         }[]
       }
+      admin_get_listings_application_counts: {
+        Args: { p_sit_ids: string[] }
+        Returns: {
+          app_count: number
+          pending_app_count: number
+          sit_id: string
+        }[]
+      }
       admin_get_sit_applications: {
         Args: { p_sit_id: string }
         Returns: {
