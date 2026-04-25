@@ -130,9 +130,22 @@ const ApplicationsSection = memo(({ recentApps, sitterProfiles, sitterBadges, lo
         </div>
       )}
       {loading ? (
-        <div className="mt-4 border rounded-xl px-4 py-3 opacity-60 cursor-not-allowed" aria-disabled="true">
-          <Skeleton className="h-4 w-56" />
-        </div>
+        <Accordion type="single" collapsible className="mt-4">
+          <AccordionItem value="read-loading" className="border rounded-xl">
+            <AccordionTrigger
+              disabled
+              aria-disabled="true"
+              aria-busy="true"
+              aria-label="Chargement des candidatures déjà consultées"
+              className="px-4 py-3 text-sm text-muted-foreground hover:no-underline opacity-60 cursor-not-allowed pointer-events-none [&>svg]:opacity-40"
+            >
+              <span className="flex items-center gap-2">
+                Candidatures reçues déjà consultées
+                <Skeleton className="inline-block h-3 w-8 align-middle" />
+              </span>
+            </AccordionTrigger>
+          </AccordionItem>
+        </Accordion>
       ) : read.length > 0 && (
         <Accordion type="single" collapsible className="mt-4">
           <AccordionItem value="read" className="border rounded-xl">
