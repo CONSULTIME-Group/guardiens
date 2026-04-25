@@ -79,6 +79,18 @@ test.afterAll(async () => {
   }
 });
 
+/**
+ * Capture automatique d'artefacts de diagnostic en cas d'échec.
+ * S'exécute APRÈS chaque test, mais AVANT le retrait de la page.
+ */
+test.afterEach(async ({ page }, testInfo) => {
+  await captureFailureArtifacts(page, testInfo, {
+    scenarioId: currentScenario,
+    focusLog: currentFocusLog,
+    phase: currentPhase,
+  });
+});
+
 const scenarioIds: ScenarioId[] = [
   "draft-owner",
   "published-owner",
