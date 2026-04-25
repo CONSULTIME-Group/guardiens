@@ -782,15 +782,20 @@ test.describe("Accessibilité — /sits/:id", () => {
           const required = isLargeText(style) ? 3.0 : 4.5;
 
           if (ratio < required) {
+            // @ts-ignore
+            const desc = (window as any).__describeEl(el);
             violations.push({
-              tag,
+              ...desc,
               text: text.slice(0, 60),
-              fg: `rgb(${fgComposed.join(",")})`,
-              bg: `rgb(${bg.join(",")})`,
-              ratio: Math.round(ratio * 100) / 100,
-              required,
-              fontSize: style.fontSize,
-              fontWeight: style.fontWeight,
+              contrast: {
+                fg: `rgb(${fgComposed.join(",")})`,
+                bg: `rgb(${bg.join(",")})`,
+                ratio: Math.round(ratio * 100) / 100,
+                required,
+                fontSize: style.fontSize,
+                fontWeight: style.fontWeight,
+                deficit: Math.round((required - ratio) * 100) / 100,
+              },
             });
           }
           seen.add(el);
@@ -801,7 +806,10 @@ test.describe("Accessibilité — /sits/:id", () => {
 
       expect(
         contrastViolations,
-        `Violations contraste WCAG AA (${contrastViolations.length}):\n${JSON.stringify(contrastViolations.slice(0, 20), null, 2)}`
+        `Violations contraste WCAG AA.${fmt(
+          "Violations contraste (limité aux 20 premières)",
+          contrastViolations.slice(0, 20)
+        )}`
       ).toEqual([]);
     });
   }
