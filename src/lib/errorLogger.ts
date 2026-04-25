@@ -92,6 +92,7 @@ const THIRD_PARTY_STACK_PATTERNS: RegExp[] = [
  * Permet d'expliquer dans l'admin pourquoi elle est marquée comme ignorée.
  */
 export type ThirdPartyReason =
+  | "in_app_webview"        // Session entière dans un WebView tiers (FB_IAB/FBAV, Instagram, TikTok…)
   | "webview_bridge"        // Stack contient une signature de bridge WebView (FB, IG, TikTok…)
   | "extension"             // Source = chrome-extension:// / moz-extension:// …
   | "tracking_pixel"        // Source = gtag, fbevents, hotjar, intercom…
