@@ -752,20 +752,20 @@ const SearchSitter = () => {
       >
         {photos.length > 0 && (
           <div className="h-52 relative">
-            <img src={photos[0]} alt="" className={`w-full h-full object-cover ${isAssigned ? "grayscale" : ""}`} loading="lazy" />
-            {isAssigned && (
+            <img src={photos[0]} alt="" className={`w-full h-full object-cover ${isInactive ? "grayscale" : ""}`} loading="lazy" />
+            {(isAssigned || isCompleted) && (
               <span className="absolute inset-0 flex items-center justify-center">
                 <span className="bg-foreground/85 text-background rounded-full px-3 py-1.5 text-xs font-semibold uppercase tracking-wide shadow-md">
-                  Gardiennage attribué
+                  {isCompleted ? "Garde terminée" : "Gardiennage attribué"}
                 </span>
               </span>
             )}
-            {!isAssigned && item.owner?.identity_verified && (
+            {!isInactive && item.owner?.identity_verified && (
               <span className="absolute top-3 left-3 flex items-center gap-1 bg-white/90 backdrop-blur-sm rounded-full px-2 py-1 text-xs text-primary font-medium">
                 <ShieldCheck className="h-3 w-3" /> Vérifié
               </span>
             )}
-            {!isDemo && !isMission && !isAssigned && (
+            {!isDemo && !isMission && !isInactive && (
               <span className="absolute top-3 right-3 z-10" onClick={(e) => e.preventDefault()}>
                 <FavoriteButton targetType="sit" targetId={item.id} size="sm" />
               </span>
@@ -775,7 +775,7 @@ const SearchSitter = () => {
                 Annonce type
               </span>
             )}
-            {item.isNew && !isDemo && !isAssigned && (
+            {item.isNew && !isDemo && !isInactive && (
               <span className="absolute top-3 left-3 mt-8 bg-primary text-primary-foreground rounded-full px-2 py-1 text-xs flex items-center gap-1">
                 <Sparkles className="h-3 w-3" /> Nouveau
               </span>
