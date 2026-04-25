@@ -4,6 +4,7 @@
  * Fire-and-forget, throttle local pour éviter les boucles.
  */
 import { supabase } from "@/integrations/supabase/client";
+import { isInAppBrowser } from "@/lib/inAppBrowser";
 
 const SENT_FINGERPRINTS = new Map<string, number>();
 const THROTTLE_MS = 30_000; // n'envoie pas le même fp plus d'1x toutes les 30s
@@ -91,6 +92,7 @@ const THIRD_PARTY_STACK_PATTERNS: RegExp[] = [
  * Permet d'expliquer dans l'admin pourquoi elle est marquée comme ignorée.
  */
 export type ThirdPartyReason =
+  | "in_app_webview"        // Session entière dans un WebView tiers (FB_IAB/FBAV, Instagram, TikTok…)
   | "webview_bridge"        // Stack contient une signature de bridge WebView (FB, IG, TikTok…)
   | "extension"             // Source = chrome-extension:// / moz-extension:// …
   | "tracking_pixel"        // Source = gtag, fbevents, hotjar, intercom…
@@ -190,7 +192,17 @@ async function send(payload: {
   // Détection JS tiers (WebViews FB/IG, extensions, pixels…) : on n'abandonne
   // pas silencieusement — on enregistre avec une sévérité dédiée et un motif,
   // pour que l'admin sache pourquoi cette erreur n'a pas été retenue comme bug.
-  const thirdPartyReason = detectThirdPartySource(payload.source, payload.stack);
+  // Priorité au filtre par User-Agent : si la session entière tourne dans un
+  // WebView in-app (Facebook FB_IAB/FBAV, Instagram, TikTok…), TOUTES les
+  // erreurs sont marquées comme tierces, qu'elles aient ou non une signature
+  // de bridge dans le stack. Évite la pollution de /admin/errors par ces
+  // navigateurs notoirement instables (autofill, bridges natifs, JS injecté).
+  const inApp = isInAppBrowser();
+  const sourceReason = detectThirdPartySource(payload.source, payload.stack);
+  const thirdPartyReason: ThirdPartyReason | null = inApp
+    ? "in_app_webview"
+    : sourceReason;
+
   let severity = payload.severity ?? "error";
   let context = payload.context ?? null;
   if (thirdPartyReason) {
@@ -199,6 +211,10 @@ async function send(payload: {
       ...(context ?? {}),
       filtered: true,
       filter_reason: thirdPartyReason,
+      // Contexte additionnel utile dans l'admin
+      ...(inApp && typeof navigator !== "undefined"
+        ? { detected_user_agent: navigator.userAgent.slice(0, 200) }
+        : {}),
     };
   }
 

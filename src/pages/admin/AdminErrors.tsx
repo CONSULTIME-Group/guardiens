@@ -49,6 +49,11 @@ interface ErrorLog {
  * Voir src/lib/errorLogger.ts → detectThirdPartySource.
  */
 const THIRD_PARTY_REASON_LABELS: Record<string, { label: string; explanation: string }> = {
+  in_app_webview: {
+    label: "WebView in-app (FB, IG, TikTok…)",
+    explanation:
+      "L'utilisateur a ouvert le site depuis le navigateur intégré d'une application (Facebook FB_IAB/FBAV, Instagram, TikTok, Snapchat…). Ces WebViews injectent du JS instable (autofill, bridges natifs, trackers) qui génère des erreurs hors de notre contrôle. Toutes les erreurs reçues depuis ces sessions sont automatiquement écartées.",
+  },
   webview_bridge: {
     label: "Bridge WebView in-app",
     explanation:
