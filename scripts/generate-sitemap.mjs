@@ -36,7 +36,11 @@ function loadStaticRoutes() {
     const changefreq = m[4];
     const priorityMatch = block.match(/sitemapPriority:\s*(["'])([^"']+)\1/);
     if (!priorityMatch) continue;
-    routes.push({ loc: path_, priority: priorityMatch[2], changefreq });
+    // `index: false` → page non indexable, exclue du sitemap (cohérent avec
+    // robots.txt et <meta robots>). Source de vérité : siteRoutes.ts.
+    const indexMatch = block.match(/index:\s*(true|false)/);
+    const indexable = indexMatch ? indexMatch[1] === "true" : true;
+    routes.push({ loc: path_, priority: priorityMatch[2], changefreq, indexable });
   }
   if (routes.length === 0) throw new Error("Aucune route extraite de staticRoutes");
   return { siteUrl, routes };
@@ -44,13 +48,10 @@ function loadStaticRoutes() {
 
 const { siteUrl: SITE_URL, routes: STATIC_ROUTES } = loadStaticRoutes();
 
-// Routes à exclure du sitemap : doit rester COHÉRENT avec robots.txt et la
-// balise <meta robots> dans le code de chaque page.
-//   - /login           : disallow (robots.txt) — pas dans sitemap
-//   - /recherche       : disallow + noindex (SearchPage.tsx) — pas dans sitemap
-// /inscription est volontairement INDEXABLE (page de conversion).
-const SITEMAP_EXCLUDE = new Set(["/login", "/recherche"]);
-const staticPages = STATIC_ROUTES.filter((r) => !SITEMAP_EXCLUDE.has(r.loc));
+// Filtrage automatique : on ne garde que les routes marquées indexables.
+// Pas de SITEMAP_EXCLUDE en doublon — la décision est prise dans siteRoutes.ts
+// via le flag `index`. Toute incohérence est impossible par construction.
+const staticPages = STATIC_ROUTES.filter((r) => r.indexable);
 
 const cityLandingPages = [
   "annecy", "lyon", "grenoble", "caluire-et-cuire", "chambery", "aura",
