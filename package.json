@@ -6,9 +6,11 @@
   "scripts": {
     "dev": "vite",
     "generate-sitemap": "node scripts/generate-sitemap.mjs",
+    "generate-robots": "node scripts/generate-robots.mjs",
+    "generate-robots:check": "node scripts/generate-robots.mjs --check",
     "sync-index-html": "node scripts/sync-index-html.mjs",
     "sync-index-html:check": "node scripts/sync-index-html.mjs --check",
-    "build": "node scripts/sync-index-html.mjs && node scripts/generate-sitemap.mjs && vite build",
+    "build": "node scripts/sync-index-html.mjs && node scripts/generate-robots.mjs && node scripts/generate-sitemap.mjs && vite build",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
     "preview": "vite preview",
