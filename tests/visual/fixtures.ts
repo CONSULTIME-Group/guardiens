@@ -10,8 +10,8 @@
 export type ScenarioId =
   | "draft-owner"
   | "published-owner"
-  | "confirmed-owner"
-  | "completed-owner";
+  | "cancelled-sitter"
+  | "completed-sitter";
 
 export interface Scenario {
   id: ScenarioId;
