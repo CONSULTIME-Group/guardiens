@@ -187,6 +187,103 @@ const SitterSitView = ({
         avgRating={avgRating}
       />
 
+      {/* Apply bar — affichée tout en haut, juste sous le header,
+          pour que le CTA "Postuler" soit visible immédiatement sans scroll. */}
+      {activeRole === "sitter" && sit.status === "published" && (() => {
+        const days =
+          sit.start_date && sit.end_date
+            ? Math.max(
+                1,
+                Math.round(
+                  (new Date(sit.end_date).getTime() -
+                    new Date(sit.start_date).getTime()) /
+                    86_400_000,
+                ) + 1,
+              )
+            : 0;
+        const showRecap =
+          accessLevel !== 1 &&
+          canApplyGuards &&
+          !hasApplied &&
+          sit.accepting_applications;
+
+        return (
+          <aside
+            aria-label="Action de candidature"
+            className="mt-4 mb-6 rounded-2xl border border-border bg-card shadow-sm"
+          >
+            <div className="px-4 md:px-6 py-3 md:py-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3 md:gap-6">
+              {showRecap ? (
+                <div className="flex items-center gap-x-5 gap-y-1 text-xs md:text-sm text-muted-foreground flex-wrap min-w-0">
+                  {owner?.city && (
+                    <span className="inline-flex items-center gap-1.5">
+                      <MapPin className="h-3.5 w-3.5 text-primary/70" aria-hidden="true" />
+                      <span className="truncate max-w-[12rem]">{owner.city}</span>
+                    </span>
+                  )}
+                  {days > 0 && (
+                    <span className="inline-flex items-center gap-1.5">
+                      <CalendarDays className="h-3.5 w-3.5 text-primary/70" aria-hidden="true" />
+                      {days} {days === 1 ? "jour" : "jours"}
+                    </span>
+                  )}
+                  {pets.length > 0 && (
+                    <span className="inline-flex items-center gap-1.5">
+                      <PawPrint className="h-3.5 w-3.5 text-primary/70" aria-hidden="true" />
+                      {pets.length} {pets.length === 1 ? "animal" : "animaux"}
+                    </span>
+                  )}
+                  {sit.max_applications && (
+                    <span className="inline-flex items-center gap-1.5">
+                      <Users className="h-3.5 w-3.5 text-primary/70" aria-hidden="true" />
+                      {appCount} / {sit.max_applications} candidature{sit.max_applications > 1 ? "s" : ""}
+                    </span>
+                  )}
+                </div>
+              ) : (
+                <div aria-hidden="true" />
+              )}
+
+              <div className="w-full md:w-auto md:shrink-0">
+                {!sit.accepting_applications ? (
+                  <Button className="w-full md:w-auto md:min-w-[16rem] h-11 md:h-12 px-6 text-base font-semibold" disabled>
+                    Candidatures en cours d'analyse
+                  </Button>
+                ) : accessLevel === 1 ? (
+                  <AccessGateBanner
+                    level={accessLevel}
+                    profileCompletion={profileCompletion}
+                    context="guard"
+                  />
+                ) : hasApplied ? (
+                  <Button className="w-full md:w-auto md:min-w-[16rem] h-11 md:h-12 px-6 text-base font-semibold" disabled>
+                    <CheckCircle2 className="h-5 w-5 mr-2" aria-hidden="true" /> Candidature envoyée
+                  </Button>
+                ) : !canApplyGuards ? (
+                  <AccessGateBanner
+                    level="3A"
+                    profileCompletion={profileCompletion}
+                    context="guard"
+                  />
+                ) : (
+                  <Button
+                    className="w-full md:w-auto md:min-w-[16rem] h-11 md:h-12 px-8 text-base font-semibold shadow-sm"
+                    onClick={() => {
+                      trackEvent("sit_apply_clicked", {
+                        source: "sit_detail_top",
+                        metadata: { sit_id: sit.id },
+                      });
+                      setApplyOpen(true);
+                    }}
+                  >
+                    Postuler pour cette garde
+                  </Button>
+                )}
+              </div>
+            </div>
+          </aside>
+        );
+      })()}
       {/* Post-confirmation checklist */}
       {(sit.status === "confirmed" || sit.status === "in_progress") && (
         <div className="mb-8">
