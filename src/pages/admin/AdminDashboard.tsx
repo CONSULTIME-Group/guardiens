@@ -143,7 +143,7 @@ const AdminDashboard = () => {
         supabase.from("profiles").select("id, first_name, role, created_at").order("created_at", { ascending: false }).limit(5),
         supabase.from("sits").select("id, title, created_at, status, property_id, properties!inner(user_id, ...profiles!inner(first_name, city))").order("created_at", { ascending: false }).limit(5),
         supabase.from("reviews").select("id, overall_rating, created_at, reviewer_id, reviewee_id, sit_id, reviewer:profiles!reviews_reviewer_id_fkey(first_name), reviewee:profiles!reviews_reviewee_id_fkey(first_name)").order("created_at", { ascending: false }).limit(5),
-        supabase.from("applications").select("id, created_at, sit_id, sitter_id, sitter:profiles!applications_sitter_id_fkey(first_name), sit:sits!applications_sit_id_fkey(title)").order("created_at", { ascending: false }).limit(5),
+        supabase.rpc("admin_get_recent_applications_activity", { p_limit: 5 }),
         supabase.from("subscriptions").select("id", { count: "exact", head: true }).eq("status", "active"),
         // New queries for "À traiter"
         supabase.from("contact_messages").select("id", { count: "exact", head: true }).eq("status", "new"),
@@ -272,8 +272,8 @@ const AdminDashboard = () => {
       });
 
       (recentApplications || []).forEach((a: any) => {
-        const sitterName = a.sitter?.first_name || "Un gardien";
-        const sitTitle = a.sit?.title || "une garde";
+        const sitterName = a.sitter_first_name || "Un gardien";
+        const sitTitle = a.sit_title || "une garde";
         activityItems.push({
           id: `app-${a.id}`,
           text: `Nouvelle candidature de ${sitterName} pour ${sitTitle}`,
