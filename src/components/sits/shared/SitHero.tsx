@@ -5,6 +5,7 @@
  * - Lightbox plein écran au clic, navigation clavier (←/→/Esc) et swipe.
  */
 import { useState, useEffect, useCallback } from "react";
+import { createPortal } from "react-dom";
 import { ChevronLeft, ChevronRight, X, Maximize2 } from "lucide-react";
 
 interface SitHeroProps {
@@ -117,75 +118,78 @@ const SitHero = ({ photos, city, priority = false }: SitHeroProps) => {
         )}
       </div>
 
-      {/* Lightbox */}
-      {lightboxOpen && (
-        <div
-          className="fixed inset-0 z-[100] bg-black/95 flex items-center justify-center animate-fade-in"
-          role="dialog"
-          aria-modal="true"
-          aria-label="Galerie photos plein écran"
-          onClick={() => setLightboxOpen(false)}
-        >
-          {/* Bouton fermer */}
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              setLightboxOpen(false);
-            }}
-            className="absolute top-4 right-4 z-10 bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-full p-3 text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
-            aria-label="Fermer la galerie"
+      {/* Lightbox — rendue via portal pour échapper à tout stacking context
+          parent (sidebar sticky, layout flex) et garantir un vrai plein écran. */}
+      {lightboxOpen && typeof document !== "undefined" &&
+        createPortal(
+          <div
+            className="fixed inset-0 z-[9999] bg-black/95 flex items-center justify-center animate-fade-in"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Galerie photos plein écran"
+            onClick={() => setLightboxOpen(false)}
           >
-            <X className="h-5 w-5" />
-          </button>
+            {/* Bouton fermer */}
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                setLightboxOpen(false);
+              }}
+              className="absolute top-4 right-4 z-10 bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-full p-3 text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+              aria-label="Fermer la galerie"
+            >
+              <X className="h-5 w-5" />
+            </button>
 
-          {/* Compteur */}
-          {total > 1 && (
-            <div className="absolute top-4 left-4 z-10 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2 text-sm font-medium text-white">
-              {photoIndex + 1} / {total}
-            </div>
-          )}
+            {/* Compteur */}
+            {total > 1 && (
+              <div className="absolute top-4 left-4 z-10 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2 text-sm font-medium text-white">
+                {photoIndex + 1} / {total}
+              </div>
+            )}
 
-          {/* Flèches navigation */}
-          {total > 1 && (
-            <>
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  prev();
-                }}
-                className="absolute left-2 md:left-4 z-10 bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-full p-3 text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
-                aria-label="Photo précédente"
-              >
-                <ChevronLeft className="h-6 w-6" />
-              </button>
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  next();
-                }}
-                className="absolute right-2 md:right-4 z-10 bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-full p-3 text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
-                aria-label="Photo suivante"
-              >
-                <ChevronRight className="h-6 w-6" />
-              </button>
-            </>
-          )}
+            {/* Flèches navigation */}
+            {total > 1 && (
+              <>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    prev();
+                  }}
+                  className="absolute left-2 md:left-4 z-10 bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-full p-3 text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+                  aria-label="Photo précédente"
+                >
+                  <ChevronLeft className="h-6 w-6" />
+                </button>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    next();
+                  }}
+                  className="absolute right-2 md:right-4 z-10 bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-full p-3 text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+                  aria-label="Photo suivante"
+                >
+                  <ChevronRight className="h-6 w-6" />
+                </button>
+              </>
+            )}
 
-          {/* Image */}
-          <img
-            src={photos[photoIndex]}
-            alt={altFor(photoIndex)}
-            onClick={(e) => e.stopPropagation()}
-            onTouchStart={handleTouchStart}
-            onTouchEnd={handleTouchEnd}
-            className="max-h-[90vh] max-w-[95vw] object-contain select-none"
-            draggable={false}
-          />
-        </div>
-      )}
+            {/* Image */}
+            <img
+              src={photos[photoIndex]}
+              alt={altFor(photoIndex)}
+              onClick={(e) => e.stopPropagation()}
+              onTouchStart={handleTouchStart}
+              onTouchEnd={handleTouchEnd}
+              className="max-h-[90vh] max-w-[95vw] object-contain select-none"
+              draggable={false}
+            />
+          </div>,
+          document.body
+        )}
     </>
   );
 };
