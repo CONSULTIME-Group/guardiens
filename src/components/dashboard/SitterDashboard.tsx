@@ -42,7 +42,7 @@ const SitterDashboard = () => {
 
   const {
     loading, profileCompletion, identityVerified, identityStatus,
-    completedSits, avgRating, badgeCount, totalApps, cancellations,
+    completedSits, avgRating, reviewsCount, badgeCount, totalApps, cancellations,
     pendingAppsCount, unreadCount, isAvailable, isFounder,
     postalCode, avatarUrl, bio, hasAnimalExperience,
     hasEmergencyProfile, hasAcceptedRecent, nextGuard,
@@ -183,6 +183,7 @@ const SitterDashboard = () => {
         profileCompletion={profileCompletion}
         completedSits={completedSits}
         avgRating={avgRating}
+        reviewsCount={reviewsCount}
         badgeCount={badgeCount}
         totalApps={totalApps}
         reputation={reputation}
