@@ -159,9 +159,15 @@ test.describe("Realtime — focus reste logique après mise à jour exogène", (
     const scn = SCENARIOS["published-sitter"];
     const url = `${BASE_URL}/sits/${scn.sitId}?scenario=published-sitter`;
 
+    // Init du contexte de capture automatique à l'échec
+    currentFocusLog = [];
+    currentScenario = "realtime-published-to-cancelled-sitter";
+    currentPhase = "setup";
+
     // Onglet A : sitter consulte la fiche
     const ctxA = await browser.newContext({ viewport: { width: 1280, height: 900 } });
     const pageA = await ctxA.newPage();
+    currentPageA = pageA;
     await pageA.goto(url, { waitUntil: "networkidle" });
     await pageA.waitForFunction(() => !!document.querySelector("h1"), { timeout: 15_000 });
 
