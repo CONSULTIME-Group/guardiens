@@ -109,6 +109,11 @@ const OwnerSitView = ({
   );
 
   const isDraft = sit.status === "draft";
+  // canCancel — propriétaire :
+  // - published : annule l'annonce avant qu'elle parte
+  // - confirmed : annule la garde avant son démarrage (notifie le gardien)
+  // - in_progress : possible mais on force le contact direct ; non géré ici (cf. message d'aide modal)
+  // - draft / completed / cancelled / expired : pas d'annulation pertinente
   const canCancel = sit.status === "published" || sit.status === "confirmed";
   const avgRating =
     reviews.length > 0
