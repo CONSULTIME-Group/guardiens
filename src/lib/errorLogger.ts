@@ -154,6 +154,8 @@ async function send(payload: {
 }) {
   if (sessionCount >= MAX_PER_SESSION) return;
   if (shouldIgnore(payload.message)) return;
+  // Filtre par source : ignore JS injecté (WebViews FB/IG, extensions, pixels…)
+  if (isThirdPartySource(payload.source, payload.stack)) return;
   const now = Date.now();
   const last = SENT_FINGERPRINTS.get(payload.fingerprint);
   if (last && now - last < THROTTLE_MS) return;
