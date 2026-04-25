@@ -154,9 +154,21 @@ const AdminErrors = () => {
             Erreurs JavaScript et exceptions captées dans le navigateur des utilisateurs.
           </p>
         </div>
-        <Button onClick={load} variant="outline" size="sm" className="gap-2">
-          <RefreshCw className="h-4 w-4" /> Actualiser
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            onClick={archiveAll}
+            variant="outline"
+            size="sm"
+            className="gap-2"
+            disabled={archiving || loading || filtered.filter((e) => !e.resolved_at).length === 0}
+          >
+            <Archive className="h-4 w-4" />
+            {archiving ? "Archivage…" : "Tout archiver"}
+          </Button>
+          <Button onClick={load} variant="outline" size="sm" className="gap-2">
+            <RefreshCw className="h-4 w-4" /> Actualiser
+          </Button>
+        </div>
       </div>
 
       {/* Stats */}
