@@ -396,7 +396,11 @@ test.describe("Realtime — focus reste logique après mise à jour exogène", (
     // Laisse React appliquer le re-render
     await pageA.waitForTimeout(200);
 
+    currentPhase = "focus-after-emit";
     const focusAfter = await describeActiveElement(pageA);
+    currentFocusLog.push(
+      await snapshotFocusEntry(pageA, currentFocusLog.length + 1, "after emitSitUpdate(cancelled)", "phase=focus-after-emit")
+    );
 
     // Mêmes garanties que pour le test sitter
     expect(focusAfter.isInDom).toBe(true);
