@@ -6,11 +6,13 @@
  * minimale suffisante pour exécuter les specs locales.
  */
 import { defineConfig, devices } from "@playwright/test";
+import { createRequire } from "node:module";
+
+const requireFn = createRequire(import.meta.url);
 
 let config: any;
 try {
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  const { createLovableConfig } = require("lovable-agent-playwright-config/config");
+  const { createLovableConfig } = requireFn("lovable-agent-playwright-config/config");
   config = createLovableConfig({});
 } catch {
   config = defineConfig({
