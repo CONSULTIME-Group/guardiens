@@ -345,13 +345,44 @@ const SitterSitView = ({
 
       <SitFooterReassurance />
 
-      {/* Sitter apply bar — sticky bottom action bar */}
+      {/* Sitter apply bar — sticky bottom action bar.
+          Largeur calculée via CSS var --sidebar-width quand dispo (cf. layout)
+          avec fallback à 16rem (256px = la sidebar par défaut). */}
       {activeRole === "sitter" && sit.status === "published" && (
         <aside
           aria-label="Action de candidature"
-          className="fixed bottom-0 left-0 right-0 md:left-64 z-40 bg-background/95 backdrop-blur-md border-t border-border shadow-[0_-4px_16px_-4px_hsl(var(--foreground)/0.08)] pb-20 md:pb-0 supports-[padding:max(0px)]:pb-[max(env(safe-area-inset-bottom),5rem)] md:supports-[padding:max(0px)]:pb-[max(env(safe-area-inset-bottom),0.75rem)]"
+          className="fixed bottom-0 left-0 right-0 md:left-[var(--sidebar-width,16rem)] z-40 bg-background/95 backdrop-blur-md border-t border-border shadow-[0_-4px_16px_-4px_hsl(var(--foreground)/0.08)] pb-20 md:pb-0 supports-[padding:max(0px)]:pb-[max(env(safe-area-inset-bottom),5rem)] md:supports-[padding:max(0px)]:pb-[max(env(safe-area-inset-bottom),0.75rem)]"
         >
           <div className="max-w-4xl mx-auto px-4 py-3">
+            {/* Mini-récap : info contextuelle pour aider la décision juste
+                avant de cliquer "Postuler". Affiché uniquement si on a au
+                moins une donnée pertinente et qu'on n'est pas en gating. */}
+            {accessLevel !== 1 && canApplyGuards && !hasApplied && sit.accepting_applications && (
+              <div className="hidden sm:flex items-center justify-center gap-x-4 gap-y-1 text-xs text-muted-foreground mb-2 flex-wrap">
+                {owner?.city && <span>📍 {owner.city}</span>}
+                {sit.start_date && sit.end_date && (() => {
+                  const days = Math.max(
+                    1,
+                    Math.round(
+                      (new Date(sit.end_date).getTime() -
+                        new Date(sit.start_date).getTime()) /
+                        86_400_000,
+                    ) + 1,
+                  );
+                  return <span>📅 {days} {days === 1 ? "jour" : "jours"}</span>;
+                })()}
+                {pets.length > 0 && (
+                  <span>
+                    🐾 {pets.length} {pets.length === 1 ? "animal" : "animaux"}
+                  </span>
+                )}
+                {sit.max_applications && (
+                  <span>
+                    👥 {appCount} / {sit.max_applications} candidature{sit.max_applications > 1 ? "s" : ""}
+                  </span>
+                )}
+              </div>
+            )}
             {!sit.accepting_applications ? (
               <Button className="w-full h-12 text-base font-semibold" disabled>
                 Candidatures en cours d'analyse
