@@ -1,0 +1,164 @@
+/**
+ * Header partagé entre OwnerSitView et SitterSitView.
+ *
+ * Inclut :
+ * - Lien retour (différent selon rôle)
+ * - Hero photos (lightbox)
+ * - Titre + actions à droite (Modifier/Voir, ou Report)
+ * - Ligne meta : ville · dates · status · note
+ * - Owner card (masquée si on est soi-même le propriétaire)
+ *
+ * Reste 100% présentationnel : aucune logique métier ici, on reçoit tout via props.
+ */
+import { Link } from "react-router-dom";
+import { ArrowLeft, Calendar, MapPin, Star, Pencil, ExternalLink } from "lucide-react";
+import { format } from "date-fns";
+import { fr } from "date-fns/locale";
+import { Button } from "@/components/ui/button";
+import VerifiedBadge from "@/components/profile/VerifiedBadge";
+import ReportButton from "@/components/reports/ReportButton";
+import SitHero from "@/components/sits/shared/SitHero";
+import { getSitStatusConfig } from "@/components/sits/shared/sitConstants";
+
+interface SitDetailHeaderProps {
+  sitId: string;
+  sitTitle: string | null;
+  sitStatus: string;
+  startDate: string | null;
+  endDate: string | null;
+  flexibleDates: boolean | null;
+  photos: string[];
+  owner: any;
+  isOwner: boolean;
+  isAuthenticatedNonOwner: boolean;
+  reviewCount: number;
+  avgRating: string | null;
+}
+
+const formatDate = (d: string | null) =>
+  d ? format(new Date(d), "d MMMM yyyy", { locale: fr }) : "";
+
+const SitDetailHeader = ({
+  sitId,
+  sitTitle,
+  sitStatus,
+  startDate,
+  endDate,
+  flexibleDates,
+  photos,
+  owner,
+  isOwner,
+  isAuthenticatedNonOwner,
+  reviewCount,
+  avgRating,
+}: SitDetailHeaderProps) => {
+  const status = getSitStatusConfig(sitStatus);
+
+  return (
+    <>
+      <Link
+        to={isOwner ? "/sits" : "/search"}
+        className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-6"
+      >
+        <ArrowLeft className="h-4 w-4" />
+        {isOwner ? "Retour à mes annonces" : "Retour à la recherche"}
+      </Link>
+
+      {/* Hero: Photos gallery avec lightbox */}
+      <SitHero photos={photos} city={owner?.city} priority />
+
+      {/* Title, location, dates, status */}
+      <div className="flex items-start justify-between gap-4 mb-1">
+        <h1 className="font-heading text-2xl md:text-3xl font-bold">
+          {sitTitle || `Garde à ${owner?.city || "..."}`}
+        </h1>
+        <div className="flex items-center gap-2 shrink-0">
+          {isOwner && (
+            <>
+              <Link to={`/sits/${sitId}/edit`}>
+                <Button variant="outline" size="sm" className="gap-1.5">
+                  <Pencil className="h-3.5 w-3.5" /> Modifier
+                </Button>
+              </Link>
+              <Link
+                to={`/annonces/${sitId}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm text-primary hover:underline cursor-pointer flex items-center gap-1"
+              >
+                Voir comme un gardien <ExternalLink className="h-3.5 w-3.5" />
+              </Link>
+            </>
+          )}
+          {isAuthenticatedNonOwner && <ReportButton targetId={sitId} targetType="sit" />}
+        </div>
+      </div>
+
+      <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground mb-6">
+        {owner?.city && (
+          <span className="flex items-center gap-1.5">
+            <MapPin className="h-4 w-4" />
+            {owner.city}
+          </span>
+        )}
+        <span className="flex items-center gap-1.5">
+          <Calendar className="h-4 w-4" />
+          {formatDate(startDate)} → {formatDate(endDate)}
+          {flexibleDates && (
+            <span className="text-xs bg-accent px-2 py-0.5 rounded-full ml-1">Flexible</span>
+          )}
+        </span>
+        <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${status.className}`}>
+          {status.label}
+        </span>
+        {avgRating && (
+          <span className="flex items-center gap-1">
+            <Star className="h-3.5 w-3.5 text-secondary fill-secondary" />
+            {avgRating} ({reviewCount})
+          </span>
+        )}
+      </div>
+
+      {/* Owner card — masquée si on est soi-même le propriétaire (info redondante) */}
+      {owner && !isOwner && (
+        <div className="flex items-center gap-3 mb-6 p-4 bg-card rounded-xl border border-border">
+          <Link to={`/gardiens/${owner.id}`}>
+            {owner.avatar_url ? (
+              <img
+                src={owner.avatar_url}
+                alt={`Photo de ${owner.first_name}`}
+                loading="lazy"
+                className="w-14 h-14 rounded-full object-cover hover:ring-2 hover:ring-primary/30 transition-all"
+              />
+            ) : (
+              <div className="w-14 h-14 rounded-full bg-muted flex items-center justify-center font-heading text-lg font-bold">
+                {owner.first_name?.charAt(0) || "?"}
+              </div>
+            )}
+          </Link>
+          <div className="flex-1 min-w-0">
+            <Link
+              to={`/gardiens/${owner.id}`}
+              className="font-medium flex items-center gap-1.5 hover:underline"
+            >
+              {owner.first_name}
+              {owner.identity_verified && <VerifiedBadge />}
+            </Link>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              {owner.bio
+                ? owner.bio.slice(0, 80) + (owner.bio.length > 80 ? "…" : "")
+                : "Propriétaire"}
+            </p>
+          </div>
+          <Link to={`/gardiens/${owner.id}`}>
+            <Button variant="outline" size="sm">
+              Voir le profil
+            </Button>
+          </Link>
+        </div>
+      )}
+    </>
+  );
+};
+
+export default SitDetailHeader;

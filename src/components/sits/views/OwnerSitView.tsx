@@ -1,0 +1,509 @@
+/**
+ * Vue propriétaire de l'annonce de garde (`/sits/:id` quand on est l'owner).
+ *
+ * Comportements préservés depuis l'ancien `SitDetail.tsx` :
+ * - Bandeau brouillon + dialogue de confirmation de publication (avec rappel des dates)
+ * - Bandeau d'alerte gardien d'urgence (≤ 15 jours)
+ * - Boutons de partage (annonce publiée)
+ * - Historique des modifications de dates
+ * - PostConfirmationChecklist côté propriétaire
+ * - Onglets : Candidatures, Animaux, Logement (avec overrides + CTA profil), Attentes, Avis
+ * - Réouverture des candidatures (compteur ±)
+ * - Bloc "Gérer cette garde" (OwnerSitManagement) + modal d'annulation
+ */
+import { useState, useEffect, useCallback, useRef } from "react";
+import { Link } from "react-router-dom";
+import { Calendar, MapPin, Send, Plus, Minus, Star, PawPrint, Home, ClipboardList } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { format } from "date-fns";
+import { fr } from "date-fns/locale";
+
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
+import { trackEvent } from "@/lib/analytics";
+import { formatSitPeriod } from "@/lib/dateRange";
+
+import EmergencyAlertBanner from "@/components/sits/EmergencyAlertBanner";
+import ShareButtons from "@/components/sits/ShareButtons";
+import SitDateHistory from "@/components/sits/SitDateHistory";
+import ApplicationsList from "@/components/sits/ApplicationsList";
+import PostConfirmationChecklist from "@/components/sits/PostConfirmationChecklist";
+import CancelSitModal from "@/components/sits/CancelSitModal";
+import OwnerSitManagement from "@/components/sits/shared/OwnerSitManagement";
+
+import SitDetailHeader from "./SitDetailHeader";
+import AnimalsTab from "./tabs/AnimalsTab";
+import HousingTab from "./tabs/HousingTab";
+import ExpectationsTab from "./tabs/ExpectationsTab";
+import ReviewsTab from "./tabs/ReviewsTab";
+import type { SitData } from "./types";
+
+interface OwnerSitViewProps {
+  sit: SitData;
+  setSit: (sit: SitData) => void;
+  owner: any;
+  property: any;
+  pets: any[];
+  ownerProfile: any;
+  reviews: any[];
+  coords: { lat: number; lng: number } | null;
+  appCount: number;
+  pendingAppCount: number;
+  hasReviewedThisSit: boolean;
+  initialLogementOverride: string;
+  initialAnimauxOverride: string;
+  currentUserId: string;
+}
+
+const formatDate = (d: string | null) =>
+  d ? format(new Date(d), "d MMMM yyyy", { locale: fr }) : "";
+
+const OwnerSitView = ({
+  sit,
+  setSit,
+  owner,
+  property,
+  pets,
+  ownerProfile,
+  reviews,
+  coords,
+  appCount,
+  pendingAppCount,
+  hasReviewedThisSit,
+  initialLogementOverride,
+  initialAnimauxOverride,
+  currentUserId,
+}: OwnerSitViewProps) => {
+  const { toast } = useToast();
+  const [publishing, setPublishing] = useState(false);
+  const [publishConfirmOpen, setPublishConfirmOpen] = useState(false);
+  const [cancelOpen, setCancelOpen] = useState(false);
+  const [reopenCount, setReopenCount] = useState(3);
+  const [logementOverride, setLogementOverride] = useState(initialLogementOverride);
+  const [animauxOverride, setAnimauxOverride] = useState(initialAnimauxOverride);
+  const [internalAppCount, setInternalAppCount] = useState(appCount);
+
+  // sync if parent re-fetches
+  useEffect(() => setInternalAppCount(appCount), [appCount]);
+
+  const overrideSaveTimeout = useRef<NodeJS.Timeout | null>(null);
+  const saveOverride = useCallback(
+    (field: "logement_override" | "animaux_override", value: string) => {
+      if (overrideSaveTimeout.current) clearTimeout(overrideSaveTimeout.current);
+      overrideSaveTimeout.current = setTimeout(async () => {
+        await supabase.from("sits").update({ [field]: value } as any).eq("id", sit.id);
+      }, 800);
+    },
+    [sit.id],
+  );
+
+  const isDraft = sit.status === "draft";
+  const canCancel = sit.status === "published" || sit.status === "confirmed";
+  const avgRating =
+    reviews.length > 0
+      ? (reviews.reduce((s: number, r: any) => s + r.overall_rating, 0) / reviews.length).toFixed(1)
+      : null;
+
+  const handlePublish = async () => {
+    if (!isDraft || publishing) return;
+    setPublishing(true);
+    const { error } = await supabase
+      .from("sits")
+      .update({ status: "published" as any })
+      .eq("id", sit.id)
+      .eq("user_id", currentUserId);
+    setPublishing(false);
+    if (error) {
+      toast({
+        variant: "destructive",
+        title: "Publication impossible",
+        description: "Le brouillon n'a pas pu être publié.",
+      });
+      return;
+    }
+    setSit({ ...sit, status: "published" });
+    toast({
+      title: "Annonce publiée",
+      description: "Les gardiens peuvent maintenant candidater.",
+    });
+  };
+
+  return (
+    <>
+      {/* Draft banner */}
+      {isDraft && (
+        <div className="mb-6 rounded-xl border border-border bg-accent/50 p-4 md:p-5">
+          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+            <div>
+              <p className="font-heading text-base font-semibold">
+                Cette annonce est encore en brouillon
+              </p>
+              <p className="text-sm text-muted-foreground">
+                Publie-la pour qu'elle apparaisse dans la recherche.
+              </p>
+            </div>
+            <Button
+              onClick={() => setPublishConfirmOpen(true)}
+              disabled={publishing}
+              className="gap-2 md:self-start"
+            >
+              <Send className="h-4 w-4" />
+              {publishing ? "Publication..." : "Publier l'annonce"}
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {/* Confirmation publication — rappel des dates exactes */}
+      <AlertDialog open={publishConfirmOpen} onOpenChange={setPublishConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmer la publication</AlertDialogTitle>
+            <AlertDialogDescription asChild>
+              <div className="space-y-3 pt-2">
+                <p>Vérifiez les informations avant que votre annonce ne devienne visible :</p>
+                <div className="rounded-lg border border-primary/20 bg-primary/5 p-3 text-sm space-y-1.5">
+                  <div className="flex items-center gap-2 text-foreground font-medium">
+                    <Calendar className="h-4 w-4 text-primary shrink-0" />
+                    <span>
+                      {formatSitPeriod(sit.start_date, sit.end_date) || "Dates non renseignées"}
+                    </span>
+                  </div>
+                  {owner?.city && (
+                    <div className="flex items-center gap-2 text-muted-foreground">
+                      <MapPin className="h-4 w-4 shrink-0" />
+                      <span>{owner.city}</span>
+                    </div>
+                  )}
+                  {sit.flexible_dates && (
+                    <p className="text-xs text-muted-foreground italic">Dates flexibles</p>
+                  )}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Vous pourrez toujours modifier l'annonce après publication.
+                </p>
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annuler</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={async () => {
+                setPublishConfirmOpen(false);
+                await handlePublish();
+              }}
+            >
+              Publier
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Emergency sitter alert — owner only, published sit starting within 15 days */}
+      {sit.status === "published" && owner?.city && (
+        <EmergencyAlertBanner
+          sitId={sit.id}
+          sitCity={owner.city}
+          startDate={sit.start_date}
+        />
+      )}
+
+      {/* Share buttons — visible to the owner of a published listing so they can broadcast it */}
+      {sit.status === "published" && (
+        <div className="mb-6">
+          <ShareButtons
+            sitId={sit.id}
+            title={sit.title || `Garde à ${owner?.city || "France"}`}
+            city={owner?.city}
+            startDate={sit.start_date}
+            endDate={sit.end_date}
+            source="owner_sit_detail"
+          />
+        </div>
+      )}
+
+      {/* Header partagé */}
+      <SitDetailHeader
+        sitId={sit.id}
+        sitTitle={sit.title}
+        sitStatus={sit.status}
+        startDate={sit.start_date}
+        endDate={sit.end_date}
+        flexibleDates={sit.flexible_dates}
+        photos={(property as any)?.photos || []}
+        owner={owner}
+        isOwner
+        isAuthenticatedNonOwner={false}
+        reviewCount={reviews.length}
+        avgRating={avgRating}
+      />
+
+      {/* Historique des modifications de dates */}
+      <SitDateHistory sitId={sit.id} />
+
+      {/* Post-confirmation checklist */}
+      {(sit.status === "confirmed" || sit.status === "in_progress") && (
+        <div className="mb-8">
+          <PostConfirmationChecklist
+            sitId={sit.id}
+            sitOwnerId={sit.user_id}
+            propertyId={sit.property_id}
+            startDate={sit.start_date}
+            endDate={sit.end_date}
+            ownerCity={owner?.city}
+            isOwner
+          />
+        </div>
+      )}
+
+      {/* Tabbed content */}
+      <Tabs defaultValue="candidatures" className="mt-2">
+        <TabsList className="w-full justify-start border-b border-border rounded-none bg-transparent h-auto p-0 gap-0 overflow-x-auto">
+          <TabsTrigger
+            value="candidatures"
+            className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-2.5 text-sm"
+          >
+            Candidatures ({internalAppCount})
+            {pendingAppCount > 0 && (
+              <span className="w-2 h-2 rounded-full bg-primary inline-block ml-1 mb-0.5" />
+            )}
+          </TabsTrigger>
+          <TabsTrigger
+            value="animals"
+            className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-2.5 text-sm gap-1.5"
+          >
+            <PawPrint className="h-3.5 w-3.5" /> Animaux
+          </TabsTrigger>
+          <TabsTrigger
+            value="housing"
+            className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-2.5 text-sm gap-1.5"
+          >
+            <Home className="h-3.5 w-3.5" /> Logement
+          </TabsTrigger>
+          <TabsTrigger
+            value="expectations"
+            className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-2.5 text-sm gap-1.5"
+          >
+            <ClipboardList className="h-3.5 w-3.5" /> Attentes
+          </TabsTrigger>
+          <TabsTrigger
+            value="reviews"
+            className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-2.5 text-sm gap-1.5"
+          >
+            <Star className="h-3.5 w-3.5" /> Avis ({reviews.length})
+          </TabsTrigger>
+        </TabsList>
+
+        {/* Candidatures tab (owner only) */}
+        <TabsContent value="candidatures" className="mt-6 space-y-4">
+          {!sit.accepting_applications && (
+            <div className="rounded-xl border border-primary/20 bg-primary/5 p-4 space-y-3">
+              <div>
+                <p className="text-sm font-semibold text-foreground">Candidatures closes</p>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  {sit.max_applications
+                    ? `Le maximum de ${sit.max_applications} candidature${sit.max_applications > 1 ? "s" : ""} a été atteint.`
+                    : "Vous avez fermé les candidatures."}
+                </p>
+              </div>
+              <div className="flex items-center gap-2 flex-wrap">
+                <div className="flex items-center gap-1">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    className="h-8 w-8"
+                    onClick={() => setReopenCount((c) => Math.max(1, c - 1))}
+                    disabled={reopenCount <= 1}
+                  >
+                    <Minus className="h-3.5 w-3.5" />
+                  </Button>
+                  <span className="w-8 text-center text-sm font-medium">{reopenCount}</span>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    className="h-8 w-8"
+                    onClick={() => setReopenCount((c) => Math.min(20, c + 1))}
+                    disabled={reopenCount >= 20}
+                  >
+                    <Plus className="h-3.5 w-3.5" />
+                  </Button>
+                </div>
+                <Button
+                  size="sm"
+                  onClick={async () => {
+                    const newMax = (sit.max_applications || internalAppCount) + reopenCount;
+                    await supabase
+                      .from("sits")
+                      .update({
+                        accepting_applications: true,
+                        max_applications: newMax,
+                      } as any)
+                      .eq("id", sit.id);
+                    setSit({
+                      ...sit,
+                      accepting_applications: true,
+                      max_applications: newMax,
+                    });
+                    toast({
+                      title: "Candidatures rouvertes",
+                      description: `${reopenCount} place${reopenCount > 1 ? "s" : ""} supplémentaire${reopenCount > 1 ? "s" : ""} ouverte${reopenCount > 1 ? "s" : ""}.`,
+                    });
+                  }}
+                >
+                  Ouvrir {reopenCount} candidature{reopenCount > 1 ? "s" : ""} de plus
+                </Button>
+              </div>
+            </div>
+          )}
+          {sit.accepting_applications && sit.max_applications && (
+            <p className="text-xs text-muted-foreground">
+              {internalAppCount}/{sit.max_applications} candidature
+              {sit.max_applications > 1 ? "s" : ""} reçue{internalAppCount > 1 ? "s" : ""}
+            </p>
+          )}
+          <ApplicationsList
+            sitId={sit.id}
+            sitTitle={sit.title}
+            petNames={pets.map((p: any) => p.name)}
+            startDate={formatDate(sit.start_date)}
+            endDate={formatDate(sit.end_date)}
+            propertyId={sit.property_id}
+            sitStatus={sit.status}
+          />
+        </TabsContent>
+
+        {/* Animals tab */}
+        <TabsContent value="animals" className="mt-6">
+          <AnimalsTab pets={pets} ownerFirstName={owner?.first_name} />
+        </TabsContent>
+
+        {/* Housing tab — avec blocs spécifiques propriétaire en tête */}
+        <TabsContent value="housing" className="mt-6 space-y-6">
+          <div className="bg-muted/30 rounded-xl p-4 mb-4 border border-border">
+            <p className="text-sm text-muted-foreground mb-3">
+              Le logement et les animaux se gèrent depuis votre profil. Les modifications
+              s'appliquent à toutes vos annonces.
+            </p>
+            <Link
+              to="/owner-profile"
+              className="border border-border rounded-full px-4 py-2 text-sm text-foreground hover:border-primary transition-colors inline-block"
+            >
+              Modifier mon profil →
+            </Link>
+          </div>
+
+          <div className="bg-card rounded-xl border border-border p-5">
+            <h3 className="text-sm font-medium text-foreground mb-1">
+              Spécifique à cette garde (optionnel)
+            </h3>
+            <p className="text-xs text-muted-foreground mb-3">
+              Ces informations s'appliquent uniquement à cette garde et complètent votre profil.
+            </p>
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm font-medium text-foreground block mb-1">
+                  Précisions sur le logement
+                </label>
+                <textarea
+                  rows={3}
+                  className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  placeholder="Ex : La chambre d'amis sera fermée, accès jardin uniquement le matin..."
+                  value={logementOverride}
+                  onChange={(e) => {
+                    setLogementOverride(e.target.value);
+                    saveOverride("logement_override", e.target.value);
+                  }}
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-foreground block mb-1">
+                  Précisions sur les animaux
+                </label>
+                <textarea
+                  rows={3}
+                  className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  placeholder="Ex : Rex aura besoin d'une promenade supplémentaire le soir pendant cette période..."
+                  value={animauxOverride}
+                  onChange={(e) => {
+                    setAnimauxOverride(e.target.value);
+                    saveOverride("animaux_override", e.target.value);
+                  }}
+                />
+              </div>
+            </div>
+          </div>
+
+          <HousingTab property={property} owner={owner} coords={coords} />
+        </TabsContent>
+
+        {/* Expectations tab */}
+        <TabsContent value="expectations" className="mt-6 space-y-6">
+          <ExpectationsTab
+            ownerProfile={ownerProfile}
+            specificExpectations={sit.specific_expectations}
+            openTo={sit.open_to}
+          />
+        </TabsContent>
+
+        {/* Reviews tab */}
+        <TabsContent value="reviews" className="mt-6">
+          <ReviewsTab
+            sitId={sit.id}
+            sitOwnerId={sit.user_id}
+            sitStatus={sit.status}
+            currentUserId={currentUserId}
+            hasReviewedThisSit={hasReviewedThisSit}
+          />
+        </TabsContent>
+      </Tabs>
+
+      {/* Bloc unifié de gestion */}
+      <OwnerSitManagement
+        sitId={sit.id}
+        propertyId={sit.property_id}
+        status={sit.status}
+        canCancel={canCancel}
+        onCancelClick={() => setCancelOpen(true)}
+      />
+
+      <div className="mt-8 bg-primary/5 border border-primary/10 rounded-xl p-5 text-center">
+        <p className="font-heading text-sm font-semibold text-primary">
+          Vous partez l'esprit léger — et si un imprévu survient, votre réseau local de gardiens
+          prend le relais.
+        </p>
+        <p className="text-xs text-muted-foreground mt-1">
+          Profils vérifiés · Avis croisés · Gardiens d'urgence mobilisables
+        </p>
+      </div>
+
+      <CancelSitModal
+        open={cancelOpen}
+        onOpenChange={setCancelOpen}
+        sitId={sit.id}
+        sitTitle={sit.title}
+        sitOwnerId={sit.user_id}
+        startDate={formatDate(sit.start_date)}
+        endDate={formatDate(sit.end_date)}
+        onCancelled={() => {
+          setSit({ ...sit, status: "cancelled" });
+          setCancelOpen(false);
+        }}
+      />
+    </>
+  );
+};
+
+export default OwnerSitView;
