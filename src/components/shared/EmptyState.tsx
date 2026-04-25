@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
@@ -12,29 +13,53 @@ import walkingDogImg from "@/assets/empty-states/walking-dog.webp";
 import emptyCalendarImg from "@/assets/empty-states/empty-calendar.webp";
 import heartBookmarkImg from "@/assets/empty-states/heart-bookmark.webp";
 
-/* Composant générique image — applique le mix-blend-multiply pour
-   intégrer la peinture au fond crème de la page (évite le rectangle
-   visible si la couleur de fond du site diffère légèrement). */
-const PaintedIllustration = ({ src, alt }: { src: string; alt: string }) => (
-  <img
-    src={src}
-    alt={alt}
-    loading="lazy"
-    width={1024}
-    height={1024}
-    /* Tailles fluides : 9rem (144px) en très petit écran, 11rem (176px) sm,
-       13rem (208px) md, 14rem (224px) lg+. max-w-[60vw] empêche tout
-       débordement même sur 320px. block + mx-auto garantit le centrage. */
-    className="block mx-auto h-auto w-36 sm:w-44 md:w-52 lg:w-56 max-w-[60vw] mix-blend-multiply select-none pointer-events-none dark:mix-blend-screen dark:opacity-80 motion-safe:animate-painted-reveal motion-reduce:opacity-100"
-    draggable={false}
-  />
-);
+import { SVG_FALLBACKS } from "./empty-state-fallbacks";
 
-const SleepingCat = () => <PaintedIllustration src={sleepingCatImg} alt="" />;
-const EmptyMailbox = () => <PaintedIllustration src={emptyMailboxImg} alt="" />;
-const WalkingDog = () => <PaintedIllustration src={walkingDogImg} alt="" />;
-const EmptyCalendar = () => <PaintedIllustration src={emptyCalendarImg} alt="" />;
-const HeartBookmark = () => <PaintedIllustration src={heartBookmarkImg} alt="" />;
+/* Composant générique image — applique le mix-blend-multiply pour
+   intégrer la peinture au fond crème de la page. En cas d'échec de
+   chargement (réseau, 404, blocage), bascule sur un SVG inline léger
+   qui garde la même empreinte visuelle (taille, centrage, blend). */
+const PaintedIllustration = ({
+  src,
+  alt,
+  fallbackKey,
+}: {
+  src: string;
+  alt: string;
+  fallbackKey: IllustrationKey;
+}) => {
+  const [errored, setErrored] = useState(false);
+  const wrapperClass =
+    "block mx-auto h-auto w-36 sm:w-44 md:w-52 lg:w-56 max-w-[60vw] mix-blend-multiply select-none pointer-events-none dark:mix-blend-screen dark:opacity-80 motion-safe:animate-painted-reveal motion-reduce:opacity-100";
+
+  if (errored) {
+    const Fallback = SVG_FALLBACKS[fallbackKey];
+    return (
+      <div className={wrapperClass} role="img" aria-label={alt}>
+        <Fallback />
+      </div>
+    );
+  }
+
+  return (
+    <img
+      src={src}
+      alt={alt}
+      loading="lazy"
+      width={1024}
+      height={1024}
+      onError={() => setErrored(true)}
+      className={wrapperClass}
+      draggable={false}
+    />
+  );
+};
+
+const SleepingCat = () => <PaintedIllustration src={sleepingCatImg} alt="" fallbackKey="sleepingCat" />;
+const EmptyMailbox = () => <PaintedIllustration src={emptyMailboxImg} alt="" fallbackKey="emptyMailbox" />;
+const WalkingDog = () => <PaintedIllustration src={walkingDogImg} alt="" fallbackKey="walkingDog" />;
+const EmptyCalendar = () => <PaintedIllustration src={emptyCalendarImg} alt="" fallbackKey="emptyCalendar" />;
+const HeartBookmark = () => <PaintedIllustration src={heartBookmarkImg} alt="" fallbackKey="heartBookmark" />;
 
 export const ILLUSTRATIONS = {
   sleepingCat: SleepingCat,
