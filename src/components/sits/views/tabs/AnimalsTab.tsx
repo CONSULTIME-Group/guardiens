@@ -70,6 +70,9 @@ function uniqueSharedValue<T>(values: (T | null | undefined)[]): T | null {
 
 const AnimalsTab = ({ pets, ownerFirstName }: AnimalsTabProps) => {
   const [breedAccordions, setBreedAccordions] = useState<Record<string, boolean>>({});
+  // Photo pet ouverte en lightbox (null = aucune). Stocke {src, alt} pour
+  // découpler du cycle de vie de la liste pets (évite les flickers).
+  const [lightboxPhoto, setLightboxPhoto] = useState<{ src: string; alt: string } | null>(null);
 
   // Calcule les valeurs partagées par TOUS les animaux pour les hisser en bandeau.
   const sharedAlone = useMemo(
