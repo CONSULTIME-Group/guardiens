@@ -30,6 +30,7 @@ type ViewerType = "anonymous" | "gardien" | "proprio" | "owner_of_sit" | "admin"
 
 const PublicSitDetail = () => {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const { user, isAuthenticated } = useAuth();
   const { hasAccess } = useSubscriptionAccess();
   const [sit, setSit] = useState<any>(null);
