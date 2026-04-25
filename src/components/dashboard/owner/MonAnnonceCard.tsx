@@ -4,6 +4,7 @@ import { format, differenceInDays } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Eye, RefreshCw, Plus, PawPrint, Home } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import ShareButtons from "@/components/sits/ShareButtons";
 import { capitalize, SPECIES_LABEL } from "./helpers";
 import type { SitRow, Pet } from "./types";
 
