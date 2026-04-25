@@ -32,35 +32,48 @@ const PaintedIllustration = ({
   fallbackKey: IllustrationKey;
 }) => {
   const [errored, setErrored] = useState(false);
-  // Tailles +40% par rapport à la version précédente (w-36→w-[12.6rem], etc.)
-  // mix-blend-darken au lieu de multiply : conserve mieux les couleurs claires
-  // de l'aquarelle et évite le "halo gris" sur les zones crème de l'image
-  // lorsque le fond de page diffère légèrement (blanc, gris, carte).
-  // Stratégie : on superpose AU-DESSUS de l'image un masque radial qui peint
-  // la couleur du fond CONTEXTUEL (variable CSS --background, héritée de la
-  // page/carte/section où l'EmptyState est rendu) sur les bords du carré.
-  // Le centre reste 100% transparent → l'illustration aquarelle est nette,
-  // les bords (où se trouve le fond crème de l'image) sont recouverts par
-  // la couleur exacte du parent → aucun halo possible, peu importe le fond.
-  // Tailles +40% par rapport à v1.
+  // Tailles +40% par rapport à v1 (w-36 → w-[12.6rem], etc.).
+  //
+  // Stratégie de fondu — DOUBLE adaptation thème + contexte :
+  //
+  // 1. LIGHT MODE
+  //    Le fond crème de l'aquarelle (#FAF9F6) ≈ couleur de page (--background:
+  //    40 33% 97%). On utilise `mix-blend-darken` pour que les pixels clairs
+  //    de l'image laissent passer le fond du contexte (carte, section, page)
+  //    et un overlay radial discret peint la couleur exacte de --background
+  //    sur les bords pour annuler tout micro-écart.
+  //
+  // 2. DARK MODE
+  //    Le fond crème de l'aquarelle est en violent contraste avec le fond
+  //    sombre (--background: 160 10% 8%). Sans correction, l'image apparaît
+  //    comme un disque lumineux flottant. On applique alors un filtre CSS
+  //    `invert(1) hue-rotate(180deg)` qui transforme le crème de l'image en
+  //    sombre (proche de --background) tout en préservant les teintes
+  //    aquarelle (le hue-rotate compense l'inversion des couleurs). Combiné
+  //    avec un overlay radial plus marqué (commence plus tôt et plus opaque),
+  //    le rendu se fond exactement comme en light, sans halo.
   const wrapperClass =
     "relative block mx-auto h-auto w-[12.6rem] sm:w-[15.4rem] md:w-[18.2rem] lg:w-[19.6rem] max-w-[84vw] aspect-square select-none pointer-events-none motion-safe:animate-painted-reveal motion-reduce:opacity-100";
 
+  // Light : darken (laisse passer le fond du contexte sur les zones claires).
+  // Dark  : invert + hue-rotate transforme crème → sombre, opacité 90 % pour
+  //         atténuer légèrement la saturation et éviter tout aspect néon.
   const imgClass =
-    "absolute inset-0 w-full h-full object-contain mix-blend-darken dark:mix-blend-screen dark:opacity-80";
+    "absolute inset-0 w-full h-full object-contain mix-blend-darken dark:mix-blend-normal dark:[filter:invert(1)_hue-rotate(180deg)_brightness(0.9)_saturate(0.85)] dark:opacity-90";
 
-  // Overlay radial qui fond les bords vers la couleur de fond du contexte.
-  // hsl(var(--background)) suit automatiquement le thème (clair/sombre) et
-  // le contexte (carte, section, page).
+  // Overlay radial : fond les bords vers --background.
+  // - Light : transition douce et tardive (le contraste est minime).
+  // - Dark  : transition plus précoce et plus opaque pour absorber les pixels
+  //           résiduels qui ne sont pas parfaitement noirs après inversion.
   const fadeOverlayStyle: React.CSSProperties = {
     background:
-      "radial-gradient(ellipse at center, transparent 50%, hsl(var(--background) / 0.55) 68%, hsl(var(--background)) 88%)",
+      "radial-gradient(ellipse at center, transparent var(--es-fade-start, 50%), hsl(var(--background) / var(--es-fade-mid-alpha, 0.55)) var(--es-fade-mid, 68%), hsl(var(--background)) var(--es-fade-end, 88%))",
   };
 
   const renderFade = () => (
     <div
       aria-hidden="true"
-      className="absolute inset-0 pointer-events-none"
+      className="absolute inset-0 pointer-events-none dark:[--es-fade-start:38%] dark:[--es-fade-mid-alpha:0.7] dark:[--es-fade-mid:58%] dark:[--es-fade-end:82%]"
       style={fadeOverlayStyle}
     />
   );
