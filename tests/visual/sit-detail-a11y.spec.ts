@@ -644,6 +644,9 @@ test.describe("Accessibilité — /sits/:id", () => {
       //   - On lit la couleur de fond du premier ancêtre opaque (approximation).
       //   - On ignore les images d'arrière-plan (background-image), donc tout
       //     texte posé sur une photo est exclu (impossible à mesurer fiablement).
+      //   - Les éléments décoratifs / icônes / aria-hidden sont filtrés via
+      //     `window.__shouldSkipContrast` (cf. tests/visual/contrast-skip-rules.ts).
+      await page.addScriptTag({ content: CONTRAST_SKIP_SCRIPT });
       const contrastViolations = await page.evaluate(() => {
         const parseRgb = (s: string): [number, number, number, number] | null => {
           const m = s.match(/rgba?\(([^)]+)\)/);
