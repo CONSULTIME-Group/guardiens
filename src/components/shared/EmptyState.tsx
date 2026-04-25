@@ -36,7 +36,7 @@ const PaintedIllustration = ({
   const [errored, setErrored] = useState(false);
 
   const wrapperClass =
-    "relative block mx-auto h-auto w-[12.6rem] sm:w-[15.4rem] md:w-[18.2rem] lg:w-[19.6rem] max-w-[84vw] aspect-square select-none pointer-events-none motion-safe:animate-painted-reveal motion-reduce:opacity-100";
+    "illustration-wrapper relative block mx-auto h-auto w-[12.6rem] sm:w-[15.4rem] md:w-[18.2rem] lg:w-[19.6rem] max-w-[84vw] aspect-square select-none pointer-events-none motion-safe:animate-painted-reveal motion-reduce:opacity-100";
 
   const imgClass =
     "illustration-blend absolute inset-0 w-full h-full object-contain";
