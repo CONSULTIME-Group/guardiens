@@ -130,6 +130,24 @@ const SitDetail = () => {
     load();
   }, [id, user]);
 
+  // Realtime : applications + sit. Le hook met à jour les compteurs et patche
+  // localement les champs susceptibles de changer (statut, accepting_applications…).
+  const handleSitPatch = useCallback((patch: Partial<SitData>) => {
+    setSit((prev) => (prev ? ({ ...prev, ...patch } as SitData) : prev));
+  }, []);
+  const handleApplicationsCounts = useCallback(
+    ({ appCount, pendingAppCount }: { appCount: number; pendingAppCount: number }) => {
+      setAppCount(appCount);
+      setPendingAppCount(pendingAppCount);
+    },
+    [],
+  );
+  useSitRealtime({
+    sitId: sit?.id,
+    onSitChange: handleSitPatch,
+    onApplicationsChange: handleApplicationsCounts,
+  });
+
   if (loading) return <SitDetailSkeleton />;
   if (!sit)
     return (
