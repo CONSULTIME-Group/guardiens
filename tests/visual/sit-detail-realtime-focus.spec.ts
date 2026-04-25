@@ -274,18 +274,20 @@ test.describe("Realtime — focus reste logique après mise à jour exogène", (
       }
     }
 
-    // 4. Le focus reste sous <main> (ou est neutre sur <body>) — il ne doit
-    //    surtout PAS atterrir dans le chrome de navigation (sidebar / nav).
+    // 4. Le focus ne doit PAS atterrir dans le chrome de navigation
+    //    (sidebar / nav / aside). Il peut être dans <main>, dans un portail
+    //    Radix attaché au body, ou sur <body> lui-même — mais jamais dans
+    //    une zone de navigation globale.
     if (!focusAfter.isBody) {
-      const isUnderMain = await pageA.evaluate(() => {
+      const isInNavChrome = await pageA.evaluate(() => {
         const el = document.activeElement;
         if (!el) return false;
-        return !!el.closest("main");
+        return !!el.closest("nav, aside, header[role='banner']");
       });
       expect(
-        isUnderMain,
-        `Après la mise à jour realtime, le focus ne doit pas migrer hors de <main> (sidebar/nav). Focus: ${JSON.stringify(focusAfter)}`
-      ).toBe(true);
+        isInNavChrome,
+        `Après la mise à jour realtime, le focus ne doit pas migrer dans la sidebar/nav. Focus: ${JSON.stringify(focusAfter)}`
+      ).toBe(false);
     }
 
     await ctxA.close();
