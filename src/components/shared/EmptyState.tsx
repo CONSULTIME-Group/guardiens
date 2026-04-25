@@ -6,11 +6,11 @@ import type { LucideIcon } from "lucide-react";
 /* ── Illustrations gouache peintes à la main, palette du site ──
    Vert sapin #2C7A5C · Terre brune #94673D · Crème #FAF7F1
    Style éditorial premium, livre d'enfant raffiné. */
-import sleepingCatImg from "@/assets/empty-states/sleeping-cat.png";
-import emptyMailboxImg from "@/assets/empty-states/empty-mailbox.png";
-import walkingDogImg from "@/assets/empty-states/walking-dog.png";
-import emptyCalendarImg from "@/assets/empty-states/empty-calendar.png";
-import heartBookmarkImg from "@/assets/empty-states/heart-bookmark.png";
+import sleepingCatImg from "@/assets/empty-states/sleeping-cat.webp";
+import emptyMailboxImg from "@/assets/empty-states/empty-mailbox.webp";
+import walkingDogImg from "@/assets/empty-states/walking-dog.webp";
+import emptyCalendarImg from "@/assets/empty-states/empty-calendar.webp";
+import heartBookmarkImg from "@/assets/empty-states/heart-bookmark.webp";
 
 /* Composant générique image — applique le mix-blend-multiply pour
    intégrer la peinture au fond crème de la page (évite le rectangle
