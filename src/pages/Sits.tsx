@@ -1,5 +1,5 @@
 import { useAuth } from "@/contexts/AuthContext";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import {
   Plus, Calendar, MessageSquare, Star, Users, Eye, BookOpen,
   MapPin, Clock, MoreHorizontal, XCircle, CheckCircle,
@@ -60,7 +60,7 @@ const appStatusConfig: Record<string, { label: string; className: string }> = {
 type Tab = "upcoming" | "in_progress" | "completed" | "cancelled";
 
 const tabs: { value: Tab; label: string; icon: typeof Calendar }[] = [
-  { value: "upcoming", label: "A venir", icon: Calendar },
+  { value: "upcoming", label: "À venir", icon: Calendar },
   { value: "in_progress", label: "En cours", icon: Clock },
   { value: "completed", label: "Passées", icon: CheckCircle },
   { value: "cancelled", label: "Annulées", icon: XCircle },
