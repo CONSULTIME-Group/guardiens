@@ -56,7 +56,7 @@ const PublicSitDetail = () => {
 
       // public_profiles : vue publique (RLS de profiles bloque les autres users)
       const [ownerRes, propRes, reviewsRes, badgeRes] = await Promise.all([
-        supabase.from("public_profiles").select("id, first_name, city, avatar_url, identity_verified, bio").eq("id", sitData.user_id).limit(1),
+        supabase.from("public_profiles").select("id, first_name, city, avatar_url, identity_verified, bio, completed_sits_count, is_founder").eq("id", sitData.user_id).limit(1),
         supabase.from("properties").select("*").eq("id", sitData.property_id).limit(1),
         supabase.from("reviews").select("overall_rating").eq("reviewee_id", sitData.user_id).eq("published", true),
         supabase.from("badge_attributions").select("badge_id").eq("user_id", sitData.user_id),
