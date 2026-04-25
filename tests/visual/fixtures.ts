@@ -237,7 +237,50 @@ export const SCENARIOS: Record<ScenarioId, Scenario> = {
       pets: basePets,
       reviews: baseReviews,
       applications: [],
+  },
+  /**
+   * Scénario dédié aux tests de la lightbox / galerie hero.
+   * 3 photos de logement + 1 photo d'animal (pet-1) = 4 photos au total.
+   * On utilise des URLs picsum.photos avec seed stable pour des images
+   * reproductibles et sans dépendance à Supabase Storage.
+   */
+  "published-sitter-with-photos": {
+    id: "published-sitter-with-photos",
+    sitId: "66666666-6666-6666-6666-666666666666",
+    viewer: {
+      id: SITTER_ID,
+      email: "lou@test.local",
+      role: "sitter",
+      firstName: "Lou",
+      lastName: "Petit",
     },
+    activeRole: "sitter",
+    data: {
+      sit: makeSit({
+        id: "66666666-6666-6666-6666-666666666666",
+        status: "published",
+      }),
+      owner: baseOwner,
+      ownerProfile: baseOwnerProfile,
+      property: {
+        ...baseProperty,
+        photos: [
+          "https://picsum.photos/seed/guardiens-hero-1/1200/800",
+          "https://picsum.photos/seed/guardiens-hero-2/1200/800",
+          "https://picsum.photos/seed/guardiens-hero-3/1200/800",
+        ],
+      },
+      pets: [
+        {
+          ...basePets[0],
+          photo_url: "https://picsum.photos/seed/guardiens-pet-mochi/600/600",
+        },
+        basePets[1],
+      ],
+      reviews: baseReviews,
+      applications: [],
+    },
+  },
   },
   "cancelled-sitter": {
     id: "cancelled-sitter",
