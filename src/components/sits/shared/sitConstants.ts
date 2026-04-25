@@ -68,13 +68,13 @@ export interface SitStatusConfig {
  * Utilisé par SitDetail, MonAnnonceCard, ApplicationsList, etc.
  */
 export const SIT_STATUS_CONFIG: Record<string, SitStatusConfig> = {
-  draft: { label: "Brouillon", className: "bg-muted text-muted-foreground" },
+  draft: { label: "Brouillon", className: "bg-muted text-foreground" },
   published: { label: "En ligne", className: "bg-primary/10 text-primary" },
   confirmed: { label: "Confirmée", className: "bg-primary/15 text-primary" },
   in_progress: { label: "En cours", className: "bg-accent text-accent-foreground" },
-  completed: { label: "Terminée", className: "bg-muted text-muted-foreground" },
-  cancelled: { label: "Annulée", className: "bg-destructive/10 text-destructive" },
-  expired: { label: "Expirée", className: "bg-muted text-muted-foreground" },
+  completed: { label: "Terminée", className: "bg-muted text-foreground" },
+  cancelled: { label: "Annulée", className: "bg-destructive/10 text-destructive-text" },
+  expired: { label: "Expirée", className: "bg-muted text-foreground" },
 };
 
 export function getSitStatusConfig(status: string | null | undefined): SitStatusConfig {

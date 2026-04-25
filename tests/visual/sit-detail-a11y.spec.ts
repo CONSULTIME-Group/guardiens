@@ -203,6 +203,177 @@ test.describe("Accessibilité — /sits/:id", () => {
         imagesWithoutAlt,
         `Images sans attribut alt: ${imagesWithoutAlt.join(", ")}`
       ).toEqual([]);
+
+      // ---------- 3. Contraste WCAG AA des textes ----------
+      // Calcule le ratio de contraste entre la couleur du texte et la couleur
+      // de fond effective de chaque élément contenant du texte visible.
+      // Seuils WCAG AA :
+      //   - Texte normal      : ≥ 4.5:1
+      //   - Texte large       : ≥ 3.0:1  (≥ 18pt OU ≥ 14pt + bold)
+      // Limites assumées :
+      //   - On lit la couleur de fond du premier ancêtre opaque (approximation).
+      //   - On ignore les images d'arrière-plan (background-image), donc tout
+      //     texte posé sur une photo est exclu (impossible à mesurer fiablement).
+      const contrastViolations = await page.evaluate(() => {
+        const parseRgb = (s: string): [number, number, number, number] | null => {
+          const m = s.match(/rgba?\(([^)]+)\)/);
+          if (!m) return null;
+          const parts = m[1].split(",").map((p) => parseFloat(p.trim()));
+          const [r, g, b, a = 1] = parts;
+          if ([r, g, b].some((v) => Number.isNaN(v))) return null;
+          return [r, g, b, a];
+        };
+
+        const relLuminance = (r: number, g: number, b: number): number => {
+          const toLin = (c: number) => {
+            const v = c / 255;
+            return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+          };
+          return 0.2126 * toLin(r) + 0.7152 * toLin(g) + 0.0722 * toLin(b);
+        };
+
+        const contrastRatio = (
+          fg: [number, number, number],
+          bg: [number, number, number]
+        ): number => {
+          const l1 = relLuminance(...fg);
+          const l2 = relLuminance(...bg);
+          const [a, b] = l1 > l2 ? [l1, l2] : [l2, l1];
+          return (a + 0.05) / (b + 0.05);
+        };
+
+        // Compose fg semi-transparent sur bg opaque
+        const composite = (
+          fg: [number, number, number, number],
+          bg: [number, number, number]
+        ): [number, number, number] => {
+          const [fr, fg_, fb, fa] = fg;
+          return [
+            Math.round(fr * fa + bg[0] * (1 - fa)),
+            Math.round(fg_ * fa + bg[1] * (1 - fa)),
+            Math.round(fb * fa + bg[2] * (1 - fa)),
+          ];
+        };
+
+        // Trouve la 1re couleur de fond opaque en remontant l'arbre.
+        // Renvoie null si on rencontre une background-image (non mesurable).
+        const findBackground = (
+          el: Element
+        ): [number, number, number] | null => {
+          let node: Element | null = el;
+          while (node && node !== document.documentElement) {
+            const style = window.getComputedStyle(node);
+            if (style.backgroundImage && style.backgroundImage !== "none") {
+              return null; // image de fond — on ne mesure pas
+            }
+            const bg = parseRgb(style.backgroundColor);
+            if (bg && bg[3] >= 0.99) {
+              return [bg[0], bg[1], bg[2]];
+            }
+            node = node.parentElement;
+          }
+          // Fallback : blanc (ou la couleur du body si définie)
+          const bodyBg = parseRgb(window.getComputedStyle(document.body).backgroundColor);
+          if (bodyBg && bodyBg[3] >= 0.99) return [bodyBg[0], bodyBg[1], bodyBg[2]];
+          return [255, 255, 255];
+        };
+
+        const isLargeText = (style: CSSStyleDeclaration): boolean => {
+          const sizePx = parseFloat(style.fontSize);
+          const weight = parseInt(style.fontWeight, 10) || 400;
+          // 18pt ≈ 24px ; 14pt ≈ 18.66px
+          if (sizePx >= 24) return true;
+          if (sizePx >= 18.66 && weight >= 700) return true;
+          return false;
+        };
+
+        // Sélectionne les feuilles textuelles : élément qui contient au moins
+        // un nœud de texte non vide en enfant direct.
+        const hasDirectText = (el: Element): string => {
+          let txt = "";
+          for (const node of Array.from(el.childNodes)) {
+            if (node.nodeType === Node.TEXT_NODE) {
+              txt += (node.textContent || "").trim();
+            }
+          }
+          return txt;
+        };
+
+        const isVisible = (el: Element): boolean => {
+          let node: Element | null = el;
+          while (node && node !== document.body) {
+            const s = window.getComputedStyle(node);
+            if (s.display === "none") return false;
+            if (s.visibility === "hidden") return false;
+            if (parseFloat(s.opacity) === 0) return false;
+            node = node.parentElement;
+          }
+          const rect = el.getBoundingClientRect();
+          return rect.width > 0 && rect.height > 0;
+        };
+
+        type Violation = {
+          tag: string;
+          text: string;
+          fg: string;
+          bg: string;
+          ratio: number;
+          required: number;
+          fontSize: string;
+          fontWeight: string;
+        };
+        const violations: Violation[] = [];
+        const seen = new Set<Element>();
+
+        // Limite l'audit à la zone <main> (contenu SitDetail). La sidebar de
+        // navigation et autres chrome globaux sont audités séparément — sortis
+        // du périmètre de cette spec qui cible SitDetail.
+        const root = document.querySelector("main") || document.body;
+        root.querySelectorAll("*").forEach((el) => {
+          if (seen.has(el)) return;
+          if (el.classList.contains("sr-only")) return;
+          // skip media / form controls (native controls : couleurs UA non maîtrisées)
+          const tag = el.tagName.toLowerCase();
+          if (["script", "style", "svg", "path", "img", "video", "canvas", "iframe", "input", "select", "textarea", "option"].includes(tag)) return;
+
+          const text = hasDirectText(el);
+          if (!text || text.length < 2) return;
+          if (!isVisible(el)) return;
+
+          const style = window.getComputedStyle(el);
+          const fgRaw = parseRgb(style.color);
+          if (!fgRaw) return;
+          if (fgRaw[3] < 0.1) return; // texte quasi invisible — ignoré (mesure non significative)
+
+          const bg = findBackground(el);
+          if (!bg) return; // posé sur une image — non mesurable
+
+          const fgComposed = composite(fgRaw, bg);
+          const ratio = contrastRatio(fgComposed, bg);
+          const required = isLargeText(style) ? 3.0 : 4.5;
+
+          if (ratio < required) {
+            violations.push({
+              tag,
+              text: text.slice(0, 60),
+              fg: `rgb(${fgComposed.join(",")})`,
+              bg: `rgb(${bg.join(",")})`,
+              ratio: Math.round(ratio * 100) / 100,
+              required,
+              fontSize: style.fontSize,
+              fontWeight: style.fontWeight,
+            });
+          }
+          seen.add(el);
+        });
+
+        return violations;
+      });
+
+      expect(
+        contrastViolations,
+        `Violations contraste WCAG AA (${contrastViolations.length}):\n${JSON.stringify(contrastViolations.slice(0, 20), null, 2)}`
+      ).toEqual([]);
     });
   }
 });

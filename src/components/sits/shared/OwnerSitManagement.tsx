@@ -84,7 +84,7 @@ const OwnerSitManagement = ({
             variant="outline"
             size="sm"
             onClick={onCancelClick}
-            className="justify-start gap-2 text-destructive hover:text-destructive hover:bg-destructive/10 border-destructive/30 hover:border-destructive/50"
+            className="justify-start gap-2 text-destructive-text hover:text-destructive-text hover:bg-destructive/10 border-destructive/30 hover:border-destructive/50"
           >
             <XCircle className="h-3.5 w-3.5" />
             Annuler la garde
