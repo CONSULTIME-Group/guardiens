@@ -11,13 +11,21 @@ interface SitSchemaProps {
 }
 
 const SitSchemaOrg = ({ title, description, city, startDate, endDate, url, imageUrl }: SitSchemaProps) => {
+  // Une annonce de garde correspond mieux à une `Offer` (avec validité temporelle)
+  // qu'à un `Service` générique. `availabilityStarts`/`availabilityEnds` ne sont
+  // pas valides sur Service ; sur Offer on utilise `validFrom`/`validThrough` qui
+  // sont reconnus par Google et Schema.org.
   const schema: Record<string, any> = {
     "@context": "https://schema.org",
-    "@type": "Service",
+    "@type": "Offer",
     name: title,
     description: description.slice(0, 160),
     url,
-    provider: {
+    category: "House Sitting",
+    price: "0",
+    priceCurrency: "EUR",
+    availability: "https://schema.org/InStock",
+    seller: {
       "@type": "Organization",
       name: "Guardiens",
       url: "https://guardiens.fr",
@@ -31,8 +39,8 @@ const SitSchemaOrg = ({ title, description, city, startDate, endDate, url, image
       },
     },
     ...(imageUrl && { image: imageUrl }),
-    ...(startDate && { availabilityStarts: startDate }),
-    ...(endDate && { availabilityEnds: endDate }),
+    ...(startDate && { validFrom: startDate }),
+    ...(endDate && { validThrough: endDate }),
   };
 
   return (

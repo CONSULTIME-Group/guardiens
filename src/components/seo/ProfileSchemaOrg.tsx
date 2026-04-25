@@ -76,7 +76,9 @@ const ProfileSchemaOrg = ({
   if (completedSits && completedSits > 0) {
     schema.interactionStatistic = {
       "@type": "InteractionCounter",
-      interactionType: { "@type": "http://schema.org/PerformAction" },
+      // Schema.org attend une référence à une Action enum, pas une URL string brute.
+      // PerformAction n'est pas un type valide ; on utilise une référence formatée.
+      interactionType: { "@type": "Action", name: "Garde réalisée" },
       userInteractionCount: completedSits,
       name: "Gardes réalisées",
     };
