@@ -158,9 +158,16 @@ const SitterDashboard = () => {
     </section>
   );
 
-  const StatusBlock = (
-    <section aria-labelledby="status-heading">
-      <h2 id="status-heading" className="sr-only">Mon statut</h2>
+  /**
+   * StatusBlock — accepte la prop `compact` pour s'empiler verticalement
+   * dans une sidebar étroite (xl). En mobile/tablette/lg, on conserve la
+   * version étalée (3 zones côte-à-côte ≥ md).
+   */
+  const buildStatusBlock = (compact: boolean) => (
+    <section aria-labelledby={compact ? "status-heading-side" : "status-heading"}>
+      <h2 id={compact ? "status-heading-side" : "status-heading"} className="sr-only">
+        Mon statut
+      </h2>
       <SitterStatusBar
         profileCompletion={profileCompletion}
         completedSits={completedSits}
@@ -169,12 +176,17 @@ const SitterDashboard = () => {
         badgeCount={badgeCount}
         totalApps={totalApps}
         reputation={reputation}
+        compact={compact}
       />
     </section>
   );
 
-  const BadgesBlock = (
-    <div className="px-4 sm:px-5 md:px-8 mb-6 md:mb-8">
+  /**
+   * BadgesBlock — px conditionnel : en sidebar (xl), pas de padding horizontal
+   * (le wrapper parent gère). En version pleine largeur, on garde la marge.
+   */
+  const buildBadgesBlock = (sidebar: boolean) => (
+    <div className={sidebar ? "mb-6" : "px-4 sm:px-5 md:px-8 mb-6 md:mb-8"}>
       <SitterBadgesSection groupedBadges={groupedBadges} condensed />
     </div>
   );
@@ -190,9 +202,14 @@ const SitterDashboard = () => {
     </div>
   );
 
-  const EmergencyBlock = (
-    <section aria-labelledby="emergency-heading" className="px-4 sm:px-5 md:px-8 mb-6 md:mb-8">
-      <h2 id="emergency-heading" className="sr-only">Éligibilité gardien d'urgence</h2>
+  const buildEmergencyBlock = (sidebar: boolean) => (
+    <section
+      aria-labelledby={sidebar ? "emergency-heading-side" : "emergency-heading"}
+      className={sidebar ? "mb-6" : "px-4 sm:px-5 md:px-8 mb-6 md:mb-8"}
+    >
+      <h2 id={sidebar ? "emergency-heading-side" : "emergency-heading"} className="sr-only">
+        Éligibilité gardien d'urgence
+      </h2>
       <EmergencyEligibility />
     </section>
   );
@@ -282,65 +299,104 @@ const SitterDashboard = () => {
         </button>
       </div>
 
-      {/* ═══ A5: 2-COLUMN LAYOUT ≥ lg ═══
-          Mobile / tablet: tout empilé dans l'ordre actuel (checklist remontée).
-          Desktop ≥ lg : main = checklist + CTA + listings, side = status + badges + emergency. */}
-      <div className="lg:grid lg:grid-cols-3 lg:gap-6 lg:px-2">
-        {/* MAIN COLUMN (2/3) */}
-        <div className="lg:col-span-2 lg:min-w-0">
-          {/* A1 — Checklist remontée juste après le hero */}
-          {ChecklistBlock}
+      {/* ═══ A5: 2-COLUMN LAYOUT ≥ xl (1280px) ═══
+          < xl  : tout empilé (mobile/tablet/lg) — StatusBar en 3 zones côte-à-côte ≥ md.
+          ≥ xl  : main 8/12 (checklist + CTA + listings + articles)
+                  side 4/12 (status compact + emergency dash + badges + eligibility). */}
 
-          {CtaBlock}
-
-          {/* Listings + Échanges */}
-          <section aria-labelledby="nearby-heading">
-            <h2 id="nearby-heading" className="sr-only">Près de chez vous</h2>
-            <SitterBottomColumns nearbyListings={nearbyListings} nearbyMissions={nearbyMissions} postalCode={postalCode} />
-          </section>
-
-          {/* Articles */}
-          {articles.length > 0 && (
-            <section aria-labelledby="articles-heading" className="px-4 sm:px-5 md:px-8 mb-6 md:mb-8">
-              <div className="flex items-center justify-between mb-4">
-                <h2 id="articles-heading" className="font-heading text-lg font-semibold">Conseils pour vous</h2>
-                <Link to="/actualites" className="text-xs text-primary hover:underline font-medium">Voir tout →</Link>
-              </div>
-              <div className="flex gap-3 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-hide">
-                {articles.map((a: any) => (
-                  <Link key={a.id} to={`/actualites/${a.slug}`} className="flex-shrink-0 w-[70vw] sm:w-64 rounded-xl border border-border bg-card overflow-hidden hover:shadow-md transition-shadow cursor-pointer">
-                    {a.cover_image_url ? (
-                      <img src={getOptimizedImageUrl(a.cover_image_url, 300, 75)} alt={a.title || "Article"} className="w-full h-28 object-cover" width={300} height={112} loading="lazy" />
-                    ) : (
-                      <div className="w-full h-28 bg-accent flex items-center justify-center">
-                        <Newspaper className="h-8 w-8 text-muted-foreground/40" aria-hidden="true" />
-                      </div>
-                    )}
-                    <div className="p-3">
-                      <h3 className="text-sm font-semibold line-clamp-2">{a.title}</h3>
-                      <p className="text-xs text-muted-foreground line-clamp-2 mt-1">{a.excerpt}</p>
+      {/* Version pleine largeur — visible < xl */}
+      <div className="xl:hidden">
+        {ChecklistBlock}
+        {CtaBlock}
+        {buildStatusBlock(false)}
+        {hasEmergencyProfile && (
+          <div className="px-4 sm:px-5 md:px-8 mb-6 md:mb-8">
+            <EmergencyDashSection />
+          </div>
+        )}
+        {buildBadgesBlock(false)}
+        <section aria-labelledby="nearby-heading">
+          <h2 id="nearby-heading" className="sr-only">Près de chez vous</h2>
+          <SitterBottomColumns nearbyListings={nearbyListings} nearbyMissions={nearbyMissions} postalCode={postalCode} />
+        </section>
+        {buildEmergencyBlock(false)}
+        {articles.length > 0 && (
+          <section aria-labelledby="articles-heading" className="px-4 sm:px-5 md:px-8 mb-6 md:mb-8">
+            <div className="flex items-center justify-between mb-4">
+              <h2 id="articles-heading" className="font-heading text-lg font-semibold">Conseils pour vous</h2>
+              <Link to="/actualites" className="text-xs text-primary hover:underline font-medium">Voir tout →</Link>
+            </div>
+            <div className="flex gap-3 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-hide">
+              {articles.map((a: any) => (
+                <Link key={a.id} to={`/actualites/${a.slug}`} className="flex-shrink-0 w-[70vw] sm:w-64 rounded-xl border border-border bg-card overflow-hidden hover:shadow-md transition-shadow cursor-pointer">
+                  {a.cover_image_url ? (
+                    <img src={getOptimizedImageUrl(a.cover_image_url, 300, 75)} alt={a.title || "Article"} className="w-full h-28 object-cover" width={300} height={112} loading="lazy" />
+                  ) : (
+                    <div className="w-full h-28 bg-accent flex items-center justify-center">
+                      <Newspaper className="h-8 w-8 text-muted-foreground/40" aria-hidden="true" />
                     </div>
-                  </Link>
-                ))}
-              </div>
+                  )}
+                  <div className="p-3">
+                    <h3 className="text-sm font-semibold line-clamp-2">{a.title}</h3>
+                    <p className="text-xs text-muted-foreground line-clamp-2 mt-1">{a.excerpt}</p>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
+      </div>
+
+      {/* Version 2 colonnes — visible ≥ xl */}
+      <div className="hidden xl:grid xl:grid-cols-12 xl:gap-6 xl:px-8">
+        {/* MAIN COLUMN — 8/12 (~66%) */}
+        <div className="xl:col-span-8 min-w-0">
+          {/* Reset child padding (parent gère via xl:px-8) en surchargeant via wrappers */}
+          <div className="[&>*]:!px-0 [&>*]:!mx-0">
+            {ChecklistBlock}
+            {CtaBlock}
+            <section aria-labelledby="nearby-heading-xl">
+              <h2 id="nearby-heading-xl" className="sr-only">Près de chez vous</h2>
+              <SitterBottomColumns nearbyListings={nearbyListings} nearbyMissions={nearbyMissions} postalCode={postalCode} />
             </section>
-          )}
+            {articles.length > 0 && (
+              <section aria-labelledby="articles-heading-xl" className="mb-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h2 id="articles-heading-xl" className="font-heading text-lg font-semibold">Conseils pour vous</h2>
+                  <Link to="/actualites" className="text-xs text-primary hover:underline font-medium">Voir tout →</Link>
+                </div>
+                <div className="flex gap-3 overflow-x-auto pb-1 scrollbar-hide">
+                  {articles.map((a: any) => (
+                    <Link key={a.id} to={`/actualites/${a.slug}`} className="flex-shrink-0 w-64 rounded-xl border border-border bg-card overflow-hidden hover:shadow-md transition-shadow cursor-pointer">
+                      {a.cover_image_url ? (
+                        <img src={getOptimizedImageUrl(a.cover_image_url, 300, 75)} alt={a.title || "Article"} className="w-full h-28 object-cover" width={300} height={112} loading="lazy" />
+                      ) : (
+                        <div className="w-full h-28 bg-accent flex items-center justify-center">
+                          <Newspaper className="h-8 w-8 text-muted-foreground/40" aria-hidden="true" />
+                        </div>
+                      )}
+                      <div className="p-3">
+                        <h3 className="text-sm font-semibold line-clamp-2">{a.title}</h3>
+                        <p className="text-xs text-muted-foreground line-clamp-2 mt-1">{a.excerpt}</p>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </section>
+            )}
+          </div>
         </div>
 
-        {/* SIDE COLUMN (1/3) */}
-        <aside aria-label="Statut, badges et urgence" className="lg:col-span-1 lg:min-w-0">
-          {StatusBlock}
-
-          {/* Emergency dashboard (déjà actif) */}
+        {/* SIDE COLUMN — 4/12 (~33%) */}
+        <aside aria-label="Statut, badges et urgence" className="xl:col-span-4 min-w-0">
+          {buildStatusBlock(true)}
           {hasEmergencyProfile && (
-            <div className="px-4 sm:px-5 md:px-8 mb-6 md:mb-8">
+            <div className="mb-6">
               <EmergencyDashSection />
             </div>
           )}
-
-          {BadgesBlock}
-
-          {EmergencyBlock}
+          {buildBadgesBlock(true)}
+          {buildEmergencyBlock(true)}
         </aside>
       </div>
     </div>
