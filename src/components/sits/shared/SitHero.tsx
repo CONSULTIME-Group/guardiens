@@ -149,20 +149,26 @@ const SitHero = ({ photos, city, priority = false }: SitHeroProps) => {
         {/* Vignettes */}
         {total > 1 && (
           <div className="flex gap-1.5 mt-2 overflow-x-auto pb-1">
-            {photos.map((p, i) => (
+            {safePhotos.map((p, i) => (
               <button
-                key={i}
+                key={`${i}-${p}`}
                 type="button"
                 onClick={() => setPhotoIndex(i)}
                 aria-label={`Voir la photo ${i + 1} sur ${total}`}
                 aria-current={i === photoIndex ? "true" : undefined}
-                className={`w-16 h-12 rounded-md shrink-0 overflow-hidden border-2 transition-all ${
+                className={`w-16 h-12 rounded-md shrink-0 overflow-hidden border-2 transition-all bg-muted ${
                   i === photoIndex
                     ? "border-primary ring-2 ring-primary/30"
                     : "border-transparent opacity-70 hover:opacity-100"
                 }`}
               >
-                <img src={p} alt="" loading="lazy" className="w-full h-full object-cover" />
+                {brokenIndices.has(i) ? (
+                  <div className="w-full h-full flex items-center justify-center">
+                    <ImageOff className="h-3 w-3 text-muted-foreground" aria-hidden="true" />
+                  </div>
+                ) : (
+                  <img src={p} alt="" loading="lazy" className="w-full h-full object-cover" />
+                )}
               </button>
             ))}
           </div>
