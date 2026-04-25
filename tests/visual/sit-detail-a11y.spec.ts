@@ -143,15 +143,95 @@ test.describe("Accessibilité — /sits/:id", () => {
         `Focusables clavier sous aria-hidden détectés:\n${JSON.stringify(ariaHiddenFocusables, null, 2)}`
       ).toEqual([]);
 
-      // ---------- 2. Libellés des sections clés ----------
+      // ---------- 2. Hiérarchie des titres et landmarks ----------
 
-      // 2a. Au moins un h1
+      // 2a. Exactement un <h1> (règle WCAG : un seul titre principal par page)
       const h1Count = await page.locator("h1").count();
-      expect(h1Count, "Doit avoir au moins un <h1>").toBeGreaterThanOrEqual(1);
+      expect(
+        h1Count,
+        `Doit avoir exactement un <h1> (trouvé: ${h1Count})`
+      ).toBe(1);
 
-      // 2b. <main> ou role=main
+      // 2a-bis. Le <h1> doit être à l'intérieur du <main> (et non dans le chrome global)
+      const h1InMain = await page
+        .locator('main h1, [role="main"] h1')
+        .count();
+      expect(
+        h1InMain,
+        "Le <h1> doit être à l'intérieur du landmark <main>"
+      ).toBeGreaterThanOrEqual(1);
+
+      // 2a-ter. Le <h1> a un texte non vide
+      const h1Text = (await page.locator("h1").first().textContent())?.trim() || "";
+      expect(h1Text.length, "Le <h1> doit avoir du texte").toBeGreaterThan(0);
+
+      // 2a-quater. Hiérarchie sans saut de niveau (H1→H3 interdit)
+      // On collecte la séquence complète des niveaux dans l'ordre du DOM, et
+      // on vérifie qu'aucun titre ne saute plus d'un niveau par rapport au
+      // précédent (ex : H2 puis H4 = violation).
+      const headingHierarchy = await page.evaluate(() => {
+        const headings = Array.from(
+          document.querySelectorAll("main h1, main h2, main h3, main h4, main h5, main h6")
+        ) as HTMLHeadingElement[];
+        return headings.map((h) => ({
+          level: parseInt(h.tagName.substring(1), 10),
+          text: (h.textContent || "").trim().slice(0, 50),
+        }));
+      });
+      const skips: { from: number; to: number; text: string }[] = [];
+      let prevLevel = 0;
+      for (const h of headingHierarchy) {
+        if (prevLevel > 0 && h.level > prevLevel + 1) {
+          skips.push({ from: prevLevel, to: h.level, text: h.text });
+        }
+        prevLevel = h.level;
+      }
+      expect(
+        skips,
+        `Sauts de niveau dans la hiérarchie des titres:\n${JSON.stringify(skips, null, 2)}\n\nSéquence complète:\n${JSON.stringify(headingHierarchy, null, 2)}`
+      ).toEqual([]);
+
+      // 2a-quinquies. Le 1er titre du <main> doit être un H1
+      if (headingHierarchy.length > 0) {
+        expect(
+          headingHierarchy[0].level,
+          `Le 1er titre du <main> doit être H1 (trouvé: H${headingHierarchy[0].level} "${headingHierarchy[0].text}")`
+        ).toBe(1);
+      }
+
+      // 2b. Exactement un landmark <main>
       const mainCount = await page.locator('main, [role="main"]').count();
-      expect(mainCount, "Doit avoir un landmark <main>").toBeGreaterThanOrEqual(1);
+      expect(
+        mainCount,
+        `Doit avoir exactement un landmark <main> (trouvé: ${mainCount})`
+      ).toBe(1);
+
+      // 2b-bis. Au moins un <nav> (navigation principale du chrome)
+      const navCount = await page.locator('nav, [role="navigation"]').count();
+      expect(
+        navCount,
+        "Doit avoir au moins un landmark <nav> (navigation principale)"
+      ).toBeGreaterThanOrEqual(1);
+
+      // 2b-ter. Si plusieurs <nav>, chacun doit être labellisé pour être distinguable
+      // (règle WAI-ARIA : éviter les landmarks dupliqués sans label)
+      if (navCount > 1) {
+        const unlabeledNavs = await page.evaluate(() => {
+          const navs = Array.from(
+            document.querySelectorAll('nav, [role="navigation"]')
+          );
+          return navs
+            .filter(
+              (n) =>
+                !n.getAttribute("aria-label") && !n.getAttribute("aria-labelledby")
+            )
+            .map((n, i) => `nav#${i} (${(n.textContent || "").trim().slice(0, 40)})`);
+        });
+        expect(
+          unlabeledNavs,
+          `Avec ${navCount} <nav>, chacun doit être labellisé (aria-label ou aria-labelledby). Non labellisés:\n${JSON.stringify(unlabeledNavs, null, 2)}`
+        ).toEqual([]);
+      }
 
       // 2c. TabsList avec aria-label
       const tabsList = page.locator('[role="tablist"][aria-label]');
