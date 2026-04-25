@@ -4,9 +4,9 @@
  * - Vignettes cliquables si plusieurs photos.
  * - Lightbox plein écran au clic, navigation clavier (←/→/Esc) et swipe.
  */
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { createPortal } from "react-dom";
-import { ChevronLeft, ChevronRight, X, Maximize2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, X, Maximize2, ImageOff } from "lucide-react";
 
 interface SitHeroProps {
   photos: string[];
@@ -19,9 +19,30 @@ const SitHero = ({ photos, city, priority = false }: SitHeroProps) => {
   const [photoIndex, setPhotoIndex] = useState(0);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [touchStartX, setTouchStartX] = useState<number | null>(null);
+  const [brokenIndices, setBrokenIndices] = useState<Set<number>>(new Set());
 
   const cityLabel = city || "France";
-  const total = photos.length;
+
+  // Filtre défensif : on ne garde que des URLs string non vides et déduplique.
+  const safePhotos = useMemo(() => {
+    if (!Array.isArray(photos)) return [];
+    const seen = new Set<string>();
+    return photos.filter((p) => {
+      if (typeof p !== "string") return false;
+      const url = p.trim();
+      if (!url) return false;
+      if (seen.has(url)) return false;
+      seen.add(url);
+      return true;
+    });
+  }, [photos]);
+
+  const total = safePhotos.length;
+
+  // Si la liste rétrécit (ex: maj realtime), on borne l'index actif.
+  useEffect(() => {
+    if (photoIndex >= total && total > 0) setPhotoIndex(0);
+  }, [total, photoIndex]);
 
   const next = useCallback(() => {
     setPhotoIndex((i) => (i + 1) % Math.max(1, total));
@@ -48,7 +69,23 @@ const SitHero = ({ photos, city, priority = false }: SitHeroProps) => {
     };
   }, [lightboxOpen, next, prev]);
 
-  if (total === 0) return null;
+  // État vide : aucune photo exploitable. On affiche un placeholder lisible
+  // plutôt que de retourner null (qui casserait silencieusement la mise en page).
+  if (total === 0) {
+    return (
+      <div className="mb-6">
+        <div
+          role="img"
+          aria-label={`Aucune photo disponible pour cette garde à ${cityLabel}`}
+          className="w-full h-72 md:h-96 rounded-xl bg-muted/50 border border-dashed border-border flex flex-col items-center justify-center text-muted-foreground gap-2"
+        >
+          <ImageOff className="h-10 w-10" aria-hidden="true" />
+          <p className="text-sm font-medium">Aucune photo pour le moment</p>
+          <p className="text-xs">Le propriétaire n'a pas encore ajouté de photos du logement ou des animaux.</p>
+        </div>
+      </div>
+    );
+  }
 
   const altFor = (i: number) =>
     `Photo ${i + 1} sur ${total} de la garde à ${cityLabel} (logement et animaux) — annonce Guardiens`;
@@ -76,13 +113,27 @@ const SitHero = ({ photos, city, priority = false }: SitHeroProps) => {
           className="group relative w-full overflow-hidden rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
           aria-label={`Agrandir la photo ${photoIndex + 1} sur ${total}`}
         >
-          <img
-            src={photos[photoIndex]}
-            alt={altFor(photoIndex)}
-            loading={priority ? "eager" : "lazy"}
-            decoding="async"
-            className="w-full h-72 md:h-96 object-cover transition-transform duration-500 group-hover:scale-[1.02]"
-          />
+          {brokenIndices.has(photoIndex) ? (
+            <div className="w-full h-72 md:h-96 bg-muted flex flex-col items-center justify-center text-muted-foreground gap-2">
+              <ImageOff className="h-8 w-8" aria-hidden="true" />
+              <p className="text-xs">Cette photo n'a pas pu être chargée</p>
+            </div>
+          ) : (
+            <img
+              src={safePhotos[photoIndex]}
+              alt={altFor(photoIndex)}
+              loading={priority ? "eager" : "lazy"}
+              decoding="async"
+              onError={() =>
+                setBrokenIndices((prev) => {
+                  const next = new Set(prev);
+                  next.add(photoIndex);
+                  return next;
+                })
+              }
+              className="w-full h-72 md:h-96 object-cover transition-transform duration-500 group-hover:scale-[1.02]"
+            />
+          )}
           {/* Overlay icône agrandir */}
           <div className="absolute top-3 right-3 bg-background/80 backdrop-blur-sm rounded-full p-2 opacity-0 group-hover:opacity-100 transition-opacity shadow-md">
             <Maximize2 className="h-4 w-4 text-foreground" aria-hidden="true" />
@@ -98,20 +149,26 @@ const SitHero = ({ photos, city, priority = false }: SitHeroProps) => {
         {/* Vignettes */}
         {total > 1 && (
           <div className="flex gap-1.5 mt-2 overflow-x-auto pb-1">
-            {photos.map((p, i) => (
+            {safePhotos.map((p, i) => (
               <button
-                key={i}
+                key={`${i}-${p}`}
                 type="button"
                 onClick={() => setPhotoIndex(i)}
                 aria-label={`Voir la photo ${i + 1} sur ${total}`}
                 aria-current={i === photoIndex ? "true" : undefined}
-                className={`w-16 h-12 rounded-md shrink-0 overflow-hidden border-2 transition-all ${
+                className={`w-16 h-12 rounded-md shrink-0 overflow-hidden border-2 transition-all bg-muted ${
                   i === photoIndex
                     ? "border-primary ring-2 ring-primary/30"
                     : "border-transparent opacity-70 hover:opacity-100"
                 }`}
               >
-                <img src={p} alt="" loading="lazy" className="w-full h-full object-cover" />
+                {brokenIndices.has(i) ? (
+                  <div className="w-full h-full flex items-center justify-center">
+                    <ImageOff className="h-3 w-3 text-muted-foreground" aria-hidden="true" />
+                  </div>
+                ) : (
+                  <img src={p} alt="" loading="lazy" className="w-full h-full object-cover" />
+                )}
               </button>
             ))}
           </div>
@@ -177,16 +234,33 @@ const SitHero = ({ photos, city, priority = false }: SitHeroProps) => {
               </>
             )}
 
-            {/* Image */}
-            <img
-              src={photos[photoIndex]}
-              alt={altFor(photoIndex)}
-              onClick={(e) => e.stopPropagation()}
-              onTouchStart={handleTouchStart}
-              onTouchEnd={handleTouchEnd}
-              className="max-h-[90vh] max-w-[95vw] object-contain select-none"
-              draggable={false}
-            />
+            {/* Image (ou placeholder si chargement échoué) */}
+            {brokenIndices.has(photoIndex) ? (
+              <div
+                onClick={(e) => e.stopPropagation()}
+                className="flex flex-col items-center justify-center gap-3 text-white/80 px-6"
+              >
+                <ImageOff className="h-12 w-12" aria-hidden="true" />
+                <p className="text-sm">Cette photo n'a pas pu être chargée</p>
+              </div>
+            ) : (
+              <img
+                src={safePhotos[photoIndex]}
+                alt={altFor(photoIndex)}
+                onClick={(e) => e.stopPropagation()}
+                onTouchStart={handleTouchStart}
+                onTouchEnd={handleTouchEnd}
+                onError={() =>
+                  setBrokenIndices((prev) => {
+                    const next = new Set(prev);
+                    next.add(photoIndex);
+                    return next;
+                  })
+                }
+                className="max-h-[90vh] max-w-[95vw] object-contain select-none"
+                draggable={false}
+              />
+            )}
           </div>,
           document.body
         )}
