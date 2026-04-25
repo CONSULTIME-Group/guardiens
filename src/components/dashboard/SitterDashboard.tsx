@@ -247,7 +247,7 @@ const SitterDashboard = () => {
                 <div className="flex items-center gap-2">
                   <CheckCircle className="h-4 w-4 text-primary" />
                   <span className="text-sm font-medium text-primary">
-                    {allChecklistDone ? "4/4 étapes complétées" : `${completedItems.length} étape${completedItems.length > 1 ? "s" : ""} déjà complétée${completedItems.length > 1 ? "s" : ""}`}
+                    {allChecklistDone ? `${allItems.length}/${allItems.length} étapes complétées` : `${completedItems.length} étape${completedItems.length > 1 ? "s" : ""} déjà complétée${completedItems.length > 1 ? "s" : ""}`}
                   </span>
                 </div>
               </AccordionTrigger>
