@@ -10,6 +10,7 @@
 export type ScenarioId =
   | "draft-owner"
   | "published-owner"
+  | "published-sitter"
   | "cancelled-sitter"
   | "completed-sitter";
 
