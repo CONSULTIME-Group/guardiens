@@ -182,13 +182,34 @@
    utiliser .illustration-blend (jamais redéclarer mask/blend/filter
    localement). */
 @layer components {
+  /* Wrapper autour de chaque illustration — garantit que le wrapper
+     n'introduit JAMAIS son propre fond. Sans cette garantie, un parent
+     avec `bg-card` pouvait théoriquement « teinter » la zone si une classe
+     tierce ajoutait un background. C'est un garde-fou défensif : le
+     comportement par défaut d'un <div> est déjà transparent, mais on
+     l'écrit explicitement pour bloquer toute classe ultérieure. */
+  .illustration-wrapper {
+    background: transparent !important;
+    background-image: none !important;
+  }
+
   .illustration-blend {
+    /* Garde-fou identique sur l'élément masqué lui-même. */
+    background: transparent !important;
+    background-image: none !important;
+
     /* Masque radial — `closest-side` garantit que 100% du gradient
        correspond au bord du carré (pas à la diagonale). Conséquence :
        tous les pixels au-delà du cercle inscrit (donc les 4 coins) sont
        AUTOMATIQUEMENT transparents. C'est ce qui élimine le halo carré
        crème visible en mode sombre quand on utilisait `ellipse` (défaut
-       = farthest-corner, qui laisse les coins opaques). */
+       = farthest-corner, qui laisse les coins opaques).
+
+       NB : aucun `hsl(var(--background))` ici. La transparence physique
+       du masque rend la classe AGNOSTIQUE au token de fond du parent
+       (--background, --card, --popover, --muted, ou n'importe quel fond
+       custom). C'est ce qui empêche toute divergence visuelle entre
+       contextes. */
     -webkit-mask-image: radial-gradient(
       circle closest-side at center,
       rgba(0, 0, 0, 1) 0%,
@@ -226,6 +247,7 @@
     filter: invert(1) hue-rotate(180deg) brightness(0.92) saturate(0.85);
     opacity: 0.95;
   }
+}
 }
 
 /* ========== Rich Article Styles ========== */
