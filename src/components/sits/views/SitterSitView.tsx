@@ -74,9 +74,10 @@ const SitterSitView = ({
   sitterProfile,
   currentUserId,
   activeRole,
-  userRole,
-  userFirstName,
 }: SitterSitViewProps) => {
+  // Lecture directe du profil — supprime les props `userRole`/`userFirstName`
+  // qui dupliquaient l'info disponible via useAuth.
+  const { user } = useAuth();
   const { level: accessLevel, profileCompletion, canApplyGuards } = useAccessLevel();
 
   const [applyOpen, setApplyOpen] = useState(false);
