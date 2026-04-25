@@ -98,7 +98,20 @@ test.describe("Visual regression — /sits/:id", () => {
       }).catch(() => {});
 
       await page.setViewportSize({ width: 1280, height: 900 });
+
+      const consoleLogs: string[] = [];
+      page.on("console", (m) => consoleLogs.push(`[${m.type()}] ${m.text()}`));
+      page.on("pageerror", (e) => consoleLogs.push(`[pageerror] ${e.message}`));
+
       await page.goto(url, { waitUntil: "networkidle" });
+
+      // DIAGNOSTIC : afficher l'URL finale et le body pour debug
+      const finalUrl = page.url();
+      const bodyStart = await page.evaluate(() => document.body.innerText.slice(0, 200));
+      console.log(`[${scenarioId}] finalUrl=${finalUrl} body="${bodyStart.replace(/\n/g, " | ")}"`);
+      if (consoleLogs.length > 0) {
+        console.log(`[${scenarioId}] page logs:\n${consoleLogs.slice(0, 10).join("\n")}`);
+      }
 
       // Attend que le titre de l'annonce soit présent (ou le message d'erreur)
       await page.waitForFunction(
