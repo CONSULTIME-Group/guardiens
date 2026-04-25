@@ -733,17 +733,30 @@ test.describe("Accessibilité — /sits/:id", () => {
           return false;
         };
 
-        // Sélectionne les feuilles textuelles : élément qui contient au moins
-        // un nœud de texte non vide en enfant direct.
-        const hasDirectText = (el: Element): string => {
-          let txt = "";
-          for (const node of Array.from(el.childNodes)) {
-            if (node.nodeType === Node.TEXT_NODE) {
-              txt += (node.textContent || "").trim();
-            }
-          }
-          return txt;
-        };
+        // Classification WCAG « large-scale text » : helper injecté via
+        // addScriptTag (cf. wcag-text-size.ts). Fallback local si l'injection
+        // n'a pas fonctionné — pour ne jamais exécuter le scan sans
+        // classification correcte (sinon faux négatifs sur le seuil 3:1).
+        const w: any = window;
+        const classifyTextSize = (
+          w.__wcagClassifyTextSize as
+            | ((px: number, weight: string | number) => "large" | "normal")
+            | undefined
+        ) ?? ((px: number, weight: string | number) => {
+          const PT = 96 / 72;
+          const wn =
+            typeof weight === "number"
+              ? weight
+              : weight === "bold" || weight === "bolder"
+              ? 700
+              : weight === "lighter"
+              ? 100
+              : parseInt(String(weight), 10) || 400;
+          if (!Number.isFinite(px) || px <= 0) return "normal";
+          if (px + 0.05 >= 18 * PT) return "large";
+          if (px + 0.05 >= 14 * PT && wn >= 700) return "large";
+          return "normal";
+        });
 
         const isVisible = (el: Element): boolean => {
           let node: Element | null = el;
