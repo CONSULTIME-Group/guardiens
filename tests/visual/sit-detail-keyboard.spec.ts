@@ -261,21 +261,50 @@ test.describe("Navigation clavier — /sits/:id", () => {
         `Éléments focusés sans indicateur visible:\n${JSON.stringify(focusVisibilityIssues, null, 2)}`
       ).toEqual([]);
 
-      // ---------- 7. Activation clavier d'un onglet via Enter ----------
-      // Trouve un onglet non sélectionné, lui donne le focus, presse Enter,
-      // et vérifie que aria-selected passe à true.
-      const inactiveTab = page.locator('[role="tab"][aria-selected="false"]').first();
-      const inactiveCount = await inactiveTab.count();
-      if (inactiveCount > 0) {
-        await inactiveTab.focus();
-        await page.keyboard.press("Enter");
-        // Petit délai pour laisser Radix mettre à jour l'état
+      // ---------- 7. Navigation au sein du tablist via flèches ----------
+      // Pattern WAI-ARIA Authoring Practices : Tab donne le focus au tablist,
+      // puis ArrowRight / ArrowLeft naviguent entre les onglets. En mode
+      // d'activation automatique (défaut Radix), le focus suffit à sélectionner.
+      // En mode manuel, il faut Enter ou Space.
+      const tabs = page.locator('[role="tab"]');
+      const tabsCount = await tabs.count();
+      if (tabsCount >= 2) {
+        // Focus le 1er onglet (forcément l'onglet sélectionné, donc tabindex=0)
+        const firstSelected = page.locator('[role="tab"][aria-selected="true"]').first();
+        await firstSelected.focus();
+        const initialLabel = await firstSelected.textContent();
+
+        // Flèche droite → onglet suivant
+        await page.keyboard.press("ArrowRight");
         await page.waitForTimeout(150);
-        const isNowSelected = await inactiveTab.getAttribute("aria-selected");
+
+        // Quel onglet est maintenant sélectionné ?
+        const newSelected = page.locator('[role="tab"][aria-selected="true"]').first();
+        const newLabel = await newSelected.textContent();
+        const newSelectedFocused = await page.evaluate(
+          () => document.activeElement?.getAttribute("role") === "tab"
+        );
+
+        // Le focus doit toujours être sur un onglet (Radix déplace le focus)
         expect(
-          isNowSelected,
-          `L'onglet doit passer à aria-selected="true" après Enter (reçu: ${isNowSelected})`
-        ).toBe("true");
+          newSelectedFocused,
+          "Après ArrowRight, le focus doit rester sur un [role='tab']"
+        ).toBe(true);
+
+        // Si Radix est en mode automatique (défaut), aria-selected a changé.
+        // Si en mode manuel, le focus a bougé mais aria-selected pas encore —
+        // alors Enter doit le faire.
+        if (newLabel === initialLabel) {
+          await page.keyboard.press("Enter");
+          await page.waitForTimeout(150);
+        }
+
+        const finalSelected = page.locator('[role="tab"][aria-selected="true"]').first();
+        const finalLabel = await finalSelected.textContent();
+        expect(
+          finalLabel,
+          `La sélection d'onglet doit changer après ArrowRight (+ Enter si manuel). Avant: "${initialLabel}", Après: "${finalLabel}"`
+        ).not.toBe(initialLabel);
       }
     });
   }
