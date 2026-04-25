@@ -6,6 +6,7 @@
  */
 
 import type { IllustrationKey } from "./EmptyState";
+// Note : import type pur — n'introduit pas de cycle runtime.
 
 /* Couleurs alignées sur la palette gouache : sapin, terre, crème.
    Utilise des HSL fixes (pas de tokens) car les SVG inline doivent rester
