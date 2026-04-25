@@ -256,7 +256,11 @@ test.describe("Realtime — focus reste logique après mise à jour exogène", (
     await expect(banner).toHaveAttribute("aria-live", "polite");
 
     // --- Vérifications focus ----------------------------------------------
+    currentPhase = "focus-after-emit";
     const focusAfter = await describeActiveElement(pageA);
+    currentFocusLog.push(
+      await snapshotFocusEntry(pageA, currentFocusLog.length + 1, "after emitSitUpdate(cancelled)", "phase=focus-after-emit")
+    );
 
     // 1. Le focus n'est jamais sur un nœud détaché du DOM
     expect(
