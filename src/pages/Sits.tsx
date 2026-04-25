@@ -421,7 +421,7 @@ const Sits = () => {
           )}
           {activeTab === "upcoming" && activeRole === "sitter" && (
             <EmptyState
-              illustration="walkingDog"
+              illustration="sitterReady"
               title="Aucune garde à venir"
               description="Consultez les annonces disponibles et postulez pour votre prochaine garde."
               actionLabel="Voir les annonces"
