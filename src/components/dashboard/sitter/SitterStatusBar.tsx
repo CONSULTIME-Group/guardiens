@@ -82,7 +82,7 @@ const SitterStatusBar = ({
         </div>
         <div className="text-center">
           <p className="text-2xl font-heading font-bold text-foreground">{totalApps}</p>
-          <p className="text-xs text-muted-foreground font-sans">Candidatures</p>
+          <p className="text-xs text-muted-foreground font-sans">Mes candidatures</p>
         </div>
       </div>
       {completedSits === 0 && (

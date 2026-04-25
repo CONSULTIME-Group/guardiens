@@ -323,7 +323,7 @@ const OwnerSitView = ({
             value="candidatures"
             className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-2.5 text-sm"
           >
-            Candidatures ({internalAppCount})
+            Candidatures reçues ({internalAppCount})
             {pendingAppCount > 0 && (
               <span className="w-2 h-2 rounded-full bg-primary inline-block ml-1 mb-0.5" />
             )}

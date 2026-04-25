@@ -70,11 +70,11 @@ const ApplicationsSection = memo(({ recentApps, sitterProfiles, sitterBadges }: 
   const read = recentApps.filter(a => a.status !== "pending" && a.status !== "discussing");
 
   return (
-    <DashSection title="Candidatures non lues" action={
+    <DashSection title="Candidatures reçues non lues" action={
       recentApps.length > 0 ? <Link to="/sits" className="text-xs text-primary hover:underline font-medium">Voir toutes</Link> : undefined
     }>
       {unread.length === 0 ? (
-        <p className="text-sm text-muted-foreground font-sans italic py-4 text-center">Aucune candidature en attente</p>
+        <p className="text-sm text-muted-foreground font-sans italic py-4 text-center">Aucune candidature reçue en attente</p>
       ) : (
         <div className="space-y-3">
           {unread.map(a => <AppCard key={a.id} app={a} sitterProfiles={sitterProfiles} />)}
@@ -84,7 +84,7 @@ const ApplicationsSection = memo(({ recentApps, sitterProfiles, sitterBadges }: 
         <Accordion type="single" collapsible className="mt-4">
           <AccordionItem value="read" className="border rounded-xl">
             <AccordionTrigger className="px-4 py-3 text-sm text-muted-foreground hover:no-underline">
-              Candidatures déjà consultées ({read.length})
+              Candidatures reçues déjà consultées ({read.length})
             </AccordionTrigger>
             <AccordionContent className="px-4 pb-4">
               <div className="space-y-3">

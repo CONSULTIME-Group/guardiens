@@ -552,7 +552,7 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
       <div className="flex items-center gap-2 mb-4">
         <Users className="h-4 w-4 text-primary" />
         <h2 className="font-heading text-lg font-semibold">
-          Candidatures ({applications.length})
+          Candidatures reçues ({applications.length})
         </h2>
       </div>
 
