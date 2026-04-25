@@ -16,11 +16,20 @@
 // Si nécessaire, on bascule vers un import relatif explicite.
 import { SCENARIOS, type Scenario, type ScenarioId } from "../../../tests/visual/fixtures";
 
+// Capture du scénario UNE SEULE FOIS au chargement du module. Sans cette
+// mémorisation, les `<Navigate to="/login">` perdent la query string
+// `?scenario=...` et toutes les requêtes suivantes verraient un scénario null.
+let _cachedScenario: Scenario | null | undefined;
 function getActiveScenario(): Scenario | null {
-  if (typeof window === "undefined") return null;
+  if (_cachedScenario !== undefined) return _cachedScenario;
+  if (typeof window === "undefined") {
+    _cachedScenario = null;
+    return null;
+  }
   const params = new URLSearchParams(window.location.search);
   const id = params.get("scenario") as ScenarioId | null;
-  return id && SCENARIOS[id] ? SCENARIOS[id] : null;
+  _cachedScenario = id && SCENARIOS[id] ? SCENARIOS[id] : null;
+  return _cachedScenario;
 }
 
 /**
