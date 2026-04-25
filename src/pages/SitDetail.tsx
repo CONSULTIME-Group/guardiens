@@ -402,12 +402,12 @@ const SitDetail = () => {
         )}
       </div>
 
-      {/* Owner card */}
-      {owner && (
+      {/* Owner card — masquée si on est soi-même le propriétaire (info redondante) */}
+      {owner && !isOwner && (
         <div className="flex items-center gap-3 mb-6 p-4 bg-card rounded-xl border border-border">
           <Link to={`/gardiens/${owner.id}`}>
             {owner.avatar_url ? (
-              <img src={owner.avatar_url} alt={owner.first_name} className="w-14 h-14 rounded-full object-cover hover:ring-2 hover:ring-primary/30 transition-all" />
+              <img src={owner.avatar_url} alt={`Photo de ${owner.first_name}`} loading="lazy" className="w-14 h-14 rounded-full object-cover hover:ring-2 hover:ring-primary/30 transition-all" />
             ) : (
               <div className="w-14 h-14 rounded-full bg-muted flex items-center justify-center font-heading text-lg font-bold">
                 {owner.first_name?.charAt(0) || "?"}
@@ -423,11 +423,9 @@ const SitDetail = () => {
               {owner.bio ? owner.bio.slice(0, 80) + (owner.bio.length > 80 ? "…" : "") : "Propriétaire"}
             </p>
           </div>
-          {!isOwner && (
-            <Link to={`/gardiens/${owner.id}`}>
-              <Button variant="outline" size="sm">Voir le profil</Button>
-            </Link>
-          )}
+          <Link to={`/gardiens/${owner.id}`}>
+            <Button variant="outline" size="sm">Voir le profil</Button>
+          </Link>
         </div>
       )}
 
