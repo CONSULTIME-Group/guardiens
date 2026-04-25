@@ -35,39 +35,88 @@ const SitterBadgesSection = ({ groupedBadges, condensed = false }: SitterBadgesS
     );
   }
 
+  const total = GARDIEN_BADGE_IDS.length;
+  const hasActive = activeCount > 0;
+  const ratio = total > 0 ? Math.min(100, Math.round((activeCount / total) * 100)) : 0;
+  const summaryText = hasActive
+    ? `${activeCount} badge${activeCount > 1 ? "s" : ""} actif${activeCount > 1 ? "s" : ""} sur ${total}`
+    : `Aucun badge actif sur ${total}`;
+  const actionText = open ? "Masquer la grille des badges" : "Afficher la grille des badges";
+
   return (
     <section aria-labelledby="sitter-badges-heading" className="space-y-3">
+      <h3 id="sitter-badges-heading" className="sr-only">
+        Mes badges — {summaryText}
+      </h3>
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
         aria-expanded={open}
         aria-controls="sitter-badges-content"
-        className="w-full flex items-center justify-between gap-2 rounded-xl border border-border/60 bg-card/50 px-4 py-3 hover:bg-card transition-colors"
+        aria-label={`${actionText}. ${summaryText}.`}
+        className="w-full flex items-center justify-between gap-3 rounded-xl border border-border/60 bg-card/50 px-4 py-3 hover:bg-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring transition-colors"
       >
-        <span className="flex items-center gap-2">
-          <Award className="h-4 w-4 text-primary" aria-hidden="true" />
-          <h3 id="sitter-badges-heading" className="text-sm font-semibold text-foreground">
-            Mes badges
-          </h3>
-          <span className="text-xs text-muted-foreground tabular-nums">
-            {activeCount} actif{activeCount > 1 ? "s" : ""} sur {GARDIEN_BADGE_IDS.length}
+        <span className="flex items-center gap-3 min-w-0 flex-1">
+          <span
+            className={`flex h-8 w-8 items-center justify-center rounded-full shrink-0 ${
+              hasActive ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"
+            }`}
+            aria-hidden="true"
+          >
+            <Award className="h-4 w-4" />
+          </span>
+          <span className="flex flex-col items-start min-w-0 flex-1">
+            <span className="flex items-baseline gap-2">
+              <span aria-hidden="true" className="text-sm font-semibold text-foreground">
+                Mes badges
+              </span>
+              <span
+                aria-hidden="true"
+                className={`text-xs font-medium tabular-nums px-1.5 py-0.5 rounded ${
+                  hasActive ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"
+                }`}
+              >
+                {activeCount}/{total}
+              </span>
+            </span>
+            <span
+              aria-hidden="true"
+              className="mt-1.5 h-1 w-full max-w-[140px] rounded-full bg-muted overflow-hidden"
+            >
+              <span
+                className={`block h-full transition-all duration-300 ${
+                  hasActive ? "bg-primary" : "bg-transparent"
+                }`}
+                style={{ width: `${ratio}%` }}
+              />
+            </span>
           </span>
         </span>
-        <ChevronDown
-          className={`h-4 w-4 text-muted-foreground transition-transform duration-200 ${open ? "rotate-180" : ""}`}
-          aria-hidden="true"
-        />
+        <span className="flex items-center gap-2 shrink-0">
+          <span aria-hidden="true" className="text-xs text-muted-foreground hidden sm:inline">
+            {open ? "Masquer" : "Afficher"}
+          </span>
+          <ChevronDown
+            className={`h-4 w-4 text-muted-foreground transition-transform duration-200 ${open ? "rotate-180" : ""}`}
+            aria-hidden="true"
+          />
+        </span>
       </button>
-      {open && (
-        <div id="sitter-badges-content">
+      <div
+        id="sitter-badges-content"
+        role="region"
+        aria-labelledby="sitter-badges-heading"
+        hidden={!open}
+      >
+        {open && (
           <BadgeGridSection
             title="Mes Badges"
             badgeIds={GARDIEN_BADGE_IDS}
             userBadges={groupedBadges}
             specialBadgeIds={SPECIAL_BADGE_IDS}
           />
-        </div>
-      )}
+        )}
+      </div>
     </section>
   );
 };
