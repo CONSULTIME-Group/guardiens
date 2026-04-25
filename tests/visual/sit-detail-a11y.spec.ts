@@ -87,8 +87,13 @@ test.describe("Accessibilité — /sits/:id", () => {
         { timeout: 15_000 }
       );
 
-      // ---------- 1. Focusables cachés ----------
-      const hiddenFocusables = await page.evaluate(() => {
+      // ---------- 1. Focusables piégés sous aria-hidden ----------
+      // Règle WCAG : un élément focusable ne doit PAS se retrouver sous un
+      // ancêtre aria-hidden="true" (le screen reader le masque mais le clavier
+      // peut quand même y arriver — incohérence). En revanche, display:none
+      // et visibility:hidden retirent l'élément du tab order : c'est OK et
+      // c'est notre pattern responsive (`hidden md:block`).
+      const ariaHiddenFocusables = await page.evaluate(() => {
         const selector = [
           "a[href]",
           "button:not([disabled])",
@@ -98,29 +103,35 @@ test.describe("Accessibilité — /sits/:id", () => {
           '[tabindex]:not([tabindex="-1"])',
         ].join(",");
 
-        const isVisuallyHidden = (el: Element): string | null => {
+        const isInTabOrder = (el: Element): boolean => {
+          // display:none ou visibility:hidden retire du tab order — OK
           let node: Element | null = el;
           while (node && node !== document.body) {
             const style = window.getComputedStyle(node);
-            if (style.display === "none") return "display:none";
-            if (style.visibility === "hidden") return "visibility:hidden";
-            if (node.getAttribute("aria-hidden") === "true") return "aria-hidden=true ancestor";
+            if (style.display === "none") return false;
+            if (style.visibility === "hidden") return false;
             node = node.parentElement;
           }
-          // pointer-events:none seul est OK (état décoratif), on ne le compte pas
-          return null;
+          return true;
         };
 
-        const offending: { tag: string; text: string; reason: string }[] = [];
+        const hasAriaHiddenAncestor = (el: Element): boolean => {
+          let node: Element | null = el;
+          while (node && node !== document.body) {
+            if (node.getAttribute("aria-hidden") === "true") return true;
+            node = node.parentElement;
+          }
+          return false;
+        };
+
+        const offending: { tag: string; text: string }[] = [];
         document.querySelectorAll(selector).forEach((el) => {
-          // Ignore les éléments .sr-only (visuellement cachés mais accessibles aux SR — légitime)
           if (el.classList.contains("sr-only")) return;
-          const reason = isVisuallyHidden(el);
-          if (reason) {
+          if (!isInTabOrder(el)) return;
+          if (hasAriaHiddenAncestor(el)) {
             offending.push({
               tag: el.tagName.toLowerCase(),
               text: (el.textContent || "").trim().slice(0, 60),
-              reason,
             });
           }
         });
@@ -128,8 +139,8 @@ test.describe("Accessibilité — /sits/:id", () => {
       });
 
       expect(
-        hiddenFocusables,
-        `Éléments focusables cachés détectés:\n${JSON.stringify(hiddenFocusables, null, 2)}`
+        ariaHiddenFocusables,
+        `Focusables clavier sous aria-hidden détectés:\n${JSON.stringify(ariaHiddenFocusables, null, 2)}`
       ).toEqual([]);
 
       // ---------- 2. Libellés des sections clés ----------
