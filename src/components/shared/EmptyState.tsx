@@ -4,14 +4,15 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
-/* ── Illustrations gouache peintes à la main, palette du site ──
-   Vert sapin #2C7A5C · Terre brune #94673D · Crème #FAF7F1
-   Style éditorial premium, livre d'enfant raffiné. */
-import sleepingCatImg from "@/assets/empty-states/sleeping-cat.webp";
-import emptyMailboxImg from "@/assets/empty-states/empty-mailbox.webp";
-import walkingDogImg from "@/assets/empty-states/walking-dog.webp";
-import emptyCalendarImg from "@/assets/empty-states/empty-calendar.webp";
-import heartBookmarkImg from "@/assets/empty-states/heart-bookmark.webp";
+/* ── Illustrations aquarelle narrative française ──
+   Scènes évocatrices de campagne, palette douce (sage, lavande, terre,
+   crème), peinture délicate qui se fond dans le fond crème de la page.
+   Chaque scène raconte l'intention de la page où elle apparaît. */
+import waitingBenchImg from "@/assets/empty-states/v2/waiting-bench.webp";
+import ruralMailboxImg from "@/assets/empty-states/v2/rural-mailbox.webp";
+import countryPathImg from "@/assets/empty-states/v2/country-path.webp";
+import openCalendarImg from "@/assets/empty-states/v2/open-calendar.webp";
+import bouquetBookmarkImg from "@/assets/empty-states/v2/bouquet-bookmark.webp";
 
 import { SVG_FALLBACKS } from "./empty-state-fallbacks";
 
@@ -55,11 +56,11 @@ const PaintedIllustration = ({
   );
 };
 
-const SleepingCat = () => <PaintedIllustration src={sleepingCatImg} alt="" fallbackKey="sleepingCat" />;
-const EmptyMailbox = () => <PaintedIllustration src={emptyMailboxImg} alt="" fallbackKey="emptyMailbox" />;
-const WalkingDog = () => <PaintedIllustration src={walkingDogImg} alt="" fallbackKey="walkingDog" />;
-const EmptyCalendar = () => <PaintedIllustration src={emptyCalendarImg} alt="" fallbackKey="emptyCalendar" />;
-const HeartBookmark = () => <PaintedIllustration src={heartBookmarkImg} alt="" fallbackKey="heartBookmark" />;
+const SleepingCat = () => <PaintedIllustration src={waitingBenchImg} alt="" fallbackKey="sleepingCat" />;
+const EmptyMailbox = () => <PaintedIllustration src={ruralMailboxImg} alt="" fallbackKey="emptyMailbox" />;
+const WalkingDog = () => <PaintedIllustration src={countryPathImg} alt="" fallbackKey="walkingDog" />;
+const EmptyCalendar = () => <PaintedIllustration src={openCalendarImg} alt="" fallbackKey="emptyCalendar" />;
+const HeartBookmark = () => <PaintedIllustration src={bouquetBookmarkImg} alt="" fallbackKey="heartBookmark" />;
 
 export const ILLUSTRATIONS = {
   sleepingCat: SleepingCat,
