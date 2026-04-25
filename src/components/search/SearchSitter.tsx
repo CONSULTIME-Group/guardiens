@@ -718,7 +718,7 @@ const SearchSitter = () => {
     ? `${format(new Date(startDate), "d MMM", { locale: fr })} → ${format(new Date(endDate), "d MMM", { locale: fr })}`
     : "Dates";
 
-  const availableSitsCount = results.filter((r: any) => !r.isAssigned).length;
+  const availableSitsCount = results.filter((r: any) => !r.isAssigned && !r.isCompleted).length;
   const resultCount = tab === "missions" && missionSubTab === "members" ? availableMembers.length : availableSitsCount;
   const countLabel = tab === "missions" && missionSubTab === "members"
     ? `${resultCount} membre${resultCount > 1 ? "s" : ""} disponible${resultCount > 1 ? "s" : ""}`
