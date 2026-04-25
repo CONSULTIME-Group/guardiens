@@ -294,19 +294,51 @@ const SitterSitView = ({
         </div>
       )}
 
-      {/* Bouton Annuler — gardien candidat uniquement */}
-      {hasApplied && sit.status === "confirmed" && (
-        <div className="mt-6 text-center">
-          <Button
-            variant="outline"
-            size="sm"
-            className="text-destructive hover:text-destructive hover:bg-destructive/10 border-destructive/30"
-            onClick={() => setCancelOpen(true)}
+      {/* Bloc "Annuler ma participation" — gardien confirmé uniquement.
+          Conditions :
+          - Le gardien a candidaté ET est l'attribué (status confirmed/in_progress)
+          - La garde n'est ni terminée, ni annulée, ni en brouillon
+          Le modal CancelSitModal détecte automatiquement le rôle via user.id ≠ sitOwnerId. */}
+      {(() => {
+        const canSitterCancel =
+          hasApplied && (sit.status === "confirmed" || sit.status === "in_progress");
+        if (!canSitterCancel) return null;
+        return (
+          <section
+            className="mt-10 mb-6 rounded-xl border border-destructive/20 bg-destructive/5 p-5 md:p-6"
+            aria-labelledby="sitter-cancel-title"
           >
-            Annuler ma participation à cette garde
-          </Button>
-        </div>
-      )}
+            <div className="flex items-start gap-3">
+              <XCircle
+                className="h-5 w-5 text-destructive shrink-0 mt-0.5"
+                aria-hidden="true"
+              />
+              <div className="flex-1 min-w-0">
+                <h2
+                  id="sitter-cancel-title"
+                  className="font-heading font-semibold text-base text-foreground"
+                >
+                  Annuler ma participation
+                </h2>
+                <p className="text-xs text-muted-foreground mt-1 mb-3">
+                  {sit.status === "in_progress"
+                    ? "La garde est en cours. Une annulation maintenant peut mettre le propriétaire en difficulté — contactez-le d'abord si possible."
+                    : "Le propriétaire sera notifié immédiatement. Pensez à le prévenir directement avant si possible."}
+                </p>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="text-destructive hover:text-destructive hover:bg-destructive/10 border-destructive/40 hover:border-destructive/60"
+                  onClick={() => setCancelOpen(true)}
+                >
+                  <XCircle className="h-3.5 w-3.5 mr-1.5" />
+                  Annuler ma participation
+                </Button>
+              </div>
+            </div>
+          </section>
+        );
+      })()}
 
       <div className="mt-8 bg-primary/5 border border-primary/10 rounded-xl p-5 text-center">
         <p className="font-heading text-sm font-semibold text-primary">
