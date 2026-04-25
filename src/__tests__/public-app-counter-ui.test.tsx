@@ -11,6 +11,7 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 // ── Mock du client Supabase ──────────────────────────────────────────────────
 const rpcMock = vi.fn();
