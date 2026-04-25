@@ -358,25 +358,48 @@ const Sits = () => {
     });
   }, [activeSits, activeRole, activeTab]);
 
+  // Sous-titre contextuel : informations utiles plutôt que générique
+  const headerSubtitle = useMemo(() => {
+    const upcoming = tabCounts.upcoming;
+    const inProgress = tabCounts.in_progress;
+    if (activeRole === "owner") {
+      const pendingApps = activeSits.reduce((sum, s) => sum + (s.pendingApplicationCount || 0), 0);
+      const parts: string[] = [];
+      if (pendingApps > 0) parts.push(`${pendingApps} candidature${pendingApps > 1 ? "s" : ""} en attente`);
+      if (inProgress > 0) parts.push(`${inProgress} garde${inProgress > 1 ? "s" : ""} en cours`);
+      else if (upcoming > 0) parts.push(`${upcoming} annonce${upcoming > 1 ? "s" : ""} active${upcoming > 1 ? "s" : ""}`);
+      return parts.length > 0 ? parts.join(" · ") : "Gérez vos annonces et suivez vos gardes.";
+    } else {
+      const parts: string[] = [];
+      if (inProgress > 0) parts.push(`${inProgress} garde${inProgress > 1 ? "s" : ""} en cours`);
+      if (upcoming > 0) parts.push(`${upcoming} à venir`);
+      return parts.length > 0 ? parts.join(" · ") : "Suivez vos candidatures et gardes.";
+    }
+  }, [tabCounts, activeSits, activeRole]);
+
   return (
-    <div className="p-4 md:p-10 max-w-4xl mx-auto animate-fade-in pb-24 md:pb-8">
+    <div className="p-4 md:p-8 max-w-4xl mx-auto animate-fade-in pb-24 md:pb-8">
       <Helmet><meta name="robots" content="noindex, nofollow" /></Helmet>
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <div>
+      <div className="flex items-center justify-between gap-3 mb-6">
+        <div className="min-w-0">
           <h1 className="font-heading text-2xl md:text-3xl font-bold mb-1">
             {activeRole === "owner" ? "Mes annonces" : "Mes gardes"}
           </h1>
-          <p className="text-muted-foreground text-sm">
-            {activeRole === "owner"
-              ? "Gérez vos annonces et suivez vos gardes."
-              : "Suivez vos candidatures et gardes."}
+          <p className="text-muted-foreground text-sm truncate">
+            {headerSubtitle}
           </p>
         </div>
-        {activeRole === "owner" && (
-          <Link to="/sits/create">
+        {activeRole === "owner" ? (
+          <Link to="/sits/create" className="shrink-0">
             <Button className="gap-2">
               <Plus className="h-4 w-4" /> Publier
+            </Button>
+          </Link>
+        ) : (
+          <Link to="/search" className="shrink-0">
+            <Button variant="outline" className="gap-2">
+              <Eye className="h-4 w-4" /> Voir les annonces
             </Button>
           </Link>
         )}
