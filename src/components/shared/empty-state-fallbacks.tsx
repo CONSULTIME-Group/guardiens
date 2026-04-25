@@ -113,5 +113,3 @@ export const SVG_FALLBACKS: Record<IllustrationKey, () => JSX.Element> = {
   heartBookmark: HeartBookmarkSvg,
   sitterReady: SitterReadySvg,
 };
-  heartBookmark: HeartBookmarkSvg,
-};
