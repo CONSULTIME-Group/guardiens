@@ -85,6 +85,16 @@ export default {
           from: { opacity: "0", transform: "translateY(10px)" },
           to: { opacity: "1", transform: "translateY(0)" },
         },
+        /* Variantes douces pour les états vides — fondu lent sans translation
+           brutale, pour préserver le rendu peinture des illustrations gouache. */
+        "soft-fade-in": {
+          from: { opacity: "0", transform: "translateY(4px)" },
+          to: { opacity: "1", transform: "translateY(0)" },
+        },
+        "painted-reveal": {
+          from: { opacity: "0", transform: "scale(0.985)" },
+          to: { opacity: "1", transform: "scale(1)" },
+        },
         "collapsible-down": {
           from: { height: "0", opacity: "0" },
           to: { height: "var(--radix-collapsible-content-height)", opacity: "1" },
