@@ -5,7 +5,7 @@ import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Calendar, MapPin, Star, ShieldCheck, Home, PawPrint, MessageSquare, CheckCircle2, XCircle, Send, Pencil, Heart, LockKeyhole, ExternalLink, ChevronDown, Plus, Minus } from "lucide-react";
+import { ArrowLeft, Calendar, MapPin, Star, ShieldCheck, Home, PawPrint, MessageSquare, CheckCircle2, Send, Pencil, ExternalLink, ChevronDown, Plus, Minus, ClipboardList } from "lucide-react";
 import { useSubscriptionAccess } from "@/hooks/useSubscriptionAccess";
 import { useAccessLevel } from "@/hooks/useAccessLevel";
 import AccessGateBanner from "@/components/access/AccessGateBanner";
@@ -27,6 +27,17 @@ import { hasMedication } from "@/lib/medication";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ShareButtons from "@/components/sits/ShareButtons";
 import SitDateHistory from "@/components/sits/SitDateHistory";
+import SitHero from "@/components/sits/shared/SitHero";
+import OwnerSitManagement from "@/components/sits/shared/OwnerSitManagement";
+import SitDetailSkeleton from "@/components/skeletons/SitDetailSkeleton";
+import {
+  ENV_LABELS as envLabels,
+  TYPE_LABELS as typeLabels,
+  SPECIES_EMOJI as speciesEmoji,
+  WALK_LABELS as walkLabels,
+  ALONE_LABELS as aloneLabels,
+  getSitStatusConfig,
+} from "@/components/sits/shared/sitConstants";
 import { trackEvent } from "@/lib/analytics";
 import { formatSitPeriod } from "@/lib/dateRange";
 import {
@@ -39,20 +50,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-
-const envLabels: Record<string, string> = {
-  city_center: "Centre-ville", suburban: "Périurbain", countryside: "Campagne",
-  mountain: "Montagne", seaside: "Bord de mer", forest: "Forêt",
-};
-const typeLabels: Record<string, string> = {
-  apartment: "Appartement", house: "Maison", farm: "Ferme", chalet: "Chalet", other: "Autre",
-};
-const speciesEmoji: Record<string, string> = {
-  dog: "🐕", cat: "🐈", horse: "🐴", bird: "🐦", rodent: "🐹",
-  fish: "🐠", reptile: "🦎", farm_animal: "🐄", nac: "🐾",
-};
-const walkLabels: Record<string, string> = { none: "Aucune balade", "30min": "30 min/jour", "1h": "1h/jour", "2h_plus": "2h+/jour" };
-const aloneLabels: Record<string, string> = { never: "Jamais seul", "2h": "2h max seul", "6h": "6h max seul", all_day: "Peut rester seul toute la journée" };
 
 interface SitData {
   id: string;
@@ -84,7 +81,7 @@ const SitDetail = () => {
   const [reviews, setReviews] = useState<any[]>([]);
   const [sitterProfile, setSitterProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [photoIndex, setPhotoIndex] = useState(0);
+  
   const [applyOpen, setApplyOpen] = useState(false);
   const [hasApplied, setHasApplied] = useState(false);
   const [cancelOpen, setCancelOpen] = useState(false);
@@ -221,16 +218,15 @@ const SitDetail = () => {
     }, 800);
   }, [sit, isOwnerCheck]);
 
-  if (loading) return <div className="p-6 md:p-10 text-muted-foreground">Chargement...</div>;
+  if (loading) return <SitDetailSkeleton />;
   if (!sit) return <div className="p-6 md:p-10"><p>Annonce introuvable.</p></div>;
   if (id?.startsWith("demo-")) return <Navigate to="/search" replace />;
-
-  const shouldNoindex = ["completed", "cancelled", "expired"].includes(sit.status);
 
   const photos: string[] = (property as any)?.photos || [];
   const avgRating = reviews.length > 0 ? (reviews.reduce((s: number, r: any) => s + r.overall_rating, 0) / reviews.length).toFixed(1) : null;
   const isOwner = sit.user_id === user?.id;
   const isDraft = sit.status === "draft";
+  const canCancel = isOwner && (sit.status === "published" || sit.status === "confirmed");
 
   const badges: string[] = [];
   if (sitterProfile && (activeRole === "sitter" || user?.role === "sitter" || user?.role === "both")) {
@@ -259,14 +255,8 @@ const SitDetail = () => {
     setSit({ ...sit, status: "published" });
     toast({ title: "Annonce publiée", description: "Les gardiens peuvent maintenant candidater." });
   };
-  const statusLabel: Record<string, { label: string; className: string }> = {
-    draft: { label: "Brouillon", className: "bg-muted text-muted-foreground" },
-    published: { label: "Publiée", className: "bg-primary/10 text-primary" },
-    confirmed: { label: "Confirmée", className: "bg-primary/10 text-primary" },
-    completed: { label: "Terminée", className: "bg-accent text-muted-foreground" },
-    cancelled: { label: "Annulée", className: "bg-destructive/10 text-destructive" },
-  };
-  const status = statusLabel[sit.status] || statusLabel.draft;
+
+  const status = getSitStatusConfig(sit.status);
 
   return (
     <div className="p-6 md:p-10 max-w-4xl mx-auto animate-fade-in pb-44 md:pb-40">
@@ -367,25 +357,8 @@ const SitDetail = () => {
         </div>
       )}
 
-      {/* Hero: Photos gallery */}
-      {photos.length > 0 && (
-        <div className="mb-6 relative">
-          <img src={photos[photoIndex]} alt="Logement" className="w-full h-48 md:h-64 rounded-xl object-cover" />
-          {photos.length > 1 && (
-            <div className="flex gap-1.5 mt-2 overflow-x-auto pb-1">
-              {photos.map((p: string, i: number) => (
-                <button
-                  key={i}
-                  onClick={() => setPhotoIndex(i)}
-                  className={`w-16 h-12 rounded-md object-cover border-2 shrink-0 overflow-hidden transition-all ${i === photoIndex ? "border-primary ring-2 ring-primary/30" : "border-transparent opacity-70 hover:opacity-100"}`}
-                >
-                  <img src={p} alt="" className="w-full h-full object-cover" />
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
+      {/* Hero: Photos gallery avec lightbox */}
+      <SitHero photos={photos} city={owner?.city} priority />
 
       {/* Title, location, dates, status */}
       <div className="flex items-start justify-between gap-4 mb-1">
@@ -401,6 +374,7 @@ const SitDetail = () => {
               <Link
                 to={`/annonces/${sit.id}`}
                 target="_blank"
+                rel="noopener noreferrer"
                 className="text-sm text-primary hover:underline cursor-pointer flex items-center gap-1"
               >
                 Voir comme un gardien <ExternalLink className="h-3.5 w-3.5" />
@@ -428,12 +402,12 @@ const SitDetail = () => {
         )}
       </div>
 
-      {/* Owner card */}
-      {owner && (
+      {/* Owner card — masquée si on est soi-même le propriétaire (info redondante) */}
+      {owner && !isOwner && (
         <div className="flex items-center gap-3 mb-6 p-4 bg-card rounded-xl border border-border">
           <Link to={`/gardiens/${owner.id}`}>
             {owner.avatar_url ? (
-              <img src={owner.avatar_url} alt={owner.first_name} className="w-14 h-14 rounded-full object-cover hover:ring-2 hover:ring-primary/30 transition-all" />
+              <img src={owner.avatar_url} alt={`Photo de ${owner.first_name}`} loading="lazy" className="w-14 h-14 rounded-full object-cover hover:ring-2 hover:ring-primary/30 transition-all" />
             ) : (
               <div className="w-14 h-14 rounded-full bg-muted flex items-center justify-center font-heading text-lg font-bold">
                 {owner.first_name?.charAt(0) || "?"}
@@ -449,11 +423,9 @@ const SitDetail = () => {
               {owner.bio ? owner.bio.slice(0, 80) + (owner.bio.length > 80 ? "…" : "") : "Propriétaire"}
             </p>
           </div>
-          {!isOwner && (
-            <Link to={`/gardiens/${owner.id}`}>
-              <Button variant="outline" size="sm">Voir le profil</Button>
-            </Link>
-          )}
+          <Link to={`/gardiens/${owner.id}`}>
+            <Button variant="outline" size="sm">Voir le profil</Button>
+          </Link>
         </div>
       )}
 
@@ -485,17 +457,17 @@ const SitDetail = () => {
               {pendingAppCount > 0 && <span className="w-2 h-2 rounded-full bg-primary inline-block ml-1 mb-0.5" />}
             </TabsTrigger>
           )}
-          <TabsTrigger value="animals" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-2.5 text-sm">
-            🐾 Animaux
+          <TabsTrigger value="animals" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-2.5 text-sm gap-1.5">
+            <PawPrint className="h-3.5 w-3.5" /> Animaux
           </TabsTrigger>
-          <TabsTrigger value="housing" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-2.5 text-sm">
-            🏠 Logement
+          <TabsTrigger value="housing" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-2.5 text-sm gap-1.5">
+            <Home className="h-3.5 w-3.5" /> Logement
           </TabsTrigger>
-          <TabsTrigger value="expectations" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-2.5 text-sm">
-            📋 Attentes
+          <TabsTrigger value="expectations" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-2.5 text-sm gap-1.5">
+            <ClipboardList className="h-3.5 w-3.5" /> Attentes
           </TabsTrigger>
-          <TabsTrigger value="reviews" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-2.5 text-sm">
-            ⭐ Avis ({reviews.length})
+          <TabsTrigger value="reviews" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-2.5 text-sm gap-1.5">
+            <Star className="h-3.5 w-3.5" /> Avis ({reviews.length})
           </TabsTrigger>
         </TabsList>
 
@@ -780,18 +752,15 @@ const SitDetail = () => {
       </Tabs>
 
       {/* Guide de la maison (owner only) */}
+      {/* Bloc unifié de gestion — propriétaire uniquement */}
       {isOwner && (
-        <div className="mt-8 p-4 bg-accent/50 rounded-xl border border-border">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium">📋 Guide de la maison</p>
-              <p className="text-xs text-muted-foreground">Adresse, codes, contacts véto — partagé après confirmation</p>
-            </div>
-            <Link to={`/house-guide/${sit.property_id}`}>
-              <Button variant="outline" size="sm">Modifier</Button>
-            </Link>
-          </div>
-        </div>
+        <OwnerSitManagement
+          sitId={sit.id}
+          propertyId={sit.property_id}
+          status={sit.status}
+          canCancel={canCancel}
+          onCancelClick={() => setCancelOpen(true)}
+        />
       )}
 
       {/* Accord de garde — sitter view */}
@@ -818,7 +787,7 @@ const SitDetail = () => {
             </div>
           ) : (
             <div className="bg-card rounded-xl border border-border p-5 space-y-3">
-              <p className="font-heading font-semibold text-sm">📋 Notre accord de garde</p>
+              <p className="font-heading font-semibold text-sm">Notre accord de garde</p>
               <p className="text-sm text-muted-foreground">
                 Le propriétaire a validé cet accord. Lisez-le et confirmez votre acceptation pour finaliser la garde.
               </p>
@@ -830,20 +799,18 @@ const SitDetail = () => {
         </div>
       )}
 
-      {/* Cancel button */}
-      {sit && user && (sit.status === "confirmed" || sit.status === "published") && (
-        (isOwner || (hasApplied && sit.status === "confirmed")) && (
-          <div className="mt-6 text-center">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-destructive hover:text-destructive hover:bg-destructive/10 text-xs"
-              onClick={() => setCancelOpen(true)}
-            >
-              <XCircle className="h-4 w-4 mr-1" /> Annuler cette garde
-            </Button>
-          </div>
-        )
+      {/* Bouton Annuler — gardien candidat uniquement (le proprio passe par OwnerSitManagement) */}
+      {!isOwner && hasApplied && sit.status === "confirmed" && (
+        <div className="mt-6 text-center">
+          <Button
+            variant="outline"
+            size="sm"
+            className="text-destructive hover:text-destructive hover:bg-destructive/10 border-destructive/30"
+            onClick={() => setCancelOpen(true)}
+          >
+            Annuler ma participation à cette garde
+          </Button>
+        </div>
       )}
 
       <div className="mt-8 bg-primary/5 border border-primary/10 rounded-xl p-5 text-center">
