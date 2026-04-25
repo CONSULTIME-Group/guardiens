@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Skeleton } from "@/components/ui/skeleton";
 import DashSection from "./DashSection";
 import { capitalize } from "./helpers";
 import type { AppRow, SitterInfo } from "./types";
@@ -11,7 +12,24 @@ interface ApplicationsSectionProps {
   recentApps: AppRow[];
   sitterProfiles: Record<string, SitterInfo>;
   sitterBadges: Record<string, { badge_key: string; count: number }[]>;
+  loading?: boolean;
 }
+
+const AppCardSkeleton = () => (
+  <div className="bg-card border border-border rounded-2xl p-4 flex gap-4" aria-hidden="true">
+    <Skeleton className="w-12 h-12 rounded-full shrink-0" />
+    <div className="flex-1 min-w-0 space-y-2">
+      <Skeleton className="h-4 w-32" />
+      <Skeleton className="h-3 w-48" />
+      <Skeleton className="h-3 w-20" />
+      <div className="flex gap-2 mt-3">
+        <Skeleton className="h-7 w-24 rounded-xl" />
+        <Skeleton className="h-7 w-28 rounded-xl" />
+      </div>
+    </div>
+  </div>
+);
+
 
 const AppCard = memo(({ app, sitterProfiles }: { app: AppRow; sitterProfiles: Record<string, SitterInfo> }) => {
   const navigate = useNavigate();
