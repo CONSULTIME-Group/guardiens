@@ -752,18 +752,15 @@ const SitDetail = () => {
       </Tabs>
 
       {/* Guide de la maison (owner only) */}
+      {/* Bloc unifié de gestion — propriétaire uniquement */}
       {isOwner && (
-        <div className="mt-8 p-4 bg-accent/50 rounded-xl border border-border">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium">📋 Guide de la maison</p>
-              <p className="text-xs text-muted-foreground">Adresse, codes, contacts véto — partagé après confirmation</p>
-            </div>
-            <Link to={`/house-guide/${sit.property_id}`}>
-              <Button variant="outline" size="sm">Modifier</Button>
-            </Link>
-          </div>
-        </div>
+        <OwnerSitManagement
+          sitId={sit.id}
+          propertyId={sit.property_id}
+          status={sit.status}
+          canCancel={canCancel}
+          onCancelClick={() => setCancelOpen(true)}
+        />
       )}
 
       {/* Accord de garde — sitter view */}
@@ -790,7 +787,7 @@ const SitDetail = () => {
             </div>
           ) : (
             <div className="bg-card rounded-xl border border-border p-5 space-y-3">
-              <p className="font-heading font-semibold text-sm">📋 Notre accord de garde</p>
+              <p className="font-heading font-semibold text-sm">Notre accord de garde</p>
               <p className="text-sm text-muted-foreground">
                 Le propriétaire a validé cet accord. Lisez-le et confirmez votre acceptation pour finaliser la garde.
               </p>
@@ -802,20 +799,18 @@ const SitDetail = () => {
         </div>
       )}
 
-      {/* Cancel button */}
-      {sit && user && (sit.status === "confirmed" || sit.status === "published") && (
-        (isOwner || (hasApplied && sit.status === "confirmed")) && (
-          <div className="mt-6 text-center">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-destructive hover:text-destructive hover:bg-destructive/10 text-xs"
-              onClick={() => setCancelOpen(true)}
-            >
-              <XCircle className="h-4 w-4 mr-1" /> Annuler cette garde
-            </Button>
-          </div>
-        )
+      {/* Bouton Annuler — gardien candidat uniquement (le proprio passe par OwnerSitManagement) */}
+      {!isOwner && hasApplied && sit.status === "confirmed" && (
+        <div className="mt-6 text-center">
+          <Button
+            variant="outline"
+            size="sm"
+            className="text-destructive hover:text-destructive hover:bg-destructive/10 border-destructive/30"
+            onClick={() => setCancelOpen(true)}
+          >
+            Annuler ma participation à cette garde
+          </Button>
+        </div>
       )}
 
       <div className="mt-8 bg-primary/5 border border-primary/10 rounded-xl p-5 text-center">
