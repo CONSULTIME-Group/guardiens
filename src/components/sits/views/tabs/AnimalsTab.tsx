@@ -14,6 +14,7 @@
 import { useMemo, useState } from "react";
 import { ChevronDown, Clock, Footprints, Pill } from "lucide-react";
 import BreedProfileCard from "@/components/breeds/BreedProfileCard";
+import PhotoLightbox from "@/components/shared/PhotoLightbox";
 import { hasMedication } from "@/lib/medication";
 import {
   SPECIES_EMOJI as speciesEmoji,
