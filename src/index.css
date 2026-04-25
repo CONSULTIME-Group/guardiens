@@ -183,31 +183,34 @@
    localement). */
 @layer components {
   .illustration-blend {
-    /* Masque radial — agressivité calibrée pour effacer toute trace
-       du fond crème de l'aquarelle, même sur conteneur très contrasté
-       (carte blanche pure, gris-bleu). */
+    /* Masque radial — `closest-side` garantit que 100% du gradient
+       correspond au bord du carré (pas à la diagonale). Conséquence :
+       tous les pixels au-delà du cercle inscrit (donc les 4 coins) sont
+       AUTOMATIQUEMENT transparents. C'est ce qui élimine le halo carré
+       crème visible en mode sombre quand on utilisait `ellipse` (défaut
+       = farthest-corner, qui laisse les coins opaques). */
     -webkit-mask-image: radial-gradient(
-      ellipse at center,
+      circle closest-side at center,
       rgba(0, 0, 0, 1) 0%,
-      rgba(0, 0, 0, 1) 35%,
-      rgba(0, 0, 0, 0.92) 50%,
-      rgba(0, 0, 0, 0.7) 62%,
-      rgba(0, 0, 0, 0.4) 72%,
-      rgba(0, 0, 0, 0.15) 80%,
-      rgba(0, 0, 0, 0) 88%
+      rgba(0, 0, 0, 1) 50%,
+      rgba(0, 0, 0, 0.92) 65%,
+      rgba(0, 0, 0, 0.6) 78%,
+      rgba(0, 0, 0, 0.25) 88%,
+      rgba(0, 0, 0, 0) 96%
     );
     mask-image: radial-gradient(
-      ellipse at center,
+      circle closest-side at center,
       rgba(0, 0, 0, 1) 0%,
-      rgba(0, 0, 0, 1) 35%,
-      rgba(0, 0, 0, 0.92) 50%,
-      rgba(0, 0, 0, 0.7) 62%,
-      rgba(0, 0, 0, 0.4) 72%,
-      rgba(0, 0, 0, 0.15) 80%,
-      rgba(0, 0, 0, 0) 88%
+      rgba(0, 0, 0, 1) 50%,
+      rgba(0, 0, 0, 0.92) 65%,
+      rgba(0, 0, 0, 0.6) 78%,
+      rgba(0, 0, 0, 0.25) 88%,
+      rgba(0, 0, 0, 0) 96%
     );
     -webkit-mask-repeat: no-repeat;
     mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+    mask-position: center;
     -webkit-mask-size: 100% 100%;
     mask-size: 100% 100%;
 

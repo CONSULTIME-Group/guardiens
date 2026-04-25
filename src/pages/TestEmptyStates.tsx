@@ -14,6 +14,8 @@
 import EmptyState, { ILLUSTRATIONS, type IllustrationKey } from "@/components/shared/EmptyState";
 import { Card } from "@/components/ui/card";
 
+import { useEffect } from "react";
+
 const KEYS = Object.keys(ILLUSTRATIONS) as IllustrationKey[];
 
 const Block = ({
@@ -34,6 +36,20 @@ const Block = ({
 );
 
 const TestEmptyStates = () => {
+  // Override de thème via `?theme=dark|light` — utile pour les tests visuels
+  // qui ne peuvent pas manipuler localStorage avant chargement.
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const theme = params.get("theme");
+    if (theme === "dark") {
+      document.documentElement.classList.add("dark");
+      try { localStorage.setItem("guardiens-theme", "dark"); } catch {}
+    } else if (theme === "light") {
+      document.documentElement.classList.remove("dark");
+      try { localStorage.setItem("guardiens-theme", "light"); } catch {}
+    }
+  }, []);
+
   return (
     <main className="min-h-screen bg-background p-4 space-y-8">
       <h1 className="font-heading text-xl">EmptyState halo regression harness</h1>
