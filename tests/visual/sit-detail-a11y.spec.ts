@@ -724,13 +724,16 @@ test.describe("Accessibilité — /sits/:id", () => {
           return [255, 255, 255];
         };
 
-        const isLargeText = (style: CSSStyleDeclaration): boolean => {
-          const sizePx = parseFloat(style.fontSize);
-          const weight = parseInt(style.fontWeight, 10) || 400;
-          // 18pt ≈ 24px ; 14pt ≈ 18.66px
-          if (sizePx >= 24) return true;
-          if (sizePx >= 18.66 && weight >= 700) return true;
-          return false;
+        // Sélectionne les feuilles textuelles : élément qui contient au moins
+        // un nœud de texte non vide en enfant direct.
+        const hasDirectText = (el: Element): string => {
+          let txt = "";
+          for (const node of Array.from(el.childNodes)) {
+            if (node.nodeType === Node.TEXT_NODE) {
+              txt += (node.textContent || "").trim();
+            }
+          }
+          return txt;
         };
 
         // Classification WCAG « large-scale text » : helper injecté via
