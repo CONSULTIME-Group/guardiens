@@ -342,15 +342,13 @@ test.describe("Accessibilité — /sits/:id", () => {
           return false;
         };
 
-        const offending: { tag: string; text: string }[] = [];
+        const offending: any[] = [];
         document.querySelectorAll(selector).forEach((el) => {
           if (el.classList.contains("sr-only")) return;
           if (!isInTabOrder(el)) return;
           if (hasAriaHiddenAncestor(el)) {
-            offending.push({
-              tag: el.tagName.toLowerCase(),
-              text: (el.textContent || "").trim().slice(0, 60),
-            });
+            // @ts-ignore
+            offending.push((window as any).__describeEl(el));
           }
         });
         return offending;
@@ -358,7 +356,10 @@ test.describe("Accessibilité — /sits/:id", () => {
 
       expect(
         ariaHiddenFocusables,
-        `Focusables clavier sous aria-hidden détectés:\n${JSON.stringify(ariaHiddenFocusables, null, 2)}`
+        `Focusables clavier sous aria-hidden détectés.${fmt(
+          "Focusables piégés sous aria-hidden",
+          ariaHiddenFocusables
+        )}`
       ).toEqual([]);
 
       // ---------- 2. Hiérarchie des titres et landmarks ----------
