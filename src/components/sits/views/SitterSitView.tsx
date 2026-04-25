@@ -156,6 +156,10 @@ const SitterSitView = ({
 
   return (
     <>
+      {/* Bandeau d'état terminal — affiché en premier pour que le gardien
+          comprenne immédiatement que l'annonce n'est pas/plus actionnable. */}
+      <SitterStatusBanner status={sit.status} />
+
       {badges.length > 0 && (
         <div className="flex flex-wrap gap-2 mb-4">
           {badges.map((b) => (
@@ -342,15 +346,7 @@ const SitterSitView = ({
         );
       })()}
 
-      <div className="mt-8 bg-primary/5 border border-primary/10 rounded-xl p-5 text-center">
-        <p className="font-heading text-sm font-semibold text-primary">
-          Vous partez l'esprit léger — et si un imprévu survient, votre réseau local de gardiens
-          prend le relais.
-        </p>
-        <p className="text-xs text-muted-foreground mt-1">
-          Profils vérifiés · Avis croisés · Gardiens d'urgence mobilisables
-        </p>
-      </div>
+      <SitFooterReassurance />
 
       {/* Sitter apply bar — sticky bottom action bar */}
       {activeRole === "sitter" && sit.status === "published" && (
