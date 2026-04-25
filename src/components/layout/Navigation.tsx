@@ -396,7 +396,7 @@ export const BottomNav = () => {
       <FeedbackDialog open={feedbackOpen} onOpenChange={setFeedbackOpen} />
       <PremiumGateDialog open={gateOpen} onClose={() => setGateOpen(false)} featureName={gateFeature} />
       <ActivateRoleDialog open={roleDialogOpen} onClose={() => setRoleDialogOpen(false)} targetRole={roleDialogTarget} />
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-card border-t border-border z-50">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-card border-t border-border z-50" aria-label="Navigation mobile">
         <div className="flex justify-around items-center h-16 px-1">
           {tabs.map((item) => {
             const isActive = location.pathname === item.to || location.pathname.startsWith(item.to + "/");
