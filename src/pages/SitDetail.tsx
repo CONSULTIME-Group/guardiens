@@ -8,7 +8,7 @@
  *
  * Le détail des comportements vit dans les sous-vues.
  */
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useParams, Navigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
@@ -17,6 +17,7 @@ import { geocodeCity } from "@/lib/geocode";
 import SitDetailSkeleton from "@/components/skeletons/SitDetailSkeleton";
 import OwnerSitView from "@/components/sits/views/OwnerSitView";
 import SitterSitView from "@/components/sits/views/SitterSitView";
+import { useSitRealtime } from "@/components/sits/views/useSitRealtime";
 import type { SitData } from "@/components/sits/views/types";
 
 const SitDetail = () => {
