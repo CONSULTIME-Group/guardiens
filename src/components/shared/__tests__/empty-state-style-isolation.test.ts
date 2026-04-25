@@ -95,8 +95,9 @@ describe("EmptyState style isolation", () => {
 
   it(".illustration-blend exists exactly once in index.css (base rule)", () => {
     const css = readFileSync(join(SRC, "index.css"), "utf8");
-    // Capture la règle de base UNIQUEMENT (exclut `.dark .illustration-blend`).
-    const matches = css.match(/(^|\s)\.illustration-blend\s*\{/gm) ?? [];
+    // Compte UNIQUEMENT la règle de base : début de ligne + indentation +
+    // .illustration-blend non précédée d'un autre sélecteur (ex: .dark).
+    const matches = css.match(/^\s*\.illustration-blend\s*\{/gm) ?? [];
     expect(matches.length, "Une seule définition de base attendue").toBe(1);
   });
 
