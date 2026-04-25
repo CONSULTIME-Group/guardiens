@@ -124,6 +124,10 @@ export async function trackFirstAction(
     // silencieux
   }
 }
+
+/**
+ * Normalise une erreur de signup Supabase vers un code stable pour le funnel.
+ */
 export function mapSignupError(message: string | undefined | null): string {
   const m = (message || "").toLowerCase();
   if (m.includes("already registered") || m.includes("already been registered") || m.includes("user already")) {
