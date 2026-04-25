@@ -87,6 +87,224 @@ test.describe("Accessibilité — /sits/:id", () => {
         { timeout: 15_000 }
       );
 
+      // ---------- Helper de description d'élément (côté browser) ----------
+      // Injecté une fois pour produire un descripteur riche et stable
+      // permettant d'identifier précisément l'élément fautif :
+      //  - selector  : sélecteur CSS unique (ID si présent, sinon chemin nth-of-type)
+      //  - domPath   : chaîne lisible "main > section.card > button.btn-primary"
+      //  - location  : { x, y, width, height } en pixels viewport
+      //  - aria      : tous les attributs aria-* + role + tabindex
+      //  - dataAttrs : data-testid, data-* significatifs
+      //  - parentTag : tag + classes du parent direct (utile pour Tabs/Cards)
+      //  - text      : 60 premiers caractères de textContent
+      //  - tag       : nom du tag
+      await page.addInitScript(() => {
+        // @ts-ignore
+        window.__describeEl = (el: Element | null) => {
+          if (!el) return { tag: "null", selector: "null" };
+
+          const buildSelector = (node: Element): string => {
+            if (node.id) return `#${node.id}`;
+            const parts: string[] = [];
+            let cur: Element | null = node;
+            let depth = 0;
+            while (cur && cur.tagName !== "HTML" && depth < 6) {
+              let part = cur.tagName.toLowerCase();
+              if (cur.id) {
+                parts.unshift(`${part}#${cur.id}`);
+                break;
+              }
+              const cls = (cur.className && typeof cur.className === "string"
+                ? cur.className.split(/\s+/).filter(Boolean).slice(0, 2)
+                : []
+              ).map((c) => `.${CSS.escape(c)}`).join("");
+              part += cls;
+              // nth-of-type pour désambiguïser
+              if (cur.parentElement) {
+                const siblings = Array.from(cur.parentElement.children).filter(
+                  (s) => s.tagName === cur!.tagName
+                );
+                if (siblings.length > 1) {
+                  part += `:nth-of-type(${siblings.indexOf(cur) + 1})`;
+                }
+              }
+              parts.unshift(part);
+              cur = cur.parentElement;
+              depth++;
+            }
+            return parts.join(" > ");
+          };
+
+          const buildDomPath = (node: Element): string => {
+            const parts: string[] = [];
+            let cur: Element | null = node;
+            let depth = 0;
+            while (cur && cur.tagName !== "BODY" && depth < 6) {
+              let part = cur.tagName.toLowerCase();
+              const id = cur.id ? `#${cur.id}` : "";
+              const cls =
+                cur.className && typeof cur.className === "string"
+                  ? "." + cur.className.split(/\s+/).filter(Boolean).slice(0, 1).join(".")
+                  : "";
+              parts.unshift(`${part}${id}${cls}`);
+              cur = cur.parentElement;
+              depth++;
+            }
+            return parts.join(" > ");
+          };
+
+          const aria: Record<string, string> = {};
+          for (const attr of Array.from(el.attributes)) {
+            if (
+              attr.name.startsWith("aria-") ||
+              attr.name === "role" ||
+              attr.name === "tabindex"
+            ) {
+              aria[attr.name] = attr.value;
+            }
+          }
+          const dataAttrs: Record<string, string> = {};
+          for (const attr of Array.from(el.attributes)) {
+            if (attr.name.startsWith("data-") && attr.name !== "data-state") {
+              dataAttrs[attr.name] = attr.value;
+            }
+            if (attr.name === "data-testid") dataAttrs[attr.name] = attr.value;
+          }
+
+          const rect = (el as HTMLElement).getBoundingClientRect();
+          const parent = el.parentElement;
+          const parentTag = parent
+            ? `${parent.tagName.toLowerCase()}${
+                parent.className && typeof parent.className === "string"
+                  ? "." + parent.className.split(/\s+/).filter(Boolean).slice(0, 1).join(".")
+                  : ""
+              }`
+            : null;
+
+          return {
+            tag: el.tagName.toLowerCase(),
+            selector: buildSelector(el),
+            domPath: buildDomPath(el),
+            location: {
+              x: Math.round(rect.left),
+              y: Math.round(rect.top),
+              width: Math.round(rect.width),
+              height: Math.round(rect.height),
+            },
+            aria: Object.keys(aria).length ? aria : undefined,
+            dataAttrs: Object.keys(dataAttrs).length ? dataAttrs : undefined,
+            parentTag,
+            text: (el.textContent || "").trim().slice(0, 60),
+          };
+        };
+      });
+      // Re-trigger : addInitScript ne s'applique qu'aux navigations suivantes,
+      // donc on injecte aussi via evaluate pour la page courante.
+      await page.evaluate(() => {
+        // @ts-ignore — réinjecte le même helper si pas déjà défini
+        if (!(window as any).__describeEl) {
+          (window as any).__describeEl = (el: Element | null) => {
+            if (!el) return { tag: "null", selector: "null" };
+            const buildSelector = (node: Element): string => {
+              if (node.id) return `#${node.id}`;
+              const parts: string[] = [];
+              let cur: Element | null = node;
+              let depth = 0;
+              while (cur && cur.tagName !== "HTML" && depth < 6) {
+                let part = cur.tagName.toLowerCase();
+                if (cur.id) {
+                  parts.unshift(`${part}#${cur.id}`);
+                  break;
+                }
+                const cls = (cur.className && typeof cur.className === "string"
+                  ? cur.className.split(/\s+/).filter(Boolean).slice(0, 2)
+                  : []
+                )
+                  .map((c) => `.${CSS.escape(c)}`)
+                  .join("");
+                part += cls;
+                if (cur.parentElement) {
+                  const siblings = Array.from(cur.parentElement.children).filter(
+                    (s) => s.tagName === cur!.tagName
+                  );
+                  if (siblings.length > 1) {
+                    part += `:nth-of-type(${siblings.indexOf(cur) + 1})`;
+                  }
+                }
+                parts.unshift(part);
+                cur = cur.parentElement;
+                depth++;
+              }
+              return parts.join(" > ");
+            };
+            const buildDomPath = (node: Element): string => {
+              const parts: string[] = [];
+              let cur: Element | null = node;
+              let depth = 0;
+              while (cur && cur.tagName !== "BODY" && depth < 6) {
+                let part = cur.tagName.toLowerCase();
+                const id = cur.id ? `#${cur.id}` : "";
+                const cls =
+                  cur.className && typeof cur.className === "string"
+                    ? "." +
+                      cur.className.split(/\s+/).filter(Boolean).slice(0, 1).join(".")
+                    : "";
+                parts.unshift(`${part}${id}${cls}`);
+                cur = cur.parentElement;
+                depth++;
+              }
+              return parts.join(" > ");
+            };
+            const aria: Record<string, string> = {};
+            const dataAttrs: Record<string, string> = {};
+            for (const attr of Array.from(el.attributes)) {
+              if (
+                attr.name.startsWith("aria-") ||
+                attr.name === "role" ||
+                attr.name === "tabindex"
+              ) {
+                aria[attr.name] = attr.value;
+              }
+              if (attr.name.startsWith("data-") && attr.name !== "data-state") {
+                dataAttrs[attr.name] = attr.value;
+              }
+            }
+            const rect = (el as HTMLElement).getBoundingClientRect();
+            const parent = el.parentElement;
+            return {
+              tag: el.tagName.toLowerCase(),
+              selector: buildSelector(el),
+              domPath: buildDomPath(el),
+              location: {
+                x: Math.round(rect.left),
+                y: Math.round(rect.top),
+                width: Math.round(rect.width),
+                height: Math.round(rect.height),
+              },
+              aria: Object.keys(aria).length ? aria : undefined,
+              dataAttrs: Object.keys(dataAttrs).length ? dataAttrs : undefined,
+              parentTag: parent
+                ? `${parent.tagName.toLowerCase()}${
+                    parent.className && typeof parent.className === "string"
+                      ? "." +
+                        parent.className.split(/\s+/).filter(Boolean).slice(0, 1).join(".")
+                      : ""
+                  }`
+                : null,
+              text: (el.textContent || "").trim().slice(0, 60),
+            };
+          };
+        }
+      });
+
+      // Helper côté Node : formate joliment les violations pour le message d'erreur.
+      const fmt = (header: string, items: unknown[]): string => {
+        if (!items || items.length === 0) return "";
+        return `\n\n=== ${header} (${items.length}) ===\n${items
+          .map((it, i) => `\n[#${i + 1}] ${JSON.stringify(it, null, 2)}`)
+          .join("\n")}\n`;
+      };
+
       // ---------- 1. Focusables piégés sous aria-hidden ----------
       // Règle WCAG : un élément focusable ne doit PAS se retrouver sous un
       // ancêtre aria-hidden="true" (le screen reader le masque mais le clavier
