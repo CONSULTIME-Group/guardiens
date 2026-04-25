@@ -527,10 +527,17 @@ test.describe("Navigation clavier — /sits/:id", () => {
         // contenu du tabpanel sélectionné (si focusable) ou au tabpanel
         // lui-même (qui doit alors être tabbable, tabindex=0). Radix rend
         // les tabpanels avec tabindex=0 par défaut.
+        currentPhase = "tab-into-panel";
         const activeTab = page.locator('[role="tab"][aria-selected="true"]').first();
         await activeTab.focus();
+        currentFocusLog.push(
+          await snapshotFocusEntry(page, currentFocusLog.length + 1, "focus(<active tab>)", "phase=tab-into-panel")
+        );
         await page.keyboard.press("Tab");
         await page.waitForTimeout(100);
+        currentFocusLog.push(
+          await snapshotFocusEntry(page, currentFocusLog.length + 1, "Tab (after tablist)", "after=tab-into-panel")
+        );
 
         const afterTablist = await page.evaluate(() => {
           const el = document.activeElement as HTMLElement | null;
