@@ -346,6 +346,18 @@ const PublicSitDetail = () => {
           />
         </div>
 
+        {/* Bloc gestion — visible uniquement si le visiteur est le propriétaire de l'annonce.
+            Les actions sensibles (annulation, édition) renvoient vers la fiche privée /sits/:id. */}
+        {viewerType === "owner_of_sit" && property && (
+          <OwnerSitManagement
+            sitId={sit.id}
+            propertyId={property.id}
+            status={sit.status}
+            canCancel={sit.status === "published" || sit.status === "confirmed"}
+            onCancelClick={() => navigate(`/sits/${sit.id}?action=cancel`)}
+          />
+        )}
+
         {/* CTA */}
         {/* TODO: à ajouter quand le bouton contact direct sera implémenté → sit_contact_clicked
             (aujourd'hui sit_apply_clicked couvre l'intent contact via candidature) */}
