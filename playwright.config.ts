@@ -15,6 +15,10 @@ try {
   const { createLovableConfig } = requireFn("lovable-agent-playwright-config/config");
   config = createLovableConfig({});
 } catch {
+  // Permet d'overrider le binaire Chromium via env var (utile en sandbox Nix
+  // où les libs système attendues par le binaire Playwright manquent).
+  const chromiumExec = process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH;
+
   config = defineConfig({
     testDir: "./tests",
     timeout: 60_000,
@@ -28,7 +32,10 @@ try {
     projects: [
       {
         name: "chromium",
-        use: { ...devices["Desktop Chrome"] },
+        use: {
+          ...devices["Desktop Chrome"],
+          ...(chromiumExec ? { launchOptions: { executablePath: chromiumExec } } : {}),
+        },
       },
     ],
   });
