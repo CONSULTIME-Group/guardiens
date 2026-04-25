@@ -81,10 +81,9 @@ const PaintedIllustration = ({
     const Fallback = SVG_FALLBACKS[fallbackKey];
     return (
       <div className={wrapperClass} role="img" aria-label={alt}>
-        <div className={imgClass}>
+        <div className={imgClass} style={maskStyle}>
           <Fallback />
         </div>
-        {renderFade()}
       </div>
     );
   }
@@ -99,9 +98,9 @@ const PaintedIllustration = ({
         height={1024}
         onError={() => setErrored(true)}
         className={imgClass}
+        style={maskStyle}
         draggable={false}
       />
-      {renderFade()}
     </div>
   );
 };
