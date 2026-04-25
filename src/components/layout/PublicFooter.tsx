@@ -5,7 +5,7 @@ const PublicFooter = React.forwardRef<HTMLElement>((_props, ref) => {
   return (
     <footer ref={ref} className="bg-foreground border-t border-white/10">
       <div className="max-w-6xl mx-auto px-6 md:px-12 py-16">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-10 mb-12">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-10 mb-12">
           <div>
             <h4 className="font-body text-xs uppercase tracking-widest text-white/30 mb-4">House-sitting par ville</h4>
             <ul className="space-y-2">
@@ -17,22 +17,35 @@ const PublicFooter = React.forwardRef<HTMLElement>((_props, ref) => {
             </ul>
           </div>
           <div>
-            <h4 className="font-body text-xs uppercase tracking-widest text-white/30 mb-4">House-sitting AURA</h4>
+            <h4 className="font-body text-xs uppercase tracking-widest text-white/30 mb-4">Par département</h4>
             <ul className="space-y-2">
-              <li><Link to="/actualites/house-sitting-aura-guide-complet" className="font-body text-sm text-white/50 hover:text-white transition-colors">House-sitting en AURA</Link></li>
-              <li><Link to="/actualites/parcs-chiens-lyon-guide-complet" className="font-body text-sm text-white/50 hover:text-white transition-colors">Parcs chiens Lyon</Link></li>
-              <li><Link to="/actualites/parcs-balades-chiens-annecy-guide" className="font-body text-sm text-white/50 hover:text-white transition-colors">Parcs chiens Annecy</Link></li>
-              <li><Link to="/actualites/parcs-balades-chiens-grenoble-guide" className="font-body text-sm text-white/50 hover:text-white transition-colors">Parcs chiens Grenoble</Link></li>
+              <li><Link to="/departement/rhone" className="font-body text-sm text-white/50 hover:text-white transition-colors">Rhône (69)</Link></li>
+              <li><Link to="/departement/haute-savoie" className="font-body text-sm text-white/50 hover:text-white transition-colors">Haute-Savoie (74)</Link></li>
+              <li><Link to="/departement/isere" className="font-body text-sm text-white/50 hover:text-white transition-colors">Isère (38)</Link></li>
+              <li><Link to="/departement/savoie" className="font-body text-sm text-white/50 hover:text-white transition-colors">Savoie (73)</Link></li>
+              <li><Link to="/departement/loire" className="font-body text-sm text-white/50 hover:text-white transition-colors">Loire (42)</Link></li>
+              <li><Link to="/departement/drome" className="font-body text-sm text-white/50 hover:text-white transition-colors">Drôme (26)</Link></li>
+              <li><Link to="/departement/puy-de-dome" className="font-body text-sm text-white/50 hover:text-white transition-colors">Puy-de-Dôme (63)</Link></li>
+            </ul>
+          </div>
+          <div>
+            <h4 className="font-body text-xs uppercase tracking-widest text-white/30 mb-4">Guides locaux</h4>
+            <ul className="space-y-2">
+              <li><Link to="/guides" className="font-body text-sm text-white/50 hover:text-white transition-colors">Tous les guides</Link></li>
+              <li><Link to="/guides/lyon" className="font-body text-sm text-white/50 hover:text-white transition-colors">Guide Lyon</Link></li>
+              <li><Link to="/guides/annecy" className="font-body text-sm text-white/50 hover:text-white transition-colors">Guide Annecy</Link></li>
+              <li><Link to="/guides/grenoble" className="font-body text-sm text-white/50 hover:text-white transition-colors">Guide Grenoble</Link></li>
+              <li><Link to="/guides/chambery" className="font-body text-sm text-white/50 hover:text-white transition-colors">Guide Chambéry</Link></li>
+              <li><Link to="/guides/aix-les-bains" className="font-body text-sm text-white/50 hover:text-white transition-colors">Guide Aix-les-Bains</Link></li>
             </ul>
           </div>
           <div>
             <h4 className="font-body text-xs uppercase tracking-widest text-white/30 mb-4">Ressources</h4>
             <ul className="space-y-2">
               <li><Link to="/actualites" className="font-body text-sm text-white/50 hover:text-white transition-colors">Articles</Link></li>
-              <li><Link to="/guides" className="font-body text-sm text-white/50 hover:text-white transition-colors">Guides locaux</Link></li>
+              <li><Link to="/actualites/house-sitting-aura-guide-complet" className="font-body text-sm text-white/50 hover:text-white transition-colors">House-sitting AURA</Link></li>
               <li><Link to="/faq" className="font-body text-sm text-white/50 hover:text-white transition-colors">FAQ</Link></li>
               <li><Link to="/tarifs" className="font-body text-sm text-white/50 hover:text-white transition-colors">Tarifs</Link></li>
-              <li><Link to="/actualites/nouveaux-tarifs-2026" className="font-body text-sm text-white/50 hover:text-white transition-colors">Tarifs 2026 en détail</Link></li>
               <li><Link to="/actualites/c-est-quoi-le-house-sitting" className="font-body text-sm text-white/50 hover:text-white transition-colors">C'est quoi le house-sitting</Link></li>
             </ul>
           </div>

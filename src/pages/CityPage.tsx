@@ -352,13 +352,23 @@ const CityPage = () => {
             </section>
           )}
 
-          {/* Internal links */}
+          {/* Internal links — maillage stratégique vers guide local + département parent */}
           <section className="max-w-5xl mx-auto px-4 py-8 border-t border-border">
-            <div className="flex flex-wrap justify-center gap-4 text-sm">
+            <div className="flex flex-wrap justify-center gap-x-4 gap-y-2 text-sm">
+              <Link to={`/guides/${cityData.slug}`} className="text-primary hover:underline">
+                Guide local de {cityData.name} →
+              </Link>
+              <Link
+                to={`/departement/${cityData.department.toLowerCase().replace(/\s+/g, "-").replace(/'/g, "")}`}
+                className="text-primary hover:underline"
+              >
+                House-sitting en {cityData.department} →
+              </Link>
+              <Link to="/guides" className="text-primary hover:underline">Tous les guides locaux →</Link>
               <Link to="/tarifs" className="text-primary hover:underline">Voir les tarifs →</Link>
               <Link to="/gardien-urgence" className="text-primary hover:underline">Gardiens d'urgence →</Link>
               <Link to="/faq" className="text-primary hover:underline">FAQ complète →</Link>
-              <Link to="/guides" className="text-primary hover:underline">Tous les guides locaux →</Link>
+              <Link to="/a-propos" className="text-primary hover:underline">À propos de Guardiens →</Link>
             </div>
           </section>
 
