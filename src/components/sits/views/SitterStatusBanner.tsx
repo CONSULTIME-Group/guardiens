@@ -20,7 +20,7 @@ const CONFIG: Record<
     title: "Cette garde a été annulée",
     description:
       "Le propriétaire a annulé son annonce. Vous pouvez explorer d'autres gardes en cours.",
-    tone: "border-destructive/20 bg-destructive/5 text-destructive",
+    tone: "border-destructive/20 bg-destructive/5 text-destructive-text",
   },
   expired: {
     Icon: Clock,
