@@ -148,12 +148,14 @@ describe("Compteur public d'annonce — agrégé, jamais détail", () => {
     const fs = await import("node:fs");
     const path = await import("node:path");
 
+    // Vitest exécute depuis la racine du projet (cwd = /dev-server).
+    // On résout depuis cwd pour rester indépendant de l'emplacement du test.
     const sitDetail = fs.readFileSync(
-      path.resolve(__dirname, "../../pages/SitDetail.tsx"),
+      path.resolve(process.cwd(), "src/pages/SitDetail.tsx"),
       "utf-8"
     );
     const useRealtime = fs.readFileSync(
-      path.resolve(__dirname, "../../components/sits/views/useSitRealtime.ts"),
+      path.resolve(process.cwd(), "src/components/sits/views/useSitRealtime.ts"),
       "utf-8"
     );
 
