@@ -90,7 +90,7 @@ const MonAnnonceCard = memo(({ sits, pets, propertyType, propertyEnvironment, pe
 
   // Active or completed sit
   const isActive = ["published", "confirmed", "in_progress"].includes(currentSit.status);
-  const statusConf = STATUS_CONFIG[currentSit.status] || STATUS_CONFIG.published;
+  const statusConf = getSitStatusConfig(currentSit.status);
   const dateRange = [
     currentSit.start_date ? format(new Date(currentSit.start_date), "d MMM", { locale: fr }) : "",
     currentSit.end_date ? format(new Date(currentSit.end_date), "d MMM yyyy", { locale: fr }) : "",
