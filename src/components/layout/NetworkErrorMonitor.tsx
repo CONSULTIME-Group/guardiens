@@ -37,6 +37,13 @@ const IGNORED_URL_PATTERNS: RegExp[] = [
   /\/auth\/v1\/user/,            // peut renvoyer 401 normalement
   /\/rest\/v1\/.*\?.*head=true/, // HEAD checks
   /\/storage\/v1\/object\/sign/, // signed-url retries
+  // Edge functions optionnelles dont l'échec est géré gracieusement
+  // (fallback UI, valeur null acceptée). Inutile d'alerter l'utilisateur
+  // ni de polluer l'admin avec des 5xx transitoires (Nominatim, etc.).
+  /\/functions\/v1\/geocode(\?|$|\/)/,
+  /\/functions\/v1\/geocode-guide-places(\?|$|\/)/,
+  /\/functions\/v1\/og-/,           // OG image previews
+  /\/functions\/v1\/fetch-seo-data/, // SEO scraping best-effort
 ];
 
 /**
