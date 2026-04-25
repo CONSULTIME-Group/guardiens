@@ -106,7 +106,14 @@ const CitySchemaOrg = ({ city }: Props) => {
           "@type": "ListItem",
           position: 2,
           name: city.department,
-          item: `https://guardiens.fr/departement/rhone`,
+          // Slug département dérivé du nom (ex: "Haute-Savoie" → "haute-savoie",
+          // "Puy-de-Dôme" → "puy-de-dome"). Cohérent avec /departement/:slug.
+          item: `https://guardiens.fr/departement/${city.department
+            .toLowerCase()
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "")
+            .replace(/\s+/g, "-")
+            .replace(/'/g, "")}`,
         },
         {
           "@type": "ListItem",
@@ -114,7 +121,7 @@ const CitySchemaOrg = ({ city }: Props) => {
           name: isLyon
             ? "Garde chien et chat Lyon"
             : `House-sitting à ${city.name}`,
-          item: `https://guardiens.fr/house-sitting/${city.slug}`,
+          // Dernier item : pas de "item" URL (recommandation Google)
         },
       ],
     },
