@@ -86,12 +86,12 @@ const SitterDashboard = () => {
   const allItems = [
     { done: onboardingChecks.profileComplete, label: `Compléter mon profil (${profileCompletion}%)`, to: "/profile" },
     { done: onboardingChecks.identityVerified, label: "Vérifier mon identité (recommandé)", to: "/settings#verification" },
-    { done: false, label: "Découvrez les gardes disponibles", to: "/search" },
+    { done: totalApps > 0, label: "Postuler à une première garde", to: "/search" },
     { done: onboardingChecks.availableMode, label: "Activer le mode disponible", to: "", isToggle: true },
   ];
   const completedItems = allItems.filter(c => c.done);
   const incompleteItems = allItems.filter(c => !c.done);
-  const allChecklistDone = completedItems.length === 4;
+  const allChecklistDone = completedItems.length === allItems.length;
 
   return (
     <div className="space-y-0 overflow-hidden">
