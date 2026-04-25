@@ -194,7 +194,7 @@ export const Sidebar = () => {
       </div>
 
       {/* Nav groups */}
-      <nav className="flex-1 px-3 overflow-y-auto">
+      <nav className="flex-1 px-3 overflow-y-auto" aria-label="Navigation principale">
         {(() => {
           const isSitterLocked = effectiveRole === "sitter" && !hasAccess;
           const premiumItems = [
