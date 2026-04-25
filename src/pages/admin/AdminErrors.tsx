@@ -43,6 +43,54 @@ interface ErrorLog {
   created_at: string;
 }
 
+/**
+ * Erreurs filtrées automatiquement parce qu'elles proviennent de JS injecté
+ * par une source tierce (WebView in-app, extension, pixel marketing…).
+ * Voir src/lib/errorLogger.ts → detectThirdPartySource.
+ */
+const THIRD_PARTY_REASON_LABELS: Record<string, { label: string; explanation: string }> = {
+  webview_bridge: {
+    label: "Bridge WebView in-app",
+    explanation:
+      "L'erreur a été déclenchée par un script natif injecté par l'application Facebook, Instagram, TikTok… (ex : autofill de contact). Ce code ne fait pas partie de notre bundle et nous ne pouvons pas le corriger.",
+  },
+  extension: {
+    label: "Extension navigateur",
+    explanation:
+      "L'erreur provient d'une extension installée par l'utilisateur (chrome-extension://, moz-extension://…). Hors de notre périmètre.",
+  },
+  tracking_pixel: {
+    label: "Pixel marketing / analytics",
+    explanation:
+      "L'erreur vient d'un script tiers de tracking (Google Tag Manager, Meta Pixel, Hotjar, Intercom…). Non actionnable depuis notre code.",
+  },
+  cross_origin_script: {
+    label: "Script cross-origin",
+    explanation:
+      "L'erreur provient d'un script chargé depuis un autre domaine que le nôtre. Probablement un service tiers intégré.",
+  },
+  anonymous_inline: {
+    label: "Script inline anonyme",
+    explanation:
+      "Aucune source identifiable et stack majoritairement anonyme — typique d'un JS injecté inline par un WebView ou un script tiers.",
+  },
+  empty_source: {
+    label: "Source vide",
+    explanation: "Le navigateur n'a pas fourni de source pour cette erreur (souvent cross-origin masqué).",
+  },
+};
+
+function getThirdPartyInfo(ctx: any): { reason: string; label: string; explanation: string } | null {
+  if (!ctx || ctx.filtered !== true) return null;
+  const reason = typeof ctx.filter_reason === "string" ? ctx.filter_reason : null;
+  if (!reason) return null;
+  const meta = THIRD_PARTY_REASON_LABELS[reason] ?? {
+    label: "Source tierce",
+    explanation: "Erreur ignorée car elle ne provient pas de notre code.",
+  };
+  return { reason, ...meta };
+}
+
 const AdminErrors = () => {
   const [errors, setErrors] = useState<ErrorLog[]>([]);
   const [loading, setLoading] = useState(true);
