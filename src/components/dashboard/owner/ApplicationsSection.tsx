@@ -146,7 +146,7 @@ const ApplicationsSection = memo(({ recentApps, sitterProfiles, sitterBadges, lo
             </AccordionTrigger>
           </AccordionItem>
         </Accordion>
-      ) : read.length > 0 && (
+      ) : read.length > 0 ? (
         <Accordion type="single" collapsible className="mt-4">
           <AccordionItem value="read" className="border rounded-xl">
             <AccordionTrigger className="px-4 py-3 text-sm text-muted-foreground hover:no-underline">
@@ -159,6 +159,10 @@ const ApplicationsSection = memo(({ recentApps, sitterProfiles, sitterBadges, lo
             </AccordionContent>
           </AccordionItem>
         </Accordion>
+      ) : (
+        <p className="mt-4 text-sm text-muted-foreground font-sans italic py-3 text-center border border-dashed border-border rounded-xl">
+          Aucune candidature consultée
+        </p>
       )}
     </DashSection>
   );
