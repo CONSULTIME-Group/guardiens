@@ -75,15 +75,14 @@ import { SVG_FALLBACKS } from "./empty-state-fallbacks";
    la SOURCE UNIQUE de vérité pour tous les composants qui afficheraient
    ces illustrations aquarelle. */
 const PaintedIllustration = ({
-  src,
-  alt,
   fallbackKey,
+  alt,
 }: {
-  src: string;
-  alt: string;
   fallbackKey: IllustrationKey;
+  alt: string;
 }) => {
   const [errored, setErrored] = useState(false);
+  const set = SETS[fallbackKey];
 
   const wrapperClass =
     "illustration-wrapper relative block mx-auto h-auto w-[12.6rem] sm:w-[15.4rem] md:w-[18.2rem] lg:w-[19.6rem] max-w-[84vw] aspect-square select-none pointer-events-none motion-safe:animate-painted-reveal motion-reduce:opacity-100";
@@ -105,11 +104,16 @@ const PaintedIllustration = ({
   return (
     <div className={wrapperClass}>
       <img
-        src={src}
+        src={set.src}
+        srcSet={set.srcSet}
+        sizes={ILLUSTRATION_SIZES}
         alt={alt}
         loading="lazy"
-        width={1024}
-        height={1024}
+        decoding="async"
+        // Width/height intrinsèques = ratio carré 1:1, évite tout CLS
+        // quel que soit la variante choisie par le navigateur.
+        width={640}
+        height={640}
         onError={() => setErrored(true)}
         className={imgClass}
         draggable={false}
@@ -118,13 +122,13 @@ const PaintedIllustration = ({
   );
 };
 
-const SleepingCat = () => <PaintedIllustration src={waitingBenchImg} alt="" fallbackKey="sleepingCat" />;
-const EmptyMailbox = () => <PaintedIllustration src={ruralMailboxImg} alt="" fallbackKey="emptyMailbox" />;
-const WalkingDog = () => <PaintedIllustration src={countryPathImg} alt="" fallbackKey="walkingDog" />;
-const EmptyCalendar = () => <PaintedIllustration src={openCalendarImg} alt="" fallbackKey="emptyCalendar" />;
-const HeartBookmark = () => <PaintedIllustration src={bouquetBookmarkImg} alt="" fallbackKey="heartBookmark" />;
-const SitterReady = () => <PaintedIllustration src={sitterReadyImg} alt="" fallbackKey="sitterReady" />;
-const QuietLeaf = () => <PaintedIllustration src={quietLeafImg} alt="" fallbackKey="quietLeaf" />;
+const SleepingCat = () => <PaintedIllustration fallbackKey="sleepingCat" alt="" />;
+const EmptyMailbox = () => <PaintedIllustration fallbackKey="emptyMailbox" alt="" />;
+const WalkingDog = () => <PaintedIllustration fallbackKey="walkingDog" alt="" />;
+const EmptyCalendar = () => <PaintedIllustration fallbackKey="emptyCalendar" alt="" />;
+const HeartBookmark = () => <PaintedIllustration fallbackKey="heartBookmark" alt="" />;
+const SitterReady = () => <PaintedIllustration fallbackKey="sitterReady" alt="" />;
+const QuietLeaf = () => <PaintedIllustration fallbackKey="quietLeaf" alt="" />;
 
 export const ILLUSTRATIONS = {
   sleepingCat: SleepingCat,
