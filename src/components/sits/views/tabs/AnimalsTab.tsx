@@ -137,11 +137,24 @@ const AnimalsTab = ({ pets, ownerFirstName }: AnimalsTabProps) => {
           <div key={pet.id}>
             <div className="flex gap-3 p-4 bg-card rounded-xl border border-border">
               {pet.photo_url ? (
-                <img
-                  src={pet.photo_url}
-                  alt={pet.name}
-                  className="w-20 h-20 rounded-xl object-cover shrink-0"
-                />
+                <button
+                  type="button"
+                  onClick={() =>
+                    setLightboxPhoto({
+                      src: pet.photo_url,
+                      alt: `Photo de ${pet.name}${pet.breed ? ` (${pet.breed})` : ""}`,
+                    })
+                  }
+                  className="shrink-0 rounded-xl overflow-hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary group"
+                  aria-label={`Agrandir la photo de ${pet.name}`}
+                >
+                  <img
+                    src={pet.photo_url}
+                    alt={pet.name}
+                    loading="lazy"
+                    className="w-20 h-20 object-cover transition-transform duration-300 group-hover:scale-105"
+                  />
+                </button>
               ) : (
                 <div
                   className="w-20 h-20 rounded-xl bg-muted flex items-center justify-center text-3xl shrink-0"
