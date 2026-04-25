@@ -457,7 +457,6 @@ const SitDetail = () => {
               {pendingAppCount > 0 && <span className="w-2 h-2 rounded-full bg-primary inline-block ml-1 mb-0.5" />}
             </TabsTrigger>
           )}
-          <TabsTrigger value="animals" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-2.5 text-sm">
           <TabsTrigger value="animals" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-2.5 text-sm gap-1.5">
             <PawPrint className="h-3.5 w-3.5" /> Animaux
           </TabsTrigger>
