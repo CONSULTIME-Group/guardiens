@@ -475,10 +475,11 @@ const SearchSitter = () => {
       const ownerMap = new Map((owners || []).map((o: any) => [o.id, o]));
       items = items.map((s: any) => ({ ...s, owner: ownerMap.get(s.user_id) || null }));
     }
-    // Mark assigned sits (will be rendered greyed-out, non-clickable)
+    // Mark assigned/completed sits (will be rendered greyed-out, non-clickable)
     items = items.map((s: any) => ({
       ...s,
       isAssigned: s.status === "confirmed" || s.status === "in_progress",
+      isCompleted: s.status === "completed",
     }));
     if (housingType !== "all") items = items.filter((s: any) => s.property?.type === housingType);
     if (withPhotosOnly) items = items.filter((s: any) => s.property?.photos?.length > 0);
