@@ -285,7 +285,12 @@ const OwnerSitView = ({
         startDate={sit.start_date}
         endDate={sit.end_date}
         flexibleDates={sit.flexible_dates}
-        photos={(property as any)?.photos || []}
+        photos={[
+          ...(((property as any)?.photos as string[] | undefined) ?? []),
+          ...pets
+            .map((p: any) => p?.photo_url)
+            .filter((u: any): u is string => typeof u === "string" && u.length > 0),
+        ]}
         owner={owner}
         isOwner
         isAuthenticatedNonOwner={false}
