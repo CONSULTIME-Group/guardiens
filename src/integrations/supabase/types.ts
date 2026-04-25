@@ -3881,6 +3881,53 @@ export type Database = {
         }
         Returns: undefined
       }
+      admin_get_accepted_sitters: {
+        Args: { p_sit_ids: string[] }
+        Returns: {
+          avatar_url: string
+          first_name: string
+          last_name: string
+          sit_id: string
+          sitter_id: string
+        }[]
+      }
+      admin_get_application_counts: {
+        Args: { p_sit_ids: string[] }
+        Returns: {
+          accepted: number
+          pending: number
+          sit_id: string
+          total: number
+        }[]
+      }
+      admin_get_applications_diagnostic: {
+        Args: never
+        Returns: {
+          created_at: string
+          id: string
+          owner_first_name: string
+          owner_last_name: string
+          sit_id: string
+          sit_status: string
+          sit_title: string
+          sit_user_id: string
+          sitter_first_name: string
+          sitter_id: string
+          sitter_last_name: string
+          status: string
+        }[]
+      }
+      admin_get_sit_applications: {
+        Args: { p_sit_id: string }
+        Returns: {
+          created_at: string
+          id: string
+          sitter_avatar_url: string
+          sitter_first_name: string
+          sitter_id: string
+          status: string
+        }[]
+      }
       admin_get_user_email: { Args: { p_user_id: string }; Returns: string }
       admin_log_message_failure: {
         Args: {
