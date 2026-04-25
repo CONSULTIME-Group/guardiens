@@ -19,6 +19,7 @@
 import { test, expect } from "../../playwright-fixture";
 import { spawn, type ChildProcess } from "node:child_process";
 import { SCENARIOS, type ScenarioId } from "./fixtures";
+import { CONTRAST_SKIP_SCRIPT } from "./contrast-skip-rules";
 
 const PORT = 8766;
 const BASE_URL = `http://localhost:${PORT}`;
