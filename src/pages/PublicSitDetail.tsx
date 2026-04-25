@@ -252,13 +252,13 @@ const PublicSitDetail = () => {
       </div>
 
       <div className="px-6 md:px-10 pb-6 md:pb-10">
-        {/* Title */}
+        {/* Title — sanitize pour corriger les espaces manquants ("4chats" → "4 chats") */}
         <h1 className="font-heading text-2xl md:text-3xl font-bold mb-2">
-          {sit.title || `Garde à ${owner?.city || "..."}`}
+          {sit.title ? sanitizeUserTitle(sit.title) : `Garde à ${owner?.city || "..."}`}
         </h1>
 
         {/* Location & dates */}
-        <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground mb-6">
+        <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground mb-4">
           {owner?.city && (
             <span className="flex items-center gap-1.5"><MapPin className="h-4 w-4" />{owner.city}</span>
           )}
@@ -269,19 +269,45 @@ const PublicSitDetail = () => {
           </span>
         </div>
 
-        {/* Animals */}
+        {/* Bandeau valeur Guardiens — uniquement pour visiteurs anonymes (audience d'acquisition) */}
+        {!isAuthenticated && (
+          <div className="mb-6 p-4 rounded-xl bg-primary/5 border border-primary/15">
+            <p className="text-sm font-medium mb-2 flex items-center gap-1.5">
+              <Heart className="h-4 w-4 text-primary" /> L'entraide entre voisins, pour faire garder son foyer
+            </p>
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              Guardiens met en relation propriétaires et gardiens du coin pour des gardes <strong>100&nbsp;% gratuites</strong>, sans commission. Inscription en 1 minute, sans engagement.
+            </p>
+          </div>
+        )}
+
+        {/* Animals — avec photo réelle si disponible, fallback emoji */}
         {pets.length > 0 && (
           <div className="mb-6">
             <h2 className="font-heading font-semibold mb-3 flex items-center gap-2">
-              <PawPrint className="h-4 w-4 text-primary" /> Les animaux
+              <PawPrint className="h-4 w-4 text-primary" /> Les animaux ({pets.length})
             </h2>
             <div className="flex flex-wrap gap-3">
               {pets.map((pet: any) => (
-                <div key={pet.id} className="flex items-center gap-2 bg-card border border-border rounded-xl px-4 py-3">
-                  <span className="text-xl">{speciesEmoji[pet.species] || "🐾"}</span>
+                <div key={pet.id} className="flex items-center gap-2.5 bg-card border border-border rounded-xl px-3 py-2.5">
+                  {pet.photo_url ? (
+                    <img
+                      src={pet.photo_url}
+                      alt={`Photo de ${pet.name}`}
+                      loading="lazy"
+                      className="w-10 h-10 rounded-full object-cover"
+                    />
+                  ) : (
+                    <span className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-lg" aria-hidden="true">
+                      {speciesEmoji[pet.species] || "🐾"}
+                    </span>
+                  )}
                   <div>
                     <p className="font-medium text-sm">{pet.name}</p>
-                    {pet.breed && <p className="text-xs text-muted-foreground">{pet.breed}</p>}
+                    <p className="text-xs text-muted-foreground">
+                      {speciesLabel[pet.species] || pet.species}
+                      {pet.breed ? ` · ${pet.breed}` : ""}
+                    </p>
                   </div>
                 </div>
               ))}
@@ -289,7 +315,7 @@ const PublicSitDetail = () => {
           </div>
         )}
 
-        {/* Housing */}
+        {/* Housing — environnements intégrés directement pour éviter les tags orphelins */}
         {property && (
           <div className="mb-6 bg-card border border-border rounded-xl p-5">
             <h2 className="font-heading font-semibold mb-2 flex items-center gap-2">
@@ -297,15 +323,14 @@ const PublicSitDetail = () => {
             </h2>
             <p className="text-sm">{typeLabels[property.type] || property.type} · {envLabels[property.environment] || property.environment}</p>
             {property.description && <p className="text-sm text-muted-foreground mt-2">{property.description}</p>}
-          </div>
-        )}
-
-        {/* Environments */}
-        {environments.length > 0 && (
-          <div className="flex flex-wrap gap-1.5 mb-6">
-            {environments.map((env: string) => (
-              <span key={env} className="px-2.5 py-1 rounded-full bg-accent text-xs">{envLabels[env] || env}</span>
-            ))}
+            {environments.length > 0 && (
+              <div className="flex flex-wrap gap-1.5 mt-3 pt-3 border-t border-border">
+                <span className="text-xs text-muted-foreground self-center mr-1">Environnement&nbsp;:</span>
+                {environments.map((env: string) => (
+                  <span key={env} className="px-2.5 py-1 rounded-full bg-accent text-xs">{envLabels[env] || env}</span>
+                ))}
+              </div>
+            )}
           </div>
         )}
 
@@ -321,40 +346,75 @@ const PublicSitDetail = () => {
           </div>
         )}
 
-        {/* Owner profile card */}
+        {/* Owner profile card — enrichie : ville, gardes accomplies, badge fondateur, bio */}
         {owner && (
-          <div className="flex items-center gap-3 mb-6 p-4 bg-card rounded-xl border border-border">
+          <div className="flex items-start gap-3 mb-6 p-4 bg-card rounded-xl border border-border">
             {owner.avatar_url ? (
-              <img src={owner.avatar_url} alt={owner.first_name} className="w-14 h-14 rounded-full object-cover" loading="lazy" />
+              <img
+                src={owner.avatar_url}
+                alt={`Photo de ${owner.first_name}`}
+                className="w-14 h-14 rounded-full object-cover shrink-0"
+                loading="lazy"
+              />
             ) : (
-              <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center font-heading text-lg font-bold text-primary">
+              <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center font-heading text-lg font-bold text-primary shrink-0">
                 {owner.first_name?.charAt(0) || "?"}
               </div>
             )}
             <div className="flex-1 min-w-0">
-              <p className="font-medium flex items-center gap-1.5">
+              <p className="font-medium flex items-center flex-wrap gap-1.5">
                 {owner.first_name}
                 {owner.identity_verified && <VerifiedBadge />}
+                {owner.is_founder && (
+                  <span
+                    className="text-[10px] uppercase tracking-wide font-semibold px-1.5 py-0.5 rounded bg-primary/10 text-primary"
+                    title="Membre fondateur"
+                  >
+                    Fondateur
+                  </span>
+                )}
               </p>
-              {avgRating && (
-                <span className="flex items-center gap-1 text-sm text-muted-foreground">
-                  <Star className="h-3.5 w-3.5 text-secondary fill-secondary" /> {avgRating} ({reviewCount} avis)
-                </span>
-              )}
+              <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5 flex-wrap">
+                {owner.city && <span>{owner.city}</span>}
+                {owner.city && typeof owner.completed_sits_count === "number" && owner.completed_sits_count > 0 && (
+                  <span aria-hidden="true">·</span>
+                )}
+                {typeof owner.completed_sits_count === "number" && owner.completed_sits_count > 0 && (
+                  <span>
+                    {owner.completed_sits_count} garde{owner.completed_sits_count > 1 ? "s" : ""} accomplie{owner.completed_sits_count > 1 ? "s" : ""}
+                  </span>
+                )}
+                {avgRating && (
+                  <>
+                    <span aria-hidden="true">·</span>
+                    <span className="flex items-center gap-1">
+                      <Star className="h-3 w-3 text-secondary fill-secondary" /> {avgRating} ({reviewCount})
+                    </span>
+                  </>
+                )}
+              </div>
+              <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
+                {owner.bio
+                  ? owner.bio
+                  : "Ce membre n'a pas encore renseigné de présentation."}
+              </p>
             </div>
           </div>
         )}
 
-        {/* Share buttons — accessible to everyone, including not-yet-logged-in visitors */}
-        <div className="mb-8">
-          <ShareButtons
-            sitId={sit.id}
-            title={sit.title || `Garde à ${owner?.city || "France"}`}
-            city={owner?.city}
-            source="public_sit_detail"
-            viewerType={viewerType}
-          />
-        </div>
+        {/* Share buttons — visible uniquement pour le propriétaire de l'annonce.
+            Pour anonymes/visiteurs : on cache, ils sont là pour découvrir, pas re-partager. */}
+        {viewerType === "owner_of_sit" && (
+          <div className="mb-8">
+            <ShareButtons
+              sitId={sit.id}
+              title={sit.title || `Garde à ${owner?.city || "France"}`}
+              city={owner?.city}
+              source="public_sit_detail"
+              viewerType={viewerType}
+            />
+          </div>
+        )}
 
         {/* Bloc gestion — visible uniquement si le visiteur est le propriétaire de l'annonce.
             Les actions sensibles (annulation, édition) renvoient vers la fiche privée /sits/:id. */}
