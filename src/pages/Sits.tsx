@@ -100,9 +100,23 @@ const Sits = () => {
   const { user, activeRole } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [sits, setSits] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<Tab>("upcoming");
+
+  // Onglet actif synchronisé avec l'URL (?tab=...) — partageable, retour navigateur OK
+  const validTabs: Tab[] = ["upcoming", "in_progress", "completed", "cancelled"];
+  const urlTab = searchParams.get("tab") as Tab | null;
+  const activeTab: Tab = urlTab && validTabs.includes(urlTab) ? urlTab : "upcoming";
+  const setActiveTab = useCallback((tab: Tab) => {
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      if (tab === "upcoming") next.delete("tab");
+      else next.set("tab", tab);
+      return next;
+    }, { replace: true });
+  }, [setSearchParams]);
+
   const [showArchived, setShowArchived] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const [archiveConfirm, setArchiveConfirm] = useState<string | null>(null);
