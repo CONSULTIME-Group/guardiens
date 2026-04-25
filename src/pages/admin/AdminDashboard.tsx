@@ -272,8 +272,8 @@ const AdminDashboard = () => {
       });
 
       (recentApplications || []).forEach((a: any) => {
-        const sitterName = a.sitter?.first_name || "Un gardien";
-        const sitTitle = a.sit?.title || "une garde";
+        const sitterName = a.sitter_first_name || "Un gardien";
+        const sitTitle = a.sit_title || "une garde";
         activityItems.push({
           id: `app-${a.id}`,
           text: `Nouvelle candidature de ${sitterName} pour ${sitTitle}`,
