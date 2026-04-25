@@ -357,25 +357,8 @@ const SitDetail = () => {
         </div>
       )}
 
-      {/* Hero: Photos gallery */}
-      {photos.length > 0 && (
-        <div className="mb-6 relative">
-          <img src={photos[photoIndex]} alt="Logement" className="w-full h-48 md:h-64 rounded-xl object-cover" />
-          {photos.length > 1 && (
-            <div className="flex gap-1.5 mt-2 overflow-x-auto pb-1">
-              {photos.map((p: string, i: number) => (
-                <button
-                  key={i}
-                  onClick={() => setPhotoIndex(i)}
-                  className={`w-16 h-12 rounded-md object-cover border-2 shrink-0 overflow-hidden transition-all ${i === photoIndex ? "border-primary ring-2 ring-primary/30" : "border-transparent opacity-70 hover:opacity-100"}`}
-                >
-                  <img src={p} alt="" className="w-full h-full object-cover" />
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
+      {/* Hero: Photos gallery avec lightbox */}
+      <SitHero photos={photos} city={owner?.city} priority />
 
       {/* Title, location, dates, status */}
       <div className="flex items-start justify-between gap-4 mb-1">
