@@ -95,18 +95,59 @@ const ApplicationModal = ({
       return;
     }
 
-    const { error } = await supabase.from("applications").insert({
-      sit_id: sitId,
-      sitter_id: user.id,
-      message: message.trim(),
-      status: "pending",
-    });
+    const { data: created, error } = await supabase
+      .from("applications")
+      .insert({
+        sit_id: sitId,
+        sitter_id: user.id,
+        message: message.trim(),
+        status: "pending",
+      })
+      .select("id")
+      .single();
     if (error) {
       setSending(false);
       toast({ title: "Erreur", description: "Impossible d'envoyer la candidature.", variant: "destructive" });
       return;
     }
     try { await trackFirstAction("application_sent", { sit_id: sitId }); } catch {}
+
+    // Notifier le propriétaire (in-app + email) — best-effort, ne bloque pas le flux
+    try {
+      const [{ data: ownerProfile }, { data: sitInfo }, { data: meProfile }] = await Promise.all([
+        supabase.from("profiles").select("email, first_name").eq("id", ownerId).maybeSingle(),
+        supabase.from("sits").select("title").eq("id", sitId).maybeSingle(),
+        supabase.from("profiles").select("first_name, avatar_url").eq("id", user.id).maybeSingle(),
+      ]);
+
+      const sitterFirstName = (meProfile?.first_name as string) || "Un gardien";
+      const sitTitle = (sitInfo?.title as string) || "votre annonce";
+
+      // Notification in-app
+      await supabase.from("notifications").insert({
+        user_id: ownerId,
+        type: "new_application",
+        title: "Nouvelle candidature",
+        body: `${sitterFirstName} a postulé à « ${sitTitle} ».`,
+        link: `/sits/${sitId}#candidatures`,
+        actor_name: sitterFirstName,
+        actor_avatar_url: meProfile?.avatar_url ?? null,
+      });
+
+      // Email transactionnel (idempotent par candidature)
+      if (ownerProfile?.email) {
+        await supabase.functions.invoke("send-transactional-email", {
+          body: {
+            templateName: "new-application",
+            recipientEmail: ownerProfile.email,
+            idempotencyKey: `new-application-${created?.id ?? `${sitId}-${user.id}`}`,
+            templateData: { sitterFirstName, sitTitle },
+          },
+        });
+      }
+    } catch (notifyErr) {
+      console.warn("[ApplicationModal] notify owner failed", notifyErr);
+    }
 
     // Vérifier si on doit fermer les candidatures (max atteint)
     if (sitCheck.max_applications) {
