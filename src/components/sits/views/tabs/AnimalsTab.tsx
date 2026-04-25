@@ -39,13 +39,17 @@ const AnimalsTab = ({ pets, ownerFirstName }: AnimalsTabProps) => {
                 className="w-20 h-20 rounded-xl object-cover shrink-0"
               />
             ) : (
-              <div className="w-20 h-20 rounded-xl bg-muted flex items-center justify-center text-3xl shrink-0">
+              <div
+                className="w-20 h-20 rounded-xl bg-muted flex items-center justify-center text-3xl shrink-0"
+                aria-hidden="true"
+              >
                 {speciesEmoji[pet.species] || "🐾"}
               </div>
             )}
             <div className="flex-1 min-w-0">
               <p className="font-heading font-semibold">
-                {speciesEmoji[pet.species]} {pet.name}
+                <span aria-hidden="true">{speciesEmoji[pet.species]} </span>
+                {pet.name}
                 {pet.breed ? ` — ${pet.breed}` : ""}
                 {pet.age ? ` · ${pet.age} ans` : ""}
               </p>
