@@ -12,7 +12,13 @@ export type EventType =
   | "signup_form_submitted"
   | "signup_completed"
   | "signup_failed"
+  | "signup_email_confirmed"      // Email cliqué + session active
   | "user_activated"
+  | "onboarding_started"          // Modale d'onboarding ouverte
+  | "onboarding_step_completed"   // Étape terminée (metadata.step: 0|1|2)
+  | "onboarding_completed"        // Profil 100% activé
+  | "onboarding_dismissed"        // Modale fermée avant la fin
+  | "first_action"                // Première vraie action (metadata.kind)
   | "cta_click"
   | "cta_proprio_clicked"
   | "cta_sitter_clicked"
