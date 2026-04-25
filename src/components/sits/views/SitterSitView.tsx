@@ -28,6 +28,8 @@ import PostConfirmationChecklist from "@/components/sits/PostConfirmationCheckli
 import CancelSitModal from "@/components/sits/CancelSitModal";
 
 import SitDetailHeader from "./SitDetailHeader";
+import SitFooterReassurance from "./SitFooterReassurance";
+import SitterStatusBanner from "./SitterStatusBanner";
 import AnimalsTab from "./tabs/AnimalsTab";
 import HousingTab from "./tabs/HousingTab";
 import ExpectationsTab from "./tabs/ExpectationsTab";
