@@ -1,6 +1,8 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { StatutGardienBadge } from "@/components/profile/StatutGardienBadge";
 import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 import type { ReputationData } from "@/hooks/useSitterDashboardData";
 
 interface SitterStatusBarProps {
@@ -15,12 +17,52 @@ interface SitterStatusBarProps {
   compact?: boolean;
 }
 
+type AppView = "sent" | "received";
+
 const SitterStatusBar = ({
   profileCompletion, completedSits, avgRating, reviewsCount, badgeCount, totalApps, reputation,
   compact = false,
 }: SitterStatusBarProps) => {
   const { user, activeRole } = useAuth();
   const profilePath = (user?.role === "both" ? activeRole : user?.role) === "owner" ? "/owner-profile" : "/profile";
+
+  // Sélecteur Mes candidatures (envoyées) ↔ Candidatures reçues (sur mes annonces)
+  const [appView, setAppView] = useState<AppView>("sent");
+  const [receivedCount, setReceivedCount] = useState<number | null>(null);
+  const [loadingReceived, setLoadingReceived] = useState(false);
+
+  useEffect(() => {
+    if (appView !== "received" || receivedCount !== null || !user?.id) return;
+    let cancelled = false;
+    setLoadingReceived(true);
+    (async () => {
+      // 1) Récupère les ids de mes annonces (en tant que propriétaire)
+      const { data: sits, error: sitsErr } = await supabase
+        .from("sits")
+        .select("id")
+        .eq("user_id", user.id);
+      if (cancelled) return;
+      if (sitsErr || !sits || sits.length === 0) {
+        setReceivedCount(0);
+        setLoadingReceived(false);
+        return;
+      }
+      // 2) Compte les candidatures reçues sur ces annonces
+      const sitIds = sits.map((s) => s.id);
+      const { count, error: appsErr } = await supabase
+        .from("applications")
+        .select("id", { count: "exact", head: true })
+        .in("sit_id", sitIds);
+      if (cancelled) return;
+      setReceivedCount(appsErr ? 0 : count || 0);
+      setLoadingReceived(false);
+    })();
+    return () => { cancelled = true; };
+  }, [appView, receivedCount, user?.id]);
+
+  const displayedCount = appView === "sent" ? totalApps : (receivedCount ?? 0);
+  const displayedLabel = appView === "sent" ? "Mes candidatures" : "Candidatures reçues";
+
   const gridCls = compact
     ? "grid-cols-1"
     : "grid-cols-1 md:grid-cols-3";
@@ -33,6 +75,7 @@ const SitterStatusBar = ({
   const wrapperCls = compact
     ? "mb-6"
     : "mx-4 sm:mx-5 md:mx-8 mb-6 md:mb-8";
+
   return (
   <div className={`${wrapperCls} bg-card border border-border rounded-2xl overflow-hidden grid ${gridCls}`}>
     {/* Zone 1 — MON PROFIL */}
@@ -81,8 +124,43 @@ const SitterStatusBar = ({
           <p className="text-xs text-muted-foreground font-sans">Badges</p>
         </div>
         <div className="text-center">
-          <p className="text-2xl font-heading font-bold text-foreground">{totalApps}</p>
-          <p className="text-xs text-muted-foreground font-sans">Mes candidatures</p>
+          <p className="text-2xl font-heading font-bold text-foreground" aria-live="polite">
+            {appView === "received" && loadingReceived ? "…" : displayedCount}
+          </p>
+          <p className="text-xs text-muted-foreground font-sans mb-1.5">{displayedLabel}</p>
+          {/* Sélecteur de contexte : envoyées (gardien) ↔ reçues (propriétaire) */}
+          <div
+            role="tablist"
+            aria-label="Contexte des candidatures"
+            className="inline-flex items-center rounded-full border border-border bg-muted/40 p-0.5 text-[10px] font-sans"
+          >
+            <button
+              type="button"
+              role="tab"
+              aria-selected={appView === "sent"}
+              onClick={() => setAppView("sent")}
+              className={`px-2 py-0.5 rounded-full transition-colors ${
+                appView === "sent"
+                  ? "bg-background text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              Gardien
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={appView === "received"}
+              onClick={() => setAppView("received")}
+              className={`px-2 py-0.5 rounded-full transition-colors ${
+                appView === "received"
+                  ? "bg-background text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              Propriétaire
+            </button>
+          </div>
         </div>
       </div>
       {completedSits === 0 && (
