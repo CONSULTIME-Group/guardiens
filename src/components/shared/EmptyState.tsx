@@ -36,40 +36,49 @@ const PaintedIllustration = ({
   // mix-blend-darken au lieu de multiply : conserve mieux les couleurs claires
   // de l'aquarelle et évite le "halo gris" sur les zones crème de l'image
   // lorsque le fond de page diffère légèrement (blanc, gris, carte).
-  // Wrapper crème (#FAF9F6) imposé autour de l'illustration : garantit que le
-  // fond aquarelle de l'image se confond TOUJOURS avec un fond crème identique,
-  // peu importe le contexte (page blanche, carte gris-bleu, section colorée).
-  // Le fondu est assuré par un masque radial doux qui efface les bords du carré
-  // crème vers le fond réel de la page → aucune bordure visible.
-  // Tailles +40% par rapport à v1 (w-36→w-[12.6rem], etc.)
+  // Stratégie : on superpose AU-DESSUS de l'image un masque radial qui peint
+  // la couleur du fond CONTEXTUEL (variable CSS --background, héritée de la
+  // page/carte/section où l'EmptyState est rendu) sur les bords du carré.
+  // Le centre reste 100% transparent → l'illustration aquarelle est nette,
+  // les bords (où se trouve le fond crème de l'image) sont recouverts par
+  // la couleur exacte du parent → aucun halo possible, peu importe le fond.
+  // Tailles +40% par rapport à v1.
   const wrapperClass =
     "relative block mx-auto h-auto w-[12.6rem] sm:w-[15.4rem] md:w-[18.2rem] lg:w-[19.6rem] max-w-[84vw] aspect-square select-none pointer-events-none motion-safe:animate-painted-reveal motion-reduce:opacity-100";
-
-  // Fond crème exact (#FAF9F6) + masque radial pour fondre les bords
-  const wrapperStyle: React.CSSProperties = {
-    backgroundColor: "#FAF9F6",
-    WebkitMaskImage:
-      "radial-gradient(ellipse at center, #000 55%, rgba(0,0,0,0.6) 75%, transparent 100%)",
-    maskImage:
-      "radial-gradient(ellipse at center, #000 55%, rgba(0,0,0,0.6) 75%, transparent 100%)",
-  };
 
   const imgClass =
     "absolute inset-0 w-full h-full object-contain mix-blend-darken dark:mix-blend-screen dark:opacity-80";
 
+  // Overlay radial qui fond les bords vers la couleur de fond du contexte.
+  // hsl(var(--background)) suit automatiquement le thème (clair/sombre) et
+  // le contexte (carte, section, page).
+  const fadeOverlayStyle: React.CSSProperties = {
+    background:
+      "radial-gradient(ellipse at center, transparent 50%, hsl(var(--background) / 0.55) 68%, hsl(var(--background)) 88%)",
+  };
+
+  const renderFade = () => (
+    <div
+      aria-hidden="true"
+      className="absolute inset-0 pointer-events-none"
+      style={fadeOverlayStyle}
+    />
+  );
+
   if (errored) {
     const Fallback = SVG_FALLBACKS[fallbackKey];
     return (
-      <div className={wrapperClass} style={wrapperStyle} role="img" aria-label={alt}>
+      <div className={wrapperClass} role="img" aria-label={alt}>
         <div className={imgClass}>
           <Fallback />
         </div>
+        {renderFade()}
       </div>
     );
   }
 
   return (
-    <div className={wrapperClass} style={wrapperStyle}>
+    <div className={wrapperClass}>
       <img
         src={src}
         alt={alt}
@@ -80,6 +89,7 @@ const PaintedIllustration = ({
         className={imgClass}
         draggable={false}
       />
+      {renderFade()}
     </div>
   );
 };
