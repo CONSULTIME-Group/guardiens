@@ -155,6 +155,14 @@ test.describe("Lightbox carrousel — /sits/:id", () => {
       "La lightbox est rendue dans document.body via createPortal"
     ).toBe(true);
 
+    // ---------- 4bis. Scroll-lock : body.style.overflow === "hidden" ----------
+    currentPhase = "scroll-lock-on";
+    const overflowOpen = await page.evaluate(() => document.body.style.overflow);
+    expect(
+      overflowOpen,
+      "Pendant que la lightbox est ouverte, le scroll du body est bloqué"
+    ).toBe("hidden");
+
     // ---------- 5. Compteur dans la lightbox : "1 / N" ----------
     currentPhase = "lightbox-counter-initial";
     if (expectedTotal > 1) {
