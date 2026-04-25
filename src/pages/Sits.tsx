@@ -467,13 +467,29 @@ const Sits = () => {
             />
           )}
           {activeTab === "in_progress" && (
-            <EmptyState illustration="sleepingCat" title="Aucune garde en cours" description="Vos gardes en cours apparaîtront ici." />
+            <EmptyState
+              illustration="sleepingCat"
+              title="Aucune garde en cours"
+              description={activeRole === "owner"
+                ? "Vos gardes en cours apparaîtront ici dès qu'une période démarre."
+                : "Vos gardes en cours apparaîtront ici dès le jour J."}
+            />
           )}
           {activeTab === "completed" && (
-            <EmptyState illustration="sleepingCat" title="Aucune garde passée" description="Vos gardes terminées apparaîtront ici." />
+            <EmptyState
+              illustration="openCalendar"
+              title="Aucune garde passée"
+              description={activeRole === "owner"
+                ? "Vos gardes terminées s'archiveront ici, avec leurs avis."
+                : "Vos gardes terminées s'afficheront ici, avec les avis reçus."}
+            />
           )}
           {activeTab === "cancelled" && (
-            <EmptyState illustration="sleepingCat" title="Aucune garde annulée" description="Tant mieux ! Aucune annulation pour le moment." />
+            <EmptyState
+              illustration="quietLeaf"
+              title="Rien à signaler ici"
+              description="Les annonces et candidatures annulées apparaîtraient à cet endroit."
+            />
           )}
         </>
       ) : (
