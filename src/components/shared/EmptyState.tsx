@@ -34,78 +34,61 @@ const PaintedIllustration = ({
   const [errored, setErrored] = useState(false);
   // Tailles +40% par rapport à v1 (w-36 → w-[12.6rem], etc.).
   //
-  // Stratégie de fondu — DOUBLE adaptation thème + contexte :
+  // Stratégie de fondu UNIVERSELLE — fonctionne sur n'importe quel fond
+  // (page crème, carte blanche pure, section grisée, conteneur bleu-gris,
+  // mode clair ou sombre) sans dépendance à un token de couleur.
   //
-  // 1. LIGHT MODE
-  //    Le fond crème de l'aquarelle (#FAF9F6) ≈ couleur de page (--background:
-  //    40 33% 97%). On utilise `mix-blend-darken` pour que les pixels clairs
-  //    de l'image laissent passer le fond du contexte (carte, section, page)
-  //    et un overlay radial discret peint la couleur exacte de --background
-  //    sur les bords pour annuler tout micro-écart.
+  // Principe : on applique un MASQUE radial (CSS `mask-image`) directement
+  // sur l'image. Le masque est un dégradé alpha (noir → transparent), donc
+  // les bords de l'image deviennent VRAIMENT transparents (et non recouverts
+  // par une couleur). Le vrai fond du parent transparaît, quel qu'il soit.
   //
-  // 2. DARK MODE
-  //    Le fond crème de l'aquarelle est en violent contraste avec le fond
-  //    sombre (--background: 160 10% 8%). Sans correction, l'image apparaît
-  //    comme un disque lumineux flottant. On applique alors un filtre CSS
-  //    `invert(1) hue-rotate(180deg)` qui transforme le crème de l'image en
-  //    sombre (proche de --background) tout en préservant les teintes
-  //    aquarelle (le hue-rotate compense l'inversion des couleurs). Combiné
-  //    avec un overlay radial plus marqué (commence plus tôt et plus opaque),
-  //    le rendu se fond exactement comme en light, sans halo.
+  // Mode clair : `mix-blend-darken` aide les pixels les plus clairs de
+  //   l'aquarelle à se confondre avec le fond, le masque finit le travail.
+  // Mode sombre : `filter: invert(1) hue-rotate(180deg)` transforme le crème
+  //   de l'image en sombre tout en préservant les teintes ; le masque applique
+  //   ensuite la même transparence en bordure.
   const wrapperClass =
     "relative block mx-auto h-auto w-[12.6rem] sm:w-[15.4rem] md:w-[18.2rem] lg:w-[19.6rem] max-w-[84vw] aspect-square select-none pointer-events-none motion-safe:animate-painted-reveal motion-reduce:opacity-100";
 
-  // Light : darken (laisse passer le fond du contexte sur les zones claires).
-  // Dark  : invert + hue-rotate transforme crème → sombre, opacité 90 % pour
-  //         atténuer légèrement la saturation et éviter tout aspect néon.
-  const imgClass =
-    "absolute inset-0 w-full h-full object-contain mix-blend-darken dark:mix-blend-normal dark:[filter:invert(1)_hue-rotate(180deg)_brightness(0.9)_saturate(0.85)] dark:opacity-90";
+  // Masque radial — agressivité calibrée pour effacer toute trace du fond
+  // crème de l'aquarelle, même sur conteneur très contrasté (carte blanche
+  // pure, gris-bleu). On démarre la dégradation dès 35 % et on atteint la
+  // transparence totale à 80 % du rayon.
+  const maskImage =
+    "radial-gradient(ellipse at center, " +
+    "rgba(0,0,0,1) 0%, " +
+    "rgba(0,0,0,1) 35%, " +
+    "rgba(0,0,0,0.92) 50%, " +
+    "rgba(0,0,0,0.7) 62%, " +
+    "rgba(0,0,0,0.4) 72%, " +
+    "rgba(0,0,0,0.15) 80%, " +
+    "rgba(0,0,0,0) 88%)";
 
-  // Overlay radial — courbe finement étalonnée pour rester invisible quel
-  // que soit le fond (crème de page, blanc pur d'une modale, gris-bleu d'une
-  // carte). Trois paliers calés sur 55 % / 75 % / 100 % du rayon :
-  //   - 0 → 55 %   : 100 % transparent → l'illustration est nette
-  //   - 55 → 75 %  : montée très progressive (alpha 0 → 0.35) → aucune bande
-  //                   visible, le crème de l'image se dilue dans le fond
-  //   - 75 → 100 % : convergence finale vers la couleur exacte du contexte
-  // En dark, on resserre les paliers (45/65/95) car le contraste image/fond
-  // est plus violent et nécessite une absorption plus précoce et plus opaque.
-  const fadeOverlayStyle: React.CSSProperties = {
-    background: [
-      "radial-gradient(ellipse at center,",
-      "  transparent var(--es-fade-start, 55%),",
-      "  hsl(var(--background) / var(--es-fade-soft-alpha, 0.18)) var(--es-fade-soft, 65%),",
-      "  hsl(var(--background) / var(--es-fade-mid-alpha, 0.55)) var(--es-fade-mid, 75%),",
-      "  hsl(var(--background) / var(--es-fade-near-alpha, 0.88)) var(--es-fade-near, 90%),",
-      "  hsl(var(--background)) var(--es-fade-end, 100%)",
-      ")",
-    ].join(" "),
+  const maskStyle: React.CSSProperties = {
+    WebkitMaskImage: maskImage,
+    maskImage,
+    WebkitMaskRepeat: "no-repeat",
+    maskRepeat: "no-repeat",
+    WebkitMaskSize: "100% 100%",
+    maskSize: "100% 100%",
   };
 
-  const renderFade = () => (
-    <div
-      aria-hidden="true"
-      className={[
-        "absolute inset-0 pointer-events-none",
-        // Dark mode : paliers resserrés pour absorber le contraste plus fort.
-        "dark:[--es-fade-start:45%]",
-        "dark:[--es-fade-soft:55%] dark:[--es-fade-soft-alpha:0.3]",
-        "dark:[--es-fade-mid:65%] dark:[--es-fade-mid-alpha:0.65]",
-        "dark:[--es-fade-near:80%] dark:[--es-fade-near-alpha:0.92]",
-        "dark:[--es-fade-end:95%]",
-      ].join(" ")}
-      style={fadeOverlayStyle}
-    />
-  );
+  // Light : multiply au lieu de darken — sur tout fond clair (blanc pur,
+  //   crème, gris doux), les pixels clairs de l'aquarelle se confondent
+  //   avec le fond car (clair × clair) ≈ clair. Aucun halo visible.
+  // Dark  : invert + hue-rotate transforme le crème en sombre, opacité
+  //   préservée, mask radial pour adoucir les bords.
+  const imgClass =
+    "absolute inset-0 w-full h-full object-contain mix-blend-multiply dark:mix-blend-normal dark:[filter:invert(1)_hue-rotate(180deg)_brightness(0.92)_saturate(0.85)] dark:opacity-95";
 
   if (errored) {
     const Fallback = SVG_FALLBACKS[fallbackKey];
     return (
       <div className={wrapperClass} role="img" aria-label={alt}>
-        <div className={imgClass}>
+        <div className={imgClass} style={maskStyle}>
           <Fallback />
         </div>
-        {renderFade()}
       </div>
     );
   }
@@ -120,9 +103,9 @@ const PaintedIllustration = ({
         height={1024}
         onError={() => setErrored(true)}
         className={imgClass}
+        style={maskStyle}
         draggable={false}
       />
-      {renderFade()}
     </div>
   );
 };
