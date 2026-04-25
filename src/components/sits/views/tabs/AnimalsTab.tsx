@@ -97,9 +97,9 @@ const AnimalsTab = ({ pets, ownerFirstName }: AnimalsTabProps) => {
                   id={panelId}
                   role="region"
                   aria-label={`Informations sur la race ${pet.breed}`}
-                  hidden={!isOpen}
+                  aria-hidden={!isOpen}
                   className={`overflow-hidden transition-all duration-300 ${
-                    isOpen ? "max-h-[2000px] opacity-100" : "max-h-0 opacity-0"
+                    isOpen ? "max-h-[2000px] opacity-100" : "max-h-0 opacity-0 pointer-events-none"
                   }`}
                 >
                   <div className="pt-4">
