@@ -315,13 +315,13 @@ test.describe("Realtime — focus reste logique après mise à jour exogène", (
     const pageB = await ctxB.newPage();
     await pageB.goto(url, { waitUntil: "networkidle" });
 
-    // Focus initial sur un élément focusable de la vue owner
-    await pageA.evaluate(() => {
-      const focusable = document.querySelector(
-        'main button, main a[href], main [role="button"]'
-      ) as HTMLElement | null;
-      focusable?.focus();
-    });
+    // Focus initial sur un élément focusable de la vue owner (via locator
+    // pour forcer le focus en headless via CDP).
+    const initialTarget = pageA
+      .locator('main button:not([disabled]), main a[href], main [role="button"]:not([aria-disabled="true"])')
+      .first();
+    expect(await initialTarget.count()).toBeGreaterThan(0);
+    await initialTarget.focus();
     const focusBefore = await describeActiveElement(pageA);
     expect(focusBefore.isBody).toBe(false);
 
