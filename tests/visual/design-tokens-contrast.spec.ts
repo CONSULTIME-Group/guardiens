@@ -340,4 +340,107 @@ test.describe("Design tokens — contraste WCAG AA (indépendant des pages)", ()
       ).toEqual([]);
     });
   }
+
+  /**
+   * Méta-test : vérifie que les règles de skip (cf. contrast-skip-rules.ts)
+   * filtrent bien les éléments décoratifs et n'écartent PAS le texte légitime.
+   *
+   * Ce test prévient les régressions du filtre lui-même : si quelqu'un assouplit
+   * trop les règles, les éléments "must skip" tomberont dans l'audit ; si
+   * quelqu'un les durcit trop, les éléments "must audit" seront ignorés à tort.
+   */
+  test("skip-rules — fixtures décoratives vs texte réel", async ({ page }) => {
+    const fixtures = `<!doctype html>
+<html lang="fr">
+  <head><meta charset="utf-8" /></head>
+  <body>
+    <main>
+      <!-- ÉLÉMENTS À IGNORER ----------------------------------------------- -->
+      <span data-fixture="must-skip" data-name="aria-hidden-text" aria-hidden="true">Texte caché aux AT</span>
+      <div data-fixture="must-skip" data-name="aria-hidden-ancestor" aria-hidden="true">
+        <span>Enfant d'un parent aria-hidden</span>
+      </div>
+      <div data-fixture="must-skip" data-name="role-presentation" role="presentation">Décoratif</div>
+      <span data-fixture="must-skip" data-name="role-none" role="none">Décoratif</span>
+      <span data-fixture="must-skip" data-name="sr-only" class="sr-only">Texte sr-only</span>
+      <span data-fixture="must-skip" data-name="visually-hidden" class="visually-hidden">Texte visually-hidden</span>
+      <i data-fixture="must-skip" data-name="lucide-icon" class="lucide-check"></i>
+      <i data-fixture="must-skip" data-name="fa-icon" class="fa-search"></i>
+      <span data-fixture="must-skip" data-name="bullet-only">•</span>
+      <span data-fixture="must-skip" data-name="symbols-only">— · •</span>
+      <span data-fixture="must-skip" data-name="opt-out" data-skip-contrast="true">Forcé skip</span>
+      <svg width="10" height="10"><title data-fixture="must-skip" data-name="svg-title">SVG title</title></svg>
+      <hr data-fixture="must-skip" data-name="hr-tag" />
+
+      <!-- ÉLÉMENTS À AUDITER ---------------------------------------------- -->
+      <p data-fixture="must-audit" data-name="paragraph">Vrai paragraphe lisible.</p>
+      <button data-fixture="must-audit" data-name="button-label">Soumettre</button>
+      <span data-fixture="must-audit" data-name="span-text">Mention légale</span>
+      <h2 data-fixture="must-audit" data-name="heading">Titre de section</h2>
+      <a data-fixture="must-audit" data-name="link" href="#">En savoir plus</a>
+      <!-- Texte visible MÊME SI un descendant est aria-hidden -->
+      <p data-fixture="must-audit" data-name="parent-of-hidden">
+        Texte parent
+        <span aria-hidden="true">décoratif</span>
+      </p>
+    </main>
+  </body>
+</html>`;
+
+    await page.route("**/__skip-fixtures", (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: "text/html; charset=utf-8",
+        body: fixtures,
+      })
+    );
+
+    await page.goto(`${BASE_URL}/__skip-fixtures`, { waitUntil: "networkidle" });
+    await page.addScriptTag({ content: CONTRAST_SKIP_SCRIPT });
+
+    const result = await page.evaluate(() => {
+      const fn = (window as any).__shouldSkipContrast as (el: Element) =>
+        | { reason: string; detail: string }
+        | null;
+      const all = Array.from(
+        document.querySelectorAll("[data-fixture]")
+      ) as HTMLElement[];
+      return all.map((el) => ({
+        fixture: el.dataset.fixture as "must-skip" | "must-audit",
+        name: el.dataset.name as string,
+        skipped: fn(el),
+      }));
+    });
+
+    const wronglyAudited = result.filter(
+      (r) => r.fixture === "must-skip" && r.skipped === null
+    );
+    const wronglySkipped = result.filter(
+      (r) => r.fixture === "must-audit" && r.skipped !== null
+    );
+
+    if (wronglyAudited.length || wronglySkipped.length) {
+      console.error("\n=== Skip-rules: éléments décoratifs NON filtrés ===");
+      for (const r of wronglyAudited) console.error(`  - ${r.name}`);
+      console.error("\n=== Skip-rules: texte réel filtré à tort ===");
+      for (const r of wronglySkipped)
+        console.error(`  - ${r.name} (raison: ${JSON.stringify(r.skipped)})`);
+    }
+
+    expect(
+      wronglyAudited,
+      `Éléments décoratifs qui auraient dû être ignorés : ${wronglyAudited
+        .map((r) => r.name)
+        .join(", ")}`
+    ).toEqual([]);
+    expect(
+      wronglySkipped,
+      `Texte réel ignoré à tort : ${wronglySkipped
+        .map((r) => `${r.name} (${r.skipped?.reason})`)
+        .join(", ")}`
+    ).toEqual([]);
+
+    // Sanity-check : le module exporte bien la liste documentée des règles.
+    expect(CONTRAST_SKIP_RULES.length).toBeGreaterThanOrEqual(8);
+  });
 });
