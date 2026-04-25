@@ -431,4 +431,68 @@ test.describe("Design tokens — contraste WCAG AA (indépendant des pages)", ()
     // Sanity-check : le module exporte bien la liste documentée des règles.
     expect(CONTRAST_SKIP_RULES.length).toBeGreaterThanOrEqual(8);
   });
+
+  /**
+   * Test unitaire pur (Node, pas de browser) de la classification WCAG
+   * « large-scale text ». Couvre les cas-limites de la spec :
+   *   - 18pt = 24px → toujours large
+   *   - 14pt ≈ 18.6667px + bold (≥700) → large
+   *   - 14pt ≈ 18.6667px + medium (500/600) → normal (bold strict)
+   *   - juste en-dessous des seuils → normal
+   *   - mots-clés font-weight (`bold`, `bolder`, `lighter`, `normal`)
+   *   - valeurs invalides → fallback 400
+   */
+  test("wcag-text-size — classification large/normal (cas-limites)", () => {
+    // Constantes de référence
+    expect(PT_18_IN_PX).toBeCloseTo(24, 6);
+    expect(PT_14_IN_PX).toBeCloseTo(18.6666, 3);
+
+    // 18pt = 24px → large quel que soit le poids
+    expect(classifyWcagTextSize(24, 400)).toBe("large");
+    expect(classifyWcagTextSize(24, 100)).toBe("large");
+    expect(classifyWcagTextSize(30, "normal")).toBe("large");
+
+    // Juste en-dessous de 24px sans bold → normal
+    expect(classifyWcagTextSize(23.9, 400)).toBe("normal");
+    expect(classifyWcagTextSize(23.9, 600)).toBe("normal"); // 600 < 700, pas bold WCAG
+
+    // 14pt ≈ 18.6667px + bold (≥700) → large
+    expect(classifyWcagTextSize(PT_14_IN_PX, 700)).toBe("large");
+    expect(classifyWcagTextSize(19, 700)).toBe("large");
+    expect(classifyWcagTextSize(19, "bold")).toBe("large");
+    expect(classifyWcagTextSize(20, "bolder")).toBe("large"); // bolder résolu à 700
+
+    // 14pt + poids non-bold (500/600) → normal (WCAG exige strictement ≥700)
+    expect(classifyWcagTextSize(19, 500)).toBe("normal");
+    expect(classifyWcagTextSize(19, 600)).toBe("normal");
+
+    // Juste en-dessous de 14pt même en bold → normal
+    expect(classifyWcagTextSize(18.5, 700)).toBe("normal");
+    expect(classifyWcagTextSize(14, "bold")).toBe("normal");
+
+    // Texte body courant (16px regular) → normal
+    expect(classifyWcagTextSize(16, 400)).toBe("normal");
+    expect(classifyWcagTextSize(16, "normal")).toBe("normal");
+
+    // Tolérance sub-pixel : 23.97px (rendu navigateur de 24px) doit rester large
+    expect(classifyWcagTextSize(23.97, 400)).toBe("large");
+
+    // resolveFontWeight — mots-clés et valeurs invalides
+    expect(resolveFontWeight("bold")).toBe(700);
+    expect(resolveFontWeight("BOLD")).toBe(700); // case-insensitive
+    expect(resolveFontWeight("bolder")).toBe(700);
+    expect(resolveFontWeight("lighter")).toBe(100);
+    expect(resolveFontWeight("normal")).toBe(400);
+    expect(resolveFontWeight("700")).toBe(700);
+    expect(resolveFontWeight(700)).toBe(700);
+    expect(resolveFontWeight("")).toBe(400);
+    expect(resolveFontWeight(null)).toBe(400);
+    expect(resolveFontWeight(undefined)).toBe(400);
+    expect(resolveFontWeight("garbage")).toBe(400);
+
+    // Valeurs aberrantes côté size → normal (jamais large par défaut)
+    expect(classifyWcagTextSize(0, 700)).toBe("normal");
+    expect(classifyWcagTextSize(-5, 700)).toBe("normal");
+    expect(classifyWcagTextSize(NaN, 700)).toBe("normal");
+  });
 });
