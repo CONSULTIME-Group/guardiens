@@ -169,6 +169,62 @@
   }
 }
 
+/* ========== EmptyState illustration blend (centralisé) ==========
+   Source UNIQUE de vérité pour intégrer les aquarelles narratives
+   à n'importe quel fond (page, carte, modale, section grisée) en
+   mode clair ou sombre, sans halo ni dépendance à une couleur fixe.
+
+   Principe : un masque radial alpha rend les bords VRAIMENT
+   transparents — le fond du parent transparaît directement, donc
+   aucun composant ne peut diverger en redéfinissant `--background`.
+
+   Tout autre composant qui veut afficher ces illustrations DOIT
+   utiliser .illustration-blend (jamais redéclarer mask/blend/filter
+   localement). */
+@layer components {
+  .illustration-blend {
+    /* Masque radial — agressivité calibrée pour effacer toute trace
+       du fond crème de l'aquarelle, même sur conteneur très contrasté
+       (carte blanche pure, gris-bleu). */
+    -webkit-mask-image: radial-gradient(
+      ellipse at center,
+      rgba(0, 0, 0, 1) 0%,
+      rgba(0, 0, 0, 1) 35%,
+      rgba(0, 0, 0, 0.92) 50%,
+      rgba(0, 0, 0, 0.7) 62%,
+      rgba(0, 0, 0, 0.4) 72%,
+      rgba(0, 0, 0, 0.15) 80%,
+      rgba(0, 0, 0, 0) 88%
+    );
+    mask-image: radial-gradient(
+      ellipse at center,
+      rgba(0, 0, 0, 1) 0%,
+      rgba(0, 0, 0, 1) 35%,
+      rgba(0, 0, 0, 0.92) 50%,
+      rgba(0, 0, 0, 0.7) 62%,
+      rgba(0, 0, 0, 0.4) 72%,
+      rgba(0, 0, 0, 0.15) 80%,
+      rgba(0, 0, 0, 0) 88%
+    );
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-size: 100% 100%;
+    mask-size: 100% 100%;
+
+    /* Light : multiply — pixels clairs de l'aquarelle se confondent
+       avec tout fond clair (blanc, crème, gris doux). */
+    mix-blend-mode: multiply;
+  }
+
+  .dark .illustration-blend {
+    /* Dark : invert + hue-rotate transforme le crème en sombre
+       tout en préservant les teintes ; le masque adoucit les bords. */
+    mix-blend-mode: normal;
+    filter: invert(1) hue-rotate(180deg) brightness(0.92) saturate(0.85);
+    opacity: 0.95;
+  }
+}
+
 /* ========== Rich Article Styles ========== */
 @layer components {
   .article-rich-content {
