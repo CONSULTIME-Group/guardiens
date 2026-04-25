@@ -13,7 +13,7 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
 } from "@/components/ui/dialog";
 import {
-  AlertTriangle, CheckCircle2, RefreshCw, Search, Trash2, ExternalLink, Archive,
+  AlertTriangle, CheckCircle2, RefreshCw, Search, Trash2, ExternalLink, Archive, ShieldAlert, Info,
 } from "lucide-react";
 import { formatDistanceToNow, format } from "date-fns";
 import { fr } from "date-fns/locale";
