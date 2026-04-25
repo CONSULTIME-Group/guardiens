@@ -1,5 +1,4 @@
 import { Link } from "react-router-dom";
-import { Separator } from "@/components/ui/separator";
 import { StatutGardienBadge } from "@/components/profile/StatutGardienBadge";
 import { useAuth } from "@/contexts/AuthContext";
 import type { ReputationData } from "@/hooks/useSitterDashboardData";
@@ -8,13 +7,14 @@ interface SitterStatusBarProps {
   profileCompletion: number;
   completedSits: number;
   avgRating: number;
+  reviewsCount: number;
   badgeCount: number;
   totalApps: number;
   reputation: ReputationData | null;
 }
 
 const SitterStatusBar = ({
-  profileCompletion, completedSits, avgRating, badgeCount, totalApps, reputation,
+  profileCompletion, completedSits, avgRating, reviewsCount, badgeCount, totalApps, reputation,
 }: SitterStatusBarProps) => {
   const { user, activeRole } = useAuth();
   const profilePath = (user?.role === "both" ? activeRole : user?.role) === "owner" ? "/owner-profile" : "/profile";
@@ -44,12 +44,22 @@ const SitterStatusBar = ({
           <p className="text-xs text-muted-foreground font-sans">Gardes</p>
         </div>
         <div className="text-center">
-          {avgRating > 0 ? (
-            <p className="text-2xl font-heading font-bold text-foreground">{avgRating}</p>
+          {reviewsCount > 0 ? (
+            <>
+              <p className="text-2xl font-heading font-bold text-foreground">
+                {avgRating.toFixed(1)}
+                <span className="text-sm font-sans font-normal text-muted-foreground">/5</span>
+              </p>
+              <p className="text-xs text-muted-foreground font-sans">
+                Note ({reviewsCount} avis)
+              </p>
+            </>
           ) : (
-            <p className="text-sm text-muted-foreground font-sans mt-1">–</p>
+            <>
+              <p className="text-sm text-muted-foreground font-sans mt-1">–</p>
+              <p className="text-xs text-muted-foreground font-sans">Note</p>
+            </>
           )}
-          <p className="text-xs text-muted-foreground font-sans">Note</p>
         </div>
         <div className="text-center">
           <p className="text-2xl font-heading font-bold text-foreground">{badgeCount}</p>
@@ -86,18 +96,13 @@ const SitterStatusBar = ({
         ].map((c) => (
           <div key={c.label} className="flex items-center gap-2">
             <div className={`w-2 h-2 rounded-full shrink-0 ${c.ok ? "bg-primary" : "bg-muted-foreground/30"}`} />
-            <span className={`text-xs font-sans ${c.ok ? "line-through text-muted-foreground" : "text-foreground/70"}`}>{c.label}</span>
+            <span className={`text-xs font-sans ${c.ok ? "line-through text-foreground/60" : "text-foreground/70"}`}>{c.label}</span>
           </div>
         ))}
       </div>
-      <Separator className="my-3" />
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-xs font-medium text-foreground">Gardien d'Urgence</p>
-          <p className="text-xs text-muted-foreground">Statut distinct — 5 conditions</p>
-        </div>
-        <Link to="/gardien-urgence" className="text-xs text-primary font-sans">En savoir plus →</Link>
-      </div>
+      <p className="text-[11px] text-muted-foreground font-sans italic mt-3 leading-snug">
+        Le statut Gardien d'urgence est distinct (note ≥ 4.7) — voir l'éligibilité plus bas.
+      </p>
     </div>
   </div>
   );

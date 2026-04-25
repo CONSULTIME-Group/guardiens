@@ -23,6 +23,7 @@ export interface SitterDashboardData {
   identityStatus: string;
   completedSits: number;
   avgRating: number;
+  reviewsCount: number;
   badgeCount: number;
   totalApps: number;
   cancellations: number;
@@ -55,6 +56,7 @@ const INITIAL_STATE: SitterDashboardData = {
   identityStatus: "not_submitted",
   completedSits: 0,
   avgRating: 0,
+  reviewsCount: 0,
   badgeCount: 0,
   totalApps: 0,
   cancellations: 0,
@@ -224,6 +226,7 @@ export function useSitterDashboardData(userId: string | undefined) {
         identityStatus: profile?.identity_verification_status || "not_submitted",
         completedSits: completed,
         avgRating: Math.round(avg * 10) / 10,
+        reviewsCount: reviews.length,
         badgeCount: badgesRes.data?.length || 0,
         totalApps: apps.length,
         cancellations: profile?.cancellation_count || 0,

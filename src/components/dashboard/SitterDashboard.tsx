@@ -42,7 +42,7 @@ const SitterDashboard = () => {
 
   const {
     loading, profileCompletion, identityVerified, identityStatus,
-    completedSits, avgRating, badgeCount, totalApps, cancellations,
+    completedSits, avgRating, reviewsCount, badgeCount, totalApps, cancellations,
     pendingAppsCount, unreadCount, isAvailable, isFounder,
     postalCode, avatarUrl, bio, hasAnimalExperience,
     hasEmergencyProfile, hasAcceptedRecent, nextGuard,
@@ -86,12 +86,12 @@ const SitterDashboard = () => {
   const allItems = [
     { done: onboardingChecks.profileComplete, label: `Compléter mon profil (${profileCompletion}%)`, to: "/profile" },
     { done: onboardingChecks.identityVerified, label: "Vérifier mon identité (recommandé)", to: "/settings#verification" },
-    { done: false, label: "Découvrez les gardes disponibles", to: "/search" },
+    { done: totalApps > 0, label: "Postuler à une première garde", to: "/search" },
     { done: onboardingChecks.availableMode, label: "Activer le mode disponible", to: "", isToggle: true },
   ];
   const completedItems = allItems.filter(c => c.done);
   const incompleteItems = allItems.filter(c => !c.done);
-  const allChecklistDone = completedItems.length === 4;
+  const allChecklistDone = completedItems.length === allItems.length;
 
   return (
     <div className="space-y-0 overflow-hidden">
@@ -183,6 +183,7 @@ const SitterDashboard = () => {
         profileCompletion={profileCompletion}
         completedSits={completedSits}
         avgRating={avgRating}
+        reviewsCount={reviewsCount}
         badgeCount={badgeCount}
         totalApps={totalApps}
         reputation={reputation}
@@ -247,7 +248,7 @@ const SitterDashboard = () => {
                 <div className="flex items-center gap-2">
                   <CheckCircle className="h-4 w-4 text-primary" />
                   <span className="text-sm font-medium text-primary">
-                    {allChecklistDone ? "4/4 étapes complétées" : `${completedItems.length} étape${completedItems.length > 1 ? "s" : ""} déjà complétée${completedItems.length > 1 ? "s" : ""}`}
+                    {allChecklistDone ? `${allItems.length}/${allItems.length} étapes complétées` : `${completedItems.length} étape${completedItems.length > 1 ? "s" : ""} déjà complétée${completedItems.length > 1 ? "s" : ""}`}
                   </span>
                 </div>
               </AccordionTrigger>
