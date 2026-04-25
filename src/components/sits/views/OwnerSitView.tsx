@@ -67,8 +67,6 @@ interface OwnerSitViewProps {
   currentUserId: string;
 }
 
-const formatDate = (d: string | null) =>
-  d ? format(new Date(d), "d MMMM yyyy", { locale: fr }) : "";
 
 const OwnerSitView = ({
   sit,
@@ -90,7 +88,6 @@ const OwnerSitView = ({
   const [publishing, setPublishing] = useState(false);
   const [publishConfirmOpen, setPublishConfirmOpen] = useState(false);
   const [cancelOpen, setCancelOpen] = useState(false);
-  const [reopenCount, setReopenCount] = useState(3);
   const [logementOverride, setLogementOverride] = useState(initialLogementOverride);
   const [animauxOverride, setAnimauxOverride] = useState(initialAnimauxOverride);
   const [internalAppCount, setInternalAppCount] = useState(appCount);
@@ -155,10 +152,12 @@ const OwnerSitView = ({
   //   (la zone que l'owner remplit le plus souvent avant publication).
   // - autres statuts : on garde "Candidatures" comme accueil naturel.
   const defaultTab = isDraft ? "housing" : "candidatures";
-  const avgRating =
-    reviews.length > 0
-      ? (reviews.reduce((s: number, r: any) => s + r.overall_rating, 0) / reviews.length).toFixed(1)
-      : null;
+
+  // Dérivés partagés (avgRating + formatDate) — voir useSitDerived.
+  const { avgRating, formatDate } = useSitDerived({
+    reviews,
+    context: "owner",
+  });
 
   const handlePublish = async () => {
     if (!isDraft || publishing) return;
