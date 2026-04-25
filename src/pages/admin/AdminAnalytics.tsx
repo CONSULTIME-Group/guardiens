@@ -182,18 +182,19 @@ const AdminAnalytics = () => {
       });
       setStepDropoffByRole(byRole);
 
-      // ── Top pages ──
+      // ── Top pages (sources normalisées) ──
       const pageCount = new Map<string, number>();
       filteredEvents.forEach((e) => {
-        if (e.event_type === "page_view" && e.source) {
-          pageCount.set(e.source, (pageCount.get(e.source) || 0) + 1);
-        }
+        if (e.event_type !== "page_view") return;
+        const normalized = normalizeSource(e.source);
+        if (!normalized) return;
+        pageCount.set(normalized, (pageCount.get(normalized) || 0) + 1);
       });
       setTopPages(
         Array.from(pageCount.entries())
           .map(([path, views]) => ({ path, views }))
           .sort((a, b) => b.views - a.views)
-          .slice(0, 10)
+          .slice(0, 15)
       );
 
       setLoading(false);
