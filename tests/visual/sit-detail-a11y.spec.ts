@@ -775,14 +775,20 @@ test.describe("Accessibilité — /sits/:id", () => {
         };
 
         type Violation = {
-          tag: string;
+          // Champs issus de __describeEl (selector, domPath, location, …)
+          [k: string]: unknown;
           text: string;
-          fg: string;
-          bg: string;
-          ratio: number;
-          required: number;
-          fontSize: string;
-          fontWeight: string;
+          contrast: {
+            fg: string;
+            bg: string;
+            ratio: number;
+            required: number;
+            fontSize: string;
+            fontSizePt: number;
+            fontWeight: string;
+            wcagSizeClass: "large" | "normal";
+            deficit: number;
+          };
         };
         const violations: Violation[] = [];
         const seen = new Set<Element>();
