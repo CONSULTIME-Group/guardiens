@@ -77,7 +77,7 @@ const SitDetailHeader = ({
       {/* Title, location, dates, status */}
       <div className="flex items-start justify-between gap-4 mb-1">
         <h1 className="font-heading text-2xl md:text-3xl font-bold">
-          {sitTitle || `Garde à ${owner?.city || "..."}`}
+          {sitTitle ? sanitizeUserTitle(sitTitle) : `Garde à ${owner?.city || "..."}`}
         </h1>
         <div className="flex items-center gap-2 shrink-0">
           {isOwner && (
@@ -104,7 +104,38 @@ const SitDetailHeader = ({
               </Link>
             </>
           )}
-          {isAuthenticatedNonOwner && <ReportButton targetId={sitId} targetType="sit" />}
+          {/* Signaler : déplacé dans un menu kebab pour ne pas concurrencer
+              visuellement le titre/CTA. Garde la même action que l'ancien
+              <ReportButton> inline. */}
+          {isAuthenticatedNonOwner && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                  aria-label="Plus d'actions sur cette annonce"
+                >
+                  <MoreHorizontal className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                {/* On utilise onSelect=preventDefault pour que le DropdownMenu
+                    ne se ferme pas avant l'ouverture du dialog interne du
+                    ReportButton (qui gère son propre <Dialog>). */}
+                <DropdownMenuItem
+                  onSelect={(e) => e.preventDefault()}
+                  className="p-0"
+                >
+                  <ReportButton
+                    targetId={sitId}
+                    targetType="sit"
+                    className="w-full justify-start px-2 py-1.5 text-sm text-foreground hover:text-destructive"
+                  />
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
         </div>
       </div>
 
