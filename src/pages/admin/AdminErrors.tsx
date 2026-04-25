@@ -118,6 +118,30 @@ const AdminErrors = () => {
     else { toast.success("Supprimée"); load(); setSelected(null); window.dispatchEvent(new Event("admin-badges-refresh")); }
   };
 
+  const [archiving, setArchiving] = useState(false);
+  const archiveAll = async () => {
+    const targets = filtered.filter((e) => !e.resolved_at);
+    if (targets.length === 0) {
+      toast.info("Aucune erreur non résolue à archiver");
+      return;
+    }
+    if (!confirm(`Archiver (marquer comme résolues) ${targets.length} erreur(s) ?`)) return;
+    setArchiving(true);
+    const { data: { user } } = await supabase.auth.getUser();
+    const ids = targets.map((e) => e.id);
+    const { error } = await supabase
+      .from("error_logs")
+      .update({ resolved_at: new Date().toISOString(), resolved_by: user?.id })
+      .in("id", ids);
+    setArchiving(false);
+    if (error) toast.error("Échec de l'archivage");
+    else {
+      toast.success(`${ids.length} erreur(s) archivée(s)`);
+      window.dispatchEvent(new Event("admin-badges-refresh"));
+      load();
+    }
+  };
+
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-6">
       <div className="flex items-center justify-between">
