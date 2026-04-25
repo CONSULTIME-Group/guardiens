@@ -113,6 +113,7 @@ const AdminRelanceIncomplet = lazy(() => import("./pages/admin/AdminRelanceIncom
 const AdminMessages = lazy(() => import("./pages/admin/AdminMessages"));
 const AdminAnalytics = lazy(() => import("./pages/admin/AdminAnalytics"));
 const AdminErrors = lazy(() => import("./pages/admin/AdminErrors"));
+const AdminDiagnostics = lazy(() => import("./pages/admin/AdminDiagnostics"));
 const EmergencySitter = lazy(() => import("./pages/EmergencySitter"));
 const MySubscription = lazy(() => import("./pages/MySubscription"));
 const Favorites = lazy(() => import("./pages/Favorites"));
@@ -273,6 +274,7 @@ const AppRoutes = () => (
         <Route path="/admin/messages" element={<AdminMessages />} />
         <Route path="/admin/analytics" element={<AdminAnalytics />} />
         <Route path="/admin/errors" element={<AdminErrors />} />
+        <Route path="/admin/diagnostics" element={<AdminDiagnostics />} />
       </Route>
       {/* App routes */}
       <Route path="/dashboard" element={<DashboardRouteShell />} />
