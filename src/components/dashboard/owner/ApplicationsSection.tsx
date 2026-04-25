@@ -22,6 +22,8 @@ const AppCard = memo(({ app, sitterProfiles }: { app: AppRow; sitterProfiles: Re
     app.sit?.end_date ? format(new Date(app.sit.end_date), "d MMM", { locale: fr }) : "",
   ].filter(Boolean).join(" → ");
 
+  const sitLink = app.sit_id ? `/sits/${app.sit_id}#candidatures` : null;
+
   return (
     <div className="bg-card border border-border rounded-2xl p-4 flex gap-4">
       <div className="w-12 h-12 rounded-full bg-primary/15 text-primary font-bold flex items-center justify-center text-lg font-sans shrink-0 overflow-hidden">
@@ -33,9 +35,19 @@ const AppCard = memo(({ app, sitterProfiles }: { app: AppRow; sitterProfiles: Re
       </div>
       <div className="flex-1 min-w-0">
         <p className="text-sm font-semibold text-foreground">{capitalize(sitter?.first_name)}</p>
-        <p className="text-xs text-muted-foreground font-sans mt-0.5 truncate">
-          {sitTitle}{dateRange ? ` · ${dateRange}` : ""}
-        </p>
+        {sitLink ? (
+          <Link
+            to={sitLink}
+            className="block text-xs text-muted-foreground font-sans mt-0.5 truncate hover:text-primary hover:underline"
+            title="Voir la candidature dans l'annonce"
+          >
+            {sitTitle}{dateRange ? ` · ${dateRange}` : ""}
+          </Link>
+        ) : (
+          <p className="text-xs text-muted-foreground font-sans mt-0.5 truncate">
+            {sitTitle}{dateRange ? ` · ${dateRange}` : ""}
+          </p>
+        )}
         <div className="flex items-center gap-2 mt-1.5 flex-wrap">
           {sitter?.avgNote ? (
             <span className="text-xs font-sans text-primary font-medium">★ {sitter.avgNote}</span>
@@ -43,7 +55,7 @@ const AppCard = memo(({ app, sitterProfiles }: { app: AppRow; sitterProfiles: Re
             <span className="text-xs font-sans text-muted-foreground italic">Nouveau</span>
           )}
         </div>
-        <div className="flex gap-2 mt-3">
+        <div className="flex gap-2 mt-3 flex-wrap">
           {sitter?.id ? (
             <button
               onClick={() => navigate(`/gardiens/${sitter.id}`)}
@@ -51,6 +63,14 @@ const AppCard = memo(({ app, sitterProfiles }: { app: AppRow; sitterProfiles: Re
             >
               Voir le profil
             </button>
+          ) : null}
+          {sitLink ? (
+            <Link
+              to={sitLink}
+              className="border border-border text-muted-foreground rounded-xl px-3 py-1.5 text-xs font-sans hover:bg-accent transition-colors"
+            >
+              Voir dans l'annonce
+            </Link>
           ) : null}
           <button
             onClick={() => navigate("/messages")}
