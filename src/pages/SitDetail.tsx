@@ -374,6 +374,7 @@ const SitDetail = () => {
               <Link
                 to={`/annonces/${sit.id}`}
                 target="_blank"
+                rel="noopener noreferrer"
                 className="text-sm text-primary hover:underline cursor-pointer flex items-center gap-1"
               >
                 Voir comme un gardien <ExternalLink className="h-3.5 w-3.5" />
