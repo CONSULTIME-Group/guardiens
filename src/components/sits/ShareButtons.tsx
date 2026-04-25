@@ -157,17 +157,17 @@ const ShareButtons = ({ sitId, title, city, startDate, endDate, source = "sit_de
           variant="outline"
           size="sm"
           onClick={handleFacebook}
-          className="gap-1.5 justify-start text-[#1877F2] hover:bg-[#1877F2]/10 border-[#1877F2]/30"
+          className="gap-1.5 justify-start hover:bg-[#1877F2]/10 border-[#1877F2]/30"
         >
-          <Facebook className="h-4 w-4" /> Facebook
+          <Facebook className="h-4 w-4 text-[#1877F2]" aria-hidden="true" /> Facebook
         </Button>
         <Button
           variant="outline"
           size="sm"
           onClick={handleWhatsapp}
-          className="gap-1.5 justify-start text-[#25D366] hover:bg-[#25D366]/10 border-[#25D366]/30"
+          className="gap-1.5 justify-start hover:bg-[#25D366]/10 border-[#25D366]/30"
         >
-          <MessageCircle className="h-4 w-4" /> WhatsApp
+          <MessageCircle className="h-4 w-4 text-[#25D366]" aria-hidden="true" /> WhatsApp
         </Button>
         <Button
           variant="outline"
