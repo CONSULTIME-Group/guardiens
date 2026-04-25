@@ -13,7 +13,7 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
 } from "@/components/ui/dialog";
 import {
-  AlertTriangle, CheckCircle2, RefreshCw, Search, Trash2, ExternalLink,
+  AlertTriangle, CheckCircle2, RefreshCw, Search, Trash2, ExternalLink, Archive,
 } from "lucide-react";
 import { formatDistanceToNow, format } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -118,6 +118,30 @@ const AdminErrors = () => {
     else { toast.success("Supprimée"); load(); setSelected(null); window.dispatchEvent(new Event("admin-badges-refresh")); }
   };
 
+  const [archiving, setArchiving] = useState(false);
+  const archiveAll = async () => {
+    const targets = filtered.filter((e) => !e.resolved_at);
+    if (targets.length === 0) {
+      toast.info("Aucune erreur non résolue à archiver");
+      return;
+    }
+    if (!confirm(`Archiver (marquer comme résolues) ${targets.length} erreur(s) ?`)) return;
+    setArchiving(true);
+    const { data: { user } } = await supabase.auth.getUser();
+    const ids = targets.map((e) => e.id);
+    const { error } = await supabase
+      .from("error_logs")
+      .update({ resolved_at: new Date().toISOString(), resolved_by: user?.id })
+      .in("id", ids);
+    setArchiving(false);
+    if (error) toast.error("Échec de l'archivage");
+    else {
+      toast.success(`${ids.length} erreur(s) archivée(s)`);
+      window.dispatchEvent(new Event("admin-badges-refresh"));
+      load();
+    }
+  };
+
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-6">
       <div className="flex items-center justify-between">
@@ -130,9 +154,21 @@ const AdminErrors = () => {
             Erreurs JavaScript et exceptions captées dans le navigateur des utilisateurs.
           </p>
         </div>
-        <Button onClick={load} variant="outline" size="sm" className="gap-2">
-          <RefreshCw className="h-4 w-4" /> Actualiser
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            onClick={archiveAll}
+            variant="outline"
+            size="sm"
+            className="gap-2"
+            disabled={archiving || loading || filtered.filter((e) => !e.resolved_at).length === 0}
+          >
+            <Archive className="h-4 w-4" />
+            {archiving ? "Archivage…" : "Tout archiver"}
+          </Button>
+          <Button onClick={load} variant="outline" size="sm" className="gap-2">
+            <RefreshCw className="h-4 w-4" /> Actualiser
+          </Button>
+        </div>
       </div>
 
       {/* Stats */}
