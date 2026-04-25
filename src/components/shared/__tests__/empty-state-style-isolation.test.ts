@@ -27,6 +27,7 @@ const SRC = join(ROOT, "src");
 const ALLOWED = new Set([
   "src/index.css",
   "src/components/shared/EmptyState.tsx",
+  "src/components/shared/empty-state-fallbacks.tsx",
   "src/pages/TestEmptyStates.tsx",
   // Tests autorisés à mentionner ces noms à des fins de vérification.
   "src/components/shared/__tests__/empty-state-style-isolation.test.ts",
