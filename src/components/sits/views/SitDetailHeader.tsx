@@ -75,11 +75,18 @@ const SitDetailHeader = ({
         <div className="flex items-center gap-2 shrink-0">
           {isOwner && (
             <>
-              <Link to={`/sits/${sitId}/edit`}>
-                <Button variant="outline" size="sm" className="gap-1.5">
-                  <Pencil className="h-3.5 w-3.5" /> Modifier
-                </Button>
-              </Link>
+              {/* Modifier : seulement sur les statuts non terminaux.
+                  Les statuts terminaux (completed/cancelled/expired/in_progress)
+                  ne doivent plus pouvoir être édités côté propriétaire. */}
+              {(sitStatus === "draft" ||
+                sitStatus === "published" ||
+                sitStatus === "confirmed") && (
+                <Link to={`/sits/${sitId}/edit`}>
+                  <Button variant="outline" size="sm" className="gap-1.5">
+                    <Pencil className="h-3.5 w-3.5" /> Modifier
+                  </Button>
+                </Link>
+              )}
               <Link
                 to={`/annonces/${sitId}`}
                 target="_blank"
