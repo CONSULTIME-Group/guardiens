@@ -89,6 +89,21 @@ test.afterAll(async () => {
   }
 });
 
+/**
+ * En cas d'échec, on attache à `testInfo` un screenshot pleine page de
+ * pageA + meta + focus log + dump des focusables. On utilise pageA
+ * (le contexte qui héberge réellement la vue testée) plutôt que la page
+ * de la fixture qui reste sur about:blank.
+ */
+test.afterEach(async ({ page }, testInfo) => {
+  const target = currentPageA ?? page;
+  await captureFailureArtifacts(target, testInfo, {
+    scenarioId: currentScenario,
+    focusLog: currentFocusLog,
+    phase: currentPhase,
+  });
+});
+
 // --- Helpers --------------------------------------------------------------
 
 /**
