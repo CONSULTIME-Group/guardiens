@@ -284,6 +284,133 @@ test.describe("Accessibilité — /sits/:id", () => {
         `Images sans attribut alt: ${imagesWithoutAlt.join(", ")}`
       ).toEqual([]);
 
+      // ---------- 2g. Nom accessible non vide pour boutons et liens ----------
+      // Règle WCAG 4.1.2 : tout contrôle interactif doit exposer un "accessible
+      // name" non vide. Algorithme W3C ARIA (simplifié) appliqué dans l'ordre :
+      //   1. aria-labelledby (concaténation des textes des éléments référencés)
+      //   2. aria-label
+      //   3. Contenu textuel visible (textContent + alt des <img> enfants)
+      //   4. title
+      //   5. value (pour input[type=submit/button/reset])
+      // Limité au <main> pour rester focalisé sur SitDetail.
+      const namelessControls = await page.evaluate(() => {
+        const root = document.querySelector("main") || document.body;
+
+        const isVisible = (el: Element): boolean => {
+          let node: Element | null = el;
+          while (node && node !== document.body) {
+            const s = window.getComputedStyle(node);
+            if (s.display === "none") return false;
+            if (s.visibility === "hidden") return false;
+            node = node.parentElement;
+          }
+          const rect = (el as HTMLElement).getBoundingClientRect();
+          return rect.width > 0 && rect.height > 0;
+        };
+
+        // Récupère le texte visible "perçu" : textContent en ignorant les
+        // descendants aria-hidden="true", et incluant les alt d'<img>.
+        const accessibleText = (el: Element): string => {
+          let txt = "";
+          const walk = (node: Node) => {
+            if (node.nodeType === Node.TEXT_NODE) {
+              txt += " " + (node.textContent || "");
+              return;
+            }
+            if (node.nodeType !== Node.ELEMENT_NODE) return;
+            const elt = node as Element;
+            // Ignore descendants masqués aux AT
+            if (elt.getAttribute("aria-hidden") === "true") return;
+            // <img> dans le bouton : utilise alt comme texte
+            if (elt.tagName === "IMG") {
+              txt += " " + ((elt as HTMLImageElement).alt || "");
+              return;
+            }
+            // <svg> : ignore (icônes décoratives sans aria-label)
+            if (elt.tagName === "SVG" || elt.tagName === "svg") {
+              const lbl = elt.getAttribute("aria-label");
+              if (lbl) txt += " " + lbl;
+              return;
+            }
+            for (const child of Array.from(elt.childNodes)) walk(child);
+          };
+          walk(el);
+          return txt.trim().replace(/\s+/g, " ");
+        };
+
+        const computeAccessibleName = (el: Element): string => {
+          // 1. aria-labelledby
+          const labelledBy = el.getAttribute("aria-labelledby");
+          if (labelledBy) {
+            const parts = labelledBy
+              .split(/\s+/)
+              .map((id) => document.getElementById(id))
+              .filter((n): n is HTMLElement => !!n)
+              .map((n) => (n.textContent || "").trim())
+              .filter((s) => s.length > 0);
+            if (parts.length) return parts.join(" ");
+          }
+          // 2. aria-label
+          const ariaLabel = el.getAttribute("aria-label");
+          if (ariaLabel && ariaLabel.trim()) return ariaLabel.trim();
+          // 3. Contenu textuel visible (en ignorant aria-hidden descendants)
+          const text = accessibleText(el);
+          if (text.length > 0) return text;
+          // 4. title
+          const title = el.getAttribute("title");
+          if (title && title.trim()) return title.trim();
+          // 5. value (input button)
+          if (el.tagName === "INPUT") {
+            const val = (el as HTMLInputElement).value;
+            if (val && val.trim()) return val.trim();
+          }
+          return "";
+        };
+
+        type Offender = {
+          tag: string;
+          role: string | null;
+          html: string;
+          classes: string;
+        };
+        const offenders: Offender[] = [];
+
+        // Sélectionne tous les contrôles interactifs
+        const selector = [
+          "button",
+          "a[href]",
+          'input[type="button"]',
+          'input[type="submit"]',
+          'input[type="reset"]',
+          '[role="button"]',
+          '[role="link"]',
+          '[role="tab"]', // les onglets sont aussi des contrôles
+        ].join(",");
+
+        root.querySelectorAll(selector).forEach((el) => {
+          if (!isVisible(el)) return;
+          // Boutons explicitement marqués décoratifs/cachés aux AT : on saute
+          if (el.getAttribute("aria-hidden") === "true") return;
+
+          const name = computeAccessibleName(el);
+          if (!name) {
+            offenders.push({
+              tag: el.tagName.toLowerCase(),
+              role: el.getAttribute("role"),
+              html: (el as HTMLElement).outerHTML.slice(0, 180),
+              classes: ((el as HTMLElement).className || "").toString().slice(0, 80),
+            });
+          }
+        });
+
+        return offenders;
+      });
+
+      expect(
+        namelessControls,
+        `Boutons/liens sans nom accessible (${namelessControls.length}):\n${JSON.stringify(namelessControls, null, 2)}`
+      ).toEqual([]);
+
       // ---------- 3. Contraste WCAG AA des textes ----------
       // Calcule le ratio de contraste entre la couleur du texte et la couleur
       // de fond effective de chaque élément contenant du texte visible.
