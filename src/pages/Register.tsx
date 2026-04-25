@@ -274,13 +274,19 @@ const Register = () => {
         emailRedirectTo: getSignupRedirectUrl(),
       },
     });
-    toast({
-      title: error ? "Erreur" : "Email renvoyé !",
-      description: error
-        ? "Impossible de renvoyer l'email. Réessayez plus tard."
-        : "Un nouvel email de confirmation vient d'être envoyé.",
-      variant: error ? "destructive" : "default",
-    });
+    if (error) {
+      const info = mapAuthError(error);
+      toast({
+        variant: "destructive",
+        title: info.title,
+        description: info.description,
+      });
+    } else {
+      toast({
+        title: "Email renvoyé !",
+        description: "Un nouvel email de confirmation vient d'être envoyé.",
+      });
+    }
     setIsResending(false);
   };
 
