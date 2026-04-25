@@ -16,6 +16,7 @@ import { Link } from "react-router-dom";
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { hasMedication } from "@/lib/medication";
+import { trackFirstAction } from "@/lib/analytics";
 
 interface PropertySummary {
   id: string;
@@ -230,6 +231,7 @@ const CreateSit = () => {
       } as any).select("id").single();
 
       if (error) throw error;
+      try { await trackFirstAction("sit_created", { sit_id: sit.id, is_urgent: isUrgent }); } catch {}
       toast({ title: "Annonce publiée ! 🎉", description: "Les gardiens peuvent maintenant postuler." });
       navigate(`/sits/${sit.id}`);
     } catch {
