@@ -48,6 +48,14 @@ const SitterBadgesSection = ({ groupedBadges, condensed = false }: SitterBadgesS
       <h3 id="sitter-badges-heading" className="sr-only">
         Mes badges — {summaryText}
       </h3>
+      <p
+        className="sr-only"
+        aria-live="polite"
+        aria-atomic="true"
+        role="status"
+      >
+        {`Badges actifs : ${activeCount} sur ${total}.`}
+      </p>
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
