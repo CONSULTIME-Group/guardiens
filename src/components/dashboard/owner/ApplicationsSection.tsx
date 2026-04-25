@@ -42,8 +42,29 @@ const AppCard = memo(({ app, sitterProfiles }: { app: AppRow; sitterProfiles: Re
 
   const sitLink = app.sit_id ? `/sits/${app.sit_id}#candidatures` : null;
 
+  const handleCardActivate = () => {
+    if (sitLink) navigate(sitLink);
+  };
+
+  const stop = (cb: () => void) => (e: React.MouseEvent) => {
+    e.stopPropagation();
+    cb();
+  };
+
   return (
-    <div className="bg-card border border-border rounded-2xl p-4 flex gap-4">
+    <div
+      className={`bg-card border border-border rounded-2xl p-4 flex gap-4 transition-colors ${sitLink ? "cursor-pointer hover:border-primary/40 hover:bg-accent/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40" : ""}`}
+      role={sitLink ? "link" : undefined}
+      tabIndex={sitLink ? 0 : undefined}
+      aria-label={sitLink ? `Voir la candidature de ${capitalize(sitter?.first_name) || "ce gardien"} dans l'annonce` : undefined}
+      onClick={sitLink ? handleCardActivate : undefined}
+      onKeyDown={sitLink ? (e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          handleCardActivate();
+        }
+      } : undefined}
+    >
       <div className="w-12 h-12 rounded-full bg-primary/15 text-primary font-bold flex items-center justify-center text-lg font-sans shrink-0 overflow-hidden">
         {sitter?.avatar_url ? (
           <img src={sitter.avatar_url} alt={`Photo de ${sitter.first_name || 'gardien'}`} className="w-full h-full rounded-full object-cover" />
@@ -53,19 +74,9 @@ const AppCard = memo(({ app, sitterProfiles }: { app: AppRow; sitterProfiles: Re
       </div>
       <div className="flex-1 min-w-0">
         <p className="text-sm font-semibold text-foreground">{capitalize(sitter?.first_name)}</p>
-        {sitLink ? (
-          <Link
-            to={sitLink}
-            className="block text-xs text-muted-foreground font-sans mt-0.5 truncate hover:text-primary hover:underline"
-            title="Voir la candidature dans l'annonce"
-          >
-            {sitTitle}{dateRange ? ` · ${dateRange}` : ""}
-          </Link>
-        ) : (
-          <p className="text-xs text-muted-foreground font-sans mt-0.5 truncate">
-            {sitTitle}{dateRange ? ` · ${dateRange}` : ""}
-          </p>
-        )}
+        <p className="text-xs text-muted-foreground font-sans mt-0.5 truncate">
+          {sitTitle}{dateRange ? ` · ${dateRange}` : ""}
+        </p>
         <div className="flex items-center gap-2 mt-1.5 flex-wrap">
           {sitter?.avgNote ? (
             <span className="text-xs font-sans text-primary font-medium">★ {sitter.avgNote}</span>
@@ -76,22 +87,16 @@ const AppCard = memo(({ app, sitterProfiles }: { app: AppRow; sitterProfiles: Re
         <div className="flex gap-2 mt-3 flex-wrap">
           {sitter?.id ? (
             <button
-              onClick={() => navigate(`/gardiens/${sitter.id}`)}
+              type="button"
+              onClick={stop(() => navigate(`/gardiens/${sitter.id}`))}
               className="border border-border text-muted-foreground rounded-xl px-3 py-1.5 text-xs font-sans hover:bg-accent transition-colors"
             >
               Voir le profil
             </button>
           ) : null}
-          {sitLink ? (
-            <Link
-              to={sitLink}
-              className="border border-border text-muted-foreground rounded-xl px-3 py-1.5 text-xs font-sans hover:bg-accent transition-colors"
-            >
-              Voir dans l'annonce
-            </Link>
-          ) : null}
           <button
-            onClick={() => navigate("/messages")}
+            type="button"
+            onClick={stop(() => navigate("/messages"))}
             className="bg-primary text-primary-foreground rounded-xl px-4 py-1.5 text-xs font-sans font-medium hover:bg-primary/90 transition-colors"
           >
             Répondre
