@@ -68,14 +68,17 @@ const baseOwnerProfile = {
 const baseProperty = {
   id: PROPERTY_ID,
   user_id: OWNER_ID,
-  city: "Annecy",
-  postal_code: "74000",
-  housing_type: "apartment",
-  size_sqm: 75,
-  has_garden: false,
-  has_balcony: true,
-  is_smoking_allowed: false,
+  // Schéma réel : enum property_type, enum property_environment
+  type: "apartment",
+  environment: "city_center",
+  rooms_count: 3,
+  bedrooms_count: 2,
+  car_required: false,
+  accessible: true,
   description: "Appartement T3 lumineux avec balcon vue lac.",
+  region_highlights: "Quartier calme, à 10 min à pied du lac d'Annecy.",
+  equipments: ["wifi", "washing_machine", "dishwasher"],
+  photos: [],
 };
 
 const basePets = [
@@ -86,8 +89,12 @@ const basePets = [
     species: "cat",
     age: 4,
     breed: "Persan",
-    description: "Très calme, aime les caresses derrière les oreilles.",
+    character: "Très calme, aime les caresses derrière les oreilles.",
     photo_url: null,
+    walk_duration: "none",
+    alone_duration: "long",
+    medication: null,
+    activity_level: "low",
   },
   {
     id: "pet-2",
@@ -96,8 +103,12 @@ const basePets = [
     species: "cat",
     age: 6,
     breed: "Persan",
-    description: "Plus indépendant, adore les fenêtres ensoleillées.",
+    character: "Plus indépendant, adore les fenêtres ensoleillées.",
     photo_url: null,
+    walk_duration: "none",
+    alone_duration: "long",
+    medication: null,
+    activity_level: "medium",
   },
 ];
 
@@ -107,11 +118,13 @@ const baseReviews = [
     sit_id: "n/a",
     reviewer_id: SITTER_ID,
     reviewee_id: OWNER_ID,
-    rating: 5,
+    // Schéma réel : `overall_rating` (int 1-5), pas `rating`
+    overall_rating: 5,
     comment: "Super accueil, animaux adorables, à recommander !",
     created_at: "2025-08-12T10:00:00Z",
     published: true,
-    type: "garde",
+    review_type: "garde",
+    moderation_status: "approved",
     reviewer: { first_name: "Lou", avatar_url: null },
   },
 ];
