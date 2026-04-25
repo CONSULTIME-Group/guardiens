@@ -169,7 +169,9 @@ test.describe("Realtime — focus reste logique après mise à jour exogène", (
       initialCount,
       "La vue doit contenir au moins un élément focusable dans <main> pour ce test."
     ).toBeGreaterThan(0);
-    await initialTarget.focus();
+    await pageA.bringToFront();
+    // En headless, click() pose un focus fiable là où locator.focus() peut être ignoré.
+    await initialTarget.click({ force: true, position: { x: 4, y: 4 } });
 
     const focusBefore = await describeActiveElement(pageA);
     expect(
