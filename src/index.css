@@ -121,6 +121,8 @@
 
     --destructive: 0 62% 50%;
     --destructive-foreground: 40 15% 90%;
+    /* En dark mode, le rouge clair contraste mieux sur fond sombre */
+    --destructive-text: 0 80% 70%;
 
     --border: 160 8% 20%;
     --input: 160 8% 20%;
