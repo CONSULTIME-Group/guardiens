@@ -3925,6 +3925,16 @@ export type Database = {
           sit_id: string
         }[]
       }
+      admin_get_recent_applications_activity: {
+        Args: { p_limit?: number }
+        Returns: {
+          created_at: string
+          id: string
+          sit_id: string
+          sit_title: string
+          sitter_first_name: string
+        }[]
+      }
       admin_get_sit_applications: {
         Args: { p_sit_id: string }
         Returns: {
