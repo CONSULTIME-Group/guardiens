@@ -84,6 +84,7 @@ const TestHeroGallery = lazy(() => import("./pages/TestHeroGallery"));
 const TestHeroDistribution = lazy(() => import("./pages/TestHeroDistribution"));
 const AdminHeroWeights = lazy(() => import("./pages/AdminHeroWeights"));
 const TestErrorBoundary = lazy(() => import("./pages/TestErrorBoundary"));
+const TestEmptyStateBg = lazy(() => import("./pages/TestEmptyStateBg"));
 const Unsubscribe = lazy(() => import("./pages/Unsubscribe"));
 const CityPage = lazy(() => import("./pages/CityPage"));
 const AdminCityPages = lazy(() => import("./pages/admin/AdminCityPages"));
