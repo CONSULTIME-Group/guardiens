@@ -762,12 +762,22 @@ test.describe("Accessibilité — /sits/:id", () => {
         // navigation et autres chrome globaux sont audités séparément — sortis
         // du périmètre de cette spec qui cible SitDetail.
         const root = document.querySelector("main") || document.body;
+        // Helper de filtrage chargé via addScriptTag (cf. contrast-skip-rules.ts).
+        const skipFn = (window as any).__shouldSkipContrast as
+          | ((el: Element) => { reason: string; detail: string } | null)
+          | undefined;
+
         root.querySelectorAll("*").forEach((el) => {
           if (seen.has(el)) return;
-          if (el.classList.contains("sr-only")) return;
-          // skip media / form controls (native controls : couleurs UA non maîtrisées)
+
+          // Règles d'exclusion centralisées (aria-hidden, sr-only, icônes,
+          // décoratifs, opt-out via data-skip-contrast, descendants <svg>, …).
+          if (skipFn && skipFn(el)) return;
+
+          // Garde-fou supplémentaire pour les contrôles natifs dont le rendu
+          // de couleur est piloté par l'UA (non maîtrisable depuis le CSS app).
           const tag = el.tagName.toLowerCase();
-          if (["script", "style", "svg", "path", "img", "video", "canvas", "iframe", "input", "select", "textarea", "option"].includes(tag)) return;
+          if (["img", "video", "canvas", "iframe", "input", "select", "textarea", "option"].includes(tag)) return;
 
           const text = hasDirectText(el);
           if (!text || text.length < 2) return;
