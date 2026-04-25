@@ -285,7 +285,7 @@ export const supabase: any = {
     async signInWithPassword() { return { data: null, error: null }; },
     async signUp() { return { data: null, error: null }; },
   },
-  channel() { return fakeChannel; },
+  channel(name: string) { return makeChannel(name); },
   removeChannel() { return Promise.resolve("ok"); },
   rpc() { return Promise.resolve({ data: null, error: null }); },
   functions: {
