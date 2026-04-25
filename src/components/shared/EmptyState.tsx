@@ -25,7 +25,7 @@ const PaintedIllustration = ({ src, alt }: { src: string; alt: string }) => (
     /* Tailles fluides : 9rem (144px) en très petit écran, 11rem (176px) sm,
        13rem (208px) md, 14rem (224px) lg+. max-w-[60vw] empêche tout
        débordement même sur 320px. block + mx-auto garantit le centrage. */
-    className="block mx-auto h-auto w-36 sm:w-44 md:w-52 lg:w-56 max-w-[60vw] mix-blend-multiply select-none pointer-events-none dark:mix-blend-screen dark:opacity-80"
+    className="block mx-auto h-auto w-36 sm:w-44 md:w-52 lg:w-56 max-w-[60vw] mix-blend-multiply select-none pointer-events-none dark:mix-blend-screen dark:opacity-80 motion-safe:animate-painted-reveal motion-reduce:opacity-100"
     draggable={false}
   />
 );
