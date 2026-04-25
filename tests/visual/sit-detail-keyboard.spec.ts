@@ -184,6 +184,11 @@ test.describe("Navigation clavier — /sits/:id", () => {
         await page.keyboard.press("Tab");
         const info = await snapshotFocus(page);
 
+        // Trace la séquence dans le focusLog partagé pour diagnostic à l'échec
+        currentFocusLog.push(
+          await snapshotFocusEntry(page, currentFocusLog.length + 1, `Tab #${i + 1}`)
+        );
+
         if (info.isBody) {
           consecutiveBodyHits++;
           // Si le focus revient 2x de suite sur body au milieu du parcours,
