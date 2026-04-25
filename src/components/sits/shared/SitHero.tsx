@@ -234,16 +234,33 @@ const SitHero = ({ photos, city, priority = false }: SitHeroProps) => {
               </>
             )}
 
-            {/* Image */}
-            <img
-              src={photos[photoIndex]}
-              alt={altFor(photoIndex)}
-              onClick={(e) => e.stopPropagation()}
-              onTouchStart={handleTouchStart}
-              onTouchEnd={handleTouchEnd}
-              className="max-h-[90vh] max-w-[95vw] object-contain select-none"
-              draggable={false}
-            />
+            {/* Image (ou placeholder si chargement échoué) */}
+            {brokenIndices.has(photoIndex) ? (
+              <div
+                onClick={(e) => e.stopPropagation()}
+                className="flex flex-col items-center justify-center gap-3 text-white/80 px-6"
+              >
+                <ImageOff className="h-12 w-12" aria-hidden="true" />
+                <p className="text-sm">Cette photo n'a pas pu être chargée</p>
+              </div>
+            ) : (
+              <img
+                src={safePhotos[photoIndex]}
+                alt={altFor(photoIndex)}
+                onClick={(e) => e.stopPropagation()}
+                onTouchStart={handleTouchStart}
+                onTouchEnd={handleTouchEnd}
+                onError={() =>
+                  setBrokenIndices((prev) => {
+                    const next = new Set(prev);
+                    next.add(photoIndex);
+                    return next;
+                  })
+                }
+                className="max-h-[90vh] max-w-[95vw] object-contain select-none"
+                draggable={false}
+              />
+            )}
           </div>,
           document.body
         )}
