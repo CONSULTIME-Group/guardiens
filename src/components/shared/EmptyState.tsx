@@ -56,11 +56,11 @@ const PaintedIllustration = ({
   );
 };
 
-const SleepingCat = () => <PaintedIllustration src={sleepingCatImg} alt="" fallbackKey="sleepingCat" />;
-const EmptyMailbox = () => <PaintedIllustration src={emptyMailboxImg} alt="" fallbackKey="emptyMailbox" />;
-const WalkingDog = () => <PaintedIllustration src={walkingDogImg} alt="" fallbackKey="walkingDog" />;
-const EmptyCalendar = () => <PaintedIllustration src={emptyCalendarImg} alt="" fallbackKey="emptyCalendar" />;
-const HeartBookmark = () => <PaintedIllustration src={heartBookmarkImg} alt="" fallbackKey="heartBookmark" />;
+const SleepingCat = () => <PaintedIllustration src={waitingBenchImg} alt="" fallbackKey="sleepingCat" />;
+const EmptyMailbox = () => <PaintedIllustration src={ruralMailboxImg} alt="" fallbackKey="emptyMailbox" />;
+const WalkingDog = () => <PaintedIllustration src={countryPathImg} alt="" fallbackKey="walkingDog" />;
+const EmptyCalendar = () => <PaintedIllustration src={openCalendarImg} alt="" fallbackKey="emptyCalendar" />;
+const HeartBookmark = () => <PaintedIllustration src={bouquetBookmarkImg} alt="" fallbackKey="heartBookmark" />;
 
 export const ILLUSTRATIONS = {
   sleepingCat: SleepingCat,
