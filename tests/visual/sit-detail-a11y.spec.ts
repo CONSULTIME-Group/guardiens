@@ -590,13 +590,7 @@ test.describe("Accessibilité — /sits/:id", () => {
           return "";
         };
 
-        type Offender = {
-          tag: string;
-          role: string | null;
-          html: string;
-          classes: string;
-        };
-        const offenders: Offender[] = [];
+        const offenders: any[] = [];
 
         // Sélectionne tous les contrôles interactifs
         const selector = [
@@ -617,11 +611,13 @@ test.describe("Accessibilité — /sits/:id", () => {
 
           const name = computeAccessibleName(el);
           if (!name) {
+            // @ts-ignore
+            const desc = (window as any).__describeEl(el);
             offenders.push({
-              tag: el.tagName.toLowerCase(),
-              role: el.getAttribute("role"),
-              html: (el as HTMLElement).outerHTML.slice(0, 180),
-              classes: ((el as HTMLElement).className || "").toString().slice(0, 80),
+              ...desc,
+              htmlSnippet: (el as HTMLElement).outerHTML.slice(0, 180),
+              hint:
+                "Ajoutez un aria-label, un texte enfant visible, ou un title.",
             });
           }
         });
@@ -631,7 +627,10 @@ test.describe("Accessibilité — /sits/:id", () => {
 
       expect(
         namelessControls,
-        `Boutons/liens sans nom accessible (${namelessControls.length}):\n${JSON.stringify(namelessControls, null, 2)}`
+        `Boutons/liens sans nom accessible.${fmt(
+          "Contrôles sans nom accessible",
+          namelessControls
+        )}`
       ).toEqual([]);
 
       // ---------- 3. Contraste WCAG AA des textes ----------
