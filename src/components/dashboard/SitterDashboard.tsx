@@ -158,9 +158,16 @@ const SitterDashboard = () => {
     </section>
   );
 
-  const StatusBlock = (
-    <section aria-labelledby="status-heading">
-      <h2 id="status-heading" className="sr-only">Mon statut</h2>
+  /**
+   * StatusBlock — accepte la prop `compact` pour s'empiler verticalement
+   * dans une sidebar étroite (xl). En mobile/tablette/lg, on conserve la
+   * version étalée (3 zones côte-à-côte ≥ md).
+   */
+  const buildStatusBlock = (compact: boolean) => (
+    <section aria-labelledby={compact ? "status-heading-side" : "status-heading"}>
+      <h2 id={compact ? "status-heading-side" : "status-heading"} className="sr-only">
+        Mon statut
+      </h2>
       <SitterStatusBar
         profileCompletion={profileCompletion}
         completedSits={completedSits}
@@ -169,12 +176,17 @@ const SitterDashboard = () => {
         badgeCount={badgeCount}
         totalApps={totalApps}
         reputation={reputation}
+        compact={compact}
       />
     </section>
   );
 
-  const BadgesBlock = (
-    <div className="px-4 sm:px-5 md:px-8 mb-6 md:mb-8">
+  /**
+   * BadgesBlock — px conditionnel : en sidebar (xl), pas de padding horizontal
+   * (le wrapper parent gère). En version pleine largeur, on garde la marge.
+   */
+  const buildBadgesBlock = (sidebar: boolean) => (
+    <div className={sidebar ? "mb-6" : "px-4 sm:px-5 md:px-8 mb-6 md:mb-8"}>
       <SitterBadgesSection groupedBadges={groupedBadges} condensed />
     </div>
   );
@@ -190,9 +202,14 @@ const SitterDashboard = () => {
     </div>
   );
 
-  const EmergencyBlock = (
-    <section aria-labelledby="emergency-heading" className="px-4 sm:px-5 md:px-8 mb-6 md:mb-8">
-      <h2 id="emergency-heading" className="sr-only">Éligibilité gardien d'urgence</h2>
+  const buildEmergencyBlock = (sidebar: boolean) => (
+    <section
+      aria-labelledby={sidebar ? "emergency-heading-side" : "emergency-heading"}
+      className={sidebar ? "mb-6" : "px-4 sm:px-5 md:px-8 mb-6 md:mb-8"}
+    >
+      <h2 id={sidebar ? "emergency-heading-side" : "emergency-heading"} className="sr-only">
+        Éligibilité gardien d'urgence
+      </h2>
       <EmergencyEligibility />
     </section>
   );
