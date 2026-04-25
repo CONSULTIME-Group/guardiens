@@ -248,6 +248,13 @@ const AnimalsTab = ({ pets, ownerFirstName }: AnimalsTabProps) => {
           </div>
         );
       })}
+
+      <PhotoLightbox
+        src={lightboxPhoto?.src ?? ""}
+        alt={lightboxPhoto?.alt ?? ""}
+        open={!!lightboxPhoto}
+        onClose={() => setLightboxPhoto(null)}
+      />
     </div>
   );
 };
