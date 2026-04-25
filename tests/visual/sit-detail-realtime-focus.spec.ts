@@ -155,15 +155,22 @@ test.describe("Realtime — focus reste logique après mise à jour exogène", (
     const bannerBefore = await pageA.locator('section[role="status"]').count();
     expect(bannerBefore, "Aucun bandeau status terminal ne doit être affiché initialement").toBe(0);
 
-    // Donne le focus à un élément focusable et stable de la page (le premier bouton
-    // ou lien rendu dans <main>). Tab depuis le body permet de simuler un user
-    // qui navigue au clavier.
-    await pageA.evaluate(() => {
-      const focusable = document.querySelector(
-        'main button, main a[href], main [role="button"]'
-      ) as HTMLElement | null;
-      focusable?.focus();
-    });
+    // Donne le focus à un élément focusable et stable de la page (premier
+    // bouton/lien rendu dans <main>). En headless, `HTMLElement.focus()` est
+    // souvent ignoré si la fenêtre n'a pas le focus système — on utilise donc
+    // le helper Playwright `locator.focus()` qui force le focus via CDP, puis
+    // on retombe sur un fallback `dispatchEvent('focus')` si la cible n'est
+    // pas trouvée par sélecteur direct.
+    const initialTarget = pageA
+      .locator('main button:not([disabled]), main a[href], main [role="button"]:not([aria-disabled="true"])')
+      .first();
+    const initialCount = await initialTarget.count();
+    expect(
+      initialCount,
+      "La vue doit contenir au moins un élément focusable dans <main> pour ce test."
+    ).toBeGreaterThan(0);
+    await initialTarget.focus();
+
     const focusBefore = await describeActiveElement(pageA);
     expect(
       focusBefore.isBody,
