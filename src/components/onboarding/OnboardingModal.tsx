@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import PostalCodeCityFields from "@/components/profile/PostalCodeCityFields";
 import ChipSelect from "@/components/profile/ChipSelect";
 import { compressImageFile } from "@/lib/compressImage";
+import { trackEvent } from "@/lib/analytics";
 
 type ActiveTab = "gardien" | "proprio";
 
@@ -128,15 +129,25 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
     load();
   }, [user, open]);
 
-  // Reset slide on open
+  // Reset slide on open + track onboarding_started une seule fois par session
+  const startedTrackedRef = useRef(false);
   useEffect(() => {
     if (open) {
       setSlide(0);
       setDontShowAgain(false);
       dontShowRef.current = false;
       setActiveTab(activeRole === "owner" ? "proprio" : "gardien");
+      if (!startedTrackedRef.current && user?.id) {
+        startedTrackedRef.current = true;
+        trackEvent("onboarding_started", {
+          source: "/onboarding",
+          metadata: { role: user.role || null, user_id: user.id },
+        });
+      }
+    } else {
+      startedTrackedRef.current = false;
     }
-  }, [open, activeRole]);
+  }, [open, activeRole, user?.id, user?.role]);
 
   const handleNextRef = useRef<() => Promise<void>>(async () => {});
 
@@ -265,6 +276,21 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
     if (slide === 2) {
       await saveCompetencesAndLifestyle();
     }
+    // Track step completion (étapes interactives uniquement: 0,1,2)
+    if (slide <= 2 && user?.id) {
+      try {
+        trackEvent("onboarding_step_completed", {
+          source: "/onboarding",
+          metadata: {
+            step: slide,
+            step_name: ["fields", "photo_bio", "skills_lifestyle"][slide],
+            role: user.role || null,
+            user_id: user.id,
+            completion: liveCompletion,
+          },
+        });
+      } catch {}
+    }
     if (slide < TOTAL_SLIDES - 1) setSlide((s) => s + 1);
   };
   // Keep ref in sync for keyboard handler
@@ -286,9 +312,20 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
       }
       await supabase.from("profiles").update(updates).eq("id", user.id);
       refreshProfile();
+      try {
+        trackEvent(dontShowRef.current ? "onboarding_completed" : "onboarding_dismissed", {
+          source: "/onboarding",
+          metadata: {
+            slide,
+            role: user.role || null,
+            user_id: user.id,
+            completion: liveCompletion,
+          },
+        });
+      } catch {}
     }
     onClose();
-  }, [user, onClose, canDismiss, refreshProfile, slide, bio, lifestyle, skillCategories, avatarUrl]);
+  }, [user, onClose, canDismiss, refreshProfile, slide, bio, lifestyle, skillCategories, avatarUrl, liveCompletion]);
 
   const completeOnboarding = async (destination: string) => {
     if (user) {
@@ -296,6 +333,17 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
       await supabase.rpc("calculate_profile_completion", { p_user_id: user.id });
       await supabase.from("profiles").update({ onboarding_completed: true }).eq("id", user.id);
       refreshProfile();
+      try {
+        trackEvent("onboarding_completed", {
+          source: "/onboarding",
+          metadata: {
+            destination,
+            role: user.role || null,
+            user_id: user.id,
+            completion: liveCompletion,
+          },
+        });
+      } catch {}
     }
     onClose();
     navigate(destination);
