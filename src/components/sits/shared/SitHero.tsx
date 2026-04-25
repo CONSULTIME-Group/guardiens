@@ -69,7 +69,23 @@ const SitHero = ({ photos, city, priority = false }: SitHeroProps) => {
     };
   }, [lightboxOpen, next, prev]);
 
-  if (total === 0) return null;
+  // État vide : aucune photo exploitable. On affiche un placeholder lisible
+  // plutôt que de retourner null (qui casserait silencieusement la mise en page).
+  if (total === 0) {
+    return (
+      <div className="mb-6">
+        <div
+          role="img"
+          aria-label={`Aucune photo disponible pour cette garde à ${cityLabel}`}
+          className="w-full h-72 md:h-96 rounded-xl bg-muted/50 border border-dashed border-border flex flex-col items-center justify-center text-muted-foreground gap-2"
+        >
+          <ImageOff className="h-10 w-10" aria-hidden="true" />
+          <p className="text-sm font-medium">Aucune photo pour le moment</p>
+          <p className="text-xs">Le propriétaire n'a pas encore ajouté de photos du logement ou des animaux.</p>
+        </div>
+      </div>
+    );
+  }
 
   const altFor = (i: number) =>
     `Photo ${i + 1} sur ${total} de la garde à ${cityLabel} (logement et animaux) — annonce Guardiens`;
