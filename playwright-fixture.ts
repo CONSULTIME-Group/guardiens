@@ -6,17 +6,18 @@
  * `test`/`expect`. En sandbox local (CI hors plateforme), il peut être absent —
  * on retombe alors sur le `test`/`expect` natif de `@playwright/test`.
  *
- * Ce fallback permet d'exécuter les tests visuels sans dépendre de l'outillage
- * spécifique à Lovable.
+ * Implémentation via `createRequire` car ce fichier est en ESM mais on a
+ * besoin de résolution synchrone (les `export` doivent exister à l'évaluation).
  */
-let exported: { test: any; expect: any };
+import { createRequire } from "node:module";
 
+const requireFn = createRequire(import.meta.url);
+
+let exported: { test: any; expect: any };
 try {
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  exported = require("lovable-agent-playwright-config/fixture");
+  exported = requireFn("lovable-agent-playwright-config/fixture");
 } catch {
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  exported = require("@playwright/test");
+  exported = requireFn("@playwright/test");
 }
 
 export const test = exported.test;
