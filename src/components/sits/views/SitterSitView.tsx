@@ -18,6 +18,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 import { trackEvent } from "@/lib/analytics";
 import { useAccessLevel } from "@/hooks/useAccessLevel";
 
@@ -30,6 +31,7 @@ import CancelSitModal from "@/components/sits/CancelSitModal";
 import SitDetailHeader from "./SitDetailHeader";
 import SitFooterReassurance from "./SitFooterReassurance";
 import SitterStatusBanner from "./SitterStatusBanner";
+import { useSitDerived } from "./useSitDerived";
 import AnimalsTab from "./tabs/AnimalsTab";
 import HousingTab from "./tabs/HousingTab";
 import ExpectationsTab from "./tabs/ExpectationsTab";
@@ -52,13 +54,8 @@ interface SitterSitViewProps {
   hasReviewedThisSit: boolean;
   sitterProfile: any;
   currentUserId: string;
-  activeRole: string | null | undefined;
-  userRole?: string | null;
-  userFirstName?: string | null;
+  activeRole: "owner" | "sitter";
 }
-
-const formatDate = (d: string | null) =>
-  d ? format(new Date(d), "d MMMM yyyy", { locale: fr }) : "";
 
 const SitterSitView = ({
   sit,
@@ -77,9 +74,10 @@ const SitterSitView = ({
   sitterProfile,
   currentUserId,
   activeRole,
-  userRole,
-  userFirstName,
 }: SitterSitViewProps) => {
+  // Lecture directe du profil — supprime les props `userRole`/`userFirstName`
+  // qui dupliquaient l'info disponible via useAuth.
+  const { user } = useAuth();
   const { level: accessLevel, profileCompletion, canApplyGuards } = useAccessLevel();
 
   const [applyOpen, setApplyOpen] = useState(false);
@@ -138,22 +136,17 @@ const SitterSitView = ({
     checkAccord();
   }, [sit.id, sit.status, currentUserId, owner, property]);
 
-  const avgRating =
-    reviews.length > 0
-      ? (reviews.reduce((s: number, r: any) => s + r.overall_rating, 0) / reviews.length).toFixed(1)
-      : null;
-
-  // Badges de matching
-  const badges: string[] = [];
-  if (sitterProfile && (activeRole === "sitter" || userRole === "sitter" || userRole === "both")) {
-    const sitterAnimals: string[] = sitterProfile.animal_types || [];
-    const petSpecies = pets.map((p: any) => p.species);
-    const matchAnimal = petSpecies.some((s: string) => sitterAnimals.includes(s));
-    if (matchAnimal) badges.push("Correspond à votre expérience animaux");
-    if (sitterProfile.geographic_radius && owner?.city && userFirstName)
-      badges.push("Proche de chez vous");
-  }
-
+  // Dérivés partagés (avgRating + formatDate + badges de matching).
+  const { avgRating, formatDate, matchingBadges: badges } = useSitDerived({
+    reviews,
+    pets,
+    sitterProfile,
+    owner,
+    context: "sitter",
+    activeRole,
+    userRole: user?.role ?? null,
+    userFirstName: user?.firstName ?? null,
+  });
   return (
     <>
       {/* Bandeau d'état terminal — affiché en premier pour que le gardien

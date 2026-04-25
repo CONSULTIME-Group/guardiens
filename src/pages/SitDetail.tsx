@@ -181,8 +181,6 @@ const SitDetail = () => {
           sitterProfile={sitterProfile}
           currentUserId={user?.id || ""}
           activeRole={activeRole}
-          userRole={(user as any)?.role}
-          userFirstName={(user as any)?.firstName}
         />
       )}
     </div>

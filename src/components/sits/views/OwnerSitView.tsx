@@ -12,8 +12,8 @@
  * - Bloc "Gérer cette garde" (OwnerSitManagement) + modal d'annulation
  */
 import { useState, useEffect, useCallback, useRef } from "react";
+import { Calendar, MapPin, Send, Star, PawPrint, Home, ClipboardList } from "lucide-react";
 import { Link } from "react-router-dom";
-import { Calendar, MapPin, Send, Plus, Minus, Star, PawPrint, Home, ClipboardList } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -26,12 +26,9 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { format } from "date-fns";
-import { fr } from "date-fns/locale";
 
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { trackEvent } from "@/lib/analytics";
 import { formatSitPeriod } from "@/lib/dateRange";
 
 import EmergencyAlertBanner from "@/components/sits/EmergencyAlertBanner";
@@ -44,6 +41,9 @@ import OwnerSitManagement from "@/components/sits/shared/OwnerSitManagement";
 
 import SitDetailHeader from "./SitDetailHeader";
 import SitFooterReassurance from "./SitFooterReassurance";
+import ReopenApplicationsCard from "./ReopenApplicationsCard";
+import SitOverridesEditor from "./SitOverridesEditor";
+import { useSitDerived } from "./useSitDerived";
 import AnimalsTab from "./tabs/AnimalsTab";
 import HousingTab from "./tabs/HousingTab";
 import ExpectationsTab from "./tabs/ExpectationsTab";
@@ -67,8 +67,6 @@ interface OwnerSitViewProps {
   currentUserId: string;
 }
 
-const formatDate = (d: string | null) =>
-  d ? format(new Date(d), "d MMMM yyyy", { locale: fr }) : "";
 
 const OwnerSitView = ({
   sit,
@@ -90,7 +88,6 @@ const OwnerSitView = ({
   const [publishing, setPublishing] = useState(false);
   const [publishConfirmOpen, setPublishConfirmOpen] = useState(false);
   const [cancelOpen, setCancelOpen] = useState(false);
-  const [reopenCount, setReopenCount] = useState(3);
   const [logementOverride, setLogementOverride] = useState(initialLogementOverride);
   const [animauxOverride, setAnimauxOverride] = useState(initialAnimauxOverride);
   const [internalAppCount, setInternalAppCount] = useState(appCount);
@@ -155,10 +152,12 @@ const OwnerSitView = ({
   //   (la zone que l'owner remplit le plus souvent avant publication).
   // - autres statuts : on garde "Candidatures" comme accueil naturel.
   const defaultTab = isDraft ? "housing" : "candidatures";
-  const avgRating =
-    reviews.length > 0
-      ? (reviews.reduce((s: number, r: any) => s + r.overall_rating, 0) / reviews.length).toFixed(1)
-      : null;
+
+  // Dérivés partagés (avgRating + formatDate) — voir useSitDerived.
+  const { avgRating, formatDate } = useSitDerived({
+    reviews,
+    context: "owner",
+  });
 
   const handlePublish = async () => {
     if (!isDraft || publishing) return;
@@ -353,65 +352,11 @@ const OwnerSitView = ({
         {/* Candidatures tab (owner only) */}
         <TabsContent value="candidatures" className="mt-6 space-y-4">
           {!sit.accepting_applications && (
-            <div className="rounded-xl border border-primary/20 bg-primary/5 p-4 space-y-3">
-              <div>
-                <p className="text-sm font-semibold text-foreground">Candidatures closes</p>
-                <p className="text-xs text-muted-foreground mt-0.5">
-                  {sit.max_applications
-                    ? `Le maximum de ${sit.max_applications} candidature${sit.max_applications > 1 ? "s" : ""} a été atteint.`
-                    : "Vous avez fermé les candidatures."}
-                </p>
-              </div>
-              <div className="flex items-center gap-2 flex-wrap">
-                <div className="flex items-center gap-1">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="icon"
-                    className="h-8 w-8"
-                    onClick={() => setReopenCount((c) => Math.max(1, c - 1))}
-                    disabled={reopenCount <= 1}
-                  >
-                    <Minus className="h-3.5 w-3.5" />
-                  </Button>
-                  <span className="w-8 text-center text-sm font-medium">{reopenCount}</span>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="icon"
-                    className="h-8 w-8"
-                    onClick={() => setReopenCount((c) => Math.min(20, c + 1))}
-                    disabled={reopenCount >= 20}
-                  >
-                    <Plus className="h-3.5 w-3.5" />
-                  </Button>
-                </div>
-                <Button
-                  size="sm"
-                  onClick={async () => {
-                    const newMax = (sit.max_applications || internalAppCount) + reopenCount;
-                    await supabase
-                      .from("sits")
-                      .update({
-                        accepting_applications: true,
-                        max_applications: newMax,
-                      } as any)
-                      .eq("id", sit.id);
-                    setSit({
-                      ...sit,
-                      accepting_applications: true,
-                      max_applications: newMax,
-                    });
-                    toast({
-                      title: "Candidatures rouvertes",
-                      description: `${reopenCount} place${reopenCount > 1 ? "s" : ""} supplémentaire${reopenCount > 1 ? "s" : ""} ouverte${reopenCount > 1 ? "s" : ""}.`,
-                    });
-                  }}
-                >
-                  Ouvrir {reopenCount} candidature{reopenCount > 1 ? "s" : ""} de plus
-                </Button>
-              </div>
-            </div>
+            <ReopenApplicationsCard
+              sit={sit}
+              setSit={setSit}
+              internalAppCount={internalAppCount}
+            />
           )}
           {sit.accepting_applications && sit.max_applications && (
             <p className="text-xs text-muted-foreground">
@@ -450,46 +395,13 @@ const OwnerSitView = ({
             </Link>
           </div>
 
-          <div className="bg-card rounded-xl border border-border p-5">
-            <h3 className="text-sm font-medium text-foreground mb-1">
-              Spécifique à cette garde (optionnel)
-            </h3>
-            <p className="text-xs text-muted-foreground mb-3">
-              Ces informations s'appliquent uniquement à cette garde et complètent votre profil.
-            </p>
-            <div className="space-y-4">
-              <div>
-                <label className="text-sm font-medium text-foreground block mb-1">
-                  Précisions sur le logement
-                </label>
-                <textarea
-                  rows={3}
-                  className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                  placeholder="Ex : La chambre d'amis sera fermée, accès jardin uniquement le matin..."
-                  value={logementOverride}
-                  onChange={(e) => {
-                    setLogementOverride(e.target.value);
-                    saveOverride("logement_override", e.target.value);
-                  }}
-                />
-              </div>
-              <div>
-                <label className="text-sm font-medium text-foreground block mb-1">
-                  Précisions sur les animaux
-                </label>
-                <textarea
-                  rows={3}
-                  className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                  placeholder="Ex : Rex aura besoin d'une promenade supplémentaire le soir pendant cette période..."
-                  value={animauxOverride}
-                  onChange={(e) => {
-                    setAnimauxOverride(e.target.value);
-                    saveOverride("animaux_override", e.target.value);
-                  }}
-                />
-              </div>
-            </div>
-          </div>
+          <SitOverridesEditor
+            logementOverride={logementOverride}
+            setLogementOverride={setLogementOverride}
+            animauxOverride={animauxOverride}
+            setAnimauxOverride={setAnimauxOverride}
+            saveOverride={saveOverride}
+          />
 
           <HousingTab property={property} owner={owner} coords={coords} />
         </TabsContent>
