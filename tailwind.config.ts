@@ -108,6 +108,10 @@ export default {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
         "fade-in": "fade-in 0.5s ease-out forwards",
+        /* Easing organique type "aquarelle qui apparaît" — décélération
+           naturelle proche d'un cubic-bezier d'illustrateur. */
+        "soft-fade-in": "soft-fade-in 0.7s cubic-bezier(0.22, 0.61, 0.36, 1) forwards",
+        "painted-reveal": "painted-reveal 0.9s cubic-bezier(0.22, 0.61, 0.36, 1) forwards",
         "collapsible-down": "collapsible-down 0.3s ease-out",
         "collapsible-up": "collapsible-up 0.3s ease-out",
       },
