@@ -28,6 +28,7 @@
 
 import { test, expect } from "../../playwright-fixture";
 import { spawn, type ChildProcess } from "node:child_process";
+import { CONTRAST_SKIP_SCRIPT, CONTRAST_SKIP_RULES } from "./contrast-skip-rules";
 
 const PORT = 8767; // distinct des autres specs visuelles
 const BASE_URL = `http://localhost:${PORT}`;
