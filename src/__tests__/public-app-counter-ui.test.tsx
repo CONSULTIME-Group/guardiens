@@ -34,18 +34,13 @@ function PublicAppCounter({ sitId, maxApplications }: { sitId: string; maxApplic
   const [pendingAppCount, setPendingAppCount] = useState<number>(0);
 
   useEffect(() => {
-    let cancelled = false;
     (async () => {
       const { supabase } = await import("@/integrations/supabase/client");
       const { data } = await supabase.rpc("get_sit_application_counts", { p_sit_id: sitId });
-      if (cancelled) return;
       const row = data?.[0];
       setAppCount(row?.app_count ?? 0);
       setPendingAppCount(row?.pending_app_count ?? 0);
     })();
-    return () => {
-      cancelled = true;
-    };
   }, [sitId]);
 
   // Rendu identique à SitterSitView.tsx (lignes 236-241)
