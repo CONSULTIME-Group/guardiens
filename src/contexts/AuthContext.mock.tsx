@@ -66,7 +66,11 @@ function buildProfile(scn: Scenario): Profile {
 const noop = async () => {};
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const scn = getActiveScenario();
+  // CRITIQUE : on capture le scénario UNE SEULE FOIS au mount via useState
+  // (lazy initializer). Sans ça, dès qu'un `<Navigate>` change l'URL en `/login`,
+  // la query string `?scenario=...` disparaît, getActiveScenario() retourne null,
+  // user devient null, et on boucle infiniment sur la redirection.
+  const [scn] = React.useState<Scenario | null>(() => getActiveScenario());
   const user = scn ? buildProfile(scn) : null;
   const activeRole: ActiveRole = scn?.activeRole ?? "sitter";
 
