@@ -16,6 +16,20 @@ export default defineConfig(({ mode }) => ({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
+      // En mode "visual-test" on remplace le client Supabase et le contexte
+      // d'auth par leurs versions mockées (voir tests/visual/).
+      ...(mode === "visual-test"
+        ? {
+            "@/integrations/supabase/client": path.resolve(
+              __dirname,
+              "./src/integrations/supabase/client.mock.ts"
+            ),
+            "@/contexts/AuthContext": path.resolve(
+              __dirname,
+              "./src/contexts/AuthContext.mock.tsx"
+            ),
+          }
+        : {}),
     },
     dedupe: ["react", "react-dom", "react/jsx-runtime", "react/jsx-dev-runtime"],
   },
