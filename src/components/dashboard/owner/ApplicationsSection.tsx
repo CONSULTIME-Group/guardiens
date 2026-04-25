@@ -140,7 +140,7 @@ const ApplicationsSection = memo(({ recentApps, sitterProfiles, sitterBadges, lo
         </div>
       )}
       {loading ? (
-        <Accordion type="single" collapsible className="mt-4">
+        <Accordion type="single" collapsible defaultValue="read-loading" className="mt-4">
           <AccordionItem value="read-loading" className="border rounded-xl">
             <AccordionTrigger
               disabled
@@ -154,6 +154,13 @@ const ApplicationsSection = memo(({ recentApps, sitterProfiles, sitterBadges, lo
                 <Skeleton className="inline-block h-3 w-8 align-middle" />
               </span>
             </AccordionTrigger>
+            <AccordionContent className="px-4 pb-4">
+              <div className="space-y-3" role="status" aria-busy="true" aria-label="Chargement des candidatures déjà consultées">
+                <AppCardSkeleton />
+                <AppCardSkeleton />
+                <span className="sr-only">Chargement des candidatures déjà consultées…</span>
+              </div>
+            </AccordionContent>
           </AccordionItem>
         </Accordion>
       ) : read.length > 0 ? (
