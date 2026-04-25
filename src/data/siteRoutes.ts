@@ -181,6 +181,8 @@ export const staticRoutes: SiteRoute[] = [
     h1: "Recherche",
     sitemapPriority: "0.7",
     changeFreq: "daily",
+    // Outil interne dynamique : noindex côté composant + Disallow + hors sitemap.
+    index: false,
   },
   {
     path: "/contact",
@@ -205,6 +207,8 @@ export const staticRoutes: SiteRoute[] = [
     h1: "Connexion",
     sitemapPriority: "0.4",
     changeFreq: "monthly",
+    // Page d'auth : pas de valeur SEO + risque de duplication. Disallow + hors sitemap.
+    index: false,
   },
   {
     path: "/inscription",
