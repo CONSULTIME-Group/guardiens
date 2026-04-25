@@ -7,6 +7,11 @@ import { Button } from "@/components/ui/button";
 import ShareButtons from "@/components/sits/ShareButtons";
 import { capitalize, SPECIES_LABEL } from "./helpers";
 import type { SitRow, Pet } from "./types";
+import {
+  ENV_LABELS,
+  TYPE_LABELS,
+  getSitStatusConfig,
+} from "@/components/sits/shared/sitConstants";
 
 interface MonAnnonceCardProps {
   sits: SitRow[];
@@ -16,22 +21,6 @@ interface MonAnnonceCardProps {
   pendingAppCount: number;
   coverPhoto?: string | null;
 }
-
-const TYPE_LABELS: Record<string, string> = {
-  apartment: "Appartement", house: "Maison", farm: "Ferme", chalet: "Chalet", other: "Autre",
-};
-const ENV_LABELS: Record<string, string> = {
-  city_center: "Centre-ville", suburban: "Périurbain", countryside: "Campagne",
-  mountain: "Montagne", seaside: "Bord de mer", forest: "Forêt",
-};
-
-const STATUS_CONFIG: Record<string, { label: string; className: string }> = {
-  published: { label: "En ligne", className: "bg-primary/10 text-primary" },
-  confirmed: { label: "Confirmée", className: "bg-primary/15 text-primary" },
-  in_progress: { label: "En cours", className: "bg-accent text-accent-foreground" },
-  completed: { label: "Terminée", className: "bg-muted text-muted-foreground" },
-  cancelled: { label: "Annulée", className: "bg-destructive/10 text-destructive" },
-};
 
 const MonAnnonceCard = memo(({ sits, pets, propertyType, propertyEnvironment, pendingAppCount, coverPhoto }: MonAnnonceCardProps) => {
   const navigate = useNavigate();
