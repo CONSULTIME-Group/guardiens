@@ -23,6 +23,20 @@
 import { test, expect } from "../../playwright-fixture";
 import { spawn, type ChildProcess } from "node:child_process";
 import { SCENARIOS, type ScenarioId } from "./fixtures";
+import {
+  captureFailureArtifacts,
+  snapshotFocusEntry,
+  type FocusLogEntry,
+} from "./failure-capture";
+
+/**
+ * focusLog du test EN COURS, partagé entre le corps du test et le afterEach.
+ * Réinitialisé au début de chaque test (par scénario) pour éviter les fuites
+ * d'un test à l'autre quand on tourne en série.
+ */
+let currentFocusLog: FocusLogEntry[] = [];
+let currentScenario: string = "unknown";
+let currentPhase: string = "init";
 
 const PORT = 8767;
 const BASE_URL = `http://localhost:${PORT}`;
