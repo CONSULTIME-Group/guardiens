@@ -477,7 +477,7 @@ const Sits = () => {
           )}
           {activeTab === "completed" && (
             <EmptyState
-              illustration="openCalendar"
+              illustration="emptyCalendar"
               title="Aucune garde passée"
               description={activeRole === "owner"
                 ? "Vos gardes terminées s'archiveront ici, avec leurs avis."
