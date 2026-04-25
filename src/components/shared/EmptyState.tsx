@@ -13,6 +13,7 @@ import ruralMailboxImg from "@/assets/empty-states/v2/rural-mailbox.webp";
 import countryPathImg from "@/assets/empty-states/v2/country-path.webp";
 import openCalendarImg from "@/assets/empty-states/v2/open-calendar.webp";
 import bouquetBookmarkImg from "@/assets/empty-states/v2/bouquet-bookmark.webp";
+import sitterReadyImg from "@/assets/empty-states/v2/sitter-ready.webp";
 
 import { SVG_FALLBACKS } from "./empty-state-fallbacks";
 
@@ -61,6 +62,7 @@ const EmptyMailbox = () => <PaintedIllustration src={ruralMailboxImg} alt="" fal
 const WalkingDog = () => <PaintedIllustration src={countryPathImg} alt="" fallbackKey="walkingDog" />;
 const EmptyCalendar = () => <PaintedIllustration src={openCalendarImg} alt="" fallbackKey="emptyCalendar" />;
 const HeartBookmark = () => <PaintedIllustration src={bouquetBookmarkImg} alt="" fallbackKey="heartBookmark" />;
+const SitterReady = () => <PaintedIllustration src={sitterReadyImg} alt="" fallbackKey="sitterReady" />;
 
 export const ILLUSTRATIONS = {
   sleepingCat: SleepingCat,
@@ -68,6 +70,7 @@ export const ILLUSTRATIONS = {
   walkingDog: WalkingDog,
   emptyCalendar: EmptyCalendar,
   heartBookmark: HeartBookmark,
+  sitterReady: SitterReady,
 } as const;
 
 export type IllustrationKey = keyof typeof ILLUSTRATIONS;
