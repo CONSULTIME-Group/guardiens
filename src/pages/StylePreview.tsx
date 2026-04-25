@@ -3,45 +3,50 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 
-import style1 from "@/assets/style-previews/style-1-line.png";
-import style2 from "@/assets/style-previews/style-2-wash.png";
-import style3 from "@/assets/style-previews/style-3-pencil.png";
-import style4 from "@/assets/style-previews/style-4-flat.png";
+import scene1 from "@/assets/style-previews-v2/scene-1-bench.png";
+import scene2 from "@/assets/style-previews-v2/scene-2-door.png";
+import scene3 from "@/assets/style-previews-v2/scene-3-suitcase.png";
+import scene4 from "@/assets/style-previews-v2/scene-4-letter.png";
 
 /**
- * Page interne (non listée) pour comparer 4 propositions de style
- * d'illustrations pour les états vides. Chaque carte simule un état
- * vide réel avec titre + description, pour juger l'intégration.
+ * Page interne (non listée) — comparatif de 4 propositions de style
+ * d'illustrations narratives à l'aquarelle pour les états vides.
+ * Inspiration : aquarelles éditoriales de campagne française, palette
+ * douce, fond crème qui se fond dans la page.
  */
 
 const STYLES = [
   {
     id: 1,
-    src: style1,
-    name: "Trait continu",
-    pitch: "Une seule ligne fine, vert sapin. Très éditorial, presque calligraphique.",
-    mood: "Élégant · Discret · Moderne",
+    src: scene1,
+    name: "Le banc qui attend",
+    pitch:
+      "Banc en bois, laisse pendue, gamelle vide, lavande. Évoque l'attente paisible du compagnon.",
+    mood: "Mélancolique · Doux · Provençal",
   },
   {
     id: 2,
-    src: style2,
-    name: "Aquarelle diluée",
-    pitch: "Lavis très dilué, sans contour, qui se fond dans le crème. Presque un souffle.",
-    mood: "Onirique · Doux · Atmosphérique",
+    src: scene2,
+    name: "La porte qui s'ouvre",
+    pitch:
+      "Porte en bois entrouverte, paillasson welcome, écuelle, roses grimpantes. Évoque l'accueil.",
+    mood: "Chaleureux · Hospitalier · Romantique",
   },
   {
     id: 3,
-    src: style3,
-    name: "Crayon doux",
-    pitch: "Esquisse au crayon de couleur, texture papier, ton terre. Carnet d'artiste.",
-    mood: "Artisanal · Chaleureux · Intime",
+    src: scene3,
+    name: "La valise prête",
+    pitch:
+      "Valise vintage devant une fenêtre ouverte sur la campagne, clocher au loin. Évoque le départ.",
+    mood: "Contemplatif · Voyage · Nostalgique",
   },
   {
     id: 4,
-    src: style4,
-    name: "Aplats organiques",
-    pitch: "Formes simples bicolores, sans contour. Style spot illustration éditoriale.",
-    mood: "Graphique · Apaisé · Contemporain",
+    src: scene4,
+    name: "Le mot manuscrit",
+    pitch:
+      "Lettre, brin de lavande, tasse de thé, pot d'herbes sur table en bois. Évoque la correspondance.",
+    mood: "Intime · Artisanal · Épistolaire",
   },
 ];
 
@@ -57,10 +62,10 @@ const StylePreview = () => {
             </Button>
           </Link>
           <h1 className="font-heading text-3xl md:text-4xl font-semibold text-foreground">
-            4 propositions de style
+            4 propositions — aquarelles narratives
           </h1>
           <p className="text-muted-foreground max-w-2xl">
-            Chaque carte simule un état vide réel pour juger l'intégration à la page. Indiquez-moi le numéro qui vous parle le plus — je l'appliquerai partout.
+            Inspiration : aquarelles éditoriales de campagne française, palette douce, fond crème qui se fond dans la page. Chaque carte simule un état vide réel pour juger l'intégration.
           </p>
         </div>
 
@@ -86,7 +91,7 @@ const StylePreview = () => {
                   loading="lazy"
                   width={1024}
                   height={1024}
-                  className="block mx-auto h-auto w-40 sm:w-48 mix-blend-multiply select-none pointer-events-none"
+                  className="block mx-auto h-auto w-48 sm:w-56 mix-blend-multiply select-none pointer-events-none"
                   draggable={false}
                 />
                 <div className="space-y-2">
@@ -113,7 +118,10 @@ const StylePreview = () => {
         <div className="bg-primary/5 border border-primary/20 rounded-lg p-5 text-center">
           <p className="text-sm text-foreground">
             Dites-moi simplement <strong>« style 1 »</strong>, <strong>« style 2 »</strong>,{" "}
-            <strong>« style 3 »</strong> ou <strong>« style 4 »</strong> — je décline le choix sur les 5 illustrations (chat, chien, boîte, calendrier, marque-page).
+            <strong>« style 3 »</strong> ou <strong>« style 4 »</strong> — je décline le style choisi sur les 5 illustrations (messages, candidatures, gardes, favoris, calendrier).
+          </p>
+          <p className="text-xs text-muted-foreground mt-2">
+            Vous pouvez aussi mixer (ex. « style 1 pour la palette, style 4 pour la composition »).
           </p>
         </div>
       </div>
