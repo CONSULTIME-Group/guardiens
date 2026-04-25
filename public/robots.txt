@@ -22,7 +22,7 @@ Disallow: /settings
 Disallow: /forgot-password
 Disallow: /reset-password
 Disallow: /login
-Disallow: /inscription
+# /inscription : page publique indexable (conversion clé)
 Disallow: /unsubscribe
 Disallow: /test-accord
 Disallow: /auth/

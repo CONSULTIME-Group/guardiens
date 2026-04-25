@@ -279,7 +279,8 @@ const Register = () => {
 
   return (
     <div className="min-h-screen flex bg-background">
-      <Helmet><meta name="robots" content="noindex, nofollow" /></Helmet>
+      {/* /inscription est une page de conversion clé : indexable (cohérent avec robots.txt + sitemap.xml). */}
+      <Helmet><meta name="robots" content="index, follow" /></Helmet>
 
       {/* Left panel */}
       <div className="hidden lg:flex lg:w-1/2 bg-accent items-center justify-center p-12 relative overflow-hidden">
