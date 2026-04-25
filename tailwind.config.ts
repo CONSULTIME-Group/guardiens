@@ -85,6 +85,16 @@ export default {
           from: { opacity: "0", transform: "translateY(10px)" },
           to: { opacity: "1", transform: "translateY(0)" },
         },
+        /* Variantes douces pour les états vides — fondu lent sans translation
+           brutale, pour préserver le rendu peinture des illustrations gouache. */
+        "soft-fade-in": {
+          from: { opacity: "0", transform: "translateY(4px)" },
+          to: { opacity: "1", transform: "translateY(0)" },
+        },
+        "painted-reveal": {
+          from: { opacity: "0", transform: "scale(0.985)" },
+          to: { opacity: "1", transform: "scale(1)" },
+        },
         "collapsible-down": {
           from: { height: "0", opacity: "0" },
           to: { height: "var(--radix-collapsible-content-height)", opacity: "1" },
@@ -98,6 +108,10 @@ export default {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
         "fade-in": "fade-in 0.5s ease-out forwards",
+        /* Easing organique type "aquarelle qui apparaît" — décélération
+           naturelle proche d'un cubic-bezier d'illustrateur. */
+        "soft-fade-in": "soft-fade-in 0.7s cubic-bezier(0.22, 0.61, 0.36, 1) forwards",
+        "painted-reveal": "painted-reveal 0.9s cubic-bezier(0.22, 0.61, 0.36, 1) forwards",
         "collapsible-down": "collapsible-down 0.3s ease-out",
         "collapsible-up": "collapsible-up 0.3s ease-out",
       },
