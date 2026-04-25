@@ -17,7 +17,8 @@ import { describe, it, expect } from "vitest";
 import { readFileSync, readdirSync, statSync } from "node:fs";
 import { join, relative } from "node:path";
 
-const ROOT = join(__dirname, "../../..");
+// process.cwd() = racine projet sous Vitest.
+const ROOT = process.cwd();
 const SRC = join(ROOT, "src");
 
 /** Fichiers EXEMPTÉS — ce sont les SEULS endroits autorisés à parler
