@@ -449,15 +449,16 @@ const SearchSitter = () => {
   };
 
   const searchSits = async (searchCoords: { lat: number; lng: number } | null) => {
-    // Show published + assigned (confirmed/in_progress) so members see "Gardiennage attribué" cards
-    // Completed sits are excluded — they belong to history, not the public search
+    // Show published + assigned (confirmed/in_progress) + completed so members see history
+    // and the page feels lived-in. Completed/assigned cards are rendered greyed-out and
+    // non-clickable so they only add volume without polluting actionable results.
     // `profiles` table has restrictive RLS (owner-only) so its embedded join returns null
     // for other owners' sits. We join `properties` (RLS now allows authenticated read for
     // active sits) and fetch owner data separately from the safe `public_profiles` view.
     let query = supabase
       .from("sits")
       .select("*, property:properties!sits_property_id_fkey(type, environment, photos)")
-      .in("status", ["published", "confirmed", "in_progress"])
+      .in("status", ["published", "confirmed", "in_progress", "completed"])
       .order("created_at", { ascending: false });
     if (startDate) query = query.gte("end_date", startDate);
     if (endDate) query = query.lte("start_date", endDate);
