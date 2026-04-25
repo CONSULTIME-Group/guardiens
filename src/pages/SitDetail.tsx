@@ -89,20 +89,12 @@ const SitDetail = () => {
         setPets(petsData || []);
       }
 
-      const [allAppsRes, pendingAppsRes] = await Promise.all([
-        supabase
-          .from("applications")
-          .select("id", { count: "exact", head: true })
-          .eq("sit_id", id!)
-          .not("status", "in", "(rejected,cancelled)"),
-        supabase
-          .from("applications")
-          .select("id", { count: "exact", head: true })
-          .eq("sit_id", id!)
-          .in("status", ["pending", "viewed", "discussing"]),
-      ]);
-      setAppCount(allAppsRes.count || 0);
-      setPendingAppCount(pendingAppsRes.count || 0);
+      const { data: countRows } = await supabase.rpc("get_sit_application_counts", {
+        p_sit_id: id!,
+      });
+      const counts = countRows?.[0];
+      setAppCount(counts?.app_count || 0);
+      setPendingAppCount(counts?.pending_app_count || 0);
 
       if (user) {
         const [spRes, appRes, reviewRes] = await Promise.all([
