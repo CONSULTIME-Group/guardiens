@@ -41,6 +41,48 @@ interface TopPage {
   views: number;
 }
 
+// Normalise une URL pathname pour regrouper les chemins dynamiques.
+// Ex: /gardiens/<uuid> → /gardiens/:id, /guides/lyon → /guides/:slug
+function normalizeSource(raw: string | null | undefined): string | null {
+  if (!raw) return null;
+  let p = raw.trim();
+  if (!p) return null;
+  // Retire querystring/fragment au cas où
+  p = p.split("?")[0].split("#")[0];
+  // Retire trailing slash sauf racine
+  if (p.length > 1 && p.endsWith("/")) p = p.slice(0, -1);
+
+  const uuidRe = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i;
+
+  // Patterns avec ID dynamique
+  const dynamicPatterns: Array<[RegExp, string]> = [
+    [/^\/gardiens\/.+$/, "/gardiens/:id"],
+    [/^\/proprietaires?\/.+$/, "/proprietaires/:id"],
+    [/^\/profil\/.+$/, "/profil/:id"],
+    [/^\/annonces\/.+$/, "/annonces/:id"],
+    [/^\/sits\/.+$/, "/sits/:id"],
+    [/^\/missions\/.+$/, "/missions/:id"],
+    [/^\/petites-missions\/.+$/, "/petites-missions/:id"],
+    [/^\/messages\/.+$/, "/messages/:id"],
+    [/^\/conversation\/.+$/, "/conversation/:id"],
+    [/^\/guides\/.+$/, "/guides/:slug"],
+    [/^\/actualites\/.+$/, "/actualites/:slug"],
+    [/^\/articles\/.+$/, "/articles/:slug"],
+    [/^\/villes?\/.+$/, "/villes/:slug"],
+    [/^\/departements?\/.+$/, "/departements/:slug"],
+    [/^\/avis\/.+$/, "/avis/:id"],
+    [/^\/admin\/[^/]+\/.+$/, (() => "")[0] as never], // placeholder, géré ci-dessous
+  ];
+  for (const [re, repl] of dynamicPatterns) {
+    if (typeof repl === "string" && re.test(p)) return repl;
+  }
+  // UUID résiduel quelque part dans le path
+  if (uuidRe.test(p)) {
+    return p.replace(uuidRe, ":id");
+  }
+  return p;
+}
+
 const AdminAnalytics = () => {
   const [range, setRange] = useState<Range>(7);
   const [roleFilter, setRoleFilter] = useState<RoleFilter>("all");
