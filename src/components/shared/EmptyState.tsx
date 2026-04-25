@@ -51,17 +51,19 @@ const PaintedIllustration = ({
   const wrapperClass =
     "relative block mx-auto h-auto w-[12.6rem] sm:w-[15.4rem] md:w-[18.2rem] lg:w-[19.6rem] max-w-[84vw] aspect-square select-none pointer-events-none motion-safe:animate-painted-reveal motion-reduce:opacity-100";
 
-  // Masque radial : opaque jusqu'à 50 %, dégrade vers transparent à 92 %.
-  // Stops intermédiaires (65 % @ 0.85, 78 % @ 0.45) lissent la transition
-  // pour qu'aucune bande ne soit perceptible, même sur fond très contrasté.
+  // Masque radial — agressivité calibrée pour effacer toute trace du fond
+  // crème de l'aquarelle, même sur conteneur très contrasté (carte blanche
+  // pure, gris-bleu). On démarre la dégradation dès 35 % et on atteint la
+  // transparence totale à 80 % du rayon.
   const maskImage =
     "radial-gradient(ellipse at center, " +
     "rgba(0,0,0,1) 0%, " +
-    "rgba(0,0,0,1) 50%, " +
-    "rgba(0,0,0,0.85) 65%, " +
-    "rgba(0,0,0,0.45) 78%, " +
-    "rgba(0,0,0,0.12) 88%, " +
-    "rgba(0,0,0,0) 95%)";
+    "rgba(0,0,0,1) 35%, " +
+    "rgba(0,0,0,0.92) 50%, " +
+    "rgba(0,0,0,0.7) 62%, " +
+    "rgba(0,0,0,0.4) 72%, " +
+    "rgba(0,0,0,0.15) 80%, " +
+    "rgba(0,0,0,0) 88%)";
 
   const maskStyle: React.CSSProperties = {
     WebkitMaskImage: maskImage,
@@ -72,10 +74,13 @@ const PaintedIllustration = ({
     maskSize: "100% 100%",
   };
 
-  // Light : darken (les pixels clairs disparaissent dans le fond clair).
-  // Dark  : invert + hue-rotate (le crème devient sombre, teintes préservées).
+  // Light : multiply au lieu de darken — sur tout fond clair (blanc pur,
+  //   crème, gris doux), les pixels clairs de l'aquarelle se confondent
+  //   avec le fond car (clair × clair) ≈ clair. Aucun halo visible.
+  // Dark  : invert + hue-rotate transforme le crème en sombre, opacité
+  //   préservée, mask radial pour adoucir les bords.
   const imgClass =
-    "absolute inset-0 w-full h-full object-contain mix-blend-darken dark:mix-blend-normal dark:[filter:invert(1)_hue-rotate(180deg)_brightness(0.92)_saturate(0.85)] dark:opacity-95";
+    "absolute inset-0 w-full h-full object-contain mix-blend-multiply dark:mix-blend-normal dark:[filter:invert(1)_hue-rotate(180deg)_brightness(0.92)_saturate(0.85)] dark:opacity-95";
 
   if (errored) {
     const Fallback = SVG_FALLBACKS[fallbackKey];
