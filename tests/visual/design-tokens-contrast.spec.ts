@@ -29,6 +29,13 @@
 import { test, expect } from "../../playwright-fixture";
 import { spawn, type ChildProcess } from "node:child_process";
 import { CONTRAST_SKIP_SCRIPT, CONTRAST_SKIP_RULES } from "./contrast-skip-rules";
+import {
+  WCAG_TEXT_SIZE_SCRIPT,
+  classifyWcagTextSize,
+  resolveFontWeight,
+  PT_18_IN_PX,
+  PT_14_IN_PX,
+} from "./wcag-text-size";
 
 const PORT = 8767; // distinct des autres specs visuelles
 const BASE_URL = `http://localhost:${PORT}`;
@@ -81,12 +88,22 @@ type Pair = {
   fg: string;
   /** Token CSS du fond (sans `--`) */
   bg: string;
-  /** "normal" (4.5:1) ou "large" (3:1) */
-  size?: "normal" | "large";
+  /**
+   * Taille de police effective rendue (px). Détermine le seuil WCAG via
+   * `__wcagClassifyTextSize`. Défaut : 16px (body text Tailwind `text-base`).
+   * Ex. : 24 pour `text-2xl`, 18 pour `text-lg`.
+   */
+  fontSizePx?: number;
+  /**
+   * Poids de police effectif (numérique ou mot-clé). Couplé à `fontSizePx`
+   * pour la classification large/normal. Défaut : 400.
+   * Ex. : 700 pour un bouton/badge en `font-bold`.
+   */
+  fontWeight?: number | "normal" | "bold";
 };
 
 const PAIRS: Pair[] = [
-  // muted-foreground sur tous les fonds neutres possibles
+  // muted-foreground sur tous les fonds neutres possibles (texte courant 16px)
   { label: "muted-foreground / background", fg: "muted-foreground", bg: "background" },
   { label: "muted-foreground / card", fg: "muted-foreground", bg: "card" },
   { label: "muted-foreground / muted", fg: "muted-foreground", bg: "muted" },
@@ -96,16 +113,20 @@ const PAIRS: Pair[] = [
   { label: "destructive-text / background", fg: "destructive-text", bg: "background" },
   { label: "destructive-text / card", fg: "destructive-text", bg: "card" },
 
-  // Badges
-  { label: "destructive-foreground / destructive", fg: "destructive-foreground", bg: "destructive" },
-  { label: "badge-success-foreground / badge-success", fg: "badge-success-foreground", bg: "badge-success" },
+  // Badges — texte court, généralement 14px gras dans la lib UI : *normal* WCAG
+  // (14px = 10.5pt < 14pt, donc pas large même avec bold). On reste à 4.5:1.
+  { label: "destructive-foreground / destructive (badge 14px bold)", fg: "destructive-foreground", bg: "destructive", fontSizePx: 14, fontWeight: 700 },
+  { label: "badge-success-foreground / badge-success (badge 14px bold)", fg: "badge-success-foreground", bg: "badge-success", fontSizePx: 14, fontWeight: 700 },
 
-  // CTA principaux
-  { label: "primary-foreground / primary", fg: "primary-foreground", bg: "primary" },
-  // Le secondary est utilisé essentiellement en bouton large (text-base/font-medium)
-  { label: "secondary-foreground / secondary", fg: "secondary-foreground", bg: "secondary", size: "large" },
+  // CTA principaux — bouton standard rendu en `text-base font-medium` (16px/500)
+  { label: "primary-foreground / primary (button 16px medium)", fg: "primary-foreground", bg: "primary", fontSizePx: 16, fontWeight: 500 },
+  // Le secondary est utilisé en bouton large rendu en `text-lg font-semibold`
+  // (≈ 18.66px / 600). 18.66px ≥ 14pt + bold (≥600 mais WCAG exige ≥700)
+  // → On force `font-bold` en pratique, mais on reste prudent et on déclare
+  //    le rendu réel : le helper classifie correctement.
+  { label: "secondary-foreground / secondary (button 18.66px bold)", fg: "secondary-foreground", bg: "secondary", fontSizePx: 18.6667, fontWeight: 700 },
 
-  // Texte standard
+  // Texte standard 16px regular
   { label: "foreground / background", fg: "foreground", bg: "background" },
   { label: "foreground / card", fg: "foreground", bg: "card" },
   { label: "foreground / muted", fg: "foreground", bg: "muted" },
@@ -122,17 +143,23 @@ const MODES: Array<{ id: "light" | "dark"; htmlClass: string }> = [
 ];
 
 // HTML minimal qui ne charge QUE le design system, pas l'app React.
+// Chaque swatch reçoit `font-size` et `font-weight` REELS issus de la paire,
+// pour que la classification large/normal soit pilotée par les métriques
+// effectives lues côté navigateur (et non par une étiquette manuelle).
 function buildHarness(htmlClass: string, pairs: Pair[]): string {
   const swatches = pairs
-    .map(
-      (p, i) => `
+    .map((p, i) => {
+      const fs = p.fontSizePx ?? 16;
+      const fw = p.fontWeight ?? 400;
+      return `
         <div data-pair-idx="${i}"
              data-fg="${p.fg}"
              data-bg="${p.bg}"
-             style="background: hsl(var(--${p.bg})); color: hsl(var(--${p.fg})); padding: 8px 12px; margin: 4px; font-size: 16px;">
+             data-label="${p.label.replace(/"/g, "&quot;")}"
+             style="background: hsl(var(--${p.bg})); color: hsl(var(--${p.fg})); padding: 8px 12px; margin: 4px; font-size: ${fs}px; font-weight: ${fw};">
           ${p.label} — Sample texte 0123 ÉéÀàÇç
-        </div>`
-    )
+        </div>`;
+    })
     .join("");
 
   return `<!doctype html>
@@ -155,8 +182,6 @@ test.describe("Design tokens — contraste WCAG AA (indépendant des pages)", ()
 
   for (const mode of MODES) {
     test(`tokens contrast — ${mode.id}`, async ({ page }) => {
-      // On sert la harness via data: URL n'est pas viable (CSS relatif à charger
-      // depuis Vite), donc on route une URL inexistante et on injecte le HTML.
       const harness = buildHarness(mode.htmlClass, PAIRS);
 
       await page.route("**/__harness", (route) =>
@@ -177,8 +202,11 @@ test.describe("Design tokens — contraste WCAG AA (indépendant des pages)", ()
         return !!bg && bg !== "rgba(0, 0, 0, 0)" && bg !== "transparent";
       });
 
+      // Injection du helper officiel de classification WCAG « large-scale text ».
+      await page.addScriptTag({ content: WCAG_TEXT_SIZE_SCRIPT });
+
       const violations = await page.evaluate(() => {
-        // Helpers WCAG -----------------------------------------------------
+        // --- Helpers contraste ------------------------------------------------
         function parseRgb(input: string): [number, number, number] | null {
           const m = input.match(/rgba?\(([^)]+)\)/i);
           if (!m) return null;
@@ -199,7 +227,18 @@ test.describe("Design tokens — contraste WCAG AA (indépendant des pages)", ()
           const [hi, lo] = la > lb ? [la, lb] : [lb, la];
           return (hi + 0.05) / (lo + 0.05);
         }
-        // ------------------------------------------------------------------
+
+        // Helpers WCAG injectés (cf. wcag-text-size.ts)
+        const w: any = window;
+        const classify = w.__wcagClassifyTextSize as (
+          px: number,
+          weight: string | number
+        ) => "large" | "normal";
+        const aaThreshold = w.__wcagAaThreshold as (
+          c: "large" | "normal"
+        ) => 3.0 | 4.5;
+
+        // --- Scan -------------------------------------------------------------
         const out: Array<{
           label: string;
           fg: string;
@@ -209,34 +248,45 @@ test.describe("Design tokens — contraste WCAG AA (indépendant des pages)", ()
           ratio: number;
           threshold: number;
           deficit: number;
+          fontSizePx: number;
+          fontSizePt: number;
+          fontWeight: string;
+          wcagSizeClass: "large" | "normal";
         }> = [];
 
+        const PX_PER_PT = 96 / 72;
         const els = Array.from(document.querySelectorAll("[data-pair-idx]")) as HTMLElement[];
         for (const el of els) {
           const fg = el.dataset.fg!;
           const bg = el.dataset.bg!;
+          const label = el.dataset.label || `${fg} / ${bg}`;
           const cs = getComputedStyle(el);
+          const fontSizePx = parseFloat(cs.fontSize);
+          const sizeClass = classify(fontSizePx, cs.fontWeight);
+          const threshold = aaThreshold(sizeClass);
           const fgRgb = parseRgb(cs.color);
           const bgRgb = parseRgb(cs.backgroundColor);
           if (!fgRgb || !bgRgb) {
             out.push({
-              label: `${fg} / ${bg}`,
+              label,
               fg,
               bg,
               fgRgb: cs.color,
               bgRgb: cs.backgroundColor,
               ratio: 0,
-              threshold: 4.5,
-              deficit: 4.5,
+              threshold,
+              deficit: threshold,
+              fontSizePx,
+              fontSizePt: Math.round((fontSizePx / PX_PER_PT) * 10) / 10,
+              fontWeight: cs.fontWeight,
+              wcagSizeClass: sizeClass,
             });
             continue;
           }
-          // Le seuil est embarqué via data-threshold sinon défaut 4.5
-          const threshold = parseFloat(el.dataset.threshold || "4.5");
           const r = ratio(fgRgb, bgRgb);
           if (r + 0.001 < threshold) {
             out.push({
-              label: `${fg} / ${bg}`,
+              label,
               fg,
               bg,
               fgRgb: cs.color,
@@ -244,78 +294,15 @@ test.describe("Design tokens — contraste WCAG AA (indépendant des pages)", ()
               ratio: Math.round(r * 100) / 100,
               threshold,
               deficit: Math.round((threshold - r) * 100) / 100,
+              fontSizePx,
+              fontSizePt: Math.round((fontSizePx / PX_PER_PT) * 10) / 10,
+              fontWeight: cs.fontWeight,
+              wcagSizeClass: sizeClass,
             });
           }
         }
         return out;
       });
-
-      // Injecter les seuils "large" côté DOM via data-threshold avant éval :
-      // on refait un eval ciblé pour les paires "large" (3:1) qui auraient
-      // été flaggées à tort avec 4.5.
-      const largeIdx = PAIRS.map((p, i) => (p.size === "large" ? i : -1)).filter((i) => i >= 0);
-      if (largeIdx.length > 0) {
-        await page.evaluate((idxs) => {
-          for (const i of idxs) {
-            const el = document.querySelector(`[data-pair-idx="${i}"]`) as HTMLElement | null;
-            if (el) el.dataset.threshold = "3";
-          }
-        }, largeIdx);
-
-        const reEval = await page.evaluate(() => {
-          function parseRgb(input: string): [number, number, number] | null {
-            const m = input.match(/rgba?\(([^)]+)\)/i);
-            if (!m) return null;
-            const parts = m[1].split(",").map((s) => parseFloat(s.trim()));
-            if (parts.length < 3 || parts.some((n) => Number.isNaN(n))) return null;
-            return [parts[0], parts[1], parts[2]];
-          }
-          function relLum([r, g, b]: [number, number, number]): number {
-            const conv = (c: number) => {
-              const s = c / 255;
-              return s <= 0.03928 ? s / 12.92 : Math.pow((s + 0.055) / 1.055, 2.4);
-            };
-            return 0.2126 * conv(r) + 0.7152 * conv(g) + 0.0722 * conv(b);
-          }
-          function ratio(a: [number, number, number], b: [number, number, number]): number {
-            const la = relLum(a);
-            const lb = relLum(b);
-            const [hi, lo] = la > lb ? [la, lb] : [lb, la];
-            return (hi + 0.05) / (lo + 0.05);
-          }
-          const out: Record<string, { ratio: number; ok: boolean }> = {};
-          const els = Array.from(
-            document.querySelectorAll('[data-pair-idx][data-threshold="3"]')
-          ) as HTMLElement[];
-          for (const el of els) {
-            const cs = getComputedStyle(el);
-            const fgRgb = parseRgb(cs.color);
-            const bgRgb = parseRgb(cs.backgroundColor);
-            const key = `${el.dataset.fg}/${el.dataset.bg}`;
-            if (!fgRgb || !bgRgb) {
-              out[key] = { ratio: 0, ok: false };
-              continue;
-            }
-            const r = ratio(fgRgb, bgRgb);
-            out[key] = { ratio: Math.round(r * 100) / 100, ok: r + 0.001 >= 3 };
-          }
-          return out;
-        });
-
-        // Retirer des violations toutes les paires "large" qui passent à 3:1
-        for (let i = violations.length - 1; i >= 0; i--) {
-          const v = violations[i];
-          const key = `${v.fg}/${v.bg}`;
-          if (reEval[key]?.ok) {
-            violations.splice(i, 1);
-          } else if (reEval[key]) {
-            // Mettre à jour le seuil affiché dans le rapport
-            v.threshold = 3;
-            v.ratio = reEval[key].ratio;
-            v.deficit = Math.round((3 - reEval[key].ratio) * 100) / 100;
-          }
-        }
-      }
 
       if (violations.length > 0) {
         const report =
@@ -325,6 +312,7 @@ test.describe("Design tokens — contraste WCAG AA (indépendant des pages)", ()
               (v, i) =>
                 `\n[#${i + 1}] ${v.label}\n` +
                 `      ratio   = ${v.ratio} (seuil ${v.threshold}, manque ${v.deficit})\n` +
+                `      classe  = ${v.wcagSizeClass} (font ${v.fontSizePx}px ≈ ${v.fontSizePt}pt, weight ${v.fontWeight})\n` +
                 `      fg(rgb) = ${v.fgRgb}\n` +
                 `      bg(rgb) = ${v.bgRgb}`
             )
@@ -335,7 +323,7 @@ test.describe("Design tokens — contraste WCAG AA (indépendant des pages)", ()
       expect(
         violations,
         `Tokens en échec WCAG AA en mode ${mode.id}: ${violations
-          .map((v) => `${v.label}=${v.ratio}/${v.threshold}`)
+          .map((v) => `${v.label}=${v.ratio}/${v.threshold}[${v.wcagSizeClass}]`)
           .join(", ")}`
       ).toEqual([]);
     });
@@ -442,5 +430,69 @@ test.describe("Design tokens — contraste WCAG AA (indépendant des pages)", ()
 
     // Sanity-check : le module exporte bien la liste documentée des règles.
     expect(CONTRAST_SKIP_RULES.length).toBeGreaterThanOrEqual(8);
+  });
+
+  /**
+   * Test unitaire pur (Node, pas de browser) de la classification WCAG
+   * « large-scale text ». Couvre les cas-limites de la spec :
+   *   - 18pt = 24px → toujours large
+   *   - 14pt ≈ 18.6667px + bold (≥700) → large
+   *   - 14pt ≈ 18.6667px + medium (500/600) → normal (bold strict)
+   *   - juste en-dessous des seuils → normal
+   *   - mots-clés font-weight (`bold`, `bolder`, `lighter`, `normal`)
+   *   - valeurs invalides → fallback 400
+   */
+  test("wcag-text-size — classification large/normal (cas-limites)", () => {
+    // Constantes de référence
+    expect(PT_18_IN_PX).toBeCloseTo(24, 6);
+    expect(PT_14_IN_PX).toBeCloseTo(18.6666, 3);
+
+    // 18pt = 24px → large quel que soit le poids
+    expect(classifyWcagTextSize(24, 400)).toBe("large");
+    expect(classifyWcagTextSize(24, 100)).toBe("large");
+    expect(classifyWcagTextSize(30, "normal")).toBe("large");
+
+    // Juste en-dessous de 24px sans bold → normal
+    expect(classifyWcagTextSize(23.9, 400)).toBe("normal");
+    expect(classifyWcagTextSize(23.9, 600)).toBe("normal"); // 600 < 700, pas bold WCAG
+
+    // 14pt ≈ 18.6667px + bold (≥700) → large
+    expect(classifyWcagTextSize(PT_14_IN_PX, 700)).toBe("large");
+    expect(classifyWcagTextSize(19, 700)).toBe("large");
+    expect(classifyWcagTextSize(19, "bold")).toBe("large");
+    expect(classifyWcagTextSize(20, "bolder")).toBe("large"); // bolder résolu à 700
+
+    // 14pt + poids non-bold (500/600) → normal (WCAG exige strictement ≥700)
+    expect(classifyWcagTextSize(19, 500)).toBe("normal");
+    expect(classifyWcagTextSize(19, 600)).toBe("normal");
+
+    // Juste en-dessous de 14pt même en bold → normal
+    expect(classifyWcagTextSize(18.5, 700)).toBe("normal");
+    expect(classifyWcagTextSize(14, "bold")).toBe("normal");
+
+    // Texte body courant (16px regular) → normal
+    expect(classifyWcagTextSize(16, 400)).toBe("normal");
+    expect(classifyWcagTextSize(16, "normal")).toBe("normal");
+
+    // Tolérance sub-pixel : 23.97px (rendu navigateur de 24px) doit rester large
+    expect(classifyWcagTextSize(23.97, 400)).toBe("large");
+
+    // resolveFontWeight — mots-clés et valeurs invalides
+    expect(resolveFontWeight("bold")).toBe(700);
+    expect(resolveFontWeight("BOLD")).toBe(700); // case-insensitive
+    expect(resolveFontWeight("bolder")).toBe(700);
+    expect(resolveFontWeight("lighter")).toBe(100);
+    expect(resolveFontWeight("normal")).toBe(400);
+    expect(resolveFontWeight("700")).toBe(700);
+    expect(resolveFontWeight(700)).toBe(700);
+    expect(resolveFontWeight("")).toBe(400);
+    expect(resolveFontWeight(null)).toBe(400);
+    expect(resolveFontWeight(undefined)).toBe(400);
+    expect(resolveFontWeight("garbage")).toBe(400);
+
+    // Valeurs aberrantes côté size → normal (jamais large par défaut)
+    expect(classifyWcagTextSize(0, 700)).toBe("normal");
+    expect(classifyWcagTextSize(-5, 700)).toBe("normal");
+    expect(classifyWcagTextSize(NaN, 700)).toBe("normal");
   });
 });

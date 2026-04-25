@@ -20,6 +20,7 @@ import { test, expect } from "../../playwright-fixture";
 import { spawn, type ChildProcess } from "node:child_process";
 import { SCENARIOS, type ScenarioId } from "./fixtures";
 import { CONTRAST_SKIP_SCRIPT } from "./contrast-skip-rules";
+import { WCAG_TEXT_SIZE_SCRIPT } from "./wcag-text-size";
 
 const PORT = 8766;
 const BASE_URL = `http://localhost:${PORT}`;
@@ -637,16 +638,28 @@ test.describe("Accessibilité — /sits/:id", () => {
       // ---------- 3. Contraste WCAG AA des textes ----------
       // Calcule le ratio de contraste entre la couleur du texte et la couleur
       // de fond effective de chaque élément contenant du texte visible.
-      // Seuils WCAG AA :
-      //   - Texte normal      : ≥ 4.5:1
-      //   - Texte large       : ≥ 3.0:1  (≥ 18pt OU ≥ 14pt + bold)
+      //
+      // Seuils WCAG 2.1 AA — classification « large-scale text » :
+      //   La spec définit large-scale comme ≥ 18pt OU ≥ 14pt + bold.
+      //   Conversion CSS officielle (96 dpi) : 1pt = 96/72 px = 1.3333… px
+      //     → 18pt = 24px exactement
+      //     → 14pt ≈ 18.6667px
+      //   Bold : font-weight numérique ≥ 700 (les mots-clés `bold`/`bolder`
+      //   sont résolus correctement par `__wcagResolveFontWeight`).
+      //
+      //   - Texte normal : ratio ≥ 4.5:1
+      //   - Texte large  : ratio ≥ 3.0:1
+      //
       // Limites assumées :
       //   - On lit la couleur de fond du premier ancêtre opaque (approximation).
       //   - On ignore les images d'arrière-plan (background-image), donc tout
       //     texte posé sur une photo est exclu (impossible à mesurer fiablement).
       //   - Les éléments décoratifs / icônes / aria-hidden sont filtrés via
       //     `window.__shouldSkipContrast` (cf. tests/visual/contrast-skip-rules.ts).
+      //   - La classification large/normal utilise `window.__wcagClassifyTextSize`
+      //     (cf. tests/visual/wcag-text-size.ts).
       await page.addScriptTag({ content: CONTRAST_SKIP_SCRIPT });
+      await page.addScriptTag({ content: WCAG_TEXT_SIZE_SCRIPT });
       const contrastViolations = await page.evaluate(() => {
         const parseRgb = (s: string): [number, number, number, number] | null => {
           const m = s.match(/rgba?\(([^)]+)\)/);
@@ -711,15 +724,6 @@ test.describe("Accessibilité — /sits/:id", () => {
           return [255, 255, 255];
         };
 
-        const isLargeText = (style: CSSStyleDeclaration): boolean => {
-          const sizePx = parseFloat(style.fontSize);
-          const weight = parseInt(style.fontWeight, 10) || 400;
-          // 18pt ≈ 24px ; 14pt ≈ 18.66px
-          if (sizePx >= 24) return true;
-          if (sizePx >= 18.66 && weight >= 700) return true;
-          return false;
-        };
-
         // Sélectionne les feuilles textuelles : élément qui contient au moins
         // un nœud de texte non vide en enfant direct.
         const hasDirectText = (el: Element): string => {
@@ -731,6 +735,31 @@ test.describe("Accessibilité — /sits/:id", () => {
           }
           return txt;
         };
+
+        // Classification WCAG « large-scale text » : helper injecté via
+        // addScriptTag (cf. wcag-text-size.ts). Fallback local si l'injection
+        // n'a pas fonctionné — pour ne jamais exécuter le scan sans
+        // classification correcte (sinon faux négatifs sur le seuil 3:1).
+        const w: any = window;
+        const classifyTextSize = (
+          w.__wcagClassifyTextSize as
+            | ((px: number, weight: string | number) => "large" | "normal")
+            | undefined
+        ) ?? ((px: number, weight: string | number) => {
+          const PT = 96 / 72;
+          const wn =
+            typeof weight === "number"
+              ? weight
+              : weight === "bold" || weight === "bolder"
+              ? 700
+              : weight === "lighter"
+              ? 100
+              : parseInt(String(weight), 10) || 400;
+          if (!Number.isFinite(px) || px <= 0) return "normal";
+          if (px + 0.05 >= 18 * PT) return "large";
+          if (px + 0.05 >= 14 * PT && wn >= 700) return "large";
+          return "normal";
+        });
 
         const isVisible = (el: Element): boolean => {
           let node: Element | null = el;
@@ -746,14 +775,20 @@ test.describe("Accessibilité — /sits/:id", () => {
         };
 
         type Violation = {
-          tag: string;
+          // Champs issus de __describeEl (selector, domPath, location, …)
+          [k: string]: unknown;
           text: string;
-          fg: string;
-          bg: string;
-          ratio: number;
-          required: number;
-          fontSize: string;
-          fontWeight: string;
+          contrast: {
+            fg: string;
+            bg: string;
+            ratio: number;
+            required: number;
+            fontSize: string;
+            fontSizePt: number;
+            fontWeight: string;
+            wcagSizeClass: "large" | "normal";
+            deficit: number;
+          };
         };
         const violations: Violation[] = [];
         const seen = new Set<Element>();
@@ -793,7 +828,10 @@ test.describe("Accessibilité — /sits/:id", () => {
 
           const fgComposed = composite(fgRaw, bg);
           const ratio = contrastRatio(fgComposed, bg);
-          const required = isLargeText(style) ? 3.0 : 4.5;
+          const fontSizePx = parseFloat(style.fontSize);
+          const sizeClass = classifyTextSize(fontSizePx, style.fontWeight);
+          const required = sizeClass === "large" ? 3.0 : 4.5;
+          const PX_PER_PT = 96 / 72;
 
           if (ratio < required) {
             // @ts-ignore
@@ -807,7 +845,9 @@ test.describe("Accessibilité — /sits/:id", () => {
                 ratio: Math.round(ratio * 100) / 100,
                 required,
                 fontSize: style.fontSize,
+                fontSizePt: Math.round((fontSizePx / PX_PER_PT) * 10) / 10,
                 fontWeight: style.fontWeight,
+                wcagSizeClass: sizeClass,
                 deficit: Math.round((required - ratio) * 100) / 100,
               },
             });
