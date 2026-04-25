@@ -309,14 +309,22 @@ test.describe("Navigation clavier — /sits/:id", () => {
       const tabs = page.locator('[role="tab"]');
       const tabsCount = await tabs.count();
       if (tabsCount >= 2) {
+        currentPhase = "tablist-arrows";
+
         // Focus le 1er onglet (forcément l'onglet sélectionné, donc tabindex=0)
         const firstSelected = page.locator('[role="tab"][aria-selected="true"]').first();
         await firstSelected.focus();
+        currentFocusLog.push(
+          await snapshotFocusEntry(page, currentFocusLog.length + 1, "focus(<1er tab actif>)", "phase=tablist-arrows")
+        );
         const initialLabel = await firstSelected.textContent();
 
         // Flèche droite → onglet suivant
         await page.keyboard.press("ArrowRight");
         await page.waitForTimeout(150);
+        currentFocusLog.push(
+          await snapshotFocusEntry(page, currentFocusLog.length + 1, "ArrowRight", "after=ArrowRight")
+        );
 
         // Quel onglet est maintenant sélectionné ?
         const newSelected = page.locator('[role="tab"][aria-selected="true"]').first();
@@ -325,18 +333,17 @@ test.describe("Navigation clavier — /sits/:id", () => {
           () => document.activeElement?.getAttribute("role") === "tab"
         );
 
-        // Le focus doit toujours être sur un onglet (Radix déplace le focus)
         expect(
           newSelectedFocused,
           "Après ArrowRight, le focus doit rester sur un [role='tab']"
         ).toBe(true);
 
-        // Si Radix est en mode automatique (défaut), aria-selected a changé.
-        // Si en mode manuel, le focus a bougé mais aria-selected pas encore —
-        // alors Enter doit le faire.
         if (newLabel === initialLabel) {
           await page.keyboard.press("Enter");
           await page.waitForTimeout(150);
+          currentFocusLog.push(
+            await snapshotFocusEntry(page, currentFocusLog.length + 1, "Enter", "after=Enter (manual mode)")
+          );
         }
 
         const finalSelected = page.locator('[role="tab"][aria-selected="true"]').first();
