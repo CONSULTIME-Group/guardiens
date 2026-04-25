@@ -305,6 +305,207 @@ test.describe("Navigation clavier — /sits/:id", () => {
           finalLabel,
           `La sélection d'onglet doit changer après ArrowRight (+ Enter si manuel). Avant: "${initialLabel}", Après: "${finalLabel}"`
         ).not.toBe(initialLabel);
+
+        // ---------- 8. Liaison tab ↔ tabpanel (aria-controls / aria-labelledby) ----------
+        // WAI-ARIA Authoring Practices : chaque [role="tab"] DOIT exposer
+        // aria-controls pointant vers l'id d'un [role="tabpanel"] existant.
+        // Le tabpanel actif DOIT exposer aria-labelledby pointant vers l'id
+        // du tab sélectionné.
+        const tabBindings = await page.evaluate(() => {
+          const tabs = Array.from(
+            document.querySelectorAll<HTMLElement>('[role="tab"]')
+          );
+          const panels = Array.from(
+            document.querySelectorAll<HTMLElement>('[role="tabpanel"]')
+          );
+          const panelIds = new Set(panels.map((p) => p.id).filter(Boolean));
+
+          const issues: {
+            tabLabel: string;
+            tabId: string | null;
+            ariaControls: string | null;
+            ariaSelected: string | null;
+            problem: string;
+          }[] = [];
+
+          for (const tab of tabs) {
+            const controls = tab.getAttribute("aria-controls");
+            const tabId = tab.getAttribute("id");
+            const selected = tab.getAttribute("aria-selected");
+            const label = (tab.textContent || "").trim().slice(0, 40);
+
+            if (!controls) {
+              issues.push({
+                tabLabel: label,
+                tabId,
+                ariaControls: controls,
+                ariaSelected: selected,
+                problem: "aria-controls manquant sur le tab",
+              });
+              continue;
+            }
+            if (!panelIds.has(controls)) {
+              issues.push({
+                tabLabel: label,
+                tabId,
+                ariaControls: controls,
+                ariaSelected: selected,
+                problem: `aria-controls="${controls}" ne cible aucun [role="tabpanel"] existant`,
+              });
+              continue;
+            }
+            const panel = document.getElementById(controls);
+            const labelledBy = panel?.getAttribute("aria-labelledby") ?? null;
+            if (selected === "true") {
+              if (!labelledBy) {
+                issues.push({
+                  tabLabel: label,
+                  tabId,
+                  ariaControls: controls,
+                  ariaSelected: selected,
+                  problem: "tabpanel actif sans aria-labelledby",
+                });
+              } else if (tabId && labelledBy !== tabId) {
+                issues.push({
+                  tabLabel: label,
+                  tabId,
+                  ariaControls: controls,
+                  ariaSelected: selected,
+                  problem: `tabpanel.aria-labelledby="${labelledBy}" ≠ tab.id="${tabId}"`,
+                });
+              }
+            }
+          }
+
+          return {
+            issues,
+            tabsCount: tabs.length,
+            panelsCount: panels.length,
+            panelIds: Array.from(panelIds),
+          };
+        });
+
+        expect(
+          tabBindings.issues,
+          `Liaisons tab ↔ tabpanel invalides:\n${JSON.stringify(tabBindings, null, 2)}`
+        ).toEqual([]);
+        expect(
+          tabBindings.panelsCount,
+          "Au moins un [role='tabpanel'] doit être présent"
+        ).toBeGreaterThan(0);
+
+        // ---------- 9. Le panneau actif change quand on sélectionne un autre onglet ----------
+        // Sélectionne explicitement le 1er onglet, mémorise son panneau actif,
+        // puis sélectionne le 2e onglet et vérifie que le panneau actif a changé.
+        const tabsHandles = page.locator('[role="tab"]');
+        const totalTabs = await tabsHandles.count();
+        if (totalTabs >= 2) {
+          // Sélection 1er onglet
+          await tabsHandles.nth(0).focus();
+          await tabsHandles.nth(0).press("Enter");
+          await page.waitForTimeout(100);
+
+          const firstActivePanel = await page.evaluate(() => {
+            const tab = document.querySelector<HTMLElement>(
+              '[role="tab"][aria-selected="true"]'
+            );
+            const id = tab?.getAttribute("aria-controls") ?? null;
+            const panel = id ? document.getElementById(id) : null;
+            return {
+              tabId: tab?.id ?? null,
+              tabLabel: (tab?.textContent || "").trim().slice(0, 40),
+              panelId: panel?.id ?? null,
+              panelHidden: panel?.hasAttribute("hidden") ?? null,
+              panelDataState: panel?.getAttribute("data-state") ?? null,
+            };
+          });
+
+          // Sélection 2e onglet via clavier
+          await tabsHandles.nth(1).focus();
+          await tabsHandles.nth(1).press("Enter");
+          await page.waitForTimeout(150);
+
+          const secondActivePanel = await page.evaluate(() => {
+            const tab = document.querySelector<HTMLElement>(
+              '[role="tab"][aria-selected="true"]'
+            );
+            const id = tab?.getAttribute("aria-controls") ?? null;
+            const panel = id ? document.getElementById(id) : null;
+            return {
+              tabId: tab?.id ?? null,
+              tabLabel: (tab?.textContent || "").trim().slice(0, 40),
+              panelId: panel?.id ?? null,
+              panelHidden: panel?.hasAttribute("hidden") ?? null,
+              panelDataState: panel?.getAttribute("data-state") ?? null,
+              // Tous les panels et leur état pour faciliter le diagnostic
+              allPanels: Array.from(
+                document.querySelectorAll<HTMLElement>('[role="tabpanel"]')
+              ).map((p) => ({
+                id: p.id,
+                state: p.getAttribute("data-state"),
+                hidden: p.hasAttribute("hidden"),
+              })),
+            };
+          });
+
+          expect(
+            secondActivePanel.panelId,
+            `Le panneau actif doit changer entre les 2 onglets. Avant: ${JSON.stringify(firstActivePanel)} — Après: ${JSON.stringify(secondActivePanel)}`
+          ).not.toBe(firstActivePanel.panelId);
+
+          expect(
+            secondActivePanel.panelDataState,
+            `Le panneau ciblé par le tab sélectionné doit être data-state="active". Reçu: ${JSON.stringify(secondActivePanel)}`
+          ).toBe("active");
+
+          // Un seul panneau doit avoir data-state="active" à la fois
+          const activeCount = secondActivePanel.allPanels.filter(
+            (p) => p.state === "active"
+          ).length;
+          expect(
+            activeCount,
+            `Un seul tabpanel doit être actif. État: ${JSON.stringify(secondActivePanel.allPanels)}`
+          ).toBe(1);
+        }
+
+        // ---------- 10. Tab depuis le tablist amène le focus dans le panneau actif ----------
+        // Le pattern WAI-ARIA prévoit qu'après le tablist, Tab passe au
+        // contenu du tabpanel sélectionné (si focusable) ou au tabpanel
+        // lui-même (qui doit alors être tabbable, tabindex=0). Radix rend
+        // les tabpanels avec tabindex=0 par défaut.
+        const activeTab = page.locator('[role="tab"][aria-selected="true"]').first();
+        await activeTab.focus();
+        await page.keyboard.press("Tab");
+        await page.waitForTimeout(100);
+
+        const afterTablist = await page.evaluate(() => {
+          const el = document.activeElement as HTMLElement | null;
+          if (!el) return null;
+          // Le focus est-il sur le tabpanel actif ou sur un de ses descendants ?
+          const activePanel = document.querySelector<HTMLElement>(
+            '[role="tabpanel"][data-state="active"]'
+          );
+          const inActivePanel = !!activePanel && activePanel.contains(el);
+          const isActivePanel = el === activePanel;
+          return {
+            tag: el.tagName.toLowerCase(),
+            role: el.getAttribute("role"),
+            tabindex: el.getAttribute("tabindex"),
+            inActivePanel,
+            isActivePanel,
+            activePanelId: activePanel?.id ?? null,
+            activePanelTabindex: activePanel?.getAttribute("tabindex") ?? null,
+          };
+        });
+
+        expect(
+          afterTablist,
+          "Aucun élément focusé après Tab depuis le tablist"
+        ).not.toBeNull();
+        expect(
+          afterTablist!.inActivePanel || afterTablist!.isActivePanel,
+          `Après Tab depuis le tablist, le focus doit être sur le tabpanel actif ou son contenu. Reçu: ${JSON.stringify(afterTablist)}`
+        ).toBe(true);
       }
     });
   }
