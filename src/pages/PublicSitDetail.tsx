@@ -2,7 +2,7 @@
 // un service de prerender actif (Prerender.io / Cloudflare Worker). À investiguer
 // séparément. Aujourd'hui : OG statiques génériques dans index.html uniquement.
 import { useState, useEffect, useRef } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -17,27 +17,20 @@ import { trackEvent } from "@/lib/analytics";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import ApplicationModal from "@/components/sits/ApplicationModal";
 import { useSubscriptionAccess } from "@/hooks/useSubscriptionAccess";
-
-const envLabels: Record<string, string> = {
-  city_center: "Centre-ville", suburban: "Périurbain", countryside: "Campagne",
-  mountain: "Montagne", seaside: "Bord de mer", forest: "Forêt",
-};
-const typeLabels: Record<string, string> = {
-  apartment: "Appartement", house: "Maison", farm: "Ferme", chalet: "Chalet", other: "Autre",
-};
-const speciesEmoji: Record<string, string> = {
-  dog: "🐕", cat: "🐈", horse: "🐴", bird: "🐦", rodent: "🐹",
-  fish: "🐠", reptile: "🦎", farm_animal: "🐄", nac: "🐾",
-};
-const speciesLabel: Record<string, string> = {
-  dog: "chien", cat: "chat", horse: "cheval", bird: "oiseau", rodent: "rongeur",
-  fish: "poisson", reptile: "reptile", farm_animal: "animal de ferme", nac: "NAC",
-};
+import SitHero from "@/components/sits/shared/SitHero";
+import OwnerSitManagement from "@/components/sits/shared/OwnerSitManagement";
+import {
+  ENV_LABELS as envLabels,
+  TYPE_LABELS as typeLabels,
+  SPECIES_EMOJI as speciesEmoji,
+  SPECIES_LABEL as speciesLabel,
+} from "@/components/sits/shared/sitConstants";
 
 type ViewerType = "anonymous" | "gardien" | "proprio" | "owner_of_sit" | "admin";
 
 const PublicSitDetail = () => {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const { user, isAuthenticated } = useAuth();
   const { hasAccess } = useSubscriptionAccess();
   const [sit, setSit] = useState<any>(null);
@@ -243,12 +236,12 @@ const PublicSitDetail = () => {
 
 
 
-      {/* Hero photo */}
-      {photos.length > 0 && (
-        <img src={photos[0]} alt={`Logement à ${cityForTitle} — annonce de garde Guardiens`} className="w-full h-64 md:h-80 object-cover" loading="eager" />
-      )}
+      {/* Hero photos — composant partagé avec /sits/:id, lightbox plein écran */}
+      <div className="px-4 md:px-10 pt-4 md:pt-6">
+        <SitHero photos={photos} city={owner?.city} priority />
+      </div>
 
-      <div className="p-6 md:p-10">
+      <div className="px-6 md:px-10 pb-6 md:pb-10">
         {/* Title */}
         <h1 className="font-heading text-2xl md:text-3xl font-bold mb-2">
           {sit.title || `Garde à ${owner?.city || "..."}`}
@@ -352,6 +345,18 @@ const PublicSitDetail = () => {
             viewerType={viewerType}
           />
         </div>
+
+        {/* Bloc gestion — visible uniquement si le visiteur est le propriétaire de l'annonce.
+            Les actions sensibles (annulation, édition) renvoient vers la fiche privée /sits/:id. */}
+        {viewerType === "owner_of_sit" && property && (
+          <OwnerSitManagement
+            sitId={sit.id}
+            propertyId={property.id}
+            status={sit.status}
+            canCancel={sit.status === "published" || sit.status === "confirmed"}
+            onCancelClick={() => navigate(`/sits/${sit.id}?action=cancel`)}
+          />
+        )}
 
         {/* CTA */}
         {/* TODO: à ajouter quand le bouton contact direct sera implémenté → sit_contact_clicked
