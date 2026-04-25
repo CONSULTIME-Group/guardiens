@@ -19,6 +19,7 @@
 import { test, expect } from "../../playwright-fixture";
 import { spawn, type ChildProcess } from "node:child_process";
 import { SCENARIOS, type ScenarioId } from "./fixtures";
+import { CONTRAST_SKIP_SCRIPT } from "./contrast-skip-rules";
 
 const PORT = 8766;
 const BASE_URL = `http://localhost:${PORT}`;
@@ -643,6 +644,9 @@ test.describe("Accessibilité — /sits/:id", () => {
       //   - On lit la couleur de fond du premier ancêtre opaque (approximation).
       //   - On ignore les images d'arrière-plan (background-image), donc tout
       //     texte posé sur une photo est exclu (impossible à mesurer fiablement).
+      //   - Les éléments décoratifs / icônes / aria-hidden sont filtrés via
+      //     `window.__shouldSkipContrast` (cf. tests/visual/contrast-skip-rules.ts).
+      await page.addScriptTag({ content: CONTRAST_SKIP_SCRIPT });
       const contrastViolations = await page.evaluate(() => {
         const parseRgb = (s: string): [number, number, number, number] | null => {
           const m = s.match(/rgba?\(([^)]+)\)/);
@@ -758,12 +762,22 @@ test.describe("Accessibilité — /sits/:id", () => {
         // navigation et autres chrome globaux sont audités séparément — sortis
         // du périmètre de cette spec qui cible SitDetail.
         const root = document.querySelector("main") || document.body;
+        // Helper de filtrage chargé via addScriptTag (cf. contrast-skip-rules.ts).
+        const skipFn = (window as any).__shouldSkipContrast as
+          | ((el: Element) => { reason: string; detail: string } | null)
+          | undefined;
+
         root.querySelectorAll("*").forEach((el) => {
           if (seen.has(el)) return;
-          if (el.classList.contains("sr-only")) return;
-          // skip media / form controls (native controls : couleurs UA non maîtrisées)
+
+          // Règles d'exclusion centralisées (aria-hidden, sr-only, icônes,
+          // décoratifs, opt-out via data-skip-contrast, descendants <svg>, …).
+          if (skipFn && skipFn(el)) return;
+
+          // Garde-fou supplémentaire pour les contrôles natifs dont le rendu
+          // de couleur est piloté par l'UA (non maîtrisable depuis le CSS app).
           const tag = el.tagName.toLowerCase();
-          if (["script", "style", "svg", "path", "img", "video", "canvas", "iframe", "input", "select", "textarea", "option"].includes(tag)) return;
+          if (["img", "video", "canvas", "iframe", "input", "select", "textarea", "option"].includes(tag)) return;
 
           const text = hasDirectText(el);
           if (!text || text.length < 2) return;
