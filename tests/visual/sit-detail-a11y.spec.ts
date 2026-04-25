@@ -21,6 +21,18 @@ import { spawn, type ChildProcess } from "node:child_process";
 import { SCENARIOS, type ScenarioId } from "./fixtures";
 import { CONTRAST_SKIP_SCRIPT } from "./contrast-skip-rules";
 import { WCAG_TEXT_SIZE_SCRIPT } from "./wcag-text-size";
+import {
+  captureFailureArtifacts,
+  type FocusLogEntry,
+} from "./failure-capture";
+
+/**
+ * État partagé pour la capture automatique d'artefacts à l'échec.
+ * Le focusLog reste vide ici (pas de séquence Tab) mais on attache quand
+ * même screenshot + meta + focusable-elements pour faciliter le diagnostic.
+ */
+let currentFocusLog: FocusLogEntry[] = [];
+let currentScenario: string = "unknown";
 
 const PORT = 8766;
 const BASE_URL = `http://localhost:${PORT}`;
@@ -63,6 +75,13 @@ test.afterAll(async () => {
   }
 });
 
+test.afterEach(async ({ page }, testInfo) => {
+  await captureFailureArtifacts(page, testInfo, {
+    scenarioId: currentScenario,
+    focusLog: currentFocusLog,
+  });
+});
+
 const scenarioIds: ScenarioId[] = [
   "draft-owner",
   "published-owner",
@@ -77,6 +96,10 @@ test.describe("Accessibilité — /sits/:id", () => {
     test(`a11y — ${scenarioId}`, async ({ page }) => {
       const scn = SCENARIOS[scenarioId];
       const url = `${BASE_URL}/sits/${scn.sitId}?scenario=${scenarioId}`;
+
+      // Init du contexte de capture automatique à l'échec
+      currentFocusLog = [];
+      currentScenario = scenarioId;
 
       await page.setViewportSize({ width: 1280, height: 900 });
       await page.goto(url, { waitUntil: "networkidle" });

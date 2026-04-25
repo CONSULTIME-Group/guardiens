@@ -23,6 +23,20 @@
 import { test, expect } from "../../playwright-fixture";
 import { spawn, type ChildProcess } from "node:child_process";
 import { SCENARIOS, type ScenarioId } from "./fixtures";
+import {
+  captureFailureArtifacts,
+  snapshotFocusEntry,
+  type FocusLogEntry,
+} from "./failure-capture";
+
+/**
+ * focusLog du test EN COURS, partagé entre le corps du test et le afterEach.
+ * Réinitialisé au début de chaque test (par scénario) pour éviter les fuites
+ * d'un test à l'autre quand on tourne en série.
+ */
+let currentFocusLog: FocusLogEntry[] = [];
+let currentScenario: string = "unknown";
+let currentPhase: string = "init";
 
 const PORT = 8767;
 const BASE_URL = `http://localhost:${PORT}`;
@@ -63,6 +77,18 @@ test.afterAll(async () => {
     viteProcess.kill("SIGTERM");
     await new Promise((r) => setTimeout(r, 500));
   }
+});
+
+/**
+ * Capture automatique d'artefacts de diagnostic en cas d'échec.
+ * S'exécute APRÈS chaque test, mais AVANT le retrait de la page.
+ */
+test.afterEach(async ({ page }, testInfo) => {
+  await captureFailureArtifacts(page, testInfo, {
+    scenarioId: currentScenario,
+    focusLog: currentFocusLog,
+    phase: currentPhase,
+  });
 });
 
 const scenarioIds: ScenarioId[] = [
@@ -129,6 +155,11 @@ test.describe("Navigation clavier — /sits/:id", () => {
       const scn = SCENARIOS[scenarioId];
       const url = `${BASE_URL}/sits/${scn.sitId}?scenario=${scenarioId}`;
 
+      // Réinit du log de focus partagé avec le afterEach pour capture à l'échec
+      currentFocusLog = [];
+      currentScenario = scenarioId;
+      currentPhase = "navigation-tab";
+
       await page.setViewportSize({ width: 1280, height: 900 });
       await page.goto(url, { waitUntil: "networkidle" });
 
@@ -152,6 +183,11 @@ test.describe("Navigation clavier — /sits/:id", () => {
       for (let i = 0; i < MAX_TABS; i++) {
         await page.keyboard.press("Tab");
         const info = await snapshotFocus(page);
+
+        // Trace la séquence dans le focusLog partagé pour diagnostic à l'échec
+        currentFocusLog.push(
+          await snapshotFocusEntry(page, currentFocusLog.length + 1, `Tab #${i + 1}`)
+        );
 
         if (info.isBody) {
           consecutiveBodyHits++;
@@ -208,9 +244,13 @@ test.describe("Navigation clavier — /sits/:id", () => {
 
       // ---------- 5. Sitter sur sit publié : le CTA d'action est focusable ----------
       if (scn.activeRole === "sitter" && scn.data.sit?.status === "published") {
+        currentPhase = "sitter-cta";
         const aside = page.locator('aside[aria-label="Action de candidature"]');
         const cta = aside.locator("button, a").first();
         await cta.focus();
+        currentFocusLog.push(
+          await snapshotFocusEntry(page, currentFocusLog.length + 1, "focus(<sitter CTA>)", "phase=sitter-cta")
+        );
         const focused = await snapshotFocus(page);
         expect(
           focused.tag === "button" || focused.tag === "a",
@@ -269,14 +309,22 @@ test.describe("Navigation clavier — /sits/:id", () => {
       const tabs = page.locator('[role="tab"]');
       const tabsCount = await tabs.count();
       if (tabsCount >= 2) {
+        currentPhase = "tablist-arrows";
+
         // Focus le 1er onglet (forcément l'onglet sélectionné, donc tabindex=0)
         const firstSelected = page.locator('[role="tab"][aria-selected="true"]').first();
         await firstSelected.focus();
+        currentFocusLog.push(
+          await snapshotFocusEntry(page, currentFocusLog.length + 1, "focus(<1er tab actif>)", "phase=tablist-arrows")
+        );
         const initialLabel = await firstSelected.textContent();
 
         // Flèche droite → onglet suivant
         await page.keyboard.press("ArrowRight");
         await page.waitForTimeout(150);
+        currentFocusLog.push(
+          await snapshotFocusEntry(page, currentFocusLog.length + 1, "ArrowRight", "after=ArrowRight")
+        );
 
         // Quel onglet est maintenant sélectionné ?
         const newSelected = page.locator('[role="tab"][aria-selected="true"]').first();
@@ -285,18 +333,17 @@ test.describe("Navigation clavier — /sits/:id", () => {
           () => document.activeElement?.getAttribute("role") === "tab"
         );
 
-        // Le focus doit toujours être sur un onglet (Radix déplace le focus)
         expect(
           newSelectedFocused,
           "Après ArrowRight, le focus doit rester sur un [role='tab']"
         ).toBe(true);
 
-        // Si Radix est en mode automatique (défaut), aria-selected a changé.
-        // Si en mode manuel, le focus a bougé mais aria-selected pas encore —
-        // alors Enter doit le faire.
         if (newLabel === initialLabel) {
           await page.keyboard.press("Enter");
           await page.waitForTimeout(150);
+          currentFocusLog.push(
+            await snapshotFocusEntry(page, currentFocusLog.length + 1, "Enter", "after=Enter (manual mode)")
+          );
         }
 
         const finalSelected = page.locator('[role="tab"][aria-selected="true"]').first();
@@ -400,10 +447,14 @@ test.describe("Navigation clavier — /sits/:id", () => {
         const tabsHandles = page.locator('[role="tab"]');
         const totalTabs = await tabsHandles.count();
         if (totalTabs >= 2) {
+          currentPhase = "panel-switch";
           // Sélection 1er onglet
           await tabsHandles.nth(0).focus();
           await tabsHandles.nth(0).press("Enter");
           await page.waitForTimeout(100);
+          currentFocusLog.push(
+            await snapshotFocusEntry(page, currentFocusLog.length + 1, "Enter (tab #0)", "phase=panel-switch")
+          );
 
           const firstActivePanel = await page.evaluate(() => {
             const tab = document.querySelector<HTMLElement>(
@@ -424,6 +475,9 @@ test.describe("Navigation clavier — /sits/:id", () => {
           await tabsHandles.nth(1).focus();
           await tabsHandles.nth(1).press("Enter");
           await page.waitForTimeout(150);
+          currentFocusLog.push(
+            await snapshotFocusEntry(page, currentFocusLog.length + 1, "Enter (tab #1)", "after=switch")
+          );
 
           const secondActivePanel = await page.evaluate(() => {
             const tab = document.querySelector<HTMLElement>(
@@ -473,10 +527,17 @@ test.describe("Navigation clavier — /sits/:id", () => {
         // contenu du tabpanel sélectionné (si focusable) ou au tabpanel
         // lui-même (qui doit alors être tabbable, tabindex=0). Radix rend
         // les tabpanels avec tabindex=0 par défaut.
+        currentPhase = "tab-into-panel";
         const activeTab = page.locator('[role="tab"][aria-selected="true"]').first();
         await activeTab.focus();
+        currentFocusLog.push(
+          await snapshotFocusEntry(page, currentFocusLog.length + 1, "focus(<active tab>)", "phase=tab-into-panel")
+        );
         await page.keyboard.press("Tab");
         await page.waitForTimeout(100);
+        currentFocusLog.push(
+          await snapshotFocusEntry(page, currentFocusLog.length + 1, "Tab (after tablist)", "after=tab-into-panel")
+        );
 
         const afterTablist = await page.evaluate(() => {
           const el = document.activeElement as HTMLElement | null;

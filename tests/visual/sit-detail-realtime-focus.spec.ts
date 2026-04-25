@@ -32,6 +32,22 @@
 import { test, expect } from "../../playwright-fixture";
 import { spawn, type ChildProcess } from "node:child_process";
 import { SCENARIOS } from "./fixtures";
+import {
+  captureFailureArtifacts,
+  snapshotFocusEntry,
+  type FocusLogEntry,
+} from "./failure-capture";
+import type { Page } from "@playwright/test";
+
+/**
+ * Contexte partagé pour la capture automatique d'artefacts à l'échec.
+ * Le test realtime opère sur une page custom (pageA) — on la mémorise ici
+ * pour que le afterEach puisse l'inspecter au lieu de la page de la fixture.
+ */
+let currentPageA: Page | null = null;
+let currentFocusLog: FocusLogEntry[] = [];
+let currentScenario: string = "unknown";
+let currentPhase: string = "init";
 
 const PORT = 8768;
 const BASE_URL = `http://localhost:${PORT}`;
@@ -71,6 +87,21 @@ test.afterAll(async () => {
     viteProcess.kill("SIGTERM");
     await new Promise((r) => setTimeout(r, 500));
   }
+});
+
+/**
+ * En cas d'échec, on attache à `testInfo` un screenshot pleine page de
+ * pageA + meta + focus log + dump des focusables. On utilise pageA
+ * (le contexte qui héberge réellement la vue testée) plutôt que la page
+ * de la fixture qui reste sur about:blank.
+ */
+test.afterEach(async ({ page }, testInfo) => {
+  const target = currentPageA ?? page;
+  await captureFailureArtifacts(target, testInfo, {
+    scenarioId: currentScenario,
+    focusLog: currentFocusLog,
+    phase: currentPhase,
+  });
 });
 
 // --- Helpers --------------------------------------------------------------
@@ -128,9 +159,15 @@ test.describe("Realtime — focus reste logique après mise à jour exogène", (
     const scn = SCENARIOS["published-sitter"];
     const url = `${BASE_URL}/sits/${scn.sitId}?scenario=published-sitter`;
 
+    // Init du contexte de capture automatique à l'échec
+    currentFocusLog = [];
+    currentScenario = "realtime-published-to-cancelled-sitter";
+    currentPhase = "setup";
+
     // Onglet A : sitter consulte la fiche
     const ctxA = await browser.newContext({ viewport: { width: 1280, height: 900 } });
     const pageA = await ctxA.newPage();
+    currentPageA = pageA;
     await pageA.goto(url, { waitUntil: "networkidle" });
     await pageA.waitForFunction(() => !!document.querySelector("h1"), { timeout: 15_000 });
 
@@ -173,7 +210,11 @@ test.describe("Realtime — focus reste logique après mise à jour exogène", (
     // En headless, click() pose un focus fiable là où locator.focus() peut être ignoré.
     await initialTarget.click({ force: true, position: { x: 4, y: 4 } });
 
+    currentPhase = "focus-before-emit";
     const focusBefore = await describeActiveElement(pageA);
+    currentFocusLog.push(
+      await snapshotFocusEntry(pageA, currentFocusLog.length + 1, "click(<initialTarget>)", "phase=focus-before-emit")
+    );
     expect(
       focusBefore.isBody,
       `Le focus initial doit être sur un élément focusable de <main>, pas sur body. Got: ${JSON.stringify(focusBefore)}`
@@ -215,7 +256,11 @@ test.describe("Realtime — focus reste logique après mise à jour exogène", (
     await expect(banner).toHaveAttribute("aria-live", "polite");
 
     // --- Vérifications focus ----------------------------------------------
+    currentPhase = "focus-after-emit";
     const focusAfter = await describeActiveElement(pageA);
+    currentFocusLog.push(
+      await snapshotFocusEntry(pageA, currentFocusLog.length + 1, "after emitSitUpdate(cancelled)", "phase=focus-after-emit")
+    );
 
     // 1. Le focus n'est jamais sur un nœud détaché du DOM
     expect(
@@ -298,8 +343,14 @@ test.describe("Realtime — focus reste logique après mise à jour exogène", (
     const scn = SCENARIOS["published-owner"];
     const url = `${BASE_URL}/sits/${scn.sitId}?scenario=published-owner`;
 
+    // Init du contexte de capture automatique à l'échec
+    currentFocusLog = [];
+    currentScenario = "realtime-published-to-cancelled-owner";
+    currentPhase = "setup";
+
     const ctxA = await browser.newContext({ viewport: { width: 1280, height: 900 } });
     const pageA = await ctxA.newPage();
+    currentPageA = pageA;
     await pageA.goto(url, { waitUntil: "networkidle" });
     await pageA.waitForFunction(() => !!document.querySelector("h1"), { timeout: 15_000 });
 
@@ -327,7 +378,11 @@ test.describe("Realtime — focus reste logique après mise à jour exogène", (
     expect(await initialTarget.count()).toBeGreaterThan(0);
     await pageA.bringToFront();
     await initialTarget.click({ force: true, position: { x: 4, y: 4 } });
+    currentPhase = "focus-before-emit";
     const focusBefore = await describeActiveElement(pageA);
+    currentFocusLog.push(
+      await snapshotFocusEntry(pageA, currentFocusLog.length + 1, "click(<initialTarget>)", "phase=focus-before-emit")
+    );
     expect(focusBefore.isBody).toBe(false);
 
     // Émet l'UPDATE realtime côté A (cancelled par un autre onglet)
@@ -341,7 +396,11 @@ test.describe("Realtime — focus reste logique après mise à jour exogène", (
     // Laisse React appliquer le re-render
     await pageA.waitForTimeout(200);
 
+    currentPhase = "focus-after-emit";
     const focusAfter = await describeActiveElement(pageA);
+    currentFocusLog.push(
+      await snapshotFocusEntry(pageA, currentFocusLog.length + 1, "after emitSitUpdate(cancelled)", "phase=focus-after-emit")
+    );
 
     // Mêmes garanties que pour le test sitter
     expect(focusAfter.isInDom).toBe(true);
