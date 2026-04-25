@@ -32,8 +32,12 @@ const PaintedIllustration = ({
   fallbackKey: IllustrationKey;
 }) => {
   const [errored, setErrored] = useState(false);
+  // Tailles +40% par rapport à la version précédente (w-36→w-[12.6rem], etc.)
+  // mix-blend-darken au lieu de multiply : conserve mieux les couleurs claires
+  // de l'aquarelle et évite le "halo gris" sur les zones crème de l'image
+  // lorsque le fond de page diffère légèrement (blanc, gris, carte).
   const wrapperClass =
-    "block mx-auto h-auto w-36 sm:w-44 md:w-52 lg:w-56 max-w-[60vw] mix-blend-multiply select-none pointer-events-none dark:mix-blend-screen dark:opacity-80 motion-safe:animate-painted-reveal motion-reduce:opacity-100";
+    "block mx-auto h-auto w-[12.6rem] sm:w-[15.4rem] md:w-[18.2rem] lg:w-[19.6rem] max-w-[84vw] mix-blend-darken select-none pointer-events-none dark:mix-blend-screen dark:opacity-80 motion-safe:animate-painted-reveal motion-reduce:opacity-100";
 
   if (errored) {
     const Fallback = SVG_FALLBACKS[fallbackKey];
