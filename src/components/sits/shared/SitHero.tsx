@@ -4,9 +4,9 @@
  * - Vignettes cliquables si plusieurs photos.
  * - Lightbox plein écran au clic, navigation clavier (←/→/Esc) et swipe.
  */
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { createPortal } from "react-dom";
-import { ChevronLeft, ChevronRight, X, Maximize2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, X, Maximize2, ImageOff } from "lucide-react";
 
 interface SitHeroProps {
   photos: string[];
@@ -19,9 +19,30 @@ const SitHero = ({ photos, city, priority = false }: SitHeroProps) => {
   const [photoIndex, setPhotoIndex] = useState(0);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [touchStartX, setTouchStartX] = useState<number | null>(null);
+  const [brokenIndices, setBrokenIndices] = useState<Set<number>>(new Set());
 
   const cityLabel = city || "France";
-  const total = photos.length;
+
+  // Filtre défensif : on ne garde que des URLs string non vides et déduplique.
+  const safePhotos = useMemo(() => {
+    if (!Array.isArray(photos)) return [];
+    const seen = new Set<string>();
+    return photos.filter((p) => {
+      if (typeof p !== "string") return false;
+      const url = p.trim();
+      if (!url) return false;
+      if (seen.has(url)) return false;
+      seen.add(url);
+      return true;
+    });
+  }, [photos]);
+
+  const total = safePhotos.length;
+
+  // Si la liste rétrécit (ex: maj realtime), on borne l'index actif.
+  useEffect(() => {
+    if (photoIndex >= total && total > 0) setPhotoIndex(0);
+  }, [total, photoIndex]);
 
   const next = useCallback(() => {
     setPhotoIndex((i) => (i + 1) % Math.max(1, total));
