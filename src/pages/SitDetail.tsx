@@ -218,16 +218,15 @@ const SitDetail = () => {
     }, 800);
   }, [sit, isOwnerCheck]);
 
-  if (loading) return <div className="p-6 md:p-10 text-muted-foreground">Chargement...</div>;
+  if (loading) return <SitDetailSkeleton />;
   if (!sit) return <div className="p-6 md:p-10"><p>Annonce introuvable.</p></div>;
   if (id?.startsWith("demo-")) return <Navigate to="/search" replace />;
-
-  const shouldNoindex = ["completed", "cancelled", "expired"].includes(sit.status);
 
   const photos: string[] = (property as any)?.photos || [];
   const avgRating = reviews.length > 0 ? (reviews.reduce((s: number, r: any) => s + r.overall_rating, 0) / reviews.length).toFixed(1) : null;
   const isOwner = sit.user_id === user?.id;
   const isDraft = sit.status === "draft";
+  const canCancel = isOwner && (sit.status === "published" || sit.status === "confirmed");
 
   const badges: string[] = [];
   if (sitterProfile && (activeRole === "sitter" || user?.role === "sitter" || user?.role === "both")) {
@@ -256,14 +255,8 @@ const SitDetail = () => {
     setSit({ ...sit, status: "published" });
     toast({ title: "Annonce publiée", description: "Les gardiens peuvent maintenant candidater." });
   };
-  const statusLabel: Record<string, { label: string; className: string }> = {
-    draft: { label: "Brouillon", className: "bg-muted text-muted-foreground" },
-    published: { label: "Publiée", className: "bg-primary/10 text-primary" },
-    confirmed: { label: "Confirmée", className: "bg-primary/10 text-primary" },
-    completed: { label: "Terminée", className: "bg-accent text-muted-foreground" },
-    cancelled: { label: "Annulée", className: "bg-destructive/10 text-destructive" },
-  };
-  const status = statusLabel[sit.status] || statusLabel.draft;
+
+  const status = getSitStatusConfig(sit.status);
 
   return (
     <div className="p-6 md:p-10 max-w-4xl mx-auto animate-fade-in pb-44 md:pb-40">
