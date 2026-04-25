@@ -30,8 +30,11 @@ const SitterStatusBar = ({
   const dividerZone2 = compact
     ? "border-b border-border"
     : "border-b md:border-b-0 md:border-r border-border";
+  const wrapperCls = compact
+    ? "mb-6"
+    : "mx-4 sm:mx-5 md:mx-8 mb-6 md:mb-8";
   return (
-  <div className={`mx-4 sm:mx-5 md:mx-8 mb-6 md:mb-8 bg-card border border-border rounded-2xl overflow-hidden grid ${gridCls}`}>
+  <div className={`${wrapperCls} bg-card border border-border rounded-2xl overflow-hidden grid ${gridCls}`}>
     {/* Zone 1 — MON PROFIL */}
     <div className={`p-4 md:p-5 ${dividerZone1}`}>
       <p className="text-xs uppercase tracking-widest text-muted-foreground font-sans mb-3">Mon profil</p>
