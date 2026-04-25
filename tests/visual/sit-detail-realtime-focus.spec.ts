@@ -210,7 +210,11 @@ test.describe("Realtime — focus reste logique après mise à jour exogène", (
     // En headless, click() pose un focus fiable là où locator.focus() peut être ignoré.
     await initialTarget.click({ force: true, position: { x: 4, y: 4 } });
 
+    currentPhase = "focus-before-emit";
     const focusBefore = await describeActiveElement(pageA);
+    currentFocusLog.push(
+      await snapshotFocusEntry(pageA, currentFocusLog.length + 1, "click(<initialTarget>)", "phase=focus-before-emit")
+    );
     expect(
       focusBefore.isBody,
       `Le focus initial doit être sur un élément focusable de <main>, pas sur body. Got: ${JSON.stringify(focusBefore)}`
