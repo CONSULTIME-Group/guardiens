@@ -131,31 +131,52 @@ const MonAnnonceCard = memo(({ sits, pets, propertyType, propertyEnvironment, pe
         )}
       </div>
 
-      {/* Encart candidatures en attente — visible immédiatement */}
-      {isActive && pendingAppCount > 0 && (
-        <button
-          type="button"
-          onClick={() => navigate(`/sits/${currentSit.id}#candidatures`)}
-          className="w-full flex items-center justify-between gap-3 rounded-xl border border-primary/30 bg-primary/5 hover:bg-primary/10 px-3 py-2.5 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-          aria-label={`${pendingAppCount} candidature${pendingAppCount > 1 ? "s" : ""} en attente — voir les candidats`}
-        >
-          <span className="flex items-center gap-2.5 min-w-0">
-            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/15 text-primary shrink-0">
+      {/* Encart candidatures — visible immédiatement, y compris à 0 */}
+      {isActive && (
+        pendingAppCount > 0 ? (
+          <button
+            type="button"
+            onClick={() => navigate(`/sits/${currentSit.id}#candidatures`)}
+            className="w-full flex items-center justify-between gap-3 rounded-xl border border-primary/30 bg-primary/5 hover:bg-primary/10 px-3 py-2.5 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            aria-label={`${pendingAppCount} candidature${pendingAppCount > 1 ? "s" : ""} en attente — voir les candidats`}
+          >
+            <span className="flex items-center gap-2.5 min-w-0">
+              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/15 text-primary shrink-0">
+                <Inbox className="h-4 w-4" />
+              </span>
+              <span className="flex flex-col min-w-0">
+                <span className="text-sm font-semibold text-foreground">
+                  {pendingAppCount} candidature{pendingAppCount > 1 ? "s" : ""} en attente
+                </span>
+                <span className="text-xs text-muted-foreground">
+                  {appCount > pendingAppCount
+                    ? `sur ${appCount} reçue${appCount > 1 ? "s" : ""} au total`
+                    : "À examiner dès maintenant"}
+                </span>
+              </span>
+            </span>
+            <ArrowRight className="h-4 w-4 text-primary shrink-0" aria-hidden="true" />
+          </button>
+        ) : (
+          <div
+            className="w-full flex items-center gap-3 rounded-xl border border-dashed border-border bg-muted/30 px-3 py-2.5"
+            role="status"
+            aria-label="0 candidature en attente"
+          >
+            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-muted text-muted-foreground shrink-0">
               <Inbox className="h-4 w-4" />
             </span>
             <span className="flex flex-col min-w-0">
               <span className="text-sm font-semibold text-foreground">
-                {pendingAppCount} candidature{pendingAppCount > 1 ? "s" : ""} en attente
+                0 candidature en attente
               </span>
               <span className="text-xs text-muted-foreground">
-                {appCount > pendingAppCount
-                  ? `sur ${appCount} reçue${appCount > 1 ? "s" : ""} au total`
-                  : "À examiner dès maintenant"}
+                Aucune candidature à examiner
+                {appCount > 0 ? ` — ${appCount} déjà traitée${appCount > 1 ? "s" : ""}` : ""}
               </span>
             </span>
-          </span>
-          <ArrowRight className="h-4 w-4 text-primary shrink-0" aria-hidden="true" />
-        </button>
+          </div>
+        )
       )}
 
       {/* Pet mini-icons */}
