@@ -98,16 +98,49 @@ const OwnerSitView = ({
   // sync if parent re-fetches
   useEffect(() => setInternalAppCount(appCount), [appCount]);
 
+  // Sauvegarde debounced des overrides logement/animaux.
+  // - Stocke la dernière valeur en attente dans `pendingOverrides` (ref)
+  //   pour pouvoir flusher de manière synchrone en cas de unmount/navigation.
+  // - Sans ce flush, l'utilisateur qui quitte la page < 800ms après son
+  //   dernier caractère perd sa saisie.
   const overrideSaveTimeout = useRef<NodeJS.Timeout | null>(null);
+  const pendingOverrides = useRef<Partial<Record<"logement_override" | "animaux_override", string>>>(
+    {},
+  );
+
+  const flushOverrides = useCallback(async () => {
+    if (overrideSaveTimeout.current) {
+      clearTimeout(overrideSaveTimeout.current);
+      overrideSaveTimeout.current = null;
+    }
+    const payload = pendingOverrides.current;
+    if (Object.keys(payload).length === 0) return;
+    pendingOverrides.current = {};
+    await supabase.from("sits").update(payload as any).eq("id", sit.id);
+  }, [sit.id]);
+
   const saveOverride = useCallback(
     (field: "logement_override" | "animaux_override", value: string) => {
+      pendingOverrides.current[field] = value;
       if (overrideSaveTimeout.current) clearTimeout(overrideSaveTimeout.current);
-      overrideSaveTimeout.current = setTimeout(async () => {
-        await supabase.from("sits").update({ [field]: value } as any).eq("id", sit.id);
+      overrideSaveTimeout.current = setTimeout(() => {
+        void flushOverrides();
       }, 800);
     },
-    [sit.id],
+    [flushOverrides],
   );
+
+  // Flush à l'unmount + au beforeunload (fermeture/onglet) pour ne rien perdre.
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      void flushOverrides();
+    };
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+      void flushOverrides();
+    };
+  }, [flushOverrides]);
 
   const isDraft = sit.status === "draft";
   // canCancel — propriétaire :
@@ -116,6 +149,12 @@ const OwnerSitView = ({
   // - in_progress : possible mais on force le contact direct ; non géré ici (cf. message d'aide modal)
   // - draft / completed / cancelled / expired : pas d'annulation pertinente
   const canCancel = sit.status === "published" || sit.status === "confirmed";
+
+  // Tab par défaut intelligent :
+  // - draft : pas de candidatures possibles → on ouvre directement sur "Logement"
+  //   (la zone que l'owner remplit le plus souvent avant publication).
+  // - autres statuts : on garde "Candidatures" comme accueil naturel.
+  const defaultTab = isDraft ? "housing" : "candidatures";
   const avgRating =
     reviews.length > 0
       ? (reviews.reduce((s: number, r: any) => s + r.overall_rating, 0) / reviews.length).toFixed(1)
