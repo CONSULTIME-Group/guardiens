@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef, useCallback } from "react";
 import { differenceInMonths } from "date-fns";
 import { Award, ChevronDown } from "lucide-react";
 import BadgeGridSection from "@/components/badges/BadgeGridSection";
@@ -23,6 +23,21 @@ const SitterBadgesSection = ({ groupedBadges, condensed = false }: SitterBadgesS
   );
 
   const [open, setOpen] = useState(activeCount > 0);
+  const toggleRef = useRef<HTMLButtonElement>(null);
+
+  const handleToggle = useCallback(() => {
+    setOpen((prev) => {
+      const next = !prev;
+      // Quand on referme la grille, on rapatrie le focus sur le bouton
+      // pour que l'utilisateur clavier ne perde pas sa position.
+      if (!next) {
+        requestAnimationFrame(() => {
+          toggleRef.current?.focus();
+        });
+      }
+      return next;
+    });
+  }, []);
 
   if (!condensed) {
     return (
@@ -57,12 +72,13 @@ const SitterBadgesSection = ({ groupedBadges, condensed = false }: SitterBadgesS
         {`Badges actifs : ${activeCount} sur ${total}.`}
       </p>
       <button
+        ref={toggleRef}
         type="button"
-        onClick={() => setOpen((o) => !o)}
+        onClick={handleToggle}
         aria-expanded={open}
         aria-controls="sitter-badges-content"
         aria-label={`${actionText}. ${summaryText}.`}
-        className="w-full flex items-center justify-between gap-2 sm:gap-3 rounded-xl border border-border/60 bg-card/50 px-3 sm:px-4 py-2.5 sm:py-3 hover:bg-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring transition-colors"
+        className="w-full flex items-center justify-between gap-2 sm:gap-3 rounded-xl border border-border/60 bg-card/50 px-3 sm:px-4 py-2.5 sm:py-3 hover:bg-card focus:outline-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background transition-colors"
       >
         <span className="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
           <span
