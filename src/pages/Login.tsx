@@ -11,6 +11,7 @@ import { ToastAction } from "@/components/ui/toast";
 import { getSignupRedirectUrl } from "@/lib/authRedirect";
 import { Eye, EyeOff } from "lucide-react";
 import { getAuthFieldAttrs } from "@/lib/inAppBrowser";
+import { mapAuthError } from "@/lib/authErrorMessages";
 const authIllustration = "https://erhccyqevdyevpyctsjj.supabase.co/storage/v1/object/public/property-photos/misc/auth-illustration.webp";
 
 const Login = () => {
@@ -33,40 +34,51 @@ const Login = () => {
       await login(email.trim().toLowerCase(), password);
       navigate("/dashboard", { replace: true });
     } catch (error: any) {
-      const msg = error.message;
-      if (msg === "Invalid login credentials") {
-        setPasswordError("Email ou mot de passe incorrect.");
+      const info = mapAuthError(error);
+
+      if (info.code === "invalid_credentials") {
+        // Erreur inline sur le champ mot de passe (UX la plus claire)
+        setPasswordError(`${info.title}. ${info.description ?? ""}`.trim());
         setFailedAttempts((n) => n + 1);
-      } else if (msg === "Email not confirmed") {
+      } else if (info.code === "email_not_confirmed") {
         const handleResend = async () => {
           const { error: resendError } = await supabase.auth.resend({
             type: "signup",
             email,
             options: { emailRedirectTo: getSignupRedirectUrl() },
           });
-          toast({
-            title: resendError ? "Erreur" : "Email envoyé !",
-            description: resendError
-              ? "Impossible de renvoyer l'email. Réessayez plus tard."
-              : "Un nouvel email de confirmation vient d'être envoyé.",
-            variant: resendError ? "destructive" : "default",
-          });
+          if (resendError) {
+            const resendInfo = mapAuthError(resendError);
+            toast({
+              variant: "destructive",
+              title: resendInfo.title,
+              description: resendInfo.description,
+            });
+          } else {
+            toast({
+              title: "Email renvoyé !",
+              description: "Un nouvel email de confirmation vient d'être envoyé.",
+            });
+          }
         };
         toast({
           variant: "destructive",
-          title: "Email non confirmé",
-          description: "Vérifiez votre boîte mail et cliquez sur le lien de confirmation.",
+          title: info.title,
+          description: info.description,
           action: (
             <ToastAction altText="Renvoyer" onClick={handleResend} className="border-white text-white hover:bg-white/20">
-              Renvoyer
+              Renvoyer l'email
             </ToastAction>
           ),
         });
+      } else if (info.code === "rate_limited") {
+        // Inline aussi : c'est lié à la saisie du formulaire
+        setPasswordError(`${info.title}. ${info.description ?? ""}`.trim());
       } else {
         toast({
           variant: "destructive",
-          title: "Erreur de connexion",
-          description: "Une erreur est survenue. Veuillez réessayer.",
+          title: info.title,
+          description: info.description,
         });
       }
     } finally {
