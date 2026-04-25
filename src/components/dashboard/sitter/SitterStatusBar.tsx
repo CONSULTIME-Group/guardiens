@@ -132,14 +132,21 @@ const SitterStatusBar = ({
           <div
             role="tablist"
             aria-label="Contexte des candidatures"
-            className="inline-flex items-center rounded-full border border-border bg-muted/40 p-0.5 text-[10px] font-sans"
+            aria-busy={loadingReceived || undefined}
+            className={`inline-flex items-center rounded-full border border-border bg-muted/40 p-0.5 text-[10px] font-sans ${
+              loadingReceived ? "opacity-60 cursor-not-allowed" : ""
+            }`}
           >
             <button
               type="button"
               role="tab"
               aria-selected={appView === "sent"}
-              onClick={() => setAppView("sent")}
-              className={`px-2 py-0.5 rounded-full transition-colors ${
+              disabled={loadingReceived}
+              onClick={() => {
+                if (loadingReceived || appView === "sent") return;
+                setAppView("sent");
+              }}
+              className={`px-2 py-0.5 rounded-full transition-colors disabled:cursor-not-allowed ${
                 appView === "sent"
                   ? "bg-background text-foreground shadow-sm"
                   : "text-muted-foreground hover:text-foreground"
@@ -151,8 +158,12 @@ const SitterStatusBar = ({
               type="button"
               role="tab"
               aria-selected={appView === "received"}
-              onClick={() => setAppView("received")}
-              className={`px-2 py-0.5 rounded-full transition-colors ${
+              disabled={loadingReceived}
+              onClick={() => {
+                if (loadingReceived || appView === "received") return;
+                setAppView("received");
+              }}
+              className={`px-2 py-0.5 rounded-full transition-colors disabled:cursor-not-allowed ${
                 appView === "received"
                   ? "bg-background text-foreground shadow-sm"
                   : "text-muted-foreground hover:text-foreground"
