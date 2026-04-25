@@ -12,6 +12,7 @@ import { cn } from "@/lib/utils";
 import { getSignupRedirectUrl } from "@/lib/authRedirect";
 import { useToast } from "@/hooks/use-toast";
 import { trackEvent, trackEventWithUserId, mapSignupError } from "@/lib/analytics";
+import { mapAuthError } from "@/lib/authErrorMessages";
 import { Eye, EyeOff, MailCheck, Info } from "lucide-react";
 import {
   Dialog,
@@ -239,15 +240,25 @@ const Register = () => {
         setFormError(
           "L'inscription prend plus de temps que prévu. Si vous n'avez pas reçu d'email de confirmation dans 2 minutes, réessayez."
         );
-      } else if (error.message?.includes("already registered") || error.message?.includes("already been registered")) {
-        setExistingAccountOpen(true);
-    } else if (error.message?.includes("weak_password") || error.message?.includes("weak") || error.code === "weak_password") {
-      setFormError("Ce mot de passe est trop courant ou a été compromis. Choisissez un mot de passe plus unique (ex : une phrase de passe).");
       } else {
-        toast({
-          variant: "destructive",
-          title: "Une erreur est survenue. Réessayez dans quelques instants.",
-        });
+        const info = mapAuthError(error);
+        if (info.code === "user_already_exists") {
+          // Dialog dédié : permet de rebondir vers /login pré-rempli
+          setExistingAccountOpen(true);
+        } else if (
+          info.code === "weak_password" ||
+          info.code === "invalid_email" ||
+          info.code === "rate_limited"
+        ) {
+          // Erreur liée à la saisie → inline sous le formulaire (plus visible qu'un toast)
+          setFormError(`${info.title}. ${info.description ?? ""}`.trim());
+        } else {
+          toast({
+            variant: "destructive",
+            title: info.title,
+            description: info.description,
+          });
+        }
       }
     } finally {
       setIsLoading(false);
