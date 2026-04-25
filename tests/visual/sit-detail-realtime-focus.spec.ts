@@ -378,7 +378,11 @@ test.describe("Realtime — focus reste logique après mise à jour exogène", (
     expect(await initialTarget.count()).toBeGreaterThan(0);
     await pageA.bringToFront();
     await initialTarget.click({ force: true, position: { x: 4, y: 4 } });
+    currentPhase = "focus-before-emit";
     const focusBefore = await describeActiveElement(pageA);
+    currentFocusLog.push(
+      await snapshotFocusEntry(pageA, currentFocusLog.length + 1, "click(<initialTarget>)", "phase=focus-before-emit")
+    );
     expect(focusBefore.isBody).toBe(false);
 
     // Émet l'UPDATE realtime côté A (cancelled par un autre onglet)
