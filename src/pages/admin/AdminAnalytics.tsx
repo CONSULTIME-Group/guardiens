@@ -41,14 +41,37 @@ interface TopPage {
   views: number;
 }
 
+// Libellé utilisé quand la source est vide, invalide ou non reconnue.
+const UNKNOWN_SOURCE_LABEL = "(autres / inconnu)";
+
 // Normalise une URL pathname pour regrouper les chemins dynamiques.
 // Ex: /gardiens/<uuid> → /gardiens/:id, /guides/lyon → /guides/:slug
-function normalizeSource(raw: string | null | undefined): string | null {
-  if (!raw) return null;
-  let p = raw.trim();
-  if (!p) return null;
+// Retourne TOUJOURS une chaîne — les sources vides/invalides tombent dans
+// UNKNOWN_SOURCE_LABEL pour ne pas perdre de lignes dans l'histogramme.
+function normalizeSource(raw: string | null | undefined): string {
+  if (raw == null) return UNKNOWN_SOURCE_LABEL;
+  let p = String(raw).trim();
+  if (!p) return UNKNOWN_SOURCE_LABEL;
+
   // Retire querystring/fragment au cas où
-  p = p.split("?")[0].split("#")[0];
+  p = p.split("?")[0].split("#")[0].trim();
+  if (!p) return UNKNOWN_SOURCE_LABEL;
+
+  // Si on reçoit une URL absolue (ex: "https://guardiens.fr/foo"), on en extrait le pathname
+  if (/^https?:\/\//i.test(p)) {
+    try {
+      p = new URL(p).pathname || "/";
+    } catch {
+      return UNKNOWN_SOURCE_LABEL;
+    }
+  }
+
+  // À ce stade on attend un chemin commençant par "/"
+  if (!p.startsWith("/")) {
+    // Source non-URL (ex: "header_cta", "email_link") — on la garde telle quelle
+    return p;
+  }
+
   // Retire trailing slash sauf racine
   if (p.length > 1 && p.endsWith("/")) p = p.slice(0, -1);
 
@@ -73,7 +96,7 @@ function normalizeSource(raw: string | null | undefined): string | null {
     [/^\/avis\/.+$/, "/avis/:id"],
   ];
   for (const [re, repl] of dynamicPatterns) {
-    if (typeof repl === "string" && re.test(p)) return repl;
+    if (re.test(p)) return repl;
   }
   // UUID résiduel quelque part dans le path
   if (uuidRe.test(p)) {
