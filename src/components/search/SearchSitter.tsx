@@ -819,7 +819,7 @@ const SearchSitter = () => {
     const cardContent = (
       <div
         className={`bg-card rounded-2xl overflow-hidden border transition-shadow ${isClickable ? "cursor-pointer hover:shadow-md" : ""} ${isInactive ? "opacity-60 grayscale-[40%]" : ""} ${isDemo ? "border-amber-400 border-dashed ring-1 ring-amber-200/60" : "border-border"}`}
-        aria-disabled={isInactive || isDemo || undefined}
+        aria-disabled={isInactive || undefined}
       >
         {photos.length > 0 && (
           <div className="h-52 relative">
