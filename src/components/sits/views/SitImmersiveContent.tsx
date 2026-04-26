@@ -41,12 +41,22 @@ import {
 } from "lucide-react";
 import VerifiedBadge from "@/components/profile/VerifiedBadge";
 import BreedProfileCard from "@/components/breeds/BreedProfileCard";
+import LocationProfileCard from "@/components/location/LocationProfileCard";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Pill,
+  Utensils,
+  AlertTriangle,
+  Activity,
+  Footprints,
+  Clock,
+} from "lucide-react";
 import { slugify } from "@/lib/normalize";
 import { CITIES } from "@/data/cities";
 import { getCityContent } from "@/data/cityContent";
@@ -225,6 +235,24 @@ const ROUTINE_ICONS: Record<string, { icon: any; bg: string; fg: string }> = {
   "Après-midi": { icon: Sunset, bg: "bg-sky-100", fg: "text-sky-700" },
   Soir: { icon: Moon, bg: "bg-indigo-100", fg: "text-indigo-700" },
   Nuit: { icon: Moon, bg: "bg-slate-100", fg: "text-slate-700" },
+};
+
+const ACTIVITY_LEVEL_LABEL: Record<string, string> = {
+  low: "Calme",
+  moderate: "Modéré",
+  high: "Très actif",
+};
+const WALK_DURATION_LABEL: Record<string, string> = {
+  short: "Courte (15–30 min)",
+  medium: "Moyenne (30–60 min)",
+  long: "Longue (1 h ou +)",
+  none: "Pas de balade",
+};
+const ALONE_DURATION_LABEL: Record<string, string> = {
+  none: "Jamais seul",
+  short: "1 à 2 h",
+  medium: "3 à 5 h",
+  long: "Une journée",
 };
 
 const SitImmersiveContent = ({
@@ -515,103 +543,268 @@ const SitImmersiveContent = ({
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Colonne principale */}
         <div className="lg:col-span-2 space-y-6">
-          {/* Le cadre — visible si description, attentes ou équipements */}
-          {hasFrame && (
-            <section className="rounded-2xl border border-border bg-card p-5 md:p-6">
-              <h2 className="text-lg font-semibold mb-3">Le cadre</h2>
-              {expectations && (
-                <p className="text-sm text-foreground/90 leading-relaxed whitespace-pre-line mb-4">
-                  {expectations}
-                </p>
-              )}
-              {propertyDescription && (
-                <p className="text-sm text-muted-foreground leading-relaxed">
-                  {propertyDescription}
-                </p>
-              )}
-              {amenities.length > 0 && (
-                <div className="mt-4 pt-4 border-t border-border flex flex-wrap gap-2">
-                  {amenities.map((a) => {
-                    const meta = AMENITY_META[a];
-                    if (!meta) {
-                      return (
-                        <span
-                          key={a}
-                          className="inline-flex items-center gap-1.5 text-xs bg-accent text-accent-foreground rounded-full px-3 py-1"
-                        >
-                          {a}
-                        </span>
-                      );
-                    }
-                    const Ico = meta.icon;
-                    return (
-                      <span
-                        key={a}
-                        className="inline-flex items-center gap-1.5 text-xs bg-accent text-accent-foreground rounded-full px-3 py-1"
-                      >
-                        <Ico className="h-3.5 w-3.5" /> {meta.label}
-                      </span>
-                    );
-                  })}
-                </div>
-              )}
-            </section>
-          )}
+          <Tabs defaultValue="garde" className="w-full">
+            <TabsList className="w-full grid grid-cols-2 md:grid-cols-4 h-auto p-1 bg-muted/50 rounded-xl mb-6 sticky top-2 z-10 backdrop-blur supports-[backdrop-filter]:bg-muted/70">
+              <TabsTrigger value="garde" className="text-xs md:text-sm py-2 data-[state=active]:bg-background data-[state=active]:shadow-sm">
+                <Heart className="h-3.5 w-3.5 mr-1.5 hidden md:inline" />
+                La garde
+              </TabsTrigger>
+              <TabsTrigger value="animaux" className="text-xs md:text-sm py-2 data-[state=active]:bg-background data-[state=active]:shadow-sm">
+                <PawPrint className="h-3.5 w-3.5 mr-1.5 hidden md:inline" />
+                Animaux{safePets.length > 0 ? ` (${safePets.length})` : ""}
+              </TabsTrigger>
+              <TabsTrigger value="logement" className="text-xs md:text-sm py-2 data-[state=active]:bg-background data-[state=active]:shadow-sm">
+                <Home className="h-3.5 w-3.5 mr-1.5 hidden md:inline" />
+                Logement & quartier
+              </TabsTrigger>
+              <TabsTrigger value="attentes" className="text-xs md:text-sm py-2 data-[state=active]:bg-background data-[state=active]:shadow-sm">
+                <ShieldCheck className="h-3.5 w-3.5 mr-1.5 hidden md:inline" />
+                Attentes
+              </TabsTrigger>
+            </TabsList>
 
-          {/* Les animaux — visible uniquement si au moins un pet */}
-          {safePets.length > 0 && (
-            <section className="rounded-2xl border border-border bg-card p-5 md:p-6">
-              <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                <PawPrint className="h-5 w-5 text-primary" /> Vos pensionnaires
-              </h2>
-              <div className="space-y-5">
-                {safePets.map((pet, i) => (
-                  <div key={pet.id || i} className="flex gap-4">
-                    {/* Photo de l'animal */}
-                    <div className="shrink-0">
-                      {pet.photo_url ? (
-                        <img
-                          src={pet.photo_url}
-                          alt={pet.name || "Animal"}
-                          loading="lazy"
-                          className="w-20 h-20 md:w-24 md:h-24 rounded-xl object-cover border border-border"
-                        />
-                      ) : (
-                        <div className="w-20 h-20 md:w-24 md:h-24 rounded-xl bg-muted border border-border flex items-center justify-center text-3xl">
-                          {SPECIES_EMOJI[pet.species] || "🐾"}
-                        </div>
-                      )}
-                    </div>
+            {/* ========== ONGLET GARDE ========== */}
+            <TabsContent value="garde" className="space-y-6 mt-0">
+              {/* Mot du proprio — visible uniquement si owner_message non vide */}
+              {hasOwnerMessage && (
+                <section className="rounded-2xl border-2 border-primary/20 bg-primary/5 p-5 md:p-6">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Heart className="h-4 w-4 text-primary" />
+                    <h2 className="text-base font-semibold">Un mot de {ownerName}</h2>
+                  </div>
+                  <p className="text-sm text-foreground/90 leading-relaxed italic whitespace-pre-line">
+                    « {ownerMessage} »
+                  </p>
+                </section>
+              )}
 
-                    {/* Infos animal */}
-                    <div className="flex-1 min-w-0 border-l-2 border-primary/30 pl-4">
-                      <div className="flex items-baseline gap-2 flex-wrap mb-1">
-                        <span className="text-xl">{SPECIES_EMOJI[pet.species] || "🐾"}</span>
-                        {pet.name && (
-                          <h3 className="font-semibold text-foreground">{pet.name}</h3>
-                        )}
-                        {pet.breed && (
-                          <span className="text-sm text-muted-foreground">· {pet.breed}</span>
-                        )}
-                        {pet.age && (
-                          <span className="text-xs text-muted-foreground">· {pet.age}</span>
-                        )}
-                      </div>
-
-                      {/* Note du propriétaire — toujours prioritaire et visible */}
-                      {pet.owner_breed_note && (
-                        <p className="text-sm text-foreground/90 leading-relaxed mb-1">
-                          <span className="font-medium">Selon {ownerName} :</span>{" "}
-                          <span className="italic text-muted-foreground">{pet.owner_breed_note}</span>
+              {/* Journée type */}
+              {hasRoutine && (
+                <section className="rounded-2xl border border-border bg-card p-5 md:p-6">
+                  <h2 className="text-lg font-semibold mb-4">Une journée type</h2>
+                  {routine ? (
+                    <div className="space-y-4">
+                      {routine.blocks.map((b, i) => {
+                        const meta = ROUTINE_ICONS[b.label] || ROUTINE_ICONS.Matin;
+                        const Ico = meta.icon;
+                        return (
+                          <div key={i} className="flex gap-3">
+                            <div
+                              className={`shrink-0 w-9 h-9 rounded-full flex items-center justify-center ${meta.bg} ${meta.fg}`}
+                            >
+                              <Ico className="h-4 w-4" />
+                            </div>
+                            <div>
+                              <p className="text-sm font-medium">{b.label}</p>
+                              <p className="text-sm text-muted-foreground">{b.text}</p>
+                            </div>
+                          </div>
+                        );
+                      })}
+                      {routine.notes && (
+                        <p className="text-xs text-muted-foreground italic pt-2 border-t border-border">
+                          {routine.notes}
                         </p>
                       )}
-                      {pet.notes && (
-                        <p className="text-sm text-muted-foreground leading-relaxed">{pet.notes}</p>
+                    </div>
+                  ) : (
+                    (() => {
+                      const isEn =
+                        typeof navigator !== "undefined" &&
+                        !!navigator.language?.toLowerCase().startsWith("en");
+                      const chipLabel = isEn ? "Free format" : "Format libre";
+                      const chipTooltip = isEn
+                        ? "The text could not be structured into Morning / Noon / Evening blocks. Encourage the owner to prefix each line with a time of day."
+                        : "Le texte n'a pas pu être structuré en blocs Matin / Midi / Soir. Encouragez le propriétaire à préfixer chaque ligne par un moment de la journée.";
+                      return (
+                        <div className="space-y-2" data-testid="routine-fallback-freetext">
+                          <span
+                            className="inline-flex items-center gap-1 rounded-full bg-muted/60 text-muted-foreground text-[11px] px-2 py-0.5 border border-border"
+                            title={chipTooltip}
+                            aria-label={chipLabel}
+                          >
+                            <Info className="h-3 w-3" />
+                            {chipLabel}
+                          </span>
+                          <p className="text-sm text-foreground whitespace-pre-line leading-relaxed">
+                            {cleanFreeText(sit.daily_routine)}
+                          </p>
+                        </div>
+                      );
+                    })()
+                  )}
+                </section>
+              )}
+
+              {!hasOwnerMessage && !hasRoutine && (
+                <p className="text-sm text-muted-foreground italic text-center py-8">
+                  {ownerName} n'a pas encore détaillé le déroulé de la garde.
+                </p>
+              )}
+            </TabsContent>
+
+            {/* ========== ONGLET ANIMAUX ========== */}
+            <TabsContent value="animaux" className="space-y-5 mt-0">
+              {safePets.length > 0 ? (
+                safePets.map((pet, i) => {
+                  const hasMedication =
+                    typeof pet.medication === "string" &&
+                    pet.medication.trim().length > 0 &&
+                    !/^aucune?$|^non$|^rien$/i.test(pet.medication.trim());
+                  const hasFood = typeof pet.food === "string" && pet.food.trim().length > 0;
+                  const hasSpecialNeeds =
+                    typeof pet.special_needs === "string" && pet.special_needs.trim().length > 0;
+                  const hasCharacter =
+                    typeof pet.character === "string" && pet.character.trim().length > 0;
+                  const activityLabel = pet.activity_level
+                    ? ACTIVITY_LEVEL_LABEL[pet.activity_level]
+                    : null;
+                  const walkLabel = pet.walk_duration
+                    ? WALK_DURATION_LABEL[pet.walk_duration]
+                    : null;
+                  const aloneLabel = pet.alone_duration
+                    ? ALONE_DURATION_LABEL[pet.alone_duration]
+                    : null;
+
+                  return (
+                    <section
+                      key={pet.id || i}
+                      className="rounded-2xl border border-border bg-card p-5 md:p-6"
+                    >
+                      <div className="flex gap-4 mb-4">
+                        {/* Photo */}
+                        <div className="shrink-0">
+                          {pet.photo_url ? (
+                            <img
+                              src={pet.photo_url}
+                              alt={pet.name || "Animal"}
+                              loading="lazy"
+                              className="w-24 h-24 md:w-28 md:h-28 rounded-xl object-cover border border-border"
+                            />
+                          ) : (
+                            <div className="w-24 h-24 md:w-28 md:h-28 rounded-xl bg-muted border border-border flex items-center justify-center text-4xl">
+                              {SPECIES_EMOJI[pet.species] || "🐾"}
+                            </div>
+                          )}
+                        </div>
+
+                        {/* En-tête */}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-baseline gap-2 flex-wrap mb-1">
+                            <span className="text-xl">{SPECIES_EMOJI[pet.species] || "🐾"}</span>
+                            {pet.name && (
+                              <h3 className="text-lg font-semibold text-foreground">{pet.name}</h3>
+                            )}
+                            {pet.breed && (
+                              <span className="text-sm text-muted-foreground">· {pet.breed}</span>
+                            )}
+                            {pet.age && (
+                              <span className="text-xs text-muted-foreground">· {pet.age}</span>
+                            )}
+                          </div>
+                          {hasCharacter && (
+                            <p className="text-sm text-muted-foreground leading-relaxed">
+                              {pet.character}
+                            </p>
+                          )}
+                          {pet.owner_breed_note && (
+                            <p className="text-sm text-foreground/90 leading-relaxed mt-1">
+                              <span className="font-medium">Selon {ownerName} :</span>{" "}
+                              <span className="italic text-muted-foreground">
+                                {pet.owner_breed_note}
+                              </span>
+                            </p>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Médication — alerte mise en avant */}
+                      {hasMedication && (
+                        <div className="rounded-xl border-2 border-amber-300 bg-amber-50 dark:bg-amber-950/30 dark:border-amber-700/50 p-3 md:p-4 mb-3 flex gap-3">
+                          <Pill className="h-5 w-5 text-amber-700 dark:text-amber-300 shrink-0 mt-0.5" />
+                          <div className="min-w-0">
+                            <p className="text-xs font-semibold uppercase tracking-wide text-amber-800 dark:text-amber-200 mb-1">
+                              Médication à administrer
+                            </p>
+                            <p className="text-sm text-amber-900 dark:text-amber-100 whitespace-pre-line leading-relaxed">
+                              {pet.medication}
+                            </p>
+                          </div>
+                        </div>
                       )}
 
-                      {/* Fiche de race repliée par défaut */}
+                      {/* Besoins spéciaux */}
+                      {hasSpecialNeeds && (
+                        <div className="rounded-xl border border-border bg-muted/40 p-3 md:p-4 mb-3 flex gap-3">
+                          <AlertTriangle className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                          <div className="min-w-0">
+                            <p className="text-xs font-semibold uppercase tracking-wide text-foreground mb-1">
+                              Besoins spéciaux
+                            </p>
+                            <p className="text-sm text-foreground/90 whitespace-pre-line leading-relaxed">
+                              {pet.special_needs}
+                            </p>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Alimentation */}
+                      {hasFood && (
+                        <div className="rounded-xl border border-border bg-card p-3 md:p-4 mb-3 flex gap-3">
+                          <Utensils className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                          <div className="min-w-0">
+                            <p className="text-xs font-semibold uppercase tracking-wide text-foreground mb-1">
+                              Alimentation
+                            </p>
+                            <p className="text-sm text-muted-foreground whitespace-pre-line leading-relaxed">
+                              {pet.food}
+                            </p>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Quotidien : activité, balade, solitude */}
+                      {(activityLabel || walkLabel || aloneLabel) && (
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-3">
+                          {activityLabel && (
+                            <div className="rounded-lg bg-muted/40 p-3 flex items-start gap-2">
+                              <Activity className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+                              <div>
+                                <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
+                                  Activité
+                                </p>
+                                <p className="text-sm font-medium">{activityLabel}</p>
+                              </div>
+                            </div>
+                          )}
+                          {walkLabel && (
+                            <div className="rounded-lg bg-muted/40 p-3 flex items-start gap-2">
+                              <Footprints className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+                              <div>
+                                <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
+                                  Balade
+                                </p>
+                                <p className="text-sm font-medium">{walkLabel}</p>
+                              </div>
+                            </div>
+                          )}
+                          {aloneLabel && (
+                            <div className="rounded-lg bg-muted/40 p-3 flex items-start gap-2">
+                              <Clock className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+                              <div>
+                                <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
+                                  Solitude tolérée
+                                </p>
+                                <p className="text-sm font-medium">{aloneLabel}</p>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Fiche de race repliée */}
                       {pet.breed && (
-                        <Accordion type="single" collapsible className="mt-3">
+                        <Accordion type="single" collapsible className="mt-2">
                           <AccordionItem
                             value={`breed-${pet.id || i}`}
                             className="border border-border rounded-lg bg-accent/20 px-3"
@@ -632,83 +825,168 @@ const SitImmersiveContent = ({
                           </AccordionItem>
                         </Accordion>
                       )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </section>
-          )}
+                    </section>
+                  );
+                })
+              ) : (
+                <p className="text-sm text-muted-foreground italic text-center py-8">
+                  Aucun animal renseigné pour cette annonce.
+                </p>
+              )}
+            </TabsContent>
 
-          {/* Journée type — visible uniquement si daily_routine non vide */}
-          {hasRoutine && (
-            <section className="rounded-2xl border border-border bg-card p-5 md:p-6">
-              <h2 className="text-lg font-semibold mb-4">Une journée type</h2>
-              {routine ? (
-                <div className="space-y-4">
-                  {routine.blocks.map((b, i) => {
-                    const meta = ROUTINE_ICONS[b.label] || ROUTINE_ICONS.Matin;
-                    const Ico = meta.icon;
-                    return (
-                      <div key={i} className="flex gap-3">
-                        <div
-                          className={`shrink-0 w-9 h-9 rounded-full flex items-center justify-center ${meta.bg} ${meta.fg}`}
-                        >
-                          <Ico className="h-4 w-4" />
-                        </div>
-                        <div>
-                          <p className="text-sm font-medium">{b.label}</p>
-                          <p className="text-sm text-muted-foreground">{b.text}</p>
-                        </div>
-                      </div>
-                    );
-                  })}
-                  {routine.notes && (
-                    <p className="text-xs text-muted-foreground italic pt-2 border-t border-border">
-                      {routine.notes}
+            {/* ========== ONGLET LOGEMENT & QUARTIER ========== */}
+            <TabsContent value="logement" className="space-y-6 mt-0">
+              {/* Description du logement + équipements */}
+              {(propertyDescription || amenities.length > 0) && (
+                <section className="rounded-2xl border border-border bg-card p-5 md:p-6">
+                  <h2 className="text-lg font-semibold mb-3 flex items-center gap-2">
+                    <Home className="h-5 w-5 text-primary" /> Le logement
+                  </h2>
+                  {propertyDescription && (
+                    <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-line">
+                      {propertyDescription}
                     </p>
                   )}
-                </div>
-              ) : (
-                (() => {
-                  const isEn =
-                    typeof navigator !== "undefined" &&
-                    !!navigator.language?.toLowerCase().startsWith("en");
-                  const chipLabel = isEn ? "Free format" : "Format libre";
-                  const chipTooltip = isEn
-                    ? "The text could not be structured into Morning / Noon / Evening blocks. Encourage the owner to prefix each line with a time of day."
-                    : "Le texte n'a pas pu être structuré en blocs Matin / Midi / Soir. Encouragez le propriétaire à préfixer chaque ligne par un moment de la journée.";
-                  return (
-                    <div className="space-y-2" data-testid="routine-fallback-freetext">
-                      <span
-                        className="inline-flex items-center gap-1 rounded-full bg-muted/60 text-muted-foreground text-[11px] px-2 py-0.5 border border-border"
-                        title={chipTooltip}
-                        aria-label={chipLabel}
-                      >
-                        <Info className="h-3 w-3" />
-                        {chipLabel}
-                      </span>
-                      <p className="text-sm text-foreground whitespace-pre-line leading-relaxed">
-                        {cleanFreeText(sit.daily_routine)}
+                  {amenities.length > 0 && (
+                    <div className="mt-4 pt-4 border-t border-border">
+                      <p className="text-xs uppercase tracking-wide text-muted-foreground mb-2">
+                        Équipements disponibles
+                      </p>
+                      <div className="flex flex-wrap gap-2">
+                        {amenities.map((a) => {
+                          const meta = AMENITY_META[a];
+                          if (!meta) {
+                            return (
+                              <span
+                                key={a}
+                                className="inline-flex items-center gap-1.5 text-xs bg-accent text-accent-foreground rounded-full px-3 py-1"
+                              >
+                                {a}
+                              </span>
+                            );
+                          }
+                          const Ico = meta.icon;
+                          return (
+                            <span
+                              key={a}
+                              className="inline-flex items-center gap-1.5 text-xs bg-accent text-accent-foreground rounded-full px-3 py-1"
+                            >
+                              <Ico className="h-3.5 w-3.5" /> {meta.label}
+                            </span>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+                </section>
+              )}
+
+              {/* Photos supplémentaires */}
+              {photos.length > 3 && (
+                <section className="rounded-2xl border border-border bg-card p-5 md:p-6">
+                  <h2 className="text-lg font-semibold mb-3">Photos du logement</h2>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                    {photos.slice(3).map((p, i) => (
+                      <img
+                        key={i}
+                        src={p}
+                        alt={`Photo ${i + 4}`}
+                        loading="lazy"
+                        className="w-full h-32 md:h-40 object-cover rounded-lg border border-border"
+                      />
+                    ))}
+                  </div>
+                </section>
+              )}
+
+              {/* Profil quartier (LocationProfileCard) */}
+              {cityName && ownerPostalCode && (
+                <section className="rounded-2xl border border-border bg-card p-5 md:p-6">
+                  <h2 className="text-lg font-semibold mb-3 flex items-center gap-2">
+                    <MapPin className="h-5 w-5 text-primary" /> Le quartier
+                  </h2>
+                  <LocationProfileCard city={cityName} postalCode={ownerPostalCode} />
+                </section>
+              )}
+
+              {/* Lien guide local */}
+              {hasLocalGuide && (
+                <Link
+                  to={`/guides/${citySlug}`}
+                  className="block rounded-2xl border border-border bg-card p-5 hover:border-primary/50 transition-colors group"
+                >
+                  <div className="flex items-start gap-3">
+                    <div className="shrink-0 w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center">
+                      <BookOpen className="h-5 w-5" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs uppercase tracking-wide text-muted-foreground mb-0.5">
+                        Guide local
+                      </p>
+                      <p className="font-semibold text-sm group-hover:text-primary transition-colors">
+                        Découvrir {cityName}
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                        Bonnes adresses, vétérinaires, parcs à chiens et spots à connaître.
                       </p>
                     </div>
-                  );
-                })()
+                    <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-0.5 transition-all shrink-0 mt-2" />
+                  </div>
+                </Link>
               )}
-            </section>
-          )}
 
-          {/* Mot du proprio — visible uniquement si owner_message non vide */}
-          {hasOwnerMessage && (
-            <section className="rounded-2xl border-2 border-primary/20 bg-primary/5 p-5 md:p-6">
-              <div className="flex items-center gap-2 mb-3">
-                <Heart className="h-4 w-4 text-primary" />
-                <h2 className="text-base font-semibold">Un mot de {ownerName}</h2>
-              </div>
-              <p className="text-sm text-foreground/90 leading-relaxed italic whitespace-pre-line">
-                « {ownerMessage} »
-              </p>
-            </section>
-          )}
+              {!propertyDescription && amenities.length === 0 && photos.length <= 3 && !cityName && (
+                <p className="text-sm text-muted-foreground italic text-center py-8">
+                  Pas encore d'information sur le logement ou le quartier.
+                </p>
+              )}
+            </TabsContent>
+
+            {/* ========== ONGLET ATTENTES ========== */}
+            <TabsContent value="attentes" className="space-y-6 mt-0">
+              {expectations ? (
+                <section className="rounded-2xl border border-border bg-card p-5 md:p-6">
+                  <h2 className="text-lg font-semibold mb-3 flex items-center gap-2">
+                    <ShieldCheck className="h-5 w-5 text-primary" />
+                    Ce que {ownerName} attend du gardien
+                  </h2>
+                  <p className="text-sm text-foreground/90 leading-relaxed whitespace-pre-line">
+                    {expectations}
+                  </p>
+                </section>
+              ) : (
+                <p className="text-sm text-muted-foreground italic text-center py-8">
+                  {ownerName} n'a pas formulé d'attentes spécifiques. N'hésitez pas à en discuter
+                  ensemble.
+                </p>
+              )}
+
+              {environments.filter((e) => ENV_META[e]).length > 0 && (
+                <section className="rounded-2xl border border-border bg-card p-5 md:p-6">
+                  <h2 className="text-lg font-semibold mb-3 flex items-center gap-2">
+                    <Trees className="h-5 w-5 text-primary" /> Cadre de vie
+                  </h2>
+                  <div className="flex flex-wrap gap-2">
+                    {environments
+                      .filter((e) => ENV_META[e])
+                      .map((e) => {
+                        const meta = ENV_META[e]!;
+                        const Ico = meta.icon;
+                        return (
+                          <span
+                            key={e}
+                            className="inline-flex items-center gap-1.5 text-sm bg-muted rounded-full px-3 py-1.5"
+                          >
+                            <Ico className="h-4 w-4" /> {meta.label}
+                          </span>
+                        );
+                      })}
+                  </div>
+                </section>
+              )}
+            </TabsContent>
+          </Tabs>
         </div>
 
         {/* Sidebar */}
@@ -759,54 +1037,7 @@ const SitImmersiveContent = ({
           {/* Slot CTA principal (candidature, gestion owner…) */}
           {ctaSlot}
 
-          {/* Guide local — visible uniquement si un guide éditorial existe pour la ville */}
-          {hasLocalGuide && (
-            <Link
-              to={`/guides/${citySlug}`}
-              className="block rounded-2xl border border-border bg-card p-5 hover:border-primary/50 transition-colors group"
-            >
-              <div className="flex items-start gap-3">
-                <div className="shrink-0 w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center">
-                  <BookOpen className="h-5 w-5" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs uppercase tracking-wide text-muted-foreground mb-0.5">
-                    Guide local
-                  </p>
-                  <p className="font-semibold text-sm group-hover:text-primary transition-colors">
-                    Découvrir {cityName}
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
-                    Bonnes adresses, vétérinaires, parcs à chiens et spots à connaître.
-                  </p>
-                </div>
-                <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-0.5 transition-all shrink-0 mt-2" />
-              </div>
-            </Link>
-          )}
-
-          {/* Encart "Guide en préparation" — la ville n'a pas encore de guide local */}
-          {showGuideComingSoon && (
-            <div className="rounded-2xl border border-dashed border-border bg-muted/30 p-5">
-              <div className="flex items-start gap-3">
-                <div className="shrink-0 w-10 h-10 rounded-full bg-muted text-muted-foreground flex items-center justify-center">
-                  <BookOpen className="h-5 w-5" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs uppercase tracking-wide text-muted-foreground mb-0.5">
-                    Guide local
-                  </p>
-                  <p className="font-semibold text-sm text-foreground">
-                    Le guide de {cityName} arrive bientôt
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
-                    On prépare une sélection de bonnes adresses, parcs et vétérinaires
-                    pour cette ville. Le lien apparaîtra ici dès sa publication.
-                  </p>
-                </div>
-              </div>
-            </div>
-          )}
+          {/* Guide local & encart "guide à venir" — désormais dans l'onglet "Logement & quartier" */}
 
           {/* Autres gardiens du coin — lien vers la recherche pré-remplie */}
           {showSittersLink && (
