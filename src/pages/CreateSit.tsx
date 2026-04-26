@@ -232,6 +232,8 @@ const CreateSit = () => {
         environments: sitEnvironments,
         min_gardien_sits: minGardienSits,
         max_applications: maxApplications,
+        owner_message: ownerMessage.trim() || null,
+        daily_routine: dailyRoutine.trim() || null,
       } as any).select("id").single();
 
       if (error) throw error;
