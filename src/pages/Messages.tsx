@@ -33,6 +33,7 @@ interface Conversation {
   archived_by: string[];
   context_type: string | null;
   sit?: { title: string; status: string; property_id: string; start_date?: string | null; end_date?: string | null; city?: string | null } | null;
+  small_mission?: { id: string; title?: string | null; city?: string | null; date_needed?: string | null } | null;
   other_user?: { id: string; first_name: string; avatar_url: string | null; identity_verified: boolean; city?: string | null; is_founder?: boolean; last_seen_at?: string | null; show_last_seen?: boolean } | null;
   last_message?: { content: string; created_at: string; sender_id: string } | null;
   unread_count: number;
