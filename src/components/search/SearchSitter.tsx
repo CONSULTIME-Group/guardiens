@@ -160,17 +160,57 @@ const SearchSitter = () => {
     return `${dept}000`;
   };
 
+  // Extrait un code département depuis la saisie : "69", "069", "69000", "75012", "2A"…
+  const extractDeptCodeFromInput = (raw: string): string | null => {
+    const v = raw.trim().toUpperCase().replace(/\s+/g, "");
+    if (/^2[AB]$/.test(v)) return v;
+    if (/^2[AB]\d{3}$/.test(v)) return v.slice(0, 2); // 2A001, 2B200
+    if (/^\d{5}$/.test(v)) {
+      // Code postal → DOM (97x) ou métropole (2 premiers chiffres)
+      if (v.startsWith("97") || v.startsWith("98")) return v.slice(0, 3);
+      // Corse : 200xx/201xx → 2A, 202xx-206xx → 2B (approx)
+      if (v.startsWith("20")) {
+        const n = parseInt(v.slice(2), 10);
+        return n < 200 ? "2A" : "2B";
+      }
+      return v.slice(0, 2);
+    }
+    if (/^\d{1,3}$/.test(v)) {
+      const n = parseInt(v, 10);
+      // 1-95 = métropole, 971-976 = DOM
+      if ((n >= 1 && n <= 95) || (n >= 971 && n <= 976)) {
+        return v.length === 1 ? `0${v}` : v;
+      }
+    }
+    return null;
+  };
+
+  const primaryDeptCode = extractDeptCodeFromInput(cityInput);
+
   const deptSuggestions = (() => {
     const q = normalize(cityInput.trim());
-    if (q.length < 2) return [] as { code: string; name: string }[];
-    return Object.entries(DEPT_NAMES)
-      .filter(([code, name]) => {
-        const nName = normalize(name);
-        // match par code OU par nom (préfixe ou contient)
-        return code.toLowerCase().startsWith(q) || nName.includes(q);
-      })
-      .slice(0, 4)
-      .map(([code, name]) => ({ code, name }));
+    if (q.length < 2 && !primaryDeptCode) return [] as { code: string; name: string; isPrimary?: boolean }[];
+
+    const matches: { code: string; name: string; isPrimary?: boolean }[] = [];
+    const seen = new Set<string>();
+
+    // 1. Match prioritaire via CP/numéro extrait
+    if (primaryDeptCode && DEPT_NAMES[primaryDeptCode]) {
+      matches.push({ code: primaryDeptCode, name: DEPT_NAMES[primaryDeptCode], isPrimary: true });
+      seen.add(primaryDeptCode);
+    }
+
+    // 2. Match texte / code partiel
+    Object.entries(DEPT_NAMES).forEach(([code, name]) => {
+      if (seen.has(code)) return;
+      const nName = normalize(name);
+      if (code.toLowerCase().startsWith(q) || nName.includes(q)) {
+        matches.push({ code, name });
+        seen.add(code);
+      }
+    });
+
+    return matches.slice(0, 4);
   })();
 
   const regionSuggestions = (() => {
@@ -1027,12 +1067,13 @@ const SearchSitter = () => {
               />
 
               {(() => {
-                // Si la saisie ressemble à un dept/région (match exact ou code), on les met EN PREMIER
+                // Si la saisie ressemble à un dept/CP/région, on les met EN PREMIER
                 const q = cityInput.trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-                const looksLikeDept = /^\d{1,3}$|^2[ab]$/i.test(q);
+                const looksLikeDeptOrCp = /^\d{1,5}$|^2[ab]\d{0,3}$/i.test(q);
                 const exactDeptOrRegion = deptSuggestions.some(d => d.name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "") === q)
                   || regionSuggestions.some(r => r.name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "") === q);
-                const territoryFirst = looksLikeDept || exactDeptOrRegion;
+                const territoryFirst = looksLikeDeptOrCp || exactDeptOrRegion;
+                const isCp = /^\d{5}$/.test(q);
 
                 const Communes = citySuggestions.length > 0 && (
                   <div className="mt-2" key="communes">
@@ -1055,17 +1096,27 @@ const SearchSitter = () => {
 
                 const Departements = deptSuggestions.length > 0 && (
                   <div className="mt-2" key="depts">
-                    <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground px-1 mb-1">Départements</p>
+                    <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground px-1 mb-1">
+                      {primaryDeptCode ? (isCp ? "Département (depuis le code postal)" : "Département reconnu") : "Départements"}
+                    </p>
                     <div className="border border-border rounded-lg overflow-hidden">
                       {deptSuggestions.map((d) => (
                         <button
                           key={d.code}
                           onClick={() => handleDeptSelect(d.code)}
-                          className="w-full text-left px-3 py-2 text-sm text-foreground hover:bg-accent transition-colors flex items-center gap-2"
+                          className={`w-full text-left px-3 py-2 text-sm transition-colors flex items-center gap-2 ${
+                            d.isPrimary
+                              ? "bg-primary/10 hover:bg-primary/15 text-foreground ring-1 ring-inset ring-primary/30"
+                              : "text-foreground hover:bg-accent"
+                          }`}
                         >
-                          <span className="inline-flex items-center justify-center min-w-[28px] h-5 rounded bg-muted text-[11px] font-mono font-medium text-foreground">{d.code}</span>
-                          <span>{d.name}</span>
-                          <span className="ml-auto text-[11px] text-muted-foreground">département</span>
+                          <span className={`inline-flex items-center justify-center min-w-[28px] h-5 rounded text-[11px] font-mono font-semibold ${
+                            d.isPrimary ? "bg-primary text-primary-foreground" : "bg-muted text-foreground"
+                          }`}>{d.code}</span>
+                          <span className={d.isPrimary ? "font-medium" : ""}>{d.name}</span>
+                          <span className="ml-auto text-[11px] text-muted-foreground">
+                            {d.isPrimary ? (isCp ? "match CP" : "correspondance") : "département"}
+                          </span>
                         </button>
                       ))}
                     </div>
