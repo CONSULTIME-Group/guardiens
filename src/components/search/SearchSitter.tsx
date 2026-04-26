@@ -9,7 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { ToastAction } from "@/components/ui/toast";
 
 const SearchMapView = lazy(() => import("@/components/search/SearchMapView"));
-import { DEMO_SITS, DEMO_MISSIONS, DEMO_THRESHOLD } from "@/data/demoListings";
+import { DEMO_SITS, DEMO_MISSIONS } from "@/data/demoListings";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -721,11 +721,16 @@ const SearchSitter = () => {
     ? `${format(new Date(startDate), "d MMM", { locale: fr })} → ${format(new Date(endDate), "d MMM", { locale: fr })}`
     : "Dates";
 
-  const availableSitsCount = results.filter((r: any) => !r.isAssigned && !r.isCompleted).length;
+  // Compteur "annonces disponibles" : on EXCLUT les démos, les attribuées et les terminées
+  // pour ne pas surévaluer l'offre réelle.
+  const availableSitsCount = results.filter((r: any) => !r.isAssigned && !r.isCompleted && !r.is_demo).length;
+  const demoCount = results.filter((r: any) => r.is_demo).length;
   const resultCount = tab === "missions" && missionSubTab === "members" ? availableMembers.length : availableSitsCount;
   const countLabel = tab === "missions" && missionSubTab === "members"
     ? `${resultCount} membre${resultCount > 1 ? "s" : ""} disponible${resultCount > 1 ? "s" : ""}`
-    : `${resultCount} garde${resultCount > 1 ? "s" : ""} disponible${resultCount > 1 ? "s" : ""} près de vous`;
+    : resultCount === 0 && demoCount > 0
+      ? "Aucune annonce réelle pour le moment"
+      : `${resultCount} annonce${resultCount > 1 ? "s" : ""} disponible${resultCount > 1 ? "s" : ""} près de vous`;
 
   // ─── Pill style ───
   const pillClass = "flex items-center gap-2 px-4 py-2 rounded-full border border-border bg-card cursor-pointer hover:border-primary transition-colors text-sm whitespace-nowrap shrink-0";
