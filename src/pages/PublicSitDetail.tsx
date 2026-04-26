@@ -578,12 +578,18 @@ const PublicSitDetail = () => {
         {!isAuthenticated && (
           <section className="mt-2 rounded-2xl bg-card border border-border p-6 text-center">
             <p className="font-heading text-base md:text-lg font-semibold mb-2">
-              Vous partez l'esprit léger — et si un imprévu survient, votre
-              réseau local de gardiens prend le relais.
+              Vous gardez l'esprit léger&nbsp;: en cas d'imprévu, le réseau de
+              gardiens d'urgence Guardiens prend le relais.
             </p>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-muted-foreground mb-4">
               Profils vérifiés · Avis croisés · Gardiens d'urgence mobilisables
             </p>
+            <Link
+              to="/recherche"
+              className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline"
+            >
+              Voir toutes les missions de garde →
+            </Link>
           </section>
         )}
 
