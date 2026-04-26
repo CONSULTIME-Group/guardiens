@@ -838,7 +838,12 @@ const SearchSitter = () => {
               Garde déjà réalisée — pour donner un aperçu de l'activité.
             </p>
           )}
-          {showCTA && (
+          {isDemo && (
+            <p className="text-xs text-amber-700 italic mt-3 flex items-center gap-1">
+              <Sparkles className="h-3 w-3" /> Exemple fictif pour vous montrer le rendu — non disponible.
+            </p>
+          )}
+          {showCTA && !isDemo && (
             <Link
               to="/mon-abonnement"
               className="block w-full py-2 text-sm text-center text-primary bg-primary/10 rounded-xl font-medium mt-3 hover:bg-primary/20 transition-colors"
