@@ -3608,6 +3608,8 @@ export type Database = {
           created_at: string
           current_period_start: string | null
           expires_at: string | null
+          expiry_30d_sent: boolean
+          expiry_7d_sent: boolean
           id: string
           plan: Database["public"]["Enums"]["subscription_plan"]
           started_at: string
@@ -3624,6 +3626,8 @@ export type Database = {
           created_at?: string
           current_period_start?: string | null
           expires_at?: string | null
+          expiry_30d_sent?: boolean
+          expiry_7d_sent?: boolean
           id?: string
           plan: Database["public"]["Enums"]["subscription_plan"]
           started_at?: string
@@ -3640,6 +3644,8 @@ export type Database = {
           created_at?: string
           current_period_start?: string | null
           expires_at?: string | null
+          expiry_30d_sent?: boolean
+          expiry_7d_sent?: boolean
           id?: string
           plan?: Database["public"]["Enums"]["subscription_plan"]
           started_at?: string
