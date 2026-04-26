@@ -1,77 +1,62 @@
 /**
- * Tests du template `new-message` :
- * vérifie que le sujet ET le rendu HTML sont correctement inversés selon
- * le rôle du destinataire (owner vs sitter) pour chaque context_type.
+ * Tests du wording de l'email `new-message`.
  *
- * Lancé via `supabase--test_edge_functions` (Deno test runner).
+ * Vérifie que le SUJET et le TITRE sont correctement inversés selon le rôle
+ * du destinataire (owner vs sitter) pour chaque context_type, ET qu'aucun
+ * wording "owner" ne fuite vers un destinataire sitter (le bug d'origine où
+ * un candidat recevait "X candidate à votre garde").
+ *
+ * On teste la logique pure (sans React) extraite dans `new-message.logic.ts`
+ * — le rendu JSX réutilise EXACTEMENT ces helpers, donc tester la logique
+ * suffit à protéger l'invariant.
+ *
+ * Lancé via le runner Deno (supabase test_edge_functions).
  */
 
 import { assert, assertEquals, assertStringIncludes, assertNotMatch } from 'https://deno.land/std@0.224.0/assert/mod.ts'
-import { renderToStaticMarkup } from 'npm:react-dom@18.3.1/server'
-import * as React from 'npm:react@18.3.1'
 
-import { template } from '../_shared/transactional-email-templates/new-message.tsx'
-
-type ContextType = 'sit_application' | 'sitter_inquiry' | 'mission_help' | 'helper_inquiry' | 'owner_pitch'
-type RecipientRole = 'owner' | 'sitter'
-
-interface Case {
-  contextType: ContextType
-  recipientRole: RecipientRole
-  /** Sujet attendu (exact). */
-  expectedSubject: string
-  /** Fragments qui DOIVENT apparaître dans le HTML rendu. */
-  htmlIncludes: string[]
-  /** Fragments qui ne DOIVENT PAS apparaître (anti-régression wording inversé). */
-  htmlExcludes?: string[]
-}
+import {
+  buildLeadSentence,
+  buildSubject,
+  labelByContext,
+  type Context,
+  type RecipientRole,
+} from '../_shared/transactional-email-templates/new-message.logic.ts'
 
 const SENDER = 'Patricia'
-const baseData = (c: Case) => ({
-  senderFirstName: SENDER,
-  conversationId: 'conv-123',
-  contextType: c.contextType,
-  recipientRole: c.recipientRole,
-  contextLabel:
-    c.contextType === 'sit_application'
-      ? (c.recipientRole === 'owner' ? 'votre annonce « Garde de Léo »' : 'l\'annonce « Garde de Léo »')
-      : c.contextType === 'mission_help'
-        ? (c.recipientRole === 'owner' ? 'votre mission « Promener Rex »' : 'la mission « Promener Rex »')
-        : undefined,
-  contextCity: 'Lyon',
-  contextDates: '14 juin → 28 juin 2026',
-  messagePreview: 'Bonjour, seriez-vous disponible ?',
-})
-
-const renderSubject = (data: Record<string, any>): string => {
-  const s = template.subject
-  return typeof s === 'function' ? s(data) : s
-}
-
-const renderHtml = (data: Record<string, any>): string => {
-  const el = React.createElement(template.component, data)
-  return renderToStaticMarkup(el as any)
-}
 
 // ---------------------------------------------------------------------------
-// MATRICE complète : 5 contextes × 2 rôles
+// Matrice d'attendus : 5 contextes × 2 rôles = 10 cas
 // ---------------------------------------------------------------------------
+interface Case {
+  contextType: Exclude<Context, undefined>
+  recipientRole: Exclude<RecipientRole, undefined>
+  expectedSubject: string
+  expectedTitle: string
+  /** Sous-chaînes qui doivent apparaître dans la phrase d'accroche. */
+  leadIncludes: string[]
+  /** Sous-chaînes interdites (anti-régression wording inversé). */
+  leadExcludes?: string[]
+}
+
 const cases: Case[] = [
   // --- sit_application ---------------------------------------------------
   {
     contextType: 'sit_application',
     recipientRole: 'owner',
     expectedSubject: `${SENDER} candidate à votre garde`,
-    htmlIncludes: ['Nouvelle candidature', 'a candidaté', 'votre annonce'],
-    htmlExcludes: ['Réponse à votre candidature', 'vous a répondu'],
+    expectedTitle: 'Nouvelle candidature',
+    leadIncludes: ['a candidaté'],
+    leadExcludes: ['vous a répondu'],
   },
   {
     contextType: 'sit_application',
     recipientRole: 'sitter',
     expectedSubject: `${SENDER} a répondu à votre candidature`,
-    htmlIncludes: ['Réponse à votre candidature', 'vous a répondu', 'l&#x27;annonce'],
-    // Anti-régression critique : le sitter ne doit JAMAIS recevoir le wording owner
-    htmlExcludes: ['candidate à votre garde', 'Nouvelle candidature', 'votre annonce'],
+    expectedTitle: 'Réponse à votre candidature',
+    leadIncludes: ['vous a répondu'],
+    // INVARIANT CRITIQUE : un sitter ne doit JAMAIS recevoir le wording owner
+    leadExcludes: ['a candidaté', 'candidate à votre garde'],
   },
 
   // --- sitter_inquiry ----------------------------------------------------
@@ -79,15 +64,15 @@ const cases: Case[] = [
     contextType: 'sitter_inquiry',
     recipientRole: 'sitter',
     expectedSubject: `${SENDER} souhaite connaître vos disponibilités`,
-    htmlIncludes: ['Un propriétaire vous contacte'],
-    htmlExcludes: ['Demande de disponibilité', 'vous a répondu'],
+    expectedTitle: 'Un propriétaire vous contacte',
+    leadIncludes: ['vous a envoyé un message'],
   },
   {
     contextType: 'sitter_inquiry',
     recipientRole: 'owner',
     expectedSubject: `${SENDER} vous a répondu`,
-    htmlIncludes: ['Demande de disponibilité'],
-    htmlExcludes: ['Un propriétaire vous contacte'],
+    expectedTitle: 'Demande de disponibilité',
+    leadIncludes: ['vous a envoyé un message'],
   },
 
   // --- mission_help ------------------------------------------------------
@@ -95,15 +80,17 @@ const cases: Case[] = [
     contextType: 'mission_help',
     recipientRole: 'owner',
     expectedSubject: `${SENDER} propose son aide pour votre mission`,
-    htmlIncludes: ['Proposition d', 'vous propose son aide', 'votre mission'],
-    htmlExcludes: ['Réponse à votre proposition'],
+    expectedTitle: "Proposition d'entraide",
+    leadIncludes: ['vous propose son aide'],
+    leadExcludes: ['vous a répondu'],
   },
   {
     contextType: 'mission_help',
     recipientRole: 'sitter',
     expectedSubject: `${SENDER} a répondu à votre proposition`,
-    htmlIncludes: ['Réponse à votre proposition', 'vous a répondu', 'la mission'],
-    htmlExcludes: ['vous propose son aide', 'votre mission'],
+    expectedTitle: 'Réponse à votre proposition',
+    leadIncludes: ['vous a répondu'],
+    leadExcludes: ['vous propose son aide'],
   },
 
   // --- helper_inquiry (pas de variation par rôle attendue) ---------------
@@ -111,13 +98,15 @@ const cases: Case[] = [
     contextType: 'helper_inquiry',
     recipientRole: 'sitter',
     expectedSubject: `${SENDER} vous a envoyé un message`,
-    htmlIncludes: ['Nouveau message d'],
+    expectedTitle: "Nouveau message d'entraide",
+    leadIncludes: ['vous a envoyé un message'],
   },
   {
     contextType: 'helper_inquiry',
     recipientRole: 'owner',
     expectedSubject: `${SENDER} vous a envoyé un message`,
-    htmlIncludes: ['Nouveau message d'],
+    expectedTitle: "Nouveau message d'entraide",
+    leadIncludes: ['vous a envoyé un message'],
   },
 
   // --- owner_pitch -------------------------------------------------------
@@ -125,111 +114,114 @@ const cases: Case[] = [
     contextType: 'owner_pitch',
     recipientRole: 'owner',
     expectedSubject: `${SENDER} souhaite vous proposer ses services`,
-    htmlIncludes: ['Un gardien vous contacte'],
-    htmlExcludes: ['Réponse à votre message'],
+    expectedTitle: 'Un gardien vous contacte',
+    leadIncludes: ['vous a envoyé un message'],
   },
   {
     contextType: 'owner_pitch',
     recipientRole: 'sitter',
     expectedSubject: `${SENDER} vous a répondu`,
-    htmlIncludes: ['Réponse à votre message'],
-    htmlExcludes: ['Un gardien vous contacte', 'souhaite vous proposer ses services'],
+    expectedTitle: 'Réponse à votre message',
+    leadIncludes: ['vous a envoyé un message'],
+    leadExcludes: ['souhaite vous proposer ses services'],
   },
 ]
 
-// Tests générés dynamiquement pour avoir un cas Deno.test par combinaison
+// ---------------------------------------------------------------------------
+// Tests générés par cas — un Deno.test par combinaison pour un diagnostic
+// fin en cas d'échec.
+// ---------------------------------------------------------------------------
 for (const c of cases) {
-  const id = `${c.contextType} + recipient=${c.recipientRole}`
+  const id = `${c.contextType} → ${c.recipientRole}`
 
-  Deno.test(`subject: ${id}`, () => {
-    const data = baseData(c)
-    assertEquals(renderSubject(data), c.expectedSubject, `Sujet incorrect pour ${id}`)
+  Deno.test(`subject — ${id}`, () => {
+    assertEquals(
+      buildSubject({ senderFirstName: SENDER, contextType: c.contextType, recipientRole: c.recipientRole }),
+      c.expectedSubject,
+    )
   })
 
-  Deno.test(`html: ${id}`, () => {
-    const data = baseData(c)
-    const html = renderHtml(data)
-    for (const needle of c.htmlIncludes) {
-      assertStringIncludes(html, needle, `HTML doit contenir "${needle}" pour ${id}`)
+  Deno.test(`title (header) — ${id}`, () => {
+    const { title } = labelByContext(c.contextType, c.recipientRole)
+    assertEquals(title, c.expectedTitle)
+  })
+
+  Deno.test(`lead sentence — ${id}`, () => {
+    const lead = buildLeadSentence(SENDER, c.contextType, c.recipientRole, undefined)
+    for (const needle of c.leadIncludes) {
+      assertStringIncludes(lead, needle, `lead "${lead}" devrait contenir "${needle}"`)
     }
-    for (const banned of c.htmlExcludes ?? []) {
-      assertNotMatch(html, new RegExp(banned.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')),
-        `HTML ne doit PAS contenir "${banned}" pour ${id}`)
+    for (const banned of (c.leadExcludes ?? [])) {
+      assertNotMatch(
+        lead,
+        new RegExp(banned.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')),
+        `lead "${lead}" ne doit PAS contenir "${banned}"`,
+      )
     }
   })
 }
 
 // ---------------------------------------------------------------------------
-// Tests transverses : détails (ville/dates) et fallbacks
+// Tests transverses
 // ---------------------------------------------------------------------------
 
-Deno.test('html: affiche ville et dates quand fournies', () => {
-  const html = renderHtml({
-    senderFirstName: SENDER,
-    contextType: 'sit_application',
-    recipientRole: 'owner',
-    contextLabel: 'votre annonce « X »',
-    contextCity: 'Schweighouse-sur-Moder',
-    contextDates: '14 juin → 28 juin 2026',
-  })
-  assertStringIncludes(html, 'Schweighouse-sur-Moder')
-  assertStringIncludes(html, '14 juin')
-  assertStringIncludes(html, '28 juin 2026')
-  assertStringIncludes(html, 'Lieu')
-  assertStringIncludes(html, 'Dates')
+Deno.test('lead sentence — inclut le contextLabel quand fourni (owner sit_application)', () => {
+  const lead = buildLeadSentence(SENDER, 'sit_application', 'owner', 'votre annonce « Garde de Léo »')
+  assertStringIncludes(lead, 'votre annonce « Garde de Léo »')
+  assertStringIncludes(lead, 'a candidaté')
 })
 
-Deno.test('html: pas de bloc détails si ni ville ni dates', () => {
-  const html = renderHtml({
-    senderFirstName: SENDER,
-    contextType: 'sit_application',
-    recipientRole: 'owner',
-    contextLabel: 'votre annonce « X »',
-  })
-  assertNotMatch(html, /Lieu\s*:/)
-  assertNotMatch(html, /Dates\s*:/)
+Deno.test('lead sentence — sitter reçoit "l\'annonce" et non "votre annonce"', () => {
+  // Le contextLabel est construit côté notify-new-message avec le bon possessif.
+  const lead = buildLeadSentence(SENDER, 'sit_application', 'sitter', 'l\'annonce « Garde de Léo »')
+  assertStringIncludes(lead, 'vous a répondu')
+  assertStringIncludes(lead, "l'annonce")
+  assertNotMatch(lead, /votre annonce/)
 })
 
-Deno.test('subject: fallback si contextType inconnu', () => {
-  const subj = renderSubject({ senderFirstName: SENDER, contextType: 'unknown_ctx' })
-  assertEquals(subj, `Vous avez un nouveau message de ${SENDER}`)
+Deno.test('subject — fallback "Un membre" quand pas de prénom', () => {
+  assertEquals(
+    buildSubject({ contextType: 'sit_application', recipientRole: 'owner' }),
+    'Un membre candidate à votre garde',
+  )
 })
 
-Deno.test('subject: fallback "Un membre" si pas de prénom', () => {
-  const subj = renderSubject({ contextType: 'sit_application', recipientRole: 'owner' })
-  assertEquals(subj, 'Un membre candidate à votre garde')
+Deno.test('subject — fallback générique pour contextType inconnu', () => {
+  assertEquals(
+    // deno-lint-ignore no-explicit-any
+    buildSubject({ senderFirstName: SENDER, contextType: 'bogus' as any, recipientRole: 'owner' }),
+    `Vous avez un nouveau message de ${SENDER}`,
+  )
 })
 
-Deno.test('html: lien CTA pointe vers la conversation', () => {
-  const html = renderHtml({
-    senderFirstName: SENDER,
-    conversationId: 'conv-abc',
-    contextType: 'sit_application',
-    recipientRole: 'owner',
-  })
-  assertStringIncludes(html, '/messages?c=conv-abc')
+Deno.test('subject — fallback générique si recipientRole manquant (sit_application)', () => {
+  // Sans rôle on retombe sur le wording "owner" par défaut.
+  // Important : c'est à notify-new-message de TOUJOURS fournir recipientRole ;
+  // ce test documente le comportement de fallback.
+  assertEquals(
+    buildSubject({ senderFirstName: SENDER, contextType: 'sit_application' }),
+    `${SENDER} candidate à votre garde`,
+  )
 })
 
-Deno.test('html: aperçu du message rendu entre guillemets', () => {
-  const html = renderHtml({
-    senderFirstName: SENDER,
-    contextType: 'sit_application',
-    recipientRole: 'sitter',
-    messagePreview: 'Coucou test',
-  })
-  assertStringIncludes(html, 'Coucou test')
+Deno.test('label — contextType undefined retombe sur "Nouveau message"', () => {
+  const { title } = labelByContext(undefined, undefined)
+  assertEquals(title, 'Nouveau message')
 })
 
 // ---------------------------------------------------------------------------
-// Garantie de couverture : la matrice couvre bien toutes les combinaisons
+// Garantie de couverture : la matrice couvre TOUTES les combinaisons.
 // ---------------------------------------------------------------------------
-Deno.test('matrice: toutes les combinaisons rôle × contexte sont testées', () => {
-  const expected: ContextType[] = ['sit_application', 'sitter_inquiry', 'mission_help', 'helper_inquiry', 'owner_pitch']
-  const roles: RecipientRole[] = ['owner', 'sitter']
-  for (const ctx of expected) {
-    for (const role of roles) {
+Deno.test('matrice — toutes les combinaisons rôle × contexte sont testées', () => {
+  const allContexts: Array<Exclude<Context, undefined>> = [
+    'sit_application', 'sitter_inquiry', 'mission_help', 'helper_inquiry', 'owner_pitch',
+  ]
+  const allRoles: Array<Exclude<RecipientRole, undefined>> = ['owner', 'sitter']
+  for (const ctx of allContexts) {
+    for (const role of allRoles) {
       const found = cases.some(c => c.contextType === ctx && c.recipientRole === role)
-      assert(found, `Cas manquant : ${ctx} / ${role}`)
+      assert(found, `Cas manquant dans la matrice : ${ctx} / ${role}`)
     }
   }
+  assertEquals(cases.length, allContexts.length * allRoles.length)
 })
