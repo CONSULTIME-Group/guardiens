@@ -759,6 +759,171 @@ const Landing = () => {
       </section>
 
 
+      {/* ═══════════════ SECTION 7bis — GUIDES & CONSEILS (SEO + engagement) ═══════════════ */}
+      <section className="py-24 md:py-32 bg-muted/30">
+        <div className="max-w-6xl mx-auto px-6">
+          <RevealSection className="text-center mb-14">
+            <span className="text-xs tracking-widest uppercase text-primary/60 font-body mb-4 block">
+              Guides &amp; conseils
+            </span>
+            <h2 className="font-heading text-4xl md:text-5xl font-semibold text-foreground leading-snug mb-4">
+              Tout ce qu'il faut savoir, avant de partir ou de garder.
+            </h2>
+            <p className="text-lg font-body text-foreground/70 max-w-2xl mx-auto">
+              Des ressources pratiques rédigées par des gens qui gardent vraiment, pour les
+              propriétaires qui s'absentent et les gardiens qui s'engagent.
+            </p>
+          </RevealSection>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+            {/* Colonne propriétaires */}
+            <RevealSection delay={0.1}>
+              <div className="rounded-2xl bg-card border border-border p-8 h-full">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center">
+                    <Home className="h-5 w-5" />
+                  </div>
+                  <h3 className="font-heading text-2xl font-semibold text-foreground">
+                    Pour les propriétaires
+                  </h3>
+                </div>
+                <p className="text-sm text-foreground/70 mb-6 leading-relaxed">
+                  Préparer son départ, choisir un gardien de confiance, anticiper les imprévus.
+                </p>
+                <ul className="space-y-3">
+                  <li>
+                    <Link
+                      to="/actualites/s-absenter-avec-animal-guide-solutions-2026"
+                      className="group flex items-start gap-2 text-foreground hover:text-primary transition-colors"
+                    >
+                      <ArrowRight className="h-4 w-4 mt-1 shrink-0 text-primary/60 group-hover:translate-x-0.5 transition-transform" />
+                      <span className="text-sm leading-relaxed">
+                        S'absenter avec un animal : le guide des 8 situations en 2026
+                      </span>
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      to="/actualites/vacances-longues-garde-animal-2-semaines"
+                      className="group flex items-start gap-2 text-foreground hover:text-primary transition-colors"
+                    >
+                      <ArrowRight className="h-4 w-4 mt-1 shrink-0 text-primary/60 group-hover:translate-x-0.5 transition-transform" />
+                      <span className="text-sm leading-relaxed">
+                        Vacances longues : faire garder son animal pendant 2 semaines ou plus
+                      </span>
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      to="/actualites/pension-chien-alternatives-guide"
+                      className="group flex items-start gap-2 text-foreground hover:text-primary transition-colors"
+                    >
+                      <ArrowRight className="h-4 w-4 mt-1 shrink-0 text-primary/60 group-hover:translate-x-0.5 transition-transform" />
+                      <span className="text-sm leading-relaxed">
+                        Alternatives à la pension pour chien : 5 solutions pour partir sereinement
+                      </span>
+                    </Link>
+                  </li>
+                </ul>
+                <div className="mt-6 pt-6 border-t border-border">
+                  <p className="text-xs text-foreground/60 leading-relaxed">
+                    <ShieldCheck className="inline h-3.5 w-3.5 text-primary mr-1 -mt-0.5" />
+                    Annonce 100% gratuite, profils vérifiés, accord de garde signé.
+                  </p>
+                </div>
+              </div>
+            </RevealSection>
+
+            {/* Colonne gardiens */}
+            <RevealSection delay={0.2}>
+              <div className="rounded-2xl bg-card border border-border p-8 h-full">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-10 h-10 rounded-full bg-secondary/10 text-secondary flex items-center justify-center">
+                    <Key className="h-5 w-5" />
+                  </div>
+                  <h3 className="font-heading text-2xl font-semibold text-foreground">
+                    Pour les gardiens
+                  </h3>
+                </div>
+                <p className="text-sm text-foreground/70 mb-6 leading-relaxed">
+                  Trouver des gardes près de chez vous, soigner son profil, créer la confiance.
+                </p>
+                <ul className="space-y-3">
+                  <li>
+                    <Link
+                      to="/actualites/garde-animaux-savoie-guide"
+                      className="group flex items-start gap-2 text-foreground hover:text-primary transition-colors"
+                    >
+                      <ArrowRight className="h-4 w-4 mt-1 shrink-0 text-primary/60 group-hover:translate-x-0.5 transition-transform" />
+                      <span className="text-sm leading-relaxed">
+                        Garde d'animaux en Savoie : le guide complet
+                      </span>
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      to="/actualites/garde-animaux-haute-savoie-guide"
+                      className="group flex items-start gap-2 text-foreground hover:text-primary transition-colors"
+                    >
+                      <ArrowRight className="h-4 w-4 mt-1 shrink-0 text-primary/60 group-hover:translate-x-0.5 transition-transform" />
+                      <span className="text-sm leading-relaxed">
+                        Garde d'animaux en Haute-Savoie : le guide complet
+                      </span>
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      to="/actualites/garde-animaux-croix-rousse-lyon"
+                      className="group flex items-start gap-2 text-foreground hover:text-primary transition-colors"
+                    >
+                      <ArrowRight className="h-4 w-4 mt-1 shrink-0 text-primary/60 group-hover:translate-x-0.5 transition-transform" />
+                      <span className="text-sm leading-relaxed">
+                        Garde de chien et chat à la Croix-Rousse : spécificités du quartier
+                      </span>
+                    </Link>
+                  </li>
+                </ul>
+                <div className="mt-6 pt-6 border-t border-border">
+                  <p className="text-xs text-foreground/60 leading-relaxed">
+                    <Gift className="inline h-3.5 w-3.5 text-secondary mr-1 -mt-0.5" />
+                    Inscription gratuite, logements à découvrir, vraies rencontres locales.
+                  </p>
+                </div>
+              </div>
+            </RevealSection>
+          </div>
+
+          {/* CTA double : tout le blog + guides locaux */}
+          <RevealSection delay={0.3}>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Button
+                asChild
+                variant="outline"
+                size="lg"
+                className="rounded-full"
+              >
+                <Link to="/actualites">
+                  <BookOpen className="mr-2 h-4 w-4" />
+                  Tous les articles &amp; conseils
+                </Link>
+              </Button>
+              <Button
+                asChild
+                variant="outline"
+                size="lg"
+                className="rounded-full"
+              >
+                <Link to="/guides">
+                  <MapPin className="mr-2 h-4 w-4" />
+                  Guides locaux par ville
+                </Link>
+              </Button>
+            </div>
+          </RevealSection>
+        </div>
+      </section>
+
+
       {/* ═══════════════ SECTION 8 — NOTRE HISTOIRE ═══════════════ */}
       <section className="bg-background">
         <div className="max-w-6xl mx-auto px-6 py-24 md:py-32">
