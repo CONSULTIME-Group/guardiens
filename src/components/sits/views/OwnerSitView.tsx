@@ -12,7 +12,7 @@
  * - Bloc "Gérer cette garde" (OwnerSitManagement) + modal d'annulation
  */
 import { useState, useEffect, useCallback, useRef } from "react";
-import { Calendar, MapPin, Send, Star, PawPrint, Home, ClipboardList } from "lucide-react";
+import { Calendar, MapPin, Send, Star, PawPrint, Home, ClipboardList, Users } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
