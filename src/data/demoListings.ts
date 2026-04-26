@@ -200,6 +200,22 @@ export const DEMO_SITS: DemoSit[] = [
     },
     pets: [
       {
+        species: "horse",
+        name: "Galaxie",
+        breed: "Jument Mérens",
+        age: "11 ans",
+        notes:
+          "Vit au pré attenant. Foin matin et soir, vérifier l'abreuvoir. Pansage simple si vous aimez — pas obligatoire. Très docile, parfaite pour débuter au contact des chevaux.",
+      },
+      {
+        species: "horse",
+        name: "Pompon",
+        breed: "Âne du Cotentin",
+        age: "9 ans",
+        notes:
+          "Inséparable de Galaxie. Adore les caresses sur le chanfrein et les pommes en récompense. Pas de monte.",
+      },
+      {
         species: "farm_animal",
         name: "Plume, Câline & Rosette",
         breed: "Poules Marans",
@@ -218,11 +234,11 @@ export const DEMO_SITS: DemoSit[] = [
     ],
     schedule: {
       morning:
-        "Ouvrir le poulailler, ramasser les œufs, gamelle de Moustache, arroser le potager (15 min).",
-      midday: "Vérifier l'eau des poules, possible cueillette tomates/courgettes.",
-      evening: "Arrosage potager, fermeture poulailler après le coucher du soleil, repas Moustache.",
+        "Foin de Galaxie & Pompon, ouverture du poulailler, ramassage des œufs, gamelle de Moustache, arrosage potager (15 min).",
+      midday: "Vérifier les abreuvoirs (chevaux + poules), possible cueillette tomates/courgettes.",
+      evening: "Foin du soir aux équidés, fermeture poulailler après le coucher du soleil, repas Moustache.",
       notes:
-        "Comptez 1h30 par jour. Tous les outils et instructions sont sur place. Possibilité de baignade au lac juste devant !",
+        "Comptez 2h par jour. Aucune compétence équestre exigée — on vous montre tout à l'arrivée. Possibilité de baignade au lac juste devant !",
     },
     ownerMessage:
       "Vous repartirez avec des œufs, des légumes, et probablement l'envie de revenir. Notre maison est ouverte aux gens curieux et respectueux de la nature.",
