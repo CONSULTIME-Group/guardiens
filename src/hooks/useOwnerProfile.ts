@@ -355,7 +355,9 @@ export function useOwnerProfile() {
     const payload = { property_id: currentPropId, ...sanitizePet(pet) };
     const { data: created, error } = await supabase
       .from("pets")
-      .insert(payload)
+      .insert(payload as any)
+      .select()
+      .single();
       .select()
       .single();
 
