@@ -11,7 +11,9 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { lazy, Suspense, useState, useMemo, useEffect } from "react";
 
-const GuideMap = lazy(() => import("@/components/guides/GuideMap"));
+// Carte chargée uniquement quand l'utilisateur s'en approche (lazy + IntersectionObserver)
+// pour préserver le LCP et limiter le poids JS initial.
+const GuideMapLazy = lazy(() => import("@/components/guides/GuideMapLazy"));
 
 interface CityGuide {
   id: string;
