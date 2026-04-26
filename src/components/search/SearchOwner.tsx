@@ -571,7 +571,17 @@ const SearchOwner = () => {
                     <button key={r} onClick={() => setRadius([r])} className={`rounded-full px-3 py-1 text-xs border transition-colors ${radius[0] === r ? "bg-primary text-primary-foreground border-primary" : "border-border text-muted-foreground hover:border-primary"}`}>{r} km</button>
                   ))}
                 </div>
-                <Slider value={radius} onValueChange={setRadius} min={5} max={100} step={5} />
+                <Slider
+                  value={radius}
+                  onValueChange={(v) => {
+                    const ALLOWED = [5, 15, 30, 50, 100];
+                    const snapped = ALLOWED.reduce((p, c) => Math.abs(c - v[0]) < Math.abs(p - v[0]) ? c : p);
+                    setRadius([snapped]);
+                  }}
+                  min={5}
+                  max={100}
+                  step={5}
+                />
                 <p className="text-xs text-muted-foreground text-center">{radius[0]} km</p>
               </PopoverContent>
             </Popover>
