@@ -1083,11 +1083,24 @@ const SearchSitter = () => {
                 const territoryFirst = looksLikeDeptOrCp || exactDeptOrRegion;
                 const isCp = /^\d{5}$/.test(q);
 
-                const Communes = citySuggestions.length > 0 && (
+                // Réduit le nombre de communes quand on cherche un dept/région
+                // pour éviter qu'elles masquent les sections Départements / Régions
+                const communesLimit = territoryFirst ? 3 : 8;
+                const visibleCities = citySuggestions.slice(0, communesLimit);
+                const hiddenCitiesCount = Math.max(0, citySuggestions.length - visibleCities.length);
+
+                const Communes = visibleCities.length > 0 && (
                   <div className="mt-2" key="communes">
-                    <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground px-1 mb-1">Communes</p>
+                    <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground px-1 mb-1 flex items-center justify-between">
+                      <span>Communes</span>
+                      {hiddenCitiesCount > 0 && (
+                        <span className="text-[10px] normal-case tracking-normal text-muted-foreground/70">
+                          +{hiddenCitiesCount} masquée{hiddenCitiesCount > 1 ? "s" : ""}
+                        </span>
+                      )}
+                    </p>
                     <div className="border border-border rounded-lg overflow-hidden">
-                      {citySuggestions.map((s, i) => (
+                      {visibleCities.map((s, i) => (
                         <button
                           key={i}
                           onClick={() => handleCitySelect(s.nom, s.codesPostaux?.[0])}
