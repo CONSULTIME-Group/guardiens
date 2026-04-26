@@ -47,6 +47,7 @@ import { useSitDerived } from "./useSitDerived";
 import AnimalsTab from "./tabs/AnimalsTab";
 import HousingTab from "./tabs/HousingTab";
 import ExpectationsTab from "./tabs/ExpectationsTab";
+import SitImmersiveContent from "./SitImmersiveContent";
 import ReviewsTab from "./tabs/ReviewsTab";
 import type { SitData } from "./types";
 
