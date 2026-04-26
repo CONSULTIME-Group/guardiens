@@ -260,7 +260,7 @@ const LogsTab = () => {
   const [statusFilter, setStatusFilter] = useState("all");
   const [templateFilter, setTemplateFilter] = useState("all");
   const [templates, setTemplates] = useState<string[]>([]);
-  const [stats, setStats] = useState({ total: 0, sent: 0, failed: 0, suppressed: 0 });
+  const [stats, setStats] = useState({ total: 0, sent: 0, failed: 0, dlq: 0, suppressed: 0 });
 
   const fetchLogs = async () => {
     setLoading(true);
@@ -302,7 +302,8 @@ const LogsTab = () => {
     setStats({
       total: deduped.length,
       sent: deduped.filter((l) => l.status === "sent").length,
-      failed: deduped.filter((l) => ["failed", "dlq"].includes(l.status)).length,
+      failed: deduped.filter((l) => l.status === "failed").length,
+      dlq: deduped.filter((l) => l.status === "dlq").length,
       suppressed: deduped.filter((l) => l.status === "suppressed").length,
     });
     setLoading(false);
@@ -322,7 +323,18 @@ const LogsTab = () => {
 
   return (
     <div className="space-y-4">
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+      {stats.dlq > 0 && (
+        <div className="rounded-md border border-destructive/40 bg-destructive/5 px-3 py-2 text-sm flex items-center justify-between gap-3">
+          <span>
+            ⚠️ <strong>{stats.dlq}</strong> email{stats.dlq > 1 ? "s" : ""} en DLQ (échec définitif après 5 tentatives) sur la période sélectionnée.
+          </span>
+          <Button size="sm" variant="outline" onClick={() => setStatusFilter("dlq")}>
+            Voir
+          </Button>
+        </div>
+      )}
+
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
         <Card><CardContent className="pt-4 pb-3 text-center">
           <div className="text-2xl font-bold">{stats.total}</div>
           <div className="text-xs text-muted-foreground">Total</div>
@@ -335,6 +347,15 @@ const LogsTab = () => {
           <div className="text-2xl font-bold text-destructive">{stats.failed}</div>
           <div className="text-xs text-muted-foreground">Échoués</div>
         </CardContent></Card>
+        <Card
+          className={stats.dlq > 0 ? "border-destructive cursor-pointer hover:bg-destructive/5 transition-colors" : "cursor-pointer hover:bg-muted/50 transition-colors"}
+          onClick={() => setStatusFilter("dlq")}
+        >
+          <CardContent className="pt-4 pb-3 text-center">
+            <div className={`text-2xl font-bold ${stats.dlq > 0 ? "text-destructive" : "text-muted-foreground"}`}>{stats.dlq}</div>
+            <div className="text-xs text-muted-foreground">DLQ</div>
+          </CardContent>
+        </Card>
         <Card><CardContent className="pt-4 pb-3 text-center">
           <div className="text-2xl font-bold text-yellow-600">{stats.suppressed}</div>
           <div className="text-xs text-muted-foreground">Supprimés</div>
