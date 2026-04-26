@@ -9,7 +9,7 @@
  */
 
 export type DemoPet = {
-  species: "dog" | "cat" | "farm_animal" | "rabbit" | "bird" | "fish" | "rodent";
+  species: "dog" | "cat" | "farm_animal" | "rabbit" | "bird" | "fish" | "rodent" | "horse" | "nac";
   name: string;
   breed?: string;
   age?: string;
