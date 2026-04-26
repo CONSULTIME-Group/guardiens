@@ -549,8 +549,8 @@ const SitImmersiveContent = ({
           {/* Slot CTA principal (candidature, gestion owner…) */}
           {ctaSlot}
 
-          {/* Guide local */}
-          {citySlug && (
+          {/* Guide local — visible uniquement si un guide éditorial existe pour la ville */}
+          {hasLocalGuide && (
             <Link
               to={`/guides/${citySlug}`}
               className="block rounded-2xl border border-border bg-card p-5 hover:border-primary/50 transition-colors group"
@@ -575,8 +575,8 @@ const SitImmersiveContent = ({
             </Link>
           )}
 
-          {/* Page ville */}
-          {citySlug && (
+          {/* Page ville — visible uniquement si la page éditoriale existe */}
+          {hasCityPage && (
             <Link
               to={`/house-sitting/${citySlug}`}
               className="block rounded-2xl border border-border bg-card p-5 hover:border-primary/50 transition-colors group"
