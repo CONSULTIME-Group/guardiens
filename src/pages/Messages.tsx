@@ -453,28 +453,47 @@ const Messages = () => {
     loadMessages(activeConv.id);
   }, [activeConv, loadMessages]);
 
-  // Pré-remplir le 1er message UNIQUEMENT si la conversation est totalement vide
-  // (aucun message non-système, peu importe l'expéditeur). Sinon, l'autre partie
-  // a déjà écrit et il serait absurde de coller un brouillon générique par-dessus.
+  // Pré-remplir le 1er message UNIQUEMENT si :
+  //  1) la conversation est totalement vide (aucun message non-système, peu importe l'expéditeur)
+  //  2) ET le champ de saisie est vide (on n'écrase jamais ce que l'utilisateur tape)
+  // Sinon, on informe l'utilisateur qu'aucun brouillon n'a été proposé (une seule fois par conv).
+  const draftHandledConvRef = useRef<string | null>(null);
   useEffect(() => {
     if (!activeConv || !user) return;
-    if (newMessage.trim() !== "") return;
+    // On attend que les messages de la conv active soient chargés avant de décider
+    // (évite un faux "vide" pendant le chargement initial).
+    if (messages.length > 0 && messages[0].conversation_id !== activeConv.id) return;
+    if (draftHandledConvRef.current === activeConv.id) return;
+
     const realMsgs = messages.filter(m => !m.is_system);
-    if (realMsgs.length > 0) return; // conv déjà entamée → pas de brouillon
-    const ctx = (activeConv.context_type || "sitter_inquiry") as ConversationContext;
-    const sitDates = activeConv.sit?.start_date && activeConv.sit?.end_date
-      ? `${new Date(activeConv.sit.start_date).toLocaleDateString("fr-FR")} → ${new Date(activeConv.sit.end_date).toLocaleDateString("fr-FR")}`
-      : null;
-    const draft = buildFirstMessageDraft({
-      context: ctx,
-      recipientFirstName: activeConv.other_user?.first_name,
-      city: activeConv.other_user?.city,
-      sitTitle: activeConv.sit?.title || null,
-      sitDates,
-    });
-    setNewMessage(draft);
+    const inputIsEmpty = newMessage.trim() === "";
+
+    if (realMsgs.length === 0 && inputIsEmpty) {
+      const ctx = (activeConv.context_type || "sitter_inquiry") as ConversationContext;
+      const sitDates = activeConv.sit?.start_date && activeConv.sit?.end_date
+        ? `${new Date(activeConv.sit.start_date).toLocaleDateString("fr-FR")} → ${new Date(activeConv.sit.end_date).toLocaleDateString("fr-FR")}`
+        : null;
+      const draft = buildFirstMessageDraft({
+        context: ctx,
+        recipientFirstName: activeConv.other_user?.first_name,
+        city: activeConv.other_user?.city,
+        sitTitle: activeConv.sit?.title || null,
+        sitDates,
+      });
+      setNewMessage(draft);
+      draftHandledConvRef.current = activeConv.id;
+    } else if (realMsgs.length > 0) {
+      // Conversation déjà entamée : pas de brouillon, on prévient discrètement.
+      toast({
+        title: "Conversation en cours",
+        description: "Aucun message type proposé : la discussion est déjà entamée.",
+      });
+      draftHandledConvRef.current = activeConv.id;
+    }
+    // Si l'input n'est pas vide mais la conv est vide, on respecte la saisie en cours
+    // sans marquer la conv comme traitée (au cas où l'utilisateur efface tout ensuite).
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeConv?.id, messages.length]);
+  }, [activeConv?.id, messages]);
 
   // Realtime
   useEffect(() => {
