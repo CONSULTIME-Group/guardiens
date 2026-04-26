@@ -88,6 +88,22 @@ const SearchSitter = () => {
   // les types de recherche (gardes, missions, membres). N'a aucun effet sur la
   // logique de tri/filtre — purement instrumental.
   const testDemoMode = searchParams.get("testDemos") === "1";
+  // Historique de vérification (mode test) — une ligne par changement de filtre clé
+  type DemoCheckRow = {
+    ts: number;
+    trigger: "city" | "startDate" | "endDate" | "sort" | "tab";
+    tab: string;
+    city: string;
+    startDate: string;
+    endDate: string;
+    sort: string;
+    real: number;
+    demo: number;
+    positions: number[];
+    interleaveOk: boolean;
+  };
+  const [demoCheckHistory, setDemoCheckHistory] = useState<DemoCheckRow[]>([]);
+
   const [sort, setSort] = useState<SortOption>("closest");
   const [viewMode, setViewMode] = useState<ViewMode>("list");
   const [cityPostalCode, setCityPostalCode] = useState<string | null>(null);
