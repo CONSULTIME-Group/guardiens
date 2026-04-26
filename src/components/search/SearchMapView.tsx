@@ -122,7 +122,7 @@ const SearchMapView = ({
               <Marker
                 key={item.id}
                 position={[coords.lat, coords.lng]}
-                icon={createPinIcon(activePin === item.id)}
+                icon={createPinIcon(getPinKind(item), activePin === item.id)}
                 eventHandlers={{
                   click: () => setActivePin(activePin === item.id ? null : item.id),
                 }}
@@ -130,6 +130,13 @@ const SearchMapView = ({
             );
           })}
         </MapContainer>
+
+        {/* Légende des pins */}
+        <div className="absolute bottom-3 left-3 z-[400] bg-card/95 backdrop-blur-sm border border-border rounded-lg shadow-sm px-3 py-2 text-xs text-foreground space-y-1 pointer-events-none">
+          <div className="flex items-center gap-2"><span className="inline-block w-3 h-3 rounded-full" style={{ background: pinColors.active.bg, border: `2px solid ${pinColors.active.ring}` }} /> Disponible</div>
+          <div className="flex items-center gap-2"><span className="inline-block w-3 h-3 rounded-full" style={{ background: pinColors.inactive.bg, border: `2px solid ${pinColors.inactive.ring}` }} /> Attribuée / terminée</div>
+          <div className="flex items-center gap-2"><span className="inline-block w-3 h-3 rounded-full border-dashed" style={{ background: pinColors.demo.bg, border: `2px dashed ${pinColors.demo.ring}` }} /> Annonce d'exemple</div>
+        </div>
 
         {activeItem && (() => {
           const coords = getCoords(activeItem);
