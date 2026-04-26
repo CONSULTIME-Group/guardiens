@@ -4,6 +4,7 @@ import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import ReportButton from "@/components/reports/ReportButton";
 import { supabase } from "@/integrations/supabase/client";
 import { geocodeCity, haversineDistance } from "@/lib/geocode";
+import { ALLOWED_ALERT_RADII, snapToAllowedRadius } from "@/lib/alertRadius";
 import { useAuth } from "@/contexts/AuthContext";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Input } from "@/components/ui/input";
