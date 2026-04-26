@@ -62,6 +62,12 @@ import {
 import { slugify } from "@/lib/normalize";
 import { CITIES } from "@/data/cities";
 import { getCityContent } from "@/data/cityContent";
+// Libellés des enums animaux — source unique partagée avec le formulaire de création
+import {
+  ACTIVITY_LABELS as ACTIVITY_LEVEL_LABEL,
+  WALK_LABELS as WALK_DURATION_LABEL,
+  ALONE_LABELS as ALONE_DURATION_LABEL,
+} from "@/components/sits/shared/sitConstants";
 
 const GUIDE_SLUGS = new Set(CITIES.map((c) => c.slug));
 
@@ -237,24 +243,6 @@ const ROUTINE_ICONS: Record<string, { icon: any; bg: string; fg: string }> = {
   "Après-midi": { icon: Sunset, bg: "bg-sky-100", fg: "text-sky-700" },
   Soir: { icon: Moon, bg: "bg-indigo-100", fg: "text-indigo-700" },
   Nuit: { icon: Moon, bg: "bg-slate-100", fg: "text-slate-700" },
-};
-
-const ACTIVITY_LEVEL_LABEL: Record<string, string> = {
-  low: "Calme",
-  moderate: "Modéré",
-  high: "Très actif",
-};
-const WALK_DURATION_LABEL: Record<string, string> = {
-  short: "Courte (15–30 min)",
-  medium: "Moyenne (30–60 min)",
-  long: "Longue (1 h ou +)",
-  none: "Pas de balade",
-};
-const ALONE_DURATION_LABEL: Record<string, string> = {
-  none: "Jamais seul",
-  short: "1 à 2 h",
-  medium: "3 à 5 h",
-  long: "Une journée",
 };
 
 const SitImmersiveContent = ({
@@ -868,11 +856,7 @@ const SitImmersiveContent = ({
                               <span className="text-xs text-muted-foreground">· {pet.age}</span>
                             )}
                           </div>
-                          {hasCharacter && (
-                            <p className="text-sm text-muted-foreground leading-relaxed">
-                              {pet.character}
-                            </p>
-                          )}
+                          {/* Le caractère est rendu plus bas, après l'alimentation, pour respecter l'ordre de priorité demandé. */}
                           {pet.owner_breed_note && (
                             <p className="text-sm text-foreground/90 leading-relaxed mt-1">
                               <span className="font-medium">Selon {ownerName} :</span>{" "}
@@ -924,6 +908,21 @@ const SitImmersiveContent = ({
                             </p>
                             <p className="text-sm text-muted-foreground whitespace-pre-line leading-relaxed">
                               {pet.food}
+                            </p>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Caractère */}
+                      {hasCharacter && (
+                        <div className="rounded-xl border border-border bg-card p-3 md:p-4 mb-3 flex gap-3">
+                          <Heart className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                          <div className="min-w-0">
+                            <p className="text-xs font-semibold uppercase tracking-wide text-foreground mb-1">
+                              Caractère
+                            </p>
+                            <p className="text-sm text-muted-foreground whitespace-pre-line leading-relaxed">
+                              {pet.character}
                             </p>
                           </div>
                         </div>
