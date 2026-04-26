@@ -180,11 +180,13 @@ export const parseRoutine = (raw: string | null) => {
   // Regex tolérante :
   //  - décorations optionnelles autour du label : « » " ' ( [ { * _ ` ~
   //  - label optionnellement entre parenthèses : (Matin) ou Matin
-  //  - suivi d'une parenthèse d'horaire optionnelle : (8h), (vers 8h)
+  //  - suivi d'une indication horaire optionnelle, entre () [] ou {} :
+  //      (8h), (vers 8h), [8h], [7h-9h], {matinée}…
+  //    → on autorise plusieurs blocs successifs (ex: "Matin (7h) [balade] :")
   //  - séparateurs label/texte tolérés : — – - : . ) → = » et tout ça avec
   //    espaces multiples (déjà normalisés) ou collés
   const re =
-    /^[\s«»"'(\[\{*_`~]*\s*(matin|midi|soir|nuit|apr[èeé]s[- ]?midi|aprem)\s*[»"'\]\)\}*_`~]*\s*(?:\([^)]*\))?\s*[—–\-:.\)=→»]?\s*(.*)$/i;
+    /^[\s«»"'(\[\{*_`~]*\s*(matin|midi|soir|nuit|apr[èeé]s[- ]?midi|aprem)\s*[»"'\]\)\}*_`~]*\s*(?:(?:\([^)]*\)|\[[^\]]*\]|\{[^}]*\})\s*)*[—–\-:.\)=→»]?\s*(.*)$/i;
 
   const blocks: { key: string; label: string; text: string }[] = [];
   const leftover: string[] = [];
