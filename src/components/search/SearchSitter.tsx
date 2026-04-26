@@ -9,7 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { ToastAction } from "@/components/ui/toast";
 
 const SearchMapView = lazy(() => import("@/components/search/SearchMapView"));
-import { DEMO_SITS, DEMO_MISSIONS, DEMO_THRESHOLD } from "@/data/demoListings";
+import { DEMO_SITS, DEMO_MISSIONS } from "@/data/demoListings";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -21,6 +21,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Search, MapPin, Calendar, Star, Lock, Zap, Sparkles } from "lucide-react";
 import { format, differenceInDays, differenceInHours } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -544,7 +545,10 @@ const SearchSitter = () => {
       });
     }
     final = sortResults(final, sort);
-    if (final.length < DEMO_THRESHOLD) {
+    // Démos affichées UNIQUEMENT si aucun résultat réel — pour ne pas fausser
+    // la perception de l'offre disponible.
+    const realActiveCount = final.filter((r: any) => !r.isAssigned && !r.isCompleted).length;
+    if (realActiveCount === 0) {
       final = [...final, ...DEMO_SITS];
     }
     const coordsMap = new Map<string, { lat: number; lng: number }>();
@@ -605,7 +609,7 @@ const SearchSitter = () => {
     let final: any[] = [...items];
     if (sort === "closest") final.sort((a: any, b: any) => (a.distance ?? 9999) - (b.distance ?? 9999));
     else if (sort === "recent") final.sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-    if (final.length < DEMO_THRESHOLD) {
+    if (final.length === 0) {
       final = [...final, ...DEMO_MISSIONS];
     }
     setResults(final);
@@ -718,11 +722,16 @@ const SearchSitter = () => {
     ? `${format(new Date(startDate), "d MMM", { locale: fr })} → ${format(new Date(endDate), "d MMM", { locale: fr })}`
     : "Dates";
 
-  const availableSitsCount = results.filter((r: any) => !r.isAssigned && !r.isCompleted).length;
+  // Compteur "annonces disponibles" : on EXCLUT les démos, les attribuées et les terminées
+  // pour ne pas surévaluer l'offre réelle.
+  const availableSitsCount = results.filter((r: any) => !r.isAssigned && !r.isCompleted && !r.is_demo).length;
+  const demoCount = results.filter((r: any) => r.is_demo).length;
   const resultCount = tab === "missions" && missionSubTab === "members" ? availableMembers.length : availableSitsCount;
   const countLabel = tab === "missions" && missionSubTab === "members"
     ? `${resultCount} membre${resultCount > 1 ? "s" : ""} disponible${resultCount > 1 ? "s" : ""}`
-    : `${resultCount} garde${resultCount > 1 ? "s" : ""} disponible${resultCount > 1 ? "s" : ""} près de vous`;
+    : resultCount === 0 && demoCount > 0
+      ? "Aucune annonce réelle pour le moment"
+      : `${resultCount} annonce${resultCount > 1 ? "s" : ""} disponible${resultCount > 1 ? "s" : ""} près de vous`;
 
   // ─── Pill style ───
   const pillClass = "flex items-center gap-2 px-4 py-2 rounded-full border border-border bg-card cursor-pointer hover:border-primary transition-colors text-sm whitespace-nowrap shrink-0";
@@ -747,12 +756,17 @@ const SearchSitter = () => {
 
     const cardContent = (
       <div
-        className={`bg-card rounded-2xl overflow-hidden border border-border transition-shadow ${isClickable ? "cursor-pointer hover:shadow-md" : ""} ${isInactive ? "opacity-60 grayscale-[40%]" : ""}`}
-        aria-disabled={isInactive || undefined}
+        className={`bg-card rounded-2xl overflow-hidden border transition-shadow ${isClickable ? "cursor-pointer hover:shadow-md" : ""} ${isInactive ? "opacity-60 grayscale-[40%]" : ""} ${isDemo ? "border-amber-400 border-dashed ring-1 ring-amber-200/60" : "border-border"}`}
+        aria-disabled={isInactive || isDemo || undefined}
       >
         {photos.length > 0 && (
           <div className="h-52 relative">
-            <img src={photos[0]} alt="" className={`w-full h-full object-cover ${isInactive ? "grayscale" : ""}`} loading="lazy" />
+            <img src={photos[0]} alt="" className={`w-full h-full object-cover ${isInactive ? "grayscale" : ""} ${isDemo ? "saturate-[0.85]" : ""}`} loading="lazy" />
+            {isDemo && (
+              <span className="absolute inset-x-0 top-0 bg-amber-400 text-amber-950 text-[11px] font-semibold uppercase tracking-wide px-3 py-1.5 text-center shadow-sm flex items-center justify-center gap-1.5">
+                <Sparkles className="h-3 w-3" /> Annonce d'exemple — pour illustrer la plateforme
+              </span>
+            )}
             {(isAssigned || isCompleted) && (
               <span className="absolute inset-0 flex items-center justify-center">
                 <span className="bg-foreground/85 text-background rounded-full px-3 py-1.5 text-xs font-semibold uppercase tracking-wide shadow-md">
@@ -760,7 +774,7 @@ const SearchSitter = () => {
                 </span>
               </span>
             )}
-            {!isInactive && item.owner?.identity_verified && (
+            {!isInactive && !isDemo && item.owner?.identity_verified && (
               <span className="absolute top-3 left-3 flex items-center gap-1 bg-white/90 backdrop-blur-sm rounded-full px-2 py-1 text-xs text-primary font-medium">
                 <ShieldCheck className="h-3 w-3" /> Vérifié
               </span>
@@ -768,11 +782,6 @@ const SearchSitter = () => {
             {!isDemo && !isMission && !isInactive && (
               <span className="absolute top-3 right-3 z-10" onClick={(e) => e.preventDefault()}>
                 <FavoriteButton targetType="sit" targetId={item.id} size="sm" />
-              </span>
-            )}
-            {isDemo && (
-              <span className="absolute top-3 right-3 bg-black/50 text-white rounded-full px-2 py-1 text-xs">
-                Annonce type
               </span>
             )}
             {item.isNew && !isDemo && !isInactive && (
@@ -830,7 +839,12 @@ const SearchSitter = () => {
               Garde déjà réalisée — pour donner un aperçu de l'activité.
             </p>
           )}
-          {showCTA && (
+          {isDemo && (
+            <p className="text-xs text-amber-700 italic mt-3 flex items-center gap-1">
+              <Sparkles className="h-3 w-3" /> Exemple fictif pour vous montrer le rendu — non disponible.
+            </p>
+          )}
+          {showCTA && !isDemo && (
             <Link
               to="/mon-abonnement"
               className="block w-full py-2 text-sm text-center text-primary bg-primary/10 rounded-xl font-medium mt-3 hover:bg-primary/20 transition-colors"
@@ -936,7 +950,7 @@ const SearchSitter = () => {
           {/* Location pill */}
           <Popover open={editingCity} onOpenChange={setEditingCity}>
             <PopoverTrigger asChild>
-              <button className={pillClass}>
+              <button className={pillClass} aria-label={`Ville sélectionnée : ${city || "aucune"}. Cliquer pour changer.`}>
                 <MapPin className="h-4 w-4 text-primary" />
                 <span className="text-foreground">{city || "Ville"}</span>
               </button>
@@ -975,7 +989,7 @@ const SearchSitter = () => {
           {/* Zone pill (radius / dept / region / france) */}
           <Popover>
             <PopoverTrigger asChild>
-              <button className={pillClass}>
+              <button className={pillClass} aria-label="Choisir la zone de recherche">
                 <span className="text-foreground">
                   {zoneMode === "radius" && `${radius[0]} km`}
                   {zoneMode === "dept" && (() => {
@@ -1102,6 +1116,16 @@ const SearchSitter = () => {
             </PopoverContent>
           </Popover>
 
+          {/* Verified toggle promu (raccourci confiance) */}
+          <button
+            onClick={() => setVerifiedOnly(v => !v)}
+            aria-pressed={verifiedOnly}
+            className={`${pillClass} ${verifiedOnly ? "bg-primary/10 border-primary text-primary" : ""}`}
+          >
+            <ShieldCheck className={`h-4 w-4 ${verifiedOnly ? "text-primary" : "text-muted-foreground"}`} />
+            <span>{verifiedOnly ? "Vérifiés uniquement" : "Vérifié"}</span>
+          </button>
+
           {/* Advanced filters pill */}
           <Sheet>
             <SheetTrigger asChild>
@@ -1221,21 +1245,17 @@ const SearchSitter = () => {
       <div className="flex justify-between items-center px-6 py-2 border-b border-border bg-background">
         <div className="flex items-center gap-3 flex-wrap">
           <span className="text-sm text-muted-foreground">{loading ? "Recherche…" : countLabel}</span>
-          <div className="flex gap-2">
-            {(["closest", "recent", "rating"] as SortOption[]).map(s => (
-              <button
-                key={s}
-                onClick={() => handleSortChange(s)}
-                className={`rounded-full px-3 py-1 text-xs transition-colors ${
-                  sort === s
-                    ? "bg-foreground text-background font-medium"
-                    : "border border-border text-muted-foreground hover:border-primary"
-                }`}
-              >
-                {s === "closest" ? "Plus proches" : s === "recent" ? "Plus récentes" : "Mieux notées"}
-              </button>
-            ))}
-          </div>
+          <Select value={sort} onValueChange={(v) => handleSortChange(v as SortOption)}>
+            <SelectTrigger className="h-8 w-auto gap-1.5 rounded-full border-border bg-card px-3 text-xs">
+              <span className="text-muted-foreground">Trier&nbsp;:</span>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent align="start">
+              <SelectItem value="closest">Plus proches</SelectItem>
+              <SelectItem value="recent">Plus récentes</SelectItem>
+              <SelectItem value="rating">Mieux notées</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
         {tab === "sits" && user && (
           <TooltipProvider>
@@ -1304,47 +1324,7 @@ const SearchSitter = () => {
         </div>
       </div>
 
-      {/* ─── Density counter (helps users understand they can widen the search) ─── */}
-      {tab === "sits" && !loading && userPostalCode && (densityCounts.dept > 0 || densityCounts.region > 0 || densityCounts.france > 0) && (
-        <div className="mx-6 mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
-          <span className="font-medium text-foreground">Densité :</span>
-          <button
-            onClick={() => setZoneMode("radius")}
-            className={`underline-offset-2 hover:underline ${zoneMode === "radius" ? "text-primary font-medium" : ""}`}
-          >
-            {densityCounts.radius} dans {radius[0]} km
-          </button>
-          <span>·</span>
-          <button
-            onClick={() => setZoneMode("dept")}
-            className={`underline-offset-2 hover:underline ${zoneMode === "dept" ? "text-primary font-medium" : ""}`}
-          >
-            {densityCounts.dept} dans le {getDeptCode(userPostalCode)}
-          </button>
-          <span>·</span>
-          <button
-            onClick={() => setZoneMode("region")}
-            className={`underline-offset-2 hover:underline ${zoneMode === "region" ? "text-primary font-medium" : ""}`}
-          >
-            {densityCounts.region} en {getRegionName(getDeptCode(userPostalCode)) || "région"}
-          </button>
-          <span>·</span>
-          <button
-            onClick={() => setZoneMode("france")}
-            className={`underline-offset-2 hover:underline ${zoneMode === "france" ? "text-primary font-medium" : ""}`}
-          >
-            {densityCounts.france} en France
-          </button>
-          {zoneMode === "radius" && densityCounts.radius < 5 && densityCounts.dept > densityCounts.radius && (
-            <button
-              onClick={() => setZoneMode("dept")}
-              className="ml-auto rounded-full bg-primary/10 text-primary px-3 py-1 text-xs font-medium hover:bg-primary/20 transition-colors"
-            >
-              Élargir au département ({densityCounts.dept}) →
-            </button>
-          )}
-        </div>
-      )}
+      {/* Densité supprimée — déjà visible dans le sélecteur de Zone et le bandeau hors-zone */}
 
       {/* ─── Out-of-zone banner ─── */}
       {tab === "sits" && !loading && userPostalCode && zoneMode !== "france" && densityCounts.france > densityCounts.radius && (() => {

@@ -10,16 +10,32 @@ const speciesIcon: Record<string, typeof PawPrint> = {
   fish: PawPrint, reptile: PawPrint, farm_animal: Bird, nac: PawPrint,
 };
 
-const createPinIcon = (isActive: boolean) => {
-  const color = isActive ? "hsl(40, 12%, 10%)" : "hsl(153, 42%, 30%)";
+type PinKind = "active" | "inactive" | "demo";
+
+const pinColors: Record<PinKind, { bg: string; ring: string }> = {
+  active:   { bg: "hsl(153, 42%, 30%)", ring: "white" },           // vert (annonce active)
+  inactive: { bg: "hsl(0, 0%, 55%)",    ring: "white" },           // gris (terminée / attribuée)
+  demo:     { bg: "hsl(43, 96%, 56%)",  ring: "hsl(43, 80%, 30%)" }, // ambre (annonce d'exemple)
+};
+
+const createPinIcon = (kind: PinKind, isActive: boolean) => {
+  const { bg, ring } = pinColors[kind];
+  const scale = isActive ? 1.15 : 1;
+  const dashed = kind === "demo" ? "border-style:dashed;" : "";
   return L.divIcon({
     className: "",
     iconSize: [36, 36],
     iconAnchor: [18, 18],
-    html: `<div style="width:36px;height:36px;border-radius:50%;background:${color};border:3px solid white;box-shadow:0 2px 8px rgba(0,0,0,0.2);display:flex;align-items:center;justify-content:center;transition:transform 0.15s;cursor:pointer;">
+    html: `<div style="width:36px;height:36px;border-radius:50%;background:${bg};border:3px solid ${ring};${dashed}box-shadow:0 2px 8px rgba(0,0,0,0.25);display:flex;align-items:center;justify-content:center;cursor:pointer;transform:scale(${scale});transition:transform 0.15s;">
       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
     </div>`,
   });
+};
+
+const getPinKind = (item: any): PinKind => {
+  if (item?.is_demo) return "demo";
+  if (item?.isAssigned || item?.isCompleted) return "inactive";
+  return "active";
 };
 
 interface MapCenterProps {
@@ -106,7 +122,7 @@ const SearchMapView = ({
               <Marker
                 key={item.id}
                 position={[coords.lat, coords.lng]}
-                icon={createPinIcon(activePin === item.id)}
+                icon={createPinIcon(getPinKind(item), activePin === item.id)}
                 eventHandlers={{
                   click: () => setActivePin(activePin === item.id ? null : item.id),
                 }}
@@ -114,6 +130,13 @@ const SearchMapView = ({
             );
           })}
         </MapContainer>
+
+        {/* Légende des pins */}
+        <div className="absolute bottom-3 left-3 z-[400] bg-card/95 backdrop-blur-sm border border-border rounded-lg shadow-sm px-3 py-2 text-xs text-foreground space-y-1 pointer-events-none">
+          <div className="flex items-center gap-2"><span className="inline-block w-3 h-3 rounded-full" style={{ background: pinColors.active.bg, border: `2px solid ${pinColors.active.ring}` }} /> Disponible</div>
+          <div className="flex items-center gap-2"><span className="inline-block w-3 h-3 rounded-full" style={{ background: pinColors.inactive.bg, border: `2px solid ${pinColors.inactive.ring}` }} /> Attribuée / terminée</div>
+          <div className="flex items-center gap-2"><span className="inline-block w-3 h-3 rounded-full border-dashed" style={{ background: pinColors.demo.bg, border: `2px dashed ${pinColors.demo.ring}` }} /> Annonce d'exemple</div>
+        </div>
 
         {activeItem && (() => {
           const coords = getCoords(activeItem);
@@ -132,11 +155,16 @@ const SearchMapView = ({
           return (
             <div
               ref={popoverRef}
-              className="absolute z-[1000] bg-card rounded-xl shadow-lg border border-border overflow-hidden"
+              className={`absolute z-[1000] bg-card rounded-xl shadow-lg overflow-hidden ${isDemo ? "border-2 border-dashed border-amber-400" : "border border-border"}`}
               style={{ width: 240, top: "50%", left: "50%", transform: "translate(-50%, -50%)" }}
             >
+              {isDemo && (
+                <div className="bg-amber-400 text-amber-950 text-[11px] font-semibold uppercase tracking-wide px-3 py-1 text-center">
+                  Annonce d'exemple
+                </div>
+              )}
               {photos.length > 0 && (
-                <img src={photos[0]} alt="Aperçu de l'annonce" loading="lazy" className="w-full h-[120px] object-cover" />
+                <img src={photos[0]} alt="Aperçu de l'annonce" loading="lazy" className={`w-full h-[120px] object-cover ${isDemo ? "saturate-[0.85]" : ""}`} />
               )}
               <div className="p-3">
                 <h4 className="text-sm font-semibold text-foreground line-clamp-2 mb-1">
@@ -159,7 +187,11 @@ const SearchMapView = ({
                     })}
                   </div>
                 )}
-                {linkTo && hasAccess ? (
+                {isDemo ? (
+                  <p className="text-[11px] text-amber-700 italic text-center py-1">
+                    Exemple fictif — non disponible
+                  </p>
+                ) : linkTo && hasAccess ? (
                   <Link
                     to={linkTo}
                     className="block w-full py-2 text-xs text-center bg-primary text-primary-foreground rounded-lg font-medium"
@@ -171,7 +203,7 @@ const SearchMapView = ({
                     to="/mon-abonnement"
                     className="block w-full py-2 text-xs text-center bg-primary text-primary-foreground rounded-lg font-medium"
                   >
-                    {hasAccess ? "Annonce type" : "S'abonner pour postuler"}
+                    S'abonner pour postuler
                   </Link>
                 )}
               </div>
