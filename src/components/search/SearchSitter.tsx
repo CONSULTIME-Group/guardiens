@@ -880,7 +880,7 @@ const SearchSitter = () => {
 
     const cardContent = (
       <div
-        className={`bg-card rounded-2xl overflow-hidden border transition-shadow ${isClickable ? "cursor-pointer hover:shadow-md" : ""} ${isInactive ? "opacity-60 grayscale-[40%]" : ""} ${isDemo ? "border-amber-400 border-dashed ring-1 ring-amber-200/60" : "border-border"} ${testDemoMode ? "ring-2 ring-offset-1 " + (isDemo ? "ring-amber-500" : "ring-sky-300/60") : ""}`}
+        className={`relative bg-card rounded-2xl overflow-hidden border transition-shadow ${isClickable ? "cursor-pointer hover:shadow-md" : ""} ${isInactive ? "opacity-60 grayscale-[40%]" : ""} ${isDemo ? "border-amber-400 border-dashed ring-1 ring-amber-200/60" : "border-border"} ${testDemoMode ? "ring-2 ring-offset-1 " + (isDemo ? "ring-amber-500" : "ring-sky-300/60") : ""}`}
         aria-disabled={isInactive || undefined}
       >
         {testDemoMode && typeof listIndex === "number" && (
