@@ -7,7 +7,23 @@ import type { TemplateEntry } from './registry.ts'
 const SITE_NAME = "Guardiens"
 const SITE_URL = "https://guardiens.fr"
 
-const SubscriptionExpires30dEmail = ({ firstName = '' }: { firstName?: string }) => (
+interface SubscriptionExpires30dProps {
+  firstName?: string
+  renewalDate?: string // ISO date string
+}
+
+const formatFrenchDate = (iso?: string): string => {
+  if (!iso) return 'votre prochaine échéance'
+  try {
+    const d = new Date(iso)
+    if (isNaN(d.getTime())) return 'votre prochaine échéance'
+    return d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })
+  } catch {
+    return 'votre prochaine échéance'
+  }
+}
+
+const SubscriptionExpires30dEmail = ({ firstName = '', renewalDate }: SubscriptionExpires30dProps) => (
   <Html lang="fr" dir="ltr">
     <Head />
     <Preview>Votre abonnement {SITE_NAME} se renouvelle dans 30 jours</Preview>
@@ -19,7 +35,7 @@ const SubscriptionExpires30dEmail = ({ firstName = '' }: { firstName?: string })
         </Text>
         <Text style={text}>
           Votre abonnement {SITE_NAME} sera renouvelé automatiquement le{' '}
-          <strong>[date]</strong> au tarif de <strong>9€/mois</strong>.
+          <strong>{formatFrenchDate(renewalDate)}</strong> au tarif de <strong>9€/mois</strong>.
         </Text>
         <Text style={text}>
           Si vous souhaitez résilier avant cette date, c'est simple :
