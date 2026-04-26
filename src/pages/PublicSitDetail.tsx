@@ -337,7 +337,7 @@ const PublicSitDetail = () => {
         <div className="mt-5 mb-3 flex flex-wrap items-center gap-2">
           <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full bg-primary/10 text-primary">
             <Sparkles className="h-3.5 w-3.5" />
-            Garde entre voisins · Sans paiement entre membres
+            Mission de gardien · Logement offert
           </span>
           {owner?.city && (
             <span className="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full bg-muted text-foreground">
@@ -349,7 +349,7 @@ const PublicSitDetail = () => {
 
         {/* Title — sanitize pour corriger les espaces manquants ("4chats" → "4 chats") */}
         <h1 className="font-heading text-3xl md:text-4xl font-bold leading-tight tracking-tight mb-3 text-foreground">
-          {sit.title ? sanitizeUserTitle(sit.title) : `Une garde à confier à ${owner?.city || "vos voisins"}`}
+          {sit.title ? sanitizeUserTitle(sit.title) : `Une mission de garde à ${owner?.city || "découvrir"}`}
         </h1>
 
         {/* Date naturelle */}
@@ -578,12 +578,18 @@ const PublicSitDetail = () => {
         {!isAuthenticated && (
           <section className="mt-2 rounded-2xl bg-card border border-border p-6 text-center">
             <p className="font-heading text-base md:text-lg font-semibold mb-2">
-              Vous partez l'esprit léger — et si un imprévu survient, votre
-              réseau local de gardiens prend le relais.
+              Vous gardez l'esprit léger&nbsp;: en cas d'imprévu, le réseau de
+              gardiens d'urgence Guardiens prend le relais.
             </p>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-muted-foreground mb-4">
               Profils vérifiés · Avis croisés · Gardiens d'urgence mobilisables
             </p>
+            <Link
+              to="/"
+              className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline"
+            >
+              Découvrir Guardiens en 1 minute →
+            </Link>
           </section>
         )}
 
@@ -595,7 +601,7 @@ const PublicSitDetail = () => {
               <div className="hidden sm:flex items-center justify-center gap-x-4 text-xs text-muted-foreground mb-2">
                 <span className="flex items-center gap-1"><ShieldCheck className="h-3.5 w-3.5 text-primary" /> Identités vérifiées</span>
                 <span className="flex items-center gap-1"><Heart className="h-3.5 w-3.5 text-primary" /> 100&nbsp;% gratuit</span>
-                <span className="flex items-center gap-1"><Users className="h-3.5 w-3.5 text-primary" /> Entre voisins</span>
+                <span className="flex items-center gap-1"><Users className="h-3.5 w-3.5 text-primary" /> Communauté de gardiens</span>
               </div>
             )}
             {!(sit as any).accepting_applications ? (
