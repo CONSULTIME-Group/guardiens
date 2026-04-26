@@ -1755,12 +1755,36 @@ const SearchSitter = () => {
         const tabLabel = tab === "sits" ? "Gardes" : inMembersTab ? "Membres dispo" : "Missions";
         const availableDemos = tab === "sits" ? DEMO_SITS.length : !inMembersTab ? DEMO_MISSIONS.length : 0;
         return (
-          <div className="mx-6 mt-4 rounded-lg border-2 border-dashed border-amber-400 bg-amber-50 p-4 text-sm space-y-2">
+          <div
+            className="mx-6 mt-4 rounded-lg border-2 border-dashed border-amber-400 bg-amber-50 p-4 text-sm space-y-2"
+            data-testid="demo-test-panel"
+            data-demo-count={demoIndices.length}
+            data-real-count={realCount}
+            data-interleave-ok={interleaveOk ? "true" : "false"}
+          >
             <div className="flex items-center justify-between flex-wrap gap-2">
               <p className="font-mono font-bold text-amber-900 flex items-center gap-2">
                 <Sparkles className="h-4 w-4" /> MODE TEST DÉMOS — Onglet&nbsp;: <span className="bg-amber-200 px-2 py-0.5 rounded">{tabLabel}</span>
               </p>
               <Link to={window.location.pathname} className="text-xs text-amber-800 underline hover:no-underline">Désactiver</Link>
+            </div>
+            {/* Légende du surlignage des cartes (DEMO ambré / REAL bleu) */}
+            <div
+              className="flex flex-wrap items-center gap-4 text-[11px] text-amber-900/90 bg-white/60 rounded px-3 py-2 border border-amber-200"
+              data-testid="demo-test-legend"
+            >
+              <span className="font-mono font-semibold uppercase tracking-wide">Légende&nbsp;:</span>
+              <span className="inline-flex items-center">
+                <span className="test-legend-swatch test-legend-swatch--demo" aria-hidden="true" />
+                Carte démo (anneau ambré + pastille « DEMO »)
+              </span>
+              <span className="inline-flex items-center">
+                <span className="test-legend-swatch test-legend-swatch--real" aria-hidden="true" />
+                Carte réelle (anneau bleu + pastille « REAL »)
+              </span>
+              <span className="text-muted-foreground">
+                La pastille en haut à gauche affiche la position dans la liste (#1, #2, …).
+              </span>
             </div>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs font-mono">
               <div className="bg-white rounded p-2 border border-amber-200">
