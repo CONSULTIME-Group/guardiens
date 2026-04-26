@@ -274,7 +274,7 @@ const PublicSitDetail = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto pb-32">
+    <div className="pb-32 bg-background">
       <Helmet>
         <title>{truncatedTitle}</title>
         <meta name="description" content={truncatedSeoDesc} />
