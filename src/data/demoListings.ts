@@ -292,31 +292,31 @@ export const DEMO_SITS: DemoSit[] = [
     },
     pets: [
       {
+        species: "dog",
+        name: "Yuki",
+        breed: "Husky sibérien",
+        age: "4 ans",
+        notes:
+          "Très câlin et bavard (ouh-ouh sonores en accueil !). Deux belles sorties par jour obligatoires (1h le matin, 45 min le soir) — sinon il s'ennuie. Tenu en laisse hors zones autorisées : un husky, ça file comme une flèche.",
+      },
+      {
         species: "cat",
         name: "Milo",
         breed: "Sacré de Birmanie",
         age: "6 ans",
         notes:
-          "Très câline mais timide les premiers jours. Se cache sous le canapé puis vient ronronner.",
-      },
-      {
-        species: "cat",
-        name: "Louane",
-        breed: "Européenne tortie",
-        age: "4 ans",
-        notes:
-          "Joueuse et bavarde, miaule pour réclamer ses croquettes à 18h pile. Adore les plumeaux.",
+          "Très câlin mais timide les premiers jours. Se cache sous le canapé puis vient ronronner. Brossage hebdo (poil mi-long).",
       },
     ],
     schedule: {
-      morning: "Gamelles, changement d'eau, ouverture du balcon si beau temps.",
-      midday: "Pas de contrainte, les chattes dorment.",
-      evening: "Repas à 18h précises (Louane n'est pas patiente), nettoyage litière, séance jeu/câlins 20 min.",
+      morning: "Sortie Yuki 1h (parc Paul-Mistral à 5 min), gamelles, ouverture du balcon si beau temps.",
+      midday: "Pause pipi rapide pour Yuki en bas de l'immeuble, Milo dort.",
+      evening: "Repas à 18h précises, sortie Yuki 45 min, nettoyage litière, séance jeu/câlins 20 min.",
       notes:
-        "Comptez 1h par jour. Litière à nettoyer tous les 2 jours. Brossage hebdo pour Milo (poil mi-long).",
+        "Comptez 2h30 par jour. Yuki est l'attraction du quartier — préparez-vous à être abordé par tous les enfants !",
     },
     ownerMessage:
-      "Mes chattes sont mes bébés. J'aime quand mes gardiens m'envoient une photo par jour, même rapide. En échange, je vous laisse mon vélo, mon Netflix et la liste de mes adresses préférées en ville !",
+      "Yuki et Milo sont mes bébés. J'aime quand mes gardiens m'envoient une photo par jour, même rapide. En échange, je vous laisse mon vélo, mon Netflix et la liste de mes adresses préférées en ville !",
     topBadges: [],
     avgRating: null,
     reviewCount: 0,
