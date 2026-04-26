@@ -305,43 +305,101 @@ export function useOwnerProfile() {
     }
   }, [user, data, pets.length, propertyId, ownerProfileId, fetchData, refreshCompletion, refreshProfile, toast]);
 
+  // Whitelists pour neutraliser toute valeur invalide envoyée aux enums Postgres
+  const SPECIES_VALUES = ["dog", "cat", "horse", "bird", "rodent", "fish", "reptile", "farm_animal", "nac"] as const;
+  const ALONE_VALUES = ["never", "2h", "6h", "all_day"] as const;
+  const WALK_VALUES = ["none", "30min", "1h", "2h_plus"] as const;
+  const ACTIVITY_VALUES = ["calm", "moderate", "sportive"] as const;
+
+  const sanitizePet = (pet: Pet) => {
+    const species = (SPECIES_VALUES as readonly string[]).includes(pet.species) ? pet.species : "dog";
+    const alone = (ALONE_VALUES as readonly string[]).includes(pet.alone_duration) ? pet.alone_duration : "never";
+    const walk = (WALK_VALUES as readonly string[]).includes(pet.walk_duration) ? pet.walk_duration : "none";
+    const activity = (ACTIVITY_VALUES as readonly string[]).includes(pet.activity_level) ? pet.activity_level : "moderate";
+    const ageNum = typeof pet.age === "number" && Number.isFinite(pet.age) ? pet.age : null;
+    return {
+      species,
+      breed: pet.breed ?? "",
+      name: (pet.name ?? "").trim(),
+      age: ageNum,
+      photo_url: pet.photo_url ? pet.photo_url : null,
+      character: pet.character ?? "",
+      alone_duration: alone,
+      walk_duration: walk,
+      medication: pet.medication ?? "",
+      food: pet.food ?? "",
+      special_needs: pet.special_needs ?? "",
+      activity_level: activity,
+      owner_breed_note: pet.owner_breed_note ?? "",
+    };
+  };
+
   const addPet = useCallback(async (pet: Pet) => {
-    const pid = propertyId;
-    if (!pid && !user) return;
-    let currentPropId = pid;
-    if (!currentPropId) {
-      const { data: newProp } = await supabase
-        .from("properties").insert({ user_id: user!.id }).select("id").single();
-      if (newProp) { currentPropId = newProp.id; setPropertyId(newProp.id); }
+    if (!user) {
+      toast({ variant: "destructive", title: "Non connecté", description: "Veuillez vous reconnecter." });
+      return;
     }
-    if (!currentPropId) return;
-    const { data: created } = await supabase.from("pets").insert({
-      property_id: currentPropId,
-      species: pet.species as any, breed: pet.breed, name: pet.name, age: pet.age,
-      photo_url: pet.photo_url || null, character: pet.character,
-      alone_duration: pet.alone_duration as any, walk_duration: pet.walk_duration as any,
-      medication: pet.medication, food: pet.food, special_needs: pet.special_needs,
-      activity_level: pet.activity_level as any,
-    }).select().single();
-    if (created) setPets(prev => [...prev, { ...pet, id: created.id, property_id: currentPropId! }]);
-  }, [propertyId, user]);
+    let currentPropId = propertyId;
+    if (!currentPropId) {
+      const { data: newProp, error: propError } = await supabase
+        .from("properties").insert({ user_id: user.id }).select("id").single();
+      if (propError || !newProp) {
+        logger.error("Failed to create property before pet insert", { error: String(propError) });
+        toast({ variant: "destructive", title: "Erreur", description: "Impossible de créer votre logement. Réessayez." });
+        return;
+      }
+      currentPropId = newProp.id;
+      setPropertyId(newProp.id);
+    }
+
+    const payload = { property_id: currentPropId, ...sanitizePet(pet) };
+    const { data: created, error } = await supabase
+      .from("pets")
+      .insert(payload)
+      .select()
+      .single();
+
+    if (error || !created) {
+      logger.error("Failed to insert pet", { error: String(error), payload });
+      toast({
+        variant: "destructive",
+        title: "Impossible d'ajouter l'animal",
+        description: error?.message || "Veuillez réessayer dans un instant.",
+      });
+      return;
+    }
+    setPets(prev => [...prev, { ...pet, ...sanitizePet(pet), id: created.id, property_id: currentPropId! }]);
+  }, [propertyId, user, toast]);
 
   const updatePet = useCallback(async (pet: Pet) => {
     if (!pet.id) return;
-    await supabase.from("pets").update({
-      species: pet.species as any, breed: pet.breed, name: pet.name, age: pet.age,
-      photo_url: pet.photo_url || null, character: pet.character,
-      alone_duration: pet.alone_duration as any, walk_duration: pet.walk_duration as any,
-      medication: pet.medication, food: pet.food, special_needs: pet.special_needs,
-      activity_level: pet.activity_level as any,
-    }).eq("id", pet.id);
-    setPets(prev => prev.map(p => p.id === pet.id ? pet : p));
-  }, []);
+    const payload = sanitizePet(pet);
+    const { error } = await supabase.from("pets").update(payload).eq("id", pet.id);
+    if (error) {
+      logger.error("Failed to update pet", { error: String(error), payload });
+      toast({
+        variant: "destructive",
+        title: "Impossible de mettre à jour l'animal",
+        description: error.message || "Veuillez réessayer.",
+      });
+      return;
+    }
+    setPets(prev => prev.map(p => p.id === pet.id ? { ...pet, ...payload } : p));
+  }, [toast]);
 
   const removePet = useCallback(async (id: string) => {
-    await supabase.from("pets").delete().eq("id", id);
+    const { error } = await supabase.from("pets").delete().eq("id", id);
+    if (error) {
+      logger.error("Failed to delete pet", { error: String(error) });
+      toast({
+        variant: "destructive",
+        title: "Impossible de supprimer l'animal",
+        description: error.message || "Veuillez réessayer.",
+      });
+      return;
+    }
     setPets(prev => prev.filter(p => p.id !== id));
-  }, []);
+  }, [toast]);
 
   const uploadPhoto = useCallback(async (file: File, bucket: string): Promise<string | null> => {
     if (!user) return null;
