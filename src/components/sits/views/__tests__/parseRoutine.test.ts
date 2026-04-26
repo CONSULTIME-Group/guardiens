@@ -417,3 +417,51 @@ describe("parseRoutine — blocs collés sur une seule ligne par , ou ;", () => 
   });
 });
 
+describe("parseRoutine — variantes typographiques d'Après-midi", () => {
+  it("apres-midi (sans accent) : reconnu et trié au bon endroit", () => {
+    const r = parseRoutine("Matin : balade\napres-midi : sieste\nSoir : repas")!;
+    expect(r.blocks.map((b) => b.label)).toEqual(["Matin", "Après-midi", "Soir"]);
+    expect(r.blocks[1].text).toBe("sieste");
+  });
+
+  it("aprem (familier) : reconnu comme Après-midi", () => {
+    const r = parseRoutine("Matin : sortie\nAprem : jeu au jardin\nSoir : croquettes")!;
+    expect(r.blocks.map((b) => b.label)).toEqual(["Matin", "Après-midi", "Soir"]);
+    expect(r.blocks[1].text).toBe("jeu au jardin");
+  });
+
+  it("aprèm (avec accent) : reconnu comme Après-midi", () => {
+    const r = parseRoutine("Matin : balade\nAprèm : câlins\nSoir : repas")!;
+    expect(r.blocks.map((b) => b.label)).toEqual(["Matin", "Après-midi", "Soir"]);
+    expect(r.blocks[1].text).toBe("câlins");
+  });
+
+  it("aprèm-midi (variante hybride) : reconnu et texte intact", () => {
+    const r = parseRoutine("Matin : sortie\nAprèm-midi : sieste tranquille\nSoir : repas")!;
+    expect(r.blocks.map((b) => b.label)).toEqual(["Matin", "Après-midi", "Soir"]);
+    expect(r.blocks[1].text).toBe("sieste tranquille");
+  });
+
+  it("apres midi (sans tiret, sans accent)", () => {
+    const r = parseRoutine("Matin : balade\napres midi : jeu\nSoir : repas")!;
+    expect(r.blocks.map((b) => b.label)).toEqual(["Matin", "Après-midi", "Soir"]);
+    expect(r.blocks[1].text).toBe("jeu");
+  });
+
+  it("APREM en MAJUSCULES + ordre mélangé", () => {
+    const r = parseRoutine("Soir : croquettes\nAPREM : sieste\nMATIN : sortie")!;
+    expect(r.blocks.map((b) => b.label)).toEqual(["Matin", "Après-midi", "Soir"]);
+  });
+
+  it("après-midi avec NBSP et horaire entre crochets", () => {
+    const r = parseRoutine("Après-midi\u00A0[15h]\u00A0:\u00A0balade au parc\nMatin : gamelle")!;
+    expect(r.blocks.map((b) => b.label)).toEqual(["Matin", "Après-midi"]);
+    expect(r.blocks[1].text).toBe("balade au parc");
+  });
+
+  it("toutes variantes mélangées sur une seule ligne (virgules)", () => {
+    const r = parseRoutine("Matin : X, aprem : Y, Soir : Z")!;
+    expect(r.blocks.map((b) => b.label)).toEqual(["Matin", "Après-midi", "Soir"]);
+  });
+});
+
