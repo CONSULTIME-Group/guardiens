@@ -102,6 +102,15 @@ const Register = () => {
       source: "/inscription",
       metadata: { has_ref: !!ref, preset_role: presetRole || null },
     });
+    // Si le rôle est pré-sélectionné via ?role= (CTA, Facebook, etc.),
+    // l'utilisateur saute l'étape 1 → on émet l'event manuellement pour
+    // éviter le sous-comptage de "Rôle choisi" dans le funnel.
+    if (presetRole) {
+      trackEvent("signup_role_selected", {
+        source: "/inscription",
+        metadata: { role: presetRole, preset: true },
+      });
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

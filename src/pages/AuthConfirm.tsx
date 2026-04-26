@@ -5,6 +5,7 @@ import { Loader2, MailCheck, AlertTriangle, RefreshCw } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
+import { trackEventWithUserId } from "@/lib/analytics";
 
 const AuthConfirm = () => {
   const navigate = useNavigate();
@@ -47,6 +48,25 @@ const AuthConfirm = () => {
             });
             navigate("/reset-password", { replace: true });
           } else {
+            // ── Émission signup_email_confirmed (avant redirect) ──
+            // C'est ICI que le funnel doit incrémenter, pas dans Dashboard :
+            // AuthConfirm consomme le hash type=signup et redirige vers /dashboard
+            // sans hash, ce qui empêchait l'émission côté Dashboard.
+            // Déduplication via localStorage par user_id.
+            try {
+              const userId = session?.user?.id ?? null;
+              if (userId) {
+                const flagKey = `email_confirmed_tracked_${userId}`;
+                if (!localStorage.getItem(flagKey)) {
+                  localStorage.setItem(flagKey, "1");
+                  trackEventWithUserId(userId, "signup_email_confirmed", {
+                    source: "/auth/confirm",
+                    metadata: { user_id: userId, via: "email_link" },
+                  });
+                }
+              }
+            } catch { /* silencieux */ }
+
             toast({
               title: "Email confirmé",
               description: "Votre compte est activé !",

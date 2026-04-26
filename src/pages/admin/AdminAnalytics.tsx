@@ -272,30 +272,49 @@ const AdminAnalytics = () => {
   const trackingOK = trackingHealth.lastEvent && (Date.now() - trackingHealth.lastEvent.getTime()) < 60 * 60 * 1000;
 
   // ── KPIs de conversion ──
+  // IMPORTANT : `signup_form_submitted` et `signup_email_confirmed` sont sous-comptés
+  // (form_submitted = uniquement signup email/mdp réussis ; email_confirmed = uniquement
+  // depuis lien email, pas Google OAuth historique). On utilise `totalInscrits` (table
+  // profiles = source de vérité absolue) comme dénominateur des étapes en aval.
   const kpis = useMemo(() => {
     const started = funnelCounts.signup_started || 0;
     const formSubmitted = funnelCounts.signup_form_submitted || 0;
-    const emailConfirmed = funnelCounts.signup_email_confirmed || 0;
+    // Pivot fiable : nombre réel d'inscrits (table profiles)
+    const realSignups = totalInscrits;
     const onboardingCompleted = funnelCounts.onboarding_completed || 0;
     const firstAction = funnelCounts.first_action || 0;
+    const clamp = (v: number) => Math.min(100, Math.max(0, v));
 
     return {
-      formSubmissionRate: started > 0 ? Math.round((formSubmitted / started) * 100) : 0,
-      emailConfirmationRate: formSubmitted > 0 ? Math.round((emailConfirmed / formSubmitted) * 100) : 0,
-      activationRate: emailConfirmed > 0 ? Math.round((onboardingCompleted / emailConfirmed) * 100) : 0,
-      deepActivationRate: onboardingCompleted > 0 ? Math.round((firstAction / onboardingCompleted) * 100) : 0,
-      globalConversion: started > 0 ? Math.round((firstAction / started) * 100) : 0,
+      // % de visites /inscription qui ont réellement créé un compte (vrai pivot)
+      signupConversionRate: started > 0 ? clamp(Math.round((realSignups / started) * 100)) : 0,
+      // Form submission rate : reste indicatif (event optionnel)
+      formSubmissionRate: started > 0 ? clamp(Math.round((formSubmitted / started) * 100)) : 0,
+      // Activation : onboarding terminé / inscrits réels
+      activationRate: realSignups > 0 ? clamp(Math.round((onboardingCompleted / realSignups) * 100)) : 0,
+      // Action profonde : 1ère action / onboarding terminé
+      deepActivationRate: onboardingCompleted > 0 ? clamp(Math.round((firstAction / onboardingCompleted) * 100)) : 0,
+      // Conversion globale : 1ère action / visites
+      globalConversion: started > 0 ? clamp(Math.round((firstAction / started) * 100)) : 0,
     };
-  }, [funnelCounts]);
+  }, [funnelCounts, totalInscrits]);
 
   // ── Funnel data pour BarChart horizontal ──
+  // On remplace `signup_form_submitted` et `signup_email_confirmed` (sous-comptés)
+  // par une étape pivot synthétique "Inscrits (profil créé)" basée sur la table
+  // profiles, qui est la seule source fiable. Les events restent disponibles dans
+  // les KPIs détaillés ci-dessus pour qui veut les inspecter.
   const funnelChartData = useMemo(() => {
-    return FUNNEL_STEPS.map((step) => ({
-      etape: step.label,
-      count: funnelCounts[step.key] || 0,
-      color: step.color,
-    }));
-  }, [funnelCounts]);
+    return [
+      { etape: "1. Visite /inscription", count: funnelCounts.signup_started || 0, color: "hsl(var(--muted-foreground))" },
+      { etape: "2. Rôle choisi", count: funnelCounts.signup_role_selected || 0, color: "hsl(var(--primary) / 0.5)" },
+      { etape: "3. Formulaire envoyé", count: funnelCounts.signup_form_submitted || 0, color: "hsl(var(--primary) / 0.65)" },
+      { etape: "4. Compte créé (réel)", count: totalInscrits, color: "hsl(var(--primary) / 0.8)" },
+      { etape: "5. Onboarding ouvert", count: funnelCounts.onboarding_started || 0, color: "hsl(var(--primary) / 0.85)" },
+      { etape: "6. Onboarding terminé", count: funnelCounts.onboarding_completed || 0, color: "hsl(var(--primary) / 0.9)" },
+      { etape: "7. 1ère action", count: funnelCounts.first_action || 0, color: "hsl(var(--primary))" },
+    ];
+  }, [funnelCounts, totalInscrits]);
 
   return (
     <div className="p-6 space-y-6">
@@ -390,14 +409,14 @@ const AdminAnalytics = () => {
                   hint={`${funnelCounts.signup_form_submitted || 0} / ${funnelCounts.signup_started || 0}`}
                 />
                 <ConversionTile
-                  label="Formulaire → Email confirmé"
-                  value={kpis.emailConfirmationRate}
-                  hint={`${funnelCounts.signup_email_confirmed || 0} / ${funnelCounts.signup_form_submitted || 0}`}
+                  label="Démarré → Compte créé"
+                  value={kpis.signupConversionRate}
+                  hint={`${totalInscrits} / ${funnelCounts.signup_started || 0} (vrais inscrits)`}
                 />
                 <ConversionTile
-                  label="Email → Onboarding terminé"
+                  label="Compte créé → Onboarding terminé"
                   value={kpis.activationRate}
-                  hint={`${funnelCounts.onboarding_completed || 0} / ${funnelCounts.signup_email_confirmed || 0}`}
+                  hint={`${funnelCounts.onboarding_completed || 0} / ${totalInscrits}`}
                 />
                 <ConversionTile
                   label="Onboarding → 1ère action"
@@ -405,6 +424,9 @@ const AdminAnalytics = () => {
                   hint={`${funnelCounts.first_action || 0} / ${funnelCounts.onboarding_completed || 0}`}
                 />
               </div>
+              <p className="text-xs text-muted-foreground mt-3">
+                Source de vérité pour "Compte créé" : table profiles. Les events <code>signup_form_submitted</code> et <code>signup_email_confirmed</code> sont indicatifs (sous-comptés sur les inscriptions Google OAuth et les anciens comptes).
+              </p>
             </CardContent>
           </Card>
 
@@ -449,7 +471,7 @@ const AdminAnalytics = () => {
                 })}
               </div>
               <p className="text-xs text-muted-foreground mt-4">
-                Les étapes 4 à 7 sont nouvelles — il faudra ~3-7 jours pour accumuler des données fiables.
+                L'étape <strong>"Compte créé (réel)"</strong> vient de la table profiles (source fiable). Les autres viennent d'events client : un drop entre étapes peut refléter un sous-comptage (ex. inscriptions Google OAuth ne déclenchent pas <code>signup_form_submitted</code>).
               </p>
             </CardContent>
           </Card>
