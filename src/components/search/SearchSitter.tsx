@@ -880,9 +880,14 @@ const SearchSitter = () => {
 
     const cardContent = (
       <div
-        className={`bg-card rounded-2xl overflow-hidden border transition-shadow ${isClickable ? "cursor-pointer hover:shadow-md" : ""} ${isInactive ? "opacity-60 grayscale-[40%]" : ""} ${isDemo ? "border-amber-400 border-dashed ring-1 ring-amber-200/60" : "border-border"}`}
+        className={`bg-card rounded-2xl overflow-hidden border transition-shadow ${isClickable ? "cursor-pointer hover:shadow-md" : ""} ${isInactive ? "opacity-60 grayscale-[40%]" : ""} ${isDemo ? "border-amber-400 border-dashed ring-1 ring-amber-200/60" : "border-border"} ${testDemoMode ? "ring-2 ring-offset-1 " + (isDemo ? "ring-amber-500" : "ring-sky-300/60") : ""}`}
         aria-disabled={isInactive || undefined}
       >
+        {testDemoMode && typeof listIndex === "number" && (
+          <span className={`absolute z-20 top-2 left-2 text-[10px] font-mono font-bold px-2 py-0.5 rounded-full shadow ${isDemo ? "bg-amber-500 text-amber-50" : "bg-sky-500 text-sky-50"}`}>
+            #{listIndex + 1} {isDemo ? "DEMO" : "REAL"}
+          </span>
+        )}
         {photos.length > 0 && (
           <div className="h-52 relative">
             <img src={photos[0]} alt="" className={`w-full h-full object-cover ${isInactive ? "grayscale" : ""} ${isDemo ? "saturate-[0.85]" : ""}`} loading="lazy" />
