@@ -1284,6 +1284,54 @@ export type Database = {
         }
         Relationships: []
       }
+      guide_requests: {
+        Row: {
+          active_sits_count: number
+          admin_notes: string | null
+          city: string
+          city_guide_id: string | null
+          created_at: string
+          department: string | null
+          first_requested_at: string
+          id: string
+          last_seen_at: string
+          postal_code: string | null
+          slug: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          active_sits_count?: number
+          admin_notes?: string | null
+          city: string
+          city_guide_id?: string | null
+          created_at?: string
+          department?: string | null
+          first_requested_at?: string
+          id?: string
+          last_seen_at?: string
+          postal_code?: string | null
+          slug: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          active_sits_count?: number
+          admin_notes?: string | null
+          city?: string
+          city_guide_id?: string | null
+          created_at?: string
+          department?: string | null
+          first_requested_at?: string
+          id?: string
+          last_seen_at?: string
+          postal_code?: string | null
+          slug?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       hero_weights: {
         Row: {
           id: number
@@ -4153,6 +4201,7 @@ export type Database = {
         }
         Returns: undefined
       }
+      slugify_city: { Args: { input: string }; Returns: string }
     }
     Enums: {
       activity_level: "calm" | "moderate" | "sportive"
