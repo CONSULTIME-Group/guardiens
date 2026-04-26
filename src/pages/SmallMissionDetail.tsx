@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { logger } from "@/lib/logger";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { sendTransactionalEmail } from "@/lib/sendTransactionalEmail";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import {
