@@ -127,14 +127,22 @@ const SearchSitter = () => {
   const hasActiveFilters = housingTypes.length > 0 || verifiedOnly || withPhotosOnly || minExperience !== "all" || environments.length > 0;
 
   // ─── City autocomplete via geo.api.gouv.fr ───
+  // Comportement unifié : on normalise (sans accents/casse) côté client puis
+  // on aiguille vers l'endpoint pertinent — `codePostal` pour 5 chiffres,
+  // `nom` sinon (l'API gère le fuzzy ascii).
   const citySearchTimeout = useRef<NodeJS.Timeout | null>(null);
   const handleCityInputChange = (val: string) => {
     setCityInput(val);
     if (citySearchTimeout.current) clearTimeout(citySearchTimeout.current);
-    if (val.length < 2) { setCitySuggestions([]); return; }
+    const q = normalize(val);
+    if (q.length < 2) { setCitySuggestions([]); return; }
     citySearchTimeout.current = setTimeout(async () => {
       try {
-        const res = await fetch(`https://geo.api.gouv.fr/communes?nom=${encodeURIComponent(val)}&fields=nom,codesPostaux&boost=population&limit=5`);
+        const isCp = /^\d{5}$/.test(q);
+        const url = isCp
+          ? `https://geo.api.gouv.fr/communes?codePostal=${encodeURIComponent(q)}&fields=nom,codesPostaux&limit=5`
+          : `https://geo.api.gouv.fr/communes?nom=${encodeURIComponent(q)}&fields=nom,codesPostaux&boost=population&limit=5`;
+        const res = await fetch(url);
         const data = await res.json();
         setCitySuggestions(data || []);
       } catch { setCitySuggestions([]); }
