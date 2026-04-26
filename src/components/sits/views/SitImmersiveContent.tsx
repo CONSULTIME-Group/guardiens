@@ -245,13 +245,6 @@ const ROUTINE_ICONS: Record<string, { icon: any; bg: string; fg: string }> = {
   Nuit: { icon: Moon, bg: "bg-slate-100", fg: "text-slate-700" },
 };
 
-// Libellés des enums animaux — source unique partagée avec le formulaire de création
-import {
-  ACTIVITY_LABELS as ACTIVITY_LEVEL_LABEL,
-  WALK_LABELS as WALK_DURATION_LABEL,
-  ALONE_LABELS as ALONE_DURATION_LABEL,
-} from "@/components/sits/shared/sitConstants";
-
 const SitImmersiveContent = ({
   sit,
   owner,
