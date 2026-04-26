@@ -99,7 +99,15 @@ const SitterGallery = () => {
         ? selectedSitId
         : null;
       const source = validSitId ? "guardiens" : "external";
-      const validPhotoDate = photoDate && /^\d{4}-\d{2}-\d{2}$/.test(photoDate) ? photoDate : null;
+      // Accepte "YYYY-MM-DD" tel quel ; convertit "YYYY-MM" (input type=month) en "YYYY-MM-01" ; sinon null
+      let validPhotoDate: string | null = null;
+      if (photoDate) {
+        if (/^\d{4}-\d{2}-\d{2}$/.test(photoDate)) {
+          validPhotoDate = photoDate;
+        } else if (/^\d{4}-\d{2}$/.test(photoDate)) {
+          validPhotoDate = `${photoDate}-01`;
+        }
+      }
 
       const payload = {
         user_id: user.id,
