@@ -413,18 +413,20 @@ const SitImmersiveContent = ({
             </section>
           )}
 
-          {/* Les animaux */}
-          {pets.length > 0 && (
+          {/* Les animaux — visible uniquement si au moins un pet */}
+          {safePets.length > 0 && (
             <section className="rounded-2xl border border-border bg-card p-5 md:p-6">
               <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
                 <PawPrint className="h-5 w-5 text-primary" /> Vos pensionnaires
               </h2>
               <div className="space-y-5">
-                {pets.map((pet, i) => (
+                {safePets.map((pet, i) => (
                   <div key={pet.id || i} className="border-l-2 border-primary/30 pl-4">
                     <div className="flex items-baseline gap-2 flex-wrap mb-1">
                       <span className="text-xl">{SPECIES_EMOJI[pet.species] || "🐾"}</span>
-                      <h3 className="font-semibold text-foreground">{pet.name}</h3>
+                      {pet.name && (
+                        <h3 className="font-semibold text-foreground">{pet.name}</h3>
+                      )}
                       {pet.breed && (
                         <span className="text-sm text-muted-foreground">· {pet.breed}</span>
                       )}
