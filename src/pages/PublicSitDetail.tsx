@@ -585,10 +585,10 @@ const PublicSitDetail = () => {
               Profils vérifiés · Avis croisés · Gardiens d'urgence mobilisables
             </p>
             <Link
-              to="/recherche"
+              to="/"
               className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline"
             >
-              Voir toutes les missions de garde →
+              Découvrir Guardiens en 1 minute →
             </Link>
           </section>
         )}
