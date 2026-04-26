@@ -95,32 +95,7 @@ const NewMessageEmail = ({
 
 export const template = {
   component: NewMessageEmail,
-  subject: (data: Record<string, any>) => {
-    const sender = data.senderFirstName || 'Un membre'
-    const role: RecipientRole = data.recipientRole
-    switch (data.contextType) {
-      case 'sit_application':
-        return role === 'sitter'
-          ? `${sender} a répondu à votre candidature`
-          : `${sender} candidate à votre garde`
-      case 'sitter_inquiry':
-        return role === 'sitter'
-          ? `${sender} souhaite connaître vos disponibilités`
-          : `${sender} vous a répondu`
-      case 'mission_help':
-        return role === 'owner'
-          ? `${sender} propose son aide pour votre mission`
-          : `${sender} a répondu à votre proposition`
-      case 'helper_inquiry':
-        return `${sender} vous a envoyé un message`
-      case 'owner_pitch':
-        return role === 'owner'
-          ? `${sender} souhaite vous proposer ses services`
-          : `${sender} vous a répondu`
-      default:
-        return `Vous avez un nouveau message de ${sender}`
-    }
-  },
+  subject: (data: Record<string, any>) => buildSubject(data),
   displayName: 'Nouveau message reçu (contextualisé)',
   previewData: {
     senderFirstName: 'Patricia',
