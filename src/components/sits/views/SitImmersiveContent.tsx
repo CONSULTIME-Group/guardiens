@@ -266,6 +266,11 @@ const SitImmersiveContent = ({
   ctaSlot,
   topSlot,
 }: SitImmersiveContentProps) => {
+  // Onglet actif (contrôlé pour permettre la navigation depuis le résumé "Garde")
+  const [activeTab, setActiveTab] = useState<"garde" | "animaux" | "logement" | "attentes">(
+    "garde",
+  );
+
   // -- Photos / hero
   const photos: string[] = Array.isArray(property?.photos)
     ? property.photos.filter((p: any) => typeof p === "string" && p.trim().length > 0)
