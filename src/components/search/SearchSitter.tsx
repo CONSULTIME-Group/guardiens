@@ -1068,10 +1068,10 @@ const SearchSitter = () => {
 
               {(() => {
                 // Si la saisie ressemble à un dept/CP/région, on les met EN PREMIER
-                const q = cityInput.trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+                const q = normalize(cityInput);
                 const looksLikeDeptOrCp = /^\d{1,5}$|^2[ab]\d{0,3}$/i.test(q);
-                const exactDeptOrRegion = deptSuggestions.some(d => d.name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "") === q)
-                  || regionSuggestions.some(r => r.name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "") === q);
+                const exactDeptOrRegion = deptSuggestions.some(d => normalize(d.name) === q)
+                  || regionSuggestions.some(r => normalize(r.name) === q);
                 const territoryFirst = looksLikeDeptOrCp || exactDeptOrRegion;
                 const isCp = /^\d{5}$/.test(q);
 
