@@ -225,11 +225,29 @@ const SitImmersiveContent = ({
   const ownerBio = (owner?.bio || ownerProfile?.welcome_notes || "").toString().trim();
   const hasOwnerCard = Boolean(owner && (ownerName || cityName || ownerBio));
 
-  // -- Guide local : seulement si la ville a un guide réellement publié
-  const hasLocalGuide = Boolean(citySlug && GUIDE_SLUGS.has(citySlug));
+  // -- Guide local : vérification dynamique en base (auto-mise à jour quand un guide est publié)
+  const { data: dbGuide } = useQuery({
+    queryKey: ["city-guide-by-slug", citySlug],
+    enabled: !!citySlug,
+    staleTime: 5 * 60 * 1000,
+    queryFn: async () => {
+      if (!citySlug) return null;
+      const { data } = await supabase
+        .from("city_guides" as any)
+        .select("id, slug, published")
+        .eq("slug", citySlug)
+        .eq("published", true)
+        .maybeSingle();
+      return data as any;
+    },
+  });
+  // Soit un guide éditorial statique (CITIES), soit un guide DB publié
+  const hasLocalGuide = Boolean(citySlug && (GUIDE_SLUGS.has(citySlug) || dbGuide));
+  // Encart "Guide en préparation" : ville renseignée mais pas encore de guide
+  const showGuideComingSoon = Boolean(citySlug && cityName && !hasLocalGuide);
   // -- Page ville (silo SEO) : seulement si du contenu éditorial existe
   const hasCityPage = Boolean(citySlug && getCityContent(citySlug));
-  
+
 
   return (
     <div>
