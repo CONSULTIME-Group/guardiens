@@ -199,10 +199,15 @@ const SearchOwner = () => {
     if (!city || alertCreated || isCreatingAlert) return;
     setIsCreatingAlert(true);
     trackEvent("search_empty_action", { source: "owner", metadata: { action: "create_alert", zone_mode: zoneMode } });
+    // Snap au rayon autorisé le plus proche (la RPC n'accepte que 5/15/30/50/100)
+    const ALLOWED_RADII = [5, 15, 30, 50, 100];
+    const snappedRadius = ALLOWED_RADII.reduce((prev, curr) =>
+      Math.abs(curr - radius[0]) < Math.abs(prev - radius[0]) ? curr : prev
+    );
     const { data, error } = await supabase.rpc("create_alert_from_search", {
       p_city: city,
       p_postal_code: cityPostalCode ?? null,
-      p_radius_km: radius[0],
+      p_radius_km: snappedRadius,
     });
     setIsCreatingAlert(false);
     if (error) {
@@ -566,7 +571,17 @@ const SearchOwner = () => {
                     <button key={r} onClick={() => setRadius([r])} className={`rounded-full px-3 py-1 text-xs border transition-colors ${radius[0] === r ? "bg-primary text-primary-foreground border-primary" : "border-border text-muted-foreground hover:border-primary"}`}>{r} km</button>
                   ))}
                 </div>
-                <Slider value={radius} onValueChange={setRadius} min={5} max={100} step={5} />
+                <Slider
+                  value={radius}
+                  onValueChange={(v) => {
+                    const ALLOWED = [5, 15, 30, 50, 100];
+                    const snapped = ALLOWED.reduce((p, c) => Math.abs(c - v[0]) < Math.abs(p - v[0]) ? c : p);
+                    setRadius([snapped]);
+                  }}
+                  min={5}
+                  max={100}
+                  step={5}
+                />
                 <p className="text-xs text-muted-foreground text-center">{radius[0]} km</p>
               </PopoverContent>
             </Popover>
