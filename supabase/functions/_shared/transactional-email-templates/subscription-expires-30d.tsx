@@ -60,7 +60,7 @@ export const template = {
   component: SubscriptionExpires30dEmail,
   subject: 'Votre abonnement Guardiens se renouvelle dans 30 jours',
   displayName: 'Renouvellement abonnement dans 30 jours',
-  previewData: { firstName: 'Marie' },
+  previewData: { firstName: 'Marie', renewalDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString() },
 } satisfies TemplateEntry
 
 const main = { backgroundColor: '#ffffff', fontFamily: "'Outfit', Arial, sans-serif" }
