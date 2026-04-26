@@ -173,7 +173,7 @@ export const parseRoutine = (raw: string | null) => {
   // tolère espaces optionnels autour de • | / et tirets longs — –
   // ainsi qu'une numérotation explicite "  2) ", "  3. " etc.
   const segments = cleaned
-    .split(/\r?\n+|\s*[•|]\s*|\s+\/\s+|\s+[—–]\s+(?=(?:matin|midi|soir|nuit|apr|aprem)\b)|\s*[,;]\s+(?=(?:matin|midi|soir|nuit|apr|aprem)\b)|\s+(?=\d+\s*[)°.\-/:]\s*(?:matin|midi|soir|nuit|apr|aprem)\b)/i)
+    .split(/\r?\n+|\s*[•|]\s*|\s+\/\s+|\s+[—–]\s+(?=(?:matin|midi|soir|nuit|apr|aprem|apr[èeé]m)\b)|\s*[,;]\s+(?=(?:matin|midi|soir|nuit|apr|aprem|apr[èeé]m)\b)|\s+(?=\d+\s*[)°.\-/:]\s*(?:matin|midi|soir|nuit|apr|aprem|apr[èeé]m)\b)/i)
     .map((l) => stripBullet(l))
     .filter(Boolean);
 
