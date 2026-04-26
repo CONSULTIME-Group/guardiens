@@ -950,11 +950,17 @@ const SearchSitter = () => {
 
     const cardContent = (
       <div
-        className={`relative bg-card rounded-2xl overflow-hidden border transition-shadow ${isClickable ? "cursor-pointer hover:shadow-md" : ""} ${isInactive ? "opacity-60 grayscale-[40%]" : ""} ${isDemo ? "border-amber-400 border-dashed ring-1 ring-amber-200/60" : "border-border"} ${testDemoMode ? "ring-2 ring-offset-1 " + (isDemo ? "ring-amber-500" : "ring-sky-300/60") : ""}`}
+        className={`relative bg-card rounded-2xl overflow-hidden border transition-shadow ${isClickable ? "cursor-pointer hover:shadow-md" : ""} ${isInactive ? "opacity-60 grayscale-[40%]" : ""} ${isDemo ? "border-amber-400 border-dashed ring-1 ring-amber-200/60" : "border-border"} ${testDemoMode ? (isDemo ? "card-test-demo" : "card-test-real") : ""}`}
         aria-disabled={isInactive || undefined}
+        data-testid={isDemo ? "search-card-demo" : "search-card-real"}
+        data-demo={isDemo ? "true" : "false"}
+        data-list-index={typeof listIndex === "number" ? listIndex + 1 : undefined}
       >
         {testDemoMode && typeof listIndex === "number" && (
-          <span className={`absolute z-20 top-2 left-2 text-[10px] font-mono font-bold px-2 py-0.5 rounded-full shadow ${isDemo ? "bg-amber-500 text-amber-50" : "bg-sky-500 text-sky-50"}`}>
+          <span
+            className={`absolute z-20 top-2 left-2 text-[10px] font-mono font-bold px-2 py-0.5 rounded-full shadow ${isDemo ? "bg-amber-500 text-amber-50" : "bg-sky-500 text-sky-50"}`}
+            data-testid="search-card-position"
+          >
             #{listIndex + 1} {isDemo ? "DEMO" : "REAL"}
           </span>
         )}
