@@ -148,6 +148,64 @@ const SearchSitter = () => {
     setEditingCity(false);
   };
 
+  // ─── Suggestions département & région (locales, dérivées de la saisie) ───
+  const normalize = (s: string) =>
+    s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+
+  // Renvoie un code postal "représentatif" du département (pour piloter le mode Zone)
+  const deptToRefPostalCode = (dept: string): string => {
+    if (dept === "2A") return "20000";
+    if (dept === "2B") return "20200";
+    if (dept.startsWith("97")) return `${dept}00`;
+    return `${dept}000`;
+  };
+
+  const deptSuggestions = (() => {
+    const q = normalize(cityInput.trim());
+    if (q.length < 2) return [] as { code: string; name: string }[];
+    return Object.entries(DEPT_NAMES)
+      .filter(([code, name]) => {
+        const nName = normalize(name);
+        // match par code OU par nom (préfixe ou contient)
+        return code.toLowerCase().startsWith(q) || nName.includes(q);
+      })
+      .slice(0, 4)
+      .map(([code, name]) => ({ code, name }));
+  })();
+
+  const regionSuggestions = (() => {
+    const q = normalize(cityInput.trim());
+    if (q.length < 2) return [] as { code: string; name: string }[];
+    return Object.entries(REGION_NAMES)
+      .filter(([, name]) => normalize(name).includes(q))
+      .slice(0, 3)
+      .map(([code, name]) => ({ code, name }));
+  })();
+
+  const handleDeptSelect = (deptCode: string) => {
+    const name = DEPT_NAMES[deptCode] || deptCode;
+    const refCp = deptToRefPostalCode(deptCode);
+    setCityInput(`${deptCode} · ${name}`);
+    setCity(name);
+    setCityPostalCode(refCp);
+    setCitySuggestions([]);
+    setZoneMode("dept");
+    setEditingCity(false);
+  };
+
+  const handleRegionSelect = (regionCode: string) => {
+    const name = REGION_NAMES[regionCode] || regionCode;
+    // CP de référence : premier département de la région
+    const firstDept = Object.entries(DEPT_TO_REGION).find(([, r]) => r === regionCode)?.[0];
+    const refCp = firstDept ? deptToRefPostalCode(firstDept) : null;
+    setCityInput(name);
+    setCity(name);
+    setCityPostalCode(refCp);
+    setCitySuggestions([]);
+    setZoneMode("region");
+    setEditingCity(false);
+  };
+
   const handleGeolocation = () => {
     if (!navigator.geolocation) return;
     navigator.geolocation.getCurrentPosition(async (pos) => {
