@@ -41,6 +41,12 @@ import {
 } from "lucide-react";
 import VerifiedBadge from "@/components/profile/VerifiedBadge";
 import BreedProfileCard from "@/components/breeds/BreedProfileCard";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import { slugify } from "@/lib/normalize";
 import { CITIES } from "@/data/cities";
 import { getCityContent } from "@/data/cityContent";
