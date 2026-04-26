@@ -32,7 +32,8 @@ interface Conversation {
   updated_at: string;
   archived_by: string[];
   context_type: string | null;
-  sit?: { title: string; status: string; property_id: string; start_date?: string | null; end_date?: string | null } | null;
+  sit?: { title: string; status: string; property_id: string; start_date?: string | null; end_date?: string | null; city?: string | null } | null;
+  small_mission?: { id: string; title?: string | null; city?: string | null; date_needed?: string | null } | null;
   other_user?: { id: string; first_name: string; avatar_url: string | null; identity_verified: boolean; city?: string | null; is_founder?: boolean; last_seen_at?: string | null; show_last_seen?: boolean } | null;
   last_message?: { content: string; created_at: string; sender_id: string } | null;
   unread_count: number;
@@ -189,23 +190,43 @@ const Messages = () => {
     const otherIds = filteredConvs.map((conv: any) => conv.owner_id === user.id ? conv.sitter_id : conv.owner_id);
     const convIds = filteredConvs.map((conv: any) => conv.id);
     const sitIds = filteredConvs.map((conv: any) => conv.sit_id).filter(Boolean);
+    const missionIds = filteredConvs.map((conv: any) => conv.small_mission_id).filter(Boolean);
 
-    const [profilesRes, allLastMsgsRes, allUnreadRes, ratingsRes, emergencyRes, sitsRes, applicationsRes] = await Promise.all([
+    const [profilesRes, allLastMsgsRes, allUnreadRes, ratingsRes, emergencyRes, sitsRes, applicationsRes, missionsRes] = await Promise.all([
       supabase.from("profiles").select("id, first_name, avatar_url, identity_verified, city, is_founder, last_seen_at").in("id", otherIds),
       supabase.from("messages").select("conversation_id, content, created_at, sender_id").in("conversation_id", convIds).order("created_at", { ascending: false }),
       supabase.from("messages").select("conversation_id, id").in("conversation_id", convIds).neq("sender_id", user.id).is("read_at", null),
       supabase.from("reviews").select("reviewee_id, overall_rating").in("reviewee_id", otherIds).eq("published", true),
       supabase.from("emergency_sitter_profiles").select("user_id, is_active").in("user_id", otherIds).eq("is_active", true),
       sitIds.length > 0
-        ? supabase.from("sits").select("id, title, status, property_id, start_date, end_date").in("id", sitIds)
+        ? supabase.from("sits").select("id, title, status, property_id, start_date, end_date, user_id").in("id", sitIds)
         : Promise.resolve({ data: [], error: null }),
       sitIds.length > 0
         ? supabase.from("applications").select("sit_id, sitter_id, status").in("sit_id", sitIds)
         : Promise.resolve({ data: [], error: null }),
+      missionIds.length > 0
+        ? supabase.from("small_missions").select("id, title, city, date_needed").in("id", missionIds)
+        : Promise.resolve({ data: [], error: null }),
     ]);
 
     const profilesMap = new Map((profilesRes.data || []).map((p: any) => [p.id, p]));
-    const sitsMap = new Map((sitsRes.data || []).map((s: any) => [s.id, s]));
+
+    // Résoudre la ville du propriétaire pour chaque sit (lieu de la garde)
+    // — distinct de other_user.city qui peut être la ville du gardien.
+    const ownerIdsForSits = Array.from(new Set((sitsRes.data || []).map((s: any) => s.user_id).filter(Boolean)));
+    const missingOwnerIds = ownerIdsForSits.filter((id: string) => !profilesMap.has(id));
+    if (missingOwnerIds.length > 0) {
+      const { data: ownerProfiles } = await supabase
+        .from("profiles").select("id, city").in("id", missingOwnerIds);
+      (ownerProfiles || []).forEach((p: any) => {
+        if (!profilesMap.has(p.id)) profilesMap.set(p.id, p);
+      });
+    }
+    const sitsMap = new Map((sitsRes.data || []).map((s: any) => {
+      const ownerCity = s.user_id ? (profilesMap.get(s.user_id)?.city ?? null) : null;
+      return [s.id, { ...s, city: ownerCity }];
+    }));
+    const missionsMap = new Map((missionsRes.data || []).map((m: any) => [m.id, m]));
 
     const lastMsgMap = new Map<string, any>();
     (allLastMsgsRes.data || []).forEach((m: any) => {
@@ -239,6 +260,7 @@ const Messages = () => {
         ...conv,
         archived_by: conv.archived_by || [],
         sit: conv.sit_id ? (sitsMap.get(conv.sit_id) || null) : null,
+        small_mission: conv.small_mission_id ? (missionsMap.get(conv.small_mission_id) || null) : null,
         other_user: profilesMap.get(otherId) || null,
         last_message: lastMsgMap.get(conv.id) || null,
         unread_count: unreadMap.get(conv.id) || 0,
