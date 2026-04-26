@@ -73,6 +73,7 @@ const SearchMapView = ({
   renderCard,
 }: SearchMapViewProps) => {
   const [activePin, setActivePin] = useState<string | null>(null);
+  const [showAll, setShowAll] = useState(false);
   const popoverRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -116,7 +117,7 @@ const SearchMapView = ({
           <MapCenterController center={center} zoom={12} />
           <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
           {results
-            .filter((item) => !item?.is_demo && !item?.isAssigned && !item?.isCompleted)
+            .filter((item) => showAll || (!item?.is_demo && !item?.isAssigned && !item?.isCompleted))
             .map((item) => {
               const coords = getCoords(item);
               if (!coords) return null;
@@ -133,12 +134,48 @@ const SearchMapView = ({
             })}
         </MapContainer>
 
-        {/* Légende : seules les annonces actives sont épinglées */}
-        <div className="absolute bottom-3 left-3 z-[400] bg-card/95 backdrop-blur-sm border border-border rounded-lg shadow-sm px-3 py-2 text-xs text-foreground pointer-events-none">
+        {/* Sélecteur : toutes les annonces vs annonces actives uniquement */}
+        <div className="absolute top-3 left-3 z-[400] bg-card/95 backdrop-blur-sm border border-border rounded-lg shadow-sm p-1 flex text-xs">
+          <button
+            type="button"
+            onClick={() => setShowAll(false)}
+            aria-pressed={!showAll}
+            className={`px-2.5 py-1.5 rounded-md font-medium transition-colors ${
+              !showAll ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            Annonces actives
+          </button>
+          <button
+            type="button"
+            onClick={() => setShowAll(true)}
+            aria-pressed={showAll}
+            className={`px-2.5 py-1.5 rounded-md font-medium transition-colors ${
+              showAll ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            Toutes les annonces
+          </button>
+        </div>
+
+        {/* Légende */}
+        <div className="absolute bottom-3 left-3 z-[400] bg-card/95 backdrop-blur-sm border border-border rounded-lg shadow-sm px-3 py-2 text-xs text-foreground pointer-events-none space-y-1">
           <div className="flex items-center gap-2">
             <span className="inline-block w-3 h-3 rounded-full" style={{ background: pinColors.active.bg, border: `2px solid ${pinColors.active.ring}` }} />
-            Annonces disponibles uniquement
+            Annonce active
           </div>
+          {showAll && (
+            <>
+              <div className="flex items-center gap-2">
+                <span className="inline-block w-3 h-3 rounded-full" style={{ background: pinColors.inactive.bg, border: `2px solid ${pinColors.inactive.ring}` }} />
+                Attribuée / terminée
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="inline-block w-3 h-3 rounded-full border-dashed" style={{ background: pinColors.demo.bg, border: `2px dashed ${pinColors.demo.ring}` }} />
+                Annonce d'exemple
+              </div>
+            </>
+          )}
         </div>
 
         {activeItem && (() => {
