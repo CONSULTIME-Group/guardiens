@@ -259,6 +259,7 @@ const Messages = () => {
         ...conv,
         archived_by: conv.archived_by || [],
         sit: conv.sit_id ? (sitsMap.get(conv.sit_id) || null) : null,
+        small_mission: conv.small_mission_id ? (missionsMap.get(conv.small_mission_id) || null) : null,
         other_user: profilesMap.get(otherId) || null,
         last_message: lastMsgMap.get(conv.id) || null,
         unread_count: unreadMap.get(conv.id) || 0,
