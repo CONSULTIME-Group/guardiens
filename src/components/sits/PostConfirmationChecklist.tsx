@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { slugify } from "@/lib/normalize";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Link } from "react-router-dom";
@@ -49,7 +50,7 @@ const PostConfirmationChecklist = ({
 
       // Check local guide for owner's city
       if (ownerCity) {
-        const slug = ownerCity.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, "-");
+        const slug = slugify(ownerCity);
         const { data: cityGuide } = await supabase
           .from("city_guides")
           .select("slug")

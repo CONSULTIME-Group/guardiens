@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { normalize } from "@/lib/normalize";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -133,10 +134,8 @@ const AdminSkills = () => {
     const updates: any = { status: "approved" };
     if (newLabel) {
       updates.label = newLabel;
-      updates.normalized_label = newLabel
-        .toLowerCase().trim()
-        .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
-        .replace(/\s+/g, " ");
+      // normalisation cohérente + collapse des espaces internes
+      updates.normalized_label = normalize(newLabel).replace(/\s+/g, " ");
     }
 
     await supabase.from("skills_library").update(updates).eq("id", skill.id);

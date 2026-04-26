@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { slugify } from "@/lib/normalize";
 import { getOptimizedImageUrl } from "@/lib/imageOptim";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, ShieldCheck, Siren, BadgeCheck, Mountain } from "lucide-react";
@@ -35,7 +36,7 @@ export default function CityHero({
   department,
   departmentSlug,
 }: CityHeroProps) {
-  const cityKey = city.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, "-");
+  const cityKey = slugify(city);
   const bgImage = heroImage || CITY_HERO_IMAGES[cityKey];
 
   return (

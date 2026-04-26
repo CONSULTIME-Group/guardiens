@@ -10,10 +10,7 @@ import { Switch } from "@/components/ui/switch";
 import { ArrowLeft, Sparkles, Loader2, ImagePlus, X } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { toast } from "sonner";
-
-const slugify = (text: string) =>
-  text.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+import { slugify } from "@/lib/normalize";
 
 const ArticleEditor = () => {
   const navigate = useNavigate();

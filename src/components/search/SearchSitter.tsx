@@ -10,6 +10,7 @@ import { ToastAction } from "@/components/ui/toast";
 
 const SearchMapView = lazy(() => import("@/components/search/SearchMapView"));
 import { DEMO_SITS, DEMO_MISSIONS } from "@/data/demoListings";
+import { normalize } from "@/lib/normalize";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -126,14 +127,22 @@ const SearchSitter = () => {
   const hasActiveFilters = housingTypes.length > 0 || verifiedOnly || withPhotosOnly || minExperience !== "all" || environments.length > 0;
 
   // ─── City autocomplete via geo.api.gouv.fr ───
+  // Comportement unifié : on normalise (sans accents/casse) côté client puis
+  // on aiguille vers l'endpoint pertinent — `codePostal` pour 5 chiffres,
+  // `nom` sinon (l'API gère le fuzzy ascii).
   const citySearchTimeout = useRef<NodeJS.Timeout | null>(null);
   const handleCityInputChange = (val: string) => {
     setCityInput(val);
     if (citySearchTimeout.current) clearTimeout(citySearchTimeout.current);
-    if (val.length < 2) { setCitySuggestions([]); return; }
+    const q = normalize(val);
+    if (q.length < 2) { setCitySuggestions([]); return; }
     citySearchTimeout.current = setTimeout(async () => {
       try {
-        const res = await fetch(`https://geo.api.gouv.fr/communes?nom=${encodeURIComponent(val)}&fields=nom,codesPostaux&boost=population&limit=5`);
+        const isCp = /^\d{5}$/.test(q);
+        const url = isCp
+          ? `https://geo.api.gouv.fr/communes?codePostal=${encodeURIComponent(q)}&fields=nom,codesPostaux&limit=5`
+          : `https://geo.api.gouv.fr/communes?nom=${encodeURIComponent(q)}&fields=nom,codesPostaux&boost=population&limit=5`;
+        const res = await fetch(url);
         const data = await res.json();
         setCitySuggestions(data || []);
       } catch { setCitySuggestions([]); }
@@ -149,8 +158,7 @@ const SearchSitter = () => {
   };
 
   // ─── Suggestions département & région (locales, dérivées de la saisie) ───
-  const normalize = (s: string) =>
-    s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  // (normalize est importé depuis @/lib/normalize — comportement unifié partout)
 
   // Renvoie un code postal "représentatif" du département (pour piloter le mode Zone)
   const deptToRefPostalCode = (dept: string): string => {
@@ -1068,10 +1076,10 @@ const SearchSitter = () => {
 
               {(() => {
                 // Si la saisie ressemble à un dept/CP/région, on les met EN PREMIER
-                const q = cityInput.trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+                const q = normalize(cityInput);
                 const looksLikeDeptOrCp = /^\d{1,5}$|^2[ab]\d{0,3}$/i.test(q);
-                const exactDeptOrRegion = deptSuggestions.some(d => d.name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "") === q)
-                  || regionSuggestions.some(r => r.name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "") === q);
+                const exactDeptOrRegion = deptSuggestions.some(d => normalize(d.name) === q)
+                  || regionSuggestions.some(r => normalize(r.name) === q);
                 const territoryFirst = looksLikeDeptOrCp || exactDeptOrRegion;
                 const isCp = /^\d{5}$/.test(q);
 

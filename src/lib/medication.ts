@@ -4,13 +4,11 @@
  * de nombreux utilisateurs y inscrivent "Aucune", "non", "rien", etc.
  * Cette fonction normalise et retourne false dans ce cas.
  */
+import { normalize } from "@/lib/normalize";
+
 export const hasMedication = (value: string | null | undefined): boolean => {
   if (!value) return false;
-  const v = value
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "") // strip accents
-    .trim();
+  const v = normalize(value);
   if (v.length === 0) return false;
   const negativePatterns = [
     "aucun",

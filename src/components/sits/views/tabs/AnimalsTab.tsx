@@ -16,6 +16,7 @@ import { ChevronDown, Clock, Footprints, Pill } from "lucide-react";
 import BreedProfileCard from "@/components/breeds/BreedProfileCard";
 import PhotoLightbox from "@/components/shared/PhotoLightbox";
 import { hasMedication } from "@/lib/medication";
+import { normalize } from "@/lib/normalize";
 import {
   SPECIES_EMOJI as speciesEmoji,
   WALK_LABELS as walkLabels,
@@ -47,10 +48,7 @@ const HIGH_RISK_MED_PATTERNS = [
 
 function isHighRiskMedication(text: string | null | undefined): boolean {
   if (!text) return false;
-  const v = text
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "");
+  const v = normalize(text);
   return HIGH_RISK_MED_PATTERNS.some((p) => v.includes(p));
 }
 
