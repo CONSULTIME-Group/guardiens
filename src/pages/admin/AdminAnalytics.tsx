@@ -471,7 +471,7 @@ const AdminAnalytics = () => {
                 })}
               </div>
               <p className="text-xs text-muted-foreground mt-4">
-                Les étapes 4 à 7 sont nouvelles — il faudra ~3-7 jours pour accumuler des données fiables.
+                L'étape <strong>"Compte créé (réel)"</strong> vient de la table profiles (source fiable). Les autres viennent d'events client : un drop entre étapes peut refléter un sous-comptage (ex. inscriptions Google OAuth ne déclenchent pas <code>signup_form_submitted</code>).
               </p>
             </CardContent>
           </Card>
