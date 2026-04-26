@@ -989,7 +989,7 @@ const SearchSitter = () => {
           {/* Zone pill (radius / dept / region / france) */}
           <Popover>
             <PopoverTrigger asChild>
-              <button className={pillClass}>
+              <button className={pillClass} aria-label="Choisir la zone de recherche">
                 <span className="text-foreground">
                   {zoneMode === "radius" && `${radius[0]} km`}
                   {zoneMode === "dept" && (() => {
