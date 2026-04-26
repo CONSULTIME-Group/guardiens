@@ -19,7 +19,9 @@ const AuthConfirm = () => {
     handled.current = true;
 
     const url = new URL(window.location.href);
-    const next = url.searchParams.get("next") || "/dashboard";
+    const rawNext = url.searchParams.get("next") || "/dashboard";
+    // Sécurité : on n'accepte que les chemins internes (pas d'URL absolue, pas de protocol-relative).
+    const next = /^\/(?!\/)/.test(rawNext) ? rawNext : "/dashboard";
 
     // Check for error in hash fragment (Supabase redirects errors there)
     const hashParams = new URLSearchParams(window.location.hash.replace("#", ""));
