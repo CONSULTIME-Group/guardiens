@@ -417,6 +417,9 @@ const OwnerSitView = ({
             ownerProfile={ownerProfile}
             specificExpectations={sit.specific_expectations}
             openTo={sit.open_to}
+            dailyRoutine={(sit as any).daily_routine}
+            ownerMessage={(sit as any).owner_message}
+            ownerFirstName={owner?.first_name}
           />
         </TabsContent>
 

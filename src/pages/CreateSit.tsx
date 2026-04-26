@@ -113,6 +113,8 @@ const CreateSit = () => {
   const [sitEnvironments, setSitEnvironments] = useState<string[]>([]);
   const [minGardienSits, setMinGardienSits] = useState(0);
   const [maxApplications, setMaxApplications] = useState<number | null>(10);
+  const [ownerMessage, setOwnerMessage] = useState("");
+  const [dailyRoutine, setDailyRoutine] = useState("");
 
   const [property, setProperty] = useState<PropertySummary | null>(null);
   const [pets, setPets] = useState<PetSummary[]>([]);
@@ -136,7 +138,7 @@ const CreateSit = () => {
       // If republishing, fetch the source sit in parallel
       let sourceSitRes: { data: any } | null = null;
       if (fromSitId) {
-        sourceSitRes = await supabase.from("sits").select("title, specific_expectations, open_to, environments, min_gardien_sits, flexible_dates, max_applications").eq("id", fromSitId).single();
+        sourceSitRes = await supabase.from("sits").select("title, specific_expectations, open_to, environments, min_gardien_sits, flexible_dates, max_applications, owner_message, daily_routine").eq("id", fromSitId).single();
       }
 
       setProfileCompletion(profileRes.data?.profile_completion || 0);
@@ -152,6 +154,8 @@ const CreateSit = () => {
         setMinGardienSits(s.min_gardien_sits || 0);
         setFlexibleDates(s.flexible_dates || false);
         setMaxApplications(s.max_applications || null);
+        setOwnerMessage(s.owner_message || "");
+        setDailyRoutine(s.daily_routine || "");
         setIsRepublish(true);
       }
 
@@ -228,6 +232,8 @@ const CreateSit = () => {
         environments: sitEnvironments,
         min_gardien_sits: minGardienSits,
         max_applications: maxApplications,
+        owner_message: ownerMessage.trim() || null,
+        daily_routine: dailyRoutine.trim() || null,
       } as any).select("id").single();
 
       if (error) throw error;
@@ -349,6 +355,38 @@ const CreateSit = () => {
           )}>
             {specificExpectations.length}/50 caractères minimum
           </p>
+        </div>
+
+        {/* Journée type — facultatif */}
+        <div>
+          <Label className="text-sm font-medium">Une journée type <span className="text-muted-foreground font-normal">(optionnel)</span></Label>
+          <p className="text-xs text-muted-foreground mt-0.5 mb-1.5">
+            Décrivez le déroulé d'une journée — matin, midi, soir. Les gardiens adorent ce niveau de détail.
+          </p>
+          <Textarea
+            placeholder={"Ex :\nMatin — Sortie du chien 30 min, gamelles, ouverture du jardin.\nMidi — Visite rapide, fontaine à recharger.\nSoir — Promenade 30 min, repas, câlins obligatoires 🥰"}
+            value={dailyRoutine}
+            onChange={e => setDailyRoutine(e.target.value.slice(0, 1500))}
+            className="mt-1 font-mono text-[13px]"
+            rows={6}
+          />
+          <p className="text-[11px] text-muted-foreground mt-1 text-right">{dailyRoutine.length}/1500</p>
+        </div>
+
+        {/* Mot de l'hôte — facultatif */}
+        <div>
+          <Label className="text-sm font-medium">Un mot de vous <span className="text-muted-foreground font-normal">(optionnel)</span></Label>
+          <p className="text-xs text-muted-foreground mt-0.5 mb-1.5">
+            Un message personnel aux futurs gardiens : ce qu'ils trouveront en arrivant, ce que vous appréciez, une touche humaine.
+          </p>
+          <Textarea
+            placeholder="Ex : On confie nos animaux à un voisin de confiance plutôt qu'à une pension. Vous repartirez sûrement avec des cookies maison et une connaissance fine du quartier !"
+            value={ownerMessage}
+            onChange={e => setOwnerMessage(e.target.value.slice(0, 800))}
+            className="mt-1"
+            rows={4}
+          />
+          <p className="text-[11px] text-muted-foreground mt-1 text-right">{ownerMessage.length}/800</p>
         </div>
 
         {/* CORRECTION 1 — "Idéale pour" */}

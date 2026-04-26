@@ -3070,6 +3070,7 @@ export type Database = {
           cancelled_at: string | null
           cancelled_by: string | null
           created_at: string
+          daily_routine: string | null
           end_date: string | null
           environments: string[]
           flexible_dates: boolean | null
@@ -3079,6 +3080,7 @@ export type Database = {
           max_applications: number | null
           min_gardien_sits: number
           open_to: string[] | null
+          owner_message: string | null
           property_id: string
           reminder_j48_sent: boolean | null
           reminder_j7_sent: boolean | null
@@ -3097,6 +3099,7 @@ export type Database = {
           cancelled_at?: string | null
           cancelled_by?: string | null
           created_at?: string
+          daily_routine?: string | null
           end_date?: string | null
           environments?: string[]
           flexible_dates?: boolean | null
@@ -3106,6 +3109,7 @@ export type Database = {
           max_applications?: number | null
           min_gardien_sits?: number
           open_to?: string[] | null
+          owner_message?: string | null
           property_id: string
           reminder_j48_sent?: boolean | null
           reminder_j7_sent?: boolean | null
@@ -3124,6 +3128,7 @@ export type Database = {
           cancelled_at?: string | null
           cancelled_by?: string | null
           created_at?: string
+          daily_routine?: string | null
           end_date?: string | null
           environments?: string[]
           flexible_dates?: boolean | null
@@ -3133,6 +3138,7 @@ export type Database = {
           max_applications?: number | null
           min_gardien_sits?: number
           open_to?: string[] | null
+          owner_message?: string | null
           property_id?: string
           reminder_j48_sent?: boolean | null
           reminder_j7_sent?: boolean | null
