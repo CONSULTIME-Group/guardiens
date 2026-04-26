@@ -197,10 +197,13 @@ const SitterGallery = () => {
               {completedSits.length > 0 && (
                 <div>
                   <Label>Lier à une garde Guardiens</Label>
-                  <Select value={selectedSitId} onValueChange={setSelectedSitId}>
+                  <Select
+                    value={selectedSitId || NO_SIT_VALUE}
+                    onValueChange={(v) => setSelectedSitId(v === NO_SIT_VALUE ? "" : v)}
+                  >
                     <SelectTrigger><SelectValue placeholder="Aucune (expérience passée)" /></SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">Aucune (expérience passée)</SelectItem>
+                      <SelectItem value={NO_SIT_VALUE}>Aucune (expérience passée)</SelectItem>
                       {completedSits.map(s => <SelectItem key={s.id} value={s.id}>{s.title}</SelectItem>)}
                     </SelectContent>
                   </Select>
