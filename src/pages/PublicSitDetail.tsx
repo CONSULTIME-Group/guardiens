@@ -601,7 +601,7 @@ const PublicSitDetail = () => {
               <div className="hidden sm:flex items-center justify-center gap-x-4 text-xs text-muted-foreground mb-2">
                 <span className="flex items-center gap-1"><ShieldCheck className="h-3.5 w-3.5 text-primary" /> Identités vérifiées</span>
                 <span className="flex items-center gap-1"><Heart className="h-3.5 w-3.5 text-primary" /> 100&nbsp;% gratuit</span>
-                <span className="flex items-center gap-1"><Users className="h-3.5 w-3.5 text-primary" /> Entre voisins</span>
+                <span className="flex items-center gap-1"><Users className="h-3.5 w-3.5 text-primary" /> Communauté de gardiens</span>
               </div>
             )}
             {!(sit as any).accepting_applications ? (
