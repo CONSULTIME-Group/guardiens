@@ -1,117 +1,310 @@
 /**
  * Static demo listings injected client-side into search results
- * when there are fewer than 5 real listings.
+ * when there are NO real listings yet.
  * These never hit the database — no FK issues.
+ *
+ * Each demo sit is enriched so it can be opened on a dedicated demo
+ * detail page (/annonces/demo/:slug) showing the full Guardiens experience:
+ * pets with breeds, host story, schedule, breed tips, local guide link…
  */
 
-export const DEMO_SITS = [
+export type DemoPet = {
+  species: "dog" | "cat" | "farm_animal" | "rabbit" | "bird" | "fish" | "rodent";
+  name: string;
+  breed?: string;
+  age?: string;
+  notes?: string;
+};
+
+export type DemoSit = {
+  id: string;
+  slug: string;
+  is_demo: true;
+  title: string;
+  description: string;
+  start_date: string | null;
+  end_date: string | null;
+  status: "published";
+  created_at: string;
+  is_urgent: boolean;
+  user_id: "demo";
+  property_id: "demo";
+  latitude: number;
+  longitude: number;
+  durationDays: number;
+  owner: {
+    first_name: string;
+    avatar_url: string | null;
+    city: string;
+    citySlug: string; // for guide link
+    department: string;
+    identity_verified: boolean;
+    bio: string;
+  };
+  property: {
+    type: "house" | "apartment";
+    environment: string;
+    environments: string[];
+    photos: string[];
+    rooms: number;
+    surface_m2: number;
+    description: string;
+    amenities: string[];
+  };
+  pets: DemoPet[];
+  schedule: {
+    morning: string;
+    midday: string;
+    evening: string;
+    notes: string;
+  };
+  ownerMessage: string;
+  avgRating: null;
+  reviewCount: 0;
+  topBadges: string[];
+  distance: null;
+  isNew: false;
+};
+
+const today = new Date();
+const addDays = (n: number) => {
+  const d = new Date(today);
+  d.setDate(d.getDate() + n);
+  return d.toISOString();
+};
+
+export const DEMO_SITS: DemoSit[] = [
   {
     id: "demo-garde-001",
+    slug: "lyon-laika-jardin",
     is_demo: true,
     title: "Maison avec jardin, Laïka et ses deux compères",
-    start_date: null,
-    end_date: null,
+    description:
+      "Nous partons deux semaines en famille et cherchons un gardien bienveillant pour veiller sur notre maison et nos trois animaux. Quartier calme et arboré du 6ᵉ, à deux pas du parc de la Tête d'Or. Maison spacieuse avec jardin clos, idéale pour Laïka qui adore prendre le soleil sur la terrasse.",
+    start_date: addDays(21),
+    end_date: addDays(35),
     status: "published",
-    created_at: new Date().toISOString(),
+    created_at: today.toISOString(),
     is_urgent: false,
     user_id: "demo",
     property_id: "demo",
     latitude: 45.7676,
     longitude: 4.8344,
+    durationDays: 14,
     owner: {
       first_name: "Nadia",
-      avatar_url: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&q=80",
+      avatar_url:
+        "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&q=80",
       city: "Lyon 6e",
+      citySlug: "lyon",
+      department: "69",
       identity_verified: true,
+      bio: "Maman de trois enfants et de trois compagnons à quatre pattes. Architecte d'intérieur. J'aime les gens qui prennent le temps de connaître les habitudes de chacun.",
     },
     property: {
       type: "house",
       environment: "city_center",
-      photos: ["https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800&q=80"],
+      environments: ["city", "garden"],
+      photos: [
+        "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=1200&q=80",
+        "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1200&q=80",
+        "https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?w=1200&q=80",
+      ],
+      rooms: 5,
+      surface_m2: 140,
+      description:
+        "Maison de ville lumineuse sur trois niveaux avec jardin clos de 80 m². Cuisine équipée ouverte, salon avec cheminée, bureau au calme. Wifi fibre, machine à café, vélos disponibles.",
+      amenities: ["wifi", "garden", "washing_machine", "bikes", "coffee_machine"],
     },
     pets: [
-      { species: "dog", name: "Laïka" },
-      { species: "cat", name: "Milo" },
-      { species: "cat", name: "Nour" },
+      {
+        species: "dog",
+        name: "Laïka",
+        breed: "Berger australien",
+        age: "5 ans",
+        notes:
+          "Très douce, adore les longues balades. Deux sorties par jour (45 min le matin, 30 min le soir).",
+      },
+      {
+        species: "cat",
+        name: "Milo",
+        breed: "European",
+        age: "8 ans",
+        notes: "Sage, dort beaucoup, sort dans le jardin la journée.",
+      },
+      {
+        species: "cat",
+        name: "Nour",
+        breed: "Européen tabby",
+        age: "3 ans",
+        notes: "Joueur, très câlin, ne supporte pas d'être seul trop longtemps.",
+      },
     ],
+    schedule: {
+      morning: "Sortie de Laïka 30-45 min, gamelles des chats, café tranquille.",
+      midday: "Une visite rapide au jardin, fontaine à eau à recharger.",
+      evening: "Promenade Laïka 30 min, repas du soir, câlins obligatoires 🥰",
+      notes:
+        "Les animaux sont autonomes mais aiment la présence — comptez environ 2h de présence active par jour.",
+    },
+    ownerMessage:
+      "On confie nos animaux à un voisin de confiance plutôt qu'à une pension. Vous repartirez sûrement avec des cookies maison de mon mari et une connaissance fine du quartier !",
+    topBadges: [],
     avgRating: null,
     reviewCount: 0,
-    topBadges: [],
     distance: null,
     isNew: false,
-    durationDays: 14,
   },
   {
     id: "demo-garde-002",
+    slug: "annecy-lac-basse-cour",
     is_demo: true,
     title: "Maison en bois face au lac, potager et basse-cour",
-    start_date: null,
-    end_date: null,
+    description:
+      "Notre cabane en bois donne directement sur le lac d'Annecy. Cadre exceptionnel pour qui aime la nature, le calme et les animaux de la ferme. Vous serez aux petits soins de nos trois poules, du chat Moustache et du potager en pleine saison.",
+    start_date: addDays(45),
+    end_date: addDays(59),
     status: "published",
-    created_at: new Date().toISOString(),
+    created_at: today.toISOString(),
     is_urgent: false,
     user_id: "demo",
     property_id: "demo",
     latitude: 45.8992,
     longitude: 6.1294,
+    durationDays: 14,
     owner: {
       first_name: "Rania",
-      avatar_url: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=200&q=80",
+      avatar_url:
+        "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400&q=80",
       city: "Annecy",
+      citySlug: "annecy",
+      department: "74",
       identity_verified: true,
+      bio: "Couple cinquantenaire passionné de permaculture. On reçoit toujours nos gardiens avec un panier de légumes du jardin et une bouteille de vin de Savoie.",
     },
     property: {
       type: "house",
       environment: "countryside",
-      photos: ["https://images.unsplash.com/photo-1499678329028-101435549a4e?w=800&q=80"],
+      environments: ["lake", "countryside", "garden"],
+      photos: [
+        "https://images.unsplash.com/photo-1499678329028-101435549a4e?w=1200&q=80",
+        "https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=1200&q=80",
+        "https://images.unsplash.com/photo-1502920917128-1aa500764cbd?w=1200&q=80",
+      ],
+      rooms: 3,
+      surface_m2: 90,
+      description:
+        "Cabane en mélèze restaurée, mezzanine, poêle à bois, terrasse plein sud face au lac. Sentier privatif jusqu'à la rive (5 min). Potager 60 m² + poulailler.",
+      amenities: ["wifi", "garden", "lake_view", "wood_stove", "kayak"],
     },
     pets: [
-      { species: "farm_animal", name: "Poule 1" },
-      { species: "farm_animal", name: "Poule 2" },
-      { species: "farm_animal", name: "Poule 3" },
-      { species: "cat", name: "Moustache" },
+      {
+        species: "farm_animal",
+        name: "Plume, Câline & Rosette",
+        breed: "Poules Marans",
+        age: "2-4 ans",
+        notes:
+          "3 œufs/jour environ. Ouvrir le poulailler le matin, refermer après le coucher du soleil pour les protéger des renards.",
+      },
+      {
+        species: "cat",
+        name: "Moustache",
+        breed: "Chat des forêts norvégiennes",
+        age: "7 ans",
+        notes:
+          "Sort librement la journée, rentre dormir le soir. Brossage 2x/semaine recommandé (poil long).",
+      },
     ],
+    schedule: {
+      morning:
+        "Ouvrir le poulailler, ramasser les œufs, gamelle de Moustache, arroser le potager (15 min).",
+      midday: "Vérifier l'eau des poules, possible cueillette tomates/courgettes.",
+      evening: "Arrosage potager, fermeture poulailler après le coucher du soleil, repas Moustache.",
+      notes:
+        "Comptez 1h30 par jour. Tous les outils et instructions sont sur place. Possibilité de baignade au lac juste devant !",
+    },
+    ownerMessage:
+      "Vous repartirez avec des œufs, des légumes, et probablement l'envie de revenir. Notre maison est ouverte aux gens curieux et respectueux de la nature.",
+    topBadges: [],
     avgRating: null,
     reviewCount: 0,
-    topBadges: [],
     distance: null,
     isNew: false,
-    durationDays: 14,
   },
   {
     id: "demo-garde-003",
+    slug: "grenoble-deux-chats-appart",
     is_demo: true,
     title: "Appartement lumineux, deux chats aux habitudes bien rodées",
-    start_date: null,
-    end_date: null,
+    description:
+      "Appartement de 75 m² au cœur de Grenoble, 4ᵉ étage avec balcon plein sud et vue sur la Bastille. Deux chattes adorables, autonomes, qui adorent les fenêtres ouvertes et les caresses du soir.",
+    start_date: addDays(10),
+    end_date: addDays(25),
     status: "published",
-    created_at: new Date().toISOString(),
+    created_at: today.toISOString(),
     is_urgent: false,
     user_id: "demo",
     property_id: "demo",
     latitude: 45.1885,
     longitude: 5.7245,
+    durationDays: 15,
     owner: {
       first_name: "Giulia",
-      avatar_url: "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=200&q=80",
+      avatar_url:
+        "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=400&q=80",
       city: "Grenoble",
+      citySlug: "grenoble",
+      department: "38",
       identity_verified: true,
+      bio: "Chercheuse au CEA, italienne d'origine. Je voyage souvent pour le travail et je cherche des gardiens fiables pour mes deux petites filles à quatre pattes.",
     },
     property: {
       type: "apartment",
       environment: "city_center",
-      photos: ["https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800&q=80"],
+      environments: ["city"],
+      photos: [
+        "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=1200&q=80",
+        "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=1200&q=80",
+        "https://images.unsplash.com/photo-1493809842364-78817add7ffb?w=1200&q=80",
+      ],
+      rooms: 3,
+      surface_m2: 75,
+      description:
+        "Appartement haussmannien rénové, parquet d'origine, cuisine ouverte. Balcon de 8 m² sécurisé pour les chattes. Métro à 3 minutes, quartier animé avec marché le dimanche.",
+      amenities: ["wifi", "balcony", "washing_machine", "dishwasher", "elevator"],
     },
     pets: [
-      { species: "cat", name: "Milo" },
-      { species: "cat", name: "Louane" },
+      {
+        species: "cat",
+        name: "Milo",
+        breed: "Sacré de Birmanie",
+        age: "6 ans",
+        notes:
+          "Très câline mais timide les premiers jours. Se cache sous le canapé puis vient ronronner.",
+      },
+      {
+        species: "cat",
+        name: "Louane",
+        breed: "Européenne tortie",
+        age: "4 ans",
+        notes:
+          "Joueuse et bavarde, miaule pour réclamer ses croquettes à 18h pile. Adore les plumeaux.",
+      },
     ],
+    schedule: {
+      morning: "Gamelles, changement d'eau, ouverture du balcon si beau temps.",
+      midday: "Pas de contrainte, les chattes dorment.",
+      evening: "Repas à 18h précises (Louane n'est pas patiente), nettoyage litière, séance jeu/câlins 20 min.",
+      notes:
+        "Comptez 1h par jour. Litière à nettoyer tous les 2 jours. Brossage hebdo pour Milo (poil mi-long).",
+    },
+    ownerMessage:
+      "Mes chattes sont mes bébés. J'aime quand mes gardiens m'envoient une photo par jour, même rapide. En échange, je vous laisse mon vélo, mon Netflix et la liste de mes adresses préférées en ville !",
+    topBadges: [],
     avgRating: null,
     reviewCount: 0,
-    topBadges: [],
     distance: null,
     isNew: false,
-    durationDays: 15,
   },
 ];
 
@@ -120,7 +313,8 @@ export const DEMO_MISSIONS = [
     id: "demo-mission-001",
     is_demo: true,
     title: "Arroser le potager pendant 10 jours",
-    description: "Potager de 20m² avec tomates, courgettes et herbes aromatiques. 20 minutes par jour, matin ou soir.",
+    description:
+      "Potager de 20m² avec tomates, courgettes et herbes aromatiques. 20 minutes par jour, matin ou soir.",
     category: "garden",
     exchange_offer: "Un panier de légumes frais à emporter",
     city: "Écully",
@@ -128,13 +322,14 @@ export const DEMO_MISSIONS = [
     status: "open",
     duration_estimate: "20 min/jour",
     date_needed: null,
-    created_at: new Date().toISOString(),
+    created_at: today.toISOString(),
     user_id: "demo",
     latitude: 45.7797,
     longitude: 3.0863,
     owner: {
       first_name: "Giulia",
-      avatar_url: "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=200&q=80",
+      avatar_url:
+        "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=200&q=80",
       city: "Écully",
       identity_verified: true,
     },
@@ -146,7 +341,8 @@ export const DEMO_MISSIONS = [
     id: "demo-mission-002",
     is_demo: true,
     title: "Promener Figo le lundi et mercredi matin",
-    description: "Figo est un border collie de 3 ans, très joueur. 45 minutes par sortie, parc à 5 minutes à pied.",
+    description:
+      "Figo est un border collie de 3 ans, très joueur. 45 minutes par sortie, parc à 5 minutes à pied.",
     category: "animals",
     exchange_offer: "Un repas maison ou des œufs du jardin",
     city: "Caluire-et-Cuire",
@@ -154,7 +350,7 @@ export const DEMO_MISSIONS = [
     status: "open",
     duration_estimate: "45 min × 2/sem",
     date_needed: null,
-    created_at: new Date().toISOString(),
+    created_at: today.toISOString(),
     user_id: "demo",
     latitude: 45.7953,
     longitude: 4.8500,
@@ -172,7 +368,8 @@ export const DEMO_MISSIONS = [
     id: "demo-mission-003",
     is_demo: true,
     title: "Tailler la haie et désherber l'allée — 2 après-midis",
-    description: "Haie de 15 mètres à tailler et allée à désherber. Outils fournis, prévoir gants.",
+    description:
+      "Haie de 15 mètres à tailler et allée à désherber. Outils fournis, prévoir gants.",
     category: "garden",
     exchange_offer: "Un dîner à mon retour, avec plaisir",
     city: "Limonest",
@@ -180,7 +377,7 @@ export const DEMO_MISSIONS = [
     status: "open",
     duration_estimate: "2h × 2",
     date_needed: null,
-    created_at: new Date().toISOString(),
+    created_at: today.toISOString(),
     user_id: "demo",
     latitude: 45.7640,
     longitude: 4.8357,
@@ -198,3 +395,6 @@ export const DEMO_MISSIONS = [
 
 /** Threshold: hide demos when real listings reach this count */
 export const DEMO_THRESHOLD = 5;
+
+export const getDemoSitBySlug = (slug: string): DemoSit | null =>
+  DEMO_SITS.find((s) => s.slug === slug) ?? null;
