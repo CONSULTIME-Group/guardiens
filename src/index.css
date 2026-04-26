@@ -574,3 +574,74 @@
   }
 }
 
+
+/* ───────────────────────────────────────────────────────────────
+   Mode test démos (?testDemos=1) — surlignage des cartes
+   ─────────────────────────────────────────────────────────────── */
+@layer components {
+  /* Carte démo en mode test : anneau ambré épais, légère teinte de fond */
+  .card-test-demo {
+    box-shadow:
+      0 0 0 2px hsl(38 92% 50% / 0.85),
+      0 0 0 4px hsl(38 92% 50% / 0.18);
+    background-color: hsl(48 96% 96% / 0.55);
+    position: relative;
+  }
+  .card-test-demo::after {
+    content: "DEMO";
+    position: absolute;
+    top: -10px;
+    right: 12px;
+    background: hsl(38 92% 50%);
+    color: hsl(38 92% 12%);
+    font-family: ui-monospace, SFMono-Regular, monospace;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 9999px;
+    letter-spacing: 0.06em;
+    pointer-events: none;
+    z-index: 30;
+  }
+  /* Carte réelle en mode test : anneau bleu fin */
+  .card-test-real {
+    box-shadow:
+      0 0 0 2px hsl(199 89% 70% / 0.55),
+      0 0 0 4px hsl(199 89% 70% / 0.12);
+    position: relative;
+  }
+  .card-test-real::after {
+    content: "REAL";
+    position: absolute;
+    top: -10px;
+    right: 12px;
+    background: hsl(199 89% 48%);
+    color: hsl(199 100% 97%);
+    font-family: ui-monospace, SFMono-Regular, monospace;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 9999px;
+    letter-spacing: 0.06em;
+    pointer-events: none;
+    z-index: 30;
+  }
+  /* Légende du mode test */
+  .test-legend-swatch {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    border-radius: 4px;
+    vertical-align: middle;
+    margin-right: 6px;
+  }
+  .test-legend-swatch--demo {
+    background: hsl(48 96% 88%);
+    box-shadow: inset 0 0 0 2px hsl(38 92% 50% / 0.85);
+  }
+  .test-legend-swatch--real {
+    background: hsl(199 100% 97%);
+    box-shadow: inset 0 0 0 2px hsl(199 89% 70% / 0.7);
+  }
+}
+
