@@ -199,10 +199,15 @@ const SearchOwner = () => {
     if (!city || alertCreated || isCreatingAlert) return;
     setIsCreatingAlert(true);
     trackEvent("search_empty_action", { source: "owner", metadata: { action: "create_alert", zone_mode: zoneMode } });
+    // Snap au rayon autorisé le plus proche (la RPC n'accepte que 5/15/30/50/100)
+    const ALLOWED_RADII = [5, 15, 30, 50, 100];
+    const snappedRadius = ALLOWED_RADII.reduce((prev, curr) =>
+      Math.abs(curr - radius[0]) < Math.abs(prev - radius[0]) ? curr : prev
+    );
     const { data, error } = await supabase.rpc("create_alert_from_search", {
       p_city: city,
       p_postal_code: cityPostalCode ?? null,
-      p_radius_km: radius[0],
+      p_radius_km: snappedRadius,
     });
     setIsCreatingAlert(false);
     if (error) {
