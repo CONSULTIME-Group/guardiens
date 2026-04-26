@@ -337,7 +337,7 @@ const PublicSitDetail = () => {
         <div className="mt-5 mb-3 flex flex-wrap items-center gap-2">
           <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full bg-primary/10 text-primary">
             <Sparkles className="h-3.5 w-3.5" />
-            Garde entre voisins · Sans paiement entre membres
+            Mission de gardien · Logement offert
           </span>
           {owner?.city && (
             <span className="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full bg-muted text-foreground">
@@ -349,7 +349,7 @@ const PublicSitDetail = () => {
 
         {/* Title — sanitize pour corriger les espaces manquants ("4chats" → "4 chats") */}
         <h1 className="font-heading text-3xl md:text-4xl font-bold leading-tight tracking-tight mb-3 text-foreground">
-          {sit.title ? sanitizeUserTitle(sit.title) : `Une garde à confier à ${owner?.city || "vos voisins"}`}
+          {sit.title ? sanitizeUserTitle(sit.title) : `Une mission de garde à ${owner?.city || "découvrir"}`}
         </h1>
 
         {/* Date naturelle */}
