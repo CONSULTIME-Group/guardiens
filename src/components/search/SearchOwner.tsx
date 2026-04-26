@@ -47,6 +47,7 @@ const SearchOwner = () => {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const { toast: toastUi } = useToast();
+  const [searchParams] = useSearchParams();
 
   // Filter state
   const [city, setCity] = useState("");
