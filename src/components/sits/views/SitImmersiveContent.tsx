@@ -239,23 +239,12 @@ const ROUTINE_ICONS: Record<string, { icon: any; bg: string; fg: string }> = {
   Nuit: { icon: Moon, bg: "bg-slate-100", fg: "text-slate-700" },
 };
 
-const ACTIVITY_LEVEL_LABEL: Record<string, string> = {
-  low: "Calme",
-  moderate: "Modéré",
-  high: "Très actif",
-};
-const WALK_DURATION_LABEL: Record<string, string> = {
-  short: "Courte (15–30 min)",
-  medium: "Moyenne (30–60 min)",
-  long: "Longue (1 h ou +)",
-  none: "Pas de balade",
-};
-const ALONE_DURATION_LABEL: Record<string, string> = {
-  none: "Jamais seul",
-  short: "1 à 2 h",
-  medium: "3 à 5 h",
-  long: "Une journée",
-};
+// Libellés des enums animaux — source unique partagée avec le formulaire de création
+import {
+  ACTIVITY_LABELS as ACTIVITY_LEVEL_LABEL,
+  WALK_LABELS as WALK_DURATION_LABEL,
+  ALONE_LABELS as ALONE_DURATION_LABEL,
+} from "@/components/sits/shared/sitConstants";
 
 const SitImmersiveContent = ({
   sit,
