@@ -1,3 +1,4 @@
+import { slugify } from "@/lib/normalize";
 /**
  * City-specific content for geo-localized destination pages.
  * Each city entry enriches the base DB data with editorial content,

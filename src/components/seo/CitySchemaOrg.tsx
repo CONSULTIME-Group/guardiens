@@ -1,6 +1,7 @@
 import { Helmet } from "react-helmet-async";
 import type { CityData } from "@/data/cities";
 import type { CityStats } from "@/hooks/useCityStats";
+import { slugify } from "@/lib/normalize";
 
 interface Props {
   city: CityData;

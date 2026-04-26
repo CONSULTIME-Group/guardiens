@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { slugify } from "@/lib/normalize";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Link } from "react-router-dom";

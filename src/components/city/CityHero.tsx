@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { slugify } from "@/lib/normalize";
 import { getOptimizedImageUrl } from "@/lib/imageOptim";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, ShieldCheck, Siren, BadgeCheck, Mountain } from "lucide-react";
