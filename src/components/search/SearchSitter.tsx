@@ -9,7 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { ToastAction } from "@/components/ui/toast";
 
 const SearchMapView = lazy(() => import("@/components/search/SearchMapView"));
-import { DEMO_SITS, DEMO_MISSIONS, interleaveDemos } from "@/data/demoListings";
+import { DEMO_SITS, DEMO_MISSIONS, interleaveDemos, auditInterleave } from "@/data/demoListings";
 import { normalize } from "@/lib/normalize";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -1744,23 +1744,42 @@ const SearchSitter = () => {
         const demoIndices = list.map((it: any, i: number) => (it?.is_demo ? i : -1)).filter((i) => i !== -1);
         const realCount = list.length - demoIndices.length;
         const allHaveBadge = demoIndices.every((i) => !!list[i]?.is_demo);
-        const interleaveOk = inMembersTab
-          ? true
-          : demoIndices.length === 0
-            ? realCount === 0
-            : demoIndices.every((idx) => {
-                if (realCount >= 3) return (idx + 1) % 4 === 0 || idx >= realCount;
-                return idx >= realCount;
-              });
+
+        // ─── Audit STRICT : 1 démo toutes les 3 vraies annonces ───
+        // Détecte toute violation causée par un filtre, un tri ou une pagination
+        // appliqué APRÈS l'intercalation.
+        const audit = auditInterleave(list, 3);
+        const observedPositions = audit.observedPositions;
+        const expectedPositions = audit.expectedPositions;
+        const missingPositions = audit.missingPositions;
+        const unexpectedPositions = audit.unexpectedPositions;
+        const strictInterleaveOk = inMembersTab ? true : audit.ok;
+        const interleaveOk = strictInterleaveOk;
+        // Pour l'affichage récap : nb de démos intercalées vs en surplus en fin
+        const slotsByRule = realCount >= 3 ? Math.floor(realCount / 3) : 0;
+        const interleavedExpectedCount = Math.min(slotsByRule, demoIndices.length);
+        const trailingDemosCount = Math.max(0, demoIndices.length - interleavedExpectedCount);
+        const expectedInterleavedPositions = expectedPositions.slice(0, interleavedExpectedCount);
         const tabLabel = tab === "sits" ? "Gardes" : inMembersTab ? "Membres dispo" : "Missions";
         const availableDemos = tab === "sits" ? DEMO_SITS.length : !inMembersTab ? DEMO_MISSIONS.length : 0;
+
+
         return (
           <div
-            className="mx-6 mt-4 rounded-lg border-2 border-dashed border-amber-400 bg-amber-50 p-4 text-sm space-y-2"
+            className={`mx-6 mt-4 rounded-lg border-2 border-dashed p-4 text-sm space-y-2 ${
+              !inMembersTab && !strictInterleaveOk
+                ? "border-red-500 bg-red-50"
+                : "border-amber-400 bg-amber-50"
+            }`}
             data-testid="demo-test-panel"
             data-demo-count={demoIndices.length}
             data-real-count={realCount}
             data-interleave-ok={interleaveOk ? "true" : "false"}
+            data-strict-interleave-ok={strictInterleaveOk ? "true" : "false"}
+            data-expected-positions={expectedPositions.join(",")}
+            data-observed-positions={observedPositions.join(",")}
+            data-missing-positions={missingPositions.join(",")}
+            data-unexpected-positions={unexpectedPositions.join(",")}
           >
             <div className="flex items-center justify-between flex-wrap gap-2">
               <p className="font-mono font-bold text-amber-900 flex items-center gap-2">
@@ -1824,10 +1843,17 @@ const SearchSitter = () => {
                 </li>
               )}
               {!inMembersTab && (
-                <li className="flex items-center gap-2">
-                  <span className={interleaveOk ? "text-emerald-600" : "text-amber-600"}>{interleaveOk ? "✅" : "⚠️"}</span>
-                  <span>
-                    Intercalation&nbsp;: {realCount >= 3 ? "1 démo toutes les 3 vraies annonces (positions 4, 8, 12…)" : "trop peu de vraies annonces — démos placées en fin de liste"}
+                <li className="flex items-center gap-2" data-testid="demo-test-assertion-interleave">
+                  <span className={strictInterleaveOk ? "text-emerald-600" : "text-red-600 font-bold"}>
+                    {strictInterleaveOk ? "✅" : "❌"}
+                  </span>
+                  <span className={strictInterleaveOk ? "" : "text-red-700 font-semibold"}>
+                    Intercalation stricte&nbsp;:{" "}
+                    {strictInterleaveOk
+                      ? realCount >= 3
+                        ? "1 démo toutes les 3 vraies annonces (positions 4, 8, 12…)"
+                        : "trop peu de vraies annonces — démos placées en fin de liste"
+                      : `règle violée — ${missingPositions.length} manquante(s), ${unexpectedPositions.length} hors-règle (voir détails ci-dessous)`}
                   </span>
                 </li>
               )}
@@ -1925,6 +1951,65 @@ const SearchSitter = () => {
                 </div>
               )}
             </div>
+
+            {/* ─── ÉCHEC : intercalation strictement non conforme ─── */}
+            {!inMembersTab && !strictInterleaveOk && (
+              <div
+                className="rounded-md border-2 border-red-500 bg-white p-3 text-xs space-y-2 shadow-sm"
+                data-testid="demo-test-failure"
+                role="alert"
+                aria-live="polite"
+              >
+                <p className="font-mono font-bold text-red-700 flex items-center gap-2 text-sm">
+                  <span aria-hidden="true">❌</span>
+                  ÉCHEC INTERCALATION — la règle « 1 démo toutes les 3 vraies annonces » n'est pas respectée
+                </p>
+                <p className="text-red-900/80">
+                  Cause possible&nbsp;: changement de filtre, pagination ou tri qui réordonne la liste après{" "}
+                  <code className="bg-red-100 px-1 rounded">interleaveDemos()</code>.
+                </p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 font-mono">
+                  <div className="bg-red-50 rounded p-2 border border-red-200">
+                    <div className="text-red-700/70 text-[10px] uppercase tracking-wide">Positions attendues</div>
+                    <div className="text-red-900 font-semibold">
+                      {expectedPositions.length > 0 ? expectedPositions.map((p) => `#${p}`).join(", ") : "—"}
+                    </div>
+                  </div>
+                  <div className="bg-red-50 rounded p-2 border border-red-200">
+                    <div className="text-red-700/70 text-[10px] uppercase tracking-wide">Positions observées</div>
+                    <div className="text-red-900 font-semibold">
+                      {observedPositions.length > 0 ? observedPositions.map((p) => `#${p}`).join(", ") : "—"}
+                    </div>
+                  </div>
+                  {missingPositions.length > 0 && (
+                    <div className="bg-red-50 rounded p-2 border border-red-200">
+                      <div className="text-red-700/70 text-[10px] uppercase tracking-wide">Démos manquantes</div>
+                      <div className="text-red-900 font-semibold" data-testid="demo-test-missing">
+                        {missingPositions.map((p) => `#${p}`).join(", ")}
+                      </div>
+                    </div>
+                  )}
+                  {unexpectedPositions.length > 0 && (
+                    <div className="bg-red-50 rounded p-2 border border-red-200">
+                      <div className="text-red-700/70 text-[10px] uppercase tracking-wide">Démos hors-règle</div>
+                      <div className="text-red-900 font-semibold" data-testid="demo-test-unexpected">
+                        {unexpectedPositions.map((p) => `#${p}`).join(", ")}
+                      </div>
+                    </div>
+                  )}
+                </div>
+                <p className="text-red-900/70 text-[11px] pt-1 border-t border-red-200">
+                  Règle&nbsp;: pour <strong>{realCount}</strong> vraies annonces, on attend{" "}
+                  <strong>{expectedInterleavedPositions.length}</strong> démo(s) intercalée(s) aux positions{" "}
+                  {expectedInterleavedPositions.length > 0
+                    ? expectedInterleavedPositions.map((p) => `#${p}`).join(", ")
+                    : "—"}
+                  {trailingDemosCount > 0 && (
+                    <> + <strong>{trailingDemosCount}</strong> démo(s) en fin de liste.</>
+                  )}
+                </p>
+              </div>
+            )}
 
             <p className="text-[11px] text-amber-800/80 pt-1 border-t border-amber-200">
               Astuce&nbsp;: changez d'onglet (Gardes / Missions / Membres) et de filtres pour vérifier que les démos restent visibles partout. Ajoutez <code className="bg-white px-1 rounded">?testDemos=1</code> à n'importe quelle URL de recherche pour réactiver ce mode.
