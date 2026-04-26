@@ -1163,26 +1163,24 @@ const SitImmersiveContent = ({
                 </p>
               )}
 
-              {environments.filter((e) => ENV_META[e]).length > 0 && (
+              {environments.length > 0 && (
                 <section className="rounded-2xl border border-border bg-card p-5 md:p-6">
                   <h2 className="text-lg font-semibold mb-3 flex items-center gap-2">
                     <Trees className="h-5 w-5 text-primary" /> Cadre de vie
                   </h2>
                   <div className="flex flex-wrap gap-2">
-                    {environments
-                      .filter((e) => ENV_META[e])
-                      .map((e) => {
-                        const meta = ENV_META[e]!;
-                        const Ico = meta.icon;
-                        return (
-                          <span
-                            key={e}
-                            className="inline-flex items-center gap-1.5 text-sm bg-muted rounded-full px-3 py-1.5"
-                          >
-                            <Ico className="h-4 w-4" /> {meta.label}
-                          </span>
-                        );
-                      })}
+                    {environments.map((e) => {
+                      const meta = getEnvMeta(e);
+                      const Ico = meta.icon;
+                      return (
+                        <span
+                          key={e}
+                          className="inline-flex items-center gap-1.5 text-sm bg-muted rounded-full px-3 py-1.5"
+                        >
+                          <Ico className="h-4 w-4" /> {meta.label}
+                        </span>
+                      );
+                    })}
                   </div>
                 </section>
               )}
