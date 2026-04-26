@@ -584,7 +584,7 @@ const SitImmersiveContent = ({
                 </div>
               ) : (
                 <p className="text-sm text-foreground whitespace-pre-line leading-relaxed">
-                  {sit.daily_routine.trim()}
+                  {cleanFreeText(sit.daily_routine)}
                 </p>
               )}
             </section>
