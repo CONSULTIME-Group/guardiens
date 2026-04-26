@@ -37,6 +37,7 @@ import {
   Building2,
   ChevronRight,
   BookOpen,
+  Info,
 } from "lucide-react";
 import VerifiedBadge from "@/components/profile/VerifiedBadge";
 import BreedProfileCard from "@/components/breeds/BreedProfileCard";
