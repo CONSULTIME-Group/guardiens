@@ -53,6 +53,41 @@ const AdminGuides = () => {
     },
   });
 
+  // Demandes de guides (villes avec annonces actives mais sans guide)
+  const { data: requests = [] } = useQuery({
+    queryKey: ["admin-guide-requests"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("guide_requests" as any)
+        .select("*")
+        .eq("status", "pending")
+        .order("active_sits_count", { ascending: false });
+      if (error) throw error;
+      return (data || []) as any[];
+    },
+  });
+
+  const dismissRequest = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await (supabase.from("guide_requests" as any) as any)
+        .update({ status: "dismissed" })
+        .eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-guide-requests"] });
+      window.dispatchEvent(new Event("admin-badges-refresh"));
+      toast.success("Demande écartée");
+    },
+  });
+
+  const prefillFromRequest = (req: any) => {
+    setCity(req.city || "");
+    setPostalCode(req.postal_code || "");
+    setDepartment(req.department || "");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
   const generateGuide = async () => {
     if (!city) return;
     setGenerating(true);
