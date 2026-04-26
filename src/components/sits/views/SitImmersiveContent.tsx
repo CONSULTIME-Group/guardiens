@@ -227,7 +227,7 @@ const SitImmersiveContent = ({
   const hasLocalGuide = Boolean(citySlug && GUIDE_SLUGS.has(citySlug));
   // -- Page ville (silo SEO) : seulement si du contenu éditorial existe
   const hasCityPage = Boolean(citySlug && getCityContent(citySlug));
-  const hasSidebarLinks = hasLocalGuide || hasCityPage;
+  
 
   return (
     <div>
