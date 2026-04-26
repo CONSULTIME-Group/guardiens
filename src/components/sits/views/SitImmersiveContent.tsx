@@ -41,12 +41,22 @@ import {
 } from "lucide-react";
 import VerifiedBadge from "@/components/profile/VerifiedBadge";
 import BreedProfileCard from "@/components/breeds/BreedProfileCard";
+import LocationProfileCard from "@/components/location/LocationProfileCard";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Pill,
+  Utensils,
+  AlertTriangle,
+  Activity,
+  Footprints,
+  Clock,
+} from "lucide-react";
 import { slugify } from "@/lib/normalize";
 import { CITIES } from "@/data/cities";
 import { getCityContent } from "@/data/cityContent";
