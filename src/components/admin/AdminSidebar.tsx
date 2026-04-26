@@ -71,7 +71,7 @@ const adminNavGroups: NavGroup[] = [
     items: [
       { to: "/admin/city-pages", icon: MapPin, label: "Pages villes" },
       { to: "/admin/departments", icon: MapPin, label: "Départements" },
-      { to: "/admin/guides", icon: Compass, label: "Guides locaux" },
+      { to: "/admin/guides", icon: Compass, label: "Guides locaux", badgeKey: "guideRequests" },
     ],
   },
   {
