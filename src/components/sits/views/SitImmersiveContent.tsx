@@ -76,17 +76,43 @@ const SPECIES_EMOJI: Record<string, string> = {
   fish: "🐠", rodent: "🐹", horse: "🐴", nac: "🦎", reptile: "🦎",
 };
 
+// Mapping environnements → libellé + icône.
+// Tolérant aux deux conventions trouvées en base :
+//  - clés FR historiques (`ville`, `campagne`, `foret`, `vignes`…) — données réelles
+//  - clés EN du formulaire moderne (`city_center`, `countryside`, `forest`…)
 const ENV_META: Record<string, { label: string; icon: any }> = {
+  // FR (données réelles en base)
+  ville: { label: "Ville", icon: Building2 },
+  centre_ville: { label: "Centre-ville", icon: Building2 },
+  periurbain: { label: "Périurbain", icon: Building2 },
+  campagne: { label: "Campagne", icon: Trees },
+  foret: { label: "Forêt", icon: Trees },
+  jardin: { label: "Jardin", icon: Trees },
+  vignes: { label: "Vignes", icon: Trees },
+  montagne: { label: "Montagne", icon: Mountain },
+  lac: { label: "Lac", icon: Waves },
+  bord_de_mer: { label: "Bord de mer", icon: Waves },
+  mer: { label: "Bord de mer", icon: Waves },
+  // EN (formulaire moderne — alias)
   city: { label: "Ville", icon: Building2 },
   city_center: { label: "Centre-ville", icon: Building2 },
+  suburban: { label: "Périurbain", icon: Building2 },
   countryside: { label: "Campagne", icon: Trees },
+  forest: { label: "Forêt", icon: Trees },
+  garden: { label: "Jardin", icon: Trees },
   mountain: { label: "Montagne", icon: Mountain },
   lake: { label: "Lac", icon: Waves },
-  garden: { label: "Jardin", icon: Trees },
   seaside: { label: "Bord de mer", icon: Waves },
-  forest: { label: "Forêt", icon: Trees },
-  suburban: { label: "Périurbain", icon: Building2 },
 };
+
+// Fallback pour toute valeur d'environnement inconnue : on capitalise la clé
+// au lieu de la masquer silencieusement. Garantit zéro perte d'info.
+const formatEnvLabel = (key: string): string =>
+  key
+    .replace(/[_-]+/g, " ")
+    .replace(/\b\w/g, (c) => c.toUpperCase());
+const getEnvMeta = (key: string) =>
+  ENV_META[key] || { label: formatEnvLabel(key), icon: Trees };
 
 const AMENITY_META: Record<string, { label: string; icon: any }> = {
   wifi: { label: "Wifi", icon: Wifi },
@@ -497,15 +523,14 @@ const SitImmersiveContent = ({
             </div>,
           );
         }
-        const knownEnvironments = environments.filter((e) => ENV_META[e]);
-        if (knownEnvironments.length > 0) {
+        if (environments.length > 0) {
           cards.push(
             <div key="frame" className="rounded-2xl border border-border bg-card p-4">
               <Trees className="h-5 w-5 text-primary mb-2" />
               <p className="text-xs text-muted-foreground">Cadre</p>
               <div className="flex flex-wrap gap-1 mt-1">
-                {knownEnvironments.map((e) => {
-                  const meta = ENV_META[e]!;
+                {environments.map((e) => {
+                  const meta = getEnvMeta(e);
                   const Ico = meta.icon;
                   return (
                     <span
@@ -1137,26 +1162,24 @@ const SitImmersiveContent = ({
                 </p>
               )}
 
-              {environments.filter((e) => ENV_META[e]).length > 0 && (
+              {environments.length > 0 && (
                 <section className="rounded-2xl border border-border bg-card p-5 md:p-6">
                   <h2 className="text-lg font-semibold mb-3 flex items-center gap-2">
                     <Trees className="h-5 w-5 text-primary" /> Cadre de vie
                   </h2>
                   <div className="flex flex-wrap gap-2">
-                    {environments
-                      .filter((e) => ENV_META[e])
-                      .map((e) => {
-                        const meta = ENV_META[e]!;
-                        const Ico = meta.icon;
-                        return (
-                          <span
-                            key={e}
-                            className="inline-flex items-center gap-1.5 text-sm bg-muted rounded-full px-3 py-1.5"
-                          >
-                            <Ico className="h-4 w-4" /> {meta.label}
-                          </span>
-                        );
-                      })}
+                    {environments.map((e) => {
+                      const meta = getEnvMeta(e);
+                      const Ico = meta.icon;
+                      return (
+                        <span
+                          key={e}
+                          className="inline-flex items-center gap-1.5 text-sm bg-muted rounded-full px-3 py-1.5"
+                        >
+                          <Ico className="h-4 w-4" /> {meta.label}
+                        </span>
+                      );
+                    })}
                   </div>
                 </section>
               )}
