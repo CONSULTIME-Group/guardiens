@@ -16,6 +16,7 @@ import { ChevronDown, Clock, Footprints, Pill } from "lucide-react";
 import BreedProfileCard from "@/components/breeds/BreedProfileCard";
 import PhotoLightbox from "@/components/shared/PhotoLightbox";
 import { hasMedication } from "@/lib/medication";
+import { normalize } from "@/lib/normalize";
 import {
   SPECIES_EMOJI as speciesEmoji,
   WALK_LABELS as walkLabels,
