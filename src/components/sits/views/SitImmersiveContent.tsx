@@ -595,6 +595,29 @@ const SitImmersiveContent = ({
             </Link>
           )}
 
+          {/* Encart "Guide en préparation" — la ville n'a pas encore de guide local */}
+          {showGuideComingSoon && (
+            <div className="rounded-2xl border border-dashed border-border bg-muted/30 p-5">
+              <div className="flex items-start gap-3">
+                <div className="shrink-0 w-10 h-10 rounded-full bg-muted text-muted-foreground flex items-center justify-center">
+                  <BookOpen className="h-5 w-5" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs uppercase tracking-wide text-muted-foreground mb-0.5">
+                    Guide local
+                  </p>
+                  <p className="font-semibold text-sm text-foreground">
+                    Le guide de {cityName} arrive bientôt
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                    On prépare une sélection de bonnes adresses, parcs et vétérinaires
+                    pour cette ville. Le lien apparaîtra ici dès sa publication.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Page ville — visible uniquement si la page éditoriale existe */}
           {hasCityPage && (
             <Link
