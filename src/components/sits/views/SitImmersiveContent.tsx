@@ -248,6 +248,62 @@ const SitImmersiveContent = ({
   // -- Page ville (silo SEO) : seulement si du contenu éditorial existe
   const hasCityPage = Boolean(citySlug && getCityContent(citySlug));
 
+  // -- Comptage gardiens : ville d'abord, département en repli si < 20 résultats
+  const ownerPostalCode: string | undefined = owner?.postal_code
+    ? String(owner.postal_code)
+    : undefined;
+  const deptCode = ownerPostalCode ? ownerPostalCode.slice(0, 2) : undefined;
+  const CITY_THRESHOLD = 20;
+
+  const { data: sittersScope } = useQuery({
+    queryKey: ["sitters-scope", cityName, deptCode],
+    enabled: !!cityName,
+    staleTime: 5 * 60 * 1000,
+    queryFn: async () => {
+      // 1. Compte ville
+      const { data: cityRows } = await supabase
+        .from("profiles")
+        .select("id, sitter_profiles!inner(user_id)")
+        .ilike("city", cityName)
+        .limit(50);
+      const cityCount = cityRows?.length ?? 0;
+
+      if (cityCount >= CITY_THRESHOLD || !deptCode) {
+        return { mode: "city" as const, count: cityCount };
+      }
+
+      // 2. Repli département (CP commençant par dept)
+      const { data: deptRows } = await supabase
+        .from("profiles")
+        .select("id, postal_code, sitter_profiles!inner(user_id)")
+        .like("postal_code", `${deptCode}%`)
+        .limit(50);
+      const deptCount = deptRows?.length ?? 0;
+
+      return {
+        mode: "dept" as const,
+        count: deptCount,
+        cityCount,
+      };
+    },
+  });
+
+  const sittersLink = (() => {
+    if (!sittersScope || !cityName) return null;
+    const params = new URLSearchParams();
+    params.set("city", cityName);
+    if (ownerPostalCode) params.set("postal_code", ownerPostalCode);
+    if (sittersScope.mode === "dept" && deptCode) {
+      params.set("zone", "dept");
+      params.set("dept", deptCode);
+    } else {
+      params.set("zone", "city");
+    }
+    return `/search?${params.toString()}`;
+  })();
+
+  const showSittersLink = Boolean(sittersLink && sittersScope && sittersScope.count > 0);
+
 
   return (
     <div>
@@ -618,10 +674,10 @@ const SitImmersiveContent = ({
             </div>
           )}
 
-          {/* Page ville — visible uniquement si la page éditoriale existe */}
-          {hasCityPage && (
+          {/* Autres gardiens du coin — lien vers la recherche pré-remplie */}
+          {showSittersLink && (
             <Link
-              to={`/house-sitting/${citySlug}`}
+              to={sittersLink!}
               className="block rounded-2xl border border-border bg-card p-5 hover:border-primary/50 transition-colors group"
             >
               <div className="flex items-start gap-3">
@@ -633,16 +689,21 @@ const SitImmersiveContent = ({
                     Communauté locale
                   </p>
                   <p className="font-semibold text-sm group-hover:text-primary transition-colors">
-                    Gardiens à {cityName}
+                    {sittersScope!.mode === "city"
+                      ? `Voir les gardiens à ${cityName}`
+                      : `Voir les gardiens du ${deptCode}`}
                   </p>
                   <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
-                    Voir les profils vérifiés et l'activité du coin.
+                    {sittersScope!.mode === "city"
+                      ? `${sittersScope!.count}+ profils vérifiés à ${cityName}.`
+                      : `${sittersScope!.count}+ profils vérifiés dans le département.`}
                   </p>
                 </div>
                 <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-0.5 transition-all shrink-0 mt-2" />
               </div>
             </Link>
           )}
+
 
           {/* Réassurance */}
           <div className="rounded-2xl bg-muted/50 p-5 text-xs text-muted-foreground space-y-2">
