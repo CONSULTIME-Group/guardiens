@@ -240,8 +240,13 @@ const CreateSit = () => {
       try { await trackFirstAction("sit_created", { sit_id: sit.id, is_urgent: isUrgent }); } catch {}
       toast({ title: "Annonce publiée ! 🎉", description: "Les gardiens peuvent maintenant postuler." });
       navigate(`/sits/${sit.id}`);
-    } catch {
-      toast({ variant: "destructive", title: "Erreur", description: "Impossible de publier l'annonce." });
+    } catch (err: any) {
+      console.error("[CreateSit] publish failed", err);
+      toast({
+        variant: "destructive",
+        title: "Impossible de publier l'annonce",
+        description: err?.message || "Vérifiez votre connexion et réessayez.",
+      });
     } finally {
       setPublishing(false);
     }
