@@ -152,22 +152,24 @@ const SitDetailHeader = ({
       </div>
 
       <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground mb-6">
-        {owner?.city && (
+        {!compact && owner?.city && (
           <span className="flex items-center gap-1.5">
             <MapPin className="h-4 w-4" aria-hidden="true" />
             {owner.city}
           </span>
         )}
-        <span className="flex items-center gap-1.5">
-          <Calendar className="h-4 w-4" aria-hidden="true" />
-          <time dateTime={startDate || undefined}>{formatDate(startDate)}</time>
-          <span aria-hidden="true">→</span>
-          <span className="sr-only">jusqu'au</span>
-          <time dateTime={endDate || undefined}>{formatDate(endDate)}</time>
-          {flexibleDates && (
-            <span className="text-xs bg-accent px-2 py-0.5 rounded-full ml-1">Flexible</span>
-          )}
-        </span>
+        {!compact && (
+          <span className="flex items-center gap-1.5">
+            <Calendar className="h-4 w-4" aria-hidden="true" />
+            <time dateTime={startDate || undefined}>{formatDate(startDate)}</time>
+            <span aria-hidden="true">→</span>
+            <span className="sr-only">jusqu'au</span>
+            <time dateTime={endDate || undefined}>{formatDate(endDate)}</time>
+            {flexibleDates && (
+              <span className="text-xs bg-accent px-2 py-0.5 rounded-full ml-1">Flexible</span>
+            )}
+          </span>
+        )}
         <span
           className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${status.className}`}
           aria-label={`Statut de l'annonce : ${status.label}`}
