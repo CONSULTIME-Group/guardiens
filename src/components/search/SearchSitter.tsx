@@ -1658,6 +1658,88 @@ const SearchSitter = () => {
         </div>
       )}
 
+      {/* ─── Mode test démos (?testDemos=1) — panneau diagnostique ─── */}
+      {testDemoMode && (() => {
+        const inMembersTab = tab === "missions" && missionSubTab === "members";
+        const list = inMembersTab ? availableMembers : results;
+        const demoIndices = list.map((it: any, i: number) => (it?.is_demo ? i : -1)).filter((i) => i !== -1);
+        const realCount = list.length - demoIndices.length;
+        const allHaveBadge = demoIndices.every((i) => !!list[i]?.is_demo);
+        const interleaveOk = inMembersTab
+          ? true
+          : demoIndices.length === 0
+            ? realCount === 0
+            : demoIndices.every((idx) => {
+                if (realCount >= 3) return (idx + 1) % 4 === 0 || idx >= realCount;
+                return idx >= realCount;
+              });
+        const tabLabel = tab === "sits" ? "Gardes" : inMembersTab ? "Membres dispo" : "Missions";
+        const availableDemos = tab === "sits" ? DEMO_SITS.length : !inMembersTab ? DEMO_MISSIONS.length : 0;
+        return (
+          <div className="mx-6 mt-4 rounded-lg border-2 border-dashed border-amber-400 bg-amber-50 p-4 text-sm space-y-2">
+            <div className="flex items-center justify-between flex-wrap gap-2">
+              <p className="font-mono font-bold text-amber-900 flex items-center gap-2">
+                <Sparkles className="h-4 w-4" /> MODE TEST DÉMOS — Onglet&nbsp;: <span className="bg-amber-200 px-2 py-0.5 rounded">{tabLabel}</span>
+              </p>
+              <Link to={window.location.pathname} className="text-xs text-amber-800 underline hover:no-underline">Désactiver</Link>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs font-mono">
+              <div className="bg-white rounded p-2 border border-amber-200">
+                <div className="text-muted-foreground">Total liste</div>
+                <div className="text-lg font-bold text-foreground">{list.length}</div>
+              </div>
+              <div className="bg-white rounded p-2 border border-amber-200">
+                <div className="text-muted-foreground">Vraies annonces</div>
+                <div className="text-lg font-bold text-sky-700">{realCount}</div>
+              </div>
+              <div className="bg-white rounded p-2 border border-amber-200">
+                <div className="text-muted-foreground">Démos affichées</div>
+                <div className="text-lg font-bold text-amber-700">{demoIndices.length}</div>
+              </div>
+              <div className="bg-white rounded p-2 border border-amber-200">
+                <div className="text-muted-foreground">Démos disponibles</div>
+                <div className="text-lg font-bold text-foreground">{availableDemos}</div>
+              </div>
+            </div>
+            <ul className="text-xs space-y-1 pt-1">
+              <li className="flex items-center gap-2">
+                <span className={inMembersTab ? "text-sky-600" : demoIndices.length > 0 ? "text-emerald-600" : "text-red-600"}>
+                  {inMembersTab ? "ℹ️" : demoIndices.length > 0 ? "✅" : "❌"}
+                </span>
+                <span>
+                  {inMembersTab
+                    ? "Onglet membres : aucune démo attendue (profils réels uniquement)."
+                    : demoIndices.length > 0
+                      ? `Démos visibles aux positions : ${demoIndices.map((i) => `#${i + 1}`).join(", ")}`
+                      : "Aucune démo détectée — vérifier interleaveDemos()"}
+                </span>
+              </li>
+              {!inMembersTab && (
+                <li className="flex items-center gap-2">
+                  <span className={allHaveBadge ? "text-emerald-600" : "text-red-600"}>{allHaveBadge ? "✅" : "❌"}</span>
+                  <span>Badge « Annonce d'exemple » présent sur toutes les démos</span>
+                </li>
+              )}
+              {!inMembersTab && (
+                <li className="flex items-center gap-2">
+                  <span className={interleaveOk ? "text-emerald-600" : "text-amber-600"}>{interleaveOk ? "✅" : "⚠️"}</span>
+                  <span>
+                    Intercalation&nbsp;: {realCount >= 3 ? "1 démo toutes les 3 vraies annonces (positions 4, 8, 12…)" : "trop peu de vraies annonces — démos placées en fin de liste"}
+                  </span>
+                </li>
+              )}
+              <li className="flex items-center gap-2 text-muted-foreground">
+                <span>🎨</span>
+                <span>Chaque carte est encadrée et numérotée&nbsp;: <span className="text-amber-700 font-semibold">DEMO</span> en jaune, <span className="text-sky-700 font-semibold">REAL</span> en bleu.</span>
+              </li>
+            </ul>
+            <p className="text-[11px] text-amber-800/80 pt-1 border-t border-amber-200">
+              Astuce&nbsp;: changez d'onglet (Gardes / Missions / Membres) et de filtres pour vérifier que les démos restent visibles partout. Ajoutez <code className="bg-white px-1 rounded">?testDemos=1</code> à n'importe quelle URL de recherche pour réactiver ce mode.
+            </p>
+          </div>
+        );
+      })()}
+
       {/* ─── Content ─── */}
       {viewMode === "list" ? (
         <div className="p-6">
