@@ -280,3 +280,57 @@ describe("parseRoutine — texte libre sans label", () => {
   });
 });
 
+describe("parseRoutine — tolérance aux espaces et caractères spéciaux", () => {
+  it("espaces multiples autour du séparateur (Matin   :   ...)", () => {
+    const txt = "Matin   :   balade\nSoir   :   repas";
+    expect(labelsOf(txt)).toEqual(["Matin", "Soir"]);
+  });
+
+  it("espaces insécables (NBSP) autour du séparateur", () => {
+    const txt = "Matin\u00A0:\u00A0balade matinale\nSoir\u00A0:\u00A0croquettes";
+    const r = parseRoutine(txt)!;
+    expect(r.blocks.map((b) => b.label)).toEqual(["Matin", "Soir"]);
+    expect(r.blocks[0].text).toBe("balade matinale");
+  });
+
+  it("narrow NBSP (\\u202F) typographie française avant les deux-points", () => {
+    const txt = "Matin\u202F: gamelle\nMidi\u202F: pâtée";
+    expect(labelsOf(txt)).toEqual(["Matin", "Midi"]);
+  });
+
+  it("label avec décorations markdown : **Matin** : ...", () => {
+    const txt = "**Matin** : balade\n**Soir** : câlins";
+    expect(labelsOf(txt)).toEqual(["Matin", "Soir"]);
+  });
+
+  it("label entre guillemets français « Matin » : ...", () => {
+    const txt = "« Matin » : promenade\n« Soir » : repas";
+    expect(labelsOf(txt)).toEqual(["Matin", "Soir"]);
+  });
+
+  it("label précédé d'un emoji (🌅 Matin : ...)", () => {
+    const txt = "🌅 Matin : sortie\n🌙 Soir : panier";
+    expect(labelsOf(txt)).toEqual(["Matin", "Soir"]);
+  });
+
+  it("séparateur flèche (Matin → ...) et égal (Soir = ...)", () => {
+    const txt = "Matin → balade\nSoir = repas léger";
+    expect(labelsOf(txt)).toEqual(["Matin", "Soir"]);
+  });
+
+  it("tabulations entre label et texte", () => {
+    const txt = "Matin\t:\tcroquettes\nSoir\t:\tpanier";
+    expect(labelsOf(txt)).toEqual(["Matin", "Soir"]);
+  });
+
+  it("label en MAJUSCULES avec espaces multiples", () => {
+    const txt = "MATIN    :    sortie pipi\nNUIT    :    dort calme";
+    expect(labelsOf(txt)).toEqual(["Matin", "Nuit"]);
+  });
+
+  it("Après-midi avec NBSP autour et ordre mélangé", () => {
+    const txt = "Après-midi\u00A0:\u00A0sieste\nMatin : balade";
+    expect(labelsOf(txt)).toEqual(["Matin", "Après-midi"]);
+  });
+});
+
