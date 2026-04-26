@@ -917,6 +917,21 @@ const SitImmersiveContent = ({
                         </div>
                       )}
 
+                      {/* Caractère */}
+                      {hasCharacter && (
+                        <div className="rounded-xl border border-border bg-card p-3 md:p-4 mb-3 flex gap-3">
+                          <Heart className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                          <div className="min-w-0">
+                            <p className="text-xs font-semibold uppercase tracking-wide text-foreground mb-1">
+                              Caractère
+                            </p>
+                            <p className="text-sm text-muted-foreground whitespace-pre-line leading-relaxed">
+                              {pet.character}
+                            </p>
+                          </div>
+                        </div>
+                      )}
+
                       {/* Quotidien : activité, balade, solitude */}
                       {(activityLabel || walkLabel || aloneLabel) && (
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-3">
