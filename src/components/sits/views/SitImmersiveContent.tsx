@@ -170,7 +170,7 @@ const SitImmersiveContent = ({
     ? property.photos.filter((p: any) => typeof p === "string" && p.trim().length > 0)
     : [];
   const coverPhoto = photos[0] || null;
-  const hasHero = Boolean(coverPhoto);
+  
 
   // -- Hôte / localisation
   const ownerName = owner?.first_name || "L'hôte";
