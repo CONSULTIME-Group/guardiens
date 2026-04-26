@@ -174,6 +174,42 @@ const PublicSitDetail = () => {
     ? sit.environments
     : (property?.environment ? [property.environment] : []);
 
+  // Durée en jours (utilisée dans le pitch + label de date naturel)
+  const durationDays = (() => {
+    if (!sit.start_date || !sit.end_date) return null;
+    const start = new Date(sit.start_date).getTime();
+    const end = new Date(sit.end_date).getTime();
+    if (Number.isNaN(start) || Number.isNaN(end) || end < start) return null;
+    return Math.max(1, Math.round((end - start) / (1000 * 60 * 60 * 24)) + 1);
+  })();
+
+  // Label date naturel : « Du 5 au 15 août 2026 · 11 jours »
+  const naturalDateLabel = (() => {
+    if (!sit.start_date || !sit.end_date) return "Dates flexibles";
+    const startDay = format(new Date(sit.start_date), "d MMMM", { locale: fr });
+    const endDay = format(new Date(sit.end_date), "d MMMM yyyy", { locale: fr });
+    const base = `Du ${startDay} au ${endDay}`;
+    return durationDays ? `${base} · ${durationDays} jour${durationDays > 1 ? "s" : ""}` : base;
+  })();
+
+  // Résumé des animaux pour le pitch (« 2 chats », « un chien et un chat »)
+  const petsPitchSummary = (() => {
+    if (pets.length === 0) return "leurs animaux";
+    if (pets.length === 1) {
+      const p = pets[0];
+      return `${p.name} (${speciesLabel[p.species] || p.species})`;
+    }
+    // Groupe par espèce
+    const byKind: Record<string, number> = {};
+    pets.forEach((p: any) => {
+      const k = speciesLabel[p.species] || p.species;
+      byKind[k] = (byKind[k] || 0) + 1;
+    });
+    return Object.entries(byKind)
+      .map(([kind, n]) => `${n} ${kind}${n > 1 ? "s" : ""}`)
+      .join(" et ");
+  })();
+
   // ── SEO / OG ──
   const cityForTitle = owner?.city || "France";
   const startFmt = sit.start_date ? format(new Date(sit.start_date), "d MMMM", { locale: fr }) : "";
