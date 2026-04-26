@@ -1803,6 +1803,96 @@ const SearchSitter = () => {
                 <span>Chaque carte est encadrée et numérotée&nbsp;: <span className="text-amber-700 font-semibold">DEMO</span> en jaune, <span className="text-sky-700 font-semibold">REAL</span> en bleu.</span>
               </li>
             </ul>
+
+            {/* Tableau de vérification par filtre — historique des changements */}
+            <div className="pt-2 border-t border-amber-200">
+              <div className="flex items-center justify-between mb-1.5">
+                <p className="text-xs font-mono font-bold text-amber-900">
+                  📊 Historique vérification ({demoCheckHistory.length})
+                </p>
+                {demoCheckHistory.length > 0 && (
+                  <button
+                    onClick={() => setDemoCheckHistory([])}
+                    className="text-[11px] text-amber-800 underline hover:no-underline"
+                  >
+                    Réinitialiser
+                  </button>
+                )}
+              </div>
+              {demoCheckHistory.length === 0 ? (
+                <p className="text-[11px] text-amber-800/70 italic">
+                  Changez la ville, les dates, le tri ou l'onglet pour voir l'historique des vérifications s'enrichir ici.
+                </p>
+              ) : (
+                <div className="overflow-x-auto rounded border border-amber-200 bg-white">
+                  <table className="w-full text-[11px] font-mono">
+                    <thead className="bg-amber-100/70 text-amber-900">
+                      <tr>
+                        <th className="text-left px-2 py-1">Heure</th>
+                        <th className="text-left px-2 py-1">Trigger</th>
+                        <th className="text-left px-2 py-1">Onglet</th>
+                        <th className="text-left px-2 py-1">Ville</th>
+                        <th className="text-left px-2 py-1">Dates</th>
+                        <th className="text-left px-2 py-1">Tri</th>
+                        <th className="text-right px-2 py-1">Réelles</th>
+                        <th className="text-right px-2 py-1">Démos</th>
+                        <th className="text-left px-2 py-1">Positions</th>
+                        <th className="text-center px-2 py-1">OK ?</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {demoCheckHistory.map((row, idx) => {
+                        const time = new Date(row.ts).toLocaleTimeString("fr-FR", {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                          second: "2-digit",
+                        });
+                        const dates =
+                          row.startDate || row.endDate
+                            ? `${row.startDate || "…"} → ${row.endDate || "…"}`
+                            : "—";
+                        return (
+                          <tr
+                            key={`${row.ts}-${idx}`}
+                            className={
+                              idx === 0
+                                ? "bg-amber-50/80 border-b border-amber-100"
+                                : "border-b border-amber-50"
+                            }
+                          >
+                            <td className="px-2 py-1 text-muted-foreground whitespace-nowrap">{time}</td>
+                            <td className="px-2 py-1">
+                              <span className="bg-amber-200/70 px-1.5 py-0.5 rounded">{row.trigger}</span>
+                            </td>
+                            <td className="px-2 py-1">{row.tab}</td>
+                            <td className="px-2 py-1 max-w-[120px] truncate" title={row.city || "—"}>
+                              {row.city || "—"}
+                            </td>
+                            <td className="px-2 py-1 whitespace-nowrap">{dates}</td>
+                            <td className="px-2 py-1">{row.sort}</td>
+                            <td className="px-2 py-1 text-right text-sky-700 font-semibold">{row.real}</td>
+                            <td className="px-2 py-1 text-right text-amber-700 font-semibold">{row.demo}</td>
+                            <td className="px-2 py-1 text-muted-foreground">
+                              {row.positions.length > 0 ? row.positions.map((p) => `#${p}`).join(", ") : "—"}
+                            </td>
+                            <td className="px-2 py-1 text-center">
+                              {row.tab === "members" ? (
+                                <span className="text-sky-600" title="Onglet membres : aucune démo attendue">ℹ️</span>
+                              ) : row.interleaveOk ? (
+                                <span className="text-emerald-600">✅</span>
+                              ) : (
+                                <span className="text-red-600" title="Intercalation cassée">❌</span>
+                              )}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+
             <p className="text-[11px] text-amber-800/80 pt-1 border-t border-amber-200">
               Astuce&nbsp;: changez d'onglet (Gardes / Missions / Membres) et de filtres pour vérifier que les démos restent visibles partout. Ajoutez <code className="bg-white px-1 rounded">?testDemos=1</code> à n'importe quelle URL de recherche pour réactiver ce mode.
             </p>
