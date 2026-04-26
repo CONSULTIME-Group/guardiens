@@ -184,8 +184,8 @@ const SitDetailHeader = ({
         )}
       </div>
 
-      {/* Owner card — masquée si on est soi-même le propriétaire (info redondante) */}
-      {owner && !isOwner && (
+      {/* Owner card — masquée si on est soi-même le propriétaire OU en mode compact (déjà dans la sidebar immersive) */}
+      {owner && !isOwner && !compact && (
         <div className="flex items-center gap-3 mb-6 p-4 bg-card rounded-xl border border-border">
           <Link to={`/gardiens/${owner.id}`}>
             {owner.avatar_url ? (
