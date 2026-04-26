@@ -138,7 +138,7 @@ const CreateSit = () => {
       // If republishing, fetch the source sit in parallel
       let sourceSitRes: { data: any } | null = null;
       if (fromSitId) {
-        sourceSitRes = await supabase.from("sits").select("title, specific_expectations, open_to, environments, min_gardien_sits, flexible_dates, max_applications").eq("id", fromSitId).single();
+        sourceSitRes = await supabase.from("sits").select("title, specific_expectations, open_to, environments, min_gardien_sits, flexible_dates, max_applications, owner_message, daily_routine").eq("id", fromSitId).single();
       }
 
       setProfileCompletion(profileRes.data?.profile_completion || 0);
