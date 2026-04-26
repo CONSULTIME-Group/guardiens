@@ -1,19 +1,35 @@
-// TODO OG dynamique : les meta og:* spécifiques à chaque annonce nécessitent
-// un service de prerender actif (Prerender.io / Cloudflare Worker). À investiguer
-// séparément. Aujourd'hui : OG statiques génériques dans index.html uniquement.
+// Page publique partagée d'une annonce — accessible sans compte, indexable.
+// Utilisée pour le partage externe (Facebook, LinkedIn, WhatsApp, lien direct).
+// Les meta og:* sont injectées via Helmet ; les caches sociaux liront index.html
+// après prerender (Prerender.io / Cloudflare Worker — TODO infra).
 import { useState, useEffect, useRef } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
-import { Calendar, MapPin, Star, PawPrint, Home, CheckCircle2, ArrowLeft, ExternalLink, ShieldCheck, Heart, Users } from "lucide-react";
+import {
+  Calendar,
+  MapPin,
+  Star,
+  PawPrint,
+  Home,
+  CheckCircle2,
+  ArrowLeft,
+  ExternalLink,
+  ShieldCheck,
+  Heart,
+  Users,
+  Sparkles,
+  HandHeart,
+} from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import VerifiedBadge from "@/components/profile/VerifiedBadge";
 import ShareButtons from "@/components/sits/ShareButtons";
 import { trackEvent } from "@/lib/analytics";
 import { sanitizeUserTitle } from "@/lib/sanitizeTitle";
+import { getOgImageAbsoluteUrl } from "@/lib/ogImages";
 
 import { TooltipProvider } from "@/components/ui/tooltip";
 import ApplicationModal from "@/components/sits/ApplicationModal";
