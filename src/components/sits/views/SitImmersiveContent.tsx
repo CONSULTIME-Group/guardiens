@@ -76,17 +76,43 @@ const SPECIES_EMOJI: Record<string, string> = {
   fish: "🐠", rodent: "🐹", horse: "🐴", nac: "🦎", reptile: "🦎",
 };
 
+// Mapping environnements → libellé + icône.
+// Tolérant aux deux conventions trouvées en base :
+//  - clés FR historiques (`ville`, `campagne`, `foret`, `vignes`…) — données réelles
+//  - clés EN du formulaire moderne (`city_center`, `countryside`, `forest`…)
 const ENV_META: Record<string, { label: string; icon: any }> = {
+  // FR (données réelles en base)
+  ville: { label: "Ville", icon: Building2 },
+  centre_ville: { label: "Centre-ville", icon: Building2 },
+  periurbain: { label: "Périurbain", icon: Building2 },
+  campagne: { label: "Campagne", icon: Trees },
+  foret: { label: "Forêt", icon: Trees },
+  jardin: { label: "Jardin", icon: Trees },
+  vignes: { label: "Vignes", icon: Trees },
+  montagne: { label: "Montagne", icon: Mountain },
+  lac: { label: "Lac", icon: Waves },
+  bord_de_mer: { label: "Bord de mer", icon: Waves },
+  mer: { label: "Bord de mer", icon: Waves },
+  // EN (formulaire moderne — alias)
   city: { label: "Ville", icon: Building2 },
   city_center: { label: "Centre-ville", icon: Building2 },
+  suburban: { label: "Périurbain", icon: Building2 },
   countryside: { label: "Campagne", icon: Trees },
+  forest: { label: "Forêt", icon: Trees },
+  garden: { label: "Jardin", icon: Trees },
   mountain: { label: "Montagne", icon: Mountain },
   lake: { label: "Lac", icon: Waves },
-  garden: { label: "Jardin", icon: Trees },
   seaside: { label: "Bord de mer", icon: Waves },
-  forest: { label: "Forêt", icon: Trees },
-  suburban: { label: "Périurbain", icon: Building2 },
 };
+
+// Fallback pour toute valeur d'environnement inconnue : on capitalise la clé
+// au lieu de la masquer silencieusement. Garantit zéro perte d'info.
+const formatEnvLabel = (key: string): string =>
+  key
+    .replace(/[_-]+/g, " ")
+    .replace(/\b\w/g, (c) => c.toUpperCase());
+const getEnvMeta = (key: string) =>
+  ENV_META[key] || { label: formatEnvLabel(key), icon: Trees };
 
 const AMENITY_META: Record<string, { label: string; icon: any }> = {
   wifi: { label: "Wifi", icon: Wifi },
