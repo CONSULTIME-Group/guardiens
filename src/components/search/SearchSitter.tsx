@@ -857,7 +857,7 @@ const SearchSitter = () => {
   const pillClass = "flex items-center gap-2 px-4 py-2 rounded-full border border-border bg-card cursor-pointer hover:border-primary transition-colors text-sm whitespace-nowrap shrink-0";
 
   // ─── Card renderer ───
-  const renderCard = (item: any) => {
+  const renderCard = (item: any, listIndex?: number) => {
     const photos: string[] = item.property?.photos || [];
     const petGroups: Record<string, string[]> = {};
     (item.pets || []).forEach((p: any) => {
