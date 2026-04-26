@@ -250,10 +250,10 @@ const GuideDetail = () => {
           </div>
         </div>
 
-        {/* Map */}
+        {/* Map (chargée à la demande, sans bloquer le LCP ni le SEO) */}
         {placesWithCoords.length > 0 && (
           <Suspense fallback={<div className="max-w-5xl mx-auto px-4 mb-8 h-[300px] sm:h-[400px] bg-muted animate-pulse rounded-xl" />}>
-            <GuideMap
+            <GuideMapLazy
               places={placesWithCoords.map(p => ({ id: p.id, name: p.name, category: p.category, latitude: p.latitude!, longitude: p.longitude!, tips: p.tips }))}
               categories={categories}
             />
