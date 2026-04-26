@@ -305,6 +305,9 @@ const PublicSitDetail = () => {
         <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>
       </Helmet>
 
+      {/* Header public — anonymes uniquement (identité de marque + nav minimale) */}
+      {!isAuthenticated && <PublicHeader />}
+
       {/* Mini-barre sticky pour les membres connectés (la page publique n'a pas le header app) */}
       {isAuthenticated && (
         <div className="sticky top-0 z-30 bg-primary/10 backdrop-blur-sm border-b border-primary/20 px-4 py-2 flex flex-wrap items-center justify-between gap-2">
@@ -322,18 +325,26 @@ const PublicSitDetail = () => {
           </Button>
         </div>
       )}
+
+      <div className="max-w-4xl mx-auto">
       {/* ─── HERO ÉDITORIAL ─────────────────────────────────────────────── */}
       <div className="px-4 md:px-10 pt-4 md:pt-6">
         <SitHero photos={photos} city={owner?.city} priority />
       </div>
 
       <div className="px-5 md:px-10 pb-6 md:pb-10">
-        {/* Eyebrow contextuel */}
-        <div className="mt-5 mb-2 flex items-center gap-2">
-          <span className="inline-flex items-center gap-1.5 text-[11px] uppercase tracking-wider font-semibold text-primary">
-            <Sparkles className="h-3 w-3" />
-            Une annonce de la communauté
+        {/* Pill contextuelle au-dessus du H1 — visible et orientée valeur */}
+        <div className="mt-5 mb-3 flex flex-wrap items-center gap-2">
+          <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full bg-primary/10 text-primary">
+            <Sparkles className="h-3.5 w-3.5" />
+            Garde entre voisins · Sans paiement entre membres
           </span>
+          {owner?.city && (
+            <span className="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full bg-muted text-foreground">
+              <MapPin className="h-3.5 w-3.5 text-primary/70" />
+              {owner.city}
+            </span>
+          )}
         </div>
 
         {/* Title — sanitize pour corriger les espaces manquants ("4chats" → "4 chats") */}
@@ -341,19 +352,11 @@ const PublicSitDetail = () => {
           {sit.title ? sanitizeUserTitle(sit.title) : `Une garde à confier à ${owner?.city || "vos voisins"}`}
         </h1>
 
-        {/* Location & dates — pictos discrets */}
+        {/* Date naturelle */}
         <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-muted-foreground mb-6">
-          {owner?.city && (
-            <span className="inline-flex items-center gap-1.5">
-              <MapPin className="h-4 w-4 text-primary/70" />
-              <span className="font-medium text-foreground">{owner.city}</span>
-            </span>
-          )}
           <span className="inline-flex items-center gap-1.5">
             <Calendar className="h-4 w-4 text-primary/70" />
-            <span>
-              {formatDate(sit.start_date)} → {formatDate(sit.end_date)}
-            </span>
+            <span className="font-medium text-foreground">{naturalDateLabel}</span>
             {sit.flexible_dates && (
               <span className="text-[11px] font-medium bg-primary/10 text-primary px-2 py-0.5 rounded-full ml-1">
                 Dates flexibles
@@ -362,40 +365,19 @@ const PublicSitDetail = () => {
           </span>
         </div>
 
-        {/* ─── BANDEAU VALEUR — visiteurs anonymes uniquement ───────────── */}
+        {/* ─── PITCH NARRATIF + TRUST — visiteurs anonymes uniquement ───── */}
         {!isAuthenticated && (
-          <section className="mb-8 rounded-2xl border border-primary/15 bg-gradient-to-br from-primary/5 to-primary/0 p-5 md:p-6">
-            <div className="flex items-start gap-3">
-              <div className="shrink-0 w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                <HandHeart className="h-5 w-5 text-primary" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <h2 className="font-heading text-base md:text-lg font-semibold mb-1.5">
-                  La confiance entre gens du coin
-                </h2>
-                <p className="text-sm text-muted-foreground leading-relaxed">
-                  Sur Guardiens, ce sont des voisins qui se rendent service.
-                  Aucun paiement entre membres, profils vérifiés, accord de
-                  garde signé&nbsp;: la garde redevient une histoire de
-                  proximité, pas de transaction.
-                </p>
-                <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1.5 text-[12px] text-muted-foreground">
-                  <span className="inline-flex items-center gap-1">
-                    <ShieldCheck className="h-3.5 w-3.5 text-primary" />
-                    Identités vérifiées
-                  </span>
-                  <span className="inline-flex items-center gap-1">
-                    <Heart className="h-3.5 w-3.5 text-primary" />
-                    100&nbsp;% gratuit entre membres
-                  </span>
-                  <span className="inline-flex items-center gap-1">
-                    <Users className="h-3.5 w-3.5 text-primary" />
-                    Réseau local
-                  </span>
-                </div>
-              </div>
-            </div>
-          </section>
+          <>
+            <PublicSitPitch
+              ownerFirstName={owner?.first_name}
+              city={owner?.city}
+              petsSummary={petsPitchSummary}
+              durationDays={durationDays}
+              datesLabel={naturalDateLabel}
+              propertyTypeLabel={property ? typeLabels[property.type] || property.type : null}
+            />
+            <PublicSitTrustStrip />
+          </>
         )}
 
         {/* ─── ANIMAUX ──────────────────────────────────────────────────── */}
