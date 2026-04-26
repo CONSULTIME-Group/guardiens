@@ -807,10 +807,14 @@ const SearchSitter = () => {
     const isAssigned = !isMission && !!item.isAssigned;
     const isCompleted = !isMission && !!item.isCompleted;
     const isInactive = isAssigned || isCompleted;
-    const linkTo = isMission ? `/petites-missions/${item.id}` : `/sits/${item.id}`;
+    const linkTo = isMission
+      ? `/petites-missions/${item.id}`
+      : isDemo
+        ? `/annonces/demo/${item.slug || item.id}`
+        : `/sits/${item.id}`;
 
-    const showCTA = !hasAccess && !isInactive;
-    const isClickable = hasAccess && !isDemo && !isInactive;
+    const showCTA = !hasAccess && !isInactive && !isDemo;
+    const isClickable = (isDemo || hasAccess) && !isInactive;
 
     const cardContent = (
       <div
