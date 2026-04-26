@@ -415,3 +415,28 @@ export const DEMO_THRESHOLD = 5;
 
 export const getDemoSitBySlug = (slug: string): DemoSit | null =>
   DEMO_SITS.find((s) => s.slug === slug) ?? null;
+
+/**
+ * Intercale des annonces de démo dans une liste de résultats réels.
+ * Une démo est insérée tous les `step` éléments réels (par défaut 3),
+ * en partant du début. Les démos restantes sont ajoutées à la fin.
+ * Garantit que les démos sont visibles sur tous types de recherche
+ * sans masquer les vraies annonces.
+ */
+export function interleaveDemos<T extends { id?: string }>(
+  real: T[],
+  demos: readonly T[],
+  step = 3,
+): T[] {
+  if (!demos.length) return real;
+  const out: T[] = [];
+  let demoIdx = 0;
+  for (let i = 0; i < real.length; i++) {
+    out.push(real[i]);
+    if ((i + 1) % step === 0 && demoIdx < demos.length) {
+      out.push(demos[demoIdx++]);
+    }
+  }
+  while (demoIdx < demos.length) out.push(demos[demoIdx++]);
+  return out;
+}
