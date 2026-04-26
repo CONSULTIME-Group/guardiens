@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import HelpButton from "./HelpButton";
 import MissionFeedbackModal from "@/components/missions/MissionFeedbackModal";
 import { supabase } from "@/integrations/supabase/client";
+import { sendTransactionalEmail } from "@/lib/sendTransactionalEmail";
 import { toast } from "sonner";
 import { format, isPast } from "date-fns";
 import { fr } from "date-fns/locale";
