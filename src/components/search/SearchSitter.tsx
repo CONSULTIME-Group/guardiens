@@ -1116,6 +1116,16 @@ const SearchSitter = () => {
             </PopoverContent>
           </Popover>
 
+          {/* Verified toggle promu (raccourci confiance) */}
+          <button
+            onClick={() => setVerifiedOnly(v => !v)}
+            aria-pressed={verifiedOnly}
+            className={`${pillClass} ${verifiedOnly ? "bg-primary/10 border-primary text-primary" : ""}`}
+          >
+            <ShieldCheck className={`h-4 w-4 ${verifiedOnly ? "text-primary" : "text-muted-foreground"}`} />
+            <span>{verifiedOnly ? "Vérifiés uniquement" : "Vérifié"}</span>
+          </button>
+
           {/* Advanced filters pill */}
           <Sheet>
             <SheetTrigger asChild>
