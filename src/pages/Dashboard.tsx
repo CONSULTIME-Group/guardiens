@@ -49,22 +49,36 @@ const Dashboard = () => {
     }
   }, [user?.id]);
 
-  // Émettre signup_email_confirmed quand l'utilisateur arrive sur le dashboard
-  // depuis le lien de confirmation email (hash type=signup ou type=email).
-  // À ce moment la session est active → RLS OK pour insérer dans analytics_events.
-  // Une seule émission par utilisateur grâce au flag localStorage.
+  // Émettre signup_email_confirmed UNE seule fois par utilisateur dès qu'on
+  // a la preuve que l'email a été validé (session active sur /dashboard).
+  // Trois cas couverts :
+  //   1. Lien email classique : hash contient type=signup ou type=email
+  //   2. Redirect depuis /auth/confirm (l'event est déjà émis là-bas, on no-op via le flag)
+  //   3. Google OAuth ou auto-confirm : pas de hash → on déclenche quand même
+  //      car la session active sur /dashboard prouve que l'email est validé.
+  // Déduplication via flag localStorage (déjà posé par AuthConfirm si applicable).
   useEffect(() => {
     if (!user?.id) return;
     try {
-      const hash = typeof window !== "undefined" ? window.location.hash : "";
-      const isFromEmailLink = hash.includes("type=signup") || hash.includes("type=email");
-      if (!isFromEmailLink) return;
       const flagKey = `email_confirmed_tracked_${user.id}`;
       if (localStorage.getItem(flagKey)) return;
+      const hash = typeof window !== "undefined" ? window.location.hash : "";
+      const isFromEmailLink = hash.includes("type=signup") || hash.includes("type=email");
+      const isFirstDashboard =
+        typeof window !== "undefined" &&
+        localStorage.getItem("first_dashboard_seen") === "pending";
+      // On émet pour tous les cas : email_link, first_dashboard (signup → confirm → dash),
+      // OAuth (Google), ou auto-confirm. Avoir une session ici = email validé.
+      const shouldEmit = isFromEmailLink || isFirstDashboard;
+      if (!shouldEmit) return;
       localStorage.setItem(flagKey, "1");
       trackEvent("signup_email_confirmed", {
         source: "/dashboard",
-        metadata: { role: user.role || null, user_id: user.id },
+        metadata: {
+          role: user.role || null,
+          user_id: user.id,
+          via: isFromEmailLink ? "email_link_hash" : "first_dashboard_proxy",
+        },
       });
     } catch {
       // silencieux
