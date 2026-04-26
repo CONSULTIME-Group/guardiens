@@ -674,10 +674,10 @@ const SitImmersiveContent = ({
             </div>
           )}
 
-          {/* Page ville — visible uniquement si la page éditoriale existe */}
-          {hasCityPage && (
+          {/* Autres gardiens du coin — lien vers la recherche pré-remplie */}
+          {showSittersLink && (
             <Link
-              to={`/house-sitting/${citySlug}`}
+              to={sittersLink!}
               className="block rounded-2xl border border-border bg-card p-5 hover:border-primary/50 transition-colors group"
             >
               <div className="flex items-start gap-3">
@@ -689,16 +689,21 @@ const SitImmersiveContent = ({
                     Communauté locale
                   </p>
                   <p className="font-semibold text-sm group-hover:text-primary transition-colors">
-                    Gardiens à {cityName}
+                    {sittersScope!.mode === "city"
+                      ? `Voir les gardiens à ${cityName}`
+                      : `Voir les gardiens du ${deptCode}`}
                   </p>
                   <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
-                    Voir les profils vérifiés et l'activité du coin.
+                    {sittersScope!.mode === "city"
+                      ? `${sittersScope!.count}+ profils vérifiés à ${cityName}.`
+                      : `${sittersScope!.count}+ profils vérifiés dans le département.`}
                   </p>
                 </div>
                 <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-0.5 transition-all shrink-0 mt-2" />
               </div>
             </Link>
           )}
+
 
           {/* Réassurance */}
           <div className="rounded-2xl bg-muted/50 p-5 text-xs text-muted-foreground space-y-2">
