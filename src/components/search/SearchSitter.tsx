@@ -903,7 +903,7 @@ const SearchSitter = () => {
           )}
           {isDemo && (
             <p className="text-xs text-amber-700 italic mt-3 flex items-center gap-1">
-              <Sparkles className="h-3 w-3" /> Exemple fictif pour vous montrer le rendu — non disponible.
+              <Sparkles className="h-3 w-3" /> Exemple — cliquez pour découvrir l'expérience complète
             </p>
           )}
           {showCTA && !isDemo && (
