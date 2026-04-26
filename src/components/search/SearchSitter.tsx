@@ -10,6 +10,7 @@ import { ToastAction } from "@/components/ui/toast";
 
 const SearchMapView = lazy(() => import("@/components/search/SearchMapView"));
 import { DEMO_SITS, DEMO_MISSIONS } from "@/data/demoListings";
+import { normalize } from "@/lib/normalize";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -149,8 +150,7 @@ const SearchSitter = () => {
   };
 
   // ─── Suggestions département & région (locales, dérivées de la saisie) ───
-  const normalize = (s: string) =>
-    s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  // (normalize est importé depuis @/lib/normalize — comportement unifié partout)
 
   // Renvoie un code postal "représentatif" du département (pour piloter le mode Zone)
   const deptToRefPostalCode = (dept: string): string => {
