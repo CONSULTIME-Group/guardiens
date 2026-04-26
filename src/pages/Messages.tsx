@@ -431,12 +431,14 @@ const Messages = () => {
     loadMessages(activeConv.id);
   }, [activeConv, loadMessages]);
 
-  // Pré-remplir le 1er message selon le contexte si conv vide et input vide
+  // Pré-remplir le 1er message UNIQUEMENT si la conversation est totalement vide
+  // (aucun message non-système, peu importe l'expéditeur). Sinon, l'autre partie
+  // a déjà écrit et il serait absurde de coller un brouillon générique par-dessus.
   useEffect(() => {
     if (!activeConv || !user) return;
     if (newMessage.trim() !== "") return;
-    const userMsgs = messages.filter(m => !m.is_system && m.sender_id === user.id);
-    if (userMsgs.length > 0) return;
+    const realMsgs = messages.filter(m => !m.is_system);
+    if (realMsgs.length > 0) return; // conv déjà entamée → pas de brouillon
     const ctx = (activeConv.context_type || "sitter_inquiry") as ConversationContext;
     const sitDates = activeConv.sit?.start_date && activeConv.sit?.end_date
       ? `${new Date(activeConv.sit.start_date).toLocaleDateString("fr-FR")} → ${new Date(activeConv.sit.end_date).toLocaleDateString("fr-FR")}`
