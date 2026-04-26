@@ -571,9 +571,12 @@ const PublicSitDetail = () => {
           />
         )}
 
+        {/* ─── MINI-FAQ — visiteurs anonymes uniquement ─────────────────── */}
+        {!isAuthenticated && <PublicSitFAQ />}
+
         {/* ─── BLOC DE RÉASSURANCE FINAL ────────────────────────────────── */}
         {!isAuthenticated && (
-          <section className="mt-10 rounded-2xl bg-card border border-border p-6 text-center">
+          <section className="mt-2 rounded-2xl bg-card border border-border p-6 text-center">
             <p className="font-heading text-base md:text-lg font-semibold mb-2">
               Vous partez l'esprit léger — et si un imprévu survient, votre
               réseau local de gardiens prend le relais.
