@@ -566,29 +566,73 @@ const SitImmersiveContent = ({
               </h2>
               <div className="space-y-5">
                 {safePets.map((pet, i) => (
-                  <div key={pet.id || i} className="border-l-2 border-primary/30 pl-4">
-                    <div className="flex items-baseline gap-2 flex-wrap mb-1">
-                      <span className="text-xl">{SPECIES_EMOJI[pet.species] || "🐾"}</span>
-                      {pet.name && (
-                        <h3 className="font-semibold text-foreground">{pet.name}</h3>
-                      )}
-                      {pet.breed && (
-                        <span className="text-sm text-muted-foreground">· {pet.breed}</span>
-                      )}
-                      {pet.age && (
-                        <span className="text-xs text-muted-foreground">· {pet.age}</span>
+                  <div key={pet.id || i} className="flex gap-4">
+                    {/* Photo de l'animal */}
+                    <div className="shrink-0">
+                      {pet.photo_url ? (
+                        <img
+                          src={pet.photo_url}
+                          alt={pet.name || "Animal"}
+                          loading="lazy"
+                          className="w-20 h-20 md:w-24 md:h-24 rounded-xl object-cover border border-border"
+                        />
+                      ) : (
+                        <div className="w-20 h-20 md:w-24 md:h-24 rounded-xl bg-muted border border-border flex items-center justify-center text-3xl">
+                          {SPECIES_EMOJI[pet.species] || "🐾"}
+                        </div>
                       )}
                     </div>
-                    {pet.notes && (
-                      <p className="text-sm text-muted-foreground leading-relaxed">{pet.notes}</p>
-                    )}
-                    {pet.breed && (
-                      <BreedProfileCard
-                        species={pet.species}
-                        breed={pet.breed}
-                        ownerFirstName={ownerName}
-                      />
-                    )}
+
+                    {/* Infos animal */}
+                    <div className="flex-1 min-w-0 border-l-2 border-primary/30 pl-4">
+                      <div className="flex items-baseline gap-2 flex-wrap mb-1">
+                        <span className="text-xl">{SPECIES_EMOJI[pet.species] || "🐾"}</span>
+                        {pet.name && (
+                          <h3 className="font-semibold text-foreground">{pet.name}</h3>
+                        )}
+                        {pet.breed && (
+                          <span className="text-sm text-muted-foreground">· {pet.breed}</span>
+                        )}
+                        {pet.age && (
+                          <span className="text-xs text-muted-foreground">· {pet.age}</span>
+                        )}
+                      </div>
+
+                      {/* Note du propriétaire — toujours prioritaire et visible */}
+                      {pet.owner_breed_note && (
+                        <p className="text-sm text-foreground/90 leading-relaxed mb-1">
+                          <span className="font-medium">Selon {ownerName} :</span>{" "}
+                          <span className="italic text-muted-foreground">{pet.owner_breed_note}</span>
+                        </p>
+                      )}
+                      {pet.notes && (
+                        <p className="text-sm text-muted-foreground leading-relaxed">{pet.notes}</p>
+                      )}
+
+                      {/* Fiche de race repliée par défaut */}
+                      {pet.breed && (
+                        <Accordion type="single" collapsible className="mt-3">
+                          <AccordionItem
+                            value={`breed-${pet.id || i}`}
+                            className="border border-border rounded-lg bg-accent/20 px-3"
+                          >
+                            <AccordionTrigger className="py-2.5 text-sm font-medium hover:no-underline">
+                              <span className="flex items-center gap-2">
+                                <Info className="h-4 w-4 text-primary" />
+                                Voir la fiche race — {pet.breed}
+                              </span>
+                            </AccordionTrigger>
+                            <AccordionContent className="pb-3">
+                              <BreedProfileCard
+                                species={pet.species}
+                                breed={pet.breed}
+                                ownerFirstName={ownerName}
+                              />
+                            </AccordionContent>
+                          </AccordionItem>
+                        </Accordion>
+                      )}
+                    </div>
                   </div>
                 ))}
               </div>
