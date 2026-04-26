@@ -27,6 +27,7 @@ import { Search, MapPin, Calendar, Star, Lock, Zap, Sparkles } from "lucide-reac
 import { format, differenceInDays, differenceInHours } from "date-fns";
 import { fr } from "date-fns/locale";
 import { geocodeCity, haversineDistance } from "@/lib/geocode";
+import { ALLOWED_ALERT_RADII, snapToAllowedRadius } from "@/lib/alertRadius";
 import { useSubscriptionAccess } from "@/hooks/useSubscriptionAccess";
 import FavoriteButton from "@/components/shared/FavoriteButton";
 import { getDeptCode, DEPT_NAMES } from "@/lib/departments";
