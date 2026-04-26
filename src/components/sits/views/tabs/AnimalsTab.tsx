@@ -47,10 +47,7 @@ const HIGH_RISK_MED_PATTERNS = [
 
 function isHighRiskMedication(text: string | null | undefined): boolean {
   if (!text) return false;
-  const v = text
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "");
+  const v = normalize(text);
   return HIGH_RISK_MED_PATTERNS.some((p) => v.includes(p));
 }
 

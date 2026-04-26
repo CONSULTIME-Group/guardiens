@@ -35,7 +35,7 @@ export default function CityHero({
   department,
   departmentSlug,
 }: CityHeroProps) {
-  const cityKey = city.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, "-");
+  const cityKey = slugify(city);
   const bgImage = heroImage || CITY_HERO_IMAGES[cityKey];
 
   return (

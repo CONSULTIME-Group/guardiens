@@ -49,7 +49,7 @@ const PostConfirmationChecklist = ({
 
       // Check local guide for owner's city
       if (ownerCity) {
-        const slug = ownerCity.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, "-");
+        const slug = slugify(ownerCity);
         const { data: cityGuide } = await supabase
           .from("city_guides")
           .select("slug")

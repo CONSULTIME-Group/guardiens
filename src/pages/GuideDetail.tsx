@@ -218,7 +218,7 @@ const GuideDetail = () => {
             </Link>
             {guide.department && (
               <Link
-                to={`/departement/${guide.department.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "")}`}
+                to={`/departement/${slugify(guide.department)}`}
                 className="text-sm text-primary hover:underline flex items-center gap-1"
               >
                 House-sitting dans le {guide.department} <ArrowRight className="h-3.5 w-3.5" />

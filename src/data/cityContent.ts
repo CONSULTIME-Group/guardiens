@@ -421,12 +421,7 @@ Nos gardiens grenoblois connaissent ces spécificités et adaptent leur approche
  * Falls back to a generic structure if no specific content exists.
  */
 export function getCityContent(slug: string): CityContentData | null {
-  const normalized = slug
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/\s+/g, "-");
-
+  const normalized = slugify(slug);
   return cityContent[normalized] || null;
 }
 
