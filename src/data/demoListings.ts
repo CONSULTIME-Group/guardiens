@@ -160,9 +160,9 @@ export const DEMO_SITS: DemoSit[] = [
     id: "demo-garde-002",
     slug: "annecy-lac-basse-cour",
     is_demo: true,
-    title: "Maison en bois face au lac, potager et basse-cour",
+    title: "Maison en bois face au lac, un âne, un cheval et la basse-cour",
     description:
-      "Notre cabane en bois donne directement sur le lac d'Annecy. Cadre exceptionnel pour qui aime la nature, le calme et les animaux de la ferme. Vous serez aux petits soins de nos trois poules, du chat Moustache et du potager en pleine saison.",
+      "Notre cabane en bois donne directement sur le lac d'Annecy. Cadre exceptionnel pour qui aime la nature, le calme et les animaux. Vous serez aux petits soins de Pompon notre âne du Cotentin, de Galaxie notre jument Mérens, des trois poules Marans, du chat Moustache et du potager en pleine saison.",
     start_date: addDays(45),
     end_date: addDays(59),
     status: "published",
