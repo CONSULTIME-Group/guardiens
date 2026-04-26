@@ -450,8 +450,8 @@ const SitImmersiveContent = ({
             </section>
           )}
 
-          {/* Journée type */}
-          {sit?.daily_routine && (
+          {/* Journée type — visible uniquement si daily_routine non vide */}
+          {hasRoutine && (
             <section className="rounded-2xl border border-border bg-card p-5 md:p-6">
               <h2 className="text-lg font-semibold mb-4">Une journée type</h2>
               {routine ? (
@@ -481,21 +481,21 @@ const SitImmersiveContent = ({
                 </div>
               ) : (
                 <p className="text-sm text-foreground whitespace-pre-line leading-relaxed">
-                  {sit.daily_routine}
+                  {sit.daily_routine.trim()}
                 </p>
               )}
             </section>
           )}
 
-          {/* Mot du proprio */}
-          {sit?.owner_message && (
+          {/* Mot du proprio — visible uniquement si owner_message non vide */}
+          {hasOwnerMessage && (
             <section className="rounded-2xl border-2 border-primary/20 bg-primary/5 p-5 md:p-6">
               <div className="flex items-center gap-2 mb-3">
                 <Heart className="h-4 w-4 text-primary" />
                 <h2 className="text-base font-semibold">Un mot de {ownerName}</h2>
               </div>
               <p className="text-sm text-foreground/90 leading-relaxed italic whitespace-pre-line">
-                « {sit.owner_message} »
+                « {ownerMessage} »
               </p>
             </section>
           )}
