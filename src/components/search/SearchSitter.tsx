@@ -725,9 +725,8 @@ const SearchSitter = () => {
     let final: any[] = [...items];
     if (sort === "closest") final.sort((a: any, b: any) => (a.distance ?? 9999) - (b.distance ?? 9999));
     else if (sort === "recent") final.sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-    if (final.length === 0) {
-      final = [...final, ...DEMO_MISSIONS];
-    }
+    // Démos toujours visibles, intercalées
+    final = interleaveDemos(final, DEMO_MISSIONS, 3);
     setResults(final);
   };
 
