@@ -354,6 +354,14 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
         }
         await supabase.from("conversations").update({ updated_at: new Date().toISOString() }).eq("id", rejConv.id);
       }
+
+      // Email transactionnel — candidature déclinée manuellement (non-bloquant)
+      sendTransactionalEmail({
+        templateName: "application-declined",
+        recipientUserId: app.sitter_id,
+        idempotencyKey: `app-declined-${app.id}`,
+        templateData: { sitTitle },
+      }).catch(() => {});
     }
 
       toast({ title: "Candidature déclinée" });
