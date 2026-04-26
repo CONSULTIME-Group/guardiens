@@ -40,6 +40,13 @@ interface SitDetailHeaderProps {
   isAuthenticatedNonOwner: boolean;
   reviewCount: number;
   avgRating: string | null;
+  /**
+   * Mode compact : masque le hero photos, le titre et la ligne meta
+   * (déjà rendus par SitImmersiveContent). Conserve le lien retour, les
+   * actions (Modifier / Voir comme gardien / Signaler), le badge statut
+   * et l'owner card.
+   */
+  compact?: boolean;
 }
 
 const formatDate = (d: string | null) =>
