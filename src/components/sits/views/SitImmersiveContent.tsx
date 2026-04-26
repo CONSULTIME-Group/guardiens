@@ -103,16 +103,33 @@ const formatDate = (d: string | null) =>
  *  - format partiel (un seul moment renseigné) → on accepte 1 bloc minimum
  *  - texte libre sans label → on retourne null pour fallback whitespace-pre-line
  */
+/**
+ * Normalise les espaces "exotiques" (NBSP, narrow NBSP, zero-width, tabulations)
+ * en simples espaces ASCII pour fiabiliser la suite du parsing.
+ */
+const normalizeWhitespace = (s: string) =>
+  s
+    .replace(/[\u00A0\u202F\u2007\u2009\u200A\u200B\u200C\u200D\uFEFF]/g, " ")
+    .replace(/\t/g, " ");
+
 const stripBullet = (s: string) =>
   s
-    // puces classiques
-    .replace(/^\s*[-*•–—→▪►●·]+\s*/, "")
+    // puces classiques + emojis "moment de la journée" en début de ligne
+    .replace(/^\s*(?:[-*•–—→▪►●·★☆▶▷▸▹»>]+|[\u{1F300}-\u{1F6FF}\u{1F900}-\u{1F9FF}\u2600-\u27BF])+\s*/u, "")
     // numérotation : "1)", "1.", "1/", "1 -", "1°", "1 :"
     .replace(/^\s*\d+\s*[)°.\-/:]\s*/, "")
+    // décorations markdown autour : **Matin**, *Matin*, _Matin_, `Matin`
+    .replace(/^[\s*_`~]+/, "")
+    .replace(/[\s*_`~]+$/, "")
     .trim();
 
 const normalizeLabel = (k: string): "Matin" | "Midi" | "Après-midi" | "Soir" | "Nuit" => {
-  const low = k.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  const low = k
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    // retire toute décoration résiduelle (guillemets, ponctuation, espaces internes)
+    .replace(/[^a-z]/g, "");
   if (low.startsWith("matin")) return "Matin";
   if (low.startsWith("midi")) return "Midi";
   if (low.startsWith("apres") || low.startsWith("aprem")) return "Après-midi";
