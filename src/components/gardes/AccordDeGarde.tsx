@@ -145,8 +145,9 @@ export default function AccordDeGarde({ garde, role = "proprio", onClose }: Acco
         toast("Accord confirmé — vous recevrez le PDF par email.");
         onClose?.();
       }
-    } catch {
-      toast.error("Une erreur est survenue — réessaie dans un instant.");
+    } catch (err: any) {
+      console.error("[AccordDeGarde] accept failed", err);
+      toast.error(err?.message || "Une erreur est survenue — réessayez dans un instant.");
     } finally {
       setIsLoading(false);
     }

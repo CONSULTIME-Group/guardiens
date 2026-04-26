@@ -145,7 +145,7 @@ export default function AdminHeroWeights() {
         <div className="text-center space-y-3">
           <p className="text-sm">Cette page est réservée aux administrateurs.</p>
           <button
-            onClick={() => navigate("/auth?redirect=/admin/hero-weights")}
+            onClick={() => navigate("/login?redirect=/admin/hero-weights")}
             className="px-4 py-2 rounded-md bg-primary text-primary-foreground text-sm"
           >
             Se connecter
