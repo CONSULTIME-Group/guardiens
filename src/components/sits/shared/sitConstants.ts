@@ -58,6 +58,12 @@ export const ALONE_LABELS: Record<string, string> = {
   all_day: "Peut rester seul toute la journée",
 };
 
+export const ACTIVITY_LABELS: Record<string, string> = {
+  calm: "Calme",
+  moderate: "Modéré",
+  sportive: "Sportif",
+};
+
 export interface SitStatusConfig {
   label: string;
   className: string;
