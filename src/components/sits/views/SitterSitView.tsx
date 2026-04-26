@@ -35,6 +35,7 @@ import AnimalsTab from "./tabs/AnimalsTab";
 import HousingTab from "./tabs/HousingTab";
 import ExpectationsTab from "./tabs/ExpectationsTab";
 import ReviewsTab from "./tabs/ReviewsTab";
+import SitImmersiveContent from "./SitImmersiveContent";
 import type { SitData } from "./types";
 
 interface SitterSitViewProps {
@@ -299,64 +300,28 @@ const SitterSitView = ({
         </div>
       )}
 
-      {/* Tabbed content */}
-      <Tabs defaultValue="animals" className="mt-2">
-        <TabsList aria-label="Sections de l'annonce" className="w-full justify-start border-b border-border rounded-none bg-transparent h-auto p-0 gap-0 overflow-x-auto">
-          <TabsTrigger
-            value="animals"
-            className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-2.5 text-sm gap-1.5"
-          >
-            <PawPrint className="h-3.5 w-3.5" /> Animaux
-          </TabsTrigger>
-          <TabsTrigger
-            value="expectations"
-            className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-2.5 text-sm gap-1.5"
-          >
-            <ClipboardList className="h-3.5 w-3.5" /> Attentes
-          </TabsTrigger>
-          <TabsTrigger
-            value="housing"
-            className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-2.5 text-sm gap-1.5"
-          >
-            <Home className="h-3.5 w-3.5" /> Logement
-          </TabsTrigger>
-          <TabsTrigger
-            value="reviews"
-            className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-2.5 text-sm gap-1.5"
-          >
-            <Star className="h-3.5 w-3.5" /> Avis ({reviews.length})
-          </TabsTrigger>
-        </TabsList>
+      {/* Contenu immersif (hero, animaux+fiches race, journée type, mot de l'hôte, sidebar) */}
+      <SitImmersiveContent
+        sit={sit}
+        owner={owner}
+        property={property}
+        pets={pets}
+        ownerProfile={ownerProfile}
+      />
 
-        <TabsContent value="animals" className="mt-6">
-          <AnimalsTab pets={pets} ownerFirstName={owner?.first_name} />
-        </TabsContent>
-
-        <TabsContent value="housing" className="mt-6 space-y-6">
-          <HousingTab property={property} owner={owner} coords={coords} />
-        </TabsContent>
-
-        <TabsContent value="expectations" className="mt-6 space-y-6">
-          <ExpectationsTab
-            ownerProfile={ownerProfile}
-            specificExpectations={sit.specific_expectations}
-            openTo={sit.open_to}
-            dailyRoutine={(sit as any).daily_routine}
-            ownerMessage={(sit as any).owner_message}
-            ownerFirstName={owner?.first_name}
-          />
-        </TabsContent>
-
-        <TabsContent value="reviews" className="mt-6">
-          <ReviewsTab
-            sitId={sit.id}
-            sitOwnerId={sit.user_id}
-            sitStatus={sit.status}
-            currentUserId={currentUserId}
-            hasReviewedThisSit={hasReviewedThisSit}
-          />
-        </TabsContent>
-      </Tabs>
+      {/* Avis sur l'hôte */}
+      <section className="mt-8">
+        <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+          <Star className="h-5 w-5 text-primary" /> Avis ({reviews.length})
+        </h2>
+        <ReviewsTab
+          sitId={sit.id}
+          sitOwnerId={sit.user_id}
+          sitStatus={sit.status}
+          currentUserId={currentUserId}
+          hasReviewedThisSit={hasReviewedThisSit}
+        />
+      </section>
 
       {/* Accord de garde — sitter view */}
       {ownerAccordSigned && ["confirmed", "in_progress", "completed"].includes(sit.status) && (

@@ -12,7 +12,7 @@
  * - Bloc "Gérer cette garde" (OwnerSitManagement) + modal d'annulation
  */
 import { useState, useEffect, useCallback, useRef } from "react";
-import { Calendar, MapPin, Send, Star, PawPrint, Home, ClipboardList } from "lucide-react";
+import { Calendar, MapPin, Send, Star, PawPrint, Home, ClipboardList, Users } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -47,6 +47,7 @@ import { useSitDerived } from "./useSitDerived";
 import AnimalsTab from "./tabs/AnimalsTab";
 import HousingTab from "./tabs/HousingTab";
 import ExpectationsTab from "./tabs/ExpectationsTab";
+import SitImmersiveContent from "./SitImmersiveContent";
 import ReviewsTab from "./tabs/ReviewsTab";
 import type { SitData } from "./types";
 
@@ -316,124 +317,86 @@ const OwnerSitView = ({
         </div>
       )}
 
-      {/* Tabbed content */}
-      <Tabs defaultValue={defaultTab} className="mt-2">
-        <TabsList aria-label="Sections de l'annonce" className="w-full justify-start border-b border-border rounded-none bg-transparent h-auto p-0 gap-0 overflow-x-auto">
-          <TabsTrigger
-            value="candidatures"
-            className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-2.5 text-sm"
-          >
-            Candidatures reçues ({internalAppCount})
-            {pendingAppCount > 0 && (
-              <span className="w-2 h-2 rounded-full bg-primary inline-block ml-1 mb-0.5" />
-            )}
-          </TabsTrigger>
-          <TabsTrigger
-            value="animals"
-            className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-2.5 text-sm gap-1.5"
-          >
-            <PawPrint className="h-3.5 w-3.5" /> Animaux
-          </TabsTrigger>
-          <TabsTrigger
-            value="housing"
-            className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-2.5 text-sm gap-1.5"
-          >
-            <Home className="h-3.5 w-3.5" /> Logement
-          </TabsTrigger>
-          <TabsTrigger
-            value="expectations"
-            className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-2.5 text-sm gap-1.5"
-          >
-            <ClipboardList className="h-3.5 w-3.5" /> Attentes
-          </TabsTrigger>
-          <TabsTrigger
-            value="reviews"
-            className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-2.5 text-sm gap-1.5"
-          >
-            <Star className="h-3.5 w-3.5" /> Avis ({reviews.length})
-          </TabsTrigger>
-        </TabsList>
-
-        {/* Candidatures tab (owner only) */}
-        <TabsContent value="candidatures" className="mt-6 space-y-4">
-          {!sit.accepting_applications && (
+      {/* Candidatures reçues — bloc dédié, en haut */}
+      <section className="mt-2 mb-8 rounded-2xl border border-border bg-card p-5 md:p-6">
+        <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+          <Users className="h-5 w-5 text-primary" />
+          Candidatures reçues ({internalAppCount})
+          {pendingAppCount > 0 && (
+            <span className="w-2 h-2 rounded-full bg-primary inline-block" />
+          )}
+        </h2>
+        {!sit.accepting_applications && (
+          <div className="mb-4">
             <ReopenApplicationsCard
               sit={sit}
               setSit={setSit}
               internalAppCount={internalAppCount}
             />
-          )}
-          {sit.accepting_applications && sit.max_applications && (
-            <p className="text-xs text-muted-foreground">
-              {internalAppCount}/{sit.max_applications} candidature
-              {sit.max_applications > 1 ? "s" : ""} reçue{internalAppCount > 1 ? "s" : ""}
-            </p>
-          )}
-          <ApplicationsList
-            sitId={sit.id}
-            sitTitle={sit.title}
-            petNames={pets.map((p: any) => p.name)}
-            startDate={formatDate(sit.start_date)}
-            endDate={formatDate(sit.end_date)}
-            propertyId={sit.property_id}
-            sitStatus={sit.status}
-          />
-        </TabsContent>
+          </div>
+        )}
+        {sit.accepting_applications && sit.max_applications && (
+          <p className="text-xs text-muted-foreground mb-3">
+            {internalAppCount}/{sit.max_applications} candidature
+            {sit.max_applications > 1 ? "s" : ""} reçue{internalAppCount > 1 ? "s" : ""}
+          </p>
+        )}
+        <ApplicationsList
+          sitId={sit.id}
+          sitTitle={sit.title}
+          petNames={pets.map((p: any) => p.name)}
+          startDate={formatDate(sit.start_date)}
+          endDate={formatDate(sit.end_date)}
+          propertyId={sit.property_id}
+          sitStatus={sit.status}
+        />
+      </section>
 
-        {/* Animals tab */}
-        <TabsContent value="animals" className="mt-6">
-          <AnimalsTab pets={pets} ownerFirstName={owner?.first_name} />
-        </TabsContent>
+      {/* Contenu immersif — vue identique à celle qu'auront les gardiens */}
+      <SitImmersiveContent
+        sit={sit}
+        owner={owner}
+        property={property}
+        pets={pets}
+        ownerProfile={ownerProfile}
+      />
 
-        {/* Housing tab — avec blocs spécifiques propriétaire en tête */}
-        <TabsContent value="housing" className="mt-6 space-y-6">
-          <div className="bg-muted/30 rounded-xl p-4 mb-4 border border-border">
-            <p className="text-sm text-muted-foreground mb-3">
-              Le logement et les animaux se gèrent depuis votre profil. Les modifications
-              s'appliquent à toutes vos annonces.
-            </p>
-            <Link
-              to="/owner-profile"
-              className="border border-border rounded-full px-4 py-2 text-sm text-foreground hover:border-primary transition-colors inline-block"
-            >
+      {/* Personnalisations spécifiques à cette annonce (overrides logement/animaux) */}
+      <section className="mt-8 rounded-2xl border border-border bg-card p-5 md:p-6 space-y-4">
+        <div>
+          <h2 className="text-lg font-semibold mb-1 flex items-center gap-2">
+            <Home className="h-5 w-5 text-primary" /> Personnaliser cette annonce
+          </h2>
+          <p className="text-sm text-muted-foreground">
+            Le logement et les animaux se gèrent depuis votre profil — les modifications
+            s'appliquent à toutes vos annonces.{" "}
+            <Link to="/owner-profile" className="text-primary hover:underline">
               Modifier mon profil →
             </Link>
-          </div>
+          </p>
+        </div>
+        <SitOverridesEditor
+          logementOverride={logementOverride}
+          setLogementOverride={setLogementOverride}
+          animauxOverride={animauxOverride}
+          setAnimauxOverride={setAnimauxOverride}
+          saveOverride={saveOverride}
+        />
+      </section>
 
-          <SitOverridesEditor
-            logementOverride={logementOverride}
-            setLogementOverride={setLogementOverride}
-            animauxOverride={animauxOverride}
-            setAnimauxOverride={setAnimauxOverride}
-            saveOverride={saveOverride}
-          />
-
-          <HousingTab property={property} owner={owner} coords={coords} />
-        </TabsContent>
-
-        {/* Expectations tab */}
-        <TabsContent value="expectations" className="mt-6 space-y-6">
-          <ExpectationsTab
-            ownerProfile={ownerProfile}
-            specificExpectations={sit.specific_expectations}
-            openTo={sit.open_to}
-            dailyRoutine={(sit as any).daily_routine}
-            ownerMessage={(sit as any).owner_message}
-            ownerFirstName={owner?.first_name}
-          />
-        </TabsContent>
-
-        {/* Reviews tab */}
-        <TabsContent value="reviews" className="mt-6">
-          <ReviewsTab
-            sitId={sit.id}
-            sitOwnerId={sit.user_id}
-            sitStatus={sit.status}
-            currentUserId={currentUserId}
-            hasReviewedThisSit={hasReviewedThisSit}
-          />
-        </TabsContent>
-      </Tabs>
+      {/* Avis */}
+      <section className="mt-8">
+        <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+          <Star className="h-5 w-5 text-primary" /> Avis ({reviews.length})
+        </h2>
+        <ReviewsTab
+          sitId={sit.id}
+          sitOwnerId={sit.user_id}
+          sitStatus={sit.status}
+          currentUserId={currentUserId}
+          hasReviewedThisSit={hasReviewedThisSit}
+        />
+      </section>
 
       {/* Bloc unifié de gestion */}
       <OwnerSitManagement

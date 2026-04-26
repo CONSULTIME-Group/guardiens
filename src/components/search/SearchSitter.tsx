@@ -9,7 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { ToastAction } from "@/components/ui/toast";
 
 const SearchMapView = lazy(() => import("@/components/search/SearchMapView"));
-import { DEMO_SITS, DEMO_MISSIONS } from "@/data/demoListings";
+import { DEMO_SITS, DEMO_MISSIONS, interleaveDemos } from "@/data/demoListings";
 import { normalize } from "@/lib/normalize";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -664,12 +664,9 @@ const SearchSitter = () => {
       });
     }
     final = sortResults(final, sort);
-    // Démos affichées UNIQUEMENT si aucun résultat réel — pour ne pas fausser
-    // la perception de l'offre disponible.
-    const realActiveCount = final.filter((r: any) => !r.isAssigned && !r.isCompleted).length;
-    if (realActiveCount === 0) {
-      final = [...final, ...DEMO_SITS];
-    }
+    // Démos toujours visibles : intercalées tous les 3 résultats pour montrer
+    // l'étendue de l'expérience Guardiens (badge "exemple" sur chacune).
+    final = interleaveDemos(final, DEMO_SITS, 3);
     const coordsMap = new Map<string, { lat: number; lng: number }>();
     final.forEach((item: any) => {
       if (!item) return;
@@ -728,9 +725,8 @@ const SearchSitter = () => {
     let final: any[] = [...items];
     if (sort === "closest") final.sort((a: any, b: any) => (a.distance ?? 9999) - (b.distance ?? 9999));
     else if (sort === "recent") final.sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-    if (final.length === 0) {
-      final = [...final, ...DEMO_MISSIONS];
-    }
+    // Démos toujours visibles, intercalées
+    final = interleaveDemos(final, DEMO_MISSIONS, 3);
     setResults(final);
   };
 
