@@ -16,7 +16,9 @@ const listTemplateFiles = (): string[] => {
     if (
       entry.isFile &&
       entry.name.endsWith(".tsx") &&
-      entry.name !== "registry.ts"
+      entry.name !== "registry.ts" &&
+      // Exclure les partials partagés (préfixe _) : ce ne sont pas des templates envoyables.
+      !entry.name.startsWith("_")
     ) {
       files.push(entry.name.replace(/\.tsx$/, ""));
     }
