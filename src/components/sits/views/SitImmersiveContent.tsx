@@ -11,6 +11,7 @@
  *  - Un mot de l'hôte (sit.owner_message)
  *  - Sidebar : profil hôte, CTA (slot via prop), guide local, page ville, réassurance
  */
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
