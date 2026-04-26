@@ -1013,31 +1013,82 @@ const SearchSitter = () => {
                 <span className="text-foreground">{city || "Ville"}</span>
               </button>
             </PopoverTrigger>
-            <PopoverContent className="w-72 p-3" align="start">
+            <PopoverContent className="w-80 p-3" align="start">
               <Input
-                placeholder="Rechercher une ville…"
+                placeholder="Ville, département (ex. 69) ou région…"
                 value={cityInput}
                 onChange={e => handleCityInputChange(e.target.value)}
                 onKeyDown={e => { if (e.key === "Enter") handleCityConfirm(); }}
                 autoFocus
               />
+
+              {/* Suggestions Communes */}
               {citySuggestions.length > 0 && (
-                <div className="mt-1 border border-border rounded-lg overflow-hidden">
-                  {citySuggestions.map((s, i) => (
-                    <button
-                      key={i}
-                      onClick={() => handleCitySelect(s.nom, s.codesPostaux?.[0])}
-                      className="w-full text-left px-3 py-2 text-sm text-foreground hover:bg-accent transition-colors"
-                    >
-                      {s.nom}
-                      {s.codesPostaux?.[0] && <span className="text-muted-foreground ml-1">({s.codesPostaux[0]})</span>}
-                    </button>
-                  ))}
+                <div className="mt-2">
+                  <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground px-1 mb-1">Communes</p>
+                  <div className="border border-border rounded-lg overflow-hidden">
+                    {citySuggestions.map((s, i) => (
+                      <button
+                        key={i}
+                        onClick={() => handleCitySelect(s.nom, s.codesPostaux?.[0])}
+                        className="w-full text-left px-3 py-2 text-sm text-foreground hover:bg-accent transition-colors flex items-center gap-2"
+                      >
+                        <MapPin className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                        <span>{s.nom}</span>
+                        {s.codesPostaux?.[0] && <span className="text-muted-foreground ml-auto text-xs">{s.codesPostaux[0]}</span>}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               )}
+
+              {/* Suggestions Départements */}
+              {deptSuggestions.length > 0 && (
+                <div className="mt-2">
+                  <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground px-1 mb-1">Départements</p>
+                  <div className="border border-border rounded-lg overflow-hidden">
+                    {deptSuggestions.map((d) => (
+                      <button
+                        key={d.code}
+                        onClick={() => handleDeptSelect(d.code)}
+                        className="w-full text-left px-3 py-2 text-sm text-foreground hover:bg-accent transition-colors flex items-center gap-2"
+                      >
+                        <span className="inline-flex items-center justify-center min-w-[28px] h-5 rounded bg-muted text-[11px] font-mono font-medium text-foreground">{d.code}</span>
+                        <span>{d.name}</span>
+                        <span className="ml-auto text-[11px] text-muted-foreground">département</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Suggestions Régions */}
+              {regionSuggestions.length > 0 && (
+                <div className="mt-2">
+                  <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground px-1 mb-1">Régions</p>
+                  <div className="border border-border rounded-lg overflow-hidden">
+                    {regionSuggestions.map((r) => (
+                      <button
+                        key={r.code}
+                        onClick={() => handleRegionSelect(r.code)}
+                        className="w-full text-left px-3 py-2 text-sm text-foreground hover:bg-accent transition-colors flex items-center gap-2"
+                      >
+                        <span className="text-base">🗺️</span>
+                        <span>{r.name}</span>
+                        <span className="ml-auto text-[11px] text-muted-foreground">région</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {cityInput.length >= 2 && citySuggestions.length === 0 && deptSuggestions.length === 0 && regionSuggestions.length === 0 && (
+                <p className="mt-2 px-1 text-xs text-muted-foreground">Aucun résultat. Essayez un nom de ville, un numéro de département ou une région.</p>
+              )}
+
               <button
                 onClick={handleGeolocation}
-                className="flex items-center gap-2 w-full mt-2 px-3 py-2 text-sm text-primary hover:bg-accent rounded-lg transition-colors"
+                className="flex items-center gap-2 w-full mt-2 px-3 py-2 text-sm text-primary hover:bg-accent rounded-lg transition-colors border-t border-border pt-3"
               >
                 <Crosshair className="h-4 w-4" /> Utiliser ma position
               </button>
