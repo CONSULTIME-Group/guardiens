@@ -13,6 +13,7 @@ import {
   Preview,
   Text,
 } from 'npm:@react-email/components@0.0.22'
+import { LegalFooter } from './_legal-footer.tsx'
 
 interface EmailChangeEmailProps {
   siteName: string
@@ -56,6 +57,7 @@ export const EmailChangeEmail = ({
         <Text style={footer}>
           Si vous n'avez pas demandé ce changement, sécurisez votre compte immédiatement.
         </Text>
+        <LegalFooter />
       </Container>
     </Body>
   </Html>

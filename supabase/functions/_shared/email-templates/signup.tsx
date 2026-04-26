@@ -13,6 +13,7 @@ import {
   Preview,
   Text,
 } from 'npm:@react-email/components@0.0.22'
+import { LegalFooter } from './_legal-footer.tsx'
 
 interface SignupEmailProps {
   siteName: string
@@ -56,6 +57,7 @@ export const SignupEmail = ({
         <Text style={footer}>
           Si vous n'avez pas créé de compte, ignorez simplement cet email.
         </Text>
+        <LegalFooter />
       </Container>
     </Body>
   </Html>

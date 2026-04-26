@@ -13,6 +13,7 @@ import {
   Preview,
   Text,
 } from 'npm:@react-email/components@0.0.22'
+import { LegalFooter } from './_legal-footer.tsx'
 
 interface InviteEmailProps {
   siteName: string
@@ -47,6 +48,7 @@ export const InviteEmail = ({
         <Text style={footer}>
           Si vous n'attendiez pas cette invitation, vous pouvez ignorer cet email.
         </Text>
+        <LegalFooter />
       </Container>
     </Body>
   </Html>
