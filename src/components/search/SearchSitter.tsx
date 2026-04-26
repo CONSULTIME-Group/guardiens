@@ -1317,47 +1317,7 @@ const SearchSitter = () => {
         </div>
       </div>
 
-      {/* ─── Density counter (helps users understand they can widen the search) ─── */}
-      {tab === "sits" && !loading && userPostalCode && (densityCounts.dept > 0 || densityCounts.region > 0 || densityCounts.france > 0) && (
-        <div className="mx-6 mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
-          <span className="font-medium text-foreground">Densité :</span>
-          <button
-            onClick={() => setZoneMode("radius")}
-            className={`underline-offset-2 hover:underline ${zoneMode === "radius" ? "text-primary font-medium" : ""}`}
-          >
-            {densityCounts.radius} dans {radius[0]} km
-          </button>
-          <span>·</span>
-          <button
-            onClick={() => setZoneMode("dept")}
-            className={`underline-offset-2 hover:underline ${zoneMode === "dept" ? "text-primary font-medium" : ""}`}
-          >
-            {densityCounts.dept} dans le {getDeptCode(userPostalCode)}
-          </button>
-          <span>·</span>
-          <button
-            onClick={() => setZoneMode("region")}
-            className={`underline-offset-2 hover:underline ${zoneMode === "region" ? "text-primary font-medium" : ""}`}
-          >
-            {densityCounts.region} en {getRegionName(getDeptCode(userPostalCode)) || "région"}
-          </button>
-          <span>·</span>
-          <button
-            onClick={() => setZoneMode("france")}
-            className={`underline-offset-2 hover:underline ${zoneMode === "france" ? "text-primary font-medium" : ""}`}
-          >
-            {densityCounts.france} en France
-          </button>
-          {zoneMode === "radius" && densityCounts.radius < 5 && densityCounts.dept > densityCounts.radius && (
-            <button
-              onClick={() => setZoneMode("dept")}
-              className="ml-auto rounded-full bg-primary/10 text-primary px-3 py-1 text-xs font-medium hover:bg-primary/20 transition-colors"
-            >
-              Élargir au département ({densityCounts.dept}) →
-            </button>
-          )}
-        </div>
-      )}
+      {/* Densité supprimée — déjà visible dans le sélecteur de Zone et le bandeau hors-zone */}
 
       {/* ─── Out-of-zone banner ─── */}
       {tab === "sits" && !loading && userPostalCode && zoneMode !== "france" && densityCounts.france > densityCounts.radius && (() => {
