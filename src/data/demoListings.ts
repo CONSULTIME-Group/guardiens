@@ -78,9 +78,9 @@ export const DEMO_SITS: DemoSit[] = [
     id: "demo-garde-001",
     slug: "lyon-laika-jardin",
     is_demo: true,
-    title: "Maison avec jardin, Laïka et ses deux compères",
+    title: "Maison avec jardin, Laïka la Malinoise et son drôle de trio",
     description:
-      "Nous partons deux semaines en famille et cherchons un gardien bienveillant pour veiller sur notre maison et nos trois animaux. Quartier calme et arboré du 6ᵉ, à deux pas du parc de la Tête d'Or. Maison spacieuse avec jardin clos, idéale pour Laïka qui adore prendre le soleil sur la terrasse.",
+      "Nous partons deux semaines en famille et cherchons un gardien bienveillant pour veiller sur notre maison et nos trois animaux : une malinoise sportive, un Maine Coon majestueux et Coco, notre perroquet gris du Gabon — un sacré personnage. Quartier calme et arboré du 6ᵉ, à deux pas du parc de la Tête d'Or. Maison spacieuse avec jardin clos, idéale pour Laïka qui adore les longues balades.",
     start_date: addDays(21),
     end_date: addDays(35),
     status: "published",
