@@ -181,6 +181,45 @@ const AdminGuides = () => {
         </CardContent>
       </Card>
 
+      {requests.length > 0 && (
+        <Card className="border-amber-500/40 bg-amber-50/40 dark:bg-amber-500/5">
+          <CardHeader>
+            <CardTitle className="text-base flex items-center gap-2">
+              <Sparkles className="h-4 w-4 text-amber-600" />
+              Villes en demande ({requests.length})
+            </CardTitle>
+            <p className="text-xs text-muted-foreground">
+              Annonces actives sans guide local rattaché. Le guide se liera automatiquement à toutes les annonces dès sa publication.
+            </p>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              {requests.map((req) => (
+                <div
+                  key={req.id}
+                  className="flex items-center gap-3 p-3 bg-background border border-border rounded-lg"
+                >
+                  <MapPin className="h-4 w-4 text-amber-600 shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-sm">{req.city}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {req.department && `Dépt ${req.department} • `}
+                      {req.active_sits_count} annonce{req.active_sits_count > 1 ? "s" : ""} active{req.active_sits_count > 1 ? "s" : ""}
+                    </p>
+                  </div>
+                  <Button size="sm" variant="default" onClick={() => prefillFromRequest(req)} className="gap-1.5">
+                    <Plus className="h-3.5 w-3.5" /> Créer le guide
+                  </Button>
+                  <Button size="icon" variant="ghost" onClick={() => dismissRequest.mutate(req.id)} title="Écarter">
+                    <X className="h-4 w-4 text-muted-foreground" />
+                  </Button>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {isLoading ? (
         <div className="space-y-3">
           {[1, 2, 3].map((i) => <div key={i} className="h-16 bg-muted animate-pulse rounded-lg" />)}
