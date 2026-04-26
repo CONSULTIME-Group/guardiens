@@ -664,12 +664,9 @@ const SearchSitter = () => {
       });
     }
     final = sortResults(final, sort);
-    // Démos affichées UNIQUEMENT si aucun résultat réel — pour ne pas fausser
-    // la perception de l'offre disponible.
-    const realActiveCount = final.filter((r: any) => !r.isAssigned && !r.isCompleted).length;
-    if (realActiveCount === 0) {
-      final = [...final, ...DEMO_SITS];
-    }
+    // Démos toujours visibles : intercalées tous les 3 résultats pour montrer
+    // l'étendue de l'expérience Guardiens (badge "exemple" sur chacune).
+    final = interleaveDemos(final, DEMO_SITS, 3);
     const coordsMap = new Map<string, { lat: number; lng: number }>();
     final.forEach((item: any) => {
       if (!item) return;
