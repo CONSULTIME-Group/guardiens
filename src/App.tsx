@@ -118,6 +118,7 @@ const EmergencySitter = lazy(() => import("./pages/EmergencySitter"));
 const MySubscription = lazy(() => import("./pages/MySubscription"));
 const Favorites = lazy(() => import("./pages/Favorites"));
 const PublicSitDetail = lazy(() => import("./pages/PublicSitDetail"));
+const DemoSitDetail = lazy(() => import("./pages/DemoSitDetail"));
 const PublicSitterProfile = lazy(() => import("./pages/PublicSitterProfile"));
 
 const TestAccordLazy = lazy(() =>
@@ -243,6 +244,7 @@ const AppRoutes = () => (
       <Route path="/actualites/gardes-longue-duree-guide" element={<Navigate to="/actualites" replace />} />
       <Route path="/profil/:id" element={<RedirectProfil />} />
       <Route path="/proprietaires/:id" element={<RedirectProprietaire />} />
+      <Route path="/annonces/demo/:slug" element={<DemoSitDetail />} />
       <Route path="/annonces/:id" element={<PublicSitDetail />} />
       <Route path="/gardiens/:id" element={<PublicSitterProfile />} />
       <Route element={<AdminLayout />}>

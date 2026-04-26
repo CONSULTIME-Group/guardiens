@@ -807,15 +807,19 @@ const SearchSitter = () => {
     const isAssigned = !isMission && !!item.isAssigned;
     const isCompleted = !isMission && !!item.isCompleted;
     const isInactive = isAssigned || isCompleted;
-    const linkTo = isMission ? `/petites-missions/${item.id}` : `/sits/${item.id}`;
+    const linkTo = isMission
+      ? `/petites-missions/${item.id}`
+      : isDemo
+        ? `/annonces/demo/${item.slug || item.id}`
+        : `/sits/${item.id}`;
 
-    const showCTA = !hasAccess && !isInactive;
-    const isClickable = hasAccess && !isDemo && !isInactive;
+    const showCTA = !hasAccess && !isInactive && !isDemo;
+    const isClickable = (isDemo || hasAccess) && !isInactive;
 
     const cardContent = (
       <div
         className={`bg-card rounded-2xl overflow-hidden border transition-shadow ${isClickable ? "cursor-pointer hover:shadow-md" : ""} ${isInactive ? "opacity-60 grayscale-[40%]" : ""} ${isDemo ? "border-amber-400 border-dashed ring-1 ring-amber-200/60" : "border-border"}`}
-        aria-disabled={isInactive || isDemo || undefined}
+        aria-disabled={isInactive || undefined}
       >
         {photos.length > 0 && (
           <div className="h-52 relative">
@@ -899,7 +903,7 @@ const SearchSitter = () => {
           )}
           {isDemo && (
             <p className="text-xs text-amber-700 italic mt-3 flex items-center gap-1">
-              <Sparkles className="h-3 w-3" /> Exemple fictif pour vous montrer le rendu — non disponible.
+              <Sparkles className="h-3 w-3" /> Exemple — cliquez pour découvrir l'expérience complète
             </p>
           )}
           {showCTA && !isDemo && (
