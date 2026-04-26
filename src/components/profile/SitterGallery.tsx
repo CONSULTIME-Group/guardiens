@@ -95,26 +95,36 @@ const SitterGallery = () => {
 
       const { data: { publicUrl } } = supabase.storage.from("sitter-gallery").getPublicUrl(path);
 
-      const source = selectedSitId ? "guardiens" : "external";
-      const { data, error } = await supabase.from("sitter_gallery").insert({
+      const validSitId = selectedSitId && selectedSitId !== NO_SIT_VALUE && UUID_RE.test(selectedSitId)
+        ? selectedSitId
+        : null;
+      const source = validSitId ? "guardiens" : "external";
+      const validPhotoDate = photoDate && /^\d{4}-\d{2}-\d{2}$/.test(photoDate) ? photoDate : null;
+
+      const payload = {
         user_id: user.id,
         photo_url: publicUrl,
-        caption,
+        caption: (caption ?? "").trim(),
         animal_type: animalType || null,
         animal_breed: animalBreed || null,
         city: city || null,
-        photo_date: photoDate || null,
-        source,
-        sit_id: selectedSitId || null,
-      }).select().single();
+        photo_date: validPhotoDate,
+        source: source as "guardiens" | "external",
+        sit_id: validSitId,
+      };
 
-      if (error) throw error;
+      const { data, error } = await supabase.from("sitter_gallery").insert(payload).select().single();
+
+      if (error) {
+        logger.error("Failed to insert sitter_gallery photo", { error: String(error), payload });
+        throw error;
+      }
       setPhotos(prev => [data as any, ...prev]);
       resetForm();
       setDialogOpen(false);
       toast.success("Photo ajoutée à votre galerie !");
     } catch (err: any) {
-      toast.error(err.message || "Erreur lors de l'upload");
+      toast.error(err?.message || "Erreur lors de l'upload");
     } finally {
       setUploading(false);
     }
