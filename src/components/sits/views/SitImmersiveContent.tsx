@@ -141,7 +141,7 @@ export const cleanFreeText = (raw: string): string => {
     .join("\n");
 };
 
-const parseRoutine = (raw: string | null) => {
+export const parseRoutine = (raw: string | null) => {
   if (!raw) return null;
   // Étape 1 : éclate sur retours à la ligne ET sur séparateurs ` / `, ` • `, ` | `
   const segments = raw
