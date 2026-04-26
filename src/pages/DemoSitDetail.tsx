@@ -87,7 +87,7 @@ const DemoSitDetail = () => {
     d ? format(new Date(d), "d MMMM yyyy", { locale: fr }) : "";
 
   const guideHref = `/guides/${sit.owner.citySlug}`;
-  const cityHref = `/villes/${sit.owner.citySlug}`;
+  const cityHref = `/house-sitting/${sit.owner.citySlug}`;
 
   return (
     <div className="min-h-screen bg-background">
