@@ -374,7 +374,7 @@ export function useOwnerProfile() {
   const updatePet = useCallback(async (pet: Pet) => {
     if (!pet.id) return;
     const payload = sanitizePet(pet);
-    const { error } = await supabase.from("pets").update(payload).eq("id", pet.id);
+    const { error } = await supabase.from("pets").update(payload as any).eq("id", pet.id);
     if (error) {
       logger.error("Failed to update pet", { error: String(error), payload });
       toast({
