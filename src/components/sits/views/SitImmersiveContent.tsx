@@ -595,9 +595,18 @@ const SitImmersiveContent = ({
                   )}
                 </div>
               ) : (
-                <p className="text-sm text-foreground whitespace-pre-line leading-relaxed">
-                  {cleanFreeText(sit.daily_routine)}
-                </p>
+                <div className="space-y-2" data-testid="routine-fallback-freetext">
+                  <span
+                    className="inline-flex items-center gap-1 rounded-full bg-muted/60 text-muted-foreground text-[11px] px-2 py-0.5 border border-border"
+                    title="Le texte n'a pas pu être structuré en blocs Matin / Midi / Soir. Encouragez le propriétaire à préfixer chaque ligne par un moment de la journée."
+                  >
+                    <Info className="h-3 w-3" />
+                    Format libre
+                  </span>
+                  <p className="text-sm text-foreground whitespace-pre-line leading-relaxed">
+                    {cleanFreeText(sit.daily_routine)}
+                  </p>
+                </div>
               )}
             </section>
           )}
