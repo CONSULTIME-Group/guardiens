@@ -160,17 +160,57 @@ const SearchSitter = () => {
     return `${dept}000`;
   };
 
+  // Extrait un code département depuis la saisie : "69", "069", "69000", "75012", "2A"…
+  const extractDeptCodeFromInput = (raw: string): string | null => {
+    const v = raw.trim().toUpperCase().replace(/\s+/g, "");
+    if (/^2[AB]$/.test(v)) return v;
+    if (/^2[AB]\d{3}$/.test(v)) return v.slice(0, 2); // 2A001, 2B200
+    if (/^\d{5}$/.test(v)) {
+      // Code postal → DOM (97x) ou métropole (2 premiers chiffres)
+      if (v.startsWith("97") || v.startsWith("98")) return v.slice(0, 3);
+      // Corse : 200xx/201xx → 2A, 202xx-206xx → 2B (approx)
+      if (v.startsWith("20")) {
+        const n = parseInt(v.slice(2), 10);
+        return n < 200 ? "2A" : "2B";
+      }
+      return v.slice(0, 2);
+    }
+    if (/^\d{1,3}$/.test(v)) {
+      const n = parseInt(v, 10);
+      // 1-95 = métropole, 971-976 = DOM
+      if ((n >= 1 && n <= 95) || (n >= 971 && n <= 976)) {
+        return v.length === 1 ? `0${v}` : v;
+      }
+    }
+    return null;
+  };
+
+  const primaryDeptCode = extractDeptCodeFromInput(cityInput);
+
   const deptSuggestions = (() => {
     const q = normalize(cityInput.trim());
-    if (q.length < 2) return [] as { code: string; name: string }[];
-    return Object.entries(DEPT_NAMES)
-      .filter(([code, name]) => {
-        const nName = normalize(name);
-        // match par code OU par nom (préfixe ou contient)
-        return code.toLowerCase().startsWith(q) || nName.includes(q);
-      })
-      .slice(0, 4)
-      .map(([code, name]) => ({ code, name }));
+    if (q.length < 2 && !primaryDeptCode) return [] as { code: string; name: string; isPrimary?: boolean }[];
+
+    const matches: { code: string; name: string; isPrimary?: boolean }[] = [];
+    const seen = new Set<string>();
+
+    // 1. Match prioritaire via CP/numéro extrait
+    if (primaryDeptCode && DEPT_NAMES[primaryDeptCode]) {
+      matches.push({ code: primaryDeptCode, name: DEPT_NAMES[primaryDeptCode], isPrimary: true });
+      seen.add(primaryDeptCode);
+    }
+
+    // 2. Match texte / code partiel
+    Object.entries(DEPT_NAMES).forEach(([code, name]) => {
+      if (seen.has(code)) return;
+      const nName = normalize(name);
+      if (code.toLowerCase().startsWith(q) || nName.includes(q)) {
+        matches.push({ code, name });
+        seen.add(code);
+      }
+    });
+
+    return matches.slice(0, 4);
   })();
 
   const regionSuggestions = (() => {
