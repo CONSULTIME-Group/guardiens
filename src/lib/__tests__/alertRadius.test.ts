@@ -37,10 +37,10 @@ describe("alertRadius — snap to RPC-allowed values", () => {
     expect(snapToAllowedRadius(20)).toBe(15);
     expect(snapToAllowedRadius(25)).toBe(30); // |25-30|=5 < |25-15|=10
     expect(snapToAllowedRadius(35)).toBe(30);
-    expect(snapToAllowedRadius(40)).toBe(50); // |40-50|=10, |40-30|=10 → tie, prev=30 wins? check
+    expect(snapToAllowedRadius(40)).toBe(30); // tie 30/50 → prev wins (30)
     expect(snapToAllowedRadius(45)).toBe(50);
     expect(snapToAllowedRadius(55)).toBe(50);
-    expect(snapToAllowedRadius(75)).toBe(100); // |75-100|=25 < |75-50|=25 → tie, prev=50 wins
+    expect(snapToAllowedRadius(75)).toBe(50); // tie 50/100 → prev wins (50)
     expect(snapToAllowedRadius(80)).toBe(100);
     expect(snapToAllowedRadius(95)).toBe(100);
   });
