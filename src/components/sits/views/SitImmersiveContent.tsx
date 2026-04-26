@@ -62,6 +62,12 @@ import {
 import { slugify } from "@/lib/normalize";
 import { CITIES } from "@/data/cities";
 import { getCityContent } from "@/data/cityContent";
+// Libellés des enums animaux — source unique partagée avec le formulaire de création
+import {
+  ACTIVITY_LABELS as ACTIVITY_LEVEL_LABEL,
+  WALK_LABELS as WALK_DURATION_LABEL,
+  ALONE_LABELS as ALONE_DURATION_LABEL,
+} from "@/components/sits/shared/sitConstants";
 
 const GUIDE_SLUGS = new Set(CITIES.map((c) => c.slug));
 
