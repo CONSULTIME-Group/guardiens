@@ -594,15 +594,14 @@ const SearchOwner = () => {
                   ))}
                 </div>
                 {(() => {
-                  const ALLOWED = [5, 15, 30, 50, 100];
-                  const currentIdx = Math.max(0, ALLOWED.indexOf(radius[0]));
+                  const currentIdx = Math.max(0, ALLOWED_ALERT_RADII.indexOf(radius[0] as any));
                   return (
                     <>
                       <Slider
                         value={[currentIdx]}
-                        onValueChange={(v) => setRadius([ALLOWED[v[0]]])}
+                        onValueChange={(v) => setRadius([ALLOWED_ALERT_RADII[v[0]]])}
                         min={0}
-                        max={ALLOWED.length - 1}
+                        max={ALLOWED_ALERT_RADII.length - 1}
                         step={1}
                       />
                       <p className="text-xs text-muted-foreground text-center">{radius[0]} km</p>
