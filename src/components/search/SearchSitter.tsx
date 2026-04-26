@@ -377,6 +377,60 @@ const SearchSitter = () => {
     setAlertCreated(false);
   }, [city, radius]);
 
+  // ─── Mode test démos : snapshot à chaque changement de filtre clé ───
+  const lastDemoFiltersRef = useRef<{ city: string; startDate: string; endDate: string; sort: string; tab: string } | null>(null);
+  useEffect(() => {
+    if (!testDemoMode) return;
+    if (loading) return; // attendre fin de la recherche
+    const inMembersTab = tab === "missions" && missionSubTab === "members";
+    const list = inMembersTab ? availableMembers : results;
+    const tabKey = inMembersTab ? "members" : tab;
+    const prev = lastDemoFiltersRef.current;
+    let trigger: DemoCheckRow["trigger"] | null = null;
+    if (!prev) trigger = "tab";
+    else if (prev.tab !== tabKey) trigger = "tab";
+    else if (prev.city !== city) trigger = "city";
+    else if (prev.startDate !== startDate) trigger = "startDate";
+    else if (prev.endDate !== endDate) trigger = "endDate";
+    else if (prev.sort !== sort) trigger = "sort";
+    if (!trigger) return;
+    lastDemoFiltersRef.current = { city, startDate, endDate, sort, tab: tabKey };
+
+    const positions = list
+      .map((it: any, i: number) => (it?.is_demo ? i + 1 : -1))
+      .filter((i) => i !== -1);
+    const real = list.length - positions.length;
+    const interleaveOk = inMembersTab
+      ? true
+      : positions.length === 0
+        ? real === 0
+        : positions.every((pos) => {
+            const idx = pos - 1;
+            if (real >= 3) return (idx + 1) % 4 === 0 || idx >= real;
+            return idx >= real;
+          });
+
+    setDemoCheckHistory((h) =>
+      [
+        {
+          ts: Date.now(),
+          trigger: trigger!,
+          tab: tabKey,
+          city,
+          startDate,
+          endDate,
+          sort,
+          real,
+          demo: positions.length,
+          positions,
+          interleaveOk,
+        },
+        ...h,
+      ].slice(0, 15),
+    );
+  }, [testDemoMode, loading, results, availableMembers, tab, missionSubTab, city, startDate, endDate, sort]);
+
+
   // Persist zone mode preference for next visit
   useEffect(() => {
     if (typeof window === "undefined") return;
