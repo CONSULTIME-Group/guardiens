@@ -165,17 +165,27 @@ const SitImmersiveContent = ({
   ctaSlot,
   topSlot,
 }: SitImmersiveContentProps) => {
-  const photos: string[] = property?.photos || [];
+  // -- Photos / hero
+  const photos: string[] = Array.isArray(property?.photos)
+    ? property.photos.filter((p: any) => typeof p === "string" && p.trim().length > 0)
+    : [];
   const coverPhoto = photos[0] || null;
+  const hasHero = Boolean(coverPhoto);
+
+  // -- Hôte / localisation
   const ownerName = owner?.first_name || "L'hôte";
   const cityName = owner?.city || "";
   const citySlug = cityName ? slugify(cityName) : null;
   const department: string | undefined =
     owner?.department || (owner?.postal_code ? String(owner.postal_code).slice(0, 2) : undefined);
 
-  const environments: string[] =
-    sit?.environments?.length ? sit.environments : ownerProfile?.environments || [];
-  const amenities: string[] = property?.equipments || property?.amenities || [];
+  // -- Environnement & équipements (filtrés)
+  const environments: string[] = (
+    sit?.environments?.length ? sit.environments : ownerProfile?.environments || []
+  ).filter(Boolean);
+  const amenities: string[] = ((property?.equipments || property?.amenities) ?? []).filter(Boolean);
+
+  // -- Durée
   const durationDays =
     sit?.start_date && sit?.end_date
       ? Math.max(
@@ -187,8 +197,37 @@ const SitImmersiveContent = ({
         )
       : null;
 
+  // -- Animaux (sécurisé)
+  const safePets = Array.isArray(pets) ? pets.filter(Boolean) : [];
+  const speciesEmojis = safePets.map((p) => SPECIES_EMOJI[p.species] || "🐾");
+
+  // -- Routine
   const routine = parseRoutine(sit?.daily_routine || null);
-  const speciesEmojis = pets.map((p) => SPECIES_EMOJI[p.species] || "🐾");
+  const hasRoutine = Boolean(
+    routine || (typeof sit?.daily_routine === "string" && sit.daily_routine.trim().length > 0),
+  );
+
+  // -- Mot de l'hôte
+  const ownerMessage =
+    typeof sit?.owner_message === "string" ? sit.owner_message.trim() : "";
+  const hasOwnerMessage = ownerMessage.length > 0;
+
+  // -- Sections "Le cadre" : visible uniquement si au moins une donnée existe
+  const expectations =
+    typeof sit?.specific_expectations === "string" ? sit.specific_expectations.trim() : "";
+  const propertyDescription =
+    typeof property?.description === "string" ? property.description.trim() : "";
+  const hasFrame = Boolean(expectations || propertyDescription || amenities.length > 0);
+
+  // -- Bio hôte (sidebar)
+  const ownerBio = (owner?.bio || ownerProfile?.welcome_notes || "").toString().trim();
+  const hasOwnerCard = Boolean(owner && (ownerName || cityName || ownerBio));
+
+  // -- Guide local : seulement si la ville a un guide réellement publié
+  const hasLocalGuide = Boolean(citySlug && GUIDE_SLUGS.has(citySlug));
+  // -- Page ville (silo SEO) : seulement si du contenu éditorial existe
+  const hasCityPage = Boolean(citySlug && getCityContent(citySlug));
+  const hasSidebarLinks = hasLocalGuide || hasCityPage;
 
   return (
     <div>
