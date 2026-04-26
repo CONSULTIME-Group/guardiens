@@ -1852,10 +1852,17 @@ const SearchSitter = () => {
                 </li>
               )}
               {!inMembersTab && (
-                <li className="flex items-center gap-2">
-                  <span className={interleaveOk ? "text-emerald-600" : "text-amber-600"}>{interleaveOk ? "✅" : "⚠️"}</span>
-                  <span>
-                    Intercalation&nbsp;: {realCount >= 3 ? "1 démo toutes les 3 vraies annonces (positions 4, 8, 12…)" : "trop peu de vraies annonces — démos placées en fin de liste"}
+                <li className="flex items-center gap-2" data-testid="demo-test-assertion-interleave">
+                  <span className={strictInterleaveOk ? "text-emerald-600" : "text-red-600 font-bold"}>
+                    {strictInterleaveOk ? "✅" : "❌"}
+                  </span>
+                  <span className={strictInterleaveOk ? "" : "text-red-700 font-semibold"}>
+                    Intercalation stricte&nbsp;:{" "}
+                    {strictInterleaveOk
+                      ? realCount >= 3
+                        ? "1 démo toutes les 3 vraies annonces (positions 4, 8, 12…)"
+                        : "trop peu de vraies annonces — démos placées en fin de liste"
+                      : `règle violée — ${missingPositions.length} manquante(s), ${unexpectedPositions.length} hors-règle (voir détails ci-dessous)`}
                   </span>
                 </li>
               )}
