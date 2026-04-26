@@ -231,7 +231,7 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
         link: `/mes-gardes`,
       });
 
-      // Email transactionnel — candidature acceptée (non-bloquant)
+      // Email transactionnel — candidature acceptée (gardien)
       sendTransactionalEmail({
         templateName: "application-accepted",
         recipientUserId: sitterId,
@@ -239,6 +239,28 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
         templateData: {
           sitTitle,
           ownerFirstName: proprio?.first_name ?? "",
+        },
+      }).catch(() => {});
+
+      // Email transactionnel — garde confirmée (propriétaire)
+      let endFormatted = "";
+      if (endDate) {
+        try { endFormatted = format(parseISO(endDate), "dd MMMM yyyy", { locale: fr }); } catch { endFormatted = endDate; }
+      }
+      const startFormattedFull = startDate
+        ? (() => { try { return format(parseISO(startDate), "dd MMMM yyyy", { locale: fr }); } catch { return startDate; } })()
+        : "";
+      sendTransactionalEmail({
+        templateName: "sit-confirmed",
+        recipientUserId: user!.id,
+        idempotencyKey: `sit-confirmed-${sitId}`,
+        templateData: {
+          sitTitle,
+          sitterFirstName: app.sitter?.first_name ?? "",
+          startDate: startFormattedFull,
+          endDate: endFormatted,
+          petNames: petNames.join(", "),
+          sitId,
         },
       }).catch(() => {});
     }
