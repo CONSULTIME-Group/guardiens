@@ -36,6 +36,11 @@ import ApplicationModal from "@/components/sits/ApplicationModal";
 import { useSubscriptionAccess } from "@/hooks/useSubscriptionAccess";
 import SitHero from "@/components/sits/shared/SitHero";
 import OwnerSitManagement from "@/components/sits/shared/OwnerSitManagement";
+import PublicHeader from "@/components/layout/PublicHeader";
+import PublicFooter from "@/components/layout/PublicFooter";
+import PublicSitPitch from "@/components/sits/public/PublicSitPitch";
+import PublicSitFAQ from "@/components/sits/public/PublicSitFAQ";
+import PublicSitTrustStrip from "@/components/sits/public/PublicSitTrustStrip";
 import {
   ENV_LABELS as envLabels,
   TYPE_LABELS as typeLabels,
@@ -169,6 +174,42 @@ const PublicSitDetail = () => {
     ? sit.environments
     : (property?.environment ? [property.environment] : []);
 
+  // Durée en jours (utilisée dans le pitch + label de date naturel)
+  const durationDays = (() => {
+    if (!sit.start_date || !sit.end_date) return null;
+    const start = new Date(sit.start_date).getTime();
+    const end = new Date(sit.end_date).getTime();
+    if (Number.isNaN(start) || Number.isNaN(end) || end < start) return null;
+    return Math.max(1, Math.round((end - start) / (1000 * 60 * 60 * 24)) + 1);
+  })();
+
+  // Label date naturel : « Du 5 au 15 août 2026 · 11 jours »
+  const naturalDateLabel = (() => {
+    if (!sit.start_date || !sit.end_date) return "Dates flexibles";
+    const startDay = format(new Date(sit.start_date), "d MMMM", { locale: fr });
+    const endDay = format(new Date(sit.end_date), "d MMMM yyyy", { locale: fr });
+    const base = `Du ${startDay} au ${endDay}`;
+    return durationDays ? `${base} · ${durationDays} jour${durationDays > 1 ? "s" : ""}` : base;
+  })();
+
+  // Résumé des animaux pour le pitch (« 2 chats », « un chien et un chat »)
+  const petsPitchSummary = (() => {
+    if (pets.length === 0) return "leurs animaux";
+    if (pets.length === 1) {
+      const p = pets[0];
+      return `${p.name} (${speciesLabel[p.species] || p.species})`;
+    }
+    // Groupe par espèce
+    const byKind: Record<string, number> = {};
+    pets.forEach((p: any) => {
+      const k = speciesLabel[p.species] || p.species;
+      byKind[k] = (byKind[k] || 0) + 1;
+    });
+    return Object.entries(byKind)
+      .map(([kind, n]) => `${n} ${kind}${n > 1 ? "s" : ""}`)
+      .join(" et ");
+  })();
+
   // ── SEO / OG ──
   const cityForTitle = owner?.city || "France";
   const startFmt = sit.start_date ? format(new Date(sit.start_date), "d MMMM", { locale: fr }) : "";
@@ -233,7 +274,7 @@ const PublicSitDetail = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto pb-32">
+    <div className="pb-32 bg-background">
       <Helmet>
         <title>{truncatedTitle}</title>
         <meta name="description" content={truncatedSeoDesc} />
@@ -264,6 +305,9 @@ const PublicSitDetail = () => {
         <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>
       </Helmet>
 
+      {/* Header public — anonymes uniquement (identité de marque + nav minimale) */}
+      {!isAuthenticated && <PublicHeader />}
+
       {/* Mini-barre sticky pour les membres connectés (la page publique n'a pas le header app) */}
       {isAuthenticated && (
         <div className="sticky top-0 z-30 bg-primary/10 backdrop-blur-sm border-b border-primary/20 px-4 py-2 flex flex-wrap items-center justify-between gap-2">
@@ -281,18 +325,26 @@ const PublicSitDetail = () => {
           </Button>
         </div>
       )}
+
+      <div className="max-w-4xl mx-auto">
       {/* ─── HERO ÉDITORIAL ─────────────────────────────────────────────── */}
       <div className="px-4 md:px-10 pt-4 md:pt-6">
         <SitHero photos={photos} city={owner?.city} priority />
       </div>
 
       <div className="px-5 md:px-10 pb-6 md:pb-10">
-        {/* Eyebrow contextuel */}
-        <div className="mt-5 mb-2 flex items-center gap-2">
-          <span className="inline-flex items-center gap-1.5 text-[11px] uppercase tracking-wider font-semibold text-primary">
-            <Sparkles className="h-3 w-3" />
-            Une annonce de la communauté
+        {/* Pill contextuelle au-dessus du H1 — visible et orientée valeur */}
+        <div className="mt-5 mb-3 flex flex-wrap items-center gap-2">
+          <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full bg-primary/10 text-primary">
+            <Sparkles className="h-3.5 w-3.5" />
+            Garde entre voisins · Sans paiement entre membres
           </span>
+          {owner?.city && (
+            <span className="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full bg-muted text-foreground">
+              <MapPin className="h-3.5 w-3.5 text-primary/70" />
+              {owner.city}
+            </span>
+          )}
         </div>
 
         {/* Title — sanitize pour corriger les espaces manquants ("4chats" → "4 chats") */}
@@ -300,19 +352,11 @@ const PublicSitDetail = () => {
           {sit.title ? sanitizeUserTitle(sit.title) : `Une garde à confier à ${owner?.city || "vos voisins"}`}
         </h1>
 
-        {/* Location & dates — pictos discrets */}
+        {/* Date naturelle */}
         <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-muted-foreground mb-6">
-          {owner?.city && (
-            <span className="inline-flex items-center gap-1.5">
-              <MapPin className="h-4 w-4 text-primary/70" />
-              <span className="font-medium text-foreground">{owner.city}</span>
-            </span>
-          )}
           <span className="inline-flex items-center gap-1.5">
             <Calendar className="h-4 w-4 text-primary/70" />
-            <span>
-              {formatDate(sit.start_date)} → {formatDate(sit.end_date)}
-            </span>
+            <span className="font-medium text-foreground">{naturalDateLabel}</span>
             {sit.flexible_dates && (
               <span className="text-[11px] font-medium bg-primary/10 text-primary px-2 py-0.5 rounded-full ml-1">
                 Dates flexibles
@@ -321,40 +365,19 @@ const PublicSitDetail = () => {
           </span>
         </div>
 
-        {/* ─── BANDEAU VALEUR — visiteurs anonymes uniquement ───────────── */}
+        {/* ─── PITCH NARRATIF + TRUST — visiteurs anonymes uniquement ───── */}
         {!isAuthenticated && (
-          <section className="mb-8 rounded-2xl border border-primary/15 bg-gradient-to-br from-primary/5 to-primary/0 p-5 md:p-6">
-            <div className="flex items-start gap-3">
-              <div className="shrink-0 w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                <HandHeart className="h-5 w-5 text-primary" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <h2 className="font-heading text-base md:text-lg font-semibold mb-1.5">
-                  La confiance entre gens du coin
-                </h2>
-                <p className="text-sm text-muted-foreground leading-relaxed">
-                  Sur Guardiens, ce sont des voisins qui se rendent service.
-                  Aucun paiement entre membres, profils vérifiés, accord de
-                  garde signé&nbsp;: la garde redevient une histoire de
-                  proximité, pas de transaction.
-                </p>
-                <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1.5 text-[12px] text-muted-foreground">
-                  <span className="inline-flex items-center gap-1">
-                    <ShieldCheck className="h-3.5 w-3.5 text-primary" />
-                    Identités vérifiées
-                  </span>
-                  <span className="inline-flex items-center gap-1">
-                    <Heart className="h-3.5 w-3.5 text-primary" />
-                    100&nbsp;% gratuit entre membres
-                  </span>
-                  <span className="inline-flex items-center gap-1">
-                    <Users className="h-3.5 w-3.5 text-primary" />
-                    Réseau local
-                  </span>
-                </div>
-              </div>
-            </div>
-          </section>
+          <>
+            <PublicSitPitch
+              ownerFirstName={owner?.first_name}
+              city={owner?.city}
+              petsSummary={petsPitchSummary}
+              durationDays={durationDays}
+              datesLabel={naturalDateLabel}
+              propertyTypeLabel={property ? typeLabels[property.type] || property.type : null}
+            />
+            <PublicSitTrustStrip />
+          </>
         )}
 
         {/* ─── ANIMAUX ──────────────────────────────────────────────────── */}
@@ -548,9 +571,12 @@ const PublicSitDetail = () => {
           />
         )}
 
+        {/* ─── MINI-FAQ — visiteurs anonymes uniquement ─────────────────── */}
+        {!isAuthenticated && <PublicSitFAQ />}
+
         {/* ─── BLOC DE RÉASSURANCE FINAL ────────────────────────────────── */}
         {!isAuthenticated && (
-          <section className="mt-10 rounded-2xl bg-card border border-border p-6 text-center">
+          <section className="mt-2 rounded-2xl bg-card border border-border p-6 text-center">
             <p className="font-heading text-base md:text-lg font-semibold mb-2">
               Vous partez l'esprit léger — et si un imprévu survient, votre
               réseau local de gardiens prend le relais.
@@ -590,8 +616,8 @@ const PublicSitDetail = () => {
               >
                 <Button className="w-full h-12 text-base font-semibold">
                   {owner?.first_name
-                    ? `Devenir gardien — aider ${owner.first_name}`
-                    : "Devenir gardien — c'est gratuit"}
+                    ? `S'inscrire et postuler — aider ${owner.first_name}`
+                    : "S'inscrire gratuitement et postuler"}
                 </Button>
               </Link>
             ) : !hasAccess ? (
@@ -630,9 +656,20 @@ const PublicSitDetail = () => {
                 Postuler à cette garde
               </Button>
             )}
+            {/* Note honnêteté : abonnement gardien à venir */}
+            {!isAuthenticated && (sit as any).accepting_applications && (
+              <p className="text-[11px] text-muted-foreground text-center mt-2 leading-snug">
+                Inscription et candidature gratuites aujourd'hui. Un abonnement gardien sera introduit à terme — vous serez prévenu(e) avant tout changement.
+              </p>
+            )}
           </div>
         </div>
       </div>
+      {/* Fin wrapper max-w-4xl */}
+      </div>
+
+      {/* Footer public — anonymes uniquement */}
+      {!isAuthenticated && <PublicFooter />}
 
       {isAuthenticated && sit && (
         <ApplicationModal
