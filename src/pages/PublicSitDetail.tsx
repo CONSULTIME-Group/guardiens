@@ -36,6 +36,11 @@ import ApplicationModal from "@/components/sits/ApplicationModal";
 import { useSubscriptionAccess } from "@/hooks/useSubscriptionAccess";
 import SitHero from "@/components/sits/shared/SitHero";
 import OwnerSitManagement from "@/components/sits/shared/OwnerSitManagement";
+import PublicHeader from "@/components/layout/PublicHeader";
+import PublicFooter from "@/components/layout/PublicFooter";
+import PublicSitPitch from "@/components/sits/public/PublicSitPitch";
+import PublicSitFAQ from "@/components/sits/public/PublicSitFAQ";
+import PublicSitTrustStrip from "@/components/sits/public/PublicSitTrustStrip";
 import {
   ENV_LABELS as envLabels,
   TYPE_LABELS as typeLabels,
