@@ -1010,7 +1010,7 @@ const SearchSitter = () => {
             <PopoverTrigger asChild>
               <button className={pillClass} aria-label={`Ville sélectionnée : ${city || "aucune"}. Cliquer pour changer.`}>
                 <MapPin className="h-4 w-4 text-primary" />
-                <span className="text-foreground">{city || "Ville"}</span>
+                <span className="text-foreground">{city || "Lieu"}</span>
               </button>
             </PopoverTrigger>
             <PopoverContent className="w-80 p-3" align="start">
