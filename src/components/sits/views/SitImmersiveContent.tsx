@@ -103,7 +103,12 @@ const formatDate = (d: string | null) =>
  *  - texte libre sans label → on retourne null pour fallback whitespace-pre-line
  */
 const stripBullet = (s: string) =>
-  s.replace(/^\s*[-*•–—→▪►●·]+\s*/, "").trim();
+  s
+    // puces classiques
+    .replace(/^\s*[-*•–—→▪►●·]+\s*/, "")
+    // numérotation : "1)", "1.", "1/", "1 -", "1°", "1 :"
+    .replace(/^\s*\d+\s*[)°.\-/:]\s*/, "")
+    .trim();
 
 const normalizeLabel = (k: string): "Matin" | "Midi" | "Après-midi" | "Soir" | "Nuit" => {
   const low = k.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
@@ -143,14 +148,20 @@ export const cleanFreeText = (raw: string): string => {
 
 export const parseRoutine = (raw: string | null) => {
   if (!raw) return null;
-  // Étape 1 : éclate sur retours à la ligne ET sur séparateurs ` / `, ` • `, ` | `
+  // Étape 1 : éclate sur retours à la ligne ET sur séparateurs inline
+  // tolère espaces optionnels autour de • | / et tirets longs — –
+  // ainsi qu'une numérotation explicite "  2) ", "  3. " etc.
   const segments = raw
-    .split(/\r?\n+|\s+[•|]\s+|\s+\/\s+/)
+    .split(/\r?\n+|\s*[•|]\s*|\s+\/\s+|\s+[—–]\s+(?=(?:matin|midi|soir|nuit|apr|aprem)\b)|\s+(?=\d+\s*[)°.\-/:]\s*(?:matin|midi|soir|nuit|apr|aprem)\b)/i)
     .map((l) => stripBullet(l))
     .filter(Boolean);
 
-  // Regex tolérante : label suivi d'un séparateur (—, –, -, :) OU d'un espace si label seul
-  const re = /^\s*(matin|midi|soir|nuit|apr[èeé]s[- ]?midi|aprem)\b\s*[—–\-:.]?\s*(.*)$/i;
+  // Regex tolérante :
+  //  - label optionnellement entre parenthèses : (Matin) ou Matin
+  //  - suivi d'une parenthèse d'horaire optionnelle : (8h), (vers 8h)
+  //  - séparateur (—, –, -, :, ), .) ou simple espace
+  const re =
+    /^\s*\(?\s*(matin|midi|soir|nuit|apr[èeé]s[- ]?midi|aprem)\s*\)?\s*(?:\([^)]*\))?\s*[—–\-:.)]?\s*(.*)$/i;
 
   const blocks: { key: string; label: string; text: string }[] = [];
   const leftover: string[] = [];
