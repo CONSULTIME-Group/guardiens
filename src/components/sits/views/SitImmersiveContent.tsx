@@ -550,7 +550,7 @@ const SitImmersiveContent = ({
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Colonne principale */}
         <div className="lg:col-span-2 space-y-6">
-          <Tabs defaultValue="garde" className="w-full">
+          <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as typeof activeTab)} className="w-full">
             <TabsList className="w-full grid grid-cols-2 md:grid-cols-4 h-auto p-1 bg-muted/50 rounded-xl mb-6 sticky top-2 z-10 backdrop-blur supports-[backdrop-filter]:bg-muted/70">
               <TabsTrigger value="garde" className="text-xs md:text-sm py-2 data-[state=active]:bg-background data-[state=active]:shadow-sm">
                 <Heart className="h-3.5 w-3.5 mr-1.5 hidden md:inline" />
