@@ -73,6 +73,7 @@ const SearchMapView = ({
   renderCard,
 }: SearchMapViewProps) => {
   const [activePin, setActivePin] = useState<string | null>(null);
+  const [showAll, setShowAll] = useState(false);
   const popoverRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
