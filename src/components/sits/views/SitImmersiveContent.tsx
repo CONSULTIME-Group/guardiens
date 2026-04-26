@@ -619,32 +619,30 @@ const SitImmersiveContent = ({
                   )}
                 </div>
               ) : (
-                <div className="space-y-2" data-testid="routine-fallback-freetext">
-                  <span
-                    className="inline-flex items-center gap-1 rounded-full bg-muted/60 text-muted-foreground text-[11px] px-2 py-0.5 border border-border"
-                    title={
-                      typeof navigator !== "undefined" &&
-                      navigator.language?.toLowerCase().startsWith("en")
-                        ? "The text could not be structured into Morning / Noon / Evening blocks. Encourage the owner to prefix each line with a time of day."
-                        : "Le texte n'a pas pu être structuré en blocs Matin / Midi / Soir. Encouragez le propriétaire à préfixer chaque ligne par un moment de la journée."
-                    }
-                    aria-label={
-                      typeof navigator !== "undefined" &&
-                      navigator.language?.toLowerCase().startsWith("en")
-                        ? "Free format"
-                        : "Format libre"
-                    }
-                  >
-                    <Info className="h-3 w-3" />
-                    {typeof navigator !== "undefined" &&
-                    navigator.language?.toLowerCase().startsWith("en")
-                      ? "Free format"
-                      : "Format libre"}
-                  </span>
-                  <p className="text-sm text-foreground whitespace-pre-line leading-relaxed">
-                    {cleanFreeText(sit.daily_routine)}
-                  </p>
-                </div>
+                (() => {
+                  const isEn =
+                    typeof navigator !== "undefined" &&
+                    !!navigator.language?.toLowerCase().startsWith("en");
+                  const chipLabel = isEn ? "Free format" : "Format libre";
+                  const chipTooltip = isEn
+                    ? "The text could not be structured into Morning / Noon / Evening blocks. Encourage the owner to prefix each line with a time of day."
+                    : "Le texte n'a pas pu être structuré en blocs Matin / Midi / Soir. Encouragez le propriétaire à préfixer chaque ligne par un moment de la journée.";
+                  return (
+                    <div className="space-y-2" data-testid="routine-fallback-freetext">
+                      <span
+                        className="inline-flex items-center gap-1 rounded-full bg-muted/60 text-muted-foreground text-[11px] px-2 py-0.5 border border-border"
+                        title={chipTooltip}
+                        aria-label={chipLabel}
+                      >
+                        <Info className="h-3 w-3" />
+                        {chipLabel}
+                      </span>
+                      <p className="text-sm text-foreground whitespace-pre-line leading-relaxed">
+                        {cleanFreeText(sit.daily_routine)}
+                      </p>
+                    </div>
+                  );
+                })()
               )}
             </section>
           )}
