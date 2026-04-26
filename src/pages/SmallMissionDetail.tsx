@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { logger } from "@/lib/logger";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { sendTransactionalEmail } from "@/lib/sendTransactionalEmail";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import {
@@ -243,6 +244,18 @@ const SmallMissionDetail = () => {
           body: `${(user as any).first_name || "Un membre"} propose son aide pour "${fresh.title}"`,
           link: `/petites-missions/${id}`,
         });
+
+        // Email transactionnel — propriétaire de la mission notifié (non-bloquant)
+        sendTransactionalEmail({
+          templateName: "mission-response",
+          recipientUserId: fresh.user_id,
+          idempotencyKey: `mission-response-${id}-${user.id}`,
+          templateData: {
+            responderFirstName: (user as any).first_name || "",
+            missionTitle: fresh.title,
+          },
+        }).catch(() => {});
+
         setHasResponded(true);
         setMessage("");
         toast({ title: "Proposition envoyée !", description: "Le publieur va être notifié." });

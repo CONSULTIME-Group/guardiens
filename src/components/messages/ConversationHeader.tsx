@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import HelpButton from "./HelpButton";
 import MissionFeedbackModal from "@/components/missions/MissionFeedbackModal";
 import { supabase } from "@/integrations/supabase/client";
+import { sendTransactionalEmail } from "@/lib/sendTransactionalEmail";
 import { toast } from "sonner";
 import { format, isPast } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -193,6 +194,18 @@ const ConversationHeader = ({
       .eq("sitter_id", conv.sitter_id);
     if (error) { toast.error("Erreur"); return; }
     toast.success(`Candidature de ${sitterName} acceptée ✅`);
+
+    // Email transactionnel — sitter informé de l'acceptation (non-bloquant)
+    sendTransactionalEmail({
+      templateName: "application-accepted",
+      recipientUserId: conv.sitter_id,
+      idempotencyKey: `app-accepted-conv-${conv.id}-${conv.sitter_id}`,
+      templateData: {
+        sitTitle: conv.sit?.title ?? "",
+        ownerFirstName: "", // owner = current user, fallback "Le propriétaire" géré côté template
+      },
+    }).catch(() => {});
+
     onActionDone();
   };
 
@@ -205,6 +218,15 @@ const ConversationHeader = ({
       .eq("sitter_id", conv.sitter_id);
     if (error) { toast.error("Erreur"); return; }
     toast.success("Candidature déclinée");
+
+    // Email transactionnel — sitter informé du refus (non-bloquant)
+    sendTransactionalEmail({
+      templateName: "application-declined",
+      recipientUserId: conv.sitter_id,
+      idempotencyKey: `app-declined-conv-${conv.id}-${conv.sitter_id}`,
+      templateData: { sitTitle: conv.sit?.title ?? "" },
+    }).catch(() => {});
+
     onActionDone();
   };
 
