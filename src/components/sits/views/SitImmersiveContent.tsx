@@ -856,11 +856,7 @@ const SitImmersiveContent = ({
                               <span className="text-xs text-muted-foreground">· {pet.age}</span>
                             )}
                           </div>
-                          {hasCharacter && (
-                            <p className="text-sm text-muted-foreground leading-relaxed">
-                              {pet.character}
-                            </p>
-                          )}
+                          {/* Le caractère est rendu plus bas, après l'alimentation, pour respecter l'ordre de priorité demandé. */}
                           {pet.owner_breed_note && (
                             <p className="text-sm text-foreground/90 leading-relaxed mt-1">
                               <span className="font-medium">Selon {ownerName} :</span>{" "}
