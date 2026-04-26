@@ -140,11 +140,24 @@ const SearchSitter = () => {
       try {
         const isCp = /^\d{5}$/.test(q);
         const url = isCp
-          ? `https://geo.api.gouv.fr/communes?codePostal=${encodeURIComponent(q)}&fields=nom,codesPostaux&limit=5`
-          : `https://geo.api.gouv.fr/communes?nom=${encodeURIComponent(q)}&fields=nom,codesPostaux&boost=population&limit=5`;
+          ? `https://geo.api.gouv.fr/communes?codePostal=${encodeURIComponent(q)}&fields=nom,codesPostaux&limit=8`
+          : `https://geo.api.gouv.fr/communes?nom=${encodeURIComponent(q)}&fields=nom,codesPostaux&boost=population&limit=8`;
         const res = await fetch(url);
-        const data = await res.json();
-        setCitySuggestions(data || []);
+        const data: { nom: string; codesPostaux?: string[] }[] = await res.json();
+        // Tri local : correspondance exacte (sans accents) > préfixe > contient
+        // Conserve l'ordre d'origine (pertinence/population) à rang égal
+        const rank = (nom: string) => {
+          const n = normalize(nom);
+          if (n === q) return 0;
+          if (n.startsWith(q)) return 1;
+          if (n.includes(q)) return 2;
+          return 3;
+        };
+        const sorted = (data || [])
+          .map((c, i) => ({ c, i, r: rank(c.nom) }))
+          .sort((a, b) => a.r - b.r || a.i - b.i)
+          .map(({ c }) => c);
+        setCitySuggestions(sorted);
       } catch { setCitySuggestions([]); }
     }, 250);
   };
