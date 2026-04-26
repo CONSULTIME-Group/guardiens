@@ -409,14 +409,14 @@ const AdminAnalytics = () => {
                   hint={`${funnelCounts.signup_form_submitted || 0} / ${funnelCounts.signup_started || 0}`}
                 />
                 <ConversionTile
-                  label="Formulaire → Email confirmé"
-                  value={kpis.emailConfirmationRate}
-                  hint={`${funnelCounts.signup_email_confirmed || 0} / ${funnelCounts.signup_form_submitted || 0}`}
+                  label="Démarré → Compte créé"
+                  value={kpis.signupConversionRate}
+                  hint={`${totalInscrits} / ${funnelCounts.signup_started || 0} (vrais inscrits)`}
                 />
                 <ConversionTile
-                  label="Email → Onboarding terminé"
+                  label="Compte créé → Onboarding terminé"
                   value={kpis.activationRate}
-                  hint={`${funnelCounts.onboarding_completed || 0} / ${funnelCounts.signup_email_confirmed || 0}`}
+                  hint={`${funnelCounts.onboarding_completed || 0} / ${totalInscrits}`}
                 />
                 <ConversionTile
                   label="Onboarding → 1ère action"
@@ -424,6 +424,9 @@ const AdminAnalytics = () => {
                   hint={`${funnelCounts.first_action || 0} / ${funnelCounts.onboarding_completed || 0}`}
                 />
               </div>
+              <p className="text-xs text-muted-foreground mt-3">
+                Source de vérité pour "Compte créé" : table profiles. Les events <code>signup_form_submitted</code> et <code>signup_email_confirmed</code> sont indicatifs (sous-comptés sur les inscriptions Google OAuth et les anciens comptes).
+              </p>
             </CardContent>
           </Card>
 
