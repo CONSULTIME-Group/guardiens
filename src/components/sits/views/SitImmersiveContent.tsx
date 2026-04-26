@@ -248,6 +248,62 @@ const SitImmersiveContent = ({
   // -- Page ville (silo SEO) : seulement si du contenu éditorial existe
   const hasCityPage = Boolean(citySlug && getCityContent(citySlug));
 
+  // -- Comptage gardiens : ville d'abord, département en repli si < 20 résultats
+  const ownerPostalCode: string | undefined = owner?.postal_code
+    ? String(owner.postal_code)
+    : undefined;
+  const deptCode = ownerPostalCode ? ownerPostalCode.slice(0, 2) : undefined;
+  const CITY_THRESHOLD = 20;
+
+  const { data: sittersScope } = useQuery({
+    queryKey: ["sitters-scope", cityName, deptCode],
+    enabled: !!cityName,
+    staleTime: 5 * 60 * 1000,
+    queryFn: async () => {
+      // 1. Compte ville
+      const { data: cityRows } = await supabase
+        .from("profiles")
+        .select("id, sitter_profiles!inner(user_id)")
+        .ilike("city", cityName)
+        .limit(50);
+      const cityCount = cityRows?.length ?? 0;
+
+      if (cityCount >= CITY_THRESHOLD || !deptCode) {
+        return { mode: "city" as const, count: cityCount };
+      }
+
+      // 2. Repli département (CP commençant par dept)
+      const { data: deptRows } = await supabase
+        .from("profiles")
+        .select("id, postal_code, sitter_profiles!inner(user_id)")
+        .like("postal_code", `${deptCode}%`)
+        .limit(50);
+      const deptCount = deptRows?.length ?? 0;
+
+      return {
+        mode: "dept" as const,
+        count: deptCount,
+        cityCount,
+      };
+    },
+  });
+
+  const sittersLink = (() => {
+    if (!sittersScope || !cityName) return null;
+    const params = new URLSearchParams();
+    params.set("city", cityName);
+    if (ownerPostalCode) params.set("postal_code", ownerPostalCode);
+    if (sittersScope.mode === "dept" && deptCode) {
+      params.set("zone", "dept");
+      params.set("dept", deptCode);
+    } else {
+      params.set("zone", "city");
+    }
+    return `/search?${params.toString()}`;
+  })();
+
+  const showSittersLink = Boolean(sittersLink && sittersScope && sittersScope.count > 0);
+
 
   return (
     <div>
