@@ -5,6 +5,7 @@ import { Loader2, MailCheck, AlertTriangle, RefreshCw } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
+import { trackEventWithUserId } from "@/lib/analytics";
 
 const AuthConfirm = () => {
   const navigate = useNavigate();
