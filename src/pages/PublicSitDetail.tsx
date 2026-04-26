@@ -281,68 +281,113 @@ const PublicSitDetail = () => {
           </Button>
         </div>
       )}
-
-
-
-      {/* Hero photos — composant partagé avec /sits/:id, lightbox plein écran */}
+      {/* ─── HERO ÉDITORIAL ─────────────────────────────────────────────── */}
       <div className="px-4 md:px-10 pt-4 md:pt-6">
         <SitHero photos={photos} city={owner?.city} priority />
       </div>
 
-      <div className="px-6 md:px-10 pb-6 md:pb-10">
-        {/* Title — sanitize pour corriger les espaces manquants ("4chats" → "4 chats") */}
-        <h1 className="font-heading text-2xl md:text-3xl font-bold mb-2">
-          {sit.title ? sanitizeUserTitle(sit.title) : `Garde à ${owner?.city || "..."}`}
-        </h1>
-
-        {/* Location & dates */}
-        <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground mb-4">
-          {owner?.city && (
-            <span className="flex items-center gap-1.5"><MapPin className="h-4 w-4" />{owner.city}</span>
-          )}
-          <span className="flex items-center gap-1.5">
-            <Calendar className="h-4 w-4" />
-            {formatDate(sit.start_date)} → {formatDate(sit.end_date)}
-            {sit.flexible_dates && <span className="text-xs bg-accent px-2 py-0.5 rounded-full ml-1">Flexible</span>}
+      <div className="px-5 md:px-10 pb-6 md:pb-10">
+        {/* Eyebrow contextuel */}
+        <div className="mt-5 mb-2 flex items-center gap-2">
+          <span className="inline-flex items-center gap-1.5 text-[11px] uppercase tracking-wider font-semibold text-primary">
+            <Sparkles className="h-3 w-3" />
+            Une annonce de la communauté
           </span>
         </div>
 
-        {/* Bandeau valeur Guardiens — uniquement pour visiteurs anonymes (audience d'acquisition) */}
+        {/* Title — sanitize pour corriger les espaces manquants ("4chats" → "4 chats") */}
+        <h1 className="font-heading text-3xl md:text-4xl font-bold leading-tight tracking-tight mb-3 text-foreground">
+          {sit.title ? sanitizeUserTitle(sit.title) : `Une garde à confier à ${owner?.city || "vos voisins"}`}
+        </h1>
+
+        {/* Location & dates — pictos discrets */}
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-muted-foreground mb-6">
+          {owner?.city && (
+            <span className="inline-flex items-center gap-1.5">
+              <MapPin className="h-4 w-4 text-primary/70" />
+              <span className="font-medium text-foreground">{owner.city}</span>
+            </span>
+          )}
+          <span className="inline-flex items-center gap-1.5">
+            <Calendar className="h-4 w-4 text-primary/70" />
+            <span>
+              {formatDate(sit.start_date)} → {formatDate(sit.end_date)}
+            </span>
+            {sit.flexible_dates && (
+              <span className="text-[11px] font-medium bg-primary/10 text-primary px-2 py-0.5 rounded-full ml-1">
+                Dates flexibles
+              </span>
+            )}
+          </span>
+        </div>
+
+        {/* ─── BANDEAU VALEUR — visiteurs anonymes uniquement ───────────── */}
         {!isAuthenticated && (
-          <div className="mb-6 p-4 rounded-xl bg-primary/5 border border-primary/15">
-            <p className="text-sm font-medium mb-2 flex items-center gap-1.5">
-              <Heart className="h-4 w-4 text-primary" /> L'entraide entre voisins, pour faire garder son foyer
-            </p>
-            <p className="text-xs text-muted-foreground leading-relaxed">
-              Guardiens met en relation propriétaires et gardiens du coin pour des gardes <strong>100&nbsp;% gratuites</strong>, sans commission. Inscription en 1 minute, sans engagement.
-            </p>
-          </div>
+          <section className="mb-8 rounded-2xl border border-primary/15 bg-gradient-to-br from-primary/5 to-primary/0 p-5 md:p-6">
+            <div className="flex items-start gap-3">
+              <div className="shrink-0 w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                <HandHeart className="h-5 w-5 text-primary" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <h2 className="font-heading text-base md:text-lg font-semibold mb-1.5">
+                  La confiance entre gens du coin
+                </h2>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  Sur Guardiens, ce sont des voisins qui se rendent service.
+                  Aucun paiement entre membres, profils vérifiés, accord de
+                  garde signé&nbsp;: la garde redevient une histoire de
+                  proximité, pas de transaction.
+                </p>
+                <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1.5 text-[12px] text-muted-foreground">
+                  <span className="inline-flex items-center gap-1">
+                    <ShieldCheck className="h-3.5 w-3.5 text-primary" />
+                    Identités vérifiées
+                  </span>
+                  <span className="inline-flex items-center gap-1">
+                    <Heart className="h-3.5 w-3.5 text-primary" />
+                    100&nbsp;% gratuit entre membres
+                  </span>
+                  <span className="inline-flex items-center gap-1">
+                    <Users className="h-3.5 w-3.5 text-primary" />
+                    Réseau local
+                  </span>
+                </div>
+              </div>
+            </div>
+          </section>
         )}
 
-        {/* Animals — avec photo réelle si disponible, fallback emoji */}
+        {/* ─── ANIMAUX ──────────────────────────────────────────────────── */}
         {pets.length > 0 && (
-          <div className="mb-6">
-            <h2 className="font-heading font-semibold mb-3 flex items-center gap-2">
-              <PawPrint className="h-4 w-4 text-primary" /> Les animaux ({pets.length})
+          <section className="mb-6">
+            <h2 className="font-heading text-lg font-semibold mb-3 flex items-center gap-2">
+              <PawPrint className="h-5 w-5 text-primary" />
+              {pets.length === 1 ? "L'animal à garder" : `Les animaux à garder (${pets.length})`}
             </h2>
-            <div className="flex flex-wrap gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {pets.map((pet: any) => (
-                <div key={pet.id} className="flex items-center gap-2.5 bg-card border border-border rounded-xl px-3 py-2.5">
+                <div
+                  key={pet.id}
+                  className="flex items-center gap-3 bg-card border border-border rounded-2xl px-4 py-3 hover:border-primary/30 transition-colors"
+                >
                   {pet.photo_url ? (
                     <img
                       src={pet.photo_url}
                       alt={`Photo de ${pet.name}`}
                       loading="lazy"
-                      className="w-10 h-10 rounded-full object-cover"
+                      className="w-12 h-12 rounded-full object-cover shrink-0"
                     />
                   ) : (
-                    <span className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-lg" aria-hidden="true">
+                    <span
+                      className="w-12 h-12 rounded-full bg-muted flex items-center justify-center text-xl shrink-0"
+                      aria-hidden="true"
+                    >
                       {speciesEmoji[pet.species] || "🐾"}
                     </span>
                   )}
-                  <div>
-                    <p className="font-medium text-sm">{pet.name}</p>
-                    <p className="text-xs text-muted-foreground">
+                  <div className="min-w-0">
+                    <p className="font-semibold text-sm truncate">{pet.name}</p>
+                    <p className="text-xs text-muted-foreground truncate">
                       {speciesLabel[pet.species] || pet.species}
                       {pet.breed ? ` · ${pet.breed}` : ""}
                     </p>
@@ -350,98 +395,136 @@ const PublicSitDetail = () => {
                 </div>
               ))}
             </div>
-          </div>
+          </section>
         )}
 
-        {/* Housing — environnements intégrés directement pour éviter les tags orphelins */}
+        {/* ─── LOGEMENT ─────────────────────────────────────────────────── */}
         {property && (
-          <div className="mb-6 bg-card border border-border rounded-xl p-5">
-            <h2 className="font-heading font-semibold mb-2 flex items-center gap-2">
-              <Home className="h-4 w-4 text-primary" /> Le logement
+          <section className="mb-6 bg-card border border-border rounded-2xl p-5 md:p-6">
+            <h2 className="font-heading text-lg font-semibold mb-2 flex items-center gap-2">
+              <Home className="h-5 w-5 text-primary" />
+              Le logement
             </h2>
-            <p className="text-sm">{typeLabels[property.type] || property.type} · {envLabels[property.environment] || property.environment}</p>
-            {property.description && <p className="text-sm text-muted-foreground mt-2">{property.description}</p>}
+            <p className="text-sm font-medium text-foreground">
+              {typeLabels[property.type] || property.type}
+              {property.environment && (
+                <>
+                  {" · "}
+                  <span className="text-muted-foreground font-normal">
+                    {envLabels[property.environment] || property.environment}
+                  </span>
+                </>
+              )}
+            </p>
+            {property.description && (
+              <p className="text-sm text-muted-foreground mt-3 leading-relaxed whitespace-pre-line">
+                {property.description}
+              </p>
+            )}
             {environments.length > 0 && (
-              <div className="flex flex-wrap gap-1.5 mt-3 pt-3 border-t border-border">
-                <span className="text-xs text-muted-foreground self-center mr-1">Environnement&nbsp;:</span>
+              <div className="flex flex-wrap gap-1.5 mt-4 pt-4 border-t border-border">
+                <span className="text-xs text-muted-foreground self-center mr-1">
+                  Environnement&nbsp;:
+                </span>
                 {environments.map((env: string) => (
-                  <span key={env} className="px-2.5 py-1 rounded-full bg-accent text-xs">{envLabels[env] || env}</span>
+                  <span
+                    key={env}
+                    className="px-2.5 py-1 rounded-full bg-accent/60 text-xs font-medium"
+                  >
+                    {envLabels[env] || env}
+                  </span>
                 ))}
               </div>
             )}
-          </div>
+          </section>
         )}
 
-        {/* Open to */}
+        {/* ─── PROFIL TYPE DE GARDIEN RECHERCHÉ ─────────────────────────── */}
         {sit.open_to && sit.open_to.length > 0 && (
-          <div className="mb-6">
-            <h3 className="text-sm font-medium mb-2">Idéale pour</h3>
-            <div className="flex flex-wrap gap-1.5">
+          <section className="mb-6">
+            <h2 className="font-heading text-base font-semibold mb-2.5 text-foreground">
+              Le gardien idéal
+            </h2>
+            <div className="flex flex-wrap gap-2">
               {sit.open_to.map((t: string) => (
-                <span key={t} className="px-2.5 py-1 rounded-full bg-accent text-xs">{t}</span>
+                <span
+                  key={t}
+                  className="px-3 py-1.5 rounded-full bg-secondary/15 text-secondary-foreground border border-secondary/20 text-xs font-medium"
+                >
+                  {t}
+                </span>
               ))}
             </div>
-          </div>
+          </section>
         )}
 
-        {/* Owner profile card — enrichie : ville, gardes accomplies, badge fondateur, bio */}
+        {/* ─── PROPRIÉTAIRE — carte humaine, mise en avant ──────────────── */}
         {owner && (
-          <div className="flex items-start gap-3 mb-6 p-4 bg-card rounded-xl border border-border">
-            {owner.avatar_url ? (
-              <img
-                src={owner.avatar_url}
-                alt={`Photo de ${owner.first_name}`}
-                className="w-14 h-14 rounded-full object-cover shrink-0"
-                loading="lazy"
-              />
-            ) : (
-              <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center font-heading text-lg font-bold text-primary shrink-0">
-                {owner.first_name?.charAt(0) || "?"}
-              </div>
-            )}
-            <div className="flex-1 min-w-0">
-              <p className="font-medium flex items-center flex-wrap gap-1.5">
-                {owner.first_name}
-                {owner.identity_verified && <VerifiedBadge />}
-                {owner.is_founder && (
-                  <span
-                    className="text-[10px] uppercase tracking-wide font-semibold px-1.5 py-0.5 rounded bg-primary/10 text-primary"
-                    title="Membre fondateur"
-                  >
-                    Fondateur
-                  </span>
-                )}
-              </p>
-              <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5 flex-wrap">
-                {owner.city && <span>{owner.city}</span>}
-                {owner.city && typeof owner.completed_sits_count === "number" && owner.completed_sits_count > 0 && (
-                  <span aria-hidden="true">·</span>
-                )}
-                {typeof owner.completed_sits_count === "number" && owner.completed_sits_count > 0 && (
-                  <span>
-                    {owner.completed_sits_count} garde{owner.completed_sits_count > 1 ? "s" : ""} accomplie{owner.completed_sits_count > 1 ? "s" : ""}
-                  </span>
-                )}
-                {avgRating && (
-                  <>
-                    <span aria-hidden="true">·</span>
-                    <span className="flex items-center gap-1">
-                      <Star className="h-3 w-3 text-secondary fill-secondary" /> {avgRating} ({reviewCount})
+          <section className="mb-6 rounded-2xl border-2 border-primary/15 bg-primary/[0.03] p-5 md:p-6">
+            <h2 className="font-heading text-base font-semibold mb-4 flex items-center gap-2">
+              <Heart className="h-4 w-4 text-primary" />
+              Faites connaissance avec {owner.first_name || "votre hôte"}
+            </h2>
+            <div className="flex items-start gap-4">
+              {owner.avatar_url ? (
+                <img
+                  src={owner.avatar_url}
+                  alt={`Photo de ${owner.first_name}`}
+                  className="w-16 h-16 md:w-20 md:h-20 rounded-full object-cover shrink-0 ring-2 ring-primary/10"
+                  loading="lazy"
+                />
+              ) : (
+                <div className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-primary/10 flex items-center justify-center font-heading text-2xl font-bold text-primary shrink-0 ring-2 ring-primary/10">
+                  {owner.first_name?.charAt(0) || "?"}
+                </div>
+              )}
+              <div className="flex-1 min-w-0">
+                <p className="font-semibold text-base flex items-center flex-wrap gap-1.5">
+                  {owner.first_name}
+                  {owner.identity_verified && <VerifiedBadge />}
+                  {owner.is_founder && (
+                    <span
+                      className="text-[10px] uppercase tracking-wide font-semibold px-1.5 py-0.5 rounded bg-primary/10 text-primary"
+                      title="Membre fondateur"
+                    >
+                      Fondateur
                     </span>
-                  </>
-                )}
+                  )}
+                </p>
+                <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5 flex-wrap">
+                  {owner.city && <span>{owner.city}</span>}
+                  {owner.city &&
+                    typeof owner.completed_sits_count === "number" &&
+                    owner.completed_sits_count > 0 && <span aria-hidden="true">·</span>}
+                  {typeof owner.completed_sits_count === "number" &&
+                    owner.completed_sits_count > 0 && (
+                      <span>
+                        {owner.completed_sits_count} garde
+                        {owner.completed_sits_count > 1 ? "s" : ""} accomplie
+                        {owner.completed_sits_count > 1 ? "s" : ""}
+                      </span>
+                    )}
+                  {avgRating && (
+                    <>
+                      <span aria-hidden="true">·</span>
+                      <span className="flex items-center gap-1">
+                        <Star className="h-3 w-3 text-secondary fill-secondary" />
+                        {avgRating} ({reviewCount} avis)
+                      </span>
+                    </>
+                  )}
+                </div>
+                <p className="text-sm text-foreground/80 mt-2.5 leading-relaxed line-clamp-4">
+                  {owner.bio
+                    ? owner.bio
+                    : `${owner.first_name || "Ce membre"} n'a pas encore renseigné de présentation, mais sera ravi(e) d'échanger avec vous.`}
+                </p>
               </div>
-              <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
-                {owner.bio
-                  ? owner.bio
-                  : "Ce membre n'a pas encore renseigné de présentation."}
-              </p>
             </div>
-          </div>
+          </section>
         )}
 
-        {/* Share buttons — visible uniquement pour le propriétaire de l'annonce.
-            Pour anonymes/visiteurs : on cache, ils sont là pour découvrir, pas re-partager. */}
+        {/* ─── PARTAGE — propriétaire de l'annonce uniquement ───────────── */}
         {viewerType === "owner_of_sit" && (
           <div className="mb-8">
             <ShareButtons
@@ -454,8 +537,7 @@ const PublicSitDetail = () => {
           </div>
         )}
 
-        {/* Bloc gestion — visible uniquement si le visiteur est le propriétaire de l'annonce.
-            Les actions sensibles (annulation, édition) renvoient vers la fiche privée /sits/:id. */}
+        {/* ─── GESTION — propriétaire de l'annonce uniquement ───────────── */}
         {viewerType === "owner_of_sit" && property && (
           <OwnerSitManagement
             sitId={sit.id}
@@ -466,9 +548,20 @@ const PublicSitDetail = () => {
           />
         )}
 
-        {/* CTA */}
-        {/* TODO: à ajouter quand le bouton contact direct sera implémenté → sit_contact_clicked
-            (aujourd'hui sit_apply_clicked couvre l'intent contact via candidature) */}
+        {/* ─── BLOC DE RÉASSURANCE FINAL ────────────────────────────────── */}
+        {!isAuthenticated && (
+          <section className="mt-10 rounded-2xl bg-card border border-border p-6 text-center">
+            <p className="font-heading text-base md:text-lg font-semibold mb-2">
+              Vous partez l'esprit léger — et si un imprévu survient, votre
+              réseau local de gardiens prend le relais.
+            </p>
+            <p className="text-xs text-muted-foreground">
+              Profils vérifiés · Avis croisés · Gardiens d'urgence mobilisables
+            </p>
+          </section>
+        )}
+
+        {/* ─── CTA STICKY ───────────────────────────────────────────────── */}
         <div className="fixed bottom-0 left-0 right-0 bg-card border-t border-border p-4 z-40 pb-20 md:pb-4">
           <div className="max-w-4xl mx-auto">
             {/* Réassurance pré-CTA — visible uniquement pour les anonymes (audience d'acquisition) */}
