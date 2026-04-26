@@ -378,3 +378,42 @@ describe("parseRoutine — indications horaires riches (crochets, accolades, mul
   });
 });
 
+describe("parseRoutine — blocs collés sur une seule ligne par , ou ;", () => {
+  it("virgules entre blocs : Matin : balade, Midi : sieste, Soir : repas", () => {
+    const r = parseRoutine("Matin : balade, Midi : sieste, Soir : repas")!;
+    expect(r.blocks.map((b) => b.label)).toEqual(["Matin", "Midi", "Soir"]);
+    expect(r.blocks[0].text).toBe("balade");
+    expect(r.blocks[1].text).toBe("sieste");
+    expect(r.blocks[2].text).toBe("repas");
+  });
+
+  it("point-virgules entre blocs : Matin : X; Soir : Y; Nuit : Z", () => {
+    const r = parseRoutine("Matin : balade; Soir : croquettes; Nuit : panier")!;
+    expect(r.blocks.map((b) => b.label)).toEqual(["Matin", "Soir", "Nuit"]);
+    expect(r.blocks[1].text).toBe("croquettes");
+  });
+
+  it("mix virgules + point-virgules + ordre mélangé", () => {
+    const r = parseRoutine("Soir : repas, Matin : sortie; Après-midi : jeu")!;
+    expect(r.blocks.map((b) => b.label)).toEqual(["Matin", "Après-midi", "Soir"]);
+  });
+
+  it("virgule à l'intérieur du texte d'un bloc ne déclenche PAS de découpe", () => {
+    const r = parseRoutine("Matin : balade, jeu et câlins\nSoir : repas")!;
+    expect(r.blocks.map((b) => b.label)).toEqual(["Matin", "Soir"]);
+    expect(r.blocks[0].text).toBe("balade, jeu et câlins");
+  });
+
+  it("blocs collés avec NBSP avant le label : Matin : X,\\u00A0Soir : Y", () => {
+    const r = parseRoutine("Matin : balade,\u00A0Soir : repas")!;
+    expect(r.blocks.map((b) => b.label)).toEqual(["Matin", "Soir"]);
+  });
+
+  it("séparation par , même avec horaires entre crochets", () => {
+    const r = parseRoutine("Matin [7h] : sortie, Soir [19h] : croquettes")!;
+    expect(r.blocks.map((b) => b.label)).toEqual(["Matin", "Soir"]);
+    expect(r.blocks[0].text).toBe("sortie");
+    expect(r.blocks[1].text).toBe("croquettes");
+  });
+});
+
