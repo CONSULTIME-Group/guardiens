@@ -154,6 +154,8 @@ const CreateSit = () => {
         setMinGardienSits(s.min_gardien_sits || 0);
         setFlexibleDates(s.flexible_dates || false);
         setMaxApplications(s.max_applications || null);
+        setOwnerMessage(s.owner_message || "");
+        setDailyRoutine(s.daily_routine || "");
         setIsRepublish(true);
       }
 
