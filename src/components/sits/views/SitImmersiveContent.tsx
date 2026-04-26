@@ -12,6 +12,8 @@
  *  - Sidebar : profil hôte, CTA (slot via prop), guide local, page ville, réassurance
  */
 import { Link } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import {
