@@ -503,8 +503,8 @@ const SitImmersiveContent = ({
 
         {/* Sidebar */}
         <aside className="space-y-4">
-          {/* Profil hôte */}
-          {owner && (
+          {/* Profil hôte — visible si données suffisantes */}
+          {hasOwnerCard && (
             <div className="rounded-2xl border border-border bg-card p-5">
               <p className="text-xs uppercase tracking-wide text-muted-foreground mb-3">
                 Votre hôte
@@ -538,9 +538,9 @@ const SitImmersiveContent = ({
                   )}
                 </div>
               </div>
-              {(owner.bio || ownerProfile?.welcome_notes) && (
+              {ownerBio && (
                 <p className="text-sm text-muted-foreground leading-relaxed line-clamp-6">
-                  {owner.bio || ownerProfile?.welcome_notes}
+                  {ownerBio}
                 </p>
               )}
             </div>
