@@ -539,24 +539,34 @@ const SitImmersiveContent = ({
         {/* Colonne principale */}
         <div className="lg:col-span-2 space-y-6">
           <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as typeof activeTab)} className="w-full">
-            <TabsList className="w-full grid grid-cols-2 md:grid-cols-4 h-auto p-1 bg-muted/50 rounded-xl mb-6 sticky top-2 z-10 backdrop-blur supports-[backdrop-filter]:bg-muted/70">
-              <TabsTrigger value="garde" className="text-xs md:text-sm py-2 data-[state=active]:bg-background data-[state=active]:shadow-sm">
-                <Heart className="h-3.5 w-3.5 mr-1.5 hidden md:inline" />
-                La garde
-              </TabsTrigger>
-              <TabsTrigger value="animaux" className="text-xs md:text-sm py-2 data-[state=active]:bg-background data-[state=active]:shadow-sm">
-                <PawPrint className="h-3.5 w-3.5 mr-1.5 hidden md:inline" />
-                Animaux{safePets.length > 0 ? ` (${safePets.length})` : ""}
-              </TabsTrigger>
-              <TabsTrigger value="logement" className="text-xs md:text-sm py-2 data-[state=active]:bg-background data-[state=active]:shadow-sm">
-                <Home className="h-3.5 w-3.5 mr-1.5 hidden md:inline" />
-                Logement & quartier
-              </TabsTrigger>
-              <TabsTrigger value="attentes" className="text-xs md:text-sm py-2 data-[state=active]:bg-background data-[state=active]:shadow-sm">
-                <ShieldCheck className="h-3.5 w-3.5 mr-1.5 hidden md:inline" />
-                Attentes
-              </TabsTrigger>
-            </TabsList>
+            {/*
+              Sticky propre :
+              - top-0 (le layout n'a pas de header fixe : sidebar latérale en desktop, BottomNav en bas en mobile)
+              - barre opaque avec backdrop-blur en fallback (lisible sur tout fond)
+              - ombre douce + bordure basse pour bien détacher du contenu qui défile dessous
+              - padding vertical interne pour aérer, mb-6 pour le bloc suivant
+              - libellés tronqués (truncate) pour rester sur 1 ligne sur mobile (4 onglets)
+            */}
+            <div className="sticky top-0 z-20 -mx-4 md:-mx-6 px-4 md:px-6 py-2 mb-6 bg-background/95 supports-[backdrop-filter]:bg-background/80 backdrop-blur-md border-b border-border/60 shadow-[0_2px_8px_-4px_rgba(0,0,0,0.08)]">
+              <TabsList className="w-full grid grid-cols-4 h-auto p-1 bg-muted/60 rounded-xl gap-1">
+                <TabsTrigger value="garde" className="text-[11px] md:text-sm py-2 px-1 md:px-3 min-w-0 data-[state=active]:bg-background data-[state=active]:shadow-sm">
+                  <Heart className="h-3.5 w-3.5 mr-1 md:mr-1.5 shrink-0 hidden sm:inline" />
+                  <span className="truncate">Garde</span>
+                </TabsTrigger>
+                <TabsTrigger value="animaux" className="text-[11px] md:text-sm py-2 px-1 md:px-3 min-w-0 data-[state=active]:bg-background data-[state=active]:shadow-sm">
+                  <PawPrint className="h-3.5 w-3.5 mr-1 md:mr-1.5 shrink-0 hidden sm:inline" />
+                  <span className="truncate">Animaux{safePets.length > 0 ? ` (${safePets.length})` : ""}</span>
+                </TabsTrigger>
+                <TabsTrigger value="logement" className="text-[11px] md:text-sm py-2 px-1 md:px-3 min-w-0 data-[state=active]:bg-background data-[state=active]:shadow-sm">
+                  <Home className="h-3.5 w-3.5 mr-1 md:mr-1.5 shrink-0 hidden sm:inline" />
+                  <span className="truncate"><span className="md:hidden">Logement</span><span className="hidden md:inline">Logement & quartier</span></span>
+                </TabsTrigger>
+                <TabsTrigger value="attentes" className="text-[11px] md:text-sm py-2 px-1 md:px-3 min-w-0 data-[state=active]:bg-background data-[state=active]:shadow-sm">
+                  <ShieldCheck className="h-3.5 w-3.5 mr-1 md:mr-1.5 shrink-0 hidden sm:inline" />
+                  <span className="truncate">Attentes</span>
+                </TabsTrigger>
+              </TabsList>
+            </div>
 
             {/* ========== ONGLET GARDE ========== */}
             <TabsContent value="garde" className="space-y-6 mt-0">
