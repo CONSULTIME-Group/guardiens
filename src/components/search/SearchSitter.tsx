@@ -968,7 +968,10 @@ const SearchSitter = () => {
           <div className="h-52 relative">
             <img src={photos[0]} alt="" className={`w-full h-full object-cover ${isInactive ? "grayscale" : ""} ${isDemo ? "saturate-[0.85]" : ""}`} loading="lazy" />
             {isDemo && (
-              <span className="absolute inset-x-0 top-0 bg-amber-400 text-amber-950 text-[11px] font-semibold uppercase tracking-wide px-3 py-1.5 text-center shadow-sm flex items-center justify-center gap-1.5">
+              <span
+                className="absolute inset-x-0 top-0 bg-amber-400 text-amber-950 text-[11px] font-semibold uppercase tracking-wide px-3 py-1.5 text-center shadow-sm flex items-center justify-center gap-1.5"
+                data-testid="demo-example-badge"
+              >
                 <Sparkles className="h-3 w-3" /> Annonce d'exemple — pour illustrer la plateforme
               </span>
             )}
