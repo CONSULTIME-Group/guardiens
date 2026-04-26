@@ -37,6 +37,7 @@ import {
   Flame,
   Building2,
   ChevronRight,
+  ArrowRight,
   BookOpen,
   Info,
 } from "lucide-react";
