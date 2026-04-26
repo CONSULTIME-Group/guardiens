@@ -465,10 +465,9 @@ const Messages = () => {
     if (messages.length > 0 && messages[0].conversation_id !== activeConv.id) return;
     if (draftHandledConvRef.current === activeConv.id) return;
 
-    const realMsgs = messages.filter(m => !m.is_system);
-    const inputIsEmpty = newMessage.trim() === "";
+    const decision = shouldPrefillDraft({ messages, currentInput: newMessage });
 
-    if (realMsgs.length === 0 && inputIsEmpty) {
+    if (decision.shouldPrefill) {
       const ctx = (activeConv.context_type || "sitter_inquiry") as ConversationContext;
       const sitDates = activeConv.sit?.start_date && activeConv.sit?.end_date
         ? `${new Date(activeConv.sit.start_date).toLocaleDateString("fr-FR")} → ${new Date(activeConv.sit.end_date).toLocaleDateString("fr-FR")}`
@@ -482,7 +481,7 @@ const Messages = () => {
       });
       setNewMessage(draft);
       draftHandledConvRef.current = activeConv.id;
-    } else if (realMsgs.length > 0) {
+    } else if (decision.reason === "conversation_already_started") {
       // Conversation déjà entamée : pas de brouillon, on prévient discrètement.
       toast({
         title: "Conversation en cours",
