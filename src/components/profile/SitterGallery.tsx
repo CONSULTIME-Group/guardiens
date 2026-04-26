@@ -9,6 +9,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Label } from "@/components/ui/label";
 import { Plus, Trash2, Camera, X, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
+import { logger } from "@/lib/logger";
+
+const NO_SIT_VALUE = "__none__";
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 const animalTypeOptions = [
   { value: "chien", label: "Chien" },
