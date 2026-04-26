@@ -1235,7 +1235,31 @@ const SitImmersiveContent = ({
           {/* Slot CTA principal (candidature, gestion owner…) */}
           {ctaSlot}
 
-          {/* Guide local & encart "guide à venir" — désormais dans l'onglet "Logement & quartier" */}
+          {/* Guide local — accès rapide depuis la sidebar */}
+          {hasLocalGuide && (
+            <Link
+              to={`/guides/${citySlug}`}
+              className="block rounded-2xl border border-border bg-card p-5 hover:border-primary/50 transition-colors group"
+            >
+              <div className="flex items-start gap-3">
+                <div className="shrink-0 w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center">
+                  <BookOpen className="h-5 w-5" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs uppercase tracking-wide text-muted-foreground mb-0.5">
+                    Guide local
+                  </p>
+                  <p className="font-semibold text-sm group-hover:text-primary transition-colors">
+                    Découvrir {cityName}
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                    Vétos, parcs à chiens, bonnes adresses du coin.
+                  </p>
+                </div>
+                <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-0.5 transition-all shrink-0 mt-2" />
+              </div>
+            </Link>
+          )}
 
           {/* Autres gardiens du coin — lien vers la recherche pré-remplie */}
           {showSittersLink && (
