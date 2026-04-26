@@ -1,18 +1,25 @@
 /**
  * Onglet "Attentes" — strictement identique entre vue propriétaire et gardien.
+ * Inclut désormais "Une journée type" et "Un mot de l'hôte" (facultatifs côté annonce).
  */
-import { ShieldCheck, MessageSquare } from "lucide-react";
+import { ShieldCheck, MessageSquare, Sun, Quote } from "lucide-react";
 
 interface ExpectationsTabProps {
   ownerProfile: any;
   specificExpectations: string | null;
   openTo: string[] | null;
+  dailyRoutine?: string | null;
+  ownerMessage?: string | null;
+  ownerFirstName?: string | null;
 }
 
 const ExpectationsTab = ({
   ownerProfile,
   specificExpectations,
   openTo,
+  dailyRoutine,
+  ownerMessage,
+  ownerFirstName,
 }: ExpectationsTabProps) => {
   return (
     <>
@@ -41,9 +48,35 @@ const ExpectationsTab = ({
               <p className="text-muted-foreground">{ownerProfile.rules_notes}</p>
             )}
             {specificExpectations && (
-              <p className="mt-2 p-3 bg-accent/50 rounded-lg">{specificExpectations}</p>
+              <p className="mt-2 p-3 bg-accent/50 rounded-lg whitespace-pre-line">{specificExpectations}</p>
             )}
           </div>
+        </div>
+      )}
+
+      {dailyRoutine && (
+        <div className="bg-card rounded-xl border border-border p-5">
+          <div className="flex items-center gap-2 mb-3">
+            <Sun className="h-4 w-4 text-primary" />
+            <h3 className="font-heading font-semibold">Une journée type</h3>
+          </div>
+          <p className="text-sm text-foreground whitespace-pre-line leading-relaxed">
+            {dailyRoutine}
+          </p>
+        </div>
+      )}
+
+      {ownerMessage && (
+        <div className="bg-primary/5 rounded-xl border border-primary/20 p-5">
+          <div className="flex items-center gap-2 mb-3">
+            <Quote className="h-4 w-4 text-primary" />
+            <h3 className="font-heading font-semibold">
+              {ownerFirstName ? `Un mot de ${ownerFirstName}` : "Un mot de l'hôte"}
+            </h3>
+          </div>
+          <p className="text-sm text-foreground italic whitespace-pre-line leading-relaxed">
+            « {ownerMessage} »
+          </p>
         </div>
       )}
 
