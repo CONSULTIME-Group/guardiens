@@ -230,6 +230,17 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
           : `Votre garde chez ${proprio?.first_name ?? "votre hôte"} est confirmée. Rendez-vous dans "Mes gardes" pour les détails.`,
         link: `/mes-gardes`,
       });
+
+      // Email transactionnel — candidature acceptée (non-bloquant)
+      sendTransactionalEmail({
+        templateName: "application-accepted",
+        recipientUserId: sitterId,
+        idempotencyKey: `app-accepted-${app.id}`,
+        templateData: {
+          sitTitle,
+          ownerFirstName: proprio?.first_name ?? "",
+        },
+      }).catch(() => {});
     }
 
 
@@ -250,6 +261,14 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
           });
           await supabase.from("conversations").update({ updated_at: new Date().toISOString() }).eq("id", rejConv.id);
         }
+
+        // Email transactionnel — candidature non retenue (non-bloquant)
+        sendTransactionalEmail({
+          templateName: "application-declined",
+          recipientUserId: ra.sitter_id,
+          idempotencyKey: `app-declined-auto-${sitId}-${ra.sitter_id}`,
+          templateData: { sitTitle },
+        }).catch(() => {});
       }
     }
 
