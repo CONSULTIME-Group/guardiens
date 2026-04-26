@@ -544,7 +544,10 @@ const SearchSitter = () => {
       });
     }
     final = sortResults(final, sort);
-    if (final.length < DEMO_THRESHOLD) {
+    // Démos affichées UNIQUEMENT si aucun résultat réel — pour ne pas fausser
+    // la perception de l'offre disponible.
+    const realActiveCount = final.filter((r: any) => !r.isAssigned && !r.isCompleted).length;
+    if (realActiveCount === 0) {
       final = [...final, ...DEMO_SITS];
     }
     const coordsMap = new Map<string, { lat: number; lng: number }>();
@@ -605,7 +608,7 @@ const SearchSitter = () => {
     let final: any[] = [...items];
     if (sort === "closest") final.sort((a: any, b: any) => (a.distance ?? 9999) - (b.distance ?? 9999));
     else if (sort === "recent") final.sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-    if (final.length < DEMO_THRESHOLD) {
+    if (final.length === 0) {
       final = [...final, ...DEMO_MISSIONS];
     }
     setResults(final);
