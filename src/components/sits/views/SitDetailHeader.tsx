@@ -83,9 +83,14 @@ const SitDetailHeader = ({
       {!compact && <SitHero photos={photos} city={owner?.city} priority />}
       {/* Title, location, dates, status */}
       <div className="flex items-start justify-between gap-4 mb-1">
-        <h1 className="font-heading text-2xl md:text-3xl font-bold">
-          {sitTitle ? sanitizeUserTitle(sitTitle) : `Garde à ${owner?.city || "..."}`}
-        </h1>
+        {!compact ? (
+          <h1 className="font-heading text-2xl md:text-3xl font-bold">
+            {sitTitle ? sanitizeUserTitle(sitTitle) : `Garde à ${owner?.city || "..."}`}
+          </h1>
+        ) : (
+          /* Spacer pour pousser les actions à droite (titre déjà dans le hero immersif) */
+          <div className="flex-1" />
+        )}
         <div className="flex items-center gap-2 shrink-0">
           {isOwner && (
             <>
