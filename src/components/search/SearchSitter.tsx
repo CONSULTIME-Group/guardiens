@@ -1963,7 +1963,7 @@ const SearchSitter = () => {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {results.map(renderCard)}
+              {results.map((item, idx) => renderCard(item, idx))}
             </div>
           )}
         </div>
