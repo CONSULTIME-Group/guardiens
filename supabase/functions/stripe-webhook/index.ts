@@ -26,6 +26,28 @@ Deno.serve(async (req) => {
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
   );
 
+  // Helper to send subscription-expired email (idempotent via key)
+  const sendExpiredEmail = async (user_id: string, marker: string) => {
+    try {
+      const { data: userData } = await supabase.auth.admin.getUserById(user_id);
+      const recipientEmail = userData?.user?.email;
+      if (!recipientEmail) {
+        console.warn(`[stripe-webhook] No email found for user ${user_id}, skipping expired email`);
+        return;
+      }
+      const { error: mailError } = await supabase.functions.invoke("send-transactional-email", {
+        body: {
+          templateName: "subscription-expired",
+          recipientEmail,
+          idempotencyKey: `subscription-expired-${user_id}-${marker}`,
+        },
+      });
+      if (mailError) console.error("[stripe-webhook] send-transactional-email error:", mailError);
+    } catch (e) {
+      console.error("[stripe-webhook] sendExpiredEmail failed:", e);
+    }
+  };
+
   try {
     switch (event.type) {
       case "customer.subscription.created":
@@ -57,6 +79,11 @@ Deno.serve(async (req) => {
           expires_at: new Date(sub.current_period_end * 1000).toISOString(),
           started_at: new Date().toISOString(),
         }, { onConflict: "user_id" });
+
+        // Send expired email if subscription transitioned to expired
+        if (statut === "expired") {
+          await sendExpiredEmail(user_id, `sub-${sub.id}-${sub.current_period_end}`);
+        }
         break;
       }
 
@@ -70,6 +97,8 @@ Deno.serve(async (req) => {
           stripe_subscription_id: sub.id,
           started_at: new Date().toISOString(),
         }, { onConflict: "user_id" });
+
+        await sendExpiredEmail(user_id, `deleted-${sub.id}`);
         break;
       }
 
