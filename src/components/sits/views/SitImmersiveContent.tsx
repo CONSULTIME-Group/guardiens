@@ -523,15 +523,14 @@ const SitImmersiveContent = ({
             </div>,
           );
         }
-        const knownEnvironments = environments.filter((e) => ENV_META[e]);
-        if (knownEnvironments.length > 0) {
+        if (environments.length > 0) {
           cards.push(
             <div key="frame" className="rounded-2xl border border-border bg-card p-4">
               <Trees className="h-5 w-5 text-primary mb-2" />
               <p className="text-xs text-muted-foreground">Cadre</p>
               <div className="flex flex-wrap gap-1 mt-1">
-                {knownEnvironments.map((e) => {
-                  const meta = ENV_META[e]!;
+                {environments.map((e) => {
+                  const meta = getEnvMeta(e);
                   const Ico = meta.icon;
                   return (
                     <span
