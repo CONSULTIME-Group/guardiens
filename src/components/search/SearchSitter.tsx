@@ -1357,17 +1357,19 @@ const SearchSitter = () => {
                       </button>
                     ))}
                   </div>
-                  <Slider
-                    value={radius}
-                    onValueChange={(v) => {
-                      const ALLOWED = [5, 15, 30, 50, 100];
-                      const snapped = ALLOWED.reduce((p, c) => Math.abs(c - v[0]) < Math.abs(p - v[0]) ? c : p);
-                      setRadius([snapped]);
-                    }}
-                    min={5}
-                    max={100}
-                    step={5}
-                  />
+                  {(() => {
+                    const ALLOWED = [5, 15, 30, 50, 100];
+                    const currentIdx = Math.max(0, ALLOWED.indexOf(radius[0]));
+                    return (
+                      <Slider
+                        value={[currentIdx]}
+                        onValueChange={(v) => setRadius([ALLOWED[v[0]]])}
+                        min={0}
+                        max={ALLOWED.length - 1}
+                        step={1}
+                      />
+                    );
+                  })()}
                 </div>
               )}
             </PopoverContent>
