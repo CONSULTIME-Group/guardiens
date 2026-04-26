@@ -17,6 +17,8 @@ import NetworkErrorMonitor from "@/components/layout/NetworkErrorMonitor";
 import { PreviewDiagnosticBanner } from "@/components/PreviewDiagnosticBanner";
 import ScrollToTop from "@/components/layout/ScrollToTop";
 import PageViewTracker from "@/components/analytics/PageViewTracker";
+import FacebookReferralTracker from "@/components/analytics/FacebookReferralTracker";
+import FacebookReferralFeedback from "@/components/analytics/FacebookReferralFeedback";
 import CookieConsent from "@/components/layout/CookieConsent";
 import { toast } from "sonner";
 import { reportError } from "@/lib/errorLogger";
@@ -324,10 +326,12 @@ const App = () => (
             <BrowserRouter>
               <ScrollToTop />
               <PageViewTracker />
+              <FacebookReferralTracker />
               <OfflineBanner />
               <NetworkErrorMonitor />
               <PreviewDiagnosticBanner />
               <AppRoutes />
+              <FacebookReferralFeedback />
               <CookieConsent />
             </BrowserRouter>
           </AuthProvider>
