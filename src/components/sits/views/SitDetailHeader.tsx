@@ -40,6 +40,13 @@ interface SitDetailHeaderProps {
   isAuthenticatedNonOwner: boolean;
   reviewCount: number;
   avgRating: string | null;
+  /**
+   * Mode compact : masque le hero photos, le titre et la ligne meta
+   * (déjà rendus par SitImmersiveContent). Conserve le lien retour, les
+   * actions (Modifier / Voir comme gardien / Signaler), le badge statut
+   * et l'owner card.
+   */
+  compact?: boolean;
 }
 
 const formatDate = (d: string | null) =>
@@ -58,6 +65,7 @@ const SitDetailHeader = ({
   isAuthenticatedNonOwner,
   reviewCount,
   avgRating,
+  compact = false,
 }: SitDetailHeaderProps) => {
   const status = getSitStatusConfig(sitStatus);
 
@@ -71,14 +79,18 @@ const SitDetailHeader = ({
         {isOwner ? "Retour à mes annonces" : "Retour à la recherche"}
       </Link>
 
-      {/* Hero: Photos gallery avec lightbox */}
-      <SitHero photos={photos} city={owner?.city} priority />
-
+      {/* Hero: Photos gallery avec lightbox — masqué en mode compact car déjà rendu par SitImmersiveContent */}
+      {!compact && <SitHero photos={photos} city={owner?.city} priority />}
       {/* Title, location, dates, status */}
       <div className="flex items-start justify-between gap-4 mb-1">
-        <h1 className="font-heading text-2xl md:text-3xl font-bold">
-          {sitTitle ? sanitizeUserTitle(sitTitle) : `Garde à ${owner?.city || "..."}`}
-        </h1>
+        {!compact ? (
+          <h1 className="font-heading text-2xl md:text-3xl font-bold">
+            {sitTitle ? sanitizeUserTitle(sitTitle) : `Garde à ${owner?.city || "..."}`}
+          </h1>
+        ) : (
+          /* Spacer pour pousser les actions à droite (titre déjà dans le hero immersif) */
+          <div className="flex-1" />
+        )}
         <div className="flex items-center gap-2 shrink-0">
           {isOwner && (
             <>
@@ -140,22 +152,24 @@ const SitDetailHeader = ({
       </div>
 
       <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground mb-6">
-        {owner?.city && (
+        {!compact && owner?.city && (
           <span className="flex items-center gap-1.5">
             <MapPin className="h-4 w-4" aria-hidden="true" />
             {owner.city}
           </span>
         )}
-        <span className="flex items-center gap-1.5">
-          <Calendar className="h-4 w-4" aria-hidden="true" />
-          <time dateTime={startDate || undefined}>{formatDate(startDate)}</time>
-          <span aria-hidden="true">→</span>
-          <span className="sr-only">jusqu'au</span>
-          <time dateTime={endDate || undefined}>{formatDate(endDate)}</time>
-          {flexibleDates && (
-            <span className="text-xs bg-accent px-2 py-0.5 rounded-full ml-1">Flexible</span>
-          )}
-        </span>
+        {!compact && (
+          <span className="flex items-center gap-1.5">
+            <Calendar className="h-4 w-4" aria-hidden="true" />
+            <time dateTime={startDate || undefined}>{formatDate(startDate)}</time>
+            <span aria-hidden="true">→</span>
+            <span className="sr-only">jusqu'au</span>
+            <time dateTime={endDate || undefined}>{formatDate(endDate)}</time>
+            {flexibleDates && (
+              <span className="text-xs bg-accent px-2 py-0.5 rounded-full ml-1">Flexible</span>
+            )}
+          </span>
+        )}
         <span
           className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${status.className}`}
           aria-label={`Statut de l'annonce : ${status.label}`}
@@ -170,8 +184,8 @@ const SitDetailHeader = ({
         )}
       </div>
 
-      {/* Owner card — masquée si on est soi-même le propriétaire (info redondante) */}
-      {owner && !isOwner && (
+      {/* Owner card — masquée si on est soi-même le propriétaire OU en mode compact (déjà dans la sidebar immersive) */}
+      {owner && !isOwner && !compact && (
         <div className="flex items-center gap-3 mb-6 p-4 bg-card rounded-xl border border-border">
           <Link to={`/gardiens/${owner.id}`}>
             {owner.avatar_url ? (

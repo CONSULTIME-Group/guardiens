@@ -297,6 +297,7 @@ const OwnerSitView = ({
         isAuthenticatedNonOwner={false}
         reviewCount={reviews.length}
         avgRating={avgRating}
+        compact
       />
 
       {/* Historique des modifications de dates */}

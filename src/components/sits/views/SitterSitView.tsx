@@ -186,6 +186,7 @@ const SitterSitView = ({
         isAuthenticatedNonOwner={!!currentUserId}
         reviewCount={reviews.length}
         avgRating={avgRating}
+        compact
       />
 
       {/* Apply bar — affichée tout en haut, juste sous le header,
