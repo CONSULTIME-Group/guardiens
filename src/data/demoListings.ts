@@ -120,32 +120,33 @@ export const DEMO_SITS: DemoSit[] = [
       {
         species: "dog",
         name: "Laïka",
-        breed: "Berger australien",
+        breed: "Berger belge malinois",
         age: "5 ans",
         notes:
-          "Très douce, adore les longues balades. Deux sorties par jour (45 min le matin, 30 min le soir).",
+          "Très énergique et obéissante. Deux vraies sorties par jour (45 min le matin, 45 min le soir) + un peu de jeu de pister dans le jardin. Aboie aux livreurs mais s'arrête au mot.",
       },
       {
         species: "cat",
         name: "Milo",
-        breed: "European",
+        breed: "Maine Coon",
         age: "8 ans",
-        notes: "Sage, dort beaucoup, sort dans le jardin la journée.",
+        notes: "Géant pataud de 9 kg. Brossage tous les 2 jours conseillé (poil long), sort dans le jardin la journée.",
       },
       {
-        species: "cat",
-        name: "Nour",
-        breed: "Européen tabby",
-        age: "3 ans",
-        notes: "Joueur, très câlin, ne supporte pas d'être seul trop longtemps.",
+        species: "bird",
+        name: "Coco",
+        breed: "Perroquet gris du Gabon",
+        age: "12 ans",
+        notes:
+          "Imite les sonneries et le rire de ma fille. Sort de sa cage 1h le matin sous surveillance. Mange fruits frais + granulés (instructions détaillées sur place).",
       },
     ],
     schedule: {
-      morning: "Sortie de Laïka 30-45 min, gamelles des chats, café tranquille.",
-      midday: "Une visite rapide au jardin, fontaine à eau à recharger.",
-      evening: "Promenade Laïka 30 min, repas du soir, câlins obligatoires 🥰",
+      morning: "Sortie running ou vélo avec Laïka 45 min, gamelles, ouverture cage de Coco 1h.",
+      midday: "Visite rapide au jardin, fontaine à eau à recharger, quelques mots à Coco — il adore.",
+      evening: "Promenade Laïka 45 min, repas du soir, brossage de Milo, câlins obligatoires 🥰",
       notes:
-        "Les animaux sont autonomes mais aiment la présence — comptez environ 2h de présence active par jour.",
+        "Comptez environ 2h30 de présence active par jour. Laïka a besoin de se dépenser — un gardien sportif sera ravi.",
     },
     ownerMessage:
       "On confie nos animaux à un voisin de confiance plutôt qu'à une pension. Vous repartirez sûrement avec des cookies maison de mon mari et une connaissance fine du quartier !",
