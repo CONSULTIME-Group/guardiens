@@ -34,7 +34,10 @@ export type EventType =
   | "referral_link_copied"
   | "page_view_pre_launch"
   | "cta_complete_profile"
-  | "advantage_link_click";
+  | "advantage_link_click"
+  | "fb_referral_landing"      // Visiteur arrivé depuis Facebook (referrer ou utm_source=facebook)
+  | "fb_referral_feedback"     // Réaction au prompt de feedback (metadata.reaction)
+  | "fb_referral_dismissed";   // Prompt fermé sans feedback
 
 interface TrackOptions {
   source?: string;
