@@ -656,9 +656,20 @@ const PublicSitDetail = () => {
                 Postuler à cette garde
               </Button>
             )}
+            {/* Note honnêteté : abonnement gardien à venir */}
+            {!isAuthenticated && (sit as any).accepting_applications && (
+              <p className="text-[11px] text-muted-foreground text-center mt-2 leading-snug">
+                Inscription et candidature gratuites aujourd'hui. Un abonnement gardien sera introduit à terme — vous serez prévenu(e) avant tout changement.
+              </p>
+            )}
           </div>
         </div>
       </div>
+      {/* Fin wrapper max-w-4xl */}
+      </div>
+
+      {/* Footer public — anonymes uniquement */}
+      {!isAuthenticated && <PublicFooter />}
 
       {isAuthenticated && sit && (
         <ApplicationModal
