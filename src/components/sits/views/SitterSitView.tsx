@@ -35,6 +35,7 @@ import AnimalsTab from "./tabs/AnimalsTab";
 import HousingTab from "./tabs/HousingTab";
 import ExpectationsTab from "./tabs/ExpectationsTab";
 import ReviewsTab from "./tabs/ReviewsTab";
+import SitImmersiveContent from "./SitImmersiveContent";
 import type { SitData } from "./types";
 
 interface SitterSitViewProps {
