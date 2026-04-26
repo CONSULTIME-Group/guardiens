@@ -114,6 +114,33 @@ const normalizeLabel = (k: string): "Matin" | "Midi" | "Après-midi" | "Soir" | 
   return "Soir";
 };
 
+/**
+ * Nettoie un texte libre multi-lignes :
+ *  - trim global
+ *  - normalise les espaces multiples sur chaque ligne
+ *  - supprime la ponctuation finale répétée (« .. », « ;; », « ,. » → rien)
+ *  - réduit les retours à la ligne consécutifs (max 1 ligne vide entre paragraphes)
+ *  - supprime les puces résiduelles en début de ligne
+ */
+const cleanFreeText = (raw: string): string => {
+  return raw
+    .trim()
+    .split(/\r?\n/)
+    .map((line) =>
+      stripBullet(line)
+        .replace(/[ \t]+/g, " ")
+        .trim()
+        .replace(/[.;,\s]+$/u, ""),
+    )
+    .filter((line, idx, arr) => {
+      // garde la ligne si non-vide, ou si c'est une ligne vide qui sépare deux paragraphes (pas en début/fin, pas doublée)
+      if (line.length > 0) return true;
+      if (idx === 0 || idx === arr.length - 1) return false;
+      return arr[idx - 1].length > 0;
+    })
+    .join("\n");
+};
+
 const parseRoutine = (raw: string | null) => {
   if (!raw) return null;
   // Étape 1 : éclate sur retours à la ligne ET sur séparateurs ` / `, ` • `, ` | `
@@ -557,7 +584,7 @@ const SitImmersiveContent = ({
                 </div>
               ) : (
                 <p className="text-sm text-foreground whitespace-pre-line leading-relaxed">
-                  {sit.daily_routine.trim()}
+                  {cleanFreeText(sit.daily_routine)}
                 </p>
               )}
             </section>
