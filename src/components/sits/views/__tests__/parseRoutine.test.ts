@@ -334,3 +334,47 @@ describe("parseRoutine — tolérance aux espaces et caractères spéciaux", () 
   });
 });
 
+describe("parseRoutine — indications horaires riches (crochets, accolades, multiples)", () => {
+  it("crochets droits : Matin [8h] : balade", () => {
+    const r = parseRoutine("Matin [8h] : balade\nSoir [19h] : croquettes")!;
+    expect(r.blocks.map((b) => b.label)).toEqual(["Matin", "Soir"]);
+    expect(r.blocks[0].text).toBe("balade");
+    expect(r.blocks[1].text).toBe("croquettes");
+  });
+
+  it("parenthèses + tiret long collé : Soir (vers 19h)–croquettes", () => {
+    const r = parseRoutine("Matin (7h)–gamelle\nSoir (vers 19h)–croquettes")!;
+    expect(r.blocks.map((b) => b.label)).toEqual(["Matin", "Soir"]);
+    expect(r.blocks[0].text).toBe("gamelle");
+    expect(r.blocks[1].text).toBe("croquettes");
+  });
+
+  it("accolades : Midi {12h-13h} - sieste", () => {
+    const r = parseRoutine("Midi {12h-13h} - sieste calme")!;
+    expect(r.blocks[0].label).toBe("Midi");
+    expect(r.blocks[0].text).toBe("sieste calme");
+  });
+
+  it("plusieurs blocs d'indication successifs : Matin (7h) [balade] : sortie", () => {
+    const r = parseRoutine("Matin (7h) [balade] : sortie au parc\nNuit [22h] : panier")!;
+    expect(r.blocks.map((b) => b.label)).toEqual(["Matin", "Nuit"]);
+    expect(r.blocks[0].text).toBe("sortie au parc");
+    expect(r.blocks[1].text).toBe("panier");
+  });
+
+  it("crochets sans séparateur explicite : Soir [19h] croquettes", () => {
+    const r = parseRoutine("Matin [8h] balade matinale\nSoir [19h] croquettes")!;
+    expect(r.blocks.map((b) => b.label)).toEqual(["Matin", "Soir"]);
+    expect(r.blocks[0].text).toBe("balade matinale");
+  });
+
+  it("ordre mélangé avec horaires en crochets", () => {
+    const txt = [
+      "Soir [19h] : repas",
+      "Matin [7h] : sortie",
+      "Après-midi [15h] : jeu",
+    ].join("\n");
+    expect(labelsOf(txt)).toEqual(["Matin", "Après-midi", "Soir"]);
+  });
+});
+
