@@ -16,7 +16,7 @@ import ContextHeaderCard from "@/components/messages/ContextHeaderCard";
 import PresenceBadge from "@/components/messages/PresenceBadge";
 import DaySeparator from "@/components/messages/DaySeparator";
 import MessageBubble from "@/components/messages/MessageBubble";
-import { buildFirstMessageDraft, type ConversationContext } from "@/lib/conversation";
+import { buildFirstMessageDraft, shouldPrefillDraft, type ConversationContext } from "@/lib/conversation";
 import { useToast } from "@/hooks/use-toast";
 import { useSubscriptionAccess } from "@/hooks/useSubscriptionAccess";
 import { Lock } from "lucide-react";
