@@ -86,31 +86,70 @@ interface SitImmersiveContentProps {
 const formatDate = (d: string | null) =>
   d ? format(new Date(d), "d MMMM yyyy", { locale: fr }) : "";
 
-/** Tente de découper la routine "Matin — … / Midi — … / Soir — …" en blocs. */
+/**
+ * Tente de découper la routine en blocs Matin / Midi / Après-midi / Soir / Nuit.
+ * Gère :
+ *  - retours à la ligne, séparateurs ` / `, `•`, `|`, ` — ` entre blocs
+ *  - puces en début de ligne (`-`, `*`, `•`, `–`, `—`, `→`)
+ *  - séparateurs label/texte variés (`—`, `–`, `-`, `:`, ` ` simple)
+ *  - casse et accents (Matin, MATIN, après-midi, Aprem, Après midi…)
+ *  - format partiel (un seul moment renseigné) → on accepte 1 bloc minimum
+ *  - texte libre sans label → on retourne null pour fallback whitespace-pre-line
+ */
+const stripBullet = (s: string) =>
+  s.replace(/^\s*[-*•–—→▪►●·]+\s*/, "").trim();
+
+const normalizeLabel = (k: string): "Matin" | "Midi" | "Après-midi" | "Soir" | "Nuit" => {
+  const low = k.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  if (low.startsWith("matin")) return "Matin";
+  if (low.startsWith("midi")) return "Midi";
+  if (low.startsWith("apres") || low.startsWith("aprem")) return "Après-midi";
+  if (low.startsWith("nuit")) return "Nuit";
+  return "Soir";
+};
+
 const parseRoutine = (raw: string | null) => {
   if (!raw) return null;
-  const lines = raw.split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
-  const re = /^\s*(matin|midi|soir|après[- ]?midi|nuit)\s*[—:\-–]\s*(.+)$/i;
+  // Étape 1 : éclate sur retours à la ligne ET sur séparateurs ` / `, ` • `, ` | `
+  const segments = raw
+    .split(/\r?\n+|\s+[•|]\s+|\s+\/\s+/)
+    .map((l) => stripBullet(l))
+    .filter(Boolean);
+
+  // Regex tolérante : label suivi d'un séparateur (—, –, -, :) OU d'un espace si label seul
+  const re = /^\s*(matin|midi|soir|nuit|apr[èeé]s[- ]?midi|aprem)\b\s*[—–\-:.]?\s*(.*)$/i;
+
   const blocks: { key: string; label: string; text: string }[] = [];
-  let leftover: string[] = [];
-  for (const line of lines) {
-    const m = line.match(re);
-    if (m) {
-      const k = m[1].toLowerCase();
-      const label = k.startsWith("matin") ? "Matin" : k.startsWith("midi") || k.startsWith("après") ? "Midi" : "Soir";
-      blocks.push({ key: k, label, text: m[2].trim() });
+  const leftover: string[] = [];
+
+  for (const seg of segments) {
+    const m = seg.match(re);
+    if (m && m[2] && m[2].trim().length > 0) {
+      const label = normalizeLabel(m[1]);
+      blocks.push({ key: label.toLowerCase(), label, text: m[2].trim().replace(/[.;,]+$/, "") });
+    } else if (m && (!m[2] || m[2].trim().length === 0)) {
+      // label seul (ex: "Matin :") — on ignore mais on ne casse pas le parsing
+      continue;
     } else {
-      leftover.push(line);
+      leftover.push(seg);
     }
   }
+
   if (blocks.length === 0) return null;
-  return { blocks, notes: leftover.join(" ") };
+
+  // Tri logique Matin → Midi → Après-midi → Soir → Nuit
+  const order = ["matin", "midi", "après-midi", "soir", "nuit"];
+  blocks.sort((a, b) => order.indexOf(a.key) - order.indexOf(b.key));
+
+  return { blocks, notes: leftover.join(" ").trim() };
 };
 
 const ROUTINE_ICONS: Record<string, { icon: any; bg: string; fg: string }> = {
   Matin: { icon: Sun, bg: "bg-amber-100", fg: "text-amber-700" },
-  Midi: { icon: Sunset, bg: "bg-sky-100", fg: "text-sky-700" },
+  Midi: { icon: Sun, bg: "bg-orange-100", fg: "text-orange-700" },
+  "Après-midi": { icon: Sunset, bg: "bg-sky-100", fg: "text-sky-700" },
   Soir: { icon: Moon, bg: "bg-indigo-100", fg: "text-indigo-700" },
+  Nuit: { icon: Moon, bg: "bg-slate-100", fg: "text-slate-700" },
 };
 
 const SitImmersiveContent = ({
