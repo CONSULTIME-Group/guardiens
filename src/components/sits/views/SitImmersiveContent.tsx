@@ -1100,17 +1100,7 @@ const SitImmersiveContent = ({
                 </section>
               )}
 
-              {/* Profil quartier (LocationProfileCard) */}
-              {cityName && ownerPostalCode && (
-                <section className="rounded-2xl border border-border bg-card p-5 md:p-6">
-                  <h2 className="text-lg font-semibold mb-3 flex items-center gap-2">
-                    <MapPin className="h-5 w-5 text-primary" /> Le quartier
-                  </h2>
-                  <LocationProfileCard city={cityName} postalCode={ownerPostalCode} />
-                </section>
-              )}
-
-              {/* Lien guide local */}
+              {/* Lien guide local — placé en haut pour visibilité */}
               {hasLocalGuide && (
                 <Link
                   to={`/guides/${citySlug}`}
@@ -1134,6 +1124,16 @@ const SitImmersiveContent = ({
                     <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-0.5 transition-all shrink-0 mt-2" />
                   </div>
                 </Link>
+              )}
+
+              {/* Profil quartier (LocationProfileCard) */}
+              {cityName && ownerPostalCode && (
+                <section className="rounded-2xl border border-border bg-card p-5 md:p-6">
+                  <h2 className="text-lg font-semibold mb-3 flex items-center gap-2">
+                    <MapPin className="h-5 w-5 text-primary" /> Le quartier
+                  </h2>
+                  <LocationProfileCard city={cityName} postalCode={ownerPostalCode} />
+                </section>
               )}
 
               {!propertyDescription && amenities.length === 0 && photos.length <= 3 && !cityName && (
