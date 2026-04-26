@@ -39,6 +39,10 @@ import {
 import VerifiedBadge from "@/components/profile/VerifiedBadge";
 import BreedProfileCard from "@/components/breeds/BreedProfileCard";
 import { slugify } from "@/lib/normalize";
+import { CITIES } from "@/data/cities";
+import { getCityContent } from "@/data/cityContent";
+
+const GUIDE_SLUGS = new Set(CITIES.map((c) => c.slug));
 
 const SPECIES_EMOJI: Record<string, string> = {
   dog: "🐕", cat: "🐈", farm_animal: "🐔", rabbit: "🐰", bird: "🦜",
