@@ -206,9 +206,11 @@ const PublicSitDetail = () => {
     ? `${window.location.origin}/annonces/${sit.id}`
     : `https://guardiens.fr/annonces/${sit.id}`;
 
-  // og:image — photo de l'annonce si dispo, sinon image générique du site
-  const ogImageUrl = photos[0] || "https://guardiens.fr/og-default.jpg";
-  const ogImageAlt = sit.title || "Annonce de garde — Guardiens";
+  // og:image — rotation stable parmi 5 visuels Guardiens (1 par hash de l'ID).
+  // Les photos réelles de l'annonce restent affichées dans le hero ; l'OG sert
+  // l'identité de marque pour les partages externes.
+  const ogImageUrl = getOgImageAbsoluteUrl(sit.id);
+  const ogImageAlt = `Guardiens — ${sit.title || "Annonce de garde"}`;
 
   const jsonLd = {
     "@context": "https://schema.org",
