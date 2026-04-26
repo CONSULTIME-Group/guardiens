@@ -128,3 +128,36 @@ export function buildFirstMessageDraft(args: {
       } et je vous contacte pour vous proposer mes services pour vos prochaines absences. N'hésitez pas à consulter mon profil.\n\nÀ bientôt !`;
   }
 }
+
+/**
+ * Décide si un brouillon de premier message doit être pré-rempli.
+ *
+ * Règles (toutes doivent être vraies) :
+ *  1. La conversation n'a AUCUN message non-système (peu importe l'expéditeur).
+ *     → si l'autre partie a déjà écrit, on ne colle pas un brouillon par-dessus.
+ *  2. Le champ de saisie est vide (trim).
+ *     → on n'écrase jamais ce que l'utilisateur tape.
+ *
+ * Retourne aussi un `reason` pour que l'UI puisse afficher un toast informatif
+ * quand aucun brouillon n'est proposé alors que la conversation est déjà entamée.
+ */
+export type PrefillDecision =
+  | { shouldPrefill: true; reason: "empty_conversation_and_input" }
+  | { shouldPrefill: false; reason: "conversation_already_started" }
+  | { shouldPrefill: false; reason: "input_not_empty" };
+
+export function shouldPrefillDraft(args: {
+  messages: ReadonlyArray<{ is_system: boolean }>;
+  currentInput: string;
+}): PrefillDecision {
+  const realMsgs = args.messages.filter(m => !m.is_system);
+  const inputIsEmpty = args.currentInput.trim() === "";
+
+  if (realMsgs.length > 0) {
+    return { shouldPrefill: false, reason: "conversation_already_started" };
+  }
+  if (!inputIsEmpty) {
+    return { shouldPrefill: false, reason: "input_not_empty" };
+  }
+  return { shouldPrefill: true, reason: "empty_conversation_and_input" };
+}
