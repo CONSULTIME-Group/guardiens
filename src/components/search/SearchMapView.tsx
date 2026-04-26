@@ -115,27 +115,30 @@ const SearchMapView = ({
         >
           <MapCenterController center={center} zoom={12} />
           <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-          {results.map((item) => {
-            const coords = getCoords(item);
-            if (!coords) return null;
-            return (
-              <Marker
-                key={item.id}
-                position={[coords.lat, coords.lng]}
-                icon={createPinIcon(getPinKind(item), activePin === item.id)}
-                eventHandlers={{
-                  click: () => setActivePin(activePin === item.id ? null : item.id),
-                }}
-              />
-            );
-          })}
+          {results
+            .filter((item) => !item?.is_demo && !item?.isAssigned && !item?.isCompleted)
+            .map((item) => {
+              const coords = getCoords(item);
+              if (!coords) return null;
+              return (
+                <Marker
+                  key={item.id}
+                  position={[coords.lat, coords.lng]}
+                  icon={createPinIcon(getPinKind(item), activePin === item.id)}
+                  eventHandlers={{
+                    click: () => setActivePin(activePin === item.id ? null : item.id),
+                  }}
+                />
+              );
+            })}
         </MapContainer>
 
-        {/* Légende des pins */}
-        <div className="absolute bottom-3 left-3 z-[400] bg-card/95 backdrop-blur-sm border border-border rounded-lg shadow-sm px-3 py-2 text-xs text-foreground space-y-1 pointer-events-none">
-          <div className="flex items-center gap-2"><span className="inline-block w-3 h-3 rounded-full" style={{ background: pinColors.active.bg, border: `2px solid ${pinColors.active.ring}` }} /> Disponible</div>
-          <div className="flex items-center gap-2"><span className="inline-block w-3 h-3 rounded-full" style={{ background: pinColors.inactive.bg, border: `2px solid ${pinColors.inactive.ring}` }} /> Attribuée / terminée</div>
-          <div className="flex items-center gap-2"><span className="inline-block w-3 h-3 rounded-full border-dashed" style={{ background: pinColors.demo.bg, border: `2px dashed ${pinColors.demo.ring}` }} /> Annonce d'exemple</div>
+        {/* Légende : seules les annonces actives sont épinglées */}
+        <div className="absolute bottom-3 left-3 z-[400] bg-card/95 backdrop-blur-sm border border-border rounded-lg shadow-sm px-3 py-2 text-xs text-foreground pointer-events-none">
+          <div className="flex items-center gap-2">
+            <span className="inline-block w-3 h-3 rounded-full" style={{ background: pinColors.active.bg, border: `2px solid ${pinColors.active.ring}` }} />
+            Annonces disponibles uniquement
+          </div>
         </div>
 
         {activeItem && (() => {
