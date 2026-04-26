@@ -370,18 +370,18 @@ const SitImmersiveContent = ({
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Colonne principale */}
         <div className="lg:col-span-2 space-y-6">
-          {/* Le cadre */}
-          {(sit?.specific_expectations || property?.description) && (
+          {/* Le cadre — visible si description, attentes ou équipements */}
+          {hasFrame && (
             <section className="rounded-2xl border border-border bg-card p-5 md:p-6">
               <h2 className="text-lg font-semibold mb-3">Le cadre</h2>
-              {sit?.specific_expectations && (
+              {expectations && (
                 <p className="text-sm text-foreground/90 leading-relaxed whitespace-pre-line mb-4">
-                  {sit.specific_expectations}
+                  {expectations}
                 </p>
               )}
-              {property?.description && (
+              {propertyDescription && (
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  {property.description}
+                  {propertyDescription}
                 </p>
               )}
               {amenities.length > 0 && (
