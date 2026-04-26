@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
+import { sendTransactionalEmail } from "@/lib/sendTransactionalEmail";
 import {
   Star, MapPin, CheckCircle2, XCircle, MessageSquare, Users,
   Archive, Eye, EyeOff, Calendar, PawPrint, Shield, AlertTriangle,
