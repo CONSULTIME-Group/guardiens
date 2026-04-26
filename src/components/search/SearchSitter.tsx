@@ -1744,16 +1744,35 @@ const SearchSitter = () => {
         const demoIndices = list.map((it: any, i: number) => (it?.is_demo ? i : -1)).filter((i) => i !== -1);
         const realCount = list.length - demoIndices.length;
         const allHaveBadge = demoIndices.every((i) => !!list[i]?.is_demo);
-        const interleaveOk = inMembersTab
+
+        // ─── Audit STRICT : 1 démo toutes les 3 vraies annonces ───
+        // Positions attendues (1-indexées) : 4, 8, 12, … tant qu'il reste des vraies annonces et des démos.
+        // Démos en surplus : autorisées uniquement à la toute fin (après les vraies).
+        const observedPositions = demoIndices.map((i) => i + 1); // 1-indexées
+        const tabAvailableDemos = tab === "sits" ? DEMO_SITS.length : !inMembersTab ? DEMO_MISSIONS.length : 0;
+        const slotsByRule = realCount >= 3 ? Math.floor(realCount / 3) : 0;
+        const interleavedExpectedCount = Math.min(slotsByRule, demoIndices.length);
+        const expectedInterleavedPositions: number[] = [];
+        for (let k = 1; k <= interleavedExpectedCount; k++) {
+          // Position (1-indexée) dans la liste finale = 3*k réelles + k démos déjà insérées = 4k
+          expectedInterleavedPositions.push(4 * k);
+        }
+        const trailingDemosCount = Math.max(0, demoIndices.length - interleavedExpectedCount);
+        const expectedTrailingPositions: number[] = [];
+        for (let k = 0; k < trailingDemosCount; k++) {
+          expectedTrailingPositions.push(list.length - trailingDemosCount + 1 + k);
+        }
+        const expectedPositions = [...expectedInterleavedPositions, ...expectedTrailingPositions];
+
+        const missingPositions = expectedPositions.filter((p) => !observedPositions.includes(p));
+        const unexpectedPositions = observedPositions.filter((p) => !expectedPositions.includes(p));
+        const strictInterleaveOk = inMembersTab
           ? true
-          : demoIndices.length === 0
-            ? realCount === 0
-            : demoIndices.every((idx) => {
-                if (realCount >= 3) return (idx + 1) % 4 === 0 || idx >= realCount;
-                return idx >= realCount;
-              });
+          : missingPositions.length === 0 && unexpectedPositions.length === 0;
+        const interleaveOk = strictInterleaveOk;
         const tabLabel = tab === "sits" ? "Gardes" : inMembersTab ? "Membres dispo" : "Missions";
-        const availableDemos = tab === "sits" ? DEMO_SITS.length : !inMembersTab ? DEMO_MISSIONS.length : 0;
+        const availableDemos = tabAvailableDemos;
+
         return (
           <div
             className="mx-6 mt-4 rounded-lg border-2 border-dashed border-amber-400 bg-amber-50 p-4 text-sm space-y-2"
