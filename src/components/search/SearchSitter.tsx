@@ -755,12 +755,17 @@ const SearchSitter = () => {
 
     const cardContent = (
       <div
-        className={`bg-card rounded-2xl overflow-hidden border border-border transition-shadow ${isClickable ? "cursor-pointer hover:shadow-md" : ""} ${isInactive ? "opacity-60 grayscale-[40%]" : ""}`}
-        aria-disabled={isInactive || undefined}
+        className={`bg-card rounded-2xl overflow-hidden border transition-shadow ${isClickable ? "cursor-pointer hover:shadow-md" : ""} ${isInactive ? "opacity-60 grayscale-[40%]" : ""} ${isDemo ? "border-amber-400 border-dashed ring-1 ring-amber-200/60" : "border-border"}`}
+        aria-disabled={isInactive || isDemo || undefined}
       >
         {photos.length > 0 && (
           <div className="h-52 relative">
-            <img src={photos[0]} alt="" className={`w-full h-full object-cover ${isInactive ? "grayscale" : ""}`} loading="lazy" />
+            <img src={photos[0]} alt="" className={`w-full h-full object-cover ${isInactive ? "grayscale" : ""} ${isDemo ? "saturate-[0.85]" : ""}`} loading="lazy" />
+            {isDemo && (
+              <span className="absolute inset-x-0 top-0 bg-amber-400 text-amber-950 text-[11px] font-semibold uppercase tracking-wide px-3 py-1.5 text-center shadow-sm flex items-center justify-center gap-1.5">
+                <Sparkles className="h-3 w-3" /> Annonce d'exemple — pour illustrer la plateforme
+              </span>
+            )}
             {(isAssigned || isCompleted) && (
               <span className="absolute inset-0 flex items-center justify-center">
                 <span className="bg-foreground/85 text-background rounded-full px-3 py-1.5 text-xs font-semibold uppercase tracking-wide shadow-md">
@@ -768,7 +773,7 @@ const SearchSitter = () => {
                 </span>
               </span>
             )}
-            {!isInactive && item.owner?.identity_verified && (
+            {!isInactive && !isDemo && item.owner?.identity_verified && (
               <span className="absolute top-3 left-3 flex items-center gap-1 bg-white/90 backdrop-blur-sm rounded-full px-2 py-1 text-xs text-primary font-medium">
                 <ShieldCheck className="h-3 w-3" /> Vérifié
               </span>
@@ -776,11 +781,6 @@ const SearchSitter = () => {
             {!isDemo && !isMission && !isInactive && (
               <span className="absolute top-3 right-3 z-10" onClick={(e) => e.preventDefault()}>
                 <FavoriteButton targetType="sit" targetId={item.id} size="sm" />
-              </span>
-            )}
-            {isDemo && (
-              <span className="absolute top-3 right-3 bg-black/50 text-white rounded-full px-2 py-1 text-xs">
-                Annonce type
               </span>
             )}
             {item.isNew && !isDemo && !isInactive && (
