@@ -119,8 +119,26 @@ const SearchOwner = () => {
     );
   }, []);
 
-  // Load owner city + postal code on mount
+  // Load owner city + postal code on mount — URL params take precedence
   useEffect(() => {
+    const urlCity = searchParams.get("city");
+    const urlPostal = searchParams.get("postal_code");
+    const urlZone = searchParams.get("zone");
+
+    if (urlCity) {
+      setCity(urlCity);
+      if (urlPostal) {
+        setCityPostalCode(urlPostal);
+        setUserPostalCode(urlPostal);
+      }
+      if (urlZone === "dept") setZoneMode("dept");
+      else if (urlZone === "region") setZoneMode("region");
+      else if (urlZone === "france") setZoneMode("france");
+      else setZoneMode("radius");
+      setInitialLoaded(true);
+      return;
+    }
+
     if (!user) return;
     (async () => {
       const { data } = await supabase.from("profiles").select("city, postal_code").eq("id", user.id).single();
@@ -131,7 +149,7 @@ const SearchOwner = () => {
       }
       setInitialLoaded(true);
     })();
-  }, [user]);
+  }, [user, searchParams]);
 
   // Fetch true France-wide sitter count (for unbiased counter + launch detection)
   useEffect(() => {
