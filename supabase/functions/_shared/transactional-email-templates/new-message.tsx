@@ -2,6 +2,7 @@ import * as React from 'npm:react@18.3.1'
 import {
   Body, Container, Head, Heading, Html, Preview, Text, Button, Hr, Section,
 } from 'npm:@react-email/components@0.0.22'
+import { BrandedHead } from './_branded-head.tsx'
 import type { TemplateEntry } from './registry.ts'
 import {
   buildLeadSentence,
@@ -46,7 +47,7 @@ const NewMessageEmail = ({
 
   return (
     <Html lang="fr" dir="ltr">
-      <Head />
+      <BrandedHead />
       <Preview>{`${sender} vous a envoyé un message sur ${SITE_NAME}`}</Preview>
       <Body style={main}>
         <Container style={container}>

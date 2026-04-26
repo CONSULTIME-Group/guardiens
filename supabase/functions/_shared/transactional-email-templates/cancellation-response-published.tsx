@@ -2,6 +2,7 @@ import * as React from 'npm:react@18.3.1'
 import {
   Body, Container, Head, Heading, Html, Preview, Text, Button, Hr,
 } from 'npm:@react-email/components@0.0.22'
+import { BrandedHead } from './_branded-head.tsx'
 import type { TemplateEntry } from './registry.ts'
 
 const SITE_NAME = "Guardiens"
@@ -14,7 +15,7 @@ interface Props {
 
 const CancellationResponsePublishedEmail = ({ responderFirstName, profileUrl }: Props) => (
   <Html lang="fr" dir="ltr">
-    <Head />
+    <BrandedHead />
     <Preview>{responderFirstName || 'Un membre'} a répondu à votre avis</Preview>
     <Body style={main}>
       <Container style={container}>

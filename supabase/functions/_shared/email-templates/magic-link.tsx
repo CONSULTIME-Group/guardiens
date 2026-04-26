@@ -12,6 +12,8 @@ import {
   Preview,
   Text,
 } from 'npm:@react-email/components@0.0.22'
+import { LegalFooter } from './_legal-footer.tsx'
+import { BrandedHead } from './_branded-head.tsx'
 
 interface MagicLinkEmailProps {
   siteName: string
@@ -23,7 +25,7 @@ export const MagicLinkEmail = ({
   confirmationUrl,
 }: MagicLinkEmailProps) => (
   <Html lang="fr" dir="ltr">
-    <Head />
+    <BrandedHead />
     <Preview>Votre lien de connexion guardiens</Preview>
     <Body style={main}>
       <Container style={container}>
@@ -41,6 +43,7 @@ export const MagicLinkEmail = ({
         <Text style={footer}>
           Si vous n'avez pas demandé ce lien, vous pouvez ignorer cet email.
         </Text>
+        <LegalFooter />
       </Container>
     </Body>
   </Html>

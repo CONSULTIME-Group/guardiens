@@ -13,6 +13,8 @@ import {
   Preview,
   Text,
 } from 'npm:@react-email/components@0.0.22'
+import { LegalFooter } from './_legal-footer.tsx'
+import { BrandedHead } from './_branded-head.tsx'
 
 interface SignupEmailProps {
   siteName: string
@@ -28,7 +30,7 @@ export const SignupEmail = ({
   confirmationUrl,
 }: SignupEmailProps) => (
   <Html lang="fr" dir="ltr">
-    <Head />
+    <BrandedHead />
     <Preview>Confirmez votre adresse email — Guardiens</Preview>
     <Body style={main}>
       <Container style={container}>
@@ -56,6 +58,7 @@ export const SignupEmail = ({
         <Text style={footer}>
           Si vous n'avez pas créé de compte, ignorez simplement cet email.
         </Text>
+        <LegalFooter />
       </Container>
     </Body>
   </Html>

@@ -12,6 +12,8 @@ import {
   Preview,
   Text,
 } from 'npm:@react-email/components@0.0.22'
+import { LegalFooter } from './_legal-footer.tsx'
+import { BrandedHead } from './_branded-head.tsx'
 
 interface RecoveryEmailProps {
   siteName: string
@@ -23,7 +25,7 @@ export const RecoveryEmail = ({
   confirmationUrl,
 }: RecoveryEmailProps) => (
   <Html lang="fr" dir="ltr">
-    <Head />
+    <BrandedHead />
     <Preview>Réinitialisation de votre mot de passe guardiens</Preview>
     <Body style={main}>
       <Container style={container}>
@@ -42,6 +44,7 @@ export const RecoveryEmail = ({
           Si vous n'avez pas fait cette demande, ignorez simplement cet email.
           Votre mot de passe ne sera pas modifié.
         </Text>
+        <LegalFooter />
       </Container>
     </Body>
   </Html>

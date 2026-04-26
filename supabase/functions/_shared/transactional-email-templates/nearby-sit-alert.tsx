@@ -2,6 +2,7 @@ import * as React from 'npm:react@18.3.1'
 import {
   Body, Container, Head, Heading, Html, Preview, Text, Button, Hr, Section,
 } from 'npm:@react-email/components@0.0.22'
+import { BrandedHead } from './_branded-head.tsx'
 import type { TemplateEntry } from './registry.ts'
 
 const SITE_NAME = "Guardiens"
@@ -33,7 +34,7 @@ const NearbySitAlertEmail = ({
   const ctaHref = sitId ? `${SITE_URL}/sits/${sitId}` : `${SITE_URL}/sits`
   return (
     <Html lang="fr" dir="ltr">
-      <Head />
+      <BrandedHead />
       <Preview>
         Une nouvelle annonce près de chez vous{city ? ` à ${city}` : ''}
       </Preview>

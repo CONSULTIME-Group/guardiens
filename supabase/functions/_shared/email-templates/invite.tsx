@@ -13,6 +13,8 @@ import {
   Preview,
   Text,
 } from 'npm:@react-email/components@0.0.22'
+import { LegalFooter } from './_legal-footer.tsx'
+import { BrandedHead } from './_branded-head.tsx'
 
 interface InviteEmailProps {
   siteName: string
@@ -26,7 +28,7 @@ export const InviteEmail = ({
   confirmationUrl,
 }: InviteEmailProps) => (
   <Html lang="fr" dir="ltr">
-    <Head />
+    <BrandedHead />
     <Preview>Vous êtes invité(e) à rejoindre guardiens</Preview>
     <Body style={main}>
       <Container style={container}>
@@ -47,6 +49,7 @@ export const InviteEmail = ({
         <Text style={footer}>
           Si vous n'attendiez pas cette invitation, vous pouvez ignorer cet email.
         </Text>
+        <LegalFooter />
       </Container>
     </Body>
   </Html>
