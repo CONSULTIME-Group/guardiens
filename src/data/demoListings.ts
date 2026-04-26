@@ -252,9 +252,9 @@ export const DEMO_SITS: DemoSit[] = [
     id: "demo-garde-003",
     slug: "grenoble-deux-chats-appart",
     is_demo: true,
-    title: "Appartement lumineux, deux chats aux habitudes bien rodées",
+    title: "Appartement lumineux, un husky câlin et une chatte sacrée",
     description:
-      "Appartement de 75 m² au cœur de Grenoble, 4ᵉ étage avec balcon plein sud et vue sur la Bastille. Deux chattes adorables, autonomes, qui adorent les fenêtres ouvertes et les caresses du soir.",
+      "Appartement de 75 m² au cœur de Grenoble, 4ᵉ étage avec balcon plein sud et vue sur la Bastille. Yuki notre husky sibérien et Milo notre Sacré de Birmanie forment un duo improbable et adorable. Cadre parfait pour qui aime la ville, la montagne à 30 min, et les animaux atypiques.",
     start_date: addDays(10),
     end_date: addDays(25),
     status: "published",
