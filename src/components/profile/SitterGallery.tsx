@@ -61,7 +61,9 @@ const SitterGallery = () => {
           .eq("sitter_id", user.id).eq("status", "accepted"),
       ]);
       setPhotos((galleryRes.data as any[]) || []);
-      const sits = (sitsRes.data || []).map((a: any) => ({ id: a.sits?.id, title: a.sits?.title })).filter((s: any) => s.id);
+      const sits = (sitsRes.data || [])
+        .map((a: any) => ({ id: a.sits?.id, title: a.sits?.title }))
+        .filter((s: any) => s.id && UUID_RE.test(s.id));
       setCompletedSits(sits);
       setLoading(false);
     };
