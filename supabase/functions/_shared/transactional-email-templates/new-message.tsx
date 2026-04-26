@@ -3,12 +3,16 @@ import {
   Body, Container, Head, Heading, Html, Preview, Text, Button, Hr, Section,
 } from 'npm:@react-email/components@0.0.22'
 import type { TemplateEntry } from './registry.ts'
+import {
+  buildLeadSentence,
+  buildSubject,
+  labelByContext,
+  type Context,
+  type RecipientRole,
+} from './new-message.logic.ts'
 
 const SITE_NAME = "Guardiens"
 const SITE_URL = "https://guardiens.fr"
-
-type Context = 'sit_application' | 'sitter_inquiry' | 'mission_help' | 'helper_inquiry' | 'owner_pitch' | undefined
-type RecipientRole = 'owner' | 'sitter' | undefined
 
 interface Props {
   senderFirstName?: string
@@ -21,59 +25,6 @@ interface Props {
   messagePreview?: string
 }
 
-/**
- * Header (titre + emoji) adapté au CONTEXTE et au RÔLE du destinataire.
- * - Pour `sit_application`: l'owner reçoit "Nouvelle candidature"; le sitter reçoit
- *   "Réponse à votre candidature" car c'est le proprio qui lui écrit.
- */
-const labelByContext = (ctx: Context, role: RecipientRole): { emoji: string; title: string } => {
-  switch (ctx) {
-    case 'sit_application':
-      return role === 'sitter'
-        ? { emoji: '✉️', title: 'Réponse à votre candidature' }
-        : { emoji: '🏡', title: 'Nouvelle candidature' }
-    case 'sitter_inquiry':
-      return role === 'sitter'
-        ? { emoji: '💬', title: 'Un propriétaire vous contacte' }
-        : { emoji: '💬', title: 'Demande de disponibilité' }
-    case 'mission_help':
-      return role === 'owner'
-        ? { emoji: '🤝', title: 'Proposition d\'entraide' }
-        : { emoji: '🤝', title: 'Réponse à votre proposition' }
-    case 'helper_inquiry':
-      return { emoji: '💬', title: 'Nouveau message d\'entraide' }
-    case 'owner_pitch':
-      return role === 'owner'
-        ? { emoji: '✋', title: 'Un gardien vous contacte' }
-        : { emoji: '✉️', title: 'Réponse à votre message' }
-    default:
-      return { emoji: '💬', title: 'Nouveau message' }
-  }
-}
-
-/**
- * Phrase d'accroche adaptée au rôle. Évite les formulations comme
- * "candidate à votre garde" envoyées au CANDIDAT lui-même.
- */
-const buildLeadSentence = (
-  sender: string,
-  ctx: Context,
-  role: RecipientRole,
-  contextLabel: string | undefined,
-): string => {
-  const ctxSuffix = contextLabel ? ` au sujet de ${contextLabel}` : ''
-  if (ctx === 'sit_application') {
-    return role === 'sitter'
-      ? `${sender} vous a répondu${ctxSuffix}.`
-      : `${sender} a candidaté${ctxSuffix}.`
-  }
-  if (ctx === 'mission_help') {
-    return role === 'owner'
-      ? `${sender} vous propose son aide${ctxSuffix}.`
-      : `${sender} vous a répondu${ctxSuffix}.`
-  }
-  return `${sender} vous a envoyé un message${ctxSuffix}.`
-}
 
 const NewMessageEmail = ({
   senderFirstName,
@@ -144,32 +95,7 @@ const NewMessageEmail = ({
 
 export const template = {
   component: NewMessageEmail,
-  subject: (data: Record<string, any>) => {
-    const sender = data.senderFirstName || 'Un membre'
-    const role: RecipientRole = data.recipientRole
-    switch (data.contextType) {
-      case 'sit_application':
-        return role === 'sitter'
-          ? `${sender} a répondu à votre candidature`
-          : `${sender} candidate à votre garde`
-      case 'sitter_inquiry':
-        return role === 'sitter'
-          ? `${sender} souhaite connaître vos disponibilités`
-          : `${sender} vous a répondu`
-      case 'mission_help':
-        return role === 'owner'
-          ? `${sender} propose son aide pour votre mission`
-          : `${sender} a répondu à votre proposition`
-      case 'helper_inquiry':
-        return `${sender} vous a envoyé un message`
-      case 'owner_pitch':
-        return role === 'owner'
-          ? `${sender} souhaite vous proposer ses services`
-          : `${sender} vous a répondu`
-      default:
-        return `Vous avez un nouveau message de ${sender}`
-    }
-  },
+  subject: (data: Record<string, any>) => buildSubject(data),
   displayName: 'Nouveau message reçu (contextualisé)',
   previewData: {
     senderFirstName: 'Patricia',
