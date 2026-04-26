@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { logger } from "@/lib/logger";
 import { supabase } from "@/integrations/supabase/client";
+import { sendTransactionalEmail } from "@/lib/sendTransactionalEmail";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { AlertTriangle } from "lucide-react";
@@ -126,24 +127,19 @@ const CancelSitModal = ({
         );
       }
 
-      // Trigger transactional email via edge function
-      try {
-        const templateName = isSitterCancelling ? "cancellation-by-sitter" : "cancellation-by-owner";
-        await supabase.functions.invoke("send-transactional-email", {
-          body: {
-            template: templateName,
-            recipientUserId: revieweeId,
-            data: {
-              cancellerFirstName: user.firstName || "Un membre",
-              sitTitle: sitTitle,
-              startDate: startDate || "",
-              reason: reason.trim(),
-            },
-          },
-        });
-      } catch {
-        // Non-blocking: email failure shouldn't prevent cancellation
-      }
+      // Trigger transactional email (non-blocking, helper résout l'email)
+      const templateName = isSitterCancelling ? "cancellation-by-sitter" : "cancellation-by-owner";
+      await sendTransactionalEmail({
+        templateName,
+        recipientUserId: revieweeId,
+        idempotencyKey: `${templateName}-${sitId}-${user.id}`,
+        templateData: {
+          cancellerFirstName: user.firstName || "Un membre",
+          sitTitle: sitTitle,
+          startDate: startDate || "",
+          reason: reason.trim(),
+        },
+      });
 
       toast.success(
         isSitterCancelling

@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { sendTransactionalEmail } from "@/lib/sendTransactionalEmail";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -112,34 +113,30 @@ const AdminReviews = () => {
       return;
     }
 
-    // Send email on validation
+    // Send email on validation (non-blocking)
     const review = cancellationReviews.find(r => r.id === reviewId);
     if (review && action === "valide") {
-      try {
-        if (field === "moderation_status") {
-          await supabase.functions.invoke("send-transactional-email", {
-            body: {
-              template: "cancellation-review-published",
-              recipientUserId: review.reviewee_id,
-              data: {
-                targetFirstName: review.reviewee?.first_name || "membre",
-                profileUrl: `https://guardiens.fr/gardiens/${review.reviewee_id}`,
-              },
-            },
-          });
-        } else if (field === "response_status") {
-          await supabase.functions.invoke("send-transactional-email", {
-            body: {
-              template: "cancellation-response-published",
-              recipientUserId: review.reviewer_id,
-              data: {
-                responderFirstName: review.reviewee?.first_name || "membre",
-                profileUrl: `https://guardiens.fr/gardiens/${review.reviewee_id}`,
-              },
-            },
-          });
-        }
-      } catch { /* non-blocking */ }
+      if (field === "moderation_status") {
+        await sendTransactionalEmail({
+          templateName: "cancellation-review-published",
+          recipientUserId: review.reviewee_id,
+          idempotencyKey: `cancellation-review-published-${reviewId}`,
+          templateData: {
+            targetFirstName: review.reviewee?.first_name || "membre",
+            profileUrl: `https://guardiens.fr/gardiens/${review.reviewee_id}`,
+          },
+        });
+      } else if (field === "response_status") {
+        await sendTransactionalEmail({
+          templateName: "cancellation-response-published",
+          recipientUserId: review.reviewer_id,
+          idempotencyKey: `cancellation-response-published-${reviewId}`,
+          templateData: {
+            responderFirstName: review.reviewee?.first_name || "membre",
+            profileUrl: `https://guardiens.fr/gardiens/${review.reviewee_id}`,
+          },
+        });
+      }
     }
 
     toast.success(action === "valide" ? "Validé avec succès" : "Refusé");
