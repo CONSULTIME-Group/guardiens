@@ -71,7 +71,7 @@ const adminNavGroups: NavGroup[] = [
     items: [
       { to: "/admin/city-pages", icon: MapPin, label: "Pages villes" },
       { to: "/admin/departments", icon: MapPin, label: "Départements" },
-      { to: "/admin/guides", icon: Compass, label: "Guides locaux" },
+      { to: "/admin/guides", icon: Compass, label: "Guides locaux", badgeKey: "guideRequests" },
     ],
   },
   {
@@ -108,6 +108,7 @@ export const AdminSidebar = () => {
         supabase.from("skills_library").select("id", { count: "exact", head: true }).eq("status", "pending"),
         supabase.from("review_disputes").select("id", { count: "exact", head: true }).eq("status", "pending"),
         supabase.from("error_logs").select("id", { count: "exact", head: true }).is("resolved_at", null),
+        supabase.from("guide_requests" as any).select("id", { count: "exact", head: true }).eq("status", "pending"),
       ]);
       setBadges({
         verifications: results[0].count || 0,
@@ -117,6 +118,7 @@ export const AdminSidebar = () => {
         skills: results[4].count || 0,
         reviewDisputes: results[5].count || 0,
         errors: results[6].count || 0,
+        guideRequests: results[7].count || 0,
       });
     };
     fetchBadges();

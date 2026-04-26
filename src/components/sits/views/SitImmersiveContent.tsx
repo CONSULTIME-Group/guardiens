@@ -12,6 +12,8 @@
  *  - Sidebar : profil hôte, CTA (slot via prop), guide local, page ville, réassurance
  */
 import { Link } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import {
@@ -223,11 +225,29 @@ const SitImmersiveContent = ({
   const ownerBio = (owner?.bio || ownerProfile?.welcome_notes || "").toString().trim();
   const hasOwnerCard = Boolean(owner && (ownerName || cityName || ownerBio));
 
-  // -- Guide local : seulement si la ville a un guide réellement publié
-  const hasLocalGuide = Boolean(citySlug && GUIDE_SLUGS.has(citySlug));
+  // -- Guide local : vérification dynamique en base (auto-mise à jour quand un guide est publié)
+  const { data: dbGuide } = useQuery({
+    queryKey: ["city-guide-by-slug", citySlug],
+    enabled: !!citySlug,
+    staleTime: 5 * 60 * 1000,
+    queryFn: async () => {
+      if (!citySlug) return null;
+      const { data } = await supabase
+        .from("city_guides" as any)
+        .select("id, slug, published")
+        .eq("slug", citySlug)
+        .eq("published", true)
+        .maybeSingle();
+      return data as any;
+    },
+  });
+  // Soit un guide éditorial statique (CITIES), soit un guide DB publié
+  const hasLocalGuide = Boolean(citySlug && (GUIDE_SLUGS.has(citySlug) || dbGuide));
+  // Encart "Guide en préparation" : ville renseignée mais pas encore de guide
+  const showGuideComingSoon = Boolean(citySlug && cityName && !hasLocalGuide);
   // -- Page ville (silo SEO) : seulement si du contenu éditorial existe
   const hasCityPage = Boolean(citySlug && getCityContent(citySlug));
-  
+
 
   return (
     <div>
@@ -573,6 +593,29 @@ const SitImmersiveContent = ({
                 <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-0.5 transition-all shrink-0 mt-2" />
               </div>
             </Link>
+          )}
+
+          {/* Encart "Guide en préparation" — la ville n'a pas encore de guide local */}
+          {showGuideComingSoon && (
+            <div className="rounded-2xl border border-dashed border-border bg-muted/30 p-5">
+              <div className="flex items-start gap-3">
+                <div className="shrink-0 w-10 h-10 rounded-full bg-muted text-muted-foreground flex items-center justify-center">
+                  <BookOpen className="h-5 w-5" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs uppercase tracking-wide text-muted-foreground mb-0.5">
+                    Guide local
+                  </p>
+                  <p className="font-semibold text-sm text-foreground">
+                    Le guide de {cityName} arrive bientôt
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                    On prépare une sélection de bonnes adresses, parcs et vétérinaires
+                    pour cette ville. Le lien apparaîtra ici dès sa publication.
+                  </p>
+                </div>
+              </div>
+            </div>
           )}
 
           {/* Page ville — visible uniquement si la page éditoriale existe */}
