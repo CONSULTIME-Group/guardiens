@@ -158,8 +158,19 @@ const SearchMapView = ({
               className="absolute z-[1000] bg-card rounded-xl shadow-lg border border-border overflow-hidden"
               style={{ width: 240, top: "50%", left: "50%", transform: "translate(-50%, -50%)" }}
             >
+          return (
+            <div
+              ref={popoverRef}
+              className={`absolute z-[1000] bg-card rounded-xl shadow-lg overflow-hidden ${isDemo ? "border-2 border-dashed border-amber-400" : "border border-border"}`}
+              style={{ width: 240, top: "50%", left: "50%", transform: "translate(-50%, -50%)" }}
+            >
+              {isDemo && (
+                <div className="bg-amber-400 text-amber-950 text-[11px] font-semibold uppercase tracking-wide px-3 py-1 text-center">
+                  Annonce d'exemple
+                </div>
+              )}
               {photos.length > 0 && (
-                <img src={photos[0]} alt="Aperçu de l'annonce" loading="lazy" className="w-full h-[120px] object-cover" />
+                <img src={photos[0]} alt="Aperçu de l'annonce" loading="lazy" className={`w-full h-[120px] object-cover ${isDemo ? "saturate-[0.85]" : ""}`} />
               )}
               <div className="p-3">
                 <h4 className="text-sm font-semibold text-foreground line-clamp-2 mb-1">
@@ -182,7 +193,11 @@ const SearchMapView = ({
                     })}
                   </div>
                 )}
-                {linkTo && hasAccess ? (
+                {isDemo ? (
+                  <p className="text-[11px] text-amber-700 italic text-center py-1">
+                    Exemple fictif — non disponible
+                  </p>
+                ) : linkTo && hasAccess ? (
                   <Link
                     to={linkTo}
                     className="block w-full py-2 text-xs text-center bg-primary text-primary-foreground rounded-lg font-medium"
@@ -194,7 +209,7 @@ const SearchMapView = ({
                     to="/mon-abonnement"
                     className="block w-full py-2 text-xs text-center bg-primary text-primary-foreground rounded-lg font-medium"
                   >
-                    {hasAccess ? "Annonce type" : "S'abonner pour postuler"}
+                    S'abonner pour postuler
                   </Link>
                 )}
               </div>
