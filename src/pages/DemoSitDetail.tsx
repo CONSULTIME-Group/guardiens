@@ -41,6 +41,8 @@ const SPECIES_EMOJI: Record<string, string> = {
   bird: "🦜",
   fish: "🐠",
   rodent: "🐹",
+  horse: "🐴",
+  nac: "🦎",
 };
 
 const SPECIES_LABEL: Record<string, string> = {
@@ -51,6 +53,8 @@ const SPECIES_LABEL: Record<string, string> = {
   bird: "Oiseau",
   fish: "Poisson",
   rodent: "Rongeur",
+  horse: "Équidé",
+  nac: "NAC",
 };
 
 const ENV_META: Record<string, { label: string; icon: any }> = {

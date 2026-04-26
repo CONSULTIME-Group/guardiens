@@ -9,7 +9,7 @@
  */
 
 export type DemoPet = {
-  species: "dog" | "cat" | "farm_animal" | "rabbit" | "bird" | "fish" | "rodent";
+  species: "dog" | "cat" | "farm_animal" | "rabbit" | "bird" | "fish" | "rodent" | "horse" | "nac";
   name: string;
   breed?: string;
   age?: string;
@@ -78,9 +78,9 @@ export const DEMO_SITS: DemoSit[] = [
     id: "demo-garde-001",
     slug: "lyon-laika-jardin",
     is_demo: true,
-    title: "Maison avec jardin, Laïka et ses deux compères",
+    title: "Maison avec jardin, Laïka la Malinoise et son drôle de trio",
     description:
-      "Nous partons deux semaines en famille et cherchons un gardien bienveillant pour veiller sur notre maison et nos trois animaux. Quartier calme et arboré du 6ᵉ, à deux pas du parc de la Tête d'Or. Maison spacieuse avec jardin clos, idéale pour Laïka qui adore prendre le soleil sur la terrasse.",
+      "Nous partons deux semaines en famille et cherchons un gardien bienveillant pour veiller sur notre maison et nos trois animaux : une malinoise sportive, un Maine Coon majestueux et Coco, notre perroquet gris du Gabon — un sacré personnage. Quartier calme et arboré du 6ᵉ, à deux pas du parc de la Tête d'Or. Maison spacieuse avec jardin clos, idéale pour Laïka qui adore les longues balades.",
     start_date: addDays(21),
     end_date: addDays(35),
     status: "published",
@@ -120,32 +120,33 @@ export const DEMO_SITS: DemoSit[] = [
       {
         species: "dog",
         name: "Laïka",
-        breed: "Berger australien",
+        breed: "Berger belge malinois",
         age: "5 ans",
         notes:
-          "Très douce, adore les longues balades. Deux sorties par jour (45 min le matin, 30 min le soir).",
+          "Très énergique et obéissante. Deux vraies sorties par jour (45 min le matin, 45 min le soir) + un peu de jeu de pister dans le jardin. Aboie aux livreurs mais s'arrête au mot.",
       },
       {
         species: "cat",
         name: "Milo",
-        breed: "European",
+        breed: "Maine Coon",
         age: "8 ans",
-        notes: "Sage, dort beaucoup, sort dans le jardin la journée.",
+        notes: "Géant pataud de 9 kg. Brossage tous les 2 jours conseillé (poil long), sort dans le jardin la journée.",
       },
       {
-        species: "cat",
-        name: "Nour",
-        breed: "Européen tabby",
-        age: "3 ans",
-        notes: "Joueur, très câlin, ne supporte pas d'être seul trop longtemps.",
+        species: "bird",
+        name: "Coco",
+        breed: "Perroquet gris du Gabon",
+        age: "12 ans",
+        notes:
+          "Imite les sonneries et le rire de ma fille. Sort de sa cage 1h le matin sous surveillance. Mange fruits frais + granulés (instructions détaillées sur place).",
       },
     ],
     schedule: {
-      morning: "Sortie de Laïka 30-45 min, gamelles des chats, café tranquille.",
-      midday: "Une visite rapide au jardin, fontaine à eau à recharger.",
-      evening: "Promenade Laïka 30 min, repas du soir, câlins obligatoires 🥰",
+      morning: "Sortie running ou vélo avec Laïka 45 min, gamelles, ouverture cage de Coco 1h.",
+      midday: "Visite rapide au jardin, fontaine à eau à recharger, quelques mots à Coco — il adore.",
+      evening: "Promenade Laïka 45 min, repas du soir, brossage de Milo, câlins obligatoires 🥰",
       notes:
-        "Les animaux sont autonomes mais aiment la présence — comptez environ 2h de présence active par jour.",
+        "Comptez environ 2h30 de présence active par jour. Laïka a besoin de se dépenser — un gardien sportif sera ravi.",
     },
     ownerMessage:
       "On confie nos animaux à un voisin de confiance plutôt qu'à une pension. Vous repartirez sûrement avec des cookies maison de mon mari et une connaissance fine du quartier !",
@@ -159,9 +160,9 @@ export const DEMO_SITS: DemoSit[] = [
     id: "demo-garde-002",
     slug: "annecy-lac-basse-cour",
     is_demo: true,
-    title: "Maison en bois face au lac, potager et basse-cour",
+    title: "Maison en bois face au lac, un âne, un cheval et la basse-cour",
     description:
-      "Notre cabane en bois donne directement sur le lac d'Annecy. Cadre exceptionnel pour qui aime la nature, le calme et les animaux de la ferme. Vous serez aux petits soins de nos trois poules, du chat Moustache et du potager en pleine saison.",
+      "Notre cabane en bois donne directement sur le lac d'Annecy. Cadre exceptionnel pour qui aime la nature, le calme et les animaux. Vous serez aux petits soins de Pompon notre âne du Cotentin, de Galaxie notre jument Mérens, des trois poules Marans, du chat Moustache et du potager en pleine saison.",
     start_date: addDays(45),
     end_date: addDays(59),
     status: "published",
@@ -199,6 +200,22 @@ export const DEMO_SITS: DemoSit[] = [
     },
     pets: [
       {
+        species: "horse",
+        name: "Galaxie",
+        breed: "Jument Mérens",
+        age: "11 ans",
+        notes:
+          "Vit au pré attenant. Foin matin et soir, vérifier l'abreuvoir. Pansage simple si vous aimez — pas obligatoire. Très docile, parfaite pour débuter au contact des chevaux.",
+      },
+      {
+        species: "horse",
+        name: "Pompon",
+        breed: "Âne du Cotentin",
+        age: "9 ans",
+        notes:
+          "Inséparable de Galaxie. Adore les caresses sur le chanfrein et les pommes en récompense. Pas de monte.",
+      },
+      {
         species: "farm_animal",
         name: "Plume, Câline & Rosette",
         breed: "Poules Marans",
@@ -217,11 +234,11 @@ export const DEMO_SITS: DemoSit[] = [
     ],
     schedule: {
       morning:
-        "Ouvrir le poulailler, ramasser les œufs, gamelle de Moustache, arroser le potager (15 min).",
-      midday: "Vérifier l'eau des poules, possible cueillette tomates/courgettes.",
-      evening: "Arrosage potager, fermeture poulailler après le coucher du soleil, repas Moustache.",
+        "Foin de Galaxie & Pompon, ouverture du poulailler, ramassage des œufs, gamelle de Moustache, arrosage potager (15 min).",
+      midday: "Vérifier les abreuvoirs (chevaux + poules), possible cueillette tomates/courgettes.",
+      evening: "Foin du soir aux équidés, fermeture poulailler après le coucher du soleil, repas Moustache.",
       notes:
-        "Comptez 1h30 par jour. Tous les outils et instructions sont sur place. Possibilité de baignade au lac juste devant !",
+        "Comptez 2h par jour. Aucune compétence équestre exigée — on vous montre tout à l'arrivée. Possibilité de baignade au lac juste devant !",
     },
     ownerMessage:
       "Vous repartirez avec des œufs, des légumes, et probablement l'envie de revenir. Notre maison est ouverte aux gens curieux et respectueux de la nature.",
@@ -235,9 +252,9 @@ export const DEMO_SITS: DemoSit[] = [
     id: "demo-garde-003",
     slug: "grenoble-deux-chats-appart",
     is_demo: true,
-    title: "Appartement lumineux, deux chats aux habitudes bien rodées",
+    title: "Appartement lumineux, un husky câlin et une chatte sacrée",
     description:
-      "Appartement de 75 m² au cœur de Grenoble, 4ᵉ étage avec balcon plein sud et vue sur la Bastille. Deux chattes adorables, autonomes, qui adorent les fenêtres ouvertes et les caresses du soir.",
+      "Appartement de 75 m² au cœur de Grenoble, 4ᵉ étage avec balcon plein sud et vue sur la Bastille. Yuki notre husky sibérien et Milo notre Sacré de Birmanie forment un duo improbable et adorable. Cadre parfait pour qui aime la ville, la montagne à 30 min, et les animaux atypiques.",
     start_date: addDays(10),
     end_date: addDays(25),
     status: "published",
@@ -275,31 +292,31 @@ export const DEMO_SITS: DemoSit[] = [
     },
     pets: [
       {
+        species: "dog",
+        name: "Yuki",
+        breed: "Husky sibérien",
+        age: "4 ans",
+        notes:
+          "Très câlin et bavard (ouh-ouh sonores en accueil !). Deux belles sorties par jour obligatoires (1h le matin, 45 min le soir) — sinon il s'ennuie. Tenu en laisse hors zones autorisées : un husky, ça file comme une flèche.",
+      },
+      {
         species: "cat",
         name: "Milo",
         breed: "Sacré de Birmanie",
         age: "6 ans",
         notes:
-          "Très câline mais timide les premiers jours. Se cache sous le canapé puis vient ronronner.",
-      },
-      {
-        species: "cat",
-        name: "Louane",
-        breed: "Européenne tortie",
-        age: "4 ans",
-        notes:
-          "Joueuse et bavarde, miaule pour réclamer ses croquettes à 18h pile. Adore les plumeaux.",
+          "Très câlin mais timide les premiers jours. Se cache sous le canapé puis vient ronronner. Brossage hebdo (poil mi-long).",
       },
     ],
     schedule: {
-      morning: "Gamelles, changement d'eau, ouverture du balcon si beau temps.",
-      midday: "Pas de contrainte, les chattes dorment.",
-      evening: "Repas à 18h précises (Louane n'est pas patiente), nettoyage litière, séance jeu/câlins 20 min.",
+      morning: "Sortie Yuki 1h (parc Paul-Mistral à 5 min), gamelles, ouverture du balcon si beau temps.",
+      midday: "Pause pipi rapide pour Yuki en bas de l'immeuble, Milo dort.",
+      evening: "Repas à 18h précises, sortie Yuki 45 min, nettoyage litière, séance jeu/câlins 20 min.",
       notes:
-        "Comptez 1h par jour. Litière à nettoyer tous les 2 jours. Brossage hebdo pour Milo (poil mi-long).",
+        "Comptez 2h30 par jour. Yuki est l'attraction du quartier — préparez-vous à être abordé par tous les enfants !",
     },
     ownerMessage:
-      "Mes chattes sont mes bébés. J'aime quand mes gardiens m'envoient une photo par jour, même rapide. En échange, je vous laisse mon vélo, mon Netflix et la liste de mes adresses préférées en ville !",
+      "Yuki et Milo sont mes bébés. J'aime quand mes gardiens m'envoient une photo par jour, même rapide. En échange, je vous laisse mon vélo, mon Netflix et la liste de mes adresses préférées en ville !",
     topBadges: [],
     avgRating: null,
     reviewCount: 0,
