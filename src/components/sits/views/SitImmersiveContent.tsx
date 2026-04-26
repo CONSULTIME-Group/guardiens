@@ -122,7 +122,7 @@ const normalizeLabel = (k: string): "Matin" | "Midi" | "Après-midi" | "Soir" | 
  *  - réduit les retours à la ligne consécutifs (max 1 ligne vide entre paragraphes)
  *  - supprime les puces résiduelles en début de ligne
  */
-const cleanFreeText = (raw: string): string => {
+export const cleanFreeText = (raw: string): string => {
   return raw
     .trim()
     .split(/\r?\n/)
@@ -141,7 +141,7 @@ const cleanFreeText = (raw: string): string => {
     .join("\n");
 };
 
-const parseRoutine = (raw: string | null) => {
+export const parseRoutine = (raw: string | null) => {
   if (!raw) return null;
   // Étape 1 : éclate sur retours à la ligne ET sur séparateurs ` / `, ` • `, ` | `
   const segments = raw
