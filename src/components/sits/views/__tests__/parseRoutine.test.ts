@@ -161,3 +161,122 @@ describe("parseRoutine — détection séparateurs avancés", () => {
     expect(r.blocks[0].text).toBe("balade");
   });
 });
+
+describe("parseRoutine — cas complets (5 moments)", () => {
+  it("Matin/Midi/Après-midi/Soir/Nuit tous renseignés, ordre alphabétique source", () => {
+    const txt = [
+      "Après-midi : promenade au parc",
+      "Matin : balade et croquettes",
+      "Midi : pâtée légère",
+      "Nuit : dort dans le panier",
+      "Soir : câlins devant la TV",
+    ].join("\n");
+    const r = parseRoutine(txt)!;
+    expect(r).not.toBeNull();
+    expect(r.blocks).toHaveLength(5);
+    expect(r.blocks.map((b) => b.label)).toEqual([
+      "Matin",
+      "Midi",
+      "Après-midi",
+      "Soir",
+      "Nuit",
+    ]);
+    expect(r.blocks.map((b) => b.text)).toEqual([
+      "balade et croquettes",
+      "pâtée légère",
+      "promenade au parc",
+      "câlins devant la TV",
+      "dort dans le panier",
+    ]);
+    expect(r.notes).toBe("");
+  });
+
+  it("5 moments avec horaires entre parenthèses + tirets collés", () => {
+    const txt = [
+      "Matin (7h)—gamelle + sortie",
+      "Midi (12h)—pâtée",
+      "Après-midi (15h)—jeu au jardin",
+      "Soir (19h)—balade longue",
+      "Nuit (23h)—dort au calme",
+    ].join("\n");
+    const labels = labelsOf(txt);
+    expect(labels).toEqual(["Matin", "Midi", "Après-midi", "Soir", "Nuit"]);
+  });
+});
+
+describe("parseRoutine — cas partiels (1 à 4 moments)", () => {
+  it("1 seul moment : Matin uniquement", () => {
+    const r = parseRoutine("Matin : balade rapide")!;
+    expect(r.blocks).toHaveLength(1);
+    expect(r.blocks[0]).toMatchObject({ label: "Matin", text: "balade rapide" });
+  });
+
+  it("1 seul moment : Soir uniquement (autre moment du spectre)", () => {
+    const r = parseRoutine("Soir : repas + câlins")!;
+    expect(r.blocks).toHaveLength(1);
+    expect(r.blocks[0]).toMatchObject({ label: "Soir", text: "repas + câlins" });
+  });
+
+  it("2 moments non contigus : Matin + Nuit", () => {
+    const r = parseRoutine("Nuit : dort\nMatin : sortie pipi")!;
+    expect(r.blocks.map((b) => b.label)).toEqual(["Matin", "Nuit"]);
+  });
+
+  it("3 moments : Matin + Midi + Soir (sans Après-midi ni Nuit)", () => {
+    const r = parseRoutine("Soir : croquettes\nMatin : balade\nMidi : sieste")!;
+    expect(r.blocks.map((b) => b.label)).toEqual(["Matin", "Midi", "Soir"]);
+  });
+
+  it("4 moments : tout sauf Nuit", () => {
+    const r = parseRoutine(
+      "Après-midi : jeu\nSoir : câlins\nMatin : balade\nMidi : pâtée",
+    )!;
+    expect(r.blocks.map((b) => b.label)).toEqual(["Matin", "Midi", "Après-midi", "Soir"]);
+    expect(r.blocks).toHaveLength(4);
+  });
+
+  it("label répété (Matin x2) : conserve les deux occurrences, triées en tête", () => {
+    const r = parseRoutine("Matin : balade courte\nSoir : repas\nMatin : 2e sortie")!;
+    const labels = r.blocks.map((b) => b.label);
+    expect(labels.filter((l) => l === "Matin")).toHaveLength(2);
+    expect(labels[labels.length - 1]).toBe("Soir");
+  });
+});
+
+describe("parseRoutine — texte libre sans label", () => {
+  it("phrase simple sans aucun moment retourne null", () => {
+    expect(parseRoutine("Mon chien aime beaucoup les promenades.")).toBeNull();
+  });
+
+  it("paragraphe multi-lignes sans aucun moment retourne null", () => {
+    const txt = [
+      "Voici quelques infos sur la routine.",
+      "Le chien dort beaucoup dans la journée.",
+      "Pensez à bien fermer la porte du jardin.",
+    ].join("\n");
+    expect(parseRoutine(txt)).toBeNull();
+  });
+
+  it("texte qui contient les mots 'matin' ou 'soir' mais pas en début de ligne", () => {
+    const txt = "Le chien aime se balader le matin et dort tôt le soir.";
+    expect(parseRoutine(txt)).toBeNull();
+  });
+
+  it("seulement des labels sans contenu (Matin: / Soir:) retourne null", () => {
+    expect(parseRoutine("Matin :\nSoir :\nNuit :")).toBeNull();
+  });
+
+  it("label seul + ligne libre : null car aucun bloc avec contenu", () => {
+    expect(parseRoutine("Matin :\nÀ voir ensemble")).toBeNull();
+  });
+
+  it("texte libre + 1 vrai bloc : retourne le bloc et garde le reste en notes", () => {
+    const r = parseRoutine(
+      "Quelques notes générales sur le chien.\nMatin : balade tranquille\nIl est très calme.",
+    )!;
+    expect(r.blocks.map((b) => b.label)).toEqual(["Matin"]);
+    expect(r.notes).toContain("Quelques notes");
+    expect(r.notes).toContain("très calme");
+  });
+});
+
