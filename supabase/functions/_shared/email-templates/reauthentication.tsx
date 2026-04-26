@@ -12,6 +12,7 @@ import {
   Text,
 } from 'npm:@react-email/components@0.0.22'
 import { LegalFooter } from './_legal-footer.tsx'
+import { BrandedHead } from './_branded-head.tsx'
 
 interface ReauthenticationEmailProps {
   token: string
@@ -19,7 +20,7 @@ interface ReauthenticationEmailProps {
 
 export const ReauthenticationEmail = ({ token }: ReauthenticationEmailProps) => (
   <Html lang="fr" dir="ltr">
-    <Head />
+    <BrandedHead />
     <Preview>Votre code de vérification guardiens</Preview>
     <Body style={main}>
       <Container style={container}>

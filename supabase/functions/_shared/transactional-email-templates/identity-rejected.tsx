@@ -2,6 +2,7 @@ import * as React from 'npm:react@18.3.1'
 import {
   Body, Container, Head, Heading, Html, Preview, Text, Button, Hr,
 } from 'npm:@react-email/components@0.0.22'
+import { BrandedHead } from './_branded-head.tsx'
 import type { TemplateEntry } from './registry.ts'
 
 const SITE_NAME = "Guardiens"
@@ -11,7 +12,7 @@ interface Props { reason?: string }
 
 const IdentityRejectedEmail = ({ reason }: Props) => (
   <Html lang="fr" dir="ltr">
-    <Head />
+    <BrandedHead />
     <Preview>Votre vérification d'identité nécessite une action</Preview>
     <Body style={main}>
       <Container style={container}>

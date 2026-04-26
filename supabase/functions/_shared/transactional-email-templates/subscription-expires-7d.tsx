@@ -2,6 +2,7 @@ import * as React from 'npm:react@18.3.1'
 import {
   Body, Container, Head, Heading, Html, Preview, Text, Button, Hr,
 } from 'npm:@react-email/components@0.0.22'
+import { BrandedHead } from './_branded-head.tsx'
 import type { TemplateEntry } from './registry.ts'
 
 const SITE_NAME = "Guardiens"
@@ -27,7 +28,7 @@ const SubscriptionExpires7dEmail = ({ firstName = '', renewalDate }: Subscriptio
   const dateLabel = formatFrenchDate(renewalDate)
   return (
   <Html lang="fr" dir="ltr">
-    <Head />
+    <BrandedHead />
     <Preview>Plus que 7 jours sur votre abonnement {SITE_NAME}</Preview>
     <Body style={main}>
       <Container style={container}>

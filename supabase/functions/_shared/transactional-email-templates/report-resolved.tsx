@@ -2,6 +2,7 @@ import * as React from 'npm:react@18.3.1'
 import {
   Body, Container, Head, Heading, Html, Preview, Text, Hr,
 } from 'npm:@react-email/components@0.0.22'
+import { BrandedHead } from './_branded-head.tsx'
 import type { TemplateEntry } from './registry.ts'
 
 const SITE_NAME = "Guardiens"
@@ -28,7 +29,7 @@ const reasonLabels: Record<string, string> = {
 
 const ReportResolvedEmail = ({ reason, status, adminNotes }: ReportResolvedProps) => (
   <Html lang="fr" dir="ltr">
-    <Head />
+    <BrandedHead />
     <Preview>Votre signalement a été {statusLabels[status || 'resolved'] || 'traité'} — {SITE_NAME}</Preview>
     <Body style={main}>
       <Container style={container}>

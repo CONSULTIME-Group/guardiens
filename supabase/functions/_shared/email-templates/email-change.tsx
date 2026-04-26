@@ -14,6 +14,7 @@ import {
   Text,
 } from 'npm:@react-email/components@0.0.22'
 import { LegalFooter } from './_legal-footer.tsx'
+import { BrandedHead } from './_branded-head.tsx'
 
 interface EmailChangeEmailProps {
   siteName: string
@@ -29,7 +30,7 @@ export const EmailChangeEmail = ({
   confirmationUrl,
 }: EmailChangeEmailProps) => (
   <Html lang="fr" dir="ltr">
-    <Head />
+    <BrandedHead />
     <Preview>Confirmez votre changement d'email sur guardiens</Preview>
     <Body style={main}>
       <Container style={container}>
