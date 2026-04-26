@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { Plus, Trash2, Eye, Loader2, MapPin, ExternalLink } from "lucide-react";
+import { Plus, Trash2, Eye, Loader2, MapPin, ExternalLink, Sparkles, X } from "lucide-react";
 
 interface CityGuide {
   id: string;
