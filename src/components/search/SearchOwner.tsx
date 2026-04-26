@@ -202,13 +202,7 @@ const SearchOwner = () => {
     trackEvent("search_empty_action", { source: "owner", metadata: { action: "create_alert", zone_mode: zoneMode } });
 
     // Snap au rayon autorisé le plus proche (la RPC n'accepte que 5/15/30/50/100)
-    const ALLOWED_RADII = [5, 15, 30, 50, 100];
-    const snapToAllowed = (r: number) =>
-      ALLOWED_RADII.reduce((prev, curr) =>
-        Math.abs(curr - r) < Math.abs(prev - r) ? curr : prev
-      );
-
-    let usedRadius = snapToAllowed(radius[0]);
+    let usedRadius = snapToAllowedRadius(radius[0]);
     let { data, error } = await supabase.rpc("create_alert_from_search", {
       p_city: city,
       p_postal_code: cityPostalCode ?? null,
