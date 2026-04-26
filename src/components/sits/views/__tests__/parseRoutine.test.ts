@@ -101,3 +101,63 @@ describe("parseRoutine — tri chronologique des moments de la journée", () => 
     expect(result!.blocks[1]).toMatchObject({ label: "Soir", text: "croquettes" });
   });
 });
+
+describe("parseRoutine — détection séparateurs avancés", () => {
+  it("tirets longs collés sans espace : Matin—balade, Soir–pâtée", () => {
+    const txt = "Matin—balade\nSoir–pâtée";
+    expect(labelsOf(txt)).toEqual(["Matin", "Soir"]);
+    const r = parseRoutine(txt)!;
+    expect(r.blocks[0].text).toBe("balade");
+    expect(r.blocks[1].text).toBe("pâtée");
+  });
+
+  it("séparateurs inline collés : Matin•balade|Midi•sieste", () => {
+    const txt = "Matin : balade•Midi : sieste|Soir : repas";
+    expect(labelsOf(txt)).toEqual(["Matin", "Midi", "Soir"]);
+  });
+
+  it("numérotation 1) 2) 3) en début de segment", () => {
+    const txt = "1) Matin : balade\n2) Midi : pâtée\n3) Soir : câlins";
+    const r = parseRoutine(txt)!;
+    expect(r.blocks.map((b) => b.label)).toEqual(["Matin", "Midi", "Soir"]);
+    expect(r.blocks[0].text).toBe("balade");
+  });
+
+  it("numérotation variée : 1. 2/ 3° 4 -", () => {
+    const txt = "1. Soir : tv\n2/ Matin : balade\n3° Midi : sieste\n4 - Nuit : panier";
+    expect(labelsOf(txt)).toEqual(["Matin", "Midi", "Soir", "Nuit"]);
+  });
+
+  it("numérotation inline mélangée avec moments", () => {
+    const txt = "1) Soir : repas 2) Matin : balade 3) Midi : sieste";
+    expect(labelsOf(txt)).toEqual(["Matin", "Midi", "Soir"]);
+  });
+
+  it("label entre parenthèses : (Matin) balade, (Soir) repas", () => {
+    const txt = "(Matin) balade tranquille\n(Soir) repas et câlins";
+    const r = parseRoutine(txt)!;
+    expect(r.blocks.map((b) => b.label)).toEqual(["Matin", "Soir"]);
+    expect(r.blocks[0].text).toBe("balade tranquille");
+  });
+
+  it("parenthèse d'horaire après label : Matin (8h) : balade", () => {
+    const txt = "Matin (8h) : balade\nSoir (19h) : croquettes";
+    const r = parseRoutine(txt)!;
+    expect(r.blocks.map((b) => b.label)).toEqual(["Matin", "Soir"]);
+    expect(r.blocks[0].text).toBe("balade");
+    expect(r.blocks[1].text).toBe("croquettes");
+  });
+
+  it("parenthèse d'horaire avec texte : Midi (vers 12h30) sieste calme", () => {
+    const txt = "Midi (vers 12h30) sieste calme";
+    const r = parseRoutine(txt)!;
+    expect(r.blocks[0]).toMatchObject({ label: "Midi", text: "sieste calme" });
+  });
+
+  it("combo : numérotation + parenthèse + tiret collé, ordre mélangé", () => {
+    const txt = "2) Soir (19h)—repas\n1) Matin (8h)—balade\n3) Nuit—panier";
+    expect(labelsOf(txt)).toEqual(["Matin", "Soir", "Nuit"]);
+    const r = parseRoutine(txt)!;
+    expect(r.blocks[0].text).toBe("balade");
+  });
+});
