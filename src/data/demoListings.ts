@@ -440,3 +440,60 @@ export function interleaveDemos<T extends { id?: string }>(
   while (demoIdx < demos.length) out.push(demos[demoIdx++]);
   return out;
 }
+
+/**
+ * Audite une liste mêlant annonces réelles et démos (déjà mélangée par
+ * `interleaveDemos` ou un autre processus) et retourne :
+ *  - les positions (1-indexées) où des démos sont attendues selon la règle
+ *    « 1 démo toutes les 3 vraies annonces, surplus à la fin »,
+ *  - les positions effectivement observées,
+ *  - les écarts (manquantes / hors-règle) et le booléen `ok`.
+ *
+ * Sert au mode test démos pour signaler visuellement toute violation
+ * causée par un filtre, un tri ou une pagination appliqué après l'intercalation.
+ */
+export function auditInterleave(
+  list: ReadonlyArray<{ is_demo?: boolean }>,
+  step = 3,
+): {
+  ok: boolean;
+  expectedPositions: number[];
+  observedPositions: number[];
+  missingPositions: number[];
+  unexpectedPositions: number[];
+} {
+  const observedPositions = list
+    .map((it, i) => (it?.is_demo ? i + 1 : -1))
+    .filter((p) => p !== -1);
+  const realCount = list.length - observedPositions.length;
+  const demoCount = observedPositions.length;
+
+  const slotsByRule = realCount >= step ? Math.floor(realCount / step) : 0;
+  const interleavedExpectedCount = Math.min(slotsByRule, demoCount);
+
+  const expectedInterleavedPositions: number[] = [];
+  for (let k = 1; k <= interleavedExpectedCount; k++) {
+    // Position dans la liste finale = k réelles intercalées (step·k réelles + k démos déjà insérées)
+    expectedInterleavedPositions.push((step + 1) * k);
+  }
+  const trailingDemosCount = Math.max(0, demoCount - interleavedExpectedCount);
+  const expectedTrailingPositions: number[] = [];
+  for (let k = 0; k < trailingDemosCount; k++) {
+    expectedTrailingPositions.push(list.length - trailingDemosCount + 1 + k);
+  }
+  const expectedPositions = [
+    ...expectedInterleavedPositions,
+    ...expectedTrailingPositions,
+  ];
+
+  const missingPositions = expectedPositions.filter((p) => !observedPositions.includes(p));
+  const unexpectedPositions = observedPositions.filter((p) => !expectedPositions.includes(p));
+
+  return {
+    ok: missingPositions.length === 0 && unexpectedPositions.length === 0,
+    expectedPositions,
+    observedPositions,
+    missingPositions,
+    unexpectedPositions,
+  };
+}
