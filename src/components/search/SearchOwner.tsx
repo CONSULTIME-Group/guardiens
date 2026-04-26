@@ -4,6 +4,7 @@ import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import ReportButton from "@/components/reports/ReportButton";
 import { supabase } from "@/integrations/supabase/client";
 import { geocodeCity, haversineDistance } from "@/lib/geocode";
+import { ALLOWED_ALERT_RADII, snapToAllowedRadius } from "@/lib/alertRadius";
 import { useAuth } from "@/contexts/AuthContext";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Input } from "@/components/ui/input";
@@ -201,13 +202,7 @@ const SearchOwner = () => {
     trackEvent("search_empty_action", { source: "owner", metadata: { action: "create_alert", zone_mode: zoneMode } });
 
     // Snap au rayon autorisé le plus proche (la RPC n'accepte que 5/15/30/50/100)
-    const ALLOWED_RADII = [5, 15, 30, 50, 100];
-    const snapToAllowed = (r: number) =>
-      ALLOWED_RADII.reduce((prev, curr) =>
-        Math.abs(curr - r) < Math.abs(prev - r) ? curr : prev
-      );
-
-    let usedRadius = snapToAllowed(radius[0]);
+    let usedRadius = snapToAllowedRadius(radius[0]);
     let { data, error } = await supabase.rpc("create_alert_from_search", {
       p_city: city,
       p_postal_code: cityPostalCode ?? null,
@@ -599,15 +594,14 @@ const SearchOwner = () => {
                   ))}
                 </div>
                 {(() => {
-                  const ALLOWED = [5, 15, 30, 50, 100];
-                  const currentIdx = Math.max(0, ALLOWED.indexOf(radius[0]));
+                  const currentIdx = Math.max(0, ALLOWED_ALERT_RADII.indexOf(radius[0] as any));
                   return (
                     <>
                       <Slider
                         value={[currentIdx]}
-                        onValueChange={(v) => setRadius([ALLOWED[v[0]]])}
+                        onValueChange={(v) => setRadius([ALLOWED_ALERT_RADII[v[0]]])}
                         min={0}
-                        max={ALLOWED.length - 1}
+                        max={ALLOWED_ALERT_RADII.length - 1}
                         step={1}
                       />
                       <p className="text-xs text-muted-foreground text-center">{radius[0]} km</p>
