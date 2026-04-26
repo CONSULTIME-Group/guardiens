@@ -1357,7 +1357,17 @@ const SearchSitter = () => {
                       </button>
                     ))}
                   </div>
-                  <Slider value={radius} onValueChange={setRadius} min={5} max={100} step={5} />
+                  <Slider
+                    value={radius}
+                    onValueChange={(v) => {
+                      const ALLOWED = [5, 15, 30, 50, 100];
+                      const snapped = ALLOWED.reduce((p, c) => Math.abs(c - v[0]) < Math.abs(p - v[0]) ? c : p);
+                      setRadius([snapped]);
+                    }}
+                    min={5}
+                    max={100}
+                    step={5}
+                  />
                 </div>
               )}
             </PopoverContent>
