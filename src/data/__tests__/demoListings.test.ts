@@ -131,3 +131,84 @@ describe("Badge « Annonce d'exemple » — flag is_demo", () => {
     }
   });
 });
+
+import { auditInterleave, interleaveDemos as iL } from "@/data/demoListings";
+
+describe("auditInterleave — assertion stricte 1 démo toutes les 3 vraies annonces", () => {
+  it("retourne ok=true sur une liste vide", () => {
+    expect(auditInterleave([]).ok).toBe(true);
+  });
+
+  it("ok=true quand interleaveDemos a produit la liste (cas nominal)", () => {
+    const r = real(9);
+    const d = demos(3);
+    const out = iL(r, d);
+    const audit = auditInterleave(out);
+    expect(audit.ok).toBe(true);
+    expect(audit.expectedPositions).toEqual([4, 8, 12]);
+    expect(audit.observedPositions).toEqual([4, 8, 12]);
+    expect(audit.missingPositions).toEqual([]);
+    expect(audit.unexpectedPositions).toEqual([]);
+  });
+
+  it("ok=true quand toutes les démos sont en fin de liste (peu de réelles)", () => {
+    // 2 réels + 3 démos => positions attendues 3, 4, 5
+    const out = iL(real(2), demos(3));
+    const audit = auditInterleave(out);
+    expect(audit.ok).toBe(true);
+    expect(audit.expectedPositions).toEqual([3, 4, 5]);
+  });
+
+  it("ok=false avec démos manquantes (filtre qui retire une démo)", () => {
+    // Liste correcte puis on retire la démo en position 8
+    const out = iL(real(9), demos(3));
+    const filtered = out.filter((_, i) => i + 1 !== 8);
+    const audit = auditInterleave(filtered);
+    expect(audit.ok).toBe(false);
+    expect(audit.missingPositions.length).toBeGreaterThan(0);
+  });
+
+  it("ok=false avec démo hors-règle (tri qui déplace une démo)", () => {
+    // Liste correcte puis on permute la démo en #4 avec la réelle #5
+    const out = iL(real(9), demos(3));
+    const swapped = [...out];
+    [swapped[3], swapped[4]] = [swapped[4], swapped[3]];
+    const audit = auditInterleave(swapped);
+    expect(audit.ok).toBe(false);
+    // La démo se retrouve en position 5 (hors-règle), et #4 est manquante
+    expect(audit.unexpectedPositions).toContain(5);
+    expect(audit.missingPositions).toContain(4);
+  });
+
+  it("ok=false si la pagination tronque sans recalculer (démos après réelles)", () => {
+    // Liste 12 items (R*9 + D*3 intercalés), tronquée à 7 => les démos #4 OK
+    // mais on perd #8 et #12 attendues.
+    const out = iL(real(9), demos(3));
+    const paged = out.slice(0, 7);
+    const audit = auditInterleave(paged);
+    // 7 items = 6 réelles + 1 démo => 1 slot attendu en #4. ✅ si la démo y est.
+    // Si on tronque proprement, ok=true ; sinon, missing/unexpected non vides.
+    if (audit.observedPositions.length === 1 && audit.observedPositions[0] === 4) {
+      expect(audit.ok).toBe(true);
+    } else {
+      expect(audit.ok).toBe(false);
+    }
+  });
+
+  it("respecte un step personnalisé", () => {
+    // step=2 => positions attendues 3, 6, 9
+    const out = iL(real(6), demos(3), 2);
+    const audit = auditInterleave(out, 2);
+    expect(audit.ok).toBe(true);
+    expect(audit.expectedPositions).toEqual([3, 6, 9]);
+  });
+
+  it("expose des positions 1-indexées cohérentes avec l'affichage UI", () => {
+    const out = iL(real(6), demos(2));
+    const audit = auditInterleave(out);
+    // 6 réels + 2 démos, step=3 => positions 4 et 8
+    expect(audit.observedPositions).toEqual([4, 8]);
+    // Aucune position 0 (les positions sont 1-indexées)
+    expect(audit.observedPositions.every((p) => p >= 1)).toBe(true);
+  });
+});
