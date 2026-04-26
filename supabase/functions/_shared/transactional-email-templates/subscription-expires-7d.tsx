@@ -7,7 +7,25 @@ import type { TemplateEntry } from './registry.ts'
 const SITE_NAME = "Guardiens"
 const SITE_URL = "https://guardiens.fr"
 
-const SubscriptionExpires7dEmail = () => (
+interface SubscriptionExpires7dProps {
+  firstName?: string
+  renewalDate?: string
+}
+
+const formatFrenchDate = (iso?: string): string | null => {
+  if (!iso) return null
+  try {
+    const d = new Date(iso)
+    if (isNaN(d.getTime())) return null
+    return d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })
+  } catch {
+    return null
+  }
+}
+
+const SubscriptionExpires7dEmail = ({ firstName = '', renewalDate }: SubscriptionExpires7dProps) => {
+  const dateLabel = formatFrenchDate(renewalDate)
+  return (
   <Html lang="fr" dir="ltr">
     <Head />
     <Preview>Plus que 7 jours sur votre abonnement {SITE_NAME}</Preview>
@@ -15,7 +33,11 @@ const SubscriptionExpires7dEmail = () => (
       <Container style={container}>
         <Heading style={h1}>Plus que 7 jours ⏳</Heading>
         <Text style={text}>
-          Votre abonnement {SITE_NAME} expire dans <strong>7 jours</strong>.
+          Bonjour{firstName ? ` ${firstName}` : ''},
+        </Text>
+        <Text style={text}>
+          Votre abonnement {SITE_NAME} expire dans <strong>7 jours</strong>
+          {dateLabel ? <> (le <strong>{dateLabel}</strong>)</> : null}.
         </Text>
         <Text style={text}>
           Sans renouvellement, vous perdrez l'accès aux fonctionnalités premium. Renouvelez maintenant pour ne rien manquer.
