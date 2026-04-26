@@ -113,6 +113,8 @@ const CreateSit = () => {
   const [sitEnvironments, setSitEnvironments] = useState<string[]>([]);
   const [minGardienSits, setMinGardienSits] = useState(0);
   const [maxApplications, setMaxApplications] = useState<number | null>(10);
+  const [ownerMessage, setOwnerMessage] = useState("");
+  const [dailyRoutine, setDailyRoutine] = useState("");
 
   const [property, setProperty] = useState<PropertySummary | null>(null);
   const [pets, setPets] = useState<PetSummary[]>([]);
