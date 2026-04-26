@@ -53,7 +53,7 @@ export async function sendTransactionalEmail(
   if (!email && recipientUserId) {
     try {
       const { data, error } = await supabase
-        .rpc("get_user_email_for_notification" as any, { p_user_id: recipientUserId });
+        .rpc("get_user_email_for_notification" as any, { target_user_id: recipientUserId });
       if (!error && typeof data === "string" && data.length > 0) {
         email = data;
       }
