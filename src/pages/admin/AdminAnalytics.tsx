@@ -9,6 +9,7 @@ import {
 } from "recharts";
 import { format, subDays, startOfDay } from "date-fns";
 import { fr } from "date-fns/locale";
+import FacebookReferralCard from "@/components/admin/analytics/FacebookReferralCard";
 
 type Range = 1 | 7 | 30;
 type RoleFilter = "all" | "owner" | "sitter" | "both";
@@ -560,6 +561,8 @@ const AdminAnalytics = () => {
               )}
             </CardContent>
           </Card>
+
+          <FacebookReferralCard rangeDays={range} />
         </>
       )}
     </div>
