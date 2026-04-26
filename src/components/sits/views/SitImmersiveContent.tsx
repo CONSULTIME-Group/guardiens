@@ -103,7 +103,12 @@ const formatDate = (d: string | null) =>
  *  - texte libre sans label → on retourne null pour fallback whitespace-pre-line
  */
 const stripBullet = (s: string) =>
-  s.replace(/^\s*[-*•–—→▪►●·]+\s*/, "").trim();
+  s
+    // puces classiques
+    .replace(/^\s*[-*•–—→▪►●·]+\s*/, "")
+    // numérotation : "1)", "1.", "1/", "1 -", "1°", "1 :"
+    .replace(/^\s*\d+\s*[)°.\-/:]\s*/, "")
+    .trim();
 
 const normalizeLabel = (k: string): "Matin" | "Midi" | "Après-midi" | "Soir" | "Nuit" => {
   const low = k.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
