@@ -1234,21 +1234,17 @@ const SearchSitter = () => {
       <div className="flex justify-between items-center px-6 py-2 border-b border-border bg-background">
         <div className="flex items-center gap-3 flex-wrap">
           <span className="text-sm text-muted-foreground">{loading ? "Recherche…" : countLabel}</span>
-          <div className="flex gap-2">
-            {(["closest", "recent", "rating"] as SortOption[]).map(s => (
-              <button
-                key={s}
-                onClick={() => handleSortChange(s)}
-                className={`rounded-full px-3 py-1 text-xs transition-colors ${
-                  sort === s
-                    ? "bg-foreground text-background font-medium"
-                    : "border border-border text-muted-foreground hover:border-primary"
-                }`}
-              >
-                {s === "closest" ? "Plus proches" : s === "recent" ? "Plus récentes" : "Mieux notées"}
-              </button>
-            ))}
-          </div>
+          <Select value={sort} onValueChange={(v) => handleSortChange(v as SortOption)}>
+            <SelectTrigger className="h-8 w-auto gap-1.5 rounded-full border-border bg-card px-3 text-xs">
+              <span className="text-muted-foreground">Trier&nbsp;:</span>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent align="start">
+              <SelectItem value="closest">Plus proches</SelectItem>
+              <SelectItem value="recent">Plus récentes</SelectItem>
+              <SelectItem value="rating">Mieux notées</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
         {tab === "sits" && user && (
           <TooltipProvider>
