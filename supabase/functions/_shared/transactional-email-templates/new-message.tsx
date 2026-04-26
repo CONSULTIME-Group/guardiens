@@ -7,30 +7,91 @@ import type { TemplateEntry } from './registry.ts'
 const SITE_NAME = "Guardiens"
 const SITE_URL = "https://guardiens.fr"
 
-type Context = 'sit_application' | 'sitter_inquiry' | 'mission_help' | 'owner_pitch' | undefined
+type Context = 'sit_application' | 'sitter_inquiry' | 'mission_help' | 'helper_inquiry' | 'owner_pitch' | undefined
+type RecipientRole = 'owner' | 'sitter' | undefined
 
 interface Props {
   senderFirstName?: string
   conversationId?: string
   contextType?: Context
-  contextLabel?: string  // ex: "votre annonce « Garde de Léo »"
+  contextLabel?: string  // ex: "votre annonce « Garde de Léo »" / "l'annonce « ... »"
+  contextCity?: string   // ex: "Lyon"
+  contextDates?: string  // ex: "14 juin → 28 juin 2026"
+  recipientRole?: RecipientRole
   messagePreview?: string
 }
 
-const labelByContext = (ctx: Context): { emoji: string; title: string } => {
+/**
+ * Header (titre + emoji) adapté au CONTEXTE et au RÔLE du destinataire.
+ * - Pour `sit_application`: l'owner reçoit "Nouvelle candidature"; le sitter reçoit
+ *   "Réponse à votre candidature" car c'est le proprio qui lui écrit.
+ */
+const labelByContext = (ctx: Context, role: RecipientRole): { emoji: string; title: string } => {
   switch (ctx) {
-    case 'sit_application': return { emoji: '🏡', title: 'Nouvelle candidature' }
-    case 'sitter_inquiry':  return { emoji: '💬', title: 'Demande de disponibilité' }
-    case 'mission_help':    return { emoji: '🤝', title: 'Proposition d\'entraide' }
-    case 'owner_pitch':     return { emoji: '✋', title: 'Un gardien vous contacte' }
-    default:                return { emoji: '💬', title: 'Nouveau message' }
+    case 'sit_application':
+      return role === 'sitter'
+        ? { emoji: '✉️', title: 'Réponse à votre candidature' }
+        : { emoji: '🏡', title: 'Nouvelle candidature' }
+    case 'sitter_inquiry':
+      return role === 'sitter'
+        ? { emoji: '💬', title: 'Un propriétaire vous contacte' }
+        : { emoji: '💬', title: 'Demande de disponibilité' }
+    case 'mission_help':
+      return role === 'owner'
+        ? { emoji: '🤝', title: 'Proposition d\'entraide' }
+        : { emoji: '🤝', title: 'Réponse à votre proposition' }
+    case 'helper_inquiry':
+      return { emoji: '💬', title: 'Nouveau message d\'entraide' }
+    case 'owner_pitch':
+      return role === 'owner'
+        ? { emoji: '✋', title: 'Un gardien vous contacte' }
+        : { emoji: '✉️', title: 'Réponse à votre message' }
+    default:
+      return { emoji: '💬', title: 'Nouveau message' }
   }
 }
 
-const NewMessageEmail = ({ senderFirstName, conversationId, contextType, contextLabel, messagePreview }: Props) => {
-  const { emoji, title } = labelByContext(contextType)
+/**
+ * Phrase d'accroche adaptée au rôle. Évite les formulations comme
+ * "candidate à votre garde" envoyées au CANDIDAT lui-même.
+ */
+const buildLeadSentence = (
+  sender: string,
+  ctx: Context,
+  role: RecipientRole,
+  contextLabel: string | undefined,
+): string => {
+  const ctxSuffix = contextLabel ? ` au sujet de ${contextLabel}` : ''
+  if (ctx === 'sit_application') {
+    return role === 'sitter'
+      ? `${sender} vous a répondu${ctxSuffix}.`
+      : `${sender} a candidaté${ctxSuffix}.`
+  }
+  if (ctx === 'mission_help') {
+    return role === 'owner'
+      ? `${sender} vous propose son aide${ctxSuffix}.`
+      : `${sender} vous a répondu${ctxSuffix}.`
+  }
+  return `${sender} vous a envoyé un message${ctxSuffix}.`
+}
+
+const NewMessageEmail = ({
+  senderFirstName,
+  conversationId,
+  contextType,
+  contextLabel,
+  contextCity,
+  contextDates,
+  recipientRole,
+  messagePreview,
+}: Props) => {
+  const { emoji, title } = labelByContext(contextType, recipientRole)
   const link = conversationId ? `${SITE_URL}/messages?c=${conversationId}` : `${SITE_URL}/messages`
   const sender = senderFirstName?.trim() || 'Un membre'
+  const lead = buildLeadSentence(sender, contextType, recipientRole, contextLabel)
+
+  // Bloc détails (ville + dates) — uniquement si on a des infos
+  const hasDetails = Boolean(contextCity || contextDates)
 
   return (
     <Html lang="fr" dir="ltr">
@@ -40,8 +101,19 @@ const NewMessageEmail = ({ senderFirstName, conversationId, contextType, context
         <Container style={container}>
           <Heading style={h1}>{title} {emoji}</Heading>
           <Text style={text}>
-            <strong>{sender}</strong> vous a envoyé un message{contextLabel ? ` concernant ${contextLabel}` : ''}.
+            <strong>{sender}</strong> — {lead.replace(`${sender} `, '')}
           </Text>
+
+          {hasDetails ? (
+            <Section style={detailsBox}>
+              {contextCity ? (
+                <Text style={detailLine}><strong>📍 Lieu :</strong> {contextCity}</Text>
+              ) : null}
+              {contextDates ? (
+                <Text style={detailLine}><strong>📅 Dates :</strong> {contextDates}</Text>
+              ) : null}
+            </Section>
+          ) : null}
 
           {messagePreview ? (
             <Section style={quoteBox}>
@@ -74,21 +146,40 @@ export const template = {
   component: NewMessageEmail,
   subject: (data: Record<string, any>) => {
     const sender = data.senderFirstName || 'Un membre'
+    const role: RecipientRole = data.recipientRole
     switch (data.contextType) {
-      case 'sit_application': return `${sender} candidate à votre garde`
-      case 'sitter_inquiry':  return `${sender} vous demande votre disponibilité`
-      case 'mission_help':    return `${sender} propose son aide pour votre mission`
-      case 'owner_pitch':     return `${sender} souhaite vous proposer ses services`
-      default:                return `Vous avez un nouveau message de ${sender}`
+      case 'sit_application':
+        return role === 'sitter'
+          ? `${sender} a répondu à votre candidature`
+          : `${sender} candidate à votre garde`
+      case 'sitter_inquiry':
+        return role === 'sitter'
+          ? `${sender} souhaite connaître vos disponibilités`
+          : `${sender} vous a répondu`
+      case 'mission_help':
+        return role === 'owner'
+          ? `${sender} propose son aide pour votre mission`
+          : `${sender} a répondu à votre proposition`
+      case 'helper_inquiry':
+        return `${sender} vous a envoyé un message`
+      case 'owner_pitch':
+        return role === 'owner'
+          ? `${sender} souhaite vous proposer ses services`
+          : `${sender} vous a répondu`
+      default:
+        return `Vous avez un nouveau message de ${sender}`
     }
   },
   displayName: 'Nouveau message reçu (contextualisé)',
   previewData: {
-    senderFirstName: 'Thomas',
+    senderFirstName: 'Patricia',
     conversationId: 'demo-uuid',
     contextType: 'sit_application',
-    contextLabel: 'votre annonce « Garde de Léo, week-end du 12 mai »',
-    messagePreview: 'Bonjour, je serais ravi de garder Léo. J\'ai déjà 8 expériences sur Guardiens et je vis à 10 min en voiture.',
+    contextLabel: 'l\'annonce « Tribu de 4 chats et 2 perroquets »',
+    contextCity: 'Schweighouse-sur-Moder',
+    contextDates: '14 juin → 28 juin 2026',
+    recipientRole: 'sitter',
+    messagePreview: 'Bonjour, seriez-vous disponible pour une rencontre avant la garde ?',
   },
 } satisfies TemplateEntry
 
@@ -98,6 +189,8 @@ const h1 = { fontSize: '24px', fontWeight: 'bold' as const, color: 'hsl(153, 42%
 const text = { fontSize: '14px', color: 'hsl(37, 7%, 43%)', lineHeight: '1.6', margin: '0 0 16px' }
 const hr = { borderColor: 'hsl(37, 22%, 89%)', margin: '20px 0' }
 const button = { backgroundColor: 'hsl(153, 42%, 30%)', color: '#ffffff', padding: '12px 28px', borderRadius: '8px', fontSize: '15px', fontWeight: '600' as const, textDecoration: 'none', display: 'inline-block' }
+const detailsBox = { backgroundColor: 'hsl(37, 30%, 96%)', border: '1px solid hsl(37, 22%, 89%)', padding: '12px 16px', margin: '8px 0 16px', borderRadius: '6px' }
+const detailLine = { fontSize: '13px', color: 'hsl(37, 12%, 30%)', lineHeight: '1.5', margin: '2px 0' }
 const quoteBox = { borderLeft: '3px solid hsl(153, 42%, 30%)', backgroundColor: 'hsl(153, 42%, 97%)', padding: '12px 16px', margin: '16px 0', borderRadius: '4px' }
 const quoteText = { fontSize: '14px', color: 'hsl(153, 30%, 25%)', lineHeight: '1.5', margin: 0, fontStyle: 'italic' as const }
 const legal = { fontSize: '10px', color: 'hsl(37, 7%, 60%)', lineHeight: '1.5', margin: '0 0 12px' }

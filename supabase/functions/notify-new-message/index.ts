@@ -118,24 +118,67 @@ Deno.serve(async (req) => {
     })
   }
 
-  // 5. Construire le label contextuel
+  // 5. Déterminer le rôle du destinataire dans la conv (owner ou sitter)
+  //    -> utilisé pour adapter le wording de l'email (ex: "candidate à votre garde"
+  //       n'a de sens que pour le owner qui reçoit, pas pour le sitter).
+  const recipientRole: 'owner' | 'sitter' = recipientId === conv.owner_id ? 'owner' : 'sitter'
+
+  // 6. Construire le label contextuel enrichi (titre + ville + dates)
   let contextLabel: string | undefined
+  let contextTitle: string | undefined
+  let contextCity: string | undefined
+  let contextDates: string | undefined
   try {
     if (conv.sit_id) {
-      const { data: sit } = await supabase.from('sits').select('title').eq('id', conv.sit_id).maybeSingle()
-      if (sit?.title) contextLabel = `votre annonce « ${sit.title} »`
+      const { data: sit } = await supabase
+        .from('sits')
+        .select('title, start_date, end_date, user_id')
+        .eq('id', conv.sit_id)
+        .maybeSingle()
+      if (sit) {
+        contextTitle = sit.title ?? undefined
+        if (sit.start_date && sit.end_date) {
+          const fmt = (d: string) => new Date(d).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' })
+          contextDates = `${fmt(sit.start_date)} → ${fmt(sit.end_date)}`
+        }
+        // Ville = ville de l'owner (propriétaire de l'annonce)
+        if (sit.user_id) {
+          const { data: ownerProfile } = await supabase
+            .from('profiles').select('city').eq('id', sit.user_id).maybeSingle()
+          if (ownerProfile?.city) contextCity = ownerProfile.city
+        }
+        if (contextTitle) {
+          // Label adapté au destinataire
+          const possessive = recipientRole === 'owner' ? 'votre annonce' : 'l\'annonce'
+          contextLabel = `${possessive} « ${contextTitle} »`
+        }
+      }
     } else if (conv.small_mission_id) {
-      const { data: m } = await supabase.from('small_missions').select('title').eq('id', conv.small_mission_id).maybeSingle()
-      if (m?.title) contextLabel = `la mission « ${m.title} »`
+      const { data: m } = await supabase
+        .from('small_missions')
+        .select('title, city, date_needed')
+        .eq('id', conv.small_mission_id)
+        .maybeSingle()
+      if (m) {
+        contextTitle = m.title ?? undefined
+        contextCity = m.city ?? undefined
+        if (m.date_needed) {
+          contextDates = new Date(m.date_needed).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' })
+        }
+        if (contextTitle) {
+          const possessive = recipientRole === 'owner' ? 'votre mission' : 'la mission'
+          contextLabel = `${possessive} « ${contextTitle} »`
+        }
+      }
     }
   } catch (e) {
     console.warn('context_label_failed', { err: String(e) })
   }
 
-  // 6. Tronquer aperçu
+  // 7. Tronquer aperçu
   const preview = (payload.content || '').trim().slice(0, 200)
 
-  // 7. Invoquer send-transactional-email
+  // 8. Invoquer send-transactional-email
   const { error: sendErr } = await supabase.functions.invoke('send-transactional-email', {
     body: {
       templateName: 'new-message',
@@ -146,6 +189,9 @@ Deno.serve(async (req) => {
         conversationId: conv.id,
         contextType: conv.context_type ?? null,
         contextLabel: contextLabel ?? null,
+        contextCity: contextCity ?? null,
+        contextDates: contextDates ?? null,
+        recipientRole,
         messagePreview: preview || null,
       },
     },
