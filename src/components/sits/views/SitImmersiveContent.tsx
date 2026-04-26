@@ -39,6 +39,10 @@ import {
 import VerifiedBadge from "@/components/profile/VerifiedBadge";
 import BreedProfileCard from "@/components/breeds/BreedProfileCard";
 import { slugify } from "@/lib/normalize";
+import { CITIES } from "@/data/cities";
+import { getCityContent } from "@/data/cityContent";
+
+const GUIDE_SLUGS = new Set(CITIES.map((c) => c.slug));
 
 const SPECIES_EMOJI: Record<string, string> = {
   dog: "🐕", cat: "🐈", farm_animal: "🐔", rabbit: "🐰", bird: "🦜",
@@ -161,17 +165,27 @@ const SitImmersiveContent = ({
   ctaSlot,
   topSlot,
 }: SitImmersiveContentProps) => {
-  const photos: string[] = property?.photos || [];
+  // -- Photos / hero
+  const photos: string[] = Array.isArray(property?.photos)
+    ? property.photos.filter((p: any) => typeof p === "string" && p.trim().length > 0)
+    : [];
   const coverPhoto = photos[0] || null;
+  
+
+  // -- Hôte / localisation
   const ownerName = owner?.first_name || "L'hôte";
   const cityName = owner?.city || "";
   const citySlug = cityName ? slugify(cityName) : null;
   const department: string | undefined =
     owner?.department || (owner?.postal_code ? String(owner.postal_code).slice(0, 2) : undefined);
 
-  const environments: string[] =
-    sit?.environments?.length ? sit.environments : ownerProfile?.environments || [];
-  const amenities: string[] = property?.equipments || property?.amenities || [];
+  // -- Environnement & équipements (filtrés)
+  const environments: string[] = (
+    sit?.environments?.length ? sit.environments : ownerProfile?.environments || []
+  ).filter(Boolean);
+  const amenities: string[] = ((property?.equipments || property?.amenities) ?? []).filter(Boolean);
+
+  // -- Durée
   const durationDays =
     sit?.start_date && sit?.end_date
       ? Math.max(
@@ -183,8 +197,37 @@ const SitImmersiveContent = ({
         )
       : null;
 
+  // -- Animaux (sécurisé)
+  const safePets = Array.isArray(pets) ? pets.filter(Boolean) : [];
+  const speciesEmojis = safePets.map((p) => SPECIES_EMOJI[p.species] || "🐾");
+
+  // -- Routine
   const routine = parseRoutine(sit?.daily_routine || null);
-  const speciesEmojis = pets.map((p) => SPECIES_EMOJI[p.species] || "🐾");
+  const hasRoutine = Boolean(
+    routine || (typeof sit?.daily_routine === "string" && sit.daily_routine.trim().length > 0),
+  );
+
+  // -- Mot de l'hôte
+  const ownerMessage =
+    typeof sit?.owner_message === "string" ? sit.owner_message.trim() : "";
+  const hasOwnerMessage = ownerMessage.length > 0;
+
+  // -- Sections "Le cadre" : visible uniquement si au moins une donnée existe
+  const expectations =
+    typeof sit?.specific_expectations === "string" ? sit.specific_expectations.trim() : "";
+  const propertyDescription =
+    typeof property?.description === "string" ? property.description.trim() : "";
+  const hasFrame = Boolean(expectations || propertyDescription || amenities.length > 0);
+
+  // -- Bio hôte (sidebar)
+  const ownerBio = (owner?.bio || ownerProfile?.welcome_notes || "").toString().trim();
+  const hasOwnerCard = Boolean(owner && (ownerName || cityName || ownerBio));
+
+  // -- Guide local : seulement si la ville a un guide réellement publié
+  const hasLocalGuide = Boolean(citySlug && GUIDE_SLUGS.has(citySlug));
+  // -- Page ville (silo SEO) : seulement si du contenu éditorial existe
+  const hasCityPage = Boolean(citySlug && getCityContent(citySlug));
+  
 
   return (
     <div>
@@ -225,81 +268,120 @@ const SitImmersiveContent = ({
         </div>
       )}
 
-      {/* Quick facts */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-        <div className="rounded-2xl border border-border bg-card p-4">
-          <Calendar className="h-5 w-5 text-primary mb-2" />
-          <p className="text-xs text-muted-foreground">Dates</p>
-          <p className="text-sm font-medium">{formatDate(sit?.start_date)}</p>
-          <p className="text-sm font-medium">→ {formatDate(sit?.end_date)}</p>
-          {durationDays && (
-            <p className="text-xs text-muted-foreground mt-1">{durationDays} jours</p>
-          )}
-        </div>
-        <div className="rounded-2xl border border-border bg-card p-4">
-          <Home className="h-5 w-5 text-primary mb-2" />
-          <p className="text-xs text-muted-foreground">Logement</p>
-          <p className="text-sm font-medium capitalize">
-            {property?.type === "house" ? "Maison" : property?.type === "apartment" ? "Appartement" : property?.type || "—"}
-          </p>
-          {(property?.surface_m2 || property?.rooms_count) && (
-            <p className="text-xs text-muted-foreground">
-              {[property?.surface_m2 && `${property.surface_m2} m²`, property?.rooms_count && `${property.rooms_count} pièces`]
-                .filter(Boolean)
-                .join(" · ")}
-            </p>
-          )}
-        </div>
-        <div className="rounded-2xl border border-border bg-card p-4">
-          <PawPrint className="h-5 w-5 text-primary mb-2" />
-          <p className="text-xs text-muted-foreground">Animaux</p>
-          <p className="text-sm font-medium">
-            {pets.length} pensionnaire{pets.length > 1 ? "s" : ""}
-          </p>
-          <p className="text-xs text-muted-foreground">{speciesEmojis.join(" ")}</p>
-        </div>
-        <div className="rounded-2xl border border-border bg-card p-4">
-          <Trees className="h-5 w-5 text-primary mb-2" />
-          <p className="text-xs text-muted-foreground">Cadre</p>
-          <div className="flex flex-wrap gap-1 mt-1">
-            {environments.length > 0 ? (
-              environments.map((e) => {
-                const meta = ENV_META[e];
-                if (!meta) return null;
-                const Ico = meta.icon;
-                return (
-                  <span
-                    key={e}
-                    className="inline-flex items-center gap-1 text-xs bg-muted rounded-full px-2 py-0.5"
-                  >
-                    <Ico className="h-3 w-3" /> {meta.label}
-                  </span>
-                );
-              })
-            ) : (
-              <span className="text-xs text-muted-foreground">—</span>
-            )}
-          </div>
-        </div>
-      </div>
+      {/* Quick facts — chaque carte s'affiche uniquement si la donnée existe */}
+      {(() => {
+        const cards: React.ReactNode[] = [];
+        if (sit?.start_date || sit?.end_date) {
+          cards.push(
+            <div key="dates" className="rounded-2xl border border-border bg-card p-4">
+              <Calendar className="h-5 w-5 text-primary mb-2" />
+              <p className="text-xs text-muted-foreground">Dates</p>
+              {sit?.start_date && (
+                <p className="text-sm font-medium">{formatDate(sit.start_date)}</p>
+              )}
+              {sit?.end_date && (
+                <p className="text-sm font-medium">→ {formatDate(sit.end_date)}</p>
+              )}
+              {durationDays && (
+                <p className="text-xs text-muted-foreground mt-1">{durationDays} jours</p>
+              )}
+            </div>,
+          );
+        }
+        if (property?.type || property?.surface_m2 || property?.rooms_count) {
+          cards.push(
+            <div key="housing" className="rounded-2xl border border-border bg-card p-4">
+              <Home className="h-5 w-5 text-primary mb-2" />
+              <p className="text-xs text-muted-foreground">Logement</p>
+              {property?.type && (
+                <p className="text-sm font-medium capitalize">
+                  {property.type === "house"
+                    ? "Maison"
+                    : property.type === "apartment"
+                      ? "Appartement"
+                      : property.type}
+                </p>
+              )}
+              {(property?.surface_m2 || property?.rooms_count) && (
+                <p className="text-xs text-muted-foreground">
+                  {[
+                    property?.surface_m2 && `${property.surface_m2} m²`,
+                    property?.rooms_count && `${property.rooms_count} pièces`,
+                  ]
+                    .filter(Boolean)
+                    .join(" · ")}
+                </p>
+              )}
+            </div>,
+          );
+        }
+        if (safePets.length > 0) {
+          cards.push(
+            <div key="pets" className="rounded-2xl border border-border bg-card p-4">
+              <PawPrint className="h-5 w-5 text-primary mb-2" />
+              <p className="text-xs text-muted-foreground">Animaux</p>
+              <p className="text-sm font-medium">
+                {safePets.length} pensionnaire{safePets.length > 1 ? "s" : ""}
+              </p>
+              {speciesEmojis.length > 0 && (
+                <p className="text-xs text-muted-foreground">{speciesEmojis.join(" ")}</p>
+              )}
+            </div>,
+          );
+        }
+        const knownEnvironments = environments.filter((e) => ENV_META[e]);
+        if (knownEnvironments.length > 0) {
+          cards.push(
+            <div key="frame" className="rounded-2xl border border-border bg-card p-4">
+              <Trees className="h-5 w-5 text-primary mb-2" />
+              <p className="text-xs text-muted-foreground">Cadre</p>
+              <div className="flex flex-wrap gap-1 mt-1">
+                {knownEnvironments.map((e) => {
+                  const meta = ENV_META[e]!;
+                  const Ico = meta.icon;
+                  return (
+                    <span
+                      key={e}
+                      className="inline-flex items-center gap-1 text-xs bg-muted rounded-full px-2 py-0.5"
+                    >
+                      <Ico className="h-3 w-3" /> {meta.label}
+                    </span>
+                  );
+                })}
+              </div>
+            </div>,
+          );
+        }
+        if (cards.length === 0) return null;
+        // Grille adaptative : 1, 2, 3 ou 4 colonnes max selon le nombre de cartes
+        const cols =
+          cards.length === 1
+            ? "grid-cols-1"
+            : cards.length === 2
+              ? "grid-cols-2"
+              : cards.length === 3
+                ? "grid-cols-2 md:grid-cols-3"
+                : "grid-cols-2 md:grid-cols-4";
+        return <div className={`grid ${cols} gap-3 mb-6`}>{cards}</div>;
+      })()}
 
       {topSlot}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Colonne principale */}
         <div className="lg:col-span-2 space-y-6">
-          {/* Le cadre */}
-          {(sit?.specific_expectations || property?.description) && (
+          {/* Le cadre — visible si description, attentes ou équipements */}
+          {hasFrame && (
             <section className="rounded-2xl border border-border bg-card p-5 md:p-6">
               <h2 className="text-lg font-semibold mb-3">Le cadre</h2>
-              {sit?.specific_expectations && (
+              {expectations && (
                 <p className="text-sm text-foreground/90 leading-relaxed whitespace-pre-line mb-4">
-                  {sit.specific_expectations}
+                  {expectations}
                 </p>
               )}
-              {property?.description && (
+              {propertyDescription && (
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  {property.description}
+                  {propertyDescription}
                 </p>
               )}
               {amenities.length > 0 && (
@@ -331,18 +413,20 @@ const SitImmersiveContent = ({
             </section>
           )}
 
-          {/* Les animaux */}
-          {pets.length > 0 && (
+          {/* Les animaux — visible uniquement si au moins un pet */}
+          {safePets.length > 0 && (
             <section className="rounded-2xl border border-border bg-card p-5 md:p-6">
               <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
                 <PawPrint className="h-5 w-5 text-primary" /> Vos pensionnaires
               </h2>
               <div className="space-y-5">
-                {pets.map((pet, i) => (
+                {safePets.map((pet, i) => (
                   <div key={pet.id || i} className="border-l-2 border-primary/30 pl-4">
                     <div className="flex items-baseline gap-2 flex-wrap mb-1">
                       <span className="text-xl">{SPECIES_EMOJI[pet.species] || "🐾"}</span>
-                      <h3 className="font-semibold text-foreground">{pet.name}</h3>
+                      {pet.name && (
+                        <h3 className="font-semibold text-foreground">{pet.name}</h3>
+                      )}
                       {pet.breed && (
                         <span className="text-sm text-muted-foreground">· {pet.breed}</span>
                       )}
@@ -366,8 +450,8 @@ const SitImmersiveContent = ({
             </section>
           )}
 
-          {/* Journée type */}
-          {sit?.daily_routine && (
+          {/* Journée type — visible uniquement si daily_routine non vide */}
+          {hasRoutine && (
             <section className="rounded-2xl border border-border bg-card p-5 md:p-6">
               <h2 className="text-lg font-semibold mb-4">Une journée type</h2>
               {routine ? (
@@ -397,21 +481,21 @@ const SitImmersiveContent = ({
                 </div>
               ) : (
                 <p className="text-sm text-foreground whitespace-pre-line leading-relaxed">
-                  {sit.daily_routine}
+                  {sit.daily_routine.trim()}
                 </p>
               )}
             </section>
           )}
 
-          {/* Mot du proprio */}
-          {sit?.owner_message && (
+          {/* Mot du proprio — visible uniquement si owner_message non vide */}
+          {hasOwnerMessage && (
             <section className="rounded-2xl border-2 border-primary/20 bg-primary/5 p-5 md:p-6">
               <div className="flex items-center gap-2 mb-3">
                 <Heart className="h-4 w-4 text-primary" />
                 <h2 className="text-base font-semibold">Un mot de {ownerName}</h2>
               </div>
               <p className="text-sm text-foreground/90 leading-relaxed italic whitespace-pre-line">
-                « {sit.owner_message} »
+                « {ownerMessage} »
               </p>
             </section>
           )}
@@ -419,8 +503,8 @@ const SitImmersiveContent = ({
 
         {/* Sidebar */}
         <aside className="space-y-4">
-          {/* Profil hôte */}
-          {owner && (
+          {/* Profil hôte — visible si données suffisantes */}
+          {hasOwnerCard && (
             <div className="rounded-2xl border border-border bg-card p-5">
               <p className="text-xs uppercase tracking-wide text-muted-foreground mb-3">
                 Votre hôte
@@ -454,9 +538,9 @@ const SitImmersiveContent = ({
                   )}
                 </div>
               </div>
-              {(owner.bio || ownerProfile?.welcome_notes) && (
+              {ownerBio && (
                 <p className="text-sm text-muted-foreground leading-relaxed line-clamp-6">
-                  {owner.bio || ownerProfile?.welcome_notes}
+                  {ownerBio}
                 </p>
               )}
             </div>
@@ -465,8 +549,8 @@ const SitImmersiveContent = ({
           {/* Slot CTA principal (candidature, gestion owner…) */}
           {ctaSlot}
 
-          {/* Guide local */}
-          {citySlug && (
+          {/* Guide local — visible uniquement si un guide éditorial existe pour la ville */}
+          {hasLocalGuide && (
             <Link
               to={`/guides/${citySlug}`}
               className="block rounded-2xl border border-border bg-card p-5 hover:border-primary/50 transition-colors group"
@@ -491,8 +575,8 @@ const SitImmersiveContent = ({
             </Link>
           )}
 
-          {/* Page ville */}
-          {citySlug && (
+          {/* Page ville — visible uniquement si la page éditoriale existe */}
+          {hasCityPage && (
             <Link
               to={`/house-sitting/${citySlug}`}
               className="block rounded-2xl border border-border bg-card p-5 hover:border-primary/50 transition-colors group"
