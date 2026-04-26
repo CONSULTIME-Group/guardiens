@@ -136,7 +136,14 @@ export function mapSignupError(message: string | undefined | null): string {
   if (m.includes("already registered") || m.includes("already been registered") || m.includes("user already")) {
     return "already_registered";
   }
-  if (m.includes("password should be at least") || m.includes("weak_password") || m.includes("weak password") || m.includes("password is too weak")) {
+  if (
+    m.includes("password should be at least") ||
+    m.includes("weak_password") ||
+    m.includes("weak password") ||
+    m.includes("password is too weak") ||
+    m.includes("password is known to be weak") ||
+    m.includes("pwned")
+  ) {
     return "weak_password";
   }
   if (m.includes("invalid email") || m.includes("email address") && m.includes("invalid")) {
