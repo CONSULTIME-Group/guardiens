@@ -300,32 +300,52 @@ const ConversationHeader = ({
         </div>
       </div>
 
-      {/* Line 2 — Sit summary or mission category */}
+      {/* Line 2 — Sit context: title + dates + city (du propriétaire = lieu de la garde) */}
       {conv.sit_id && conv.sit?.title && (
-        <div className="flex items-center gap-3 px-4 py-2 border-t border-border/50 bg-accent/30 text-xs text-muted-foreground">
-          {conv.sit?.start_date && (
-            <span className="flex items-center gap-1">
-              <Calendar className="h-3 w-3" />
-              {formatShortDate(conv.sit.start_date)}
-              {conv.sit?.end_date && ` → ${formatShortDate(conv.sit.end_date)}`}
-            </span>
-          )}
-          {conv.other_user?.city && (
-            <>
-              <span>·</span>
-              <span className="flex items-center gap-1">
-                <MapPin className="h-3 w-3" /> {conv.other_user.city}
-              </span>
-            </>
+        <div className="px-4 py-2 border-t border-border/50 bg-accent/30">
+          <p
+            className="text-sm font-medium text-foreground truncate"
+            title={conv.sit.title}
+          >
+            🏡 {conv.sit.title}
+          </p>
+          {(conv.sit?.start_date || conv.sit?.city) && (
+            <div className="flex items-center flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground mt-0.5">
+              {conv.sit?.start_date && (
+                <span className="flex items-center gap-1">
+                  <Calendar className="h-3 w-3" />
+                  {formatShortDate(conv.sit.start_date)}
+                  {conv.sit?.end_date && ` → ${formatShortDate(conv.sit.end_date)}`}
+                </span>
+              )}
+              {conv.sit?.city && (
+                <span className="flex items-center gap-1">
+                  <MapPin className="h-3 w-3" /> {capitalize(conv.sit.city)}
+                </span>
+              )}
+            </div>
           )}
         </div>
       )}
+
       {/* Small mission contextual banners */}
       {isSmallMission && missionData && responseData && responseData.status === "pending" && (
         <div className="px-4 py-3 bg-muted/50 border-t border-border">
           <p className="text-xs text-muted-foreground mb-0.5">Mission</p>
           <p className="text-sm font-medium text-foreground">{missionData.title}</p>
-          <p className="text-xs text-muted-foreground mt-0.5 mb-2">
+          <div className="flex items-center flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground mt-0.5">
+            {missionData.date_needed && (
+              <span className="flex items-center gap-1">
+                <Calendar className="h-3 w-3" /> {formatShortDate(missionData.date_needed)}
+              </span>
+            )}
+            {(conv.small_mission?.city) && (
+              <span className="flex items-center gap-1">
+                <MapPin className="h-3 w-3" /> {capitalize(conv.small_mission.city)}
+              </span>
+            )}
+          </div>
+          <p className="text-xs text-muted-foreground mt-1 mb-2">
             En échange : {missionData.exchange_offer}
           </p>
           {isRecipient && (
@@ -381,9 +401,30 @@ const ConversationHeader = ({
           )}
         </div>
       )}
+      {/* Identification mission lorsqu'AUCUNE proposition n'est en cours :
+          on doit quand même voir titre + date + lieu pour s'y retrouver. */}
       {isSmallMission && !responseData && (
-        <div className="px-4 py-2 border-t border-border/50 bg-accent/30 text-xs text-muted-foreground">
-          🌿 Petite mission
+        <div className="px-4 py-2 border-t border-border/50 bg-accent/30">
+          <p className="text-xs text-muted-foreground mb-0.5">🌿 Petite mission</p>
+          {missionData?.title && (
+            <p className="text-sm font-medium text-foreground truncate" title={missionData.title}>
+              {missionData.title}
+            </p>
+          )}
+          {(missionData?.date_needed || conv.small_mission?.city) && (
+            <div className="flex items-center flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground mt-0.5">
+              {missionData?.date_needed && (
+                <span className="flex items-center gap-1">
+                  <Calendar className="h-3 w-3" /> {formatShortDate(missionData.date_needed)}
+                </span>
+              )}
+              {conv.small_mission?.city && (
+                <span className="flex items-center gap-1">
+                  <MapPin className="h-3 w-3" /> {capitalize(conv.small_mission.city)}
+                </span>
+              )}
+            </div>
+          )}
         </div>
       )}
 
