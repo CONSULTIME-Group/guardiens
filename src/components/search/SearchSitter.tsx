@@ -1775,11 +1775,20 @@ const SearchSitter = () => {
 
         return (
           <div
-            className="mx-6 mt-4 rounded-lg border-2 border-dashed border-amber-400 bg-amber-50 p-4 text-sm space-y-2"
+            className={`mx-6 mt-4 rounded-lg border-2 border-dashed p-4 text-sm space-y-2 ${
+              !inMembersTab && !strictInterleaveOk
+                ? "border-red-500 bg-red-50"
+                : "border-amber-400 bg-amber-50"
+            }`}
             data-testid="demo-test-panel"
             data-demo-count={demoIndices.length}
             data-real-count={realCount}
             data-interleave-ok={interleaveOk ? "true" : "false"}
+            data-strict-interleave-ok={strictInterleaveOk ? "true" : "false"}
+            data-expected-positions={expectedPositions.join(",")}
+            data-observed-positions={observedPositions.join(",")}
+            data-missing-positions={missingPositions.join(",")}
+            data-unexpected-positions={unexpectedPositions.join(",")}
           >
             <div className="flex items-center justify-between flex-wrap gap-2">
               <p className="font-mono font-bold text-amber-900 flex items-center gap-2">
