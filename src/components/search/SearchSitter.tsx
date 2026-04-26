@@ -83,6 +83,11 @@ const SearchSitter = () => {
   const [withPhotosOnly, setWithPhotosOnly] = useState(false);
   const [minExperience, setMinExperience] = useState<ExperienceFilter>("all");
   const [emergencyOnly, setEmergencyOnly] = useState(searchParams.get("emergency") === "true");
+  // Mode test démos : ?testDemos=1 dans l'URL active un panneau de diagnostic
+  // qui vérifie la présence + l'intercalation des annonces d'exemple sur tous
+  // les types de recherche (gardes, missions, membres). N'a aucun effet sur la
+  // logique de tri/filtre — purement instrumental.
+  const testDemoMode = searchParams.get("testDemos") === "1";
   const [sort, setSort] = useState<SortOption>("closest");
   const [viewMode, setViewMode] = useState<ViewMode>("list");
   const [cityPostalCode, setCityPostalCode] = useState<string | null>(null);
