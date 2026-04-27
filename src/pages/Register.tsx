@@ -340,6 +340,9 @@ const Register = () => {
             )}
           </div>
 
+          {/* Bandeau WebView in-app (FB/IG/TikTok) — masqué dans navigateur standard */}
+          <InAppBrowserBanner className="mb-6" />
+
           {/* Illustration mobile only */}
           {step !== "confirmation" && (
             <div className="flex justify-center mb-8 lg:hidden">
