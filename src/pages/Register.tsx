@@ -43,10 +43,10 @@ const getPasswordStrength = (pw: string): { score: 0 | 1 | 2 | 3 | 4; label: str
 
   const map: Record<number, { label: string; color: string }> = {
     0: { label: "", color: "" },
-    1: { label: "Faible", color: "bg-destructive" },
-    2: { label: "Moyen", color: "bg-orange-400" },
-    3: { label: "Bon", color: "bg-yellow-400" },
-    4: { label: "Fort", color: "bg-green-500" },
+    1: { label: "Faible", color: "bg-strength-weak" },
+    2: { label: "Moyen", color: "bg-strength-medium" },
+    3: { label: "Bon", color: "bg-strength-good" },
+    4: { label: "Fort", color: "bg-strength-strong" },
   };
   return { score: score as 0 | 1 | 2 | 3 | 4, ...map[score] };
 };

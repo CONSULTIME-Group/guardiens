@@ -6,9 +6,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { getRecoveryRedirectUrl } from "@/lib/authRedirect";
+import { mapAuthError } from "@/lib/authErrorMessages";
 import { ArrowLeft } from "lucide-react";
 import { Helmet } from "react-helmet-async";
-const forgotPasswordPhoto = "https://erhccyqevdyevpyctsjj.supabase.co/storage/v1/object/public/property-photos/misc/forgot-password-photo.webp";
+import { AuthIllustrationPanel } from "@/components/auth/AuthIllustrationPanel";
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState("");
@@ -27,10 +28,11 @@ const ForgotPassword = () => {
       if (error) throw error;
       setSent(true);
     } catch (error: any) {
+      const info = mapAuthError(error);
       toast({
         variant: "destructive",
-        title: "Erreur",
-        description: "Une erreur est survenue. Veuillez réessayer.",
+        title: info.title,
+        description: info.description,
       });
     } finally {
       setIsLoading(false);
@@ -40,29 +42,17 @@ const ForgotPassword = () => {
   return (
     <div className="min-h-screen flex bg-background">
       <Helmet><meta name="robots" content="noindex, nofollow" /></Helmet>
-      {/* Left panel - illustration (hidden on mobile) */}
-      <div className="hidden lg:flex lg:w-1/2 bg-accent items-center justify-center p-12 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-secondary/10" />
-        <div className="relative z-10 flex flex-col items-center text-center max-w-lg">
-          <img
-            src={forgotPasswordPhoto}
-            alt="Chat aventurier dans la nature"
-            className="mb-8 rounded-2xl shadow-lg max-h-80 object-cover"
-          />
-          <h2 className="font-heading text-2xl font-semibold text-foreground mb-3">
-            Pas de panique !
-          </h2>
-          <p className="text-muted-foreground leading-relaxed">
-            On vous envoie un lien pour retrouver l'accès à votre compte en quelques secondes.
-          </p>
-        </div>
-      </div>
 
-      {/* Right panel - form */}
+      <AuthIllustrationPanel
+        title="Pas de panique"
+        description="Nous vous envoyons un lien pour retrouver l'accès à votre compte en quelques secondes."
+      />
+
       <div className="flex-1 flex items-center justify-center px-6 py-12">
         <div className="w-full max-w-md">
           <Link to="/" className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground mb-6 gap-1">
-            ← Retour au site
+            <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+            Retour au site
           </Link>
           <div className="text-center mb-10">
             <Link to="/" className="inline-block">
@@ -71,19 +61,8 @@ const ForgotPassword = () => {
               </h1>
             </Link>
             <p className="text-muted-foreground">
-              {sent ? "Email envoyé !" : "Réinitialiser votre mot de passe"}
+              {sent ? "Email envoyé" : "Réinitialiser votre mot de passe"}
             </p>
-          </div>
-
-          {/* Illustration mobile only */}
-          <div className="flex justify-center mb-8 lg:hidden">
-            <img
-              src={forgotPasswordPhoto}
-              alt="Chien et chat heureux"
-              width={200}
-              height={200}
-              className="drop-shadow-md"
-            />
           </div>
 
           {sent ? (
@@ -106,6 +85,7 @@ const ForgotPassword = () => {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
+                  autoComplete="email"
                   className="rounded-lg h-12"
                 />
               </div>
@@ -117,7 +97,7 @@ const ForgotPassword = () => {
 
           <p className="text-center text-sm text-muted-foreground mt-6">
             <Link to="/login" className="text-primary font-medium hover:underline inline-flex items-center gap-1">
-              <ArrowLeft className="h-4 w-4" />
+              <ArrowLeft className="h-4 w-4" aria-hidden="true" />
               Retour à la connexion
             </Link>
           </p>
