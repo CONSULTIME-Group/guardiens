@@ -4,38 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Dog, Flower2, Handshake, ArrowRight, Lock, X, Sprout, PawPrint, GraduationCap, Star, MapPin, Search as SearchIcon, Check } from "lucide-react";
-import spotVergerSrc from "@/assets/missions/spot-verger.png";
-import spotJardinSrc from "@/assets/missions/spot-jardin.png";
-import spotPoulesSrc from "@/assets/missions/spot-poules.png";
-import spotChienSrc from "@/assets/missions/spot-chien.png";
-import spotBricolageSrc from "@/assets/missions/spot-bricolage.png";
-import spotBienetreSrc from "@/assets/missions/spot-bienetre.png";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { Textarea } from "@/components/ui/textarea";
-import { Switch } from "@/components/ui/switch";
-import PageMeta from "@/components/PageMeta";
-import { useAuth } from "@/contexts/AuthContext";
-import { supabase } from "@/integrations/supabase/client";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useSubscriptionAccess } from "@/hooks/useSubscriptionAccess";
-import { useAccessLevel } from "@/hooks/useAccessLevel";
-import AccessGateBanner from "@/components/access/AccessGateBanner";
-import ProposeExchangeDialog from "@/components/missions/ProposeExchangeDialog";
-import ProposeHelperExchangeDialog from "@/components/missions/ProposeHelperExchangeDialog";
-import { geocodeCity, haversineDistance } from "@/lib/geocode";
-import CompetenceAutocomplete from "@/components/profile/CompetenceAutocomplete";
-
-const ILLU_VERSION = "gouache-v3-auth-20260427";
-const bust = (src: string) => `${src}${src.includes("?") ? "&" : "?"}v=${ILLU_VERSION}`;
-
-const ILLUSTRATED_EXAMPLES = [
-  { img: bust(spotVergerSrc), alt: "Panier en osier rempli de fruits frais — illustration gouache", title: "Verger à ramasser", text: "Fruits frais à emporter", badge: "Écully" },
-  { img: bust(spotJardinSrc), alt: "Sécateur et herbes aromatiques — illustration gouache", title: "Coup de main au jardin", text: "Sécateur, herbes, récolte", badge: "entre voisins" },
-  { img: bust(spotPoulesSrc), alt: "Poule rousse près d'œufs frais — illustration gouache", title: "Poules à garder", text: "Les œufs sont pour vous", badge: "Caluire" },
-  { img: bust(spotChienSrc), alt: "Chien assis au regard naturel — illustration gouache", title: "Chien à promener", text: "Balades en réciprocité", badge: "entre voisins" },
-  { img: bust(spotBricolageSrc), alt: "Boîte à outils avec marteau et tournevis — illustration gouache", title: "Petit bricolage", text: "Un repas fait maison", badge: "Annecy" },
-  { img: bust(spotBienetreSrc), alt: "Tasse, lavande et galet de bien-être — illustration gouache", title: "Énergie & bien-être", text: "Reiki, massage, méditation", badge: "entre voisins" },
-];
 
 const CATEGORY_META: Record<string, { label: string; icon: typeof Dog; colorClass: string }> = {
   animals: { label: "Animaux", icon: Dog, colorClass: "text-primary" },
