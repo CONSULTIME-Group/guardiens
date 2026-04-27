@@ -4,12 +4,6 @@ import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Dog, Flower2, Handshake, ArrowRight, Lock, X, Sprout, PawPrint, GraduationCap, Star, MapPin, Search as SearchIcon, Check } from "lucide-react";
-import spotVergerSrc from "@/assets/missions/spot-verger.png";
-import spotJardinSrc from "@/assets/missions/spot-jardin.png";
-import spotPoulesSrc from "@/assets/missions/spot-poules.png";
-import spotChienSrc from "@/assets/missions/spot-chien.png";
-import spotBricolageSrc from "@/assets/missions/spot-bricolage.png";
-import spotBienetreSrc from "@/assets/missions/spot-bienetre.png";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
@@ -24,18 +18,6 @@ import ProposeExchangeDialog from "@/components/missions/ProposeExchangeDialog";
 import ProposeHelperExchangeDialog from "@/components/missions/ProposeHelperExchangeDialog";
 import { geocodeCity, haversineDistance } from "@/lib/geocode";
 import CompetenceAutocomplete from "@/components/profile/CompetenceAutocomplete";
-
-const ILLU_VERSION = "gouache-v3-auth-20260427";
-const bust = (src: string) => `${src}${src.includes("?") ? "&" : "?"}v=${ILLU_VERSION}`;
-
-const ILLUSTRATED_EXAMPLES = [
-  { img: bust(spotVergerSrc), alt: "Panier en osier rempli de fruits frais — illustration gouache", title: "Verger à ramasser", text: "Fruits frais à emporter", badge: "Écully" },
-  { img: bust(spotJardinSrc), alt: "Sécateur et herbes aromatiques — illustration gouache", title: "Coup de main au jardin", text: "Sécateur, herbes, récolte", badge: "entre voisins" },
-  { img: bust(spotPoulesSrc), alt: "Poule rousse près d'œufs frais — illustration gouache", title: "Poules à garder", text: "Les œufs sont pour vous", badge: "Caluire" },
-  { img: bust(spotChienSrc), alt: "Chien assis au regard naturel — illustration gouache", title: "Chien à promener", text: "Balades en réciprocité", badge: "entre voisins" },
-  { img: bust(spotBricolageSrc), alt: "Boîte à outils avec marteau et tournevis — illustration gouache", title: "Petit bricolage", text: "Un repas fait maison", badge: "Annecy" },
-  { img: bust(spotBienetreSrc), alt: "Tasse, lavande et galet de bien-être — illustration gouache", title: "Énergie & bien-être", text: "Reiki, massage, méditation", badge: "entre voisins" },
-];
 
 const CATEGORY_META: Record<string, { label: string; icon: typeof Dog; colorClass: string }> = {
   animals: { label: "Animaux", icon: Dog, colorClass: "text-primary" },
@@ -546,20 +528,6 @@ const SmallMissions = () => {
 
         <main className="max-w-6xl mx-auto px-4 py-12 space-y-16">
           <section className="space-y-6">
-
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-              {ILLUSTRATED_EXAMPLES.map((example) => (
-                <div key={example.title} className="rounded-xl border border-border bg-card p-3 text-center shadow-sm">
-                  <img src={example.img} alt={example.alt} className="mx-auto h-20 w-20 object-contain" loading="eager" />
-                  <p className="mt-2 text-sm font-heading font-semibold text-foreground leading-tight">{example.title}</p>
-                  <p className="mt-1 text-xs text-muted-foreground leading-snug">{example.text}</p>
-                  <span className="mt-2 inline-block rounded-full bg-muted px-2 py-0.5 text-[11px] text-muted-foreground">
-                    {example.badge}
-                  </span>
-                </div>
-              ))}
-            </div>
-
             {/* Mode toggle: need / offer */}
             <div className="flex items-center justify-center gap-1 bg-muted rounded-lg p-1 w-fit mx-auto">
               <button
