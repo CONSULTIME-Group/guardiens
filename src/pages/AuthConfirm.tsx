@@ -63,6 +63,18 @@ const AuthConfirm = () => {
                     source: "/auth/confirm",
                     metadata: { user_id: userId, via: "email_link" },
                   });
+                  // Émet aussi `signup_completed` ici : c'est le vrai signal de
+                  // fin d'inscription quand l'email n'est pas auto-confirmé.
+                  // Sans ça, le funnel admin reste bloqué à 0 alors que des
+                  // comptes sont bien créés (cf. cas du 26/04 : 70 starts → 18 comptes).
+                  const completedKey = `signup_completed_tracked_${userId}`;
+                  if (!localStorage.getItem(completedKey)) {
+                    localStorage.setItem(completedKey, "1");
+                    trackEventWithUserId(userId, "signup_completed", {
+                      source: "/auth/confirm",
+                      metadata: { user_id: userId, auto_confirmed: false, via: "email_link" },
+                    });
+                  }
                 }
               }
             } catch { /* silencieux */ }
