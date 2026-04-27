@@ -344,22 +344,26 @@ const Register = () => {
       </div>
 
       {/* Right panel — pb-32 pour éviter masquage par cookie banner sur mobile */}
-      <div className="flex-1 flex items-center justify-center px-6 py-12 pb-32 md:pb-12">
+      <div className="flex-1 flex items-start lg:items-center justify-center px-6 pt-4 pb-32 md:pt-12 md:pb-12">
         <div className="w-full max-w-md">
-          <Link to="/" className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground mb-6 gap-1">
+          {/* Lien retour : compact sur mobile pour libérer de l'espace */}
+          <Link
+            to="/"
+            className="inline-flex items-center text-xs lg:text-sm text-muted-foreground hover:text-foreground mb-2 lg:mb-6 gap-1"
+          >
             ← Retour au site
           </Link>
-          <div className="text-center mb-8">
+          <div className="text-center mb-4 lg:mb-8">
             <Link to="/" className="inline-block">
-              <h1 className="font-heading text-3xl font-bold mb-2 hover:opacity-80 transition-opacity">
+              <h1 className="font-heading text-xl lg:text-3xl font-bold mb-1 lg:mb-2 hover:opacity-80 transition-opacity">
                 <span className="text-primary">g</span>uardiens
               </h1>
             </Link>
             {step !== "confirmation" && (
               <>
                 {/* Indicateur de progression mobile-first */}
-                <div className="mt-3 mb-2 flex flex-col items-center gap-1.5" aria-label={`Inscription, étape ${step} sur 2`}>
-                  <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 text-primary text-xs font-semibold px-2.5 py-1">
+                <div className="mt-2 lg:mt-3 mb-1 lg:mb-2 flex flex-col items-center gap-1 lg:gap-1.5" aria-label={`Inscription, étape ${step} sur 2`}>
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 text-primary text-xs font-semibold px-2.5 py-0.5 lg:py-1">
                     <span className="tabular-nums">Étape {step}/2</span>
                   </span>
                   <div className="w-32 h-1 rounded-full bg-muted overflow-hidden" role="progressbar" aria-valuenow={step === 1 ? 50 : 100} aria-valuemin={0} aria-valuemax={100}>
@@ -369,20 +373,20 @@ const Register = () => {
                     />
                   </div>
                 </div>
-                <p className="text-foreground font-medium mt-3">
+                <p className="text-foreground font-medium text-sm lg:text-base mt-2 lg:mt-3">
                   {step === 1 ? "Bienvenue 👋" : "Plus qu'une étape ✨"}
                 </p>
-                <p className="text-sm text-muted-foreground mt-1">
+                <p className="text-xs lg:text-sm text-muted-foreground mt-0.5 lg:mt-1">
                   {step === 1
-                    ? "On commence par votre profil — ça prend 30 secondes."
+                    ? "On commence par votre profil — 30 secondes."
                     : "Vos identifiants et c'est terminé. Promis."}
                 </p>
               </>
             )}
           </div>
 
-          {/* Preuve sociale mobile (le panel desktop l'affiche déjà) */}
-          {step !== "confirmation" && totalInscrits !== null && totalInscrits > 0 && (
+          {/* Preuve sociale mobile : visible UNIQUEMENT à l'étape 2 (à l'étape 1, le panel desktop la montre déjà et on gagne de l'espace mobile) */}
+          {step === 2 && totalInscrits !== null && totalInscrits > 0 && (
             <div className="lg:hidden flex items-center justify-center gap-2 mb-6 text-sm text-muted-foreground">
               <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-primary/10 text-primary text-xs font-semibold">
                 {totalInscrits}
@@ -392,12 +396,12 @@ const Register = () => {
           )}
 
           {/* Bandeau WebView in-app (FB/IG/TikTok) — masqué dans navigateur standard */}
-          <InAppBrowserBanner className="mb-6" />
+          <InAppBrowserBanner className="mb-4 lg:mb-6" />
 
-          {/* Illustration mobile only — réduite pour libérer de l'espace */}
-          {step !== "confirmation" && (
+          {/* Illustration mobile : masquée à l'étape 1 (gain d'espace), réduite à l'étape 2 */}
+          {step === 2 && (
             <div className="flex justify-center mb-6 lg:hidden">
-              <img src={authIllustration} alt="Chien et chat heureux" width={140} height={140} className="drop-shadow-md" />
+              <img src={authIllustration} alt="Chien et chat heureux" width={120} height={120} className="drop-shadow-md" />
             </div>
           )}
 
