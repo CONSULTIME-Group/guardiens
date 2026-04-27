@@ -345,14 +345,20 @@ const Register = () => {
           aria-hidden="true"
           className="max-w-full max-h-full w-auto h-auto object-contain"
         />
-        {/* Fondu latéral discret vers le formulaire pour une transition douce */}
+        {/* Fondu latéral discret vers le formulaire */}
         <div className="absolute inset-y-0 right-0 w-24 bg-gradient-to-r from-transparent to-background pointer-events-none" />
-
-        <div className="relative z-10 mt-auto p-8 max-w-lg hidden">
+        {/* Texte d'accroche placé dans la zone vide haut-droite de l'illustration */}
+        <div className="absolute top-12 right-12 z-10 max-w-[280px] text-right">
+          <h2 className="font-heading text-2xl font-semibold text-foreground mb-2 leading-tight">
+            Rejoignez<br />la communauté
+          </h2>
+          <p className="text-sm text-foreground/75 leading-relaxed">
+            Des passionnés du coin prennent soin des animaux comme des leurs.
+          </p>
           {totalInscrits !== null && totalInscrits > 0 && (
-            <div className="mt-6 inline-flex items-center gap-2 rounded-full bg-card/90 backdrop-blur px-4 py-2 border border-border">
-              <span className="text-2xl font-heading font-bold text-primary">{totalInscrits}</span>
-              <span className="text-sm text-muted-foreground">membres déjà inscrits</span>
+            <div className="mt-4 inline-flex items-center gap-2 rounded-full bg-card/90 backdrop-blur px-3 py-1.5 border border-border">
+              <span className="text-lg font-heading font-bold text-primary">{totalInscrits}</span>
+              <span className="text-xs text-muted-foreground">membres inscrits</span>
             </div>
           )}
         </div>
