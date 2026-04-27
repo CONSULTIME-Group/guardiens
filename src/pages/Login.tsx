@@ -95,7 +95,7 @@ const Login = () => {
           src={authIllustration}
           alt=""
           aria-hidden="true"
-          className="absolute inset-0 w-full h-full object-cover mix-blend-multiply opacity-75"
+          className="absolute inset-0 w-full h-full object-cover mix-blend-multiply opacity-100"
           style={{
             WebkitMaskImage:
               "radial-gradient(ellipse 95% 100% at 40% 50%, black 0%, rgba(0,0,0,0.85) 25%, transparent 95%)",
