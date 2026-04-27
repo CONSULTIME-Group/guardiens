@@ -377,20 +377,21 @@ const Register = () => {
         }
       />
 
+      {/* Lien retour : sticky en haut à gauche du viewport, hors grille du formulaire */}
+      <Link
+        to="/"
+        className="absolute top-4 left-4 lg:top-6 lg:left-6 z-20 inline-flex items-center text-xs lg:text-sm text-muted-foreground hover:text-foreground gap-1"
+      >
+        <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+        Retour au site
+      </Link>
+
       {/* Right panel — pb-32 pour éviter masquage par cookie banner sur mobile */}
-      <div className="flex-1 flex items-start lg:items-center justify-center px-6 pt-4 pb-24 md:pt-12 md:pb-12">
+      <div className="flex-1 flex items-center justify-center px-6 pt-16 pb-24 md:pt-12 md:pb-12">
         <div className="w-full max-w-md">
-          {/* Lien retour : compact sur mobile pour libérer de l'espace */}
-          <Link
-            to="/"
-            className="inline-flex items-center text-xs lg:text-sm text-muted-foreground hover:text-foreground mb-2 lg:mb-6 gap-1"
-          >
-            <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-            Retour au site
-          </Link>
           <div className="text-center mb-4 lg:mb-8">
             <Link to="/" className="inline-block">
-              <h1 className="font-heading text-xl lg:text-3xl font-bold mb-1 lg:mb-2 hover:opacity-80 transition-opacity">
+              <h1 className="font-heading text-2xl lg:text-4xl font-bold mb-1 lg:mb-3 hover:opacity-80 transition-opacity">
                 <span className="text-primary">g</span>uardiens
               </h1>
             </Link>
@@ -520,29 +521,53 @@ const Register = () => {
 
           {/* ── Step 1: role selection ── */}
           {step === 1 && (
-            <div className="space-y-3 lg:space-y-4 animate-in fade-in-0 slide-in-from-bottom-4 duration-300">
-              {roles.map((role) => (
-                <button
-                  key={role.value}
-                  onClick={() => {
-                    setSelectedRole(role.value);
-                    setStep(2);
-                    trackEvent("signup_role_selected", {
-                      source: "/inscription",
-                      metadata: { role: role.value },
-                    });
-                  }}
-                  className={cn(
-                    "w-full text-left p-3.5 lg:p-5 rounded-lg border-2 transition-all",
-                    "hover:border-primary hover:bg-primary/5",
-                    selectedRole === role.value ? "border-primary bg-primary/5" : "border-border"
-                  )}
-                >
-                  <div className="font-semibold text-sm lg:text-base mb-0.5 lg:mb-1">{role.label}</div>
-                  <div className="text-xs lg:text-sm text-muted-foreground leading-snug">{role.description}</div>
-                </button>
-              ))}
-            </div>
+            <>
+              <div className="space-y-3 lg:space-y-4 animate-in fade-in-0 slide-in-from-bottom-4 duration-300">
+                {roles.map((role) => (
+                  <button
+                    key={role.value}
+                    onClick={() => {
+                      setSelectedRole(role.value);
+                      setStep(2);
+                      trackEvent("signup_role_selected", {
+                        source: "/inscription",
+                        metadata: { role: role.value },
+                      });
+                    }}
+                    className={cn(
+                      "group relative w-full text-left p-3.5 lg:p-5 rounded-lg border-2 transition-all duration-200",
+                      "hover:border-primary hover:bg-primary/5 hover:-translate-y-0.5 hover:shadow-md",
+                      "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2",
+                      selectedRole === role.value ? "border-primary bg-primary/5" : "border-border"
+                    )}
+                  >
+                    {role.value === "owner" && (
+                      <span className="absolute -top-2 right-3 inline-flex items-center rounded-full bg-primary px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-primary-foreground shadow-sm">
+                        Le plus populaire
+                      </span>
+                    )}
+                    <div className="font-semibold text-sm lg:text-base mb-0.5 lg:mb-1">{role.label}</div>
+                    <div className="text-xs lg:text-sm text-muted-foreground leading-snug">{role.description}</div>
+                  </button>
+                ))}
+              </div>
+
+              {/* Trust strip — réassurances clés juste avant la décision */}
+              <ul className="mt-5 lg:mt-6 flex flex-wrap items-center justify-center gap-x-3 gap-y-1.5 text-[11px] lg:text-xs text-muted-foreground">
+                <li className="inline-flex items-center gap-1.5">
+                  <span className="h-1.5 w-1.5 rounded-full bg-primary/60" aria-hidden="true" />
+                  0 € pour les propriétaires
+                </li>
+                <li className="inline-flex items-center gap-1.5">
+                  <span className="h-1.5 w-1.5 rounded-full bg-primary/60" aria-hidden="true" />
+                  Sans engagement
+                </li>
+                <li className="inline-flex items-center gap-1.5">
+                  <span className="h-1.5 w-1.5 rounded-full bg-primary/60" aria-hidden="true" />
+                  Données hébergées en France
+                </li>
+              </ul>
+            </>
           )}
 
           {/* ── Step 2: form ── */}
