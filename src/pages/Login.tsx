@@ -95,18 +95,18 @@ const Login = () => {
           src={authIllustration}
           alt=""
           aria-hidden="true"
-          className="absolute inset-0 w-full h-full object-cover mix-blend-multiply opacity-40"
+          className="absolute inset-0 w-full h-full object-cover mix-blend-multiply opacity-75"
           style={{
             WebkitMaskImage:
               "radial-gradient(ellipse 90% 95% at 40% 50%, black 10%, transparent 100%)",
             maskImage:
               "radial-gradient(ellipse 90% 95% at 40% 50%, black 10%, transparent 100%)",
-            filter: "saturate(0.85) hue-rotate(-8deg)",
+            filter: "saturate(0.8) hue-rotate(-8deg) blur(2.5px)",
           }}
         />
         {/* Filtre de teinte aligné sur la palette (vert sapin primaire) */}
         <div
-          className="absolute inset-0 pointer-events-none mix-blend-color opacity-30"
+          className="absolute inset-0 pointer-events-none mix-blend-color opacity-25"
           style={{
             backgroundColor: "hsl(var(--primary))",
             WebkitMaskImage:
