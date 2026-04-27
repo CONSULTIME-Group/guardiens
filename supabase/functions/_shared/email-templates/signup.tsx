@@ -218,7 +218,11 @@ const signature = {
 }
 const signatureName = {
   color: '#1a1a1a',
-  fontWeight: '500' as const,
+  fontWeight: '600' as const,
+}
+const signatureRole = {
+  color: '#8a8a8a',
+  fontSize: '13px',
 }
 const securityBox = {
   backgroundColor: '#faf8f4',
