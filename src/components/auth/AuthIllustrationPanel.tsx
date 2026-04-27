@@ -1,4 +1,4 @@
-import authIllustration from "@/assets/auth-illustration-gouache-v3.png";
+import authIllustration from "@/assets/auth-illustration-village-v4.png";
 
 interface AuthIllustrationPanelProps {
   title: string;
@@ -9,7 +9,7 @@ interface AuthIllustrationPanelProps {
 
 /**
  * Panneau d'illustration partagé entre /login et /inscription.
- * Affichage net, sans voile ni masque : la gouache parle d'elle-même.
+ * Illustration gouache d'ambiance village + texte superposé (titre, description, KPI dynamique).
  */
 export const AuthIllustrationPanel = ({ title, description, footerSlot }: AuthIllustrationPanelProps) => {
   return (
@@ -19,10 +19,10 @@ export const AuthIllustrationPanel = ({ title, description, footerSlot }: AuthIl
         alt=""
         aria-hidden="true"
         className="absolute inset-0 w-full h-full object-cover"
-        style={{ objectPosition: "center 35%" }}
+        style={{ objectPosition: "center 30%" }}
       />
-      {/* Voile inférieur uniquement pour garantir la lisibilité du titre */}
-      <div className="absolute bottom-0 left-0 right-0 h-1/3 bg-gradient-to-t from-background via-background/80 to-transparent pointer-events-none" />
+      {/* Voile inférieur pour garantir la lisibilité du texte superposé */}
+      <div className="absolute bottom-0 left-0 right-0 h-1/2 bg-gradient-to-t from-background via-background/85 to-transparent pointer-events-none" />
 
       <div className="relative z-10 mt-auto p-12 max-w-lg">
         <h2 className="font-heading text-3xl font-semibold text-foreground mb-3">{title}</h2>
