@@ -90,23 +90,15 @@ const Login = () => {
   return (
     <div className="min-h-screen flex bg-background">
       <Helmet><meta name="robots" content="noindex, nofollow" /></Helmet>
-      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-background">
+      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-background items-center justify-center">
         <img
           src={authIllustration}
           alt=""
           aria-hidden="true"
-          className="absolute inset-0 w-full h-full object-cover"
+          className="max-w-full max-h-full w-auto h-auto object-contain"
         />
-        {/* Fondu latéral doux vers le formulaire (droite) — préserve la lisibilité sans masquer l'image */}
-        <div className="absolute inset-y-0 right-0 w-1/3 bg-gradient-to-r from-transparent to-background pointer-events-none" />
-        {/* Voile très léger derrière le texte en bas pour garantir la lisibilité du titre */}
-        <div className="absolute bottom-0 left-0 right-0 h-1/3 bg-gradient-to-t from-background/85 via-background/40 to-transparent pointer-events-none" />
-        <div className="relative z-10 mt-auto p-12 max-w-lg">
-          <h2 className="font-heading text-3xl font-semibold text-foreground mb-3">Vos animaux entre de bonnes mains</h2>
-          <p className="text-foreground/80 leading-relaxed">
-            Rejoignez une communauté de passionnés qui prennent soin des animaux comme des leurs, dans le confort de leur foyer.
-          </p>
-        </div>
+        {/* Fondu latéral discret vers le formulaire pour une transition douce */}
+        <div className="absolute inset-y-0 right-0 w-24 bg-gradient-to-r from-transparent to-background pointer-events-none" />
       </div>
 
       <div className="flex-1 flex items-center justify-center px-6 py-12">
