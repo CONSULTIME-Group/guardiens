@@ -1,4 +1,4 @@
-import authIllustration from "@/assets/auth-illustration-carnet-v11.png";
+import authIllustration from "@/assets/auth-illustration-carnet-v12.png";
 
 interface AuthIllustrationPanelProps {
   title: string;
@@ -9,28 +9,18 @@ interface AuthIllustrationPanelProps {
 
 /**
  * Panneau d'illustration partagé entre /login et /inscription.
- * L'illustration carnet de voyage déborde volontairement vers la droite, sans bord
- * franc : le fondu intégré au visuel + un masque CSS supplémentaire dissolvent
- * la frontière avec le formulaire.
+ * Le visuel déborde légèrement vers le formulaire, mais c'est désormais
+ * l'illustration elle-même qui gère le fondu pour éviter toute cassure artificielle.
  */
 export const AuthIllustrationPanel = ({ title, description, footerSlot }: AuthIllustrationPanelProps) => {
   return (
     <div className="hidden lg:block lg:w-1/2 relative">
-      {/* L'image dépasse de 12% à droite pour mordre sur le formulaire */}
-      <div className="absolute inset-y-0 left-0 right-[-12%] overflow-hidden">
+      <div className="absolute inset-y-0 left-0 right-[-10%] overflow-hidden">
         <img
           src={authIllustration}
-          alt="Carnet de voyage aquarellé : un après-midi de garde et d'entraide dans un village du Sud"
+          alt="Carnet de voyage aquarellé : entraide locale et garde d'animaux entre voisins dans un village du Sud"
           className="absolute inset-0 w-full h-full object-cover"
-          style={{
-            objectPosition: "left center",
-            // Double fondu : à droite vers la transparence (intégration formulaire),
-            // léger fondu en bas pour la lisibilité du texte superposé.
-            WebkitMaskImage:
-              "linear-gradient(to right, black 0%, black 60%, transparent 100%)",
-            maskImage:
-              "linear-gradient(to right, black 0%, black 60%, transparent 100%)",
-          }}
+          style={{ objectPosition: "left center" }}
         />
       </div>
 
