@@ -98,6 +98,18 @@
     --badge-success-foreground: 153 50% 25%;
     --sitter-hero: 153 50% 18%;
     --toggle-active: 153 55% 55%;
+
+    /* Warning (utilisé pour les bandeaux d'avertissement non bloquants : spam, conseils mobiles, etc.) */
+    --warning: 38 92% 50%;
+    --warning-foreground: 30 70% 20%;
+    --warning-soft: 48 100% 96%;
+    --warning-border: 43 96% 78%;
+
+    /* Password strength meter (4 niveaux progressifs cohérents avec la palette) */
+    --strength-weak: 0 72% 50%;
+    --strength-medium: 25 90% 55%;
+    --strength-good: 45 90% 50%;
+    --strength-strong: 142 65% 42%;
   }
 
   .dark {
@@ -146,6 +158,16 @@
     --message-sent: 153 30% 20%;
     --badge-success: 153 30% 20%;
     --badge-success-foreground: 141 50% 75%;
+
+    --warning: 38 90% 55%;
+    --warning-foreground: 48 100% 92%;
+    --warning-soft: 38 30% 18%;
+    --warning-border: 38 50% 30%;
+
+    --strength-weak: 0 65% 55%;
+    --strength-medium: 25 80% 55%;
+    --strength-good: 45 80% 55%;
+    --strength-strong: 142 55% 50%;
   }
 }
 
