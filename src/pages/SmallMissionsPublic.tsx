@@ -4,12 +4,22 @@ import PageMeta from "@/components/PageMeta";
 import PageBreadcrumb from "@/components/seo/PageBreadcrumb";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { ArrowLeft, ChevronRight, Home } from "lucide-react";
-import spotVerger from "@/assets/missions/spot-verger.png";
-import spotJardin from "@/assets/missions/spot-jardin.png";
-import spotPoules from "@/assets/missions/spot-poules.png";
-import spotChien from "@/assets/missions/spot-chien.png";
-import spotBricolage from "@/assets/missions/spot-bricolage.png";
-import spotBienetre from "@/assets/missions/spot-bienetre.png";
+import spotVergerSrc from "@/assets/missions/spot-verger.png";
+import spotJardinSrc from "@/assets/missions/spot-jardin.png";
+import spotPoulesSrc from "@/assets/missions/spot-poules.png";
+import spotChienSrc from "@/assets/missions/spot-chien.png";
+import spotBricolageSrc from "@/assets/missions/spot-bricolage.png";
+import spotBienetreSrc from "@/assets/missions/spot-bienetre.png";
+
+/* Cache-buster: force le navigateur à re-télécharger les illustrations (gouache v2) */
+const ILLU_VERSION = "gouache-v2-20260427";
+const bust = (src: string) => `${src}${src.includes("?") ? "&" : "?"}v=${ILLU_VERSION}`;
+const spotVerger = bust(spotVergerSrc);
+const spotJardin = bust(spotJardinSrc);
+const spotPoules = bust(spotPoulesSrc);
+const spotChien = bust(spotChienSrc);
+const spotBricolage = bust(spotBricolageSrc);
+const spotBienetre = bust(spotBienetreSrc);
 import PublicHeader from "@/components/layout/PublicHeader";
 import PublicFooter from "@/components/layout/PublicFooter";
 import { useAuth } from "@/contexts/AuthContext";
