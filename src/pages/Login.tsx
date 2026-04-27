@@ -90,12 +90,17 @@ const Login = () => {
   return (
     <div className="min-h-screen flex bg-background">
       <Helmet><meta name="robots" content="noindex, nofollow" /></Helmet>
-      <div className="hidden lg:flex lg:w-1/2 bg-accent items-center justify-center p-12 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-secondary/10" />
-        <div className="relative z-10 flex flex-col items-center text-center max-w-lg">
-          <img src={authIllustration} alt="Chien et chat heureux" width={400} height={400} className="mb-8 drop-shadow-lg" />
-          <h2 className="font-heading text-2xl font-semibold text-foreground mb-3">Vos animaux entre de bonnes mains</h2>
-          <p className="text-muted-foreground leading-relaxed">
+      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden">
+        <img
+          src={authIllustration}
+          alt=""
+          aria-hidden="true"
+          className="absolute inset-0 w-full h-full object-cover"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-background/85 via-background/20 to-transparent" />
+        <div className="relative z-10 mt-auto p-12 max-w-lg">
+          <h2 className="font-heading text-3xl font-semibold text-foreground mb-3">Vos animaux entre de bonnes mains</h2>
+          <p className="text-foreground/80 leading-relaxed">
             Rejoignez une communauté de passionnés qui prennent soin des animaux comme des leurs, dans le confort de leur foyer.
           </p>
         </div>

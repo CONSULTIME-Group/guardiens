@@ -326,16 +326,21 @@ const Register = () => {
       <Helmet><meta name="robots" content="index, follow" /></Helmet>
 
       {/* Left panel */}
-      <div className="hidden lg:flex lg:w-1/2 bg-accent items-center justify-center p-12 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-secondary/10" />
-        <div className="relative z-10 flex flex-col items-center text-center max-w-lg">
-          <img src={authIllustration} alt="Chien et chat heureux" width={400} height={400} className="mb-8 drop-shadow-lg" />
-          <h2 className="font-heading text-2xl font-semibold text-foreground mb-3">Rejoignez la communauté</h2>
-          <p className="text-muted-foreground leading-relaxed">
+      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden">
+        <img
+          src={authIllustration}
+          alt=""
+          aria-hidden="true"
+          className="absolute inset-0 w-full h-full object-cover"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-background/85 via-background/20 to-transparent" />
+        <div className="relative z-10 mt-auto p-12 max-w-lg">
+          <h2 className="font-heading text-3xl font-semibold text-foreground mb-3">Rejoignez la communauté</h2>
+          <p className="text-foreground/80 leading-relaxed">
             Des milliers de passionnés prennent soin des animaux comme des leurs, dans le confort de leur foyer.
           </p>
           {totalInscrits !== null && totalInscrits > 0 && (
-            <div className="mt-6 inline-flex items-center gap-2 rounded-full bg-card px-4 py-2 border border-border">
+            <div className="mt-6 inline-flex items-center gap-2 rounded-full bg-card/90 backdrop-blur px-4 py-2 border border-border">
               <span className="text-2xl font-heading font-bold text-primary">{totalInscrits}</span>
               <span className="text-sm text-muted-foreground">membres déjà inscrits</span>
             </div>
