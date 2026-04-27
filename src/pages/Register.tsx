@@ -337,7 +337,7 @@ const Register = () => {
               "radial-gradient(ellipse 90% 95% at 40% 50%, black 10%, transparent 100%)",
             maskImage:
               "radial-gradient(ellipse 90% 95% at 40% 50%, black 10%, transparent 100%)",
-            filter: "saturate(0.8) hue-rotate(-8deg) blur(2.5px)",
+            filter: "saturate(0.75) hue-rotate(-8deg) blur(1.2px)",
           }}
         />
         {/* Filtre de teinte aligné sur la palette (vert sapin primaire) */}
