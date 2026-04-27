@@ -729,12 +729,14 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
               </Button>
             )}
             {slide >= 1 && slide <= 2 && (
-              <button
+              <Button
+                variant="ghost"
+                size="sm"
                 onClick={handleNext}
-                className="text-xs text-muted-foreground underline-offset-4 hover:underline transition-colors px-2 py-1"
+                className="text-muted-foreground hover:text-foreground"
               >
-                Plus tard
-              </button>
+                Passer cette étape
+              </Button>
             )}
             {slide < TOTAL_SLIDES - 1 && (
               <Button

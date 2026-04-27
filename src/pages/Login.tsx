@@ -12,6 +12,7 @@ import { getSignupRedirectUrl } from "@/lib/authRedirect";
 import { Eye, EyeOff } from "lucide-react";
 import { getAuthFieldAttrs } from "@/lib/inAppBrowser";
 import { mapAuthError } from "@/lib/authErrorMessages";
+import { InAppBrowserBanner } from "@/components/auth/InAppBrowserBanner";
 const authIllustration = "https://erhccyqevdyevpyctsjj.supabase.co/storage/v1/object/public/property-photos/misc/auth-illustration.webp";
 
 const Login = () => {
@@ -113,6 +114,8 @@ const Login = () => {
             </Link>
             <p className="text-muted-foreground">Content de vous revoir</p>
           </div>
+
+          <InAppBrowserBanner className="mb-6" />
 
           <div className="flex justify-center mb-8 lg:hidden">
             <img src={authIllustration} alt="Chien et chat heureux" width={200} height={200} className="drop-shadow-md" />
