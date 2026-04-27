@@ -472,6 +472,20 @@ const Register = () => {
                 <button type="button" onClick={() => setStep(1)} className="block mx-auto mt-2 text-sm text-muted-foreground hover:text-foreground">
                   Changer de rôle
                 </button>
+                {/* Message de réassurance contextualisé selon le rôle */}
+                {selectedRole && (
+                  <p className="mt-3 text-xs text-muted-foreground/90 leading-relaxed max-w-xs mx-auto">
+                    {selectedRole === "owner" && (
+                      <>✨ Vous pourrez <strong className="text-foreground/80">publier vos premières annonces</strong> juste après.</>
+                    )}
+                    {selectedRole === "sitter" && (
+                      <>✨ Vous pourrez <strong className="text-foreground/80">compléter votre profil et candidater</strong> juste après.</>
+                    )}
+                    {selectedRole === "both" && (
+                      <>✨ Vous pourrez <strong className="text-foreground/80">publier vos annonces ET candidater</strong> juste après.</>
+                    )}
+                  </p>
+                )}
               </div>
 
               <div className="space-y-2">
