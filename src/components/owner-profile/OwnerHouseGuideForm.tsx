@@ -271,7 +271,7 @@ const OwnerHouseGuideForm = () => {
           owner_message: current.owner_message || null,
           published: true,
           updated_at: new Date().toISOString(),
-        }, { onConflict: "user_id" });
+        }, { onConflict: "property_id" });
 
       if (error) throw error;
 
