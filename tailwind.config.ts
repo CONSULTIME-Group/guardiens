@@ -55,6 +55,16 @@ export default {
         hint: "hsl(var(--hint))",
         "sitter-hero": "hsl(var(--sitter-hero))",
         "toggle-active": "hsl(var(--toggle-active))",
+        warning: {
+          DEFAULT: "hsl(var(--warning))",
+          foreground: "hsl(var(--warning-foreground))",
+          soft: "hsl(var(--warning-soft))",
+          border: "hsl(var(--warning-border))",
+        },
+        "strength-weak": "hsl(var(--strength-weak))",
+        "strength-medium": "hsl(var(--strength-medium))",
+        "strength-good": "hsl(var(--strength-good))",
+        "strength-strong": "hsl(var(--strength-strong))",
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
           foreground: "hsl(var(--sidebar-foreground))",
