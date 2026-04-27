@@ -398,12 +398,7 @@ const Register = () => {
           {/* Bandeau WebView in-app (FB/IG/TikTok) — masqué dans navigateur standard */}
           <InAppBrowserBanner className="mb-4 lg:mb-6" />
 
-          {/* Illustration mobile : masquée à l'étape 1 (gain d'espace), réduite à l'étape 2 */}
-          {step === 2 && (
-            <div className="flex justify-center mb-6 lg:hidden">
-              <img src={authIllustration} alt="Chien et chat heureux" width={120} height={120} className="drop-shadow-md" />
-            </div>
-          )}
+          {/* Illustration retirée du flux mobile : déjà visible dans le panel desktop gauche, et coûte ~200px précieux sur mobile (la priorité = champs + CTA visibles sans scroller). */}
 
           {/* ── Confirmation screen ── */}
           {step === "confirmation" && (
