@@ -22,7 +22,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
-const authIllustration = "https://erhccyqevdyevpyctsjj.supabase.co/storage/v1/object/public/property-photos/misc/auth-illustration.webp";
+import authIllustration from "@/assets/auth-illustration-gouache.png";
 
 type Role = "owner" | "sitter" | "both";
 
