@@ -5,6 +5,19 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Dog, Flower2, Handshake, ArrowRight, Lock, X, Sprout, PawPrint, GraduationCap, Star, MapPin, Search as SearchIcon, Check } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
+import PageMeta from "@/components/PageMeta";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useSubscriptionAccess } from "@/hooks/useSubscriptionAccess";
+import { useAccessLevel } from "@/hooks/useAccessLevel";
+import AccessGateBanner from "@/components/access/AccessGateBanner";
+import ProposeExchangeDialog from "@/components/missions/ProposeExchangeDialog";
+import ProposeHelperExchangeDialog from "@/components/missions/ProposeHelperExchangeDialog";
+import { geocodeCity, haversineDistance } from "@/lib/geocode";
+import CompetenceAutocomplete from "@/components/profile/CompetenceAutocomplete";
 
 const CATEGORY_META: Record<string, { label: string; icon: typeof Dog; colorClass: string }> = {
   animals: { label: "Animaux", icon: Dog, colorClass: "text-primary" },
