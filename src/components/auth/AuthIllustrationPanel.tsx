@@ -1,4 +1,4 @@
-import authIllustration from "@/assets/auth-illustration-gouache.png";
+import authIllustration from "@/assets/auth-illustration-gouache-v2.png";
 
 interface AuthIllustrationPanelProps {
   title: string;
