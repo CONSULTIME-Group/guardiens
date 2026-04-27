@@ -334,35 +334,56 @@ const Register = () => {
           <p className="text-muted-foreground leading-relaxed">
             Des milliers de passionnés prennent soin des animaux comme des leurs, dans le confort de leur foyer.
           </p>
+          {totalInscrits !== null && totalInscrits > 0 && (
+            <div className="mt-6 inline-flex items-center gap-2 rounded-full bg-card px-4 py-2 border border-border">
+              <span className="text-2xl font-heading font-bold text-primary">{totalInscrits}</span>
+              <span className="text-sm text-muted-foreground">membres déjà inscrits</span>
+            </div>
+          )}
         </div>
       </div>
 
-      {/* Right panel */}
-      <div className="flex-1 flex items-center justify-center px-6 py-12">
+      {/* Right panel — pb-32 pour éviter masquage par cookie banner sur mobile */}
+      <div className="flex-1 flex items-center justify-center px-6 py-12 pb-32 md:pb-12">
         <div className="w-full max-w-md">
           <Link to="/" className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground mb-6 gap-1">
             ← Retour au site
           </Link>
-          <div className="text-center mb-10">
+          <div className="text-center mb-8">
             <Link to="/" className="inline-block">
               <h1 className="font-heading text-3xl font-bold mb-2 hover:opacity-80 transition-opacity">
                 <span className="text-primary">g</span>uardiens
               </h1>
             </Link>
             {step !== "confirmation" && (
-              <p className="text-muted-foreground">
-                {step === 1 ? "Quel est votre profil ?" : "Créez votre compte"}
-              </p>
+              <>
+                <p className="text-foreground font-medium">
+                  {step === 1 ? "Bienvenue 👋" : "Plus qu'une étape"}
+                </p>
+                <p className="text-sm text-muted-foreground mt-1">
+                  {step === 1 ? "On commence par votre profil." : "Créez votre compte — c'est gratuit."}
+                </p>
+              </>
             )}
           </div>
+
+          {/* Preuve sociale mobile (le panel desktop l'affiche déjà) */}
+          {step !== "confirmation" && totalInscrits !== null && totalInscrits > 0 && (
+            <div className="lg:hidden flex items-center justify-center gap-2 mb-6 text-sm text-muted-foreground">
+              <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-primary/10 text-primary text-xs font-semibold">
+                {totalInscrits}
+              </span>
+              <span>membres déjà inscrits sur Guardiens</span>
+            </div>
+          )}
 
           {/* Bandeau WebView in-app (FB/IG/TikTok) — masqué dans navigateur standard */}
           <InAppBrowserBanner className="mb-6" />
 
-          {/* Illustration mobile only */}
+          {/* Illustration mobile only — réduite pour libérer de l'espace */}
           {step !== "confirmation" && (
-            <div className="flex justify-center mb-8 lg:hidden">
-              <img src={authIllustration} alt="Chien et chat heureux" width={200} height={200} className="drop-shadow-md" />
+            <div className="flex justify-center mb-6 lg:hidden">
+              <img src={authIllustration} alt="Chien et chat heureux" width={140} height={140} className="drop-shadow-md" />
             </div>
           )}
 
