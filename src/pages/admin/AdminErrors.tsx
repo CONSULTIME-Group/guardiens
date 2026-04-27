@@ -110,6 +110,9 @@ const AdminErrors = () => {
     if (filter === "unresolved") q = q.is("resolved_at", null);
     if (filter === "resolved") q = q.not("resolved_at", "is", null);
     if (severityFilter !== "all") q = q.eq("severity", severityFilter);
+    // Par défaut, on masque les erreurs marquées tierces (autofill WebView FB/IG, extensions…)
+    // — elles polluent le panneau alors qu'elles ne viennent pas de notre bundle.
+    else q = q.neq("severity", "ignored_third_party");
     const { data, error } = await q;
     if (error) toast.error("Erreur de chargement");
     setErrors((data as ErrorLog[]) || []);
