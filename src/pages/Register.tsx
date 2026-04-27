@@ -85,6 +85,7 @@ const Register = () => {
   const [formError, setFormError] = useState<string | null>(null);
   const [existingAccountOpen, setExistingAccountOpen] = useState(false);
   const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [totalInscrits, setTotalInscrits] = useState<number | null>(null);
 
   const { register } = useAuth();
   const navigate = useNavigate();
