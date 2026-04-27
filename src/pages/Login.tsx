@@ -97,8 +97,17 @@ const Login = () => {
           aria-hidden="true"
           className="max-w-full max-h-full w-auto h-auto object-contain"
         />
-        {/* Fondu latéral discret vers le formulaire pour une transition douce */}
+        {/* Fondu latéral discret vers le formulaire */}
         <div className="absolute inset-y-0 right-0 w-24 bg-gradient-to-r from-transparent to-background pointer-events-none" />
+        {/* Texte d'accroche placé dans la zone vide haut-droite de l'illustration */}
+        <div className="absolute top-12 right-12 z-10 max-w-[260px] text-right">
+          <h2 className="font-heading text-2xl font-semibold text-foreground mb-2 leading-tight">
+            Vos animaux<br />entre de bonnes mains
+          </h2>
+          <p className="text-sm text-foreground/75 leading-relaxed">
+            Une communauté du coin qui veille sur les vôtres comme sur les siens.
+          </p>
+        </div>
       </div>
 
       <div className="flex-1 flex items-center justify-center px-6 py-12">
