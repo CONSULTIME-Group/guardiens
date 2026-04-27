@@ -442,7 +442,7 @@ const Register = () => {
 
           {/* ── Step 1: role selection ── */}
           {step === 1 && (
-            <div className="space-y-4 animate-in fade-in-0 slide-in-from-bottom-4 duration-300">
+            <div className="space-y-3 lg:space-y-4 animate-in fade-in-0 slide-in-from-bottom-4 duration-300">
               {roles.map((role) => (
                 <button
                   key={role.value}
@@ -455,13 +455,13 @@ const Register = () => {
                     });
                   }}
                   className={cn(
-                    "w-full text-left p-5 rounded-lg border-2 transition-all",
+                    "w-full text-left p-3.5 lg:p-5 rounded-lg border-2 transition-all",
                     "hover:border-primary hover:bg-primary/5",
                     selectedRole === role.value ? "border-primary bg-primary/5" : "border-border"
                   )}
                 >
-                  <div className="font-semibold mb-1">{role.label}</div>
-                  <div className="text-sm text-muted-foreground">{role.description}</div>
+                  <div className="font-semibold text-sm lg:text-base mb-0.5 lg:mb-1">{role.label}</div>
+                  <div className="text-xs lg:text-sm text-muted-foreground leading-snug">{role.description}</div>
                 </button>
               ))}
             </div>
