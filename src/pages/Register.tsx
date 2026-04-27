@@ -428,11 +428,11 @@ const Register = () => {
               </div>
 
               {/* Encadré spam — mis en avant car c'est la cause #1 d'abandon */}
-              <div className="w-full max-w-sm rounded-lg bg-amber-50 border border-amber-200 px-4 py-3 text-left space-y-2">
-                <p className="text-sm font-semibold text-amber-900">
+              <div className="w-full max-w-sm rounded-lg bg-warning-soft border border-warning-border px-4 py-3 text-left space-y-2">
+                <p className="text-sm font-semibold text-warning-foreground">
                   Vous ne voyez rien dans votre boîte de réception ?
                 </p>
-                <ul className="text-xs text-amber-900/80 leading-relaxed space-y-1 list-disc pl-4">
+                <ul className="text-xs text-warning-foreground/85 leading-relaxed space-y-1 list-disc pl-4">
                   <li>
                     Vérifiez vos <strong>spams / courriers indésirables</strong> et l'onglet <strong>Promotions</strong>.
                   </li>
@@ -478,9 +478,10 @@ const Register = () => {
                 <button
                   type="button"
                   onClick={goToLoginWithEmail}
-                  className="text-sm text-muted-foreground hover:text-foreground"
+                  className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
                 >
-                  ← Retour à la connexion
+                  <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+                  Retour à la connexion
                 </button>
                 <Link
                   to="/contact"
