@@ -101,6 +101,18 @@ const Login = () => {
               "radial-gradient(ellipse 65% 70% at 40% 50%, black 30%, transparent 95%)",
             maskImage:
               "radial-gradient(ellipse 65% 70% at 40% 50%, black 30%, transparent 95%)",
+            filter: "saturate(0.85) hue-rotate(-8deg)",
+          }}
+        />
+        {/* Filtre de teinte aligné sur la palette (vert sapin primaire) */}
+        <div
+          className="absolute inset-0 pointer-events-none mix-blend-color opacity-30"
+          style={{
+            backgroundColor: "hsl(var(--primary))",
+            WebkitMaskImage:
+              "radial-gradient(ellipse 65% 70% at 40% 50%, black 30%, transparent 95%)",
+            maskImage:
+              "radial-gradient(ellipse 65% 70% at 40% 50%, black 30%, transparent 95%)",
           }}
         />
         {/* Fondu latéral vers le formulaire (droite) */}
