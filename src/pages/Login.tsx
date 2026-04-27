@@ -95,8 +95,9 @@ const Login = () => {
           src={authIllustration}
           alt=""
           aria-hidden="true"
-          className="absolute inset-0 w-full h-full object-contain object-center mix-blend-multiply opacity-90"
+          className="absolute inset-0 w-full h-full object-cover mix-blend-multiply opacity-95"
         />
+        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/30 to-background/40" />
         <div className="relative z-10 mt-auto p-12 max-w-lg">
           <h2 className="font-heading text-3xl font-semibold text-foreground mb-3">Vos animaux entre de bonnes mains</h2>
           <p className="text-foreground/80 leading-relaxed">
