@@ -360,7 +360,8 @@ const Register = () => {
             to="/"
             className="inline-flex items-center text-xs lg:text-sm text-muted-foreground hover:text-foreground mb-2 lg:mb-6 gap-1"
           >
-            ← Retour au site
+            <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+            Retour au site
           </Link>
           <div className="text-center mb-4 lg:mb-8">
             <Link to="/" className="inline-block">
@@ -383,7 +384,7 @@ const Register = () => {
                   </div>
                 </div>
                 <p className="text-foreground font-medium text-sm lg:text-base mt-2 lg:mt-3">
-                  {step === 1 ? "Bienvenue 👋" : "Plus qu'une étape ✨"}
+                  {step === 1 ? "Bienvenue" : "Plus qu'une étape"}
                 </p>
                 <p className="text-xs lg:text-sm text-muted-foreground mt-0.5 lg:mt-1">
                   {step === 1
