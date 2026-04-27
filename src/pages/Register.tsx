@@ -13,8 +13,10 @@ import { getSignupRedirectUrl } from "@/lib/authRedirect";
 import { useToast } from "@/hooks/use-toast";
 import { trackEvent, trackEventWithUserId, mapSignupError } from "@/lib/analytics";
 import { mapAuthError } from "@/lib/authErrorMessages";
-import { Eye, EyeOff, MailCheck, Info } from "lucide-react";
+import { Eye, EyeOff, MailCheck, ArrowLeft } from "lucide-react";
 import { InAppBrowserBanner } from "@/components/auth/InAppBrowserBanner";
+import { AuthIllustrationPanel } from "@/components/auth/AuthIllustrationPanel";
+import { lovable } from "@/integrations/lovable";
 import {
   Dialog,
   DialogContent,
@@ -22,7 +24,6 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
-import authIllustration from "@/assets/auth-illustration-gouache.png";
 
 type Role = "owner" | "sitter" | "both";
 
