@@ -116,6 +116,21 @@ const Register = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Charge le nombre d'inscrits pour preuve sociale
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase
+        .from("public_stats")
+        .select("total_inscrits")
+        .single();
+      if (!cancelled && data?.total_inscrits && typeof data.total_inscrits === "number") {
+        setTotalInscrits(data.total_inscrits);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedRole) return;
