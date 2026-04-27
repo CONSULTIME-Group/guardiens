@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Eye, EyeOff } from "lucide-react";
 import { Helmet } from "react-helmet-async";
-import authIllustration from "@/assets/auth-illustration-watercolor.png";
+import authIllustration from "@/assets/auth-illustration-gouache.png";
 
 const ResetPassword = () => {
   const [password, setPassword] = useState("");
@@ -74,15 +74,15 @@ const ResetPassword = () => {
     <div className="min-h-screen flex bg-background">
       <Helmet><meta name="robots" content="noindex, nofollow" /></Helmet>
       {/* Left panel - illustration (hidden on mobile) */}
-      <div className="hidden lg:flex lg:w-1/2 bg-accent/30 items-center justify-center p-16 relative">
-        <div className="relative z-10 flex flex-col items-center text-center max-w-md gap-8">
+      <div className="hidden lg:flex lg:w-1/2 bg-accent items-center justify-center p-12 relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-secondary/10" />
+        <div className="relative z-10 flex flex-col items-center text-center max-w-lg">
           <img
             src={authIllustration}
-            alt=""
-            aria-hidden="true"
-            width={520}
-            height={520}
-            className="w-full max-w-md h-auto mb-2"
+            alt="Chien et chat heureux"
+            width={400}
+            height={400}
+            className="mb-8 drop-shadow-lg"
           />
           <h2 className="font-heading text-2xl font-semibold text-foreground mb-3">
             Nouveau départ
