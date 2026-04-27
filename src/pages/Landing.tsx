@@ -666,6 +666,40 @@ const Landing = () => {
             </RevealSection>
           </div>
 
+          {/* ─── Exemples concrets — alignement promesse FB (Reiki, jardin, bricolage…) ─── */}
+          <RevealSection delay={0.25} className="mt-16">
+            <p className="text-center text-xs tracking-widest uppercase text-primary/60 font-body mb-6">
+              Quelques exemples vus sur Guardiens cette semaine
+            </p>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 max-w-5xl mx-auto">
+              {[
+                { emoji: "🌿", label: "Arroser les plantes" },
+                { emoji: "🐔", label: "Garder les poules" },
+                { emoji: "🐕", label: "Promener le chien" },
+                { emoji: "🔨", label: "Petit bricolage" },
+                { emoji: "🌱", label: "Tailler le jardin" },
+                { emoji: "🧘", label: "Séance de Reiki" },
+                { emoji: "🍞", label: "Cours de pain maison" },
+                { emoji: "📦", label: "Réceptionner un colis" },
+                { emoji: "🚗", label: "Covoiturage rdv" },
+                { emoji: "🪴", label: "Bouture, semis" },
+                { emoji: "🐈", label: "Visite d'un chat" },
+                { emoji: "💬", label: "Café & écoute" },
+              ].map((item) => (
+                <div
+                  key={item.label}
+                  className="flex flex-col items-center text-center bg-card rounded-xl px-3 py-4 border border-border/60 hover:border-primary/40 hover:shadow-sm transition-all"
+                >
+                  <span className="text-2xl mb-1.5" aria-hidden="true">{item.emoji}</span>
+                  <span className="text-xs font-body text-foreground/80 leading-tight">{item.label}</span>
+                </div>
+              ))}
+            </div>
+            <p className="text-center text-xs text-foreground/50 mt-4 italic">
+              Et tout ce que vous savez faire — il y a forcément quelqu'un près de chez vous qui en a besoin.
+            </p>
+          </RevealSection>
+
           <RevealSection delay={0.3} className="text-center mt-12">
             <div className="border-l-4 border-primary pl-6 max-w-xl mx-auto text-left mb-10">
               <p className="text-xl md:text-2xl font-heading font-semibold italic text-foreground leading-snug">
