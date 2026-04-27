@@ -360,6 +360,12 @@ const Register = () => {
                 <span className="font-medium text-foreground">{email}</span>.
                 Cliquez dessus pour activer votre compte.
               </p>
+              <div className="rounded-lg bg-primary/5 border border-primary/15 px-4 py-3 max-w-sm text-left space-y-1.5">
+                <p className="text-xs font-semibold text-foreground">⚠️ Important — sur mobile</p>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  Quand vous cliquerez sur le lien, ouvrez-le <strong>dans le même navigateur</strong> (Chrome ou Safari) — pas dans l'application Facebook ou Instagram. Sinon votre session sera perdue et vous devrez recommencer.
+                </p>
+              </div>
               <p className="text-muted-foreground/70 text-xs leading-relaxed max-w-sm">
                 💡 Pensez à vérifier vos <strong>spams</strong> ou l'onglet <strong>Promotions</strong> si vous ne trouvez pas l'email.
               </p>
