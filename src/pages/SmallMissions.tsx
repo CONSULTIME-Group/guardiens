@@ -546,20 +546,6 @@ const SmallMissions = () => {
 
         <main className="max-w-6xl mx-auto px-4 py-12 space-y-16">
           <section className="space-y-6">
-
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-              {ILLUSTRATED_EXAMPLES.map((example) => (
-                <div key={example.title} className="rounded-xl border border-border bg-card p-3 text-center shadow-sm">
-                  <img src={example.img} alt={example.alt} className="mx-auto h-20 w-20 object-contain" loading="eager" />
-                  <p className="mt-2 text-sm font-heading font-semibold text-foreground leading-tight">{example.title}</p>
-                  <p className="mt-1 text-xs text-muted-foreground leading-snug">{example.text}</p>
-                  <span className="mt-2 inline-block rounded-full bg-muted px-2 py-0.5 text-[11px] text-muted-foreground">
-                    {example.badge}
-                  </span>
-                </div>
-              ))}
-            </div>
-
             {/* Mode toggle: need / offer */}
             <div className="flex items-center justify-center gap-1 bg-muted rounded-lg p-1 w-fit mx-auto">
               <button
