@@ -12,6 +12,7 @@ import { getSignupRedirectUrl } from "@/lib/authRedirect";
 import { Eye, EyeOff } from "lucide-react";
 import { getAuthFieldAttrs } from "@/lib/inAppBrowser";
 import { mapAuthError } from "@/lib/authErrorMessages";
+import { InAppBrowserBanner } from "@/components/auth/InAppBrowserBanner";
 const authIllustration = "https://erhccyqevdyevpyctsjj.supabase.co/storage/v1/object/public/property-photos/misc/auth-illustration.webp";
 
 const Login = () => {
