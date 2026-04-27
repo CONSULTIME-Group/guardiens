@@ -331,7 +331,7 @@ const Register = () => {
           src={authIllustration}
           alt=""
           aria-hidden="true"
-          className="absolute inset-0 w-full h-full object-cover mix-blend-multiply opacity-95"
+          className="absolute inset-0 w-full h-full object-cover mix-blend-multiply opacity-60"
           style={{
             WebkitMaskImage:
               "radial-gradient(ellipse 75% 80% at 50% 50%, black 55%, transparent 100%)",
