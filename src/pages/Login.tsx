@@ -95,14 +95,18 @@ const Login = () => {
           src={authIllustration}
           alt=""
           aria-hidden="true"
-          className="absolute inset-0 w-full h-full object-cover mix-blend-multiply opacity-60"
+          className="absolute inset-0 w-full h-full object-cover mix-blend-multiply opacity-40"
           style={{
             WebkitMaskImage:
-              "radial-gradient(ellipse 75% 80% at 50% 50%, black 55%, transparent 100%)",
+              "radial-gradient(ellipse 65% 70% at 40% 50%, black 30%, transparent 95%)",
             maskImage:
-              "radial-gradient(ellipse 75% 80% at 50% 50%, black 55%, transparent 100%)",
+              "radial-gradient(ellipse 65% 70% at 40% 50%, black 30%, transparent 95%)",
           }}
         />
+        {/* Fondu latéral vers le formulaire (droite) */}
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-background/40 to-background pointer-events-none" />
+        {/* Voile derrière le texte pour garantir la lisibilité */}
+        <div className="absolute bottom-0 left-0 right-0 h-1/2 bg-gradient-to-t from-background via-background/70 to-transparent pointer-events-none" />
         <div className="relative z-10 mt-auto p-12 max-w-lg">
           <h2 className="font-heading text-3xl font-semibold text-foreground mb-3">Vos animaux entre de bonnes mains</h2>
           <p className="text-foreground/80 leading-relaxed">
