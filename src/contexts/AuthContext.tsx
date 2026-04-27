@@ -220,14 +220,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       // If no session (email confirmation required), role is stored in user metadata
       // and will be applied when the user confirms their email via handle_new_user_role trigger
 
-      supabase.functions.invoke("send-transactional-email", {
-        body: {
-          templateName: "welcome",
-          recipientEmail: email,
-          idempotencyKey: `welcome-${data.user.id}`,
-          templateData: { firstName: "", role },
-        },
-      }).catch((err) => console.warn("Welcome email failed:", err));
+      // Note: l'email de bienvenue est désormais fusionné dans l'email de confirmation
+      // d'inscription (template signup.tsx) pour éviter d'envoyer deux emails à la suite.
+      // Le template "welcome" reste disponible pour d'autres usages (resend-welcome-batch).
 
       // Pre-set activeRole so the first dashboard load matches the chosen role
       const initialActive: ActiveRole = role === "sitter" ? "sitter" : "owner";
