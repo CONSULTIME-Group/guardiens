@@ -447,12 +447,12 @@ const Register = () => {
               </div>
               <div className="space-y-2">
                 <h2 className="font-heading text-xl font-semibold text-foreground">
-                  Vérifiez votre boîte mail
+                  Un seul email vous attend
                 </h2>
                 <p className="text-muted-foreground text-sm leading-relaxed max-w-sm">
-                  Un lien de confirmation a été envoyé à{" "}
+                  Nous venons d'envoyer un message à{" "}
                   <span className="font-medium text-foreground break-all">{email}</span>.
-                  Cliquez dessus pour activer votre compte.
+                  Il combine la <strong className="text-foreground">confirmation de votre adresse</strong> et notre <strong className="text-foreground">message de bienvenue</strong> — cliquez sur le bouton à l'intérieur pour activer votre compte.
                 </p>
               </div>
 
