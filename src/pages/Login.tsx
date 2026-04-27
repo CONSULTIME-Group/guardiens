@@ -115,6 +115,8 @@ const Login = () => {
             <p className="text-muted-foreground">Content de vous revoir</p>
           </div>
 
+          <InAppBrowserBanner className="mb-6" />
+
           <div className="flex justify-center mb-8 lg:hidden">
             <img src={authIllustration} alt="Chien et chat heureux" width={200} height={200} className="drop-shadow-md" />
           </div>
