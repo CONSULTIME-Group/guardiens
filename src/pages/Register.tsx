@@ -326,12 +326,18 @@ const Register = () => {
       <Helmet><meta name="robots" content="index, follow" /></Helmet>
 
       {/* Left panel */}
-      <div className="hidden lg:block lg:w-1/2 relative bg-background">
+      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-background">
         <img
           src={authIllustration}
           alt=""
           aria-hidden="true"
-          className="absolute inset-y-0 left-0 h-full w-[150%] object-contain object-left pointer-events-none z-20 opacity-90"
+          className="absolute inset-0 w-full h-full object-cover mix-blend-multiply opacity-60"
+          style={{
+            WebkitMaskImage:
+              "radial-gradient(ellipse 75% 80% at 50% 50%, black 55%, transparent 100%)",
+            maskImage:
+              "radial-gradient(ellipse 75% 80% at 50% 50%, black 55%, transparent 100%)",
+          }}
         />
         <div className="relative z-10 mt-auto p-12 max-w-lg">
           <h2 className="font-heading text-3xl font-semibold text-foreground mb-3">Rejoignez la communauté</h2>
