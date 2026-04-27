@@ -534,13 +534,13 @@ const Register = () => {
                 {selectedRole && (
                   <p className="mt-3 text-xs text-muted-foreground/90 leading-relaxed max-w-xs mx-auto">
                     {selectedRole === "owner" && (
-                      <>✨ Vous pourrez <strong className="text-foreground/80">publier vos premières annonces</strong> juste après.</>
+                      <>Vous pourrez <strong className="text-foreground/80">publier vos premières annonces</strong> juste après.</>
                     )}
                     {selectedRole === "sitter" && (
-                      <>✨ Vous pourrez <strong className="text-foreground/80">compléter votre profil et candidater</strong> juste après.</>
+                      <>Vous pourrez <strong className="text-foreground/80">compléter votre profil et candidater</strong> juste après.</>
                     )}
                     {selectedRole === "both" && (
-                      <>✨ Vous pourrez <strong className="text-foreground/80">publier vos annonces ET candidater</strong> juste après.</>
+                      <>Vous pourrez <strong className="text-foreground/80">publier vos annonces ET candidater</strong> juste après.</>
                     )}
                   </p>
                 )}
@@ -573,8 +573,14 @@ const Register = () => {
                     autoComplete="new-password"
                     className="rounded-lg h-12 pr-12"
                   />
-                  <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors">
-                    {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    aria-label={showPassword ? "Masquer le mot de passe" : "Afficher le mot de passe"}
+                    aria-pressed={showPassword}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    {showPassword ? <EyeOff className="h-5 w-5" aria-hidden="true" /> : <Eye className="h-5 w-5" aria-hidden="true" />}
                   </button>
                 </div>
                 <p className="text-xs text-muted-foreground">
@@ -615,9 +621,9 @@ const Register = () => {
                 />
                 <label htmlFor="terms" className="text-sm text-muted-foreground leading-snug cursor-pointer">
                   J'accepte les{" "}
-                  <Link to="/cgu" target="_blank" className="text-primary hover:underline">conditions d'utilisation</Link>
+                  <Link to="/cgu" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">conditions d'utilisation</Link>
                   {" "}et la{" "}
-                  <Link to="/confidentialite" target="_blank" className="text-primary hover:underline">politique de confidentialité</Link>.
+                  <Link to="/confidentialite" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">politique de confidentialité</Link>.
                 </label>
               </div>
 
@@ -625,7 +631,7 @@ const Register = () => {
                 {isLoading ? "Création..." : "Créer mon compte — gratuit"}
               </Button>
               <p className="text-center text-xs text-muted-foreground">
-                🔒 Pas de spam · Désinscription en 1 clic · Vos données restent en France
+                Pas de spam · Désinscription en 1 clic · Vos données restent en France
               </p>
             </form>
           )}
