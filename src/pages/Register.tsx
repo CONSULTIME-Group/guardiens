@@ -339,50 +339,18 @@ const Register = () => {
       {/* /inscription est une page de conversion clé : indexable (cohérent avec robots.txt + sitemap.xml). */}
       <Helmet><meta name="robots" content="index, follow" /></Helmet>
 
-      {/* Left panel */}
-      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-background">
-        <img
-          src={authIllustration}
-          alt=""
-          aria-hidden="true"
-          className="absolute inset-0 w-full h-full object-cover mix-blend-multiply opacity-100"
-          style={{
-            WebkitMaskImage:
-              "radial-gradient(ellipse 95% 100% at 40% 50%, black 0%, rgba(0,0,0,0.85) 25%, transparent 95%)",
-            maskImage:
-              "radial-gradient(ellipse 95% 100% at 40% 50%, black 0%, rgba(0,0,0,0.85) 25%, transparent 95%)",
-            filter: "saturate(0.75) hue-rotate(-8deg) blur(1.2px)",
-          }}
-        />
-        {/* Filtre de teinte aligné sur la palette (vert sapin primaire) */}
-        <div
-          className="absolute inset-0 pointer-events-none mix-blend-color opacity-25"
-          style={{
-            backgroundColor: "hsl(var(--primary))",
-            WebkitMaskImage:
-              "radial-gradient(ellipse 95% 100% at 40% 50%, black 0%, rgba(0,0,0,0.85) 25%, transparent 95%)",
-            maskImage:
-              "radial-gradient(ellipse 95% 100% at 40% 50%, black 0%, rgba(0,0,0,0.85) 25%, transparent 95%)",
-          }}
-        />
-        {/* Fondu latéral vers le formulaire (droite) */}
-        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-background/40 to-background pointer-events-none" />
-        {/* Voile derrière le texte pour garantir la lisibilité */}
-        <div className="absolute bottom-0 left-0 right-0 h-1/2 bg-gradient-to-t from-background via-background/70 to-transparent pointer-events-none" />
-
-        <div className="relative z-10 mt-auto p-12 max-w-lg">
-          <h2 className="font-heading text-3xl font-semibold text-foreground mb-3">Rejoignez la communauté</h2>
-          <p className="text-foreground/80 leading-relaxed">
-            Des milliers de passionnés prennent soin des animaux comme des leurs, dans le confort de leur foyer.
-          </p>
-          {totalInscrits !== null && totalInscrits > 0 && (
+      <AuthIllustrationPanel
+        title="Rejoignez la communauté"
+        description="Des milliers de passionnés prennent soin des animaux comme des leurs, dans le confort de leur foyer."
+        footerSlot={
+          totalInscrits !== null && totalInscrits > 0 ? (
             <div className="mt-6 inline-flex items-center gap-2 rounded-full bg-card/90 backdrop-blur px-4 py-2 border border-border">
               <span className="text-2xl font-heading font-bold text-primary">{totalInscrits}</span>
               <span className="text-sm text-muted-foreground">membres déjà inscrits</span>
             </div>
-          )}
-        </div>
-      </div>
+          ) : null
+        }
+      />
 
       {/* Right panel — pb-32 pour éviter masquage par cookie banner sur mobile */}
       <div className="flex-1 flex items-start lg:items-center justify-center px-6 pt-4 pb-24 md:pt-12 md:pb-12">
