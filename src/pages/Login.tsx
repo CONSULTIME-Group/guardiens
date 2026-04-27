@@ -98,9 +98,9 @@ const Login = () => {
           className="absolute inset-0 w-full h-full object-cover mix-blend-multiply opacity-40"
           style={{
             WebkitMaskImage:
-              "radial-gradient(ellipse 65% 70% at 40% 50%, black 30%, transparent 95%)",
+              "radial-gradient(ellipse 90% 95% at 40% 50%, black 10%, transparent 100%)",
             maskImage:
-              "radial-gradient(ellipse 65% 70% at 40% 50%, black 30%, transparent 95%)",
+              "radial-gradient(ellipse 90% 95% at 40% 50%, black 10%, transparent 100%)",
             filter: "saturate(0.85) hue-rotate(-8deg)",
           }}
         />
@@ -110,9 +110,9 @@ const Login = () => {
           style={{
             backgroundColor: "hsl(var(--primary))",
             WebkitMaskImage:
-              "radial-gradient(ellipse 65% 70% at 40% 50%, black 30%, transparent 95%)",
+              "radial-gradient(ellipse 90% 95% at 40% 50%, black 10%, transparent 100%)",
             maskImage:
-              "radial-gradient(ellipse 65% 70% at 40% 50%, black 30%, transparent 95%)",
+              "radial-gradient(ellipse 90% 95% at 40% 50%, black 10%, transparent 100%)",
           }}
         />
         {/* Fondu latéral vers le formulaire (droite) */}
