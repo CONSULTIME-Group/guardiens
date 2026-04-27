@@ -90,14 +90,13 @@ const Login = () => {
   return (
     <div className="min-h-screen flex bg-background">
       <Helmet><meta name="robots" content="noindex, nofollow" /></Helmet>
-      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden">
+      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-background">
         <img
           src={authIllustration}
           alt=""
           aria-hidden="true"
-          className="absolute inset-0 w-full h-full object-cover"
+          className="absolute inset-0 w-full h-full object-contain object-center mix-blend-multiply opacity-90"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-background/85 via-background/20 to-transparent" />
         <div className="relative z-10 mt-auto p-12 max-w-lg">
           <h2 className="font-heading text-3xl font-semibold text-foreground mb-3">Vos animaux entre de bonnes mains</h2>
           <p className="text-foreground/80 leading-relaxed">
