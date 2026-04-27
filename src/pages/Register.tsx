@@ -14,6 +14,7 @@ import { useToast } from "@/hooks/use-toast";
 import { trackEvent, trackEventWithUserId, mapSignupError } from "@/lib/analytics";
 import { mapAuthError } from "@/lib/authErrorMessages";
 import { Eye, EyeOff, MailCheck, Info } from "lucide-react";
+import { InAppBrowserBanner } from "@/components/auth/InAppBrowserBanner";
 import {
   Dialog,
   DialogContent,
