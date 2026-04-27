@@ -334,6 +334,31 @@ const Register = () => {
     navigate(`/login?email=${encodeURIComponent(email)}`);
   };
 
+  const handleGoogleSignUp = async () => {
+    if (!acceptedTerms) {
+      setFormError("Veuillez accepter les conditions d'utilisation avant de continuer avec Google.");
+      return;
+    }
+    setIsGoogleLoading(true);
+    try {
+      trackEvent("signup_form_submitted", {
+        source: "/inscription",
+        metadata: { role: selectedRole, method: "google" },
+      });
+    } catch {}
+    const result = await lovable.auth.signInWithOAuth("google", {
+      redirect_uri: window.location.origin,
+    });
+    if (result.error) {
+      const info = mapAuthError(result.error as any);
+      toast({ variant: "destructive", title: info.title, description: info.description });
+      setIsGoogleLoading(false);
+      return;
+    }
+    if (result.redirected) return;
+    navigate("/dashboard");
+  };
+
   return (
     <div className="min-h-screen flex bg-background">
       {/* /inscription est une page de conversion clé : indexable (cohérent avec robots.txt + sitemap.xml). */}
