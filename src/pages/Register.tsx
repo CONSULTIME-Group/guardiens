@@ -537,8 +537,11 @@ const Register = () => {
               </div>
 
               <Button type="submit" className="w-full" size="lg" disabled={isLoading || !acceptedTerms}>
-                {isLoading ? "Création..." : "Créer mon compte"}
+                {isLoading ? "Création..." : "Créer mon compte — gratuit"}
               </Button>
+              <p className="text-center text-xs text-muted-foreground">
+                🔒 Pas de spam · Désinscription en 1 clic · Vos données restent en France
+              </p>
             </form>
           )}
 
