@@ -1,34 +1,26 @@
-import authIllustration from "@/assets/auth-illustration-village-v4.png";
+import authIllustration from "@/assets/auth-illustration-village-v5.png";
 
 interface AuthIllustrationPanelProps {
-  title: string;
-  description: string;
-  /** Optionnel : preuve sociale (membres inscrits, etc.) affichée sous la description. */
+  /** Conservé pour compat API mais non rendu : titre/description/KPI sont peints dans l'illustration. */
+  title?: string;
+  description?: string;
   footerSlot?: React.ReactNode;
 }
 
 /**
  * Panneau d'illustration partagé entre /login et /inscription.
- * Illustration gouache d'ambiance village + texte superposé (titre, description, KPI dynamique).
+ * Le contenu textuel (titre, baseline, KPI) est peint à la main dans l'illustration
+ * pour une cohérence éditoriale maximale. Aucune superposition HTML.
  */
-export const AuthIllustrationPanel = ({ title, description, footerSlot }: AuthIllustrationPanelProps) => {
+export const AuthIllustrationPanel = (_props: AuthIllustrationPanelProps) => {
   return (
     <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-background">
       <img
         src={authIllustration}
-        alt=""
-        aria-hidden="true"
+        alt="Illustration d'un village paisible où voisins, chiens et chats partagent le quotidien"
         className="absolute inset-0 w-full h-full object-cover"
-        style={{ objectPosition: "center 30%" }}
+        style={{ objectPosition: "center center" }}
       />
-      {/* Voile inférieur pour garantir la lisibilité du texte superposé */}
-      <div className="absolute bottom-0 left-0 right-0 h-1/2 bg-gradient-to-t from-background via-background/85 to-transparent pointer-events-none" />
-
-      <div className="relative z-10 mt-auto p-12 max-w-lg">
-        <h2 className="font-heading text-3xl font-semibold text-foreground mb-3">{title}</h2>
-        <p className="text-foreground/80 leading-relaxed">{description}</p>
-        {footerSlot}
-      </div>
     </div>
   );
 };
