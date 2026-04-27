@@ -357,11 +357,25 @@ const Register = () => {
             </Link>
             {step !== "confirmation" && (
               <>
-                <p className="text-foreground font-medium">
-                  {step === 1 ? "Bienvenue 👋" : "Plus qu'une étape"}
+                {/* Indicateur de progression mobile-first */}
+                <div className="mt-3 mb-2 flex flex-col items-center gap-1.5" aria-label={`Inscription, étape ${step} sur 2`}>
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 text-primary text-xs font-semibold px-2.5 py-1">
+                    <span className="tabular-nums">Étape {step}/2</span>
+                  </span>
+                  <div className="w-32 h-1 rounded-full bg-muted overflow-hidden" role="progressbar" aria-valuenow={step === 1 ? 50 : 100} aria-valuemin={0} aria-valuemax={100}>
+                    <div
+                      className="h-full bg-primary transition-all duration-500 ease-out"
+                      style={{ width: step === 1 ? "50%" : "100%" }}
+                    />
+                  </div>
+                </div>
+                <p className="text-foreground font-medium mt-3">
+                  {step === 1 ? "Bienvenue 👋" : "Plus qu'une étape ✨"}
                 </p>
                 <p className="text-sm text-muted-foreground mt-1">
-                  {step === 1 ? "On commence par votre profil." : "Créez votre compte — c'est gratuit."}
+                  {step === 1
+                    ? "On commence par votre profil — ça prend 30 secondes."
+                    : "Vos identifiants et c'est terminé. Promis."}
                 </p>
               </>
             )}
