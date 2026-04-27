@@ -1,4 +1,4 @@
-import authIllustration from "@/assets/auth-illustration-gouache.png";
+import authIllustration from "@/assets/auth-illustration-gouache-v2.png";
 
 interface AuthIllustrationPanelProps {
   title: string;
@@ -18,24 +18,23 @@ export const AuthIllustrationPanel = ({ title, description, footerSlot }: AuthIl
         src={authIllustration}
         alt=""
         aria-hidden="true"
-        className="absolute inset-0 w-full h-full object-cover mix-blend-multiply opacity-100"
+        className="absolute inset-0 w-full h-full object-cover"
         style={{
           WebkitMaskImage:
-            "radial-gradient(ellipse 95% 100% at 40% 50%, black 0%, rgba(0,0,0,0.85) 25%, transparent 95%)",
+            "radial-gradient(ellipse 100% 100% at 35% 50%, black 0%, rgba(0,0,0,0.9) 35%, transparent 100%)",
           maskImage:
-            "radial-gradient(ellipse 95% 100% at 40% 50%, black 0%, rgba(0,0,0,0.85) 25%, transparent 95%)",
-          filter: "saturate(0.75) hue-rotate(-8deg) blur(1.2px)",
+            "radial-gradient(ellipse 100% 100% at 35% 50%, black 0%, rgba(0,0,0,0.9) 35%, transparent 100%)",
         }}
       />
-      {/* Filtre de teinte aligné sur la palette (vert sapin primaire) */}
+      {/* Voile primaire très léger pour ancrer dans la palette sans dénaturer la gouache */}
       <div
-        className="absolute inset-0 pointer-events-none mix-blend-color opacity-25"
+        className="absolute inset-0 pointer-events-none mix-blend-multiply opacity-10"
         style={{
           backgroundColor: "hsl(var(--primary))",
           WebkitMaskImage:
-            "radial-gradient(ellipse 95% 100% at 40% 50%, black 0%, rgba(0,0,0,0.85) 25%, transparent 95%)",
+            "radial-gradient(ellipse 100% 100% at 35% 50%, black 0%, rgba(0,0,0,0.9) 35%, transparent 100%)",
           maskImage:
-            "radial-gradient(ellipse 95% 100% at 40% 50%, black 0%, rgba(0,0,0,0.85) 25%, transparent 95%)",
+            "radial-gradient(ellipse 100% 100% at 35% 50%, black 0%, rgba(0,0,0,0.9) 35%, transparent 100%)",
         }}
       />
       {/* Fondu latéral vers le formulaire (droite) */}
