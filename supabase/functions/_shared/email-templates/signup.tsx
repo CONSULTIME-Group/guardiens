@@ -43,12 +43,14 @@ export const SignupEmail = ({
           <span style={{ color: '#3d7a5f' }}>g</span>uardiens
         </Heading>
 
-        {/* Accroche directe */}
-        <Heading style={h1}>Bienvenue parmi nous.</Heading>
+        {/* Accroche directe et chaleureuse */}
+        <Heading style={h1}>Quelle joie de vous accueillir.</Heading>
 
         <Text style={lead}>
-          Il vous reste une dernière étape pour activer votre compte sur{' '}
-          <Link href={siteUrl} style={link}>{siteName}</Link>.
+          Vous venez de rejoindre{' '}
+          <Link href={siteUrl} style={link}>{siteName}</Link>, une communauté de propriétaires
+          et de gardiens qui prennent soin les uns des autres, et de leurs animaux.
+          Il ne vous reste qu'une étape pour activer votre compte.
         </Text>
 
         {/* CTA principal placé HAUT pour conversion immédiate */}
@@ -90,10 +92,11 @@ export const SignupEmail = ({
 
         <Hr style={hr} />
 
-        {/* Signature humaine */}
+        {/* Signature humaine et chaleureuse */}
         <Text style={signature}>
-          À très vite sur {siteName},<br />
-          <span style={signatureName}>Jérémie, fondateur</span>
+          Au plaisir de faire votre connaissance,<br />
+          <span style={signatureName}>Jérémie</span><br />
+          <span style={signatureRole}>Fondateur de {siteName}</span>
         </Text>
 
         {/* Anti-phishing — important */}
@@ -215,7 +218,11 @@ const signature = {
 }
 const signatureName = {
   color: '#1a1a1a',
-  fontWeight: '500' as const,
+  fontWeight: '600' as const,
+}
+const signatureRole = {
+  color: '#8a8a8a',
+  fontSize: '13px',
 }
 const securityBox = {
   backgroundColor: '#faf8f4',
