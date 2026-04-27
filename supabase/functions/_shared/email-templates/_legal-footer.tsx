@@ -38,7 +38,7 @@ export const LegalFooter = () => (
       d'opposition sur vos données personnelles. Pour exercer ces droits :{' '}
       <a href="mailto:contact@guardiens.fr" style={link}>contact@guardiens.fr</a>.
     </Text>
-    <Text style={signature}>L'équipe {SITE_NAME} 🐾</Text>
+    <Text style={signature}>L'équipe {SITE_NAME}</Text>
   </Section>
 )
 
