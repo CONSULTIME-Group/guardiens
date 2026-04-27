@@ -82,6 +82,8 @@ const Register = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isResending, setIsResending] = useState(false);
+  const [resendCooldown, setResendCooldown] = useState(0);
+  const [resendCount, setResendCount] = useState(0);
   const [formError, setFormError] = useState<string | null>(null);
   const [existingAccountOpen, setExistingAccountOpen] = useState(false);
   const [acceptedTerms, setAcceptedTerms] = useState(false);
@@ -115,6 +117,13 @@ const Register = () => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Cooldown anti-spam pour le bouton "Renvoyer l'email"
+  useEffect(() => {
+    if (resendCooldown <= 0) return;
+    const t = setInterval(() => setResendCooldown((s) => Math.max(0, s - 1)), 1000);
+    return () => clearInterval(t);
+  }, [resendCooldown]);
 
   // Charge le nombre d'inscrits pour preuve sociale
   useEffect(() => {
@@ -292,6 +301,7 @@ const Register = () => {
   };
 
   const handleResendEmail = async () => {
+    if (resendCooldown > 0 || isResending) return;
     setIsResending(true);
     const { error } = await supabase.auth.resend({
       type: "signup",
@@ -308,9 +318,11 @@ const Register = () => {
         description: info.description,
       });
     } else {
+      setResendCount((n) => n + 1);
+      setResendCooldown(45);
       toast({
-        title: "Email renvoyé !",
-        description: "Un nouvel email de confirmation vient d'être envoyé.",
+        title: "Email renvoyé",
+        description: `Nouveau lien envoyé à ${email}. Pensez à vérifier vos spams.`,
       });
     }
     setIsResending(false);
@@ -429,36 +441,83 @@ const Register = () => {
 
           {/* ── Confirmation screen ── */}
           {step === "confirmation" && (
-            <div className="flex flex-col items-center text-center space-y-5 py-6 animate-in fade-in-0 slide-in-from-bottom-4 duration-300">
-              <MailCheck className="h-12 w-12 text-primary" />
-              <h2 className="font-heading text-xl font-semibold text-foreground">Vérifiez votre boîte mail</h2>
-              <p className="text-muted-foreground text-sm leading-relaxed max-w-sm">
-                On vous a envoyé un lien de confirmation à{" "}
-                <span className="font-medium text-foreground">{email}</span>.
-                Cliquez dessus pour activer votre compte.
-              </p>
-              <div className="rounded-lg bg-primary/5 border border-primary/15 px-4 py-3 max-w-sm text-left space-y-1.5">
-                <p className="text-xs font-semibold text-foreground">⚠️ Important — sur mobile</p>
-                <p className="text-xs text-muted-foreground leading-relaxed">
-                  Quand vous cliquerez sur le lien, ouvrez-le <strong>dans le même navigateur</strong> (Chrome ou Safari) — pas dans l'application Facebook ou Instagram. Sinon votre session sera perdue et vous devrez recommencer.
+            <div className="flex flex-col items-center text-center space-y-5 py-4 animate-in fade-in-0 slide-in-from-bottom-4 duration-300">
+              <div className="rounded-full bg-primary/10 p-4">
+                <MailCheck className="h-10 w-10 text-primary" />
+              </div>
+              <div className="space-y-2">
+                <h2 className="font-heading text-xl font-semibold text-foreground">
+                  Vérifiez votre boîte mail
+                </h2>
+                <p className="text-muted-foreground text-sm leading-relaxed max-w-sm">
+                  Un lien de confirmation a été envoyé à{" "}
+                  <span className="font-medium text-foreground break-all">{email}</span>.
+                  Cliquez dessus pour activer votre compte.
                 </p>
               </div>
-              <p className="text-muted-foreground/70 text-xs leading-relaxed max-w-sm">
-                💡 Pensez à vérifier vos <strong>spams</strong> ou l'onglet <strong>Promotions</strong> si vous ne trouvez pas l'email.
-              </p>
-              <button
+
+              {/* Encadré spam — mis en avant car c'est la cause #1 d'abandon */}
+              <div className="w-full max-w-sm rounded-lg bg-amber-50 border border-amber-200 px-4 py-3 text-left space-y-2">
+                <p className="text-sm font-semibold text-amber-900">
+                  Vous ne voyez rien dans votre boîte de réception ?
+                </p>
+                <ul className="text-xs text-amber-900/80 leading-relaxed space-y-1 list-disc pl-4">
+                  <li>
+                    Vérifiez vos <strong>spams / courriers indésirables</strong> et l'onglet <strong>Promotions</strong>.
+                  </li>
+                  <li>
+                    L'expéditeur est{" "}
+                    <span className="font-mono text-[11px]">noreply@notify.guardiens.fr</span>.
+                  </li>
+                  <li>L'arrivée peut prendre 1 à 2 minutes.</li>
+                </ul>
+              </div>
+
+              {/* Bouton de renvoi — proéminent, avec cooldown anti-spam-click */}
+              <Button
+                type="button"
+                variant="outline"
+                size="lg"
                 onClick={handleResendEmail}
-                disabled={isResending}
-                className="text-sm text-primary hover:underline disabled:opacity-50"
+                disabled={isResending || resendCooldown > 0}
+                className="w-full max-w-sm"
               >
-                {isResending ? "Envoi en cours…" : "Vous n'avez rien reçu ? Renvoyer l'email →"}
-              </button>
-              <button
-                onClick={goToLoginWithEmail}
-                className="text-sm text-muted-foreground hover:text-foreground"
-              >
-                ← Retour à la connexion
-              </button>
+                {isResending
+                  ? "Envoi en cours…"
+                  : resendCooldown > 0
+                  ? `Renvoyer dans ${resendCooldown}s`
+                  : resendCount > 0
+                  ? "Renvoyer l'email à nouveau"
+                  : "Je n'ai rien reçu — renvoyer l'email"}
+              </Button>
+
+              {/* Conseil mobile — déplacé en secondaire car moins critique */}
+              <p className="text-xs text-muted-foreground/80 leading-relaxed max-w-sm">
+                Sur mobile, ouvrez le lien <strong>dans Chrome ou Safari</strong> — pas dans l'application Facebook ou Instagram, sinon votre session sera perdue.
+              </p>
+
+              <div className="flex flex-col items-center gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => { setStep(presetRole ? 2 : 1); setResendCount(0); setResendCooldown(0); }}
+                  className="text-sm text-muted-foreground hover:text-foreground underline-offset-4 hover:underline"
+                >
+                  Email incorrect ? Recommencer
+                </button>
+                <button
+                  type="button"
+                  onClick={goToLoginWithEmail}
+                  className="text-sm text-muted-foreground hover:text-foreground"
+                >
+                  ← Retour à la connexion
+                </button>
+                <Link
+                  to="/contact"
+                  className="text-xs text-muted-foreground/70 hover:text-foreground mt-2"
+                >
+                  Toujours bloqué ? Contactez-nous
+                </Link>
+              </div>
             </div>
           )}
 
