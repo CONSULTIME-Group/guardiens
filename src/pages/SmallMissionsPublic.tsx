@@ -3,7 +3,13 @@ import { Button } from "@/components/ui/button";
 import PageMeta from "@/components/PageMeta";
 import PageBreadcrumb from "@/components/seo/PageBreadcrumb";
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import { Apple, Sprout, Egg, PawPrint, Hammer, ChefHat, ArrowLeft, ChevronRight, Home } from "lucide-react";
+import { ArrowLeft, ChevronRight, Home } from "lucide-react";
+import spotVerger from "@/assets/missions/spot-verger.png";
+import spotJardin from "@/assets/missions/spot-jardin.png";
+import spotPoules from "@/assets/missions/spot-poules.png";
+import spotChien from "@/assets/missions/spot-chien.png";
+import spotBricolage from "@/assets/missions/spot-bricolage.png";
+import spotBienetre from "@/assets/missions/spot-bienetre.png";
 import PublicHeader from "@/components/layout/PublicHeader";
 import PublicFooter from "@/components/layout/PublicFooter";
 import { useAuth } from "@/contexts/AuthContext";
@@ -42,12 +48,12 @@ function Reveal({ children, delay = 0 }: { children: ReactNode; delay?: number }
 
 /* ── data ── */
 const examples = [
-  { Icon: Apple, title: "Verger à ramasser", text: "Venir ramasser les fruits avant qu'ils tombent contre un énorme panier de fruits frais à emporter.", badge: "Fruits · Écully" },
-  { Icon: Sprout, title: "Potager à planter", text: "Donner un coup de main pour planter les légumes au printemps — et venir se servir librement à la récolte.", badge: "Légumes · Lyon 3e" },
-  { Icon: Egg, title: "Poules à garder", text: "Nourrir les poules et ramasser les œufs pendant 10 jours contre des œufs frais à volonté au retour.", badge: "Œufs · Caluire" },
-  { Icon: PawPrint, title: "Chien à promener", text: "Deux semaines de balades contre son chien promené la prochaine fois qu'on part.", badge: "Réciprocité · Grenoble" },
-  { Icon: Hammer, title: "Meubles à monter", text: "Une après-midi de montage IKEA contre un vrai repas fait maison et une bouteille.", badge: "Repas · Annecy" },
-  { Icon: ChefHat, title: "Cours de cuisine", text: "2h à apprendre à faire la pâte fraîche contre une aide pour la déclaration d'impôts.", badge: "Échange · Chambéry" },
+  { img: spotVerger, alt: "Panier en osier rempli de fruits frais — illustration gouache", title: "Verger à ramasser", text: "Venir ramasser les fruits avant qu'ils tombent contre un énorme panier de fruits frais à emporter.", badge: "Fruits · Écully" },
+  { img: spotJardin, alt: "Panier d'herbes aromatiques et sécateur — illustration gouache", title: "Coup de main au jardin", text: "Donner un coup de main pour planter, désherber ou tailler — et venir se servir librement à la récolte.", badge: "Jardinage · entre voisins" },
+  { img: spotPoules, alt: "Poule rousse devant un nid de paille avec des œufs — illustration gouache", title: "Poules à garder", text: "Nourrir les poules et ramasser les œufs pendant 10 jours contre des œufs frais à volonté au retour.", badge: "Œufs · Caluire" },
+  { img: spotChien, alt: "Chien assis avec sa laisse en cuir — illustration gouache", title: "Chien à promener", text: "Deux semaines de balades contre son chien promené la prochaine fois qu'on part.", badge: "Réciprocité · entre voisins" },
+  { img: spotBricolage, alt: "Boîte à outils en bois ouverte avec marteau, tournevis et clé — illustration gouache", title: "Petit bricolage", text: "Un coup de main pour monter une étagère, fixer un meuble ou changer un robinet, contre un vrai repas fait maison.", badge: "Repas · Annecy" },
+  { img: spotBienetre, alt: "Tasse en céramique, brin de lavande et galet — illustration gouache", title: "Énergie & bien-être", text: "Une séance de Reiki, un massage ou un moment de méditation partagés, en échange d'un service rendu en retour.", badge: "Échange · entre voisins" },
 ];
 
 /* ── page ── */
@@ -255,7 +261,14 @@ const SmallMissionsPublic = () => {
               {examples.map((ex, i) => (
                 <Reveal key={ex.title} delay={0.05 * i}>
                   <div className="bg-card border border-border rounded-2xl p-8 hover:-translate-y-1 hover:shadow-lg transition-all duration-300 h-full flex flex-col">
-                    <ex.Icon className="text-primary/70 mb-4" size={28} strokeWidth={1.5} />
+                    <img
+                      src={ex.img}
+                      alt={ex.alt}
+                      loading="lazy"
+                      width={512}
+                      height={512}
+                      className="w-24 h-24 md:w-28 md:h-28 object-contain mb-4 -ml-2"
+                    />
                     <h3 className="font-heading text-lg font-semibold text-foreground mb-2">{ex.title}</h3>
                     <p className="text-sm md:text-base font-body text-foreground/70 leading-relaxed flex-1">{ex.text}</p>
                     <span className="inline-block mt-4 text-xs font-body font-semibold tracking-wide text-secondary bg-secondary/10 rounded-full px-3 py-1 w-fit">
