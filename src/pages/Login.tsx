@@ -90,17 +90,17 @@ const Login = () => {
   return (
     <div className="min-h-screen flex bg-background">
       <Helmet><meta name="robots" content="noindex, nofollow" /></Helmet>
-      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-background">
+      <div className="hidden lg:flex lg:w-1/2 relative bg-background">
         <img
           src={authIllustration}
           alt=""
           aria-hidden="true"
-          className="absolute inset-0 w-full h-full object-cover mix-blend-multiply opacity-60"
+          className="absolute inset-y-0 left-0 h-full w-[125%] object-cover object-left mix-blend-multiply opacity-60 pointer-events-none z-10"
           style={{
             WebkitMaskImage:
-              "radial-gradient(ellipse 75% 80% at 50% 50%, black 55%, transparent 100%)",
+              "radial-gradient(ellipse 65% 75% at 40% 50%, black 40%, transparent 95%)",
             maskImage:
-              "radial-gradient(ellipse 75% 80% at 50% 50%, black 55%, transparent 100%)",
+              "radial-gradient(ellipse 65% 75% at 40% 50%, black 40%, transparent 95%)",
           }}
         />
         <div className="relative z-10 mt-auto p-12 max-w-lg">
