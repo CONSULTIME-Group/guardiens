@@ -344,7 +344,7 @@ const Register = () => {
       </div>
 
       {/* Right panel — pb-32 pour éviter masquage par cookie banner sur mobile */}
-      <div className="flex-1 flex items-start lg:items-center justify-center px-6 pt-4 pb-32 md:pt-12 md:pb-12">
+      <div className="flex-1 flex items-start lg:items-center justify-center px-6 pt-4 pb-24 md:pt-12 md:pb-12">
         <div className="w-full max-w-md">
           {/* Lien retour : compact sur mobile pour libérer de l'espace */}
           <Link
