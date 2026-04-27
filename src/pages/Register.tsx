@@ -89,6 +89,7 @@ const Register = () => {
   const [existingAccountOpen, setExistingAccountOpen] = useState(false);
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [totalInscrits, setTotalInscrits] = useState<number | null>(null);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 
   const { register } = useAuth();
   const navigate = useNavigate();
