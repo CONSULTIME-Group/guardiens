@@ -118,6 +118,13 @@ const Register = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Cooldown anti-spam pour le bouton "Renvoyer l'email"
+  useEffect(() => {
+    if (resendCooldown <= 0) return;
+    const t = setInterval(() => setResendCooldown((s) => Math.max(0, s - 1)), 1000);
+    return () => clearInterval(t);
+  }, [resendCooldown]);
+
   // Charge le nombre d'inscrits pour preuve sociale
   useEffect(() => {
     let cancelled = false;
@@ -294,6 +301,7 @@ const Register = () => {
   };
 
   const handleResendEmail = async () => {
+    if (resendCooldown > 0 || isResending) return;
     setIsResending(true);
     const { error } = await supabase.auth.resend({
       type: "signup",
@@ -310,9 +318,11 @@ const Register = () => {
         description: info.description,
       });
     } else {
+      setResendCount((n) => n + 1);
+      setResendCooldown(45);
       toast({
-        title: "Email renvoyé !",
-        description: "Un nouvel email de confirmation vient d'être envoyé.",
+        title: "Email renvoyé",
+        description: `Nouveau lien envoyé à ${email}. Pensez à vérifier vos spams.`,
       });
     }
     setIsResending(false);
