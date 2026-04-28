@@ -965,6 +965,13 @@ const SearchSitter = () => {
     const isAssigned = !isMission && !!item.isAssigned;
     const isCompleted = !isMission && !!item.isCompleted;
     const isInactive = isAssigned || isCompleted;
+    // Annonce hors du rayon de recherche : on l'affiche seulement quand
+    // l'utilisateur a élargi la zone (région/France) ET que la distance dépasse son rayon.
+    const isOutOfZone =
+      !isMission &&
+      !isDemo &&
+      typeof item.distance === "number" &&
+      item.distance > radius[0];
     const linkTo = isMission
       ? `/petites-missions/${item.id}`
       : isDemo
