@@ -153,7 +153,7 @@ export const staticRoutes: SiteRoute[] = [
   {
     path: "/petites-missions",
     title: "Petites missions — Entraide communautaire | Guardiens",
-    metaDescription: "Coups de main de quartier : arrosage des plantes, promenade, nourrissage des animaux. L'entraide locale entre voisins, sans argent ni commission.",
+    metaDescription: "Coups de main de quartier : arrosage des plantes, promenade, nourrissage des animaux. L'entraide locale entre gens du coin, sans argent ni commission.",
     h1: "Petites missions",
     sitemapPriority: "0.7",
     changeFreq: "daily",
