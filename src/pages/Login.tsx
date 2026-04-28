@@ -16,6 +16,7 @@ import { mapAuthError } from "@/lib/authErrorMessages";
 import { InAppBrowserBanner } from "@/components/auth/InAppBrowserBanner";
 import { AuthIllustrationPanel } from "@/components/auth/AuthIllustrationPanel";
 import { trackEvent } from "@/lib/analytics";
+import { startOAuthFlow, logOAuthStage, endOAuthFlow } from "@/lib/oauthLogger";
 
 const Login = () => {
   const [searchParams] = useSearchParams();
@@ -32,19 +33,27 @@ const Login = () => {
 
   const handleGoogleSignIn = async () => {
     setIsGoogleLoading(true);
+    startOAuthFlow("/login");
     try {
       trackEvent("login_completed", { source: "/login", metadata: { method: "google", stage: "started" } });
     } catch {}
+    logOAuthStage("sdk_called", "/login", { redirect_uri: window.location.origin });
     const result = await lovable.auth.signInWithOAuth("google", {
       redirect_uri: window.location.origin,
     });
     if (result.error) {
       const info = mapAuthError(result.error as any);
+      logOAuthStage("error", "/login", { code: info.code, title: info.title });
+      endOAuthFlow("error");
       toast({ variant: "destructive", title: info.title, description: info.description });
       setIsGoogleLoading(false);
       return;
     }
-    if (result.redirected) return;
+    if (result.redirected) {
+      logOAuthStage("redirecting", "/login");
+      return;
+    }
+    logOAuthStage("tokens_received", "/login");
     navigate("/dashboard", { replace: true });
   };
 
