@@ -47,13 +47,13 @@ export const AuthIllustrationPanel = ({ title, tagline, description, footerSlot 
         aria-hidden="true"
         loading="lazy"
         width={1536}
-        height={384}
+        height={192}
         className="hidden lg:block pointer-events-none absolute right-0 max-w-none h-auto z-20 select-none"
         style={{
-          top: "-2.5rem",
+          top: "-1.25rem",
           width: "150%",
           opacity: 0.85,
-          transform: "translateX(85%) scaleY(0.38)",
+          transform: "translateX(85%)",
           transformOrigin: "left top",
         }}
       />
