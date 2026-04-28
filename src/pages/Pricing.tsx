@@ -296,21 +296,33 @@ const Pricing = () => {
               </div>
               <CardHeader className="text-center pb-2 p-8 pt-10">
                 <div className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-3 font-body">Gardien</div>
-                <div className="text-center space-y-1.5 py-2">
-                  {before && (
-                    <p className="text-xs uppercase tracking-widest text-primary font-body font-semibold">
-                      Gratuit jusqu'au 13 juin
+                {before ? (
+                  <div className="text-center space-y-2 py-2">
+                    <p className="text-[11px] uppercase tracking-widest text-amber-700 font-body font-semibold">
+                      Jusqu'au 13 juin 2026
                     </p>
-                  )}
-                  <p className="font-heading text-5xl font-bold text-foreground">
-                    <span className="text-lg font-body font-normal text-foreground/60 mr-1">à partir de</span>
-                    6,99€
-                    <span className="text-lg font-body font-normal text-foreground/60 ml-1">/mois</span>
-                  </p>
-                  <p className="text-xs text-foreground/50 font-body">
-                    7 jours d'essai · Sans CB · Résiliable à tout moment
-                  </p>
-                </div>
+                    <p className="font-heading text-5xl font-bold text-primary leading-none">
+                      Gratuit
+                    </p>
+                    <p className="text-xs text-foreground/55 font-body pt-1">
+                      Accès complet, sans carte bancaire.
+                    </p>
+                    <p className="text-xs text-foreground/45 font-body italic">
+                      Après le 13 juin : <span className="line-through">6,99€/mois</span> avec 7 jours d'essai.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="text-center space-y-1.5 py-2">
+                    <p className="font-heading text-5xl font-bold text-foreground">
+                      <span className="text-lg font-body font-normal text-foreground/60 mr-1">à partir de</span>
+                      6,99€
+                      <span className="text-lg font-body font-normal text-foreground/60 ml-1">/mois</span>
+                    </p>
+                    <p className="text-xs text-foreground/50 font-body">
+                      7 jours d'essai · Sans CB · Résiliable à tout moment
+                    </p>
+                  </div>
+                )}
               </CardHeader>
               <CardContent className="space-y-5 px-8 pb-8 pt-2 flex-1 flex flex-col">
                 <ul className="space-y-3">
