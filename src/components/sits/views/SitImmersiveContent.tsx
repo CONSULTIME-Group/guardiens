@@ -284,8 +284,6 @@ const SitImmersiveContent = ({
   property,
   pets,
   ownerProfile,
-  ctaSlot,
-  topSlot,
 }: SitImmersiveContentProps) => {
   // Onglet actif (contrôlé pour permettre la navigation depuis le résumé "Garde")
   const [activeTab, setActiveTab] = useState<"garde" | "animaux" | "logement" | "attentes">(
