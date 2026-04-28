@@ -718,15 +718,6 @@ const Messages = () => {
             </div>
           </div>
 
-          {/* Suggested messages */}
-          <SuggestedMessages
-            messages={messages}
-            userId={user?.id}
-            activeConv={activeConv}
-            onSelect={(text) => setNewMessage(text)}
-            isEntraideContact={isEntraideContact}
-          />
-
           {/* Input or Paywall — only gate sit conversations for non-subscribed sitters */}
           {effectiveRole === "sitter" && !hasAccess && !activeConv.small_mission_id ? (
             <div className="border-t border-border bg-muted/50 p-4 mb-16 md:mb-0">
