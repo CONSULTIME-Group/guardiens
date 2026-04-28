@@ -521,18 +521,18 @@ const Pricing = () => {
             <ShieldCheck className="h-10 w-10 text-primary-foreground/80 mx-auto mb-4" />
             <p className="text-xl md:text-2xl font-heading font-semibold text-primary-foreground text-center mb-2 px-4">
               {before
-                ? "Rejoignez les Fondateurs avant le 13 mai"
+                ? "Rejoignez Guardiens — c'est gratuit jusqu'au 13 juin"
                 : "Prêt à rejoindre Guardiens ?"}
             </p>
             <p className="text-sm md:text-base font-body text-primary-foreground/80 text-center mb-8 max-w-xl mx-auto px-4">
               {before
-                ? "Badge à vie, accès gratuit jusqu'au 13 juin, sans carte bancaire."
+                ? "Accès complet pour tous les rôles, sans carte bancaire. Inscriptions Fondateur ouvertes jusqu'au 13 mai (badge à vie)."
                 : "6,99€/mois pour les gardiens, 7 jours d'essai offerts. Gratuit pour les propriétaires."}
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center px-4">
               <Link to={registerLink("sitter")}>
                 <Button className="bg-background text-foreground font-body font-medium px-8 py-4 rounded-xl text-base hover:bg-background/90 transition-colors min-h-[52px] w-full sm:w-auto" size="xl">
-                  Devenir gardien — essai gratuit
+                  {before ? "Devenir gardien — gratuit" : "Devenir gardien — essai gratuit"}
                 </Button>
               </Link>
               <Link to={registerLink("owner")}>
