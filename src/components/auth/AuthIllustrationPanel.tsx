@@ -1,5 +1,4 @@
 import authIllustration from "@/assets/auth-illustration.png";
-import sageOverflow from "@/assets/auth-sage-overflow.png";
 
 
 interface AuthIllustrationPanelProps {
@@ -37,23 +36,6 @@ export const AuthIllustrationPanel = ({ title, tagline, description, footerSlot 
           style={{ objectPosition: "center 75%" }}
         />
       </div>
-
-      {/* Fine branche de sauge en débord — gouache assortie au reste de
-          l'illustration. Sort du bord droit du tableau et se prolonge
-          sur le panneau de droite, fine, sans rien superposer. */}
-      <img
-        src={sageOverflow}
-        alt=""
-        aria-hidden="true"
-        loading="lazy"
-        width={1920}
-        height={240}
-        className="hidden lg:block pointer-events-none absolute left-0 top-0 max-w-none h-auto z-20 select-none"
-        style={{
-          width: "200%",
-          opacity: 0.85,
-        }}
-      />
 
       <div className="relative z-10 h-full flex flex-col justify-start p-12">
         <div className="max-w-md rounded-2xl bg-background/80 backdrop-blur-sm border border-border/50 shadow-sm px-6 py-5">
