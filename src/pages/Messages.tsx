@@ -16,7 +16,6 @@ import ContextHeaderCard from "@/components/messages/ContextHeaderCard";
 import PresenceBadge from "@/components/messages/PresenceBadge";
 import DaySeparator from "@/components/messages/DaySeparator";
 import MessageBubble from "@/components/messages/MessageBubble";
-import { buildFirstMessageDraft, shouldPrefillDraft, type ConversationContext } from "@/lib/conversation";
 import { useToast } from "@/hooks/use-toast";
 import { useSubscriptionAccess } from "@/hooks/useSubscriptionAccess";
 import { Lock } from "lucide-react";
@@ -77,66 +76,6 @@ const capitalize = (s?: string | null) => {
 
 type ConvPill = "all" | "garde" | "mission" | "archived";
 
-// ─── Suggested messages by context ─────────────────────────
-const ownerGardeSuggestions = [
-  "Bonjour, merci pour votre candidature !",
-  "Pouvez-vous me dire plus sur votre expérience avec les chats ?",
-  "Seriez-vous disponible pour une rencontre avant la garde ?",
-];
-const sitterGardeSuggestions = [
-  "Bonjour, je suis très intéressé par cette garde.",
-  "J'ai de l'expérience avec ce type d'animaux.",
-  "Je serais disponible pour une rencontre si vous le souhaitez.",
-];
-const missionSuggestions = [
-  "Bonjour, je peux vous aider !",
-  "Quand seriez-vous disponible ?",
-  "Qu'attendez-vous en échange ?",
-];
-const entraideContactSuggestions = [
-  "Bonjour ! J'ai vu que vous étiez disponible pour aider.",
-  "Quel type d'aide proposez-vous ?",
-  "On pourrait en discuter ?",
-];
-
-const SuggestedMessages = ({
-  messages: msgs, userId, activeConv, onSelect, isEntraideContact,
-}: {
-  messages: Message[]; userId?: string; activeConv: Conversation;
-  onSelect: (text: string) => void; isEntraideContact?: boolean;
-}) => {
-  const userMsgs = msgs.filter(m => m.sender_id === userId && !m.is_system);
-  if (userMsgs.length > 0) return null;
-
-  const isOwner = activeConv.owner_id === userId;
-  const isMission = !!activeConv.small_mission_id;
-
-  let suggestions: string[];
-  if (isEntraideContact) {
-    suggestions = entraideContactSuggestions;
-  } else if (isMission) {
-    suggestions = missionSuggestions;
-  } else if (isOwner) {
-    suggestions = ownerGardeSuggestions;
-  } else {
-    suggestions = sitterGardeSuggestions;
-  }
-
-  return (
-    <div className="px-4 pb-2 flex flex-wrap gap-2">
-      {suggestions.map((s, i) => (
-        <button
-          key={i}
-          onClick={() => onSelect(s)}
-          className="border border-border rounded-full px-3 py-1 text-xs text-foreground bg-card hover:bg-muted cursor-pointer transition-colors"
-        >
-          {s}
-        </button>
-      ))}
-    </div>
-  );
-};
-
 const Messages = () => {
   const { user, activeRole } = useAuth();
   const isMobile = useIsMobile();
@@ -156,7 +95,6 @@ const Messages = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [autoOpened, setAutoOpened] = useState(false);
-  const [isEntraideContact, setIsEntraideContact] = useState(false);
 
   const loadConversations = useCallback(async () => {
     if (!user) return;
@@ -309,7 +247,6 @@ const Messages = () => {
 
       if (existing) {
         setActiveConv(existing);
-        setIsEntraideContact(true);
         searchParams.delete("gardien");
         setSearchParams(searchParams, { replace: true });
         setAutoOpened(true);
@@ -351,7 +288,6 @@ const Messages = () => {
 
           setConversations(prev => [enriched, ...prev]);
           setActiveConv(enriched);
-          setIsEntraideContact(true);
           searchParams.delete("gardien");
           setSearchParams(searchParams, { replace: true });
           setAutoOpened(true);
@@ -452,47 +388,6 @@ const Messages = () => {
     if (!activeConv) return;
     loadMessages(activeConv.id);
   }, [activeConv, loadMessages]);
-
-  // Pré-remplir le 1er message UNIQUEMENT si :
-  //  1) la conversation est totalement vide (aucun message non-système, peu importe l'expéditeur)
-  //  2) ET le champ de saisie est vide (on n'écrase jamais ce que l'utilisateur tape)
-  // Sinon, on informe l'utilisateur qu'aucun brouillon n'a été proposé (une seule fois par conv).
-  const draftHandledConvRef = useRef<string | null>(null);
-  useEffect(() => {
-    if (!activeConv || !user) return;
-    // On attend que les messages de la conv active soient chargés avant de décider
-    // (évite un faux "vide" pendant le chargement initial).
-    if (messages.length > 0 && messages[0].conversation_id !== activeConv.id) return;
-    if (draftHandledConvRef.current === activeConv.id) return;
-
-    const decision = shouldPrefillDraft({ messages, currentInput: newMessage });
-
-    if (decision.shouldPrefill) {
-      const ctx = (activeConv.context_type || "sitter_inquiry") as ConversationContext;
-      const sitDates = activeConv.sit?.start_date && activeConv.sit?.end_date
-        ? `${new Date(activeConv.sit.start_date).toLocaleDateString("fr-FR")} → ${new Date(activeConv.sit.end_date).toLocaleDateString("fr-FR")}`
-        : null;
-      const draft = buildFirstMessageDraft({
-        context: ctx,
-        recipientFirstName: activeConv.other_user?.first_name,
-        city: activeConv.other_user?.city,
-        sitTitle: activeConv.sit?.title || null,
-        sitDates,
-      });
-      setNewMessage(draft);
-      draftHandledConvRef.current = activeConv.id;
-    } else if (decision.reason === "conversation_already_started") {
-      // Conversation déjà entamée : pas de brouillon, on prévient discrètement.
-      toast({
-        title: "Conversation en cours",
-        description: "Aucun message type proposé : la discussion est déjà entamée.",
-      });
-      draftHandledConvRef.current = activeConv.id;
-    }
-    // Si l'input n'est pas vide mais la conv est vide, on respecte la saisie en cours
-    // sans marquer la conv comme traitée (au cas où l'utilisateur efface tout ensuite).
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeConv?.id, messages]);
 
   // Realtime
   useEffect(() => {
@@ -822,15 +717,6 @@ const Messages = () => {
               <div ref={messagesEndRef} />
             </div>
           </div>
-
-          {/* Suggested messages */}
-          <SuggestedMessages
-            messages={messages}
-            userId={user?.id}
-            activeConv={activeConv}
-            onSelect={(text) => setNewMessage(text)}
-            isEntraideContact={isEntraideContact}
-          />
 
           {/* Input or Paywall — only gate sit conversations for non-subscribed sitters */}
           {effectiveRole === "sitter" && !hasAccess && !activeConv.small_mission_id ? (
