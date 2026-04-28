@@ -545,8 +545,8 @@ const SitImmersiveContent = ({
               <p className="text-sm font-medium">
                 {safePets.length} pensionnaire{safePets.length > 1 ? "s" : ""}
               </p>
-              {speciesEmojis.length > 0 && (
-                <p className="text-xs text-muted-foreground">{speciesEmojis.join(" ")}</p>
+              {speciesSummary && (
+                <p className="text-xs text-muted-foreground">{speciesSummary}</p>
               )}
             </div>,
           );
