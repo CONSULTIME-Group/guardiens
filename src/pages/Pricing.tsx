@@ -151,6 +151,11 @@ const Pricing = () => {
             <p className="text-base md:text-lg font-body text-foreground/65 leading-relaxed">
               Gratuit pour les propriétaires, à vie. 6,99€/mois pour les gardiens, avec 7 jours d'essai offerts. C'est tout.
             </p>
+            {before && (
+              <p className="mt-4 inline-block bg-amber-100 text-amber-900 font-body font-semibold text-sm md:text-base px-4 py-2 rounded-full border border-amber-200">
+                Jusqu'au 13 juin 2026 : <span className="underline decoration-amber-400 decoration-2 underline-offset-2">100% gratuit pour tout le monde</span>, gardien comme propriétaire.
+              </p>
+            )}
           </section>
 
           {/* Founder Banner — urgence */}
