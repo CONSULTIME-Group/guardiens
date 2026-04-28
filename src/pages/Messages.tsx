@@ -16,7 +16,6 @@ import ContextHeaderCard from "@/components/messages/ContextHeaderCard";
 import PresenceBadge from "@/components/messages/PresenceBadge";
 import DaySeparator from "@/components/messages/DaySeparator";
 import MessageBubble from "@/components/messages/MessageBubble";
-import { buildFirstMessageDraft, shouldPrefillDraft, type ConversationContext } from "@/lib/conversation";
 import { useToast } from "@/hooks/use-toast";
 import { useSubscriptionAccess } from "@/hooks/useSubscriptionAccess";
 import { Lock } from "lucide-react";
@@ -76,66 +75,6 @@ const capitalize = (s?: string | null) => {
 };
 
 type ConvPill = "all" | "garde" | "mission" | "archived";
-
-// ─── Suggested messages by context ─────────────────────────
-const ownerGardeSuggestions = [
-  "Bonjour, merci pour votre candidature !",
-  "Pouvez-vous me dire plus sur votre expérience avec les chats ?",
-  "Seriez-vous disponible pour une rencontre avant la garde ?",
-];
-const sitterGardeSuggestions = [
-  "Bonjour, je suis très intéressé par cette garde.",
-  "J'ai de l'expérience avec ce type d'animaux.",
-  "Je serais disponible pour une rencontre si vous le souhaitez.",
-];
-const missionSuggestions = [
-  "Bonjour, je peux vous aider !",
-  "Quand seriez-vous disponible ?",
-  "Qu'attendez-vous en échange ?",
-];
-const entraideContactSuggestions = [
-  "Bonjour ! J'ai vu que vous étiez disponible pour aider.",
-  "Quel type d'aide proposez-vous ?",
-  "On pourrait en discuter ?",
-];
-
-const SuggestedMessages = ({
-  messages: msgs, userId, activeConv, onSelect, isEntraideContact,
-}: {
-  messages: Message[]; userId?: string; activeConv: Conversation;
-  onSelect: (text: string) => void; isEntraideContact?: boolean;
-}) => {
-  const userMsgs = msgs.filter(m => m.sender_id === userId && !m.is_system);
-  if (userMsgs.length > 0) return null;
-
-  const isOwner = activeConv.owner_id === userId;
-  const isMission = !!activeConv.small_mission_id;
-
-  let suggestions: string[];
-  if (isEntraideContact) {
-    suggestions = entraideContactSuggestions;
-  } else if (isMission) {
-    suggestions = missionSuggestions;
-  } else if (isOwner) {
-    suggestions = ownerGardeSuggestions;
-  } else {
-    suggestions = sitterGardeSuggestions;
-  }
-
-  return (
-    <div className="px-4 pb-2 flex flex-wrap gap-2">
-      {suggestions.map((s, i) => (
-        <button
-          key={i}
-          onClick={() => onSelect(s)}
-          className="border border-border rounded-full px-3 py-1 text-xs text-foreground bg-card hover:bg-muted cursor-pointer transition-colors"
-        >
-          {s}
-        </button>
-      ))}
-    </div>
-  );
-};
 
 const Messages = () => {
   const { user, activeRole } = useAuth();
