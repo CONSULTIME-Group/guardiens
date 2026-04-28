@@ -115,8 +115,8 @@ const Login = () => {
       <Helmet><meta name="robots" content="noindex, nofollow" /></Helmet>
 
       <AuthIllustrationPanel
-        title="Vos animaux entre de bonnes mains"
-        description="Rejoignez une communauté de passionnés qui prennent soin des animaux comme des leurs, dans le confort de leur foyer."
+        title="Le tissu d'entraide retrouvé"
+        description="Gardiennage de maison, coup de main entre voisins, échange de services : Guardiens fait revivre la confiance locale, près de chez vous comme à la campagne."
       />
 
       <div className="flex-1 flex items-center justify-center px-6 py-12">
