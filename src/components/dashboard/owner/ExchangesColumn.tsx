@@ -29,7 +29,14 @@ const ExchangesColumn = memo(({ missions }: { missions: SmallMission[] }) => {
         </button>
       </div>
       {missions.length === 0 ? (
-        <p className="text-xs text-muted-foreground font-sans italic text-center">Pas encore d'échange dans votre zone.</p>
+        <div className="rounded-xl bg-muted/40 border border-dashed border-border p-3 text-center">
+          <p className="text-xs text-muted-foreground font-sans italic">
+            Aucune mission autour de vous pour le moment.
+          </p>
+          <p className="text-xs text-foreground/80 font-sans mt-1">
+            Soyez la première étincelle&nbsp;: publiez un besoin ou proposez votre aide ci-dessus.
+          </p>
+        </div>
       ) : (
         missions.map(m => (
           <Link key={m.id} to={`/petites-missions/${m.id}`} className="flex items-center gap-3 py-2.5 border-b border-border last:border-0">
