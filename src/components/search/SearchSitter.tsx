@@ -983,10 +983,11 @@ const SearchSitter = () => {
 
     const cardContent = (
       <div
-        className={`relative bg-card rounded-2xl overflow-hidden border transition-shadow ${isClickable ? "cursor-pointer hover:shadow-md" : ""} ${isInactive ? "opacity-60 grayscale-[40%]" : ""} ${isDemo ? "border-amber-400 border-dashed ring-1 ring-amber-200/60" : "border-border"} ${testDemoMode ? (isDemo ? "card-test-demo" : "card-test-real") : ""}`}
+        className={`relative bg-card rounded-2xl overflow-hidden border transition-shadow ${isClickable ? "cursor-pointer hover:shadow-md" : ""} ${isInactive ? "opacity-60 grayscale-[40%]" : ""} ${isDemo ? "border-amber-400 border-dashed ring-1 ring-amber-200/60" : isOutOfZone ? "border-dashed border-muted-foreground/40" : "border-border"} ${testDemoMode ? (isDemo ? "card-test-demo" : "card-test-real") : ""}`}
         aria-disabled={isInactive || undefined}
         data-testid={isDemo ? "search-card-demo" : "search-card-real"}
         data-demo={isDemo ? "true" : "false"}
+        data-out-of-zone={isOutOfZone ? "true" : undefined}
         data-list-index={typeof listIndex === "number" ? listIndex + 1 : undefined}
       >
         {testDemoMode && typeof listIndex === "number" && (
