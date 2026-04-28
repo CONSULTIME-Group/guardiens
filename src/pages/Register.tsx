@@ -365,8 +365,8 @@ const Register = () => {
       <Helmet><meta name="robots" content="index, follow" /></Helmet>
 
       <AuthIllustrationPanel
-        title="Rejoignez la communauté"
-        description="Des milliers de passionnés prennent soin des animaux comme des leurs, dans le confort de leur foyer."
+        title="Rejoignez un voisinage de confiance"
+        description="Faites garder votre maison, prêtez main forte, échangez un service : ici, on retisse les liens de proximité — du cœur du village jusqu'aux hameaux de campagne."
         footerSlot={
           totalInscrits !== null && totalInscrits > 0 ? (
             <div className="mt-8 inline-flex items-center gap-3 rounded-full bg-card/85 backdrop-blur-md pl-3 pr-5 py-2 border border-border/60 shadow-sm">
