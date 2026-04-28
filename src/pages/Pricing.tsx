@@ -154,14 +154,20 @@ const Pricing = () => {
               Sans commission, sans frais cachés
             </div>
             <h1 className="font-heading text-3xl md:text-5xl font-bold text-foreground leading-tight mb-4">
-              Un seul prix. <span className="text-primary">Transparent.</span>
+              {before ? (
+                <>100% gratuit. <span className="text-primary">Pour tout le monde.</span></>
+              ) : (
+                <>Un seul prix. <span className="text-primary">Transparent.</span></>
+              )}
             </h1>
             <p className="text-base md:text-lg font-body text-foreground/65 leading-relaxed">
-              Gratuit pour les propriétaires, à vie. 6,99€/mois pour les gardiens, avec 7 jours d'essai offerts. C'est tout.
+              {before
+                ? "Jusqu'au 13 juin 2026, l'accès complet à Guardiens est entièrement gratuit — gardiens comme propriétaires. Aucune carte bancaire demandée."
+                : "Gratuit pour les propriétaires, à vie. 6,99€/mois pour les gardiens, avec 7 jours d'essai offerts. C'est tout."}
             </p>
             {before && (
-              <p className="mt-4 inline-block bg-amber-100 text-amber-900 font-body font-semibold text-sm md:text-base px-4 py-2 rounded-full border border-amber-200">
-                Jusqu'au 13 juin 2026 : <span className="underline decoration-amber-400 decoration-2 underline-offset-2">100% gratuit pour tout le monde</span>, gardien comme propriétaire.
+              <p className="mt-4 text-xs md:text-sm font-body text-foreground/55 italic">
+                Après le 13 juin : gratuit pour les propriétaires (à vie) · 6,99€/mois pour les gardiens.
               </p>
             )}
           </section>
