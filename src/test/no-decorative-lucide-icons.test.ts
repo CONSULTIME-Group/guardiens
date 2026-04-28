@@ -53,6 +53,18 @@ const DENYLIST = [
 const ALLOWED_FILES = new Set<string>([
   // Le présent test (déclare la denylist en chaîne, pas en import)
   "src/test/no-decorative-lucide-icons.test.ts",
+
+  // --- UI fonctionnelle exemptée ---
+  // Star = primitive de notation (rating), pas décoratif
+  "src/components/reviews/StarRating.tsx",
+  "src/components/reviews/ReviewsDisplay.tsx",
+  // ShieldCheck = badge de statut "vérifié" (signal fonctionnel)
+  "src/components/profile/VerifiedBadge.tsx",
+  "src/components/profile/TrustProfile.tsx",
+  "src/components/profile/TrustScore.tsx",
+  // Home = icône de navigation (breadcrumb racine, nav primaire)
+  "src/components/layout/Breadcrumbs.tsx",
+  "src/components/layout/Navigation.tsx",
 ]);
 
 /** Dossiers ignorés (vendor / générés). */
