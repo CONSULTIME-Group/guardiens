@@ -158,6 +158,19 @@ const Login = () => {
             {isGoogleLoading ? "Connexion…" : "Continuer avec Google"}
           </Button>
 
+          {/* Clickwrap implicite : si l'utilisateur cr\u00e9e un compte via Google depuis /login
+              (premier OAuth), il n'a pas vu la case CGU de /inscription. On l'informe ici. */}
+          <p className="text-center text-[11px] text-muted-foreground -mt-2 mb-4 leading-snug">
+            En continuant avec Google, vous acceptez nos{" "}
+            <Link to="/cgu" target="_blank" rel="noopener noreferrer" className="underline hover:text-foreground">
+              conditions d'utilisation
+            </Link>{" "}
+            et notre{" "}
+            <Link to="/confidentialite" target="_blank" rel="noopener noreferrer" className="underline hover:text-foreground">
+              politique de confidentialit\u00e9
+            </Link>.
+          </p>
+
           <div className="relative my-6" role="separator">
             <div className="absolute inset-0 flex items-center">
               <span className="w-full border-t border-border" />
