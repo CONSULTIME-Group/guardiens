@@ -26,19 +26,30 @@ interface AuthIllustrationPanelProps {
 export const AuthIllustrationPanel = ({ title, tagline, description, footerSlot }: AuthIllustrationPanelProps) => {
   return (
     <div className="hidden lg:block lg:w-1/2 relative bg-background">
-      <div className="absolute inset-0 overflow-hidden">
+      {/*
+        Calque image + voile : strictement décoratif, en arrière-plan (z-0),
+        non-interactif (pointer-events-none sur le wrapper ET le voile).
+        Toute la moitié gauche est non-cliquable par design — aucune action
+        utilisateur ne vit ici, le contenu interactif est dans la moitié droite.
+      */}
+      <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none" aria-hidden="true">
         <img
           src={authIllustration}
-          alt="Scène aquarellée : entraide locale, remise de clés et garde d'animaux entre gens du coin dans un village du Sud"
-          className="absolute inset-0 w-full h-full object-cover"
+          alt=""
+          className="absolute inset-0 w-full h-full object-cover select-none"
           // Abaissement de l'image : on cale le centre visuel plus bas pour
           // dégager de l'espace en haut où vient se poser l'encart de texte.
           style={{ objectPosition: "center 75%" }}
+          draggable={false}
         />
-        {/* Voile blanc ~25% pour adoucir l'illustration et améliorer la lisibilité du cartouche. */}
-        <div className="absolute inset-0 bg-background/25 pointer-events-none" aria-hidden="true" />
+        {/* Voile sémantique ~25% : s'adapte au thème via bg-background. */}
+        <div className="absolute inset-0 bg-background/25" />
       </div>
 
+      {/*
+        Contenu (titre + cartouche). z-10 garantit qu'il passe au-dessus du
+        voile décoratif quel que soit l'ordre du DOM.
+      */}
       <div className="relative z-10 h-full flex flex-col justify-start p-12">
         <div className="max-w-md rounded-2xl bg-background/80 backdrop-blur-sm border border-border/50 shadow-sm px-6 py-5">
           <h2 className="font-heading text-3xl font-semibold text-foreground mb-2 leading-tight">{title}</h2>
