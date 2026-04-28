@@ -330,7 +330,24 @@ const SitImmersiveContent = ({
 
   // -- Animaux (sécurisé)
   const safePets = Array.isArray(pets) ? pets.filter(Boolean) : [];
-  const speciesEmojis = safePets.map((p) => SPECIES_EMOJI[p.species] || "🐾");
+  // Résumé textuel par espèce ("2 chiens · 1 chat") — remplace les emojis
+  const speciesSummary = (() => {
+    const counts = new Map<string, number>();
+    for (const p of safePets) {
+      const label = speciesLabel(p?.species);
+      counts.set(label, (counts.get(label) || 0) + 1);
+    }
+    const pluralize = (label: string, n: number) => {
+      if (n <= 1) return `${n} ${label.toLowerCase()}`;
+      // pluriel simple : ajoute "s" sauf si déjà terminé par "s" ou "x"
+      const last = label.slice(-1).toLowerCase();
+      const plural = last === "s" || last === "x" ? label : `${label}s`;
+      return `${n} ${plural.toLowerCase()}`;
+    };
+    return Array.from(counts.entries())
+      .map(([label, n]) => pluralize(label, n))
+      .join(" · ");
+  })();
 
   // -- Routine
   const routine = parseRoutine(sit?.daily_routine || null);
