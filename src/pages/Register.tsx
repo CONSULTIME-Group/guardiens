@@ -17,6 +17,7 @@ import { Eye, EyeOff, MailCheck, ArrowLeft } from "lucide-react";
 import { InAppBrowserBanner } from "@/components/auth/InAppBrowserBanner";
 import { AuthIllustrationPanel } from "@/components/auth/AuthIllustrationPanel";
 import { lovable } from "@/integrations/lovable";
+import { startOAuthFlow, logOAuthStage, endOAuthFlow } from "@/lib/oauthLogger";
 import {
   Dialog,
   DialogContent,
@@ -336,26 +337,38 @@ const Register = () => {
 
   const handleGoogleSignUp = async () => {
     if (!acceptedTerms) {
+      logOAuthStage("blocked_terms", "/inscription");
       setFormError("Veuillez accepter les conditions d'utilisation avant de continuer avec Google.");
       return;
     }
     setIsGoogleLoading(true);
+    startOAuthFlow("/inscription");
     try {
       trackEvent("signup_form_submitted", {
         source: "/inscription",
         metadata: { role: selectedRole, method: "google" },
       });
     } catch {}
+    logOAuthStage("sdk_called", "/inscription", {
+      role: selectedRole,
+      redirect_uri: window.location.origin,
+    });
     const result = await lovable.auth.signInWithOAuth("google", {
       redirect_uri: window.location.origin,
     });
     if (result.error) {
       const info = mapAuthError(result.error as any);
+      logOAuthStage("error", "/inscription", { code: info.code, title: info.title });
+      endOAuthFlow("error");
       toast({ variant: "destructive", title: info.title, description: info.description });
       setIsGoogleLoading(false);
       return;
     }
-    if (result.redirected) return;
+    if (result.redirected) {
+      logOAuthStage("redirecting", "/inscription");
+      return;
+    }
+    logOAuthStage("tokens_received", "/inscription");
     navigate("/dashboard");
   };
 
