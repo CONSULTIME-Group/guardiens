@@ -334,49 +334,51 @@ const Pricing = () => {
                   ))}
                 </ul>
 
-                {/* Bloc formules */}
-                <div className="bg-background border border-border/50 rounded-xl p-4 space-y-3 text-left">
-                  <p className="text-xs uppercase tracking-widest text-foreground/50 font-body">
-                    Trois formules
-                  </p>
-                  <div
-                    onClick={() => setFormule('one_shot')}
-                    className={`flex items-start justify-between gap-3 border rounded-lg p-3 cursor-pointer transition-all ${formule === 'one_shot' ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/40'}`}
-                  >
-                    <div className="min-w-0">
-                      <p className="text-sm font-medium text-foreground font-body">Accès un mois</p>
-                      <p className="text-xs text-foreground/50 font-body">Paiement immédiat · Sans renouvellement</p>
-                    </div>
-                    <span className="text-sm font-semibold text-foreground font-body flex-shrink-0">12€</span>
-                  </div>
-                  <div
-                    onClick={() => setFormule('mensuel')}
-                    className={`flex items-start justify-between gap-3 border rounded-lg p-3 cursor-pointer transition-all ${formule === 'mensuel' ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/40'}`}
-                  >
-                    <div className="min-w-0">
-                      <div className="flex items-center gap-2">
-                        <p className="text-sm font-medium text-foreground font-body">Mensuel</p>
-                        <span className="text-xs font-body text-primary/70">Le plus choisi</span>
+                {/* Bloc formules — masqué pendant la période de gratuité totale */}
+                {!before && (
+                  <div className="bg-background border border-border/50 rounded-xl p-4 space-y-3 text-left">
+                    <p className="text-xs uppercase tracking-widest text-foreground/50 font-body">
+                      Trois formules
+                    </p>
+                    <div
+                      onClick={() => setFormule('one_shot')}
+                      className={`flex items-start justify-between gap-3 border rounded-lg p-3 cursor-pointer transition-all ${formule === 'one_shot' ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/40'}`}
+                    >
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium text-foreground font-body">Accès un mois</p>
+                        <p className="text-xs text-foreground/50 font-body">Paiement immédiat · Sans renouvellement</p>
                       </div>
-                      <p className="text-xs text-foreground/50 font-body">7 jours d'essai · Annulable à tout moment</p>
+                      <span className="text-sm font-semibold text-foreground font-body flex-shrink-0">12€</span>
                     </div>
-                    <span className="text-sm font-semibold text-primary font-body flex-shrink-0">6,99€/mois</span>
-                  </div>
-                  <div
-                    onClick={() => setFormule('prorata')}
-                    className={`flex items-start justify-between gap-3 border rounded-lg p-3 cursor-pointer transition-all ${formule === 'prorata' ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/40'}`}
-                  >
-                    <div className="min-w-0">
-                      <div className="flex items-center gap-2">
-                        <p className="text-sm font-medium text-foreground font-body">Jusqu'à fin 2026</p>
-                        <span className="text-[10px] font-body font-semibold bg-green-100 text-green-700 px-1.5 py-0.5 rounded-full leading-none">-20%</span>
+                    <div
+                      onClick={() => setFormule('mensuel')}
+                      className={`flex items-start justify-between gap-3 border rounded-lg p-3 cursor-pointer transition-all ${formule === 'mensuel' ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/40'}`}
+                    >
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2">
+                          <p className="text-sm font-medium text-foreground font-body">Mensuel</p>
+                          <span className="text-xs font-body text-primary/70">Le plus choisi</span>
+                        </div>
+                        <p className="text-xs text-foreground/50 font-body">7 jours d'essai · Annulable à tout moment</p>
                       </div>
-                      <p className="text-xs text-foreground/50 font-body">Un seul paiement pour tous les mois restants en 2026</p>
-                      <p className="text-xs text-foreground/40 italic font-body">Ex. aujourd'hui : ~8 mois → environ 45€ au lieu de 56€</p>
+                      <span className="text-sm font-semibold text-primary font-body flex-shrink-0">6,99€/mois</span>
                     </div>
-                    <span className="text-sm font-semibold text-primary font-body flex-shrink-0">5,59€/mois</span>
+                    <div
+                      onClick={() => setFormule('prorata')}
+                      className={`flex items-start justify-between gap-3 border rounded-lg p-3 cursor-pointer transition-all ${formule === 'prorata' ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/40'}`}
+                    >
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2">
+                          <p className="text-sm font-medium text-foreground font-body">Jusqu'à fin 2026</p>
+                          <span className="text-[10px] font-body font-semibold bg-green-100 text-green-700 px-1.5 py-0.5 rounded-full leading-none">-20%</span>
+                        </div>
+                        <p className="text-xs text-foreground/50 font-body">Un seul paiement pour tous les mois restants en 2026</p>
+                        <p className="text-xs text-foreground/40 italic font-body">Ex. aujourd'hui : ~8 mois → environ 45€ au lieu de 56€</p>
+                      </div>
+                      <span className="text-sm font-semibold text-primary font-body flex-shrink-0">5,59€/mois</span>
+                    </div>
                   </div>
-                </div>
+                )}
 
                 {/* CTA */}
                 <div className="space-y-1 pt-2 mt-auto">
@@ -384,10 +386,12 @@ const Pricing = () => {
                     to={registerLink("sitter")}
                     className="w-full inline-flex items-center justify-center bg-primary text-primary-foreground font-body font-medium text-sm px-6 py-3.5 rounded-xl hover:bg-primary/90 transition-colors min-h-[44px]"
                   >
-                    {ctaLabels[formule]}
+                    {before ? "S'inscrire — gratuit jusqu'au 13 juin" : ctaLabels[formule]}
                   </Link>
                   <p className="text-xs font-body text-foreground/50 text-center mt-2">
-                    Inscription sans carte bancaire. L'abonnement mensuel inclut 7 jours d'essai offerts.
+                    {before
+                      ? "Aucune carte bancaire demandée. Vous choisirez (ou non) un abonnement après le 13 juin."
+                      : "Inscription sans carte bancaire. L'abonnement mensuel inclut 7 jours d'essai offerts."}
                   </p>
                 </div>
               </CardContent>
