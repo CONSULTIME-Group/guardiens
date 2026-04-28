@@ -124,8 +124,16 @@ const Pricing = () => {
   return (
     <>
       <PageMeta
-        title="Tarifs Guardiens — 6,99€/mois pour les gardiens"
-        description="Gratuit pour les propriétaires, pour toujours. 6,99€/mois pour les gardiens avec 7 jours d'essai offerts. Sans commission, sans frais cachés."
+        title={
+          before
+            ? "Tarifs Guardiens — 100% gratuit pour tous jusqu'au 13 juin 2026"
+            : "Tarifs Guardiens — 6,99€/mois pour les gardiens"
+        }
+        description={
+          before
+            ? "Jusqu'au 13 juin 2026, l'accès est entièrement gratuit pour les gardiens et les propriétaires. Sans carte bancaire, sans commission, sans frais cachés."
+            : "Gratuit pour les propriétaires, pour toujours. 6,99€/mois pour les gardiens avec 7 jours d'essai offerts. Sans commission, sans frais cachés."
+        }
         path="/tarifs"
       />
 
@@ -146,14 +154,20 @@ const Pricing = () => {
               Sans commission, sans frais cachés
             </div>
             <h1 className="font-heading text-3xl md:text-5xl font-bold text-foreground leading-tight mb-4">
-              Un seul prix. <span className="text-primary">Transparent.</span>
+              {before ? (
+                <>100% gratuit. <span className="text-primary">Pour tout le monde.</span></>
+              ) : (
+                <>Un seul prix. <span className="text-primary">Transparent.</span></>
+              )}
             </h1>
             <p className="text-base md:text-lg font-body text-foreground/65 leading-relaxed">
-              Gratuit pour les propriétaires, à vie. 6,99€/mois pour les gardiens, avec 7 jours d'essai offerts. C'est tout.
+              {before
+                ? "Jusqu'au 13 juin 2026, l'accès complet à Guardiens est entièrement gratuit — gardiens comme propriétaires. Aucune carte bancaire demandée."
+                : "Gratuit pour les propriétaires, à vie. 6,99€/mois pour les gardiens, avec 7 jours d'essai offerts. C'est tout."}
             </p>
             {before && (
-              <p className="mt-4 inline-block bg-amber-100 text-amber-900 font-body font-semibold text-sm md:text-base px-4 py-2 rounded-full border border-amber-200">
-                Jusqu'au 13 juin 2026 : <span className="underline decoration-amber-400 decoration-2 underline-offset-2">100% gratuit pour tout le monde</span>, gardien comme propriétaire.
+              <p className="mt-4 text-xs md:text-sm font-body text-foreground/55 italic">
+                Après le 13 juin : gratuit pour les propriétaires (à vie) · 6,99€/mois pour les gardiens.
               </p>
             )}
           </section>
@@ -282,21 +296,33 @@ const Pricing = () => {
               </div>
               <CardHeader className="text-center pb-2 p-8 pt-10">
                 <div className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-3 font-body">Gardien</div>
-                <div className="text-center space-y-1.5 py-2">
-                  {before && (
-                    <p className="text-xs uppercase tracking-widest text-primary font-body font-semibold">
-                      Gratuit jusqu'au 13 juin
+                {before ? (
+                  <div className="text-center space-y-2 py-2">
+                    <p className="text-[11px] uppercase tracking-widest text-amber-700 font-body font-semibold">
+                      Jusqu'au 13 juin 2026
                     </p>
-                  )}
-                  <p className="font-heading text-5xl font-bold text-foreground">
-                    <span className="text-lg font-body font-normal text-foreground/60 mr-1">à partir de</span>
-                    6,99€
-                    <span className="text-lg font-body font-normal text-foreground/60 ml-1">/mois</span>
-                  </p>
-                  <p className="text-xs text-foreground/50 font-body">
-                    7 jours d'essai · Sans CB · Résiliable à tout moment
-                  </p>
-                </div>
+                    <p className="font-heading text-5xl font-bold text-primary leading-none">
+                      Gratuit
+                    </p>
+                    <p className="text-xs text-foreground/55 font-body pt-1">
+                      Accès complet, sans carte bancaire.
+                    </p>
+                    <p className="text-xs text-foreground/45 font-body italic">
+                      Après le 13 juin : <span className="line-through">6,99€/mois</span> avec 7 jours d'essai.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="text-center space-y-1.5 py-2">
+                    <p className="font-heading text-5xl font-bold text-foreground">
+                      <span className="text-lg font-body font-normal text-foreground/60 mr-1">à partir de</span>
+                      6,99€
+                      <span className="text-lg font-body font-normal text-foreground/60 ml-1">/mois</span>
+                    </p>
+                    <p className="text-xs text-foreground/50 font-body">
+                      7 jours d'essai · Sans CB · Résiliable à tout moment
+                    </p>
+                  </div>
+                )}
               </CardHeader>
               <CardContent className="space-y-5 px-8 pb-8 pt-2 flex-1 flex flex-col">
                 <ul className="space-y-3">
@@ -308,49 +334,51 @@ const Pricing = () => {
                   ))}
                 </ul>
 
-                {/* Bloc formules */}
-                <div className="bg-background border border-border/50 rounded-xl p-4 space-y-3 text-left">
-                  <p className="text-xs uppercase tracking-widest text-foreground/50 font-body">
-                    Trois formules
-                  </p>
-                  <div
-                    onClick={() => setFormule('one_shot')}
-                    className={`flex items-start justify-between gap-3 border rounded-lg p-3 cursor-pointer transition-all ${formule === 'one_shot' ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/40'}`}
-                  >
-                    <div className="min-w-0">
-                      <p className="text-sm font-medium text-foreground font-body">Accès un mois</p>
-                      <p className="text-xs text-foreground/50 font-body">Paiement immédiat · Sans renouvellement</p>
-                    </div>
-                    <span className="text-sm font-semibold text-foreground font-body flex-shrink-0">12€</span>
-                  </div>
-                  <div
-                    onClick={() => setFormule('mensuel')}
-                    className={`flex items-start justify-between gap-3 border rounded-lg p-3 cursor-pointer transition-all ${formule === 'mensuel' ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/40'}`}
-                  >
-                    <div className="min-w-0">
-                      <div className="flex items-center gap-2">
-                        <p className="text-sm font-medium text-foreground font-body">Mensuel</p>
-                        <span className="text-xs font-body text-primary/70">Le plus choisi</span>
+                {/* Bloc formules — masqué pendant la période de gratuité totale */}
+                {!before && (
+                  <div className="bg-background border border-border/50 rounded-xl p-4 space-y-3 text-left">
+                    <p className="text-xs uppercase tracking-widest text-foreground/50 font-body">
+                      Trois formules
+                    </p>
+                    <div
+                      onClick={() => setFormule('one_shot')}
+                      className={`flex items-start justify-between gap-3 border rounded-lg p-3 cursor-pointer transition-all ${formule === 'one_shot' ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/40'}`}
+                    >
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium text-foreground font-body">Accès un mois</p>
+                        <p className="text-xs text-foreground/50 font-body">Paiement immédiat · Sans renouvellement</p>
                       </div>
-                      <p className="text-xs text-foreground/50 font-body">7 jours d'essai · Annulable à tout moment</p>
+                      <span className="text-sm font-semibold text-foreground font-body flex-shrink-0">12€</span>
                     </div>
-                    <span className="text-sm font-semibold text-primary font-body flex-shrink-0">6,99€/mois</span>
-                  </div>
-                  <div
-                    onClick={() => setFormule('prorata')}
-                    className={`flex items-start justify-between gap-3 border rounded-lg p-3 cursor-pointer transition-all ${formule === 'prorata' ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/40'}`}
-                  >
-                    <div className="min-w-0">
-                      <div className="flex items-center gap-2">
-                        <p className="text-sm font-medium text-foreground font-body">Jusqu'à fin 2026</p>
-                        <span className="text-[10px] font-body font-semibold bg-green-100 text-green-700 px-1.5 py-0.5 rounded-full leading-none">-20%</span>
+                    <div
+                      onClick={() => setFormule('mensuel')}
+                      className={`flex items-start justify-between gap-3 border rounded-lg p-3 cursor-pointer transition-all ${formule === 'mensuel' ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/40'}`}
+                    >
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2">
+                          <p className="text-sm font-medium text-foreground font-body">Mensuel</p>
+                          <span className="text-xs font-body text-primary/70">Le plus choisi</span>
+                        </div>
+                        <p className="text-xs text-foreground/50 font-body">7 jours d'essai · Annulable à tout moment</p>
                       </div>
-                      <p className="text-xs text-foreground/50 font-body">Un seul paiement pour tous les mois restants en 2026</p>
-                      <p className="text-xs text-foreground/40 italic font-body">Ex. aujourd'hui : ~8 mois → environ 45€ au lieu de 56€</p>
+                      <span className="text-sm font-semibold text-primary font-body flex-shrink-0">6,99€/mois</span>
                     </div>
-                    <span className="text-sm font-semibold text-primary font-body flex-shrink-0">5,59€/mois</span>
+                    <div
+                      onClick={() => setFormule('prorata')}
+                      className={`flex items-start justify-between gap-3 border rounded-lg p-3 cursor-pointer transition-all ${formule === 'prorata' ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/40'}`}
+                    >
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2">
+                          <p className="text-sm font-medium text-foreground font-body">Jusqu'à fin 2026</p>
+                          <span className="text-[10px] font-body font-semibold bg-green-100 text-green-700 px-1.5 py-0.5 rounded-full leading-none">-20%</span>
+                        </div>
+                        <p className="text-xs text-foreground/50 font-body">Un seul paiement pour tous les mois restants en 2026</p>
+                        <p className="text-xs text-foreground/40 italic font-body">Ex. aujourd'hui : ~8 mois → environ 45€ au lieu de 56€</p>
+                      </div>
+                      <span className="text-sm font-semibold text-primary font-body flex-shrink-0">5,59€/mois</span>
+                    </div>
                   </div>
-                </div>
+                )}
 
                 {/* CTA */}
                 <div className="space-y-1 pt-2 mt-auto">
@@ -358,10 +386,12 @@ const Pricing = () => {
                     to={registerLink("sitter")}
                     className="w-full inline-flex items-center justify-center bg-primary text-primary-foreground font-body font-medium text-sm px-6 py-3.5 rounded-xl hover:bg-primary/90 transition-colors min-h-[44px]"
                   >
-                    {ctaLabels[formule]}
+                    {before ? "S'inscrire — gratuit jusqu'au 13 juin" : ctaLabels[formule]}
                   </Link>
                   <p className="text-xs font-body text-foreground/50 text-center mt-2">
-                    Inscription sans carte bancaire. L'abonnement mensuel inclut 7 jours d'essai offerts.
+                    {before
+                      ? "Aucune carte bancaire demandée. Vous choisirez (ou non) un abonnement après le 13 juin."
+                      : "Inscription sans carte bancaire. L'abonnement mensuel inclut 7 jours d'essai offerts."}
                   </p>
                 </div>
               </CardContent>
@@ -491,18 +521,18 @@ const Pricing = () => {
             <ShieldCheck className="h-10 w-10 text-primary-foreground/80 mx-auto mb-4" />
             <p className="text-xl md:text-2xl font-heading font-semibold text-primary-foreground text-center mb-2 px-4">
               {before
-                ? "Rejoignez les Fondateurs avant le 13 mai"
+                ? "Rejoignez Guardiens — c'est gratuit jusqu'au 13 juin"
                 : "Prêt à rejoindre Guardiens ?"}
             </p>
             <p className="text-sm md:text-base font-body text-primary-foreground/80 text-center mb-8 max-w-xl mx-auto px-4">
               {before
-                ? "Badge à vie, accès gratuit jusqu'au 13 juin, sans carte bancaire."
+                ? "Accès complet pour tous les rôles, sans carte bancaire. Inscriptions Fondateur ouvertes jusqu'au 13 mai (badge à vie)."
                 : "6,99€/mois pour les gardiens, 7 jours d'essai offerts. Gratuit pour les propriétaires."}
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center px-4">
               <Link to={registerLink("sitter")}>
                 <Button className="bg-background text-foreground font-body font-medium px-8 py-4 rounded-xl text-base hover:bg-background/90 transition-colors min-h-[52px] w-full sm:w-auto" size="xl">
-                  Devenir gardien — essai gratuit
+                  {before ? "Devenir gardien — gratuit" : "Devenir gardien — essai gratuit"}
                 </Button>
               </Link>
               <Link to={registerLink("owner")}>
