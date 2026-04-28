@@ -39,7 +39,6 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'sit-confirmed': sitConfirmed,
   'dispute-resolved': disputeResolved,
   'report-resolved': reportResolved,
-  'welcome': welcome,
   'new-application': newApplication,
   'application-declined': applicationDeclined,
   'application-accepted': applicationAccepted,
