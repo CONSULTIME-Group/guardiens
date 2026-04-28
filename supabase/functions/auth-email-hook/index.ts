@@ -17,7 +17,7 @@ const corsHeaders = {
 }
 
 const EMAIL_SUBJECTS: Record<string, string> = {
-  signup: 'Confirmez votre email — Guardiens',
+  signup: 'Bienvenue sur Guardiens — confirmez votre adresse',
   invite: 'Vous êtes invité(e) sur Guardiens',
   magiclink: 'Votre lien de connexion — Guardiens',
   recovery: 'Réinitialisation de votre mot de passe — Guardiens',
