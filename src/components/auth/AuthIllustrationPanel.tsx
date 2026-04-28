@@ -52,6 +52,21 @@ export const AuthIllustrationPanel = ({ title, tagline, description, footerSlot 
         style={{ opacity: 0.92 }}
       />
 
+      {/* Grappes de glycine en débord, descendant depuis le bord droit du
+          panneau gauche vers le panneau de formulaire. Léger flou pour évoquer
+          un collage peint, opacité <1 pour ne jamais nuire à la lisibilité.
+          Positionnée plus bas que la branche de sauge pour étager les plans. */}
+      <img
+        src={wisteriaOverflow}
+        alt=""
+        aria-hidden="true"
+        loading="lazy"
+        width={1024}
+        height={1280}
+        className="hidden lg:block pointer-events-none absolute top-[18%] right-0 translate-x-[62%] w-[42%] max-w-[360px] h-auto z-20 select-none"
+        style={{ opacity: 0.85, filter: "blur(0.6px)" }}
+      />
+
       <div className="relative z-10 h-full flex flex-col justify-start p-12">
         <div className="max-w-md rounded-2xl bg-background/80 backdrop-blur-sm border border-border/50 shadow-sm px-6 py-5">
           <h2 className="font-heading text-3xl font-semibold text-foreground mb-2 leading-tight">{title}</h2>
