@@ -369,9 +369,11 @@ const Register = () => {
         description="Des milliers de passionnés prennent soin des animaux comme des leurs, dans le confort de leur foyer."
         footerSlot={
           totalInscrits !== null && totalInscrits > 0 ? (
-            <div className="mt-6 inline-flex items-center gap-2 rounded-full bg-card/90 backdrop-blur px-4 py-2 border border-border">
-              <span className="text-2xl font-heading font-bold text-primary">{totalInscrits}</span>
-              <span className="text-sm text-muted-foreground">membres déjà inscrits</span>
+            <div className="mt-8 inline-flex items-center gap-3 rounded-full bg-card/85 backdrop-blur-md pl-3 pr-5 py-2 border border-border/60 shadow-sm">
+              <span className="inline-flex items-center justify-center min-w-[2.5rem] h-9 px-2 rounded-full bg-primary/10 text-primary font-heading text-lg font-bold tabular-nums">
+                {totalInscrits}
+              </span>
+              <span className="text-sm text-foreground/80">membres déjà inscrits</span>
             </div>
           ) : null
         }
@@ -380,9 +382,9 @@ const Register = () => {
       {/* Lien retour : sticky en haut à gauche du viewport, hors grille du formulaire */}
       <Link
         to="/"
-        className="absolute top-4 left-4 lg:top-6 lg:left-6 z-20 inline-flex items-center text-xs lg:text-sm text-muted-foreground hover:text-foreground gap-1"
+        className="absolute top-4 left-4 lg:top-6 lg:left-6 z-20 inline-flex items-center gap-1.5 rounded-full bg-card/85 backdrop-blur-md border border-border/60 px-3 py-1.5 text-xs lg:text-sm text-foreground/80 hover:text-foreground hover:bg-card transition-colors shadow-sm"
       >
-        <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+        <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" />
         Retour au site
       </Link>
 
