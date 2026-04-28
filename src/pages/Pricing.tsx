@@ -131,7 +131,7 @@ const Pricing = () => {
         }
         description={
           before
-            ? "Jusqu'au 13 juin 2026, l'accès est entièrement gratuit pour les gardiens et les propriétaires. Sans carte bancaire, sans commission, sans frais cachés."
+            ? "100% gratuit jusqu'au 13 juin 2026 pour tous, gardiens comme propriétaires. Sans carte bancaire, sans commission, sans frais cachés."
             : "Gratuit pour les propriétaires, pour toujours. 6,99€/mois pour les gardiens avec 7 jours d'essai offerts. Sans commission, sans frais cachés."
         }
         path="/tarifs"
