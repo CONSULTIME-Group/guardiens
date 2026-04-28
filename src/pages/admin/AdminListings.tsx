@@ -138,7 +138,60 @@ const AdminListings = () => {
     }
   };
 
-  return (
+  const buildShareData = (listing: any) => {
+    const url = `${window.location.origin}/sits/${listing.id}`;
+    const title = listing.title || "Une annonce de garde sur Guardiens";
+    const text = `${title}${listing.owner?.city ? ` — ${listing.owner.city}` : ""} : découvrez cette annonce sur Guardiens.`;
+    return { url, title, text };
+  };
+
+  const handleCopyLink = async (listing: any) => {
+    const { url } = buildShareData(listing);
+    try {
+      await navigator.clipboard.writeText(url);
+      toast.success("Lien copié dans le presse-papier");
+    } catch {
+      toast.error("Impossible de copier le lien");
+    }
+  };
+
+  const handleNativeShare = async (listing: any) => {
+    const data = buildShareData(listing);
+    if (typeof navigator !== "undefined" && (navigator as any).share) {
+      try {
+        await (navigator as any).share(data);
+      } catch {
+        /* annulé par l'utilisateur */
+      }
+    } else {
+      handleCopyLink(listing);
+    }
+  };
+
+  const openShareWindow = (url: string) => {
+    window.open(url, "_blank", "noopener,noreferrer,width=600,height=600");
+  };
+
+  const handleShareTo = (listing: any, channel: "twitter" | "facebook" | "whatsapp" | "email") => {
+    const data = buildShareData(listing);
+    const encodedUrl = encodeURIComponent(data.url);
+    const encodedText = encodeURIComponent(data.text);
+    switch (channel) {
+      case "twitter":
+        openShareWindow(`https://twitter.com/intent/tweet?text=${encodedText}&url=${encodedUrl}`);
+        break;
+      case "facebook":
+        openShareWindow(`https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`);
+        break;
+      case "whatsapp":
+        openShareWindow(`https://wa.me/?text=${encodedText}%20${encodedUrl}`);
+        break;
+      case "email":
+        window.location.href = `mailto:?subject=${encodeURIComponent(data.title)}&body=${encodedText}%0A%0A${encodedUrl}`;
+        break;
+    }
+  };
+
     <div className="space-y-6">
       <h1 className="font-body text-2xl font-bold">Annonces</h1>
 
