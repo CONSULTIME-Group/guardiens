@@ -35,6 +35,8 @@ export const AuthIllustrationPanel = ({ title, tagline, description, footerSlot 
           // dégager de l'espace en haut où vient se poser l'encart de texte.
           style={{ objectPosition: "center 75%" }}
         />
+        {/* Voile blanc ~25% pour adoucir l'illustration et améliorer la lisibilité du cartouche. */}
+        <div className="absolute inset-0 bg-background/25 pointer-events-none" aria-hidden="true" />
       </div>
 
       <div className="relative z-10 h-full flex flex-col justify-start p-12">
