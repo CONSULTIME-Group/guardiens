@@ -62,6 +62,7 @@ import {
 import { slugify } from "@/lib/normalize";
 import { CITIES } from "@/data/cities";
 import { getCityContent } from "@/data/cityContent";
+import { PetPhoto } from "@/components/sits/views/PetPhoto";
 // Libellés des enums animaux — source unique partagée avec le formulaire de création
 import {
   ACTIVITY_LABELS as ACTIVITY_LEVEL_LABEL,
