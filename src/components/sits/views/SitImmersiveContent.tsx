@@ -589,7 +589,7 @@ const SitImmersiveContent = ({
         return <div className={`grid ${cols} gap-3 mb-6`}>{cards}</div>;
       })()}
 
-      {topSlot}
+
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Colonne principale */}
@@ -1279,8 +1279,7 @@ const SitImmersiveContent = ({
             </div>
           )}
 
-          {/* Slot CTA principal (candidature, gestion owner…) */}
-          {ctaSlot}
+
 
           {/* Guide local — accès rapide depuis la sidebar */}
           {hasLocalGuide && (
