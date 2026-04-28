@@ -1,4 +1,5 @@
 import authIllustration from "@/assets/auth-illustration.png";
+import sageOverflow from "@/assets/auth-sage-overflow.png";
 
 interface AuthIllustrationPanelProps {
   title: string;
@@ -33,6 +34,22 @@ export const AuthIllustrationPanel = ({ title, tagline, description, footerSlot 
           style={{ objectPosition: "center center" }}
         />
       </div>
+
+      {/* Branche de sauge/glycine en débord sur le panneau de droite.
+          Positionnée en haut, hauteur limitée et right négatif pour sortir
+          du panneau gauche sans masquer le formulaire (qui commence plus bas
+          et au centre du panneau droit). pointer-events-none pour ne pas
+          intercepter les clics sur les inputs. */}
+      <img
+        src={sageOverflow}
+        alt=""
+        aria-hidden="true"
+        loading="lazy"
+        width={1536}
+        height={512}
+        className="hidden lg:block pointer-events-none absolute top-0 right-0 translate-x-[55%] w-[70%] max-w-[640px] h-auto z-20 select-none"
+        style={{ opacity: 0.92 }}
+      />
 
       <div className="relative z-10 h-full flex flex-col justify-start p-12">
         <div className="max-w-md rounded-2xl bg-background/80 backdrop-blur-sm border border-border/50 shadow-sm px-6 py-5">
