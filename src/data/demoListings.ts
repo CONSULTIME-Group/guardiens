@@ -149,7 +149,7 @@ export const DEMO_SITS: DemoSit[] = [
         "Comptez environ 2h30 de présence active par jour. Laïka a besoin de se dépenser — un gardien sportif sera ravi.",
     },
     ownerMessage:
-      "On confie nos animaux à un voisin de confiance plutôt qu'à une pension. Vous repartirez sûrement avec des cookies maison de mon mari et une connaissance fine du quartier !",
+      "On confie nos animaux à un membre du coin de confiance plutôt qu'à une pension. Vous repartirez sûrement avec des cookies maison de mon mari et une connaissance fine du quartier !",
     topBadges: [],
     avgRating: null,
     reviewCount: 0,

@@ -59,11 +59,11 @@ function Reveal({ children, delay = 0 }: { children: ReactNode; delay?: number }
 /* ── data ── */
 const examples = [
   { img: spotVerger, alt: "Panier en osier rempli de fruits frais — illustration gouache", title: "Verger à ramasser", text: "Venir ramasser les fruits avant qu'ils tombent contre un énorme panier de fruits frais à emporter.", badge: "Fruits · Écully" },
-  { img: spotJardin, alt: "Panier d'herbes aromatiques et sécateur — illustration gouache", title: "Coup de main au jardin", text: "Donner un coup de main pour planter, désherber ou tailler — et venir se servir librement à la récolte.", badge: "Jardinage · entre voisins" },
+  { img: spotJardin, alt: "Panier d'herbes aromatiques et sécateur — illustration gouache", title: "Coup de main au jardin", text: "Donner un coup de main pour planter, désherber ou tailler — et venir se servir librement à la récolte.", badge: "Jardinage · entre gens du coin" },
   { img: spotPoules, alt: "Poule rousse devant un nid de paille avec des œufs — illustration gouache", title: "Poules à garder", text: "Nourrir les poules et ramasser les œufs pendant 10 jours contre des œufs frais à volonté au retour.", badge: "Œufs · Caluire" },
-  { img: spotChien, alt: "Chien assis avec sa laisse en cuir — illustration gouache", title: "Chien à promener", text: "Deux semaines de balades contre son chien promené la prochaine fois qu'on part.", badge: "Réciprocité · entre voisins" },
+  { img: spotChien, alt: "Chien assis avec sa laisse en cuir — illustration gouache", title: "Chien à promener", text: "Deux semaines de balades contre son chien promené la prochaine fois qu'on part.", badge: "Réciprocité · entre gens du coin" },
   { img: spotBricolage, alt: "Boîte à outils en bois ouverte avec marteau, tournevis et clé — illustration gouache", title: "Petit bricolage", text: "Un coup de main pour monter une étagère, fixer un meuble ou changer un robinet, contre un vrai repas fait maison.", badge: "Repas · Annecy" },
-  { img: spotBienetre, alt: "Tasse en céramique, brin de lavande et galet — illustration gouache", title: "Énergie & bien-être", text: "Une séance de Reiki, un massage ou un moment de méditation partagés, en échange d'un service rendu en retour.", badge: "Échange · entre voisins" },
+  { img: spotBienetre, alt: "Tasse en céramique, brin de lavande et galet — illustration gouache", title: "Énergie & bien-être", text: "Une séance de Reiki, un massage ou un moment de méditation partagés, en échange d'un service rendu en retour.", badge: "Échange · entre gens du coin" },
 ];
 
 /* ── page ── */
@@ -96,7 +96,7 @@ const SmallMissionsPublic = () => {
     <>
       <PageMeta
         title="Petites missions d'entraide locale — Guardiens"
-        description="Échangez des coups de main entre voisins. Jardinage, animaux, bricolage — sans argent. Gratuit pour tous, pour toujours."
+        description="Échangez des coups de main entre gens du coin. Jardinage, animaux, bricolage — sans argent. Gratuit pour tous, pour toujours."
       />
 
       <div className="min-h-screen bg-background font-body">
@@ -115,7 +115,7 @@ const SmallMissionsPublic = () => {
 
             <Reveal delay={0.1}>
               <h1 className="font-heading text-5xl md:text-6xl font-bold text-foreground leading-tight max-w-2xl mx-auto">
-                Entraide locale entre voisins —<br /> échangez sans argent.
+                Entraide locale entre gens du coin —<br /> échangez sans argent.
               </h1>
               <p className="font-heading text-xl md:text-2xl italic text-foreground/70 mt-3 max-w-lg mx-auto">
                 Ce que vous avez contre ce que vous n'avez pas encore vécu.
@@ -361,7 +361,7 @@ const SmallMissionsPublic = () => {
             <h2 className="font-heading text-2xl font-bold text-center mb-10">Questions fréquentes</h2>
             <Accordion type="single" collapsible className="space-y-2">
               {[
-                { q: "C'est quoi les petites missions ?", a: "Des coups de main entre voisins — jardinage, animaux, bricolage — échangés sans argent. Vous proposez ce que vous savez faire, ou publiez ce dont vous avez besoin." },
+                { q: "C'est quoi les petites missions ?", a: "Des coups de main entre gens du coin — jardinage, animaux, bricolage — échangés sans argent. Vous proposez ce que vous savez faire, ou publiez ce dont vous avez besoin." },
                 { q: "C'est vraiment gratuit ?", a: "Oui. L'entraide entre gens du coin est gratuite pour tous, pour toujours. Aucun frais, aucune commission." },
                 { q: "Comment fonctionne l'échange ?", a: "Pas d'argent. Vous proposez quelque chose en retour — un repas, des légumes, un coup de main futur. L'échange se décide entre vous." },
                 { q: "Faut-il être abonné ?", a: "Non. Les petites missions sont accessibles à tous les membres inscrits, sans abonnement." },
@@ -405,7 +405,7 @@ const SmallMissionsPublic = () => {
             "@context": "https://schema.org",
             "@type": "FAQPage",
             mainEntity: [
-              { "@type": "Question", name: "C'est quoi les petites missions ?", acceptedAnswer: { "@type": "Answer", text: "Des coups de main entre voisins — jardinage, animaux, bricolage — échangés sans argent. Vous proposez ce que vous savez faire, ou publiez ce dont vous avez besoin." } },
+              { "@type": "Question", name: "C'est quoi les petites missions ?", acceptedAnswer: { "@type": "Answer", text: "Des coups de main entre gens du coin — jardinage, animaux, bricolage — échangés sans argent. Vous proposez ce que vous savez faire, ou publiez ce dont vous avez besoin." } },
               { "@type": "Question", name: "C'est vraiment gratuit ?", acceptedAnswer: { "@type": "Answer", text: "Oui. L'entraide entre gens du coin est gratuite pour tous, pour toujours. Aucun frais, aucune commission." } },
               { "@type": "Question", name: "Comment fonctionne l'échange ?", acceptedAnswer: { "@type": "Answer", text: "Pas d'argent. Vous proposez quelque chose en retour — un repas, des légumes, un coup de main futur. L'échange se décide entre vous." } },
               { "@type": "Question", name: "Faut-il être abonné ?", acceptedAnswer: { "@type": "Answer", text: "Non. Les petites missions sont accessibles à tous les membres inscrits, sans abonnement." } },

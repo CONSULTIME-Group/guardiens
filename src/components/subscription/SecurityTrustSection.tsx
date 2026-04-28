@@ -24,7 +24,7 @@ const items = [
   {
     icon: Users,
     title: "Communauté à taille humaine",
-    desc: "Pas d'inconnus venus de l'autre bout du monde. Des voisins, des gens du coin.",
+    desc: "Pas d'inconnus venus de l'autre bout du monde. Des gens du coin, vérifiés et notés.",
   },
   {
     icon: ShieldCheck,

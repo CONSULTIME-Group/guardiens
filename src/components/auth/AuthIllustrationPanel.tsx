@@ -28,7 +28,7 @@ export const AuthIllustrationPanel = ({ title, tagline, description, footerSlot 
       <div className="absolute inset-0 overflow-hidden">
         <img
           src={authIllustration}
-          alt="Scène aquarellée : entraide locale, remise de clés entre voisins et garde d'animaux dans un village du Sud"
+          alt="Scène aquarellée : entraide locale, remise de clés et garde d'animaux entre gens du coin dans un village du Sud"
           className="absolute inset-0 w-full h-full object-cover"
           style={{ objectPosition: "center center" }}
         />

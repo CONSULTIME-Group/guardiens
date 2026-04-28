@@ -55,7 +55,7 @@ const ContextHeaderCard = ({ contextType, isOwner, sit, otherFirstName, otherCit
               {isHelper
                 ? (isOwner
                     ? `Vous sondez ${otherFirstName || "ce membre"} pour un futur coup de main.`
-                    : `${otherFirstName || "Un voisin"} vous sonde pour un futur coup de main.`)
+                    : `${otherFirstName || "Une personne du coin"} vous sonde pour un futur coup de main.`)
                 : (isOwner
                     ? `Vous avez sondé ${otherFirstName || "ce gardien"} avant de publier une annonce.`
                     : `${otherFirstName || "Ce propriétaire"} vous sonde avant de publier une annonce.`)}

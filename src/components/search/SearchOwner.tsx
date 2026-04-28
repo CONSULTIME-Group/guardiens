@@ -272,7 +272,7 @@ const SearchOwner = () => {
       } catch { /* user cancelled */ }
     } else {
       await navigator.clipboard.writeText(`${shareText} ${url}`);
-      toast.success("Lien copié — partagez-le à un voisin de confiance.");
+      toast.success("Lien copié — partagez-le à une personne de confiance.");
     }
   };
 
@@ -840,7 +840,7 @@ const SearchOwner = () => {
                 >
                   <div className="flex items-center gap-2 mb-1">
                     <Share2 className="h-4 w-4 text-primary" />
-                    <span className="font-medium text-sm">Inviter un voisin de confiance</span>
+                    <span className="font-medium text-sm">Inviter une personne de confiance</span>
                   </div>
                   <p className="text-xs text-muted-foreground">
                     Vous connaissez quelqu'un de fiable près de chez vous ? Invitez-le à rejoindre Guardiens.

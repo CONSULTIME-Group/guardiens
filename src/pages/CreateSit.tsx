@@ -385,7 +385,7 @@ const CreateSit = () => {
             Un message personnel aux futurs gardiens : ce qu'ils trouveront en arrivant, ce que vous appréciez, une touche humaine.
           </p>
           <Textarea
-            placeholder="Ex : On confie nos animaux à un voisin de confiance plutôt qu'à une pension. Vous repartirez sûrement avec des cookies maison et une connaissance fine du quartier !"
+            placeholder="Ex : On confie nos animaux à un membre du coin de confiance plutôt qu'à une pension. Vous repartirez sûrement avec des cookies maison et une connaissance fine du quartier !"
             value={ownerMessage}
             onChange={e => setOwnerMessage(e.target.value.slice(0, 800))}
             className="mt-1"

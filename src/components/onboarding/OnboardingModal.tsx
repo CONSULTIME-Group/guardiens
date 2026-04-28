@@ -763,7 +763,7 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
 const EntraideSlide = () => (
   <div className="space-y-4">
     <h2 className="font-heading text-2xl font-bold text-foreground">
-      Au-delà des gardes : l'entraide entre voisins.
+      Au-delà des gardes : l'entraide entre gens du coin.
     </h2>
     <p className="text-base text-foreground/80 leading-relaxed">
       Promener un chien ce soir. Arroser un potager le week-end. Partager un

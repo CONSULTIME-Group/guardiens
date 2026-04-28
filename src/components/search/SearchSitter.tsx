@@ -2316,7 +2316,7 @@ const SearchSitter = () => {
                       </p>
                       <p className="text-xs text-muted-foreground mt-1">
                         {tab === "sits"
-                          ? "L'entraide entre voisins reste libre pour tous : promener un chien, nourrir un chat, arroser des plantes…"
+                          ? "L'entraide entre gens du coin reste libre pour tous : promener un chien, nourrir un chat, arroser des plantes…"
                           : "Découvrez les annonces de garde près de chez vous."}
                       </p>
                       <Button

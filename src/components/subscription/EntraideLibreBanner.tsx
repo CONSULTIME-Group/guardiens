@@ -12,7 +12,7 @@ export default function EntraideLibreBanner() {
             L'entraide entre gens du coin restera toujours gratuite
           </p>
           <p className="text-xs md:text-sm text-foreground/70 font-body leading-relaxed">
-            Arroser un potager, sortir un chien le weekend, garder des poules le temps d'un marché… Ces coups de main entre voisins font le tissu d'un village et ne devraient jamais avoir de prix. C'est à nous de montrer l'exemple : les <strong className="text-foreground font-semibold">petites missions d'entraide resteront 100 % gratuites à vie</strong>, pour que ce lien continue d'exister indépendamment de toute monétisation.
+            Arroser un potager, sortir un chien le weekend, garder des poules le temps d'un marché… Ces coups de main entre gens du coin font le tissu d'un village et ne devraient jamais avoir de prix. C'est à nous de montrer l'exemple : les <strong className="text-foreground font-semibold">petites missions d'entraide resteront 100 % gratuites à vie</strong>, pour que ce lien continue d'exister indépendamment de toute monétisation.
           </p>
         </div>
       </div>

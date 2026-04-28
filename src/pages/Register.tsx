@@ -365,7 +365,7 @@ const Register = () => {
       <Helmet><meta name="robots" content="index, follow" /></Helmet>
 
       <AuthIllustrationPanel
-        title="Rejoignez un voisinage de confiance"
+        title="Rejoignez une communauté de confiance"
         description="Faites garder votre maison, prêtez main forte, échangez un service : ici, on retisse les liens de proximité — du cœur du village jusqu'aux hameaux de campagne."
         footerSlot={
           totalInscrits !== null && totalInscrits > 0 ? (
