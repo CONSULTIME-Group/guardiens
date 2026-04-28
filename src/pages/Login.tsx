@@ -115,9 +115,9 @@ const Login = () => {
       <Helmet><meta name="robots" content="noindex, nofollow" /></Helmet>
 
       <AuthIllustrationPanel
-        title="Le voisinage qui veille sur vous"
-        tagline="Un service rendu, un lien retissé."
-        description="Garder une maison, rendre un service, prêter main forte : ici, on retisse la confiance entre voisins, du cœur du village jusqu'aux hameaux."
+        title="L'entraide de quartier, retrouvée"
+        tagline="Un coup de main, un lien de confiance."
+        description="Un gardien de votre région veille sur votre maison et vos animaux. Et entre voisins, on ose à nouveau demander, et proposer un coup de main."
       />
 
       <div className="flex-1 flex items-center justify-center px-6 py-12">
