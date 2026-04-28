@@ -72,10 +72,20 @@ import {
 
 const GUIDE_SLUGS = new Set(CITIES.map((c) => c.slug));
 
-const SPECIES_EMOJI: Record<string, string> = {
-  dog: "🐕", cat: "🐈", farm_animal: "🐔", rabbit: "🐰", bird: "🦜",
-  fish: "🐠", rodent: "🐹", horse: "🐴", nac: "🦎", reptile: "🦎",
+// Libellés FR des espèces — remplace les emojis (règle no-emoji dans le contenu).
+const SPECIES_LABEL: Record<string, string> = {
+  dog: "Chien",
+  cat: "Chat",
+  farm_animal: "Animal de ferme",
+  rabbit: "Lapin",
+  bird: "Oiseau",
+  fish: "Poisson",
+  rodent: "Rongeur",
+  horse: "Cheval",
+  nac: "NAC",
+  reptile: "Reptile",
 };
+const speciesLabel = (s?: string | null) => (s && SPECIES_LABEL[s]) || "Animal";
 
 // Mapping environnements → libellé + icône.
 // Tolérant aux deux conventions trouvées en base :
