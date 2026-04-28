@@ -115,8 +115,8 @@ const Login = () => {
       <Helmet><meta name="robots" content="noindex, nofollow" /></Helmet>
 
       <AuthIllustrationPanel
-        title="Le tissu d'entraide retrouvé"
-        description="Gardiennage de maison, coup de main entre voisins, échange de services : Guardiens fait revivre la confiance locale, près de chez vous comme à la campagne."
+        title="Le voisinage qui veille sur vous"
+        description="Garder une maison, rendre un service, prêter main forte : ici, on retisse la confiance entre voisins, du cœur du village jusqu'aux hameaux."
       />
 
       <div className="flex-1 flex items-center justify-center px-6 py-12">
