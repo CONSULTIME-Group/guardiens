@@ -842,45 +842,16 @@ const SitImmersiveContent = ({
                       className="rounded-2xl border border-border bg-card p-5 md:p-6"
                     >
                       <div className="flex gap-4 mb-4">
-                        {/* Photo de l'animal — fallback emoji espèce si photo_url manquante */}
-                        <div className="shrink-0">
-                          {pet.photo_url ? (
-                            <img
-                              src={pet.photo_url}
-                              alt={pet.name ? `Photo de ${pet.name}` : "Photo de l'animal"}
-                              loading="lazy"
-                              onError={(e) => {
-                                // Si l'URL casse, on bascule sur le fallback visuel
-                                const target = e.currentTarget;
-                                target.style.display = "none";
-                                target.parentElement
-                                  ?.querySelector("[data-pet-fallback]")
-                                  ?.removeAttribute("hidden");
-                              }}
-                              className="w-24 h-24 md:w-28 md:h-28 rounded-xl object-cover border border-border bg-muted"
-                            />
-                          ) : null}
-                          <div
-                            data-pet-fallback
-                            hidden={!!pet.photo_url}
-                            aria-label={
-                              pet.name
-                                ? `Pas de photo pour ${pet.name}`
-                                : "Pas de photo de l'animal"
-                            }
-                            className="w-24 h-24 md:w-28 md:h-28 rounded-xl bg-muted border border-border flex flex-col items-center justify-center gap-1"
-                          >
-                            <span className="text-4xl leading-none" aria-hidden>
-                              {SPECIES_EMOJI[pet.species] || "🐾"}
-                            </span>
-                            <PawPrint className="h-3 w-3 text-muted-foreground/60" aria-hidden />
-                          </div>
-                        </div>
+                        {/* Photo de l'animal — fallback neutre si photo manquante (sans emoji décoratif) */}
+                        <PetPhoto
+                          src={pet.photo_url}
+                          name={pet.name}
+                          className="w-24 h-24 md:w-28 md:h-28 rounded-xl"
+                        />
 
                         {/* En-tête */}
                         <div className="flex-1 min-w-0">
                           <div className="flex items-baseline gap-2 flex-wrap mb-1">
-                            <span className="text-xl">{SPECIES_EMOJI[pet.species] || "🐾"}</span>
                             {pet.name && (
                               <h3 className="text-lg font-semibold text-foreground">{pet.name}</h3>
                             )}
