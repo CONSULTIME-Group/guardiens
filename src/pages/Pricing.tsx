@@ -291,27 +291,12 @@ const Pricing = () => {
               </div>
               <CardHeader className="text-center pb-2 p-8 pt-10">
                 <div className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-3 font-body">Propriétaire</div>
-                {before ? (
-                  <div className="text-center space-y-2 py-2">
-                    <p className="text-[11px] uppercase tracking-widest text-amber-700 font-body font-semibold">
-                      Jusqu'au 13 juin 2026
-                    </p>
-                    <p className="font-heading text-5xl font-bold text-primary leading-none">
-                      Gratuit
-                    </p>
-                    <p className="text-xs text-foreground/55 font-body pt-1">
-                      Accès complet, sans carte bancaire.
-                    </p>
-                    <p className="text-xs text-foreground/45 font-body italic">
-                      Après le 13 juin : toujours gratuit, à vie.
-                    </p>
-                  </div>
-                ) : (
-                  <>
-                    <CardTitle className="font-heading text-5xl font-bold text-foreground">Gratuit</CardTitle>
-                    <p className="text-sm font-body text-foreground/60 italic mt-2">Parce qu'on ne facture pas ceux qui ouvrent leur maison.</p>
-                  </>
-                )}
+                {/* Pas de mention temporelle ici : l'espace propriétaire est gratuit à vie,
+                    indépendamment de la période promotionnelle du 13 juin. */}
+                <CardTitle className="font-heading text-5xl font-bold text-foreground">Gratuit</CardTitle>
+                <p className="text-sm font-body text-foreground/60 italic mt-2">
+                  À vie. Parce qu'on ne facture pas ceux qui ouvrent leur maison.
+                </p>
               </CardHeader>
               <CardContent className="space-y-5 px-8 pb-8 pt-2 flex-1 flex flex-col">
                 <ul className="space-y-3 flex-1">
