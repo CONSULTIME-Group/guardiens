@@ -39,9 +39,8 @@ export const AuthIllustrationPanel = ({ title, tagline, description, footerSlot 
       </div>
 
       {/* Branche de sauge en débord — gouache assortie au reste de
-          l'illustration. Étirée sur toute la largeur du panneau droit pour
-          créer une vraie continuité botanique entre les deux moitiés.
-          pointer-events-none pour ne jamais bloquer le formulaire. */}
+          l'illustration. Placée tout en haut, fine et sans débordement
+          vertical, pour ne jamais chevaucher l'encart de texte. */}
       <img
         src={sageOverflow}
         alt=""
@@ -49,8 +48,8 @@ export const AuthIllustrationPanel = ({ title, tagline, description, footerSlot 
         loading="lazy"
         width={1536}
         height={384}
-        className="hidden lg:block pointer-events-none absolute top-[6%] right-0 translate-x-[92%] w-[180%] max-w-none h-auto z-20 select-none"
-        style={{ opacity: 0.95 }}
+        className="hidden lg:block pointer-events-none absolute top-[1%] right-0 translate-x-[88%] w-[160%] max-w-none h-auto z-20 select-none"
+        style={{ opacity: 0.9, transform: "translateX(88%) scaleY(0.55)", transformOrigin: "left center" }}
       />
 
       {/* Grappe de glycine en débord, peinte dans la même gouache que
