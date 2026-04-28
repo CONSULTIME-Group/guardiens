@@ -1,5 +1,6 @@
 import { memo } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
 import type { SmallMission } from "./types";
 
 const MyMissionsColumn = memo(({ missions }: { missions: SmallMission[] }) => {
@@ -12,7 +13,15 @@ const MyMissionsColumn = memo(({ missions }: { missions: SmallMission[] }) => {
         <Link to="/petites-missions" className="text-xs text-primary font-sans hover:underline">Voir tout</Link>
       </div>
       {missions.length === 0 ? (
-        <p className="text-xs text-muted-foreground font-sans italic text-center py-4">Aucune mission pour le moment.</p>
+        <div className="py-2">
+          <p className="text-xs text-muted-foreground font-sans mb-3">
+            <span className="font-semibold text-foreground">Osez !</span> Demandez un coup de main en publiant une petite mission, ou proposez quelque chose en échange — un café, une histoire, un service…
+          </p>
+          <div className="flex flex-col gap-2">
+            <Button onClick={() => navigate("/petites-missions/creer")} className="w-full rounded-xl text-xs font-medium">Publier un besoin →</Button>
+            <Button variant="outline" onClick={() => navigate("/petites-missions")} className="w-full rounded-xl text-xs font-medium">Proposer mon aide →</Button>
+          </div>
+        </div>
       ) : (
         missions.map(m => {
           const responseCount = m.small_mission_responses?.length || 0;
