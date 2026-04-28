@@ -1691,8 +1691,8 @@ const SearchSitter = () => {
         // Variante "partiel" = utilisateur a déjà des résultats dans son rayon
         // Variante "vide" = aucun résultat local mais des annonces existent ailleurs
         const containerClass = hasLocal
-          ? "mx-6 mt-4 rounded-2xl border border-border bg-card shadow-sm p-4 sm:p-5 flex items-start sm:items-center gap-4 flex-col sm:flex-row"
-          : "mx-6 mt-4 rounded-2xl border-2 border-primary/40 bg-gradient-to-br from-primary/15 via-primary/10 to-primary/5 shadow-md p-4 sm:p-5 flex items-start sm:items-center gap-4 flex-col sm:flex-row";
+          ? "mx-6 mt-4 w-[calc(100%-3rem)] text-left rounded-2xl border border-border bg-card shadow-sm hover:shadow-md hover:border-primary/40 transition p-4 sm:p-5 flex items-start sm:items-center gap-4 flex-col sm:flex-row cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+          : "mx-6 mt-4 w-[calc(100%-3rem)] text-left rounded-2xl border-2 border-primary/40 bg-gradient-to-br from-primary/15 via-primary/10 to-primary/5 shadow-md hover:shadow-lg hover:border-primary/60 transition p-4 sm:p-5 flex items-start sm:items-center gap-4 flex-col sm:flex-row cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40";
         const iconWrapClass = hasLocal
           ? "h-10 w-10 sm:h-11 sm:w-11 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0"
           : "h-12 w-12 sm:h-14 sm:w-14 rounded-full bg-primary text-primary-foreground flex items-center justify-center shrink-0 shadow-sm relative";
@@ -1703,6 +1703,23 @@ const SearchSitter = () => {
         const titleClass = hasLocal
           ? "font-heading font-semibold text-sm sm:text-base text-foreground leading-tight"
           : "font-heading font-semibold text-base sm:text-lg text-foreground leading-tight";
+
+        const handleBannerClick = () => {
+          trackEvent("search_outofzone_click", {
+            source: "search_outofzone_banner",
+            metadata: {
+              action: "expand_zone",
+              to: "france",
+              previous_mode: zoneMode,
+              delta: elsewhere,
+              count_radius: densityCounts.radius,
+              count_region: densityCounts.region,
+              count_france: densityCounts.france,
+              has_local: hasLocal,
+            },
+          });
+          setZoneMode("france");
+        };
 
         return (
           <div className={containerClass}>
