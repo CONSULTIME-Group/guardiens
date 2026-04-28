@@ -726,7 +726,7 @@ const SitImmersiveContent = ({
                           {safePets.slice(0, 4).map((p, i) => {
                             const photo =
                               (Array.isArray(p?.photos) && p.photos[0]) || p?.photo_url || null;
-                            const emoji = SPECIES_EMOJI[p?.species] || "🐾";
+                            const initial = (p?.name?.[0] || "?").toUpperCase();
                             return (
                               <span
                                 key={i}
@@ -739,8 +739,8 @@ const SitImmersiveContent = ({
                                     className="w-6 h-6 rounded-full object-cover"
                                   />
                                 ) : (
-                                  <span className="w-6 h-6 rounded-full bg-background flex items-center justify-center text-sm">
-                                    {emoji}
+                                  <span className="w-6 h-6 rounded-full bg-background flex items-center justify-center text-[11px] text-muted-foreground/70 font-serif">
+                                    {initial}
                                   </span>
                                 )}
                                 <span className="font-medium">{p?.name || "Animal"}</span>
