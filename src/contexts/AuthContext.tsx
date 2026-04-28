@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useCallback, useEffect, use
 import { supabase } from "@/integrations/supabase/client";
 import type { User as SupabaseUser } from "@supabase/supabase-js";
 import { getSignupRedirectUrl } from "@/lib/authRedirect";
+import { getOAuthTraceId, logOAuthStage, endOAuthFlow } from "@/lib/oauthLogger";
 
 type Role = "owner" | "sitter" | "both";
 type ActiveRole = "owner" | "sitter";
@@ -138,12 +139,32 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [checkFounderExpiry]);
 
   useEffect(() => {
+    // Au montage : si un flux OAuth est actif (trace_id présent en sessionStorage),
+    // on logge le "callback_returned" pour matérialiser le retour depuis Google.
+    if (getOAuthTraceId()) {
+      logOAuthStage("callback_returned", "auth-context", {
+        href_path: typeof window !== "undefined" ? window.location.pathname : null,
+      });
+    }
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         if (session?.user) {
+          // Si un flux OAuth est en cours, on trace la pose de session.
+          if (getOAuthTraceId()) {
+            logOAuthStage("session_set", "auth-context", {
+              event,
+              provider: (session.user.app_metadata as any)?.provider ?? null,
+            });
+          }
           setTimeout(async () => {
             await fetchProfile(session.user);
             setLoading(false);
+            // Profil chargé = équivalent /user OK + données métier prêtes.
+            if (getOAuthTraceId()) {
+              logOAuthStage("user_endpoint_ok", "auth-context");
+              endOAuthFlow("success");
+            }
           }, 0);
         } else {
           setUser(null);
