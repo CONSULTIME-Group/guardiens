@@ -1,5 +1,6 @@
 import authIllustration from "@/assets/auth-illustration.png";
 import sageOverflow from "@/assets/auth-sage-overflow.png";
+import wisteriaOverflow from "@/assets/auth-wisteria-overflow.png";
 
 interface AuthIllustrationPanelProps {
   title: string;
@@ -49,6 +50,21 @@ export const AuthIllustrationPanel = ({ title, tagline, description, footerSlot 
         height={512}
         className="hidden lg:block pointer-events-none absolute top-0 right-0 translate-x-[55%] w-[70%] max-w-[640px] h-auto z-20 select-none"
         style={{ opacity: 0.92 }}
+      />
+
+      {/* Grappes de glycine en débord, descendant depuis le bord droit du
+          panneau gauche vers le panneau de formulaire. Léger flou pour évoquer
+          un collage peint, opacité <1 pour ne jamais nuire à la lisibilité.
+          Positionnée plus bas que la branche de sauge pour étager les plans. */}
+      <img
+        src={wisteriaOverflow}
+        alt=""
+        aria-hidden="true"
+        loading="lazy"
+        width={1024}
+        height={1280}
+        className="hidden lg:block pointer-events-none absolute top-[18%] right-0 translate-x-[62%] w-[42%] max-w-[360px] h-auto z-20 select-none"
+        style={{ opacity: 0.85, filter: "blur(0.6px)" }}
       />
 
       <div className="relative z-10 h-full flex flex-col justify-start p-12">
