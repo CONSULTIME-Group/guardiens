@@ -335,8 +335,9 @@ const Pricing = () => {
                     <p className="text-xs text-foreground/55 font-body pt-1">
                       Accès complet, sans carte bancaire.
                     </p>
-                    <p className="text-xs text-foreground/45 font-body italic">
-                      Après le 13 juin : <span className="line-through">6,99€/mois</span> avec 7 jours d'essai.
+                    <p className="text-xs text-foreground/70 font-body font-medium pt-1">
+                      Puis <span className="font-semibold text-foreground">6,99 €/mois</span> à partir du 13 juin 2026
+                      <span className="text-foreground/55"> (7 jours d'essai offerts).</span>
                     </p>
                   </div>
                 ) : (
