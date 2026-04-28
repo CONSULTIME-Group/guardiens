@@ -1031,6 +1031,14 @@ const SearchSitter = () => {
                 <Sparkles className="h-3 w-3" /> Nouveau
               </span>
             )}
+            {isOutOfZone && !isInactive && (
+              <span
+                className="absolute bottom-3 left-3 inline-flex items-center gap-1 bg-foreground/85 text-background backdrop-blur-sm rounded-full px-2.5 py-1 text-[11px] font-medium shadow-sm"
+                title={`Cette annonce est à ${Math.round(item.distance)} km, au-delà de votre rayon de ${radius[0]} km`}
+              >
+                <MapPin className="h-3 w-3" /> Hors zone · {Math.round(item.distance)} km
+              </span>
+            )}
           </div>
         )}
         <div className="p-4">
@@ -1040,10 +1048,15 @@ const SearchSitter = () => {
             </h3>
             {item.owner?.is_founder && <FounderBadge size="sm" />}
           </div>
-          <p className="text-sm text-muted-foreground mb-2 flex items-center gap-1">
-            <MapPin className="h-3.5 w-3.5" />
+          <p className={`text-sm mb-2 flex items-center gap-1 ${isOutOfZone ? "text-foreground" : "text-muted-foreground"}`}>
+            <MapPin className={`h-3.5 w-3.5 ${isOutOfZone ? "text-primary" : ""}`} />
             {item.owner?.city || ""}
-            {item.distance != null && ` · ${item.distance < 1 ? "< 1" : Math.round(item.distance).toLocaleString("fr-FR").replace(/\s/g, "\u202F")} km`}
+            {item.distance != null && (
+              <span className={isOutOfZone ? "font-semibold text-primary" : ""}>
+                {" · "}
+                {item.distance < 1 ? "< 1" : Math.round(item.distance).toLocaleString("fr-FR").replace(/\s/g, "\u202F")} km
+              </span>
+            )}
           </p>
           {Object.keys(petGroups).length > 0 && (
             <div className="flex flex-wrap items-center gap-3 mb-2">
