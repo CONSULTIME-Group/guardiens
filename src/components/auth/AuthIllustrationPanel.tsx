@@ -32,39 +32,39 @@ export const AuthIllustrationPanel = ({ title, tagline, description, footerSlot 
           src={authIllustration}
           alt="Scène aquarellée : entraide locale, remise de clés et garde d'animaux entre gens du coin dans un village du Sud"
           className="absolute inset-0 w-full h-full object-cover"
-          style={{ objectPosition: "center center" }}
+          // Abaissement de l'image : on cale le centre visuel plus bas pour
+          // dégager de l'espace en haut où vient se poser l'encart de texte.
+          style={{ objectPosition: "center 75%" }}
         />
       </div>
 
-      {/* Branche de sauge/glycine en débord sur le panneau de droite.
-          Positionnée en haut, hauteur limitée et right négatif pour sortir
-          du panneau gauche sans masquer le formulaire (qui commence plus bas
-          et au centre du panneau droit). pointer-events-none pour ne pas
-          intercepter les clics sur les inputs. */}
+      {/* Branche de sauge en débord — gouache assortie au reste de
+          l'illustration. Étirée sur toute la largeur du panneau droit pour
+          créer une vraie continuité botanique entre les deux moitiés.
+          pointer-events-none pour ne jamais bloquer le formulaire. */}
       <img
         src={sageOverflow}
         alt=""
         aria-hidden="true"
         loading="lazy"
         width={1536}
-        height={512}
-        className="hidden lg:block pointer-events-none absolute top-0 right-0 translate-x-[55%] w-[70%] max-w-[640px] h-auto z-20 select-none"
-        style={{ opacity: 0.92 }}
+        height={384}
+        className="hidden lg:block pointer-events-none absolute top-[6%] right-0 translate-x-[92%] w-[180%] max-w-none h-auto z-20 select-none"
+        style={{ opacity: 0.95 }}
       />
 
-      {/* Grappes de glycine en débord, descendant depuis le bord droit du
-          panneau gauche vers le panneau de formulaire. Léger flou pour évoquer
-          un collage peint, opacité <1 pour ne jamais nuire à la lisibilité.
-          Positionnée plus bas que la branche de sauge pour étager les plans. */}
+      {/* Grappe de glycine en débord, peinte dans la même gouache que
+          l'illustration principale. Étagée sous la sauge, opacité préservée
+          pour ne pas gêner la lisibilité du formulaire. */}
       <img
         src={wisteriaOverflow}
         alt=""
         aria-hidden="true"
         loading="lazy"
-        width={1024}
-        height={1280}
-        className="hidden lg:block pointer-events-none absolute top-[18%] right-0 translate-x-[62%] w-[42%] max-w-[360px] h-auto z-20 select-none"
-        style={{ opacity: 0.85, filter: "blur(0.6px)" }}
+        width={896}
+        height={1200}
+        className="hidden lg:block pointer-events-none absolute top-[14%] right-0 translate-x-[58%] w-[40%] max-w-[340px] h-auto z-20 select-none"
+        style={{ opacity: 0.9 }}
       />
 
       <div className="relative z-10 h-full flex flex-col justify-start p-12">
