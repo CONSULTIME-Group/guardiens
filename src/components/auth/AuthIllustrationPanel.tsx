@@ -38,38 +38,24 @@ export const AuthIllustrationPanel = ({ title, tagline, description, footerSlot 
         />
       </div>
 
-      {/* Branche de sauge en débord — gouache assortie au reste de
-          l'illustration. Placée tout en haut, fine et sans débordement
-          vertical, pour ne jamais chevaucher l'encart de texte. */}
+      {/* Bandeau botanique en débord : une fine branche de sauge qui sort du
+          bord droit de l'illustration peinte et se prolonge naturellement sur
+          le panneau du formulaire, avec une grappe de glycine qui pend depuis
+          le haut de l'écran à droite (gravité respectée). pointer-events-none
+          pour ne jamais bloquer les inputs ; positionné suffisamment haut pour
+          ne couvrir ni le titre, ni les CTA. */}
       <img
         src={sageOverflow}
         alt=""
         aria-hidden="true"
         loading="lazy"
-        width={1536}
-        height={192}
-        className="hidden lg:block pointer-events-none absolute right-0 max-w-none h-auto z-20 select-none"
+        width={1920}
+        height={640}
+        className="hidden lg:block pointer-events-none absolute left-0 top-0 max-w-none h-auto z-20 select-none"
         style={{
-          top: "-1.25rem",
-          width: "150%",
-          opacity: 0.85,
-          transform: "translateX(85%)",
-          transformOrigin: "left top",
+          width: "200%",
+          opacity: 0.9,
         }}
-      />
-
-      {/* Grappe de glycine en débord, peinte dans la même gouache que
-          l'illustration principale. Étagée sous la sauge, opacité préservée
-          pour ne pas gêner la lisibilité du formulaire. */}
-      <img
-        src={wisteriaOverflow}
-        alt=""
-        aria-hidden="true"
-        loading="lazy"
-        width={896}
-        height={1200}
-        className="hidden lg:block pointer-events-none absolute top-[14%] right-0 translate-x-[58%] w-[40%] max-w-[340px] h-auto z-20 select-none"
-        style={{ opacity: 0.9 }}
       />
 
       <div className="relative z-10 h-full flex flex-col justify-start p-12">
