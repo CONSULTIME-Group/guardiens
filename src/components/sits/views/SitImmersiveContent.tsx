@@ -483,7 +483,13 @@ const SitImmersiveContent = ({
           {photos.length > 1 && (
             <div className="grid grid-cols-2 gap-1 p-1">
               {photos.slice(1, 3).map((p, i) => (
-                <img key={i} src={p} alt="" className="w-full h-32 md:h-44 object-cover" />
+                <img
+                  key={i}
+                  src={p}
+                  alt={`Photo ${i + 2} de ${sit?.title || "l'annonce"}`}
+                  loading="lazy"
+                  className="w-full h-32 md:h-44 object-cover"
+                />
               ))}
             </div>
           )}
