@@ -151,6 +151,11 @@ const Pricing = () => {
             <p className="text-base md:text-lg font-body text-foreground/65 leading-relaxed">
               Gratuit pour les propriétaires, à vie. 6,99€/mois pour les gardiens, avec 7 jours d'essai offerts. C'est tout.
             </p>
+            {before && (
+              <p className="mt-4 inline-block bg-amber-100 text-amber-900 font-body font-semibold text-sm md:text-base px-4 py-2 rounded-full border border-amber-200">
+                Jusqu'au 13 juin 2026 : <span className="underline decoration-amber-400 decoration-2 underline-offset-2">100% gratuit pour tout le monde</span>, gardien comme propriétaire.
+              </p>
+            )}
           </section>
 
           {/* Founder Banner — urgence */}
@@ -160,45 +165,57 @@ const Pricing = () => {
                 <div className="bg-amber-100 px-6 py-2.5 flex items-center justify-center gap-2">
                   <Star className="w-4 h-4 text-amber-500" fill="currentColor" />
                   <span className="text-sm font-medium text-amber-800 font-body tracking-wide">
-                    Offre Fondateur — jusqu'au 13 mai 2026
+                    Offre Fondateur — inscriptions ouvertes jusqu'au 13 mai 2026
                   </span>
                   <Star className="w-4 h-4 text-amber-500" fill="currentColor" />
                 </div>
 
-                <div className="px-6 sm:px-10 py-6 flex flex-col md:flex-row items-center gap-6">
-                  <div className="flex items-center gap-4">
-                    <Clock className="w-10 h-10 text-amber-600 shrink-0" />
-                    <div>
-                      <p className="font-heading text-3xl font-bold text-amber-700 tabular-nums leading-none">
-                        {daysLeft} jour{daysLeft > 1 ? 's' : ''}
-                      </p>
-                      <p className="text-xs text-amber-600/80 font-body mt-1">
-                        avant la fin de l'offre
-                      </p>
-                    </div>
+                <div className="px-6 sm:px-10 py-7 space-y-5">
+                  {/* Message principal — sans ambiguïté */}
+                  <div className="text-center space-y-2">
+                    <h2 className="font-heading text-2xl md:text-3xl font-bold text-amber-900 leading-tight">
+                      100% gratuit pour tout le monde jusqu'au 13 juin 2026
+                    </h2>
+                    <p className="text-sm md:text-base text-amber-800/90 font-body max-w-2xl mx-auto">
+                      Aucun paiement, aucune carte bancaire. Gardiens et propriétaires accèdent à toutes les fonctionnalités sans frais jusqu'à cette date.
+                    </p>
                   </div>
 
-                  <div className="flex-1 grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm">
-                    <div className="flex items-center gap-2 text-amber-800 font-body">
-                      <BadgeCheck className="w-4 h-4 text-amber-600 shrink-0" />
-                      Badge Fondateur à vie
+                  <div className="flex flex-col md:flex-row items-center gap-6 pt-2 border-t border-amber-200/60">
+                    <div className="flex items-center gap-4 pt-4">
+                      <Clock className="w-10 h-10 text-amber-600 shrink-0" />
+                      <div>
+                        <p className="font-heading text-3xl font-bold text-amber-700 tabular-nums leading-none">
+                          {daysLeft} jour{daysLeft > 1 ? 's' : ''}
+                        </p>
+                        <p className="text-xs text-amber-600/80 font-body mt-1">
+                          avant la fin des inscriptions Fondateur
+                        </p>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-2 text-amber-800 font-body">
-                      <Gift className="w-4 h-4 text-amber-600 shrink-0" />
-                      Gratuit jusqu'au 13 juin
-                    </div>
-                    <div className="flex items-center gap-2 text-amber-800 font-body">
-                      <CreditCard className="w-4 h-4 text-amber-600 shrink-0" />
-                      Sans carte bancaire
-                    </div>
-                  </div>
 
-                  <Link
-                    to="/inscription"
-                    className="shrink-0 inline-flex items-center gap-2 bg-primary text-primary-foreground font-body font-medium text-sm px-6 py-3 rounded-xl hover:bg-primary/90 transition-colors min-h-[44px] whitespace-nowrap"
-                  >
-                    Devenir Fondateur
-                  </Link>
+                    <div className="flex-1 grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm pt-4">
+                      <div className="flex items-center gap-2 text-amber-800 font-body">
+                        <BadgeCheck className="w-4 h-4 text-amber-600 shrink-0" />
+                        Badge Fondateur à vie
+                      </div>
+                      <div className="flex items-center gap-2 text-amber-800 font-body">
+                        <Gift className="w-4 h-4 text-amber-600 shrink-0" />
+                        Accès gratuit jusqu'au 13 juin
+                      </div>
+                      <div className="flex items-center gap-2 text-amber-800 font-body">
+                        <CreditCard className="w-4 h-4 text-amber-600 shrink-0" />
+                        Sans carte bancaire
+                      </div>
+                    </div>
+
+                    <Link
+                      to="/inscription"
+                      className="shrink-0 inline-flex items-center gap-2 bg-primary text-primary-foreground font-body font-medium text-sm px-6 py-3 rounded-xl hover:bg-primary/90 transition-colors min-h-[44px] whitespace-nowrap mt-4 md:mt-0"
+                    >
+                      Devenir Fondateur
+                    </Link>
+                  </div>
                 </div>
               </div>
             </section>
