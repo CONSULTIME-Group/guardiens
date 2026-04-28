@@ -95,7 +95,6 @@ const Messages = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [autoOpened, setAutoOpened] = useState(false);
-  const [isEntraideContact, setIsEntraideContact] = useState(false);
 
   const loadConversations = useCallback(async () => {
     if (!user) return;
@@ -248,7 +247,6 @@ const Messages = () => {
 
       if (existing) {
         setActiveConv(existing);
-        setIsEntraideContact(true);
         searchParams.delete("gardien");
         setSearchParams(searchParams, { replace: true });
         setAutoOpened(true);
@@ -290,7 +288,6 @@ const Messages = () => {
 
           setConversations(prev => [enriched, ...prev]);
           setActiveConv(enriched);
-          setIsEntraideContact(true);
           searchParams.delete("gardien");
           setSearchParams(searchParams, { replace: true });
           setAutoOpened(true);
