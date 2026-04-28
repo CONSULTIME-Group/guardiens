@@ -965,6 +965,13 @@ const SearchSitter = () => {
     const isAssigned = !isMission && !!item.isAssigned;
     const isCompleted = !isMission && !!item.isCompleted;
     const isInactive = isAssigned || isCompleted;
+    // Annonce hors du rayon de recherche : on l'affiche seulement quand
+    // l'utilisateur a élargi la zone (région/France) ET que la distance dépasse son rayon.
+    const isOutOfZone =
+      !isMission &&
+      !isDemo &&
+      typeof item.distance === "number" &&
+      item.distance > radius[0];
     const linkTo = isMission
       ? `/petites-missions/${item.id}`
       : isDemo
@@ -976,10 +983,11 @@ const SearchSitter = () => {
 
     const cardContent = (
       <div
-        className={`relative bg-card rounded-2xl overflow-hidden border transition-shadow ${isClickable ? "cursor-pointer hover:shadow-md" : ""} ${isInactive ? "opacity-60 grayscale-[40%]" : ""} ${isDemo ? "border-amber-400 border-dashed ring-1 ring-amber-200/60" : "border-border"} ${testDemoMode ? (isDemo ? "card-test-demo" : "card-test-real") : ""}`}
+        className={`relative bg-card rounded-2xl overflow-hidden border transition-shadow ${isClickable ? "cursor-pointer hover:shadow-md" : ""} ${isInactive ? "opacity-60 grayscale-[40%]" : ""} ${isDemo ? "border-amber-400 border-dashed ring-1 ring-amber-200/60" : isOutOfZone ? "border-dashed border-muted-foreground/40" : "border-border"} ${testDemoMode ? (isDemo ? "card-test-demo" : "card-test-real") : ""}`}
         aria-disabled={isInactive || undefined}
         data-testid={isDemo ? "search-card-demo" : "search-card-real"}
         data-demo={isDemo ? "true" : "false"}
+        data-out-of-zone={isOutOfZone ? "true" : undefined}
         data-list-index={typeof listIndex === "number" ? listIndex + 1 : undefined}
       >
         {testDemoMode && typeof listIndex === "number" && (
@@ -1023,6 +1031,14 @@ const SearchSitter = () => {
                 <Sparkles className="h-3 w-3" /> Nouveau
               </span>
             )}
+            {isOutOfZone && !isInactive && (
+              <span
+                className="absolute bottom-3 left-3 inline-flex items-center gap-1 bg-foreground/85 text-background backdrop-blur-sm rounded-full px-2.5 py-1 text-[11px] font-medium shadow-sm"
+                title={`Cette annonce est à ${Math.round(item.distance)} km, au-delà de votre rayon de ${radius[0]} km`}
+              >
+                <MapPin className="h-3 w-3" /> Hors zone · {Math.round(item.distance)} km
+              </span>
+            )}
           </div>
         )}
         <div className="p-4">
@@ -1032,10 +1048,15 @@ const SearchSitter = () => {
             </h3>
             {item.owner?.is_founder && <FounderBadge size="sm" />}
           </div>
-          <p className="text-sm text-muted-foreground mb-2 flex items-center gap-1">
-            <MapPin className="h-3.5 w-3.5" />
+          <p className={`text-sm mb-2 flex items-center gap-1 ${isOutOfZone ? "text-foreground" : "text-muted-foreground"}`}>
+            <MapPin className={`h-3.5 w-3.5 ${isOutOfZone ? "text-primary" : ""}`} />
             {item.owner?.city || ""}
-            {item.distance != null && ` · ${item.distance < 1 ? "< 1" : Math.round(item.distance).toLocaleString("fr-FR").replace(/\s/g, "\u202F")} km`}
+            {item.distance != null && (
+              <span className={isOutOfZone ? "font-semibold text-primary" : ""}>
+                {" · "}
+                {item.distance < 1 ? "< 1" : Math.round(item.distance).toLocaleString("fr-FR").replace(/\s/g, "\u202F")} km
+              </span>
+            )}
           </p>
           {Object.keys(petGroups).length > 0 && (
             <div className="flex flex-wrap items-center gap-3 mb-2">
@@ -1670,8 +1691,8 @@ const SearchSitter = () => {
         // Variante "partiel" = utilisateur a déjà des résultats dans son rayon
         // Variante "vide" = aucun résultat local mais des annonces existent ailleurs
         const containerClass = hasLocal
-          ? "mx-6 mt-4 rounded-2xl border border-border bg-card shadow-sm p-4 sm:p-5 flex items-start sm:items-center gap-4 flex-col sm:flex-row"
-          : "mx-6 mt-4 rounded-2xl border-2 border-primary/40 bg-gradient-to-br from-primary/15 via-primary/10 to-primary/5 shadow-md p-4 sm:p-5 flex items-start sm:items-center gap-4 flex-col sm:flex-row";
+          ? "mx-6 mt-4 w-[calc(100%-3rem)] text-left rounded-2xl border border-border bg-card shadow-sm hover:shadow-md hover:border-primary/40 transition p-4 sm:p-5 flex items-start sm:items-center gap-4 flex-col sm:flex-row cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+          : "mx-6 mt-4 w-[calc(100%-3rem)] text-left rounded-2xl border-2 border-primary/40 bg-gradient-to-br from-primary/15 via-primary/10 to-primary/5 shadow-md hover:shadow-lg hover:border-primary/60 transition p-4 sm:p-5 flex items-start sm:items-center gap-4 flex-col sm:flex-row cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40";
         const iconWrapClass = hasLocal
           ? "h-10 w-10 sm:h-11 sm:w-11 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0"
           : "h-12 w-12 sm:h-14 sm:w-14 rounded-full bg-primary text-primary-foreground flex items-center justify-center shrink-0 shadow-sm relative";
@@ -1683,8 +1704,41 @@ const SearchSitter = () => {
           ? "font-heading font-semibold text-sm sm:text-base text-foreground leading-tight"
           : "font-heading font-semibold text-base sm:text-lg text-foreground leading-tight";
 
+        const handleBannerClick = () => {
+          trackEvent("search_outofzone_click", {
+            source: "search_outofzone_banner",
+            metadata: {
+              action: "expand_zone",
+              to: "france",
+              previous_mode: zoneMode,
+              delta: elsewhere,
+              count_radius: densityCounts.radius,
+              count_region: densityCounts.region,
+              count_france: densityCounts.france,
+              has_local: hasLocal,
+            },
+          });
+          setZoneMode("france");
+        };
+
         return (
-          <div className={containerClass}>
+          <div
+            role="button"
+            tabIndex={0}
+            aria-label={
+              hasLocal
+                ? `Voir ${elsewhere} autres annonces hors de votre rayon — passe en recherche France entière`
+                : `${elsewhere} annonces existent ailleurs en France — passer en recherche France entière`
+            }
+            onClick={handleBannerClick}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                handleBannerClick();
+              }
+            }}
+            className={containerClass}
+          >
             <div className="flex items-start gap-4 flex-1 min-w-0 w-full">
               <div className={iconWrapClass}>
                 <MapPin className={iconClass} />
@@ -1708,6 +1762,9 @@ const SearchSitter = () => {
                       annonce{elsewhere > 1 ? "s" : ""} hors de votre zone
                     </>
                   )}
+                  <span className="ml-2 text-xs font-normal text-primary underline underline-offset-2">
+                    Voir toute la France →
+                  </span>
                 </p>
                 <p className="text-xs sm:text-sm text-muted-foreground mt-1">
                   {hasLocal && densityCounts.radius > 0
@@ -1724,7 +1781,10 @@ const SearchSitter = () => {
                 </p>
               </div>
             </div>
-            <div className="flex flex-wrap gap-2 shrink-0 w-full sm:w-auto">
+            <div
+              className="flex flex-wrap gap-2 shrink-0 w-full sm:w-auto"
+              onClick={(e) => e.stopPropagation()}
+            >
               {densityCounts.region > densityCounts.radius && (
                 <Button size="sm" variant="outline" className="bg-card" onClick={() => {
                   trackEvent("search_outofzone_click", { source: "search_outofzone", metadata: { action: "expand_zone", to: "region", previous_mode: zoneMode, delta: elsewhere, count_radius: densityCounts.radius, count_region: densityCounts.region, count_france: densityCounts.france, has_local: hasLocal } });
