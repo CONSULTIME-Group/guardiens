@@ -62,6 +62,7 @@ import {
 import { slugify } from "@/lib/normalize";
 import { CITIES } from "@/data/cities";
 import { getCityContent } from "@/data/cityContent";
+import { PetPhoto } from "@/components/sits/views/PetPhoto";
 // Libellés des enums animaux — source unique partagée avec le formulaire de création
 import {
   ACTIVITY_LABELS as ACTIVITY_LEVEL_LABEL,
@@ -815,6 +816,50 @@ const SitImmersiveContent = ({
 
             {/* ========== ONGLET ANIMAUX ========== */}
             <TabsContent value="animaux" className="space-y-5 mt-0">
+              {safePets.length > 1 && (
+                <nav
+                  aria-label="Sommaire des animaux"
+                  className="rounded-2xl border border-border bg-muted/30 p-3 md:p-4"
+                >
+                  <p className="text-xs uppercase tracking-wide text-muted-foreground mb-2">
+                    {safePets.length} pensionnaires — cliquez pour aller à une fiche
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {safePets.map((p, idx) => {
+                      const anchor = `pet-${p?.id || idx}`;
+                      return (
+                        <a
+                          key={anchor}
+                          href={`#${anchor}`}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            document
+                              .getElementById(anchor)
+                              ?.scrollIntoView({ behavior: "smooth", block: "start" });
+                          }}
+                          className="inline-flex items-center gap-2 rounded-full bg-background border border-border pl-1 pr-3 py-0.5 text-xs hover:border-primary/40 transition"
+                        >
+                          {p?.photo_url ? (
+                            <img
+                              src={p.photo_url}
+                              alt=""
+                              className="w-6 h-6 rounded-full object-cover"
+                            />
+                          ) : (
+                            <span className="w-6 h-6 rounded-full bg-muted flex items-center justify-center text-[11px] text-muted-foreground/70 font-serif">
+                              {(p?.name?.[0] || "?").toUpperCase()}
+                            </span>
+                          )}
+                          <span className="font-medium">{p?.name || "Animal"}</span>
+                          {p?.breed && (
+                            <span className="text-muted-foreground">· {p.breed}</span>
+                          )}
+                        </a>
+                      );
+                    })}
+                  </div>
+                </nav>
+              )}
               {safePets.length > 0 ? (
                 safePets.map((pet, i) => {
                   const hasMedication =
@@ -839,48 +884,20 @@ const SitImmersiveContent = ({
                   return (
                     <section
                       key={pet.id || i}
-                      className="rounded-2xl border border-border bg-card p-5 md:p-6"
+                      id={`pet-${pet.id || i}`}
+                      className="rounded-2xl border border-border bg-card p-5 md:p-6 scroll-mt-24"
                     >
                       <div className="flex gap-4 mb-4">
-                        {/* Photo de l'animal — fallback emoji espèce si photo_url manquante */}
-                        <div className="shrink-0">
-                          {pet.photo_url ? (
-                            <img
-                              src={pet.photo_url}
-                              alt={pet.name ? `Photo de ${pet.name}` : "Photo de l'animal"}
-                              loading="lazy"
-                              onError={(e) => {
-                                // Si l'URL casse, on bascule sur le fallback visuel
-                                const target = e.currentTarget;
-                                target.style.display = "none";
-                                target.parentElement
-                                  ?.querySelector("[data-pet-fallback]")
-                                  ?.removeAttribute("hidden");
-                              }}
-                              className="w-24 h-24 md:w-28 md:h-28 rounded-xl object-cover border border-border bg-muted"
-                            />
-                          ) : null}
-                          <div
-                            data-pet-fallback
-                            hidden={!!pet.photo_url}
-                            aria-label={
-                              pet.name
-                                ? `Pas de photo pour ${pet.name}`
-                                : "Pas de photo de l'animal"
-                            }
-                            className="w-24 h-24 md:w-28 md:h-28 rounded-xl bg-muted border border-border flex flex-col items-center justify-center gap-1"
-                          >
-                            <span className="text-4xl leading-none" aria-hidden>
-                              {SPECIES_EMOJI[pet.species] || "🐾"}
-                            </span>
-                            <PawPrint className="h-3 w-3 text-muted-foreground/60" aria-hidden />
-                          </div>
-                        </div>
+                        {/* Photo de l'animal — fallback neutre si photo manquante (sans emoji décoratif) */}
+                        <PetPhoto
+                          src={pet.photo_url}
+                          name={pet.name}
+                          className="w-24 h-24 md:w-28 md:h-28 rounded-xl"
+                        />
 
                         {/* En-tête */}
                         <div className="flex-1 min-w-0">
                           <div className="flex items-baseline gap-2 flex-wrap mb-1">
-                            <span className="text-xl">{SPECIES_EMOJI[pet.species] || "🐾"}</span>
                             {pet.name && (
                               <h3 className="text-lg font-semibold text-foreground">{pet.name}</h3>
                             )}
