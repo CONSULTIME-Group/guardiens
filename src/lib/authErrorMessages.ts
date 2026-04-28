@@ -164,6 +164,108 @@ export function mapAuthError(err: AnyAuthError | null | undefined): AuthErrorInf
     };
   }
 
+  // ── OAuth : utilisateur a annulé / fermé l'écran Google ──
+  if (
+    code === "access_denied" ||
+    code === "user_cancelled" ||
+    code === "oauth_cancelled" ||
+    msg.includes("access_denied") ||
+    msg.includes("user denied") ||
+    msg.includes("user cancelled") ||
+    msg.includes("user canceled") ||
+    msg.includes("flow_state_expired") ||
+    msg.includes("oauth flow was cancelled")
+  ) {
+    return {
+      code: "oauth_cancelled",
+      title: "Connexion Google annulée",
+      description:
+        "Vous avez fermé la fenêtre Google avant la fin. Réessayez et terminez la connexion en sélectionnant votre compte.",
+    };
+  }
+
+  // ── OAuth : permissions refusées côté Google ──
+  if (
+    code === "oauth_provider_not_supported" ||
+    msg.includes("scope") && msg.includes("denied") ||
+    msg.includes("insufficient_scope") ||
+    msg.includes("consent_required") ||
+    msg.includes("permissions")
+  ) {
+    return {
+      code: "oauth_permissions_denied",
+      title: "Autorisations Google refusées",
+      description:
+        "Pour vous connecter, Google doit nous transmettre votre adresse email et votre nom. Réessayez et acceptez le partage de ces informations.",
+    };
+  }
+
+  // ── OAuth : popup bloquée par le navigateur ──
+  if (
+    code === "popup_blocked" ||
+    code === "popup_closed_by_user" ||
+    msg.includes("popup") && (msg.includes("block") || msg.includes("closed")) ||
+    msg.includes("window.open") ||
+    msg.includes("blocked by browser")
+  ) {
+    return {
+      code: "oauth_popup_blocked",
+      title: "Fenêtre Google bloquée par votre navigateur",
+      description:
+        "Autorisez les fenêtres pop-up pour ce site dans les réglages de votre navigateur, puis réessayez. Sur mobile, désactivez le mode lecteur ou navigation privée stricte.",
+    };
+  }
+
+  // ── OAuth : redirection interrompue / état invalide ──
+  if (
+    code === "bad_oauth_state" ||
+    code === "bad_oauth_callback" ||
+    code === "invalid_request" ||
+    msg.includes("oauth state") ||
+    msg.includes("invalid state") ||
+    msg.includes("state mismatch") ||
+    msg.includes("redirect_uri") ||
+    msg.includes("oauth callback")
+  ) {
+    return {
+      code: "oauth_redirect_interrupted",
+      title: "Connexion Google interrompue",
+      description:
+        "La redirection depuis Google n'a pas abouti (onglet fermé, retour arrière ou cookies bloqués). Réessayez sans changer d'onglet, et autorisez les cookies tiers si besoin.",
+    };
+  }
+
+  // ── OAuth : email déjà utilisé avec une autre méthode ──
+  if (
+    code === "identity_already_exists" ||
+    code === "email_address_not_authorized" ||
+    msg.includes("identity already exists") ||
+    msg.includes("user with this email already exists") ||
+    msg.includes("account exists with different credential")
+  ) {
+    return {
+      code: "oauth_identity_conflict",
+      title: "Cet email est déjà associé à un autre mode de connexion",
+      description:
+        "Connectez-vous d'abord avec votre email et mot de passe, puis liez votre compte Google depuis votre profil.",
+    };
+  }
+
+  // ── OAuth : provider mal configuré côté serveur ──
+  if (
+    code === "oauth_provider_not_supported" ||
+    code === "provider_disabled" ||
+    msg.includes("provider is not enabled") ||
+    msg.includes("unsupported_provider")
+  ) {
+    return {
+      code: "oauth_provider_unavailable",
+      title: "Connexion Google momentanément indisponible",
+      description:
+        "Ce mode de connexion est temporairement désactivé. Utilisez votre email et mot de passe, ou réessayez plus tard.",
+    };
+  }
+
   // ── Réseau / serveur ──
   if (
     msg === "timeout" ||
