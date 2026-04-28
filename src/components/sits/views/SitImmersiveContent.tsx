@@ -145,10 +145,6 @@ interface SitImmersiveContentProps {
   property: any;
   pets: any[];
   ownerProfile: any;
-  /** Slot principal de droite (ex : bloc candidature côté gardien, gestion côté propriétaire). */
-  ctaSlot?: React.ReactNode;
-  /** Ajout sous le quick-facts (ex : badges de matching côté gardien). */
-  topSlot?: React.ReactNode;
 }
 
 const formatDate = (d: string | null) =>
