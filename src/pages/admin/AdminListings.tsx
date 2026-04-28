@@ -272,6 +272,38 @@ const AdminListings = () => {
                       <Button variant="ghost" size="icon" title="Voir" onClick={() => navigate(`/sits/${listing.id}`)}>
                         <Eye className="h-4 w-4" />
                       </Button>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon" title="Partager">
+                            <Share2 className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-56">
+                          <DropdownMenuLabel className="text-xs text-muted-foreground">
+                            Partager cette annonce
+                          </DropdownMenuLabel>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem onSelect={() => handleCopyLink(listing)}>
+                            <Link2 className="h-4 w-4 mr-2" /> Copier le lien
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onSelect={() => handleNativeShare(listing)}>
+                            <Share2 className="h-4 w-4 mr-2" /> Partage rapide…
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem onSelect={() => handleShareTo(listing, "facebook")}>
+                            Facebook
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onSelect={() => handleShareTo(listing, "twitter")}>
+                            X (Twitter)
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onSelect={() => handleShareTo(listing, "whatsapp")}>
+                            WhatsApp
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onSelect={() => handleShareTo(listing, "email")}>
+                            <Mail className="h-4 w-4 mr-2" /> E-mail
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                       {listing.status !== "cancelled" ? (
                         <Button variant="ghost" size="icon" title="Masquer" onClick={() => setHideModal(listing.id)}>
                           <EyeOff className="h-4 w-4" />
