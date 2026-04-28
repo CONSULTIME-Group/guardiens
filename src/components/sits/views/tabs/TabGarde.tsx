@@ -1,9 +1,9 @@
 /**
  * Onglet "Garde" : mot de l'hôte, journée type, aperçus cliquables
  * vers les autres onglets (Animaux / Logement / Attentes).
+ * Aucune icône Lucide décorative — seuls ArrowRight (nav) et Info (statut) restent.
  */
-import { Heart, Info, ArrowRight, PawPrint, Home, ShieldCheck } from "lucide-react";
-import { ROUTINE_ICONS } from "./sitMeta";
+import { ArrowRight, Info } from "lucide-react";
 import { parseRoutine, cleanFreeText } from "./parseRoutine";
 
 interface TabGardeProps {
@@ -46,10 +46,9 @@ const TabGarde = ({
       {/* Mot du proprio */}
       {hasOwnerMessage && (
         <section className="rounded-2xl border-2 border-primary/20 bg-primary/5 p-5 md:p-6">
-          <div className="flex items-center gap-2 mb-3">
-            <Heart className="h-4 w-4 text-primary" />
-            <h2 className="text-base font-semibold">Un mot de {ownerName}</h2>
-          </div>
+          <p className="text-[11px] uppercase tracking-wider text-primary/80 font-semibold mb-2">
+            Un mot de {ownerName}
+          </p>
           <p className="text-sm text-foreground/90 leading-relaxed italic whitespace-pre-line">
             « {ownerMessage} »
           </p>
@@ -62,25 +61,16 @@ const TabGarde = ({
           <h2 className="text-lg font-semibold mb-4">Une journée type</h2>
           {routine ? (
             <div className="space-y-4">
-              {routine.blocks.map((b, i) => {
-                const meta = ROUTINE_ICONS[b.label] || ROUTINE_ICONS.Matin;
-                const Ico = meta.icon;
-                return (
-                  <div key={i} className="flex gap-3">
-                    <div
-                      className={`shrink-0 w-9 h-9 rounded-full flex items-center justify-center ${meta.bg} ${meta.fg}`}
-                    >
-                      <Ico className="h-4 w-4" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium">{b.label}</p>
-                      <p className="text-sm text-muted-foreground">{b.text}</p>
-                    </div>
-                  </div>
-                );
-              })}
+              {routine.blocks.map((b, i) => (
+                <div key={i} className="border-l-2 border-primary/30 pl-4">
+                  <p className="text-[11px] uppercase tracking-wider text-muted-foreground font-semibold mb-1">
+                    {b.label}
+                  </p>
+                  <p className="text-sm text-foreground/90 leading-relaxed">{b.text}</p>
+                </div>
+              ))}
               {routine.notes && (
-                <p className="text-xs text-muted-foreground italic pt-2 border-t border-border">
+                <p className="text-xs text-muted-foreground italic pt-2 border-t border-border leading-relaxed">
                   {routine.notes}
                 </p>
               )}
@@ -101,7 +91,7 @@ const TabGarde = ({
                     title={chipTooltip}
                     aria-label={chipLabel}
                   >
-                    <Info className="h-3 w-3" />
+                    <Info aria-hidden="true" className="h-3 w-3" />
                     {chipLabel}
                   </span>
                   <p className="text-sm text-foreground whitespace-pre-line leading-relaxed">
@@ -131,15 +121,15 @@ const TabGarde = ({
             className="w-full text-left rounded-2xl border border-border bg-card p-4 md:p-5 hover:border-primary/40 hover:bg-accent/30 transition group"
           >
             <div className="flex items-start gap-4">
-              <div className="shrink-0 w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center">
-                <PawPrint className="h-5 w-5" />
-              </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between gap-2 mb-2">
                   <p className="text-sm font-semibold">
                     {safePets.length} pensionnaire{safePets.length > 1 ? "s" : ""}
                   </p>
-                  <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-0.5 transition" />
+                  <ArrowRight
+                    aria-hidden="true"
+                    className="h-4 w-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-0.5 transition shrink-0"
+                  />
                 </div>
                 <div className="flex flex-wrap gap-2">
                   {safePets.slice(0, 4).map((p, i) => {
@@ -187,15 +177,15 @@ const TabGarde = ({
             className="w-full text-left rounded-2xl border border-border bg-card p-4 md:p-5 hover:border-primary/40 hover:bg-accent/30 transition group"
           >
             <div className="flex items-start gap-4">
-              <div className="shrink-0 w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center">
-                <Home className="h-5 w-5" />
-              </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between gap-2 mb-1">
                   <p className="text-sm font-semibold">Logement & quartier</p>
-                  <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-0.5 transition" />
+                  <ArrowRight
+                    aria-hidden="true"
+                    className="h-4 w-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-0.5 transition shrink-0"
+                  />
                 </div>
-                <p className="text-xs text-muted-foreground">
+                <p className="text-xs text-muted-foreground line-clamp-1">
                   {[
                     property?.type === "house"
                       ? "Maison"
@@ -210,7 +200,7 @@ const TabGarde = ({
                     .join(" · ")}
                 </p>
                 {propertyDescription && (
-                  <p className="text-sm text-foreground/80 mt-2 line-clamp-2">
+                  <p className="text-sm text-foreground/80 mt-2 line-clamp-2 leading-relaxed">
                     {propertyDescription}
                   </p>
                 )}
@@ -232,16 +222,18 @@ const TabGarde = ({
             className="w-full text-left rounded-2xl border border-border bg-card p-4 md:p-5 hover:border-primary/40 hover:bg-accent/30 transition group"
           >
             <div className="flex items-start gap-4">
-              <div className="shrink-0 w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center">
-                <ShieldCheck className="h-5 w-5" />
-              </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between gap-2 mb-1">
                   <p className="text-sm font-semibold">Attentes de {ownerName}</p>
-                  <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-0.5 transition" />
+                  <ArrowRight
+                    aria-hidden="true"
+                    className="h-4 w-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-0.5 transition shrink-0"
+                  />
                 </div>
                 {expectations ? (
-                  <p className="text-sm text-foreground/80 line-clamp-2">{expectations}</p>
+                  <p className="text-sm text-foreground/80 line-clamp-2 leading-relaxed">
+                    {expectations}
+                  </p>
                 ) : (
                   <p className="text-xs text-muted-foreground">
                     {environments.length} repère{environments.length > 1 ? "s" : ""} sur le cadre de vie

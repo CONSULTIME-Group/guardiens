@@ -1,16 +1,8 @@
 /**
  * Onglet "Animaux" : sommaire si plusieurs, puis fiche détaillée par animal.
+ * Aucune icône Lucide décorative — seules Pill / AlertTriangle (statut santé) et Info (statut) restent.
  */
-import {
-  Pill,
-  Utensils,
-  AlertTriangle,
-  Heart,
-  Activity,
-  Footprints,
-  Clock,
-  Info,
-} from "lucide-react";
+import { Pill, AlertTriangle, Info } from "lucide-react";
 import { PetPhoto } from "@/components/sits/views/PetPhoto";
 import BreedProfileCard from "@/components/breeds/BreedProfileCard";
 import {
@@ -30,6 +22,42 @@ interface TabAnimauxProps {
   ownerName: string;
 }
 
+const InfoBlock = ({
+  label,
+  text,
+  tone = "default",
+}: {
+  label: string;
+  text: string;
+  tone?: "default" | "muted";
+}) => (
+  <div
+    className={`rounded-xl border border-border ${
+      tone === "muted" ? "bg-muted/40" : "bg-card"
+    } p-3 md:p-4 mb-3`}
+  >
+    <p className="text-[11px] font-semibold uppercase tracking-wider text-foreground mb-1">
+      {label}
+    </p>
+    <p
+      className={`text-sm whitespace-pre-line leading-relaxed ${
+        tone === "muted" ? "text-foreground/90" : "text-muted-foreground"
+      }`}
+    >
+      {text}
+    </p>
+  </div>
+);
+
+const StatBlock = ({ label, value }: { label: string; value: string }) => (
+  <div className="rounded-lg bg-muted/40 p-3">
+    <p className="text-[11px] uppercase tracking-wider text-muted-foreground mb-0.5">
+      {label}
+    </p>
+    <p className="text-sm font-medium leading-tight">{value}</p>
+  </div>
+);
+
 const TabAnimaux = ({ safePets, ownerName }: TabAnimauxProps) => {
   if (safePets.length === 0) {
     return (
@@ -46,7 +74,7 @@ const TabAnimaux = ({ safePets, ownerName }: TabAnimauxProps) => {
           aria-label="Sommaire des animaux"
           className="rounded-2xl border border-border bg-muted/30 p-3 md:p-4"
         >
-          <p className="text-xs uppercase tracking-wide text-muted-foreground mb-2">
+          <p className="text-[11px] uppercase tracking-wider text-muted-foreground mb-2">
             {safePets.length} pensionnaires — cliquez pour aller à une fiche
           </p>
           <div className="flex flex-wrap gap-2">
@@ -115,7 +143,9 @@ const TabAnimaux = ({ safePets, ownerName }: TabAnimauxProps) => {
               <div className="flex-1 min-w-0">
                 <div className="flex items-baseline gap-2 flex-wrap mb-1">
                   {pet.name && (
-                    <h3 className="text-lg font-semibold text-foreground">{pet.name}</h3>
+                    <h3 className="text-lg font-semibold text-foreground leading-tight">
+                      {pet.name}
+                    </h3>
                   )}
                   {pet.breed && (
                     <span className="text-sm text-muted-foreground">· {pet.breed}</span>
@@ -137,9 +167,12 @@ const TabAnimaux = ({ safePets, ownerName }: TabAnimauxProps) => {
 
             {hasMedication && (
               <div className="rounded-xl border-2 border-amber-300 bg-amber-50 dark:bg-amber-950/30 dark:border-amber-700/50 p-3 md:p-4 mb-3 flex gap-3">
-                <Pill className="h-5 w-5 text-amber-700 dark:text-amber-300 shrink-0 mt-0.5" />
+                <Pill
+                  aria-hidden="true"
+                  className="h-5 w-5 text-amber-700 dark:text-amber-300 shrink-0 mt-0.5"
+                />
                 <div className="min-w-0">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-amber-800 dark:text-amber-200 mb-1">
+                  <p className="text-[11px] font-semibold uppercase tracking-wider text-amber-800 dark:text-amber-200 mb-1">
                     Médication à administrer
                   </p>
                   <p className="text-sm text-amber-900 dark:text-amber-100 whitespace-pre-line leading-relaxed">
@@ -151,9 +184,12 @@ const TabAnimaux = ({ safePets, ownerName }: TabAnimauxProps) => {
 
             {hasSpecialNeeds && (
               <div className="rounded-xl border border-border bg-muted/40 p-3 md:p-4 mb-3 flex gap-3">
-                <AlertTriangle className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                <AlertTriangle
+                  aria-hidden="true"
+                  className="h-5 w-5 text-primary shrink-0 mt-0.5"
+                />
                 <div className="min-w-0">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-foreground mb-1">
+                  <p className="text-[11px] font-semibold uppercase tracking-wider text-foreground mb-1">
                     Besoins spéciaux
                   </p>
                   <p className="text-sm text-foreground/90 whitespace-pre-line leading-relaxed">
@@ -163,69 +199,14 @@ const TabAnimaux = ({ safePets, ownerName }: TabAnimauxProps) => {
               </div>
             )}
 
-            {hasFood && (
-              <div className="rounded-xl border border-border bg-card p-3 md:p-4 mb-3 flex gap-3">
-                <Utensils className="h-5 w-5 text-primary shrink-0 mt-0.5" />
-                <div className="min-w-0">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-foreground mb-1">
-                    Alimentation
-                  </p>
-                  <p className="text-sm text-muted-foreground whitespace-pre-line leading-relaxed">
-                    {pet.food}
-                  </p>
-                </div>
-              </div>
-            )}
-
-            {hasCharacter && (
-              <div className="rounded-xl border border-border bg-card p-3 md:p-4 mb-3 flex gap-3">
-                <Heart className="h-5 w-5 text-primary shrink-0 mt-0.5" />
-                <div className="min-w-0">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-foreground mb-1">
-                    Caractère
-                  </p>
-                  <p className="text-sm text-muted-foreground whitespace-pre-line leading-relaxed">
-                    {pet.character}
-                  </p>
-                </div>
-              </div>
-            )}
+            {hasFood && <InfoBlock label="Alimentation" text={pet.food} />}
+            {hasCharacter && <InfoBlock label="Caractère" text={pet.character} />}
 
             {(activityLabel || walkLabel || aloneLabel) && (
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-3">
-                {activityLabel && (
-                  <div className="rounded-lg bg-muted/40 p-3 flex items-start gap-2">
-                    <Activity className="h-4 w-4 text-primary mt-0.5 shrink-0" />
-                    <div>
-                      <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
-                        Activité
-                      </p>
-                      <p className="text-sm font-medium">{activityLabel}</p>
-                    </div>
-                  </div>
-                )}
-                {walkLabel && (
-                  <div className="rounded-lg bg-muted/40 p-3 flex items-start gap-2">
-                    <Footprints className="h-4 w-4 text-primary mt-0.5 shrink-0" />
-                    <div>
-                      <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
-                        Balade
-                      </p>
-                      <p className="text-sm font-medium">{walkLabel}</p>
-                    </div>
-                  </div>
-                )}
-                {aloneLabel && (
-                  <div className="rounded-lg bg-muted/40 p-3 flex items-start gap-2">
-                    <Clock className="h-4 w-4 text-primary mt-0.5 shrink-0" />
-                    <div>
-                      <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
-                        Solitude tolérée
-                      </p>
-                      <p className="text-sm font-medium">{aloneLabel}</p>
-                    </div>
-                  </div>
-                )}
+                {activityLabel && <StatBlock label="Activité" value={activityLabel} />}
+                {walkLabel && <StatBlock label="Balade" value={walkLabel} />}
+                {aloneLabel && <StatBlock label="Solitude tolérée" value={aloneLabel} />}
               </div>
             )}
 
@@ -237,7 +218,7 @@ const TabAnimaux = ({ safePets, ownerName }: TabAnimauxProps) => {
                 >
                   <AccordionTrigger className="py-2.5 text-sm font-medium hover:no-underline">
                     <span className="flex items-center gap-2">
-                      <Info className="h-4 w-4 text-primary" />
+                      <Info aria-hidden="true" className="h-4 w-4 text-primary" />
                       Voir la fiche race — {pet.breed}
                     </span>
                   </AccordionTrigger>
