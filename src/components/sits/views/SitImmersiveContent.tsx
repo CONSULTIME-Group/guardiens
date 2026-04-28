@@ -14,7 +14,7 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Heart, PawPrint, Home, ShieldCheck } from "lucide-react";
+
 import { slugify } from "@/lib/normalize";
 import { CITIES } from "@/data/cities";
 import { getCityContent } from "@/data/cityContent";
@@ -223,14 +223,12 @@ const SitImmersiveContent = ({
                   value="garde"
                   className="text-[11px] md:text-sm py-2 px-1 md:px-3 min-w-0 data-[state=active]:bg-background data-[state=active]:shadow-sm"
                 >
-                  <Heart className="h-3.5 w-3.5 mr-1 md:mr-1.5 shrink-0 hidden sm:inline" />
                   <span className="truncate">Garde</span>
                 </TabsTrigger>
                 <TabsTrigger
                   value="animaux"
                   className="text-[11px] md:text-sm py-2 px-1 md:px-3 min-w-0 data-[state=active]:bg-background data-[state=active]:shadow-sm"
                 >
-                  <PawPrint className="h-3.5 w-3.5 mr-1 md:mr-1.5 shrink-0 hidden sm:inline" />
                   <span className="truncate">
                     Animaux{safePets.length > 0 ? ` (${safePets.length})` : ""}
                   </span>
@@ -239,7 +237,6 @@ const SitImmersiveContent = ({
                   value="logement"
                   className="text-[11px] md:text-sm py-2 px-1 md:px-3 min-w-0 data-[state=active]:bg-background data-[state=active]:shadow-sm"
                 >
-                  <Home className="h-3.5 w-3.5 mr-1 md:mr-1.5 shrink-0 hidden sm:inline" />
                   <span className="truncate">
                     <span className="md:hidden">Logement</span>
                     <span className="hidden md:inline">Logement & quartier</span>
@@ -249,7 +246,6 @@ const SitImmersiveContent = ({
                   value="attentes"
                   className="text-[11px] md:text-sm py-2 px-1 md:px-3 min-w-0 data-[state=active]:bg-background data-[state=active]:shadow-sm"
                 >
-                  <ShieldCheck className="h-3.5 w-3.5 mr-1 md:mr-1.5 shrink-0 hidden sm:inline" />
                   <span className="truncate">Attentes</span>
                 </TabsTrigger>
               </TabsList>

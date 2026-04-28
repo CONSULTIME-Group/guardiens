@@ -2,7 +2,7 @@
  * Hero photo principale + bandeau ville/titre superposé.
  * Utilisé en tête de SitImmersiveContent.
  */
-import { MapPin } from "lucide-react";
+
 
 interface SitHeroProps {
   photos: string[];
@@ -28,13 +28,10 @@ const SitHero = ({ photos, title, cityName, department }: SitHeroProps) => {
         />
         <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent p-5 md:p-8">
           {(cityName || department) && (
-            <div className="flex items-center gap-2 mb-2 text-white/90 text-sm">
-              <MapPin className="h-4 w-4" />
-              <span>
-                {cityName}
-                {department ? ` · ${department}` : ""}
-              </span>
-            </div>
+            <p className="mb-2 text-white/90 text-sm font-medium">
+              {cityName}
+              {department ? ` · ${department}` : ""}
+            </p>
           )}
           {title && (
             <h1 className="text-2xl md:text-4xl font-bold text-white leading-tight max-w-3xl">
