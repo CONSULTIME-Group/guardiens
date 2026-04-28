@@ -116,6 +116,7 @@ const Login = () => {
 
       <AuthIllustrationPanel
         title="Le voisinage qui veille sur vous"
+        tagline="Un service rendu, un lien retissé."
         description="Garder une maison, rendre un service, prêter main forte : ici, on retisse la confiance entre voisins, du cœur du village jusqu'aux hameaux."
       />
 
