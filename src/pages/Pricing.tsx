@@ -42,6 +42,26 @@ const comparisonRows = [
 
 const faqItems = [
   {
+    q: "L'accès est-il vraiment gratuit pour tout le monde jusqu'au 13 juin 2026 ?",
+    a: `Oui. Jusqu'au 13 juin 2026, **l'accès complet à Guardiens est 100% gratuit pour tout le monde** — gardiens comme propriétaires, sans aucune exception.
+
+Aucune carte bancaire n'est demandée à l'inscription. Vous accédez à toutes les fonctionnalités : publier une annonce, postuler aux gardes, échanger en messagerie, laisser des avis, utiliser l'entraide.
+
+Cette gratuité totale ne dépend pas du programme Fondateur. Que vous vous inscriviez le 1er février ou le 12 juin 2026, vous ne payez rien jusqu'au 13 juin 2026.
+
+À partir du 14 juin 2026, l'abonnement gardien à 6,99€/mois devient nécessaire pour postuler aux gardes. L'espace propriétaire, lui, reste gratuit à vie.`,
+  },
+  {
+    q: "Quelle est la différence entre la gratuité jusqu'au 13 juin et le programme Fondateur ?",
+    a: `Ce sont deux choses distinctes qui se cumulent.
+
+**La gratuité totale jusqu'au 13 juin 2026** concerne **tous les inscrits**, sans condition de date. Personne ne paie avant cette date.
+
+**Le programme Fondateur** est un statut symbolique réservé aux personnes inscrites **avant le 13 mai 2026**. Il donne droit à un badge Fondateur affiché à vie sur le profil — ce badge ne sera plus jamais attribué après cette date.
+
+En clair : tout le monde est gratuit jusqu'au 13 juin, et seuls les premiers inscrits (avant le 13 mai) reçoivent en plus le badge Fondateur.`,
+  },
+  {
     q: "Pourquoi c'est gratuit pour les propriétaires ?",
     a: `Parce qu'on ne facture pas l'accès à ceux qui ouvrent leur maison.
 
@@ -53,25 +73,29 @@ Pour comprendre comment fonctionne la mise en relation : [Comment bien choisir s
   },
   {
     q: "Comment fonctionne l'essai gratuit de 7 jours ?",
-    a: `Vous vous inscrivez en tant que gardien, sans carte bancaire. Pendant 7 jours, vous accédez à toutes les fonctionnalités : postuler aux gardes, échanger avec les propriétaires, créer votre profil de confiance.
+    a: `Cet essai s'applique **après le 13 juin 2026**, lorsque l'abonnement gardien devient payant.
+
+Vous vous inscrivez en tant que gardien, sans carte bancaire. Pendant 7 jours, vous accédez à toutes les fonctionnalités : postuler aux gardes, échanger avec les propriétaires, créer votre profil de confiance.
 
 Aucun prélèvement automatique. À la fin de l'essai, vous choisissez si vous souhaitez activer l'abonnement à 6,99€/mois. Si vous ne faites rien, l'accès s'interrompt sans frais.
 
-C'est l'occasion de tester sereinement, sans engagement.`,
+Avant le 13 juin 2026, cet essai n'a pas lieu d'être : tout est déjà gratuit pour tout le monde.`,
   },
   {
     q: "Pourquoi le 13 mai ?",
     a: `C'est l'anniversaire de Jérémie, cofondateur de Guardiens.
 
-Plutôt que de recevoir des cadeaux, il a décidé d'offrir l'accès gratuit à ceux qui nous rejoignent avant cette date.
+Plutôt que de recevoir des cadeaux, il a décidé de marquer cette date avec le programme Fondateur : les personnes inscrites avant le 13 mai 2026 reçoivent un **badge Fondateur affiché à vie** sur leur profil. Ce badge ne sera plus jamais attribué après cette date.
 
-Les inscrits avant le 13 mai 2026 deviennent **Fondateurs** : accès gratuit jusqu'au 13 juin, badge Fondateur affiché à vie. Ce badge ne sera plus jamais attribué après cette date.`,
+À ne pas confondre avec la gratuité : **tout le monde est gratuit jusqu'au 13 juin 2026**, qu'il s'inscrive avant ou après le 13 mai. Le 13 mai concerne uniquement le badge.`,
   },
   {
     q: "Y a-t-il des frais cachés ?",
-    a: `Non. **Ce que paient les gardiens :** 6,99€/mois, 12€ pour un mois, ou la formule 2026 à -20%. C'est tout.
+    a: `Non. **Jusqu'au 13 juin 2026 :** rien à payer pour personne, sans carte bancaire.
 
-**Ce que paient les propriétaires :** Rien. Publier, recevoir des candidatures, choisir, évaluer — gratuit en permanence.
+**Après le 13 juin 2026 — ce que paient les gardiens :** 6,99€/mois, 12€ pour un mois, ou la formule 2026 à -20%. C'est tout.
+
+**Ce que paient les propriétaires :** Rien, jamais. Publier, recevoir des candidatures, choisir, évaluer — gratuit en permanence.
 
 **Ce qu'on ne prend pas :** Aucune commission sur les gardes. Pas d'assurance obligatoire, pas de booking fee, pas de frais de mise en relation.`,
   },
