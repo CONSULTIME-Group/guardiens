@@ -38,23 +38,20 @@ export const AuthIllustrationPanel = ({ title, tagline, description, footerSlot 
         />
       </div>
 
-      {/* Bandeau botanique en débord : une fine branche de sauge qui sort du
-          bord droit de l'illustration peinte et se prolonge naturellement sur
-          le panneau du formulaire, avec une grappe de glycine qui pend depuis
-          le haut de l'écran à droite (gravité respectée). pointer-events-none
-          pour ne jamais bloquer les inputs ; positionné suffisamment haut pour
-          ne couvrir ni le titre, ni les CTA. */}
+      {/* Fine branche de sauge en débord — gouache assortie au reste de
+          l'illustration. Sort du bord droit du tableau et se prolonge
+          sur le panneau de droite, fine, sans rien superposer. */}
       <img
         src={sageOverflow}
         alt=""
         aria-hidden="true"
         loading="lazy"
         width={1920}
-        height={640}
+        height={240}
         className="hidden lg:block pointer-events-none absolute left-0 top-0 max-w-none h-auto z-20 select-none"
         style={{
           width: "200%",
-          opacity: 0.9,
+          opacity: 0.85,
         }}
       />
 
