@@ -186,7 +186,6 @@ const Login = () => {
               {" "}(RGPD, art. 15 à 17).
             </span>
           </p>
-          </p>
 
           <div className="relative my-6" role="separator">
             <div className="absolute inset-0 flex items-center">
