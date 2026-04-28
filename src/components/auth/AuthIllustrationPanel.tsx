@@ -1,5 +1,6 @@
 import authIllustration from "@/assets/auth-illustration.png";
 import sageOverflow from "@/assets/auth-sage-overflow.png";
+import wisteriaOverflow from "@/assets/auth-wisteria-overflow.png";
 
 interface AuthIllustrationPanelProps {
   title: string;
