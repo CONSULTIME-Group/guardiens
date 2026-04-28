@@ -115,7 +115,7 @@ const Login = () => {
       <Helmet><meta name="robots" content="noindex, nofollow" /></Helmet>
 
       <AuthIllustrationPanel
-        title="L'entraide de quartier, retrouvée"
+        title="L'entraide locale, retrouvée"
         tagline="Un coup de main, un lien de confiance."
         description="Un gardien de votre région veille sur votre maison et vos animaux. Et entre gens du coin, on ose à nouveau demander, et proposer un coup de main."
       />
