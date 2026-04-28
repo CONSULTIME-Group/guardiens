@@ -12,7 +12,7 @@ const ExchangesColumn = memo(({ missions }: { missions: SmallMission[] }) => {
         <Link to="/petites-missions" className="text-xs text-primary font-sans hover:underline">Voir tout</Link>
       </div>
       <p className="text-xs text-muted-foreground font-sans mb-3">
-        Les échanges près de chez vous — en priorité ceux qui correspondent à vos compétences.
+        <span className="font-semibold text-foreground">Osez !</span> Demandez un coup de main en publiant une petite mission, ou proposez quelque chose en échange — un café, une histoire, un service…
       </p>
       <div className="flex flex-col gap-2 mb-3">
         <button
