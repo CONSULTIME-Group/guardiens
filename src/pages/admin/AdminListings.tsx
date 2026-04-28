@@ -192,6 +192,7 @@ const AdminListings = () => {
     }
   };
 
+  return (
     <div className="space-y-6">
       <h1 className="font-body text-2xl font-bold">Annonces</h1>
 
