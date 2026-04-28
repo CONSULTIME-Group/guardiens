@@ -56,7 +56,7 @@ const SitterBottomColumns = ({ nearbyListings, nearbyMissions, postalCode }: Sit
         </div>
         {nearbyMissions.length === 0 ? (
           <>
-            <p className="text-xs text-muted-foreground font-sans mb-3">En priorité : les échanges qui correspondent à vos compétences.</p>
+            <p className="text-xs text-muted-foreground font-sans mb-3"><span className="font-semibold text-foreground">Osez !</span> Demandez un coup de main en publiant une petite mission, ou proposez quelque chose en échange — un café, une histoire, un service…</p>
             <div className="flex flex-col gap-2 mb-4">
               <Button onClick={() => navigate("/petites-missions/creer")} className="w-full rounded-xl text-xs font-medium">Publier un besoin →</Button>
               <Button variant="outline" onClick={() => navigate("/petites-missions")} className="w-full rounded-xl text-xs font-medium">Proposer mon aide →</Button>
