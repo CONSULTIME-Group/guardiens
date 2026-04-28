@@ -7,8 +7,10 @@ import { installGlobalErrorHandlers } from "./lib/logger";
 import { installGlobalErrorLogger } from "./lib/errorLogger";
 import { initConsent } from "./lib/cookieConsent";
 import { installStorageFallback } from "./lib/storageFallback";
+import { installOAuthDebugHelper } from "./lib/oauthLogger";
 
 installStorageFallback();
+installOAuthDebugHelper();
 
 const container = document.getElementById("root");
 if (!container) {
