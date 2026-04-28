@@ -1,4 +1,4 @@
-import authIllustration from "@/assets/auth-illustration-carnet-v23.png";
+import authIllustration from "@/assets/auth-illustration-carnet-v24.png";
 
 interface AuthIllustrationPanelProps {
   title: string;
