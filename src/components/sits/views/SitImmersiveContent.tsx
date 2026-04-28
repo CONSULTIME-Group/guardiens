@@ -884,7 +884,8 @@ const SitImmersiveContent = ({
                   return (
                     <section
                       key={pet.id || i}
-                      className="rounded-2xl border border-border bg-card p-5 md:p-6"
+                      id={`pet-${pet.id || i}`}
+                      className="rounded-2xl border border-border bg-card p-5 md:p-6 scroll-mt-24"
                     >
                       <div className="flex gap-4 mb-4">
                         {/* Photo de l'animal — fallback neutre si photo manquante (sans emoji décoratif) */}
