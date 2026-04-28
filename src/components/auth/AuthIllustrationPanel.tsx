@@ -48,8 +48,14 @@ export const AuthIllustrationPanel = ({ title, tagline, description, footerSlot 
         loading="lazy"
         width={1536}
         height={384}
-        className="hidden lg:block pointer-events-none absolute top-[1%] right-0 translate-x-[88%] w-[160%] max-w-none h-auto z-20 select-none"
-        style={{ opacity: 0.9, transform: "translateX(88%) scaleY(0.55)", transformOrigin: "left center" }}
+        className="hidden lg:block pointer-events-none absolute right-0 max-w-none h-auto z-20 select-none"
+        style={{
+          top: "-2.5rem",
+          width: "150%",
+          opacity: 0.85,
+          transform: "translateX(85%) scaleY(0.38)",
+          transformOrigin: "left top",
+        }}
       />
 
       {/* Grappe de glycine en débord, peinte dans la même gouache que
