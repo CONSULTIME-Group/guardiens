@@ -816,6 +816,50 @@ const SitImmersiveContent = ({
 
             {/* ========== ONGLET ANIMAUX ========== */}
             <TabsContent value="animaux" className="space-y-5 mt-0">
+              {safePets.length > 1 && (
+                <nav
+                  aria-label="Sommaire des animaux"
+                  className="rounded-2xl border border-border bg-muted/30 p-3 md:p-4"
+                >
+                  <p className="text-xs uppercase tracking-wide text-muted-foreground mb-2">
+                    {safePets.length} pensionnaires — cliquez pour aller à une fiche
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {safePets.map((p, idx) => {
+                      const anchor = `pet-${p?.id || idx}`;
+                      return (
+                        <a
+                          key={anchor}
+                          href={`#${anchor}`}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            document
+                              .getElementById(anchor)
+                              ?.scrollIntoView({ behavior: "smooth", block: "start" });
+                          }}
+                          className="inline-flex items-center gap-2 rounded-full bg-background border border-border pl-1 pr-3 py-0.5 text-xs hover:border-primary/40 transition"
+                        >
+                          {p?.photo_url ? (
+                            <img
+                              src={p.photo_url}
+                              alt=""
+                              className="w-6 h-6 rounded-full object-cover"
+                            />
+                          ) : (
+                            <span className="w-6 h-6 rounded-full bg-muted flex items-center justify-center text-[11px] text-muted-foreground/70 font-serif">
+                              {(p?.name?.[0] || "?").toUpperCase()}
+                            </span>
+                          )}
+                          <span className="font-medium">{p?.name || "Animal"}</span>
+                          {p?.breed && (
+                            <span className="text-muted-foreground">· {p.breed}</span>
+                          )}
+                        </a>
+                      );
+                    })}
+                  </div>
+                </nav>
+              )}
               {safePets.length > 0 ? (
                 safePets.map((pet, i) => {
                   const hasMedication =
