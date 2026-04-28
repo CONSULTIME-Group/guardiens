@@ -1722,7 +1722,23 @@ const SearchSitter = () => {
         };
 
         return (
-          <div className={containerClass}>
+          <div
+            role="button"
+            tabIndex={0}
+            aria-label={
+              hasLocal
+                ? `Voir ${elsewhere} autres annonces hors de votre rayon — passe en recherche France entière`
+                : `${elsewhere} annonces existent ailleurs en France — passer en recherche France entière`
+            }
+            onClick={handleBannerClick}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                handleBannerClick();
+              }
+            }}
+            className={containerClass}
+          >
             <div className="flex items-start gap-4 flex-1 min-w-0 w-full">
               <div className={iconWrapClass}>
                 <MapPin className={iconClass} />
@@ -1746,6 +1762,9 @@ const SearchSitter = () => {
                       annonce{elsewhere > 1 ? "s" : ""} hors de votre zone
                     </>
                   )}
+                  <span className="ml-2 text-xs font-normal text-primary underline underline-offset-2">
+                    Voir toute la France →
+                  </span>
                 </p>
                 <p className="text-xs sm:text-sm text-muted-foreground mt-1">
                   {hasLocal && densityCounts.radius > 0
@@ -1762,7 +1781,10 @@ const SearchSitter = () => {
                 </p>
               </div>
             </div>
-            <div className="flex flex-wrap gap-2 shrink-0 w-full sm:w-auto">
+            <div
+              className="flex flex-wrap gap-2 shrink-0 w-full sm:w-auto"
+              onClick={(e) => e.stopPropagation()}
+            >
               {densityCounts.region > densityCounts.radius && (
                 <Button size="sm" variant="outline" className="bg-card" onClick={() => {
                   trackEvent("search_outofzone_click", { source: "search_outofzone", metadata: { action: "expand_zone", to: "region", previous_mode: zoneMode, delta: elsewhere, count_radius: densityCounts.radius, count_region: densityCounts.region, count_france: densityCounts.france, has_local: hasLocal } });
