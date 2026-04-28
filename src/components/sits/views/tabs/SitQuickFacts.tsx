@@ -1,8 +1,8 @@
 /**
  * Cartes "quick facts" : Dates, Logement, Animaux, Cadre.
  * Chaque carte ne s'affiche que si la donnée existe.
+ * Aucune icône Lucide décorative — texte pur (mem://constraints/no-icons-in-content).
  */
-import { Calendar, Home, PawPrint, Trees } from "lucide-react";
 import { formatDate, getEnvMeta } from "./sitMeta";
 
 interface SitQuickFactsProps {
@@ -13,6 +13,21 @@ interface SitQuickFactsProps {
   environments: string[];
   durationDays: number | null;
 }
+
+const Card = ({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}) => (
+  <div className="rounded-2xl border border-border bg-card p-4">
+    <p className="text-[11px] uppercase tracking-wider text-muted-foreground mb-1.5">
+      {label}
+    </p>
+    {children}
+  </div>
+);
 
 const SitQuickFacts = ({
   sit,
@@ -26,25 +41,25 @@ const SitQuickFacts = ({
 
   if (sit?.start_date || sit?.end_date) {
     cards.push(
-      <div key="dates" className="rounded-2xl border border-border bg-card p-4">
-        <Calendar className="h-5 w-5 text-primary mb-2" />
-        <p className="text-xs text-muted-foreground">Dates</p>
-        {sit?.start_date && <p className="text-sm font-medium">{formatDate(sit.start_date)}</p>}
-        {sit?.end_date && <p className="text-sm font-medium">→ {formatDate(sit.end_date)}</p>}
+      <Card key="dates" label="Dates">
+        {sit?.start_date && (
+          <p className="text-sm font-medium leading-tight">{formatDate(sit.start_date)}</p>
+        )}
+        {sit?.end_date && (
+          <p className="text-sm font-medium leading-tight">→ {formatDate(sit.end_date)}</p>
+        )}
         {durationDays && (
           <p className="text-xs text-muted-foreground mt-1">{durationDays} jours</p>
         )}
-      </div>,
+      </Card>,
     );
   }
 
   if (property?.type || property?.surface_m2 || property?.rooms_count) {
     cards.push(
-      <div key="housing" className="rounded-2xl border border-border bg-card p-4">
-        <Home className="h-5 w-5 text-primary mb-2" />
-        <p className="text-xs text-muted-foreground">Logement</p>
+      <Card key="housing" label="Logement">
         {property?.type && (
-          <p className="text-sm font-medium capitalize">
+          <p className="text-sm font-medium leading-tight capitalize">
             {property.type === "house"
               ? "Maison"
               : property.type === "apartment"
@@ -53,7 +68,7 @@ const SitQuickFacts = ({
           </p>
         )}
         {(property?.surface_m2 || property?.rooms_count) && (
-          <p className="text-xs text-muted-foreground">
+          <p className="text-xs text-muted-foreground mt-1">
             {[
               property?.surface_m2 && `${property.surface_m2} m²`,
               property?.rooms_count && `${property.rooms_count} pièces`,
@@ -62,43 +77,40 @@ const SitQuickFacts = ({
               .join(" · ")}
           </p>
         )}
-      </div>,
+      </Card>,
     );
   }
 
   if (petsCount > 0) {
     cards.push(
-      <div key="pets" className="rounded-2xl border border-border bg-card p-4">
-        <PawPrint className="h-5 w-5 text-primary mb-2" />
-        <p className="text-xs text-muted-foreground">Animaux</p>
-        <p className="text-sm font-medium">
+      <Card key="pets" label="Animaux">
+        <p className="text-sm font-medium leading-tight">
           {petsCount} pensionnaire{petsCount > 1 ? "s" : ""}
         </p>
-        {speciesSummary && <p className="text-xs text-muted-foreground">{speciesSummary}</p>}
-      </div>,
+        {speciesSummary && (
+          <p className="text-xs text-muted-foreground mt-1 line-clamp-1">{speciesSummary}</p>
+        )}
+      </Card>,
     );
   }
 
   if (environments.length > 0) {
     cards.push(
-      <div key="frame" className="rounded-2xl border border-border bg-card p-4">
-        <Trees className="h-5 w-5 text-primary mb-2" />
-        <p className="text-xs text-muted-foreground">Cadre</p>
-        <div className="flex flex-wrap gap-1 mt-1">
+      <Card key="frame" label="Cadre">
+        <div className="flex flex-wrap gap-1 mt-0.5">
           {environments.map((e) => {
             const meta = getEnvMeta(e);
-            const Ico = meta.icon;
             return (
               <span
                 key={e}
-                className="inline-flex items-center gap-1 text-xs bg-muted rounded-full px-2 py-0.5"
+                className="inline-flex items-center text-[11px] bg-muted rounded-full px-2 py-0.5 font-medium"
               >
-                <Ico className="h-3 w-3" /> {meta.label}
+                {meta.label}
               </span>
             );
           })}
         </div>
-      </div>,
+      </Card>,
     );
   }
 
