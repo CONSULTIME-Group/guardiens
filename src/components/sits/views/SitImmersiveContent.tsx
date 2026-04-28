@@ -72,10 +72,20 @@ import {
 
 const GUIDE_SLUGS = new Set(CITIES.map((c) => c.slug));
 
-const SPECIES_EMOJI: Record<string, string> = {
-  dog: "🐕", cat: "🐈", farm_animal: "🐔", rabbit: "🐰", bird: "🦜",
-  fish: "🐠", rodent: "🐹", horse: "🐴", nac: "🦎", reptile: "🦎",
+// Libellés FR des espèces — remplace les emojis (règle no-emoji dans le contenu).
+const SPECIES_LABEL: Record<string, string> = {
+  dog: "Chien",
+  cat: "Chat",
+  farm_animal: "Animal de ferme",
+  rabbit: "Lapin",
+  bird: "Oiseau",
+  fish: "Poisson",
+  rodent: "Rongeur",
+  horse: "Cheval",
+  nac: "NAC",
+  reptile: "Reptile",
 };
+const speciesLabel = (s?: string | null) => (s && SPECIES_LABEL[s]) || "Animal";
 
 // Mapping environnements → libellé + icône.
 // Tolérant aux deux conventions trouvées en base :
@@ -135,10 +145,6 @@ interface SitImmersiveContentProps {
   property: any;
   pets: any[];
   ownerProfile: any;
-  /** Slot principal de droite (ex : bloc candidature côté gardien, gestion côté propriétaire). */
-  ctaSlot?: React.ReactNode;
-  /** Ajout sous le quick-facts (ex : badges de matching côté gardien). */
-  topSlot?: React.ReactNode;
 }
 
 const formatDate = (d: string | null) =>
@@ -278,8 +284,6 @@ const SitImmersiveContent = ({
   property,
   pets,
   ownerProfile,
-  ctaSlot,
-  topSlot,
 }: SitImmersiveContentProps) => {
   // Onglet actif (contrôlé pour permettre la navigation depuis le résumé "Garde")
   const [activeTab, setActiveTab] = useState<"garde" | "animaux" | "logement" | "attentes">(
@@ -320,7 +324,24 @@ const SitImmersiveContent = ({
 
   // -- Animaux (sécurisé)
   const safePets = Array.isArray(pets) ? pets.filter(Boolean) : [];
-  const speciesEmojis = safePets.map((p) => SPECIES_EMOJI[p.species] || "🐾");
+  // Résumé textuel par espèce ("2 chiens · 1 chat") — remplace les emojis
+  const speciesSummary = (() => {
+    const counts = new Map<string, number>();
+    for (const p of safePets) {
+      const label = speciesLabel(p?.species);
+      counts.set(label, (counts.get(label) || 0) + 1);
+    }
+    const pluralize = (label: string, n: number) => {
+      if (n <= 1) return `${n} ${label.toLowerCase()}`;
+      // pluriel simple : ajoute "s" sauf si déjà terminé par "s" ou "x"
+      const last = label.slice(-1).toLowerCase();
+      const plural = last === "s" || last === "x" ? label : `${label}s`;
+      return `${n} ${plural.toLowerCase()}`;
+    };
+    return Array.from(counts.entries())
+      .map(([label, n]) => pluralize(label, n))
+      .join(" · ");
+  })();
 
   // -- Routine
   const routine = parseRoutine(sit?.daily_routine || null);
@@ -432,7 +453,10 @@ const SitImmersiveContent = ({
           <div className="relative">
             <img
               src={coverPhoto}
-              alt={sit?.title || "Photo de l'annonce"}
+              alt={sit?.title ? `Photo principale — ${sit.title}` : "Photo principale de l'annonce"}
+              loading="eager"
+              fetchPriority="high"
+              decoding="async"
               className="w-full h-[280px] md:h-[420px] object-cover"
             />
             <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent p-5 md:p-8">
@@ -456,7 +480,13 @@ const SitImmersiveContent = ({
           {photos.length > 1 && (
             <div className="grid grid-cols-2 gap-1 p-1">
               {photos.slice(1, 3).map((p, i) => (
-                <img key={i} src={p} alt="" className="w-full h-32 md:h-44 object-cover" />
+                <img
+                  key={i}
+                  src={p}
+                  alt={`Photo ${i + 2} de ${sit?.title || "l'annonce"}`}
+                  loading="lazy"
+                  className="w-full h-32 md:h-44 object-cover"
+                />
               ))}
             </div>
           )}
@@ -518,8 +548,8 @@ const SitImmersiveContent = ({
               <p className="text-sm font-medium">
                 {safePets.length} pensionnaire{safePets.length > 1 ? "s" : ""}
               </p>
-              {speciesEmojis.length > 0 && (
-                <p className="text-xs text-muted-foreground">{speciesEmojis.join(" ")}</p>
+              {speciesSummary && (
+                <p className="text-xs text-muted-foreground">{speciesSummary}</p>
               )}
             </div>,
           );
@@ -559,7 +589,7 @@ const SitImmersiveContent = ({
         return <div className={`grid ${cols} gap-3 mb-6`}>{cards}</div>;
       })()}
 
-      {topSlot}
+
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Colonne principale */}
@@ -574,7 +604,7 @@ const SitImmersiveContent = ({
               - libellés tronqués (truncate) pour rester sur 1 ligne sur mobile (4 onglets)
             */}
             <div className="sticky top-0 z-20 -mx-4 md:-mx-6 px-4 md:px-6 py-2 mb-6 bg-background/95 supports-[backdrop-filter]:bg-background/80 backdrop-blur-md border-b border-border/60 shadow-[0_2px_8px_-4px_rgba(0,0,0,0.08)]">
-              <TabsList className="w-full grid grid-cols-4 h-auto p-1 bg-muted/60 rounded-xl gap-1">
+              <TabsList aria-label="Sections de l'annonce" className="w-full grid grid-cols-4 h-auto p-1 bg-muted/60 rounded-xl gap-1">
                 <TabsTrigger value="garde" className="text-[11px] md:text-sm py-2 px-1 md:px-3 min-w-0 data-[state=active]:bg-background data-[state=active]:shadow-sm">
                   <Heart className="h-3.5 w-3.5 mr-1 md:mr-1.5 shrink-0 hidden sm:inline" />
                   <span className="truncate">Garde</span>
@@ -699,7 +729,7 @@ const SitImmersiveContent = ({
                           {safePets.slice(0, 4).map((p, i) => {
                             const photo =
                               (Array.isArray(p?.photos) && p.photos[0]) || p?.photo_url || null;
-                            const emoji = SPECIES_EMOJI[p?.species] || "🐾";
+                            const initial = (p?.name?.[0] || "?").toUpperCase();
                             return (
                               <span
                                 key={i}
@@ -712,8 +742,8 @@ const SitImmersiveContent = ({
                                     className="w-6 h-6 rounded-full object-cover"
                                   />
                                 ) : (
-                                  <span className="w-6 h-6 rounded-full bg-background flex items-center justify-center text-sm">
-                                    {emoji}
+                                  <span className="w-6 h-6 rounded-full bg-background flex items-center justify-center text-[11px] text-muted-foreground/70 font-serif">
+                                    {initial}
                                   </span>
                                 )}
                                 <span className="font-medium">{p?.name || "Animal"}</span>
@@ -1249,8 +1279,7 @@ const SitImmersiveContent = ({
             </div>
           )}
 
-          {/* Slot CTA principal (candidature, gestion owner…) */}
-          {ctaSlot}
+
 
           {/* Guide local — accès rapide depuis la sidebar */}
           {hasLocalGuide && (
