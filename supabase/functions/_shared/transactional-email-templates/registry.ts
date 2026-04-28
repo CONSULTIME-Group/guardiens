@@ -10,7 +10,6 @@ export interface TemplateEntry {
 }
 
 import { template as reportResolved } from './report-resolved.tsx'
-import { template as welcome } from './welcome.tsx'
 import { template as newApplication } from './new-application.tsx'
 import { template as applicationDeclined } from './application-declined.tsx'
 import { template as applicationAccepted } from './application-accepted.tsx'
