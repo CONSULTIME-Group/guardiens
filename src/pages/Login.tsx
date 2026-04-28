@@ -167,9 +167,10 @@ const Login = () => {
             {isGoogleLoading ? "Connexion…" : "Continuer avec Google"}
           </Button>
 
-          {/* Clickwrap implicite : si l'utilisateur crée un compte via Google depuis /login
-              (premier OAuth), il n'a pas vu la case CGU de /inscription. On l'informe ici. */}
-          <p className="text-center text-[11px] text-muted-foreground -mt-2 mb-4 leading-snug">
+          {/* Clickwrap RGPD : couvre le cas où Google crée un nouveau compte
+              depuis /login (premier OAuth) sans passer par la case CGU de /inscription.
+              Mention explicite du responsable de traitement, des données reçues et des droits. */}
+          <p className="text-center text-[11px] text-muted-foreground -mt-2 mb-4 leading-relaxed px-2 sm:px-4">
             En continuant avec Google, vous acceptez nos{" "}
             <Link to="/cgu" target="_blank" rel="noopener noreferrer" className="underline hover:text-foreground">
               conditions d'utilisation
@@ -178,6 +179,12 @@ const Login = () => {
             <Link to="/confidentialite" target="_blank" rel="noopener noreferrer" className="underline hover:text-foreground">
               politique de confidentialité
             </Link>.
+            <span className="block mt-1 text-[10px] text-muted-foreground/80">
+              Google nous transmet uniquement votre nom, votre email et votre photo de profil.
+              Vos données sont hébergées en Europe par Guardiens (responsable de traitement).
+              Vous gardez à tout moment un droit d'accès, de rectification et de suppression
+              {" "}(RGPD, art. 15 à 17).
+            </span>
           </p>
 
           <div className="relative my-6" role="separator">
