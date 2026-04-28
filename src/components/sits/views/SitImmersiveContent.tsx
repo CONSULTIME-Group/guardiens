@@ -459,7 +459,10 @@ const SitImmersiveContent = ({
           <div className="relative">
             <img
               src={coverPhoto}
-              alt={sit?.title || "Photo de l'annonce"}
+              alt={sit?.title ? `Photo principale — ${sit.title}` : "Photo principale de l'annonce"}
+              loading="eager"
+              fetchPriority="high"
+              decoding="async"
               className="w-full h-[280px] md:h-[420px] object-cover"
             />
             <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent p-5 md:p-8">
@@ -607,7 +610,7 @@ const SitImmersiveContent = ({
               - libellés tronqués (truncate) pour rester sur 1 ligne sur mobile (4 onglets)
             */}
             <div className="sticky top-0 z-20 -mx-4 md:-mx-6 px-4 md:px-6 py-2 mb-6 bg-background/95 supports-[backdrop-filter]:bg-background/80 backdrop-blur-md border-b border-border/60 shadow-[0_2px_8px_-4px_rgba(0,0,0,0.08)]">
-              <TabsList className="w-full grid grid-cols-4 h-auto p-1 bg-muted/60 rounded-xl gap-1">
+              <TabsList aria-label="Sections de l'annonce" className="w-full grid grid-cols-4 h-auto p-1 bg-muted/60 rounded-xl gap-1">
                 <TabsTrigger value="garde" className="text-[11px] md:text-sm py-2 px-1 md:px-3 min-w-0 data-[state=active]:bg-background data-[state=active]:shadow-sm">
                   <Heart className="h-3.5 w-3.5 mr-1 md:mr-1.5 shrink-0 hidden sm:inline" />
                   <span className="truncate">Garde</span>
