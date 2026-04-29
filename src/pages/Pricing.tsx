@@ -32,13 +32,15 @@ const sitterFeatures = [
   "Guides locaux et fiches races complètes",
 ];
 
-const comparisonRows = [
-  { label: "Commission sur la garde", guardiens: "0 %", others: "15 – 25 %" },
-  { label: "Coût pour le propriétaire", guardiens: "Gratuit", others: "Frais de service" },
-  { label: "Gardiens de proximité", guardiens: "Toujours", others: "Rarement garanti" },
-  { label: "Vérification d'identité", guardiens: "Oui", others: "Variable" },
-  { label: "Entraide gratuite", guardiens: "Incluse", others: "Non proposée" },
-  { label: "Gardiens d'urgence locaux", guardiens: "Oui", others: "Non proposé" },
+// Comparatif "vs autres plateformes" supprimé (mémoire core : never mention competitors).
+// Remplacé par une grille "ce qu'on facture / ce qu'on ne facture pas" Guardiens-only.
+const promiseRows: Array<{ label: string; value: string; positive: boolean }> = [
+  { label: "Commission sur la garde", value: "0 %", positive: true },
+  { label: "Coût pour le propriétaire", value: "0 € à vie", positive: true },
+  { label: "Vérification d'identité", value: "Incluse", positive: true },
+  { label: "Entraide & petites missions", value: "Gratuites à vie", positive: true },
+  { label: "Carte bancaire à l'inscription", value: "Jamais", positive: true },
+  { label: "Frais de mise en relation", value: "Aucun", positive: true },
 ];
 
 const faqItems = [
