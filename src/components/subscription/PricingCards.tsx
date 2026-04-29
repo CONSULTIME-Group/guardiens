@@ -126,6 +126,9 @@ export default function PricingCards() {
         Renouvellement automatique au 1er janvier 2027 a 6,99&#8364;/mois sauf resiliation avant cette date.
         Vous recevrez un rappel 30 jours avant.
       </p>
+      </div>
+
+      <FreeAccountSection />
     </div>
   );
 }
