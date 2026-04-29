@@ -14,9 +14,40 @@ const prefetchDemoDetail = () => {
   demoDetailPrefetched = true;
   // Même chemin d'import que dans src/App.tsx → réutilise le même chunk lazy
   import("@/pages/DemoSitDetail").catch(() => {
-    // Si le préchargement échoue (offline, etc.), on autorise une nouvelle tentative
     demoDetailPrefetched = false;
   });
+  // Précharge aussi la donnée demo (petit module synchrone, mais évite un round-trip parse)
+  import("@/data/demoListings").catch(() => {});
+};
+
+// Photo hero (1ère photo) par slug — alignée sur src/data/demoListings.ts
+// Évite le 1er paint vide sur mobile en chargeant l'image avant la navigation.
+const DEMO_HERO_BY_SLUG: Record<string, string> = {
+  "lyon-laika-jardin":
+    "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=1200&q=80",
+  "annecy-lac-basse-cour":
+    "https://images.unsplash.com/photo-1499678329028-101435549a4e?w=1200&q=80",
+  "grenoble-deux-chats-appart":
+    "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=1200&q=80",
+};
+
+const prefetchedHeroes = new Set<string>();
+const prefetchDemoHero = (slug: string) => {
+  const url = DEMO_HERO_BY_SLUG[slug];
+  if (!url || prefetchedHeroes.has(slug) || typeof document === "undefined") return;
+  prefetchedHeroes.add(slug);
+  // Utilise <link rel="preload" as="image"> : haute priorité, supporté largement (mobile inclus)
+  const link = document.createElement("link");
+  link.rel = "preload";
+  link.as = "image";
+  link.href = url;
+  link.crossOrigin = "anonymous";
+  document.head.appendChild(link);
+};
+
+const prefetchDemoRoute = (slug: string) => {
+  prefetchDemoDetail();
+  prefetchDemoHero(slug);
 };
 
 // Slugs alignés sur src/data/demoListings.ts → page /annonces/demo/:slug
@@ -67,18 +98,18 @@ const DemoListingCard = React.forwardRef<HTMLAnchorElement, typeof DEMO_LISTINGS
 }, ref) => {
   const internalRef = React.useRef<HTMLAnchorElement | null>(null);
 
-  // Précharge le chunk DemoSitDetail dès qu'une carte entre dans le viewport
+  // Précharge chunk JS + image hero dès qu'une carte entre dans le viewport
   React.useEffect(() => {
     const node = internalRef.current;
     if (!node || typeof IntersectionObserver === "undefined") {
       // Fallback : préchargement immédiat si l'API n'est pas disponible
-      prefetchDemoDetail();
+      prefetchDemoRoute(slug);
       return;
     }
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries.some((e) => e.isIntersecting)) {
-          prefetchDemoDetail();
+          prefetchDemoRoute(slug);
           observer.disconnect();
         }
       },
@@ -86,7 +117,7 @@ const DemoListingCard = React.forwardRef<HTMLAnchorElement, typeof DEMO_LISTINGS
     );
     observer.observe(node);
     return () => observer.disconnect();
-  }, []);
+  }, [slug]);
 
   const setRefs = React.useCallback(
     (node: HTMLAnchorElement | null) => {
@@ -97,13 +128,15 @@ const DemoListingCard = React.forwardRef<HTMLAnchorElement, typeof DEMO_LISTINGS
     [ref],
   );
 
+  const handlePrefetch = React.useCallback(() => prefetchDemoRoute(slug), [slug]);
+
   return (
   <Link
     ref={setRefs}
     to={`/annonces/demo/${slug}`}
-    onMouseEnter={prefetchDemoDetail}
-    onFocus={prefetchDemoDetail}
-    onTouchStart={prefetchDemoDetail}
+    onMouseEnter={handlePrefetch}
+    onFocus={handlePrefetch}
+    onTouchStart={handlePrefetch}
     onClick={() =>
       trackEvent("sit_view", {
         source: "landing_demo_card",
