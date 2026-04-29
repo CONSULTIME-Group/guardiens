@@ -137,8 +137,9 @@ const Landing = () => {
   const navigate = useNavigate();
   const seasonal = getSeasonalBanner();
 
-  const [kpiMaisons, setKpiMaisons] = useState<number>(37);
-  const [kpiAnimaux, setKpiAnimaux] = useState<number>(234);
+  // KPIs : valeurs réelles uniquement, remontées depuis public_stats (pas d'offsets factices).
+  const [kpiMaisons, setKpiMaisons] = useState<number>(0);
+  const [kpiAnimaux, setKpiAnimaux] = useState<number>(0);
   const [kpiInscrits, setKpiInscrits] = useState<number>(0);
   const [kpiMissions, setKpiMissions] = useState<number>(0);
 
@@ -150,7 +151,7 @@ const Landing = () => {
         .single();
       if (data) {
         if (typeof data.maisons_gardees === 'number') {
-          setKpiMaisons(data.maisons_gardees + 37);
+          setKpiMaisons(data.maisons_gardees);
         }
         if (typeof data.total_inscrits === 'number') {
           setKpiInscrits(data.total_inscrits);
@@ -159,7 +160,7 @@ const Landing = () => {
           setKpiMissions(data.missions_entraide);
         }
         if (typeof data.animaux_accompagnes === 'number') {
-          setKpiAnimaux(234 + data.animaux_accompagnes);
+          setKpiAnimaux(data.animaux_accompagnes);
         }
       }
     };
