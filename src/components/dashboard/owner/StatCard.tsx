@@ -18,10 +18,17 @@ const StatCard = memo(({ value, label, fallback, highlight = false, to }: StatCa
       : "bg-card border border-border"
   } ${to ? "hover:border-primary/40 hover:shadow-sm cursor-pointer" : ""}`;
 
+  const isZero = value === 0 || value === "0";
+  const valueColor = highlight
+    ? "text-primary"
+    : isZero
+      ? "text-muted-foreground/60"
+      : "text-foreground";
+
   const inner = (
     <>
       {value !== null ? (
-        <p className={`text-3xl font-heading font-bold mb-1 ${highlight ? "text-primary" : "text-foreground"}`}>
+        <p className={`text-3xl font-heading font-bold mb-1 ${valueColor}`}>
           {value}
         </p>
       ) : (

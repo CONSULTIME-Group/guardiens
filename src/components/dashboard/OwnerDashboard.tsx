@@ -209,7 +209,7 @@ const OwnerDashboard = () => {
           </div>
           <button
             onClick={() => navigate("/sits/create")}
-            className="shrink-0 bg-primary-foreground text-primary rounded-xl px-5 py-2.5 text-sm font-medium font-sans hover:bg-primary-foreground/90 hover:shadow-md transition-all w-full md:w-auto text-center shadow-sm"
+            className="shrink-0 bg-background text-primary rounded-xl px-5 py-2.5 text-sm font-semibold font-sans hover:bg-background/90 hover:shadow-md transition-all w-full md:w-auto text-center shadow-md ring-1 ring-background/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-background"
           >
             + Publier une annonce
           </button>
@@ -220,14 +220,6 @@ const OwnerDashboard = () => {
         <AccessGateBanner level={level} profileCompletion={accessProfileCompletion} context="guard" />
       </div>
 
-      <div className="px-5 md:px-8 -mt-2">
-        <button
-          onClick={() => setSearchParams({ tour: "true" })}
-          className="text-xs text-muted-foreground underline-offset-4 hover:underline"
-        >
-          Revoir la présentation
-        </button>
-      </div>
 
       {/* ═══ Banner ═══ */}
       {banner && (
