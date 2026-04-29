@@ -64,9 +64,42 @@ const DEMO_LISTINGS = [
 
 const DemoListingCard = React.forwardRef<HTMLAnchorElement, typeof DEMO_LISTINGS[0]>(({
   id, slug, photo, city, animals, dates, title, description, ownerName, ownerPhoto, badges,
-}, ref) => (
+}, ref) => {
+  const internalRef = React.useRef<HTMLAnchorElement | null>(null);
+
+  // Précharge le chunk DemoSitDetail dès qu'une carte entre dans le viewport
+  React.useEffect(() => {
+    const node = internalRef.current;
+    if (!node || typeof IntersectionObserver === "undefined") {
+      // Fallback : préchargement immédiat si l'API n'est pas disponible
+      prefetchDemoDetail();
+      return;
+    }
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((e) => e.isIntersecting)) {
+          prefetchDemoDetail();
+          observer.disconnect();
+        }
+      },
+      { rootMargin: "200px" },
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, []);
+
+  const setRefs = React.useCallback(
+    (node: HTMLAnchorElement | null) => {
+      internalRef.current = node;
+      if (typeof ref === "function") ref(node);
+      else if (ref) (ref as React.MutableRefObject<HTMLAnchorElement | null>).current = node;
+    },
+    [ref],
+  );
+
+  return (
   <Link
-    ref={ref}
+    ref={setRefs}
     to={`/annonces/demo/${slug}`}
     onMouseEnter={prefetchDemoDetail}
     onFocus={prefetchDemoDetail}
@@ -121,7 +154,8 @@ const DemoListingCard = React.forwardRef<HTMLAnchorElement, typeof DEMO_LISTINGS
       </span>
     </div>
   </Link>
-));
+  );
+});
 DemoListingCard.displayName = "DemoListingCard";
 
 const DemoListingShowcase = React.forwardRef<HTMLElement>((_props, ref) => (
