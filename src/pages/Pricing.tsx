@@ -52,7 +52,7 @@ Aucune carte bancaire n'est demandée à l'inscription. Vous accédez à toutes 
 
 Cette gratuité totale ne dépend pas du programme Fondateur. Que vous vous inscriviez le 1er février ou le 12 juin 2026, vous ne payez rien jusqu'au 13 juin 2026.
 
-À partir du 14 juin 2026, l'abonnement gardien à 6,99€/mois devient nécessaire pour postuler aux gardes. L'espace propriétaire, lui, reste gratuit à vie.`,
+À partir du 14 juin 2026, l'abonnement gardien à 6,99 €/mois devient nécessaire pour postuler aux gardes. L'espace propriétaire, lui, reste à 0 € à vie.`,
   },
   {
     q: "Quelle est la différence entre la gratuité jusqu'au 13 juin et le programme Fondateur ?",
@@ -80,7 +80,7 @@ Pour comprendre comment fonctionne la mise en relation : [Comment bien choisir s
 
 Vous vous inscrivez en tant que gardien, sans carte bancaire. Pendant 7 jours, vous accédez à toutes les fonctionnalités : postuler aux gardes, échanger avec les propriétaires, créer votre profil de confiance.
 
-Aucun prélèvement automatique. À la fin de l'essai, vous choisissez si vous souhaitez activer l'abonnement à 6,99€/mois. Si vous ne faites rien, l'accès s'interrompt sans frais.
+Aucun prélèvement automatique. À la fin de l'essai, vous choisissez si vous souhaitez activer l'abonnement à 6,99 €/mois. Si vous ne faites rien, l'accès s'interrompt sans frais.
 
 Avant le 13 juin 2026, cet essai n'a pas lieu d'être : tout est déjà gratuit pour tout le monde.`,
   },
@@ -96,7 +96,7 @@ Plutôt que de recevoir des cadeaux, il a décidé de marquer cette date avec le
     q: "Y a-t-il des frais cachés ?",
     a: `Non. **Jusqu'au 13 juin 2026 :** rien à payer pour personne, sans carte bancaire.
 
-**Après le 13 juin 2026 — ce que paient les gardiens :** 6,99€/mois, 12€ pour un mois, ou la formule 2026 à -20%. C'est tout.
+**Après le 13 juin 2026 — ce que paient les gardiens :** 6,99 €/mois, 12 € pour un mois, ou la formule 2026 à -20%. C'est tout.
 
 **Ce que paient les propriétaires :** Rien, jamais. Publier, recevoir des candidatures, choisir, évaluer — gratuit en permanence.
 
