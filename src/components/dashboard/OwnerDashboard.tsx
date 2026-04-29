@@ -254,15 +254,17 @@ const OwnerDashboard = () => {
         </div>
       )}
 
-      {/* ═══ Candidatures ═══ */}
-      <div className="px-5 md:px-8">
-        <ApplicationsSection
-          recentApps={recentApps}
-          sitterProfiles={sitterProfiles}
-          sitterBadges={sitterBadges}
-          loading={loading}
-        />
-      </div>
+      {/* ═══ Candidatures (masquée si totalement vide) ═══ */}
+      {(loading || recentApps.length > 0) && (
+        <div className="px-5 md:px-8">
+          <ApplicationsSection
+            recentApps={recentApps}
+            sitterProfiles={sitterProfiles}
+            sitterBadges={sitterBadges}
+            loading={loading}
+          />
+        </div>
+      )}
 
       {/* ═══ Stats ═══ */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 px-5 md:px-8">
