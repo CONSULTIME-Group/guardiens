@@ -248,6 +248,7 @@ export function useOwnerDashboardData(userId: string | undefined) {
           propertyEnvironment,
           propertyCoverPhoto,
           onboardingChecks,
+          pendingReviews,
           profile: p ? {
             first_name: p.first_name,
             avatar_url: p.avatar_url,
