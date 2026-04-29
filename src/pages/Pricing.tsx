@@ -255,8 +255,7 @@ const Pricing = () => {
           <section className="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-5xl mx-auto items-stretch mb-12 md:mb-16">
             {/* Owner Card */}
             <Card className="bg-card border border-border/40 rounded-2xl h-full flex flex-col relative">
-              <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-primary/10 text-primary text-xs font-body font-medium px-3 py-1 rounded-full flex items-center gap-1.5">
-                <CheckCircle className="h-3 w-3" />
+              <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-primary/10 text-primary text-xs font-body font-medium px-3 py-1 rounded-full">
                 Gratuit pour toujours
               </div>
               <CardHeader className="text-center pb-2 p-8 pt-10">
