@@ -4112,6 +4112,7 @@ export type Database = {
           pending_app_count: number
         }[]
       }
+      get_unread_messages_count: { Args: { _user_id: string }; Returns: number }
       get_user_email_for_notification: {
         Args: { target_user_id: string }
         Returns: string
