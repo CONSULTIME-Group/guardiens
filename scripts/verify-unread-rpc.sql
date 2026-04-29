@@ -26,13 +26,9 @@ DECLARE
   conv_e      uuid := gen_random_uuid();
   v_count     int;
 BEGIN
-  -- Pick 3 existing profiles to satisfy the FK on conversations.owner_id/sitter_id.
-  -- The test inserts only into messages/conversations and rolls back at the end,
-  -- so these profiles are not affected.
-  SELECT array_agg(id) INTO STRICT u_me FROM (
-    SELECT id FROM public.profiles ORDER BY id LIMIT 1
-  ) s;
-  -- Workaround: select scalar properly
+  -- Pick 3 existing profiles to satisfy FK on conversations.owner_id/sitter_id.
+  -- The test only inserts into messages/conversations and rolls back, so the
+  -- selected profiles are not affected.
   SELECT id INTO u_me    FROM public.profiles ORDER BY id            LIMIT 1;
   SELECT id INTO u_other FROM public.profiles ORDER BY id OFFSET 1   LIMIT 1;
   SELECT id INTO u_third FROM public.profiles ORDER BY id OFFSET 2   LIMIT 1;
