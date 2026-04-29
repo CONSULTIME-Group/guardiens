@@ -246,9 +246,9 @@ const Landing = () => {
         <div className="relative z-10 w-full max-w-7xl mx-auto px-6 md:px-12 lg:px-16 py-24">
           <div className="max-w-2xl lg:max-w-3xl">
 
-            {/* Badge gratuit */}
+            {/* Badge 0 € propriétaires */}
             <div className="inline-flex items-center rounded-full px-4 py-1.5 mb-6 bg-white/15 border border-white/30 backdrop-blur-sm animate-hero-fade-up">
-              <span className="font-body text-xs text-white tracking-wide">Gratuit pour les propriétaires — pour toujours</span>
+              <span className="font-body text-xs text-white tracking-wide">0 € pour les propriétaires — pour toujours</span>
             </div>
 
             {/* H1 with staggered animation */}
