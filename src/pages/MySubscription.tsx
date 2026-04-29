@@ -328,7 +328,6 @@ const MySubscription = () => {
   const isFounder = !!profile?.is_founder;
   const renewalFormatted = sub?.expires_at ? format(new Date(sub.expires_at), "d MMMM yyyy", { locale: fr }) : "—";
   const planLabel = sub?.plan === "monthly" ? "Formule mensuelle"
-    : sub?.plan === "oneshot" ? "Accès un mois"
     : sub?.plan === "yearly" ? "Accès 2026"
     : "Abonnement";
   const showReferral = effectiveRole !== "owner";
@@ -367,7 +366,7 @@ const MySubscription = () => {
                   Pré-lancement {"·"} Bêta
                 </span>
                 <h1 className="font-heading text-2xl sm:text-3xl font-semibold text-foreground leading-tight">
-                  Tout est gratuit jusqu'au 13 mai.
+                  Tout est offert jusqu'au 13 mai.
                 </h1>
                 <p className="text-base text-foreground/70 font-body max-w-sm leading-relaxed">
                   Guardiens est en version bêta. Toutes les fonctionnalités sont ouvertes — sans restriction.
@@ -392,7 +391,7 @@ const MySubscription = () => {
                     { label: "Maintenant", sub: "Accès complet", active: true, amber: false },
                     { label: "13 mai", sub: "Badge Fondateur", active: false, amber: true },
                     { label: "13 juin", sub: "Fin de grâce", active: false, amber: false },
-                    { label: "Ensuite", sub: "À partir de 6,99€/mois", active: false, amber: false },
+                    { label: "Ensuite", sub: "6,99 €/mois · 7 jours d’essai", active: false, amber: false },
                   ].map(({ label, sub: subText, active, amber }) => (
                     <div key={label} role="listitem" className="flex flex-col items-center gap-1.5 z-10 flex-1">
                       <div className={[
@@ -484,7 +483,7 @@ const MySubscription = () => {
                     <div className="space-y-1">
                       <p className="text-sm font-semibold text-amber-800 font-body">Vous devenez Fondateur le 13 mai.</p>
                       <p className="text-sm text-amber-700 font-body leading-relaxed">
-                        Chaque membre inscrit avant le 13 mai bénéficie d'un mois supplémentaire gratuit jusqu'au 13 juin, et reçoit le badge Fondateur à vie, visible sur son profil public.
+                        Chaque membre inscrit avant le 13 mai bénéficie d'un mois supplémentaire offert jusqu'au 13 juin, et reçoit le badge Fondateur à vie, visible sur son profil public.
                       </p>
                     </div>
                   </div>
@@ -518,21 +517,10 @@ const MySubscription = () => {
 
             {/* Pricing preview */}
             <div className="bg-card border border-border/60 rounded-xl p-5 space-y-3">
-              <p className="text-xs uppercase tracking-widest text-foreground/50 font-body">Après le 13 juin — les formules disponibles</p>
-              <div className="grid grid-cols-3 gap-3">
-                <div className="text-center space-y-1">
-                  <p className="font-heading text-xl font-bold text-foreground">12€</p>
-                  <p className="text-[11px] text-foreground/50 font-body">Un mois, sans engagement</p>
-                </div>
-                <div className="text-center space-y-1 border-x border-border/40 px-2">
-                  <p className="font-heading text-xl font-bold text-primary">9€<span className="text-xs font-normal text-foreground/50">/mois</span></p>
-                  <p className="text-[11px] text-foreground/50 font-body">7 jours d'essai offerts</p>
-                </div>
-                <div className="text-center space-y-1">
-                  <span className="inline-flex bg-green-100 text-green-700 text-[10px] px-1.5 py-0.5 rounded-full font-medium font-body">-20%</span>
-                  <p className="font-heading text-xl font-bold text-foreground">~7€<span className="text-xs font-normal text-foreground/50">/mois</span></p>
-                  <p className="text-[11px] text-foreground/50 font-body">Jusqu'à fin 2026</p>
-                </div>
+              <p className="text-xs uppercase tracking-widest text-foreground/50 font-body">Après le 13 juin — la formule</p>
+              <div className="flex flex-col items-center text-center space-y-1">
+                <p className="font-heading text-3xl font-bold text-primary">6,99 €<span className="text-sm font-normal text-foreground/50">/mois</span></p>
+                <p className="text-xs text-foreground/60 font-body">Sans engagement · 7 jours d’essai</p>
               </div>
               <p className="text-xs text-foreground/40 font-body text-center">Aucun prélèvement automatique avant votre choix.</p>
             </div>
@@ -587,7 +575,7 @@ const MySubscription = () => {
           <div className="bg-card border border-border rounded-xl p-8 max-w-2xl mx-auto space-y-4">
             <div className="flex items-center gap-3">
               <Home className="h-7 w-7 text-primary" />
-              <h2 className="text-2xl font-heading font-semibold">Guardiens est gratuit pour les propriétaires.</h2>
+              <h2 className="text-2xl font-heading font-semibold">Guardiens est offert pour les propriétaires.</h2>
             </div>
             <p className="text-sm text-foreground/70 font-body">
               Publiez vos annonces, recevez des candidatures et échangez avec les gardiens — sans frais, pour toujours.
@@ -604,7 +592,7 @@ const MySubscription = () => {
             <div className="flex flex-col items-center text-center space-y-3">
               <BadgeSceauLarge id="fondateur" size={52} />
               <h2 className="font-heading text-2xl font-semibold text-foreground">Vous êtes Fondateur Guardiens.</h2>
-              <p className="text-base text-foreground/70 font-body">Votre accès complet est gratuit jusqu'au 13 juin 2026.</p>
+              <p className="text-base text-foreground/70 font-body">Votre accès complet est offert jusqu'au 13 juin 2026.</p>
             </div>
 
             <div className="bg-amber-50 rounded-xl py-4 px-6 space-y-2">
@@ -612,7 +600,7 @@ const MySubscription = () => {
               <div className="w-full bg-amber-200 rounded-full h-2 overflow-hidden">
                 <div className="bg-amber-400 h-2 rounded-full transition-all duration-500" ref={(el) => { if (el) el.style.width = `${progressPct}%`; }} />
               </div>
-              <p className="text-xs text-amber-600 font-body">Accès gratuit jusqu'au 13 juin 2026</p>
+              <p className="text-xs text-amber-600 font-body">Accès offert jusqu'au 13 juin 2026</p>
             </div>
 
             <div className="bg-muted/30 rounded-xl p-5">
@@ -749,7 +737,7 @@ const MySubscription = () => {
               <div className="flex justify-between text-sm font-body">
                 <span className="text-foreground/60">Tarif</span>
                 <span className="font-medium text-foreground">
-                  {sub?.plan === "monthly" ? "6,99€/mois" : sub?.plan === "oneshot" ? "12€ (paiement unique)" : "Formule 2026"}
+                  {sub?.plan === "monthly" ? "6,99 €/mois" : "Formule 2026"}
                 </span>
               </div>
             </div>
