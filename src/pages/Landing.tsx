@@ -553,7 +553,7 @@ const Landing = () => {
               onClick={() => navigate("/inscription?role=owner")}
               className="font-body text-sm font-semibold tracking-wide rounded-full px-10 py-4 bg-primary text-primary-foreground hover:brightness-90 hover:scale-[1.02] transition-all duration-200"
             >
-              Je cherche un gardien — c'est gratuit
+              Je cherche un gardien — 0 €
             </button>
           </RevealSection>
         </div>
