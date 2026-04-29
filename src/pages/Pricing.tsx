@@ -493,12 +493,11 @@ const Pricing = () => {
 
           {/* ═══ CTA final ═══ */}
           <section className="text-center py-10 md:py-14 bg-gradient-to-br from-primary to-primary/85 rounded-2xl mb-12">
-            
-            <p className="text-xl md:text-2xl font-heading font-semibold text-primary-foreground text-center mb-3 px-4">
+            <h2 className="text-xl md:text-2xl font-heading font-semibold text-primary-foreground text-center mb-3 px-4">
               {before
                 ? "Rejoignez Guardiens dès maintenant"
                 : "Prêt à rejoindre Guardiens ?"}
-            </p>
+            </h2>
             <p className="text-sm md:text-base font-body text-primary-foreground/85 text-center mb-8 max-w-xl mx-auto px-4">
               Sans carte bancaire à l'inscription. Vous décidez ensuite.
             </p>
