@@ -29,6 +29,8 @@ export interface SitterDashboardData {
   cancellations: number;
   pendingAppsCount: number;
   unreadCount: number;
+  unreadLoading: boolean;
+  unreadError: string | null;
   isAvailable: boolean;
   isFounder: boolean;
   postalCode: string | null;
