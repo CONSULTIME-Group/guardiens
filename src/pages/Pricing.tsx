@@ -518,36 +518,23 @@ const Pricing = () => {
           {/* ═══ CTA final ═══ */}
           <section className="text-center py-10 md:py-14 bg-gradient-to-br from-primary to-primary/85 rounded-2xl mb-12">
             <ShieldCheck className="h-10 w-10 text-primary-foreground/80 mx-auto mb-4" />
-            {before && (
-              <p className="inline-block bg-primary-foreground/15 text-primary-foreground text-xs md:text-sm font-body font-semibold px-3 py-1 rounded-full mb-3 border border-primary-foreground/20">
-                100% gratuit pour tout le monde jusqu'au 13 juin 2026
-              </p>
-            )}
-            <p className="text-xl md:text-2xl font-heading font-semibold text-primary-foreground text-center mb-2 px-4">
+            <p className="text-xl md:text-2xl font-heading font-semibold text-primary-foreground text-center mb-3 px-4">
               {before
-                ? "Rejoignez Guardiens dès maintenant — sans rien payer"
+                ? "Rejoignez Guardiens dès maintenant"
                 : "Prêt à rejoindre Guardiens ?"}
             </p>
-            <p className="text-sm md:text-base font-body text-primary-foreground/85 text-center mb-2 max-w-xl mx-auto px-4">
-              {before
-                ? "Accès complet pour les gardiens et les propriétaires, sans carte bancaire. Inscriptions Fondateur ouvertes jusqu'au 13 mai (badge à vie)."
-                : "6,99€/mois pour les gardiens, 7 jours d'essai offerts. Gratuit pour les propriétaires."}
+            <p className="text-sm md:text-base font-body text-primary-foreground/85 text-center mb-8 max-w-xl mx-auto px-4">
+              Sans carte bancaire à l'inscription. Vous décidez ensuite.
             </p>
-            {before && (
-              <p className="text-xs font-body text-primary-foreground/65 text-center mb-8 max-w-xl mx-auto px-4">
-                Après le 13 juin 2026 : gratuit à vie pour les propriétaires · 6,99€/mois pour les gardiens.
-              </p>
-            )}
-            {!before && <div className="mb-8" />}
             <div className="flex flex-col sm:flex-row gap-3 justify-center px-4">
               <Link to={registerLink("sitter")}>
                 <Button className="bg-background text-foreground font-body font-medium px-8 py-4 rounded-xl text-base hover:bg-background/90 transition-colors min-h-[52px] w-full sm:w-auto" size="xl">
-                  {before ? "Devenir gardien — gratuit jusqu'au 13 juin" : "Devenir gardien — essai gratuit"}
+                  Devenir gardien
                 </Button>
               </Link>
               <Link to={registerLink("owner")}>
                 <Button variant="outline" className="bg-transparent text-primary-foreground border-2 border-primary-foreground/30 hover:bg-primary-foreground/10 hover:border-primary-foreground/50 font-body font-medium px-8 py-4 rounded-xl text-base min-h-[52px] w-full sm:w-auto" size="xl">
-                  Publier une annonce — gratuit à vie
+                  Publier une annonce
                 </Button>
               </Link>
             </div>
