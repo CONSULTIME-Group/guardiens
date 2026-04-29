@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
-import { Check, CheckCircle, Star, MapPin, Clock, ShieldCheck } from "lucide-react";
+import { Check, MapPin } from "lucide-react";
 import PageMeta from "@/components/PageMeta";
 import PageBreadcrumb from "@/components/seo/PageBreadcrumb";
 import PublicHeader from "@/components/layout/PublicHeader";
@@ -197,26 +197,21 @@ const Pricing = () => {
           {before && (
             <section className="mb-12 md:mb-16">
               <div className="w-full max-w-5xl mx-auto bg-gradient-to-br from-amber-50 to-amber-100/50 border border-amber-200/60 rounded-2xl overflow-hidden">
-                <div className="bg-amber-100 px-6 py-2.5 flex items-center justify-center gap-2">
-                  <Star className="w-4 h-4 text-amber-500" fill="currentColor" />
+                <div className="bg-amber-100 px-6 py-2.5 text-center">
                   <span className="text-sm font-medium text-amber-800 font-body tracking-wide">
                     Programme Fondateur — clôture le 13 mai 2026
                   </span>
-                  <Star className="w-4 h-4 text-amber-500" fill="currentColor" />
                 </div>
 
                 <div className="px-6 sm:px-10 py-7">
                   <div className="flex flex-col md:flex-row items-center gap-6">
-                    <div className="flex items-center gap-4">
-                      <Clock className="w-10 h-10 text-amber-600 shrink-0" />
-                      <div>
-                        <p className="font-heading text-3xl font-bold text-amber-700 tabular-nums leading-none">
-                          {daysLeft} jour{daysLeft > 1 ? 's' : ''}
-                        </p>
-                        <p className="text-xs text-amber-600/80 font-body mt-1">
-                          pour rejoindre les Fondateurs
-                        </p>
-                      </div>
+                    <div className="text-center md:text-left">
+                      <p className="font-heading text-3xl font-bold text-amber-700 tabular-nums leading-none">
+                        {daysLeft} jour{daysLeft > 1 ? 's' : ''}
+                      </p>
+                      <p className="text-xs text-amber-600/80 font-body mt-1">
+                        pour rejoindre les Fondateurs
+                      </p>
                     </div>
 
                     <div className="flex-1 text-center md:text-left">
@@ -241,15 +236,11 @@ const Pricing = () => {
           )}
 
           {grace && (
-            <section className="rounded-2xl p-6 md:p-8 text-center space-y-4 border-2 border-amber-300 bg-amber-50 mb-12 max-w-5xl mx-auto">
-              <div className="flex items-center justify-center gap-2">
-                <Star className="h-6 w-6 text-amber-500" fill="currentColor" />
-                <h2 className="font-heading text-2xl font-bold text-foreground">Les Fondateurs ont jusqu'au 13 juin</h2>
-                <Star className="h-6 w-6 text-amber-500" fill="currentColor" />
-              </div>
+            <section className="rounded-2xl p-6 md:p-8 text-center space-y-3 border-2 border-amber-300 bg-amber-50 mb-12 max-w-5xl mx-auto">
+              <h2 className="font-heading text-2xl font-bold text-foreground">Les Fondateurs ont jusqu'au 13 juin</h2>
               <p className="text-muted-foreground max-w-2xl mx-auto font-body">
-                Les membres inscrits avant le 13 mai conservent un accès gratuit jusqu'au 13 juin.
-                Après cette date, l'abonnement à 6,99€/mois sera nécessaire. Le badge Fondateur reste à vie.
+                Les membres inscrits avant le 13 mai conservent leur accès gratuit jusqu'au 13 juin.
+                Après cette date, l'abonnement à 6,99 €/mois sera nécessaire. Le badge Fondateur reste à vie.
               </p>
             </section>
           )}
@@ -264,8 +255,7 @@ const Pricing = () => {
           <section className="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-5xl mx-auto items-stretch mb-12 md:mb-16">
             {/* Owner Card */}
             <Card className="bg-card border border-border/40 rounded-2xl h-full flex flex-col relative">
-              <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-primary/10 text-primary text-xs font-body font-medium px-3 py-1 rounded-full flex items-center gap-1.5">
-                <CheckCircle className="h-3 w-3" />
+              <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-primary/10 text-primary text-xs font-body font-medium px-3 py-1 rounded-full">
                 Gratuit pour toujours
               </div>
               <CardHeader className="text-center pb-2 p-8 pt-10">
@@ -300,8 +290,7 @@ const Pricing = () => {
 
             {/* Sitter Card */}
             <Card className="border-2 border-primary/30 relative shadow-xl rounded-2xl h-full flex flex-col bg-primary/5">
-              <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-amber-100 text-amber-800 text-xs font-body font-medium px-3 py-1 rounded-full flex items-center gap-1.5">
-                <Star className="h-3 w-3" fill="currentColor" />
+              <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-amber-100 text-amber-800 text-xs font-body font-medium px-3 py-1 rounded-full">
                 Le plus choisi
               </div>
               <CardHeader className="text-center pb-2 p-8 pt-10">
@@ -504,7 +493,7 @@ const Pricing = () => {
 
           {/* ═══ CTA final ═══ */}
           <section className="text-center py-10 md:py-14 bg-gradient-to-br from-primary to-primary/85 rounded-2xl mb-12">
-            <ShieldCheck className="h-10 w-10 text-primary-foreground/80 mx-auto mb-4" />
+            
             <p className="text-xl md:text-2xl font-heading font-semibold text-primary-foreground text-center mb-3 px-4">
               {before
                 ? "Rejoignez Guardiens dès maintenant"
