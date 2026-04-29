@@ -8,7 +8,7 @@ const ExchangesColumn = memo(({ missions }: { missions: SmallMission[] }) => {
   return (
     <div className="bg-card border border-border rounded-2xl p-5">
       <div className="flex justify-between items-center mb-4">
-        <p className="text-sm font-semibold text-foreground">Échanges autour de vous</p>
+        <h3 className="text-sm font-semibold text-foreground">Échanges autour de vous</h3>
         <Link to="/petites-missions" className="text-xs text-primary font-sans hover:underline">Voir tout</Link>
       </div>
       <p className="text-xs text-muted-foreground font-sans mb-3">
