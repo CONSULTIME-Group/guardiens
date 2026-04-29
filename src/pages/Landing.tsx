@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import notreHistoirePanorama from "@/assets/story-photo.webp";
 import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, ArrowLeft, Home, Key, Handshake, ShieldCheck, MessageCircle, Users, ClipboardCheck, Star, BookOpen, Gift, Coffee, MapPin } from "lucide-react";
+import { ArrowRight, ArrowLeft } from "lucide-react";
 import { trackEvent } from "@/lib/analytics";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -204,7 +204,11 @@ const Landing = () => {
             provider: { "@type": "Organization", name: "Guardiens", url: "https://guardiens.fr" },
             areaServed: { "@type": "AdministrativeArea", name: "Auvergne-Rhône-Alpes" },
             serviceType: ["Pet sitting", "House sitting", "Garde d'animaux", "Gardiennage de maison", "Garde de chien", "Garde de chat"],
-            offers: { "@type": "Offer", price: "0", priceCurrency: "EUR", description: "Inscription et mise en relation 100% gratuites" },
+            offers: [
+              { "@type": "Offer", name: "Espace propriétaire", price: "0", priceCurrency: "EUR", description: "Publication d'annonces et mise en relation à 0 € à vie pour les propriétaires" },
+              { "@type": "Offer", name: "Abonnement gardien", price: "6.99", priceCurrency: "EUR", description: "Abonnement gardien à 6,99 €/mois après le 13 juin 2026 — accès à 0 € jusqu'à cette date" },
+              { "@type": "Offer", name: "Entraide entre gens du coin", price: "0", priceCurrency: "EUR", description: "Petites missions et entraide à 0 € pour tous, pour toujours" },
+            ],
           }),
         }}
       />
@@ -216,7 +220,7 @@ const Landing = () => {
             "@type": "FAQPage",
             mainEntity: [
               { "@type": "Question", name: "Qu'est-ce que le house sitting ?", acceptedAnswer: { "@type": "Answer", text: "Le house sitting est un échange de services : un gardien habite gratuitement dans votre maison pendant votre absence et prend soin de vos animaux. C'est gratuit pour les deux parties." } },
-              { "@type": "Question", name: "Guardiens est-il gratuit ?", acceptedAnswer: { "@type": "Answer", text: "Oui, Guardiens est 100% gratuit pour les propriétaires. Les gardiens bénéficient d'un accès gratuit jusqu'au 13 juin 2026, puis l'abonnement est à 6,99€/mois. L'entraide reste gratuite pour tous, pour toujours." } },
+              { "@type": "Question", name: "Guardiens est-il gratuit ?", acceptedAnswer: { "@type": "Answer", text: "Oui, Guardiens est à 0 € pour les propriétaires, à vie. Les gardiens bénéficient d'un accès à 0 € jusqu'au 13 juin 2026, puis l'abonnement est à 6,99 €/mois. L'entraide reste à 0 € pour tous, pour toujours." } },
               { "@type": "Question", name: "Comment trouver un pet sitter près de chez moi ?", acceptedAnswer: { "@type": "Answer", text: "Inscrivez-vous sur Guardiens, publiez votre annonce de garde avec les dates et vos animaux, et recevez des candidatures de gardiens qui habitent près de chez vous." } },
             ],
           }),
