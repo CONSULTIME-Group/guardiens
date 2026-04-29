@@ -676,25 +676,24 @@ const Landing = () => {
             </p>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 max-w-5xl mx-auto">
               {[
-                { emoji: "🌿", label: "Arroser les plantes" },
-                { emoji: "🐔", label: "Garder les poules" },
-                { emoji: "🐕", label: "Promener le chien" },
-                { emoji: "🔨", label: "Petit bricolage" },
-                { emoji: "🌱", label: "Tailler le jardin" },
-                { emoji: "🧘", label: "Séance de Reiki" },
-                { emoji: "🍞", label: "Cours de pain maison" },
-                { emoji: "📦", label: "Réceptionner un colis" },
-                { emoji: "🚗", label: "Covoiturage rdv" },
-                { emoji: "🪴", label: "Bouture, semis" },
-                { emoji: "🐈", label: "Visite d'un chat" },
-                { emoji: "💬", label: "Café & écoute" },
-              ].map((item) => (
+                "Arroser les plantes",
+                "Garder les poules",
+                "Promener le chien",
+                "Petit bricolage",
+                "Tailler le jardin",
+                "Séance de Reiki",
+                "Cours de pain maison",
+                "Réceptionner un colis",
+                "Covoiturage rdv",
+                "Bouture, semis",
+                "Visite d'un chat",
+                "Café & écoute",
+              ].map((label) => (
                 <div
-                  key={item.label}
-                  className="flex flex-col items-center text-center bg-card rounded-xl px-3 py-4 border border-border/60 hover:border-primary/40 hover:shadow-sm transition-all"
+                  key={label}
+                  className="flex items-center justify-center text-center bg-card rounded-xl px-3 py-4 border border-border/60 hover:border-primary/40 hover:shadow-sm transition-all min-h-[64px]"
                 >
-                  <span className="text-2xl mb-1.5" aria-hidden="true">{item.emoji}</span>
-                  <span className="text-xs font-body text-foreground/80 leading-tight">{item.label}</span>
+                  <span className="text-xs font-body text-foreground/80 leading-tight">{label}</span>
                 </div>
               ))}
             </div>
@@ -816,10 +815,8 @@ const Landing = () => {
             {/* Colonne propriétaires */}
             <RevealSection delay={0.1}>
               <div className="rounded-2xl bg-card border border-border p-8 h-full">
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center">
-                    <Home className="h-5 w-5" />
-                  </div>
+                <div className="mb-6">
+                  <p className="text-xs tracking-widest uppercase text-primary/70 font-body mb-2">Propriétaires</p>
                   <h3 className="font-heading text-2xl font-semibold text-foreground">
                     Pour les propriétaires
                   </h3>
@@ -864,8 +861,7 @@ const Landing = () => {
                 </ul>
                 <div className="mt-6 pt-6 border-t border-border">
                   <p className="text-xs text-foreground/60 leading-relaxed">
-                    <ShieldCheck className="inline h-3.5 w-3.5 text-primary mr-1 -mt-0.5" />
-                    Annonce 100% gratuite, profils vérifiés, accord de garde signé.
+                    Annonce à 0 €, profils vérifiés, accord de garde signé.
                   </p>
                 </div>
               </div>
@@ -874,10 +870,8 @@ const Landing = () => {
             {/* Colonne gardiens */}
             <RevealSection delay={0.2}>
               <div className="rounded-2xl bg-card border border-border p-8 h-full">
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="w-10 h-10 rounded-full bg-secondary/10 text-secondary flex items-center justify-center">
-                    <Key className="h-5 w-5" />
-                  </div>
+                <div className="mb-6">
+                  <p className="text-xs tracking-widest uppercase text-secondary/80 font-body mb-2">Gardiens</p>
                   <h3 className="font-heading text-2xl font-semibold text-foreground">
                     Pour les gardiens
                   </h3>
@@ -922,8 +916,7 @@ const Landing = () => {
                 </ul>
                 <div className="mt-6 pt-6 border-t border-border">
                   <p className="text-xs text-foreground/60 leading-relaxed">
-                    <Gift className="inline h-3.5 w-3.5 text-secondary mr-1 -mt-0.5" />
-                    Inscription gratuite, logements à découvrir, vraies rencontres locales.
+                    Inscription à 0 €, logements à découvrir, vraies rencontres locales.
                   </p>
                 </div>
               </div>
@@ -940,7 +933,6 @@ const Landing = () => {
                 className="rounded-full"
               >
                 <Link to="/actualites">
-                  <BookOpen className="mr-2 h-4 w-4" />
                   Tous les articles &amp; conseils
                 </Link>
               </Button>
@@ -951,7 +943,6 @@ const Landing = () => {
                 className="rounded-full"
               >
                 <Link to="/guides">
-                  <MapPin className="mr-2 h-4 w-4" />
                   Guides locaux par ville
                 </Link>
               </Button>
