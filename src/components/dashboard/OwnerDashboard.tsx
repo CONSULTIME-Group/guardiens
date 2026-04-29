@@ -247,6 +247,13 @@ const OwnerDashboard = () => {
         />
       </div>
 
+      {/* ═══ Avis à laisser (post-garde) ═══ */}
+      {pendingReviews.length > 0 && (
+        <div className="px-5 md:px-8">
+          <PendingReviewsCard pendingReviews={pendingReviews} />
+        </div>
+      )}
+
       {/* ═══ Candidatures ═══ */}
       <div className="px-5 md:px-8">
         <ApplicationsSection
