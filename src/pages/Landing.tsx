@@ -1016,7 +1016,7 @@ const Landing = () => {
                 Elisa, ma compagne et co-fondatrice de Guardiens, est arrivée d'Argentine avec un visa qui ne lui permettait pas de travailler. Elle gardait des animaux. Elle rentrait avec des histoires : des gens qui ouvraient leur porte, leur vie, librement. Des inconnus qui finissaient par nous inviter à Noël.
               </p>
               <p className="text-lg font-body leading-relaxed text-foreground/85 mb-7">
-                Elisa et moi avons gardé 37 maisons en cinq ans en Auvergne-Rhône-Alpes.
+                Elisa et moi avons gardé 37 maisons en cinq ans, dans des villages, des villes, des hameaux.
               </p>
               <div className="border-l-4 border-primary pl-6 my-8">
                 <p className="text-2xl md:text-3xl font-heading font-semibold italic text-foreground leading-snug">
