@@ -1,4 +1,4 @@
-import { memo } from "react";
+import { memo, useMemo } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import type { SmallMission } from "./types";
@@ -7,11 +7,15 @@ const MyMissionsColumn = memo(({ missions }: { missions: SmallMission[] }) => {
   const navigate = useNavigate();
 
   // Tri : actives (non terminées) d'abord, puis terminées — ordre interne préservé.
-  const sortedMissions = [...missions].sort((a, b) => {
-    const aDone = a.status === "completed" ? 1 : 0;
-    const bDone = b.status === "completed" ? 1 : 0;
-    return aDone - bDone;
-  });
+  const sortedMissions = useMemo(
+    () =>
+      [...missions].sort((a, b) => {
+        const aDone = a.status === "completed" ? 1 : 0;
+        const bDone = b.status === "completed" ? 1 : 0;
+        return aDone - bDone;
+      }),
+    [missions]
+  );
 
   return (
     <div className="bg-card border border-border rounded-2xl p-5">
