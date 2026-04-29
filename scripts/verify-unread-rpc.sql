@@ -120,11 +120,14 @@ BEGIN
     RAISE EXCEPTION 'FAIL aggregate RPC for u_me: expected 1, got %', v_count;
   END IF;
 
-  -- u_other is sender on A,B,C,E and owner on conv_d (with u_me's own message → excluded)
-  -- → 0 unread for u_other
+  -- u_other is participant on A, B, C, D, E.
+  -- Unread messages addressed to u_other (sender <> u_other, not archived, not read):
+  --   • conv_d: u_me sent "my own message" → counts as 1 unread for u_other.
+  --   • conv_a/b/c/e: u_other is the sender or message is read → 0.
+  -- Expected: 1.
   SELECT public.get_unread_messages_count(u_other) INTO v_count;
-  IF v_count <> 0 THEN
-    RAISE EXCEPTION 'FAIL aggregate RPC for u_other: expected 0, got %', v_count;
+  IF v_count <> 1 THEN
+    RAISE EXCEPTION 'FAIL aggregate RPC for u_other: expected 1, got %', v_count;
   END IF;
 
   RAISE NOTICE '✅ All get_unread_messages_count scenarios passed';
