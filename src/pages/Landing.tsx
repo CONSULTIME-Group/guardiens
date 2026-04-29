@@ -301,7 +301,7 @@ const Landing = () => {
               Et l'entraide de quartier redevient naturelle.
             </p>
             <p className="font-body text-base md:text-lg text-white/70 max-w-lg mb-10 leading-relaxed animate-hero-fade-up animation-delay-700">
-              Confiez vos animaux à un gardien de votre quartier. Osez demander un coup de main. Osez en proposer un.
+              Confiez vos animaux à un gardien près de chez vous. Osez demander un coup de main. Osez en proposer un.
             </p>
 
             {/* CTAs — propriétaire mis en avant (priorité business : combler le manque d'annonces) */}
