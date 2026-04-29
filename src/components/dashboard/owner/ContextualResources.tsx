@@ -1,4 +1,4 @@
-import { memo } from "react";
+import { memo, useId } from "react";
 import { Link } from "react-router-dom";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -24,6 +24,15 @@ interface ContextualResourcesProps {
  * - Titre : hauteur fixe via line-clamp-1.
  * - Grille : grid-rows explicite, gap stable, items-stretch.
  * - Carte : hauteur fixe (h-[88px]) + line-clamp pour titre/desc.
+ *
+ * Accessibilité :
+ * - Section reliée au titre via aria-labelledby.
+ * - Skeleton : role="status" + aria-live="polite" + texte sr-only,
+ *   les Skeletons décoratifs sont aria-hidden.
+ * - <ul role="list"> / <li role="listitem"> pour préserver la sémantique
+ *   même si list-style:none est appliqué (bug Safari/VoiceOver connu).
+ * - Liens : aria-label explicite + description liée par aria-describedby,
+ *   flèche décorative aria-hidden.
  */
 const SECTION_CLASSES = "animate-fade-in min-h-[140px]";
 const TITLE_CLASSES = "font-body text-base font-semibold mb-3 h-6 leading-6 line-clamp-1";
@@ -31,11 +40,17 @@ const GRID_CLASSES = "grid grid-cols-1 md:grid-cols-3 grid-rows-[auto] gap-2 ite
 const CARD_BASE_CLASSES = "block h-[88px] rounded-xl border border-border bg-card p-4 overflow-hidden";
 
 export const ContextualResourcesSkeleton = () => (
-  <section aria-label="Chargement des ressources" aria-busy="true" className={SECTION_CLASSES}>
-    <Skeleton className="h-6 w-64 mb-3" />
-    <ul className={GRID_CLASSES}>
+  <section
+    role="status"
+    aria-live="polite"
+    aria-busy="true"
+    className={SECTION_CLASSES}
+  >
+    <span className="sr-only">Chargement des ressources contextuelles…</span>
+    <Skeleton aria-hidden="true" className="h-6 w-64 mb-3" />
+    <ul role="list" className={GRID_CLASSES} aria-hidden="true">
       {Array.from({ length: 3 }).map((_, i) => (
-        <li key={i}>
+        <li key={i} role="listitem">
           <div className={CARD_BASE_CLASSES}>
             <Skeleton className="h-4 w-3/4 mb-2" />
             <Skeleton className="h-3 w-full mt-2" />
@@ -47,6 +62,8 @@ export const ContextualResourcesSkeleton = () => (
 );
 
 const ContextualResources = memo(({ annoncesCount, gardesCount, loading }: ContextualResourcesProps) => {
+  const headingId = useId();
+
   if (loading) return <ContextualResourcesSkeleton />;
 
   let resTitle = "";
@@ -79,23 +96,30 @@ const ContextualResources = memo(({ annoncesCount, gardesCount, loading }: Conte
   // Pas de return null : la section est structurelle dans la mise en page du dashboard.
 
   return (
-    <section aria-label={resTitle} className={SECTION_CLASSES}>
-      <h2 className={TITLE_CLASSES}>{resTitle}</h2>
-      <ul className={GRID_CLASSES}>
-        {resItems.map((r) => (
-          <li key={r.href}>
-            <Link
-              to={r.href}
-              className={`${CARD_BASE_CLASSES} hover:bg-primary/5 hover:border-primary/30 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring`}
-            >
-              <p className="text-sm font-semibold text-foreground leading-snug line-clamp-1">
-                {r.title}
-                <span className="text-primary ml-1" aria-hidden="true">→</span>
-              </p>
-              <p className="text-xs text-muted-foreground mt-1 leading-relaxed line-clamp-2">{r.description}</p>
-            </Link>
-          </li>
-        ))}
+    <section aria-labelledby={headingId} className={SECTION_CLASSES}>
+      <h2 id={headingId} className={TITLE_CLASSES}>{resTitle}</h2>
+      <ul role="list" className={GRID_CLASSES}>
+        {resItems.map((r, idx) => {
+          const descId = `${headingId}-desc-${idx}`;
+          return (
+            <li key={r.href} role="listitem">
+              <Link
+                to={r.href}
+                aria-label={`${r.title} — lire l'article`}
+                aria-describedby={descId}
+                className={`${CARD_BASE_CLASSES} hover:bg-primary/5 hover:border-primary/30 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring`}
+              >
+                <p className="text-sm font-semibold text-foreground leading-snug line-clamp-1">
+                  {r.title}
+                  <span className="text-primary ml-1" aria-hidden="true">→</span>
+                </p>
+                <p id={descId} className="text-xs text-muted-foreground mt-1 leading-relaxed line-clamp-2">
+                  {r.description}
+                </p>
+              </Link>
+            </li>
+          );
+        })}
       </ul>
     </section>
   );
