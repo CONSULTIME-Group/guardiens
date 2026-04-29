@@ -290,7 +290,7 @@ const Landing = () => {
 
             {/* Badge 0 € propriétaires */}
             <div className="inline-flex items-center rounded-full px-4 py-1.5 mb-6 bg-white/15 border border-white/30 backdrop-blur-sm animate-hero-fade-up">
-              <span className="font-body text-xs text-white tracking-wide">0 € pour les propriétaires — pour toujours</span>
+              <span className="font-body text-xs text-white tracking-wide">0 € pour les propriétaires, à vie</span>
             </div>
 
             {/* H1 with staggered animation */}
@@ -301,7 +301,7 @@ const Landing = () => {
               Et l'entraide de quartier redevient naturelle.
             </p>
             <p className="font-body text-base md:text-lg text-white/70 max-w-lg mb-10 leading-relaxed animate-hero-fade-up animation-delay-700">
-              Confiez vos animaux à un gardien de votre quartier. Osez demander un coup de main. Osez en proposer un.
+              Confiez vos animaux à un gardien près de chez vous. Osez demander un coup de main. Osez en proposer un.
             </p>
 
             {/* CTAs — propriétaire mis en avant (priorité business : combler le manque d'annonces) */}
@@ -1072,7 +1072,7 @@ const Landing = () => {
               House-sitting près de chez vous
             </h2>
             <p className="text-center text-foreground/60 font-body max-w-2xl mx-auto mb-16">
-              Des gardiens vérifiés dans votre ville, disponibles rapidement. 0 € pour les propriétaires.
+              Des gardiens vérifiés près de chez vous, disponibles rapidement. 0 € pour les propriétaires, à vie.
             </p>
           </RevealSection>
 
