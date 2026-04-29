@@ -98,18 +98,18 @@ const DemoListingCard = React.forwardRef<HTMLAnchorElement, typeof DEMO_LISTINGS
 }, ref) => {
   const internalRef = React.useRef<HTMLAnchorElement | null>(null);
 
-  // Précharge le chunk DemoSitDetail dès qu'une carte entre dans le viewport
+  // Précharge chunk JS + image hero dès qu'une carte entre dans le viewport
   React.useEffect(() => {
     const node = internalRef.current;
     if (!node || typeof IntersectionObserver === "undefined") {
       // Fallback : préchargement immédiat si l'API n'est pas disponible
-      prefetchDemoDetail();
+      prefetchDemoRoute(slug);
       return;
     }
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries.some((e) => e.isIntersecting)) {
-          prefetchDemoDetail();
+          prefetchDemoRoute(slug);
           observer.disconnect();
         }
       },
@@ -117,7 +117,7 @@ const DemoListingCard = React.forwardRef<HTMLAnchorElement, typeof DEMO_LISTINGS
     );
     observer.observe(node);
     return () => observer.disconnect();
-  }, []);
+  }, [slug]);
 
   const setRefs = React.useCallback(
     (node: HTMLAnchorElement | null) => {
@@ -128,13 +128,15 @@ const DemoListingCard = React.forwardRef<HTMLAnchorElement, typeof DEMO_LISTINGS
     [ref],
   );
 
+  const handlePrefetch = React.useCallback(() => prefetchDemoRoute(slug), [slug]);
+
   return (
   <Link
     ref={setRefs}
     to={`/annonces/demo/${slug}`}
-    onMouseEnter={prefetchDemoDetail}
-    onFocus={prefetchDemoDetail}
-    onTouchStart={prefetchDemoDetail}
+    onMouseEnter={handlePrefetch}
+    onFocus={handlePrefetch}
+    onTouchStart={handlePrefetch}
     onClick={() =>
       trackEvent("sit_view", {
         source: "landing_demo_card",
