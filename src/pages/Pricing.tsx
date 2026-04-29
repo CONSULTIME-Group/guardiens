@@ -164,11 +164,11 @@ const Pricing = () => {
         path="/tarifs"
       />
 
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
-      />
-
+      <Helmet>
+        <script type="application/ld+json">
+          {JSON.stringify(faqJsonLd)}
+        </script>
+      </Helmet>
       <div className="min-h-screen bg-background">
         <PublicHeader />
         <PageBreadcrumb items={[{ label: "Tarifs" }]} />
