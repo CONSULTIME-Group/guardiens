@@ -15,6 +15,46 @@ import { staticRoutes, DEFAULT_OG_IMAGE } from "@/data/siteRoutes";
 const HOME_ROUTE = staticRoutes.find((route) => route.path === "/");
 const HOME_OG_IMAGE = HOME_ROUTE?.ogImage ?? DEFAULT_OG_IMAGE;
 
+/**
+ * Bandeau saisonnier dynamique : titre + sous-titre adaptés au moment de l'année.
+ * - Décembre : fêtes
+ * - Janvier-Mars : hiver / vacances de février
+ * - Avril-Juin : printemps / pré-été
+ * - Juillet-Août : été
+ * - Septembre-Novembre : automne / Toussaint
+ */
+function getSeasonalBanner(): { title: string; description: string } {
+  const month = new Date().getMonth(); // 0 = janvier
+  if (month === 11) {
+    return {
+      title: "Vous partez pour les fêtes ?",
+      description: "Publiez votre annonce dès maintenant. Un gardien de votre région s'occupera de votre maison et de vos animaux pendant les fêtes de fin d'année.",
+    };
+  }
+  if (month <= 2) {
+    return {
+      title: "Vous partez cet hiver ?",
+      description: "Vacances au ski, week-ends prolongés, déplacements pro : confiez votre maison et vos animaux à un gardien de votre région.",
+    };
+  }
+  if (month <= 5) {
+    return {
+      title: "Vous préparez vos vacances ?",
+      description: "Anticipez : publiez votre annonce maintenant pour trouver le bon gardien avant le pic de l'été. La rencontre se fait toujours avant le départ.",
+    };
+  }
+  if (month <= 7) {
+    return {
+      title: "Vous partez cet été ?",
+      description: "Publiez votre annonce dès maintenant. Un gardien de votre région s'occupera de votre maison et de vos animaux pendant votre absence.",
+    };
+  }
+  return {
+    title: "Vous partez cet automne ?",
+    description: "Toussaint, escapades, déplacements : un gardien de votre région veille sur votre maison et vos animaux pendant que vous êtes absent.",
+  };
+}
+
 
 
 const testimonials = [
@@ -95,6 +135,7 @@ RevealSection.displayName = "RevealSection";
 
 const Landing = () => {
   const navigate = useNavigate();
+  const seasonal = getSeasonalBanner();
 
   const [kpiMaisons, setKpiMaisons] = useState<number>(37);
   const [kpiAnimaux, setKpiAnimaux] = useState<number>(234);
@@ -246,9 +287,9 @@ const Landing = () => {
         <div className="relative z-10 w-full max-w-7xl mx-auto px-6 md:px-12 lg:px-16 py-24">
           <div className="max-w-2xl lg:max-w-3xl">
 
-            {/* Badge gratuit */}
+            {/* Badge 0 € propriétaires */}
             <div className="inline-flex items-center rounded-full px-4 py-1.5 mb-6 bg-white/15 border border-white/30 backdrop-blur-sm animate-hero-fade-up">
-              <span className="font-body text-xs text-white tracking-wide">Gratuit pour les propriétaires — pour toujours</span>
+              <span className="font-body text-xs text-white tracking-wide">0 € pour les propriétaires — pour toujours</span>
             </div>
 
             {/* H1 with staggered animation */}
@@ -271,7 +312,7 @@ const Landing = () => {
                 }}
                 className="font-body text-base font-semibold tracking-wide rounded-full px-12 py-4 bg-primary text-primary-foreground hover:brightness-95 hover:scale-[1.03] transition-all duration-200 shadow-xl shadow-primary/40 ring-2 ring-primary-foreground/10"
               >
-                Publier mon annonce — gratuit
+                Publier mon annonce — 0 €
               </button>
               <button
                 onClick={() => {
@@ -371,12 +412,12 @@ const Landing = () => {
         </div>
       </section>
 
-      {/* ═══════════════ BANDEAU — VOUS PARTEZ CET ÉTÉ ═══════════════ */}
+      {/* ═══════════════ BANDEAU SAISONNIER (titre + sous-titre dynamiques) ═══════════════ */}
       <section className="bg-primary/5 py-16">
         <div className="max-w-3xl mx-auto px-4 text-center">
-          <h2 className="text-3xl md:text-4xl font-heading font-bold text-foreground">Vous partez cet été ?</h2>
+          <h2 className="text-3xl md:text-4xl font-heading font-bold text-foreground">{seasonal.title}</h2>
           <p className="text-lg text-muted-foreground mt-4 leading-relaxed">
-            Publiez votre annonce maintenant, gratuitement. Un gardien de votre région s'occupera de votre maison et de vos animaux pendant votre absence.
+            {seasonal.description}
           </p>
           <button
             onClick={() => {
@@ -393,17 +434,7 @@ const Landing = () => {
         </div>
       </section>
 
-      {/* ═══════════════ BANDEAU ENTRAIDE ═══════════════ */}
-      <section className="bg-primary/5 border-y border-primary/10">
-        <div className="max-w-5xl mx-auto px-6 py-5 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-6 text-center sm:text-left">
-          <p className="font-body text-sm md:text-base text-foreground/80">
-            <strong className="text-foreground">L'entraide entre gens du coin reste à 0 €.</strong> Pour tous. Pour toujours. C'est l'esprit de Guardiens.
-          </p>
-          <Link to="/petites-missions" className="text-sm font-body text-primary font-medium hover:underline whitespace-nowrap shrink-0">
-            En savoir plus →
-          </Link>
-        </div>
-      </section>
+      {/* (Bandeau entraide retiré : info portée par la carte Entraide ci-dessous + section dédiée plus bas) */}
 
       {/* ═══════════════ SECTION 2 — CE QU'ON FAIT ENSEMBLE ═══════════════ */}
       <section className="py-24 md:py-32 bg-background">
@@ -522,7 +553,7 @@ const Landing = () => {
               onClick={() => navigate("/inscription?role=owner")}
               className="font-body text-sm font-semibold tracking-wide rounded-full px-10 py-4 bg-primary text-primary-foreground hover:brightness-90 hover:scale-[1.02] transition-all duration-200"
             >
-              Je cherche un gardien — c'est gratuit
+              Je cherche un gardien — 0 €
             </button>
           </RevealSection>
         </div>
@@ -611,7 +642,7 @@ const Landing = () => {
               onClick={() => navigate("/inscription?role=owner")}
               className="font-body text-sm font-semibold tracking-wide rounded-full px-10 py-4 bg-primary text-primary-foreground hover:brightness-90 hover:scale-[1.02] transition-all duration-200"
             >
-              Créer mon compte gratuit
+              Créer mon compte — 0 €
             </button>
           </RevealSection>
         </div>
@@ -719,7 +750,7 @@ const Landing = () => {
                 to="/inscription"
                 className="inline-flex items-center gap-2 bg-card text-foreground border border-border px-8 py-4 rounded-full font-body font-medium text-sm hover:bg-muted transition-colors"
               >
-                Créer mon compte — c'est gratuit
+                Créer mon compte — 0 €
               </Link>
             </div>
           </RevealSection>
@@ -1030,7 +1061,7 @@ const Landing = () => {
               House-sitting près de chez vous
             </h2>
             <p className="text-center text-foreground/60 font-body max-w-2xl mx-auto mb-16">
-              Des gardiens vérifiés dans votre ville, disponibles rapidement. Gratuit pour les propriétaires.
+              Des gardiens vérifiés dans votre ville, disponibles rapidement. 0 € pour les propriétaires.
             </p>
           </RevealSection>
 
@@ -1091,7 +1122,7 @@ const Landing = () => {
             Inscrivez-vous avant le 13 mai.
           </h2>
           <p className="font-body text-lg text-white/85 leading-relaxed mb-10">
-            Badge Fondateur à vie. Accès gratuit jusqu'au 13 juin. Et surtout, vous serez parmi les premiers à vivre ça. Pourquoi le 13 mai ? C'est l'anniversaire de Jérémie. Il préfère offrir l'accès plutôt que recevoir des chaussettes.
+            Badge Fondateur à vie. Accès à 0 € jusqu'au 13 juin. Et surtout, vous serez parmi les premiers à vivre ça. Pourquoi le 13 mai ? C'est l'anniversaire de Jérémie. Il préfère offrir l'accès plutôt que recevoir des chaussettes.
           </p>
           <button
             onClick={() => navigate("/inscription")}
@@ -1117,7 +1148,7 @@ const Landing = () => {
               onClick={() => navigate("/inscription?role=owner")}
               className="font-body text-sm font-semibold tracking-wide rounded-full px-10 py-4 bg-primary text-primary-foreground hover:brightness-90 hover:scale-[1.02] transition-all duration-200"
             >
-              Je cherche un gardien — gratuit
+              Je cherche un gardien — 0 €
             </button>
             <button
               onClick={() => navigate("/inscription?role=sitter")}
@@ -1130,10 +1161,10 @@ const Landing = () => {
             onClick={() => navigate("/petites-missions")}
             className="font-body text-sm font-medium tracking-wide rounded-full px-8 py-3 bg-white/10 text-white border border-white/20 hover:bg-white/20 transition-all duration-200"
           >
-            Découvrir l'entraide — gratuit pour tous
+            Découvrir l'entraide — 0 € pour tous
           </button>
           <p className="mt-8 text-xs text-white/40 font-body">
-            Badge Fondateur à vie · Accès gratuit jusqu'au 13 juin · L'entraide reste gratuite pour toujours
+            Badge Fondateur à vie · Accès à 0 € jusqu'au 13 juin · L'entraide reste à 0 € pour toujours
           </p>
         </RevealSection>
       </section>
