@@ -259,7 +259,7 @@ export function useOwnerDashboardData(userId: string | undefined) {
             first_name: p.first_name,
             avatar_url: p.avatar_url,
             bio: p.bio,
-            onboarding_minimal_completed: (p as any).onboarding_minimal_completed ?? false,
+            onboarding_minimal_completed: (p as { onboarding_minimal_completed?: boolean }).onboarding_minimal_completed ?? false,
           } : null,
         });
         setLoading(false);
