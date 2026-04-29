@@ -1419,7 +1419,7 @@ const AlertsSection = ({ user }: { user: any }) => {
 
             {formZoneType === "region" && (
               <p className="text-sm text-muted-foreground">
-                Vous recevrez les annonces publiées dans toute la région Auvergne-Rhône-Alpes.
+                Vous recevrez les annonces publiées dans toute la France.
               </p>
             )}
 
