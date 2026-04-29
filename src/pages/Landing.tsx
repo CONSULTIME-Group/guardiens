@@ -137,8 +137,9 @@ const Landing = () => {
   const navigate = useNavigate();
   const seasonal = getSeasonalBanner();
 
-  const [kpiMaisons, setKpiMaisons] = useState<number>(37);
-  const [kpiAnimaux, setKpiAnimaux] = useState<number>(234);
+  // KPIs : valeurs réelles uniquement, remontées depuis public_stats (pas d'offsets factices).
+  const [kpiMaisons, setKpiMaisons] = useState<number>(0);
+  const [kpiAnimaux, setKpiAnimaux] = useState<number>(0);
   const [kpiInscrits, setKpiInscrits] = useState<number>(0);
   const [kpiMissions, setKpiMissions] = useState<number>(0);
 
@@ -150,7 +151,7 @@ const Landing = () => {
         .single();
       if (data) {
         if (typeof data.maisons_gardees === 'number') {
-          setKpiMaisons(data.maisons_gardees + 37);
+          setKpiMaisons(data.maisons_gardees);
         }
         if (typeof data.total_inscrits === 'number') {
           setKpiInscrits(data.total_inscrits);
@@ -159,7 +160,7 @@ const Landing = () => {
           setKpiMissions(data.missions_entraide);
         }
         if (typeof data.animaux_accompagnes === 'number') {
-          setKpiAnimaux(234 + data.animaux_accompagnes);
+          setKpiAnimaux(data.animaux_accompagnes);
         }
       }
     };
@@ -344,24 +345,34 @@ const Landing = () => {
               Badge Fondateur à vie pour les inscrits avant le 13 mai.
             </p>
 
-            <div className="flex flex-row justify-center sm:justify-start gap-12 mt-12 animate-hero-fade-up animation-delay-1100">
-              <div className="border-r border-white/20 pr-12">
-                <span className="block text-3xl font-heading font-bold text-white">{kpiMaisons}</span>
-                <span className="text-xs font-body text-white/50 tracking-wide uppercase mt-1 block">maisons gardées</span>
+            {(kpiMaisons > 0 || kpiAnimaux > 0 || kpiInscrits > 0 || kpiMissions > 0) && (
+              <div className="flex flex-row flex-wrap justify-center sm:justify-start gap-x-12 gap-y-6 mt-12 animate-hero-fade-up animation-delay-1100">
+                {kpiMaisons > 0 && (
+                  <div className="border-r border-white/20 pr-12 last:border-r-0 last:pr-0">
+                    <span className="block text-3xl font-heading font-bold text-white">{kpiMaisons}</span>
+                    <span className="text-xs font-body text-white/50 tracking-wide uppercase mt-1 block">maisons gardées</span>
+                  </div>
+                )}
+                {kpiAnimaux > 0 && (
+                  <div className="border-r border-white/20 pr-12 last:border-r-0 last:pr-0">
+                    <span className="block text-3xl font-heading font-bold text-white">{kpiAnimaux}</span>
+                    <span className="text-xs font-body text-white/50 tracking-wide uppercase mt-1 block">animaux accompagnés</span>
+                  </div>
+                )}
+                {kpiInscrits > 0 && (
+                  <div className="border-r border-white/20 pr-12 last:border-r-0 last:pr-0">
+                    <span className="block text-3xl font-heading font-bold text-white">{kpiInscrits}</span>
+                    <span className="text-xs font-body text-white/50 tracking-wide uppercase mt-1 block">inscrits</span>
+                  </div>
+                )}
+                {kpiMissions > 0 && (
+                  <div className="last:border-r-0 last:pr-0">
+                    <span className="block text-3xl font-heading font-bold text-white">{kpiMissions}</span>
+                    <span className="text-xs font-body text-white/50 tracking-wide uppercase mt-1 block">entraides</span>
+                  </div>
+                )}
               </div>
-              <div className="border-r border-white/20 pr-12">
-                <span className="block text-3xl font-heading font-bold text-white">{kpiAnimaux}</span>
-                <span className="text-xs font-body text-white/50 tracking-wide uppercase mt-1 block">animaux accompagnés</span>
-              </div>
-              <div className="border-r border-white/20 pr-12">
-                <span className="block text-3xl font-heading font-bold text-white">{kpiInscrits}</span>
-                <span className="text-xs font-body text-white/50 tracking-wide uppercase mt-1 block">inscrits</span>
-              </div>
-              <div>
-                <span className="block text-3xl font-heading font-bold text-white">{kpiMissions}</span>
-                <span className="text-xs font-body text-white/50 tracking-wide uppercase mt-1 block">entraides</span>
-              </div>
-            </div>
+            )}
           </div>
         </div>
       </section>
