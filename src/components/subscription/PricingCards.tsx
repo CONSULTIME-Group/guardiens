@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { CheckCircle2, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { logger } from "@/lib/logger";
+import FreeAccountSection from "./FreeAccountSection";
 
 const calculateYearlyProrata = (): { price: number; months: number; savings: number } => {
   const now = new Date();
@@ -43,7 +44,8 @@ export default function PricingCards() {
   };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div className="space-y-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       {/* Mensuel */}
       <div className="bg-card border border-border rounded-2xl p-6 flex flex-col">
         <p className="text-xs tracking-widest uppercase text-muted-foreground font-body mb-3">
@@ -124,6 +126,9 @@ export default function PricingCards() {
         Renouvellement automatique au 1er janvier 2027 a 6,99&#8364;/mois sauf resiliation avant cette date.
         Vous recevrez un rappel 30 jours avant.
       </p>
+      </div>
+
+      <FreeAccountSection />
     </div>
   );
 }
