@@ -16,9 +16,9 @@ BEGIN;
 
 DO $$
 DECLARE
-  u_me        uuid := gen_random_uuid();
-  u_other     uuid := gen_random_uuid();
-  u_third     uuid := gen_random_uuid();
+  u_me        uuid;
+  u_other     uuid;
+  u_third     uuid;
   conv_a      uuid := gen_random_uuid();
   conv_b      uuid := gen_random_uuid();
   conv_c      uuid := gen_random_uuid();
