@@ -189,14 +189,9 @@ const Pricing = () => {
             </h1>
             <p className="text-base md:text-lg font-body text-foreground/65 leading-relaxed">
               {before
-                ? "Jusqu'au 13 juin 2026, l'accès complet à Guardiens est entièrement gratuit — gardiens comme propriétaires. Aucune carte bancaire demandée."
-                : "Gratuit pour les propriétaires, à vie. 6,99€/mois pour les gardiens, avec 7 jours d'essai offerts. C'est tout."}
+                ? "Jusqu'au 13 juin 2026, l'accès complet est offert — gardiens comme propriétaires. Aucune carte bancaire demandée."
+                : "0 € à vie pour les propriétaires. 6,99 €/mois pour les gardiens, avec 7 jours d'essai. C'est tout."}
             </p>
-            {before && (
-              <p className="mt-4 text-xs md:text-sm font-body text-foreground/55 italic">
-                Après le 13 juin : gratuit pour les propriétaires (à vie) · 6,99€/mois pour les gardiens.
-              </p>
-            )}
           </section>
 
           {/* Founder Banner — urgence */}
