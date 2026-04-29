@@ -181,7 +181,7 @@ const Pricing = () => {
             </p>
             <h1 className="font-heading text-3xl md:text-5xl font-bold text-foreground leading-tight mb-4">
               {before ? (
-                <>100% gratuit. <span className="text-primary">Pour tout le monde.</span></>
+                <>Offert. <span className="text-primary">Pour tout le monde.</span></>
               ) : (
                 <>Un seul prix. <span className="text-primary">Transparent.</span></>
               )}
@@ -189,7 +189,7 @@ const Pricing = () => {
             <p className="text-base md:text-lg font-body text-foreground/65 leading-relaxed">
               {before
                 ? "Jusqu'au 13 juin 2026, l'accès complet est offert — gardiens comme propriétaires. Aucune carte bancaire demandée."
-                : "0 € à vie pour les propriétaires. 6,99 €/mois pour les gardiens, avec 7 jours d'essai. C'est tout."}
+                : "Offert à vie pour les propriétaires. 6,99 €/mois pour les gardiens, avec 7 jours d'essai. C'est tout."}
             </p>
           </section>
 
