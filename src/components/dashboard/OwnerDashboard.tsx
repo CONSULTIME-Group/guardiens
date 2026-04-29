@@ -34,10 +34,8 @@ import {
   SPECIES_LABEL, PROPRIO_SPECIAL_IDS, BANNER_STYLES,
   capitalize, capitalizeWords,
 } from "./owner/helpers";
-import type {
-  Pet, SitRow, SitterInfo, AppRow, SmallMission,
-  HighlightRow, OnboardingChecks,
-} from "./owner/types";
+import type { Pet } from "./owner/types";
+import { useOwnerDashboardData } from "@/hooks/useOwnerDashboardData";
 
 /* ═══════════════════════════════════════════════════════
    Main component
