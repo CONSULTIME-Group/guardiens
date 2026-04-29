@@ -212,8 +212,8 @@ export const staticRoutes: SiteRoute[] = [
   },
   {
     path: "/inscription",
-    title: "Inscription — Créer un compte gratuit | Guardiens",
-    metaDescription: "Rejoignez la communauté Guardiens. Inscription gratuite pour les propriétaires, 6,99€/mois pour les gardiens avec 7 jours d'essai sans engagement.",
+    title: "Inscription — Créer un compte à 0 € | Guardiens",
+    metaDescription: "Rejoignez la communauté Guardiens. Inscription à 0 € pour les propriétaires (à vie), 6,99 €/mois pour les gardiens avec 7 jours d'essai sans engagement.",
     h1: "Créer un compte",
     sitemapPriority: "0.6",
     changeFreq: "monthly",
