@@ -1232,7 +1232,7 @@ const AlertsSection = ({ user }: { user: any }) => {
   const zoneDescription = (a: AlertPref) => {
     if (a.zone_type === "rayon") return `${a.city} · ${a.radius_km} km`;
     if (a.zone_type === "departement") return `Département ${a.departement}`;
-    return "Région Auvergne-Rhône-Alpes";
+    return "France entière";
   };
 
   const firstActiveAlert = alertes.find((a) => a.active);
@@ -1352,7 +1352,7 @@ const AlertsSection = ({ user }: { user: any }) => {
                 {([
                   { value: "rayon", label: "Par rayon" },
                   { value: "departement", label: "Par département" },
-                  { value: "region", label: "Région AURA" },
+                  { value: "region", label: "France entière" },
                 ] as const).map((opt) => (
                   <button
                     key={opt.value}
@@ -1419,7 +1419,7 @@ const AlertsSection = ({ user }: { user: any }) => {
 
             {formZoneType === "region" && (
               <p className="text-sm text-muted-foreground">
-                Vous recevrez les annonces publiées dans toute la région Auvergne-Rhône-Alpes.
+                Vous recevrez les annonces publiées dans toute la France.
               </p>
             )}
 

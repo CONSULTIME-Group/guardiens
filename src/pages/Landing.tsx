@@ -210,9 +210,9 @@ const Landing = () => {
             name: "Guardiens",
             url: "https://guardiens.fr",
             logo: "https://guardiens.fr/favicon.ico",
-            description: "Plateforme de pet sitting et house sitting de proximité en Auvergne-Rhône-Alpes — 0 € pour les propriétaires, à vie.",
-            areaServed: { "@type": "AdministrativeArea", name: "Auvergne-Rhône-Alpes" },
-            knowsAbout: ["House-sitting", "Pet-sitting", "Garde d'animaux à domicile", "Entraide entre gens du coin", "Petites missions entre gens du coin", "Auvergne-Rhône-Alpes"],
+            description: "Plateforme de pet sitting et house sitting de proximité — 0 € pour les propriétaires, à vie.",
+            areaServed: { "@type": "Country", name: "France" },
+            knowsAbout: ["House-sitting", "Pet-sitting", "Garde d'animaux à domicile", "Entraide entre gens du coin", "Petites missions entre gens du coin", "Proximité"],
             slogan: "Quelqu'un du coin veille sur votre maison.",
             founder: [{ "@type": "Person", name: "Jérémie" }, { "@type": "Person", name: "Elisa" }],
             sameAs: [],
@@ -242,9 +242,9 @@ const Landing = () => {
             "@context": "https://schema.org",
             "@type": "Service",
             name: "Pet sitting & House sitting de proximité",
-            description: "Service de garde d'animaux et house sitting de proximité en Auvergne-Rhône-Alpes. Avis croisés, 0 € pour les propriétaires à vie.",
+            description: "Service de garde d'animaux et house sitting de proximité. Avis croisés, 0 € pour les propriétaires à vie.",
             provider: { "@type": "Organization", name: "Guardiens", url: "https://guardiens.fr" },
-            areaServed: { "@type": "AdministrativeArea", name: "Auvergne-Rhône-Alpes" },
+            areaServed: { "@type": "Country", name: "France" },
             serviceType: ["Pet sitting", "House sitting", "Garde d'animaux", "Gardiennage de maison", "Garde de chien", "Garde de chat"],
             offers: [
               { "@type": "Offer", name: "Espace propriétaire", price: "0", priceCurrency: "EUR", description: "Publication d'annonces et mise en relation à 0 € à vie pour les propriétaires" },
@@ -414,9 +414,9 @@ const Landing = () => {
 
             <div className="bg-card border border-border rounded-xl p-6">
               <p className="text-xs tracking-widest uppercase text-primary/70 font-body">04</p>
-              <h3 className="mt-3 font-heading font-semibold text-lg text-foreground">Des gardiens de votre région</h3>
+              <h3 className="mt-3 font-heading font-semibold text-lg text-foreground">Un gardien près de chez vous</h3>
               <p className="mt-2 text-muted-foreground text-sm leading-relaxed">
-                En Auvergne-Rhône-Alpes, on privilégie la proximité. Votre gardien habite à quelques kilomètres, jamais à l'autre bout de la France.
+                La proximité, partout. Votre gardien habite à quelques kilomètres, pas à l'autre bout du pays — où que vous soyez.
               </p>
             </div>
           </div>
@@ -1016,7 +1016,7 @@ const Landing = () => {
                 Elisa, ma compagne et co-fondatrice de Guardiens, est arrivée d'Argentine avec un visa qui ne lui permettait pas de travailler. Elle gardait des animaux. Elle rentrait avec des histoires : des gens qui ouvraient leur porte, leur vie, librement. Des inconnus qui finissaient par nous inviter à Noël.
               </p>
               <p className="text-lg font-body leading-relaxed text-foreground/85 mb-7">
-                Elisa et moi avons gardé 37 maisons en cinq ans en Auvergne-Rhône-Alpes.
+                Elisa et moi avons gardé 37 maisons en cinq ans, dans des villages, des villes, des hameaux.
               </p>
               <div className="border-l-4 border-primary pl-6 my-8">
                 <p className="text-2xl md:text-3xl font-heading font-semibold italic text-foreground leading-snug">
@@ -1049,7 +1049,7 @@ const Landing = () => {
           <div className="w-full mt-16 rounded-2xl overflow-hidden">
             <img
               src={notreHistoirePanorama}
-              alt="Une garde en Auvergne-Rhône-Alpes — Guardiens"
+              alt="Une garde de maison et d'animaux — Guardiens"
               className="w-full h-64 md:h-96 object-cover object-center"
               loading="lazy"
               width={1920}

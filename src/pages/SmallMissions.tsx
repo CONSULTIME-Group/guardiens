@@ -984,7 +984,7 @@ const SmallMissions = () => {
                 "@type": "Service",
                 name: "Petites missions Guardiens",
                 description: "Entraide communautaire entre gens du coin autour des animaux, du jardin et des compétences.",
-                areaServed: { "@type": "AdministrativeArea", name: "Auvergne-Rhône-Alpes" },
+                areaServed: { "@type": "Country", name: "France" },
                 provider: { "@type": "Organization", name: "Guardiens", url: "https://guardiens.fr" },
               }),
             }}

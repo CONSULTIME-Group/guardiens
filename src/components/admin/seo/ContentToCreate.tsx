@@ -12,7 +12,7 @@ import { Badge } from "@/components/ui/badge";
 interface TypeCount { category: string; count: number }
 
 const TYPE_OBJECTIVES = [
-  { label: "Villes AURA", filter: (c: string) => c === "ville", goal: 10, priority: "high" as const },
+  { label: "Pages villes", filter: (c: string) => c === "ville", goal: 10, priority: "high" as const },
   { label: "Races", filter: (c: string) => c === "guide_race", goal: 15, priority: "medium" as const },
   { label: "Guides locaux", filter: (c: string) => c === "guide_local", goal: 15, priority: "medium" as const },
   { label: "Vie locale", filter: (c: string) => c === "vie_locale", goal: 10, priority: "low" as const },
