@@ -60,8 +60,10 @@ describe("ContextualResources", () => {
     expect(section).not.toBeNull();
     expect(section).toHaveAttribute("aria-busy", "true");
 
-    // Skeleton rend aussi 3 placeholders pour préserver la grille
-    const items = within(section!).getAllByRole("listitem");
+    // Skeleton rend aussi 3 placeholders pour préserver la grille.
+    // Le <ul> est aria-hidden (purement décoratif), donc on interroge le DOM
+    // directement plutôt que via les rôles ARIA filtrés par testing-library.
+    const items = section!.querySelectorAll("li");
     expect(items).toHaveLength(3);
   });
 
