@@ -28,13 +28,13 @@ function getSeasonalBanner(): { title: string; description: string } {
   if (month === 11) {
     return {
       title: "Vous partez pour les fêtes ?",
-      description: "Publiez votre annonce dès maintenant. Un gardien de votre région s'occupera de votre maison et de vos animaux pendant les fêtes de fin d'année.",
+      description: "Publiez votre annonce dès maintenant. Un gardien près de chez vous s'occupera de votre maison et de vos animaux pendant les fêtes de fin d'année.",
     };
   }
   if (month <= 2) {
     return {
       title: "Vous partez cet hiver ?",
-      description: "Vacances au ski, week-ends prolongés, déplacements pro : confiez votre maison et vos animaux à un gardien de votre région.",
+      description: "Vacances au ski, week-ends prolongés, déplacements pro : confiez votre maison et vos animaux à un gardien près de chez vous.",
     };
   }
   if (month <= 5) {
@@ -46,12 +46,12 @@ function getSeasonalBanner(): { title: string; description: string } {
   if (month <= 7) {
     return {
       title: "Vous partez cet été ?",
-      description: "Publiez votre annonce dès maintenant. Un gardien de votre région s'occupera de votre maison et de vos animaux pendant votre absence.",
+      description: "Publiez votre annonce dès maintenant. Un gardien près de chez vous s'occupera de votre maison et de vos animaux pendant votre absence.",
     };
   }
   return {
     title: "Vous partez cet automne ?",
-    description: "Toussaint, escapades, déplacements : un gardien de votre région veille sur votre maison et vos animaux pendant que vous êtes absent.",
+    description: "Toussaint, escapades, déplacements : un gardien près de chez vous veille sur votre maison et vos animaux pendant que vous êtes absent.",
   };
 }
 
@@ -196,7 +196,7 @@ const Landing = () => {
     <div className="min-h-screen bg-background text-foreground">
       <PageMeta
         title="Guardiens — Partez l'esprit tranquille"
-        description="Un gardien de votre région s'occupe de votre maison et de vos animaux pendant vos absences. 0 € pour les propriétaires, à vie."
+        description="Un gardien près de chez vous s'occupe de votre maison et de vos animaux pendant vos absences. 0 € pour les propriétaires, à vie."
         path="/"
         image={HOME_OG_IMAGE}
       />
@@ -384,7 +384,7 @@ const Landing = () => {
             Pourquoi publier votre annonce sur Guardiens ?
           </h2>
           <p className="text-lg text-muted-foreground text-center mt-2 max-w-2xl mx-auto">
-            Des gardiens de votre région, vérifiés, pour partir l'esprit tranquille.
+            Des gardiens près de chez vous, vérifiés, pour partir l'esprit tranquille.
           </p>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-12">
