@@ -236,15 +236,11 @@ const Pricing = () => {
           )}
 
           {grace && (
-            <section className="rounded-2xl p-6 md:p-8 text-center space-y-4 border-2 border-amber-300 bg-amber-50 mb-12 max-w-5xl mx-auto">
-              <div className="flex items-center justify-center gap-2">
-                <Star className="h-6 w-6 text-amber-500" fill="currentColor" />
-                <h2 className="font-heading text-2xl font-bold text-foreground">Les Fondateurs ont jusqu'au 13 juin</h2>
-                <Star className="h-6 w-6 text-amber-500" fill="currentColor" />
-              </div>
+            <section className="rounded-2xl p-6 md:p-8 text-center space-y-3 border-2 border-amber-300 bg-amber-50 mb-12 max-w-5xl mx-auto">
+              <h2 className="font-heading text-2xl font-bold text-foreground">Les Fondateurs ont jusqu'au 13 juin</h2>
               <p className="text-muted-foreground max-w-2xl mx-auto font-body">
-                Les membres inscrits avant le 13 mai conservent un accès gratuit jusqu'au 13 juin.
-                Après cette date, l'abonnement à 6,99€/mois sera nécessaire. Le badge Fondateur reste à vie.
+                Les membres inscrits avant le 13 mai conservent leur accès gratuit jusqu'au 13 juin.
+                Après cette date, l'abonnement à 6,99 €/mois sera nécessaire. Le badge Fondateur reste à vie.
               </p>
             </section>
           )}
