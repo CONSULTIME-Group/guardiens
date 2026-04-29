@@ -103,20 +103,39 @@ const MonAnnonceCard = memo(({ sits, pets, propertyType, propertyEnvironment, pe
 
   return (
     <div className="bg-card border border-border rounded-2xl overflow-hidden">
-      {coverPhoto && (
-        <div className="h-32 w-full overflow-hidden">
+      {coverPhoto ? (
+        <div className="relative h-40 w-full overflow-hidden">
           <img src={coverPhoto} alt="Photo du logement" className="w-full h-full object-cover" />
+          <div className="absolute inset-0 bg-gradient-to-t from-foreground/70 via-foreground/10 to-transparent" aria-hidden="true" />
+          <div className="absolute top-3 left-3 right-3 flex items-start justify-between gap-2">
+            <span className="text-[11px] uppercase tracking-wider text-background/90 font-sans bg-foreground/40 backdrop-blur-sm rounded-full px-2.5 py-1">
+              {isActive ? "Mon annonce" : "Dernière garde"}
+            </span>
+            <span className={`text-xs rounded-full px-2.5 py-1 font-medium backdrop-blur-sm ${statusConf.className}`}>
+              {statusConf.label}
+            </span>
+          </div>
+          <div className="absolute bottom-3 left-4 right-4">
+            <p className="text-base font-medium text-background leading-snug drop-shadow-sm">
+              {currentSit.title}
+            </p>
+          </div>
         </div>
-      )}
+      ) : null}
       <div className="p-5 space-y-3">
-      <div className="flex items-center justify-between">
-        <h3 className="text-sm font-semibold text-foreground">
-          {isActive ? "Mon annonce" : "Dernière garde"}
-        </h3>
-        <span className={`text-xs rounded-full px-2.5 py-0.5 font-medium ${statusConf.className}`}>
-          {statusConf.label}
-        </span>
-      </div>
+      {!coverPhoto && (
+        <>
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-semibold text-foreground">
+              {isActive ? "Mon annonce" : "Dernière garde"}
+            </h3>
+            <span className={`text-xs rounded-full px-2.5 py-0.5 font-medium ${statusConf.className}`}>
+              {statusConf.label}
+            </span>
+          </div>
+          <p className="text-sm font-medium text-foreground leading-snug">{currentSit.title}</p>
+        </>
+      )}
 
       <p className="text-sm font-medium text-foreground leading-snug">{currentSit.title}</p>
 
