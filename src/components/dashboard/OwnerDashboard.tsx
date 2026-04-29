@@ -9,7 +9,7 @@ import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import OnboardingWelcome from "./OnboardingWelcome";
 import NearbyEmergencySitters from "./NearbyEmergencySitters";
 import DashboardSkeleton from "@/components/skeletons/DashboardSkeleton";
-import { PawPrint, Plus, Eye } from "lucide-react";
+import { Plus, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { format, differenceInDays, differenceInMonths } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -290,7 +290,7 @@ const OwnerDashboard = () => {
           <Link to="/owner-profile" className="text-xs text-primary hover:underline font-medium">Gérer</Link>
         }>
           {pets.length === 0 ? (
-            <EmptyCard icon={PawPrint} text="Aucun animal enregistré" hint="Ajoutez vos compagnons pour attirer les bons gardiens" cta="Ajouter un animal" to="/owner-profile" />
+            <EmptyCard text="Aucun animal enregistré" hint="Ajoutez vos compagnons pour attirer les bons gardiens" cta="Ajouter un animal" to="/owner-profile" />
           ) : (
             <>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">

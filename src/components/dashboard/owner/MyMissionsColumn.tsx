@@ -16,7 +16,7 @@ const MyMissionsColumn = memo(({ missions }: { missions: SmallMission[] }) => {
   return (
     <div className="bg-card border border-border rounded-2xl p-5">
       <div className="flex justify-between items-center mb-4">
-        <p className="text-sm font-semibold text-foreground">Mes petites missions</p>
+        <h3 className="text-sm font-semibold text-foreground">Mes petites missions</h3>
         <Link to="/petites-missions" className="text-xs text-primary font-sans hover:underline">Voir tout</Link>
       </div>
       {sortedMissions.length === 0 ? (

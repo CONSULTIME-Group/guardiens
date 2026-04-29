@@ -36,9 +36,9 @@ const PendingReviewsCard = memo(({ pendingReviews }: { pendingReviews: PendingRe
               </div>
             )}
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold text-foreground">
+              <h3 className="text-sm font-semibold text-foreground">
                 Comment s'est passée votre garde avec {name} ?
-              </p>
+              </h3>
               <p className="text-xs text-muted-foreground mt-0.5 truncate">
                 {r.sitTitle}
                 {endLabel ? ` — terminée le ${endLabel}` : ""}

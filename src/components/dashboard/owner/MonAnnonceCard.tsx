@@ -2,7 +2,7 @@ import { memo } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { format, differenceInDays } from "date-fns";
 import { fr } from "date-fns/locale";
-import { Eye, RefreshCw, Plus, PawPrint, Home, Inbox, ArrowRight } from "lucide-react";
+import { Eye, RefreshCw, Plus, Inbox, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import ShareButtons from "@/components/sits/ShareButtons";
 import { capitalize, SPECIES_LABEL } from "./helpers";
@@ -36,10 +36,10 @@ const MonAnnonceCard = memo(({ sits, pets, propertyType, propertyEnvironment, pe
     return (
       <div className="bg-card border border-border rounded-2xl p-6 text-center space-y-3">
         <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
-          <Home className="h-6 w-6 text-primary/60" />
+          <span className="text-lg font-heading font-bold text-primary/70" aria-hidden="true">M</span>
         </div>
         <div>
-          <p className="text-sm font-semibold text-foreground">Mon annonce</p>
+          <h3 className="text-sm font-semibold text-foreground">Mon annonce</h3>
           <p className="text-xs text-muted-foreground mt-1">
             Complétez votre profil (logement + animaux) puis publiez votre première annonce.
           </p>
@@ -56,24 +56,21 @@ const MonAnnonceCard = memo(({ sits, pets, propertyType, propertyEnvironment, pe
     return (
       <div className="bg-card border-2 border-dashed border-primary/30 rounded-2xl p-5 space-y-4">
         <div className="flex items-center justify-between">
-          <p className="text-sm font-semibold text-foreground">Mon annonce</p>
+          <h3 className="text-sm font-semibold text-foreground">Mon annonce</h3>
           <span className="text-xs bg-muted text-muted-foreground rounded-full px-2 py-0.5">Brouillon</span>
         </div>
 
         {/* Preview from profile */}
-        <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
+        <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground">
           {propertyType && (
-            <span className="flex items-center gap-1">
-              <Home className="h-3 w-3" />
+            <span>
               {TYPE_LABELS[propertyType] || propertyType}
               {propertyEnvironment ? ` · ${ENV_LABELS[propertyEnvironment] || propertyEnvironment}` : ""}
             </span>
           )}
+          {propertyType && pets.length > 0 && <span aria-hidden="true">·</span>}
           {pets.length > 0 && (
-            <span className="flex items-center gap-1">
-              <PawPrint className="h-3 w-3" />
-              {pets.map(p => capitalize(p.name)).join(", ")}
-            </span>
+            <span>{pets.map(p => capitalize(p.name)).join(", ")}</span>
           )}
         </div>
 
@@ -103,22 +100,39 @@ const MonAnnonceCard = memo(({ sits, pets, propertyType, propertyEnvironment, pe
 
   return (
     <div className="bg-card border border-border rounded-2xl overflow-hidden">
-      {coverPhoto && (
-        <div className="h-32 w-full overflow-hidden">
+      {coverPhoto ? (
+        <div className="relative h-40 w-full overflow-hidden">
           <img src={coverPhoto} alt="Photo du logement" className="w-full h-full object-cover" />
+          <div className="absolute inset-0 bg-gradient-to-t from-foreground/70 via-foreground/10 to-transparent" aria-hidden="true" />
+          <div className="absolute top-3 left-3 right-3 flex items-start justify-between gap-2">
+            <span className="text-[11px] uppercase tracking-wider text-background/90 font-sans bg-foreground/40 backdrop-blur-sm rounded-full px-2.5 py-1">
+              {isActive ? "Mon annonce" : "Dernière garde"}
+            </span>
+            <span className={`text-xs rounded-full px-2.5 py-1 font-medium backdrop-blur-sm ${statusConf.className}`}>
+              {statusConf.label}
+            </span>
+          </div>
+          <div className="absolute bottom-3 left-4 right-4">
+            <p className="text-base font-medium text-background leading-snug drop-shadow-sm">
+              {currentSit.title}
+            </p>
+          </div>
         </div>
-      )}
+      ) : null}
       <div className="p-5 space-y-3">
-      <div className="flex items-center justify-between">
-        <p className="text-sm font-semibold text-foreground">
-          {isActive ? "Mon annonce" : "Dernière garde"}
-        </p>
-        <span className={`text-xs rounded-full px-2.5 py-0.5 font-medium ${statusConf.className}`}>
-          {statusConf.label}
-        </span>
-      </div>
-
-      <p className="text-sm font-medium text-foreground leading-snug">{currentSit.title}</p>
+      {!coverPhoto && (
+        <>
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-semibold text-foreground">
+              {isActive ? "Mon annonce" : "Dernière garde"}
+            </h3>
+            <span className={`text-xs rounded-full px-2.5 py-0.5 font-medium ${statusConf.className}`}>
+              {statusConf.label}
+            </span>
+          </div>
+          <p className="text-sm font-medium text-foreground leading-snug">{currentSit.title}</p>
+        </>
+      )}
 
       <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
         <span>{dateRange}</span>
@@ -184,11 +198,13 @@ const MonAnnonceCard = memo(({ sits, pets, propertyType, propertyEnvironment, pe
       {pets.length > 0 && (
         <div className="flex items-center gap-2">
           {pets.slice(0, 4).map(pet => (
-            <div key={pet.id} className="flex items-center gap-1 text-xs text-muted-foreground">
+            <div key={pet.id} className="flex items-center gap-1.5 text-xs text-muted-foreground">
               {pet.photo_url ? (
                 <img src={pet.photo_url} alt={pet.name} className="w-5 h-5 rounded-full object-cover" />
               ) : (
-                <PawPrint className="h-3.5 w-3.5" />
+                <span className="w-5 h-5 rounded-full bg-primary/10 text-primary text-[10px] font-semibold flex items-center justify-center" aria-hidden="true">
+                  {pet.name?.[0]?.toUpperCase() || "·"}
+                </span>
               )}
               <span>{capitalize(pet.name)}</span>
             </div>
@@ -200,7 +216,7 @@ const MonAnnonceCard = memo(({ sits, pets, propertyType, propertyEnvironment, pe
       <div className="flex flex-wrap gap-2 pt-1">
         {isActive ? (
           <>
-            <Button variant="outline" size="sm" className="flex-1 min-w-[110px] text-xs" onClick={() => navigate(`/sits/${currentSit.id}`)}>
+            <Button size="sm" className="flex-1 min-w-[110px] text-xs" onClick={() => navigate(`/sits/${currentSit.id}`)}>
               <Eye className="h-3.5 w-3.5 mr-1" /> Voir l'annonce
             </Button>
             <Button variant="outline" size="sm" className="flex-1 min-w-[110px] text-xs" onClick={() => navigate(`/sits/${currentSit.id}/edit`)}>
