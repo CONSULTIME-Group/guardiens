@@ -168,12 +168,19 @@ const OwnerDashboard = () => {
       </div>
 
       {/* ═══ Hero header ═══ */}
-      <div className="relative overflow-hidden bg-primary rounded-b-3xl px-5 md:px-10 pt-6 md:pt-8 pb-5 md:pb-6 mx-0">
-        <div className="absolute right-0 top-0 opacity-[0.06] pointer-events-none">
-          <svg width="280" height="200" viewBox="0 0 280 200" aria-hidden="true">
-            <ellipse cx="200" cy="100" rx="160" ry="100" fill="white" />
-            <rect x="80" y="50" width="100" height="90" fill="white" rx="6" />
-            <polygon points="80,50 130,15 180,50" fill="white" />
+      <div className="relative overflow-hidden bg-primary rounded-b-3xl px-5 md:px-10 pt-6 md:pt-8 pb-5 md:pb-6 mx-0 animate-fade-in">
+        {/* Texture organique */}
+        <div className="absolute -right-12 -top-8 opacity-[0.10] pointer-events-none" aria-hidden="true">
+          <svg width="360" height="260" viewBox="0 0 360 260" fill="none">
+            <path
+              d="M40 180 C 80 120, 160 100, 220 140 S 340 220, 320 80"
+              stroke="white"
+              strokeWidth="2"
+              strokeLinecap="round"
+              fill="none"
+            />
+            <circle cx="280" cy="90" r="70" fill="white" opacity="0.6" />
+            <circle cx="180" cy="180" r="40" fill="white" opacity="0.4" />
           </svg>
         </div>
         <div className="relative z-10 flex flex-col md:flex-row md:items-end md:justify-between gap-4">
@@ -201,7 +208,7 @@ const OwnerDashboard = () => {
           </div>
           <button
             onClick={() => navigate("/sits/create")}
-            className="shrink-0 bg-primary-foreground text-primary rounded-xl px-5 py-2.5 text-sm font-medium font-sans hover:bg-primary-foreground/90 transition-colors w-full md:w-auto text-center"
+            className="shrink-0 bg-primary-foreground text-primary rounded-xl px-5 py-2.5 text-sm font-medium font-sans hover:bg-primary-foreground/90 hover:shadow-md transition-all w-full md:w-auto text-center shadow-sm"
           >
             + Publier une annonce
           </button>
