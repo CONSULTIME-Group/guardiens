@@ -197,6 +197,7 @@ function syncIndexHtml(html, truth) {
 
 function main() {
   const truth = loadHomeTruth();
+  assertNoForbiddenVocabulary(truth);
   const original = readFileSync(INDEX_PATH, "utf8");
   const { html: updated, unreplaced } = syncIndexHtml(original, truth);
 
