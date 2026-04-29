@@ -281,17 +281,51 @@ export function useSitterDashboardData(userId: string | undefined) {
     return () => { supabase.removeChannel(channel); };
   }, [userId, setPartial]);
 
+  // Manual refetch of the unread counter — exposed for retry on error.
+  const refetchUnread = useCallback(async () => {
+    if (!userId) return;
+    setPartial({ unreadLoading: true, unreadError: null });
+    const { data: count, error } = await (supabase as any).rpc(
+      "get_unread_messages_count",
+      { _user_id: userId }
+    );
+    if (error) {
+      setPartial({
+        unreadLoading: false,
+        unreadError: "Impossible de charger vos messages non lus.",
+      });
+      return;
+    }
+    setPartial({
+      unreadCount: (count as number) ?? 0,
+      unreadLoading: false,
+      unreadError: null,
+    });
+  }, [userId, setPartial]);
+
   // Realtime sync for unread messages count
   // Re-fetches the RPC whenever a message is inserted or its read_at is updated.
   // The RPC itself enforces: not sender, not archived, only my conversations.
   useEffect(() => {
     if (!userId) return;
     let timer: ReturnType<typeof setTimeout> | null = null;
-    const refresh = async () => {
+    const refresh = () => {
       if (timer) clearTimeout(timer);
       timer = setTimeout(async () => {
-        const { data: count } = await (supabase as any).rpc("get_unread_messages_count", { _user_id: userId });
-        setPartial({ unreadCount: (count as number) ?? 0 });
+        const { data: count, error } = await (supabase as any).rpc(
+          "get_unread_messages_count",
+          { _user_id: userId }
+        );
+        if (error) {
+          setPartial({
+            unreadError: "Impossible de rafraîchir vos messages non lus.",
+          });
+          return;
+        }
+        setPartial({
+          unreadCount: (count as number) ?? 0,
+          unreadError: null,
+        });
       }, 250);
     };
     const channel = supabase
@@ -312,5 +346,5 @@ export function useSitterDashboardData(userId: string | undefined) {
     await supabase.from("sitter_profiles").update({ is_available: newVal }).eq("user_id", userId);
   }, [userId, data.isAvailable, setPartial]);
 
-  return { ...data, setPartial, toggleAvailability };
+  return { ...data, setPartial, toggleAvailability, refetchUnread };
 }
