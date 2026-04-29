@@ -197,26 +197,21 @@ const Pricing = () => {
           {before && (
             <section className="mb-12 md:mb-16">
               <div className="w-full max-w-5xl mx-auto bg-gradient-to-br from-amber-50 to-amber-100/50 border border-amber-200/60 rounded-2xl overflow-hidden">
-                <div className="bg-amber-100 px-6 py-2.5 flex items-center justify-center gap-2">
-                  <Star className="w-4 h-4 text-amber-500" fill="currentColor" />
+                <div className="bg-amber-100 px-6 py-2.5 text-center">
                   <span className="text-sm font-medium text-amber-800 font-body tracking-wide">
                     Programme Fondateur — clôture le 13 mai 2026
                   </span>
-                  <Star className="w-4 h-4 text-amber-500" fill="currentColor" />
                 </div>
 
                 <div className="px-6 sm:px-10 py-7">
                   <div className="flex flex-col md:flex-row items-center gap-6">
-                    <div className="flex items-center gap-4">
-                      <Clock className="w-10 h-10 text-amber-600 shrink-0" />
-                      <div>
-                        <p className="font-heading text-3xl font-bold text-amber-700 tabular-nums leading-none">
-                          {daysLeft} jour{daysLeft > 1 ? 's' : ''}
-                        </p>
-                        <p className="text-xs text-amber-600/80 font-body mt-1">
-                          pour rejoindre les Fondateurs
-                        </p>
-                      </div>
+                    <div className="text-center md:text-left">
+                      <p className="font-heading text-3xl font-bold text-amber-700 tabular-nums leading-none">
+                        {daysLeft} jour{daysLeft > 1 ? 's' : ''}
+                      </p>
+                      <p className="text-xs text-amber-600/80 font-body mt-1">
+                        pour rejoindre les Fondateurs
+                      </p>
                     </div>
 
                     <div className="flex-1 text-center md:text-left">
