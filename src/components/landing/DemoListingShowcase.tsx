@@ -1,9 +1,11 @@
 import React from "react";
 import { Link } from "react-router-dom";
 
+// Slugs alignés sur src/data/demoListings.ts → page /annonces/demo/:slug
 const DEMO_LISTINGS = [
   {
     id: "demo-1",
+    slug: "lyon-laika-jardin",
     photo: "/images/landing/annonce-maison-jardin.webp",
     city: "Lyon 6e",
     animals: ["1 chien", "2 chats"],
@@ -16,6 +18,7 @@ const DEMO_LISTINGS = [
   },
   {
     id: "demo-2",
+    slug: "annecy-lac-basse-cour",
     photo: "/images/landing/annonce-maison-lac.webp",
     city: "Annecy",
     animals: ["3 poules", "1 chat"],
@@ -28,6 +31,7 @@ const DEMO_LISTINGS = [
   },
   {
     id: "demo-3",
+    slug: "grenoble-deux-chats-appart",
     photo: "/images/landing/annonce-appartement-chats.webp",
     city: "Grenoble",
     animals: ["2 chats"],
