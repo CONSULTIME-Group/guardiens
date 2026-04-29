@@ -135,6 +135,7 @@ RevealSection.displayName = "RevealSection";
 
 const Landing = () => {
   const navigate = useNavigate();
+  const seasonal = getSeasonalBanner();
 
   const [kpiMaisons, setKpiMaisons] = useState<number>(37);
   const [kpiAnimaux, setKpiAnimaux] = useState<number>(234);
