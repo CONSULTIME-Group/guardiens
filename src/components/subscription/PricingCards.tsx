@@ -128,8 +128,6 @@ export default function PricingCards() {
         Vous recevrez un rappel 30 jours avant.
       </p>
       </div>
-
-      <FreeAccountSection />
     </div>
   );
 }
