@@ -1072,7 +1072,7 @@ const Landing = () => {
               House-sitting près de chez vous
             </h2>
             <p className="text-center text-foreground/60 font-body max-w-2xl mx-auto mb-16">
-              Des gardiens vérifiés dans votre ville, disponibles rapidement. 0 € pour les propriétaires.
+              Des gardiens vérifiés près de chez vous, disponibles rapidement. 0 € pour les propriétaires, à vie.
             </p>
           </RevealSection>
 
