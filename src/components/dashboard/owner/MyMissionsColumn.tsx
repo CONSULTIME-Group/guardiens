@@ -6,13 +6,20 @@ import type { SmallMission } from "./types";
 const MyMissionsColumn = memo(({ missions }: { missions: SmallMission[] }) => {
   const navigate = useNavigate();
 
+  // Tri : actives (non terminées) d'abord, puis terminées — ordre interne préservé.
+  const sortedMissions = [...missions].sort((a, b) => {
+    const aDone = a.status === "completed" ? 1 : 0;
+    const bDone = b.status === "completed" ? 1 : 0;
+    return aDone - bDone;
+  });
+
   return (
     <div className="bg-card border border-border rounded-2xl p-5">
       <div className="flex justify-between items-center mb-4">
         <p className="text-sm font-semibold text-foreground">Mes petites missions</p>
         <Link to="/petites-missions" className="text-xs text-primary font-sans hover:underline">Voir tout</Link>
       </div>
-      {missions.length === 0 ? (
+      {sortedMissions.length === 0 ? (
         <div className="py-2">
           <p className="text-xs text-muted-foreground font-sans mb-3">
             <span className="font-semibold text-foreground">Osez !</span> Demandez un coup de main en publiant une petite mission, ou proposez quelque chose en échange — un café, une histoire, un service…
