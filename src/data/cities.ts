@@ -90,7 +90,7 @@ export const CITIES: CityData[] = [
     ],
     h1: "Garde de chien et de chat à Lyon : la plateforme de confiance des propriétaires",
     metaDescription:
-      "Faites garder votre chien ou votre chat à Lyon par un home sitter de proximité vérifié. Inscription gratuite pour les propriétaires. Sans commission.",
+      "Faites garder votre chien ou votre chat à Lyon par un home sitter de proximité vérifié. Inscription à 0 € pour les propriétaires. Sans commission.",
     localSpots: [
       {
         name: "Parc de la Tête d'Or",
@@ -182,7 +182,7 @@ export const CITIES: CityData[] = [
     ],
     h1: "House-sitting à Caluire-et-Cuire : votre gardien de confiance",
     metaDescription:
-      "Garde de maison et animaux à Caluire-et-Cuire. Gardiens vérifiés à 15 min. Résidences avec jardin, chiens et chats bienvenus. Gratuit propriétaires.",
+      "Garde de maison et animaux à Caluire-et-Cuire. Gardiens vérifiés à 15 min. Résidences avec jardin, chiens et chats bienvenus. 0 € propriétaires.",
     localSpots: [
       {
         name: "Parc de Montribloud",
