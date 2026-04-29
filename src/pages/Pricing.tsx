@@ -301,7 +301,7 @@ const Pricing = () => {
                       0 €
                     </p>
                     <p className="text-xs text-foreground/55 font-body pt-1">
-                      Puis <span className="font-semibold text-foreground">6,99 €/mois</span> · 7 jours d'essai
+                      Puis <span className="font-semibold text-foreground">6,99 €/mois</span> à partir du 14 juin 2026
                     </p>
                   </div>
                 ) : (
