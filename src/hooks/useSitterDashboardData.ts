@@ -266,6 +266,7 @@ export function useSitterDashboardData(userId: string | undefined) {
     };
 
     load();
+    return () => { cancelled = true; };
   }, [userId]);
 
   // Realtime sync for availability
