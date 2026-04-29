@@ -407,35 +407,29 @@ const Pricing = () => {
           <SecurityTrustSection />
 
           {/* ═══ Comparatif ═══ */}
-          <section className="mb-12 md:mb-16 max-w-3xl mx-auto">
+          <section className="mb-12 md:mb-16 max-w-4xl mx-auto">
             <div className="text-center mb-8">
               <h2 className="font-heading text-2xl md:text-3xl font-semibold text-foreground mb-3">
-                Guardiens vs plateformes classiques
+                Notre engagement tarifaire
               </h2>
               <p className="text-sm font-body text-foreground/60">
-                Pas de commission, pas de frais cachés. Voici ce qui nous différencie.
+                Six promesses concrètes, sans astérisque ni frais cachés.
               </p>
             </div>
-            <div className="overflow-hidden rounded-2xl border border-border/40">
-              <table className="w-full text-sm font-body">
-                <thead>
-                  <tr className="bg-muted/40">
-                    <th className="text-left py-3 px-4 font-medium text-foreground/70"></th>
-                    <th className="text-center py-3 px-4 font-heading font-semibold text-primary">Guardiens</th>
-                    <th className="text-center py-3 px-4 font-medium text-foreground/50">Autres plateformes</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {comparisonRows.map((row, i) => (
-                    <tr key={row.label} className={i % 2 === 0 ? "bg-card" : "bg-muted/20"}>
-                      <td className="py-3 px-4 text-foreground/70">{row.label}</td>
-                      <td className="py-3 px-4 text-center font-medium text-primary">{row.guardiens}</td>
-                      <td className="py-3 px-4 text-center text-foreground/40">{row.others}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+            <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {promiseRows.map((row) => (
+                <li
+                  key={row.label}
+                  className="flex items-center justify-between gap-4 rounded-xl border border-border/40 bg-card px-4 py-3"
+                >
+                  <span className="text-sm font-body text-foreground/75">{row.label}</span>
+                  <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary font-body whitespace-nowrap">
+                    <Check className="h-4 w-4" />
+                    {row.value}
+                  </span>
+                </li>
+              ))}
+            </ul>
           </section>
 
           {/* ═══ Témoignage ═══ */}
