@@ -240,16 +240,12 @@ const MonAnnonceCard = memo(({ sits, pets, propertyType, propertyEnvironment, pe
           </>
         ) : (
           <>
-            <Button size="sm" className="w-full text-xs" onClick={() => navigate(`/sits/create?from=${currentSit.id}`)}>
-              <RefreshCw className="h-3.5 w-3.5 mr-1" /> Republier cette annonce
+            <Button variant="outline" size="sm" className="flex-1 min-w-[140px] text-xs" onClick={() => navigate(`/sits/create?from=${currentSit.id}`)}>
+              <RefreshCw className="h-3.5 w-3.5 mr-1" /> Republier
             </Button>
-            <button
-              type="button"
-              onClick={() => navigate(`/sits/create`)}
-              className="w-full text-xs text-muted-foreground hover:text-foreground hover:underline transition-colors py-1"
-            >
-              Ou créer une nouvelle annonce
-            </button>
+            <Button size="sm" className="flex-1 min-w-[140px] text-xs" onClick={() => navigate(`/sits/create`)}>
+              <Plus className="h-3.5 w-3.5 mr-1" /> Nouvelle annonce
+            </Button>
           </>
         )}
         </div>
