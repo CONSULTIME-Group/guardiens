@@ -750,7 +750,7 @@ const Landing = () => {
                 to="/inscription"
                 className="inline-flex items-center gap-2 bg-card text-foreground border border-border px-8 py-4 rounded-full font-body font-medium text-sm hover:bg-muted transition-colors"
               >
-                Créer mon compte — c'est gratuit
+                Créer mon compte — 0 €
               </Link>
             </div>
           </RevealSection>
