@@ -14,16 +14,31 @@ interface ContextualResourcesProps {
   loading?: boolean;
 }
 
+/**
+ * Dimensions verrouillées pour éviter tout layout shift entre :
+ * - état skeleton / état chargé
+ * - les 3 variantes de contenu (annoncesCount/gardesCount)
+ * - les changements de longueur de titre/description
+ *
+ * - Section : min-height fixe (titre + grille).
+ * - Titre : hauteur fixe via line-clamp-1.
+ * - Grille : grid-rows explicite, gap stable, items-stretch.
+ * - Carte : hauteur fixe (h-[88px]) + line-clamp pour titre/desc.
+ */
+const SECTION_CLASSES = "animate-fade-in min-h-[140px]";
+const TITLE_CLASSES = "font-body text-base font-semibold mb-3 h-6 leading-6 line-clamp-1";
+const GRID_CLASSES = "grid grid-cols-1 md:grid-cols-3 grid-rows-[auto] gap-2 items-stretch";
+const CARD_BASE_CLASSES = "block h-[88px] rounded-xl border border-border bg-card p-4 overflow-hidden";
+
 export const ContextualResourcesSkeleton = () => (
-  <section aria-label="Chargement des ressources" aria-busy="true" className="animate-fade-in">
-    <Skeleton className="h-5 w-64 mb-3" />
-    <ul className="grid grid-cols-1 md:grid-cols-3 gap-2">
+  <section aria-label="Chargement des ressources" aria-busy="true" className={SECTION_CLASSES}>
+    <Skeleton className="h-6 w-64 mb-3" />
+    <ul className={GRID_CLASSES}>
       {Array.from({ length: 3 }).map((_, i) => (
         <li key={i}>
-          <div className="block h-full rounded-xl border border-border bg-card p-4">
+          <div className={CARD_BASE_CLASSES}>
             <Skeleton className="h-4 w-3/4 mb-2" />
             <Skeleton className="h-3 w-full mt-2" />
-            <Skeleton className="h-3 w-2/3 mt-1.5" />
           </div>
         </li>
       ))}
@@ -64,20 +79,20 @@ const ContextualResources = memo(({ annoncesCount, gardesCount, loading }: Conte
   // Pas de return null : la section est structurelle dans la mise en page du dashboard.
 
   return (
-    <section aria-label={resTitle} className="animate-fade-in">
-      <h2 className="font-body text-base font-semibold mb-3">{resTitle}</h2>
-      <ul className="grid grid-cols-1 md:grid-cols-3 gap-2">
+    <section aria-label={resTitle} className={SECTION_CLASSES}>
+      <h2 className={TITLE_CLASSES}>{resTitle}</h2>
+      <ul className={GRID_CLASSES}>
         {resItems.map((r) => (
           <li key={r.href}>
             <Link
               to={r.href}
-              className="block h-full rounded-xl border border-border bg-card hover:bg-primary/5 hover:border-primary/30 transition-colors p-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className={`${CARD_BASE_CLASSES} hover:bg-primary/5 hover:border-primary/30 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring`}
             >
-              <p className="text-sm font-semibold text-foreground leading-snug">
+              <p className="text-sm font-semibold text-foreground leading-snug line-clamp-1">
                 {r.title}
                 <span className="text-primary ml-1" aria-hidden="true">→</span>
               </p>
-              <p className="text-xs text-muted-foreground mt-1 leading-relaxed">{r.description}</p>
+              <p className="text-xs text-muted-foreground mt-1 leading-relaxed line-clamp-2">{r.description}</p>
             </Link>
           </li>
         ))}
