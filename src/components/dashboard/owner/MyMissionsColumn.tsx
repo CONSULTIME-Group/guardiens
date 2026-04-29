@@ -30,7 +30,7 @@ const MyMissionsColumn = memo(({ missions }: { missions: SmallMission[] }) => {
           </div>
         </div>
       ) : (
-        missions.map(m => {
+        sortedMissions.map(m => {
           const responseCount = m.small_mission_responses?.length || 0;
           const isCompleted = m.status === "completed";
           return (
