@@ -36,7 +36,7 @@ const MonAnnonceCard = memo(({ sits, pets, propertyType, propertyEnvironment, pe
     return (
       <div className="bg-card border border-border rounded-2xl p-6 text-center space-y-3">
         <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
-          <Home className="h-6 w-6 text-primary/60" />
+          <span className="text-lg font-heading font-bold text-primary/70" aria-hidden="true">M</span>
         </div>
         <div>
           <h3 className="text-sm font-semibold text-foreground">Mon annonce</h3>
@@ -61,19 +61,16 @@ const MonAnnonceCard = memo(({ sits, pets, propertyType, propertyEnvironment, pe
         </div>
 
         {/* Preview from profile */}
-        <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
+        <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground">
           {propertyType && (
-            <span className="flex items-center gap-1">
-              <Home className="h-3 w-3" />
+            <span>
               {TYPE_LABELS[propertyType] || propertyType}
               {propertyEnvironment ? ` · ${ENV_LABELS[propertyEnvironment] || propertyEnvironment}` : ""}
             </span>
           )}
+          {propertyType && pets.length > 0 && <span aria-hidden="true">·</span>}
           {pets.length > 0 && (
-            <span className="flex items-center gap-1">
-              <PawPrint className="h-3 w-3" />
-              {pets.map(p => capitalize(p.name)).join(", ")}
-            </span>
+            <span>{pets.map(p => capitalize(p.name)).join(", ")}</span>
           )}
         </div>
 
