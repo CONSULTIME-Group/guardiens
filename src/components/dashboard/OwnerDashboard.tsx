@@ -345,7 +345,7 @@ const OwnerDashboard = () => {
 
       {/* ═══ Contextual resources ═══ */}
       <div className="px-5 md:px-8">
-        <ContextualResources annoncesCount={sits.length} gardesCount={completedSits.length} />
+        <ContextualResources annoncesCount={sits.length} gardesCount={completedSits.length} loading={loading} />
       </div>
 
       {/* ═══ Bottom columns ═══ */}
