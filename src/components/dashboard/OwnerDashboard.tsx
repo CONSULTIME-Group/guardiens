@@ -30,6 +30,7 @@ import ExchangesColumn from "./owner/ExchangesColumn";
 import DashSection from "./owner/DashSection";
 import EmptyCard from "./owner/EmptyCard";
 import StatCard from "./owner/StatCard";
+import PendingReviewsCard from "./owner/PendingReviewsCard";
 import {
   SPECIES_LABEL, PROPRIO_SPECIAL_IDS, BANNER_STYLES,
   capitalize, capitalizeWords,
@@ -53,6 +54,7 @@ const OwnerDashboard = () => {
     sits, pets, recentApps, reviews, highlights, smallMissions, myMissions,
     verificationStatus, sitterBadges, sitterProfiles, trustedSitterCount,
     propertyType, propertyEnvironment, propertyCoverPhoto, onboardingChecks,
+    pendingReviews,
   } = data;
 
   /* ── UI state ── */
