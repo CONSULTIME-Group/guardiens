@@ -196,7 +196,7 @@ const Landing = () => {
     <div className="min-h-screen bg-background text-foreground">
       <PageMeta
         title="Guardiens — Partez l'esprit tranquille"
-        description="Un gardien près de chez vous s'occupe de votre maison et de vos animaux pendant vos absences. 0 € pour les propriétaires, à vie."
+        description="Un gardien près de chez vous veille sur votre maison et vos animaux pendant vos absences. Service offert pour les propriétaires, à vie (0 €). Sans carte bancaire."
         path="/"
         image={HOME_OG_IMAGE}
       />
@@ -210,7 +210,7 @@ const Landing = () => {
             name: "Guardiens",
             url: "https://guardiens.fr",
             logo: "https://guardiens.fr/favicon.ico",
-            description: "Plateforme de pet sitting et house sitting de proximité — 0 € pour les propriétaires, à vie.",
+            description: "Plateforme de pet sitting et house sitting de proximité — service offert pour les propriétaires, à vie (0 €).",
             areaServed: { "@type": "Country", name: "France" },
             knowsAbout: ["House-sitting", "Pet-sitting", "Garde d'animaux à domicile", "Entraide entre gens du coin", "Petites missions entre gens du coin", "Proximité"],
             slogan: "Quelqu'un du coin veille sur votre maison.",
@@ -242,14 +242,14 @@ const Landing = () => {
             "@context": "https://schema.org",
             "@type": "Service",
             name: "Pet sitting & House sitting de proximité",
-            description: "Service de garde d'animaux et house sitting de proximité. Avis croisés, 0 € pour les propriétaires à vie.",
+            description: "Service de garde d'animaux et house sitting de proximité. Avis croisés, service offert pour les propriétaires à vie (0 €).",
             provider: { "@type": "Organization", name: "Guardiens", url: "https://guardiens.fr" },
             areaServed: { "@type": "Country", name: "France" },
             serviceType: ["Pet sitting", "House sitting", "Garde d'animaux", "Gardiennage de maison", "Garde de chien", "Garde de chat"],
             offers: [
-              { "@type": "Offer", name: "Espace propriétaire", price: "0", priceCurrency: "EUR", description: "Publication d'annonces et mise en relation à 0 € à vie pour les propriétaires" },
-              { "@type": "Offer", name: "Abonnement gardien", price: "6.99", priceCurrency: "EUR", description: "Abonnement gardien à 6,99 €/mois après le 13 juin 2026 — accès à 0 € jusqu'à cette date" },
-              { "@type": "Offer", name: "Entraide entre gens du coin", price: "0", priceCurrency: "EUR", description: "Petites missions et entraide à 0 € pour tous, pour toujours" },
+              { "@type": "Offer", name: "Espace propriétaire", price: "0", priceCurrency: "EUR", description: "Publication d'annonces et mise en relation offertes à vie pour les propriétaires (0 €). Sans carte bancaire." },
+              { "@type": "Offer", name: "Abonnement gardien", price: "6.99", priceCurrency: "EUR", description: "Abonnement gardien à 6,99 €/mois après le 13 juin 2026 — accès offert (0 €) jusqu'à cette date." },
+              { "@type": "Offer", name: "Entraide entre gens du coin", price: "0", priceCurrency: "EUR", description: "Petites missions et entraide offertes pour tous, pour toujours (0 €)." },
             ],
           }),
         }}
@@ -261,8 +261,8 @@ const Landing = () => {
             "@context": "https://schema.org",
             "@type": "FAQPage",
             mainEntity: [
-              { "@type": "Question", name: "Qu'est-ce que le house sitting ?", acceptedAnswer: { "@type": "Answer", text: "Le house sitting est un échange de services : un gardien habite à 0 € dans votre maison pendant votre absence et prend soin de vos animaux. L'échange n'implique aucune transaction financière entre les deux parties." } },
-              { "@type": "Question", name: "Guardiens est-il à 0 € ?", acceptedAnswer: { "@type": "Answer", text: "Oui, Guardiens est à 0 € pour les propriétaires, à vie. Les gardiens bénéficient d'un accès à 0 € jusqu'au 13 juin 2026, puis l'abonnement est à 6,99 €/mois. L'entraide reste à 0 € pour tous, pour toujours." } },
+              { "@type": "Question", name: "Qu'est-ce que le house sitting ?", acceptedAnswer: { "@type": "Answer", text: "Le house sitting est un échange de services : un gardien habite gratuitement (0 €) dans votre maison pendant votre absence et prend soin de vos animaux. L'échange n'implique aucune transaction financière entre les deux parties." } },
+              { "@type": "Question", name: "Guardiens est-il offert pour les propriétaires ?", acceptedAnswer: { "@type": "Answer", text: "Oui, Guardiens est entièrement offert pour les propriétaires (0 €), à vie, sans carte bancaire. Les gardiens bénéficient d'un accès offert (0 €) jusqu'au 13 juin 2026, puis l'abonnement est à 6,99 €/mois. L'entraide entre gens du coin reste offerte pour tous, pour toujours (0 €)." } },
               { "@type": "Question", name: "Comment trouver un pet sitter près de chez moi ?", acceptedAnswer: { "@type": "Answer", text: "Inscrivez-vous sur Guardiens, publiez votre annonce de garde avec les dates et vos animaux, et recevez des candidatures de gardiens qui habitent près de chez vous." } },
             ],
           }),

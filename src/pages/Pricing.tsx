@@ -153,13 +153,13 @@ const Pricing = () => {
       <PageMeta
         title={
           before
-            ? "Tarifs Guardiens — 0 € pour tous jusqu'au 13 juin 2026"
-            : "Tarifs Guardiens — 0 € pour les propriétaires, 6,99 €/mois pour les gardiens"
+            ? "Tarifs Guardiens — Offert pour tous jusqu'au 13 juin 2026 (0 €)"
+            : "Tarifs Guardiens — Offert pour les propriétaires (0 €), 6,99 €/mois pour les gardiens"
         }
         description={
           before
-            ? "0 € jusqu'au 13 juin 2026 pour tous, gardiens comme propriétaires. Sans carte bancaire, sans commission, sans frais cachés."
-            : "0 € à vie pour les propriétaires. 6,99 €/mois pour les gardiens avec 7 jours d'essai. Sans commission, sans frais cachés."
+            ? "Accès complet offert jusqu'au 13 juin 2026 pour tous, gardiens comme propriétaires (0 €). Sans carte bancaire, sans commission, sans frais cachés."
+            : "Offert à vie pour les propriétaires (0 €). 6,99 €/mois pour les gardiens avec 7 jours d'essai. Sans commission, sans frais cachés."
         }
         path="/tarifs"
       />
