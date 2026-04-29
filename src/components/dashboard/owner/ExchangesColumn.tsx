@@ -12,30 +12,19 @@ const ExchangesColumn = memo(({ missions }: { missions: SmallMission[] }) => {
         <Link to="/petites-missions" className="text-xs text-primary font-sans hover:underline">Voir tout</Link>
       </div>
       <p className="text-xs text-muted-foreground font-sans mb-3">
-        <span className="font-semibold text-foreground">Osez !</span> Demandez un coup de main en publiant une petite mission, ou proposez quelque chose en échange — un café, une histoire, un service…
+        Découvrez les besoins de gens du coin et proposez votre aide ponctuelle.
       </p>
-      <div className="flex flex-col gap-2 mb-3">
-        <button
-          onClick={() => navigate("/petites-missions/creer")}
-          className="w-full bg-primary text-primary-foreground rounded-xl py-2.5 text-xs font-sans font-medium"
-        >
-          Publier un besoin
-        </button>
-        <button
-          onClick={() => navigate("/petites-missions")}
-          className="w-full border border-primary text-primary rounded-xl py-2.5 text-xs font-sans font-medium"
-        >
-          Proposer mon aide
-        </button>
-      </div>
       {missions.length === 0 ? (
         <div className="rounded-xl bg-muted/40 border border-dashed border-border p-3 text-center">
           <p className="text-xs text-muted-foreground font-sans italic">
             Aucune mission autour de vous pour le moment.
           </p>
-          <p className="text-xs text-foreground/80 font-sans mt-1">
-            Soyez la première étincelle&nbsp;: publiez un besoin ou proposez votre aide ci-dessus.
-          </p>
+          <button
+            onClick={() => navigate("/petites-missions")}
+            className="mt-2 text-xs text-primary hover:underline font-sans font-medium"
+          >
+            Parcourir toutes les missions →
+          </button>
         </div>
       ) : (
         missions.map(m => (
