@@ -290,7 +290,7 @@ const Landing = () => {
 
             {/* Badge 0 € propriétaires */}
             <div className="inline-flex items-center rounded-full px-4 py-1.5 mb-6 bg-white/15 border border-white/30 backdrop-blur-sm animate-hero-fade-up">
-              <span className="font-body text-xs text-white tracking-wide">0 € pour les propriétaires — pour toujours</span>
+              <span className="font-body text-xs text-white tracking-wide">0 € pour les propriétaires, à vie</span>
             </div>
 
             {/* H1 with staggered animation */}
