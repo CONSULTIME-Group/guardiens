@@ -223,7 +223,7 @@ export const Sidebar = () => {
                   Messagerie
                   <Crown className="h-[11px] w-[11px] text-amber-500 ml-1" />
                   {unreadCount > 0 && (
-                    <span className="absolute right-3 bg-destructive text-destructive-foreground text-[10px] rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1 font-semibold">
+                    <span className="absolute right-3 bg-destructive text-destructive-foreground text-[10px] rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1 font-semibold tabular-nums">
                       {unreadCount > 99 ? "99+" : unreadCount}
                     </span>
                   )}
