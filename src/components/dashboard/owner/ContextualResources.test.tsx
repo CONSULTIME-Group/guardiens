@@ -18,7 +18,7 @@ describe("ContextualResources", () => {
     { label: "annonces et gardes existantes", annoncesCount: 3, gardesCount: 5, expectedHeading: /optimiser vos prochaines gardes/i },
     // Cas limites
     { label: "valeurs très élevées", annoncesCount: 9999, gardesCount: 9999, expectedHeading: /optimiser vos prochaines gardes/i },
-    { label: "valeurs négatives (défensif)", annoncesCount: -1, gardesCount: -5, expectedHeading: /préparer votre première garde/i },
+    { label: "valeurs négatives (défensif, traitées comme actives)", annoncesCount: -1, gardesCount: -5, expectedHeading: /optimiser vos prochaines gardes/i },
   ];
 
   it.each(cases)(
