@@ -95,11 +95,17 @@ export function useOwnerDashboardData(userId: string | undefined) {
         const sitsData = (sitsRes.data || []) as SitRow[];
         const p = profileRes.data;
         const verStatus = p?.identity_verification_status || "not_submitted";
-        const propsData = propsRes.data || [];
+        const propsData = (propsRes.data || []) as Array<{
+          id: string;
+          type?: string | null;
+          environment?: string | null;
+          photos?: string[] | null;
+        }>;
 
-        const propertyType = propsData[0] ? ((propsData[0] as any).type || null) : null;
-        const propertyEnvironment = propsData[0] ? ((propsData[0] as any).environment || null) : null;
-        const photos = propsData[0] ? (propsData[0] as any).photos : null;
+        const firstProp = propsData[0];
+        const propertyType = firstProp?.type ?? null;
+        const propertyEnvironment = firstProp?.environment ?? null;
+        const photos = firstProp?.photos ?? null;
         const propertyCoverPhoto = Array.isArray(photos) && photos.length > 0 ? photos[0] : null;
 
         const onboardingChecks: OnboardingChecks = {
@@ -125,8 +131,8 @@ export function useOwnerDashboardData(userId: string | undefined) {
         // Applications + sitter details
         const sitIds = sitsData.map(s => s.id);
         let recentApps: AppRow[] = [];
-        let sitterProfiles: Record<string, SitterInfo> = {};
-        let sitterBadges: Record<string, { badge_key: string; count: number }[]> = {};
+        const sitterProfiles: Record<string, SitterInfo> = {};
+        const sitterBadges: Record<string, { badge_key: string; count: number }[]> = {};
 
         if (sitIds.length > 0) {
           const { data: apps } = await supabase
