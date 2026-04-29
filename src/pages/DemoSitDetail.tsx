@@ -377,9 +377,32 @@ const DemoSitDetail = () => {
               {!isAuthenticated ? (
                 <div className="space-y-2">
                   <Button asChild className="w-full">
-                    <Link to="/register?role=sitter">Devenir gardien</Link>
+                    <Link
+                      to="/inscription?role=owner"
+                      onClick={() =>
+                        trackEvent("cta_proprio_clicked", {
+                          source: "demo_sit_detail",
+                          metadata: { location: "demo_detail_primary_cta", slug: sit.slug },
+                        })
+                      }
+                    >
+                      J'ouvre un compte — 0 € pour les propriétaires
+                    </Link>
                   </Button>
                   <Button asChild variant="outline" className="w-full">
+                    <Link
+                      to="/inscription?role=sitter"
+                      onClick={() =>
+                        trackEvent("cta_sitter_clicked", {
+                          source: "demo_sit_detail",
+                          metadata: { location: "demo_detail_sitter_cta", slug: sit.slug },
+                        })
+                      }
+                    >
+                      Devenir gardien
+                    </Link>
+                  </Button>
+                  <Button asChild variant="ghost" className="w-full">
                     <Link to="/search">Voir les vraies annonces</Link>
                   </Button>
                 </div>
