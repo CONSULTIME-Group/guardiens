@@ -117,7 +117,7 @@ const DemoListingShowcase = React.forwardRef<HTMLElement>((_props, ref) => (
           to="/inscription?role=owner"
           className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-8 py-4 rounded-full font-body font-medium text-base hover:bg-primary/90 transition-colors"
         >
-          Créer mon compte — gratuit pour les propriétaires
+          Créer mon compte — 0 € pour les propriétaires
         </Link>
       </div>
     </div>
