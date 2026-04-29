@@ -280,13 +280,31 @@ export default function ArticleDetail() {
             "@context": "https://schema.org",
             "@type": "Product",
             "name": "Abonnement Gardien Guardiens",
-            "description": "Abonnement pour devenir gardien de maison et d'animaux sur Guardiens",
+            "description": "Abonnement unique pour devenir gardien de maison et d'animaux sur Guardiens. 7 jours d'essai offerts, sans engagement.",
             "brand": { "@type": "Brand", "name": "Guardiens" },
-            "offers": [
-              { "@type": "Offer", "name": "Mensuel sans engagement", "price": "9.00", "priceCurrency": "EUR", "priceSpecification": { "@type": "UnitPriceSpecification", "price": "9.00", "priceCurrency": "EUR", "referenceQuantity": { "@type": "QuantitativeValue", "value": "1", "unitCode": "MON" } }, "availability": "https://schema.org/InStock" },
-              { "@type": "Offer", "name": "One-shot 1 mois", "price": "12.00", "priceCurrency": "EUR", "availability": "https://schema.org/InStock" },
-              { "@type": "Offer", "name": "Annuel -20%", "price": "86.40", "priceCurrency": "EUR", "availability": "https://schema.org/InStock" }
-            ]
+            "offers": {
+              "@type": "Offer",
+              "name": "Abonnement gardien mensuel",
+              "price": "6.99",
+              "priceCurrency": "EUR",
+              "priceSpecification": {
+                "@type": "UnitPriceSpecification",
+                "price": "6.99",
+                "priceCurrency": "EUR",
+                "referenceQuantity": {
+                  "@type": "QuantitativeValue",
+                  "value": "1",
+                  "unitCode": "MON"
+                }
+              },
+              "availability": "https://schema.org/InStock",
+              "eligibleDuration": {
+                "@type": "QuantitativeValue",
+                "value": "7",
+                "unitCode": "DAY",
+                "description": "7 jours d'essai offerts avant tout prélèvement"
+              }
+            }
           })}</script>
         </Helmet>
       )}
