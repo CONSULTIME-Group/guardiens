@@ -9,10 +9,10 @@ export default function EntraideLibreBanner() {
         </div>
         <div className="flex-1 min-w-0 space-y-1.5">
           <p className="font-heading text-sm md:text-base font-semibold text-foreground leading-snug">
-            L'entraide entre gens du coin restera toujours gratuite
+            L'entraide entre gens du coin restera toujours offerte (0 €)
           </p>
           <p className="text-xs md:text-sm text-foreground/70 font-body leading-relaxed">
-            Arroser un potager, sortir un chien le weekend, garder des poules le temps d'un marché… Ces coups de main entre gens du coin font le tissu d'un village et ne devraient jamais avoir de prix. C'est à nous de montrer l'exemple : les <strong className="text-foreground font-semibold">petites missions d'entraide resteront 100 % gratuites à vie</strong>, pour que ce lien continue d'exister indépendamment de toute monétisation.
+            Arroser un potager, sortir un chien le weekend, garder des poules le temps d'un marché… Ces coups de main entre gens du coin font le tissu d'un village et ne devraient jamais avoir de prix. C'est à nous de montrer l'exemple : les <strong className="text-foreground font-semibold">petites missions d'entraide resteront 100 % offertes (0 €) à vie</strong>, pour que ce lien continue d'exister indépendamment de toute monétisation.
           </p>
         </div>
       </div>
