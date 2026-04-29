@@ -414,9 +414,9 @@ const Landing = () => {
 
             <div className="bg-card border border-border rounded-xl p-6">
               <p className="text-xs tracking-widest uppercase text-primary/70 font-body">04</p>
-              <h3 className="mt-3 font-heading font-semibold text-lg text-foreground">Des gardiens de votre région</h3>
+              <h3 className="mt-3 font-heading font-semibold text-lg text-foreground">Un gardien près de chez vous</h3>
               <p className="mt-2 text-muted-foreground text-sm leading-relaxed">
-                En Auvergne-Rhône-Alpes, on privilégie la proximité. Votre gardien habite à quelques kilomètres, jamais à l'autre bout de la France.
+                La proximité, partout. Votre gardien habite à quelques kilomètres, pas à l'autre bout du pays — où que vous soyez.
               </p>
             </div>
           </div>
