@@ -67,7 +67,7 @@ const PublicFooter = React.forwardRef<HTMLElement>((_props, ref) => {
               <span className="text-primary">g</span>uardiens
             </h3>
             <p className="font-body text-sm text-white/40">
-              House-sitting de proximité en AURA
+              House-sitting de proximité
             </p>
           </div>
           <div className="flex flex-wrap gap-4 text-sm text-white/40 font-body">
