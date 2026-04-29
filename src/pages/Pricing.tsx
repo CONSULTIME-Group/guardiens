@@ -261,17 +261,11 @@ const Pricing = () => {
           )}
 
           {grace && (
-            <section
-              className="rounded-2xl p-6 md:p-8 text-center space-y-4 border-2 mb-12 max-w-5xl mx-auto"
-              style={{
-                backgroundColor: "hsl(45 100% 96%)",
-                borderColor: "hsl(24 36% 60%)",
-              }}
-            >
+            <section className="rounded-2xl p-6 md:p-8 text-center space-y-4 border-2 border-amber-300 bg-amber-50 mb-12 max-w-5xl mx-auto">
               <div className="flex items-center justify-center gap-2">
-                <Star className="h-6 w-6" style={{ color: "hsl(24 36% 60%)" }} fill="hsl(24 36% 60%)" />
+                <Star className="h-6 w-6 text-amber-500" fill="currentColor" />
                 <h2 className="font-heading text-2xl font-bold text-foreground">Les Fondateurs ont jusqu'au 13 juin</h2>
-                <Star className="h-6 w-6" style={{ color: "hsl(24 36% 60%)" }} fill="hsl(24 36% 60%)" />
+                <Star className="h-6 w-6 text-amber-500" fill="currentColor" />
               </div>
               <p className="text-muted-foreground max-w-2xl mx-auto font-body">
                 Les membres inscrits avant le 13 mai conservent un accès gratuit jusqu'au 13 juin.
@@ -280,7 +274,11 @@ const Pricing = () => {
             </section>
           )}
 
-          <EntraideLibreBanner />
+          {/* Section informative — placée AVANT les cartes payantes pour
+              installer la valeur (ce qui reste gratuit) avant le prix. */}
+          <div className="max-w-5xl mx-auto mb-10">
+            <FreeAccountSection />
+          </div>
 
           {/* ═══ Cartes pricing détaillées ═══ */}
           <section className="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-5xl mx-auto items-stretch mb-12 md:mb-16">
