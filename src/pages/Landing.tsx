@@ -337,32 +337,32 @@ const Landing = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-12">
             <div className="bg-card border border-border rounded-xl p-6">
-              <Gift className="w-10 h-10 text-primary" />
-              <h3 className="mt-4 font-heading font-semibold text-lg text-foreground">100% gratuit, pour toujours</h3>
+              <p className="text-xs tracking-widest uppercase text-primary/70 font-body">01</p>
+              <h3 className="mt-3 font-heading font-semibold text-lg text-foreground">0 € pour les propriétaires, à vie</h3>
               <p className="mt-2 text-muted-foreground text-sm leading-relaxed">
-                Publier votre annonce, recevoir des candidatures, échanger avec les gardiens : tout est gratuit pour les propriétaires. Sans limite de temps.
+                Publier votre annonce, recevoir des candidatures, échanger avec les gardiens : tout est à 0 € pour les propriétaires. Sans limite de temps.
               </p>
             </div>
 
             <div className="bg-card border border-border rounded-xl p-6">
-              <Coffee className="w-10 h-10 text-primary" />
-              <h3 className="mt-4 font-heading font-semibold text-lg text-foreground">Une rencontre avant chaque garde</h3>
+              <p className="text-xs tracking-widest uppercase text-primary/70 font-body">02</p>
+              <h3 className="mt-3 font-heading font-semibold text-lg text-foreground">Une rencontre avant chaque garde</h3>
               <p className="mt-2 text-muted-foreground text-sm leading-relaxed">
                 Vous choisissez votre gardien après l'avoir rencontré. Un café, une visite du logement, et la confiance s'installe naturellement.
               </p>
             </div>
 
             <div className="bg-card border border-border rounded-xl p-6">
-              <ShieldCheck className="w-10 h-10 text-primary" />
-              <h3 className="mt-4 font-heading font-semibold text-lg text-foreground">Des profils vérifiés</h3>
+              <p className="text-xs tracking-widest uppercase text-primary/70 font-body">03</p>
+              <h3 className="mt-3 font-heading font-semibold text-lg text-foreground">Des profils vérifiés</h3>
               <p className="mt-2 text-muted-foreground text-sm leading-relaxed">
                 Chaque gardien est vérifié par notre équipe : pièce d'identité, avis des propriétaires précédents, historique de gardes réalisées.
               </p>
             </div>
 
             <div className="bg-card border border-border rounded-xl p-6">
-              <MapPin className="w-10 h-10 text-primary" />
-              <h3 className="mt-4 font-heading font-semibold text-lg text-foreground">Des gardiens de votre région</h3>
+              <p className="text-xs tracking-widest uppercase text-primary/70 font-body">04</p>
+              <h3 className="mt-3 font-heading font-semibold text-lg text-foreground">Des gardiens de votre région</h3>
               <p className="mt-2 text-muted-foreground text-sm leading-relaxed">
                 En Auvergne-Rhône-Alpes, on privilégie la proximité. Votre gardien habite à quelques kilomètres, jamais à l'autre bout de la France.
               </p>
@@ -396,9 +396,8 @@ const Landing = () => {
       {/* ═══════════════ BANDEAU ENTRAIDE ═══════════════ */}
       <section className="bg-primary/5 border-y border-primary/10">
         <div className="max-w-5xl mx-auto px-6 py-5 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-6 text-center sm:text-left">
-          <Handshake className="h-5 w-5 text-primary shrink-0" />
           <p className="font-body text-sm md:text-base text-foreground/80">
-            <strong className="text-foreground">L'entraide entre gens du coin est gratuite.</strong> Pour tous. Pour toujours. C'est l'esprit de Guardiens.
+            <strong className="text-foreground">L'entraide entre gens du coin reste à 0 €.</strong> Pour tous. Pour toujours. C'est l'esprit de Guardiens.
           </p>
           <Link to="/petites-missions" className="text-sm font-body text-primary font-medium hover:underline whitespace-nowrap shrink-0">
             En savoir plus →
