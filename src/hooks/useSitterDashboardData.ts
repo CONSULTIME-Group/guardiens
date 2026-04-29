@@ -97,6 +97,11 @@ export function useSitterDashboardData(userId: string | undefined) {
 
   useEffect(() => {
     if (!userId) return;
+    // Reset to initial state when userId changes — prevents the unread badge
+    // (and other counters) from flickering with the previous user's values
+    // while the new fetch is in flight.
+    let cancelled = false;
+    setData(INITIAL_STATE);
 
     const load = async () => {
       const [
@@ -221,6 +226,7 @@ export function useSitterDashboardData(userId: string | undefined) {
         };
       }
 
+      if (cancelled) return;
       setData({
         loading: false,
         profileCompletion: profile?.profile_completion || 0,
@@ -260,6 +266,7 @@ export function useSitterDashboardData(userId: string | undefined) {
     };
 
     load();
+    return () => { cancelled = true; };
   }, [userId]);
 
   // Realtime sync for availability

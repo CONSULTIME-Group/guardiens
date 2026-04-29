@@ -265,7 +265,7 @@ const SitterDashboard = () => {
           {unreadCount > 0 && (
             <Link to="/messages" className="flex items-center gap-2 bg-accent/50 border border-border rounded-xl px-3 py-2 text-xs font-medium text-foreground hover:bg-accent transition-colors">
               <MessageSquare className="h-4 w-4 text-primary" aria-hidden="true" />
-              {unreadCount} message{unreadCount > 1 ? "s" : ""} non lu{unreadCount > 1 ? "s" : ""}
+              <span className="tabular-nums">{unreadCount > 99 ? "99+" : unreadCount}</span> message{unreadCount > 1 ? "s" : ""} non lu{unreadCount > 1 ? "s" : ""}
             </Link>
           )}
         </nav>

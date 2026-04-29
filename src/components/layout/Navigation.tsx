@@ -44,7 +44,7 @@ const SidebarItem = ({
     <Icon className="h-[18px] w-[18px]" strokeWidth={1.8} />
     {label}
     {badge !== undefined && badge > 0 && (
-      <span className="absolute right-3 bg-destructive text-destructive-foreground text-[10px] rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1 font-semibold">
+      <span className="absolute right-3 bg-destructive text-destructive-foreground text-[10px] rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1 font-semibold tabular-nums">
         {badge > 99 ? "99+" : badge}
       </span>
     )}
@@ -223,7 +223,7 @@ export const Sidebar = () => {
                   Messagerie
                   <Crown className="h-[11px] w-[11px] text-amber-500 ml-1" />
                   {unreadCount > 0 && (
-                    <span className="absolute right-3 bg-destructive text-destructive-foreground text-[10px] rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1 font-semibold">
+                    <span className="absolute right-3 bg-destructive text-destructive-foreground text-[10px] rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1 font-semibold tabular-nums">
                       {unreadCount > 99 ? "99+" : unreadCount}
                     </span>
                   )}
@@ -420,7 +420,7 @@ export const BottomNav = () => {
                     <item.icon className="h-5 w-5" strokeWidth={1.8} />
                     <Crown className="h-[9px] w-[9px] text-amber-500 absolute -top-1 -right-1.5" />
                     {item.badge !== undefined && item.badge > 0 && (
-                      <span className="absolute -top-1 -right-2 bg-destructive text-destructive-foreground text-[8px] rounded-full min-w-[14px] h-[14px] flex items-center justify-center px-0.5 font-bold">
+                      <span className="absolute -top-1 -right-2 bg-destructive text-destructive-foreground text-[8px] rounded-full min-w-[14px] h-[14px] flex items-center justify-center px-0.5 font-bold tabular-nums">
                         {item.badge > 99 ? "99+" : item.badge}
                       </span>
                     )}
@@ -442,7 +442,7 @@ export const BottomNav = () => {
                 <div className="relative">
                   <item.icon className="h-5 w-5" strokeWidth={isActive ? 2.2 : 1.8} />
                   {item.badge !== undefined && item.badge > 0 && (
-                    <span className="absolute -top-1 -right-2 bg-destructive text-destructive-foreground text-[8px] rounded-full min-w-[14px] h-[14px] flex items-center justify-center px-0.5 font-bold">
+                    <span className="absolute -top-1 -right-2 bg-destructive text-destructive-foreground text-[8px] rounded-full min-w-[14px] h-[14px] flex items-center justify-center px-0.5 font-bold tabular-nums">
                       {item.badge > 99 ? "99+" : item.badge}
                     </span>
                   )}
