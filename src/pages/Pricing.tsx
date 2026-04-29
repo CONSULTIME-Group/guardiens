@@ -36,11 +36,11 @@ const sitterFeatures = [
 // Remplacé par une grille "ce qu'on facture / ce qu'on ne facture pas" Guardiens-only.
 const promiseRows: Array<{ label: string; value: string; positive: boolean }> = [
   { label: "Commission sur la garde", value: "0 %", positive: true },
-  { label: "Coût pour le propriétaire", value: "0 € à vie", positive: true },
   { label: "Vérification d'identité", value: "Incluse", positive: true },
   { label: "Entraide & petites missions", value: "Gratuites à vie", positive: true },
   { label: "Carte bancaire à l'inscription", value: "Jamais", positive: true },
   { label: "Frais de mise en relation", value: "Aucun", positive: true },
+  { label: "Engagement de durée", value: "Aucun", positive: true },
 ];
 
 const faqItems = [
@@ -301,7 +301,7 @@ const Pricing = () => {
                       0 €
                     </p>
                     <p className="text-xs text-foreground/55 font-body pt-1">
-                      Puis <span className="font-semibold text-foreground">6,99 €/mois</span> · 7 jours d'essai
+                      Puis <span className="font-semibold text-foreground">6,99 €/mois</span> à partir du 14 juin 2026
                     </p>
                   </div>
                 ) : (
@@ -493,12 +493,11 @@ const Pricing = () => {
 
           {/* ═══ CTA final ═══ */}
           <section className="text-center py-10 md:py-14 bg-gradient-to-br from-primary to-primary/85 rounded-2xl mb-12">
-            
-            <p className="text-xl md:text-2xl font-heading font-semibold text-primary-foreground text-center mb-3 px-4">
+            <h2 className="text-xl md:text-2xl font-heading font-semibold text-primary-foreground text-center mb-3 px-4">
               {before
                 ? "Rejoignez Guardiens dès maintenant"
                 : "Prêt à rejoindre Guardiens ?"}
-            </p>
+            </h2>
             <p className="text-sm md:text-base font-body text-primary-foreground/85 text-center mb-8 max-w-xl mx-auto px-4">
               Sans carte bancaire à l'inscription. Vous décidez ensuite.
             </p>
