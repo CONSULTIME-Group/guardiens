@@ -50,7 +50,7 @@ const FreeAccountSection = () => {
     >
       <div className="max-w-3xl mx-auto text-center mb-6">
         <p className="text-xs tracking-widest uppercase text-muted-foreground font-body mb-2">
-          Compte gratuit
+          Avant de parler tarifs
         </p>
         <h3
           id="compte-gratuit-titre"
@@ -59,7 +59,7 @@ const FreeAccountSection = () => {
           Ce qui reste gratuit pour tout le monde
         </h3>
         <p className="text-sm font-body text-muted-foreground">
-          Même sans abonnement gardien, votre compte Guardiens conserve un large
+          Même sans abonnement gardien actif, votre compte Guardiens conserve un large
           accès à la plateforme. L'abonnement à 6,99&nbsp;€/mois sert uniquement
           à postuler aux gardes longues et à apparaître dans la recherche gardien.
         </p>
