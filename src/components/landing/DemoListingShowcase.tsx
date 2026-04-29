@@ -2,6 +2,11 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { trackEvent } from "@/lib/analytics";
 
+// Libellé unique réutilisé par toutes les cartes (UI + accessibilité)
+const DEMO_CARD_CTA_LABEL = "Voir l'annonce de démonstration";
+const DEMO_CARD_CTA_CLASSNAME =
+  "w-full mt-3 py-2.5 rounded-xl bg-primary/10 text-primary font-body font-medium text-sm text-center group-hover:bg-primary group-hover:text-primary-foreground transition-colors block";
+
 // Slugs alignés sur src/data/demoListings.ts → page /annonces/demo/:slug
 const DEMO_LISTINGS = [
   {
@@ -57,7 +62,7 @@ const DemoListingCard = React.forwardRef<HTMLAnchorElement, typeof DEMO_LISTINGS
         metadata: { demo_id: id, slug, city, location: "landing_showcase" },
       })
     }
-    aria-label={`Voir l'annonce de démonstration : ${title} — ${city}`}
+    aria-label={`${DEMO_CARD_CTA_LABEL} : ${title} — ${city}`}
     className="group bg-card rounded-2xl overflow-hidden border border-border shadow-sm flex flex-col hover:shadow-lg hover:border-primary/30 hover:-translate-y-0.5 transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
   >
     <div className="relative">
@@ -96,10 +101,8 @@ const DemoListingCard = React.forwardRef<HTMLAnchorElement, typeof DEMO_LISTINGS
         </div>
       </div>
 
-      <span
-        className="w-full mt-3 py-2.5 rounded-xl bg-primary/10 text-primary font-body font-medium text-sm text-center group-hover:bg-primary group-hover:text-primary-foreground transition-colors block"
-      >
-        Voir l'annonce de démonstration →
+      <span aria-hidden="true" className={DEMO_CARD_CTA_CLASSNAME}>
+        {DEMO_CARD_CTA_LABEL} →
       </span>
     </div>
   </Link>
