@@ -21,7 +21,7 @@ const Terms = () => {
 
           <h2 className="font-heading text-xl font-bold text-foreground pt-4">1. Objet</h2>
           <p>
-            Les présentes Conditions Générales d'Utilisation (ci-après « CGU ») régissent l'accès et l'utilisation de la plateforme Guardiens, accessible à l'adresse guardiens.fr (ci-après « la Plateforme »). Guardiens est une plateforme de mise en relation entre propriétaires d'animaux et de logements et gardiens bénévoles pour le house-sitting, principalement en région Auvergne-Rhône-Alpes.
+            Les présentes Conditions Générales d'Utilisation (ci-après « CGU ») régissent l'accès et l'utilisation de la plateforme Guardiens, accessible à l'adresse guardiens.fr (ci-après « la Plateforme »). Guardiens est une plateforme de mise en relation entre propriétaires d'animaux et de logements et gardiens bénévoles pour le house-sitting.
           </p>
           <p>
             L'utilisation de la Plateforme implique l'acceptation pleine et entière des présentes CGU.
