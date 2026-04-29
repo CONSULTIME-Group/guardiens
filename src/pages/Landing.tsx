@@ -420,13 +420,13 @@ const Landing = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <RevealSection delay={0.1}>
               <div className="bg-card rounded-2xl p-8 shadow-sm text-left h-full">
-                <Home className="h-8 w-8 text-primary mb-4" />
+                <p className="text-xs tracking-widest uppercase text-primary/70 font-body mb-3">Propriétaires</p>
                 <h3 className="text-xl font-heading font-semibold text-foreground mb-3">Vous partez. Votre maison vit.</h3>
                 <p className="text-base font-body leading-relaxed text-foreground/70 mb-4">
                   Trouvez quelqu'un du coin pour garder votre maison et vos animaux. Vous le rencontrez avant. Vous choisissez.
                 </p>
                 <span className="inline-block px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-body font-medium mb-4">
-                  Gratuit pour les propriétaires
+                  0 € pour les propriétaires
                 </span>
                 <Link to="/inscription?role=owner" className="block text-sm font-body text-primary font-medium hover:underline">
                   Je cherche un gardien →
@@ -436,7 +436,7 @@ const Landing = () => {
 
             <RevealSection delay={0.2}>
               <div className="bg-card rounded-2xl p-8 shadow-sm text-left h-full">
-                <Key className="h-8 w-8 text-primary mb-4" />
+                <p className="text-xs tracking-widest uppercase text-primary/70 font-body mb-3">Gardiens</p>
                 <h3 className="text-xl font-heading font-semibold text-foreground mb-3">Vous gardez. Vous découvrez.</h3>
                 <p className="text-base font-body leading-relaxed text-foreground/70 mb-4">
                   Proposez-vous comme gardien. Vivez dans des maisons, avec des animaux, dans des quartiers que vous n'auriez jamais explorés autrement.
@@ -450,9 +450,9 @@ const Landing = () => {
             <RevealSection delay={0.3}>
               <div className="bg-card rounded-2xl p-8 shadow-sm text-left h-full border-2 border-primary/20 relative overflow-hidden">
                 <div className="absolute top-0 right-0 bg-primary text-primary-foreground text-[10px] font-body font-bold uppercase tracking-wider px-3 py-1 rounded-bl-lg">
-                  Gratuit pour tous
+                  0 € pour tous
                 </div>
-                <Handshake className="h-8 w-8 text-primary mb-4" />
+                <p className="text-xs tracking-widest uppercase text-primary/70 font-body mb-3">Entraide</p>
                 <h3 className="text-xl font-heading font-semibold text-foreground mb-3">Un coup de main. Un échange.</h3>
                 <p className="text-base font-body leading-relaxed text-foreground/70 mb-4">
                   Arroser un potager, promener un chien, partager une compétence. Sans argent. C'est l'âme de Guardiens — et ça ne changera jamais.
