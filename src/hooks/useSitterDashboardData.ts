@@ -64,6 +64,8 @@ const INITIAL_STATE: SitterDashboardData = {
   cancellations: 0,
   pendingAppsCount: 0,
   unreadCount: 0,
+  unreadLoading: true,
+  unreadError: null,
   isAvailable: false,
   isFounder: false,
   postalCode: null,
