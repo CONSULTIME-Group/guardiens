@@ -11,14 +11,9 @@
  */
 const accesGratuits: Array<{ titre: string; detail: string }> = [
   {
-    titre: "Espace propriétaire complet",
-    detail:
-      "Publier et gérer vos annonces de garde, recevoir des candidatures, échanger avec les gardiens — gratuit à vie, sans limite.",
-  },
-  {
     titre: "Entraide & petites missions",
     detail:
-      "Demander ou proposer un coup de main près de chez vous (promenade, visite, transport vétérinaire…). Gratuit pour tout le monde, à vie.",
+      "Arroser un potager, sortir un chien le weekend, garder des poules le temps d'un marché… Demander ou proposer un coup de main près de chez vous reste 100 % gratuit à vie, pour préserver ce lien indépendamment de toute monétisation.",
   },
   {
     titre: "Guides locaux & conseils ville",
@@ -55,7 +50,7 @@ const FreeAccountSection = () => {
     >
       <div className="max-w-3xl mx-auto text-center mb-6">
         <p className="text-xs tracking-widest uppercase text-muted-foreground font-body mb-2">
-          Compte gratuit
+          Avant de parler tarifs
         </p>
         <h3
           id="compte-gratuit-titre"
@@ -64,7 +59,7 @@ const FreeAccountSection = () => {
           Ce qui reste gratuit pour tout le monde
         </h3>
         <p className="text-sm font-body text-muted-foreground">
-          Même sans abonnement gardien, votre compte Guardiens conserve un large
+          Même sans abonnement gardien actif, votre compte Guardiens conserve un large
           accès à la plateforme. L'abonnement à 6,99&nbsp;€/mois sert uniquement
           à postuler aux gardes longues et à apparaître dans la recherche gardien.
         </p>

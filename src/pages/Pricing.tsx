@@ -10,7 +10,7 @@ import PageMeta from "@/components/PageMeta";
 import PageBreadcrumb from "@/components/seo/PageBreadcrumb";
 import PublicHeader from "@/components/layout/PublicHeader";
 import PublicFooter from "@/components/layout/PublicFooter";
-import EntraideLibreBanner from "@/components/subscription/EntraideLibreBanner";
+
 import FreeAccountSection from "@/components/subscription/FreeAccountSection";
 import SecurityTrustSection from "@/components/subscription/SecurityTrustSection";
 import { LAUNCH_DATE, isBeforeLaunch, isInGracePeriod } from "@/lib/constants";
@@ -261,17 +261,11 @@ const Pricing = () => {
           )}
 
           {grace && (
-            <section
-              className="rounded-2xl p-6 md:p-8 text-center space-y-4 border-2 mb-12 max-w-5xl mx-auto"
-              style={{
-                backgroundColor: "hsl(45 100% 96%)",
-                borderColor: "hsl(24 36% 60%)",
-              }}
-            >
+            <section className="rounded-2xl p-6 md:p-8 text-center space-y-4 border-2 border-amber-300 bg-amber-50 mb-12 max-w-5xl mx-auto">
               <div className="flex items-center justify-center gap-2">
-                <Star className="h-6 w-6" style={{ color: "hsl(24 36% 60%)" }} fill="hsl(24 36% 60%)" />
+                <Star className="h-6 w-6 text-amber-500" fill="currentColor" />
                 <h2 className="font-heading text-2xl font-bold text-foreground">Les Fondateurs ont jusqu'au 13 juin</h2>
-                <Star className="h-6 w-6" style={{ color: "hsl(24 36% 60%)" }} fill="hsl(24 36% 60%)" />
+                <Star className="h-6 w-6 text-amber-500" fill="currentColor" />
               </div>
               <p className="text-muted-foreground max-w-2xl mx-auto font-body">
                 Les membres inscrits avant le 13 mai conservent un accès gratuit jusqu'au 13 juin.
@@ -280,7 +274,11 @@ const Pricing = () => {
             </section>
           )}
 
-          <EntraideLibreBanner />
+          {/* Section informative — placée AVANT les cartes payantes pour
+              installer la valeur (ce qui reste gratuit) avant le prix. */}
+          <div className="max-w-5xl mx-auto mb-10">
+            <FreeAccountSection />
+          </div>
 
           {/* ═══ Cartes pricing détaillées ═══ */}
           <section className="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-5xl mx-auto items-stretch mb-12 md:mb-16">
@@ -292,8 +290,6 @@ const Pricing = () => {
               </div>
               <CardHeader className="text-center pb-2 p-8 pt-10">
                 <div className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-3 font-body">Propriétaire</div>
-                {/* Pas de mention temporelle ici : l'espace propriétaire est gratuit à vie,
-                    indépendamment de la période promotionnelle du 13 juin. */}
                 <CardTitle className="font-heading text-5xl font-bold text-foreground">Gratuit</CardTitle>
                 <p className="text-sm font-body text-foreground/60 italic mt-2">
                   À vie. Parce qu'on ne facture pas ceux qui ouvrent leur maison.
@@ -308,7 +304,6 @@ const Pricing = () => {
                     </li>
                   ))}
                 </ul>
-                <p className="text-xs font-body text-foreground/50 text-center italic">Gratuit maintenant, gratuit toujours.</p>
                 <div className="mt-auto">
                   <Link to={registerLink("owner")} className="block">
                     <Button variant="outline" className="w-full min-h-[44px] font-body border-2 border-foreground/20 hover:border-foreground/40 text-foreground/60 hover:text-foreground bg-transparent transition-colors duration-200" size="lg">S'inscrire gratuitement</Button>
@@ -427,8 +422,6 @@ const Pricing = () => {
               </CardContent>
             </Card>
           </section>
-
-          <FreeAccountSection />
 
           {/* ═══ SÉCURITÉ & VÉRIFICATIONS ═══ */}
           <SecurityTrustSection />

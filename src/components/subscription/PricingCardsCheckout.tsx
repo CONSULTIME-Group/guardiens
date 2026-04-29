@@ -42,6 +42,7 @@ export default function PricingCardsCheckout() {
 
   return (
     <div className="space-y-8">
+    <FreeAccountSection />
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
       <div className="bg-card border border-border rounded-xl p-5 flex flex-col">
         <p className="font-heading text-lg font-semibold mb-2">Un mois</p>
@@ -90,8 +91,6 @@ export default function PricingCardsCheckout() {
         </Button>
       </div>
     </div>
-
-    <FreeAccountSection />
     </div>
   );
 }

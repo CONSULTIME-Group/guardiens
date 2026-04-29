@@ -45,6 +45,7 @@ export default function PricingCards() {
 
   return (
     <div className="space-y-8">
+      <FreeAccountSection />
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       {/* Mensuel */}
       <div className="bg-card border border-border rounded-2xl p-6 flex flex-col">
@@ -127,8 +128,6 @@ export default function PricingCards() {
         Vous recevrez un rappel 30 jours avant.
       </p>
       </div>
-
-      <FreeAccountSection />
     </div>
   );
 }
