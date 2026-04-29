@@ -233,7 +233,11 @@ export function useSitterDashboardData(userId: string | undefined) {
         totalApps: apps.length,
         cancellations: profile?.cancellation_count || 0,
         pendingAppsCount: apps.filter((a: any) => ["pending", "viewed", "discussing"].includes(a.status)).length,
-        unreadCount: (unreadRes as any).data ?? 0,
+        unreadCount: (unreadRes as any).error ? 0 : ((unreadRes as any).data ?? 0),
+        unreadLoading: false,
+        unreadError: (unreadRes as any).error
+          ? "Impossible de charger vos messages non lus."
+          : null,
         isAvailable: sitter?.is_available || false,
         isFounder: profile?.is_founder || false,
         postalCode: profile?.postal_code || null,
