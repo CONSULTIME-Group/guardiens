@@ -30,6 +30,7 @@ import ExchangesColumn from "./owner/ExchangesColumn";
 import DashSection from "./owner/DashSection";
 import EmptyCard from "./owner/EmptyCard";
 import StatCard from "./owner/StatCard";
+import PendingReviewsCard from "./owner/PendingReviewsCard";
 import {
   SPECIES_LABEL, PROPRIO_SPECIAL_IDS, BANNER_STYLES,
   capitalize, capitalizeWords,
@@ -53,6 +54,7 @@ const OwnerDashboard = () => {
     sits, pets, recentApps, reviews, highlights, smallMissions, myMissions,
     verificationStatus, sitterBadges, sitterProfiles, trustedSitterCount,
     propertyType, propertyEnvironment, propertyCoverPhoto, onboardingChecks,
+    pendingReviews,
   } = data;
 
   /* ── UI state ── */
@@ -233,6 +235,14 @@ const OwnerDashboard = () => {
         </div>
       )}
 
+      {/* ═══ Stats (vue d'ensemble immédiate) ═══ */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 px-5 md:px-8">
+        <StatCard value={completedSits.length} label="Gardes réalisées" />
+        <StatCard value={avgRating > 0 ? `${avgRating} ★` : null} fallback="Pas encore" label="Note moyenne" />
+        <StatCard value={activeSits.length} label="Annonces actives" />
+        <StatCard value={trustedSitterCount} label="Gardiens de confiance" />
+      </div>
+
       {/* ═══ Mon annonce ═══ */}
       <div className="px-5 md:px-8">
         <MonAnnonceCard
@@ -245,23 +255,24 @@ const OwnerDashboard = () => {
         />
       </div>
 
-      {/* ═══ Candidatures ═══ */}
-      <div className="px-5 md:px-8">
-        <ApplicationsSection
-          recentApps={recentApps}
-          sitterProfiles={sitterProfiles}
-          sitterBadges={sitterBadges}
-          loading={loading}
-        />
-      </div>
+      {/* ═══ Avis à laisser (post-garde) ═══ */}
+      {pendingReviews.length > 0 && (
+        <div className="px-5 md:px-8">
+          <PendingReviewsCard pendingReviews={pendingReviews} />
+        </div>
+      )}
 
-      {/* ═══ Stats ═══ */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 px-5 md:px-8">
-        <StatCard value={completedSits.length} label="Gardes réalisées" />
-        <StatCard value={avgRating > 0 ? `${avgRating} ★` : null} fallback="Pas encore" label="Note moyenne" />
-        <StatCard value={activeSits.length} label="Annonces actives" />
-        <StatCard value={trustedSitterCount} label="Gardiens de confiance" />
-      </div>
+      {/* ═══ Candidatures (masquée si totalement vide) ═══ */}
+      {(loading || recentApps.length > 0) && (
+        <div className="px-5 md:px-8">
+          <ApplicationsSection
+            recentApps={recentApps}
+            sitterProfiles={sitterProfiles}
+            sitterBadges={sitterBadges}
+            loading={loading}
+          />
+        </div>
+      )}
 
       {/* ═══ Badges ═══ */}
       <div className="px-5 md:px-8 mb-6 md:mb-8">

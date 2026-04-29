@@ -110,7 +110,9 @@ const MonAnnonceCard = memo(({ sits, pets, propertyType, propertyEnvironment, pe
       )}
       <div className="p-5 space-y-3">
       <div className="flex items-center justify-between">
-        <p className="text-sm font-semibold text-foreground">Mon annonce</p>
+        <p className="text-sm font-semibold text-foreground">
+          {isActive ? "Mon annonce" : "Dernière garde"}
+        </p>
         <span className={`text-xs rounded-full px-2.5 py-0.5 font-medium ${statusConf.className}`}>
           {statusConf.label}
         </span>
@@ -217,12 +219,16 @@ const MonAnnonceCard = memo(({ sits, pets, propertyType, propertyEnvironment, pe
           </>
         ) : (
           <>
-            <Button size="sm" className="flex-1 text-xs" onClick={() => navigate(`/sits/create?from=${currentSit.id}`)}>
-              <RefreshCw className="h-3.5 w-3.5 mr-1" /> Republier
+            <Button size="sm" className="w-full text-xs" onClick={() => navigate(`/sits/create?from=${currentSit.id}`)}>
+              <RefreshCw className="h-3.5 w-3.5 mr-1" /> Republier cette annonce
             </Button>
-            <Button variant="outline" size="sm" className="flex-1 text-xs" onClick={() => navigate(`/sits/create`)}>
-              <Plus className="h-3.5 w-3.5 mr-1" /> Nouvelle annonce
-            </Button>
+            <button
+              type="button"
+              onClick={() => navigate(`/sits/create`)}
+              className="w-full text-xs text-muted-foreground hover:text-foreground hover:underline transition-colors py-1"
+            >
+              Ou créer une nouvelle annonce
+            </button>
           </>
         )}
         </div>
