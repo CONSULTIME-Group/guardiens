@@ -1352,7 +1352,7 @@ const AlertsSection = ({ user }: { user: any }) => {
                 {([
                   { value: "rayon", label: "Par rayon" },
                   { value: "departement", label: "Par département" },
-                  { value: "region", label: "Région AURA" },
+                  { value: "region", label: "France entière" },
                 ] as const).map((opt) => (
                   <button
                     key={opt.value}
