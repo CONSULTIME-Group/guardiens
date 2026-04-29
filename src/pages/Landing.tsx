@@ -313,7 +313,7 @@ const Landing = () => {
                 }}
                 className="font-body text-base font-semibold tracking-wide rounded-full px-12 py-4 bg-primary text-primary-foreground hover:brightness-95 hover:scale-[1.03] transition-all duration-200 shadow-xl shadow-primary/40 ring-2 ring-primary-foreground/10"
               >
-                Publier mon annonce — 0 €
+                Publier mon annonce
               </button>
               <button
                 onClick={() => {
@@ -564,11 +564,14 @@ const Landing = () => {
               onClick={() => navigate("/inscription?role=owner")}
               className="font-body text-sm font-semibold tracking-wide rounded-full px-10 py-4 bg-primary text-primary-foreground hover:brightness-90 hover:scale-[1.02] transition-all duration-200"
             >
-              Je cherche un gardien — 0 €
-            </button>
-          </RevealSection>
-        </div>
-      </section>
+                Je cherche un gardien
+              </button>
+              <p className="mt-3 text-xs text-muted-foreground font-body">
+                Inscription en 2 minutes · Sans carte bancaire
+              </p>
+            </RevealSection>
+          </div>
+        </section>
 
 
       {/* ═══════════════ SECTION 4 — VITRINE DÉMO ═══════════════ */}
@@ -653,8 +656,11 @@ const Landing = () => {
               onClick={() => navigate("/inscription?role=owner")}
               className="font-body text-sm font-semibold tracking-wide rounded-full px-10 py-4 bg-primary text-primary-foreground hover:brightness-90 hover:scale-[1.02] transition-all duration-200"
             >
-              Créer mon compte — 0 €
+              Créer mon compte
             </button>
+            <p className="mt-3 text-xs text-muted-foreground font-body">
+              Pour les propriétaires, à vie · Sans carte bancaire
+            </p>
           </RevealSection>
         </div>
       </section>
@@ -665,7 +671,7 @@ const Landing = () => {
         <div className="max-w-5xl mx-auto px-6">
           <RevealSection>
             <span className="text-xs tracking-widest uppercase text-primary/60 font-body mb-4 block text-center">
-              0 € · Pour tous · Pour toujours
+              Pour tous · Pour toujours
             </span>
             <h2 className="text-4xl md:text-5xl font-heading font-semibold leading-snug text-foreground text-center mb-6">
               Osez demander un coup de main.
@@ -761,7 +767,7 @@ const Landing = () => {
                 to="/inscription"
                 className="inline-flex items-center gap-2 bg-card text-foreground border border-border px-8 py-4 rounded-full font-body font-medium text-sm hover:bg-muted transition-colors"
               >
-                Créer mon compte — 0 €
+                Créer mon compte
               </Link>
             </div>
           </RevealSection>
@@ -1159,7 +1165,7 @@ const Landing = () => {
               onClick={() => navigate("/inscription?role=owner")}
               className="font-body text-sm font-semibold tracking-wide rounded-full px-10 py-4 bg-primary text-primary-foreground hover:brightness-90 hover:scale-[1.02] transition-all duration-200"
             >
-              Je cherche un gardien — 0 €
+              Je cherche un gardien
             </button>
             <button
               onClick={() => navigate("/inscription?role=sitter")}
@@ -1168,14 +1174,17 @@ const Landing = () => {
               Je veux garder
             </button>
           </div>
+          <p className="text-xs text-white/60 font-body mb-6">
+            Sans carte bancaire · Inscription en 2 minutes
+          </p>
           <button
             onClick={() => navigate("/petites-missions")}
             className="font-body text-sm font-medium tracking-wide rounded-full px-8 py-3 bg-white/10 text-white border border-white/20 hover:bg-white/20 transition-all duration-200"
           >
-            Découvrir l'entraide — 0 € pour tous
+            Découvrir l'entraide de quartier
           </button>
           <p className="mt-8 text-xs text-white/40 font-body">
-            Badge Fondateur à vie · Accès à 0 € jusqu'au 13 juin · L'entraide reste à 0 € pour toujours
+            Badge Fondateur à vie · Accès offert jusqu'au 13 juin · L'entraide reste sans frais, pour toujours
           </p>
         </RevealSection>
       </section>
