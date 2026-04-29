@@ -229,7 +229,7 @@ export function useSitterDashboardData(userId: string | undefined) {
         totalApps: apps.length,
         cancellations: profile?.cancellation_count || 0,
         pendingAppsCount: apps.filter((a: any) => ["pending", "viewed", "discussing"].includes(a.status)).length,
-        unreadCount: unreadRes.count || 0,
+        unreadCount: (unreadRes as any).data ?? 0,
         isAvailable: sitter?.is_available || false,
         isFounder: profile?.is_founder || false,
         postalCode: profile?.postal_code || null,
