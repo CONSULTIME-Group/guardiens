@@ -391,11 +391,11 @@ const Pricing = () => {
                     to={registerLink("sitter")}
                     className="w-full inline-flex items-center justify-center bg-primary text-primary-foreground font-body font-medium text-sm px-6 py-3.5 rounded-xl hover:bg-primary/90 transition-colors min-h-[44px]"
                   >
-                    {before ? "S'inscrire — gratuit jusqu'au 13 juin" : ctaLabels[formule]}
+                    {before ? "Devenir gardien" : ctaLabels[formule]}
                   </Link>
                   <p className="text-xs font-body text-foreground/50 text-center mt-2">
                     {before
-                      ? "Aucune carte bancaire demandée. Vous choisirez (ou non) un abonnement après le 13 juin."
+                      ? "Aucune carte bancaire demandée."
                       : "Inscription sans carte bancaire. L'abonnement mensuel inclut 7 jours d'essai offerts."}
                   </p>
                 </div>
