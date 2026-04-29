@@ -290,8 +290,6 @@ const Pricing = () => {
               </div>
               <CardHeader className="text-center pb-2 p-8 pt-10">
                 <div className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-3 font-body">Propriétaire</div>
-                {/* Pas de mention temporelle ici : l'espace propriétaire est gratuit à vie,
-                    indépendamment de la période promotionnelle du 13 juin. */}
                 <CardTitle className="font-heading text-5xl font-bold text-foreground">Gratuit</CardTitle>
                 <p className="text-sm font-body text-foreground/60 italic mt-2">
                   À vie. Parce qu'on ne facture pas ceux qui ouvrent leur maison.
@@ -306,7 +304,6 @@ const Pricing = () => {
                     </li>
                   ))}
                 </ul>
-                <p className="text-xs font-body text-foreground/50 text-center italic">Gratuit maintenant, gratuit toujours.</p>
                 <div className="mt-auto">
                   <Link to={registerLink("owner")} className="block">
                     <Button variant="outline" className="w-full min-h-[44px] font-body border-2 border-foreground/20 hover:border-foreground/40 text-foreground/60 hover:text-foreground bg-transparent transition-colors duration-200" size="lg">S'inscrire gratuitement</Button>
