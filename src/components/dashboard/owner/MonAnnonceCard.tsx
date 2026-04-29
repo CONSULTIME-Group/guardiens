@@ -137,8 +137,6 @@ const MonAnnonceCard = memo(({ sits, pets, propertyType, propertyEnvironment, pe
         </>
       )}
 
-      <p className="text-sm font-medium text-foreground leading-snug">{currentSit.title}</p>
-
       <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
         <span>{dateRange}</span>
         {isActive && daysUntilStart !== null && daysUntilStart > 0 && (
