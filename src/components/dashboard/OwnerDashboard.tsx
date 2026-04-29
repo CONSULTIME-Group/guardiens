@@ -235,6 +235,14 @@ const OwnerDashboard = () => {
         </div>
       )}
 
+      {/* ═══ Stats (vue d'ensemble immédiate) ═══ */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 px-5 md:px-8">
+        <StatCard value={completedSits.length} label="Gardes réalisées" />
+        <StatCard value={avgRating > 0 ? `${avgRating} ★` : null} fallback="Pas encore" label="Note moyenne" />
+        <StatCard value={activeSits.length} label="Annonces actives" />
+        <StatCard value={trustedSitterCount} label="Gardiens de confiance" />
+      </div>
+
       {/* ═══ Mon annonce ═══ */}
       <div className="px-5 md:px-8">
         <MonAnnonceCard
@@ -265,14 +273,6 @@ const OwnerDashboard = () => {
           />
         </div>
       )}
-
-      {/* ═══ Stats ═══ */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 px-5 md:px-8">
-        <StatCard value={completedSits.length} label="Gardes réalisées" />
-        <StatCard value={avgRating > 0 ? `${avgRating} ★` : null} fallback="Pas encore" label="Note moyenne" />
-        <StatCard value={activeSits.length} label="Annonces actives" />
-        <StatCard value={trustedSitterCount} label="Gardiens de confiance" />
-      </div>
 
       {/* ═══ Badges ═══ */}
       <div className="px-5 md:px-8 mb-6 md:mb-8">
