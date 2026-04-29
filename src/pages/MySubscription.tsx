@@ -133,7 +133,7 @@ const PRE_LAUNCH_ADVANTAGES: { label: string; href: string | null }[] = [
 
 const FOUNDER_FAQ = [
   {
-    q: "C’est vraiment gratuit jusqu’au 13 juin ?",
+    q: "C’est vraiment offert jusqu’au 13 juin ?",
     a: "Oui. Aucune carte bancaire demandée avant le 13 juin. Après cette date, vous choisissez librement de souscrire — rien ne démarre automatiquement.",
   },
   {
