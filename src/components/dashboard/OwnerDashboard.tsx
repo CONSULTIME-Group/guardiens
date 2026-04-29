@@ -238,8 +238,14 @@ const OwnerDashboard = () => {
       {/* ═══ Stats (vue d'ensemble immédiate) ═══ */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 px-5 md:px-8">
         <StatCard value={completedSits.length} label="Gardes réalisées" />
-        <StatCard value={avgRating > 0 ? `${avgRating} ★` : null} fallback="Pas encore" label="Note moyenne" />
-        <StatCard value={activeSits.length} label="Annonces actives" />
+        <StatCard
+          value={avgRating > 0 ? `${avgRating} ★` : null}
+          fallback="Pas encore"
+          label="Note moyenne"
+          highlight={avgRating > 0}
+          to={user?.id ? `/gardiens/${user.id}?tab=proprio#avis` : undefined}
+        />
+        <StatCard value={activeSits.length} label="Annonces actives" to="/sits" />
         <StatCard value={trustedSitterCount} label="Gardiens de confiance" />
       </div>
 
