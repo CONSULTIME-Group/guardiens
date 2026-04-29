@@ -98,18 +98,35 @@ const DemoListingCard = React.forwardRef<HTMLAnchorElement, typeof DEMO_LISTINGS
 }, ref) => {
   const internalRef = React.useRef<HTMLAnchorElement | null>(null);
 
+  // Mesure de l'impact du préchargement : on retient l'horodatage et la source du 1er trigger
+  const prefetchInfoRef = React.useRef<{
+    triggeredAt: number;
+    source: "viewport" | "hover" | "focus" | "touch";
+  } | null>(null);
+
+  const triggerPrefetch = React.useCallback(
+    (source: "viewport" | "hover" | "focus" | "touch") => {
+      prefetchDemoRoute(slug);
+      // Premier trigger gagne (mesure du préchargement le plus précoce vs clic)
+      if (!prefetchInfoRef.current) {
+        prefetchInfoRef.current = { triggeredAt: performance.now(), source };
+      }
+    },
+    [slug],
+  );
+
   // Précharge chunk JS + image hero dès qu'une carte entre dans le viewport
   React.useEffect(() => {
     const node = internalRef.current;
     if (!node || typeof IntersectionObserver === "undefined") {
       // Fallback : préchargement immédiat si l'API n'est pas disponible
-      prefetchDemoRoute(slug);
+      triggerPrefetch("viewport");
       return;
     }
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries.some((e) => e.isIntersecting)) {
-          prefetchDemoRoute(slug);
+          triggerPrefetch("viewport");
           observer.disconnect();
         }
       },
@@ -117,7 +134,7 @@ const DemoListingCard = React.forwardRef<HTMLAnchorElement, typeof DEMO_LISTINGS
     );
     observer.observe(node);
     return () => observer.disconnect();
-  }, [slug]);
+  }, [triggerPrefetch]);
 
   const setRefs = React.useCallback(
     (node: HTMLAnchorElement | null) => {
@@ -128,21 +145,36 @@ const DemoListingCard = React.forwardRef<HTMLAnchorElement, typeof DEMO_LISTINGS
     [ref],
   );
 
-  const handlePrefetch = React.useCallback(() => prefetchDemoRoute(slug), [slug]);
+  const onHover = React.useCallback(() => triggerPrefetch("hover"), [triggerPrefetch]);
+  const onFocusCb = React.useCallback(() => triggerPrefetch("focus"), [triggerPrefetch]);
+  const onTouch = React.useCallback(() => triggerPrefetch("touch"), [triggerPrefetch]);
+
+  const handleClick = React.useCallback(() => {
+    const info = prefetchInfoRef.current;
+    const prefetchLeadMs = info ? Math.round(performance.now() - info.triggeredAt) : null;
+    trackEvent("sit_view", {
+      source: "landing_demo_card",
+      metadata: {
+        demo_id: id,
+        slug,
+        city,
+        location: "landing_showcase",
+        // Mesure d'impact du préchargement
+        prefetched: info !== null,
+        prefetch_source: info?.source ?? null,
+        prefetch_lead_ms: prefetchLeadMs, // Délai entre 1er prefetch et clic
+      },
+    });
+  }, [id, slug, city]);
 
   return (
   <Link
     ref={setRefs}
     to={`/annonces/demo/${slug}`}
-    onMouseEnter={handlePrefetch}
-    onFocus={handlePrefetch}
-    onTouchStart={handlePrefetch}
-    onClick={() =>
-      trackEvent("sit_view", {
-        source: "landing_demo_card",
-        metadata: { demo_id: id, slug, city, location: "landing_showcase" },
-      })
-    }
+    onMouseEnter={onHover}
+    onFocus={onFocusCb}
+    onTouchStart={onTouch}
+    onClick={handleClick}
     aria-label={`${DEMO_CARD_CTA_LABEL} : ${title} — ${city}`}
     className="group bg-card rounded-2xl overflow-hidden border border-border shadow-sm flex flex-col hover:shadow-lg hover:border-primary/30 hover:-translate-y-0.5 transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
   >
