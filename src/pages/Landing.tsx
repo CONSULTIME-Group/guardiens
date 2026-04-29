@@ -412,12 +412,12 @@ const Landing = () => {
         </div>
       </section>
 
-      {/* ═══════════════ BANDEAU — VOUS PARTEZ CET ÉTÉ ═══════════════ */}
+      {/* ═══════════════ BANDEAU SAISONNIER (titre + sous-titre dynamiques) ═══════════════ */}
       <section className="bg-primary/5 py-16">
         <div className="max-w-3xl mx-auto px-4 text-center">
-          <h2 className="text-3xl md:text-4xl font-heading font-bold text-foreground">Vous partez cet été ?</h2>
+          <h2 className="text-3xl md:text-4xl font-heading font-bold text-foreground">{seasonal.title}</h2>
           <p className="text-lg text-muted-foreground mt-4 leading-relaxed">
-            Publiez votre annonce maintenant, gratuitement. Un gardien de votre région s'occupera de votre maison et de vos animaux pendant votre absence.
+            {seasonal.description}
           </p>
           <button
             onClick={() => {
@@ -434,17 +434,7 @@ const Landing = () => {
         </div>
       </section>
 
-      {/* ═══════════════ BANDEAU ENTRAIDE ═══════════════ */}
-      <section className="bg-primary/5 border-y border-primary/10">
-        <div className="max-w-5xl mx-auto px-6 py-5 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-6 text-center sm:text-left">
-          <p className="font-body text-sm md:text-base text-foreground/80">
-            <strong className="text-foreground">L'entraide entre gens du coin reste à 0 €.</strong> Pour tous. Pour toujours. C'est l'esprit de Guardiens.
-          </p>
-          <Link to="/petites-missions" className="text-sm font-body text-primary font-medium hover:underline whitespace-nowrap shrink-0">
-            En savoir plus →
-          </Link>
-        </div>
-      </section>
+      {/* (Bandeau entraide retiré : info portée par la carte Entraide ci-dessous + section dédiée plus bas) */}
 
       {/* ═══════════════ SECTION 2 — CE QU'ON FAIT ENSEMBLE ═══════════════ */}
       <section className="py-24 md:py-32 bg-background">
