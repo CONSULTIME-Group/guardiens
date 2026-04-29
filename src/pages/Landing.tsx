@@ -1161,10 +1161,10 @@ const Landing = () => {
             onClick={() => navigate("/petites-missions")}
             className="font-body text-sm font-medium tracking-wide rounded-full px-8 py-3 bg-white/10 text-white border border-white/20 hover:bg-white/20 transition-all duration-200"
           >
-            Découvrir l'entraide — gratuit pour tous
+            Découvrir l'entraide — 0 € pour tous
           </button>
           <p className="mt-8 text-xs text-white/40 font-body">
-            Badge Fondateur à vie · Accès gratuit jusqu'au 13 juin · L'entraide reste gratuite pour toujours
+            Badge Fondateur à vie · Accès à 0 € jusqu'au 13 juin · L'entraide reste à 0 € pour toujours
           </p>
         </RevealSection>
       </section>
