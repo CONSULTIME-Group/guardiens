@@ -6,6 +6,15 @@ import type {
   HighlightRow, OnboardingChecks,
 } from "@/components/dashboard/owner/types";
 
+export interface PendingReview {
+  sitId: string;
+  sitTitle: string;
+  endDate: string | null;
+  sitterId: string;
+  sitterName: string | null;
+  sitterAvatar: string | null;
+}
+
 export interface OwnerDashboardData {
   sits: SitRow[];
   pets: Pet[];
@@ -23,6 +32,7 @@ export interface OwnerDashboardData {
   propertyEnvironment: string | null;
   propertyCoverPhoto: string | null;
   onboardingChecks: OnboardingChecks;
+  pendingReviews: PendingReview[];
   profile: {
     first_name: string | null;
     avatar_url: string | null;
@@ -51,6 +61,7 @@ const INITIAL: OwnerDashboardData = {
     hasName: false, hasAvatar: false, hasBio: false,
     hasIdentity: false, hasProperty: false, hasPets: false, hasSit: false,
   },
+  pendingReviews: [],
   profile: null,
 };
 
