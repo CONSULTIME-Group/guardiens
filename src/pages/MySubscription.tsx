@@ -134,11 +134,11 @@ const PRE_LAUNCH_ADVANTAGES: { label: string; href: string | null }[] = [
 const FOUNDER_FAQ = [
   {
     q: "C’est vraiment gratuit jusqu’au 13 juin ?",
-    a: "Oui. Aucune carte bancaire demandée avant le 13 juin. Après cette date, vous choisissez librement une formule — rien ne démarre automatiquement.",
+    a: "Oui. Aucune carte bancaire demandée avant le 13 juin. Après cette date, vous choisissez librement de souscrire — rien ne démarre automatiquement.",
   },
   {
     q: "Que se passe-t-il après le 13 juin ?",
-    a: "Trois options : 12€ pour un mois, 6,99€/mois sans engagement, ou un tarif annuel réduit. Vous décidez au moment voulu.",
+    a: "Une seule formule : 6,99 €/mois sans engagement, avec 7 jours d’essai. Vous décidez librement au moment voulu.",
   },
   {
     q: "Qu’est-ce que le badge Fondateur ?",
