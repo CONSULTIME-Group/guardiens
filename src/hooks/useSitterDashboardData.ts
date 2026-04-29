@@ -97,6 +97,11 @@ export function useSitterDashboardData(userId: string | undefined) {
 
   useEffect(() => {
     if (!userId) return;
+    // Reset to initial state when userId changes — prevents the unread badge
+    // (and other counters) from flickering with the previous user's values
+    // while the new fetch is in flight.
+    let cancelled = false;
+    setData(INITIAL_STATE);
 
     const load = async () => {
       const [
