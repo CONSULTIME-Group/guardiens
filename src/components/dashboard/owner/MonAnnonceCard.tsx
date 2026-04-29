@@ -198,11 +198,13 @@ const MonAnnonceCard = memo(({ sits, pets, propertyType, propertyEnvironment, pe
       {pets.length > 0 && (
         <div className="flex items-center gap-2">
           {pets.slice(0, 4).map(pet => (
-            <div key={pet.id} className="flex items-center gap-1 text-xs text-muted-foreground">
+            <div key={pet.id} className="flex items-center gap-1.5 text-xs text-muted-foreground">
               {pet.photo_url ? (
                 <img src={pet.photo_url} alt={pet.name} className="w-5 h-5 rounded-full object-cover" />
               ) : (
-                <PawPrint className="h-3.5 w-3.5" />
+                <span className="w-5 h-5 rounded-full bg-primary/10 text-primary text-[10px] font-semibold flex items-center justify-center" aria-hidden="true">
+                  {pet.name?.[0]?.toUpperCase() || "·"}
+                </span>
               )}
               <span>{capitalize(pet.name)}</span>
             </div>
