@@ -160,15 +160,15 @@ const OwnerDashboard = () => {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 md:space-y-8 pb-8">
 
       {/* Role activation banner */}
-      <div className="px-5 md:px-8">
+      <div className="px-5 md:px-8 pt-2">
         <RoleActivationBanner userRole={user?.role || "owner"} />
       </div>
 
       {/* ═══ Hero header ═══ */}
-      <div className="relative overflow-hidden bg-primary rounded-b-3xl px-5 md:px-10 pt-6 md:pt-8 pb-5 md:pb-6 mb-6 md:mb-8">
+      <div className="relative overflow-hidden bg-primary rounded-b-3xl px-5 md:px-10 pt-6 md:pt-8 pb-5 md:pb-6 mx-0">
         <div className="absolute right-0 top-0 opacity-[0.06] pointer-events-none">
           <svg width="280" height="200" viewBox="0 0 280 200" aria-hidden="true">
             <ellipse cx="200" cy="100" rx="160" ry="100" fill="white" />
@@ -208,11 +208,11 @@ const OwnerDashboard = () => {
         </div>
       </div>
 
-      <div className="px-5 md:px-8 mt-4">
+      <div className="px-5 md:px-8">
         <AccessGateBanner level={level} profileCompletion={accessProfileCompletion} context="guard" />
       </div>
 
-      <div className="px-5 md:px-8 -mt-4 mb-2">
+      <div className="px-5 md:px-8 -mt-2">
         <button
           onClick={() => setSearchParams({ tour: "true" })}
           className="text-xs text-muted-foreground underline-offset-4 hover:underline"
@@ -223,8 +223,8 @@ const OwnerDashboard = () => {
 
       {/* ═══ Banner ═══ */}
       {banner && (
-        <div className="px-5 md:px-8 -mt-4 mb-4">
-          <div className={`p-4 rounded-xl border ${BANNER_STYLES[banner.variant]} flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2`}>
+        <div className="px-5 md:px-8">
+          <div className={`p-4 rounded-2xl border ${BANNER_STYLES[banner.variant]} flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2`}>
             <p className="text-sm font-medium">{banner.label}</p>
             {banner.ctaLabel && banner.to && (
               <Link to={banner.to} className="text-sm font-semibold hover:underline shrink-0">
