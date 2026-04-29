@@ -45,12 +45,12 @@ const DEMO_LISTINGS = [
 ];
 
 const DemoListingCard = React.forwardRef<HTMLAnchorElement, typeof DEMO_LISTINGS[0]>(({
-  photo, city, animals, dates, title, description, ownerName, ownerPhoto, badges,
+  slug, photo, city, animals, dates, title, description, ownerName, ownerPhoto, badges,
 }, ref) => (
   <Link
     ref={ref}
-    to="/inscription?role=owner"
-    aria-label={`${title} — ${city}. J'ouvre un compte pour découvrir des annonces comme celle-ci.`}
+    to={`/annonces/demo/${slug}`}
+    aria-label={`Voir l'annonce de démonstration : ${title} — ${city}`}
     className="group bg-card rounded-2xl overflow-hidden border border-border shadow-sm flex flex-col hover:shadow-lg hover:border-primary/30 hover:-translate-y-0.5 transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
   >
     <div className="relative">
