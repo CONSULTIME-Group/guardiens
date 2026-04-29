@@ -62,7 +62,7 @@ const faqs = [
   },
   {
     q: "Est-ce que le gardien d'urgence est payé plus ?",
-    a: "Non, pas d'échange d'argent. Mais chaque intervention vous offre 3 mois d'abonnement gratuit, ainsi qu'une visibilité prioritaire dans la recherche.",
+    a: "Non, pas d'échange d'argent. Mais chaque intervention vous offre 3 mois d'abonnement offerts, ainsi qu'une visibilité prioritaire dans la recherche.",
   },
   {
     q: "Que se passe-t-il si je refuse une demande d'urgence ?",

@@ -72,7 +72,7 @@ const FAQ = () => {
     <>
       <PageMeta
         title="FAQ Guardiens — Toutes vos questions"
-        description="Toutes vos questions sur Guardiens — abonnement gardien, accès propriétaire gratuit, parrainage et petites missions d'entraide."
+        description="Toutes vos questions sur Guardiens — abonnement gardien, accès propriétaire à 0 € à vie, parrainage et petites missions d'entraide."
         path="/faq"
       />
 

@@ -49,8 +49,8 @@ const DEFAULT_FAQ = (cityName: string) => [
     a: `Sur Guardiens, vous publiez une annonce et les gardiens disponibles à ${cityName} et ses environs postulent directement. Chaque gardien est vérifié manuellement avant d'apparaître sur la plateforme.`,
   },
   {
-    q: `Est-ce vraiment gratuit pour les propriétaires à ${cityName} ?`,
-    a: "Oui. Guardiens est sans frais pour tous les propriétaires, sans limite dans le temps. Seuls les gardiens paient un abonnement pour accéder aux annonces et postuler.",
+    q: `Est-ce vraiment à 0 € pour les propriétaires à ${cityName} ?`,
+    a: "Oui. Guardiens est à 0 € pour tous les propriétaires, à vie, sans limite dans le temps. Seuls les gardiens paient un abonnement pour accéder aux annonces et postuler.",
   },
   {
     q: `Que se passe-t-il en cas d'urgence pendant la garde à ${cityName} ?`,
@@ -144,7 +144,7 @@ const CitySchemaOrg = ({ city }: Props) => {
         streetAddress: "Rue Juiverie",
         addressLocality: "Lyon",
         postalCode: "69005",
-        addressRegion: "Auvergne-Rhône-Alpes",
+        addressRegion: "France",
         addressCountry: "FR",
       },
       geo: {
@@ -156,7 +156,7 @@ const CitySchemaOrg = ({ city }: Props) => {
         "@type": "City",
         name: "Lyon",
       },
-      priceRange: "Gratuit pour les propriétaires",
+      priceRange: "0 € pour les propriétaires",
     });
   }
 
