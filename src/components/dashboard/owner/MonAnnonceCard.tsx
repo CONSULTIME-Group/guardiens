@@ -102,7 +102,12 @@ const MonAnnonceCard = memo(({ sits, pets, propertyType, propertyEnvironment, pe
     <div className="bg-card border border-border rounded-2xl overflow-hidden">
       {coverPhoto ? (
         <div className="relative h-40 w-full overflow-hidden">
-          <img src={coverPhoto} alt="Photo du logement" className="w-full h-full object-cover" />
+          <img
+            src={coverPhoto}
+            alt={`Photo de couverture de l'annonce ${currentSit.title || ""}`.trim()}
+            loading="lazy"
+            className="w-full h-full object-cover"
+          />
           <div className="absolute inset-0 bg-gradient-to-t from-foreground/70 via-foreground/10 to-transparent" aria-hidden="true" />
           <div className="absolute top-3 left-3 right-3 flex items-start justify-between gap-2">
             <span className="text-[11px] uppercase tracking-wider text-background/90 font-sans bg-foreground/40 backdrop-blur-sm rounded-full px-2.5 py-1">
