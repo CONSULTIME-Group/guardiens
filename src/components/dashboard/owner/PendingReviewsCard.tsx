@@ -48,7 +48,7 @@ const PendingReviewsCard = memo(({ pendingReviews }: { pendingReviews: PendingRe
               size="sm"
               className="shrink-0"
               onClick={() =>
-                navigate(`/sits/${r.sitId}/review?reviewee=${r.sitterId}`)
+                navigate(`/review/${r.sitId}?reviewee=${r.sitterId}`)
               }
             >
               Laisser un avis
