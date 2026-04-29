@@ -115,9 +115,7 @@ export function useSitterDashboardData(userId: string | undefined) {
           .select("id, title, slug, cover_image_url, excerpt, category")
           .eq("published", true).eq("category", "conseil_gardien")
           .order("published_at", { ascending: false }).limit(3),
-        supabase.from("messages")
-          .select("id", { count: "exact", head: true })
-          .neq("sender_id", userId).is("read_at", null),
+        (supabase as any).rpc("get_unread_messages_count", { _user_id: userId }),
         // Single badge query — replaces both badgeDetailsRes AND useUserBadges
         supabase.from("badge_attributions")
           .select("badge_id, created_at").eq("user_id", userId)
