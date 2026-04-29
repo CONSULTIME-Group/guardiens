@@ -130,6 +130,12 @@ const DemoListingShowcase = React.forwardRef<HTMLElement>((_props, ref) => (
       <div className="text-center">
         <Link
           to="/inscription?role=owner"
+          onClick={() =>
+            trackEvent("cta_proprio_clicked", {
+              source: "landing_demo_showcase",
+              metadata: { location: "demo_showcase_main_cta" },
+            })
+          }
           className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-8 py-4 rounded-full font-body font-medium text-base hover:bg-primary/90 transition-colors"
         >
           J'ouvre un compte — 0 € pour les propriétaires
