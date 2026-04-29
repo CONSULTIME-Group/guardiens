@@ -1232,7 +1232,7 @@ const AlertsSection = ({ user }: { user: any }) => {
   const zoneDescription = (a: AlertPref) => {
     if (a.zone_type === "rayon") return `${a.city} · ${a.radius_km} km`;
     if (a.zone_type === "departement") return `Département ${a.departement}`;
-    return "Région Auvergne-Rhône-Alpes";
+    return "France entière";
   };
 
   const firstActiveAlert = alertes.find((a) => a.active);
