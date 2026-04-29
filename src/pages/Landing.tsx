@@ -1049,7 +1049,7 @@ const Landing = () => {
           <div className="w-full mt-16 rounded-2xl overflow-hidden">
             <img
               src={notreHistoirePanorama}
-              alt="Une garde en Auvergne-Rhône-Alpes — Guardiens"
+              alt="Une garde de maison et d'animaux — Guardiens"
               className="w-full h-64 md:h-96 object-cover object-center"
               loading="lazy"
               width={1920}
