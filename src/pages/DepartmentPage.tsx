@@ -251,9 +251,12 @@ const DepartmentPage = () => {
           </p>
           <Link to="/inscription">
             <Button size="lg" className="gap-2">
-              S'inscrire — 0 € <ArrowRight className="h-4 w-4" />
+              Créer mon compte <ArrowRight className="h-4 w-4" />
             </Button>
           </Link>
+          <p className="text-xs text-muted-foreground mt-3">
+            Inscription en 2 minutes · Sans carte bancaire
+          </p>
         </section>
 
         {/* JSON-LD: Breadcrumb */}

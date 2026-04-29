@@ -255,7 +255,7 @@ const DemoListingShowcase = React.forwardRef<HTMLElement>((_props, ref) => (
           }
           className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-8 py-4 rounded-full font-body font-medium text-base hover:bg-primary/90 transition-colors"
         >
-          J'ouvre un compte — 0 € pour les propriétaires
+          Publier mon annonce
         </Link>
       </div>
     </div>

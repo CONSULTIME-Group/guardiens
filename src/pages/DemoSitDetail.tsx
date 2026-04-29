@@ -386,7 +386,7 @@ const DemoSitDetail = () => {
                         })
                       }
                     >
-                      J'ouvre un compte — 0 € pour les propriétaires
+                      Publier mon annonce
                     </Link>
                   </Button>
                   <Button asChild variant="outline" className="w-full">

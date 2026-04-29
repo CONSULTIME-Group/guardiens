@@ -78,7 +78,7 @@ export default function PublicHeader() {
           ))}
           <div className="pt-2 border-t border-border">
             <Button className="w-full" size="sm" onClick={() => { setOpen(false); navigate("/inscription"); }}>
-              S'inscrire — 0 € pour les propriétaires
+              Créer mon compte
             </Button>
           </div>
         </nav>
