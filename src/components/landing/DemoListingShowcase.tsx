@@ -101,10 +101,8 @@ const DemoListingCard = React.forwardRef<HTMLAnchorElement, typeof DEMO_LISTINGS
         </div>
       </div>
 
-      <span
-        className="w-full mt-3 py-2.5 rounded-xl bg-primary/10 text-primary font-body font-medium text-sm text-center group-hover:bg-primary group-hover:text-primary-foreground transition-colors block"
-      >
-        Voir l'annonce de démonstration →
+      <span aria-hidden="true" className={DEMO_CARD_CTA_CLASSNAME}>
+        {DEMO_CARD_CTA_LABEL} →
       </span>
     </div>
   </Link>
