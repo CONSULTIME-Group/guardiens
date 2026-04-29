@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import notreHistoirePanorama from "@/assets/story-photo.webp";
 import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, ArrowLeft, Home, Key, Handshake, ShieldCheck, MessageCircle, Users, ClipboardCheck, Star, BookOpen, Gift, Coffee, MapPin } from "lucide-react";
+import { ArrowRight, ArrowLeft } from "lucide-react";
 import { trackEvent } from "@/lib/analytics";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -154,7 +154,7 @@ const Landing = () => {
     <div className="min-h-screen bg-background text-foreground">
       <PageMeta
         title="Guardiens — Partez l'esprit tranquille"
-        description="Un gardien de votre région s'occupe de votre maison et de vos animaux pendant vos absences. Gratuit pour les propriétaires."
+        description="Un gardien de votre région s'occupe de votre maison et de vos animaux pendant vos absences. 0 € pour les propriétaires, à vie."
         path="/"
         image={HOME_OG_IMAGE}
       />
@@ -168,7 +168,7 @@ const Landing = () => {
             name: "Guardiens",
             url: "https://guardiens.fr",
             logo: "https://guardiens.fr/favicon.ico",
-            description: "Plateforme gratuite de pet sitting et house sitting de proximité en Auvergne-Rhône-Alpes.",
+            description: "Plateforme de pet sitting et house sitting de proximité en Auvergne-Rhône-Alpes — 0 € pour les propriétaires, à vie.",
             areaServed: { "@type": "AdministrativeArea", name: "Auvergne-Rhône-Alpes" },
             knowsAbout: ["House-sitting", "Pet-sitting", "Garde d'animaux à domicile", "Entraide entre gens du coin", "Petites missions entre gens du coin", "Auvergne-Rhône-Alpes"],
             slogan: "Quelqu'un du coin veille sur votre maison.",
@@ -199,12 +199,16 @@ const Landing = () => {
           __html: JSON.stringify({
             "@context": "https://schema.org",
             "@type": "Service",
-            name: "Pet sitting & House sitting gratuit",
-            description: "Service de garde d'animaux et house sitting gratuit en Auvergne-Rhône-Alpes. Avis croisés, inscription gratuite.",
+            name: "Pet sitting & House sitting de proximité",
+            description: "Service de garde d'animaux et house sitting de proximité en Auvergne-Rhône-Alpes. Avis croisés, 0 € pour les propriétaires à vie.",
             provider: { "@type": "Organization", name: "Guardiens", url: "https://guardiens.fr" },
             areaServed: { "@type": "AdministrativeArea", name: "Auvergne-Rhône-Alpes" },
             serviceType: ["Pet sitting", "House sitting", "Garde d'animaux", "Gardiennage de maison", "Garde de chien", "Garde de chat"],
-            offers: { "@type": "Offer", price: "0", priceCurrency: "EUR", description: "Inscription et mise en relation 100% gratuites" },
+            offers: [
+              { "@type": "Offer", name: "Espace propriétaire", price: "0", priceCurrency: "EUR", description: "Publication d'annonces et mise en relation à 0 € à vie pour les propriétaires" },
+              { "@type": "Offer", name: "Abonnement gardien", price: "6.99", priceCurrency: "EUR", description: "Abonnement gardien à 6,99 €/mois après le 13 juin 2026 — accès à 0 € jusqu'à cette date" },
+              { "@type": "Offer", name: "Entraide entre gens du coin", price: "0", priceCurrency: "EUR", description: "Petites missions et entraide à 0 € pour tous, pour toujours" },
+            ],
           }),
         }}
       />
@@ -215,8 +219,8 @@ const Landing = () => {
             "@context": "https://schema.org",
             "@type": "FAQPage",
             mainEntity: [
-              { "@type": "Question", name: "Qu'est-ce que le house sitting ?", acceptedAnswer: { "@type": "Answer", text: "Le house sitting est un échange de services : un gardien habite gratuitement dans votre maison pendant votre absence et prend soin de vos animaux. C'est gratuit pour les deux parties." } },
-              { "@type": "Question", name: "Guardiens est-il gratuit ?", acceptedAnswer: { "@type": "Answer", text: "Oui, Guardiens est 100% gratuit pour les propriétaires. Les gardiens bénéficient d'un accès gratuit jusqu'au 13 juin 2026, puis l'abonnement est à 6,99€/mois. L'entraide reste gratuite pour tous, pour toujours." } },
+              { "@type": "Question", name: "Qu'est-ce que le house sitting ?", acceptedAnswer: { "@type": "Answer", text: "Le house sitting est un échange de services : un gardien habite à 0 € dans votre maison pendant votre absence et prend soin de vos animaux. L'échange n'implique aucune transaction financière entre les deux parties." } },
+              { "@type": "Question", name: "Guardiens est-il gratuit ?", acceptedAnswer: { "@type": "Answer", text: "Oui, Guardiens est à 0 € pour les propriétaires, à vie. Les gardiens bénéficient d'un accès à 0 € jusqu'au 13 juin 2026, puis l'abonnement est à 6,99 €/mois. L'entraide reste à 0 € pour tous, pour toujours." } },
               { "@type": "Question", name: "Comment trouver un pet sitter près de chez moi ?", acceptedAnswer: { "@type": "Answer", text: "Inscrivez-vous sur Guardiens, publiez votre annonce de garde avec les dates et vos animaux, et recevez des candidatures de gardiens qui habitent près de chez vous." } },
             ],
           }),
@@ -333,32 +337,32 @@ const Landing = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-12">
             <div className="bg-card border border-border rounded-xl p-6">
-              <Gift className="w-10 h-10 text-primary" />
-              <h3 className="mt-4 font-heading font-semibold text-lg text-foreground">100% gratuit, pour toujours</h3>
+              <p className="text-xs tracking-widest uppercase text-primary/70 font-body">01</p>
+              <h3 className="mt-3 font-heading font-semibold text-lg text-foreground">0 € pour les propriétaires, à vie</h3>
               <p className="mt-2 text-muted-foreground text-sm leading-relaxed">
-                Publier votre annonce, recevoir des candidatures, échanger avec les gardiens : tout est gratuit pour les propriétaires. Sans limite de temps.
+                Publier votre annonce, recevoir des candidatures, échanger avec les gardiens : tout est à 0 € pour les propriétaires. Sans limite de temps.
               </p>
             </div>
 
             <div className="bg-card border border-border rounded-xl p-6">
-              <Coffee className="w-10 h-10 text-primary" />
-              <h3 className="mt-4 font-heading font-semibold text-lg text-foreground">Une rencontre avant chaque garde</h3>
+              <p className="text-xs tracking-widest uppercase text-primary/70 font-body">02</p>
+              <h3 className="mt-3 font-heading font-semibold text-lg text-foreground">Une rencontre avant chaque garde</h3>
               <p className="mt-2 text-muted-foreground text-sm leading-relaxed">
                 Vous choisissez votre gardien après l'avoir rencontré. Un café, une visite du logement, et la confiance s'installe naturellement.
               </p>
             </div>
 
             <div className="bg-card border border-border rounded-xl p-6">
-              <ShieldCheck className="w-10 h-10 text-primary" />
-              <h3 className="mt-4 font-heading font-semibold text-lg text-foreground">Des profils vérifiés</h3>
+              <p className="text-xs tracking-widest uppercase text-primary/70 font-body">03</p>
+              <h3 className="mt-3 font-heading font-semibold text-lg text-foreground">Des profils vérifiés</h3>
               <p className="mt-2 text-muted-foreground text-sm leading-relaxed">
                 Chaque gardien est vérifié par notre équipe : pièce d'identité, avis des propriétaires précédents, historique de gardes réalisées.
               </p>
             </div>
 
             <div className="bg-card border border-border rounded-xl p-6">
-              <MapPin className="w-10 h-10 text-primary" />
-              <h3 className="mt-4 font-heading font-semibold text-lg text-foreground">Des gardiens de votre région</h3>
+              <p className="text-xs tracking-widest uppercase text-primary/70 font-body">04</p>
+              <h3 className="mt-3 font-heading font-semibold text-lg text-foreground">Des gardiens de votre région</h3>
               <p className="mt-2 text-muted-foreground text-sm leading-relaxed">
                 En Auvergne-Rhône-Alpes, on privilégie la proximité. Votre gardien habite à quelques kilomètres, jamais à l'autre bout de la France.
               </p>
@@ -392,9 +396,8 @@ const Landing = () => {
       {/* ═══════════════ BANDEAU ENTRAIDE ═══════════════ */}
       <section className="bg-primary/5 border-y border-primary/10">
         <div className="max-w-5xl mx-auto px-6 py-5 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-6 text-center sm:text-left">
-          <Handshake className="h-5 w-5 text-primary shrink-0" />
           <p className="font-body text-sm md:text-base text-foreground/80">
-            <strong className="text-foreground">L'entraide entre gens du coin est gratuite.</strong> Pour tous. Pour toujours. C'est l'esprit de Guardiens.
+            <strong className="text-foreground">L'entraide entre gens du coin reste à 0 €.</strong> Pour tous. Pour toujours. C'est l'esprit de Guardiens.
           </p>
           <Link to="/petites-missions" className="text-sm font-body text-primary font-medium hover:underline whitespace-nowrap shrink-0">
             En savoir plus →
@@ -417,13 +420,13 @@ const Landing = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <RevealSection delay={0.1}>
               <div className="bg-card rounded-2xl p-8 shadow-sm text-left h-full">
-                <Home className="h-8 w-8 text-primary mb-4" />
+                <p className="text-xs tracking-widest uppercase text-primary/70 font-body mb-3">Propriétaires</p>
                 <h3 className="text-xl font-heading font-semibold text-foreground mb-3">Vous partez. Votre maison vit.</h3>
                 <p className="text-base font-body leading-relaxed text-foreground/70 mb-4">
                   Trouvez quelqu'un du coin pour garder votre maison et vos animaux. Vous le rencontrez avant. Vous choisissez.
                 </p>
                 <span className="inline-block px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-body font-medium mb-4">
-                  Gratuit pour les propriétaires
+                  0 € pour les propriétaires
                 </span>
                 <Link to="/inscription?role=owner" className="block text-sm font-body text-primary font-medium hover:underline">
                   Je cherche un gardien →
@@ -433,7 +436,7 @@ const Landing = () => {
 
             <RevealSection delay={0.2}>
               <div className="bg-card rounded-2xl p-8 shadow-sm text-left h-full">
-                <Key className="h-8 w-8 text-primary mb-4" />
+                <p className="text-xs tracking-widest uppercase text-primary/70 font-body mb-3">Gardiens</p>
                 <h3 className="text-xl font-heading font-semibold text-foreground mb-3">Vous gardez. Vous découvrez.</h3>
                 <p className="text-base font-body leading-relaxed text-foreground/70 mb-4">
                   Proposez-vous comme gardien. Vivez dans des maisons, avec des animaux, dans des quartiers que vous n'auriez jamais explorés autrement.
@@ -447,9 +450,9 @@ const Landing = () => {
             <RevealSection delay={0.3}>
               <div className="bg-card rounded-2xl p-8 shadow-sm text-left h-full border-2 border-primary/20 relative overflow-hidden">
                 <div className="absolute top-0 right-0 bg-primary text-primary-foreground text-[10px] font-body font-bold uppercase tracking-wider px-3 py-1 rounded-bl-lg">
-                  Gratuit pour tous
+                  0 € pour tous
                 </div>
-                <Handshake className="h-8 w-8 text-primary mb-4" />
+                <p className="text-xs tracking-widest uppercase text-primary/70 font-body mb-3">Entraide</p>
                 <h3 className="text-xl font-heading font-semibold text-foreground mb-3">Un coup de main. Un échange.</h3>
                 <p className="text-base font-body leading-relaxed text-foreground/70 mb-4">
                   Arroser un potager, promener un chien, partager une compétence. Sans argent. C'est l'âme de Guardiens — et ça ne changera jamais.
@@ -551,15 +554,15 @@ const Landing = () => {
             {/* Connaître */}
             <RevealSection delay={0.1}>
               <div className="bg-card rounded-2xl p-8 shadow-sm h-full border border-border">
-                <Users className="h-8 w-8 text-primary mb-4" />
-                <h3 className="text-lg font-heading font-semibold text-foreground mb-3">Connaître</h3>
+                <p className="text-xs tracking-widest uppercase text-primary/70 font-body mb-3">Connaître</p>
+                <h3 className="text-lg font-heading font-semibold text-foreground mb-4">Avant de confier vos clés</h3>
                 <ul className="space-y-3 text-sm font-body text-foreground/70 leading-relaxed">
                   <li className="flex items-start gap-2.5">
-                    <Star className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                    <span className="mt-2 h-1.5 w-1.5 rounded-full bg-primary shrink-0" aria-hidden="true" />
                     <span><strong className="text-foreground">Avis croisés</strong> — Après chaque garde, chacun note l'autre. Transparent.</span>
                   </li>
                   <li className="flex items-start gap-2.5">
-                    <Users className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                    <span className="mt-2 h-1.5 w-1.5 rounded-full bg-primary shrink-0" aria-hidden="true" />
                     <span><strong className="text-foreground">Profils détaillés</strong> — Compétences, expériences vérifiées, galerie photos.</span>
                   </li>
                 </ul>
@@ -569,15 +572,15 @@ const Landing = () => {
             {/* Sécuriser */}
             <RevealSection delay={0.2}>
               <div className="bg-card rounded-2xl p-8 shadow-sm h-full border border-border">
-                <ShieldCheck className="h-8 w-8 text-primary mb-4" />
-                <h3 className="text-lg font-heading font-semibold text-foreground mb-3">Sécuriser</h3>
+                <p className="text-xs tracking-widest uppercase text-primary/70 font-body mb-3">Sécuriser</p>
+                <h3 className="text-lg font-heading font-semibold text-foreground mb-4">Une garde encadrée</h3>
                 <ul className="space-y-3 text-sm font-body text-foreground/70 leading-relaxed">
                   <li className="flex items-start gap-2.5">
-                    <ShieldCheck className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                    <span className="mt-2 h-1.5 w-1.5 rounded-full bg-primary shrink-0" aria-hidden="true" />
                     <span><strong className="text-foreground">Vérification d'identité</strong> — Badge visible sur le profil de chaque gardien vérifié.</span>
                   </li>
                   <li className="flex items-start gap-2.5">
-                    <ClipboardCheck className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                    <span className="mt-2 h-1.5 w-1.5 rounded-full bg-primary shrink-0" aria-hidden="true" />
                     <span><strong className="text-foreground">Accord de garde</strong> — Un document clair, signé par les deux parties avant le départ.</span>
                   </li>
                 </ul>
@@ -587,15 +590,15 @@ const Landing = () => {
             {/* Communiquer */}
             <RevealSection delay={0.3}>
               <div className="bg-card rounded-2xl p-8 shadow-sm h-full border border-border">
-                <MessageCircle className="h-8 w-8 text-primary mb-4" />
-                <h3 className="text-lg font-heading font-semibold text-foreground mb-3">Communiquer</h3>
+                <p className="text-xs tracking-widest uppercase text-primary/70 font-body mb-3">Communiquer</p>
+                <h3 className="text-lg font-heading font-semibold text-foreground mb-4">Pendant et après</h3>
                 <ul className="space-y-3 text-sm font-body text-foreground/70 leading-relaxed">
                   <li className="flex items-start gap-2.5">
-                    <MessageCircle className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                    <span className="mt-2 h-1.5 w-1.5 rounded-full bg-primary shrink-0" aria-hidden="true" />
                     <span><strong className="text-foreground">Messagerie intégrée</strong> — Échangez avant, pendant et après la garde.</span>
                   </li>
                   <li className="flex items-start gap-2.5">
-                    <BookOpen className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                    <span className="mt-2 h-1.5 w-1.5 rounded-full bg-primary shrink-0" aria-hidden="true" />
                     <span><strong className="text-foreground">Guide de maison</strong> — Vétérinaire, clés, Wi-Fi, habitudes : tout au même endroit.</span>
                   </li>
                 </ul>
@@ -620,7 +623,7 @@ const Landing = () => {
         <div className="max-w-5xl mx-auto px-6">
           <RevealSection>
             <span className="text-xs tracking-widest uppercase text-primary/60 font-body mb-4 block text-center">
-              Gratuit · Pour tous · Pour toujours
+              0 € · Pour tous · Pour toujours
             </span>
             <h2 className="text-4xl md:text-5xl font-heading font-semibold leading-snug text-foreground text-center mb-6">
               Osez demander un coup de main.
@@ -673,25 +676,24 @@ const Landing = () => {
             </p>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 max-w-5xl mx-auto">
               {[
-                { emoji: "🌿", label: "Arroser les plantes" },
-                { emoji: "🐔", label: "Garder les poules" },
-                { emoji: "🐕", label: "Promener le chien" },
-                { emoji: "🔨", label: "Petit bricolage" },
-                { emoji: "🌱", label: "Tailler le jardin" },
-                { emoji: "🧘", label: "Séance de Reiki" },
-                { emoji: "🍞", label: "Cours de pain maison" },
-                { emoji: "📦", label: "Réceptionner un colis" },
-                { emoji: "🚗", label: "Covoiturage rdv" },
-                { emoji: "🪴", label: "Bouture, semis" },
-                { emoji: "🐈", label: "Visite d'un chat" },
-                { emoji: "💬", label: "Café & écoute" },
-              ].map((item) => (
+                "Arroser les plantes",
+                "Garder les poules",
+                "Promener le chien",
+                "Petit bricolage",
+                "Tailler le jardin",
+                "Séance de Reiki",
+                "Cours de pain maison",
+                "Réceptionner un colis",
+                "Covoiturage rdv",
+                "Bouture, semis",
+                "Visite d'un chat",
+                "Café & écoute",
+              ].map((label) => (
                 <div
-                  key={item.label}
-                  className="flex flex-col items-center text-center bg-card rounded-xl px-3 py-4 border border-border/60 hover:border-primary/40 hover:shadow-sm transition-all"
+                  key={label}
+                  className="flex items-center justify-center text-center bg-card rounded-xl px-3 py-4 border border-border/60 hover:border-primary/40 hover:shadow-sm transition-all min-h-[64px]"
                 >
-                  <span className="text-2xl mb-1.5" aria-hidden="true">{item.emoji}</span>
-                  <span className="text-xs font-body text-foreground/80 leading-tight">{item.label}</span>
+                  <span className="text-xs font-body text-foreground/80 leading-tight">{label}</span>
                 </div>
               ))}
             </div>
@@ -813,10 +815,8 @@ const Landing = () => {
             {/* Colonne propriétaires */}
             <RevealSection delay={0.1}>
               <div className="rounded-2xl bg-card border border-border p-8 h-full">
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center">
-                    <Home className="h-5 w-5" />
-                  </div>
+                <div className="mb-6">
+                  <p className="text-xs tracking-widest uppercase text-primary/70 font-body mb-2">Propriétaires</p>
                   <h3 className="font-heading text-2xl font-semibold text-foreground">
                     Pour les propriétaires
                   </h3>
@@ -861,8 +861,7 @@ const Landing = () => {
                 </ul>
                 <div className="mt-6 pt-6 border-t border-border">
                   <p className="text-xs text-foreground/60 leading-relaxed">
-                    <ShieldCheck className="inline h-3.5 w-3.5 text-primary mr-1 -mt-0.5" />
-                    Annonce 100% gratuite, profils vérifiés, accord de garde signé.
+                    Annonce à 0 €, profils vérifiés, accord de garde signé.
                   </p>
                 </div>
               </div>
@@ -871,10 +870,8 @@ const Landing = () => {
             {/* Colonne gardiens */}
             <RevealSection delay={0.2}>
               <div className="rounded-2xl bg-card border border-border p-8 h-full">
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="w-10 h-10 rounded-full bg-secondary/10 text-secondary flex items-center justify-center">
-                    <Key className="h-5 w-5" />
-                  </div>
+                <div className="mb-6">
+                  <p className="text-xs tracking-widest uppercase text-secondary/80 font-body mb-2">Gardiens</p>
                   <h3 className="font-heading text-2xl font-semibold text-foreground">
                     Pour les gardiens
                   </h3>
@@ -919,8 +916,7 @@ const Landing = () => {
                 </ul>
                 <div className="mt-6 pt-6 border-t border-border">
                   <p className="text-xs text-foreground/60 leading-relaxed">
-                    <Gift className="inline h-3.5 w-3.5 text-secondary mr-1 -mt-0.5" />
-                    Inscription gratuite, logements à découvrir, vraies rencontres locales.
+                    Inscription à 0 €, logements à découvrir, vraies rencontres locales.
                   </p>
                 </div>
               </div>
@@ -937,7 +933,6 @@ const Landing = () => {
                 className="rounded-full"
               >
                 <Link to="/actualites">
-                  <BookOpen className="mr-2 h-4 w-4" />
                   Tous les articles &amp; conseils
                 </Link>
               </Button>
@@ -948,7 +943,6 @@ const Landing = () => {
                 className="rounded-full"
               >
                 <Link to="/guides">
-                  <MapPin className="mr-2 h-4 w-4" />
                   Guides locaux par ville
                 </Link>
               </Button>
