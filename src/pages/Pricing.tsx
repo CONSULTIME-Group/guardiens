@@ -300,7 +300,7 @@ const Pricing = () => {
             </Card>
 
             {/* Sitter Card */}
-            <Card className="border-2 border-primary/30 relative shadow-xl rounded-2xl md:scale-105 h-full flex flex-col bg-primary/5">
+            <Card className="border-2 border-primary/30 relative shadow-xl rounded-2xl h-full flex flex-col bg-primary/5">
               <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-amber-100 text-amber-800 text-xs font-body font-medium px-3 py-1 rounded-full flex items-center gap-1.5">
                 <Star className="h-3 w-3" fill="currentColor" />
                 Le plus choisi
@@ -308,19 +308,12 @@ const Pricing = () => {
               <CardHeader className="text-center pb-2 p-8 pt-10">
                 <div className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-3 font-body">Gardien</div>
                 {before ? (
-                  <div className="text-center space-y-2 py-2">
-                    <p className="text-[11px] uppercase tracking-widest text-amber-700 font-body font-semibold">
-                      Jusqu'au 13 juin 2026
-                    </p>
+                  <div className="text-center space-y-1.5 py-2">
                     <p className="font-heading text-5xl font-bold text-primary leading-none">
-                      Gratuit
+                      0 €
                     </p>
                     <p className="text-xs text-foreground/55 font-body pt-1">
-                      Accès complet, sans carte bancaire.
-                    </p>
-                    <p className="text-xs text-foreground/70 font-body font-medium pt-1">
-                      Puis <span className="font-semibold text-foreground">6,99 €/mois</span> à partir du 13 juin 2026
-                      <span className="text-foreground/55"> (7 jours d'essai offerts).</span>
+                      Puis <span className="font-semibold text-foreground">6,99 €/mois</span> · 7 jours d'essai
                     </p>
                   </div>
                 ) : (
