@@ -90,8 +90,8 @@ const DepartmentPage = () => {
   return (
     <>
       <PageMeta
-        title={page.meta_title || `Pet sitting & House sitting ${page.department} – Garde d'animaux gratuite | Guardiens`}
-        description={page.meta_description || `Trouvez un pet sitter ou house sitter dans le ${page.department}. Garde d'animaux gratuite entre particuliers. ${cityPages.length} villes couvertes sur Guardiens.`}
+        title={page.meta_title || `Pet sitting & House sitting ${page.department} – Garde d'animaux à 0 € pour les propriétaires | Guardiens`}
+        description={page.meta_description || `Trouvez un pet sitter ou house sitter dans le ${page.department}. Garde d'animaux entre particuliers, à 0 € pour les propriétaires. ${cityPages.length} villes couvertes sur Guardiens.`}
         path={`/departement/${page.slug}`}
       />
 
@@ -127,7 +127,7 @@ const DepartmentPage = () => {
             </Badge>
             <Badge variant="outline" className="text-base px-4 py-2 gap-2">
               <Heart className="h-4 w-4" />
-              Inscrivez-vous gratuitement
+              Inscription à 0 €
             </Badge>
           </div>
 
@@ -232,9 +232,9 @@ const DepartmentPage = () => {
             <Card>
               <CardContent className="p-6">
                 <Heart className="h-8 w-8 text-primary mb-3" />
-                <h3 className="font-semibold text-foreground mb-2">Gratuité</h3>
+                <h3 className="font-semibold text-foreground mb-2">0 € pour les propriétaires</h3>
                 <p className="text-sm text-muted-foreground">
-                  Inscrivez-vous gratuitement. Pas de commission sur les gardes.
+                  Inscription à 0 €, à vie. Pas de commission sur les gardes.
                 </p>
               </CardContent>
             </Card>
@@ -251,7 +251,7 @@ const DepartmentPage = () => {
           </p>
           <Link to="/inscription">
             <Button size="lg" className="gap-2">
-              S'inscrire gratuitement <ArrowRight className="h-4 w-4" />
+              S'inscrire — 0 € <ArrowRight className="h-4 w-4" />
             </Button>
           </Link>
         </section>
@@ -279,7 +279,7 @@ const DepartmentPage = () => {
               "@context": "https://schema.org",
               "@type": "Service",
               name: `Pet sitting & House sitting dans le ${page.department}`,
-              description: `Service de garde d'animaux et house sitting gratuit dans le ${page.department}. ${cityPages.length} villes couvertes. Gardiens vérifiés.`,
+              description: `Service de garde d'animaux et house sitting à 0 € pour les propriétaires dans le ${page.department}. ${cityPages.length} villes couvertes. Gardiens vérifiés.`,
               provider: {
                 "@type": "Organization",
                 name: "Guardiens",
