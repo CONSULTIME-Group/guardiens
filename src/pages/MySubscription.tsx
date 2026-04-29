@@ -20,7 +20,7 @@ import {
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { toast } from "sonner";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, Link } from "react-router-dom";
 
 import { LAUNCH_DATE, LAUNCH_START, GRACE_END, FOUNDER_START } from "@/lib/constants";
 
@@ -442,13 +442,13 @@ const MySubscription = () => {
                       <span className="text-xs text-foreground/50 font-body whitespace-nowrap">{profileCompletion} % complété</span>
                     </div>
                   </div>
-                  <a
-                    href={effectiveRole === "owner" ? "/owner-profile" : "/profile"}
+                  <Link
+                    to={effectiveRole === "owner" ? "/owner-profile" : "/profile"}
                     className="text-sm font-medium text-primary font-body hover:underline whitespace-nowrap flex-shrink-0"
                     onClick={() => trackEvent("cta_complete_profile", { source: "pre_launch_nudge" })}
                   >
                     Compléter {"→"}
-                  </a>
+                  </Link>
                 </div>
               )}
 
@@ -460,13 +460,13 @@ const MySubscription = () => {
                     <div key={label} className="flex items-center gap-2.5 min-w-0 group">
                       <Check className="w-4 h-4 text-primary flex-shrink-0" aria-hidden="true" />
                       {href ? (
-                        <a
-                          href={href}
+                        <Link
+                          to={href}
                           className="text-sm text-foreground/80 font-body leading-snug group-hover:text-primary group-hover:underline transition-colors"
                           onClick={() => trackEvent("advantage_link_click", { label })}
                         >
                           {label}
-                        </a>
+                        </Link>
                       ) : (
                         <span className="text-sm text-foreground/80 font-body leading-snug">{label}</span>
                       )}
@@ -503,14 +503,14 @@ const MySubscription = () => {
 
               {/* Main CTA */}
               <div className="px-6 sm:px-8 py-6 flex flex-col items-center gap-2">
-                <a
-                  href="/search"
+                <Link
+                  to="/search"
                   className="w-full inline-flex items-center justify-center gap-2 bg-primary text-primary-foreground font-body font-medium text-sm px-6 py-3.5 rounded-xl hover:bg-primary/90 transition-colors min-h-[44px]"
                   onClick={() => trackEvent("cta_prelaunched_explore", { source: "pre_launch_main_cta" })}
                 >
                   <SearchIcon className="w-4 h-4" aria-hidden="true" />
                   Explorer les annonces
-                </a>
+                </Link>
                 <p className="text-xs text-foreground/40 font-body text-center">Revenez ici le 13 mai pour choisir votre formule.</p>
               </div>
             </div>
@@ -749,6 +749,7 @@ const MySubscription = () => {
 
             {sub?.plan === "monthly" && (
               <button
+                type="button"
                 onClick={openPortal}
                 className="w-full text-xs text-destructive/60 hover:text-destructive transition-colors text-center font-body py-1"
               >
