@@ -1,5 +1,6 @@
 import { memo } from "react";
 import { Link } from "react-router-dom";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface ResItem {
   title: string;
@@ -10,7 +11,25 @@ interface ResItem {
 interface ContextualResourcesProps {
   annoncesCount: number;
   gardesCount: number;
+  loading?: boolean;
 }
+
+export const ContextualResourcesSkeleton = () => (
+  <section aria-label="Chargement des ressources" aria-busy="true" className="animate-fade-in">
+    <Skeleton className="h-5 w-64 mb-3" />
+    <ul className="grid grid-cols-1 md:grid-cols-3 gap-2">
+      {Array.from({ length: 3 }).map((_, i) => (
+        <li key={i}>
+          <div className="block h-full rounded-xl border border-border bg-card p-4">
+            <Skeleton className="h-4 w-3/4 mb-2" />
+            <Skeleton className="h-3 w-full mt-2" />
+            <Skeleton className="h-3 w-2/3 mt-1.5" />
+          </div>
+        </li>
+      ))}
+    </ul>
+  </section>
+);
 
 const ContextualResources = memo(({ annoncesCount, gardesCount }: ContextualResourcesProps) => {
   let resTitle = "";
