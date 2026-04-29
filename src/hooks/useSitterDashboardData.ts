@@ -226,6 +226,7 @@ export function useSitterDashboardData(userId: string | undefined) {
         };
       }
 
+      if (cancelled) return;
       setData({
         loading: false,
         profileCompletion: profile?.profile_completion || 0,
