@@ -7,6 +7,18 @@ const DEMO_CARD_CTA_LABEL = "Voir l'annonce de démonstration";
 const DEMO_CARD_CTA_CLASSNAME =
   "w-full mt-3 py-2.5 rounded-xl bg-primary/10 text-primary font-body font-medium text-sm text-center group-hover:bg-primary group-hover:text-primary-foreground transition-colors block";
 
+// Préchargement du chunk de la page DemoSitDetail (idempotent : Vite met l'import en cache)
+let demoDetailPrefetched = false;
+const prefetchDemoDetail = () => {
+  if (demoDetailPrefetched) return;
+  demoDetailPrefetched = true;
+  // Même chemin d'import que dans src/App.tsx → réutilise le même chunk lazy
+  import("@/pages/DemoSitDetail").catch(() => {
+    // Si le préchargement échoue (offline, etc.), on autorise une nouvelle tentative
+    demoDetailPrefetched = false;
+  });
+};
+
 // Slugs alignés sur src/data/demoListings.ts → page /annonces/demo/:slug
 const DEMO_LISTINGS = [
   {
@@ -56,6 +68,9 @@ const DemoListingCard = React.forwardRef<HTMLAnchorElement, typeof DEMO_LISTINGS
   <Link
     ref={ref}
     to={`/annonces/demo/${slug}`}
+    onMouseEnter={prefetchDemoDetail}
+    onFocus={prefetchDemoDetail}
+    onTouchStart={prefetchDemoDetail}
     onClick={() =>
       trackEvent("sit_view", {
         source: "landing_demo_card",
