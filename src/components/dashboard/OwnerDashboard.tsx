@@ -3,7 +3,7 @@ import FounderBadge from "@/components/badges/FounderBadge";
 import { supabase } from "@/integrations/supabase/client";
 import { logger } from "@/lib/logger";
 import { useAuth } from "@/contexts/AuthContext";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 
 import OnboardingWelcome from "./OnboardingWelcome";
@@ -46,7 +46,7 @@ const OwnerDashboard = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { level, profileCompletion: accessProfileCompletion } = useAccessLevel();
-  const [searchParams, setSearchParams] = useSearchParams();
+  
 
   /* ── Data fetching (extracted hook) ── */
   const { data, loading } = useOwnerDashboardData(user?.id);
