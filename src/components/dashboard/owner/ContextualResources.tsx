@@ -39,7 +39,8 @@ const ContextualResources = memo(({ annoncesCount, gardesCount }: ContextualReso
     ];
   }
 
-  if (resItems.length === 0) return null;
+  // resItems contient toujours 3 entrées (3 branches couvrent tous les cas).
+  // Pas de return null : la section est structurelle dans la mise en page du dashboard.
 
   return (
     <section aria-label={resTitle} className="animate-fade-in">
