@@ -187,13 +187,44 @@ export function useOwnerDashboardData(userId: string | undefined) {
         });
         const trustedSitterCount = Object.values(sitterSitCounts).filter(c => c >= 2).length;
 
-        // My missions
-        const [myMissionsDataRes, allMyMissionsCountRes] = await Promise.all([
+        // Pending reviews : gardes terminées récentes (< 14j) avec sitter accepté,
+        // sans avis encore laissé par le propriétaire.
+        const fourteenDaysAgo = new Date();
+        fourteenDaysAgo.setDate(fourteenDaysAgo.getDate() - 14);
+        const recentCompleted = completedSitsData.filter(s => {
+          if (!s.end_date) return false;
+          return new Date(s.end_date) >= fourteenDaysAgo;
+        });
+        const recentSitIds = recentCompleted.map(s => s.id);
+
+        // My missions + reviews déjà laissés par le propriétaire
+        const [myMissionsDataRes, allMyMissionsCountRes, ownerReviewsRes] = await Promise.all([
           supabase.from("small_missions").select("id, title, category, status, created_at, small_mission_responses(id, status)").eq("user_id", userId).order("created_at", { ascending: false }).limit(3),
           supabase.from("small_missions").select("id, status").eq("user_id", userId),
+          recentSitIds.length > 0
+            ? supabase.from("reviews").select("sit_id").eq("reviewer_id", userId).in("sit_id", recentSitIds)
+            : Promise.resolve({ data: [], error: null }),
         ]);
 
         if (cancelled) return;
+
+        const reviewedSitIds = new Set((ownerReviewsRes.data || []).map((r: { sit_id: string }) => r.sit_id));
+        const pendingReviews: PendingReview[] = recentCompleted
+          .filter(s => !reviewedSitIds.has(s.id))
+          .map(s => {
+            const accepted = (s.applications || []).find(a => a.status === "accepted");
+            if (!accepted) return null;
+            const sitterInfo = sitterProfiles[accepted.sitter_id];
+            return {
+              sitId: s.id,
+              sitTitle: s.title,
+              endDate: s.end_date,
+              sitterId: accepted.sitter_id,
+              sitterName: sitterInfo?.first_name ?? null,
+              sitterAvatar: sitterInfo?.avatar_url ?? null,
+            };
+          })
+          .filter((x): x is PendingReview => x !== null);
 
         const allMyMissions = allMyMissionsCountRes.data || [];
 
