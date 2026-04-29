@@ -242,9 +242,9 @@ const Landing = () => {
             "@context": "https://schema.org",
             "@type": "Service",
             name: "Pet sitting & House sitting de proximité",
-            description: "Service de garde d'animaux et house sitting de proximité en Auvergne-Rhône-Alpes. Avis croisés, 0 € pour les propriétaires à vie.",
+            description: "Service de garde d'animaux et house sitting de proximité. Avis croisés, 0 € pour les propriétaires à vie.",
             provider: { "@type": "Organization", name: "Guardiens", url: "https://guardiens.fr" },
-            areaServed: { "@type": "AdministrativeArea", name: "Auvergne-Rhône-Alpes" },
+            areaServed: { "@type": "Country", name: "France" },
             serviceType: ["Pet sitting", "House sitting", "Garde d'animaux", "Gardiennage de maison", "Garde de chien", "Garde de chat"],
             offers: [
               { "@type": "Offer", name: "Espace propriétaire", price: "0", priceCurrency: "EUR", description: "Publication d'annonces et mise en relation à 0 € à vie pour les propriétaires" },
