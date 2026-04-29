@@ -47,35 +47,19 @@ const OwnerDashboard = () => {
   const { level, profileCompletion: accessProfileCompletion } = useAccessLevel();
   const [searchParams, setSearchParams] = useSearchParams();
 
-  /* ── Remote state ── */
-  const [sits, setSits] = useState<SitRow[]>([]);
-  const [pets, setPets] = useState<Pet[]>([]);
-  const [recentApps, setRecentApps] = useState<AppRow[]>([]);
-  const [reviews, setReviews] = useState<{ overall_rating: number }[]>([]);
-  const [highlights, setHighlights] = useState<HighlightRow[]>([]);
-  const [smallMissions, setSmallMissions] = useState<SmallMission[]>([]);
-  const [myMissions, setMyMissions] = useState<SmallMission[]>([]);
-  const [verificationStatus, setVerificationStatus] = useState("not_submitted");
-  const [missionMetrics, setMissionMetrics] = useState({ total: 0, completed: 0 });
-  const [sitterBadges, setSitterBadges] = useState<Record<string, { badge_key: string; count: number }[]>>({});
-  const [sitterProfiles, setSitterProfiles] = useState<Record<string, SitterInfo>>({});
-  const [trustedSitterCount, setTrustedSitterCount] = useState(0);
-  const [propertyType, setPropertyType] = useState<string | null>(null);
-  const [propertyEnvironment, setPropertyEnvironment] = useState<string | null>(null);
-  const [propertyCoverPhoto, setPropertyCoverPhoto] = useState<string | null>(null);
+  /* ── Data fetching (extracted hook) ── */
+  const { data, loading } = useOwnerDashboardData(user?.id);
+  const {
+    sits, pets, recentApps, reviews, highlights, smallMissions, myMissions,
+    verificationStatus, sitterBadges, sitterProfiles, trustedSitterCount,
+    propertyType, propertyEnvironment, propertyCoverPhoto, onboardingChecks,
+  } = data;
 
   /* ── UI state ── */
-  const [loading, setLoading] = useState(true);
   const [showOnboarding, setShowOnboarding] = useState(false);
-  const [onboardingChecks, setOnboardingChecks] = useState<OnboardingChecks>({
-    hasName: false, hasAvatar: false, hasBio: false,
-    hasIdentity: false, hasProperty: false, hasPets: false, hasSit: false,
-  });
 
   /* ── Badges (react-query) ── */
   const { data: userBadges } = useUserBadges(user?.id);
-
-  // Badge counts now handled by BadgeGridSection
 
   /* ── Derived values (stable `now` per render cycle, not stale memo) ── */
   const now = new Date();
@@ -93,174 +77,16 @@ const OwnerDashboard = () => {
     [sits]
   );
 
-  /* ── Data loading (single effect, single profile fetch) ── */
+  /* ── Onboarding visibility (driven by hook data + user state) ── */
   useEffect(() => {
-    if (!user) return;
-    let cancelled = false;
-
-    // Reset state immediately to avoid showing previous user's data (anti-flicker)
-    setLoading(true);
-    setSits([]);
-    setPets([]);
-    setRecentApps([]);
-    setReviews([]);
-    setHighlights([]);
-    setSmallMissions([]);
-    setMyMissions([]);
-    setVerificationStatus("not_submitted");
-    setMissionMetrics({ total: 0, completed: 0 });
-    setSitterBadges({});
-    setSitterProfiles({});
-    setTrustedSitterCount(0);
-    setPropertyType(null);
-    setPropertyEnvironment(null);
-    setPropertyCoverPhoto(null);
-
-    const load = async () => {
-      try {
-        const [sitsRes, propsRes, reviewsRes, profileRes, highlightsRes, missionsRes] = await Promise.all([
-          supabase.from("sits").select("*, applications(id, status, sitter_id)").eq("user_id", user.id).order("created_at", { ascending: false }),
-          supabase.from("properties").select("id, type, environment, photos").eq("user_id", user.id),
-          supabase.from("reviews").select("overall_rating").eq("reviewee_id", user.id).eq("published", true),
-          supabase.from("profiles").select("first_name, avatar_url, bio, identity_verification_status, onboarding_completed, onboarding_dismissed_at, onboarding_minimal_completed").eq("id", user.id).single(),
-          supabase.from("owner_highlights").select("*, sitter:profiles!owner_highlights_sitter_id_fkey(first_name, avatar_url)").eq("owner_id", user.id).eq("hidden", false).order("created_at", { ascending: false }).limit(5),
-          supabase.from("small_missions").select("id, title, category, city, created_at").eq("status", "open").order("created_at", { ascending: false }).limit(2),
-        ]);
-
-        if (cancelled) return;
-
-        const sitsData = (sitsRes.data || []) as SitRow[];
-        setSits(sitsData);
-        setReviews(reviewsRes.data || []);
-        setHighlights((highlightsRes.data || []) as HighlightRow[]);
-        setSmallMissions((missionsRes.data || []) as SmallMission[]);
-
-        const p = profileRes.data;
-        const verStatus = p?.identity_verification_status || "not_submitted";
-        setVerificationStatus(verStatus);
-
-        // Onboarding is now handled by AppLayout
-
-        const hasName = !!(p?.first_name);
-        const hasAvatar = !!(p?.avatar_url);
-        const hasBio = !!(p?.bio && p.bio.length > 10);
-        const hasIdentity = verStatus === "verified" || verStatus === "pending";
-        const propsData = propsRes.data || [];
-        const hasProperty = propsData.length > 0;
-        if (propsData.length > 0) {
-          setPropertyType((propsData[0] as any).type || null);
-          setPropertyEnvironment((propsData[0] as any).environment || null);
-          const photos = (propsData[0] as any).photos;
-          setPropertyCoverPhoto(Array.isArray(photos) && photos.length > 0 ? photos[0] : null);
-        }
-        const hasSit = sitsData.length > 0;
-        setOnboardingChecks({ hasName, hasAvatar, hasBio, hasIdentity, hasProperty, hasPets: false, hasSit });
-
-        const dismissed = localStorage.getItem("onboarding_owner_dismissed");
-        const mc = (p as Record<string, unknown>)?.onboarding_minimal_completed as boolean ?? false;
-        if (!dismissed && user.profileCompletion < 60 && mc) {
-          setShowOnboarding(true);
-        }
-
-        // Pets
-        const propIds = (propsRes.data || []).map((pr: { id: string }) => pr.id);
-        if (propIds.length > 0) {
-          const { data } = await supabase.from("pets").select("*").in("property_id", propIds);
-          if (!cancelled) {
-            setPets((data || []) as Pet[]);
-            setOnboardingChecks(prev => ({ ...prev, hasPets: (data || []).length > 0 }));
-          }
-        }
-
-        // Applications + sitter details
-        const sitIds = sitsData.map(s => s.id);
-        if (sitIds.length > 0) {
-          const { data: apps } = await supabase
-            .from("applications")
-            .select("*, sitter:profiles!applications_sitter_id_fkey(id, first_name, avatar_url, identity_verified, completed_sits_count), sit:sits(title, start_date, end_date)")
-            .in("sit_id", sitIds)
-            .order("created_at", { ascending: false })
-            .limit(20);
-
-          if (!cancelled) {
-            setRecentApps((apps || []) as AppRow[]);
-
-            const profiles: Record<string, SitterInfo> = {};
-            (apps || []).forEach((a: AppRow) => {
-              if (a.sitter?.id) profiles[a.sitter.id] = a.sitter;
-            });
-            setSitterProfiles(profiles);
-
-            const sitterIds = [...new Set((apps || []).map((a: AppRow) => a.sitter?.id).filter(Boolean))] as string[];
-            if (sitterIds.length > 0) {
-              const [{ data: badgeData }, { data: sitterReviews }] = await Promise.all([
-                supabase.from("badge_attributions").select("user_id, badge_id").in("user_id", sitterIds),
-                supabase.from("reviews").select("reviewee_id, overall_rating").in("reviewee_id", sitterIds).eq("published", true),
-              ]);
-
-              if (!cancelled) {
-                const grouped: Record<string, Record<string, number>> = {};
-                (badgeData || []).forEach((b: { user_id: string; badge_id: string }) => {
-                  if (!grouped[b.user_id]) grouped[b.user_id] = {};
-                  grouped[b.user_id][b.badge_id] = (grouped[b.user_id][b.badge_id] || 0) + 1;
-                });
-                const result: Record<string, { badge_key: string; count: number }[]> = {};
-                Object.entries(grouped).forEach(([uid, badges]) => {
-                  result[uid] = Object.entries(badges).map(([k, c]) => ({ badge_key: k, count: c }));
-                });
-                setSitterBadges(result);
-
-                const ratingMap: Record<string, number[]> = {};
-                (sitterReviews || []).forEach((r: { reviewee_id: string; overall_rating: number }) => {
-                  if (!ratingMap[r.reviewee_id]) ratingMap[r.reviewee_id] = [];
-                  ratingMap[r.reviewee_id].push(r.overall_rating);
-                });
-                setSitterProfiles(prev => {
-                  const updated = { ...prev };
-                  Object.entries(ratingMap).forEach(([id, ratings]) => {
-                    if (updated[id]) {
-                      updated[id] = { ...updated[id], avgNote: Math.round((ratings.reduce((a, b) => a + b, 0) / ratings.length) * 10) / 10 };
-                    }
-                  });
-                  return updated;
-                });
-              }
-            }
-          }
-        }
-
-        // Trusted sitter count
-        const completedSitsData = sitsData.filter(s => s.status === "completed");
-        const sitterSitCounts: Record<string, number> = {};
-        completedSitsData.forEach(s => {
-          (s.applications || [])
-            .filter(a => a.status === "accepted")
-            .forEach(a => { sitterSitCounts[a.sitter_id] = (sitterSitCounts[a.sitter_id] || 0) + 1; });
-        });
-        if (!cancelled) setTrustedSitterCount(Object.values(sitterSitCounts).filter(c => c >= 2).length);
-
-        // My missions
-        const [myMissionsDataRes, allMyMissionsCountRes] = await Promise.all([
-          supabase.from("small_missions").select("id, title, category, status, created_at, small_mission_responses(id, status)").eq("user_id", user.id).order("created_at", { ascending: false }).limit(3),
-          supabase.from("small_missions").select("id, status").eq("user_id", user.id),
-        ]);
-
-        if (!cancelled) {
-          setMyMissions((myMissionsDataRes.data || []) as SmallMission[]);
-          const allMyMissions = allMyMissionsCountRes.data || [];
-          setMissionMetrics({ total: allMyMissions.length, completed: allMyMissions.filter((m: { status: string }) => m.status === "completed").length });
-          setLoading(false);
-        }
-      } catch (err) {
-        logger.error("[OwnerDashboard] load error", { err: String(err) });
-        if (!cancelled) setLoading(false);
-      }
-    };
-
-    load();
-    return () => { cancelled = true; };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user?.id]);
+    if (loading || !user || !data.profile) return;
+    const dismissed = localStorage.getItem("onboarding_owner_dismissed");
+    if (!dismissed && user.profileCompletion < 60 && data.profile.onboarding_minimal_completed) {
+      setShowOnboarding(true);
+    } else {
+      setShowOnboarding(false);
+    }
+  }, [loading, user, data.profile]);
 
   /* ── Dynamic text ── */
   const subtitle = useMemo(() => {
