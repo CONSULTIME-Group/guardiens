@@ -91,8 +91,6 @@ export default function PricingCardsCheckout() {
         </Button>
       </div>
     </div>
-
-    <FreeAccountSection />
     </div>
   );
 }
