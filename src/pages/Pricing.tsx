@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
-import { Check, CheckCircle, Star, MapPin, Quote, Clock, ShieldCheck, Sparkles } from "lucide-react";
+import { Check, CheckCircle, Star, MapPin, Clock, ShieldCheck } from "lucide-react";
 import PageMeta from "@/components/PageMeta";
 import PageBreadcrumb from "@/components/seo/PageBreadcrumb";
 import PublicHeader from "@/components/layout/PublicHeader";
@@ -153,13 +153,13 @@ const Pricing = () => {
       <PageMeta
         title={
           before
-            ? "Tarifs Guardiens — 100% gratuit pour tous jusqu'au 13 juin 2026"
-            : "Tarifs Guardiens — 6,99€/mois pour les gardiens"
+            ? "Tarifs Guardiens — 0 € pour tous jusqu'au 13 juin 2026"
+            : "Tarifs Guardiens — 0 € pour les propriétaires, 6,99 €/mois pour les gardiens"
         }
         description={
           before
-            ? "100% gratuit jusqu'au 13 juin 2026 pour tous, gardiens comme propriétaires. Sans carte bancaire, sans commission, sans frais cachés."
-            : "Gratuit pour les propriétaires, pour toujours. 6,99€/mois pour les gardiens avec 7 jours d'essai offerts. Sans commission, sans frais cachés."
+            ? "0 € jusqu'au 13 juin 2026 pour tous, gardiens comme propriétaires. Sans carte bancaire, sans commission, sans frais cachés."
+            : "0 € à vie pour les propriétaires. 6,99 €/mois pour les gardiens avec 7 jours d'essai. Sans commission, sans frais cachés."
         }
         path="/tarifs"
       />
@@ -176,10 +176,9 @@ const Pricing = () => {
         <main className="max-w-6xl mx-auto px-4">
           {/* ═══ HERO ═══ */}
           <section className="py-10 md:py-14 text-center max-w-2xl mx-auto">
-            <div className="inline-flex items-center gap-1.5 bg-primary/10 text-primary text-xs font-body font-semibold uppercase tracking-wider px-3 py-1.5 rounded-full mb-4">
-              <Sparkles className="h-3.5 w-3.5" />
+            <p className="inline-block bg-primary/10 text-primary text-xs font-body font-semibold uppercase tracking-wider px-3 py-1.5 rounded-full mb-4">
               Sans commission, sans frais cachés
-            </div>
+            </p>
             <h1 className="font-heading text-3xl md:text-5xl font-bold text-foreground leading-tight mb-4">
               {before ? (
                 <>100% gratuit. <span className="text-primary">Pour tout le monde.</span></>
@@ -432,20 +431,8 @@ const Pricing = () => {
             </ul>
           </section>
 
-          {/* ═══ Témoignage ═══ */}
-          <section className="max-w-2xl mx-auto mb-12 md:mb-16 text-center">
-            <div className="bg-card border border-border/40 rounded-2xl p-8 md:p-10 relative">
-              <Quote className="h-8 w-8 text-primary/20 absolute top-6 left-6" />
-              <blockquote className="font-body text-foreground/80 text-base md:text-lg leading-relaxed italic mb-4">
-                « Je n'aurais jamais cru pouvoir garder des animaux aussi près de chez moi.
-                En trois gardes, j'ai rencontré des gens incroyables et leurs compagnons.
-                C'est bien plus qu'un abonnement — c'est une communauté. »
-              </blockquote>
-              <p className="text-sm font-body text-foreground/50">
-                — Camille, gardienne à Lyon depuis 2026
-              </p>
-            </div>
-          </section>
+          {/* Témoignage retiré : aucun avis vérifié à afficher tant que la
+              base d'avis réels n'est pas suffisante. Évite les fausses preuves. */}
 
           {/* ═══ Internal links — villes ═══ */}
           <section className="max-w-3xl mx-auto mb-12 md:mb-16">
