@@ -44,7 +44,7 @@ const SidebarItem = ({
     <Icon className="h-[18px] w-[18px]" strokeWidth={1.8} />
     {label}
     {badge !== undefined && badge > 0 && (
-      <span className="absolute right-3 bg-destructive text-destructive-foreground text-[10px] rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1 font-semibold">
+      <span className="absolute right-3 bg-destructive text-destructive-foreground text-[10px] rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1 font-semibold tabular-nums">
         {badge > 99 ? "99+" : badge}
       </span>
     )}
