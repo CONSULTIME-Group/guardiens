@@ -154,7 +154,8 @@ const DemoListingCard = React.forwardRef<HTMLAnchorElement, typeof DEMO_LISTINGS
       </span>
     </div>
   </Link>
-));
+  );
+});
 DemoListingCard.displayName = "DemoListingCard";
 
 const DemoListingShowcase = React.forwardRef<HTMLElement>((_props, ref) => (
