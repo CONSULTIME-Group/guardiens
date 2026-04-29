@@ -1,5 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import { trackEvent } from "@/lib/analytics";
 
 // Slugs alignés sur src/data/demoListings.ts → page /annonces/demo/:slug
 const DEMO_LISTINGS = [
@@ -45,11 +46,17 @@ const DEMO_LISTINGS = [
 ];
 
 const DemoListingCard = React.forwardRef<HTMLAnchorElement, typeof DEMO_LISTINGS[0]>(({
-  slug, photo, city, animals, dates, title, description, ownerName, ownerPhoto, badges,
+  id, slug, photo, city, animals, dates, title, description, ownerName, ownerPhoto, badges,
 }, ref) => (
   <Link
     ref={ref}
     to={`/annonces/demo/${slug}`}
+    onClick={() =>
+      trackEvent("sit_view", {
+        source: "landing_demo_card",
+        metadata: { demo_id: id, slug, city, location: "landing_showcase" },
+      })
+    }
     aria-label={`Voir l'annonce de démonstration : ${title} — ${city}`}
     className="group bg-card rounded-2xl overflow-hidden border border-border shadow-sm flex flex-col hover:shadow-lg hover:border-primary/30 hover:-translate-y-0.5 transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
   >
@@ -123,6 +130,12 @@ const DemoListingShowcase = React.forwardRef<HTMLElement>((_props, ref) => (
       <div className="text-center">
         <Link
           to="/inscription?role=owner"
+          onClick={() =>
+            trackEvent("cta_proprio_clicked", {
+              source: "landing_demo_showcase",
+              metadata: { location: "demo_showcase_main_cta" },
+            })
+          }
           className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-8 py-4 rounded-full font-body font-medium text-base hover:bg-primary/90 transition-colors"
         >
           J'ouvre un compte — 0 € pour les propriétaires
