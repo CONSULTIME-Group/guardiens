@@ -31,7 +31,9 @@ export const ContextualResourcesSkeleton = () => (
   </section>
 );
 
-const ContextualResources = memo(({ annoncesCount, gardesCount }: ContextualResourcesProps) => {
+const ContextualResources = memo(({ annoncesCount, gardesCount, loading }: ContextualResourcesProps) => {
+  if (loading) return <ContextualResourcesSkeleton />;
+
   let resTitle = "";
   let resItems: ResItem[] = [];
 
