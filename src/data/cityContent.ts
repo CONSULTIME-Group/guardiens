@@ -128,7 +128,7 @@ Tout est sur la plateforme : messagerie, avis croisés, guide de la maison, et m
 
 Mais quand vient le moment de partir — vacances, déplacement professionnel, week-end en famille — la question se pose : **à qui confier votre animal et votre maison à Lyon ?**
 
-Guardiens est une plateforme de garde d'animaux et de home sitting fondée en Auvergne-Rhône-Alpes par Jérémie et Elisa, installés dans le Vieux-Lyon, rue Juiverie. Après cinq ans de house-sitting en AURA — 37 maisons gardées, 234 animaux accompagnés — ils ont construit un outil pensé pour les propriétaires lyonnais : des gardiens de proximité, une rencontre physique systématique avant chaque garde, et un système de confiance vérifiée.
+Guardiens est une plateforme de garde d'animaux et de home sitting fondée par Jérémie et Elisa, installés dans le Vieux-Lyon, rue Juiverie. Après cinq ans de house-sitting à travers la France — des dizaines de maisons gardées, des centaines d'animaux accompagnés — ils ont construit un outil pensé pour les propriétaires lyonnais : des gardiens de proximité, une rencontre physique systématique avant chaque garde, et un système de confiance vérifiée.
 
 Ce que Guardiens propose concrètement : vous publiez votre annonce, des gardiens de votre quartier postulent, vous les rencontrez autour d'un café ou lors d'une visite de votre logement, puis vous confirmez la garde. Votre animal reste chez lui, dans ses repères. Votre maison reste vivante. [Inscrivez-vous pour publier votre annonce](/inscription?role=owner).`,
       },
@@ -243,13 +243,13 @@ Tous passent par le même processus de vérification : identité contrôlée, pr
       {
         id: "histoire",
         title: "L'histoire de Guardiens à Lyon",
-        content: `Guardiens est né dans le Vieux-Lyon, rue Juiverie, dans l'appartement de Jérémie et Elisa. Pendant cinq ans, ils ont pratiqué le house-sitting à travers toute la région Auvergne-Rhône-Alpes : 37 maisons gardées, de la ferme isolée en Ardèche à l'appartement haussmannien des Brotteaux, en passant par les chalets de Haute-Savoie.
+        content: `Guardiens est né dans le Vieux-Lyon, rue Juiverie, dans l'appartement de Jérémie et Elisa. Pendant cinq ans, ils ont pratiqué le house-sitting à travers la France : des dizaines de maisons gardées, de la ferme isolée à l'appartement haussmannien des Brotteaux, en passant par les chalets de montagne.
 
 234 animaux accompagnés — des chiens de berger aux chats craintifs, des poules de jardin aux tortues de terrarium. Chaque garde leur a appris quelque chose : comment gérer un chien anxieux en l'absence de son maître, comment rassurer un chat qui se cache pendant trois jours, comment intervenir quand une chaudière tombe en panne un dimanche soir.
 
 C'est cette expérience de terrain qui structure aujourd'hui la plateforme : la rencontre physique obligatoire avant chaque garde, le guide de la maison qui centralise toutes les informations pratiques, le réseau de gardiens d'urgence mobilisables en quelques heures, les avis croisés qui construisent la confiance au fil du temps.
 
-Guardiens lance officiellement le 13 mai 2026 avec les premiers fondateurs — ceux qui rejoignent la plateforme avant le lancement public et qui contribuent à façonner l'outil. Lyon est le point de départ, l'Auvergne-Rhône-Alpes le terrain naturel d'expansion.`,
+Guardiens lance officiellement le 13 mai 2026 avec les premiers fondateurs — ceux qui rejoignent la plateforme avant le lancement public et qui contribuent à façonner l'outil. Lyon est le point de départ, la France entière le terrain naturel d'expansion.`,
       },
       {
         id: "faq",
@@ -280,12 +280,12 @@ Oui. La plateforme est conçue pour les gardes de toute durée, du week-end prol
       },
       {
         id: "conclusion",
-        title: "Lyon, point de départ de Guardiens en Auvergne-Rhône-Alpes",
+        title: "Lyon, point de départ de Guardiens partout en France",
         content: `Lyon est le coeur du réseau Guardiens. C'est ici que la plateforme est née, ici que les premiers gardiens et propriétaires se sont rencontrés, ici que le modèle de confiance de proximité a été testé et validé.
 
 Que vous viviez dans le Vieux-Lyon, à la Croix-Rousse, à Monplaisir ou à Villeurbanne, Guardiens vous connecte avec des gardiens vérifiés de votre quartier. Votre animal reste dans ses repères, votre maison reste vivante, et vous partez l'esprit libre.
 
-Le réseau s'étend progressivement à toute l'Auvergne-Rhône-Alpes : [Annecy](/actualites/house-sitting-annecy), Grenoble, Chambéry, et au-delà. Mais Lyon reste le pilier, la ville de référence, celle où tout a commencé.
+Le réseau s'étend progressivement à toute la France : [Annecy](/actualites/house-sitting-annecy), Grenoble, Chambéry, et bien au-delà. Mais Lyon reste le pilier, la ville de référence, celle où tout a commencé.
 
 [Publiez votre première annonce](/inscription?role=owner) — c'est sans frais pour les propriétaires.
 
