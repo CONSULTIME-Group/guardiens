@@ -298,7 +298,11 @@ const OwnerDashboard = () => {
   const cta = useMemo(() => {
     if (activeSits.length === 0)
       return { text: "Publiez votre première annonce — c'est gratuit et ça prend 5 minutes", cta: "Publier une annonce", to: "/sits/create" };
-    const noAppSit = activeSits.find(s => s.status === "published" && (!s.applications || s.applications.length === 0) && differenceInDays(now, new Date(s.created_at)) >= 7);
+    const noAppSit = activeSits.find(s => {
+      if (s.status !== "published") return false;
+      const activeApps = (s.applications || []).filter(a => ["pending", "accepted", "discussing"].includes(a.status));
+      return activeApps.length === 0 && differenceInDays(now, new Date(s.created_at)) >= 7;
+    });
     if (noAppSit)
       return { text: "Votre annonce n'a pas encore de candidature. Enrichissez votre profil pour attirer les gardiens.", cta: "Voir mon profil", to: "/owner-profile" };
     return null;

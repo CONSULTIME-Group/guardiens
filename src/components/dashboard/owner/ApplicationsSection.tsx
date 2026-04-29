@@ -109,8 +109,10 @@ const AppCard = memo(({ app, sitterProfiles }: { app: AppRow; sitterProfiles: Re
 AppCard.displayName = "AppCard";
 
 const ApplicationsSection = memo(({ recentApps, sitterProfiles, sitterBadges, loading = false }: ApplicationsSectionProps) => {
-  const unread = recentApps.filter(a => a.status === "pending" || a.status === "discussing");
-  const read = recentApps.filter(a => a.status !== "pending" && a.status !== "discussing");
+  // "Non lues" = candidatures réellement en attente de première réponse.
+  // 'discussing' a déjà été ouvert/répondu → va dans "déjà consultées".
+  const unread = recentApps.filter(a => a.status === "pending");
+  const read = recentApps.filter(a => a.status !== "pending");
 
   // « Voir toutes » : retiré entièrement de l'UI pendant le chargement,
   // affiché ensuite uniquement s'il y a des candidatures à consulter.
