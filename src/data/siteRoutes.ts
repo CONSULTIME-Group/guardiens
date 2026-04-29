@@ -120,7 +120,7 @@ export const staticRoutes: SiteRoute[] = [
   {
     path: "/",
     title: "Guardiens — Partez l'esprit tranquille",
-    metaDescription: "Un gardien de votre région s'occupe de votre maison et de vos animaux pendant vos absences. Gratuit pour les propriétaires.",
+    metaDescription: "Un gardien près de chez vous s'occupe de votre maison et de vos animaux pendant vos absences. 0 € pour les propriétaires, à vie.",
     h1: "Guardiens — Comme confier ses clés à quelqu'un du coin",
     sitemapPriority: "1.0",
     changeFreq: "weekly",
@@ -128,8 +128,8 @@ export const staticRoutes: SiteRoute[] = [
   },
   {
     path: "/tarifs",
-    title: "Tarifs — 6,99€/mois pour les gardiens | Guardiens",
-    metaDescription: "6,99€/mois pour les gardiens, 7 jours d'essai offerts. Gratuit pour les propriétaires. Sans commission, sans frais cachés.",
+    title: "Tarifs — 6,99 €/mois pour les gardiens | Guardiens",
+    metaDescription: "6,99 €/mois pour les gardiens, 7 jours d'essai offerts. 0 € pour les propriétaires, à vie. Sans commission, sans frais cachés.",
     h1: "Nos tarifs",
     sitemapPriority: "0.8",
     changeFreq: "monthly",
@@ -212,8 +212,8 @@ export const staticRoutes: SiteRoute[] = [
   },
   {
     path: "/inscription",
-    title: "Inscription — Créer un compte gratuit | Guardiens",
-    metaDescription: "Rejoignez la communauté Guardiens. Inscription gratuite pour les propriétaires, 6,99€/mois pour les gardiens avec 7 jours d'essai sans engagement.",
+    title: "Inscription — Créer un compte à 0 € | Guardiens",
+    metaDescription: "Rejoignez la communauté Guardiens. Inscription à 0 € pour les propriétaires (à vie), 6,99 €/mois pour les gardiens avec 7 jours d'essai sans engagement.",
     h1: "Créer un compte",
     sitemapPriority: "0.6",
     changeFreq: "monthly",
