@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Check, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import FreeAccountSection from "./FreeAccountSection";
 
 const calculateProrata = () => {
   const now = new Date();
@@ -40,6 +41,7 @@ export default function PricingCardsCheckout() {
   };
 
   return (
+    <div className="space-y-8">
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
       <div className="bg-card border border-border rounded-xl p-5 flex flex-col">
         <p className="font-heading text-lg font-semibold mb-2">Un mois</p>
