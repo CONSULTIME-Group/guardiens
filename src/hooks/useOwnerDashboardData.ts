@@ -118,32 +118,35 @@ export function useOwnerDashboardData(userId: string | undefined) {
           hasSit: sitsData.length > 0,
         };
 
-        // Pets
-        const propIds = propsData.map((pr: { id: string }) => pr.id);
-        let petsData: Pet[] = [];
-        if (propIds.length > 0) {
-          const { data: pd } = await supabase.from("pets").select("*").in("property_id", propIds);
-          if (cancelled) return;
-          petsData = (pd || []) as Pet[];
-          onboardingChecks.hasPets = petsData.length > 0;
-        }
-
-        // Applications + sitter details
+        // Pets + Applications — parallèles (indépendantes)
+        const propIds = propsData.map((pr) => pr.id);
         const sitIds = sitsData.map(s => s.id);
+
+        const petsPromise = propIds.length > 0
+          ? supabase.from("pets").select("*").in("property_id", propIds)
+          : Promise.resolve({ data: [], error: null });
+
+        const appsPromise = sitIds.length > 0
+          ? supabase
+              .from("applications")
+              .select("*, sitter:profiles!applications_sitter_id_fkey(id, first_name, avatar_url, identity_verified, completed_sits_count), sit:sits(title, start_date, end_date)")
+              .in("sit_id", sitIds)
+              .order("created_at", { ascending: false })
+              .limit(20)
+          : Promise.resolve({ data: [], error: null });
+
+        const [petsRes, appsRes] = await Promise.all([petsPromise, appsPromise]);
+        if (cancelled) return;
+
+        const petsData = (petsRes.data || []) as Pet[];
+        if (propIds.length > 0) onboardingChecks.hasPets = petsData.length > 0;
+
         let recentApps: AppRow[] = [];
         const sitterProfiles: Record<string, SitterInfo> = {};
         const sitterBadges: Record<string, { badge_key: string; count: number }[]> = {};
 
         if (sitIds.length > 0) {
-          const { data: apps } = await supabase
-            .from("applications")
-            .select("*, sitter:profiles!applications_sitter_id_fkey(id, first_name, avatar_url, identity_verified, completed_sits_count), sit:sits(title, start_date, end_date)")
-            .in("sit_id", sitIds)
-            .order("created_at", { ascending: false })
-            .limit(20);
-
-          if (cancelled) return;
-          recentApps = (apps || []) as AppRow[];
+          recentApps = (appsRes.data || []) as AppRow[];
 
           recentApps.forEach((a) => {
             if (a.sitter?.id) sitterProfiles[a.sitter.id] = a.sitter;
