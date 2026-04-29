@@ -36,11 +36,11 @@ const sitterFeatures = [
 // Remplacé par une grille "ce qu'on facture / ce qu'on ne facture pas" Guardiens-only.
 const promiseRows: Array<{ label: string; value: string; positive: boolean }> = [
   { label: "Commission sur la garde", value: "0 %", positive: true },
-  { label: "Coût pour le propriétaire", value: "0 € à vie", positive: true },
   { label: "Vérification d'identité", value: "Incluse", positive: true },
   { label: "Entraide & petites missions", value: "Gratuites à vie", positive: true },
   { label: "Carte bancaire à l'inscription", value: "Jamais", positive: true },
   { label: "Frais de mise en relation", value: "Aucun", positive: true },
+  { label: "Engagement de durée", value: "Aucun", positive: true },
 ];
 
 const faqItems = [
