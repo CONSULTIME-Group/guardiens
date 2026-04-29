@@ -1,9 +1,11 @@
 import React from "react";
 import { Link } from "react-router-dom";
 
+// Slugs alignés sur src/data/demoListings.ts → page /annonces/demo/:slug
 const DEMO_LISTINGS = [
   {
     id: "demo-1",
+    slug: "lyon-laika-jardin",
     photo: "/images/landing/annonce-maison-jardin.webp",
     city: "Lyon 6e",
     animals: ["1 chien", "2 chats"],
@@ -16,6 +18,7 @@ const DEMO_LISTINGS = [
   },
   {
     id: "demo-2",
+    slug: "annecy-lac-basse-cour",
     photo: "/images/landing/annonce-maison-lac.webp",
     city: "Annecy",
     animals: ["3 poules", "1 chat"],
@@ -28,6 +31,7 @@ const DEMO_LISTINGS = [
   },
   {
     id: "demo-3",
+    slug: "grenoble-deux-chats-appart",
     photo: "/images/landing/annonce-appartement-chats.webp",
     city: "Grenoble",
     animals: ["2 chats"],
@@ -41,12 +45,12 @@ const DEMO_LISTINGS = [
 ];
 
 const DemoListingCard = React.forwardRef<HTMLAnchorElement, typeof DEMO_LISTINGS[0]>(({
-  photo, city, animals, dates, title, description, ownerName, ownerPhoto, badges,
+  slug, photo, city, animals, dates, title, description, ownerName, ownerPhoto, badges,
 }, ref) => (
   <Link
     ref={ref}
-    to="/inscription?role=owner"
-    aria-label={`${title} — ${city}. J'ouvre un compte pour découvrir des annonces comme celle-ci.`}
+    to={`/annonces/demo/${slug}`}
+    aria-label={`Voir l'annonce de démonstration : ${title} — ${city}`}
     className="group bg-card rounded-2xl overflow-hidden border border-border shadow-sm flex flex-col hover:shadow-lg hover:border-primary/30 hover:-translate-y-0.5 transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
   >
     <div className="relative">
@@ -88,7 +92,7 @@ const DemoListingCard = React.forwardRef<HTMLAnchorElement, typeof DEMO_LISTINGS
       <span
         className="w-full mt-3 py-2.5 rounded-xl bg-primary/10 text-primary font-body font-medium text-sm text-center group-hover:bg-primary group-hover:text-primary-foreground transition-colors block"
       >
-        J'ouvre un compte →
+        Voir l'annonce de démonstration →
       </span>
     </div>
   </Link>
