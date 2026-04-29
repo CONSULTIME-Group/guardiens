@@ -442,7 +442,7 @@ export const BottomNav = () => {
                 <div className="relative">
                   <item.icon className="h-5 w-5" strokeWidth={isActive ? 2.2 : 1.8} />
                   {item.badge !== undefined && item.badge > 0 && (
-                    <span className="absolute -top-1 -right-2 bg-destructive text-destructive-foreground text-[8px] rounded-full min-w-[14px] h-[14px] flex items-center justify-center px-0.5 font-bold">
+                    <span className="absolute -top-1 -right-2 bg-destructive text-destructive-foreground text-[8px] rounded-full min-w-[14px] h-[14px] flex items-center justify-center px-0.5 font-bold tabular-nums">
                       {item.badge > 99 ? "99+" : item.badge}
                     </span>
                   )}
