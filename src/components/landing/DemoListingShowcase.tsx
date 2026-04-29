@@ -68,6 +68,9 @@ const DemoListingCard = React.forwardRef<HTMLAnchorElement, typeof DEMO_LISTINGS
   <Link
     ref={ref}
     to={`/annonces/demo/${slug}`}
+    onMouseEnter={prefetchDemoDetail}
+    onFocus={prefetchDemoDetail}
+    onTouchStart={prefetchDemoDetail}
     onClick={() =>
       trackEvent("sit_view", {
         source: "landing_demo_card",
