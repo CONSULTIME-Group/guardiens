@@ -426,8 +426,6 @@ const Pricing = () => {
             </Card>
           </section>
 
-          <FreeAccountSection />
-
           {/* ═══ SÉCURITÉ & VÉRIFICATIONS ═══ */}
           <SecurityTrustSection />
 
