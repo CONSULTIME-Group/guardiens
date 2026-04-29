@@ -271,7 +271,7 @@ const Landing = () => {
                 }}
                 className="font-body text-base font-semibold tracking-wide rounded-full px-12 py-4 bg-primary text-primary-foreground hover:brightness-95 hover:scale-[1.03] transition-all duration-200 shadow-xl shadow-primary/40 ring-2 ring-primary-foreground/10"
               >
-                Publier mon annonce — gratuit
+                Publier mon annonce — 0 €
               </button>
               <button
                 onClick={() => {
