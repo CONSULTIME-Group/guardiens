@@ -11,14 +11,9 @@
  */
 const accesGratuits: Array<{ titre: string; detail: string }> = [
   {
-    titre: "Espace propriétaire complet",
-    detail:
-      "Publier et gérer vos annonces de garde, recevoir des candidatures, échanger avec les gardiens — gratuit à vie, sans limite.",
-  },
-  {
     titre: "Entraide & petites missions",
     detail:
-      "Demander ou proposer un coup de main près de chez vous (promenade, visite, transport vétérinaire…). Gratuit pour tout le monde, à vie.",
+      "Arroser un potager, sortir un chien le weekend, garder des poules le temps d'un marché… Demander ou proposer un coup de main près de chez vous reste 100 % gratuit à vie, pour préserver ce lien indépendamment de toute monétisation.",
   },
   {
     titre: "Guides locaux & conseils ville",
