@@ -273,6 +273,30 @@ export function useSitterDashboardData(userId: string | undefined) {
     return () => { supabase.removeChannel(channel); };
   }, [userId, setPartial]);
 
+  // Realtime sync for unread messages count
+  // Re-fetches the RPC whenever a message is inserted or its read_at is updated.
+  // The RPC itself enforces: not sender, not archived, only my conversations.
+  useEffect(() => {
+    if (!userId) return;
+    let timer: ReturnType<typeof setTimeout> | null = null;
+    const refresh = async () => {
+      if (timer) clearTimeout(timer);
+      timer = setTimeout(async () => {
+        const { data: count } = await (supabase as any).rpc("get_unread_messages_count", { _user_id: userId });
+        setPartial({ unreadCount: (count as number) ?? 0 });
+      }, 250);
+    };
+    const channel = supabase
+      .channel(`sitter-unread-${userId}`)
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "messages" }, refresh)
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "messages" }, refresh)
+      .subscribe();
+    return () => {
+      if (timer) clearTimeout(timer);
+      supabase.removeChannel(channel);
+    };
+  }, [userId, setPartial]);
+
   const toggleAvailability = useCallback(async () => {
     if (!userId) return;
     const newVal = !data.isAvailable;
