@@ -303,7 +303,7 @@ export default function ArticleDetail() {
             "address": {
               "@type": "PostalAddress",
               "addressLocality": article.city,
-              "addressRegion": article.region || "Auvergne-Rhône-Alpes",
+              ...(article.region ? { "addressRegion": article.region } : {}),
               "addressCountry": "FR"
             },
             "priceRange": "Gratuit",
