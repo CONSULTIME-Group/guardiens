@@ -12,11 +12,11 @@ interface StatCardProps {
 }
 
 const StatCard = memo(({ value, label, fallback, highlight = false, to }: StatCardProps) => {
-  const baseClasses = `rounded-2xl p-4 text-center transition-all ${
+  const baseClasses = `block rounded-2xl p-4 text-center transition-all ${
     highlight
       ? "bg-primary/5 border border-primary/20"
       : "bg-card border border-border"
-  } ${to ? "hover:border-primary/40 hover:shadow-sm cursor-pointer" : ""}`;
+  } ${to ? "hover:border-primary/40 hover:shadow-sm cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" : ""}`;
 
   const isZero = value === 0 || value === "0";
   const valueColor = highlight
