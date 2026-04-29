@@ -110,7 +110,9 @@ const MonAnnonceCard = memo(({ sits, pets, propertyType, propertyEnvironment, pe
       )}
       <div className="p-5 space-y-3">
       <div className="flex items-center justify-between">
-        <p className="text-sm font-semibold text-foreground">Mon annonce</p>
+        <p className="text-sm font-semibold text-foreground">
+          {isActive ? "Mon annonce" : "Dernière garde"}
+        </p>
         <span className={`text-xs rounded-full px-2.5 py-0.5 font-medium ${statusConf.className}`}>
           {statusConf.label}
         </span>
