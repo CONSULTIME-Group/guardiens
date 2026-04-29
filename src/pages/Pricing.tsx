@@ -290,8 +290,7 @@ const Pricing = () => {
 
             {/* Sitter Card */}
             <Card className="border-2 border-primary/30 relative shadow-xl rounded-2xl h-full flex flex-col bg-primary/5">
-              <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-amber-100 text-amber-800 text-xs font-body font-medium px-3 py-1 rounded-full flex items-center gap-1.5">
-                <Star className="h-3 w-3" fill="currentColor" />
+              <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-amber-100 text-amber-800 text-xs font-body font-medium px-3 py-1 rounded-full">
                 Le plus choisi
               </div>
               <CardHeader className="text-center pb-2 p-8 pt-10">
