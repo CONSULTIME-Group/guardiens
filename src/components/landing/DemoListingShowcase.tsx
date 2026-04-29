@@ -40,12 +40,17 @@ const DEMO_LISTINGS = [
   },
 ];
 
-const DemoListingCard = React.forwardRef<HTMLDivElement, typeof DEMO_LISTINGS[0]>(({
+const DemoListingCard = React.forwardRef<HTMLAnchorElement, typeof DEMO_LISTINGS[0]>(({
   photo, city, animals, dates, title, description, ownerName, ownerPhoto, badges,
 }, ref) => (
-  <div ref={ref} className="bg-card rounded-2xl overflow-hidden border border-border shadow-sm flex flex-col">
+  <Link
+    ref={ref}
+    to="/inscription?role=owner"
+    aria-label={`${title} — ${city}. J'ouvre un compte pour découvrir des annonces comme celle-ci.`}
+    className="group bg-card rounded-2xl overflow-hidden border border-border shadow-sm flex flex-col hover:shadow-lg hover:border-primary/30 hover:-translate-y-0.5 transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+  >
     <div className="relative">
-      <img src={photo} alt={title} className="w-full h-48 object-cover" loading="lazy" width={700} height={467} />
+      <img src={photo} alt={title} className="w-full h-48 object-cover group-hover:scale-[1.02] transition-transform duration-300" loading="lazy" width={700} height={467} />
       <span className="absolute top-3 left-3 bg-white/90 text-foreground/50 text-xs font-body font-medium px-3 py-1 rounded-full border border-border/60">
         Bientôt disponible
       </span>
@@ -64,7 +69,7 @@ const DemoListingCard = React.forwardRef<HTMLDivElement, typeof DEMO_LISTINGS[0]
         <span className="text-xs font-body text-foreground/50">{dates}</span>
       </div>
 
-      <h3 className="text-xl font-heading font-semibold leading-snug">{title}</h3>
+      <h3 className="text-xl font-heading font-semibold leading-snug group-hover:text-primary transition-colors">{title}</h3>
 
       <p className="text-sm font-body text-foreground/70 line-clamp-2">{description}</p>
 
@@ -80,14 +85,13 @@ const DemoListingCard = React.forwardRef<HTMLDivElement, typeof DEMO_LISTINGS[0]
         </div>
       </div>
 
-      <Link
-        to="/inscription?role=owner"
-        className="w-full mt-3 py-2.5 rounded-xl bg-primary/10 text-primary font-body font-medium text-sm text-center hover:bg-primary/20 transition-colors block"
+      <span
+        className="w-full mt-3 py-2.5 rounded-xl bg-primary/10 text-primary font-body font-medium text-sm text-center group-hover:bg-primary group-hover:text-primary-foreground transition-colors block"
       >
-        Publier une annonce similaire →
-      </Link>
+        J'ouvre un compte →
+      </span>
     </div>
-  </div>
+  </Link>
 ));
 DemoListingCard.displayName = "DemoListingCard";
 
