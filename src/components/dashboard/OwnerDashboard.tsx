@@ -200,9 +200,10 @@ const OwnerDashboard = () => {
                 to={`/gardiens/${user.id}?tab=proprio`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 text-xs font-body text-primary-foreground/70 hover:text-primary-foreground transition-colors mt-2"
+                className="inline-flex items-center gap-1.5 text-xs font-body text-primary-foreground/70 hover:text-primary-foreground transition-colors mt-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-foreground/60 rounded"
+                aria-label="Voir mon profil public (nouvel onglet)"
               >
-                <Eye className="w-3 h-3" /> Voir mon profil public →
+                <Eye className="w-3 h-3" aria-hidden="true" /> Voir mon profil public →
               </Link>
             ) : null}
           </div>
@@ -243,7 +244,10 @@ const OwnerDashboard = () => {
       )}
 
       {/* ═══ Stats (vue d'ensemble immédiate) ═══ */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 px-5 md:px-8">
+      <section
+        aria-label="Vos statistiques propriétaire"
+        className="grid grid-cols-2 md:grid-cols-4 gap-3 px-5 md:px-8"
+      >
         <StatCard value={completedSits.length} label="Gardes réalisées" />
         <StatCard
           value={avgRating > 0 ? `${avgRating} ★` : null}
@@ -254,7 +258,7 @@ const OwnerDashboard = () => {
         />
         <StatCard value={activeSits.length} label="Annonces actives" to="/sits" />
         <StatCard value={trustedSitterCount} label="Gardiens de confiance" />
-      </div>
+      </section>
 
       {/* ═══ Mon annonce ═══ */}
       <div className="px-5 md:px-8">
