@@ -46,11 +46,17 @@ const DEMO_LISTINGS = [
 ];
 
 const DemoListingCard = React.forwardRef<HTMLAnchorElement, typeof DEMO_LISTINGS[0]>(({
-  slug, photo, city, animals, dates, title, description, ownerName, ownerPhoto, badges,
+  id, slug, photo, city, animals, dates, title, description, ownerName, ownerPhoto, badges,
 }, ref) => (
   <Link
     ref={ref}
     to={`/annonces/demo/${slug}`}
+    onClick={() =>
+      trackEvent("sit_view", {
+        source: "landing_demo_card",
+        metadata: { demo_id: id, slug, city, location: "landing_showcase" },
+      })
+    }
     aria-label={`Voir l'annonce de démonstration : ${title} — ${city}`}
     className="group bg-card rounded-2xl overflow-hidden border border-border shadow-sm flex flex-col hover:shadow-lg hover:border-primary/30 hover:-translate-y-0.5 transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
   >
