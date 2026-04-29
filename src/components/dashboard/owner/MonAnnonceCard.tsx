@@ -2,7 +2,7 @@ import { memo } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { format, differenceInDays } from "date-fns";
 import { fr } from "date-fns/locale";
-import { Eye, RefreshCw, Plus, PawPrint, Home, Inbox, ArrowRight } from "lucide-react";
+import { Eye, RefreshCw, Plus, Inbox, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import ShareButtons from "@/components/sits/ShareButtons";
 import { capitalize, SPECIES_LABEL } from "./helpers";
