@@ -431,20 +431,8 @@ const Pricing = () => {
             </ul>
           </section>
 
-          {/* ═══ Témoignage ═══ */}
-          <section className="max-w-2xl mx-auto mb-12 md:mb-16 text-center">
-            <div className="bg-card border border-border/40 rounded-2xl p-8 md:p-10 relative">
-              <Quote className="h-8 w-8 text-primary/20 absolute top-6 left-6" />
-              <blockquote className="font-body text-foreground/80 text-base md:text-lg leading-relaxed italic mb-4">
-                « Je n'aurais jamais cru pouvoir garder des animaux aussi près de chez moi.
-                En trois gardes, j'ai rencontré des gens incroyables et leurs compagnons.
-                C'est bien plus qu'un abonnement — c'est une communauté. »
-              </blockquote>
-              <p className="text-sm font-body text-foreground/50">
-                — Camille, gardienne à Lyon depuis 2026
-              </p>
-            </div>
-          </section>
+          {/* Témoignage retiré : aucun avis vérifié à afficher tant que la
+              base d'avis réels n'est pas suffisante. Évite les fausses preuves. */}
 
           {/* ═══ Internal links — villes ═══ */}
           <section className="max-w-3xl mx-auto mb-12 md:mb-16">
