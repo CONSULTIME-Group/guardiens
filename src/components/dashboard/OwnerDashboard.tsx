@@ -160,20 +160,27 @@ const OwnerDashboard = () => {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 md:space-y-8 pb-8">
 
       {/* Role activation banner */}
-      <div className="px-5 md:px-8">
+      <div className="px-5 md:px-8 pt-2">
         <RoleActivationBanner userRole={user?.role || "owner"} />
       </div>
 
       {/* ═══ Hero header ═══ */}
-      <div className="relative overflow-hidden bg-primary rounded-b-3xl px-5 md:px-10 pt-6 md:pt-8 pb-5 md:pb-6 mb-6 md:mb-8">
-        <div className="absolute right-0 top-0 opacity-[0.06] pointer-events-none">
-          <svg width="280" height="200" viewBox="0 0 280 200" aria-hidden="true">
-            <ellipse cx="200" cy="100" rx="160" ry="100" fill="white" />
-            <rect x="80" y="50" width="100" height="90" fill="white" rx="6" />
-            <polygon points="80,50 130,15 180,50" fill="white" />
+      <div className="relative overflow-hidden bg-primary rounded-b-3xl px-5 md:px-10 pt-6 md:pt-8 pb-5 md:pb-6 mx-0 animate-fade-in">
+        {/* Texture organique */}
+        <div className="absolute -right-12 -top-8 opacity-[0.10] pointer-events-none" aria-hidden="true">
+          <svg width="360" height="260" viewBox="0 0 360 260" fill="none">
+            <path
+              d="M40 180 C 80 120, 160 100, 220 140 S 340 220, 320 80"
+              stroke="white"
+              strokeWidth="2"
+              strokeLinecap="round"
+              fill="none"
+            />
+            <circle cx="280" cy="90" r="70" fill="white" opacity="0.6" />
+            <circle cx="180" cy="180" r="40" fill="white" opacity="0.4" />
           </svg>
         </div>
         <div className="relative z-10 flex flex-col md:flex-row md:items-end md:justify-between gap-4">
@@ -201,18 +208,18 @@ const OwnerDashboard = () => {
           </div>
           <button
             onClick={() => navigate("/sits/create")}
-            className="shrink-0 bg-primary-foreground text-primary rounded-xl px-5 py-2.5 text-sm font-medium font-sans hover:bg-primary-foreground/90 transition-colors w-full md:w-auto text-center"
+            className="shrink-0 bg-primary-foreground text-primary rounded-xl px-5 py-2.5 text-sm font-medium font-sans hover:bg-primary-foreground/90 hover:shadow-md transition-all w-full md:w-auto text-center shadow-sm"
           >
             + Publier une annonce
           </button>
         </div>
       </div>
 
-      <div className="px-5 md:px-8 mt-4">
+      <div className="px-5 md:px-8">
         <AccessGateBanner level={level} profileCompletion={accessProfileCompletion} context="guard" />
       </div>
 
-      <div className="px-5 md:px-8 -mt-4 mb-2">
+      <div className="px-5 md:px-8 -mt-2">
         <button
           onClick={() => setSearchParams({ tour: "true" })}
           className="text-xs text-muted-foreground underline-offset-4 hover:underline"
@@ -223,8 +230,8 @@ const OwnerDashboard = () => {
 
       {/* ═══ Banner ═══ */}
       {banner && (
-        <div className="px-5 md:px-8 -mt-4 mb-4">
-          <div className={`p-4 rounded-xl border ${BANNER_STYLES[banner.variant]} flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2`}>
+        <div className="px-5 md:px-8">
+          <div className={`p-4 rounded-2xl border ${BANNER_STYLES[banner.variant]} flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2`}>
             <p className="text-sm font-medium">{banner.label}</p>
             {banner.ctaLabel && banner.to && (
               <Link to={banner.to} className="text-sm font-semibold hover:underline shrink-0">
@@ -238,8 +245,14 @@ const OwnerDashboard = () => {
       {/* ═══ Stats (vue d'ensemble immédiate) ═══ */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 px-5 md:px-8">
         <StatCard value={completedSits.length} label="Gardes réalisées" />
-        <StatCard value={avgRating > 0 ? `${avgRating} ★` : null} fallback="Pas encore" label="Note moyenne" />
-        <StatCard value={activeSits.length} label="Annonces actives" />
+        <StatCard
+          value={avgRating > 0 ? `${avgRating} ★` : null}
+          fallback="Pas encore"
+          label="Note moyenne"
+          highlight={avgRating > 0}
+          to={user?.id ? `/gardiens/${user.id}?tab=proprio#avis` : undefined}
+        />
+        <StatCard value={activeSits.length} label="Annonces actives" to="/sits" />
         <StatCard value={trustedSitterCount} label="Gardiens de confiance" />
       </div>
 
