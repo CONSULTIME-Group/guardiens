@@ -39,7 +39,7 @@ const StickyCTA = ({ city, stats }: Props) => {
 
   if (isBeforeLaunch && stats.guardiansCount > 0) {
     message = `${stats.guardiansCount} gardien${stats.guardiansCount > 1 ? "s" : ""} déjà inscrit${stats.guardiansCount > 1 ? "s" : ""} à ${city.name}. Rejoignez les membres fondateurs avant le 13 mai.`;
-    ctaText = "M'inscrire — 0 €";
+    ctaText = "Créer mon compte";
     ctaLink = "/inscription";
   } else if (isBeforeLaunch) {
     message = `Soyez parmi les premiers gardiens à ${city.name}.`;
