@@ -32,6 +32,7 @@ import VerifiedBadge from "@/components/profile/VerifiedBadge";
 import BreedProfileCard from "@/components/breeds/BreedProfileCard";
 import { getDemoSitBySlug } from "@/data/demoListings";
 import { useAuth } from "@/contexts/AuthContext";
+import { trackEvent } from "@/lib/analytics";
 
 const SPECIES_EMOJI: Record<string, string> = {
   dog: "🐕",
