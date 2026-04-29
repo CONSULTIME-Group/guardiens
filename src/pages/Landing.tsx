@@ -15,6 +15,46 @@ import { staticRoutes, DEFAULT_OG_IMAGE } from "@/data/siteRoutes";
 const HOME_ROUTE = staticRoutes.find((route) => route.path === "/");
 const HOME_OG_IMAGE = HOME_ROUTE?.ogImage ?? DEFAULT_OG_IMAGE;
 
+/**
+ * Bandeau saisonnier dynamique : titre + sous-titre adaptés au moment de l'année.
+ * - Décembre : fêtes
+ * - Janvier-Mars : hiver / vacances de février
+ * - Avril-Juin : printemps / pré-été
+ * - Juillet-Août : été
+ * - Septembre-Novembre : automne / Toussaint
+ */
+function getSeasonalBanner(): { title: string; description: string } {
+  const month = new Date().getMonth(); // 0 = janvier
+  if (month === 11) {
+    return {
+      title: "Vous partez pour les fêtes ?",
+      description: "Publiez votre annonce dès maintenant. Un gardien de votre région s'occupera de votre maison et de vos animaux pendant les fêtes de fin d'année.",
+    };
+  }
+  if (month <= 2) {
+    return {
+      title: "Vous partez cet hiver ?",
+      description: "Vacances au ski, week-ends prolongés, déplacements pro : confiez votre maison et vos animaux à un gardien de votre région.",
+    };
+  }
+  if (month <= 5) {
+    return {
+      title: "Vous préparez vos vacances ?",
+      description: "Anticipez : publiez votre annonce maintenant pour trouver le bon gardien avant le pic de l'été. La rencontre se fait toujours avant le départ.",
+    };
+  }
+  if (month <= 7) {
+    return {
+      title: "Vous partez cet été ?",
+      description: "Publiez votre annonce dès maintenant. Un gardien de votre région s'occupera de votre maison et de vos animaux pendant votre absence.",
+    };
+  }
+  return {
+    title: "Vous partez cet automne ?",
+    description: "Toussaint, escapades, déplacements : un gardien de votre région veille sur votre maison et vos animaux pendant que vous êtes absent.",
+  };
+}
+
 
 
 const testimonials = [
