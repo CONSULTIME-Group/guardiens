@@ -126,7 +126,7 @@ const Login = () => {
       <AuthIllustrationPanel
         title="L'entraide locale, retrouvée"
         tagline="Un coup de main, un lien de confiance."
-        description="Un gardien de votre région veille sur votre maison et vos animaux. Et entre gens du coin, on ose à nouveau demander, et proposer un coup de main."
+        description="Un gardien près de chez vous veille sur votre maison et vos animaux. Et entre gens du coin, on ose à nouveau demander, et proposer un coup de main."
       />
 
       <div className="flex-1 flex items-center justify-center px-6 py-12">
