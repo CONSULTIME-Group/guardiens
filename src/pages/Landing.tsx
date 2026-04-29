@@ -554,15 +554,15 @@ const Landing = () => {
             {/* Connaître */}
             <RevealSection delay={0.1}>
               <div className="bg-card rounded-2xl p-8 shadow-sm h-full border border-border">
-                <Users className="h-8 w-8 text-primary mb-4" />
-                <h3 className="text-lg font-heading font-semibold text-foreground mb-3">Connaître</h3>
+                <p className="text-xs tracking-widest uppercase text-primary/70 font-body mb-3">Connaître</p>
+                <h3 className="text-lg font-heading font-semibold text-foreground mb-4">Avant de confier vos clés</h3>
                 <ul className="space-y-3 text-sm font-body text-foreground/70 leading-relaxed">
                   <li className="flex items-start gap-2.5">
-                    <Star className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                    <span className="mt-2 h-1.5 w-1.5 rounded-full bg-primary shrink-0" aria-hidden="true" />
                     <span><strong className="text-foreground">Avis croisés</strong> — Après chaque garde, chacun note l'autre. Transparent.</span>
                   </li>
                   <li className="flex items-start gap-2.5">
-                    <Users className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                    <span className="mt-2 h-1.5 w-1.5 rounded-full bg-primary shrink-0" aria-hidden="true" />
                     <span><strong className="text-foreground">Profils détaillés</strong> — Compétences, expériences vérifiées, galerie photos.</span>
                   </li>
                 </ul>
@@ -572,15 +572,15 @@ const Landing = () => {
             {/* Sécuriser */}
             <RevealSection delay={0.2}>
               <div className="bg-card rounded-2xl p-8 shadow-sm h-full border border-border">
-                <ShieldCheck className="h-8 w-8 text-primary mb-4" />
-                <h3 className="text-lg font-heading font-semibold text-foreground mb-3">Sécuriser</h3>
+                <p className="text-xs tracking-widest uppercase text-primary/70 font-body mb-3">Sécuriser</p>
+                <h3 className="text-lg font-heading font-semibold text-foreground mb-4">Une garde encadrée</h3>
                 <ul className="space-y-3 text-sm font-body text-foreground/70 leading-relaxed">
                   <li className="flex items-start gap-2.5">
-                    <ShieldCheck className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                    <span className="mt-2 h-1.5 w-1.5 rounded-full bg-primary shrink-0" aria-hidden="true" />
                     <span><strong className="text-foreground">Vérification d'identité</strong> — Badge visible sur le profil de chaque gardien vérifié.</span>
                   </li>
                   <li className="flex items-start gap-2.5">
-                    <ClipboardCheck className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                    <span className="mt-2 h-1.5 w-1.5 rounded-full bg-primary shrink-0" aria-hidden="true" />
                     <span><strong className="text-foreground">Accord de garde</strong> — Un document clair, signé par les deux parties avant le départ.</span>
                   </li>
                 </ul>
@@ -590,15 +590,15 @@ const Landing = () => {
             {/* Communiquer */}
             <RevealSection delay={0.3}>
               <div className="bg-card rounded-2xl p-8 shadow-sm h-full border border-border">
-                <MessageCircle className="h-8 w-8 text-primary mb-4" />
-                <h3 className="text-lg font-heading font-semibold text-foreground mb-3">Communiquer</h3>
+                <p className="text-xs tracking-widest uppercase text-primary/70 font-body mb-3">Communiquer</p>
+                <h3 className="text-lg font-heading font-semibold text-foreground mb-4">Pendant et après</h3>
                 <ul className="space-y-3 text-sm font-body text-foreground/70 leading-relaxed">
                   <li className="flex items-start gap-2.5">
-                    <MessageCircle className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                    <span className="mt-2 h-1.5 w-1.5 rounded-full bg-primary shrink-0" aria-hidden="true" />
                     <span><strong className="text-foreground">Messagerie intégrée</strong> — Échangez avant, pendant et après la garde.</span>
                   </li>
                   <li className="flex items-start gap-2.5">
-                    <BookOpen className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                    <span className="mt-2 h-1.5 w-1.5 rounded-full bg-primary shrink-0" aria-hidden="true" />
                     <span><strong className="text-foreground">Guide de maison</strong> — Vétérinaire, clés, Wi-Fi, habitudes : tout au même endroit.</span>
                   </li>
                 </ul>
