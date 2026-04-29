@@ -2,6 +2,11 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { trackEvent } from "@/lib/analytics";
 
+// Libellé unique réutilisé par toutes les cartes (UI + accessibilité)
+const DEMO_CARD_CTA_LABEL = "Voir l'annonce de démonstration";
+const DEMO_CARD_CTA_CLASSNAME =
+  "w-full mt-3 py-2.5 rounded-xl bg-primary/10 text-primary font-body font-medium text-sm text-center group-hover:bg-primary group-hover:text-primary-foreground transition-colors block";
+
 // Slugs alignés sur src/data/demoListings.ts → page /annonces/demo/:slug
 const DEMO_LISTINGS = [
   {
