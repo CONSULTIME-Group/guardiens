@@ -154,7 +154,7 @@ const Landing = () => {
     <div className="min-h-screen bg-background text-foreground">
       <PageMeta
         title="Guardiens — Partez l'esprit tranquille"
-        description="Un gardien de votre région s'occupe de votre maison et de vos animaux pendant vos absences. Gratuit pour les propriétaires."
+        description="Un gardien de votre région s'occupe de votre maison et de vos animaux pendant vos absences. 0 € pour les propriétaires, à vie."
         path="/"
         image={HOME_OG_IMAGE}
       />
@@ -168,7 +168,7 @@ const Landing = () => {
             name: "Guardiens",
             url: "https://guardiens.fr",
             logo: "https://guardiens.fr/favicon.ico",
-            description: "Plateforme gratuite de pet sitting et house sitting de proximité en Auvergne-Rhône-Alpes.",
+            description: "Plateforme de pet sitting et house sitting de proximité en Auvergne-Rhône-Alpes — 0 € pour les propriétaires, à vie.",
             areaServed: { "@type": "AdministrativeArea", name: "Auvergne-Rhône-Alpes" },
             knowsAbout: ["House-sitting", "Pet-sitting", "Garde d'animaux à domicile", "Entraide entre gens du coin", "Petites missions entre gens du coin", "Auvergne-Rhône-Alpes"],
             slogan: "Quelqu'un du coin veille sur votre maison.",
@@ -199,8 +199,8 @@ const Landing = () => {
           __html: JSON.stringify({
             "@context": "https://schema.org",
             "@type": "Service",
-            name: "Pet sitting & House sitting gratuit",
-            description: "Service de garde d'animaux et house sitting gratuit en Auvergne-Rhône-Alpes. Avis croisés, inscription gratuite.",
+            name: "Pet sitting & House sitting de proximité",
+            description: "Service de garde d'animaux et house sitting de proximité en Auvergne-Rhône-Alpes. Avis croisés, 0 € pour les propriétaires à vie.",
             provider: { "@type": "Organization", name: "Guardiens", url: "https://guardiens.fr" },
             areaServed: { "@type": "AdministrativeArea", name: "Auvergne-Rhône-Alpes" },
             serviceType: ["Pet sitting", "House sitting", "Garde d'animaux", "Gardiennage de maison", "Garde de chien", "Garde de chat"],
@@ -219,7 +219,7 @@ const Landing = () => {
             "@context": "https://schema.org",
             "@type": "FAQPage",
             mainEntity: [
-              { "@type": "Question", name: "Qu'est-ce que le house sitting ?", acceptedAnswer: { "@type": "Answer", text: "Le house sitting est un échange de services : un gardien habite gratuitement dans votre maison pendant votre absence et prend soin de vos animaux. C'est gratuit pour les deux parties." } },
+              { "@type": "Question", name: "Qu'est-ce que le house sitting ?", acceptedAnswer: { "@type": "Answer", text: "Le house sitting est un échange de services : un gardien habite à 0 € dans votre maison pendant votre absence et prend soin de vos animaux. L'échange n'implique aucune transaction financière entre les deux parties." } },
               { "@type": "Question", name: "Guardiens est-il gratuit ?", acceptedAnswer: { "@type": "Answer", text: "Oui, Guardiens est à 0 € pour les propriétaires, à vie. Les gardiens bénéficient d'un accès à 0 € jusqu'au 13 juin 2026, puis l'abonnement est à 6,99 €/mois. L'entraide reste à 0 € pour tous, pour toujours." } },
               { "@type": "Question", name: "Comment trouver un pet sitter près de chez moi ?", acceptedAnswer: { "@type": "Answer", text: "Inscrivez-vous sur Guardiens, publiez votre annonce de garde avec les dates et vos animaux, et recevez des candidatures de gardiens qui habitent près de chez vous." } },
             ],
@@ -623,7 +623,7 @@ const Landing = () => {
         <div className="max-w-5xl mx-auto px-6">
           <RevealSection>
             <span className="text-xs tracking-widest uppercase text-primary/60 font-body mb-4 block text-center">
-              Gratuit · Pour tous · Pour toujours
+              0 € · Pour tous · Pour toujours
             </span>
             <h2 className="text-4xl md:text-5xl font-heading font-semibold leading-snug text-foreground text-center mb-6">
               Osez demander un coup de main.
