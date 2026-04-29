@@ -446,7 +446,7 @@ const DemoSitDetail = () => {
             <div className="rounded-2xl bg-muted/50 p-5 text-xs text-muted-foreground space-y-2">
               <p className="flex items-center gap-2 font-medium text-foreground">
                 <ShieldCheck className="h-4 w-4 text-primary" />
-                Sur Guardiens, c'est gratuit, entre gens du coin
+                Sur Guardiens, c'est à 0 € pour les propriétaires, entre gens du coin
               </p>
               <p>
                 Aucun paiement entre membres. Profils vérifiés, avis croisés,

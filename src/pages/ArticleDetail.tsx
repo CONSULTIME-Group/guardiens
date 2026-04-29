@@ -306,7 +306,7 @@ export default function ArticleDetail() {
               ...(article.region ? { "addressRegion": article.region } : {}),
               "addressCountry": "FR"
             },
-            "priceRange": "Gratuit",
+            "priceRange": "0 € pour les propriétaires",
           })}</script>
         </Helmet>
       )}
