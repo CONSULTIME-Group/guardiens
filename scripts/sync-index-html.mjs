@@ -22,6 +22,47 @@ const ROUTES_PATH = resolve(ROOT, "src/data/siteRoutes.ts");
 const CHECK_ONLY = process.argv.includes("--check");
 
 // ──────────────────────────────────────────────────────────────
+// 0. Garde-fou : vocabulaire proscrit
+// ──────────────────────────────────────────────────────────────
+// Empêche la sync de réécrire des balises corrigées avec du contenu non
+// conforme à la charte éditoriale (mémoires Core "Mot PROSCRIT" + "PROSCRIT
+// régional"). Si un développeur réintroduit "AURA", "voisin" ou "votre région"
+// dans siteRoutes.ts, le build casse AVANT que index.html ne soit pollué.
+const FORBIDDEN_RULES = [
+  { pattern: /\bAURA\b/, label: "AURA (acronyme régional proscrit)" },
+  { pattern: /Auvergne-Rhône-Alpes/i, label: "« Auvergne-Rhône-Alpes » (proscrit régional)" },
+  { pattern: /\bvoisin(?:e|s|age)?\b/i, label: "« voisin / voisinage » (mot proscrit)" },
+  { pattern: /votre région/i, label: "« votre région » (proximité régionale interdite)" },
+  { pattern: /\b9\s*€\s*\/\s*mois\b/i, label: "ancien tarif 9 €/mois (utiliser 6,99 €/mois)" },
+  { pattern: /\bGratuit\b/, label: "« Gratuit » avec capitale (préférer « 0 € » en SEO)" },
+];
+
+function assertNoForbiddenVocabulary(truth) {
+  const violations = [];
+  const fields = {
+    title: truth.title,
+    "metaDescription (siteRoutes.ts route /)": truth.description,
+  };
+  for (const [field, value] of Object.entries(fields)) {
+    for (const rule of FORBIDDEN_RULES) {
+      if (rule.pattern.test(value)) {
+        violations.push(`   ❌ Champ « ${field} » contient ${rule.label}`);
+        violations.push(`      → "${value}"`);
+      }
+    }
+  }
+  if (violations.length > 0) {
+    console.error("❌ GARDE-FOU SEO : vocabulaire proscrit détecté dans siteRoutes.ts.");
+    console.error("   Le sync vers index.html est BLOQUÉ pour éviter d'écraser les");
+    console.error("   balises conformes par du contenu interdit.\n");
+    console.error(violations.join("\n"));
+    console.error("\n   Corrigez src/data/siteRoutes.ts (route '/') puis relancez le build.");
+    process.exit(3);
+  }
+}
+
+
+// ──────────────────────────────────────────────────────────────
 // 1. Extraire la vérité depuis siteRoutes.ts
 // ──────────────────────────────────────────────────────────────
 
