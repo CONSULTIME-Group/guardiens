@@ -79,12 +79,8 @@ const CitySchemaOrg = ({ city }: Props) => {
         "@type": "City",
         name: city.name,
         containedInPlace: {
-          "@type": "AdministrativeArea",
-          name: "Auvergne-Rhône-Alpes",
-          containedInPlace: {
-            "@type": "Country",
-            name: "France",
-          },
+          "@type": "Country",
+          name: "France",
         },
       },
       offers: {

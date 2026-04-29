@@ -24,7 +24,7 @@ const trustSignals = [
   { icon: BadgeCheck, label: "Identité vérifiée" },
   { icon: Siren, label: "Gardiens d'urgence" },
   { icon: ShieldCheck, label: "Zéro frais propriétaire" },
-  { icon: Mountain, label: "Esprit AURA" },
+  { icon: Mountain, label: "Esprit de proximité" },
 ];
 
 export default function CityHero({
