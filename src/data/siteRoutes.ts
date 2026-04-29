@@ -265,8 +265,8 @@ export const dynamicRoutes: DynamicRouteConfig[] = [
     // Instance représentative : l'article "nouveaux-tarifs-2026" (contenu stable, pilier SEO)
     sampleParams: { slug: "nouveaux-tarifs-2026" },
     // Titre et description réels servis par la page (vérifiés strictement)
-    sampleTitle: "Tarifs Guardiens 2026 — 6,99€/mois, 7 jours offerts | Guardiens",
-    sampleDescription: "Les tarifs officiels Guardiens pour 2026 : 6,99€/mois pour les gardiens avec 7 jours offerts, gratuit pour les propriétaires. Sans commission ni frais cachés.",
+    sampleTitle: "Tarifs Guardiens 2026 — 6,99 €/mois, 7 jours offerts | Guardiens",
+    sampleDescription: "Les tarifs officiels Guardiens pour 2026 : 6,99 €/mois pour les gardiens avec 7 jours offerts, 0 € à vie pour les propriétaires. Sans commission ni frais cachés.",
   },
   {
     pathPattern: "/house-sitting/:city",

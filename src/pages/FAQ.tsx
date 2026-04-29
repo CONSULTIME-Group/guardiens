@@ -72,7 +72,7 @@ const FAQ = () => {
     <>
       <PageMeta
         title="FAQ Guardiens — Toutes vos questions"
-        description="Toutes vos questions sur Guardiens — abonnement gardien, accès propriétaire gratuit, parrainage et petites missions d'entraide."
+        description="Toutes vos questions sur Guardiens — abonnement gardien, accès propriétaire à 0 € à vie, parrainage et petites missions d'entraide."
         path="/faq"
       />
 
@@ -174,8 +174,8 @@ const FAQ = () => {
           )}
 
           <div className="mt-10 rounded-xl border border-primary/20 bg-primary/5 p-6 text-center">
-            <p className="font-heading font-semibold text-foreground mb-1">💰 Tout savoir sur nos tarifs</p>
-            <p className="text-sm text-muted-foreground mb-4">6,99€/mois pour les gardiens, gratuit pour les propriétaires. Découvrez les trois formules en détail.</p>
+            <p className="font-heading font-semibold text-foreground mb-1">Tout savoir sur nos tarifs</p>
+            <p className="text-sm text-muted-foreground mb-4">6,99 €/mois pour les gardiens, 0 € à vie pour les propriétaires. Découvrez les trois formules en détail.</p>
             <Link
               to="/actualites/nouveaux-tarifs-2026"
               className="inline-flex items-center justify-center rounded-lg bg-primary px-6 py-3 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"

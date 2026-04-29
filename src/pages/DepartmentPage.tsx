@@ -90,8 +90,8 @@ const DepartmentPage = () => {
   return (
     <>
       <PageMeta
-        title={page.meta_title || `Pet sitting & House sitting ${page.department} – Garde d'animaux gratuite | Guardiens`}
-        description={page.meta_description || `Trouvez un pet sitter ou house sitter dans le ${page.department}. Garde d'animaux gratuite entre particuliers. ${cityPages.length} villes couvertes sur Guardiens.`}
+        title={page.meta_title || `Pet sitting & House sitting ${page.department} – Garde d'animaux à 0 € pour les propriétaires | Guardiens`}
+        description={page.meta_description || `Trouvez un pet sitter ou house sitter dans le ${page.department}. Garde d'animaux entre particuliers, à 0 € pour les propriétaires. ${cityPages.length} villes couvertes sur Guardiens.`}
         path={`/departement/${page.slug}`}
       />
 
@@ -127,7 +127,7 @@ const DepartmentPage = () => {
             </Badge>
             <Badge variant="outline" className="text-base px-4 py-2 gap-2">
               <Heart className="h-4 w-4" />
-              Inscrivez-vous gratuitement
+              Inscription à 0 €
             </Badge>
           </div>
 
@@ -232,9 +232,9 @@ const DepartmentPage = () => {
             <Card>
               <CardContent className="p-6">
                 <Heart className="h-8 w-8 text-primary mb-3" />
-                <h3 className="font-semibold text-foreground mb-2">Gratuité</h3>
+                <h3 className="font-semibold text-foreground mb-2">0 € pour les propriétaires</h3>
                 <p className="text-sm text-muted-foreground">
-                  Inscrivez-vous gratuitement. Pas de commission sur les gardes.
+                  Inscription à 0 €, à vie. Pas de commission sur les gardes.
                 </p>
               </CardContent>
             </Card>
@@ -251,7 +251,7 @@ const DepartmentPage = () => {
           </p>
           <Link to="/inscription">
             <Button size="lg" className="gap-2">
-              S'inscrire gratuitement <ArrowRight className="h-4 w-4" />
+              S'inscrire — 0 € <ArrowRight className="h-4 w-4" />
             </Button>
           </Link>
         </section>
@@ -279,7 +279,7 @@ const DepartmentPage = () => {
               "@context": "https://schema.org",
               "@type": "Service",
               name: `Pet sitting & House sitting dans le ${page.department}`,
-              description: `Service de garde d'animaux et house sitting gratuit dans le ${page.department}. ${cityPages.length} villes couvertes. Gardiens vérifiés.`,
+              description: `Service de garde d'animaux et house sitting à 0 € pour les propriétaires dans le ${page.department}. ${cityPages.length} villes couvertes. Gardiens vérifiés.`,
               provider: {
                 "@type": "Organization",
                 name: "Guardiens",
@@ -298,7 +298,7 @@ const DepartmentPage = () => {
                 "@type": "Offer",
                 price: "0",
                 priceCurrency: "EUR",
-                description: "Inscription et mise en relation gratuites",
+                description: "Inscription et mise en relation à 0 € pour les propriétaires",
               },
             }),
           }}
@@ -317,15 +317,15 @@ const DepartmentPage = () => {
                   name: `Comment trouver un pet sitter dans le ${page.department} ?`,
                   acceptedAnswer: {
                     "@type": "Answer",
-                    text: `Inscrivez-vous gratuitement sur Guardiens et parcourez les ${cityPages.length} villes du ${page.department} pour trouver un gardien vérifié près de chez vous.`,
+                    text: `Inscrivez-vous à 0 € sur Guardiens et parcourez les ${cityPages.length} villes du ${page.department} pour trouver un gardien vérifié près de chez vous.`,
                   },
                 },
                 {
                   "@type": "Question",
-                  name: `Le house sitting dans le ${page.department} est-il gratuit ?`,
+                  name: `Le house sitting dans le ${page.department} est-il à 0 € ?`,
                   acceptedAnswer: {
                     "@type": "Answer",
-                    text: "Oui, Guardiens est 100% gratuit. Le house sitting repose sur l'échange : le gardien loge gratuitement en échange de la garde de vos animaux.",
+                    text: "Oui, Guardiens est à 0 € pour les propriétaires, à vie. Le house sitting repose sur l'échange : le gardien loge sans frais en échange de la garde de vos animaux.",
                   },
                 },
               ],

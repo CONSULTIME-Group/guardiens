@@ -96,7 +96,7 @@ const SmallMissionsPublic = () => {
     <>
       <PageMeta
         title="Petites missions d'entraide locale — Guardiens"
-        description="Échangez des coups de main entre gens du coin. Jardinage, animaux, bricolage — sans argent. Gratuit pour tous, pour toujours."
+        description="Échangez des coups de main entre gens du coin. Jardinage, animaux, bricolage — sans argent. À 0 € pour tous, pour toujours."
       />
 
       <div className="min-h-screen bg-background font-body">
@@ -138,7 +138,7 @@ const SmallMissionsPublic = () => {
                 </Button>
               </div>
               <p className="text-xs text-foreground/50 mt-4">
-                Gratuit pour tous — pour toujours.
+                À 0 € pour tous — pour toujours.
               </p>
             </Reveal>
 
@@ -336,7 +336,7 @@ const SmallMissionsPublic = () => {
             </Reveal>
             <Reveal delay={0.1}>
               <p className="font-body text-lg text-white/85 leading-relaxed mb-10">
-                Gratuit. Pour tous. Pour toujours. Entre gens du coin qui se choisissent.
+                À 0 €. Pour tous. Pour toujours. Entre gens du coin qui se choisissent.
               </p>
             </Reveal>
             <Reveal delay={0.2}>
@@ -349,7 +349,7 @@ const SmallMissionsPublic = () => {
                 </Button>
               </div>
               <p className="text-xs text-white/50 mt-6">
-                Gratuit · Badge Fondateur à vie · Accès jusqu'au 13 juin
+                0 € · Badge Fondateur à vie · Accès jusqu'au 13 juin
               </p>
             </Reveal>
           </div>
@@ -362,7 +362,7 @@ const SmallMissionsPublic = () => {
             <Accordion type="single" collapsible className="space-y-2">
               {[
                 { q: "C'est quoi les petites missions ?", a: "Des coups de main entre gens du coin — jardinage, animaux, bricolage — échangés sans argent. Vous proposez ce que vous savez faire, ou publiez ce dont vous avez besoin." },
-                { q: "C'est vraiment gratuit ?", a: "Oui. L'entraide entre gens du coin est gratuite pour tous, pour toujours. Aucun frais, aucune commission." },
+                { q: "C'est vraiment à 0 € ?", a: "Oui. L'entraide entre gens du coin est à 0 € pour tous, pour toujours. Aucun frais, aucune commission." },
                 { q: "Comment fonctionne l'échange ?", a: "Pas d'argent. Vous proposez quelque chose en retour — un repas, des légumes, un coup de main futur. L'échange se décide entre vous." },
                 { q: "Faut-il être abonné ?", a: "Non. Les petites missions sont accessibles à tous les membres inscrits, sans abonnement." },
                 { q: "Quels types de missions peut-on publier ?", a: "Tout ce qui tourne autour de la maison, du jardin, des animaux et du quartier. Tonte, arrosage, promenade de chien, bricolage, cuisine…" },
@@ -406,7 +406,7 @@ const SmallMissionsPublic = () => {
             "@type": "FAQPage",
             mainEntity: [
               { "@type": "Question", name: "C'est quoi les petites missions ?", acceptedAnswer: { "@type": "Answer", text: "Des coups de main entre gens du coin — jardinage, animaux, bricolage — échangés sans argent. Vous proposez ce que vous savez faire, ou publiez ce dont vous avez besoin." } },
-              { "@type": "Question", name: "C'est vraiment gratuit ?", acceptedAnswer: { "@type": "Answer", text: "Oui. L'entraide entre gens du coin est gratuite pour tous, pour toujours. Aucun frais, aucune commission." } },
+              { "@type": "Question", name: "C'est vraiment à 0 € ?", acceptedAnswer: { "@type": "Answer", text: "Oui. L'entraide entre gens du coin est à 0 € pour tous, pour toujours. Aucun frais, aucune commission." } },
               { "@type": "Question", name: "Comment fonctionne l'échange ?", acceptedAnswer: { "@type": "Answer", text: "Pas d'argent. Vous proposez quelque chose en retour — un repas, des légumes, un coup de main futur. L'échange se décide entre vous." } },
               { "@type": "Question", name: "Faut-il être abonné ?", acceptedAnswer: { "@type": "Answer", text: "Non. Les petites missions sont accessibles à tous les membres inscrits, sans abonnement." } },
               { "@type": "Question", name: "Quels types de missions peut-on publier ?", acceptedAnswer: { "@type": "Answer", text: "Tout ce qui tourne autour de la maison, du jardin, des animaux et du quartier. Tonte, arrosage, promenade de chien, bricolage, cuisine…" } },
