@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { CheckCircle2, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { logger } from "@/lib/logger";
+import FreeAccountSection from "./FreeAccountSection";
 
 const calculateYearlyProrata = (): { price: number; months: number; savings: number } => {
   const now = new Date();

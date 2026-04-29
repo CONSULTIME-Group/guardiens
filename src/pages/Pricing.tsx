@@ -11,6 +11,7 @@ import PageBreadcrumb from "@/components/seo/PageBreadcrumb";
 import PublicHeader from "@/components/layout/PublicHeader";
 import PublicFooter from "@/components/layout/PublicFooter";
 import EntraideLibreBanner from "@/components/subscription/EntraideLibreBanner";
+import FreeAccountSection from "@/components/subscription/FreeAccountSection";
 import SecurityTrustSection from "@/components/subscription/SecurityTrustSection";
 import { LAUNCH_DATE, isBeforeLaunch, isInGracePeriod } from "@/lib/constants";
 
@@ -426,6 +427,8 @@ const Pricing = () => {
               </CardContent>
             </Card>
           </section>
+
+          <FreeAccountSection />
 
           {/* ═══ SÉCURITÉ & VÉRIFICATIONS ═══ */}
           <SecurityTrustSection />
