@@ -493,7 +493,7 @@ const Pricing = () => {
 
           {/* ═══ CTA final ═══ */}
           <section className="text-center py-10 md:py-14 bg-gradient-to-br from-primary to-primary/85 rounded-2xl mb-12">
-            <ShieldCheck className="h-10 w-10 text-primary-foreground/80 mx-auto mb-4" />
+            
             <p className="text-xl md:text-2xl font-heading font-semibold text-primary-foreground text-center mb-3 px-4">
               {before
                 ? "Rejoignez Guardiens dès maintenant"
