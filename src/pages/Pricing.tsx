@@ -153,8 +153,8 @@ const Pricing = () => {
       <PageMeta
         title={
           before
-            ? "Tarifs Guardiens — Offert pour tous jusqu'au 13 juin 2026 (0 €)"
-            : "Tarifs Guardiens — Offert pour les propriétaires (0 €), 6,99 €/mois pour les gardiens"
+            ? "Tarifs Guardiens — Offert pour tous (0 €) jusqu'au 13 juin 2026"
+            : "Tarifs Guardiens — Offert propriétaires (0 €), 6,99 €/mois gardiens"
         }
         description={
           before
