@@ -217,7 +217,7 @@ const MonAnnonceCard = memo(({ sits, pets, propertyType, propertyEnvironment, pe
       <div className="flex flex-wrap gap-2 pt-1">
         {isActive ? (
           <>
-            <Button variant="outline" size="sm" className="flex-1 min-w-[110px] text-xs" onClick={() => navigate(`/sits/${currentSit.id}`)}>
+            <Button size="sm" className="flex-1 min-w-[110px] text-xs" onClick={() => navigate(`/sits/${currentSit.id}`)}>
               <Eye className="h-3.5 w-3.5 mr-1" /> Voir l'annonce
             </Button>
             <Button variant="outline" size="sm" className="flex-1 min-w-[110px] text-xs" onClick={() => navigate(`/sits/${currentSit.id}/edit`)}>
