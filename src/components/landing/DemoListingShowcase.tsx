@@ -92,7 +92,7 @@ const DemoListingCard = React.forwardRef<HTMLAnchorElement, typeof DEMO_LISTINGS
       <span
         className="w-full mt-3 py-2.5 rounded-xl bg-primary/10 text-primary font-body font-medium text-sm text-center group-hover:bg-primary group-hover:text-primary-foreground transition-colors block"
       >
-        J'ouvre un compte →
+        Voir l'annonce de démonstration →
       </span>
     </div>
   </Link>
