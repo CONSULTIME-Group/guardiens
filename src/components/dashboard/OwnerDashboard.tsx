@@ -100,6 +100,24 @@ const OwnerDashboard = () => {
     if (!user) return;
     let cancelled = false;
 
+    // Reset state immediately to avoid showing previous user's data (anti-flicker)
+    setLoading(true);
+    setSits([]);
+    setPets([]);
+    setRecentApps([]);
+    setReviews([]);
+    setHighlights([]);
+    setSmallMissions([]);
+    setMyMissions([]);
+    setVerificationStatus("not_submitted");
+    setMissionMetrics({ total: 0, completed: 0 });
+    setSitterBadges({});
+    setSitterProfiles({});
+    setTrustedSitterCount(0);
+    setPropertyType(null);
+    setPropertyEnvironment(null);
+    setPropertyCoverPhoto(null);
+
     const load = async () => {
       try {
         const [sitsRes, propsRes, reviewsRes, profileRes, highlightsRes, missionsRes] = await Promise.all([
