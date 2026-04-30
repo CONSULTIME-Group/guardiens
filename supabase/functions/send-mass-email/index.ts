@@ -299,15 +299,49 @@ Deno.serve(async (req) => {
     let errors = 0;
     const BATCH_SIZE = 100;
 
+    // Crée d'abord la campagne pour avoir son id (pour le tracking)
+    const { data: campaign, error: campErr } = await serviceClient
+      .from("mass_emails")
+      .insert({
+        segment,
+        filters: filters as any,
+        subject,
+        body,
+        cta_label: cta_label || null,
+        cta_url: cta_url || null,
+        recipients_count: 0, // sera mis à jour après envoi
+        status: "sending",
+        sent_by: userId,
+      })
+      .select("id")
+      .single();
+    if (campErr || !campaign) {
+      throw new Error(`Failed to create campaign row: ${campErr?.message}`);
+    }
+    const campaignId = campaign.id as string;
+
+    // Active le tracking ouvertures + clics côté Resend
     const emailObjects = recipients.map((email) => ({
       from: "Guardiens <bonjour@guardiens.fr>",
       to: [email],
       subject,
       html,
+      tracking: { opens: true, clicks: true },
+      tags: [{ name: "campaign_id", value: campaignId }],
     }));
+
+    // Rows de tracking à insérer (resend_id renseigné après chaque batch OK)
+    const sendRows: Array<{
+      mass_email_id: string;
+      recipient_email: string;
+      resend_id: string | null;
+      status: string;
+      error_message: string | null;
+    }> = [];
 
     for (let i = 0; i < emailObjects.length; i += BATCH_SIZE) {
       const batch = emailObjects.slice(i, i + BATCH_SIZE);
+      const batchEmails = recipients.slice(i, i + BATCH_SIZE);
       try {
         const res = await fetch("https://api.resend.com/emails/batch", {
           method: "POST",
@@ -320,30 +354,72 @@ Deno.serve(async (req) => {
         const resBody = await res.text();
         if (res.ok) {
           sent += batch.length;
+          // Parse la réponse — Resend renvoie { data: [{ id }, ...] } dans l'ordre d'envoi
+          let ids: string[] = [];
+          try {
+            const parsed = JSON.parse(resBody);
+            ids = (parsed?.data || []).map((d: any) => d?.id || null);
+          } catch {
+            // pas grave, on stocke sans id
+          }
+          batchEmails.forEach((email, idx) => {
+            sendRows.push({
+              mass_email_id: campaignId,
+              recipient_email: email,
+              resend_id: ids[idx] || null,
+              status: "sent",
+              error_message: null,
+            });
+          });
         } else {
           console.error(`Batch failed (${i}): ${res.status} ${resBody}`);
           errors += batch.length;
+          batchEmails.forEach((email) => {
+            sendRows.push({
+              mass_email_id: campaignId,
+              recipient_email: email,
+              resend_id: null,
+              status: "failed",
+              error_message: `${res.status}: ${resBody.slice(0, 200)}`,
+            });
+          });
         }
       } catch (e) {
         console.error(`Batch error (${i}):`, e);
         errors += batch.length;
+        batchEmails.forEach((email) => {
+          sendRows.push({
+            mass_email_id: campaignId,
+            recipient_email: email,
+            resend_id: null,
+            status: "failed",
+            error_message: String(e).slice(0, 200),
+          });
+        });
       }
       if (i + BATCH_SIZE < emailObjects.length) {
         await new Promise((r) => setTimeout(r, 1000));
       }
     }
 
-    await serviceClient.from("mass_emails").insert({
-      segment,
-      filters: filters as any,
-      subject,
-      body,
-      cta_label: cta_label || null,
-      cta_url: cta_url || null,
-      recipients_count: sent,
-      status: errors > 0 && sent === 0 ? "error" : "sent",
-      sent_by: userId,
-    });
+    // Insert tracking rows en chunks (Postgres limit)
+    const INSERT_CHUNK = 500;
+    for (let i = 0; i < sendRows.length; i += INSERT_CHUNK) {
+      const chunk = sendRows.slice(i, i + INSERT_CHUNK);
+      const { error: insErr } = await serviceClient
+        .from("mass_email_sends")
+        .insert(chunk);
+      if (insErr) console.error(`mass_email_sends insert error (chunk ${i}):`, insErr);
+    }
+
+    // Met à jour la campagne avec le compte final
+    await serviceClient
+      .from("mass_emails")
+      .update({
+        recipients_count: sent,
+        status: errors > 0 && sent === 0 ? "error" : "sent",
+      })
+      .eq("id", campaignId);
 
     return new Response(JSON.stringify({ sent, errors }), {
       status: 200,

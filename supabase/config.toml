@@ -17,3 +17,5 @@ project_id = "erhccyqevdyevpyctsjj"
     verify_jwt = false
   [functions.notify-new-message]
     verify_jwt = false
+  [functions.resend-webhook]
+    verify_jwt = false
