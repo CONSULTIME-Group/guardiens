@@ -125,6 +125,10 @@ export const AdminSidebar = () => {
         supabase.from("review_disputes").select("id", { count: "exact", head: true }).eq("status", "pending"),
         supabase.from("error_logs").select("id", { count: "exact", head: true }).is("resolved_at", null).neq("severity", "ignored_third_party"),
         supabase.from("guide_requests" as any).select("id", { count: "exact", head: true }).eq("status", "pending"),
+        supabase.from("reviews").select("id", { count: "exact", head: true }).eq("moderation_status", "pending"),
+        supabase.from("admin_message_logs").select("id", { count: "exact", head: true }).eq("status", "failed"),
+        supabase.from("reports").select("id", { count: "exact", head: true }).eq("status", "new").eq("target_type", "sit"),
+        supabase.from("reports").select("id", { count: "exact", head: true }).eq("status", "new").eq("target_type", "small_mission"),
       ]);
       setBadges({
         verifications: results[0].count || 0,
@@ -135,6 +139,10 @@ export const AdminSidebar = () => {
         reviewDisputes: results[5].count || 0,
         errors: results[6].count || 0,
         guideRequests: results[7].count || 0,
+        reviewsModeration: results[8].count || 0,
+        adminMessageFailed: results[9].count || 0,
+        reportsSit: results[10].count || 0,
+        reportsMission: results[11].count || 0,
       });
     };
     fetchBadges();
