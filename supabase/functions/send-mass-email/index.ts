@@ -23,6 +23,7 @@ interface MassEmailFilters {
   no_application_ever?: boolean;
   no_sit_published_ever?: boolean;
   no_conversation_ever?: boolean;
+  exclude_user_ids?: string[];
 }
 
 function buildHtml(subject: string, body: string, ctaLabel?: string, ctaUrl?: string): string {
