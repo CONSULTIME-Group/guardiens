@@ -1714,6 +1714,87 @@ export type Database = {
           },
         ]
       }
+      mass_email_sends: {
+        Row: {
+          bounced_at: string | null
+          click_count: number
+          complained_at: string | null
+          created_at: string
+          delivered_at: string | null
+          error_message: string | null
+          first_clicked_at: string | null
+          first_opened_at: string | null
+          id: string
+          last_clicked_at: string | null
+          last_clicked_url: string | null
+          last_opened_at: string | null
+          mass_email_id: string
+          open_count: number
+          recipient_email: string
+          resend_id: string | null
+          sent_at: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          bounced_at?: string | null
+          click_count?: number
+          complained_at?: string | null
+          created_at?: string
+          delivered_at?: string | null
+          error_message?: string | null
+          first_clicked_at?: string | null
+          first_opened_at?: string | null
+          id?: string
+          last_clicked_at?: string | null
+          last_clicked_url?: string | null
+          last_opened_at?: string | null
+          mass_email_id: string
+          open_count?: number
+          recipient_email: string
+          resend_id?: string | null
+          sent_at?: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          bounced_at?: string | null
+          click_count?: number
+          complained_at?: string | null
+          created_at?: string
+          delivered_at?: string | null
+          error_message?: string | null
+          first_clicked_at?: string | null
+          first_opened_at?: string | null
+          id?: string
+          last_clicked_at?: string | null
+          last_clicked_url?: string | null
+          last_opened_at?: string | null
+          mass_email_id?: string
+          open_count?: number
+          recipient_email?: string
+          resend_id?: string | null
+          sent_at?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mass_email_sends_mass_email_id_fkey"
+            columns: ["mass_email_id"]
+            isOneToOne: false
+            referencedRelation: "mass_email_stats"
+            referencedColumns: ["mass_email_id"]
+          },
+          {
+            foreignKeyName: "mass_email_sends_mass_email_id_fkey"
+            columns: ["mass_email_id"]
+            isOneToOne: false
+            referencedRelation: "mass_emails"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       mass_emails: {
         Row: {
           body: string
@@ -3874,6 +3955,27 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      mass_email_stats: {
+        Row: {
+          bounced_count: number | null
+          click_rate: number | null
+          click_through_rate: number | null
+          complained_count: number | null
+          created_at: string | null
+          delivered_count: number | null
+          mass_email_id: string | null
+          open_rate: number | null
+          recipients_count: number | null
+          segment: string | null
+          subject: string | null
+          total_clicks: number | null
+          total_opens: number | null
+          tracked_count: number | null
+          unique_clicks: number | null
+          unique_opens: number | null
+        }
+        Relationships: []
       }
       profile_reputation: {
         Row: {
