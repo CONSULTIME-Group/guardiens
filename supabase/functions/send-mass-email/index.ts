@@ -210,6 +210,12 @@ async function fetchTargetedProfiles(
     result = result.filter((p) => inactiveIds.has(p.id));
   }
 
+  // Exclusion explicite par user_id (ex: ne pas envoyer au propriétaire d'une annonce mise en avant)
+  if (filters.exclude_user_ids && filters.exclude_user_ids.length > 0) {
+    const excluded = new Set(filters.exclude_user_ids);
+    result = result.filter((p) => !excluded.has(p.id));
+  }
+
   return result;
 }
 
