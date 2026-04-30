@@ -59,19 +59,19 @@ const adminNavGroups: NavGroup[] = [
   {
     label: "ACTIVITÉ",
     items: [
-      { to: "/admin/listings", icon: Megaphone, label: "Annonces" },
-      { to: "/admin/sits-management", icon: CalendarCheck, label: "Gardes" },
-      { to: "/admin/small-missions", icon: Handshake, label: "Petites missions" },
+      { to: "/admin/listings", icon: Megaphone, label: "Annonces", badgeKey: "reportsSit" },
+      { to: "/admin/sits-management", icon: CalendarCheck, label: "Gardes", badgeKey: "reportsSit" },
+      { to: "/admin/small-missions", icon: Handshake, label: "Petites missions", badgeKey: "reportsMission" },
     ],
   },
   {
     label: "MODÉRATION",
     items: [
-      { to: "/admin/reviews", icon: Star, label: "Avis" },
+      { to: "/admin/reviews", icon: Star, label: "Avis", badgeKey: "reviewsModeration" },
       { to: "/admin/review-disputes", icon: AlertTriangle, label: "Contestations d'avis", badgeKey: "reviewDisputes" },
       { to: "/admin/reports", icon: Flag, label: "Signalements", badgeKey: "reports" },
       { to: "/admin/contact-messages", icon: MessageSquare, label: "Messages contact", badgeKey: "contactMessages" },
-      { to: "/admin/messages", icon: MessageSquare, label: "Messagerie" },
+      { to: "/admin/messages", icon: MessageSquare, label: "Messagerie", badgeKey: "adminMessageFailed" },
       { to: "/admin/envois-groupes", icon: Mail, label: "Envois groupés" },
     ],
   },
