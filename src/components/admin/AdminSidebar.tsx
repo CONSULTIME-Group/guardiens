@@ -187,7 +187,11 @@ export const AdminSidebar = () => {
                     <item.icon className="h-4 w-4 shrink-0" />
                     <span className="truncate flex-1">{item.label}</span>
                     {badgeCount > 0 && (
-                      <span className="ml-auto bg-destructive text-destructive-foreground text-[10px] font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1">
+                      <span
+                        className="ml-auto bg-destructive text-destructive-foreground text-[10px] font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1"
+                        title={item.badgeKey ? `${badgeCount} ${BADGE_TITLES[item.badgeKey] ?? "à traiter"}` : undefined}
+                        aria-label={item.badgeKey ? `${badgeCount} ${BADGE_TITLES[item.badgeKey] ?? "à traiter"}` : undefined}
+                      >
                         {badgeCount}
                       </span>
                     )}
