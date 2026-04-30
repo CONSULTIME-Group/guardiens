@@ -123,5 +123,6 @@ export function countActiveFilters(f: MassEmailFilters): number {
   if (f.no_application_ever) n++;
   if (f.no_sit_published_ever) n++;
   if (f.no_conversation_ever) n++;
+  if (f.exclude_user_ids && f.exclude_user_ids.length > 0) n++;
   return n;
 }
