@@ -107,7 +107,7 @@ export const AdminSidebar = () => {
         supabase.from("contact_messages").select("id", { count: "exact", head: true }).eq("status", "new"),
         supabase.from("skills_library").select("id", { count: "exact", head: true }).eq("status", "pending"),
         supabase.from("review_disputes").select("id", { count: "exact", head: true }).eq("status", "pending"),
-        supabase.from("error_logs").select("id", { count: "exact", head: true }).is("resolved_at", null),
+        supabase.from("error_logs").select("id", { count: "exact", head: true }).is("resolved_at", null).neq("severity", "ignored_third_party"),
         supabase.from("guide_requests" as any).select("id", { count: "exact", head: true }).eq("status", "pending"),
       ]);
       setBadges({
