@@ -31,6 +31,9 @@ export interface MassEmailFilters {
   no_application_ever?: boolean;      // gardien n'ayant jamais postulé
   no_sit_published_ever?: boolean;    // proprio n'ayant jamais publié d'annonce
   no_conversation_ever?: boolean;     // n'a jamais initié de conversation
+
+  // Exclusions explicites — ex: ne pas envoyer au propriétaire d'une annonce mise en avant
+  exclude_user_ids?: string[];
 }
 
 /** Présets rapides "dormants" — un clic pour appliquer un combo de filtres. */
@@ -120,5 +123,6 @@ export function countActiveFilters(f: MassEmailFilters): number {
   if (f.no_application_ever) n++;
   if (f.no_sit_published_ever) n++;
   if (f.no_conversation_ever) n++;
+  if (f.exclude_user_ids && f.exclude_user_ids.length > 0) n++;
   return n;
 }

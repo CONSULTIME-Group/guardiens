@@ -315,6 +315,33 @@ export const MassEmailFiltersPanel = ({ segment, setSegment, filters, setFilters
                 />
               </AccordionContent>
             </AccordionItem>
+
+            <AccordionItem value="exclusions">
+              <AccordionTrigger className="text-sm">Exclusions</AccordionTrigger>
+              <AccordionContent className="space-y-3">
+                <div>
+                  <Label htmlFor="exclude-ids" className="text-xs">
+                    Exclure des user IDs (un par ligne ou séparés par virgule)
+                  </Label>
+                  <textarea
+                    id="exclude-ids"
+                    className="mt-1 w-full min-h-[80px] rounded-md border border-input bg-background px-3 py-2 text-sm font-mono"
+                    placeholder="a39281eb-86ef-4d98-8733-082d243df3f5"
+                    value={(filters.exclude_user_ids || []).join("\n")}
+                    onChange={(e) => {
+                      const ids = e.target.value
+                        .split(/[\s,]+/)
+                        .map((s) => s.trim())
+                        .filter(Boolean);
+                      update({ exclude_user_ids: ids.length ? ids : undefined });
+                    }}
+                  />
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    Pratique pour exclure le propriétaire d'une annonce mise en avant.
+                  </p>
+                </div>
+              </AccordionContent>
+            </AccordionItem>
           </Accordion>
         </CardContent>
       </Card>
