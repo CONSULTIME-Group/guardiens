@@ -16,7 +16,23 @@ interface NavItem {
   label: string;
   end?: boolean;
   badgeKey?: string;
+  badgeTitle?: string;
 }
+
+const BADGE_TITLES: Record<string, string> = {
+  verifications: "vérifications d'identité en attente",
+  experiences: "expériences externes à vérifier",
+  skills: "compétences proposées à valider",
+  reviewsModeration: "avis en attente de modération",
+  reviewDisputes: "contestations d'avis à traiter",
+  reports: "signalements ouverts",
+  contactMessages: "messages de contact non traités",
+  adminMessageFailed: "messages admin en échec",
+  errors: "erreurs non résolues",
+  guideRequests: "demandes de guides en attente",
+  reportsSit: "signalements visant des annonces / gardes",
+  reportsMission: "signalements visant des petites missions",
+};
 
 interface NavGroup {
   label: string;
@@ -43,19 +59,19 @@ const adminNavGroups: NavGroup[] = [
   {
     label: "ACTIVITÉ",
     items: [
-      { to: "/admin/listings", icon: Megaphone, label: "Annonces" },
-      { to: "/admin/sits-management", icon: CalendarCheck, label: "Gardes" },
-      { to: "/admin/small-missions", icon: Handshake, label: "Petites missions" },
+      { to: "/admin/listings", icon: Megaphone, label: "Annonces", badgeKey: "reportsSit" },
+      { to: "/admin/sits-management", icon: CalendarCheck, label: "Gardes", badgeKey: "reportsSit" },
+      { to: "/admin/small-missions", icon: Handshake, label: "Petites missions", badgeKey: "reportsMission" },
     ],
   },
   {
     label: "MODÉRATION",
     items: [
-      { to: "/admin/reviews", icon: Star, label: "Avis" },
+      { to: "/admin/reviews", icon: Star, label: "Avis", badgeKey: "reviewsModeration" },
       { to: "/admin/review-disputes", icon: AlertTriangle, label: "Contestations d'avis", badgeKey: "reviewDisputes" },
       { to: "/admin/reports", icon: Flag, label: "Signalements", badgeKey: "reports" },
       { to: "/admin/contact-messages", icon: MessageSquare, label: "Messages contact", badgeKey: "contactMessages" },
-      { to: "/admin/messages", icon: MessageSquare, label: "Messagerie" },
+      { to: "/admin/messages", icon: MessageSquare, label: "Messagerie", badgeKey: "adminMessageFailed" },
       { to: "/admin/envois-groupes", icon: Mail, label: "Envois groupés" },
     ],
   },
@@ -109,6 +125,10 @@ export const AdminSidebar = () => {
         supabase.from("review_disputes").select("id", { count: "exact", head: true }).eq("status", "pending"),
         supabase.from("error_logs").select("id", { count: "exact", head: true }).is("resolved_at", null).neq("severity", "ignored_third_party"),
         supabase.from("guide_requests" as any).select("id", { count: "exact", head: true }).eq("status", "pending"),
+        supabase.from("reviews").select("id", { count: "exact", head: true }).eq("moderation_status", "pending"),
+        supabase.from("admin_message_logs").select("id", { count: "exact", head: true }).eq("status", "failed"),
+        supabase.from("reports").select("id", { count: "exact", head: true }).eq("status", "new").eq("target_type", "sit"),
+        supabase.from("reports").select("id", { count: "exact", head: true }).eq("status", "new").eq("target_type", "small_mission"),
       ]);
       setBadges({
         verifications: results[0].count || 0,
@@ -119,6 +139,10 @@ export const AdminSidebar = () => {
         reviewDisputes: results[5].count || 0,
         errors: results[6].count || 0,
         guideRequests: results[7].count || 0,
+        reviewsModeration: results[8].count || 0,
+        adminMessageFailed: results[9].count || 0,
+        reportsSit: results[10].count || 0,
+        reportsMission: results[11].count || 0,
       });
     };
     fetchBadges();
@@ -163,7 +187,11 @@ export const AdminSidebar = () => {
                     <item.icon className="h-4 w-4 shrink-0" />
                     <span className="truncate flex-1">{item.label}</span>
                     {badgeCount > 0 && (
-                      <span className="ml-auto bg-destructive text-destructive-foreground text-[10px] font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1">
+                      <span
+                        className="ml-auto bg-destructive text-destructive-foreground text-[10px] font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1"
+                        title={item.badgeKey ? `${badgeCount} ${BADGE_TITLES[item.badgeKey] ?? "à traiter"}` : undefined}
+                        aria-label={item.badgeKey ? `${badgeCount} ${BADGE_TITLES[item.badgeKey] ?? "à traiter"}` : undefined}
+                      >
                         {badgeCount}
                       </span>
                     )}
