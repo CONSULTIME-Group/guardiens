@@ -16,7 +16,23 @@ interface NavItem {
   label: string;
   end?: boolean;
   badgeKey?: string;
+  badgeTitle?: string;
 }
+
+const BADGE_TITLES: Record<string, string> = {
+  verifications: "vérifications d'identité en attente",
+  experiences: "expériences externes à vérifier",
+  skills: "compétences proposées à valider",
+  reviewsModeration: "avis en attente de modération",
+  reviewDisputes: "contestations d'avis à traiter",
+  reports: "signalements ouverts",
+  contactMessages: "messages de contact non traités",
+  adminMessageFailed: "messages admin en échec",
+  errors: "erreurs non résolues",
+  guideRequests: "demandes de guides en attente",
+  reportsSit: "signalements visant des annonces / gardes",
+  reportsMission: "signalements visant des petites missions",
+};
 
 interface NavGroup {
   label: string;
