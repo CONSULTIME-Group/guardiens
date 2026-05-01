@@ -29,7 +29,6 @@ import MyMissionsColumn from "./owner/MyMissionsColumn";
 import ExchangesColumn from "./owner/ExchangesColumn";
 import DashSection from "./owner/DashSection";
 import EmptyCard from "./owner/EmptyCard";
-import StatCard from "./owner/StatCard";
 import StatsStrip from "./owner/StatsStrip";
 import PendingReviewsCard from "./owner/PendingReviewsCard";
 import {
