@@ -810,8 +810,8 @@ const SmallMissionDetail = () => {
         {/* Not logged in */}
         {!user && (
           <div className="text-center py-8">
-            <p className="text-muted-foreground mb-3">Connectez-vous pour proposer votre aide.</p>
-            <Link to="/login"><Button>Se connecter</Button></Link>
+            <p className="text-muted-foreground mb-3">Inscrivez-vous gratuitement pour proposer votre aide.</p>
+            <Link to="/inscription"><Button>S'inscrire gratuitement</Button></Link>
           </div>
         )}
       </div>
