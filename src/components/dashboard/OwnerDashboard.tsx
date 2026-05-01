@@ -360,6 +360,17 @@ const OwnerDashboard = () => {
           specialBadgeIds={PROPRIO_SPECIAL_IDS}
         />
       </div>
+
+      {/* ═══ CTA sticky mobile (action principale toujours accessible) ═══ */}
+      {pendingAppCount > 0 ? (
+        <MobileStickyCTA
+          label="Voir les candidatures"
+          to="/sits"
+          badge={pendingAppCount}
+        />
+      ) : (
+        <MobileStickyCTA label="Publier une annonce" to="/sits/create" />
+      )}
     </div>
   );
 };
