@@ -10,17 +10,21 @@ vi.mock("@/contexts/AuthContext", () => ({
 }));
 
 vi.mock("@/integrations/supabase/client", () => {
-  const chain: any = {
-    select: () => chain,
-    eq: () => chain,
-    gte: () => chain,
-    single: () => Promise.resolve({ data: null, error: null }),
-    maybeSingle: () => Promise.resolve({ data: null, error: null }),
-    then: (cb: any) => cb({ data: [], error: null }),
+  const makeChain = (): any => {
+    const chain: any = {
+      select: () => chain,
+      eq: () => chain,
+      gte: () => chain,
+      single: () => Promise.resolve({ data: null, error: null }),
+      maybeSingle: () => Promise.resolve({ data: null, error: null }),
+      // Thenable: when awaited directly, resolves to empty list
+      then: (resolve: any) => resolve({ data: [], error: null }),
+    };
+    return chain;
   };
   return {
     supabase: {
-      from: () => chain,
+      from: () => makeChain(),
     },
   };
 });
