@@ -32,11 +32,11 @@ interface CompetenceRow {
 type FilterStatus = "pending" | "approved" | "rejected" | "all";
 
 const CATEGORY_LABELS: Record<string, string> = {
-  jardin: "🌿 Jardin",
-  animaux: "🐾 Animaux",
+  jardin: "Jardin",
+  animaux: "Animaux",
   competences: "Compétences",
-  competences_savoirs: "📚 Compétences & Savoirs",
-  coups_de_main: "🤝 Coups de main",
+  competences_savoirs: "Compétences & Savoirs",
+  coups_de_main: "Coups de main",
 };
 
 const AdminSkills = () => {
@@ -78,7 +78,7 @@ const AdminSkills = () => {
         .lt("created_at", new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString()),
     ]);
 
-    const { data: memberData } = await supabase
+    const memberRes = await supabase
       .from("profiles")
       .select("id", { count: "exact", head: true })
       .neq("custom_skills", "[]");
@@ -87,7 +87,7 @@ const AdminSkills = () => {
       pending: pendingRes.count || 0,
       approved: approvedRes.count || 0,
       rejected: rejectedRes.count || 0,
-      members: memberData ? (memberData as any) : 0,
+      members: memberRes.count || 0,
     });
     setStaleCount(staleRes.count || 0);
     setLoading(false);
@@ -243,8 +243,8 @@ const AdminSkills = () => {
   };
 
   return (
-    <div className="p-6 md:p-10 max-w-6xl mx-auto space-y-6">
-      <h1 className="font-heading text-2xl font-bold">Compétences membres</h1>
+    <div className="space-y-6">
+      <h1 className="font-body text-2xl font-bold">Compétences membres</h1>
 
       <Tabs defaultValue="competences">
         <TabsList>
@@ -361,9 +361,9 @@ const AdminSkills = () => {
           </p>
 
           {staleCount > 0 && (
-            <div className="flex items-center gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4">
-              <AlertTriangle className="h-5 w-5 text-amber-600 shrink-0" />
-              <p className="text-sm text-amber-900 font-medium">
+            <div className="flex items-center gap-3 rounded-xl border border-warning/20 bg-warning-soft p-4">
+              <AlertTriangle className="h-5 w-5 text-warning shrink-0" />
+              <p className="text-sm text-warning-foreground font-medium">
                 {staleCount} compétence(s) en attente depuis plus de 48h.
               </p>
             </div>
@@ -409,7 +409,7 @@ const AdminSkills = () => {
                   {skills.map(skill => (
                     <tr
                       key={skill.id}
-                      className={skill.status === "pending" && isStale(skill.created_at) ? "bg-amber-50/60" : ""}
+                      className={skill.status === "pending" && isStale(skill.created_at) ? "bg-warning-soft/40" : ""}
                     >
                       <td className="px-4 py-3">{skill.label}</td>
                       <td className="px-4 py-3 text-muted-foreground">{skill.normalized_label}</td>
