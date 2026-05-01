@@ -882,6 +882,118 @@ exports[`SitterEmergencyCard — modes aperçu > snapshot — vue ELIGIBLE (tous
 </DocumentFragment>
 `;
 
+exports[`SitterEmergencyCard — modes aperçu > snapshot — vue ELIGIBLE (tous critères OK, pas encore activé) 2`] = `
+<DocumentFragment>
+  <div
+    class="flex items-center gap-1 rounded-full border border-dashed border-amber-400/60 bg-background/80 backdrop-blur px-2 py-1 mb-2 text-[11px] w-fit"
+  >
+    <svg
+      class="lucide lucide-eye h-3 w-3 text-amber-600"
+      fill="none"
+      height="24"
+      stroke="currentColor"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      stroke-width="2"
+      viewBox="0 0 24 24"
+      width="24"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"
+      />
+      <circle
+        cx="12"
+        cy="12"
+        r="3"
+      />
+    </svg>
+    <span
+      class="text-muted-foreground mr-1"
+    >
+      Aperçu :
+    </span>
+    <button
+      class="px-1.5 py-0.5 rounded-full transition text-muted-foreground hover:text-foreground"
+      type="button"
+    >
+      locked
+    </button>
+    <button
+      class="px-1.5 py-0.5 rounded-full transition bg-amber-500 text-white font-medium"
+      type="button"
+    >
+      eligible
+    </button>
+    <button
+      class="px-1.5 py-0.5 rounded-full transition text-muted-foreground hover:text-foreground"
+      type="button"
+    >
+      active
+    </button>
+    <button
+      aria-label="Quitter l'aperçu (revenir aux données réelles)"
+      class="ml-1 px-1.5 py-0.5 rounded-full text-muted-foreground hover:text-foreground"
+      title="Revenir aux données réelles"
+      type="button"
+    >
+      ✕
+    </button>
+  </div>
+  <div
+    class="rounded-2xl border-2 border-amber-300 bg-gradient-to-br from-amber-50 to-amber-100/50 p-5 space-y-3"
+  >
+    <div
+      class="flex items-center gap-2.5"
+    >
+      <span
+        class="inline-flex items-center justify-center h-9 w-9 rounded-full bg-gradient-to-br from-amber-400 to-amber-500 text-white shadow"
+      >
+        <svg
+          class="lucide lucide-zap h-4 w-4"
+          fill="currentColor"
+          height="24"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="24"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"
+          />
+        </svg>
+      </span>
+      <div>
+        <p
+          class="font-heading font-semibold text-sm"
+        >
+          Vous êtes éligible
+        </p>
+        <p
+          class="text-xs text-muted-foreground"
+        >
+          Activez le mode Gardien d'urgence
+        </p>
+      </div>
+    </div>
+    <p
+      class="text-xs text-foreground/80"
+    >
+      Tous les critères sont validés. Activez votre profil pour recevoir les demandes urgentes des propriétaires de votre zone.
+    </p>
+    <a
+      class="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 font-body rounded-pill h-9 px-4 w-full bg-amber-500 hover:bg-amber-600 text-white"
+      href="/gardien-urgence"
+    >
+      Activer maintenant
+    </a>
+  </div>
+</DocumentFragment>
+`;
+
 exports[`SitterEmergencyCard — modes aperçu > snapshot — vue LOCKED (critères non remplis) 1`] = `
 <DocumentFragment>
   <div
