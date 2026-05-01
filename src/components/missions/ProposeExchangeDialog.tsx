@@ -85,10 +85,10 @@ const ProposeExchangeDialog = ({
 
       // 3. Build and send message
       const messageContent = [
-        `💡 Proposition d'échange pour « ${mission.title} »`,
-        `\n🎁 Ce que je propose : ${exchangeOffer.trim()}`,
-        needDescription.trim() ? `\n🔍 Ce dont j'ai besoin : ${needDescription.trim()}` : "",
-        exchangeDate ? `\n📅 Date proposée : ${exchangeDate}` : "",
+        `Proposition d'échange pour « ${mission.title} »`,
+        `\nCe que je propose : ${exchangeOffer.trim()}`,
+        needDescription.trim() ? `\nCe dont j'ai besoin : ${needDescription.trim()}` : "",
+        exchangeDate ? `\nDate proposée : ${exchangeDate}` : "",
       ].filter(Boolean).join("");
 
       const { error: msgError } = await supabase
