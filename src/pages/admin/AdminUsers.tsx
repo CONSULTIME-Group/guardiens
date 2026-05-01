@@ -166,7 +166,7 @@ const AdminUsers = () => {
       if (userIds.length > 0) {
         const [emailRes, modRes] = await Promise.all([
           supabase.rpc("get_user_emails_admin", { p_user_ids: userIds }),
-          supabase.from("profile_moderation").select("profile_id, admin_notes, is_manual_super"),
+          supabase.from("profile_moderation").select("profile_id, admin_notes, is_manual_super").in("profile_id", userIds),
         ]);
         emailMap = new Map((emailRes.data || []).map((e: any) => [e.id, e.email]));
         modMap = new Map((modRes.data || []).map((m: any) => [m.profile_id, { admin_notes: m.admin_notes, is_manual_super: m.is_manual_super }]));

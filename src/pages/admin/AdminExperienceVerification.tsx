@@ -28,12 +28,19 @@ const AdminExperienceVerification = () => {
   const [zoomedImg, setZoomedImg] = useState<string | null>(null);
   const [signedUrls, setSignedUrls] = useState<Record<string, string>>({});
 
-  const getSignedUrl = async (path: string): Promise<string> => {
-    if (signedUrls[path]) return signedUrls[path];
-    const { data } = await supabase.storage.from("experience-screenshots").createSignedUrl(path, 3600);
-    const url = data?.signedUrl || "";
-    if (url) setSignedUrls(prev => ({ ...prev, [path]: url }));
-    return url;
+  const hydrateSignedUrls = async (paths: string[]) => {
+    if (paths.length === 0) return;
+    const newUrls: Record<string, string> = {};
+    await Promise.all(
+      paths.map(async (path) => {
+        if (signedUrls[path]) return;
+        const { data } = await supabase.storage.from("experience-screenshots").createSignedUrl(path, 3600);
+        if (data?.signedUrl) newUrls[path] = data.signedUrl;
+      })
+    );
+    if (Object.keys(newUrls).length > 0) {
+      setSignedUrls(prev => ({ ...prev, ...newUrls }));
+    }
   };
 
   const fetchCounts = useCallback(async () => {
@@ -53,11 +60,8 @@ const AdminExperienceVerification = () => {
       .eq("verification_status", activeTab)
       .order("created_at", { ascending: activeTab === "pending" });
     const exps = data || [];
-    for (const exp of exps) {
-      for (const path of (exp.screenshot_urls || [])) {
-        getSignedUrl(path);
-      }
-    }
+    const allPaths = exps.flatMap((exp: any) => exp.screenshot_urls || []);
+    await hydrateSignedUrls(allPaths);
     setExperiences(exps);
     setLoading(false);
   }, [activeTab]);
