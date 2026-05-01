@@ -342,14 +342,8 @@ const SitterDashboard = () => {
         {ChecklistBlock}
         {CtaBlock}
         {buildStatusBlock(false)}
-        {/* Emergency : un seul bloc — soit le dashboard si actif, soit l'éligibilité */}
-        {hasEmergencyProfile ? (
-          <div className="px-4 sm:px-5 md:px-8 mb-6 md:mb-8">
-            <EmergencyDashSection />
-          </div>
-        ) : (
-          buildEmergencyBlock(false)
-        )}
+        {/* Carte unifiée Gardien d'urgence (3 états : locked / eligible / active) */}
+        {buildEmergencyBlock(false)}
         {buildBadgesBlock(false)}
         <section aria-labelledby="nearby-heading">
           <h2 id="nearby-heading" className="sr-only">Près de chez vous</h2>
