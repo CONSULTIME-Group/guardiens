@@ -59,9 +59,22 @@ const AuthConfirm = () => {
                 const flagKey = `email_confirmed_tracked_${userId}`;
                 if (!localStorage.getItem(flagKey)) {
                   localStorage.setItem(flagKey, "1");
+
+                  // Récupère le rôle depuis profiles pour que les filtres
+                  // owner/sitter du dashboard admin fonctionnent.
+                  let role: string | null = null;
+                  try {
+                    const { data: prof } = await supabase
+                      .from("profiles")
+                      .select("role")
+                      .eq("user_id", userId)
+                      .maybeSingle();
+                    role = (prof?.role as string | undefined) ?? null;
+                  } catch { /* silencieux */ }
+
                   trackEventWithUserId(userId, "signup_email_confirmed", {
                     source: "/auth/confirm",
-                    metadata: { user_id: userId, via: "email_link" },
+                    metadata: { user_id: userId, role, via: "email_link" },
                   });
                   // Émet aussi `signup_completed` ici : c'est le vrai signal de
                   // fin d'inscription quand l'email n'est pas auto-confirmé.
@@ -72,7 +85,7 @@ const AuthConfirm = () => {
                     localStorage.setItem(completedKey, "1");
                     trackEventWithUserId(userId, "signup_completed", {
                       source: "/auth/confirm",
-                      metadata: { user_id: userId, auto_confirmed: false, via: "email_link" },
+                      metadata: { user_id: userId, role, auto_confirmed: false, via: "email_link" },
                     });
                   }
                 }
