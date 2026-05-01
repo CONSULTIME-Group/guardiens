@@ -1,39 +1,40 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Settings, Globe, Users, Bell, Shield, Database, ExternalLink, Clock, CheckCircle2, AlertCircle } from "lucide-react";
+import { Settings, Globe, Database, ExternalLink, CheckCircle2, AlertCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
+
+const FOUNDER_DATE = "2026-05-13";
 
 const AdminSettings = () => {
-  const [founderDate, setFounderDate] = useState("2026-05-13");
-  const [stats, setStats] = useState({ totalUsers: 0, totalSits: 0, totalReviews: 0, storageUsed: "—" });
+  const [stats, setStats] = useState({ totalUsers: 0, totalSits: 0, totalReviews: 0 });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchStats = async () => {
-      const [
-        { count: totalUsers },
-        { count: totalSits },
-        { count: totalReviews },
-      ] = await Promise.all([
-        supabase.from("profiles").select("id", { count: "exact", head: true }),
-        supabase.from("sits").select("id", { count: "exact", head: true }),
-        supabase.from("reviews").select("id", { count: "exact", head: true }),
-      ]);
-      setStats({
-        totalUsers: totalUsers || 0,
-        totalSits: totalSits || 0,
-        totalReviews: totalReviews || 0,
-        storageUsed: "—",
-      });
-      setLoading(false);
+      try {
+        const [
+          { count: totalUsers },
+          { count: totalSits },
+          { count: totalReviews },
+        ] = await Promise.all([
+          supabase.from("profiles").select("id", { count: "exact", head: true }),
+          supabase.from("sits").select("id", { count: "exact", head: true }),
+          supabase.from("reviews").select("id", { count: "exact", head: true }),
+        ]);
+        setStats({
+          totalUsers: totalUsers || 0,
+          totalSits: totalSits || 0,
+          totalReviews: totalReviews || 0,
+        });
+      } catch (err) {
+        console.warn("AdminSettings: stats unavailable", err);
+      } finally {
+        setLoading(false);
+      }
     };
-    fetchStats();
+    void fetchStats();
   }, []);
 
   return (
@@ -87,7 +88,7 @@ const AdminSettings = () => {
           {loading ? (
             <p className="text-sm text-muted-foreground">Chargement...</p>
           ) : (
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="text-center p-3 rounded-lg bg-muted/50">
                 <div className="text-xl font-bold">{stats.totalUsers}</div>
                 <div className="text-xs text-muted-foreground">Utilisateurs</div>
@@ -99,10 +100,6 @@ const AdminSettings = () => {
               <div className="text-center p-3 rounded-lg bg-muted/50">
                 <div className="text-xl font-bold">{stats.totalReviews}</div>
                 <div className="text-xs text-muted-foreground">Avis</div>
-              </div>
-              <div className="text-center p-3 rounded-lg bg-muted/50">
-                <div className="text-xl font-bold">{stats.storageUsed}</div>
-                <div className="text-xs text-muted-foreground">Stockage</div>
               </div>
             </div>
           )}
@@ -123,7 +120,7 @@ const AdminSettings = () => {
               <div>
                 <p className="text-sm font-medium">Statut Fondateur</p>
                 <p className="text-xs text-muted-foreground">
-                  Les membres inscrits avant le {new Date(founderDate).toLocaleDateString("fr-FR")} obtiennent le statut Fondateur (gratuit à vie).
+                  Les membres inscrits avant le {new Date(FOUNDER_DATE).toLocaleDateString("fr-FR")} obtiennent le statut Fondateur (gratuit à vie).
                 </p>
               </div>
               <Badge variant="default" className="text-xs">Actif</Badge>
@@ -131,20 +128,30 @@ const AdminSettings = () => {
             <Separator />
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium">Gratuité propriétaires 2026</p>
+                <p className="text-sm font-medium">Espace propriétaire gratuit</p>
                 <p className="text-xs text-muted-foreground">
-                  Accès gratuit pour tous les propriétaires pendant l'année 2026.
+                  L'espace propriétaire est gratuit, sans limite de durée.
                 </p>
               </div>
               <Badge variant="default" className="text-xs">Actif</Badge>
+            </div>
+            <Separator />
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium">Entraide entre membres</p>
+                <p className="text-xs text-muted-foreground">
+                  Les petites missions d'entraide sont gratuites pour tous, sans limite.
+                </p>
+              </div>
+              <Badge variant="default" className="text-xs">Gratuit</Badge>
             </div>
             <Separator />
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium">Abonnement gardien</p>
-                <p className="text-xs text-muted-foreground">49 €/an pour les gardiens (hors fondateurs).</p>
+                <p className="text-xs text-muted-foreground">9 €/mois pour activer l'espace gardien (hors fondateurs).</p>
               </div>
-              <Badge variant="secondary" className="text-xs">49 €/an</Badge>
+              <Badge variant="secondary" className="text-xs">9 €/mois</Badge>
             </div>
             <Separator />
             <div className="flex items-center justify-between">
