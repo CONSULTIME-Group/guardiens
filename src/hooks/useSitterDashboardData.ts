@@ -40,7 +40,9 @@ export interface SitterDashboardData {
   hasEmergencyProfile: boolean;
   hasAcceptedRecent: boolean;
   nextGuard: any | null;
+  nextGuardError: string | null;
   nearbyListings: any[];
+  nearbyError: string | null;
   articles: any[];
   badges: any[];
   onboardingCompleted: boolean;
@@ -49,6 +51,7 @@ export interface SitterDashboardData {
   reputation: ReputationData | null;
   groupedBadges: GroupedBadge[];
   nearbyMissions: any[];
+  nearbyMissionsError: string | null;
 }
 
 const INITIAL_STATE: SitterDashboardData = {
