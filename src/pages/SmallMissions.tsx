@@ -1005,7 +1005,7 @@ const SmallMissions = () => {
       <Dialog open={offerDialogOpen} onOpenChange={setOfferDialogOpen}>
         <DialogContent className="sm:max-w-lg max-h-[85vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="font-heading text-lg">Proposer mon aide</DialogTitle>
+            <DialogTitle className="font-heading text-lg">J'ai du temps à offrir</DialogTitle>
             <DialogDescription className="text-sm text-muted-foreground">
               Indiquez dans quels domaines vous pouvez aider, ajoutez vos compétences spécifiques et décrivez ce que vous proposez.
             </DialogDescription>
