@@ -770,17 +770,29 @@ const SmallMissions = () => {
             ) : (
               <div className="rounded-2xl border border-dashed border-primary/30 bg-primary/5 p-8 text-center space-y-3">
                 <p className="font-heading text-lg font-semibold text-foreground">
-                  Personne n'a encore osé près de chez vous.
+                  {mode === "offer"
+                    ? "Aucune demande pour le moment près de chez vous."
+                    : "Personne n'a encore osé près de chez vous."}
                 </p>
                 <p className="text-sm text-muted-foreground max-w-md mx-auto">
-                  Soyez la première personne à publier. Une demande d'aujourd'hui, c'est des gens du coin qui la voient demain — et souvent une rencontre qui change la semaine.
+                  {mode === "offer"
+                    ? "Rendez-vous visible : indiquez vos disponibilités juste en dessous. Quand une demande arrivera, vous serez la première personne à qui l'on pense."
+                    : "Soyez la première personne à publier. Une demande d'aujourd'hui, c'est des gens du coin qui la voient demain — et souvent une rencontre qui change la semaine."}
                 </p>
-                <Link to="/petites-missions/creer" className="inline-block">
-                  <Button variant="hero" size="lg" className="mt-2">
-                    J'ose, je publie ma demande
+                {mode === "need" && (
+                  <Link to="/petites-missions/creer" className="inline-block">
+                    <Button variant="hero" size="lg" className="mt-2">
+                      J'ose, je publie ma demande
+                      <ArrowRight className="ml-2 h-4 w-4" />
+                    </Button>
+                  </Link>
+                )}
+                {mode === "offer" && (
+                  <Button variant="hero" size="lg" className="mt-2" onClick={openOfferDialog}>
+                    J'ai du temps à offrir
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
-                </Link>
+                )}
               </div>
             )}
 
