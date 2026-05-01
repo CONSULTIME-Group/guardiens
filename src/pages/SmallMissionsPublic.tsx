@@ -115,30 +115,30 @@ const SmallMissionsPublic = () => {
 
             <Reveal delay={0.1}>
               <h1 className="font-heading text-5xl md:text-6xl font-bold text-foreground leading-tight max-w-2xl mx-auto">
-                Entraide locale entre gens du coin —<br /> échangez sans argent.
+                Osez demander.<br />Quelqu'un, près de chez vous, n'attend que ça.
               </h1>
-              <p className="font-heading text-xl md:text-2xl italic text-foreground/70 mt-3 max-w-lg mx-auto">
-                Ce que vous avez contre ce que vous n'avez pas encore vécu.
+              <p className="font-heading text-xl md:text-2xl italic text-foreground/70 mt-4 max-w-lg mx-auto">
+                Demander un coup de main, ce n'est pas déranger. C'est offrir une occasion de rendre service.
               </p>
             </Reveal>
 
             <Reveal delay={0.2}>
               <p className="font-body text-lg text-foreground/70 leading-relaxed text-center max-w-lg mx-auto mt-6">
-                Un coup de main contre un repas. Un jardin contre des légumes. Une compétence contre une soirée. Ici personne ne facture ce qui n'a pas de prix.
+                Une tonte de pelouse. Un colis à réceptionner. Un meuble à monter. Un chien à sortir une heure. Ce que vous n'osez pas demander à votre famille, vous pouvez l'oser ici — sans gêne, sans facture, sans dette.
               </p>
             </Reveal>
 
             <Reveal delay={0.3}>
               <div className="flex flex-col sm:flex-row gap-4 justify-center mt-10">
                 <Button onClick={goToCreate} className="bg-primary text-primary-foreground rounded-full px-9 py-4 h-auto text-sm font-semibold tracking-wide hover:bg-primary/90 transition-all duration-200">
-                  Je propose une mission
+                  J'ose demander
                 </Button>
                 <Button onClick={goToHelp} variant="outline" className="border-2 border-primary text-primary rounded-full px-9 py-4 h-auto text-sm font-semibold tracking-wide hover:bg-primary hover:text-primary-foreground transition-all duration-200">
-                  Je veux aider
+                  J'ai du temps à offrir
                 </Button>
               </div>
               <p className="text-xs text-foreground/50 mt-4">
-                À 0 € pour tous — pour toujours.
+                À 0 € pour tous — pour toujours. Aucun engagement, aucun jugement.
               </p>
             </Reveal>
 
