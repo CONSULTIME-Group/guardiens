@@ -2,12 +2,25 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Link } from "react-router-dom";
-import { Zap, Star, MapPin } from "lucide-react";
-import EmergencyBadge from "@/components/profile/EmergencyBadge";
+import { Star } from "lucide-react";
 
+interface SitterRow {
+  id: string;
+  first_name: string | null;
+  avatar_url: string | null;
+  city: string | null;
+  avgRating: string | null;
+}
+
+/**
+ * Carte sidebar compacte « Gardiens d'urgence à proximité ».
+ * Design optimisé pour colonne droite : header coloré urgence, lignes denses,
+ * pas d'icônes décoratives dans le contenu (uniquement Star fonctionnelle pour la note).
+ */
 const NearbyEmergencySitters = () => {
   const { user } = useAuth();
-  const [sitters, setSitters] = useState<any[]>([]);
+  const [sitters, setSitters] = useState<SitterRow[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!user) return;
@@ -18,10 +31,16 @@ const NearbyEmergencySitters = () => {
         .eq("is_active", true)
         .limit(10);
 
-      if (!emergencyProfiles || emergencyProfiles.length === 0) return;
+      if (!emergencyProfiles || emergencyProfiles.length === 0) {
+        setLoading(false);
+        return;
+      }
 
       const userIds = emergencyProfiles.map(e => e.user_id).filter(id => id !== user.id);
-      if (userIds.length === 0) return;
+      if (userIds.length === 0) {
+        setLoading(false);
+        return;
+      }
 
       const [profilesRes, reviewsRes] = await Promise.all([
         supabase.from("profiles").select("id, first_name, avatar_url, city").in("id", userIds),
@@ -34,50 +53,87 @@ const NearbyEmergencySitters = () => {
         ratingMap.get(r.reviewee_id)!.push(r.overall_rating);
       });
 
-      const enriched = (profilesRes.data || []).slice(0, 3).map((p: any) => {
+      const enriched: SitterRow[] = (profilesRes.data || []).slice(0, 3).map((p: any) => {
         const ratings = ratingMap.get(p.id) || [];
         const avg = ratings.length > 0 ? (ratings.reduce((s, v) => s + v, 0) / ratings.length).toFixed(1) : null;
-        return { ...p, avgRating: avg };
+        return { id: p.id, first_name: p.first_name, avatar_url: p.avatar_url, city: p.city, avgRating: avg };
       });
 
       setSitters(enriched);
+      setLoading(false);
     };
     load();
   }, [user]);
 
-  if (sitters.length === 0) return null;
+  if (loading || sitters.length === 0) return null;
 
   return (
-    <div className="animate-fade-in">
-      <div className="flex items-center justify-between mb-3">
-        <h2 className="font-body text-base font-semibold">Gardiens d'urgence à proximité</h2>
-        <Link to="/search?emergency=true" className="text-xs text-primary hover:underline font-medium">Voir tous →</Link>
-      </div>
-      <p className="text-xs text-muted-foreground mb-3">Disponibles rapidement en cas d'imprévu</p>
-      <div className="space-y-2">
-        {sitters.map((s: any) => (
-          <Link key={s.id} to={`/gardiens/${s.id}`} className="flex items-center gap-3 p-3 rounded-xl bg-card border border-border hover:bg-accent/50 transition-colors">
-            {s.avatar_url ? (
-              <img src={s.avatar_url} alt={`Photo de ${s.first_name || 'gardien'}`} className="w-12 h-12 rounded-full object-cover shrink-0" />
-            ) : (
-              <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center text-sm font-bold shrink-0">
-                {s.first_name?.charAt(0) || "?"}
+    <section
+      className="rounded-2xl border border-border bg-card overflow-hidden animate-fade-in"
+      aria-label="Gardiens d'urgence à proximité"
+    >
+      {/* Header compact avec accent urgence */}
+      <header className="px-4 py-3 bg-gradient-to-r from-destructive/8 via-destructive/5 to-transparent border-b border-border">
+        <div className="flex items-center justify-between gap-2">
+          <div className="min-w-0">
+            <p className="text-[10px] uppercase tracking-[2px] text-destructive font-sans font-semibold">
+              Urgence
+            </p>
+            <h2 className="font-heading text-sm font-bold text-foreground leading-tight mt-0.5">
+              Gardiens disponibles rapidement
+            </h2>
+          </div>
+        </div>
+      </header>
+
+      {/* Liste dense */}
+      <ul className="divide-y divide-border">
+        {sitters.map((s) => (
+          <li key={s.id}>
+            <Link
+              to={`/gardiens/${s.id}`}
+              className="flex items-center gap-3 px-4 py-2.5 hover:bg-accent/40 transition-colors focus-visible:outline-none focus-visible:bg-accent/40"
+            >
+              {s.avatar_url ? (
+                <img
+                  src={s.avatar_url}
+                  alt=""
+                  className="w-10 h-10 rounded-full object-cover shrink-0 ring-1 ring-border"
+                  loading="lazy"
+                />
+              ) : (
+                <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-sm font-bold shrink-0">
+                  {s.first_name?.charAt(0) || "?"}
+                </div>
+              )}
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold text-foreground truncate">
+                  {s.first_name || "Gardien"}
+                </p>
+                <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5">
+                  {s.city && <span className="truncate">{s.city}</span>}
+                  {s.city && s.avgRating && <span aria-hidden="true">·</span>}
+                  {s.avgRating && (
+                    <span className="flex items-center gap-0.5 shrink-0">
+                      <Star className="h-3 w-3 text-amber-500 fill-amber-500" aria-hidden="true" />
+                      <span className="tabular-nums">{s.avgRating}</span>
+                    </span>
+                  )}
+                </div>
               </div>
-            )}
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-1.5">
-                <p className="text-sm font-medium">{s.first_name}</p>
-                <EmergencyBadge size="sm" />
-              </div>
-              <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5">
-                {s.city && <span className="flex items-center gap-0.5"><MapPin className="h-3 w-3" />{s.city}</span>}
-                {s.avgRating && <span className="flex items-center gap-0.5"><Star className="h-3 w-3 text-yellow-500 fill-yellow-500" />{s.avgRating}</span>}
-              </div>
-            </div>
-          </Link>
+            </Link>
+          </li>
         ))}
-      </div>
-    </div>
+      </ul>
+
+      {/* Footer CTA */}
+      <Link
+        to="/search?emergency=true"
+        className="block px-4 py-2.5 text-xs text-center text-primary font-semibold hover:bg-accent/30 border-t border-border transition-colors"
+      >
+        Voir tous les gardiens d'urgence →
+      </Link>
+    </section>
   );
 };
 
