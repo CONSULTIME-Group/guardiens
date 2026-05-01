@@ -1,16 +1,41 @@
 import { Link, useNavigate } from "react-router-dom";
 import { format, differenceInHours } from "date-fns";
 import { fr } from "date-fns/locale";
+import { AlertCircle, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface SitterBottomColumnsProps {
   nearbyListings: any[];
   nearbyMissions: any[];
   postalCode: string | null;
+  nearbyError?: string | null;
+  nearbyMissionsError?: string | null;
 }
 
-const SitterBottomColumns = ({ nearbyListings, nearbyMissions, postalCode }: SitterBottomColumnsProps) => {
+const SitterBottomColumns = ({
+  nearbyListings,
+  nearbyMissions,
+  postalCode,
+  nearbyError = null,
+  nearbyMissionsError = null,
+}: SitterBottomColumnsProps) => {
   const navigate = useNavigate();
+
+  const ErrorState = ({ message }: { message: string }) => (
+    <div role="alert" className="rounded-xl border border-destructive/30 bg-destructive/5 p-4 text-center">
+      <p className="text-xs text-destructive font-medium inline-flex items-center gap-1.5 justify-center mb-1">
+        <AlertCircle className="h-3.5 w-3.5" aria-hidden="true" />
+        {message}
+      </p>
+      <button
+        type="button"
+        onClick={() => window.location.reload()}
+        className="mt-1 inline-flex items-center gap-1 text-xs text-destructive hover:underline"
+      >
+        <RefreshCw className="h-3 w-3" aria-hidden="true" /> Réessayer
+      </button>
+    </div>
+  );
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 px-4 sm:px-5 md:px-8 mb-6 md:mb-8">
