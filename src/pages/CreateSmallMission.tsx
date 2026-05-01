@@ -274,7 +274,9 @@ const CreateSmallMission = () => {
               </div>
 
               <Button type="submit" className="w-full" size="lg" disabled={submitting || !!exchangeError}>
-                {submitting ? "Publication..." : "Publier la mission"}
+                {submitting
+                  ? "Publication..."
+                  : missionType === "offre" ? "J'ai du temps à offrir" : "J'ose, je publie"}
               </Button>
             </form>
           </CardContent>
