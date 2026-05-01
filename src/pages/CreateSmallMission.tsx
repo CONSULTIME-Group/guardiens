@@ -118,7 +118,10 @@ const CreateSmallMission = () => {
 
   return (
     <>
-      <PageMeta title="Poster une petite mission | Guardiens" description="Proposez une mission d'entraide à la communauté Guardiens." />
+      <PageMeta
+        title={missionType === "offre" ? "J'ai du temps à offrir | Guardiens" : "J'ose demander un coup de main | Guardiens"}
+        description="Publiez une demande ou une offre d'entraide. Coups de main entre gens du coin, sans argent qui circule."
+      />
 
       <div className="max-w-2xl mx-auto px-4 py-8 space-y-6 pb-40">
         <button
@@ -162,15 +165,15 @@ const CreateSmallMission = () => {
             <form onSubmit={handleSubmit} className="space-y-5 pb-32">
               {/* Type toggle */}
               <div className="space-y-2">
-                <Label>Type de mission *</Label>
+                <Label>Vous publiez… *</Label>
                 <div className="flex gap-2">
                   <Button type="button" variant={missionType === "besoin" ? "default" : "outline"} size="sm" className="flex-1"
                     onClick={() => setMissionType("besoin")}>
-                    J'ose demander
+                    Une demande
                   </Button>
                   <Button type="button" variant={missionType === "offre" ? "default" : "outline"} size="sm" className="flex-1"
                     onClick={() => setMissionType("offre")}>
-                    J'ai du temps à offrir
+                    Une offre d'aide
                   </Button>
                 </div>
               </div>

@@ -258,7 +258,7 @@ const SmallMissionDetail = () => {
 
         setHasResponded(true);
         setMessage("");
-        toast({ title: "Proposition envoyée !", description: "Le publieur va être notifié." });
+        toast({ title: "Proposition envoyée !", description: "La personne qui demande va être prévenue." });
         load();
       }
     } catch (err: any) {
@@ -280,7 +280,7 @@ const SmallMissionDetail = () => {
         .from("small_missions").select("status").eq("id", id!).single();
       if (!freshMission) throw new Error("Mission introuvable");
       if (freshMission.status === "cancelled" || freshMission.status === "completed") {
-        toast({ variant: "destructive", title: "Mission clôturée", description: "Cette mission n'accepte plus de candidatures." });
+        toast({ variant: "destructive", title: "Mission clôturée", description: "Cette mission n'accepte plus de propositions." });
         return;
       }
 
@@ -360,7 +360,7 @@ const SmallMissionDetail = () => {
       await supabase.from("notifications").insert({
         user_id: resp.responder_id, type: "mission_declined",
         title: "Proposition non retenue",
-        body: `Une autre organisation a été choisie pour "${mission.title}". Merci pour votre proposition.`,
+        body: `Quelqu'un d'autre a été choisi pour "${mission.title}". Merci pour votre proposition.`,
       });
     } catch (err: any) {
       logger.error("[handleDeclineResponse]", { err: String(err) });
@@ -451,7 +451,7 @@ const SmallMissionDetail = () => {
           <div className="absolute inset-0 bg-gradient-to-r from-background/90 via-background/75 to-background/60" />
         </div>
         <div className="relative max-w-3xl mx-auto px-6 py-10">
-          <PageMeta title={`${mission.title} — Entraide Guardiens`} description={mission.description?.slice(0, 155)} />
+          <PageMeta title={`${mission.title} — Coup de main près de chez vous | Guardiens`} description={mission.description?.slice(0, 155)} />
           <Link to="/petites-missions" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-4">
             <ArrowLeft className="h-4 w-4" /> Retour aux missions
           </Link>
@@ -584,7 +584,7 @@ const SmallMissionDetail = () => {
                   Propositions reçues ({responses.length})
                 </h2>
                 {responses.length === 0 ? (
-                  <p className="text-sm text-muted-foreground italic py-6 text-center">Aucune proposition pour le moment.</p>
+                  <p className="text-sm text-muted-foreground italic py-6 text-center">Pas encore de proposition. Patience — souvent, les premières arrivent dans la journée.</p>
                 ) : (
                   <div className="space-y-3">
                     {responses.map((r: any) => (
@@ -763,7 +763,7 @@ const SmallMissionDetail = () => {
                   <XCircle className="h-5 w-5 text-muted-foreground" />
                   <p className="font-medium text-muted-foreground">Non retenu(e)</p>
                 </div>
-                <p className="text-sm text-muted-foreground">Une autre organisation a été choisie. Merci pour votre proposition.</p>
+                <p className="text-sm text-muted-foreground">Quelqu'un d'autre a été choisi cette fois. Merci d'avoir osé proposer.</p>
               </div>
             )}
 
@@ -791,7 +791,7 @@ const SmallMissionDetail = () => {
           <div className="fixed bottom-0 left-0 right-0 md:left-64 bg-card border-t border-border p-4 z-40 md:pb-4 pb-20">
             <div className="max-w-3xl mx-auto space-y-2">
               <Textarea
-                placeholder="Présentez-vous et expliquez pourquoi vous souhaitez participer..."
+                placeholder="Dites bonjour, présentez-vous en deux mots et expliquez ce que vous proposez. Pas besoin d'en faire des tonnes."
                 value={message}
                 onChange={e => setMessage(e.target.value)}
                 className="min-h-[60px]"
@@ -801,7 +801,7 @@ const SmallMissionDetail = () => {
                 onClick={handleRespond}
                 disabled={submitting || !message.trim()}
               >
-                {submitting ? "Envoi..." : "Proposer mon aide"}
+                {submitting ? "Envoi..." : "J'ose proposer mon aide"}
               </Button>
             </div>
           </div>
@@ -810,8 +810,8 @@ const SmallMissionDetail = () => {
         {/* Not logged in */}
         {!user && (
           <div className="text-center py-8">
-            <p className="text-muted-foreground mb-3">Connectez-vous pour proposer votre aide.</p>
-            <Link to="/login"><Button>Se connecter</Button></Link>
+            <p className="text-muted-foreground mb-3">Inscrivez-vous gratuitement pour proposer votre aide.</p>
+            <Link to="/inscription"><Button>S'inscrire gratuitement</Button></Link>
           </div>
         )}
       </div>
