@@ -451,7 +451,7 @@ const SmallMissionDetail = () => {
           <div className="absolute inset-0 bg-gradient-to-r from-background/90 via-background/75 to-background/60" />
         </div>
         <div className="relative max-w-3xl mx-auto px-6 py-10">
-          <PageMeta title={`${mission.title} — Entraide Guardiens`} description={mission.description?.slice(0, 155)} />
+          <PageMeta title={`${mission.title} — Coup de main près de chez vous | Guardiens`} description={mission.description?.slice(0, 155)} />
           <Link to="/petites-missions" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-4">
             <ArrowLeft className="h-4 w-4" /> Retour aux missions
           </Link>
