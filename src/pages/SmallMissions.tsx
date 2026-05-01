@@ -799,8 +799,8 @@ const SmallMissions = () => {
             {/* ═══ Section 2 — Disponibles pour aider ═══ */}
             {(helperCount > 0 || isAuthenticated) && (
               <div className="mt-10">
-                {/* Toggle dispo */}
-                {isAuthenticated && (
+                {/* Toggle dispo — uniquement en mode "offer" pour rester cohérent avec l'intention */}
+                {isAuthenticated && mode === "offer" && (
                   <div className="bg-primary/5 border border-primary/20 rounded-xl p-3 mb-4 flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <Switch
@@ -816,7 +816,7 @@ const SmallMissions = () => {
                       <p className="text-sm text-foreground">
                         {(currentUserProfile as any)?.available_for_help
                           ? "Vous êtes visible — disponible pour aider"
-                          : "Indiquez-vous comme disponible pour aider"}
+                          : "Rendez-vous visible auprès des gens du coin"}
                       </p>
                     </div>
                     {(currentUserProfile as any)?.available_for_help && (
@@ -827,7 +827,7 @@ const SmallMissions = () => {
                   </div>
                 )}
                 <h2 className="text-base font-semibold text-foreground mb-4 flex items-center gap-2">
-                  Disponibles pour aider
+                  {mode === "need" ? "Des gens du coin prêts à aider" : "Autres personnes disponibles"}
                   <span className="text-xs font-normal bg-muted text-muted-foreground px-2 py-0.5 rounded-full">
                     {helperCount} personne{helperCount > 1 ? "s" : ""} du coin
                   </span>
