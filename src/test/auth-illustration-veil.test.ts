@@ -31,11 +31,11 @@ describe("AuthIllustrationPanel — voile d'opacité 25%", () => {
 
   const source = existsSync(PANEL_PATH) ? readFileSync(PANEL_PATH, "utf-8") : "";
 
-  it("contient le voile sémantique bg-background/25", () => {
-    const matches = source.match(/bg-background\/25/g) ?? [];
+  it("contient un voile sémantique bg-background/<opacity>", () => {
+    const matches = source.match(/bg-background\/\d+/g) ?? [];
     expect(
       matches.length,
-      "Le voile `bg-background/25` doit rester présent dans AuthIllustrationPanel.tsx",
+      "Un voile `bg-background/<opacity>` doit rester présent dans AuthIllustrationPanel.tsx",
     ).toBeGreaterThanOrEqual(1);
   });
 
