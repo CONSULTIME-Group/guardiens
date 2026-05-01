@@ -360,7 +360,7 @@ const SmallMissionDetail = () => {
       await supabase.from("notifications").insert({
         user_id: resp.responder_id, type: "mission_declined",
         title: "Proposition non retenue",
-        body: `Une autre organisation a été choisie pour "${mission.title}". Merci pour votre proposition.`,
+        body: `Quelqu'un d'autre a été choisi pour "${mission.title}". Merci pour votre proposition.`,
       });
     } catch (err: any) {
       logger.error("[handleDeclineResponse]", { err: String(err) });
