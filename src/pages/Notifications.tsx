@@ -21,19 +21,44 @@ interface Notification {
   actor_avatar_url: string | null;
 }
 
-const typeIcons: Record<string, string> = {
-  sitter_available: "🟢",
-  new_application: "📩",
-  sit_confirmed: "✅",
-  sit_cancelled: "❌",
-  review_published: "⭐",
-  new_message: "💬",
-  application_accepted: "🎉",
-  application_rejected: "😔",
-  application_cancelled: "↩️",
-  reminder_7days: "📅",
-  reminder_48h: "⏰",
-  info: "ℹ️",
+// Catégorie sémantique → couleur de pastille (token-based, pas d'emoji)
+const typeTone: Record<string, "success" | "info" | "warning" | "destructive" | "muted"> = {
+  sitter_available: "success",
+  new_application: "info",
+  sit_confirmed: "success",
+  sit_started: "success",
+  sit_completed: "success",
+  sit_cancelled: "destructive",
+  review_published: "info",
+  new_message: "info",
+  application_accepted: "success",
+  application_rejected: "warning",
+  application_cancelled: "muted",
+  reminder_7days: "info",
+  reminder_48h: "warning",
+  identity_verified: "success",
+  identity_rejected: "warning",
+  experience_verified: "success",
+  experience_rejected: "warning",
+  emergency_alert: "destructive",
+  mission_proposal: "info",
+  mission_accepted: "success",
+  mission_declined: "muted",
+  mission_completed: "success",
+  mission_cancelled: "muted",
+  subscription_offered: "success",
+  listing_hidden: "warning",
+  listing_deleted: "destructive",
+  admin_contact: "info",
+  info: "muted",
+};
+
+const toneClasses: Record<string, string> = {
+  success: "bg-success",
+  info: "bg-info",
+  warning: "bg-warning",
+  destructive: "bg-destructive",
+  muted: "bg-muted-foreground/40",
 };
 
 const Notifications = () => {
