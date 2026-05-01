@@ -150,13 +150,17 @@ const Notifications = () => {
       </div>
 
       {notifications.length === 0 ? (
-        <div className="text-center py-20 text-muted-foreground">
-          <Bell className="h-12 w-12 mx-auto mb-4 opacity-30" />
-          <p>Aucune notification pour le moment.</p>
+        <div className="text-center py-20">
+          <Bell className="h-12 w-12 mx-auto mb-4 text-muted-foreground/40" />
+          <p className="text-muted-foreground">Tout est calme pour le moment.</p>
+          <p className="text-sm text-muted-foreground/80 mt-1">
+            Vos prochaines actualités apparaîtront ici : nouvelles propositions, candidatures, messages, gardes confirmées…
+          </p>
         </div>
       ) : (
         <div className="space-y-2">
           {notifications.map((n) => {
+            const tone = typeTone[n.type] || "muted";
             const content = (
               <div
                 className={`rounded-lg border border-border p-4 transition-colors hover:shadow-sm ${
@@ -167,7 +171,10 @@ const Notifications = () => {
                   {n.actor_avatar_url ? (
                     <img src={n.actor_avatar_url} alt="" className="w-9 h-9 rounded-full object-cover shrink-0 mt-0.5" />
                   ) : (
-                    <span className="text-lg mt-0.5 shrink-0">{typeIcons[n.type] || "🔔"}</span>
+                    <span
+                      aria-hidden
+                      className={`mt-2 shrink-0 h-2.5 w-2.5 rounded-full ${toneClasses[tone]}`}
+                    />
                   )}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between gap-2">
