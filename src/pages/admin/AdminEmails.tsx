@@ -340,7 +340,7 @@ const LogsTab = () => {
           <div className="text-xs text-muted-foreground">Total</div>
         </CardContent></Card>
         <Card><CardContent className="pt-4 pb-3 text-center">
-          <div className="text-2xl font-bold text-green-600">{stats.sent}</div>
+          <div className="text-2xl font-bold text-success">{stats.sent}</div>
           <div className="text-xs text-muted-foreground">Envoyés</div>
         </CardContent></Card>
         <Card><CardContent className="pt-4 pb-3 text-center">
@@ -357,7 +357,7 @@ const LogsTab = () => {
           </CardContent>
         </Card>
         <Card><CardContent className="pt-4 pb-3 text-center">
-          <div className="text-2xl font-bold text-yellow-600">{stats.suppressed}</div>
+          <div className="text-2xl font-bold text-warning">{stats.suppressed}</div>
           <div className="text-xs text-muted-foreground">Supprimés</div>
         </CardContent></Card>
       </div>

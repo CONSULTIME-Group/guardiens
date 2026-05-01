@@ -214,9 +214,9 @@ const AdminVerifications = () => {
 
   const statusBadge = (status: string) => {
     switch (status) {
-      case "verified": return <Badge className="bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300 border-0">Validée</Badge>;
-      case "rejected": return <Badge className="bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-300 border-0">Refusée</Badge>;
-      case "pending": return <Badge className="bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-300 border-0">En attente</Badge>;
+      case "verified": return <Badge className="bg-success-soft text-success border-0">Validée</Badge>;
+      case "rejected": return <Badge className="bg-destructive/10 text-destructive border-0">Refusée</Badge>;
+      case "pending": return <Badge className="bg-warning-soft text-warning-foreground border-0">En attente</Badge>;
       default: return <Badge variant="outline">{status}</Badge>;
     }
   };
@@ -233,19 +233,19 @@ const AdminVerifications = () => {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <Card>
           <CardContent className="p-4 flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-yellow-100 dark:bg-yellow-900/30"><Clock className="h-5 w-5 text-yellow-600 dark:text-yellow-400" /></div>
+            <div className="p-2 rounded-lg bg-warning-soft"><Clock className="h-5 w-5 text-warning" /></div>
             <div><p className="text-2xl font-bold">{metrics.pending}</p><p className="text-xs text-muted-foreground">En attente</p></div>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4 flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-green-100 dark:bg-green-900/30"><CheckCircle2 className="h-5 w-5 text-green-600 dark:text-green-400" /></div>
+            <div className="p-2 rounded-lg bg-success-soft"><CheckCircle2 className="h-5 w-5 text-success" /></div>
             <div><p className="text-2xl font-bold">{metrics.verifiedWeek}</p><p className="text-xs text-muted-foreground">Validées cette semaine</p></div>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4 flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-red-100 dark:bg-red-900/30"><XCircle className="h-5 w-5 text-red-600 dark:text-red-400" /></div>
+            <div className="p-2 rounded-lg bg-destructive/10"><XCircle className="h-5 w-5 text-destructive" /></div>
             <div><p className="text-2xl font-bold">{metrics.rejectedWeek}</p><p className="text-xs text-muted-foreground">Refusées cette semaine</p></div>
           </CardContent>
         </Card>
