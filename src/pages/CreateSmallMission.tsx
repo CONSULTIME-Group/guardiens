@@ -24,7 +24,7 @@ const CATEGORIES = [
   { value: "animals", label: "🐕 Animaux", icon: Dog },
   { value: "garden", label: "🌱 Jardin", icon: Flower2 },
   { value: "house", label: "🏠 Maison", icon: Home },
-  { value: "skills", label: "🤝 Échange de compétences", icon: Handshake },
+  { value: "skills", label: "Échange de compétences", icon: Handshake },
 ];
 
 const DURATIONS = [
