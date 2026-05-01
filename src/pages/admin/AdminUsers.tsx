@@ -145,7 +145,11 @@ const AdminUsers = () => {
     let query = supabase
       .from("profiles")
       .select("id, first_name, last_name, role, city, postal_code, avatar_url, bio, profile_completion, created_at, updated_at, cancellation_count, identity_verified, identity_verification_status, account_status, is_founder, skill_categories, available_for_help, custom_skills, completed_sits_count, cancellations_as_proprio")
-      .order("created_at", { ascending: false });
+      .order("created_at", { ascending: false })
+      // Évite le cap silencieux Supabase à 1000. Au-delà de 2000 utilisateurs,
+      // basculer en pagination server-side avec .range() (le filtrage client devra
+      // alors aussi devenir server-side).
+      .limit(2000);
 
     if (filterRole !== "all") query = query.eq("role", filterRole as any);
     if (filterVerification !== "all") {
