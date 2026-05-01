@@ -74,11 +74,11 @@ const AdminSEO = () => {
   if (!loading && error === "GOOGLE_SERVICE_ACCOUNT_JSON not configured") {
     return (
       <div className="space-y-8">
-        <h1 className="text-2xl font-bold text-foreground">Dashboard SEO</h1>
-        <Card className="border-orange-300">
+        <h1 className="font-body text-2xl font-bold text-foreground">Dashboard SEO</h1>
+        <Card className="border-warning">
           <CardContent className="py-6">
             <div className="flex items-start gap-3">
-              <AlertCircle className="h-6 w-6 text-orange-500 shrink-0 mt-0.5" />
+              <AlertCircle className="h-6 w-6 text-warning shrink-0 mt-0.5" />
               <div>
                 <h3 className="font-semibold mb-2">Configuration requise</h3>
                 <ol className="text-sm text-muted-foreground space-y-1 list-decimal pl-4">
@@ -138,7 +138,7 @@ const AdminSEO = () => {
       )}
 
       {error && !seoData && (
-        <Card className="border-red-300">
+        <Card className="border-destructive">
           <CardContent className="py-6 text-sm text-destructive">{error}</CardContent>
         </Card>
       )}
