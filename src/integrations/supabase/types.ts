@@ -4154,9 +4154,17 @@ export type Database = {
         }
         Returns: string
       }
+      admin_reject_competence_label: {
+        Args: { p_label: string }
+        Returns: number
+      }
       admin_send_message_to_user: {
         Args: { p_content: string; p_target_user_id: string }
         Returns: string
+      }
+      admin_update_skill_status: {
+        Args: { p_new_label?: string; p_new_status: string; p_skill_id: string }
+        Returns: number
       }
       apply_referral_reward: {
         Args: { p_referred_id: string }
