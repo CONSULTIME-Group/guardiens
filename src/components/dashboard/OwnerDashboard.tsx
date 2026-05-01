@@ -30,6 +30,7 @@ import DashSection from "./owner/DashSection";
 import EmptyCard from "./owner/EmptyCard";
 import StatsStrip from "./owner/StatsStrip";
 import PendingReviewsCard from "./owner/PendingReviewsCard";
+import MobileStickyCTA from "./owner/MobileStickyCTA";
 import {
   SPECIES_LABEL, PROPRIO_SPECIAL_IDS, BANNER_STYLES,
   capitalize, capitalizeWords,
@@ -149,7 +150,7 @@ const OwnerDashboard = () => {
   const showApplicationsSection = loading || hasReadApps;
 
   return (
-    <div className="space-y-6 md:space-y-8 pb-8">
+    <div className="space-y-6 md:space-y-8 pb-24 md:pb-8">
 
       {/* Role activation banner */}
       <div className="px-5 md:px-8 pt-2">
@@ -185,7 +186,7 @@ const OwnerDashboard = () => {
           <Button
             size="lg"
             onClick={() => navigate("/sits/create")}
-            className="shrink-0 w-full md:w-auto rounded-xl"
+            className="hidden md:inline-flex shrink-0 rounded-xl"
           >
             <Plus className="h-4 w-4 mr-1.5" /> Publier une annonce
           </Button>
@@ -359,6 +360,17 @@ const OwnerDashboard = () => {
           specialBadgeIds={PROPRIO_SPECIAL_IDS}
         />
       </div>
+
+      {/* ═══ CTA sticky mobile (action principale toujours accessible) ═══ */}
+      {pendingAppCount > 0 ? (
+        <MobileStickyCTA
+          label="Voir les candidatures"
+          to="/sits"
+          badge={pendingAppCount}
+        />
+      ) : (
+        <MobileStickyCTA label="Publier une annonce" to="/sits/create" />
+      )}
     </div>
   );
 };
