@@ -99,7 +99,7 @@ const MissionFeedbackModal = ({
         <DialogHeader>
           <DialogTitle className="font-heading text-lg">Comment ça s'est passé ?</DialogTitle>
           <p className="text-sm text-muted-foreground">
-            Votre retour sur l'entraide avec {receiverName}
+            Votre retour aide les gens du coin à se faire confiance. Avec {receiverName}, c'était comment ?
           </p>
         </DialogHeader>
 

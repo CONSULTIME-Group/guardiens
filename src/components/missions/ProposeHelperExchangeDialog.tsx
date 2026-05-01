@@ -122,7 +122,7 @@ const ProposeHelperExchangeDialog = ({
         <DialogHeader>
           <DialogTitle>Proposer un échange à {helper.first_name}</DialogTitle>
           <DialogDescription>
-            {helper.first_name} est disponible pour aider.
+            {helper.first_name} a indiqué être disponible — n'hésitez pas, c'est exactement pour ça que cette personne est là.
           </DialogDescription>
         </DialogHeader>
 
@@ -187,7 +187,7 @@ const ProposeHelperExchangeDialog = ({
             disabled={loading || !exchangeOffer.trim() || !needDescription.trim()}
           >
             {loading && <Loader2 className="animate-spin w-4 h-4 mr-2" />}
-            Envoyer ma proposition
+            J'ose proposer
           </Button>
         </DialogFooter>
       </DialogContent>

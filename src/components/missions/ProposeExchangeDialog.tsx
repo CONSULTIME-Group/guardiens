@@ -163,7 +163,7 @@ const ProposeExchangeDialog = ({
             <p className="font-medium text-foreground">{mission.exchange_offer}</p>
             {isExpired && (
               <p className="text-xs text-warning mt-1">
-                Cette mission est peut-être terminée — vous pouvez quand même envoyer un message.
+                La date est passée — vous pouvez quand même proposer, parfois ça arrange tout le monde.
               </p>
             )}
           </div>
@@ -215,7 +215,7 @@ const ProposeExchangeDialog = ({
             disabled={loading || !exchangeOffer.trim()}
           >
             {loading && <Loader2 className="animate-spin w-4 h-4 mr-2" />}
-            Envoyer ma proposition
+            J'ose proposer
           </Button>
         </DialogFooter>
       </DialogContent>
