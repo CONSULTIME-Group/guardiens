@@ -40,7 +40,9 @@ export interface SitterDashboardData {
   hasEmergencyProfile: boolean;
   hasAcceptedRecent: boolean;
   nextGuard: any | null;
+  nextGuardError: string | null;
   nearbyListings: any[];
+  nearbyError: string | null;
   articles: any[];
   badges: any[];
   onboardingCompleted: boolean;
@@ -49,6 +51,7 @@ export interface SitterDashboardData {
   reputation: ReputationData | null;
   groupedBadges: GroupedBadge[];
   nearbyMissions: any[];
+  nearbyMissionsError: string | null;
 }
 
 const INITIAL_STATE: SitterDashboardData = {
@@ -75,7 +78,9 @@ const INITIAL_STATE: SitterDashboardData = {
   hasEmergencyProfile: false,
   hasAcceptedRecent: false,
   nextGuard: null,
+  nextGuardError: null,
   nearbyListings: [],
+  nearbyError: null,
   articles: [],
   badges: [],
   onboardingCompleted: false,
@@ -84,6 +89,7 @@ const INITIAL_STATE: SitterDashboardData = {
   reputation: null,
   groupedBadges: [],
   nearbyMissions: [],
+  nearbyMissionsError: null,
 };
 
 export function useSitterDashboardData(userId: string | undefined) {
@@ -166,47 +172,64 @@ export function useSitterDashboardData(userId: string | undefined) {
       // Nearby listings — filtered by owner's department (first 2 chars of postal code)
       const userDept = profile?.postal_code?.slice(0, 2);
       let nearbyListings: any[] = [];
+      let nearbyError: string | null = null;
       if (userDept) {
-        const { data: deptListings } = await supabase
+        const { data: deptListings, error: listErr } = await supabase
           .from("sits")
           .select("id, title, start_date, end_date, user_id, property_id, status, created_at, is_urgent, properties:property_id(photos, type, environment)")
           .eq("status", "published")
           .neq("user_id", userId)
           .order("created_at", { ascending: false })
           .limit(50);
-        const candidateOwnerIds = Array.from(new Set((deptListings || []).map((s: any) => s.user_id)));
-        if (candidateOwnerIds.length > 0) {
-          const { data: owners } = await supabase
-            .from("public_profiles")
-            .select("id, postal_code")
-            .in("id", candidateOwnerIds);
-          const deptOwnerIds = new Set(
-            (owners || [])
-              .filter((o: any) => o.postal_code?.startsWith(userDept))
-              .map((o: any) => o.id)
-          );
-          nearbyListings = (deptListings || [])
-            .filter((s: any) => deptOwnerIds.has(s.user_id))
-            .slice(0, 4);
+        if (listErr) {
+          nearbyError = "Impossible de charger les annonces près de chez vous.";
+        } else {
+          const candidateOwnerIds = Array.from(new Set((deptListings || []).map((s: any) => s.user_id)));
+          if (candidateOwnerIds.length > 0) {
+            const { data: owners, error: ownersErr } = await supabase
+              .from("public_profiles")
+              .select("id, postal_code")
+              .in("id", candidateOwnerIds);
+            if (ownersErr) {
+              nearbyError = "Impossible de charger les annonces près de chez vous.";
+            } else {
+              const deptOwnerIds = new Set(
+                (owners || [])
+                  .filter((o: any) => o.postal_code?.startsWith(userDept))
+                  .map((o: any) => o.id)
+              );
+              nearbyListings = (deptListings || [])
+                .filter((s: any) => deptOwnerIds.has(s.user_id))
+                .slice(0, 4);
+            }
+          }
         }
       }
 
       // Nearby missions — filtered by department
       let nearbyMissions: any[] = [];
+      let nearbyMissionsError: string | null = null;
       if (userDept) {
-        const { data: missions } = await supabase
+        const { data: missions, error: missionsErr } = await supabase
           .from("small_missions")
           .select("id, title, category, city, postal_code, date_needed, status, created_at, user_id")
           .eq("status", "open")
           .order("created_at", { ascending: false })
           .limit(20);
-        nearbyMissions = (missions || [])
-          .filter((m: any) => m.user_id !== userId && m.postal_code?.startsWith(userDept))
-          .slice(0, 4);
+        if (missionsErr) {
+          nearbyMissionsError = "Impossible de charger les échanges autour de vous.";
+        } else {
+          nearbyMissions = (missions || [])
+            .filter((m: any) => m.user_id !== userId && m.postal_code?.startsWith(userDept))
+            .slice(0, 4);
+        }
       }
 
       // Next guard
       let nextGuard: any = null;
+      let nextGuardError: string | null = appsRes.error
+        ? "Impossible de charger votre prochaine garde."
+        : null;
       const now = new Date();
       const futureGuards = acceptedApps
         .filter((a: any) => a.sit?.start_date && new Date(a.sit.start_date) > now)
@@ -218,6 +241,9 @@ export function useSitterDashboardData(userId: string | undefined) {
           supabase.from("profiles").select("first_name").eq("id", g.sit.user_id).single(),
           supabase.from("pets").select("species").eq("property_id", g.sit.property_id),
         ]);
+        if (ownerRes.error || petsRes.error) {
+          nextGuardError = "Détails de la prochaine garde indisponibles.";
+        }
         nextGuard = {
           ...g.sit,
           ownerName: ownerRes.data?.first_name || "",
@@ -253,7 +279,9 @@ export function useSitterDashboardData(userId: string | undefined) {
         hasEmergencyProfile: !!emProfileRes.data,
         hasAcceptedRecent: recentAccepted,
         nextGuard,
+        nextGuardError,
         nearbyListings,
+        nearbyError,
         articles: articlesRes.data || [],
         badges: allBadges,
         onboardingCompleted: (profile as any)?.onboarding_completed || false,
@@ -262,6 +290,7 @@ export function useSitterDashboardData(userId: string | undefined) {
         reputation,
         groupedBadges,
         nearbyMissions,
+        nearbyMissionsError,
       });
     };
 

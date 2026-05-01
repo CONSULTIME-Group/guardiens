@@ -15,6 +15,7 @@ import SitterHero from "./sitter/SitterHero";
 import SitterNextGuard from "./sitter/SitterNextGuard";
 import SitterNextGuardEmpty from "./sitter/SitterNextGuardEmpty";
 import NearestListingHero from "./sitter/NearestListingHero";
+import DashboardSectionState from "./sitter/DashboardSectionState";
 import SitterMobileStickyCTA from "./sitter/SitterMobileStickyCTA";
 import SitterStatusBar from "./sitter/SitterStatusBar";
 import SitterBadgesSection from "./sitter/SitterBadgesSection";
@@ -48,8 +49,8 @@ const SitterDashboard = () => {
     completedSits, avgRating, reviewsCount, badgeCount, totalApps, cancellations,
     pendingAppsCount, unreadCount, isAvailable, isFounder,
     postalCode, avatarUrl, bio, hasAnimalExperience,
-    hasEmergencyProfile, hasAcceptedRecent, nextGuard,
-    nearbyListings, articles, nearbyMissions,
+    hasEmergencyProfile, hasAcceptedRecent, nextGuard, nextGuardError,
+    nearbyListings, nearbyError, articles, nearbyMissions, nearbyMissionsError,
     onboardingCompleted, onboardingDismissed, minimalCompleted,
     setPartial, toggleAvailability,
     reputation, groupedBadges,
@@ -277,11 +278,25 @@ const SitterDashboard = () => {
         onToggleAvailability={toggleAvailability}
       />
 
-      {/* Hero contextuel : prochaine garde > annonce phare > empty state */}
+      {/* Hero contextuel : prochaine garde > erreur > annonce phare > erreur > empty state */}
       {nextGuard ? (
         <SitterNextGuard nextGuard={nextGuard} />
+      ) : nextGuardError ? (
+        <DashboardSectionState
+          variant="error"
+          eyebrow="Prochaine garde"
+          description={nextGuardError}
+          onRetry={() => window.location.reload()}
+        />
       ) : nearbyListings.length > 0 ? (
         <NearestListingHero listing={nearbyListings[0]} />
+      ) : nearbyError ? (
+        <DashboardSectionState
+          variant="error"
+          eyebrow="Annonce la plus proche"
+          description={nearbyError}
+          onRetry={() => window.location.reload()}
+        />
       ) : (
         <SitterNextGuardEmpty />
       )}
@@ -357,7 +372,7 @@ const SitterDashboard = () => {
         <div className="px-4 sm:px-5 md:px-8 mb-6">
           <DashSection eyebrow="Près de chez vous" title="À découvrir" description="Annonces, échanges et conseils sélectionnés pour vous.">
             <div className="space-y-4">
-              <SitterBottomColumns nearbyListings={nearbyListings} nearbyMissions={nearbyMissions} postalCode={postalCode} />
+              <SitterBottomColumns nearbyListings={nearbyListings} nearbyMissions={nearbyMissions} postalCode={postalCode} nearbyError={nearbyError} nearbyMissionsError={nearbyMissionsError} />
               {articles.length > 0 && (
                 <div>
                   <div className="flex items-center justify-between mb-3">
@@ -400,7 +415,7 @@ const SitterDashboard = () => {
             {CtaBlock}
             <section aria-labelledby="nearby-heading-xl">
               <h2 id="nearby-heading-xl" className="sr-only">Près de chez vous</h2>
-              <SitterBottomColumns nearbyListings={nearbyListings} nearbyMissions={nearbyMissions} postalCode={postalCode} />
+              <SitterBottomColumns nearbyListings={nearbyListings} nearbyMissions={nearbyMissions} postalCode={postalCode} nearbyError={nearbyError} nearbyMissionsError={nearbyMissionsError} />
             </section>
             {articles.length > 0 && (
               <section aria-labelledby="articles-heading-xl" className="mb-6">

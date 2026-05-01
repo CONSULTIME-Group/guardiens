@@ -1,16 +1,41 @@
 import { Link, useNavigate } from "react-router-dom";
 import { format, differenceInHours } from "date-fns";
 import { fr } from "date-fns/locale";
+import { AlertCircle, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface SitterBottomColumnsProps {
   nearbyListings: any[];
   nearbyMissions: any[];
   postalCode: string | null;
+  nearbyError?: string | null;
+  nearbyMissionsError?: string | null;
 }
 
-const SitterBottomColumns = ({ nearbyListings, nearbyMissions, postalCode }: SitterBottomColumnsProps) => {
+const SitterBottomColumns = ({
+  nearbyListings,
+  nearbyMissions,
+  postalCode,
+  nearbyError = null,
+  nearbyMissionsError = null,
+}: SitterBottomColumnsProps) => {
   const navigate = useNavigate();
+
+  const ErrorState = ({ message }: { message: string }) => (
+    <div role="alert" className="rounded-xl border border-destructive/30 bg-destructive/5 p-4 text-center">
+      <p className="text-xs text-destructive font-medium inline-flex items-center gap-1.5 justify-center mb-1">
+        <AlertCircle className="h-3.5 w-3.5" aria-hidden="true" />
+        {message}
+      </p>
+      <button
+        type="button"
+        onClick={() => window.location.reload()}
+        className="mt-1 inline-flex items-center gap-1 text-xs text-destructive hover:underline"
+      >
+        <RefreshCw className="h-3 w-3" aria-hidden="true" /> Réessayer
+      </button>
+    </div>
+  );
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 px-4 sm:px-5 md:px-8 mb-6 md:mb-8">
@@ -20,7 +45,9 @@ const SitterBottomColumns = ({ nearbyListings, nearbyMissions, postalCode }: Sit
           <p className="text-sm font-semibold text-foreground">Annonces près de chez vous</p>
           <Link to="/search" className="text-xs text-primary font-sans hover:underline">Voir tout →</Link>
         </div>
-        {nearbyListings.length === 0 ? (
+        {nearbyError ? (
+          <ErrorState message={nearbyError} />
+        ) : nearbyListings.length === 0 ? (
           <div className="text-center py-4">
             <p className="text-sm text-muted-foreground font-sans italic mb-3">Pas encore d'annonce dans votre zone.</p>
             <p className="text-xs text-muted-foreground font-sans">Activez le mode disponible pour être contacté directement par les propriétaires.</p>
@@ -58,7 +85,9 @@ const SitterBottomColumns = ({ nearbyListings, nearbyMissions, postalCode }: Sit
           <p className="text-sm font-semibold text-foreground">Échanges autour de vous</p>
           <Link to="/petites-missions" className="text-xs text-primary font-sans hover:underline">Voir tout →</Link>
         </div>
-        {nearbyMissions.length === 0 ? (
+        {nearbyMissionsError ? (
+          <ErrorState message={nearbyMissionsError} />
+        ) : nearbyMissions.length === 0 ? (
           <>
             <p className="text-xs text-muted-foreground font-sans mb-3"><span className="font-semibold text-foreground">Osez !</span> Demandez un coup de main en publiant une petite mission, ou proposez quelque chose en échange — un café, une histoire, un service…</p>
             <div className="flex flex-col gap-2 mb-4">
