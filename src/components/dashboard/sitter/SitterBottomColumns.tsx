@@ -45,7 +45,9 @@ const SitterBottomColumns = ({
           <p className="text-sm font-semibold text-foreground">Annonces près de chez vous</p>
           <Link to="/search" className="text-xs text-primary font-sans hover:underline">Voir tout →</Link>
         </div>
-        {nearbyListings.length === 0 ? (
+        {nearbyError ? (
+          <ErrorState message={nearbyError} />
+        ) : nearbyListings.length === 0 ? (
           <div className="text-center py-4">
             <p className="text-sm text-muted-foreground font-sans italic mb-3">Pas encore d'annonce dans votre zone.</p>
             <p className="text-xs text-muted-foreground font-sans">Activez le mode disponible pour être contacté directement par les propriétaires.</p>
