@@ -507,7 +507,7 @@ const AdminUsers = () => {
                             }
                           }}
                         >
-                          <Crown className={`h-4 w-4 ${user.is_manual_super ? 'text-amber-500' : ''}`} />
+                          <Crown className={`h-4 w-4 ${user.is_manual_super ? 'text-warning' : ''}`} />
                         </Button>
                         <Button
                           variant="ghost"
