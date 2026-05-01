@@ -131,32 +131,12 @@ const AdminSkills = () => {
   useEffect(() => { fetchCompetences(); fetchPendingCompetences(); }, [fetchCompetences, fetchPendingCompetences]);
 
   const handleApprove = async (skill: SkillRow, newLabel?: string) => {
-    const updates: any = { status: "approved" };
-    if (newLabel) {
-      updates.label = newLabel;
-      // normalisation cohérente + collapse des espaces internes
-      updates.normalized_label = normalize(newLabel).replace(/\s+/g, " ");
-    }
-
-    await supabase.from("skills_library").update(updates).eq("id", skill.id);
-
-    const { data: profiles } = await supabase
-      .from("profiles")
-      .select("id, custom_skills")
-      .filter("custom_skills", "cs", `[{"skill_id":"${skill.id}"}]`);
-
-    if (profiles) {
-      for (const p of profiles) {
-        const pSkills = (p.custom_skills as unknown as any[]) || [];
-        const updated = pSkills.map((s: any) =>
-          s.skill_id === skill.id
-            ? { ...s, status: "approved", ...(newLabel ? { label: newLabel } : {}) }
-            : s
-        );
-        await supabase.from("profiles").update({ custom_skills: updated } as any).eq("id", p.id);
-      }
-    }
-
+    const { error } = await supabase.rpc("admin_update_skill_status", {
+      p_skill_id: skill.id,
+      p_new_status: "approved",
+      p_new_label: newLabel || null,
+    });
+    if (error) { toast({ description: "Erreur lors de l'approbation." }); return; }
     setEditingId(null);
     toast({ description: `Compétence "${newLabel || skill.label}" approuvée.` });
     fetchSkills();
@@ -164,21 +144,12 @@ const AdminSkills = () => {
   };
 
   const handleReject = async (skill: SkillRow) => {
-    await supabase.from("skills_library").update({ status: "rejected" } as any).eq("id", skill.id);
-
-    const { data: profiles } = await supabase
-      .from("profiles")
-      .select("id, custom_skills")
-      .filter("custom_skills", "cs", `[{"skill_id":"${skill.id}"}]`);
-
-    if (profiles) {
-      for (const p of profiles) {
-        const skills = (p.custom_skills as any[]) || [];
-        const filtered = skills.filter((s: any) => s.skill_id !== skill.id);
-        await supabase.from("profiles").update({ custom_skills: filtered } as any).eq("id", p.id);
-      }
-    }
-
+    const { error } = await supabase.rpc("admin_update_skill_status", {
+      p_skill_id: skill.id,
+      p_new_status: "rejected",
+      p_new_label: null,
+    });
+    if (error) { toast({ description: "Erreur lors du refus." }); return; }
     toast({ description: `Compétence "${skill.label}" refusée.` });
     fetchSkills();
     window.dispatchEvent(new Event("admin-badges-refresh"));
@@ -196,34 +167,9 @@ const AdminSkills = () => {
   };
 
   const handleRejectCompetence = async (label: string) => {
-    // Remove from all sitter and owner profiles that contain this competence
-    const [sitterRes, ownerRes] = await Promise.all([
-      supabase.from("sitter_profiles").select("id, competences").contains("competences", [label]),
-      supabase.from("owner_profiles").select("id, competences").contains("competences", [label]),
-    ]);
-
-    let updatedCount = 0;
-
-    for (const p of (sitterRes.data || [])) {
-      const comps = ((p as any).competences || []).filter((c: string) => c !== label);
-      const { error } = await supabase.from("sitter_profiles").update({ competences: comps } as any).eq("id", p.id);
-      if (error) {
-        console.error("Error updating sitter_profile:", p.id, error);
-      } else {
-        updatedCount++;
-      }
-    }
-    for (const p of (ownerRes.data || [])) {
-      const comps = ((p as any).competences || []).filter((c: string) => c !== label);
-      const { error } = await supabase.from("owner_profiles").update({ competences: comps } as any).eq("id", p.id);
-      if (error) {
-        console.error("Error updating owner_profile:", p.id, error);
-      } else {
-        updatedCount++;
-      }
-    }
-
-    toast({ description: `"${label}" refusée et retirée de ${updatedCount} profil(s).` });
+    const { data, error } = await supabase.rpc("admin_reject_competence_label", { p_label: label });
+    if (error) { toast({ description: "Erreur lors du refus." }); return; }
+    toast({ description: `"${label}" refusée et retirée de ${data ?? 0} profil(s).` });
     fetchPendingCompetences();
   };
 
