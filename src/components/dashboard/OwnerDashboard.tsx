@@ -312,11 +312,10 @@ const OwnerDashboard = () => {
           </DashSection>
         </div>
 
-        {/* Colonne contexte : urgence, échanges, missions */}
+        {/* Colonne contexte : urgence + missions unifiées */}
         <aside className="space-y-6">
           <NearbyEmergencySitters />
-          <MyMissionsColumn missions={myMissions} />
-          <ExchangesColumn missions={smallMissions} />
+          <MissionsTabsCard myMissions={myMissions} nearbyMissions={smallMissions} />
         </aside>
       </div>
 
