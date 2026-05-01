@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect, useMemo } from "react";
 const entraideHeader = "https://erhccyqevdyevpyctsjj.supabase.co/storage/v1/object/public/property-photos/misc/entraide-header.webp";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Dog, Flower2, Handshake, ArrowRight, Lock, X, Sprout, PawPrint, GraduationCap, Star, MapPin, Search as SearchIcon, Check } from "lucide-react";
@@ -98,8 +98,10 @@ const SmallMissions = () => {
   const queryClient = useQueryClient();
   const { hasAccess, status: subStatus } = useSubscriptionAccess();
   const { level: accessLevel, profileCompletion, canApplyMissions } = useAccessLevel();
+  const [searchParams] = useSearchParams();
+  const initialMode: ModeFilter = searchParams.get("type") === "offre" ? "offer" : "need";
   const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>("all");
-  const [mode, setMode] = useState<ModeFilter>("need");
+  const [mode, setMode] = useState<ModeFilter>(initialMode);
   const [dialogMission, setDialogMission] = useState<any>(null);
   const [dialogTarget, setDialogTarget] = useState<{ id: string; name: string } | null>(null);
   const [skillPromptDismissed, setSkillPromptDismissed] = useState(() => {
@@ -523,6 +525,9 @@ const SmallMissions = () => {
             <p className="text-muted-foreground max-w-2xl mx-auto">
               Des coups de main, des échanges, des compétences. Entre gens du coin qui se choisissent.
             </p>
+            <p className="inline-block text-xs font-medium bg-badge-success text-badge-success-foreground px-3 py-1 rounded-full">
+              Les petites missions sont gratuites à vie, pour tout le monde.
+            </p>
           </div>
         </section>
 
@@ -644,21 +649,23 @@ const SmallMissions = () => {
               </div>
 
               {/* Category filter pills */}
-              <div className="flex flex-wrap items-center gap-2 justify-center">
-                {FILTER_PILLS.map(({ key, label, icon: Icon }) => (
-                  <button
-                    key={key}
-                    onClick={() => setCategoryFilter(key)}
-                    className={`flex items-center gap-1.5 rounded-full border px-4 py-2 text-sm transition-colors ${
-                      categoryFilter === key
-                        ? "bg-primary text-primary-foreground border-primary"
-                        : "bg-muted text-foreground border-border hover:border-primary/40"
-                    }`}
-                  >
-                    {Icon && <Icon className="h-3.5 w-3.5" />}
-                    {label}
-                  </button>
-                ))}
+              <div className="-mx-4 px-4 overflow-x-auto sm:overflow-visible sm:mx-0 sm:px-0">
+                <div className="flex sm:flex-wrap items-center gap-2 sm:justify-center w-max sm:w-auto">
+                  {FILTER_PILLS.map(({ key, label, icon: Icon }) => (
+                    <button
+                      key={key}
+                      onClick={() => setCategoryFilter(key)}
+                      className={`flex items-center gap-1.5 rounded-full border px-4 py-2 text-sm whitespace-nowrap transition-colors ${
+                        categoryFilter === key
+                          ? "bg-primary text-primary-foreground border-primary"
+                          : "bg-muted text-foreground border-border hover:border-primary/40"
+                      }`}
+                    >
+                      {Icon && <Icon className="h-3.5 w-3.5" />}
+                      {label}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
 
@@ -883,9 +890,9 @@ const SmallMissions = () => {
 
           {(!allMissions || allMissions.length === 0) && (
             <section className="text-center space-y-6 max-w-3xl mx-auto">
-              <h1 className="font-heading text-4xl md:text-5xl font-bold text-foreground">
+              <h2 className="font-heading text-4xl md:text-5xl font-bold text-foreground">
                 Petites missions — L'entraide entre gens du coin, version Guardiens
-              </h1>
+              </h2>
             </section>
           )}
 
