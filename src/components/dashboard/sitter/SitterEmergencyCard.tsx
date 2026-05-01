@@ -119,7 +119,7 @@ const SitterEmergencyCard = ({ hasEmergencyProfile }: SitterEmergencyCardProps) 
     initialPreview as any
   );
 
-  const PreviewToggle = isDev && previewMode !== null ? (
+  const PreviewToggle = isDev ? (
     <div className="flex items-center gap-1 rounded-full border border-dashed border-amber-400/60 bg-background/80 backdrop-blur px-2 py-1 mb-2 text-[11px] w-fit">
       <Eye className="h-3 w-3 text-amber-600" />
       <span className="text-muted-foreground mr-1">Aperçu :</span>
@@ -137,14 +137,17 @@ const SitterEmergencyCard = ({ hasEmergencyProfile }: SitterEmergencyCardProps) 
           {m}
         </button>
       ))}
-      <button
-        type="button"
-        onClick={() => setPreviewMode(null)}
-        className="ml-1 px-1.5 py-0.5 rounded-full text-muted-foreground hover:text-foreground"
-        aria-label="Quitter l'aperçu"
-      >
-        ✕
-      </button>
+      {previewMode !== null && (
+        <button
+          type="button"
+          onClick={() => setPreviewMode(null)}
+          className="ml-1 px-1.5 py-0.5 rounded-full text-muted-foreground hover:text-foreground"
+          aria-label="Quitter l'aperçu (revenir aux données réelles)"
+          title="Revenir aux données réelles"
+        >
+          ✕
+        </button>
+      )}
     </div>
   ) : null;
 
