@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { Check, Loader2 } from "lucide-react";
-import { toast } from "sonner";
+import { Check, CheckCircle2, Loader2 } from "lucide-react";
+import { toast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import StepIdentity from "@/components/profile/StepIdentity";
 import StepSitterProfile from "@/components/profile/StepSitterProfile";
@@ -210,7 +210,8 @@ const SitterProfile = () => {
       const merged = { ...data, ...localData } as SitterProfileData;
       const mobilityNowComplete = (merged.geographic_radius ?? 0) > 0;
       if (mobilityNowComplete && !mobilityWasComplete) {
-        toast.success("Mobilité complétée", {
+        toast({
+          title: "Mobilité complétée",
           description: "Vos préférences de mobilité sont enregistrées.",
         });
       }
@@ -328,7 +329,7 @@ const SitterProfile = () => {
 
           {/* Right content */}
           <div className="flex-1 min-w-0 pb-32">
-            <div id="profile-section-content" className="bg-card rounded-xl border border-border p-5 md:p-8 scroll-mt-24">
+            <div id="profile-section-content" className="bg-card rounded-2xl border border-border p-5 md:p-8 scroll-mt-24">
               {activeSection === "identity" && (
                 <StepIdentity data={mergedData} onChange={handleChange} onUploadAvatar={handleUploadAvatar} />
               )}
@@ -366,7 +367,9 @@ const SitterProfile = () => {
       <div className="fixed bottom-16 md:bottom-0 left-0 right-0 z-40 bg-background/95 backdrop-blur-sm border-t border-border py-4 px-6 flex items-center justify-between supports-[padding:max(0px)]:pb-[max(env(safe-area-inset-bottom),0.75rem)]">
         <p className="text-xs text-muted-foreground">
           {saved && !dirty ? (
-            <span className="text-primary">✓ Profil à jour</span>
+            <span className="inline-flex items-center gap-1 text-primary">
+              <CheckCircle2 className="h-3.5 w-3.5" aria-hidden="true" /> Profil à jour
+            </span>
           ) : dirty ? (
             "Modifications non sauvegardées"
           ) : null}
