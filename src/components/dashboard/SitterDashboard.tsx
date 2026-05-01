@@ -421,14 +421,8 @@ const SitterDashboard = () => {
         {/* SIDE COLUMN — 4/12 (~33%) */}
         <aside aria-label="Statut, badges et urgence" className="xl:col-span-4 min-w-0">
           {buildStatusBlock(true)}
-          {/* Un seul bloc urgence : profil actif → dashboard, sinon → éligibilité */}
-          {hasEmergencyProfile ? (
-            <div className="mb-6">
-              <EmergencyDashSection />
-            </div>
-          ) : (
-            buildEmergencyBlock(true)
-          )}
+          {/* Carte unifiée Gardien d'urgence (3 états) */}
+          {buildEmergencyBlock(true)}
           {buildBadgesBlock(true)}
         </aside>
       </div>
