@@ -51,13 +51,13 @@ const STATUS_LABELS: Record<string, { label: string; className: string }> = {
 const PUBLISHER_BADGES = [
   { key: "coup_de_main_en_or", label: "Coup de main en or", icon: Star, iconColor: "text-warning", bgColor: "bg-warning-soft", borderColor: "border-warning-border", selectedBg: "bg-warning/15" },
   { key: "super_voisin", label: "Personne en or", icon: Heart, iconColor: "text-success", bgColor: "bg-success-soft", borderColor: "border-success-border", selectedBg: "bg-success-soft/80" },
-  { key: "on_remet_ca", label: "On remet ça", icon: RotateCcw, iconColor: "text-primary", bgColor: "bg-primary/5", borderColor: "border-primary/30", selectedBg: "bg-primary/15" },
+  { key: "on_remet_ca", label: "On remet ça", icon: RotateCcw, iconColor: "text-info", bgColor: "bg-info-soft", borderColor: "border-info-border", selectedBg: "bg-info-soft/80" },
 ];
 
 const CANDIDATE_BADGES = [
   { key: "guide_aux_petits_oignons", label: "Guide aux petits oignons", icon: Star, iconColor: "text-warning", bgColor: "bg-warning-soft", borderColor: "border-warning-border", selectedBg: "bg-warning/15" },
   { key: "toujours_joignable", label: "Toujours joignable", icon: MessageSquare, iconColor: "text-success", bgColor: "bg-success-soft", borderColor: "border-success-border", selectedBg: "bg-success-soft/80" },
-  { key: "on_reviendra", label: "On reviendra", icon: RotateCcw, iconColor: "text-primary", bgColor: "bg-primary/5", borderColor: "border-primary/30", selectedBg: "bg-primary/15" },
+  { key: "on_reviendra", label: "On reviendra", icon: RotateCcw, iconColor: "text-info", bgColor: "bg-info-soft", borderColor: "border-info-border", selectedBg: "bg-info-soft/80" },
 ];
 
 /* ── Inline Feedback Form ── */
