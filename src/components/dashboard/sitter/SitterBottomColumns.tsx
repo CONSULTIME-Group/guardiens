@@ -85,7 +85,9 @@ const SitterBottomColumns = ({
           <p className="text-sm font-semibold text-foreground">Échanges autour de vous</p>
           <Link to="/petites-missions" className="text-xs text-primary font-sans hover:underline">Voir tout →</Link>
         </div>
-        {nearbyMissions.length === 0 ? (
+        {nearbyMissionsError ? (
+          <ErrorState message={nearbyMissionsError} />
+        ) : nearbyMissions.length === 0 ? (
           <>
             <p className="text-xs text-muted-foreground font-sans mb-3"><span className="font-semibold text-foreground">Osez !</span> Demandez un coup de main en publiant une petite mission, ou proposez quelque chose en échange — un café, une histoire, un service…</p>
             <div className="flex flex-col gap-2 mb-4">
