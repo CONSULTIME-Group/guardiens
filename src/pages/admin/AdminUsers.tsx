@@ -61,25 +61,19 @@ const AdminUsers = () => {
     open: false, userId: "", userName: ""
   });
   const [deleting, setDeleting] = useState(false);
-  const [messageModal, setMessageModal] = useState<{ open: boolean; userId: string; userName: string; content: string; step: "edit" | "preview" }>({
+  const [messageModal, setMessageModal] = useState<MessageModalState>({
     open: false, userId: "", userName: "", content: "", step: "edit"
   });
   const [sendingMessage, setSendingMessage] = useState(false);
-  const [historyModal, setHistoryModal] = useState<{ open: boolean; loading: boolean; items: Array<{ id: string; conversation_id: string | null; content: string; created_at: string; recipient_id: string; recipient_name: string; recipient_avatar: string | null; status: "success" | "failed"; error_message: string | null }> }>({
+  const [historyModal, setHistoryModal] = useState<{ open: boolean; loading: boolean; items: HistoryItem[] }>({
     open: false, loading: false, items: [],
   });
-  const [errorDetailModal, setErrorDetailModal] = useState<{ open: boolean; recipient: string; sentAt: string; error: string; content: string }>({
+  const [errorDetailModal, setErrorDetailModal] = useState<ErrorDetailState>({
     open: false, recipient: "", sentAt: "", error: "", content: "",
   });
-  const [lastMessageModal, setLastMessageModal] = useState<{
-    open: boolean;
-    loading: boolean;
-    userName: string;
-    userId: string;
-    conversationId: string | null;
-    content: string | null;
-    sentAt: string | null;
-  }>({ open: false, loading: false, userName: "", userId: "", conversationId: null, content: null, sentAt: null });
+  const [lastMessageModal, setLastMessageModal] = useState<LastMessageState>({
+    open: false, loading: false, userName: "", userId: "", conversationId: null, content: null, sentAt: null
+  });
   const navigate = useNavigate();
 
   const openHistory = async () => {
