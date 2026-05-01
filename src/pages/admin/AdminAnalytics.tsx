@@ -24,87 +24,29 @@ interface DailyStat {
 
 // Étapes du funnel d'activation (ordre = entonnoir)
 const FUNNEL_STEPS = [
-  { key: "signup_started", label: "1. Visite /inscription", color: "hsl(var(--muted-foreground))" },
-  { key: "signup_role_selected", label: "2. Rôle choisi", color: "hsl(var(--primary) / 0.6)" },
-  { key: "signup_form_submitted", label: "3. Formulaire envoyé", color: "hsl(var(--primary) / 0.7)" },
-  { key: "signup_email_confirmed", label: "4. Email confirmé", color: "hsl(var(--primary) / 0.8)" },
-  { key: "onboarding_started", label: "5. Onboarding ouvert", color: "hsl(var(--primary) / 0.85)" },
-  { key: "onboarding_completed", label: "6. Onboarding terminé", color: "hsl(var(--primary) / 0.9)" },
-  { key: "first_action", label: "7. 1ère action", color: "hsl(var(--primary))" },
+  { key: "signup_started", label: "1. Visite /inscription" },
+  { key: "signup_role_selected", label: "2. Rôle choisi" },
+  { key: "signup_form_submitted", label: "3. Formulaire envoyé" },
+  { key: "signup_email_confirmed", label: "4. Email confirmé" },
+  { key: "onboarding_started", label: "5. Onboarding ouvert" },
+  { key: "onboarding_completed", label: "6. Onboarding terminé" },
+  { key: "first_action", label: "7. 1ère action" },
 ] as const;
 
-interface FunnelCounts {
-  [key: string]: number;
-}
+// Events qui n'ont pas (ou rarement) de metadata.role rattaché.
+// Ils sont émis avant choix de rôle ou par tracker générique : on évite de les
+// filtrer par rôle pour ne pas afficher 0 systématiquement.
+const ROLE_AGNOSTIC_EVENTS = new Set([
+  "page_view",
+  "signup_started",
+  "signup_email_confirmed",
+  "fb_referral_landing",
+  "fb_referral_feedback",
+  "fb_referral_dismissed",
+]);
 
-interface TopPage {
-  path: string;
-  views: number;
-}
-
-// Libellé utilisé quand la source est vide, invalide ou non reconnue.
-const UNKNOWN_SOURCE_LABEL = "(autres / inconnu)";
-
-// Normalise une URL pathname pour regrouper les chemins dynamiques.
-// Ex: /gardiens/<uuid> → /gardiens/:id, /guides/lyon → /guides/:slug
-// Retourne TOUJOURS une chaîne — les sources vides/invalides tombent dans
-// UNKNOWN_SOURCE_LABEL pour ne pas perdre de lignes dans l'histogramme.
-function normalizeSource(raw: string | null | undefined): string {
-  if (raw == null) return UNKNOWN_SOURCE_LABEL;
-  let p = String(raw).trim();
-  if (!p) return UNKNOWN_SOURCE_LABEL;
-
-  // Retire querystring/fragment au cas où
-  p = p.split("?")[0].split("#")[0].trim();
-  if (!p) return UNKNOWN_SOURCE_LABEL;
-
-  // Si on reçoit une URL absolue (ex: "https://guardiens.fr/foo"), on en extrait le pathname
-  if (/^https?:\/\//i.test(p)) {
-    try {
-      p = new URL(p).pathname || "/";
-    } catch {
-      return UNKNOWN_SOURCE_LABEL;
-    }
-  }
-
-  // À ce stade on attend un chemin commençant par "/"
-  if (!p.startsWith("/")) {
-    // Source non-URL (ex: "header_cta", "email_link") — on la garde telle quelle
-    return p;
-  }
-
-  // Retire trailing slash sauf racine
-  if (p.length > 1 && p.endsWith("/")) p = p.slice(0, -1);
-
-  const uuidRe = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i;
-
-  // Patterns avec ID dynamique
-  const dynamicPatterns: Array<[RegExp, string]> = [
-    [/^\/gardiens\/.+$/, "/gardiens/:id"],
-    [/^\/proprietaires?\/.+$/, "/proprietaires/:id"],
-    [/^\/profil\/.+$/, "/profil/:id"],
-    [/^\/annonces\/.+$/, "/annonces/:id"],
-    [/^\/sits\/.+$/, "/sits/:id"],
-    [/^\/missions\/.+$/, "/missions/:id"],
-    [/^\/petites-missions\/.+$/, "/petites-missions/:id"],
-    [/^\/messages\/.+$/, "/messages/:id"],
-    [/^\/conversation\/.+$/, "/conversation/:id"],
-    [/^\/guides\/.+$/, "/guides/:slug"],
-    [/^\/actualites\/.+$/, "/actualites/:slug"],
-    [/^\/articles\/.+$/, "/articles/:slug"],
-    [/^\/villes?\/.+$/, "/villes/:slug"],
-    [/^\/departements?\/.+$/, "/departements/:slug"],
-    [/^\/avis\/.+$/, "/avis/:id"],
-  ];
-  for (const [re, repl] of dynamicPatterns) {
-    if (re.test(p)) return repl;
-  }
-  // UUID résiduel quelque part dans le path
-  if (uuidRe.test(p)) {
-    return p.replace(uuidRe, ":id");
-  }
-  return p;
-}
+interface FunnelCounts { [key: string]: number; }
+interface TopPage { path: string; views: number; }
 
 const AdminAnalytics = () => {
   const [range, setRange] = useState<Range>(7);
@@ -122,149 +64,190 @@ const AdminAnalytics = () => {
     eventsCount24h: 0,
   });
   const [totalInscrits, setTotalInscrits] = useState(0);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const load = async () => {
       setLoading(true);
-      const since = startOfDay(subDays(new Date(), range - 1));
-      const sincePrev = startOfDay(subDays(new Date(), range * 2 - 1));
+      setError(null);
 
-      // 1. Profils créés (vrai nombre d'inscrits — source de vérité)
-      const { data: profilesData } = await supabase
-        .from("profiles")
-        .select("created_at, role")
-        .gte("created_at", since.toISOString());
+      // Fenêtres temporelles cohérentes : [since, until[ et [sincePrev, since[
+      const now = new Date();
+      const until = now;
+      const since = startOfDay(subDays(now, range - 1));
+      const sincePrev = startOfDay(subDays(since, range));
+      // Pour le filtre rôle envoyé en RPC : on n'envoie le rôle que pour les
+      // events role-aware. Pour les role-agnostic, on calcule sans filtre.
+      const rpcRole = roleFilter === "all" ? null : roleFilter;
 
-      // 2. Tous les events de la période (avec role en metadata)
-      const { data: eventsData } = await supabase
-        .from("analytics_events")
-        .select("event_type, created_at, source, metadata")
-        .gte("created_at", since.toISOString())
-        .order("created_at", { ascending: false })
-        .limit(10000);
+      try {
+        // ── 1. Profils créés (source de vérité pour les inscrits) ──
+        const profilesQuery = supabase
+          .from("profiles")
+          .select("created_at, role", { count: "exact" })
+          .gte("created_at", since.toISOString())
+          .lt("created_at", until.toISOString());
 
-      // 3. Période précédente (pour deltas)
-      const { data: prevEventsData } = await supabase
-        .from("analytics_events")
-        .select("event_type, metadata")
-        .gte("created_at", sincePrev.toISOString())
-        .lt("created_at", since.toISOString())
-        .limit(10000);
+        // ── 2. RPC : counts events filtrés par rôle ──
+        const countsRolePromise = supabase.rpc("admin_analytics_event_counts", {
+          _since: since.toISOString(),
+          _until: until.toISOString(),
+          _role: rpcRole,
+        });
+        // ── 3. RPC : counts events sans filtre (pour role-agnostic) ──
+        const countsAllPromise = supabase.rpc("admin_analytics_event_counts", {
+          _since: since.toISOString(),
+          _until: until.toISOString(),
+          _role: null,
+        });
+        // ── 4. RPC : période précédente (filtrée) ──
+        const prevCountsPromise = supabase.rpc("admin_analytics_event_counts", {
+          _since: sincePrev.toISOString(),
+          _until: since.toISOString(),
+          _role: rpcRole,
+        });
+        const prevCountsAllPromise = supabase.rpc("admin_analytics_event_counts", {
+          _since: sincePrev.toISOString(),
+          _until: since.toISOString(),
+          _role: null,
+        });
+        // ── 5. RPC : daily ──
+        const dailyPromise = supabase.rpc("admin_analytics_daily_events", {
+          _since: since.toISOString(),
+          _until: until.toISOString(),
+          _role: rpcRole,
+        });
+        // ── 6. RPC : top sources (toujours non filtré par rôle car page_view est role-agnostic) ──
+        const topPromise = supabase.rpc("admin_analytics_top_sources", {
+          _since: since.toISOString(),
+          _until: until.toISOString(),
+          _role: null,
+          _limit: 15,
+        });
+        // ── 7. RPC : breakdown par rôle ──
+        const breakdownPromise = supabase.rpc("admin_analytics_role_breakdown", {
+          _since: since.toISOString(),
+          _until: until.toISOString(),
+        });
+        // ── 8. Santé tracking ──
+        const lastEvPromise = supabase
+          .from("analytics_events")
+          .select("created_at")
+          .order("created_at", { ascending: false })
+          .limit(1);
+        const last24h = subDays(now, 1);
+        const count24hPromise = supabase
+          .from("analytics_events")
+          .select("*", { count: "exact", head: true })
+          .gte("created_at", last24h.toISOString());
 
-      // 4. Santé du tracking
-      const { data: lastEv } = await supabase
-        .from("analytics_events")
-        .select("created_at")
-        .order("created_at", { ascending: false })
-        .limit(1);
+        const [
+          { data: profilesData, error: profilesErr },
+          { data: countsRole, error: countsRoleErr },
+          { data: countsAll, error: countsAllErr },
+          { data: prevCounts, error: prevCountsErr },
+          { data: prevCountsAll, error: prevCountsAllErr },
+          { data: dailyData, error: dailyErr },
+          { data: topData, error: topErr },
+          { data: breakdownData, error: breakdownErr },
+          { data: lastEv },
+          { count: count24h },
+        ] = await Promise.all([
+          profilesQuery,
+          countsRolePromise,
+          countsAllPromise,
+          prevCountsPromise,
+          prevCountsAllPromise,
+          dailyPromise,
+          topPromise,
+          breakdownPromise,
+          lastEvPromise,
+          count24hPromise,
+        ]);
 
-      const last24h = subDays(new Date(), 1);
-      const { count: count24h } = await supabase
-        .from("analytics_events")
-        .select("*", { count: "exact", head: true })
-        .gte("created_at", last24h.toISOString());
-
-      setTrackingHealth({
-        lastEvent: lastEv?.[0]?.created_at ? new Date(lastEv[0].created_at) : null,
-        eventsCount24h: count24h ?? 0,
-      });
-
-      // ── Filtre par rôle (lit metadata.role) ──
-      const matchRole = (e: any) => {
-        if (roleFilter === "all") return true;
-        const r = e?.metadata?.role;
-        return r === roleFilter;
-      };
-
-      const filteredEvents = (eventsData || []).filter(matchRole);
-      const filteredPrev = (prevEventsData || []).filter(matchRole);
-
-      // ── Daily aggregates (inscrits filtrés par rôle si demandé) ──
-      const dayMap = new Map<string, DailyStat>();
-      for (let i = 0; i < range; i++) {
-        const d = format(subDays(new Date(), i), "yyyy-MM-dd");
-        dayMap.set(d, { jour: d, inscrits: 0, page_views: 0, signup_started: 0, signup_completed: 0 });
-      }
-
-      const filteredProfiles = (profilesData || []).filter(p =>
-        roleFilter === "all" ? true : p.role === roleFilter
-      );
-
-      filteredProfiles.forEach((p) => {
-        const k = format(new Date(p.created_at!), "yyyy-MM-dd");
-        const row = dayMap.get(k);
-        if (row) row.inscrits++;
-      });
-
-      filteredEvents.forEach((e) => {
-        const k = format(new Date(e.created_at!), "yyyy-MM-dd");
-        const row = dayMap.get(k);
-        if (!row) return;
-        if (e.event_type === "page_view") row.page_views++;
-        if (e.event_type === "signup_started") row.signup_started++;
-        if (e.event_type === "signup_completed" || e.event_type === "onboarding_completed") {
-          row.signup_completed++;
+        const firstErr = profilesErr || countsRoleErr || countsAllErr || prevCountsErr || prevCountsAllErr || dailyErr || topErr || breakdownErr;
+        if (firstErr) {
+          throw new Error(firstErr.message);
         }
-      });
 
-      setDaily(Array.from(dayMap.values()).sort((a, b) => a.jour.localeCompare(b.jour)));
-      setTotalInscrits(filteredProfiles.length);
+        // Tracking health
+        setTrackingHealth({
+          lastEvent: lastEv?.[0]?.created_at ? new Date(lastEv[0].created_at) : null,
+          eventsCount24h: count24h ?? 0,
+        });
 
-      // ── Compteurs funnel (current period) ──
-      const counts: FunnelCounts = {};
-      const prevCounts: FunnelCounts = {};
-      let pv = 0;
-      let prevPv = 0;
-      FUNNEL_STEPS.forEach(s => { counts[s.key] = 0; prevCounts[s.key] = 0; });
+        // Profils filtrés par rôle
+        const filteredProfiles = (profilesData || []).filter((p: any) =>
+          roleFilter === "all" ? true : p.role === roleFilter
+        );
+        setTotalInscrits(filteredProfiles.length);
 
-      filteredEvents.forEach((e) => {
-        if (e.event_type === "page_view") pv++;
-        if (counts[e.event_type] !== undefined) counts[e.event_type]++;
-      });
-      filteredPrev.forEach((e) => {
-        if (e.event_type === "page_view") prevPv++;
-        if (prevCounts[e.event_type] !== undefined) prevCounts[e.event_type]++;
-      });
+        // Map des counts (role-aware vs role-agnostic)
+        const roleMap = new Map<string, number>();
+        (countsRole || []).forEach((r: any) => roleMap.set(r.event_type, Number(r.cnt)));
+        const allMap = new Map<string, number>();
+        (countsAll || []).forEach((r: any) => allMap.set(r.event_type, Number(r.cnt)));
+        const prevRoleMap = new Map<string, number>();
+        (prevCounts || []).forEach((r: any) => prevRoleMap.set(r.event_type, Number(r.cnt)));
+        const prevAllMap = new Map<string, number>();
+        (prevCountsAll || []).forEach((r: any) => prevAllMap.set(r.event_type, Number(r.cnt)));
 
-      setFunnelCounts(counts);
-      setPreviousFunnel(prevCounts);
-      setPageViews(pv);
-      setPreviousPageViews(prevPv);
+        // Pour chaque step : si role-agnostic, on prend allMap (sinon le filtre fausse tout).
+        // Sinon on prend roleMap.
+        const counts: FunnelCounts = {};
+        const prevC: FunnelCounts = {};
+        FUNNEL_STEPS.forEach((s) => {
+          const useAll = ROLE_AGNOSTIC_EVENTS.has(s.key);
+          counts[s.key] = (useAll ? allMap : roleMap).get(s.key) || 0;
+          prevC[s.key] = (useAll ? prevAllMap : prevRoleMap).get(s.key) || 0;
+        });
+        setFunnelCounts(counts);
+        setPreviousFunnel(prevC);
+        // page_views : toujours allMap
+        setPageViews(allMap.get("page_view") || 0);
+        setPreviousPageViews(prevAllMap.get("page_view") || 0);
 
-      // ── Drop-off par rôle (pour comparaison Propriétaire vs Gardien) ──
-      const byRole: Record<string, FunnelCounts> = {
-        owner: {},
-        sitter: {},
-        both: {},
-      };
-      ["owner", "sitter", "both"].forEach(r =>
-        FUNNEL_STEPS.forEach(s => { byRole[r][s.key] = 0; })
-      );
-      (eventsData || []).forEach((e: any) => {
-        const r = e?.metadata?.role;
-        if (!r || !byRole[r]) return;
-        if (byRole[r][e.event_type] !== undefined) byRole[r][e.event_type]++;
-      });
-      setStepDropoffByRole(byRole);
+        // Daily : compléter les jours sans events à 0 + ajouter inscrits
+        const dayMap = new Map<string, DailyStat>();
+        for (let i = 0; i < range; i++) {
+          const d = format(subDays(now, i), "yyyy-MM-dd");
+          dayMap.set(d, { jour: d, inscrits: 0, page_views: 0, signup_started: 0, signup_completed: 0 });
+        }
+        (dailyData || []).forEach((r: any) => {
+          const k = r.jour;
+          const row = dayMap.get(k);
+          if (!row) return;
+          row.page_views = Number(r.page_views) || 0;
+          row.signup_started = Number(r.signup_started) || 0;
+          row.signup_completed = Number(r.signup_completed) || 0;
+        });
+        filteredProfiles.forEach((p: any) => {
+          const k = format(new Date(p.created_at), "yyyy-MM-dd");
+          const row = dayMap.get(k);
+          if (row) row.inscrits++;
+        });
+        setDaily(Array.from(dayMap.values()).sort((a, b) => a.jour.localeCompare(b.jour)));
 
-      // ── Top pages (sources normalisées) ──
-      // normalizeSource() retourne TOUJOURS une chaîne : les sources vides
-      // ou non reconnues sont regroupées sous UNKNOWN_SOURCE_LABEL afin de
-      // ne pas perdre de page_view dans le total.
-      const pageCount = new Map<string, number>();
-      filteredEvents.forEach((e) => {
-        if (e.event_type !== "page_view") return;
-        const normalized = normalizeSource(e.source);
-        pageCount.set(normalized, (pageCount.get(normalized) || 0) + 1);
-      });
-      setTopPages(
-        Array.from(pageCount.entries())
-          .map(([path, views]) => ({ path, views }))
-          .sort((a, b) => b.views - a.views)
-          .slice(0, 15)
-      );
+        // Top pages
+        setTopPages((topData || []).map((r: any) => ({ path: r.path, views: Number(r.views) })));
 
-      setLoading(false);
+        // Breakdown par rôle
+        const byRole: Record<string, FunnelCounts> = { owner: {}, sitter: {}, both: {} };
+        ["owner", "sitter", "both"].forEach((r) =>
+          FUNNEL_STEPS.forEach((s) => { byRole[r][s.key] = 0; })
+        );
+        (breakdownData || []).forEach((r: any) => {
+          if (!byRole[r.role]) return;
+          if (byRole[r.role][r.event_type] !== undefined) {
+            byRole[r.role][r.event_type] = Number(r.cnt);
+          }
+        });
+        setStepDropoffByRole(byRole);
+      } catch (e: any) {
+        setError(e?.message || "Erreur de chargement");
+      } finally {
+        setLoading(false);
+      }
     };
     load();
   }, [range, roleFilter]);
@@ -272,47 +255,41 @@ const AdminAnalytics = () => {
   const trackingOK = trackingHealth.lastEvent && (Date.now() - trackingHealth.lastEvent.getTime()) < 60 * 60 * 1000;
 
   // ── KPIs de conversion ──
-  // IMPORTANT : `signup_form_submitted` et `signup_email_confirmed` sont sous-comptés
-  // (form_submitted = uniquement signup email/mdp réussis ; email_confirmed = uniquement
-  // depuis lien email, pas Google OAuth historique). On utilise `totalInscrits` (table
-  // profiles = source de vérité absolue) comme dénominateur des étapes en aval.
   const kpis = useMemo(() => {
     const started = funnelCounts.signup_started || 0;
     const formSubmitted = funnelCounts.signup_form_submitted || 0;
-    // Pivot fiable : nombre réel d'inscrits (table profiles)
     const realSignups = totalInscrits;
     const onboardingCompleted = funnelCounts.onboarding_completed || 0;
     const firstAction = funnelCounts.first_action || 0;
     const clamp = (v: number) => Math.min(100, Math.max(0, v));
 
     return {
-      // % de visites /inscription qui ont réellement créé un compte (vrai pivot)
       signupConversionRate: started > 0 ? clamp(Math.round((realSignups / started) * 100)) : 0,
-      // Form submission rate : reste indicatif (event optionnel)
       formSubmissionRate: started > 0 ? clamp(Math.round((formSubmitted / started) * 100)) : 0,
-      // Activation : onboarding terminé / inscrits réels
       activationRate: realSignups > 0 ? clamp(Math.round((onboardingCompleted / realSignups) * 100)) : 0,
-      // Action profonde : 1ère action / onboarding terminé
       deepActivationRate: onboardingCompleted > 0 ? clamp(Math.round((firstAction / onboardingCompleted) * 100)) : 0,
-      // Conversion globale : 1ère action / visites
       globalConversion: started > 0 ? clamp(Math.round((firstAction / started) * 100)) : 0,
     };
   }, [funnelCounts, totalInscrits]);
 
-  // ── Funnel data pour BarChart horizontal ──
-  // On remplace `signup_form_submitted` et `signup_email_confirmed` (sous-comptés)
-  // par une étape pivot synthétique "Inscrits (profil créé)" basée sur la table
-  // profiles, qui est la seule source fiable. Les events restent disponibles dans
-  // les KPIs détaillés ci-dessus pour qui veut les inspecter.
   const funnelChartData = useMemo(() => {
+    const colors = [
+      "hsl(var(--muted-foreground))",
+      "hsl(var(--primary) / 0.5)",
+      "hsl(var(--primary) / 0.65)",
+      "hsl(var(--primary) / 0.8)",
+      "hsl(var(--primary) / 0.85)",
+      "hsl(var(--primary) / 0.9)",
+      "hsl(var(--primary))",
+    ];
     return [
-      { etape: "1. Visite /inscription", count: funnelCounts.signup_started || 0, color: "hsl(var(--muted-foreground))" },
-      { etape: "2. Rôle choisi", count: funnelCounts.signup_role_selected || 0, color: "hsl(var(--primary) / 0.5)" },
-      { etape: "3. Formulaire envoyé", count: funnelCounts.signup_form_submitted || 0, color: "hsl(var(--primary) / 0.65)" },
-      { etape: "4. Compte créé (réel)", count: totalInscrits, color: "hsl(var(--primary) / 0.8)" },
-      { etape: "5. Onboarding ouvert", count: funnelCounts.onboarding_started || 0, color: "hsl(var(--primary) / 0.85)" },
-      { etape: "6. Onboarding terminé", count: funnelCounts.onboarding_completed || 0, color: "hsl(var(--primary) / 0.9)" },
-      { etape: "7. 1ère action", count: funnelCounts.first_action || 0, color: "hsl(var(--primary))" },
+      { etape: "1. Visite /inscription", count: funnelCounts.signup_started || 0, color: colors[0] },
+      { etape: "2. Rôle choisi", count: funnelCounts.signup_role_selected || 0, color: colors[1] },
+      { etape: "3. Formulaire envoyé", count: funnelCounts.signup_form_submitted || 0, color: colors[2] },
+      { etape: "4. Compte créé (réel)", count: totalInscrits, color: colors[3] },
+      { etape: "5. Onboarding ouvert", count: funnelCounts.onboarding_started || 0, color: colors[4] },
+      { etape: "6. Onboarding terminé", count: funnelCounts.onboarding_completed || 0, color: colors[5] },
+      { etape: "7. 1ère action", count: funnelCounts.first_action || 0, color: colors[6] },
     ];
   }, [funnelCounts, totalInscrits]);
 
@@ -342,7 +319,19 @@ const AdminAnalytics = () => {
         </div>
       </div>
 
-      {!trackingOK && (
+      {error && (
+        <Card className="border-destructive bg-destructive/5">
+          <CardContent className="flex items-start gap-3 p-4">
+            <AlertCircle className="h-5 w-5 text-destructive shrink-0 mt-0.5" />
+            <div className="text-sm">
+              <p className="font-medium text-destructive">Chargement impossible</p>
+              <p className="text-muted-foreground mt-0.5">{error}</p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {!trackingOK && !error && (
         <Card className="border-destructive bg-destructive/5">
           <CardContent className="flex items-start gap-3 p-4">
             <AlertCircle className="h-5 w-5 text-destructive shrink-0 mt-0.5" />
@@ -607,7 +596,7 @@ const StatCard = ({ label, value, delta, icon: Icon, hint }: {
       </div>
       <div className="text-2xl font-bold text-foreground tabular-nums">{value}</div>
       {delta !== null && (
-        <div className={`flex items-center gap-1 text-xs mt-1 ${delta > 0 ? "text-green-600" : delta < 0 ? "text-destructive" : "text-muted-foreground"}`}>
+        <div className={`flex items-center gap-1 text-xs mt-1 ${delta > 0 ? "text-success" : delta < 0 ? "text-destructive" : "text-muted-foreground"}`}>
           {delta > 0 ? <TrendingUp className="h-3 w-3" /> : delta < 0 ? <TrendingDown className="h-3 w-3" /> : null}
           <span>{delta > 0 ? "+" : ""}{delta}% vs période préc.</span>
         </div>
@@ -619,8 +608,8 @@ const StatCard = ({ label, value, delta, icon: Icon, hint }: {
 
 const ConversionTile = ({ label, value, hint }: { label: string; value: number; hint: string }) => {
   const colorClass =
-    value >= 50 ? "text-green-600" :
-    value >= 25 ? "text-amber-600" :
+    value >= 50 ? "text-success" :
+    value >= 25 ? "text-warning" :
     "text-destructive";
   return (
     <div className="bg-muted/40 rounded-lg p-3 border border-border">
