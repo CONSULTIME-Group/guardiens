@@ -139,8 +139,14 @@ const CreateSmallMission = () => {
             <h2 className="font-heading font-bold text-foreground">L'entraide, c'est l'esprit Guardiens</h2>
           </div>
           <p className="text-sm text-muted-foreground">
-            Les petites missions, c'est l'entraide de quartier. Pas de l'argent, pas du travail — du lien.
+            Les petites missions, c'est l'entraide entre gens du coin. Pas de l'argent, pas du travail — du lien.
             Vous proposez un coup de main, l'autre vous offre un bon repas, des légumes du jardin, ou simplement sa gratitude.
+          </p>
+          <p className="text-sm text-muted-foreground">
+            <span className="font-medium text-foreground">À noter :</span> les petites missions sont des coups de main ponctuels, sans nuitée chez la personne. Pour une garde avec hébergement, passez par une annonce de garde dédiée.
+          </p>
+          <p className="inline-block text-xs font-medium bg-badge-success text-badge-success-foreground px-3 py-1 rounded-full mt-1">
+            Gratuit à vie, pour tout le monde.
           </p>
         </div>
 
@@ -158,11 +164,11 @@ const CreateSmallMission = () => {
                 <div className="flex gap-2">
                   <Button type="button" variant={missionType === "besoin" ? "default" : "outline"} size="sm" className="flex-1"
                     onClick={() => setMissionType("besoin")}>
-                    🔍 J'ai besoin d'aide
+                    J'ai besoin d'aide
                   </Button>
                   <Button type="button" variant={missionType === "offre" ? "default" : "outline"} size="sm" className="flex-1"
                     onClick={() => setMissionType("offre")}>
-                    🤝 Je propose mon aide
+                    Je propose mon aide
                   </Button>
                 </div>
               </div>
