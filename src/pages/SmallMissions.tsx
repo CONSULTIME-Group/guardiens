@@ -586,18 +586,18 @@ const SmallMissions = () => {
               <AccessGateBanner level={accessLevel} profileCompletion={profileCompletion} context="mission" />
             )}
 
-            {/* Skill prompt */}
-            {isAuthenticated && mySkills.length === 0 && !skillPromptDismissed && (
-              <div className="bg-muted rounded-xl p-4 flex items-start gap-3">
+            {/* Skill prompt — uniquement en mode "offer" pour éviter le doublon avec le toggle dispo */}
+            {isAuthenticated && mode === "offer" && mySkills.length === 0 && !skillPromptDismissed && (
+              <div className="bg-primary/5 border border-primary/20 rounded-xl p-4 flex items-start gap-3">
                 <div className="flex-1">
                   <p className="text-sm text-foreground font-medium">
-                    Déclarez vos compétences pour voir en priorité les échanges qui vous correspondent.
+                    Osez dire ce que vous savez faire. Même un petit talent peut changer la semaine de quelqu'un.
                   </p>
                   <button onClick={openOfferDialog} className="text-sm text-primary font-semibold mt-1 inline-block hover:underline">
                     Déclarer mes compétences →
                   </button>
                 </div>
-                <button onClick={dismissSkillPrompt} className="text-muted-foreground hover:text-foreground shrink-0">
+                <button onClick={dismissSkillPrompt} className="text-muted-foreground hover:text-foreground shrink-0" aria-label="Fermer">
                   <X className="h-4 w-4" />
                 </button>
               </div>
@@ -634,8 +634,8 @@ const SmallMissions = () => {
                       }}
                       className="flex-1 h-2 accent-[hsl(var(--primary))] cursor-pointer"
                     />
-                    <span className="text-xs font-medium text-foreground whitespace-nowrap min-w-[50px] text-right">
-                      {radiusKm === 0 ? "∞" : `${radiusKm} km`}
+                    <span className="text-xs font-medium text-foreground whitespace-nowrap min-w-[60px] text-right">
+                      {radiusKm === 0 ? "Partout" : `${radiusKm} km`}
                     </span>
                   </div>
                   {geocodingOrigin && (
@@ -687,9 +687,9 @@ const SmallMissions = () => {
 
             {/* ═══ Section 1 — Missions près de chez vous ═══ */}
             <h2 className="text-base font-semibold text-foreground mb-4 flex items-center gap-2">
-              Missions près de chez vous
+              {mode === "offer" ? "Demandes du coin à aider" : "Demandes près de chez vous"}
               <span className="text-xs font-normal bg-muted text-muted-foreground px-2 py-0.5 rounded-full">
-                {missionCount} mission{missionCount > 1 ? "s" : ""}
+                {missionCount} demande{missionCount > 1 ? "s" : ""}
               </span>
             </h2>
 
@@ -757,7 +757,7 @@ const SmallMissions = () => {
                                   setDialogTarget({ id: m.user_id, name: (m.profiles as any)?.first_name || "ce membre" });
                                 }}
                               >
-                                Proposer un échange →
+                                {mode === "offer" ? "Je peux aider →" : "Proposer un échange →"}
                               </Button>
                             )
                           )}
@@ -770,25 +770,37 @@ const SmallMissions = () => {
             ) : (
               <div className="rounded-2xl border border-dashed border-primary/30 bg-primary/5 p-8 text-center space-y-3">
                 <p className="font-heading text-lg font-semibold text-foreground">
-                  Personne n'a encore osé près de chez vous.
+                  {mode === "offer"
+                    ? "Aucune demande pour le moment près de chez vous."
+                    : "Personne n'a encore osé près de chez vous."}
                 </p>
                 <p className="text-sm text-muted-foreground max-w-md mx-auto">
-                  Soyez la première personne à publier. Une demande d'aujourd'hui, c'est des gens du coin qui la voient demain — et souvent une rencontre qui change la semaine.
+                  {mode === "offer"
+                    ? "Rendez-vous visible : indiquez vos disponibilités juste en dessous. Quand une demande arrivera, vous serez la première personne à qui l'on pense."
+                    : "Soyez la première personne à publier. Une demande d'aujourd'hui, c'est des gens du coin qui la voient demain — et souvent une rencontre qui change la semaine."}
                 </p>
-                <Link to="/petites-missions/creer" className="inline-block">
-                  <Button variant="hero" size="lg" className="mt-2">
-                    J'ose, je publie ma demande
+                {mode === "need" && (
+                  <Link to="/petites-missions/creer" className="inline-block">
+                    <Button variant="hero" size="lg" className="mt-2">
+                      J'ose, je publie ma demande
+                      <ArrowRight className="ml-2 h-4 w-4" />
+                    </Button>
+                  </Link>
+                )}
+                {mode === "offer" && (
+                  <Button variant="hero" size="lg" className="mt-2" onClick={openOfferDialog}>
+                    J'ai du temps à offrir
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
-                </Link>
+                )}
               </div>
             )}
 
             {/* ═══ Section 2 — Disponibles pour aider ═══ */}
             {(helperCount > 0 || isAuthenticated) && (
               <div className="mt-10">
-                {/* Toggle dispo */}
-                {isAuthenticated && (
+                {/* Toggle dispo — uniquement en mode "offer" pour rester cohérent avec l'intention */}
+                {isAuthenticated && mode === "offer" && (
                   <div className="bg-primary/5 border border-primary/20 rounded-xl p-3 mb-4 flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <Switch
@@ -804,7 +816,7 @@ const SmallMissions = () => {
                       <p className="text-sm text-foreground">
                         {(currentUserProfile as any)?.available_for_help
                           ? "Vous êtes visible — disponible pour aider"
-                          : "Indiquez-vous comme disponible pour aider"}
+                          : "Rendez-vous visible auprès des gens du coin"}
                       </p>
                     </div>
                     {(currentUserProfile as any)?.available_for_help && (
@@ -815,7 +827,7 @@ const SmallMissions = () => {
                   </div>
                 )}
                 <h2 className="text-base font-semibold text-foreground mb-4 flex items-center gap-2">
-                  Disponibles pour aider
+                  {mode === "need" ? "Des gens du coin prêts à aider" : "Autres personnes disponibles"}
                   <span className="text-xs font-normal bg-muted text-muted-foreground px-2 py-0.5 rounded-full">
                     {helperCount} personne{helperCount > 1 ? "s" : ""} du coin
                   </span>
@@ -862,7 +874,7 @@ const SmallMissions = () => {
                         {h.sits_count > 0 && (
                           <p className="text-xs text-foreground/60 flex items-center gap-1">
                             <Star className="h-3 w-3 fill-primary text-primary" />
-                            {h.review_count > 0 ? `${h.review_avg.toFixed(1)} · ` : ""}{h.sits_count} garde{h.sits_count > 1 ? "s" : ""}
+                            {h.review_count > 0 ? `${h.review_avg.toFixed(1)} · ` : ""}{h.sits_count} mission{h.sits_count > 1 ? "s" : ""} accomplie{h.sits_count > 1 ? "s" : ""}
                           </p>
                         )}
                         {/* Compétences spécifiques (au-delà des catégories) */}
@@ -932,6 +944,30 @@ const SmallMissions = () => {
                           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
                             {complementaryHelpers.map(renderHelperCard)}
                           </div>
+                        </div>
+                      )}
+
+                      {/* Empty state — personne de disponible dans le rayon */}
+                      {priorityHelpers.length === 0 && complementaryHelpers.length === 0 && (
+                        <div className="rounded-2xl border border-dashed border-primary/30 bg-primary/5 p-8 text-center space-y-3">
+                          <p className="font-heading text-lg font-semibold text-foreground">
+                            {mode === "offer"
+                              ? "Vous seriez la première personne disponible ici."
+                              : "Personne ne s'est encore déclaré disponible près de chez vous."}
+                          </p>
+                          <p className="text-sm text-muted-foreground max-w-md mx-auto">
+                            {mode === "offer"
+                              ? "Activez votre disponibilité ci-dessus : votre présence donne envie aux autres d'oser à leur tour."
+                              : "Élargissez le rayon, ou publiez votre demande : les personnes du coin reçoivent une alerte et se manifestent souvent dans la journée."}
+                          </p>
+                          {mode === "need" && (
+                            <Link to="/petites-missions/creer" className="inline-block">
+                              <Button variant="hero" size="lg" className="mt-2">
+                                J'ose, je publie ma demande
+                                <ArrowRight className="ml-2 h-4 w-4" />
+                              </Button>
+                            </Link>
+                          )}
                         </div>
                       )}
                     </div>
