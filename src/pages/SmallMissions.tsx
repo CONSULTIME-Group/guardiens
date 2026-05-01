@@ -752,12 +752,18 @@ const SmallMissions = () => {
                 })}
               </div>
             ) : (
-              <div>
-                <p className="text-sm text-muted-foreground">
-                  Aucune mission publiée près de chez vous.
+              <div className="rounded-2xl border border-dashed border-primary/30 bg-primary/5 p-8 text-center space-y-3">
+                <p className="font-heading text-lg font-semibold text-foreground">
+                  Personne n'a encore osé près de chez vous.
                 </p>
-                <Link to="/petites-missions/creer" className="text-sm text-primary underline mt-1 inline-block">
-                  Publiez la vôtre →
+                <p className="text-sm text-muted-foreground max-w-md mx-auto">
+                  Soyez la première personne à publier. Une demande d'aujourd'hui, c'est des gens du coin qui la voient demain — et souvent une rencontre qui change la semaine.
+                </p>
+                <Link to="/petites-missions/creer" className="inline-block">
+                  <Button variant="hero" size="lg" className="mt-2">
+                    J'ose, je publie ma demande
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
                 </Link>
               </div>
             )}
