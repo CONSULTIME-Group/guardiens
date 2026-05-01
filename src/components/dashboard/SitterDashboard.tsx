@@ -318,17 +318,19 @@ const SitterDashboard = () => {
         {ChecklistBlock}
         {CtaBlock}
         {buildStatusBlock(false)}
-        {hasEmergencyProfile && (
+        {/* Emergency : un seul bloc — soit le dashboard si actif, soit l'éligibilité */}
+        {hasEmergencyProfile ? (
           <div className="px-4 sm:px-5 md:px-8 mb-6 md:mb-8">
             <EmergencyDashSection />
           </div>
+        ) : (
+          buildEmergencyBlock(false)
         )}
         {buildBadgesBlock(false)}
         <section aria-labelledby="nearby-heading">
           <h2 id="nearby-heading" className="sr-only">Près de chez vous</h2>
           <SitterBottomColumns nearbyListings={nearbyListings} nearbyMissions={nearbyMissions} postalCode={postalCode} />
         </section>
-        {buildEmergencyBlock(false)}
         {articles.length > 0 && (
           <section aria-labelledby="articles-heading" className="px-4 sm:px-5 md:px-8 mb-6 md:mb-8">
             <div className="flex items-center justify-between mb-4">
