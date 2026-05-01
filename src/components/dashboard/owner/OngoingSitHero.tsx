@@ -120,16 +120,16 @@ const OngoingSitHero = memo(({ sit, sitterProfiles, coverPhoto }: OngoingSitHero
                   {sitterName} s'occupe de vos animaux
                 </h3>
                 <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
-                  {sit.end_date && (
-                    <span className="flex items-center gap-1 min-w-0">
+                {sit.end_date && (
+                    <span className="flex items-center gap-1 min-w-0 max-w-full">
                       <Calendar className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
-                      {/* Mobile : version courte ; sm+ : version longue */}
-                      <span className="sm:hidden truncate">
+                      {/* Mobile : version ultra-courte, jamais de wrap */}
+                      <span className="sm:hidden truncate whitespace-nowrap">
                         {daysLeft !== null && daysLeft > 0
-                          ? `Encore ${daysLeft} j · fin ${endLabelShort}`
-                          : `Dernier jour · fin ${endLabelShort}`}
+                          ? `${daysLeft} j · ${endLabelShort}`
+                          : `Dernier jour · ${endLabelShort}`}
                       </span>
-                      <span className="hidden sm:inline truncate">
+                      <span className="hidden sm:inline truncate whitespace-nowrap">
                         {daysLeft !== null && daysLeft > 0
                           ? `Encore ${daysLeft} jour${daysLeft > 1 ? "s" : ""} — fin ${endLabelLong}`
                           : `Dernier jour — fin ${endLabelLong}`}
