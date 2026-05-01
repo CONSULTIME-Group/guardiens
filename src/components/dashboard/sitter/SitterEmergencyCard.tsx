@@ -86,7 +86,7 @@ const SitterEmergencyCard = ({ hasEmergencyProfile }: SitterEmergencyCardProps) 
   useEffect(() => { load(); }, [user]);
 
   const handleSave = async () => {
-    if (!user || !profile) return;
+    if (!user || !profile || previewMode) return;
     setSaving(true);
     await supabase.from("emergency_sitter_profiles").update({
       radius_km: radius[0],
@@ -100,7 +100,7 @@ const SitterEmergencyCard = ({ hasEmergencyProfile }: SitterEmergencyCardProps) 
   };
 
   const handleToggleActive = async (active: boolean) => {
-    if (!user) return;
+    if (!user || previewMode) return;
     await supabase.from("emergency_sitter_profiles").update({ is_active: active } as any).eq("user_id", user.id);
     setProfile((prev: any) => ({ ...prev, is_active: active }));
     toast({ title: active ? "Mode urgence réactivé" : "Mode urgence désactivé" });
