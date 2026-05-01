@@ -393,21 +393,21 @@ const SmallMissionsPublic = () => {
           <div className="max-w-2xl mx-auto px-6 py-24 md:py-32 text-center">
             <Reveal>
               <h2 className="font-heading text-4xl md:text-5xl font-bold text-white leading-tight mb-6">
-                Le premier échange est souvent le plus simple.
+                Osez. Vraiment.<br />Personne ne vous jugera.
               </h2>
             </Reveal>
             <Reveal delay={0.1}>
               <p className="font-body text-lg text-white/85 leading-relaxed mb-10">
-                À 0 €. Pour tous. Pour toujours. Entre gens du coin qui se choisissent.
+                Le pire qui puisse arriver, c'est que personne ne réponde. Le meilleur, c'est de rencontrer quelqu'un qui change votre semaine. À 0 €. Pour tous. Pour toujours.
               </p>
             </Reveal>
             <Reveal delay={0.2}>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Button onClick={goToCreate} className="bg-white text-primary rounded-full px-10 py-4 h-auto text-sm font-bold tracking-wide hover:bg-white/90 hover:scale-[1.02] transition-all duration-200">
-                  Je propose une mission
+                  J'ose demander
                 </Button>
                 <Button onClick={goToHelp} className="bg-transparent border-2 border-white/70 text-white rounded-full px-10 py-4 h-auto text-sm font-semibold tracking-wide hover:bg-white/15 transition-all duration-200">
-                  Je veux aider
+                  J'ai du temps à offrir
                 </Button>
               </div>
               <p className="text-xs text-white/50 mt-6">
