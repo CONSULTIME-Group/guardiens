@@ -193,10 +193,7 @@ export default function PublicSitterProfile() {
     <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
       {props.animalTypes.length > 0 && (
         <div>
-          <div className="flex items-center gap-2 mb-2.5">
-            <PawPrint className="w-4 h-4 text-primary" aria-hidden="true" />
-            <h3 className="text-sm font-semibold text-foreground font-body">Animaux acceptés</h3>
-          </div>
+          <h3 className="text-sm font-semibold text-foreground font-body mb-2.5">Animaux acceptés</h3>
           <div className="flex flex-wrap gap-1.5">
             {props.animalTypes.map(a => (
               <span key={a} className="border border-border bg-card rounded-full text-xs px-2.5 py-1 text-foreground font-body">
@@ -205,17 +202,14 @@ export default function PublicSitterProfile() {
             ))}
             {props.sitterProfile?.farm_animals_ok && (
               <span className="border border-primary text-primary rounded-full text-xs px-2.5 py-1 bg-primary/5 font-body">
-                Races exigeantes
+                Animaux de ferme
               </span>
             )}
           </div>
         </div>
       )}
       <div>
-        <div className="flex items-center gap-2 mb-2.5">
-          {props.hasVehicle ? <Car className="w-4 h-4 text-primary" aria-hidden="true" /> : <MapPin className="w-4 h-4 text-primary" aria-hidden="true" />}
-          <h3 className="text-sm font-semibold text-foreground font-body">Zone d'intervention</h3>
-        </div>
+        <h3 className="text-sm font-semibold text-foreground font-body mb-2.5">Zone d'intervention</h3>
         <p className="text-sm text-foreground/70 font-body">
           {props.hasVehicle
             ? `Avec véhicule${props.radius ? ` — rayon ${props.radius} km${props.city ? ` · ${props.city}` : ''}` : ''}`
@@ -226,10 +220,7 @@ export default function PublicSitterProfile() {
       </div>
       {props.competences.length > 0 && (
         <div>
-          <div className="flex items-center gap-2 mb-2.5">
-            <Heart className="w-4 h-4 text-primary" aria-hidden="true" />
-            <h3 className="text-sm font-semibold text-foreground font-body">Savoir-faire</h3>
-          </div>
+          <h3 className="text-sm font-semibold text-foreground font-body mb-2.5">Savoir-faire</h3>
           <div className="flex flex-wrap gap-1.5">
             {props.competences.map(c => (
               <span key={c} className="border border-border bg-card rounded-full text-xs px-2.5 py-1 text-foreground/80 font-body">{c}</span>
@@ -239,10 +230,7 @@ export default function PublicSitterProfile() {
       )}
       {props.lifestyle.length > 0 && (
         <div>
-          <div className="flex items-center gap-2 mb-2.5">
-            <Star className="w-4 h-4 text-primary" aria-hidden="true" />
-            <h3 className="text-sm font-semibold text-foreground font-body">Style de vie</h3>
-          </div>
+          <h3 className="text-sm font-semibold text-foreground font-body mb-2.5">Style de vie</h3>
           <div className="flex flex-wrap gap-1.5">
             {props.lifestyle.map(l => (
               <span key={l} className="border border-border bg-card rounded-full text-xs px-2.5 py-1 text-foreground font-body">{l}</span>
@@ -252,10 +240,7 @@ export default function PublicSitterProfile() {
       )}
       {props.preferredEnvironments.length > 0 && (
         <div>
-          <div className="flex items-center gap-2 mb-2.5">
-            <Home className="w-4 h-4 text-primary" aria-hidden="true" />
-            <h3 className="text-sm font-semibold text-foreground font-body">Environnements préférés</h3>
-          </div>
+          <h3 className="text-sm font-semibold text-foreground font-body mb-2.5">Environnements préférés</h3>
           <div className="flex flex-wrap gap-1.5">
             {props.preferredEnvironments.map(e => (
               <span key={e} className="border border-border bg-card rounded-full text-xs px-2.5 py-1 text-foreground font-body">{ENV_LABELS[e] || e}</span>
@@ -265,10 +250,7 @@ export default function PublicSitterProfile() {
       )}
       {(props.typeLine || props.durationLabel || props.frequencyLabel || props.noticeLabel) && (
         <div>
-          <div className="flex items-center gap-2 mb-2.5">
-            <BadgeCheck className="w-4 h-4 text-primary" aria-hidden="true" />
-            <h3 className="text-sm font-semibold text-foreground font-body">Profil &amp; disponibilité</h3>
-          </div>
+          <h3 className="text-sm font-semibold text-foreground font-body mb-2.5">Profil &amp; disponibilité</h3>
           <div className="text-sm text-foreground/70 font-body space-y-0.5">
             {props.typeLine && <p>{props.typeLine}</p>}
             {props.durationLabel && <p>{props.durationLabel}</p>}
@@ -662,15 +644,15 @@ export default function PublicSitterProfile() {
           url={`https://guardiens.fr/gardiens/${id}`}
         />
       )}
-      {/* Bandes latérales décoratives */}
-      <div style={{ position: 'fixed', left: 0, top: 0, bottom: 0, width: '56px', background: 'linear-gradient(to right, rgba(45,106,79,0.06), transparent)', pointerEvents: 'none', zIndex: 0 }} />
-      <div style={{ position: 'fixed', right: 0, top: 0, bottom: 0, width: '56px', background: 'linear-gradient(to left, rgba(45,106,79,0.06), transparent)', pointerEvents: 'none', zIndex: 0 }} />
-      {/* Texte vertical gauche */}
-      <div style={{ position: 'fixed', left: '10px', top: '50%', transform: 'translateY(-50%) rotate(-90deg)', fontSize: '9px', letterSpacing: '4px', textTransform: 'uppercase' as const, color: 'rgba(45,106,79,0.28)', whiteSpace: 'nowrap', pointerEvents: 'none', zIndex: 0, fontFamily: 'sans-serif' }}>
+      {/* Bandes latérales décoratives — desktop ≥ lg uniquement (sinon traversent le contenu en mobile) */}
+      <div className="hidden lg:block" style={{ position: 'fixed', left: 0, top: 0, bottom: 0, width: '56px', background: 'linear-gradient(to right, rgba(45,106,79,0.06), transparent)', pointerEvents: 'none', zIndex: 0 }} aria-hidden="true" />
+      <div className="hidden lg:block" style={{ position: 'fixed', right: 0, top: 0, bottom: 0, width: '56px', background: 'linear-gradient(to left, rgba(45,106,79,0.06), transparent)', pointerEvents: 'none', zIndex: 0 }} aria-hidden="true" />
+      {/* Texte vertical gauche — desktop ≥ lg uniquement */}
+      <div className="hidden lg:block" style={{ position: 'fixed', left: '10px', top: '50%', transform: 'translateY(-50%) rotate(-90deg)', fontSize: '9px', letterSpacing: '4px', textTransform: 'uppercase' as const, color: 'rgba(45,106,79,0.28)', whiteSpace: 'nowrap', pointerEvents: 'none', zIndex: 0, fontFamily: 'sans-serif' }} aria-hidden="true">
         Guardiens · House-sitting de proximité
       </div>
-      {/* Texte vertical droit */}
-      <div style={{ position: 'fixed', right: '10px', top: '50%', transform: 'translateY(-50%) rotate(90deg)', fontSize: '9px', letterSpacing: '4px', textTransform: 'uppercase' as const, color: 'rgba(45,106,79,0.28)', whiteSpace: 'nowrap', pointerEvents: 'none', zIndex: 0, fontFamily: 'sans-serif' }}>
+      {/* Texte vertical droit — desktop ≥ lg uniquement */}
+      <div className="hidden lg:block" style={{ position: 'fixed', right: '10px', top: '50%', transform: 'translateY(-50%) rotate(90deg)', fontSize: '9px', letterSpacing: '4px', textTransform: 'uppercase' as const, color: 'rgba(45,106,79,0.28)', whiteSpace: 'nowrap', pointerEvents: 'none', zIndex: 0, fontFamily: 'sans-serif' }} aria-hidden="true">
         Gardiens de confiance · Gens du coin
       </div>
       <PageMeta
@@ -988,8 +970,7 @@ export default function PublicSitterProfile() {
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-2.5 md:gap-3">
                   {/* Tuile 1 — Animaux acceptés */}
                   <div className="bg-card border border-border rounded-xl p-2.5 sm:p-3.5 md:p-4 flex flex-col gap-1 sm:gap-1.5 min-h-[88px] sm:min-h-[92px] min-w-0">
-                    <div className="flex items-center gap-1 sm:gap-1.5 text-[10px] sm:text-[11px] uppercase tracking-wider text-muted-foreground font-body">
-                      <PawPrint className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-primary shrink-0" aria-hidden="true" />
+                    <div className="text-[10px] sm:text-[11px] uppercase tracking-wider text-muted-foreground font-body">
                       <span className="truncate">Animaux</span>
                     </div>
                     {animalTypes.length > 0 ? (
@@ -1003,8 +984,7 @@ export default function PublicSitterProfile() {
 
                   {/* Tuile 2 — Zone d'intervention */}
                   <div className="bg-card border border-border rounded-xl p-2.5 sm:p-3.5 md:p-4 flex flex-col gap-1 sm:gap-1.5 min-h-[88px] sm:min-h-[92px] min-w-0">
-                    <div className="flex items-center gap-1 sm:gap-1.5 text-[10px] sm:text-[11px] uppercase tracking-wider text-muted-foreground font-body">
-                      {hasVehicle ? <Car className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-primary shrink-0" aria-hidden="true" /> : <MapPin className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-primary shrink-0" aria-hidden="true" />}
+                    <div className="text-[10px] sm:text-[11px] uppercase tracking-wider text-muted-foreground font-body">
                       <span className="truncate">Zone</span>
                     </div>
                     {radius || city ? (
@@ -1027,8 +1007,7 @@ export default function PublicSitterProfile() {
 
                   {/* Tuile 3 — Disponibilité */}
                   <div className="bg-card border border-border rounded-xl p-2.5 sm:p-3.5 md:p-4 flex flex-col gap-1 sm:gap-1.5 min-h-[88px] sm:min-h-[92px] min-w-0">
-                    <div className="flex items-center gap-1 sm:gap-1.5 text-[10px] sm:text-[11px] uppercase tracking-wider text-muted-foreground font-body">
-                      <BadgeCheck className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-primary shrink-0" aria-hidden="true" />
+                    <div className="text-[10px] sm:text-[11px] uppercase tracking-wider text-muted-foreground font-body">
                       <span className="truncate">Disponibilité</span>
                     </div>
                     {isAvailable ? (
@@ -1055,8 +1034,7 @@ export default function PublicSitterProfile() {
 
                   {/* Tuile 4 — Confiance / preuves */}
                   <div className="bg-card border border-border rounded-xl p-2.5 sm:p-3.5 md:p-4 flex flex-col gap-1 sm:gap-1.5 min-h-[88px] sm:min-h-[92px] min-w-0">
-                    <div className="flex items-center gap-1 sm:gap-1.5 text-[10px] sm:text-[11px] uppercase tracking-wider text-muted-foreground font-body">
-                      <Shield className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-primary shrink-0" aria-hidden="true" />
+                    <div className="text-[10px] sm:text-[11px] uppercase tracking-wider text-muted-foreground font-body">
                       <span className="truncate">Confiance</span>
                     </div>
                     {hasTrustSignals ? (
