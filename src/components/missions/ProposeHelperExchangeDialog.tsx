@@ -69,10 +69,10 @@ const ProposeHelperExchangeDialog = ({
 
       // Send structured message
       const messageContent = [
-        `💡 Proposition d'échange`,
-        `\n🔍 Ce dont j'ai besoin : ${needDescription.trim()}`,
-        `\n🎁 Ce que je propose en échange : ${exchangeOffer.trim()}`,
-        exchangeDate ? `\n📅 Date proposée : ${exchangeDate}` : "",
+        `Proposition d'échange`,
+        `\nCe dont j'ai besoin : ${needDescription.trim()}`,
+        `\nCe que je propose en échange : ${exchangeOffer.trim()}`,
+        exchangeDate ? `\nDate proposée : ${exchangeDate}` : "",
       ].filter(Boolean).join("");
 
       const { error: msgError } = await supabase.from("messages").insert({

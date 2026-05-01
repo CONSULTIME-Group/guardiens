@@ -15,30 +15,30 @@ const MISSION_BADGES = [
     label: "Coup de main en or",
     description: "Travail impeccable, sérieux",
     icon: Star,
-    bgColor: "bg-amber-50 dark:bg-amber-900/20",
-    borderColor: "border-amber-300 dark:border-amber-700",
-    iconColor: "text-amber-500",
-    selectedBg: "bg-amber-100 dark:bg-amber-900/40",
+    bgColor: "bg-warning-soft",
+    borderColor: "border-warning-border",
+    iconColor: "text-warning",
+    selectedBg: "bg-warning/15",
   },
   {
     key: "super_voisin",
     label: "Personne en or",
     description: "Sympa, ponctuel, agréable",
     icon: Heart,
-    bgColor: "bg-green-50 dark:bg-green-900/20",
-    borderColor: "border-green-300 dark:border-green-700",
-    iconColor: "text-green-500",
-    selectedBg: "bg-green-100 dark:bg-green-900/40",
+    bgColor: "bg-badge-success",
+    borderColor: "border-badge-success-foreground/20",
+    iconColor: "text-badge-success-foreground",
+    selectedBg: "bg-badge-success/80",
   },
   {
     key: "on_remet_ca",
     label: "On remet ça",
     description: "On veut retravailler ensemble",
     icon: RotateCcw,
-    bgColor: "bg-blue-50 dark:bg-blue-900/20",
-    borderColor: "border-blue-300 dark:border-blue-700",
-    iconColor: "text-blue-500",
-    selectedBg: "bg-blue-100 dark:bg-blue-900/40",
+    bgColor: "bg-primary/5",
+    borderColor: "border-primary/30",
+    iconColor: "text-primary",
+    selectedBg: "bg-primary/15",
   },
 ];
 
@@ -86,7 +86,7 @@ const MissionFeedbackModal = ({
         return;
       }
     } else {
-      toast({ title: "Merci pour votre retour ! 🙌" });
+      toast({ title: "Merci pour votre retour !" });
     }
 
     onOpenChange(false);
@@ -117,7 +117,7 @@ const MissionFeedbackModal = ({
                 }`}
               >
                 <ThumbsUp className={`h-8 w-8 ${positive === true ? "text-primary" : "text-muted-foreground"}`} />
-                <span className="text-sm font-medium">Oui 👍</span>
+                <span className="text-sm font-medium">Oui</span>
               </button>
               <button
                 onClick={() => setPositive(false)}
@@ -128,7 +128,7 @@ const MissionFeedbackModal = ({
                 }`}
               >
                 <ThumbsDown className={`h-8 w-8 ${positive === false ? "text-destructive" : "text-muted-foreground"}`} />
-                <span className="text-sm font-medium">Non 👎</span>
+                <span className="text-sm font-medium">Non</span>
               </button>
             </div>
           </div>

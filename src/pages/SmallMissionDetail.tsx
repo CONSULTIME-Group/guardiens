@@ -607,7 +607,6 @@ const SmallMissionDetail = () => {
                               <>
                                 <Button
                                   size="sm"
-                                  className="bg-green-600 hover:bg-green-700 text-white"
                                   onClick={() => handleAcceptResponse(r.id)}
                                   disabled={!!processingResponseId}
                                 >
@@ -653,7 +652,7 @@ const SmallMissionDetail = () => {
                   <div key={r.id}>
                     {feedbackSent[r.responder_id] ? (
                       <div className="bg-muted/50 rounded-xl p-4 flex items-center gap-2 text-sm text-muted-foreground">
-                        <CheckCircle2 className="h-4 w-4 text-green-600" />
+                        <CheckCircle2 className="h-4 w-4 text-badge-success-foreground" />
                         Avis envoyé pour {r.responder?.first_name}
                       </div>
                     ) : (
@@ -684,7 +683,7 @@ const SmallMissionDetail = () => {
                     <div>
                       <p className="text-sm font-medium">{fb.giver?.first_name}</p>
                       {fb.positive !== null && (
-                        <span className={`inline-flex items-center gap-1 text-xs mt-1 ${fb.positive ? "text-green-600" : "text-destructive"}`}>
+                        <span className={`inline-flex items-center gap-1 text-xs mt-1 ${fb.positive ? "text-badge-success-foreground" : "text-destructive"}`}>
                           {fb.positive ? <ThumbsUp className="h-3 w-3" /> : <ThumbsDown className="h-3 w-3" />}
                           {fb.positive ? "Positif" : "Négatif"}
                         </span>
