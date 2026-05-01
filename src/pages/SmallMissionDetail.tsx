@@ -42,22 +42,22 @@ const DURATION_LABELS: Record<string, string> = {
 };
 
 const STATUS_LABELS: Record<string, { label: string; className: string }> = {
-  open: { label: "Ouverte", className: "bg-badge-success text-badge-success-foreground" },
-  in_progress: { label: "En cours", className: "bg-primary/10 text-primary" },
+  open: { label: "Ouverte", className: "bg-success-soft text-success" },
+  in_progress: { label: "En cours", className: "bg-info-soft text-info" },
   completed: { label: "Terminée", className: "bg-muted text-muted-foreground" },
   cancelled: { label: "Annulée", className: "bg-destructive/10 text-destructive" },
 };
 
 const PUBLISHER_BADGES = [
   { key: "coup_de_main_en_or", label: "Coup de main en or", icon: Star, iconColor: "text-warning", bgColor: "bg-warning-soft", borderColor: "border-warning-border", selectedBg: "bg-warning/15" },
-  { key: "super_voisin", label: "Personne en or", icon: Heart, iconColor: "text-primary", bgColor: "bg-badge-success", borderColor: "border-badge-success-foreground/20", selectedBg: "bg-badge-success/80" },
-  { key: "on_remet_ca", label: "On remet ça", icon: RotateCcw, iconColor: "text-primary", bgColor: "bg-primary/5", borderColor: "border-primary/30", selectedBg: "bg-primary/15" },
+  { key: "super_voisin", label: "Personne en or", icon: Heart, iconColor: "text-success", bgColor: "bg-success-soft", borderColor: "border-success-border", selectedBg: "bg-success-soft/80" },
+  { key: "on_remet_ca", label: "On remet ça", icon: RotateCcw, iconColor: "text-info", bgColor: "bg-info-soft", borderColor: "border-info-border", selectedBg: "bg-info-soft/80" },
 ];
 
 const CANDIDATE_BADGES = [
   { key: "guide_aux_petits_oignons", label: "Guide aux petits oignons", icon: Star, iconColor: "text-warning", bgColor: "bg-warning-soft", borderColor: "border-warning-border", selectedBg: "bg-warning/15" },
-  { key: "toujours_joignable", label: "Toujours joignable", icon: MessageSquare, iconColor: "text-primary", bgColor: "bg-badge-success", borderColor: "border-badge-success-foreground/20", selectedBg: "bg-badge-success/80" },
-  { key: "on_reviendra", label: "On reviendra", icon: RotateCcw, iconColor: "text-primary", bgColor: "bg-primary/5", borderColor: "border-primary/30", selectedBg: "bg-primary/15" },
+  { key: "toujours_joignable", label: "Toujours joignable", icon: MessageSquare, iconColor: "text-success", bgColor: "bg-success-soft", borderColor: "border-success-border", selectedBg: "bg-success-soft/80" },
+  { key: "on_reviendra", label: "On reviendra", icon: RotateCcw, iconColor: "text-info", bgColor: "bg-info-soft", borderColor: "border-info-border", selectedBg: "bg-info-soft/80" },
 ];
 
 /* ── Inline Feedback Form ── */
@@ -484,17 +484,17 @@ const SmallMissionDetail = () => {
 
         {/* In progress banner */}
         {mission.status === "in_progress" && acceptedResponses.length > 0 && (
-          <div className="bg-badge-success border border-badge-success-foreground/20 rounded-xl p-4 mb-6">
+          <div className="bg-success-soft border border-success-border rounded-xl p-4 mb-6">
             <div className="flex items-center gap-2 mb-2">
-              <CheckCircle2 className="h-5 w-5 text-badge-success-foreground" />
-              <p className="font-medium text-badge-success-foreground">
+              <CheckCircle2 className="h-5 w-5 text-success" />
+              <p className="font-medium text-success">
                 Mission organisée avec {acceptedResponses.map(r => r.responder?.first_name).filter(Boolean).join(", ")}
               </p>
             </div>
             {isAuthor && (
               <div className="flex flex-wrap gap-2 mt-3">
                 {acceptedResponses.map(r => (
-                  <Button key={r.id} variant="outline" size="sm" onClick={() => navigate(r.conversation_id ? `/messages?c=${r.conversation_id}` : "/messages")} className="gap-2 border-badge-success-foreground/30 text-badge-success-foreground">
+                  <Button key={r.id} variant="outline" size="sm" onClick={() => navigate(r.conversation_id ? `/messages?c=${r.conversation_id}` : "/messages")} className="gap-2 border-success-border text-success">
                     {r.responder?.avatar_url ? <img src={r.responder.avatar_url} className="w-5 h-5 rounded-full object-cover" /> : null}
                     {r.responder?.first_name} — Messagerie
                   </Button>
@@ -623,7 +623,7 @@ const SmallMissionDetail = () => {
                               </>
                             )}
                             {r.status === "accepted" && (
-                              <span className="text-xs font-medium text-badge-success-foreground bg-badge-success px-2 py-1 rounded-full">Acceptée</span>
+                              <span className="text-xs font-medium text-success bg-success-soft px-2 py-1 rounded-full">Acceptée</span>
                             )}
                             {r.status === "declined" && (
                               <span className="text-xs font-medium text-destructive bg-destructive/10 px-2 py-1 rounded-full">Non retenu(e)</span>
@@ -652,7 +652,7 @@ const SmallMissionDetail = () => {
                   <div key={r.id}>
                     {feedbackSent[r.responder_id] ? (
                       <div className="bg-muted/50 rounded-xl p-4 flex items-center gap-2 text-sm text-muted-foreground">
-                        <CheckCircle2 className="h-4 w-4 text-badge-success-foreground" />
+                        <CheckCircle2 className="h-4 w-4 text-success" />
                         Avis envoyé pour {r.responder?.first_name}
                       </div>
                     ) : (
@@ -683,7 +683,7 @@ const SmallMissionDetail = () => {
                     <div>
                       <p className="text-sm font-medium">{fb.giver?.first_name}</p>
                       {fb.positive !== null && (
-                        <span className={`inline-flex items-center gap-1 text-xs mt-1 ${fb.positive ? "text-badge-success-foreground" : "text-destructive"}`}>
+                        <span className={`inline-flex items-center gap-1 text-xs mt-1 ${fb.positive ? "text-success" : "text-destructive"}`}>
                           {fb.positive ? <ThumbsUp className="h-3 w-3" /> : <ThumbsDown className="h-3 w-3" />}
                           {fb.positive ? "Positif" : "Négatif"}
                         </span>
@@ -706,9 +706,9 @@ const SmallMissionDetail = () => {
             {/* Accepted */}
             {myResponse.status === "accepted" && mission.status === "in_progress" && (
               <>
-                <div className="bg-badge-success border border-badge-success-foreground/20 rounded-xl p-4 flex items-center gap-2">
-                  <CheckCircle2 className="h-5 w-5 text-badge-success-foreground" />
-                  <p className="font-medium text-badge-success-foreground">Proposition acceptée</p>
+                <div className="bg-success-soft border border-success-border rounded-xl p-4 flex items-center gap-2">
+                  <CheckCircle2 className="h-5 w-5 text-success" />
+                  <p className="font-medium text-success">Proposition acceptée</p>
                 </div>
                 <Button onClick={() => navigate("/messages")} className="w-full gap-2">
                   <MessageSquare className="h-4 w-4" /> Aller dans la messagerie
@@ -721,7 +721,7 @@ const SmallMissionDetail = () => {
               <>
                 {feedbackSent[mission.user_id] ? (
                   <div className="bg-muted/50 rounded-xl p-4 flex items-center gap-2 text-sm text-muted-foreground">
-                    <CheckCircle2 className="h-4 w-4 text-badge-success-foreground" />
+                    <CheckCircle2 className="h-4 w-4 text-success" />
                     Vous avez donné votre avis — merci !
                   </div>
                 ) : (
@@ -769,9 +769,9 @@ const SmallMissionDetail = () => {
 
             {/* Pending */}
             {myResponse.status === "pending" && mission.status !== "cancelled" && (
-              <div className="bg-primary/5 border border-primary/20 rounded-xl p-4 flex items-center gap-2">
-                <Clock className="h-5 w-5 text-primary" />
-                <p className="text-sm text-primary">Votre proposition est en attente de réponse.</p>
+              <div className="bg-info-soft border border-info-border rounded-xl p-4 flex items-center gap-2">
+                <Clock className="h-5 w-5 text-info" />
+                <p className="text-sm text-info">Votre proposition est en attente de réponse.</p>
               </div>
             )}
           </div>

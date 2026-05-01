@@ -61,6 +61,18 @@ export default {
           soft: "hsl(var(--warning-soft))",
           border: "hsl(var(--warning-border))",
         },
+        success: {
+          DEFAULT: "hsl(var(--success))",
+          foreground: "hsl(var(--success-foreground))",
+          soft: "hsl(var(--success-soft))",
+          border: "hsl(var(--success-border))",
+        },
+        info: {
+          DEFAULT: "hsl(var(--info))",
+          foreground: "hsl(var(--info-foreground))",
+          soft: "hsl(var(--info-soft))",
+          border: "hsl(var(--info-border))",
+        },
         "strength-weak": "hsl(var(--strength-weak))",
         "strength-medium": "hsl(var(--strength-medium))",
         "strength-good": "hsl(var(--strength-good))",

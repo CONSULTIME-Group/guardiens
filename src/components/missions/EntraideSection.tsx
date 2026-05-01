@@ -120,7 +120,7 @@ const EntraideSection = ({ userId }: EntraideSectionProps) => {
                   className="flex items-center gap-3 p-3 rounded-xl bg-card border border-primary/20 hover:bg-accent/50 transition-colors"
                 >
                   <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${
-                    isBesoin ? "bg-badge-success text-badge-success-foreground" : "bg-primary/10 text-primary"
+                    isBesoin ? "bg-success-soft text-success" : "bg-info-soft text-info"
                   }`}>
                     {isBesoin ? "Besoin" : "Offre"}
                   </span>
@@ -182,7 +182,7 @@ const EntraideSection = ({ userId }: EntraideSectionProps) => {
                   </span>
                 )}
               </div>
-              <ThumbsUp className="h-3.5 w-3.5 text-badge-success-foreground shrink-0 mt-1" />
+              <ThumbsUp className="h-3.5 w-3.5 text-success shrink-0 mt-1" />
             </div>
           ))}
         </div>
