@@ -42,7 +42,7 @@ const AdminListings = () => {
 
   const fetchListings = useCallback(async () => {
     setLoading(true);
-    let q = supabase.from("sits").select(`*, owner:profiles!sits_user_id_fkey(first_name, last_name, city, avatar_url)`).order("created_at", { ascending: false });
+    let q = supabase.from("sits").select(`*, owner:profiles!sits_user_id_fkey(first_name, last_name, city, avatar_url)`).order("created_at", { ascending: false }).limit(2000);
     if (filterStatus === "no_draft") {
       q = q.neq("status", "draft" as any);
     } else if (filterStatus !== "all") {
