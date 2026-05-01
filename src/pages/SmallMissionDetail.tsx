@@ -584,7 +584,7 @@ const SmallMissionDetail = () => {
                   Propositions reçues ({responses.length})
                 </h2>
                 {responses.length === 0 ? (
-                  <p className="text-sm text-muted-foreground italic py-6 text-center">Aucune proposition pour le moment.</p>
+                  <p className="text-sm text-muted-foreground italic py-6 text-center">Pas encore de proposition. Patience — souvent, les premières arrivent dans la journée.</p>
                 ) : (
                   <div className="space-y-3">
                     {responses.map((r: any) => (
