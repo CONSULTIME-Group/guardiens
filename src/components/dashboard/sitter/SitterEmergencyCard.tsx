@@ -106,13 +106,75 @@ const SitterEmergencyCard = ({ hasEmergencyProfile }: SitterEmergencyCardProps) 
     toast({ title: active ? "Mode urgence réactivé" : "Mode urgence désactivé" });
   };
 
-  if (loading) {
+  // ─── Mode aperçu (dev only) ───
+  // Active via ?previewEmergency=locked|eligible|active dans l'URL,
+  // puis switch flottant en haut de la carte pour basculer entre les 3 vues.
+  const isDev = import.meta.env.DEV;
+  const initialPreview = (() => {
+    if (!isDev || typeof window === "undefined") return null;
+    const p = new URLSearchParams(window.location.search).get("previewEmergency");
+    return p === "locked" || p === "eligible" || p === "active" ? p : null;
+  })();
+  const [previewMode, setPreviewMode] = useState<"locked" | "eligible" | "active" | null>(
+    initialPreview as any
+  );
+
+  const PreviewToggle = isDev && previewMode !== null ? (
+    <div className="flex items-center gap-1 rounded-full border border-dashed border-amber-400/60 bg-background/80 backdrop-blur px-2 py-1 mb-2 text-[11px] w-fit">
+      <Eye className="h-3 w-3 text-amber-600" />
+      <span className="text-muted-foreground mr-1">Aperçu :</span>
+      {(["locked", "eligible", "active"] as const).map(m => (
+        <button
+          key={m}
+          type="button"
+          onClick={() => setPreviewMode(m)}
+          className={`px-1.5 py-0.5 rounded-full transition ${
+            previewMode === m
+              ? "bg-amber-500 text-white font-medium"
+              : "text-muted-foreground hover:text-foreground"
+          }`}
+        >
+          {m}
+        </button>
+      ))}
+      <button
+        type="button"
+        onClick={() => setPreviewMode(null)}
+        className="ml-1 px-1.5 py-0.5 rounded-full text-muted-foreground hover:text-foreground"
+        aria-label="Quitter l'aperçu"
+      >
+        ✕
+      </button>
+    </div>
+  ) : null;
+
+  if (loading && !previewMode) {
     return <div className="rounded-2xl border border-border bg-card p-5 h-40 animate-pulse" aria-busy="true" />;
   }
-  if (!checks) return null;
+  if (!checks && !previewMode) return null;
+
+  // Données fictives pour l'aperçu
+  const previewChecks = {
+    locked: { completedSits: 1, avgRating: 4.5, recentCancellations: 1, identityVerified: false, hasSubscription: true },
+    eligible: { completedSits: 5, avgRating: 4.8, recentCancellations: 0, identityVerified: true, hasSubscription: true },
+    active: { completedSits: 8, avgRating: 4.9, recentCancellations: 0, identityVerified: true, hasSubscription: true },
+  };
+  const previewProfile = {
+    is_active: true,
+    radius_km: 20,
+    animal_types: ["Chiens", "Chats"],
+    sms_alerts: true,
+    interventions_count: 2,
+  };
+
+  const effectiveChecks = previewMode ? previewChecks[previewMode] : checks!;
+  const effectiveProfile = previewMode === "active" ? previewProfile : profile;
+  const effectiveHasProfile = previewMode
+    ? previewMode === "active"
+    : hasEmergencyProfile;
 
   // ─── ÉTAT 3 — ACTIVE ───
-  if (hasEmergencyProfile && profile) {
+  if (effectiveHasProfile && effectiveProfile) {
     return (
       <>
         <div className="rounded-2xl border-2 border-amber-300 bg-gradient-to-br from-amber-50 to-amber-100/50 p-5 space-y-3">
