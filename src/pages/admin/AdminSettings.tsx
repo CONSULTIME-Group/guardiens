@@ -164,7 +164,7 @@ const AdminSettings = () => {
                   Activé temporairement (DNS en attente pour guardiens.fr).
                 </p>
               </div>
-              <Badge variant="outline" className="text-xs border-yellow-500 text-yellow-700">Temporaire</Badge>
+              <Badge variant="outline" className="text-xs border-warning text-warning">Temporaire</Badge>
             </div>
           </div>
         </CardContent>
@@ -192,7 +192,7 @@ const AdminSettings = () => {
                 </div>
                 <Badge
                   variant={service.status === "connecté" ? "default" : "outline"}
-                  className={`text-xs ${service.status !== "connecté" ? "border-yellow-500 text-yellow-700" : ""}`}
+                  className={`text-xs ${service.status !== "connecté" ? "border-warning text-warning" : ""}`}
                 >
                   {service.status === "connecté" ? (
                     <><CheckCircle2 className="h-3 w-3 mr-1" />{service.status}</>
