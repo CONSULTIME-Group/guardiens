@@ -115,30 +115,30 @@ const SmallMissionsPublic = () => {
 
             <Reveal delay={0.1}>
               <h1 className="font-heading text-5xl md:text-6xl font-bold text-foreground leading-tight max-w-2xl mx-auto">
-                Entraide locale entre gens du coin —<br /> échangez sans argent.
+                Osez demander.<br />Quelqu'un, près de chez vous, n'attend que ça.
               </h1>
-              <p className="font-heading text-xl md:text-2xl italic text-foreground/70 mt-3 max-w-lg mx-auto">
-                Ce que vous avez contre ce que vous n'avez pas encore vécu.
+              <p className="font-heading text-xl md:text-2xl italic text-foreground/70 mt-4 max-w-lg mx-auto">
+                Demander un coup de main, ce n'est pas déranger. C'est offrir une occasion de rendre service.
               </p>
             </Reveal>
 
             <Reveal delay={0.2}>
               <p className="font-body text-lg text-foreground/70 leading-relaxed text-center max-w-lg mx-auto mt-6">
-                Un coup de main contre un repas. Un jardin contre des légumes. Une compétence contre une soirée. Ici personne ne facture ce qui n'a pas de prix.
+                Une tonte de pelouse. Un colis à réceptionner. Un meuble à monter. Un chien à sortir une heure. Ce que vous n'osez pas demander à votre famille, vous pouvez l'oser ici — sans gêne, sans facture, sans dette.
               </p>
             </Reveal>
 
             <Reveal delay={0.3}>
               <div className="flex flex-col sm:flex-row gap-4 justify-center mt-10">
                 <Button onClick={goToCreate} className="bg-primary text-primary-foreground rounded-full px-9 py-4 h-auto text-sm font-semibold tracking-wide hover:bg-primary/90 transition-all duration-200">
-                  Je propose une mission
+                  J'ose demander
                 </Button>
                 <Button onClick={goToHelp} variant="outline" className="border-2 border-primary text-primary rounded-full px-9 py-4 h-auto text-sm font-semibold tracking-wide hover:bg-primary hover:text-primary-foreground transition-all duration-200">
-                  Je veux aider
+                  J'ai du temps à offrir
                 </Button>
               </div>
               <p className="text-xs text-foreground/50 mt-4">
-                À 0 € pour tous — pour toujours.
+                À 0 € pour tous — pour toujours. Aucun engagement, aucun jugement.
               </p>
             </Reveal>
 
@@ -181,6 +181,68 @@ const SmallMissionsPublic = () => {
               <p className="text-lg font-heading italic leading-relaxed text-foreground/85 text-center">
                 C'est ça qu'on appelle vivre quelque part.
               </p>
+            </Reveal>
+          </div>
+        </section>
+
+        {/* ═══ SECTION 2.5 — LEVÉE DES FREINS ═══ */}
+        <section className="bg-background border-t border-border/40">
+          <div className="max-w-3xl mx-auto px-6 py-24 md:py-28">
+            <Reveal>
+              <p className="text-xs font-body font-semibold tracking-widest uppercase text-primary/60 text-center mb-4">
+                Ce qui vous retient n'a pas lieu d'être
+              </p>
+              <h2 className="font-heading text-3xl md:text-4xl font-semibold text-foreground text-center leading-snug mb-14">
+                Vous hésitez ? C'est normal.<br />Voici pourquoi vous pouvez y aller.
+              </h2>
+            </Reveal>
+
+            <div className="space-y-10">
+              {[
+                {
+                  fear: "« Je ne veux pas déranger. »",
+                  answer: "Personne ne reçoit votre demande de force. Les gens du coin la voient, et seuls ceux qui ont envie d'aider répondent. Vous ne dérangez personne — vous offrez une opportunité.",
+                },
+                {
+                  fear: "« Je n'ai rien à offrir en échange. »",
+                  answer: "Un café, un sourire, une conversation, un panier de tomates l'été prochain. L'échange n'a pas besoin d'être à la hauteur. Il a juste besoin d'être sincère.",
+                },
+                {
+                  fear: "« C'est trop petit comme demande. »",
+                  answer: "Justement. Les petites missions sont faites pour les petites choses — celles qu'on n'ose pas demander parce qu'on a peur de paraître faible ou exigeant. C'est exactement pour ça qu'on a créé cet espace.",
+                },
+                {
+                  fear: "« Je ne connais personne ici. »",
+                  answer: "C'est précisément le bon moment pour publier. Chaque mission est une porte ouverte sur une rencontre. La première est toujours la plus difficile à oser — la suivante devient évidente.",
+                },
+                {
+                  fear: "« Et si personne ne répond ? »",
+                  answer: "Ça peut arriver. Reformulez, relancez, ou proposez vous-même votre aide ailleurs. La communauté grandit chaque semaine. Votre demande n'est jamais perdue — elle peut trouver quelqu'un demain.",
+                },
+              ].map((item, i) => (
+                <Reveal key={i} delay={0.05 * i}>
+                  <div className="grid md:grid-cols-[1fr_2fr] gap-4 md:gap-10 items-start border-b border-border/40 pb-10 last:border-0 last:pb-0">
+                    <p className="font-heading text-lg md:text-xl italic text-foreground/50 leading-snug">
+                      {item.fear}
+                    </p>
+                    <p className="font-body text-base md:text-lg text-foreground/85 leading-relaxed">
+                      {item.answer}
+                    </p>
+                  </div>
+                </Reveal>
+              ))}
+            </div>
+
+            <Reveal delay={0.3}>
+              <div className="mt-16 text-center">
+                <p className="font-heading text-xl md:text-2xl italic text-foreground/80 leading-relaxed max-w-xl mx-auto">
+                  La vraie question n'est pas « est-ce que j'ai le droit de demander ? ».<br />
+                  C'est « qu'est-ce que je rate en n'osant pas ? ».
+                </p>
+                <Button onClick={goToCreate} className="bg-primary text-primary-foreground rounded-full px-9 py-4 h-auto text-sm font-semibold tracking-wide hover:bg-primary/90 transition-all duration-200 mt-8">
+                  J'ose, je publie ma première mission
+                </Button>
+              </div>
             </Reveal>
           </div>
         </section>
@@ -331,21 +393,21 @@ const SmallMissionsPublic = () => {
           <div className="max-w-2xl mx-auto px-6 py-24 md:py-32 text-center">
             <Reveal>
               <h2 className="font-heading text-4xl md:text-5xl font-bold text-white leading-tight mb-6">
-                Le premier échange est souvent le plus simple.
+                Osez. Vraiment.<br />Personne ne vous jugera.
               </h2>
             </Reveal>
             <Reveal delay={0.1}>
               <p className="font-body text-lg text-white/85 leading-relaxed mb-10">
-                À 0 €. Pour tous. Pour toujours. Entre gens du coin qui se choisissent.
+                Le pire qui puisse arriver, c'est que personne ne réponde. Le meilleur, c'est de rencontrer quelqu'un qui change votre semaine. À 0 €. Pour tous. Pour toujours.
               </p>
             </Reveal>
             <Reveal delay={0.2}>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Button onClick={goToCreate} className="bg-white text-primary rounded-full px-10 py-4 h-auto text-sm font-bold tracking-wide hover:bg-white/90 hover:scale-[1.02] transition-all duration-200">
-                  Je propose une mission
+                  J'ose demander
                 </Button>
                 <Button onClick={goToHelp} className="bg-transparent border-2 border-white/70 text-white rounded-full px-10 py-4 h-auto text-sm font-semibold tracking-wide hover:bg-white/15 transition-all duration-200">
-                  Je veux aider
+                  J'ai du temps à offrir
                 </Button>
               </div>
               <p className="text-xs text-white/50 mt-6">
