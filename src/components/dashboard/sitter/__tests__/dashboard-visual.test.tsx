@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { render } from "@testing-library/react";
+import { render, act } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import NearestListingHero from "../NearestListingHero";
 import SitterNextGuardEmpty from "../SitterNextGuardEmpty";
@@ -105,7 +105,11 @@ describe("SitterNextGuardEmpty", () => {
 // SitterEmergencyCard — 3 vues via mode aperçu
 // ─────────────────────────────────────────────────────────
 describe("SitterEmergencyCard — modes aperçu", () => {
-  const flush = () => new Promise((r) => setTimeout(r, 0));
+  const flush = async () => {
+    await act(async () => {
+      await new Promise((r) => setTimeout(r, 0));
+    });
+  };
 
   it("snapshot — vue LOCKED (critères non remplis)", async () => {
     setPreviewParam("locked");
