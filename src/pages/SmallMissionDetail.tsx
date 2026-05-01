@@ -50,13 +50,13 @@ const STATUS_LABELS: Record<string, { label: string; className: string }> = {
 
 const PUBLISHER_BADGES = [
   { key: "coup_de_main_en_or", label: "Coup de main en or", icon: Star, iconColor: "text-warning", bgColor: "bg-warning-soft", borderColor: "border-warning-border", selectedBg: "bg-warning/15" },
-  { key: "super_voisin", label: "Personne en or", icon: Heart, iconColor: "text-primary", bgColor: "bg-badge-success", borderColor: "border-badge-success-foreground/20", selectedBg: "bg-badge-success/80" },
+  { key: "super_voisin", label: "Personne en or", icon: Heart, iconColor: "text-success", bgColor: "bg-success-soft", borderColor: "border-success-border", selectedBg: "bg-success-soft/80" },
   { key: "on_remet_ca", label: "On remet ça", icon: RotateCcw, iconColor: "text-primary", bgColor: "bg-primary/5", borderColor: "border-primary/30", selectedBg: "bg-primary/15" },
 ];
 
 const CANDIDATE_BADGES = [
   { key: "guide_aux_petits_oignons", label: "Guide aux petits oignons", icon: Star, iconColor: "text-warning", bgColor: "bg-warning-soft", borderColor: "border-warning-border", selectedBg: "bg-warning/15" },
-  { key: "toujours_joignable", label: "Toujours joignable", icon: MessageSquare, iconColor: "text-primary", bgColor: "bg-badge-success", borderColor: "border-badge-success-foreground/20", selectedBg: "bg-badge-success/80" },
+  { key: "toujours_joignable", label: "Toujours joignable", icon: MessageSquare, iconColor: "text-success", bgColor: "bg-success-soft", borderColor: "border-success-border", selectedBg: "bg-success-soft/80" },
   { key: "on_reviendra", label: "On reviendra", icon: RotateCcw, iconColor: "text-primary", bgColor: "bg-primary/5", borderColor: "border-primary/30", selectedBg: "bg-primary/15" },
 ];
 
@@ -706,9 +706,9 @@ const SmallMissionDetail = () => {
             {/* Accepted */}
             {myResponse.status === "accepted" && mission.status === "in_progress" && (
               <>
-                <div className="bg-badge-success border border-badge-success-foreground/20 rounded-xl p-4 flex items-center gap-2">
-                  <CheckCircle2 className="h-5 w-5 text-badge-success-foreground" />
-                  <p className="font-medium text-badge-success-foreground">Proposition acceptée</p>
+                <div className="bg-success-soft border border-success-border rounded-xl p-4 flex items-center gap-2">
+                  <CheckCircle2 className="h-5 w-5 text-success" />
+                  <p className="font-medium text-success">Proposition acceptée</p>
                 </div>
                 <Button onClick={() => navigate("/messages")} className="w-full gap-2">
                   <MessageSquare className="h-4 w-4" /> Aller dans la messagerie
