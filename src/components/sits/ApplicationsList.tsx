@@ -224,7 +224,7 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
       await supabase.from("notifications").insert({
         user_id: sitterId,
         type: "sit_confirmed",
-        title: "Garde confirmée 🎉",
+        title: "Garde confirmée",
         body: guideCheck
           ? `Votre garde chez ${proprio?.first_name ?? "votre hôte"} est confirmée. Le guide de la maison sera disponible dans votre espace à partir du ${startFormatted}.`
           : `Votre garde chez ${proprio?.first_name ?? "votre hôte"} est confirmée. Rendez-vous dans "Mes gardes" pour les détails.`,

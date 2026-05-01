@@ -151,7 +151,7 @@ Deno.serve(async (req) => {
     const notifications = eligibleSitterIds.map((sitterId) => ({
       user_id: sitterId,
       type: "emergency_alert",
-      title: "🚨 Alerte gardien d'urgence",
+      title: "Demande de gardien en urgence",
       body: `${requesterProfile?.first_name || "Un propriétaire"} a besoin d'un gardien d'urgence près de ${sitCity}. Pouvez-vous aider ?`,
       link: `/sits/${sitId}`,
       actor_name: requesterProfile?.first_name || null,

@@ -227,7 +227,7 @@ Rules:
       await supabaseAdmin.from("notifications").insert({
         user_id: user.id,
         type: "identity_verified",
-        title: "Identité vérifiée ✓",
+        title: "Identité vérifiée",
         body: "Votre pièce d'identité a été validée avec succès. Vous avez maintenant accès à toutes les fonctionnalités.",
         link: "/settings#verification",
       });

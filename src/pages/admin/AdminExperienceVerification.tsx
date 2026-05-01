@@ -69,7 +69,7 @@ const AdminExperienceVerification = () => {
     if (error) { toast.error("Erreur"); return; }
     await supabase.from("notifications").insert({
       user_id: userId, type: "experience_verified",
-      title: "Expérience vérifiée ✓",
+      title: "Expérience vérifiée",
       body: "Votre expérience externe a été validée et apparaît maintenant sur votre profil.",
       link: "/profile",
     });
