@@ -137,9 +137,14 @@ const Landing = () => {
   const navigate = useNavigate();
   const seasonal = getSeasonalBanner();
 
-  // KPIs : valeurs réelles uniquement, remontées depuis public_stats (pas d'offsets factices).
-  const [kpiMaisons, setKpiMaisons] = useState<number>(0);
-  const [kpiAnimaux, setKpiAnimaux] = useState<number>(0);
+  // KPIs : valeurs réelles depuis public_stats + socle historique fondateurs
+  // (Jérémie & Elisa : 37 maisons gardées en 5 ans, ~90 animaux accompagnés).
+  // Cohérent avec le récit fondateur plus bas dans la page.
+  const FOUNDERS_HOUSES_OFFSET = 37;
+  const FOUNDERS_ANIMALS_OFFSET = 90;
+
+  const [kpiMaisons, setKpiMaisons] = useState<number>(FOUNDERS_HOUSES_OFFSET);
+  const [kpiAnimaux, setKpiAnimaux] = useState<number>(FOUNDERS_ANIMALS_OFFSET);
   const [kpiInscrits, setKpiInscrits] = useState<number>(0);
   const [kpiMissions, setKpiMissions] = useState<number>(0);
 
@@ -151,7 +156,7 @@ const Landing = () => {
         .single();
       if (data) {
         if (typeof data.maisons_gardees === 'number') {
-          setKpiMaisons(data.maisons_gardees);
+          setKpiMaisons(data.maisons_gardees + FOUNDERS_HOUSES_OFFSET);
         }
         if (typeof data.total_inscrits === 'number') {
           setKpiInscrits(data.total_inscrits);
@@ -160,7 +165,7 @@ const Landing = () => {
           setKpiMissions(data.missions_entraide);
         }
         if (typeof data.animaux_accompagnes === 'number') {
-          setKpiAnimaux(data.animaux_accompagnes);
+          setKpiAnimaux(data.animaux_accompagnes + FOUNDERS_ANIMALS_OFFSET);
         }
       }
     };
