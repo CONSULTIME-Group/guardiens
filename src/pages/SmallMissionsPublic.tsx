@@ -77,13 +77,20 @@ const SmallMissionsPublic = () => {
 
   useEffect(() => {
     const load = async () => {
-      const { data } = await supabase.from("public_stats").select("*").single();
-      if (data) {
-        if (typeof data.missions_entraide === "number") setKpiMissions(data.missions_entraide);
-        if (typeof data.total_inscrits === "number") setKpiHelpers(data.total_inscrits);
+      // `.single()` rejette quand la vue ne renvoie pas exactement une ligne
+      // (PGRST116). On dégrade silencieusement : les KPIs restent à 0 et
+      // l'erreur ne pollue pas le moniteur d'`unhandled_rejection`.
+      try {
+        const { data } = await supabase.from("public_stats").select("*").maybeSingle();
+        if (data) {
+          if (typeof data.missions_entraide === "number") setKpiMissions(data.missions_entraide);
+          if (typeof data.total_inscrits === "number") setKpiHelpers(data.total_inscrits);
+        }
+      } catch (err) {
+        console.warn("public_stats unavailable:", err);
       }
     };
-    load();
+    void load();
   }, []);
 
   /** Auth-aware navigation: redirect to register if not logged in */
