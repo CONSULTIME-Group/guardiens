@@ -763,7 +763,7 @@ const SmallMissionDetail = () => {
                   <XCircle className="h-5 w-5 text-muted-foreground" />
                   <p className="font-medium text-muted-foreground">Non retenu(e)</p>
                 </div>
-                <p className="text-sm text-muted-foreground">Une autre organisation a été choisie. Merci pour votre proposition.</p>
+                <p className="text-sm text-muted-foreground">Quelqu'un d'autre a été choisi cette fois. Merci d'avoir osé proposer.</p>
               </div>
             )}
 
