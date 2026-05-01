@@ -11,8 +11,7 @@ import NearbyEmergencySitters from "./NearbyEmergencySitters";
 import DashboardSkeleton from "@/components/skeletons/DashboardSkeleton";
 import { Plus, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { format, differenceInDays } from "date-fns";
-import { fr } from "date-fns/locale";
+import { differenceInDays } from "date-fns";
 
 import RoleActivationBanner from "./RoleActivationBanner";
 import AccessGateBanner from "@/components/access/AccessGateBanner";
@@ -23,6 +22,7 @@ import { PROPRIO_BADGE_IDS } from "@/components/badges/badge-definitions";
 
 /* ── Extracted sub-components ── */
 import MonAnnonceCard from "./owner/MonAnnonceCard";
+import OngoingSitHero from "./owner/OngoingSitHero";
 import ApplicationsSection from "./owner/ApplicationsSection";
 import ContextualResources from "./owner/ContextualResources";
 import MyMissionsColumn from "./owner/MyMissionsColumn";
@@ -107,19 +107,14 @@ const OwnerDashboard = () => {
   }, [ongoingSit, sits, pendingAppCount]);
 
   const banner = useMemo(() => {
+    // Si une garde est en cours, l'info est portée par <OngoingSitHero/> → pas de banner redondant.
+    if (ongoingSit) return null;
     if (verificationStatus !== "verified" && verificationStatus !== "pending")
       return { variant: "info" as const, label: "Recommandé : vérifiez votre identité pour rassurer les gardiens qui consultent votre annonce.", to: "/settings#verification", ctaLabel: "Vérifier mon identité →" };
-    if (ongoingSit) {
-      const acceptedApp = (ongoingSit.applications || []).find(a => a.status === "accepted");
-      const sitterName = acceptedApp?.sitter_id && sitterProfiles[acceptedApp.sitter_id]?.first_name;
-      const endLabel = ongoingSit.end_date ? format(new Date(ongoingSit.end_date), "d MMMM", { locale: fr }) : "";
-      const nameStr = sitterName ? capitalize(sitterName) : "votre gardien";
-      return { variant: "success" as const, label: `Garde en cours — ${nameStr} s'occupe de vos animaux${endLabel ? ` jusqu'au ${endLabel}` : ""}.` };
-    }
     if (pendingAppCount > 0)
       return { variant: "info" as const, label: `Vous avez ${pendingAppCount} candidature${pendingAppCount > 1 ? "s" : ""} non lue${pendingAppCount > 1 ? "s" : ""}.`, to: "/sits", ctaLabel: "Voir les candidatures →" };
     return null;
-  }, [verificationStatus, ongoingSit, pendingAppCount, sitterProfiles]);
+  }, [verificationStatus, ongoingSit, pendingAppCount]);
 
   // CTA bas de page supprimé : redondant avec le hero (action principale toujours
   // visible en haut) et avec MonAnnonceCard (qui guide déjà sur l'action contextuelle).
@@ -202,7 +197,18 @@ const OwnerDashboard = () => {
         <AccessGateBanner level={level} profileCompletion={accessProfileCompletion} context="guard" />
       </div>
 
-      {/* ═══ Banner contextuel ═══ */}
+      {/* ═══ Hero "garde en cours" (prioritaire, contextuel) ═══ */}
+      {ongoingSit && (
+        <div className="px-5 md:px-8">
+          <OngoingSitHero
+            sit={ongoingSit}
+            sitterProfiles={sitterProfiles}
+            coverPhoto={propertyCoverPhoto}
+          />
+        </div>
+      )}
+
+      {/* ═══ Banner contextuel (vérification, candidatures non lues) ═══ */}
       {banner && (
         <div className="px-5 md:px-8">
           <div className={`p-4 rounded-2xl border ${BANNER_STYLES[banner.variant]} flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2`}>
