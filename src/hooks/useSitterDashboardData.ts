@@ -78,7 +78,9 @@ const INITIAL_STATE: SitterDashboardData = {
   hasEmergencyProfile: false,
   hasAcceptedRecent: false,
   nextGuard: null,
+  nextGuardError: null,
   nearbyListings: [],
+  nearbyError: null,
   articles: [],
   badges: [],
   onboardingCompleted: false,
@@ -87,6 +89,7 @@ const INITIAL_STATE: SitterDashboardData = {
   reputation: null,
   groupedBadges: [],
   nearbyMissions: [],
+  nearbyMissionsError: null,
 };
 
 export function useSitterDashboardData(userId: string | undefined) {
