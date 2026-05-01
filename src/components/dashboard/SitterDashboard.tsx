@@ -253,8 +253,14 @@ const SitterDashboard = () => {
         onToggleAvailability={toggleAvailability}
       />
 
-      {/* Next guard card */}
-      {nextGuard && <SitterNextGuard nextGuard={nextGuard} />}
+      {/* Hero contextuel : prochaine garde > annonce phare > empty state */}
+      {nextGuard ? (
+        <SitterNextGuard nextGuard={nextGuard} />
+      ) : nearbyListings.length > 0 ? (
+        <NearestListingHero listing={nearbyListings[0]} />
+      ) : (
+        <SitterNextGuardEmpty />
+      )}
 
       {/* Quick action badges for pending apps / unread messages */}
       {(pendingAppsCount > 0 || unreadCount > 0) && (
