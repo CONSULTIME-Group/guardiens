@@ -118,7 +118,10 @@ const CreateSmallMission = () => {
 
   return (
     <>
-      <PageMeta title="Poster une petite mission | Guardiens" description="Proposez une mission d'entraide à la communauté Guardiens." />
+      <PageMeta
+        title={missionType === "offre" ? "J'ai du temps à offrir | Guardiens" : "J'ose demander un coup de main | Guardiens"}
+        description="Publiez une demande ou une offre d'entraide. Coups de main entre gens du coin, sans argent qui circule."
+      />
 
       <div className="max-w-2xl mx-auto px-4 py-8 space-y-6 pb-40">
         <button
