@@ -23,6 +23,7 @@ import { PROPRIO_BADGE_IDS } from "@/components/badges/badge-definitions";
 
 /* ── Extracted sub-components ── */
 import MonAnnonceCard from "./owner/MonAnnonceCard";
+import OngoingSitHero from "./owner/OngoingSitHero";
 import ApplicationsSection from "./owner/ApplicationsSection";
 import ContextualResources from "./owner/ContextualResources";
 import MyMissionsColumn from "./owner/MyMissionsColumn";
