@@ -258,7 +258,7 @@ const SmallMissionDetail = () => {
 
         setHasResponded(true);
         setMessage("");
-        toast({ title: "Proposition envoyée !", description: "Le publieur va être notifié." });
+        toast({ title: "Proposition envoyée !", description: "La personne qui demande va être prévenue." });
         load();
       }
     } catch (err: any) {
