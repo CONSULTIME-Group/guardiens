@@ -17,6 +17,7 @@ import { useAccessLevel } from "@/hooks/useAccessLevel";
 import AccessGateBanner from "@/components/access/AccessGateBanner";
 import MissionPhotoUpload from "@/components/missions/MissionPhotoUpload";
 import { geocodeCity } from "@/lib/geocode";
+import { trackFirstAction } from "@/lib/analytics";
 
 const EURO_REGEX = /\d+\s*[€]|[€]\s*\d+|\d+\s*euro/i;
 
@@ -104,6 +105,7 @@ const CreateSmallMission = () => {
     if (error) {
       toast({ title: "Erreur", description: error.message, variant: "destructive" });
     } else {
+      try { await trackFirstAction("mission_created", { category, mission_type: missionType }); } catch {}
       // Refresh the public list so the new mission shows up immediately
       await queryClient.invalidateQueries({ queryKey: ["small-missions-all"] });
       toast({

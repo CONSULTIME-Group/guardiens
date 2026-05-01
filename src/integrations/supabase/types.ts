@@ -4047,6 +4047,7 @@ export type Database = {
         Args: { _role?: string; _since: string; _until: string }
         Returns: {
           jour: string
+          onboarding_completed: number
           page_views: number
           signup_completed: number
           signup_started: number

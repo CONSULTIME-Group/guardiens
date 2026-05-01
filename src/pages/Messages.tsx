@@ -18,6 +18,7 @@ import DaySeparator from "@/components/messages/DaySeparator";
 import MessageBubble from "@/components/messages/MessageBubble";
 import { useToast } from "@/hooks/use-toast";
 import { useSubscriptionAccess } from "@/hooks/useSubscriptionAccess";
+import { trackFirstAction } from "@/lib/analytics";
 import { Lock } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
@@ -421,6 +422,7 @@ const Messages = () => {
     setSending(true);
     await supabase.from("messages").insert({ conversation_id: activeConv.id, sender_id: user.id, content: newMessage.trim() });
     // last_message_at + first_message_sent gérés automatiquement par trigger DB
+    try { await trackFirstAction("message_sent", { conversation_id: activeConv.id }); } catch {}
     setNewMessage("");
     setSending(false);
     loadConversations();
