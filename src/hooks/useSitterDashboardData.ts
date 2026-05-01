@@ -52,6 +52,8 @@ export interface SitterDashboardData {
   groupedBadges: GroupedBadge[];
   nearbyMissions: any[];
   nearbyMissionsError: string | null;
+  myMissions: any[];
+  myMissionsError: string | null;
 }
 
 const INITIAL_STATE: SitterDashboardData = {
@@ -90,6 +92,8 @@ const INITIAL_STATE: SitterDashboardData = {
   groupedBadges: [],
   nearbyMissions: [],
   nearbyMissionsError: null,
+  myMissions: [],
+  myMissionsError: null,
 };
 
 export function useSitterDashboardData(userId: string | undefined) {
@@ -225,6 +229,25 @@ export function useSitterDashboardData(userId: string | undefined) {
         }
       }
 
+      // My missions — published by the sitter (open + completed),
+      // with response counts. Used by SitterMissionsSection.
+      let myMissions: any[] = [];
+      let myMissionsError: string | null = null;
+      {
+        const { data: mine, error: mineErr } = await supabase
+          .from("small_missions")
+          .select("id, title, category, city, date_needed, status, created_at, small_mission_responses(id, status)")
+          .eq("user_id", userId)
+          .in("status", ["open", "completed"])
+          .order("created_at", { ascending: false })
+          .limit(8);
+        if (mineErr) {
+          myMissionsError = "Impossible de charger vos missions publiées.";
+        } else {
+          myMissions = mine || [];
+        }
+      }
+
       // Next guard
       let nextGuard: any = null;
       let nextGuardError: string | null = appsRes.error
@@ -291,6 +314,8 @@ export function useSitterDashboardData(userId: string | undefined) {
         groupedBadges,
         nearbyMissions,
         nearbyMissionsError,
+        myMissions,
+        myMissionsError,
       });
     };
 
