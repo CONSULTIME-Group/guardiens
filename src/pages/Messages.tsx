@@ -18,6 +18,7 @@ import DaySeparator from "@/components/messages/DaySeparator";
 import MessageBubble from "@/components/messages/MessageBubble";
 import { useToast } from "@/hooks/use-toast";
 import { useSubscriptionAccess } from "@/hooks/useSubscriptionAccess";
+import { trackFirstAction } from "@/lib/analytics";
 import { Lock } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
