@@ -791,7 +791,7 @@ const SmallMissionDetail = () => {
           <div className="fixed bottom-0 left-0 right-0 md:left-64 bg-card border-t border-border p-4 z-40 md:pb-4 pb-20">
             <div className="max-w-3xl mx-auto space-y-2">
               <Textarea
-                placeholder="Présentez-vous et expliquez pourquoi vous souhaitez participer..."
+                placeholder="Dites bonjour, présentez-vous en deux mots et expliquez ce que vous proposez. Pas besoin d'en faire des tonnes."
                 value={message}
                 onChange={e => setMessage(e.target.value)}
                 className="min-h-[60px]"
@@ -801,7 +801,7 @@ const SmallMissionDetail = () => {
                 onClick={handleRespond}
                 disabled={submitting || !message.trim()}
               >
-                {submitting ? "Envoi..." : "Proposer mon aide"}
+                {submitting ? "Envoi..." : "J'ose proposer mon aide"}
               </Button>
             </div>
           </div>
