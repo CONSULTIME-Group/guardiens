@@ -155,9 +155,10 @@ const NotificationBell = () => {
         </div>
         <div className="max-h-80 overflow-y-auto">
           {notifications.length === 0 ? (
-            <p className="text-sm text-muted-foreground text-center py-8">
-              Aucune notification
-            </p>
+            <div className="text-center py-8 px-4">
+              <p className="text-sm text-muted-foreground">Tout est calme par ici.</p>
+              <p className="text-xs text-muted-foreground/80 mt-1">Vous serez prévenu·e dès qu'il se passera quelque chose.</p>
+            </div>
           ) : (
             notifications.map((n) => {
               const inner = (

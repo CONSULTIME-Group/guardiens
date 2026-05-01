@@ -98,7 +98,7 @@ Deno.serve(async (req) => {
         adminClient.from("notifications").insert({
           user_id: userId,
           type: "identity_verified",
-          title: "Identité vérifiée ✓",
+          title: "Identité vérifiée",
           body: "Votre identité a été vérifiée. Le badge apparaît maintenant sur votre profil.",
           link: "/profile",
         }),

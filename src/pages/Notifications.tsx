@@ -21,19 +21,44 @@ interface Notification {
   actor_avatar_url: string | null;
 }
 
-const typeIcons: Record<string, string> = {
-  sitter_available: "🟢",
-  new_application: "📩",
-  sit_confirmed: "✅",
-  sit_cancelled: "❌",
-  review_published: "⭐",
-  new_message: "💬",
-  application_accepted: "🎉",
-  application_rejected: "😔",
-  application_cancelled: "↩️",
-  reminder_7days: "📅",
-  reminder_48h: "⏰",
-  info: "ℹ️",
+// Catégorie sémantique → couleur de pastille (token-based, pas d'emoji)
+const typeTone: Record<string, "success" | "info" | "warning" | "destructive" | "muted"> = {
+  sitter_available: "success",
+  new_application: "info",
+  sit_confirmed: "success",
+  sit_started: "success",
+  sit_completed: "success",
+  sit_cancelled: "destructive",
+  review_published: "info",
+  new_message: "info",
+  application_accepted: "success",
+  application_rejected: "warning",
+  application_cancelled: "muted",
+  reminder_7days: "info",
+  reminder_48h: "warning",
+  identity_verified: "success",
+  identity_rejected: "warning",
+  experience_verified: "success",
+  experience_rejected: "warning",
+  emergency_alert: "destructive",
+  mission_proposal: "info",
+  mission_accepted: "success",
+  mission_declined: "muted",
+  mission_completed: "success",
+  mission_cancelled: "muted",
+  subscription_offered: "success",
+  listing_hidden: "warning",
+  listing_deleted: "destructive",
+  admin_contact: "info",
+  info: "muted",
+};
+
+const toneClasses: Record<string, string> = {
+  success: "bg-success",
+  info: "bg-info",
+  warning: "bg-warning",
+  destructive: "bg-destructive",
+  muted: "bg-muted-foreground/40",
 };
 
 const Notifications = () => {
@@ -125,13 +150,17 @@ const Notifications = () => {
       </div>
 
       {notifications.length === 0 ? (
-        <div className="text-center py-20 text-muted-foreground">
-          <Bell className="h-12 w-12 mx-auto mb-4 opacity-30" />
-          <p>Aucune notification pour le moment.</p>
+        <div className="text-center py-20">
+          <Bell className="h-12 w-12 mx-auto mb-4 text-muted-foreground/40" />
+          <p className="text-muted-foreground">Tout est calme pour le moment.</p>
+          <p className="text-sm text-muted-foreground/80 mt-1">
+            Vos prochaines actualités apparaîtront ici : nouvelles propositions, candidatures, messages, gardes confirmées…
+          </p>
         </div>
       ) : (
         <div className="space-y-2">
           {notifications.map((n) => {
+            const tone = typeTone[n.type] || "muted";
             const content = (
               <div
                 className={`rounded-lg border border-border p-4 transition-colors hover:shadow-sm ${
@@ -142,7 +171,10 @@ const Notifications = () => {
                   {n.actor_avatar_url ? (
                     <img src={n.actor_avatar_url} alt="" className="w-9 h-9 rounded-full object-cover shrink-0 mt-0.5" />
                   ) : (
-                    <span className="text-lg mt-0.5 shrink-0">{typeIcons[n.type] || "🔔"}</span>
+                    <span
+                      aria-hidden
+                      className={`mt-2 shrink-0 h-2.5 w-2.5 rounded-full ${toneClasses[tone]}`}
+                    />
                   )}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between gap-2">
