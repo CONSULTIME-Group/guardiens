@@ -6,15 +6,18 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { format, formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
-import { Eye, Ban, ShieldCheck, StickyNote, RotateCcw, Trash2, AlertTriangle, Crown, ChevronLeft, ChevronRight, MessageSquare, FileText } from "lucide-react";
+import { Eye, Ban, ShieldCheck, StickyNote, RotateCcw, Trash2, Crown, ChevronLeft, ChevronRight, MessageSquare, FileText } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { Switch } from "@/components/ui/switch";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { SuspendUserDialog } from "./_components/users/SuspendUserDialog";
+import { NoteUserDialog } from "./_components/users/NoteUserDialog";
+import { DeleteUserDialog } from "./_components/users/DeleteUserDialog";
+import { SendMessageDialog, type MessageModalState } from "./_components/users/SendMessageDialog";
+import { MessageHistoryDialog, type HistoryItem } from "./_components/users/MessageHistoryDialog";
+import { LastMessageDialog, type LastMessageState } from "./_components/users/LastMessageDialog";
+import { ErrorDetailDialog, type ErrorDetailState } from "./_components/users/ErrorDetailDialog";
 
 const roleLabels: Record<string, string> = {
   owner: "Propriétaire",
