@@ -21,9 +21,9 @@ import { geocodeCity } from "@/lib/geocode";
 const EURO_REGEX = /\d+\s*[€]|[€]\s*\d+|\d+\s*euro/i;
 
 const CATEGORIES = [
-  { value: "animals", label: "🐕 Animaux", icon: Dog },
-  { value: "garden", label: "🌱 Jardin", icon: Flower2 },
-  { value: "house", label: "🏠 Maison", icon: Home },
+  { value: "animals", label: "Animaux", icon: Dog },
+  { value: "garden", label: "Jardin", icon: Flower2 },
+  { value: "house", label: "Maison", icon: Home },
   { value: "skills", label: "Échange de compétences", icon: Handshake },
 ];
 
@@ -59,7 +59,7 @@ const CreateSmallMission = () => {
   const handleExchangeChange = (val: string) => {
     setExchangeOffer(val);
     if (EURO_REGEX.test(val)) {
-      setExchangeError("Ici on s'échange des coups de main et des bons repas, pas des euros 😊");
+      setExchangeError("Ici on s'échange des coups de main et des bons repas, pas des euros.");
     } else {
       setExchangeError("");
     }
