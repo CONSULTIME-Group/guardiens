@@ -193,10 +193,7 @@ export default function PublicSitterProfile() {
     <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
       {props.animalTypes.length > 0 && (
         <div>
-          <div className="flex items-center gap-2 mb-2.5">
-            <PawPrint className="w-4 h-4 text-primary" aria-hidden="true" />
-            <h3 className="text-sm font-semibold text-foreground font-body">Animaux acceptés</h3>
-          </div>
+          <h3 className="text-sm font-semibold text-foreground font-body mb-2.5">Animaux acceptés</h3>
           <div className="flex flex-wrap gap-1.5">
             {props.animalTypes.map(a => (
               <span key={a} className="border border-border bg-card rounded-full text-xs px-2.5 py-1 text-foreground font-body">
@@ -205,17 +202,14 @@ export default function PublicSitterProfile() {
             ))}
             {props.sitterProfile?.farm_animals_ok && (
               <span className="border border-primary text-primary rounded-full text-xs px-2.5 py-1 bg-primary/5 font-body">
-                Races exigeantes
+                Animaux de ferme
               </span>
             )}
           </div>
         </div>
       )}
       <div>
-        <div className="flex items-center gap-2 mb-2.5">
-          {props.hasVehicle ? <Car className="w-4 h-4 text-primary" aria-hidden="true" /> : <MapPin className="w-4 h-4 text-primary" aria-hidden="true" />}
-          <h3 className="text-sm font-semibold text-foreground font-body">Zone d'intervention</h3>
-        </div>
+        <h3 className="text-sm font-semibold text-foreground font-body mb-2.5">Zone d'intervention</h3>
         <p className="text-sm text-foreground/70 font-body">
           {props.hasVehicle
             ? `Avec véhicule${props.radius ? ` — rayon ${props.radius} km${props.city ? ` · ${props.city}` : ''}` : ''}`
@@ -226,10 +220,7 @@ export default function PublicSitterProfile() {
       </div>
       {props.competences.length > 0 && (
         <div>
-          <div className="flex items-center gap-2 mb-2.5">
-            <Heart className="w-4 h-4 text-primary" aria-hidden="true" />
-            <h3 className="text-sm font-semibold text-foreground font-body">Savoir-faire</h3>
-          </div>
+          <h3 className="text-sm font-semibold text-foreground font-body mb-2.5">Savoir-faire</h3>
           <div className="flex flex-wrap gap-1.5">
             {props.competences.map(c => (
               <span key={c} className="border border-border bg-card rounded-full text-xs px-2.5 py-1 text-foreground/80 font-body">{c}</span>
@@ -239,10 +230,7 @@ export default function PublicSitterProfile() {
       )}
       {props.lifestyle.length > 0 && (
         <div>
-          <div className="flex items-center gap-2 mb-2.5">
-            <Star className="w-4 h-4 text-primary" aria-hidden="true" />
-            <h3 className="text-sm font-semibold text-foreground font-body">Style de vie</h3>
-          </div>
+          <h3 className="text-sm font-semibold text-foreground font-body mb-2.5">Style de vie</h3>
           <div className="flex flex-wrap gap-1.5">
             {props.lifestyle.map(l => (
               <span key={l} className="border border-border bg-card rounded-full text-xs px-2.5 py-1 text-foreground font-body">{l}</span>
@@ -252,10 +240,7 @@ export default function PublicSitterProfile() {
       )}
       {props.preferredEnvironments.length > 0 && (
         <div>
-          <div className="flex items-center gap-2 mb-2.5">
-            <Home className="w-4 h-4 text-primary" aria-hidden="true" />
-            <h3 className="text-sm font-semibold text-foreground font-body">Environnements préférés</h3>
-          </div>
+          <h3 className="text-sm font-semibold text-foreground font-body mb-2.5">Environnements préférés</h3>
           <div className="flex flex-wrap gap-1.5">
             {props.preferredEnvironments.map(e => (
               <span key={e} className="border border-border bg-card rounded-full text-xs px-2.5 py-1 text-foreground font-body">{ENV_LABELS[e] || e}</span>
@@ -265,10 +250,7 @@ export default function PublicSitterProfile() {
       )}
       {(props.typeLine || props.durationLabel || props.frequencyLabel || props.noticeLabel) && (
         <div>
-          <div className="flex items-center gap-2 mb-2.5">
-            <BadgeCheck className="w-4 h-4 text-primary" aria-hidden="true" />
-            <h3 className="text-sm font-semibold text-foreground font-body">Profil &amp; disponibilité</h3>
-          </div>
+          <h3 className="text-sm font-semibold text-foreground font-body mb-2.5">Profil &amp; disponibilité</h3>
           <div className="text-sm text-foreground/70 font-body space-y-0.5">
             {props.typeLine && <p>{props.typeLine}</p>}
             {props.durationLabel && <p>{props.durationLabel}</p>}
