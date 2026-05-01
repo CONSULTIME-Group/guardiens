@@ -29,7 +29,7 @@ import MyMissionsColumn from "./owner/MyMissionsColumn";
 import ExchangesColumn from "./owner/ExchangesColumn";
 import DashSection from "./owner/DashSection";
 import EmptyCard from "./owner/EmptyCard";
-import StatCard from "./owner/StatCard";
+import StatsStrip from "./owner/StatsStrip";
 import PendingReviewsCard from "./owner/PendingReviewsCard";
 import {
   SPECIES_LABEL, PROPRIO_SPECIAL_IDS, BANNER_STYLES,
@@ -222,26 +222,9 @@ const OwnerDashboard = () => {
         </div>
       )}
 
-      {/* ═══ Stats ═══ */}
-      <section
-        aria-label="Vos statistiques propriétaire"
-        className="grid grid-cols-2 md:grid-cols-4 gap-3 px-5 md:px-8"
-      >
-        <StatCard value={completedSits.length} label="Gardes réalisées" />
-        <StatCard
-          value={avgRating > 0 ? `${avgRating} ★` : null}
-          fallback="Pas encore"
-          label="Note moyenne"
-          highlight={avgRating > 0}
-          to={user?.id ? `/gardiens/${user.id}?tab=proprio#avis` : undefined}
-        />
-        <StatCard value={activeSits.length} label="Annonces actives" to="/sits" />
-        <StatCard value={trustedSitterCount} label="Gardiens de confiance" />
-      </section>
-
       {/* ═══ PILOTAGE (gauche) + CONTEXTE (droite) ═══ */}
       <div className="px-5 md:px-8 grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Colonne pilotage : annonce, avis à laisser, candidatures consultées */}
+        {/* Colonne pilotage : annonce, stats, avis à laisser, candidatures consultées */}
         <div className="lg:col-span-2 space-y-6">
           <MonAnnonceCard
             sits={sits}
@@ -250,6 +233,22 @@ const OwnerDashboard = () => {
             propertyEnvironment={propertyEnvironment}
             pendingAppCount={pendingAppCount}
             coverPhoto={propertyCoverPhoto}
+          />
+
+          {/* Stats fusionnées : strip compact directement sous la carte annonce */}
+          <StatsStrip
+            items={[
+              { value: completedSits.length, label: "Gardes réalisées" },
+              {
+                value: avgRating > 0 ? `${avgRating} ★` : null,
+                fallback: "Pas encore",
+                label: "Note moyenne",
+                highlight: avgRating > 0,
+                to: user?.id ? `/gardiens/${user.id}?tab=proprio#avis` : undefined,
+              },
+              { value: activeSits.length, label: "Annonces actives", to: "/sits" },
+              { value: trustedSitterCount, label: "Gardiens de confiance" },
+            ]}
           />
 
           {pendingReviews.length > 0 && (
