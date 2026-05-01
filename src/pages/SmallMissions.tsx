@@ -757,7 +757,7 @@ const SmallMissions = () => {
                                   setDialogTarget({ id: m.user_id, name: (m.profiles as any)?.first_name || "ce membre" });
                                 }}
                               >
-                                Proposer un échange →
+                                {mode === "offer" ? "Je peux aider →" : "Proposer un échange →"}
                               </Button>
                             )
                           )}
