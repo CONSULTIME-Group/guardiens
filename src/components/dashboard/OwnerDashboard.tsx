@@ -150,7 +150,7 @@ const OwnerDashboard = () => {
   const showApplicationsSection = loading || hasReadApps;
 
   return (
-    <div className="space-y-6 md:space-y-8 pb-8">
+    <div className="space-y-6 md:space-y-8 pb-24 md:pb-8">
 
       {/* Role activation banner */}
       <div className="px-5 md:px-8 pt-2">
