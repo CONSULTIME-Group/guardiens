@@ -525,6 +525,9 @@ const SmallMissions = () => {
             <p className="text-muted-foreground max-w-2xl mx-auto">
               Des coups de main, des échanges, des compétences. Entre gens du coin qui se choisissent.
             </p>
+            <p className="inline-block text-xs font-medium bg-badge-success text-badge-success-foreground px-3 py-1 rounded-full">
+              Les petites missions sont gratuites à vie, pour tout le monde.
+            </p>
           </div>
         </section>
 
