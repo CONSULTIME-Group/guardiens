@@ -186,7 +186,7 @@ const OwnerDashboard = () => {
           <Button
             size="lg"
             onClick={() => navigate("/sits/create")}
-            className="shrink-0 w-full md:w-auto rounded-xl"
+            className="hidden md:inline-flex shrink-0 rounded-xl"
           >
             <Plus className="h-4 w-4 mr-1.5" /> Publier une annonce
           </Button>
