@@ -421,6 +421,7 @@ const Messages = () => {
     setSending(true);
     await supabase.from("messages").insert({ conversation_id: activeConv.id, sender_id: user.id, content: newMessage.trim() });
     // last_message_at + first_message_sent gérés automatiquement par trigger DB
+    try { await trackFirstAction("message_sent", { conversation_id: activeConv.id }); } catch {}
     setNewMessage("");
     setSending(false);
     loadConversations();
