@@ -139,7 +139,7 @@ const AdminSEO = () => {
 
       {error && !seoData && (
         <Card className="border-red-300">
-          <CardContent className="py-6 text-sm text-red-500">{error}</CardContent>
+          <CardContent className="py-6 text-sm text-destructive">{error}</CardContent>
         </Card>
       )}
 

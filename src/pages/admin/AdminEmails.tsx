@@ -578,9 +578,9 @@ const ConfigTab = () => {
         </div>
 
         {config.retry_after_until && (
-          <Card className="border-yellow-200 bg-yellow-50">
+          <Card className="border-warning-border bg-warning-soft">
             <CardContent className="py-3 px-4">
-              <div className="flex items-center gap-2 text-yellow-800 text-sm">
+              <div className="flex items-center gap-2 text-warning-foreground text-sm">
                 <AlertCircle className="h-4 w-4" />
                 Rate-limit actif jusqu'à {format(new Date(config.retry_after_until), "dd MMM HH:mm", { locale: fr })}
               </div>
