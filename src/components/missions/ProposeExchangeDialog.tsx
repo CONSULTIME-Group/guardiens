@@ -215,7 +215,7 @@ const ProposeExchangeDialog = ({
             disabled={loading || !exchangeOffer.trim()}
           >
             {loading && <Loader2 className="animate-spin w-4 h-4 mr-2" />}
-            Envoyer ma proposition
+            J'ose proposer
           </Button>
         </DialogFooter>
       </DialogContent>
