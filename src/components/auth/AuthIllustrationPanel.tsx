@@ -47,8 +47,8 @@ export const AuthIllustrationPanel = forwardRef<HTMLDivElement, AuthIllustration
             style={{ objectPosition: "center 75%" }}
             draggable={false}
           />
-          {/* Voile sémantique ~25% : s'adapte au thème via bg-background. */}
-          <div className="absolute inset-0 bg-background/25" />
+          {/* Voile sémantique ~10% : s'adapte au thème via bg-background. */}
+          <div className="absolute inset-0 bg-background/10" />
         </div>
 
         {/*
