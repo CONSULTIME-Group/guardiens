@@ -106,7 +106,12 @@ const CreateSmallMission = () => {
     } else {
       // Refresh the public list so the new mission shows up immediately
       await queryClient.invalidateQueries({ queryKey: ["small-missions-all"] });
-      toast({ title: "Mission publiée !", description: "Votre petite mission est en ligne." });
+      toast({
+        title: "Bravo d'avoir osé.",
+        description: missionType === "offre"
+          ? "Votre proposition d'aide est en ligne — les gens du coin peuvent vous trouver."
+          : "Votre demande est en ligne — les gens du coin vont la voir.",
+      });
       navigate("/petites-missions");
     }
   };
@@ -129,21 +134,18 @@ const CreateSmallMission = () => {
         )}
 
         {(accessLoading || canApplyMissions) && <>
-        {/* Encart pédagogique */}
-        <div
-          className="rounded-xl p-5 border space-y-2"
-          style={{ backgroundColor: "hsl(45 30% 96%)", borderColor: "hsl(40 20% 85%)" }}
-        >
-          <div className="flex items-center gap-2">
-            <Heart className="h-5 w-5 text-primary" />
-            <h2 className="font-heading font-bold text-foreground">L'entraide, c'est l'esprit Guardiens</h2>
-          </div>
+        {/* Encouragement OSER */}
+        <div className="rounded-xl p-5 border border-primary/20 bg-primary/5 space-y-2">
+          <h2 className="font-heading font-bold text-foreground">
+            Vous hésitez ? C'est normal. Personne ne vous jugera.
+          </h2>
           <p className="text-sm text-muted-foreground">
-            Les petites missions, c'est l'entraide entre gens du coin. Pas de l'argent, pas du travail — du lien.
-            Vous proposez un coup de main, l'autre vous offre un bon repas, des légumes du jardin, ou simplement sa gratitude.
+            {missionType === "offre"
+              ? "Décrivez ce que vous savez faire, même modestement. Quelqu'un du coin a peut-être besoin exactement de ça."
+              : "Décrivez votre besoin, même petit. Vous ne dérangez personne — vous offrez une occasion de rendre service."}
           </p>
-          <p className="text-sm text-muted-foreground">
-            <span className="font-medium text-foreground">À noter :</span> les petites missions sont des coups de main ponctuels, sans nuitée chez la personne. Pour une garde avec hébergement, passez par une annonce de garde dédiée.
+          <p className="text-xs text-muted-foreground">
+            <span className="font-medium text-foreground">À noter :</span> les petites missions sont des coups de main ponctuels, sans nuitée chez la personne.
           </p>
           <p className="inline-block text-xs font-medium bg-badge-success text-badge-success-foreground px-3 py-1 rounded-full mt-1">
             Gratuit à vie, pour tout le monde.
@@ -153,7 +155,7 @@ const CreateSmallMission = () => {
         <Card>
           <CardHeader>
             <CardTitle className="font-heading">
-              {missionType === "offre" ? "Proposer mon aide" : "Publier un besoin"}
+              {missionType === "offre" ? "J'ai du temps à offrir" : "J'ose demander"}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -164,11 +166,11 @@ const CreateSmallMission = () => {
                 <div className="flex gap-2">
                   <Button type="button" variant={missionType === "besoin" ? "default" : "outline"} size="sm" className="flex-1"
                     onClick={() => setMissionType("besoin")}>
-                    J'ai besoin d'aide
+                    J'ose demander
                   </Button>
                   <Button type="button" variant={missionType === "offre" ? "default" : "outline"} size="sm" className="flex-1"
                     onClick={() => setMissionType("offre")}>
-                    Je propose mon aide
+                    J'ai du temps à offrir
                   </Button>
                 </div>
               </div>
@@ -191,29 +193,41 @@ const CreateSmallMission = () => {
                 <Input
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  placeholder="Ex : Promener mon chien 3 fois cette semaine"
+                  placeholder={
+                    missionType === "offre"
+                      ? "Ex : Je peux promener un chien le week-end"
+                      : "Ex : Promener mon chien 3 fois cette semaine"
+                  }
                   maxLength={120}
                 />
               </div>
 
               {/* Description */}
               <div className="space-y-2">
-                <Label>Description *</Label>
+                <Label>{missionType === "offre" ? "Ce que vous proposez *" : "Description *"}</Label>
                 <Textarea
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  placeholder="Décrivez ce dont vous avez besoin. Soyez précis : quand, combien de temps, ce qu'il faut savoir."
+                  placeholder={
+                    missionType === "offre"
+                      ? "Décrivez ce que vous savez faire. Soyez concret : quand êtes-vous dispo, à quelle fréquence, ce qu'il faut savoir."
+                      : "Décrivez ce dont vous avez besoin. Soyez précis : quand, combien de temps, ce qu'il faut savoir."
+                  }
                   rows={4}
                 />
               </div>
 
               {/* Échange */}
               <div className="space-y-2">
-                <Label>En échange *</Label>
+                <Label>{missionType === "offre" ? "Ce que vous aimeriez en échange *" : "En échange *"}</Label>
                 <Input
                   value={exchangeOffer}
                   onChange={(e) => handleExchangeChange(e.target.value)}
-                  placeholder="Ex : Un bon repas, des légumes du jardin, un panier de fruits..."
+                  placeholder={
+                    missionType === "offre"
+                      ? "Ex : Un bon repas partagé, des légumes, ou « à voir ensemble »"
+                      : "Ex : Un bon repas, des légumes du jardin, un panier de fruits..."
+                  }
                 />
                 {exchangeError && (
                   <p className="text-sm text-destructive bg-destructive/10 rounded-md px-3 py-2">
@@ -260,7 +274,9 @@ const CreateSmallMission = () => {
               </div>
 
               <Button type="submit" className="w-full" size="lg" disabled={submitting || !!exchangeError}>
-                {submitting ? "Publication..." : "Publier la mission"}
+                {submitting
+                  ? "Publication..."
+                  : missionType === "offre" ? "J'ai du temps à offrir" : "J'ose, je publie"}
               </Button>
             </form>
           </CardContent>

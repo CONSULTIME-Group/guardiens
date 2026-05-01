@@ -282,7 +282,7 @@ const SmallMissionsPublic = () => {
                     ))}
                   </div>
                   <button onClick={goToCreate} className="inline-flex items-center gap-2 text-primary font-semibold text-sm mt-8 hover:gap-3 transition-all duration-200">
-                    Publier une mission <span>→</span>
+                    J'ose demander <span>→</span>
                   </button>
                 </div>
               </Reveal>
@@ -309,7 +309,7 @@ const SmallMissionsPublic = () => {
                     ))}
                   </div>
                   <button onClick={goToHelp} className="inline-flex items-center gap-2 text-secondary font-semibold text-sm mt-8 hover:gap-3 transition-all duration-200">
-                    Proposer mon aide <span>→</span>
+                    J'ai du temps à offrir <span>→</span>
                   </button>
                 </div>
               </Reveal>

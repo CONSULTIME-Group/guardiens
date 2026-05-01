@@ -520,10 +520,10 @@ const SmallMissions = () => {
           </div>
           <div className="relative max-w-6xl mx-auto px-4 py-16 md:py-24 text-center space-y-4">
             <h1 className="font-heading text-4xl md:text-5xl font-bold text-foreground">
-              Petites missions — Entre gens du coin
+              Osez. Quelqu'un du coin n'attend que ça.
             </h1>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              Des coups de main, des échanges, des compétences. Entre gens du coin qui se choisissent.
+              Demander un coup de main, ce n'est pas déranger — c'est offrir une occasion de rendre service. Ici, personne ne juge ce qui est petit.
             </p>
             <p className="inline-block text-xs font-medium bg-badge-success text-badge-success-foreground px-3 py-1 rounded-full">
               Les petites missions sont gratuites à vie, pour tout le monde.
@@ -539,13 +539,13 @@ const SmallMissions = () => {
                 onClick={() => setMode("need")}
                 className={`px-4 py-2 text-sm rounded-md transition-colors ${mode === "need" ? "bg-background text-foreground shadow-sm font-medium" : "text-muted-foreground hover:text-foreground"}`}
               >
-                Je cherche de l'aide
+                J'ose demander
               </button>
               <button
                 onClick={() => setMode("offer")}
                 className={`px-4 py-2 text-sm rounded-md transition-colors ${mode === "offer" ? "bg-background text-foreground shadow-sm font-medium" : "text-muted-foreground hover:text-foreground"}`}
               >
-                Je propose mon aide
+                J'ai du temps à offrir
               </button>
             </div>
 
@@ -554,13 +554,13 @@ const SmallMissions = () => {
                 {mode === "need" ? (
                   <Link to="/petites-missions/creer">
                     <Button variant="hero" size="lg">
-                      Poster une mission
+                      J'ose demander
                       <ArrowRight className="ml-2 h-4 w-4" />
                     </Button>
                   </Link>
                 ) : (
                   <Button variant="hero" size="lg" onClick={openOfferDialog}>
-                    Proposer mon aide
+                    J'ai du temps à offrir
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
                 )}
@@ -752,12 +752,18 @@ const SmallMissions = () => {
                 })}
               </div>
             ) : (
-              <div>
-                <p className="text-sm text-muted-foreground">
-                  Aucune mission publiée près de chez vous.
+              <div className="rounded-2xl border border-dashed border-primary/30 bg-primary/5 p-8 text-center space-y-3">
+                <p className="font-heading text-lg font-semibold text-foreground">
+                  Personne n'a encore osé près de chez vous.
                 </p>
-                <Link to="/petites-missions/creer" className="text-sm text-primary underline mt-1 inline-block">
-                  Publiez la vôtre →
+                <p className="text-sm text-muted-foreground max-w-md mx-auto">
+                  Soyez la première personne à publier. Une demande d'aujourd'hui, c'est des gens du coin qui la voient demain — et souvent une rencontre qui change la semaine.
+                </p>
+                <Link to="/petites-missions/creer" className="inline-block">
+                  <Button variant="hero" size="lg" className="mt-2">
+                    J'ose, je publie ma demande
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
                 </Link>
               </div>
             )}
@@ -888,26 +894,9 @@ const SmallMissions = () => {
             )}
           </section>
 
-          {(!allMissions || allMissions.length === 0) && (
-            <section className="text-center space-y-6 max-w-3xl mx-auto">
-              <h2 className="font-heading text-4xl md:text-5xl font-bold text-foreground">
-                Petites missions — L'entraide entre gens du coin, version Guardiens
-              </h2>
-            </section>
-          )}
-
-          <section className="text-left space-y-4 text-muted-foreground max-w-3xl mx-auto">
-            <p>
-              Chez Guardiens, tout a commencé par un coup de main. Promener un chien, nourrir des chats le temps d'un week-end, arroser un jardin. Avant les gardes longues, il y avait ces petits gestes — et c'est eux qui ont créé la confiance.
-            </p>
-            <p>
-              Les petites missions, c'est ce même esprit. Vous avez besoin d'un coup de main avec vos animaux, votre jardin ? Quelqu'un du coin est là. Pas contre de l'argent — contre un bon repas, des tomates du jardin, ou simplement le plaisir de se rendre service.
-            </p>
-          </section>
-
           {/* Exemples par catégorie — sans Maison */}
           <section className="space-y-8">
-            <h2 className="font-heading text-2xl font-bold text-foreground text-center">Exemples de missions</h2>
+            <h2 className="font-heading text-2xl font-bold text-foreground text-center">Quelques exemples d'échanges</h2>
             {(["animals", "garden", "skills"] as const).map((cat) => {
               const meta = CATEGORY_META[cat];
               const Icon = meta.icon;
@@ -933,45 +922,16 @@ const SmallMissions = () => {
             })}
           </section>
 
-          {/* Comment ça marche — une seule occurrence */}
-          <section className="space-y-8">
-            <h2 className="font-heading text-2xl font-bold text-foreground text-center">Comment ça marche</h2>
-            <div className="grid md:grid-cols-3 gap-6">
-              {[
-                { step: "1", title: "Poster votre mission", desc: "Décrivez ce dont vous avez besoin et ce que vous proposez en échange." },
-                { step: "2", title: "Quelqu'un répond", desc: "Un membre du coin vous propose son aide. Échangez en messagerie." },
-                { step: "3", title: "Rendez-vous et entraidez-vous", desc: "Vous vous rencontrez, vous vous aidez, et souvent ça finit autour d'un café." },
-              ].map((s) => (
-                <div key={s.step} className="text-center space-y-2">
-                  <div className="w-10 h-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center mx-auto font-bold">
-                    {s.step}
-                  </div>
-                  <h3 className="font-heading font-semibold text-foreground">{s.title}</h3>
-                  <p className="text-sm text-muted-foreground">{s.desc}</p>
-                </div>
-              ))}
-            </div>
-          </section>
-
-          {/* Encart pédagogique */}
-          <section className="rounded-2xl p-6 md:p-8 text-center space-y-4 border border-border bg-muted">
-            <h2 className="font-heading text-xl font-bold text-foreground">L'entraide, c'est l'esprit Guardiens</h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
-              Les petites missions, c'est l'entraide entre gens du coin. Pas de l'argent, pas du travail — du lien.
-              Proposez un coup de main, l'autre vous offre un bon repas, des légumes du jardin, ou simplement sa gratitude.
-              C'est comme ça qu'on a commencé : un chien à promener, un café qui s'éternise, et une amitié qui dure.
-            </p>
-          </section>
-
-          {/* CTA */}
+          {/* CTA final unifié */}
           <section className="text-center space-y-4 py-8">
-            <p className="text-lg text-muted-foreground max-w-xl mx-auto">
-              Rejoignez une communauté qui s'entraide — pas une marketplace.
+            <p className="font-heading text-xl md:text-2xl italic text-foreground/80 max-w-xl mx-auto leading-relaxed">
+              Le pire qui puisse arriver, c'est que personne ne réponde.<br />
+              Le meilleur, c'est de rencontrer quelqu'un qui change votre semaine.
             </p>
             {isAuthenticated ? (
               <Link to="/petites-missions/creer">
                 <Button variant="hero" size="xl">
-                  Poster une petite mission
+                  J'ose demander
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
               </Link>
@@ -1045,7 +1005,7 @@ const SmallMissions = () => {
       <Dialog open={offerDialogOpen} onOpenChange={setOfferDialogOpen}>
         <DialogContent className="sm:max-w-lg max-h-[85vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="font-heading text-lg">Proposer mon aide</DialogTitle>
+            <DialogTitle className="font-heading text-lg">J'ai du temps à offrir</DialogTitle>
             <DialogDescription className="text-sm text-muted-foreground">
               Indiquez dans quels domaines vous pouvez aider, ajoutez vos compétences spécifiques et décrivez ce que vous proposez.
             </DialogDescription>
