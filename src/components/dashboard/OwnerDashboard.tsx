@@ -198,7 +198,18 @@ const OwnerDashboard = () => {
         <AccessGateBanner level={level} profileCompletion={accessProfileCompletion} context="guard" />
       </div>
 
-      {/* ═══ Banner contextuel ═══ */}
+      {/* ═══ Hero "garde en cours" (prioritaire, contextuel) ═══ */}
+      {ongoingSit && (
+        <div className="px-5 md:px-8">
+          <OngoingSitHero
+            sit={ongoingSit}
+            sitterProfiles={sitterProfiles}
+            coverPhoto={propertyCoverPhoto}
+          />
+        </div>
+      )}
+
+      {/* ═══ Banner contextuel (vérification, candidatures non lues) ═══ */}
       {banner && (
         <div className="px-5 md:px-8">
           <div className={`p-4 rounded-2xl border ${BANNER_STYLES[banner.variant]} flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2`}>
