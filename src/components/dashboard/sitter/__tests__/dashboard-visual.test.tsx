@@ -5,8 +5,10 @@ import NearestListingHero from "../NearestListingHero";
 import SitterNextGuardEmpty from "../SitterNextGuardEmpty";
 
 // ─── Mocks pour SitterEmergencyCard (Auth + Supabase) ───
+// Pas de user → la fonction load() retourne tôt et n'appelle pas Supabase ;
+// le composant rend uniquement à partir des données d'aperçu (previewMode).
 vi.mock("@/contexts/AuthContext", () => ({
-  useAuth: () => ({ user: { id: "test-user" } }),
+  useAuth: () => ({ user: null }),
 }));
 
 vi.mock("@/integrations/supabase/client", () => {
