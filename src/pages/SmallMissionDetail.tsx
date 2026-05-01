@@ -26,10 +26,10 @@ import AccessGateBanner from "@/components/access/AccessGateBanner";
 import MissionPhotoGallery from "@/components/missions/MissionPhotoGallery";
 
 const CATEGORY_META: Record<string, { label: string; icon: typeof Dog; colorClass: string }> = {
-  animals: { label: "Animaux", icon: Dog, colorClass: "text-orange-500" },
-  garden: { label: "Jardin", icon: Flower2, colorClass: "text-green-600" },
-  house: { label: "Maison", icon: Home, colorClass: "text-blue-500" },
-  skills: { label: "Compétences", icon: Handshake, colorClass: "text-amber-600" },
+  animals: { label: "Animaux", icon: Dog, colorClass: "text-primary" },
+  garden: { label: "Jardin", icon: Flower2, colorClass: "text-primary" },
+  house: { label: "Maison", icon: Handshake, colorClass: "text-primary" },
+  skills: { label: "Compétences", icon: Handshake, colorClass: "text-primary" },
 };
 
 const DURATION_LABELS: Record<string, string> = {
@@ -42,22 +42,22 @@ const DURATION_LABELS: Record<string, string> = {
 };
 
 const STATUS_LABELS: Record<string, { label: string; className: string }> = {
-  open: { label: "Ouverte", className: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" },
-  in_progress: { label: "En cours", className: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400" },
+  open: { label: "Ouverte", className: "bg-badge-success text-badge-success-foreground" },
+  in_progress: { label: "En cours", className: "bg-primary/10 text-primary" },
   completed: { label: "Terminée", className: "bg-muted text-muted-foreground" },
   cancelled: { label: "Annulée", className: "bg-destructive/10 text-destructive" },
 };
 
 const PUBLISHER_BADGES = [
-  { key: "coup_de_main_en_or", label: "Coup de main en or", icon: Star, iconColor: "text-amber-500", bgColor: "bg-amber-50 dark:bg-amber-900/20", borderColor: "border-amber-300 dark:border-amber-700", selectedBg: "bg-amber-100 dark:bg-amber-900/40" },
-  { key: "super_voisin", label: "Personne en or", icon: Heart, iconColor: "text-green-500", bgColor: "bg-green-50 dark:bg-green-900/20", borderColor: "border-green-300 dark:border-green-700", selectedBg: "bg-green-100 dark:bg-green-900/40" },
-  { key: "on_remet_ca", label: "On remet ça", icon: RotateCcw, iconColor: "text-blue-500", bgColor: "bg-blue-50 dark:bg-blue-900/20", borderColor: "border-blue-300 dark:border-blue-700", selectedBg: "bg-blue-100 dark:bg-blue-900/40" },
+  { key: "coup_de_main_en_or", label: "Coup de main en or", icon: Star, iconColor: "text-warning", bgColor: "bg-warning-soft", borderColor: "border-warning-border", selectedBg: "bg-warning/15" },
+  { key: "super_voisin", label: "Personne en or", icon: Heart, iconColor: "text-primary", bgColor: "bg-badge-success", borderColor: "border-badge-success-foreground/20", selectedBg: "bg-badge-success/80" },
+  { key: "on_remet_ca", label: "On remet ça", icon: RotateCcw, iconColor: "text-primary", bgColor: "bg-primary/5", borderColor: "border-primary/30", selectedBg: "bg-primary/15" },
 ];
 
 const CANDIDATE_BADGES = [
-  { key: "guide_aux_petits_oignons", label: "Guide aux petits oignons", icon: Star, iconColor: "text-amber-500", bgColor: "bg-amber-50 dark:bg-amber-900/20", borderColor: "border-amber-300 dark:border-amber-700", selectedBg: "bg-amber-100 dark:bg-amber-900/40" },
-  { key: "toujours_joignable", label: "Toujours joignable", icon: MessageSquare, iconColor: "text-green-500", bgColor: "bg-green-50 dark:bg-green-900/20", borderColor: "border-green-300 dark:border-green-700", selectedBg: "bg-green-100 dark:bg-green-900/40" },
-  { key: "on_reviendra", label: "On reviendra", icon: RotateCcw, iconColor: "text-blue-500", bgColor: "bg-blue-50 dark:bg-blue-900/20", borderColor: "border-blue-300 dark:border-blue-700", selectedBg: "bg-blue-100 dark:bg-blue-900/40" },
+  { key: "guide_aux_petits_oignons", label: "Guide aux petits oignons", icon: Star, iconColor: "text-warning", bgColor: "bg-warning-soft", borderColor: "border-warning-border", selectedBg: "bg-warning/15" },
+  { key: "toujours_joignable", label: "Toujours joignable", icon: MessageSquare, iconColor: "text-primary", bgColor: "bg-badge-success", borderColor: "border-badge-success-foreground/20", selectedBg: "bg-badge-success/80" },
+  { key: "on_reviendra", label: "On reviendra", icon: RotateCcw, iconColor: "text-primary", bgColor: "bg-primary/5", borderColor: "border-primary/30", selectedBg: "bg-primary/15" },
 ];
 
 /* ── Inline Feedback Form ── */
