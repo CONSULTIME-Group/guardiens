@@ -15,6 +15,9 @@ import EmergencyEligibility from "./EmergencyEligibility";
 
 import SitterHero from "./sitter/SitterHero";
 import SitterNextGuard from "./sitter/SitterNextGuard";
+import SitterNextGuardEmpty from "./sitter/SitterNextGuardEmpty";
+import NearestListingHero from "./sitter/NearestListingHero";
+import SitterMobileStickyCTA from "./sitter/SitterMobileStickyCTA";
 import SitterStatusBar from "./sitter/SitterStatusBar";
 import SitterBadgesSection from "./sitter/SitterBadgesSection";
 import SitterBottomColumns from "./sitter/SitterBottomColumns";
@@ -250,8 +253,14 @@ const SitterDashboard = () => {
         onToggleAvailability={toggleAvailability}
       />
 
-      {/* Next guard card */}
-      {nextGuard && <SitterNextGuard nextGuard={nextGuard} />}
+      {/* Hero contextuel : prochaine garde > annonce phare > empty state */}
+      {nextGuard ? (
+        <SitterNextGuard nextGuard={nextGuard} />
+      ) : nearbyListings.length > 0 ? (
+        <NearestListingHero listing={nearbyListings[0]} />
+      ) : (
+        <SitterNextGuardEmpty />
+      )}
 
       {/* Quick action badges for pending apps / unread messages */}
       {(pendingAppsCount > 0 || unreadCount > 0) && (
@@ -309,17 +318,19 @@ const SitterDashboard = () => {
         {ChecklistBlock}
         {CtaBlock}
         {buildStatusBlock(false)}
-        {hasEmergencyProfile && (
+        {/* Emergency : un seul bloc — soit le dashboard si actif, soit l'éligibilité */}
+        {hasEmergencyProfile ? (
           <div className="px-4 sm:px-5 md:px-8 mb-6 md:mb-8">
             <EmergencyDashSection />
           </div>
+        ) : (
+          buildEmergencyBlock(false)
         )}
         {buildBadgesBlock(false)}
         <section aria-labelledby="nearby-heading">
           <h2 id="nearby-heading" className="sr-only">Près de chez vous</h2>
           <SitterBottomColumns nearbyListings={nearbyListings} nearbyMissions={nearbyMissions} postalCode={postalCode} />
         </section>
-        {buildEmergencyBlock(false)}
         {articles.length > 0 && (
           <section aria-labelledby="articles-heading" className="px-4 sm:px-5 md:px-8 mb-6 md:mb-8">
             <div className="flex items-center justify-between mb-4">
@@ -392,15 +403,23 @@ const SitterDashboard = () => {
         {/* SIDE COLUMN — 4/12 (~33%) */}
         <aside aria-label="Statut, badges et urgence" className="xl:col-span-4 min-w-0">
           {buildStatusBlock(true)}
-          {hasEmergencyProfile && (
+          {/* Un seul bloc urgence : profil actif → dashboard, sinon → éligibilité */}
+          {hasEmergencyProfile ? (
             <div className="mb-6">
               <EmergencyDashSection />
             </div>
+          ) : (
+            buildEmergencyBlock(true)
           )}
           {buildBadgesBlock(true)}
-          {buildEmergencyBlock(true)}
         </aside>
       </div>
+
+      {/* CTA sticky mobile (md-) */}
+      <SitterMobileStickyCTA pendingAppsCount={pendingAppsCount} unreadCount={unreadCount} />
+
+      {/* Espace pour ne pas masquer le contenu derrière le sticky */}
+      <div className="md:hidden h-20" aria-hidden="true" />
     </div>
   );
 };
