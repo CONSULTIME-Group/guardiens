@@ -69,21 +69,21 @@ const OngoingSitHero = memo(({ sit, sitterProfiles, coverPhoto }: OngoingSitHero
                 <Sparkles className="h-8 w-8 text-primary/30" aria-hidden="true" />
               </div>
             )}
-            {/* Voile pour lisibilité du badge sur photo claire */}
+            {/* Voile renforcé pour lisibilité du badge sur photo claire (mobile) */}
             <div
-              className="absolute inset-x-0 top-0 h-16 bg-gradient-to-b from-black/30 to-transparent pointer-events-none sm:hidden"
+              className="absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-black/45 via-black/20 to-transparent pointer-events-none sm:hidden"
               aria-hidden="true"
             />
-            {/* Badge J-X — plus lisible sur mobile */}
-            <div className="absolute top-3 left-3">
+            {/* Badge J-X — plus gros, plus contrasté, mieux positionné sur mobile */}
+            <div className="absolute top-2.5 left-2.5 sm:top-3 sm:left-3">
               <span
-                className={`inline-flex items-center gap-1 text-xs font-semibold rounded-full px-2.5 py-1 shadow-md ${
+                className={`inline-flex items-center gap-1.5 text-[13px] sm:text-xs font-heading font-bold tracking-tight rounded-full px-3 py-1.5 sm:px-2.5 sm:py-1 shadow-lg ring-1 ring-black/5 backdrop-blur-sm ${
                   daysLeft === 0
                     ? "bg-amber-500 text-white"
                     : "bg-primary text-primary-foreground"
                 }`}
               >
-                <Clock className="h-3 w-3" aria-hidden="true" />
+                <Clock className="h-3.5 w-3.5 sm:h-3 sm:w-3" aria-hidden="true" />
                 {badgeLabel}
               </span>
             </div>
