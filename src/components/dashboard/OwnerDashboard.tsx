@@ -11,8 +11,7 @@ import NearbyEmergencySitters from "./NearbyEmergencySitters";
 import DashboardSkeleton from "@/components/skeletons/DashboardSkeleton";
 import { Plus, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { format, differenceInDays } from "date-fns";
-import { fr } from "date-fns/locale";
+import { differenceInDays } from "date-fns";
 
 import RoleActivationBanner from "./RoleActivationBanner";
 import AccessGateBanner from "@/components/access/AccessGateBanner";
