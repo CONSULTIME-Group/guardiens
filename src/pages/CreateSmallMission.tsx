@@ -165,15 +165,15 @@ const CreateSmallMission = () => {
             <form onSubmit={handleSubmit} className="space-y-5 pb-32">
               {/* Type toggle */}
               <div className="space-y-2">
-                <Label>Type de mission *</Label>
+                <Label>Vous publiez… *</Label>
                 <div className="flex gap-2">
                   <Button type="button" variant={missionType === "besoin" ? "default" : "outline"} size="sm" className="flex-1"
                     onClick={() => setMissionType("besoin")}>
-                    J'ose demander
+                    Une demande
                   </Button>
                   <Button type="button" variant={missionType === "offre" ? "default" : "outline"} size="sm" className="flex-1"
                     onClick={() => setMissionType("offre")}>
-                    J'ai du temps à offrir
+                    Une offre d'aide
                   </Button>
                 </div>
               </div>
