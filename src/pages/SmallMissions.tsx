@@ -634,8 +634,8 @@ const SmallMissions = () => {
                       }}
                       className="flex-1 h-2 accent-[hsl(var(--primary))] cursor-pointer"
                     />
-                    <span className="text-xs font-medium text-foreground whitespace-nowrap min-w-[50px] text-right">
-                      {radiusKm === 0 ? "∞" : `${radiusKm} km`}
+                    <span className="text-xs font-medium text-foreground whitespace-nowrap min-w-[60px] text-right">
+                      {radiusKm === 0 ? "Partout" : `${radiusKm} km`}
                     </span>
                   </div>
                   {geocodingOrigin && (
