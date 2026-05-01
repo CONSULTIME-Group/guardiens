@@ -820,8 +820,8 @@ const SmallMissions = () => {
                     {helperCount} personne{helperCount > 1 ? "s" : ""} du coin
                   </span>
                 </h2>
-                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {filteredHelpers.map((h: any) => {
+                {(() => {
+                  const renderHelperCard = (h: any) => {
                     const skillCats: string[] = h.skill_categories || [];
                     const displayedSkills = skillCats.slice(0, 2);
                     const extraCount = skillCats.length - 2;
@@ -865,7 +865,7 @@ const SmallMissions = () => {
                             {h.review_count > 0 ? `${h.review_avg.toFixed(1)} · ` : ""}{h.sits_count} garde{h.sits_count > 1 ? "s" : ""}
                           </p>
                         )}
-                        {/* Competences spécifiques (priorité) puis catégories */}
+                        {/* Compétences spécifiques (au-delà des catégories) */}
                         {(() => {
                           const comps: string[] = h.competences || [];
                           const toShow = comps.length > 0 ? comps : (h.custom_skills as string[] || []);
@@ -904,8 +904,39 @@ const SmallMissions = () => {
                         </div>
                       </div>
                     );
-                  })}
-                </div>
+                  };
+
+                  return (
+                    <div className="space-y-8">
+                      {/* Bloc 1 — Compétences spécifiques renseignées (priorité) */}
+                      {priorityHelpers.length > 0 && (
+                        <div className="space-y-3">
+                          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                            {priorityHelpers.map(renderHelperCard)}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Bloc 2 — Disponibles en complémentaire (catégories seules) */}
+                      {complementaryHelpers.length > 0 && (
+                        <div className="space-y-3">
+                          <div className="flex items-center gap-3">
+                            <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+                              En complémentaire
+                            </h3>
+                            <span className="text-xs text-muted-foreground">
+                              Disponibles sans compétence précisée
+                            </span>
+                            <div className="flex-1 h-px bg-border" />
+                          </div>
+                          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                            {complementaryHelpers.map(renderHelperCard)}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })()}
               </div>
             )}
           </section>
