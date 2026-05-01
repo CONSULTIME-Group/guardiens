@@ -874,7 +874,7 @@ const SmallMissions = () => {
                         {h.sits_count > 0 && (
                           <p className="text-xs text-foreground/60 flex items-center gap-1">
                             <Star className="h-3 w-3 fill-primary text-primary" />
-                            {h.review_count > 0 ? `${h.review_avg.toFixed(1)} · ` : ""}{h.sits_count} garde{h.sits_count > 1 ? "s" : ""}
+                            {h.review_count > 0 ? `${h.review_avg.toFixed(1)} · ` : ""}{h.sits_count} mission{h.sits_count > 1 ? "s" : ""} accomplie{h.sits_count > 1 ? "s" : ""}
                           </p>
                         )}
                         {/* Compétences spécifiques (au-delà des catégories) */}
