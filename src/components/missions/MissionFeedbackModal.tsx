@@ -35,10 +35,10 @@ const MISSION_BADGES = [
     label: "On remet ça",
     description: "On veut retravailler ensemble",
     icon: RotateCcw,
-    bgColor: "bg-primary/5",
-    borderColor: "border-primary/30",
-    iconColor: "text-primary",
-    selectedBg: "bg-primary/15",
+    bgColor: "bg-info-soft",
+    borderColor: "border-info-border",
+    iconColor: "text-info",
+    selectedBg: "bg-info-soft/80",
   },
 ];
 
