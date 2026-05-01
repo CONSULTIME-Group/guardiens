@@ -105,6 +105,18 @@
     --warning-soft: 48 100% 96%;
     --warning-border: 43 96% 78%;
 
+    /* Success (états positifs : acceptation, validation, échange réussi) */
+    --success: 153 50% 35%;
+    --success-foreground: 0 0% 100%;
+    --success-soft: 141 50% 94%;
+    --success-border: 153 40% 70%;
+
+    /* Info (états informatifs : en attente, neutres) */
+    --info: 210 70% 45%;
+    --info-foreground: 0 0% 100%;
+    --info-soft: 210 60% 96%;
+    --info-border: 210 60% 80%;
+
     /* Password strength meter (4 niveaux progressifs cohérents avec la palette) */
     --strength-weak: 0 72% 50%;
     --strength-medium: 25 90% 55%;
@@ -163,6 +175,16 @@
     --warning-foreground: 48 100% 92%;
     --warning-soft: 38 30% 18%;
     --warning-border: 38 50% 30%;
+
+    --success: 153 45% 50%;
+    --success-foreground: 160 10% 8%;
+    --success-soft: 153 30% 20%;
+    --success-border: 153 40% 35%;
+
+    --info: 210 65% 55%;
+    --info-foreground: 160 10% 8%;
+    --info-soft: 210 30% 20%;
+    --info-border: 210 40% 35%;
 
     --strength-weak: 0 65% 55%;
     --strength-medium: 25 80% 55%;
