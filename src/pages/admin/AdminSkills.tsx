@@ -459,7 +459,7 @@ const AdminSkills = () => {
                           </div>
                         ) : (
                           <span className={`text-xs font-medium ${
-                            skill.status === "approved" ? "text-green-600" : "text-destructive"
+                            skill.status === "approved" ? "text-success" : "text-destructive"
                           }`}>
                             {skill.status === "approved" ? "Approuvée" : "Refusée"}
                           </span>

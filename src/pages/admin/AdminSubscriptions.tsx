@@ -17,7 +17,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 const planLabels: Record<string, { label: string; color: string }> = {
   founder_free: { label: "Fondateur", color: "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400" },
   annual_sitter: { label: "Premium", color: "bg-primary/10 text-primary" },
-  free_launch: { label: "Lancement gratuit", color: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400" },
+  free_launch: { label: "Lancement gratuit", color: "bg-success-soft text-success" },
   owner_free: { label: "Proprio gratuit", color: "bg-muted text-muted-foreground" },
 };
 
@@ -221,7 +221,7 @@ const AdminSubscriptions = () => {
         </Card>
         <Card>
           <CardContent className="p-4 flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-red-100 dark:bg-red-900/30"><AlertTriangle className="h-5 w-5 text-red-500" /></div>
+            <div className="p-2 rounded-lg bg-destructive/10"><AlertTriangle className="h-5 w-5 text-destructive" /></div>
             <div>
               <p className="text-2xl font-bold">{metrics.expiredMonth}</p>
               <p className="text-xs text-muted-foreground">Expirés ce mois</p>
@@ -230,7 +230,7 @@ const AdminSubscriptions = () => {
         </Card>
         <Card>
           <CardContent className="p-4 flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-green-100 dark:bg-green-900/30"><CreditCard className="h-5 w-5 text-green-600 dark:text-green-400" /></div>
+            <div className="p-2 rounded-lg bg-success-soft"><CreditCard className="h-5 w-5 text-success" /></div>
             <div>
               <p className="text-2xl font-bold">{metrics.revenue}€</p>
               <p className="text-xs text-muted-foreground">Revenus estimés</p>
