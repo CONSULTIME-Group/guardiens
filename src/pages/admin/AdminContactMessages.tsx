@@ -186,9 +186,9 @@ const AdminContactMessages = () => {
 
   const statusBadge = (status: string) => {
     switch (status) {
-      case "new": return <Badge className="bg-yellow-100 text-yellow-800 border-0"><Clock className="h-3 w-3 mr-1" />Nouveau</Badge>;
+      case "new": return <Badge className="bg-warning-soft text-warning-foreground border-0"><Clock className="h-3 w-3 mr-1" />Nouveau</Badge>;
       case "en_cours": return <Badge variant="secondary"><PlayCircle className="h-3 w-3 mr-1" />En cours</Badge>;
-      case "replied": return <Badge className="bg-green-100 text-green-800 border-0"><CheckCircle2 className="h-3 w-3 mr-1" />Répondu</Badge>;
+      case "replied": return <Badge className="bg-success-soft text-success border-0"><CheckCircle2 className="h-3 w-3 mr-1" />Répondu</Badge>;
       case "closed": return <Badge className="bg-muted text-muted-foreground border-0"><XCircle className="h-3 w-3 mr-1" />Fermé</Badge>;
       default: return <Badge variant="outline">{status}</Badge>;
     }

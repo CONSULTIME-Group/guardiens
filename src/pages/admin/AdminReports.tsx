@@ -138,8 +138,8 @@ const AdminReports = () => {
                 <CardContent className="p-5 space-y-3">
                   <div className="flex items-start justify-between">
                     <div className="flex items-center gap-3">
-                      <div className="p-2 rounded-lg bg-red-50 dark:bg-red-900/20">
-                        <AlertTriangle className="h-5 w-5 text-red-500" />
+                      <div className="p-2 rounded-lg bg-destructive/10">
+                        <AlertTriangle className="h-5 w-5 text-destructive" />
                       </div>
                       <div>
                         <div className="flex items-center gap-2 mb-0.5">
@@ -159,7 +159,7 @@ const AdminReports = () => {
                   )}
 
                   {report.admin_notes && (
-                    <div className="text-xs bg-yellow-50 dark:bg-yellow-900/20 p-2 rounded-lg border border-yellow-200 dark:border-yellow-800">
+                    <div className="text-xs bg-warning-soft p-2 rounded-lg border border-warning-border">
                       <span className="font-medium">Note admin :</span> {report.admin_notes}
                     </div>
                   )}

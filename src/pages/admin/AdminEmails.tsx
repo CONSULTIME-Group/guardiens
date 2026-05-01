@@ -340,7 +340,7 @@ const LogsTab = () => {
           <div className="text-xs text-muted-foreground">Total</div>
         </CardContent></Card>
         <Card><CardContent className="pt-4 pb-3 text-center">
-          <div className="text-2xl font-bold text-green-600">{stats.sent}</div>
+          <div className="text-2xl font-bold text-success">{stats.sent}</div>
           <div className="text-xs text-muted-foreground">Envoyés</div>
         </CardContent></Card>
         <Card><CardContent className="pt-4 pb-3 text-center">
@@ -357,7 +357,7 @@ const LogsTab = () => {
           </CardContent>
         </Card>
         <Card><CardContent className="pt-4 pb-3 text-center">
-          <div className="text-2xl font-bold text-yellow-600">{stats.suppressed}</div>
+          <div className="text-2xl font-bold text-warning">{stats.suppressed}</div>
           <div className="text-xs text-muted-foreground">Supprimés</div>
         </CardContent></Card>
       </div>
@@ -578,9 +578,9 @@ const ConfigTab = () => {
         </div>
 
         {config.retry_after_until && (
-          <Card className="border-yellow-200 bg-yellow-50">
+          <Card className="border-warning-border bg-warning-soft">
             <CardContent className="py-3 px-4">
-              <div className="flex items-center gap-2 text-yellow-800 text-sm">
+              <div className="flex items-center gap-2 text-warning-foreground text-sm">
                 <AlertCircle className="h-4 w-4" />
                 Rate-limit actif jusqu'à {format(new Date(config.retry_after_until), "dd MMM HH:mm", { locale: fr })}
               </div>

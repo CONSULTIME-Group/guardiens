@@ -96,7 +96,7 @@ const AdminLegal = () => {
               { label: "Comparaison tarifaire avec clause de bonne foi", done: true },
             ].map((item) => (
               <div key={item.label} className="flex items-center gap-2">
-                <div className={`h-2 w-2 rounded-full ${item.done ? "bg-green-500" : "bg-yellow-500"}`} />
+                <div className={`h-2 w-2 rounded-full ${item.done ? "bg-success" : "bg-warning"}`} />
                 <span className="text-xs text-muted-foreground">{item.label}</span>
                 {item.done && <Badge variant="outline" className="text-[10px] h-4">OK</Badge>}
               </div>

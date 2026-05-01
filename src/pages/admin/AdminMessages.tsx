@@ -197,8 +197,8 @@ export default function AdminMessages() {
             <Card>
               <CardContent className="p-5">
                 <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-lg bg-blue-500/10 flex items-center justify-center">
-                    <Users className="h-5 w-5 text-blue-500" />
+                  <div className="h-10 w-10 rounded-lg bg-info-soft flex items-center justify-center">
+                    <Users className="h-5 w-5 text-info" />
                   </div>
                   <div>
                     <p className="text-2xl font-bold text-foreground">{stats?.totalConversations || 0}</p>

@@ -148,7 +148,7 @@ const AdminReviews = () => {
   const renderStars = (rating: number) => (
     <div className="flex">
       {Array.from({ length: 5 }, (_, i) => (
-        <Star key={i} className={`h-3.5 w-3.5 ${i < rating ? "text-yellow-500 fill-yellow-500" : "text-muted"}`} />
+        <Star key={i} className={`h-3.5 w-3.5 ${i < rating ? "text-warning fill-warning" : "text-muted"}`} />
       ))}
     </div>
   );
