@@ -1194,17 +1194,18 @@ const Landing = () => {
       {/* Hero animation keyframes */}
       <style>{`
         @keyframes heroFadeUp {
-          from { opacity: 0; transform: translateY(20px); }
+          from { opacity: 0; transform: translateY(16px); }
           to { opacity: 1; transform: translateY(0); }
         }
-        .animate-hero-fade-up { animation: heroFadeUp 0.8s ease-out both; }
-        .animation-delay-400 { animation-delay: 0.4s; }
-        .animation-delay-700 { animation-delay: 0.7s; }
-        .animation-delay-900 { animation-delay: 0.9s; }
-        .animation-delay-1000 { animation-delay: 1s; }
-        .animation-delay-1100 { animation-delay: 1.1s; }
+        .animate-hero-fade-up { animation: heroFadeUp 0.55s cubic-bezier(0.22, 1, 0.36, 1) both; }
+        /* Cadence resserrée : H1 visible <500ms après l'image (LCP perçu). */
+        .animation-delay-400 { animation-delay: 0.08s; }
+        .animation-delay-700 { animation-delay: 0.18s; }
+        .animation-delay-900 { animation-delay: 0.28s; }
+        .animation-delay-1000 { animation-delay: 0.38s; }
+        .animation-delay-1100 { animation-delay: 0.48s; }
         @media (prefers-reduced-motion: reduce) {
-          * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+          .animate-hero-fade-up { animation: none !important; opacity: 1 !important; transform: none !important; }
         }
       `}</style>
     </div>
