@@ -265,9 +265,14 @@ const OwnerDashboard = () => {
           )}
 
           {/* Mes animaux dans la colonne principale */}
-          <DashSection title="Mes animaux" action={
-            <Link to="/owner-profile" className="text-xs text-primary hover:underline font-medium">Gérer</Link>
-          }>
+          <DashSection
+            eyebrow="Famille"
+            title="Mes animaux"
+            description="Vos compagnons tels qu'ils apparaissent aux gardiens."
+            action={
+              <Link to="/owner-profile" className="text-xs text-primary hover:underline font-medium">Gérer</Link>
+            }
+          >
             {pets.length === 0 ? (
               <EmptyCard text="Aucun animal enregistré" hint="Ajoutez vos compagnons pour attirer les bons gardiens" cta="Ajouter un animal" to="/owner-profile" />
             ) : (
