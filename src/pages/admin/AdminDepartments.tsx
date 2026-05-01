@@ -5,6 +5,16 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import { Plus, Trash2, Loader2, Building2, ExternalLink } from "lucide-react";
 
@@ -20,8 +30,9 @@ interface DepartmentPage {
 const AdminDepartments = () => {
   const queryClient = useQueryClient();
   const [department, setDepartment] = useState("");
-  const [region, setRegion] = useState("Auvergne-Rhône-Alpes");
+  const [region, setRegion] = useState("");
   const [generating, setGenerating] = useState(false);
+  const [pendingDelete, setPendingDelete] = useState<DepartmentPage | null>(null);
 
   const { data: pages = [], isLoading } = useQuery({
     queryKey: ["admin-departments"],
@@ -39,19 +50,13 @@ const AdminDepartments = () => {
     if (!department) return;
     setGenerating(true);
     try {
-      const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
-      const res = await fetch(
-        `https://${projectId}.supabase.co/functions/v1/generate-department-page`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ department, region }),
-        }
-      );
-      if (!res.ok) throw new Error(await res.text());
-      const data = await res.json();
+      const { data, error } = await supabase.functions.invoke("generate-department-page", {
+        body: { department, region: region.trim() || undefined },
+      });
+      if (error) throw error;
       toast.success(`Page département générée pour ${data.department}`);
       setDepartment("");
+      setRegion("");
       queryClient.invalidateQueries({ queryKey: ["admin-departments"] });
     } catch (err: any) {
       toast.error("Erreur: " + err.message);
@@ -65,7 +70,11 @@ const AdminDepartments = () => {
       const { error } = await (supabase.from("seo_department_pages" as any) as any).update({ published }).eq("id", id);
       if (error) throw error;
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["admin-departments"] }),
+    onSuccess: (_, vars) => {
+      queryClient.invalidateQueries({ queryKey: ["admin-departments"] });
+      toast.success(vars.published ? "Page publiée" : "Page dépubliée");
+    },
+    onError: (err: any) => toast.error("Erreur: " + err.message),
   });
 
   const deleteMutation = useMutation({
@@ -76,13 +85,15 @@ const AdminDepartments = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-departments"] });
       toast.success("Page département supprimée");
+      setPendingDelete(null);
     },
+    onError: (err: any) => toast.error("Erreur: " + err.message),
   });
 
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-foreground">Pages départements</h1>
+        <h1 className="font-body text-2xl font-bold text-foreground">Pages départements</h1>
         <p className="text-muted-foreground text-sm">{pages.length} départements</p>
       </div>
 
@@ -99,7 +110,7 @@ const AdminDepartments = () => {
               className="w-56"
             />
             <Input
-              placeholder="Région"
+              placeholder="Région (optionnel)"
               value={region}
               onChange={(e) => setRegion(e.target.value)}
               className="w-56"
@@ -123,7 +134,7 @@ const AdminDepartments = () => {
               <Building2 className="h-4 w-4 text-primary shrink-0" />
               <div className="flex-1 min-w-0">
                 <p className="font-medium text-sm text-foreground">{p.department}</p>
-                <p className="text-xs text-muted-foreground">{p.region}</p>
+                {p.region && <p className="text-xs text-muted-foreground">{p.region}</p>}
               </div>
               <Switch
                 checked={p.published}
@@ -132,13 +143,38 @@ const AdminDepartments = () => {
               <a href={`/departement/${p.slug}`} target="_blank" rel="noopener" className="text-muted-foreground hover:text-foreground">
                 <ExternalLink className="h-4 w-4" />
               </a>
-              <Button size="icon" variant="ghost" onClick={() => deleteMutation.mutate(p.id)}>
+              <Button size="icon" variant="ghost" onClick={() => setPendingDelete(p)}>
                 <Trash2 className="h-4 w-4 text-destructive" />
               </Button>
             </div>
           ))}
+          {pages.length === 0 && (
+            <p className="text-center text-muted-foreground py-8">
+              Aucune page département créée.
+            </p>
+          )}
         </div>
       )}
+
+      <AlertDialog open={!!pendingDelete} onOpenChange={(o) => !o && setPendingDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Supprimer cette page département ?</AlertDialogTitle>
+            <AlertDialogDescription>
+              La page de {pendingDelete?.department} sera définitivement supprimée.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annuler</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => pendingDelete && deleteMutation.mutate(pendingDelete.id)}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Supprimer
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

@@ -5,19 +5,24 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import { Plus, ExternalLink, Loader2, Trash2 } from "lucide-react";
 
-const DEPARTMENTS_AURA = [
-  "Ain", "Allier", "Ardèche", "Cantal", "Drôme",
-  "Isère", "Loire", "Haute-Loire", "Puy-de-Dôme",
-  "Rhône", "Savoie", "Haute-Savoie",
-];
-
 const AdminCityPages = () => {
   const [city, setCity] = useState("");
-  const [department, setDepartment] = useState(DEPARTMENTS_AURA[0]);
+  const [department, setDepartment] = useState("");
   const [generating, setGenerating] = useState(false);
+  const [pendingDelete, setPendingDelete] = useState<{ id: string; city: string } | null>(null);
 
   const { data: pages, refetch } = useQuery({
     queryKey: ["admin-city-pages"],
@@ -38,12 +43,13 @@ const AdminCityPages = () => {
     }
     setGenerating(true);
     try {
-      const { data, error } = await supabase.functions.invoke("generate-city-page", {
-        body: { city: city.trim(), department },
+      const { error } = await supabase.functions.invoke("generate-city-page", {
+        body: { city: city.trim(), department: department.trim() || undefined },
       });
       if (error) throw error;
       toast.success(`Page créée pour ${city}`);
       setCity("");
+      setDepartment("");
       refetch();
     } catch (err: any) {
       toast.error(`Erreur : ${err.message}`);
@@ -52,18 +58,19 @@ const AdminCityPages = () => {
     }
   };
 
-  const handleDelete = async (id: string, cityName: string) => {
-    if (!confirm(`Supprimer la page de ${cityName} ?`)) return;
+  const confirmDelete = async () => {
+    if (!pendingDelete) return;
     const { error } = await supabase
       .from("seo_city_pages" as any)
       .delete()
-      .eq("id", id);
+      .eq("id", pendingDelete.id);
     if (error) {
       toast.error("Erreur lors de la suppression");
     } else {
       toast.success("Page supprimée");
       refetch();
     }
+    setPendingDelete(null);
   };
 
   const handleTogglePublish = async (id: string, published: boolean) => {
@@ -74,6 +81,7 @@ const AdminCityPages = () => {
     if (error) {
       toast.error("Erreur");
     } else {
+      toast.success(published ? "Page dépubliée" : "Page publiée");
       refetch();
     }
   };
@@ -81,7 +89,7 @@ const AdminCityPages = () => {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-foreground">Pages SEO Villes</h1>
+        <h1 className="font-body text-2xl font-bold text-foreground">Pages SEO Villes</h1>
         <p className="text-muted-foreground">Générez des landing pages par ville pour le référencement.</p>
       </div>
 
@@ -97,15 +105,12 @@ const AdminCityPages = () => {
               onChange={(e) => setCity(e.target.value)}
               className="flex-1"
             />
-            <select
+            <Input
+              placeholder="Département (optionnel)"
               value={department}
               onChange={(e) => setDepartment(e.target.value)}
-              className="h-10 px-3 rounded-md border border-input bg-background text-sm"
-            >
-              {DEPARTMENTS_AURA.map((d) => (
-                <option key={d} value={d}>{d}</option>
-              ))}
-            </select>
+              className="sm:w-56"
+            />
             <Button onClick={handleGenerate} disabled={generating} className="gap-2">
               {generating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
               Générer
@@ -124,7 +129,9 @@ const AdminCityPages = () => {
                   <Badge variant={page.published ? "default" : "secondary"}>
                     {page.published ? "Publiée" : "Brouillon"}
                   </Badge>
-                  <span className="text-xs text-muted-foreground">{page.department}</span>
+                  {page.department && (
+                    <span className="text-xs text-muted-foreground">{page.department}</span>
+                  )}
                 </div>
                 <p className="text-sm text-muted-foreground truncate">{page.meta_description}</p>
               </div>
@@ -148,7 +155,7 @@ const AdminCityPages = () => {
                 <Button
                   variant="ghost"
                   size="icon"
-                  onClick={() => handleDelete(page.id, page.city)}
+                  onClick={() => setPendingDelete({ id: page.id, city: page.city })}
                   className="text-destructive hover:text-destructive"
                 >
                   <Trash2 className="h-4 w-4" />
@@ -163,6 +170,23 @@ const AdminCityPages = () => {
           </p>
         )}
       </div>
+
+      <AlertDialog open={!!pendingDelete} onOpenChange={(o) => !o && setPendingDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Supprimer la page ?</AlertDialogTitle>
+            <AlertDialogDescription>
+              La page de {pendingDelete?.city} sera définitivement supprimée.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annuler</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Supprimer
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
