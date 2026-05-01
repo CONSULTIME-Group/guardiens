@@ -1,0 +1,160 @@
+import { memo, useMemo, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import type { SmallMission } from "./types";
+
+interface MissionsTabsCardProps {
+  myMissions: SmallMission[];
+  nearbyMissions: SmallMission[];
+}
+
+/**
+ * Carte unifiée "Petites missions" — fusion de MyMissionsColumn + ExchangesColumn.
+ * Deux onglets internes :
+ *  - Mes missions : besoins/offres publiés par l'utilisateur
+ *  - Autour de moi : missions des gens du coin
+ * Réduit drastiquement l'empilement vertical dans la colonne droite.
+ */
+const MissionsTabsCard = memo(({ myMissions, nearbyMissions }: MissionsTabsCardProps) => {
+  const navigate = useNavigate();
+  const [tab, setTab] = useState<"mine" | "nearby">(
+    myMissions.length > 0 ? "mine" : "nearby"
+  );
+
+  const sortedMine = useMemo(
+    () =>
+      [...myMissions].sort((a, b) => {
+        const aDone = a.status === "completed" ? 1 : 0;
+        const bDone = b.status === "completed" ? 1 : 0;
+        return aDone - bDone;
+      }),
+    [myMissions]
+  );
+
+  const tabBtn = (key: "mine" | "nearby", label: string, count: number) => {
+    const active = tab === key;
+    return (
+      <button
+        type="button"
+        onClick={() => setTab(key)}
+        className={`flex-1 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+          active
+            ? "bg-card text-foreground shadow-sm"
+            : "text-muted-foreground hover:text-foreground"
+        }`}
+        aria-pressed={active}
+      >
+        {label}
+        {count > 0 && (
+          <span className={`ml-1.5 text-[10px] ${active ? "text-primary" : "text-muted-foreground/70"}`}>
+            {count}
+          </span>
+        )}
+      </button>
+    );
+  };
+
+  return (
+    <div className="bg-card border border-border rounded-2xl p-5">
+      <div className="flex items-center justify-between gap-2 mb-3">
+        <h3 className="text-sm font-semibold text-foreground">Petites missions</h3>
+        <Link to="/petites-missions" className="text-xs text-primary font-sans hover:underline shrink-0">
+          Voir tout
+        </Link>
+      </div>
+
+      {/* Onglets internes */}
+      <div className="flex gap-1 p-1 bg-muted/50 rounded-xl mb-4" role="tablist">
+        {tabBtn("mine", "Les miennes", myMissions.length)}
+        {tabBtn("nearby", "Autour de moi", nearbyMissions.length)}
+      </div>
+
+      {/* Contenu : Mes missions */}
+      {tab === "mine" && (
+        sortedMine.length === 0 ? (
+          <div className="py-1">
+            <p className="text-xs text-muted-foreground font-sans mb-3">
+              <span className="font-semibold text-foreground">Osez !</span> Demandez un coup de main, ou proposez quelque chose en échange — un café, une histoire, un service…
+            </p>
+            <div className="flex flex-col gap-2">
+              <Button
+                onClick={() => navigate("/petites-missions/creer")}
+                className="w-full rounded-xl text-xs font-medium"
+                size="sm"
+              >
+                Publier un besoin →
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => navigate("/petites-missions")}
+                className="w-full rounded-xl text-xs font-medium"
+                size="sm"
+              >
+                Proposer mon aide →
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <div>
+            {sortedMine.map(m => {
+              const responseCount = m.small_mission_responses?.length || 0;
+              const isCompleted = m.status === "completed";
+              return (
+                <Link
+                  key={m.id}
+                  to={`/petites-missions/${m.id}`}
+                  className="flex items-center gap-3 py-2.5 border-b border-border last:border-0 hover:bg-muted/30 -mx-2 px-2 rounded-lg transition-colors"
+                >
+                  <div className={`w-2 h-2 rounded-full shrink-0 ${isCompleted ? "bg-muted-foreground/30" : "bg-primary"}`} />
+                  <p className={`text-xs font-sans flex-1 truncate ${isCompleted ? "text-muted-foreground line-through" : "text-foreground"}`}>
+                    {m.title}
+                  </p>
+                  <p className="text-xs text-muted-foreground font-sans shrink-0">
+                    {isCompleted ? "Terminée" : `${responseCount} réponse${responseCount > 1 ? "s" : ""}`}
+                  </p>
+                </Link>
+              );
+            })}
+          </div>
+        )
+      )}
+
+      {/* Contenu : Autour de moi */}
+      {tab === "nearby" && (
+        nearbyMissions.length === 0 ? (
+          <div className="rounded-xl bg-muted/40 border border-dashed border-border p-3 text-center">
+            <p className="text-xs text-muted-foreground font-sans italic">
+              Aucune mission autour de vous pour le moment.
+            </p>
+            <button
+              onClick={() => navigate("/petites-missions")}
+              className="mt-2 text-xs text-primary hover:underline font-sans font-medium"
+            >
+              Parcourir toutes les missions →
+            </button>
+          </div>
+        ) : (
+          <div>
+            <p className="text-xs text-muted-foreground font-sans mb-3">
+              Découvrez les besoins de gens du coin et proposez votre aide.
+            </p>
+            {nearbyMissions.map(m => (
+              <Link
+                key={m.id}
+                to={`/petites-missions/${m.id}`}
+                className="flex items-center gap-3 py-2.5 border-b border-border last:border-0 hover:bg-muted/30 -mx-2 px-2 rounded-lg transition-colors"
+              >
+                <div className="w-2 h-2 rounded-full shrink-0 bg-primary" />
+                <p className="text-xs font-sans flex-1 truncate text-foreground">{m.title}</p>
+                <p className="text-xs text-muted-foreground font-sans shrink-0">{m.city || ""}</p>
+              </Link>
+            ))}
+          </div>
+        )
+      )}
+    </div>
+  );
+});
+
+MissionsTabsCard.displayName = "MissionsTabsCard";
+export default MissionsTabsCard;

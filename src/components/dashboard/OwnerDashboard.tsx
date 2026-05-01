@@ -25,8 +25,7 @@ import MonAnnonceCard from "./owner/MonAnnonceCard";
 import OngoingSitHero from "./owner/OngoingSitHero";
 import ApplicationsSection from "./owner/ApplicationsSection";
 import ContextualResources from "./owner/ContextualResources";
-import MyMissionsColumn from "./owner/MyMissionsColumn";
-import ExchangesColumn from "./owner/ExchangesColumn";
+import MissionsTabsCard from "./owner/MissionsTabsCard";
 import DashSection from "./owner/DashSection";
 import EmptyCard from "./owner/EmptyCard";
 import StatsStrip from "./owner/StatsStrip";
@@ -313,11 +312,10 @@ const OwnerDashboard = () => {
           </DashSection>
         </div>
 
-        {/* Colonne contexte : urgence, échanges, missions */}
+        {/* Colonne contexte : urgence + missions unifiées */}
         <aside className="space-y-6">
           <NearbyEmergencySitters />
-          <MyMissionsColumn missions={myMissions} />
-          <ExchangesColumn missions={smallMissions} />
+          <MissionsTabsCard myMissions={myMissions} nearbyMissions={smallMissions} />
         </aside>
       </div>
 
