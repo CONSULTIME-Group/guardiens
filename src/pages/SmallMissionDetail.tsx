@@ -323,7 +323,7 @@ const SmallMissionDetail = () => {
         await supabase.from("messages").insert({
           conversation_id: convId,
           sender_id: user!.id,
-          content: `✅ Proposition acceptée pour « ${mission.title} ». Vous pouvez maintenant échanger pour organiser l'entraide.`,
+          content: `Proposition acceptée pour « ${mission.title} ». Vous pouvez maintenant échanger pour organiser l'entraide.`,
           is_system: true,
         });
       }
@@ -484,17 +484,17 @@ const SmallMissionDetail = () => {
 
         {/* In progress banner */}
         {mission.status === "in_progress" && acceptedResponses.length > 0 && (
-          <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl p-4 mb-6">
+          <div className="bg-badge-success border border-badge-success-foreground/20 rounded-xl p-4 mb-6">
             <div className="flex items-center gap-2 mb-2">
-              <CheckCircle2 className="h-5 w-5 text-green-600" />
-              <p className="font-medium text-green-800 dark:text-green-300">
+              <CheckCircle2 className="h-5 w-5 text-badge-success-foreground" />
+              <p className="font-medium text-badge-success-foreground">
                 Mission organisée avec {acceptedResponses.map(r => r.responder?.first_name).filter(Boolean).join(", ")}
               </p>
             </div>
             {isAuthor && (
               <div className="flex flex-wrap gap-2 mt-3">
                 {acceptedResponses.map(r => (
-                  <Button key={r.id} variant="outline" size="sm" onClick={() => navigate(r.conversation_id ? `/messages?c=${r.conversation_id}` : "/messages")} className="gap-2 border-green-300 text-green-700 dark:border-green-700 dark:text-green-400">
+                  <Button key={r.id} variant="outline" size="sm" onClick={() => navigate(r.conversation_id ? `/messages?c=${r.conversation_id}` : "/messages")} className="gap-2 border-badge-success-foreground/30 text-badge-success-foreground">
                     {r.responder?.avatar_url ? <img src={r.responder.avatar_url} className="w-5 h-5 rounded-full object-cover" /> : null}
                     {r.responder?.first_name} — Messagerie
                   </Button>
@@ -624,7 +624,7 @@ const SmallMissionDetail = () => {
                               </>
                             )}
                             {r.status === "accepted" && (
-                              <span className="text-xs font-medium text-green-600 bg-green-100 dark:bg-green-900/30 px-2 py-1 rounded-full">Acceptée</span>
+                              <span className="text-xs font-medium text-badge-success-foreground bg-badge-success px-2 py-1 rounded-full">Acceptée</span>
                             )}
                             {r.status === "declined" && (
                               <span className="text-xs font-medium text-destructive bg-destructive/10 px-2 py-1 rounded-full">Non retenu(e)</span>
@@ -707,9 +707,9 @@ const SmallMissionDetail = () => {
             {/* Accepted */}
             {myResponse.status === "accepted" && mission.status === "in_progress" && (
               <>
-                <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl p-4 flex items-center gap-2">
-                  <CheckCircle2 className="h-5 w-5 text-green-600" />
-                  <p className="font-medium text-green-800 dark:text-green-300">Proposition acceptée</p>
+                <div className="bg-badge-success border border-badge-success-foreground/20 rounded-xl p-4 flex items-center gap-2">
+                  <CheckCircle2 className="h-5 w-5 text-badge-success-foreground" />
+                  <p className="font-medium text-badge-success-foreground">Proposition acceptée</p>
                 </div>
                 <Button onClick={() => navigate("/messages")} className="w-full gap-2">
                   <MessageSquare className="h-4 w-4" /> Aller dans la messagerie
@@ -722,7 +722,7 @@ const SmallMissionDetail = () => {
               <>
                 {feedbackSent[mission.user_id] ? (
                   <div className="bg-muted/50 rounded-xl p-4 flex items-center gap-2 text-sm text-muted-foreground">
-                    <CheckCircle2 className="h-4 w-4 text-green-600" />
+                    <CheckCircle2 className="h-4 w-4 text-badge-success-foreground" />
                     Vous avez donné votre avis — merci !
                   </div>
                 ) : (
@@ -770,9 +770,9 @@ const SmallMissionDetail = () => {
 
             {/* Pending */}
             {myResponse.status === "pending" && mission.status !== "cancelled" && (
-              <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-4 flex items-center gap-2">
-                <Clock className="h-5 w-5 text-blue-600" />
-                <p className="text-sm text-blue-800 dark:text-blue-300">Votre proposition est en attente de réponse.</p>
+              <div className="bg-primary/5 border border-primary/20 rounded-xl p-4 flex items-center gap-2">
+                <Clock className="h-5 w-5 text-primary" />
+                <p className="text-sm text-primary">Votre proposition est en attente de réponse.</p>
               </div>
             )}
           </div>
