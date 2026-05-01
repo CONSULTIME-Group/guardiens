@@ -238,7 +238,7 @@ const AdminExperienceVerification = () => {
         <TabsList>
           <TabsTrigger value="pending" className="gap-1.5">
             <Clock className="h-3.5 w-3.5" /> En attente
-            {counts.pending > 0 && <Badge variant="destructive" className="ml-1 h-5 px-1.5 text-xs">{counts.pending}</Badge>}
+            {counts.pending > 0 && <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-xs">{counts.pending}</Badge>}
           </TabsTrigger>
           <TabsTrigger value="verified" className="gap-1.5">
             <CheckCircle2 className="h-3.5 w-3.5" /> Validées ({counts.verified})
