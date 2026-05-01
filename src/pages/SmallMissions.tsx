@@ -586,18 +586,18 @@ const SmallMissions = () => {
               <AccessGateBanner level={accessLevel} profileCompletion={profileCompletion} context="mission" />
             )}
 
-            {/* Skill prompt */}
-            {isAuthenticated && mySkills.length === 0 && !skillPromptDismissed && (
-              <div className="bg-muted rounded-xl p-4 flex items-start gap-3">
+            {/* Skill prompt — uniquement en mode "offer" pour éviter le doublon avec le toggle dispo */}
+            {isAuthenticated && mode === "offer" && mySkills.length === 0 && !skillPromptDismissed && (
+              <div className="bg-primary/5 border border-primary/20 rounded-xl p-4 flex items-start gap-3">
                 <div className="flex-1">
                   <p className="text-sm text-foreground font-medium">
-                    Déclarez vos compétences pour voir en priorité les échanges qui vous correspondent.
+                    Osez dire ce que vous savez faire. Même un petit talent peut changer la semaine de quelqu'un.
                   </p>
                   <button onClick={openOfferDialog} className="text-sm text-primary font-semibold mt-1 inline-block hover:underline">
                     Déclarer mes compétences →
                   </button>
                 </div>
-                <button onClick={dismissSkillPrompt} className="text-muted-foreground hover:text-foreground shrink-0">
+                <button onClick={dismissSkillPrompt} className="text-muted-foreground hover:text-foreground shrink-0" aria-label="Fermer">
                   <X className="h-4 w-4" />
                 </button>
               </div>
