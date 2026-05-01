@@ -98,18 +98,42 @@ const SitterDashboard = () => {
   const allChecklistDone = completedItems.length === allItems.length;
 
   // ── Checklist content (extrait pour réutilisation desktop/mobile) ──
+  // Mode compact : tout est complété → simple bandeau replié, gain de place ~70%.
   const ChecklistBlock = (
     <section aria-labelledby="onboarding-checklist-heading" className="px-4 sm:px-5 md:px-8 mb-6 md:mb-8">
-      <h2 id="onboarding-checklist-heading" className="sr-only">Checklist d'activation</h2>
-      {incompleteItems.length > 0 && (
-        <div className="mb-4">
-          <p className="text-sm font-medium text-foreground mb-3">
-            À compléter ({incompleteItems.length} restante{incompleteItems.length > 1 ? "s" : ""})
-          </p>
-          <div role="list">
+      {allChecklistDone ? (
+        // Mode compact — tout vert, on ne prend qu'une ligne
+        <Accordion type="single" collapsible>
+          <AccordionItem value="done" className="border-none">
+            <AccordionTrigger className="flex items-center justify-between bg-primary/5 border border-primary/20 rounded-xl px-4 py-2.5 cursor-pointer hover:no-underline hover:bg-primary/10 transition-colors [&[data-state=open]>svg]:rotate-180">
+              <div className="flex items-center gap-2">
+                <CheckCircle className="h-4 w-4 text-primary" aria-hidden="true" />
+                <span className="text-sm font-medium text-primary">
+                  Profil prêt — {allItems.length}/{allItems.length} étapes complétées
+                </span>
+              </div>
+            </AccordionTrigger>
+            <AccordionContent className="pt-2 pb-0">
+              {completedItems.map((item: any, i: number) => (
+                <div key={i} className="flex items-center gap-3 py-2 border-b border-border last:border-0 px-2">
+                  <CheckCircle className="h-4 w-4 text-primary" aria-hidden="true" />
+                  <span className="text-sm line-through text-foreground/60">{item.label}</span>
+                </div>
+              ))}
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
+      ) : (
+        // Mode expansé — il reste des choses à faire
+        <DashSection
+          eyebrow="Activation"
+          title="Finalisez votre profil"
+          description={`${incompleteItems.length} étape${incompleteItems.length > 1 ? "s" : ""} pour devenir pleinement visible auprès des propriétaires.`}
+        >
+          <div role="list" className="bg-card border border-border rounded-2xl overflow-hidden">
             {incompleteItems.map((item: any, i: number) =>
               item.isToggle ? (
-                <div key="toggle" role="listitem" className="flex items-center justify-between py-3 border-b border-border last:border-0 px-2">
+                <div key="toggle" role="listitem" className="flex items-center justify-between py-3 border-b border-border last:border-0 px-4">
                   <div className="flex items-center">
                     <Circle className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
                     <span className="text-sm text-foreground ml-3">Activer le mode disponible</span>
@@ -125,39 +149,39 @@ const SitterDashboard = () => {
                   </button>
                 </div>
               ) : (
-                <Link key={i} to={item.to} role="listitem" className="flex items-center justify-between py-3 border-b border-border last:border-0 cursor-pointer hover:bg-muted/30 rounded-lg px-2 transition-colors">
+                <Link key={i} to={item.to} role="listitem" className="group flex items-center justify-between py-3 px-4 border-b border-border last:border-0 cursor-pointer hover:bg-muted/40 transition-all duration-200 ease-out hover:translate-x-0.5">
                   <div className="flex items-center">
-                    <Circle className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
+                    <Circle className="h-4 w-4 text-muted-foreground transition-colors group-hover:text-primary" aria-hidden="true" />
                     <span className="text-sm text-foreground ml-3">{item.label}</span>
                   </div>
-                  <ChevronRight className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
+                  <ChevronRight className="h-4 w-4 text-muted-foreground transition-transform duration-200 group-hover:translate-x-0.5 group-hover:text-primary" aria-hidden="true" />
                 </Link>
               )
             )}
           </div>
-        </div>
-      )}
-      {completedItems.length > 0 && (
-        <Accordion type="single" collapsible>
-          <AccordionItem value="done" className="border-none">
-            <AccordionTrigger className="flex items-center justify-between bg-muted/30 rounded-xl px-4 py-3 cursor-pointer hover:no-underline [&[data-state=open]>svg]:rotate-180">
-              <div className="flex items-center gap-2">
-                <CheckCircle className="h-4 w-4 text-primary" aria-hidden="true" />
-                <span className="text-sm font-medium text-primary">
-                  {allChecklistDone ? `${allItems.length}/${allItems.length} étapes complétées` : `${completedItems.length} étape${completedItems.length > 1 ? "s" : ""} déjà complétée${completedItems.length > 1 ? "s" : ""}`}
-                </span>
-              </div>
-            </AccordionTrigger>
-            <AccordionContent className="pt-2 pb-0">
-              {completedItems.map((item: any, i: number) => (
-                <div key={i} className="flex items-center gap-3 py-2 border-b border-border last:border-0">
-                  <CheckCircle className="h-4 w-4 text-primary" aria-hidden="true" />
-                  <span className="text-sm line-through text-foreground/60">{item.label}</span>
-                </div>
-              ))}
-            </AccordionContent>
-          </AccordionItem>
-        </Accordion>
+          {completedItems.length > 0 && (
+            <Accordion type="single" collapsible className="mt-3">
+              <AccordionItem value="done" className="border-none">
+                <AccordionTrigger className="flex items-center justify-between bg-muted/30 rounded-xl px-4 py-2.5 cursor-pointer hover:no-underline [&[data-state=open]>svg]:rotate-180">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="h-4 w-4 text-primary" aria-hidden="true" />
+                    <span className="text-sm font-medium text-primary">
+                      {completedItems.length} étape{completedItems.length > 1 ? "s" : ""} déjà complétée{completedItems.length > 1 ? "s" : ""}
+                    </span>
+                  </div>
+                </AccordionTrigger>
+                <AccordionContent className="pt-2 pb-0">
+                  {completedItems.map((item: any, i: number) => (
+                    <div key={i} className="flex items-center gap-3 py-2 border-b border-border last:border-0 px-2">
+                      <CheckCircle className="h-4 w-4 text-primary" aria-hidden="true" />
+                      <span className="text-sm line-through text-foreground/60">{item.label}</span>
+                    </div>
+                  ))}
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
+          )}
+        </DashSection>
       )}
     </section>
   );
