@@ -4043,6 +4043,42 @@ export type Database = {
         }
         Returns: undefined
       }
+      admin_analytics_daily_events: {
+        Args: { _role?: string; _since: string; _until: string }
+        Returns: {
+          jour: string
+          page_views: number
+          signup_completed: number
+          signup_started: number
+        }[]
+      }
+      admin_analytics_event_counts: {
+        Args: { _role?: string; _since: string; _until: string }
+        Returns: {
+          cnt: number
+          event_type: string
+        }[]
+      }
+      admin_analytics_role_breakdown: {
+        Args: { _since: string; _until: string }
+        Returns: {
+          cnt: number
+          event_type: string
+          role: string
+        }[]
+      }
+      admin_analytics_top_sources: {
+        Args: {
+          _limit?: number
+          _role?: string
+          _since: string
+          _until: string
+        }
+        Returns: {
+          path: string
+          views: number
+        }[]
+      }
       admin_get_accepted_sitters: {
         Args: { p_sit_ids: string[] }
         Returns: {
@@ -4264,6 +4300,7 @@ export type Database = {
         }
         Returns: number
       }
+      normalize_analytics_source: { Args: { raw: string }; Returns: string }
       read_email_batch: {
         Args: { batch_size: number; queue_name: string; vt: number }
         Returns: {
