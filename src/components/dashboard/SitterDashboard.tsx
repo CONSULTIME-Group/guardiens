@@ -403,15 +403,23 @@ const SitterDashboard = () => {
         {/* SIDE COLUMN — 4/12 (~33%) */}
         <aside aria-label="Statut, badges et urgence" className="xl:col-span-4 min-w-0">
           {buildStatusBlock(true)}
-          {hasEmergencyProfile && (
+          {/* Un seul bloc urgence : profil actif → dashboard, sinon → éligibilité */}
+          {hasEmergencyProfile ? (
             <div className="mb-6">
               <EmergencyDashSection />
             </div>
+          ) : (
+            buildEmergencyBlock(true)
           )}
           {buildBadgesBlock(true)}
-          {buildEmergencyBlock(true)}
         </aside>
       </div>
+
+      {/* CTA sticky mobile (md-) */}
+      <SitterMobileStickyCTA pendingAppsCount={pendingAppsCount} unreadCount={unreadCount} />
+
+      {/* Espace pour ne pas masquer le contenu derrière le sticky */}
+      <div className="md:hidden h-20" aria-hidden="true" />
     </div>
   );
 };
