@@ -185,6 +185,68 @@ const SmallMissionsPublic = () => {
           </div>
         </section>
 
+        {/* ═══ SECTION 2.5 — LEVÉE DES FREINS ═══ */}
+        <section className="bg-background border-t border-border/40">
+          <div className="max-w-3xl mx-auto px-6 py-24 md:py-28">
+            <Reveal>
+              <p className="text-xs font-body font-semibold tracking-widest uppercase text-primary/60 text-center mb-4">
+                Ce qui vous retient n'a pas lieu d'être
+              </p>
+              <h2 className="font-heading text-3xl md:text-4xl font-semibold text-foreground text-center leading-snug mb-14">
+                Vous hésitez ? C'est normal.<br />Voici pourquoi vous pouvez y aller.
+              </h2>
+            </Reveal>
+
+            <div className="space-y-10">
+              {[
+                {
+                  fear: "« Je ne veux pas déranger. »",
+                  answer: "Personne ne reçoit votre demande de force. Les gens du coin la voient, et seuls ceux qui ont envie d'aider répondent. Vous ne dérangez personne — vous offrez une opportunité.",
+                },
+                {
+                  fear: "« Je n'ai rien à offrir en échange. »",
+                  answer: "Un café, un sourire, une conversation, un panier de tomates l'été prochain. L'échange n'a pas besoin d'être à la hauteur. Il a juste besoin d'être sincère.",
+                },
+                {
+                  fear: "« C'est trop petit comme demande. »",
+                  answer: "Justement. Les petites missions sont faites pour les petites choses — celles qu'on n'ose pas demander parce qu'on a peur de paraître faible ou exigeant. C'est exactement pour ça qu'on a créé cet espace.",
+                },
+                {
+                  fear: "« Je ne connais personne ici. »",
+                  answer: "C'est précisément le bon moment pour publier. Chaque mission est une porte ouverte sur une rencontre. La première est toujours la plus difficile à oser — la suivante devient évidente.",
+                },
+                {
+                  fear: "« Et si personne ne répond ? »",
+                  answer: "Ça peut arriver. Reformulez, relancez, ou proposez vous-même votre aide ailleurs. La communauté grandit chaque semaine. Votre demande n'est jamais perdue — elle peut trouver quelqu'un demain.",
+                },
+              ].map((item, i) => (
+                <Reveal key={i} delay={0.05 * i}>
+                  <div className="grid md:grid-cols-[1fr_2fr] gap-4 md:gap-10 items-start border-b border-border/40 pb-10 last:border-0 last:pb-0">
+                    <p className="font-heading text-lg md:text-xl italic text-foreground/50 leading-snug">
+                      {item.fear}
+                    </p>
+                    <p className="font-body text-base md:text-lg text-foreground/85 leading-relaxed">
+                      {item.answer}
+                    </p>
+                  </div>
+                </Reveal>
+              ))}
+            </div>
+
+            <Reveal delay={0.3}>
+              <div className="mt-16 text-center">
+                <p className="font-heading text-xl md:text-2xl italic text-foreground/80 leading-relaxed max-w-xl mx-auto">
+                  La vraie question n'est pas « est-ce que j'ai le droit de demander ? ».<br />
+                  C'est « qu'est-ce que je rate en n'osant pas ? ».
+                </p>
+                <Button onClick={goToCreate} className="bg-primary text-primary-foreground rounded-full px-9 py-4 h-auto text-sm font-semibold tracking-wide hover:bg-primary/90 transition-all duration-200 mt-8">
+                  J'ose, je publie ma première mission
+                </Button>
+              </div>
+            </Reveal>
+          </div>
+        </section>
+
         {/* ═══ SECTION 3 — LES DEUX MODES ═══ */}
         <section className="bg-muted">
           <div className="max-w-4xl mx-auto px-6 py-24 md:py-32">
