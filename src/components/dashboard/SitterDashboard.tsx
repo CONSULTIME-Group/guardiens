@@ -15,6 +15,7 @@ import SitterHero from "./sitter/SitterHero";
 import SitterNextGuard from "./sitter/SitterNextGuard";
 import SitterNextGuardEmpty from "./sitter/SitterNextGuardEmpty";
 import NearestListingHero from "./sitter/NearestListingHero";
+import DashboardSectionState from "./sitter/DashboardSectionState";
 import SitterMobileStickyCTA from "./sitter/SitterMobileStickyCTA";
 import SitterStatusBar from "./sitter/SitterStatusBar";
 import SitterBadgesSection from "./sitter/SitterBadgesSection";
