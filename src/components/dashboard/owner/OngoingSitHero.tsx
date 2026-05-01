@@ -2,7 +2,7 @@ import { memo } from "react";
 import { Link } from "react-router-dom";
 import { differenceInDays, format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { MessageSquare, ArrowRight, Sparkles, Calendar } from "lucide-react";
+import { MessageSquare, ArrowRight, Sparkles, Calendar, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getOptimizedImageUrl } from "@/lib/imageOptim";
 import { capitalize } from "./helpers";
@@ -40,7 +40,8 @@ const OngoingSitHero = memo(({ sit, sitterProfiles, coverPhoto }: OngoingSitHero
     : 0;
 
   const sitterName = sitter?.first_name ? capitalize(sitter.first_name) : "Votre gardien";
-  const endLabel = sit.end_date ? format(new Date(sit.end_date), "EEEE d MMMM", { locale: fr }) : null;
+  const endLabelLong = sit.end_date ? format(new Date(sit.end_date), "EEEE d MMMM", { locale: fr }) : null;
+  const endLabelShort = sit.end_date ? format(new Date(sit.end_date), "d MMM", { locale: fr }) : null;
 
   const badgeLabel = daysLeft === null
     ? "En cours"
@@ -53,7 +54,7 @@ const OngoingSitHero = memo(({ sit, sitterProfiles, coverPhoto }: OngoingSitHero
       <div className="group block bg-card border border-border rounded-2xl overflow-hidden transition-all duration-300 ease-out hover:shadow-lg hover:border-primary/30">
         <div className="flex flex-col sm:flex-row">
           {/* Image de couverture */}
-          <div className="relative sm:w-48 md:w-56 h-40 sm:h-auto sm:min-h-[180px] overflow-hidden bg-muted shrink-0">
+          <div className="relative sm:w-48 md:w-56 h-36 sm:h-auto sm:min-h-[180px] overflow-hidden bg-muted shrink-0">
             {coverPhoto ? (
               <img
                 src={getOptimizedImageUrl(coverPhoto, 400, 80)}
@@ -68,9 +69,21 @@ const OngoingSitHero = memo(({ sit, sitterProfiles, coverPhoto }: OngoingSitHero
                 <Sparkles className="h-8 w-8 text-primary/30" aria-hidden="true" />
               </div>
             )}
-            {/* Badge J-X */}
-            <div className="absolute top-2 left-2">
-              <span className="text-[11px] font-semibold bg-primary text-primary-foreground rounded-full px-2 py-0.5 shadow">
+            {/* Voile pour lisibilité du badge sur photo claire */}
+            <div
+              className="absolute inset-x-0 top-0 h-16 bg-gradient-to-b from-black/30 to-transparent pointer-events-none sm:hidden"
+              aria-hidden="true"
+            />
+            {/* Badge J-X — plus lisible sur mobile */}
+            <div className="absolute top-3 left-3">
+              <span
+                className={`inline-flex items-center gap-1 text-xs font-semibold rounded-full px-2.5 py-1 shadow-md ${
+                  daysLeft === 0
+                    ? "bg-amber-500 text-white"
+                    : "bg-primary text-primary-foreground"
+                }`}
+              >
+                <Clock className="h-3 w-3" aria-hidden="true" />
                 {badgeLabel}
               </span>
             </div>
@@ -107,12 +120,20 @@ const OngoingSitHero = memo(({ sit, sitterProfiles, coverPhoto }: OngoingSitHero
                   {sitterName} s'occupe de vos animaux
                 </h3>
                 <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
-                  {endLabel && (
-                    <span className="flex items-center gap-1">
-                      <Calendar className="h-3.5 w-3.5" aria-hidden="true" />
-                      {daysLeft !== null && daysLeft > 0
-                        ? `Encore ${daysLeft} jour${daysLeft > 1 ? "s" : ""} — fin ${endLabel}`
-                        : `Dernier jour — fin ${endLabel}`}
+                  {sit.end_date && (
+                    <span className="flex items-center gap-1 min-w-0">
+                      <Calendar className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                      {/* Mobile : version courte ; sm+ : version longue */}
+                      <span className="sm:hidden truncate">
+                        {daysLeft !== null && daysLeft > 0
+                          ? `Encore ${daysLeft} j · fin ${endLabelShort}`
+                          : `Dernier jour · fin ${endLabelShort}`}
+                      </span>
+                      <span className="hidden sm:inline truncate">
+                        {daysLeft !== null && daysLeft > 0
+                          ? `Encore ${daysLeft} jour${daysLeft > 1 ? "s" : ""} — fin ${endLabelLong}`
+                          : `Dernier jour — fin ${endLabelLong}`}
+                      </span>
                     </span>
                   )}
                 </div>
@@ -134,18 +155,9 @@ const OngoingSitHero = memo(({ sit, sitterProfiles, coverPhoto }: OngoingSitHero
               </div>
             )}
 
-            {/* Actions */}
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              {sitter?.id ? (
-                <Link
-                  to={`/gardiens/${sitter.id}`}
-                  className="inline-flex items-center gap-1 text-xs text-primary hover:underline transition-transform duration-200 hover:translate-x-0.5"
-                >
-                  Voir le profil <ArrowRight className="h-3 w-3" aria-hidden="true" />
-                </Link>
-              ) : <span />}
-
-              <div className="flex gap-2 shrink-0 w-full sm:w-auto">
+            {/* Actions — pile mobile, ligne sm+ */}
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+              <div className="flex gap-2 w-full sm:w-auto sm:order-2 shrink-0">
                 {sitter?.id && (
                   <Button asChild size="sm" className="flex-1 sm:flex-initial rounded-xl group/btn">
                     <Link to={`/messages?with=${sitter.id}&sit=${sit.id}`}>
@@ -158,6 +170,15 @@ const OngoingSitHero = memo(({ sit, sitterProfiles, coverPhoto }: OngoingSitHero
                   <Link to={`/sits/${sit.id}`}>Voir l'annonce</Link>
                 </Button>
               </div>
+
+              {sitter?.id ? (
+                <Link
+                  to={`/gardiens/${sitter.id}`}
+                  className="inline-flex items-center gap-1 text-xs text-primary hover:underline transition-transform duration-200 hover:translate-x-0.5 self-start sm:self-auto sm:order-1"
+                >
+                  Voir le profil <ArrowRight className="h-3 w-3" aria-hidden="true" />
+                </Link>
+              ) : null}
             </div>
           </div>
         </div>
