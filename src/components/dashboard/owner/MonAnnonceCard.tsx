@@ -99,14 +99,14 @@ const MonAnnonceCard = memo(({ sits, pets, propertyType, propertyEnvironment, pe
     : null;
 
   return (
-    <div className="bg-card border border-border rounded-2xl overflow-hidden">
+    <div className="group/card bg-card border border-border rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-md hover:border-border/80">
       {coverPhoto ? (
         <div className="relative h-40 w-full overflow-hidden">
           <img
             src={coverPhoto}
             alt={`Photo de couverture de l'annonce ${currentSit.title || ""}`.trim()}
             loading="lazy"
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover/card:scale-[1.03]"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-foreground/70 via-foreground/10 to-transparent" aria-hidden="true" />
           <div className="absolute top-3 left-3 right-3 flex items-start justify-between gap-2">
