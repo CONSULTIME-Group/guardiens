@@ -195,9 +195,9 @@ const SitterDashboard = () => {
     <div className="px-4 sm:px-5 md:px-8 mb-6 md:mb-8">
       <button
         onClick={() => navigate("/search")}
-        className="w-full bg-primary text-primary-foreground rounded-2xl py-3 sm:py-4 text-sm sm:text-base font-sans font-semibold hover:bg-primary/90 transition-colors"
+        className="group w-full bg-primary text-primary-foreground rounded-2xl py-3 sm:py-4 text-sm sm:text-base font-sans font-semibold hover:bg-primary/90 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 ease-out"
       >
-        Découvrez les gardes disponibles →
+        Découvrez les gardes disponibles <span className="inline-block transition-transform duration-200 group-hover:translate-x-1">→</span>
       </button>
     </div>
   );
@@ -257,14 +257,14 @@ const SitterDashboard = () => {
       {(pendingAppsCount > 0 || unreadCount > 0) && (
         <nav aria-label="Notifications rapides" className="flex gap-3 px-4 sm:px-5 md:px-8 mb-4">
           {pendingAppsCount > 0 && (
-            <Link to="/sits" className="flex items-center gap-2 bg-accent/50 border border-border rounded-xl px-3 py-2 text-xs font-medium text-foreground hover:bg-accent transition-colors">
-              <FileText className="h-4 w-4 text-primary" aria-hidden="true" />
+            <Link to="/sits" className="group flex items-center gap-2 bg-accent/50 border border-border rounded-xl px-3 py-2 text-xs font-medium text-foreground hover:bg-accent hover:border-primary/30 hover:shadow-sm transition-all duration-200 ease-out hover:-translate-y-0.5">
+              <FileText className="h-4 w-4 text-primary transition-transform duration-200 group-hover:scale-110" aria-hidden="true" />
               {pendingAppsCount} candidature{pendingAppsCount > 1 ? "s" : ""} en attente
             </Link>
           )}
           {unreadCount > 0 && (
-            <Link to="/messages" className="flex items-center gap-2 bg-accent/50 border border-border rounded-xl px-3 py-2 text-xs font-medium text-foreground hover:bg-accent transition-colors">
-              <MessageSquare className="h-4 w-4 text-primary" aria-hidden="true" />
+            <Link to="/messages" className="group flex items-center gap-2 bg-accent/50 border border-border rounded-xl px-3 py-2 text-xs font-medium text-foreground hover:bg-accent hover:border-primary/30 hover:shadow-sm transition-all duration-200 ease-out hover:-translate-y-0.5">
+              <MessageSquare className="h-4 w-4 text-primary transition-transform duration-200 group-hover:scale-110" aria-hidden="true" />
               <span className="tabular-nums">{unreadCount > 99 ? "99+" : unreadCount}</span> message{unreadCount > 1 ? "s" : ""} non lu{unreadCount > 1 ? "s" : ""}
             </Link>
           )}
@@ -328,16 +328,18 @@ const SitterDashboard = () => {
             </div>
             <div className="flex gap-3 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-hide">
               {articles.map((a: any) => (
-                <Link key={a.id} to={`/actualites/${a.slug}`} className="flex-shrink-0 w-[70vw] sm:w-64 rounded-xl border border-border bg-card overflow-hidden hover:shadow-md transition-shadow cursor-pointer">
+                <Link key={a.id} to={`/actualites/${a.slug}`} className="group flex-shrink-0 w-[70vw] sm:w-64 rounded-xl border border-border bg-card overflow-hidden hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 ease-out cursor-pointer">
                   {a.cover_image_url ? (
-                    <img src={getOptimizedImageUrl(a.cover_image_url, 300, 75)} alt={a.title || "Article"} className="w-full h-28 object-cover" width={300} height={112} loading="lazy" />
+                    <div className="w-full h-28 overflow-hidden">
+                      <img src={getOptimizedImageUrl(a.cover_image_url, 300, 75)} alt={a.title || "Article"} className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-105" width={300} height={112} loading="lazy" />
+                    </div>
                   ) : (
                     <div className="w-full h-28 bg-accent flex items-center justify-center">
                       <Newspaper className="h-8 w-8 text-muted-foreground/40" aria-hidden="true" />
                     </div>
                   )}
                   <div className="p-3">
-                    <h3 className="text-sm font-semibold line-clamp-2">{a.title}</h3>
+                    <h3 className="text-sm font-semibold line-clamp-2 transition-colors group-hover:text-primary">{a.title}</h3>
                     <p className="text-xs text-muted-foreground line-clamp-2 mt-1">{a.excerpt}</p>
                   </div>
                 </Link>

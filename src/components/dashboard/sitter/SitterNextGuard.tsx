@@ -22,18 +22,18 @@ const SitterNextGuard = ({ nextGuard }: SitterNextGuardProps) => {
     <div className="px-4 sm:px-5 md:px-8 mb-6 md:mb-8">
       <Link
         to={`/sits/${nextGuard.id}`}
-        className="block bg-primary/5 border border-primary/20 rounded-2xl p-4 sm:p-5 hover:bg-primary/10 transition-colors"
+        className="group block bg-primary/5 border border-primary/20 rounded-2xl p-4 sm:p-5 transition-all duration-300 ease-out hover:bg-primary/10 hover:border-primary/30 hover:shadow-md hover:-translate-y-0.5"
       >
         <div className="flex items-center justify-between mb-2">
           <p className="text-xs uppercase tracking-widest text-primary font-sans font-medium">
             Prochaine garde
           </p>
-          <span className="text-xs bg-primary text-primary-foreground rounded-full px-2.5 py-0.5 font-medium">
+          <span className="text-xs bg-primary text-primary-foreground rounded-full px-2.5 py-0.5 font-medium transition-transform duration-200 group-hover:scale-105">
             J-{nextGuard.daysUntil}
           </span>
         </div>
 
-        <p className="text-sm font-semibold text-foreground mb-2 line-clamp-1">
+        <p className="text-sm font-semibold text-foreground mb-2 line-clamp-1 transition-colors group-hover:text-primary">
           {nextGuard.title}
         </p>
 
