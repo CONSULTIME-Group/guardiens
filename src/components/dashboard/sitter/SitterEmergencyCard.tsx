@@ -245,74 +245,80 @@ const SitterEmergencyCard = ({ hasEmergencyProfile }: SitterEmergencyCardProps) 
 
   // ─── ÉTAT 1 & 2 ───
   const items = [
-    { label: `Gardes : ${checks.completedSits}/3`, ok: checks.completedSits >= 3 },
-    { label: `Note : ${checks.avgRating || "—"}/4.7`, ok: checks.avgRating >= 4.7 },
-    { label: `Annulations (6 mois) : ${checks.recentCancellations}`, ok: checks.recentCancellations === 0 },
-    { label: "Identité vérifiée", ok: checks.identityVerified },
-    { label: "Abonnement actif", ok: checks.hasSubscription },
+    { label: `Gardes : ${effectiveChecks.completedSits}/3`, ok: effectiveChecks.completedSits >= 3 },
+    { label: `Note : ${effectiveChecks.avgRating || "—"}/4.7`, ok: effectiveChecks.avgRating >= 4.7 },
+    { label: `Annulations (6 mois) : ${effectiveChecks.recentCancellations}`, ok: effectiveChecks.recentCancellations === 0 },
+    { label: "Identité vérifiée", ok: effectiveChecks.identityVerified },
+    { label: "Abonnement actif", ok: effectiveChecks.hasSubscription },
   ];
-  const allOk = items.every(i => i.ok);
-  const remaining = Math.max(0, 3 - checks.completedSits);
+  const allOk = previewMode === "eligible" ? true : items.every(i => i.ok);
+  const remaining = Math.max(0, 3 - effectiveChecks.completedSits);
 
   // ─── ÉTAT 2 — ELIGIBLE ───
   if (allOk) {
     return (
-      <div className="rounded-2xl border-2 border-amber-300 bg-gradient-to-br from-amber-50 to-amber-100/50 p-5 space-y-3">
-        <div className="flex items-center gap-2.5">
-          <span className="inline-flex items-center justify-center h-9 w-9 rounded-full bg-gradient-to-br from-amber-400 to-amber-500 text-white shadow">
-            <Zap className="h-4 w-4" fill="currentColor" />
-          </span>
-          <div>
-            <p className="font-heading font-semibold text-sm">Vous êtes éligible</p>
-            <p className="text-xs text-muted-foreground">Activez le mode Gardien d'urgence</p>
+      <>
+        {PreviewToggle}
+        <div className="rounded-2xl border-2 border-amber-300 bg-gradient-to-br from-amber-50 to-amber-100/50 p-5 space-y-3">
+          <div className="flex items-center gap-2.5">
+            <span className="inline-flex items-center justify-center h-9 w-9 rounded-full bg-gradient-to-br from-amber-400 to-amber-500 text-white shadow">
+              <Zap className="h-4 w-4" fill="currentColor" />
+            </span>
+            <div>
+              <p className="font-heading font-semibold text-sm">Vous êtes éligible</p>
+              <p className="text-xs text-muted-foreground">Activez le mode Gardien d'urgence</p>
+            </div>
           </div>
+          <p className="text-xs text-foreground/80">
+            Tous les critères sont validés. Activez votre profil pour recevoir les demandes urgentes des propriétaires de votre zone.
+          </p>
+          <Button asChild size="sm" className="w-full bg-amber-500 hover:bg-amber-600 text-white">
+            <Link to="/gardien-urgence">Activer maintenant</Link>
+          </Button>
         </div>
-        <p className="text-xs text-foreground/80">
-          Tous les critères sont validés. Activez votre profil pour recevoir les demandes urgentes des propriétaires de votre zone.
-        </p>
-        <Button asChild size="sm" className="w-full bg-amber-500 hover:bg-amber-600 text-white">
-          <Link to="/gardien-urgence">Activer maintenant</Link>
-        </Button>
-      </div>
+      </>
     );
   }
 
   // ─── ÉTAT 1 — LOCKED ───
   return (
-    <div className="rounded-2xl border border-border bg-card p-5 space-y-3">
-      <div className="flex items-center gap-2.5">
-        <span className="inline-flex items-center justify-center h-9 w-9 rounded-full bg-muted">
-          <Zap className="h-4 w-4 text-amber-500" />
-        </span>
-        <div>
-          <p className="font-heading font-semibold text-sm">Gardien d'urgence</p>
-          <p className="text-xs text-muted-foreground">Le plus haut niveau de confiance</p>
-        </div>
-      </div>
-
-      <div className="space-y-1.5">
-        {items.map((item, i) => (
-          <div key={i} className="flex items-center gap-2 text-sm">
-            {item.ok ? (
-              <CheckCircle2 className="h-4 w-4 text-primary shrink-0" />
-            ) : (
-              <XCircle className="h-4 w-4 text-muted-foreground/60 shrink-0" />
-            )}
-            <span className={item.ok ? "text-foreground" : "text-muted-foreground"}>{item.label}</span>
+    <>
+      {PreviewToggle}
+      <div className="rounded-2xl border border-border bg-card p-5 space-y-3">
+        <div className="flex items-center gap-2.5">
+          <span className="inline-flex items-center justify-center h-9 w-9 rounded-full bg-muted">
+            <Zap className="h-4 w-4 text-amber-500" />
+          </span>
+          <div>
+            <p className="font-heading font-semibold text-sm">Gardien d'urgence</p>
+            <p className="text-xs text-muted-foreground">Le plus haut niveau de confiance</p>
           </div>
-        ))}
+        </div>
+
+        <div className="space-y-1.5">
+          {items.map((item, i) => (
+            <div key={i} className="flex items-center gap-2 text-sm">
+              {item.ok ? (
+                <CheckCircle2 className="h-4 w-4 text-primary shrink-0" />
+              ) : (
+                <XCircle className="h-4 w-4 text-muted-foreground/60 shrink-0" />
+              )}
+              <span className={item.ok ? "text-foreground" : "text-muted-foreground"}>{item.label}</span>
+            </div>
+          ))}
+        </div>
+
+        {remaining > 0 && (
+          <p className="text-xs text-muted-foreground">
+            Encore {remaining} garde{remaining > 1 ? "s" : ""} pour débloquer le statut.
+          </p>
+        )}
+
+        <Link to="/gardien-urgence" className="text-xs text-primary hover:underline inline-flex items-center gap-1">
+          En savoir plus <ChevronRight className="h-3 w-3" />
+        </Link>
       </div>
-
-      {remaining > 0 && (
-        <p className="text-xs text-muted-foreground">
-          Encore {remaining} garde{remaining > 1 ? "s" : ""} pour débloquer le statut.
-        </p>
-      )}
-
-      <Link to="/gardien-urgence" className="text-xs text-primary hover:underline inline-flex items-center gap-1">
-        En savoir plus <ChevronRight className="h-3 w-3" />
-      </Link>
-    </div>
+    </>
   );
 };
 
