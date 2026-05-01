@@ -278,11 +278,25 @@ const SitterDashboard = () => {
         onToggleAvailability={toggleAvailability}
       />
 
-      {/* Hero contextuel : prochaine garde > annonce phare > empty state */}
+      {/* Hero contextuel : prochaine garde > erreur > annonce phare > erreur > empty state */}
       {nextGuard ? (
         <SitterNextGuard nextGuard={nextGuard} />
+      ) : nextGuardError ? (
+        <DashboardSectionState
+          variant="error"
+          eyebrow="Prochaine garde"
+          description={nextGuardError}
+          onRetry={() => window.location.reload()}
+        />
       ) : nearbyListings.length > 0 ? (
         <NearestListingHero listing={nearbyListings[0]} />
+      ) : nearbyError ? (
+        <DashboardSectionState
+          variant="error"
+          eyebrow="Annonce la plus proche"
+          description={nearbyError}
+          onRetry={() => window.location.reload()}
+        />
       ) : (
         <SitterNextGuardEmpty />
       )}
