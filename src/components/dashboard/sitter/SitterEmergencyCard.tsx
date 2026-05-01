@@ -180,6 +180,7 @@ const SitterEmergencyCard = ({ hasEmergencyProfile }: SitterEmergencyCardProps) 
   if (effectiveHasProfile && effectiveProfile) {
     return (
       <>
+        {PreviewToggle}
         <div className="rounded-2xl border-2 border-amber-300 bg-gradient-to-br from-amber-50 to-amber-100/50 p-5 space-y-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2.5">
@@ -189,21 +190,21 @@ const SitterEmergencyCard = ({ hasEmergencyProfile }: SitterEmergencyCardProps) 
               <div>
                 <p className="font-heading font-semibold text-sm">Gardien d'urgence</p>
                 <p className="text-xs text-muted-foreground">
-                  {profile.is_active ? "Actif — visible en cas d'urgence" : "Désactivé"}
+                  {effectiveProfile.is_active ? "Actif — visible en cas d'urgence" : "Désactivé"}
                 </p>
               </div>
             </div>
-            <Switch checked={profile.is_active} onCheckedChange={handleToggleActive} />
+            <Switch checked={effectiveProfile.is_active} onCheckedChange={handleToggleActive} />
           </div>
 
-          {profile.is_active && (
+          {effectiveProfile.is_active && (
             <div className="text-xs text-muted-foreground space-y-1 pl-1">
-              <p>Rayon : <span className="font-medium text-foreground">{profile.radius_km} km</span></p>
-              <p>Animaux : <span className="font-medium text-foreground">{(profile.animal_types as string[])?.join(", ") || "Tous"}</span></p>
-              <p>Alertes SMS : <span className="font-medium text-foreground">{profile.sms_alerts ? "activées" : "désactivées"}</span></p>
-              {(profile as any).interventions_count > 0 && (
+              <p>Rayon : <span className="font-medium text-foreground">{effectiveProfile.radius_km} km</span></p>
+              <p>Animaux : <span className="font-medium text-foreground">{(effectiveProfile.animal_types as string[])?.join(", ") || "Tous"}</span></p>
+              <p>Alertes SMS : <span className="font-medium text-foreground">{effectiveProfile.sms_alerts ? "activées" : "désactivées"}</span></p>
+              {(effectiveProfile as any).interventions_count > 0 && (
                 <p className="text-amber-700 font-medium pt-1">
-                  {(profile as any).interventions_count} intervention{(profile as any).interventions_count > 1 ? "s" : ""} — {(profile as any).interventions_count * 3} mois offert{(profile as any).interventions_count * 3 > 1 ? "s" : ""}
+                  {(effectiveProfile as any).interventions_count} intervention{(effectiveProfile as any).interventions_count > 1 ? "s" : ""} — {(effectiveProfile as any).interventions_count * 3} mois offert{(effectiveProfile as any).interventions_count * 3 > 1 ? "s" : ""}
                 </p>
               )}
             </div>
