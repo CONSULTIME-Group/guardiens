@@ -10,8 +10,6 @@ import { useSitterDashboardData } from "@/hooks/useSitterDashboardData";
 
 import RoleActivationBanner from "./RoleActivationBanner";
 import AccessGateBanner from "@/components/access/AccessGateBanner";
-import EmergencyDashSection from "./EmergencyDashSection";
-import EmergencyEligibility from "./EmergencyEligibility";
 
 import SitterHero from "./sitter/SitterHero";
 import SitterNextGuard from "./sitter/SitterNextGuard";
@@ -21,6 +19,7 @@ import SitterMobileStickyCTA from "./sitter/SitterMobileStickyCTA";
 import SitterStatusBar from "./sitter/SitterStatusBar";
 import SitterBadgesSection from "./sitter/SitterBadgesSection";
 import SitterBottomColumns from "./sitter/SitterBottomColumns";
+import SitterEmergencyCard from "./sitter/SitterEmergencyCard";
 import DashSection from "./owner/DashSection";
 
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
