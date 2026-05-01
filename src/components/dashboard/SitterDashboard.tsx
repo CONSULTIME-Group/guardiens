@@ -51,6 +51,7 @@ const SitterDashboard = () => {
     postalCode, avatarUrl, bio, hasAnimalExperience,
     hasEmergencyProfile, hasAcceptedRecent, nextGuard, nextGuardError,
     nearbyListings, nearbyError, articles, nearbyMissions, nearbyMissionsError,
+    myMissions, myMissionsError,
     onboardingCompleted, onboardingDismissed, minimalCompleted,
     setPartial, toggleAvailability,
     reputation, groupedBadges,
@@ -372,7 +373,7 @@ const SitterDashboard = () => {
         <div className="px-4 sm:px-5 md:px-8 mb-6">
           <DashSection eyebrow="Près de chez vous" title="À découvrir" description="Annonces, échanges et conseils sélectionnés pour vous.">
             <div className="space-y-4">
-              <SitterBottomColumns nearbyListings={nearbyListings} nearbyMissions={nearbyMissions} postalCode={postalCode} nearbyError={nearbyError} nearbyMissionsError={nearbyMissionsError} />
+              <SitterBottomColumns nearbyListings={nearbyListings} nearbyMissions={nearbyMissions} myMissions={myMissions} postalCode={postalCode} nearbyError={nearbyError} nearbyMissionsError={nearbyMissionsError} myMissionsError={myMissionsError} />
               {articles.length > 0 && (
                 <div>
                   <div className="flex items-center justify-between mb-3">
@@ -415,7 +416,7 @@ const SitterDashboard = () => {
             {CtaBlock}
             <section aria-labelledby="nearby-heading-xl">
               <h2 id="nearby-heading-xl" className="sr-only">Près de chez vous</h2>
-              <SitterBottomColumns nearbyListings={nearbyListings} nearbyMissions={nearbyMissions} postalCode={postalCode} nearbyError={nearbyError} nearbyMissionsError={nearbyMissionsError} />
+              <SitterBottomColumns nearbyListings={nearbyListings} nearbyMissions={nearbyMissions} myMissions={myMissions} postalCode={postalCode} nearbyError={nearbyError} nearbyMissionsError={nearbyMissionsError} myMissionsError={myMissionsError} />
             </section>
             {articles.length > 0 && (
               <section aria-labelledby="articles-heading-xl" className="mb-6">

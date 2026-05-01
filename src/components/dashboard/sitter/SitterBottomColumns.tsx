@@ -1,25 +1,28 @@
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { format, differenceInHours } from "date-fns";
 import { fr } from "date-fns/locale";
 import { AlertCircle, RefreshCw } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import SitterMissionsSection from "./SitterMissionsSection";
 
 interface SitterBottomColumnsProps {
   nearbyListings: any[];
   nearbyMissions: any[];
+  myMissions: any[];
   postalCode: string | null;
   nearbyError?: string | null;
   nearbyMissionsError?: string | null;
+  myMissionsError?: string | null;
 }
 
 const SitterBottomColumns = ({
   nearbyListings,
   nearbyMissions,
+  myMissions,
   postalCode,
   nearbyError = null,
   nearbyMissionsError = null,
+  myMissionsError = null,
 }: SitterBottomColumnsProps) => {
-  const navigate = useNavigate();
 
   const ErrorState = ({ message }: { message: string }) => (
     <div role="alert" className="rounded-xl border border-destructive/30 bg-destructive/5 p-4 text-center">
@@ -79,49 +82,14 @@ const SitterBottomColumns = ({
         )}
       </div>
 
-      {/* Colonne droite — Échanges */}
-      <div className="bg-card border border-border rounded-2xl p-4 sm:p-5 transition-shadow duration-300 hover:shadow-sm">
-        <div className="flex justify-between items-center mb-4">
-          <p className="text-sm font-semibold text-foreground">Échanges autour de vous</p>
-          <Link to="/petites-missions" className="text-xs text-primary font-sans hover:underline">Voir tout →</Link>
-        </div>
-        {nearbyMissionsError ? (
-          <ErrorState message={nearbyMissionsError} />
-        ) : nearbyMissions.length === 0 ? (
-          <>
-            <p className="text-xs text-muted-foreground font-sans mb-3"><span className="font-semibold text-foreground">Osez !</span> Demandez un coup de main en publiant une petite mission, ou proposez quelque chose en échange — un café, une histoire, un service…</p>
-            <div className="flex flex-col gap-2 mb-4">
-              <Button onClick={() => navigate("/petites-missions/creer")} className="w-full rounded-xl text-xs font-medium">Publier un besoin →</Button>
-              <Button variant="outline" onClick={() => navigate("/petites-missions")} className="w-full rounded-xl text-xs font-medium">Proposer mon aide →</Button>
-            </div>
-            <p className="text-xs text-muted-foreground font-sans italic text-center">
-              {postalCode ? "Pas encore d'échange dans votre zone." : "Ajoutez votre code postal pour voir les échanges proches."}
-            </p>
-          </>
-        ) : (
-          <>
-            {nearbyMissions.map((m: any) => (
-              <Link
-                key={m.id}
-                to={`/petites-missions/${m.id}`}
-                className="group flex items-start gap-3 py-2.5 border-b border-border last:border-0 -mx-2 px-2 rounded-lg transition-all duration-200 ease-out hover:bg-muted/40 hover:translate-x-0.5"
-              >
-                <div className="w-2 h-2 rounded-full bg-accent-foreground/40 shrink-0 mt-1.5 transition-transform duration-200 group-hover:scale-125 group-hover:bg-primary" />
-                <div className="flex-1">
-                  <p className="text-xs text-foreground/80 font-sans leading-snug transition-colors group-hover:text-foreground">{m.title}</p>
-                  <p className="text-xs text-muted-foreground font-sans mt-0.5">
-                    {m.city}{m.date_needed ? ` · ${format(new Date(m.date_needed), "d MMM", { locale: fr })}` : ""}
-                  </p>
-                </div>
-              </Link>
-            ))}
-            <div className="flex gap-2 mt-3">
-              <Button size="sm" onClick={() => navigate("/petites-missions/creer")} className="flex-1 rounded-xl text-xs">Publier un besoin</Button>
-              <Button size="sm" variant="outline" onClick={() => navigate("/petites-missions")} className="flex-1 rounded-xl text-xs">Voir tout</Button>
-            </div>
-          </>
-        )}
-      </div>
+      {/* Colonne droite — Petites missions (mes missions + autour de vous) */}
+      <SitterMissionsSection
+        myMissions={myMissions}
+        nearbyMissions={nearbyMissions}
+        postalCode={postalCode}
+        myMissionsError={myMissionsError}
+        nearbyMissionsError={nearbyMissionsError}
+      />
     </div>
   );
 };
