@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect, useMemo } from "react";
 const entraideHeader = "https://erhccyqevdyevpyctsjj.supabase.co/storage/v1/object/public/property-photos/misc/entraide-header.webp";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Dog, Flower2, Handshake, ArrowRight, Lock, X, Sprout, PawPrint, GraduationCap, Star, MapPin, Search as SearchIcon, Check } from "lucide-react";
@@ -98,8 +98,10 @@ const SmallMissions = () => {
   const queryClient = useQueryClient();
   const { hasAccess, status: subStatus } = useSubscriptionAccess();
   const { level: accessLevel, profileCompletion, canApplyMissions } = useAccessLevel();
+  const [searchParams] = useSearchParams();
+  const initialMode: ModeFilter = searchParams.get("type") === "offre" ? "offer" : "need";
   const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>("all");
-  const [mode, setMode] = useState<ModeFilter>("need");
+  const [mode, setMode] = useState<ModeFilter>(initialMode);
   const [dialogMission, setDialogMission] = useState<any>(null);
   const [dialogTarget, setDialogTarget] = useState<{ id: string; name: string } | null>(null);
   const [skillPromptDismissed, setSkillPromptDismissed] = useState(() => {
