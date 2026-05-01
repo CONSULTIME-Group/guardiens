@@ -30,6 +30,7 @@ import DashSection from "./owner/DashSection";
 import EmptyCard from "./owner/EmptyCard";
 import StatsStrip from "./owner/StatsStrip";
 import PendingReviewsCard from "./owner/PendingReviewsCard";
+import MobileStickyCTA from "./owner/MobileStickyCTA";
 import {
   SPECIES_LABEL, PROPRIO_SPECIAL_IDS, BANNER_STYLES,
   capitalize, capitalizeWords,
