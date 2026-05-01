@@ -1,0 +1,1275 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Owner Dashboard — visual snapshots > MissionsTabsCard > matches snapshot on desktop (1280px) 1`] = `
+<div
+  class="bg-card border border-border rounded-2xl p-5 transition-shadow duration-300 hover:shadow-sm"
+>
+  <div
+    class="flex items-center justify-between gap-2 mb-3"
+  >
+    <h3
+      class="text-sm font-semibold text-foreground"
+    >
+      Petites missions
+    </h3>
+    <a
+      class="text-xs text-primary font-sans hover:underline shrink-0"
+      href="/petites-missions"
+    >
+      Voir tout
+    </a>
+  </div>
+  <div
+    class="flex gap-1 p-1 bg-muted/50 rounded-xl mb-4"
+    role="tablist"
+  >
+    <button
+      aria-pressed="true"
+      class="flex-1 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 ease-out bg-card text-foreground shadow-sm"
+      type="button"
+    >
+      Les miennes
+      <span
+        class="ml-1.5 text-[10px] text-primary"
+      >
+        1
+      </span>
+    </button>
+    <button
+      aria-pressed="false"
+      class="flex-1 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 ease-out text-muted-foreground hover:text-foreground hover:bg-card/50"
+      type="button"
+    >
+      Autour de moi
+      <span
+        class="ml-1.5 text-[10px] text-muted-foreground/70"
+      >
+        1
+      </span>
+    </button>
+  </div>
+  <div>
+    <a
+      class="group flex items-center gap-3 py-2.5 border-b border-border last:border-0 hover:bg-muted/40 -mx-2 px-2 rounded-lg transition-all duration-200 ease-out hover:translate-x-0.5"
+      href="/petites-missions/mission-1"
+    >
+      <div
+        class="w-2 h-2 rounded-full shrink-0 transition-transform duration-200 group-hover:scale-125 bg-primary"
+      />
+      <p
+        class="text-xs font-sans flex-1 truncate transition-colors text-foreground group-hover:text-primary"
+      >
+        Promener mon chien
+      </p>
+      <p
+        class="text-xs text-muted-foreground font-sans shrink-0"
+      >
+        1 réponse
+      </p>
+    </a>
+  </div>
+</div>
+`;
+
+exports[`Owner Dashboard — visual snapshots > MissionsTabsCard > matches snapshot on mobile (390px) 1`] = `
+<div
+  class="bg-card border border-border rounded-2xl p-5 transition-shadow duration-300 hover:shadow-sm"
+>
+  <div
+    class="flex items-center justify-between gap-2 mb-3"
+  >
+    <h3
+      class="text-sm font-semibold text-foreground"
+    >
+      Petites missions
+    </h3>
+    <a
+      class="text-xs text-primary font-sans hover:underline shrink-0"
+      href="/petites-missions"
+    >
+      Voir tout
+    </a>
+  </div>
+  <div
+    class="flex gap-1 p-1 bg-muted/50 rounded-xl mb-4"
+    role="tablist"
+  >
+    <button
+      aria-pressed="true"
+      class="flex-1 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 ease-out bg-card text-foreground shadow-sm"
+      type="button"
+    >
+      Les miennes
+      <span
+        class="ml-1.5 text-[10px] text-primary"
+      >
+        1
+      </span>
+    </button>
+    <button
+      aria-pressed="false"
+      class="flex-1 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 ease-out text-muted-foreground hover:text-foreground hover:bg-card/50"
+      type="button"
+    >
+      Autour de moi
+      <span
+        class="ml-1.5 text-[10px] text-muted-foreground/70"
+      >
+        1
+      </span>
+    </button>
+  </div>
+  <div>
+    <a
+      class="group flex items-center gap-3 py-2.5 border-b border-border last:border-0 hover:bg-muted/40 -mx-2 px-2 rounded-lg transition-all duration-200 ease-out hover:translate-x-0.5"
+      href="/petites-missions/mission-1"
+    >
+      <div
+        class="w-2 h-2 rounded-full shrink-0 transition-transform duration-200 group-hover:scale-125 bg-primary"
+      />
+      <p
+        class="text-xs font-sans flex-1 truncate transition-colors text-foreground group-hover:text-primary"
+      >
+        Promener mon chien
+      </p>
+      <p
+        class="text-xs text-muted-foreground font-sans shrink-0"
+      >
+        1 réponse
+      </p>
+    </a>
+  </div>
+</div>
+`;
+
+exports[`Owner Dashboard — visual snapshots > MonAnnonceCard > matches snapshot on desktop (1280px) 1`] = `
+<div
+  class="group/card bg-card border border-border rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-md hover:border-border/80"
+>
+  <div
+    class="p-5 space-y-3"
+  >
+    <div
+      class="flex items-center justify-between"
+    >
+      <h3
+        class="text-sm font-semibold text-foreground"
+      >
+        Mon annonce
+      </h3>
+      <span
+        class="text-xs rounded-full px-2.5 py-0.5 font-medium bg-primary/10 text-primary"
+      >
+        En ligne
+      </span>
+    </div>
+    <p
+      class="text-sm font-medium text-foreground leading-snug"
+    >
+      Garde de Luna
+    </p>
+    <div
+      class="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground"
+    >
+      <span>
+        10 mai → 20 mai 2026
+      </span>
+      <span>
+        dans 
+        28
+        j
+      </span>
+    </div>
+    <button
+      aria-label="2 candidatures en attente — voir les candidats"
+      class="w-full flex items-center justify-between gap-3 rounded-xl border border-primary/30 bg-primary/5 hover:bg-primary/10 px-3 py-2.5 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      type="button"
+    >
+      <span
+        class="flex items-center gap-2.5 min-w-0"
+      >
+        <span
+          class="flex h-8 w-8 items-center justify-center rounded-full bg-primary/15 text-primary shrink-0"
+        >
+          <svg
+            class="lucide lucide-inbox h-4 w-4"
+            fill="none"
+            height="24"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <polyline
+              points="22 12 16 12 14 15 10 15 8 12 2 12"
+            />
+            <path
+              d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"
+            />
+          </svg>
+        </span>
+        <span
+          class="flex flex-col min-w-0"
+        >
+          <span
+            class="text-sm font-semibold text-foreground"
+          >
+            2
+             candidature
+            s
+             en attente
+          </span>
+          <span
+            class="text-xs text-muted-foreground"
+          >
+            sur 
+            0
+             reçue
+             au total
+          </span>
+        </span>
+      </span>
+      <svg
+        aria-hidden="true"
+        class="lucide lucide-arrow-right h-4 w-4 text-primary shrink-0"
+        fill="none"
+        height="24"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        viewBox="0 0 24 24"
+        width="24"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M5 12h14"
+        />
+        <path
+          d="m12 5 7 7-7 7"
+        />
+      </svg>
+    </button>
+    <div
+      class="flex items-center gap-2"
+    >
+      <div
+        class="flex items-center gap-1.5 text-xs text-muted-foreground"
+      >
+        <span
+          aria-hidden="true"
+          class="w-5 h-5 rounded-full bg-primary/10 text-primary text-[10px] font-semibold flex items-center justify-center"
+        >
+          L
+        </span>
+        <span>
+          Luna
+        </span>
+      </div>
+    </div>
+    <div
+      class="flex flex-wrap gap-2 pt-1"
+    >
+      <button
+        class="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium ring-offset-background transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 font-body bg-primary text-primary-foreground hover:bg-primary/90 rounded-pill h-9 px-4 flex-1 min-w-[110px] text-xs"
+      >
+        <svg
+          class="lucide lucide-eye h-3.5 w-3.5 mr-1"
+          fill="none"
+          height="24"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="24"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"
+          />
+          <circle
+            cx="12"
+            cy="12"
+            r="3"
+          />
+        </svg>
+         Voir l'annonce
+      </button>
+      <button
+        class="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium ring-offset-background transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 font-body border border-input bg-background hover:bg-accent hover:text-accent-foreground rounded-pill h-9 px-4 flex-1 min-w-[110px] text-xs"
+      >
+        Modifier
+      </button>
+      <button
+        aria-label="Partager cette annonce"
+        class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium ring-offset-background transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 font-body border border-input bg-background hover:bg-accent hover:text-accent-foreground rounded-pill h-9 px-4 gap-1.5"
+      >
+        <svg
+          class="lucide lucide-share2 h-4 w-4"
+          fill="none"
+          height="24"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="24"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <circle
+            cx="18"
+            cy="5"
+            r="3"
+          />
+          <circle
+            cx="6"
+            cy="12"
+            r="3"
+          />
+          <circle
+            cx="18"
+            cy="19"
+            r="3"
+          />
+          <line
+            x1="8.59"
+            x2="15.42"
+            y1="13.51"
+            y2="17.49"
+          />
+          <line
+            x1="15.41"
+            x2="8.59"
+            y1="6.51"
+            y2="10.49"
+          />
+        </svg>
+         Partager
+      </button>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Owner Dashboard — visual snapshots > MonAnnonceCard > matches snapshot on mobile (390px) 1`] = `
+<div
+  class="group/card bg-card border border-border rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-md hover:border-border/80"
+>
+  <div
+    class="p-5 space-y-3"
+  >
+    <div
+      class="flex items-center justify-between"
+    >
+      <h3
+        class="text-sm font-semibold text-foreground"
+      >
+        Mon annonce
+      </h3>
+      <span
+        class="text-xs rounded-full px-2.5 py-0.5 font-medium bg-primary/10 text-primary"
+      >
+        En ligne
+      </span>
+    </div>
+    <p
+      class="text-sm font-medium text-foreground leading-snug"
+    >
+      Garde de Luna
+    </p>
+    <div
+      class="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground"
+    >
+      <span>
+        10 mai → 20 mai 2026
+      </span>
+      <span>
+        dans 
+        28
+        j
+      </span>
+    </div>
+    <button
+      aria-label="2 candidatures en attente — voir les candidats"
+      class="w-full flex items-center justify-between gap-3 rounded-xl border border-primary/30 bg-primary/5 hover:bg-primary/10 px-3 py-2.5 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      type="button"
+    >
+      <span
+        class="flex items-center gap-2.5 min-w-0"
+      >
+        <span
+          class="flex h-8 w-8 items-center justify-center rounded-full bg-primary/15 text-primary shrink-0"
+        >
+          <svg
+            class="lucide lucide-inbox h-4 w-4"
+            fill="none"
+            height="24"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <polyline
+              points="22 12 16 12 14 15 10 15 8 12 2 12"
+            />
+            <path
+              d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"
+            />
+          </svg>
+        </span>
+        <span
+          class="flex flex-col min-w-0"
+        >
+          <span
+            class="text-sm font-semibold text-foreground"
+          >
+            2
+             candidature
+            s
+             en attente
+          </span>
+          <span
+            class="text-xs text-muted-foreground"
+          >
+            sur 
+            0
+             reçue
+             au total
+          </span>
+        </span>
+      </span>
+      <svg
+        aria-hidden="true"
+        class="lucide lucide-arrow-right h-4 w-4 text-primary shrink-0"
+        fill="none"
+        height="24"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        viewBox="0 0 24 24"
+        width="24"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M5 12h14"
+        />
+        <path
+          d="m12 5 7 7-7 7"
+        />
+      </svg>
+    </button>
+    <div
+      class="flex items-center gap-2"
+    >
+      <div
+        class="flex items-center gap-1.5 text-xs text-muted-foreground"
+      >
+        <span
+          aria-hidden="true"
+          class="w-5 h-5 rounded-full bg-primary/10 text-primary text-[10px] font-semibold flex items-center justify-center"
+        >
+          L
+        </span>
+        <span>
+          Luna
+        </span>
+      </div>
+    </div>
+    <div
+      class="flex flex-wrap gap-2 pt-1"
+    >
+      <button
+        class="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium ring-offset-background transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 font-body bg-primary text-primary-foreground hover:bg-primary/90 rounded-pill h-9 px-4 flex-1 min-w-[110px] text-xs"
+      >
+        <svg
+          class="lucide lucide-eye h-3.5 w-3.5 mr-1"
+          fill="none"
+          height="24"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="24"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"
+          />
+          <circle
+            cx="12"
+            cy="12"
+            r="3"
+          />
+        </svg>
+         Voir l'annonce
+      </button>
+      <button
+        class="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium ring-offset-background transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 font-body border border-input bg-background hover:bg-accent hover:text-accent-foreground rounded-pill h-9 px-4 flex-1 min-w-[110px] text-xs"
+      >
+        Modifier
+      </button>
+      <button
+        aria-label="Partager cette annonce"
+        class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium ring-offset-background transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 font-body border border-input bg-background hover:bg-accent hover:text-accent-foreground rounded-pill h-9 px-4 gap-1.5"
+      >
+        <svg
+          class="lucide lucide-share2 h-4 w-4"
+          fill="none"
+          height="24"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="24"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <circle
+            cx="18"
+            cy="5"
+            r="3"
+          />
+          <circle
+            cx="6"
+            cy="12"
+            r="3"
+          />
+          <circle
+            cx="18"
+            cy="19"
+            r="3"
+          />
+          <line
+            x1="8.59"
+            x2="15.42"
+            y1="13.51"
+            y2="17.49"
+          />
+          <line
+            x1="15.41"
+            x2="8.59"
+            y1="6.51"
+            y2="10.49"
+          />
+        </svg>
+         Partager
+      </button>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Owner Dashboard — visual snapshots > OngoingSitHero > matches snapshot on desktop (1280px) 1`] = `
+<div
+  class="px-4 sm:px-5 md:px-8 mb-6 md:mb-8"
+>
+  <div
+    class="group block bg-card border border-border rounded-2xl overflow-hidden transition-all duration-300 ease-out hover:shadow-lg hover:border-primary/30"
+  >
+    <div
+      class="flex flex-col sm:flex-row"
+    >
+      <div
+        class="relative sm:w-48 md:w-56 h-36 sm:h-auto sm:min-h-[180px] overflow-hidden bg-muted shrink-0"
+      >
+        <div
+          class="w-full h-full bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-sparkles h-8 w-8 text-primary/30"
+            fill="none"
+            height="24"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"
+            />
+            <path
+              d="M20 3v4"
+            />
+            <path
+              d="M22 5h-4"
+            />
+            <path
+              d="M4 17v2"
+            />
+            <path
+              d="M5 18H3"
+            />
+          </svg>
+        </div>
+        <div
+          aria-hidden="true"
+          class="absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-black/45 via-black/20 to-transparent pointer-events-none sm:hidden"
+        />
+        <div
+          class="absolute top-2.5 left-2.5 sm:top-3 sm:left-3"
+        >
+          <span
+            class="inline-flex items-center gap-1.5 text-[13px] sm:text-xs font-heading font-bold tracking-tight rounded-full px-3 py-1.5 sm:px-2.5 sm:py-1 shadow-lg ring-1 ring-black/5 backdrop-blur-sm bg-primary text-primary-foreground"
+          >
+            <svg
+              aria-hidden="true"
+              class="lucide lucide-clock h-3.5 w-3.5 sm:h-3 sm:w-3"
+              fill="none"
+              height="24"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <circle
+                cx="12"
+                cy="12"
+                r="10"
+              />
+              <polyline
+                points="12 6 12 12 16 14"
+              />
+            </svg>
+            J-2
+          </span>
+        </div>
+      </div>
+      <div
+        class="flex-1 p-4 sm:p-5 flex flex-col justify-between min-w-0 gap-3"
+      >
+        <div
+          class="flex items-start gap-3 min-w-0"
+        >
+          <a
+            aria-label="Voir le profil de Claire"
+            class="shrink-0 group/avatar"
+            href="/gardiens/sitter-1"
+          >
+            <div
+              class="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-primary/15 ring-2 ring-primary/40 flex items-center justify-center text-primary font-heading font-bold text-lg transition-all duration-300 group-hover/avatar:ring-primary group-hover/avatar:scale-105"
+            >
+              C
+            </div>
+          </a>
+          <div
+            class="min-w-0 flex-1"
+          >
+            <p
+              class="text-xs uppercase tracking-widest text-primary font-sans font-medium mb-1.5 flex items-center gap-1.5"
+            >
+              <svg
+                aria-hidden="true"
+                class="lucide lucide-sparkles h-3 w-3"
+                fill="none"
+                height="24"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"
+                />
+                <path
+                  d="M20 3v4"
+                />
+                <path
+                  d="M22 5h-4"
+                />
+                <path
+                  d="M4 17v2"
+                />
+                <path
+                  d="M5 18H3"
+                />
+              </svg>
+              Garde en cours
+            </p>
+            <h3
+              class="text-base sm:text-lg font-heading font-semibold text-foreground leading-tight mb-1"
+            >
+              Claire
+               s'occupe de vos animaux
+            </h3>
+            <div
+              class="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground"
+            >
+              <span
+                class="flex items-center gap-1 min-w-0 max-w-full"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-calendar h-3.5 w-3.5 shrink-0"
+                  fill="none"
+                  height="24"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M8 2v4"
+                  />
+                  <path
+                    d="M16 2v4"
+                  />
+                  <rect
+                    height="18"
+                    rx="2"
+                    width="18"
+                    x="3"
+                    y="4"
+                  />
+                  <path
+                    d="M3 10h18"
+                  />
+                </svg>
+                <span
+                  class="sm:hidden truncate whitespace-nowrap"
+                >
+                  2 j · 14 avr.
+                </span>
+                <span
+                  class="hidden sm:inline truncate whitespace-nowrap"
+                >
+                  Encore 2 jours — fin mardi 14 avril
+                </span>
+              </span>
+            </div>
+          </div>
+        </div>
+        <div
+          class="h-1.5 w-full bg-primary/15 rounded-full overflow-hidden"
+        >
+          <div
+            aria-label="Garde réalisée à 67%"
+            aria-valuemax="100"
+            aria-valuemin="0"
+            aria-valuenow="67"
+            class="h-full bg-primary transition-all duration-500 ease-out"
+            role="progressbar"
+            style="width: 67%;"
+          />
+        </div>
+        <div
+          class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3"
+        >
+          <div
+            class="flex gap-2 w-full sm:w-auto sm:order-2 shrink-0"
+          >
+            <a
+              class="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 font-body bg-primary text-primary-foreground hover:bg-primary/90 rounded-pill h-9 px-4 flex-1 sm:flex-initial rounded-xl group/btn"
+              href="/messages?with=sitter-1&sit=sit-1"
+            >
+              <svg
+                class="lucide lucide-message-square h-4 w-4 mr-1.5 transition-transform duration-200 group-hover/btn:scale-110"
+                fill="none"
+                height="24"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"
+                />
+              </svg>
+              Message
+            </a>
+            <a
+              class="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 font-body border border-input bg-background hover:bg-accent hover:text-accent-foreground rounded-pill h-9 px-4 flex-1 sm:flex-initial rounded-xl"
+              href="/sits/sit-1"
+            >
+              Voir l'annonce
+            </a>
+          </div>
+          <a
+            class="inline-flex items-center gap-1 text-xs text-primary hover:underline transition-transform duration-200 hover:translate-x-0.5 self-start sm:self-auto sm:order-1"
+            href="/gardiens/sitter-1"
+          >
+            Voir le profil 
+            <svg
+              aria-hidden="true"
+              class="lucide lucide-arrow-right h-3 w-3"
+              fill="none"
+              height="24"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M5 12h14"
+              />
+              <path
+                d="m12 5 7 7-7 7"
+              />
+            </svg>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Owner Dashboard — visual snapshots > OngoingSitHero > matches snapshot on mobile (390px) 1`] = `
+<div
+  class="px-4 sm:px-5 md:px-8 mb-6 md:mb-8"
+>
+  <div
+    class="group block bg-card border border-border rounded-2xl overflow-hidden transition-all duration-300 ease-out hover:shadow-lg hover:border-primary/30"
+  >
+    <div
+      class="flex flex-col sm:flex-row"
+    >
+      <div
+        class="relative sm:w-48 md:w-56 h-36 sm:h-auto sm:min-h-[180px] overflow-hidden bg-muted shrink-0"
+      >
+        <div
+          class="w-full h-full bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-sparkles h-8 w-8 text-primary/30"
+            fill="none"
+            height="24"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"
+            />
+            <path
+              d="M20 3v4"
+            />
+            <path
+              d="M22 5h-4"
+            />
+            <path
+              d="M4 17v2"
+            />
+            <path
+              d="M5 18H3"
+            />
+          </svg>
+        </div>
+        <div
+          aria-hidden="true"
+          class="absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-black/45 via-black/20 to-transparent pointer-events-none sm:hidden"
+        />
+        <div
+          class="absolute top-2.5 left-2.5 sm:top-3 sm:left-3"
+        >
+          <span
+            class="inline-flex items-center gap-1.5 text-[13px] sm:text-xs font-heading font-bold tracking-tight rounded-full px-3 py-1.5 sm:px-2.5 sm:py-1 shadow-lg ring-1 ring-black/5 backdrop-blur-sm bg-primary text-primary-foreground"
+          >
+            <svg
+              aria-hidden="true"
+              class="lucide lucide-clock h-3.5 w-3.5 sm:h-3 sm:w-3"
+              fill="none"
+              height="24"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <circle
+                cx="12"
+                cy="12"
+                r="10"
+              />
+              <polyline
+                points="12 6 12 12 16 14"
+              />
+            </svg>
+            J-2
+          </span>
+        </div>
+      </div>
+      <div
+        class="flex-1 p-4 sm:p-5 flex flex-col justify-between min-w-0 gap-3"
+      >
+        <div
+          class="flex items-start gap-3 min-w-0"
+        >
+          <a
+            aria-label="Voir le profil de Claire"
+            class="shrink-0 group/avatar"
+            href="/gardiens/sitter-1"
+          >
+            <div
+              class="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-primary/15 ring-2 ring-primary/40 flex items-center justify-center text-primary font-heading font-bold text-lg transition-all duration-300 group-hover/avatar:ring-primary group-hover/avatar:scale-105"
+            >
+              C
+            </div>
+          </a>
+          <div
+            class="min-w-0 flex-1"
+          >
+            <p
+              class="text-xs uppercase tracking-widest text-primary font-sans font-medium mb-1.5 flex items-center gap-1.5"
+            >
+              <svg
+                aria-hidden="true"
+                class="lucide lucide-sparkles h-3 w-3"
+                fill="none"
+                height="24"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"
+                />
+                <path
+                  d="M20 3v4"
+                />
+                <path
+                  d="M22 5h-4"
+                />
+                <path
+                  d="M4 17v2"
+                />
+                <path
+                  d="M5 18H3"
+                />
+              </svg>
+              Garde en cours
+            </p>
+            <h3
+              class="text-base sm:text-lg font-heading font-semibold text-foreground leading-tight mb-1"
+            >
+              Claire
+               s'occupe de vos animaux
+            </h3>
+            <div
+              class="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground"
+            >
+              <span
+                class="flex items-center gap-1 min-w-0 max-w-full"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-calendar h-3.5 w-3.5 shrink-0"
+                  fill="none"
+                  height="24"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M8 2v4"
+                  />
+                  <path
+                    d="M16 2v4"
+                  />
+                  <rect
+                    height="18"
+                    rx="2"
+                    width="18"
+                    x="3"
+                    y="4"
+                  />
+                  <path
+                    d="M3 10h18"
+                  />
+                </svg>
+                <span
+                  class="sm:hidden truncate whitespace-nowrap"
+                >
+                  2 j · 14 avr.
+                </span>
+                <span
+                  class="hidden sm:inline truncate whitespace-nowrap"
+                >
+                  Encore 2 jours — fin mardi 14 avril
+                </span>
+              </span>
+            </div>
+          </div>
+        </div>
+        <div
+          class="h-1.5 w-full bg-primary/15 rounded-full overflow-hidden"
+        >
+          <div
+            aria-label="Garde réalisée à 67%"
+            aria-valuemax="100"
+            aria-valuemin="0"
+            aria-valuenow="67"
+            class="h-full bg-primary transition-all duration-500 ease-out"
+            role="progressbar"
+            style="width: 67%;"
+          />
+        </div>
+        <div
+          class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3"
+        >
+          <div
+            class="flex gap-2 w-full sm:w-auto sm:order-2 shrink-0"
+          >
+            <a
+              class="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 font-body bg-primary text-primary-foreground hover:bg-primary/90 rounded-pill h-9 px-4 flex-1 sm:flex-initial rounded-xl group/btn"
+              href="/messages?with=sitter-1&sit=sit-1"
+            >
+              <svg
+                class="lucide lucide-message-square h-4 w-4 mr-1.5 transition-transform duration-200 group-hover/btn:scale-110"
+                fill="none"
+                height="24"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"
+                />
+              </svg>
+              Message
+            </a>
+            <a
+              class="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 font-body border border-input bg-background hover:bg-accent hover:text-accent-foreground rounded-pill h-9 px-4 flex-1 sm:flex-initial rounded-xl"
+              href="/sits/sit-1"
+            >
+              Voir l'annonce
+            </a>
+          </div>
+          <a
+            class="inline-flex items-center gap-1 text-xs text-primary hover:underline transition-transform duration-200 hover:translate-x-0.5 self-start sm:self-auto sm:order-1"
+            href="/gardiens/sitter-1"
+          >
+            Voir le profil 
+            <svg
+              aria-hidden="true"
+              class="lucide lucide-arrow-right h-3 w-3"
+              fill="none"
+              height="24"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M5 12h14"
+              />
+              <path
+                d="m12 5 7 7-7 7"
+              />
+            </svg>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Owner Dashboard — visual snapshots > StatsStrip > matches snapshot on desktop (1280px) 1`] = `
+<section
+  aria-label="Vos statistiques propriétaire"
+  class="grid grid-cols-2 md:grid-cols-4 divide-y md:divide-y-0 md:divide-x divide-border rounded-2xl border border-border bg-card overflow-hidden transition-shadow duration-300 hover:shadow-sm"
+>
+  <a
+    aria-label="Annonces : 3"
+    class="group block transition-colors duration-200 hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset"
+    href="/annonces"
+  >
+    <div
+      class="px-4 py-3 text-center md:text-left"
+    >
+      <p
+        class="text-xl md:text-2xl font-heading font-bold leading-none transition-transform duration-200 ease-out text-foreground group-hover:-translate-y-0.5"
+      >
+        3
+      </p>
+      <p
+        class="text-[10px] md:text-[11px] uppercase tracking-wider text-muted-foreground font-sans mt-1.5 transition-colors duration-200 group-hover:text-foreground/80"
+      >
+        Annonces
+      </p>
+    </div>
+  </a>
+  <a
+    aria-label="Candidatures : 12"
+    class="group block transition-colors duration-200 hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset"
+    href="/candidatures"
+  >
+    <div
+      class="px-4 py-3 text-center md:text-left"
+    >
+      <p
+        class="text-xl md:text-2xl font-heading font-bold leading-none transition-transform duration-200 ease-out text-primary group-hover:-translate-y-0.5"
+      >
+        12
+      </p>
+      <p
+        class="text-[10px] md:text-[11px] uppercase tracking-wider text-muted-foreground font-sans mt-1.5 transition-colors duration-200 group-hover:text-foreground/80"
+      >
+        Candidatures
+      </p>
+    </div>
+  </a>
+  <div>
+    <div
+      class="px-4 py-3 text-center md:text-left"
+    >
+      <p
+        class="text-xl md:text-2xl font-heading font-bold leading-none transition-transform duration-200 ease-out text-foreground "
+      >
+        4.8
+      </p>
+      <p
+        class="text-[10px] md:text-[11px] uppercase tracking-wider text-muted-foreground font-sans mt-1.5 transition-colors duration-200 "
+      >
+        Note moyenne
+      </p>
+    </div>
+  </div>
+  <div>
+    <div
+      class="px-4 py-3 text-center md:text-left"
+    >
+      <p
+        class="text-sm text-muted-foreground leading-none mt-1"
+      >
+        —
+      </p>
+      <p
+        class="text-[10px] md:text-[11px] uppercase tracking-wider text-muted-foreground font-sans mt-1.5 transition-colors duration-200 "
+      >
+        À venir
+      </p>
+    </div>
+  </div>
+</section>
+`;
+
+exports[`Owner Dashboard — visual snapshots > StatsStrip > matches snapshot on mobile (390px) 1`] = `
+<section
+  aria-label="Vos statistiques propriétaire"
+  class="grid grid-cols-2 md:grid-cols-4 divide-y md:divide-y-0 md:divide-x divide-border rounded-2xl border border-border bg-card overflow-hidden transition-shadow duration-300 hover:shadow-sm"
+>
+  <a
+    aria-label="Annonces : 3"
+    class="group block transition-colors duration-200 hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset"
+    href="/annonces"
+  >
+    <div
+      class="px-4 py-3 text-center md:text-left"
+    >
+      <p
+        class="text-xl md:text-2xl font-heading font-bold leading-none transition-transform duration-200 ease-out text-foreground group-hover:-translate-y-0.5"
+      >
+        3
+      </p>
+      <p
+        class="text-[10px] md:text-[11px] uppercase tracking-wider text-muted-foreground font-sans mt-1.5 transition-colors duration-200 group-hover:text-foreground/80"
+      >
+        Annonces
+      </p>
+    </div>
+  </a>
+  <a
+    aria-label="Candidatures : 12"
+    class="group block transition-colors duration-200 hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset"
+    href="/candidatures"
+  >
+    <div
+      class="px-4 py-3 text-center md:text-left"
+    >
+      <p
+        class="text-xl md:text-2xl font-heading font-bold leading-none transition-transform duration-200 ease-out text-primary group-hover:-translate-y-0.5"
+      >
+        12
+      </p>
+      <p
+        class="text-[10px] md:text-[11px] uppercase tracking-wider text-muted-foreground font-sans mt-1.5 transition-colors duration-200 group-hover:text-foreground/80"
+      >
+        Candidatures
+      </p>
+    </div>
+  </a>
+  <div>
+    <div
+      class="px-4 py-3 text-center md:text-left"
+    >
+      <p
+        class="text-xl md:text-2xl font-heading font-bold leading-none transition-transform duration-200 ease-out text-foreground "
+      >
+        4.8
+      </p>
+      <p
+        class="text-[10px] md:text-[11px] uppercase tracking-wider text-muted-foreground font-sans mt-1.5 transition-colors duration-200 "
+      >
+        Note moyenne
+      </p>
+    </div>
+  </div>
+  <div>
+    <div
+      class="px-4 py-3 text-center md:text-left"
+    >
+      <p
+        class="text-sm text-muted-foreground leading-none mt-1"
+      >
+        —
+      </p>
+      <p
+        class="text-[10px] md:text-[11px] uppercase tracking-wider text-muted-foreground font-sans mt-1.5 transition-colors duration-200 "
+      >
+        À venir
+      </p>
+    </div>
+  </div>
+</section>
+`;
