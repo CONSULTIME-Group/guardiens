@@ -520,10 +520,10 @@ const SmallMissions = () => {
           </div>
           <div className="relative max-w-6xl mx-auto px-4 py-16 md:py-24 text-center space-y-4">
             <h1 className="font-heading text-4xl md:text-5xl font-bold text-foreground">
-              Petites missions — Entre gens du coin
+              Osez. Quelqu'un du coin n'attend que ça.
             </h1>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              Des coups de main, des échanges, des compétences. Entre gens du coin qui se choisissent.
+              Demander un coup de main, ce n'est pas déranger — c'est offrir une occasion de rendre service. Ici, personne ne juge ce qui est petit.
             </p>
             <p className="inline-block text-xs font-medium bg-badge-success text-badge-success-foreground px-3 py-1 rounded-full">
               Les petites missions sont gratuites à vie, pour tout le monde.
@@ -539,13 +539,13 @@ const SmallMissions = () => {
                 onClick={() => setMode("need")}
                 className={`px-4 py-2 text-sm rounded-md transition-colors ${mode === "need" ? "bg-background text-foreground shadow-sm font-medium" : "text-muted-foreground hover:text-foreground"}`}
               >
-                Je cherche de l'aide
+                J'ose demander
               </button>
               <button
                 onClick={() => setMode("offer")}
                 className={`px-4 py-2 text-sm rounded-md transition-colors ${mode === "offer" ? "bg-background text-foreground shadow-sm font-medium" : "text-muted-foreground hover:text-foreground"}`}
               >
-                Je propose mon aide
+                J'ai du temps à offrir
               </button>
             </div>
 
@@ -554,13 +554,13 @@ const SmallMissions = () => {
                 {mode === "need" ? (
                   <Link to="/petites-missions/creer">
                     <Button variant="hero" size="lg">
-                      Poster une mission
+                      J'ose demander
                       <ArrowRight className="ml-2 h-4 w-4" />
                     </Button>
                   </Link>
                 ) : (
                   <Button variant="hero" size="lg" onClick={openOfferDialog}>
-                    Proposer mon aide
+                    J'ai du temps à offrir
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
                 )}
