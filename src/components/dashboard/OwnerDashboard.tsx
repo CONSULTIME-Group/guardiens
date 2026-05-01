@@ -108,19 +108,14 @@ const OwnerDashboard = () => {
   }, [ongoingSit, sits, pendingAppCount]);
 
   const banner = useMemo(() => {
+    // Si une garde est en cours, l'info est portée par <OngoingSitHero/> → pas de banner redondant.
+    if (ongoingSit) return null;
     if (verificationStatus !== "verified" && verificationStatus !== "pending")
       return { variant: "info" as const, label: "Recommandé : vérifiez votre identité pour rassurer les gardiens qui consultent votre annonce.", to: "/settings#verification", ctaLabel: "Vérifier mon identité →" };
-    if (ongoingSit) {
-      const acceptedApp = (ongoingSit.applications || []).find(a => a.status === "accepted");
-      const sitterName = acceptedApp?.sitter_id && sitterProfiles[acceptedApp.sitter_id]?.first_name;
-      const endLabel = ongoingSit.end_date ? format(new Date(ongoingSit.end_date), "d MMMM", { locale: fr }) : "";
-      const nameStr = sitterName ? capitalize(sitterName) : "votre gardien";
-      return { variant: "success" as const, label: `Garde en cours — ${nameStr} s'occupe de vos animaux${endLabel ? ` jusqu'au ${endLabel}` : ""}.` };
-    }
     if (pendingAppCount > 0)
       return { variant: "info" as const, label: `Vous avez ${pendingAppCount} candidature${pendingAppCount > 1 ? "s" : ""} non lue${pendingAppCount > 1 ? "s" : ""}.`, to: "/sits", ctaLabel: "Voir les candidatures →" };
     return null;
-  }, [verificationStatus, ongoingSit, pendingAppCount, sitterProfiles]);
+  }, [verificationStatus, ongoingSit, pendingAppCount]);
 
   // CTA bas de page supprimé : redondant avec le hero (action principale toujours
   // visible en haut) et avec MonAnnonceCard (qui guide déjà sur l'action contextuelle).
