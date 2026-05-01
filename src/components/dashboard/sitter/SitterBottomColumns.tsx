@@ -2,22 +2,26 @@ import { Link, useNavigate } from "react-router-dom";
 import { format, differenceInHours } from "date-fns";
 import { fr } from "date-fns/locale";
 import { AlertCircle, RefreshCw } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import SitterMissionsSection from "./SitterMissionsSection";
 
 interface SitterBottomColumnsProps {
   nearbyListings: any[];
   nearbyMissions: any[];
+  myMissions: any[];
   postalCode: string | null;
   nearbyError?: string | null;
   nearbyMissionsError?: string | null;
+  myMissionsError?: string | null;
 }
 
 const SitterBottomColumns = ({
   nearbyListings,
   nearbyMissions,
+  myMissions,
   postalCode,
   nearbyError = null,
   nearbyMissionsError = null,
+  myMissionsError = null,
 }: SitterBottomColumnsProps) => {
   const navigate = useNavigate();
 
