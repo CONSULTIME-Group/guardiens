@@ -327,8 +327,12 @@ const OwnerDashboard = () => {
 
       {/* ═══ Coups de coeur ═══ */}
       {highlights.length > 0 && (
-        <div className="px-5 md:px-8">
-          <DashSection title="Ce que les gardiens disent de votre maison">
+        <div className="px-5 md:px-8 pt-2 border-t border-border/40">
+          <DashSection
+            eyebrow="Social proof"
+            title="Ce que les gardiens disent de votre maison"
+            description="Les moments forts partagés après chaque garde."
+          >
             <div className="space-y-2">
               {highlights.slice(0, 3).map(h => (
                 <div key={h.id} className="flex items-start gap-3 p-3 rounded-2xl bg-card border border-border">
@@ -352,12 +356,12 @@ const OwnerDashboard = () => {
       )}
 
       {/* ═══ Ressources éditoriales (descendues : moins prioritaires) ═══ */}
-      <div className="px-5 md:px-8">
+      <div className="px-5 md:px-8 pt-2 border-t border-border/40">
         <ContextualResources annoncesCount={sits.length} gardesCount={completedSits.length} loading={loading} />
       </div>
 
       {/* ═══ Badges (vanity, en bas) ═══ */}
-      <div className="px-5 md:px-8 mb-6 md:mb-8">
+      <div className="px-5 md:px-8 pt-2 mb-6 md:mb-8 border-t border-border/40">
         <BadgeGridSection
           title="Vos Badges"
           badgeIds={PROPRIO_BADGE_IDS}
