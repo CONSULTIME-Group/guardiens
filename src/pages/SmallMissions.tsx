@@ -649,21 +649,23 @@ const SmallMissions = () => {
               </div>
 
               {/* Category filter pills */}
-              <div className="flex flex-wrap items-center gap-2 justify-center">
-                {FILTER_PILLS.map(({ key, label, icon: Icon }) => (
-                  <button
-                    key={key}
-                    onClick={() => setCategoryFilter(key)}
-                    className={`flex items-center gap-1.5 rounded-full border px-4 py-2 text-sm transition-colors ${
-                      categoryFilter === key
-                        ? "bg-primary text-primary-foreground border-primary"
-                        : "bg-muted text-foreground border-border hover:border-primary/40"
-                    }`}
-                  >
-                    {Icon && <Icon className="h-3.5 w-3.5" />}
-                    {label}
-                  </button>
-                ))}
+              <div className="-mx-4 px-4 overflow-x-auto sm:overflow-visible sm:mx-0 sm:px-0">
+                <div className="flex sm:flex-wrap items-center gap-2 sm:justify-center w-max sm:w-auto">
+                  {FILTER_PILLS.map(({ key, label, icon: Icon }) => (
+                    <button
+                      key={key}
+                      onClick={() => setCategoryFilter(key)}
+                      className={`flex items-center gap-1.5 rounded-full border px-4 py-2 text-sm whitespace-nowrap transition-colors ${
+                        categoryFilter === key
+                          ? "bg-primary text-primary-foreground border-primary"
+                          : "bg-muted text-foreground border-border hover:border-primary/40"
+                      }`}
+                    >
+                      {Icon && <Icon className="h-3.5 w-3.5" />}
+                      {label}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
 
