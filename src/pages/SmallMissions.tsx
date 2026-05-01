@@ -941,10 +941,6 @@ const SmallMissions = () => {
               </Link>
             )}
           </section>
-                <Button variant="hero" size="xl">S'inscrire gratuitement</Button>
-              </Link>
-            )}
-          </section>
 
           {/* Schema.org */}
           <script
