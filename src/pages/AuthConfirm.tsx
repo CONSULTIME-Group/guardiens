@@ -33,7 +33,7 @@ const AuthConfirm = () => {
     }
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
+      async (event, session) => {
         if (
           event === "SIGNED_IN" ||
           event === "PASSWORD_RECOVERY" ||
@@ -67,7 +67,7 @@ const AuthConfirm = () => {
                     const { data: prof } = await supabase
                       .from("profiles")
                       .select("role")
-                      .eq("user_id", userId)
+                      .eq("id", userId)
                       .maybeSingle();
                     role = (prof?.role as string | undefined) ?? null;
                   } catch { /* silencieux */ }
