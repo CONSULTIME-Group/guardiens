@@ -159,6 +159,12 @@ const OwnerDashboard = () => {
     );
   }
 
+  // Si MonAnnonceCard affiche déjà l'encart candidatures, on évite le doublon
+  // de la section ApplicationsSection (qui réapparaît dès qu'il y a des candidatures
+  // déjà consultées à montrer dans l'accordéon).
+  const hasReadApps = recentApps.some(a => a.status !== "pending");
+  const showApplicationsSection = loading || hasReadApps;
+
   return (
     <div className="space-y-6 md:space-y-8 pb-8">
 
@@ -167,61 +173,47 @@ const OwnerDashboard = () => {
         <RoleActivationBanner userRole={user?.role || "owner"} />
       </div>
 
-      {/* ═══ Hero header ═══ */}
-      <div className="relative overflow-hidden bg-primary rounded-b-3xl px-5 md:px-10 pt-6 md:pt-8 pb-5 md:pb-6 mx-0 animate-fade-in">
-        {/* Texture organique */}
-        <div className="absolute -right-12 -top-8 opacity-[0.10] pointer-events-none" aria-hidden="true">
-          <svg width="360" height="260" viewBox="0 0 360 260" fill="none">
-            <path
-              d="M40 180 C 80 120, 160 100, 220 140 S 340 220, 320 80"
-              stroke="white"
-              strokeWidth="2"
-              strokeLinecap="round"
-              fill="none"
-            />
-            <circle cx="280" cy="90" r="70" fill="white" opacity="0.6" />
-            <circle cx="180" cy="180" r="40" fill="white" opacity="0.4" />
-          </svg>
-        </div>
-        <div className="relative z-10 flex flex-col md:flex-row md:items-end md:justify-between gap-4">
-          <div>
-            <p className="text-xs uppercase tracking-[3px] text-primary-foreground/60 font-sans mb-1">
+      {/* ═══ Hero header (épuré, light) ═══ */}
+      <header className="px-5 md:px-8 pt-2 animate-fade-in">
+        <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+          <div className="min-w-0">
+            <p className="text-xs uppercase tracking-[2px] text-muted-foreground font-sans mb-1.5">
               Espace propriétaire
             </p>
-            <div className="flex items-center gap-3">
-              <h1 className="text-2xl md:text-4xl font-heading font-bold text-primary-foreground leading-tight mb-1">
+            <div className="flex items-center gap-3 flex-wrap">
+              <h1 className="text-2xl md:text-3xl font-heading font-bold text-foreground leading-tight">
                 Bonjour{user?.firstName ? `, ${capitalize(user.firstName)}` : ""} !
               </h1>
               {user?.isFounder && <FounderBadge size="sm" />}
             </div>
-            <p className="text-sm text-primary-foreground/75 font-sans">{subtitle}</p>
+            <p className="text-sm text-muted-foreground font-sans mt-1">{subtitle}</p>
             {user?.id ? (
               <Link
                 to={`/gardiens/${user.id}?tab=proprio`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 text-xs font-body text-primary-foreground/70 hover:text-primary-foreground transition-colors mt-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-foreground/60 rounded"
+                className="inline-flex items-center gap-1.5 text-xs text-primary hover:underline mt-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded"
                 aria-label="Voir mon profil public (nouvel onglet)"
               >
-                <Eye className="w-3 h-3" aria-hidden="true" /> Voir mon profil public →
+                <Eye className="w-3 h-3" aria-hidden="true" /> Voir mon profil public
               </Link>
             ) : null}
           </div>
-          <button
+          <Button
+            size="lg"
             onClick={() => navigate("/sits/create")}
-            className="shrink-0 bg-background text-primary rounded-xl px-5 py-2.5 text-sm font-semibold font-sans hover:bg-background/90 hover:shadow-md transition-all w-full md:w-auto text-center shadow-md ring-1 ring-background/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-background"
+            className="shrink-0 w-full md:w-auto rounded-xl"
           >
-            + Publier une annonce
-          </button>
+            <Plus className="h-4 w-4 mr-1.5" /> Publier une annonce
+          </Button>
         </div>
-      </div>
+      </header>
 
       <div className="px-5 md:px-8">
         <AccessGateBanner level={level} profileCompletion={accessProfileCompletion} context="guard" />
       </div>
 
-
-      {/* ═══ Banner ═══ */}
+      {/* ═══ Banner contextuel ═══ */}
       {banner && (
         <div className="px-5 md:px-8">
           <div className={`p-4 rounded-2xl border ${BANNER_STYLES[banner.variant]} flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2`}>
@@ -235,7 +227,7 @@ const OwnerDashboard = () => {
         </div>
       )}
 
-      {/* ═══ Stats (vue d'ensemble immédiate) ═══ */}
+      {/* ═══ Stats ═══ */}
       <section
         aria-label="Vos statistiques propriétaire"
         className="grid grid-cols-2 md:grid-cols-4 gap-3 px-5 md:px-8"
@@ -252,122 +244,88 @@ const OwnerDashboard = () => {
         <StatCard value={trustedSitterCount} label="Gardiens de confiance" />
       </section>
 
-      {/* ═══ Mon annonce ═══ */}
-      <div className="px-5 md:px-8">
-        <MonAnnonceCard
-          sits={sits}
-          pets={pets}
-          propertyType={propertyType}
-          propertyEnvironment={propertyEnvironment}
-          pendingAppCount={pendingAppCount}
-          coverPhoto={propertyCoverPhoto}
-        />
-      </div>
-
-      {/* ═══ Avis à laisser (post-garde) ═══ */}
-      {pendingReviews.length > 0 && (
-        <div className="px-5 md:px-8">
-          <PendingReviewsCard pendingReviews={pendingReviews} />
-        </div>
-      )}
-
-      {/* ═══ Candidatures (masquée si totalement vide) ═══ */}
-      {(loading || recentApps.length > 0) && (
-        <div className="px-5 md:px-8">
-          <ApplicationsSection
-            recentApps={recentApps}
-            sitterProfiles={sitterProfiles}
-            sitterBadges={sitterBadges}
-            loading={loading}
+      {/* ═══ PILOTAGE (gauche) + CONTEXTE (droite) ═══ */}
+      <div className="px-5 md:px-8 grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Colonne pilotage : annonce, avis à laisser, candidatures consultées */}
+        <div className="lg:col-span-2 space-y-6">
+          <MonAnnonceCard
+            sits={sits}
+            pets={pets}
+            propertyType={propertyType}
+            propertyEnvironment={propertyEnvironment}
+            pendingAppCount={pendingAppCount}
+            coverPhoto={propertyCoverPhoto}
           />
-        </div>
-      )}
 
-      {/* ═══ Badges ═══ */}
-      <div className="px-5 md:px-8 mb-6 md:mb-8">
-        <BadgeGridSection
-          title="Vos Badges"
-          badgeIds={PROPRIO_BADGE_IDS}
-          userBadges={userBadges}
-          specialBadgeIds={PROPRIO_SPECIAL_IDS}
-        />
-      </div>
-
-      {/* ═══ Mes animaux ═══ */}
-      <div className="px-5 md:px-8">
-        <DashSection title="Mes animaux" action={
-          <Link to="/owner-profile" className="text-xs text-primary hover:underline font-medium">Gérer</Link>
-        }>
-          {pets.length === 0 ? (
-            <EmptyCard text="Aucun animal enregistré" hint="Ajoutez vos compagnons pour attirer les bons gardiens" cta="Ajouter un animal" to="/owner-profile" />
-          ) : (
-            <>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
-                {pets.map(pet => {
-                  const nextSit = getNextSitForPet(pet);
-                  return (
-                    <div key={pet.id} className="bg-card border border-border rounded-2xl p-4 flex items-center gap-3">
-                      <div className="w-11 h-11 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-lg shrink-0 overflow-hidden">
-                        {pet.photo_url ? (
-                          <img src={pet.photo_url} alt={pet.name} className="w-full h-full rounded-full object-cover" />
-                        ) : (
-                          pet.name ? pet.name[0].toUpperCase() : "?"
-                        )}
-                      </div>
-                      <div>
-                        <p className="text-sm font-semibold text-foreground">{capitalize(pet.name)}</p>
-                        <p className="text-xs text-muted-foreground font-sans">
-                          {SPECIES_LABEL[pet.species] || capitalize(pet.species)}
-                          {pet.breed ? ` · ${capitalizeWords(pet.breed)}` : ""}
-                          {pet.age ? ` · ${pet.age} an${pet.age > 1 ? "s" : ""}` : ""}
-                        </p>
-                        {nextSit && nextSit.status === "confirmed" ? (
-                          <span className="text-xs font-sans bg-primary/10 text-primary rounded-md px-2 py-0.5 mt-1 inline-block">
-                            Garde confirmée
-                          </span>
-                        ) : nextSit ? (
-                          <span className="text-xs font-sans bg-accent text-accent-foreground rounded-md px-2 py-0.5 mt-1 inline-block">
-                            Annonce en cours
-                          </span>
-                        ) : null}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-              <Link to="/owner-profile" className="text-sm text-primary font-sans flex items-center gap-1 hover:underline">
-                <Plus className="h-3.5 w-3.5" /> Ajouter un animal
-              </Link>
-            </>
+          {pendingReviews.length > 0 && (
+            <PendingReviewsCard pendingReviews={pendingReviews} />
           )}
-        </DashSection>
-      </div>
 
-      {/* ═══ Contextual resources ═══ */}
-      <div className="px-5 md:px-8">
-        <ContextualResources annoncesCount={sits.length} gardesCount={completedSits.length} loading={loading} />
-      </div>
+          {showApplicationsSection && (
+            <ApplicationsSection
+              recentApps={recentApps}
+              sitterProfiles={sitterProfiles}
+              sitterBadges={sitterBadges}
+              loading={loading}
+            />
+          )}
 
-      {/* ═══ Bottom columns ═══ */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 px-5 md:px-8">
-        <MyMissionsColumn missions={myMissions} />
-        <ExchangesColumn missions={smallMissions} />
-      </div>
-
-      {/* ═══ Emergency sitters ═══ */}
-      <div className="px-5 md:px-8">
-        <NearbyEmergencySitters />
-      </div>
-
-      {/* ═══ CTA ═══ */}
-      {cta && (
-        <div className="px-5 md:px-8">
-          <div className="p-6 rounded-xl bg-primary/5 border-2 border-dashed border-primary/30 text-center">
-            <p className="text-sm text-muted-foreground mb-3">{cta.text}</p>
-            <Link to={cta.to}><Button>{cta.cta}</Button></Link>
-          </div>
+          {/* Mes animaux dans la colonne principale */}
+          <DashSection title="Mes animaux" action={
+            <Link to="/owner-profile" className="text-xs text-primary hover:underline font-medium">Gérer</Link>
+          }>
+            {pets.length === 0 ? (
+              <EmptyCard text="Aucun animal enregistré" hint="Ajoutez vos compagnons pour attirer les bons gardiens" cta="Ajouter un animal" to="/owner-profile" />
+            ) : (
+              <>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+                  {pets.map(pet => {
+                    const nextSit = getNextSitForPet(pet);
+                    return (
+                      <div key={pet.id} className="bg-card border border-border rounded-2xl p-4 flex items-center gap-3">
+                        <div className="w-11 h-11 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-lg shrink-0 overflow-hidden">
+                          {pet.photo_url ? (
+                            <img src={pet.photo_url} alt={pet.name} className="w-full h-full rounded-full object-cover" />
+                          ) : (
+                            pet.name ? pet.name[0].toUpperCase() : "?"
+                          )}
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-sm font-semibold text-foreground truncate">{capitalize(pet.name)}</p>
+                          <p className="text-xs text-muted-foreground font-sans">
+                            {SPECIES_LABEL[pet.species] || capitalize(pet.species)}
+                            {pet.breed ? ` · ${capitalizeWords(pet.breed)}` : ""}
+                            {pet.age ? ` · ${pet.age} an${pet.age > 1 ? "s" : ""}` : ""}
+                          </p>
+                          {nextSit && nextSit.status === "confirmed" ? (
+                            <span className="text-xs font-sans bg-primary/10 text-primary rounded-xl px-2 py-0.5 mt-1 inline-block">
+                              Garde confirmée
+                            </span>
+                          ) : nextSit ? (
+                            <span className="text-xs font-sans bg-accent text-accent-foreground rounded-xl px-2 py-0.5 mt-1 inline-block">
+                              Annonce en cours
+                            </span>
+                          ) : null}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+                <Link to="/owner-profile" className="text-sm text-primary font-sans hover:underline">
+                  Ajouter un animal
+                </Link>
+              </>
+            )}
+          </DashSection>
         </div>
-      )}
+
+        {/* Colonne contexte : urgence, échanges, missions */}
+        <aside className="space-y-6">
+          <NearbyEmergencySitters />
+          <MyMissionsColumn missions={myMissions} />
+          <ExchangesColumn missions={smallMissions} />
+        </aside>
+      </div>
 
       {/* ═══ Coups de coeur ═══ */}
       {highlights.length > 0 && (
@@ -375,7 +333,7 @@ const OwnerDashboard = () => {
           <DashSection title="Ce que les gardiens disent de votre maison">
             <div className="space-y-2">
               {highlights.slice(0, 3).map(h => (
-                <div key={h.id} className="flex items-start gap-3 p-3 rounded-xl bg-card border border-border">
+                <div key={h.id} className="flex items-start gap-3 p-3 rounded-2xl bg-card border border-border">
                   {h.sitter?.avatar_url ? (
                     <img src={h.sitter.avatar_url} alt={`Photo de ${h.sitter.first_name || 'gardien'}`} loading="lazy" className="w-10 h-10 rounded-full object-cover shrink-0" />
                   ) : (
@@ -387,13 +345,28 @@ const OwnerDashboard = () => {
                     <p className="text-xs font-medium">{capitalize(h.sitter?.first_name)}</p>
                     <p className="text-sm text-muted-foreground mt-0.5">{h.text}</p>
                   </div>
-                  {h.photo_url && <img src={h.photo_url} alt="Photo de garde" loading="lazy" className="w-16 h-12 rounded-lg object-cover shrink-0" />}
+                  {h.photo_url && <img src={h.photo_url} alt="Photo de garde" loading="lazy" className="w-16 h-12 rounded-xl object-cover shrink-0" />}
                 </div>
               ))}
             </div>
           </DashSection>
         </div>
       )}
+
+      {/* ═══ Ressources éditoriales (descendues : moins prioritaires) ═══ */}
+      <div className="px-5 md:px-8">
+        <ContextualResources annoncesCount={sits.length} gardesCount={completedSits.length} loading={loading} />
+      </div>
+
+      {/* ═══ Badges (vanity, en bas) ═══ */}
+      <div className="px-5 md:px-8 mb-6 md:mb-8">
+        <BadgeGridSection
+          title="Vos Badges"
+          badgeIds={PROPRIO_BADGE_IDS}
+          userBadges={userBadges}
+          specialBadgeIds={PROPRIO_SPECIAL_IDS}
+        />
+      </div>
     </div>
   );
 };
