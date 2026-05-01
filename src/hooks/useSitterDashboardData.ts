@@ -279,7 +279,9 @@ export function useSitterDashboardData(userId: string | undefined) {
         hasEmergencyProfile: !!emProfileRes.data,
         hasAcceptedRecent: recentAccepted,
         nextGuard,
+        nextGuardError,
         nearbyListings,
+        nearbyError,
         articles: articlesRes.data || [],
         badges: allBadges,
         onboardingCompleted: (profile as any)?.onboarding_completed || false,
@@ -288,6 +290,7 @@ export function useSitterDashboardData(userId: string | undefined) {
         reputation,
         groupedBadges,
         nearbyMissions,
+        nearbyMissionsError,
       });
     };
 
