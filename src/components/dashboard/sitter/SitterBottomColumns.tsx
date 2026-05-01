@@ -1,4 +1,4 @@
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { format, differenceInHours } from "date-fns";
 import { fr } from "date-fns/locale";
 import { AlertCircle, RefreshCw } from "lucide-react";
@@ -23,7 +23,6 @@ const SitterBottomColumns = ({
   nearbyMissionsError = null,
   myMissionsError = null,
 }: SitterBottomColumnsProps) => {
-  const navigate = useNavigate();
 
   const ErrorState = ({ message }: { message: string }) => (
     <div role="alert" className="rounded-xl border border-destructive/30 bg-destructive/5 p-4 text-center">

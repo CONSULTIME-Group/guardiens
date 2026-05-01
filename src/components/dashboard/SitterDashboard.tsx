@@ -51,6 +51,7 @@ const SitterDashboard = () => {
     postalCode, avatarUrl, bio, hasAnimalExperience,
     hasEmergencyProfile, hasAcceptedRecent, nextGuard, nextGuardError,
     nearbyListings, nearbyError, articles, nearbyMissions, nearbyMissionsError,
+    myMissions, myMissionsError,
     onboardingCompleted, onboardingDismissed, minimalCompleted,
     setPartial, toggleAvailability,
     reputation, groupedBadges,
