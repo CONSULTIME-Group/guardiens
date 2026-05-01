@@ -1,4 +1,4 @@
-import { CheckCircle2, Circle, Eye } from "lucide-react";
+import { CheckCircle2, Circle, Eye, AlertTriangle } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useState, type ReactNode, type MouseEvent } from "react";
 import { cn } from "@/lib/utils";
@@ -67,12 +67,14 @@ const ProfileSidebar = ({
         </div>
         <p className="text-sm font-semibold text-foreground">{completion}% complété</p>
         {completion >= 60 ? (
-          <span className="inline-block text-xs text-primary bg-primary/10 rounded-full px-2 py-0.5">
-            ✓ Profil visible par les {role === "sitter" ? "proprios" : "gardiens"}
+          <span className="inline-flex items-center gap-1 text-xs text-primary bg-primary/10 rounded-full px-2 py-0.5">
+            <CheckCircle2 className="h-3 w-3" aria-hidden="true" />
+            Profil visible par les {role === "sitter" ? "propriétaires" : "gardiens"}
           </span>
         ) : (
-          <span className="inline-block text-xs text-amber-700 bg-amber-50 rounded-full px-2 py-0.5">
-            ⚠ Profil non visible — complétez à 60%
+          <span className="inline-flex items-center gap-1 text-xs text-warning-foreground bg-warning-soft border border-warning-border rounded-full px-2 py-0.5">
+            <AlertTriangle className="h-3 w-3" aria-hidden="true" />
+            Profil non visible — complétez à 60 %
           </span>
         )}
       </div>
@@ -106,7 +108,7 @@ const ProfileSidebar = ({
                   {s.optional && <span className="text-xs font-normal text-muted-foreground ml-1">(optionnel)</span>}
                 </p>
                 <p className={cn("text-xs hidden lg:block", s.complete ? "text-primary" : "text-muted-foreground")}>
-                  {s.complete ? "Complété ✓" : s.missingCount > 0 ? `${s.missingCount} point${s.missingCount > 1 ? "s" : ""} manquant${s.missingCount > 1 ? "s" : ""}` : s.subtitle}
+                  {s.complete ? "Complété" : s.missingCount > 0 ? `${s.missingCount} point${s.missingCount > 1 ? "s" : ""} manquant${s.missingCount > 1 ? "s" : ""}` : s.subtitle}
                 </p>
                 {!s.complete && s.missingLabels && s.missingLabels.length > 0 && (
                   (() => {
@@ -121,7 +123,7 @@ const ProfileSidebar = ({
                         <Tooltip>
                           <TooltipTrigger asChild>
                             {hasMany ? (
-                              <ul className="text-[11px] text-amber-700 leading-snug space-y-0.5">
+                              <ul className="text-[11px] text-warning-foreground leading-snug space-y-0.5">
                                 {(isExpanded ? labels : labels.slice(0, 2)).map(l => (
                                   <li key={l} className="flex gap-1">
                                     <span aria-hidden>•</span>
@@ -133,7 +135,7 @@ const ProfileSidebar = ({
                                 )}
                               </ul>
                             ) : (
-                              <p className="text-[11px] text-amber-700 leading-snug break-words">
+                              <p className="text-[11px] text-warning-foreground leading-snug break-words">
                                 Il manque : <span className="font-medium">{labels[0]}</span>
                               </p>
                             )}
@@ -176,18 +178,19 @@ const ProfileSidebar = ({
         const labels = active.missingLabels ?? [];
         if (active.complete || labels.length === 0) return null;
         return (
-          <div className="lg:hidden rounded-lg border border-amber-200 bg-amber-50 px-3 py-2.5">
-            <p className="text-xs font-medium text-amber-900">
+          <div className="lg:hidden rounded-lg border border-warning-border bg-warning-soft px-3 py-2.5">
+            <p className="text-xs font-medium text-warning-foreground flex items-center gap-1.5">
+              <AlertTriangle className="h-3 w-3" aria-hidden="true" />
               {active.label} — {labels.length} point{labels.length > 1 ? "s" : ""} manquant{labels.length > 1 ? "s" : ""}
             </p>
             {labels.length === 1 ? (
-              <p className="mt-1.5 text-xs text-amber-800 leading-snug">
+              <p className="mt-1.5 text-xs text-warning-foreground/90 leading-snug">
                 Il manque : <span className="font-medium">{labels[0]}</span>
               </p>
             ) : (
               <ul className="mt-1.5 space-y-0.5">
                 {labels.map(l => (
-                  <li key={l} className="text-xs text-amber-800 leading-snug">• {l}</li>
+                  <li key={l} className="text-xs text-warning-foreground/90 leading-snug">• {l}</li>
                 ))}
               </ul>
             )}
