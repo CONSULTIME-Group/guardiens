@@ -121,19 +121,8 @@ const OwnerDashboard = () => {
     return null;
   }, [verificationStatus, ongoingSit, pendingAppCount, sitterProfiles]);
 
-  const cta = useMemo(() => {
-    if (activeSits.length === 0)
-      return { text: "Publiez votre première annonce — c'est gratuit et ça prend 5 minutes", cta: "Publier une annonce", to: "/sits/create" };
-    const noAppSit = activeSits.find(s => {
-      if (s.status !== "published") return false;
-      const activeApps = (s.applications || []).filter(a => ["pending", "accepted", "discussing"].includes(a.status));
-      return activeApps.length === 0 && differenceInDays(now, new Date(s.created_at)) >= 7;
-    });
-    if (noAppSit)
-      return { text: "Votre annonce n'a pas encore de candidature. Enrichissez votre profil pour attirer les gardiens.", cta: "Voir mon profil", to: "/owner-profile" };
-    return null;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeSits]);
+  // CTA bas de page supprimé : redondant avec le hero (action principale toujours
+  // visible en haut) et avec MonAnnonceCard (qui guide déjà sur l'action contextuelle).
 
   const getNextSitForPet = useCallback((pet: Pet) => {
     const currentDate = new Date();
