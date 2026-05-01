@@ -946,6 +946,30 @@ const SmallMissions = () => {
                           </div>
                         </div>
                       )}
+
+                      {/* Empty state — personne de disponible dans le rayon */}
+                      {priorityHelpers.length === 0 && complementaryHelpers.length === 0 && (
+                        <div className="rounded-2xl border border-dashed border-primary/30 bg-primary/5 p-8 text-center space-y-3">
+                          <p className="font-heading text-lg font-semibold text-foreground">
+                            {mode === "offer"
+                              ? "Vous seriez la première personne disponible ici."
+                              : "Personne ne s'est encore déclaré disponible près de chez vous."}
+                          </p>
+                          <p className="text-sm text-muted-foreground max-w-md mx-auto">
+                            {mode === "offer"
+                              ? "Activez votre disponibilité ci-dessus : votre présence donne envie aux autres d'oser à leur tour."
+                              : "Élargissez le rayon, ou publiez votre demande : les personnes du coin reçoivent une alerte et se manifestent souvent dans la journée."}
+                          </p>
+                          {mode === "need" && (
+                            <Link to="/petites-missions/creer" className="inline-block">
+                              <Button variant="hero" size="lg" className="mt-2">
+                                J'ose, je publie ma demande
+                                <ArrowRight className="ml-2 h-4 w-4" />
+                              </Button>
+                            </Link>
+                          )}
+                        </div>
+                      )}
                     </div>
                   );
                 })()}
