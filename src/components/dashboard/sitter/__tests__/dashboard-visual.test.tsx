@@ -38,9 +38,8 @@ const renderWithRouter = (ui: React.ReactElement, route = "/") =>
   render(<MemoryRouter initialEntries={[route]}>{ui}</MemoryRouter>);
 
 const setPreviewParam = (mode: "locked" | "eligible" | "active" | null) => {
-  const url = new URL("http://localhost/");
-  if (mode) url.searchParams.set("previewEmergency", mode);
-  window.history.replaceState({}, "", url.toString());
+  const search = mode ? `?previewEmergency=${mode}` : "";
+  window.history.replaceState({}, "", `/${search}`);
 };
 
 beforeEach(() => {
