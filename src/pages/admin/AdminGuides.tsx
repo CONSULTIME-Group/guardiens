@@ -5,9 +5,18 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
-import { Badge } from "@/components/ui/badge";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
-import { Plus, Trash2, Eye, Loader2, MapPin, ExternalLink, Sparkles, X } from "lucide-react";
+import { Plus, Trash2, Loader2, MapPin, ExternalLink, Sparkles, X } from "lucide-react";
 
 interface CityGuide {
   id: string;
@@ -24,6 +33,7 @@ const AdminGuides = () => {
   const [postalCode, setPostalCode] = useState("");
   const [department, setDepartment] = useState("");
   const [generating, setGenerating] = useState(false);
+  const [pendingDelete, setPendingDelete] = useState<CityGuide | null>(null);
 
   const { data: guides = [], isLoading } = useQuery({
     queryKey: ["admin-guides"],
@@ -39,11 +49,15 @@ const AdminGuides = () => {
   });
 
   const { data: placeCounts = {} } = useQuery({
-    queryKey: ["admin-guide-place-counts"],
+    queryKey: ["admin-guide-place-counts", guides.map((g) => g.id).join(",")],
+    enabled: guides.length > 0,
     queryFn: async () => {
+      // Optimisation: ne récupère que la colonne d'agrégation, filtré sur les guides chargés
+      const ids = guides.map((g) => g.id);
       const { data, error } = await supabase
         .from("city_guide_places" as any)
-        .select("city_guide_id");
+        .select("city_guide_id")
+        .in("city_guide_id", ids);
       if (error) throw error;
       const counts: Record<string, number> = {};
       ((data || []) as any[]).forEach((p: any) => {
@@ -53,7 +67,6 @@ const AdminGuides = () => {
     },
   });
 
-  // Demandes de guides (villes avec annonces actives mais sans guide)
   const { data: requests = [] } = useQuery({
     queryKey: ["admin-guide-requests"],
     queryFn: async () => {
@@ -92,17 +105,10 @@ const AdminGuides = () => {
     if (!city) return;
     setGenerating(true);
     try {
-      const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
-      const res = await fetch(
-        `https://${projectId}.supabase.co/functions/v1/generate-city-guide`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ city, postal_code: postalCode, department }),
-        }
-      );
-      if (!res.ok) throw new Error(await res.text());
-      const data = await res.json();
+      const { data, error } = await supabase.functions.invoke("generate-city-guide", {
+        body: { city, postal_code: postalCode, department },
+      });
+      if (error) throw error;
       toast.success(`Guide généré pour ${data.city} (${data.places_count || 0} lieux)`);
       setCity("");
       setPostalCode("");
@@ -121,7 +127,11 @@ const AdminGuides = () => {
       const { error } = await (supabase.from("city_guides" as any) as any).update({ published }).eq("id", id);
       if (error) throw error;
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["admin-guides"] }),
+    onSuccess: (_, vars) => {
+      queryClient.invalidateQueries({ queryKey: ["admin-guides"] });
+      toast.success(vars.published ? "Guide publié" : "Guide dépublié");
+    },
+    onError: (err: any) => toast.error("Erreur: " + err.message),
   });
 
   const deleteMutation = useMutation({
@@ -132,13 +142,15 @@ const AdminGuides = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-guides"] });
       toast.success("Guide supprimé");
+      setPendingDelete(null);
     },
+    onError: (err: any) => toast.error("Erreur: " + err.message),
   });
 
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-foreground">Guides locaux</h1>
+        <h1 className="font-body text-2xl font-bold text-foreground">Guides locaux</h1>
         <p className="text-muted-foreground text-sm">
           {guides.length} guides • Générés par IA avec lieux réels
         </p>
@@ -175,17 +187,17 @@ const AdminGuides = () => {
           </div>
           {generating && (
             <p className="text-xs text-muted-foreground mt-2">
-              ⏳ La génération prend ~30s (intro + 5 catégories de lieux)
+              La génération prend ~30s (intro + 5 catégories de lieux).
             </p>
           )}
         </CardContent>
       </Card>
 
       {requests.length > 0 && (
-        <Card className="border-amber-500/40 bg-amber-50/40 dark:bg-amber-500/5">
+        <Card className="border-warning/40 bg-warning/5">
           <CardHeader>
             <CardTitle className="text-base flex items-center gap-2">
-              <Sparkles className="h-4 w-4 text-amber-600" />
+              <Sparkles className="h-4 w-4 text-warning" />
               Villes en demande ({requests.length})
             </CardTitle>
             <p className="text-xs text-muted-foreground">
@@ -199,7 +211,7 @@ const AdminGuides = () => {
                   key={req.id}
                   className="flex items-center gap-3 p-3 bg-background border border-border rounded-lg"
                 >
-                  <MapPin className="h-4 w-4 text-amber-600 shrink-0" />
+                  <MapPin className="h-4 w-4 text-warning shrink-0" />
                   <div className="flex-1 min-w-0">
                     <p className="font-medium text-sm">{req.city}</p>
                     <p className="text-xs text-muted-foreground">
@@ -250,13 +262,33 @@ const AdminGuides = () => {
               >
                 <ExternalLink className="h-4 w-4" />
               </a>
-              <Button size="icon" variant="ghost" onClick={() => deleteMutation.mutate(guide.id)}>
+              <Button size="icon" variant="ghost" onClick={() => setPendingDelete(guide)}>
                 <Trash2 className="h-4 w-4 text-destructive" />
               </Button>
             </div>
           ))}
         </div>
       )}
+
+      <AlertDialog open={!!pendingDelete} onOpenChange={(o) => !o && setPendingDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Supprimer ce guide ?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Le guide de {pendingDelete?.city} et tous ses lieux associés seront supprimés.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annuler</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => pendingDelete && deleteMutation.mutate(pendingDelete.id)}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Supprimer
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
