@@ -333,49 +333,61 @@ const SitterDashboard = () => {
       </div>
 
       {/* ═══ A5: 2-COLUMN LAYOUT ≥ xl (1280px) ═══
-          < xl  : tout empilé (mobile/tablet/lg) — StatusBar en 3 zones côte-à-côte ≥ md.
-          ≥ xl  : main 8/12 (checklist + CTA + listings + articles)
-                  side 4/12 (status compact + emergency dash + badges + eligibility). */}
+          < xl  : tout empilé en 3 zones macro (Activation / Statut / Découverte)
+          ≥ xl  : main 8/12 (Activation + Découverte) | side 4/12 (Statut). */}
 
-      {/* Version pleine largeur — visible < xl */}
+      {/* Version pleine largeur — visible < xl — 3 zones */}
       <div className="xl:hidden">
+        {/* ── ZONE 1 : ACTIVATION (checklist + CTA principal) ── */}
         {ChecklistBlock}
         {CtaBlock}
-        {buildStatusBlock(false)}
-        {/* Carte unifiée Gardien d'urgence (3 états : locked / eligible / active) */}
-        {buildEmergencyBlock(false)}
-        {buildBadgesBlock(false)}
-        <section aria-labelledby="nearby-heading">
-          <h2 id="nearby-heading" className="sr-only">Près de chez vous</h2>
-          <SitterBottomColumns nearbyListings={nearbyListings} nearbyMissions={nearbyMissions} postalCode={postalCode} />
-        </section>
-        {articles.length > 0 && (
-          <section aria-labelledby="articles-heading" className="px-4 sm:px-5 md:px-8 mb-6 md:mb-8">
-            <div className="flex items-center justify-between mb-4">
-              <h2 id="articles-heading" className="font-heading text-lg font-semibold">Conseils pour vous</h2>
-              <Link to="/actualites" className="text-xs text-primary hover:underline font-medium">Voir tout →</Link>
+
+        {/* ── ZONE 2 : STATUT & RÉPUTATION (status + urgence + badges) ── */}
+        <div className="px-4 sm:px-5 md:px-8 mb-6">
+          <DashSection eyebrow="Votre profil" title="Statut & réputation" description="Votre vitrine auprès des propriétaires.">
+            <div className="space-y-4">
+              {buildStatusBlock(false)}
+              {buildBadgesBlock(false)}
+              {buildEmergencyBlock(false)}
             </div>
-            <div className="flex gap-3 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-hide">
-              {articles.map((a: any) => (
-                <Link key={a.id} to={`/actualites/${a.slug}`} className="group flex-shrink-0 w-[70vw] sm:w-64 rounded-xl border border-border bg-card overflow-hidden hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 ease-out cursor-pointer">
-                  {a.cover_image_url ? (
-                    <div className="w-full h-28 overflow-hidden">
-                      <img src={getOptimizedImageUrl(a.cover_image_url, 300, 75)} alt={a.title || "Article"} className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-105" width={300} height={112} loading="lazy" />
-                    </div>
-                  ) : (
-                    <div className="w-full h-28 bg-accent flex items-center justify-center">
-                      <Newspaper className="h-8 w-8 text-muted-foreground/40" aria-hidden="true" />
-                    </div>
-                  )}
-                  <div className="p-3">
-                    <h3 className="text-sm font-semibold line-clamp-2 transition-colors group-hover:text-primary">{a.title}</h3>
-                    <p className="text-xs text-muted-foreground line-clamp-2 mt-1">{a.excerpt}</p>
+          </DashSection>
+        </div>
+
+        {/* ── ZONE 3 : DÉCOUVERTE (annonces + missions + articles) ── */}
+        <div className="px-4 sm:px-5 md:px-8 mb-6">
+          <DashSection eyebrow="Près de chez vous" title="À découvrir" description="Annonces, échanges et conseils sélectionnés pour vous.">
+            <div className="space-y-4">
+              <SitterBottomColumns nearbyListings={nearbyListings} nearbyMissions={nearbyMissions} postalCode={postalCode} />
+              {articles.length > 0 && (
+                <div>
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="font-heading text-base font-semibold">Conseils pour vous</h3>
+                    <Link to="/actualites" className="text-xs text-primary hover:underline font-medium">Voir tout →</Link>
                   </div>
-                </Link>
-              ))}
+                  <div className="flex gap-3 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-hide">
+                    {articles.map((a: any) => (
+                      <Link key={a.id} to={`/actualites/${a.slug}`} className="group flex-shrink-0 w-[70vw] sm:w-64 rounded-xl border border-border bg-card overflow-hidden hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 ease-out cursor-pointer">
+                        {a.cover_image_url ? (
+                          <div className="w-full h-28 overflow-hidden">
+                            <img src={getOptimizedImageUrl(a.cover_image_url, 300, 75)} alt={a.title || "Article"} className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-105" width={300} height={112} loading="lazy" />
+                          </div>
+                        ) : (
+                          <div className="w-full h-28 bg-accent flex items-center justify-center">
+                            <Newspaper className="h-8 w-8 text-muted-foreground/40" aria-hidden="true" />
+                          </div>
+                        )}
+                        <div className="p-3">
+                          <h4 className="text-sm font-semibold line-clamp-2 transition-colors group-hover:text-primary">{a.title}</h4>
+                          <p className="text-xs text-muted-foreground line-clamp-2 mt-1">{a.excerpt}</p>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
-          </section>
-        )}
+          </DashSection>
+        </div>
       </div>
 
       {/* Version 2 colonnes — visible ≥ xl */}
