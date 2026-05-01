@@ -280,7 +280,7 @@ const SmallMissionDetail = () => {
         .from("small_missions").select("status").eq("id", id!).single();
       if (!freshMission) throw new Error("Mission introuvable");
       if (freshMission.status === "cancelled" || freshMission.status === "completed") {
-        toast({ variant: "destructive", title: "Mission clôturée", description: "Cette mission n'accepte plus de candidatures." });
+        toast({ variant: "destructive", title: "Mission clôturée", description: "Cette mission n'accepte plus de propositions." });
         return;
       }
 
