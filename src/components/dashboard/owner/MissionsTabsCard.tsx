@@ -37,10 +37,10 @@ const MissionsTabsCard = memo(({ myMissions, nearbyMissions }: MissionsTabsCardP
       <button
         type="button"
         onClick={() => setTab(key)}
-        className={`flex-1 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+        className={`flex-1 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 ease-out ${
           active
             ? "bg-card text-foreground shadow-sm"
-            : "text-muted-foreground hover:text-foreground"
+            : "text-muted-foreground hover:text-foreground hover:bg-card/50"
         }`}
         aria-pressed={active}
       >
@@ -55,7 +55,7 @@ const MissionsTabsCard = memo(({ myMissions, nearbyMissions }: MissionsTabsCardP
   };
 
   return (
-    <div className="bg-card border border-border rounded-2xl p-5">
+    <div className="bg-card border border-border rounded-2xl p-5 transition-shadow duration-300 hover:shadow-sm">
       <div className="flex items-center justify-between gap-2 mb-3">
         <h3 className="text-sm font-semibold text-foreground">Petites missions</h3>
         <Link to="/petites-missions" className="text-xs text-primary font-sans hover:underline shrink-0">
@@ -103,10 +103,10 @@ const MissionsTabsCard = memo(({ myMissions, nearbyMissions }: MissionsTabsCardP
                 <Link
                   key={m.id}
                   to={`/petites-missions/${m.id}`}
-                  className="flex items-center gap-3 py-2.5 border-b border-border last:border-0 hover:bg-muted/30 -mx-2 px-2 rounded-lg transition-colors"
+                  className="group flex items-center gap-3 py-2.5 border-b border-border last:border-0 hover:bg-muted/40 -mx-2 px-2 rounded-lg transition-all duration-200 ease-out hover:translate-x-0.5"
                 >
-                  <div className={`w-2 h-2 rounded-full shrink-0 ${isCompleted ? "bg-muted-foreground/30" : "bg-primary"}`} />
-                  <p className={`text-xs font-sans flex-1 truncate ${isCompleted ? "text-muted-foreground line-through" : "text-foreground"}`}>
+                  <div className={`w-2 h-2 rounded-full shrink-0 transition-transform duration-200 group-hover:scale-125 ${isCompleted ? "bg-muted-foreground/30" : "bg-primary"}`} />
+                  <p className={`text-xs font-sans flex-1 truncate transition-colors ${isCompleted ? "text-muted-foreground line-through" : "text-foreground group-hover:text-primary"}`}>
                     {m.title}
                   </p>
                   <p className="text-xs text-muted-foreground font-sans shrink-0">
@@ -142,10 +142,10 @@ const MissionsTabsCard = memo(({ myMissions, nearbyMissions }: MissionsTabsCardP
               <Link
                 key={m.id}
                 to={`/petites-missions/${m.id}`}
-                className="flex items-center gap-3 py-2.5 border-b border-border last:border-0 hover:bg-muted/30 -mx-2 px-2 rounded-lg transition-colors"
+                className="group flex items-center gap-3 py-2.5 border-b border-border last:border-0 hover:bg-muted/40 -mx-2 px-2 rounded-lg transition-all duration-200 ease-out hover:translate-x-0.5"
               >
-                <div className="w-2 h-2 rounded-full shrink-0 bg-primary" />
-                <p className="text-xs font-sans flex-1 truncate text-foreground">{m.title}</p>
+                <div className="w-2 h-2 rounded-full shrink-0 bg-primary transition-transform duration-200 group-hover:scale-125" />
+                <p className="text-xs font-sans flex-1 truncate text-foreground transition-colors group-hover:text-primary">{m.title}</p>
                 <p className="text-xs text-muted-foreground font-sans shrink-0">{m.city || ""}</p>
               </Link>
             ))}
