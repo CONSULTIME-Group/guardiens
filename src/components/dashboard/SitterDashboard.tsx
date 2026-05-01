@@ -235,9 +235,9 @@ const SitterDashboard = () => {
       className={sidebar ? "mb-6" : "px-4 sm:px-5 md:px-8 mb-6 md:mb-8"}
     >
       <h2 id={sidebar ? "emergency-heading-side" : "emergency-heading"} className="sr-only">
-        Éligibilité gardien d'urgence
+        Gardien d'urgence
       </h2>
-      <EmergencyEligibility />
+      <SitterEmergencyCard hasEmergencyProfile={hasEmergencyProfile} />
     </section>
   );
 
