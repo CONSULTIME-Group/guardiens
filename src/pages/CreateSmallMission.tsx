@@ -106,7 +106,12 @@ const CreateSmallMission = () => {
     } else {
       // Refresh the public list so the new mission shows up immediately
       await queryClient.invalidateQueries({ queryKey: ["small-missions-all"] });
-      toast({ title: "Mission publiée !", description: "Votre petite mission est en ligne." });
+      toast({
+        title: "Bravo d'avoir osé.",
+        description: missionType === "offre"
+          ? "Votre proposition d'aide est en ligne — les gens du coin peuvent vous trouver."
+          : "Votre demande est en ligne — les gens du coin vont la voir.",
+      });
       navigate("/petites-missions");
     }
   };
