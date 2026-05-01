@@ -104,6 +104,7 @@ const CreateSmallMission = () => {
     if (error) {
       toast({ title: "Erreur", description: error.message, variant: "destructive" });
     } else {
+      try { await trackFirstAction("mission_created", { category, mission_type: missionType }); } catch {}
       // Refresh the public list so the new mission shows up immediately
       await queryClient.invalidateQueries({ queryKey: ["small-missions-all"] });
       toast({
