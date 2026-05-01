@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback } from "react";
-import { normalize } from "@/lib/normalize";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
