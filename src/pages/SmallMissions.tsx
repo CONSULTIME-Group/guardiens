@@ -490,6 +490,22 @@ const SmallMissions = () => {
   const missionCount = filteredMissions.length;
   const helperCount = filteredHelpers.length;
 
+  // Tri par priorité : ceux qui ont déclaré des compétences spécifiques (au-delà
+  // des simples catégories) apparaissent en premier ; les autres sont
+  // « complémentaires ».
+  const { priorityHelpers, complementaryHelpers } = useMemo(() => {
+    const priority: any[] = [];
+    const complementary: any[] = [];
+    for (const h of filteredHelpers) {
+      const hasSpecificSkills =
+        (h.competences && h.competences.length > 0) ||
+        (h.custom_skills && h.custom_skills.length > 0);
+      if (hasSpecificSkills) priority.push(h);
+      else complementary.push(h);
+    }
+    return { priorityHelpers: priority, complementaryHelpers: complementary };
+  }, [filteredHelpers]);
+
   const dismissSkillPrompt = () => {
     setSkillPromptDismissed(true);
     try { localStorage.setItem("guardiens_skill_prompt_dismissed", "true"); } catch {}
