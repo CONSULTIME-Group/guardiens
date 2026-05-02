@@ -232,6 +232,32 @@ const ShareButtons = ({ sitId, title, city, startDate, endDate, source = "sit_de
         </Button>
       </div>
 
+      {/* Visuel HD personnalisé pour partage manuel (Facebook image post) */}
+      <div className="mt-4 rounded-lg border border-dashed border-primary/30 bg-primary/[0.03] p-3">
+        <div className="flex items-start justify-between gap-3 flex-wrap">
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-semibold text-foreground mb-0.5">
+              Pour un post Facebook avec image en grand
+            </p>
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              Téléchargez le visuel personnalisé (photo de votre maison + dates + animaux),
+              attachez-le à votre publication, puis collez le lien dans le texte. L'image sera
+              mise en avant et le lien restera bien cliquable.
+            </p>
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleDownloadVisual}
+            disabled={downloading}
+            className="gap-1.5 shrink-0"
+          >
+            <Download className="h-4 w-4" />
+            {downloading ? "Préparation…" : "Télécharger le visuel"}
+          </Button>
+        </div>
+      </div>
+
       {hasNativeShare && (
         <Button
           variant="ghost"
