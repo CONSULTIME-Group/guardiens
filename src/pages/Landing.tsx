@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import notreHistoirePanorama from "@/assets/story-photo.webp";
-import franceLocalNational from "@/assets/illustrations/france-local-national.jpg";
+import franceLocalNational from "@/assets/illustrations/france-local-national.webp";
 import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, ArrowLeft } from "lucide-react";
