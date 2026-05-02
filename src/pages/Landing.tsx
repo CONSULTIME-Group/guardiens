@@ -468,20 +468,20 @@ const Landing = () => {
                   className="block w-full h-auto max-w-[420px] sm:max-w-[460px] lg:max-w-none mx-auto rounded-2xl transition-transform duration-700 ease-out group-hover/illu:scale-[1.02] motion-reduce:transition-none motion-reduce:transform-none"
                   style={{ imageRendering: 'auto' }}
                 />
-                <div className="mt-5 grid grid-cols-3 gap-2.5 text-center max-w-[460px] mx-auto">
-                  <div className="rounded-xl bg-background border border-border py-3.5 px-2 transition-all duration-300 hover:border-primary/40 hover:-translate-y-0.5 hover:shadow-sm">
+                <ul className="mt-5 grid grid-cols-3 gap-2.5 text-center max-w-[460px] mx-auto" aria-label="Périmètres de recherche disponibles">
+                  <li className="rounded-xl bg-background border border-border py-3.5 px-2 transition-all duration-300 hover:border-primary/40 hover:-translate-y-0.5 hover:shadow-sm">
                     <p className="font-heading font-bold text-xl md:text-2xl text-primary leading-none">5 km</p>
-                    <p className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground mt-1.5">Hyper-local</p>
-                  </div>
-                  <div className="rounded-xl bg-background border border-border py-3.5 px-2 transition-all duration-300 hover:border-primary/40 hover:-translate-y-0.5 hover:shadow-sm">
+                    <p className="text-xs uppercase tracking-[0.12em] text-muted-foreground mt-1.5">Hyper-local</p>
+                  </li>
+                  <li className="rounded-xl bg-background border border-border py-3.5 px-2 transition-all duration-300 hover:border-primary/40 hover:-translate-y-0.5 hover:shadow-sm">
                     <p className="font-heading font-bold text-xl md:text-2xl text-primary leading-none">30 km</p>
-                    <p className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground mt-1.5">Du coin</p>
-                  </div>
-                  <div className="rounded-xl bg-background border border-border py-3.5 px-2 transition-all duration-300 hover:border-primary/40 hover:-translate-y-0.5 hover:shadow-sm">
+                    <p className="text-xs uppercase tracking-[0.12em] text-muted-foreground mt-1.5">Du coin</p>
+                  </li>
+                  <li className="rounded-xl bg-background border border-border py-3.5 px-2 transition-all duration-300 hover:border-primary/40 hover:-translate-y-0.5 hover:shadow-sm">
                     <p className="font-heading font-bold text-xl md:text-2xl text-primary leading-none">France</p>
-                    <p className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground mt-1.5">Sans limite</p>
-                  </div>
-                </div>
+                    <p className="text-xs uppercase tracking-[0.12em] text-muted-foreground mt-1.5">Sans limite</p>
+                  </li>
+                </ul>
               </div>
             </RevealOnScroll>
 
