@@ -335,7 +335,7 @@ async function send(payload: {
       _url: typeof window !== "undefined" ? window.location.href.slice(0, 500) : null,
       _user_agent: typeof navigator !== "undefined" ? navigator.userAgent.slice(0, 300) : null,
       _severity: severity,
-      _context: context,
+      _context: context as any,
       _user_email: user?.email ?? null,
     });
   } catch {
