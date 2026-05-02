@@ -66,8 +66,12 @@ export const AuthIllustrationPanel = forwardRef<HTMLDivElement, AuthIllustration
               // chat lecteur (haut-droit), chèvre+brouette (bas-droit),
               // potager (bas-gauche), promeneur emmêlé (centre) restent tous visibles
               // quelle que soit la hauteur/largeur du panneau (desktop large, écran 4:3, etc.).
-              // Le fond crème (bg-background) prend le relais autour, ce qui se confond
-              // avec le papier peint de la gouache — pas de bande visible.
+              //
+              // UNIFICATION DU FOND : le papier de la gouache a été pré-aligné
+              // au pixel près sur bg-background (hsl 40 33% 97% ≈ #FAF8F5),
+              // donc les bandes laissées libres par object-contain (haut, gauche,
+              // droite) se confondent visuellement avec la peinture — aucune
+              // démarcation visible, même en plein écran 4K.
               objectPosition: "50% 100%",
               // Léger fade uniquement sur le bord droit pour fondre vers le formulaire.
               WebkitMaskImage:
