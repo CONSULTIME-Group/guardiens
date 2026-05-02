@@ -1,6 +1,7 @@
 import { forwardRef, useEffect, useRef, useState } from "react";
 import authIllustration from "@/assets/auth-illustration.png";
-import authIllustrationVideo from "@/assets/auth-illustration.mp4.asset.json";
+import authIllustrationMp4 from "@/assets/auth-illustration.mp4?url";
+import authIllustrationWebm from "@/assets/auth-illustration.webm?url";
 
 
 interface AuthIllustrationPanelProps {
@@ -196,7 +197,6 @@ export const AuthIllustrationPanel = forwardRef<HTMLDivElement, AuthIllustration
             <>
               <video
                 ref={videoARef}
-                src={authIllustrationVideo.url}
                 poster={authIllustration}
                 autoPlay
                 muted
@@ -219,16 +219,19 @@ export const AuthIllustrationPanel = forwardRef<HTMLDivElement, AuthIllustration
                   maskImage:
                     "linear-gradient(to right, hsl(0 0% 0%) 0%, hsl(0 0% 0%) 88%, transparent 100%)",
                 }}
-              />
+              >
+                <source src={authIllustrationWebm} type="video/webm" />
+                <source src={authIllustrationMp4} type="video/mp4" />
+              </video>
               <video
                 ref={videoBRef}
-                src={authIllustrationVideo.url}
                 muted
                 loop
                 playsInline
                 preload="auto"
                 aria-hidden="true"
                 tabIndex={-1}
+                onError={() => setAnimate(false)}
                 className="absolute inset-0 w-full h-full object-contain object-bottom select-none"
                 style={{
                   opacity: 0,
@@ -240,7 +243,10 @@ export const AuthIllustrationPanel = forwardRef<HTMLDivElement, AuthIllustration
                   maskImage:
                     "linear-gradient(to right, hsl(0 0% 0%) 0%, hsl(0 0% 0%) 88%, transparent 100%)",
                 }}
-              />
+              >
+                <source src={authIllustrationWebm} type="video/webm" />
+                <source src={authIllustrationMp4} type="video/mp4" />
+              </video>
             </>
           )}
         </div>
