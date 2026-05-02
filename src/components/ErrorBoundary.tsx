@@ -46,8 +46,18 @@ export class ErrorBoundary extends Component<Props, State> {
     }
 
     this.setState({ errorId });
+
+    // Extrait le nom du premier composant en faute depuis le componentStack
+    // (ex: "    in MyBuggyCard\n    in Suspense\n    in Route…") → "MyBuggyCard"
+    const componentName = (() => {
+      const stack = info.componentStack ?? "";
+      const match = stack.match(/^\s*(?:in\s+|at\s+)?([A-Z][A-Za-z0-9_]+)/m);
+      return match?.[1] ?? null;
+    })();
+
     reportError(error, {
       source: "ErrorBoundary",
+      component: componentName,
       componentStack: info.componentStack?.slice(0, 1500),
       errorId,
     });
