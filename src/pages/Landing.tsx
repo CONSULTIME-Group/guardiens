@@ -915,7 +915,7 @@ const Landing = () => {
                 </ul>
                 <div className="mt-6 pt-6 border-t border-border">
                   <p className="text-xs text-foreground/60 leading-relaxed">
-                    Annonce à 0 €, profils vérifiés, accord de garde signé.
+                    Annonce gratuite, profils vérifiés, accord de garde signé.
                   </p>
                 </div>
               </div>
