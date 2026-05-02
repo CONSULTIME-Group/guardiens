@@ -41,14 +41,20 @@ export const AuthIllustrationPanel = forwardRef<HTMLDivElement, AuthIllustration
           <img
             src={authIllustration}
             alt=""
-            className="absolute inset-0 w-full h-full object-cover select-none"
-            // Abaissement de l'image : on cale le centre visuel plus bas pour
-            // dégager de l'espace en haut où vient se poser l'encart de texte.
-            style={{ objectPosition: "center 75%" }}
+            className="absolute inset-0 w-full h-full object-contain object-bottom select-none"
+            style={{
+              // Soft fade on all edges so the painted scene melts into bg-background
+              WebkitMaskImage:
+                "radial-gradient(ellipse 85% 75% at 50% 65%, hsl(0 0% 0%) 60%, transparent 100%)",
+              maskImage:
+                "radial-gradient(ellipse 85% 75% at 50% 65%, hsl(0 0% 0%) 60%, transparent 100%)",
+            }}
             draggable={false}
+            loading="lazy"
+            decoding="async"
+            width={1024}
+            height={1024}
           />
-          {/* Voile sémantique ~10% : s'adapte au thème via bg-background. */}
-          <div className="absolute inset-0 bg-background/10" />
         </div>
 
         {/*
