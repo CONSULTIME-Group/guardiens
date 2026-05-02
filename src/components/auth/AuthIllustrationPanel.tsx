@@ -55,6 +55,95 @@ export const AuthIllustrationPanel = forwardRef<HTMLDivElement, AuthIllustration
       return () => mq.removeEventListener("change", onChange);
     }, []);
 
+    /**
+     * Détection "seamless loop" : on échantillonne la première et la dernière
+     * frame de la vidéo dans un canvas hors-écran, puis on calcule la
+     * différence pixel moyenne. Si elle dépasse un seuil, la boucle aurait un
+     * saut visible → on bascule définitivement sur l'image fixe.
+     *
+     * Tourne une seule fois au montage. Aucun rendu écran si la vidéo passe.
+     */
+    useEffect(() => {
+      if (!animate) return;
+      if (typeof window === "undefined") return;
+
+      let cancelled = false;
+      const probe = document.createElement("video");
+      probe.src = authIllustrationVideo.url;
+      probe.muted = true;
+      probe.playsInline = true;
+      probe.preload = "auto";
+      probe.crossOrigin = "anonymous";
+
+      const cleanupProbe = () => {
+        probe.removeAttribute("src");
+        try { probe.load(); } catch { /* noop */ }
+      };
+
+      const grabFrame = (time: number): Promise<ImageData | null> =>
+        new Promise((resolve) => {
+          const onSeeked = () => {
+            try {
+              const w = 64;
+              const h = Math.max(1, Math.round((probe.videoHeight / probe.videoWidth) * w)) || 36;
+              const canvas = document.createElement("canvas");
+              canvas.width = w;
+              canvas.height = h;
+              const ctx = canvas.getContext("2d", { willReadFrequently: true });
+              if (!ctx) return resolve(null);
+              ctx.drawImage(probe, 0, 0, w, h);
+              resolve(ctx.getImageData(0, 0, w, h));
+            } catch {
+              // SecurityError (canvas CORS-tainted) → on garde l'animation
+              // activée par défaut (le crossfade gère déjà la plupart des cas).
+              resolve(null);
+            }
+          };
+          probe.addEventListener("seeked", onSeeked, { once: true });
+          probe.currentTime = Math.max(0, time);
+        });
+
+      const run = async () => {
+        await new Promise<void>((resolve) => {
+          if (probe.readyState >= 1) return resolve();
+          probe.addEventListener("loadedmetadata", () => resolve(), { once: true });
+        });
+        if (cancelled) return;
+        const dur = probe.duration;
+        if (!dur || !isFinite(dur)) return;
+
+        const first = await grabFrame(0.05);
+        if (cancelled || !first) return cleanupProbe();
+        const last = await grabFrame(Math.max(0.05, dur - 0.05));
+        if (cancelled || !last) return cleanupProbe();
+
+        // Différence pixel moyenne sur RGB (0–255).
+        let sum = 0;
+        const n = first.data.length / 4;
+        for (let i = 0; i < first.data.length; i += 4) {
+          sum += Math.abs(first.data[i] - last.data[i]);
+          sum += Math.abs(first.data[i + 1] - last.data[i + 1]);
+          sum += Math.abs(first.data[i + 2] - last.data[i + 2]);
+        }
+        const meanDiff = sum / (n * 3);
+
+        // Seuil empirique : <8/255 ≈ imperceptible (bruit d'encodage),
+        // >8/255 = vrai mouvement résiduel → la boucle ferait un saut visible.
+        const SEAMLESS_THRESHOLD = 8;
+        if (meanDiff > SEAMLESS_THRESHOLD && !cancelled) {
+          setAnimate(false);
+        }
+        cleanupProbe();
+      };
+
+      run().catch(() => cleanupProbe());
+
+      return () => {
+        cancelled = true;
+        cleanupProbe();
+      };
+    }, [animate]);
+
     useEffect(() => {
       if (!animate) return;
       const a = videoARef.current;
