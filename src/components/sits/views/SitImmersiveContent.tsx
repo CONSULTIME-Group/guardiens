@@ -193,6 +193,9 @@ const SitImmersiveContent = ({
     <div>
       <SitHero
         photos={photos}
+        petPhotos={safePets
+          .filter((p: any) => typeof p?.photo_url === "string" && p.photo_url.trim().length > 0)
+          .map((p: any) => ({ url: p.photo_url, name: p?.name, species: p?.species }))}
         title={sit?.title}
         cityName={cityName}
         department={department}
