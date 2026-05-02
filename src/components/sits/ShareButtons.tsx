@@ -119,7 +119,7 @@ const ShareButtons = ({ sitId, title, city, startDate, endDate, source = "sit_de
       const blobUrl = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = blobUrl;
-      a.download = `guardiens-annonce-${sitId.slice(0, 8)}.svg`;
+      a.download = `guardiens-annonce-${sitId.slice(0, 8)}.png`;
       document.body.appendChild(a);
       a.click();
       a.remove();
