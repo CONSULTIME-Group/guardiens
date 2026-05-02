@@ -139,27 +139,49 @@ export const AuthIllustrationPanel = forwardRef<HTMLDivElement, AuthIllustration
             Ne se monte que si l'utilisateur n'a pas demandé reduced-motion.
           */}
           {animate && (
-            <video
-              ref={videoRef}
-              src={authIllustrationVideo.url}
-              poster={authIllustration}
-              autoPlay
-              muted
-              loop
-              playsInline
-              preload="metadata"
-              aria-hidden="true"
-              tabIndex={-1}
-              onError={() => setAnimate(false)}
-              className="absolute inset-0 w-full h-full object-contain object-bottom select-none transition-opacity duration-700"
-              style={{
-                objectPosition: "50% 100%",
-                WebkitMaskImage:
-                  "linear-gradient(to right, hsl(0 0% 0%) 0%, hsl(0 0% 0%) 88%, transparent 100%)",
-                maskImage:
-                  "linear-gradient(to right, hsl(0 0% 0%) 0%, hsl(0 0% 0%) 88%, transparent 100%)",
-              }}
-            />
+            <>
+              <video
+                ref={videoARef}
+                src={authIllustrationVideo.url}
+                poster={authIllustration}
+                autoPlay
+                muted
+                loop
+                playsInline
+                preload="auto"
+                aria-hidden="true"
+                tabIndex={-1}
+                onError={() => setAnimate(false)}
+                className="absolute inset-0 w-full h-full object-contain object-bottom select-none"
+                style={{
+                  opacity: aOpacity,
+                  objectPosition: "50% 100%",
+                  WebkitMaskImage:
+                    "linear-gradient(to right, hsl(0 0% 0%) 0%, hsl(0 0% 0%) 88%, transparent 100%)",
+                  maskImage:
+                    "linear-gradient(to right, hsl(0 0% 0%) 0%, hsl(0 0% 0%) 88%, transparent 100%)",
+                }}
+              />
+              <video
+                ref={videoBRef}
+                src={authIllustrationVideo.url}
+                muted
+                loop
+                playsInline
+                preload="auto"
+                aria-hidden="true"
+                tabIndex={-1}
+                className="absolute inset-0 w-full h-full object-contain object-bottom select-none"
+                style={{
+                  opacity: 1 - aOpacity,
+                  objectPosition: "50% 100%",
+                  WebkitMaskImage:
+                    "linear-gradient(to right, hsl(0 0% 0%) 0%, hsl(0 0% 0%) 88%, transparent 100%)",
+                  maskImage:
+                    "linear-gradient(to right, hsl(0 0% 0%) 0%, hsl(0 0% 0%) 88%, transparent 100%)",
+                }}
+              />
+            </>
           )}
         </div>
 
