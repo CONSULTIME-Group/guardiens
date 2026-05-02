@@ -970,7 +970,7 @@ const Landing = () => {
                 </ul>
                 <div className="mt-6 pt-6 border-t border-border">
                   <p className="text-xs text-foreground/60 leading-relaxed">
-                    Inscription à 0 €, logements à découvrir, vraies rencontres locales.
+                    Inscription gratuite, logements à découvrir, vraies rencontres locales.
                   </p>
                 </div>
               </div>
