@@ -258,7 +258,7 @@ export const AuthIllustrationPanel = forwardRef<HTMLDivElement, AuthIllustration
                 muted
                 loop
                 playsInline
-                preload="auto"
+                preload="metadata"
                 aria-hidden="true"
                 tabIndex={-1}
                 onError={() => setAnimate(false)}
