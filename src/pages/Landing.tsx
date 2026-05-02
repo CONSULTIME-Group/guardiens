@@ -432,6 +432,47 @@ const Landing = () => {
         </div>
       </section>
 
+      {/* ═══════════════ SECTION — LOCAL OU NATIONAL ═══════════════ */}
+      <section className="bg-background py-16 md:py-20">
+        <div className="max-w-5xl mx-auto px-4">
+          <div className="text-center mb-10">
+            <span className="text-xs tracking-widest uppercase text-primary/70 font-body">Le périmètre, c'est vous</span>
+            <h2 className="font-heading text-3xl md:text-4xl font-bold text-foreground mt-3">
+              Local par envie, national par liberté
+            </h2>
+            <p className="text-muted-foreground mt-4 max-w-2xl mx-auto leading-relaxed">
+              Notre promesse, c'est la confiance retrouvée avec les gens du coin.
+              Mais rien ne vous y oblige : Guardiens couvre toute la France, et c'est vous qui choisissez jusqu'où vous voulez aller.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="bg-card border border-border rounded-2xl p-6 md:p-8">
+              <p className="text-xs tracking-widest uppercase text-primary/70 font-body">Mode proximité</p>
+              <h3 className="mt-3 font-heading font-semibold text-xl text-foreground">Un gardien du coin, à quelques rues</h3>
+              <p className="mt-3 text-muted-foreground text-sm md:text-base leading-relaxed">
+                Idéal pour les gardes courtes, les imprévus, les coups de main réguliers.
+                Vous choisissez le rayon : 5, 15, 30 km. La rencontre est facile, la confiance s'installe vite.
+              </p>
+            </div>
+
+            <div className="bg-card border border-border rounded-2xl p-6 md:p-8">
+              <p className="text-xs tracking-widest uppercase text-primary/70 font-body">Mode élargi</p>
+              <h3 className="mt-3 font-heading font-semibold text-xl text-foreground">Toute la France, et même un peu plus loin</h3>
+              <p className="mt-3 text-muted-foreground text-sm md:text-base leading-relaxed">
+                Vous habitez une petite commune et voulez plus de candidatures ?
+                Vous voulez découvrir une autre région le temps d'une garde ?
+                Élargissez à votre département, votre région ou la France entière, en un clic.
+              </p>
+            </div>
+          </div>
+
+          <p className="text-center text-sm text-muted-foreground italic mt-8">
+            Quel que soit le périmètre, la confiance reste le fil rouge : profils vérifiés, avis publics, rencontre avant chaque garde.
+          </p>
+        </div>
+      </section>
+
       {/* ═══════════════ BANDEAU SAISONNIER (titre + sous-titre dynamiques) ═══════════════ */}
       <section className="bg-primary/5 py-16">
         <div className="max-w-3xl mx-auto px-4 text-center">
