@@ -306,8 +306,11 @@ const Landing = () => {
             <p className="font-heading text-2xl md:text-3xl lg:text-4xl italic text-white/85 leading-snug mb-6 animate-hero-fade-up animation-delay-700">
               Et l'entraide de quartier redevient naturelle.
             </p>
-            <p className="font-body text-base md:text-lg text-white/70 max-w-lg mb-10 leading-relaxed animate-hero-fade-up animation-delay-700">
+            <p className="font-body text-base md:text-lg text-white/70 max-w-lg mb-3 leading-relaxed animate-hero-fade-up animation-delay-700">
               Confiez vos animaux à un gardien près de chez vous. Osez demander un coup de main. Osez en proposer un.
+            </p>
+            <p className="font-body text-sm text-white/55 max-w-lg mb-10 italic animate-hero-fade-up animation-delay-700">
+              Du coin… ou d'ailleurs : les annonces sont accessibles partout en France.
             </p>
 
             {/* CTAs — propriétaire mis en avant (priorité business : combler le manque d'annonces) */}
@@ -420,9 +423,9 @@ const Landing = () => {
 
             <div className="bg-card border border-border rounded-xl p-6">
               <p className="text-xs tracking-widest uppercase text-primary/70 font-body">04</p>
-              <h3 className="mt-3 font-heading font-semibold text-lg text-foreground">Un gardien près de chez vous</h3>
+              <h3 className="mt-3 font-heading font-semibold text-lg text-foreground">Local par envie, national par liberté</h3>
               <p className="mt-2 text-muted-foreground text-sm leading-relaxed">
-                La proximité, partout. Votre gardien habite à quelques kilomètres, pas à l'autre bout du pays — où que vous soyez.
+                Notre cœur, c'est la proximité : un gardien à quelques kilomètres. Mais rien ne vous y oblige : élargissez le rayon, explorez d'autres régions, créez du lien partout en France.
               </p>
             </div>
           </div>
