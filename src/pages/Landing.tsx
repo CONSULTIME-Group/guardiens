@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import notreHistoirePanorama from "@/assets/story-photo.webp";
-import franceLocalNational from "@/assets/illustrations/france-local-national.jpg";
+import franceLocalNational from "@/assets/illustrations/france-local-national.webp";
 import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, ArrowLeft } from "lucide-react";
@@ -460,8 +460,8 @@ const Landing = () => {
                 <img
                   src={franceLocalNational}
                   alt="Illustration gouache d'une carte de France parsemée de points reliés, symbolisant le réseau de gardiens partout dans le pays."
-                  width={1024}
-                  height={1024}
+                  width={960}
+                  height={960}
                   loading="lazy"
                   decoding="async"
                   sizes="(max-width: 640px) 90vw, (max-width: 1024px) 60vw, 480px"
