@@ -37,14 +37,21 @@ export const AuthIllustrationPanel = forwardRef<HTMLDivElement, AuthIllustration
     //   garantissant qu'on voit la même chose que le screenshot statique pendant le chargement.
     // Boucle infinie sans saut visible : deux vidéos identiques jouent en parallèle,
     // décalées d'une demi-durée. À tout moment, au moins l'une des deux est loin
-    // de son bord (donc loin du "saut" du loop). On crossfade entre les deux en
-    // gardant TOUJOURS la somme des opacités = 1 (vrai crossfade additif), pour
-    // qu'aucune image fixe sous-jacente ne transparaisse pendant la transition.
+    // de son bord. Le crossfade ping-pong garde TOUJOURS la somme des opacités = 1.
+    //
+    // Optimisations CPU/GPU :
+    //  - Une seule sonde (vidéo cachée) supprimée → on s'appuie sur le crossfade
+    //    pour absorber les imperfections de loop (le test analytique 50 cycles
+    //    dans auth-illustration-loop-stability.test.ts garantit la stabilité).
+    //  - Mise à jour des opacités via writes directs sur ref.style (pas de
+    //    re-render React 60×/s).
+    //  - Tick throttlé à 30Hz (un fade de 0.9s reste totalement fluide).
+    //  - will-change: opacity + translateZ(0) → composition GPU dédiée, pas de
+    //    repaint du reste de la page.
+    //  - Pause auto quand l'onglet est caché (visibilitychange).
     const videoARef = useRef<HTMLVideoElement>(null);
     const videoBRef = useRef<HTMLVideoElement>(null);
     const [animate, setAnimate] = useState(false);
-    // Opacité de A. B = 1 - aOpacity. Donc somme constante = 1.
-    const [aOpacity, setAOpacity] = useState(1);
 
     useEffect(() => {
       if (typeof window === "undefined") return;
@@ -55,95 +62,6 @@ export const AuthIllustrationPanel = forwardRef<HTMLDivElement, AuthIllustration
       return () => mq.removeEventListener("change", onChange);
     }, []);
 
-    /**
-     * Détection "seamless loop" : on échantillonne la première et la dernière
-     * frame de la vidéo dans un canvas hors-écran, puis on calcule la
-     * différence pixel moyenne. Si elle dépasse un seuil, la boucle aurait un
-     * saut visible → on bascule définitivement sur l'image fixe.
-     *
-     * Tourne une seule fois au montage. Aucun rendu écran si la vidéo passe.
-     */
-    useEffect(() => {
-      if (!animate) return;
-      if (typeof window === "undefined") return;
-
-      let cancelled = false;
-      const probe = document.createElement("video");
-      probe.src = authIllustrationVideo.url;
-      probe.muted = true;
-      probe.playsInline = true;
-      probe.preload = "auto";
-      probe.crossOrigin = "anonymous";
-
-      const cleanupProbe = () => {
-        probe.removeAttribute("src");
-        try { probe.load(); } catch { /* noop */ }
-      };
-
-      const grabFrame = (time: number): Promise<ImageData | null> =>
-        new Promise((resolve) => {
-          const onSeeked = () => {
-            try {
-              const w = 64;
-              const h = Math.max(1, Math.round((probe.videoHeight / probe.videoWidth) * w)) || 36;
-              const canvas = document.createElement("canvas");
-              canvas.width = w;
-              canvas.height = h;
-              const ctx = canvas.getContext("2d", { willReadFrequently: true });
-              if (!ctx) return resolve(null);
-              ctx.drawImage(probe, 0, 0, w, h);
-              resolve(ctx.getImageData(0, 0, w, h));
-            } catch {
-              // SecurityError (canvas CORS-tainted) → on garde l'animation
-              // activée par défaut (le crossfade gère déjà la plupart des cas).
-              resolve(null);
-            }
-          };
-          probe.addEventListener("seeked", onSeeked, { once: true });
-          probe.currentTime = Math.max(0, time);
-        });
-
-      const run = async () => {
-        await new Promise<void>((resolve) => {
-          if (probe.readyState >= 1) return resolve();
-          probe.addEventListener("loadedmetadata", () => resolve(), { once: true });
-        });
-        if (cancelled) return;
-        const dur = probe.duration;
-        if (!dur || !isFinite(dur)) return;
-
-        const first = await grabFrame(0.05);
-        if (cancelled || !first) return cleanupProbe();
-        const last = await grabFrame(Math.max(0.05, dur - 0.05));
-        if (cancelled || !last) return cleanupProbe();
-
-        // Différence pixel moyenne sur RGB (0–255).
-        let sum = 0;
-        const n = first.data.length / 4;
-        for (let i = 0; i < first.data.length; i += 4) {
-          sum += Math.abs(first.data[i] - last.data[i]);
-          sum += Math.abs(first.data[i + 1] - last.data[i + 1]);
-          sum += Math.abs(first.data[i + 2] - last.data[i + 2]);
-        }
-        const meanDiff = sum / (n * 3);
-
-        // Seuil empirique : <8/255 ≈ imperceptible (bruit d'encodage),
-        // >8/255 = vrai mouvement résiduel → la boucle ferait un saut visible.
-        const SEAMLESS_THRESHOLD = 8;
-        if (meanDiff > SEAMLESS_THRESHOLD && !cancelled) {
-          setAnimate(false);
-        }
-        cleanupProbe();
-      };
-
-      run().catch(() => cleanupProbe());
-
-      return () => {
-        cancelled = true;
-        cleanupProbe();
-      };
-    }, [animate]);
-
     useEffect(() => {
       if (!animate) return;
       const a = videoARef.current;
@@ -151,8 +69,8 @@ export const AuthIllustrationPanel = forwardRef<HTMLDivElement, AuthIllustration
       if (!a || !b) return;
 
       let raf = 0;
-      // Largeur du crossfade autour de chaque bord (sec). Plus c'est long,
-      // plus la transition est invisible mais plus on voit "deux scènes en même temps".
+      let lastTickAt = 0;
+      const TICK_INTERVAL = 1000 / 30; // 30Hz : largement assez pour un fade de 0.9s
       const FADE = 0.9;
 
       const init = () => {
@@ -161,45 +79,55 @@ export const AuthIllustrationPanel = forwardRef<HTMLDivElement, AuthIllustration
           raf = requestAnimationFrame(init);
           return;
         }
-        const half = dur / 2;
-        // B démarre pile au milieu de A → quand A est près d'un bord,
-        // B est au centre de son propre clip (zone "safe", aucune coupure).
-        b.currentTime = half;
+        b.currentTime = dur / 2;
         b.play().catch(() => {});
 
-        // Resync périodique pour éviter la dérive des deux vidéos sur le long terme.
         const resync = () => {
           const d = a.duration;
           if (!d || !isFinite(d)) return;
           const expected = (a.currentTime + d / 2) % d;
           const drift = Math.abs(b.currentTime - expected);
-          // Si la dérive dépasse 80ms, on resync silencieusement (toujours pendant
-          // que A est dominant, jamais pendant que B est visible).
           if (drift > 0.08 && a.currentTime > FADE && a.currentTime < d - FADE) {
             b.currentTime = expected;
           }
         };
         const resyncId = window.setInterval(resync, 1500);
 
-        const tick = () => {
-          const d = a.duration;
-          if (d && isFinite(d)) {
-            const t = a.currentTime;
-            // Distance de A à son bord le plus proche (0 ou d).
-            const distA = Math.min(t, d - t);
-            // Quand distA >= FADE → A pleinement visible (opa=1).
-            // Quand distA = 0 → A invisible (opa=0), B prend tout (opa=1).
-            // Courbe smoothstep pour un fondu doux et imperceptible.
-            const x = Math.min(1, Math.max(0, distA / FADE));
-            const smooth = x * x * (3 - 2 * x);
-            setAOpacity(smooth);
+        const tick = (now: number) => {
+          if (now - lastTickAt >= TICK_INTERVAL) {
+            lastTickAt = now;
+            const d = a.duration;
+            if (d && isFinite(d)) {
+              const t = a.currentTime;
+              const distA = Math.min(t, d - t);
+              const x = Math.min(1, Math.max(0, distA / FADE));
+              const smooth = x * x * (3 - 2 * x);
+              // Écriture directe sur le DOM → aucun re-render React.
+              a.style.opacity = String(smooth);
+              b.style.opacity = String(1 - smooth);
+            }
           }
           raf = requestAnimationFrame(tick);
         };
-        tick();
+        raf = requestAnimationFrame(tick);
+
+        // Pause/reprise selon la visibilité de l'onglet (gros gain CPU/batterie).
+        const onVisibility = () => {
+          if (document.hidden) {
+            a.pause();
+            b.pause();
+            cancelAnimationFrame(raf);
+          } else {
+            a.play().catch(() => {});
+            b.play().catch(() => {});
+            raf = requestAnimationFrame(tick);
+          }
+        };
+        document.addEventListener("visibilitychange", onVisibility);
 
         return () => {
           window.clearInterval(resyncId);
+          document.removeEventListener("visibilitychange", onVisibility);
         };
       };
 
