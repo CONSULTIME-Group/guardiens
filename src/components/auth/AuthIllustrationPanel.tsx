@@ -124,8 +124,8 @@ export const AuthIllustrationPanel = forwardRef<HTMLDivElement, AuthIllustration
 
       let raf = 0;
       let lastTickAt = 0;
-      const TICK_INTERVAL = 1000 / 30; // 30Hz : largement assez pour un fade de 0.9s
-      const FADE = 0.9;
+      const TICK_INTERVAL = 1000 / 30; // 30Hz : largement assez pour un fade de 1.2s
+      const FADE = 1.2; // élargi : +33% de tolérance aux jitters réseau
 
       const init = () => {
         const dur = a.duration;
@@ -147,6 +147,10 @@ export const AuthIllustrationPanel = forwardRef<HTMLDivElement, AuthIllustration
         };
         const resyncId = window.setInterval(resync, 1500);
 
+        // Robustesse aux variations de débit : on suit l'état "ready" de
+        // chaque vidéo. Si l'une stall (waiting/seeking, readyState < 3)
+        // pendant qu'on essaie de fader VERS elle, on gèle la transition
+        // sur la vidéo encore prête → aucun calque transparent visible.
         const tick = (now: number) => {
           if (now - lastTickAt >= TICK_INTERVAL) {
             lastTickAt = now;
@@ -155,15 +159,45 @@ export const AuthIllustrationPanel = forwardRef<HTMLDivElement, AuthIllustration
               const t = a.currentTime;
               const distA = Math.min(t, d - t);
               const x = Math.min(1, Math.max(0, distA / FADE));
-              const smooth = x * x * (3 - 2 * x);
-              // Écriture directe sur le DOM → aucun re-render React.
-              a.style.opacity = String(smooth);
-              b.style.opacity = String(1 - smooth);
+              // smoothstep cubique
+              let smoothA = x * x * (3 - 2 * x);
+              let smoothB = 1 - smoothA;
+
+              const aReady = a.readyState >= 3 && !a.seeking;
+              const bReady = b.readyState >= 3 && !b.seeking;
+
+              // Garde-fou : la SOMME des opacités visibles doit toujours
+              // rester ~1. Si une vidéo n'est pas prête, l'autre prend tout.
+              if (!bReady && aReady) {
+                smoothA = 1;
+                smoothB = 0;
+              } else if (!aReady && bReady) {
+                smoothA = 0;
+                smoothB = 1;
+              } else if (!aReady && !bReady) {
+                // Pire cas (très rare) : on laisse la PNG poster en dessous
+                // assurer la continuité visuelle. Opacités forcées à 0.
+                smoothA = 0;
+                smoothB = 0;
+              }
+
+              a.style.opacity = String(smoothA);
+              b.style.opacity = String(smoothB);
             }
           }
           raf = requestAnimationFrame(tick);
         };
         raf = requestAnimationFrame(tick);
+
+        // Reprise immédiate dès qu'une vidéo a re-buffé : force un tick
+        // pour mettre à jour l'opacité avant le prochain frame paint.
+        const onPlayable = () => {
+          lastTickAt = 0;
+        };
+        a.addEventListener("playing", onPlayable);
+        b.addEventListener("playing", onPlayable);
+        a.addEventListener("canplaythrough", onPlayable);
+        b.addEventListener("canplaythrough", onPlayable);
 
         // Pause/reprise selon la visibilité de l'onglet (gros gain CPU/batterie).
         const onVisibility = () => {
@@ -182,6 +216,10 @@ export const AuthIllustrationPanel = forwardRef<HTMLDivElement, AuthIllustration
         return () => {
           window.clearInterval(resyncId);
           document.removeEventListener("visibilitychange", onVisibility);
+          a.removeEventListener("playing", onPlayable);
+          b.removeEventListener("playing", onPlayable);
+          a.removeEventListener("canplaythrough", onPlayable);
+          b.removeEventListener("canplaythrough", onPlayable);
         };
       };
 
