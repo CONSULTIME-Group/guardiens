@@ -452,9 +452,9 @@ const Landing = () => {
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
             {/* Illustration France gouache */}
-            <div className="relative order-2 lg:order-1 mx-auto w-full max-w-md lg:max-w-none">
-              <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/10 rounded-3xl blur-2xl" aria-hidden="true" />
-              <div className="relative bg-card/50 border border-border rounded-3xl p-4 sm:p-5 md:p-7 shadow-sm">
+            <div className="relative order-2 lg:order-1 mx-auto w-full max-w-md lg:max-w-none group/illu">
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/10 rounded-3xl blur-2xl transition-opacity duration-500 group-hover/illu:opacity-80 opacity-60" aria-hidden="true" />
+              <div className="relative bg-card/50 border border-border rounded-3xl p-4 sm:p-5 md:p-7 shadow-sm transition-all duration-500 group-hover/illu:shadow-lg group-hover/illu:-translate-y-0.5">
                 <img
                   src={franceLocalNational}
                   alt="Illustration gouache d'une carte de France parsemée de points reliés, symbolisant le réseau de gardiens partout dans le pays."
@@ -463,19 +463,19 @@ const Landing = () => {
                   loading="lazy"
                   decoding="async"
                   sizes="(max-width: 640px) 90vw, (max-width: 1024px) 60vw, 480px"
-                  className="block w-full h-auto max-w-[420px] sm:max-w-[460px] lg:max-w-none mx-auto rounded-2xl"
+                  className="block w-full h-auto max-w-[420px] sm:max-w-[460px] lg:max-w-none mx-auto rounded-2xl transition-transform duration-700 ease-out group-hover/illu:scale-[1.02] motion-reduce:transition-none motion-reduce:transform-none"
                   style={{ imageRendering: 'auto' }}
                 />
                 <div className="mt-5 grid grid-cols-3 gap-2.5 text-center max-w-[460px] mx-auto">
-                  <div className="rounded-xl bg-background border border-border py-3.5 px-2">
+                  <div className="rounded-xl bg-background border border-border py-3.5 px-2 transition-all duration-300 hover:border-primary/40 hover:-translate-y-0.5 hover:shadow-sm">
                     <p className="font-heading font-bold text-xl md:text-2xl text-primary leading-none">5 km</p>
                     <p className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground mt-1.5">Hyper-local</p>
                   </div>
-                  <div className="rounded-xl bg-background border border-border py-3.5 px-2">
+                  <div className="rounded-xl bg-background border border-border py-3.5 px-2 transition-all duration-300 hover:border-primary/40 hover:-translate-y-0.5 hover:shadow-sm">
                     <p className="font-heading font-bold text-xl md:text-2xl text-primary leading-none">30 km</p>
                     <p className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground mt-1.5">Du coin</p>
                   </div>
-                  <div className="rounded-xl bg-background border border-border py-3.5 px-2">
+                  <div className="rounded-xl bg-background border border-border py-3.5 px-2 transition-all duration-300 hover:border-primary/40 hover:-translate-y-0.5 hover:shadow-sm">
                     <p className="font-heading font-bold text-xl md:text-2xl text-primary leading-none">France</p>
                     <p className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground mt-1.5">Sans limite</p>
                   </div>
@@ -485,7 +485,7 @@ const Landing = () => {
 
             {/* Contenu */}
             <div className="order-1 lg:order-2 space-y-5 md:space-y-6">
-              <article className="bg-card border border-border rounded-2xl p-6 md:p-8">
+              <article className="bg-card border border-border rounded-2xl p-6 md:p-8 transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 hover:border-primary/30 motion-reduce:transition-none motion-reduce:transform-none">
                 <p className="text-[11px] tracking-[0.2em] uppercase text-primary/70 font-body">Mode proximité</p>
                 <h3 className="mt-3 font-heading font-semibold text-xl md:text-2xl text-foreground leading-snug">
                   Un gardien du coin, à quelques rues
@@ -496,7 +496,7 @@ const Landing = () => {
                 </p>
               </article>
 
-              <article className="bg-card border border-border rounded-2xl p-6 md:p-8">
+              <article className="bg-card border border-border rounded-2xl p-6 md:p-8 transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 hover:border-primary/30 motion-reduce:transition-none motion-reduce:transform-none">
                 <p className="text-[11px] tracking-[0.2em] uppercase text-primary/70 font-body">Mode élargi</p>
                 <h3 className="mt-3 font-heading font-semibold text-xl md:text-2xl text-foreground leading-snug">
                   Toute la France, et même un peu plus loin
