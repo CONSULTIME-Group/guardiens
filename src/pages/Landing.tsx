@@ -202,7 +202,7 @@ const Landing = () => {
     <div className="min-h-screen bg-background text-foreground">
       <PageMeta
         title="Guardiens — Partez l'esprit tranquille"
-        description="Un gardien près de chez vous veille sur votre maison et vos animaux. Offert pour les propriétaires, à vie (0 €). Sans carte bancaire."
+        description="Un gardien près de chez vous — ou ailleurs en France — veille sur votre maison et vos animaux. Offert pour les propriétaires, à vie (0 €). Sans carte bancaire."
         path="/"
         image={HOME_OG_IMAGE}
       />
