@@ -435,15 +435,16 @@ const Landing = () => {
       </section>
 
       {/* ═══════════════ SECTION — LOCAL OU NATIONAL ═══════════════ */}
-      <section className="bg-background py-20 md:py-28">
+      <section className="bg-background py-20 md:py-28" aria-labelledby="scope-heading">
         <div className="max-w-6xl mx-auto px-5 sm:px-6">
           {/* En-tête */}
           <div className="text-center mb-14 md:mb-20 max-w-3xl mx-auto">
-            <span className="text-[11px] tracking-[0.2em] uppercase text-primary/70 font-body">
+            <p className="text-xs md:text-[13px] tracking-[0.2em] uppercase text-primary font-body font-medium">
               Le périmètre, c'est vous
-            </span>
-            <h2 className="font-heading text-[2rem] leading-[1.15] md:text-5xl md:leading-[1.1] font-bold text-foreground mt-4 tracking-tight">
-              Local par envie,<br className="hidden sm:block" /> national par liberté
+            </p>
+            <h2 id="scope-heading" className="font-heading text-[2rem] leading-[1.15] md:text-5xl md:leading-[1.1] font-bold text-foreground mt-4 tracking-tight">
+              <span className="sm:inline">Local par envie,</span>{" "}
+              <span className="sm:inline">national par liberté</span>
             </h2>
             <p className="text-base md:text-lg text-muted-foreground mt-5 md:mt-6 leading-relaxed">
               Notre promesse, c'est la confiance retrouvée avec les gens du coin.
@@ -467,27 +468,27 @@ const Landing = () => {
                   className="block w-full h-auto max-w-[420px] sm:max-w-[460px] lg:max-w-none mx-auto rounded-2xl transition-transform duration-700 ease-out group-hover/illu:scale-[1.02] motion-reduce:transition-none motion-reduce:transform-none"
                   style={{ imageRendering: 'auto' }}
                 />
-                <div className="mt-5 grid grid-cols-3 gap-2.5 text-center max-w-[460px] mx-auto">
-                  <div className="rounded-xl bg-background border border-border py-3.5 px-2 transition-all duration-300 hover:border-primary/40 hover:-translate-y-0.5 hover:shadow-sm">
+                <ul className="mt-5 grid grid-cols-3 gap-2.5 text-center max-w-[460px] mx-auto" aria-label="Périmètres de recherche disponibles">
+                  <li className="rounded-xl bg-background border border-border py-3.5 px-2 transition-all duration-300 hover:border-primary/40 hover:-translate-y-0.5 hover:shadow-sm">
                     <p className="font-heading font-bold text-xl md:text-2xl text-primary leading-none">5 km</p>
-                    <p className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground mt-1.5">Hyper-local</p>
-                  </div>
-                  <div className="rounded-xl bg-background border border-border py-3.5 px-2 transition-all duration-300 hover:border-primary/40 hover:-translate-y-0.5 hover:shadow-sm">
+                    <p className="text-xs uppercase tracking-[0.12em] text-muted-foreground mt-1.5">Hyper-local</p>
+                  </li>
+                  <li className="rounded-xl bg-background border border-border py-3.5 px-2 transition-all duration-300 hover:border-primary/40 hover:-translate-y-0.5 hover:shadow-sm">
                     <p className="font-heading font-bold text-xl md:text-2xl text-primary leading-none">30 km</p>
-                    <p className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground mt-1.5">Du coin</p>
-                  </div>
-                  <div className="rounded-xl bg-background border border-border py-3.5 px-2 transition-all duration-300 hover:border-primary/40 hover:-translate-y-0.5 hover:shadow-sm">
+                    <p className="text-xs uppercase tracking-[0.12em] text-muted-foreground mt-1.5">Du coin</p>
+                  </li>
+                  <li className="rounded-xl bg-background border border-border py-3.5 px-2 transition-all duration-300 hover:border-primary/40 hover:-translate-y-0.5 hover:shadow-sm">
                     <p className="font-heading font-bold text-xl md:text-2xl text-primary leading-none">France</p>
-                    <p className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground mt-1.5">Sans limite</p>
-                  </div>
-                </div>
+                    <p className="text-xs uppercase tracking-[0.12em] text-muted-foreground mt-1.5">Sans limite</p>
+                  </li>
+                </ul>
               </div>
             </RevealOnScroll>
 
             {/* Contenu */}
             <RevealOnScroll from="right" delay={120} className="order-1 lg:order-2 space-y-5 md:space-y-6">
               <article className="bg-card border border-border rounded-2xl p-6 md:p-8 transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 hover:border-primary/30 motion-reduce:transition-none motion-reduce:transform-none">
-                <p className="text-[11px] tracking-[0.2em] uppercase text-primary/70 font-body">Mode proximité</p>
+                <p className="text-xs md:text-[13px] tracking-[0.2em] uppercase text-primary font-body font-medium">Mode proximité</p>
                 <h3 className="mt-3 font-heading font-semibold text-xl md:text-2xl text-foreground leading-snug">
                   Un gardien du coin, à quelques rues
                 </h3>
@@ -498,7 +499,7 @@ const Landing = () => {
               </article>
 
               <article className="bg-card border border-border rounded-2xl p-6 md:p-8 transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 hover:border-primary/30 motion-reduce:transition-none motion-reduce:transform-none">
-                <p className="text-[11px] tracking-[0.2em] uppercase text-primary/70 font-body">Mode élargi</p>
+                <p className="text-xs md:text-[13px] tracking-[0.2em] uppercase text-primary font-body font-medium">Mode élargi</p>
                 <h3 className="mt-3 font-heading font-semibold text-xl md:text-2xl text-foreground leading-snug">
                   Toute la France, et même un peu plus loin
                 </h3>
