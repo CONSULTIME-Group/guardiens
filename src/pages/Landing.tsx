@@ -138,13 +138,14 @@ const Landing = () => {
   const seasonal = getSeasonalBanner();
 
   // KPIs : valeurs réelles depuis public_stats + socle historique fondateurs
-  // pour les maisons uniquement (Jérémie & Elisa : 37 maisons gardées en 5 ans,
-  // chiffre cité explicitement dans le récit fondateur plus bas dans la page).
-  // Pas d'offset sur les animaux : aucun chiffre fondé n'est mentionné.
+  // - Maisons : 37 maisons gardées en 5 ans par Jérémie & Elisa (cité dans le récit fondateur).
+  // - Animaux : 234 animaux accompagnés sur la même période (cité dans le récit fondateur,
+  //   src/data/cityContent.ts). On part donc de 234 et on ajoute les nouveaux comptés en base.
   const FOUNDERS_HOUSES_OFFSET = 37;
+  const FOUNDERS_ANIMALS_OFFSET = 234;
 
   const [kpiMaisons, setKpiMaisons] = useState<number>(FOUNDERS_HOUSES_OFFSET);
-  const [kpiAnimaux, setKpiAnimaux] = useState<number>(0);
+  const [kpiAnimaux, setKpiAnimaux] = useState<number>(FOUNDERS_ANIMALS_OFFSET);
   const [kpiInscrits, setKpiInscrits] = useState<number>(0);
   const [kpiMissions, setKpiMissions] = useState<number>(0);
 
@@ -165,7 +166,7 @@ const Landing = () => {
           setKpiMissions(data.missions_entraide);
         }
         if (typeof data.animaux_accompagnes === 'number') {
-          setKpiAnimaux(data.animaux_accompagnes);
+          setKpiAnimaux(data.animaux_accompagnes + FOUNDERS_ANIMALS_OFFSET);
         }
       }
     };
