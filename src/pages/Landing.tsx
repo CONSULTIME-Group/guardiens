@@ -435,15 +435,16 @@ const Landing = () => {
       </section>
 
       {/* ═══════════════ SECTION — LOCAL OU NATIONAL ═══════════════ */}
-      <section className="bg-background py-20 md:py-28">
+      <section className="bg-background py-20 md:py-28" aria-labelledby="scope-heading">
         <div className="max-w-6xl mx-auto px-5 sm:px-6">
           {/* En-tête */}
           <div className="text-center mb-14 md:mb-20 max-w-3xl mx-auto">
-            <span className="text-[11px] tracking-[0.2em] uppercase text-primary/70 font-body">
+            <p className="text-xs md:text-[13px] tracking-[0.2em] uppercase text-primary font-body font-medium">
               Le périmètre, c'est vous
-            </span>
-            <h2 className="font-heading text-[2rem] leading-[1.15] md:text-5xl md:leading-[1.1] font-bold text-foreground mt-4 tracking-tight">
-              Local par envie,<br className="hidden sm:block" /> national par liberté
+            </p>
+            <h2 id="scope-heading" className="font-heading text-[2rem] leading-[1.15] md:text-5xl md:leading-[1.1] font-bold text-foreground mt-4 tracking-tight">
+              <span className="sm:inline">Local par envie,</span>{" "}
+              <span className="sm:inline">national par liberté</span>
             </h2>
             <p className="text-base md:text-lg text-muted-foreground mt-5 md:mt-6 leading-relaxed">
               Notre promesse, c'est la confiance retrouvée avec les gens du coin.
