@@ -41,13 +41,20 @@ const getPinKind = (item: any): PinKind => {
 interface MapCenterProps {
   center: [number, number];
   zoom: number;
+  bounds: L.LatLngBoundsExpression | null;
 }
 
-const MapCenterController = ({ center, zoom }: MapCenterProps) => {
+const MapCenterController = ({ center, zoom, bounds }: MapCenterProps) => {
   const map = useMap();
   useEffect(() => {
-    map.setView(center, zoom);
-  }, [center, zoom, map]);
+    if (bounds) {
+      // Recadrage automatique sur la zone couverte par les résultats
+      // (s'adapte au rayon, département, région, France entière…)
+      map.fitBounds(bounds, { padding: [40, 40], maxZoom: 13, animate: true });
+    } else {
+      map.setView(center, zoom, { animate: true });
+    }
+  }, [center, zoom, bounds, map]);
   return null;
 };
 
