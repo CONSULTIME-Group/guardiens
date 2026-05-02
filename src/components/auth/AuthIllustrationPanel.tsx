@@ -1,6 +1,7 @@
 import { forwardRef, useEffect, useRef, useState } from "react";
 import authIllustration from "@/assets/auth-illustration.png";
-import authIllustrationVideo from "@/assets/auth-illustration.mp4.asset.json";
+import authIllustrationMp4 from "@/assets/auth-illustration.mp4?url";
+import authIllustrationWebm from "@/assets/auth-illustration.webm?url";
 
 
 interface AuthIllustrationPanelProps {
