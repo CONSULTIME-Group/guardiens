@@ -474,7 +474,7 @@ const Landing = () => {
                   Trouvez quelqu'un du coin pour garder votre maison et vos animaux. Vous le rencontrez avant. Vous choisissez.
                 </p>
                 <span className="inline-block px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-body font-medium mb-4">
-                  0 € pour les propriétaires
+                  Gratuit pour les propriétaires
                 </span>
                 <Link to="/inscription?role=owner" className="block text-sm font-body text-primary font-medium hover:underline">
                   Je cherche un gardien →
