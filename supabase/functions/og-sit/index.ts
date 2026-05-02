@@ -17,7 +17,10 @@ const corsHeaders = {
 };
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
-const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY")!;
+// service role : on ne renvoie qu'une image OG publique (first_name + ville + photo propriété),
+// déjà exposée sur /annonces/:id. L'anon key échoue car public_profiles est une vue
+// security_invoker dont anon n'a pas le SELECT sous-jacent sur profiles.
+const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
 const speciesLabel: Record<string, string> = {
   dog: "chien", cat: "chat", horse: "cheval", bird: "oiseau", rodent: "rongeur",
