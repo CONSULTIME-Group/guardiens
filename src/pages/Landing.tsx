@@ -199,6 +199,38 @@ const Landing = () => {
     return () => window.clearInterval(intervalId);
   }, [isTestimonialsHovered, testimonialPages.length]);
 
+  /* ── Idle preload of the France illustration (low priority, post-LCP) ── */
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    // Already preloaded? skip.
+    if (document.querySelector('link[data-preload="france-local-national"]')) return;
+
+    const schedule: (cb: () => void) => number =
+      (window as any).requestIdleCallback
+        ? (cb) => (window as any).requestIdleCallback(cb, { timeout: 2500 })
+        : (cb) => window.setTimeout(cb, 1500);
+
+    const handle = schedule(() => {
+      const link = document.createElement("link");
+      link.rel = "preload";
+      link.as = "image";
+      link.href = franceLocalNational;
+      link.type = "image/webp";
+      // Low priority so it never competes with the hero / LCP resources.
+      link.setAttribute("fetchpriority", "low");
+      link.dataset.preload = "france-local-national";
+      document.head.appendChild(link);
+    });
+
+    return () => {
+      if ((window as any).cancelIdleCallback && (window as any).requestIdleCallback) {
+        (window as any).cancelIdleCallback(handle);
+      } else {
+        window.clearTimeout(handle);
+      }
+    };
+  }, []);
+
 
   return (
     <div className="min-h-screen bg-background text-foreground">
