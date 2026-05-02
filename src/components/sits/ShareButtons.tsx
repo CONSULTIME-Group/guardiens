@@ -36,11 +36,16 @@ type ShareChannel = "facebook" | "whatsapp" | "x" | "email" | "copy" | "native";
 const ShareButtons = ({ sitId, title, city, startDate, endDate, source = "sit_detail", compact = false, viewerType = "anonymous" }: ShareButtonsProps) => {
   const { toast } = useToast();
   const [copied, setCopied] = useState(false);
+  const [downloading, setDownloading] = useState(false);
 
   // Always share the public, indexable URL — never the protected /sits/:id one
   const shareUrl = typeof window !== "undefined"
     ? `${window.location.origin}/annonces/${sitId}`
     : `https://guardiens.fr/annonces/${sitId}`;
+
+  // URL de l'image OG personnalisée (servie par l'edge function og-sit, avec photo réelle)
+  const supabaseUrl = (supabase as any)?.supabaseUrl || `https://${import.meta.env.VITE_SUPABASE_PROJECT_ID}.supabase.co`;
+  const visualDownloadUrl = `${supabaseUrl}/functions/v1/og-sit?id=${sitId}&download=1`;
 
   const periodLabel = formatSitPeriod(startDate, endDate);
   const cityPart = city ? ` à ${city}` : "";
