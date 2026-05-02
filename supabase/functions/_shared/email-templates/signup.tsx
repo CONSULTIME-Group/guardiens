@@ -122,8 +122,8 @@ export const SignupEmail = ({
         </Text>
         <Text style={stepText}>
           <strong style={stepNum}>2.</strong> Vous découvrirez les
-          membres et les annonces près de chez vous, à quelques minutes
-          ou quelques rues.
+          membres et les annonces près de chez vous — et partout en
+          France si vous élargissez votre recherche.
         </Text>
         <Text style={stepText}>
           <strong style={stepNum}>3.</strong> Vous pourrez écrire en

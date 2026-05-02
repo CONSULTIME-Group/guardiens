@@ -28,7 +28,8 @@ const OnboardingJ1Email = ({ firstName }: OnboardingJ1Props) => {
           </Text>
 
           <Text style={text}>
-            Pour accéder aux annonces de garde et aux petites missions près de chez vous,
+            Pour accéder aux annonces de garde et aux petites missions près de chez vous
+            — ou ailleurs en France si vous élargissez votre rayon —,
             votre profil doit être complété à 60 % minimum. Il vous manque peut-être juste
             une photo et une courte bio.
           </Text>
