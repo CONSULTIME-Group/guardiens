@@ -296,7 +296,7 @@ const Landing = () => {
 
             {/* Badge 0 € propriétaires */}
             <div className="inline-flex items-center rounded-full px-4 py-1.5 mb-6 bg-white/15 border border-white/30 backdrop-blur-sm animate-hero-fade-up">
-              <span className="font-body text-xs text-white tracking-wide">0 € pour les propriétaires, à vie</span>
+              <span className="font-body text-xs text-white tracking-wide">Gratuit pour les propriétaires, à vie</span>
             </div>
 
             {/* H1 with staggered animation */}
@@ -396,9 +396,9 @@ const Landing = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-12">
             <div className="bg-card border border-border rounded-xl p-6">
               <p className="text-xs tracking-widest uppercase text-primary/70 font-body">01</p>
-              <h3 className="mt-3 font-heading font-semibold text-lg text-foreground">0 € pour les propriétaires, à vie</h3>
+              <h3 className="mt-3 font-heading font-semibold text-lg text-foreground">Gratuit pour les propriétaires, à vie</h3>
               <p className="mt-2 text-muted-foreground text-sm leading-relaxed">
-                Publier votre annonce, recevoir des candidatures, échanger avec les gardiens : tout est à 0 € pour les propriétaires. Sans limite de temps.
+                Publier votre annonce, recevoir des candidatures, échanger avec les gardiens : tout est gratuit pour les propriétaires. Sans limite de temps.
               </p>
             </div>
 
@@ -474,7 +474,7 @@ const Landing = () => {
                   Trouvez quelqu'un du coin pour garder votre maison et vos animaux. Vous le rencontrez avant. Vous choisissez.
                 </p>
                 <span className="inline-block px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-body font-medium mb-4">
-                  0 € pour les propriétaires
+                  Gratuit pour les propriétaires
                 </span>
                 <Link to="/inscription?role=owner" className="block text-sm font-body text-primary font-medium hover:underline">
                   Je cherche un gardien →
@@ -498,7 +498,7 @@ const Landing = () => {
             <RevealSection delay={0.3}>
               <div className="bg-card rounded-2xl p-8 shadow-sm text-left h-full border-2 border-primary/20 relative overflow-hidden">
                 <div className="absolute top-0 right-0 bg-primary text-primary-foreground text-[10px] font-body font-bold uppercase tracking-wider px-3 py-1 rounded-bl-lg">
-                  0 € pour tous
+                  Gratuit pour tous
                 </div>
                 <p className="text-xs tracking-widest uppercase text-primary/70 font-body mb-3">Entraide</p>
                 <h3 className="text-xl font-heading font-semibold text-foreground mb-3">Un coup de main. Un échange.</h3>
@@ -915,7 +915,7 @@ const Landing = () => {
                 </ul>
                 <div className="mt-6 pt-6 border-t border-border">
                   <p className="text-xs text-foreground/60 leading-relaxed">
-                    Annonce à 0 €, profils vérifiés, accord de garde signé.
+                    Annonce gratuite, profils vérifiés, accord de garde signé.
                   </p>
                 </div>
               </div>
@@ -970,7 +970,7 @@ const Landing = () => {
                 </ul>
                 <div className="mt-6 pt-6 border-t border-border">
                   <p className="text-xs text-foreground/60 leading-relaxed">
-                    Inscription à 0 €, logements à découvrir, vraies rencontres locales.
+                    Inscription gratuite, logements à découvrir, vraies rencontres locales.
                   </p>
                 </div>
               </div>
@@ -1084,7 +1084,7 @@ const Landing = () => {
               House-sitting près de chez vous
             </h2>
             <p className="text-center text-foreground/60 font-body max-w-2xl mx-auto mb-16">
-              Des gardiens vérifiés près de chez vous, disponibles rapidement. 0 € pour les propriétaires, à vie.
+              Des gardiens vérifiés près de chez vous, disponibles rapidement. Gratuit pour les propriétaires, à vie.
             </p>
           </RevealSection>
 
@@ -1145,7 +1145,7 @@ const Landing = () => {
             Inscrivez-vous avant le 13 mai.
           </h2>
           <p className="font-body text-lg text-white/85 leading-relaxed mb-10">
-            Badge Fondateur à vie. Accès à 0 € jusqu'au 13 juin. Et surtout, vous serez parmi les premiers à vivre ça. Pourquoi le 13 mai ? C'est l'anniversaire de Jérémie. Il préfère offrir l'accès plutôt que recevoir des chaussettes.
+            Badge Fondateur à vie. Accès gratuit jusqu'au 13 juin. Et surtout, vous serez parmi les premiers à vivre ça. Pourquoi le 13 mai ? C'est l'anniversaire de Jérémie. Il préfère offrir l'accès plutôt que recevoir des chaussettes.
           </p>
           <button
             onClick={() => navigate("/inscription")}
