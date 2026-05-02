@@ -363,10 +363,10 @@ const GuideDetail = () => {
               Vous allez garder à {guide.city} ?
             </p>
             <Link
-              to="/inscription"
+              to={`/house-sitting/${guide.slug}`}
               className="inline-flex items-center justify-center rounded-lg bg-primary px-6 py-3 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
             >
-              Voir les gardes disponibles
+              Voir les gardes à {guide.city}
             </Link>
           </div>
         </main>
