@@ -33,6 +33,7 @@ import FavoriteButton from "@/components/shared/FavoriteButton";
 import { getDeptCode, DEPT_NAMES } from "@/lib/departments";
 import { getRegionCode, getRegionName, getDeptsInRegion, REGION_NAMES, DEPT_TO_REGION } from "@/lib/regions";
 import { trackEvent } from "@/lib/analytics";
+import ReachReassuranceBanner from "@/components/marketing/ReachReassuranceBanner";
 
 const animalChips = ["Chiens", "Chats", "Chevaux", "Animaux de ferme", "NAC"];
 const animalChipToSpecies: Record<string, string> = {
@@ -1198,6 +1199,14 @@ const SearchSitter = () => {
           </div>
         </div>
       )}
+
+      {/* Réassurance périmètre — visible avant la barre de recherche */}
+      <div className="px-6 pt-4">
+        <ReachReassuranceBanner
+          variant="inline"
+          inlineText="Du coin par défaut — élargissez à toute la France quand vous le voulez."
+        />
+      </div>
 
       {/* ─── Sticky search bar ─── */}
       <div className="sticky top-0 z-10 bg-background border-b border-border">
