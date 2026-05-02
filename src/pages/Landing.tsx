@@ -498,7 +498,7 @@ const Landing = () => {
             <RevealSection delay={0.3}>
               <div className="bg-card rounded-2xl p-8 shadow-sm text-left h-full border-2 border-primary/20 relative overflow-hidden">
                 <div className="absolute top-0 right-0 bg-primary text-primary-foreground text-[10px] font-body font-bold uppercase tracking-wider px-3 py-1 rounded-bl-lg">
-                  0 € pour tous
+                  Gratuit pour tous
                 </div>
                 <p className="text-xs tracking-widest uppercase text-primary/70 font-body mb-3">Entraide</p>
                 <h3 className="text-xl font-heading font-semibold text-foreground mb-3">Un coup de main. Un échange.</h3>
