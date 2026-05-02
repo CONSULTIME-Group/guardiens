@@ -53,15 +53,47 @@ export const AuthIllustrationPanel = forwardRef<HTMLDivElement, AuthIllustration
     const videoARef = useRef<HTMLVideoElement>(null);
     const videoBRef = useRef<HTMLVideoElement>(null);
     const [animate, setAnimate] = useState(false);
+    // Mount des <video> différé : aucun octet vidéo ne part avant que la
+    // page soit interactive ET que le navigateur ait du temps libre.
+    // Tant que false, seule la PNG (732 KB) est téléchargée.
+    const [mountVideos, setMountVideos] = useState(false);
 
     useEffect(() => {
       if (typeof window === "undefined") return;
       const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
-      setAnimate(!mq.matches);
-      const onChange = (e: MediaQueryListEvent) => setAnimate(!e.matches);
+      // Respect Save-Data + connexions lentes (2g/slow-2g/3g) : poster-only.
+      const conn = (navigator as Navigator & {
+        connection?: { saveData?: boolean; effectiveType?: string };
+      }).connection;
+      const slow =
+        !!conn?.saveData ||
+        (conn?.effectiveType ? /^(slow-2g|2g|3g)$/.test(conn.effectiveType) : false);
+      setAnimate(!mq.matches && !slow);
+      const onChange = (e: MediaQueryListEvent) => setAnimate(!e.matches && !slow);
       mq.addEventListener("change", onChange);
       return () => mq.removeEventListener("change", onChange);
     }, []);
+
+    // Différer le mount des <video> jusqu'à idle (max 1.5s) pour ne pas
+    // concurrencer les scripts critiques d'auth (form, OAuth, Supabase).
+    useEffect(() => {
+      if (!animate) return;
+      const w = window as Window & {
+        requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number;
+        cancelIdleCallback?: (id: number) => void;
+      };
+      let idleId: number | undefined;
+      let timeoutId: number | undefined;
+      if (w.requestIdleCallback) {
+        idleId = w.requestIdleCallback(() => setMountVideos(true), { timeout: 1500 });
+      } else {
+        timeoutId = window.setTimeout(() => setMountVideos(true), 1500);
+      }
+      return () => {
+        if (idleId !== undefined) w.cancelIdleCallback?.(idleId);
+        if (timeoutId !== undefined) window.clearTimeout(timeoutId);
+      };
+    }, [animate]);
 
     useEffect(() => {
       if (!animate) return;
