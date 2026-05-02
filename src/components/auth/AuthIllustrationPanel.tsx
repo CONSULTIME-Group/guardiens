@@ -1,5 +1,6 @@
-import { forwardRef } from "react";
+import { forwardRef, useEffect, useRef, useState } from "react";
 import authIllustration from "@/assets/auth-illustration.png";
+import authIllustrationVideo from "@/assets/auth-illustration.mp4.asset.json";
 
 
 interface AuthIllustrationPanelProps {
@@ -29,6 +30,23 @@ interface AuthIllustrationPanelProps {
  */
 export const AuthIllustrationPanel = forwardRef<HTMLDivElement, AuthIllustrationPanelProps>(
   ({ title, tagline, description, footerSlot }, ref) => {
+    // Micro-animation : cinemagraph par-dessus l'image fixe.
+    // - Désactivée si prefers-reduced-motion (accessibilité)
+    // - Désactivée si la vidéo échoue à charger (fallback transparent → image visible)
+    // - L'image PNG reste TOUJOURS rendue dessous comme fallback / poster initial,
+    //   garantissant qu'on voit la même chose que le screenshot statique pendant le chargement.
+    const videoRef = useRef<HTMLVideoElement>(null);
+    const [animate, setAnimate] = useState(false);
+
+    useEffect(() => {
+      if (typeof window === "undefined") return;
+      const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+      setAnimate(!mq.matches);
+      const onChange = (e: MediaQueryListEvent) => setAnimate(!e.matches);
+      mq.addEventListener("change", onChange);
+      return () => mq.removeEventListener("change", onChange);
+    }, []);
+
     return (
       <div ref={ref} className="hidden lg:block lg:w-1/2 relative bg-background">
         {/*
@@ -38,6 +56,7 @@ export const AuthIllustrationPanel = forwardRef<HTMLDivElement, AuthIllustration
           utilisateur ne vit ici, le contenu interactif est dans la moitié droite.
         */}
         <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none" aria-hidden="true">
+          {/* Couche 1 : image fixe, toujours présente (poster + fallback) */}
           <img
             src={authIllustration}
             alt=""
@@ -57,11 +76,41 @@ export const AuthIllustrationPanel = forwardRef<HTMLDivElement, AuthIllustration
                 "linear-gradient(to right, hsl(0 0% 0%) 0%, hsl(0 0% 0%) 88%, transparent 100%)",
             }}
             draggable={false}
-            loading="lazy"
+            loading="eager"
             decoding="async"
             width={1024}
             height={1366}
           />
+
+          {/*
+            Couche 2 : cinemagraph mp4 superposé exactement comme l'image
+            (mêmes dimensions, même object-fit, même position, même masque).
+            Animation très subtile : hirondelles, canard, fontaine, drapeaux.
+            Ne se monte que si l'utilisateur n'a pas demandé reduced-motion.
+          */}
+          {animate && (
+            <video
+              ref={videoRef}
+              src={authIllustrationVideo.url}
+              poster={authIllustration}
+              autoPlay
+              muted
+              loop
+              playsInline
+              preload="metadata"
+              aria-hidden="true"
+              tabIndex={-1}
+              onError={() => setAnimate(false)}
+              className="absolute inset-0 w-full h-full object-contain object-bottom select-none transition-opacity duration-700"
+              style={{
+                objectPosition: "50% 100%",
+                WebkitMaskImage:
+                  "linear-gradient(to right, hsl(0 0% 0%) 0%, hsl(0 0% 0%) 88%, transparent 100%)",
+                maskImage:
+                  "linear-gradient(to right, hsl(0 0% 0%) 0%, hsl(0 0% 0%) 88%, transparent 100%)",
+              }}
+            />
+          )}
         </div>
 
         {/*
