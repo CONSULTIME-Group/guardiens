@@ -35,13 +35,15 @@ export const AuthIllustrationPanel = forwardRef<HTMLDivElement, AuthIllustration
     // - Désactivée si la vidéo échoue à charger (fallback transparent → image visible)
     // - L'image PNG reste TOUJOURS rendue dessous comme fallback / poster initial,
     //   garantissant qu'on voit la même chose que le screenshot statique pendant le chargement.
-    // Deux vidéos jouent en parallèle, décalées de la moitié de la durée.
-    // On crossfade en permanence entre les deux : quand l'une approche de sa fin
-    // (donc du "saut" du loop), l'autre est en plein milieu et prend le relais.
-    // Résultat : aucune coupure visible, la boucle paraît infinie et naturelle.
+    // Boucle infinie sans saut visible : deux vidéos identiques jouent en parallèle,
+    // décalées d'une demi-durée. À tout moment, au moins l'une des deux est loin
+    // de son bord (donc loin du "saut" du loop). On crossfade entre les deux en
+    // gardant TOUJOURS la somme des opacités = 1 (vrai crossfade additif), pour
+    // qu'aucune image fixe sous-jacente ne transparaisse pendant la transition.
     const videoARef = useRef<HTMLVideoElement>(null);
     const videoBRef = useRef<HTMLVideoElement>(null);
     const [animate, setAnimate] = useState(false);
+    // Opacité de A. B = 1 - aOpacity. Donc somme constante = 1.
     const [aOpacity, setAOpacity] = useState(1);
 
     useEffect(() => {
@@ -53,7 +55,6 @@ export const AuthIllustrationPanel = forwardRef<HTMLDivElement, AuthIllustration
       return () => mq.removeEventListener("change", onChange);
     }, []);
 
-    // Démarre la 2e vidéo décalée de la moitié de la durée, et crossfade en continu.
     useEffect(() => {
       if (!animate) return;
       const a = videoARef.current;
@@ -61,36 +62,72 @@ export const AuthIllustrationPanel = forwardRef<HTMLDivElement, AuthIllustration
       if (!a || !b) return;
 
       let raf = 0;
-      const FADE = 1.2; // secondes de crossfade autour des bords
+      // Largeur du crossfade autour de chaque bord (sec). Plus c'est long,
+      // plus la transition est invisible mais plus on voit "deux scènes en même temps".
+      const FADE = 0.9;
 
       const init = () => {
         const dur = a.duration;
-        if (!dur || !isFinite(dur)) {
+        if (!dur || !isFinite(dur) || dur < 2 * FADE + 0.1) {
           raf = requestAnimationFrame(init);
           return;
         }
-        b.currentTime = dur / 2;
+        const half = dur / 2;
+        // B démarre pile au milieu de A → quand A est près d'un bord,
+        // B est au centre de son propre clip (zone "safe", aucune coupure).
+        b.currentTime = half;
         b.play().catch(() => {});
+
+        // Resync périodique pour éviter la dérive des deux vidéos sur le long terme.
+        const resync = () => {
+          const d = a.duration;
+          if (!d || !isFinite(d)) return;
+          const expected = (a.currentTime + d / 2) % d;
+          const drift = Math.abs(b.currentTime - expected);
+          // Si la dérive dépasse 80ms, on resync silencieusement (toujours pendant
+          // que A est dominant, jamais pendant que B est visible).
+          if (drift > 0.08 && a.currentTime > FADE && a.currentTime < d - FADE) {
+            b.currentTime = expected;
+          }
+        };
+        const resyncId = window.setInterval(resync, 1500);
 
         const tick = () => {
           const d = a.duration;
           if (d && isFinite(d)) {
             const t = a.currentTime;
-            // Distance au "saut" (fin/début) du clip A
+            // Distance de A à son bord le plus proche (0 ou d).
             const distA = Math.min(t, d - t);
-            // A reste à 1, fade vers 0 quand on approche du bord
-            const target = distA < FADE ? Math.max(0, distA / FADE) : 1;
-            setAOpacity(target);
+            // Quand distA >= FADE → A pleinement visible (opa=1).
+            // Quand distA = 0 → A invisible (opa=0), B prend tout (opa=1).
+            // Courbe smoothstep pour un fondu doux et imperceptible.
+            const x = Math.min(1, Math.max(0, distA / FADE));
+            const smooth = x * x * (3 - 2 * x);
+            setAOpacity(smooth);
           }
           raf = requestAnimationFrame(tick);
         };
         tick();
+
+        return () => {
+          window.clearInterval(resyncId);
+        };
       };
 
-      if (a.readyState >= 1) init();
-      else a.addEventListener("loadedmetadata", init, { once: true });
+      let cleanup: (() => void) | undefined;
+      if (a.readyState >= 1) {
+        cleanup = init() as undefined | (() => void);
+      } else {
+        const onMeta = () => {
+          cleanup = init() as undefined | (() => void);
+        };
+        a.addEventListener("loadedmetadata", onMeta, { once: true });
+      }
 
-      return () => cancelAnimationFrame(raf);
+      return () => {
+        cancelAnimationFrame(raf);
+        cleanup?.();
+      };
     }, [animate]);
 
     return (
