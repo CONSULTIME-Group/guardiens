@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Facebook, Link2, MessageCircle, Mail, Check, Share2, Calendar, MapPin } from "lucide-react";
+import { Facebook, Link2, MessageCircle, Mail, Check, Share2, Calendar, MapPin, Download } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { trackEvent } from "@/lib/analytics";
