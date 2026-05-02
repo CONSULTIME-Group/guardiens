@@ -434,24 +434,27 @@ const Landing = () => {
       </section>
 
       {/* ═══════════════ SECTION — LOCAL OU NATIONAL ═══════════════ */}
-      <section className="bg-background py-16 md:py-24">
-        <div className="max-w-6xl mx-auto px-4">
-          <div className="text-center mb-12 md:mb-16">
-            <span className="text-xs tracking-widest uppercase text-primary/70 font-body">Le périmètre, c'est vous</span>
-            <h2 className="font-heading text-3xl md:text-4xl font-bold text-foreground mt-3">
-              Local par envie, national par liberté
+      <section className="bg-background py-20 md:py-28">
+        <div className="max-w-6xl mx-auto px-5 sm:px-6">
+          {/* En-tête */}
+          <div className="text-center mb-14 md:mb-20 max-w-3xl mx-auto">
+            <span className="text-[11px] tracking-[0.2em] uppercase text-primary/70 font-body">
+              Le périmètre, c'est vous
+            </span>
+            <h2 className="font-heading text-[2rem] leading-[1.15] md:text-5xl md:leading-[1.1] font-bold text-foreground mt-4 tracking-tight">
+              Local par envie,<br className="hidden sm:block" /> national par liberté
             </h2>
-            <p className="text-muted-foreground mt-4 max-w-2xl mx-auto leading-relaxed">
+            <p className="text-base md:text-lg text-muted-foreground mt-5 md:mt-6 leading-relaxed">
               Notre promesse, c'est la confiance retrouvée avec les gens du coin.
               Mais rien ne vous y oblige : Guardiens couvre toute la France, et c'est vous qui choisissez jusqu'où vous voulez aller.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-14 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
             {/* Illustration France gouache */}
             <div className="relative order-2 lg:order-1 mx-auto w-full max-w-md lg:max-w-none">
               <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/10 rounded-3xl blur-2xl" aria-hidden="true" />
-              <div className="relative bg-card/50 border border-border rounded-3xl p-3 sm:p-4 md:p-6 shadow-sm">
+              <div className="relative bg-card/50 border border-border rounded-3xl p-4 sm:p-5 md:p-7 shadow-sm">
                 <img
                   src={franceLocalNational}
                   alt="Illustration gouache d'une carte de France parsemée de points reliés, symbolisant le réseau de gardiens partout dans le pays."
@@ -463,47 +466,51 @@ const Landing = () => {
                   className="block w-full h-auto max-w-[420px] sm:max-w-[460px] lg:max-w-none mx-auto rounded-2xl"
                   style={{ imageRendering: 'auto' }}
                 />
-                <div className="mt-4 grid grid-cols-3 gap-2 text-center max-w-[460px] mx-auto">
-                  <div className="rounded-xl bg-background border border-border py-3 px-2">
-                    <p className="font-heading font-bold text-xl text-primary">5 km</p>
-                    <p className="text-[10px] uppercase tracking-wider text-muted-foreground mt-1">Hyper-local</p>
+                <div className="mt-5 grid grid-cols-3 gap-2.5 text-center max-w-[460px] mx-auto">
+                  <div className="rounded-xl bg-background border border-border py-3.5 px-2">
+                    <p className="font-heading font-bold text-xl md:text-2xl text-primary leading-none">5 km</p>
+                    <p className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground mt-1.5">Hyper-local</p>
                   </div>
-                  <div className="rounded-xl bg-background border border-border py-3 px-2">
-                    <p className="font-heading font-bold text-xl text-primary">30 km</p>
-                    <p className="text-[10px] uppercase tracking-wider text-muted-foreground mt-1">Du coin</p>
+                  <div className="rounded-xl bg-background border border-border py-3.5 px-2">
+                    <p className="font-heading font-bold text-xl md:text-2xl text-primary leading-none">30 km</p>
+                    <p className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground mt-1.5">Du coin</p>
                   </div>
-                  <div className="rounded-xl bg-background border border-border py-3 px-2">
-                    <p className="font-heading font-bold text-xl text-primary">France</p>
-                    <p className="text-[10px] uppercase tracking-wider text-muted-foreground mt-1">Sans limite</p>
+                  <div className="rounded-xl bg-background border border-border py-3.5 px-2">
+                    <p className="font-heading font-bold text-xl md:text-2xl text-primary leading-none">France</p>
+                    <p className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground mt-1.5">Sans limite</p>
                   </div>
                 </div>
               </div>
             </div>
 
             {/* Contenu */}
-            <div className="order-1 lg:order-2 space-y-6">
-              <div className="bg-card border border-border rounded-2xl p-6 md:p-7">
-                <p className="text-xs tracking-widest uppercase text-primary/70 font-body">Mode proximité</p>
-                <h3 className="mt-3 font-heading font-semibold text-xl text-foreground">Un gardien du coin, à quelques rues</h3>
-                <p className="mt-3 text-muted-foreground text-sm md:text-base leading-relaxed">
+            <div className="order-1 lg:order-2 space-y-5 md:space-y-6">
+              <article className="bg-card border border-border rounded-2xl p-6 md:p-8">
+                <p className="text-[11px] tracking-[0.2em] uppercase text-primary/70 font-body">Mode proximité</p>
+                <h3 className="mt-3 font-heading font-semibold text-xl md:text-2xl text-foreground leading-snug">
+                  Un gardien du coin, à quelques rues
+                </h3>
+                <p className="mt-3 md:mt-4 text-muted-foreground text-[15px] md:text-base leading-relaxed">
                   Idéal pour les gardes courtes, les imprévus, les coups de main réguliers.
                   Vous choisissez le rayon : 5, 15, 30 km. La rencontre est facile, la confiance s'installe vite.
                 </p>
-              </div>
+              </article>
 
-              <div className="bg-card border border-border rounded-2xl p-6 md:p-7">
-                <p className="text-xs tracking-widest uppercase text-primary/70 font-body">Mode élargi</p>
-                <h3 className="mt-3 font-heading font-semibold text-xl text-foreground">Toute la France, et même un peu plus loin</h3>
-                <p className="mt-3 text-muted-foreground text-sm md:text-base leading-relaxed">
+              <article className="bg-card border border-border rounded-2xl p-6 md:p-8">
+                <p className="text-[11px] tracking-[0.2em] uppercase text-primary/70 font-body">Mode élargi</p>
+                <h3 className="mt-3 font-heading font-semibold text-xl md:text-2xl text-foreground leading-snug">
+                  Toute la France, et même un peu plus loin
+                </h3>
+                <p className="mt-3 md:mt-4 text-muted-foreground text-[15px] md:text-base leading-relaxed">
                   Vous habitez une petite commune et voulez plus de candidatures ?
                   Vous voulez découvrir une autre région le temps d'une garde ?
                   Élargissez à votre département, votre région ou la France entière, en un clic.
                 </p>
-              </div>
+              </article>
             </div>
           </div>
 
-          <p className="text-center text-sm text-muted-foreground italic mt-10 md:mt-12 max-w-2xl mx-auto">
+          <p className="text-center text-[13px] md:text-sm text-muted-foreground italic mt-14 md:mt-16 max-w-2xl mx-auto leading-relaxed">
             Quel que soit le périmètre, la confiance reste le fil rouge : profils vérifiés, avis publics, rencontre avant chaque garde.
           </p>
         </div>
