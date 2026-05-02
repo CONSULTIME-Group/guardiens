@@ -50,7 +50,7 @@ const ShareButtons = ({ sitId, title, city, startDate, endDate, source = "sit_de
   const periodLabel = formatSitPeriod(startDate, endDate);
   const cityPart = city ? ` à ${city}` : "";
   const datePart = periodLabel ? ` (${periodLabel})` : "";
-  const shareText = `${title}${cityPart}${datePart} — une annonce de garde sur Guardiens. Quelqu'un du coin pour veiller sur la maison ?`;
+  const shareText = `${title}${cityPart}${datePart} — une annonce de garde sur Guardiens. Quelqu'un du coin (ou d'ailleurs en France) pour veiller sur la maison ?`;
 
   const track = (channel: ShareChannel) => {
     try {
