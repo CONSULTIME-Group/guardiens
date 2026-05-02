@@ -96,7 +96,7 @@ export const AuthIllustrationPanel = forwardRef<HTMLDivElement, AuthIllustration
     }, [animate]);
 
     useEffect(() => {
-      if (!animate) return;
+      if (!animate || !mountVideos) return;
       const a = videoARef.current;
       const b = videoBRef.current;
       if (!a || !b) return;
