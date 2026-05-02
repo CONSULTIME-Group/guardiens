@@ -249,7 +249,7 @@ export const AuthIllustrationPanel = forwardRef<HTMLDivElement, AuthIllustration
             Animation très subtile : hirondelles, canard, fontaine, drapeaux.
             Ne se monte que si l'utilisateur n'a pas demandé reduced-motion.
           */}
-          {animate && (
+          {animate && mountVideos && (
             <>
               <video
                 ref={videoARef}
