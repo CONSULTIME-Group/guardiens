@@ -35,8 +35,14 @@ export const AuthIllustrationPanel = forwardRef<HTMLDivElement, AuthIllustration
     // - Désactivée si la vidéo échoue à charger (fallback transparent → image visible)
     // - L'image PNG reste TOUJOURS rendue dessous comme fallback / poster initial,
     //   garantissant qu'on voit la même chose que le screenshot statique pendant le chargement.
-    const videoRef = useRef<HTMLVideoElement>(null);
+    // Deux vidéos jouent en parallèle, décalées de la moitié de la durée.
+    // On crossfade en permanence entre les deux : quand l'une approche de sa fin
+    // (donc du "saut" du loop), l'autre est en plein milieu et prend le relais.
+    // Résultat : aucune coupure visible, la boucle paraît infinie et naturelle.
+    const videoARef = useRef<HTMLVideoElement>(null);
+    const videoBRef = useRef<HTMLVideoElement>(null);
     const [animate, setAnimate] = useState(false);
+    const [aOpacity, setAOpacity] = useState(1);
 
     useEffect(() => {
       if (typeof window === "undefined") return;
@@ -46,6 +52,46 @@ export const AuthIllustrationPanel = forwardRef<HTMLDivElement, AuthIllustration
       mq.addEventListener("change", onChange);
       return () => mq.removeEventListener("change", onChange);
     }, []);
+
+    // Démarre la 2e vidéo décalée de la moitié de la durée, et crossfade en continu.
+    useEffect(() => {
+      if (!animate) return;
+      const a = videoARef.current;
+      const b = videoBRef.current;
+      if (!a || !b) return;
+
+      let raf = 0;
+      const FADE = 1.2; // secondes de crossfade autour des bords
+
+      const init = () => {
+        const dur = a.duration;
+        if (!dur || !isFinite(dur)) {
+          raf = requestAnimationFrame(init);
+          return;
+        }
+        b.currentTime = dur / 2;
+        b.play().catch(() => {});
+
+        const tick = () => {
+          const d = a.duration;
+          if (d && isFinite(d)) {
+            const t = a.currentTime;
+            // Distance au "saut" (fin/début) du clip A
+            const distA = Math.min(t, d - t);
+            // A reste à 1, fade vers 0 quand on approche du bord
+            const target = distA < FADE ? Math.max(0, distA / FADE) : 1;
+            setAOpacity(target);
+          }
+          raf = requestAnimationFrame(tick);
+        };
+        tick();
+      };
+
+      if (a.readyState >= 1) init();
+      else a.addEventListener("loadedmetadata", init, { once: true });
+
+      return () => cancelAnimationFrame(raf);
+    }, [animate]);
 
     return (
       <div ref={ref} className="hidden lg:block lg:w-1/2 relative bg-background">
