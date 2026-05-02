@@ -103,7 +103,24 @@ const SearchMapView = ({
 
   const center: [number, number] = userCoords
     ? [userCoords.lat, userCoords.lng]
-    : [45.7676, 4.8344];
+    : [46.6, 2.5];
+
+  const visibleResults = results.filter(
+    (item) => showAll || (!item?.is_demo && !item?.isAssigned && !item?.isCompleted)
+  );
+  const visibleCoords = visibleResults
+    .map((item) => getCoords(item))
+    .filter((c): c is { lat: number; lng: number } => !!c);
+
+  let bounds: L.LatLngBoundsExpression | null = null;
+  if (visibleCoords.length >= 2) {
+    bounds = visibleCoords.map((c) => [c.lat, c.lng]) as L.LatLngBoundsExpression;
+  } else if (visibleCoords.length === 1 && userCoords) {
+    bounds = [
+      [visibleCoords[0].lat, visibleCoords[0].lng],
+      [userCoords.lat, userCoords.lng],
+    ] as L.LatLngBoundsExpression;
+  }
 
   const activeItem = results.find((r) => r.id === activePin);
 
@@ -116,13 +133,17 @@ const SearchMapView = ({
       <div className="w-1/2 relative">
         <MapContainer
           center={center}
-          zoom={12}
+          zoom={userCoords ? 11 : 6}
           className="w-full h-full"
           zoomControl={true}
           attributionControl={false}
         >
-          <MapCenterController center={center} zoom={12} />
-          <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+          <MapCenterController center={center} zoom={userCoords ? 11 : 6} bounds={bounds} />
+          <TileLayer
+            url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+            subdomains="abcd"
+            maxZoom={19}
+          />
           {results
             .filter((item) => showAll || (!item?.is_demo && !item?.isAssigned && !item?.isCompleted))
             .map((item) => {
