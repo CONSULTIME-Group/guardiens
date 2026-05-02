@@ -41,25 +41,26 @@ export const AuthIllustrationPanel = forwardRef<HTMLDivElement, AuthIllustration
           <img
             src={authIllustration}
             alt=""
-            className="absolute inset-0 w-full h-full object-cover select-none"
+            className="absolute inset-0 w-full h-full object-contain object-bottom select-none"
             style={{
-              // Center slightly below middle so the key-exchange in the foreground stays visible,
-              // while keeping the airy sky at the top to host the title cartouche.
-              objectPosition: "50% 60%",
-              // Soft fade only on the right edge (toward the form) and a subtle top fade
-              // so the painted scene melts into bg-background without cropping the foreground.
+              // object-contain garantit qu'AUCUNE scène n'est rognée :
+              // chat lecteur (haut-droit), chèvre+brouette (bas-droit),
+              // potager (bas-gauche), promeneur emmêlé (centre) restent tous visibles
+              // quelle que soit la hauteur/largeur du panneau (desktop large, écran 4:3, etc.).
+              // Le fond crème (bg-background) prend le relais autour, ce qui se confond
+              // avec le papier peint de la gouache — pas de bande visible.
+              objectPosition: "50% 100%",
+              // Léger fade uniquement sur le bord droit pour fondre vers le formulaire.
               WebkitMaskImage:
-                "linear-gradient(to right, hsl(0 0% 0%) 0%, hsl(0 0% 0%) 80%, transparent 100%), linear-gradient(to bottom, transparent 0%, hsl(0 0% 0%) 12%, hsl(0 0% 0%) 100%)",
+                "linear-gradient(to right, hsl(0 0% 0%) 0%, hsl(0 0% 0%) 88%, transparent 100%)",
               maskImage:
-                "linear-gradient(to right, hsl(0 0% 0%) 0%, hsl(0 0% 0%) 80%, transparent 100%), linear-gradient(to bottom, transparent 0%, hsl(0 0% 0%) 12%, hsl(0 0% 0%) 100%)",
-              WebkitMaskComposite: "source-in",
-              maskComposite: "intersect",
+                "linear-gradient(to right, hsl(0 0% 0%) 0%, hsl(0 0% 0%) 88%, transparent 100%)",
             }}
             draggable={false}
             loading="lazy"
             decoding="async"
             width={1024}
-            height={1024}
+            height={1366}
           />
         </div>
 
