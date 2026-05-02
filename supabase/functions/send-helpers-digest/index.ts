@@ -64,6 +64,23 @@ Deno.serve(async (req) => {
       return json({ sent: 0, skipped: 0, reason: "Aucun destinataire" });
     }
 
+    // Pré-charger les compétences validées (status='approved') pour ne déclencher
+    // que sur des compétences réellement reconnues par la modération.
+    const { data: approvedSkills, error: skillsErr } = await supabase
+      .from("skills_library")
+      .select("label, normalized_label")
+      .eq("status", "approved");
+    if (skillsErr) throw skillsErr;
+
+    const approvedSet = new Set<string>(
+      (approvedSkills || [])
+        .map((s: any) => (s.normalized_label || s.label || "").toString().trim().toLowerCase())
+        .filter((s: string) => s.length > 0),
+    );
+
+    const normalizeSkill = (s: unknown): string =>
+      typeof s === "string" ? s.trim().toLowerCase().replace(/\s+/g, " ") : "";
+
     let sent = 0;
     let skipped = 0;
     const details: any[] = [];
@@ -103,8 +120,14 @@ Deno.serve(async (req) => {
 
       const helpers: any[] = [];
       for (const c of candidates || []) {
-        // Filtre compétence spécifique : custom_skills doit contenir au moins une string non vide
-        const skills = Array.isArray(c.custom_skills) ? c.custom_skills.filter((s: any) => typeof s === "string" && s.trim().length > 0) : [];
+        // Filtre compétence spécifique :
+        // - chaque entrée custom_skills doit être une string non vide après trim
+        // - elle doit correspondre à une compétence VALIDÉE (status='approved') dans skills_library
+        const rawSkills = Array.isArray(c.custom_skills) ? c.custom_skills : [];
+        const skills = rawSkills.filter((s: any) => {
+          const norm = normalizeSkill(s);
+          return norm.length > 0 && approvedSet.has(norm);
+        });
         if (skills.length === 0) continue;
 
         if (!c.city) continue;
