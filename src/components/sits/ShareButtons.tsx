@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Facebook, Link2, MessageCircle, Mail, Check, Share2, Calendar, MapPin } from "lucide-react";
+import { Facebook, Link2, MessageCircle, Mail, Check, Share2, Calendar, MapPin, Download } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { trackEvent } from "@/lib/analytics";
@@ -35,11 +36,16 @@ type ShareChannel = "facebook" | "whatsapp" | "x" | "email" | "copy" | "native";
 const ShareButtons = ({ sitId, title, city, startDate, endDate, source = "sit_detail", compact = false, viewerType = "anonymous" }: ShareButtonsProps) => {
   const { toast } = useToast();
   const [copied, setCopied] = useState(false);
+  const [downloading, setDownloading] = useState(false);
 
   // Always share the public, indexable URL — never the protected /sits/:id one
   const shareUrl = typeof window !== "undefined"
     ? `${window.location.origin}/annonces/${sitId}`
     : `https://guardiens.fr/annonces/${sitId}`;
+
+  // URL de l'image OG personnalisée (servie par l'edge function og-sit, avec photo réelle)
+  const supabaseUrl = (supabase as any)?.supabaseUrl || `https://${import.meta.env.VITE_SUPABASE_PROJECT_ID}.supabase.co`;
+  const visualDownloadUrl = `${supabaseUrl}/functions/v1/og-sit?id=${sitId}&download=1`;
 
   const periodLabel = formatSitPeriod(startDate, endDate);
   const cityPart = city ? ` à ${city}` : "";
@@ -100,6 +106,36 @@ const ShareButtons = ({ sitId, title, city, startDate, endDate, source = "sit_de
       await navigator.share({ title, text: shareText, url: shareUrl });
     } catch {
       // user cancelled — silent
+    }
+  };
+
+  const handleDownloadVisual = async () => {
+    try {
+      track("copy"); // event analytics dédié à créer si besoin ; on réutilise pour ne pas casser le typage
+      setDownloading(true);
+      const res = await fetch(visualDownloadUrl);
+      if (!res.ok) throw new Error("download failed");
+      const blob = await res.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = blobUrl;
+      a.download = `guardiens-annonce-${sitId.slice(0, 8)}.svg`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(blobUrl);
+      toast({
+        title: "Visuel téléchargé ✓",
+        description: "Attachez-le à votre publication Facebook avant de coller le lien.",
+      });
+    } catch {
+      toast({
+        variant: "destructive",
+        title: "Téléchargement impossible",
+        description: "Réessayez dans quelques instants.",
+      });
+    } finally {
+      setDownloading(false);
     }
   };
 
@@ -194,6 +230,32 @@ const ShareButtons = ({ sitId, title, city, startDate, endDate, source = "sit_de
           {copied ? <Check className="h-4 w-4 text-primary" /> : <Link2 className="h-4 w-4" />}
           {copied ? "Copié" : "Copier le lien"}
         </Button>
+      </div>
+
+      {/* Visuel HD personnalisé pour partage manuel (Facebook image post) */}
+      <div className="mt-4 rounded-lg border border-dashed border-primary/30 bg-primary/[0.03] p-3">
+        <div className="flex items-start justify-between gap-3 flex-wrap">
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-semibold text-foreground mb-0.5">
+              Pour un post Facebook avec image en grand
+            </p>
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              Téléchargez le visuel personnalisé (photo de votre maison + dates + animaux),
+              attachez-le à votre publication, puis collez le lien dans le texte. L'image sera
+              mise en avant et le lien restera bien cliquable.
+            </p>
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleDownloadVisual}
+            disabled={downloading}
+            className="gap-1.5 shrink-0"
+          >
+            <Download className="h-4 w-4" />
+            {downloading ? "Préparation…" : "Télécharger le visuel"}
+          </Button>
+        </div>
       </div>
 
       {hasNativeShare && (
