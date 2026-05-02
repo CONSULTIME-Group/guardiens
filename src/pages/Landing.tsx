@@ -12,7 +12,6 @@ import DemoListingShowcase from "@/components/landing/DemoListingShowcase";
 import PublicHeader from "@/components/layout/PublicHeader";
 import PublicFooter from "@/components/layout/PublicFooter";
 import { staticRoutes, DEFAULT_OG_IMAGE } from "@/data/siteRoutes";
-import { useInView } from "@/hooks/useInView";
 import RevealOnScroll from "@/components/ui/RevealOnScroll";
 
 const HOME_ROUTE = staticRoutes.find((route) => route.path === "/");
