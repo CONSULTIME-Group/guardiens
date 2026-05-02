@@ -243,7 +243,10 @@ export const AuthIllustrationPanel = forwardRef<HTMLDivElement, AuthIllustration
                   maskImage:
                     "linear-gradient(to right, hsl(0 0% 0%) 0%, hsl(0 0% 0%) 88%, transparent 100%)",
                 }}
-              />
+              >
+                <source src={authIllustrationWebm} type="video/webm" />
+                <source src={authIllustrationMp4} type="video/mp4" />
+              </video>
             </>
           )}
         </div>
