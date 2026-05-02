@@ -165,6 +165,9 @@ export const AuthIllustrationPanel = forwardRef<HTMLDivElement, AuthIllustration
 
       return () => {
         cancelAnimationFrame(raf);
+        window.clearTimeout(fallbackTimer);
+        window.clearTimeout(noSourceTimer);
+        a.removeEventListener("canplay", onCanPlay);
         cleanup?.();
       };
     }, [animate]);
