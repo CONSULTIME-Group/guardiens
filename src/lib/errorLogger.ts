@@ -280,16 +280,67 @@ export function installGlobalErrorLogger() {
 
   window.addEventListener("unhandledrejection", (event) => {
     const reason = event.reason;
-    const message =
-      reason instanceof Error
-        ? reason.message
-        : typeof reason === "string"
-        ? reason
-        : JSON.stringify(reason)?.slice(0, 500) || "Unhandled rejection";
+
+    // Construire un message le plus parlant possible
+    let message: string;
+    let stack: string | null = null;
+
+    if (reason instanceof Error) {
+      message = reason.message || reason.name || "Error";
+      stack = reason.stack ?? null;
+    } else if (typeof reason === "string") {
+      message = reason;
+    } else if (reason && typeof reason === "object") {
+      // Tenter d'extraire des champs courants (Supabase, fetch, DOMException…)
+      const r = reason as Record<string, unknown>;
+      const candidate =
+        (r.message as string) ||
+        (r.error_description as string) ||
+        (r.error as string) ||
+        (r.statusText as string) ||
+        (r.name as string) ||
+        "";
+      const keys = Object.keys(r).slice(0, 10).join(",");
+      const serialized = (() => {
+        try {
+          return JSON.stringify(r)?.slice(0, 300);
+        } catch {
+          return "";
+        }
+      })();
+      message =
+        candidate ||
+        serialized ||
+        (keys ? `Empty rejection (keys: ${keys})` : "Empty rejection ({})");
+    } else {
+      message = String(reason ?? "Unhandled rejection (no reason)");
+    }
+
+    // Filtrer le bruit Safari iOS / aborts de navigation :
+    // - DOMException AbortError (fetch annulé, navigation, onglet en background)
+    // - rejections totalement vides sans stack (typiquement Safari qui abort)
+    const isAbort =
+      (reason instanceof DOMException && reason.name === "AbortError") ||
+      /aborted|abort/i.test(message);
+    const isEmptyNoise =
+      !stack &&
+      reason &&
+      typeof reason === "object" &&
+      Object.keys(reason as object).length === 0;
+
+    if (isAbort || isEmptyNoise) {
+      // On n'envoie pas — ce n'est pas actionnable.
+      if (import.meta.env.DEV) {
+        // eslint-disable-next-line no-console
+        console.debug("[errorLogger] ignored rejection:", reason);
+      }
+      return;
+    }
+
     void send({
       fingerprint: fingerprint(message),
-      message,
-      stack: reason instanceof Error ? reason.stack ?? null : null,
+      message: message.slice(0, 500),
+      stack,
       severity: "unhandled_rejection",
     });
   });
