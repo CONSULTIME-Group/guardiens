@@ -483,10 +483,10 @@ const Landing = () => {
                   </div>
                 </div>
               </div>
-            </div>
+            </RevealOnScroll>
 
             {/* Contenu */}
-            <div className="order-1 lg:order-2 space-y-5 md:space-y-6">
+            <RevealOnScroll from="right" delay={120} className="order-1 lg:order-2 space-y-5 md:space-y-6">
               <article className="bg-card border border-border rounded-2xl p-6 md:p-8 transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 hover:border-primary/30 motion-reduce:transition-none motion-reduce:transform-none">
                 <p className="text-[11px] tracking-[0.2em] uppercase text-primary/70 font-body">Mode proximité</p>
                 <h3 className="mt-3 font-heading font-semibold text-xl md:text-2xl text-foreground leading-snug">
@@ -509,7 +509,7 @@ const Landing = () => {
                   Élargissez à votre département, votre région ou la France entière, en un clic.
                 </p>
               </article>
-            </div>
+            </RevealOnScroll>
           </div>
 
           <p className="text-center text-[13px] md:text-sm text-muted-foreground italic mt-14 md:mt-16 max-w-2xl mx-auto leading-relaxed">
