@@ -231,7 +231,9 @@ export const AuthIllustrationPanel = forwardRef<HTMLDivElement, AuthIllustration
                 tabIndex={-1}
                 className="absolute inset-0 w-full h-full object-contain object-bottom select-none"
                 style={{
-                  opacity: 1 - aOpacity,
+                  opacity: 0,
+                  willChange: "opacity",
+                  transform: "translateZ(0)",
                   objectPosition: "50% 100%",
                   WebkitMaskImage:
                     "linear-gradient(to right, hsl(0 0% 0%) 0%, hsl(0 0% 0%) 88%, transparent 100%)",
