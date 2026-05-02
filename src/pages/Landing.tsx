@@ -202,7 +202,7 @@ const Landing = () => {
     <div className="min-h-screen bg-background text-foreground">
       <PageMeta
         title="Guardiens — Partez l'esprit tranquille"
-        description="Un gardien près de chez vous veille sur votre maison et vos animaux. Offert pour les propriétaires, à vie (0 €). Sans carte bancaire."
+        description="Un gardien près de chez vous — ou ailleurs en France — veille sur votre maison et vos animaux. Offert pour les propriétaires, à vie (0 €). Sans carte bancaire."
         path="/"
         image={HOME_OG_IMAGE}
       />
@@ -306,8 +306,11 @@ const Landing = () => {
             <p className="font-heading text-2xl md:text-3xl lg:text-4xl italic text-white/85 leading-snug mb-6 animate-hero-fade-up animation-delay-700">
               Et l'entraide de quartier redevient naturelle.
             </p>
-            <p className="font-body text-base md:text-lg text-white/70 max-w-lg mb-10 leading-relaxed animate-hero-fade-up animation-delay-700">
+            <p className="font-body text-base md:text-lg text-white/70 max-w-lg mb-3 leading-relaxed animate-hero-fade-up animation-delay-700">
               Confiez vos animaux à un gardien près de chez vous. Osez demander un coup de main. Osez en proposer un.
+            </p>
+            <p className="font-body text-sm text-white/55 max-w-lg mb-10 italic animate-hero-fade-up animation-delay-700">
+              Du coin… ou d'ailleurs : les annonces sont accessibles partout en France.
             </p>
 
             {/* CTAs — propriétaire mis en avant (priorité business : combler le manque d'annonces) */}
@@ -420,12 +423,53 @@ const Landing = () => {
 
             <div className="bg-card border border-border rounded-xl p-6">
               <p className="text-xs tracking-widest uppercase text-primary/70 font-body">04</p>
-              <h3 className="mt-3 font-heading font-semibold text-lg text-foreground">Un gardien près de chez vous</h3>
+              <h3 className="mt-3 font-heading font-semibold text-lg text-foreground">Local par envie, national par liberté</h3>
               <p className="mt-2 text-muted-foreground text-sm leading-relaxed">
-                La proximité, partout. Votre gardien habite à quelques kilomètres, pas à l'autre bout du pays — où que vous soyez.
+                Notre cœur, c'est la proximité : un gardien à quelques kilomètres. Mais rien ne vous y oblige : élargissez le rayon, explorez d'autres régions, créez du lien partout en France.
               </p>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* ═══════════════ SECTION — LOCAL OU NATIONAL ═══════════════ */}
+      <section className="bg-background py-16 md:py-20">
+        <div className="max-w-5xl mx-auto px-4">
+          <div className="text-center mb-10">
+            <span className="text-xs tracking-widest uppercase text-primary/70 font-body">Le périmètre, c'est vous</span>
+            <h2 className="font-heading text-3xl md:text-4xl font-bold text-foreground mt-3">
+              Local par envie, national par liberté
+            </h2>
+            <p className="text-muted-foreground mt-4 max-w-2xl mx-auto leading-relaxed">
+              Notre promesse, c'est la confiance retrouvée avec les gens du coin.
+              Mais rien ne vous y oblige : Guardiens couvre toute la France, et c'est vous qui choisissez jusqu'où vous voulez aller.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="bg-card border border-border rounded-2xl p-6 md:p-8">
+              <p className="text-xs tracking-widest uppercase text-primary/70 font-body">Mode proximité</p>
+              <h3 className="mt-3 font-heading font-semibold text-xl text-foreground">Un gardien du coin, à quelques rues</h3>
+              <p className="mt-3 text-muted-foreground text-sm md:text-base leading-relaxed">
+                Idéal pour les gardes courtes, les imprévus, les coups de main réguliers.
+                Vous choisissez le rayon : 5, 15, 30 km. La rencontre est facile, la confiance s'installe vite.
+              </p>
+            </div>
+
+            <div className="bg-card border border-border rounded-2xl p-6 md:p-8">
+              <p className="text-xs tracking-widest uppercase text-primary/70 font-body">Mode élargi</p>
+              <h3 className="mt-3 font-heading font-semibold text-xl text-foreground">Toute la France, et même un peu plus loin</h3>
+              <p className="mt-3 text-muted-foreground text-sm md:text-base leading-relaxed">
+                Vous habitez une petite commune et voulez plus de candidatures ?
+                Vous voulez découvrir une autre région le temps d'une garde ?
+                Élargissez à votre département, votre région ou la France entière, en un clic.
+              </p>
+            </div>
+          </div>
+
+          <p className="text-center text-sm text-muted-foreground italic mt-8">
+            Quel que soit le périmètre, la confiance reste le fil rouge : profils vérifiés, avis publics, rencontre avant chaque garde.
+          </p>
         </div>
       </section>
 
