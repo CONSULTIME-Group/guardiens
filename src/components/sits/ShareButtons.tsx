@@ -109,6 +109,36 @@ const ShareButtons = ({ sitId, title, city, startDate, endDate, source = "sit_de
     }
   };
 
+  const handleDownloadVisual = async () => {
+    try {
+      track("copy"); // event analytics dédié à créer si besoin ; on réutilise pour ne pas casser le typage
+      setDownloading(true);
+      const res = await fetch(visualDownloadUrl);
+      if (!res.ok) throw new Error("download failed");
+      const blob = await res.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = blobUrl;
+      a.download = `guardiens-annonce-${sitId.slice(0, 8)}.svg`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(blobUrl);
+      toast({
+        title: "Visuel téléchargé ✓",
+        description: "Attachez-le à votre publication Facebook avant de coller le lien.",
+      });
+    } catch {
+      toast({
+        variant: "destructive",
+        title: "Téléchargement impossible",
+        description: "Réessayez dans quelques instants.",
+      });
+    } finally {
+      setDownloading(false);
+    }
+  };
+
   const hasNativeShare =
     typeof navigator !== "undefined" && typeof (navigator as any).share === "function";
 
