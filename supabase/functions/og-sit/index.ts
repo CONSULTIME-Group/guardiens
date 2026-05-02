@@ -64,14 +64,19 @@ function formatDateRange(start: string | null, end: string | null): string {
 async function fetchAsDataUri(url: string): Promise<string | null> {
   try {
     const ctrl = new AbortController();
-    const timer = setTimeout(() => ctrl.abort(), 4000);
+    const timer = setTimeout(() => ctrl.abort(), 8000);
     const res = await fetch(url, { signal: ctrl.signal });
     clearTimeout(timer);
-    if (!res.ok) return null;
+    if (!res.ok) {
+      console.warn("[og-sit] fetch photo failed", res.status, url);
+      return null;
+    }
     const ct = res.headers.get("content-type") || "image/jpeg";
     const buf = new Uint8Array(await res.arrayBuffer());
-    // Limite raisonnable (3 Mo) pour éviter SVG trop gros
-    if (buf.byteLength > 3_000_000) return null;
+    if (buf.byteLength > 5_000_000) {
+      console.warn("[og-sit] photo too large", buf.byteLength, url);
+      return null;
+    }
     let bin = "";
     const chunk = 0x8000;
     for (let i = 0; i < buf.length; i += chunk) {
@@ -79,7 +84,8 @@ async function fetchAsDataUri(url: string): Promise<string | null> {
     }
     const b64 = btoa(bin);
     return `data:${ct};base64,${b64}`;
-  } catch {
+  } catch (e) {
+    console.warn("[og-sit] fetchAsDataUri error", String(e));
     return null;
   }
 }
