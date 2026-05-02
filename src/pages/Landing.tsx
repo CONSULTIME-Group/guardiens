@@ -449,18 +449,21 @@ const Landing = () => {
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-14 items-center">
             {/* Illustration France gouache */}
-            <div className="relative order-2 lg:order-1">
+            <div className="relative order-2 lg:order-1 mx-auto w-full max-w-md lg:max-w-none">
               <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/10 rounded-3xl blur-2xl" aria-hidden="true" />
-              <div className="relative bg-card/50 border border-border rounded-3xl p-4 md:p-6 shadow-sm">
+              <div className="relative bg-card/50 border border-border rounded-3xl p-3 sm:p-4 md:p-6 shadow-sm">
                 <img
                   src={franceLocalNational}
                   alt="Illustration gouache d'une carte de France parsemée de points reliés, symbolisant le réseau de gardiens partout dans le pays."
                   width={1024}
                   height={1024}
                   loading="lazy"
-                  className="w-full h-auto rounded-2xl"
+                  decoding="async"
+                  sizes="(max-width: 640px) 90vw, (max-width: 1024px) 60vw, 480px"
+                  className="block w-full h-auto max-w-[420px] sm:max-w-[460px] lg:max-w-none mx-auto rounded-2xl"
+                  style={{ imageRendering: 'auto' }}
                 />
-                <div className="mt-4 grid grid-cols-3 gap-2 text-center">
+                <div className="mt-4 grid grid-cols-3 gap-2 text-center max-w-[460px] mx-auto">
                   <div className="rounded-xl bg-background border border-border py-3 px-2">
                     <p className="font-heading font-bold text-xl text-primary">5 km</p>
                     <p className="text-[10px] uppercase tracking-wider text-muted-foreground mt-1">Hyper-local</p>
