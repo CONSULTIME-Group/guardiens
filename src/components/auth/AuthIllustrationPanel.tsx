@@ -202,7 +202,7 @@ export const AuthIllustrationPanel = forwardRef<HTMLDivElement, AuthIllustration
         a.removeEventListener("canplay", onCanPlay);
         cleanup?.();
       };
-    }, [animate]);
+    }, [animate, mountVideos]);
 
     return (
       <div ref={ref} className="hidden lg:block lg:w-1/2 relative bg-background">
