@@ -64,6 +64,23 @@ Deno.serve(async (req) => {
       return json({ sent: 0, skipped: 0, reason: "Aucun destinataire" });
     }
 
+    // Pré-charger les compétences validées (status='approved') pour ne déclencher
+    // que sur des compétences réellement reconnues par la modération.
+    const { data: approvedSkills, error: skillsErr } = await supabase
+      .from("skills_library")
+      .select("label, normalized_label")
+      .eq("status", "approved");
+    if (skillsErr) throw skillsErr;
+
+    const approvedSet = new Set<string>(
+      (approvedSkills || [])
+        .map((s: any) => (s.normalized_label || s.label || "").toString().trim().toLowerCase())
+        .filter((s: string) => s.length > 0),
+    );
+
+    const normalizeSkill = (s: unknown): string =>
+      typeof s === "string" ? s.trim().toLowerCase().replace(/\s+/g, " ") : "";
+
     let sent = 0;
     let skipped = 0;
     const details: any[] = [];
