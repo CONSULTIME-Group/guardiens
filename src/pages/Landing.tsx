@@ -488,7 +488,7 @@ const Landing = () => {
             {/* Contenu */}
             <RevealOnScroll from="right" delay={120} className="order-1 lg:order-2 space-y-5 md:space-y-6">
               <article className="bg-card border border-border rounded-2xl p-6 md:p-8 transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 hover:border-primary/30 motion-reduce:transition-none motion-reduce:transform-none">
-                <p className="text-[11px] tracking-[0.2em] uppercase text-primary/70 font-body">Mode proximité</p>
+                <p className="text-xs md:text-[13px] tracking-[0.2em] uppercase text-primary font-body font-medium">Mode proximité</p>
                 <h3 className="mt-3 font-heading font-semibold text-xl md:text-2xl text-foreground leading-snug">
                   Un gardien du coin, à quelques rues
                 </h3>
@@ -499,7 +499,7 @@ const Landing = () => {
               </article>
 
               <article className="bg-card border border-border rounded-2xl p-6 md:p-8 transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 hover:border-primary/30 motion-reduce:transition-none motion-reduce:transform-none">
-                <p className="text-[11px] tracking-[0.2em] uppercase text-primary/70 font-body">Mode élargi</p>
+                <p className="text-xs md:text-[13px] tracking-[0.2em] uppercase text-primary font-body font-medium">Mode élargi</p>
                 <h3 className="mt-3 font-heading font-semibold text-xl md:text-2xl text-foreground leading-snug">
                   Toute la France, et même un peu plus loin
                 </h3>
