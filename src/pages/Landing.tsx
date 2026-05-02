@@ -396,9 +396,9 @@ const Landing = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-12">
             <div className="bg-card border border-border rounded-xl p-6">
               <p className="text-xs tracking-widest uppercase text-primary/70 font-body">01</p>
-              <h3 className="mt-3 font-heading font-semibold text-lg text-foreground">0 € pour les propriétaires, à vie</h3>
+              <h3 className="mt-3 font-heading font-semibold text-lg text-foreground">Gratuit pour les propriétaires, à vie</h3>
               <p className="mt-2 text-muted-foreground text-sm leading-relaxed">
-                Publier votre annonce, recevoir des candidatures, échanger avec les gardiens : tout est à 0 € pour les propriétaires. Sans limite de temps.
+                Publier votre annonce, recevoir des candidatures, échanger avec les gardiens : tout est gratuit pour les propriétaires. Sans limite de temps.
               </p>
             </div>
 
