@@ -176,6 +176,95 @@ function fingerprint(message: string, source?: string, line?: number): string {
   return Math.abs(hash).toString(36);
 }
 
+/**
+ * Collecte un instantané de contexte enrichi pour aider à reproduire l'erreur :
+ * route React (pathname + search + hash), state du history, referrer, viewport,
+ * langue, fuseau horaire, état réseau/visibilité, plateforme, etc.
+ *
+ * Tout est best-effort : chaque champ est protégé par try/catch pour ne JAMAIS
+ * faire planter le logger lui-même.
+ */
+function collectRuntimeContext(): Record<string, unknown> {
+  const ctx: Record<string, unknown> = {};
+  if (typeof window === "undefined") return ctx;
+
+  try {
+    ctx.pathname = window.location.pathname;
+    ctx.search = window.location.search || null;
+    ctx.hash = window.location.hash || null;
+    ctx.referrer = document.referrer || null;
+  } catch { /* noop */ }
+
+  try {
+    // history.state contient souvent le state passé par react-router (location.state)
+    const hs = window.history?.state;
+    if (hs && typeof hs === "object") {
+      // On ne sérialise que les clés sûres pour éviter les payloads énormes
+      const safe: Record<string, unknown> = {};
+      for (const [k, v] of Object.entries(hs as Record<string, unknown>)) {
+        if (typeof v === "string" || typeof v === "number" || typeof v === "boolean" || v === null) {
+          safe[k] = v;
+        } else if (v && typeof v === "object") {
+          safe[k] = "[object]";
+        }
+      }
+      ctx.history_state = safe;
+    }
+  } catch { /* noop */ }
+
+  try {
+    ctx.viewport = `${window.innerWidth}x${window.innerHeight}`;
+    ctx.dpr = window.devicePixelRatio ?? 1;
+  } catch { /* noop */ }
+
+  try {
+    if (typeof screen !== "undefined") ctx.screen = `${screen.width}x${screen.height}`;
+  } catch { /* noop */ }
+
+  try {
+    if (typeof navigator !== "undefined") {
+      ctx.language = navigator.language ?? null;
+      ctx.online = navigator.onLine;
+      // @ts-expect-error - non standard mais largement supporté
+      const conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+      if (conn?.effectiveType) ctx.network = conn.effectiveType;
+      // @ts-expect-error - non standard
+      if (typeof navigator.deviceMemory === "number") ctx.device_memory = navigator.deviceMemory;
+      ctx.platform = navigator.platform ?? null;
+    }
+  } catch { /* noop */ }
+
+  try {
+    ctx.timezone = Intl.DateTimeFormat().resolvedOptions().timeZone ?? null;
+  } catch { /* noop */ }
+
+  try {
+    if (typeof document !== "undefined") {
+      ctx.visibility = document.visibilityState;
+      // Nom de la page tel qu'affiché (utile pour identifier le contexte)
+      if (document.title) ctx.page_title = document.title.slice(0, 200);
+    }
+  } catch { /* noop */ }
+
+  try {
+    // Composant logique courant éventuellement défini par une ErrorBoundary
+    // ou par du code applicatif via setCurrentComponent().
+    if (CURRENT_COMPONENT) ctx.component = CURRENT_COMPONENT;
+  } catch { /* noop */ }
+
+  return ctx;
+}
+
+/**
+ * Nom du composant logique courant (renseigné par les ErrorBoundary ou
+ * manuellement via setCurrentComponent). Permet de savoir d'où vient l'erreur
+ * sans dépendre uniquement du stack minifié.
+ */
+let CURRENT_COMPONENT: string | null = null;
+export function setCurrentComponent(name: string | null) {
+  CURRENT_COMPONENT = name;
+}
+
 async function send(payload: {
   fingerprint: string;
   message: string;
@@ -204,7 +293,7 @@ async function send(payload: {
     : sourceReason;
 
   let severity = payload.severity ?? "error";
-  let context = payload.context ?? null;
+  let context: Record<string, unknown> | null = payload.context ?? null;
   if (thirdPartyReason) {
     severity = "ignored_third_party";
     context = {
@@ -215,6 +304,13 @@ async function send(payload: {
       ...(inApp && typeof navigator !== "undefined"
         ? { detected_user_agent: navigator.userAgent.slice(0, 200) }
         : {}),
+    };
+  } else {
+    // Vraie erreur (pas filtrée comme tierce) → on enrichit avec le contexte
+    // runtime complet pour faciliter la reproduction.
+    context = {
+      ...collectRuntimeContext(),
+      ...(context ?? {}), // le contexte explicite passé par l'appelant gagne
     };
   }
 
@@ -239,7 +335,7 @@ async function send(payload: {
       _url: typeof window !== "undefined" ? window.location.href.slice(0, 500) : null,
       _user_agent: typeof navigator !== "undefined" ? navigator.userAgent.slice(0, 300) : null,
       _severity: severity,
-      _context: context,
+      _context: context as any,
       _user_email: user?.email ?? null,
     });
   } catch {
