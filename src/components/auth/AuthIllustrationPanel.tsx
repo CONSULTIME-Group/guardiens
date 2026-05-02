@@ -41,13 +41,19 @@ export const AuthIllustrationPanel = forwardRef<HTMLDivElement, AuthIllustration
           <img
             src={authIllustration}
             alt=""
-            className="absolute inset-0 w-full h-full object-contain object-bottom select-none"
+            className="absolute inset-0 w-full h-full object-cover select-none"
             style={{
-              // Soft fade on all edges so the painted scene melts into bg-background
+              // Center slightly below middle so the key-exchange in the foreground stays visible,
+              // while keeping the airy sky at the top to host the title cartouche.
+              objectPosition: "50% 60%",
+              // Soft fade only on the right edge (toward the form) and a subtle top fade
+              // so the painted scene melts into bg-background without cropping the foreground.
               WebkitMaskImage:
-                "radial-gradient(ellipse 85% 75% at 50% 65%, hsl(0 0% 0%) 60%, transparent 100%)",
+                "linear-gradient(to right, hsl(0 0% 0%) 0%, hsl(0 0% 0%) 80%, transparent 100%), linear-gradient(to bottom, transparent 0%, hsl(0 0% 0%) 12%, hsl(0 0% 0%) 100%)",
               maskImage:
-                "radial-gradient(ellipse 85% 75% at 50% 65%, hsl(0 0% 0%) 60%, transparent 100%)",
+                "linear-gradient(to right, hsl(0 0% 0%) 0%, hsl(0 0% 0%) 80%, transparent 100%), linear-gradient(to bottom, transparent 0%, hsl(0 0% 0%) 12%, hsl(0 0% 0%) 100%)",
+              WebkitMaskComposite: "source-in",
+              maskComposite: "intersect",
             }}
             draggable={false}
             loading="lazy"
