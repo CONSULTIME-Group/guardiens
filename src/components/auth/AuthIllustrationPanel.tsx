@@ -69,6 +69,27 @@ export const AuthIllustrationPanel = forwardRef<HTMLDivElement, AuthIllustration
       const b = videoBRef.current;
       if (!a || !b) return;
 
+      // Garde-fou poster-only : si la vidéo n'atteint pas `canplay` dans les 4s
+      // (codec non supporté, réseau coupé, decode KO sans émettre d'`error`,
+      // tous les <source> épuisés…), on bascule sur l'image fixe. La PNG sous
+      // les deux vidéos reste TOUJOURS visible, donc l'utilisateur ne voit
+      // jamais d'écran vide — au pire l'illustration statique.
+      const fallbackTimer = window.setTimeout(() => {
+        if (a.readyState < 3 /* HAVE_FUTURE_DATA */) {
+          setAnimate(false);
+        }
+      }, 4000);
+      const onCanPlay = () => window.clearTimeout(fallbackTimer);
+      a.addEventListener("canplay", onCanPlay, { once: true });
+
+      // Si tous les <source> ont été essayés sans succès, video.networkState
+      // vaut NETWORK_NO_SOURCE (3). Vérifié au prochain tick (laisse au
+      // navigateur le temps de tenter chaque source).
+      const checkNoSource = () => {
+        if (a.networkState === 3 || b.networkState === 3) setAnimate(false);
+      };
+      const noSourceTimer = window.setTimeout(checkNoSource, 1500);
+
       let raf = 0;
       let lastTickAt = 0;
       const TICK_INTERVAL = 1000 / 30; // 30Hz : largement assez pour un fade de 0.9s
@@ -144,6 +165,9 @@ export const AuthIllustrationPanel = forwardRef<HTMLDivElement, AuthIllustration
 
       return () => {
         cancelAnimationFrame(raf);
+        window.clearTimeout(fallbackTimer);
+        window.clearTimeout(noSourceTimer);
+        a.removeEventListener("canplay", onCanPlay);
         cleanup?.();
       };
     }, [animate]);
