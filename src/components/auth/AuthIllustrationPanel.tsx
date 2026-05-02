@@ -208,7 +208,11 @@ export const AuthIllustrationPanel = forwardRef<HTMLDivElement, AuthIllustration
                 onError={() => setAnimate(false)}
                 className="absolute inset-0 w-full h-full object-contain object-bottom select-none"
                 style={{
-                  opacity: aOpacity,
+                  // Opacités pilotées par le rAF tick directement sur ref.style
+                  // (zéro re-render React). État initial : A pleine, B transparente.
+                  opacity: 1,
+                  willChange: "opacity",
+                  transform: "translateZ(0)",
                   objectPosition: "50% 100%",
                   WebkitMaskImage:
                     "linear-gradient(to right, hsl(0 0% 0%) 0%, hsl(0 0% 0%) 88%, transparent 100%)",
