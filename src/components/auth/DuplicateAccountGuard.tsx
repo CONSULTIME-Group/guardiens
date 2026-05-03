@@ -121,15 +121,19 @@ const DuplicateAccountGuard = () => {
   if (autoCleaning) {
     return (
       <div
-        className="fixed inset-0 z-[60] flex items-center justify-center bg-background/90 backdrop-blur-sm"
+        className="fixed inset-0 z-[60] flex items-center justify-center bg-background/90 backdrop-blur-sm px-6"
         role="status"
         aria-live="polite"
       >
-        <div className="text-center space-y-2">
-          <p className="font-heading text-lg">Compte en doublon détecté</p>
+        <div className="text-center space-y-3 max-w-md">
+          <p className="font-heading text-lg">Doublon Google détecté</p>
           <p className="text-sm text-muted-foreground">
-            Nettoyage automatique en cours…
+            Google a créé un nouveau compte avec une variante de votre email
+            (points ou googlemail.com). Comme ce compte est vide, nous le
+            supprimons automatiquement et vous renvoyons vers votre compte
+            d'origine.
           </p>
+          <p className="text-xs text-muted-foreground">Nettoyage en cours…</p>
         </div>
       </div>
     );
