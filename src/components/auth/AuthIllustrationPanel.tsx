@@ -57,6 +57,11 @@ export const AuthIllustrationPanel = forwardRef<HTMLDivElement, AuthIllustration
     // page soit interactive ET que le navigateur ait du temps libre.
     // Tant que false, seule la PNG (732 KB) est téléchargée.
     const [mountVideos, setMountVideos] = useState(false);
+    // Compatibilité Fast Refresh/HMR : des versions intermédiaires du JSX ont
+    // référencé `aOpacity` / `bOpacity` au rendu. Les conserver explicitement
+    // évite tout ReferenceError si Vite applique une mise à jour partielle.
+    const aOpacity = 1;
+    const bOpacity = 0;
 
     useEffect(() => {
       if (typeof window === "undefined") return;
@@ -304,7 +309,7 @@ export const AuthIllustrationPanel = forwardRef<HTMLDivElement, AuthIllustration
                 style={{
                   // Opacités pilotées par le rAF tick directement sur ref.style
                   // (zéro re-render React). État initial : A pleine, B transparente.
-                  opacity: 1,
+                  opacity: aOpacity,
                   willChange: "opacity",
                   transform: "translateZ(0)",
                   objectPosition: "50% 100%",
@@ -328,7 +333,7 @@ export const AuthIllustrationPanel = forwardRef<HTMLDivElement, AuthIllustration
                 onError={() => setAnimate(false)}
                 className="absolute inset-0 w-full h-full object-contain object-bottom select-none"
                 style={{
-                  opacity: 0,
+                  opacity: bOpacity,
                   willChange: "opacity",
                   transform: "translateZ(0)",
                   objectPosition: "50% 100%",
