@@ -113,7 +113,8 @@ const CitySchemaOrg = ({ city }: Props) => {
  name: isLyon
  ? "Garde chien et chat Lyon"
  : `House-sitting à ${city.name}`,
- // Dernier item : pas de "item" URL (recommandation Google)
+ // Google exige un "item" (URL) sur TOUS les éléments, y compris le dernier.
+ item: `https://guardiens.fr/house-sitting/${city.slug}`,
  },
  ],
  },
