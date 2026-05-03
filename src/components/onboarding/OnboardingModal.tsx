@@ -351,6 +351,18 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
 
   const leaveToLogin = async () => {
     onClose();
+    try {
+      const keysToClear = [
+        "guardiens_active_role",
+        "onboarding_owner_dismissed",
+        "first_dashboard_seen",
+        "first_dashboard_role",
+      ];
+      keysToClear.forEach((k) => {
+        try { localStorage.removeItem(k); } catch {}
+      });
+      try { sessionStorage.clear(); } catch {}
+    } catch {}
     await logout();
     navigate("/login", { replace: true });
   };
