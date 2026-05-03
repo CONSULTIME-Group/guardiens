@@ -377,7 +377,7 @@ const Register = () => {
  return;
  }
  logOAuthStage("tokens_received", "/inscription");
- navigate("/dashboard");
+ navigate("/dashboard", { replace: true });
  };
 
  return (

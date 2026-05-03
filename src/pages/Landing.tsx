@@ -136,8 +136,33 @@ RevealSection.displayName = "RevealSection";
 
 
 const Landing = () => {
- const navigate = useNavigate();
- const seasonal = getSeasonalBanner();
+  const navigate = useNavigate();
+  const seasonal = getSeasonalBanner();
+
+  // OAuth mobile fallback : si Google nous renvoie sur "/" alors qu'un flux
+  // OAuth est actif (in-app browser, PWA, broker mobile), on récupère la
+  // session puis on file sur /dashboard sans bloquer l'utilisateur sur la home.
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const traceRaw = typeof window !== "undefined"
+          ? window.sessionStorage.getItem("guardiens.oauth.trace")
+          : null;
+        if (!traceRaw) return;
+        const { data } = await supabase.auth.getSession();
+        if (cancelled) return;
+        if (data.session?.user) {
+          try { window.sessionStorage.removeItem("guardiens.oauth.trace"); } catch {}
+          try { window.sessionStorage.removeItem("guardiens.oauth.start"); } catch {}
+          navigate("/dashboard", { replace: true });
+        }
+      } catch {
+        // silencieux : on ne casse pas la home pour autant
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [navigate]);
 
  // KPIs : valeurs réelles depuis public_stats + socle historique fondateurs
  // - Maisons : 37 maisons gardées en 5 ans par Jérémie & Elisa (cité dans le récit fondateur).
