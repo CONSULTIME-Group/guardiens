@@ -3,6 +3,10 @@ import authIllustration from "@/assets/auth-illustration.png";
 import authIllustrationMp4 from "@/assets/auth-illustration.mp4?url";
 import authIllustrationWebm from "@/assets/auth-illustration.webm?url";
 
+// Alias de compatibilité Fast Refresh/HMR : l'ancien JSX référençait
+// `authIllustrationVideo` avant l'ajout du couple WebM/MP4.
+const authIllustrationVideo = authIllustrationMp4;
+
 
 interface AuthIllustrationPanelProps {
   title: string;
@@ -320,7 +324,7 @@ export const AuthIllustrationPanel = forwardRef<HTMLDivElement, AuthIllustration
                 }}
               >
                 <source src={authIllustrationWebm} type="video/webm" />
-                <source src={authIllustrationMp4} type="video/mp4" />
+                <source src={authIllustrationVideo} type="video/mp4" />
               </video>
               <video
                 ref={videoBRef}
@@ -344,7 +348,7 @@ export const AuthIllustrationPanel = forwardRef<HTMLDivElement, AuthIllustration
                 }}
               >
                 <source src={authIllustrationWebm} type="video/webm" />
-                <source src={authIllustrationMp4} type="video/mp4" />
+                <source src={authIllustrationVideo} type="video/mp4" />
               </video>
             </>
           )}
