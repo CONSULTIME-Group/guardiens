@@ -53,16 +53,17 @@ const MentionsLegales = () => {
           <h2 className="font-heading text-xl font-bold text-foreground pt-4">4. Données personnelles</h2>
           <p>
             Conformément à la loi n° 78-17 du 6 janvier 1978 modifiée (« Informatique et Libertés ») et au Règlement Général sur la Protection des Données (RGPD – UE 2016/679), vous disposez d'un droit d'accès, de rectification, d'effacement et de portabilité de vos données. Pour exercer ces droits, contactez-nous à{" "}
-            <a href="mailto:dpo@guardiens.fr" className="text-primary hover:underline">dpo@guardiens.fr</a>.
+            <a href="mailto:contact@guardiens.fr" className="text-primary hover:underline">contact@guardiens.fr</a> en précisant la mention « Données personnelles » dans l'objet du message.
           </p>
           <p>
             Pour en savoir plus, consultez notre{" "}
-            <a href="/confidentialite" className="text-primary hover:underline">politique de confidentialité</a>.
+            <a href="/confidentialite" className="text-primary hover:underline">politique de confidentialité</a> et nos{" "}
+            <a href="/cgu" className="text-primary hover:underline">conditions générales d'utilisation</a>.
           </p>
 
           <h2 className="font-heading text-xl font-bold text-foreground pt-4">5. Cookies</h2>
           <p>
-            Le site utilise exclusivement des cookies techniques nécessaires au fonctionnement du service (authentification, préférences d'affichage). Aucun cookie publicitaire, analytique ou de suivi tiers n'est déposé. Conformément à la recommandation CNIL du 17 septembre 2020, ces cookies strictement nécessaires ne requièrent pas de consentement.
+            Le site utilise des cookies strictement nécessaires au fonctionnement du service (authentification, session, préférences d'affichage), exemptés de consentement conformément aux lignes directrices de la CNIL du 17 septembre 2020. Un cookie de mesure d'audience (Google Analytics) est susceptible d'être déposé uniquement après recueil de votre consentement explicite via la bannière affichée à votre première visite. Aucun cookie publicitaire ni cookie de profilage commercial n'est utilisé. Le détail des traceurs et de leur durée figure dans la <a href="/confidentialite" className="text-primary hover:underline">politique de confidentialité</a>.
           </p>
 
           <h2 className="font-heading text-xl font-bold text-foreground pt-4">6. Limitation de responsabilité</h2>
