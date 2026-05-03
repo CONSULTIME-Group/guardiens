@@ -32,6 +32,13 @@ const IGNORED_PATTERNS: RegExp[] = [
   // Supabase Auth navigator.locks : verrou volé par un autre onglet — bénin, géré en interne par le SDK
   /Lock ".*" was (released|not granted) because/i,
   /lock:sb-.*-auth-token/i,
+  // Navigateurs trop anciens (Chrome <92, Safari <15) : APIs ES2022 manquantes
+  // (.at(), .findLast(), Object.hasOwn…) utilisées par web-vitals ou polyfills.
+  // Non actionnable côté code — on ne supporte pas ces versions.
+  /\.at is not a function/i,
+  /'at' is not a function/i,
+  /\.findLast(Index)? is not a function/i,
+  /Object\.hasOwn is not a function/i,
 ];
 
 function shouldIgnore(message: string): boolean {
