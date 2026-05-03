@@ -294,9 +294,9 @@ const Pricing = () => {
  <div className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-3 font-body">Gardien</div>
  {before ? (
  <div className="text-center space-y-1.5 py-2">
- <p className="font-heading text-5xl font-bold text-primary leading-none">
- 0 €
- </p>
+                    <p className="font-heading text-5xl font-bold text-primary leading-none">
+                      Gratuit
+                    </p>
  <p className="text-xs text-foreground/55 font-body pt-1">
  Puis <span className="font-semibold text-foreground">6,99 €/mois</span> à partir du 14 juin 2026
  </p>
