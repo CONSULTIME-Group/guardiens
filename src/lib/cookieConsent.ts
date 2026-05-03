@@ -50,15 +50,22 @@ export function loadGoogleAnalytics() {
   s.src = `https://www.googletagmanager.com/gtag/js?id=${GA_ID}`;
   s.async = true;
   document.head.appendChild(s);
-  s.onload = () => {
-    (window as any).dataLayer = (window as any).dataLayer || [];
-    function gtag(...args: any[]) {
-      (window as any).dataLayer.push(args);
-    }
-    (window as any).gtag = gtag;
-    gtag("js", new Date());
-    gtag("config", GA_ID, { send_page_view: true, anonymize_ip: true });
-  };
+    s.onload = () => {
+      (window as any).dataLayer = (window as any).dataLayer || [];
+      function gtag(...args: any[]) {
+        (window as any).dataLayer.push(args);
+      }
+      (window as any).gtag = gtag;
+      gtag("js", new Date());
+      // Mesure d'audience exemptée CNIL : IP anonymisée, pas de pub/remarketing,
+      // pas de Google Signals, pas de partage cross-produits.
+      gtag("config", GA_ID, {
+        send_page_view: true,
+        anonymize_ip: true,
+        allow_google_signals: false,
+        allow_ad_personalization_signals: false,
+      });
+    };
 }
 
 export function disableGoogleAnalytics() {
@@ -67,16 +74,17 @@ export function disableGoogleAnalytics() {
 }
 
 /**
- * Initialise GA si l'utilisateur a déjà accepté.
- * À appeler depuis main.tsx au boot.
+ * Initialise GA au boot.
+ * Mesure d'audience exemptée CNIL (anonymize_ip, pas de pub/signals) :
+ * pas de bandeau requis. On charge GA pour TOUS les visiteurs, sauf opt-out
+ * explicite stocké en localStorage.
  */
 export function initConsent() {
   const consent = getStoredConsent();
-  if (consent === "granted") {
-    // Léger délai pour ne pas bloquer le LCP
-    setTimeout(loadGoogleAnalytics, 2000);
-  } else if (consent === "denied") {
+  if (consent === "denied") {
     disableGoogleAnalytics();
+    return;
   }
-  // Si null → on attend que l'utilisateur réponde au bandeau
+  // Léger délai pour ne pas bloquer le LCP
+  setTimeout(loadGoogleAnalytics, 2000);
 }
