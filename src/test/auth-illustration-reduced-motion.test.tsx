@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { render, cleanup } from "@testing-library/react";
+import { render, cleanup, act } from "@testing-library/react";
 import { AuthIllustrationPanel } from "@/components/auth/AuthIllustrationPanel";
 
 /**
@@ -50,11 +50,16 @@ describe("AuthIllustrationPanel — prefers-reduced-motion", () => {
   });
 
   it("monte les deux <video> du crossfade quand reduced-motion N'EST PAS demandé", () => {
+    vi.useFakeTimers();
     mockMatchMedia(false);
     const { container } = render(
       <AuthIllustrationPanel title="Bienvenue" description="Test" />
     );
+    act(() => {
+      vi.advanceTimersByTime(1500);
+    });
     // Deux <video> = crossfade ping-pong pour boucle invisible.
     expect(container.querySelectorAll("video").length).toBe(2);
+    vi.useRealTimers();
   });
 });
