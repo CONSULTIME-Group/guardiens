@@ -50,15 +50,22 @@ export function loadGoogleAnalytics() {
   s.src = `https://www.googletagmanager.com/gtag/js?id=${GA_ID}`;
   s.async = true;
   document.head.appendChild(s);
-  s.onload = () => {
-    (window as any).dataLayer = (window as any).dataLayer || [];
-    function gtag(...args: any[]) {
-      (window as any).dataLayer.push(args);
-    }
-    (window as any).gtag = gtag;
-    gtag("js", new Date());
-    gtag("config", GA_ID, { send_page_view: true, anonymize_ip: true });
-  };
+    s.onload = () => {
+      (window as any).dataLayer = (window as any).dataLayer || [];
+      function gtag(...args: any[]) {
+        (window as any).dataLayer.push(args);
+      }
+      (window as any).gtag = gtag;
+      gtag("js", new Date());
+      // Mesure d'audience exemptée CNIL : IP anonymisée, pas de pub/remarketing,
+      // pas de Google Signals, pas de partage cross-produits.
+      gtag("config", GA_ID, {
+        send_page_view: true,
+        anonymize_ip: true,
+        allow_google_signals: false,
+        allow_ad_personalization_signals: false,
+      });
+    };
 }
 
 export function disableGoogleAnalytics() {
