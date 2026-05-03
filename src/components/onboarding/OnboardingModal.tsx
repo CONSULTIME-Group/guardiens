@@ -743,14 +743,6 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
                   </button>
                 </div>
               </>
-            ) : slide === 0 ? (
-              <button
-                type="button"
-                onClick={leaveToLogin}
-                className="text-xs text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
-              >
-                Utiliser un autre compte
-              </button>
             ) : null}
           </div>
 
