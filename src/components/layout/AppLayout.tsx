@@ -9,6 +9,7 @@ import Breadcrumbs from "./Breadcrumbs";
 const NotificationBell = lazy(() => import("./NotificationBell"));
 import { useAuth } from "@/contexts/AuthContext";
 import OnboardingModal from "@/components/onboarding/OnboardingModal";
+import DuplicateAccountGuard from "@/components/auth/DuplicateAccountGuard";
 import { usePresenceHeartbeat } from "@/hooks/usePresenceHeartbeat";
 
 export const AppLayout = ({ children }: { children?: ReactNode }) => {
