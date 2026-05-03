@@ -267,8 +267,8 @@ Deno.serve(async (req) => {
         .single();
 
       if (cached) {
-        const cacheAge = Date.now() - new Date(cached.updated_at).getTime();
-        if (cacheAge < 3600000) {
+          const cacheAge = Date.now() - new Date(cached.updated_at).getTime();
+        if (cacheAge < 900000) {
           return new Response(
             JSON.stringify({ ...cached.data, cached: true, updated_at: cached.updated_at }),
             { headers: { ...corsHeaders, "Content-Type": "application/json" } }
