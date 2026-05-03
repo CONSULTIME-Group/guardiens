@@ -1,9 +1,12 @@
-import { useState, type ReactNode } from "react";
+import { lazy, Suspense, useState, type ReactNode } from "react";
 import { Outlet, useSearchParams, Link } from "react-router-dom";
 import { Sidebar, BottomNav } from "./Navigation";
 import { BackButton } from "./BackButton";
 import Breadcrumbs from "./Breadcrumbs";
-import NotificationBell from "./NotificationBell";
+// NotificationBell tire date-fns + locale (vendor-date ~27Ko). Chargement
+// différé pour ne pas peser sur les pages publiques (login, landing…) qui
+// n'utilisent jamais le shell AppLayout mais partagent l'entry bundle.
+const NotificationBell = lazy(() => import("./NotificationBell"));
 import { useAuth } from "@/contexts/AuthContext";
 import OnboardingModal from "@/components/onboarding/OnboardingModal";
 import { usePresenceHeartbeat } from "@/hooks/usePresenceHeartbeat";
