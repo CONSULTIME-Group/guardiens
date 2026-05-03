@@ -40,6 +40,10 @@ const Login = () => {
     logOAuthStage("sdk_called", "/login", { redirect_uri: window.location.origin });
     const result = await lovable.auth.signInWithOAuth("google", {
       redirect_uri: window.location.origin,
+      extraParams: {
+        prompt: "select_account",
+        ...(email.trim() ? { login_hint: email.trim().toLowerCase() } : {}),
+      },
     });
     if (result.error) {
       const info = mapAuthError(result.error as any);
