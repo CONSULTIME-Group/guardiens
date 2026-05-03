@@ -172,10 +172,10 @@ const Register = () => {
  return;
  }
 
- if (!acceptedTerms) {
- setFormError("Veuillez accepter les conditions d'utilisation.");
- return;
- }
+      if (!acceptedCgu || !acceptedCgs || !acceptedPrivacy) {
+        setFormError("Veuillez accepter les CGU (v5), les CGS (v1) et la politique de confidentialité.");
+        return;
+      }
 
  // ── signup_form_submitted (après validation client, avant appel Supabase) ──
  try {
