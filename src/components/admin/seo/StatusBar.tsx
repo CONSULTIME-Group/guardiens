@@ -142,14 +142,14 @@ const StatusBar = ({ data, loading, refreshing, onRefresh }: StatusBarProps) => 
           </div>
           <div className="pt-2 border-t border-border/60 text-[11px] text-muted-foreground font-sans leading-relaxed">
             <p>
-              <strong className="text-foreground">Délais natifs Google :</strong> GA4 ingère les données avec
-              ~24-48h de latence (la journée d'aujourd'hui n'est jamais incluse). GSC publie avec 2-3 jours
-              de retard (J-3 minimum). Si vous voyez peu de variations, c'est normal — c'est la cadence
-              officielle des API, pas un bug du dashboard.
+              <strong className="text-foreground">Délais natifs Google :</strong> GA4 met à jour en quasi
+              temps réel mais peut renvoyer le jour J avec quelques heures de latence. GSC publie avec
+              2-3 jours de retard (J-2 minimum). Si le « dernier jour GA4 reçu » date de plusieurs jours,
+              vérifiez le compte de service / la propriété GA4.
             </p>
             <p className="mt-1">
-              <strong className="text-foreground">Cache :</strong> les données sont mises en cache 1h pour
-              limiter les quotas Google. Cliquez sur l'icône{" "}
+              <strong className="text-foreground">Cache :</strong> les données sont mises en cache 15 min
+              pour limiter les quotas Google. Cliquez sur l'icône{" "}
               <RefreshCw className="inline h-3 w-3 -mt-0.5" /> pour forcer un appel live.
             </p>
           </div>
