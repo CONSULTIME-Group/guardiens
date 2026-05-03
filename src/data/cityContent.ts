@@ -7,47 +7,47 @@ import { slugify } from "@/lib/normalize";
  */
 
 export interface CityPOI {
-  title: string;
-  description: string;
-  icon: "mountain" | "water" | "stethoscope" | "tree" | "building" | "map";
+ title: string;
+ description: string;
+ icon: "mountain" | "water" | "stethoscope" | "tree" | "building" | "map";
 }
 
 export interface CityArticleSection {
-  id: string;
-  title: string;
-  content: string;
+ id: string;
+ title: string;
+ content: string;
 }
 
 export interface CityContentData {
-  heroImage?: string;
-  heroAlt: string;
-  h1Override?: string;
-  subtitle: string;
-  articleSections: CityArticleSection[];
-  pois: CityPOI[];
-  nearbyTowns: string[];
+ heroImage?: string;
+ heroAlt: string;
+ h1Override?: string;
+ subtitle: string;
+ articleSections: CityArticleSection[];
+ pois: CityPOI[];
+ nearbyTowns: string[];
 }
 
 const cityContent: Record<string, CityContentData> = {
-  annecy: {
-    heroAlt: "Vue panoramique du lac d'Annecy et des montagnes enneigées",
-    subtitle: "Confiez votre maison et vos animaux à un home sitter de confiance en Haute-Savoie.",
-    articleSections: [
-      {
-        id: "pourquoi",
-        title: "Pourquoi le house-sitting à Annecy ?",
-        content: `Annecy, c'est le cadre de vie dont rêvent beaucoup de Français : le lac, les montagnes, une vieille ville colorée. Mais quand on part en vacances ou en déplacement, la question se pose : **qui s'occupe de la maison et des animaux ?**
+ annecy: {
+ heroAlt: "Vue panoramique du lac d'Annecy et des montagnes enneigées",
+ subtitle: "Confiez votre maison et vos animaux à un home sitter de confiance en Haute-Savoie.",
+ articleSections: [
+ {
+ id: "pourquoi",
+ title: "Pourquoi le house-sitting à Annecy ?",
+ content: `Annecy, c'est le cadre de vie dont rêvent beaucoup de Français : le lac, les montagnes, une vieille ville colorée. Mais quand on part en vacances ou en déplacement, la question se pose : **qui s'occupe de la maison et des animaux ?**
 
 Les pensions pour animaux autour d'Annecy coûtent entre 25 et 45 € par jour. Pour deux semaines, ça fait vite 350 à 600 €. Et votre chat qui déteste les cages ? Votre chien qui a besoin de son jardin ?
 
 Le house-sitting (parfois appelé home sitting en français), c'est la solution de bon sens : un gardien vérifié vient chez vous, s'occupe de vos animaux dans leur environnement, arrose le jardin, et veille sur la maison. **Gratuit pour le propriétaire. Logement offert pour le gardien.**
 
 À Annecy, cette logique de proximité est naturelle. Les gens se connaissent entre quartiers, l'entraide est dans l'ADN savoyard. Guardiens digitalise cette confiance de proximité.`,
-      },
-      {
-        id: "securite",
-        title: "Sécurité et vigilance : gel, jardin, montagne",
-        content: `En Haute-Savoie, les hivers sont rudes. Un house-sitter à Annecy, ce n'est pas juste quelqu'un qui nourrit le chat — c'est quelqu'un qui :
+ },
+ {
+ id: "securite",
+ title: "Sécurité et vigilance : gel, jardin, montagne",
+ content: `En Haute-Savoie, les hivers sont rudes. Un house-sitter à Annecy, ce n'est pas juste quelqu'un qui nourrit le chat — c'est quelqu'un qui :
 
 - **Surveille les canalisations** quand il fait -10°C
 - **Déneige les accès** pour éviter les chutes et les dégâts
@@ -57,11 +57,11 @@ Le house-sitting (parfois appelé home sitting en français), c'est la solution 
 En été, c'est l'arrosage du jardin, la gestion des volets contre la chaleur, et une présence dissuasive contre les cambriolages — un vrai sujet dans les zones résidentielles autour du lac.
 
 **Un gardien local connaît ces réalités.** Il sait que la route du Semnoz peut geler en novembre, que les jardins en bord de lac demandent un arrosage spécifique, et que les vétos d'urgence sont à Seynod ou Meythet.`,
-      },
-      {
-        id: "match",
-        title: "Le match : pension animale vs Guardiens",
-        content: `| | Pension | Guardiens |
+ },
+ {
+ id: "match",
+ title: "Le match : pension animale vs Guardiens",
+ content: `| | Pension | Guardiens |
 |---|---|---|
 | **Coût** | 25-45 €/jour | Gratuit |
 | **Environnement** | Cage / box collectif | Chez vous |
@@ -71,11 +71,11 @@ En été, c'est l'arrosage du jardin, la gestion des volets contre la chaleur, e
 | **Lien humain** | Personnel de pension | Gardien de confiance |
 
 Pour un séjour de 14 jours avec un chien et un chat, **vous économisez 500 à 800 € en moyenne** tout en offrant un meilleur confort à vos animaux.`,
-      },
-      {
-        id: "comment",
-        title: "Comment ça marche ?",
-        content: `**1. Inscrivez-vous** — gratuit en 2 minutes, que vous soyez propriétaire ou gardien.
+ },
+ {
+ id: "comment",
+ title: "Comment ça marche ?",
+ content: `**1. Inscrivez-vous** — gratuit en 2 minutes, que vous soyez propriétaire ou gardien.
 
 **2. Publiez votre annonce** — décrivez votre maison, vos animaux, les dates, et vos attentes.
 
@@ -84,58 +84,58 @@ Pour un séjour de 14 jours avec un chien et un chat, **vous économisez 500 à 
 **4. Choisissez et partez serein** — échangez par messagerie, organisez la passation, et c'est parti.
 
 Tout est sur la plateforme : messagerie, avis croisés, guide de la maison, et même des gardiens d'urgence en cas d'imprévu.`,
-      },
-    ],
-    pois: [
-      {
-        title: "Balades au Semnoz",
-        description: "Randonnées accessibles à 20 min d'Annecy. Parfait pour les gardiens avec chien — sentiers balisés et panoramas sur le lac.",
-        icon: "mountain",
-      },
-      {
-        title: "Baignades à Veyrier",
-        description: "Plages dog-friendly en été. Les gardiens qui aiment la nature apprécient ce coin préservé au pied de la Tournette.",
-        icon: "water",
-      },
-      {
-        title: "Urgences vétérinaires 74",
-        description: "Clinique VetAdom à Seynod et Urgences Vétérinaires du Lac à Meythet — ouvertes week-end et nuit.",
-        icon: "stethoscope",
-      },
-    ],
-    nearbyTowns: [
-      "Annecy-le-Vieux",
-      "Seynod",
-      "Cran-Gevrier",
-      "Meythet",
-      "Pringy",
-      "Argonay",
-      "Veyrier-du-Lac",
-      "Talloires",
-      "Thônes",
-      "La Clusaz",
-    ],
-  },
+ },
+ ],
+ pois: [
+ {
+ title: "Balades au Semnoz",
+ description: "Randonnées accessibles à 20 min d'Annecy. Parfait pour les gardiens avec chien — sentiers balisés et panoramas sur le lac.",
+ icon: "mountain",
+ },
+ {
+ title: "Baignades à Veyrier",
+ description: "Plages dog-friendly en été. Les gardiens qui aiment la nature apprécient ce coin préservé au pied de la Tournette.",
+ icon: "water",
+ },
+ {
+ title: "Urgences vétérinaires 74",
+ description: "Clinique VetAdom à Seynod et Urgences Vétérinaires du Lac à Meythet — ouvertes week-end et nuit.",
+ icon: "stethoscope",
+ },
+ ],
+ nearbyTowns: [
+ "Annecy-le-Vieux",
+ "Seynod",
+ "Cran-Gevrier",
+ "Meythet",
+ "Pringy",
+ "Argonay",
+ "Veyrier-du-Lac",
+ "Talloires",
+ "Thônes",
+ "La Clusaz",
+ ],
+ },
 
-  lyon: {
-    heroAlt: "Garde de chien et de chat à Lyon - Vue panoramique depuis Fourvière au coucher du soleil - Guardiens",
-    subtitle: "Faites garder votre chien, votre chat ou votre maison à Lyon par un home sitter de proximité vérifié. Sans commission, sans frais de pension.",
-    articleSections: [
-      {
-        id: "introduction",
-        title: "Lyon, ville d'animaux : pourquoi la garde de proximité change tout",
-        content: `Lyon est l'une des villes les plus accueillantes de France pour les animaux de compagnie. Près d'un quart des foyers lyonnais vivent avec un chien ou un chat. Du parc de la Tête d'Or aux quais de Saône, la ville offre un cadre de vie où les animaux ont toute leur place.
+ lyon: {
+ heroAlt: "Garde de chien et de chat à Lyon - Vue panoramique depuis Fourvière au coucher du soleil - Guardiens",
+ subtitle: "Faites garder votre chien, votre chat ou votre maison à Lyon par un home sitter de proximité vérifié. Sans commission, sans frais de pension.",
+ articleSections: [
+ {
+ id: "introduction",
+ title: "Lyon, ville d'animaux : pourquoi la garde de proximité change tout",
+ content: `Lyon est l'une des villes les plus accueillantes de France pour les animaux de compagnie. Près d'un quart des foyers lyonnais vivent avec un chien ou un chat. Du parc de la Tête d'Or aux quais de Saône, la ville offre un cadre de vie où les animaux ont toute leur place.
 
 Mais quand vient le moment de partir — vacances, déplacement professionnel, week-end en famille — la question se pose : **à qui confier votre animal et votre maison à Lyon ?**
 
 Guardiens est une plateforme de garde d'animaux et de home sitting fondée par Jérémie et Elisa, installés dans le Vieux-Lyon, rue Juiverie. Après cinq ans de house-sitting à travers la France — des dizaines de maisons gardées, des centaines d'animaux accompagnés — ils ont construit un outil pensé pour les propriétaires lyonnais : des gardiens de proximité, une rencontre physique systématique avant chaque garde, et un système de confiance vérifiée.
 
 Ce que Guardiens propose concrètement : vous publiez votre annonce, des gardiens de votre quartier postulent, vous les rencontrez autour d'un café ou lors d'une visite de votre logement, puis vous confirmez la garde. Votre animal reste chez lui, dans ses repères. Votre maison reste vivante. [Inscrivez-vous pour publier votre annonce](/inscription?role=owner).`,
-      },
-      {
-        id: "pourquoi-proximite",
-        title: "Pourquoi Lyon a besoin d'une plateforme de proximité",
-        content: `### Une ville où les animaux font partie de la famille
+ },
+ {
+ id: "pourquoi-proximite",
+ title: "Pourquoi Lyon a besoin d'une plateforme de proximité",
+ content: `### Une ville où les animaux font partie de la famille
 
 Lyon compte plus de 150 000 chiens et chats dans son agglomération. Les Lyonnais sont attachés à leurs compagnons : promenades quotidiennes à la Tête d'Or, terrasses dog-friendly dans le Vieux-Lyon, cliniques vétérinaires de quartier ouvertes le samedi. L'animal n'est pas un accessoire — c'est un membre du foyer.
 
@@ -152,11 +152,11 @@ Sans compter que votre maison reste vide. Boîte aux lettres qui déborde, plant
 Le home sitting existe depuis des décennies dans les pays anglo-saxons. Le principe est simple : un gardien de confiance s'installe chez vous, s'occupe de vos animaux dans leur environnement habituel, et veille sur votre maison. Pas de frais de pension, pas de stress pour l'animal, pas de maison vide.
 
 À Lyon, cette logique de proximité prend tout son sens. Les quartiers ont une identité forte, les personnes du coin se reconnaissent. Guardiens structure cette confiance de proximité avec des outils de vérification et un cadre clair.`,
-      },
-      {
-        id: "fonctionnement",
-        title: "Comment fonctionne Guardiens à Lyon",
-        content: `### Etape 1 — Publiez votre annonce
+ },
+ {
+ id: "fonctionnement",
+ title: "Comment fonctionne Guardiens à Lyon",
+ content: `### Etape 1 — Publiez votre annonce
 
 Décrivez votre maison, vos animaux, les dates de votre absence et vos attentes. La publication est entièrement sans frais pour les propriétaires. Précisez votre arrondissement ou votre commune pour que les gardiens de proximité vous trouvent. [Voir les tarifs](/tarifs).
 
@@ -171,11 +171,11 @@ Une fois le gardien choisi, vous échangez les informations pratiques via la mes
 ### Etape 4 — Partez l'esprit libre avec des nouvelles régulières
 
 Pendant la garde, votre gardien envoie des photos et des nouvelles de vos animaux. En cas d'imprévu, le réseau de [gardiens d'urgence à Lyon](/gardien-urgence) peut intervenir rapidement.`,
-      },
-      {
-        id: "quartiers",
-        title: "Les quartiers de Lyon couverts par nos gardiens",
-        content: `Lyon se compose de neuf arrondissements et d'une ceinture de communes limitrophes, chacun avec ses particularités pour la garde d'animaux. Nos gardiens à Lyon connaissent les spécificités de chaque quartier.
+ },
+ {
+ id: "quartiers",
+ title: "Les quartiers de Lyon couverts par nos gardiens",
+ content: `Lyon se compose de neuf arrondissements et d'une ceinture de communes limitrophes, chacun avec ses particularités pour la garde d'animaux. Nos gardiens à Lyon connaissent les spécificités de chaque quartier.
 
 **Lyon 1er — Terreaux, Croix-Rousse pentes.** Quartier dense, rues pavées et montées. Les chiens de petite taille s'y adaptent bien. Les gardiens du 1er connaissent les passages piétons vers les quais de Saône pour des promenades au calme. Peu de jardins privatifs — les sorties régulières sont essentielles.
 
@@ -196,11 +196,11 @@ Pendant la garde, votre gardien envoie des photos et des nouvelles de vos animau
 **Lyon 9ème — Vaise, Valmy.** Quartier en renouveau côté Confluence, résidentiel et verdoyant côté Vaise. L'Île Barbe, accessible à pied, est un paradis pour les promenades avec chien. Les gardiens du 9ème apprécient le calme des bords de Saône et la proximité de l'autoroute pour les propriétaires qui voyagent.
 
 **Communes limitrophes.** Nos gardiens couvrent également [Caluire-et-Cuire](/house-sitting/caluire-et-cuire) (résidences avec jardin, bords de Saône), Villeurbanne (proximité Tête d'Or, quartier Gratte-Ciel), Bron (maisons individuelles, parc de Parilly), Oullins (quartiers calmes, accès Confluence), et Ecully (résidentiel, campus universitaire, jardins). Chaque commune a ses gardiens de proximité référencés sur la plateforme.`,
-      },
-      {
-        id: "proprietaires",
-        title: "Propriétaires — ce que vous offre Guardiens",
-        content: `Confier votre animal et votre maison à Lyon est une décision importante. Voici ce que Guardiens met en place pour que vous partiez l'esprit libre :
+ },
+ {
+ id: "proprietaires",
+ title: "Propriétaires — ce que vous offre Guardiens",
+ content: `Confier votre animal et votre maison à Lyon est une décision importante. Voici ce que Guardiens met en place pour que vous partiez l'esprit libre :
 
 **Votre animal reste chez lui, dans ses repères.** Pas de cage, pas de box collectif, pas de transport stressant. Votre chien dort dans son panier, votre chat garde son territoire. Le gardien s'adapte à la routine de votre animal — horaires de repas, promenades habituelles, médicaments si nécessaire.
 
@@ -213,11 +213,11 @@ Pendant la garde, votre gardien envoie des photos et des nouvelles de vos animau
 **Un accord de garde clair.** Un document optionnel formalise les engagements de chaque partie : dates, responsabilités, contacts d'urgence. Jamais contraignant, toujours rassurant.
 
 **Des gardiens vérifiés.** Chaque gardien passe par une vérification d'identité et une rencontre physique. Les avis croisés après chaque garde construisent un historique de confiance visible sur le profil.`,
-      },
-      {
-        id: "gardiens",
-        title: "Gardiens — qui sont les personnes de confiance à Lyon",
-        content: `Les gardiens Guardiens à Lyon ne correspondent pas à un profil unique. C'est cette diversité qui permet de trouver la bonne personne pour chaque situation :
+ },
+ {
+ id: "gardiens",
+ title: "Gardiens — qui sont les personnes de confiance à Lyon",
+ content: `Les gardiens Guardiens à Lyon ne correspondent pas à un profil unique. C'est cette diversité qui permet de trouver la bonne personne pour chaque situation :
 
 **Retraités actifs** du Vieux-Lyon ou des Brotteaux, qui ont du temps, de l'expérience avec les animaux et une connaissance fine de leur quartier. Ils apprécient la compagnie d'un animal et la responsabilité de veiller sur une maison.
 
@@ -228,33 +228,33 @@ Pendant la garde, votre gardien envoie des photos et des nouvelles de vos animau
 **Etudiants vérifiés** — pour les gardes courtes, les week-ends ou les ponts. Leur disponibilité et leur énergie conviennent parfaitement aux chiens actifs qui ont besoin de longues promenades.
 
 Tous passent par le même processus de vérification : identité contrôlée, profil détaillé, rencontre physique avec le propriétaire avant chaque garde.`,
-      },
-      {
-        id: "tarifs",
-        title: "Tarifs Guardiens : transparents et sans surprise",
-        content: `Le modèle économique de Guardiens est conçu pour être lisible :
+ },
+ {
+ id: "tarifs",
+ title: "Tarifs Guardiens : transparents et sans surprise",
+ content: `Le modèle économique de Guardiens est conçu pour être lisible :
 
 **Propriétaires : sans frais.** Vous publiez votre annonce, vous recevez des candidatures, vous choisissez votre gardien. Tout cela sans débourser un centime, toute l'année 2026.
 
 **Gardiens : trois formules au choix.** L'abonnement mensuel à 6,99 euros par mois (résiliable à tout moment), la formule ponctuelle à 12 euros (pour une garde unique), ou l'abonnement annuel avec une réduction de 20 pour cent. [Consultez le détail des formules sur la page tarifs](/tarifs).
 
 **Aucune commission par garde.** Contrairement aux plateformes qui prélèvent 15 à 20 pour cent sur chaque transaction, Guardiens ne touche rien sur les gardes elles-mêmes. Le gardien paie son abonnement, le propriétaire ne paie rien. C'est tout.`,
-      },
-      {
-        id: "histoire",
-        title: "L'histoire de Guardiens à Lyon",
-        content: `Guardiens est né dans le Vieux-Lyon, rue Juiverie, dans l'appartement de Jérémie et Elisa. Pendant cinq ans, ils ont pratiqué le house-sitting à travers la France : des dizaines de maisons gardées, de la ferme isolée à l'appartement haussmannien des Brotteaux, en passant par les chalets de montagne.
+ },
+ {
+ id: "histoire",
+ title: "L'histoire de Guardiens à Lyon",
+ content: `Guardiens est né dans le Vieux-Lyon, rue Juiverie, dans l'appartement de Jérémie et Elisa. Pendant cinq ans, ils ont pratiqué le house-sitting à travers la France : des dizaines de maisons gardées, de la ferme isolée à l'appartement haussmannien des Brotteaux, en passant par les chalets de montagne.
 
 234 animaux accompagnés — des chiens de berger aux chats craintifs, des poules de jardin aux tortues de terrarium. Chaque garde leur a appris quelque chose : comment gérer un chien anxieux en l'absence de son maître, comment rassurer un chat qui se cache pendant trois jours, comment intervenir quand une chaudière tombe en panne un dimanche soir.
 
 C'est cette expérience de terrain qui structure aujourd'hui la plateforme : la rencontre physique obligatoire avant chaque garde, le guide de la maison qui centralise toutes les informations pratiques, le réseau de gardiens d'urgence mobilisables en quelques heures, les avis croisés qui construisent la confiance au fil du temps.
 
 Guardiens lance officiellement le 13 mai 2026 avec les premiers fondateurs — ceux qui rejoignent la plateforme avant le lancement public et qui contribuent à façonner l'outil. Lyon est le point de départ, la France entière le terrain naturel d'expansion.`,
-      },
-      {
-        id: "faq",
-        title: "Questions fréquentes des propriétaires à Lyon",
-        content: `**Comment rencontrer un gardien avant de confier ma maison ?**
+ },
+ {
+ id: "faq",
+ title: "Questions fréquentes des propriétaires à Lyon",
+ content: `**Comment rencontrer un gardien avant de confier ma maison ?**
 Après avoir accepté une candidature, vous organisez une rencontre directement via la messagerie Guardiens. La plupart des propriétaires à Lyon choisissent un café de quartier ou une visite du logement. Cette étape est systématique et fortement recommandée.
 
 **Que se passe-t-il en cas d'urgence ou d'imprévu ?**
@@ -277,11 +277,11 @@ Lors de la rencontre préalable ou le jour du départ, vous remettez les clés e
 
 **Guardiens fonctionne-t-il pour les gardes de plusieurs semaines ?**
 Oui. La plateforme est conçue pour les gardes de toute durée, du week-end prolongé aux absences de plusieurs semaines. Les gardiens indiquent leurs disponibilités sur leur profil.`,
-      },
-      {
-        id: "conclusion",
-        title: "Lyon, point de départ de Guardiens partout en France",
-        content: `Lyon est le coeur du réseau Guardiens. C'est ici que la plateforme est née, ici que les premiers gardiens et propriétaires se sont rencontrés, ici que le modèle de confiance de proximité a été testé et validé.
+ },
+ {
+ id: "conclusion",
+ title: "Lyon, point de départ de Guardiens partout en France",
+ content: `Lyon est le coeur du réseau Guardiens. C'est ici que la plateforme est née, ici que les premiers gardiens et propriétaires se sont rencontrés, ici que le modèle de confiance de proximité a été testé et validé.
 
 Que vous viviez dans le Vieux-Lyon, à la Croix-Rousse, à Monplaisir ou à Villeurbanne, Guardiens vous connecte avec des gardiens vérifiés de votre quartier. Votre animal reste dans ses repères, votre maison reste vivante, et vous partez l'esprit libre.
 
@@ -292,61 +292,61 @@ Le réseau s'étend progressivement à toute la France : [Annecy](/actualites/ho
 [Devenez gardien à Lyon](/inscription?role=guardian) — rejoignez le réseau de confiance.
 
 Consultez également le [guide complet du gardien à Lyon](/guides/lyon), la page [département du Rhône](/departement/rhone), ou découvrez [ce qu'est le house-sitting](/actualites/c-est-quoi-le-house-sitting).`,
-      },
-    ],
-    pois: [
-      {
-        title: "Parc de la Tête d'Or",
-        description: "105 hectares en plein coeur de Lyon. Le plus grand parc urbain de France, idéal pour les promenades quotidiennes avec un chien. Sentiers ombragés et zones enherbées.",
-        icon: "tree",
-      },
-      {
-        title: "Berges du Rhône",
-        description: "5 km de promenades aménagées le long du fleuve. Zones dog-friendly, ambiance familiale. Les gardiens sportifs apprécient ce parcours en plein coeur de Lyon.",
-        icon: "water",
-      },
-      {
-        title: "Quais de Saône",
-        description: "Promenade piétonne de Saint-Paul à Ile Barbe. Calme et verdure en bord de rivière, parfait pour les chiens anxieux qui ont besoin de tranquillité à Lyon.",
-        icon: "water",
-      },
-      {
-        title: "Urgences vétérinaires Lyon",
-        description: "VetEmergency Lyon 8ème et Clinique Vétérinaire de Garde — ouvertes 24h/24, 7j/7. Numéros dans chaque guide de la maison.",
-        icon: "stethoscope",
-      },
-    ],
-    nearbyTowns: [
-      "Villeurbanne",
-      "Caluire-et-Cuire",
-      "Ecully",
-      "Tassin-la-Demi-Lune",
-      "Sainte-Foy-lès-Lyon",
-      "Oullins",
-      "Bron",
-      "Vénissieux",
-      "Rillieux-la-Pape",
-      "Saint-Priest",
-    ],
-  },
+ },
+ ],
+ pois: [
+ {
+ title: "Parc de la Tête d'Or",
+ description: "105 hectares en plein coeur de Lyon. Le plus grand parc urbain de France, idéal pour les promenades quotidiennes avec un chien. Sentiers ombragés et zones enherbées.",
+ icon: "tree",
+ },
+ {
+ title: "Berges du Rhône",
+ description: "5 km de promenades aménagées le long du fleuve. Zones dog-friendly, ambiance familiale. Les gardiens sportifs apprécient ce parcours en plein coeur de Lyon.",
+ icon: "water",
+ },
+ {
+ title: "Quais de Saône",
+ description: "Promenade piétonne de Saint-Paul à Ile Barbe. Calme et verdure en bord de rivière, parfait pour les chiens anxieux qui ont besoin de tranquillité à Lyon.",
+ icon: "water",
+ },
+ {
+ title: "Urgences vétérinaires Lyon",
+ description: "VetEmergency Lyon 8ème et Clinique Vétérinaire de Garde — ouvertes 24h/24, 7j/7. Numéros dans chaque guide de la maison.",
+ icon: "stethoscope",
+ },
+ ],
+ nearbyTowns: [
+ "Villeurbanne",
+ "Caluire-et-Cuire",
+ "Ecully",
+ "Tassin-la-Demi-Lune",
+ "Sainte-Foy-lès-Lyon",
+ "Oullins",
+ "Bron",
+ "Vénissieux",
+ "Rillieux-la-Pape",
+ "Saint-Priest",
+ ],
+ },
 
-  grenoble: {
-    heroAlt: "Vue de Grenoble avec les Alpes et la Bastille en arrière-plan",
-    subtitle: "Trouvez un home sitter de confiance au pied des Alpes — gardiens vérifiés dans l'agglomération grenobloise.",
-    articleSections: [
-      {
-        id: "pourquoi",
-        title: "Pourquoi le house-sitting à Grenoble ?",
-        content: `Grenoble, ceinturée par trois massifs montagneux — Chartreuse, Vercors, Belledonne — attire des passionnés d'outdoor. Mais quand on part randonner, skier ou voyager, qui garde la maison et les animaux ?
+ grenoble: {
+ heroAlt: "Vue de Grenoble avec les Alpes et la Bastille en arrière-plan",
+ subtitle: "Trouvez un home sitter de confiance au pied des Alpes — gardiens vérifiés dans l'agglomération grenobloise.",
+ articleSections: [
+ {
+ id: "pourquoi",
+ title: "Pourquoi le house-sitting à Grenoble ?",
+ content: `Grenoble, ceinturée par trois massifs montagneux — Chartreuse, Vercors, Belledonne — attire des passionnés d'outdoor. Mais quand on part randonner, skier ou voyager, qui garde la maison et les animaux ?
 
 Le house-sitting (parfois appelé home sitting en français) à Grenoble, c'est la réponse locale : un home sitter vérifié s'installe chez vous, s'occupe de vos animaux dans leur environnement, et veille sur votre logement. **Gratuit pour le propriétaire.**
 
 La cuvette grenobloise crée des contraintes spécifiques : pics de pollution en hiver, chaleur estivale concentrée, et quartiers en pente parfois difficiles d'accès par temps de neige. Un home sitter local connaît ces réalités.`,
-      },
-      {
-        id: "securite",
-        title: "Pollution, montagne et vigilance : les réflexes d'un gardien grenoblois",
-        content: `Grenoble est régulièrement touchée par des épisodes de pollution aux particules fines, surtout entre novembre et février. Un house-sitter averti sait :
+ },
+ {
+ id: "securite",
+ title: "Pollution, montagne et vigilance : les réflexes d'un gardien grenoblois",
+ content: `Grenoble est régulièrement touchée par des épisodes de pollution aux particules fines, surtout entre novembre et février. Un house-sitter averti sait :
 
 - **Limiter les sorties** des animaux lors des alertes pollution (seuil PM10)
 - **Fermer les fenêtres** et utiliser la VMC en mode recirculation
@@ -355,11 +355,11 @@ La cuvette grenobloise crée des contraintes spécifiques : pics de pollution en
 En hiver, les quartiers en pente de La Tronche, Corenc ou Eybens peuvent geler. Un gardien grenoblois anticipe le salage, connaît les parkings en contrebas et sait gérer un chauffage collectif.
 
 En été, la cuvette concentre la chaleur : un bon gardien maintient les volets fermés la journée et aère en soirée — un réflexe vital pour les animaux sensibles.`,
-      },
-      {
-        id: "match",
-        title: "Pension vs Guardiens à Grenoble",
-        content: `Les pensions pour chiens autour de Grenoble facturent entre 25 et 40 €/jour. Pour un chat, comptez 15 à 20 €.
+ },
+ {
+ id: "match",
+ title: "Pension vs Guardiens à Grenoble",
+ content: `Les pensions pour chiens autour de Grenoble facturent entre 25 et 40 €/jour. Pour un chat, comptez 15 à 20 €.
 
 | | Pension | Guardiens |
 |---|---|---|
@@ -370,11 +370,11 @@ En été, la cuvette concentre la chaleur : un bon gardien maintient les volets 
 | **Jardin entretenu** | Non | Oui |
 
 Pour un séjour ski de 10 jours avec un chien, **vous économisez 250 à 400 €** et votre animal reste dans son environnement.`,
-      },
-      {
-        id: "quartiers",
-        title: "Grenoble quartier par quartier",
-        content: `Chaque quartier grenoblois a ses spécificités pour le house-sitting :
+ },
+ {
+ id: "quartiers",
+ title: "Grenoble quartier par quartier",
+ content: `Chaque quartier grenoblois a ses spécificités pour le house-sitting :
 
 - **Centre-ville / Championnet** : appartements, copropriétés strictes, sorties chien au Parc Paul Mistral
 - **Île Verte** : résidentiel calme, proximité Isère, idéal familles avec jardin
@@ -383,38 +383,38 @@ Pour un séjour ski de 10 jours avec un chien, **vous économisez 250 à 400 €
 - **Meylan / La Tronche** : résidentiel chic, grands jardins, altitude = meilleur air mais risque verglas
 
 Nos gardiens grenoblois connaissent ces spécificités et adaptent leur approche en conséquence.`,
-      },
-    ],
-    pois: [
-      {
-        title: "Bastille & sentiers",
-        description: "Réseau de randonnées accessible depuis le centre-ville. Montée à pied ou en téléphérique. Parfait pour les gardiens avec chien actif.",
-        icon: "mountain",
-      },
-      {
-        title: "Parc Paul Mistral",
-        description: "Grand parc urbain central avec pelouses et zones ombragées — le poumon vert des gardiens en ville.",
-        icon: "tree",
-      },
-      {
-        title: "Urgences vétérinaires 38",
-        description: "Clinique vétérinaire de garde à Échirolles — urgences 24h/24. Clinique du Drac à Fontaine en journée.",
-        icon: "stethoscope",
-      },
-    ],
-    nearbyTowns: [
-      "Meylan",
-      "Saint-Martin-d'Hères",
-      "Échirolles",
-      "Fontaine",
-      "Sassenage",
-      "La Tronche",
-      "Corenc",
-      "Voiron",
-      "Eybens",
-      "Seyssinet-Pariset",
-    ],
-  },
+ },
+ ],
+ pois: [
+ {
+ title: "Bastille & sentiers",
+ description: "Réseau de randonnées accessible depuis le centre-ville. Montée à pied ou en téléphérique. Parfait pour les gardiens avec chien actif.",
+ icon: "mountain",
+ },
+ {
+ title: "Parc Paul Mistral",
+ description: "Grand parc urbain central avec pelouses et zones ombragées — le poumon vert des gardiens en ville.",
+ icon: "tree",
+ },
+ {
+ title: "Urgences vétérinaires 38",
+ description: "Clinique vétérinaire de garde à Échirolles — urgences 24h/24. Clinique du Drac à Fontaine en journée.",
+ icon: "stethoscope",
+ },
+ ],
+ nearbyTowns: [
+ "Meylan",
+ "Saint-Martin-d'Hères",
+ "Échirolles",
+ "Fontaine",
+ "Sassenage",
+ "La Tronche",
+ "Corenc",
+ "Voiron",
+ "Eybens",
+ "Seyssinet-Pariset",
+ ],
+ },
 };
 
 /**
@@ -422,8 +422,8 @@ Nos gardiens grenoblois connaissent ces spécificités et adaptent leur approche
  * Falls back to a generic structure if no specific content exists.
  */
 export function getCityContent(slug: string): CityContentData | null {
-  const normalized = slugify(slug);
-  return cityContent[normalized] || null;
+ const normalized = slugify(slug);
+ return cityContent[normalized] || null;
 }
 
 export default cityContent;
