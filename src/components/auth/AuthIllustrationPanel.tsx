@@ -68,19 +68,11 @@ export const AuthIllustrationPanel = forwardRef<HTMLDivElement, AuthIllustration
     const bOpacity = 0;
 
     useEffect(() => {
-      if (typeof window === "undefined") return;
-      const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
-      // Respect Save-Data + connexions lentes (2g/slow-2g/3g) : poster-only.
-      const conn = (navigator as Navigator & {
-        connection?: { saveData?: boolean; effectiveType?: string };
-      }).connection;
-      const slow =
-        !!conn?.saveData ||
-        (conn?.effectiveType ? /^(slow-2g|2g|3g)$/.test(conn.effectiveType) : false);
-      setAnimate(!mq.matches && !slow);
-      const onChange = (e: MediaQueryListEvent) => setAnimate(!e.matches && !slow);
-      mq.addEventListener("change", onChange);
-      return () => mq.removeEventListener("change", onChange);
+      // Cinemagraph désactivé : l'illustration PNG a été remasterisée
+      // (gags ajoutés, laisses retirées) et les fichiers .mp4/.webm
+      // contiennent encore l'ancienne version. On reste sur la PNG fixe
+      // tant qu'un nouveau cinemagraph n'a pas été régénéré.
+      setAnimate(false);
     }, []);
 
     // Différer le mount des <video> jusqu'à idle (max 1.5s) pour ne pas
