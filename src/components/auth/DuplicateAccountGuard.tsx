@@ -12,24 +12,28 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { useToast } from "@/hooks/use-toast";
 
 /**
  * Détecte le cas "Sign in with Google" où Google a créé un nouveau compte
- * (variante d'email Gmail avec/sans points) alors que l'utilisateur a déjà
- * un compte canonique. Au lieu de l'enfermer dans l'onboarding, on lui propose
- * de se reconnecter avec son compte d'origine.
+ * (variante d'email Gmail avec/sans points, ou googlemail.com) alors que
+ * l'utilisateur a déjà un compte canonique Guardiens.
  *
- * Déclenchement strict :
- *  - utilisateur loggé
- *  - profil "frais" : pas de prénom + onboarding non complété
- *  - email Gmail/Googlemail
- *  - un autre profil avec email Gmail équivalent existe (RPC)
+ * Stratégie en 2 niveaux :
+ *  1. Compte STRICTEMENT VIDE → suppression automatique + redirect /login.
+ *  2. Compte avec données (cas rare) → dialog : « me reconnecter » ou « continuer ».
+ *
+ * Garde-fous :
+ *  - Vérif côté serveur via `is_account_empty` (impossible à forger).
+ *  - Suppression via edge function authentifiée (service_role).
  */
 const DuplicateAccountGuard = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const { toast } = useToast();
   const checked = useRef(false);
   const [canonicalEmail, setCanonicalEmail] = useState<string | null>(null);
+  const [autoCleaning, setAutoCleaning] = useState(false);
 
   useEffect(() => {
     if (checked.current) return;
@@ -38,26 +42,70 @@ const DuplicateAccountGuard = () => {
     const localPart = user.email.split("@")[0]?.toLowerCase() ?? "";
     const domain = user.email.split("@")[1]?.toLowerCase() ?? "";
     const isGmail = domain === "gmail.com" || domain === "googlemail.com";
-    const looksFresh = !user.firstName && !user.onboardingMinimalCompleted && !user.onboardingCompleted;
+    const looksFresh =
+      !user.firstName &&
+      !user.onboardingMinimalCompleted &&
+      !user.onboardingCompleted;
 
     if (!isGmail || !looksFresh || !localPart) return;
 
     checked.current = true;
     (async () => {
       try {
-        const { data, error } = await supabase.rpc("find_duplicate_gmail_account", {
+        const { data: dup, error: dupErr } = await supabase.rpc(
+          "find_duplicate_gmail_account",
+          { _user_id: user.id }
+        );
+        if (dupErr) return;
+        const row = Array.isArray(dup) ? dup[0] : dup;
+        const canonical = row?.canonical_email as string | undefined;
+        if (!canonical) return;
+
+        // Double-check serveur : compte VRAIMENT vide ?
+        const { data: emptyData } = await supabase.rpc("is_account_empty", {
           _user_id: user.id,
         });
-        if (error) return;
-        const row = Array.isArray(data) ? data[0] : data;
-        if (row?.canonical_email) {
-          setCanonicalEmail(row.canonical_email as string);
+
+        if (emptyData === true) {
+          // Cas le plus fréquent : nettoyage automatique silencieux.
+          setAutoCleaning(true);
+          const { data: result, error: fnErr } = await supabase.functions.invoke(
+            "delete-empty-duplicate-account",
+            { body: {} }
+          );
+          if (fnErr || (result as any)?.error) {
+            // Fallback : on bascule sur le dialog manuel.
+            setAutoCleaning(false);
+            setCanonicalEmail(canonical);
+            return;
+          }
+          toast({
+            title: "Compte en doublon supprimé",
+            description: `Reconnectez-vous avec votre compte d'origine : ${canonical}`,
+          });
+          await logout();
+          navigate(`/login?email=${encodeURIComponent(canonical)}`, {
+            replace: true,
+          });
+          return;
         }
+
+        // Compte avec données → dialog manuel.
+        setCanonicalEmail(canonical);
       } catch {
         // silencieux
       }
     })();
-  }, [user?.id, user?.email, user?.firstName, user?.onboardingMinimalCompleted, user?.onboardingCompleted]);
+  }, [
+    user?.id,
+    user?.email,
+    user?.firstName,
+    user?.onboardingMinimalCompleted,
+    user?.onboardingCompleted,
+    logout,
+    navigate,
+    toast,
+  ]);
 
   const handleSwitch = async () => {
     const target = canonicalEmail
@@ -68,6 +116,23 @@ const DuplicateAccountGuard = () => {
     navigate(target, { replace: true });
   };
 
+  if (autoCleaning) {
+    return (
+      <div
+        className="fixed inset-0 z-[60] flex items-center justify-center bg-background/90 backdrop-blur-sm"
+        role="status"
+        aria-live="polite"
+      >
+        <div className="text-center space-y-2">
+          <p className="font-heading text-lg">Compte en doublon détecté</p>
+          <p className="text-sm text-muted-foreground">
+            Nettoyage automatique en cours…
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <AlertDialog open={!!canonicalEmail}>
       <AlertDialogContent>
@@ -76,7 +141,7 @@ const DuplicateAccountGuard = () => {
           <AlertDialogDescription>
             Vous possédez déjà un compte Guardiens avec l'adresse{" "}
             <strong>{canonicalEmail}</strong>. Google a créé une variante de cet
-            email (avec ou sans points), ce qui crée un nouveau compte vide. Pour
+            email (avec ou sans points), ce qui crée un nouveau compte. Pour
             retrouver vos données, reconnectez-vous avec votre compte d'origine.
           </AlertDialogDescription>
         </AlertDialogHeader>
