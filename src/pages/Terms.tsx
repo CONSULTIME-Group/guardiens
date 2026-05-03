@@ -344,18 +344,15 @@ const Terms = () => {
           </p>
 
           {/* ============ 23. MÉDIATION ============ */}
-          <h2 className="font-heading text-xl font-bold text-foreground pt-4">23. Médiation de la consommation</h2>
+          <h2 className="font-heading text-xl font-bold text-foreground pt-4">23. Réclamations et résolution amiable</h2>
           <p>
-            Conformément aux articles L. 612-1 et suivants du Code de la consommation, en cas de litige n'ayant pas pu être résolu directement avec Guardiens, le consommateur peut recourir gratuitement à un médiateur de la consommation.
+            <strong className="text-foreground">Réclamation interne préalable</strong> : avant toute action contentieuse ou démarche externe, l'utilisateur s'engage à adresser sa réclamation par email à <a href="mailto:contact@guardiens.fr" className="text-primary hover:underline">contact@guardiens.fr</a>, en précisant l'objet du différend et les éléments justificatifs. Guardiens accuse réception sous 7 jours ouvrés et s'efforce d'apporter une réponse motivée dans un délai maximum de <strong className="text-foreground">deux (2) mois</strong>.
           </p>
           <p>
-            <strong className="text-foreground">Désignation en cours</strong> : Guardiens procède actuellement à la sélection et à l'adhésion auprès d'un organisme de médiation référencé par la Commission d'évaluation et de contrôle de la médiation de la consommation (CECMC). Les coordonnées du médiateur agréé seront publiées dans les présentes CGU et communiquées par email aux utilisateurs dès la finalisation de cette adhésion.
+            <strong className="text-foreground">Médiation de la consommation</strong> : conformément aux articles L. 611-1 et suivants du Code de la consommation, le consommateur a le droit de recourir gratuitement à un médiateur de la consommation en cas de litige non résolu. La liste actualisée des médiateurs agréés par la Commission d'évaluation et de contrôle de la médiation de la consommation (CECMC) est consultable sur <a href="https://www.economie.gouv.fr/mediation-conso" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">economie.gouv.fr/mediation-conso</a>. Les coordonnées du médiateur retenu par Guardiens sont publiées sur la page <a href="/mentions-legales" className="text-primary hover:underline">Mentions légales</a> ainsi que dans tout email de réponse à une réclamation, conformément à l'article R. 616-1 du Code de la consommation.
           </p>
           <p>
-            Dans l'intervalle, toute réclamation peut être adressée à <a href="mailto:contact@guardiens.fr" className="text-primary hover:underline">contact@guardiens.fr</a>. À défaut de réponse satisfaisante dans un délai de deux mois, le consommateur conserve la faculté de saisir le juge compétent (article 24) ou la plateforme européenne de Règlement en Ligne des Litiges (RLL) accessible à : <a href="https://ec.europa.eu/consumers/odr" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">ec.europa.eu/consumers/odr</a>.
-          </p>
-          <p>
-            La liste des médiateurs agréés est consultable sur <a href="https://www.economie.gouv.fr/mediation-conso" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">economie.gouv.fr/mediation-conso</a>.
+            <strong className="text-foreground">Règlement en ligne des litiges (UE)</strong> : la plateforme européenne RLL est accessible à : <a href="https://ec.europa.eu/consumers/odr" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">ec.europa.eu/consumers/odr</a>.
           </p>
 
           {/* ============ 24. DROIT APPLICABLE ============ */}
