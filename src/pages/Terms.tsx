@@ -18,7 +18,7 @@ const Terms = () => {
         </h1>
 
         <div className="prose prose-lg max-w-none text-muted-foreground space-y-6">
-          <p className="text-sm">Version 3 — Dernière mise à jour : 3 mai 2026</p>
+          <p className="text-sm">Dernière mise à jour : 3 mai 2026</p>
 
           {/* ============ 1. ÉDITEUR ============ */}
           <h2 className="font-heading text-xl font-bold text-foreground pt-4">1. Éditeur de la Plateforme</h2>
