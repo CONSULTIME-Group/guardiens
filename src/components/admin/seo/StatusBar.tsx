@@ -58,10 +58,17 @@ const StatusBar = ({ data, loading, refreshing, onRefresh }: StatusBarProps) => 
     d.setDate(d.getDate() - n);
     return d;
   };
-  const ga4Range = `${fmt(minus(30))} → ${fmt(minus(1))}`;
-  const gscRange = `${fmt(minus(31))} → ${fmt(minus(3))}`;
+  const ga4Range = `${fmt(minus(29))} → ${fmt(today)}`;
+  const gscRange = `${fmt(minus(30))} → ${fmt(minus(2))}`;
 
-  const isStale = cacheAgeMin !== null && cacheAgeMin > 60;
+  // Dernier jour réellement présent dans GA4 (format YYYYMMDD)
+  const ga4Days = data?.ga4?.current?.sessionsByDay ?? [];
+  const lastGa4Raw = ga4Days[ga4Days.length - 1]?.date ?? null;
+  const lastGa4Date = lastGa4Raw
+    ? `${lastGa4Raw.slice(6, 8)}/${lastGa4Raw.slice(4, 6)}/${lastGa4Raw.slice(0, 4)}`
+    : "—";
+
+  const isStale = cacheAgeMin !== null && cacheAgeMin > 15;
 
   return (
     <div className="space-y-2">
@@ -122,11 +129,12 @@ const StatusBar = ({ data, loading, refreshing, onRefresh }: StatusBarProps) => 
               value={cacheAgeMin !== null ? `${cacheAgeMin} min` : "—"}
               warn={isStale}
             />
-            <ExpertRow label="TTL cache" value="60 min (puis fallback 24h si erreur)" />
+            <ExpertRow label="TTL cache" value="15 min (puis fallback 24h si erreur)" />
             <ExpertRow label="Source" value={data?.cached ? (data?.stale ? "cache périmé (fallback)" : "cache") : "live API"} />
             <ExpertRow label="GA4 propertyId" value={data?.ga4?.propertyId ?? "—"} />
-            <ExpertRow label="Plage GA4" value={`${ga4Range} (J-30 → J-1)`} />
-            <ExpertRow label="Plage GSC" value={`${gscRange} (J-31 → J-3)`} />
+            <ExpertRow label="Plage GA4 demandée" value={`${ga4Range} (J-29 → aujourd'hui)`} />
+            <ExpertRow label="Dernier jour GA4 reçu" value={lastGa4Date} />
+            <ExpertRow label="Plage GSC demandée" value={`${gscRange} (J-30 → J-2)`} />
             <ExpertRow label="GA4 sessions" value={data?.ga4?.current?.sessions?.toLocaleString() ?? "—"} />
             <ExpertRow label="GA4 utilisateurs actifs" value={data?.ga4?.current?.activeUsers?.toLocaleString() ?? "—"} />
             <ExpertRow label="GSC clics" value={gscClicks.toLocaleString()} />
@@ -134,14 +142,14 @@ const StatusBar = ({ data, loading, refreshing, onRefresh }: StatusBarProps) => 
           </div>
           <div className="pt-2 border-t border-border/60 text-[11px] text-muted-foreground font-sans leading-relaxed">
             <p>
-              <strong className="text-foreground">Délais natifs Google :</strong> GA4 ingère les données avec
-              ~24-48h de latence (la journée d'aujourd'hui n'est jamais incluse). GSC publie avec 2-3 jours
-              de retard (J-3 minimum). Si vous voyez peu de variations, c'est normal — c'est la cadence
-              officielle des API, pas un bug du dashboard.
+              <strong className="text-foreground">Délais natifs Google :</strong> GA4 met à jour en quasi
+              temps réel mais peut renvoyer le jour J avec quelques heures de latence. GSC publie avec
+              2-3 jours de retard (J-2 minimum). Si le « dernier jour GA4 reçu » date de plusieurs jours,
+              vérifiez le compte de service / la propriété GA4.
             </p>
             <p className="mt-1">
-              <strong className="text-foreground">Cache :</strong> les données sont mises en cache 1h pour
-              limiter les quotas Google. Cliquez sur l'icône{" "}
+              <strong className="text-foreground">Cache :</strong> les données sont mises en cache 15 min
+              pour limiter les quotas Google. Cliquez sur l'icône{" "}
               <RefreshCw className="inline h-3 w-3 -mt-0.5" /> pour forcer un appel live.
             </p>
           </div>
