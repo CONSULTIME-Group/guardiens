@@ -138,7 +138,9 @@ export const Sidebar = () => {
           <span className="text-foreground" aria-hidden="true">uardiens</span>
           <span className="ml-1.5 text-[10px] font-medium tracking-wide text-foreground/35 align-middle select-none" aria-hidden="true">bêta</span>
         </span>
-        <NotificationBell />
+        <Suspense fallback={<div className="w-9 h-9" aria-hidden />}>
+          <NotificationBell />
+        </Suspense>
       </div>
       <FeedbackDialog open={feedbackOpen} onOpenChange={setFeedbackOpen} />
       <PremiumGateDialog open={gateOpen} onClose={() => setGateOpen(false)} featureName={gateFeature} />
