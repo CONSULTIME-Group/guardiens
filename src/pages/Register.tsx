@@ -338,12 +338,12 @@ const Register = () => {
  navigate(`/login?email=${encodeURIComponent(email)}`);
  };
 
- const handleGoogleSignUp = async () => {
- if (!acceptedTerms) {
- logOAuthStage("blocked_terms", "/inscription");
- setFormError("Veuillez accepter les conditions d'utilisation avant de continuer avec Google.");
- return;
- }
+  const handleGoogleSignUp = async () => {
+    if (!acceptedCgu || !acceptedCgs || !acceptedPrivacy) {
+      logOAuthStage("blocked_terms", "/inscription");
+      setFormError("Veuillez accepter les CGU (v5), les CGS (v1) et la politique de confidentialité avant de continuer avec Google.");
+      return;
+    }
  setIsGoogleLoading(true);
  startOAuthFlow("/inscription");
  try {
