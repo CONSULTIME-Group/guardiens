@@ -78,9 +78,18 @@ const MentionsLegales = () => {
             Les comparaisons de prix et de fonctionnalités présentées sur ce site sont réalisées de bonne foi, sur la base de données publiquement accessibles sur les sites des concurrents aux dates indiquées. Elles sont fournies à titre informatif et ne constituent ni un dénigrement, ni une publicité comparative au sens de l'article L. 122-1 du Code de la consommation. Les tarifs des tiers peuvent évoluer. Guardiens s'engage à mettre à jour ces informations régulièrement.
           </p>
 
-          <h2 className="font-heading text-xl font-bold text-foreground pt-4">8. Droit applicable et médiation</h2>
+          <h2 id="mediation" className="font-heading text-xl font-bold text-foreground pt-4">8. Droit applicable, réclamations et médiation de la consommation</h2>
           <p>
-            Les présentes mentions sont régies par le droit français. En cas de litige, les tribunaux de Lyon sont compétents. Conformément aux articles L. 611-1 et R. 612-1 du Code de la consommation, en cas de litige non résolu, le consommateur peut recourir gratuitement à un médiateur de la consommation. Le médiateur compétent sera communiqué dès sa désignation.
+            Les présentes mentions sont régies par le droit français. En cas de litige, et après échec d'une résolution amiable, les tribunaux français territorialement compétents au sens des articles 42 et suivants du Code de procédure civile pourront être saisis. Le consommateur conserve la faculté de saisir, à son choix, la juridiction du lieu où il demeurait au moment de la conclusion du contrat ou de la survenance du fait dommageable (article R. 631-3 du Code de la consommation).
+          </p>
+          <p>
+            <strong className="text-foreground">Réclamation préalable</strong> : toute réclamation doit être adressée en premier lieu à <a href="mailto:contact@guardiens.fr" className="text-primary hover:underline">contact@guardiens.fr</a>. Guardiens s'engage à répondre dans un délai maximal de deux (2) mois à compter de la réception de la demande.
+          </p>
+          <p>
+            <strong className="text-foreground">Médiation de la consommation</strong> : le service Guardiens est, à la date des présentes, fourni à titre entièrement gratuit à ses utilisateurs. Aucune somme n'est perçue auprès des consommateurs. Le dispositif de médiation de la consommation prévu aux articles L. 611-1 et suivants du Code de la consommation s'applique aux litiges nés de l'exécution d'un contrat de vente ou de fourniture de services à titre onéreux entre un professionnel et un consommateur (article L. 611-1, 1°). En l'absence de relation contractuelle onéreuse, Guardiens n'est pas tenu, à ce stade, de désigner un médiateur de la consommation. Un médiateur agréé par la Commission d'évaluation et de contrôle de la médiation de la consommation (CECMC) sera désigné préalablement à l'ouverture de toute offre payante destinée aux consommateurs, et ses coordonnées seront publiées sur la présente page ainsi que mentionnées dans toute réponse écrite à une réclamation, conformément à l'article R. 616-1 du Code de la consommation.
+          </p>
+          <p>
+            <strong className="text-foreground">Plateforme européenne de règlement en ligne des litiges</strong> : conformément à l'article 14 du règlement (UE) n° 524/2013, la Commission européenne met à disposition une plateforme de règlement en ligne des litiges, accessible à l'adresse <a href="https://ec.europa.eu/consumers/odr" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">ec.europa.eu/consumers/odr</a>.
           </p>
 
           <h2 className="font-heading text-xl font-bold text-foreground pt-4">9. Crédits</h2>
