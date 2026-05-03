@@ -351,6 +351,18 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
 
   const leaveToLogin = async () => {
     onClose();
+    try {
+      const keysToClear = [
+        "guardiens_active_role",
+        "onboarding_owner_dismissed",
+        "first_dashboard_seen",
+        "first_dashboard_role",
+      ];
+      keysToClear.forEach((k) => {
+        try { localStorage.removeItem(k); } catch {}
+      });
+      try { sessionStorage.clear(); } catch {}
+    } catch {}
     await logout();
     navigate("/login", { replace: true });
   };
@@ -362,14 +374,24 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center backdrop-blur-sm bg-background/80">
       <div className="max-w-2xl w-full mx-auto mt-8 md:mt-16 bg-card rounded-2xl shadow-xl p-6 md:p-10 relative max-h-[90vh] overflow-y-auto">
-        {canDismiss && (
+        <div className="absolute right-4 top-4 flex items-center gap-3 z-10">
           <button
-            onClick={dismiss}
-            className="absolute right-4 top-4 rounded-sm text-muted-foreground hover:text-foreground transition-colors z-10"
+            type="button"
+            onClick={leaveToLogin}
+            className="text-xs text-muted-foreground hover:text-foreground underline-offset-4 hover:underline transition-colors"
           >
-            <X className="h-5 w-5" />
+            Retour à la connexion
           </button>
-        )}
+          {canDismiss && (
+            <button
+              onClick={dismiss}
+              aria-label="Fermer"
+              className="rounded-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <X className="h-5 w-5" />
+            </button>
+          )}
+        </div>
 
         {/* Progress indicator */}
         <div className="mb-6">
@@ -721,14 +743,6 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
                   </button>
                 </div>
               </>
-            ) : slide === 0 ? (
-              <button
-                type="button"
-                onClick={leaveToLogin}
-                className="text-xs text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
-              >
-                Utiliser un autre compte
-              </button>
             ) : null}
           </div>
 
