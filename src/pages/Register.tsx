@@ -713,7 +713,9 @@ const Register = () => {
  />
  <label htmlFor="terms" className="text-sm text-muted-foreground leading-snug cursor-pointer">
  J'accepte les{" "}
- <Link to="/cgu" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">conditions d'utilisation</Link>
+ <Link to="/cgu" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">CGU</Link>,
+ {" "}les{" "}
+ <Link to="/cgs" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">CGS</Link>
  {" "}et la{" "}
  <Link to="/confidentialite" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">politique de confidentialité</Link>.
  </label>

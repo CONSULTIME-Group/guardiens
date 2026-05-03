@@ -75,6 +75,8 @@ const PublicFooter = React.forwardRef<HTMLElement>((_props, ref) => {
             <span className="text-white/20">·</span>
             <Link to="/cgu" className="hover:text-white transition-colors">CGU</Link>
             <span className="text-white/20">·</span>
+            <Link to="/cgs" className="hover:text-white transition-colors">CGS</Link>
+            <span className="text-white/20">·</span>
             <Link to="/confidentialite" className="hover:text-white transition-colors">Politique de confidentialité</Link>
             <span className="text-white/20">·</span>
             <Link to="/mentions-legales" className="hover:text-white transition-colors">Mentions légales</Link>
