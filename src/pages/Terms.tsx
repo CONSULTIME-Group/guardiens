@@ -35,7 +35,7 @@ const Terms = () => {
             <li>TVA non applicable, art. 293 B du CGI</li>
           </ul>
           <p>
-            <strong className="text-foreground">Hébergeur</strong> : les coordonnées de l'hébergeur technique de la Plateforme sont disponibles sur la page Mentions légales. Langue contractuelle : français.
+            <strong className="text-foreground">Hébergeur</strong> : les coordonnées de l'hébergeur technique de la Plateforme sont disponibles sur la page <a href="/mentions-legales" className="text-primary hover:underline">Mentions légales</a>. Langue contractuelle : français.
           </p>
 
           {/* ============ 2. OBJET ============ */}
