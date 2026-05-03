@@ -88,7 +88,10 @@ const Register = () => {
  const [resendCount, setResendCount] = useState(0);
  const [formError, setFormError] = useState<string | null>(null);
  const [existingAccountOpen, setExistingAccountOpen] = useState(false);
- const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [acceptedCgu, setAcceptedCgu] = useState(false);
+  const [acceptedCgs, setAcceptedCgs] = useState(false);
+  const [acceptedPrivacy, setAcceptedPrivacy] = useState(false);
+  const acceptedTerms = acceptedCgu && acceptedCgs && acceptedPrivacy;
  const [totalInscrits, setTotalInscrits] = useState<number | null>(null);
  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 
