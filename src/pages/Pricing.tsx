@@ -257,10 +257,10 @@ const Pricing = () => {
  <Card className="bg-card border border-border/40 rounded-2xl h-full flex flex-col relative">
  <CardHeader className="text-center pb-2 p-8 pt-10">
  <div className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-3 font-body">Propriétaire</div>
- <CardTitle className="font-heading text-5xl font-bold text-foreground">0 €</CardTitle>
- <p className="text-sm font-body text-foreground/60 mt-2">
- À vie, sans condition.
- </p>
+                <CardTitle className="font-heading text-5xl font-bold text-foreground">Gratuit</CardTitle>
+                <p className="text-sm font-body text-foreground/60 mt-2">
+                  Sans condition.
+                </p>
  </CardHeader>
  <CardContent className="space-y-5 px-8 pb-8 pt-2 flex-1 flex flex-col">
  <ul className="space-y-3 flex-1">
