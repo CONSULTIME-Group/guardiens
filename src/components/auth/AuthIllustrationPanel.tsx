@@ -8,7 +8,6 @@ import { isCinemagraphInSync } from "@/assets/auth-illustration.manifest";
 // `authIllustrationVideo` avant l'ajout du couple WebM/MP4.
 const authIllustrationVideo = authIllustrationMp4;
 
-
 interface AuthIllustrationPanelProps {
   title: string;
   /** Micro-slogan court (5–7 mots) affiché entre le titre et la description, en italique discret. */
@@ -55,12 +54,14 @@ export const AuthIllustrationPanel = forwardRef<HTMLDivElement, AuthIllustration
     //  - will-change: opacity + translateZ(0) → composition GPU dédiée, pas de
     //    repaint du reste de la page.
     //  - Pause auto quand l'onglet est caché (visibilitychange).
+    const panelRef = useRef<HTMLDivElement>(null);
     const videoARef = useRef<HTMLVideoElement>(null);
     const videoBRef = useRef<HTMLVideoElement>(null);
     const [animate, setAnimate] = useState(false);
+    const [hasEnteredViewport, setHasEnteredViewport] = useState(false);
     // Mount des <video> différé : aucun octet vidéo ne part avant que la
-    // page soit interactive ET que le navigateur ait du temps libre.
-    // Tant que false, seule la PNG (732 KB) est téléchargée.
+    // page soit interactive, que le panneau soit réellement visible à l'écran,
+    // ET que le navigateur ait du temps libre.
     const [mountVideos, setMountVideos] = useState(false);
     // Compatibilité Fast Refresh/HMR : des versions intermédiaires du JSX ont
     // référencé `aOpacity` / `bOpacity` au rendu. Les conserver explicitement
@@ -92,10 +93,39 @@ export const AuthIllustrationPanel = forwardRef<HTMLDivElement, AuthIllustration
       return () => mq.removeEventListener("change", onChange);
     }, []);
 
+    // Chargement réellement paresseux : sur desktop seulement, les vidéos ne se
+    // montent qu'une fois le panneau illustration visible à l'écran.
+    useEffect(() => {
+      const node = panelRef.current;
+      if (!node || typeof window === "undefined") return;
+      if (!("IntersectionObserver" in window)) {
+        setHasEnteredViewport(true);
+        return;
+      }
+
+      const observer = new IntersectionObserver(
+        (entries) => {
+          const entry = entries[0];
+          if (entry?.isIntersecting) {
+            setHasEnteredViewport(true);
+            observer.disconnect();
+          }
+        },
+        {
+          root: null,
+          threshold: 0.2,
+          rootMargin: "160px 0px",
+        }
+      );
+
+      observer.observe(node);
+      return () => observer.disconnect();
+    }, []);
+
     // Différer le mount des <video> jusqu'à idle (max 1.5s) pour ne pas
     // concurrencer les scripts critiques d'auth (form, OAuth, Supabase).
     useEffect(() => {
-      if (!animate) return;
+      if (!animate || !hasEnteredViewport || mountVideos) return;
       const w = window as Window & {
         requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number;
         cancelIdleCallback?: (id: number) => void;
@@ -111,7 +141,7 @@ export const AuthIllustrationPanel = forwardRef<HTMLDivElement, AuthIllustration
         if (idleId !== undefined) w.cancelIdleCallback?.(idleId);
         if (timeoutId !== undefined) window.clearTimeout(timeoutId);
       };
-    }, [animate]);
+    }, [animate, hasEnteredViewport, mountVideos]);
 
     useEffect(() => {
       if (!animate || !mountVideos) return;
@@ -261,7 +291,17 @@ export const AuthIllustrationPanel = forwardRef<HTMLDivElement, AuthIllustration
     }, [animate, mountVideos]);
 
     return (
-      <div ref={ref} className="hidden lg:block lg:w-1/2 relative bg-background">
+      <div
+        ref={(node) => {
+          panelRef.current = node;
+          if (typeof ref === "function") {
+            ref(node);
+          } else if (ref) {
+            ref.current = node;
+          }
+        }}
+        className="hidden lg:block lg:w-1/2 relative bg-background"
+      >
         {/*
           Calque image + voile : strictement décoratif, en arrière-plan (z-0),
           non-interactif (pointer-events-none sur le wrapper ET le voile).
@@ -303,7 +343,8 @@ export const AuthIllustrationPanel = forwardRef<HTMLDivElement, AuthIllustration
             Couche 2 : cinemagraph mp4 superposé exactement comme l'image
             (mêmes dimensions, même object-fit, même position, même masque).
             Animation très subtile : hirondelles, canard, fontaine, drapeaux.
-            Ne se monte que si l'utilisateur n'a pas demandé reduced-motion.
+            Ne se monte que si l'utilisateur n'a pas demandé reduced-motion,
+            que le cinemagraph est synchronisé, et que le panneau est visible.
           */}
           {animate && mountVideos && (
             <>
