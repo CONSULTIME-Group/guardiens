@@ -2,6 +2,7 @@ import { forwardRef, useEffect, useRef, useState } from "react";
 import authIllustration from "@/assets/auth-illustration.png";
 import authIllustrationMp4 from "@/assets/auth-illustration.mp4?url";
 import authIllustrationWebm from "@/assets/auth-illustration.webm?url";
+import { isCinemagraphInSync } from "@/assets/auth-illustration.manifest";
 
 // Alias de compatibilité Fast Refresh/HMR : l'ancien JSX référençait
 // `authIllustrationVideo` avant l'ajout du couple WebM/MP4.
