@@ -37,9 +37,10 @@ const Login = () => {
     try {
       trackEvent("login_completed", { source: "/login", metadata: { method: "google", stage: "started" } });
     } catch {}
-    logOAuthStage("sdk_called", "/login", { redirect_uri: window.location.origin });
+    const googleRedirectUrl = `${window.location.origin}/dashboard`;
+    logOAuthStage("sdk_called", "/login", { redirect_uri: googleRedirectUrl });
     const result = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: window.location.origin,
+      redirect_uri: googleRedirectUrl,
       extraParams: {
         prompt: "select_account",
         ...(email.trim() ? { login_hint: email.trim().toLowerCase() } : {}),
