@@ -294,15 +294,18 @@ Deno.serve(async (req) => {
     const ga4PropertyId = Deno.env.get("GA4_PROPERTY_ID") || "530010609";
 
     // Date ranges
-    const gscEnd = formatDate(daysAgo(3));
-    const gscStart = formatDate(daysAgo(31));
-    const gscPrevEnd = formatDate(daysAgo(32));
-    const gscPrevStart = formatDate(daysAgo(60));
+    // GSC publie avec 2-3j de latence → on demande J-30 → J-2 (au cas où J-2 soit déjà dispo)
+    const gscEnd = formatDate(daysAgo(2));
+    const gscStart = formatDate(daysAgo(30));
+    const gscPrevEnd = formatDate(daysAgo(31));
+    const gscPrevStart = formatDate(daysAgo(59));
 
-    const ga4End = formatDate(daysAgo(1));
-    const ga4Start = formatDate(daysAgo(30));
-    const ga4PrevEnd = formatDate(daysAgo(31));
-    const ga4PrevStart = formatDate(daysAgo(60));
+    // GA4 ingère en quasi temps-réel → on demande jusqu'à AUJOURD'HUI (today)
+    // pour ne pas couper les données fraîches du jour en cours.
+    const ga4End = formatDate(new Date());
+    const ga4Start = formatDate(daysAgo(29));
+    const ga4PrevEnd = formatDate(daysAgo(30));
+    const ga4PrevStart = formatDate(daysAgo(59));
 
     // Fetch channel grouping data from GA4
     async function fetchGA4Channels(
