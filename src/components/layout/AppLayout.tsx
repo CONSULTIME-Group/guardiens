@@ -63,6 +63,7 @@ export const AppLayout = ({ children }: { children?: ReactNode }) => {
           }}
         />
       )}
+      <DuplicateAccountGuard />
     </div>
   );
 };
