@@ -19,7 +19,7 @@ import ScrollToTop from "@/components/layout/ScrollToTop";
 import PageViewTracker from "@/components/analytics/PageViewTracker";
 import FacebookReferralTracker from "@/components/analytics/FacebookReferralTracker";
 import FacebookReferralFeedback from "@/components/analytics/FacebookReferralFeedback";
-import CookieConsent from "@/components/layout/CookieConsent";
+// CookieConsent retiré (mesure d'audience exemptée CNIL)
 import { toast } from "sonner";
 import { reportError } from "@/lib/errorLogger";
 
