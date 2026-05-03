@@ -58,10 +58,17 @@ const StatusBar = ({ data, loading, refreshing, onRefresh }: StatusBarProps) => 
     d.setDate(d.getDate() - n);
     return d;
   };
-  const ga4Range = `${fmt(minus(30))} → ${fmt(minus(1))}`;
-  const gscRange = `${fmt(minus(31))} → ${fmt(minus(3))}`;
+  const ga4Range = `${fmt(minus(29))} → ${fmt(today)}`;
+  const gscRange = `${fmt(minus(30))} → ${fmt(minus(2))}`;
 
-  const isStale = cacheAgeMin !== null && cacheAgeMin > 60;
+  // Dernier jour réellement présent dans GA4 (format YYYYMMDD)
+  const ga4Days = data?.ga4?.current?.sessionsByDay ?? [];
+  const lastGa4Raw = ga4Days[ga4Days.length - 1]?.date ?? null;
+  const lastGa4Date = lastGa4Raw
+    ? `${lastGa4Raw.slice(6, 8)}/${lastGa4Raw.slice(4, 6)}/${lastGa4Raw.slice(0, 4)}`
+    : "—";
+
+  const isStale = cacheAgeMin !== null && cacheAgeMin > 15;
 
   return (
     <div className="space-y-2">
