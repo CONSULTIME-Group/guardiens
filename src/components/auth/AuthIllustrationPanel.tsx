@@ -143,6 +143,41 @@ export const AuthIllustrationPanel = forwardRef<HTMLDivElement, AuthIllustration
       };
     }, [animate, hasEnteredViewport, mountVideos]);
 
+    // Préchargement léger : injecte des <link rel="preload" as="video"> en
+    // priorité basse uniquement si le manifeste confirme que mp4/webm sont
+    // synchronisés avec la PNG. Permet au navigateur de récupérer les
+    // premiers octets pendant l'idle, sans bloquer les ressources critiques.
+    // Aucun preload si reduced-motion, save-data, connexion lente, ou
+    // cinemagraph désynchronisé — dans ces cas on reste sur la PNG.
+    useEffect(() => {
+      if (typeof document === "undefined") return;
+      if (!isCinemagraphInSync || !animate || !hasEnteredViewport) return;
+
+      const supportsWebm = document
+        .createElement("video")
+        .canPlayType('video/webm; codecs="vp9"');
+      const href = supportsWebm ? authIllustrationWebm : authIllustrationMp4;
+      const type = supportsWebm ? "video/webm" : "video/mp4";
+
+      const existing = document.head.querySelector(
+        `link[rel="preload"][href="${href}"]`
+      );
+      if (existing) return;
+
+      const link = document.createElement("link");
+      link.rel = "preload";
+      link.as = "video";
+      link.href = href;
+      link.type = type;
+      // Priorité basse : ne concurrence pas le bundle JS / CSS critique.
+      (link as HTMLLinkElement & { fetchPriority?: string }).fetchPriority = "low";
+      document.head.appendChild(link);
+
+      return () => {
+        link.parentNode?.removeChild(link);
+      };
+    }, [animate, hasEnteredViewport]);
+
     useEffect(() => {
       if (!animate || !mountVideos) return;
       const a = videoARef.current;
