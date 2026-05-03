@@ -72,10 +72,11 @@ const Terms = () => {
 
           <h3 className="font-heading text-lg font-semibold text-foreground pt-2">Tarifs</h3>
           <ul className="list-disc pl-6 space-y-1">
-            <li><strong className="text-foreground">Espace Propriétaire</strong> : gratuit, sans limite de durée.</li>
-            <li><strong className="text-foreground">Espace Gardien</strong> : abonnement standard à <strong className="text-foreground">9 € TTC par mois</strong>, sans engagement, résiliable à tout moment.</li>
-            <li><strong className="text-foreground">Petites missions</strong> : gratuites pour tous les membres, sans limite de durée.</li>
-            <li><strong className="text-foreground">Programme Fondateur</strong> : les utilisateurs inscrits avant le 13 mai 2026 bénéficient de conditions préférentielles, détaillées sur la page Tarifs.</li>
+            <li><strong className="text-foreground">Espace Propriétaire</strong> : 0 € à vie, sans carte bancaire requise, sans limite de durée.</li>
+            <li><strong className="text-foreground">Espace Gardien</strong> : abonnement standard à <strong className="text-foreground">6,99 € TTC par mois</strong>, sans engagement, résiliable à tout moment depuis l'espace personnel. Un essai gratuit de 7 jours est proposé lors de la première souscription, sans prélèvement automatique à l'issue de la période d'essai (l'utilisateur choisit explicitement de poursuivre).</li>
+            <li><strong className="text-foreground">Petites missions (entraide)</strong> : 0 € à vie pour tous les membres, sans condition d'abonnement.</li>
+            <li><strong className="text-foreground">Période de lancement</strong> : jusqu'au <strong className="text-foreground">13 juin 2026</strong>, l'accès Gardien est intégralement offert (0 €). À compter du 14 juin 2026, l'abonnement à 6,99 € TTC/mois devient nécessaire pour postuler aux gardes.</li>
+            <li><strong className="text-foreground">Programme Fondateur</strong> : les utilisateurs inscrits avant le 13 juin 2026 bénéficient de conditions préférentielles détaillées sur la page Tarifs (badge à vie, formule 2026 avec remise).</li>
             <li><strong className="text-foreground">Parrainage</strong> : un mois d'abonnement Gardien offert par filleul actif, dans les conditions précisées sur la page dédiée.</li>
           </ul>
           <p>
