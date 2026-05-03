@@ -70,6 +70,14 @@ export const AuthIllustrationPanel = forwardRef<HTMLDivElement, AuthIllustration
 
     useEffect(() => {
       if (typeof window === "undefined") return;
+      // Garde-fou de synchronisation : si la vidéo n'a pas été régénérée
+      // après une mise à jour de la PNG, on reste sur l'image fixe pour
+      // éviter d'afficher une scène obsolète. Réactivation automatique dès
+      // que `videoVersion === pngVersion` dans le manifeste.
+      if (!isCinemagraphInSync) {
+        setAnimate(false);
+        return;
+      }
       const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
       // Respect Save-Data + connexions lentes (2g/slow-2g/3g) : poster-only.
       const conn = (navigator as Navigator & {
