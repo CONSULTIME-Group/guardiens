@@ -348,15 +348,16 @@ const Terms = () => {
           {/* ============ 23. MÉDIATION ============ */}
           <h2 className="font-heading text-xl font-bold text-foreground pt-4">23. Médiation de la consommation</h2>
           <p>
-            Conformément aux articles L. 612-1 et R. 612-1 du Code de la consommation, et après avoir tenté de résoudre le litige directement auprès de Guardiens, le consommateur peut recourir gratuitement à un médiateur de la consommation. Le médiateur désigné par Guardiens est :
+            Conformément aux articles L. 612-1 et suivants du Code de la consommation, en cas de litige n'ayant pas pu être résolu directement avec Guardiens, le consommateur peut recourir gratuitement à un médiateur de la consommation.
           </p>
-          <ul className="list-disc pl-6 space-y-1">
-            <li><strong className="text-foreground">MEDICYS</strong> — Centre de médiation et de règlement amiable des huissiers de justice</li>
-            <li>Adresse : 73 Boulevard de Clichy, 75009 Paris</li>
-            <li>Site : <a href="https://app.medicys.fr" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">app.medicys.fr</a></li>
-          </ul>
           <p>
-            La plateforme européenne de Règlement en Ligne des Litiges (RLL) est par ailleurs accessible à : <a href="https://ec.europa.eu/consumers/odr" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">ec.europa.eu/consumers/odr</a>.
+            <strong className="text-foreground">Désignation en cours</strong> : Guardiens procède actuellement à la sélection et à l'adhésion auprès d'un organisme de médiation référencé par la Commission d'évaluation et de contrôle de la médiation de la consommation (CECMC). Les coordonnées du médiateur agréé seront publiées dans les présentes CGU et communiquées par email aux utilisateurs dès la finalisation de cette adhésion.
+          </p>
+          <p>
+            Dans l'intervalle, toute réclamation peut être adressée à <a href="mailto:contact@guardiens.fr" className="text-primary hover:underline">contact@guardiens.fr</a>. À défaut de réponse satisfaisante dans un délai de deux mois, le consommateur conserve la faculté de saisir le juge compétent (article 24) ou la plateforme européenne de Règlement en Ligne des Litiges (RLL) accessible à : <a href="https://ec.europa.eu/consumers/odr" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">ec.europa.eu/consumers/odr</a>.
+          </p>
+          <p>
+            La liste des médiateurs agréés est consultable sur <a href="https://www.economie.gouv.fr/mediation-conso" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">economie.gouv.fr/mediation-conso</a>.
           </p>
 
           {/* ============ 24. DROIT APPLICABLE ============ */}
