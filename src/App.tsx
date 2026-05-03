@@ -338,7 +338,8 @@ const App = () => (
               <PreviewDiagnosticBanner />
               <AppRoutes />
               <FacebookReferralFeedback />
-              <CookieConsent />
+              {/* Bannière cookies retirée : mesure d'audience GA4 exemptée CNIL
+                  (anonymize_ip, pas de pub/signals). Voir src/lib/cookieConsent.ts. */}
             </BrowserRouter>
           </AuthProvider>
         </TooltipProvider>
