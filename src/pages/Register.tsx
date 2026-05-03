@@ -706,23 +706,51 @@ const Register = () => {
  </div>
 
 
- {/* CGU checkbox */}
- <div className="flex items-start gap-2">
- <Checkbox
- id="terms"
- checked={acceptedTerms}
- onCheckedChange={(v) => setAcceptedTerms(v === true)}
- className="mt-0.5"
- />
- <label htmlFor="terms" className="text-sm text-muted-foreground leading-snug cursor-pointer">
- J'accepte les{" "}
- <Link to="/cgu" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">CGU</Link>,
- {" "}les{" "}
- <Link to="/cgs" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">CGS</Link>
- {" "}et la{" "}
- <Link to="/confidentialite" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">politique de confidentialité</Link>.
- </label>
- </div>
+          {/* Acceptation légale */}
+          <div className="space-y-2">
+            <div className="flex items-start gap-2">
+              <Checkbox
+                id="accept-cgu"
+                checked={acceptedCgu}
+                onCheckedChange={(v) => setAcceptedCgu(v === true)}
+                className="mt-0.5"
+              />
+              <label htmlFor="accept-cgu" className="text-sm text-muted-foreground leading-snug cursor-pointer">
+                J'accepte les{" "}
+                <Link to="/cgu" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+                  Conditions Générales d'Utilisation (v5)
+                </Link>.
+              </label>
+            </div>
+            <div className="flex items-start gap-2">
+              <Checkbox
+                id="accept-cgs"
+                checked={acceptedCgs}
+                onCheckedChange={(v) => setAcceptedCgs(v === true)}
+                className="mt-0.5"
+              />
+              <label htmlFor="accept-cgs" className="text-sm text-muted-foreground leading-snug cursor-pointer">
+                J'accepte les{" "}
+                <Link to="/cgs" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+                  Conditions Générales de Services (v1)
+                </Link>.
+              </label>
+            </div>
+            <div className="flex items-start gap-2">
+              <Checkbox
+                id="accept-privacy"
+                checked={acceptedPrivacy}
+                onCheckedChange={(v) => setAcceptedPrivacy(v === true)}
+                className="mt-0.5"
+              />
+              <label htmlFor="accept-privacy" className="text-sm text-muted-foreground leading-snug cursor-pointer">
+                J'ai lu et j'accepte la{" "}
+                <Link to="/confidentialite" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+                  politique de confidentialité
+                </Link>.
+              </label>
+            </div>
+          </div>
 
  <Button type="submit" className="w-full" size="lg" disabled={isLoading || !acceptedTerms}>
  {isLoading ? "Création..." : "Créer mon compte"}
