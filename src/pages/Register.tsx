@@ -352,12 +352,13 @@ const Register = () => {
  metadata: { role: selectedRole, method: "google" },
  });
  } catch {}
- logOAuthStage("sdk_called", "/inscription", {
+  const googleRedirectUrl = `${window.location.origin}/dashboard`;
+  logOAuthStage("sdk_called", "/inscription", {
  role: selectedRole,
- redirect_uri: window.location.origin,
+ redirect_uri: googleRedirectUrl,
  });
  const result = await lovable.auth.signInWithOAuth("google", {
- redirect_uri: window.location.origin,
+ redirect_uri: googleRedirectUrl,
  extraParams: {
  prompt: "select_account",
  ...(email.trim() ? { login_hint: email.trim().toLowerCase() } : {}),
