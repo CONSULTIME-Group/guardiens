@@ -80,12 +80,14 @@ const DuplicateAccountGuard = () => {
             return;
           }
           toast({
-            title: "Compte en doublon supprimé",
-            description: `Reconnectez-vous avec votre compte d'origine : ${canonical}`,
+            title: "Doublon Google détecté et supprimé",
+            description: `Google a créé un nouveau compte avec une variante de votre email (points ou googlemail.com). Ce compte vide vient d'être supprimé automatiquement. Reconnectez-vous avec votre adresse d'origine : ${canonical}`,
+            duration: 9000,
           });
           await logout();
           navigate(`/login?email=${encodeURIComponent(canonical)}`, {
             replace: true,
+            state: { prefilledEmail: canonical, reason: "duplicate-cleaned" },
           });
           return;
         }
