@@ -378,7 +378,7 @@ const CityPage = () => {
  Prêt à partir l'esprit libre ?
  </h2>
  <p className="text-muted-foreground mb-8 max-w-xl mx-auto">
- Publiez votre annonce en 5 minutes. À 0 €.
+ Publiez votre annonce en 5 minutes. Gratuitement.
  </p>
  <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
  <Link to="/inscription?role=owner">
