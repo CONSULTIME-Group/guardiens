@@ -34,7 +34,9 @@ export const AppLayout = ({ children }: { children?: ReactNode }) => {
             <span className="text-primary">g</span>
             <span className="text-foreground">uardiens</span>
           </Link>
-          <NotificationBell />
+          <Suspense fallback={<div className="w-9 h-9" aria-hidden />}>
+            <NotificationBell />
+          </Suspense>
         </div>
         {/* Single navigation aid: BackButton on mobile, Breadcrumbs on desktop */}
         <div className="md:hidden">
