@@ -18,7 +18,7 @@ const Terms = () => {
         </h1>
 
         <div className="prose prose-lg max-w-none text-muted-foreground space-y-6">
-          <p className="text-sm">Version 3 — Dernière mise à jour : 3 mai 2026</p>
+          <p className="text-sm">Dernière mise à jour : 3 mai 2026</p>
 
           {/* ============ 1. ÉDITEUR ============ */}
           <h2 className="font-heading text-xl font-bold text-foreground pt-4">1. Éditeur de la Plateforme</h2>
@@ -94,12 +94,10 @@ const Terms = () => {
 
           <h3 className="font-heading text-lg font-semibold text-foreground pt-2">Tarifs</h3>
           <ul className="list-disc pl-6 space-y-1">
-            <li><strong className="text-foreground">Espace Propriétaire</strong> : 0 € à vie, sans carte bancaire requise, sans limite de durée.</li>
-            <li><strong className="text-foreground">Espace Gardien</strong> : abonnement standard à <strong className="text-foreground">6,99 € TTC par mois</strong>, sans engagement, résiliable à tout moment depuis l'espace personnel. Un essai gratuit de 7 jours est proposé lors de la première souscription, sans prélèvement automatique à l'issue de la période d'essai (l'utilisateur choisit explicitement de poursuivre).</li>
-            <li><strong className="text-foreground">Petites missions (entraide)</strong> : 0 € à vie pour tous les membres, sans condition d'abonnement.</li>
-            <li><strong className="text-foreground">Période de lancement</strong> : jusqu'au <strong className="text-foreground">13 juin 2026</strong>, l'accès Gardien est intégralement offert (0 €). À compter du 14 juin 2026, l'abonnement à 6,99 € TTC/mois devient nécessaire pour postuler aux gardes.</li>
-            <li><strong className="text-foreground">Programme Fondateur</strong> : les utilisateurs inscrits avant le 13 juin 2026 bénéficient de conditions préférentielles détaillées sur la page Tarifs.</li>
-            <li><strong className="text-foreground">Parrainage</strong> : un mois d'abonnement Gardien offert par filleul actif, dans les conditions précisées sur la page dédiée.</li>
+            <li><strong className="text-foreground">Espace Propriétaire</strong> : gratuit, sans carte bancaire requise, sans limite de durée.</li>
+            <li><strong className="text-foreground">Espace Gardien</strong> : abonnement standard à <strong className="text-foreground">6,99 € TTC par mois</strong>, sans engagement, résiliable à tout moment depuis l'espace personnel. Un essai gratuit est proposé lors de la première souscription, sans prélèvement automatique à l'issue de la période d'essai (l'utilisateur choisit explicitement de poursuivre).</li>
+            <li><strong className="text-foreground">Petites missions (entraide)</strong> : gratuites pour tous les membres, sans condition d'abonnement et sans limite de durée.</li>
+            <li><strong className="text-foreground">Programme Fondateur, parrainage et offres promotionnelles</strong> : les conditions, durées et modalités des offres ponctuelles (gratuité étendue, remises, badge, mois offert par filleul actif) sont précisées sur les pages dédiées de la Plateforme et peuvent évoluer dans le temps.</li>
           </ul>
           <p>
             Aucune commission n'est prélevée sur les gardes ou sur les petites missions. Les prix sont exprimés en euros toutes taxes comprises.
@@ -346,18 +344,15 @@ const Terms = () => {
           </p>
 
           {/* ============ 23. MÉDIATION ============ */}
-          <h2 className="font-heading text-xl font-bold text-foreground pt-4">23. Médiation de la consommation</h2>
+          <h2 className="font-heading text-xl font-bold text-foreground pt-4">23. Réclamations et résolution amiable</h2>
           <p>
-            Conformément aux articles L. 612-1 et suivants du Code de la consommation, en cas de litige n'ayant pas pu être résolu directement avec Guardiens, le consommateur peut recourir gratuitement à un médiateur de la consommation.
+            <strong className="text-foreground">Réclamation interne préalable</strong> : avant toute action contentieuse ou démarche externe, l'utilisateur s'engage à adresser sa réclamation par email à <a href="mailto:contact@guardiens.fr" className="text-primary hover:underline">contact@guardiens.fr</a>, en précisant l'objet du différend et les éléments justificatifs. Guardiens accuse réception sous 7 jours ouvrés et s'efforce d'apporter une réponse motivée dans un délai maximum de <strong className="text-foreground">deux (2) mois</strong>.
           </p>
           <p>
-            <strong className="text-foreground">Désignation en cours</strong> : Guardiens procède actuellement à la sélection et à l'adhésion auprès d'un organisme de médiation référencé par la Commission d'évaluation et de contrôle de la médiation de la consommation (CECMC). Les coordonnées du médiateur agréé seront publiées dans les présentes CGU et communiquées par email aux utilisateurs dès la finalisation de cette adhésion.
+            <strong className="text-foreground">Médiation de la consommation</strong> : conformément aux articles L. 611-1 et suivants du Code de la consommation, le consommateur a le droit de recourir gratuitement à un médiateur de la consommation en cas de litige non résolu. La liste actualisée des médiateurs agréés par la Commission d'évaluation et de contrôle de la médiation de la consommation (CECMC) est consultable sur <a href="https://www.economie.gouv.fr/mediation-conso" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">economie.gouv.fr/mediation-conso</a>. Les coordonnées du médiateur retenu par Guardiens sont publiées sur la page <a href="/mentions-legales" className="text-primary hover:underline">Mentions légales</a> ainsi que dans tout email de réponse à une réclamation, conformément à l'article R. 616-1 du Code de la consommation.
           </p>
           <p>
-            Dans l'intervalle, toute réclamation peut être adressée à <a href="mailto:contact@guardiens.fr" className="text-primary hover:underline">contact@guardiens.fr</a>. À défaut de réponse satisfaisante dans un délai de deux mois, le consommateur conserve la faculté de saisir le juge compétent (article 24) ou la plateforme européenne de Règlement en Ligne des Litiges (RLL) accessible à : <a href="https://ec.europa.eu/consumers/odr" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">ec.europa.eu/consumers/odr</a>.
-          </p>
-          <p>
-            La liste des médiateurs agréés est consultable sur <a href="https://www.economie.gouv.fr/mediation-conso" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">economie.gouv.fr/mediation-conso</a>.
+            <strong className="text-foreground">Règlement en ligne des litiges (UE)</strong> : la plateforme européenne RLL est accessible à : <a href="https://ec.europa.eu/consumers/odr" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">ec.europa.eu/consumers/odr</a>.
           </p>
 
           {/* ============ 24. DROIT APPLICABLE ============ */}
