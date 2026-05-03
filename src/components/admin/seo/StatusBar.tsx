@@ -89,6 +89,14 @@ const StatusBar = ({ data, loading, refreshing, onRefresh }: StatusBarProps) => 
               {data?.stale && " · périmé"}
             </span>
           )}
+          {data?.ga4 && (
+            <span
+              className="text-xs text-muted-foreground"
+              title="Dernier jour pour lequel GA4 a renvoyé des données"
+            >
+              Dernier jour GA4 : <span className="font-medium text-foreground">{lastGa4Date}</span>
+            </span>
+          )}
         </div>
         <div className="flex items-center gap-1">
           <Button
