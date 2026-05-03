@@ -4237,6 +4237,13 @@ export type Database = {
         Args: { payload: Json; queue_name: string }
         Returns: number
       }
+      find_duplicate_gmail_account: {
+        Args: { _user_id: string }
+        Returns: {
+          canonical_email: string
+          canonical_user_id: string
+        }[]
+      }
       get_garde_environments: {
         Args: { p_garde_id: string }
         Returns: string[]
