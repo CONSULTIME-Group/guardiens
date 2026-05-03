@@ -352,12 +352,17 @@ const Register = () => {
  metadata: { role: selectedRole, method: "google" },
  });
  } catch {}
- logOAuthStage("sdk_called", "/inscription", {
+  const googleRedirectUrl = `${window.location.origin}/dashboard`;
+  logOAuthStage("sdk_called", "/inscription", {
  role: selectedRole,
- redirect_uri: window.location.origin,
+ redirect_uri: googleRedirectUrl,
  });
  const result = await lovable.auth.signInWithOAuth("google", {
- redirect_uri: window.location.origin,
+ redirect_uri: googleRedirectUrl,
+ extraParams: {
+ prompt: "select_account",
+ ...(email.trim() ? { login_hint: email.trim().toLowerCase() } : {}),
+ },
  });
  if (result.error) {
  const info = mapAuthError(result.error as any);
@@ -761,12 +766,23 @@ const Register = () => {
  </form>
  )}
 
- {step !== "confirmation" && (
- <p className="text-center text-sm text-muted-foreground mt-6">
- Déjà un compte ?{" "}
- <Link to="/login" className="text-primary font-medium hover:underline">Se connecter</Link>
- </p>
- )}
+  {step !== "confirmation" && (
+  <div className="mt-6 space-y-2 text-center text-sm text-muted-foreground">
+  <p>
+  Déjà un compte ?{" "}
+  <Link to="/login" className="text-primary font-medium hover:underline">Se connecter</Link>
+  </p>
+  {step === 2 && (
+  <button
+  type="button"
+  onClick={() => navigate("/login")}
+  className="text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
+  >
+  Quitter l'inscription et revenir à la connexion
+  </button>
+  )}
+  </div>
+  )}
  </div>
  </div>
 

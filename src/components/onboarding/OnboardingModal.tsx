@@ -37,7 +37,7 @@ const SKILL_CATEGORIES = [
 ];
 
 const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalProps) => {
-  const { user, activeRole, refreshProfile } = useAuth();
+  const { user, activeRole, refreshProfile, logout } = useAuth();
   const navigate = useNavigate();
   const [slide, setSlide] = useState(0);
   const [activeTab, setActiveTab] = useState<ActiveTab>(() =>
@@ -347,6 +347,12 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
     }
     onClose();
     navigate(destination);
+  };
+
+  const leaveToLogin = async () => {
+    onClose();
+    await logout();
+    navigate("/login", { replace: true });
   };
 
   if (!open) return null;
@@ -716,9 +722,13 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
                 </div>
               </>
             ) : slide === 0 ? (
-              <p className="text-xs text-muted-foreground italic">
-                Ces informations sont nécessaires pour continuer.
-              </p>
+              <button
+                type="button"
+                onClick={leaveToLogin}
+                className="text-xs text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
+              >
+                Utiliser un autre compte
+              </button>
             ) : null}
           </div>
 
