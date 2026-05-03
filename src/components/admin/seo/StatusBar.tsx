@@ -129,11 +129,12 @@ const StatusBar = ({ data, loading, refreshing, onRefresh }: StatusBarProps) => 
               value={cacheAgeMin !== null ? `${cacheAgeMin} min` : "—"}
               warn={isStale}
             />
-            <ExpertRow label="TTL cache" value="60 min (puis fallback 24h si erreur)" />
+            <ExpertRow label="TTL cache" value="15 min (puis fallback 24h si erreur)" />
             <ExpertRow label="Source" value={data?.cached ? (data?.stale ? "cache périmé (fallback)" : "cache") : "live API"} />
             <ExpertRow label="GA4 propertyId" value={data?.ga4?.propertyId ?? "—"} />
-            <ExpertRow label="Plage GA4" value={`${ga4Range} (J-30 → J-1)`} />
-            <ExpertRow label="Plage GSC" value={`${gscRange} (J-31 → J-3)`} />
+            <ExpertRow label="Plage GA4 demandée" value={`${ga4Range} (J-29 → aujourd'hui)`} />
+            <ExpertRow label="Dernier jour GA4 reçu" value={lastGa4Date} />
+            <ExpertRow label="Plage GSC demandée" value={`${gscRange} (J-30 → J-2)`} />
             <ExpertRow label="GA4 sessions" value={data?.ga4?.current?.sessions?.toLocaleString() ?? "—"} />
             <ExpertRow label="GA4 utilisateurs actifs" value={data?.ga4?.current?.activeUsers?.toLocaleString() ?? "—"} />
             <ExpertRow label="GSC clics" value={gscClicks.toLocaleString()} />
