@@ -120,7 +120,7 @@ export const staticRoutes: SiteRoute[] = [
  {
  path: "/",
  title: "Guardiens — Partez l'esprit tranquille",
- metaDescription: "Un gardien près de chez vous s'occupe de votre maison et de vos animaux pendant vos absences. Gratuit pour les propriétaires.",
+ metaDescription: "Un gardien près de chez vous s'occupe de votre maison et de vos animaux pendant vos absences. gratuit pour les propriétaires.",
  h1: "Guardiens — Comme confier ses clés à quelqu'un du coin",
  sitemapPriority: "1.0",
  changeFreq: "weekly",
@@ -129,7 +129,7 @@ export const staticRoutes: SiteRoute[] = [
  {
  path: "/tarifs",
  title: "Tarifs — 6,99 €/mois pour les gardiens | Guardiens",
- metaDescription: "6,99 €/mois pour les gardiens, 7 jours d'essai offerts. Gratuit pour les propriétaires. Sans commission, sans frais cachés.",
+ metaDescription: "6,99 €/mois pour les gardiens, 7 jours d'essai offerts. gratuit pour les propriétaires. Sans commission, sans frais cachés.",
  h1: "Nos tarifs",
  sitemapPriority: "0.8",
  changeFreq: "monthly",
@@ -274,7 +274,7 @@ export const dynamicRoutes: DynamicRouteConfig[] = [
  sampleParams: { slug: "nouveaux-tarifs-2026" },
  // Titre et description réels servis par la page (vérifiés strictement)
  sampleTitle: "Tarifs Guardiens 2026 — 6,99 €/mois, 7 jours offerts | Guardiens",
- sampleDescription: "Les tarifs officiels Guardiens pour 2026 : 6,99 €/mois pour les gardiens avec 7 jours offerts, Gratuit pour les propriétaires. Sans commission ni frais cachés.",
+ sampleDescription: "Les tarifs officiels Guardiens pour 2026 : 6,99 €/mois pour les gardiens avec 7 jours offerts, gratuit pour les propriétaires. Sans commission ni frais cachés.",
  },
  {
  pathPattern: "/house-sitting/:city",
