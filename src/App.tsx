@@ -67,6 +67,7 @@ const ArticleDetail = lazy(() => import("./pages/ArticleDetail"));
 const About = lazy(() => import("./pages/About"));
 const Contact = lazy(() => import("./pages/Contact"));
 const Terms = lazy(() => import("./pages/Terms"));
+const Cgs = lazy(() => import("./pages/Cgs"));
 const Privacy = lazy(() => import("./pages/Privacy"));
 const AdminArticles = lazy(() => import("./pages/AdminArticles"));
 const ArticleEditor = lazy(() => import("./pages/ArticleEditor"));
@@ -227,6 +228,7 @@ const AppRoutes = () => (
       <Route path="/a-propos" element={<About />} />
       <Route path="/contact" element={<Contact />} />
       <Route path="/cgu" element={<Terms />} />
+      <Route path="/cgs" element={<Cgs />} />
       <Route path="/confidentialite" element={<Privacy />} />
       <Route path="/mentions-legales" element={<MentionsLegales />} />
       <Route path="/faq" element={<FAQ />} />

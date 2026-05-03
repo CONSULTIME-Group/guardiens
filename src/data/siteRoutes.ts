@@ -227,6 +227,14 @@ export const staticRoutes: SiteRoute[] = [
  changeFreq: "yearly",
  },
  {
+ path: "/cgs",
+ title: "Conditions générales de services | Guardiens",
+ metaDescription: "Conditions générales de services Guardiens : tarifs, paiement, période d'essai, résiliation simplifiée et droit de rétractation.",
+ h1: "Conditions générales de services",
+ sitemapPriority: "0.3",
+ changeFreq: "yearly",
+ },
+ {
  path: "/confidentialite",
  title: "Politique de confidentialité | Guardiens",
  metaDescription: "Comment Guardiens protège vos données personnelles : collecte, conservation, partage, cookies et exercice de vos droits RGPD en France.",
