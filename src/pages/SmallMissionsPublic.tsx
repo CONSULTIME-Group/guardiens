@@ -396,6 +396,153 @@ const SmallMissionsPublic = () => {
  </p>
  </Reveal>
  </div>
+  </section>
+
+ {/* ═══ SECTION 4.5 — CE QU'ON ÉCHANGE / CE QU'ON N'ÉCHANGE PAS (densification éditoriale) ═══ */}
+ <section className="bg-background border-t border-border/40">
+ <div className="max-w-5xl mx-auto px-6 py-20 md:py-24">
+ <Reveal>
+ <p className="text-xs font-body font-semibold tracking-widest uppercase text-primary/60 text-center mb-4">
+ Le cadre
+ </p>
+ <h2 className="font-heading text-3xl md:text-4xl font-semibold text-foreground text-center leading-snug mb-3">
+ Ce qu'on échange (et ce qu'on n'échange pas)
+ </h2>
+ <p className="font-body text-base md:text-lg italic text-foreground/60 text-center max-w-xl mx-auto mb-12">
+ Pour que vous soyez sûr·e d'être au bon endroit.
+ </p>
+ </Reveal>
+
+ <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+ {/* Bloc gauche — ce qu'on échange */}
+ <Reveal delay={0.05}>
+ <div className="bg-card border border-border rounded-2xl p-8 md:p-10 h-full">
+ <h3 className="font-heading text-xl md:text-2xl font-semibold text-foreground mb-6">
+ Ce qu'on échange
+ </h3>
+ <div className="space-y-6">
+ {[
+ {
+ cat: "Animaux",
+ desc: "Le quotidien d'un compagnon, sans engagement professionnel.",
+ ex: "Promener un chien, nourrir des chats le weekend, accompagner chez le vétérinaire, garder les poules quelques jours.",
+ },
+ {
+ cat: "Maison & jardin",
+ desc: "Les petits gestes qui évitent qu'une absence vire au casse-tête.",
+ ex: "Arroser les plantes, relever le courrier, réceptionner un colis, tondre la pelouse occasionnellement.",
+ },
+ {
+ cat: "Compétences & temps",
+ desc: "Ce que vous savez faire et que quelqu'un, à côté, ne sait pas encore.",
+ ex: "Conseils, dépannage informatique léger, écoute, transmission d'un savoir, bricolage simple.",
+ },
+ ].map((item) => (
+ <div key={item.cat} className="flex gap-4">
+ <span
+ aria-hidden="true"
+ className="flex-shrink-0 w-7 h-7 rounded-full bg-primary/15 text-primary flex items-center justify-center font-bold text-sm mt-0.5"
+ >
+ ✓
+ </span>
+ <div>
+ <h4 className="font-heading text-base md:text-lg font-semibold text-foreground mb-1">
+ {item.cat}
+ </h4>
+ <p className="font-body text-sm md:text-base text-foreground/70 leading-relaxed mb-1">
+ {item.desc}
+ </p>
+ <p className="font-body text-sm text-foreground/60 leading-relaxed italic">
+ {item.ex}
+ </p>
+ </div>
+ </div>
+ ))}
+ </div>
+ </div>
+ </Reveal>
+
+ {/* Bloc droit — ce qu'on n'échange pas */}
+ <Reveal delay={0.1}>
+ <div className="bg-card border border-border rounded-2xl p-8 md:p-10 h-full">
+ <h3 className="font-heading text-xl md:text-2xl font-semibold text-foreground mb-6">
+ Ce qu'on n'échange pas
+ </h3>
+ <div className="space-y-5">
+ {[
+ "De l'argent. Jamais. C'est non négociable, et c'est précisément ce qui rend l'échange beau.",
+ "Des services réguliers de garde d'enfants ou d'aide à la personne professionnelle. Pour ça, il faut un cadre déclaré et des assurances adaptées.",
+ "Des objets à acheter, à louer, à troquer. Guardiens n'est pas un site de petites annonces.",
+ "Du travail au noir déguisé en « petit coup de main ». Si c'est un job, c'est un job — et ça ne passe pas par Guardiens.",
+ ].map((txt, i) => (
+ <div key={i} className="flex gap-4">
+ <span
+ aria-hidden="true"
+ className="flex-shrink-0 w-7 h-7 rounded-full bg-muted text-foreground/50 flex items-center justify-center font-bold text-sm mt-0.5"
+ >
+ ✗
+ </span>
+ <p className="font-body text-sm md:text-base text-foreground/75 leading-relaxed">
+ {txt}
+ </p>
+ </div>
+ ))}
+ </div>
+ </div>
+ </Reveal>
+ </div>
+ </div>
+ </section>
+
+ {/* ═══ SECTION 4.6 — COMMENT ÇA SE PASSE, CONCRÈTEMENT (densification éditoriale) ═══ */}
+ <section className="bg-muted/30 border-t border-border/40">
+ <div className="max-w-5xl mx-auto px-6 py-20 md:py-24">
+ <Reveal>
+ <p className="text-xs font-body font-semibold tracking-widest uppercase text-primary/60 text-center mb-4">
+ Sur le terrain
+ </p>
+ <h2 className="font-heading text-3xl md:text-4xl font-semibold text-foreground text-center leading-snug mb-3">
+ Comment ça se passe, concrètement
+ </h2>
+ <p className="font-body text-base md:text-lg italic text-foreground/60 text-center max-w-xl mx-auto mb-12">
+ Trois exemples typiques de missions réalisées sur Guardiens.
+ </p>
+ </Reveal>
+
+ <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+ {[
+ {
+ title: "Une demande d'arrosage",
+ text: "Une habitante de la Croix-Rousse part deux semaines en juillet. Elle propose une corbeille de tomates de son potager, contre l'arrosage trois fois par semaine. Quatre personnes du quartier répondent en moins de vingt-quatre heures.",
+ },
+ {
+ title: "Une offre de promenade",
+ text: "Quelqu'un à Caluire propose de promener un chien le matin avant le travail, contre une bière partagée de temps en temps. Trois mois plus tard, il connaît la moitié du quartier et a trouvé un café où on lui garde sa table.",
+ },
+ {
+ title: "Un échange de compétences",
+ text: "À Annecy, une demande de cours de cuisine italienne contre un coup de main au montage d'une terrasse en bois. Les deux parties ont gagné un samedi mémorable, un nouveau contact, et l'envie de recommencer.",
+ },
+ ].map((s, i) => (
+ <Reveal key={s.title} delay={0.05 * i}>
+ <div className="bg-card border border-border rounded-2xl p-6 md:p-7 h-full flex flex-col">
+ <h3 className="font-heading text-lg md:text-xl font-semibold text-foreground mb-3">
+ {s.title}
+ </h3>
+ <p className="font-body text-sm md:text-base text-foreground/75 leading-relaxed flex-1">
+ {s.text}
+ </p>
+ </div>
+ </Reveal>
+ ))}
+ </div>
+
+ <Reveal delay={0.2}>
+ <p className="text-center font-body text-sm text-foreground/55 italic mt-10 max-w-xl mx-auto">
+ Exemples typiques de missions observées sur Guardiens. Les détails sont fictifs, l'esprit est réel.
+ </p>
+ </Reveal>
+ </div>
  </section>
 
  {/* ═══ SECTION 5 — RÈGLES ═══ */}
