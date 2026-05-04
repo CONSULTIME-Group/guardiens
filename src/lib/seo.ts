@@ -21,9 +21,11 @@ export const buildAbsoluteUrl = (pathname: string) => {
  * - Trims whitespace
  * - Returns null if empty/invalid
  * - Resolves relative paths against SITE_URL
- * - Collapses duplicate slashes in the path
+ * - Collapses duplicate slashes (incl. right after the domain)
+ * - Lowercases the path (origin is already lowercased by URL)
  * - Strips trailing slash (except root)
  * - Drops query string and hash
+ * - Idempotent: normalizeCanonical(normalizeCanonical(x)) === normalizeCanonical(x)
  */
 export const normalizeCanonical = (raw?: string | null): string | null => {
   if (!raw) return null;
@@ -31,11 +33,11 @@ export const normalizeCanonical = (raw?: string | null): string | null => {
   if (!trimmed) return null;
 
   try {
-    // Absolute URL (http/https) or relative resolved against SITE_URL
     const isAbsolute = /^https?:\/\//i.test(trimmed);
     const url = new URL(isAbsolute ? trimmed : trimmed, SITE_URL);
     if (url.protocol !== "http:" && url.protocol !== "https:") return null;
-    const path = normalizePathname(url.pathname);
+    // Lowercase the path; normalizePathname collapses dup slashes and trims trailing.
+    const path = normalizePathname(url.pathname.toLowerCase());
     return `${url.origin}${path}`;
   } catch {
     return null;
