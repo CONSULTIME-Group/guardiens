@@ -114,4 +114,27 @@ describe("normalizeCanonical", () => {
       );
     });
   });
+
+  describe("slug variants", () => {
+    it("collapses a double slash right after the domain", () => {
+      expect(normalizeCanonical("https://guardiens.fr//house-sitting/lyon")).toBe(
+        "https://guardiens.fr/house-sitting/lyon",
+      );
+    });
+    it("lowercases uppercase characters in the path", () => {
+      expect(normalizeCanonical("https://guardiens.fr/House-Sitting/LYON")).toBe(
+        "https://guardiens.fr/house-sitting/lyon",
+      );
+    });
+    it("is idempotent on an already-normalized URL", () => {
+      const normalized = "https://guardiens.fr/house-sitting/lyon";
+      expect(normalizeCanonical(normalized)).toBe(normalized);
+      expect(normalizeCanonical(normalizeCanonical(normalized)!)).toBe(normalized);
+    });
+    it("normalizes a messy real-world value to the canonical form", () => {
+      expect(
+        normalizeCanonical("  https://guardiens.fr//House-Sitting///Lyon/?utm=x#a  "),
+      ).toBe("https://guardiens.fr/house-sitting/lyon");
+    });
+  });
 });
