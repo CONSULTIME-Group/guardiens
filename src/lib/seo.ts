@@ -16,4 +16,30 @@ export const buildAbsoluteUrl = (pathname: string) => {
   return `${SITE_URL}${normalizedPath}`;
 };
 
+/**
+ * Normalize a canonical URL value coming from any source (DB, prop, hardcoded).
+ * - Trims whitespace
+ * - Returns null if empty/invalid
+ * - Resolves relative paths against SITE_URL
+ * - Collapses duplicate slashes in the path
+ * - Strips trailing slash (except root)
+ * - Drops query string and hash
+ */
+export const normalizeCanonical = (raw?: string | null): string | null => {
+  if (!raw) return null;
+  const trimmed = raw.trim();
+  if (!trimmed) return null;
+
+  try {
+    // Absolute URL (http/https) or relative resolved against SITE_URL
+    const isAbsolute = /^https?:\/\//i.test(trimmed);
+    const url = new URL(isAbsolute ? trimmed : trimmed, SITE_URL);
+    if (url.protocol !== "http:" && url.protocol !== "https:") return null;
+    const path = normalizePathname(url.pathname);
+    return `${url.origin}${path}`;
+  } catch {
+    return null;
+  }
+};
+
 export { SITE_URL };

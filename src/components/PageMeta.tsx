@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
-import { buildAbsoluteUrl, normalizePathname } from "@/lib/seo";
+import { buildAbsoluteUrl, normalizeCanonical, normalizePathname } from "@/lib/seo";
 import { DEFAULT_OG_IMAGE } from "@/data/siteRoutes";
 
 const DEFAULT_IMAGE = DEFAULT_OG_IMAGE;
@@ -63,7 +63,7 @@ const PageMeta = ({
     };
 
     upsertMetaTag({ attr: "name", key: "robots", content: noindex ? "noindex, follow" : "index, follow" });
-    upsertCanonical(canonical && canonical.trim() ? canonical.trim() : currentUrl);
+    upsertCanonical(normalizeCanonical(canonical) ?? currentUrl);
 
     upsertMetaTag({ attr: "property", key: "og:title", content: fullTitle });
     upsertMetaTag({ attr: "property", key: "og:description", content: metaDescription });
