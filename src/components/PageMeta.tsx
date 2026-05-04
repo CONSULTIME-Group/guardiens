@@ -63,7 +63,7 @@ const PageMeta = ({
     };
 
     upsertMetaTag({ attr: "name", key: "robots", content: noindex ? "noindex, follow" : "index, follow" });
-    upsertCanonical(canonical && canonical.trim() ? canonical.trim() : currentUrl);
+    upsertCanonical(normalizeCanonical(canonical) ?? currentUrl);
 
     upsertMetaTag({ attr: "property", key: "og:title", content: fullTitle });
     upsertMetaTag({ attr: "property", key: "og:description", content: metaDescription });
