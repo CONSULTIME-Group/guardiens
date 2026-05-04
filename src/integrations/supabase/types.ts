@@ -340,6 +340,7 @@ export type Database = {
           region: string | null
           related_breed: string | null
           related_city: string | null
+          seo_dirty_at: string | null
           slug: string
           tags: string[] | null
           title: string
@@ -366,6 +367,7 @@ export type Database = {
           region?: string | null
           related_breed?: string | null
           related_city?: string | null
+          seo_dirty_at?: string | null
           slug: string
           tags?: string[] | null
           title?: string
@@ -392,6 +394,7 @@ export type Database = {
           region?: string | null
           related_breed?: string | null
           related_city?: string | null
+          seo_dirty_at?: string | null
           slug?: string
           tags?: string[] | null
           title?: string
@@ -624,6 +627,7 @@ export type Database = {
           intro: string
           postal_code: string
           published: boolean
+          seo_dirty_at: string | null
           slug: string
           updated_at: string
         }
@@ -637,6 +641,7 @@ export type Database = {
           intro?: string
           postal_code?: string
           published?: boolean
+          seo_dirty_at?: string | null
           slug: string
           updated_at?: string
         }
@@ -650,6 +655,7 @@ export type Database = {
           intro?: string
           postal_code?: string
           published?: boolean
+          seo_dirty_at?: string | null
           slug?: string
           updated_at?: string
         }
@@ -3066,6 +3072,7 @@ export type Database = {
           meta_title: string
           noindex: boolean | null
           published: boolean
+          seo_dirty_at: string | null
           sitter_count: number
           slug: string
           updated_at: string
@@ -3087,6 +3094,7 @@ export type Database = {
           meta_title?: string
           noindex?: boolean | null
           published?: boolean
+          seo_dirty_at?: string | null
           sitter_count?: number
           slug: string
           updated_at?: string
@@ -3108,6 +3116,7 @@ export type Database = {
           meta_title?: string
           noindex?: boolean | null
           published?: boolean
+          seo_dirty_at?: string | null
           sitter_count?: number
           slug?: string
           updated_at?: string
