@@ -8,6 +8,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { ArrowLeft, ArrowRight, Calendar, MapPin, User, Compass, Building2 } from "lucide-react";
 import PageMeta from "@/components/PageMeta";
 import { Helmet } from "react-helmet-async";
+import { logSeoSnapshot } from "@/lib/seoDebugLog";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import ArticleRenderer, { resolveImagePath } from "@/components/articles/ArticleRenderer";
