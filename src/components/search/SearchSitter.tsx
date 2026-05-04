@@ -441,8 +441,8 @@ const SearchSitter = () => {
 
  // Track out-of-zone banner impression (déduplique par tab+zoneMode dans la session)
  const outOfZoneTrackedRef = useRef<Set<string>>(new Set());
- useEffect(() => {
- if (loading || tab !== "sits" || !userPostalCode || zoneMode === "france") return;
+  useEffect(() => {
+ if (loading || tab !== "sits" || zoneMode === "france") return;
  const delta = densityCounts.france - densityCounts.radius;
  if (delta <= 0) return;
  const key = `${tab}|${zoneMode}|${delta}`;
