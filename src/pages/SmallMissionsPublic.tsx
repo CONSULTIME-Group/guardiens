@@ -338,9 +338,9 @@ const SmallMissionsPublic = () => {
 
  <div className="space-y-6 font-body text-base md:text-lg text-foreground/80 leading-relaxed">
  <Reveal delay={0.05}>
- <p>
- Avant, on demandait au voisin du dessus d'arroser les plantes pendant les vacances. La voisine du rez-de-chaussée gardait le chien le weekend. Le retraité d'en face réceptionnait les colis. Personne ne facturait, personne ne tenait les comptes. Ce n'était pas un service — c'était une habitude. Une manière banale, presque invisible, de faire tenir un quartier. Aujourd'hui, pour les mêmes besoins, on appelle un professionnel, on souscrit un abonnement, ou on s'abstient.
- </p>
+  <p>
+  Avant, on demandait à la personne du dessus d'arroser les plantes pendant les vacances. Celle du rez-de-chaussée gardait le chien le weekend. Le retraité d'en face réceptionnait les colis. Personne ne facturait, personne ne tenait les comptes. Ce n'était pas un service — c'était une habitude. Une manière banale, presque invisible, de faire tenir un quartier. Aujourd'hui, pour les mêmes besoins, on appelle un professionnel, on souscrit un abonnement, ou on s'abstient.
+  </p>
  </Reveal>
  <Reveal delay={0.1}>
  <p>
@@ -408,9 +408,9 @@ const SmallMissionsPublic = () => {
  <h2 className="font-heading text-3xl md:text-4xl font-semibold text-foreground text-center leading-snug mb-3">
  Ce qu'on échange (et ce qu'on n'échange pas)
  </h2>
- <p className="font-body text-base md:text-lg italic text-foreground/60 text-center max-w-xl mx-auto mb-12">
- Pour que vous soyez sûr·e d'être au bon endroit.
- </p>
+  <p className="font-body text-base md:text-lg italic text-foreground/60 text-center max-w-xl mx-auto mb-12">
+  Pour que chacun soit au bon endroit.
+  </p>
  </Reveal>
 
  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
