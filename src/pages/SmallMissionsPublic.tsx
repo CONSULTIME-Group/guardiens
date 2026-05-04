@@ -633,7 +633,7 @@ const SmallMissionsPublic = () => {
   href: "/tarifs",
   category: "Tarifs",
   title: "Les tarifs Guardiens, en toute transparence",
-  desc: "Gratuit pour les propriétaires. 6,99 €/mois pour les gardiens. L'entraide reste sans frais, pour tous, pour toujours.",
+  desc: "Gratuit pour les propriétaires. 6,99 €/mois pour les gardiens. L'entraide reste sans frais, pour tous, sans abonnement requis.",
   cta: "Voir les tarifs →",
   },
   {
@@ -676,7 +676,7 @@ const SmallMissionsPublic = () => {
  </Reveal>
  <Reveal delay={0.1}>
  <p className="font-body text-lg text-white/85 leading-relaxed mb-10">
- Le pire qui puisse arriver, c'est que personne ne réponde. Le meilleur, c'est de rencontrer quelqu'un qui change votre semaine. Gratuit. Pour tous. Pour toujours.
+ Le pire qui puisse arriver, c'est que personne ne réponde. Le meilleur, c'est de rencontrer quelqu'un qui change votre semaine. Gratuit. Pour tous. Sans abonnement requis.
  </p>
  </Reveal>
  <Reveal delay={0.2}>
