@@ -16,6 +16,7 @@ interface PageMetaProps {
   publishedAt?: string;
   author?: string;
   noindex?: boolean;
+  canonical?: string;
 }
 
 const PageMeta = ({
@@ -27,6 +28,7 @@ const PageMeta = ({
   publishedAt,
   author,
   noindex = false,
+  canonical,
 }: PageMetaProps) => {
   const location = useLocation();
   const currentPath = normalizePathname(path || location.pathname);
@@ -61,7 +63,7 @@ const PageMeta = ({
     };
 
     upsertMetaTag({ attr: "name", key: "robots", content: noindex ? "noindex, follow" : "index, follow" });
-    upsertCanonical(currentUrl);
+    upsertCanonical(canonical && canonical.trim() ? canonical.trim() : currentUrl);
 
     upsertMetaTag({ attr: "property", key: "og:title", content: fullTitle });
     upsertMetaTag({ attr: "property", key: "og:description", content: metaDescription });
@@ -91,7 +93,7 @@ const PageMeta = ({
 
     // Signal to Prerender.io that SEO-critical content is ready
     (window as any).prerenderReady = true;
-  }, [author, currentUrl, fullTitle, image, metaDescription, noindex, publishedAt, type]);
+  }, [author, canonical, currentUrl, fullTitle, image, metaDescription, noindex, publishedAt, type]);
 
   return (
     <Helmet>
