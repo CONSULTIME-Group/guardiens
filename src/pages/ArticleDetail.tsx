@@ -125,6 +125,35 @@ const ARTICLE_REDIRECTS: Record<string, string> = {
  "5-erreurs-premiere-garde": "reussir-premiere-garde-house-sitting",
 };
 
+/**
+ * Tiny child component: re-runs after PageMeta has flushed Helmet so we can
+ * record both the DB-level article context and the resulting <head>.
+ */
+function ArticleSeoLogger({ article }: { article: ArticleFull }) {
+  useEffect(() => {
+    logSeoSnapshot({
+      path: `/actualites/${article.slug}`,
+      source: "ArticleDetail",
+      input: {
+        title: article.meta_title || article.title,
+        description: article.meta_description || article.excerpt,
+        canonical: article.canonical_url ?? null,
+        noindex: article.noindex === true,
+        type: "article",
+      },
+      article: {
+        id: article.id,
+        slug: article.slug,
+        canonical_url: article.canonical_url,
+        noindex: article.noindex,
+        meta_title: article.meta_title,
+        meta_description: article.meta_description,
+      },
+    });
+  }, [article]);
+  return null;
+}
+
 export default function ArticleDetail() {
  const { slug } = useParams<{ slug: string }>();
  const navigate = useNavigate();
