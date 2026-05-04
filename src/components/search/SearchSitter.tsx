@@ -441,8 +441,8 @@ const SearchSitter = () => {
 
  // Track out-of-zone banner impression (déduplique par tab+zoneMode dans la session)
  const outOfZoneTrackedRef = useRef<Set<string>>(new Set());
- useEffect(() => {
- if (loading || tab !== "sits" || !userPostalCode || zoneMode === "france") return;
+  useEffect(() => {
+ if (loading || tab !== "sits" || zoneMode === "france") return;
  const delta = densityCounts.france - densityCounts.radius;
  if (delta <= 0) return;
  const key = `${tab}|${zoneMode}|${delta}`;
@@ -1691,7 +1691,7 @@ const SearchSitter = () => {
  {/* Densité supprimée — déjà visible dans le sélecteur de Zone et le bandeau hors-zone */}
 
  {/* ─── Out-of-zone banner ─── */}
- {tab === "sits" && !loading && userPostalCode && zoneMode !== "france" && densityCounts.france > densityCounts.radius && (() => {
+ {tab === "sits" && !loading && zoneMode !== "france" && densityCounts.france > densityCounts.radius && (() => {
  const elsewhere = densityCounts.france - densityCounts.radius;
  const inDeptOnly = Math.max(0, densityCounts.dept - densityCounts.radius);
  const inRegionOnly = Math.max(0, densityCounts.region - densityCounts.dept);
