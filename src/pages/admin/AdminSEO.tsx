@@ -335,6 +335,16 @@ const AdminSEO = () => {
             Sitemap <ExternalLink className="h-4 w-4 ml-2" />
           </a>
         </Button>
+        <Button variant="default" asChild>
+          <a href="/admin/prerender">
+            Re-snapshot Prerender
+          </a>
+        </Button>
+        <Button variant="outline" asChild>
+          <a href="/admin/build-info">
+            Build info
+          </a>
+        </Button>
       </div>
     </div>
   );
