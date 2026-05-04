@@ -29,6 +29,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import PostalCodeCityFields from "@/components/profile/PostalCodeCityFields";
+import ActiveRolesSection from "@/components/settings/ActiveRolesSection";
 import { compressImageFile } from "@/lib/compressImage";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -296,6 +297,11 @@ const Settings = () => {
 
       <Separator />
 
+      {/* Mes espaces actifs (gardien / propriétaire) */}
+      <ActiveRolesSection />
+
+      <Separator />
+
       {/* Apparence */}
       <ThemeSection />
 
@@ -429,7 +435,7 @@ const Settings = () => {
       <Separator />
 
       {/* Suppression compte */}
-      <section className="my-8">
+      <section className="my-8" data-section="delete-account">
         <div className="flex items-center gap-2 mb-4">
           <Trash2 className="h-5 w-5 text-destructive" />
           <h2 className="font-heading text-lg font-semibold text-destructive">Supprimer mon compte</h2>
