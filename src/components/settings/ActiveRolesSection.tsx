@@ -20,7 +20,7 @@ import ActivateRoleDialog from "@/components/premium/ActivateRoleDialog";
 type DeactivateTarget = "sitter" | "owner" | null;
 
 const ActiveRolesSection = () => {
-  const { user, refreshProfile, switchRole } = useAuth();
+  const { user, refreshProfile, switchRole, activeRole } = useAuth();
   const navigate = useNavigate();
   const [target, setTarget] = useState<DeactivateTarget>(null);
   const [activateDialog, setActivateDialog] = useState<"gardien" | "proprio" | null>(null);
@@ -32,6 +32,18 @@ const ActiveRolesSection = () => {
   const role = user.role;
   const sitterActive = role === "sitter" || role === "both";
   const ownerActive = role === "owner" || role === "both";
+  const hasBothRoles = role === "both";
+
+  const handleSetDefault = (next: "owner" | "sitter") => {
+    if (next === activeRole) return;
+    switchRole(next);
+    toast.success(
+      next === "sitter"
+        ? "Espace gardien défini par défaut."
+        : "Espace propriétaire défini par défaut.",
+    );
+  };
+
 
   // Tentative de désactivation : ouvre le bon dialog selon l'état
   const handleToggle = (which: "sitter" | "owner") => {
@@ -136,6 +148,54 @@ const ActiveRolesSection = () => {
               aria-label="Activer ou désactiver l'espace gardien"
             />
           </div>
+
+          {hasBothRoles && (
+            <div className="border-t border-border pt-4 mt-2">
+              <p className="text-sm font-medium mb-1">Espace affiché par défaut</p>
+              <p className="text-xs text-muted-foreground mb-3">
+                Choisissez l'espace ouvert au prochain démarrage. Vous pouvez basculer
+                à tout moment depuis la barre latérale.
+              </p>
+              <div
+                role="radiogroup"
+                aria-label="Espace par défaut"
+                className="grid grid-cols-2 gap-2"
+              >
+                <button
+                  type="button"
+                  role="radio"
+                  aria-checked={activeRole === "owner"}
+                  onClick={() => handleSetDefault("owner")}
+                  className={`rounded-md border px-3 py-2 text-sm text-left transition-colors ${
+                    activeRole === "owner"
+                      ? "border-primary bg-primary/5 text-foreground"
+                      : "border-border bg-card text-muted-foreground hover:border-primary/40"
+                  }`}
+                >
+                  <span className="block font-medium">Propriétaire</span>
+                  <span className="block text-xs text-muted-foreground">
+                    Mes annonces et candidats
+                  </span>
+                </button>
+                <button
+                  type="button"
+                  role="radio"
+                  aria-checked={activeRole === "sitter"}
+                  onClick={() => handleSetDefault("sitter")}
+                  className={`rounded-md border px-3 py-2 text-sm text-left transition-colors ${
+                    activeRole === "sitter"
+                      ? "border-primary bg-primary/5 text-foreground"
+                      : "border-border bg-card text-muted-foreground hover:border-primary/40"
+                  }`}
+                >
+                  <span className="block font-medium">Gardien</span>
+                  <span className="block text-xs text-muted-foreground">
+                    Annonces et candidatures
+                  </span>
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </section>
 
