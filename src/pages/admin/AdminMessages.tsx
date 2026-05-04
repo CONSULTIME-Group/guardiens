@@ -2,18 +2,30 @@ import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { MessageSquare, Users, TrendingUp, Calendar } from "lucide-react";
+import { MessageSquare, Users, TrendingUp, Calendar, Reply, Layers } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { format, subDays, subMonths, startOfDay } from "date-fns";
+import { Badge } from "@/components/ui/badge";
+import { format, subDays, subMonths, formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
+import { Link } from "react-router-dom";
 
-interface MessageStats {
-  totalHuman: number;
-  totalSystem: number;
-  totalConversations: number;
-  avgPerDay: number;
+type Period = "7d" | "30d" | "90d" | "all";
+
+interface Stats {
+  total_human: number;
+  total_system: number;
+  conversations_active: number;
+  conversations_total: number;
+  conversations_started_period: number;
+  conversations_with_reply: number;
+  reply_rate: number;
+  active_days: number;
+  avg_per_active_day: number;
+  last_message_at: string | null;
+  by_context: Record<string, number>;
+  daily: { date: string; human: number; system: number }[];
 }
 
 interface TopUser {
@@ -22,24 +34,31 @@ interface TopUser {
   avatar_url: string | null;
   role: string | null;
   message_count: number;
+  conv_count: number;
   last_message_at: string;
 }
 
-interface DailyCount {
-  date: string;
-  count: number;
-}
+const CTX_LABEL: Record<string, string> = {
+  sit_application: "Candidature garde",
+  sitter_inquiry: "Contact gardien",
+  small_mission: "Coup de main",
+  private: "Privé",
+};
 
-type Period = "7d" | "30d" | "90d" | "all";
+const CTX_COLOR: Record<string, string> = {
+  sit_application: "bg-primary",
+  sitter_inquiry: "bg-info",
+  small_mission: "bg-amber-500",
+  private: "bg-muted-foreground",
+};
 
 export default function AdminMessages() {
   const [period, setPeriod] = useState<Period>("30d");
-  const [stats, setStats] = useState<MessageStats | null>(null);
+  const [stats, setStats] = useState<Stats | null>(null);
   const [topUsers, setTopUsers] = useState<TopUser[]>([]);
-  const [dailyCounts, setDailyCounts] = useState<DailyCount[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const getSinceDate = (p: Period): string | null => {
+  const sinceISO = (p: Period): string | null => {
     const now = new Date();
     if (p === "7d") return subDays(now, 7).toISOString();
     if (p === "30d") return subDays(now, 30).toISOString();
@@ -48,213 +67,156 @@ export default function AdminMessages() {
   };
 
   useEffect(() => {
-    const fetchData = async () => {
+    let cancelled = false;
+    const run = async () => {
       setLoading(true);
-      const since = getSinceDate(period);
+      const since = sinceISO(period);
 
-      // Fetch all human messages for the period
-      let query = supabase
-        .from("messages")
-        .select("id, sender_id, created_at, is_system, conversation_id")
-        .eq("is_system", false);
-
-      if (since) {
-        query = query.gte("created_at", since);
-      }
-
-      const { data: messages, error } = await query.order("created_at", { ascending: false }).limit(1000);
-
-      if (error || !messages) {
-        console.error("Error fetching messages:", error);
-        setLoading(false);
-        return;
-      }
-
-      // Also get system message count
-      let sysQuery = supabase
-        .from("messages")
-        .select("id", { count: "exact", head: true })
-        .eq("is_system", true);
-      if (since) sysQuery = sysQuery.gte("created_at", since);
-      const { count: sysCount } = await sysQuery;
-
-      // Compute stats
-      const uniqueConvs = new Set(messages.map((m) => m.conversation_id));
-      const days = period === "7d" ? 7 : period === "30d" ? 30 : period === "90d" ? 90 : Math.max(1, Math.ceil((Date.now() - new Date(messages[messages.length - 1]?.created_at || Date.now()).getTime()) / 86400000));
-
-      setStats({
-        totalHuman: messages.length,
-        totalSystem: sysCount || 0,
-        totalConversations: uniqueConvs.size,
-        avgPerDay: Math.round((messages.length / days) * 10) / 10,
+      // 1) Server-side aggregate (no row limit, accurate)
+      const { data: statsData, error: statsErr } = await supabase.rpc("admin_message_stats", {
+        _since: since,
       });
+      if (statsErr) console.error("admin_message_stats error", statsErr);
 
-      // Top 20 users by message count
-      const userCounts: Record<string, { count: number; lastAt: string }> = {};
-      for (const m of messages) {
-        if (!userCounts[m.sender_id]) {
-          userCounts[m.sender_id] = { count: 0, lastAt: m.created_at };
-        }
-        userCounts[m.sender_id].count++;
-        if (m.created_at > userCounts[m.sender_id].lastAt) {
-          userCounts[m.sender_id].lastAt = m.created_at;
-        }
+      // 2) Top users — still client-side but bounded and only for ranking
+      let q = supabase
+        .from("messages")
+        .select("sender_id, conversation_id, created_at")
+        .eq("is_system", false)
+        .order("created_at", { ascending: false })
+        .limit(2000);
+      if (since) q = q.gte("created_at", since);
+      const { data: msgs } = await q;
+
+      const acc: Record<string, { count: number; convs: Set<string>; last: string }> = {};
+      for (const m of msgs || []) {
+        const a = (acc[m.sender_id] ||= { count: 0, convs: new Set(), last: m.created_at });
+        a.count++;
+        a.convs.add(m.conversation_id);
+        if (m.created_at > a.last) a.last = m.created_at;
       }
-
-      const sortedUserIds = Object.entries(userCounts)
+      const ranked = Object.entries(acc)
         .sort((a, b) => b[1].count - a[1].count)
         .slice(0, 20);
+      const ids = ranked.map(([id]) => id);
+      const { data: profiles } = ids.length
+        ? await supabase.from("profiles").select("id, first_name, avatar_url, role").in("id", ids)
+        : { data: [] as any[] };
+      const pmap = new Map((profiles || []).map((p: any) => [p.id, p]));
+      const top: TopUser[] = ranked.map(([id, d]) => ({
+        user_id: id,
+        first_name: pmap.get(id)?.first_name || null,
+        avatar_url: pmap.get(id)?.avatar_url || null,
+        role: pmap.get(id)?.role || null,
+        message_count: d.count,
+        conv_count: d.convs.size,
+        last_message_at: d.last,
+      }));
 
-      // Fetch profiles for top users
-      const userIds = sortedUserIds.map(([id]) => id);
-      const { data: profiles } = await supabase
-        .from("profiles")
-        .select("id, first_name, avatar_url, role")
-        .in("id", userIds);
-
-      const profileMap = new Map((profiles || []).map((p) => [p.id, p]));
-      const topList: TopUser[] = sortedUserIds.map(([id, data]) => {
-        const profile = profileMap.get(id);
-        return {
-          user_id: id,
-          first_name: profile?.first_name || null,
-          avatar_url: profile?.avatar_url || null,
-          role: profile?.role || null,
-          message_count: data.count,
-          last_message_at: data.lastAt,
-        };
-      });
-      setTopUsers(topList);
-
-      // Daily counts (last 14 days max for chart)
-      const dailyMap: Record<string, number> = {};
-      for (const m of messages) {
-        const day = format(new Date(m.created_at), "yyyy-MM-dd");
-        dailyMap[day] = (dailyMap[day] || 0) + 1;
+      if (!cancelled) {
+        setStats((statsData as unknown as Stats) || null);
+        setTopUsers(top);
+        setLoading(false);
       }
-      const daily = Object.entries(dailyMap)
-        .sort((a, b) => a[0].localeCompare(b[0]))
-        .slice(-14)
-        .map(([date, count]) => ({ date, count }));
-      setDailyCounts(daily);
-
-      setLoading(false);
     };
-
-    fetchData();
+    run();
+    return () => {
+      cancelled = true;
+    };
   }, [period]);
 
-  const roleLabel = (role: string | null) => {
-    if (role === "owner") return "Propriétaire";
-    if (role === "sitter") return "Gardien";
-    if (role === "both") return "Les deux";
-    return role || "—";
-  };
+  const roleLabel = (r: string | null) =>
+    r === "owner" ? "Propriétaire" : r === "sitter" ? "Gardien" : r === "both" ? "Les deux" : "—";
 
-  const maxCount = Math.max(...dailyCounts.map((d) => d.count), 1);
+  const maxBar = Math.max(...(stats?.daily.map((d) => d.human + d.system) || [1]), 1);
+  const ctxEntries = Object.entries(stats?.by_context || {}).sort((a, b) => b[1] - a[1]);
+  const ctxTotal = ctxEntries.reduce((s, [, v]) => s + v, 0);
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
           <h1 className="text-2xl font-bold text-foreground">Messagerie</h1>
-          <p className="text-sm text-muted-foreground">Statistiques des échanges entre membres</p>
+          <p className="text-sm text-muted-foreground">
+            Statistiques fiables (calculs côté serveur, sans limite de lignes)
+          </p>
         </div>
         <Select value={period} onValueChange={(v) => setPeriod(v as Period)}>
-          <SelectTrigger className="w-40">
-            <SelectValue />
-          </SelectTrigger>
+          <SelectTrigger className="w-44"><SelectValue /></SelectTrigger>
           <SelectContent>
             <SelectItem value="7d">7 derniers jours</SelectItem>
             <SelectItem value="30d">30 derniers jours</SelectItem>
             <SelectItem value="90d">3 derniers mois</SelectItem>
-            <SelectItem value="all">Tout</SelectItem>
+            <SelectItem value="all">Depuis le début</SelectItem>
           </SelectContent>
         </Select>
       </div>
 
-      {/* Stats cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {loading ? (
-          Array.from({ length: 4 }).map((_, i) => (
-            <Card key={i}><CardContent className="p-5"><Skeleton className="h-10 w-20" /></CardContent></Card>
+      {/* KPI cards */}
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+        {loading || !stats ? (
+          Array.from({ length: 6 }).map((_, i) => (
+            <Card key={i}><CardContent className="p-4"><Skeleton className="h-12 w-full" /></CardContent></Card>
           ))
         ) : (
           <>
-            <Card>
-              <CardContent className="p-5">
-                <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                    <MessageSquare className="h-5 w-5 text-primary" />
-                  </div>
-                  <div>
-                    <p className="text-2xl font-bold text-foreground">{stats?.totalHuman || 0}</p>
-                    <p className="text-xs text-muted-foreground">Messages humains</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-5">
-                <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-lg bg-info-soft flex items-center justify-center">
-                    <Users className="h-5 w-5 text-info" />
-                  </div>
-                  <div>
-                    <p className="text-2xl font-bold text-foreground">{stats?.totalConversations || 0}</p>
-                    <p className="text-xs text-muted-foreground">Conversations actives</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-5">
-                <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-lg bg-amber-500/10 flex items-center justify-center">
-                    <TrendingUp className="h-5 w-5 text-amber-500" />
-                  </div>
-                  <div>
-                    <p className="text-2xl font-bold text-foreground">{stats?.avgPerDay || 0}</p>
-                    <p className="text-xs text-muted-foreground">Moyenne / jour</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-5">
-                <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-lg bg-muted flex items-center justify-center">
-                    <Calendar className="h-5 w-5 text-muted-foreground" />
-                  </div>
-                  <div>
-                    <p className="text-2xl font-bold text-foreground">{stats?.totalSystem || 0}</p>
-                    <p className="text-xs text-muted-foreground">Messages système</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            <KpiCard icon={<MessageSquare className="h-4 w-4 text-primary" />} label="Messages humains" value={stats.total_human} />
+            <KpiCard icon={<Calendar className="h-4 w-4 text-muted-foreground" />} label="Messages système" value={stats.total_system} />
+            <KpiCard
+              icon={<Users className="h-4 w-4 text-info" />}
+              label="Conv. avec échange"
+              value={stats.conversations_active}
+              hint={`/ ${stats.conversations_total} en base`}
+            />
+            <KpiCard
+              icon={<Reply className="h-4 w-4 text-emerald-600" />}
+              label="Taux de réponse"
+              value={`${stats.reply_rate}%`}
+              hint={`${stats.conversations_with_reply}/${stats.conversations_started_period} conv. répondues`}
+            />
+            <KpiCard
+              icon={<TrendingUp className="h-4 w-4 text-amber-500" />}
+              label="Moy. / jour actif"
+              value={stats.avg_per_active_day}
+              hint={`${stats.active_days} jour(s) avec activité`}
+            />
+            <KpiCard
+              icon={<Layers className="h-4 w-4 text-muted-foreground" />}
+              label="Dernier message"
+              value={
+                stats.last_message_at
+                  ? formatDistanceToNow(new Date(stats.last_message_at), { addSuffix: true, locale: fr })
+                  : "—"
+              }
+              small
+            />
           </>
         )}
       </div>
 
-      {/* Mini bar chart */}
-      {!loading && dailyCounts.length > 0 && (
+      {/* Breakdown by context */}
+      {!loading && stats && ctxTotal > 0 && (
         <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Messages par jour (14 derniers jours actifs)</CardTitle>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm">Répartition par type de conversation</CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="flex items-end gap-1 h-32">
-              {dailyCounts.map((d) => (
-                <div key={d.date} className="flex-1 flex flex-col items-center gap-1">
-                  <span className="text-[10px] text-muted-foreground font-medium">{d.count}</span>
-                  <div
-                    className="w-full bg-primary/80 rounded-t-sm transition-all"
-                    style={{ height: `${Math.max(4, (d.count / maxCount) * 100)}%` }}
-                  />
-                  <span className="text-[9px] text-muted-foreground rotate-[-45deg] origin-top-left whitespace-nowrap mt-1">
-                    {format(new Date(d.date), "dd/MM")}
-                  </span>
+          <CardContent className="space-y-3">
+            <div className="flex h-3 rounded-full overflow-hidden bg-muted">
+              {ctxEntries.map(([k, v]) => (
+                <div
+                  key={k}
+                  className={CTX_COLOR[k] || "bg-muted-foreground"}
+                  style={{ width: `${(v / ctxTotal) * 100}%` }}
+                  title={`${CTX_LABEL[k] || k}: ${v}`}
+                />
+              ))}
+            </div>
+            <div className="flex flex-wrap gap-3 text-xs">
+              {ctxEntries.map(([k, v]) => (
+                <div key={k} className="flex items-center gap-1.5">
+                  <span className={`inline-block w-2.5 h-2.5 rounded-sm ${CTX_COLOR[k] || "bg-muted-foreground"}`} />
+                  <span className="text-foreground font-medium">{CTX_LABEL[k] || k}</span>
+                  <span className="text-muted-foreground">{v} ({Math.round((v / ctxTotal) * 100)}%)</span>
                 </div>
               ))}
             </div>
@@ -262,10 +224,52 @@ export default function AdminMessages() {
         </Card>
       )}
 
-      {/* Top 20 users */}
+      {/* Daily chart, zero-filled */}
+      {!loading && stats && stats.daily.length > 0 && (
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              Messages par jour — 14 derniers jours calendaires
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-end gap-1 h-32">
+              {stats.daily.map((d) => {
+                const total = d.human + d.system;
+                return (
+                  <div key={d.date} className="flex-1 flex flex-col items-center gap-1">
+                    <span className="text-[10px] text-muted-foreground font-medium">{total || ""}</span>
+                    <div className="w-full flex flex-col-reverse" style={{ height: "100%" }}>
+                      <div
+                        className="w-full bg-primary/80 rounded-t-sm transition-all"
+                        style={{ height: `${total === 0 ? 2 : (d.human / maxBar) * 100}%` }}
+                      />
+                      {d.system > 0 && (
+                        <div
+                          className="w-full bg-muted-foreground/40"
+                          style={{ height: `${(d.system / maxBar) * 100}%` }}
+                        />
+                      )}
+                    </div>
+                    <span className="text-[9px] text-muted-foreground rotate-[-45deg] origin-top-left whitespace-nowrap mt-1">
+                      {format(new Date(d.date), "dd/MM")}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+            <div className="flex gap-3 text-[10px] text-muted-foreground mt-2 justify-end">
+              <span className="flex items-center gap-1"><span className="w-2 h-2 bg-primary/80 rounded-sm" /> humain</span>
+              <span className="flex items-center gap-1"><span className="w-2 h-2 bg-muted-foreground/40 rounded-sm" /> système</span>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Top users */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Top 20 — Membres les plus actifs</CardTitle>
+          <CardTitle className="text-base">Top 20 — Membres les plus actifs (par messages envoyés)</CardTitle>
         </CardHeader>
         <CardContent>
           {loading ? (
@@ -282,6 +286,7 @@ export default function AdminMessages() {
                   <TableHead>Membre</TableHead>
                   <TableHead>Rôle</TableHead>
                   <TableHead className="text-right">Messages</TableHead>
+                  <TableHead className="text-right">Conv.</TableHead>
                   <TableHead className="text-right">Dernier msg</TableHead>
                 </TableRow>
               </TableHeader>
@@ -290,18 +295,22 @@ export default function AdminMessages() {
                   <TableRow key={u.user_id}>
                     <TableCell className="font-medium text-muted-foreground">{i + 1}</TableCell>
                     <TableCell>
-                      <div className="flex items-center gap-2">
+                      <Link
+                        to={`/admin/users?id=${u.user_id}`}
+                        className="flex items-center gap-2 hover:underline"
+                      >
                         <Avatar className="h-7 w-7">
                           <AvatarImage src={u.avatar_url || ""} />
-                          <AvatarFallback className="text-xs">
-                            {(u.first_name || "?")[0]}
-                          </AvatarFallback>
+                          <AvatarFallback className="text-xs">{(u.first_name || "?")[0]}</AvatarFallback>
                         </Avatar>
                         <span className="text-sm font-medium">{u.first_name || "Anonyme"}</span>
-                      </div>
+                      </Link>
                     </TableCell>
-                    <TableCell className="text-sm text-muted-foreground">{roleLabel(u.role)}</TableCell>
+                    <TableCell>
+                      <Badge variant="outline" className="text-xs">{roleLabel(u.role)}</Badge>
+                    </TableCell>
                     <TableCell className="text-right font-semibold">{u.message_count}</TableCell>
+                    <TableCell className="text-right text-sm text-muted-foreground">{u.conv_count}</TableCell>
                     <TableCell className="text-right text-sm text-muted-foreground">
                       {format(new Date(u.last_message_at), "dd MMM yyyy", { locale: fr })}
                     </TableCell>
@@ -313,5 +322,28 @@ export default function AdminMessages() {
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+function KpiCard({
+  icon, label, value, hint, small,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: string | number;
+  hint?: string;
+  small?: boolean;
+}) {
+  return (
+    <Card>
+      <CardContent className="p-4">
+        <div className="flex items-center gap-2 mb-1.5">
+          <div className="h-7 w-7 rounded-md bg-muted flex items-center justify-center">{icon}</div>
+          <p className="text-[11px] text-muted-foreground font-medium uppercase tracking-wide">{label}</p>
+        </div>
+        <p className={small ? "text-sm font-semibold text-foreground" : "text-2xl font-bold text-foreground"}>{value}</p>
+        {hint && <p className="text-[11px] text-muted-foreground mt-0.5">{hint}</p>}
+      </CardContent>
+    </Card>
   );
 }
