@@ -41,6 +41,36 @@ Deno.serve(async (req) => {
   if (req.method !== "POST") return json(405, { error: "Method not allowed" });
   if (!PRERENDER_TOKEN) return json(500, { error: "PRERENDER_TOKEN not configured" });
 
+  // Parse optional body — if `urls` is provided, recache those directly
+  // (manual admin trigger). Otherwise fall back to dirty-row scanning.
+  let bodyUrls: string[] | undefined;
+  try {
+    const ct = req.headers.get("content-type") ?? "";
+    if (ct.includes("application/json")) {
+      const parsed = await req.json().catch(() => ({}));
+      if (Array.isArray(parsed?.urls)) {
+        bodyUrls = parsed.urls
+          .filter((u: unknown): u is string => typeof u === "string" && u.length > 0)
+          .map((u: string) => (u.startsWith("http") ? u : `${SITE}${u.startsWith("/") ? "" : "/"}${u}`))
+          .slice(0, 200);
+      }
+    }
+  } catch { /* ignore */ }
+
+  if (bodyUrls && bodyUrls.length > 0) {
+    const results: Array<{ url: string; ok: boolean; status?: number; error?: string }> = [];
+    for (const u of bodyUrls) results.push(await recache(u));
+    const flushed = results.filter((r) => r.ok).length;
+    console.log(`[prerender-recache-pending] manual flush ${flushed}/${bodyUrls.length}`);
+    return json(flushed === bodyUrls.length ? 200 : 207, {
+      ok: flushed === bodyUrls.length,
+      mode: "manual",
+      total: bodyUrls.length,
+      flushed,
+      results,
+    });
+  }
+
   const sb = createClient(SUPABASE_URL, SERVICE_ROLE);
 
   // 1. Collect dirty rows from each table (cap to 200 per table to stay safe).
