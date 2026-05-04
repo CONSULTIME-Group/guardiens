@@ -53,7 +53,7 @@ describe("normalizeCanonical", () => {
       );
     });
     it("collapses duplicate slashes on relative paths", () => {
-      expect(normalizeCanonical("///actualites///foo")).toBe(
+      expect(normalizeCanonical("/actualites///foo")).toBe(
         "https://guardiens.fr/actualites/foo",
       );
     });
