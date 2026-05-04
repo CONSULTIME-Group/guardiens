@@ -217,6 +217,8 @@ const AppRoutes = () => (
   <Suspense fallback={<FallbackSpinner />}>
     <Routes>
       <Route path="/" element={<Landing />} />
+      <Route path="/admin/seo-debug" element={<SeoDebug />} />
+
       <Route path="/login" element={<PublicOnlyRoute><Login /></PublicOnlyRoute>} />
       <Route path="/register" element={<RegisterRedirect />} />
       <Route path="/inscription" element={<PublicOnlyRoute><Register /></PublicOnlyRoute>} />
