@@ -162,7 +162,8 @@ describe("ActiveRolesSection — dernier rôle actif", () => {
     renderSection();
     fireEvent.click(switches()[0]);
     expect(await screen.findByText(/seul espace actif/i)).toBeInTheDocument();
-    fireEvent.click(screen.getByText(/Activer l'autre espace/i));
+    const activateBtns = screen.getAllByRole("button", { name: /Activer l'autre espace/i });
+    fireEvent.click(activateBtns[activateBtns.length - 1]);
     const dialog = await screen.findByTestId("activate-dialog");
     expect(dialog.getAttribute("data-target")).toBe("gardien");
   });
