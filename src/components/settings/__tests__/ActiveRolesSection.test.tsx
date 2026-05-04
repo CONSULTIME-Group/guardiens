@@ -69,7 +69,13 @@ beforeEach(() => {
   vi.clearAllMocks();
   currentUser = { id: "user-1", role: "both" };
   currentActiveRole = "owner";
+});
+
+afterEach(() => {
   cleanup();
+  // Radix monte les Dialog dans un portail attaché à document.body :
+  // on purge manuellement pour éviter les fuites entre tests.
+  document.body.innerHTML = "";
 });
 
 describe("ActiveRolesSection — bascule symétrique", () => {
