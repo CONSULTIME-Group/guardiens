@@ -114,7 +114,7 @@ export default function AdminMessages() {
       }));
 
       if (!cancelled) {
-        setStats(statsData as Stats | null);
+        setStats((statsData as unknown as Stats) || null);
         setTopUsers(top);
         setLoading(false);
       }
