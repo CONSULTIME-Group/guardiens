@@ -30,8 +30,8 @@ vi.mock("@/contexts/AuthContext", () => ({
 
 vi.mock("@/integrations/supabase/client", () => ({
   supabase: {
-    from: (...args: any[]) => mockFrom(...args),
-    functions: { invoke: (...args: any[]) => mockInvoke(...args) },
+    from: (table: string) => mockFrom(table),
+    functions: { invoke: (name: string, opts?: unknown) => mockInvoke(name, opts) },
   },
 }));
 
