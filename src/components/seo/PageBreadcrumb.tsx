@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 
 export interface BreadcrumbItem {
@@ -18,23 +18,33 @@ const BASE_URL = "https://guardiens.fr";
  * 2. Schema.org BreadcrumbList JSON-LD in <head>
  */
 const PageBreadcrumb = ({ items }: PageBreadcrumbProps) => {
+  const location = useLocation();
+
   // Always prepend "Accueil"
   const allItems: BreadcrumbItem[] = [
     { label: "Accueil", href: "/" },
     ...items,
   ];
 
-  // Schema.org BreadcrumbList
+  // Current page absolute URL (used as fallback for the last crumb)
+  const currentPath = location.pathname.replace(/\/+$/, "") || "/";
+  const currentUrl = `${BASE_URL}${currentPath}`;
+
+  // Schema.org BreadcrumbList — every ListItem MUST have an `item` URL
+  // (Google now flags missing URLs on the last item as invalid).
   const schemaItems = allItems.map((item, i) => {
+    const isLast = i === allItems.length - 1;
+    const href = item.href
+      ? `${BASE_URL}${item.href}`
+      : isLast
+        ? currentUrl
+        : undefined;
     const entry: Record<string, any> = {
       "@type": "ListItem",
       position: i + 1,
       name: item.label,
     };
-    // Last item has no "item" URL per Google spec
-    if (item.href && i < allItems.length - 1) {
-      entry.item = `${BASE_URL}${item.href}`;
-    }
+    if (href) entry.item = href;
     return entry;
   });
 
