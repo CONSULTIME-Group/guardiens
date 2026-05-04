@@ -3051,14 +3051,20 @@ export type Database = {
       seo_city_pages: {
         Row: {
           active_sits_count: number
+          canonical_url: string | null
           city: string
+          content: string | null
+          cover_image_url: string | null
           created_at: string
           department: string
+          excerpt: string | null
           h1_title: string
+          hero_image_alt: string | null
           id: string
           intro_text: string
           meta_description: string
           meta_title: string
+          noindex: boolean | null
           published: boolean
           sitter_count: number
           slug: string
@@ -3066,14 +3072,20 @@ export type Database = {
         }
         Insert: {
           active_sits_count?: number
+          canonical_url?: string | null
           city: string
+          content?: string | null
+          cover_image_url?: string | null
           created_at?: string
           department: string
+          excerpt?: string | null
           h1_title?: string
+          hero_image_alt?: string | null
           id?: string
           intro_text?: string
           meta_description?: string
           meta_title?: string
+          noindex?: boolean | null
           published?: boolean
           sitter_count?: number
           slug: string
@@ -3081,14 +3093,20 @@ export type Database = {
         }
         Update: {
           active_sits_count?: number
+          canonical_url?: string | null
           city?: string
+          content?: string | null
+          cover_image_url?: string | null
           created_at?: string
           department?: string
+          excerpt?: string | null
           h1_title?: string
+          hero_image_alt?: string | null
           id?: string
           intro_text?: string
           meta_description?: string
           meta_title?: string
+          noindex?: boolean | null
           published?: boolean
           sitter_count?: number
           slug?: string
