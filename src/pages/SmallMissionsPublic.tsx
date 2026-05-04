@@ -572,9 +572,87 @@ const SmallMissionsPublic = () => {
  ))}
  </div>
  </div>
- </section>
+  </section>
 
- {/* ═══ SECTION 6 — CTA FINAL ═══ */}
+  {/* ═══ SECTION 5.5 — POUR ALLER PLUS LOIN (maillage interne) ═══ */}
+  <section className="py-20 bg-background">
+  <div className="max-w-6xl mx-auto px-6">
+  <Reveal>
+  <div className="text-center mb-12">
+  <span className="text-xs tracking-widest uppercase text-primary/60 font-body mb-4 block">Pour aller plus loin</span>
+  <h2 className="text-3xl md:text-4xl font-heading font-semibold text-foreground">
+  Comment l'entraide locale prend forme près de chez vous
+  </h2>
+  </div>
+  </Reveal>
+  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+  {[
+  {
+  href: "/actualites/jardinage-entraide-quartier-lyon",
+  category: "Jardinage",
+  title: "Trouver de l'aide pour son jardin, sans passer par une agence",
+  desc: "Tonte, taille, désherbage : comment l'entraide entre gens du coin remplace les pros dans bien des cas.",
+  cta: "Lire l'article →",
+  },
+  {
+  href: "/actualites/arroser-plantes-vacances-lyon",
+  category: "Vacances",
+  title: "Qui peut arroser vos plantes pendant les vacances ?",
+  desc: "La solution la plus simple est souvent à trois étages au-dessus. On vous explique comment l'organiser.",
+  cta: "Lire l'article →",
+  },
+  {
+  href: "/actualites/courses-aide-domicile-entraide-senior-lyon",
+  category: "Quotidien",
+  title: "Aide aux courses entre particuliers : comment ça marche",
+  desc: "Un coup de main pour faire les courses, accompagner un rendez-vous médical, ou simplement passer un moment ensemble.",
+  cta: "Lire l'article →",
+  },
+  {
+  href: "/house-sitting/lyon",
+  category: "Lyon",
+  title: "Trouver un gardien de confiance dans votre quartier",
+  desc: "House-sitting et garde d'animaux à Lyon, par des gens qui habitent près de chez vous.",
+  cta: "Découvrir →",
+  },
+  {
+  href: "/tarifs",
+  category: "Tarifs",
+  title: "Les tarifs Guardiens, en toute transparence",
+  desc: "Gratuit pour les propriétaires. 6,99 €/mois pour les gardiens. L'entraide reste sans frais, pour tous, pour toujours.",
+  cta: "Voir les tarifs →",
+  },
+  {
+  href: "/faq",
+  category: "FAQ",
+  title: "Questions fréquentes sur l'entraide et la garde",
+  desc: "Tout ce qu'il faut savoir avant de publier votre première demande ou de proposer votre aide.",
+  cta: "Consulter la FAQ →",
+  },
+  ].map((card, i) => (
+  <Reveal key={card.href} delay={0.05 * i}>
+  <a
+  href={card.href}
+  className="group block h-full bg-card border border-border rounded-2xl p-6 hover:border-primary/30 hover:shadow-md transition-all duration-200"
+  >
+  <span className="text-xs tracking-widest uppercase text-primary/70 font-body mb-3 block">{card.category}</span>
+  <h3 className="text-lg font-heading font-semibold text-foreground mb-2 group-hover:text-primary transition-colors">
+  {card.title}
+  </h3>
+  <p className="text-sm font-body text-foreground/70 leading-relaxed line-clamp-3">
+  {card.desc}
+  </p>
+  <span className="mt-4 inline-flex items-center text-sm font-body text-primary font-medium group-hover:underline">
+  {card.cta}
+  </span>
+  </a>
+  </Reveal>
+  ))}
+  </div>
+  </div>
+  </section>
+
+  {/* ═══ SECTION 6 — CTA FINAL ═══ */}
  <section className="bg-primary">
  <div className="max-w-2xl mx-auto px-6 py-24 md:py-32 text-center">
  <Reveal>
