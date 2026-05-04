@@ -137,4 +137,41 @@ describe("normalizeCanonical", () => {
       ).toBe("https://guardiens.fr/house-sitting/lyon");
     });
   });
+
+  describe("origin normalization (protocol & www)", () => {
+    it("upgrades http → https when host matches SITE_URL", () => {
+      expect(normalizeCanonical("http://guardiens.fr/lyon")).toBe(
+        "https://guardiens.fr/lyon",
+      );
+    });
+    it("strips www. when host matches SITE_URL", () => {
+      expect(normalizeCanonical("https://www.guardiens.fr/lyon")).toBe(
+        "https://guardiens.fr/lyon",
+      );
+    });
+    it("strips www. and upgrades http together", () => {
+      expect(normalizeCanonical("http://www.guardiens.fr/House-Sitting/Lyon/")).toBe(
+        "https://guardiens.fr/house-sitting/lyon",
+      );
+    });
+    it("lowercases an uppercased site host", () => {
+      expect(normalizeCanonical("https://GUARDIENS.FR/lyon")).toBe(
+        "https://guardiens.fr/lyon",
+      );
+    });
+    it("preserves protocol and host on cross-origin URLs (no forced upgrade)", () => {
+      expect(normalizeCanonical("http://other-domain.com/page/")).toBe(
+        "http://other-domain.com/page",
+      );
+      expect(normalizeCanonical("https://www.other-domain.com/page")).toBe(
+        "https://www.other-domain.com/page",
+      );
+    });
+    it("is idempotent across protocol/www variants", () => {
+      const a = normalizeCanonical("http://www.guardiens.fr/lyon/");
+      const b = normalizeCanonical(a!);
+      expect(a).toBe("https://guardiens.fr/lyon");
+      expect(b).toBe(a);
+    });
+  });
 });
