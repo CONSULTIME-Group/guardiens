@@ -266,6 +266,7 @@ export default function ArticleDetail() {
  noindex={article.noindex === true}
  canonical={article.canonical_url || undefined}
  />
+ <ArticleSeoLogger article={article} />
 
  {/* CORRECTION 1 — Schema.org Article */}
  <Helmet>
