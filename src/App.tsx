@@ -219,6 +219,7 @@ const AppRoutes = () => (
     <Routes>
       <Route path="/" element={<Landing />} />
       <Route path="/admin/seo-debug" element={<SeoDebug />} />
+      <Route path="/admin/build-info" element={<BuildInfo />} />
 
       <Route path="/login" element={<PublicOnlyRoute><Login /></PublicOnlyRoute>} />
       <Route path="/register" element={<RegisterRedirect />} />
