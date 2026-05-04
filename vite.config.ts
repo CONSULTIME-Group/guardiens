@@ -1,7 +1,42 @@
-import { defineConfig } from "vite";
+import { defineConfig, type Plugin } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import { componentTagger } from "lovable-tagger";
+
+/**
+ * Post-build hook: after a successful production build, ping the
+ * `prerender-recache-pending` edge function so Prerender re-snapshots
+ * every page whose canonical_url / noindex / meta_* changed since the
+ * last publish. Non-blocking and best-effort — never fails the build.
+ */
+const prerenderFlushPlugin = (): Plugin => ({
+  name: "prerender-flush-after-publish",
+  apply: "build",
+  async closeBundle() {
+    const projectId = process.env.VITE_SUPABASE_PROJECT_ID;
+    const anon = process.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+    if (!projectId || !anon) {
+      console.log("[prerender-flush] skipped (missing VITE_SUPABASE_* env)");
+      return;
+    }
+    const url = `https://${projectId}.supabase.co/functions/v1/prerender-recache-pending`;
+    try {
+      const r = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${anon}`,
+          apikey: anon,
+        },
+        body: "{}",
+      });
+      const txt = await r.text();
+      console.log(`[prerender-flush] ${r.status} ${txt.slice(0, 200)}`);
+    } catch (e) {
+      console.warn(`[prerender-flush] non-blocking failure: ${e instanceof Error ? e.message : String(e)}`);
+    }
+  },
+});
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
@@ -12,7 +47,11 @@ export default defineConfig(({ mode }) => ({
       overlay: false,
     },
   },
-  plugins: [react(), mode === "development" && componentTagger()].filter(Boolean),
+  plugins: [
+    react(),
+    mode === "development" && componentTagger(),
+    mode === "production" && prerenderFlushPlugin(),
+  ].filter(Boolean) as Plugin[],
   resolve: {
     // IMPORTANT : alias sous forme de TABLEAU. Vite évalue dans l'ordre et
     // le premier match gagne. Les mocks doivent donc précéder l'alias générique
