@@ -38,8 +38,23 @@ const prerenderFlushPlugin = (): Plugin => ({
   },
 });
 
+// Build-time metadata injected into the bundle so /admin/build-info can
+// display the exact bundle currently served in production.
+const BUILD_TIME = new Date().toISOString();
+const BUILD_ID =
+  process.env.LOVABLE_BUILD_ID ||
+  process.env.VERCEL_GIT_COMMIT_SHA ||
+  process.env.COMMIT_SHA ||
+  process.env.GIT_COMMIT ||
+  BUILD_TIME.replace(/[:.]/g, "-");
+
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
+  define: {
+    __BUILD_ID__: JSON.stringify(BUILD_ID),
+    __BUILD_TIME__: JSON.stringify(BUILD_TIME),
+    __BUILD_MODE__: JSON.stringify(mode),
+  },
   server: {
     host: "::",
     port: 8080,
