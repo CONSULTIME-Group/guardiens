@@ -17,10 +17,24 @@ const PageViewTracker = () => {
   const lastEmitAt = useRef<number>(0);
 
   useEffect(() => {
-    const now = Date.now();
-    if (lastPath.current === location.pathname && now - lastEmitAt.current < 1500) return;
+    const path = location.pathname;
 
-    lastPath.current = location.pathname;
+    // Ignore les chemins parasites :
+    // - /assets/* : bundles JS/CSS, sourcemaps (.js.map), tombent dans le SPA fallback
+    //   et seraient comptés comme page_view alors que ce sont des requêtes de crawlers
+    //   ou de bots qui scannent les sourcemaps. On y trouve aussi des littéraux de
+    //   template non interpolés (ex: /assets/${e}, /assets/'+e+') extraits du code
+    //   minifié — du bruit pur.
+    // - extensions de fichiers statiques requêtés en direct.
+    const isAssetNoise =
+      path.startsWith("/assets/") ||
+      /\.(js|css|map|png|jpg|jpeg|gif|svg|webp|avif|ico|woff2?|ttf|eot|json|xml|txt)$/i.test(path);
+    if (isAssetNoise) return;
+
+    const now = Date.now();
+    if (lastPath.current === path && now - lastEmitAt.current < 1500) return;
+
+    lastPath.current = path;
     lastEmitAt.current = now;
 
     trackEvent("page_view", {
