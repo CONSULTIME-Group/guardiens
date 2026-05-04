@@ -50,6 +50,7 @@ const DashboardRouteShell = () => (
 const AdminLayout = lazy(() => import("@/components/admin/AdminLayout").then((m) => ({ default: m.AdminLayout })));
 const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
+const SeoDebug = lazy(() => import("./pages/SeoDebug"));
 const Profile = lazy(() => import("./pages/Profile"));
 const SearchPage = lazy(() => import("./pages/SearchPage"));
 const SearchOwner = lazy(() => import("./components/search/SearchOwner"));
@@ -216,6 +217,8 @@ const AppRoutes = () => (
   <Suspense fallback={<FallbackSpinner />}>
     <Routes>
       <Route path="/" element={<Landing />} />
+      <Route path="/admin/seo-debug" element={<SeoDebug />} />
+
       <Route path="/login" element={<PublicOnlyRoute><Login /></PublicOnlyRoute>} />
       <Route path="/register" element={<RegisterRedirect />} />
       <Route path="/inscription" element={<PublicOnlyRoute><Register /></PublicOnlyRoute>} />

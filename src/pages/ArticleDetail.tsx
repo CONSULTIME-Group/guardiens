@@ -8,6 +8,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { ArrowLeft, ArrowRight, Calendar, MapPin, User, Compass, Building2 } from "lucide-react";
 import PageMeta from "@/components/PageMeta";
 import { Helmet } from "react-helmet-async";
+import { logSeoSnapshot } from "@/lib/seoDebugLog";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import ArticleRenderer, { resolveImagePath } from "@/components/articles/ArticleRenderer";
@@ -123,6 +124,35 @@ const ARTICLE_REDIRECTS: Record<string, string> = {
  "devenir-pet-sitter": "creer-profil-gardien-attractif",
  "5-erreurs-premiere-garde": "reussir-premiere-garde-house-sitting",
 };
+
+/**
+ * Tiny child component: re-runs after PageMeta has flushed Helmet so we can
+ * record both the DB-level article context and the resulting <head>.
+ */
+function ArticleSeoLogger({ article }: { article: ArticleFull }) {
+  useEffect(() => {
+    logSeoSnapshot({
+      path: `/actualites/${article.slug}`,
+      source: "ArticleDetail",
+      input: {
+        title: article.meta_title || article.title,
+        description: article.meta_description || article.excerpt,
+        canonical: article.canonical_url ?? null,
+        noindex: article.noindex === true,
+        type: "article",
+      },
+      article: {
+        id: article.id,
+        slug: article.slug,
+        canonical_url: article.canonical_url,
+        noindex: article.noindex,
+        meta_title: article.meta_title,
+        meta_description: article.meta_description,
+      },
+    });
+  }, [article]);
+  return null;
+}
 
 export default function ArticleDetail() {
  const { slug } = useParams<{ slug: string }>();
@@ -265,6 +295,7 @@ export default function ArticleDetail() {
  noindex={article.noindex === true}
  canonical={article.canonical_url || undefined}
  />
+ <ArticleSeoLogger article={article} />
 
  {/* CORRECTION 1 — Schema.org Article */}
  <Helmet>

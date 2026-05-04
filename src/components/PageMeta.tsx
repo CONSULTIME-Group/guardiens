@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { buildAbsoluteUrl, normalizeCanonical, normalizePathname } from "@/lib/seo";
+import { logSeoSnapshot } from "@/lib/seoDebugLog";
 import { DEFAULT_OG_IMAGE } from "@/data/siteRoutes";
 
 const DEFAULT_IMAGE = DEFAULT_OG_IMAGE;
@@ -93,7 +94,20 @@ const PageMeta = ({
 
     // Signal to Prerender.io that SEO-critical content is ready
     (window as any).prerenderReady = true;
-  }, [author, canonical, currentUrl, fullTitle, image, metaDescription, noindex, publishedAt, type]);
+
+    // Record snapshot for /admin/seo-debug
+    logSeoSnapshot({
+      path: currentPath,
+      source: "PageMeta",
+      input: {
+        title: fullTitle,
+        description: metaDescription,
+        canonical: canonical ?? null,
+        noindex,
+        type,
+      },
+    });
+  }, [author, canonical, currentPath, currentUrl, fullTitle, image, metaDescription, noindex, publishedAt, type]);
 
   return (
     <Helmet>
