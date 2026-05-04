@@ -20,7 +20,7 @@ import ActivateRoleDialog from "@/components/premium/ActivateRoleDialog";
 type DeactivateTarget = "sitter" | "owner" | null;
 
 const ActiveRolesSection = () => {
-  const { user, refreshProfile, switchRole } = useAuth();
+  const { user, refreshProfile, switchRole, activeRole } = useAuth();
   const navigate = useNavigate();
   const [target, setTarget] = useState<DeactivateTarget>(null);
   const [activateDialog, setActivateDialog] = useState<"gardien" | "proprio" | null>(null);
@@ -32,6 +32,18 @@ const ActiveRolesSection = () => {
   const role = user.role;
   const sitterActive = role === "sitter" || role === "both";
   const ownerActive = role === "owner" || role === "both";
+  const hasBothRoles = role === "both";
+
+  const handleSetDefault = (next: "owner" | "sitter") => {
+    if (next === activeRole) return;
+    switchRole(next);
+    toast.success(
+      next === "sitter"
+        ? "Espace gardien défini par défaut."
+        : "Espace propriétaire défini par défaut.",
+    );
+  };
+
 
   // Tentative de désactivation : ouvre le bon dialog selon l'état
   const handleToggle = (which: "sitter" | "owner") => {
