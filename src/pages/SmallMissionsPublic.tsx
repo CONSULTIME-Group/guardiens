@@ -682,66 +682,67 @@ const SmallMissionsPublic = () => {
  </section>
 
  {/* ═══ SECTION 7 — FAQ ═══ */}
- <section className="bg-muted/50 py-16">
- <div className="max-w-3xl mx-auto px-6">
- <h2 className="font-heading text-2xl font-bold text-center mb-10">Questions fréquentes</h2>
- <Accordion type="single" collapsible className="space-y-2">
- {[
- { q: "C'est quoi les petites missions ?", a: "Des coups de main entre gens du coin — jardinage, animaux, bricolage — échangés sans argent. Vous proposez ce que vous savez faire, ou publiez ce dont vous avez besoin." },
- { q: "C'est vraiment gratuitement ?", a: "Oui. L'entraide entre gens du coin est gratuite pour tous. Aucun frais, aucune commission." },
- { q: "Comment fonctionne l'échange ?", a: "Pas d'argent. Vous proposez quelque chose en retour — un repas, des légumes, un coup de main futur. L'échange se décide entre vous." },
- { q: "Faut-il être abonné ?", a: "Non. Les petites missions sont accessibles à tous les membres inscrits, sans abonnement." },
- { q: "Quels types de missions peut-on publier ?", a: "Tout ce qui tourne autour de la maison, du jardin, des animaux et du quartier. Tonte, arrosage, promenade de chien, bricolage, cuisine…" },
- { q: "Comment je sais que la personne est fiable ?", a: "Chaque membre a un profil avec avis, badges et score de confiance. Vous pouvez échanger par messagerie avant de vous engager." },
- ].map((faq, i) => (
- <AccordionItem key={i} value={`faq-${i}`} className="bg-card border border-border rounded-xl px-4">
- <AccordionTrigger className="text-sm font-semibold text-left hover:no-underline py-4">
- {faq.q}
- </AccordionTrigger>
- <AccordionContent className="text-sm text-muted-foreground pb-4">
- {faq.a}
- </AccordionContent>
- </AccordionItem>
- ))}
- </Accordion>
- </div>
- </section>
+  <section className="bg-muted/50 py-16">
+   <div className="max-w-3xl mx-auto px-6">
+    <h2 className="font-heading text-2xl font-bold text-center mb-10">Questions fréquentes</h2>
+    <Accordion type="single" collapsible className="space-y-2">
+     {FAQ_ITEMS.map((faq, i) => (
+      <AccordionItem key={i} value={`faq-${i}`} className="bg-card border border-border rounded-xl px-4">
+       <AccordionTrigger className="text-sm font-semibold text-left hover:no-underline py-4">
+        {faq.q}
+       </AccordionTrigger>
+       <AccordionContent className="text-sm text-muted-foreground pb-4">
+        {faq.a}
+       </AccordionContent>
+      </AccordionItem>
+     ))}
+    </Accordion>
+   </div>
+  </section>
 
- {/* ═══ FOOTER ═══ */}
- <PublicFooter />
+  {/* ═══ FOOTER ═══ */}
+  <PublicFooter />
 
- {/* Schema.org — Service */}
- <script
- type="application/ld+json"
- dangerouslySetInnerHTML={{
- __html: JSON.stringify({
- "@context": "https://schema.org",
- "@type": "Service",
- name: "Petites missions Guardiens",
- description: "Entraide communautaire entre gens du coin. Échanges sans argent autour des animaux, du jardin et de la maison.",
- areaServed: { "@type": "Country", name: "France" },
- provider: { "@type": "Organization", name: "Guardiens", url: "https://guardiens.fr" },
- }),
- }}
- />
-
- {/* Schema.org — FAQPage */}
- <Helmet>
- <script type="application/ld+json">{JSON.stringify({
- "@context": "https://schema.org",
- "@type": "FAQPage",
- mainEntity: [
- { "@type": "Question", name: "C'est quoi les petites missions ?", acceptedAnswer: { "@type": "Answer", text: "Des coups de main entre gens du coin — jardinage, animaux, bricolage — échangés sans argent. Vous proposez ce que vous savez faire, ou publiez ce dont vous avez besoin." } },
- { "@type": "Question", name: "C'est vraiment gratuitement ?", acceptedAnswer: { "@type": "Answer", text: "Oui. L'entraide entre gens du coin est gratuite pour tous. Aucun frais, aucune commission." } },
- { "@type": "Question", name: "Comment fonctionne l'échange ?", acceptedAnswer: { "@type": "Answer", text: "Pas d'argent. Vous proposez quelque chose en retour — un repas, des légumes, un coup de main futur. L'échange se décide entre vous." } },
- { "@type": "Question", name: "Faut-il être abonné ?", acceptedAnswer: { "@type": "Answer", text: "Non. Les petites missions sont accessibles à tous les membres inscrits, sans abonnement." } },
- { "@type": "Question", name: "Quels types de missions peut-on publier ?", acceptedAnswer: { "@type": "Answer", text: "Tout ce qui tourne autour de la maison, du jardin, des animaux et du quartier. Tonte, arrosage, promenade de chien, bricolage, cuisine…" } },
- { "@type": "Question", name: "Comment je sais que la personne est fiable ?", acceptedAnswer: { "@type": "Answer", text: "Chaque membre a un profil avec avis, badges et score de confiance. Vous pouvez échanger par messagerie avant de vous engager." } },
- ],
- })}</script>
- </Helmet>
- </div>
- </>
+  {/* Schema.org — Service + FAQPage (dans <head> via Helmet) */}
+  <Helmet>
+   <script type="application/ld+json">{JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "Service",
+    name: "Petites missions Guardiens",
+    description: "Entraide communautaire entre gens du coin. Échanges sans argent autour des animaux, du jardin et de la maison.",
+    url: "https://guardiens.fr/petites-missions",
+    serviceType: [
+     "Entraide locale",
+     "Garde d'animaux ponctuelle",
+     "Aide jardinage",
+     "Petits services entre gens du coin",
+     "Échange de compétences",
+    ],
+    areaServed: { "@type": "Country", name: "France" },
+    provider: { "@type": "Organization", name: "Guardiens", url: "https://guardiens.fr" },
+    audience: {
+     "@type": "Audience",
+     name: "Habitants de France souhaitant échanger des services en nature avec les gens de leur coin",
+    },
+    offers: {
+     "@type": "Offer",
+     price: "0",
+     priceCurrency: "EUR",
+     description: "Service entièrement gratuit pour tous, sans abonnement requis. Aucune transaction financière entre membres.",
+    },
+   })}</script>
+   <script type="application/ld+json">{JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: FAQ_ITEMS.map((faq) => ({
+     "@type": "Question",
+     name: faq.q,
+     acceptedAnswer: { "@type": "Answer", text: faq.a },
+    })),
+   })}</script>
+  </Helmet>
+  </div>
+  </>
  );
 };
 
