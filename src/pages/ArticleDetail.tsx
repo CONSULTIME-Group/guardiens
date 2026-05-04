@@ -263,6 +263,7 @@ export default function ArticleDetail() {
  publishedAt={article.published_at || undefined}
  author={article.author_name}
  noindex={article.noindex === true}
+ canonical={article.canonical_url || undefined}
  />
 
  {/* CORRECTION 1 — Schema.org Article */}
