@@ -81,4 +81,57 @@ describe("ArticleDetail head — noindex + canonical propagation", () => {
       expect(getCanonical()).toBe("https://guardiens.fr/house-sitting/annecy");
     });
   });
+
+  it("emits exactly one canonical and one robots tag (no Helmet duplicates)", async () => {
+    renderArticleHead({
+      noindex: true,
+      canonical: "https://guardiens.fr/house-sitting/lyon",
+      path: "/actualites/house-sitting-lyon",
+    });
+
+    await waitFor(() => {
+      expect(getRobots()).toBe("noindex, follow");
+    });
+
+    const canonicals = document.head.querySelectorAll('link[rel="canonical"]');
+    const robots = document.head.querySelectorAll('meta[name="robots"]');
+    expect(canonicals.length).toBe(1);
+    expect(robots.length).toBe(1);
+  });
+
+  it("dedupes when canonical is provided in messy form alongside the normalized one", async () => {
+    // Render two PageMeta back-to-back to simulate nested layouts; Helmet should
+    // still resolve to a single canonical/robots in <head>.
+    render(
+      <HelmetProvider>
+        <MemoryRouter initialEntries={["/actualites/house-sitting-lyon"]}>
+          <>
+            <PageMeta
+              title="Outer"
+              description="outer"
+              path="/actualites/house-sitting-lyon"
+              noindex={false}
+            />
+            <PageMeta
+              title="Inner"
+              description="inner"
+              path="/actualites/house-sitting-lyon"
+              noindex={true}
+              canonical="  https://guardiens.fr/house-sitting/lyon/  "
+            />
+          </>
+        </MemoryRouter>
+      </HelmetProvider>,
+    );
+
+    await waitFor(() => {
+      expect(getRobots()).toBe("noindex, follow");
+    });
+
+    const canonicals = document.head.querySelectorAll('link[rel="canonical"]');
+    const robots = document.head.querySelectorAll('meta[name="robots"]');
+    expect(canonicals.length).toBe(1);
+    expect(robots.length).toBe(1);
+    expect(canonicals[0].getAttribute("href")).toBe("https://guardiens.fr/house-sitting/lyon");
+  });
 });
