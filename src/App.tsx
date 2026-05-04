@@ -51,6 +51,7 @@ const AdminLayout = lazy(() => import("@/components/admin/AdminLayout").then((m)
 const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const SeoDebug = lazy(() => import("./pages/SeoDebug"));
+const BuildInfo = lazy(() => import("./pages/BuildInfo"));
 const Profile = lazy(() => import("./pages/Profile"));
 const SearchPage = lazy(() => import("./pages/SearchPage"));
 const SearchOwner = lazy(() => import("./components/search/SearchOwner"));
