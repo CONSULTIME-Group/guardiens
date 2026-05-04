@@ -1691,7 +1691,7 @@ const SearchSitter = () => {
  {/* Densité supprimée — déjà visible dans le sélecteur de Zone et le bandeau hors-zone */}
 
  {/* ─── Out-of-zone banner ─── */}
- {tab === "sits" && !loading && userPostalCode && zoneMode !== "france" && densityCounts.france > densityCounts.radius && (() => {
+ {tab === "sits" && !loading && zoneMode !== "france" && densityCounts.france > densityCounts.radius && (() => {
  const elsewhere = densityCounts.france - densityCounts.radius;
  const inDeptOnly = Math.max(0, densityCounts.dept - densityCounts.radius);
  const inRegionOnly = Math.max(0, densityCounts.region - densityCounts.dept);
