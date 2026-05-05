@@ -502,19 +502,58 @@ async function runWithConcurrency(items, limit, worker) {
 // 5. Diff attendu vs. observé
 // ──────────────────────────────────────────────────────────────
 
+/**
+ * F4 : normalise une valeur de titre en retirant le suffixe " | Guardiens"
+ * (ou " — Guardiens"). Permet de comparer titre attendu vs réel sans
+ * faux positif structurel quand l'un porte le suffixe et l'autre non.
+ */
+function stripSiteSuffix(s) {
+  if (typeof s !== "string") return s;
+  return s
+    .replace(/\s*\|\s*Guardiens\s*$/i, "")
+    .replace(/\s*—\s*Guardiens\s*$/i, "")
+    .trim();
+}
+
 function diffTags(actualTags, expectedTags, options = {}) {
-  const { tolerantKeys = new Set() } = options;
+  const { tolerantKeys = new Set(), softTitleKeys = new Set(), softTitleParam = null } = options;
   const diffs = [];
   for (const [key, expected] of Object.entries(expectedTags)) {
     const actual = actualTags[key];
     if (actual == null) {
       diffs.push({ key, status: "MISSING", expected, actual: null });
-    } else if (tolerantKeys.has(key)) {
+      continue;
+    }
+    if (tolerantKeys.has(key)) {
       // Mode tolérant : on vérifie juste que la valeur existe et n'est pas vide
       if (!actual.trim()) {
         diffs.push({ key, status: "EMPTY", expected: "(valeur non vide attendue)", actual });
       }
-    } else if (actual !== expected) {
+      continue;
+    }
+    // F3 : titre dynamique avec sampleParams → check soft : présence du param
+    // interpolé + suffixe " | Guardiens".
+    if (softTitleKeys.has(key)) {
+      const hasSuffix = /\|\s*Guardiens\s*$/i.test(actual) || /—\s*Guardiens\s*$/i.test(actual);
+      const hasParam = softTitleParam
+        ? actual.toLowerCase().includes(softTitleParam.toLowerCase())
+        : true;
+      if (!hasSuffix || !hasParam) {
+        diffs.push({
+          key,
+          status: "SOFT_TITLE_MISMATCH",
+          expected: `contient "${softTitleParam ?? "(param)"}" et suffixe " | Guardiens"`,
+          actual,
+        });
+      }
+      continue;
+    }
+    // F4 : si l'un des deux porte le suffixe " | Guardiens" et pas l'autre,
+    // comparer sans suffixe (évite faux positif index.html vs route).
+    if (key === "og:title" || key === "twitter:title") {
+      if (stripSiteSuffix(actual) === stripSiteSuffix(expected)) continue;
+    }
+    if (actual !== expected) {
       diffs.push({ key, status: "MISMATCH", expected, actual });
     }
   }
