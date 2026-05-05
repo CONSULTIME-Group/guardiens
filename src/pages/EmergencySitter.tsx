@@ -28,12 +28,12 @@ const steps = [
 
 const ownerCards = [
   { icon: Clock, title: "Mobilisable en quelques heures", desc: "Pas besoin d'attendre des jours. Les gardiens d'urgence répondent vite." },
-  { icon: Shield, title: "Vérifié et expérimenté", desc: "3+ gardes réalisées, note 4.7+, 0 annulation, identité vérifiée." },
-  { icon: MapPin, title: "Près de chez vous", desc: "Sollicités automatiquement dans un rayon de 35 km du lieu de garde." },
+  { icon: Shield, title: "Vérifié et expérimenté", desc: "5+ gardes réalisées, note 4.7+, 0 annulation, identité vérifiée." },
+  { icon: MapPin, title: "Des gens du coin", desc: "Sollicités automatiquement dans un rayon de 35 km — ce sont des gens du coin, pas des inconnus." },
 ];
 
 const conditions = [
-  "3 gardes réalisées sur Guardiens",
+  "5 gardes réalisées sur Guardiens",
   "Note moyenne ≥ 4.7/5",
   "0 annulation sur les 6 derniers mois",
   "Identité vérifiée",
@@ -44,33 +44,92 @@ const advantages = [
   "Visibilité prioritaire dans les résultats de recherche",
   "Alertes urgentes reçues en premier",
   "Écusson distinctif « Gardien d'urgence »",
-  "3 mois d'abonnement offerts par intervention",
+  "1 mois d'abonnement offert par intervention",
+];
+
+const stories = [
+  {
+    name: "Hélène, Lyon 6e",
+    text: "Hospitalisation programmée mais avancée à la dernière minute. Deux chats à la maison, personne autour pour s'en occuper. Elle active l'alerte le mardi soir. Un gardien d'urgence — déjà vérifié, déjà noté — répond dans les deux heures. Rendez-vous le lendemain matin avant qu'elle parte. Au retour, les chats sont toujours là, le frigo aussi.",
+  },
+  {
+    name: "Pierre, Annecy",
+    text: "Berger australien de 5 ans, magnifique mais réactif avec les inconnus. Pierre doit partir cinq jours pour un déplacement pro. Pas question de l'envoyer en pension. Il active l'alerte. Un gardien d'urgence formé aux chiens à fort caractère répond le soir même. Première rencontre dehors, en terrain neutre, comme il faut. Pierre est parti rassuré.",
+  },
+  {
+    name: "Camille, Grenoble",
+    text: "Décès soudain d'un proche en région parisienne. Camille doit partir quatre jours, son chat de 14 ans ne supporte plus les déménagements. L'alerte part le matin, un gardien d'urgence du coin répond avant midi. Le chat n'a pas bougé de la maison. Camille non plus, en quelque sorte.",
+  },
+  {
+    name: "Sophie, Vieux-Lyon",
+    text: "Chien diabétique, deux injections par jour à heures fixes. Personne dans son entourage ne sait faire. Sophie doit s'absenter trois jours. Elle active l'alerte en précisant la compétence soin. Un gardien d'urgence avec expérience véto répond dans la journée. Démonstration de l'injection le matin du départ. Tout s'est passé comme prévu.",
+  },
+  {
+    name: "Thomas, Chambéry",
+    text: "Mission consulting imprévue à l'étranger, départ dans 36 heures. Deux chats à la maison, pas de famille en ville. Thomas active l'alerte le jeudi soir. Vendredi matin, un gardien d'urgence est passé pour rencontrer les chats et récupérer les clés. Six jours de mission, zéro stress côté chats.",
+  },
+  {
+    name: "Élise, Saint-Étienne",
+    text: "Déménagement précipité — l'ancien proprio a avancé l'état des lieux d'une semaine. Deux chats stressés, un logement en chantier, pas le temps de s'en occuper. L'alerte passe à 9h, un gardien d'urgence répond à 11h. Les chats ont fini la semaine au calme chez le gardien, le temps que tout soit en place.",
+  },
+];
+
+const comparisonRows = [
+  { criteria: "Délai", classic: "Anticipé (semaines)", urgent: "Moins de 24h" },
+  { criteria: "Durée typique", classic: "7 à 21 jours", urgent: "Souvent courte (1 à 7 jours)" },
+  { criteria: "Profil gardien", classic: "Tout gardien vérifié", urgent: "5+ gardes, note 4.7+, 0 annulation" },
+  { criteria: "Type de demande", classic: "Planifiée", urgent: "Imprévue" },
+  { criteria: "Type d'animaux", classic: "Tous", urgent: "Tous (y compris réactifs)" },
 ];
 
 const faqs = [
   {
-    q: "Qu'est-ce qu'un gardien d'urgence ?",
-    a: "Un gardien expérimenté : 3+ gardes, note 4.7+, zéro annulation sur 6 mois, ID vérifiée. Disponible rapidement dans son rayon. C'est le plus haut niveau de confiance sur Guardiens.",
+    q: "Combien de temps pour être contacté(e) en cas d'urgence ?",
+    a: "Sur Guardiens, les alertes d'urgence sont prioritaires : les gardiens d'urgence éligibles dans votre rayon sont notifiés instantanément (SMS, email, push). En moyenne, vous recevez une réponse en moins de 4 heures, et un rendez-vous dans les 24 heures.",
   },
   {
-    q: "Comment trouver un gardien d'urgence ?",
-    a: "Filtrez la recherche par « Gardiens d'urgence ». Ou utilisez le bouton « Besoin d'aide » pendant une garde — les gardiens d'urgence seront alertés.",
+    q: "Et la nuit ou le week-end, ça fonctionne ?",
+    a: "Oui. Les alertes d'urgence sont actives 24/7. La nuit et le week-end, les notifications sont envoyées en priorité aux gardiens ayant indiqué une disponibilité étendue. Les délais de réponse peuvent être un peu plus longs en plages atypiques (jusqu'à 6 heures), mais le service reste actif.",
   },
   {
-    q: "Comment devenir gardien d'urgence ?",
-    a: "Remplissez les conditions (3 gardes, 4.7+, 0 annulation sur 6 mois, ID vérifiée, abonnement actif). L'invitation apparaît automatiquement sur votre dashboard.",
+    q: "Mon chien est réactif ou anxieux, est-ce possible quand même ?",
+    a: "Oui, c'est même un cas typique d'urgence. Quand vous activez l'alerte, vous précisez le profil de votre animal (réactif, anxieux, soin particulier, etc.). Seuls les gardiens d'urgence ayant l'expérience et la compétence requises sont notifiés. Aucun gardien ne prend une garde sans rencontrer l'animal d'abord — c'est la règle.",
   },
   {
-    q: "Est-ce que le gardien d'urgence est payé plus ?",
-    a: "Non, pas d'échange d'argent. Mais chaque intervention vous offre 3 mois d'abonnement offerts, ainsi qu'une visibilité prioritaire dans la recherche.",
+    q: "Combien ça coûte une garde d'urgence ?",
+    a: "Pour les propriétaires, l'inscription et l'utilisation de Guardiens (y compris l'alerte d'urgence) sont sans frais. Aucun supplément n'est appliqué pour une garde d'urgence par rapport à une garde classique. La logique reste celle du house-sitting : pas d'argent qui circule entre vous et le gardien.",
+  },
+  {
+    q: "Quelle différence avec une garde classique ?",
+    a: "Une garde classique se prépare à l'avance : vous publiez votre annonce, recevez plusieurs candidatures, choisissez. Une garde d'urgence est immédiate : un gardien éligible (5 gardes minimum, note 4.7+, 0 annulation, ID vérifiée) répond rapidement, vous le rencontrez le jour même ou le lendemain, la garde commence dans les 24h.",
+  },
+  {
+    q: "Et si je suis hospitalisé(e), comment ça se passe ?",
+    a: "C'est l'un des cas les plus fréquents. Vous (ou un proche) activez l'alerte directement depuis votre dashboard ou par téléphone. Si vous n'êtes pas en état, un proche peut le faire à votre place avec votre accord. Le gardien d'urgence prend le relais : maison, animaux, courrier si besoin. Vous reprenez tout en main au retour.",
+  },
+  {
+    q: "Comment devenir gardien d'urgence sur Guardiens ?",
+    a: "Quatre conditions : avoir réalisé au moins 5 gardes complètes sur Guardiens, avoir une note moyenne supérieure à 4.7/5, n'avoir annulé aucune garde, et avoir une identité vérifiée. Une fois ces critères remplis, vous pouvez activer le statut depuis votre dashboard.",
+  },
+  {
+    q: "À quoi je m'engage exactement comme gardien d'urgence ?",
+    a: "À répondre rapidement aux alertes que vous recevez (notification push, SMS, email). Vous n'êtes pas obligé(e) d'accepter chaque demande : vous pouvez décliner si vous n'êtes pas disponible. Mais vous vous engagez à répondre, pas à ignorer.",
   },
   {
     q: "Que se passe-t-il si je refuse une demande d'urgence ?",
-    a: "Premier refus : pas de conséquence. Deuxième refus : perte du statut pour 6 mois. Les propriétaires comptent sur la disponibilité des gardiens d'urgence.",
+    a: "Le premier refus n'a aucune conséquence — c'est normal de ne pas être toujours disponible. En revanche, un deuxième refus consécutif entraîne la perte du statut pendant 6 mois. C'est notre garantie pour les propriétaires : un gardien d'urgence est vraiment disponible.",
   },
   {
-    q: "Que se passe-t-il si je perds le statut ?",
-    a: "Note < 4.7 → pause (remontez la note). Annulation → perte, réactivable quand 0 annulation sur 6 mois. 2ᵉ refus urgence → perte 6 mois.",
+    q: "Qu'est-ce que je gagne à être gardien d'urgence ?",
+    a: "Visibilité prioritaire dans les résultats de recherche, accès anticipé à des gardes intéressantes, écusson distinctif sur votre profil, et un mois d'abonnement offert par intervention d'urgence. Surtout : vous rendez un service réel à des gens du coin qui en ont vraiment besoin.",
+  },
+  {
+    q: "Comment je suis prévenu(e) d'une urgence ?",
+    a: "SMS + email + notification push (si activée). Vous configurez vos préférences depuis le dashboard : rayon d'intervention (5 à 200 km), plages horaires de disponibilité, types d'animaux acceptés. Seules les alertes correspondant à vos préférences vous parviennent.",
+  },
+  {
+    q: "Puis-je perdre mon statut de gardien d'urgence ?",
+    a: "Oui, dans plusieurs cas : note qui descend sous 4.7 (statut mis en pause, récupérable), annulation d'une garde acceptée (perte immédiate, réactivable après 5 nouvelles gardes sans incident), deuxième refus d'urgence consécutif (suspension 6 mois), abonnement expiré (statut en pause).",
   },
 ];
 
@@ -84,6 +143,29 @@ const faqJsonLd = {
   })),
 };
 
+const serviceJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Service",
+  name: "Garde animaux d'urgence",
+  url: "https://guardiens.fr/gardien-urgence",
+  serviceType: ["pet sitting d'urgence", "garde d'animaux à domicile en urgence"],
+  provider: {
+    "@type": "Organization",
+    name: "Guardiens",
+    url: "https://guardiens.fr",
+  },
+  areaServed: {
+    "@type": "Country",
+    name: "France",
+  },
+  audience: {
+    "@type": "Audience",
+    audienceType: "Propriétaires d'animaux ayant un besoin de garde imprévu",
+  },
+  description:
+    "Trouvez un gardien vérifié près de chez vous en moins de 24h pour vos animaux et votre maison en cas d'imprévu : hospitalisation, deuil, déplacement professionnel.",
+};
+
 const stepColors = [
   { bg: "bg-accent", text: "text-accent-foreground" },
   { bg: "bg-primary/10", text: "text-primary" },
@@ -94,12 +176,13 @@ const EmergencySitter = () => {
   return (
     <div className="min-h-screen bg-background">
       <PageMeta
-        title="Gardien d'urgence — Intervention rapide | Guardiens"
-        description="Besoin d'un gardien en urgence pour vos animaux ? Des gardiens vérifiés, expérimentés et disponibles rapidement près de chez vous."
+        title="Gardien d'urgence — Garde en moins de 24h | Guardiens"
+        description="Besoin d'un gardien en urgence pour vos animaux ? Activez l'alerte Guardiens et trouvez un gardien vérifié près de chez vous en moins de 24 heures."
         path="/gardien-urgence"
       />
       <Helmet>
         <script type="application/ld+json">{JSON.stringify(faqJsonLd)}</script>
+        <script type="application/ld+json">{JSON.stringify(serviceJsonLd)}</script>
       </Helmet>
       <PublicHeader />
       <PageBreadcrumb items={[{ label: "Gardien d'urgence" }]} />
@@ -115,7 +198,7 @@ const EmergencySitter = () => {
           </h1>
           <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
             Votre filet de sécurité local. Un imprévu, une annulation de dernière minute, un départ précipité ?
-            Les gardiens d'urgence sont des membres expérimentés, mobilisables rapidement parce qu'ils sont près de chez vous.
+            Des gens du coin formés à l'urgence, vérifiés, mobilisables en moins de 24h.
           </p>
           <p className="mt-3 text-base text-muted-foreground">
             C'est la force de la proximité : une solution en quelques heures, pas en quelques jours.
@@ -139,11 +222,68 @@ const EmergencySitter = () => {
         </div>
       </section>
 
+      {/* Cas concrets d'urgence */}
+      <section className="bg-background py-16 border-t border-border">
+        <div className="max-w-5xl mx-auto px-4">
+          <div className="text-center mb-10">
+            <p className="text-xs text-muted-foreground tracking-[0.2em] uppercase mb-3">
+              Six cas, six urgences
+            </p>
+            <h2 className="font-heading text-2xl md:text-3xl font-bold mb-4">
+              Quand le besoin est réel.
+            </h2>
+            <p className="text-muted-foreground max-w-2xl mx-auto">
+              L'urgence ne ressemble pas toujours à ce qu'on imagine. Voici six situations rencontrées sur Guardiens — toutes résolues en moins de 24 heures.
+            </p>
+          </div>
+          <div className="grid md:grid-cols-2 gap-5">
+            {stories.map((s) => (
+              <article key={s.name} className="bg-card border border-border rounded-lg p-6">
+                <h3 className="font-heading font-semibold mb-3">{s.name}</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">{s.text}</p>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Comparatif classique vs urgence */}
+      <section className="bg-muted/30 py-16 border-t border-border">
+        <div className="max-w-4xl mx-auto px-4">
+          <div className="text-center mb-10">
+            <h2 className="font-heading text-2xl md:text-3xl font-bold mb-3">
+              Garde classique vs garde d'urgence
+            </h2>
+            <p className="text-muted-foreground">Deux modes, une même confiance.</p>
+          </div>
+          <div className="overflow-x-auto rounded-lg border border-border bg-card">
+            <table className="w-full text-sm">
+              <thead className="bg-muted/50">
+                <tr>
+                  <th className="text-left p-4 font-heading font-semibold">Critère</th>
+                  <th className="text-left p-4 font-heading font-semibold">Garde classique</th>
+                  <th className="text-left p-4 font-heading font-semibold">Garde d'urgence</th>
+                </tr>
+              </thead>
+              <tbody>
+                {comparisonRows.map((row, i) => (
+                  <tr key={row.criteria} className={i > 0 ? "border-t border-border" : ""}>
+                    <td className="p-4 font-medium">{row.criteria}</td>
+                    <td className="p-4 text-muted-foreground">{row.classic}</td>
+                    <td className="p-4 text-muted-foreground">{row.urgent}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
       {/* Section proprio */}
       <section className="bg-muted/50 py-16">
         <div className="max-w-5xl mx-auto px-4">
           <h2 className="font-heading text-2xl font-bold text-center mb-3">
-            La tranquillité d'avoir quelqu'un de confiance à côté
+            La tranquillité d'avoir des gens du coin de confiance
           </h2>
           <p className="text-center text-muted-foreground mb-10">Pour les propriétaires</p>
           <div className="grid md:grid-cols-3 gap-6">
@@ -156,7 +296,7 @@ const EmergencySitter = () => {
             ))}
           </div>
           <div className="text-center mt-8">
-            <Link to="/search?emergency=true">
+            <Link to="/inscription?role=owner">
               <Button size="lg" className="gap-2">
                 <MapPin className="h-4 w-4" />
                 Trouver un gardien d'urgence près de chez moi
@@ -253,7 +393,7 @@ const EmergencySitter = () => {
       <section className="max-w-4xl mx-auto px-4 py-12 border-t border-border">
         <h2 className="font-heading text-xl font-bold text-center mb-3">Gardiens d'urgence par ville</h2>
         <p className="text-sm text-muted-foreground text-center mb-6">
-          Le réseau d'urgence s'appuie sur des gardiens locaux partout en France. Voici les villes où nos gardiens sont les plus actifs.
+          Le réseau d'urgence s'appuie sur des gardiens locaux partout en France. Voici les villes où les gardiens d'urgence y sont les plus actifs.
         </p>
         <div className="flex flex-wrap justify-center gap-3">
           {[
@@ -279,10 +419,33 @@ const EmergencySitter = () => {
         </div>
       </section>
 
+      {/* Pour aller plus loin — maillage interne */}
+      <section className="py-12 bg-muted/30 border-t border-border">
+        <div className="container max-w-4xl mx-auto px-4">
+          <p className="text-xs text-muted-foreground tracking-[0.2em] uppercase mb-6 text-center">
+            Pour aller plus loin
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <Link to="/petites-missions" className="group block bg-card border border-border rounded-lg p-6 hover:border-primary transition">
+              <p className="font-semibold mb-2 group-hover:text-primary transition">Petites missions d'entraide</p>
+              <p className="text-sm text-muted-foreground">Pour des coups de main ponctuels (sans urgence) entre gens du coin.</p>
+            </Link>
+            <Link to="/guides" className="group block bg-card border border-border rounded-lg p-6 hover:border-primary transition">
+              <p className="font-semibold mb-2 group-hover:text-primary transition">Guides locaux par ville</p>
+              <p className="text-sm text-muted-foreground">Vétos, parcs, cafés dog-friendly et bonnes adresses près de chez vous.</p>
+            </Link>
+            <Link to="/actualites/devenir-gardien-urgence-guardiens" className="group block bg-card border border-border rounded-lg p-6 hover:border-primary transition">
+              <p className="font-semibold mb-2 group-hover:text-primary transition">Devenir gardien d'urgence</p>
+              <p className="text-sm text-muted-foreground">Le guide complet pour rejoindre le réseau de gardiens d'urgence Guardiens.</p>
+            </Link>
+          </div>
+        </div>
+      </section>
+
       {/* Footer CTA — integrated into PublicFooter area */}
       <section className="py-8 text-center border-t border-border">
         <div className="flex items-center justify-center gap-4 flex-wrap">
-          <Link to="/search?emergency=true">
+          <Link to="/inscription?role=owner">
             <Button size="sm">Trouver un gardien d'urgence</Button>
           </Link>
           <Link to="/dashboard">
