@@ -5,6 +5,19 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+/**
+ * normalize-skill
+ *
+ * Rôle STRICT : suggérer une normalisation orthographique + une catégorie pour
+ * une compétence soumise. Cette fonction NE CHANGE JAMAIS le statut.
+ * Seul un admin peut passer une compétence en `approved` / `rejected` / merger
+ * via la page /admin/skills (RPC `admin_update_skill_status`).
+ *
+ * Comportements supprimés (anciens) :
+ *  - auto-rejet sur "inappropriate"
+ *  - auto-merge sur duplicate_of_label
+ *  - réécriture du status
+ */
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -38,7 +51,15 @@ Deno.serve(async (req) => {
       return new Response(JSON.stringify({ error: "Skill not found" }), { status: 404, headers: corsHeaders });
     }
 
-    // Get existing approved skills for comparison
+    // On ne touche jamais à une compétence déjà tranchée par un admin
+    if (skill.status !== "pending") {
+      return new Response(
+        JSON.stringify({ status: "skipped", reason: `skill already in status ${skill.status}` }),
+        { headers: corsHeaders },
+      );
+    }
+
+    // Get existing approved skills (juste pour aider l'IA à proposer une normalisation cohérente)
     const { data: approvedSkills } = await adminClient
       .from("skills_library")
       .select("id, label, normalized_label")
@@ -47,8 +68,8 @@ Deno.serve(async (req) => {
 
     const approvedLabels = (approvedSkills || []).map((s: any) => s.label).join(", ");
 
-    // Call AI via Lovable proxy
-    const aiResponse = await fetch("https://ai-gateway.lovable.dev/v1/chat/completions", {
+    // Call AI via Lovable proxy — uniquement pour SUGGÉRER
+    const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -59,20 +80,20 @@ Deno.serve(async (req) => {
         messages: [
           {
             role: "system",
-            content: `Tu es modérateur pour Guardiens, plateforme de house-sitting et d'entraide de proximité en AURA. Les compétences d'entraide couvrent tout ce qu'un particulier peut échanger : jardinage, bricolage, plomberie légère, cuisine, cours, aide admin, etc. Seuls cas à refuser : contenu offensant ou illégal, services récurrents professionnels explicites (ex: 'femme de ménage 3h/semaine tous les lundis'), publicité commerciale. Réponds UNIQUEMENT en JSON valide.`,
+            content: `Tu es assistant de pré-traitement pour Guardiens, plateforme de house-sitting et d'entraide de proximité (couverture France entière). Les compétences d'entraide couvrent tout ce qu'un particulier peut échanger : jardinage, bricolage, plomberie légère, cuisine, cours, aide admin, etc. Tu ne décides RIEN, tu ne fais que SUGGÉRER. Réponds UNIQUEMENT en JSON valide.`,
           },
           {
             role: "user",
             content: `Compétence soumise : '${skill.label}'
-Compétences approuvées existantes : ${approvedLabels || "aucune"}
+Compétences déjà approuvées : ${approvedLabels || "aucune"}
 
-Retourne :
+Retourne uniquement des suggestions destinées à un modérateur humain :
 {
-  "normalized": "label corrigé en français, première lettre majuscule",
-  "duplicate_of_label": "label existant identique en sens ou null",
+  "normalized": "label corrigé en français, première lettre majuscule, sinon null si déjà bon",
+  "duplicate_of_label": "label existant identique en sens si évident, sinon null",
   "category": "jardin|animaux|competences|coups_de_main|null",
-  "inappropriate": true ou false,
-  "inappropriate_reason": "raison courte si inappropriate sinon null"
+  "flag_inappropriate": true ou false,
+  "flag_reason": "raison courte si flag_inappropriate ou doublon, sinon null"
 }`,
           },
         ],
@@ -88,7 +109,7 @@ Retourne :
 
     const aiData = await aiResponse.json();
     const content = aiData.choices?.[0]?.message?.content || "";
-    
+
     // Parse JSON from response (handle markdown code blocks)
     let parsed: any;
     try {
@@ -99,74 +120,9 @@ Retourne :
       return new Response(JSON.stringify({ status: "parse_failed" }), { headers: corsHeaders });
     }
 
-    // Handle inappropriate content
-    if (parsed.inappropriate) {
-      await adminClient
-        .from("skills_library")
-        .update({ status: "rejected" })
-        .eq("id", skill_id);
-
-      // Remove from all profiles
-      const { data: affectedProfiles } = await adminClient
-        .from("profiles")
-        .select("id, custom_skills")
-        .filter("custom_skills", "cs", `[{"skill_id":"${skill_id}"}]`);
-
-      if (affectedProfiles) {
-        for (const p of affectedProfiles) {
-          const skills = (p.custom_skills as any[]) || [];
-          const filtered = skills.filter((s: any) => s.skill_id !== skill_id);
-          await adminClient.from("profiles").update({ custom_skills: filtered }).eq("id", p.id);
-        }
-      }
-
-      return new Response(JSON.stringify({ status: "rejected", reason: parsed.inappropriate_reason }), { headers: corsHeaders });
-    }
-
-    // Handle duplicates
-    if (parsed.duplicate_of_label) {
-      const existingMatch = (approvedSkills || []).find(
-        (s: any) => s.label.toLowerCase() === parsed.duplicate_of_label.toLowerCase()
-      );
-
-      if (existingMatch) {
-        // Mark as merged
-        await adminClient
-          .from("skills_library")
-          .update({ status: "rejected", merged_into: existingMatch.id })
-          .eq("id", skill_id);
-
-        // Update profiles to point to existing skill
-        const { data: affectedProfiles } = await adminClient
-          .from("profiles")
-          .select("id, custom_skills")
-          .filter("custom_skills", "cs", `[{"skill_id":"${skill_id}"}]`);
-
-        if (affectedProfiles) {
-          for (const p of affectedProfiles) {
-            const skills = (p.custom_skills as any[]) || [];
-            const updated = skills.map((s: any) =>
-              s.skill_id === skill_id
-                ? { ...s, skill_id: existingMatch.id, status: existingMatch.status || "approved", label: existingMatch.label }
-                : s
-            );
-            await adminClient.from("profiles").update({ custom_skills: updated }).eq("id", p.id);
-          }
-        }
-
-        // Increment usage on target
-        await adminClient
-          .from("skills_library")
-          .update({ usage_count: (existingMatch as any).usage_count ? (existingMatch as any).usage_count + 1 : 2 })
-          .eq("id", existingMatch.id);
-
-        return new Response(JSON.stringify({ status: "merged", target_id: existingMatch.id }), { headers: corsHeaders });
-      }
-    }
-
-    // Update with normalized data and category
-    const updates: any = {};
-    if (parsed.normalized) {
+    // Update UNIQUEMENT label normalisé + catégorie (pas de status, pas de merged_into)
+    const updates: Record<string, unknown> = {};
+    if (parsed.normalized && typeof parsed.normalized === "string") {
       updates.label = parsed.normalized;
       updates.normalized_label = parsed.normalized
         .toLowerCase()
@@ -175,18 +131,38 @@ Retourne :
         .replace(/[\u0300-\u036f]/g, "")
         .replace(/\s+/g, " ");
     }
-    if (parsed.category) {
+    if (parsed.category && typeof parsed.category === "string") {
       updates.category = parsed.category;
     }
 
     if (Object.keys(updates).length > 0) {
-      await adminClient
-        .from("skills_library")
-        .update(updates)
-        .eq("id", skill_id);
+      await adminClient.from("skills_library").update(updates).eq("id", skill_id);
     }
 
-    return new Response(JSON.stringify({ status: "normalized", updates }), { headers: corsHeaders });
+    // Trace dans les logs serveur (visibles côté Lovable Cloud) pour aider l'admin
+    if (parsed.flag_inappropriate || parsed.duplicate_of_label) {
+      console.log("normalize-skill suggestion", {
+        skill_id,
+        original_label: skill.label,
+        normalized: parsed.normalized,
+        duplicate_of_label: parsed.duplicate_of_label,
+        flag_inappropriate: parsed.flag_inappropriate,
+        flag_reason: parsed.flag_reason,
+      });
+    }
+
+    return new Response(
+      JSON.stringify({
+        status: "suggested",
+        updates,
+        suggestions: {
+          duplicate_of_label: parsed.duplicate_of_label || null,
+          flag_inappropriate: !!parsed.flag_inappropriate,
+          flag_reason: parsed.flag_reason || null,
+        },
+      }),
+      { headers: corsHeaders },
+    );
   } catch (err) {
     console.error("normalize-skill error:", err);
     return new Response(JSON.stringify({ error: "Internal error" }), { status: 500, headers: corsHeaders });
