@@ -694,7 +694,7 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
                     : "border-border bg-card text-muted-foreground hover:border-primary/50"
                 }`}
               >
-                ✏️ Écrire un message personnalisé
+                Écrire un message personnalisé
               </button>
 
               {declineCustom && (
