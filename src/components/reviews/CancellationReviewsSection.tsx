@@ -137,7 +137,7 @@ const CancellationReviewCard = ({ review, currentUserId }: { review: any; curren
       {submitted && (
         <div className="border-t border-border mt-3 pt-3">
           <p className="text-xs text-primary font-medium">
-            ✓ Réponse soumise — en attente de validation.
+            Réponse soumise — en attente de validation.
           </p>
         </div>
       )}
