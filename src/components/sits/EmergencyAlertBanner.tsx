@@ -36,7 +36,7 @@ const EmergencyAlertBanner = ({ sitId, sitCity, startDate }: EmergencyAlertBanne
       setAlerted(true);
       toast.success(
         count > 0
-          ? `${count} gardien${count > 1 ? "s" : ""} d'urgence alerté${count > 1 ? "s" : ""} à proximité de ${sitCity} ⚡`
+          ? `${count} gardien${count > 1 ? "s" : ""} d'urgence alerté${count > 1 ? "s" : ""} à proximité de ${sitCity}.`
           : "Aucun gardien d'urgence disponible dans votre zone pour le moment."
       );
     } catch {
