@@ -39,6 +39,8 @@ interface GalleryPhoto {
 const OwnerGallery = () => {
   const { user } = useAuth();
   const { toast } = useToast();
+  const [searchParams] = useSearchParams();
+  const fromSitId = searchParams.get("from")?.startsWith("sit:") ? searchParams.get("from")!.slice(4) : null;
   const fileRef = useRef<HTMLInputElement>(null);
 
   const [photos, setPhotos] = useState<GalleryPhoto[]>([]);
