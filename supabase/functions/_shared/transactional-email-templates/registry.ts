@@ -35,6 +35,7 @@ import { template as nearbySitAlert } from './nearby-sit-alert.tsx'
 import { template as sitConfirmed } from './sit-confirmed.tsx'
 import { template as conseilsAnnoncePersonnalises } from './conseils-annonce-personnalises.tsx'
 import { template as conseilsPublicationAnnonce } from './conseils-publication-annonce.tsx'
+import { template as relancePieceIdentite } from './relance-piece-identite.tsx'
 
 export const TEMPLATES: Record<string, TemplateEntry> = {
   'nearby-sit-alert': nearbySitAlert,
