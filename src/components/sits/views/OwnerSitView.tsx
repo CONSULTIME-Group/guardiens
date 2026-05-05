@@ -286,7 +286,7 @@ const OwnerSitView = ({
         </div>
       )}
 
-      {/* Header partagé */}
+      {/* Header partagé (compact) — actions Modifier / Aperçu gardien + statut */}
       <SitDetailHeader
         sitId={sit.id}
         sitTitle={sit.title}
@@ -326,8 +326,30 @@ const OwnerSitView = ({
         </div>
       )}
 
-      {/* Candidatures reçues — bloc dédié, en haut */}
-      <section className="mt-2 mb-8 rounded-2xl border border-border bg-card p-5 md:p-6">
+      {/* Photos & couverture — gestion intégrée à la fiche */}
+      <SitPhotoManager
+        sitId={sit.id}
+        ownerId={currentUserId}
+        initialCoverPhotoUrl={(sit as any).cover_photo_url ?? null}
+        initialGallery={ownerGallery}
+        onCoverChange={(url) => {
+          setSit({ ...sit, cover_photo_url: url } as any);
+        }}
+      />
+
+      {/* Aperçu de l'annonce — vue identique à celle des gardiens, EN PREMIER pour
+          que le propriétaire visualise immédiatement à quoi ressemble son annonce. */}
+      <SitImmersiveContent
+        sit={sit}
+        owner={owner}
+        property={property}
+        pets={pets}
+        ownerProfile={ownerProfile}
+      />
+
+      {/* Candidatures reçues — APRÈS l'aperçu : on voit d'abord son annonce,
+          puis qui y a postulé. */}
+      <section className="mt-8 mb-8 rounded-2xl border border-border bg-card p-5 md:p-6">
         <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
           <Users className="h-5 w-5 text-primary" />
           Candidatures reçues ({internalAppCount})
@@ -361,37 +383,37 @@ const OwnerSitView = ({
         />
       </section>
 
-      {/* Contenu immersif — vue identique à celle qu'auront les gardiens */}
-      <SitImmersiveContent
-        sit={sit}
-        owner={owner}
-        property={property}
-        pets={pets}
-        ownerProfile={ownerProfile}
-      />
-
-      {/* Personnalisations spécifiques à cette annonce (overrides logement/animaux) */}
-      <section className="mt-8 rounded-2xl border border-border bg-card p-5 md:p-6 space-y-4">
-        <div>
-          <h2 className="text-lg font-semibold mb-1 flex items-center gap-2">
-            <Home className="h-5 w-5 text-primary" /> Personnaliser cette annonce
-          </h2>
-          <p className="text-sm text-muted-foreground">
+      {/* Notes spécifiques à cette garde — accordion fermé par défaut. */}
+      <Collapsible className="mt-2 mb-8 rounded-2xl border border-border bg-card">
+        <CollapsibleTrigger className="group w-full flex items-center justify-between gap-2 p-5 md:p-6 text-left">
+          <div>
+            <h2 className="text-base font-semibold flex items-center gap-2">
+              <Home className="h-5 w-5 text-primary" /> Notes spécifiques à cette garde
+            </h2>
+            <p className="text-sm text-muted-foreground mt-1">
+              Précisions logement / animaux qui ne s'appliquent qu'à cette annonce
+              (optionnel).
+            </p>
+          </div>
+          <ChevronDown className="h-5 w-5 text-muted-foreground shrink-0 transition-transform group-data-[state=open]:rotate-180" />
+        </CollapsibleTrigger>
+        <CollapsibleContent className="px-5 md:px-6 pb-5 md:pb-6 space-y-4">
+          <p className="text-xs text-muted-foreground">
             Le logement et les animaux se gèrent depuis votre profil — les modifications
             s'appliquent à toutes vos annonces.{" "}
             <Link to="/owner-profile" className="text-primary hover:underline">
               Modifier mon profil →
             </Link>
           </p>
-        </div>
-        <SitOverridesEditor
-          logementOverride={logementOverride}
-          setLogementOverride={setLogementOverride}
-          animauxOverride={animauxOverride}
-          setAnimauxOverride={setAnimauxOverride}
-          saveOverride={saveOverride}
-        />
-      </section>
+          <SitOverridesEditor
+            logementOverride={logementOverride}
+            setLogementOverride={setLogementOverride}
+            animauxOverride={animauxOverride}
+            setAnimauxOverride={setAnimauxOverride}
+            saveOverride={saveOverride}
+          />
+        </CollapsibleContent>
+      </Collapsible>
 
       {/* Avis */}
       <section className="mt-8">
