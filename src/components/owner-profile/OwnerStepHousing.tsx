@@ -24,23 +24,11 @@ const EQUIPMENTS = ["Jardin", "Piscine", "WiFi", "Parking", "Terrasse", "Chemin�
 interface Props {
   data: OwnerProfileData;
   onChange: (partial: Partial<OwnerProfileData>) => void;
-  onUploadPhoto: (file: File, bucket: string) => Promise<string | null>;
+  /** Conservé pour compat avec OwnerProfile.tsx mais non utilisé ici (la galerie gère ses uploads). */
+  onUploadPhoto?: (file: File, bucket: string) => Promise<string | null>;
 }
 
-const OwnerStepHousing = ({ data, onChange, onUploadPhoto }: Props) => {
-  const fileRef = useRef<HTMLInputElement>(null);
-
-  const handlePhotos = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || []);
-    for (const file of files) {
-      const url = await onUploadPhoto(file, "property-photos");
-      if (url) onChange({ photos: [...(data.photos || []), url] });
-    }
-  };
-
-  const removePhoto = (index: number) => {
-    onChange({ photos: data.photos.filter((_, i) => i !== index) });
-  };
+const OwnerStepHousing = ({ data, onChange }: Props) => {
 
   return (
     <div className="space-y-6">
