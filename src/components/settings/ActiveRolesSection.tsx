@@ -181,6 +181,24 @@ const ActiveRolesSection = () => {
             />
           </div>
 
+          {sitterActive && (
+            <div className="flex items-center justify-between gap-4 rounded-md bg-muted/40 border border-border/60 p-3">
+              <div className="space-y-0.5">
+                <Label className="text-sm font-medium">Disponible pour garder</Label>
+                <p className="text-xs text-muted-foreground">
+                  Désactivez simplement ce bouton pour ne plus apparaître comme gardien
+                  disponible. Vous gardez votre compte, vos avis et votre historique.
+                </p>
+              </div>
+              <Switch
+                checked={!!isAvailable}
+                disabled={availLoading || isAvailable === null}
+                onCheckedChange={toggleAvailability}
+                aria-label="Indiquer si vous êtes disponible pour garder"
+              />
+            </div>
+          )}
+
           {hasBothRoles && (
             <div className="border-t border-border pt-4 mt-2">
               <p className="text-sm font-medium mb-1">Espace affiché par défaut</p>
