@@ -384,7 +384,7 @@ const ConversationHeader = ({
       {isSmallMission && missionData && responseData && responseData.status === "accepted" && (
         <div className="px-4 py-2 bg-green-50 border-t border-green-200 flex items-center gap-2">
           <CheckCircle className="text-green-600 w-4 h-4 shrink-0" />
-          <span className="text-sm text-green-700 font-medium">Échange accepté ✓</span>
+          <span className="text-sm text-green-700 font-medium">Échange accepté</span>
           {missionData.date_needed && isPast(new Date(missionData.date_needed)) && (
             <Button
               size="sm"
