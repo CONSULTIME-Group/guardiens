@@ -427,7 +427,7 @@ const ConversationHeader = ({
           on doit quand même voir titre + date + lieu pour s'y retrouver. */}
       {isSmallMission && !responseData && (
         <div className="px-4 py-2 border-t border-border/50 bg-accent/30">
-          <p className="text-xs text-muted-foreground mb-0.5">🌿 Petite mission</p>
+          <p className="text-xs text-muted-foreground mb-0.5">Petite mission</p>
           {missionData?.title && (
             <p className="text-sm font-medium text-foreground truncate" title={missionData.title}>
               {missionData.title}
