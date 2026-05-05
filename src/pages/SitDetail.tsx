@@ -54,7 +54,7 @@ const SitDetail = () => {
       setInitialLogementOverride((sitData as any).logement_override || "");
       setInitialAnimauxOverride((sitData as any).animaux_override || "");
 
-      const [ownerRes, propRes, ownerProfRes, reviewsRes] = await Promise.all([
+      const [ownerRes, propRes, ownerProfRes, reviewsRes, galleryRes] = await Promise.all([
         supabase.from("public_profiles").select("*").eq("id", sitData.user_id).limit(1),
         supabase.from("properties").select("*").eq("id", sitData.property_id).limit(1),
         supabase.from("owner_profiles").select("*").eq("user_id", sitData.user_id).limit(1),
@@ -65,16 +65,29 @@ const SitDetail = () => {
           )
           .eq("reviewee_id", sitData.user_id)
           .eq("published", true),
+        // Galerie propriétaire = source de vérité unique pour les photos.
+        supabase
+          .from("owner_gallery")
+          .select("id, photo_url, position")
+          .eq("user_id", sitData.user_id)
+          .order("position", { ascending: true }),
       ]);
 
       const ownerData = ownerRes.data?.[0] ?? null;
       const propertyData = propRes.data?.[0] ?? null;
       const ownerProfileData = ownerProfRes.data?.[0] ?? null;
 
+      // Injecter les photos owner_gallery dans property pour le hero.
+      const galleryUrls = (galleryRes.data || []).map((g: any) => g.photo_url).filter(Boolean);
+      const enrichedProperty = propertyData
+        ? { ...propertyData, photos: galleryUrls.length > 0 ? galleryUrls : (propertyData as any).photos }
+        : propertyData;
+
       setOwner(ownerData);
-      setProperty(propertyData);
+      setProperty(enrichedProperty);
       setOwnerProfile(ownerProfileData);
       setReviews(reviewsRes.data || []);
+      setOwnerGallery((galleryRes.data || []).map((g: any) => ({ id: g.id, photo_url: g.photo_url })));
 
       if (ownerData?.city) {
         geocodeCity(ownerData.city).then((result) => {
