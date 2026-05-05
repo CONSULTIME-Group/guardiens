@@ -192,7 +192,7 @@ const OwnerSitView = ({
                 Cette annonce est encore en brouillon
               </p>
               <p className="text-sm text-muted-foreground">
-                Publie-la pour qu'elle apparaisse dans la recherche.
+                Publiez-la pour qu'elle apparaisse dans la recherche.
               </p>
             </div>
             <Button
