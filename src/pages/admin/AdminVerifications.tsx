@@ -349,6 +349,56 @@ const AdminVerifications = () => {
                         {user.avatar_url ? <img src={user.avatar_url} alt="Profil" className="w-full h-48 object-contain rounded-lg border bg-muted" /> : <div className="w-full h-48 rounded-lg border bg-muted flex items-center justify-center text-xs text-muted-foreground">Aucune photo</div>}
                       </div>
                     </div>
+                    {(() => {
+                      const logs = userLogs[user.id] || [];
+                      const events: Array<{ ts: string; label: string; tone: "info" | "success" | "destructive" | "warning" | "muted"; detail?: string }> = [];
+                      events.push({
+                        ts: user.created_at,
+                        label: "Inscription du membre",
+                        tone: "muted",
+                      });
+                      if (user.identity_document_url) {
+                        events.push({ ts: user.updated_at, label: "Pièce d'identité déposée", tone: "info" });
+                      }
+                      if (user.identity_selfie_url) {
+                        events.push({ ts: user.updated_at, label: "Selfie déposé", tone: "info" });
+                      }
+                      logs.forEach((log) => {
+                        events.push({
+                          ts: log.created_at,
+                          label:
+                            log.result === "verified" ? "Validée par l'admin" :
+                            log.result === "rejected" ? "Refusée par l'admin" :
+                            `Décision : ${log.result}`,
+                          tone: log.result === "verified" ? "success" : log.result === "rejected" ? "destructive" : "warning",
+                          detail: log.rejection_reason || log.document_type || undefined,
+                        });
+                      });
+                      events.sort((a, b) => new Date(b.ts).getTime() - new Date(a.ts).getTime());
+                      if (!events.length) return null;
+                      const toneClass = (t: string) =>
+                        t === "success" ? "bg-success" :
+                        t === "destructive" ? "bg-destructive" :
+                        t === "warning" ? "bg-warning" :
+                        t === "info" ? "bg-info" : "bg-muted-foreground/40";
+                      return (
+                        <div className="rounded-lg border border-border bg-muted/30 p-3 space-y-2">
+                          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Historique du dossier</p>
+                          <ol className="space-y-1.5">
+                            {events.slice(0, 8).map((ev, i) => (
+                              <li key={i} className="flex items-start gap-2 text-xs">
+                                <span className={`mt-1 h-1.5 w-1.5 rounded-full shrink-0 ${toneClass(ev.tone)}`} />
+                                <span className="text-muted-foreground tabular-nums shrink-0 w-36">
+                                  {format(new Date(ev.ts), "d MMM yyyy HH:mm", { locale: fr })}
+                                </span>
+                                <span className="font-medium">{ev.label}</span>
+                                {ev.detail && <span className="text-muted-foreground italic">— {ev.detail}</span>}
+                              </li>
+                            ))}
+                          </ol>
+                        </div>
+                      );
+                    })()}
                     <div className="flex flex-wrap items-center gap-3 pt-2 border-t border-border">
                       <Button size="sm" className="gap-1.5" disabled={busyUserId === user.id || isIncomplete} onClick={() => handleApprove(user.id)} title={isIncomplete ? "Dossier incomplet : impossible de valider" : undefined}><ShieldCheck className="h-4 w-4" /> {busyUserId === user.id ? "Validation..." : "Valider"}</Button>
                       <Button size="sm" variant="destructive" className="gap-1.5" disabled={busyUserId === user.id || isIncomplete} onClick={() => setRejectModal({ open: true, userId: user.id, reason: "", customReason: "" })}><ShieldX className="h-4 w-4" /> Refuser</Button>
