@@ -78,39 +78,20 @@ export default function AdminMessages() {
       });
       if (statsErr) console.error("admin_message_stats error", statsErr);
 
-      // 2) Top users — still client-side but bounded and only for ranking
-      let q = supabase
-        .from("messages")
-        .select("sender_id, conversation_id, created_at")
-        .eq("is_system", false)
-        .order("created_at", { ascending: false })
-        .limit(2000);
-      if (since) q = q.gte("created_at", since);
-      const { data: msgs } = await q;
-
-      const acc: Record<string, { count: number; convs: Set<string>; last: string }> = {};
-      for (const m of msgs || []) {
-        const a = (acc[m.sender_id] ||= { count: 0, convs: new Set(), last: m.created_at });
-        a.count++;
-        a.convs.add(m.conversation_id);
-        if (m.created_at > a.last) a.last = m.created_at;
-      }
-      const ranked = Object.entries(acc)
-        .sort((a, b) => b[1].count - a[1].count)
-        .slice(0, 20);
-      const ids = ranked.map(([id]) => id);
-      const { data: profiles } = ids.length
-        ? await supabase.from("profiles").select("id, first_name, avatar_url, role").in("id", ids)
-        : { data: [] as any[] };
-      const pmap = new Map((profiles || []).map((p: any) => [p.id, p]));
-      const top: TopUser[] = ranked.map(([id, d]) => ({
-        user_id: id,
-        first_name: pmap.get(id)?.first_name || null,
-        avatar_url: pmap.get(id)?.avatar_url || null,
-        role: pmap.get(id)?.role || null,
-        message_count: d.count,
-        conv_count: d.convs.size,
-        last_message_at: d.last,
+      // 2) Top users — RPC admin (contourne RLS, classement fiable)
+      const { data: topData, error: topErr } = await supabase.rpc("admin_top_message_users", {
+        _since: since,
+        _limit: 20,
+      });
+      if (topErr) console.error("admin_top_message_users error", topErr);
+      const top: TopUser[] = ((topData as any[]) || []).map((u) => ({
+        user_id: u.user_id,
+        first_name: u.first_name,
+        avatar_url: u.avatar_url,
+        role: u.role,
+        message_count: u.message_count,
+        conv_count: u.conv_count,
+        last_message_at: u.last_message_at,
       }));
 
       if (!cancelled) {
