@@ -7,7 +7,7 @@ export function StatutGardienBadge({ statut, size = 'normal' }: StatutGardienBad
   if (statut === 'novice') return null
 
   const isSuper = statut === 'super_gardien'
-  const label = isSuper ? 'Super Gardien ✦' : 'Gardien Confirmé'
+  const label = isSuper ? 'Super Gardien' : 'Gardien Confirmé'
   const px = size === 'compact' ? 'px-2 py-0.5' : 'px-2.5 py-0.5'
 
   return (
