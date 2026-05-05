@@ -19,12 +19,12 @@ interface Props {
   editable?: boolean;
 }
 
-const fields: { key: keyof LocationProfile; label: string; emoji: string }[] = [
-  { key: "neighborhood_type", label: "Quartier", emoji: "🏘️" },
-  { key: "nature_access", label: "Nature", emoji: "🌿" },
-  { key: "amenities", label: "Services", emoji: "🏪" },
-  { key: "transport", label: "Transports", emoji: "🚆" },
-  { key: "activities", label: "Activités", emoji: "🎭" },
+const fields: { key: keyof LocationProfile; label: string }[] = [
+  { key: "neighborhood_type", label: "Quartier" },
+  { key: "nature_access", label: "Nature" },
+  { key: "amenities", label: "Services" },
+  { key: "transport", label: "Transports" },
+  { key: "activities", label: "Activités" },
 ];
 
 const LocationProfileCard = ({ city, postalCode, onUseDescription, editable = false }: Props) => {
