@@ -155,7 +155,7 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
     } as any).eq("id", sitId);
 
     const petNamesStr = petNames.join(", ");
-    const confirmMsg = `🎉 La garde est confirmée ! Vous avez été choisi(e) pour garder ${petNamesStr} du ${startDate} au ${endDate}.`;
+    const confirmMsg = `La garde est confirmée. Vous avez été choisi(e) pour garder ${petNamesStr} du ${startDate} au ${endDate}.`;
     const { data: acceptedConv } = await supabase
       .from("conversations")
       .select("id")
@@ -181,7 +181,7 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
         await supabase.from("messages").insert({
           conversation_id: acceptedConv.id,
           sender_id: user.id,
-          content: "📋 Le guide de la maison est disponible ! Vous y trouverez l'adresse exacte, les codes d'accès, les contacts utiles et toutes les consignes.",
+          content: "Le guide de la maison est disponible. Vous y trouverez l'adresse exacte, les codes d'accès, les contacts utiles et toutes les consignes.",
           is_system: true,
         });
       }
@@ -458,7 +458,12 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
               {sitter?.is_founder && <FounderBadge size="sm" />}
             </div>
             <div className="flex items-center gap-3 text-sm text-muted-foreground flex-wrap">
-              {sitter?.city && <span>📍 {sitter.city}</span>}
+              {sitter?.city && (
+                <span className="inline-flex items-center gap-1">
+                  <MapPin className="h-3 w-3" />
+                  {sitter.city}
+                </span>
+              )}
               <span>{completedSits} garde{completedSits !== 1 ? "s" : ""} sur Guardiens</span>
             </div>
           </div>
@@ -544,7 +549,10 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
 
         {app.status === "accepted" && (
           <div className="mt-4 space-y-2">
-            <p className="text-sm text-primary font-medium">✓ Garde confirmée</p>
+            <p className="text-sm text-primary font-medium inline-flex items-center gap-1.5">
+              <CheckCircle2 className="h-4 w-4" />
+              Garde confirmée
+            </p>
             <button
               onClick={async () => {
                 const { data: conv } = await supabase
@@ -686,7 +694,7 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
                     : "border-border bg-card text-muted-foreground hover:border-primary/50"
                 }`}
               >
-                ✏️ Écrire un message personnalisé
+                Écrire un message personnalisé
               </button>
 
               {declineCustom && (
