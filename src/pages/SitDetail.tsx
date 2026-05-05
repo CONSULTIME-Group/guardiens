@@ -190,6 +190,8 @@ const SitDetail = () => {
           hasReviewedThisSit={hasReviewedThisSit}
           initialLogementOverride={initialLogementOverride}
           initialAnimauxOverride={initialAnimauxOverride}
+          ownerGallery={ownerGallery}
+          setOwnerGallery={setOwnerGallery}
           currentUserId={user!.id}
         />
       ) : (
