@@ -18,6 +18,11 @@ interface SkillRow {
   created_at: string;
   first_submitted_by: string | null;
   merged_into: string | null;
+  ai_verdict: string | null;
+  ai_reason: string | null;
+  ai_duplicate_of_label: string | null;
+  ai_suggested_label: string | null;
+  ai_checked_at: string | null;
 }
 
 interface CompetenceRow {
