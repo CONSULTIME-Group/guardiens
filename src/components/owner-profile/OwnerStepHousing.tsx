@@ -92,27 +92,22 @@ const OwnerStepHousing = ({ data, onChange }: Props) => {
         <ChipSelect options={EQUIPMENTS} selected={data.equipments} onChange={v => onChange({ equipments: v })} />
       </div>
 
-      {/* Photos — désormais centralisées dans la Galerie */}
-      <div className="rounded-xl border border-border bg-muted/30 p-4 flex items-start gap-3">
-        <Images className="h-5 w-5 text-primary shrink-0 mt-0.5" />
-        <div className="flex-1 space-y-1">
-          <p className="text-sm font-medium text-foreground">Photos du logement</p>
-          <p className="text-xs text-muted-foreground">
-            Toutes vos photos se gèrent au même endroit, dans la <strong>Galerie</strong>.
-            Vous pourrez aussi y choisir la photo de couverture pour chaque annonce.
-          </p>
-          <a
-            href="#galerie"
-            onClick={(e) => {
-              e.preventDefault();
-              const evt = new CustomEvent("owner-profile:goto-section", { detail: "gallery" });
-              window.dispatchEvent(evt);
-            }}
-            className="inline-block text-sm text-primary hover:underline mt-1"
-          >
-            Aller à la Galerie →
-          </a>
-        </div>
+      {/* Photos — gérées dans la Galerie (source unique) */}
+      <div className="space-y-2">
+        <Label>Photos du logement</Label>
+        <p className="text-xs text-muted-foreground">
+          Toutes vos photos se gèrent dans la <strong>Galerie</strong>. Vous y choisissez aussi la photo de couverture de chaque annonce.
+        </p>
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() => {
+            const evt = new CustomEvent("owner-profile:goto-section", { detail: "gallery" });
+            window.dispatchEvent(evt);
+          }}
+        >
+          Ouvrir la Galerie
+        </Button>
       </div>
 
       <div className="space-y-2">
