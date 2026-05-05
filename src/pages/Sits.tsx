@@ -127,7 +127,7 @@ const Sits = () => {
     }, { replace: true });
   }, [setSearchParams]);
 
-  const [showArchived, setShowArchived] = useState(false);
+  // (showArchived state removed — replaced by tabs)
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const [archiveConfirm, setArchiveConfirm] = useState<string | null>(null);
   const [openGuideId, setOpenGuideId] = useState<string | null>(null);
