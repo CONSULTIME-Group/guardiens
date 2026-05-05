@@ -334,7 +334,7 @@ const SitterSitView = ({
             <div className="bg-card rounded-xl border border-border p-5 flex items-center gap-3">
               <CheckCircle2 className="h-5 w-5 text-primary shrink-0" />
               <div>
-                <p className="text-sm font-medium">Accord de garde accepté ✓</p>
+                <p className="text-sm font-medium">Accord de garde accepté</p>
                 <p className="text-xs text-muted-foreground">
                   Signé le{" "}
                   {sitterAccordSigned.accepted_at
