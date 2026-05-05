@@ -93,6 +93,8 @@ const OwnerSitView = ({
   hasReviewedThisSit,
   initialLogementOverride,
   initialAnimauxOverride,
+  ownerGallery,
+  setOwnerGallery,
   currentUserId,
 }: OwnerSitViewProps) => {
   const { toast } = useToast();
