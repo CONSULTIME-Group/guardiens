@@ -329,7 +329,7 @@ const ConversationHeader = ({
             className="text-sm font-medium text-foreground truncate"
             title={conv.sit.title}
           >
-            🏡 {conv.sit.title}
+            {conv.sit.title}
           </p>
           {(conv.sit?.start_date || conv.sit?.city) && (
             <div className="flex items-center flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground mt-0.5">
