@@ -125,7 +125,7 @@ const ShareButtons = ({ sitId, title, city, startDate, endDate, source = "sit_de
       a.remove();
       URL.revokeObjectURL(blobUrl);
       toast({
-        title: "Visuel téléchargé ✓",
+        title: "Visuel téléchargé",
         description: "Attachez-le à votre publication Facebook avant de coller le lien.",
       });
     } catch {
