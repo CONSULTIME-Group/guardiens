@@ -181,7 +181,7 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
         await supabase.from("messages").insert({
           conversation_id: acceptedConv.id,
           sender_id: user.id,
-          content: "📋 Le guide de la maison est disponible ! Vous y trouverez l'adresse exacte, les codes d'accès, les contacts utiles et toutes les consignes.",
+          content: "Le guide de la maison est disponible. Vous y trouverez l'adresse exacte, les codes d'accès, les contacts utiles et toutes les consignes.",
           is_system: true,
         });
       }
