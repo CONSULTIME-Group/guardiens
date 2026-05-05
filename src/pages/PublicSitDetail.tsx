@@ -216,11 +216,12 @@ const PublicSitDetail = () => {
  })();
 
  // Résumé des animaux pour le pitch (« 2 chats », « un chien et un chat »)
+ const capitalize = (s: string) => s ? s.charAt(0).toUpperCase() + s.slice(1) : s;
  const petsPitchSummary = (() => {
  if (pets.length === 0) return "leurs animaux";
  if (pets.length === 1) {
  const p = pets[0];
- return `${p.name} (${speciesLabel[p.species] || p.species})`;
+ return `${capitalize(p.name)} (${speciesLabel[p.species] || p.species})`;
  }
  // Groupe par espèce
  const byKind: Record<string, number> = {};
