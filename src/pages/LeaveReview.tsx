@@ -297,7 +297,7 @@ const LeaveReview = () => {
   if (alreadyReviewed) {
     return (
       <div className="p-6 md:p-10 max-w-2xl mx-auto text-center">
-        <p className="text-lg font-heading font-semibold mb-2">Avis déjà envoyé ✓</p>
+        <p className="text-lg font-heading font-semibold mb-2">Avis déjà envoyé</p>
         <p className="text-sm text-muted-foreground mb-4">Vous avez déjà laissé un avis pour cette garde.</p>
         <Link to={`/sits/${sitId}`}><Button variant="outline">Retour à la garde</Button></Link>
       </div>
