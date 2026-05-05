@@ -104,8 +104,8 @@ const EditSit = () => {
         flexibleMonths.length > 0 ? `Mois : ${flexibleMonths.join(", ")}` : "",
         flexibleDuration ? `Durée : ${flexibleDuration}` : "",
       ].filter(Boolean).join(" · ");
-      if (flexNote && !expectations.includes("📅 Flexibilité")) {
-        expectations = `${expectations}\n\n📅 Flexibilité : ${flexNote}`.trim();
+      if (flexNote && !expectations.includes("Flexibilité :")) {
+        expectations = `${expectations}\n\nFlexibilité : ${flexNote}`.trim();
       }
     }
 
