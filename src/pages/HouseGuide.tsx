@@ -109,13 +109,29 @@ const HouseGuide = () => {
         .select("*")
         .eq("property_id", propertyId)
         .maybeSingle();
-      setGuide(data ? (data as any) : emptyGuide(propertyId, user.id));
+      const base = emptyGuide(propertyId, user.id);
+      if (data) {
+        // Normalise les champs nullables (DB) en strings vides pour les inputs contrôlés
+        const merged: GuideData = { ...base } as GuideData;
+        for (const key of Object.keys(base) as Array<keyof GuideData>) {
+          const v = (data as any)[key];
+          if (key === "published") {
+            (merged as any)[key] = v === true;
+          } else if (typeof v === "string") {
+            (merged as any)[key] = v;
+          }
+        }
+        merged.id = (data as any).id;
+        setGuide(merged);
+      } else {
+        setGuide(base);
+      }
       setLoading(false);
     };
     load();
   }, [propertyId, user]);
 
-  const update = (field: keyof GuideData, value: string) => {
+  const update = <K extends keyof GuideData>(field: K, value: GuideData[K]) => {
     if (!guide) return;
     setGuide({ ...guide, [field]: value });
   };
