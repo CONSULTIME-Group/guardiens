@@ -11,6 +11,7 @@ import AiSuggestButton from "../profile/AiSuggestButton";
 import LocationProfileCard from "../location/LocationProfileCard";
 import EnvironmentPills from "../shared/EnvironmentPills";
 import PhotoTipsAlert from "./PhotoTipsAlert";
+import PhotoQualityChecker from "./PhotoQualityChecker";
 import type { OwnerProfileData } from "@/hooks/useOwnerProfile";
 
 const TYPES = ["Appartement", "Maison", "Ferme", "Chalet", "Autre"];
@@ -129,6 +130,11 @@ const OwnerStepHousing = ({ data, onChange, onUploadPhoto }: Props) => {
           )}
         </div>
         <input ref={fileRef} type="file" accept="image/*" multiple className="hidden" onChange={handlePhotos} />
+        {data.photos.length > 0 && (
+          <div className="pt-1">
+            <PhotoQualityChecker photos={data.photos} />
+          </div>
+        )}
       </div>
 
       <div className="space-y-2">
