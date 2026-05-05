@@ -193,6 +193,11 @@ const HouseGuide = () => {
       <Section icon={Home} title="Adresse & accès">
         <Field label="Adresse exacte" value={guide.exact_address} onChange={v => update("exact_address", v)} placeholder="12 rue des Lilas, 75011 Paris" />
         <Field label="Codes d'accès (digicode, portail, boîte à clé...)" value={guide.access_codes} onChange={v => update("access_codes", v)} placeholder="Digicode : 1234A, boîte à clé sous le pot" type="textarea" />
+        <Field label="Remise des clés" value={guide.key_instructions} onChange={v => update("key_instructions", v)} placeholder="Clés cachées sous le pot du romarin, ou récupérées chez la gardienne au RDC" type="textarea" />
+      </Section>
+
+      <Section icon={Car} title="Stationnement">
+        <Field label="Instructions de stationnement" value={guide.parking_instructions} onChange={v => update("parking_instructions", v)} placeholder="Place n°12 au sous-sol, ou stationnement libre rue des Acacias" type="textarea" />
       </Section>
 
       <Section icon={Wifi} title="WiFi">
@@ -200,6 +205,7 @@ const HouseGuide = () => {
           <Field label="Nom du réseau" value={guide.wifi_name} onChange={v => update("wifi_name", v)} placeholder="MaisonDupont_5G" />
           <Field label="Mot de passe" value={guide.wifi_password} onChange={v => update("wifi_password", v)} placeholder="••••••••" />
         </div>
+        <Field label="Précisions WiFi" value={guide.wifi_instructions} onChange={v => update("wifi_instructions", v)} placeholder="Box dans le salon, redémarrer en cas de coupure" type="textarea" />
       </Section>
 
       <Section icon={Phone} title="Contacts utiles">
@@ -231,13 +237,47 @@ const HouseGuide = () => {
 
       <Section icon={Info} title="Consignes de la maison">
         <Field label="Instructions détaillées" value={guide.detailed_instructions} onChange={v => update("detailed_instructions", v)}
-          placeholder="Arroser les plantes tous les 2 jours, fermer les volets le soir..." type="textarea" />
+          placeholder="Fermer les volets le soir, sortir la poubelle le mardi soir..." type="textarea" />
         <Field label="Jours de poubelle" value={guide.trash_days} onChange={v => update("trash_days", v)} placeholder="Mardi et vendredi matin" />
         <Field label="Chauffage / climatisation" value={guide.heating_instructions} onChange={v => update("heating_instructions", v)}
           placeholder="Thermostat dans le couloir, régler à 20°C" type="textarea" />
         <Field label="Notes sur les appareils" value={guide.appliance_notes} onChange={v => update("appliance_notes", v)}
           placeholder="Machine à laver : programme 30°, séchoir interdit pour la laine..." type="textarea" />
       </Section>
+
+      <Section icon={Sprout} title="Plantes">
+        <Field label="Arrosage des plantes" value={guide.plants_watering} onChange={v => update("plants_watering", v)}
+          placeholder="Plantes du salon : tous les 2 jours. Plantes du balcon : 1 fois par semaine." type="textarea" />
+      </Section>
+
+      <Section icon={Mail} title="Courrier">
+        <Field label="Gestion du courrier" value={guide.mail_instructions} onChange={v => update("mail_instructions", v)}
+          placeholder="Vider la boîte aux lettres tous les 2-3 jours et déposer le courrier sur la console de l'entrée" type="textarea" />
+      </Section>
+
+      <Section icon={Ban} title="Zones interdites">
+        <Field label="Pièces ou zones à ne pas utiliser" value={guide.forbidden_zones} onChange={v => update("forbidden_zones", v)}
+          placeholder="Bureau au 1er étage fermé à clé, cave réservée au propriétaire" type="textarea" />
+      </Section>
+
+      <Section icon={MessageSquare} title="Mot d'accueil">
+        <Field label="Message personnel pour le gardien" value={guide.owner_message} onChange={v => update("owner_message", v)}
+          placeholder="Bienvenue chez nous ! N'hésitez pas à utiliser les épices du placard et le café est offert." type="textarea" />
+      </Section>
+
+      <div className="mt-8 rounded-2xl border border-border bg-card p-4 flex items-center justify-between gap-4">
+        <div>
+          <p className="font-medium text-foreground">Publier le guide</p>
+          <p className="text-xs text-muted-foreground mt-1">
+            Une fois publié, le guide sera visible par le gardien confirmé pendant les dates de la garde.
+          </p>
+        </div>
+        <Switch
+          checked={guide.published}
+          onCheckedChange={(v) => update("published", v)}
+          aria-label="Publier le guide"
+        />
+      </div>
 
       <div className="fixed bottom-0 left-0 right-0 md:left-64 bg-card border-t border-border p-4 z-40 md:pb-4 pb-20">
         <div className="max-w-2xl mx-auto">
