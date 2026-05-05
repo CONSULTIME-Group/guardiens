@@ -8,7 +8,7 @@
  * Vocabulaire : on parle de "gardien" (et non "voisin") — c'est le rôle
  * réel sur la plateforme (vérifié, noté, expérimenté).
  */
-import { Home, PawPrint, MapPin, Plane, Heart } from "lucide-react";
+import { Home, PawPrint, Plane, Heart } from "lucide-react";
 
 interface PublicSitPitchProps {
   ownerFirstName?: string | null;
@@ -27,19 +27,19 @@ export default function PublicSitPitch({
   datesLabel,
   propertyTypeLabel,
 }: PublicSitPitchProps) {
-  const name = ownerFirstName || "Un membre Guardiens";
-  const firstName = name.split(" ")[0];
-  const cityLabel = city || "sa ville";
+  const firstName = (ownerFirstName || "").trim().split(" ")[0];
+  const subjectLabel = firstName || "Le propriétaire";
+  const possessive = firstName ? "sa" : "la";
+  const cityLabel = city?.trim() || null;
   const durationPart = durationDays
     ? `${durationDays} jour${durationDays > 1 ? "s" : ""}`
-    : "quelques jours";
+    : null;
 
   return (
     <section
       aria-labelledby="public-sit-pitch-heading"
       className="relative overflow-hidden rounded-3xl border border-primary/25 bg-gradient-to-br from-primary/[0.10] via-primary/[0.04] to-transparent p-6 md:p-8 mb-6 shadow-sm"
     >
-      {/* Halo décoratif discret */}
       <div
         aria-hidden="true"
         className="pointer-events-none absolute -top-16 -right-16 w-56 h-56 rounded-full bg-primary/10 blur-3xl"
@@ -56,14 +56,14 @@ export default function PublicSitPitch({
           className="font-heading text-xl md:text-2xl font-bold leading-tight text-foreground"
         >
           Devenez le gardien de{" "}
-          <span className="text-primary">{petsSummary}</span> à {cityLabel}
-          {durationDays ? <> pendant <span className="text-primary">{durationPart}</span></> : null}.
+          <span className="text-primary">{petsSummary}</span>
+          {cityLabel ? <> à <span className="text-primary">{cityLabel}</span></> : null}.
         </h2>
 
         <p className="mt-3 text-[15px] text-foreground/80 leading-relaxed">
-          {firstName} part en voyage et confie sa maison et ses compagnons à un
+          {subjectLabel} part en voyage et confie {possessive} maison et {possessive === "sa" ? "ses" : "les"} compagnons à un
           gardien Guardiens. <strong className="text-foreground">Vous êtes
-          logé(e) gratuitement</strong> en échange de votre présence
+          logé·e gratuitement</strong> en échange de votre présence
           bienveillante&nbsp;: une vraie parenthèse, dans un nouveau décor, à
           votre rythme.
         </p>
@@ -92,16 +92,11 @@ export default function PublicSitPitch({
             <div className="min-w-0">
               <p className="font-semibold text-foreground leading-tight">Changement de décor</p>
               <p className="text-xs text-muted-foreground mt-0.5 truncate">
-                {cityLabel} · {durationPart}
+                {[cityLabel, durationPart].filter(Boolean).join(" · ") || datesLabel}
               </p>
             </div>
           </li>
         </ul>
-
-        <p className="mt-4 inline-flex items-center gap-1.5 text-xs text-muted-foreground">
-          <MapPin className="h-3.5 w-3.5 text-primary/70" aria-hidden="true" />
-          {datesLabel}
-        </p>
       </div>
     </section>
   );
