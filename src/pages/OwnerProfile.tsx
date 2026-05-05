@@ -15,6 +15,7 @@ import ProfileSidebar, { type SidebarSection } from "@/components/profile/Profil
 import ScoreBreakdown, { type ScoreCriterion } from "@/components/profile/ScoreBreakdown";
 import { useOwnerProfile, type OwnerProfileData } from "@/hooks/useOwnerProfile";
 import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 
 const SECTIONS_META = [
   { id: "identity", num: 1, label: "Identité", subtitle: "Qui vous êtes" },
