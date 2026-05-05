@@ -882,7 +882,8 @@ const IdentityVerificationSection = ({ user }: { user: any }) => {
         {status !== "verified" && (
           <div className="space-y-4">
             <div className="text-xs text-muted-foreground space-y-1">
-              <p className="font-medium text-foreground text-sm">Documents acceptés :</p>
+              <p className="font-medium text-foreground text-sm">Étape 1 — Pièce d'identité</p>
+              <p className="text-xs">Documents acceptés :</p>
               <ul className="list-disc list-inside space-y-0.5">
                 <li>Carte d'identité (recto)</li>
                 <li>Passeport (page photo)</li>
