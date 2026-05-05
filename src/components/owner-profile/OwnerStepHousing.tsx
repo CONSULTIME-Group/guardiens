@@ -130,6 +130,11 @@ const OwnerStepHousing = ({ data, onChange, onUploadPhoto }: Props) => {
           )}
         </div>
         <input ref={fileRef} type="file" accept="image/*" multiple className="hidden" onChange={handlePhotos} />
+        {data.photos.length > 0 && (
+          <div className="pt-1">
+            <PhotoQualityChecker photos={data.photos} />
+          </div>
+        )}
       </div>
 
       <div className="space-y-2">
