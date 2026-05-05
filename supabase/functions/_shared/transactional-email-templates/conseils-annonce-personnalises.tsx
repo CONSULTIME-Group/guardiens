@@ -38,10 +38,12 @@ const ConseilsAnnoncePersoEmail = ({
   hasHouseGuide = false,
   articleSlug = 'rediger-bonne-annonce-house-sitting',
   articleTitle = "Rédiger une bonne annonce : ce qui attire les bons gardiens",
+  petsContext,
+  photosNote,
+  remindCoverPhoto = false,
 }: ConseilsAnnoncePersoProps) => {
   const name = firstName?.trim() || ''
   const editUrl = sitId ? `${SITE_URL}/sits/${sitId}/edit` : `${SITE_URL}/sits`
-  const guideUrl = `${SITE_URL}/sits`
   const articleUrl = `${SITE_URL}/articles/${articleSlug}`
 
   return (
