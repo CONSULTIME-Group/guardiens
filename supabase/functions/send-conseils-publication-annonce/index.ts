@@ -66,9 +66,30 @@ Deno.serve(async (req) => {
         .maybeSingle()
 
       if (!profile?.email) { skipped++; continue }
+
+      // ---- IDEMPOTENCE STRICTE (3 verrous) ----
+      // Verrou 1 : flag profil — bloque toute re-publication ultérieure
       if (profile.first_sit_email_sent_at) { skipped++; continue }
 
-      // Vérification stricte : ne doit avoir QU'UNE seule annonce (celle-ci)
+      // Verrou 2 : log d'envoi — résiste même si le flag a été perdu/réinitialisé
+      // (re-passage brouillon → publié, restauration BDD, bug de mise à jour, etc.)
+      const { count: alreadySentCount } = await supabase
+        .from('email_send_log')
+        .select('id', { count: 'exact', head: true })
+        .eq('template_name', 'conseils-publication-annonce')
+        .eq('recipient_email', profile.email)
+
+      if ((alreadySentCount ?? 0) > 0) {
+        // Réparer le flag si manquant pour éviter de re-checker à chaque cron
+        await supabase
+          .from('profiles')
+          .update({ first_sit_email_sent_at: new Date().toISOString() })
+          .eq('id', sit.user_id)
+        skipped++
+        continue
+      }
+
+      // Verrou 3 : ne doit avoir QU'UNE seule annonce (celle-ci) — toutes statuts confondus
       const { count: sitCount } = await supabase
         .from('sits')
         .select('id', { count: 'exact', head: true })
