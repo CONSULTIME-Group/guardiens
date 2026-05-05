@@ -134,6 +134,10 @@ const OwnerGallery = () => {
 
       <PhotoTipsAlert />
 
+      {photos.length > 0 && (
+        <PhotoQualityChecker photos={photos.map((p) => p.photo_url)} />
+      )}
+
       {/* Photo grid */}
       {photos.length > 0 && (
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
