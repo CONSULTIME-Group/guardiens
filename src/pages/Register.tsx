@@ -382,8 +382,8 @@ const Register = () => {
 
  return (
  <div className="min-h-screen flex bg-background">
- {/* /inscription est une page de conversion clé : indexable (cohérent avec robots.txt + sitemap.xml). */}
- <Helmet><meta name="robots" content="index, follow" /></Helmet>
+ {/* /inscription : noindex (anti-cannibalisation brand — siteRoutes.ts index:false). */}
+ <Helmet><meta name="robots" content="noindex, follow" /></Helmet>
 
  <AuthIllustrationPanel
  title="Rejoignez une communauté de confiance"
